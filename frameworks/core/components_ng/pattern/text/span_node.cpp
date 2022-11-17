@@ -23,6 +23,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/property/property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline/pipeline_context.h"
 
@@ -31,12 +32,9 @@ namespace {
 std::string GetDeclaration(const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration)
 {
     auto jsonSpanDeclaration = JsonUtil::Create(true);
-    if (color) {
-        jsonSpanDeclaration->Put("color", (color.value().ColorToString()).c_str());
-    }
-    if (textDecoration) {
-        jsonSpanDeclaration->Put("type", V2::ConvertWrapTextDecorationToStirng(textDecoration.value()).c_str());
-    }
+    jsonSpanDeclaration->Put(
+        "type", V2::ConvertWrapTextDecorationToStirng(textDecoration.value_or(TextDecoration::NONE)).c_str());
+    jsonSpanDeclaration->Put("color", (color.value_or(Color::BLACK).ColorToString()).c_str());
     return jsonSpanDeclaration->ToString();
 }
 } // namespace
@@ -79,6 +77,24 @@ void SpanNode::MountToParagraph()
             auto textPattern = textNode->GetPattern<TextPattern>();
             if (textPattern) {
                 textPattern->AddChildSpanItem(Claim(this));
+                return;
+            }
+        }
+        parent = parent->GetParent();
+    }
+    LOGE("fail to find Text or Parent Span");
+}
+
+void SpanNode::RequestTextFlushDirty()
+{
+    auto parent = GetParent();
+    while (parent) {
+        auto textNode = DynamicCast<FrameNode>(parent);
+        if (textNode) {
+            textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            auto textPattern = textNode->GetPattern<TextPattern>();
+            if (textPattern) {
+                textPattern->OnModifyDone();
                 return;
             }
         }

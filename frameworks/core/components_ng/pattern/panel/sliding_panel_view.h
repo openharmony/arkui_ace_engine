@@ -34,6 +34,7 @@ public:
     static void SetMiniHeight(const Dimension& miniHeight);
     static void SetHalfHeight(const Dimension& halfHeight);
     static void SetFullHeight(const Dimension& fullHeight);
+    static void SetIsShow(bool isShow);
     static void SetBackgroundColor(Color backgroundColor);
     static void SetOnSizeChange(ChangeEvent&& changeEvent);
     static void SetOnHeightChange(HeightChangeEvent&& onHeightChange);

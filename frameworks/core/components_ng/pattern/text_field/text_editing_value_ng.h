@@ -57,32 +57,32 @@ struct TextEditingValueNG {
 
     std::string GetValueBeforeCursor() const
     {
-        if (caretPosition > static_cast<int32_t>(text.size()) || caretPosition < 0) {
+        if (caretPosition > static_cast<int32_t>(text.size()) || caretPosition <= 0) {
             return "";
         }
-        return text.substr(0, caretPosition);
+        return  StringUtils::ToString(GetWideText().substr(0, caretPosition));
     }
 
     std::string GetValueAfterCursor() const
     {
-        if (caretPosition > static_cast<int32_t>(text.size()) || caretPosition < 0) {
+        if (caretPosition >= static_cast<int32_t>(text.size()) || caretPosition < 0) {
             return "";
         }
-        return text.substr(caretPosition, text.size());
+        return  StringUtils::ToString(GetWideText().substr(caretPosition));
     }
 
     std::string GetValueBeforePosition(int32_t position) const
     {
         position = std::clamp(position, 0, static_cast<int32_t>(text.size()));
         LOGD("GetValueBeforePosition %{public}d", position);
-        return text.substr(0, position);
+        return  StringUtils::ToString(GetWideText().substr(0, position));
     }
 
     std::string GetValueAfterPosition(int32_t position) const
     {
         position = std::clamp(position, 0, static_cast<int32_t>(text.size()));
         LOGD("GetValueAfterPosition %{public}d", position);
-        return text.substr(position, text.size());
+        return  StringUtils::ToString(GetWideText().substr(position));
     }
 
     std::string GetSelectedText(int32_t start, int32_t end) const
@@ -93,7 +93,7 @@ struct TextEditingValueNG {
         }
         auto min = std::min(start, end);
         auto max = std::max(start, end);
-        return text.substr(min, max - min);
+        return  StringUtils::ToString(GetWideText().substr(min, max));
     }
 
     std::string ToString() const

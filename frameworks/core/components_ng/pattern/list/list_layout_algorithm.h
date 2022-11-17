@@ -49,7 +49,7 @@ class ACE_EXPORT ListLayoutAlgorithm : public LayoutAlgorithm {
 public:
     using PositionMap = std::map<int32_t, ListItemInfo>;
 
-    ListLayoutAlgorithm(int32_t startIndex, int32_t endIndex) : preStartIndex_(startIndex), preEndIndex_(endIndex) {}
+    ListLayoutAlgorithm() = default;
 
     ~ListLayoutAlgorithm() override = default;
 
@@ -70,6 +70,11 @@ public:
         overScrollFeature_ = true;
     }
 
+    void SetCanOverScroll(bool canOverScroll)
+    {
+        canOverScroll_ = canOverScroll;
+    }
+
     void SetIndex(int32_t index)
     {
         jumpIndex_ = index;
@@ -80,8 +85,9 @@ public:
         scrollIndexAlignment_ = align;
     }
 
-    void SetCurrentOffset(float offset)
+    void SetCurrentDelta(float offset)
     {
+        currentDelta_ = offset;
         currentOffset_ = offset;
     }
 
@@ -211,6 +217,7 @@ private:
 
     PositionMap itemPosition_;
     float currentOffset_ = 0.0f;
+    float currentDelta_ = 0.0f;
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
     int32_t preStartIndex_ = -1;
@@ -220,6 +227,7 @@ private:
 
     float spaceWidth_ = 0.0f;
     bool overScrollFeature_ = false;
+    bool canOverScroll_ = false;
 
     int32_t totalItemCount_ = 0;
 

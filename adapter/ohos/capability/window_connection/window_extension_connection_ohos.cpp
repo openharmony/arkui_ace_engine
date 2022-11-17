@@ -233,7 +233,9 @@ void WindowExtensionConnectionAdapterOhos::ConnectExtension(const RefPtr<NG::Fra
 {
 #if defined(ENABLE_ROSEN_BACKEND) && defined(OS_ACCOUNT_EXISTS)
     LOGI("connect to windows extension begin");
-    windowExtension_ = std::make_unique<Rosen::WindowExtensionConnection>();
+    if (!windowExtension_) {
+        windowExtension_ = std::make_unique<Rosen::WindowExtensionConnection>();
+    }
     std::vector<int32_t> userIds;
     ErrCode code = AccountSA::OsAccountManager::QueryActiveOsAccountIds(userIds);
     if (code != ERR_OK) {
@@ -272,7 +274,9 @@ void WindowExtensionConnectionAdapterOhos::ConnectExtension(
     LOGI("ConnectExtension rect: %{public}s", rect.ToString().c_str());
 #if defined(ENABLE_ROSEN_BACKEND) && defined(OS_ACCOUNT_EXISTS)
     LOGI("connect to windows extension begin");
-    windowExtension_ = std::make_unique<Rosen::WindowExtensionConnection>();
+    if (!windowExtension_) {
+        windowExtension_ = std::make_unique<Rosen::WindowExtensionConnection>();
+    }
     std::vector<int32_t> userIds;
     ErrCode code = AccountSA::OsAccountManager::QueryActiveOsAccountIds(userIds);
     if (code != ERR_OK) {

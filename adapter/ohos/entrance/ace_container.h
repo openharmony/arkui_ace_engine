@@ -16,13 +16,13 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_CPP_ACE_CONTAINER_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_CPP_ACE_CONTAINER_H
 
+#include <cstddef>
 #include <memory>
 #include <mutex>
 
 #include "ability_context.h"
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
-#include "wm/wm_common.h"
 
 #include "adapter/ohos/entrance/ace_ability.h"
 #include "adapter/ohos/entrance/platform_event_callback.h"
@@ -238,7 +238,7 @@ public:
         return "";
     }
 
-    void SetSharedRuntime(void* runtime)
+    void SetSharedRuntime(void* runtime) override
     {
         sharedRuntime_ = runtime;
     }
@@ -253,7 +253,7 @@ public:
         return isSubContainer_;
     }
 
-    void* GetSharedRuntime()
+    void* GetSharedRuntime() override
     {
         return sharedRuntime_;
     }
@@ -354,6 +354,9 @@ public:
         cardFrontendMap = cardFrontendMap_;
     }
 
+    void SetToken(sptr<IRemoteObject>& token);
+    sptr<IRemoteObject> GetToken();
+
 private:
     void InitializeFrontend();
     void InitializeCallback();
@@ -391,6 +394,7 @@ private:
     sptr<OHOS::Rosen::Window> uiWindow_ = nullptr;
     std::string windowName_;
     uint32_t windowId_ = OHOS::Rosen::INVALID_WINDOW_ID;
+    sptr<IRemoteObject> token_;
 
     bool isSubContainer_ = false;
     int32_t parentId_ = 0;
@@ -398,6 +402,7 @@ private:
 
     mutable std::mutex cardFrontMutex_;
     mutable std::mutex cardPipelineMutex_;
+    mutable std::mutex cardTokensMutex_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };

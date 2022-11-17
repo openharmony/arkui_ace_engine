@@ -49,8 +49,7 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
-        json->Put("indicator", GetIndicator().value_or(false) ? "true" : "false");
-        json->Put("stars", std::to_string(GetStars().value_or(5)).c_str());
+        ACE_PROPERTY_TO_JSON_VALUE(propRatingPropertyGroup_, RatingPropertyGroup);
     }
 
     ACE_DEFINE_PROPERTY_GROUP(RatingPropertyGroup, RatingPropertyGroup);

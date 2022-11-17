@@ -82,7 +82,7 @@ public:
     {
         return isFirstNavDestination_;
     }
-
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 private:
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;

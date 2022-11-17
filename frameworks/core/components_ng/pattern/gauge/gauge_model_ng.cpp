@@ -29,7 +29,7 @@ void GaugeModelNG::Create(float value, float min, float max)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::DATA_PANEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GaugePattern>(); });
+        V2::GAUGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GaugePattern>(); });
     stack->Push(frameNode);
 
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, Value, value);

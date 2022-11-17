@@ -75,8 +75,8 @@ static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
 SvgDom::SvgDom()
 {
     svgContext_ = AceType::MakeRefPtr<SvgContext>();
-    attrCallback_ = [weakSvgDom = AceType::WeakClaim(this)](const std::string& styleName,
-                    const std::pair<std::string, std::string>& attrPair) {
+    attrCallback_ = [weakSvgDom = AceType::WeakClaim(this)](
+                        const std::string& styleName, const std::pair<std::string, std::string>& attrPair) {
         auto svgDom = weakSvgDom.Upgrade();
         if (!svgDom) {
             LOGE("svg dom is null");
@@ -88,9 +88,7 @@ SvgDom::SvgDom()
     };
 }
 
-SvgDom::~SvgDom()
-{
-}
+SvgDom::~SvgDom() {}
 
 RefPtr<SvgDom> SvgDom::CreateSvgDom(SkStream& svgStream, const std::optional<Color>& color)
 {
@@ -126,8 +124,7 @@ bool SvgDom::ParseSvg(SkStream& svgStream)
     return true;
 }
 
-RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xmlNode,
-    const RefPtr<SvgNode>& parent)
+RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xmlNode, const RefPtr<SvgNode>& parent)
 {
     const char* element = dom.getName(xmlNode);
     if (dom.getType(xmlNode) == SkDOM::kText_Type) {
@@ -162,8 +159,8 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
 
 void SvgDom::ParseAttrs(const SkDOM& xmlDom, const SkDOM::Node* xmlNode, const RefPtr<SvgNode>& svgNode)
 {
-    const char *name = nullptr;
-    const char *value = nullptr;
+    const char* name = nullptr;
+    const char* value = nullptr;
     SkDOM::AttrIter attrIter(xmlDom, xmlNode);
     while ((name = attrIter.next(&value))) {
         SetAttrValue(name, value, svgNode);
@@ -213,7 +210,7 @@ void SvgDom::ParseClassAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::stri
         if (attrMap.empty()) {
             continue;
         }
-        for (const auto& attr: attrMap) {
+        for (const auto& attr : attrMap) {
             svgNode->SetAttr(attr.first, attr.second);
         }
     }
@@ -240,22 +237,14 @@ void SvgDom::ParseStyleAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::stri
 void SvgDom::SetAttrValue(const std::string& name, const std::string& value, const RefPtr<SvgNode>& svgNode)
 {
     static const LinearMapNode<void (*)(const std::string&, const WeakPtr<SvgNode>&, SvgDom&)> attrs[] = {
-        { DOM_SVG_CLASS,
-            [](const std::string& val, const WeakPtr<SvgNode>& svgNode, SvgDom& svgDom) {
-                svgDom.ParseClassAttr(svgNode, val);
-            } },
-        { DOM_SVG_FILL,
-            [](const std::string& val, const WeakPtr<SvgNode>& svgNode, SvgDom& svgDom) {
-                svgDom.ParseFillAttr(svgNode, val);
-            } },
-        { DOM_ID,
-            [](const std::string& val, const WeakPtr<SvgNode>& svgNode, SvgDom& svgDom) {
-                svgDom.ParseIdAttr(svgNode, val);
-            } },
-        { DOM_SVG_STYLE,
-            [](const std::string& val, const WeakPtr<SvgNode>& svgNode, SvgDom& svgDom) {
-                svgDom.ParseStyleAttr(svgNode, val);
-            } },
+        { DOM_SVG_CLASS, [](const std::string& val, const WeakPtr<SvgNode>& svgNode,
+                             SvgDom& svgDom) { svgDom.ParseClassAttr(svgNode, val); } },
+        { DOM_SVG_FILL, [](const std::string& val, const WeakPtr<SvgNode>& svgNode,
+                            SvgDom& svgDom) { svgDom.ParseFillAttr(svgNode, val); } },
+        { DOM_ID, [](const std::string& val, const WeakPtr<SvgNode>& svgNode,
+                      SvgDom& svgDom) { svgDom.ParseIdAttr(svgNode, val); } },
+        { DOM_SVG_STYLE, [](const std::string& val, const WeakPtr<SvgNode>& svgNode,
+                             SvgDom& svgDom) { svgDom.ParseStyleAttr(svgNode, val); } },
     };
     if (value.empty()) {
         return;
@@ -314,19 +303,15 @@ void SvgDom::FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& la
             tx = svgSize_.Width() * half - (viewBox_.Width() * half + viewBox_.Left()) * scaleViewBox;
             ty = svgSize_.Height() * half - (viewBox_.Height() * half + viewBox_.Top()) * scaleViewBox;
         } else if (!layout_.IsEmpty()) {
-            scaleViewBox =
-                std::min(layout_.Width() / viewBox_.Width(), layout_.Height() / viewBox_.Height());
+            scaleViewBox = std::min(layout_.Width() / viewBox_.Width(), layout_.Height() / viewBox_.Height());
             tx = layout_.Width() * half - (viewBox_.Width() * half + viewBox_.Left()) * scaleViewBox;
             ty = layout_.Height() * half - (viewBox_.Height() * half + viewBox_.Top()) * scaleViewBox;
         } else {
             LOGW("FitImage containerSize and svgSize is null");
         }
     }
-
-    RSRect clipRect(0.0f, 0.0f, static_cast<float>(layout_.Width()), static_cast<float>(layout_.Height()));
     canvas.Translate(static_cast<float>(tx), static_cast<float>(ty));
     canvas.Scale(static_cast<float>(scaleX * scaleViewBox), static_cast<float>(scaleY * scaleViewBox));
-    canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
 }
 
 void SvgDom::FitViewPort(const Size& layout)
@@ -397,6 +382,11 @@ void SvgDom::ApplyCover(double& scaleX, double& scaleY)
         scaleX = layout_.Width() / svgSize_.Width();
         scaleY = scaleX;
     }
+}
+
+SizeF SvgDom::GetContainerSize() const
+{
+    return { static_cast<float>(svgSize_.Width()), static_cast<float>(svgSize_.Height()) };
 }
 
 } // namespace OHOS::Ace::NG

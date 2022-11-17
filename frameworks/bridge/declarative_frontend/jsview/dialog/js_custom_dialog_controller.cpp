@@ -80,6 +80,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         JSRef<JSVal> customStyleValue = constructorArg->GetProperty("customStyle");
         if (customStyleValue->IsBoolean()) {
             instance->dialogProperties_.customStyle = customStyleValue->ToBoolean();
+            instance->dialogProperties_.useCustom = customStyleValue->ToBoolean();
         }
 
         // Parse alignment
@@ -323,12 +324,12 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
     if (Container::IsCurrentUseNewPipeline()) {
         auto container = Container::Current();
         auto currentId = Container::CurrentId();
+        CHECK_NULL_VOID(container);
         if (container->IsSubContainer()) {
             currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
             container = AceEngine::Get().GetContainer(currentId);
         }
         ContainerScope scope(currentId);
-        CHECK_NULL_VOID(container);
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_VOID(pipelineContext);
         auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
@@ -385,12 +386,12 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
     if (Container::IsCurrentUseNewPipeline()) {
         auto container = Container::Current();
         auto currentId = Container::CurrentId();
+        CHECK_NULL_VOID(container);
         if (container->IsSubContainer()) {
             currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
             container = AceEngine::Get().GetContainer(currentId);
         }
         ContainerScope scope(currentId);
-        CHECK_NULL_VOID(container);
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_VOID(pipelineContext);
         auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);

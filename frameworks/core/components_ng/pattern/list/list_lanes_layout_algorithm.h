@@ -24,7 +24,6 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ListLanesLayoutAlgorithm : public ListLayoutAlgorithm {
     DECLARE_ACE_TYPE(ListLanesLayoutAlgorithm, ListLayoutAlgorithm);
 public:
-    ListLanesLayoutAlgorithm(int32_t startIndex, int32_t endIndex) : ListLayoutAlgorithm(startIndex, endIndex) {}
     void SwapLanesItemRange(std::map<int32_t, int32_t>& itemRange)
     {
         lanesItemRange_.swap(itemRange);

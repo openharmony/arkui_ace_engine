@@ -61,7 +61,7 @@ public:
     }
 
 protected:
-    void OnBeginGestureReferee(int32_t touchId) override;
+    void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override;
     void OnFinishGestureReferee(int32_t touchId) override;
     void GroupAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal);
 

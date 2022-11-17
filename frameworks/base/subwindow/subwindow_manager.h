@@ -26,6 +26,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 namespace OHOS::Ace {
 
@@ -66,6 +67,9 @@ public:
     void HideMenuNG(int32_t targetId);
     void HideMenuNG();
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
+    void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo);
+    void HidePopupNG(int32_t targetId);
+    void HidePopupNG();
     bool CancelPopup(const std::string& id);
     void CloseMenu();
     void ClearMenu();
@@ -79,11 +83,11 @@ public:
     const RefPtr<Subwindow>& GetCurrentDialogWindow();
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom);
-    void ShowDialog(const std::string& title, const std::string& message,
-        const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
+    void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
+        bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
         const std::set<std::string>& dialogCallbacks);
-    void ShowActionMenu(const std::string& title,
-        const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback);
+    void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
+        std::function<void(int32_t, int32_t)>&& callback);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();

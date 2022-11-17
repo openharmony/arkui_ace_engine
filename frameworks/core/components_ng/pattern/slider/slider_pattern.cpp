@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 
 #include "base/geometry/offset.h"
+#include "core/components_ng/pattern/slider/slider_accessibility_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -293,4 +294,8 @@ Axis SliderPattern::GetDirection() const
     return sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
 }
 
+RefPtr<AccessibilityProperty> SliderPattern::CreateAccessibilityProperty()
+{
+    return MakeRefPtr<SliderAccessibilityProperty>();
+}
 } // namespace OHOS::Ace::NG

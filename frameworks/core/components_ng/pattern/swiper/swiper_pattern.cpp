@@ -508,6 +508,10 @@ void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void SwiperPattern::HandleTouchDown()
 {
+    const auto& tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
+    if (tabBarFinishCallback) {
+        tabBarFinishCallback();
+    }
     // Stop translate animation when touch down.
     if (controller_ && !controller_->IsStopped()) {
         // Clear stop listener before stop, otherwise the previous swipe will be considered complete.
@@ -517,6 +521,11 @@ void SwiperPattern::HandleTouchDown()
 
     // Stop auto play when touch down.
     StopAutoPlay();
+
+    if (springController_ && !springController_->IsStopped()) {
+        springController_->ClearStopListeners();
+        springController_->Stop();
+    }
 }
 
 void SwiperPattern::HandleTouchUp()
@@ -526,6 +535,10 @@ void SwiperPattern::HandleTouchUp()
 
 void SwiperPattern::HandleDragStart()
 {
+    const auto& tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
+    if (tabBarFinishCallback) {
+        tabBarFinishCallback();
+    }
 #ifdef OHOS_PLATFORM
     // Increase the cpu frequency when sliding.
     ResSchedReport::GetInstance().ResSchedDataReport("slide_on");

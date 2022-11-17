@@ -46,6 +46,7 @@ public:
         const RefPtr<Frontend>& frontend, int32_t instanceId);
     PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId);
+    PipelineContext() = default;
 
     ~PipelineContext() override = default;
 
@@ -174,10 +175,7 @@ public:
 
     const RefPtr<OverlayManager>& GetOverlayManager();
 
-    const RefPtr<SelectOverlayManager>& GetSelectOverlayManager()
-    {
-        return selectOverlayManager_;
-    }
+    const RefPtr<SelectOverlayManager>& GetSelectOverlayManager();
 
     const RefPtr<SharedOverlayManager>& GetSharedOverlayManager()
     {
@@ -227,10 +225,6 @@ public:
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
 
-    void SetDrawDelegate(std::unique_ptr<DrawDelegate> delegate)
-    {
-        drawDelegate_ = std::move(delegate);
-    }
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);
     void NotifyMemoryLevel(int32_t level) override;
@@ -294,7 +288,6 @@ private:
     std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_;
-    std::unique_ptr<DrawDelegate> drawDelegate_;
 
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;

@@ -102,6 +102,7 @@ public:
         auto group = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
         json->Put("name", name.c_str());
         json->Put("group", group.c_str());
+        json->Put("type", "ToggleType.Checkbox");
     }
 
 private:

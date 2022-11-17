@@ -39,7 +39,7 @@ RefPtr<SwiperController> SwiperModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
     auto swiperGroupNode = SwiperGroupNode::GetOrCreateGroupNode(
-        V2::STACK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StackPattern>(); });
+        V2::SWIPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StackPattern>(); });
     swiperGroupNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
 
     RefPtr<FrameNode> swiperNode;
@@ -48,7 +48,9 @@ RefPtr<SwiperController> SwiperModelNG::Create()
         swiperNode = FrameNode::GetOrCreateFrameNode(
             V2::SWIPER_ETS_TAG, swiperNodeId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
         swiperGroupNode->AddChild(swiperNode);
-        swiperNode->MarkModifyDone();
+        if (swiperNode) {
+            swiperNode->MarkModifyDone();
+        }
     } else {
         auto swiperUINode = swiperGroupNode->GetChildren().front();
         CHECK_NULL_RETURN(swiperUINode, nullptr);

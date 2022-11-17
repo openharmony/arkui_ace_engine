@@ -883,6 +883,18 @@ void DeclarativeFrontend::DumpFrontend() const
     }
 }
 
+std::string DeclarativeFrontend::GetPagePath() const
+{
+    if (!delegate_) {
+        return "";
+    }
+    int32_t routerIndex = 0;
+    std::string routerName;
+    std::string routerPath;
+    delegate_->GetState(routerIndex, routerName, routerPath);
+    return routerPath + routerName;
+}
+
 void DeclarativeFrontend::TriggerGarbageCollection()
 {
     if (jsEngine_) {

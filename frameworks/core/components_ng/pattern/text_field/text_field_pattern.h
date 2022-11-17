@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
+#include "core/gestures/gesture_info.h"
 
 #if defined(ENABLE_STANDARD_INPUT)
 #include "commonlibrary/c_utils/base/include/refbase.h"
@@ -270,6 +271,11 @@ public:
     }
     void CaretMoveToLastNewLineChar();
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void InitEditingValueText(std::string content);
+    const TextEditingValueNG& GetTextEditingValue()
+    {
+        return textEditingValue_;
+    }
 
 private:
     bool IsTextArea();
@@ -280,10 +286,12 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
+    void HandleClickEvent(GestureEvent& info);
 
     void InitFocusEvent();
     void InitTouchEvent();
     void InitLongPressEvent();
+    void InitClickEvent();
 
     void AddScrollEvent();
     void OnTextAreaScroll(float dy);
@@ -328,8 +336,14 @@ private:
     std::string TextInputActionToString() const;
     std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
+    std::string GetTextColor() const;
+    std::string GetCaretColor() const;
     std::string GetPlaceholderColor() const;
     std::string GetFontSize() const;
+    Ace::FontStyle GetItalicFontStyle() const;
+    FontWeight GetFontWeight() const;
+    std::string GetFontFamily() const;
+    TextAlign GetTextAlign() const;
     std::string GetPlaceHolder() const;
     uint32_t GetMaxLength() const;
     std::string GetInputFilter() const;

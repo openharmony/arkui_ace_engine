@@ -190,7 +190,7 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
 
     if (Container::IsCurrentUseNewPipeline()) {
         // TODO: add textfield impl.
-        TextFieldModel::GetInstance()->CreateTextInput(placeholderSrc, value);
+        TextFieldModel::GetInstance()->CreateTextArea(placeholderSrc, value);
         return;
     }
 

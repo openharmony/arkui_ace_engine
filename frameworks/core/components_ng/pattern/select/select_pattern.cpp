@@ -61,13 +61,14 @@ void SelectPattern::RegisterOnClick()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    auto callback = [id = host->GetId(), menu = menu_](GestureEvent& /*info*/) mutable {
+    auto callback = [id = host->GetId(), menu = menu_](GestureEvent& info) mutable {
         LOGD("start executing click callback %p", RawPtr(menu));
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         auto overlayManager = context->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
-        overlayManager->ShowMenu(id, false, NG::OffsetF(), menu);
+        auto offset = OffsetF(info.GetOffsetX(), info.GetOffsetY());
+        overlayManager->ShowMenu(id, offset, menu);
         // menuNode already registered, nullify
         menu.Reset();
     };
@@ -146,6 +147,12 @@ void SelectPattern::SetSelected(int32_t index)
     }
     UpdateSelectedProps(index);
     selected_ = index;
+}
+
+void SelectPattern::AddOptionNode(const RefPtr<FrameNode>& option)
+{
+    CHECK_NULL_VOID(option);
+    options_.push_back(option);
 }
 
 void SelectPattern::BuildChild()
@@ -386,10 +393,8 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
         lastSelected->SetItalicFontStyle(newSelected->GetItalicFontStyle());
         lastSelected->SetFontWeight(newSelected->GetFontWeight());
 
-        auto defaultPaintProps = options_[index]->GetPaintProperty<OptionPaintProperty>();
-        CHECK_NULL_VOID(defaultPaintProps);
         lastSelected->SetBgColor(newSelected->GetBgColor());
-        options_[selected_]->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        options_[selected_]->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
 
     // set newSelected props
@@ -411,7 +416,6 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
     if (selectedBgColor_.has_value()) {
         newSelected->SetBgColor(selectedBgColor_.value());
     }
-    options_[index]->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SelectPattern::UpdateText(int32_t index)

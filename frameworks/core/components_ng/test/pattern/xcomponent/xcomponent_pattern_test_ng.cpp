@@ -192,7 +192,6 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest004, TestSize.Le
     //         }).height(300).width(300)
     */
     layoutConstraint.selfIdealSize.SetSize(CONTAINER_SIZE);
-    xComponentLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
     auto xComponentSize =
         xComponentLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value_or(SizeF(0.0f, 0.0f));
     EXPECT_EQ(xComponentSize, CONTAINER_SIZE);

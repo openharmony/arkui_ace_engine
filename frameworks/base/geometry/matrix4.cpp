@@ -286,7 +286,7 @@ Matrix4 Matrix4::operator*(const Matrix4& matrix)
 Matrix4N Matrix4::operator*(const Matrix4N& matrix) const
 {
     int32_t columns = matrix.GetColNum();
-    Matrix4N matrix4n { columns };
+    Matrix4N matrix4n(columns);
     for (auto i = 0; i < DIMENSION; i++) {
         for (auto j = 0; j < columns; j++) {
             double value = 0.0;
@@ -420,7 +420,7 @@ Matrix4N::Matrix4N(int32_t columns) : columns_(columns)
 
 bool Matrix4N::SetEntry(int32_t row, int32_t col, double value)
 {
-    if (row >= DIMENSION || col >= columns_) {
+    if (row < 0 || row >= DIMENSION || col < 0 || col >= columns_) {
         return false;
     }
     matrix4n_[row][col] = value;
@@ -458,7 +458,7 @@ MatrixN4 Matrix4N::Transpose() const
 
 std::vector<double> Matrix4N::MapScalars(const std::vector<double>& src) const
 {
-    std::vector<double> value { DIMENSION, 0 };
+    std::vector<double> value(DIMENSION, 0);
     if (static_cast<int32_t>(src.size()) != columns_) {
         return value;
     }
@@ -495,7 +495,7 @@ MatrixN4::MatrixN4(int32_t rows) : rows_(rows)
 
 bool MatrixN4::SetEntry(int32_t row, int32_t col, double value)
 {
-    if (row >= rows_ || col >= DIMENSION) {
+    if (row < 0 || row >= rows_ || col < 0 || col >= DIMENSION) {
         return false;
     }
     matrixn4_[row][col] = value;
@@ -515,7 +515,7 @@ Matrix4N MatrixN4::Transpose() const
 
 std::vector<double> MatrixN4::MapScalars(const std::vector<double>& src) const
 {
-    std::vector<double> value { rows_, 0 };
+    std::vector<double> value(rows_, 0);
     if (static_cast<int32_t>(src.size()) != DIMENSION) {
         return value;
     }

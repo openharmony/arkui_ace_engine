@@ -53,11 +53,7 @@ public:
         menu_ = menu;
     }
 
-    void AddOptionNode(const RefPtr<FrameNode>& option)
-    {
-        CHECK_NULL_VOID(option);
-        options_.push_back(option);
-    }
+    void AddOptionNode(const RefPtr<FrameNode>& option);
 
     void SetSelected(int32_t index);
 
