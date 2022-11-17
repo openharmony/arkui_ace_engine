@@ -68,11 +68,6 @@ void FlutterRenderWeb::Paint(RenderContext& context, const Offset& offset)
     }
     if (delegate_) {
         delegate_->Resize(drawSize_.Width(), drawSize_.Height());
-        if (!isUrlLoaded_) {
-            LOGI("FlutterRenderWeb::Paint start LoadUrl");
-            delegate_->LoadUrl();
-            isUrlLoaded_ = true;
-        }
     }
     RenderNode::Paint(context, offset);
 }
