@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/swiper_indicator_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper_indicator/swiper_indicator_layout_property.h"
 #include "core/components_ng/pattern/swiper_indicator/swiper_indicator_paint_method.h"
@@ -46,76 +47,30 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         auto indicatorLayoutAlgorithm = MakeRefPtr<SwiperIndicatorLayoutAlgorithm>();
-        indicatorLayoutAlgorithm->SetSwiperWidth(swiperWidth_);
-        indicatorLayoutAlgorithm->SetSwiperHeight(swiperHeight_);
-        indicatorLayoutAlgorithm->SetSwiperPaddingLeft(swiperPaddingLeft_);
-        indicatorLayoutAlgorithm->SetSwiperPaddingTop(swiperPaddingTop_);
         return indicatorLayoutAlgorithm;
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        if (GetPaintMethod()) {
-            auto paintMethod = GetPaintMethod();
-            paintMethod->SetItemCount(itemCount_);
-            paintMethod->SetAxis(axis_);
-            paintMethod->SetMainDelta(currentOffset_);
-            paintMethod->SetShowIndicator(showIndicator_);
-            return GetPaintMethod();
-        }
-        auto swiperIndicatorPaintMethod =
-            MakeRefPtr<SwiperIndicatorPaintMethod>(currentOffset_, axis_, currentIndex_, itemCount_, showIndicator_);
-        SetPaintMethod(swiperIndicatorPaintMethod);
-        return swiperIndicatorPaintMethod;
-    }
-
-    void SetPaintMethod(const RefPtr<SwiperIndicatorPaintMethod>& paintMethod)
-    {
-        swiperIndicatorPaintMethod_ = paintMethod;
-    }
-
-    RefPtr<SwiperIndicatorPaintMethod> GetPaintMethod() const
-    {
-        return swiperIndicatorPaintMethod_;
+        auto swiperPattern = GetSwiperNode()->GetPattern<SwiperPattern>();
+        CHECK_NULL_RETURN(swiperPattern, nullptr);
+        return MakeRefPtr<SwiperIndicatorPaintMethod>(
+            swiperPattern->GetDirection(), swiperPattern->GetCurrentIndex(), swiperPattern->TotalCount());
     }
 
     RefPtr<FrameNode> GetSwiperNode() const
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
-        auto stackNode = host->GetParent();
-        CHECK_NULL_RETURN(stackNode, nullptr);
-        auto swiperNode = stackNode->GetChildren().front();
+        auto swiperNode = host->GetParent();
         CHECK_NULL_RETURN(swiperNode, nullptr);
         return DynamicCast<FrameNode>(swiperNode);
-    }
-
-    void SetCurrentIndex(int32_t currentIndex)
-    {
-        currentIndex_ = currentIndex;
-    }
-
-    int32_t GetCurrentIndex() const
-    {
-        return currentIndex_;
     }
 
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void SetIndicatorSize();
-
-    RefPtr<SwiperIndicatorPaintMethod> swiperIndicatorPaintMethod_;
-    float currentOffset_ = 0.0f;
-    int32_t currentIndex_ = 0;
-    int32_t itemCount_ = 0;
-    bool showIndicator_ = true;
-    Axis axis_ = Axis::HORIZONTAL;
-    double swiperWidth_ = 0.0;
-    double swiperHeight_ = 0.0;
-    double swiperPaddingLeft_ = 0.0;
-    double swiperPaddingTop_ = 0.0;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPattern);
 };

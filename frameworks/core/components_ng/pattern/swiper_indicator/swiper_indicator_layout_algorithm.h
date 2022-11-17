@@ -37,32 +37,8 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    void SetSwiperWidth(double swiperWidth)
-    {
-        swiperWidth_ = swiperWidth;
-    }
-
-    void SetSwiperHeight(double swiperHeight)
-    {
-        swiperHeight_ = swiperHeight;
-    }
-
-    void SetSwiperPaddingLeft(double swiperPaddingLeft)
-    {
-        swiperPaddingLeft_ = swiperPaddingLeft;
-    }
-
-    void SetSwiperPaddingTop(double swiperPaddingTop)
-    {
-        swiperPaddingTop_ = swiperPaddingTop;
-    }
-
 private:
-    double GetValidEdgeLength(double swiperLength, double indicatorLength, const Dimension& edge) const;
-    double swiperWidth_ = 0.0;
-    double swiperHeight_ = 0.0;
-    double swiperPaddingLeft_ = 0.0;
-    double swiperPaddingTop_ = 0.0;
+    static double GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge);
     float indicatorWidth_ = 0.0f;
     float indicatorHeight_ = 0.0f;
 };

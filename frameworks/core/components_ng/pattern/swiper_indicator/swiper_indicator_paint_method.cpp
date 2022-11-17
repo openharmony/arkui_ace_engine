@@ -27,7 +27,7 @@
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/paint_property.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -43,18 +43,17 @@ CanvasDrawFunction SwiperIndicatorPaintMethod::GetContentDrawFunction(PaintWrapp
 {
     auto paintProperty = DynamicCast<SwiperIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_RETURN(paintProperty, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
-    auto geometryNode = paintWrapper->GetGeometryNode();
+    const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
     SizeF contentSize = geometryNode->GetFrameSize();
     auto contentOffset = geometryNode->GetContentOffset();
 
-    auto paintFunc = [weak = WeakClaim(this), paintProperty, contentSize, showIndicator = showIndicator_,
-                         contentOffset](RSCanvas& canvas) {
+    auto paintFunc = [weak = WeakClaim(this), paintProperty, contentSize, contentOffset](RSCanvas& canvas) {
         auto swiper_ = weak.Upgrade();
-        if (showIndicator && swiper_) {
+        if (swiper_) {
             if (paintProperty->GetIndicatorMaskValue(false)) {
                 swiper_->PaintMask(canvas, paintProperty, contentSize, contentOffset);
             }
@@ -119,19 +118,21 @@ void SwiperIndicatorPaintMethod::PaintMask(
 void SwiperIndicatorPaintMethod::PaintContent(
     RSCanvas& canvas, const RefPtr<SwiperIndicatorPaintProperty>& paintProperty, SizeF contentSize)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperTheme);
     auto indicatorSize = axis_ == Axis::HORIZONTAL ? contentSize.Height() : contentSize.Width();
     auto userSize = paintProperty->GetSizeValue(swiperTheme->GetSize()).ConvertToPx();
+    if (LessNotEqual(userSize, 0.0)) {
+        userSize = swiperTheme->GetSize().ConvertToPx();
+    }
     auto radius = userSize / 2.0;
     auto selectedSize = userSize * 2.0f;
 
     Offset center = Offset(INDICATOR_PADDING_DEFAULT.ConvertToPx() + radius, indicatorSize / 2.0);
-    int32_t targetIndex = GetCurrentIndex();
     for (int32_t i = 0; i < itemCount_; i++) {
-        if (i != targetIndex) {
+        if (i != currentIndex_) {
             RSBrush brush;
             brush.SetColor(ToRSColor(paintProperty->GetColor().value_or(swiperTheme->GetColor())));
             canvas.AttachBrush(brush);
