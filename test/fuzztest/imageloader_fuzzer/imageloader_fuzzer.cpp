@@ -78,29 +78,6 @@ bool InternalImageLoad(const uint8_t* data, size_t size)
     return internalImageLoader.LoadImageData(info, context) != nullptr;
 }
 
-void MinorTest(const uint8_t* data, size_t size)
-{
-    OHOS::Ace::ImageSourceInfo i;
-    const sk_sp<SkImage> rawImage;
-    auto ri = size % u16m;
-    std::string s(reinterpret_cast<const char*>(data), ri);
-    i = ImageSourceInfo(s);
-    ImageSourceInfo::IsSVGSource(s, InternalResource::ResourceId::SVG_START);
-    ImageSourceInfo::IsPngSource(s, InternalResource::ResourceId::SVG_START);
-    ImageSourceInfo::ResolveURIType(s);
-    ImageSourceInfo::IsValidBase64Head(s, "example");
-    ImageSourceInfo::IsUriOfDataAbilityEncoded(s, "example");
-    auto k = ImageCompressor::GetInstance();
-    Size s2;
-    ImageProvider::ResizeSkImage(rawImage, s, s2) ;
-    SkPixmap  pixmap;
-    sk_sp<SkData> compressdImage;
-#ifdef FUZZTEST
-    k->PartDoing();
-#endif
-    k->GpuCompress(s, pixmap, 0, 0);
-    k->WriteToFile("", compressdImage, s2);
-}
 } // namespace OHOS::Ace
 
 using namespace OHOS;
@@ -108,7 +85,6 @@ using namespace OHOS::Ace;
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    MinorTest(data, size);
     InternalImageLoad(data, size);
     NetworkImageLoad(data, size);
     AssetImageLoad(data, size);
