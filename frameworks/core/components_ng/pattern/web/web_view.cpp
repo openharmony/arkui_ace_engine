@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void WebView::Create(const std::string& webData)
@@ -35,6 +36,7 @@ void WebView::Create(const std::string& webData)
     auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->SetWebData(webData);
+    RegisterPipelineCallback(nodeId);
 }
 
 void WebView::Create(const std::string& src, const RefPtr<WebController>& webController)
@@ -49,6 +51,7 @@ void WebView::Create(const std::string& src, const RefPtr<WebController>& webCon
     CHECK_NULL_VOID(webPattern);
     webPattern->SetWebSrc(src);
     webPattern->SetWebController(webController);
+    RegisterPipelineCallback(nodeId);
 }
 
 void WebView::Create(const std::string& src, SetWebIdCallback&& setWebIdCallback)
@@ -62,6 +65,14 @@ void WebView::Create(const std::string& src, SetWebIdCallback&& setWebIdCallback
     CHECK_NULL_VOID(webPattern);
     webPattern->SetWebSrc(src);
     webPattern->SetSetWebIdCallback(std::move(setWebIdCallback));
+    RegisterPipelineCallback(nodeId);
+}
+
+void WebView::RegisterPipelineCallback(int32_t nodeId)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(nodeId);
 }
 
 void WebView::SetOnCommonDialogImpl(OnWebSyncFunc&& onCommonDialogImpl, DialogEventType dialogEventType)

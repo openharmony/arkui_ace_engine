@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/**
+ * SynchedPropertyNesedObject
+ * 
+ * all definitions in this file are framework internal
+ */
 class SynchedPropertyNesedObject<C extends Object>
   extends ObservedPropertyObjectAbstract<C>
   implements ISinglePropertyChangeSubscriber<C> {

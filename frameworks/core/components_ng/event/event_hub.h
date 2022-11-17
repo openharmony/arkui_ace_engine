@@ -63,10 +63,11 @@ public:
         return inputEventHub_;
     }
 
-    const RefPtr<FocusHub>& GetOrCreateFocusHub(FocusType type = FocusType::DISABLE, bool focusable = false)
+    const RefPtr<FocusHub>& GetOrCreateFocusHub(
+        FocusType type = FocusType::DISABLE, bool focusable = false, FocusStyle focusState = FocusStyle::NONE)
     {
         if (!focusHub_) {
-            focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this), type, focusable);
+            focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this), type, focusable, focusState);
         }
         return focusHub_;
     }
@@ -211,6 +212,11 @@ public:
     }
     // get XTS inspector value
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+
+    void MarkModifyDone();
+
+protected:
+    virtual void OnModifyDone() {}
 
 private:
     WeakPtr<FrameNode> host_;

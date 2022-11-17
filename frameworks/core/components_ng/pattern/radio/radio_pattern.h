@@ -57,7 +57,8 @@ public:
         auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, nullptr);
         auto enabled = eventHub->IsEnabled();
-        auto paintMethod = MakeRefPtr<RadioPaintMethod>(enabled);
+        auto paintMethod =
+            MakeRefPtr<RadioPaintMethod>(enabled, isTouch_, isHover_, totalScale_, pointScale_, uiStatus_);
         return paintMethod;
     }
 
@@ -95,7 +96,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        return { FocusType::NODE, true, FocusStyle::OUTER_BORDER };
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -116,15 +117,35 @@ private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
+    void InitClickEvent();
+    void InitTouchEvent();
+    void InitMouseEvent();
     void OnClick();
     void UpdateState();
     void UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool check);
+    void OnTouchDown();
+    void OnTouchUp();
+    void HandleMouseEvent(bool isHover);
+    void PlayAnimation(bool isOn);
+    void StopAnimation();
+    void UpdateTotalScale(float scale);
+    void UpdatePointScale(float scale);
+    void UpdateUIStatus(bool check);
 
     RefPtr<ClickEvent> clickListener_;
+    RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<InputEvent> mouseEvent_;
+    RefPtr<Animator> onController_;
+    RefPtr<Animator> offController_;
 
     bool preCheck_ = false;
     std::optional<std::string> preValue_;
     std::optional<std::string> preGroup_;
+    bool isTouch_ = false;
+    bool isHover_ = false;
+    float totalScale_ = 1.0f;
+    float pointScale_ = 0.5f;
+    UIStatus uiStatus_ = UIStatus::UNSELECTED;
 
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };

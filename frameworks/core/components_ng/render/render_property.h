@@ -83,23 +83,6 @@ struct TransformProperty {
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 
-struct DecorationProperty {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlurRadius, Dimension);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackShadow, Shadow);
-
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
-    {
-        json->Put("backdropBlur", propBlurRadius.value_or(0.0_vp).Value());
-        auto jsonShadow = JsonUtil::Create(true);
-        auto shadow = propBackShadow.value_or(Shadow());
-        jsonShadow->Put("radius", std::to_string(shadow.GetBlurRadius()).c_str());
-        jsonShadow->Put("color", shadow.GetColor().ColorToString().c_str());
-        jsonShadow->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
-        jsonShadow->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
-        json->Put("shadow", jsonShadow);
-    }
-};
-
 struct GraphicsProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontBrightness, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontGrayScale, Dimension);
@@ -110,6 +93,8 @@ struct GraphicsProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontHueRotate, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontColorBlend, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontBlurRadius, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlurRadius, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackShadow, Shadow);
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 

@@ -43,7 +43,6 @@ void ListLayoutAlgorithm::UpdateListItemConstraint(
         auto width = selfIdealSize.Width();
         if (width.has_value()) {
             contentConstraint.maxSize.SetWidth(width.value());
-            contentConstraint.minSize.SetWidth(width.value());
         }
         return;
     }
@@ -51,7 +50,6 @@ void ListLayoutAlgorithm::UpdateListItemConstraint(
     auto height = selfIdealSize.Height();
     if (height.has_value()) {
         contentConstraint.maxSize.SetHeight(height.value());
-        contentConstraint.minSize.SetHeight(height.value());
     }
 }
 
@@ -94,6 +92,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     if (totalItemCount_ > 0) {
+        currentOffset_ = currentDelta_;
         startMainPos_ = currentOffset_;
         endMainPos_ = currentOffset_ + contentMainSize_;
         LOGD("pre start index: %{public}d, pre end index: %{public}d, offset is %{public}f, startMainPos: %{public}f, "
@@ -115,7 +114,10 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (!itemPosition_.empty()) {
             preStartPos_ = itemPosition_.begin()->second.startPos;
             preEndPos_ = itemPosition_.rbegin()->second.endPos;
+            preStartIndex_ = std::min(GetStartIndex(), totalItemCount_ - 1);
+            preEndIndex_ = std::min(GetEndIndex(), totalItemCount_ - 1);
             itemPosition_.clear();
+            layoutWrapper->RemoveAllChildInRenderTree();
         }
 
         CalculateLanes(listLayoutProperty, layoutConstraint, axis);
@@ -141,20 +143,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     LOGD("new start index is %{public}d, new end index is %{public}d, offset is %{public}f, mainSize is %{public}f",
         GetStartIndex(), GetEndIndex(), currentOffset_, contentMainSize_);
-}
-
-void ListLayoutAlgorithm::RecyclePrevIndex(LayoutWrapper* layoutWrapper)
-{
-    if (preStartIndex_ < GetStartIndex() && preStartIndex_ >= 0) {
-        for (int32_t i = preStartIndex_; i < GetStartIndex(); i++) {
-            layoutWrapper->RemoveChildInRenderTree(i);
-        }
-    }
-    if (preEndIndex_ > GetEndIndex()) {
-        for (int32_t i = GetEndIndex() + 1; i <= preEndIndex_; i++) {
-            layoutWrapper->RemoveChildInRenderTree(i);
-        }
-    }
 }
 
 void ListLayoutAlgorithm::CalculateEstimateOffset()
@@ -190,7 +178,7 @@ void ListLayoutAlgorithm::MeasureList(
         }
         jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value());
         if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_TOP) {
-            LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), 0.0f);
+            LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), startMainPos_);
             float endPos = itemPosition_.begin()->second.startPos - spaceWidth_;
             if (jumpIndex_.value() > 0 && GreatNotEqual(endPos, startMainPos_)) {
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, endPos);
@@ -205,10 +193,15 @@ void ListLayoutAlgorithm::MeasureList(
         CalculateEstimateOffset();
     } else if (NonNegative(currentOffset_)) {
         LayoutForward(layoutWrapper, layoutConstraint, axis, preStartIndex_, preStartPos_);
+        if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
+            LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
+        }
     } else {
         LayoutBackward(layoutWrapper, layoutConstraint, axis, preEndIndex_, preEndPos_);
+        if (GetEndIndex() < (totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
+            LayoutForward(layoutWrapper, layoutConstraint, axis, GetEndIndex() + 1, GetEndPosition());
+        }
     }
-    RecyclePrevIndex(layoutWrapper);
     GetHeaderFooterGroupNode(layoutWrapper);
 }
 
@@ -302,9 +295,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
             }
         } else {
             // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
-            auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-            auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
-            if ((edgeEffect != EdgeEffect::SPRING) || jumpIndex_.has_value()) {
+            if (!canOverScroll_ || jumpIndex_.has_value()) {
                 currentOffset_ = currentEndPos - contentMainSize_;
                 LOGD("LayoutForward: adjust offset to %{public}f", currentOffset_);
                 startMainPos_ = currentOffset_;
@@ -358,10 +349,8 @@ void ListLayoutAlgorithm::LayoutBackward(
 
     bool normalToOverScroll = false;
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
-    auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
     if (GreatNotEqual(currentStartPos, startMainPos_)) {
-        if ((edgeEffect != EdgeEffect::SPRING) || jumpIndex_.has_value()) {
+        if (!canOverScroll_ || jumpIndex_.has_value()) {
             currentOffset_ = currentStartPos;
             endMainPos_ = currentOffset_ + contentMainSize_;
             startMainPos_ = currentStartPos;

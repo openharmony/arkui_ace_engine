@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
@@ -34,7 +35,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     // currently using click point as menu position
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
-    position_ = props->GetMenuOffset().value();
+    position_ = props->GetMenuOffset().value_or(OffsetF());
 }
 
 // Called to perform layout render node and child.

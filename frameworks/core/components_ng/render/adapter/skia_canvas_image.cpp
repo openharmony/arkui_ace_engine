@@ -20,6 +20,12 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/ui/rs_surface_node.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
+#endif
+
 namespace OHOS::Ace::NG {
 
 RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
@@ -134,7 +140,7 @@ int32_t SkiaCanvasImage::GetWidth() const
 #ifdef NG_BUILD
     return 0;
 #else
-    return image_->width();
+    return image_->image() ? image_->width() : image_->compressWidth();
 #endif
 }
 
@@ -143,7 +149,7 @@ int32_t SkiaCanvasImage::GetHeight() const
 #ifdef NG_BUILD
     return 0;
 #else
-    return image_->height();
+    return image_->image() ? image_->height() : image_->compressHeight();
 #endif
 }
 
@@ -152,7 +158,39 @@ void SkiaCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, co
     auto image = GetCanvasImage();
     RSImage rsImage(&image);
     RSSamplingOptions options;
+
+#ifdef ENABLE_ROSEN_BACKEND
+    auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
+    if (rsCanvas == nullptr) {
+        canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
+        return;
+    }
+    auto skCanvas = rsCanvas->ExportSkCanvas();
+    if (skCanvas == nullptr) {
+        canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
+        return;
+    }
+    auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
+    if (recordingCanvas == nullptr) {
+        canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
+        return;
+    }
+    SkPaint paint;
+    SkVector radii[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
+    Rosen::RsImageInfo rsImageInfo(
+        (int)(imagePaintConfig_->imageFit_),
+        (int)(imagePaintConfig_->imageRepeat_),
+        radii,
+        1.0,
+        GetUniqueID(),
+        GetCompressWidth(),
+        GetCompressHeight()
+    );
+    auto data = GetCompressData();
+    recordingCanvas->DrawImageWithParm(image, std::move(data), rsImageInfo, paint);
+#else
     canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
+#endif
 }
 
 } // namespace OHOS::Ace::NG

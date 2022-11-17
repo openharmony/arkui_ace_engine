@@ -21,12 +21,15 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
+#include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
+#include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -39,19 +42,28 @@ constexpr Dimension TAB_BAR_DEFAULT_SIZE = 56.0_vp;
 void TabBarLayoutAlgorithm::UpdateChildConstraint(LayoutConstraintF& childConstraint,
     const RefPtr<TabBarLayoutProperty>& layoutProperty, const SizeF& ideaSize, int32_t childCount, Axis axis)
 {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
     childConstraint.parentIdealSize = OptionalSizeF(ideaSize);
     const auto& barMode = layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED);
     if (barMode == TabBarMode::FIXED) {
         auto childIdeaSize = ideaSize;
         if (axis == Axis::HORIZONTAL) {
             childIdeaSize.SetWidth(ideaSize.Width() / childCount);
+            childConstraint.maxSize.SetHeight(
+                childConstraint.maxSize.Height() - tabTheme->GetSubTabIndicatorHeight().ConvertToPx());
         } else if (axis == Axis::VERTICAL) {
-            childIdeaSize.SetHeight(ideaSize.Height() / childCount);
+            childIdeaSize.SetHeight(
+                ideaSize.Height() / childCount - tabTheme->GetSubTabIndicatorHeight().ConvertToPx());
         }
         childConstraint.selfIdealSize = OptionalSizeF(childIdeaSize);
     } else {
         if (axis == Axis::HORIZONTAL) {
             childConstraint.maxSize.SetWidth(Infinity<float>());
+            childConstraint.maxSize.SetHeight(
+                childConstraint.maxSize.Height() - tabTheme->GetSubTabIndicatorHeight().ConvertToPx());
         } else if (axis == Axis::VERTICAL) {
             childConstraint.maxSize.SetHeight(Infinity<float>());
         }
@@ -60,6 +72,10 @@ void TabBarLayoutAlgorithm::UpdateChildConstraint(LayoutConstraintF& childConstr
 
 void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -91,7 +107,13 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             continue;
         }
         childWrapper->Measure(childLayoutConstraint);
-        childrenMainSize_ += childWrapper->GetGeometryNode()->GetMarginFrameSize().MainSize(axis);
+        if (axis == Axis::HORIZONTAL) {
+            childrenMainSize_ += childWrapper->GetGeometryNode()->GetMarginFrameSize().MainSize(axis);
+        } else {
+            childrenMainSize_ = childrenMainSize_ +
+                                childWrapper->GetGeometryNode()->GetMarginFrameSize().MainSize(axis) +
+                                tabTheme->GetSubTabIndicatorHeight().ConvertToPx();
+        }
     }
 }
 
@@ -101,13 +123,90 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto childCount = layoutWrapper->GetTotalChildCount();
     auto axis = GetAxis(layoutWrapper);
     auto frameSize = geometryNode->GetFrameSize();
 
+    auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    int32_t indicator = layoutProperty->GetIndicatorValue(0);
+    if (indicator != indicator_ &&
+        layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
+        indicator_ = indicator;
+        auto space = GetSpace(layoutWrapper, indicator, frameSize, axis);
+        float frontChildrenMainSize = CalculateFrontChildrenMainSize(layoutWrapper, indicator, axis);
+        if (frontChildrenMainSize < space) {
+            OffsetF childOffset = OffsetF(0.0f, 0.0f);
+            currentOffset_ = 0.0f;
+            LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
+            return;
+        }
+        float backChildrenMainSize = CalculateBackChildrenMainSize(layoutWrapper, indicator, axis);
+        if (backChildrenMainSize < space) {
+            auto scrollableDistance = std::max(childrenMainSize_ - frameSize.MainSize(axis), 0.0f);
+            currentOffset_ = -scrollableDistance;
+            OffsetF childOffset =
+                (axis == Axis::HORIZONTAL ? OffsetF(-scrollableDistance, 0.0f) : OffsetF(0.0f, -scrollableDistance));
+            LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
+            return;
+        }
+        auto scrollableDistance = std::max(frontChildrenMainSize - space, 0.0f);
+        currentOffset_ = -scrollableDistance;
+        OffsetF childOffset =
+            (axis == Axis::HORIZONTAL ? OffsetF(-scrollableDistance, 0.0f) : OffsetF(0.0f, -scrollableDistance));
+        LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
+        return;
+    }
     auto scrollableDistance = std::max(childrenMainSize_ - frameSize.MainSize(axis), 0.0f);
     currentOffset_ = std::clamp(currentOffset_, -scrollableDistance, 0.0f);
     OffsetF childOffset = (axis == Axis::HORIZONTAL ? OffsetF(currentOffset_, 0.0f) : OffsetF(0.0f, currentOffset_));
+    indicator_ = indicator;
+    LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
+}
+
+Axis TabBarLayoutAlgorithm::GetAxis(LayoutWrapper* layoutWrapper) const
+{
+    auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, Axis::HORIZONTAL);
+    return layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
+}
+
+float TabBarLayoutAlgorithm::GetSpace(
+    LayoutWrapper* layoutWrapper, int32_t indicator, const SizeF& frameSize, Axis axis)
+{
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(indicator);
+    if (!childWrapper) {
+        return 0.0f;
+    }
+    auto childGeometryNode = childWrapper->GetGeometryNode();
+    auto childFrameSize = childGeometryNode->GetMarginFrameSize();
+    return (frameSize.MainSize(axis) - childFrameSize.MainSize(axis)) / 2;
+}
+
+float TabBarLayoutAlgorithm::CalculateFrontChildrenMainSize(LayoutWrapper* layoutWrapper, int32_t indicator, Axis axis)
+{
+    float frontChildrenMainSize = 0.0f;
+    for (int32_t index = 0; index < indicator; ++index) {
+        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        if (!childWrapper) {
+            return 0.0f;
+        }
+        auto childGeometryNode = childWrapper->GetGeometryNode();
+        auto childFrameSize = childGeometryNode->GetMarginFrameSize();
+        frontChildrenMainSize += childFrameSize.MainSize(axis);
+    }
+    return frontChildrenMainSize;
+}
+
+void TabBarLayoutAlgorithm::LayoutChildren(
+    LayoutWrapper* layoutWrapper, const SizeF& frameSize, Axis axis, OffsetF& childOffset)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    auto childCount = layoutWrapper->GetTotalChildCount();
+    auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
     for (int32_t index = 0; index < childCount; ++index) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childWrapper) {
@@ -125,37 +224,26 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         if (axis == Axis::HORIZONTAL) {
             childOffset += OffsetF(childFrameSize.Width(), 0.0f);
         } else {
-            childOffset += OffsetF(0.0f, childFrameSize.Height());
+            childOffset += OffsetF(0.0f, childFrameSize.Height() + tabTheme->GetSubTabIndicatorHeight().ConvertToPx());
         }
     }
     tabItemOffset_.emplace_back(childOffset);
 }
 
-Axis TabBarLayoutAlgorithm::GetAxis(LayoutWrapper* layoutWrapper) const
+float TabBarLayoutAlgorithm::CalculateBackChildrenMainSize(LayoutWrapper* layoutWrapper, int32_t indicator, Axis axis)
 {
-    auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(layoutProperty, Axis::HORIZONTAL);
-    return layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
-}
-
-RectF TabBarLayoutAlgorithm::GetIndicatorRect(const RefPtr<LayoutWrapper>& layoutWrapper) const
-{
-    auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(layoutProperty, RectF());
-    int32_t indicator = layoutProperty->GetIndicatorValue(0);
-
-    auto childColumn = layoutWrapper->GetOrCreateChildByIndex(indicator);
-    CHECK_NULL_RETURN(childColumn, RectF());
-    auto grandChildren = childColumn->GetOrCreateChildByIndex(childColumn->GetTotalChildCount() - 1);
-    CHECK_NULL_RETURN(grandChildren, RectF());
-    auto grandChildGeometryNode = grandChildren->GetGeometryNode();
-    RectF indicatorRect = grandChildGeometryNode->GetFrameRect();
-
-    /* Set indicatorRect at the bottom of columnNode's last child */
-    auto childColumnRect = childColumn->GetGeometryNode()->GetFrameRect();
-    indicatorRect.SetLeft(indicatorRect.GetX() + childColumnRect.GetX());
-    indicatorRect.SetTop(indicatorRect.Bottom() + childColumnRect.GetY());
-    return indicatorRect;
+    float backChildrenMainSize = 0.0f;
+    auto childCount = layoutWrapper->GetTotalChildCount();
+    for (int32_t index = indicator + 1; index < childCount; ++index) {
+        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        if (!childWrapper) {
+            return 0.0f;
+        }
+        auto childGeometryNode = childWrapper->GetGeometryNode();
+        auto childFrameSize = childGeometryNode->GetMarginFrameSize();
+        backChildrenMainSize += childFrameSize.MainSize(axis);
+    }
+    return backChildrenMainSize;
 }
 
 } // namespace OHOS::Ace::NG

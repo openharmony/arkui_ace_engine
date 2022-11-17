@@ -368,7 +368,8 @@ void ImageProvider::GetSVGImageDOMAsyncFromData(const sk_sp<SkData>& skData,
 }
 #endif
 
-void ImageProvider::UploadImageToGPUForRender(const sk_sp<SkImage>& image,
+void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> context,
+    const sk_sp<SkImage>& image,
     const sk_sp<SkData>& data,
     const std::function<void(flutter::SkiaGPUObject<SkImage>, sk_sp<SkData>)>&& callback,
     const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
@@ -387,20 +388,13 @@ void ImageProvider::UploadImageToGPUForRender(const sk_sp<SkImage>& image,
         callback({ image, renderTaskHolder->unrefQueue }, data);
         return;
     }
-    auto task = [image, callback, renderTaskHolder, src] () {
+    auto task = [context, image, callback, renderTaskHolder, src] () {
         if (!renderTaskHolder) {
             LOGW("renderTaskHolder has been released.");
             return;
         }
-        // weak reference of io manager must be check and used on io thread, because io manager is created on io thread.
-        if (!renderTaskHolder->ioManager) {
-            // Shell is closing.
-            callback({ image, renderTaskHolder->unrefQueue }, nullptr);
-            return;
-        }
         ACE_DCHECK(!image->isTextureBacked());
-        bool needRaster = ImageCompressor::GetInstance()->CanCompress()
-            || renderTaskHolder->ioManager->GetResourceContext();
+        bool needRaster = ImageCompressor::GetInstance()->CanCompress();
         if (!needRaster) {
             callback({ image, renderTaskHolder->unrefQueue }, nullptr);
             return;
@@ -423,26 +417,22 @@ void ImageProvider::UploadImageToGPUForRender(const sk_sp<SkImage>& image,
             if (ImageCompressor::GetInstance()->CanCompress()) {
                 compressData = ImageCompressor::GetInstance()->GpuCompress(src, pixmap, width, height);
                 ImageCompressor::GetInstance()->WriteToFile(src, compressData, { width, height });
-                renderTaskHolder->ioTaskRunner->PostDelayedTask(ImageCompressor::GetInstance()->ScheduleReleaseTask(),
-                    fml::TimeDelta::FromMilliseconds(ImageCompressor::releaseTimeMs));
+                auto pipelineContext = context.Upgrade();
+                if (pipelineContext && pipelineContext->GetTaskExecutor()) {
+                    auto taskExecutor = pipelineContext->GetTaskExecutor();
+                    taskExecutor->PostDelayedTask(ImageCompressor::GetInstance()->ScheduleReleaseTask(),
+                        TaskExecutor::TaskType::UI, ImageCompressor::releaseTimeMs);
+                } else {
+                    BackgroundTaskExecutor::GetInstance().PostTask(
+                        ImageCompressor::GetInstance()->ScheduleReleaseTask());
+                }
             }
-            auto resContext = renderTaskHolder->ioManager->GetResourceContext();
-            if (!resContext) {
-                callback({ image, renderTaskHolder->unrefQueue }, compressData);
-            } else {
-                auto textureImage =
-#ifdef NG_BUILD
-                    SkImage::MakeCrossContextFromPixmap(resContext.get(), pixmap, true, true);
-#else
-                    SkImage::MakeCrossContextFromPixmap(resContext.get(), pixmap, true, pixmap.colorSpace(), true);
-#endif
-                callback({ textureImage ? textureImage : rasterizedImage, renderTaskHolder->unrefQueue }, compressData);
-            }
+            callback({ image, renderTaskHolder->unrefQueue }, compressData);
             // Trigger purge cpu bitmap resource, after image upload to gpu.
             SkGraphics::PurgeResourceCache();
         }
     };
-    renderTaskHolder->ioTaskRunner->PostTask(std::move(task));
+    BackgroundTaskExecutor::GetInstance().PostTask(task);
 #endif
 }
 

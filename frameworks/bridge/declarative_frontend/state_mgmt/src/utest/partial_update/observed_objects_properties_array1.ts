@@ -26,11 +26,11 @@ const array1ObsObjPropsPU = tsuite("Partial update: Array of Observed Object and
 
   class SubscribingView implements IMultiPropertiesChangeSubscriber {
 
-    private id_: number = SubscriberManager.Get().MakeId();
+    private id_: number = SubscriberManager.MakeId();
     private label_: string;
 
     constructor(label: string) {
-      SubscriberManager.Get().add(this);
+      SubscriberManager.Add(this);
       this.label_ = label;
     }
 
@@ -43,7 +43,7 @@ const array1ObsObjPropsPU = tsuite("Partial update: Array of Observed Object and
     // that the subscriber is about to be deleted
     // hence , unsubscribe
     aboutToBeDeleted(): void {
-      SubscriberManager.Get().delete(this.id__());
+      SubscriberManager.Delete(this.id__());
     }
 
     // implements IMultiPropertiesChangePublisher
@@ -116,6 +116,7 @@ const array1ObsObjPropsPU = tsuite("Partial update: Array of Observed Object and
     parentViewProp.aboutToBeDeleted();
     parentView.aboutToBeDeleted();
 
-    test(`After cleanup: SubscriberManager num of subscribers is ${SubscriberManager.Get().numberOfSubscrbers()} should be 0 .`, SubscriberManager.Get().numberOfSubscrbers() == 0);
+    test(`After cleanup: SubscriberManager num of subscribers is ${SubscriberManager.NumberOfSubscribers()} should be 0 .`,
+      SubscriberManager.NumberOfSubscribers() == 0);
   });
 });

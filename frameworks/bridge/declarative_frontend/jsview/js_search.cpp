@@ -19,17 +19,18 @@
 #include <string>
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/search/search_component.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/text_field_component.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/search/search_view.h"
-#include "bridge/declarative_frontend/jsview/js_textfield.h"
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -39,6 +40,7 @@ const TextInputAction INPUT_TEXTINPUTACTION_VALUE_DEFAULT = TextInputAction::UNS
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = {
     "sans-serif",
 };
+const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 
 Radius defaultRadius;
 constexpr Dimension BOX_HOVER_RADIUS = 18.0_vp;
@@ -233,6 +235,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("placeholderColor", &JSSearch::SetPlaceholderColor, opt);
     JSClass<JSSearch>::StaticMethod("placeholderFont", &JSSearch::SetPlaceholderFont, opt);
     JSClass<JSSearch>::StaticMethod("textFont", &JSSearch::SetTextFont, opt);
+    JSClass<JSSearch>::StaticMethod("textAlign", &JSSearch::SetTextAlign, opt);
     JSClass<JSSearch>::StaticMethod("onSubmit", &JSSearch::OnSubmit, opt);
     JSClass<JSSearch>::StaticMethod("onChange", &JSSearch::OnChange, opt);
     JSClass<JSSearch>::StaticMethod("border", &JSSearch::JsBorder);
@@ -273,7 +276,7 @@ void JSSearch::Create(const JSCallbackInfo& info)
             tip = placeholder;
         }
         std::string text;
-        if (ParseJsString(param->GetProperty("text"), text)) {
+        if (ParseJsString(param->GetProperty("value"), text)) {
             key = text;
         }
         std::string icon;
@@ -284,7 +287,7 @@ void JSSearch::Create(const JSCallbackInfo& info)
         auto controller = NG::SearchView::Create(key, tip, src);
         auto controllerObj = param->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
-            auto *jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSSearchController>();
+            auto* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSSearchController>();
             if (jsController) {
                 jsController->SetController(controller);
             }
@@ -399,11 +402,13 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
     if (Container::IsCurrentUseNewPipeline()) {
         auto param = JSRef<JSObject>::Cast(info[0]);
         Font font;
-        auto size = param->GetProperty("size");
-        if (!size->IsNull() && size->IsNumber()) {
-            Dimension fontSize;
-            if (ParseJsDimensionFp(size, fontSize)) {
-                font.fontSize = fontSize;
+        auto fontSize = param->GetProperty("size");
+        if (!fontSize->IsNull()) {
+            Dimension size;
+            if (!ParseJsDimensionFp(fontSize, size)) {
+                LOGE("Parse to dimension FP failed.");
+            } else {
+                font.fontSize = size;
             }
         }
 
@@ -492,11 +497,13 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
     if (Container::IsCurrentUseNewPipeline()) {
         auto param = JSRef<JSObject>::Cast(info[0]);
         Font font;
-        auto size = param->GetProperty("size");
-        if (!size->IsNull() && size->IsNumber()) {
-            Dimension fontSize;
-            if (ParseJsDimensionFp(size, fontSize)) {
-                font.fontSize = fontSize;
+        auto fontSize = param->GetProperty("size");
+        if (!fontSize->IsNull()) {
+            Dimension size;
+            if (!ParseJsDimensionFp(fontSize, size)) {
+                LOGE("Parse to dimension FP failed.");
+            } else {
+                font.fontSize = size;
             }
         }
 
@@ -578,6 +585,31 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
         textStyle.SetFontStyle(styleVal);
     }
     textFieldComponent->SetEditingStyle(textStyle);
+}
+
+void JSSearch::SetTextAlign(int32_t value)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
+            NG::SearchView::SetTextAlign(TEXT_ALIGNS[value]);
+        } else {
+            LOGE("the value is error");
+        }
+        return;
+    }
+
+    if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
+        auto* stack = ViewStackProcessor::GetInstance();
+        auto component = AceType::DynamicCast<SearchComponent>(stack->GetMainComponent());
+        CHECK_NULL_VOID(component);
+        auto childComponent = component->GetChild();
+        CHECK_NULL_VOID(childComponent);
+        auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
+        CHECK_NULL_VOID(textFieldComponent);
+        textFieldComponent->SetTextAlign(TEXT_ALIGNS[value]);
+    } else {
+        LOGE("the value is error");
+    }
 }
 
 void JSSearch::JsBorder(const JSCallbackInfo& info)

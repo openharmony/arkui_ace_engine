@@ -109,6 +109,11 @@ template("declarative_js_engine") {
     deps = []
     configs = [ "$ace_root:ace_config" ]
 
+    if (defined(config.model_component_support) &&
+        config.model_component_support) {
+      configs += [ "//foundation/graphic/graphic_3d/3d_widget_adapter:widget_adapter_config" ]
+    }
+
     sources = [
       "engine/bindings_implementation.cpp",
       "engine/declarative_engine_loader.cpp",
@@ -275,11 +280,14 @@ template("declarative_js_engine") {
       "jsview/models/list_item_group_model_impl.cpp",
       "jsview/models/list_item_model_impl.cpp",
       "jsview/models/list_model_impl.cpp",
+      "jsview/models/loading_progress_model_impl.cpp",
       "jsview/models/marquee_model_impl.cpp",
       "jsview/models/navigator_model_impl.cpp",
+      "jsview/models/page_transition_model_impl.cpp",
       "jsview/models/path_model_impl.cpp",
       "jsview/models/patternlock_model_impl.cpp",
       "jsview/models/polygon_model_impl.cpp",
+      "jsview/models/progress_model_impl.cpp",
       "jsview/models/qrcode_model_impl.cpp",
       "jsview/models/radio_model_impl.cpp",
       "jsview/models/rect_model_impl.cpp",
@@ -289,6 +297,7 @@ template("declarative_js_engine") {
       "jsview/models/shape_abstract_model_impl.cpp",
       "jsview/models/shape_model_impl.cpp",
       "jsview/models/slider_model_impl.cpp",
+      "jsview/models/sliding_panel_model_impl.cpp",
       "jsview/models/span_model_impl.cpp",
       "jsview/models/stack_model_impl.cpp",
       "jsview/models/stepper_item_model_impl.cpp",
@@ -365,6 +374,11 @@ template("declarative_js_engine") {
 
     if (defined(config.preview_support) && config.preview_support) {
       sources += [ "jsview/js_previewer_mock.cpp" ]
+    }
+
+    if (defined(config.model_component_support) &&
+        config.model_component_support) {
+      sources += [ "jsview/js_sceneview.cpp" ]
     }
 
     if (defined(config.use_build_in_js_engine) &&

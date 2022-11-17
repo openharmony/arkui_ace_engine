@@ -29,6 +29,8 @@
 
 namespace OHOS::Ace::NG {
 
+thread_local int32_t UINode::currentAccessibilityId_ = 0;
+
 UINode::~UINode()
 {
     if (!removeSilently_) {
@@ -39,11 +41,10 @@ UINode::~UINode()
     if (!onMainTree_) {
         return;
     }
-    DetachFromMainTree();
     onMainTree_ = false;
 }
 
-void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot)
+void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently)
 {
     CHECK_NULL_VOID(child);
     auto it = std::find(children_.begin(), children_.end(), child);
@@ -55,14 +56,7 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot)
 
     it = children_.begin();
     std::advance(it, slot);
-    children_.insert(it, child);
-
-    child->SetParent(Claim(this));
-    child->SetDepth(GetDepth() + 1);
-    if (onMainTree_) {
-        child->AttachToMainTree();
-    }
-    MarkNeedSyncRenderTree();
+    DoAddChild(it, child, silently);
 }
 
 std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child)
@@ -121,13 +115,7 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
     }
 
     auto iter = RemoveChild(oldNode);
-    children_.insert(iter, newNode);
-    newNode->SetParent(Claim(this));
-    newNode->SetDepth(GetDepth() + 1);
-    if (onMainTree_) {
-        newNode->AttachToMainTree();
-    }
-    MarkNeedSyncRenderTree();
+    DoAddChild(iter, newNode);
 }
 
 void UINode::Clean()
@@ -139,10 +127,10 @@ void UINode::Clean()
     MarkNeedSyncRenderTree();
 }
 
-void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot)
+void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool silently)
 {
     CHECK_NULL_VOID(parent);
-    parent->AddChild(AceType::Claim(this), slot);
+    parent->AddChild(AceType::Claim(this), slot, silently);
     if (parent->GetPageId() != 0) {
         SetHostPageId(parent->GetPageId());
     }
@@ -150,8 +138,21 @@ void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot)
 
 void UINode::OnRemoveFromParent()
 {
+    DetachFromMainTree();
     parent_.Reset();
     depth_ = -1;
+}
+
+void UINode::DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently)
+{
+    children_.insert(it, child);
+
+    child->SetParent(Claim(this));
+    child->SetDepth(GetDepth() + 1);
+    if (!silently && onMainTree_) {
+        child->AttachToMainTree();
+    }
+    MarkNeedSyncRenderTree();
 }
 
 RefPtr<FrameNode> UINode::GetFocusParent() const
@@ -325,12 +326,12 @@ RefPtr<PipelineContext> UINode::GetContext()
 }
 
 HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result)
+    const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
     HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
     for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
         auto& child = *iter;
-        auto hitResult = child->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
+        auto hitResult = child->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result, touchId);
         if (hitResult == HitTestResult::STOP_BUBBLING) {
             return HitTestResult::STOP_BUBBLING;
         }
@@ -434,6 +435,32 @@ void UINode::SetActive(bool active)
     for (const auto& child : children_) {
         child->SetActive(active);
     }
+}
+
+std::pair<bool, int32_t> UINode::GetChildFlatIndex(int32_t id)
+{
+    if (GetId() == id) {
+        return std::pair<bool, int32_t>(true, 0);
+    }
+
+    const auto& node = ElementRegister::GetInstance()->GetUINodeById(id);
+    if (!node) {
+        return std::pair<bool, int32_t>(false, 0);
+    }
+
+    if (node && (node->GetTag() == GetTag())) {
+        return std::pair<bool, int32_t>(false, 1);
+    }
+
+    int32_t count = 0;
+    for (const auto& child : GetChildren()) {
+        auto res = child->GetChildFlatIndex(id);
+        if (res.first) {
+            return std::pair<bool, int32_t>(true, count + res.second);
+        }
+        count += res.second;
+    }
+    return std::pair<bool, int32_t>(false, count);
 }
 
 } // namespace OHOS::Ace::NG

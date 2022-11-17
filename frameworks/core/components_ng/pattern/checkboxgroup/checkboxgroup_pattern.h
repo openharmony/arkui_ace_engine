@@ -58,7 +58,7 @@ public:
         auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, nullptr);
         auto enabled = eventHub->IsEnabled();
-        auto paintMethod = MakeRefPtr<CheckBoxGroupPaintMethod>(enabled);
+        auto paintMethod = MakeRefPtr<CheckBoxGroupPaintMethod>(enabled, isTouch_, isHover_, shapeScale_, uiStatus_);
         return paintMethod;
     }
 
@@ -103,12 +103,27 @@ public:
         json->Put("group", group.c_str());
     }
 
+    void ResetUIStatus()
+    {
+        uiStatus_ = UIStatus::UNSELECTED;
+    }
+
+    void UpdateAnimation(bool check);
+    void UpdateUIStatus(bool check);
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
+    void InitClickEvent();
+    void InitTouchEvent();
+    void InitMouseEvent();
     void OnClick();
-
+    void OnTouchDown();
+    void OnTouchUp();
+    void HandleMouseEvent(bool isHover);
+    void UpdateCheckBoxShape(float value);
+    void UpdateUnSelect();
     void UpdateState();
     void UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool select);
     void UpdateRepeatedGroupStatus(const RefPtr<FrameNode>& frameNode, bool select);
@@ -118,8 +133,17 @@ private:
 
     std::optional<std::string> preGroup_;
     bool isAddToMap_ = true;
-    
+
     RefPtr<ClickEvent> clickListener_;
+    RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<InputEvent> mouseEvent_;
+    bool isTouch_ = false;
+    bool isHover_ = false;
+    // animation control
+    RefPtr<Animator> controller_;
+    RefPtr<CurveAnimation<float>> translate_;
+    float shapeScale_ = 1.0f;
+    UIStatus uiStatus_ = UIStatus::UNSELECTED;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupPattern);
 };

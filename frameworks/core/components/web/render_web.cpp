@@ -51,9 +51,7 @@ void RenderWeb::OnAttachContext()
         drawSize_ = Size(pipelineContext->GetRootWidth(), pipelineContext->GetRootHeight());
         drawSizeCache_ = drawSize_;
         position_ = Offset(0, 0);
-#ifdef OHOS_STANDARD_SYSTEM
-        delegate_->InitOHOSWeb(context_);
-#else
+#ifndef OHOS_STANDARD_SYSTEM
         delegate_->CreatePlatformResource(drawSize_, position_, context_);
 #endif
     }
@@ -307,6 +305,7 @@ void RenderWeb::OnAppShow()
 void RenderWeb::OnAppHide()
 {
     RenderNode::OnAppHide();
+    needOnFocus_ = false;
     if (delegate_) {
         delegate_->HideWebView();
     }

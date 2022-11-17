@@ -330,6 +330,11 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/wrap:ace_core_components_wrap_$platform",
     ]
 
+    if (defined(config.model_component_support) &&
+        config.model_component_support) {
+      deps += [ "$ace_root/frameworks/core/components/scene_viewer:ace_core_components_scene_viewer_$platform" ]
+    }
+
     deps += [
       "$ace_root/frameworks/core/components_v2/common:ace_core_components_common_v2_$platform",
       "$ace_root/frameworks/core/components_v2/foreach:ace_core_components_foreach_v2_$platform",
@@ -622,6 +627,7 @@ template("ace_core_ng_source_set") {
       "components/common/layout/grid_column_info.cpp",
       "components/common/layout/grid_container_info.cpp",
       "components/common/layout/grid_system_manager.cpp",
+      "components/common/layout/screen_system_manager.cpp",
 
       # v1 deps
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
@@ -641,6 +647,7 @@ template("ace_core_ng_source_set") {
       "components/theme/theme_utils.cpp",
 
       # v2 inspector
+      "components_v2/grid/grid_event.cpp",
       "components_v2/grid_layout/grid_container_utils.cpp",
       "components_v2/inspector/inspector_constants.cpp",
       "components_v2/inspector/utils.cpp",
@@ -666,6 +673,16 @@ template("ace_core_ng_source_set") {
         "$ace_flutter_engine_root_new:third_party_flutter_engine_dev_$platform",
         "$ace_flutter_engine_root_new/third_party/skia:ace_skia_dev_$platform",
       ]
+    }
+
+    if (defined(config.build_container_scope_lib) &&
+        config.build_container_scope_lib) {
+      sources -= [ "common/container_scope.cpp" ]
+      if (defined(config.build_for_ios) && config.build_for_ios) {
+        deps += [ "$ace_napi:ace_container_scope_static" ]
+      } else {
+        deps += [ "$ace_napi:ace_container_scope" ]
+      }
     }
 
     deps += [

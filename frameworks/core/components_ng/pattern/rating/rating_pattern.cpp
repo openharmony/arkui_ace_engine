@@ -246,7 +246,7 @@ void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(const double eventP
 
     // step1: calculate the number of star which the touch point falls on.
     double wholeStarNum = 0.0;
-    float singleWidth = singleStarDstRect_.Width();
+    const float singleWidth = singleStarDstRect_.Width();
     wholeStarNum = floor(eventPointX / singleWidth);
 
     // step2: calculate relative position where the touch point falls on the wholeStarNum star.
@@ -254,21 +254,22 @@ void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(const double eventP
     posInSingle = (eventPointX - wholeStarNum * singleWidth) / singleWidth;
     // step3: calculate the new ratingScore according to the touch point.
     double ratingScore = wholeStarNum + posInSingle;
-    int32_t starNum =
+    const int32_t starNum =
         ratingLayoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(DEFAULT_RATING_STAR_NUM));
-    double stepSize = ratingRenderProperty->GetStepSize().value_or(GetStepSizeFromTheme().value_or(0.5));
-    // step3.1: constrain ratingScore which cannot be greater than starNum and be less than stepSize.
+    const double stepSize = ratingRenderProperty->GetStepSize().value_or(GetStepSizeFromTheme().value_or(0.5));
+    // step3.1: constrain ratingScore which cannot be greater than starNum and be less than 0.0.
     ratingScore = ratingScore > starNum ? starNum : ratingScore;
-    ratingScore = (ratingScore > stepSize) ? ratingScore : stepSize;
-    double newDrawScore = fmin(ceil(ratingScore / stepSize) * stepSize, starNum);
+    ratingScore = (ratingScore < 0.0) ? 0.0 : ratingScore;
+    const double newDrawScore = fmin(ceil(ratingScore / stepSize) * stepSize, starNum);
     // step3.2: Determine whether the old and new ratingScores are same or not.
-    double oldRatingScore = ratingRenderProperty->GetRatingScoreValue();
-    double oldDrawScore = fmin(Round(oldRatingScore / stepSize) * stepSize, static_cast<double>(starNum));
+    const double oldRatingScore = ratingRenderProperty->GetRatingScoreValue();
+    const double oldDrawScore = fmin(Round(oldRatingScore / stepSize) * stepSize, static_cast<double>(starNum));
     if (NearEqual(newDrawScore, oldDrawScore)) {
         return;
     }
     // step4: Update the ratingScore saved in renderProperty and update render.
     ratingRenderProperty->UpdateRatingScore(newDrawScore);
+    ratingRenderProperty->UpdateTouchStar(static_cast<int32_t>(wholeStarNum));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -441,6 +442,45 @@ void RatingPattern::UpdateInternalResource(ImageSourceInfo& sourceInfo, int32_t 
     }
 }
 
+bool RatingPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
+    double ratingScore = ratingRenderProperty->GetRatingScoreValue();
+    const double stepSize =
+        ratingRenderProperty->GetStepSize().value_or(GetStepSizeFromTheme().value_or(DEFAULT_RATING_STEP_SIZE));
+    if (event.code == KeyCode::KEY_DPAD_LEFT) {
+        ratingScore = fmax(ratingScore - stepSize, 0.0);
+        ratingRenderProperty->UpdateRatingScore(ratingScore);
+        auto host = GetHost();
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        return true;
+    }
+    if (event.code == KeyCode::KEY_DPAD_RIGHT) {
+        ratingScore = fmin(ratingScore + stepSize, GetLayoutProperty<RatingLayoutProperty>()->GetStars().value_or(
+                                                       GetStarNumFromTheme().value_or(DEFAULT_RATING_STAR_NUM)));
+        ratingRenderProperty->UpdateRatingScore(ratingScore);
+        auto host = GetHost();
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        return true;
+    }
+    return false;
+}
+
+void RatingPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
 void RatingPattern::OnModifyDone()
 {
     // Reset image state code.
@@ -505,11 +545,16 @@ void RatingPattern::OnModifyDone()
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    // Init touch, pan and click event and register callback.
+    // Init touch, pan, click and key event and register callback.
     InitTouchEvent(gestureHub);
     InitPanEvent(gestureHub);
     InitClickEvent(gestureHub);
+    auto focusHub = host->GetFocusHub();
+    if (focusHub) {
+        InitOnKeyEvent(focusHub);
+    }
 }
+
 // XTS inspector code
 void RatingPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {

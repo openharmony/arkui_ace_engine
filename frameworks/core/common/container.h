@@ -249,6 +249,12 @@ public:
 
     virtual void GetCardFrontendMap(std::unordered_map<int64_t, WeakPtr<Frontend>>& cardFrontendMap) const {}
 
+    virtual void SetSharedRuntime(void* runtime) {}
+    virtual void* GetSharedRuntime()
+    {
+        return nullptr;
+    }
+
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     bool firstUpdateData_ = true;

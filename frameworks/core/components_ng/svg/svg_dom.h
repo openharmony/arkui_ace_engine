@@ -43,11 +43,7 @@ public:
     void DrawImage(
         RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>& color) override;
 
-    SizeF GetContainerSize() const override
-    {
-        // TODO: return correct size
-        return {};
-    }
+    SizeF GetContainerSize() const override;
     void SetContainerSize(const SizeF& containerSize) override {}
     void SetSvgFillColor(const std::optional<Color>& color) override
     {

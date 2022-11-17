@@ -274,13 +274,16 @@ void GridPattern::AddScrollEvent()
     gestureHub->AddScrollableEvent(scrollableEvent_);
 }
 
-bool GridPattern::OnScrollCallback(float offset, int32_t /* source */)
+bool GridPattern::OnScrollCallback(float offset, int32_t source)
 {
-    /* Stop scroll controler animation */
+    // Stop scroll controller animation
     if (animator_) {
         animator_->Stop();
     }
-    return UpdateScrollPosition(static_cast<float>(offset));
+    if (source == SCROLL_FROM_START) {
+        return true;
+    }
+    return UpdateScrollPosition(offset);
 }
 
 bool GridPattern::UpdateScrollPosition(float offset)
@@ -292,10 +295,11 @@ bool GridPattern::UpdateScrollPosition(float offset)
     CHECK_NULL_RETURN(host, false);
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
-    if (gridLayoutInfo_.reachEnd_) {
+    if (gridLayoutInfo_.offsetEnd_) {
         if (LessOrEqual(offset, 0)) {
             return false;
         }
+        gridLayoutInfo_.offsetEnd_ = false;
         gridLayoutInfo_.reachEnd_ = false;
     }
     if (gridLayoutInfo_.reachStart_) {
@@ -304,6 +308,7 @@ bool GridPattern::UpdateScrollPosition(float offset)
         }
         gridLayoutInfo_.reachStart_ = false;
     }
+    gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
     gridLayoutInfo_.currentOffset_ += offset;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;

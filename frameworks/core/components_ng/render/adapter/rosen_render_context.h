@@ -37,6 +37,8 @@
 namespace OHOS::Ace::NG {
 class BorderImageModifier;
 class MouseSelectModifier;
+class FocusStateModifier;
+class PageTransitionEffect;
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext)
 public:
@@ -66,6 +68,10 @@ public:
     void ResetBlendBorderColor() override;
 
     void BlendBorderColor(const Color& color) override;
+
+    void PaintFocusState(Dimension focusPaddingVp) override;
+
+    void ClearFocusState() override;
 
     RefPtr<Canvas> GetCanvas() override;
     void Restore() override;
@@ -119,7 +125,7 @@ public:
     void AnimateHoverEffectScale(bool isHovered) override;
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
-    void UpdateBackShadow(const Shadow& shadow) override;
+    void OnBackShadowUpdate(const Shadow& shadow) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
     void OnTransformMatrixUpdate(const Matrix4& matrix) override;
@@ -137,7 +143,7 @@ public:
     void OnNodeDisappear(FrameNode* host) override;
     void ClipWithRect(const RectF& rectF) override;
 
-    bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const override;
+    bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
 
     void SetSharedTranslate(float xTranslate, float yTranslate) override;
     void ResetSharedTranslate() override;
@@ -228,6 +234,9 @@ private:
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot);
 
+    std::shared_ptr<Rosen::RSTransitionEffect> GetDefaultPageTransition(PageTransitionType type);
+    std::shared_ptr<Rosen::RSTransitionEffect> GetPageTransitionEffect(const RefPtr<PageTransitionEffect>& transition);
+
     void PaintBackground();
     void PaintClip(const SizeF& frameSize);
     void PaintGradient(const SizeF& frameSize);
@@ -237,7 +246,6 @@ private:
     void PaintBorderImage();
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
-
 
     RectF AdjustPaintRect();
 
@@ -261,6 +269,7 @@ private:
 
     std::shared_ptr<BorderImageModifier> borderImageModifier_ = nullptr;
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_ = nullptr;
+    std::shared_ptr<FocusStateModifier> focusStateModifier_ = nullptr;
     std::optional<TransformMatrixModifier> transformMatrixModifier_;
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;

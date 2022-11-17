@@ -31,7 +31,7 @@ enum class Direction {
     PRE = 0,
     NEXT,
 };
-using ChangeIndicatorEvent = std::function<void(const BaseEventInfo* info)>;
+using ChangeIndicatorEvent = std::function<void()>;
 using ChangeEvent = std::function<void(int32_t index)>;
 using ChangeEventPtr = std::shared_ptr<ChangeEvent>;
 using ChangeDoneEvent = std::function<void()>;
@@ -62,7 +62,7 @@ public:
     void FireChangeDoneEvent(bool direction)
     {
         if (changeDoneEvent_) {
-            if (direction == true) {
+            if (direction) {
                 direction_ = Direction::NEXT;
             } else {
                 direction_ = Direction::PRE;
@@ -82,7 +82,7 @@ public:
     void FireIndicatorChangeEvent(int32_t index) const
     {
         if (changeIndicatorEvent_) {
-            changeIndicatorEvent_(std::make_shared<SwiperChangeEvent>(index).get());
+            changeIndicatorEvent_();
         }
     }
 

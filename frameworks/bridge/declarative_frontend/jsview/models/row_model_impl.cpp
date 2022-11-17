@@ -32,7 +32,7 @@ void RowModelImpl::Create(const std::optional<Dimension>& space, AlignDeclaratio
     ViewStackProcessor::GetInstance()->ClaimElementId(rowComponent);
     rowComponent->SetMainAxisSize(MainAxisSize::MIN);
     rowComponent->SetCrossAxisSize(CrossAxisSize::MIN);
-    if (space.has_value()) {
+    if (space.has_value() && space->Value() >= 0.0) {
         rowComponent->SetSpace(space.value());
     }
     if (declaration != nullptr) {

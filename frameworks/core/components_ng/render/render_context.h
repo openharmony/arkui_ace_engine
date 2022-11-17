@@ -33,23 +33,16 @@
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/canvas.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/render_property.h"
 #include "core/pipeline/base/constants.h"
 
-namespace OHOS::Rosen {
-class RSNode;
-namespace Drawing {
-class Canvas;
-}
-}
 namespace OHOS::Ace::NG {
 class GeometryNode;
 class RenderPropertyNode;
 class FrameNode;
 class Modifier;
 
-using RSNode = Rosen::RSNode;
-using RSCanvas = Rosen::Drawing::Canvas;
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
 
 // RenderContext is used for render node to paint.
@@ -105,6 +98,10 @@ public:
 
     virtual void BlendBorderColor(const Color& color) {}
 
+    virtual void PaintFocusState(Dimension focusPaddingVp) {}
+
+    virtual void ClearFocusState() {}
+
     virtual void UpdateBorderWidthF(const BorderWidthPropertyF& value) {}
 
     // clip node without padding
@@ -126,7 +123,7 @@ public:
     virtual void OnNodeDisappear(FrameNode* host) {}
     virtual void OnNodeAppear() {}
 
-    virtual bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const
+    virtual bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
     {
         return false;
     }
@@ -138,7 +135,6 @@ public:
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
-    virtual void UpdateBackShadow(const Shadow& shadow) {}
 
     virtual void ClipWithRect(const RectF& rectF) {}
 
@@ -225,9 +221,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
 
-    // Decoration
-    ACE_DEFINE_PROPERTY_GROUP(BackDecoration, DecorationProperty);
-
     // Graphics
     ACE_DEFINE_PROPERTY_GROUP(Graphics, GraphicsProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontBrightness, Dimension);
@@ -239,6 +232,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontHueRotate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontColorBlend, Color);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontBlurRadius, Dimension);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackShadow, Shadow);
 
     // BorderRadius.
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
@@ -334,6 +328,7 @@ protected:
     virtual void OnFrontHueRotateUpdate(float value) {}
     virtual void OnFrontColorBlendUpdate(const Color& value) {}
     virtual void OnFrontBlurRadiusUpdate(const Dimension& value) {}
+    virtual void OnBackShadowUpdate(const Shadow& shadow) {}
 
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}

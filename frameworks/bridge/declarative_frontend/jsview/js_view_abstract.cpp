@@ -40,6 +40,7 @@
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
+#include "core/components/common/layout/screen_system_manager.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -2831,18 +2832,15 @@ void JSViewAbstract::JsUseSizeType(const JSCallbackInfo& info)
         return;
     }
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
-    // keys order must be strictly refer to GridSizeType
-    const char* keys[] = { "", "xs", "sm", "md", "lg" };
-
-    for (uint32_t i = 1; i < sizeof(keys) / sizeof(const char*); i++) {
-        JSRef<JSVal> val = sizeObj->GetProperty(keys[i]);
+    for (auto values: SCREEN_SIZE_VALUES) {
+        JSRef<JSVal> val = sizeObj->GetProperty(values.second.c_str());
         if (val->IsNull() || val->IsEmpty()) {
             continue;
         }
         uint32_t span = 0;
         int32_t offset = 0;
         if (ParseSpanAndOffset(val, span, offset)) {
-            ViewAbstractModel::GetInstance()->SetGrid(span, offset, static_cast<GridSizeType>(i));
+            ViewAbstractModel::GetInstance()->SetGrid(span, offset, values.first);
         }
     }
 }
@@ -3313,9 +3311,8 @@ void JSViewAbstract::JsShadow(const JSCallbackInfo& info)
     }
     double radius = 0.0;
     ParseJsonDouble(argsPtrItem->GetValue("radius"), radius);
-    if (LessOrEqual(radius, 0.0)) {
-        LOGE("JsShadow Parse radius failed, radius = %{public}lf", radius);
-        return;
+    if (LessNotEqual(radius, 0.0)) {
+        radius = 0.0;
     }
     std::vector<Shadow> shadows(1);
     shadows.begin()->SetBlurRadius(radius);

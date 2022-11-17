@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/**
+ * AceConsole implemented onm C++ Side
+ * 
+ * non-public API
+ */
+
 declare class AceConsole {
     log(...args : any) : void;
     debug(...args : any) : void;

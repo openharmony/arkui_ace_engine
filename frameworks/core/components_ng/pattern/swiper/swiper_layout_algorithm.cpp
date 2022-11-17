@@ -155,6 +155,16 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameSize(idealSize.ConvertToSizeT());
+
+    // Measure swiper indicator
+    if (swiperLayoutProperty->GetShowIndicatorValue(true)) {
+        auto indicatorWrapper = layoutWrapper->GetOrCreateChildByIndex(totalCount_);
+        if (indicatorWrapper) {
+            auto indicatorLayoutConstraint = swiperLayoutProperty->CreateChildConstraint();
+            indicatorLayoutConstraint.parentIdealSize = idealSize;
+            indicatorWrapper->Measure(indicatorLayoutConstraint);
+        }
+    }
 }
 
 void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -165,14 +175,13 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto childrenSize = layoutWrapper->GetTotalChildCount();
     auto itemWidth = (axis == Axis::HORIZONTAL ? (size.Width() / displayCount) : (size.Height() / displayCount));
     auto itemSpace = SwiperUtils::GetItemSpace(swiperLayoutProperty);
     auto padding = swiperLayoutProperty->CreatePaddingAndBorder();
     OffsetF paddingOffset = { padding.left.value_or(0.0f), padding.top.value_or(0.0f) };
 
     // Effect when difference between current index and target index is greater than 1.
-    // eg. Current index is 0, call swipeTo method to jump to index 2,
+    // e.g. Current index is 0, call swipeTo method to jump to index 2,
     // change item's position only 0 and 2, ignore others.
     if (SwiperUtils::IsStretch(swiperLayoutProperty) && targetIndex_.has_value() &&
         std::abs(targetIndex_.value() - currentIndex_) > 1) {
@@ -242,12 +251,20 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                                                 : OffsetF(0, frameSize.Height() + itemSpace));
     }
 
-    // Adjust offset when loop.
+    // Layout swiper indicator
+    if (swiperLayoutProperty->GetShowIndicatorValue(true)) {
+        auto indicatorWrapper = layoutWrapper->GetOrCreateChildByIndex(totalCount_);
+        if (indicatorWrapper) {
+            indicatorWrapper->Layout();
+        }
+    }
+
+    // Adjust offset when looped.
     if (!isLoop_) {
         return;
     }
     if (currentIndex_ == 0 && GreatNotEqual(currentOffset_, 0.0)) {
-        auto lastWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 1);
+        auto lastWrapper = layoutWrapper->GetOrCreateChildByIndex(totalCount_ - 1);
         if (lastWrapper) {
             auto geometryNode = lastWrapper->GetGeometryNode();
             auto frameSize = geometryNode->GetMarginFrameSize();
@@ -255,7 +272,7 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             geometryNode->SetMarginFrameOffset(preOffset + paddingOffset);
             lastWrapper->Layout();
         }
-    } else if (currentIndex_ == childrenSize - 1 && LessNotEqual(currentOffset_, 0.0)) {
+    } else if (currentIndex_ == totalCount_ - 1 && LessNotEqual(currentOffset_, 0.0)) {
         auto firstWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
         if (firstWrapper) {
             auto geometryNode = firstWrapper->GetGeometryNode();

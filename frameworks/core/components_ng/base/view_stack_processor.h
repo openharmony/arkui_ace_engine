@@ -29,32 +29,6 @@
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/gestures/gesture_processor.h"
 #include "core/pipeline/base/render_context.h"
-
-#define ACE_UPDATE_FIRST_CHILD_LAYOUT_PROPERTY(target, name, value)                         \
-    do {                                                                                    \
-        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();             \
-                                                                                            \
-        CHECK_NULL_VOID(frameNode);                                                         \
-        auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front()); \
-        CHECK_NULL_VOID(childNode);                                                         \
-        auto cast##target = childNode->GetLayoutProperty<target>();                         \
-        if (cast##target) {                                                                 \
-            cast##target->Update##name(value);                                              \
-        }                                                                                   \
-    } while (false)
-
-#define ACE_UPDATE_SECOND_CHILD_LAYOUT_PROPERTY(target, name, value)                       \
-    do {                                                                                   \
-        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();            \
-        CHECK_NULL_VOID(frameNode);                                                        \
-        auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().back()); \
-        CHECK_NULL_VOID(childNode);                                                        \
-        auto cast##target = childNode->GetLayoutProperty<target>();                        \
-        if (cast##target) {                                                                \
-            cast##target->Update##name(value);                                             \
-        }                                                                                  \
-    } while (false)
-
 #define ACE_UPDATE_LAYOUT_PROPERTY(target, name, value)                         \
     do {                                                                        \
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
@@ -64,31 +38,6 @@
             cast##target->Update##name(value);                                  \
         }                                                                       \
     } while (false)
-
-#define ACE_UPDATE_FIRST_CHILD_PAINT_PROPERTY(target, name, value)                          \
-    do {                                                                                    \
-        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();             \
-        CHECK_NULL_VOID(frameNode);                                                         \
-        auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front()); \
-        CHECK_NULL_VOID(childNode);                                                         \
-        auto cast##target = childNode->GetPaintProperty<target>();                          \
-        if (cast##target) {                                                                 \
-            cast##target->Update##name(value);                                              \
-        }                                                                                   \
-    } while (false)
-
-#define ACE_UPDATE_SECOND_CHILD_PAINT_PROPERTY(target, name, value)                        \
-    do {                                                                                   \
-        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();            \
-        CHECK_NULL_VOID(frameNode);                                                        \
-        auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().back()); \
-        CHECK_NULL_VOID(childNode);                                                        \
-        auto cast##target = childNode->GetPaintProperty<target>();                         \
-        if (cast##target) {                                                                \
-            cast##target->Update##name(value);                                             \
-        }                                                                                  \
-    } while (false)
-
 #define ACE_UPDATE_PAINT_PROPERTY(target, name, value)                          \
     do {                                                                        \
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
@@ -172,9 +121,6 @@ public:
     // create wrappingComponentsMap and the component to map and then Push
     // the map to the render component stack.
     void Push(const RefPtr<UINode>& element, bool isCustomView = false);
-
-    void PushTabBar(const TabBarParam& tabBarParam);
-    const TabBarParam& PopTabBar() const;
 
     // Wrap the components map for the stack top and then pop the stack.
     // Add the wrapped component has child of the new stack top's main component.
@@ -291,6 +237,17 @@ public:
 
     void FlushImplicitAnimation();
 
+    // used for knowing which page node to execute the pageTransitionFunc
+    void SetPageNode(const RefPtr<FrameNode>& pageNode)
+    {
+        currentPage_ = pageNode;
+    }
+
+    const RefPtr<FrameNode>& GetPageNode() const
+    {
+        return currentPage_;
+    }
+
 private:
     ViewStackProcessor();
 
@@ -301,6 +258,8 @@ private:
 
     // render component stack
     std::stack<RefPtr<UINode>> elementsStack_;
+
+    RefPtr<FrameNode> currentPage_;
 
     RefPtr<GestureProcessor> gestureStack_;
 
@@ -316,8 +275,6 @@ private:
 
     // elmtId to account get access to
     ElementIdType accountGetAccessToNodeId_ = ElementRegister::UndefinedElementId;
-
-    TabBarParam tabBarParam_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ViewStackProcessor);
 };

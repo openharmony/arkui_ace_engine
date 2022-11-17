@@ -129,7 +129,7 @@ void SlidingPanelPattern::InitializeLayoutProps()
     minBlankHeight_ = BLANK_MIN_HEIGHT.ConvertToPx();
 
     if (isFirstLayout_) {
-        CheckPanelModeandType();
+        CheckPanelModeAndType();
         UpdateCurrentOffset(0); // Initialize firstLayout panel currentOffset_
         AnimateTo(defaultBlankHeights_[mode_], mode_);
         if (previousMode_ != mode_) {
@@ -156,7 +156,7 @@ void SlidingPanelPattern::CheckHeightValidity()
     defaultBlankHeights_[PanelMode::FULL] = std::clamp(defaultBlankHeights_[PanelMode::FULL], minBlank, maxBlank);
 }
 
-void SlidingPanelPattern::CheckPanelModeandType()
+void SlidingPanelPattern::CheckPanelModeAndType()
 {
     // This parameter does not take effect when PanelMode is set to Half and PanelType is set to minibar
     if (mode_ == PanelMode::HALF && type_ == PanelType::MINI_BAR) {

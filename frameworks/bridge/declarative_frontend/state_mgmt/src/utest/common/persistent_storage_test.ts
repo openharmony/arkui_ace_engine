@@ -86,9 +86,10 @@ const testPersistentStorage = tsuite("PersistentStorage", () => {
     PersistentStorage.AboutToBeDeleted();
     const deleteOk = AppStorage.Delete("persistentSay") && AppStorage.Delete("persistentSubject") && AppStorage.Delete("newProp") && AppStorage.Delete("existingPropToPersist");
 
-    SubscriberManager.Get().dumpSubscriberInfo();
+    SubscriberManager.DumpSubscriberInfo();
 
     test("PersistentStorage teardown complete", deleteOk);
-    test(`SubscriberManager num of subscribers, is ${SubscriberManager.Get().numberOfSubscrbers()} should be 0`, SubscriberManager.Get().numberOfSubscrbers() == 0);
+    test(`SubscriberManager num of subscribers, is ${SubscriberManager.NumberOfSubscribers()} should be 0`, 
+       SubscriberManager.NumberOfSubscribers() == 0);
   });
 });

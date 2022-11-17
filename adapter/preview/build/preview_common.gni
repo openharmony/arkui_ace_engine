@@ -29,6 +29,7 @@ enable_standard_input = false
 video_components_support = false
 web_components_support = false
 preview_support = true
+model_component_support = false
 defines = []
 
 if (defined(web_components_support) && web_components_support) {
@@ -65,4 +66,8 @@ if (defined(enable_ability_component) && enable_ability_component) {
 
 if (defined(preview_support) && preview_support) {
   defines += [ "PREVIEW" ]
+}
+
+if (defined(model_component_support) && model_component_support) {
+  defines += [ "MODEL_COMPONENT_SUPPORTED" ]
 }

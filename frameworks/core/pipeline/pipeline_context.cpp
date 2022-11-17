@@ -59,7 +59,7 @@
 #include "core/common/thread_checker.h"
 #include "core/common/layout_inspector.h"
 #include "core/components/checkable/render_checkable.h"
-#include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/common/layout/screen_system_manager.h"
 #include "core/components/container_modal/container_modal_component.h"
 #include "core/components/container_modal/container_modal_element.h"
 #include "core/components/custom_paint/offscreen_canvas.h"
@@ -2299,8 +2299,8 @@ void PipelineContext::SetRootSizeWithWidthHeight(int32_t width, int32_t height, 
         rootNode->MarkNeedRender();
         focusAnimationManager_->SetAvailableRect(paintRect);
     }
-    GridSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
-    GridSystemManager::GetInstance().OnSurfaceChanged(width);
+    ScreenSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
+    ScreenSystemManager::GetInstance().OnSurfaceChanged(width);
 }
 
 void PipelineContext::SetAppBgColor(const Color& color)
@@ -2858,10 +2858,10 @@ void PipelineContext::FlushBuildAndLayoutBeforeSurfaceReady()
         TaskExecutor::TaskType::UI);
 }
 
-void PipelineContext::RootLostFocus() const
+void PipelineContext::RootLostFocus(BlurReason reason) const
 {
     if (rootElement_) {
-        rootElement_->LostFocus();
+        rootElement_->LostFocus(reason);
     }
 }
 
@@ -2869,7 +2869,7 @@ void PipelineContext::WindowFocus(bool isFocus)
 {
     onFocus_ = isFocus;
     if (!isFocus) {
-        RootLostFocus();
+        RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
     }

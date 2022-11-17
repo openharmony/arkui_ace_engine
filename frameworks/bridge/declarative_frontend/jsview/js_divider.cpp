@@ -74,6 +74,7 @@ void JSDivider::SetDividerColor(const JSCallbackInfo& info)
     }
     Color dividerColor;
     if (!ParseJsColor(info[0], dividerColor)) {
+        DividerModel::GetInstance()->DividerColor(dividerColor);
         return;
     }
     DividerModel::GetInstance()->DividerColor(dividerColor);

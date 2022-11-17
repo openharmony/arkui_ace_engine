@@ -61,7 +61,7 @@ public:
     bool IsActive() const;
     Size GetRootSize() const;
 
-    void Reset();
+    void Reset(const RefPtr<ScrollBar>& scrollBar = nullptr);
 
     ShapeMode GetShapeMode() const
     {
@@ -163,6 +163,11 @@ public:
         inactiveWidth_ = inactiveWidth;
     }
 
+    const Dimension& GetInactiveWidth() const
+    {
+        return inactiveWidth_;
+    }
+
     void SetActiveWidth(const Dimension& activeWidth)
     {
         activeWidth_ = activeWidth;
@@ -176,6 +181,11 @@ public:
     void SetNormalWidth(const Dimension& normalWidth)
     {
         normalWidth_ = normalWidth;
+    }
+
+    const Dimension& GetNormalWidth() const
+    {
+        return normalWidth_;
     }
 
     const Rect& GetActiveRect() const
