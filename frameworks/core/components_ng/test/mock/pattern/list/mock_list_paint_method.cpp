@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/grid/grid_event_hub.h"
+#include "core/components_ng/pattern/list/list_paint_method.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<FrameNode> GridEventHub::FindGridItemByPosition(float /* x */, float /* y */)
+CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* /* paintWrapper */)
 {
+    // just use the private value
+    vertical_ = false;
+    lanes_ = 1;
+    space_ = 0.0f;
     return nullptr;
-}
-
-int32_t GridEventHub::GetGridItemIndex(const RefPtr<FrameNode>& /* frameNode */)
-{
-    return 0;
 }
 } // namespace OHOS::Ace::NG

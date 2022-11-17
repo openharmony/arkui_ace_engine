@@ -26,7 +26,6 @@
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
-#include "core/components_v2/list/list_component.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ListPaintMethod : public NodePaintMethod {
