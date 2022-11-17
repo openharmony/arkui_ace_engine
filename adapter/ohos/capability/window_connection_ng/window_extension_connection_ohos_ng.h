@@ -13,20 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_WINDOW_CONNECTION_WINDOW_EXTENSION_CONNECTION_OHOS_H
-#define FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_WINDOW_CONNECTION_WINDOW_EXTENSION_CONNECTION_OHOS_H
+#ifndef FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_WINDOW_CONNECTION_WINDOW_EXTENSION_CONNECTION_OHOS_NG_H
+#define FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_WINDOW_CONNECTION_WINDOW_EXTENSION_CONNECTION_OHOS_NG_H
 
 #include "window_extension_connection.h"
 
-#include "core/common/window/window_extension_connection_adapter.h"
+#include "core/common/window_ng/window_extension_connection_adapter_ng.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT WindowExtensionConnectionAdapterOhos : public WindowExtensionConnectionAdapter {
-    DECLARE_ACE_TYPE(WindowExtensionConnectionAdapterOhos, WindowExtensionConnectionAdapter);
+class ACE_EXPORT WindowExtensionConnectionAdapterOhosNG : public WindowExtensionConnectionAdapterNG {
+    DECLARE_ACE_TYPE(WindowExtensionConnectionAdapterOhosNG, WindowExtensionConnectionAdapterNG);
 
 public:
-    void ConnectExtension(
-        const std::string& want, const Rect& rect, WeakPtr<RenderNode> node, int32_t windowId) override;
+    void ConnectExtension(const RefPtr<NG::FrameNode>& node, int32_t windowId) override;
     void RemoveExtension() override;
     void UpdateRect(const Rect& rect) override;
     void Show() override;
@@ -37,4 +36,4 @@ private:
 };
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_WINDOW_CONNECTION_WINDOW_EXTENSION_CONNECTION_OHOS_H
+#endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_WINDOW_CONNECTION_WINDOW_EXTENSION_CONNECTION_OHOS_NG_H

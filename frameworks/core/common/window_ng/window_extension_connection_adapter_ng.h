@@ -13,30 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_WINDOW_WINDOW_EXTENSION_CONNECTION_ADAPTER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_WINDOW_WINDOW_EXTENSION_CONNECTION_ADAPTER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_WINDOW_WINDOW_EXTENSION_CONNECTION_ADAPTER_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_WINDOW_WINDOW_EXTENSION_CONNECTION_ADAPTER_NG_H
 
 #include <string>
 
+#include "base/geometry/rect.h"
 #include "base/memory/referenced.h"
 #include "base/thread/task_executor.h"
-#include "base/geometry/rect.h"
-#include  "core/components_ng/base/frame_node.h"
-#include "core/pipeline/base/render_node.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT WindowExtensionConnectionAdapter : public AceType {
-    DECLARE_ACE_TYPE(WindowExtensionConnectionAdapter, AceType);
+class ACE_EXPORT WindowExtensionConnectionAdapterNG : public AceType {
+    DECLARE_ACE_TYPE(WindowExtensionConnectionAdapterNG, AceType);
 
 public:
     virtual void Show() {}
     virtual void Hide() {}
     virtual void RequestFocus() {}
-    virtual void ConnectExtension(
-        const std::string& want, const Rect& rect, WeakPtr<RenderNode> node, int32_t windowId) = 0;
+    virtual void ConnectExtension(const RefPtr<NG::FrameNode>& node, int32_t windowId) = 0;
     virtual void UpdateRect(const Rect& rect) = 0;
     virtual void RemoveExtension() = 0;
 };
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_WINDOW_WINDOW_EXTENSION_CONNECTION_ADAPTER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_WINDOW_WINDOW_EXTENSION_CONNECTION_ADAPTER_NG_H
