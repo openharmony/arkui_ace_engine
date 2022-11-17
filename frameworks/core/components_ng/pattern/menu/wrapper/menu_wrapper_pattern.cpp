@@ -19,38 +19,49 @@
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/event/click_event.h"
+#include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu) const
+{
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    LOGI("closing menu %{public}d", targetId_);
+    // ContextMenu: close in subwindowManager
+    if (menuPattern->IsContextMenu()) {
+        SubwindowManager::GetInstance()->HideMenuNG(targetId_);
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->HideMenu(targetId_);
+}
+
 void MenuWrapperPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gestureHub = host->GetOrCreateGestureEventHub();
 
-    // close menu when clicked outside the menu region
-    auto callback = [targetId = targetId_, weak = WeakClaim(RawPtr(host))](const TouchEventInfo& info) {
+    // hide menu when touched outside the menu region
+    auto callback = [weak = WeakClaim(RawPtr(host))](const TouchEventInfo& info) {
         if (info.GetTouches().empty()) {
             return;
         }
         auto host = weak.Upgrade();
         CHECK_NULL_VOID(host);
-
+        auto pattern = host->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto touch = info.GetTouches().front();
+        // get menu frame node (child of menu wrapper)
         auto menuNode = host->GetChildAtIndex(0);
         CHECK_NULL_VOID(menuNode);
-        if (!InstanceOf<FrameNode>(menuNode)) {
-            LOGW("MenuWrapper's child is not a Menu! type = %{public}s", menuNode->GetTag().c_str());
-            return;
-        }
         auto menuFrameNode = DynamicCast<FrameNode>(menuNode);
         CHECK_NULL_VOID(menuFrameNode);
-        auto menuPattern = menuFrameNode->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
-        // ContextMenu: close subwindow whenever touch event calls
-        if (menuPattern->IsContextMenu()) {
-            SubwindowManager::GetInstance()->HideMenuNG(targetId);
-            return;
-        }
 
         // get menuNode's touch region
         auto menuGeometryNode = menuFrameNode->GetGeometryNode();
@@ -59,13 +70,7 @@ void MenuWrapperPattern::OnModifyDone()
         const auto& position = info.GetTouches().front().GetGlobalLocation();
         // if DOWN-touched outside the menu region, then hide menu
         if (!menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
-            auto pipeline = host->GetContext();
-            CHECK_NULL_VOID(pipeline);
-            auto overlayManager = pipeline->GetOverlayManager();
-
-            overlayManager->HideMenu(targetId);
-            LOGD("touch is outside the menu region (%{public}f, %{public}f), menu %{public}d removed", position.GetX(),
-                position.GetY(), targetId);
+            pattern->HideMenu(menuFrameNode);
         }
     };
     auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(callback));
