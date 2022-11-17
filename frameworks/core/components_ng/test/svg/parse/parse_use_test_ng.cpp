@@ -14,6 +14,8 @@
  */
 
 #include <string>
+#include "core/components/common/layout/constants.h"
+#include "core/components_ng/render/canvas_image.h"
 #define private public
 #define protected public
 
@@ -25,6 +27,8 @@
 #include "core/components_ng/svg/parse/svg_svg.h"
 #include "core/components_ng/svg/parse/svg_use.h"
 #include "core/components_ng/svg/svg_dom.h"
+#include "core/components_ng/test/svg/parse/svg_const.h"
+#include "core/components/common/layout/constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -50,13 +54,14 @@ const std::string SVG_LABEL =
     "11.4995363,2 C7.75253773,2 4.25335915,3.53140612 1.72434435,6.1884639 C1.34357805,6.58850824 "
     "0.71060597,6.60413618 0.310561632,6.22336988 C-0.0894827058,5.84260359 -0.105110646,5.2096315 "
     "0.27565565,4.80958716 C3.1785132,1.75975912 7.19946582,-5.68434189e-14 11.4995363,-5.68434189e-14 "
-    "Z\"/></defs><use fill=\"#434D56\" fill-rule=\"nonzero\" stroke=\"none\" stroke-width=\"1\" "
+    "Z\"/></defs><use fill=\"red\" fill-rule=\"nonzero\" stroke=\"blue\" stroke-width=\"1\" "
     "transform=\"translate(.5 2.75)\" xlink:href=\"#uxs-a\"/></svg>";
 const std::string HREF = "uxs-a";
 const std::string FILL_RULE = "nonzero";
 const std::string TRANSFORM = "translate(.5 2.75)";
 constexpr float STROKE_WIDTH = 1;
 constexpr int32_t INDEX_ONE = 1;
+constexpr int32_t STROKE = 0xff0000ff;
 } // namespace
 class ParseUseTestNg : public testing::Test {};
 
@@ -70,7 +75,7 @@ HWTEST_F(ParseUseTestNg, ParseTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(SVG_LABEL.c_str(), SVG_LABEL.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::GREEN);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(static_cast<int32_t>(svg->children_.size()), 0);
     auto svgUse = AceType::DynamicCast<SvgUse>(svg->children_.at(INDEX_ONE));
@@ -82,7 +87,12 @@ HWTEST_F(ParseUseTestNg, ParseTest001, TestSize.Level1)
     EXPECT_STREQ(svgUseDeclaration->GetTransform().c_str(), TRANSFORM.c_str());
     auto stroke = svgUseDeclaration->GetStrokeState();
     EXPECT_FLOAT_EQ(STROKE_WIDTH, stroke.GetLineWidth().ConvertToPx());
-    EXPECT_EQ(stroke.HasStroke(), false);
+    EXPECT_EQ(stroke.HasStroke(), true);
+    EXPECT_STREQ(stroke.GetColor().ColorToString().c_str(), Color(STROKE).ColorToString().c_str());
     EXPECT_STREQ(svgUseDeclaration->GetHref().c_str(), HREF.c_str());
+    RSCanvas rSCanvas;
+    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COPONENT_WIDTH, IMAGE_COPONENT_HEIGHT), Color::BLACK);
+    EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
+    EXPECT_EQ(svgDom->viewBox_.IsValid(), true);
 }
 } // namespace OHOS::Ace::NG
