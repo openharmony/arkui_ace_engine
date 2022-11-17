@@ -116,8 +116,8 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (!itemPosition_.empty()) {
             preStartPos_ = itemPosition_.begin()->second.startPos;
             preEndPos_ = itemPosition_.rbegin()->second.endPos;
-            preStartIndex_ = GetStartIndex();
-            preEndIndex_ = GetEndIndex();
+            preStartIndex_ = std::min(GetStartIndex(), totalItemCount_ - 1);
+            preEndIndex_ = std::min(GetEndIndex(), totalItemCount_ - 1);
             itemPosition_.clear();
         }
 
@@ -208,8 +208,14 @@ void ListLayoutAlgorithm::MeasureList(
         CalculateEstimateOffset();
     } else if (NonNegative(currentOffset_)) {
         LayoutForward(layoutWrapper, layoutConstraint, axis, preStartIndex_, preStartPos_);
+        if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
+            LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
+        }
     } else {
         LayoutBackward(layoutWrapper, layoutConstraint, axis, preEndIndex_, preEndPos_);
+        if (GetEndIndex() < (totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
+            LayoutForward(layoutWrapper, layoutConstraint, axis, GetEndIndex() + 1, GetEndPosition());
+        }
     }
     RecyclePrevIndex(layoutWrapper);
     GetHeaderFooterGroupNode(layoutWrapper);
