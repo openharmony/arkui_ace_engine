@@ -103,6 +103,16 @@ public:
         return badgeSize_;
     }
 
+    int GetMaxCount() const
+    {
+        return maxCount_;
+    }
+
+    const Dimension& GetNumericalBadgePadding()
+    {
+        return numericalBadgePadding_;
+    }
+
 protected:
     BadgeTheme() = default;
 
@@ -114,6 +124,8 @@ private:
     bool showMessage_;
     Dimension badgeFontSize_;
     Dimension badgeSize_ = 16.0_vp;
+    Dimension numericalBadgePadding_ = 6.0_vp;
+    int maxCount_ = 99;
 };
 
 } // namespace OHOS::Ace
