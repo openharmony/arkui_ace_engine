@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_STEPPER_STEPPER_ITEM_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_STEPPER_STEPPER_ITEM_LAYOUT_PROPERTY_H
 
-#include <map>
-
 #include "base/i18n/localization.h"
 #include "core/components_ng/layout/layout_property.h"
 

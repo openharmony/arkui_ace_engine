@@ -669,13 +669,9 @@ void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
 
 void ViewAbstract::SetInspectorId(const std::string& inspectorId)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    if (frameNode) {
-        frameNode->UpdateInspectorId(inspectorId);
-    } else {
-        auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-        CHECK_NULL_VOID(spanNode);
-        spanNode->UpdateInspectorId(inspectorId);
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    if (uiNode) {
+        uiNode->UpdateInspectorId(inspectorId);
     }
 }
 
