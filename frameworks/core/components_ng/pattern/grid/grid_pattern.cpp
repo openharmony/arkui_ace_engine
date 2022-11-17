@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
+#include "base/geometry/axis.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
@@ -28,6 +29,7 @@ namespace {
 constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
 constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
+constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
 } // namespace
 
 RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
@@ -43,6 +45,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     if (!gridLayoutProperty->IsVertical()) {
         std::swap(crossCount, mainCount);
     }
+    gridLayoutInfo_.crossCount_ = crossCount;
 
     // When rowsTemplate and columnsTemplate is both setting, use static layout algorithm.
     if (!rows.empty() && !cols.empty()) {
@@ -265,16 +268,27 @@ void GridPattern::AddScrollEvent()
             LOGE("grid pattern upgrade fail when try handle scroll event.");
             return false;
         }
-        return gridPattern->UpdateScrollPosition(static_cast<float>(offset), source);
+        return gridPattern->OnScrollCallback(static_cast<float>(offset), source);
     };
     scrollableEvent_->SetScrollPositionCallback(std::move(scrollCallback));
     gestureHub->AddScrollableEvent(scrollableEvent_);
 }
 
-bool GridPattern::UpdateScrollPosition(float offset, int32_t source)
+bool GridPattern::OnScrollCallback(float offset, int32_t source)
 {
+    if (animator_) {
+        animator_->Stop();
+    }
     if (source == SCROLL_FROM_START) {
         return true;
+    }
+    return UpdateScrollPosition(static_cast<float>(offset));
+}
+
+bool GridPattern::UpdateScrollPosition(float offset)
+{
+    if (!isConfigScrollable_) {
+        return false;
     }
 
     auto host = GetHost();
@@ -309,7 +323,14 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto gridLayoutAlgorithm = DynamicCast<GridLayoutBaseAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(gridLayoutAlgorithm, false);
-    gridLayoutInfo_ = gridLayoutAlgorithm->GetGridLayoutInfo();
+    const auto& gridLayoutInfo = gridLayoutAlgorithm->GetGridLayoutInfo();
+    auto eventhub = GetEventHub<GridEventHub>();
+    CHECK_NULL_RETURN(eventhub, false);
+    if (gridLayoutInfo_.startMainLineIndex_ != gridLayoutInfo.startMainLineIndex_) {
+        eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
+    }
+    gridLayoutInfo_ = gridLayoutInfo;
+    gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
     return false;
 }
 
@@ -408,21 +429,8 @@ bool GridPattern::OnKeyEvent(const KeyEvent& event)
     if (event.action != KeyAction::DOWN) {
         return false;
     }
-    if (event.code == KeyCode::KEY_PAGE_DOWN) {
-        if (!isConfigScrollable_) {
-            return false;
-        }
-        LOGD("Keycode is PgDn. Scroll offset is %{public}f", -GetMainContentSize());
-        UpdateScrollPosition(-GetMainContentSize(), SCROLL_FROM_UPDATE);
-        return true;
-    }
-    if (event.code == KeyCode::KEY_PAGE_UP) {
-        if (!isConfigScrollable_) {
-            return false;
-        }
-        LOGD("Keycode is PgUp. Scroll offset is %{public}f", GetMainContentSize());
-        UpdateScrollPosition(GetMainContentSize(), SCROLL_FROM_UPDATE);
-        return true;
+    if ((event.code == KeyCode::KEY_PAGE_DOWN) || (event.code == KeyCode::KEY_PAGE_UP)) {
+        ScrollPage(event.code == KeyCode::KEY_PAGE_UP);
     }
     if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN) {
         HandleDirectionKey(event.code);
@@ -442,6 +450,78 @@ bool GridPattern::HandleDirectionKey(KeyCode code)
         return true;
     }
     return false;
+}
+
+void GridPattern::SetPositionController(const RefPtr<ScrollController>& controller)
+{
+    positionController_ = DynamicCast<GridPositionController>(controller);
+    if (controller) {
+        controller->SetScrollPattern(AceType::WeakClaim<GridPattern>(this));
+    }
+}
+
+void GridPattern::ScrollPage(bool reverse)
+{
+    if (!isConfigScrollable_) {
+        return;
+    }
+    if (!reverse) {
+        LOGD("PgDn. Scroll offset is %{public}f", -GetMainContentSize());
+        UpdateScrollPosition(-GetMainContentSize());
+    } else {
+        LOGD("PgUp. Scroll offset is %{public}f", GetMainContentSize());
+        UpdateScrollPosition(GetMainContentSize());
+    }
+}
+
+bool GridPattern::UpdateStartIndex(uint32_t index)
+{
+    if (!isConfigScrollable_) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    int32_t startMainLineIndex = index / gridLayoutInfo_.crossCount_;
+    gridLayoutInfo_.currentOffset_ = 0;
+    gridLayoutInfo_.startMainLineIndex_ = startMainLineIndex;
+    gridLayoutInfo_.startIndex_ = startMainLineIndex * gridLayoutInfo_.crossCount_;
+    gridLayoutInfo_.endIndex_ = gridLayoutInfo_.startIndex_ - 1;
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    return true;
+}
+
+void GridPattern::UpdateScrollerAnimation(float offset)
+{
+    UpdateScrollPosition(offset - animatorOffset_);
+    animatorOffset_ = offset;
+}
+
+bool GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve)
+{
+    if (!isConfigScrollable_) {
+        return false;
+    }
+    if (!animator_) {
+        animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
+    }
+    if (!animator_->IsStopped()) {
+        animator_->Stop();
+    }
+    animatorOffset_ = 0;
+    animator_->ClearInterpolators();
+
+    auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(0, position, curve);
+    animation->AddListener(
+        [offset = gridLayoutInfo_.currentOffset_, weakScroll = AceType::WeakClaim(this)](float value) {
+            auto gridPattern = weakScroll.Upgrade();
+            if (gridPattern) {
+                gridPattern->UpdateScrollPosition(value);
+            }
+        });
+    animator_->AddInterpolator(animation);
+    animator_->SetDuration(std::min(duration, SCROLL_MAX_TIME));
+    animator_->Play();
+    return true;
 }
 
 } // namespace OHOS::Ace::NG

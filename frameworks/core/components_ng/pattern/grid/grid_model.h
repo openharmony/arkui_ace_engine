@@ -34,7 +34,7 @@ public:
     virtual ~GridModel() = default;
 
     virtual void Create(
-        const RefPtr<V2::GridPositionController>& positionController, const RefPtr<ScrollBarProxy>& scrollBarProxy) = 0;
+        const RefPtr<ScrollControllerBase>& positionController, const RefPtr<ScrollBarProxy>& scrollBarProxy) = 0;
     virtual void Pop() = 0;
     virtual void SetColumnsTemplate(const std::string& value) = 0;
     virtual void SetRowsTemplate(const std::string& value) = 0;
@@ -61,6 +61,7 @@ public:
     virtual void SetOnItemDragMove(std::function<void(const ItemDragInfo&, int32_t, int32_t)>&& value) = 0;
     virtual void SetOnItemDragLeave(std::function<void(const ItemDragInfo&, int32_t)>&& value) = 0;
     virtual void SetOnItemDrop(std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)>&& value) = 0;
+    virtual RefPtr<ScrollControllerBase> CreatePositionController();
 
 private:
     static std::unique_ptr<GridModel> instance_;

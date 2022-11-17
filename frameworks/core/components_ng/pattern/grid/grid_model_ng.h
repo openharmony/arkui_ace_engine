@@ -29,8 +29,8 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT GridModelNG : public OHOS::Ace::GridModel {
 public:
-    void Create(const RefPtr<V2::GridPositionController>& positionController,
-        const RefPtr<ScrollBarProxy>& scrollBarProxy) override;
+    void Create(
+        const RefPtr<ScrollControllerBase>& positionController, const RefPtr<ScrollBarProxy>& scrollBarProxy) override;
     void Pop() override;
     void SetColumnsTemplate(const std::string& value) override;
     void SetRowsTemplate(const std::string& value) override;
@@ -57,6 +57,7 @@ public:
     void SetOnItemDragMove(ItemDragMoveFunc&& value) override;
     void SetOnItemDragLeave(ItemDragLeaveFunc&& value) override;
     void SetOnItemDrop(ItemDropFunc&& value) override;
+    RefPtr<ScrollControllerBase> CreatePositionController() override;
 
 private:
     void AddDragFrameNodeToManager() const;
