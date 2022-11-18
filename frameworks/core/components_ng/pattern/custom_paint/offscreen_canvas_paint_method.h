@@ -66,7 +66,7 @@ private:
     double PxStrToDouble(const std::string& str);
     double BlurStrToDouble(const std::string& str);
 
-    void ImageObjReady(const RefPtr<ImageObject>& imageObj) override;
+    void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
 
     sk_sp<SkImage> GetImage(const std::string& src) override { return sk_sp<SkImage>(); }

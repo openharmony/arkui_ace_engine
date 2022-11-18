@@ -18,8 +18,6 @@
 
 #include <functional>
 
-#include "third_party/skia/include/core/SkData.h"
-
 #include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/image_state_manager.h"
@@ -136,6 +134,11 @@ public:
         const std::optional<Color>& svgFillColor, const LoadCallbacks& loadCallbacks, ImageObjectType imageObjectType);
     static ImageObjectType ParseImageObjectType(
         const RefPtr<NG::ImageData>& data, const ImageSourceInfo& imageSourceInfo);
+    static bool QueryImageObjectFromCache(const LoadCallbacks& loadCallbacks, const ImageSourceInfo& sourceInfo);
+    static std::string GenerateCacheKey(const ImageSourceInfo& srcInfo, const NG::SizeF& targetImageSize);
+    static RefPtr<CanvasImage> QueryCanvasImageFromCache(
+        const RefPtr<ImageObject> obj, const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget);
+    static void CacheCanvasImageToImageCache(const RefPtr<CanvasImage>& canvasImage, const std::string& key);
 
 protected:
     static void WrapTaskAndPostTo(
