@@ -138,8 +138,28 @@ void TabsModelNG::SetIsVertical(bool isVertical)
 
 void TabsModelNG::SetIndex(int32_t index)
 {
-    auto swiperLayoutProperty = GetSwiperLayoutProperty();
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().back());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
+    swiperLayoutProperty->UpdateIndex(index);
+    auto tabContentNum = swiperNode->TotalChildCount();
+    if (tabContentNum == 0) {
+        return;
+    }
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().front());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    auto tabBarLayoutProperty = GetTabBarLayoutProperty();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    if (index > tabContentNum - 1 || index < 0) {
+        index = 0;
+    }
+    tabBarLayoutProperty->UpdateIndicator(index);
+    tabBarPattern->UpdateTextColor(index);
     swiperLayoutProperty->UpdateIndex(index);
 }
 
