@@ -138,7 +138,7 @@ void OptionPattern::SetFontSize(const Dimension& value)
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
-    props->UpdateForceRender(true);
+    text_->MarkModifyDone();
     props->UpdateFontSize(value);
 }
 
@@ -147,7 +147,7 @@ void OptionPattern::SetItalicFontStyle(const Ace::FontStyle& value)
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
-    props->UpdateForceRender(true);
+    text_->MarkModifyDone();
     props->UpdateItalicFontStyle(value);
 }
 
@@ -156,7 +156,7 @@ void OptionPattern::SetFontWeight(const FontWeight& value)
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
-    props->UpdateForceRender(true);
+    text_->MarkModifyDone();
     props->UpdateFontWeight(value);
 }
 
@@ -165,7 +165,7 @@ void OptionPattern::SetFontFamily(const std::vector<std::string>& value)
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
-    props->UpdateForceRender(true);
+    text_->MarkModifyDone();
     props->UpdateFontFamily(value);
 }
 
@@ -174,7 +174,7 @@ void OptionPattern::SetFontColor(const Color& color)
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
-    props->UpdateForceRender(true);
+    text_->MarkModifyDone();
     props->UpdateTextColor(color);
 }
 
