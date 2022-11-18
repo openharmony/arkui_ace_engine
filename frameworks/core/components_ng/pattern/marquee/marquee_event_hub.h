@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MARQUEE_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MARQUEE_EVENT_HUB_H
 
-#include "base/memory/ace_type.h"
 #include "core/components_ng/event/event_hub.h"
 
 namespace OHOS::Ace::NG {
