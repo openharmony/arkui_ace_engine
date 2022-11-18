@@ -176,7 +176,7 @@ private:
     void Tick(uint64_t duration);
     void StopAutoPlay();
     void StartAutoPlay();
-    bool IsOutOfBoundary(double mainOffset) const;
+    bool IsOutOfBoundary(float mainOffset) const;
     float MainSize() const;
     void FireChangeEvent() const;
     void CalculateCacheRange();
