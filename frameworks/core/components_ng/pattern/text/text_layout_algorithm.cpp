@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
-#include <unicode/uchar.h>
+#include "text_layout_adapter.h"
 
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
@@ -189,11 +189,11 @@ TextDirection TextLayoutAlgorithm::GetTextDirection(const std::string& content)
     TextDirection textDirection = TextDirection::LTR;
     auto showingTextForWString = StringUtils::ToWstring(content);
     for (const auto& charOfShowingText : showingTextForWString) {
-        if (u_charDirection(charOfShowingText) == UCharDirection::U_LEFT_TO_RIGHT) {
+        if (TextLayoutadapter::IsLeftToRight(charOfShowingText)) {
             textDirection = TextDirection::LTR;
-        } else if (u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT) {
+        } else if (TextLayoutadapter::IsRightToLeft(charOfShowingText)) {
             textDirection = TextDirection::RTL;
-        } else if (u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT_ARABIC) {
+        } else if (TextLayoutadapter::IsRightTOLeftArabic(charOfShowingText)) {
             textDirection = TextDirection::RTL;
         }
     }
