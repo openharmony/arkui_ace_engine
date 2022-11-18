@@ -296,7 +296,13 @@ void CheckBoxGroupPattern::UpdateState()
         auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
         CHECK_NULL_VOID(paintProperty);
         if (paintProperty->HasCheckBoxGroupSelect() && paintProperty->GetCheckBoxGroupSelectValue()) {
-            paintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
+            auto selectAll = paintProperty->GetCheckBoxGroupSelectValue();
+            if (selectAll) {
+                paintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
+            }
+            if (selectAll || (!selectAll && !isFirstCreated_)) {
+                UpdateUIStatus(selectAll);
+            }
         }
     } else {
         if (preGroup.value() != group) {
@@ -318,6 +324,7 @@ void CheckBoxGroupPattern::UpdateState()
             }
         }
     }
+    isFirstCreated_ = false;
     pattern->SetPreGroup(group);
 }
 
