@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,19 @@
  * limitations under the License.
  */
 
-#include "base/i18n/localization.h"
+#include "core/components_ng/pattern/text/text_layout_adapter.h"
 
-namespace OHOS::Ace {
-struct LocaleProxy final {};
-Localization::~Localization() = default;
-
-std::string Localization::GetFontLocale()
+namespace OHOS::Ace::NG {
+bool TextLayoutadapter::IsLeftToRight(UChar32 charOfShowingText)
 {
-    return fontLocale_;
+    return true;
 }
-
-std::shared_ptr<Localization> Localization::GetInstance()
+bool TextLayoutadapter::IsRightToLeft(UChar32 charOfShowingText)
 {
-    static auto instance = std::make_shared<Localization>();
-    return instance;
+    return false;
 }
-
-std::string Localization::GetEntryLetters(const std::string& lettersIndex)
+bool TextLayoutadapter::IsRightTOLeftArabic(UChar32 charOfShowingText)
 {
-    return "";
+    return false;
 }
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::NG
