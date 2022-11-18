@@ -86,9 +86,10 @@ public:
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);
 
 private:
-    void PopToast();
+    void PopToast(int32_t targetId);
 
-    WeakPtr<FrameNode> toast_;
+    // toast should contain id to avoid multiple delete.
+    std::unordered_map<int32_t, WeakPtr<FrameNode>> toastMap_;
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     // K: target frameNode ID, V: menuNode
