@@ -574,28 +574,35 @@ void SwiperPattern::HandleTouchDown()
         tabBarFinishCallback();
     }
     // Stop translate animation when touch down.
-    if (controller_ && !controller_->IsStopped()) {
-        // Clear stop listener before stop, otherwise the previous swipe will be considered complete.
-        controller_->ClearStopListeners();
-        controller_->Stop();
+    if (controller_ && controller_->IsRunning()) {
+        controller_->Pause();
+    }
+
+    if (springController_ && springController_->IsRunning()) {
+        springController_->Pause();
     }
 
     // Stop auto play when touch down.
     StopAutoPlay();
-
-    if (springController_ && !springController_->IsStopped()) {
-        springController_->ClearStopListeners();
-        springController_->Stop();
-    }
 }
 
 void SwiperPattern::HandleTouchUp()
 {
+    if (controller_ && !controller_->IsStopped()) {
+        controller_->Play();
+    }
+
+    if (springController_ && !springController_->IsStopped()) {
+        springController_->Play();
+    }
+
     StartAutoPlay();
 }
 
 void SwiperPattern::HandleDragStart()
 {
+    StopTranslateAnimation();
+
     const auto& tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
     if (tabBarFinishCallback) {
         tabBarFinishCallback();
