@@ -140,6 +140,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isTouch_ = false;
     bool isHover_ = false;
+    bool isFirstCreated_ = true;
     // animation control
     RefPtr<Animator> controller_;
     RefPtr<CurveAnimation<float>> translate_;
