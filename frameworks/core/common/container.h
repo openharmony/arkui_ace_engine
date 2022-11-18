@@ -247,17 +247,13 @@ public:
         return false;
     }
 
-    void SetIdeDebuggerConnected(bool IdeDebuggerConnected)
-    {
-        IdeDebuggerConnected_ = IdeDebuggerConnected;
-    }
-
-    bool GetIdeDebuggerConnected()
-    {
-        return IdeDebuggerConnected_;
-    }
-
     virtual void GetCardFrontendMap(std::unordered_map<int64_t, WeakPtr<Frontend>>& cardFrontendMap) const {}
+
+    virtual void SetSharedRuntime(void* runtime) {}
+    virtual void* GetSharedRuntime()
+    {
+        return nullptr;
+    }
 
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
@@ -269,7 +265,6 @@ private:
     std::string moduleName_;
     std::string bundlePath_;
     std::string filesDataPath_;
-    bool IdeDebuggerConnected_ = false;
     bool usePartialUpdate_ = false;
     Settings settings_;
     ACE_DISALLOW_COPY_AND_MOVE(Container);

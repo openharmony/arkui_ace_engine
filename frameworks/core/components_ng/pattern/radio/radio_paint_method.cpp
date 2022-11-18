@@ -26,24 +26,25 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr uint8_t ENABLED_ALPHA = 255;
+constexpr uint8_t DISABLED_ALPHA = 102;
+const Color TRANSPARENT_COLOR = Color(0x00000000);
+} // namespace
 
 CanvasDrawFunction RadioPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
     InitializeParam();
-
     auto paintProperty = DynamicCast<RadioPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_RETURN(paintProperty, nullptr);
-
     bool checked = false;
     if (paintProperty->HasRadioCheck()) {
         checked = paintProperty->GetRadioCheckValue();
     } else {
         paintProperty->UpdateRadioCheck(false);
     }
-
     auto contentSize = paintWrapper->GetContentSize();
     auto offset = paintWrapper->GetContentOffset();
-
     auto paintFunc = [weak = WeakClaim(this), checked, contentSize, offset](RSCanvas& canvas) {
         auto radio = weak.Upgrade();
         if (radio) {
@@ -63,23 +64,26 @@ void RadioPaintMethod::InitializeParam()
     activeColor_ = radioTheme->GetActiveColor();
     inactiveColor_ = radioTheme->GetInactiveColor();
     shadowColor_ = radioTheme->GetShadowColor();
+    clickEffectColor_ = radioTheme->GetClickEffectColor();
+    hoverColor_ = radioTheme->GetHoverColor();
+    hotZoneHorizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding();
 }
 
 void RadioPaintMethod::PaintRadio(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& offset) const
 {
-    const float totalScale = 1.0f;
-    const float pointScale = 0.5f;
+    if (isTouch_) {
+        DrawTouchBoard(canvas, contentSize, offset);
+    }
+    if (isHover_) {
+        DrawHoverBoard(canvas, contentSize, offset);
+    }
     float outCircleRadius = contentSize.Width() / 2;
-    constexpr uint8_t ENABLED_ALPHA = 255;
-    constexpr uint8_t DISABLED_ALPHA = 102;
-
     float centerX = outCircleRadius + offset.GetX();
     float centerY = outCircleRadius + offset.GetY();
-
-    if (checked) {
+    if (uiStatus_ == UIStatus::SELECTED) {
         // draw stroke border
-        RSPen pen = RSPen();
-        RSBrush brush = RSBrush();
+        RSPen pen;
+        RSBrush brush;
         brush.SetAntiAlias(true);
         brush.SetColor(ToRSColor(activeColor_));
         pen.SetAntiAlias(true);
@@ -89,27 +93,26 @@ void RadioPaintMethod::PaintRadio(RSCanvas& canvas, bool checked, const SizeF& c
             pen.SetColor(ToRSColor(activeColor_.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
         }
         canvas.AttachBrush(brush);
-        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale);
+        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale_);
         canvas.AttachPen(pen);
-        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale);
+        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale_);
         // draw shadow
-        if (!NearZero(pointScale) && !NearEqual(pointScale, 1.0)) {
+        if (!NearZero(pointScale_) && !NearEqual(pointScale_, 1.0)) {
             brush.SetColor(ToRSColor(shadowColor_));
             canvas.AttachBrush(brush);
-            canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * pointScale + shadowWidth_);
+            canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * pointScale_ + shadowWidth_);
         }
         // draw inner circle
         brush.SetColor(ToRSColor(Color::WHITE));
         canvas.AttachBrush(brush);
-        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * pointScale);
+        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * pointScale_);
         pen.SetColor(ToRSColor(Color::WHITE));
         canvas.AttachPen(pen);
-        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * pointScale);
-    } else {
-        // draw inner circle
-        RSPen pen = RSPen();
-        RSBrush brush = RSBrush();
-        brush.SetColor(ToRSColor(Color::WHITE));
+        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * pointScale_);
+    } else if (uiStatus_ == UIStatus::UNSELECTED) {
+        RSPen pen;
+        RSBrush brush;
+        brush.SetColor(ToRSColor(TRANSPARENT_COLOR));
         brush.SetAntiAlias(true);
         canvas.AttachBrush(brush);
         canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius - borderWidth_ / 2.0);
@@ -124,6 +127,30 @@ void RadioPaintMethod::PaintRadio(RSCanvas& canvas, bool checked, const SizeF& c
         canvas.AttachPen(pen);
         canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius - borderWidth_ / 2.0);
     }
+}
+
+void RadioPaintMethod::DrawTouchBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const
+{
+    float outCircleRadius = contentSize.Width() / 2;
+    float centerX = outCircleRadius + offset.GetX();
+    float centerY = outCircleRadius + offset.GetY();
+    RSBrush brush;
+    brush.SetColor(ToRSColor(Color(clickEffectColor_)));
+    brush.SetAntiAlias(true);
+    canvas.AttachBrush(brush);
+    canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius + hotZoneHorizontalPadding_.ConvertToPx());
+}
+
+void RadioPaintMethod::DrawHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const
+{
+    float outCircleRadius = contentSize.Width() / 2;
+    float centerX = outCircleRadius + offset.GetX();
+    float centerY = outCircleRadius + offset.GetY();
+    RSBrush brush;
+    brush.SetColor(ToRSColor(Color(hoverColor_)));
+    brush.SetAntiAlias(true);
+    canvas.AttachBrush(brush);
+    canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius + hotZoneHorizontalPadding_.ConvertToPx());
 }
 
 } // namespace OHOS::Ace::NG

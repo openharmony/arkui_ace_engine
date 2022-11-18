@@ -102,6 +102,11 @@ public:
         LOGI("json not support dump now.");
     }
 
+    std::string GetPagePath() const override
+    {
+        return "";
+    }
+
     void SetEventHandler(const RefPtr<AceEventHandler>& handler)
     {
         handler_ = handler;

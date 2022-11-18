@@ -20,8 +20,10 @@
 #include <string>
 
 #include "base/memory/ace_type.h"
+#include "core/accessibility/accessibility_utils.h"
 
 namespace OHOS::Ace::NG {
+class FrameNode;
 class ACE_EXPORT AccessibilityProperty : public virtual AceType {
     DECLARE_ACE_TYPE(AccessibilityProperty, AceType);
 
@@ -43,11 +45,6 @@ public:
     }
 
     virtual bool IsChecked() const
-    {
-        return false;
-    }
-
-    virtual bool IsAccessibilityFocused() const
     {
         return false;
     }
@@ -82,6 +79,11 @@ public:
         return false;
     }
 
+    virtual bool IsScrollable() const
+    {
+        return false;
+    }
+
     virtual int32_t GetCurrentIndex() const
     {
         return 0;
@@ -97,7 +99,28 @@ public:
         return 0;
     }
 
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("scrollable", IsScrollable());
+    }
+
+    virtual bool HasRange() const
+    {
+        return false;
+    }
+
+    virtual AccessibilityValue GetAccessibilityValue() const
+    {
+        return AccessibilityValue();
+    }
+
+    void SetHost(const WeakPtr<FrameNode>& host)
+    {
+        host_ = host;
+    }
+
 protected:
+    WeakPtr<FrameNode> host_;
     ACE_DISALLOW_COPY_AND_MOVE(AccessibilityProperty);
 };
 } // namespace OHOS::Ace::NG

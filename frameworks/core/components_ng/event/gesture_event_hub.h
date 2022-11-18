@@ -241,7 +241,7 @@ public:
 
     // the return value means prevents event bubbling.
     bool ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        TouchTestResult& innerTargets, TouchTestResult& finalResult);
+        TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId);
 
     RefPtr<FrameNode> GetFrameNode() const;
 
@@ -257,7 +257,8 @@ public:
         hitTestMode_ = hitTestMode;
     }
 
-    void CombineIntoExclusiveRecognizer(const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result);
+    void CombineIntoExclusiveRecognizer(
+        const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result, int32_t touchId);
 
     bool IsResponseRegion() const
     {
@@ -297,9 +298,11 @@ public:
     void HandleOnDragEnd(const GestureEvent& info);
     void HandleOnDragCancel();
 
+    void OnModifyDone();
+
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult);
+        std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId);
 
     void UpdateGestureHierarchy();
 

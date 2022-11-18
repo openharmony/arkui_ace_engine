@@ -57,6 +57,8 @@ public:
         return MakeRefPtr<SliderLayoutAlgorithm>();
     }
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<SliderEventHub>();

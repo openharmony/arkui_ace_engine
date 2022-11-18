@@ -61,12 +61,12 @@ const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDi
 
 void JSGrid::Create(const JSCallbackInfo& info)
 {
-    RefPtr<V2::GridPositionController> positionController;
+    RefPtr<ScrollControllerBase> positionController;
     RefPtr<ScrollBarProxy> scrollBarProxy;
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSScroller* jsScroller = JSRef<JSObject>::Cast(info[0])->Unwrap<JSScroller>();
         if (jsScroller) {
-            positionController = AceType::MakeRefPtr<V2::GridPositionController>();
+            positionController = GridModel::GetInstance()->CreatePositionController();
             jsScroller->SetController(positionController);
 
             // Init scroll bar proxy.
@@ -158,7 +158,7 @@ void JSGrid::JsGridHeight(const JSCallbackInfo& info)
 
 void JSGrid::JsOnScrollIndex(const JSCallbackInfo& info)
 {
-    if (info[0]->IsFunction()) {
+    if (!info[0]->IsFunction()) {
         LOGE("param not valid, need function");
         return;
     }

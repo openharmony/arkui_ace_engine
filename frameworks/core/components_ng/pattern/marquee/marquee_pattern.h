@@ -23,7 +23,6 @@
 #include "core/components_ng/pattern/marquee/marquee_layout_algorithm.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/pipeline/base/constants.h"

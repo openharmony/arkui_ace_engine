@@ -34,13 +34,24 @@ void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
 
-    json->Put("maxVlaue", std::to_string(GetMaxValue().value_or(PROGRSS_MAX_VALUE)).c_str());
-    json->Put("vlaue", std::to_string(GetValue().value_or(0.f)).c_str());
+    json->Put("constructor", ProgressOptions().c_str());
+    json->Put("total", std::to_string(GetMaxValue().value_or(PROGRSS_MAX_VALUE)).c_str());
+    json->Put("value", std::to_string(GetValue().value_or(0.f)).c_str());
     json->Put("scaleCount", std::to_string(GetScaleCount().value_or(progressTheme->GetScaleNumber())).c_str());
     json->Put("scaleWidth", (GetScaleWidth().value_or(progressTheme->GetScaleWidth()).ToString()).c_str());
     json->Put("color", (GetColor().value_or(progressTheme->GetTrackSelectedColor())).ColorToString().c_str());
     json->Put(
         "backgroundColor", (GetBackgroundColor().value_or(progressTheme->GetTrackBgColor())).ColorToString().c_str());
+}
+
+std::string ProgressPaintProperty::ProgressOptions() const
+{
+    auto JsonValue = JsonUtil::Create(true);
+    JsonValue->Put("value", std::to_string(GetValue().value_or(0.f)).c_str());
+    JsonValue->Put("total", std::to_string(GetMaxValue().value_or(PROGRSS_MAX_VALUE)).c_str());
+    JsonValue->Put("type",
+        ProgressTypeUtils::ConvertProgressTypeToString(GetProgressType().value_or(ProgressType::LINEAR)).c_str());
+    return JsonValue->ToString();
 }
 
 } // namespace OHOS::Ace::NG

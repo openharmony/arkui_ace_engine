@@ -38,8 +38,13 @@ struct GridLayoutInfo {
     int32_t startMainLineIndex_ = 0;
     int32_t endMainLineIndex_ = 0;
 
+    uint32_t crossCount_ = 0;
+    uint32_t childrenCount_ = 0;
+
     bool reachEnd_ = false;
     bool reachStart_ = false;
+
+    bool offsetEnd_ = false;
 
     // Map structure: [mainIndex, [crossIndex, index]],
     // when vertical, mainIndex is rowIndex and crossIndex is columnIndex.

@@ -136,6 +136,14 @@ public:
         return enable_;
     }
 
+    bool Idle() const
+    {
+        if (scrollable_) {
+            return scrollable_->Idle();
+        }
+        return true;
+    }
+
 private:
     ScrollPositionCallback callback_;
     OnScrollCallback onScrollCallback_;

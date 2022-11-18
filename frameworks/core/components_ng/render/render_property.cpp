@@ -117,7 +117,7 @@ void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         if (!shapeType.empty()) {
             jsonClip->Put("shape", shapeType.c_str());
         }
-        json->Put("clip", jsonClip);
+        json->Put("clip", jsonClip->ToString().c_str());
     } else {
         json->Put("clip", propClipEdge.value_or(false) ? "true" : "false");
     }

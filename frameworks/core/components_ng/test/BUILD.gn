@@ -20,10 +20,13 @@ group("unittest") {
     deps = [
       "base:base_unittest",
       "event:event_unittest",
+      "inner_api:inner_api_unit_test",
       "layout:layout_unittest",
+      "manager:manager_unittest",
       "pattern:pattern_unittest",
       "property:property_unittest",
       "render:render_unittest",
+      "svg:svg_unittest",
       "syntax:syntax_unittest",
     ]
   }

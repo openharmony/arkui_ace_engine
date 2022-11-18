@@ -267,7 +267,7 @@ void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
     DialogProperties properties;
     ButtonInfo buttonInfo;
     properties.alignment = DialogAlignment::CENTER;
-    properties.useCustom = false;
+    properties.useCustom = true;
 
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
@@ -409,7 +409,7 @@ void JSTextPickerDialog::ParseText(RefPtr<PickerTextComponent>& component, const
         return;
     }
 
-    component->SetIsDialog(false);
+    component->SetIsDialog(true);
     component->SetIsCreateDialogComponent(true);
     component->SetColumnHeight(height);
     component->SetSelected(selected);

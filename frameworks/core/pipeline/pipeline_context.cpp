@@ -559,15 +559,6 @@ void PipelineContext::FlushLayout()
     }
 }
 
-void PipelineContext::TryCallNextFrameLayoutCallback()
-{
-    if (isForegroundCalled_ && nextFrameLayoutCallback_) {
-        isForegroundCalled_ = false;
-        nextFrameLayoutCallback_();
-        LOGI("nextFrameLayoutCallback called");
-    }
-}
-
 void PipelineContext::FlushGeometryProperties()
 {
     if (geometryChangedNodes_.empty()) {

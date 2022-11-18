@@ -22,6 +22,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/pipeline/base/component.h"
 
 namespace OHOS::Ace {
@@ -34,11 +35,13 @@ public:
 
     virtual void InitContainer() = 0;
     virtual void ShowMenu(const RefPtr<Component>& newComponent) = 0;
-    virtual void ShowMenuNG(
-        const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) = 0;
+    virtual void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) = 0;
     virtual void HideMenuNG(int32_t targetId) = 0;
     virtual void HideMenuNG() = 0;
     virtual void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) = 0;
+    virtual void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) = 0;
+    virtual void HidePopupNG(int32_t targetId) = 0;
+    virtual void HidePopupNG() = 0;
     virtual bool CancelPopup(const std::string& id) = 0;
     virtual void CloseMenu() = 0;
     virtual void ClearMenu() {};
@@ -60,8 +63,8 @@ public:
     virtual void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) = 0;
-    virtual void ShowActionMenu(const std::string& title,
-        const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback) = 0;
+    virtual void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
+        std::function<void(int32_t, int32_t)>&& callback) = 0;
 
 private:
     int32_t subwindowId_ = 0;

@@ -140,7 +140,6 @@ void PluginComponentManager::UIServiceListener::OnRequestCallBack(
     const AAFwk::Want& want, const std::string& name,  const std::string& data)
 {
     LOGD("PluginComponentManager::UIServiceListener::OnRequestCallBack");
-    std::lock_guard<std::mutex> lock(mutex_);
     for (auto &callback : callbackVec_) {
         if (callback.second == CallBackType::RequestEvent && callback.first != nullptr) {
             callback.first->OnRequestEvent(want, name, data);
@@ -151,6 +150,7 @@ void PluginComponentManager::UIServiceListener::OnRequestCallBack(
 void PluginComponentManager::UIServiceListener::OnReturnRequest(
     const AAFwk::Want& want, const std::string& source, const std::string& data, const std::string& extraData)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     LOGD("PluginComponentManager::UIServiceListener::OnReturnRequest");
     for (auto iter = callbackVec_.begin(); iter != callbackVec_.end();) {
         if (iter->second == CallBackType::RequestCallBack && iter->first != nullptr) {

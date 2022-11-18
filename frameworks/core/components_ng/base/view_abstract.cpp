@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/option/option_view.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -524,6 +525,7 @@ void ViewAbstract::BindPopup(
     auto popupInfo = overlayManager->GetPopupInfo(targetId);
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
+    auto showInSubWindow = param->IsShowInSubWindow();
     if (popupInfo.isCurrentOnShow == isShow) {
         LOGI("No need to change popup show flag.");
         return;
@@ -553,12 +555,17 @@ void ViewAbstract::BindPopup(
     }
     // update PopupInfo props
     popupInfo.popupId = popupId;
-    popupInfo.markNeedUpdate = isShow;
     popupInfo.popupNode = popupNode;
     if (popupNode) {
         popupNode->MarkModifyDone();
     }
     popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
+    popupInfo.targetSize = SizeF(param->GetTargetSize().Width(), param->GetTargetSize().Height());
+    popupInfo.targetOffset = OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY());
+    if (showInSubWindow) {
+        SubwindowManager::GetInstance()->ShowPopupNG(targetId, popupInfo);
+        return;
+    }
     overlayManager->UpdatePopupNode(targetId, popupInfo);
 }
 
@@ -576,12 +583,12 @@ void BindMenu(const RefPtr<FrameNode> menuNode, int32_t targetId, const NG::Offs
     CHECK_NULL_VOID(overlayManager);
 
     // pass in menuNode to register it in OverlayManager
-    overlayManager->ShowMenu(targetId, true, offset, menuNode);
+    overlayManager->ShowMenu(targetId, offset, menuNode);
     LOGD("ViewAbstract BindMenu finished %{public}p", AceType::RawPtr(menuNode));
 }
 
-void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode,
-    const NG::OffsetF& offset)
+void ViewAbstract::BindMenuWithItems(
+    std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode, const NG::OffsetF& offset)
 {
     CHECK_NULL_VOID(targetNode);
 
@@ -624,7 +631,7 @@ void ViewAbstract::ShowMenu(int32_t targetId, const NG::OffsetF& offset, bool is
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
 
-    overlayManager->ShowMenu(targetId, true, offset, nullptr, isContextMenu);
+    overlayManager->ShowMenu(targetId, offset, nullptr, isContextMenu);
 }
 
 void ViewAbstract::SetBackdropBlur(const Dimension& radius)
@@ -659,9 +666,10 @@ void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
 
 void ViewAbstract::SetInspectorId(const std::string& inspectorId)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    frameNode->UpdateInspectorId(inspectorId);
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    if (uiNode) {
+        uiNode->UpdateInspectorId(inspectorId);
+    }
 }
 
 void ViewAbstract::SetGrid(std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type)

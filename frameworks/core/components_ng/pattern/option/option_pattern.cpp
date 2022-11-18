@@ -40,7 +40,7 @@ void OptionPattern::RegisterOnClick()
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<OptionEventHub>();
 
-    auto event = [JsAction = hub->GetJsCallback(), onSelect = hub->GetOnSelect(), targetId = targetId_, index = index_](
+    auto event = [JsAction = hub->GetJsCallback(), onSelect = hub->GetOnSelect(), index = index_](
                      GestureEvent& /*info*/) {
         if (JsAction) {
             LOGI("Option's callback executing");
@@ -50,12 +50,6 @@ void OptionPattern::RegisterOnClick()
             LOGI("selecting option %d", index);
             onSelect(index);
         }
-        // hide menu when option is clicked
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->HideMenu(targetId);
     };
     auto clickEvent = MakeRefPtr<ClickEvent>(std::move(event));
 
@@ -138,6 +132,7 @@ void OptionPattern::SetFontSize(const Dimension& value)
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
+    props->UpdateForceRender(true);
     props->UpdateFontSize(value);
 }
 
@@ -146,6 +141,7 @@ void OptionPattern::SetItalicFontStyle(const Ace::FontStyle& value)
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
+    props->UpdateForceRender(true);
     props->UpdateItalicFontStyle(value);
 }
 
@@ -154,6 +150,7 @@ void OptionPattern::SetFontWeight(const FontWeight& value)
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
+    props->UpdateForceRender(true);
     props->UpdateFontWeight(value);
 }
 
@@ -162,6 +159,7 @@ void OptionPattern::SetFontFamily(const std::vector<std::string>& value)
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
+    props->UpdateForceRender(true);
     props->UpdateFontFamily(value);
 }
 
@@ -170,6 +168,7 @@ void OptionPattern::SetFontColor(const Color& color)
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
+    props->UpdateForceRender(true);
     props->UpdateTextColor(color);
 }
 

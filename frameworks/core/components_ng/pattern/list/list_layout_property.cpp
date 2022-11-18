@@ -20,35 +20,37 @@ namespace OHOS::Ace::NG {
 void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     LayoutProperty::ToJsonValue(json);
-    json->Put("Space", propSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-    json->Put("InitialIndex", std::to_string(propInitialIndex_.value_or(0)).c_str());
-    json->Put("ListDirection", propListDirection_.value_or(Axis::VERTICAL) == Axis::VERTICAL
-                                   ? "Axis::VERTICAL"
-                                   : "Axis::HORIZONTAL");
+    json->Put("space", propSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+    json->Put("initialIndex", std::to_string(propInitialIndex_.value_or(0)).c_str());
+    json->Put("listDirection", propListDirection_.value_or(Axis::VERTICAL) == Axis::VERTICAL
+                                   ? "Axis.Vertical"
+                                   : "Axis.Horizontal");
+    json->Put("editMode", "true");
+    json->Put("chainAnimation", "true");
     if (propDivider_.has_value()) {
-        json->Put("DividerStrokeWidth", propDivider_.value().strokeWidth.ToString().c_str());
-        json->Put("DividerStartMargin", propDivider_.value().startMargin.ToString().c_str());
-        json->Put("DividerEndMargin", propDivider_.value().endMargin.ToString().c_str());
-        json->Put("DividerColor", propDivider_.value().color.ColorToString().c_str());
+        auto divider = JsonUtil::Create(false);
+        divider->Put("strokeWidth", propDivider_.value().strokeWidth.ToString().c_str());
+        divider->Put("startMargin", propDivider_.value().startMargin.ToString().c_str());
+        divider->Put("endMargin", propDivider_.value().endMargin.ToString().c_str());
+        divider->Put("color", propDivider_.value().color.ColorToString().c_str());
+        json->Put("divider", divider);
     } else {
-        json->Put("DividerStrokeWidth", Dimension(0, DimensionUnit::VP).ToString().c_str());
-        json->Put("DividerStartMargin", Dimension(0, DimensionUnit::VP).ToString().c_str());
-        json->Put("DividerEndMargin", Dimension(0, DimensionUnit::VP).ToString().c_str());
-        json->Put("DividerColor", Color::WHITE.ColorToString().c_str());
+        auto divider = JsonUtil::Create(false);
+        json->Put("divider", divider);
     }
-    json->Put("EdgeEffect", propEdgeEffect_.value_or(EdgeEffect::SPRING) == EdgeEffect::SPRING
-                                ? "EdgeEffect::SPRING"
-                                : "EdgeEffect::NONE");
-    json->Put("Lanes", std::to_string(propLanes_.value_or(0)).c_str());
-    json->Put("LaneMinLength", propLaneMinLength_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-    json->Put("LaneMaxLength", propLaneMaxLength_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+    json->Put("edgeEffect", propEdgeEffect_.value_or(EdgeEffect::SPRING) == EdgeEffect::SPRING
+                                ? "EdgeEffect.Spring"
+                                : "EdgeEffect.None");
+    json->Put("lanes", std::to_string(propLanes_.value_or(0)).c_str());
+    json->Put("laneMinLength", propLaneMinLength_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+    json->Put("laneMaxLength", propLaneMaxLength_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
     if (propListItemAlign_.value_or(V2::ListItemAlign::CENTER) == V2::ListItemAlign::START) {
-        json->Put("ListItemAlign", "ListItemAlign::START");
+        json->Put("listItemAlign", "ListItemAlign.Start");
     } else if (propListItemAlign_.value_or(V2::ListItemAlign::CENTER) == V2::ListItemAlign::CENTER) {
-        json->Put("ListItemAlign", "ListItemAlign::CENTER");
+        json->Put("listItemAlign", "ListItemAlign.Center");
     } else {
-        json->Put("ListItemAlign", "ListItemAlign::END");
+        json->Put("listItemAlign", "ListItemAlign.End");
     }
-    json->Put("CachedCount", std::to_string(propCachedCount_.value_or(0)).c_str());
+    json->Put("cachedCount", std::to_string(propCachedCount_.value_or(0)).c_str());
 }
 }

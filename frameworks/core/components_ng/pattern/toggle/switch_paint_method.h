@@ -27,7 +27,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT SwitchPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SwitchPaintMethod, NodePaintMethod)
 public:
-    explicit SwitchPaintMethod(float mainDelta) : mainDelta_(mainDelta) {};
+    explicit SwitchPaintMethod(float mainDelta, bool enabled) : mainDelta_(mainDelta), enabled_(enabled) {};
     ~SwitchPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
@@ -37,6 +37,7 @@ private:
         RSCanvas& canvas, RefPtr<SwitchPaintProperty> paintProperty, SizeF contentSize, OffsetF contentOffset);
     float mainDelta_ = 0.0f;
     const float radiusGap_ = 2.0f;
+    bool enabled_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPaintMethod);
 };

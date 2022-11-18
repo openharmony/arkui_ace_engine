@@ -46,15 +46,15 @@ std::string NavigatorEventHub::GetNavigatorType() const
 {
     switch (type_) {
         case NavigatorType::PUSH:
-            return "NavigatorType.Push";
+            return "NavigationType.Push";
         case NavigatorType::BACK:
-            return "NavigatorType.Back";
+            return "NavigationType.Back";
         case NavigatorType::DEFAULT:
-            return "NavigatorType.Default";
+            return "NavigationType.Default";
         case NavigatorType::REPLACE:
-            return "NavigatorType.Replace";
+            return "NavigationType.Replace";
         default:
-            return "NavigatorType.Push";
+            return "NavigationType.Push";
     }
 }
 

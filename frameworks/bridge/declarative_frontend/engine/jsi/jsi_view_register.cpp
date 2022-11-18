@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
@@ -251,6 +252,18 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
             }
             return false;
         });
+        auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(pageRootNode);
+        pagePattern->SetPageTransitionFunc(
+            [weakCustom = WeakPtr<NG::CustomNodeBase>(customNode), weakPage = WeakPtr<NG::FrameNode>(pageNode)]() {
+                auto custom = weakCustom.Upgrade();
+                auto page = weakPage.Upgrade();
+                if (custom && page) {
+                    NG::ScopedViewStackProcessor scopedViewStackProcessor;
+                    NG::ViewStackProcessor::GetInstance()->SetPageNode(page);
+                    custom->CallPageTransitionFunction();
+                    NG::ViewStackProcessor::GetInstance()->SetPageNode(nullptr);
+                }
+            });
         return;
     }
 
@@ -522,7 +535,6 @@ panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runt
         if (!delegate) {
             return panda::JSValueRef::Undefined(vm);
         }
-
         delegate->FireCardAction(action);
     }
     return panda::JSValueRef::Undefined(vm);

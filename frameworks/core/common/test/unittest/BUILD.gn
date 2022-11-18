@@ -18,6 +18,9 @@ group("unittest") {
   testonly = true
   deps = []
   if (!is_wearable_product && !is_asan) {
-    deps += [ "plugin:unittest" ]
+    deps += [
+      "ime:unittest",
+      "plugin:unittest",
+    ]
   }
 }

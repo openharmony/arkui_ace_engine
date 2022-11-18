@@ -122,6 +122,7 @@ public:
     void OnSurfaceChanged(int32_t width, int32_t height) override;
 
     void DumpFrontend() const override;
+    std::string GetPagePath() const override;
 
     RefPtr<AceEventHandler> GetEventHandler() override
     {
