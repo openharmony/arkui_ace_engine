@@ -428,14 +428,7 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(const RefPtr<BubbleLayoutP
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
     auto context = targetNode->GetRenderContext();
     CHECK_NULL_VOID(context);
-    if (context->HasPosition()) {
-        OffsetT<Dimension> positionValue = context->GetPosition().value();
-        auto positionX = positionValue.GetX();
-        auto positionY = positionValue.GetY();
-        targetOffset_ = OffsetF(positionX.ConvertToPx(), positionY.ConvertToPx());
-    } else {
-        targetOffset_ = targetNode->GetOffsetRelativeToWindow();
-    }
+    targetOffset_ = targetNode->GetPaintRectOffset();
     // Show in SubWindow
     if (showInSubWindow) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
