@@ -25,6 +25,7 @@
 #include "third_party/skia/include/utils/SkBase64.h"
 
 #include "base/i18n/localization.h"
+#include "base/image/pixel_map.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/flutter_font_collection.h"
@@ -210,13 +211,13 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> image;
     if (!renderTaskHolder_->ioManager) {
-        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     } else {
 #ifndef GPU_DISABLED
         image = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
             imagePixmap, true, imagePixmap.colorSpace(), true);
 #else
-        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
 #endif
     }
     if (!image) {

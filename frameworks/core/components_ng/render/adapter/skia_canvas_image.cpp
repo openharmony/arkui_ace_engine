@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
 
+#include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/image_provider/adapter/flutter_image_provider.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -58,13 +59,16 @@ RefPtr<CanvasImage> CanvasImage::Create(
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> skImage;
     if (!flutterRenderTaskHolder->ioManager) {
-        skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        skImage =
+            SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     } else {
 #ifndef GPU_DISABLED
         skImage = SkImage::MakeCrossContextFromPixmap(flutterRenderTaskHolder->ioManager->GetResourceContext().get(),
             imagePixmap, true, imagePixmap.colorSpace(), true);
 #else
-        skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        // SkImage needs to hold PixelMap shared_ptr
+        skImage =
+            SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
 #endif
     }
     auto canvasImage = flutter::CanvasImage::Create();
