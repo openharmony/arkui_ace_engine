@@ -15,6 +15,7 @@
 
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
@@ -39,6 +40,8 @@ class OffscreenCanvas : public AceType {
 };
 enum class FrontendType {};
 
+RefPtr<MockPipelineBase> MockPipelineBase::pipeline_;
+
 void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) {}
 
 void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) {}
@@ -49,9 +52,7 @@ void PipelineBase::SetRootSize(double density, int32_t width, int32_t height) {}
 
 RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
 {
-    auto pipeline = AceType::MakeRefPtr<MockPipelineBase>();
-    pipeline->SetThemeManager(AceType::MakeRefPtr<ThemeManager>());
-    return pipeline;
+    return MockPipelineBase::GetCurrent();
 }
 
 double PipelineBase::NormalizeToPx(const Dimension& /* dimension */) const
@@ -91,5 +92,20 @@ void PipelineBase::RequestFrame() {}
 Rect PipelineBase::GetCurrentWindowRect() const
 {
     return { 0., 0., DISPLAY_WIDTH, DISPLAY_HEIGHT };
+}
+
+void MockPipelineBase::SetUp()
+{
+    pipeline_ = AceType::MakeRefPtr<MockPipelineBase>();
+}
+
+void MockPipelineBase::TearDown()
+{
+    pipeline_ = nullptr;
+}
+
+RefPtr<MockPipelineBase> MockPipelineBase::GetCurrent()
+{
+    return pipeline_;
 }
 } // namespace OHOS::Ace

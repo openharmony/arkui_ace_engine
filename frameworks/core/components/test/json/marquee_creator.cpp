@@ -18,7 +18,7 @@
 #include "base/log/log.h"
 #include "core/components/marquee/marquee_theme.h"
 #include "core/components/test/json/text_style_creator.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
@@ -70,7 +70,7 @@ RefPtr<Component> MarqueeCreator::CreateFromJson(const JsonValue& componentJson,
 
 void MarqueeCreator::InitStyle(RefPtr<MarqueeComponent> marquee)
 {
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     auto theme = themeManager->GetTheme<MarqueeTheme>();
     TextStyle textStyle;
     textStyle.SetFontSize(theme->GetFontSize());

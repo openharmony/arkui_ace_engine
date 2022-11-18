@@ -24,7 +24,7 @@
 #include "core/components/scroll/scroll_spring_effect.h"
 #include "core/components/test/unittest/list/list_test_utils.h"
 #include "core/components/test/unittest/mock/mock_render_common.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -32,7 +32,7 @@ using namespace testing::ext;
 namespace OHOS::Ace {
 namespace {
 
-const RefPtr<ThemeManager> THEME_MANAGER = AceType::MakeRefPtr<ThemeManager>();
+const auto THEME_MANAGER = AceType::MakeRefPtr<ThemeManagerImpl>();
 const char LIST_ITEM_GROUP_EVENT_GROUPCLICK[] = "groupclick";
 
 } // namespace

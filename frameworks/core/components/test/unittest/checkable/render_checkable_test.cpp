@@ -31,6 +31,7 @@
 #include "core/components/checkable/render_switch.h"
 #include "core/components/test/unittest/mock/mock_render_depend.h"
 #include "core/components/text/render_text.h"
+#include "core/components/theme/theme_manager_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -68,7 +69,7 @@ constexpr double TEST_TEXT_FONT_SIZE = 30.0;
 constexpr Dimension TEST_TEXT_LETTER_SPACING = 10.0_px;
 constexpr double TEST_TEXT_SIZE = 200.0;
 constexpr bool SHOW_TEXT = true;
-const RefPtr<ThemeManager> THEME_MANAGER = AceType::MakeRefPtr<ThemeManager>();
+const auto THEME_MANAGER = AceType::MakeRefPtr<ThemeManagerImpl>();
 
 const TouchEvent MOCK_DOWN_TOUCH_EVENT { 10, 10, 10, TouchType::DOWN };
 const TouchEvent MOCK_MOVE_TOUCH_EVENT { 10, 10, 10, TouchType::MOVE };

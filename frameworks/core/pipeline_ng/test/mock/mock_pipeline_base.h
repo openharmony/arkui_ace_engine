@@ -28,6 +28,10 @@ public:
     MockPipelineBase() = default;
     ~MockPipelineBase() override = default;
 
+    static void SetUp();
+    static void TearDown();
+    static RefPtr<MockPipelineBase> GetCurrent();
+
     MOCK_METHOD0(SetupRootElement, void());
     MOCK_METHOD3(
         AddKeyFrame, void(float fraction, const RefPtr<Curve>& curve, const std::function<void()>& propertyCallback));
@@ -86,6 +90,8 @@ public:
     MOCK_METHOD6(MeasureText, double(const std::string& text, double fontSize, int32_t fontStyle,
         const std::string& fontWeight, const std::string& fontFamily, double letterSpacing));
     MOCK_METHOD1(SetContainerWindow, void(bool isShow));
+
+    static RefPtr<MockPipelineBase> pipeline_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_BASE_H

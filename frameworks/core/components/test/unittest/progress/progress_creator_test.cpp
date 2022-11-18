@@ -23,7 +23,7 @@
 #include "core/components/progress/progress_theme.h"
 #include "core/components/test/json/loading_progress_creator.h"
 #include "core/components/test/json/progress_creator.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/components/track/track_component.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/constants.h"
@@ -116,7 +116,7 @@ void ProgressCreatorTest::CompareAllDefault(const RefPtr<ProgressComponent>& pro
     EXPECT_EQ(type, ProgressType::LINEAR);
     RefPtr<TrackComponent> track = progress->GetTrack();
     Color trackBackgroundColor = track->GetBackgroundColor();
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     auto theme = themeManager->GetTheme<ProgressTheme>();
     ASSERT_TRUE(theme);
     EXPECT_TRUE(trackBackgroundColor == theme->GetTrackBgColor());
