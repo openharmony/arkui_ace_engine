@@ -114,6 +114,10 @@ public:
         return {};
     }
 
+    void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback);
+
+    void HandleVisibleAreaChangeEvent();
+
     void Destroy() override;
 
     void OnShow() override;
@@ -218,6 +222,11 @@ public:
         isNeedShowFocus_ = isNeedShowFocus;
     }
 
+    bool GetOnShow() const
+    {
+        return onShow_;
+    }
+
     bool RequestDefaultFocus();
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
@@ -286,6 +295,8 @@ private:
     std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_;
+
+    std::unordered_map<int32_t, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
 
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
