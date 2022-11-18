@@ -13,30 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_PEN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_PEN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_BRUSH_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_BRUSH_H
+
+#include <memory>
 
 #include "testing_color.h"
+#include "testing_filter.h"
+#include "testing_shader_effect.h"
 #include "utils/scalar.h"
 
 namespace OHOS::Ace::Testing {
 using scalar = Rosen::Drawing::scalar;
-class TestingPen {
+class TestingBrush {
 public:
-    enum class CapStyle {
-        FLAT_CAP,
-        SQUARE_CAP,
-        ROUND_CAP,
-    };
-
-    TestingPen() = default;
-    ~TestingPen() = default;
+    TestingBrush() = default;
+    ~TestingBrush() = default;
 
     virtual void SetAntiAlias(bool aa) {}
     virtual void SetWidth(scalar width) {}
-    virtual void SetCapStyle(CapStyle cs) {}
     virtual void SetColor(const TestingColor& c) {}
     virtual void SetColor(int c) {}
+    virtual void SetShaderEffect(std::shared_ptr<TestingShaderEffect> e) {}
+    virtual void SetFilter(const TestingFilter filter) {}
 };
 } // namespace OHOS::Ace::Testing
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_PEN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_BRUSH_H

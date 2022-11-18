@@ -13,24 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_PEN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_PEN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_PATH_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_PATH_H
 
 #include "gmock/gmock.h"
-#include "testing_color.h"
-#include "testing_pen.h"
+#include "testing_path.h"
 
 namespace OHOS::Ace::Testing {
-class MockPen : public TestingPen {
+class MockPath : public TestingPath {
 public:
-    MockPen() = default;
-    ~MockPen() = default;
+    MockPath() = default;
+    ~MockPath() = default;
 
-    MOCK_METHOD1(SetAntiAlias, void(bool aa));
-    MOCK_METHOD1(SetWidth, void(scalar width));
-    MOCK_METHOD1(SetCapStyle, void(CapStyle cs));
-    MOCK_METHOD1(SetColor, void(const TestingColor& c));
-    MOCK_METHOD1(SetColor, void(int c));
+    MOCK_METHOD3(AddArc, void(Rect oval, scalar startAngle, scalar sweepAngle));
+    MOCK_METHOD2(MoveTo, void(scalar x, scalar y));
+    MOCK_METHOD2(LineTo, void(scalar x, scalar y));
 };
 } // namespace OHOS::Ace::Testing
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_PEN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_PATH_H

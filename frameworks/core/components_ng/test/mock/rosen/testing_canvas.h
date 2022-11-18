@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_CANVAS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_CANVAS_H
 
+#include "testing_brush.h"
+#include "testing_path.h"
 #include "testing_pen.h"
 #include "utils/point.h"
 
@@ -27,8 +29,30 @@ public:
     explicit TestingCanvas(void* rawCanvas) {}
     virtual ~TestingCanvas() = default;
 
-    virtual void DrawLine(const Point& startPt, const Point& endPt) = 0;
-    virtual TestingCanvas& AttachPen(const TestingPen& pen) = 0;
+    virtual void DrawLine(const Point& startPt, const Point& endPt) {}
+    virtual void DrawPath(const TestingPath& path) {}
+
+    virtual void Rotate(scalar deg, scalar sx, scalar sy) {}
+
+    virtual TestingCanvas& AttachPen(const TestingPen& pen)
+    {
+        return *this;
+    }
+    virtual TestingCanvas& AttachBrush(const TestingBrush& brush)
+    {
+        return *this;
+    }
+    virtual TestingCanvas& DetachPen()
+    {
+        return *this;
+    }
+    virtual TestingCanvas& DetachBrush()
+    {
+        return *this;
+    }
+
+    virtual void Save() {}
+    virtual void Restore() {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_CANVAS_H
