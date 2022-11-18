@@ -36,16 +36,8 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(ratingTheme, std::nullopt);
 
     SizeF componentSize;
-    auto ratingLayoutProperty = DynamicCast<RatingLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    // case 2.1: Rating use the mini size specified in the theme, when it is used as indicator.
-    bool indicator = ratingLayoutProperty->GetIndicator().value_or(false);
-    if (!indicator) {
-        componentSize.SetHeight(static_cast<float>(ratingTheme->GetRatingHeight().ConvertToPx()));
-        componentSize.SetWidth(static_cast<float>(ratingTheme->GetRatingWidth().ConvertToPx()));
-    } else {
-        componentSize.SetHeight(static_cast<float>(ratingTheme->GetRatingMiniHeight().ConvertToPx()));
-        componentSize.SetWidth(static_cast<float>(ratingTheme->GetRatingMiniWidth().ConvertToPx()));
-    }
+    componentSize.SetHeight(static_cast<float>(ratingTheme->GetRatingHeight().ConvertToPx()));
+    componentSize.SetWidth(static_cast<float>(ratingTheme->GetRatingWidth().ConvertToPx()));
     return contentConstraint.Constrain(componentSize);
 }
 
