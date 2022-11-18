@@ -13,11 +13,36 @@
 
 import("//build/ohos.gni")
 
-ohos_prebuilt_etc("share_picker_dialog_hap") {
-  module_install_dir = "app/com.ohos.sharepickerdialog"
-  source = "share_picker_dialog.hap"
+ohos_hap("share_picker_dialog_hap") {
+  hap_profile = "entry/src/main/module.json"
+
+  deps = [
+    ":share_picker_dialog_js_assets",
+    ":share_picker_dialog_resources",
+  ]
+
+  certificate_profile = "signature/openharmony_sx.p7b"
+  hap_name = "share_picker_dialog"
+  subsystem_name = "application"
   part_name = "prebuilt_hap"
-  subsystem_name = "applications"
+  module_install_dir = "app/com.ohos.sharepickerdialog"
+}
+
+ohos_js_assets("share_picker_dialog_js_assets") {
+  hap_profile = "entry/src/main/module.json"
+  ets2abc = true
+  source_dir = "entry/src/main/ets"
+}
+
+ohos_app_scope("share_picker_dialog_app_profile") {
+  app_profile = "AppScope/app.json"
+  sources = [ "AppScope/resources" ]
+}
+
+ohos_resources("share_picker_dialog_resources") {
+  sources = [ "entry/src/main/resources" ]
+  deps = [ ":share_picker_dialog_app_profile" ]
+  hap_profile = "entry/src/main/module.json"
 }
 
 group("dialog_hap") {
