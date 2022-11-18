@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components/common/properties/motion_path_evaluator.h"
 
-namespace OHOS::Ace::NG {
-RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
+namespace OHOS::Ace {
+MotionPathEvaluator::MotionPathEvaluator(
+    const MotionPathOption& option, const Offset& start, const Offset& end, PositionType type)
+    : motionPathOption_(option), startPoint_(start), endPoint_(end), positionType_(type)
+{}
+
+DimensionOffset DimensionOffsetEvaluator::Evaluate(
+    const DimensionOffset& start, const DimensionOffset& end, float fraction)
 {
-    return nullptr;
+    return DimensionOffset();
 }
-
-void ListPattern::OnModifyDone() {}
-
-void ListPattern::OnAttachToFrameNode() {}
-
-bool ListPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* config */)
-{
-    return false;
-}
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace

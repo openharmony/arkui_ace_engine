@@ -953,9 +953,9 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest012, TestSize.Level1)
     EXPECT_FALSE(preGridTargetFrameNode);
 
     /**
-     * @tc.steps: step7. call OnItemDragEnd
+     * @tc.steps: step6. call OnItemDragEnd
      *                   case: eventHub dose have onDrop_
-     * @tc.expected: step7. frameNode's OnDrop_ will be called
+     * @tc.expected: step6. frameNode's OnDrop_ will be called
      *                      itemDropInfo will be assigned to EXTRA_INFO
      *                      preGridTargetFrameNode_ be assigned to nullptr
      */
@@ -964,6 +964,68 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest012, TestSize.Level1)
                           int32_t /* insertIndex */, bool /* isSuccess */) { itemDropInfo = EXTRA_INFO; };
     eventHub->SetOnItemDrop(onItemDrop);
     dragDropManager->OnItemDragEnd(GLOBAL_X, GLOBAL_Y, DRAGGED_INDEX, DRAG_TYPE_GRID);
+    EXPECT_EQ(itemDropInfo, EXTRA_INFO);
+    preGridTargetFrameNode = dragDropManager->preGridTargetFrameNode_;
+    EXPECT_FALSE(preGridTargetFrameNode);
+}
+
+/**
+ * @tc.name: DragDropManagerTest013
+ * @tc.desc: Test OnItemDragEnd type is list
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager and create a DragWindow
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    GestureEvent gestureEvent;
+    auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
+    EXPECT_TRUE(dragDropProxy);
+
+    /**
+     * @tc.steps: step2. construct a frameNode which type is list and set its GeometryNode
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<ListPattern>());
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    ASSERT_TRUE(eventHub);
+
+    // Set geometry node to make sure (GLOBAL_X, GLOBAL_Y) in geoNode.frameRect_
+    auto geoNode = AceType::MakeRefPtr<GeometryNode>();
+    geoNode->SetMarginFrameOffset(FRAME_OFFSET);
+    geoNode->SetFrameSize(FRAME_SIZE);
+    frameNode->SetGeometryNode(geoNode);
+
+    /**
+     * @tc.steps: step3. call OnItemDragEnd
+     *                   case: listDragFrameNodes_ is empty
+     * @tc.expected: step3. preGridTargetFrameNode_ is null
+     *                      (still use preGridTargetFrameNode_, maybe a bug)
+     */
+    dragDropManager->OnItemDragEnd(GLOBAL_X, GLOBAL_Y, DRAGGED_INDEX, DRAG_TYPE_LIST);
+    auto preGridTargetFrameNode = dragDropManager->preGridTargetFrameNode_;
+    EXPECT_FALSE(preGridTargetFrameNode);
+
+    /**
+     * @tc.steps: step4. call AddDragFrameNode
+     *                   after that, listDragFrameNodes_ is not empty
+     */
+    dragDropManager->AddListDragFrameNode(frameNode);
+
+    /**
+     * @tc.steps: step5. call OnItemDragEnd
+     * @tc.expected: step5. frameNode's OnDrop_ will be called
+     *                      itemDropInfo will be assigned to EXTRA_INFO
+     *                      preGridTargetFrameNode_ be assigned to nullptr
+     */
+    std::string itemDropInfo;
+    auto onItemDrop = [&itemDropInfo](const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */,
+                          int32_t /* insertIndex */, bool /* isSuccess */) { itemDropInfo = EXTRA_INFO; };
+    eventHub->SetOnItemDrop(onItemDrop);
+    dragDropManager->OnItemDragEnd(GLOBAL_X, GLOBAL_Y, DRAGGED_INDEX, DRAG_TYPE_LIST);
     EXPECT_EQ(itemDropInfo, EXTRA_INFO);
     preGridTargetFrameNode = dragDropManager->preGridTargetFrameNode_;
     EXPECT_FALSE(preGridTargetFrameNode);

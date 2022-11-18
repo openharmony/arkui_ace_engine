@@ -13,21 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/list/list_event_hub.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
+int32_t ListEventHub::GetListItemIndexByPosition(float /* x */, float /* y */)
 {
-    return nullptr;
-}
-
-void ListPattern::OnModifyDone() {}
-
-void ListPattern::OnAttachToFrameNode() {}
-
-bool ListPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* config */)
-{
-    return false;
+    return 0;
 }
 } // namespace OHOS::Ace::NG
