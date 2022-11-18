@@ -683,4 +683,178 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg013, TestSize.Level1)
     customPattern->UpdateLineWidth(DEFAULT_DOUBLE0);
     EXPECT_TRUE(paintMethod->HasTask());
 }
+
+/**
+ * @tc.name: CustomPaintPatternTestNg014
+ * @tc.desc: Test functions about updating parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg014, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto customPattern = CreateCustomPaintPattern();
+    ASSERT_NE(customPattern, nullptr);
+    auto paintMethod = AceType::DynamicCast<CanvasPaintMethod>(customPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    paintMethod->tasks_.clear();
+    EXPECT_FALSE(paintMethod->HasTask());
+
+    /**
+     * @tc.steps2: Test functions about updating parameters.
+     * @tc.expected: The task queue of paintMethod is changed to unempty.
+     */
+    CompositeOperation compositeOperation = CompositeOperation::SOURCE_OVER;
+    customPattern->UpdateCompositeOperation(compositeOperation);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->UpdateGlobalAlpha(DEFAULT_DOUBLE0);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->UpdateMiterLimit(DEFAULT_DOUBLE0);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    Color color;
+    paintMethod->tasks_.clear();
+    customPattern->UpdateFillColor(color);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    Ace::Gradient gradient;
+    paintMethod->tasks_.clear();
+    customPattern->UpdateFillGradient(gradient);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    Ace::Pattern pattern;
+    paintMethod->tasks_.clear();
+    customPattern->UpdateFillPattern(pattern);
+    EXPECT_TRUE(paintMethod->HasTask());
+}
+
+/**
+ * @tc.name: CustomPaintPatternTestNg015
+ * @tc.desc: Test functions about image.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg015, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto customPattern = CreateCustomPaintPattern();
+    ASSERT_NE(customPattern, nullptr);
+    auto paintMethod = AceType::DynamicCast<CanvasPaintMethod>(customPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    paintMethod->tasks_.clear();
+    EXPECT_FALSE(paintMethod->HasTask());
+
+    /**
+     * @tc.steps2: Test functions about image.
+     * @tc.expected: The task queue of paintMethod is changed to unempty.
+     */
+    Ace::CanvasImage canvasImage;
+    customPattern->DrawImage(canvasImage, DEFAULT_DOUBLE0, DEFAULT_DOUBLE0);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    RefPtr<PixelMap> pixelMap(nullptr);
+    paintMethod->tasks_.clear();
+    customPattern->DrawPixelMap(pixelMap, canvasImage);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    Ace::ImageData imageData;
+    paintMethod->tasks_.clear();
+    customPattern->PutImageData(imageData);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    RefPtr<OffscreenCanvasPattern> offscreenCanvasPattern;
+    paintMethod->tasks_.clear();
+    customPattern->TransferFromImageBitmap(offscreenCanvasPattern);
+    EXPECT_TRUE(paintMethod->HasTask());
+}
+
+/**
+ * @tc.name: CustomPaintPatternTestNg016
+ * @tc.desc: Test functions about curve.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg016, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto customPattern = CreateCustomPaintPattern();
+    ASSERT_NE(customPattern, nullptr);
+    auto paintMethod = AceType::DynamicCast<CanvasPaintMethod>(customPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    paintMethod->tasks_.clear();
+    EXPECT_FALSE(paintMethod->HasTask());
+
+    /**
+     * @tc.steps2: Test functions about curve.
+     * @tc.expected: The task queue of paintMethod is changed to unempty.
+     */
+    ArcParam arcParam;
+    customPattern->Arc(arcParam);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    ArcToParam arcToParam;
+    paintMethod->tasks_.clear();
+    customPattern->ArcTo(arcToParam);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->MoveTo(DEFAULT_DOUBLE1, DEFAULT_DOUBLE1);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    EllipseParam ellipseParam;
+    paintMethod->tasks_.clear();
+    customPattern->Ellipse(ellipseParam);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    BezierCurveParam bezierCurveParam;
+    paintMethod->tasks_.clear();
+    customPattern->BezierCurveTo(bezierCurveParam);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    QuadraticCurveParam quadraticCurveParam;
+    paintMethod->tasks_.clear();
+    customPattern->QuadraticCurveTo(quadraticCurveParam);
+    EXPECT_TRUE(paintMethod->HasTask());
+}
+
+/**
+ * @tc.name: CustomPaintPatternTestNg017
+ * @tc.desc: Test functions about CanvasFillRule.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg017, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto customPattern = CreateCustomPaintPattern();
+    ASSERT_NE(customPattern, nullptr);
+    auto paintMethod = AceType::DynamicCast<CanvasPaintMethod>(customPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    paintMethod->tasks_.clear();
+    EXPECT_FALSE(paintMethod->HasTask());
+
+    /**
+     * @tc.steps2: Test functions about CanvasFillRule.
+     * @tc.expected: The task queue of paintMethod is changed to unempty.
+     */
+    CanvasFillRule rule;
+    customPattern->UpdateFillRuleForPath(rule);
+    EXPECT_TRUE(paintMethod->HasTask());
+
+    paintMethod->tasks_.clear();
+    customPattern->UpdateFillRuleForPath2D(rule);
+    EXPECT_TRUE(paintMethod->HasTask());
+}
 } // namespace OHOS::Ace::NG

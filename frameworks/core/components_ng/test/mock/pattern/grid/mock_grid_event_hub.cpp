@@ -16,11 +16,12 @@
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<FrameNode> GridEventHub::FindGridItemByPosition(float x, float y)
+RefPtr<FrameNode> GridEventHub::FindGridItemByPosition(float /* x */, float /* y */)
 {
     return nullptr;
 }
-int32_t GridEventHub::GetGridItemIndex(const RefPtr<FrameNode>& frameNode)
+
+int32_t GridEventHub::GetGridItemIndex(const RefPtr<FrameNode>& /* frameNode */)
 {
     return 0;
 }

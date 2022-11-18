@@ -21,7 +21,7 @@ namespace OHOS::Ace {
 namespace {
 constexpr double DISPLAY_WIDTH = 720;
 constexpr double DISPLAY_HEIGHT = 1280;
-}
+} // namespace
 class Window : public AceType {
     DECLARE_ACE_TYPE(Window, AceType);
 };
@@ -66,6 +66,8 @@ uint64_t PipelineBase::GetTimeFromExternalTimer()
     return 1;
 }
 
+void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskType type) {}
+
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {
     return nullptr;
@@ -88,6 +90,6 @@ void PipelineBase::RequestFrame() {}
 
 Rect PipelineBase::GetCurrentWindowRect() const
 {
-    return {0., 0., DISPLAY_WIDTH, DISPLAY_HEIGHT};
+    return { 0., 0., DISPLAY_WIDTH, DISPLAY_HEIGHT };
 }
 } // namespace OHOS::Ace

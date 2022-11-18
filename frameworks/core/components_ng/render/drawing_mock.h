@@ -26,7 +26,11 @@
 
 namespace OHOS::Ace {
 using RSCanvas = Testing::MockCanvas;
-using RSPen = Testing::MockPen;
+using RSPen = Testing::TestingPen;
+using RSBrush = Testing::TestingBrush;
+using RSPath = Testing::TestingPath;
+using RSShaderEffect = Testing::TestingShaderEffect;
+using RSFilter = Testing::TestingFilter;
 using RSColor = Testing::TestingColor;
 using RSPoint = Rosen::Drawing::PointF;
 using RSScalar = Rosen::Drawing::scalar;

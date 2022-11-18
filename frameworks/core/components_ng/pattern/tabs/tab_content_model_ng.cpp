@@ -172,9 +172,11 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     CHECK_NULL_VOID(textNode);
     CHECK_NULL_VOID(imageNode);
 
-    auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
-    CHECK_NULL_VOID(tabBarLayoutProperty);
-    int32_t indicator = tabBarLayoutProperty->GetIndicatorValue(0);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabContentNode->GetParent());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    int32_t indicator = swiperPattern->GetCurrentIndex();
 
     // Update property of text.
     auto pipelineContext = PipelineContext::GetCurrentContext();

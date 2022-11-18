@@ -158,6 +158,9 @@ void ViewAbstract::SetFlexGrow(float value)
 
 void ViewAbstract::SetFlexBasis(const Dimension& value)
 {
+    if (LessNotEqual(value.Value(), 0.0f)) {
+        return;
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, value);
 }
 
@@ -361,6 +364,19 @@ void ViewAbstract::SetOnAreaChanged(
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnAreaChanged(std::move(onAreaChanged));
+}
+
+void ViewAbstract::SetOnVisibleChange(
+    std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    for (const auto& ratio : ratioList) {
+        pipeline->AddVisibleAreaChangeNode(frameNode, ratio, onVisibleChange);
+    }
 }
 
 void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
@@ -666,13 +682,9 @@ void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
 
 void ViewAbstract::SetInspectorId(const std::string& inspectorId)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    if (frameNode) {
-        frameNode->UpdateInspectorId(inspectorId);
-    } else {
-        auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-        CHECK_NULL_VOID(spanNode);
-        spanNode->UpdateInspectorId(inspectorId);
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    if (uiNode) {
+        uiNode->UpdateInspectorId(inspectorId);
     }
 }
 

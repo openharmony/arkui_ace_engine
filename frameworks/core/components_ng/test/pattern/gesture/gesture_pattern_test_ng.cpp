@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #define private public
 #define protected public
 
@@ -57,6 +58,9 @@ constexpr double PI = 360.0;
 constexpr double COMMON_VALUE_RANGE_CASE = 101.0;
 constexpr double SPECIAL_VALUE_RANGE_CASE1 = 181.0;
 constexpr double SPECIAL_VALUE_RANGE_CASE2 = -181.0;
+constexpr double SWIPE_SPEED = 10.0;
+constexpr double VERTICAL_ANGLE = 90.0;
+constexpr double HORIZONTAL_ANGLE = 180.0;
 } // namespace
 
 class GesturePatternTestNg : public testing::Test {
@@ -370,7 +374,7 @@ HWTEST_F(GesturePatternTestNg, LongPressRecognizerTest001, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     longPressRecognizer.OnAccepted();
-    EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::READY);
+    EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step3. call OnRejected function and compare result.
@@ -742,6 +746,280 @@ HWTEST_F(GesturePatternTestNg, RotationRecognizerTest003, TestSize.Level1)
 
     result = rotationRecognizer.ChangeValueRange(SPECIAL_VALUE_RANGE_CASE2);
     EXPECT_EQ(result, SPECIAL_VALUE_RANGE_CASE2 + PI);
+}
+
+/**
+ * @tc.name: RotationRecognizerTest004
+ * @tc.desc: Test RotationRecognizer function: ComputeAngle
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturePatternTestNg, RotationRecognizerTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create RotationRecognizer.
+     */
+    RotationRecognizer rotationRecognizer =
+        RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+
+    /**
+     * @tc.steps: step2. call ComputeAngle function and compare result.
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEventStart;
+    touchEventStart.id = 0;
+    rotationRecognizer.touchPoints_[0] = touchEventStart;
+    TouchEvent touchEventEnd;
+    touchEventEnd.id = 1;
+    rotationRecognizer.touchPoints_[1] = touchEventEnd;
+    auto result = rotationRecognizer.ComputeAngle();
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: RotationRecognizerTest005
+ * @tc.desc: Test RotationRecognizer function: OnResetStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturePatternTestNg, RotationRecognizerTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create RotationRecognizer.
+     */
+    RotationRecognizer rotationRecognizer =
+        RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+
+    /**
+     * @tc.steps: step2. call OnResetStatus function and compare result.
+     * @tc.expected: step2. result equals.
+     */
+    rotationRecognizer.OnResetStatus();
+    EXPECT_EQ(rotationRecognizer.initialAngle_, 0.0);
+    EXPECT_EQ(rotationRecognizer.currentAngle_, 0.0);
+    EXPECT_EQ(rotationRecognizer.resultAngle_, 0.0);
+}
+
+/**
+ * @tc.name: SwipeRecognizerTest001
+ * @tc.desc: Test SwipeRecognizer function: OnAccepted OnRejected
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    SwipeRecognizer swipeRecognizer =
+        SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    
+    /**
+     * @tc.steps: step2. call OnAccepted function and compare result.
+     * @tc.expected: step2. result equals.
+     */
+    swipeRecognizer.OnAccepted();
+    EXPECT_EQ(swipeRecognizer.refereeState_, RefereeState::SUCCEED);
+
+    /**
+     * @tc.steps: step3. call OnRejected function and compare result.
+     * @tc.expected: step3. result equals.
+     */
+    swipeRecognizer.OnRejected();
+    EXPECT_EQ(swipeRecognizer.refereeState_, RefereeState::FAIL);
+}
+
+/**
+ * @tc.name: SwipeRecognizerTest002
+ * @tc.desc: Test SwipeRecognizer function: HandleTouchDown
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    SwipeRecognizer swipeRecognizer =
+        SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    
+    /**
+     * @tc.steps: step2. call HandleTouchDown function
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    swipeRecognizer.fingers_ = 1;
+    swipeRecognizer.HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer.lastTouchEvent_.id, touchEvent.id);
+    EXPECT_EQ(swipeRecognizer.refereeState_, RefereeState::DETECTING);
+
+    AxisEvent axisEvent;
+    swipeRecognizer.HandleTouchDownEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer.axisVerticalTotal_, 0.0);
+    EXPECT_EQ(swipeRecognizer.axisHorizontalTotal_, 0.0);
+    EXPECT_EQ(swipeRecognizer.refereeState_, RefereeState::DETECTING);
+}
+
+/**
+ * @tc.name: SwipeRecognizerTest003
+ * @tc.desc: Test SwipeRecognizer function: HandleTouchUp
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    SwipeRecognizer swipeRecognizer =
+        SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    
+    /**
+     * @tc.steps: step2. call HandleTouchUp function
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    swipeRecognizer.refereeState_ = RefereeState::FAIL;
+    swipeRecognizer.downEvents_[touchEvent.id] = touchEvent;
+    swipeRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), touchEvent.x);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), touchEvent.y);
+    EXPECT_EQ(swipeRecognizer.lastTouchEvent_.id, touchEvent.id);
+
+    AxisEvent axisEvent;
+    swipeRecognizer.refereeState_ = RefereeState::FAIL;
+    swipeRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), axisEvent.x);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), axisEvent.y);
+}
+
+/**
+ * @tc.name: SwipeRecognizerTest004
+ * @tc.desc: Test SwipeRecognizer function: HandleTouchMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    SwipeRecognizer swipeRecognizer =
+        SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    
+    /**
+     * @tc.steps: step2. call HandleTouchMove function
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    swipeRecognizer.refereeState_ = RefereeState::FAIL;
+    swipeRecognizer.downEvents_[touchEvent.id] = touchEvent;
+    touchEvent.x = 0;
+    touchEvent.y = 1;
+    swipeRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), touchEvent.x);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), touchEvent.y);
+    EXPECT_EQ(swipeRecognizer.lastTouchEvent_.id, touchEvent.id);
+
+    AxisEvent axisEvent;
+    swipeRecognizer.refereeState_ = RefereeState::FAIL;
+    swipeRecognizer.HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), axisEvent.x);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), axisEvent.y);
+    EXPECT_EQ(swipeRecognizer.axisVerticalTotal_, 0);
+    EXPECT_EQ(swipeRecognizer.axisHorizontalTotal_, 0);
+}
+
+/**
+ * @tc.name: SwipeRecognizerTest005
+ * @tc.desc: Test SwipeRecognizer function: CheckAngle
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    SwipeRecognizer swipeRecognizer =
+        SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    
+    /**
+     * @tc.steps: step2. call CheckAngle function
+     * @tc.expected: step2. result equals.
+     */
+    swipeRecognizer.prevAngle_ = std::make_optional(VERTICAL_ANGLE);
+    auto result = swipeRecognizer.CheckAngle(0);
+    EXPECT_EQ(result, false);
+    
+    swipeRecognizer.prevAngle_ = std::make_optional(VERTICAL_ANGLE);
+    result = swipeRecognizer.CheckAngle(VERTICAL_ANGLE);
+    EXPECT_EQ(result, true);
+
+    swipeRecognizer.prevAngle_ = std::make_optional(VERTICAL_ANGLE);
+    swipeRecognizer.direction_.type = SwipeDirection::HORIZONTAL;
+    result = swipeRecognizer.CheckAngle(VERTICAL_ANGLE);
+    EXPECT_EQ(result, false);
+
+    swipeRecognizer.prevAngle_ = std::make_optional(VERTICAL_ANGLE);
+    swipeRecognizer.direction_.type = SwipeDirection::VERTICAL;
+    result = swipeRecognizer.CheckAngle(HORIZONTAL_ANGLE);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: SwipeRecognizerTest006
+ * @tc.desc: Test SwipeRecognizer function: OnResetStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    SwipeRecognizer swipeRecognizer =
+        SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    
+    /**
+     * @tc.steps: step2. call OnResetStatus function
+     * @tc.expected: step2. result equals.
+     */
+    swipeRecognizer.OnResetStatus();
+    EXPECT_EQ(swipeRecognizer.axisHorizontalTotal_, 0.0);
+    EXPECT_EQ(swipeRecognizer.axisVerticalTotal_, 0.0);
+    EXPECT_EQ(swipeRecognizer.resultSpeed_, 0.0);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), 0.0);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), 0.0);
+}
+
+/**
+ * @tc.name: SwipeRecognizerTest007
+ * @tc.desc: Test SwipeRecognizer function: ReconcileFrom
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    SwipeRecognizer swipeRecognizer =
+        SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    RefPtr<SwipeRecognizer> swipeRecognizerPtr =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    
+    /**
+     * @tc.steps: step2. call ReconcileFrom function
+     * @tc.expected: step2. result equals.
+     */
+    auto result = swipeRecognizer.ReconcileFrom(nullptr);
+    EXPECT_EQ(result, false);
+
+    result = swipeRecognizer.ReconcileFrom(swipeRecognizerPtr);
+    EXPECT_EQ(result, true);
+
+    swipeRecognizer.fingers_ = 1;
+    result = swipeRecognizer.ReconcileFrom(swipeRecognizerPtr);
+    EXPECT_EQ(result, true);
 }
 
 /**

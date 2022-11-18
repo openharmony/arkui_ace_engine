@@ -36,6 +36,7 @@
 #define private public
 #define protected public
 
+#include "core/image/image_object.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
@@ -420,5 +421,390 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg008, 
     EXPECT_DOUBLE_EQ(matrix1[0], matrix20);
     EXPECT_DOUBLE_EQ(matrix1[4], matrix24);
     EXPECT_DOUBLE_EQ(matrix1[18], matrix218);
+}
+
+/**
+ * @tc.name: OffscreenCanvasPaintMethodTestNg009
+ * @tc.desc: Test the function SetSaturateFilter of OffscreenCanvasPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg009, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = CreateOffscreenCanvasPaintMethod(CANVAS_WIDTH, CANVAS_HEIGHT);
+    ASSERT_NE(paintMethod, nullptr);
+    float matrix1[20] = { 0 };
+
+    /**
+     * @tc.steps2: Call the function SetSaturateFilter with percent string.
+     * @tc.expected: The values at the corresponding positions of the matrix1 are calculated correctly.
+     */
+    std::string percentStr("50%");
+    constexpr float matrix10 = 0.3086f * 0.5 + 0.5;
+    constexpr float matrix11 = 0.6094f * 0.5;
+    constexpr float matrix118 = 1.0;
+    paintMethod->SetSaturateFilter(percentStr);
+    auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
+    skColorFilter1->asAColorMatrix(matrix1);
+    EXPECT_DOUBLE_EQ(matrix1[0], matrix10);
+    EXPECT_DOUBLE_EQ(matrix1[1], matrix11);
+    EXPECT_DOUBLE_EQ(matrix1[18], matrix118);
+
+    /**
+     * @tc.steps3: Call the function SetSaturateFilter with non-percent string.
+     * @tc.expected: The values at the corresponding positions of the matrix1 are calculated correctly.
+     */
+    std::string nonPercentStr("2.0");
+    constexpr float matrix20 = 0.3086f * (1 - 2.0) + 2.0;
+    constexpr float matrix21 = 0.6094f * (1 - 2.0);
+    constexpr float matrix218 = 1.0;
+    paintMethod->SetSaturateFilter(nonPercentStr);
+    auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
+    skColorFilter2->asAColorMatrix(matrix1);
+    EXPECT_DOUBLE_EQ(matrix1[0], matrix20);
+    EXPECT_DOUBLE_EQ(matrix1[1], matrix21);
+    EXPECT_DOUBLE_EQ(matrix1[18], matrix218);
+}
+
+/**
+ * @tc.name: OffscreenCanvasPaintMethodTestNg010
+ * @tc.desc: Test the function SetHueRotateFilter of OffscreenCanvasPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg010, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = CreateOffscreenCanvasPaintMethod(CANVAS_WIDTH, CANVAS_HEIGHT);
+    ASSERT_NE(paintMethod, nullptr);
+    float matrix1[20] = { 0 };
+
+    /**
+     * @tc.steps2: Call the function SetHueRotateFilter with "420deg".
+     * @tc.expected: The value at the position 0 of the matrix1 is equal to 0.5.
+     */
+    std::string filterParam1("660deg");
+    constexpr float matrix10 = 0.5;
+    paintMethod->SetHueRotateFilter(filterParam1);
+    auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
+    skColorFilter1->asAColorMatrix(matrix1);
+    EXPECT_DOUBLE_EQ(matrix1[0], matrix10);
+
+    /**
+     * @tc.steps3: Call the function SetHueRotateFilter with "3.142rad".
+     * @tc.expected: The value at the position 1 of the matrix1 is equal to 0.5.
+     */
+    std::string filterParam2("3.142rad");
+    constexpr float matrix11 = 0.5;
+    paintMethod->SetHueRotateFilter(filterParam2);
+    auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
+    skColorFilter2->asAColorMatrix(matrix1);
+    EXPECT_DOUBLE_EQ(matrix1[1], matrix11);
+
+    /**
+     * @tc.steps3: Call the function SetHueRotateFilter with "0.2turn".
+     * @tc.expected: The value at the position 2 of the matrix1 is equal to 0.6.
+     */
+    std::string filterParam3("0.2turn");
+    constexpr float matrix12 = 0.6;
+    paintMethod->SetHueRotateFilter(filterParam3);
+    auto* skColorFilter3 = paintMethod->imagePaint_.getColorFilter();
+    skColorFilter3->asAColorMatrix(matrix1);
+    EXPECT_DOUBLE_EQ(matrix1[2], matrix12);
+}
+
+/**
+ * @tc.name: OffscreenCanvasPaintMethodTestNg011
+ * @tc.desc: Test the function SetDropShadowFilter of OffscreenCanvasPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg011, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = CreateOffscreenCanvasPaintMethod(CANVAS_WIDTH, CANVAS_HEIGHT);
+    ASSERT_NE(paintMethod, nullptr);
+    constexpr double offsetX = 0.1;
+    constexpr double offsetY = 0.2;
+    constexpr double blurRadius = 0.3;
+    const Color white = Color::WHITE;
+
+    /**
+     * @tc.steps2: Call the function SetDropShadowFilter with nullOffsetsStr.
+     * @tc.expected: The attributions of imageShadow_ are not be changed.
+     */
+    std::string nullOffsetsStr;
+    paintMethod->SetDropShadowFilter(nullOffsetsStr);
+    EXPECT_NE(paintMethod->imageShadow_.GetOffset().GetX(), offsetX);
+    EXPECT_NE(paintMethod->imageShadow_.GetOffset().GetY(), offsetY);
+    EXPECT_NE(paintMethod->imageShadow_.GetBlurRadius(), blurRadius);
+    EXPECT_NE(paintMethod->imageShadow_.GetColor(), white);
+
+    /**
+     * @tc.steps3: Call the function SetDropShadowFilter with invalidOffsetsStr.
+     * @tc.expected: The attributions of imageShadow_ are not be changed.
+     */
+    std::string invalidOffsetsStr("0.1px 0.2px");
+    paintMethod->SetDropShadowFilter(invalidOffsetsStr);
+    EXPECT_NE(paintMethod->imageShadow_.GetOffset().GetX(), offsetX);
+    EXPECT_NE(paintMethod->imageShadow_.GetOffset().GetY(), offsetY);
+    EXPECT_NE(paintMethod->imageShadow_.GetBlurRadius(), blurRadius);
+    EXPECT_NE(paintMethod->imageShadow_.GetColor(), white);
+
+    /**
+     * @tc.steps4: Call the function SetDropShadowFilter with validOffsetsStr.
+     * @tc.expected: The attributions of imageShadow_ are be changed to corresponding values.
+     */
+    std::string validOffsetsStr("0.1px 0.2px 0.3px white");
+    paintMethod->SetDropShadowFilter(validOffsetsStr);
+    EXPECT_DOUBLE_EQ(paintMethod->imageShadow_.GetOffset().GetX(), offsetX);
+    EXPECT_DOUBLE_EQ(paintMethod->imageShadow_.GetOffset().GetY(), offsetY);
+    EXPECT_DOUBLE_EQ(paintMethod->imageShadow_.GetBlurRadius(), blurRadius);
+    EXPECT_EQ(paintMethod->imageShadow_.GetColor(), white);
+}
+
+/**
+ * @tc.name: OffscreenCanvasPaintMethodTestNg012
+ * @tc.desc: Test the function GetFilterType of OffscreenCanvasPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg012, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = CreateOffscreenCanvasPaintMethod(CANVAS_WIDTH, CANVAS_HEIGHT);
+    ASSERT_NE(paintMethod, nullptr);
+    const std::string nullStr;
+    const std::string targetType("targetType");
+    const std::string targetParam("targetParam");
+    std::string filterType;
+    std::string filterParam;
+
+    /**
+     * @tc.steps2: Call the function GetFilterType with filterParam_ = "".
+     * @tc.expected: The return value is false and the output string is null.
+     */
+    paintMethod->filterParam_ = "";
+    EXPECT_FALSE(paintMethod->GetFilterType(filterType, filterParam));
+    EXPECT_EQ(filterType, nullStr);
+    EXPECT_EQ(filterParam, nullStr);
+
+    /**
+     * @tc.steps3: Call the function GetFilterType with filterParam_ = "targetType(targetParam".
+     * @tc.expected: The return value is false and the output string is corrected.
+     */
+    paintMethod->filterParam_ = "targetType(targetParam";
+    EXPECT_FALSE(paintMethod->GetFilterType(filterType, filterParam));
+    EXPECT_EQ(filterType, targetType);
+    EXPECT_EQ(filterParam, targetParam);
+
+    /**
+     * @tc.steps4: Call the function GetFilterType with filterParam_ = "targetType(targetParam)".
+     * @tc.expected: The return value is true and the output string is corrected.
+     */
+    paintMethod->filterParam_ = "targetType(targetParam)";
+    EXPECT_TRUE(paintMethod->GetFilterType(filterType, filterParam));
+    EXPECT_EQ(filterType, targetType);
+    EXPECT_EQ(filterParam, targetParam);
+}
+
+/**
+ * @tc.name: OffscreenCanvasPaintMethodTestNg013
+ * @tc.desc: Test functions ImageObjReady and ImageObjFailed of OffscreenCanvasPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg013, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = CreateOffscreenCanvasPaintMethod(CANVAS_WIDTH, CANVAS_HEIGHT);
+    ASSERT_NE(paintMethod, nullptr);
+    const std::string nullSrc;
+    const std::string loadingSrc("loading");
+
+    /**
+     * @tc.steps2: Call the function ImageObjFailed.
+     * @tc.expected: The srcs of loadingSource_ and currentSource_ are equal to nullSrc.
+     */
+    paintMethod->ImageObjFailed();
+    EXPECT_EQ(paintMethod->loadingSource_.GetSrc(), nullSrc);
+    EXPECT_EQ(paintMethod->currentSource_.GetSrc(), nullSrc);
+    
+    /**
+     * @tc.steps3: Call the function ImageObjReady with imageObj->isSvg_ = false.
+     * @tc.expected: The srcs of currentSource_ is not equal to loadingSrc.
+     */
+    ImageSourceInfo source;
+    Size imageSize;
+    auto imageObj = AceType::MakeRefPtr<Ace::SvgSkiaImageObject>(source, imageSize, 0, nullptr);
+    imageObj->isSvg_ = false;
+    paintMethod->loadingSource_.SetSrc(loadingSrc);
+    paintMethod->ImageObjReady(imageObj);
+    EXPECT_NE(paintMethod->currentSource_.GetSrc(), loadingSrc);
+
+    /**
+     * @tc.steps4: Call the function ImageObjReady with imageObj->isSvg_ = true.
+     * @tc.expected: The srcs of currentSource_ is equal to loadingSrc.
+     */
+    imageObj->isSvg_ = true;
+    paintMethod->loadingSource_.SetSrc(loadingSrc);
+    paintMethod->ImageObjReady(imageObj);
+    EXPECT_EQ(paintMethod->currentSource_.GetSrc(), loadingSrc);
+}
+
+/**
+ * @tc.name: OffscreenCanvasPaintMethodTestNg014
+ * @tc.desc: Test the function HasImageShadow of OffscreenCanvasPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg014, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = CreateOffscreenCanvasPaintMethod(CANVAS_WIDTH, CANVAS_HEIGHT);
+    ASSERT_NE(paintMethod, nullptr);
+    const std::string imageShadowAttr1("0px 0px 0px black");
+    const std::string imageShadowAttr2("1px 0px 0px black");
+
+    /**
+     * @tc.steps2: Call the function HasImageShadow with imageShadowAttr1.
+     * @tc.expected: The return value is false.
+     */
+    
+    paintMethod->SetDropShadowFilter(imageShadowAttr1);
+    EXPECT_FALSE(paintMethod->HasImageShadow());
+    
+    /**
+     * @tc.steps3: Call the function HasImageShadow with imageShadowAttr2.
+     * @tc.expected: The return value is true.
+     */
+    paintMethod->SetDropShadowFilter(imageShadowAttr2);
+    EXPECT_TRUE(paintMethod->HasImageShadow());
+}
+
+/**
+ * @tc.name: OffscreenCanvasPaintMethodTestNg015
+ * @tc.desc: Test the function SetPaintImage of OffscreenCanvasPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg015, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = CreateOffscreenCanvasPaintMethod(CANVAS_WIDTH, CANVAS_HEIGHT);
+    ASSERT_NE(paintMethod, nullptr);
+    float matrix1[20] = { 0 };
+
+    /**
+     * @tc.steps2: Call the function SetPaintImage with paintMethod->filterParam_ = "".
+     * @tc.expected: The value at the position 0 is equal to 1.0f.
+     */
+    paintMethod->filterParam_ = "targetType(targetParam)";
+    constexpr float matrix10 = 1.0f;
+    paintMethod->SetPaintImage();
+    auto* skColorFilter1 = paintMethod->imagePaint_.getColorFilter();
+    skColorFilter1->asAColorMatrix(matrix1);
+    EXPECT_DOUBLE_EQ(matrix1[0], matrix10);
+
+    /**
+     * @tc.steps3: Call the function SetPaintImage with paintMethod->filterParam_ = "targetType(targetParam)".
+     * @tc.expected: The value at the position 0 is equal to 1.0f.
+     */
+    paintMethod->filterParam_ = "targetType(targetParam)";
+    paintMethod->SetPaintImage();
+    auto* skColorFilter2 = paintMethod->imagePaint_.getColorFilter();
+    skColorFilter2->asAColorMatrix(matrix1);
+    EXPECT_DOUBLE_EQ(matrix1[0], matrix10);
+
+    /**
+     * @tc.steps4: Call the function SetPaintImage with paintMethod->filterParam_ = "hue-rotate(60deg)".
+     * @tc.expected: The value at the position 0 is equal to 0.5f.
+     */
+    paintMethod->filterParam_ = "hue-rotate(60deg)";
+    constexpr float matrix11 = 0.5f;
+    paintMethod->InitFilterFunc();
+    paintMethod->SetPaintImage();
+    auto* skColorFilter3 = paintMethod->imagePaint_.getColorFilter();
+    skColorFilter3->asAColorMatrix(matrix1);
+    EXPECT_DOUBLE_EQ(matrix1[0], matrix11);
+}
+
+/**
+ * @tc.name: OffscreenCanvasPaintMethodTestNg016
+ * @tc.desc: Test the function GetBaselineOffset of OffscreenCanvasPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg016, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = CreateOffscreenCanvasPaintMethod(CANVAS_WIDTH, CANVAS_HEIGHT);
+    ASSERT_NE(paintMethod, nullptr);
+    std::unique_ptr<MockParagraph> mockParagraph = std::make_unique<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, GetMaxIntrinsicWidth()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
+    EXPECT_CALL(*mockParagraph, GetAlphabeticBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
+    EXPECT_CALL(*mockParagraph, GetIdeographicBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
+    EXPECT_CALL(*mockParagraph, GetHeight()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
+    std::unique_ptr<txt::Paragraph> paragraph(std::move(mockParagraph));
+
+    /**
+     * @tc.steps2: Test functions GetAlignOffset.
+     * @tc.expected: The return value is affected by the second parameter.
+     */
+    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::LEFT, paragraph), DEFAULT_DOUBLE0);
+    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::RIGHT, paragraph), -DEFAULT_DOUBLE10);
+    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::CENTER, paragraph), -DEFAULT_DOUBLE10/2);
+    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::JUSTIFY, paragraph), DEFAULT_DOUBLE0);
+    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::START, paragraph), DEFAULT_DOUBLE0);
+    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::END, paragraph), -DEFAULT_DOUBLE10);
+}
+
+/**
+ * @tc.name: OffscreenCanvasPaintMethodTestNg017
+ * @tc.desc: Test the function SetPaintImage of OffscreenCanvasPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg017, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = CreateOffscreenCanvasPaintMethod(CANVAS_WIDTH, CANVAS_HEIGHT);
+    ASSERT_NE(paintMethod, nullptr);
+    std::unique_ptr<MockParagraph> mockParagraph = std::make_unique<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, GetMaxIntrinsicWidth()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
+    EXPECT_CALL(*mockParagraph, GetAlphabeticBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
+    EXPECT_CALL(*mockParagraph, GetIdeographicBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
+    EXPECT_CALL(*mockParagraph, GetHeight()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
+    std::unique_ptr<txt::Paragraph> paragraph(std::move(mockParagraph));
+
+    /**
+     * @tc.steps2: Test functions GetBaselineOffset.
+     * @tc.expected: The return value is affected by the first parameter.
+     */
+    EXPECT_DOUBLE_EQ(paintMethod->GetBaselineOffset(TextBaseline::ALPHABETIC, paragraph), -DEFAULT_DOUBLE10);
+    EXPECT_DOUBLE_EQ(paintMethod->GetBaselineOffset(TextBaseline::IDEOGRAPHIC, paragraph), -DEFAULT_DOUBLE10);
+    EXPECT_DOUBLE_EQ(paintMethod->GetBaselineOffset(TextBaseline::TOP, paragraph), DEFAULT_DOUBLE0);
+    EXPECT_DOUBLE_EQ(paintMethod->GetBaselineOffset(TextBaseline::BOTTOM, paragraph), -DEFAULT_DOUBLE10);
+    EXPECT_DOUBLE_EQ(paintMethod->GetBaselineOffset(TextBaseline::MIDDLE, paragraph), -DEFAULT_DOUBLE10 / 2);
+    EXPECT_DOUBLE_EQ(paintMethod->GetBaselineOffset(TextBaseline::HANGING, paragraph), DEFAULT_DOUBLE0);
 }
 } // namespace OHOS::Ace::NG

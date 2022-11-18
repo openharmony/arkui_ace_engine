@@ -1132,6 +1132,7 @@ bool RenderTextField::CloseKeyboard(bool forceClose)
             return false;
         }
         inputMethod->HideTextInput();
+        inputMethod->Close();
 #else
         if (HasConnection()) {
             connection_->Close(GetInstanceId());

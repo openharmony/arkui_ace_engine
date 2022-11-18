@@ -296,9 +296,6 @@ Axis SliderPattern::GetDirection() const
 
 RefPtr<AccessibilityProperty> SliderPattern::CreateAccessibilityProperty()
 {
-    auto result = MakeRefPtr<SliderAccessibilityProperty>();
-    CHECK_NULL_RETURN(result, result);
-    result->SetHost(WeakClaim(RawPtr(GetHost())));
-    return result;
+    return MakeRefPtr<SliderAccessibilityProperty>();
 }
 } // namespace OHOS::Ace::NG

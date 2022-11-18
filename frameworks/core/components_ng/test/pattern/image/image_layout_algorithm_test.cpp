@@ -107,7 +107,7 @@ HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout001, TestSize.Level1)
 
 /**
  * @tc.name: ImageLayout002
- * @tc.desc: Verify that ImageComponent which has no SelfSize can resize with ImageSize, whether there is an Alt or not.
+ * @tc.desc: Verify that Image which has no SelfSize can resize with ContainerSize.
  * @tc.type: FUNC
  */
 HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout002, TestSize.Level1)
@@ -125,6 +125,9 @@ HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout002, TestSize.Level1)
         LoadNotifier(nullptr, nullptr, nullptr));
     EXPECT_TRUE(altloadingCtx != nullptr);
     LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.maxSize.SetWidth(IMAGE_COMPONENT_MAXSIZE_WIDTH);
+    layoutConstraintSize.maxSize.SetHeight(IMAGE_COMPONENT_MAXSIZE_HEIGHT);
+    imageLayoutProperty->UpdateLayoutConstraint(layoutConstraintSize);
     /**
     //     corresponding ets code:
     //         Image(IMAGE_SRC_URL).fitOriginalSize(true)
@@ -133,7 +136,7 @@ HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout002, TestSize.Level1)
     EXPECT_TRUE(imageLayoutAlgorithm1 != nullptr);
     auto size1 = imageLayoutAlgorithm1->MeasureContent(layoutConstraintSize, &layoutWrapper);
     EXPECT_TRUE(size1 != std::nullopt);
-    EXPECT_EQ(size1.value(), SizeF(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(size1.value(), SizeF(IMAGE_COMPONENT_MAXSIZE_WIDTH, IMAGE_COMPONENT_MAXSIZE_HEIGHT));
     /**
     //     corresponding ets code:
     //         Image(IMAGE_SRC_URL).Alt(ALT_SRC_URL).fitOriginalSize(true)
@@ -142,7 +145,7 @@ HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout002, TestSize.Level1)
     EXPECT_TRUE(imageLayoutAlgorithm2 != nullptr);
     auto size2 = imageLayoutAlgorithm2->MeasureContent(layoutConstraintSize, &layoutWrapper);
     EXPECT_TRUE(size2 != std::nullopt);
-    EXPECT_EQ(size2.value(), SizeF(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(size2.value(), SizeF(IMAGE_COMPONENT_MAXSIZE_WIDTH, IMAGE_COMPONENT_MAXSIZE_HEIGHT));
 }
 
 /**
@@ -169,9 +172,12 @@ HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout003, TestSize.Level1)
     //         Image().Alt(ALT_SRC_URL).fitOriginalSize(true)
     */
     LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.maxSize.SetWidth(IMAGE_COMPONENT_MAXSIZE_WIDTH);
+    layoutConstraintSize.maxSize.SetHeight(IMAGE_COMPONENT_MAXSIZE_HEIGHT);
+    imageLayoutProperty->UpdateLayoutConstraint(layoutConstraintSize);
     auto size = imageLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
     EXPECT_TRUE(size != std::nullopt);
-    EXPECT_EQ(size.value(), SizeF(ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(size.value(), SizeF(IMAGE_COMPONENT_MAXSIZE_WIDTH, IMAGE_COMPONENT_MAXSIZE_HEIGHT));
 }
 
 /**
@@ -511,7 +517,7 @@ HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout009, TestSize.Level1)
 /**
  * @tc.name: ImageLayout010
  * @tc.desc: Verify that ImageComponent which has no SelfSize can resize with ImageSize, whether fitOriginalSize is set
- *           default. FitOriginalSize is true by default.
+ *           default. FitOriginalSize is false by default.
  * @tc.type: FUNC
  */
 HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout010, TestSize.Level1)
@@ -535,19 +541,19 @@ HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout010, TestSize.Level1)
     EXPECT_TRUE(imageLayoutAlgorithm1 != nullptr);
     auto size1 = imageLayoutAlgorithm1->MeasureContent(layoutConstraintSize, &layoutWrapper1);
     EXPECT_TRUE(size1 != std::nullopt);
-    EXPECT_EQ(size1.value(), SizeF(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(size1.value(), SizeF(IMAGE_COMPONENT_MAXSIZE_WIDTH, IMAGE_COMPONENT_MAXSIZE_HEIGHT));
 
-    imageLayoutProperty->UpdateFitOriginalSize(true);
+    imageLayoutProperty->UpdateFitOriginalSize(false);
     LayoutWrapper layoutWrapper2(nullptr, nullptr, imageLayoutProperty);
     /**
     //     corresponding ets code:
-    //         Image(IMAGE_SRC_URL).fitOriginalSize(true)
+    //         Image(IMAGE_SRC_URL).fitOriginalSize(false)
     */
     auto imageLayoutAlgorithm2 = AceType::MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx, nullptr);
     EXPECT_TRUE(imageLayoutAlgorithm2 != nullptr);
     auto size2 = imageLayoutAlgorithm2->MeasureContent(layoutConstraintSize, &layoutWrapper2);
     EXPECT_TRUE(size2 != std::nullopt);
-    EXPECT_EQ(size2.value(), SizeF(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(size2.value(), SizeF(IMAGE_COMPONENT_MAXSIZE_WIDTH, IMAGE_COMPONENT_MAXSIZE_HEIGHT));
 }
 
 /**

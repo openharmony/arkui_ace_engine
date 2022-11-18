@@ -47,33 +47,39 @@ void OverlayManager::ShowToast(
     CHECK_NULL_VOID(rootNode);
 
     // only one toast
-    if (!toast_.Invalid()) {
-        rootNode->RemoveChild(toast_.Upgrade());
-        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    for (auto [id, toastNodeWeak] : toastMap_) {
+        rootNode->RemoveChild(toastNodeWeak.Upgrade());
     }
+    toastMap_.clear();
 
     auto toastNode = ToastView::CreateToastNode(message, bottom, isRightToLeft);
+    auto toastId = toastNode->GetId();
     CHECK_NULL_VOID(toastNode);
 
     // mount to parent
     toastNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    toast_ = toastNode;
+    toastMap_[toastId] = toastNode;
 
     context->GetTaskExecutor()->PostDelayedTask(
-        [weak = WeakClaim(this)] {
+        [weak = WeakClaim(this), toastId] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->PopToast();
+            overlayManager->PopToast(toastId);
         },
         TaskExecutor::TaskType::UI, duration);
 }
 
-void OverlayManager::PopToast()
+void OverlayManager::PopToast(int32_t toastId)
 {
-    auto toastUnderPop = toast_.Upgrade();
+    auto toastIter = toastMap_.find(toastId);
+    if (toastIter == toastMap_.end()) {
+        LOGI("No toast under pop");
+        return;
+    }
+    auto toastUnderPop = toastIter->second.Upgrade();
     if (!toastUnderPop) {
-        LOGE("No toast under pop");
+        LOGI("No toast under pop");
         return;
     }
     auto rootNode = rootNodeWeak_.Upgrade();
@@ -83,6 +89,7 @@ void OverlayManager::PopToast()
     }
     LOGI("begin to pop toast, id is %{public}d", toastUnderPop->GetId());
     rootNode->RemoveChild(toastUnderPop);
+    toastMap_.erase(toastId);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -143,8 +150,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void OverlayManager::ShowMenu(
-    int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu, bool isContextMenu)
+void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu, bool isContextMenu)
 {
     if (!menu) {
         // get existing menuNode

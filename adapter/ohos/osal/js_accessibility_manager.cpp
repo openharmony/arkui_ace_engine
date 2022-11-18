@@ -497,7 +497,7 @@ void FindText(const RefPtr<NG::UINode>& node, const std::string& text, std::list
     CHECK_NULL_VOID(node);
 
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
-    if (frameNode) {
+    if (frameNode && !frameNode->IsInternal()) {
         if (frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText().find(text) !=
             std::string::npos) {
             LOGI("FindText find nodeId(%{public}d)", frameNode->GetAccessibilityId());

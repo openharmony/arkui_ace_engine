@@ -74,7 +74,7 @@ RefPtr<PixelMap> PixelMap::CreatePixelMap(void* rawPtr)
     }
     return AceType::MakeRefPtr<PixelMapOhos>(*pixmapPtr);
 }
- 
+
 RefPtr<PixelMap> PixelMap::CreatePixelMapFromDataAbility(void* uniquePtr)
 {
     std::unique_ptr<Media::PixelMap>* pixmapPtr = reinterpret_cast<std::unique_ptr<Media::PixelMap>*>(uniquePtr);
@@ -182,8 +182,8 @@ std::shared_ptr<Media::PixelMap> PixelMapOhos::GetPixelMapSharedPtr()
     return pixmap_;
 }
 
-RefPtr<PixelMap> PixelMap::ConvertSkImageToPixmap(const uint32_t *colors, uint32_t colorLength,
-    int32_t width, int32_t height)
+RefPtr<PixelMap> PixelMap::ConvertSkImageToPixmap(
+    const uint32_t* colors, uint32_t colorLength, int32_t width, int32_t height)
 {
     Media::InitializationOptions opts;
     opts.size.width = width;

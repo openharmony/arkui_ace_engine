@@ -238,11 +238,20 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     return listLayoutAlgorithm;
 }
 
-void ListPattern::UpdateCurrentOffset(float offset)
+bool ListPattern::UpdateCurrentOffset(float offset)
 {
+    // check edgeEffect is not springEffect
+    if (!(scrollEffect_ && scrollEffect_->IsSpringEffect())) {
+        if ((startIndex_ == 0) && NonNegative(startMainPos_) && Positive(offset)) {
+            return false;
+        }
+        if (endIndex_ == maxListItemIndex_ && LessOrEqual(endMainPos_, GetMainContentSize()) && Negative(offset)) {
+            return false;
+        }
+    }
     currentDelta_ = currentDelta_ - offset;
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, false);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     auto header = headerGroupNode_.Upgrade();
     if (header) {
@@ -253,7 +262,7 @@ void ListPattern::UpdateCurrentOffset(float offset)
         footer->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     if (!IsOutOfBoundary() || !scrollable_) {
-        return;
+        return true;
     }
 
     // over scroll in drag update from normal to over scroll.
@@ -271,6 +280,7 @@ void ListPattern::UpdateCurrentOffset(float offset)
         auto friction = CalculateFriction(std::abs(overScroll) / GetMainContentSize());
         currentDelta_ = currentDelta_ * friction;
     }
+    return true;
 }
 
 void ListPattern::ProcessScrollEnd()
@@ -325,7 +335,7 @@ void ListPattern::InitScrollableEvent()
         pattern->SetScrollStop(false);
         pattern->SetScrollState(source);
         if (source != SCROLL_FROM_START) {
-            pattern->UpdateCurrentOffset(static_cast<float>(offset));
+            return pattern->UpdateCurrentOffset(static_cast<float>(offset));
         }
         return true;
     };

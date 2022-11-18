@@ -30,6 +30,7 @@ public:
     MOCK_METHOD1(SetWidth, void(scalar width));
     MOCK_METHOD1(SetCapStyle, void(CapStyle cs));
     MOCK_METHOD1(SetColor, void(const TestingColor& c));
+    MOCK_METHOD1(SetColor, void(int c));
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_PEN_H

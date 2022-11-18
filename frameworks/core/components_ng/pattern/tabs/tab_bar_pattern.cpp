@@ -17,10 +17,13 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components/tab_bar/tab_theme.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -138,7 +141,15 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     childrenMainSize_ = tabBarLayoutAlgorithm->GetChildrenMainSize();
     indicator_ = tabBarLayoutAlgorithm->GetIndicator();
     auto layoutProperty = DynamicCast<TabBarLayoutProperty>(dirty->GetLayoutProperty());
-    int32_t indicator = layoutProperty->GetIndicatorValue(0);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto tabsFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_RETURN(tabsFrameNode, false);
+    auto swiperFrameNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildren().back());
+    CHECK_NULL_RETURN(swiperFrameNode, false);
+    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(swiperPattern, false);
+    int32_t indicator = swiperPattern->GetCurrentIndex();
     UpdateIndicator(indicator);
     return false;
 }
@@ -198,7 +209,11 @@ void TabBarPattern::HandleClick(const GestureEvent& info) const
     }
     auto index = isRTL_ ? std::distance(tabItemOffsets_.begin(), pos) : std::distance(tabItemOffsets_.begin(), pos) - 1;
     if (index >= 0 && index < totalCount && swiperController_) {
-        swiperController_->SwipeToWithoutAnimation(index);
+        if (animationDuration_.has_value()) {
+            swiperController_->SwipeTo(index);
+        } else {
+            swiperController_->SwipeToWithoutAnimation(index);
+        }
         layoutProperty->UpdateIndicator(index);
     }
 }

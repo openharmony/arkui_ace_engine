@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
-#include <unicode/uchar.h>
+#include "text_layout_adapter.h"
 
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
@@ -57,9 +57,8 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
             skipMeasure = NearEqual(GetTextWidth(), width);
         }
     }
-    auto prop = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    if (!skipMeasure || prop->GetForceRenderValue(false)) {
-        prop->UpdateForceRender(false);
+
+    if (!skipMeasure) {
         TextStyle textStyle = CreateTextStyleUsingTheme(textLayoutProperty->GetFontStyle(),
             textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
         if (!textStyle.GetAdaptTextSize()) {
@@ -74,12 +73,12 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
             }
         }
 
-        double paragraphNewWidth = paragraph_->GetMaxWidth();
+        double paragraphNewWidth = std::min(GetTextWidth(), paragraph_->GetMaxWidth());
         if (!contentConstraint.selfIdealSize.Width()) {
             paragraphNewWidth = std::clamp(GetTextWidth(), 0.0f, contentConstraint.maxSize.Width());
-            if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
-                paragraph_->Layout(std::ceil(paragraphNewWidth));
-            }
+        }
+        if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
+            paragraph_->Layout(std::ceil(paragraphNewWidth));
         }
     }
 
@@ -189,12 +188,12 @@ TextDirection TextLayoutAlgorithm::GetTextDirection(const std::string& content)
     TextDirection textDirection = TextDirection::LTR;
     auto showingTextForWString = StringUtils::ToWstring(content);
     for (const auto& charOfShowingText : showingTextForWString) {
-        if (u_charDirection(charOfShowingText) == UCharDirection::U_LEFT_TO_RIGHT) {
-            textDirection = TextDirection::LTR;
-        } else if (u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT) {
-            textDirection = TextDirection::RTL;
-        } else if (u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT_ARABIC) {
-            textDirection = TextDirection::RTL;
+        if (TextLayoutadapter::IsLeftToRight(charOfShowingText)) {
+            return TextDirection::LTR;
+        } else if (TextLayoutadapter::IsRightToLeft(charOfShowingText)) {
+            return TextDirection::RTL;
+        } else if (TextLayoutadapter::IsRightTOLeftArabic(charOfShowingText)) {
+            return TextDirection::RTL;
         }
     }
     return textDirection;

@@ -312,12 +312,7 @@ void AceContainer::OnShow(int32_t instanceId)
             auto pipelineBase = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineBase);
             pipelineBase->OnShow();
-            auto pipelineContext = DynamicCast<PipelineContext>(pipelineBase);
-            if (!pipelineContext) {
-                LOGI("old pipeline context is null, SetForegroundCalled failed.");
-                return;
-            }
-            pipelineContext->SetForegroundCalled(true);
+            pipelineBase->SetForegroundCalled(true);
         },
         TaskExecutor::TaskType::UI);
 }

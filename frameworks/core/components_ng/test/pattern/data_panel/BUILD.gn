@@ -64,6 +64,7 @@ ohos_unittest("data_panel_pattern_test_ng") {
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
 
     # self
+    "data_panel_paint_method_test_ng.cpp",
     "data_panel_pattern_test_ng.cpp",
   ]
 

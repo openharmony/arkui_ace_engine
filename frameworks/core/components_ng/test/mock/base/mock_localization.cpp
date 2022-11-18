@@ -39,4 +39,9 @@ const std::string Localization::FormatDateTime(DateTime dateTime, const std::str
 {
     return "08:00:00";
 }
+
+std::string Localization::GetEntryLetters(const std::string& lettersIndex)
+{
+    return "";
+}
 } // namespace OHOS::Ace
