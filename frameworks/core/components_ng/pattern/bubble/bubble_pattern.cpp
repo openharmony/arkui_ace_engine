@@ -41,6 +41,11 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     childOffset_ = bubbleLayoutAlgorithm->GetChildOffset();
     childSize_ = bubbleLayoutAlgorithm->GetChildSize();
     touchRegion_ = bubbleLayoutAlgorithm->GetTouchRegion();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto paintProperty = host->GetPaintProperty<BubbleRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    paintProperty->UpdatePlacement(bubbleLayoutAlgorithm->GetArrowPlacement());
     return true;
 }
 
