@@ -26,7 +26,6 @@ void FrameNode::OnWindowFocused() {}
 void FrameNode::OnWindowUnfocused() {}
 void FrameNode::OnNotifyMemoryLevel(int32_t level) {}
 void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType) const {}
-void FrameNode::InitializePatternAndContext() {}
 void FrameNode::DumpInfo() {}
 void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
@@ -98,7 +97,14 @@ RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId
 RefPtr<FrameNode> FrameNode::CreateFrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
 {
-    return MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot);
+    auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot);
+    frameNode->InitializePatternAndContext();
+    return frameNode;
+}
+
+void FrameNode::InitializePatternAndContext()
+{
+    pattern_->AttachToFrameNode(WeakClaim(this));
 }
 
 std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
