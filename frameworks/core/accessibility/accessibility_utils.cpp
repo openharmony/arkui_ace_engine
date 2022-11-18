@@ -63,7 +63,7 @@ const int32_t FOCUS_DIRECTION_RIGHT = 1 << 3;
 const int32_t FOCUS_DIRECTION_FORWARD = 1 << 4;
 const int32_t FOCUS_DIRECTION_BACKWARD = 1 << 5;
 
-static bool CheckRectBeam(Rect nodeRect, Rect itemRect, const int direction)
+static bool CheckRectBeam(const Rect& nodeRect, const Rect& itemRect, const int direction)
 {
     switch (direction) {
         case FOCUS_DIRECTION_LEFT:
@@ -78,7 +78,7 @@ static bool CheckRectBeam(Rect nodeRect, Rect itemRect, const int direction)
     return false;
 }
 
-static bool IsToDirectionOf(Rect nodeRect, Rect itemRect, const int direction)
+static bool IsToDirectionOf(const Rect& nodeRect, const Rect& itemRect, const int direction)
 {
     switch (direction) {
         case FOCUS_DIRECTION_LEFT:
@@ -95,7 +95,7 @@ static bool IsToDirectionOf(Rect nodeRect, Rect itemRect, const int direction)
     return false;
 }
 
-static double MajorAxisDistanceToFarEdge(Rect nodeRect, Rect itemRect, const int direction)
+static double MajorAxisDistanceToFarEdge(const Rect& nodeRect, const Rect& itemRect, const int direction)
 {
     double distance = 0.0;
     switch (direction) {
@@ -118,7 +118,7 @@ static double MajorAxisDistanceToFarEdge(Rect nodeRect, Rect itemRect, const int
     return distance > 1.0 ? distance : 1.0;
 }
 
-static double MajorAxisDistance(Rect nodeRect, Rect itemRect, const int direction)
+static double MajorAxisDistance(const Rect& nodeRect, const Rect& itemRect, const int direction)
 {
     double distance = 0.0;
     switch (direction) {
@@ -141,7 +141,7 @@ static double MajorAxisDistance(Rect nodeRect, Rect itemRect, const int directio
     return distance > 0.0 ? distance : 0.0;
 }
 
-static double MinorAxisDistance(Rect nodeRect, Rect itemRect, const int direction)
+static double MinorAxisDistance(const Rect& nodeRect, const Rect& itemRect, const int direction)
 {
     double distance = 0.0;
     switch (direction) {
@@ -165,7 +165,7 @@ static double GetWeightedDistanceFor(double majorAxisDistance, double minorAxisD
     return WEIGHTED_VALUE * majorAxisDistance * majorAxisDistance + minorAxisDistance * minorAxisDistance;
 }
 
-static bool IsCandidateRect(Rect nodeRect, Rect itemRect, const int direction)
+static bool IsCandidateRect(const Rect& nodeRect, const Rect& itemRect, const int direction)
 {
     switch (direction) {
         case FOCUS_DIRECTION_LEFT:
@@ -183,7 +183,7 @@ static bool IsCandidateRect(Rect nodeRect, Rect itemRect, const int direction)
 }
 
 // Check whether rect1 is outright better than rect2.
-static bool OutrightBetter(Rect nodeRect, const int direction, Rect Rect1, Rect Rect2)
+static bool OutrightBetter(const Rect& nodeRect, const int direction, const Rect& Rect1, const Rect& Rect2)
 {
     bool rect1InSrcBeam = CheckRectBeam(nodeRect, Rect1, direction);
     bool rect2InSrcBeam = CheckRectBeam(nodeRect, Rect2, direction);
@@ -203,7 +203,7 @@ static bool OutrightBetter(Rect nodeRect, const int direction, Rect Rect1, Rect 
     return (MajorAxisDistance(nodeRect, Rect1, direction) < MajorAxisDistanceToFarEdge(nodeRect, Rect2, direction));
 }
 
-bool CheckBetterRect(Rect nodeRect, const int direction, Rect itemRect, Rect tempBest)
+bool CheckBetterRect(const Rect& nodeRect, const int direction, const Rect& itemRect, const Rect& tempBest)
 {
     if (!IsCandidateRect(nodeRect, itemRect, direction)) {
         return false;

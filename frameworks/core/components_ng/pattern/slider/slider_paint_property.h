@@ -46,26 +46,21 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         PaintProperty::ToJsonValue(json);
-
-        json->Put("Value", std::to_string(GetValue().value_or(0.0f)).c_str());
-        json->Put("Min", std::to_string(GetMin().value_or(0.0f)).c_str());
-        json->Put("Max", std::to_string(GetMax().value_or(100.0f)).c_str());
-        json->Put("Step", std::to_string(GetStep().value_or(1.0f)).c_str());
-        json->Put("Reverse", GetReverse().value_or(false) ? "true" : "false");
-        static const std::array<std::string, 4> AXIS_TO_STRING = {
-            "Axis.VERTICAL",
-            "Axis.HORIZONTAL",
-            "Axis.FREE",
-            "Axis.NONE",
-        };
+        auto jsonConstructor = JsonUtil::Create(true);
+        jsonConstructor->Put("value", std::to_string(GetValue().value_or(0.0f)).c_str());
+        jsonConstructor->Put("min", std::to_string(GetMin().value_or(0.0f)).c_str());
+        jsonConstructor->Put("max", std::to_string(GetMax().value_or(100.0f)).c_str());
+        jsonConstructor->Put("step", std::to_string(GetStep().value_or(1.0f)).c_str());
+        jsonConstructor->Put("reverse", GetReverse().value_or(false) ? "true" : "false");
+        jsonConstructor->Put("direction",
+            (GetDirection().value_or(Axis::HORIZONTAL)) == Axis::VERTICAL ? "Axis.Vertical" : "Axis.Horizontal");
+        json->Put("constructor", jsonConstructor);
+        json->Put("blockColor", GetBlockColor().value_or(Color(0xffffffff)).ColorToString().c_str());
         json->Put(
-            "Direction", AXIS_TO_STRING.at(static_cast<int32_t>(GetDirection().value_or(Axis::HORIZONTAL))).c_str());
-        json->Put("BlockColor", GetBlockColor().value_or(Color(0xffffffff)).ColorToString().c_str());
-        json->Put(
-            "TrackBackgroundColor", GetTrackBackgroundColor().value_or(Color(0xafdbdbdb)).ColorToString().c_str());
-        json->Put("SelectColor", GetSelectColor().value_or(Color(0xff007dff)).ColorToString().c_str());
-        json->Put("ShowSteps", GetShowSteps().value_or(false) ? "true" : "false");
-        json->Put("ShowTips", GetShowTips().value_or(false) ? "true" : "false");
+            "trackBackgroundColor", GetTrackBackgroundColor().value_or(Color(0xafdbdbdb)).ColorToString().c_str());
+        json->Put("selectColor", GetSelectColor().value_or(Color(0xff007dff)).ColorToString().c_str());
+        json->Put("showSteps", GetShowSteps().value_or(false) ? "true" : "false");
+        json->Put("showTips", GetShowTips().value_or(false) ? "true" : "false");
     }
 
     ACE_DEFINE_PROPERTY_GROUP(SliderPaintStyle, SliderPaintStyle)

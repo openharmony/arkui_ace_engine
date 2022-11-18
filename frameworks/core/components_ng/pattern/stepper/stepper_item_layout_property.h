@@ -50,11 +50,13 @@ public:
     {
         LayoutProperty::ToJsonValue(json);
 
-        json->Put("PrevLabel",
-            GetLeftLabel().value_or(Localization::GetInstance()->GetEntryLetters("stepper.back")).c_str());
-        json->Put("NextLabel",
+        json->Put(
+            "prevLabel", GetLeftLabel().value_or(Localization::GetInstance()->GetEntryLetters("stepper.back")).c_str());
+        json->Put("nextLabel",
             GetRightLabel().value_or(Localization::GetInstance()->GetEntryLetters("stepper.next")).c_str());
-        json->Put("Status", ("Status" + GetLabelStatus().value_or("normal")).c_str());
+        static const std::map<std::string, std::string> STATUS_TO_STRING = { { "normal", "ItemState.Normal" },
+            { "disabled", "ItemState.Disabled" }, { "waiting", "ItemState.Waiting" }, { "skip", "ItemState.Skip" } };
+        json->Put("status", STATUS_TO_STRING.at(GetLabelStatus().value_or("normal")).c_str());
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LeftLabel, std::string, PROPERTY_UPDATE_LAYOUT);

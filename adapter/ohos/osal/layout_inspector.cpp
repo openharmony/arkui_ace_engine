@@ -17,14 +17,19 @@
 
 #include <string>
 
+#include "third_party/skia/include/core/SkString.h"
+#include "third_party/skia/include/utils/SkBase64.h"
 #include "wm/window.h"
 
 #include "base/thread/background_task_executor.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
 #include "core/components_v2/inspector/inspector.h"
+#include "foundation/ability/ability_runtime/frameworks/native/runtime/connect_server_manager.h"
 
 namespace OHOS::Ace {
+
+bool LayoutInspector::layoutInspectorStatus_ = false;
 
 void LayoutInspector::SupportInspector()
 {
@@ -33,8 +38,11 @@ void LayoutInspector::SupportInspector()
         LOGE("container null");
         return;
     }
-    if (!container->GetIdeDebuggerConnected()) {
-        return;
+    if (!layoutInspectorStatus_) {
+        SetlayoutInspectorStatus();
+        if (!layoutInspectorStatus_) {
+            return;
+        }
     }
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!pipelineContext) {
@@ -56,10 +64,8 @@ void LayoutInspector::SupportInspector()
     auto data = (*pixelMap).GetPixels();
     auto height = (*pixelMap).GetHeight();
     auto stride = (*pixelMap).GetRowBytes();
-    for (int32_t i = 0; i < height; i++) {
-        for (int32_t j = 0; j < stride; j++) {
-            pixelStr += std::to_string(*(data + i * stride + j));
-        }
+    for (int32_t i = 0; i < height * stride; i++) {
+        pixelStr += std::to_string(*(data + i));
     }
     auto message = JsonUtil::Create(true);
     message->Put("type", "snapShot");
@@ -67,11 +73,32 @@ void LayoutInspector::SupportInspector()
     message->Put("height", height);
     message->Put("posX", container->GetViewPosX());
     message->Put("posY", container->GetViewPosY());
-    message->Put("pixelMap", pixelStr.c_str());
-    auto sendTask = [jsonTreeStr, jsonSnapshotStr = message->ToString()]() {
-        ConnectServerManager::Get().SendInspector(jsonTreeStr, jsonSnapshotStr);
+    int32_t encodeLength = SkBase64::Encode(data, height * stride, nullptr);
+    SkString info(encodeLength);
+    SkBase64::Encode(data, height * stride, info.writable_str());
+    message->Put("pixelMapBase64", info.c_str());
+    auto sendTask = [jsonTreeStr, jsonSnapshotStr = message->ToString(), container]() {
+        if (container->IsUseStageModel()) {
+            OHOS::AbilityRuntime::ConnectServerManager::Get().SendInspector(jsonTreeStr, jsonSnapshotStr);
+        } else {
+            OHOS::Ace::ConnectServerManager::Get().SendInspector(jsonTreeStr, jsonSnapshotStr);
+        }
     };
     BackgroundTaskExecutor::GetInstance().PostTask(std::move(sendTask));
+}
+
+void LayoutInspector::SetlayoutInspectorStatus()
+{
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("container is null");
+        return;
+    }
+    if (container->IsUseStageModel()) {
+        layoutInspectorStatus_ = OHOS::AbilityRuntime::ConnectServerManager::Get().GetlayoutInspectorStatus();
+        return;
+    }
+    layoutInspectorStatus_ = OHOS::Ace::ConnectServerManager::Get().GetlayoutInspectorStatus();
 }
 
 } // namespace OHOS::Ace

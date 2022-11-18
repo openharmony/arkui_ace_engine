@@ -26,7 +26,7 @@ const Color DEFAULT_SELECTED_COLOR = Color(0xFF007DFF);
 void CheckBoxPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     PaintProperty::ToJsonValue(json);
-    json->Put("select", GetCheckBoxSelect().value_or(false) ? "true" : "false");
+    json->Put("isOn", GetCheckBoxSelect().value_or(false) ? "true" : "false");
     json->Put("selectedColor", GetCheckBoxSelectedColor().value_or(DEFAULT_SELECTED_COLOR).ColorToString().c_str());
 }
 

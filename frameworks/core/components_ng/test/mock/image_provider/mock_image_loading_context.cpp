@@ -111,7 +111,7 @@ void ImageLoadingContext::MakeCanvasImage(
 
 SizeF ImageLoadingContext::GetImageSize() const
 {
-    return { -1.0f, -1.0f };
+    return SizeF(GetSourceInfo().GetSourceSize().Width(), GetSourceInfo().GetSourceSize().Height());
 }
 
 ImageFit ImageLoadingContext::GetImageFit() const

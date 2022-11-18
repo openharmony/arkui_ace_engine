@@ -20,8 +20,10 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/placement.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -60,7 +62,7 @@ HWTEST_F(BubblePropertyTestNg, BubblePropertyTest001, TestSize.Level1)
 
 /**
  * @tc.name: BubblePropertyTest002
- * @tc.desc: set panelType value into BubblePropertyTest002 and get it.
+ * @tc.desc: set message value into BubblePropertyTest002 and get it.
  * @tc.type: FUNC
  */
 HWTEST_F(BubblePropertyTestNg, BubblePropertyTest002, TestSize.Level1)
@@ -74,6 +76,29 @@ HWTEST_F(BubblePropertyTestNg, BubblePropertyTest002, TestSize.Level1)
     ViewAbstract::BindPopup(popupParam, frameNode, nullptr);
     auto message = popupParam->GetMessage();
     EXPECT_EQ(message, BUBBLE_MESSAGE);
+}
+
+/**
+ * @tc.name: BubblePropertyTest003
+ * @tc.desc: set placementOnTop value into BubblePropertyTest003 and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubblePropertyTestNg, BubblePropertyTest003, TestSize.Level1)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    popupParam->SetPlacement(Placement::TOP);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_FALSE(frameNode == nullptr);
+    ViewAbstract::BindPopup(popupParam, frameNode, nullptr);
+    auto targetId = frameNode->GetId();
+    auto targetTag = frameNode->GetTag();
+    auto popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, popupParam);
+    EXPECT_FALSE(popupNode == nullptr);
+    auto bubbleLayoutProperty = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    EXPECT_FALSE(bubbleLayoutProperty == nullptr);
+    EXPECT_EQ(bubbleLayoutProperty->GetPlacement().value_or(Placement::BOTTOM), Placement::TOP);
 }
 
 } // namespace OHOS::Ace::NG

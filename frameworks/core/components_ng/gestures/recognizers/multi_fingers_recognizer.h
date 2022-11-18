@@ -40,7 +40,7 @@ public:
     }
 
 protected:
-    void OnBeginGestureReferee(int32_t touchId) override
+    void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override
     {
         touchPoints_[touchId] = {};
     }

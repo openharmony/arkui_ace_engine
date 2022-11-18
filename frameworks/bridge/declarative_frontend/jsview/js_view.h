@@ -173,6 +173,7 @@ public:
 
     void FindChildById(const JSCallbackInfo& info);
     void FindChildByIdForPreview(const JSCallbackInfo& info);
+    bool GetChildByViewId(const std::string& viewId, JSRef<JSObject>& childView, JSRef<JSObject>& targetView);
 
     void ExecuteUpdateWithValueParams(const std::string& jsonData) override
     {

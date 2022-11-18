@@ -16,6 +16,7 @@
 #include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::NG {
+thread_local int32_t UINode::currentAccessibilityId_ = 0;
 UINode::~UINode() {}
 void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode) {}
 void UINode::Clean() {}
@@ -38,7 +39,7 @@ void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleL
 void UINode::Build() {}
 void UINode::SetActive(bool active) {}
 
-void UINode::AddChild(const RefPtr<UINode>& child, int32_t /* slot */)
+void UINode::AddChild(const RefPtr<UINode>& child, int32_t /* slot */, bool /*silently*/)
 {
     CHECK_NULL_VOID(child);
     auto it = std::find(children_.begin(), children_.end(), child);
@@ -51,7 +52,7 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t /* slot */)
     child->SetParent(Claim(this));
 }
 
-void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot)
+void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool silently)
 {
     CHECK_NULL_VOID(parent);
     parent->AddChild(AceType::Claim(this), slot);
@@ -75,7 +76,7 @@ int32_t UINode::RemoveChildAndReturnIndex(const RefPtr<UINode>& child)
 
 void UINode::RemoveChildAtIndex(int32_t index) {}
 
-RefPtr<UINode> UINode::GetChildAtIndex(int32_t index)
+RefPtr<UINode> UINode::GetChildAtIndex(int32_t index) const
 {
     return nullptr;
 }

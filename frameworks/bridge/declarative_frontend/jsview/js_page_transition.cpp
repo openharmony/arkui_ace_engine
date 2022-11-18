@@ -17,7 +17,28 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_page_transition_function.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "bridge/declarative_frontend/jsview/models/page_transition_model_impl.h"
+#include "core/components_ng/pattern/stage/page_transition_model_ng.h"
+
+namespace OHOS::Ace {
+std::unique_ptr<PageTransitionModel> PageTransitionModel::instance_ = nullptr;
+
+PageTransitionModel* PageTransitionModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::PageTransitionModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::PageTransitionModelNG());
+        } else {
+            instance_.reset(new Framework::PageTransitionModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
@@ -55,10 +76,7 @@ void JSPageTransition::Slide(const JSCallbackInfo& info)
         auto effect = info[0]->ToNumber<int32_t>();
 
         if (effect >= static_cast<int32_t>(SlideEffect::LEFT) && effect <= static_cast<int32_t>(SlideEffect::BOTTOM)) {
-            const auto& pageTransition = GetPageTransition();
-            if (pageTransition) {
-                pageTransition->SetEffect(static_cast<SlideEffect>(effect));
-            }
+            PageTransitionModel::GetInstance()->SetSlideEffect(static_cast<SlideEffect>(effect));
         }
     }
 }
@@ -73,25 +91,19 @@ void JSPageTransition::Translate(const JSCallbackInfo& info)
             return;
         }
 
-        auto translateX = Dimension(0.0);
-        auto translateY = Dimension(0.0);
-        auto translateZ = Dimension(0.0);
+        NG::TranslateOptions option;
 
         Dimension length;
         if (JSViewAbstract::ParseJsonDimensionVp(args->GetValue("x"), length)) {
-            translateX = length;
+            option.x = length;
         }
         if (JSViewAbstract::ParseJsonDimensionVp(args->GetValue("y"), length)) {
-            translateY = length;
+            option.y = length;
         }
         if (JSViewAbstract::ParseJsonDimensionVp(args->GetValue("z"), length)) {
-            translateZ = length;
+            option.z = length;
         }
-
-        const auto& pageTransition = GetPageTransition();
-        if (pageTransition) {
-            pageTransition->AddTranslateAnimation(translateX, translateY, translateZ);
-        }
+        PageTransitionModel::GetInstance()->SetTranslateEffect(option);
     }
 }
 
@@ -125,11 +137,9 @@ void JSPageTransition::Scale(const JSCallbackInfo& info)
         if (JSViewAbstract::ParseJsonDimensionVp(args->GetValue("centerY"), length)) {
             centerY = length;
         }
-
-        const auto& pageTransition = GetPageTransition();
-        if (pageTransition) {
-            pageTransition->AddScaleAnimation(scaleX, scaleY, scaleZ, centerX, centerY);
-        }
+        NG::ScaleOptions option(
+            static_cast<float>(scaleX), static_cast<float>(scaleY), static_cast<float>(scaleZ), centerX, centerY);
+        PageTransitionModel::GetInstance()->SetScaleEffect(option);
     }
 }
 
@@ -144,10 +154,7 @@ void JSPageTransition::Opacity(const JSCallbackInfo& info)
     if (!JSViewAbstract::ParseJsDouble(info[0], opacity)) {
         return;
     }
-    const auto& pageTransition = GetPageTransition();
-    if (pageTransition) {
-        pageTransition->AddOpacityAnimation(opacity);
-    }
+    PageTransitionModel::GetInstance()->SetOpacityEffect(static_cast<float>(opacity));
 }
 
 void JSPageTransition::JsHandlerOnEnter(const JSCallbackInfo& info)
@@ -168,10 +175,7 @@ void JSPageTransition::JsHandlerOnEnter(const JSCallbackInfo& info)
         func->Execute(type, progress);
     };
 
-    const auto& pageTransition = GetPageTransition();
-    if (pageTransition) {
-        pageTransition->SetOnEnterHandler(std::move(onEnterHandler));
-    }
+    PageTransitionModel::GetInstance()->SetOnEnter(std::move(onEnterHandler));
 }
 
 void JSPageTransition::JsHandlerOnExit(const JSCallbackInfo& info)
@@ -192,76 +196,49 @@ void JSPageTransition::JsHandlerOnExit(const JSCallbackInfo& info)
         func->Execute(type, progress);
     };
 
-    const auto& pageTransition = GetPageTransition();
-    if (pageTransition) {
-        pageTransition->SetOnExitHandler(std::move(onExitHandler));
-    }
+    PageTransitionModel::GetInstance()->SetOnExit(std::move(onExitHandler));
 }
 
 void JSPageTransition::Create(const JSCallbackInfo& info)
 {
     LOGD("JSPageTransition::JSTransition::Create");
-    // create PageTransitionComponent
-    auto pageTransitionComponent = ViewStackProcessor::GetInstance()->GetPageTransitionComponent();
-    if (pageTransitionComponent) {
-        pageTransitionComponent->ClearPageTransition();
-    }
+    PageTransitionModel::GetInstance()->Create();
 }
 
 void JSPageTransition::Pop()
 {
     LOGD("JSPageTransition::Pop");
-    auto pageTransitionComponent = ViewStackProcessor::GetInstance()->GetPageTransitionComponent();
-    if (pageTransitionComponent) {
-        pageTransitionComponent->ClearPageTransitionStack();
-    }
+    PageTransitionModel::GetInstance()->Pop();
 }
 
-RefPtr<PageTransition> JSPageTransition::CreateTransition(
-    PageTransitionType type, const std::unique_ptr<JsonValue>& transitionArgs)
+PageTransitionOption JSPageTransition::ParseTransitionOption(const std::unique_ptr<JsonValue>& transitionArgs)
 {
-    RouteType routeType = RouteType::NONE;
-    int32_t duration = 1000;
-    int32_t delay = 0;
-    RefPtr<Curve> curve = AceType::MakeRefPtr<LinearCurve>();
+    PageTransitionOption option;
+    const int32_t defaultDuration = 1000;
+    option.duration = defaultDuration;
+    option.curve = Curves::LINEAR;
     if (transitionArgs && !transitionArgs->IsNull()) {
-        duration = transitionArgs->GetInt("duration", 1000);
-        delay = transitionArgs->GetInt("delay", 0);
+        option.duration = transitionArgs->GetInt("duration", defaultDuration);
+        option.delay = transitionArgs->GetInt("delay", 0);
         auto routeTypeTmp = transitionArgs->GetInt("type", static_cast<int32_t>(RouteType::NONE));
         if (routeTypeTmp >= static_cast<int32_t>(RouteType::NONE) &&
             routeTypeTmp <= static_cast<int32_t>(RouteType::POP)) {
-            routeType = static_cast<RouteType>(routeTypeTmp);
+            option.routeType = static_cast<RouteType>(routeTypeTmp);
         } else {
-            LOGE("CreateTransition RouteType out of range");
+            LOGW("CreateTransition RouteType out of range");
         }
 
         auto curveArgs = transitionArgs->GetValue("curve");
         if (curveArgs->IsString()) {
-            curve = CreateCurve(curveArgs->GetString());
+            option.curve = CreateCurve(curveArgs->GetString());
         } else if (curveArgs->IsObject()) {
             auto curveString = curveArgs->GetValue("__curveString");
             if (curveString) {
-                curve = CreateCurve(curveString->GetString());
+                option.curve = CreateCurve(curveString->GetString());
             }
         }
     }
-
-    auto pageTransitionInfo = AceType::MakeRefPtr<PageTransition>(type);
-    pageTransitionInfo->SetDuration(duration);
-    pageTransitionInfo->SetDelay(delay);
-    pageTransitionInfo->SetCurve(curve);
-    pageTransitionInfo->SetRouteType(routeType);
-
-    return pageTransitionInfo;
-}
-
-RefPtr<PageTransition> JSPageTransition::GetPageTransition()
-{
-    auto pageTransitionComponent = ViewStackProcessor::GetInstance()->GetPageTransitionComponent();
-    if (pageTransitionComponent) {
-        return pageTransitionComponent->GetTopPageTransition();
-    }
-    return nullptr;
+    return option;
 }
 
 void JSPageTransitionEnter::Create(const JSCallbackInfo& info)
@@ -269,26 +246,18 @@ void JSPageTransitionEnter::Create(const JSCallbackInfo& info)
     LOGD("JSPageTransitionEnter::Create");
     if (info.Length() > 0 && info[0]->IsObject()) {
         auto transitionArgs = JsonUtil::ParseJsonString(info[0]->ToString());
-        auto pageTransition = CreateTransition(PageTransitionType::ENTER, transitionArgs);
-
-        auto pageTransitionComponent = ViewStackProcessor::GetInstance()->GetPageTransitionComponent();
-        if (pageTransitionComponent) {
-            pageTransitionComponent->PushPageTransition(pageTransition);
-        }
+        auto option = ParseTransitionOption(transitionArgs);
+        PageTransitionModel::GetInstance()->CreateTransition(PageTransitionType::ENTER, option);
     }
 }
 
 void JSPageTransitionExit::Create(const JSCallbackInfo& info)
 {
-    LOGD("JSPageTransitionEnter::Create");
+    LOGD("JSPageTransitionExit::Create");
     if (info.Length() > 0 && info[0]->IsObject()) {
         auto transitionArgs = JsonUtil::ParseJsonString(info[0]->ToString());
-        auto pageTransition = CreateTransition(PageTransitionType::EXIT, transitionArgs);
-
-        auto pageTransitionComponent = ViewStackProcessor::GetInstance()->GetPageTransitionComponent();
-        if (pageTransitionComponent) {
-            pageTransitionComponent->PushPageTransition(pageTransition);
-        }
+        auto option = ParseTransitionOption(transitionArgs);
+        PageTransitionModel::GetInstance()->CreateTransition(PageTransitionType::EXIT, option);
     }
 }
 

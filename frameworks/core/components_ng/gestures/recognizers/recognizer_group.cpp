@@ -21,9 +21,17 @@
 
 namespace OHOS::Ace::NG {
 
-void RecognizerGroup::OnBeginGestureReferee(int32_t touchId)
+void RecognizerGroup::OnBeginGestureReferee(int32_t touchId, bool needUpdateChild)
 {
     MultiFingersRecognizer::OnBeginGestureReferee(touchId);
+    if (!needUpdateChild) {
+        return;
+    }
+    for (const auto& child : recognizers_) {
+        if (child) {
+            child->BeginReferee(touchId, needUpdateChild);
+        }
+    }
 }
 
 void RecognizerGroup::OnFinishGestureReferee(int32_t touchId)

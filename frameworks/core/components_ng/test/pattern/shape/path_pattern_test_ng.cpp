@@ -70,28 +70,50 @@ public:
         RSCanvas rsCavas(&canvas);
         contentDraw(rsCavas);
     }
+
+    void CheckCommands(bool hasValue)
+    {
+        auto pathModelNG = PathModelNG();
+        pathModelNG.Create();
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+        EXPECT_EQ(frameNode == nullptr, false);
+        if (hasValue) {
+            pathModelNG.SetCommands(PATH_CMD);
+        }
+        auto shapeAbstactModel = ShapeAbstractModelNG();
+        SetSize(shapeAbstactModel);
+        ViewStackProcessor::GetInstance()->Pop();
+        auto pathPaintProperty = frameNode->GetPaintProperty<PathPaintProperty>();
+        if (hasValue) {
+            EXPECT_EQ(pathPaintProperty->HasCommands(), true);
+            EXPECT_STREQ(pathPaintProperty->GetCommandsValue().c_str(), PATH_CMD.c_str());
+        } else {
+            EXPECT_EQ(pathPaintProperty->HasCommands(), false);
+        }
+        Draw(frameNode);
+    }
 };
 
 /**
- * @tc.name: PathPaintProperty001
+ * @tc.name: COMMONDS001
  * @tc.desc: create path with cmd
  * @tc.type: FUNC
  */
 
-HWTEST_F(PathPatternTestNg, PathPaintProperty001, TestSize.Level1)
+HWTEST_F(PathPatternTestNg, COMMONDS001, TestSize.Level1)
 {
-    auto pathModelNG = PathModelNG();
-    pathModelNG.Create();
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    EXPECT_EQ(frameNode == nullptr, false);
-    pathModelNG.SetCommands(PATH_CMD);
-    auto shapeAbstactModel = ShapeAbstractModelNG();
-    SetSize(shapeAbstactModel);
-    ViewStackProcessor::GetInstance()->Pop();
-    auto pathPaintProperty = frameNode->GetPaintProperty<PathPaintProperty>();
-    EXPECT_EQ(pathPaintProperty->HasCommands(), true);
-    EXPECT_STREQ(pathPaintProperty->GetCommandsValue().c_str(), PATH_CMD.c_str());
-    Draw(frameNode);
+    CheckCommands(true);
+}
+
+/**
+ * @tc.name: COMMONDS002
+ * @tc.desc: create path with no cmd
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(PathPatternTestNg, COMMONDS002, TestSize.Level1)
+{
+    CheckCommands(false);
 }
 
 } // namespace OHOS::Ace::NG

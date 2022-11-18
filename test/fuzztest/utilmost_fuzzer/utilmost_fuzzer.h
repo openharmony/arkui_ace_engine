@@ -12,20 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef TEST_FUZZTEST_UTILMOST_FUZZER_H
+#define TEST_FUZZTEST_UTILMOST_FUZZER_H
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_QRCODE_QRCODE_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_QRCODE_QRCODE_VIEW_H
 
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
+#define FUZZ_PROJECT_NAME "util_fuzzer"
 
-namespace OHOS::Ace::NG {
-
-class ACE_EXPORT QRCodeView {
-public:
-    static void Create(const std::string& value);
-    static void SetQRCodeColor(Color color);
-};
-
-} // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_QRCODE_QRCODE_VIEW_H
+#endif // TEST_FUZZTEST_UTILMOST_FUZZER_H

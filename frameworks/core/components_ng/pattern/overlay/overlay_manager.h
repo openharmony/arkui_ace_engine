@@ -36,6 +36,8 @@ struct PopupInfo {
     RefPtr<FrameNode> popupNode;
     bool markNeedUpdate = false;
     bool isCurrentOnShow = false;
+    SizeF targetSize;
+    OffsetF targetOffset;
 };
 
 // StageManager is the base class for root render node to perform page switch.
@@ -51,14 +53,15 @@ public:
     }
 
     void UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo);
+    void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
 
     const PopupInfo& GetPopupInfo(int32_t targetId)
     {
         return popupMap_[targetId];
     }
 
-    void ShowMenu(int32_t targetId, bool isMenu = true, const NG::OffsetF& offset = NG::OffsetF(),
-        RefPtr<FrameNode> menu = nullptr, bool isContextMenu = false);
+    void ShowMenu(
+        int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr, bool isContextMenu = false);
     void HideMenu(int32_t targetId);
     void DeleteMenu(int32_t targetId);
     void ShowMenuInSubWindow(int32_t targetId, bool isMenu = true, const NG::OffsetF& offset = NG::OffsetF(),

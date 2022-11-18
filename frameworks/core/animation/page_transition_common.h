@@ -16,7 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PAGE_TRANSITION_PAGE_TRANSITION_COMMON_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PAGE_TRANSITION_PAGE_TRANSITION_COMMON_H
 
+#include "frameworks/base/memory/referenced.h"
+
 namespace OHOS::Ace {
+
+class Curve;
 
 enum class PageTransitionType {
     ENTER,      // current page enter not specify route type.
@@ -41,6 +45,14 @@ enum class SlideEffect {
     TOP,
     BOTTOM,
 };
+
+struct PageTransitionOption {
+    RouteType routeType = RouteType::NONE;
+    int32_t duration = 0;
+    int32_t delay = 0;
+    RefPtr<Curve> curve;
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PAGE_TRANSITION_PAGE_TRANSITION_COMMON_H

@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/models/grid_model_impl.h"
 
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -26,15 +27,16 @@
 namespace OHOS::Ace::Framework {
 
 void GridModelImpl::Create(
-    const RefPtr<V2::GridPositionController>& positionController, const RefPtr<ScrollBarProxy>& scrollBarProxy)
+    const RefPtr<ScrollControllerBase>& positionController, const RefPtr<ScrollBarProxy>& scrollBarProxy)
 {
+    auto controller = AceType::DynamicCast<V2::GridPositionController>(positionController);
     std::list<RefPtr<OHOS::Ace::Component>> componentChildren;
     RefPtr<OHOS::Ace::GridLayoutComponent> gridComponent = AceType::MakeRefPtr<GridLayoutComponent>(componentChildren);
     ViewStackProcessor::GetInstance()->ClaimElementId(gridComponent);
     gridComponent->SetDeclarative();
     gridComponent->SetNeedShrink(true);
-    if (positionController) {
-        gridComponent->SetController(positionController);
+    if (controller) {
+        gridComponent->SetController(controller);
     }
     if (scrollBarProxy) {
         gridComponent->SetScrollBarProxy(scrollBarProxy);
@@ -253,6 +255,11 @@ void GridModelImpl::SetOnItemDrop(std::function<void(const ItemDragInfo&, int32_
     auto grid = AceType::DynamicCast<GridLayoutComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(grid);
     grid->SetOnGridDropId(value);
+}
+
+RefPtr<ScrollControllerBase> GridModelImpl::CreatePositionController()
+{
+    return AceType::MakeRefPtr<V2::GridPositionController>();
 }
 
 } // namespace OHOS::Ace::Framework

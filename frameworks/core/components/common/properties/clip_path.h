@@ -22,8 +22,11 @@
 #include "base/geometry/dimension_offset.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
+#ifndef FUZZTEST
 #include "core/components/common/properties/radius.h"
-
+#else
+#include "test/fuzztest/utilmost_fuzzer/radius.h"
+#endif
 
 namespace OHOS::Ace {
 

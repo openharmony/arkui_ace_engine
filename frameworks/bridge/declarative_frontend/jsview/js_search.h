@@ -31,6 +31,7 @@ public:
     static void SetPlaceholderColor(const JSCallbackInfo& info);
     static void SetPlaceholderFont(const JSCallbackInfo& info);
     static void SetTextFont(const JSCallbackInfo& info);
+    static void SetTextAlign(int32_t value);
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderWidth(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);

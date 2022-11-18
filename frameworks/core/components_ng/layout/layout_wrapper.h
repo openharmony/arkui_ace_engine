@@ -108,6 +108,7 @@ public:
 
     static void RemoveChildInRenderTree(const RefPtr<LayoutWrapper>& wrapper);
     void RemoveChildInRenderTree(int32_t index);
+    void RemoveAllChildInRenderTree();
 
     void ResetHostNode();
 
@@ -163,7 +164,7 @@ public:
 
     bool IsContraintNoChanged() const
     {
-        return isContraintNoChanged_;
+        return isConstraintNotChanged_;
     }
 
     // dirty layoutBox mount to host and switch layoutBox.
@@ -224,7 +225,7 @@ private:
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithm_;
 
     int32_t currentChildCount_ = 0;
-    bool isContraintNoChanged_ = false;
+    bool isConstraintNotChanged_ = false;
     bool isActive_ = false;
     bool needForceSyncRenderTree_ = false;
     bool isRootNode_ = false;

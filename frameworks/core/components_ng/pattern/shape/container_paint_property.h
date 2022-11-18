@@ -64,21 +64,14 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         ShapePaintProperty::ToJsonValue(json);
+        auto viewBoxJson = JsonUtil::Create(true);
         if (propShapeViewBox_.has_value()) {
-            JsonValue viewBoxJson;
-            viewBoxJson.Put("x", propShapeViewBox_.value().Left().ConvertToPx());
-            viewBoxJson.Put("y", propShapeViewBox_.value().Top().ConvertToPx());
-            viewBoxJson.Put("width", propShapeViewBox_.value().Width().ConvertToPx());
-            viewBoxJson.Put("height", propShapeViewBox_.value().Height().ConvertToPx());
-            json->Put("viewPort", viewBoxJson.ToString().c_str());
+            viewBoxJson->Put("x", propShapeViewBox_.value().Left().ToString().c_str());
+            viewBoxJson->Put("y", propShapeViewBox_.value().Top().ToString().c_str());
+            viewBoxJson->Put("width", propShapeViewBox_.value().Width().ToString().c_str());
+            viewBoxJson->Put("height", propShapeViewBox_.value().Height().ToString().c_str());
         }
-        if (propImageMesh_.has_value()) {
-            std::string str;
-            str.insert(str.begin(), propImageMesh_.value().GetMesh().begin(), propImageMesh_.value().GetMesh().end());
-            str.append(",").append(std::to_string(propImageMesh_.value().GetColumn())).append(",");
-            str.append(std::to_string(propImageMesh_.value().GetRow()));
-            json->Put("mesh", str.c_str());
-        }
+        json->Put("viewPort", viewBoxJson);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageMesh, ImageMesh, PROPERTY_UPDATE_RENDER);

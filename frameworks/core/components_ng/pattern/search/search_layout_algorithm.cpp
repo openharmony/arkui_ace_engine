@@ -26,19 +26,12 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
-constexpr float DIVIDER_SPACE = 7.0;
-constexpr float SEARCH_DIVIDER_WIDTH = 1.0;
-constexpr float TEXT_PADDING = 18.0;
-constexpr Dimension SEARCH_SPACING = 2.0_vp;
-constexpr Dimension ICON_HEIGHT = 16.0_vp;
-constexpr Dimension ICON_WIIDTH_OFFSET = 14.0_vp;
-
+namespace {
 constexpr int TEXTFIELD_INDEX = 0;
 constexpr int IMAGE_INDEX = 1;
 constexpr int BUTTON_INDEX = 2;
 constexpr int BUTTON_TEXT_INDEX = 0;
-
+} // namespace
 
 void SearchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -89,7 +82,7 @@ void SearchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         textLayoutProperty->UpdateContent(searchButton->value());
 
         PaddingProperty padding;
-        padding.SetEdges(CalcLength(TEXT_PADDING));
+        padding.SetEdges(CalcLength(searchTheme->GetTextPadding()));
         textLayoutProperty->UpdatePadding(padding);
 
         auto buttonLayoutConstraint = childLayoutConstraint;
@@ -101,8 +94,9 @@ void SearchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // Measure TextField
     auto textFieldLayoutConstraint = childLayoutConstraint;
     auto buttonWidth = buttonWrapper->GetGeometryNode()->GetFrameSize().Width();
-    auto textFieldWidth = idealSize.Width() - 2 * ICON_WIIDTH_OFFSET.ConvertToPx() - ICON_HEIGHT.ConvertToPx() -
-                          buttonWidth - DIVIDER_SPACE;
+    auto textFieldWidth = idealSize.Width() - 2 * searchTheme->GetIconWidthOffset().ConvertToPx() -
+                          searchTheme->GetIconHeight().ConvertToPx() - buttonWidth -
+                          searchTheme->GetSearchDividerWidth();
     auto textFieldHeight = idealSize.Height();
     textFieldLayoutConstraint.selfIdealSize = OptionalSizeF(textFieldWidth, textFieldHeight);
 
@@ -134,21 +128,24 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(geometryNode);
     auto layoutProperty = DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetThemeManager()->GetTheme<SearchTheme>();
     // Layout TextField
     auto textFieldWrapper = layoutWrapper->GetOrCreateChildByIndex(TEXTFIELD_INDEX);
     CHECK_NULL_VOID(textFieldWrapper);
     auto textFieldGeometryNode = textFieldWrapper->GetGeometryNode();
     CHECK_NULL_VOID(textFieldGeometryNode);
 
-    float textFieldHorizontalOffset = 2 * ICON_WIIDTH_OFFSET.ConvertToPx() + ICON_HEIGHT.ConvertToPx();
+    float textFieldHorizontalOffset =
+        2 * searchTheme->GetIconWidthOffset().ConvertToPx() + searchTheme->GetIconHeight().ConvertToPx();
     textFieldGeometryNode->SetMarginFrameOffset(OffsetF(textFieldHorizontalOffset, 0.0f));
     textFieldWrapper->Layout();
 
     // Layout Image
     auto searchSize = geometryNode->GetFrameSize();
-    float imageHorizontalOffset = ICON_WIIDTH_OFFSET.ConvertToPx();
-    float imageVerticalOffset = (searchSize.Height() - ICON_HEIGHT.ConvertToPx()) / 2.0;
+    float imageHorizontalOffset = searchTheme->GetIconWidthOffset().ConvertToPx();
+    float imageVerticalOffset = (searchSize.Height() - searchTheme->GetIconHeight().ConvertToPx()) / 2.0;
     OffsetF imageOffset(imageHorizontalOffset, imageVerticalOffset);
     auto imageWrapper = layoutWrapper->GetOrCreateChildByIndex(IMAGE_INDEX);
     CHECK_NULL_VOID(imageWrapper);
@@ -167,10 +164,11 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto buttonFrameSize = buttonGeometryNode->GetFrameSize();
 
         float buttonVerticalOffset = (searchSize.Height() - buttonFrameSize.Height()) / 2.0;
-        float buttonHorizontalOffset = searchSize.Width() - buttonFrameSize.Width() - DIVIDER_SPACE;
+        float buttonHorizontalOffset = searchSize.Width() - buttonFrameSize.Width() - searchTheme->GetDividerSpace();
         OffsetF buttonOffset;
-        buttonOffset = OffsetF(buttonHorizontalOffset, buttonVerticalOffset) +
-                       OffsetF(SEARCH_SPACING.ConvertToPx() + SEARCH_DIVIDER_WIDTH, 0.0);
+        buttonOffset =
+            OffsetF(buttonHorizontalOffset, buttonVerticalOffset) +
+            OffsetF(searchTheme->GetSearchSpacing().ConvertToPx() + searchTheme->GetSearchDividerWidth(), 0.0);
         buttonGeometryNode->SetMarginFrameOffset(buttonOffset);
         buttonWrapper->Layout();
     }

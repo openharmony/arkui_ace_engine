@@ -26,10 +26,6 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 
-#if defined(PREVIEW)
-const int32_t OFFSET_PREVIEW = 9;
-#endif
-
 namespace OHOS::Ace::Framework {
 std::string JsiBaseUtils::GenerateSummaryBody(
     const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime)
@@ -396,11 +392,7 @@ std::string JsiBaseUtils::GetSourceInfo(const std::string& line, const std::stri
     if (isAppPage) {
         mapInfo = appMap->Find(StringToInt(line) - offSet, StringToInt(column));
     } else {
-#if defined(PREVIEW)
-        mapInfo = pageMap->Find(StringToInt(line) - offSet + OFFSET_PREVIEW, StringToInt(column));
-#else
         mapInfo = pageMap->Find(StringToInt(line) - offSet, StringToInt(column));
-#endif
     }
     if (mapInfo.row == 0 || mapInfo.col == 0) {
         return "";

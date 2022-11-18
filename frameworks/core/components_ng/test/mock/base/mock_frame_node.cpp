@@ -51,7 +51,11 @@ void FrameNode::MarkResponseRegion(bool isResponseRegion) {}
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
 {
-    layoutProperty_ = MakeRefPtr<LayoutProperty>();
+    paintProperty_ = pattern->CreatePaintProperty();
+    layoutProperty_ = pattern->CreateLayoutProperty();
+    eventHub_ = pattern->CreateEventHub();
+    accessibilityProperty_ = pattern->CreateAccessibilityProperty();
+    layoutProperty_->SetHost(WeakClaim(this));
 }
 
 void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
@@ -74,7 +78,8 @@ RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
 RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
-    return nullptr;
+    auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
+    return CreateFrameNode(tag, nodeId, pattern);
 }
 
 RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId)
