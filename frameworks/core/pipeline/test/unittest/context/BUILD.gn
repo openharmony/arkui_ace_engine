@@ -43,6 +43,7 @@ ohos_unittest("PipelineContextTest") {
     "//foundation/arkui/ace_engine/frameworks/core/animation/spring_motion.cpp",
 
     #base
+    "$ace_root/adapter/ohos/osal/frame_trace_adapter_impl.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/adapter/ohos/osal/ressched_report.cpp",
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
@@ -238,9 +239,12 @@ ohos_unittest("PipelineContextTest") {
     "$ace_root/frameworks/base/resource:ace_resource",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$cjson_root:cjson_static",
+    "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf:frame_trace_intf",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
+
+  include_dirs = [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf" ]
 
   if (!is_standard_system) {
     aosp_deps = [ "shared_library:libcurl" ]
