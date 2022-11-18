@@ -186,6 +186,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     if (onShow_ && onFocus_) {
         FlushFocus();
     }
+    HandleVisibleAreaChangeEvent();
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
@@ -821,6 +822,43 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
     if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
         eventManager_->AxisTest(scaleEvent, rootNode_);
         eventManager_->DispatchAxisEventNG(scaleEvent);
+    }
+}
+
+void PipelineContext::AddVisibleAreaChangeNode(
+    const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback)
+{
+    CHECK_NULL_VOID(node);
+    VisibleCallbackInfo info;
+    info.callback = callback;
+    info.visibleRatio = ratio;
+    info.isCurrentVisible = false;
+    auto iter = visibleAreaChangeNodes_.find(node->GetId());
+    if (iter != visibleAreaChangeNodes_.end()) {
+        auto& callbackList = iter->second;
+        callbackList.emplace_back(info);
+    } else {
+        std::list<VisibleCallbackInfo> callbackList;
+        callbackList.emplace_back(info);
+        visibleAreaChangeNodes_[node->GetId()] = callbackList;
+    }
+}
+
+void PipelineContext::HandleVisibleAreaChangeEvent()
+{
+    if (visibleAreaChangeNodes_.empty()) {
+        return;
+    }
+    for (auto& visibleChangeNode : visibleAreaChangeNodes_) {
+        auto uiNode = ElementRegister::GetInstance()->GetUINodeById(visibleChangeNode.first);
+        if (!uiNode) {
+            continue;
+        }
+        auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+        if (!frameNode) {
+            continue;
+        }
+        frameNode->TriggerVisibleAreaChangeCallback(visibleChangeNode.second);
     }
 }
 
