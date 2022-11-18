@@ -74,12 +74,12 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
             }
         }
 
-        double paragraphNewWidth = paragraph_->GetMaxWidth();
+        double paragraphNewWidth = std::min(GetTextWidth(), paragraph_->GetMaxWidth());
         if (!contentConstraint.selfIdealSize.Width()) {
             paragraphNewWidth = std::clamp(GetTextWidth(), 0.0f, contentConstraint.maxSize.Width());
-            if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
-                paragraph_->Layout(std::ceil(paragraphNewWidth));
-            }
+        }
+        if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
+            paragraph_->Layout(std::ceil(paragraphNewWidth));
         }
     }
 
@@ -190,11 +190,11 @@ TextDirection TextLayoutAlgorithm::GetTextDirection(const std::string& content)
     auto showingTextForWString = StringUtils::ToWstring(content);
     for (const auto& charOfShowingText : showingTextForWString) {
         if (TextLayoutadapter::IsLeftToRight(charOfShowingText)) {
-            textDirection = TextDirection::LTR;
+            return TextDirection::LTR;
         } else if (TextLayoutadapter::IsRightToLeft(charOfShowingText)) {
-            textDirection = TextDirection::RTL;
+            return TextDirection::RTL;
         } else if (TextLayoutadapter::IsRightTOLeftArabic(charOfShowingText)) {
-            textDirection = TextDirection::RTL;
+            return TextDirection::RTL;
         }
     }
     return textDirection;
