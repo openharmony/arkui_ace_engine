@@ -16,10 +16,10 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_OSAL_PIXEL_MAP_OHOS_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_PIXEL_MAP_OHOS_H
 
-#include "base/image/pixel_map.h"
-
 #include "pixel_map.h"
 #include "pixel_map_manager.h"
+
+#include "base/image/pixel_map.h"
 
 namespace OHOS::Ace {
 
@@ -46,7 +46,6 @@ public:
 
 private:
     std::shared_ptr<Media::PixelMap> pixmap_;
-
 };
 
 } // namespace OHOS::Ace

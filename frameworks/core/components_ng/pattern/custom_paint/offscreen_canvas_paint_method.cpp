@@ -25,6 +25,7 @@
 #include "third_party/skia/include/utils/SkBase64.h"
 
 #include "base/i18n/localization.h"
+#include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
 #include "core/components/common/painter/flutter_decoration_painter.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
@@ -509,7 +510,7 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> image;
 
-    image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+    image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     if (!image) {
         LOGE("image is null");
         return;
