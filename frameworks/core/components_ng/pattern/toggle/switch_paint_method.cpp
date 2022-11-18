@@ -71,6 +71,7 @@ void SwitchPaintMethod::PaintContent(
         brush.SetColor(ToRSColor(inactiveColor));
     }
     brush.SetBlendMode(RSBlendMode::SRC_OVER);
+    brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
 
     rosen::Rect rect;
@@ -88,6 +89,7 @@ void SwitchPaintMethod::PaintContent(
         } else {
             brush.SetColor(ToRSColor(selectedColor));
         }
+        brush.SetAntiAlias(true);
         canvas.AttachBrush(brush);
         rosen::Rect rectCover;
         rectCover.SetLeft(xOffset);
@@ -98,6 +100,7 @@ void SwitchPaintMethod::PaintContent(
         canvas.DrawRoundRect(roundRectCover);
     }
     brush.SetColor(ToRSColor(paintProperty->GetSwitchPointColor().value_or(switchTheme->GetPointColor())));
+    brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
     rosen::Point point;
     point.SetX(xOffset + borderWidth_ + hoverRadius_ + mainDelta_);
