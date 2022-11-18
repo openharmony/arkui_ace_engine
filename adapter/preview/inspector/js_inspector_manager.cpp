@@ -220,7 +220,7 @@ bool JsInspectorManager::OperateGeneralComponent(
     int32_t parentID, int32_t slot, std::string& operateType, RefPtr<Component> newComponent)
 {
     auto parentElement = GetInspectorElementById(parentID);
-    if (!parentElement || !(parentElement->IsRectValid())) {
+    if (!parentElement) {
         LOGE("parentElement should not be nullptr or display");
         return false;
     }
