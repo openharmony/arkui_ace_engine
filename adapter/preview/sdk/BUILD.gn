@@ -113,12 +113,14 @@ if (is_standard_system) {
         "$shared_library_path_napi/ace/napi/libace_napi.dylib",
         "$shared_library_path_napi/ace/napi/libace_napi_quickjs.dylib",
         "$shared_library_path_uv/ace/napi/libuv.dylib",
+        "//third_party/icu/ohos_icu4j/data/icudt67l.dat",
       ]
     } else {
       sources = [
         "$shared_library_path_napi/ace/napi/libace_napi.dll",
         "$shared_library_path_napi/ace/napi/libace_napi_quickjs.dll",
         "$shared_library_path_uv/ace/napi/libuv.dll",
+        "//third_party/icu/ohos_icu4j/data/icudt67l.dat",
       ]
     }
     outputs = [ target_out_dir + "/previewer/common/bin/{{source_file_part}}" ]
