@@ -36,7 +36,6 @@ void ExclusiveRecognizer::OnAccepted()
         AceType::TypeName(activeRecognizer_));
     refereeState_ = RefereeState::SUCCEED;
     if (activeRecognizer_) {
-        activeRecognizer_->SetCoordinateOffset(coordinateOffset_);
         activeRecognizer_->OnAccepted();
     } else {
         LOGW("the active recognizer is null");
@@ -102,11 +101,11 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
         case TouchType::DOWN:
         case TouchType::UP:
         case TouchType::CANCEL: {
-            if (activeRecognizer_) {
+            if (activeRecognizer_ && activeRecognizer_->CheckTouchId(point.id)) {
                 activeRecognizer_->HandleEvent(point);
             } else {
                 for (const auto& recognizer : recognizers_) {
-                    if (recognizer) {
+                    if (recognizer && recognizer->CheckTouchId(point.id)) {
                         recognizer->HandleEvent(point);
                     }
                 }

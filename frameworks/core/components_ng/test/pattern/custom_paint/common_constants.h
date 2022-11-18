@@ -40,9 +40,12 @@ extern const int32_t CANVAS_WIDTH;
 extern const int32_t CANVAS_HEIGHT;
 
 extern const std::string NULL_STR;
+extern const std::string DEFAULT_STR;
 extern const std::string IMAGE_SRC;
 extern const std::string REPETITION_STR;
+extern const std::vector<std::string> CANDIDATE_STRINGS;
 
+extern const double DEFAULT_DOUBLE;
 extern const std::vector<double> CANDIDATE_DOUBLES;
 
 extern const std::vector<Color> CANDIDATE_COLORS;

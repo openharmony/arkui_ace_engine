@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "js_plugin_callback.h"
+#include <mutex>
 
 #include "hilog_wrapper.h"
 #include "js_plugin_callback_mgr.h"
@@ -97,25 +98,50 @@ size_t JSPluginCallback::GetID(void)
 
 void JSPluginCallback::SendRequestEventResult(napi_value jsObject)
 {
-    std::string strTemplate("");
-    std::string strDate("");
-    std::string strExtraData("");
     napi_value jsTemplate = AceGetPropertyValueByPropertyName(cbInfo_.env, jsObject, "template", napi_string);
     napi_value jsData = AceGetPropertyValueByPropertyName(cbInfo_.env, jsObject, "data", napi_object);
     napi_value jsExtraData = AceGetPropertyValueByPropertyName(cbInfo_.env, jsObject, "extraData", napi_object);
 
+    struct MyData {
+        AAFwk::Want want;
+        std::string strTemplate;
+        std::string strDate;
+        std::string strExtraData;
+    };
+
+    MyData* data = new MyData;
+    data->want = want_;
+
     if (jsTemplate != nullptr) {
-        strTemplate = AceUnwrapStringFromJS(cbInfo_.env, jsTemplate);
+        data->strTemplate = AceUnwrapStringFromJS(cbInfo_.env, jsTemplate);
     }
 
     if (jsData != nullptr) {
-        AceKVObjectToString(cbInfo_.env, jsData, strDate);
+        AceKVObjectToString(cbInfo_.env, jsData, data->strDate);
     }
 
     if (jsExtraData != nullptr) {
-        AceKVObjectToString(cbInfo_.env, jsExtraData, strExtraData);
+        AceKVObjectToString(cbInfo_.env, jsExtraData, data->strExtraData);
     }
-    PluginComponentManager::GetInstance()->ReturnRequest(want_, strTemplate, strDate, strExtraData);
+
+    uv_loop_s* loop = nullptr;
+    napi_get_uv_event_loop(cbInfo_.env, &loop);
+    uv_work_t* work = new uv_work_t;
+    work->data = (void*)data;
+    int rev = uv_queue_work(
+        loop, work, [](uv_work_t* work) {
+            MyData* data = (MyData*)work->data;
+            PluginComponentManager::GetInstance()->ReturnRequest(
+                data->want, data->strTemplate, data->strDate, data->strExtraData);
+        },
+        [](uv_work_t* work, int status) {
+            delete (MyData*)work->data;
+            delete work;
+        });
+    if (rev != 0) {
+        delete work;
+        delete data;
+    }
 }
 
 napi_value JSPluginCallback::MakeCallbackParamForRequest(
@@ -357,7 +383,54 @@ void JSPluginCallback::OnRequestCallBack(const PluginComponentTemplate& pluginTe
         uvWorkData_.data = data;
         uvWorkData_.extraData = extraData;
 
-        OnRequestCallBackInner(&uvWorkData_);
+        if (getpid() != gettid()) {
+            uv_loop_s* loop = nullptr;
+            napi_get_uv_event_loop(cbInfo_.env, &loop);
+
+            struct ResultData {
+                JSPluginCallback* context = nullptr;
+                std::mutex mtx;
+                bool ready = false;
+                std::condition_variable cv;
+            };
+
+            ResultData* resultData = new ResultData;
+            resultData->context = this;
+
+            uv_work_t* work = new uv_work_t;
+            work->data = (void*)resultData;
+            int rev = uv_queue_work(
+                loop, work, [](uv_work_t* work) {},
+                [](uv_work_t* work, int status) {
+                    if (work == nullptr) {
+                        return;
+                    }
+                    ResultData* data = (ResultData*)work->data;
+                    if (data->context) {
+                        data->context->OnRequestCallBackInner(&data->context->uvWorkData_);
+                    }
+
+                    {
+                        std::unique_lock<std::mutex> lock(data->mtx);
+                        data->ready=true;
+                        data->cv.notify_all();
+                    }
+                    delete work;
+                });
+
+            if (rev != 0) {
+                delete resultData;
+                delete work;
+            } else {
+                {
+                    std::unique_lock<std::mutex> lock(resultData->mtx);
+                    resultData->cv.wait(lock, [&] { return resultData->ready; });
+                }
+                delete resultData;
+            }
+        } else {
+            OnRequestCallBackInner(&uvWorkData_);
+        }
     } else {
         if (asyncJSCallbackInfo_) {
             asyncJSCallbackInfo_->requestCallbackData.sourceName = pluginTemplate.GetSource();

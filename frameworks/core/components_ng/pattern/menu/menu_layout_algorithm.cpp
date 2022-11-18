@@ -31,10 +31,10 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     screenSize_ = SizeF(pipeline->GetRootWidth(), pipeline->GetRootHeight());
 
-    // calculate menu position based on target FrameNode
+    // currently using click point as menu position
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
-    position_ = props->GetMenuOffset().value();
+    position_ = props->GetMenuOffset().value_or(OffsetF());
 }
 
 // Called to perform layout render node and child.

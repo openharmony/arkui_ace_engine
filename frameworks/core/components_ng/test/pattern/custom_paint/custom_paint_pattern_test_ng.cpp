@@ -89,11 +89,37 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg001, TestSize.Level1)
     EXPECT_EQ(customPattern->GetHeight(), IDEAL_HEIGHT);
 
     customPattern->paintMethod_ = AceType::MakeRefPtr<CanvasPaintMethod>(nullptr);
-    EXPECT_FALSE(customPattern->paintMethod_ == nullptr);
+    EXPECT_FALSE(customPattern->CreateNodePaintMethod() == nullptr);
     customPattern->paintMethod_->SetLineDash(CANDIDATE_DOUBLES);
-    customPattern->paintMethod_->SetLineDashOffset(CANDIDATE_DOUBLES[0]);
-    EXPECT_EQ(customPattern->GetLineDash().dashOffset, CANDIDATE_DOUBLES[0]);
-    EXPECT_EQ(customPattern->GetLineDash().lineDash, CANDIDATE_DOUBLES);
+    customPattern->paintMethod_->SetLineDashOffset(DEFAULT_DOUBLE);
+    EXPECT_EQ(customPattern->GetLineDash().dashOffset, DEFAULT_DOUBLE);
+    for (uint32_t i = 1; i < CANDIDATE_DOUBLES.size(); ++i) {
+        EXPECT_EQ(customPattern->paintMethod_->GetLineDash().lineDash[i], CANDIDATE_DOUBLES[i]);
+    }
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    EXPECT_FALSE(layoutWrapper == nullptr);
+    auto layoutAlgorithm = customPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(layoutAlgorithm == nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    EXPECT_TRUE(customPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    config.skipMeasure = true;
+    EXPECT_FALSE(customPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+
+    PaintState paintState;
+    EXPECT_EQ(customPattern->MeasureText(DEFAULT_STR, paintState), 0.0);
+    EXPECT_EQ(customPattern->MeasureTextHeight(DEFAULT_STR, paintState), 0.0);
+    TextMetrics textMetrics = customPattern->MeasureTextMetrics(DEFAULT_STR, paintState);
+    EXPECT_EQ(textMetrics.width, 0.0);
+    EXPECT_EQ(textMetrics.height, 0.0);
+    EXPECT_EQ(textMetrics.actualBoundingBoxLeft, 0.0);
+    EXPECT_EQ(textMetrics.actualBoundingBoxRight, 0.0);
+    EXPECT_EQ(textMetrics.actualBoundingBoxAscent, 0.0);
+    EXPECT_EQ(textMetrics.actualBoundingBoxDescent, 0.0);
 }
 
 /**

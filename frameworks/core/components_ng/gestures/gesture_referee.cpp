@@ -33,7 +33,6 @@ void GestureScope::AddMember(const RefPtr<NGGestureRecognizer>& recognizer)
         return;
     }
 
-    recognizer->BeginReferee(static_cast<int32_t>(touchId_));
     recognizers_.emplace_back(recognizer);
 }
 
@@ -69,6 +68,7 @@ bool GestureScope::CheckNeedBlocked(const RefPtr<NGGestureRecognizer>& recognize
 
 void GestureScope::OnAcceptGesture(const RefPtr<NGGestureRecognizer>& recognizer)
 {
+    hasGestureAccepted_ = true;
     for (const auto& weak : recognizers_) {
         auto gesture = weak.Upgrade();
         if (gesture == recognizer) {
@@ -270,6 +270,19 @@ void GestureReferee::HandleRejectDisposal(const RefPtr<NGGestureRecognizer>& rec
             ++iter;
         }
     }
+}
+
+bool GestureReferee::HasGestureAccepted(size_t touchId) const
+{
+    const auto& iter = gestureScopes_.find(touchId);
+    if (iter == gestureScopes_.end()) {
+        LOGI("gesture scope is not exist");
+        return false;
+    }
+
+    const auto& scope = iter->second;
+    CHECK_NULL_RETURN(scope, false);
+    return scope->HasGestureAccepted();
 }
 
 } // namespace OHOS::Ace::NG

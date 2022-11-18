@@ -44,10 +44,10 @@ void GridItemLayoutProperty::ResetGridLayoutInfoAndMeasure() const
 void GridItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     LayoutProperty::ToJsonValue(json);
-    json->Put("rowStart", propRowStart_.value_or(0));
-    json->Put("rowEnd", propRowEnd_.value_or(0));
-    json->Put("columnStart", propColumnStart_.value_or(0));
-    json->Put("columnEnd", propColumnEnd_.value_or(0));
+    json->Put("rowStart", std::to_string(propRowStart_.value_or(0)).c_str());
+    json->Put("rowEnd", std::to_string(propRowEnd_.value_or(0)).c_str());
+    json->Put("columnStart", std::to_string(propColumnStart_.value_or(0)).c_str());
+    json->Put("columnEnd", std::to_string(propColumnEnd_.value_or(0)).c_str());
 }
 
 } // namespace OHOS::Ace::NG

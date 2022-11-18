@@ -130,14 +130,13 @@ RefPtr<ImageCache> PipelineBase::GetImageCache() const
 void PipelineBase::SetRootSize(double density, int32_t width, int32_t height)
 {
     ACE_SCOPED_TRACE("SetRootSize(%lf, %d, %d)", density, width, height);
-
+    density_ = density;
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), density, width, height]() {
             auto context = weak.Upgrade();
             if (!context) {
                 return;
             }
-            context->density_ = density;
             context->SetRootRect(width, height);
         },
         TaskExecutor::TaskType::UI);
@@ -560,6 +559,23 @@ void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibil
         return;
     }
     accessibilityManager->SendAccessibilityAsyncEvent(accessibilityEvent);
+}
+
+void PipelineBase::Destroy()
+{
+    CHECK_RUN_ON(UI);
+    LOGI("PipelineBase::Destroy begin.");
+    ClearImageCache();
+    platformResRegister_.Reset();
+    drawDelegate_.reset();
+    eventManager_->ClearResults();
+    imageCache_.Reset();
+    fontManager_.Reset();
+    themeManager_.Reset();
+    window_->Destroy();
+    touchPluginPipelineContext_.clear();
+    virtualKeyBoardCallback_.clear();
+    LOGI("PipelineBase::Destroy end.");
 }
 
 } // namespace OHOS::Ace

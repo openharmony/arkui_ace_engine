@@ -20,6 +20,12 @@ config("config_shape_test") {
   visibility = [ ":*" ]
   include_dirs = [
     "//commonlibrary/c_utils/base/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+    "//third_party/flutter/skia",
     "$ace_root",
     "$ace_root/frameworks",
   ]
@@ -33,12 +39,9 @@ ohos_unittest("circle_pattern_test_ng") {
     "circle_pattern_test_ng.cpp",
   ]
 
-  include_dirs = [ "//third_party/googletest/googlemock/include" ]
-
   deps = [
     "$ace_root/build:ace_ohos_unittest_base",
     "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
-    "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -53,6 +56,22 @@ ohos_unittest("ellipse_pattern_test_ng") {
   sources = [
     "base_shape_pattern_test_ng.cpp",
     "ellipse_pattern_test_ng.cpp",
+  ]
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+  ]
+  configs = [
+    ":config_shape_test",
+    "$ace_root:ace_config",
+  ]
+}
+
+ohos_unittest("line_pattern_test_ng") {
+  module_out_path = "$test_output_path/shape"
+  sources = [
+    "base_shape_pattern_test_ng.cpp",
+    "line_pattern_test_ng.cpp",
   ]
   deps = [
     "$ace_root/build:ace_ohos_unittest_base",
@@ -151,6 +170,7 @@ group("shape_pattern_unit_test") {
   deps = [
     ":circle_pattern_test_ng",
     ":ellipse_pattern_test_ng",
+    ":line_pattern_test_ng",
     ":path_pattern_test_ng",
     ":polygon_pattern_test_ng",
     ":polyline_pattern_test_ng",

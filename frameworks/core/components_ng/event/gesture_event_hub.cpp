@@ -36,7 +36,7 @@ RefPtr<FrameNode> GestureEventHub::GetFrameNode() const
 }
 
 bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    TouchTestResult& innerTargets, TouchTestResult& finalResult)
+    TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId)
 {
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
@@ -63,6 +63,10 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
 
     std::list<RefPtr<NGGestureRecognizer>> longPressRecognizers;
     for (const auto& item : dragTargets) {
+        auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item);
+        if (recognizer) {
+            recognizer->BeginReferee(touchId);
+        }
         longPressRecognizers.emplace_back(AceType::DynamicCast<NGGestureRecognizer>(item));
     }
     if (!longPressRecognizers.empty()) {
@@ -81,19 +85,28 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     for (auto const& eventTarget : innerTargets) {
         auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(eventTarget);
         if (recognizer) {
+            recognizer->BeginReferee(touchId);
             innerRecognizers.push_back(std::move(recognizer));
         } else {
             finalResult.push_back(eventTarget);
         }
     }
 
-    ProcessTouchTestHierarchy(coordinateOffset, touchRestrict, innerRecognizers, finalResult);
+    ProcessTouchTestHierarchy(coordinateOffset, touchRestrict, innerRecognizers, finalResult, touchId);
 
     return false;
 }
 
+void GestureEventHub::OnModifyDone()
+{
+    if (recreateGesture_) {
+        UpdateGestureHierarchy();
+        recreateGesture_ = false;
+    }
+}
+
 void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult)
+    std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId)
 {
     auto host = GetFrameNode();
     if (!host) {
@@ -117,12 +130,8 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
             innerExclusiveRecognizer_->AddChildren(innerRecognizers);
         }
         innerExclusiveRecognizer_->SetCoordinateOffset(offset);
+        innerExclusiveRecognizer_->BeginReferee(touchId);
         current = innerExclusiveRecognizer_;
-    }
-
-    if (recreateGesture_) {
-        UpdateGestureHierarchy();
-        recreateGesture_ = false;
     }
 
     auto context = host->GetContext();
@@ -133,6 +142,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
             continue;
         }
         recognizer->SetCoordinateOffset(offset);
+        recognizer->BeginReferee(touchId, true);
         auto gestureMask = recognizer->GetPriorityMask();
         if (gestureMask == GestureMask::IgnoreInternal) {
             // In ignore case, dropped the self inner recognizer and children recognizer.
@@ -153,6 +163,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                     externalParallelRecognizer_[parallelIndex]->AddChildren(recognizers);
                 }
                 externalParallelRecognizer_[parallelIndex]->SetCoordinateOffset(offset);
+                externalParallelRecognizer_[parallelIndex]->BeginReferee(touchId);
                 current = externalParallelRecognizer_[parallelIndex];
                 parallelIndex++;
             } else if (recognizers.size() == 1) {
@@ -175,6 +186,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                     externalExclusiveRecognizer_[exclusiveIndex]->AddChildren(recognizers);
                 }
                 externalExclusiveRecognizer_[exclusiveIndex]->SetCoordinateOffset(offset);
+                externalExclusiveRecognizer_[exclusiveIndex]->BeginReferee(touchId);
                 current = externalExclusiveRecognizer_[exclusiveIndex];
                 exclusiveIndex++;
             } else if (recognizers.size() == 1) {
@@ -241,7 +253,7 @@ void GestureEventHub::UpdateGestureHierarchy()
 }
 
 void GestureEventHub::CombineIntoExclusiveRecognizer(
-    const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result)
+    const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result, int32_t touchId)
 {
     TouchTestResult finalResult;
     std::list<RefPtr<NGGestureRecognizer>> recognizers;
@@ -266,6 +278,7 @@ void GestureEventHub::CombineIntoExclusiveRecognizer(
             nodeExclusiveRecognizer_->AddChildren(recognizers);
         }
         nodeExclusiveRecognizer_->SetCoordinateOffset(offset);
+        nodeExclusiveRecognizer_->BeginReferee(touchId);
         current = nodeExclusiveRecognizer_;
     }
 
@@ -369,7 +382,6 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
     }
 
     CHECK_NULL_VOID(dragDropProxy_);
-    dragDropProxy_->OnDragEnd(info);
     dragDropProxy_->DestroyDragWindow();
     dragDropProxy_ = nullptr;
 }

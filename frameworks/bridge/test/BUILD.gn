@@ -44,6 +44,7 @@ group("unittest") {
 
       #"unittest/jsfrontend/swiper:unittest",
       #"unittest/jsfrontend/switch:unittest",
+      "unittest/jsfrontend/transform_convertor:unittest",
       "unittest/jsfrontend/utils:unittest",
     ]
 

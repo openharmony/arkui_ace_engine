@@ -15,9 +15,8 @@
 
 #include "core/components_ng/base/inspector.h"
 
-#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
-#include "core/pipeline/base/element_register.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -42,12 +41,10 @@ RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::strin
     while (!elements.empty()) {
         auto current = elements.front();
         elements.pop();
-        inspectorElement = AceType::DynamicCast<FrameNode>(current);
-        if (inspectorElement && inspectorElement->HasInspectorId()) {
-            if (key == inspectorElement->GetInspectorIdValue()) {
-                return inspectorElement;
-            }
+        if (key == current->GetInspectorId().value_or("")) {
+            return current;
         }
+
         const auto& children = current->GetChildren();
         for (const auto& child : children) {
             elements.push(child);
@@ -205,11 +202,11 @@ bool Inspector::SendEventByKey(const std::string& key, int action, const std::st
                 .y = (rect.Top() + rect.Height() / 2),
                 .type = TouchType::DOWN,
                 .time = std::chrono::high_resolution_clock::now() };
-            context->OnTouchEvent(point);
+            context->OnTouchEvent(point.UpdatePointers());
 
             switch (action) {
                 case static_cast<int>(AceAction::ACTION_CLICK): {
-                    context->OnTouchEvent(GetUpPoint(point));
+                    context->OnTouchEvent(GetUpPoint(point).UpdatePointers());
                     break;
                 }
                 case static_cast<int>(AceAction::ACTION_LONG_CLICK): {
@@ -217,7 +214,7 @@ bool Inspector::SendEventByKey(const std::string& key, int action, const std::st
                     auto&& callback = [weak, point]() {
                         auto refPtr = weak.Upgrade();
                         if (refPtr) {
-                            refPtr->OnTouchEvent(GetUpPoint(point));
+                            refPtr->OnTouchEvent(GetUpPoint(point).UpdatePointers());
                         }
                     };
                     inspectorTimer.Reset(callback);

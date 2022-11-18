@@ -49,10 +49,14 @@ public:
 
     void Build() override;
 
+    int32_t FrameCount() const override
+    {
+        return 1;
+    }
+
 private:
     std::string viewKey_;
     RenderFunction renderFunction_;
-    RefPtr<UINode> child_;
 };
 } // namespace OHOS::Ace::NG
 

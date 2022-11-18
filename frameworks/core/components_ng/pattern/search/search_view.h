@@ -30,12 +30,13 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT SearchView {
 public:
-    static RefPtr<TextFieldController> Create(
-        std::optional<std::string>& value, std::optional<std::string>& placeholder, std::optional<std::string>& icon);
+    static RefPtr<TextFieldController> Create(const std::optional<std::string>& value,
+        const std::optional<std::string>& placeholder, const std::optional<std::string>& icon);
     static void SetSearchButton(const std::string& text);
     static void SetPlaceholderColor(const Color& color);
     static void SetPlaceholderFont(const Font& font);
     static void SetTextFont(const Font& font);
+    static void SetTextAlign(const TextAlign& textAlign);
     static void SetCopyOption(const CopyOptions& copyOptions);
 
     static void SetOnSubmit(ChangeAndSubmitEvent&& onSubmit);

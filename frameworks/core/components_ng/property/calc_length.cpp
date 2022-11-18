@@ -17,14 +17,14 @@
 
 #include "base/utils/string_expression.h"
 #include "base/utils/utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
 ScaleProperty ScaleProperty::CreateScaleProperty()
 {
     ScaleProperty scaleProperty;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, scaleProperty);
     scaleProperty.fpScale = pipeline->GetFontScale();
     scaleProperty.vpScale = static_cast<float>(pipeline->GetDipScale());

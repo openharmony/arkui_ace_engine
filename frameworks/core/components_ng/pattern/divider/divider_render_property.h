@@ -46,7 +46,7 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         PaintProperty::ToJsonValue(json);
-        json->Put("dividerColor", propDividerColor_.value_or(Color::BLACK).ColorToString().c_str());
+        json->Put("color", propDividerColor_.value_or(Color::BLACK).ColorToString().c_str());
         json->Put("lineCap", propLineCap_.value_or(LineCap::SQUARE) == LineCap::BUTT
                                  ? "BUTT"
                                  : (propLineCap_.value_or(LineCap::SQUARE) == LineCap::ROUND ? "ROUND" : "SQUARE"));

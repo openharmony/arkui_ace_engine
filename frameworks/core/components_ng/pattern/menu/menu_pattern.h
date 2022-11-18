@@ -32,7 +32,7 @@ class MenuPattern : public Pattern {
     DECLARE_ACE_TYPE(MenuPattern, Pattern);
 
 public:
-    MenuPattern() = default;
+    explicit MenuPattern(int32_t targetId) : targetId_(targetId) {};
     ~MenuPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -67,6 +67,9 @@ public:
 
 private:
     void OnModifyDone() override;
+    void RegisterOnClick();
+
+    int32_t targetId_ = -1;
     bool isContextMenu_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);

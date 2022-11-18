@@ -28,7 +28,6 @@
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
-#include "core/components_ng/pattern/swiper_indicator/swiper_indicator_view.h"
 
 namespace OHOS::Ace {
 
@@ -90,7 +89,6 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSSwiper>::StaticMethod("create", &JSSwiper::Create, opt);
     JSClass<JSSwiper>::StaticMethod("autoPlay", &JSSwiper::SetAutoPlay, opt);
-    JSClass<JSSwiper>::StaticMethod("digital", &JSSwiper::SetDigital, opt);
     JSClass<JSSwiper>::StaticMethod("duration", &JSSwiper::SetDuration, opt);
     JSClass<JSSwiper>::StaticMethod("index", &JSSwiper::SetIndex, opt);
     JSClass<JSSwiper>::StaticMethod("interval", &JSSwiper::SetInterval, opt);
@@ -184,11 +182,6 @@ void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
     }
 }
 
-void JSSwiper::SetDigital(bool digitalIndicator)
-{
-    SwiperModel::GetInstance()->SetDigital(digitalIndicator);
-}
-
 void JSSwiper::SetDuration(int32_t duration)
 {
     if (duration < 0) {
@@ -236,53 +229,6 @@ void JSSwiper::SetIndicator(bool showIndicator)
 
 void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (info[0]->IsObject()) {
-            JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-            JSRef<JSVal> leftValue = obj->GetProperty("left");
-            JSRef<JSVal> topValue = obj->GetProperty("top");
-            JSRef<JSVal> rightValue = obj->GetProperty("right");
-            JSRef<JSVal> bottomValue = obj->GetProperty("bottom");
-            JSRef<JSVal> sizeValue = obj->GetProperty("size");
-            JSRef<JSVal> maskValue = obj->GetProperty("mask");
-            JSRef<JSVal> colorValue = obj->GetProperty("color");
-            JSRef<JSVal> selectedColorValue = obj->GetProperty("selectedColor");
-
-            Dimension dimLeft;
-            if (ParseJsDimensionPx(leftValue, dimLeft)) {
-                NG::SwiperIndicatorView::SetLeft(dimLeft);
-            }
-            Dimension dimTop;
-            if (ParseJsDimensionPx(topValue, dimTop)) {
-                NG::SwiperIndicatorView::SetTop(dimTop);
-            }
-            Dimension dimRight;
-            if (ParseJsDimensionPx(rightValue, dimRight)) {
-                NG::SwiperIndicatorView::SetRight(dimRight);
-            }
-            Dimension dimBottom;
-            if (ParseJsDimensionPx(bottomValue, dimBottom)) {
-                NG::SwiperIndicatorView::SetBottom(dimBottom);
-            }
-            Dimension dimSize;
-            if (ParseJsDimensionPx(sizeValue, dimSize)) {
-                NG::SwiperIndicatorView::SetSize(dimSize);
-            }
-            if (maskValue->IsBoolean()) {
-                auto mask = maskValue->ToBoolean();
-                NG::SwiperIndicatorView::SetIndicatorMask(mask);
-            }
-            Color colorVal;
-            if (ParseJsColor(colorValue, colorVal)) {
-                NG::SwiperIndicatorView::SetColor(colorVal);
-            }
-            Color selectedColorVal;
-            if (ParseJsColor(selectedColorValue, selectedColorVal)) {
-                NG::SwiperIndicatorView::SetSelectedColor(selectedColorVal);
-            }
-        }
-        return;
-    }
     SwiperParameters swiperParameters;
     if (info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -418,16 +364,6 @@ void JSSwiper::SetOnClick(const JSCallbackInfo& info)
     }
 
     info.SetReturnValue(info.This());
-}
-
-RefPtr<OHOS::Ace::SwiperIndicator> JSSwiper::InitIndicatorStyle()
-{
-    auto indicator = AceType::MakeRefPtr<OHOS::Ace::SwiperIndicator>();
-    auto indicatorTheme = GetTheme<SwiperIndicatorTheme>();
-    if (indicatorTheme) {
-        indicator->InitStyle(indicatorTheme);
-    }
-    return indicator;
 }
 
 void JSSwiper::SetWidth(const JSCallbackInfo& info)

@@ -35,8 +35,8 @@ void TextFieldModelNG::CreateNode(
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::TEXTINPUT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(isTextArea ? V2::TEXTAREA_ETS_TAG : V2::TEXTINPUT_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     stack->Push(frameNode);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
@@ -74,6 +74,7 @@ void TextFieldModelNG::CreateNode(
     SetCaretColor(textFieldTheme->GetCursorColor());
     // TODO: basic padding check ux
     pattern->SetBasicPaddingLeft(static_cast<float>(radius.GetX().ConvertToPx() / 2.0f));
+    pattern->InitEditingValueText(textFieldLayoutProperty->GetValueValue(""));
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
     textFieldLayoutProperty->UpdateCopyOptions(CopyOptions::Distributed);

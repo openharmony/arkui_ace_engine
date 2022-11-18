@@ -239,6 +239,10 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
     if (!formManagerBridge_) {
         formManagerBridge_ = AceType::MakeRefPtr<FormManagerDelegate>(GetContext());
         int32_t instanceID = context->GetInstanceId();
+        auto formUtils = FormManager::GetInstance().GetFormUtils();
+        if (formUtils) {
+            formManagerBridge_->SetFormUtils(formUtils);
+        }
         formManagerBridge_->AddFormAcquireCallback(
             [weak = WeakClaim(this), instanceID](int64_t id, std::string path, std::string module, std::string data,
                 std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap, AppExecFwk::FormJsInfo formJsInfo,

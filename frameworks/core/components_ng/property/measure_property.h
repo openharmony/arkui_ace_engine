@@ -271,6 +271,21 @@ struct PaddingPropertyT {
         str.append("bottom: [").append(bottom.has_value() ? bottom->ToString() : "NA").append("]");
         return str;
     }
+    std::string ToJsonString() const
+    {
+        if (top == right && right == bottom && bottom == left) {
+            if (top.has_value()) {
+                return top->ToString();
+            }
+            return "0.0";
+        }
+        auto jsonValue = JsonUtil::Create(true);
+        jsonValue->Put("top", top->ToString().c_str());
+        jsonValue->Put("right", right->ToString().c_str());
+        jsonValue->Put("bottom", bottom->ToString().c_str());
+        jsonValue->Put("left", left->ToString().c_str());
+        return jsonValue->ToString();
+    }
 };
 
 template<>

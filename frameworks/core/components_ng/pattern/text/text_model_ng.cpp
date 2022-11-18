@@ -65,14 +65,14 @@ void TextModelNG::Create(const std::string& content)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, content);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, TextAlign::START);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::CENTER_LEFT);
-
-    auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
-    CHECK_NULL_VOID(textAccessibilityProperty);
-    textAccessibilityProperty->SetHost(AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 
 void TextModelNG::SetFontSize(const Dimension& value)
 {
+    if (!value.IsValid()) {
+        LOGE("FontSize value is not valid");
+        return;
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value);
 }
 

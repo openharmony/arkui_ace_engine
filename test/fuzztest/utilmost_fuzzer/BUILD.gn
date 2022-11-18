@@ -1,0 +1,95 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#####################hydra-fuzz###################
+import("//build/config/features.gni")
+import("//build/test.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
+module_output_path = "arkui/utilmost"
+
+##############################fuzztest##########################################
+import("//foundation/arkui/ace_engine/ace_config.gni")
+ohos_fuzztest("UtilMostFuzzTest") {
+  module_out_path = module_output_path
+  fuzz_config_file =
+      "//foundation/arkui/ace_engine/test/fuzztest/utilmost_fuzzer"
+  include_dirs = []
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+  ]
+  sources = [
+    "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/frameworks/base/geometry/dimension.cpp",
+    "$ace_root/frameworks/base/json/json_util.cpp",
+    "$ace_root/frameworks/base/log/dump_log.cpp",
+    "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
+
+    #"$ace_root/frameworks/base/utils/resource_configuration.cpp",
+    #"$ace_root/frameworks/base/utils/string_expression.cpp",
+    #"$ace_root/frameworks/bridge/common/utils/source_map.cpp",
+    "$ace_root/frameworks/bridge/common/utils/utils.cpp",
+    "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
+    "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
+    "$ace_root/frameworks/core/animation/cubic_curve.cpp",
+    "$ace_root/frameworks/core/animation/curves.cpp",
+    "$ace_root/frameworks/core/animation/spring_curve.cpp",
+    "$ace_root/frameworks/core/animation/spring_model.cpp",
+    "$ace_root/frameworks/core/components/common/properties/clip_path.cpp",
+    "//third_party/cJSON/cJSON.c",
+    "utilmost_fuzzer.cpp",
+
+    #"$ace_root/frameworks/core/animation/curves.cpp",
+    #"$ace_root/frameworks/base/geometry/dimension.cpp",
+  ]
+  include_dirs = [
+    "$ace_root/frameworks/base/utils",
+    "$ace_root/frameworks/base/json",
+    "$ace_root/frameworks/base/",
+    "$ace_root/frameworks",
+    "$ace_root",
+    cjson_root,
+  ]
+  defines = [ "FUZZTEST" ]
+  deps = [
+    #"$ace_root/adapter/ohos/osal:ace_osal_ohos",
+    "//foundation/window/window_manager/utils:libwmutil",
+    "//foundation/window/window_manager/wm:libwm",
+    "//third_party/icu/icu4c:shared_icui18n",
+    "//third_party/icu/icu4c:shared_icuuc",
+  ]
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:ability_manager",
+    "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hiviewdfx_hilog_native:libhilog",
+    "input:libmmi-client",
+    "ipc:ipc_core",
+    "window_manager:libdm",
+  ]
+}
+
+###############################################################################
+group("fuzztest") {
+  testonly = true
+  deps = []
+  deps += [
+    # deps file
+    ":UtilMostFuzzTest",
+  ]
+}
+###############################################################################

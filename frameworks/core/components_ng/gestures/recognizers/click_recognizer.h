@@ -67,6 +67,7 @@ private:
         focusPoint_ = {};
         fingerDeadlineTimer_.Cancel();
         tapDeadlineTimer_.Cancel();
+        currentTouchPointsNum_ = 0;
     }
 
     void HandleOverdueDeadline();
@@ -95,6 +96,8 @@ private:
     bool useCatchMode_ = true;
     CancelableCallback<void()> fingerDeadlineTimer_;
     CancelableCallback<void()> tapDeadlineTimer_;
+
+    int32_t currentTouchPointsNum_ = 0;
 };
 
 } // namespace OHOS::Ace::NG

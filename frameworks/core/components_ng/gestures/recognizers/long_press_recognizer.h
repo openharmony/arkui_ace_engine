@@ -43,6 +43,9 @@ public:
         : MultiFingersRecognizer(fingers), duration_(duration), repeat_(repeat), isForDrag_(isForDrag),
           isDisableMouseLeft_(isDisableMouseLeft)
     {}
+    LongPressRecognizer(bool isForDrag = false, bool isDisableMouseLeft = false)
+        : isForDrag_(isForDrag), isDisableMouseLeft_(isDisableMouseLeft)
+    {}
     ~LongPressRecognizer() override = default;
 
     void OnAccepted() override;

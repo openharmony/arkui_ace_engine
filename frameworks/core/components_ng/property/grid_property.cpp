@@ -44,8 +44,8 @@ bool GridProperty::UpdateContainer(const RefPtr<Property>& container, const RefP
     auto gridContainer = DynamicCast<GridContainerLayoutProperty>(container);
 
     GridColumnInfo::Builder builder;
-    auto containerInfo = MakeRefPtr<GridContainerInfo>(gridContainer->GetContainerInfoValue());
-    builder.SetParent(Claim(&gridContainer->GetContainerInfoRef()));
+    auto gridContainerInfo = AceType::MakeRefPtr<GridContainerInfo>(gridContainer->GetContainerInfoRef());
+    builder.SetParent(gridContainerInfo);
     for (const auto& item : typedPropertySet_) {
         builder.SetSizeColumn(item.type_, item.span_);
         builder.SetOffset(item.offset_, item.type_);
@@ -118,6 +118,47 @@ bool GridProperty::SetOffset(GridSizeType type, int32_t offset)
     }
     item->offset_ = offset;
     return true;
+}
+
+void GridProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    const char* GRID_SIZE_TYPE[] = { "default", "sx", "sm", "md", "lg" };
+    if (!gridInfo_) {
+        auto item = std::find_if(typedPropertySet_.begin(), typedPropertySet_.end(),
+            [](const GridTypedProperty& p) { return p.type_ == GridSizeType::UNDEFINED; });
+        if (item == typedPropertySet_.end()) {
+            json->Put("gridSpan", 1);
+            json->Put("gridOffset", 0);
+        } else {
+            json->Put("gridSpan", item->span_);
+            json->Put("gridOffset", item->offset_);
+        }
+
+        auto useSizeType = JsonUtil::Create(false);
+        for (const auto& item : typedPropertySet_) {
+            auto jsonValue = JsonUtil::Create(true);
+            jsonValue->Put("span", item.span_);
+            jsonValue->Put("offset", item.offset_);
+            useSizeType->Put(GRID_SIZE_TYPE[static_cast<int32_t>(item.type_)], jsonValue);
+        }
+        json->Put("useSizeType", useSizeType);
+        return;
+    }
+
+    auto gridOffset = gridInfo_->GetOffset(GridSizeType::UNDEFINED);
+    json->Put("gridSpan", static_cast<int32_t>(gridInfo_->GetColumns()));
+    json->Put("gridOffset", gridOffset == -1 ? 0 : gridOffset);
+
+    auto useSizeType = JsonUtil::Create(false);
+    auto index = static_cast<int32_t>(GridSizeType::XS);
+    for (; index < static_cast<int32_t>(GridSizeType::XL); index++) {
+        auto jsonValue = JsonUtil::Create(true);
+        auto type = static_cast<GridSizeType>(index);
+        jsonValue->Put("span", static_cast<int32_t>(gridInfo_->GetColumns(type)));
+        jsonValue->Put("offset", gridInfo_->GetOffset(type));
+        useSizeType->Put(GRID_SIZE_TYPE[index], jsonValue);
+    }
+    json->Put("useSizeType", useSizeType);
 }
 
 } // namespace OHOS::Ace::NG

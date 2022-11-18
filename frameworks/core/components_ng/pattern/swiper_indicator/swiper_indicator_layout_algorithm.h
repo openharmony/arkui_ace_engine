@@ -37,7 +37,10 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    void UpdateIndicatorPosition(LayoutWrapper* layoutWrapper);
+private:
+    static double GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge);
+    float indicatorWidth_ = 0.0f;
+    float indicatorHeight_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

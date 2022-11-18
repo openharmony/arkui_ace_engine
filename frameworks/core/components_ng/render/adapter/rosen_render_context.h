@@ -37,6 +37,7 @@
 namespace OHOS::Ace::NG {
 class BorderImageModifier;
 class MouseSelectModifier;
+class PageTransitionEffect;
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext)
 public:
@@ -137,7 +138,7 @@ public:
     void OnNodeDisappear(FrameNode* host) override;
     void ClipWithRect(const RectF& rectF) override;
 
-    bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) const override;
+    bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
 
     void SetSharedTranslate(float xTranslate, float yTranslate) override;
     void ResetSharedTranslate() override;
@@ -227,6 +228,9 @@ private:
     void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot);
+
+    std::shared_ptr<Rosen::RSTransitionEffect> GetDefaultPageTransition(PageTransitionType type);
+    std::shared_ptr<Rosen::RSTransitionEffect> GetPageTransitionEffect(const RefPtr<PageTransitionEffect>& transition);
 
     void PaintBackground();
     void PaintClip(const SizeF& frameSize);

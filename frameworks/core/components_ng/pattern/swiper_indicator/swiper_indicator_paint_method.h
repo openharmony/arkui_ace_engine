@@ -28,100 +28,39 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT SwiperIndicatorPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SwiperIndicatorPaintMethod, NodePaintMethod)
 public:
-    SwiperIndicatorPaintMethod(float mainDelta, Axis axis, int32_t currentIndex, int32_t itemCount, bool showIndicator)
-        : mainDelta_(mainDelta), axis_(axis), currentIndex_(currentIndex), itemCount_(itemCount),
-          showIndicator_(showIndicator) {};
+    SwiperIndicatorPaintMethod(Axis axis, int32_t currentIndex, int32_t itemCount)
+        : axis_(axis), currentIndex_(currentIndex), itemCount_(itemCount) {};
     ~SwiperIndicatorPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
-
-    void CanvasDrawIndicator(RSCanvas& canvas, const Offset& offset);
-
-    void InitIndicatorStyle();
-
-    void SetIndicator(const RefPtr<OHOS::Ace::SwiperIndicator>& indicator)
-    {
-        indicator_ = indicator;
-    }
-
-    RefPtr<OHOS::Ace::SwiperIndicator> GetIndicator() const
-    {
-        return indicator_;
-    }
 
     void SetCurrentIndex(int32_t index)
     {
         currentIndex_ = index;
     }
 
-    int32_t GetCurrentIndex() const
+    void SetItemCount(int32_t itemCount)
     {
-        return currentIndex_;
+        itemCount_ = itemCount;
     }
 
-protected:
-    struct IndicatorProperties final {
-        IndicatorProperties(const Offset& normalPaddingStart, const Offset& normalPaddingEnd,
-            const Offset& selectedPaddingStart, const Offset& selectedPaddingEnd, const Offset& centerPadding,
-            uint32_t normalColor, uint32_t selectedColor, double normalPointRadius, double selectedPointRadius,
-            double indicatorPointPadding)
-            : normalPaddingStart(normalPaddingStart), normalPaddingEnd(normalPaddingEnd),
-              selectedPaddingStart(selectedPaddingStart), selectedPaddingEnd(selectedPaddingEnd),
-              centerPadding(centerPadding), normalColor(normalColor), selectedColor(selectedColor),
-              normalPointRadius(normalPointRadius), selectedPointRadius(selectedPointRadius),
-              indicatorPointPadding(indicatorPointPadding)
-        {}
-        IndicatorProperties(IndicatorProperties&& indicatorProperties) = default;
-        ~IndicatorProperties() = default;
+    void SetAxis(Axis axis)
+    {
+        axis_ = axis;
+    }
 
-        Offset normalPaddingStart;
-        Offset normalPaddingEnd;
-        Offset selectedPaddingStart;
-        Offset selectedPaddingEnd;
-        Offset centerPadding;
-        uint32_t normalColor;
-        uint32_t selectedColor;
-        double normalPointRadius;
-        double selectedPointRadius;
-        double indicatorPointPadding;
-    };
-
-    struct IndicatorPaintData {
-        double width = 0.0;
-        double height = 0.0;
-        double radius = 0.0;
-        Color color;
-        Offset position;
-        Offset center;
-    };
-
-    struct SwiperIndicatorData {
-        bool isDigital = false;
-        bool isPressed = false;
-        bool isHovered = false;
-        IndicatorPaintData indicatorPaintData;
-        std::unordered_map<int32_t, IndicatorPaintData> indicatorItemData;
-        double pointPadding = 0.0;
-        double startEndPadding = 0.0;
-    };
+    Axis GetAxis() const
+    {
+        return axis_;
+    }
 
 private:
-    void PaintContent(
-        RSCanvas& canvas, RefPtr<SwiperIndicatorPaintProperty> paintProperty, SizeF contentSize, OffsetF contentOffset);
-    IndicatorProperties PrepareIndicatorProperties(RefPtr<SwiperIndicatorPaintProperty> paintProperty);
+    void PaintContent(RSCanvas& canvas, const RefPtr<SwiperIndicatorPaintProperty>& paintProperty, SizeF contentSize);
     void PaintMask(
         RSCanvas& canvas, RefPtr<SwiperIndicatorPaintProperty> paintProperty, SizeF contentSize, OffsetF contentOffset);
-    float mainDelta_ = 0.0f;
-    const float radiusGap_ = 2.0f;
-    double scale_ = 0.0;
     Axis axis_ = Axis::HORIZONTAL;
-    RefPtr<OHOS::Ace::SwiperIndicator> indicator_;
-    double swiperWidth_ = 0.0;
-    double swiperHeight_ = 0.0;
-    Offset indicatorPosition_;
     int32_t currentIndex_ = 0;
-    int32_t itemCount_ = 1;
-    bool showIndicator_ = true;
+    int32_t itemCount_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPaintMethod);
 };

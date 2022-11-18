@@ -81,7 +81,7 @@ public:
 
     void InitializePatternAndContext();
 
-    void MarkModifyDone();
+    virtual void MarkModifyDone();
 
     void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override;
 
@@ -186,7 +186,7 @@ public:
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-        const TouchRestrict& touchRestrict, TouchTestResult& result) override;
+        const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId) override;
 
     HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
         MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode) override;
@@ -252,6 +252,8 @@ public:
     void OnNotifyMemoryLevel(int32_t level) override;
 
     OffsetF GetOffsetRelativeToWindow() const;
+
+    OffsetF GetPaintRectOffset() const;
 
     void SetActive(bool active) override;
 

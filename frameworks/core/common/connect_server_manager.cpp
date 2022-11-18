@@ -39,23 +39,15 @@ using StoreMessage = void (*)(int32_t instanceId, const std::string& message);
 using StoreInspectorInfo = void (*)(const std::string& jsonTreeStr, const std::string& jsonSnapshotStr);
 using RemoveMessage = void (*)(int32_t instanceId);
 using WaitForDebugger = bool (*)();
-using SetCreatTreeCallBack = void (*)(const std::function<void(int32_t)>& setConnectedStaus, int32_t instanceId);
+using SetSwitchCallBack = void (*)(const std::function<void(bool)>& setSwitchStatus);
 
 SendMessage g_sendMessage = nullptr;
 RemoveMessage g_removeMessage = nullptr;
 StoreInspectorInfo g_storeInspectorInfo = nullptr;
 StoreMessage g_storeMessage = nullptr;
-SetCreatTreeCallBack g_setCreatTreeCallBack = nullptr;
+SetSwitchCallBack g_setSwitchCallBack = nullptr;
+WaitForDebugger g_waitForDebugger = nullptr;
 
-void SetCallbackFunc(int32_t instanceId)
-{
-    auto container = AceEngine::Get().GetContainer(instanceId);
-    if (!container) {
-        LOGE("Container is null");
-        return;
-    }
-    container->SetIdeDebuggerConnected(true);
-}
 
 } // namespace
 
@@ -89,15 +81,16 @@ bool ConnectServerManager::InitFunc()
     g_sendMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
     g_storeMessage = reinterpret_cast<StoreMessage>(dlsym(handlerConnectServerSo_, "StoreMessage"));
     g_removeMessage = reinterpret_cast<RemoveMessage>(dlsym(handlerConnectServerSo_, "RemoveMessage"));
-    g_setCreatTreeCallBack = reinterpret_cast<SetCreatTreeCallBack>(
-        dlsym(handlerConnectServerSo_, "SetCreatTreeCallBack"));
+    g_setSwitchCallBack = reinterpret_cast<SetSwitchCallBack>(
+        dlsym(handlerConnectServerSo_, "SetSwitchCallBack"));
     g_storeInspectorInfo = reinterpret_cast<StoreInspectorInfo>(dlsym(handlerConnectServerSo_, "StoreInspectorInfo"));
+    g_waitForDebugger = reinterpret_cast<WaitForDebugger>(dlsym(handlerConnectServerSo_, "WaitForDebugger"));
     if (g_sendMessage == nullptr || g_storeMessage == nullptr || g_removeMessage == nullptr) {
         CloseConnectServerSo();
         return false;
     }
 
-    if (g_storeInspectorInfo ==  nullptr || g_setCreatTreeCallBack == nullptr) {
+    if (g_storeInspectorInfo ==  nullptr || g_setSwitchCallBack == nullptr || g_waitForDebugger == nullptr) {
         CloseConnectServerSo();
         return false;
     }
@@ -135,13 +128,8 @@ void ConnectServerManager::SetDebugMode()
     if (!isDebugVersion_ || handlerConnectServerSo_ == nullptr) {
         return;
     }
-    WaitForDebugger waitForDebugger = reinterpret_cast<WaitForDebugger>(
-        dlsym(handlerConnectServerSo_, "WaitForDebugger"));
-    if (waitForDebugger == nullptr) {
-        return;
-    }
-    if (!waitForDebugger()) { // waitForDebugger : waitForDebugger means the connection state of the connect server
-        isDebugMode_ = true;
+    
+    if (!g_waitForDebugger()) { // waitForDebugger : waitForDebugger means the connection state of the connect server
         AceApplicationInfo::GetInstance().SetNeedDebugBreakPoint(true);
     }
 }
@@ -178,12 +166,12 @@ void ConnectServerManager::AddInstance(int32_t instanceId, const std::string& in
     // Get the message including information of new instance, which will be send to IDE.
     std::string message = GetInstanceMapMessage("addInstance", instanceId);
 
-    if (isDebugMode_) { // isDebugMode_ : isDebugMode_ means the connection state of the connect server
+    if (!g_waitForDebugger()) { // g_waitForDebugger : the res means the connection state of the connect server
         g_sendMessage(message); // if connected, message will be sent immediately.
     } else { // if not connected, message will be stored and sent later when "connected" coming.
         g_storeMessage(instanceId, message);
     }
-    g_setCreatTreeCallBack(std::bind(&SetCallbackFunc, std::placeholders::_1), instanceId);
+    g_setSwitchCallBack(std::bind(&ConnectServerManager::SetLayoutInspectorStatus, this, std::placeholders::_1));
 }
 
 void ConnectServerManager::SendInspector(const std::string& jsonTreeStr, const std::string& jsonSnapshotStr)
@@ -211,7 +199,7 @@ void ConnectServerManager::RemoveInstance(int32_t instanceId)
         LOGW("Instance name not found with instance id: %{public}d", instanceId);
     }
 
-    if (isDebugMode_) {
+    if (!g_waitForDebugger()) {
         g_sendMessage(message);
     } else {
         g_removeMessage(instanceId);

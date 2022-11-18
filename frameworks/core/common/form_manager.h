@@ -22,6 +22,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/singleton.h"
+#include "core/components/form/resource/form_utils.h"
 #include "core/components/form/sub_container.h"
 
 namespace OHOS::Ace {
@@ -30,19 +31,22 @@ class ACE_EXPORT FormManager final : public Singleton<FormManager> {
     DECLARE_SINGLETON(FormManager);
 
 public:
-
     void AddSubContainer(int64_t formId, const RefPtr<SubContainer>& subContainer);
     void RemoveSubContainer(int64_t formId);
     void AddNonmatchedContainer(const std::string& cardKey, const RefPtr<SubContainer>& subContainer);
     RefPtr<SubContainer> GetSubContainer(int64_t formId);
     RefPtr<SubContainer> MatchSubContainerWithFormId(int64_t formId, const std::string& cardKey);
     void Dump(const std::vector<std::string>& params);
+    void SetFormUtils(const std::shared_ptr<FormUtils>& formUtils);
+    std::shared_ptr<FormUtils> GetFormUtils();
 
 private:
     std::mutex mutex_;
     std::unordered_map<int64_t, RefPtr<SubContainer>> subContainerMap_;
     std::mutex nonmatchedContainerMutex_;
     std::unordered_map<std::string, RefPtr<SubContainer>> nonmatchedContainerMap_;
+    std::mutex formUtilsMutex_;
+    std::shared_ptr<FormUtils> formUtils_;
 };
 
 } // namespace OHOS::Ace

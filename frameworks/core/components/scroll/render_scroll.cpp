@@ -527,26 +527,29 @@ void RenderScroll::ResetScrollEventCallBack()
 
 void RenderScroll::InitScrollBar(const RefPtr<ScrollBar>& scrollBar)
 {
-    if (scrollBar_ != scrollBar) {
-        if (scrollBar_) {
-            // Clear the old data.
-            scrollBar_->Reset();
-        }
-        scrollBar_ = scrollBar;
-        if (!scrollBar_) {
-            scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::OFF);
-        }
-        if (axis_ == Axis::HORIZONTAL) {
-            scrollBar_->SetPositionMode(PositionMode::BOTTOM);
-        }
-        if (axis_ == Axis::VERTICAL) {
-            if (rightToLeft_) {
-                scrollBar_->SetPositionMode(PositionMode::LEFT);
-            }
-        }
-        scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
-        SetBarCallBack(axis_ == Axis::VERTICAL);
+    if (scrollBar_ == scrollBar) {
+        return;
     }
+
+    if (scrollBar_) {
+        // Clear the old data.
+        scrollBar_->Reset(scrollBar);
+        return;
+    }
+    scrollBar_ = scrollBar;
+    if (!scrollBar_) {
+        scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::OFF);
+    }
+    if (axis_ == Axis::HORIZONTAL) {
+        scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+    }
+    if (axis_ == Axis::VERTICAL) {
+        if (rightToLeft_) {
+            scrollBar_->SetPositionMode(PositionMode::LEFT);
+        }
+    }
+    scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
+    SetBarCallBack(axis_ == Axis::VERTICAL);
 }
 
 void RenderScroll::ResetScrollable()

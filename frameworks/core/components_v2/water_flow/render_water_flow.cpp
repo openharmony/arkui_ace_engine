@@ -380,8 +380,14 @@ void RenderWaterFlow::CallItemConstraintSize()
 
 void RenderWaterFlow::InitialFlowProp()
 {
-    // Not first time layout after update, no need to initial.
+    // Not first time layout after update, no need to initialize.
     if (!updateFlag_) {
+        return;
+    }
+
+    // Not valid layout size, no need to initialize.
+    auto maxLayoutSize = GetLayoutParam().GetMaxSize();
+    if (!maxLayoutSize.IsValid() || maxLayoutSize.IsEmpty()) {
         return;
     }
 

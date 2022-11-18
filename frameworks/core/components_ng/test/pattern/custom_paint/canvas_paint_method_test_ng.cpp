@@ -242,7 +242,9 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg003, TestSize.Level1)
     }
 
     paintMethod->SetLineDash(CANDIDATE_DOUBLES);
-    EXPECT_EQ(paintMethod->GetLineDash().lineDash, CANDIDATE_DOUBLES);
+    for (uint32_t i = 1; i < CANDIDATE_DOUBLES.size(); ++i) {
+        EXPECT_EQ(paintMethod->GetLineDash().lineDash[i], CANDIDATE_DOUBLES[i]);
+    }
     for (double item : CANDIDATE_DOUBLES) {
         paintMethod->SetLineDashOffset(item);
         EXPECT_EQ(paintMethod->GetLineDash().dashOffset, item);

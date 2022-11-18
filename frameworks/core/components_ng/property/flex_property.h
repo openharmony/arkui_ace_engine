@@ -47,6 +47,7 @@ struct FlexItemProperty {
         json->Put("flexGrow", propFlexGrow.value_or(0.0));
         json->Put("flexShrink", propFlexShrink.value_or(1));
         json->Put("alignSelf", ITEM_ALIGN[static_cast<int32_t>(propAlignSelf.value_or(FlexAlign::AUTO))]);
+        json->Put("displayPriority", propDisplayIndex.value_or(1));
     }
 
     bool GetTwoHorizontalDirectionAligned() const

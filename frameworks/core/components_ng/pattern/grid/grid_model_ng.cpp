@@ -25,19 +25,26 @@
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/pattern/grid/grid_position_controller.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 void GridModelNG::Create(
-    const RefPtr<V2::GridPositionController>& /*positionController*/, const RefPtr<ScrollBarProxy>& /*scrollBarProxy*/)
+    const RefPtr<ScrollControllerBase>& positionController, const RefPtr<ScrollBarProxy>& scrollBarProxy)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::GRID_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridPattern>(); });
     stack->Push(frameNode);
+    if (positionController) {
+        auto pattern = frameNode->GetPattern<GridPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto controller = AceType::DynamicCast<GridPositionController>(positionController);
+        pattern->SetPositionController(controller);
+    }
 }
 
 void GridModelNG::Pop()
@@ -248,6 +255,11 @@ bool GridModelNG::CheckTemplate(const std::string& value)
     StringUtils::StringSplitter(value, ' ', strs);
     std::regex reg("\\d+fr");
     return std::all_of(strs.begin(), strs.end(), [reg](const std::string& str) { return std::regex_match(str, reg); });
+}
+
+RefPtr<ScrollControllerBase> GridModelNG::CreatePositionController()
+{
+    return AceType::MakeRefPtr<GridPositionController>();
 }
 
 } // namespace OHOS::Ace::NG
