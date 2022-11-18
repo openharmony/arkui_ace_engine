@@ -99,12 +99,6 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg001
     ASSERT_NE(offscreenCanvasPattern, nullptr);
     auto paintMethod = offscreenCanvasPattern->offscreenPaintMethod_;
     ASSERT_NE(paintMethod, nullptr);
-    std::unique_ptr<MockParagraph> mockParagraph = std::make_unique<MockParagraph>();
-    EXPECT_CALL(*mockParagraph, GetMaxIntrinsicWidth()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
-    EXPECT_CALL(*mockParagraph, GetAlphabeticBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
-    EXPECT_CALL(*mockParagraph, GetIdeographicBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
-    EXPECT_CALL(*mockParagraph, GetHeight()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
-    std::unique_ptr<txt::Paragraph> paragraph(std::move(mockParagraph));
 
     /**
      * @tc.steps2: Test functions GetWidth and GetHeight.
@@ -120,28 +114,6 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg001
     for (const std::string& item : CANDIDATE_STRINGS) {
         EXPECT_EQ(paintMethod->GetTextDirection(item), TextDirection::LTR);
     }
-
-    /**
-     * @tc.steps4: Test functions GetAlignOffset.
-     * @tc.expected: The return value is affected by the second parameter.
-     */
-    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::LEFT, paragraph), DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::RIGHT, paragraph), -DEFAULT_DOUBLE10);
-    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::CENTER, paragraph), -DEFAULT_DOUBLE10/2);
-    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::JUSTIFY, paragraph), DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::START, paragraph), DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::END, paragraph), -DEFAULT_DOUBLE10);
-
-    /**
-     * @tc.steps5: Test functions GetBaselineOffset.
-     * @tc.expected: The return value is affected by the first parameter.
-     */
-    EXPECT_DOUBLE_EQ(paintMethod->GetBaselineOffset(TextBaseline::ALPHABETIC, paragraph), -DEFAULT_DOUBLE10);
-    EXPECT_DOUBLE_EQ(paintMethod->GetBaselineOffset(TextBaseline::IDEOGRAPHIC, paragraph), -DEFAULT_DOUBLE10);
-    EXPECT_DOUBLE_EQ(paintMethod->GetBaselineOffset(TextBaseline::TOP, paragraph), DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(paintMethod->GetBaselineOffset(TextBaseline::BOTTOM, paragraph), -DEFAULT_DOUBLE10);
-    EXPECT_DOUBLE_EQ(paintMethod->GetBaselineOffset(TextBaseline::MIDDLE, paragraph), -DEFAULT_DOUBLE10 / 2);
-    EXPECT_DOUBLE_EQ(paintMethod->GetBaselineOffset(TextBaseline::HANGING, paragraph), DEFAULT_DOUBLE0);
 }
 
 /**
