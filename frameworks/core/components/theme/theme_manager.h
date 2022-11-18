@@ -16,92 +16,45 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_H
 
-#include <mutex>
-
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace {
-
 class ACE_EXPORT ThemeManager : public AceType {
     DECLARE_ACE_TYPE(ThemeManager, AceType);
 
 public:
-    ThemeManager();
-    ~ThemeManager() = default;
+    ThemeManager() = default;
+    virtual ~ThemeManager() = default;
 
-    void InitResource(const ResourceInfo& resourceInfo)
-    {
-        themeConstants_->InitResource(resourceInfo);
-    }
+    virtual void InitResource(const ResourceInfo& resourceInfo) {}
 
-    void UpdateConfig(const ResourceConfiguration& config)
-    {
-        themeConstants_->UpdateConfig(config);
-    }
+    virtual void UpdateConfig(const ResourceConfiguration& config) {}
 
-    void LoadSystemTheme(int32_t themeId)
-    {
-        currentThemeId_ = themeId;
-        themeConstants_->LoadTheme(themeId);
-    }
+    virtual void LoadSystemTheme(int32_t themeId) {}
 
-    void ParseSystemTheme()
-    {
-        themeConstants_->ParseTheme();
-    }
+    virtual void ParseSystemTheme() {}
 
-    void LoadCustomTheme(const RefPtr<AssetManager>& assetManager)
-    {
-        themeConstants_->LoadCustomStyle(assetManager);
-    }
+    virtual void LoadCustomTheme(const RefPtr<AssetManager>& assetManager) {}
 
-    /*
-     * Color scheme of the whole window, app bg color will be change in transparent scheme.
-     */
-    void SetColorScheme(ColorScheme colorScheme)
-    {
-        themeConstants_->SetColorScheme(colorScheme);
-    }
+    virtual void SetColorScheme(ColorScheme colorScheme) {}
 
-    /*
-     * Get color value from AppTheme (if exists) or system theme style.
-     * Prebuild background color will be returned if AppTheme and system theme style both not exists.
-     * @return App background color.
-     */
-    Color GetBackgroundColor() const;
+    virtual Color GetBackgroundColor() const = 0;
 
-    RefPtr<ThemeConstants> GetThemeConstants(const std::string& bundleName = "",
-                                             const std::string& moduleName = "") const
-    {
-        themeConstants_->UpdateThemeConstants(bundleName, moduleName);
-        return themeConstants_;
-    }
+    virtual RefPtr<ThemeConstants> GetThemeConstants(
+        const std::string& bundleName = "", const std::string& moduleName = "") const = 0;
 
-    /*
-     * Get target theme, this function will cause construction of the theme if it not exists.
-     * @return Target component theme.
-     */
-    RefPtr<Theme> GetTheme(ThemeType type);
+    virtual RefPtr<Theme> GetTheme(ThemeType type) = 0;
+
+    virtual void LoadResourceThemes() {}
 
     template<typename T>
     RefPtr<T> GetTheme()
     {
         return AceType::DynamicCast<T>(GetTheme(T::TypeId()));
     }
-
-    void LoadResourceThemes();
-
-private:
-    std::unordered_map<ThemeType, RefPtr<Theme>> themes_;
-    RefPtr<ThemeConstants> themeConstants_;
-    int32_t currentThemeId_ = -1;
-
-    ACE_DISALLOW_COPY_AND_MOVE(ThemeManager);
 };
-
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_H

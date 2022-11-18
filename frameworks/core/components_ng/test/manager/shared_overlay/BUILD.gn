@@ -52,7 +52,6 @@ ohos_unittest("shared_overlay_manager_test_ng") {
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_theme_manager.cpp",
 
     # self
     "shared_overlay_manager_test_ng.cpp",

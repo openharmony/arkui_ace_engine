@@ -20,7 +20,7 @@
 #include "core/components_v2/list/render_list.h"
 #include "core/components_v2/list/render_list_item.h"
 #include "core/components/test/unittest/mock/mock_render_common.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -28,7 +28,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::V2 {
 namespace {
 
-const RefPtr<ThemeManager> THEME_MANAGER = AceType::MakeRefPtr<ThemeManager>();
+const auto THEME_MANAGER = AceType::MakeRefPtr<ThemeManagerImpl>();
 
 } // namespace
 

@@ -18,7 +18,7 @@
 #include "base/log/log.h"
 #include "core/components/slider/block_component.h"
 #include "core/components/test/json/color_creator.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/components/track/track_component.h"
 #include "core/pipeline/base/constants.h"
 
@@ -59,7 +59,7 @@ RefPtr<Component> SliderCreator::CreateFromJson(const JsonValue& componentJson, 
         return nullptr;
     }
     RefPtr<SliderComponent> slider = AceType::MakeRefPtr<SliderComponent>(value, step, min, max);
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     auto theme = themeManager->GetTheme<SliderTheme>();
     if (theme) {
         slider->SetThemeStyle(theme);

@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/rosen/testing_canvas.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -47,11 +48,22 @@ constexpr float ZERO = 0.0f;
 constexpr Dimension WIDTH = 50.0_vp;
 constexpr Dimension WIDTH_SMALL = 0.5_vp;
 } // namespace
+
 class GaugePaintMethodTestNg : public testing::Test {
 public:
-    static void SetUpTestSuite() {};
-    static void TearDownTestSuite() {};
+    static void SetUpTestCase();
+    static void TearDownTestCase();
 };
+
+void GaugePaintMethodTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void GaugePaintMethodTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 /**
  * @tc.name: GaugePaintMethodTest001
@@ -186,7 +198,7 @@ HWTEST_F(GaugePaintMethodTestNg, GaugePaintMethodTest004, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     RenderRingInfo data;
-    RSCanvas rsCanvas;
+    Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawPath(_)).Times(2);
@@ -230,7 +242,7 @@ HWTEST_F(GaugePaintMethodTestNg, GaugePaintTest001, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     RenderRingInfo data;
-    RSCanvas rsCanvas;
+    Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -266,7 +278,7 @@ HWTEST_F(GaugePaintMethodTestNg, GaugePaintTest002, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     RenderRingInfo data;
-    RSCanvas rsCanvas;
+    Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, DrawPath(_)).Times(0);
     gaugePaintMethod.Paint(rsCanvas, paintwrapper);
 }
@@ -299,7 +311,7 @@ HWTEST_F(GaugePaintMethodTestNg, GaugePaintTest003, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     RenderRingInfo data;
-    RSCanvas rsCanvas;
+    Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, DrawPath(_)).Times(0);
     gaugePaintMethod.Paint(rsCanvas, paintwrapper);
 }
@@ -332,7 +344,7 @@ HWTEST_F(GaugePaintMethodTestNg, GaugePaintTest004, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     RenderRingInfo data;
-    RSCanvas rsCanvas;
+    Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, DrawPath(_)).Times(0);
     gaugePaintMethod.Paint(rsCanvas, paintwrapper);
 }
@@ -365,7 +377,7 @@ HWTEST_F(GaugePaintMethodTestNg, GaugePaintTest005, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     RenderRingInfo data;
-    RSCanvas rsCanvas;
+    Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, DrawPath(_)).Times(0);
     gaugePaintMethod.Paint(rsCanvas, paintwrapper);
 }
@@ -402,7 +414,7 @@ HWTEST_F(GaugePaintMethodTestNg, GaugePaintTest006, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     RenderRingInfo data;
-    RSCanvas rsCanvas;
+    Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -442,7 +454,7 @@ HWTEST_F(GaugePaintMethodTestNg, GaugePaintTest007, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     RenderRingInfo data;
-    RSCanvas rsCanvas;
+    Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -479,7 +491,7 @@ HWTEST_F(GaugePaintMethodTestNg, GaugePaintTest008, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     RenderRingInfo data;
-    RSCanvas rsCanvas;
+    Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -516,7 +528,7 @@ HWTEST_F(GaugePaintMethodTestNg, GaugePaintTest009, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     RenderRingInfo data;
-    RSCanvas rsCanvas;
+    Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -556,7 +568,7 @@ HWTEST_F(GaugePaintMethodTestNg, GaugePaintTest010, TestSize.Level1)
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
     RenderRingInfo data;
-    RSCanvas rsCanvas;
+    Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));

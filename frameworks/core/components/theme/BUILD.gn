@@ -48,7 +48,7 @@ template("ace_core_components_theme_set") {
       "icon_theme.cpp",
       "theme_attributes.cpp",
       "theme_constants.cpp",
-      "theme_manager.cpp",
+      "theme_manager_impl.cpp",
       "theme_utils.cpp",
     ]
 

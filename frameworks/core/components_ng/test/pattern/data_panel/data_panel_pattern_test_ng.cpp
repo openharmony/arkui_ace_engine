@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 #include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -43,9 +44,19 @@ constexpr bool NO_SKIP_MEASURE = false;
 
 class DataPanelPropertyTestNg : public testing::Test {
 public:
-    static void SetUpTestSuite() {};
-    static void TearDownTestSuite() {};
+    static void SetUpTestCase();
+    static void TearDownTestCase();
 };
+
+void DataPanelPropertyTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void DataPanelPropertyTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 /**
  * @tc.name: DataPanelPatternTest001

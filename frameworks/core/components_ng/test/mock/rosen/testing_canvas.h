@@ -30,6 +30,7 @@ public:
     virtual ~TestingCanvas() = default;
 
     virtual void DrawLine(const Point& startPt, const Point& endPt) {}
+    
     virtual void DrawPath(const TestingPath& path) {}
 
     virtual void Rotate(scalar deg, scalar sx, scalar sy) {}
@@ -38,14 +39,17 @@ public:
     {
         return *this;
     }
+
     virtual TestingCanvas& AttachBrush(const TestingBrush& brush)
     {
         return *this;
     }
+
     virtual TestingCanvas& DetachPen()
     {
         return *this;
     }
+    
     virtual TestingCanvas& DetachBrush()
     {
         return *this;

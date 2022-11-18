@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -53,14 +54,17 @@ class ImageModelNgTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
 };
 
-void ImageModelNgTest::SetUpTestCase() {}
-void ImageModelNgTest::TearDownTestCase() {}
-void ImageModelNgTest::SetUp() {}
-void ImageModelNgTest::TearDown() {}
+void ImageModelNgTest::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void ImageModelNgTest::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 /**
  * @tc.name: ImageCreator001

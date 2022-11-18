@@ -28,7 +28,7 @@
 #include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/text_field_manager.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "flutter/lib/ui/ui_dart_state.h"
@@ -338,7 +338,7 @@ void DialogContainer::AttachView(std::unique_ptr<Window> window, AceView* view, 
     taskExecutor_->PostTask([] { FrameReport::GetInstance().Init(); }, TaskExecutor::TaskType::UI);
     ThemeConstants::InitDeviceType();
     // Load custom style at UI thread before frontend attach, to make sure style can be loaded before building dom tree.
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     if (themeManager) {
         pipelineContext_->SetThemeManager(themeManager);
         // Init resource

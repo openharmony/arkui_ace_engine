@@ -49,7 +49,6 @@ ohos_unittest("input_event_hub_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/layout/mock_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/theme/mock_theme.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_container.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
