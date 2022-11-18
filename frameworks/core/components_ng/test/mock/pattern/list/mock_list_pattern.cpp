@@ -13,15 +13,25 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/grid/grid_event_hub.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<FrameNode> GridEventHub::FindGridItemByPosition(float /* x */, float /* y */)
+RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
 {
     return nullptr;
 }
 
-int32_t GridEventHub::GetGridItemIndex(const RefPtr<FrameNode>& /* frameNode */)
+void ListPattern::OnModifyDone() {}
+
+void ListPattern::OnAttachToFrameNode() {}
+
+bool ListPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* config */)
+{
+    return false;
+}
+
+int32_t ListEventHub::GetListItemIndexByPosition(float /* x */, float /* y */)
 {
     return 0;
 }

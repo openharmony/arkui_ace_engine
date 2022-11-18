@@ -37,6 +37,4 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep /* step */, const Weak
 {
     return nullptr;
 }
-
-void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {};
 } // namespace OHOS::Ace::NG

@@ -13,16 +13,8 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/grid/grid_event_hub.h"
+#include "core/components_ng/pattern/list/list_layout_property.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<FrameNode> GridEventHub::FindGridItemByPosition(float /* x */, float /* y */)
-{
-    return nullptr;
-}
-
-int32_t GridEventHub::GetGridItemIndex(const RefPtr<FrameNode>& /* frameNode */)
-{
-    return 0;
-}
+void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 } // namespace OHOS::Ace::NG
