@@ -265,6 +265,7 @@ void SubwindowOhos::ShowWindow()
         return;
     }
     LOGI("Show the subwindow successfully.");
+    isShowed_ = true;
     SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
 }
 
@@ -282,6 +283,7 @@ void SubwindowOhos::HideWindow()
         LOGE("Hide window failed with errCode: %{public}d", static_cast<int32_t>(ret));
         return;
     }
+    isShowed_ = false;
     LOGI("Hide the subwindow successfully.");
 }
 
@@ -372,6 +374,10 @@ void SubwindowOhos::ShowMenu(const RefPtr<Component>& newComponent)
 void SubwindowOhos::CloseMenu()
 {
     LOGI("Close the menu");
+    if (!isShowed_) {
+        LOGW("Subwindow is not showed.");
+        return;
+    }
     if (popup_) {
         popup_->CloseContextMenu();
     }
