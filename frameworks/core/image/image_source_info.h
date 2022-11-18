@@ -45,26 +45,18 @@ public:
 
     bool operator==(const ImageSourceInfo& info) const
     {
+        // only svg uses fillColor
+        if (isSvg_ && fillColor_ != info.fillColor_) {
+            return false;
+        }
         return ((!pixmap_ && !info.pixmap_) || (pixmap_ && info.pixmap_ && pixmap_ == info.pixmap_)) &&
-                // TODO: Use GetModifyId to distinguish two PixelMap objects after Media provides it
-               src_ == info.src_ &&
-               resourceId_ == info.resourceId_ &&
-               sourceWidth_ == info.sourceWidth_ &&
-               sourceHeight_ == info.sourceHeight_ &&
-               fillColor_ == info.fillColor_;
+        // TODO: Use GetModifyId to distinguish two PixelMap objects after Media provides it
+        src_ == info.src_ && resourceId_ == info.resourceId_;
     }
 
     bool operator!=(const ImageSourceInfo& info) const
     {
-        return (!pixmap_ && info.pixmap_) ||
-               (pixmap_ && !info.pixmap_) ||
-               (pixmap_ && info.pixmap_ && pixmap_ != info.pixmap_) ||
-                // TODO: Use GetModifyId to distinguish two PixelMap objects after Media provides it
-               src_ != info.src_ ||
-               resourceId_ != info.resourceId_ ||
-               sourceWidth_ != info.sourceWidth_ ||
-               sourceHeight_ != info.sourceHeight_ ||
-               fillColor_ != info.fillColor_;
+        return !(operator==(info));
     }
 
     void SetSrc(const std::string& src, std::optional<Color> fillColor = std::nullopt)
