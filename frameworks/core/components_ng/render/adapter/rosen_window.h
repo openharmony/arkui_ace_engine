@@ -58,6 +58,8 @@ public:
     void OnShow() override;
     void OnHide() override;
 
+    void SetDrawTextAsBitmap(bool useBitmap) override;
+
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;

@@ -131,14 +131,7 @@ public:
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
 
     void OnSurfaceChanged(
-        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override
-    {
-        auto frontend = weakFrontend_.Upgrade();
-        if (frontend) {
-            frontend->OnSurfaceChanged(width, height);
-        }
-        SetRootSize(density_, width, height);
-    }
+        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override;
 
     void OnSurfacePositionChanged(int32_t posX, int32_t posY) override {}
 
@@ -238,6 +231,8 @@ public:
     void Finish(bool autoFinish) const override;
 
 protected:
+    void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type);
+
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushFocus();

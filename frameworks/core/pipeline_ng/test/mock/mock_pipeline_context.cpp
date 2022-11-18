@@ -112,6 +112,8 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight) {}
 
+void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
+
 const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
 {
     if (selectOverlayManager_) {
