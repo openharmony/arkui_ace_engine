@@ -255,6 +255,8 @@ public:
 
     OffsetF GetPaintRectOffset() const;
 
+    void AdjustGridOffset();
+
     void SetActive(bool active) override;
 
     bool IsActive() const

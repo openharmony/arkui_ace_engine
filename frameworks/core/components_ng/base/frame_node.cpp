@@ -307,6 +307,13 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     RebuildRenderContextTree();
 }
 
+void FrameNode::AdjustGridOffset()
+{
+    if (layoutProperty_->UpdateGridOffset(Claim(this))) {
+        renderContext_->SyncGeometryProperties(RawPtr(GetGeometryNode()));
+    }
+}
+
 void FrameNode::SetActive(bool active)
 {
     bool activeChanged = false;
@@ -465,9 +472,9 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     }
     auto flag = layoutProperty_->GetPropertyChangeFlag();
-    // It is necessary to copy the layoutProperty property to prevent the layoutProperty property from being modified
-    // during the layout process, resulting in the problem of judging whether the front-end setting value changes the
-    // next time js is executed.
+    // It is necessary to copy the layoutProperty property to prevent the layoutProperty property from being
+    // modified during the layout process, resulting in the problem of judging whether the front-end setting value
+    // changes the next time js is executed.
     auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
     LOGD("%{public}s create layout wrapper: %{public}x, %{public}d, %{public}d", GetTag().c_str(), flag, forceMeasure,
         forceLayout);
@@ -513,9 +520,9 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
     pattern_->BeforeCreatePaintWrapper();
     isRenderDirtyMarked_ = false;
     auto paintMethod = pattern_->CreateNodePaintMethod();
-    // It is necessary to copy the layoutProperty property to prevent the paintProperty_ property from being modified
-    // during the paint process, resulting in the problem of judging whether the front-end setting value changes the
-    // next time js is executed.
+    // It is necessary to copy the layoutProperty property to prevent the paintProperty_ property from being
+    // modified during the paint process, resulting in the problem of judging whether the front-end setting value
+    // changes the next time js is executed.
     if (paintMethod) {
         auto paintWrapper = MakeRefPtr<PaintWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_->Clone());
         paintWrapper->SetNodePaintMethod(paintMethod);
@@ -756,10 +763,10 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
 
     HitTestResult testResult = HitTestResult::OUT_OF_REGION;
     bool preventBubbling = false;
-    // Child nodes are repackaged into gesture groups (parallel gesture groups, exclusive gesture groups, etc.) based on
-    // the gesture attributes set by the current parent node (high and low priority, parallel gestures, etc.), the
-    // newComingTargets is the template object to collect child nodes gesture and used by gestureHub to pack gesture
-    // group.
+    // Child nodes are repackaged into gesture groups (parallel gesture groups, exclusive gesture groups, etc.)
+    // based on the gesture attributes set by the current parent node (high and low priority, parallel gestures,
+    // etc.), the newComingTargets is the template object to collect child nodes gesture and used by gestureHub to
+    // pack gesture group.
     TouchTestResult newComingTargets;
     const auto localPoint = parentLocalPoint - paintRect.GetOffset();
     bool consumed = false;

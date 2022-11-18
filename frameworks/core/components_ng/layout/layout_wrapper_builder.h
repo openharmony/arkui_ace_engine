@@ -63,6 +63,8 @@ public:
 
     virtual void SwapDirtyAndUpdateBuildCache() {}
 
+    virtual void AdjustGridOffset() {}
+
 protected:
     virtual int32_t OnGetTotalCount() = 0;
     virtual RefPtr<LayoutWrapper> OnGetOrCreateWrapperByIndex(int32_t index) = 0;
