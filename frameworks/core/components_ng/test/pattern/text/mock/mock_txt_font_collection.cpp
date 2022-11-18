@@ -13,11 +13,18 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/test/mock/render/mock_render_context.h"
+#include "third_party/flutter/engine/flutter/third_party/txt/src/txt/font_collection.h"
+
+#include "core/components_ng/render/adapter/txt_font_collection.h"
+#include "core/components_ng/render/font_collection.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<RenderContext> RenderContext::Create()
+TxtFontCollection::TxtFontCollection(const std::shared_ptr<txt::FontCollection>& fontCollection)
+    : collection_(fontCollection)
+{}
+RefPtr<FontCollection> FontCollection::Current()
 {
-    return MakeRefPtr<MockRenderContext>();
+    std::shared_ptr<txt::FontCollection> fontCollection;
+    return AceType::MakeRefPtr<TxtFontCollection>(fontCollection);
 }
 } // namespace OHOS::Ace::NG

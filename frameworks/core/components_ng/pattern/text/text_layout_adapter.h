@@ -13,11 +13,20 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/test/mock/render/mock_render_context.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_ADAPTER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_ADAPTER_H
+
+#include <atomic>
+#include <string>
+#include <unicode/uchar.h>
 
 namespace OHOS::Ace::NG {
-RefPtr<RenderContext> RenderContext::Create()
-{
-    return MakeRefPtr<MockRenderContext>();
-}
+class TextLayoutadapter {
+public:
+    static bool IsLeftToRight(UChar32 charOfShowingText);
+    static bool IsRightToLeft(UChar32 charOfShowingText);
+    static bool IsRightTOLeftArabic(UChar32 charOfShowingText);
+};
 } // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_ADAPTER_H
