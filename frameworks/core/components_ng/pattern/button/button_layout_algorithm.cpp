@@ -37,12 +37,24 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
 {
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(buttonLayoutProperty);
-
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    Dimension radius;
     if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
+        auto minSize = std::min(frameSize.Height(), frameSize.Width());
+        radius.SetValue(minSize / 2.0);
+        BorderRadiusProperty borderRadius { radius, radius, radius, radius };
+        host->GetRenderContext()->UpdateBorderRadius(borderRadius);
         MeasureCircleButton(layoutWrapper);
+    } else if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CAPSULE) {
+        radius.SetValue(frameSize.Height() / 2.0);
     } else {
-        BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
+        radius = buttonLayoutProperty->GetBorderRadiusValue(Dimension());
     }
+    BorderRadiusProperty borderRadius { radius, radius, radius, radius };
+    host->GetRenderContext()->UpdateBorderRadius(borderRadius);
 }
 
 void ButtonLayoutAlgorithm::MeasureCircleButton(LayoutWrapper* layoutWrapper)
@@ -106,9 +118,9 @@ void ButtonLayoutAlgorithm::UpdateFrameSizeUsingChild(LayoutWrapper* layoutWrapp
         childFrame = childFrame > childSize ? childFrame : childSize;
     }
     childFrame.Constrain(minSize, maxSize);
-    auto lenght = std::sqrt(std::pow(childFrame.Height(), 2) + std::pow(childFrame.Width(), 2));
-    childFrame.SetHeight(static_cast<float>(lenght));
-    childFrame.SetWidth(static_cast<float>(lenght));
+    auto length = std::sqrt(std::pow(childFrame.Height(), 2) + std::pow(childFrame.Width(), 2));
+    childFrame.SetHeight(static_cast<float>(length));
+    childFrame.SetWidth(static_cast<float>(length));
     AddPaddingToSize(padding, childFrame);
     frameSize.UpdateIllegalSizeWithCheck(childFrame);
 }

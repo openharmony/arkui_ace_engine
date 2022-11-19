@@ -39,6 +39,12 @@ public:
         return stateEffect_.value_or(true);
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        EventHub::ToJsonValue(json);
+        json->Put("stateEffect", GetStateEffect() ? "true" : "false");
+    }
+
 private:
     std::optional<bool> stateEffect_;
 
