@@ -38,7 +38,7 @@ private:
         auto* stack = ViewStackProcessor::GetInstance();
         auto nodeId = stack->ClaimNodeId();
 
-        if (stack->GetMainFrameNode()->GetTag() == V2::TABS_ETS_TAG) {
+        if (stack->GetMainFrameNode() && stack->GetMainFrameNode()->GetTag() == V2::TABS_ETS_TAG) {
             forEachBuilder->ExpandChildrenOnInitial();
             return;
         }
