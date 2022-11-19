@@ -24,6 +24,8 @@
 #include "core/components_ng/svg/parse/svg_line.h"
 #include "core/components_ng/svg/parse/svg_svg.h"
 #include "core/components_ng/svg/svg_dom.h"
+#include "core/components_ng/test/svg/parse/svg_const.h"
+#include "core/components/common/layout/constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -60,5 +62,9 @@ HWTEST_F(ParseLineTestNg, ParseTest001, TestSize.Level1)
     EXPECT_FLOAT_EQ(lineDeclaration->GetY1().ConvertToPx(), Y1);
     EXPECT_FLOAT_EQ(lineDeclaration->GetX2().ConvertToPx(), X2);
     EXPECT_FLOAT_EQ(lineDeclaration->GetY2().ConvertToPx(), Y2);
+    RSCanvas rSCanvas;
+    svgDom->DrawImage(rSCanvas, ImageFit::NONE, Size(IMAGE_COPONENT_WIDTH, IMAGE_COPONENT_HEIGHT), Color::RED);
+    EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
+    EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }
 } // namespace OHOS::Ace::NG
