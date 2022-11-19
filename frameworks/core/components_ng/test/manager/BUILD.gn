@@ -19,5 +19,6 @@ group("manager_unittest") {
     "full_screen:full_screen_manager_test_ng",
     "select_overlay/select_overlay_manager:select_overlay_manager_test_ng",
     "select_overlay/select_overlay_proxy:select_overlay_proxy_test_ng",
+    "shared_overlay:shared_overlay_manager_test_ng",
   ]
 }

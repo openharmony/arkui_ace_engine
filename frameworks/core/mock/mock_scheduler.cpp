@@ -13,21 +13,12 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/animation/scheduler.h"
 
-namespace OHOS::Ace::NG {
-RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
-{
-    return nullptr;
-}
-
-void ListPattern::OnModifyDone() {}
-
-void ListPattern::OnAttachToFrameNode() {}
-
-bool ListPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* config */)
+namespace OHOS::Ace {
+bool Scheduler::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
+    const std::function<void()> propertyCallback, const std::function<void()>& finishCallBack)
 {
     return false;
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace
