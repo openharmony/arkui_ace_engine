@@ -560,6 +560,9 @@ public:
         return frontendType_;
     }
 
+    virtual double MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+        const std::string& fontWeight, const std::string& fontFamily, double letterSpacing) = 0;
+
     double GetDensity() const
     {
         return density_;

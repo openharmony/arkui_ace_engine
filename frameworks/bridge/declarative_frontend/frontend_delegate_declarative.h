@@ -174,6 +174,9 @@ public:
         return manifestParser_->GetWindowConfig();
     }
 
+    double MeasureText(const std::string& text, double fontSize, int32_t fontStyle, const std::string& fontWeight,
+        const std::string& fontFamily, double letterSpacing) override;
+
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
     void SetToastStopListenerCallback(std::function<void()>&& stopCallback) override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
