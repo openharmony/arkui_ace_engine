@@ -19,16 +19,21 @@
 using namespace testing;
 using namespace testing::ext;
 
-namespace OHOS::Ace::NG {
-class ViewportConfigTestNG : public testing::Test {};
+namespace OHOS::Ace {
+class UiContentTest : public testing::Test {};
 
-HWTEST_F(ViewportConfigTestNG, ParseTest001, TestSize.Level1)
+/**
+ * @tc.name: DumpTest001
+ * @tc.desc: test Dump infos
+ * @tc.type: FUNC
+ */
+HWTEST_F(UiContentTest, DumpTest001, TestSize.Level1)
 {
     auto infos = std::vector<std::string>();
     UIContent::ShowDumpHelp(infos);
     EXPECT_GT(infos.size(), 0);
-    for (auto info : infos) {
+    for (const auto& info : infos) {
         GTEST_LOG_(INFO) << info;
     }
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace
