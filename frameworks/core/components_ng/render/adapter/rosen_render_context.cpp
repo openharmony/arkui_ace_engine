@@ -1161,12 +1161,6 @@ void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
 
 void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
 {
-    const auto& graphics = GetOrCreateGraphics();
-    if (graphics->CheckBlurRadius(radius)) {
-        return;
-    }
-    graphics->UpdateBlurRadius(radius);
-
     auto pipelineBase = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineBase);
     std::shared_ptr<Rosen::RSFilter> backFilter = nullptr;
@@ -1387,45 +1381,27 @@ void RosenRenderContext::PaintGradient(const SizeF& frameSize)
 
 void RosenRenderContext::OnLinearGradientUpdate(const NG::Gradient& gradient)
 {
-    auto& gradientProperty = GetOrCreateGradient();
-    if (!gradientProperty || !gradientProperty->UpdateLinearGradient(gradient)) {
-        return;
-    }
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
-    if (!NearZero(frameSize.Width()) && !NearZero(frameSize.Height())) {
-        PaintGradient(frameSize);
+    RectF rect = GetPaintRectWithoutTransform();
+    if (!NearZero(rect.Width()) && !NearZero(rect.Height())) {
+        PaintGradient(rect.GetSize());
     }
     RequestNextFrame();
 }
 
 void RosenRenderContext::OnRadialGradientUpdate(const NG::Gradient& gradient)
 {
-    auto& gradientProperty = GetOrCreateGradient();
-    if (!gradientProperty || !gradientProperty->UpdateRadialGradient(gradient)) {
-        return;
-    }
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
-    if (!NearZero(frameSize.Width()) && !NearZero(frameSize.Height())) {
-        PaintGradient(frameSize);
+    RectF rect = GetPaintRectWithoutTransform();
+    if (!NearZero(rect.Width()) && !NearZero(rect.Height())) {
+        PaintGradient(rect.GetSize());
     }
     RequestNextFrame();
 }
 
 void RosenRenderContext::OnSweepGradientUpdate(const NG::Gradient& gradient)
 {
-    auto& gradientProperty = GetOrCreateGradient();
-    if (!gradientProperty || !gradientProperty->UpdateSweepGradient(gradient)) {
-        return;
-    }
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
-    if (!NearZero(frameSize.Width()) && !NearZero(frameSize.Height())) {
-        PaintGradient(frameSize);
+    RectF rect = GetPaintRectWithoutTransform();
+    if (!NearZero(rect.Width()) && !NearZero(rect.Height())) {
+        PaintGradient(rect.GetSize());
     }
     RequestNextFrame();
 }
