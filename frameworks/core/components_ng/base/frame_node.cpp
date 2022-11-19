@@ -38,6 +38,10 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
+namespace {
+constexpr double VISIBLE_RATIO_MIN = 0.0;
+constexpr double VISIBLE_RATIO_MAX = 1.0;
+}
 namespace OHOS::Ace::NG {
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
@@ -311,6 +315,107 @@ void FrameNode::AdjustGridOffset()
 {
     if (layoutProperty_->UpdateGridOffset(Claim(this))) {
         renderContext_->SyncGeometryProperties(RawPtr(GetGeometryNode()));
+    }
+}
+
+void FrameNode::TriggerVisibleAreaChangeCallback(std::list<VisibleCallbackInfo>& callbackInfoList)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+
+    bool curFrameIsActive = true;
+    auto parent = GetParent();
+    while (parent) {
+        auto parentFrame = AceType::DynamicCast<FrameNode>(parent);
+        if (!parentFrame) {
+            parent = parent->GetParent();
+            continue;
+        }
+        if (!parentFrame->isActive_) {
+            curFrameIsActive = false;
+            break;
+        }
+        parent = parent->GetParent();
+    }
+
+    if (!context->GetOnShow() || !IsVisible() || !curFrameIsActive) {
+        if (!NearEqual(lastVisibleRatio_, VISIBLE_RATIO_MIN)) {
+            ProcessAllVisibleCallback(callbackInfoList, VISIBLE_RATIO_MIN);
+            lastVisibleRatio_ = VISIBLE_RATIO_MIN;
+        }
+        return;
+    }
+
+    auto frameRect = renderContext_->GetPaintRectWithTransform();
+    frameRect.SetOffset(GetOffsetRelativeToWindow());
+    auto visibleRect = frameRect;
+    RectF parentRect;
+    auto parentUi = GetParent();
+    while (parentUi) {
+        auto parentFrame = AceType::DynamicCast<FrameNode>(parentUi);
+        if (!parentFrame) {
+            parentUi = parentUi->GetParent();
+            continue;
+        }
+        parentRect = parentFrame->GetRenderContext()->GetPaintRectWithTransform();
+        parentRect.SetOffset(parentFrame->GetOffsetRelativeToWindow());
+        visibleRect = visibleRect.Constrain(parentRect);
+        parentUi = parentUi->GetParent();
+    }
+
+    double currentVisibleRatio =
+        std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect), VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
+    if (!NearEqual(currentVisibleRatio, lastVisibleRatio_)) {
+        ProcessAllVisibleCallback(callbackInfoList, currentVisibleRatio);
+        lastVisibleRatio_ = currentVisibleRatio;
+    }
+}
+
+double FrameNode::CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect)
+{
+    if (!visibleRect.IsValid() || !renderRect.IsValid()) {
+        return 0.0;
+    }
+    return visibleRect.Width() * visibleRect.Height() / (renderRect.Width() * renderRect.Height());
+}
+
+void FrameNode::ProcessAllVisibleCallback(std::list<VisibleCallbackInfo>& callbackInfoList, double currentVisibleRatio)
+{
+    for (auto& nodeCallbackInfo : callbackInfoList) {
+        if (GreatNotEqual(currentVisibleRatio, nodeCallbackInfo.visibleRatio) && !nodeCallbackInfo.isCurrentVisible) {
+            OnVisibleAreaChangeCallback(nodeCallbackInfo, true, currentVisibleRatio);
+            continue;
+        }
+
+        if (LessNotEqual(currentVisibleRatio, nodeCallbackInfo.visibleRatio) && nodeCallbackInfo.isCurrentVisible) {
+            OnVisibleAreaChangeCallback(nodeCallbackInfo, false, currentVisibleRatio);
+            continue;
+        }
+
+        if (NearEqual(currentVisibleRatio, nodeCallbackInfo.visibleRatio) &&
+            NearEqual(nodeCallbackInfo.visibleRatio, VISIBLE_RATIO_MIN)) {
+            if (nodeCallbackInfo.isCurrentVisible) {
+                OnVisibleAreaChangeCallback(nodeCallbackInfo, false, VISIBLE_RATIO_MIN);
+            } else {
+                OnVisibleAreaChangeCallback(nodeCallbackInfo, true, VISIBLE_RATIO_MIN);
+            }
+        } else if (NearEqual(currentVisibleRatio, nodeCallbackInfo.visibleRatio) &&
+                   NearEqual(nodeCallbackInfo.visibleRatio, VISIBLE_RATIO_MAX)) {
+            if (!nodeCallbackInfo.isCurrentVisible) {
+                OnVisibleAreaChangeCallback(nodeCallbackInfo, true, VISIBLE_RATIO_MAX);
+            } else {
+                OnVisibleAreaChangeCallback(nodeCallbackInfo, false, VISIBLE_RATIO_MAX);
+            }
+        }
+    }
+}
+
+void FrameNode::OnVisibleAreaChangeCallback(
+    VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio)
+{
+    callbackInfo.isCurrentVisible = visibleType;
+    if (callbackInfo.callback) {
+        callbackInfo.callback(visibleType, currentVisibleRatio);
     }
 }
 

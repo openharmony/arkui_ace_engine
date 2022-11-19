@@ -29,7 +29,7 @@ enum class PixelFormat : int32_t {
     RGB_888 = 5,
     ALPHA_8 = 6,
     RGBA_F16 = 7,
-    NV21 = 8,  // Each pixel is sotred on 3/2 bytes.
+    NV21 = 8, // Each pixel is stored on 3/2 bytes.
     NV12 = 9,
     CMYK = 10,
 };
@@ -60,6 +60,10 @@ public:
     virtual void* GetRawPixelMapPtr() const = 0;
     virtual std::string GetId() = 0;
     virtual std::string GetModifyId() = 0;
+
+    static void* GetReleaseContext(const RefPtr<PixelMap>& pixelMap);
+    // passed to SkImage to release PixelMap shared_ptr
+    static void ReleaseProc(const void* /* pixels */, void* context);
 };
 
 } // namespace OHOS::Ace

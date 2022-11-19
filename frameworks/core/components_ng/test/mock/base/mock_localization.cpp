@@ -30,6 +30,16 @@ std::shared_ptr<Localization> Localization::GetInstance()
     return instance;
 }
 
+std::string Localization::FormatDuration(uint32_t duration, const std::string& format)
+{
+    return "08:00:00";
+}
+
+const std::string Localization::FormatDateTime(DateTime dateTime, const std::string& format)
+{
+    return "08:00:00";
+}
+
 std::string Localization::GetEntryLetters(const std::string& lettersIndex)
 {
     return "";

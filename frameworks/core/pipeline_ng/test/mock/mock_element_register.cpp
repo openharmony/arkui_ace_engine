@@ -20,4 +20,14 @@ ElementRegister* ElementRegister::GetInstance()
 {
     return new ElementRegister();
 }
+
+bool ElementRegister::RemoveItem(ElementIdType elementId)
+{
+    return true;
+}
+
+bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
+{
+    return true;
+}
 } // namespace OHOS::Ace

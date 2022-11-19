@@ -51,6 +51,7 @@ ohos_unittest("drag_drop_manager_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/grid/mock_grid_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/grid/mock_grid_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/grid/mock_grid_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/list/mock_list_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/list/mock_list_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/list/mock_list_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/list/mock_list_paint_method.cpp",

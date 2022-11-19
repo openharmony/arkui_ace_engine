@@ -30,9 +30,4 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(
 {
     return false;
 }
-
-int32_t ListEventHub::GetListItemIndexByPosition(float /* x */, float /* y */)
-{
-    return 0;
-}
 } // namespace OHOS::Ace::NG
