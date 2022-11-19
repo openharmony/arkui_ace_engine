@@ -909,7 +909,7 @@ void RenderScroll::SetBarCallBack(bool isVertical)
                 return;
             }
             scroll->scrollBarOpacity_ = value;
-            scroll->MarkNeedLayout(true);
+            scroll->MarkNeedRender();
         };
         auto&& scrollEndCallback = [weakScroll = AceType::WeakClaim(this), isVertical]() {
             auto scroll = weakScroll.Upgrade();

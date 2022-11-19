@@ -1205,6 +1205,17 @@ void RenderGridScroll::InitScrollBar()
     }
     if (scrollBar_) {
         scrollBar_->SetDisplayMode(component_->GetScrollBar());
+        if (!component_->GetScrollBarWidth().empty()) {
+            const auto& width = StringUtils::StringToDimension(component_->GetScrollBarWidth());
+            scrollBar_->SetInactiveWidth(width);
+            scrollBar_->SetNormalWidth(width);
+            scrollBar_->SetActiveWidth(width);
+            scrollBar_->SetTouchWidth(width);
+        }
+        if (!component_->GetScrollBarColor().empty()) {
+            scrollBarColor_ = Color::FromString(component_->GetScrollBarColor());
+            scrollBar_->SetForegroundColor(scrollBarColor_);
+        }
         scrollBar_->Reset();
         return;
     }
