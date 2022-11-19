@@ -59,6 +59,16 @@ ohos_unittest("js_inspector_test") {
     "inspect_stepper_item_test.cpp",
     "inspect_stepper_test.cpp",
     "inspect_swiper_test.cpp",
+    "inspect_switch_test.cpp",
+    "inspect_tab_bar_test.cpp",
+    "inspect_tab_content_test.cpp",
+    "inspect_tabs_test.cpp",
+    "inspect_text_test.cpp",
+    "inspect_textarea_test.cpp",
+    "inspect_toggle_test.cpp",
+    "inspect_toolbar_item_test.cpp",
+    "inspect_toolbar_test.cpp",
+    "inspect_video_test.cpp",
   ]
 
   deps = [
