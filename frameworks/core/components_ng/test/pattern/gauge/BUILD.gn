@@ -89,7 +89,6 @@ ohos_unittest("gauge_pattern_test_ng") {
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_container.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_theme_manager.cpp",
 
     # self
     "$ace_root/frameworks/core/components_ng/pattern/gauge/gauge_layout_algorithm.cpp",

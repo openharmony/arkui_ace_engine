@@ -27,6 +27,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -62,14 +63,17 @@ class ImageAnimatorViewTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
 };
 
-void ImageAnimatorViewTestNg::SetUpTestCase() {}
-void ImageAnimatorViewTestNg::TearDownTestCase() {}
-void ImageAnimatorViewTestNg::SetUp() {}
-void ImageAnimatorViewTestNg::TearDown() {}
+void ImageAnimatorViewTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void ImageAnimatorViewTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 /**
  * @tc.name: ImageAnimatorTest001

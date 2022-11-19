@@ -20,7 +20,7 @@
 #include "core/components/checkable/render_checkbox.h"
 #include "core/components/checkable/render_radio.h"
 #include "core/components/checkable/render_switch.h"
-
+#include "core/components/theme/theme_manager_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -28,7 +28,7 @@ using namespace testing::ext;
 namespace OHOS::Ace {
 namespace {
 constexpr double TEST_TEXT_SIZE = 200.0;
-const RefPtr<ThemeManager> THEME_MANAGER = AceType::MakeRefPtr<ThemeManager>();
+const auto THEME_MANAGER = AceType::MakeRefPtr<ThemeManagerImpl>();
 } // namespace
 
 class MockRenderSwitch final : public RenderSwitch {

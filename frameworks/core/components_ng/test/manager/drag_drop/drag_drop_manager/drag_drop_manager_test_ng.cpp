@@ -29,7 +29,8 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
-#include "frameworks/core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/pattern.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 #define private public
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
@@ -65,11 +66,19 @@ const DragType DRAG_TYPE_LIST = DragType::LIST;
 
 class DragDropManagerTestNg : public testing::Test {
 public:
-    static void SetUpTestSuite() {};
-    static void TearDownTestSuite() {};
-
-protected:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
 };
+
+void DragDropManagerTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void DragDropManagerTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 /**
  * @tc.name: DragDropManagerTest001

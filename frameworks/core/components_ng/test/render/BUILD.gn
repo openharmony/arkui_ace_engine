@@ -13,5 +13,5 @@
 
 group("render_unittest") {
   testonly = true
-  deps = [ "adapter:rosen_render_context_test_ng" ]
+  deps = []
 }

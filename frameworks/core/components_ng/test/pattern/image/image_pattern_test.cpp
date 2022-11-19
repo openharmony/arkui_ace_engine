@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -57,8 +58,6 @@ class ImagePatternTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
     static RefPtr<FrameNode> CreateImageNode(const std::string& src, const std::string& alt,
         RefPtr<PixelMap> pixMap = nullptr, const Color& svgFillColor = SVG_FILL_COLOR_DEFAULT,
         const ImageFit& imageFit = ImageFit::NONE, const ImageRenderMode& renderMode = ImageRenderMode::TEMPLATE,
@@ -67,10 +66,16 @@ public:
         bool matchTextDirection = false);
 };
 
-void ImagePatternTest::SetUpTestCase() {}
-void ImagePatternTest::TearDownTestCase() {}
-void ImagePatternTest::SetUp() {}
-void ImagePatternTest::TearDown() {}
+void ImagePatternTest::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void ImagePatternTest::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
+
 RefPtr<FrameNode> ImagePatternTest::CreateImageNode(const std::string& src, const std::string& alt,
     RefPtr<PixelMap> pixMap, const Color& svgFillColor, const ImageFit& imageFit, const ImageRenderMode& renderMode,
     const ImageInterpolation& interpolation, const ImageRepeat& imageRepeat, const std::vector<float>& colorFilter,

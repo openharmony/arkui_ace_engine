@@ -18,7 +18,7 @@
 #include "core/common/ime/text_selection.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/common/dom/dom_textarea.h"
 #include "frameworks/bridge/test/unittest/jsfrontend/dom_node_factory.h"
@@ -84,7 +84,7 @@ HWTEST_F(DomTextareaTest, DomTextareaCreatorTest001, TestSize.Level1)
      * @tc.steps: step2. Check styles and attributes of created textarea node.
      * @tc.expected: step2. The styles and attributes are as expected.
      */
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     RefPtr<TextFieldTheme> theme = themeManager->GetTheme<TextFieldTheme>();
     ASSERT_TRUE(theme);
 

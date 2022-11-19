@@ -23,7 +23,8 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
-#include "frameworks/core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/pattern.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -39,13 +40,22 @@ const std::string ROOT_TAG("root");
 constexpr int32_t NODE_ID = 143;
 constexpr int32_t NODE_ID_2 = 601;
 } // namespace
+
 class SelectOverlayManagerTestNg : public testing::Test {
 public:
-    static void SetUpTestSuite() {};
-    static void TearDownTestSuite() {};
-
-protected:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
 };
+
+void SelectOverlayManagerTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void SelectOverlayManagerTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 /**
  * @tc.name: SelectOverlayManagerTest001

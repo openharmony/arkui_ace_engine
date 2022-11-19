@@ -158,7 +158,7 @@ ohos_source_set("ace_test_log") {
     "hiviewdfx_hilog_native:libhilog",
   ]
 
-  configs = [ ":ace_test_config" ]
+  configs = [ ":ace_unittest_config" ]
 }
 
 config("ace_test_coverage_config") {

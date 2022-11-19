@@ -28,6 +28,10 @@ public:
     MockPipelineBase() = default;
     ~MockPipelineBase() override = default;
 
+    static void SetUp();
+    static void TearDown();
+    static RefPtr<MockPipelineBase> GetCurrent();
+
     MOCK_METHOD0(SetupRootElement, void());
     MOCK_METHOD3(
         AddKeyFrame, void(float fraction, const RefPtr<Curve>& curve, const std::function<void()>& propertyCallback));
@@ -83,6 +87,8 @@ public:
     MOCK_METHOD3(SetRootRect, void(double width, double height, double offset));
     MOCK_METHOD0(FlushPipelineWithoutAnimation, void());
     MOCK_METHOD1(OnVirtualKeyboardHeightChange, void(float keyboardHeight));
+
+    static RefPtr<MockPipelineBase> pipeline_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_BASE_H
