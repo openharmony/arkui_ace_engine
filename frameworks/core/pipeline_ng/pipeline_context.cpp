@@ -371,6 +371,11 @@ const RefPtr<StageManager>& PipelineContext::GetStageManager()
     return stageManager_;
 }
 
+const RefPtr<DragDropManager>& PipelineContext::GetDragDropManager()
+{
+    return dragDropManager_;
+}
+
 const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
 {
     return selectOverlayManager_;
