@@ -155,7 +155,7 @@ void TextFieldModelImpl::SetPlaceholderFont(const Font& value)
     auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
     CHECK_NULL_VOID(component);
     auto textStyle = component->GetPlaceHoldStyle();
-    if (value.fontSize) {
+    if (value.fontSize && value.fontSize->IsNonNegative()) {
         textStyle.SetFontSize(value.fontSize.value());
     }
     if (value.fontWeight) {
@@ -220,6 +220,9 @@ void TextFieldModelImpl::SetMaxLines(uint32_t value)
 
 void TextFieldModelImpl::SetFontSize(const Dimension& value)
 {
+    if (value.IsNegative()) {
+        return;
+    }
     auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
     CHECK_NULL_VOID(component);
