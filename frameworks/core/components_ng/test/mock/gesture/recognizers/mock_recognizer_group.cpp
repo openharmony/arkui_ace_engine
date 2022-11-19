@@ -13,21 +13,8 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/pipeline/base/element_register.h"
+#include "core/components_ng/gestures/recognizers/recognizer_group.h"
 
-namespace OHOS::Ace {
-ElementRegister* ElementRegister::GetInstance()
-{
-    return new ElementRegister();
-}
-
-bool ElementRegister::RemoveItem(ElementIdType elementId)
-{
-    return true;
-}
-
-bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
-{
-    return true;
-}
-} // namespace OHOS::Ace
+namespace OHOS::Ace::NG {
+void RecognizerGroup::AddChildren(const std::list<RefPtr<NGGestureRecognizer>>& recognizers) {}
+} // namespace OHOS::Ace::NG
