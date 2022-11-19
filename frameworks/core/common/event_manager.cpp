@@ -246,23 +246,9 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& point)
     // If one gesture recognizer has already been won, other gesture recognizers will still be affected by
     // the event, each recognizer needs to filter the extra events by itself.
     if (dispatchSuccess) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            // Need update here: onTouch/Recognizer need update
-            bool isStopTouchEvent = false;
-            for (const auto& entry : iter->second) {
-                auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
-                if (recognizer) {
-                    entry->HandleMultiContainerEvent(point);
-                }
-                if (!recognizer && !isStopTouchEvent) {
-                    isStopTouchEvent = !entry->HandleMultiContainerEvent(point);
-                }
-            }
-        } else {
-            for (const auto& entry : iter->second) {
-                if (!entry->HandleMultiContainerEvent(point)) {
-                    break;
-                }
+        for (const auto& entry : iter->second) {
+            if (!entry->HandleMultiContainerEvent(point)) {
+                break;
             }
         }
     }

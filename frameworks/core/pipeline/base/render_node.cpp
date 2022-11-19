@@ -45,7 +45,6 @@
 #include "core/components/grid_layout/render_grid_layout.h"
 #include "core/components/root/render_root.h"
 #include "core/components/scroll/render_single_child_scroll.h"
-#include "core/components/stack/render_stack.h"
 #include "core/components/transform/render_transform.h"
 #include "core/components_v2/list/render_list.h"
 #include "core/event/ace_event_helper.h"
@@ -774,7 +773,7 @@ bool RenderNode::DispatchTouchTestToChildren(const Point& localPoint, const Poin
                     break;
                 }
             }
-            if (isInRegion && (InstanceOf<RenderStack>(this) || child->GetHitTestMode() != HitTestMode::HTMDEFAULT)) {
+            if (isInRegion && child->GetHitTestMode() != HitTestMode::HTMDEFAULT) {
                 break;
             }
         }
