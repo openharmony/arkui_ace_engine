@@ -28,6 +28,7 @@
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components/focus_animation/focus_animation_theme.h"
 #include "core/components/image/image_theme.h"
+#include "core/components/indexer/indexer_theme.h"
 #include "core/components/list/list_item_theme.h"
 #include "core/components/list/list_theme.h"
 #include "core/components/marquee/marquee_theme.h"
@@ -113,7 +114,8 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { DragBarTheme::TypeId(), &ThemeBuildFunc<DragBarTheme::Builder> },
     { SemiModalTheme::TypeId(), &ThemeBuildFunc<SemiModalTheme::Builder> },
     { IconTheme::TypeId(), &ThemeBuildFunc<IconTheme::Builder> },
-    { V2::PatternLockTheme::TypeId(), &ThemeBuildFunc<V2::PatternLockTheme::Builder> }
+    { V2::PatternLockTheme::TypeId(), &ThemeBuildFunc<V2::PatternLockTheme::Builder> },
+    { IndexerTheme::TypeId(), &ThemeBuildFunc<IndexerTheme::Builder> }
 };
 
 } // namespace
