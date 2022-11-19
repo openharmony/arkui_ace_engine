@@ -793,7 +793,6 @@ class SubscriberManager {
      */
     constructor() {
         this.subscriberById_ = new Map();
-        this.nextFreeId_ = 0;
         
     }
     /**
@@ -956,7 +955,7 @@ class SubscriberManager {
      * @returns a globally unique id to be assigned to a Subscriber
      */
     makeId() {
-        return this.nextFreeId_++;
+        return ViewStackProcessor.MakeUniqueId();
     }
 }
 /*

@@ -22,8 +22,6 @@ class SubscriberManager {
 
   private subscriberById_: Map<number, IPropertySubscriber>;
 
-  private nextFreeId_: number;
-
   private static instance_: SubscriberManager;
 
   /**
@@ -203,7 +201,7 @@ class SubscriberManager {
    * @returns a globally unique id to be assigned to a Subscriber
    */
   makeId(): number {
-    return this.nextFreeId_++;
+    return ViewStackProcessor.MakeUniqueId();
   }
 
   /**
@@ -214,7 +212,6 @@ class SubscriberManager {
    */
   private constructor() {
     this.subscriberById_ = new Map<number, IPropertySubscriber>();
-    this.nextFreeId_ = 0;
     stateMgmtConsole.debug("SubscriberManager has been created.");
   }
 }
