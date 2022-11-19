@@ -118,7 +118,21 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);
     padding_ = popupTheme->GetPadding();
-    border_.SetBorderRadius(popupTheme->GetRadius());
+    bool useCustom = layoutProp->GetUseCustom().value_or(false);
+    if (useCustom) {
+        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
+        CHECK_NULL_VOID(targetNode);
+        auto context = targetNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        auto borderRadius = BorderRadiusProperty();
+        if (context) {
+            borderRadius = context->GetBorderRadiusValue(BorderRadiusProperty());
+        }
+        auto radius = Radius(borderRadius.radiusBottomLeft->Value());
+        border_.SetBorderRadius(radius);
+    } else {
+        border_.SetBorderRadius(popupTheme->GetRadius());
+    }
     targetSpace_ = popupTheme->GetTargetSpace();
     placement_ = layoutProp->GetPlacement().value_or(Placement::BOTTOM);
 }
