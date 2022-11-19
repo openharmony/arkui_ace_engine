@@ -43,6 +43,11 @@ public:
         return MakeRefPtr<TimePickerEventHub>();
     }
 
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        return MakeRefPtr<TimePickerPaintMethod>();
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<LinearLayoutAlgorithm>();
@@ -55,7 +60,7 @@ public:
 
     void OnColumnsBuilding();
 
-    std::unordered_map<std::string, RefPtr<FrameNode>> GetAllChildNode() const;
+    std::unordered_map<std::string, RefPtr<FrameNode>> GetAllChildNode();
 
     void HandleHourColumnBuilding();
 
@@ -72,11 +77,11 @@ public:
 
     void SetEventCallback(EventCallback&& value);
 
-    void FireChangeEvent(bool refresh) const;
+    void FireChangeEvent(bool refresh);
 
-    std::string GetSelectedObject(bool isColumnChange, int32_t status = -1) const;
+    std::string GetSelectedObject(bool isColumnChange, int32_t status = -1);
 
-    PickerTime GetCurrentTime() const;
+    PickerTime GetCurrentTime();
 
     uint32_t GetHourFromAmPm(bool isAm, uint32_t amPmhour) const;
 
@@ -245,9 +250,12 @@ public:
         json->Put("isUseMilitaryTime", V2::ConvertBoolToString(hour24_).c_str());
     }
 
+    void CreateAmPmNode();
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);

@@ -26,7 +26,7 @@ class ACE_EXPORT TextPickerLayoutAlgorithm : public LinearLayoutAlgorithm {
     DECLARE_ACE_TYPE(TextPickerLayoutAlgorithm, LinearLayoutAlgorithm);
 
 public:
-    explicit TextPickerLayoutAlgorithm(float currentOffset) : currentOffset_(currentOffset) {}
+    TextPickerLayoutAlgorithm() = default;
     ~TextPickerLayoutAlgorithm() override = default;
 
     void OnReset() override {}
@@ -36,6 +36,11 @@ public:
     float GetCurrentOffset() const
     {
         return currentOffset_;
+    }
+
+    void SetCurrentOffset(float currentOffset)
+    {
+        currentOffset_ = currentOffset;
     }
 
 private:

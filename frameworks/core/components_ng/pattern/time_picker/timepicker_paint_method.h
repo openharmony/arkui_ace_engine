@@ -29,17 +29,11 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT TimePickerPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(TimePickerPaintMethod, NodePaintMethod)
 public:
-    TimePickerPaintMethod(float dividerSpacingWidth, float gradientHeight, float dividerHeight)
-        : dividerSpacingWidth_(dividerSpacingWidth), gradientHeight_(gradientHeight), dividerHeight_(dividerHeight)
-    {}
+    TimePickerPaintMethod() = default;
     ~TimePickerPaintMethod() override = default;
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
-
-private:
-    float dividerSpacingWidth_;
-    float gradientHeight_;
-    float dividerHeight_;
+    void PaintGradient(RSCanvas& canvas, const RectF& frameRect);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_TIME_PICKER_PAINT_METHOD_H

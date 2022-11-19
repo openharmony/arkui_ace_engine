@@ -804,12 +804,12 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
         startDateLunar_ = SolarToLunar(startDefaultDateSolar_);
         endDateLunar_ = SolarToLunar(endDefaultDateSolar_);
     }
-    auto startYear = GetStartDateLunar().year;
-    auto endYear = GetEndDateLunar().year;
-    auto startMonth = GetStartDateLunar().month;
-    auto endMonth = GetEndDateLunar().month;
-    auto startDay = GetStartDateLunar().day;
-    auto endDay = GetEndDateLunar().day;
+    auto startYear = startDateLunar_.year;
+    auto endYear = endDateLunar_.year;
+    auto startMonth = startDateLunar_.month;
+    auto endMonth = endDateLunar_.month;
+    auto startDay = startDateLunar_.day;
+    auto endDay = endDateLunar_.day;
     uint32_t maxDay = GetLunarMaxDay(current.year, current.month, current.isLeapMonth);
     if (startYear < endYear) {
         startMonth = 1;

@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/picker/toss_animation_controller.h"
+#include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
 
 #include <sys/time.h>
 
-#include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -27,7 +29,7 @@ constexpr double DRAG = 0.995;
 constexpr double ZERO_SPEED = 0.5;
 } // namespace
 
-void TossAnimationController::SetStart(double y)
+void TextPickerTossAnimationController::SetStart(double y)
 {
     if (toss_) {
         toss_->Stop();
@@ -37,7 +39,7 @@ void TossAnimationController::SetStart(double y)
     timeStart_ = GetCurrentTime();
 }
 
-void TossAnimationController::SetEnd(double y)
+void TextPickerTossAnimationController::SetEnd(double y)
 {
     if (toss_) {
         toss_->Stop();
@@ -47,7 +49,7 @@ void TossAnimationController::SetEnd(double y)
     timeEnd_ = GetCurrentTime();
 }
 
-bool TossAnimationController::Play()
+bool TextPickerTossAnimationController::Play()
 {
     auto timeDiff = timeEnd_ - timeStart_;
     if (timeDiff < MIN_TIME) {
@@ -79,7 +81,7 @@ bool TossAnimationController::Play()
             LOGE("toss ref is null.");
             return;
         }
-        auto column = AceType::DynamicCast<DatePickerColumnPattern>(ref->column_.Upgrade());
+        auto column = AceType::DynamicCast<TextPickerPattern>(ref->column_.Upgrade());
         if (!column) {
             LOGE("toss column is null.");
             return;
@@ -94,7 +96,7 @@ bool TossAnimationController::Play()
             LOGE("toss ref is null when stop.");
             return;
         }
-        auto column = AceType::DynamicCast<DatePickerColumnPattern>(ref->column_.Upgrade());
+        auto column = AceType::DynamicCast<TextPickerPattern>(ref->column_.Upgrade());
         if (!column) {
             LOGE("column is null when stop.");
             return;
@@ -105,7 +107,7 @@ bool TossAnimationController::Play()
     return true;
 }
 
-double TossAnimationController::GetCurrentTime() const
+double TextPickerTossAnimationController::GetCurrentTime() const
 {
     struct timeval tv = { 0 };
     int result = gettimeofday(&tv, nullptr);
