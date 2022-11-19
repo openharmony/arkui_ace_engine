@@ -28,6 +28,32 @@ class InspectRatingTest : public testing::Test {
 public:
     static void SetUpTestSuite() {};
     static void TearDownTestSuite() {};
+
+    void CheckRatingAttrAndStyle(InspectRating& inspectRating, uint16_t attrsSize, uint16_t stylesSize)
+    {
+        uint16_t attrsSizeInsert = 6;
+        uint16_t stylesSizeInsert = 1;
+        uint16_t insertTwo = 2;
+        DeviceType deviceType = SystemProperties::GetDeviceType();
+        EXPECT_EQ(inspectRating.attrs_["numstars"], "5");
+        EXPECT_EQ(inspectRating.attrs_["rating"], "0");
+        EXPECT_EQ(inspectRating.attrs_["stepsize"], "0.5");
+        EXPECT_EQ(inspectRating.attrs_["indicator"], "false");
+        EXPECT_EQ(inspectRating.attrs_["disabled"], "false");
+        EXPECT_EQ(inspectRating.attrs_["focusable"], "true");
+        if (deviceType == DeviceType::PHONE) {
+            EXPECT_EQ(inspectRating.styles_["width"], "120px");
+            EXPECT_EQ(inspectRating.styles_["height"], "24px");
+            stylesSizeInsert += insertTwo;
+        } else if (deviceType == DeviceType::TV) {
+            EXPECT_EQ(inspectRating.styles_["width"], "360px");
+            EXPECT_EQ(inspectRating.styles_["height"], "72px");
+            stylesSizeInsert += insertTwo;
+        }
+        EXPECT_EQ(inspectRating.styles_["rtl-flip"], "true");
+        EXPECT_EQ(inspectRating.attrs_.size(), attrsSize + attrsSizeInsert);
+        EXPECT_EQ(inspectRating.styles_.size(), stylesSize + stylesSizeInsert);
+    }
 };
 
 /**
@@ -46,7 +72,7 @@ HWTEST_F(InspectRatingTest, InspectRatingTest001, TestSize.Level1)
 
 /**
  * @tc.name: InspectRatingTest002
- * @tc.desc: InspectRating::PackAttrAndStyle
+ * @tc.desc: InspectRating::PackAttrAndStyle-PHONE
  * @tc.type: FUNC
  */
 HWTEST_F(InspectRatingTest, InspectRatingTest002, TestSize.Level1)
@@ -56,20 +82,111 @@ HWTEST_F(InspectRatingTest, InspectRatingTest002, TestSize.Level1)
     InspectRating inspectRating(nodeId, tag);
     auto attrsSize = inspectRating.attrs_.size();
     auto stylesSize = inspectRating.styles_.size();
-    uint16_t attrsSizeInsert = 6;
-    uint16_t stylesSizeInsert = 3;
 
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
     inspectRating.PackAttrAndStyle();
-    EXPECT_EQ(inspectRating.attrs_.size(), attrsSize + attrsSizeInsert);
-    EXPECT_EQ(inspectRating.attrs_["numstars"], "5");
-    EXPECT_EQ(inspectRating.attrs_["rating"], "0");
-    EXPECT_EQ(inspectRating.attrs_["stepsize"], "0.5");
-    EXPECT_EQ(inspectRating.attrs_["indicator"], "false");
-    EXPECT_EQ(inspectRating.attrs_["disabled"], "false");
-    EXPECT_EQ(inspectRating.attrs_["focusable"], "true");
-    EXPECT_EQ(inspectRating.styles_.size(), stylesSize + stylesSizeInsert);
-    EXPECT_EQ(inspectRating.styles_["width"], "120px");
-    EXPECT_EQ(inspectRating.styles_["height"], "24px");
-    EXPECT_EQ(inspectRating.styles_["rtl-flip"], "true");
+    CheckRatingAttrAndStyle(inspectRating, attrsSize, stylesSize);
+    SystemProperties::SetDeviceType(deviceType);
+}
+
+/**
+ * @tc.name: InspectRatingTest003
+ * @tc.desc: InspectRating::PackAttrAndStyle-TV
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectRatingTest, InspectRatingTest003, TestSize.Level1)
+{
+    NodeId nodeId = -1;
+    std::string tag = "tagTest";
+    InspectRating inspectRating(nodeId, tag);
+    auto attrsSize = inspectRating.attrs_.size();
+    auto stylesSize = inspectRating.styles_.size();
+
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    SystemProperties::SetDeviceType(DeviceType::TV);
+    inspectRating.PackAttrAndStyle();
+    CheckRatingAttrAndStyle(inspectRating, attrsSize, stylesSize);
+    SystemProperties::SetDeviceType(deviceType);
+}
+
+/**
+ * @tc.name: InspectRatingTest004
+ * @tc.desc: InspectRating::PackAttrAndStyle-WATCH
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectRatingTest, InspectRatingTest004, TestSize.Level1)
+{
+    NodeId nodeId = -1;
+    std::string tag = "tagTest";
+    InspectRating inspectRating(nodeId, tag);
+    auto attrsSize = inspectRating.attrs_.size();
+    auto stylesSize = inspectRating.styles_.size();
+
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    SystemProperties::SetDeviceType(DeviceType::WATCH);
+    inspectRating.PackAttrAndStyle();
+    CheckRatingAttrAndStyle(inspectRating, attrsSize, stylesSize);
+    SystemProperties::SetDeviceType(deviceType);
+}
+
+/**
+ * @tc.name: InspectRatingTest005
+ * @tc.desc: InspectRating::PackAttrAndStyle-CAR
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectRatingTest, InspectRatingTest005, TestSize.Level1)
+{
+    NodeId nodeId = -1;
+    std::string tag = "tagTest";
+    InspectRating inspectRating(nodeId, tag);
+    auto attrsSize = inspectRating.attrs_.size();
+    auto stylesSize = inspectRating.styles_.size();
+
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    SystemProperties::SetDeviceType(DeviceType::CAR);
+    inspectRating.PackAttrAndStyle();
+    CheckRatingAttrAndStyle(inspectRating, attrsSize, stylesSize);
+    SystemProperties::SetDeviceType(deviceType);
+}
+
+/**
+ * @tc.name: InspectRatingTest006
+ * @tc.desc: InspectRating::PackAttrAndStyle-TABLET
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectRatingTest, InspectRatingTest006, TestSize.Level1)
+{
+    NodeId nodeId = -1;
+    std::string tag = "tagTest";
+    InspectRating inspectRating(nodeId, tag);
+    auto attrsSize = inspectRating.attrs_.size();
+    auto stylesSize = inspectRating.styles_.size();
+
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    SystemProperties::SetDeviceType(DeviceType::TABLET);
+    inspectRating.PackAttrAndStyle();
+    CheckRatingAttrAndStyle(inspectRating, attrsSize, stylesSize);
+    SystemProperties::SetDeviceType(deviceType);
+}
+
+/**
+ * @tc.name: InspectRatingTest007
+ * @tc.desc: InspectRating::PackAttrAndStyle-UNKNOWN
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectRatingTest, InspectRatingTest007, TestSize.Level1)
+{
+    NodeId nodeId = -1;
+    std::string tag = "tagTest";
+    InspectRating inspectRating(nodeId, tag);
+    auto attrsSize = inspectRating.attrs_.size();
+    auto stylesSize = inspectRating.styles_.size();
+
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    SystemProperties::SetDeviceType(DeviceType::UNKNOWN);
+    inspectRating.PackAttrAndStyle();
+    CheckRatingAttrAndStyle(inspectRating, attrsSize, stylesSize);
+    SystemProperties::SetDeviceType(deviceType);
 }
 } // namespace OHOS::Ace::Framework
