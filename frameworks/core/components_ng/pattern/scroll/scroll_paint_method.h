@@ -31,6 +31,7 @@ public:
 
 private:
     void PaintScrollBar(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
+    void PaintScrollEffect(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
 };
 } // namespace OHOS::Ace::NG
 

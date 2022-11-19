@@ -244,7 +244,16 @@ bool ScrollPattern::ScrollPageCheck(float delta, int32_t source)
     return true;
 }
 
-void ScrollPattern::HandleScrollEffect() {}
+void ScrollPattern::HandleScrollEffect()
+{
+    // handle edge effect
+    if (scrollEffect_) {
+        auto overScroll = scrollEffect_->CalculateOverScroll(lastOffset_, ReachMaxCount());
+        if (!NearZero(overScroll)) {
+            scrollEffect_->HandleOverScroll(axis_, overScroll, viewPort_);
+        }
+    }
+}
 
 void ScrollPattern::HandleScrollBarOutBoundary() {}
 
@@ -575,18 +584,35 @@ void ScrollPattern::RemoveScrollEdgeEffect()
 
 void ScrollPattern::SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect)
 {
-    if (scrollEffect && scrollEffect->IsSpringEffect()) {
-        auto springEffect = AceType::DynamicCast<ScrollSpringEffect>(scrollEffect);
-        CHECK_NULL_VOID(springEffect);
-        springEffect->SetOutBoundaryCallback([weakScroll = AceType::WeakClaim(this)]() {
-            auto scroll = weakScroll.Upgrade();
-            if (scroll) {
-                return scroll->IsOutOfBoundary();
-            }
-            return false;
-        });
-        // add callback to springEdgeEffect
-        SetEdgeEffectCallback(scrollEffect);
+    if (scrollEffect) {
+        if (scrollEffect->IsSpringEffect()) {
+            auto springEffect = AceType::DynamicCast<ScrollSpringEffect>(scrollEffect);
+            CHECK_NULL_VOID(springEffect);
+            springEffect->SetOutBoundaryCallback([weakScroll = AceType::WeakClaim(this)]() {
+                auto scroll = weakScroll.Upgrade();
+                if (scroll) {
+                    return scroll->IsOutOfBoundary();
+                }
+                return false;
+            });
+            // add callback to springEdgeEffect
+            SetEdgeEffectCallback(scrollEffect);
+        }
+        if (scrollEffect->IsFadeEffect()) {
+            scrollEffect->SetHandleOverScrollCallback([weakScroll = AceType::WeakClaim(this)]() -> void {
+                auto scroll = weakScroll.Upgrade();
+                if (scroll == nullptr) {
+                    return;
+                }
+                auto host = scroll->GetHost();
+                if (host == nullptr) {
+                    return;
+                }
+                host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            });
+            SetEdgeEffectCallback(scrollEffect);
+            scrollEffect->InitialEdgeEffect();
+        }
     }
     RemoveScrollEdgeEffect();
     scrollEffect_ = scrollEffect;
