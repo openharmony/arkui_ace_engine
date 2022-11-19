@@ -18,6 +18,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -100,7 +101,42 @@ HWTEST_F(FlexPatternTestNg, FlexWrapFrameNodeCreator001, TestSize.Level1)
 }
 
 /**
- * @tc.name: FlexWrapFrameNodeCreator001
+ * @tc.name: FlexWrapFrameNodeCreator002
+ * @tc.desc: Test creating flex then switch to wrap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexPatternTestNg, FlexWrapFrameNodeCreator002, TestSize.Level1)
+{
+    FlexModelNG instance;
+    // create a regular flex
+    instance.CreateFlexRow();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_FALSE(frameNode == nullptr);
+    auto pattern = frameNode->GetPattern<FlexLayoutPattern>();
+    EXPECT_TRUE(!pattern->GetIsWrap());
+    auto flexId = frameNode->GetId();
+    instance.SetDirection(FlexDirection::COLUMN);
+    instance.SetMainAxisAlign(FlexAlign::FLEX_END);
+    instance.SetCrossAxisAlign(FlexAlign::SPACE_AROUND);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_FALSE(layoutProperty == nullptr);
+    RefPtr<FlexLayoutProperty> flexLayoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutProperty);
+    EXPECT_FALSE(flexLayoutProperty == nullptr);
+    EXPECT_EQ(flexLayoutProperty->GetFlexDirectionValue(FlexDirection::ROW) == FlexDirection::COLUMN, true);
+    EXPECT_EQ(flexLayoutProperty->GetMainAxisAlignValue(FlexAlign::FLEX_START) == FlexAlign::FLEX_END, true);
+    EXPECT_EQ(flexLayoutProperty->GetCrossAxisAlignValue(FlexAlign::FLEX_START) == FlexAlign::SPACE_AROUND, true);
+    ViewStackProcessor::GetInstance()->Finish();
+    instance.CreateWrap();
+    frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_FALSE(frameNode == nullptr);
+    // after creating wrap, id should be the same and node should use wrap layout algorithm
+    EXPECT_EQ(frameNode->GetId(), flexId);
+    pattern = frameNode->GetPattern<FlexLayoutPattern>();
+    EXPECT_TRUE(pattern->GetIsWrap());
+}
+
+/**
+ * @tc.name: FlexWrapFrameNodeLayout001
  * @tc.desc: Test layout of flex wrap.
  * @tc.type: FUNC
  */
