@@ -242,7 +242,6 @@ private:
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
 
-
     RectF AdjustPaintRect();
 
     DataReadyNotifyTask CreateBgImageDataReadyCallback();
