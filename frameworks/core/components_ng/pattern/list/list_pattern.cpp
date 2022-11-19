@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
@@ -78,7 +79,7 @@ void ListPattern::OnModifyDone()
         SetScrollEdgeEffect(scrollEdgeEffect);
         gestureHub->AddScrollEdgeEffect(GetDirection(), scrollEffect_);
     }
-
+    SetScrollBar();
     auto focusHub = host->GetFocusHub();
     if (focusHub) {
         InitOnKeyEvent(focusHub);
@@ -126,11 +127,12 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (currentOffset_ != lastOffset_) {
         ProcessEvent(indexChanged, finalOffset);
     }
+    UpdateScrollBarOffset();
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
-    return listLayoutProperty && listLayoutProperty->GetDivider().has_value();
+    return (listLayoutProperty && listLayoutProperty->GetDivider().has_value()) || scrollBar_;
 }
 
 void ListPattern::ProcessEvent(bool indexChanged, float finalOffset)
@@ -241,7 +243,7 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
 bool ListPattern::UpdateCurrentOffset(float offset)
 {
     // check edgeEffect is not springEffect
-    if (!(scrollEffect_ && scrollEffect_->IsSpringEffect())) {
+    if (!(scrollEffect_ && scrollEffect_->IsSpringEffect()) || !isScrollContent_) {
         if ((startIndex_ == 0) && NonNegative(startMainPos_) && Positive(offset)) {
             return false;
         }
@@ -293,6 +295,7 @@ void ListPattern::ProcessScrollEnd()
     if (onScrollStop) {
         onScrollStop();
     }
+    isScrollContent_ = true;
     SetScrollStop(true);
 }
 
@@ -303,6 +306,15 @@ float ListPattern::GetMainContentSize() const
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0);
     return geometryNode->GetPaddingSize().MainSize(GetDirection());
+}
+
+SizeF ListPattern::GetContentSize() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, SizeF());
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, SizeF());
+    return geometryNode->GetPaddingSize();
 }
 
 Axis ListPattern::GetDirection() const
@@ -335,6 +347,13 @@ void ListPattern::InitScrollableEvent()
         pattern->SetScrollStop(false);
         pattern->SetScrollState(source);
         if (source != SCROLL_FROM_START) {
+            if (!pattern->isScrollContent_ && pattern->scrollBar_) {
+                if (source == SCROLL_FROM_UPDATE) {
+                    offset = pattern->scrollBar_->CalcPatternOffset(-offset);
+                } else {
+                    return false;
+                }
+            }
             return pattern->UpdateCurrentOffset(static_cast<float>(offset));
         }
         return true;
@@ -352,9 +371,7 @@ void ListPattern::InitScrollableEvent()
     auto onScrollBegin = listEventHub->GetOnScrollBegin();
     if (onScrollBegin) {
         auto scrollBeginTask = [weak = WeakClaim(this)](Dimension dx, Dimension dy) {
-            ScrollInfo scrollInfo;
-            scrollInfo.dx = dx;
-            scrollInfo.dy = dy;
+            ScrollInfo scrollInfo = { dx, dy };
             auto pattern = weak.Upgrade();
             CHECK_NULL_RETURN(pattern, scrollInfo);
             auto host = pattern->GetHost();
@@ -547,4 +564,100 @@ Offset ListPattern::GetCurrentOffset() const
     }
     return {0.0, GetTotalOffset()};
 }
+
+void ListPattern::SetScrollBar()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listPaintProperty = host->GetPaintProperty<ListPaintProperty>();
+    auto displayMode = listPaintProperty->GetBarDisplayMode().value_or(DisplayMode::OFF);
+    if (displayMode == DisplayMode::OFF) {
+        if (scrollBar_) {
+            scrollBar_.Reset();
+        }
+        if (touchEvent_) {
+            auto hub = host->GetEventHub<EventHub>();
+            CHECK_NULL_VOID(hub);
+            auto gestureHub = hub->GetOrCreateGestureEventHub();
+            CHECK_NULL_VOID(gestureHub);
+            gestureHub->RemoveTouchEvent(touchEvent_);
+            touchEvent_.Reset();
+        }
+    } else if (!scrollBar_) {
+        scrollBar_ = AceType::MakeRefPtr<ScrollBar>(displayMode);
+        // set the scroll bar style
+        if (GetDirection() == Axis::HORIZONTAL) {
+            scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+        }
+        RegisterScrollBarEventTask();
+    } else if (scrollBar_->GetDisplayMode() != displayMode) {
+        scrollBar_->SetDisplayMode(displayMode);
+    } else {
+        return;
+    }
+
+    if (isInitialized_) {
+        UpdateScrollBarOffset();
+    }
+}
+
+void ListPattern::UpdateScrollBarOffset()
+{
+    if (!scrollBar_) {
+        return;
+    }
+    if (itemPosition_.empty()) {
+        return;
+    }
+    SizeF ContentSize = GetContentSize();
+    Size size(ContentSize.Width(), ContentSize.Height());
+    float itemsSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
+    float currentOffset = itemsSize / itemPosition_.size() * itemPosition_.begin()->first - startMainPos_;
+    Offset scrollOffset = { currentOffset, currentOffset }; // fit for w/h switched.
+    auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1);
+    scrollBar_->SetDriving(!isScrollContent_);
+    scrollBar_->UpdateScrollBarRegion(Offset(), size, scrollOffset, estimatedHeight);
+}
+
+void ListPattern::RegisterScrollBarEventTask()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (touchEvent_) {
+        gestureHub->RemoveTouchEvent(touchEvent_);
+    }
+    touchEvent_ = MakeRefPtr<TouchEventImpl>([weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto scrollBar = pattern->scrollBar_;
+        CHECK_NULL_VOID(scrollBar);
+        if (info.GetTouches().empty()) {
+            return;
+        }
+        auto touch = info.GetTouches().front();
+        if (touch.GetTouchType() == TouchType::DOWN) {
+            Point point(touch.GetLocalLocation().GetX(), touch.GetLocalLocation().GetY());
+            if (scrollBar->InBarRegion(point)) {
+                scrollBar->SetPressed(true);
+                pattern->isScrollContent_ = false;
+            } else {
+                scrollBar->SetPressed(false);
+                pattern->isScrollContent_ = true;
+            }
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+            scrollBar->SetPressed(false);
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+    });
+    gestureHub->AddTouchEvent(touchEvent_);
+}
+
 } // namespace OHOS::Ace::NG

@@ -21,8 +21,10 @@
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_paint_method.h"
+#include "core/components_ng/pattern/list/list_paint_property.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -43,7 +45,9 @@ public:
         auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
         auto lanes = listLayoutProperty->GetLanes().value_or(1);
         auto drawVertical = (axis == Axis::HORIZONTAL);
-        return MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes, spaceWidth_, itemPosition_);
+        auto paint =  MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes, spaceWidth_, itemPosition_);
+        paint->SetScrollBar(AceType::WeakClaim(AceType::RawPtr(scrollBar_)));
+        return paint;
     }
 
     bool IsAtomicNode() const override
@@ -54,6 +58,11 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<ListLayoutProperty>();
+    }
+
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<ListPaintProperty>();
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -147,6 +156,10 @@ public:
     bool ScrollPage(bool reverse);
     Offset GetCurrentOffset() const;
 
+    void SetScrollBar();
+    void UpdateScrollBarOffset();
+    void RegisterScrollBarEventTask();
+
 private:
     void ProcessScrollEnd();
 
@@ -158,6 +171,7 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
 
+    SizeF GetContentSize() const;
     float GetMainContentSize() const;
     void ProcessEvent(bool indexChanged, float finalOffset);
     void CheckScrollable();
@@ -188,6 +202,10 @@ private:
     ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
     int32_t scrollIndex_ = 0;
     bool scrollable_ = true;
+
+    RefPtr<ScrollBar> scrollBar_;
+    RefPtr<TouchEventImpl> touchEvent_;
+    bool isScrollContent_ = true;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
     bool isScroll_ = false;

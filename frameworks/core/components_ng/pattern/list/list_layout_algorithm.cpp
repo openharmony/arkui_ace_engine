@@ -187,7 +187,7 @@ void ListLayoutAlgorithm::MeasureList(
         LOGD("StartIndex index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
             startIndex, currentOffset_, startMainPos_, endMainPos_);
         LayoutForward(layoutWrapper, layoutConstraint, axis, startIndex, startPos);
-        if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
+        if (GreatNotEqual(GetStartPosition(), startMainPos_)) {
             LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
         }
     }
