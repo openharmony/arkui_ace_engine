@@ -43,7 +43,6 @@ void ListLayoutAlgorithm::UpdateListItemConstraint(
         auto width = selfIdealSize.Width();
         if (width.has_value()) {
             contentConstraint.maxSize.SetWidth(width.value());
-            contentConstraint.minSize.SetWidth(width.value());
         }
         return;
     }
@@ -51,7 +50,6 @@ void ListLayoutAlgorithm::UpdateListItemConstraint(
     auto height = selfIdealSize.Height();
     if (height.has_value()) {
         contentConstraint.maxSize.SetHeight(height.value());
-        contentConstraint.minSize.SetHeight(height.value());
     }
 }
 
@@ -159,8 +157,10 @@ void ListLayoutAlgorithm::MeasureList(
 {
     int32_t startIndex = 0;
     float startPos = 0.0f;
+    float endPos = 0.0f;
     if (!itemPosition_.empty()) {
         startPos = itemPosition_.begin()->second.startPos;
+        endPos = itemPosition_.begin()->second.endPos;
         startIndex = std::min(GetStartIndex(), totalItemCount_ - 1);
         itemPosition_.clear();
         layoutWrapper->RemoveAllChildInRenderTree();
@@ -188,9 +188,16 @@ void ListLayoutAlgorithm::MeasureList(
     } else {
         LOGD("StartIndex index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
             startIndex, currentOffset_, startMainPos_, endMainPos_);
-        LayoutForward(layoutWrapper, layoutConstraint, axis, startIndex, startPos);
-        if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
-            LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
+        if (NonNegative(currentOffset_)) {
+            LayoutForward(layoutWrapper, layoutConstraint, axis, startIndex, startPos);
+            if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
+                LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
+            }
+        } else {
+            LayoutBackward(layoutWrapper, layoutConstraint, axis, startIndex, endPos);
+            if (GetEndIndex() < (totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
+                LayoutForward(layoutWrapper, layoutConstraint, axis, GetEndIndex() + 1, GetEndPosition());
+            }
         }
     }
     GetHeaderFooterGroupNode(layoutWrapper);
