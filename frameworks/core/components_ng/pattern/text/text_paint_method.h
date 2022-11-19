@@ -22,7 +22,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paragraph.h"
 
@@ -41,9 +40,7 @@ public:
         auto offset = paintWrapper->GetContentOffset();
         auto paintOffset = offset - OffsetF(0.0, baselineOffset_);
         return [paragraph = paragraph_, paintOffset](RSCanvas& canvas) {
-            SkCanvas* skCanvas = canvas.GetImpl<Rosen::Drawing::SkiaCanvas>()->ExportSkCanvas();
-            auto paragraphCanvas = Canvas::Create(skCanvas);
-            paragraph->Paint(paragraphCanvas, paintOffset.GetX(), paintOffset.GetY());
+            paragraph->Paint(canvas, paintOffset.GetX(), paintOffset.GetY());
         };
     }
 
