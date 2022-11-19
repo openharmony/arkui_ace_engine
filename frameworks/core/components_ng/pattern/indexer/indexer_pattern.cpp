@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
 
 #include "base/utils/utils.h"
+#include "core/components/indexer/indexer_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
@@ -246,18 +247,21 @@ void IndexerPattern::ApplyIndexChanged()
     if (onPopupSelected && (selected_ >= 0) && (selected_ < itemCount_)) {
         onPopupSelected(selected_);
     }
-        
-    auto color = layoutProperty->GetColor().value_or(Color(INDEXER_LIST_COLOR));
-    auto selectedColor = layoutProperty->GetSelectedColor().value_or(Color(INDEXER_LIST_ACTIVE_COLOR));
-    auto popupColor = layoutProperty->GetPopupColor().value_or(Color(BUBBLE_FONT_COLOR));
-    auto selectedBackgroundColor = layoutProperty->GetSelectedBackgroundColor()
-        .value_or(Color(INDEXER_ACTIVE_BG_COLOR));
-    auto popupBackground = layoutProperty->GetPopupBackground().value_or(Color(BUBBLE_BG_COLOR));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    auto color = layoutProperty->GetColor().value_or(indexerTheme->GetColor());
+    auto selectedColor = layoutProperty->GetSelectedColor().value_or(indexerTheme->GetSelectedColor());
+    auto popupColor = layoutProperty->GetPopupColor().value_or(indexerTheme->GetPopupColor());
+    auto selectedBackgroundColor =
+        layoutProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSeclectedBackgroundColor());
+    auto popupBackground = layoutProperty->GetPopupBackground().value_or(indexerTheme->GetPopupBackgroundColor());
     auto usingPopup = layoutProperty->GetUsingPopup().value_or(false);
-    TextStyle textStyle;
-    auto selectedFont = layoutProperty->GetSelectedFont().value_or(textStyle);
-    auto popupFont = layoutProperty->GetPopupFont().value_or(textStyle);
-    auto font = layoutProperty->GetFont().value_or(textStyle);
+    auto selectedFont = layoutProperty->GetSelectedFont().value_or(indexerTheme->GetSelectedFont());
+    auto popupFont = layoutProperty->GetPopupFont().value_or(indexerTheme->GetPopupFont());
+    auto font = layoutProperty->GetFont().value_or(indexerTheme->GetFont());
 
     int32_t index = 0;
     auto childrenNode = host->GetChildren();
