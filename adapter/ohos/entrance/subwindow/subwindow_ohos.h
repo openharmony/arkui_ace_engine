@@ -117,6 +117,7 @@ private:
     int32_t targetId_ = -1;
     bool isToastWindow_ = false;
     int32_t popupTargetId_ = -1;
+    bool isShowed_ = false;
 };
 
 } // namespace OHOS::Ace
