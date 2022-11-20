@@ -532,6 +532,12 @@ bool PipelineContext::OnBackPressed()
         return false;
     }
 
+    // if has popup, back press would hide popup and not trigger page back
+    if (overlayManager_->RemoveOverlay()) {
+        LOGI("popup hidden: back press accepted");
+        return true;
+    }
+
     auto result = false;
     taskExecutor_->PostSyncTask(
         [weakFrontend = weakFrontend_, weakPipelineContext = WeakClaim(this), &result]() {
