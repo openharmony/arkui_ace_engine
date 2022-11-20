@@ -233,6 +233,7 @@ build_component_ng("pattern_ng") {
     "select_overlay/select_overlay_property.cpp",
     "shape/circle_model_ng.cpp",
     "shape/ellipse_model_ng.cpp",
+    "shape/line_layout_algorithm.cpp",
     "shape/line_model_ng.cpp",
     "shape/path_model_ng.cpp",
     "shape/polygon_model_ng.cpp",
