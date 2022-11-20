@@ -220,7 +220,7 @@ void CheckBoxPattern::UpdateUnSelect()
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (!paintProperty->GetCheckBoxSelectValue()) {
+    if (paintProperty->HasCheckBoxSelect() && !paintProperty->GetCheckBoxSelectValue()) {
         uiStatus_ = UIStatus::UNSELECTED;
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
