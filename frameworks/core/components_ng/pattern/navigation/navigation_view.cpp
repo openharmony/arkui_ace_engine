@@ -531,7 +531,7 @@ void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
         BuildMoreIemNode(barItemNode);
 
         OffsetF offset(0, 0);
-        auto barMenuNode = MenuView::Create(std::move(params), V2::BAR_ITEM_ETS_TAG, barItemNodeId, offset, true);
+        auto barMenuNode = MenuView::Create(std::move(params), barItemNodeId, MenuType::NavigationMenu);
         BuildMoreItemNodeAction(barItemNode, barMenuNode);
         menuNode->AddChild(barItemNode);
         navBarNode->SetMenuNode(barMenuNode);

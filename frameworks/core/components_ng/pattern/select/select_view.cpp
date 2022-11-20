@@ -39,7 +39,7 @@ void SelectView::Create(const std::vector<SelectParam>& params)
     pattern->BuildChild();
 
     // create menu node
-    auto menu = MenuView::Create(params, V2::SELECT_ETS_TAG, nodeId);
+    auto menu = MenuView::Create(params, nodeId);
     pattern->SetMenuNode(menu);
 
     // store option pointers in select
