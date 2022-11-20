@@ -113,9 +113,9 @@ void DialogPattern::HandleTouchUp(const Offset& clickPosition)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto dialogRenderProp = host->GetPaintProperty<DialogRenderProperty>();
-    CHECK_NULL_VOID(dialogRenderProp);
-    auto autoCancel = dialogRenderProp->GetAutoCancel().value_or(true);
+    auto props = host->GetLayoutProperty<DialogLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    auto autoCancel = props->GetAutoCancel().value_or(true);
     if (autoCancel) {
         auto content = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
         CHECK_NULL_VOID(content);
