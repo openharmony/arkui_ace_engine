@@ -200,9 +200,10 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
     if (transitionType != PageTransitionType::NONE) {
-        pagePattern->TriggerPageTransition(transitionType, [weak = WeakPtr<PagePattern>(pagePattern)]() {
+        pagePattern->TriggerPageTransition(transitionType, [pageNode]() {
             LOGI("pageTransition exit finish");
-            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pageNode);
+            auto pattern = pageNode->GetPattern<PagePattern>();
             CHECK_NULL_VOID(pattern);
             pattern->OnHide();
         });
