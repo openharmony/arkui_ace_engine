@@ -24,9 +24,8 @@
 #include <string>
 #include <vector>
 
-
-#include "base/geometry/dimension.h"
 #include "base/geometry/calc_dimension.h"
+#include "base/geometry/dimension.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
 
@@ -182,6 +181,18 @@ inline double StringToDouble(const std::string& value)
     }
 }
 
+inline bool StringToDouble(const std::string& value, double& res)
+{
+    char* pEnd = nullptr;
+    double result = std::strtod(value.c_str(), &pEnd);
+    if (pEnd == value.c_str() || errno == ERANGE) {
+        return false;
+    } else {
+        res = result;
+        return true;
+    }
+}
+
 inline float StringToFloat(const std::string& value)
 {
     char* pEnd = nullptr;
@@ -228,7 +239,6 @@ inline CalcDimension StringToCalcDimension(const std::string& value, bool useVp 
         return StringToDimensionWithUnit(value, useVp ? DimensionUnit::VP : DimensionUnit::PX);
     }
 }
-
 
 inline Dimension StringToDimension(const std::string& value, bool useVp = false)
 {
