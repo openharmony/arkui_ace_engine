@@ -70,7 +70,8 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // calculate main size.
     auto contentConstraint = listLayoutProperty->GetContentLayoutConstraint().value();
     auto contentIdealSize = CreateIdealSize(
-        contentConstraint, axis, listLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS));
+        contentConstraint, axis, listLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS),
+        listLayoutProperty->CreateMargin());
 
     const auto& padding = listLayoutProperty->CreatePaddingAndBorder();
     paddingBeforeContent_ = axis == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
