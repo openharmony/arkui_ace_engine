@@ -85,6 +85,8 @@ void PipelineContext::WindowFocus(bool isFocus) {}
 
 void PipelineContext::ShowContainerTitle(bool isShow) {}
 
+void PipelineContext::SetContainerWindow(bool isShow) {}
+
 void PipelineContext::SetAppBgColor(const Color& color) {}
 
 void PipelineContext::SetAppTitle(const std::string& title) {}

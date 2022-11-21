@@ -59,6 +59,9 @@ void ContainerModalPattern::ShowTitle(bool isShow)
     CHECK_NULL_VOID(floatingTitleNode);
     windowMode_ = PipelineContext::GetCurrentContext()->GetWindowManager()->GetWindowMode();
 
+    // set container window show state to RS
+    PipelineContext::GetCurrentContext()->SetContainerWindow(isShow);
+
     // update container modal padding and border
     auto layoutProperty = containerNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);

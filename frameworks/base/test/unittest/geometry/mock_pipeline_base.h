@@ -69,6 +69,7 @@ public:
     MOCK_METHOD(void, ShowContainerTitle, (bool isShow), (override));
     MOCK_METHOD(void, SetAppTitle, (const std::string& title), (override));
     MOCK_METHOD(void, SetAppIcon, (const RefPtr<PixelMap>& icon), (override));
+    MOCK_METHOD(void, SetContainerWindow, (bool isShow), (override));
 
 private:
     MOCK_METHOD(void, FlushVsync, (uint64_t nanoTimestamp, uint32_t frameCount), (override));
