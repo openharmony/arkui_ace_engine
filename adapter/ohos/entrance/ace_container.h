@@ -190,7 +190,7 @@ public:
         resourceInfo_.SetPackagePath(packagePath);
     }
 
-    std::string GetHapPath() const
+    std::string GetHapPath() const override
     {
         return resourceInfo_.GetHapPath();
     }
