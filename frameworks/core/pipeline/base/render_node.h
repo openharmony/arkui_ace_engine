@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/rect.h"
+#include "base/geometry/matrix4.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/system_properties.h"

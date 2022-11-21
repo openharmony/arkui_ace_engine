@@ -148,6 +148,15 @@ public:
         }
     }
 
+    Matrix4 GetTransformMatrix(const Offset& offset)
+    {
+        Matrix4 transform = GetTransformByOffset(UpdateWithEffectMatrix(transform_), origin_);
+        if (!offset.IsZero()) {
+            transform = GetTransformByOffset(transform, offset);
+        }
+        return transform;
+    }
+
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;

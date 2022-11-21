@@ -657,6 +657,18 @@ std::string InspectorComposedElement::GetRect()
         rect.SetRect(0, 0, 0, 0);
     }
 
+    if (accessibilityNode_) {
+        auto render = AceType::DynamicCast<RenderTransform>(GetInspectorNode(TransformElement::TypeId()));
+        if (render || accessibilityNode_->GetMatrix4Flag()) {
+            if (render) {
+                auto transformNow = render->GetTransformMatrix(render->GetTransitionPaintRect().GetOffset());
+                accessibilityNode_->SetTransformToChild(transformNow);
+            }
+            Matrix4 transform = accessibilityNode_->GetMatrix4();
+            rect = accessibilityNode_->GetRectWithTransform(rect, transform);
+        }
+    }
+
     strRec = std::to_string(rect.Left())
                  .append(",")
                  .append(std::to_string(rect.Top()))
