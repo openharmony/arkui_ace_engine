@@ -145,6 +145,16 @@ public:
         animationDuration_ = animationDuration;
     }
 
+    void SetTouching(bool isTouching)
+    {
+        touching_ = isTouching;
+    }
+
+    bool IsTouching() const
+    {
+        return touching_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -153,8 +163,14 @@ private:
     void InitClick(const RefPtr<GestureEventHub>& gestureHub);
     void InitScrollable(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouch(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleClick(const GestureEvent& info) const;
+    void HandleClick(const GestureEvent& info);
     void HandleTouchEvent(const TouchLocationInfo& info);
+
+    void HandleTouchDown(int32_t index);
+    void HandleTouchUp(int32_t index);
+    int32_t CalculateSelectedIndex(const Offset& info);
+
+    void PlayPressAnimation(int32_t index, float endOpacityRatio);
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -170,6 +186,10 @@ private:
     std::optional<int32_t> animationDuration_;
 
     bool isRTL_ = false; // TODO Adapt RTL.
+
+    bool touching_ = false; // whether the item is in touching
+    float hoverOpacity_ = 0.0;
+    int32_t touchingIndex_ = 0;
 };
 } // namespace OHOS::Ace::NG
 
