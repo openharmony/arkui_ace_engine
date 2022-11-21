@@ -41,34 +41,22 @@ public:
         std::string progressTypeUtils = "";
         switch (progressType) {
             case ProgressType::LINEAR:
-                progressTypeUtils = "ProgressType.LINEAR";
-                break;
-            case ProgressType::RING:
-                progressTypeUtils = "ProgressType.RING";
-                break;
-            case ProgressType::SCALE:
-                progressTypeUtils = "ProgressType.SCALE";
-                break;
-            case ProgressType::CIRCLE:
-                progressTypeUtils = "ProgressType.CIRCLE";
-                break;
-            case ProgressType::GAUGE:
-                progressTypeUtils = "ProgressType.GAUGE";
-                break;
-            case ProgressType::ARC:
-                progressTypeUtils = "ProgressType.ARC";
+                progressTypeUtils = "ProgressStyle.Linear";
                 break;
             case ProgressType::MOON:
-                progressTypeUtils = "ProgressType.MOON";
+                progressTypeUtils = "ProgressStyle.Eclipse";
                 break;
-            case ProgressType::BUBBLE:
-                progressTypeUtils = "ProgressType.BUBBLE";
+            case ProgressType::SCALE:
+                progressTypeUtils = "ProgressStyle.ScaleRing";
+                break;
+            case ProgressType::RING:
+                progressTypeUtils = "ProgressStyle.Ring";
                 break;
             case ProgressType::CAPSULE:
-                progressTypeUtils = "ProgressType.CAPSULE";
+                progressTypeUtils = "ProgressStyle.Capsule";
                 break;
             default:
-                progressTypeUtils = "ProgressType.DEFAULT";
+                progressTypeUtils = "ProgressStyle.Linear";
         }
         return progressTypeUtils;
     }

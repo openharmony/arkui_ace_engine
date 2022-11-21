@@ -62,11 +62,8 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     dialogLayoutProp->UpdateDialogAlignment(param.alignment);
     dialogLayoutProp->UpdateDialogOffset(param.offset);
     dialogLayoutProp->UpdateGridCount(param.gridCount);
-    dialogLayoutProp->UpdateUseCustom(param.useCustom);
-    auto dialogRenderProp = dialog->GetPaintProperty<DialogRenderProperty>();
-    CHECK_NULL_RETURN(dialogRenderProp, dialog);
-    dialogRenderProp->UpdateAutoCancel(param.autoCancel);
-    dialogRenderProp->UpdateUseCustomStyle(param.customStyle);
+    dialogLayoutProp->UpdateUseCustomStyle(param.customStyle);
+    dialogLayoutProp->UpdateAutoCancel(param.autoCancel);
     // create gray background
     auto dialogContext = dialog->GetRenderContext();
     CHECK_NULL_RETURN(dialogContext, dialog);

@@ -14,12 +14,6 @@
  */
 #ifndef TEST_FUZZTEST_RES_FUZZER_H
 #define TEST_FUZZTEST_RES_FUZZER_H
-#include <climits>
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <fcntl.h>
-#include <unistd.h>
 
 #define FUZZ_PROJECT_NAME "res_fuzzer"
 #endif // TEST_FUZZTEST_RES_LOADER_FUZZER_H

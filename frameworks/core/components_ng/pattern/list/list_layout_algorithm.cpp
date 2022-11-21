@@ -43,7 +43,6 @@ void ListLayoutAlgorithm::UpdateListItemConstraint(
         auto width = selfIdealSize.Width();
         if (width.has_value()) {
             contentConstraint.maxSize.SetWidth(width.value());
-            contentConstraint.minSize.SetWidth(width.value());
         }
         return;
     }
@@ -51,7 +50,6 @@ void ListLayoutAlgorithm::UpdateListItemConstraint(
     auto height = selfIdealSize.Height();
     if (height.has_value()) {
         contentConstraint.maxSize.SetHeight(height.value());
-        contentConstraint.minSize.SetHeight(height.value());
     }
 }
 
@@ -94,11 +92,9 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     if (totalItemCount_ > 0) {
+        currentOffset_ = currentDelta_;
         startMainPos_ = currentOffset_;
         endMainPos_ = currentOffset_ + contentMainSize_;
-        LOGD("pre start index: %{public}d, pre end index: %{public}d, offset is %{public}f, startMainPos: %{public}f, "
-             "endMainPos: %{public}f",
-            preStartIndex_, preEndIndex_, currentOffset_, startMainPos_, endMainPos_);
         stickyStyle_ = listLayoutProperty->GetStickyStyle().value_or(V2::StickyStyle::NONE);
         auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis);
         auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
@@ -110,12 +106,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             if (dividerSpace.has_value()) {
                 spaceWidth_ = std::max(spaceWidth_, dividerSpace.value());
             }
-        }
-
-        if (!itemPosition_.empty()) {
-            preStartPos_ = itemPosition_.begin()->second.startPos;
-            preEndPos_ = itemPosition_.rbegin()->second.endPos;
-            itemPosition_.clear();
         }
 
         CalculateLanes(listLayoutProperty, layoutConstraint, axis);
@@ -143,20 +133,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         GetStartIndex(), GetEndIndex(), currentOffset_, contentMainSize_);
 }
 
-void ListLayoutAlgorithm::RecyclePrevIndex(LayoutWrapper* layoutWrapper)
-{
-    if (preStartIndex_ < GetStartIndex() && preStartIndex_ >= 0) {
-        for (int32_t i = preStartIndex_; i < GetStartIndex(); i++) {
-            layoutWrapper->RemoveChildInRenderTree(i);
-        }
-    }
-    if (preEndIndex_ > GetEndIndex()) {
-        for (int32_t i = GetEndIndex() + 1; i <= preEndIndex_; i++) {
-            layoutWrapper->RemoveChildInRenderTree(i);
-        }
-    }
-}
-
 void ListLayoutAlgorithm::CalculateEstimateOffset()
 {
     if (itemPosition_.empty()) {
@@ -179,36 +155,51 @@ void ListLayoutAlgorithm::CalculateEstimateOffset()
 void ListLayoutAlgorithm::MeasureList(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis)
 {
+    int32_t startIndex = 0;
+    float startPos = 0.0f;
+    float endPos = 0.0f;
+    if (!itemPosition_.empty()) {
+        startPos = itemPosition_.begin()->second.startPos;
+        endPos = itemPosition_.begin()->second.endPos;
+        startIndex = std::min(GetStartIndex(), totalItemCount_ - 1);
+        itemPosition_.clear();
+        layoutWrapper->RemoveAllChildInRenderTree();
+    }
     if (jumpIndex_) {
-        if (totalItemCount_ == 0) {
-            LOGI("child size is empty");
-            return;
-        }
+        LOGD("Jump index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
+            jumpIndex_.value(), currentOffset_, startMainPos_, endMainPos_);
         if (jumpIndex_.value() < 0 || jumpIndex_.value() >= totalItemCount_) {
             LOGW("jump index is illegal, %{public}d, %{public}d", jumpIndex_.value(), totalItemCount_);
             jumpIndex_ = std::clamp(jumpIndex_.value(), 0, totalItemCount_ - 1);
         }
         jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value());
         if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_TOP) {
-            LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), 0.0f);
-            float endPos = itemPosition_.begin()->second.startPos - spaceWidth_;
-            if (jumpIndex_.value() > 0 && GreatNotEqual(endPos, startMainPos_)) {
-                LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, endPos);
+            LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), startMainPos_);
+            if (jumpIndex_.value() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
+                LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, GetStartPosition());
             }
         } else if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_BUTTON) {
             LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), endMainPos_);
-            float startPos = itemPosition_.rbegin()->second.endPos + spaceWidth_;
-            if (jumpIndex_.value() < totalItemCount_ - 1 && LessNotEqual(startPos, endMainPos_)) {
-                LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() + 1, startPos);
+            if (jumpIndex_.value() < totalItemCount_ - 1 && LessNotEqual(GetEndPosition(), endMainPos_)) {
+                LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() + 1, GetEndPosition());
             }
         }
         CalculateEstimateOffset();
-    } else if (NonNegative(currentOffset_)) {
-        LayoutForward(layoutWrapper, layoutConstraint, axis, preStartIndex_, preStartPos_);
     } else {
-        LayoutBackward(layoutWrapper, layoutConstraint, axis, preEndIndex_, preEndPos_);
+        LOGD("StartIndex index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
+            startIndex, currentOffset_, startMainPos_, endMainPos_);
+        if (NonNegative(currentOffset_)) {
+            LayoutForward(layoutWrapper, layoutConstraint, axis, startIndex, startPos);
+            if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
+                LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
+            }
+        } else {
+            LayoutBackward(layoutWrapper, layoutConstraint, axis, startIndex, endPos);
+            if (GetEndIndex() < (totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
+                LayoutForward(layoutWrapper, layoutConstraint, axis, GetEndIndex() + 1, GetEndPosition());
+            }
+        }
     }
-    RecyclePrevIndex(layoutWrapper);
     GetHeaderFooterGroupNode(layoutWrapper);
 }
 
@@ -302,9 +293,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
             }
         } else {
             // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
-            auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-            auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
-            if ((edgeEffect != EdgeEffect::SPRING) || jumpIndex_.has_value()) {
+            if (!canOverScroll_ || jumpIndex_.has_value()) {
                 currentOffset_ = currentEndPos - contentMainSize_;
                 LOGD("LayoutForward: adjust offset to %{public}f", currentOffset_);
                 startMainPos_ = currentOffset_;
@@ -358,10 +347,8 @@ void ListLayoutAlgorithm::LayoutBackward(
 
     bool normalToOverScroll = false;
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
-    auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
     if (GreatNotEqual(currentStartPos, startMainPos_)) {
-        if ((edgeEffect != EdgeEffect::SPRING) || jumpIndex_.has_value()) {
+        if (!canOverScroll_ || jumpIndex_.has_value()) {
             currentOffset_ = currentStartPos;
             endMainPos_ = currentOffset_ + contentMainSize_;
             startMainPos_ = currentStartPos;

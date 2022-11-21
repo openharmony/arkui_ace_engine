@@ -15,16 +15,17 @@
 
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 
-#include "third_party/skia/include/effects/SkBlurImageFilter.h"
 #include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 #include "flutter/third_party/txt/src/txt/paragraph_style.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
+#include "third_party/skia/include/effects/SkBlurImageFilter.h"
 #include "third_party/skia/include/encode/SkJpegEncoder.h"
 #include "third_party/skia/include/encode/SkPngEncoder.h"
 #include "third_party/skia/include/encode/SkWebpEncoder.h"
 #include "third_party/skia/include/utils/SkBase64.h"
 
 #include "base/i18n/localization.h"
+#include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
 #include "core/components/common/painter/flutter_decoration_painter.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
@@ -69,7 +70,7 @@ double GetQuality(const std::string& args, const double quality)
 } // namespace
 
 OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(
-    const RefPtr<PipelineContext> context, int32_t width, int32_t height)
+    const RefPtr<PipelineBase> context, int32_t width, int32_t height)
 {
     isOffscreen_ = true;
     antiAlias_ = true;
@@ -423,7 +424,7 @@ double OffscreenCanvasPaintMethod::BlurStrToDouble(const std::string& str)
     return ret;
 }
 
-void OffscreenCanvasPaintMethod::ImageObjReady(const RefPtr<ImageObject>& imageObj)
+void OffscreenCanvasPaintMethod::ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj)
 {
     if (imageObj->IsSvg()) {
         skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj)->GetSkiaDom();
@@ -454,8 +455,8 @@ void OffscreenCanvasPaintMethod::DrawImage(
     }
 
     auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
-                        ? ImageProvider::GetSkImage(canvasImage.src, context_, Size(width, height))
-                        : ImageProvider::GetSkImage(canvasImage.src, context_);
+                     ? Ace::ImageProvider::GetSkImage(canvasImage.src, context_, Size(width, height))
+                     : Ace::ImageProvider::GetSkImage(canvasImage.src, context_);
     if (!image) {
         LOGE("image is null");
         return;
@@ -503,13 +504,13 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
     }
 
     // get skImage form pixelMap
-    auto imageInfo = ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
+    auto imageInfo = Ace::ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
     SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
 
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> image;
 
-    image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+    image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     if (!image) {
         LOGE("image is null");
         return;

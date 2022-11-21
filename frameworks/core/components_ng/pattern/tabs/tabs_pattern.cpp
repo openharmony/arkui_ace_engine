@@ -47,8 +47,14 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().back());
     CHECK_NULL_VOID(swiperNode);
 
-    ChangeEvent changeEvent([tabBarPattern, jsEvent = std::move(event)](int32_t index) {
+    ChangeEvent changeEvent([tabBarNode, tabBarPattern, jsEvent = std::move(event)](int32_t index) {
+        auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
+        CHECK_NULL_VOID(tabBarLayoutProperty);
         tabBarPattern->UpdateIndicator(index);
+        tabBarPattern->UpdateTextColor(index);
+        if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
+            tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
         /* js callback */
         if (jsEvent) {
             TabContentChangeEvent eventInfo(index);

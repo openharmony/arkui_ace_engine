@@ -18,8 +18,11 @@
 
 #include "gtest/gtest.h"
 
+#include "core/common/ace_engine.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/test/unittest/geometry/mock_pipeline_base.h"
+#include "base/test/unittest/geometry/mock_container.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -43,11 +46,23 @@ namespace OHOS::Ace::NG {
 
 class OffscreenCanvasPaintPatternTestNg : public testing::Test {
 public:
+    // Create the pointer of the class OffscreenCanvasPattern
+    static RefPtr<OffscreenCanvasPattern> CreateOffscreenCanvasPattern(int32_t width, int32_t height);
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
+
+RefPtr<OffscreenCanvasPattern> OffscreenCanvasPaintPatternTestNg::CreateOffscreenCanvasPattern(
+    int32_t width, int32_t height)
+{
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    RefPtr<PipelineBase> pipelineContext = AceType::MakeRefPtr<MockPipelineBase>();
+    RefPtr<Container> container = AceType::MakeRefPtr<MockContainer>(pipelineContext);
+    AceEngine::Get().AddContainer(DEFAULT_INSTANCE_ID, container);
+    return AceType::MakeRefPtr<OffscreenCanvasPattern>(width, height);
+}
 
 void OffscreenCanvasPaintPatternTestNg::SetUpTestCase()
 {
@@ -71,42 +86,34 @@ void OffscreenCanvasPaintPatternTestNg::TearDown()
 
 /**
  * @tc.name: OffscreenCanvasPaintPatternTestNg001
- * @tc.desc: Test attributes of the object customPattern.
+ * @tc.desc: Test functions of the object customPattern.
  * @tc.type: FUNC
  */
 HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg001, TestSize.Level1)
 {
-    auto offscreenCanvasPattern = AceType::MakeRefPtr<OffscreenCanvasPattern>(CANVAS_WIDTH, CANVAS_HEIGHT);
-    EXPECT_FALSE(offscreenCanvasPattern == nullptr);
-    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>(nullptr, CANVAS_WIDTH, CANVAS_HEIGHT);
-    offscreenCanvasPattern->offscreenPaintMethod_ = paintMethod;
-    EXPECT_FALSE(offscreenCanvasPattern->offscreenPaintMethod_ == nullptr);
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto offscreenCanvasPattern = CreateOffscreenCanvasPattern(CANVAS_WIDTH, CANVAS_HEIGHT);
+    ASSERT_NE(offscreenCanvasPattern, nullptr);
+    auto paintMethod = offscreenCanvasPattern->offscreenPaintMethod_;
+    ASSERT_NE(paintMethod, nullptr);
+
+    /**
+     * @tc.steps2: Test functions GetWidth and GetHeight.
+     * @tc.expected: The return values are equal to which used to create the object of OffscreenCanvasPattern.
+     */
     EXPECT_EQ(offscreenCanvasPattern->GetWidth(), CANVAS_WIDTH);
     EXPECT_EQ(offscreenCanvasPattern->GetHeight(), CANVAS_HEIGHT);
-    // The function GetTextDirection always returns TextDirection::LTR.
+
+    /**
+     * @tc.steps3: Test functions GetTextDirection.
+     * @tc.expected: The function GetTextDirection always returns TextDirection::LTR..
+     */
     for (const std::string& item : CANDIDATE_STRINGS) {
         EXPECT_EQ(paintMethod->GetTextDirection(item), TextDirection::LTR);
     }
-    std::unique_ptr<MockParagraph> mockParagraph = std::make_unique<MockParagraph>();
-    EXPECT_CALL(*mockParagraph, GetMaxIntrinsicWidth()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE));
-    EXPECT_CALL(*mockParagraph, GetAlphabeticBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE));
-    EXPECT_CALL(*mockParagraph, GetIdeographicBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE));
-    EXPECT_CALL(*mockParagraph, GetHeight()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE));
-
-    std::unique_ptr<txt::Paragraph> paragraph(std::move(mockParagraph));
-    EXPECT_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::LEFT, paragraph), 0.0);
-    EXPECT_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::RIGHT, paragraph), -DEFAULT_DOUBLE);
-    EXPECT_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::CENTER, paragraph), -DEFAULT_DOUBLE/2);
-    EXPECT_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::JUSTIFY, paragraph), 0.0);
-    EXPECT_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::START, paragraph), 0.0);
-    EXPECT_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::END, paragraph), -DEFAULT_DOUBLE);
-
-    EXPECT_EQ(paintMethod->GetBaselineOffset(TextBaseline::ALPHABETIC, paragraph), -DEFAULT_DOUBLE);
-    EXPECT_EQ(paintMethod->GetBaselineOffset(TextBaseline::IDEOGRAPHIC, paragraph), -DEFAULT_DOUBLE);
-    EXPECT_EQ(paintMethod->GetBaselineOffset(TextBaseline::TOP, paragraph), 0.0);
-    EXPECT_EQ(paintMethod->GetBaselineOffset(TextBaseline::BOTTOM, paragraph), -DEFAULT_DOUBLE);
-    EXPECT_EQ(paintMethod->GetBaselineOffset(TextBaseline::MIDDLE, paragraph), -DEFAULT_DOUBLE / 2);
-    EXPECT_EQ(paintMethod->GetBaselineOffset(TextBaseline::HANGING, paragraph), 0.0);
 }
 
 /**
@@ -116,12 +123,20 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg001
  */
 HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg002, TestSize.Level1)
 {
-    // Access to private properties and methods is implemented using macro definitions during testing.
-    auto offscreenCanvasPattern = AceType::MakeRefPtr<OffscreenCanvasPattern>(CANVAS_WIDTH, CANVAS_HEIGHT);
-    EXPECT_FALSE(offscreenCanvasPattern == nullptr);
-    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>(nullptr, CANVAS_WIDTH, CANVAS_HEIGHT);
-    offscreenCanvasPattern->offscreenPaintMethod_ = paintMethod;
-    EXPECT_FALSE(offscreenCanvasPattern->offscreenPaintMethod_ == nullptr);
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto offscreenCanvasPattern = CreateOffscreenCanvasPattern(CANVAS_WIDTH, CANVAS_HEIGHT);
+    ASSERT_NE(offscreenCanvasPattern, nullptr);
+    auto paintMethod = offscreenCanvasPattern->offscreenPaintMethod_;
+    ASSERT_NE(paintMethod, nullptr);
+
+    /**
+     * @tc.steps2: Test all interfaces beginning with "Get" and "Set", which related to the variable fillState_.
+     * @tc.expected: The return values of interfaces beginning with "Get" are equal to the input parameters of
+     *               corresponding interfaces beginning with "Set"
+     */
     for (auto color : CANDIDATE_COLORS) {
         offscreenCanvasPattern->SetFillColor(color);
         EXPECT_EQ(paintMethod->fillState_.GetColor(), color);
@@ -130,8 +145,8 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg002
 
     Ace::Pattern imagePattern;
     offscreenCanvasPattern->SetFillPattern(imagePattern);
-    EXPECT_EQ(paintMethod->fillState_.GetPattern().GetImageWidth(), 0);
-    EXPECT_EQ(paintMethod->fillState_.GetPattern().GetImageHeight(), 0);
+    EXPECT_DOUBLE_EQ(paintMethod->fillState_.GetPattern().GetImageWidth(), DEFAULT_DOUBLE0);
+    EXPECT_DOUBLE_EQ(paintMethod->fillState_.GetPattern().GetImageHeight(), DEFAULT_DOUBLE0);
     EXPECT_EQ(paintMethod->fillState_.GetPattern().GetImgSrc(), NULL_STR);
     EXPECT_EQ(paintMethod->fillState_.GetPattern().GetRepetition(), NULL_STR);
     imagePattern.SetImageWidth(IDEAL_WIDTH);
@@ -139,8 +154,8 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg002
     imagePattern.SetImgSrc(IMAGE_SRC);
     imagePattern.SetRepetition(REPETITION_STR);
     offscreenCanvasPattern->SetFillPattern(imagePattern);
-    EXPECT_EQ(paintMethod->fillState_.GetPattern().GetImageWidth(), IDEAL_WIDTH);
-    EXPECT_EQ(paintMethod->fillState_.GetPattern().GetImageHeight(), IDEAL_HEIGHT);
+    EXPECT_DOUBLE_EQ(paintMethod->fillState_.GetPattern().GetImageWidth(), IDEAL_WIDTH);
+    EXPECT_DOUBLE_EQ(paintMethod->fillState_.GetPattern().GetImageHeight(), IDEAL_HEIGHT);
     EXPECT_EQ(paintMethod->fillState_.GetPattern().GetImgSrc(), IMAGE_SRC);
     EXPECT_EQ(paintMethod->fillState_.GetPattern().GetRepetition(), REPETITION_STR);
     
@@ -187,12 +202,20 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg002
  */
 HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg003, TestSize.Level1)
 {
-    // Access to private properties and methods is implemented using macro definitions during testing.
-    auto offscreenCanvasPattern = AceType::MakeRefPtr<OffscreenCanvasPattern>(CANVAS_WIDTH, CANVAS_HEIGHT);
-    EXPECT_FALSE(offscreenCanvasPattern == nullptr);
-    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>(nullptr, CANVAS_WIDTH, CANVAS_HEIGHT);
-    offscreenCanvasPattern->offscreenPaintMethod_ = paintMethod;
-    EXPECT_FALSE(offscreenCanvasPattern->offscreenPaintMethod_ == nullptr);
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto offscreenCanvasPattern = CreateOffscreenCanvasPattern(CANVAS_WIDTH, CANVAS_HEIGHT);
+    ASSERT_NE(offscreenCanvasPattern, nullptr);
+    auto paintMethod = offscreenCanvasPattern->offscreenPaintMethod_;
+    ASSERT_NE(paintMethod, nullptr);
+
+    /**
+     * @tc.steps2: Test all interfaces beginning with "Get" and "Set", which related to the variable strokeState_.
+     * @tc.expected: The return values of interfaces beginning with "Get" are equal to the input parameters of
+     *               corresponding interfaces beginning with "Set"
+     */
     for (auto color : CANDIDATE_COLORS) {
         offscreenCanvasPattern->SetStrokeColor(color);
         EXPECT_EQ(paintMethod->strokeState_.GetColor(), color);
@@ -200,8 +223,8 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg003
 
     Ace::Pattern imagePattern;
     offscreenCanvasPattern->SetStrokePattern(imagePattern);
-    EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetImageWidth(), 0);
-    EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetImageHeight(), 0);
+    EXPECT_DOUBLE_EQ(paintMethod->strokeState_.GetPattern().GetImageWidth(), DEFAULT_DOUBLE0);
+    EXPECT_DOUBLE_EQ(paintMethod->strokeState_.GetPattern().GetImageHeight(), DEFAULT_DOUBLE0);
     EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetImgSrc(), NULL_STR);
     EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetRepetition(), NULL_STR);
     imagePattern.SetImageWidth(IDEAL_WIDTH);
@@ -209,8 +232,8 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg003
     imagePattern.SetImgSrc(IMAGE_SRC);
     imagePattern.SetRepetition(REPETITION_STR);
     offscreenCanvasPattern->SetStrokePattern(imagePattern);
-    EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetImageWidth(), IDEAL_WIDTH);
-    EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetImageHeight(), IDEAL_HEIGHT);
+    EXPECT_DOUBLE_EQ(paintMethod->strokeState_.GetPattern().GetImageWidth(), IDEAL_WIDTH);
+    EXPECT_DOUBLE_EQ(paintMethod->strokeState_.GetPattern().GetImageHeight(), IDEAL_HEIGHT);
     EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetImgSrc(), IMAGE_SRC);
     EXPECT_EQ(paintMethod->strokeState_.GetPattern().GetRepetition(), REPETITION_STR);
 
@@ -278,15 +301,23 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg003
  */
 HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg004, TestSize.Level1)
 {
-    // Access to private properties and methods is implemented using macro definitions during testing.
-    auto offscreenCanvasPattern = AceType::MakeRefPtr<OffscreenCanvasPattern>(CANVAS_WIDTH, CANVAS_HEIGHT);
-    EXPECT_FALSE(offscreenCanvasPattern == nullptr);
-    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>(nullptr, CANVAS_WIDTH, CANVAS_HEIGHT);
-    offscreenCanvasPattern->offscreenPaintMethod_ = paintMethod;
-    EXPECT_FALSE(offscreenCanvasPattern->offscreenPaintMethod_ == nullptr);
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto offscreenCanvasPattern = CreateOffscreenCanvasPattern(CANVAS_WIDTH, CANVAS_HEIGHT);
+    ASSERT_NE(offscreenCanvasPattern, nullptr);
+    auto paintMethod = offscreenCanvasPattern->offscreenPaintMethod_;
+    ASSERT_NE(paintMethod, nullptr);
+
+    /**
+     * @tc.steps2: Test all interfaces beginning with "Get" and "Set", which related to the variable globalState_.
+     * @tc.expected: The return values of interfaces beginning with "Get" are equal to the input parameters of
+     *               corresponding interfaces beginning with "Set"
+     */
     for (double item : CANDIDATE_DOUBLES) {
         offscreenCanvasPattern->SetAlpha(item);
-        EXPECT_EQ(paintMethod->globalState_.GetAlpha(), item);
+        EXPECT_DOUBLE_EQ(paintMethod->globalState_.GetAlpha(), item);
     }
     for (auto compositeOperation : CANDIDATE_COMPOSITE_OPERATIONS) {
         offscreenCanvasPattern->SetCompositeType(compositeOperation);
@@ -301,12 +332,20 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg004
  */
 HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg005, TestSize.Level1)
 {
-    // Access to private properties and methods is implemented using macro definitions during testing.
-    auto offscreenCanvasPattern = AceType::MakeRefPtr<OffscreenCanvasPattern>(CANVAS_WIDTH, CANVAS_HEIGHT);
-    EXPECT_FALSE(offscreenCanvasPattern == nullptr);
-    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>(nullptr, CANVAS_WIDTH, CANVAS_HEIGHT);
-    offscreenCanvasPattern->offscreenPaintMethod_ = paintMethod;
-    EXPECT_FALSE(offscreenCanvasPattern->offscreenPaintMethod_ == nullptr);
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto offscreenCanvasPattern = CreateOffscreenCanvasPattern(CANVAS_WIDTH, CANVAS_HEIGHT);
+    ASSERT_NE(offscreenCanvasPattern, nullptr);
+    auto paintMethod = offscreenCanvasPattern->offscreenPaintMethod_;
+    ASSERT_NE(paintMethod, nullptr);
+
+    /**
+     * @tc.steps2: Test all interfaces beginning with "Get" and "Set", which related to the variable shadow_.
+     * @tc.expected: The return values of interfaces beginning with "Get" are equal to the input parameters of
+     *               corresponding interfaces beginning with "Set"
+     */
     for (auto color : CANDIDATE_COLORS) {
         offscreenCanvasPattern->SetShadowColor(color);
         EXPECT_EQ(paintMethod->shadow_.GetColor(), color);
@@ -315,18 +354,99 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg005
     offscreenCanvasPattern->SetShadowOffsetY(CANDIDATE_DOUBLES[0]);
     offscreenCanvasPattern->SetShadowBlur(CANDIDATE_DOUBLES[0]);
     EXPECT_FALSE(paintMethod->HasShadow());
-    EXPECT_EQ(paintMethod->shadow_.GetOffset().GetX(), CANDIDATE_DOUBLES[0]);
-    EXPECT_EQ(paintMethod->shadow_.GetOffset().GetY(), CANDIDATE_DOUBLES[0]);
-    EXPECT_EQ(paintMethod->shadow_.GetBlurRadius(), CANDIDATE_DOUBLES[0]);
+    EXPECT_DOUBLE_EQ(paintMethod->shadow_.GetOffset().GetX(), CANDIDATE_DOUBLES[0]);
+    EXPECT_DOUBLE_EQ(paintMethod->shadow_.GetOffset().GetY(), CANDIDATE_DOUBLES[0]);
+    EXPECT_DOUBLE_EQ(paintMethod->shadow_.GetBlurRadius(), CANDIDATE_DOUBLES[0]);
     for (uint32_t i = 1; i < CANDIDATE_DOUBLES.size(); ++i) {
         offscreenCanvasPattern->SetShadowOffsetX(CANDIDATE_DOUBLES[i]);
         offscreenCanvasPattern->SetShadowOffsetY(CANDIDATE_DOUBLES[i]);
         offscreenCanvasPattern->SetShadowBlur(CANDIDATE_DOUBLES[i]);
         EXPECT_TRUE(paintMethod->HasShadow());
-        EXPECT_EQ(paintMethod->shadow_.GetOffset().GetX(), CANDIDATE_DOUBLES[i]);
-        EXPECT_EQ(paintMethod->shadow_.GetOffset().GetY(), CANDIDATE_DOUBLES[i]);
-        EXPECT_EQ(paintMethod->shadow_.GetBlurRadius(), CANDIDATE_DOUBLES[i]);
+        EXPECT_DOUBLE_EQ(paintMethod->shadow_.GetOffset().GetX(), CANDIDATE_DOUBLES[i]);
+        EXPECT_DOUBLE_EQ(paintMethod->shadow_.GetOffset().GetY(), CANDIDATE_DOUBLES[i]);
+        EXPECT_DOUBLE_EQ(paintMethod->shadow_.GetBlurRadius(), CANDIDATE_DOUBLES[i]);
     }
+}
+
+/**
+ * @tc.name: OffscreenCanvasPaintPatternTestNg006
+ * @tc.desc: Test all functions about OffscreenCanvasPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg006, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto offscreenCanvasPattern = CreateOffscreenCanvasPattern(CANVAS_WIDTH, CANVAS_HEIGHT);
+    ASSERT_NE(offscreenCanvasPattern, nullptr);
+    auto paintMethod = offscreenCanvasPattern->offscreenPaintMethod_;
+    ASSERT_NE(paintMethod, nullptr);
+
+    /**
+     * @tc.steps2: Test the function ToDataURL.
+     * @tc.expected: The return value is affected by the first parameter.
+     */
+    std::string result = offscreenCanvasPattern->ToDataURL(IMAGE_PNG, DEFAULT_DOUBLE1);
+    EXPECT_EQ(result.substr(URL_PREFIX.size(), IMAGE_PNG.size()), IMAGE_PNG);
+    result = offscreenCanvasPattern->ToDataURL(IMAGE_JPEG, -DEFAULT_DOUBLE2);
+    EXPECT_EQ(result.substr(URL_PREFIX.size(), IMAGE_JPEG.size()), IMAGE_JPEG);
+    result = offscreenCanvasPattern->ToDataURL(IMAGE_WEBP, -DEFAULT_DOUBLE1);
+    EXPECT_EQ(result.substr(URL_PREFIX.size(), IMAGE_WEBP.size()), IMAGE_WEBP);
+
+    /**
+     * @tc.steps3: Test functions SetFillRuleForPath and SetFillRuleForPath2D.
+     * @tc.expected: The corresponding attributes are modified.
+     */
+    for (uint32_t i = 0; i < CANDIDATE_CANVAS_FILL_RULES.size(); ++i) {
+        offscreenCanvasPattern->SetFillRuleForPath(CANDIDATE_CANVAS_FILL_RULES[i]);
+        EXPECT_EQ(paintMethod->skPath_.getFillType(), CANDIDATE_SKPATH_FILL_TYPES[i]);
+        offscreenCanvasPattern->SetFillRuleForPath2D(CANDIDATE_CANVAS_FILL_RULES[i]);
+        EXPECT_EQ(paintMethod->skPath2d_.getFillType(), CANDIDATE_SKPATH_FILL_TYPES[i]);
+    }
+
+    /**
+     * @tc.steps4: Test functions SetSmoothingEnabled and SetAntiAlias.
+     * @tc.expected: The corresponding attributes are modified.
+     */
+    offscreenCanvasPattern->SetSmoothingEnabled(true);
+    EXPECT_TRUE(paintMethod->smoothingEnabled_);
+    offscreenCanvasPattern->SetSmoothingEnabled(false);
+    EXPECT_FALSE(paintMethod->smoothingEnabled_);
+    offscreenCanvasPattern->SetAntiAlias(true);
+    EXPECT_TRUE(paintMethod->antiAlias_);
+    offscreenCanvasPattern->SetAntiAlias(false);
+    EXPECT_FALSE(paintMethod->antiAlias_);
+
+    /**
+     * @tc.steps4: Test the function GetImageData.
+     * @tc.expected: The attributes dirtyWidth and dirtyHeight of return value are equal to DEFAULT_DOUBLE1.
+     */
+    auto imageData1 = offscreenCanvasPattern->GetImageData(
+        DEFAULT_DOUBLE1, DEFAULT_DOUBLE1, DEFAULT_DOUBLE1, DEFAULT_DOUBLE1);
+    EXPECT_DOUBLE_EQ(imageData1->dirtyWidth, DEFAULT_DOUBLE1);
+    EXPECT_DOUBLE_EQ(imageData1->dirtyHeight, DEFAULT_DOUBLE1);
+
+    /**
+     * @tc.steps5: Call the function MeasureTextMetrics.
+     * @tc.expected: All parts of the return TextMetrics object are equal to zero.
+     */
+    PaintState paintState;
+    TextMetrics textMetrics = offscreenCanvasPattern->MeasureTextMetrics(DEFAULT_STR, paintState);
+    EXPECT_DOUBLE_EQ(textMetrics.width, DEFAULT_DOUBLE0);
+    EXPECT_DOUBLE_EQ(textMetrics.height, DEFAULT_DOUBLE0);
+    EXPECT_DOUBLE_EQ(textMetrics.actualBoundingBoxLeft, DEFAULT_DOUBLE0);
+    EXPECT_DOUBLE_EQ(textMetrics.actualBoundingBoxRight, DEFAULT_DOUBLE0);
+    EXPECT_DOUBLE_EQ(textMetrics.actualBoundingBoxAscent, DEFAULT_DOUBLE0);
+    EXPECT_DOUBLE_EQ(textMetrics.actualBoundingBoxDescent, DEFAULT_DOUBLE0);
+
+    /**
+     * @tc.steps6: Call functions MeasureText and MeasureTextHeight.
+     * @tc.expected: All return values are equal to zero.
+     */
+    EXPECT_DOUBLE_EQ(offscreenCanvasPattern->MeasureText(DEFAULT_STR, paintState), DEFAULT_DOUBLE0);
+    EXPECT_DOUBLE_EQ(offscreenCanvasPattern->MeasureTextHeight(DEFAULT_STR, paintState), DEFAULT_DOUBLE0);
 }
 
 } // namespace OHOS::Ace::NG

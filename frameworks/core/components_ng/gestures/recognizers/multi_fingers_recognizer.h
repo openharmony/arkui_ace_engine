@@ -34,8 +34,13 @@ public:
 
     void UpdateFingerListInfo(const Offset& coordinateOffset);
 
+    bool CheckTouchId(int32_t touchId) override
+    {
+        return touchPoints_.find(touchId) != touchPoints_.end();
+    }
+
 protected:
-    void OnBeginGestureReferee(int32_t touchId) override
+    void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override
     {
         touchPoints_[touchId] = {};
     }

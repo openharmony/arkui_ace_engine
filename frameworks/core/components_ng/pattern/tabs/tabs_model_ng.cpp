@@ -34,6 +34,11 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
+namespace {
+
+constexpr int32_t ANIMATION_DURATION_DEFAULT = 200;
+
+} // namespace
 namespace OHOS::Ace::NG {
 
 void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<TabController>& /*tabController*/,
@@ -53,7 +58,10 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     swiperPaintProperty->UpdateLoop(false);
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
-    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateCachedCount(0);
+    swiperPaintProperty->UpdateDuration(ANIMATION_DURATION_DEFAULT);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    swiperLayoutProperty->UpdateCachedCount(0);
+    swiperLayoutProperty->UpdateShowIndicator(false);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     auto controller = swiperController;
@@ -130,13 +138,29 @@ void TabsModelNG::SetIsVertical(bool isVertical)
 
 void TabsModelNG::SetIndex(int32_t index)
 {
-    auto swiperLayoutProperty = GetSwiperLayoutProperty();
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().back());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
     swiperLayoutProperty->UpdateIndex(index);
-
+    auto tabContentNum = swiperNode->TotalChildCount();
+    if (tabContentNum == 0) {
+        return;
+    }
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().front());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
     auto tabBarLayoutProperty = GetTabBarLayoutProperty();
     CHECK_NULL_VOID(tabBarLayoutProperty);
+    if (index > tabContentNum - 1 || index < 0) {
+        index = 0;
+    }
     tabBarLayoutProperty->UpdateIndicator(index);
+    tabBarPattern->UpdateTextColor(index);
+    swiperLayoutProperty->UpdateIndex(index);
 }
 
 void TabsModelNG::SetScrollable(bool scrollable)
@@ -148,6 +172,16 @@ void TabsModelNG::SetScrollable(bool scrollable)
 
 void TabsModelNG::SetAnimationDuration(float duration)
 {
+    if (duration < 0) {
+        return;
+    }
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().front());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    tabBarPattern->SetAnimationDuration(static_cast<int32_t>(duration));
     auto swiperPaintProperty = GetSwiperPaintProperty();
     CHECK_NULL_VOID(swiperPaintProperty);
     swiperPaintProperty->UpdateDuration(static_cast<int32_t>(duration));

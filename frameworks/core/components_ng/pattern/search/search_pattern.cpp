@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components/search/search_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -35,9 +36,13 @@ void SearchPattern::OnModifyDone()
     auto searchButton = layoutProperty->GetSearchButton();
     searchButton_ = searchButton.has_value() ? searchButton->value() : "";
     InitSearchController();
-    // Image click event
     auto imageFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(1));
     CHECK_NULL_VOID(imageFrameNode);
+    imageFrameNode->MarkModifyDone();
+    auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(2));
+    CHECK_NULL_VOID(buttonFrameNode);
+    buttonFrameNode->MarkModifyDone();
+    // Image click event
     if (imageClickListener_) {
         return;
     }
@@ -48,13 +53,9 @@ void SearchPattern::OnModifyDone()
         CHECK_NULL_VOID(searchPattern);
         searchPattern->OnClickButtonAndImage();
     };
-
     imageClickListener_ = MakeRefPtr<ClickEvent>(std::move(imageClickCallback));
     imageGesture->AddClickEvent(imageClickListener_);
-
     // Button click event
-    auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(2));
-    CHECK_NULL_VOID(buttonFrameNode);
     if (buttonClickListener_) {
         return;
     }

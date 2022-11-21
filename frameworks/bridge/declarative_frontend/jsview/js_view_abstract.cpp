@@ -3313,9 +3313,8 @@ void JSViewAbstract::JsShadow(const JSCallbackInfo& info)
     }
     double radius = 0.0;
     ParseJsonDouble(argsPtrItem->GetValue("radius"), radius);
-    if (LessOrEqual(radius, 0.0)) {
-        LOGE("JsShadow Parse radius failed, radius = %{public}lf", radius);
-        return;
+    if (LessNotEqual(radius, 0.0)) {
+        radius = 0.0;
     }
     std::vector<Shadow> shadows(1);
     shadows.begin()->SetBlurRadius(radius);
@@ -4368,6 +4367,7 @@ void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
     auto ratioArray = JSRef<JSArray>::Cast(info[0]);
     size_t size = ratioArray->Length();
     std::vector<double> ratioVec(size);
+    ratioVec.clear();
     for (size_t i = 0; i < size; i++) {
         double ratio = 0.0;
         ParseJsDouble(ratioArray->GetValueAt(i), ratio);

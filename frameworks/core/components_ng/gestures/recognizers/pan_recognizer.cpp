@@ -99,7 +99,7 @@ void PanRecognizer::OnRejected()
 
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    LOGD("pan recognizer receives touch down event, begin to detect pan event");
+    LOGI("pan recognizer receives %{public}d touch down event, begin to detect pan event", event.id);
     fingers_ = newFingers_;
     distance_ = newDistance_;
     direction_ = newDirection_;
@@ -110,11 +110,13 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
 
     if (fingers_ > MAX_PAN_FINGERS) {
+        LOGI("fingers_ is larger than max fingers");
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
 
     if (direction_.type == PanDirection::NONE) {
+        LOGI("the direction type is none");
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -127,11 +129,6 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
     auto fingerNum = static_cast<int32_t>(touchPoints_.size());
 
-    if (fingerNum > fingers_) {
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
-        return;
-    }
-
     if (fingerNum == fingers_) {
         velocityTracker_.Reset();
         velocityTracker_.UpdateTouchPoint(event);
@@ -141,7 +138,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
-    LOGD("pan recognizer receives axis start event, begin to detect pan event");
+    LOGI("pan recognizer receives axis start event, begin to detect pan event");
     fingers_ = newFingers_;
     distance_ = newDistance_;
     direction_ = newDirection_;
@@ -156,6 +153,7 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     }
 
     if (direction_.type == PanDirection::NONE) {
+        LOGI("the direction type is none");
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -169,7 +167,7 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    LOGD("pan recognizer receives touch up event");
+    LOGI("pan recognizer receives %{public}d touch up event", event.id);
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
     velocityTracker_.UpdateTouchPoint(event, true);
@@ -189,7 +187,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
-    LOGD("pan recognizer receives axis end event");
+    LOGI("pan recognizer receives axis end event");
     globalPoint_ = Point(event.x, event.y);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -343,22 +341,21 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
             return GestureAcceptResult::ACCEPT;
         }
         return GestureAcceptResult::DETECTING;
-    } else {
-        if ((direction_.type & PanDirection::VERTICAL) != 0) {
-            double offset = averageDistance_.GetY();
-            if (fabs(offset) < distance_) {
-                return GestureAcceptResult::DETECTING;
-            }
-            if ((direction_.type & PanDirection::UP) == 0 && offset < 0) {
-                return GestureAcceptResult::REJECT;
-            }
-            if ((direction_.type & PanDirection::DOWN) == 0 && offset > 0) {
-                return GestureAcceptResult::REJECT;
-            }
-            return GestureAcceptResult::ACCEPT;
-        }
-        return GestureAcceptResult::DETECTING;
     }
+    if ((direction_.type & PanDirection::VERTICAL) != 0) {
+        double offset = averageDistance_.GetY();
+        if (fabs(offset) < distance_) {
+            return GestureAcceptResult::DETECTING;
+        }
+        if ((direction_.type & PanDirection::UP) == 0 && offset < 0) {
+            return GestureAcceptResult::REJECT;
+        }
+        if ((direction_.type & PanDirection::DOWN) == 0 && offset > 0) {
+            return GestureAcceptResult::REJECT;
+        }
+        return GestureAcceptResult::ACCEPT;
+    }
+    return GestureAcceptResult::DETECTING;
 }
 
 void PanRecognizer::OnResetStatus()

@@ -137,6 +137,7 @@ std::string NavBarNode::GetBarItemsString(bool isMenu) const
 
 void NavBarNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
+    FrameNode::ToJsonValue(json);
     json->Put("title", GetTitleString().c_str());
     json->Put("subtitle", GetSubtitleString().c_str());
     json->Put("menus", GetBarItemsString(true).c_str());

@@ -297,6 +297,7 @@ void RenderSelectPopup::CreatePopupAnimation(bool isMenu)
     auto hideAlphaAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(1.0f, 0.0f, Curves::FAST_OUT_SLOW_IN);
     TweenOption hideOption;
     hideOption.SetDuration(theme->GetHideTime(isMenu));
+    hideOption.SetFillMode(FillMode::FORWARDS);
     hideOption.SetTransformFloatAnimation(AnimationType::SCALE, hideScaleAnimation);
     hideOption.SetOpacityAnimation(hideAlphaAnimation);
     selectPopup_->SetHideOption(hideOption);

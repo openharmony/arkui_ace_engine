@@ -59,7 +59,6 @@ private:
     RectF touchRegion_;
     OffsetF topLeftPoint_;
 
-    bool isLimit_ = true;
     int32_t gridCount_ = -1;
     DimensionOffset dialogOffset_;
     DialogAlignment alignment_ = DialogAlignment::DEFAULT;

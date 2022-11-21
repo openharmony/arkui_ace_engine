@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
+#include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 
@@ -79,6 +80,11 @@ public:
         return MakeRefPtr<SwiperEventHub>();
     }
 
+    int32_t GetCurrentShownIndex() const
+    {
+        return currentIndex_;
+    }
+
     RefPtr<SwiperController> GetSwiperController() const
     {
         return swiperController_;
@@ -117,6 +123,11 @@ public:
         }
     }
 
+    void SetSwiperParameters(const SwiperParameters& swiperParameters)
+    {
+        swiperParameters_ = swiperParameters;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -137,6 +148,9 @@ private:
 
     // Init controller of swiper, controller support showNext, showPrevious and finishAnimation interface.
     void InitSwiperController();
+
+    // Init swiper indicator
+    void InitSwiperIndicator();
 
     void HandleDragStart();
     void HandleDragUpdate(const GestureEvent& info);
@@ -162,7 +176,7 @@ private:
     void Tick(uint64_t duration);
     void StopAutoPlay();
     void StartAutoPlay();
-    bool IsOutOfBoundary(double mainOffset) const;
+    bool IsOutOfBoundary(float mainOffset) const;
     float MainSize() const;
     void FireChangeEvent() const;
     void CalculateCacheRange();
@@ -177,6 +191,7 @@ private:
     bool IsAutoPlay() const;
     bool IsLoop() const;
     bool IsDisableSwipe() const;
+    bool IsShowIndicator() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -209,6 +224,8 @@ private:
     uint64_t elapsedTime_ = 0; // millisecond.
 
     ChangeEventPtr changeEvent_;
+
+    SwiperParameters swiperParameters_;
 };
 } // namespace OHOS::Ace::NG
 

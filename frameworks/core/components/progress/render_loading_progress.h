@@ -44,6 +44,12 @@ public:
         // Refresh will set new diameter when window size changed.
         if (!NearEqual(NormalizeToPx(diameter), diameter_)) {
             diameterDimension_ = diameter;
+            if (ringController_) {
+                ringController_->Stop();
+            }
+            if (cometController_) {
+                cometController_->Stop();
+            }
             ringController_ = nullptr;
             cometController_ = nullptr;
             usedScale_ = 0.0;

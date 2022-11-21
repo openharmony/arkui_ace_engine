@@ -46,6 +46,8 @@ CanvasDrawFunction SwitchPaintMethod::GetContentDrawFunction(PaintWrapper* paint
 void SwitchPaintMethod::PaintContent(
     RSCanvas& canvas, RefPtr<SwitchPaintProperty> paintProperty, SizeF contentSize, OffsetF contentOffset)
 {
+    constexpr uint8_t ENABLED_ALPHA = 255;
+    constexpr uint8_t DISABLED_ALPHA = 102;
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
@@ -62,8 +64,14 @@ void SwitchPaintMethod::PaintContent(
     auto hoverRadius_ = radius - radiusGap_;
 
     RSBrush brush;
-    brush.SetColor(ToRSColor(switchTheme->GetInactiveColor()));
+    auto inactiveColor = switchTheme->GetInactiveColor();
+    if (!enabled_) {
+        brush.SetColor(ToRSColor(inactiveColor.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
+    } else {
+        brush.SetColor(ToRSColor(inactiveColor));
+    }
     brush.SetBlendMode(RSBlendMode::SRC_OVER);
+    brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
 
     rosen::Rect rect;
@@ -75,7 +83,13 @@ void SwitchPaintMethod::PaintContent(
     canvas.DrawRoundRect(roundRect);
 
     if (!NearEqual(mainDelta_, 0)) {
-        brush.SetColor(ToRSColor(paintProperty->GetSelectedColor().value_or(switchTheme->GetActiveColor())));
+        auto selectedColor = paintProperty->GetSelectedColor().value_or(switchTheme->GetActiveColor());
+        if (!enabled_) {
+            brush.SetColor(ToRSColor(selectedColor.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
+        } else {
+            brush.SetColor(ToRSColor(selectedColor));
+        }
+        brush.SetAntiAlias(true);
         canvas.AttachBrush(brush);
         rosen::Rect rectCover;
         rectCover.SetLeft(xOffset);
@@ -86,6 +100,7 @@ void SwitchPaintMethod::PaintContent(
         canvas.DrawRoundRect(roundRectCover);
     }
     brush.SetColor(ToRSColor(paintProperty->GetSwitchPointColor().value_or(switchTheme->GetPointColor())));
+    brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
     rosen::Point point;
     point.SetX(xOffset + borderWidth_ + hoverRadius_ + mainDelta_);

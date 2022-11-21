@@ -249,7 +249,7 @@ void CustomPaintPaintMethod::InitImagePaint()
 void CustomPaintPaintMethod::InitImageCallbacks()
 {
     imageObjSuccessCallback_ = [weak = AceType::WeakClaim(this)](
-                                   ImageSourceInfo info, const RefPtr<ImageObject>& imageObj) {
+                                   ImageSourceInfo info, const RefPtr<Ace::ImageObject>& imageObj) {
         auto paintMethod = weak.Upgrade();
         if (paintMethod->loadingSource_ == info) {
             paintMethod->ImageObjReady(imageObj);

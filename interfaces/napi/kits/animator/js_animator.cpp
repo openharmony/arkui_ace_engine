@@ -284,12 +284,21 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
     auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(option->begin, option->end, curve);
     // convert onframe function to reference
     napi_ref onframeRef = animatorResult->GetOnframeRef();
+    if (onframeRef) {
+        uint32_t count = 0;
+        napi_reference_unref(env, onframeRef, &count);
+    }
     napi_create_reference(env, onframe, 1, &onframeRef);
+    animatorResult->SetOnframeRef(onframeRef);
     animation->AddListener([env, onframeRef](double value) {
         napi_value ret = nullptr;
         napi_value valueNapi = nullptr;
         napi_value onframe = nullptr;
-        napi_get_reference_value(env, onframeRef, &onframe);
+        auto result = napi_get_reference_value(env, onframeRef, &onframe);
+        if (result != napi_ok || onframe == nullptr) {
+            LOGW("get onframe in callback failed");
+            return;
+        }
         napi_create_double(env, value, &valueNapi);
         napi_call_function(env, NULL, onframe, 1, &valueNapi, &ret);
     });
@@ -325,13 +334,22 @@ static napi_value SetOnfinish(napi_env env, napi_callback_info info)
     }
     // convert onfinish function to reference
     napi_ref onfinishRef = animatorResult->GetOnfinishRef();
+    if (onfinishRef) {
+        uint32_t count = 0;
+        napi_reference_unref(env, onfinishRef, &count);
+    }
     napi_create_reference(env, onfinish, 1, &onfinishRef);
+    animatorResult->SetOnfinishRef(onfinishRef);
     animator->ClearStopListeners();
     animator->AddStopListener([env, onfinishRef] {
         LOGI("JsAnimator: onfinish->AddIdleListener");
         napi_value ret = nullptr;
         napi_value onfinish = nullptr;
-        napi_get_reference_value(env, onfinishRef, &onfinish);
+        auto result = napi_get_reference_value(env, onfinishRef, &onfinish);
+        if (result != napi_ok || onfinish == nullptr) {
+            LOGW("get onfinish in callback failed");
+            return;
+        }
         napi_call_function(env, NULL, onfinish, 0, NULL, &ret);
     });
     napi_value undefined;
@@ -364,13 +382,22 @@ static napi_value SetOncancel(napi_env env, napi_callback_info info)
     }
     // convert oncancel function to reference
     napi_ref oncancelRef = animatorResult->GetOncancelRef();
+    if (oncancelRef) {
+        uint32_t count = 0;
+        napi_reference_unref(env, oncancelRef, &count);
+    }
     napi_create_reference(env, oncancel, 1, &oncancelRef);
+    animatorResult->SetOncancelRef(oncancelRef);
     animator->ClearIdleListeners();
     animator->AddIdleListener([env, oncancelRef] {
         LOGI("JsAnimator: oncancel->AddIdleListener");
         napi_value ret = nullptr;
         napi_value oncancel = nullptr;
-        napi_get_reference_value(env, oncancelRef, &oncancel);
+        auto result = napi_get_reference_value(env, oncancelRef, &oncancel);
+        if (result != napi_ok || oncancel == nullptr) {
+            LOGW("get oncancel in callback failed");
+            return;
+        }
         napi_call_function(env, NULL, oncancel, 0, NULL, &ret);
     });
     napi_value undefined;
@@ -403,13 +430,22 @@ static napi_value SetOnrepeat(napi_env env, napi_callback_info info)
     }
     // convert onrepeat function to reference
     napi_ref onrepeatRef = animatorResult->GetOnrepeatRef();
+    if (onrepeatRef) {
+        uint32_t count = 0;
+        napi_reference_unref(env, onrepeatRef, &count);
+    }
     napi_create_reference(env, onrepeat, 1, &onrepeatRef);
+    animatorResult->SetOnrepeatRef(onrepeatRef);
     animator->ClearRepeatListeners();
     animator->AddRepeatListener([env, onrepeatRef] {
         LOGI("JsAnimator: onrepeat->AddIdleListener");
         napi_value ret = nullptr;
         napi_value onrepeat = nullptr;
-        napi_get_reference_value(env, onrepeatRef, &onrepeat);
+        auto result = napi_get_reference_value(env, onrepeatRef, &onrepeat);
+        if (result != napi_ok || onrepeat == nullptr) {
+            LOGW("get onrepeat in callback failed");
+            return;
+        }
         napi_call_function(env, NULL, onrepeat, 0, NULL, &ret);
     });
     napi_value undefined;

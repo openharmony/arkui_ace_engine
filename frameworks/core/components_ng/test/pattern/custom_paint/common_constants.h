@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_CUSTOM_PAINT_COMMON_CONSTANTS_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_CUSTOM_PAINT_COMMON_CONSTANTS_H
 
 #include <string>
 #include <vector>
@@ -23,7 +25,6 @@
 #include "include/core/SkPath.h"
 
 namespace OHOS::Ace::NG {
-
 extern const float IDEAL_WIDTH;
 extern const float IDEAL_HEIGHT;
 extern const SizeF IDEAL_SIZE;
@@ -38,14 +39,25 @@ extern const SizeF MIN_SIZE;
 
 extern const int32_t CANVAS_WIDTH;
 extern const int32_t CANVAS_HEIGHT;
+extern const int32_t DEFAULT_INSTANCE_ID;
+
+extern const double DEFAULT_DOUBLE0;
+extern const double DEFAULT_DOUBLE1;
+extern const double DEFAULT_DOUBLE2;
+extern const double DEFAULT_DOUBLE10;
+
+extern const std::string URL_PREFIX;
+extern const std::string IMAGE_PNG;
+extern const std::string IMAGE_JPEG;
+extern const std::string IMAGE_WEBP;
 
 extern const std::string NULL_STR;
 extern const std::string DEFAULT_STR;
 extern const std::string IMAGE_SRC;
 extern const std::string REPETITION_STR;
 extern const std::vector<std::string> CANDIDATE_STRINGS;
+extern const std::vector<std::string> FUNCTION_NAMES;
 
-extern const double DEFAULT_DOUBLE;
 extern const std::vector<double> CANDIDATE_DOUBLES;
 
 extern const std::vector<Color> CANDIDATE_COLORS;
@@ -71,5 +83,6 @@ extern const std::vector<LineJoinStyle> CANDIDATE_LINE_JOIN_STYLES;
 extern const std::vector<CanvasFillRule> CANDIDATE_CANVAS_FILL_RULES;
 
 extern const std::vector<SkPath::FillType> CANDIDATE_SKPATH_FILL_TYPES;
-
 } // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_CUSTOM_PAINT_COMMON_CONSTANTS_H

@@ -29,3 +29,16 @@ ohos_unittest("viewport_config_test") {
 
   configs += [ "$ace_root:ace_test_coverage_config" ]
 }
+
+ohos_unittest("ui_content_test") {
+  module_out_path = module_output_path
+  include_dirs = [ "//commonlibrary/c_utils/base/include" ]
+  sources = [
+    "$ace_root/interfaces/inner_api/ace/ui_content.cpp",
+    "ui_content_test.cpp",
+  ]
+
+  configs = [ "$ace_root:ace_config" ]
+
+  configs += [ "$ace_root:ace_test_coverage_config" ]
+}

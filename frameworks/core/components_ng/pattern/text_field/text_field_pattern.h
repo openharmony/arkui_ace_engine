@@ -277,6 +277,21 @@ public:
         return textEditingValue_;
     }
 
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    void SetInputMethodStatus(bool imeAttached)
+    {
+        imeAttached_ = imeAttached;
+    }
+
+#endif
+    bool HasConnection() const
+    {
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+        return imeAttached_;
+#endif
+        return false;
+    }
+
 private:
     bool IsTextArea();
     void HandleBlurEvent();
@@ -336,8 +351,14 @@ private:
     std::string TextInputActionToString() const;
     std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
+    std::string GetTextColor() const;
+    std::string GetCaretColor() const;
     std::string GetPlaceholderColor() const;
     std::string GetFontSize() const;
+    Ace::FontStyle GetItalicFontStyle() const;
+    FontWeight GetFontWeight() const;
+    std::string GetFontFamily() const;
+    TextAlign GetTextAlign() const;
     std::string GetPlaceHolder() const;
     uint32_t GetMaxLength() const;
     std::string GetInputFilter() const;
@@ -345,8 +366,9 @@ private:
     void Delete(int32_t start, int32_t end);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
-    bool FilterWithRegex(const std::string& filter, const std::string& valueToUpdate, std::string& result);
-    void EditingValueFilter(const std::string& valueToUpdate, std::string& result);
+    bool FilterWithRegex(
+        const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
+    void EditingValueFilter(std::string& valueToUpdate, std::string& result);
     float PreferredLineHeight();
     void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
     bool CursorInContentRegion();
@@ -418,6 +440,10 @@ private:
     std::vector<TextSelector> redoTextSelectorRecords_;
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;
+
+#endif
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    bool imeAttached_ = false;
 #endif
     int32_t instanceId_ = -1;
 };

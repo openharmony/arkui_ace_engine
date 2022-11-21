@@ -17,6 +17,8 @@
 
 #include "third_party/skia/include/core/SkGraphics.h"
 
+#include "core/components_ng/image_provider/image_object.h"
+
 namespace OHOS::Ace {
 
 RefPtr<ImageCache> ImageCache::Create()

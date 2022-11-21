@@ -26,7 +26,7 @@ class CanvasPaintMethod : public CustomPaintPaintMethod {
     DECLARE_ACE_TYPE(CanvasPaintMethod, CustomPaintPaintMethod)
 public:
     CanvasPaintMethod() = default;
-    explicit CanvasPaintMethod(const RefPtr<NG::PipelineContext> context)
+    explicit CanvasPaintMethod(const RefPtr<PipelineBase> context)
     {
         context_ = context;
         isOffscreen_ = false;
@@ -82,7 +82,7 @@ private:
     void PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void CreateBitmap(SizeF contentSize);
 
-    void ImageObjReady(const RefPtr<ImageObject>& imageObj) override;
+    void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
     sk_sp<SkImage> GetImage(const std::string& src) override;
     void SetPaintImage() override {};
@@ -97,7 +97,7 @@ private:
     std::list<TaskFunc> tasks_;
     SizeF lastLayoutSize_;
 
-    RefPtr<ImageObject> imageObj_ = nullptr;
+    RefPtr<Ace::ImageObject> imageObj_ = nullptr;
     RefPtr<ImageCache> imageCache_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPaintMethod);

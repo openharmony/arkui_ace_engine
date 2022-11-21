@@ -17,9 +17,14 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scrollable.h"
+#include "core/components/tab_bar/tab_theme.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -73,6 +78,18 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
     if (scrollableEvent_) {
         gestureHub->RemoveScrollableEvent(scrollableEvent_);
     }
+
+    auto callback = [weak = WeakClaim(this)]() {
+        auto tabBarPattern = weak.Upgrade();
+        CHECK_NULL_VOID(tabBarPattern);
+        auto scrollable = tabBarPattern->scrollableEvent_->GetScrollable();
+        if (scrollable) {
+            scrollable->StopScrollable();
+        }
+    };
+
+    swiperController_->SetTabBarFinishCallback(std::move(callback));
+
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(axis);
     scrollableEvent_->SetScrollPositionCallback(std::move(task));
     gestureHub->AddScrollableEvent(scrollableEvent_);
@@ -102,7 +119,11 @@ void TabBarPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
 
     InitClick(gestureHub);
-    InitScrollable(gestureHub);
+    auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
+        InitScrollable(gestureHub);
+    }
     InitTouch(gestureHub);
 }
 
@@ -118,10 +139,19 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     tabItemOffsets_ = tabBarLayoutAlgorithm->GetTabItemOffset();
     currentOffset_ = tabBarLayoutAlgorithm->GetCurrentOffset();
 
-    RectF indicatorRect = tabBarLayoutAlgorithm->GetIndicatorRect(dirty);
-    auto paintProperty = GetHost()->GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, false);
-    paintProperty->UpdateIndicator(indicatorRect);
+    childrenMainSize_ = tabBarLayoutAlgorithm->GetChildrenMainSize();
+    indicator_ = tabBarLayoutAlgorithm->GetIndicator();
+    auto layoutProperty = DynamicCast<TabBarLayoutProperty>(dirty->GetLayoutProperty());
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto tabsFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_RETURN(tabsFrameNode, false);
+    auto swiperFrameNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildren().back());
+    CHECK_NULL_RETURN(swiperFrameNode, false);
+    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(swiperPattern, false);
+    int32_t indicator = swiperPattern->GetCurrentIndex();
+    UpdateIndicator(indicator);
     return false;
 }
 
@@ -143,8 +173,7 @@ void TabBarPattern::HandleClick(const GestureEvent& info) const
     auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     auto totalCount = host->TotalChildCount();
 
-    OffsetF currentOffset = (axis == Axis::HORIZONTAL ? OffsetF(currentOffset_, 0.0f) : OffsetF(0.0f, currentOffset_));
-    auto local = OffsetF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()) - currentOffset;
+    auto local = OffsetF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
     if (axis == Axis::VERTICAL) {
         auto clickRange = std::make_pair(tabItemOffsets_[0].GetY(), tabItemOffsets_[tabItemOffsets_.size() - 1].GetY());
         if (LessNotEqual(local.GetY(), clickRange.first) || GreatNotEqual(local.GetY(), clickRange.second)) {
@@ -181,7 +210,12 @@ void TabBarPattern::HandleClick(const GestureEvent& info) const
     }
     auto index = isRTL_ ? std::distance(tabItemOffsets_.begin(), pos) : std::distance(tabItemOffsets_.begin(), pos) - 1;
     if (index >= 0 && index < totalCount && swiperController_) {
-        swiperController_->SwipeToWithoutAnimation(index);
+        if (animationDuration_.has_value()) {
+            swiperController_->SwipeTo(index);
+        } else {
+            swiperController_->SwipeToWithoutAnimation(index);
+        }
+        layoutProperty->UpdateIndicator(index);
     }
 }
 
@@ -195,6 +229,7 @@ void TabBarPattern::UpdateCurrentOffset(float offset)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     currentOffset_ = currentOffset_ + offset;
+    UpdateIndicator(indicator_);
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
@@ -202,13 +237,57 @@ void TabBarPattern::UpdateIndicator(int32_t indicator)
 {
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     layoutProperty->UpdateIndicator(indicator);
-    RectF rect = layoutProperty->GetIndicatorRect(indicator);
-    auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
-    paintProperty->UpdateIndicator(rect);
 
     auto tabBarNode = GetHost();
     CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    if (tabBarPattern->IsContainsBuilder()) {
+        return;
+    }
+
+    RectF rect = layoutProperty->GetIndicatorRect(indicator);
+    auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
+    paintProperty->UpdateIndicator(rect);
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TabBarPattern::UpdateTextColor(int32_t indicator)
+{
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    if (tabBarPattern->IsContainsBuilder()) {
+        return;
+    }
+    auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(indicator));
+    CHECK_NULL_VOID(columnNode);
+    auto selectedColumnId = columnNode->GetId();
+    CHECK_NULL_VOID(tabBarNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    for (const auto& columnNode : tabBarNode->GetChildren()) {
+        CHECK_NULL_VOID(columnNode);
+        auto textNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
+        CHECK_NULL_VOID(textNode);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        if (columnNode->GetId() == selectedColumnId) {
+            textLayoutProperty->UpdateTextColor(tabTheme->GetActiveIndicatorColor());
+        } else {
+            textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOffColor());
+        }
+        textNode->MarkModifyDone();
+        textNode->MarkDirtyNode();
+    }
+}
+
+bool TabBarPattern::IsContainsBuilder()
+{
+    return std::any_of(tabBarType_.begin(), tabBarType_.end(), [](const auto& isBuilder) { return isBuilder.second; });
 }
 
 } // namespace OHOS::Ace::NG

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 
 #include "base/geometry/offset.h"
+#include "core/components_ng/pattern/slider/slider_accessibility_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -150,8 +151,8 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     auto frameOffset = GetHostFrameOffset();
     CHECK_NULL_VOID(frameOffset.has_value());
     float length = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
-                       ? static_cast<float>(localLocation->GetX()) - frameOffset.value().GetX()
-                       : static_cast<float>(localLocation->GetY()) - frameOffset.value().GetY();
+                       ? static_cast<float>(localLocation->GetX())
+                       : static_cast<float>(localLocation->GetY());
     float touchLength = sliderPaintProperty->GetReverse().value_or(false) ? borderBlank_ + sliderLength_ - length
                                                                           : length - borderBlank_;
     float min = sliderPaintProperty->GetMin().value_or(0.0f);
@@ -160,10 +161,10 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     CHECK_NULL_VOID(sliderLength_ != 0);
     valueRatio_ = touchLength / sliderLength_;
     CHECK_NULL_VOID(stepRatio_ != 0);
-    valueRatio_ = std::round(valueRatio_ / stepRatio_) * stepRatio_;
+    valueRatio_ = NearEqual(valueRatio_, 1) ? 1 : std::round(valueRatio_ / stepRatio_) * stepRatio_;
     float oldValue = value_;
     value_ = valueRatio_ * (max - min) + min;
-    valueChangeFlag_ = NearEqual(oldValue, value_);
+    valueChangeFlag_ = !NearEqual(oldValue, value_);
 }
 
 void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -293,4 +294,8 @@ Axis SliderPattern::GetDirection() const
     return sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
 }
 
+RefPtr<AccessibilityProperty> SliderPattern::CreateAccessibilityProperty()
+{
+    return MakeRefPtr<SliderAccessibilityProperty>();
+}
 } // namespace OHOS::Ace::NG

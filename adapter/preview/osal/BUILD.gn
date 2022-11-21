@@ -72,6 +72,7 @@ template("ace_osal_preview_source_set") {
     ]
     if (is_standard_system) {
       sources += [
+        "frame_trace_adapter_impl.cpp",
         "resource_adapter_impl_standard.cpp",
         "resource_convertor.cpp",
       ]
@@ -85,7 +86,10 @@ template("ace_osal_preview_source_set") {
         deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_linux(${current_toolchain})" ]
       }
     } else {
-      sources += [ "resource_adapter_impl.cpp" ]
+      sources += [
+        "frame_trace_adapter_impl.cpp",
+        "resource_adapter_impl.cpp",
+      ]
       include_dirs = [
         "//commonlibrary/c_utils/base/include",
         "//prebuilts/ace-toolkit/preview/rich/include/resmgr/resourcemanager/include",

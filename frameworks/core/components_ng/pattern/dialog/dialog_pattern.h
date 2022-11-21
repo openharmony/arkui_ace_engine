@@ -16,7 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIALOG_DIALOG_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIALOG_DIALOG_PATTERN_H
 
-#include <stdint.h>
+#include <cstdint>
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
@@ -26,7 +27,6 @@
 #include "core/components_ng/pattern/dialog//dialog_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
-#include "core/components_ng/pattern/dialog/dialog_render_property.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -52,11 +52,6 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return AceType::MakeRefPtr<DialogLayoutAlgorithm>();
-    }
-
-    RefPtr<PaintProperty> CreatePaintProperty() override
-    {
-        return MakeRefPtr<DialogRenderProperty>();
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -91,7 +86,7 @@ private:
     void PopDialog(int32_t buttonIdx);
 
     // set render context properties of content frame
-    void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const RefPtr<DialogTheme>& theme);
+    static void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const RefPtr<DialogTheme>& theme);
 
     RefPtr<FrameNode> BuildTitle(const DialogProperties& dialogProperties);
     RefPtr<FrameNode> BuildContent(const DialogProperties& dialogProperties);

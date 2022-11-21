@@ -17,6 +17,8 @@
 #define OHOS_NAPI_ACE_PLUGIN_CALLBACK_H
 
 #include <atomic>
+#include <condition_variable>
+#include <mutex>
 #include <string>
 #include <uv.h>
 #include "core/components/plugin/plugin_component_callback.h"

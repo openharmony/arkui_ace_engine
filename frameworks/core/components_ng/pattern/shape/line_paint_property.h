@@ -63,16 +63,16 @@ public:
     {
         ShapePaintProperty::ToJsonValue(json);
         if (propStartPoint_.has_value()) {
-            std::vector<double> point(2);
-            point[0] = propStartPoint_.value().first.ConvertToPx();
-            point[1] = propStartPoint_.value().second.ConvertToPx();
-            json->Put("startPoint", point.data());
+            auto startPointArray = JsonUtil::CreateArray(true);
+            startPointArray->Put("0", propStartPoint_.value().first.Value());
+            startPointArray->Put("1", propStartPoint_.value().second.Value());
+            json->Put("startPoint", startPointArray);
         }
         if (propEndPoint_.has_value()) {
-            std::vector<double> point(2);
-            point[0] = propEndPoint_.value().first.ConvertToPx();
-            point[1] = propEndPoint_.value().second.ConvertToPx();
-            json->Put("endPoint", point.data());
+            auto endPointArray = JsonUtil::CreateArray(true);
+            endPointArray->Put("0", propEndPoint_.value().first.Value());
+            endPointArray->Put("1", propEndPoint_.value().second.Value());
+            json->Put("endPoint", endPointArray);
         }
     }
 
