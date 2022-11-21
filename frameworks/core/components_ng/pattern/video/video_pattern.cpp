@@ -350,6 +350,14 @@ void VideoPattern::SetSpeed()
     }
 }
 
+void VideoPattern::UpdateMuted()
+{
+    if (mediaPlayer_->IsMediaPlayerValid()) {
+        float volume = muted_ ? 0.0f : 1.0f;
+        mediaPlayer_->SetVolume(volume, volume);
+    }
+}
+
 void VideoPattern::OnUpdateTime(uint32_t time, int pos) const
 {
     auto host = GetHost();
@@ -373,6 +381,7 @@ void VideoPattern::OnUpdateTime(uint32_t time, int pos) const
         std::string timeText = IntTimeToText(time);
         textLayoutProperty->UpdateContent(timeText);
         durationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        durationNode->MarkModifyDone();
         if (pos == CURRENT_POS) {
             auto sliderNode = DynamicCast<FrameNode>(controlBar->GetChildAtIndex(SLIDER_POS));
             auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
@@ -415,6 +424,7 @@ void VideoPattern::OnModifyDone()
     // Create the control bar
     AddControlBarNodeIfNeeded();
     UpdateMediaPlayer();
+    UpdateVideoProperty();
 }
 
 void VideoPattern::AddPreviewNodeIfNeeded()
@@ -479,6 +489,16 @@ void VideoPattern::AddControlBarNodeIfNeeded()
             ++iter;
         }
     }
+}
+
+void VideoPattern::UpdateVideoProperty()
+{
+    if (autoPlay_) {
+        Start();
+    }
+    SetSpeed();
+    UpdateLooping();
+    UpdateMuted();
 }
 
 void VideoPattern::OnRebuildFrame()
