@@ -36,7 +36,6 @@ constexpr float SCALE_WIDTH = 1.5 / SCALE_ICON;
 constexpr int32_t DOWN_DURATION = 150;
 constexpr int32_t RESET_DURATION = 250;
 constexpr int32_t STYLE_DURATION = 200;
-constexpr Dimension HOT_REGION_HEIGHT = 24.0_vp;
 
 // For DragBar Shrink State Point.
 const OffsetT<Dimension> POINT_L_SHRINK = OffsetT<Dimension>(17.0_vp, 15.0_vp); // Left Point position.
@@ -316,67 +315,6 @@ void DragBarPattern::HandleTouchUp()
     barRangeAnimator_->ClearInterpolators();
     barRangeAnimator_->AddInterpolator(dragAnimation);
     barRangeAnimator_->Play();
-}
-
-void DragBarPattern::SetStatusBarHeight(float height)
-{
-    // Reset full window animation.
-    if (animator_->IsRunning()) {
-        animator_->ClearAllListeners();
-        animator_->ClearInterpolators();
-        Stretching();
-        FadingOut();
-    }
-    if (GreatOrEqual(height, 0.0) && !NearEqual(statusBarHeight_.Value(), height)) {
-        statusBarHeight_.SetValue(height);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    }
-}
-
-void DragBarPattern::Stretching()
-{
-    auto layoutProperty = GetLayoutProperty<DragBarLayoutProperty>();
-    auto hotRegionHeight = layoutProperty->GetHotRegionHeight().value_or(HOT_REGION_HEIGHT.ConvertToPx());
-    auto keyframeFrom = AceType::MakeRefPtr<Keyframe<float>>(0.0f, hotRegionHeight);
-    auto keyframeTo = AceType::MakeRefPtr<Keyframe<float>>(1.0f, GetStatusBarHeight());
-    auto animation = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-    animation->AddKeyframe(keyframeFrom);
-    animation->AddKeyframe(keyframeTo);
-    animation->AddListener([weak = AceType::WeakClaim(this)](const float& height) {
-        auto dragBar = weak.Upgrade();
-        if (!dragBar) {
-            return;
-        }
-        dragBar->GetLayoutProperty<DragBarLayoutProperty>()->UpdateHotRegionHeight(height);
-        dragBar->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    });
-    animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
-        auto dragBar = weak.Upgrade();
-        if (!dragBar) {
-            return;
-        }
-        dragBar->GetLayoutProperty<DragBarLayoutProperty>()->UpdateFullScreenMode(true);
-        dragBar->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    });
-    animator_->AddInterpolator(animation);
-}
-
-void DragBarPattern::FadingOut()
-{
-    auto keyframeFrom = AceType::MakeRefPtr<Keyframe<float>>(0.0, 1.0);
-    auto keyframeTo = AceType::MakeRefPtr<Keyframe<float>>(1.0, 0.0);
-    auto animation = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-    animation->AddKeyframe(keyframeFrom);
-    animation->AddKeyframe(keyframeTo);
-    animation->AddListener([weak = AceType::WeakClaim(this)](const float& opacity) {
-        auto dragBar = weak.Upgrade();
-        if (dragBar) {
-            dragBar->GetPaintProperty<DragBarPaintProperty>()->UpdateOpacity(opacity);
-        }
-    });
-    animator_->AddInterpolator(animation);
 }
 
 void DragBarPattern::MarkDirtyNode(PropertyChangeFlag extraFlag)

@@ -25,6 +25,7 @@ group("pattern_unittest") {
     "custom_paint:custom_paint_pattern_test_ng",
     "data_panel:data_panel_pattern_test_ng",
     "divider:divider_pattern_test_ng",
+    "dragBar:dragBar_pattern_test_ng",
     "flex:flex_pattern_unit_test",
     "focusHub:focusHub_pattern_test_ng",
     "gauge:gauge_pattern_test_ng",
