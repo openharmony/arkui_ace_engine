@@ -13,29 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVROUTER_EVENT_HUB_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVROUTER_EVENT_HUB_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVDESTINATION_EVENT_HUB_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVDESTINATION_EVENT_HUB_H
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 
 namespace OHOS::Ace::NG {
-
 using OnStateChangeEvent = std::function<void(bool)>;
-using OnDestinationChangeEvent = std::function<void()>;
 
-class NavRouterEventHub : public EventHub {
-    DECLARE_ACE_TYPE(NavRouterEventHub, EventHub)
+class NavDestinationEventHub : public EventHub {
+    DECLARE_ACE_TYPE(NavDestinationEventHub, EventHub)
 public:
-    void SetOnStateChange(OnStateChangeEvent&& changeEvent)
+    void SetOnStateChange(const OnStateChangeEvent& changeEvent)
     {
         onStateChangeEvent_ = changeEvent;
-    }
-
-    const OnStateChangeEvent& GetOnStateChange()
-    {
-        return onStateChangeEvent_;
     }
 
     void FireChangeEvent(bool isActivated) const
@@ -44,24 +37,9 @@ public:
             onStateChangeEvent_(isActivated);
         }
     }
-
-    void SetOnDestinationChange(OnDestinationChangeEvent&& onDestinationChangeEvent)
-    {
-        onDestinationChangeEvent_ = onDestinationChangeEvent;
-    }
-
-    void FireDestinationChangeEvent() const
-    {
-        if (onDestinationChangeEvent_) {
-            onDestinationChangeEvent_();
-        }
-    }
-
 private:
     OnStateChangeEvent onStateChangeEvent_;
-    OnDestinationChangeEvent onDestinationChangeEvent_;
 };
-
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVROUTER_EVENT_HUB_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVDESTINATION_EVENT_HUB_H

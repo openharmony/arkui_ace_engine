@@ -166,23 +166,21 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(hostNode);
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(navigationLayoutProperty);
-
-    if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::AUTO) {
-        auto context = hostNode->GetContext();
-        CHECK_NULL_VOID(context);
-        if (context->GetCurrentRootWidth() >= static_cast<float>(WINDOW_WIDTH.ConvertToPx())) {
-            navigationLayoutProperty->UpdateNavigationMode(NavigationMode::SPLIT);
-        } else {
-            navigationLayoutProperty->UpdateNavigationMode(NavigationMode::STACK);
-        }
-    }
-
     const auto& constraint = navigationLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     auto size = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
+
+    if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::AUTO) {
+        if (size.Width() >= static_cast<float>(WINDOW_WIDTH.ConvertToPx())) {
+            navigationLayoutProperty->UpdateNavigationMode(NavigationMode::SPLIT);
+        } else {
+            navigationLayoutProperty->UpdateNavigationMode(NavigationMode::STACK);
+        }
+    }
+
     auto navBarSize = size;
     auto contentSize = size;
     auto dividerSize = SizeF(0.0f, 0.0f);

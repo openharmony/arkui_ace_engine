@@ -42,7 +42,6 @@ public:
         copy->propNavBarWidth_ = CloneNavBarWidth();
         copy->propNavBarPosition_ = CloneNavBarPosition();
         copy->propHideNavBar_ = CloneHideNavBar();
-        copy->propTitleBarHeight_ = CloneTitleBarHeight();
         copy->propDestinationChange_ = CloneDestinationChange();
         copy->propNoPixMap_ = CloneNoPixMap();
         copy->propImageSource_ = CloneImageSource();
@@ -57,7 +56,6 @@ public:
         ResetNavBarWidth();
         ResetNavBarPosition();
         ResetHideNavBar();
-        ResetTitleBarHeight();
         ResetDestinationChange();
         ResetNoPixMap();
         ResetImageSource();
@@ -68,7 +66,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NavBarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NavBarPosition, NavBarPosition, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideNavBar, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleBarHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DestinationChange, bool, PROPERTY_UPDATE_MEASURE);
     // back button icon
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NoPixMap, bool, PROPERTY_UPDATE_MEASURE);

@@ -41,7 +41,7 @@ float TitleBarLayoutAlgorithm::GetFontHeightByFontSize(const RefPtr<LayoutWrappe
 {
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, 0.0f);
-    auto preFontSize = textLayoutProperty->GetFontSize().value_or(titleFontSize_);
+    auto preFontSize = textLayoutProperty->GetFontSize().value_or(MIN_TITLE_FONT_SIZE);
     textLayoutProperty->UpdateFontSize(fontSize);
     auto constraint = textLayoutProperty->CreateChildConstraint();
     layoutWrapper->Measure(constraint);
@@ -97,6 +97,7 @@ void TitleBarLayoutAlgorithm::MeasureSubtitle(LayoutWrapper* layoutWrapper, cons
     auto subtitleWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(subtitleWrapper);
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
+    constraint.maxSize.SetHeight(titleBarSize.Height());
 
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
@@ -147,6 +148,12 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
     auto titleWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(titleWrapper);
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
+    constraint.maxSize.SetHeight(titleBarSize.Height());
+
+    if (titleBarLayoutProperty->HasTitleHeight()) {
+        constraint.maxSize.SetHeight(
+            static_cast<float>(titleBarLayoutProperty->GetTitleHeightValue().ConvertToPx()));
+    }
 
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
@@ -275,6 +282,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
     } else {
         offsetY = (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - titleHeight) / 2;
     }
+
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
         TitleBarParentType::NAV_DESTINATION) {

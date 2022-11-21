@@ -41,6 +41,7 @@ public:
         copy->propTitleMode_ = CloneTitleMode();
         copy->propHideBackButton_ = CloneHideBackButton();
         copy->propTitleBarParentType_ = CloneTitleBarParentType();
+        copy->propTitleHeight_ = CloneTitleHeight();
         copy->propNoPixMap_ = CloneNoPixMap();
         copy->propImageSource_ = CloneImageSource();
         copy->propPixelMap_ = ClonePixelMap();
@@ -53,6 +54,7 @@ public:
         ResetTitleMode();
         ResetHideBackButton();
         ResetTitleBarParentType();
+        ResetTitleHeight();
         ResetNoPixMap();
         ResetImageSource();
         ResetPixelMap();
@@ -62,6 +64,7 @@ private:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleMode, NavigationTitleMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideBackButton, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleBarParentType, TitleBarParentType, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     // back button icon
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NoPixMap, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageSource, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
