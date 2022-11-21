@@ -514,6 +514,7 @@ void FindText(const RefPtr<NG::UINode>& node, const std::string& text, std::list
 
 RefPtr<NG::FrameNode> GetInspectorById(const RefPtr<NG::FrameNode>& root, int32_t id)
 {
+    CHECK_NULL_RETURN(root, nullptr);
     std::queue<RefPtr<NG::UINode>> nodes;
     nodes.push(root);
     RefPtr<NG::FrameNode> frameNode;
