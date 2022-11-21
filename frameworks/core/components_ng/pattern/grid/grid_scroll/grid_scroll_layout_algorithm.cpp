@@ -171,8 +171,14 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     // Step3: Check if need to fill blank at start (in situation of grid items moving down)
     FillBlankAtStart(mainSize, crossSize, gridLayoutProperty, layoutWrapper, crossGap);
     if (gridLayoutInfo_.reachStart_) {
+        auto offset = gridLayoutInfo_.currentOffset_;
         gridLayoutInfo_.currentOffset_ = 0.0;
         gridLayoutInfo_.prevOffset_ = 0.0;
+        // we need lastline if blank at start is not fully filled when start line is shorter
+        FillBlankAtEnd(mainSize, crossSize, gridLayoutProperty, layoutWrapper, mainLength -= offset);
+        if (gridLayoutInfo_.reachEnd_) {
+            ModifyCurrentOffsetWhenReachEnd(mainSize, crossGap);
+        }
     }
 }
 
@@ -203,7 +209,7 @@ void GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize
 void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, float crossGap)
 {
     // scroll forward
-    if (LessOrEqual(gridLayoutInfo_.prevOffset_, gridLayoutInfo_.currentOffset_)) {
+    if (LessNotEqual(gridLayoutInfo_.prevOffset_, gridLayoutInfo_.currentOffset_)) {
         gridLayoutInfo_.reachEnd_ = false;
         return;
     }
@@ -246,15 +252,22 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(float mainSize, float crossSize,
             continue;
         }
         gridLayoutInfo_.reachEnd_ = true;
-        break;
+        return;
     };
+    // last line make LessNotEqual(mainLength, mainSize) and continue is reach end too
+    gridLayoutInfo_.reachEnd_ = gridLayoutInfo_.endIndex_ == layoutWrapper->GetTotalChildCount() - 1;
 }
 
 void GridScrollLayoutAlgorithm::MeasureRecordedItems(
     float mainSize, float crossSize, float crossGap, LayoutWrapper* layoutWrapper, float& mainLength)
 {
     currentMainLineIndex_ = gridLayoutInfo_.startMainLineIndex_ - 1;
+    // already at start line, do not use offset for mainLength
+    if (gridLayoutInfo_.startMainLineIndex_ == 0 && GreatNotEqual(mainLength, 0)) {
+        mainLength = 0;
+    }
     bool runOutOfRecord = false;
+    int32_t lineRemoved = 0;
     // Measure grid items row by row
     while (LessNotEqual(mainLength, mainSize)) {
         // If [gridMatrix_] does not contain record of line [currentMainLineIndex_], do [FillNewLineBackward]
@@ -292,9 +305,15 @@ void GridScrollLayoutAlgorithm::MeasureRecordedItems(
         // [lineHeightMap_] will take place in [StripItemsOutOfViewport].
         // TODO: inactive items
         if (LessOrEqual(mainLength, 0.0)) {
-            gridLayoutInfo_.currentOffset_ = mainLength;
-            gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_ + 1;
-            gridLayoutInfo_.startIndex_ = currentIndex + 1;
+            // if no line can be added, no line should be removed
+            if (gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.endMainLineIndex_ + 1 + lineRemoved) !=
+                gridLayoutInfo_.gridMatrix_.end()) {
+                gridLayoutInfo_.currentOffset_ = mainLength;
+                gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+                gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_ + 1;
+                gridLayoutInfo_.startIndex_ = currentIndex + 1;
+                lineRemoved++;
+            }
         }
     }
     // Case 1. if this while-loop breaks due to running out of records, the [currentMainLineIndex_] is larger by 1 than
