@@ -27,6 +27,7 @@ group("pattern_unittest") {
     "rating:rating_pattern_test_ng",
     "relative_container:relative_container_pattern_test_ng",
     "shape:shape_pattern_unit_test",
+    "stack:stack_pattern_test_ng",
     "stepper:stepper_pattern_test_ng",
     "text:text_pattern_test_ng",
     "textfield:textfield_pattern_test_ng",
