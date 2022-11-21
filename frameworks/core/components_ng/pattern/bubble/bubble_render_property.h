@@ -20,7 +20,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/placement.h"
-#include "core/components/common/properties/radius.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -42,7 +41,6 @@ public:
         paintProperty->propBackgroundColor_ = CloneBackgroundColor();
         paintProperty->propArrowOffset_ = CloneArrowOffset();
         paintProperty->propPlacement_ = ClonePlacement();
-        paintProperty->propBorderRadius_ = CloneBorderRadius();
         return paintProperty;
     }
 
@@ -56,7 +54,6 @@ public:
         ResetUseCustom();
         ResetPlacement();
         ResetArrowOffset();
-        ResetBorderRadius();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoCancel, bool, PROPERTY_UPDATE_RENDER);
@@ -66,7 +63,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableArrow, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UseCustom, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowOffset, Dimension, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderRadius, Radius, PROPERTY_UPDATE_RENDER);
 
     ACE_DISALLOW_COPY_AND_MOVE(BubbleRenderProperty);
 };

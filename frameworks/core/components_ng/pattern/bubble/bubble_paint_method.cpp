@@ -135,14 +135,10 @@ void BubblePaintMethod::PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);
     backgroundColor_ = paintProperty->GetBackgroundColor().value_or(popupTheme->GetBackgroundColor());
-    if (useCustom_) {
-        Radius radius = paintProperty->GetBorderRadiusValue();
-        border_.SetBorderRadius(radius);
-    } else {
-        border_.SetBorderRadius(popupTheme->GetRadius());
-    }
+    border_.SetBorderRadius(popupTheme->GetRadius());
     padding_ = popupTheme->GetPadding();
     RSPen paint;
+    paint.SetColor(backgroundColor_.GetValue());
     paint.SetAntiAlias(true);
     // TODO: color is not correct
     RSBrush brush;
