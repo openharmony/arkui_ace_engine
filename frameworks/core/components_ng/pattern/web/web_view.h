@@ -19,7 +19,6 @@
 #include <functional>
 #include <string>
 
-#include "core/components/box/drag_drop_event.h"
 #include "core/components/web/web_property.h"
 
 namespace OHOS::Ace::NG {
@@ -83,11 +82,6 @@ public:
     static void SetBackgroundColor(int32_t backgroundColor);
     static void SetInitialScale(float scale);
     static void SetSearchResultReceiveEventId(OnWebAsyncFunc&& searchResultReceiveEventId);
-    static void SetOnDragStartId(const OnDragFunc& onDragStartId);
-    static void SetOnDragEnterId(const OnDropFunc& onDragEnterId);
-    static void SetOnDragMoveId(const OnDropFunc& onDragMoveId);
-    static void SetOnDragLeaveId(const OnDropFunc& onDragLeaveId);
-    static void SetOnDropId(const OnDropFunc& onDropId);
     static void SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     static void SetWindowNewEvent(OnWebAsyncFunc&& windowNewEventId);
     static void SetWindowExitEventId(OnWebAsyncFunc&& windowExitEventId);

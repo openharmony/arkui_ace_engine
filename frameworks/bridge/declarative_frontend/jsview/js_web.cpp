@@ -3307,47 +3307,12 @@ void JSWeb::OnSearchResultReceive(const JSCallbackInfo& args)
 
 void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
 {
-    RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     if (Container::IsCurrentUseNewPipeline()) {
-        auto instanceId = Container::CurrentId();
-        auto uiCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc), instanceId](
-                              const RefPtr<DragEvent>& info, const std::string& extraParams) -> DragItemInfo {
-            ContainerScope scope(instanceId);
-            DragItemInfo itemInfo;
-            auto context = PipelineBase::GetCurrentContext();
-            if (!context) {
-                return itemInfo;
-            }
-            // need to execute in ui.
-            context->PostSyncEvent([execCtx, func = func, info, &extraParams, &itemInfo]() -> void {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                auto ret = func->Execute(info, extraParams);
-                if (!ret->IsObject()) {
-                    LOGE("builder param is not an object.");
-                    return;
-                }
-                auto component = ParseDragNode(ret);
-                if (component) {
-                    LOGI("use custom builder param.");
-                    itemInfo.customComponent = AceType::DynamicCast<Component>(component);
-                    return;
-                }
-
-                auto builderObj = JSRef<JSObject>::Cast(ret);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-                auto pixmap = builderObj->GetProperty("pixelMap");
-                itemInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
-#endif
-                auto extraInfo = builderObj->GetProperty("extraInfo");
-                ParseJsString(extraInfo, itemInfo.extraInfo);
-                component = ParseDragNode(builderObj->GetProperty("builder"));
-                itemInfo.customComponent = AceType::DynamicCast<Component>(component);
-            });
-            return itemInfo;
-        };
-        NG::WebView::SetOnDragStartId(std::move(uiCallback));
+        JSViewAbstract::JsOnDragStart(info);
         return;
     }
+
+    RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) -> DragItemInfo {
         DragItemInfo itemInfo;
@@ -3384,22 +3349,12 @@ void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
 
 void JSWeb::JsOnDragEnter(const JSCallbackInfo& info)
 {
-    RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     if (Container::IsCurrentUseNewPipeline()) {
-        auto instanceId = Container::CurrentId();
-        auto uiCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc), instanceId](
-                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
-            ContainerScope scope(instanceId);
-            auto context = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(context);
-            context->PostSyncEvent([execCtx, func = func, info, &extraParams]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                func->Execute(info, extraParams);
-            });
-        };
-        NG::WebView::SetOnDragEnterId(std::move(uiCallback));
+        JSViewAbstract::JsOnDragEnter(info);
         return;
     }
+
+    RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -3414,22 +3369,12 @@ void JSWeb::JsOnDragEnter(const JSCallbackInfo& info)
 
 void JSWeb::JsOnDragMove(const JSCallbackInfo& info)
 {
-    RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     if (Container::IsCurrentUseNewPipeline()) {
-        auto instanceId = Container::CurrentId();
-        auto uiCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc), instanceId](
-                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
-            ContainerScope scope(instanceId);
-            auto context = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(context);
-            context->PostSyncEvent([execCtx, func = func, info, &extraParams]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                func->Execute(info, extraParams);
-            });
-        };
-        NG::WebView::SetOnDragMoveId(std::move(uiCallback));
+        JSViewAbstract::JsOnDragMove(info);
         return;
     }
+
+    RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -3444,22 +3389,12 @@ void JSWeb::JsOnDragMove(const JSCallbackInfo& info)
 
 void JSWeb::JsOnDragLeave(const JSCallbackInfo& info)
 {
-    RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     if (Container::IsCurrentUseNewPipeline()) {
-        auto instanceId = Container::CurrentId();
-        auto uiCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc), instanceId](
-                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
-            ContainerScope scope(instanceId);
-            auto context = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(context);
-            context->PostSyncEvent([execCtx, func = func, info, &extraParams]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                func->Execute(info, extraParams);
-            });
-        };
-        NG::WebView::SetOnDragLeaveId(std::move(uiCallback));
+        JSViewAbstract::JsOnDragLeave(info);
         return;
     }
+
+    RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -3474,23 +3409,12 @@ void JSWeb::JsOnDragLeave(const JSCallbackInfo& info)
 
 void JSWeb::JsOnDrop(const JSCallbackInfo& info)
 {
-    RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     if (Container::IsCurrentUseNewPipeline()) {
-        auto instanceId = Container::CurrentId();
-        auto uiCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc), instanceId](
-                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
-            ContainerScope scope(instanceId);
-            auto context = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(context);
-            context->PostSyncEvent([execCtx, func = func, info, &extraParams]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                ACE_SCORING_EVENT("onDrop");
-                func->Execute(info, extraParams);
-            });
-        };
-        NG::WebView::SetOnDropId(std::move(uiCallback));
+        JSViewAbstract::JsOnDrop(info);
         return;
     }
+
+    RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
                         const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
