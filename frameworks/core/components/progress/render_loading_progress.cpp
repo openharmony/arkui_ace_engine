@@ -287,6 +287,8 @@ void RenderLoadingProgress::SetLoadingMode(int32_t mode)
         cometController_->ClearStopListeners();
         ringController_->Finish();
         cometController_->Finish();
+        ringController_->Stop();
+        cometController_->Stop();
         ringController_ = nullptr;
         cometController_ = nullptr;
         moveStopId_ = 0;
