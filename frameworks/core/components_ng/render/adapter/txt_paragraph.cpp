@@ -147,12 +147,10 @@ size_t TxtParagraph::GetLineCount()
     return paragraphTxt->GetLineCount();
 }
 
-void TxtParagraph::Paint(const RefPtr<Canvas>& canvas, float x, float y)
+void TxtParagraph::Paint(const RSCanvas& canvas, float x, float y)
 {
     CHECK_NULL_VOID(paragraph_);
-    auto skiaCanvas = AceType::DynamicCast<SkiaCanvas>(canvas);
-    CHECK_NULL_VOID(skiaCanvas);
-    auto* skCanvas = skiaCanvas->RawCanvas();
+    SkCanvas* skCanvas = canvas.GetImpl<RSSkCanvas>()->ExportSkCanvas();
     CHECK_NULL_VOID(skCanvas);
     paragraph_->Paint(skCanvas, x, y);
 }

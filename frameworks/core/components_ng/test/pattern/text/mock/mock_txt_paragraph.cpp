@@ -91,5 +91,5 @@ size_t TxtParagraph::GetLineCount()
     return 1;
 }
 
-void TxtParagraph::Paint(const RefPtr<Canvas>& canvas, float x, float y) {}
+void TxtParagraph::Paint(const RSCanvas& canvas, float x, float y) {}
 } // namespace OHOS::Ace::NG
