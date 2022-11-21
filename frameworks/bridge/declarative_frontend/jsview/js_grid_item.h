@@ -32,17 +32,13 @@ public:
     static void Create(const JSCallbackInfo& args);
 
 protected:
-#define ACE_DEFINE_SET_GRID_ITEM_SIZE(name)                                                                       \
-    static void SetGridItem##name(const JSCallbackInfo& info)                                                     \
+#ifdef NG_BUILD
+#define ACE_DEFINE_SET_COMPONENT_SIZE(name) \
+    static void SetComponent##name(const JSCallbackInfo& info) {}
+#else
+#define ACE_DEFINE_SET_COMPONENT_SIZE(name)                                                                       \
+    static void SetComponent##name(const JSCallbackInfo& info)                                                    \
     {                                                                                                             \
-        if (info.Length() < 1) {                                                                                  \
-            LOGE("The arg is wrong when set %{public}s of grid item", #name);                                     \
-            return;                                                                                               \
-        }                                                                                                         \
-        if (!JSViewAbstract::Js##name(info[0])) {                                                                 \
-            LOGE("JSViewAbstract fail to parse %{public}s of grid item", #name);                                  \
-            return;                                                                                               \
-        }                                                                                                         \
         Dimension item##name;                                                                                     \
         if (!ParseJsDimensionVp(info[0], item##name)) {                                                           \
             LOGE("Fail to parse %{public}s of grid item in Dimension unit", #name);                               \
@@ -54,7 +50,24 @@ protected:
             gridItem->SetGridItem##name(item##name);                                                              \
         }                                                                                                         \
     }
+#endif
 
+#define ACE_DEFINE_SET_GRID_ITEM_SIZE(name)                                      \
+    static void SetGridItem##name(const JSCallbackInfo& info)                    \
+    {                                                                            \
+        if (info.Length() < 1) {                                                 \
+            LOGE("The arg is wrong when set %{public}s of grid item", #name);    \
+            return;                                                              \
+        }                                                                        \
+        if (!JSViewAbstract::Js##name(info[0])) {                                \
+            LOGE("JSViewAbstract fail to parse %{public}s of grid item", #name); \
+            return;                                                              \
+        }                                                                        \
+        SetComponent##name(info);                                                \
+    }
+
+    ACE_DEFINE_SET_COMPONENT_SIZE(Width);
+    ACE_DEFINE_SET_COMPONENT_SIZE(Height);
     ACE_DEFINE_SET_GRID_ITEM_SIZE(Width);
     ACE_DEFINE_SET_GRID_ITEM_SIZE(Height);
     static void SetColumnStart(int32_t columnStart);

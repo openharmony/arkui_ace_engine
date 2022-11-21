@@ -105,7 +105,9 @@ void JSTabs::Create(const JSCallbackInfo& info)
             if (!tabController) {
                 tabController = JSTabsController::CreateController();
             }
+#ifndef NG_BUILD
             tabController->SetInitialIndex(index);
+#endif
         }
     }
 

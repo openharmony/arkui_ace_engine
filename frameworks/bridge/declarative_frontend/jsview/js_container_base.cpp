@@ -15,32 +15,8 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/base/view_stack_model_ng.h"
-#include "frameworks/bridge/declarative_frontend/jsview/models/view_stack_model_impl.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_stack_model.h"
 
-namespace OHOS::Ace {
-
-std::unique_ptr<ViewStackModel> ViewStackModel::instance_ = nullptr;
-
-ViewStackModel* ViewStackModel::GetInstance()
-{
-    if (!instance_) {
-#ifdef NG_BUILD
-        instance_.reset(new NG::ViewStackModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
-            instance_.reset(new NG::ViewStackModelNG());
-        } else {
-            instance_.reset(new Framework::ViewStackModelImpl());
-        }
-#endif
-    }
-    return instance_.get();
-}
-
-} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 void JSContainerBase::Pop()
