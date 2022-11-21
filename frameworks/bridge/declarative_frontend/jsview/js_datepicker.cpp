@@ -513,7 +513,7 @@ void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
     ButtonInfo buttonInfo;
     DialogProperties properties;
     properties.alignment = DialogAlignment::CENTER;
-    properties.useCustom = true;
+    properties.customStyle = true;
 
     std::map<std::string, PickerDate> datePickerProperty;
     if (startDate->IsObject()) {
@@ -791,7 +791,7 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
     ButtonInfo buttonInfo;
     DialogProperties properties;
     properties.alignment = DialogAlignment::CENTER;
-    properties.useCustom = true;
+    properties.customStyle = true;
 
     std::map<std::string, PickerTime> timePickerProperty;
     if (selectedTime->IsObject()) {
