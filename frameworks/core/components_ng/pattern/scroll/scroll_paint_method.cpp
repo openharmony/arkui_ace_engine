@@ -48,9 +48,6 @@ void ScrollPaintMethod::PaintScrollBar(RSCanvas& canvas, PaintWrapper* paintWrap
     }
 
     ScrollBarPainter::PaintRectBar(canvas, scrollBar, UINT8_MAX);
-    if (scrollBar->GetFirstLoad()) {
-        scrollBar->SetFirstLoad(false);
-    }
 }
 
 } // namespace OHOS::Ace::NG
