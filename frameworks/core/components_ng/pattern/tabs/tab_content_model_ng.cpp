@@ -179,6 +179,10 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     int32_t indicator = swiperPattern->GetCurrentIndex();
+    int32_t totalCount = swiperPattern->TotalCount();
+    if (indicator > totalCount - 1 || indicator < 0) {
+        indicator = 0;
+    }
 
     // Update property of text.
     auto pipelineContext = PipelineContext::GetCurrentContext();

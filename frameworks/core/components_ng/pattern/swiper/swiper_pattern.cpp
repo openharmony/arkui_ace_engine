@@ -81,7 +81,7 @@ void SwiperPattern::OnModifyDone()
 
     InitSwiperIndicator();
     auto childrenSize = TotalCount();
-    if (layoutProperty->GetIndex().has_value() && CurrentIndex() >= 0 && CurrentIndex() < childrenSize) {
+    if (layoutProperty->GetIndex().has_value() && CurrentIndex() >= 0) {
         currentIndex_ = CurrentIndex();
     } else {
         LOGE("index is not valid: %{public}d, items size: %{public}d", CurrentIndex(), childrenSize);
@@ -116,6 +116,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto swiperLayoutAlgorithm = DynamicCast<SwiperLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(swiperLayoutAlgorithm, false);
     preItemRange_ = swiperLayoutAlgorithm->GetItemRange();
+    currentIndex_ = swiperLayoutAlgorithm->GetCurrentIndex();
     return GetEdgeEffect() == EdgeEffect::FADE;
 }
 
