@@ -179,10 +179,7 @@ public:
         return sharedTransitionManager_;
     }
 
-    const RefPtr<DragDropManager>& GetDragDropManager()
-    {
-        return dragDropManager_;
-    }
+    const RefPtr<DragDropManager>& GetDragDropManager();
 
     void FlushBuild() override;
 
