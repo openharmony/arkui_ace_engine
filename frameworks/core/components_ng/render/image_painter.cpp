@@ -123,7 +123,8 @@ void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const S
 
     RectF srcRect;
     srcRect.SetSize(svgContainerSize);
-    canvasImage_->DrawToRSCanvas(canvas, ToRSRect(srcRect), ToRSRect(imagePaintConfig.dstRect_));
+    canvasImage_->DrawToRSCanvas(
+        canvas, ToRSRect(srcRect), ToRSRect(imagePaintConfig.dstRect_), std::array<PointF, 4>());
     canvas.Restore();
 }
 
@@ -147,23 +148,16 @@ void ImagePainter::DrawStaticImage(
     }
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
-    if (imagePaintConfig.borderRadiusXY_) {
-        RSRect rsRect(ToRSRect(imagePaintConfig.dstRect_));
-        std::vector<RSPoint> radiusXY;
-        for (auto radiusPoint : *imagePaintConfig.borderRadiusXY_) {
-            radiusXY.emplace_back(RSPoint(radiusPoint.GetX(), radiusPoint.GetY()));
-        }
-        RSRoundRect roundRect(rsRect, radiusXY);
-        canvas.ClipRoundRect(roundRect, rosen::ClipOp::INTERSECT);
-    }
+
     if (imagePaintConfig.needFlipCanvasHorizontally_) {
         ImagePainter::FlipHorizontal(canvas, offset.GetX(), imagePaintConfig.dstRect_.Width());
     }
 
     brush.SetFilter(filter);
     canvas.AttachBrush(brush);
-    // need add recordingCanvas's ClipAdaptiveRRect operation.
-    canvasImage_->DrawToRSCanvas(canvas, ToRSRect(imagePaintConfig.srcRect_), ToRSRect(imagePaintConfig.dstRect_));
+    // include recordingCanvas's ClipAdaptiveRRect operation.
+    canvasImage_->DrawToRSCanvas(canvas, ToRSRect(imagePaintConfig.srcRect_), ToRSRect(imagePaintConfig.dstRect_),
+        imagePaintConfig.borderRadiusXY_ ? *imagePaintConfig.borderRadiusXY_ : std::array<PointF, 4>());
     canvas.Restore();
 }
 

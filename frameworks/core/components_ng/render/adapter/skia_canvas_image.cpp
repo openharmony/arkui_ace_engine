@@ -157,7 +157,8 @@ int32_t SkiaCanvasImage::GetHeight() const
 #endif
 }
 
-void SkiaCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect)
+void SkiaCanvasImage::DrawToRSCanvas(
+    RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const std::array<PointF, 4>& radiusXY)
 {
     auto image = GetCanvasImage();
     RSImage rsImage(&image);
@@ -181,6 +182,21 @@ void SkiaCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, co
     }
     SkPaint paint;
     SkVector radii[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
+    if (radiusXY.size() == 4) {
+        radii[SkRRect::kUpperLeft_Corner].set(
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperLeft_Corner].GetX(), 0.0f)),
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperLeft_Corner].GetY(), 0.0f)));
+        radii[SkRRect::kUpperRight_Corner].set(
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperRight_Corner].GetX(), 0.0f)),
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperRight_Corner].GetY(), 0.0f)));
+        radii[SkRRect::kLowerLeft_Corner].set(
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerRight_Corner].GetX(), 0.0f)),
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerRight_Corner].GetY(), 0.0f)));
+        radii[SkRRect::kLowerRight_Corner].set(
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerLeft_Corner].GetX(), 0.0f)),
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerLeft_Corner].GetY(), 0.0f)));
+    }
+    recordingCanvas->ClipAdaptiveRRect(radii);
     Rosen::RsImageInfo rsImageInfo(
         (int)(GetPaintConfig().imageFit_),
         (int)(GetPaintConfig().imageRepeat_),
@@ -196,5 +212,4 @@ void SkiaCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, co
     canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
 #endif
 }
-
 } // namespace OHOS::Ace::NG
