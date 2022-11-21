@@ -69,6 +69,8 @@ uint64_t PipelineBase::GetTimeFromExternalTimer()
 
 void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskType type) {}
 
+void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type) {}
+
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {
     return nullptr;

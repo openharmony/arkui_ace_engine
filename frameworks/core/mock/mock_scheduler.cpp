@@ -16,9 +16,29 @@
 #include "core/animation/scheduler.h"
 
 namespace OHOS::Ace {
+void Scheduler::OnFrame(uint64_t nanoTimestamp) {}
+
+void Scheduler::Start() {}
+
+void Scheduler::Stop() {}
+
 bool Scheduler::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()> propertyCallback, const std::function<void()>& finishCallBack)
 {
     return false;
 }
+void Scheduler::OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+    const std::function<void()>& finishCallBack) {}
+
+bool Scheduler::CloseImplicitAnimation()
+{
+    scheduleId_ = 0;
+    startupTimestamp_ = 0;
+    return false;
+}
+
+void Scheduler::AddKeyFrame(float fraction, const RefPtr<Curve>& curve,
+    const std::function<void()>& propertyCallback) {}
+
+void Scheduler::AddKeyFrame(float fraction, const std::function<void()>& propertyCallback) {}
 } // namespace OHOS::Ace
