@@ -149,7 +149,8 @@ void CounterModelNG::SetHeight(const Dimension& value)
     subLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(value), CalcLength(value)));
 
     int32_t contentId = frameNode->GetPattern<CounterPattern>()->GetContentId();
-    auto contentNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(contentId)));
+    auto contentNode = AceType::DynamicCast<FrameNode>(
+        frameNode->GetChildAtIndex(frameNode->GetChildIndexById(contentId)));
     CHECK_NULL_VOID(contentNode);
     auto contentLayoutProperty = contentNode->GetLayoutProperty();
     contentLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));
