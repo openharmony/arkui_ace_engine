@@ -39,13 +39,13 @@ public:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSTextAreaController* scroller);
     void CaretPosition(int32_t caretPosition);
-    void SetController(const RefPtr<TextFieldController>& controller)
+    void SetController(const RefPtr<TextFieldControllerBase>& controller)
     {
         controller_ = controller;
     }
 
 private:
-    RefPtr<TextFieldController> controller_;
+    RefPtr<TextFieldControllerBase> controller_;
     ACE_DISALLOW_COPY_AND_MOVE(JSTextAreaController);
 };
 

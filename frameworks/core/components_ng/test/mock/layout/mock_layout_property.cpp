@@ -24,6 +24,11 @@ RefPtr<LayoutProperty> LayoutProperty::Clone() const
     return nullptr;
 }
 
+void LayoutProperty::SetHost(const WeakPtr<FrameNode>& host)
+{
+    host_ = host;
+}
+
 void LayoutProperty::Clone(RefPtr<LayoutProperty> layoutProperty) const {}
 
 void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
@@ -40,6 +45,13 @@ void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
     calcLayoutConstraint_->maxSize = constraint.maxSize;
     calcLayoutConstraint_->minSize = constraint.minSize;
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+}
+
+void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty) {}
+
+void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint)
+{
+    layoutConstraint_ = parentConstraint;
 }
 
 void LayoutProperty::OnVisibilityUpdate(VisibleType visible) const {}

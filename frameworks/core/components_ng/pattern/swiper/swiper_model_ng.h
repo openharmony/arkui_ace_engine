@@ -49,7 +49,6 @@ public:
     void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange) override;
 
     void SetRemoteMessageEventId(RemoteCallback&& remoteCallback) override;
-    void SetDigital(bool digitalIndicator) override;
     void SetOnClick(
         std::function<void(const BaseEventInfo* info, const RefPtr<V2::InspectorFunctionImpl>& impl)>&& value) override;
     void SetMainSwiperSizeWidth() override;

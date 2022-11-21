@@ -34,8 +34,7 @@ ohos_fuzztest("UtilFuzzTest") {
     "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",
     "$ace_root/frameworks/base/log/dump_log.cpp",
-    "$ace_root/frameworks/base/utils/resource_configuration.cpp",
-    "$ace_root/frameworks/base/utils/string_expression.cpp",
+    "$ace_root/frameworks/bridge/common/utils/source_map.cpp",
     "//third_party/cJSON/cJSON.c",
     "util_fuzzer.cpp",
   ]
@@ -47,24 +46,9 @@ ohos_fuzztest("UtilFuzzTest") {
     "$ace_root",
     cjson_root,
   ]
-
-  deps = [
-    #"$ace_root/adapter/ohos/osal:ace_osal_ohos",
-    "//foundation/window/window_manager/utils:libwmutil",
-    "//foundation/window/window_manager/wm:libwm",
-    "//third_party/icu/icu4c:shared_icui18n",
-    "//third_party/icu/icu4c:shared_icuuc",
-  ]
   external_deps = [
-    "ability_base:want",
-    "ability_runtime:ability_manager",
-    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
-    "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
-    "input:libmmi-client",
-    "ipc:ipc_core",
-    "window_manager:libdm",
   ]
 }
 

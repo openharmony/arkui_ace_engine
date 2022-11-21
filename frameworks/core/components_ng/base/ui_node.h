@@ -80,6 +80,16 @@ public:
         return children_;
     }
 
+    RefPtr<UINode> GetLastChild()
+    {
+        return children_.back();
+    }
+
+    RefPtr<UINode> GetFirstChild()
+    {
+        return children_.front();
+    }
+
     void GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList);
 
     int32_t GetChildIndexById(int32_t id);

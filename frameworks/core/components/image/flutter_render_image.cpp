@@ -22,6 +22,7 @@
 #include "third_party/skia/include/core/SkShader.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
 
+#include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
 
 #include "core/common/frontend.h"
@@ -401,7 +402,7 @@ void FlutterRenderImage::ProcessPixmapForPaint()
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> skImage;
     if (!renderTaskHolder_->ioManager) {
-        skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        skImage = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixmap));
     } else {
 #ifndef GPU_DISABLED
         skImage = SkImage::MakeCrossContextFromPixmap(

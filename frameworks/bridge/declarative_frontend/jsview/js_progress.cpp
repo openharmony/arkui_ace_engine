@@ -215,10 +215,13 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
 
     auto jsScaleCount = paramObject->GetProperty("scaleCount");
     auto scaleCount = jsScaleCount->IsNumber() ? jsScaleCount->ToNumber<int32_t>() : theme->GetScaleNumber();
-    if (scaleCount > 0.0 && Container::IsCurrentUseNewPipeline()) {
-        NG::ProgressView::SetScaleCount(scaleCount);
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (scaleCount > 0.0) {
+            NG::ProgressView::SetScaleCount(scaleCount);
+        } else {
+            NG::ProgressView::SetScaleCount(theme->GetScaleNumber());
+        }
     }
-
     Dimension scaleWidthDimension;
     auto jsScaleWidth = paramObject->GetProperty("scaleWidth");
     if (!ParseJsDimensionVp(jsScaleWidth, scaleWidthDimension)) {

@@ -25,7 +25,6 @@ void FrameNode::OnWindowFocused() {}
 void FrameNode::OnWindowUnfocused() {}
 void FrameNode::OnNotifyMemoryLevel(int32_t level) {}
 void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType) const {}
-void FrameNode::InitializePatternAndContext() {}
 void FrameNode::DumpInfo() {}
 void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
@@ -52,7 +51,11 @@ void FrameNode::MarkResponseRegion(bool isResponseRegion) {}
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
 {
-    layoutProperty_ = MakeRefPtr<LayoutProperty>();
+    paintProperty_ = pattern->CreatePaintProperty();
+    layoutProperty_ = pattern->CreateLayoutProperty();
+    eventHub_ = pattern->CreateEventHub();
+    accessibilityProperty_ = pattern->CreateAccessibilityProperty();
+    layoutProperty_->SetHost(WeakClaim(this));
 }
 
 void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
@@ -75,7 +78,8 @@ RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
 RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
-    return nullptr;
+    auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
+    return CreateFrameNode(tag, nodeId, pattern);
 }
 
 RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId)
@@ -86,7 +90,14 @@ RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId
 RefPtr<FrameNode> FrameNode::CreateFrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
 {
-    return nullptr;
+    auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot);
+    frameNode->InitializePatternAndContext();
+    return frameNode;
+}
+
+void FrameNode::InitializePatternAndContext()
+{
+    pattern_->AttachToFrameNode(WeakClaim(this));
 }
 
 std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)

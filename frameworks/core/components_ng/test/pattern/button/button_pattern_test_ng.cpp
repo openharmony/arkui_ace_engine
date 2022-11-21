@@ -45,7 +45,6 @@ const Ace::FontWeight BUTTON_BOLD_FONT_WEIGHT_VALUE = Ace::FontWeight::BOLD;
 const Ace::FontStyle BUTTON_ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
 const Color BUTTON_TEXT_COLOR_VALUE = Color::RED;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
-const bool STATE_EFFECT_TRUE_VALUE = true;
 const char BUTTON_ETS_TAG[] = "Button";
 const char TEXT_ETS_TAG[] = "Text";
 
@@ -85,10 +84,10 @@ RefPtr<FrameNode> ButtonPatternTestNg::CreateLabelButtonParagraph(
         ButtonView::SetFontWeight(testProperty.fontWeightValue.value());
     }
     if (testProperty.textColorValue.has_value()) {
-        ButtonView::SetTextColor(testProperty.textColorValue.value());
+        ButtonView::SetFontColor(testProperty.textColorValue.value());
     }
     if (testProperty.fontStyleValue.has_value()) {
-        ButtonView::SetItalicFontStyle(testProperty.fontStyleValue.value());
+        ButtonView::SetFontStyle(testProperty.fontStyleValue.value());
     }
     if (testProperty.fontFamilyValue.has_value()) {
         ButtonView::SetFontFamily(testProperty.fontFamilyValue.value());
@@ -108,7 +107,6 @@ HWTEST_F(ButtonPatternTestNg, ButtonFrameNodeCreator001, TestSize.Level1)
 {
     TestProperty testProperty;
     testProperty.typeValue = std::make_optional(BUTTON_TYPE_CAPSULE_VALUE);
-    testProperty.stateEffectValue = std::make_optional(STATE_EFFECT_TRUE_VALUE);
 
     RefPtr<FrameNode> frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
     EXPECT_EQ(frameNode == nullptr, false);
@@ -151,7 +149,6 @@ HWTEST_F(ButtonPatternTestNg, ButtonFrameNodeCreator003, TestSize.Level1)
 {
     TestProperty testProperty;
     testProperty.typeValue = std::make_optional(BUTTON_TYPE_DOWNLOAD_VALUE);
-    testProperty.stateEffectValue = std::make_optional(STATE_EFFECT_TRUE_VALUE);
     testProperty.fontSizeValue = std::make_optional(BUTTON_FONT_SIZE_VALUE);
     testProperty.fontWeightValue = std::make_optional(BUTTON_BOLD_FONT_WEIGHT_VALUE);
     RefPtr<FrameNode> frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
@@ -161,7 +158,6 @@ HWTEST_F(ButtonPatternTestNg, ButtonFrameNodeCreator003, TestSize.Level1)
     RefPtr<ButtonLayoutProperty> buttonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(layoutProperty);
     EXPECT_EQ(buttonLayoutProperty == nullptr, false);
     EXPECT_EQ(buttonLayoutProperty->GetTypeValue(), BUTTON_TYPE_DOWNLOAD_VALUE);
-    EXPECT_EQ(buttonLayoutProperty->GetStateEffectValue(), STATE_EFFECT_TRUE_VALUE);
     EXPECT_EQ(buttonLayoutProperty->GetFontSizeValue(), BUTTON_FONT_SIZE_VALUE);
     EXPECT_EQ(buttonLayoutProperty->GetFontWeightValue(), BUTTON_BOLD_FONT_WEIGHT_VALUE);
     EXPECT_EQ(buttonLayoutProperty->GetLabelValue(), CREATE_VALUE);
@@ -199,7 +195,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonFrameNodeCreator004, TestSize.Level1)
     RefPtr<ButtonLayoutProperty> buttonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(layoutProperty);
     EXPECT_EQ(buttonLayoutProperty == nullptr, false);
     EXPECT_EQ(buttonLayoutProperty->GetTypeValue(), BUTTON_TYPE_CIRCLE_VALUE);
-    EXPECT_EQ(buttonLayoutProperty->GetTextColorValue(), BUTTON_TEXT_COLOR_VALUE);
+    EXPECT_EQ(buttonLayoutProperty->GetFontColorValue(), BUTTON_TEXT_COLOR_VALUE);
     EXPECT_EQ(buttonLayoutProperty->GetLabelValue(), CREATE_VALUE);
     EXPECT_EQ(textLayoutPropertyValue->GetItalicFontStyle().value(), BUTTON_ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(textLayoutPropertyValue->GetFontFamily().value(), FONT_FAMILY_VALUE);

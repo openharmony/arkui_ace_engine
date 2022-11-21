@@ -568,7 +568,9 @@ public:
 
     void SetOnVisibleChange(
         std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) override
-    {}
+    {
+        ViewAbstract::SetOnVisibleChange(std::move(onVisibleChange), ratios);
+    }
 
     void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&

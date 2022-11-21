@@ -114,6 +114,10 @@ public:
         return {};
     }
 
+    void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback);
+
+    void HandleVisibleAreaChangeEvent();
+
     void Destroy() override;
 
     void OnShow() override;
@@ -131,14 +135,7 @@ public:
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
 
     void OnSurfaceChanged(
-        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override
-    {
-        auto frontend = weakFrontend_.Upgrade();
-        if (frontend) {
-            frontend->OnSurfaceChanged(width, height);
-        }
-        SetRootSize(density_, width, height);
-    }
+        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override;
 
     void OnSurfacePositionChanged(int32_t posX, int32_t posY) override {}
 
@@ -221,6 +218,11 @@ public:
         isNeedShowFocus_ = isNeedShowFocus;
     }
 
+    bool GetOnShow() const
+    {
+        return onShow_;
+    }
+
     bool RequestDefaultFocus();
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
@@ -238,6 +240,8 @@ public:
     void Finish(bool autoFinish) const override;
 
 protected:
+    void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type);
+
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushFocus();
@@ -289,6 +293,8 @@ private:
 
     RefPtr<FrameNode> rootNode_;
 
+    std::unordered_map<int32_t, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
+
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
     RefPtr<FullScreenManager> fullScreenManager_;
@@ -301,6 +307,8 @@ private:
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isNeedShowFocus_ = false;
+    bool onShow_ = true;
+    bool onFocus_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

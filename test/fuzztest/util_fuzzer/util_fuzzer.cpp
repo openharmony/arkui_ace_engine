@@ -20,36 +20,33 @@
 #include <string>
 
 #include "json_util.h"
-#include "resource_configuration.h"
-#include "string_expression.h"
+
+#include "frameworks/base/memory/ace_type.h"
+#include "frameworks/bridge/common/utils/source_map.h"
 
 namespace OHOS {
-
 using namespace OHOS::Ace;
+using namespace std;
+constexpr uint32_t u16m = 65535;
+string appjsmap = "{\"version\":3,"
+                             "\"file\":\"./pages/dfxtest.js\","
+                             "\"mappings\":\";\","
+                             "\"sources\":[],"
+                             "\"names\":[\"_ohos_router_1\",\"router\",\"_ohos_process_1\",\"process\"]}";
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     bool result = false;
-    ResourceConfiguration r;
-    uint32_t update = 0;
-    std::string s;
-    r.UpdateFromJsonString(s, update);
+    uint32_t errorPos = 0;
+    string s(reinterpret_cast<const char*>(data), size % u16m);
+    std::vector<std::string> sourceKeyInfo;
+    OHOS::Ace::Framework::RevSourceMap::ExtractKeyInfo(s, sourceKeyInfo);
+    RefPtr<Framework::RevSourceMap> RevSourceMap = AceType::MakeRefPtr<Framework::RevSourceMap>();
+    RevSourceMap->Init(appjsmap);
+    RevSourceMap->GetOriginalNames(s, errorPos);
     return result;
 }
 
-void calc(const uint8_t* data, size_t size)
-{
-    double vpScale = 1;
-    double fpScale = 1;
-    double lpxScale = 1;
-    double parentLength = 1;
-    std::string s;
-    StringExpression::CalculateExp(s, [vpScale, fpScale, lpxScale, parentLength](const Dimension& dim) -> double {
-        double result = -1.0;
-        dim.NormalizeToPx(vpScale, fpScale, lpxScale, parentLength, result);
-        return result;
-    });
-}
 
 } // namespace OHOS
 
@@ -58,6 +55,5 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::DoSomethingInterestingWithMyAPI(data, size);
-    OHOS::calc(data, size);
     return 0;
 }
