@@ -63,7 +63,8 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     auto rootWidth = Dimension(context->GetRootWidth());
     toastProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(rootWidth), std::nullopt));
 
-    auto bottomPosition = Dimension(StringUtils::StringToDimension(bottom, true).ConvertToPx());
+    auto bottomPosition = Dimension(StringUtils::StringToDimensionWithThemeValue(bottom, true,
+        toastTheme->GetBottom()).ConvertToPx());
     Color textColor;
     Color toastBackgroundColor;
     Dimension fontSize;
@@ -82,7 +83,8 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     minWidth = Dimension(toastTheme->GetMinWidth().ConvertToPx());
     maxWidth = Dimension(toastTheme->GetMaxWidth().ConvertToPx());
     minHeight = Dimension(toastTheme->GetMinHeight().ConvertToPx());
-    toastbottom = Dimension(bottomPosition.IsValid() ? bottomPosition.Value() : toastTheme->GetBottom().ConvertToPx());
+    toastbottom = Dimension(
+        GreatOrEqual(bottomPosition.Value(), 0.0) ? bottomPosition.Value() : toastTheme->GetBottom().ConvertToPx());
     auto radius = toastTheme->GetRadius();
     borderRadius.SetRadius(Dimension(radius.GetX().Value()));
     auto padding = toastTheme->GetPadding();
