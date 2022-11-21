@@ -143,23 +143,17 @@ bool HdcJdwpSimulator::Connect()
         int rc = connect(cfd, reinterpret_cast<struct sockaddr *>(&caddr), caddrLen);
         if (rc != 0) {
             LOGE("connect failed errno:%{public}d", errno);
-            close(ctxPoint_->cfd);
-            ctxPoint_->cfd = -1;
-            sleep(2);
-            continue;
-        }
-        if (ConnectJpid(this)) {
+        } else if (ConnectJpid(this)) {
             char recvBuf[100] = { 0 }; // 100 buf size
             int ret = recv(cfd, recvBuf, sizeof(recvBuf), 0); // stop when server connect, or retry
             LOGE("jdwp retry connect server errno:%{public}d, ret:%{public}d", errno, ret);
-            if (errno != EINTR && errno != EAGAIN) {
-                close(ctxPoint_->cfd);
-                ctxPoint_->cfd = -1;
-            } else {
+            if (errno == EINTR || errno == EAGAIN) {
                 return false;
             }
         }
-        sleep(2); // connect per 2 second
+        close(ctxPoint_->cfd);
+        ctxPoint_->cfd = -1;
+        sleep(3); // connect per 3 second
     }
     return true;
 }
