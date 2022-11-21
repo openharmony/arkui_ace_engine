@@ -128,6 +128,9 @@ public:
         swiperParameters_ = swiperParameters;
     }
 
+    void ShowNext();
+    void ShowPrevious();
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -167,8 +170,6 @@ private:
     // Implement of swiper controller
     void SwipeToWithoutAnimation(int32_t index);
     void SwipeTo(int32_t index);
-    void ShowNext();
-    void ShowPrevious();
     void FinishAnimation();
     void StopTranslateAnimation();
 
