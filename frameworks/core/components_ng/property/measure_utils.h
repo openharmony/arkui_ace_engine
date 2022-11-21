@@ -107,7 +107,8 @@ SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, Meas
  * @param measureType the measure info.
  * @return SizeF the node size info.
  */
-OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType);
+OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType,
+    const MarginPropertyF& margin = MarginPropertyF());
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_MEASURE_UTILS_H
