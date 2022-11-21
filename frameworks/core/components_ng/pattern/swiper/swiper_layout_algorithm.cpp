@@ -68,6 +68,10 @@ void SwiperLayoutAlgorithm::InitItemRange(LayoutWrapper* layoutWrapper)
     ACE_SCOPED_TRACE("SwiperLayoutAlgorithm::InitItemRange");
     itemRange_.clear();
 
+    if (currentIndex_ < 0 || currentIndex_ > totalCount_ - 1) {
+        currentIndex_ = 0;
+    }
+
     /* Load next index while swiping */
     LoadItemWithDrag(layoutWrapper);
 

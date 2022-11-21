@@ -151,6 +151,10 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(swiperPattern, false);
     int32_t indicator = swiperPattern->GetCurrentIndex();
+    int32_t totalCount = swiperPattern->TotalCount();
+    if (indicator > totalCount - 1 || indicator < 0) {
+        indicator = 0;
+    }
     UpdateIndicator(indicator);
     return false;
 }
