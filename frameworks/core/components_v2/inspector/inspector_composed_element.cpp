@@ -828,9 +828,9 @@ std::string InspectorComposedElement::GetBackgroundImage() const
         return "NONE";
     }
     auto imageRepeat = image->GetImageRepeat();
-    if (imageRepeat == ImageRepeat::REPEATX) {
+    if (imageRepeat == ImageRepeat::REPEAT_X) {
         return image->GetSrc() + ", ImageRepeat.X";
-    } else if (imageRepeat == ImageRepeat::REPEATY) {
+    } else if (imageRepeat == ImageRepeat::REPEAT_Y) {
         return image->GetSrc() + ", ImageRepeat.Y";
     } else if (imageRepeat == ImageRepeat::REPEAT) {
         return image->GetSrc() + ", ImageRepeat.XY";

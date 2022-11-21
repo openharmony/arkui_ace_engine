@@ -45,6 +45,7 @@ ohos_unittest("image_animator_pattern_test") {
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/image/image_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image_animator/image_animator_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image_animator/image_animator_view.cpp",
