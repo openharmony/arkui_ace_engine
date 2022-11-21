@@ -30,8 +30,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 // TODO datepicker style modification
-constexpr float LAYOUT_WEIGHT = 30.0;
-constexpr float PADDING_WEIGHT = 10.0;
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const int32_t DIVIDER_SIZE = 2;
 const Dimension FONT_SIZE = Dimension(2.0);
@@ -45,8 +43,7 @@ void TextPickerPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto textPickerLayoutProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(textPickerLayoutProperty);
-    textPickerLayoutProperty->UpdateLayoutWeight(LAYOUT_WEIGHT);
-    textPickerLayoutProperty->UpdatePadding(PaddingProperty { CalcLength(PADDING_WEIGHT, DimensionUnit::PX) });
+    textPickerLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
     textPickerLayoutProperty->UpdateAlignSelf(FlexAlign::CENTER);
 
     auto context = host->GetContext();
@@ -145,26 +142,18 @@ void TextPickerPattern::FlushCurrentOptions()
     auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
     auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-
+    auto height = CalculateHeight();
     for (uint32_t index = 0; index < showCount; index++) {
         uint32_t optionIndex = (totalOptionCount + currentIndex + index - selectedIndex) % totalOptionCount;
         auto optionValue = textPickerPattern->GetOption(optionIndex);
-        int32_t diffIndex = static_cast<int32_t>(index) - static_cast<int32_t>(selectedIndex);
-        int32_t virtualIndex = static_cast<int32_t>(currentIndex) + diffIndex;
-        bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
+
         auto textNode = DynamicCast<FrameNode>(*iter);
         CHECK_NULL_VOID(textNode);
         auto textPattern = textNode->GetPattern<TextPattern>();
         CHECK_NULL_VOID(textPattern);
         auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        // TODO Property Update
-        if (NotLoopOptions() && !virtualIndexValidate) {
-            textLayoutProperty->UpdateContent("");
-            continue;
-        }
-        textLayoutProperty->UpdateContent(optionValue);
-        auto height = CalculateHeight();
+
         if (index < middleIndex) {
             if (index == 0) {
                 textLayoutProperty->UpdateFontSize(normalOptionSize);
@@ -173,8 +162,7 @@ void TextPickerPattern::FlushCurrentOptions()
             }
             textLayoutProperty->UpdateMaxLines(1);
             textLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE),
-                    CalcLength(height)));
+                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE), CalcLength(height)));
             textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
         }
         if (index == middleIndex) {
@@ -182,8 +170,7 @@ void TextPickerPattern::FlushCurrentOptions()
             textLayoutProperty->UpdateMaxLines(1);
             textLayoutProperty->UpdateFontSize(selectedOptionSize);
             textLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE),
-                    CalcLength(height)));
+                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE), CalcLength(height)));
             textLayoutProperty->UpdateAlignment(Alignment::CENTER);
         }
         if (index > middleIndex) {
@@ -194,14 +181,23 @@ void TextPickerPattern::FlushCurrentOptions()
             }
             textLayoutProperty->UpdateMaxLines(1);
             textLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE),
-                    CalcLength(height)));
+                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE), CalcLength(height)));
             textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
         }
+        iter++;
+        int32_t diffIndex = static_cast<int32_t>(index) - static_cast<int32_t>(selectedIndex);
+        int32_t virtualIndex = static_cast<int32_t>(currentIndex) + diffIndex;
+        bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
+        if (NotLoopOptions() && !virtualIndexValidate) {
+            textLayoutProperty->UpdateContent("");
+            textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            textNode->MarkModifyDone();
+            continue;
+        }
+        textLayoutProperty->UpdateContent(optionValue);
         textNode->GetRenderContext()->SetClipToFrame(true);
         textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         textNode->MarkModifyDone();
-        iter++;
     }
     selectedIndex_ = currentIndex;
     if (isIndexChanged_) {
@@ -420,6 +416,7 @@ double TextPickerPattern::CalculateHeight()
     } else {
         height = pickerTheme->GetGradientHeight().Value();
     }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     return height;
 }
 
