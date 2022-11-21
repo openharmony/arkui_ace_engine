@@ -52,6 +52,7 @@ ohos_unittest("image_pattern_test") {
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_source_info.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/layout/mock_box_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/layout/mock_layout_property.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/theme/mock_icon_theme.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/theme/mock_theme.cpp",

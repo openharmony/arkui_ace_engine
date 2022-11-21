@@ -104,6 +104,9 @@ public:
         if (totalCount_ == totalCount) {
             return;
         }
+        if (totalCount_ < totalCount) {
+            reachTail_ = false;
+        }
         totalCount_ = totalCount;
         totalCountFlag_ = true;
     }

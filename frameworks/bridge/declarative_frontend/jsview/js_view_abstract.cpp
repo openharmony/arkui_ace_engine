@@ -4368,6 +4368,7 @@ void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
     auto ratioArray = JSRef<JSArray>::Cast(info[0]);
     size_t size = ratioArray->Length();
     std::vector<double> ratioVec(size);
+    ratioVec.clear();
     for (size_t i = 0; i < size; i++) {
         double ratio = 0.0;
         ParseJsDouble(ratioArray->GetValueAt(i), ratio);

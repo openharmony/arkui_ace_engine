@@ -363,6 +363,19 @@ void ViewAbstract::SetOnAreaChanged(
     eventHub->SetOnAreaChanged(std::move(onAreaChanged));
 }
 
+void ViewAbstract::SetOnVisibleChange(
+    std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    for (const auto& ratio : ratioList) {
+        pipeline->AddVisibleAreaChangeNode(frameNode, ratio, onVisibleChange);
+    }
+}
+
 void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();

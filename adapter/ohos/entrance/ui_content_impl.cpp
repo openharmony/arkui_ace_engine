@@ -873,10 +873,21 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
         LOGE("UIContentImpl container is null");
         return;
     }
-    auto colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    auto deviceAccess = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
-    auto languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-    container->UpdateConfiguration(colorMode, deviceAccess, languageTag);
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("OnSizeChange: taskExecutor is null.");
+        return;
+    }
+    taskExecutor->PostTask([weakContainer = WeakPtr<Platform::AceContainer>(container), config]() {
+        auto container = weakContainer.Upgrade();
+        if (!container) {
+            return;
+        }
+        auto colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+        auto deviceAccess = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
+        auto languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+        container->UpdateConfiguration(colorMode, deviceAccess, languageTag);
+    }, TaskExecutor::TaskType::UI);
     LOGI("UIContentImpl: UpdateConfiguration called End, name:%{public}s", config->GetName().c_str());
 }
 

@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -157,6 +158,7 @@ EnterStateTask ImageLoadingContext::CreateOnLoadSuccessTask()
         CHECK_NULL_VOID(imageLoadingContext);
         if (imageLoadingContext->loadNotifier_.loadSuccessNotifyTask_) {
             imageLoadingContext->loadNotifier_.loadSuccessNotifyTask_(imageLoadingContext->GetSourceInfo());
+            imageLoadingContext->CacheImageObject();
         }
         imageLoadingContext->needAlt_ = false;
     };
@@ -372,6 +374,17 @@ void ImageLoadingContext::ResetLoading()
 void ImageLoadingContext::ResumeLoading()
 {
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_DATA);
+}
+
+void ImageLoadingContext::CacheImageObject()
+{
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineCtx);
+    auto imageCache = pipelineCtx->GetImageCache();
+    CHECK_NULL_VOID(imageCache);
+    if (imageCache && imageObj_->GetFrameCount() == 1 && !AceType::InstanceOf<PixelMapImageObject>(imageObj_)) {
+        imageCache->CacheImgObjNG(imageObj_->GetSourceInfo().ToString(), imageObj_);
+    }
 }
 
 } // namespace OHOS::Ace::NG

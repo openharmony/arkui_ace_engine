@@ -89,8 +89,8 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
     }
     if (AceType::InstanceOf<SwitchPattern>(pattern)) {
         if (toggleType == ToggleType::SWITCH) {
-            ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
             stack->Push(childFrameNode);
+            ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
             return;
         }
         if (toggleType == ToggleType::CHECKBOX) {

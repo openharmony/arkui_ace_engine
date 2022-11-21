@@ -29,4 +29,9 @@ std::shared_ptr<Localization> Localization::GetInstance()
     static auto instance = std::make_shared<Localization>();
     return instance;
 }
+
+std::string Localization::GetEntryLetters(const std::string& lettersIndex)
+{
+    return "";
+}
 } // namespace OHOS::Ace

@@ -32,7 +32,6 @@ public:
     virtual void Show() {}
     virtual void Hide() {}
     virtual void RequestFocus() {}
-    virtual void ConnectExtension(const RefPtr<NG::FrameNode>& node, int32_t windowId) = 0;
     virtual void ConnectExtension(
         const std::string& want, const Rect& rect, WeakPtr<RenderNode> node, int32_t windowId) = 0;
     virtual void UpdateRect(const Rect& rect) = 0;

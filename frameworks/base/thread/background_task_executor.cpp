@@ -17,9 +17,13 @@
 
 #include <pthread.h>
 #include <string>
+#include <functional>
 
 #include "base/log/log.h"
 #include "base/memory/memory_monitor.h"
+#include "base/thread/frame_trace_adapter.h"
+
+static const std::string BG_THREAD_NAME = "ui";
 
 namespace OHOS::Ace {
 namespace {
@@ -83,6 +87,18 @@ bool BackgroundTaskExecutor::PostTask(Task&& task, BgTaskPriority priority)
     if (!running_) {
         return false;
     }
+    FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
+    if (ft != nullptr && ft->EnableFrameTrace(BG_THREAD_NAME)) {
+        switch (priority) {
+            case BgTaskPriority::LOW:
+                ft->QuickExecute(std::move(task));
+                break;
+            default:
+                ft->SlowExecute(std::move(task));
+                break;
+        }
+        return true;
+    }
     switch (priority) {
         case BgTaskPriority::LOW:
             lowPriorityTasks_.emplace_back(std::move(task));
@@ -104,6 +120,18 @@ bool BackgroundTaskExecutor::PostTask(const Task& task, BgTaskPriority priority)
     std::lock_guard<std::mutex> lock(mutex_);
     if (!running_) {
         return false;
+    }
+    FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
+    if (ft != nullptr && ft->EnableFrameTrace(BG_THREAD_NAME)) {
+        Task variableTask = task;
+        switch (priority) {
+            case BgTaskPriority::LOW:
+                ft->QuickExecute(std::move(variableTask));
+                break;
+            default:
+                ft->SlowExecute(std::move(variableTask));
+        }
+        return true;
     }
     switch (priority) {
         case BgTaskPriority::LOW:

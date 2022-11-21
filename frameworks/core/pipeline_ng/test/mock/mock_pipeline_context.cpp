@@ -163,4 +163,8 @@ bool PipelineContext::OnBackPressed()
 void UITaskScheduler::FlushTask() {}
 
 UITaskScheduler::~UITaskScheduler() = default;
+
+void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty) {}
+
+void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty) {}
 } // namespace OHOS::Ace::NG

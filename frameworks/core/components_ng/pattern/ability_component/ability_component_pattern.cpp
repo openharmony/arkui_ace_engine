@@ -27,7 +27,7 @@ void AbilityComponentPattern::OnModifyDone()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     int32_t windowId = pipelineContext->GetWindowId();
-    adapter_ = WindowExtensionConnectionProxy::CreateAdapter();
+    adapter_ = WindowExtensionConnectionProxyNG::CreateAdapter();
     if (adapter_) {
         adapter_->ConnectExtension(GetHost(), windowId);
     }
@@ -67,7 +67,7 @@ void AbilityComponentPattern::UpdateWindowRect()
     CHECK_NULL_VOID(host);
     auto size = host->GetGeometryNode()->GetFrameSize();
     auto offset = host->GetGeometryNode()->GetFrameOffset() + host->GetOffsetRelativeToWindow();
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto rect = pipeline->GetDisplayWindowRectInfo();
 
