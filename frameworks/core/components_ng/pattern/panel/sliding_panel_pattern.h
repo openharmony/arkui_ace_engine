@@ -25,7 +25,6 @@
 #include "core/components_ng/pattern/panel/sliding_panel_event_hub.h"
 #include "core/components_ng/pattern/panel/sliding_panel_layout_algorithm.h"
 #include "core/components_ng/pattern/panel/sliding_panel_layout_property.h"
-#include "core/components_ng/pattern/panel/sliding_panel_node.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
