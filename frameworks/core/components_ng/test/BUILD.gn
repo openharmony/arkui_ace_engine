@@ -20,7 +20,6 @@ group("unittest") {
     deps = [
       "base:base_unittest",
       "event:event_unittest",
-      "inner_api:inner_api_unit_test",
       "layout:layout_unittest",
       "manager:manager_unittest",
       "pattern:pattern_unittest",
