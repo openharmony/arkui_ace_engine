@@ -34,8 +34,10 @@ namespace {
 const std::string PLACEHOLDER = "DEFAULT PLACEHOLDER";
 const std::string EMPTY_TEXT_VALUE;
 const std::string TEXT_VALUE = "DEFAULT_TEXT";
+const std::string INSERT_VALUE_SINGLE_NUMBER = "1";
 const std::string INSERT_VALUE_SINGLE_CHAR = "X";
 const std::string LOWERCASE_FILTER = "[a-z]";
+const std::string NUMBER_FILTER = "^[0-9]*$";
 const int32_t CARET_POSITION_1 = 10;
 const int32_t DELETE_LENGTH_1 = 1;
 } // namespace
@@ -123,6 +125,27 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldFilter001, TestSize.Level1)
     pattern->InsertValue(INSERT_VALUE_SINGLE_CHAR);
     EXPECT_EQ(pattern->GetEditingValue().text, EMPTY_TEXT_VALUE);
     EXPECT_EQ(pattern->GetEditingValue().caretPosition, EMPTY_TEXT_VALUE.size());
+}
+
+/**
+ * @tc.name: TextFieldFilter002
+ * @tc.desc: Test textfield filter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldFilter002, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(PLACEHOLDER, EMPTY_TEXT_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_FALSE(layoutProperty == nullptr);
+    layoutProperty->UpdateInputFilter(NUMBER_FILTER);
+    pattern->InsertValue(INSERT_VALUE_SINGLE_NUMBER);
+    EXPECT_EQ(pattern->GetEditingValue().text, INSERT_VALUE_SINGLE_NUMBER);
+    EXPECT_EQ(pattern->GetEditingValue().caretPosition, INSERT_VALUE_SINGLE_NUMBER.size());
 }
 
 /**
