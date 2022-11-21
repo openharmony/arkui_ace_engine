@@ -55,6 +55,7 @@ void MarqueeModelNG::SetValue(const std::string& value)
     ACE_DCHECK(textLayoutProperty);
     textLayoutProperty->UpdateContent(value);
     textChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    textChild->MarkModifyDone();
 }
 
 void MarqueeModelNG::SetPlayerStatus(bool playerStatus)
