@@ -84,6 +84,11 @@ public:
     {
         return isWrap_;
     }
+    
+    void SetIsWrap(bool isWrap)
+    {
+        isWrap_ = isWrap;
+    }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
