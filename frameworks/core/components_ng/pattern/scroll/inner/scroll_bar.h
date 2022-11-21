@@ -98,8 +98,6 @@ public:
     double GetNormalWidthToPx() const;
     double CalcPatternOffset(double scrollBarOffset);
 
-    void Reset();
-
     ShapeMode GetShapeMode() const
     {
         return shapeMode_;
@@ -245,16 +243,6 @@ public:
         return isScrollable_;
     }
 
-    void SetFirstLoad(bool firstLoad)
-    {
-        firstLoad_ = firstLoad;
-    }
-
-    bool GetFirstLoad() const
-    {
-        return firstLoad_;
-    }
-
     void SetPositionMode(PositionMode positionMode)
     {
         positionMode_ = positionMode;
@@ -337,7 +325,6 @@ private:
     double offsetScale_ = 1.0f;
 
     bool isScrollable_ = false;
-    bool firstLoad_ = true;
 
     bool isPressed_ = false;
     bool isDriving_ = false; // false: scroll driving; true: bar driving

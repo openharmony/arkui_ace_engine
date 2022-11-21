@@ -49,9 +49,6 @@ void ScrollPaintMethod::PaintScrollBar(RSCanvas& canvas, PaintWrapper* paintWrap
     }
 
     ScrollBarPainter::PaintRectBar(canvas, scrollBar, UINT8_MAX);
-    if (scrollBar->GetFirstLoad()) {
-        scrollBar->SetFirstLoad(false);
-    }
 }
 
 void ScrollPaintMethod::PaintScrollEffect(RSCanvas& canvas, PaintWrapper* paintWrapper) const
