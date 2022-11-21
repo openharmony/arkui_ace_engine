@@ -61,7 +61,7 @@ public:
         auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, nullptr);
         auto enabled = eventHub->IsEnabled();
-        auto paintMethod = MakeRefPtr<SwitchPaintMethod>(currentOffset_, enabled);
+        auto paintMethod = MakeRefPtr<SwitchPaintMethod>(currentOffset_, enabled, isTouch_, isHover_);
         return paintMethod;
     }
 
@@ -76,10 +76,16 @@ private:
     void StopTranslateAnimation();
     void UpdateChangeEvent() const;
     void OnChange();
+    void OnTouchDown();
+    void OnTouchUp();
+    void HandleMouseEvent(bool isHover);
     float GetSwitchWidth() const;
 
     // Init pan recognizer to move items when drag update, play translate animation when drag end.
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitClickEvent();
+    void InitTouchEvent();
+    void InitMouseEvent();
 
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd();
@@ -96,6 +102,11 @@ private:
     std::optional<bool> isOn_;
     bool changeFlag_ = false;
     float currentOffset_ = 0.0f;
+
+    RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<InputEvent> mouseEvent_;
+    bool isTouch_ = false;
+    bool isHover_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
 };

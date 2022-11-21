@@ -27,7 +27,8 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT SwitchPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SwitchPaintMethod, NodePaintMethod)
 public:
-    explicit SwitchPaintMethod(float mainDelta, bool enabled) : mainDelta_(mainDelta), enabled_(enabled) {};
+    explicit SwitchPaintMethod(float mainDelta, bool enabled, bool isTouch, bool isHover)
+        : mainDelta_(mainDelta), enabled_(enabled), isTouch_(isTouch), isHover_(isHover) {};
     ~SwitchPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
@@ -35,9 +36,21 @@ public:
 private:
     void PaintContent(
         RSCanvas& canvas, RefPtr<SwitchPaintProperty> paintProperty, SizeF contentSize, OffsetF contentOffset);
+
+    void DrawTouchBoard(RSCanvas& canvas, const OffsetF& offset) const;
+    void DrawHoverBoard(RSCanvas& canvas, const OffsetF& offset) const;
     float mainDelta_ = 0.0f;
+    float defaltWidth_ = 0.0f;
+    float defaultHeight_ = 0.0f;
+    float pointRadius_ = 0.0f;
     const float radiusGap_ = 2.0f;
     bool enabled_ = true;
+    Color clickEffectColor_ = Color::WHITE;
+    Color hoverColor_ = Color::WHITE;
+    Dimension hoverRadius_ = 8.0_vp;
+
+    bool isTouch_ = false;
+    bool isHover_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPaintMethod);
 };
