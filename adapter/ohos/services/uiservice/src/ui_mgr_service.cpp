@@ -20,7 +20,6 @@
 #include "hilog_wrapper.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
-
 #include "string_ex.h"
 #include "system_ability_definition.h"
 #include "ui_service_mgr_errors.h"
@@ -29,29 +28,25 @@ namespace OHOS {
 namespace Ace {
 namespace {
 constexpr int32_t UI_MGR_SERVICE_SA_ID = 7001;
-const bool REGISTER_RESULT =
-    SystemAbility::MakeAndRegisterAbility(DelayedSingleton<UIMgrService>::GetInstance().get());
-}
+const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(DelayedSingleton<UIMgrService>::GetInstance().get());
+} // namespace
 
 // UiservicePluginDialog UIMgrService::dialogPlugin_;
 
 UIMgrService::UIMgrService()
-    : SystemAbility(UI_MGR_SERVICE_SA_ID, true),
-      eventLoop_(nullptr),
-      handler_(nullptr),
+    : SystemAbility(UI_MGR_SERVICE_SA_ID, true), eventLoop_(nullptr), handler_(nullptr),
       state_(UIServiceRunningState::STATE_NOT_START)
-{
-}
+{}
 
 UIMgrService::~UIMgrService()
 {
-    std::lock_guard<std::mutex> lock(uiMutex_);
+    std::lock_guard<std::recursive_mutex> lock(uiMutex_);
     callbackMap_.clear();
 }
 
 int32_t UIMgrService::Dump(int32_t fd, const std::vector<std::u16string>& args)
 {
-    std::lock_guard<std::mutex> lock(uiMutex_);
+    std::lock_guard<std::recursive_mutex> lock(uiMutex_);
     dprintf(fd, "total callbacks: %u\n", callbackMap_.size());
     if (!callbackMap_.empty()) {
         dprintf(fd, "callback keys: \n");
@@ -156,12 +151,16 @@ int32_t UIMgrService::UnregisterCallBack(const AAFwk::Want& want)
     return NO_ERROR;
 }
 
-int32_t UIMgrService::Push(const AAFwk::Want& want, const std::string& name,
-    const std::string& jsonPath, const std::string& data, const std::string& extraData)
+int32_t UIMgrService::Push(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
+    const std::string& data, const std::string& extraData)
 {
     HILOG_INFO("UIMgrService::Push called start");
-    std::lock_guard<std::mutex> lock(uiMutex_);
-    for (auto iter = callbackMap_.begin(); iter != callbackMap_.end(); ++iter) {
+    std::map<std::string, sptr<IUIService>> callbackMap;
+    {
+        std::lock_guard<std::recursive_mutex> lock(uiMutex_);
+        callbackMap = std::map<std::string, sptr<IUIService>>(callbackMap_);
+    }
+    for (auto iter = callbackMap.begin(); iter != callbackMap.end(); ++iter) {
         sptr<IUIService> uiService = iter->second;
         if (uiService == nullptr) {
             return UI_SERVICE_IS_NULL;
@@ -175,8 +174,12 @@ int32_t UIMgrService::Push(const AAFwk::Want& want, const std::string& name,
 int32_t UIMgrService::Request(const AAFwk::Want& want, const std::string& name, const std::string& data)
 {
     HILOG_INFO("UIMgrService::Request called start");
-    std::lock_guard<std::mutex> lock(uiMutex_);
-    for (auto iter = callbackMap_.begin(); iter != callbackMap_.end(); ++iter) {
+    std::map<std::string, sptr<IUIService>> callbackMap;
+    {
+        std::lock_guard<std::recursive_mutex> lock(uiMutex_);
+        callbackMap = std::map<std::string, sptr<IUIService>>(callbackMap_);
+    }
+    for (auto iter = callbackMap.begin(); iter != callbackMap.end(); ++iter) {
         sptr<IUIService> uiService = iter->second;
         if (uiService == nullptr) {
             return UI_SERVICE_IS_NULL;
@@ -191,7 +194,12 @@ int32_t UIMgrService::ReturnRequest(
     const AAFwk::Want& want, const std::string& source, const std::string& data, const std::string& extraData)
 {
     HILOG_INFO("UIMgrService::ReturnRequest called start");
-    for (auto iter = callbackMap_.begin(); iter != callbackMap_.end(); ++iter) {
+    std::map<std::string, sptr<IUIService>> callbackMap;
+    {
+        std::lock_guard<std::recursive_mutex> lock(uiMutex_);
+        callbackMap = std::map<std::string, sptr<IUIService>>(callbackMap_);
+    }
+    for (auto iter = callbackMap.begin(); iter != callbackMap.end(); ++iter) {
         sptr<IUIService> uiService = iter->second;
         if (uiService == nullptr) {
             return UI_SERVICE_IS_NULL;
@@ -205,7 +213,7 @@ int32_t UIMgrService::ReturnRequest(
 int32_t UIMgrService::HandleRegister(const AAFwk::Want& want, const sptr<IUIService>& uiService)
 {
     HILOG_INFO("UIMgrService::HandleRegister called start");
-    std::lock_guard<std::mutex> lock(uiMutex_);
+    std::lock_guard<std::recursive_mutex> lock(uiMutex_);
     std::string keyStr = GetCallBackKeyStr(want);
     HILOG_INFO("UIMgrService::HandleRegister keyStr = %{public}s", keyStr.c_str());
     bool exist = CheckCallBackFromMap(keyStr);
@@ -220,7 +228,7 @@ int32_t UIMgrService::HandleRegister(const AAFwk::Want& want, const sptr<IUIServ
 int32_t UIMgrService::HandleUnregister(const AAFwk::Want& want)
 {
     HILOG_INFO("UIMgrService::HandleUnregister called start");
-    std::lock_guard<std::mutex> lock(uiMutex_);
+    std::lock_guard<std::recursive_mutex> lock(uiMutex_);
     std::string keyStr = GetCallBackKeyStr(want);
     bool exist = CheckCallBackFromMap(keyStr);
     if (!exist) {
@@ -235,7 +243,7 @@ int32_t UIMgrService::HandleUnregister(const AAFwk::Want& want)
 std::string UIMgrService::GetCallBackKeyStr(const AAFwk::Want& want)
 {
     HILOG_INFO("UIMgrService::GetCallBackKeyStr called start");
-    AppExecFwk::ElementName element =  want.GetElement();
+    AppExecFwk::ElementName element = want.GetElement();
     std::string bundleName = element.GetBundleName();
     std::string keyStr = bundleName;
     HILOG_INFO("UIMgrService::GetCallBackKeyStr called end");
@@ -245,6 +253,7 @@ std::string UIMgrService::GetCallBackKeyStr(const AAFwk::Want& want)
 bool UIMgrService::CheckCallBackFromMap(const std::string& key)
 {
     HILOG_INFO("UIMgrService::CheckCallBackFromMap called start");
+    std::lock_guard<std::recursive_mutex> lock(uiMutex_);
     auto it = callbackMap_.find(key);
     if (it == callbackMap_.end()) {
         return false;
@@ -252,5 +261,5 @@ bool UIMgrService::CheckCallBackFromMap(const std::string& key)
     HILOG_INFO("UIMgrService::CheckCallBackFromMap called end");
     return true;
 }
-}  // namespace Ace
-}  // namespace OHOS
+} // namespace Ace
+} // namespace OHOS
