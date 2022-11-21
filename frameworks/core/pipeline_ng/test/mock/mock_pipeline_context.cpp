@@ -169,6 +169,12 @@ bool PipelineContext::OnBackPressed()
     return false;
 }
 
+double PipelineContext::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+    const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+{
+    return 0.0;
+}
+
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
 void UITaskScheduler::FlushTask() {}
 

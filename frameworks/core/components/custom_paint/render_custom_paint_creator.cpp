@@ -29,4 +29,19 @@ RefPtr<RenderNode> RenderCustomPaint::Create()
         return AceType::MakeRefPtr<FlutterRenderCustomPaint>();
     }
 }
+
+double RenderCustomPaint::PaintMeasureText(const std::string& text, double fontSize,
+    int32_t fontStyle, const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+{
+    if (SystemProperties::GetRosenBackendEnabled()) {
+#ifdef ENABLE_ROSEN_BACKEND
+        return RosenRenderCustomPaint::MeasureTextInner(text, fontSize, fontStyle,
+            fontWeight, fontFamily, letterSpacing);
+#else
+        return 0.0;
+#endif
+    } else {
+        return 0.0;
+    }
+}
 } // namespace OHOS::Ace
