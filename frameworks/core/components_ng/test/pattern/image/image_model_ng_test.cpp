@@ -41,8 +41,8 @@ constexpr ImageFit IMAGE_FIT_DEFAULT = ImageFit::COVER;
 constexpr bool SYNCMODE_DEFAULT = false;
 constexpr CopyOptions COPYOPTIONS_DEFAULT = CopyOptions::None;
 constexpr bool AUTORESIZE_DEFAULT = true;
-constexpr bool FITORIGINALSIZE_DEFAULT = true;
-constexpr ImageRepeat IMAGE_NO_REPEAT = ImageRepeat::NOREPEAT;
+constexpr bool FIT_ORIGINAL_SIZE_DEFAULT = true;
+constexpr ImageRepeat IMAGE_NO_REPEAT = ImageRepeat::NO_REPEAT;
 constexpr ImageInterpolation IMAGE_NO_INTERPOLATION = ImageInterpolation::NONE;
 constexpr ImageRenderMode IMAGE_NO_RENDERMODE = ImageRenderMode::ORIGINAL;
 constexpr bool MATCHTEXTDIRECTION_DEFAULT = false;
@@ -119,7 +119,7 @@ HWTEST_F(ImageModelNgTest, ImageCreator003, TestSize.Level1)
     image.SetSyncMode(SYNCMODE_DEFAULT);
     image.SetCopyOption(COPYOPTIONS_DEFAULT);
     image.SetAutoResize(AUTORESIZE_DEFAULT);
-    image.SetFitMaxSize(FITORIGINALSIZE_DEFAULT);
+    image.SetFitMaxSize(FIT_ORIGINAL_SIZE_DEFAULT);
     image.SetImageSourceSize({ Dimension(IMAGE_SOURCESIZE_WIDTH), Dimension(IMAGE_SOURCESIZE_HEIGHT) });
     image.SetImageRenderMode(IMAGE_NO_RENDERMODE);
     image.SetImageInterpolation(IMAGE_NO_INTERPOLATION);
@@ -138,7 +138,7 @@ HWTEST_F(ImageModelNgTest, ImageCreator003, TestSize.Level1)
     EXPECT_EQ(imageLayoutProperty->GetCopyOptionsValue(), COPYOPTIONS_DEFAULT);
     EXPECT_TRUE(imageLayoutProperty->GetImageSizeStyle() != nullptr);
     EXPECT_EQ(imageLayoutProperty->GetAutoResize().value(), AUTORESIZE_DEFAULT);
-    EXPECT_EQ(imageLayoutProperty->GetFitOriginalSize().value(), FITORIGINALSIZE_DEFAULT);
+    EXPECT_EQ(imageLayoutProperty->GetFitOriginalSize().value(), FIT_ORIGINAL_SIZE_DEFAULT);
     EXPECT_EQ(imageLayoutProperty->GetSourceSize().value(),
         SizeF(static_cast<float>(Dimension(IMAGE_SOURCESIZE_WIDTH).ConvertToPx()),
             static_cast<float>(Dimension(IMAGE_SOURCESIZE_HEIGHT).ConvertToPx())));

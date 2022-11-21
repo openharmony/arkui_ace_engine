@@ -51,7 +51,7 @@ RefPtr<Component> ImageCreator::CreateFromJson(const JsonValue& componentJson, c
     }
     if (componentJson.Contains(IMAGE_REPEAT) && componentJson.GetValue(IMAGE_REPEAT)->IsNumber()) {
         image->SetImageRepeat(
-            ConvertIntToEnum(componentJson.GetValue(IMAGE_REPEAT)->GetInt(), IMAGE_REPEATS, ImageRepeat::NOREPEAT));
+            ConvertIntToEnum(componentJson.GetValue(IMAGE_REPEAT)->GetInt(), IMAGE_REPEATS, ImageRepeat::NO_REPEAT));
     }
     image->SetImageFit(ConvertStrToFit(componentJson.GetString(IMAGE_FIT)));
     if (componentJson.Contains(IMAGE_COLOR) && componentJson.GetValue(IMAGE_COLOR)->IsObject()) {

@@ -50,7 +50,7 @@ RefPtr<BackgroundImage> BackgroundImageCreator::CreateFromJson(const JsonValue& 
     backgroundImage->SetSrc(src, nullptr);
     if (json.Contains(IMAGE_REPEAT) && json.GetValue(IMAGE_REPEAT)->IsNumber()) {
         backgroundImage->SetImageRepeat(
-            ConvertIntToEnum(json.GetValue(IMAGE_REPEAT)->GetInt(), IMAGE_REPEATS, ImageRepeat::NOREPEAT));
+            ConvertIntToEnum(json.GetValue(IMAGE_REPEAT)->GetInt(), IMAGE_REPEATS, ImageRepeat::NO_REPEAT));
     }
     if (json.Contains(IMAGE_SIZE) && json.GetValue(IMAGE_SIZE)->IsObject()) {
         auto imageSizeJson = json.GetValue(IMAGE_SIZE);

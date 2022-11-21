@@ -37,7 +37,7 @@ struct ImagePaintStyle {
             "ImageInterpolation.Medium", "ImageInterpolation.High" };
         static const char* RENDERMODEVALUE[] = { "ImageRenderMode.Original", "ImageRenderMode.Template" };
         json->Put(
-            "objectRepeat", OBJECTREPEATVALUE[static_cast<int32_t>(propImageRepeat.value_or(ImageRepeat::NOREPEAT))]);
+            "objectRepeat", OBJECTREPEATVALUE[static_cast<int32_t>(propImageRepeat.value_or(ImageRepeat::NO_REPEAT))]);
         json->Put("interpolation",
             INTERPOLATIONVALUE[static_cast<int32_t>(propImageInterpolation.value_or(ImageInterpolation::NONE))]);
         json->Put("renderMode",
