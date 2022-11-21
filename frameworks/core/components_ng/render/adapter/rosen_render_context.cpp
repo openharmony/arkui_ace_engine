@@ -1099,19 +1099,12 @@ void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
 
 void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
 {
-    auto& backDecoration = GetOrCreateBackDecoration();
-    if (backDecoration->CheckBlurRadius(radius)) {
-        return;
-    }
-    backDecoration->UpdateBlurRadius(radius);
-
     auto pipelineBase = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineBase);
     std::shared_ptr<Rosen::RSFilter> backFilter = nullptr;
     auto blurStyle = GetBackgroundBlurStyleValue(BlurStyle::NoMaterial);
     if (blurStyle != BlurStyle::NoMaterial) {
-        backFilter = Rosen::RSFilter::CreateMaterialFilter(
-            static_cast<int>(blurStyle), pipelineBase->GetDipScale());
+        backFilter = Rosen::RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle), pipelineBase->GetDipScale());
     } else if (radius.IsValid()) {
         float radiusPx = pipelineBase->NormalizeToPx(radius);
         float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
@@ -1135,23 +1128,26 @@ void RosenRenderContext::OnFrontBlurRadiusUpdate(const Dimension& radius)
     RequestNextFrame();
 }
 
-void RosenRenderContext::UpdateBackShadow(const Shadow& shadow)
+void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
 {
-    const auto& backDecoration = GetOrCreateBackDecoration();
-    if (backDecoration->CheckBackShadow(shadow)) {
-        return;
-    }
-    backDecoration->UpdateBackShadow(shadow);
     CHECK_NULL_VOID(rsNode_);
-    if (!shadow.GetHardwareAcceleration()) {
-        rsNode_->SetShadowRadius(SkiaDecorationPainter::ConvertRadiusToSigma(shadow.GetBlurRadius()));
-    } else {
-        rsNode_->SetShadowElevation(shadow.GetElevation());
+    if (!shadow.IsValid()) {
+        if (shadow.GetHardwareAcceleration()) {
+            rsNode_->SetShadowElevation(0.0);
+        } else {
+            rsNode_->SetShadowRadius(0.0);
+        }
+        RequestNextFrame();
+        return;
     }
     rsNode_->SetShadowColor(shadow.GetColor().GetValue());
     rsNode_->SetShadowOffsetX(shadow.GetOffset().GetX());
     rsNode_->SetShadowOffsetY(shadow.GetOffset().GetY());
-    rsNode_->SetShadowElevation(shadow.GetElevation());
+    if (shadow.GetHardwareAcceleration()) {
+        rsNode_->SetShadowElevation(shadow.GetElevation());
+    } else {
+        rsNode_->SetShadowRadius(SkiaDecorationPainter::ConvertRadiusToSigma(shadow.GetBlurRadius()));
+    }
     RequestNextFrame();
 }
 
@@ -1331,45 +1327,27 @@ void RosenRenderContext::PaintGradient(const SizeF& frameSize)
 
 void RosenRenderContext::OnLinearGradientUpdate(const NG::Gradient& gradient)
 {
-    auto& gradientProperty = GetOrCreateGradient();
-    if (!gradientProperty || !gradientProperty->UpdateLinearGradient(gradient)) {
-        return;
-    }
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
-    if (!NearZero(frameSize.Width()) && !NearZero(frameSize.Height())) {
-        PaintGradient(frameSize);
+    RectF rect = GetPaintRectWithoutTransform();
+    if (!NearZero(rect.Width()) && !NearZero(rect.Height())) {
+        PaintGradient(rect.GetSize());
     }
     RequestNextFrame();
 }
 
 void RosenRenderContext::OnRadialGradientUpdate(const NG::Gradient& gradient)
 {
-    auto& gradientProperty = GetOrCreateGradient();
-    if (!gradientProperty || !gradientProperty->UpdateRadialGradient(gradient)) {
-        return;
-    }
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
-    if (!NearZero(frameSize.Width()) && !NearZero(frameSize.Height())) {
-        PaintGradient(frameSize);
+    RectF rect = GetPaintRectWithoutTransform();
+    if (!NearZero(rect.Width()) && !NearZero(rect.Height())) {
+        PaintGradient(rect.GetSize());
     }
     RequestNextFrame();
 }
 
 void RosenRenderContext::OnSweepGradientUpdate(const NG::Gradient& gradient)
 {
-    auto& gradientProperty = GetOrCreateGradient();
-    if (!gradientProperty || !gradientProperty->UpdateSweepGradient(gradient)) {
-        return;
-    }
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
-    if (!NearZero(frameSize.Width()) && !NearZero(frameSize.Height())) {
-        PaintGradient(frameSize);
+    RectF rect = GetPaintRectWithoutTransform();
+    if (!NearZero(rect.Width()) && !NearZero(rect.Height())) {
+        PaintGradient(rect.GetSize());
     }
     RequestNextFrame();
 }
