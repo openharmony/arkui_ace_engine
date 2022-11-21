@@ -119,18 +119,13 @@ void ContainerModalPattern::InitContainerEvent()
     CHECK_NULL_VOID(context);
 
     auto titlePopupDistance = TITLE_POPUP_DISTANCE * containerNode->GetContext()->GetDensity();
-    TranslateOptions translate;
-    translate.y = Dimension(-titlePopupDistance);
-    TransitionOptions transOptions;
-    transOptions.UpdateTranslate(translate);
-
     AnimationOption option;
     option.SetDuration(TITLE_POPUP_DURATION);
     option.SetCurve(Curves::EASE_IN_OUT);
 
     // init touch event
-    touchEventHub->SetTouchEvent([floatingLayoutProperty, context, option, transOptions, titlePopupDistance,
-                                     weak = WeakClaim(this)](TouchEventInfo& info) {
+    touchEventHub->SetTouchEvent([floatingLayoutProperty, context, option, titlePopupDistance, weak = WeakClaim(this)](
+                                     TouchEventInfo& info) {
         auto container = weak.Upgrade();
         CHECK_NULL_VOID(container);
         if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() <= titlePopupDistance) {
@@ -151,8 +146,11 @@ void ContainerModalPattern::InitContainerEvent()
             // step3. If the horizontal distance of the touch move does not exceed 10px and the vertical distance
             // exceeds 20px, the floating title will be displayed.
             if (deltaMoveX <= MOVE_POPUP_DISTANCE_X && deltaMoveY >= MOVE_POPUP_DISTANCE_Y) {
+                context->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
                 floatingLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-                context->NotifyTransition(option, transOptions, true);
+                AnimationUtils::Animate(option, [context]() {
+                    context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+                });
             }
             return;
         }
@@ -162,29 +160,33 @@ void ContainerModalPattern::InitContainerEvent()
         if (floatingLayoutProperty->GetVisibilityValue() != VisibleType::VISIBLE) {
             return;
         }
-        // TODO: transition out animation
         // step4. Touch other area to hide floating title.
-        floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        AnimationUtils::Animate(option, [context, titlePopupDistance]() {
+                context->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
+            }, [floatingLayoutProperty]() { floatingLayoutProperty->UpdateVisibility(VisibleType::GONE); });
     });
 
     // init mouse event
     auto mouseEventHub = containerNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(mouseEventHub);
-    mouseEventHub->SetMouseEvent([floatingLayoutProperty, context, option, transOptions, titlePopupDistance,
-                                     weak = WeakClaim(this)](MouseInfo& info) {
+    mouseEventHub->SetMouseEvent([floatingLayoutProperty, context, option, titlePopupDistance, weak = WeakClaim(this)](
+                                     MouseInfo& info) {
         auto container = weak.Upgrade();
         CHECK_NULL_VOID(container);
         if (info.GetAction() != MouseAction::MOVE) {
             return;
         }
         if (info.GetLocalLocation().GetY() <= MOUSE_MOVE_POPUP_DISTANCE && container->CanShowFloatingTitle()) {
+            context->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
             floatingLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-            context->NotifyTransition(option, transOptions, true);
+            AnimationUtils::Animate(option, [context]() { context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f }); });
         }
 
         if (info.GetLocalLocation().GetY() >= titlePopupDistance &&
             floatingLayoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
-            floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
+            AnimationUtils::Animate(option, [context, titlePopupDistance]() {
+                    context->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
+                }, [floatingLayoutProperty]() { floatingLayoutProperty->UpdateVisibility(VisibleType::GONE); });
         }
     });
 }
