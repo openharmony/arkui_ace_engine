@@ -75,7 +75,9 @@ public:
     }
 
 private:
-    void InitItemRange();
+    void InitItemRange(LayoutWrapper* layoutWrapper);
+    void AddToItemRange(int32_t index);
+    void LoadItemWithDrag(LayoutWrapper* layoutWrapper);
 
     bool isLoop_ = true;
     int32_t currentIndex_ = 0;
