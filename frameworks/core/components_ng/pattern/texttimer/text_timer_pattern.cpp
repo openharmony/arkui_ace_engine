@@ -145,9 +145,10 @@ void TextTimerPattern::UpdateTextTimer(uint32_t elapsedTime)
     if (textLayoutProperty->GetContent() == timerText) {
         return; // needless to update
     }
-    textLayoutProperty->UpdateForceRender(true);
+
     textLayoutProperty->UpdateContent(timerText); // Update time text.
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    TextPattern::OnModifyDone();
 }
 
 std::string TextTimerPattern::GetFormat() const
