@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/progress/progress_view.h"
+#include "core/components_ng/pattern/progress/progress_model_ng.h"
 
 #include "base/geometry/dimension.h"
 #include "base/log/log_wrapper.h"
@@ -23,12 +23,12 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void ProgressView::Create(double min, double value, double cachedValue, double max, ProgressType type)
+void ProgressModelNG::Create(double min, double value, double cachedValue, double max, NG::ProgressType type)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::PROGRESS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ProgressPattern>(); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::PROGRESS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ProgressPattern>(); });
     stack->Push(frameNode);
 
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Value, value);
@@ -37,38 +37,43 @@ void ProgressView::Create(double min, double value, double cachedValue, double m
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, Type, type);
 }
 
-void ProgressView::SetValue(double value)
+void ProgressModelNG::SetValue(double value)
 {
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
+    auto maxValue = progressPaintProperty->GetMaxValue();
+    if (value > maxValue) {
+        LOGE("value is lager than total , set value euqals total");
+        value = maxValue.value_or(0);
+    }
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Value, value);
 }
 
-void ProgressView::SetMaxValue(double value)
-{
-    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, MaxValue, value);
-}
-
-void ProgressView::SetColor(const Color& value)
+void ProgressModelNG::SetColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Color, value);
 }
 
-void ProgressView::SetBackgroundColor(const Color& value)
+void ProgressModelNG::SetBackgroundColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, value);
 }
 
-void ProgressView::SetStrokeWidth(const Dimension& value)
+void ProgressModelNG::SetStrokeWidth(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, StrokeWidth, value);
 }
 
-void ProgressView::SetScaleCount(int32_t value)
+void ProgressModelNG::SetScaleCount(int32_t value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, ScaleCount, value);
 }
 
-void ProgressView::SetScaleWidth(const Dimension& value)
+void ProgressModelNG::SetScaleWidth(const Dimension& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, ScaleWidth, value);
 }
+
 } // namespace OHOS::Ace::NG
