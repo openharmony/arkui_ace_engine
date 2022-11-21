@@ -15,8 +15,8 @@
 
 #include "utilengine_fuzzer.h"
 
+#include <securec.h>
 #include "test/fuzztest/utilengine_fuzzer/utilengine_fuzzer.h"
-
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
 
@@ -31,7 +31,7 @@ namespace OHOS {
         if (size < sizeInt) {
             return false;
         }
-        memcpy(&id, data, sizeof(uint32_t));
+        memcpy_s(&id, sizeof(uint32_t), data, sizeof(uint32_t));
         auto& loader = Framework::JsEngineLoader::GetDeclarative(DECLARATIVE_ENGINE_SHARED_LIB);
         auto jsEngine = loader.CreateJsEngine(id);
         EngineHelper::AddEngine(id, jsEngine);
