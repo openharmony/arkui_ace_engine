@@ -131,9 +131,7 @@ void FrameNode::InitializePatternAndContext()
     renderContext_->SetHostNode(WeakClaim(this));
     // Initialize FocusHub
     if (pattern_->GetFocusPattern().focusType != FocusType::DISABLE) {
-        auto focusHub = GetOrCreateFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->SetScopeFocusAlgorithm(pattern_->GetScopeFocusAlgorithm());
+        GetOrCreateFocusHub();
     }
 }
 

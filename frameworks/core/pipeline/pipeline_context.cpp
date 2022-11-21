@@ -2864,6 +2864,9 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
     }
+    if (onFocus_ && onShow_) {
+        FlushFocus();
+    }
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         LOGD("WindowFocus failed, Window modal is not container.");
         return;
