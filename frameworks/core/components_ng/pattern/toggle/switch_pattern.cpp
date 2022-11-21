@@ -34,7 +34,6 @@ void SwitchPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
 }
 
 bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
@@ -86,20 +85,10 @@ void SwitchPattern::OnModifyDone()
     if (isOn != isOn_.value()) {
         OnChange();
     }
-    if (clickListener_) {
-        return;
-    }
-    auto gesture = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto switchPattern = weak.Upgrade();
-        CHECK_NULL_VOID(switchPattern);
-        switchPattern->OnClick();
-    };
-
-    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gesture->AddClickEvent(clickListener_);
+    InitClickEvent();
     InitPanEvent(gestureHub);
+    InitTouchEvent();
+    InitMouseEvent();
 }
 
 void SwitchPattern::UpdateCurrentOffset(float offset)
@@ -230,6 +219,22 @@ void SwitchPattern::OnClick()
     OnChange();
 }
 
+void SwitchPattern::OnTouchDown()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    isTouch_ = true;
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SwitchPattern::OnTouchUp()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    isTouch_ = false;
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void SwitchPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     if (panEvent_) {
@@ -279,6 +284,79 @@ void SwitchPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
+}
+
+void SwitchPattern::InitClickEvent()
+{
+    if (clickListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto switchPattern = weak.Upgrade();
+        CHECK_NULL_VOID(switchPattern);
+        switchPattern->OnClick();
+    };
+
+    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gesture->AddClickEvent(clickListener_);
+}
+
+void SwitchPattern::InitTouchEvent()
+{
+    if (touchListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto switchPattern = weak.Upgrade();
+        CHECK_NULL_VOID(switchPattern);
+        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            switchPattern->OnTouchDown();
+        }
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+            switchPattern->OnTouchUp();
+        }
+    };
+    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gesture->AddTouchEvent(touchListener_);
+}
+
+void SwitchPattern::InitMouseEvent()
+{
+    if (mouseEvent_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto eventHub = GetHost()->GetEventHub<SwitchEventHub>();
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+
+    auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleMouseEvent(isHover);
+        }
+    };
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnHoverEvent(mouseEvent_);
+}
+
+void SwitchPattern::HandleMouseEvent(bool isHover)
+{
+    isHover_ = isHover;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    isTouch_ = false;
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SwitchPattern::HandleDragUpdate(const GestureEvent& info)
