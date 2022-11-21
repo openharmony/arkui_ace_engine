@@ -143,6 +143,8 @@ bool HdcJdwpSimulator::Connect()
         int rc = connect(cfd, reinterpret_cast<struct sockaddr *>(&caddr), caddrLen);
         if (rc != 0) {
             LOGE("connect failed errno:%{public}d", errno);
+            close(ctxPoint_->cfd);
+            ctxPoint_->cfd = -1;
             return false;
         }
         if (ConnectJpid(this)) {
