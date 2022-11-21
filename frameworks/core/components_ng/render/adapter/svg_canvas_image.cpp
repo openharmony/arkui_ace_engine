@@ -39,7 +39,8 @@ void SvgCanvasImage::SetSvgFillColor(const std::optional<Color>& color)
     color_ = color;
 }
 
-void SvgCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect&  /*dstRect*/)
+void SvgCanvasImage::DrawToRSCanvas(
+    RSCanvas& canvas, const RSRect& srcRect, const RSRect& /* dstRect */, const std::array<PointF, 4>& /* radiusXY */)
 {
     CHECK_NULL_VOID(svgDom_);
     svgDom_->DrawImage(canvas, imageFit_, Size(srcRect.GetWidth(), srcRect.GetHeight()), color_);
