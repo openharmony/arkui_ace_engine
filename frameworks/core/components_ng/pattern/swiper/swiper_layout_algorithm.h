@@ -74,6 +74,11 @@ public:
         isLoop_ = isLoop;
     }
 
+    int32_t GetCurrentIndex() const
+    {
+        return currentIndex_;
+    }
+
 private:
     void InitItemRange(LayoutWrapper* layoutWrapper);
     void AddToItemRange(int32_t index);
