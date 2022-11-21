@@ -17,13 +17,14 @@
 
 #define private public
 #define protected public
-
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/image_provider/image_state_manager.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
@@ -147,6 +148,10 @@ HWTEST_F(ImagePatternTest, ImagePatternModifyDone001, TestSize.Level1)
  */
 HWTEST_F(ImagePatternTest, UpdateInternalResource001, TestSize.Level1)
 {
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<IconTheme>()));
     auto frameNode = ImagePatternTest::CreateImageNode("", ALT_SRC_URL);
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
