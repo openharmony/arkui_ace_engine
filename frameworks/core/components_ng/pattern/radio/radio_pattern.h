@@ -138,6 +138,7 @@ private:
     RefPtr<Animator> onController_;
     RefPtr<Animator> offController_;
 
+    bool isFirstCreated_ = true;
     bool preCheck_ = false;
     std::optional<std::string> preValue_;
     std::optional<std::string> preGroup_;
