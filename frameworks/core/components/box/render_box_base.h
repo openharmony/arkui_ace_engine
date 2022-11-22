@@ -354,6 +354,7 @@ protected:
 
 private:
     bool IsSizeValid(const Dimension& value, double maxLimit);
+    bool IsDeclarativePara();
 
     Edge additionalPadding_;
     bool useFlexWidth_ = false;
