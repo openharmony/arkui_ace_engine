@@ -516,8 +516,10 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
 {
     CHECK_RUN_ON(UI);
     float positionY = 0;
-    auto manager = PipelineBase::GetTextFieldManager();
+    auto manager = DynamicCast<TextFieldManager>(PipelineBase::GetTextFieldManager());
+    float height = 0.0f;
     if (manager) {
+        height = manager->GetHeight();
         positionY = static_cast<float>(manager->GetClickPosition().GetY());
     }
     auto rootSize = rootNode_->GetGeometryNode()->GetFrameSize();
@@ -529,6 +531,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
         SetRootRect(rootSize.Width(), rootSize.Height(), 0);
     } else if (positionY > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {
         SetRootRect(rootSize.Width(), rootSize.Height(), -offsetFix);
+    } else if (positionY + height > rootSize.Height() - keyboardHeight &&
+               positionY < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) {
+        SetRootRect(rootSize.Width(), rootSize.Height(), -height - offsetFix / 2.0f);
     }
 }
 

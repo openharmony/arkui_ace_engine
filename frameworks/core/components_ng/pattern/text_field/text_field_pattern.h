@@ -342,7 +342,7 @@ private:
     void StopTwinkling();
 
     void SetCaretOffsetXForEmptyText();
-    void UpdateTextFieldManager(const Offset& offset);
+    void UpdateTextFieldManager(const Offset& offset, float height);
     void OnTextInputActionUpdate(TextInputAction value);
 
     std::u16string GetTextForDisplay() const;
