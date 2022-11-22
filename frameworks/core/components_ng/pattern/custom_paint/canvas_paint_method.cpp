@@ -26,6 +26,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/image/pixel_map.h"
+#include "base/utils/utils.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/flutter_font_collection.h"
@@ -54,13 +55,12 @@ std::string GetMimeType(const std::string& args)
     StringUtils::StringSplitter(args, '"', values);
     if (values.size() < 3) {
         return IMAGE_PNG;
-    } else {
-        // Convert to lowercase string.
-        for (size_t i = 0; i < values[1].size(); ++i) {
-            values[1][i] = static_cast<uint8_t>(tolower(values[1][i]));
-        }
-        return values[1];
     }
+    // Convert to lowercase string.
+    for (size_t i = 0; i < values[1].size(); ++i) {
+        values[1][i] = static_cast<uint8_t>(tolower(values[1][i]));
+    }
+    return values[1];
 }
 
 // Quality need between 0.0 and 1.0 for MimeType jpeg and webp
@@ -88,9 +88,8 @@ CanvasDrawFunction CanvasPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
 {
     auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto customPaint = weak.Upgrade();
-        if (customPaint) {
-            customPaint->PaintCustomPaint(canvas, paintWrapper);
-        }
+        CHECK_NULL_VOID(customPaint);
+        customPaint->PaintCustomPaint(canvas, paintWrapper);
     };
 
     return paintFunc;
@@ -138,17 +137,17 @@ void CanvasPaintMethod::CreateBitmap(SizeF frameSize)
 void CanvasPaintMethod::ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj)
 {
     imageObj_ = imageObj;
-    if (imageObj_->IsSvg()) {
-        skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj_)->GetSkiaDom();
-        currentSource_ = loadingSource_;
-        Ace::CanvasImage canvasImage = canvasImage_;
-        TaskFunc func = [canvasImage](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
-            paintMethod.DrawImage(paintWrapper, canvasImage, 0, 0);
-        };
-        tasks_.emplace_back(func);
+    if (!imageObj_->IsSvg()) {
+        LOGE("image is not svg");
         return;
     }
-    LOGE("image is not svg");
+    skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj_)->GetSkiaDom();
+    currentSource_ = loadingSource_;
+    Ace::CanvasImage canvasImage = canvasImage_;
+    TaskFunc func = [canvasImage](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.DrawImage(paintWrapper, canvasImage, 0, 0);
+    };
+    tasks_.emplace_back(func);
 }
 
 void CanvasPaintMethod::ImageObjFailed()
@@ -160,10 +159,8 @@ void CanvasPaintMethod::ImageObjFailed()
 void CanvasPaintMethod::DrawImage(
     PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
+    auto* currentDartState = flutter::UIDartState::Current();
+    CHECK_NULL_VOID(currentDartState);
     std::string::size_type tmp = canvasImage.src.find(".svg");
     if (tmp != std::string::npos) {
         DrawSvgImage(paintWrapper, canvasImage);
@@ -171,10 +168,7 @@ void CanvasPaintMethod::DrawImage(
     }
 
     auto image = GetImage(canvasImage.src);
-    if (!image) {
-        LOGE("image is null");
-        return;
-    }
+    CHECK_NULL_VOID(image);
     InitImagePaint();
     InitPaintBlend(imagePaint_);
 
@@ -200,9 +194,8 @@ void CanvasPaintMethod::DrawImage(
 
 void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
+    auto* currentDartState = flutter::UIDartState::Current();
+    CHECK_NULL_VOID(currentDartState);
 
     // get skImage form pixelMap
     auto imageInfo = Ace::ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
@@ -220,10 +213,7 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
         image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
 #endif
     }
-    if (!image) {
-        LOGE("image is null");
-        return;
-    }
+    CHECK_NULL_VOID(image);
     InitImagePaint();
     InitPaintBlend(imagePaint_);
     switch (canvasImage.flag) {
@@ -260,15 +250,12 @@ sk_sp<SkImage> CanvasPaintMethod::GetImage(const std::string& src)
     CHECK_NULL_RETURN(context_, nullptr);
 
     auto image = Ace::ImageProvider::GetSkImage(src, context_);
-    if (image) {
-        auto rasterizedImage = image->makeRasterImage();
-        auto canvasImage = flutter::CanvasImage::Create();
-        canvasImage->set_image({ rasterizedImage, renderTaskHolder_->unrefQueue });
-        imageCache_->CacheImage(src, std::make_shared<CachedImage>(canvasImage));
-        return rasterizedImage;
-    }
-
-    return image;
+    CHECK_NULL_RETURN(image, nullptr);
+    auto rasterizedImage = image->makeRasterImage();
+    auto canvasImage = flutter::CanvasImage::Create();
+    canvasImage->set_image({ rasterizedImage, renderTaskHolder_->unrefQueue });
+    imageCache_->CacheImage(src, std::make_shared<CachedImage>(canvasImage));
+    return rasterizedImage;
 }
 
 std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
@@ -297,9 +284,7 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
         tempCanvas.drawBitmapRect(canvasCache_, srcRect, dstRect, nullptr);
     }
     pixels = tempCache.pixmap().addr8();
-    if (pixels == nullptr) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(pixels, nullptr);
     std::unique_ptr<Ace::ImageData> imageData = std::make_unique<Ace::ImageData>();
     imageData->dirtyWidth = dirtyWidth;
     imageData->dirtyHeight = dirtyHeight;
@@ -319,10 +304,8 @@ void CanvasPaintMethod::TransferFromImageBitmap(PaintWrapper* paintWrapper,
 {
     std::unique_ptr<Ace::ImageData> imageData =
         offscreenCanvas->GetImageData(0, 0, offscreenCanvas->GetWidth(), offscreenCanvas->GetHeight());
-    Ace::ImageData* imageDataPtr = imageData.get();
-    if (imageData != nullptr) {
-        PutImageData(paintWrapper, *imageDataPtr);
-    }
+    CHECK_NULL_VOID(imageData);
+    PutImageData(paintWrapper, *imageData);
 }
 
 void CanvasPaintMethod::FillText(PaintWrapper* paintWrapper, const std::string& text, double x, double y)
@@ -331,9 +314,8 @@ void CanvasPaintMethod::FillText(PaintWrapper* paintWrapper, const std::string& 
     auto offset = paintWrapper->GetContentOffset();
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
 
-    if (!UpdateParagraph(offset, text, false)) {
-        return;
-    }
+    auto success = UpdateParagraph(offset, text, false);
+    CHECK_NULL_VOID(success);
     PaintText(offset, frameSize, x, y, false);
 }
 
@@ -344,15 +326,13 @@ void CanvasPaintMethod::StrokeText(PaintWrapper* paintWrapper, const std::string
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
 
     if (HasShadow()) {
-        if (!UpdateParagraph(offset, text, true, true)) {
-            return;
-        }
+        auto success = UpdateParagraph(offset, text, false);
+        CHECK_NULL_VOID(success);
         PaintText(offset, frameSize, x, y, true);
     }
 
-    if (!UpdateParagraph(offset, text, true)) {
-        return;
-    }
+    auto success = UpdateParagraph(offset, text, false);
+    CHECK_NULL_VOID(success);
     PaintText(offset, frameSize, x, y, true);
 }
 
@@ -362,10 +342,7 @@ double CanvasPaintMethod::MeasureText(const std::string& text, const PaintState&
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
-    if (!fontCollection) {
-        LOGW("MeasureText: fontCollection is null");
-        return 0.0;
-    }
+    CHECK_NULL_RETURN(fontCollection, 0.0);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
@@ -383,10 +360,7 @@ double CanvasPaintMethod::MeasureTextHeight(const std::string& text, const Paint
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
-    if (!fontCollection) {
-        LOGW("MeasureText: fontCollection is null");
-        return 0.0;
-    }
+    CHECK_NULL_RETURN(fontCollection, 0.0);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
@@ -401,13 +375,11 @@ double CanvasPaintMethod::MeasureTextHeight(const std::string& text, const Paint
 TextMetrics CanvasPaintMethod::MeasureTextMetrics(const std::string& text, const PaintState& state)
 {
     using namespace Constants;
+    TextMetrics textMetrics = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
-    if (!fontCollection) {
-        LOGW("MeasureText: fontCollection is null");
-        return { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-    }
+    CHECK_NULL_RETURN(fontCollection, textMetrics);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
@@ -420,16 +392,13 @@ TextMetrics CanvasPaintMethod::MeasureTextMetrics(const std::string& text, const
     auto textAlign = state.GetTextAlign();
     auto textBaseLine = state.GetTextStyle().GetTextBaseline();
 
-    auto width = paragraph->GetMaxIntrinsicWidth();
-    auto height = paragraph->GetHeight();
-
-    auto actualBoundingBoxLeft = -GetAlignOffset(textAlign, paragraph);
-    auto actualBoundingBoxRight = width - actualBoundingBoxLeft;
-    auto actualBoundingBoxAscent = -GetBaselineOffset(textBaseLine, paragraph);
-    auto actualBoundingBoxDescent = height - actualBoundingBoxAscent;
-
-    return { width, height, actualBoundingBoxLeft, actualBoundingBoxRight, actualBoundingBoxAscent,
-        actualBoundingBoxDescent };
+    textMetrics.width = paragraph->GetMaxIntrinsicWidth();
+    textMetrics.height = paragraph->GetHeight();
+    textMetrics.actualBoundingBoxLeft = -GetAlignOffset(textAlign, paragraph);
+    textMetrics.actualBoundingBoxRight = textMetrics.width - textMetrics.actualBoundingBoxLeft;
+    textMetrics.actualBoundingBoxAscent = -GetBaselineOffset(textBaseLine, paragraph);
+    textMetrics.actualBoundingBoxDescent = textMetrics.height - textMetrics.actualBoundingBoxAscent;
+    return textMetrics;
 }
 
 void CanvasPaintMethod::PaintText(
@@ -523,10 +492,7 @@ bool CanvasPaintMethod::UpdateParagraph(const OffsetF& offset, const std::string
         style.text_align = ConvertTxtTextAlign(fillState_.GetTextAlign());
     }
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
-    if (!fontCollection) {
-        LOGW("UpdateParagraph: fontCollection is null");
-        return false;
-    }
+    CHECK_NULL_RETURN(fontCollection, false);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
     if (!isStroke && hasShadow) {
@@ -592,6 +558,31 @@ void CanvasPaintMethod::UpdateTextStyleForeground(
     }
 }
 
+void CanvasPaintMethod::PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    RosenDecorationPainter::PaintShadow(path, shadow, canvas);
+#endif
+}
+
+void CanvasPaintMethod::Path2DRect(const OffsetF& offset, const PathArgs& args)
+{
+    double left = args.para1 + offset.GetX();
+    double top = args.para2 + offset.GetY();
+    double right = args.para3 + args.para1 + offset.GetX();
+    double bottom = args.para4 + args.para2 + offset.GetY();
+    skPath2d_.addRect(SkRect::MakeLTRB(left, top, right, bottom));
+}
+
+void CanvasPaintMethod::SetTransform(const TransformParam& param)
+{
+    double viewScale = context_->GetViewScale();
+    SkMatrix skMatrix;
+    skMatrix.setAll(param.scaleX * viewScale, param.skewY * viewScale, param.translateX * viewScale,
+        param.skewX * viewScale, param.scaleY * viewScale, param.translateY * viewScale, 0, 0, 1);
+    skCanvas_->setMatrix(skMatrix);
+}
+
 std::string CanvasPaintMethod::ToDataURL(const std::string& args)
 {
     std::string mimeType = GetMimeType(args);
@@ -611,10 +602,7 @@ std::string CanvasPaintMethod::ToDataURL(const std::string& args)
         }
 
         success = canvasCache_.pixmap().scalePixels(tempCache.pixmap(), SkFilterQuality::kHigh_SkFilterQuality);
-        if (!success) {
-            LOGE("scalePixels failed when ToDataURL.");
-            return UNSUPPORTED;
-        }
+        CHECK_NULL_RETURN(success, UNSUPPORTED);
     }
     SkPixmap src = tempCache.pixmap();
     SkDynamicMemoryWStream dst;
@@ -631,15 +619,9 @@ std::string CanvasPaintMethod::ToDataURL(const std::string& args)
         SkPngEncoder::Options options;
         success = SkPngEncoder::Encode(&dst, src, options);
     }
-    if (!success) {
-        LOGE("Encode failed when ToDataURL.");
-        return UNSUPPORTED;
-    }
+    CHECK_NULL_RETURN(success, UNSUPPORTED);
     auto result = dst.detachAsData();
-    if (result == nullptr) {
-        LOGE("DetachAsData failed when ToDataURL.");
-        return UNSUPPORTED;
-    }
+    CHECK_NULL_RETURN(result, UNSUPPORTED);
     size_t len = SkBase64::Encode(result->data(), result->size(), nullptr);
     if (len > MAX_LENGTH) {
         LOGE("ToDataURL failed, image too large.");
