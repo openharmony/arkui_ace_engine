@@ -22,6 +22,16 @@ void TextFieldManager::SetClickPosition(const Offset& position)
     position_ = position;
 }
 
+void TextFieldManager::SetHeight(float height)
+{
+    height_ = height;
+}
+
+float TextFieldManager::GetHeight() const
+{
+    return height_;
+}
+
 const Offset& TextFieldManager::GetClickPosition()
 {
     return position_;

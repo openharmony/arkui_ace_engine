@@ -874,7 +874,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
-        UpdateTextFieldManager(info.GetTouches().front().GetGlobalLocation());
+        UpdateTextFieldManager(info.GetTouches().front().GetGlobalLocation(), frameRect_.Height());
     } else if (touchType == TouchType::UP) {
         HandleTouchUp();
     }
@@ -952,7 +952,7 @@ void TextFieldPattern::InitClickEvent()
 
 void TextFieldPattern::HandleClickEvent(GestureEvent& info)
 {
-    UpdateTextFieldManager(info.GetGlobalLocation());
+    UpdateTextFieldManager(info.GetGlobalLocation(), frameRect_.Height());
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     if (!focusHub->IsFocusable()) {
         return;
@@ -1115,13 +1115,14 @@ void TextFieldPattern::UpdatePositionOfParagraph(int32_t position)
     textEditingValue_.CursorMoveToPosition(position);
 }
 
-void TextFieldPattern::UpdateTextFieldManager(const Offset& offset)
+void TextFieldPattern::UpdateTextFieldManager(const Offset& offset, float height)
 {
     auto context = GetHost()->GetContext();
     CHECK_NULL_VOID(context);
     auto textFieldManager = DynamicCast<TextFieldManager>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
     textFieldManager->SetClickPosition(offset);
+    textFieldManager->SetHeight(height);
     textFieldManager->SetOnFocusTextField(WeakClaim(this));
 }
 
