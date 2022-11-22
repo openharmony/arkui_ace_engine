@@ -13,19 +13,16 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/calendar/calendar_controller_ng.h"
-
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
+#include "core/components_ng/pattern/calendar/calendar_controller_ng.h"
 
 namespace OHOS::Ace::NG {
 
 void CalendarControllerNg::BackToToday()
 {
     auto pattern = pattern_.Upgrade();
-    if (!pattern) {
-        LOGE("calendar pattern is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(pattern);
     auto calendarPattern = AceType::DynamicCast<CalendarPattern>(pattern);
     calendarPattern->FireFirstRequestData();
     calendarPattern->SetBackToToday(true);
@@ -34,10 +31,7 @@ void CalendarControllerNg::BackToToday()
 void CalendarControllerNg::GoTo(int32_t year, int32_t month, int32_t day)
 {
     auto pattern = pattern_.Upgrade();
-    if (!pattern) {
-        LOGE("calendar data adapter is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(pattern);
     auto calendarPattern = AceType::DynamicCast<CalendarPattern>(pattern);
     LOGD("go to: year=%{private}d, month=%{private}d, day=%{private}d", year, month, day);
     calendarPattern->FireGoToRequestData(year, month, day);
