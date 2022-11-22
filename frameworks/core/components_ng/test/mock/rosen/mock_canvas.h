@@ -37,6 +37,7 @@ public:
     MOCK_METHOD0(Save, void());
     MOCK_METHOD0(Restore, void());
     MOCK_METHOD2(DrawCircle, void(const Point& centerPt, scalar radius));
+    MOCK_METHOD1(DrawRoundRect, void(const RSRoundRect& roundRect));
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_CANVAS_H

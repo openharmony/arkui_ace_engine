@@ -20,9 +20,11 @@
 #include "testing_path.h"
 #include "testing_pen.h"
 #include "utils/point.h"
+#include "utils/round_rect.h"
 
 namespace OHOS::Ace::Testing {
 using Point = Rosen::Drawing::Point;
+using RSRoundRect = Rosen::Drawing::RoundRect;
 class TestingCanvas {
 public:
     TestingCanvas() = default;
@@ -58,6 +60,7 @@ public:
     virtual void Save() {}
     virtual void Restore() {}
     virtual void DrawCircle(const Point& centerPt, scalar radius) {}
+    virtual void DrawRoundRect(const RSRoundRect& roundRect) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_CANVAS_H

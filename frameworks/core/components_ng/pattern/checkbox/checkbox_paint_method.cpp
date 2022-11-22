@@ -62,7 +62,7 @@ CanvasDrawFunction CheckBoxPaintMethod::GetContentDrawFunction(PaintWrapper* pai
 
 void CheckBoxPaintMethod::InitializeParam()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkBoxTheme);
@@ -84,10 +84,6 @@ void CheckBoxPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWra
     auto paintProperty = DynamicCast<CheckBoxPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
     auto contentSize = paintWrapper->GetContentSize();
-    bool isSelected = false;
-    if (paintProperty->HasCheckBoxSelect()) {
-        isSelected = paintProperty->GetCheckBoxSelectValue();
-    }
     auto color = activeColor_;
     if (paintProperty->HasCheckBoxSelectedColor()) {
         color = paintProperty->GetCheckBoxSelectedColorValue();

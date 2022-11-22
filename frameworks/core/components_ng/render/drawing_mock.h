@@ -39,5 +39,6 @@ using RSColor = Testing::TestingColor;
 using RSPoint = Rosen::Drawing::PointF;
 using RSScalar = Rosen::Drawing::scalar;
 using RSRect = Rosen::Drawing::RectF;
+using RSRoundRect = Rosen::Drawing::RoundRect;
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_MOCK_H
