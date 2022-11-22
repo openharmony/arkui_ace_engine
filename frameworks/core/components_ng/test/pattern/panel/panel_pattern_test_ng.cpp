@@ -34,9 +34,10 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
-constexpr bool SLIDING_PANEL_SHOW = false;
+constexpr bool SLIDING_PANEL_SHOW = true;
 constexpr bool SLIDING_PANEL_LAYOUT_PROPERTY_HAS_DRAG_BAR = false;
-constexpr bool SLIDING_PANEL_HAS_DRAG_BAR = false;
+constexpr bool SLIDING_PANEL_HAS_DRAG_BAR_FALSE = false;
+constexpr bool SLIDING_PANEL_HAS_DRAG_BAR_TRUE = true;
 
 constexpr float ZERO = 0.0f;
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
@@ -61,11 +62,14 @@ constexpr float DEFAULT_BLANK_HEIGHT_MODE_HALF = 568.0f;
 const Offset START_POINT(START_X, START_Y);
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 constexpr Color BACKGROUND_COLOR_VALUE = Color(0XFFFF0000);
+constexpr Color BORDER_COLOR = Color(0XFFDD0000);
+constexpr Dimension BORDER_WIDTH = 5.0_px;
 constexpr Dimension SLIDING_PANEL_MINI_HEIGHT = 50.0_px;
 constexpr Dimension SLIDING_PANEL_HALF_HEIGHT = 300.0_px;
 constexpr Dimension SLIDING_PANEL_FULL_HEIGHT = 600.0_px;
 constexpr PanelType PANEL_TYPE_VALUE = PanelType::MINI_BAR;
 constexpr PanelMode PANEL_MODE_VALUE = PanelMode::FULL;
+constexpr BorderStyle BORDER_STYLE = BorderStyle::DASHED;
 const std::vector<PanelType> PANEL_PANEL_TYPE = { PanelType::MINI_BAR, PanelType::FOLDABLE_BAR,
     PanelType::TEMP_DISPLAY };
 } // namespace
@@ -148,7 +152,12 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest001, TestSize.Level1)
     slidingPanelModelNG.SetPanelType(PANEL_TYPE_VALUE);
     slidingPanelModelNG.SetPanelMode(PANEL_MODE_VALUE);
     slidingPanelModelNG.SetBackgroundColor(BACKGROUND_COLOR_VALUE);
-    slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_HAS_DRAG_BAR);
+    slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_HAS_DRAG_BAR_TRUE);
+    slidingPanelModelNG.SetIsShow(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetBorderColor(BORDER_COLOR);
+    slidingPanelModelNG.SetBorderWidth(BORDER_WIDTH);
+    slidingPanelModelNG.SetBorderStyle(BORDER_STYLE);
+    slidingPanelModelNG.SetBorder(BORDER_STYLE, BORDER_WIDTH);
     slidingPanelModelNG.Pop();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_FALSE(frameNode == nullptr);
@@ -239,7 +248,7 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest003, TestSize.Level1)
     TestProperty testProperty;
     testProperty.panelType = std::make_optional(PANEL_TYPE_VALUE);
     testProperty.panelMode = std::make_optional(PANEL_MODE_VALUE);
-    testProperty.hasDragBar = std::make_optional(SLIDING_PANEL_HAS_DRAG_BAR);
+    testProperty.hasDragBar = std::make_optional(SLIDING_PANEL_HAS_DRAG_BAR_FALSE);
     testProperty.miniHeight = std::make_optional(SLIDING_PANEL_MINI_HEIGHT);
     testProperty.halfHeight = std::make_optional(SLIDING_PANEL_HALF_HEIGHT);
     testProperty.fullHeight = std::make_optional(SLIDING_PANEL_FULL_HEIGHT);
@@ -263,7 +272,7 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest003, TestSize.Level1)
      */
     EXPECT_EQ(slidingPanelLayoutProperty->GetPanelType(), PANEL_TYPE_VALUE);
     EXPECT_EQ(slidingPanelLayoutProperty->GetPanelMode(), PANEL_MODE_VALUE);
-    EXPECT_EQ(slidingPanelLayoutProperty->GetHasDragBar(), SLIDING_PANEL_HAS_DRAG_BAR);
+    EXPECT_EQ(slidingPanelLayoutProperty->GetHasDragBar(), SLIDING_PANEL_HAS_DRAG_BAR_FALSE);
     EXPECT_EQ(slidingPanelLayoutProperty->GetMiniHeight(), SLIDING_PANEL_MINI_HEIGHT);
     EXPECT_EQ(slidingPanelLayoutProperty->GetHalfHeight(), SLIDING_PANEL_HALF_HEIGHT);
     EXPECT_EQ(slidingPanelLayoutProperty->GetFullHeight(), SLIDING_PANEL_FULL_HEIGHT);
