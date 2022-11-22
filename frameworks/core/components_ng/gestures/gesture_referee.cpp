@@ -23,10 +23,7 @@ namespace OHOS::Ace::NG {
 
 void GestureScope::AddMember(const RefPtr<NGGestureRecognizer>& recognizer)
 {
-    if (!recognizer) {
-        LOGE("gesture recognizer is null, AddMember failed.");
-        return;
-    }
+    CHECK_NULL_VOID(recognizer);
 
     if (Existed(recognizer)) {
         LOGW("gesture recognizer has already been added.");
@@ -38,10 +35,7 @@ void GestureScope::AddMember(const RefPtr<NGGestureRecognizer>& recognizer)
 
 bool GestureScope::Existed(const RefPtr<NGGestureRecognizer>& recognizer)
 {
-    if (!recognizer) {
-        LOGE("recognizer is null, AddNGGestureRecognizer failed.");
-        return false;
-    }
+    CHECK_NULL_RETURN(recognizer, false);
 
     if (recognizers_.empty()) {
         return false;
