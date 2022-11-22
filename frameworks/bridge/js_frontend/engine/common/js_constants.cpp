@@ -61,6 +61,15 @@ const char PROMPT_KEY_BUTTONS[] = "buttons";
 const char PROMPT_DIALOG_AUTO_CANCEL[] = "autocancel";
 const char PROMPT_SHOW_ACTION_MENU[] = "showActionMenu";
 
+// for measure
+const char MEASURE_TEXT[] = "measure";
+const char MEASURE_KEY_TEXT_CONTENT[] = "textContent";
+const char MEASURE_KEY_FONTSIZE[] = "fontSize";
+const char MEASURE_KEY_FONTSTYLE[] = "fontStyle";
+const char MEASURE_KEY_FONTWEIGHT[] = "fontWeight";
+const char MEASURE_KEY_FONTFAMILY[] = "fontFamily";
+const char MEASURE_KEY_LETTER_SPACING[] = "letterSpacing";
+
 // for callback
 const char APP_DESTROY_FINISH[] = "appDestroyFinish";
 const char CALLBACK_NATIVE[] = "callbackNative";

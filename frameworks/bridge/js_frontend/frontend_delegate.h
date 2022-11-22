@@ -109,6 +109,12 @@ public:
     virtual int32_t GetVersionCode() const = 0;
 
     // ----------------
+    // system.measure
+    // ----------------
+    virtual double MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+        const std::string& fontWeight, const std::string& fontFamily, double letterSpacing) = 0;
+
+    // ----------------
     // system.prompt
     // ----------------
     virtual void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) = 0;

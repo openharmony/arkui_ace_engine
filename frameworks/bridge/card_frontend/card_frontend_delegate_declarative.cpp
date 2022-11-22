@@ -71,4 +71,10 @@ void CardFrontendDelegateDeclarative::FireCardAction(const std::string& action)
         TaskExecutor::TaskType::UI); // eTSCard UI == Main JS/UI/PLATFORM
 }
 
+double CardFrontendDelegateDeclarative::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+    const std::string& fontWeight, const std::string& fontFamily, double letterSpace)
+    {
+        return 0.0;
+    }
+
 } // namespace OHOS::Ace::Framework

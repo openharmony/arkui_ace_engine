@@ -19,6 +19,7 @@ common_napi_libs = [
   "device",
   "font",
   "grid",
+  "measure",
   "mediaquery",
   "prompt",
   "promptaction",

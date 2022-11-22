@@ -928,6 +928,13 @@ int32_t PluginFrontendDelegate::GetVersionCode() const
     return manifestParser_->GetAppInfo()->GetVersionCode();
 }
 
+double PluginFrontendDelegate::MeasureText(const std::string& text, double fontSize,
+    int32_t fontStyle, const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+{
+    auto pipelineContext = pipelineContextHolder_.Get();
+    return pipelineContext->MeasureText(text, fontSize, fontStyle, fontWeight, fontFamily, letterSpacing);
+}
+
 void PluginFrontendDelegate::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
 {
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
