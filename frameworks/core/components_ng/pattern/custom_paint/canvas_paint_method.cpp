@@ -326,12 +326,12 @@ void CanvasPaintMethod::StrokeText(PaintWrapper* paintWrapper, const std::string
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
 
     if (HasShadow()) {
-        auto success = UpdateParagraph(offset, text, false);
+        auto success = UpdateParagraph(offset, text, true, true);
         CHECK_NULL_VOID(success);
         PaintText(offset, frameSize, x, y, true);
     }
 
-    auto success = UpdateParagraph(offset, text, false);
+    auto success = UpdateParagraph(offset, text, true);
     CHECK_NULL_VOID(success);
     PaintText(offset, frameSize, x, y, true);
 }
