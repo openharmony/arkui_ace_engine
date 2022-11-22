@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
