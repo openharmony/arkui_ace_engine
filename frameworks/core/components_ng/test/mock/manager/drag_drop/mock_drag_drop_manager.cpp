@@ -18,6 +18,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+std::string ITEM_DRAG_START("OnItemDragStart");
+std::string ON_DRAG_START("OnDragStart");
 constexpr int32_t CURRENT_ID = 1;
 } // namespace
 
@@ -28,9 +30,10 @@ bool DragDropManager::CheckDragDropProxy(int64_t id) const
 
 void DragDropManager::UpdateDragWindowPosition(int32_t globalX, int32_t globalY) {}
 
-void DragDropManager::OnDragStart(float /* globalX */, float /* globalY */, const RefPtr<FrameNode>& /* frameNode */)
+void DragDropManager::OnDragStart(float /* globalX */, float /* globalY */, const RefPtr<FrameNode>& frameNode)
 {
     GTEST_LOG_(INFO) << "OnDragStart has called";
+    frameNode->SetNodeName(ON_DRAG_START);
 }
 
 void DragDropManager::OnDragMove(float /* globalX */, float /* globalY */, const std::string& /* extraInfo */)
@@ -48,10 +51,10 @@ void DragDropManager::onDragCancel()
     GTEST_LOG_(INFO) << "onDragCancel has called";
 }
 
-void DragDropManager::OnItemDragStart(
-    float /* globalX */, float /* globalY */, const RefPtr<FrameNode>& /* frameNode */)
+void DragDropManager::OnItemDragStart(float /* globalX */, float /* globalY */, const RefPtr<FrameNode>& frameNode)
 {
     GTEST_LOG_(INFO) << "OnItemDragStart has called";
+    frameNode->SetNodeName(ITEM_DRAG_START);
 }
 
 void DragDropManager::OnItemDragMove(
@@ -65,7 +68,10 @@ void DragDropManager::OnItemDragEnd(
     GTEST_LOG_(INFO) << "OnItemDragEnd has called";
 }
 
-void DragDropManager::onItemDragCancel() {}
+void DragDropManager::onItemDragCancel()
+{
+    GTEST_LOG_(INFO) << "onItemDragCancel has called";
+}
 
 void DragDropManager::AddDataToClipboard(const std::string& extraInfo)
 {
@@ -79,7 +85,7 @@ void DragDropManager::GetExtraInfoFromClipboard(std::string& /* extraInfo */)
 
 void DragDropManager::RestoreClipboardData()
 {
-    GTEST_LOG_(INFO) << "GetExtraInfoFromClipboard has called";
+    GTEST_LOG_(INFO) << "RestoreClipboardData has called";
 }
 
 void DragDropManager::DestroyDragWindow() {}
