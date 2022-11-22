@@ -287,9 +287,14 @@ HWTEST_F(BubblePatternTestNg, PanelPatternTest003, TestSize.Level1)
      * @tc.expected: step3. check whether the value is correct.
      */
     bubbleHub->FireChangeEvent(false);
-    EXPECT_EQ(stateChange, std::to_string(false));
+    auto jsonFalse = JsonUtil::Create(true);
+    jsonFalse->Put("isVisible", false);
+    EXPECT_EQ(stateChange, jsonFalse->ToString());
+
     bubbleHub->FireChangeEvent(true);
-    EXPECT_EQ(stateChange, std::to_string(true));
+    auto jsonTrue = JsonUtil::Create(true);
+    jsonTrue->Put("isVisible", true);
+    EXPECT_EQ(stateChange, jsonTrue->ToString());
 }
 
 /**
