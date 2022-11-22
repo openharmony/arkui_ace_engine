@@ -71,7 +71,10 @@ private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleClick(const GestureEvent& info);
 
+    RefPtr<ClickEvent> clickEvent_;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPattern);
 };
 } // namespace OHOS::Ace::NG
