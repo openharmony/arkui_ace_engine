@@ -231,8 +231,7 @@ void IndexerPattern::ApplyIndexChanged()
 
     auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
-    auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
+        
     auto onSelected = indexerEventHub->GetOnSelected();
     if (onSelected && (selected_ >= 0) && (selected_ < itemCount_)) {
         onSelected(selected_);
@@ -257,8 +256,8 @@ void IndexerPattern::ApplyIndexChanged()
     auto selectedColor = layoutProperty->GetSelectedColor().value_or(indexerTheme->GetSelectedColor());
     auto popupColor = layoutProperty->GetPopupColor().value_or(indexerTheme->GetPopupColor());
     auto selectedBackgroundColor =
-        paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSeclectedBackgroundColor());
-    auto popupBackground = paintProperty->GetPopupBackground().value_or(indexerTheme->GetPopupBackgroundColor());
+        layoutProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSeclectedBackgroundColor());
+    auto popupBackground = layoutProperty->GetPopupBackground().value_or(indexerTheme->GetPopupBackgroundColor());
     auto usingPopup = layoutProperty->GetUsingPopup().value_or(false);
     auto selectedFont = layoutProperty->GetSelectedFont().value_or(indexerTheme->GetSelectedFont());
     auto popupFont = layoutProperty->GetPopupFont().value_or(indexerTheme->GetPopupFont());
@@ -278,7 +277,7 @@ void IndexerPattern::ApplyIndexChanged()
             auto childRenderContext = childNode->GetRenderContext();
             childRenderContext->BlendBgColor(selectedBackgroundColor);
         } else if (index == itemCount_) {
-            if (usingPopup && isInitialized_) {
+            if (usingPopup) {
                 std::vector<std::string> arrayValueSelected = {};
                 auto popupDataValue = popupData.value_or(arrayValueSelected);
                 popupDataValue.insert(std::begin(popupDataValue), arrayValue_[selected_]);

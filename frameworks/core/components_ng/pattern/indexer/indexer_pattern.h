@@ -16,13 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_INDEXER_INDEXER_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_INDEXER_INDEXER_PATTERN_H
 
-#include <optional>
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/indexer/indexer_event_hub.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_algorithm.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
-#include "core/components_ng/pattern/indexer/indexer_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -42,11 +40,6 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<IndexerLayoutProperty>();
-    }
-
-    RefPtr<PaintProperty> CreatePaintProperty() override
-    {
-        return MakeRefPtr<IndexerPaintProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
