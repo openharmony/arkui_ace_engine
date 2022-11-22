@@ -321,6 +321,11 @@ public:
         return astcPsnr_;
     }
 
+    static bool GetExtSurfaceEnabled()
+    {
+        return extSurfaceEnabled_;
+    }
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;
@@ -354,6 +359,7 @@ private:
     static bool astcEnabled_;
     static int32_t astcMax_;
     static int32_t astcPsnr_;
+    static bool extSurfaceEnabled_;
 };
 
 } // namespace OHOS::Ace
