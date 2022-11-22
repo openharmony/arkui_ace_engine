@@ -121,8 +121,10 @@ void JSGrid::SetColumnsGap(const JSCallbackInfo& info)
         return;
     }
     Dimension colGap;
-    if (!ParseJsDimensionVp(info[0], colGap)) {
-        return;
+
+    bool colResult = ParseJsDimensionVp(info[0], colGap);
+    if (!colResult || colGap.Value() < 0) {
+        colGap.SetValue(0);
     }
 
     GridModel::GetInstance()->SetColumnsGap(colGap);
@@ -135,8 +137,10 @@ void JSGrid::SetRowsGap(const JSCallbackInfo& info)
         return;
     }
     Dimension rowGap;
-    if (!ParseJsDimensionVp(info[0], rowGap)) {
-        return;
+
+    bool colResult = ParseJsDimensionVp(info[0], rowGap);
+    if (!colResult || rowGap.Value() < 0) {
+        rowGap.SetValue(0);
     }
 
     GridModel::GetInstance()->SetRowsGap(rowGap);
