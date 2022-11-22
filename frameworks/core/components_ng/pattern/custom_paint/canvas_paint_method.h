@@ -29,13 +29,8 @@ public:
     explicit CanvasPaintMethod(const RefPtr<PipelineBase> context)
     {
         context_ = context;
-        isOffscreen_ = false;
-
-        auto currentDartState = flutter::UIDartState::Current();
-        if (!currentDartState) {
-            return;
-        }
-
+        auto* currentDartState = flutter::UIDartState::Current();
+        CHECK_NULL_VOID(currentDartState);
         renderTaskHolder_ = MakeRefPtr<FlutterRenderTaskHolder>(currentDartState->GetSkiaUnrefQueue(),
             currentDartState->GetIOManager(), currentDartState->GetTaskRunners().GetIOTaskRunner());
 
@@ -77,6 +72,7 @@ public:
     double MeasureText(const std::string& text, const PaintState& state);
     double MeasureTextHeight(const std::string& text, const PaintState& state);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
+    void SetTransform(const TransformParam& param) override;
 
 private:
     void PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWrapper);
@@ -93,6 +89,16 @@ private:
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     bool UpdateParagraph(const OffsetF& offset, const std::string& text, bool isStroke, bool hasShadow = true);
     void UpdateTextStyleForeground(const OffsetF& offset, bool isStroke, txt::TextStyle& txtStyle, bool hasShadow);
+    void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas) override;
+    OffsetF GetContentOffset(PaintWrapper* paintWrapper) const override
+    {
+        return paintWrapper ? paintWrapper->GetContentOffset() : OffsetF(0.0f, 0.0f);
+    }
+    void Path2DRect(const OffsetF& offset, const PathArgs& args) override;
+    SkCanvas* GetRawPtrOfSkCanvas() override
+    {
+        return skCanvas_.get();
+    }
 
     std::list<TaskFunc> tasks_;
     SizeF lastLayoutSize_;
