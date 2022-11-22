@@ -523,8 +523,13 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     CHECK_NULL_RETURN(delegate_, false);
     CHECK_NULL_RETURN(dirty, false);
     auto geometryNode = dirty->GetGeometryNode();
-    auto drawSize = geometryNode->GetContentSize();
-    drawSize_ = Size(drawSize.Width(), drawSize.Height());
+    auto drawSize = Size(geometryNode->GetContentSize().Width(), geometryNode->GetContentSize().Height());
+    if (drawSize.IsInfinite() || drawSize.IsEmpty()) {
+        LOGE("resize invalid %{public}f, %{public}f", drawSize.Width(), drawSize.Height());
+        return false;
+    }
+
+    drawSize_ = drawSize;
     drawSizeCache_ = drawSize_;
     delegate_->Resize(drawSize_.Width(), drawSize_.Height());
     // first update size to load url.
