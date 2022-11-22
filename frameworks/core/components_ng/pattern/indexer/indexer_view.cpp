@@ -71,12 +71,12 @@ void IndexerView::SetPopupColor(const Color& popupColor)
 
 void IndexerView::SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SelectedBackgroundColor, selectedBackgroundColor);
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerPaintProperty, SelectedBackgroundColor, selectedBackgroundColor);
 }
 
 void IndexerView::SetPopupBackground(const Color& popupBackground)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupBackground, popupBackground);
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerPaintProperty, PopupBackground, popupBackground);
 }
 
 void IndexerView::SetUsingPopup(bool usingPopup)
