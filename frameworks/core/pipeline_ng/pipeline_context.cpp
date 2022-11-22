@@ -877,6 +877,9 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
     }
+    if (onFocus_ && onShow_) {
+        FlushFocus();
+    }
     FlushWindowFocusChangedCallback(isFocus);
 }
 
