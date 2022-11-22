@@ -30,7 +30,6 @@ namespace {
 constexpr Dimension DEFAULT_FONT_SZIE = 14.0_fp;
 constexpr Dimension BUTTON_PADDING = 8.0_fp;
 constexpr Dimension BUTTON_ZERO_PADDING = 0.0_fp;
-constexpr Color MASK_COLOR = Color(0x55c0c0c0);
 
 } // namespace
 
@@ -83,7 +82,7 @@ void PopupComponentV2::Initialization(const RefPtr<ThemeManager>& themeManager, 
     box->SetChild(child);
     GetPopupParam()->SetBorder(decoration->GetBorder());
     if (!GetPopupParam()->IsMaskColorSetted()) {
-        GetPopupParam()->SetMaskColor(MASK_COLOR);
+        GetPopupParam()->SetMaskColor(popupTheme->GetMaskColor());
     }
     if (!GetPopupParam()->IsBackgroundColorSetted()) {
         GetPopupParam()->SetBackgroundColor(popupTheme->GetBackgroundColor());
