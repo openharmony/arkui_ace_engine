@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/components_ng/pattern/indexer/indexer_paint_property.h"
 #define private public
 
 #include <optional>
@@ -165,6 +166,8 @@ HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator001, TestSize.Level1)
     EXPECT_NE(layoutProperty, nullptr);
     RefPtr<IndexerLayoutProperty> indexerLayoutProperty = AceType::DynamicCast<IndexerLayoutProperty>(layoutProperty);
     EXPECT_NE(indexerLayoutProperty, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<IndexerPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
 
     /**
      * @tc.steps: step3. compare indexer properties and expected value.
@@ -175,8 +178,8 @@ HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator001, TestSize.Level1)
     EXPECT_EQ(indexerLayoutProperty->GetColor().value(), COLOR_VALUE);
     EXPECT_EQ(indexerLayoutProperty->GetSelectedColor().value(), COLOR_VALUE);
     EXPECT_EQ(indexerLayoutProperty->GetPopupColor().value(), COLOR_VALUE);
-    EXPECT_EQ(indexerLayoutProperty->GetSelectedBackgroundColor().value(), COLOR_VALUE);
-    EXPECT_EQ(indexerLayoutProperty->GetPopupBackground().value(), COLOR_VALUE);
+    EXPECT_EQ(paintProperty->GetSelectedBackgroundColor().value(), COLOR_VALUE);
+    EXPECT_EQ(paintProperty->GetPopupBackground().value(), COLOR_VALUE);
     EXPECT_EQ(indexerLayoutProperty->GetUsingPopup().value(), true);
     EXPECT_EQ(indexerLayoutProperty->GetSelectedFont().value(), SELECTED_FONT_VALUE);
     EXPECT_EQ(indexerLayoutProperty->GetPopupFont().value(), POPUP_FONT_VALUE);
