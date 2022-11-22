@@ -76,6 +76,41 @@ public:
         return {};
     }
 
+    void ClearVisualState() override
+    {
+        ViewStackProcessor::GetInstance()->ClearVisualState();
+    }
+
+    void SetVisualState(VisualState state) override
+    {
+        ViewStackProcessor::GetInstance()->SetVisualState(state);
+    }
+
+    void StartGetAccessRecordingFor(int32_t elmtId) override
+    {
+        ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(elmtId);
+    }
+
+    int32_t GetElmtIdToAccountFor() override
+    {
+        return ViewStackProcessor::GetInstance()->GetNodeIdToAccountFor();
+    }
+
+    void SetElmtIdToAccountFor(int32_t elmtId) override
+    {
+        ViewStackProcessor::GetInstance()->SetNodeIdToAccountFor(elmtId);
+    }
+
+    void StopGetAccessRecording() override
+    {
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+
+    void ImplicitPopBeforeContinue() override
+    {
+        ViewStackProcessor::GetInstance()->ImplicitPopBeforeContinue();
+    }
+
 private:
     std::unique_ptr<ScopedViewStackProcessor> scopeStack_;
 };

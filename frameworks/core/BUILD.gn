@@ -637,6 +637,7 @@ template("ace_core_ng_source_set") {
       "components/font/font_loader_creator.cpp",
       "components/font/font_manager_creator.cpp",
       "components/panel/sliding_events.cpp",
+      "components/picker/picker_animation.cpp",
       "components/picker/picker_data.cpp",
       "components/scroll/scrollable.cpp",
       "components/theme/app_theme.cpp",

@@ -16,12 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_STACK_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_STACK_MODEL_H
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/common/properties/state_attributes.h"
 
 namespace OHOS::Ace {
 
@@ -39,6 +41,13 @@ public:
     virtual RefPtr<AceType> Finish() = 0;
     virtual std::string ProcessViewId(const std::string& viewId) = 0;
     virtual AnimationOption GetImplicitAnimationOption() = 0;
+    virtual void ClearVisualState() = 0;
+    virtual void SetVisualState(VisualState state) = 0;
+    virtual void StartGetAccessRecordingFor(int32_t elmtId) = 0;
+    virtual int32_t GetElmtIdToAccountFor() = 0;
+    virtual void SetElmtIdToAccountFor(int32_t elmtId) = 0;
+    virtual void StopGetAccessRecording() = 0;
+    virtual void ImplicitPopBeforeContinue() = 0;
 
 private:
     static std::unique_ptr<ViewStackModel> instance_;

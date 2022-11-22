@@ -17,11 +17,35 @@
 
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/models/view_stack_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/base/view_stack_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/pipeline/base/element_register.h"
 
+namespace OHOS::Ace {
+
+std::unique_ptr<ViewStackModel> ViewStackModel::instance_ = nullptr;
+
+ViewStackModel* ViewStackModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::ViewStackModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::ViewStackModelNG());
+        } else {
+            instance_.reset(new Framework::ViewStackModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 
 void JSViewStackProcessor::JSVisualState(const JSCallbackInfo& info)
@@ -29,21 +53,13 @@ void JSViewStackProcessor::JSVisualState(const JSCallbackInfo& info)
     LOGD("JSVisualState");
     if ((info.Length() < 1) || (!info[0]->IsString())) {
         LOGE("JSVisualState: is not a string.");
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::ViewStackProcessor::GetInstance()->ClearVisualState();
-        } else {
-            ViewStackProcessor::GetInstance()->ClearVisualState();
-        }
+        ViewStackModel::GetInstance()->ClearVisualState();
         return;
     }
 
     std::string state = info[0]->ToString();
     VisualState visualState = JSViewStackProcessor::StringToVisualState(state);
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewStackProcessor::GetInstance()->SetVisualState(visualState);
-    } else {
-        ViewStackProcessor::GetInstance()->SetVisualState(visualState);
-    }
+    ViewStackModel::GetInstance()->SetVisualState(visualState);
 }
 
 // public static emthods exposed to JS
@@ -93,51 +109,27 @@ VisualState JSViewStackProcessor::StringToVisualState(const std::string& stateSt
 
 void JSViewStackProcessor::JsStartGetAccessRecordingFor(ElementIdType elmtId)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        return NG::ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(elmtId);
-    }
-    return ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(elmtId);
+    ViewStackModel::GetInstance()->StartGetAccessRecordingFor(elmtId);
 }
 
 int32_t JSViewStackProcessor::JsGetElmtIdToAccountFor()
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        return NG::ViewStackProcessor::GetInstance()->GetNodeIdToAccountFor();
-    }
-    return ViewStackProcessor::GetInstance()->GetElmtIdToAccountFor();
+    return ViewStackModel::GetInstance()->GetElmtIdToAccountFor();
 }
 
 void JSViewStackProcessor::JsSetElmtIdToAccountFor(ElementIdType elmtId)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        return NG::ViewStackProcessor::GetInstance()->SetNodeIdToAccountFor(elmtId);
-    }
-    ViewStackProcessor::GetInstance()->SetElmtIdToAccountFor(elmtId);
+    ViewStackModel::GetInstance()->SetElmtIdToAccountFor(elmtId);
 }
 
 void JSViewStackProcessor::JsStopGetAccessRecording()
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        return NG::ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    }
-    return ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    return ViewStackModel::GetInstance()->StopGetAccessRecording();
 }
 
 void JSViewStackProcessor::JsImplicitPopBeforeContinue()
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewStackProcessor::GetInstance()->ImplicitPopBeforeContinue();
-        return;
-    }
-    if ((ViewStackProcessor::GetInstance()->Size() > 1) && ViewStackProcessor::GetInstance()->ShouldPopImmediately()) {
-        LOGD("Implicit Pop before continue.");
-        ViewStackProcessor::GetInstance()->Pop();
-        LOGD("Implicit Pop done, top component is %{public}s",
-            AceType::TypeName(ViewStackProcessor::GetInstance()->GetMainComponent()));
-    } else {
-        LOGD("NO Implicit Pop before continue. top component is %{public}s",
-            AceType::TypeName(ViewStackProcessor::GetInstance()->GetMainComponent()));
-    }
+    ViewStackModel::GetInstance()->ImplicitPopBeforeContinue();
 }
 
 void JSViewStackProcessor::JSMakeUniqueId(const JSCallbackInfo& info)

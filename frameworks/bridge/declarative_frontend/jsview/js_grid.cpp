@@ -87,6 +87,9 @@ void JSGrid::PopGrid(const JSCallbackInfo& /*info*/)
 
 void JSGrid::UseProxy(const JSCallbackInfo& args)
 {
+#ifdef NG_BUILD
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+#else
     auto parentGrid = ViewStackProcessor::GetInstance()->GetTopGrid();
     if (parentGrid == nullptr) {
         LOGE("no parent Grid");
@@ -98,6 +101,7 @@ void JSGrid::UseProxy(const JSCallbackInfo& args)
     LOGD("parent Grid uses proxied code path %{public}s.",
         (parentGrid ? !parentGrid->UseNonProxiedCodePath() ? "yes" : "false" : "no parent grid (error)"));
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(parentGrid ? !parentGrid->UseNonProxiedCodePath() : false)));
+#endif
 }
 
 void JSGrid::SetColumnsTemplate(const std::string& value)
