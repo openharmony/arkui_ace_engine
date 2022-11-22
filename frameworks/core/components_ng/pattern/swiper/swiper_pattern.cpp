@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
+#include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/swiper_indicator/swiper_indicator_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
@@ -117,6 +118,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(swiperLayoutAlgorithm, false);
     preItemRange_ = swiperLayoutAlgorithm->GetItemRange();
     currentIndex_ = swiperLayoutAlgorithm->GetCurrentIndex();
+    maxChildSize_ = swiperLayoutAlgorithm->GetMaxChildSize();
     return GetEdgeEffect() == EdgeEffect::FADE;
 }
 
@@ -197,7 +199,7 @@ void SwiperPattern::SwipeTo(int32_t index)
     }
 
     // TODO Adapt displayCount.
-    auto translateOffset = targetIndex_.value() > currentIndex_ ? -MainSize() : MainSize();
+    auto translateOffset = targetIndex_.value() > currentIndex_ ? -GetTranslateLength() : GetTranslateLength();
     PlayTranslateAnimation(0, translateOffset, targetIndex_.value(), true);
 }
 
@@ -213,7 +215,8 @@ void SwiperPattern::ShowNext()
     StopAutoPlay();
     StopTranslateAnimation();
     if (childrenSize > 0 && GetDisplayCount() != 0) {
-        PlayTranslateAnimation(0, -MainSize() / GetDisplayCount(), (currentIndex_ + 1) % childrenSize, true);
+        auto endPosition = GetTranslateLength();
+        PlayTranslateAnimation(0, -endPosition, (currentIndex_ + 1) % childrenSize, true);
     }
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
@@ -232,8 +235,8 @@ void SwiperPattern::ShowPrevious()
     StopAutoPlay();
     StopTranslateAnimation();
     if (childrenSize > 0 && GetDisplayCount() != 0) {
-        PlayTranslateAnimation(
-            0, MainSize() / GetDisplayCount(), (currentIndex_ + childrenSize - 1) % childrenSize, true);
+        auto endPosition = GetTranslateLength();
+        PlayTranslateAnimation(0, endPosition, (currentIndex_ + childrenSize - 1) % childrenSize, true);
     }
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
@@ -302,6 +305,7 @@ void SwiperPattern::InitSwiperIndicator()
     auto swiperNode = GetHost();
     CHECK_NULL_VOID(swiperNode);
     RefPtr<FrameNode> indicatorNode;
+    CHECK_NULL_VOID(swiperNode->GetLastChild());
     if (swiperNode->GetLastChild()->GetTag() != V2::SWIPER_INDICATOR_ETS_TAG) {
         LOGI("Swiper create new indicator");
         if (!IsShowIndicator()) {
@@ -522,7 +526,8 @@ void SwiperPattern::Tick(uint64_t duration)
                 scheduler_->Stop();
             }
         } else {
-            PlayTranslateAnimation(0, -MainSize() / displayCount, (currentIndex_ + 1) % childrenSize);
+            auto endPosition = GetTranslateLength();
+            PlayTranslateAnimation(0, -endPosition, (currentIndex_ + 1) % childrenSize);
         }
         elapsedTime_ = 0;
     }
@@ -679,7 +684,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
 #endif
     // Play translate animation.
-    auto mainSize = MainSize() / std::max(GetDisplayCount(), 1);
+    auto mainSize = GetTranslateLength();
     if (LessOrEqual(mainSize, 0)) {
         LOGE("Main size is not positive.");
         return;
@@ -958,6 +963,19 @@ int32_t SwiperPattern::TotalCount() const
     CHECK_NULL_RETURN(host, 0);
     // last child is swiper indicator
     return IsShowIndicator() ? host->TotalChildCount() - 1 : host->TotalChildCount();
+}
+
+float SwiperPattern::GetTranslateLength() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0);
+
+    auto layoutProperty = host->GetLayoutProperty<SwiperLayoutProperty>();
+    if (!SwiperUtils::IsStretch(layoutProperty)) {
+        return GetDirection() == Axis::HORIZONTAL ? maxChildSize_.Width() : maxChildSize_.Height();
+    }
+
+    return MainSize() / static_cast<float>(std::max(GetDisplayCount(), 1));
 }
 
 } // namespace OHOS::Ace::NG

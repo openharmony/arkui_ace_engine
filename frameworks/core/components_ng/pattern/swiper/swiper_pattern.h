@@ -192,6 +192,7 @@ private:
     bool IsLoop() const;
     bool IsDisableSwipe() const;
     bool IsShowIndicator() const;
+    float GetTranslateLength() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -226,6 +227,7 @@ private:
     ChangeEventPtr changeEvent_;
 
     SwiperParameters swiperParameters_;
+    SizeF maxChildSize_;
 };
 } // namespace OHOS::Ace::NG
 
