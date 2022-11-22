@@ -368,10 +368,7 @@ void ContainerModalPattern::SetAppTitle(const std::string& title)
 
 void ContainerModalPattern::SetAppIcon(const RefPtr<PixelMap>& icon)
 {
-    if (icon == nullptr) {
-        LOGE("SetAppIcon failed, icon PixelMap is null.");
-        return;
-    }
+    CHECK_NULL_VOID(icon);
     LOGI("SetAppIcon successfully");
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetPixMap(icon);

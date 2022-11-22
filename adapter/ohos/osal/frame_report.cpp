@@ -22,6 +22,7 @@
 #include <frame_collector.h>
 
 #include "base/log/log_wrapper.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -48,10 +49,7 @@ bool FrameReport::LoadLibrary()
 {
     if (!frameSchedSoLoaded_) {
         frameSchedHandle_ = dlopen(FRAME_AWARE_SO_PATH.c_str(), RTLD_LAZY);
-        if (frameSchedHandle_ == nullptr) {
-            LOGE("frame-ace:[LoadLibrary]dlopen libframe_ui_intf.so failed! error = %s\n", dlerror());
-            return false;
-        }
+        CHECK_NULL_RETURN(frameSchedHandle_, false);
         frameSchedSoLoaded_ = true;
     }
     LOGD("frame-ace:[LoadLibrary]dlopen libframe_ui_intf.so success");
@@ -71,16 +69,10 @@ void FrameReport::CloseLibrary()
 
 void *FrameReport::LoadSymbol(const char *symName)
 {
-    if (!frameSchedSoLoaded_) {
-        LOGE("frame-ace:[loadSymbol]libframe_ui_intf.so not loaded.\n");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(frameSchedSoLoaded_, nullptr);
 
     void *funcSym = dlsym(frameSchedHandle_, symName);
-    if (funcSym == nullptr) {
-        LOGE("frame-ace:[loadSymbol]Get %{public}s symbol failed: %{public}s\n", symName, dlerror());
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(funcSym, nullptr);
     return funcSym;
 }
 
@@ -88,11 +80,8 @@ void FrameReport::Init()
 {
     LoadLibrary();
     frameInitFunc_ = (FrameInitFunc)LoadSymbol("Init");
-    if (frameInitFunc_ != nullptr) {
-        frameInitFunc_();
-    } else {
-        LOGE("frame-ace:[Init]load init function failed!");
-    }
+    CHECK_NULL_VOID(frameInitFunc_);
+    frameInitFunc_();
 }
 
 int FrameReport::GetEnable()
@@ -106,12 +95,8 @@ int FrameReport::GetFrameReportEnable()
         return 0;
     }
     frameGetEnableFunc_ = (FrameGetEnableFunc)LoadSymbol("GetSenseSchedEnable");
-    if (frameGetEnableFunc_ != nullptr) {
-        return frameGetEnableFunc_();
-    } else {
-        LOGE("frame-ace:[GetFrameReportEnable]load GetSenseSchedEnable function failed!");
-        return 0;
-    }
+    CHECK_NULL_RETURN(frameGetEnableFunc_, 0);
+    return frameGetEnableFunc_();
 }
 
 void FrameReport::BeginFlushAnimation()
@@ -121,11 +106,8 @@ void FrameReport::BeginFlushAnimation()
         return;
     }
     beginFlushAnimationFunc_ = (BeginFlushAnimationFunc)LoadSymbol("BeginFlushAnimation");
-    if (beginFlushAnimationFunc_ != nullptr) {
-        beginFlushAnimationFunc_();
-    } else {
-        LOGE("frame-ace:[BeginFlushAnimation]load BeginFlushAnimation function failed!");
-    }
+    CHECK_NULL_VOID(beginFlushAnimationFunc_);
+    beginFlushAnimationFunc_();
 }
 
 void FrameReport::EndFlushAnimation()
@@ -135,11 +117,8 @@ void FrameReport::EndFlushAnimation()
         return;
     }
     endFlushAnimationFunc_ = (EndFlushAnimationFunc)LoadSymbol("EndFlushAnimation");
-    if (endFlushAnimationFunc_ != nullptr) {
-        endFlushAnimationFunc_();
-    } else {
-        LOGE("frame-ace:[EndFlushAnimation]load EndFlushAnimation function failed!");
-    }
+    CHECK_NULL_VOID(endFlushAnimationFunc_);
+    endFlushAnimationFunc_();
 }
 
 void FrameReport::BeginFlushBuild()
@@ -149,11 +128,8 @@ void FrameReport::BeginFlushBuild()
         return;
     }
     beginFlushBuildFunc_ = (BeginFlushBuildFunc)LoadSymbol("BeginFlushBuild");
-    if (beginFlushBuildFunc_ != nullptr) {
-        beginFlushBuildFunc_();
-    } else {
-        LOGE("frame-ace:[BeginFlushBuild]load BeginFlushBuild function failed!");
-    }
+    CHECK_NULL_VOID(beginFlushBuildFunc_);
+    beginFlushBuildFunc_();
 }
 
 void FrameReport::EndFlushBuild()
@@ -163,11 +139,8 @@ void FrameReport::EndFlushBuild()
         return;
     }
     endFlushBuildFunc_ = (EndFlushBuildFunc)LoadSymbol("EndFlushBuild");
-    if (endFlushBuildFunc_ != nullptr) {
-        endFlushBuildFunc_();
-    } else {
-        LOGE("frame-ace:[EndFlushBuild]load EndFlushBuild function failed!");
-    }
+    CHECK_NULL_VOID(endFlushBuildFunc_);
+    endFlushBuildFunc_();
 }
 
 void FrameReport::BeginFlushLayout()
@@ -177,11 +150,8 @@ void FrameReport::BeginFlushLayout()
         return;
     }
     beginFlushLayoutFunc_ = (BeginFlushLayoutFunc)LoadSymbol("BeginFlushLayout");
-    if (beginFlushLayoutFunc_ != nullptr) {
-        beginFlushLayoutFunc_();
-    } else {
-        LOGE("frame-ace:[BeginFlushLayout]load BeginFlushLayout function failed!");
-    }
+    CHECK_NULL_VOID(beginFlushLayoutFunc_);
+    beginFlushLayoutFunc_();
 }
 
 void FrameReport::EndFlushLayout()
@@ -191,11 +161,8 @@ void FrameReport::EndFlushLayout()
         return;
     }
     endFlushLayoutFunc_ = (EndFlushLayoutFunc)LoadSymbol("EndFlushLayout");
-    if (endFlushLayoutFunc_ != nullptr) {
-        endFlushLayoutFunc_();
-    } else {
-        LOGE("frame-ace:[EndFlushLayout]load EndFlushLayout function failed!");
-    }
+    CHECK_NULL_VOID(endFlushLayoutFunc_);
+    endFlushLayoutFunc_();
 }
 
 void FrameReport::BeginFlushRender()
@@ -205,11 +172,8 @@ void FrameReport::BeginFlushRender()
         return;
     }
     beginFlushRenderFunc_ = (BeginFlushRenderFunc)LoadSymbol("BeginFlushRender");
-    if (beginFlushRenderFunc_ != nullptr) {
-        beginFlushRenderFunc_();
-    } else {
-        LOGE("frame-ace:[BeginFlushRender]load BeginFlushRender function failed!");
-    }
+    CHECK_NULL_VOID(beginFlushRenderFunc_);
+    beginFlushRenderFunc_();
 }
 
 void FrameReport::EndFlushRender()
@@ -218,11 +182,8 @@ void FrameReport::EndFlushRender()
         return;
     }
     endFlushRenderFunc_ = (EndFlushRenderFunc)LoadSymbol("EndFlushRender");
-    if (endFlushRenderFunc_ != nullptr) {
-        endFlushRenderFunc_();
-    } else {
-        LOGE("frame-ace:[EndFlushRender]load EndFlushRender function failed!");
-    }
+    CHECK_NULL_VOID(endFlushRenderFunc_);
+    endFlushRenderFunc_();
 }
 
 void FrameReport::BeginFlushRenderFinish()
@@ -231,11 +192,8 @@ void FrameReport::BeginFlushRenderFinish()
         return;
     }
     beginFlushRenderFinishFunc_ = (BeginFlushRenderFinishFunc)LoadSymbol("BeginFlushRenderFinish");
-    if (beginFlushRenderFinishFunc_ != nullptr) {
-        beginFlushRenderFinishFunc_();
-    } else {
-        LOGE("frame-ace:[BeginFlushRenderFinish]load EndFlushRenderFinish function failed!");
-    }
+    CHECK_NULL_VOID(beginFlushRenderFinishFunc_);
+    beginFlushRenderFinishFunc_();
 }
 
 void FrameReport::EndFlushRenderFinish()
@@ -245,11 +203,8 @@ void FrameReport::EndFlushRenderFinish()
         return;
     }
     endFlushRenderFinishFunc_ = (EndFlushRenderFinishFunc)LoadSymbol("EndFlushRenderFinish");
-    if (endFlushRenderFinishFunc_ != nullptr) {
-        endFlushRenderFinishFunc_();
-    } else {
-        LOGE("frame-ace:[EndFlushRenderFinish]load EndFlushRenderFinish function failed!");
-    }
+    CHECK_NULL_VOID(endFlushRenderFinishFunc_);
+    endFlushRenderFinishFunc_();
 }
 
 void FrameReport::BeginProcessPostFlush()
@@ -258,11 +213,8 @@ void FrameReport::BeginProcessPostFlush()
         return;
     }
     beginProcessPostFunc_ = (BeginProcessPostFlushFunc)LoadSymbol("BeginProcessPostFlush");
-    if (beginProcessPostFunc_ != nullptr) {
-        beginProcessPostFunc_();
-    } else {
-        LOGE("frame-ace:[BeginProcessPostFlush]load BeginProcessPostFlush function failed!");
-    }
+    CHECK_NULL_VOID(beginProcessPostFunc_);
+    beginProcessPostFunc_();
 }
 
 void FrameReport::BeginListFling()
@@ -271,11 +223,8 @@ void FrameReport::BeginListFling()
         return;
     }
     beginListFlingFunc_ = (BeginListFlingFunc)LoadSymbol("BeginListFling");
-    if (beginListFlingFunc_ != nullptr) {
-        beginListFlingFunc_();
-    } else {
-        LOGE("frame-ace:[BeginListFling]load BeginListFling function failed!");
-    }
+    CHECK_NULL_VOID(beginListFlingFunc_);
+    beginListFlingFunc_();
 }
 
 void FrameReport::EndListFling()
@@ -284,10 +233,7 @@ void FrameReport::EndListFling()
         return;
     }
     endListFlingFunc_ = (EndListFlingFunc)LoadSymbol("EndListFling");
-    if (endListFlingFunc_ != nullptr) {
-        endListFlingFunc_();
-    } else {
-        LOGE("frame-ace:[EndListFling]load EndListFling function failed!");
-    }
+    CHECK_NULL_VOID(beginListFlingFunc_);
+    endListFlingFunc_();
 }
 } // namespace OHOS::Ace
