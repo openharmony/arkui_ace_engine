@@ -15,6 +15,7 @@
 
 #include "core/components_v2/tabs/tabs_component.h"
 
+#include "base/memory/ace_type.h"
 #include "core/components/clip/clip_component.h"
 #include "core/components/foreach/for_each_component.h"
 #include "core/components_v2/tabs/tabs_element.h"

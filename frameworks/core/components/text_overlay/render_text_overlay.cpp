@@ -521,8 +521,7 @@ void RenderTextOverlay::UpdateWeakWeb(const RefPtr<TextOverlayComponent>& overla
         return;
     }
     isUsedByWeb_ = true;
-    auto callback = [weak = WeakClaim(this)](const OverlayShowOption& option,
-        float startHeight, float endHeight) {
+    auto callback = [weak = WeakClaim(this)](const OverlayShowOption& option, float startHeight, float endHeight) {
         auto overlay = weak.Upgrade();
         if (!overlay) {
             return;
@@ -716,7 +715,7 @@ Offset RenderTextOverlay::ComputeChildPosition(const RefPtr<RenderNode>& child)
                    childPosition.GetX() + child->GetLayoutSize().Width(), GetLayoutParam().GetMaxSize().Width())) {
         childPosition.SetX(GetLayoutParam().GetMaxSize().Width() - child->GetLayoutSize().Width() - DEFAULT_SPACING);
     }
-    if (LessNotEqual(childPosition.GetY(), 0.0)) {
+    if (LessNotEqual(childPosition.GetY(), NormalizeToPx(TOOL_BAR_HEIGHT))) {
         childPosition.SetY(endHandleOffset_.GetY() + menuSpacingWithHandle + menuSpacingWithText);
     }
     return childPosition;
