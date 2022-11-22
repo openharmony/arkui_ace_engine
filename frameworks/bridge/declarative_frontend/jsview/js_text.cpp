@@ -136,8 +136,16 @@ void JSText::SetTextOverflow(const JSCallbackInfo& info)
     info.SetReturnValue(info.This());
 }
 
-void JSText::SetMaxLines(int32_t value)
+void JSText::SetMaxLines(const JSCallbackInfo& info)
 {
+    int32_t value;
+    if (info[0]->ToString() == "Infinity") {
+        value = Infinity<uint32_t>();
+    } else if (!info[0]->IsNumber()) {
+        return;
+    } else {
+        ParseJsInt32(info[0], value);
+    }
     TextModel::GetInstance()->SetMaxLines(value);
 }
 

@@ -34,7 +34,7 @@ public:
     static void SetFontWeight(const std::string& value);
     static void SetTextColor(const JSCallbackInfo& info);
     static void SetTextOverflow(const JSCallbackInfo& info);
-    static void SetMaxLines(int32_t value);
+    static void SetMaxLines(const JSCallbackInfo& info);
     static void SetFontStyle(int32_t value);
     static void SetAlign(const JSCallbackInfo &info);
     static void SetTextAlign(int32_t value);
