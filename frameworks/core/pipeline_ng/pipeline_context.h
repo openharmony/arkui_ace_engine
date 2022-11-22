@@ -231,6 +231,7 @@ public:
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);
     void NotifyMemoryLevel(int32_t level) override;
     void FlushMessages() override;
+    void SetContainerWindow(bool isShow) override;
 
     void FlushUITasks() override
     {
