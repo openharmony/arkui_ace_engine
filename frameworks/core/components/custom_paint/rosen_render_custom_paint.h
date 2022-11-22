@@ -103,8 +103,8 @@ public:
 private:
     void InitImagePaint();
     void InitPaintBlend(SkPaint& paint);
-    bool UpdateParagraph(const Offset& offset, const std::string& text, bool isStroke, bool hasShadow = true);
-    void PaintText(const Offset& offset, double x, double y, bool isStroke, bool hasShadow = true);
+    bool UpdateParagraph(const Offset& offset, const std::string& text, bool isStroke, bool hasShadow = false);
+    void PaintText(const Offset& offset, double x, double y, bool isStroke, bool hasShadow = false);
     double GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     SkPaint GetStrokePaint();
