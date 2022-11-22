@@ -112,6 +112,7 @@ void TextClockPattern::UpdateTimeText()
     }
     textLayoutProperty->UpdateContent(currentTime); // update time text.
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    TextPattern::OnModifyDone();
     if (isStart_) {
         RequestUpdateForNextSecond();
     }
