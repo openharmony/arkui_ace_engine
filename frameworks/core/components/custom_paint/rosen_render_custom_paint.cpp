@@ -497,10 +497,10 @@ void RosenRenderCustomPaint::ClearRect(const Offset& offset, const Rect& rect)
 
 void RosenRenderCustomPaint::FillText(const Offset& offset, const std::string& text, double x, double y)
 {
-    if (!UpdateParagraph(offset, text, false)) {
+    if (!UpdateParagraph(offset, text, false, HasShadow())) {
         return;
     }
-    PaintText(offset, x, y, false);
+    PaintText(offset, x, y, false, HasShadow());
 }
 
 void RosenRenderCustomPaint::StrokeText(const Offset& offset, const std::string& text, double x, double y)
@@ -509,7 +509,7 @@ void RosenRenderCustomPaint::StrokeText(const Offset& offset, const std::string&
         if (!UpdateParagraph(offset, text, true, true)) {
             return;
         }
-        PaintText(offset, x, y, true);
+        PaintText(offset, x, y, true, true);
     }
 
     if (!UpdateParagraph(offset, text, true)) {
