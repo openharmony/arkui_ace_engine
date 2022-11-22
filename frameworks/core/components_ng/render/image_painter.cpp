@@ -99,7 +99,7 @@ void ImagePainter::DrawImage(
         DrawSVGImage(canvas, offset, contentSize, imagePaintConfig);
         return;
     }
-    if (imagePaintConfig.imageRepeat_ == ImageRepeat::NOREPEAT) {
+    if (imagePaintConfig.imageRepeat_ == ImageRepeat::NO_REPEAT) {
         DrawStaticImage(canvas, offset, imagePaintConfig);
         return;
     }
@@ -178,7 +178,7 @@ void ImagePainter::FlipHorizontal(RSCanvas& canvas, double horizontalOffset, dou
 void ImagePainter::DrawImageWithRepeat(
     RSCanvas& canvas, const ImagePaintConfig& imagePaintConfig, const RectF& contentRect) const
 {
-    if (imagePaintConfig.imageRepeat_ == ImageRepeat::NOREPEAT) {
+    if (imagePaintConfig.imageRepeat_ == ImageRepeat::NO_REPEAT) {
         return;
     }
     auto offset = contentRect.GetOffset();
@@ -187,9 +187,9 @@ void ImagePainter::DrawImageWithRepeat(
     float singleImageWidth = imagePaintConfig.dstRect_.Width();
     float singleImageHeight = imagePaintConfig.dstRect_.Height();
     bool imageRepeatX =
-        imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT || imagePaintConfig.imageRepeat_ == ImageRepeat::REPEATX;
+        imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT || imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT_X;
     bool imageRepeatY =
-        imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT || imagePaintConfig.imageRepeat_ == ImageRepeat::REPEATY;
+        imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT || imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT_Y;
     std::vector<uint32_t> dirRepeatNum = {
         static_cast<uint32_t>(ceil(imagePaintConfig.dstRect_.GetY() / singleImageHeight)),
         static_cast<uint32_t>((ceil((contentHeight - imagePaintConfig.dstRect_.GetY()) / singleImageHeight))) - 1,
