@@ -51,7 +51,9 @@ void RenderWeb::OnAttachContext()
         drawSize_ = Size(pipelineContext->GetRootWidth(), pipelineContext->GetRootHeight());
         drawSizeCache_ = drawSize_;
         position_ = Offset(0, 0);
+        delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
 #ifndef OHOS_STANDARD_SYSTEM
+        delegate_->SetDrawSize(drawSize_);
         delegate_->CreatePlatformResource(drawSize_, position_, context_);
 #endif
     }
@@ -313,6 +315,7 @@ void RenderWeb::OnAppHide()
 
 void RenderWeb::OnGlobalPositionChanged()
 {
+    UpdateGlobalPos();
     if (!textOverlay_ || !updateHandlePosition_) {
         return;
     }
@@ -324,7 +327,23 @@ void RenderWeb::OnPositionChanged()
     PopTextOverlay();
 }
 
-void RenderWeb::OnSizeChanged() {}
+void RenderWeb::OnSizeChanged()
+{
+    if (drawSize_.IsWidthInfinite() || drawSize_.IsHeightInfinite() ||
+        drawSize_.Width() == 0 || drawSize_.Height() == 0) {
+        LOGE("size is invalid");
+        return;
+    }
+    UpdateGlobalPos();
+    if (!isUrlLoaded_) {
+        delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+        if (!delegate_->LoadDataWithRichText()) {
+            LOGI("RenderWeb::Paint start LoadUrl");
+            delegate_->LoadUrl();
+        }
+        isUrlLoaded_ = true;
+    }
+}
 
 void RenderWeb::Initialize()
 {
@@ -1138,6 +1157,14 @@ void RenderWeb::PanOnActionCancel()
         hasDragItem_ = false;
     }
     SetPreDragDropNode(nullptr);
+}
+
+void RenderWeb::UpdateGlobalPos()
+{
+    auto position = GetGlobalOffset();
+    if (delegate_) {
+        delegate_->SetWebRendeGlobalPos(position);
+    }
 }
 #endif
 } // namespace OHOS::Ace
