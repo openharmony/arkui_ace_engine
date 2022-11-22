@@ -104,6 +104,38 @@ void SwiperPattern::OnModifyDone()
     if (focusHub) {
         InitOnKeyEvent(focusHub);
     }
+    auto removeSwiperEventCallback = [weak = WeakClaim(this)]() {
+        auto swiperPattern = weak.Upgrade();
+        CHECK_NULL_VOID(swiperPattern);
+        auto host = swiperPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto hub = host->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(hub);
+        auto gestureHub = hub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->RemoveTouchEvent(swiperPattern->touchEvent_);
+        if (!swiperPattern->IsDisableSwipe()) {
+            gestureHub->RemovePanEvent(swiperPattern->panEvent_);
+        }
+    };
+    swiperController_->SetRemoveSwiperEventCallback(std::move(removeSwiperEventCallback));
+
+    auto addSwiperEventCallback = [weak = WeakClaim(this)]() {
+        auto swiperPattern = weak.Upgrade();
+        CHECK_NULL_VOID(swiperPattern);
+        auto host = swiperPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto hub = host->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(hub);
+        auto gestureHub = hub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->AddTouchEvent(swiperPattern->touchEvent_);
+        if (!swiperPattern->IsDisableSwipe()) {
+            gestureHub->AddPanEvent(
+                swiperPattern->panEvent_, swiperPattern->panDirection_, 1, swiperPattern->distance_);
+        }
+    };
+    swiperController_->SetAddSwiperEventCallback(std::move(addSwiperEventCallback));
 }
 
 bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -411,27 +443,26 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         }
     };
 
-    PanDirection panDirection;
     if (GetDirection() == Axis::VERTICAL) {
-        panDirection.type = PanDirection::VERTICAL;
+        panDirection_.type = PanDirection::VERTICAL;
     } else {
-        panDirection.type = PanDirection::HORIZONTAL;
+        panDirection_.type = PanDirection::HORIZONTAL;
     }
     if (panEvent_) {
         gestureHub->RemovePanEvent(panEvent_);
     }
 
-    float distance = DEFAULT_PAN_DISTANCE;
+    distance_ = DEFAULT_PAN_DISTANCE;
     auto host = GetHost();
     if (host) {
         auto context = host->GetContext();
         if (context) {
-            distance = static_cast<float>(context->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP)));
+            distance_ = static_cast<float>(context->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP)));
         }
     }
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
+    gestureHub->AddPanEvent(panEvent_, panDirection_, 1, distance_);
 }
 
 void SwiperPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -579,10 +610,6 @@ void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void SwiperPattern::HandleTouchDown()
 {
-    const auto& tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
-    if (tabBarFinishCallback) {
-        tabBarFinishCallback();
-    }
     // Stop translate animation when touch down.
     if (controller_ && controller_->IsRunning()) {
         controller_->Pause();
@@ -616,6 +643,11 @@ void SwiperPattern::HandleDragStart()
     const auto& tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
     if (tabBarFinishCallback) {
         tabBarFinishCallback();
+    }
+
+    const auto& removeEventCallback = swiperController_->GetRemoveTabBarEventCallback();
+    if (removeEventCallback) {
+        removeEventCallback();
     }
 #ifdef OHOS_PLATFORM
     // Increase the cpu frequency when sliding.
@@ -658,6 +690,10 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 
 void SwiperPattern::HandleDragEnd(double dragVelocity)
 {
+    const auto& addEventCallback = swiperController_->GetAddTabBarEventCallback();
+    if (addEventCallback) {
+        addEventCallback();
+    }
     LOGD("Drag end velocity: %{public}lf, currentOffset: %{public}lf", dragVelocity, currentOffset_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
