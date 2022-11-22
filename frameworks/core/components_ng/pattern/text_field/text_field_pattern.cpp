@@ -144,7 +144,7 @@ float TextFieldPattern::GetTextOrPlaceHolderFontSize()
     } else {
         fontSize = textFieldTheme ? textFieldTheme->GetFontSize() : DEFAULT_FONT;
     }
-    return static_cast<float>(fontSize.ConvertToPx());
+    return std::min(static_cast<float>(fontSize.ConvertToPx()), contentRect_.Height());
 }
 
 TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS) {}
@@ -1066,7 +1066,7 @@ void TextFieldPattern::OnModifyDone()
     }
     obscureTickCountDown_ = OBSCURE_SHOW_TICKS;
     caretHeight_ = GetTextOrPlaceHolderFontSize() + static_cast<float>(CURSOR_PADDING.ConvertToPx()) * 2.0f;
-    utilPadding_ = layoutProperty->CreatePaddingAndBorderWithDefault(basicPaddingLeft_, 0.0f, 0.0f, 0.0f);
+    ProcessPadding();
     if (layoutProperty->GetTypeChangedValue(false)) {
         ClearEditingValue();
         layoutProperty->ResetTypeChanged();
@@ -1074,6 +1074,21 @@ void TextFieldPattern::OnModifyDone()
         redoOperationRecords_.clear();
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void TextFieldPattern::ProcessPadding()
+{
+    auto pipeline = GetHost()->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto themePadding = textFieldTheme->GetPadding();
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    utilPadding_ = layoutProperty->CreatePaddingAndBorderWithDefault(
+        themePadding.Left().ConvertToPx(), themePadding.Top().ConvertToPx(), 0.0f, 0.0f);
 }
 
 void TextFieldPattern::InitEditingValueText(std::string content)
