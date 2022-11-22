@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "base/geometry/axis.h"
+#include "base/geometry/matrix4.h"
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
@@ -639,6 +640,39 @@ public:
         return clipFlag_;
     }
 
+    void SetTransformToChild(Matrix4 matrix4)
+    {
+        for (auto& child : children_) {
+            child->SetTransformToChild(matrix4);
+        }
+        matrix4_ = matrix4;
+    }
+
+    Matrix4 GetMatrix4()
+    {
+        return matrix4_;
+    }
+
+    Rect GetRectWithTransform(const Rect& rect, Matrix4& matrix4)
+    {
+        Point ltPoint = matrix4 * Point(rect.Left(), rect.Top());
+        Point rtPoint = matrix4 * Point(rect.Right(), rect.Top());
+        Point lbPoint = matrix4 * Point(rect.Left(), rect.Bottom());
+        Point rbPoint = matrix4 * Point(rect.Right(), rect.Bottom());
+        auto left = std::min(std::min(ltPoint.GetX(), rtPoint.GetX()), std::min(lbPoint.GetX(), rbPoint.GetX()));
+        auto right = std::max(std::max(ltPoint.GetX(), rtPoint.GetX()), std::max(lbPoint.GetX(), rbPoint.GetX()));
+        auto top = std::min(std::min(ltPoint.GetY(), rtPoint.GetY()), std::min(lbPoint.GetY(), rbPoint.GetY()));
+        auto bottom = std::max(std::max(ltPoint.GetY(), rtPoint.GetY()), std::max(lbPoint.GetY(), rbPoint.GetY()));
+        return Rect(left, top, right - left, bottom - top);
+    }
+
+    bool GetMatrix4Flag()
+    {
+        if (matrix4_ == Matrix4()) {
+            return false;
+        }
+        return true;
+    }
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     // used for inspector node in PC preview
     bool GetClearRectInfoFlag() const
@@ -859,6 +893,7 @@ private:
     std::vector<std::pair<std::string, std::string>> attrs_;
     std::vector<std::pair<std::string, std::string>> styles_;
     bool clipFlag_ = false;
+    Matrix4 matrix4_;
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     // used for inspector node in PC preview
     bool isClearRectInfo_ = false;
