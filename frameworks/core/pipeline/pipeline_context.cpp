@@ -2178,10 +2178,15 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
             textFieldManager_->MovePage(GetLastPage()->GetPageId(), { newRootWidth, newRootHeight }, offsetHeight);
         }
     }
-    auto frontend = weakFrontend_.Upgrade();
-    if (frontend) {
-        frontend->OnSurfaceChanged(width, height);
-    }
+
+    taskExecutor_->PostTask([weakFrontend = weakFrontend_, width, height](){
+        auto frontend = weakFrontend.Upgrade();
+        if (frontend) {
+            frontend->OnSurfaceChanged(width, height);
+        }
+    },
+    TaskExecutor::TaskType::JS);
+
 
     // init transition clip size when surface changed.
     const auto& pageElement = GetLastPage();
