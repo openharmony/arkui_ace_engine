@@ -122,9 +122,7 @@ RefPtr<ImageEncodedInfo> ImageEncodedInfo::CreateImageEncodedInfoForStaticImage(
     auto skiaImageData = DynamicCast<SkiaImageData>(data);
     CHECK_NULL_RETURN(skiaImageData, nullptr);
     auto codec = SkCodec::MakeFromData(skiaImageData->GetSkData());
-    if (!codec) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(codec, nullptr);
     int32_t totalFrames = 1;
     SizeF imageSize;
     totalFrames = codec->getFrameCount();
@@ -161,9 +159,7 @@ RefPtr<CanvasImage> ImageProvider::QueryCanvasImageFromCache(
     auto key = GenerateCacheKey(obj->GetSourceInfo(), resizeTarget);
     auto cacheImage =
         pipelineCtx->GetImageCache()->GetCacheImage(key);
-    if (!cacheImage) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(cacheImage, nullptr);
 #ifdef NG_BUILD
     canvasImage = cacheImage->imagePtr;
 #else
@@ -362,11 +358,10 @@ void ImageProvider::CacheCanvasImageToImageCache(const RefPtr<CanvasImage>& canv
     pipelineCtx->GetImageCache()->CacheImage(key, std::make_shared<CachedImage>(canvasImage));
 #else
     auto skiaCanvasImage = AceType::DynamicCast<SkiaCanvasImage>(canvasImage);
-    if (skiaCanvasImage) {
-        LOGD("[ImageCache][CanvasImage] succeed caching image: %{public}s", key.c_str());
-        pipelineCtx->GetImageCache()->CacheImage(
-            key, std::make_shared<CachedImage>(skiaCanvasImage->GetFlutterCanvasImage()));
-    }
+    CHECK_NULL_VOID(skiaCanvasImage);
+    LOGD("[ImageCache][CanvasImage] succeed caching image: %{public}s", key.c_str());
+    pipelineCtx->GetImageCache()->CacheImage(
+        key, std::make_shared<CachedImage>(skiaCanvasImage->GetFlutterCanvasImage()));
 #endif
 }
 
