@@ -21,6 +21,7 @@
 
 #define private public
 #define protected public
+#include "core/components/theme/theme_manager_impl.h"
 #include "frameworks/bridge/card_frontend/card_frontend.h"
 
 namespace OHOS::Ace::Framework {
@@ -54,7 +55,7 @@ void CardTestFactory::ParseCardDslWithParams(
         auto platformWindow = std::make_unique<MockPlatformWindow>();
         auto window = std::make_unique<Window>(std::move(platformWindow));
         context_ = AceType::MakeRefPtr<PipelineContext>(std::move(window), nullptr, nullptr, nullptr, frontend, 0);
-        context_->SetThemeManager(AceType::MakeRefPtr<ThemeManager>());
+        context_->SetThemeManager(AceType::MakeRefPtr<ThemeManagerImpl>());
     }
     cardFrontend.Initialize(FrontendType::JS_CARD, nullptr);
     cardFrontend.ParsePage(context_, content, params, page);

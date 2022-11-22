@@ -61,7 +61,26 @@ void SwitchPaintMethod::PaintContent(
     auto yOffset = contentOffset.GetY();
 
     auto borderWidth_ = static_cast<float>(switchTheme->GetBorderWidth().Value());
-    auto hoverRadius_ = radius - radiusGap_;
+    pointRadius_ = radius - radiusGap_;
+
+    clickEffectColor_ = switchTheme->GetClickEffectColor();
+    hoverColor_ = switchTheme->GetHoverColor();
+    hoverRadius_ = switchTheme->GetHoverRadius();
+    defaltWidth_ = switchTheme->GetDefaultWidth().ConvertToPx();
+    defaultHeight_ = switchTheme->GetDefaultHeight().ConvertToPx();
+
+    if (isTouch_) {
+        OffsetF touchBoardOffset;
+        touchBoardOffset.SetX(contentOffset.GetX() - (defaltWidth_ - width) / 2.0);
+        touchBoardOffset.SetY(contentOffset.GetY() - (defaultHeight_ - height) / 2.0);
+        DrawTouchBoard(canvas, touchBoardOffset);
+    }
+    if (isHover_) {
+        OffsetF hoverBoardOffset;
+        hoverBoardOffset.SetX(contentOffset.GetX() - (defaltWidth_ - width) / 2.0);
+        hoverBoardOffset.SetY(contentOffset.GetY() - (defaultHeight_ - height) / 2.0);
+        DrawHoverBoard(canvas, hoverBoardOffset);
+    }
 
     RSBrush brush;
     auto inactiveColor = switchTheme->GetInactiveColor();
@@ -71,6 +90,7 @@ void SwitchPaintMethod::PaintContent(
         brush.SetColor(ToRSColor(inactiveColor));
     }
     brush.SetBlendMode(RSBlendMode::SRC_OVER);
+    brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
 
     rosen::Rect rect;
@@ -88,6 +108,7 @@ void SwitchPaintMethod::PaintContent(
         } else {
             brush.SetColor(ToRSColor(selectedColor));
         }
+        brush.SetAntiAlias(true);
         canvas.AttachBrush(brush);
         rosen::Rect rectCover;
         rectCover.SetLeft(xOffset);
@@ -98,11 +119,39 @@ void SwitchPaintMethod::PaintContent(
         canvas.DrawRoundRect(roundRectCover);
     }
     brush.SetColor(ToRSColor(paintProperty->GetSwitchPointColor().value_or(switchTheme->GetPointColor())));
+    brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
+
     rosen::Point point;
-    point.SetX(xOffset + borderWidth_ + hoverRadius_ + mainDelta_);
+    point.SetX(xOffset + borderWidth_ + pointRadius_ + mainDelta_);
     point.SetY(yOffset + radius);
-    canvas.DrawCircle(point, hoverRadius_);
+    canvas.DrawCircle(point, pointRadius_);
+}
+
+void SwitchPaintMethod::DrawTouchBoard(RSCanvas& canvas, const OffsetF& offset) const
+{
+    RSBrush brush;
+    brush.SetColor(ToRSColor(Color(clickEffectColor_)));
+    brush.SetAntiAlias(true);
+    auto rightBottomX = offset.GetX() + defaltWidth_;
+    auto rightBottomY = offset.GetY() + defaultHeight_;
+    auto rrect = RSRoundRect({ offset.GetX(), offset.GetY(), rightBottomX, rightBottomY }, hoverRadius_.ConvertToPx(),
+        hoverRadius_.ConvertToPx());
+    canvas.AttachBrush(brush);
+    canvas.DrawRoundRect(rrect);
+}
+
+void SwitchPaintMethod::DrawHoverBoard(RSCanvas& canvas, const OffsetF& offset) const
+{
+    RSBrush brush;
+    brush.SetColor(ToRSColor(Color(hoverColor_)));
+    brush.SetAntiAlias(true);
+    auto rightBottomX = offset.GetX() + defaltWidth_;
+    auto rightBottomY = offset.GetY() + defaultHeight_;
+    auto rrect = RSRoundRect({ offset.GetX(), offset.GetY(), rightBottomX, rightBottomY }, hoverRadius_.ConvertToPx(),
+        hoverRadius_.ConvertToPx());
+    canvas.AttachBrush(brush);
+    canvas.DrawRoundRect(rrect);
 }
 
 } // namespace OHOS::Ace::NG

@@ -13,7 +13,13 @@
  * limitations under the License.
  */
 
+#include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS ::Ace {
 class Window : public AceType {
@@ -84,6 +90,8 @@ void PipelineContext::WindowFocus(bool isFocus) {}
 
 void PipelineContext::ShowContainerTitle(bool isShow) {}
 
+void PipelineContext::SetContainerWindow(bool isShow) {}
+
 void PipelineContext::SetAppBgColor(const Color& color) {}
 
 void PipelineContext::SetAppTitle(const std::string& title) {}
@@ -112,6 +120,8 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight) {}
 
+void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
+
 const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
 {
     if (selectOverlayManager_) {
@@ -130,6 +140,15 @@ const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
     selectOverlayInfo.secondHandle = secondHandleInfo;
     selectOverlayManager_->CreateAndShowSelectOverlay(selectOverlayInfo);
     return selectOverlayManager_;
+}
+
+const RefPtr<DragDropManager>& PipelineContext::GetDragDropManager()
+{
+    if (dragDropManager_) {
+        return dragDropManager_;
+    }
+    dragDropManager_ = AceType::MakeRefPtr<DragDropManager>();
+    return dragDropManager_;
 }
 
 uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
@@ -165,4 +184,12 @@ UITaskScheduler::~UITaskScheduler() = default;
 void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty) {}
 
 void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty) {}
+
+const RefPtr<StageManager>& PipelineContext::GetStageManager()
+{
+    auto stageNode = MakeRefPtr<FrameNode>(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
+    stageManager_ = MakeRefPtr<StageManager>(stageNode);
+    return stageManager_;
+}
 } // namespace OHOS::Ace::NG

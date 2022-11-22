@@ -107,6 +107,8 @@ public:
 
     void SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty);
 
+    void TriggerVisibleAreaChangeCallback(std::list<VisibleCallbackInfo>& callbackInfoList);
+
     const RefPtr<GeometryNode>& GetGeometryNode() const
     {
         return geometryNode_;
@@ -253,6 +255,10 @@ public:
 
     OffsetF GetOffsetRelativeToWindow() const;
 
+    OffsetF GetPaintRectOffset() const;
+
+    void AdjustGridOffset();
+
     void SetActive(bool active) override;
 
     bool IsActive() const
@@ -305,6 +311,11 @@ private:
     std::vector<RectF> GetResponseRegionList(const RectF& rect);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
+    void ProcessAllVisibleCallback(std::list<VisibleCallbackInfo>& callbackInfoList, double currentVisibleRatio);
+    void OnVisibleAreaChangeCallback(
+        VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio);
+    double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
+
     struct ZIndexComparator {
         bool operator()(const RefPtr<FrameNode>& left, const RefPtr<FrameNode>& right) const
         {
@@ -334,6 +345,8 @@ private:
 
     bool isActive_ = false;
     bool isResponseRegion_ = false;
+
+    double lastVisibleRatio_ = 0.0;
 
     // internal node such as Text in Button CreateWithLabel
     // should not seen by preview inspector or accessibility

@@ -101,7 +101,7 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     selfSize_ = layoutWrapper->GetGeometryNode()->GetFrameSize(); // bubble's size
     auto child = children.front();
     childSize_ = child->GetGeometryNode()->GetMarginFrameSize(); // bubble's child's size
-    childOffset_ = GetChildPosition(childSize_, bubbleProp);     // bubble's child's offset
+    childOffset_ = GetChildPosition(childSize_, bubbleProp); // bubble's child's offset
     bool useCustom = bubbleProp->GetUseCustom().value_or(false);
     if (useCustom) { // use custom popupOption
         UpdateCustomChildPosition(bubbleProp);
@@ -428,14 +428,7 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(const RefPtr<BubbleLayoutP
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
     auto context = targetNode->GetRenderContext();
     CHECK_NULL_VOID(context);
-    if (context->HasPosition()) {
-        OffsetT<Dimension> positionValue = context->GetPosition().value();
-        auto positionX = positionValue.GetX();
-        auto positionY = positionValue.GetY();
-        targetOffset_ = OffsetF(positionX.ConvertToPx(), positionY.ConvertToPx());
-    } else {
-        targetOffset_ = targetNode->GetOffsetRelativeToWindow();
-    }
+    targetOffset_ = targetNode->GetPaintRectOffset();
     // Show in SubWindow
     if (showInSubWindow) {
         auto pipelineContext = PipelineContext::GetCurrentContext();

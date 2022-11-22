@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
 
+#include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/image_provider/adapter/flutter_image_provider.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -58,13 +59,16 @@ RefPtr<CanvasImage> CanvasImage::Create(
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> skImage;
     if (!flutterRenderTaskHolder->ioManager) {
-        skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        skImage =
+            SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     } else {
 #ifndef GPU_DISABLED
         skImage = SkImage::MakeCrossContextFromPixmap(flutterRenderTaskHolder->ioManager->GetResourceContext().get(),
             imagePixmap, true, imagePixmap.colorSpace(), true);
 #else
-        skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        // SkImage needs to hold PixelMap shared_ptr
+        skImage =
+            SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
 #endif
     }
     auto canvasImage = flutter::CanvasImage::Create();
@@ -181,16 +185,13 @@ void SkiaCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, co
         (int)(imagePaintConfig_->imageFit_),
         (int)(imagePaintConfig_->imageRepeat_),
         radii,
-        1.0
+        1.0,
+        GetUniqueID(),
+        GetCompressWidth(),
+        GetCompressHeight()
     );
-    int w = GetCompressWidth();
-    int h = GetCompressHeight();
     auto data = GetCompressData();
-    recordingCanvas->DrawImageWithParm(image, std::move(data), w, h, rsImageInfo, paint);
-    if (data) {
-        // should only clear image after sending draw command.
-        ReplaceSkImage({ nullptr, nullptr });
-    }
+    recordingCanvas->DrawImageWithParm(image, std::move(data), rsImageInfo, paint);
 #else
     canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
 #endif

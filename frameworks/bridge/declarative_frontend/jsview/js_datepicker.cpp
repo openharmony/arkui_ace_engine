@@ -364,9 +364,15 @@ void JSDatePicker::CreateDatePicker(const JSRef<JSObject>& paramObj)
     }
     if (Container::IsCurrentUseNewPipeline()) {
         NG::DatePickerView::CreateDatePicker();
-        NG::DatePickerView::SetStartDate(parseStartDate);
-        NG::DatePickerView::SetEndDate(parseEndDate);
-        NG::DatePickerView::SetSelectedDate(parseSelectedDate);
+        if (startDate->IsObject()) {
+            NG::DatePickerView::SetStartDate(parseStartDate);
+        }
+        if (endDate->IsObject()) {
+            NG::DatePickerView::SetEndDate(parseEndDate);
+        }
+        if (selectedDate->IsObject()) {
+            NG::DatePickerView::SetSelectedDate(parseSelectedDate);
+        }
         return;
     }
 
@@ -513,7 +519,7 @@ void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
     ButtonInfo buttonInfo;
     DialogProperties properties;
     properties.alignment = DialogAlignment::CENTER;
-    properties.useCustom = true;
+    properties.customStyle = true;
 
     std::map<std::string, PickerDate> datePickerProperty;
     if (startDate->IsObject()) {
@@ -791,7 +797,7 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
     ButtonInfo buttonInfo;
     DialogProperties properties;
     properties.alignment = DialogAlignment::CENTER;
-    properties.useCustom = true;
+    properties.customStyle = true;
 
     std::map<std::string, PickerTime> timePickerProperty;
     if (selectedTime->IsObject()) {

@@ -21,13 +21,13 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-
 constexpr double IMAGE_COMPONENTSIZE_WIDTH = 400.0;
 constexpr double IMAGE_COMPONENTSIZE_HEIGHT = 500.0;
 constexpr double IMAGE_COMPONENT_MAXSIZE_WIDTH = 600.0;
@@ -42,21 +42,23 @@ constexpr Dimension ALT_SOURCEINFO_WIDTH = Dimension(ALT_SOURCESIZE_WIDTH);
 constexpr Dimension ALT_SOURCEINFO_HEIGHT = Dimension(ALT_SOURCESIZE_HEIGHT);
 const std::string IMAGE_SRC_URL = "common/srcexample.jpg";
 const std::string ALT_SRC_URL = "common/altexample.jpg";
-
 } // namespace
 
 class ImageLayoutAlgorithmTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
 };
 
-void ImageLayoutAlgorithmTest::SetUpTestCase() {}
-void ImageLayoutAlgorithmTest::TearDownTestCase() {}
-void ImageLayoutAlgorithmTest::SetUp() {}
-void ImageLayoutAlgorithmTest::TearDown() {}
+void ImageLayoutAlgorithmTest::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void ImageLayoutAlgorithmTest::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 /**
  * @tc.name: ImageLayout001
@@ -109,13 +111,14 @@ HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout001, TestSize.Level1)
 
 /**
  * @tc.name: ImageLayout002
- * @tc.desc: Verify that ImageComponent which has no SelfSize can resize with ImageSize, whether there is an Alt or not.
+ * @tc.desc: Verify that Image which has no SelfSize can resize with ContainerSize.
  * @tc.type: FUNC
  */
 HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout002, TestSize.Level1)
 {
     auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
     EXPECT_TRUE(imageLayoutProperty != nullptr);
+    imageLayoutProperty->UpdateFitOriginalSize(true);
     LayoutWrapper layoutWrapper(nullptr, nullptr, imageLayoutProperty);
     auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
@@ -128,7 +131,7 @@ HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout002, TestSize.Level1)
     LayoutConstraintF layoutConstraintSize;
     /**
     //     corresponding ets code:
-    //         Image(IMAGE_SRC_URL)
+    //         Image(IMAGE_SRC_URL).fitOriginalSize(true)
     */
     auto imageLayoutAlgorithm1 = AceType::MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx, nullptr);
     EXPECT_TRUE(imageLayoutAlgorithm1 != nullptr);
@@ -137,7 +140,7 @@ HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout002, TestSize.Level1)
     EXPECT_EQ(size1.value(), SizeF(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
     /**
     //     corresponding ets code:
-    //         Image(IMAGE_SRC_URL).Alt(ALT_SRC_URL)
+    //         Image(IMAGE_SRC_URL).Alt(ALT_SRC_URL).fitOriginalSize(true)
     */
     auto imageLayoutAlgorithm2 = AceType::MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx, altloadingCtx);
     EXPECT_TRUE(imageLayoutAlgorithm2 != nullptr);
@@ -154,6 +157,8 @@ HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout002, TestSize.Level1)
 HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout003, TestSize.Level1)
 {
     auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
+    EXPECT_TRUE(imageLayoutProperty != nullptr);
+    imageLayoutProperty->UpdateFitOriginalSize(true);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_TRUE(geometryNode != nullptr);
     LayoutWrapper layoutWrapper(nullptr, geometryNode, imageLayoutProperty);
@@ -165,7 +170,7 @@ HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout003, TestSize.Level1)
     EXPECT_TRUE(imageLayoutAlgorithm != nullptr);
     /**
     //     corresponding ets code:
-    //         Image().Alt(ALT_SRC_URL)
+    //         Image().Alt(ALT_SRC_URL).fitOriginalSize(true)
     */
     LayoutConstraintF layoutConstraintSize;
     auto size = imageLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
@@ -510,40 +515,43 @@ HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout009, TestSize.Level1)
 /**
  * @tc.name: ImageLayout010
  * @tc.desc: Verify that ImageComponent which has no SelfSize can resize with ImageSize, whether fitOriginalSize is set
- *           true or default. FitOriginalSize is true by default.
+ *           default. FitOriginalSize is false by default.
  * @tc.type: FUNC
  */
 HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout010, TestSize.Level1)
 {
     auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
     EXPECT_TRUE(imageLayoutProperty != nullptr);
-    LayoutWrapper layoutWrapper(nullptr, nullptr, imageLayoutProperty);
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.maxSize.SetWidth(IMAGE_COMPONENT_MAXSIZE_WIDTH);
+    layoutConstraintSize.maxSize.SetHeight(IMAGE_COMPONENT_MAXSIZE_HEIGHT);
+    imageLayoutProperty->UpdateLayoutConstraint(layoutConstraintSize);
     auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
         LoadNotifier(nullptr, nullptr, nullptr));
     EXPECT_TRUE(loadingCtx != nullptr);
-    LayoutConstraintF layoutConstraintSize;
+    LayoutWrapper layoutWrapper1(nullptr, nullptr, imageLayoutProperty);
     /**
     //     corresponding ets code:
     //         Image(IMAGE_SRC_URL)
     */
     auto imageLayoutAlgorithm1 = AceType::MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx, nullptr);
     EXPECT_TRUE(imageLayoutAlgorithm1 != nullptr);
-    auto size1 = imageLayoutAlgorithm1->MeasureContent(layoutConstraintSize, &layoutWrapper);
+    auto size1 = imageLayoutAlgorithm1->MeasureContent(layoutConstraintSize, &layoutWrapper1);
     EXPECT_TRUE(size1 != std::nullopt);
-    EXPECT_EQ(size1.value(), SizeF(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(size1.value(), SizeF(IMAGE_COMPONENT_MAXSIZE_WIDTH, IMAGE_COMPONENT_MAXSIZE_HEIGHT));
 
-    imageLayoutProperty->UpdateFitOriginalSize(true);
+    imageLayoutProperty->UpdateFitOriginalSize(false);
     LayoutWrapper layoutWrapper2(nullptr, nullptr, imageLayoutProperty);
     /**
     //     corresponding ets code:
-    //         Image(IMAGE_SRC_URL).fitOriginalSize(true)
+    //         Image(IMAGE_SRC_URL).fitOriginalSize(false)
     */
     auto imageLayoutAlgorithm2 = AceType::MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx, nullptr);
     EXPECT_TRUE(imageLayoutAlgorithm2 != nullptr);
     auto size2 = imageLayoutAlgorithm2->MeasureContent(layoutConstraintSize, &layoutWrapper2);
     EXPECT_TRUE(size2 != std::nullopt);
-    EXPECT_EQ(size2.value(), SizeF(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(size2.value(), SizeF(IMAGE_COMPONENT_MAXSIZE_WIDTH, IMAGE_COMPONENT_MAXSIZE_HEIGHT));
 }
 
 /**
@@ -568,5 +576,4 @@ HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout011, TestSize.Level1)
     auto size = imageLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
     EXPECT_FALSE(size == std::nullopt);
 }
-
 } // namespace OHOS::Ace::NG

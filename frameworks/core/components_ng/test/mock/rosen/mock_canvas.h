@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "testing_canvas.h"
+#include "testing_path.h"
 
 namespace OHOS::Ace::Testing {
 class MockCanvas : public TestingCanvas {
@@ -27,7 +28,15 @@ public:
     ~MockCanvas() = default;
 
     MOCK_METHOD2(DrawLine, void(const Point& startPt, const Point& endPt));
+    MOCK_METHOD1(DrawPath, void(const TestingPath& path));
+    MOCK_METHOD3(Rotate, void(scalar deg, scalar sx, scalar sy));
     MOCK_METHOD1(AttachPen, TestingCanvas&(const TestingPen& pen));
+    MOCK_METHOD1(AttachBrush, TestingCanvas&(const TestingBrush& brhsu));
+    MOCK_METHOD0(DetachPen, TestingCanvas&());
+    MOCK_METHOD0(DetachBrush, TestingCanvas&());
+    MOCK_METHOD0(Save, void());
+    MOCK_METHOD0(Restore, void());
+    MOCK_METHOD2(DrawCircle, void(const Point& centerPt, scalar radius));
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_CANVAS_H

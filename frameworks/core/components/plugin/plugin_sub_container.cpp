@@ -20,6 +20,7 @@
 #include "core/common/container_scope.h"
 #include "core/common/plugin_manager.h"
 #include "core/components/plugin/file_asset_provider.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/pattern/plugin/plugin_layout_property.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
@@ -268,7 +269,7 @@ void PluginSubContainer::SetPluginComponentTheme(
         pluginResourceInfo.SetPackagePath(path.substr(0, position + 1));
     }
     pluginResourceInfo.SetResourceConfiguration(resConfig);
-    pipelineContext_->SetThemeManager(AceType::MakeRefPtr<ThemeManager>());
+    pipelineContext_->SetThemeManager(AceType::MakeRefPtr<ThemeManagerImpl>());
     auto pluginThemeManager = pipelineContext_->GetThemeManager();
     if (pluginThemeManager) {
         // Init resource, load theme map, do not parse yet.

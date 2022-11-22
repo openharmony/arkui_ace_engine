@@ -60,4 +60,4 @@ HWTEST_F(InspectFormTest, InspectFormTest002, TestSize.Level1)
     EXPECT_EQ(inspectForm.attrs_.size(), attrsSize);
     EXPECT_EQ(inspectForm.styles_.size(), stylesSize);
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::Framework

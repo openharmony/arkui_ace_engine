@@ -213,6 +213,11 @@ public:
     // get XTS inspector value
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 
+    void MarkModifyDone();
+
+protected:
+    virtual void OnModifyDone() {}
+
 private:
     WeakPtr<FrameNode> host_;
     RefPtr<GestureEventHub> gestureEventHub_;

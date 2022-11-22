@@ -18,6 +18,7 @@
 
 #include "gtest/gtest.h"
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -41,7 +42,8 @@ namespace {
 const int START_INDEX = 0;
 const int THREE_ITEM_SIZE = 3;
 const int FOUR_ITEM_SIZE = 4;
-const int DISPLAYPRIORITY_TWO = 2; 
+const int DISPLAYPRIORITY_TWO = 2;
+const float HALF = 0.5f;
 
 const float RK356_WIDTH = 720.0f;
 const float RK356_HEIGHT = 1136.0f;
@@ -80,7 +82,8 @@ const OffsetF OFFSET_BOTTOM_MIDDLE = OffsetF(RK356_WIDTH / 2.0f, RK356_HEIGHT);
 const OffsetF OFFSET_BOTTOM_RIGHT = OffsetF(RK356_WIDTH, RK356_HEIGHT);
 
 const float NOPADDING = 0.0f;
-
+const float PADDING_FIVE = 5.0f;
+const float DOUBLE = 2.0f;
 } // namespace
 
 class FlexLayoutTestNg : public testing::Test {
@@ -3314,11 +3317,186 @@ HWTEST_F(FlexLayoutTestNg, FlexRowLayoutTest011, TestSize.Level1)
     rowLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
 
     EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(ZERO, ZERO));
+    EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF(ZERO, ZERO));
+    EXPECT_EQ(secondLayoutWrapper->GetGeometryNode()->GetFrameSize(), SMALL_ITEM_SIZE);
     EXPECT_EQ(
-        firstLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF(ZERO, ZERO));
+        secondLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF(ZERO, (ROW_HEIGHT - SMALL_ITEM_HEIGHT) / 2));
+}
+
+/**
+ * @tc.name: FlexRowLayoutTest012
+ * @tc.desc: Set flex has a flex child and a blank children and second child has layout weight 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexLayoutTestNg, FlexRowLayoutTest012, TestSize.Level1)
+{
+    // create root linear node
+    auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    EXPECT_FALSE(rowFrameNode == nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
+
+    auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
+    EXPECT_FALSE(rowLayoutPattern == nullptr);
+    auto rowLayoutProperty = rowLayoutPattern->GetLayoutProperty<LinearLayoutProperty>();
+    EXPECT_FALSE(rowLayoutProperty == nullptr);
+    rowLayoutProperty->UpdateFlexDirection(FlexDirection::ROW);
+    auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(rowLayoutAlgorithm == nullptr);
+    // update layout wrapper for root node
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(CONTAINER_SIZE.Width()), CalcLength(CONTAINER_SIZE.Height())));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = CONTAINER_SIZE;
+    childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
+    /* corresponding ets code:
+        Flex() {
+            Flex() {
+                Blank()
+                .width(100)
+                .height(40)
+                .layoutWeight(1)
+            }
+        }.height(80)
+        .width('100%')
+    */
+    // create node and layout wrapper for the first node
+    auto firstFrameNode =
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    firstGeometryNode->Reset();
+    auto firstLayoutProperty = firstFrameNode->GetLayoutProperty();
+    RefPtr<LayoutWrapper> firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(firstFrameNode, firstGeometryNode, firstLayoutProperty);
+    firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    auto boxLayoutAlgorithm = firstFrameNode->GetPattern<LinearLayoutPattern>()->CreateLayoutAlgorithm();
+    EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
+    firstLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+    rowFrameNode->AddChild(firstFrameNode);
+    layoutWrapper->AppendChild(firstLayoutWrapper);
+
+    // create node and layout wrapper for the second node
+    auto secondFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> secondGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    secondGeometryNode->Reset();
+    RefPtr<LayoutWrapper> secondLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(secondFrameNode, secondGeometryNode, secondFrameNode->GetLayoutProperty());
+    secondLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    secondLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
+    // update layout weight for the grandchild node
+    secondLayoutWrapper->GetLayoutProperty()->UpdateLayoutWeight(1);
+    secondLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+    firstFrameNode->AddChild(secondFrameNode);
+    firstLayoutWrapper->AppendChild(secondLayoutWrapper);
+    rowLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    rowLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+
+    EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameSize().Width(), CONTAINER_SIZE.Width());
+    EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameOffset(),
+        OffsetF(ZERO, CONTAINER_SIZE.Height() - SMALL_ITEM_HEIGHT) * HALF);
+}
+
+/**
+ * @tc.name: FlexRowLayoutTest013
+ * @tc.desc: Set two children parent has padding, first child has layout weight
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexLayoutTestNg, FlexRowLayoutTest013, TestSize.Level1)
+{
+    auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    EXPECT_FALSE(rowFrameNode == nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
+
+    auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
+    EXPECT_FALSE(rowLayoutPattern == nullptr);
+    auto rowLayoutProperty = rowLayoutPattern->GetLayoutProperty<LinearLayoutProperty>();
+    EXPECT_FALSE(rowLayoutProperty == nullptr);
+    rowLayoutProperty->UpdateFlexDirection(FlexDirection::ROW);
+    rowLayoutProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
+    auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(rowLayoutAlgorithm == nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(RK356_WIDTH), CalcLength(ROW_HEIGHT)));
+    PaddingProperty padding;
+    padding.left = CalcLength(PADDING_FIVE);
+    padding.right = CalcLength(PADDING_FIVE);
+    padding.top = CalcLength(PADDING_FIVE);
+    padding.bottom = CalcLength(PADDING_FIVE);
+    layoutWrapper->GetLayoutProperty()->UpdatePadding(padding);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = CONTAINER_SIZE;
+    childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
+    /* corresponding ets code:
+        Flex({direction: FlexDirection.Row}) {
+          Blank()
+            .layoutWeight(1)
+          Blank()
+        }.height(80)
+        .padding(5)
+        .width('100%')
+        .backgroundColor(0xAFEEEE)
+    */
+    auto firstFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    firstGeometryNode->Reset();
+    auto firstLayoutProperty = firstFrameNode->GetLayoutProperty();
+    firstLayoutProperty->UpdateLayoutWeight(1);
+    RefPtr<LayoutWrapper> firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(firstFrameNode, firstGeometryNode, firstLayoutProperty);
+    firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    firstLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(std::nullopt, CalcLength(SMALL_ITEM_HEIGHT)));
+    auto boxLayoutAlgorithm = firstFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
+    firstLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+    rowFrameNode->AddChild(firstFrameNode);
+    layoutWrapper->AppendChild(firstLayoutWrapper);
+
+    auto secondFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> secondGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    secondGeometryNode->Reset();
+    RefPtr<LayoutWrapper> secondLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(secondFrameNode, secondGeometryNode, secondFrameNode->GetLayoutProperty());
+    secondLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    secondLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
+    secondLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+    rowFrameNode->AddChild(secondFrameNode);
+    layoutWrapper->AppendChild(secondLayoutWrapper);
+    rowLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    rowLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+
+    EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameSize(),
+        SizeF(CONTAINER_SIZE.Width() - PADDING_FIVE * DOUBLE - SMALL_ITEM_WIDTH, SMALL_ITEM_HEIGHT));
+    EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF(PADDING_FIVE, PADDING_FIVE));
     EXPECT_EQ(secondLayoutWrapper->GetGeometryNode()->GetFrameSize(), SMALL_ITEM_SIZE);
     EXPECT_EQ(secondLayoutWrapper->GetGeometryNode()->GetFrameOffset(),
-        OffsetF(ZERO, (ROW_HEIGHT - SMALL_ITEM_HEIGHT) / 2));
+        OffsetF(CONTAINER_SIZE.Width() - PADDING_FIVE - SMALL_ITEM_WIDTH, PADDING_FIVE));
 }
 
 } // namespace OHOS::Ace::NG

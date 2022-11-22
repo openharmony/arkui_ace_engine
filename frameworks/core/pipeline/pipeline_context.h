@@ -810,16 +810,6 @@ public:
         return onShow_;
     }
 
-    void SetNextFrameLayoutCallback(std::function<void()>&& callback)
-    {
-        nextFrameLayoutCallback_ = std::move(callback);
-    }
-
-    void SetForegroundCalled(bool isForegroundCalled)
-    {
-        isForegroundCalled_ = isForegroundCalled;
-    }
-
     void AddRectCallback(OutOfRectGetRectCallback& getRectCallback, OutOfRectTouchCallback& touchCallback,
         OutOfRectMouseCallback& mouseCallback)
     {
@@ -835,6 +825,8 @@ public:
     {
         parentPipeline_ = pipeline;
     }
+
+    void SetContainerWindow(bool isShow) override;
 
     void SetAppTitle(const std::string& title) override;
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
@@ -879,7 +871,6 @@ private:
     void CreateTouchEventOnZoom(const AxisEvent& event);
     void HandleVisibleAreaChangeEvent();
     void FlushTouchEvents();
-    void TryCallNextFrameLayoutCallback();
 
     template<typename T>
     struct NodeCompare {
@@ -1047,7 +1038,6 @@ private:
 
     bool isSubPipeline_ = false;
     WeakPtr<PipelineBase> parentPipeline_;
-    bool isForegroundCalled_ = false;
 
     std::unordered_map<ComposeId, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
 

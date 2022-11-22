@@ -84,6 +84,11 @@ public:
         return touchRegion_;
     }
 
+    Placement GetArrowPlacement() const
+    {
+        return arrowPlacement_;
+    }
+
 private:
     enum class ErrorPositionType {
         NORMAL = 0,

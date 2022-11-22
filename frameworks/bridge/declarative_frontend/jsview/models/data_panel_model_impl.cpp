@@ -60,7 +60,7 @@ void DataPanelModelImpl::Create(const std::vector<double>& values, double max, i
     } else if (type == 0) {
         component->SetPanelType(ChartType::RAINBOW);
     }
-    RefPtr<ThemeManager> dataPanelManager = AceType::MakeRefPtr<ThemeManager>();
+    RefPtr<ThemeManager> dataPanelManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     component->InitalStyle(dataPanelManager);
     ViewStackProcessor::GetInstance()->ClaimElementId(component);
     ViewStackProcessor::GetInstance()->Push(component);

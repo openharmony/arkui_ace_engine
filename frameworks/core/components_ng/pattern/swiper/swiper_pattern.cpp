@@ -76,10 +76,12 @@ void SwiperPattern::OnModifyDone()
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
 
     InitSwiperIndicator();
     auto childrenSize = TotalCount();
-    if (CurrentIndex() >= 0) {
+    if (layoutProperty->GetIndex().has_value() && CurrentIndex() >= 0) {
         currentIndex_ = CurrentIndex();
     } else {
         LOGE("index is not valid: %{public}d, items size: %{public}d", CurrentIndex(), childrenSize);
@@ -114,6 +116,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto swiperLayoutAlgorithm = DynamicCast<SwiperLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(swiperLayoutAlgorithm, false);
     preItemRange_ = swiperLayoutAlgorithm->GetItemRange();
+    currentIndex_ = swiperLayoutAlgorithm->GetCurrentIndex();
     return GetEdgeEffect() == EdgeEffect::FADE;
 }
 
@@ -138,7 +141,7 @@ void SwiperPattern::CalculateCacheRange()
     if (loadCount >= totalCount) { // Load all items.
         startIndex_ = 0;
         endIndex_ = totalCount - 1;
-        LOGI("Load all items, range [%{public}d - %{public}d]", startIndex_, endIndex_);
+        LOGD("Load all items, range [%{public}d - %{public}d]", startIndex_, endIndex_);
         return;
     }
 
@@ -150,7 +153,7 @@ void SwiperPattern::CalculateCacheRange()
         endIndex_ = (currentIndex_ + cacheCount) % totalCount;
     }
 
-    LOGI("Cache range [%{public}d - %{public}d], totalCount: %{public}d", startIndex_, endIndex_, totalCount);
+    LOGD("Cache range [%{public}d - %{public}d], totalCount: %{public}d", startIndex_, endIndex_, totalCount);
 }
 
 void SwiperPattern::FireChangeEvent() const
@@ -164,7 +167,7 @@ void SwiperPattern::FireChangeEvent() const
 
 void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
 {
-    LOGI("Swipe to index: %{public}d without animation", index);
+    LOGD("Swipe to index: %{public}d without animation", index);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     currentIndex_ = index;
@@ -175,7 +178,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
 
 void SwiperPattern::SwipeTo(int32_t index)
 {
-    LOGI("Swipe to index: %{public}d with animation, duration: %{public}d", index, GetDuration());
+    LOGD("Swipe to index: %{public}d with animation, duration: %{public}d", index, GetDuration());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto targetIndex = std::clamp(index, 0, TotalCount() - 1);
@@ -360,7 +363,7 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     direction_ = GetDirection();
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        LOGI("Pan event start");
+        LOGD("Pan event start");
         auto pattern = weak.Upgrade();
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS) {
@@ -386,7 +389,7 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
+        LOGD("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS) {
@@ -397,7 +400,7 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
-        LOGI("Pan event cancel");
+        LOGD("Pan event cancel");
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleDragEnd(0.0);
@@ -564,6 +567,8 @@ void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
         HandleTouchDown();
     } else if (touchType == TouchType::UP) {
         HandleTouchUp();
+    } else if (touchType == TouchType::CANCEL) {
+        HandleTouchUp();
     }
 }
 
@@ -574,28 +579,35 @@ void SwiperPattern::HandleTouchDown()
         tabBarFinishCallback();
     }
     // Stop translate animation when touch down.
-    if (controller_ && !controller_->IsStopped()) {
-        // Clear stop listener before stop, otherwise the previous swipe will be considered complete.
-        controller_->ClearStopListeners();
-        controller_->Stop();
+    if (controller_ && controller_->IsRunning()) {
+        controller_->Pause();
+    }
+
+    if (springController_ && springController_->IsRunning()) {
+        springController_->Pause();
     }
 
     // Stop auto play when touch down.
     StopAutoPlay();
-
-    if (springController_ && !springController_->IsStopped()) {
-        springController_->ClearStopListeners();
-        springController_->Stop();
-    }
 }
 
 void SwiperPattern::HandleTouchUp()
 {
+    if (controller_ && !controller_->IsStopped()) {
+        controller_->Play();
+    }
+
+    if (springController_ && !springController_->IsStopped()) {
+        springController_->Play();
+    }
+
     StartAutoPlay();
 }
 
 void SwiperPattern::HandleDragStart()
 {
+    StopTranslateAnimation();
+
     const auto& tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
     if (tabBarFinishCallback) {
         tabBarFinishCallback();
@@ -614,7 +626,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
     if (!IsLoop() && isOutOfBoundary) {
         auto edgeEffect = GetEdgeEffect();
         if (edgeEffect == EdgeEffect::SPRING) {
-            LOGI("Swiper has reached boundary, can't drag any more, effect spring.");
+            LOGD("Swiper has reached boundary, can't drag any more, effect spring.");
             auto mainOffset = std::fmod(currentOffset_, MainSize());
             auto friction = CalculateFriction(std::abs(mainOffset) / MainSize());
             UpdateCurrentOffset(friction * mainDelta);
@@ -622,7 +634,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
         }
 
         if (edgeEffect == EdgeEffect::FADE) {
-            LOGI("Swiper has reached boundary, can't drag any more, effect fade");
+            LOGD("Swiper has reached boundary, can't drag any more, effect fade");
             auto host = GetHost();
             CHECK_NULL_VOID(host);
             currentOffset_ += mainDelta;
@@ -631,7 +643,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
         }
 
         if (edgeEffect == EdgeEffect::NONE) {
-            LOGI("Swiper has reached boundary, can't drag any more.");
+            LOGD("Swiper has reached boundary, can't drag any more.");
             return;
         }
     }
@@ -641,7 +653,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 
 void SwiperPattern::HandleDragEnd(double dragVelocity)
 {
-    LOGI("Drag end velocity: %{public}lf, currentOffset: %{public}lf", dragVelocity, currentOffset_);
+    LOGD("Drag end velocity: %{public}lf, currentOffset: %{public}lf", dragVelocity, currentOffset_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
@@ -693,6 +705,8 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         } else if (nextIndex >= childrenSize && childrenSize > 0) {
             nextIndex = nextIndex % childrenSize;
         }
+    } else {
+        nextIndex = std::clamp(nextIndex, 0, childrenSize - 1);
     }
 
     PlayTranslateAnimation(start, end, nextIndex);
@@ -701,7 +715,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
 
 void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay)
 {
-    LOGI("Play translate animation startPos: %{public}lf, endPos: %{public}lf, nextIndex: %{public}d", startPos, endPos,
+    LOGD("Play translate animation startPos: %{public}lf, endPos: %{public}lf, nextIndex: %{public}d", startPos, endPos,
         nextIndex);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -752,7 +766,7 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
 
 void SwiperPattern::PlaySpringAnimation(double dragVelocity)
 {
-    LOGI("Play spring animation start");
+    LOGD("Play spring animation start");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!springController_) {
@@ -796,7 +810,7 @@ void SwiperPattern::PlayFadeAnimation()
         return;
     }
 
-    LOGI("Play fade animation start");
+    LOGD("Play fade animation start");
     if (!fadeController_) {
         fadeController_ = AceType::MakeRefPtr<Animator>(host->GetContext());
     }
@@ -819,7 +833,7 @@ void SwiperPattern::PlayFadeAnimation()
     fadeController_->Play();
 }
 
-bool SwiperPattern::IsOutOfBoundary(double mainOffset) const
+bool SwiperPattern::IsOutOfBoundary(float mainOffset) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -828,9 +842,16 @@ bool SwiperPattern::IsOutOfBoundary(double mainOffset) const
         return false;
     }
 
-    mainOffset = std::fmod(currentOffset_, MainSize());
-    auto isOutOfStart = currentIndex_ == 0 && GreatOrEqual(mainOffset, 0.0);
-    auto isOutOfEnd = currentIndex_ == TotalCount() - 1 && LessOrEqual(mainOffset, 0.0);
+    auto index = currentIndex_;
+    auto positiveAxis = Positive(mainOffset);
+    auto mainSize = MainSize();
+    if (Positive(mainSize)) {
+        auto interval = mainOffset / mainSize;
+        index -= static_cast<int32_t>(positiveAxis ? floorf(interval) : ceilf(interval));
+    }
+
+    auto isOutOfStart = index == 0 && NonNegative(mainOffset);
+    auto isOutOfEnd = index == TotalCount() - 1 && NonPositive(mainOffset);
     return isOutOfStart || isOutOfEnd;
 }
 

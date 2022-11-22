@@ -21,7 +21,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/components/theme/theme_utils.h"
 
 using namespace testing;
@@ -34,7 +34,7 @@ const std::string COLOR_ID_NORMAL = "\"@id003\"";
 const std::string COLOR_ID_NOT_FOUND = "\"@id9999\"";
 const Color COLOR_ERROR = Color(0xff000000);
 const std::string COLOR_ID_ERROR[] = { "", "\"@id\"", "\"@idabc\"", "\"@idid003\"", "\"@003\"", "\"@id001@id003\"" };
-const RefPtr<ThemeManager> THEME_MANAGER = AceType::MakeRefPtr<ThemeManager>();
+const auto THEME_MANAGER = AceType::MakeRefPtr<ThemeManagerImpl>();
 
 Color ParseColor(const std::string& id)
 {

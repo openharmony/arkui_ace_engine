@@ -186,7 +186,15 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
-    textStyle.SetFontSize(layoutProperty->GetFontSizeValue(theme ? theme->GetFontSize() : textStyle.GetFontSize()));
+
+    Dimension fontSize;
+    if (layoutProperty->HasFontSize() && layoutProperty->GetFontSizeValue(Dimension()).IsNonNegative()) {
+        fontSize = layoutProperty->GetFontSizeValue(Dimension());
+    } else {
+        fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();
+    }
+    textStyle.SetFontSize(fontSize);
+
     textStyle.SetFontWeight(
         layoutProperty->GetFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
     textStyle.SetTextColor(layoutProperty->GetTextColorValue(theme ? theme->GetTextColor() : textStyle.GetTextColor()));
@@ -206,8 +214,13 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
-    textStyle.SetFontSize(
-        layoutProperty->GetPlaceholderFontSizeValue(theme ? theme->GetFontSize() : textStyle.GetFontSize()));
+    Dimension fontSize;
+    if (layoutProperty->HasFontSize() && layoutProperty->GetPlaceholderFontSizeValue(Dimension()).IsNonNegative()) {
+        fontSize = layoutProperty->GetPlaceholderFontSizeValue(Dimension());
+    } else {
+        fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();
+    }
+    textStyle.SetFontSize(fontSize);
     textStyle.SetFontWeight(
         layoutProperty->GetPlaceholderFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
     textStyle.SetTextColor(

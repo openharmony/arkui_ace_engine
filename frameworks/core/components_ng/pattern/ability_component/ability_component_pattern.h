@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ABILITY_COMPONENT_PATTERN_H
 
 #include "frameworks/base/memory/referenced.h"
-#include "frameworks/core/common/window/window_extension_connection_proxy.h"
+#include "frameworks/core/common/window_ng/window_extension_connection_proxy_ng.h"
 #include "frameworks/core/components_ng/pattern/ability_component/ability_component_event_hub.h"
 #include "frameworks/core/components_ng/pattern/ability_component/ability_component_layout_algorithm.h"
 #include "frameworks/core/components_ng/pattern/ability_component/ability_component_render_property.h"
@@ -57,6 +57,7 @@ public:
     void OnModifyDone() override;
     void FireConnect();
     void FireDisConnect();
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
 private:
     void OnActive() override
@@ -74,12 +75,10 @@ private:
         }
         isActive_ = false;
     }
-
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void UpdateWindowRect();
     bool isActive_ = false;
     bool hasConnectionToAbility_ = false;
-    RefPtr<WindowExtensionConnectionAdapter> adapter_;
+    RefPtr<WindowExtensionConnectionAdapterNG> adapter_;
     ACE_DISALLOW_COPY_AND_MOVE(AbilityComponentPattern);
 };
 

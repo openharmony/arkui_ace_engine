@@ -38,6 +38,7 @@ void ImageProvider::WrapTaskAndPostTo(
     taskExecutor->PostTask(
         [task, id = Container::CurrentId()] {
             ContainerScope scope(id);
+            CHECK_NULL_VOID(task);
             task();
         },
         taskType);
@@ -46,6 +47,7 @@ void ImageProvider::WrapTaskAndPostTo(
 #define WRAP_TASK_AND_POST_TO(thread, threadName)                                                       \
     void ImageProvider::WrapTaskAndPostTo##threadName(std::function<void()>&& task)                     \
     {                                                                                                   \
+        CHECK_NULL_VOID(task);                                                                          \
         ImageProvider::WrapTaskAndPostTo(std::move(task), TaskExecutor::TaskType::thread, #threadName); \
     }
 WRAP_TASK_AND_POST_TO(UI, UI);
@@ -248,6 +250,12 @@ void ImageProvider::MakeCanvasImageForSVG(const WeakPtr<SvgImageObject>& imageOb
     };
     // TODO: add sync load
     ImageProvider::WrapTaskAndPostToBackground(std::move(canvasImageMakingTask));
+}
+
+std::string ImageProvider::GenerateCacheKey(const ImageSourceInfo& srcInfo, const NG::SizeF& targetImageSize)
+{
+    return srcInfo.GetCacheKey() + std::to_string(static_cast<int32_t>(targetImageSize.Width())) +
+           std::to_string(static_cast<int32_t>(targetImageSize.Height()));
 }
 
 } // namespace OHOS::Ace::NG

@@ -265,6 +265,7 @@ void SubwindowOhos::ShowWindow()
         return;
     }
     LOGI("Show the subwindow successfully.");
+    isShowed_ = true;
     SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
 }
 
@@ -282,6 +283,7 @@ void SubwindowOhos::HideWindow()
         LOGE("Hide window failed with errCode: %{public}d", static_cast<int32_t>(ret));
         return;
     }
+    isShowed_ = false;
     LOGI("Hide the subwindow successfully.");
 }
 
@@ -325,6 +327,7 @@ void SubwindowOhos::ClearMenu()
 
 void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset)
 {
+    LOGI("SubwindowOhos::ShowMenuNG");
     ShowWindow();
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
@@ -337,6 +340,7 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t tar
 
 void SubwindowOhos::HideMenuNG()
 {
+    LOGI("SubwindowOhos::HideMenuNG");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -350,6 +354,7 @@ void SubwindowOhos::HideMenuNG()
 
 void SubwindowOhos::HideMenuNG(int32_t targetId)
 {
+    LOGI("SubwindowOhos::HideMenuNG for target id %{public}d", targetId);
     targetId_ = targetId;
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
@@ -372,6 +377,10 @@ void SubwindowOhos::ShowMenu(const RefPtr<Component>& newComponent)
 void SubwindowOhos::CloseMenu()
 {
     LOGI("Close the menu");
+    if (!isShowed_) {
+        LOGW("Subwindow is not showed.");
+        return;
+    }
     if (popup_) {
         popup_->CloseContextMenu();
     }

@@ -21,6 +21,7 @@
 #include "fml/memory/ref_ptr.h"
 
 #include "base/geometry/ng/rect_t.h"
+#include "base/image/pixel_map.h"
 #include "base/log/log_wrapper.h"
 #include "core/components/text/render_text.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -81,14 +82,15 @@ SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap)
     return SkImageInfo::Make(pixmap->GetWidth(), pixmap->GetHeight(), colorType, alphaType, colorSpace);
 }
 
-void DrawSkImage(SkCanvas* canvas, const RefPtr<PixelMap>& pixelmap, int32_t width, int32_t height)
+void DrawSkImage(SkCanvas* canvas, const RefPtr<PixelMap>& pixmap, int32_t width, int32_t height)
 {
     // Step1: Create SkPixmap
-    auto imageInfo = MakeSkImageInfoFromPixelMap(pixelmap);
-    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelmap->GetPixels()), pixelmap->GetRowBytes());
+    auto imageInfo = MakeSkImageInfoFromPixelMap(pixmap);
+    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixmap->GetPixels()), pixmap->GetRowBytes());
 
     // Step2: Create SkImage and draw it
-    sk_sp<SkImage> skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+    sk_sp<SkImage> skImage =
+        SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixmap));
     if (!skImage) {
         LOGE("sk image is nullptr");
         return;
@@ -100,7 +102,7 @@ void DrawSkImage(SkCanvas* canvas, const RefPtr<PixelMap>& pixelmap, int32_t wid
 #else
     paint.setColor(paint.getColor4f(), colorSpace.get());
 #endif
-    auto skSrcRect = SkRect::MakeXYWH(0, 0, pixelmap->GetWidth(), pixelmap->GetHeight());
+    auto skSrcRect = SkRect::MakeXYWH(0, 0, pixmap->GetWidth(), pixmap->GetHeight());
     auto skDstRect = SkRect::MakeXYWH(0, 0, width, height);
     canvas->drawImageRect(skImage, skSrcRect, skDstRect, &paint);
 }

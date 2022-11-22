@@ -367,12 +367,16 @@ void PipelineContext::ShowContainerTitle(bool isShow)
     auto containerModal = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
     if (containerModal) {
         containerModal->ShowTitle(isShow);
-#ifdef ENABLE_ROSEN_BACKEND
-        if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-            rsUIDirector_->SetContainerWindow(isShow); // set container window show state to render service
-        }
-#endif
     }
+}
+
+void PipelineContext::SetContainerWindow(bool isShow)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+        rsUIDirector_->SetContainerWindow(isShow, density_); // set container window show state to render service
+    }
+#endif
 }
 
 void PipelineContext::BlurWindowWithDrag(bool isBlur)
@@ -556,15 +560,6 @@ void PipelineContext::FlushLayout()
     TryCallNextFrameLayoutCallback();
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushLayout();
-    }
-}
-
-void PipelineContext::TryCallNextFrameLayoutCallback()
-{
-    if (isForegroundCalled_ && nextFrameLayoutCallback_) {
-        isForegroundCalled_ = false;
-        nextFrameLayoutCallback_();
-        LOGI("nextFrameLayoutCallback called");
     }
 }
 

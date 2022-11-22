@@ -175,6 +175,10 @@ bool ParseParamWithCallback(napi_env env, RouterAsyncContext* asyncContext, cons
             napi_value params = nullptr;
             napi_get_named_property(env, argv[i], "url", &uriNApi);
             napi_typeof(env, uriNApi, &valueType);
+            if (valueType == napi_undefined) {
+                NapiThrow(env, "The required url parameter is missing.", Framework::ERROR_CODE_PARAM_INVALID);
+                return false;
+            }
             if (valueType != napi_string) {
                 LOGE("url is invalid");
                 NapiThrow(env, "The type of the url parameter is not string.", Framework::ERROR_CODE_PARAM_INVALID);
@@ -214,6 +218,8 @@ static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info
 {
     napi_value result = nullptr;
     size_t requireArgc = 1;
+    size_t largestArgc = 3;
+    size_t largestArgcPromise = 2;
     size_t argc = ARGC_WITH_MODE_AND_CALLBACK;
     napi_value argv[ARGC_WITH_MODE_AND_CALLBACK] = { 0 };
     napi_value thisVar = nullptr;
@@ -224,6 +230,10 @@ static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info
         NapiThrow(env, "The number of parameters must be greater than or equal to 1.",
             Framework::ERROR_CODE_PARAM_INVALID);
         return result;
+    } else if (argc > largestArgc) {
+        LOGE("params number err");
+        NapiThrow(env, "The largest number of parameters is 3.", Framework::ERROR_CODE_PARAM_INVALID);
+        return result;
     }
     auto asyncContext = new RouterAsyncContext();
     if (!ParseParamWithCallback(env, asyncContext, argc, argv)) {
@@ -233,6 +243,10 @@ static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info
 
     if (asyncContext->callbackRef == nullptr) {
         napi_create_promise(env, &asyncContext->deferred, &result);
+        if (argc > largestArgcPromise) {
+            NapiThrow(env, "The largest number of parameters is 2 in Promise.", Framework::ERROR_CODE_PARAM_INVALID);
+            return result;
+        }
     } else {
         asyncContext->deferred = nullptr;
         napi_get_undefined(env, &result);
@@ -361,6 +375,8 @@ static napi_value JSRouterReplaceWithCallback(napi_env env, napi_callback_info i
 {
     napi_value result = nullptr;
     size_t requireArgc = 1;
+    size_t largestArgc = 3;
+    size_t largestArgcPromise = 2;
     size_t argc = ARGC_WITH_MODE_AND_CALLBACK;
     napi_value argv[ARGC_WITH_MODE_AND_CALLBACK] = { 0 };
     napi_value thisVar = nullptr;
@@ -371,6 +387,10 @@ static napi_value JSRouterReplaceWithCallback(napi_env env, napi_callback_info i
         NapiThrow(env, "The number of parameters must be greater than or equal to 1.",
             Framework::ERROR_CODE_PARAM_INVALID);
         return result;
+    } else if (argc > largestArgc) {
+        LOGE("params number err");
+        NapiThrow(env, "The largest number of parameters is 3.", Framework::ERROR_CODE_PARAM_INVALID);
+        return result;
     }
     auto asyncContext = new RouterAsyncContext();
     if (!ParseParamWithCallback(env, asyncContext, argc, argv)) {
@@ -380,6 +400,10 @@ static napi_value JSRouterReplaceWithCallback(napi_env env, napi_callback_info i
 
     if (asyncContext->callbackRef == nullptr) {
         napi_create_promise(env, &asyncContext->deferred, &result);
+        if (argc > largestArgcPromise) {
+            NapiThrow(env, "The largest number of parameters is 2 in Promise.", Framework::ERROR_CODE_PARAM_INVALID);
+            return result;
+        }
     } else {
         asyncContext->deferred = nullptr;
         napi_get_undefined(env, &result);

@@ -61,4 +61,4 @@ HWTEST_F(InspectCameraTest, InspectCameraTest002, TestSize.Level1)
     EXPECT_EQ(inspectCamera.attrs_["flash"], "off");
     EXPECT_EQ(inspectCamera.attrs_["deviceposition"], "back");
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::Framework

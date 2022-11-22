@@ -285,6 +285,9 @@ bool RatingPattern::IsIndicator()
 
 void RatingPattern::HandleDragUpdate(const GestureEvent& info)
 {
+    if (IsIndicator()) {
+        return;
+    }
     RecalculatedRatingScoreBasedOnEventPoint(info.GetLocalLocation().GetX());
 }
 
@@ -301,6 +304,9 @@ void RatingPattern::FireChangeEvent() const
 
 void RatingPattern::HandleDragEnd()
 {
+    if (IsIndicator()) {
+        return;
+    }
     FireChangeEvent();
 }
 
@@ -370,6 +376,9 @@ void RatingPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void RatingPattern::HandleTouchUp()
 {
+    if (IsIndicator()) {
+        return;
+    }
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
     // Update touch star to 0 to indicate there is no star to be touched.
@@ -381,6 +390,9 @@ void RatingPattern::HandleTouchUp()
 
 void RatingPattern::HandleTouchDown(const Offset& localPosition)
 {
+    if (IsIndicator()) {
+        return;
+    }
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
     // calculate the number of star the touch point falls on adn trigger render update.
@@ -393,6 +405,9 @@ void RatingPattern::HandleTouchDown(const Offset& localPosition)
 
 void RatingPattern::HandleClick(const GestureEvent& info)
 {
+    if (IsIndicator()) {
+        return;
+    }
     RecalculatedRatingScoreBasedOnEventPoint(info.GetLocalLocation().GetX());
     FireChangeEvent();
 }

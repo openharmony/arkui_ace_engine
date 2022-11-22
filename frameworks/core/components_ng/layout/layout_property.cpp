@@ -257,40 +257,55 @@ void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)
     if (!gridProperty_) {
         return;
     }
-    auto parent = host->GetParent();
+    auto parent = host->GetAncestorNodeOfFrame();
     while (parent) {
         if (parent->GetTag() == V2::GRIDCONTAINER_ETS_TAG) {
-            auto containerLayout = AceType::DynamicCast<FrameNode>(parent)->GetLayoutProperty();
+            auto containerLayout = parent->GetLayoutProperty();
             gridProperty_->UpdateContainer(containerLayout, host);
-            SetHost(host);
             UpdateUserDefinedIdealSize(CalcSize(CalcLength(gridProperty_->GetWidth()), std::nullopt));
             break;
         }
-        parent = parent->GetParent();
+        parent = parent->GetAncestorNodeOfFrame();
     }
 }
 
-void LayoutProperty::UpdateGridOffset(LayoutWrapper* layoutWrapper)
+void LayoutProperty::UpdateGridProperty(std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type)
 {
-    if (!gridProperty_ || !gridProperty_->HasContainer()) {
-        return;
+    if (!gridProperty_) {
+        gridProperty_ = std::make_unique<GridProperty>();
     }
 
+    bool isSpanUpdated = (span.has_value() && gridProperty_->UpdateSpan(span.value(), type));
+    bool isOffsetUpdated = (offset.has_value() && gridProperty_->UpdateOffset(offset.value(), type));
+    if (isSpanUpdated || isOffsetUpdated) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+bool LayoutProperty::UpdateGridOffset(const RefPtr<FrameNode>& host)
+{
+    if (!gridProperty_) {
+        return false;
+    }
     auto optOffset = gridProperty_->GetOffset();
     if (optOffset == UNDEFINED_DIMENSION) {
-        return;
+        return false;
     }
-    float offset = 0;
-    auto host = layoutWrapper->GetHostNode();
-    for (auto node = DynamicCast<FrameNode>(host->GetParent()); (node && node->GetTag() != V2::GRIDCONTAINER_ETS_TAG);
-         node = DynamicCast<FrameNode>(node->GetParent())) {
-        auto geometryNode = node->GetGeometryNode();
-        offset += geometryNode->GetFrameOffset().GetX();
+
+    RefPtr<FrameNode> parent = host->GetAncestorNodeOfFrame();
+    auto parentOffset = parent->GetOffsetRelativeToWindow();
+    auto globalOffset = gridProperty_->GetContainerPosition();
+
+    OffsetF offset(optOffset.ConvertToPx(), 0);
+    offset = offset + globalOffset - parentOffset;
+
+    const auto& geometryNode = host->GetGeometryNode();
+    if (offset.GetX() == geometryNode->GetFrameOffset().GetX()) {
+        return false;
     }
-    const auto& currentGeometryNode = layoutWrapper->GetGeometryNode();
-    auto frameOffset = currentGeometryNode->GetFrameOffset();
-    frameOffset.SetX(optOffset.ConvertToPx() - offset);
-    currentGeometryNode->SetFrameOffset(frameOffset);
+    offset.SetY(geometryNode->GetFrameOffset().GetY());
+    geometryNode->SetFrameOffset(offset);
+    return true;
 }
 
 void LayoutProperty::CheckSelfIdealSize()

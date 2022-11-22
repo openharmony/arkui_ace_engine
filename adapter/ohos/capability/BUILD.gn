@@ -64,6 +64,8 @@ template("ace_capability_ohos_source_set") {
       sources += [
         "window_connection/window_extension_connection_ohos.cpp",
         "window_connection/window_extension_connection_proxy.cpp",
+        "window_connection_ng/window_extension_connection_ohos_ng.cpp",
+        "window_connection_ng/window_extension_connection_proxy_ng.cpp",
       ]
     }
   }

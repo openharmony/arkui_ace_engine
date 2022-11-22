@@ -254,10 +254,14 @@ std::string JsiBaseUtils::TranslateStack(const std::string& stackStr, const std:
     bool isAppPage = appFlag > 0 && appMap;
     if (!isAppPage) {
         std::string tag = std::as_const(pageUrl);
-        char* ch = strrchr((char*)tag.c_str(), '.');
-        int index = ch - tag.c_str();
-        tag.insert(index, "_");
-        runningPageTag = tag;
+        std::string str = tag;
+        if (tag.find("\\") == std::string::npos) {
+            str = tag.replace(tag.find("/"), 1, "\\");
+        }
+        char* ch = strrchr((char*)str.c_str(), '.');
+        int index = ch - str.c_str();
+        str.insert(index, "_");
+        runningPageTag = str;
     }
     // find per line of stack
     std::vector<std::string> res;

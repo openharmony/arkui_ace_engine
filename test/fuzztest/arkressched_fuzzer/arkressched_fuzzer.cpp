@@ -23,14 +23,14 @@ using namespace std;
     void veryfi(string& s, const uint8_t* data, size_t size)
     {
         bool ok = true;
-        auto ri = size % u16m;        
-        for ( size_t i = 0 ; i < ri ; i++ ) {
-            if (( data[i] < '0' || data[i] > '9' ) && ( data[i] < 'a' || data[i] > 'z' )) {
+        auto ri = size % u16m;
+        for (size_t i = 0; i < ri; i++) {
+            if ((data[i] < '0' || data[i] > '9') && (data[i] < 'a' || data[i] > 'z')) {
                 ok = false;
                 break;
             }
         }
-        if ( ri == 0 || ok == false ) {
+        if (ri == 0 || ok == false) {
             s = "123";
             return;
         }

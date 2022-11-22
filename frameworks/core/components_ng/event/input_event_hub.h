@@ -66,6 +66,7 @@ public:
         }
         hoverEffectType_ = type;
     }
+
     HoverEffectType GetHoverEffect()
     {
         return hoverEffectType_;

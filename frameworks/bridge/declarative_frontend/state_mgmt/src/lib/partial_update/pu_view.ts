@@ -107,9 +107,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
    *    - localStorage do not specify, will inherit from parent View.
    *
   */
-  constructor(parent: ViewPU, localStorage?: LocalStorage) {
+  constructor(parent: ViewPU, localStorage: LocalStorage, elmtId : number = -1) {
     super();
-    this.id_ = SubscriberManager.MakeId();
+    // if set use the elmtId also as the ViewPU object's subscribable id.
+    // these matching is requiremrnt for updateChildViewById(elmtId) being able to
+    // find the child ViewPU object by given elmtId
+    this.id_= elmtId == -1 ? SubscriberManager.MakeId() : elmtId;
     this.providedVars_ = parent ? new Map(parent.providedVars_)
       : new Map<string, ObservedPropertyAbstractPU<any>>();
 
@@ -201,9 +204,22 @@ abstract class ViewPU extends NativeViewPartialUpdate
     return hasBeenDeleted;
   }
 
+  /**
+   * Retrieve child by given id
+   * @param id 
+   * @returns child if in map and weak ref can still be downreferenced
+   */
+  public getChildById(id: number) {
+    const childWeakRef = this.childrenWeakrefMap_.get(id);
+    return childWeakRef ? childWeakRef.deref() : undefined;
+  }
+
   protected abstract purgeVariableDependenciesOnElmtId(removedElmtId: number);
   protected abstract initialRender(): void;
   protected abstract rerender(): void;
+  protected updateStateVars(params: {}) : void {
+    stateMgmtConsole.warn("ViewPU.updateStateVars unimplemented. Pls upgrade to latest eDSL transpiler version.")
+  }
 
   protected initialRenderView(): void {
     this.initialRender();
@@ -249,6 +265,21 @@ abstract class ViewPU extends NativeViewPartialUpdate
     stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).forceCompleteRerender - end`);
   }
 
+  public updateStateVarsOfChildByElmtId(elmtId, params: Object) : void {
+    stateMgmtConsole.debug(`ViewPU('${this.constructor.name}', ${this.id__()}).updateChildViewById(${elmtId}) - start`);
+
+    if (elmtId<0) {
+      stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).updateChildViewById(${elmtId}) - invalid elmtId - internal error!`);
+      return ;
+    }
+    let child : ViewPU = this.getChildById(elmtId);
+    if (!child) {
+      stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).updateChildViewById(${elmtId}) - no child with this elmtId - internal error!`);
+      return;
+    }
+    child.updateStateVars(params);
+    stateMgmtConsole.debug(`ViewPU('${this.constructor.name}', ${this.id__()}).updateChildViewById(${elmtId}) - end`);
+  }
 
   // implements IMultiPropertiesChangeSubscriber
   viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number>): void {

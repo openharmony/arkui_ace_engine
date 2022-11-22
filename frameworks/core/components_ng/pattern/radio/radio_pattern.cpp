@@ -63,7 +63,7 @@ void RadioPattern::OnModifyDone()
     UpdateState();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(radioTheme);
@@ -239,9 +239,12 @@ void RadioPattern::UpdateState()
         if (check) {
             UpdateUIStatus(true);
             PlayAnimation(true);
+        } else {
+            isFirstCreated_ = false;
         }
     } else {
         paintProperty->UpdateRadioCheck(false);
+        isFirstCreated_ = false;
     }
 
     if (preCheck_ != check) {
@@ -281,7 +284,10 @@ void RadioPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bo
 
     auto radioEventHub = GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(radioEventHub);
-    radioEventHub->UpdateChangeEvent(check);
+    if (!isFirstCreated_) {
+        radioEventHub->UpdateChangeEvent(check);
+    }
+    isFirstCreated_ = false;
     if (check) {
         pageEventHub->UpdateRadioGroupValue(radioEventHub->GetGroup(), frameNode->GetId());
     } else {

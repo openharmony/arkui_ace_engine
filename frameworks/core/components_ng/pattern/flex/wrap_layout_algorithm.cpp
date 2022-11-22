@@ -484,7 +484,7 @@ void WrapLayoutAlgorithm::CalcItemMainAxisStartAndSpaceBetween(
         }
         case WrapAlignment::SPACE_BETWEEN: {
             float mainSpace = content.count > 1 ? spaceLeftOnMainAxis / static_cast<float>(content.count - 1) : 0.0f;
-            spaceBetweenItemsOnMainAxis = isHorizontal_ ? OffsetF(0.0f, mainSpace) : OffsetF(mainSpace, 0.0f);
+            spaceBetweenItemsOnMainAxis = isHorizontal_ ? OffsetF(mainSpace, 0.0f) : OffsetF(0.0f, mainSpace);
             break;
         }
         case WrapAlignment::SPACE_EVENLY: {

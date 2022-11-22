@@ -88,7 +88,7 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void OnTouchDown(const TouchEventInfo& info);
     void OnTouchMove(const TouchEventInfo& info);
-    void OnTouchUp(const TouchEventInfo& info);
+    void OnTouchUp();
 
     bool CheckChoosePoint(int16_t x, int16_t y) const;
     bool AddChoosePoint(const OffsetF& offset, int16_t x, int16_t y);

@@ -56,6 +56,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr Dimension DEFAULT_FONT = Dimension(16, DimensionUnit::FP);
 constexpr uint32_t TWINKLING_INTERVAL_MS = 500;
 constexpr uint32_t OBSCURE_SHOW_TICKS = 3;
 constexpr char16_t OBSCURING_CHARACTER = u'•';
@@ -136,8 +137,13 @@ float TextFieldPattern::GetTextOrPlaceHolderFontSize()
     CHECK_NULL_RETURN(themeManager, 0.0f);
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);
-    auto fontSize =
-        textFieldLayoutProperty->GetFontSizeValue(textFieldTheme ? textFieldTheme->GetFontSize() : Dimension(-1));
+    Dimension fontSize;
+    if (textFieldLayoutProperty->HasFontSize() &&
+        textFieldLayoutProperty->GetFontSizeValue(Dimension()).IsNonNegative()) {
+        fontSize = textFieldLayoutProperty->GetFontSizeValue(Dimension());
+    } else {
+        fontSize = textFieldTheme ? textFieldTheme->GetFontSize() : DEFAULT_FONT;
+    }
     return static_cast<float>(fontSize.ConvertToPx());
 }
 
@@ -152,10 +158,13 @@ TextFieldPattern::~TextFieldPattern()
     }
 
     // If soft keyboard is still exist, close it.
+    if (HasConnection()) {
 #if defined(ENABLE_STANDARD_INPUT)
-    LOGI("Destruction text field, close input method.");
-    MiscServices::InputMethodController::GetInstance()->Close();
+        LOGI("Destruction of text field, close input method.");
+        MiscServices::InputMethodController::GetInstance()->HideTextInput();
+        MiscServices::InputMethodController::GetInstance()->Close();
 #endif
+    }
 }
 
 #if defined(ENABLE_STANDARD_INPUT)
@@ -1061,6 +1070,13 @@ void TextFieldPattern::OnModifyDone()
     obscureTickCountDown_ = OBSCURE_SHOW_TICKS;
     caretHeight_ = GetTextOrPlaceHolderFontSize() + static_cast<float>(CURSOR_PADDING.ConvertToPx()) * 2.0f;
     utilPadding_ = layoutProperty->CreatePaddingAndBorderWithDefault(basicPaddingLeft_, 0.0f, 0.0f, 0.0f);
+    if (layoutProperty->GetTypeChangedValue(false)) {
+        ClearEditingValue();
+        layoutProperty->ResetTypeChanged();
+        operationRecords_.clear();
+        redoOperationRecords_.clear();
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::InitEditingValueText(std::string content)
@@ -1161,6 +1177,7 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose)
             return false;
         }
         inputMethod->HideTextInput();
+        inputMethod->Close();
 #endif
         return true;
     }
@@ -1795,9 +1812,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("text", textEditingValue_.text.c_str());
     json->Put("fontSize", GetFontSize().c_str());
     json->Put("fontColor", GetTextColor().c_str());
-    json->Put("fontStyle", GetItalicFontStyle() == Ace::FontStyle::NORMAL
-                               ? "FontStyle.Normal"
-                               : "FontStyle.Italic");
+    json->Put("fontStyle", GetItalicFontStyle() == Ace::FontStyle::NORMAL ? "FontStyle.Normal" : "FontStyle.Italic");
     json->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(GetFontWeight()).c_str());
     json->Put("fontFamily", GetFontFamily().c_str());
     json->Put("textAlign", V2::ConvertWrapTextAlignToString(GetTextAlign()).c_str());

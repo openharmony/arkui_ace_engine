@@ -135,7 +135,6 @@ public:
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
-    virtual void UpdateBackShadow(const Shadow& shadow) {}
 
     virtual void ClipWithRect(const RectF& rectF) {}
 
@@ -222,9 +221,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
 
-    // Decoration
-    ACE_DEFINE_PROPERTY_GROUP(BackDecoration, DecorationProperty);
-
     // Graphics
     ACE_DEFINE_PROPERTY_GROUP(Graphics, GraphicsProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontBrightness, Dimension);
@@ -236,6 +232,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontHueRotate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontColorBlend, Color);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontBlurRadius, Dimension);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackShadow, Shadow);
 
     // BorderRadius.
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
@@ -331,6 +328,7 @@ protected:
     virtual void OnFrontHueRotateUpdate(float value) {}
     virtual void OnFrontColorBlendUpdate(const Color& value) {}
     virtual void OnFrontBlurRadiusUpdate(const Dimension& value) {}
+    virtual void OnBackShadowUpdate(const Shadow& shadow) {}
 
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}

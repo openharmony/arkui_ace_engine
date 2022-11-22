@@ -125,6 +125,9 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     std::string hapPath = resourceInfo.GetHapPath();
     auto resConfig = ConvertConfigToGlobal(resourceInfo.GetResourceConfiguration());
     std::shared_ptr<Global::Resource::ResourceManager> newResMgr(Global::Resource::CreateResourceManager());
+    if (!newResMgr) {
+        LOGW("create resource manager from Global::Resource::CreateResourceManager() failed!");
+    }
     std::string resIndexPath = hapPath.empty() ? (resPath + "resources.index") : hapPath;
     auto resRet = newResMgr->AddResource(resIndexPath.c_str());
     auto configRet = newResMgr->UpdateResConfig(*resConfig);
@@ -158,17 +161,19 @@ RefPtr<ThemeStyle> ResourceAdapterImpl::GetTheme(int32_t themeId)
     auto theme = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
     auto ret = resourceManager_->GetThemeById(themeId, theme->rawAttrs_);
     std::string OHFlag = "ohos_"; // fit with resource/base/theme.json and pattern.json
-    for (size_t i = 0; i < sizeof(PATTERN_MAP) / sizeof(PATTERN_MAP[0]); i++) {
-        ResourceThemeStyle::RawAttrMap attrMap;
-        std::string patternTag = PATTERN_MAP[i];
-        std::string patternName = OHFlag + PATTERN_MAP[i];
-        ret = resourceManager_->GetPatternByName(patternName.c_str(), attrMap);
-        LOGD("theme pattern[%{public}s, %{public}s], attr size=%{public}zu",
-            patternTag.c_str(), patternName.c_str(), attrMap.size());
-        if (attrMap.empty()) {
-            continue;
+    if (resourceManager_) {
+        for (size_t i = 0; i < sizeof(PATTERN_MAP) / sizeof(PATTERN_MAP[0]); i++) {
+            ResourceThemeStyle::RawAttrMap attrMap;
+            std::string patternTag = PATTERN_MAP[i];
+            std::string patternName = OHFlag + PATTERN_MAP[i];
+            ret = resourceManager_->GetPatternByName(patternName.c_str(), attrMap);
+            LOGD("theme pattern[%{public}s, %{public}s], attr size=%{public}zu",
+                patternTag.c_str(), patternName.c_str(), attrMap.size());
+            if (attrMap.empty()) {
+                continue;
+            }
+            theme->patternAttrs_[patternTag] = attrMap;
         }
-        theme->patternAttrs_[patternTag] = attrMap;
     }
     LOGI("themeId=%{public}d, ret=%{public}d, attr size=%{public}zu, pattern size=%{public}zu",
         themeId, ret, theme->rawAttrs_.size(), theme->patternAttrs_.size());
@@ -224,7 +229,7 @@ std::string ResourceAdapterImpl::GetString(uint32_t resId)
     if (resourceManager_) {
         auto state = resourceManager_->GetStringById(resId, strResult);
         if (state != Global::Resource::SUCCESS) {
-            LOGE("GetString error, id=%{public}u", resId);
+            LOGD("GetString error, id=%{public}u", resId);
         }
     }
     return strResult;
@@ -248,7 +253,7 @@ std::vector<std::string> ResourceAdapterImpl::GetStringArray(uint32_t resId) con
     if (resourceManager_) {
         auto state = resourceManager_->GetStringArrayById(resId, strResults);
         if (state != Global::Resource::SUCCESS) {
-            LOGE("GetStringArray error, id=%{public}u", resId);
+            LOGD("GetStringArray error, id=%{public}u", resId);
         }
     }
     return strResults;

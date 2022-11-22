@@ -220,7 +220,7 @@ void CheckBoxPattern::UpdateUnSelect()
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (!paintProperty->GetCheckBoxSelectValue()) {
+    if (paintProperty->HasCheckBoxSelect() && !paintProperty->GetCheckBoxSelectValue()) {
         uiStatus_ = UIStatus::UNSELECTED;
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
@@ -293,8 +293,11 @@ void CheckBoxPattern::UpdateState()
         PipelineContext::GetCurrentContext()->AddBuildFinishCallBack(callback);
         if (paintProperty->HasCheckBoxSelect()) {
             auto isSelected = paintProperty->GetCheckBoxSelectValue();
-            UpdateUIStatus(isSelected);
+            if (isSelected || (!isSelected && !isFirstCreated_)) {
+                UpdateUIStatus(isSelected);
+            }
         }
+        isFirstCreated_ = false;
         pattern->SetPreGroup(group);
         return;
     }
@@ -448,7 +451,9 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
                 auto paintProperty = node->GetPaintProperty<CheckBoxPaintProperty>();
                 CHECK_NULL_VOID(paintProperty);
                 paintProperty->UpdateCheckBoxSelect(true);
-                node->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                auto checkBoxPattern = node->GetPattern<CheckBoxPattern>();
+                CHECK_NULL_VOID(checkBoxPattern);
+                checkBoxPattern->UpdateUIStatus(true);
             }
         }
     }
@@ -473,12 +478,17 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
             }
             node->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
+        auto checkBoxGroupPattern = checkBoxGroupNode->GetPattern<CheckBoxGroupPattern>();
+        CHECK_NULL_VOID(checkBoxGroupPattern);
         if (allIsSame && paintProperty->GetCheckBoxSelectValue()) {
             groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
+            checkBoxGroupPattern->UpdateUIStatus(true);
         } else if (allIsSame && !paintProperty->GetCheckBoxSelectValue()) {
             groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::NONE);
+            checkBoxGroupPattern->UpdateUIStatus(false);
         } else {
             groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::PART);
+            checkBoxGroupPattern->ResetUIStatus();
         }
         checkBoxGroupNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }

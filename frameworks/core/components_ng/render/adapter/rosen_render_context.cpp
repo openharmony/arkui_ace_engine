@@ -285,11 +285,11 @@ void RosenRenderContext::PaintBackground()
     auto skiaCanvasImage = DynamicCast<SkiaCanvasImage>(bgLoadingCtx_->GetCanvasImage());
     CHECK_NULL_VOID(skiaCanvasImage);
     auto skImage = skiaCanvasImage->GetCanvasImage();
-    CHECK_NULL_VOID(skImage);
-    // use compress data to draw bg image
-    skiaCanvasImage->SetCompressData(nullptr, 0, 0);
     auto rosenImage = std::make_shared<Rosen::RSImage>();
     rosenImage->SetImage(skImage);
+    auto compressData = skiaCanvasImage->GetCompressData();
+    rosenImage->SetCompressData(compressData, skiaCanvasImage->GetUniqueID(), skiaCanvasImage->GetCompressWidth(),
+        skiaCanvasImage->GetCompressHeight());
     rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NOREPEAT)));
     rsNode_->SetBgImage(rosenImage);
 
@@ -602,18 +602,13 @@ void RosenRenderContext::PaintBorderImage()
             return;
         }
         auto borderWidthProperty = layoutProperty->GetBorderWidthProperty()
-                                ? (*layoutProperty->GetBorderWidthProperty())
-                                : BorderWidthProperty();
+                                       ? (*layoutProperty->GetBorderWidthProperty())
+                                       : BorderWidthProperty();
         RSImage rsImage(&skImage);
         RSCanvas rsCanvas(&canvas);
-        BorderImagePainter borderImagePainter(
-            layoutProperty->GetBorderWidthProperty() != nullptr,
-            *rosenRenderContext->GetBdImage(),
-            borderWidthProperty,
-            paintRect.GetSize(),
-            rsImage,
-            PipelineBase::GetCurrentContext()->GetDipScale()
-        );
+        BorderImagePainter borderImagePainter(layoutProperty->GetBorderWidthProperty() != nullptr,
+            *rosenRenderContext->GetBdImage(), borderWidthProperty, paintRect.GetSize(), rsImage,
+            PipelineBase::GetCurrentContext()->GetDipScale());
         borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), rsCanvas);
     };
 
@@ -709,16 +704,14 @@ void RosenRenderContext::PaintBorderImageGradient()
     CHECK_NULL_VOID(layoutProperty);
 
     auto borderImageProperty = *GetBdImage();
-    auto borderWidthProperty = layoutProperty->GetBorderWidthProperty()
-                                    ? (*layoutProperty->GetBorderWidthProperty())
-                                    : BorderWidthProperty();
+    auto borderWidthProperty =
+        layoutProperty->GetBorderWidthProperty() ? (*layoutProperty->GetBorderWidthProperty()) : BorderWidthProperty();
     bool hasBorderWidthProperty = layoutProperty->GetBorderWidthProperty() != nullptr;
     auto paintTask = [paintSize, borderImageProperty, borderWidthProperty, hasBorderWidthProperty](
                          const NG::Gradient& gradient, RSCanvas& rsCanvas) mutable {
         auto rsImage = SkiaDecorationPainter::CreateBorderImageGradient(gradient, paintSize);
-        BorderImagePainter borderImagePainter(hasBorderWidthProperty,
-            borderImageProperty, borderWidthProperty, paintSize, rsImage,
-            PipelineBase::GetCurrentContext()->GetDipScale());
+        BorderImagePainter borderImagePainter(hasBorderWidthProperty, borderImageProperty, borderWidthProperty,
+            paintSize, rsImage, PipelineBase::GetCurrentContext()->GetDipScale());
         borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), rsCanvas);
     };
 
@@ -1161,12 +1154,6 @@ void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
 
 void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
 {
-    auto& backDecoration = GetOrCreateBackDecoration();
-    if (backDecoration->CheckBlurRadius(radius)) {
-        return;
-    }
-    backDecoration->UpdateBlurRadius(radius);
-
     auto pipelineBase = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineBase);
     std::shared_ptr<Rosen::RSFilter> backFilter = nullptr;
@@ -1196,23 +1183,26 @@ void RosenRenderContext::OnFrontBlurRadiusUpdate(const Dimension& radius)
     RequestNextFrame();
 }
 
-void RosenRenderContext::UpdateBackShadow(const Shadow& shadow)
+void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
 {
-    const auto& backDecoration = GetOrCreateBackDecoration();
-    if (backDecoration->CheckBackShadow(shadow)) {
-        return;
-    }
-    backDecoration->UpdateBackShadow(shadow);
     CHECK_NULL_VOID(rsNode_);
-    if (!shadow.GetHardwareAcceleration()) {
-        rsNode_->SetShadowRadius(SkiaDecorationPainter::ConvertRadiusToSigma(shadow.GetBlurRadius()));
-    } else {
-        rsNode_->SetShadowElevation(shadow.GetElevation());
+    if (!shadow.IsValid()) {
+        if (shadow.GetHardwareAcceleration()) {
+            rsNode_->SetShadowElevation(0.0);
+        } else {
+            rsNode_->SetShadowRadius(0.0);
+        }
+        RequestNextFrame();
+        return;
     }
     rsNode_->SetShadowColor(shadow.GetColor().GetValue());
     rsNode_->SetShadowOffsetX(shadow.GetOffset().GetX());
     rsNode_->SetShadowOffsetY(shadow.GetOffset().GetY());
-    rsNode_->SetShadowElevation(shadow.GetElevation());
+    if (shadow.GetHardwareAcceleration()) {
+        rsNode_->SetShadowElevation(shadow.GetElevation());
+    } else {
+        rsNode_->SetShadowRadius(SkiaDecorationPainter::ConvertRadiusToSigma(shadow.GetBlurRadius()));
+    }
     RequestNextFrame();
 }
 
@@ -1392,45 +1382,27 @@ void RosenRenderContext::PaintGradient(const SizeF& frameSize)
 
 void RosenRenderContext::OnLinearGradientUpdate(const NG::Gradient& gradient)
 {
-    auto& gradientProperty = GetOrCreateGradient();
-    if (!gradientProperty || !gradientProperty->UpdateLinearGradient(gradient)) {
-        return;
-    }
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
-    if (!NearZero(frameSize.Width()) && !NearZero(frameSize.Height())) {
-        PaintGradient(frameSize);
+    RectF rect = GetPaintRectWithoutTransform();
+    if (!NearZero(rect.Width()) && !NearZero(rect.Height())) {
+        PaintGradient(rect.GetSize());
     }
     RequestNextFrame();
 }
 
 void RosenRenderContext::OnRadialGradientUpdate(const NG::Gradient& gradient)
 {
-    auto& gradientProperty = GetOrCreateGradient();
-    if (!gradientProperty || !gradientProperty->UpdateRadialGradient(gradient)) {
-        return;
-    }
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
-    if (!NearZero(frameSize.Width()) && !NearZero(frameSize.Height())) {
-        PaintGradient(frameSize);
+    RectF rect = GetPaintRectWithoutTransform();
+    if (!NearZero(rect.Width()) && !NearZero(rect.Height())) {
+        PaintGradient(rect.GetSize());
     }
     RequestNextFrame();
 }
 
 void RosenRenderContext::OnSweepGradientUpdate(const NG::Gradient& gradient)
 {
-    auto& gradientProperty = GetOrCreateGradient();
-    if (!gradientProperty || !gradientProperty->UpdateSweepGradient(gradient)) {
-        return;
-    }
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
-    if (!NearZero(frameSize.Width()) && !NearZero(frameSize.Height())) {
-        PaintGradient(frameSize);
+    RectF rect = GetPaintRectWithoutTransform();
+    if (!NearZero(rect.Width()) && !NearZero(rect.Height())) {
+        PaintGradient(rect.GetSize());
     }
     RequestNextFrame();
 }
@@ -1527,10 +1499,10 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetPageTransition
                 effect->Translate({ rect.Width(), 0, 0 });
                 break;
             case SlideEffect::BOTTOM:
-                effect->Translate({ rect.Height(), 0, 0 });
+                effect->Translate({ 0, rect.Height(), 0 });
                 break;
             case SlideEffect::TOP:
-                effect->Translate({ -rect.Height(), 0, 0 });
+                effect->Translate({ 0, -rect.Height(), 0 });
                 break;
             default:
                 LOGW("unexpected slide effect");
@@ -1589,8 +1561,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
     }
     if (transitionIn) {
         AnimationUtils::Animate(
-            option, [rsNode = rsNode_, effect, transitionIn]() { rsNode->NotifyTransition(effect, transitionIn); },
-            onFinish);
+            option, [rsNode = rsNode_, effect]() { rsNode->NotifyTransition(effect, true); }, onFinish);
     } else {
         auto wrappedFinish = [onFinish, weak = WeakPtr<FrameNode>(host)]() {
             auto host = weak.Upgrade();
@@ -1602,8 +1573,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
             }
         };
         AnimationUtils::Animate(
-            option, [rsNode = rsNode_, effect, transitionIn]() { rsNode->NotifyTransition(effect, transitionIn); },
-            wrappedFinish);
+            option, [rsNode = rsNode_, effect]() { rsNode->NotifyTransition(effect, false); }, wrappedFinish);
     }
     return true;
 }

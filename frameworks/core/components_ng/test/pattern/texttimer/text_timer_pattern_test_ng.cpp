@@ -13,11 +13,14 @@
  * limitations under the License.
  */
 
+#define private public
 #include <optional>
 #include <string>
 
 #include "gtest/gtest.h"
 
+#include "base/json/json_util.h"
+#include "base/memory/ace_type.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
@@ -31,6 +34,7 @@ namespace {
 constexpr double INPUT_COUNT = 60000.0;
 constexpr bool IS_COUNT_DOWN = false;
 const std::string TEXT_TIMER_FORMAT = "HH:mm:ss.SS";
+const std::string FORMAT_DATA = "08:00:00";
 const std::string UTC_1 = "1000000000000";
 const std::string UTC_2 = "2000000000000";
 const std::string ELAPSED_TIME_1 = "200";
@@ -54,20 +58,9 @@ struct TestProperty {
 };
 
 class TextTimerPatternTestNg : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
-
 protected:
     static RefPtr<FrameNode> CreateTextTimerParagraph(const TestProperty& testProperty);
 };
-
-void TextTimerPatternTestNg::SetUpTestCase() {}
-void TextTimerPatternTestNg::TearDownTestCase() {}
-void TextTimerPatternTestNg::SetUp() {}
-void TextTimerPatternTestNg::TearDown() {}
 
 RefPtr<FrameNode> TextTimerPatternTestNg::CreateTextTimerParagraph(const TestProperty& testProperty)
 {
@@ -144,44 +137,69 @@ HWTEST_F(TextTimerPatternTestNg, TextTimerTest001, TestSize.Level1)
     EXPECT_EQ(textTimerLayoutProperty->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(textTimerLayoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(textTimerLayoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
+
+    auto json = JsonUtil::Create(true);
+    layoutProperty->ToJsonValue(json);
 }
 
 /**
  * @tc.name: TextTimerTest002
- * @tc.desc: Verify whether the layout property, event and controller functions are created.
+ * @tc.desc: Test the entry function OnModifyDone of texttimer and related function.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTimerPatternTestNg, TextTimerTest002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Initialize format, inputCount, isCountDown properties of texttimer.
+     * @tc.steps: step1. create texttimer frameNode.
      */
-    TestProperty testProperty;
-    testProperty.format = std::make_optional(TEXT_TIMER_FORMAT);
-    testProperty.inputCount = std::make_optional(INPUT_COUNT);
-    testProperty.isCountDown = std::make_optional(IS_COUNT_DOWN);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTTIMER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextTimerPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
 
     /**
-     * @tc.steps: step2. create frameNode to get layout properties.
+     * @tc.steps: step2. get pattern and layoutProperty.
      * @tc.expected: step2. related function is called.
      */
-    RefPtr<FrameNode> frameNode = CreateTextTimerParagraph(testProperty);
-    EXPECT_NE(frameNode, nullptr);
-    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    EXPECT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
 
     /**
-     * @tc.steps: step3. get pattern and create layout property, event, controller.
-     * @tc.expected: step3. related function is called.
+     * @tc.steps: step3. call OnModifyDone and tick when default properties.
+     * @tc.expected: step3. check whether the content is correct.
      */
-    auto timerPattern = frameNode->GetPattern<TextTimerPattern>();
-    EXPECT_NE(timerPattern, nullptr);
-    auto timerLayoutProperty = timerPattern->CreateLayoutProperty();
+    pattern->InitTextTimerController();
+    pattern->OnModifyDone();
+    constexpr int32_t duration = 100;
+    pattern->Tick(duration);
+    EXPECT_EQ(layoutProperty->GetContent(), FORMAT_DATA);
+
+    /**
+     * @tc.steps: step4. call OnModifyDone and tick when set properties.
+     * @tc.expected: step4. check whether the properties and content is correct.
+     */
+    layoutProperty->UpdateInputCount(0);
+    EXPECT_EQ(layoutProperty->GetInputCount(), 0);
+    layoutProperty->UpdateIsCountDown(true);
+    EXPECT_EQ(layoutProperty->GetIsCountDown(), true);
+    pattern->OnModifyDone();
+    pattern->Tick(0);
+    EXPECT_EQ(layoutProperty->GetContent(), FORMAT_DATA);
+
+    /**
+     * @tc.steps: step5. get controller and create layout property and event.
+     * @tc.expected: step5. related function is called.
+     */
+    auto controller = pattern->GetTextTimerController();
+    EXPECT_NE(controller, nullptr);
+    controller->Start();
+    controller->Reset();
+    controller->Pause();
+    auto timerLayoutProperty = pattern->CreateLayoutProperty();
     EXPECT_NE(timerLayoutProperty, nullptr);
-    auto event = timerPattern->CreateEventHub();
+    auto event = pattern->CreateEventHub();
     EXPECT_NE(event, nullptr);
-    auto timerController = timerPattern->GetTextTimerController();
-    EXPECT_NE(timerController, nullptr);
 }
 
 /**

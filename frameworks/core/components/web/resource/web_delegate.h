@@ -525,6 +525,7 @@ private:
 
     std::string bundlePath_;
     std::string bundleDataPath_;
+    std::string hapPath_;
     RefPtr<PixelMap> pixelMap_ = nullptr;
     bool isRefreshPixelMap_ = false;
     Size drawSize_;

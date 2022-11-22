@@ -138,6 +138,7 @@ void BubblePaintMethod::PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper
     border_.SetBorderRadius(popupTheme->GetRadius());
     padding_ = popupTheme->GetPadding();
     RSPen paint;
+    paint.SetColor(backgroundColor_.GetValue());
     paint.SetAntiAlias(true);
     // TODO: color is not correct
     RSBrush brush;

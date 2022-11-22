@@ -794,7 +794,6 @@ class SubscriberManager {
      */
     constructor() {
         this.subscriberById_ = new Map();
-        this.nextFreeId_ = 0;
         
     }
     /**
@@ -957,7 +956,7 @@ class SubscriberManager {
      * @returns a globally unique id to be assigned to a Subscriber
      */
     makeId() {
-        return this.nextFreeId_++;
+        return ViewStackProcessor.MakeUniqueId();
     }
 }
 /*
@@ -1717,8 +1716,13 @@ class SubscribableHandler {
         
     }
     addOwningProperty(subscriber) {
-        
-        this.owningProperties_.add(subscriber.id__());
+        if (subscriber) {
+            
+            this.owningProperties_.add(subscriber.id__());
+        }
+        else {
+            stateMgmtConsole.warn(`SubscribableHandler: addOwningProperty: undefined subscriber. - Internal error?`);
+        }
     }
     /*
         the inverse function of createOneWaySync or createTwoWaySync
@@ -2259,18 +2263,22 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
     the property.
     */
     aboutToBeDeleted() {
-        // unregister from parent of this link
-        this.linkedParentProperty_.unlinkSuscriber(this.id__());
-        // unregister from the ObservedObject
-        ObservedObject.removeOwningProperty(this.getObject(), this);
+        if (this.linkedParentProperty_) {
+            // unregister from parent of this link
+            this.linkedParentProperty_.unlinkSuscriber(this.id__());
+            // unregister from the ObservedObject
+            ObservedObject.removeOwningProperty(this.getObject(), this);
+        }
         super.aboutToBeDeleted();
     }
     getObject() {
         this.notifyPropertyRead();
-        return this.linkedParentProperty_.get();
+        return (this.linkedParentProperty_ ? this.linkedParentProperty_.get() : undefined);
     }
     setObject(newValue) {
-        this.linkedParentProperty_.set(newValue);
+        if (this.linkedParentProperty_) {
+            this.linkedParentProperty_.set(newValue);
+        }
     }
     // this object is subscriber to ObservedObject
     // will call this cb function when property has changed
@@ -2438,8 +2446,10 @@ class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
     the property.
   */
     aboutToBeDeleted() {
-        this.source_.unlinkSuscriber(this.id__());
-        this.source_ = undefined;
+        if (this.source_) {
+            this.source_.unlinkSuscriber(this.id__());
+            this.source_ = undefined;
+        }
         super.aboutToBeDeleted();
     }
     // this object is subscriber to  SynchedPropertySimpleTwoWay
@@ -3109,12 +3119,18 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
     */
     aboutToBeDeleted() {
         // unregister from parent of this link
-        this.linkedParentProperty_.unlinkSuscriber(this.id__());
-        // unregister from the ObservedObject
-        ObservedObject.removeOwningProperty(this.linkedParentProperty_.getUnmonitored(), this);
+        if (this.linkedParentProperty_) {
+            this.linkedParentProperty_.unlinkSuscriber(this.id__());
+            // unregister from the ObservedObject
+            ObservedObject.removeOwningProperty(this.linkedParentProperty_.getUnmonitored(), this);
+        }
         super.aboutToBeDeleted();
     }
     setObject(newValue) {
+        if (!this.linkedParentProperty_) {
+            stateMgmtConsole.warn(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject, no linked parent property.`);
+            return;
+        }
         this.linkedParentProperty_.set(newValue);
     }
     // this object is subscriber to ObservedObject
@@ -3122,32 +3138,32 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
     hasChanged(newValue) {
         if (!this.changeNotificationIsOngoing_) {
             
-            this.notifyHasChanged(this.linkedParentProperty_.getUnmonitored());
+            this.notifyHasChanged(this.getUnmonitored());
         }
     }
     getUnmonitored() {
         
         // unmonitored get access , no call to otifyPropertyRead !
-        return this.linkedParentProperty_.getUnmonitored();
+        return (this.linkedParentProperty_ ? this.linkedParentProperty_.getUnmonitored() : undefined);
     }
     // get 'read through` from the ObservedProperty
     get() {
         
         this.notifyPropertyRead();
-        return this.linkedParentProperty_.getUnmonitored();
+        return this.getUnmonitored();
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
-        if (this.linkedParentProperty_.getUnmonitored() == newValue) {
+        if (this.getUnmonitored() == newValue) {
             
             return;
         }
         
-        ObservedObject.removeOwningProperty(this.linkedParentProperty_.getUnmonitored(), this);
+        ObservedObject.removeOwningProperty(this.getUnmonitored(), this);
         // avoid circular notifications @Link -> source @State -> other but also back to same @Link
         this.changeNotificationIsOngoing_ = true;
         this.setObject(newValue);
-        ObservedObject.addOwningProperty(this.linkedParentProperty_.getUnmonitored(), this);
+        ObservedObject.addOwningProperty(this.getUnmonitored(), this);
         this.notifyHasChanged(newValue);
         this.changeNotificationIsOngoing_ = false;
     }
@@ -3180,22 +3196,26 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
         this.source_.subscribeMe(this);
         // use own backing store for value to avoid
         // value changes to be propagated back to source
-        this.wrappedValue_ = source.getUnmonitored();
+        if (this.source_) {
+            this.wrappedValue_ = source.getUnmonitored();
+        }
     }
     /*
       like a destructor, need to call this before deleting
       the property.
     */
     aboutToBeDeleted() {
-        this.source_.unlinkSuscriber(this.id__());
-        this.source_ = undefined;
+        if (this.source_) {
+            this.source_.unlinkSuscriber(this.id__());
+            this.source_ = undefined;
+        }
         super.aboutToBeDeleted();
     }
     // this object is subscriber to  source
     // when source notifies a change, copy its value to local backing store
     hasChanged(newValue) {
         
-        this.wrappedValue_ = this.source_.getUnmonitored();
+        this.wrappedValue_ = newValue;
         this.notifyHasChanged(newValue);
     }
     getUnmonitored() {
@@ -3250,8 +3270,10 @@ class SynchedPropertySimpleTwoWayPU extends ObservedPropertySimpleAbstractPU {
     the property.
   */
     aboutToBeDeleted() {
-        this.source_.unlinkSuscriber(this.id__());
-        this.source_ = undefined;
+        if (this.source_) {
+            this.source_.unlinkSuscriber(this.id__());
+            this.source_ = undefined;
+        }
         super.aboutToBeDeleted();
     }
     // this object is subscriber to  SynchedPropertySimpleTwoWayPU
@@ -3265,16 +3287,20 @@ class SynchedPropertySimpleTwoWayPU extends ObservedPropertySimpleAbstractPU {
     }
     getUnmonitored() {
         
-        return this.source_.getUnmonitored();
+        return (this.source_ ? this.source_.getUnmonitored() : undefined);
     }
     // get 'read through` from the ObservedProperty
     get() {
         
         this.notifyPropertyRead();
-        return this.source_.getUnmonitored();
+        return this.getUnmonitored();
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
+        if (!this.source_) {
+            
+            return;
+        }
         if (this.source_.get() == newValue) {
             
             return;
@@ -3405,7 +3431,7 @@ class ViewPU extends NativeViewPartialUpdate {
      *    - localStorage do not specify, will inherit from parent View.
      *
     */
-    constructor(parent, localStorage) {
+    constructor(parent, localStorage, elmtId = -1) {
         super();
         this.parent_ = undefined;
         this.childrenWeakrefMap_ = new Map();
@@ -3419,7 +3445,10 @@ class ViewPU extends NativeViewPartialUpdate {
         // my LocalStorge instance, shared with ancestor Views.
         // create a default instance on demand if none is initialized
         this.localStoragebackStore_ = undefined;
-        this.id_ = SubscriberManager.MakeId();
+        // if set use the elmtId also as the ViewPU object's subscribable id.
+        // these matching is requiremrnt for updateChildViewById(elmtId) being able to
+        // find the child ViewPU object by given elmtId
+        this.id_ = elmtId == -1 ? SubscriberManager.MakeId() : elmtId;
         this.providedVars_ = parent ? new Map(parent.providedVars_)
             : new Map();
         this.localStoragebackStore_ = undefined;
@@ -3516,6 +3545,18 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         return hasBeenDeleted;
     }
+    /**
+     * Retrieve child by given id
+     * @param id
+     * @returns child if in map and weak ref can still be downreferenced
+     */
+    getChildById(id) {
+        const childWeakRef = this.childrenWeakrefMap_.get(id);
+        return childWeakRef ? childWeakRef.deref() : undefined;
+    }
+    updateStateVars(params) {
+        stateMgmtConsole.warn("ViewPU.updateStateVars unimplemented. Pls upgrade to latest eDSL transpiler version.");
+    }
     initialRenderView() {
         this.initialRender();
     }
@@ -3554,6 +3595,20 @@ class ViewPU extends NativeViewPartialUpdate {
             });
         }
         stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).forceCompleteRerender - end`);
+    }
+    updateStateVarsOfChildByElmtId(elmtId, params) {
+        
+        if (elmtId < 0) {
+            stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).updateChildViewById(${elmtId}) - invalid elmtId - internal error!`);
+            return;
+        }
+        let child = this.getChildById(elmtId);
+        if (!child) {
+            stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).updateChildViewById(${elmtId}) - no child with this elmtId - internal error!`);
+            return;
+        }
+        child.updateStateVars(params);
+        
     }
     // implements IMultiPropertiesChangeSubscriber
     viewPropertyHasChanged(varName, dependentElmtIds) {

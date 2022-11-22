@@ -29,6 +29,7 @@ CanvasDrawFunction ScrollPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
         auto scroll = weak.Upgrade();
         if (scroll) {
             scroll->PaintScrollBar(canvas, paintWrapper);
+            scroll->PaintScrollEffect(canvas, paintWrapper);
         }
     };
 
@@ -48,9 +49,17 @@ void ScrollPaintMethod::PaintScrollBar(RSCanvas& canvas, PaintWrapper* paintWrap
     }
 
     ScrollBarPainter::PaintRectBar(canvas, scrollBar, UINT8_MAX);
-    if (scrollBar->GetFirstLoad()) {
-        scrollBar->SetFirstLoad(false);
-    }
+}
+
+void ScrollPaintMethod::PaintScrollEffect(RSCanvas& canvas, PaintWrapper* paintWrapper) const
+{
+    CHECK_NULL_VOID(paintWrapper);
+    auto paintProperty = DynamicCast<ScrollPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
+    auto scrollEdgeEffect = paintProperty->GetScrollEdgeEffect();
+    CHECK_NULL_VOID(scrollEdgeEffect);
+    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+    scrollEdgeEffect->Paint(canvas, frameSize, { 0.0f, 0.0f });
 }
 
 } // namespace OHOS::Ace::NG

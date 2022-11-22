@@ -249,9 +249,7 @@ void LayoutWrapper::Layout()
         }
         layoutProperty_->UpdateContentConstraint();
     }
-
     layoutAlgorithm_->Layout(this);
-    layoutProperty_->UpdateGridOffset(this);
     LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", host->GetTag().c_str(),
         host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
 }
@@ -309,5 +307,15 @@ void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
         return;
     }
     host->SwapDirtyLayoutWrapperOnMainThread(Claim(this));
+
+    /* Adjust components' position which have been set grid properties */
+    for (const auto& child : children_) {
+        if (child && child->GetHostNode()) {
+            child->GetHostNode()->AdjustGridOffset();
+        }
+    }
+    if (layoutWrapperBuilder_) {
+        layoutWrapperBuilder_->SwapDirtyAndUpdateBuildCache();
+    }
 }
 } // namespace OHOS::Ace::NG

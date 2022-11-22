@@ -85,10 +85,17 @@ public:
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);
 
-private:
-    void PopToast();
+    /**  pop overlays (if any) on back press
+    *
+    *    @return    true if popup was removed, false if no overlay exists
+    */
+    bool RemoveOverlay();
 
-    WeakPtr<FrameNode> toast_;
+private:
+    void PopToast(int32_t targetId);
+
+    // toast should contain id to avoid multiple delete.
+    std::unordered_map<int32_t, WeakPtr<FrameNode>> toastMap_;
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     // K: target frameNode ID, V: menuNode

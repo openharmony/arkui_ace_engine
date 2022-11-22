@@ -20,13 +20,21 @@
 #include "utils/rect.h"
 #include "utils/scalar.h"
 
-#include "core/components_ng/test/mock/rosen/mock_canvas.h"
-#include "core/components_ng/test/mock/rosen/mock_pen.h"
+#include "core/components_ng/test/mock/rosen/testing_canvas.h"
+#include "core/components_ng/test/mock/rosen/testing_pen.h"
 #include "core/components_ng/test/mock/rosen/testing_color.h"
+#include "core/components_ng/test/mock/rosen/testing_filter.h"
+#include "core/components_ng/test/mock/rosen/testing_path.h"
+#include "core/components_ng/test/mock/rosen/testing_shader_effect.h"
+#include "core/components_ng/test/mock/rosen/testing_brush.h"
 
 namespace OHOS::Ace {
-using RSCanvas = Testing::MockCanvas;
-using RSPen = Testing::MockPen;
+using RSCanvas = Testing::TestingCanvas;
+using RSPen = Testing::TestingPen;
+using RSBrush = Testing::TestingBrush;
+using RSPath = Testing::TestingPath;
+using RSShaderEffect = Testing::TestingShaderEffect;
+using RSFilter = Testing::TestingFilter;
 using RSColor = Testing::TestingColor;
 using RSPoint = Rosen::Drawing::PointF;
 using RSScalar = Rosen::Drawing::scalar;

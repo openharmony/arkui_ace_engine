@@ -105,7 +105,7 @@ void UpdateChildLayoutConstrainByFlexBasis(
     if (!flexBasis) {
         return;
     }
-    if (flexBasis->Unit() == DimensionUnit::AUTO) {
+    if (flexBasis->Unit() == DimensionUnit::AUTO || !flexBasis->IsValid()) {
         return;
     }
     if (direction == FlexDirection::ROW || direction == FlexDirection::ROW_REVERSE) {
@@ -201,7 +201,7 @@ void FlexLayoutAlgorithm::InitFlexProperties(LayoutWrapper* layoutWrapper)
 }
 
 void FlexLayoutAlgorithm::TravelChildrenFlexProps(
-    LayoutWrapper* layoutWrapper, const SizeF& realSize, const PaddingPropertyF& padding)
+    LayoutWrapper* layoutWrapper, const SizeF& realSize)
 {
     if (!magicNodes_.empty()) {
         LOGD("second measure feature, only update child layout constraint");
@@ -223,7 +223,6 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     SizeF maxSize(LessOrEqual(realSize.Width(), 0.0f) ? childLayoutConstraint.maxSize.Width() : realSize.Width(),
         LessOrEqual(realSize.Height(), 0.0f) ? childLayoutConstraint.maxSize.Height() : realSize.Height());
-    MinusPaddingToSize(padding, maxSize);
     childLayoutConstraint.maxSize = maxSize;
     for (const auto& child : children) {
         if (child->IsOutOfLayout()) {
@@ -638,7 +637,11 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (Negative(mainAxisSize_)) {
         mainAxisSize_ = 0.0f;
     }
-    TravelChildrenFlexProps(layoutWrapper, realSize, padding);
+    TravelChildrenFlexProps(layoutWrapper, realSize);
+    if (GreatNotEqual(totalFlexWeight_, 0.0f)) {
+        LOGD("Flex weight only supported in match parent");
+        isInfiniteLayout_ = false;
+    }
     selfIdealCrossAxisSize_ = GetCrossAxisSizeHelper(realSize, direction_);
     FlexItemProperties flexItemProperties;
 

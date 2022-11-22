@@ -25,6 +25,7 @@
 #include "core/components/navigation_bar/render_navigation_container.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components/stage/stage_component.h"
+#include "core/components/theme/theme_manager_impl.h"
 namespace OHOS::Ace {
 
 namespace {
@@ -85,7 +86,7 @@ RefPtr<ComposedComponent> NavigationContainerComponent::BuildToolBar(
         }
     }
     auto tabBar = AceType::MakeRefPtr<TabBarComponent>(tabBarItems, controller);
-    auto theme = AceType::MakeRefPtr<ThemeManager>()->GetTheme<TabTheme>();
+    auto theme = AceType::MakeRefPtr<ThemeManagerImpl>()->GetTheme<TabTheme>();
     tabBar->InitBottomTabStyle(theme);
 
     auto component = declaration->toolBarBuilder;

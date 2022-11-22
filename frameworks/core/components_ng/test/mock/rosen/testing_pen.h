@@ -32,10 +32,11 @@ public:
     TestingPen() = default;
     ~TestingPen() = default;
 
-    virtual void SetAntiAlias(bool aa) = 0;
-    virtual void SetWidth(scalar width) = 0;
-    virtual void SetCapStyle(CapStyle cs) = 0;
-    virtual void SetColor(const TestingColor& c) = 0;
+    virtual void SetAntiAlias(bool aa) {}
+    virtual void SetWidth(scalar width) {}
+    virtual void SetCapStyle(CapStyle cs) {}
+    virtual void SetColor(const TestingColor& c) {}
+    virtual void SetColor(int c) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_PEN_H

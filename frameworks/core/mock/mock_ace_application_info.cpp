@@ -61,6 +61,23 @@ const std::string& AceApplicationInfo::GetAbilityName() const
     return abilityName_;
 }
 
+int32_t AceApplicationInfo::GetUid() const
+{
+    return uid_;
+}
+
+const std::string& AceApplicationInfo::GetPackageName() const
+{
+    return packageName_;
+}
+#endif
+
+#ifdef ACE_UNITTEST
+const std::string& AceApplicationInfo::GetAbilityName() const
+{
+    return abilityName_;
+}
+
 int32_t AceApplicationInfo::GetUid() const 
 {
     return uid_;

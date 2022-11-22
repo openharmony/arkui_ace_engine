@@ -45,11 +45,16 @@ napi_value GetReturnObject(napi_env env, std::string callbackString)
 
 static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
 {
+    size_t requireArgc = 1;
     size_t argc = 1;
     napi_value argv = nullptr;
     napi_value thisVar = nullptr;
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
+    if (argc != requireArgc) {
+        NapiThrow(env, "The number of parameters must be equal to 1.", Framework::ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
 
     napi_value messageNApi = nullptr;
     napi_value durationNApi = nullptr;
@@ -88,6 +93,9 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
             NapiThrow(env, "Can not get message from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
+    } else if (valueType == napi_undefined) {
+        NapiThrow(env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
+        return nullptr;
     } else {
         LOGE("The parameter type is incorrect.");
         NapiThrow(env, "The type of message is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
@@ -542,6 +550,17 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                         if (ParseResourceParam(env, textNApi, id, type, params)) {
                             ParseString(id, type, params, textString);
                         }
+                    } else {
+                        delete asyncContext;
+                        asyncContext = nullptr;
+                        if (valueType == napi_undefined) {
+                            NapiThrow(
+                                env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
+                        } else {
+                            NapiThrow(env, "The type of the button text parameter is incorrect.",
+                                Framework::ERROR_CODE_PARAM_INVALID);
+                        }
+                        return nullptr;
                     }
                     napi_typeof(env, colorNApi, &valueType);
                     if (valueType == napi_string) {
@@ -556,10 +575,31 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                         if (ParseResourceParam(env, colorNApi, id, type, params)) {
                             ParseString(id, type, params, colorString);
                         }
+                    } else {
+                        delete asyncContext;
+                        asyncContext = nullptr;
+                        if (valueType == napi_undefined) {
+                            NapiThrow(
+                                env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
+                        } else {
+                            NapiThrow(env, "The type of the button color parameter is incorrect.",
+                                Framework::ERROR_CODE_PARAM_INVALID);
+                        }
+                        return nullptr;
                     }
                     ButtonInfo buttonInfo = { .text = textString, .textColor = colorString };
                     asyncContext->buttons.emplace_back(buttonInfo);
                 }
+            } else {
+                delete asyncContext;
+                asyncContext = nullptr;
+                if (valueType == napi_undefined) {
+                    NapiThrow(env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
+                } else {
+                    NapiThrow(
+                        env, "The type of the button parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+                }
+                return nullptr;
             }
         } else if (valueType == napi_function) {
             napi_create_reference(env, argv[i], 1, &asyncContext->callbackRef);

@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double MIN_TIME = 1.0;
-constexpr int MIN_DURATION = 250;
+constexpr int32_t MIN_DURATION = 250;
 constexpr double DRAG = 0.995;
 constexpr double ZERO_SPEED = 0.5;
 } // namespace
@@ -61,7 +61,7 @@ bool TossAnimationController::Play()
         return false;
     }
 
-    double zeroSpeed = (speed > 0 ? ZERO_SPEED : 0.0 - ZERO_SPEED);
+    double zeroSpeed = GreatNotEqual(speed, 0.0) ? ZERO_SPEED : -ZERO_SPEED;
     double time = zeroSpeed / speed;
     time = std::log(time) / std::log(DRAG);
     if (time < MIN_DURATION) {

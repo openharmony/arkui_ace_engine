@@ -68,4 +68,4 @@ HWTEST_F(InspectImageTest, InspectImageTest002, TestSize.Level1)
     EXPECT_EQ(inspectImage.styles_["match-text-direction"], "false");
     EXPECT_EQ(inspectImage.styles_["fit-original-size"], "false");
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::Framework

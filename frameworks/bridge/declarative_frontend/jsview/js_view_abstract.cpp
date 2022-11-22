@@ -2332,11 +2332,43 @@ bool JSViewAbstract::ParseJsDimensionPx(const JSRef<JSVal>& jsValue, Dimension& 
     return ParseJsDimension(jsValue, result, DimensionUnit::PX);
 }
 
-bool JSViewAbstract::ParseJsDouble(const JSRef<JSVal>& jsValue, double& result)
+bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result)
 {
-    if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    if (jsObj->IsEmpty()) {
+        LOGW("jsObj is nullptr");
         return false;
     }
+    JSRef<JSVal> id = jsObj->GetProperty("id");
+    JSRef<JSVal> type = jsObj->GetProperty("type");
+    if (!id->IsNumber() || !type->IsNumber()) {
+        LOGW("at least one of id and type is not number");
+        return false;
+    }
+    auto themeConstants = GetThemeConstants(jsObj);
+    auto resId = id->ToNumber<uint32_t>();
+    auto resType = type->ToNumber<uint32_t>();
+    if (!themeConstants) {
+        LOGW("themeConstants is nullptr");
+        return false;
+    }
+    if (resType == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto numberString = themeConstants->GetString(resId);
+        return StringUtils::StringToDouble(numberString, result);
+    }
+    if (resType == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        result = themeConstants->GetInt(resId);
+        return true;
+    }
+    if (resType == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        result = themeConstants->GetDouble(resId);
+        return true;
+    }
+    return false;
+}
+
+bool JSViewAbstract::ParseJsDouble(const JSRef<JSVal>& jsValue, double& result)
+{
     if (jsValue->IsNumber()) {
         result = jsValue->ToNumber<double>();
         return true;
@@ -2345,20 +2377,10 @@ bool JSViewAbstract::ParseJsDouble(const JSRef<JSVal>& jsValue, double& result)
         result = StringUtils::StringToDouble(jsValue->ToString());
         return true;
     }
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (!resId->IsNumber()) {
-        LOGW("resId is not number");
-        return false;
+    if (jsValue->IsObject()) {
+        return ParseResourceToDouble(jsValue, result);
     }
-
-    auto themeConstants = GetThemeConstants(jsObj);
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
-        return false;
-    }
-    result = themeConstants->GetDouble(resId->ToNumber<uint32_t>());
-    return true;
+    return false;
 }
 
 bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
@@ -3311,9 +3333,8 @@ void JSViewAbstract::JsShadow(const JSCallbackInfo& info)
     }
     double radius = 0.0;
     ParseJsonDouble(argsPtrItem->GetValue("radius"), radius);
-    if (LessOrEqual(radius, 0.0)) {
-        LOGE("JsShadow Parse radius failed, radius = %{public}lf", radius);
-        return;
+    if (LessNotEqual(radius, 0.0)) {
+        radius = 0.0;
     }
     std::vector<Shadow> shadows(1);
     shadows.begin()->SetBlurRadius(radius);
@@ -4366,6 +4387,7 @@ void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
     auto ratioArray = JSRef<JSArray>::Cast(info[0]);
     size_t size = ratioArray->Length();
     std::vector<double> ratioVec(size);
+    ratioVec.clear();
     for (size_t i = 0; i < size; i++) {
         double ratio = 0.0;
         ParseJsDouble(ratioArray->GetValueAt(i), ratio);

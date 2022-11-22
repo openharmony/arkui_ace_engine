@@ -35,6 +35,7 @@
 #include "third_party/skia/include/utils/SkParsePath.h"
 
 #include "base/i18n/localization.h"
+#include "base/image/pixel_map.h"
 #include "base/json/json_util.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/string_utils.h"
@@ -1456,13 +1457,13 @@ void FlutterRenderCustomPaint::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Can
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> image;
     if (!renderTaskHolder_->ioManager) {
-        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     } else {
 #ifndef GPU_DISABLED
         image = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
             imagePixmap, true, imagePixmap.colorSpace(), true);
 #else
-        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
 #endif
     }
     if (!image) {

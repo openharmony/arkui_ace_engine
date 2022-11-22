@@ -25,9 +25,10 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
+#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "frameworks/core/components_ng/pattern/pattern.h"
-#include "frameworks/core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -38,13 +39,22 @@ constexpr int32_t NODE_ID_2 = 601;
 const RectF FIRST_HANDLE_INFO_RECT(0, 0, 100.0f, 100.0f);
 const RectF SECOND_HANDLE_INFO_RECT(0, 0, 200.0f, 200.0f);
 } // namespace
+
 class SelectOverlayProxyTestNg : public testing::Test {
 public:
-    static void SetUpTestSuite() {};
-    static void TearDownTestSuite() {};
-
-protected:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
 };
+
+void SelectOverlayProxyTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void SelectOverlayProxyTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 /**
  * @tc.name: SelectOverlayProxyTest001

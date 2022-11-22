@@ -50,7 +50,7 @@ DataPanelModifier::DataPanelModifier() : date_(AceType::MakeRefPtr<AnimatablePro
     AttachProperty(date_);
 }
 
-void PaintRainbowFilterMask(RSCanvas& canvas, double factor, ArcData arcData)
+void DataPanelModifier::PaintRainbowFilterMask(RSCanvas& canvas, double factor, ArcData arcData) const
 {
     float thickness = arcData.thickness;
     float radius = arcData.radius - SHADOW_BLUR_RADIUS;

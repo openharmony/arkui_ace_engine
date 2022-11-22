@@ -85,4 +85,4 @@ HWTEST_F(InspectGridColumnTest, InspectGridColumnTest002, TestSize.Level1)
     EXPECT_EQ(inspectGridColumn.styles_.find("flex-shrink"), inspectGridColumn.styles_.end());
     EXPECT_EQ(inspectGridColumn.styles_.find("position"), inspectGridColumn.styles_.end());
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::Framework

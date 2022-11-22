@@ -18,6 +18,7 @@
 #include "core/components/image/image_component.h"
 #include "core/components/select/select_component.h"
 #include "core/components/text/text_component.h"
+#include "core/components/theme/theme_manager_impl.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -46,7 +47,7 @@ RefPtr<Component> SelectCreator::CreateFromJson(const JsonValue& componentJson, 
     }
 
     LOGD("Create object of className[%{public}s].", strValue.c_str());
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     theme_ = themeManager->GetTheme<SelectTheme>();
     auto select = AceType::MakeRefPtr<SelectComponent>();
     select->InitTheme(themeManager);

@@ -14,13 +14,18 @@
  */
 
 #include "gtest/gtest.h"
-
+#define private public
+#define protected public
 #include "core/components/checkable/checkable_theme.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_paint_property.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -29,31 +34,38 @@ namespace {
 const std::string NAME = "radio";
 const std::string GROUP_NAME = "radioGroup";
 const std::string GROUP_NAME_CHANGE = "radioGroupChange";
-const Dimension WIDTH = 50.0_vp;
-const Dimension HEIGHT = 50.0_vp;
-const NG::PaddingPropertyF PADDING = NG::PaddingPropertyF();
-const bool CHECKED = true;
+constexpr Dimension WIDTH = 50.0_vp;
+constexpr Dimension HEIGHT = 50.0_vp;
+constexpr NG::PaddingPropertyF PADDING = NG::PaddingPropertyF();
+constexpr bool CHECKED = true;
+constexpr Dimension HORIZONTAL_PADDING = Dimension(5.0);
+constexpr Dimension VERTICAL_PADDING = Dimension(4.0);
 } // namespace
 
-class RadioPropertyTestNg : public testing::Test {
+class RadioPatternTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
+    void SetUp() override {}
+    void TearDown() override {}
 };
 
-void RadioPropertyTestNg::SetUpTestCase() {}
-void RadioPropertyTestNg::TearDownTestCase() {}
-void RadioPropertyTestNg::SetUp() {}
-void RadioPropertyTestNg::TearDown() {}
+void RadioPatternTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void RadioPatternTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 /**
  * @tc.name: RadioPaintPropertyTest001
  * @tc.desc: Set Radio value into RadioPaintProperty and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPropertyTestNg, RadioPaintPropertyTest001, TestSize.Level1)
+HWTEST_F(RadioPatternTestNg, RadioPaintPropertyTest001, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -73,7 +85,7 @@ HWTEST_F(RadioPropertyTestNg, RadioPaintPropertyTest001, TestSize.Level1)
  * @tc.desc: Set Radio value into RadioEventHub and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPropertyTestNg, RadioEventHubPropertyTest002, TestSize.Level1)
+HWTEST_F(RadioPatternTestNg, RadioEventHubPropertyTest002, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -90,7 +102,7 @@ HWTEST_F(RadioPropertyTestNg, RadioEventHubPropertyTest002, TestSize.Level1)
  * @tc.desc: Test Radio onChange event.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPropertyTestNg, RadioEventTest003, TestSize.Level1)
+HWTEST_F(RadioPatternTestNg, RadioEventTest003, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -110,8 +122,15 @@ HWTEST_F(RadioPropertyTestNg, RadioEventTest003, TestSize.Level1)
  * @tc.desc: Test Radio onModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPropertyTestNg, RadioPatternTest004, TestSize.Level1)
+HWTEST_F(RadioPatternTestNg, RadioPatternTest004, TestSize.Level1)
 {
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto radioTheme = AceType::MakeRefPtr<RadioTheme>();
+    radioTheme->hotZoneHorizontalPadding_ = HORIZONTAL_PADDING;
+    radioTheme->hotZoneVerticalPadding_ = VERTICAL_PADDING;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(radioTheme));
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -119,61 +138,17 @@ HWTEST_F(RadioPropertyTestNg, RadioPatternTest004, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto pattern = frameNode->GetPattern<RadioPattern>();
     EXPECT_FALSE(pattern == nullptr);
+    EXPECT_EQ(frameNode->GetLayoutProperty()->GetMarginProperty()->left.value(),
+        CalcLength(radioTheme->hotZoneHorizontalPadding_.Value()));
+    EXPECT_EQ(frameNode->GetLayoutProperty()->GetMarginProperty()->right.value(),
+        CalcLength(radioTheme->hotZoneHorizontalPadding_.Value()));
+    EXPECT_EQ(frameNode->GetLayoutProperty()->GetMarginProperty()->top.value(),
+        CalcLength(radioTheme->hotZoneVerticalPadding_.Value()));
+    EXPECT_EQ(frameNode->GetLayoutProperty()->GetMarginProperty()->bottom.value(),
+        CalcLength(radioTheme->hotZoneVerticalPadding_.Value()));
     pattern->SetPreGroup(GROUP_NAME);
     frameNode->MarkModifyDone();
     pattern->SetPreGroup(GROUP_NAME_CHANGE);
     frameNode->MarkModifyDone();
 }
-
-/**
- * @tc.name: RadioMeasureTest005
- * @tc.desc: Test Radio Measure.
- * @tc.type: FUNC
- */
-HWTEST_F(RadioPropertyTestNg, RadioMeasureTest005, TestSize.Level1)
-{
-    RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
-
-    // Create LayoutWrapper and set radioLayoutAlgorithm.
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(geometryNode == nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    auto radioPattern = frameNode->GetPattern<RadioPattern>();
-    EXPECT_FALSE(radioPattern == nullptr);
-    auto radioLayoutAlgorithm = radioPattern->CreateLayoutAlgorithm();
-    EXPECT_FALSE(radioLayoutAlgorithm == nullptr);
-    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(radioLayoutAlgorithm));
-    // Radio without setting height and width.
-    const LayoutConstraintF layoutConstraint;
-    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
-    // Calculate the size and offset.
-    radioLayoutAlgorithm->Measure(&layoutWrapper);
-    radioLayoutAlgorithm->Layout(&layoutWrapper);
-    // Test the default size set in theme and the offset.
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->FlushBuild();
-    auto radioTheme = pipeline->GetTheme<RadioTheme>();
-    CHECK_NULL_VOID(radioTheme);
-    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize(),
-        SizeF(radioTheme->GetHeight().ConvertToPx(), radioTheme->GetWidth().ConvertToPx()));
-    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameOffset(), OffsetF(0.0, 0.0));
-
-    /**
-    //     corresponding ets code:
-    //         Radio({ value: 'radio', group: 'radioGroup' }).width(50).height(50)
-    */
-    LayoutConstraintF layoutConstraintSize;
-    layoutConstraintSize.selfIdealSize.SetSize(SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
-    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize);
-    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
-    radioLayoutAlgorithm->Measure(&layoutWrapper);
-    // Test the size set by codes.
-    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize(), SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
-}
-
 } // namespace OHOS::Ace::NG

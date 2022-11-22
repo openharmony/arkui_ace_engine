@@ -54,7 +54,6 @@ void SlidingPanelModelNG::Create(bool isShow)
 
     auto type = isShow ? VisibleType::VISIBLE : VisibleType::GONE;
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, type);
-    SetIsShow(isShow);
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext) {
         renderContext->UpdateBackgroundColor(BG_COLOR);
