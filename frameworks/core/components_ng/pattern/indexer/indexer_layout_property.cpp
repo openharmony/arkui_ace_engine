@@ -24,6 +24,9 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("Color", propColor_.value_or(Color::WHITE).ColorToString().c_str());
     json->Put("SelectedColor", propSelectedColor_.value_or(Color::WHITE).ColorToString().c_str());
     json->Put("PopupColor", propPopupColor_.value_or(Color::WHITE).ColorToString().c_str());
+    json->Put("SelectedBackgroundColor", propSelectedBackgroundColor_.value_or(Color::WHITE)
+                                             .ColorToString().c_str());
+    json->Put("PopupBackground", propPopupBackground_.value_or(Color::WHITE).ColorToString().c_str());
     json->Put("UsingPopup", propUsingPopup_.value_or(false) ? "true" : "false");
     json->Put("ItemSize", propItemSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
     json->Put("AlignStyle", propAlignStyle_.value_or(AlignStyle::LEFT) == AlignStyle::LEFT
