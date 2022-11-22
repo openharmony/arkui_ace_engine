@@ -22,6 +22,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 
 namespace OHOS::Ace::NG {
 
@@ -41,6 +42,7 @@ public:
         paintProperty->UpdatePaintProperty(this);
         paintProperty->currentOffset_ = currentOffset_;
         paintProperty->scrollBar_ = scrollBar_;
+        paintProperty->scrollEdgeEffect_ = scrollEdgeEffect_;
         paintProperty->viewPortExtent_ = viewPortExtent_;
         paintProperty->propAxis_ = CloneAxis();
         return paintProperty;
@@ -54,6 +56,16 @@ public:
         json->Put("scrollBar", scrollBar_ ? scrollBarMap[scrollBar_->GetDisplayMode()].c_str() : "");
         json->Put("scrollBarColor", scrollBar_ ? scrollBar_->GetForegroundColor().ColorToString().c_str() : "");
         json->Put("scrollBarWidth", scrollBar_ ? scrollBar_->GetActiveWidth().ToString().c_str() : "");
+    }
+
+    void SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEdgeEffect)
+    {
+        scrollEdgeEffect_ = scrollEdgeEffect;
+    }
+
+    RefPtr<ScrollEdgeEffect> GetScrollEdgeEffect() const
+    {
+        return scrollEdgeEffect_;
     }
 
     RefPtr<ScrollBar> GetScrollBar()
@@ -136,6 +148,7 @@ private:
     float currentOffset_ = 0.0f;
     SizeF viewPortExtent_;
     RefPtr<ScrollBar> scrollBar_;
+    RefPtr<ScrollEdgeEffect> scrollEdgeEffect_;
 };
 
 } // namespace OHOS::Ace::NG
