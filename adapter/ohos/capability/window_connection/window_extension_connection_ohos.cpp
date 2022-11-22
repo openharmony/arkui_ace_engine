@@ -17,6 +17,7 @@
 #include <functional>
 #include <memory>
 
+#include "base/utils/utils.h"
 #include "common/rs_color.h"
 #include "element_name.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
@@ -62,9 +63,7 @@ public:
         auto task = [weak = node_, instanceId = instanceId_]() {
             ContainerScope scope(instanceId);
             auto node = weak.Upgrade();
-            if (!node) {
-                return;
-            }
+            CHECK_NULL_VOID(node);
             auto ability = AceType::DynamicCast<V2::RenderAbilityComponent>(node);
             if (ability) {
                 ability->FireConnect();
@@ -85,9 +84,7 @@ public:
         auto task = [weak = node_, instanceId = instanceId_]() {
             ContainerScope scope(instanceId);
             auto node = weak.Upgrade();
-            if (!node) {
-                return;
-            }
+            CHECK_NULL_VOID(node);
             auto ability = AceType::DynamicCast<V2::RenderAbilityComponent>(node);
             if (ability) {
                 ability->FireDisconnect();
