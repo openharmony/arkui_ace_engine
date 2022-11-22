@@ -15,9 +15,9 @@
 
 #include "core/components_ng/pattern/picker/datepicker_column_layout_algorithm.h"
 
+#include "core/components_ng/pattern/linear_layout/linear_layout_utils.h"
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -38,7 +38,8 @@ void DatePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     for (const auto& child : children) {
         auto childGeometryNode = child->GetGeometryNode();
         auto childSize = childGeometryNode->GetMarginFrameSize();
-        auto childOffset = padding.Offset() + OffsetF(0.0f, childStartCoordinate);
+        auto childOffset =
+            OffsetF(0.0f, childStartCoordinate + static_cast<float>(currentOffset_) + padding.Offset().GetY());
         childGeometryNode->SetMarginFrameOffset(childOffset);
         child->Layout();
         childStartCoordinate += childSize.Height();

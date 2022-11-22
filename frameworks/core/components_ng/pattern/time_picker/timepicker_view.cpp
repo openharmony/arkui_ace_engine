@@ -106,6 +106,8 @@ void TimePickerView::SetHour24(bool isUseMilitaryTime)
     CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     timePickerRowPattern->SetHour24(isUseMilitaryTime);
+    frameNode->MarkModifyDone();
+    frameNode->MarkDirtyNode();
 }
 
 void TimePickerView::SetOnChange(ChangeEvent&& onChange)

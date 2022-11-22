@@ -29,17 +29,24 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT TextPickerPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(TextPickerPaintMethod, NodePaintMethod)
 public:
-    TextPickerPaintMethod(float dividerSpacingWidth, float gradientHeight, float dividerHeight)
-        : dividerSpacingWidth_(dividerSpacingWidth), gradientHeight_(gradientHeight), dividerHeight_(dividerHeight)
-    {}
+    TextPickerPaintMethod() = default;
     ~TextPickerPaintMethod() override = default;
 
-    CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
 
+    double GetDefaultPickerItemHeight() const
+    {
+        return defaultPickerItemHeight_;
+    }
+
+    void SetDefaultPickerItemHeight(double defaultPickerItemHeight)
+    {
+        defaultPickerItemHeight_ = defaultPickerItemHeight;
+    }
+
+    CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
+    void PaintGradient(RSCanvas& canvas, const RectF& frameRect);
 private:
-    float dividerSpacingWidth_;
-    float gradientHeight_;
-    float dividerHeight_;
+    double defaultPickerItemHeight_ = 0.0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_PICKER_TEXT_PICKER_PAINT_METHOD_H
