@@ -34,6 +34,7 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
     CHECK_NULL_VOID(backButtonLayoutProperty);
 
     if (!titleBarLayoutProperty->HasNoPixMap()) {
+        backButtonNode->MarkModifyDone();
         return;
     }
 
@@ -50,6 +51,28 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
     }
 }
 
+void MountTitle(const RefPtr<TitleBarNode>& hostNode)
+{
+    auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    auto titleNode = AceType::DynamicCast<FrameNode>(hostNode->GetTitle());
+    CHECK_NULL_VOID(titleNode);
+    auto titleLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(titleLayoutProperty);
+    titleNode->MarkModifyDone();
+}
+
+void MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
+{
+    auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    auto subtitleNode = AceType::DynamicCast<FrameNode>(hostNode->GetSubtitle());
+    CHECK_NULL_VOID(subtitleNode);
+    auto titleLayoutProperty = subtitleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(titleLayoutProperty);
+    subtitleNode->MarkModifyDone();
+}
+
 }
 
 void TitleBarPattern::OnModifyDone()
@@ -57,6 +80,8 @@ void TitleBarPattern::OnModifyDone()
     auto hostNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     MountBackButton(hostNode);
+    MountTitle(hostNode);
+    MountSubTitle(hostNode);
 
     // navBar title bar
     auto titleBarLayoutProperty = AceType::DynamicCast<TitleBarLayoutProperty>(hostNode->GetLayoutProperty());
@@ -358,6 +383,13 @@ bool TitleBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     isInitialSubtitle_ = titleBarLayoutAlgorithm->IsInitialSubtitle();
     minTitleHeight_ = titleBarLayoutAlgorithm->GetMinTitleHeight();
     return true;
+}
+
+void TitleBarPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToFrame(true);
 }
 
 } // namespace OHOS::Ace::NG

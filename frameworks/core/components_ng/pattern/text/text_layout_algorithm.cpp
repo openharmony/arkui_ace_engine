@@ -43,6 +43,10 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, std::nullopt);
 
+    if (!contentConstraint.maxSize.IsPositive()) {
+        return std::nullopt;
+    }
+
     bool skipMeasure = false;
     if (paragraph_) {
         // remeasure case, check text length and layout constrain.
