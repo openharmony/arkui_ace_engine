@@ -750,17 +750,10 @@ private:
     static void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode,
         bool isContextMenu, const NG::OffsetF& offset)
     {
-        // builder already executed, just show menu
-        if (!buildFunc) {
-            NG::ViewAbstract::ShowMenu(targetNode->GetId(), offset, isContextMenu);
-            return;
-        }
         NG::ScopedViewStackProcessor builderViewStackProcessor;
         buildFunc();
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         NG::ViewAbstract::BindMenuWithCustomNode(customNode, targetNode, isContextMenu, offset);
-        // nullify builder
-        buildFunc = nullptr;
     }
     RefPtr<InputEvent> mouseCallback_;
 };
