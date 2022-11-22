@@ -35,6 +35,7 @@ void SliderComponent::SetThemeStyle(const RefPtr<SliderTheme>& theme)
     if (!theme) {
         return;
     }
+    theme_ = theme;
     block_->SetBlockColor(theme->GetBlockColor());
     track_->SetBackgroundColor(theme->GetTrackBgColor());
     track_->SetSelectColor(theme->GetTrackSelectedColor());
