@@ -276,6 +276,11 @@ void JSRadio::OnChange(const JSCallbackInfo& args)
 
 void JSRadio::JsOnClick(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsOnClick(args);
+        return;
+    }
+
     if (JSViewBindEvent(&CheckableComponent::SetOnClick, args)) {
     } else {
         LOGW("Failed to bind event");
