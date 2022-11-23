@@ -40,7 +40,7 @@ void GridContainerLayoutProperty::OnContainerInfoUpdate(const GridContainerInfo&
 
 void GridContainerLayoutProperty::BuildWidth(float width)
 {
-    if (NearEqual(width, Infinity<float>())) {
+    if (GreaterOrEqualToInfinity(width)) {
         propContainerInfo_->BuildColumnWidth();
     } else {
         propContainerInfo_->BuildColumnWidth(width);

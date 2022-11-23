@@ -41,7 +41,7 @@ std::optional<SizeF> CalendarLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     auto maxSize = contentConstraint.maxSize;
     SizeF layoutSize;
-    if (GreatOrEqual(maxSize.Width(), Infinity<float>()) || GreatOrEqual(maxSize.Height(), Infinity<float>())) {
+    if (GreaterOrEqualToInfinity(maxSize.Width()) || GreaterOrEqualToInfinity(maxSize.Height())) {
         auto minSize = contentConstraint.minSize;
         layoutSize = SizeF(
             std::max(maxSize.Width(), calendarMinSize.Width()), std::max(minSize.Height(), calendarMinSize.Height()));
@@ -49,7 +49,7 @@ std::optional<SizeF> CalendarLayoutAlgorithm::MeasureContent(
         layoutSize = SizeF(
             std::max(maxSize.Width(), calendarMinSize.Width()), std::max(maxSize.Height(), calendarMinSize.Height()));
     }
-    if (GreatOrEqual(maxSize.Width(), Infinity<float>()) || GreatOrEqual(maxSize.Height(), Infinity<float>())) {
+    if (GreaterOrEqualToInfinity(maxSize.Width()) || GreaterOrEqualToInfinity(maxSize.Height())) {
         auto frameNode = layoutWrapper->GetHostNode();
         CHECK_NULL_RETURN(frameNode, std::nullopt);
         auto pipeline = frameNode->GetContext();
