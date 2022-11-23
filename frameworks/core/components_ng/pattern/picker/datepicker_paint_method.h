@@ -29,17 +29,11 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT DatePickerPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(DatePickerPaintMethod, NodePaintMethod)
 public:
-    DatePickerPaintMethod(float dividerSpacingWidth, float gradientHeight, float dividerHeight)
-        : dividerSpacingWidth_(dividerSpacingWidth), gradientHeight_(gradientHeight), dividerHeight_(dividerHeight)
-    {}
+    DatePickerPaintMethod() = default;
     ~DatePickerPaintMethod() override = default;
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
-
-private:
-    float dividerSpacingWidth_;
-    float gradientHeight_;
-    float dividerHeight_;
+    void PaintGradient(RSCanvas& canvas, const RectF& frameRect);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DATEPICKER_DATEPICKER_PAINT_METHOD_H

@@ -19,15 +19,9 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components_ng/render/drawing_forward.h"
 
-namespace OHOS::Rosen::Drawing {
-class Canvas;
-class RectF;
-} // namespace OHOS::Rosen::Drawing
 namespace OHOS::Ace::NG {
-
-using RSCanvas = Rosen::Drawing::Canvas;
-using RSRect = Rosen::Drawing::RectF;
 
 struct ImagePaintConfig {
     ImagePaintConfig(const RectF& srcRect, const RectF& dstRect) : srcRect_(srcRect), dstRect_(dstRect) {}

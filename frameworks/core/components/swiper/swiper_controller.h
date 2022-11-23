@@ -115,6 +115,46 @@ public:
         return tabBarFinishCallback_;
     }
 
+    void SetRemoveTabBarEventCallback(const CommonFunc& removeTabBarEventCallback)
+    {
+        removeTabBarEventCallback_ = removeTabBarEventCallback;
+    }
+
+    const CommonFunc& GetRemoveTabBarEventCallback() const
+    {
+        return removeTabBarEventCallback_;
+    }
+
+    void SetAddTabBarEventCallback(const CommonFunc& addTabBarEventCallback)
+    {
+        addTabBarEventCallback_ = addTabBarEventCallback;
+    }
+
+    const CommonFunc& GetAddTabBarEventCallback() const
+    {
+        return addTabBarEventCallback_;
+    }
+
+    void SetRemoveSwiperEventCallback(const CommonFunc& removeSwiperEventCallback)
+    {
+        removeSwiperEventCallback_ = removeSwiperEventCallback;
+    }
+
+    const CommonFunc& GetRemoveSwiperEventCallback() const
+    {
+        return removeSwiperEventCallback_;
+    }
+
+    void SetAddSwiperEventCallback(const CommonFunc& addSwiperEventCallback)
+    {
+        addSwiperEventCallback_ = addSwiperEventCallback;
+    }
+
+    const CommonFunc& GetAddSwiperEventCallback() const
+    {
+        return addSwiperEventCallback_;
+    }
+
 private:
     SwipeToImpl swipeToImpl_;
     SwipeToWithoutAnimationImpl swipeToWithoutAnimationImpl_;
@@ -123,6 +163,10 @@ private:
     CommonFunc finishImpl_;
     CommonFunc finishCallback_;
     CommonFunc tabBarFinishCallback_;
+    CommonFunc removeTabBarEventCallback_;
+    CommonFunc addTabBarEventCallback_;
+    CommonFunc removeSwiperEventCallback_;
+    CommonFunc addSwiperEventCallback_;
 };
 
 } // namespace OHOS::Ace

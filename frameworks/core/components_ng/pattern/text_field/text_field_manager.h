@@ -48,10 +48,14 @@ public:
     bool ResetSlidingPanelParentHeight();
 
     bool UpdatePanelForVirtualKeyboard(double offsetY, double fullHeight);
+    void SetHeight(float height);
+
+    float GetHeight() const;
 
 private:
     bool hasMove_ = false;
     Offset position_;
+    float height_ = 0.0f;
     WeakPtr<TextFieldPattern> onFocusTextField_;
 };
 

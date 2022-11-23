@@ -74,6 +74,7 @@ public:
 
 private:
     SrcType ResolveSrcType() const;
+    void GenerateCacheKey();
 
     std::string src_;
     std::string cacheKey_;

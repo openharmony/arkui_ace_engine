@@ -775,7 +775,8 @@ void RosenRenderImage::CanvasDrawImageRect(
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
     if (GetAdaptiveFrameRectFlag()) {
         recordingCanvas->translate(imageRenderPosition_.GetX() * -1, imageRenderPosition_.GetY() * -1);
-        Rosen::RsImageInfo rsImageInfo(fitNum, repeatNum, radii_, scale_);
+        Rosen::RsImageInfo rsImageInfo(fitNum, repeatNum, radii_, scale_,
+            0, image_->compressWidth(), image_->compressHeight());
         recordingCanvas->DrawImageWithParm(image_->image(), image_->compressData(), rsImageInfo, paint);
         image_->setCompress(nullptr, 0, 0);
         return;

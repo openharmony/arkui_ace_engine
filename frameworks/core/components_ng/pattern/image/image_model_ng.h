@@ -32,7 +32,7 @@ public:
     void SetBlur(double blur) override;
     void SetImageFit(int32_t value) override;
     void SetMatchTextDirection(bool value) override;
-    void SetFitMaxSize(bool value) override;
+    void SetFitOriginSize(bool value) override;
     void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) override;
     void SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback) override;
     void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) override;

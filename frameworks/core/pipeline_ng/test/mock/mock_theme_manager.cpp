@@ -16,8 +16,6 @@
 #include "core/components/theme/theme_manager.h"
 
 namespace OHOS::Ace {
-
-
 ThemeManager::ThemeManager() = default;
 
 Color ThemeManager::GetBackgroundColor() const
@@ -25,8 +23,5 @@ Color ThemeManager::GetBackgroundColor() const
     return {};
 }
 
-void ThemeManager::LoadResourceThemes()
-{
-}
-
+void ThemeManager::LoadResourceThemes() {}
 } // namespace OHOS::Ace

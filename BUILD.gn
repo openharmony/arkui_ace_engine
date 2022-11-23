@@ -110,6 +110,58 @@ config("ace_test_config") {
   ldflags = [ "-Wl,-gc-sections" ]
 }
 
+config("ace_unittest_config") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "$ace_root",
+    "$ace_root/frameworks",
+    "$root_out_dir/arkui/framework",
+  ]
+  cflags_cc = []
+  defines = []
+
+  if (is_standard_system && !use_mingw_win && !use_mac && !use_linux) {
+    include_dirs += [
+      "//base/global/resource_management/frameworks/resmgr/include",
+      "//base/global/resource_management/interfaces/inner_api/include",
+    ]
+
+    cflags_cc += [
+      "-Wno-thread-safety-attributes",
+      "-Wno-thread-safety-analysis",
+      "-Wno-non-c-typedef-for-linkage",
+    ]
+    defines += [ "OHOS_STANDARD_SYSTEM" ]
+  }
+
+  cflags = [
+    "-fvisibility=hidden",
+    "-fdata-sections",
+    "-ffunction-sections",
+  ]
+
+  cflags_cc += [ "-fvisibility-inlines-hidden" ]
+  ldflags = [ "-Wl,-gc-sections" ]
+
+  defines += [ "ACE_UNITTEST" ]
+}
+
+ohos_source_set("ace_test_log") {
+  sources = [
+    "$ace_root/adapter/ohos/osal/ace_trace.cpp",
+    "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/frameworks/base/log/ace_trace.cpp",
+  ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "hitrace_native:hitrace_meter",
+    "hiviewdfx_hilog_native:libhilog",
+  ]
+
+  configs = [ ":ace_unittest_config" ]
+}
+
 config("ace_test_coverage_config") {
   if (ace_engine_feature_enable_coverage) {
     cflags = [ "--coverage" ]

@@ -267,7 +267,7 @@ void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
     DialogProperties properties;
     ButtonInfo buttonInfo;
     properties.alignment = DialogAlignment::CENTER;
-    properties.customStyle = true;
+    properties.customStyle = false;
 
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;

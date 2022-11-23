@@ -103,7 +103,8 @@ public:
 
     void SetPadding(const Dimension& value) override
     {
-        ViewAbstract::SetPadding(NG::CalcLength(value));
+        // padding must great or equal zero.
+        ViewAbstract::SetPadding(NG::CalcLength(value.IsNonNegative() ? value : Dimension()));
     }
 
     void SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
@@ -111,16 +112,16 @@ public:
     {
         NG::PaddingProperty paddings;
         if (top.has_value()) {
-            paddings.top = NG::CalcLength(top.value());
+            paddings.top = NG::CalcLength(top.value().IsNonNegative() ? top.value() : Dimension());
         }
         if (bottom.has_value()) {
-            paddings.bottom = NG::CalcLength(bottom.value());
+            paddings.bottom = NG::CalcLength(bottom.value().IsNonNegative() ? bottom.value() : Dimension());
         }
         if (left.has_value()) {
-            paddings.left = NG::CalcLength(left.value());
+            paddings.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : Dimension());
         }
         if (right.has_value()) {
-            paddings.right = NG::CalcLength(right.value());
+            paddings.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : Dimension());
         }
         ViewAbstract::SetPadding(paddings);
     }
@@ -205,10 +206,10 @@ public:
         const std::optional<BorderStyle>& styleTop, const std::optional<BorderStyle>& styleBottom) override
     {
         NG::BorderStyleProperty borderStyles;
-        borderStyles.styleLeft = styleLeft;
-        borderStyles.styleRight = styleRight;
-        borderStyles.styleTop = styleTop;
-        borderStyles.styleBottom = styleBottom;
+        borderStyles.styleLeft = styleLeft.value_or(BorderStyle::SOLID);
+        borderStyles.styleRight = styleRight.value_or(BorderStyle::SOLID);
+        borderStyles.styleTop = styleTop.value_or(BorderStyle::SOLID);
+        borderStyles.styleBottom = styleBottom.value_or(BorderStyle::SOLID);
         ViewAbstract::SetBorderStyle(borderStyles);
     }
 
@@ -744,17 +745,10 @@ private:
     static void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode,
         bool isContextMenu, const NG::OffsetF& offset)
     {
-        // builder already executed, just show menu
-        if (!buildFunc) {
-            NG::ViewAbstract::ShowMenu(targetNode->GetId(), offset, isContextMenu);
-            return;
-        }
         NG::ScopedViewStackProcessor builderViewStackProcessor;
         buildFunc();
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         NG::ViewAbstract::BindMenuWithCustomNode(customNode, targetNode, isContextMenu, offset);
-        // nullify builder
-        buildFunc = nullptr;
     }
     RefPtr<InputEvent> mouseCallback_;
 };

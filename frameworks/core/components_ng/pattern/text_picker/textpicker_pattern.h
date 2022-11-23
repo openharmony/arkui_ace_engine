@@ -20,8 +20,10 @@
 
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
+#include "core/components_ng/pattern/text_picker/textpicker_layout_algorithm.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
+#include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
 
 namespace OHOS::Ace::NG {
 class TextPickerPattern : public LinearLayoutPattern {
@@ -44,7 +46,9 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<LinearLayoutAlgorithm>();
+        auto layoutAlgorithm = MakeRefPtr<TextPickerLayoutAlgorithm>();
+        layoutAlgorithm->SetCurrentOffset(GetCurrentOffset());
+        return layoutAlgorithm;
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -54,7 +58,9 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<TextPickerPaintMethod>(dividerSpacingWidth_, gradientHeight_, dividerHeight_);
+        auto textPickerPaintMethod = MakeRefPtr<TextPickerPaintMethod>();
+        textPickerPaintMethod->SetDefaultPickerItemHeight(CalculateHeight());
+        return textPickerPaintMethod;
     }
 
     void OnColumnsBuilding();
@@ -65,7 +71,7 @@ public:
 
     void UpdateCurrentOffset(float offset);
 
-    void UpdateColumnChildPosition(double y);
+    void UpdateColumnChildPosition(double offsetY);
 
     bool CanMove(bool isDown) const;
 
@@ -142,13 +148,29 @@ public:
 
     float GetCurrentOffset() const
     {
-        return currentOffset_;
+        return deltaSize_;
+    }
+
+    void SetCurrentOffset(float deltaSize)
+    {
+        deltaSize_ = deltaSize;
     }
 
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::NODE, true };
     }
+
+    const RefPtr<TextPickerTossAnimationController>& GetToss() const
+    {
+        return tossAnimationController_;
+    }
+
+    void UpdateToss(double offsetY);
+
+    void TossStoped();
+
+    void UpdateScrollDelta(double delta);
 
 private:
     void OnModifyDone() override;
@@ -159,7 +181,15 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
     double CalculateHeight();
-    void SetDividerHeight(uint32_t showOptionCount, double height);
+
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleDragStart(const GestureEvent& event);
+    void HandleDragMove(const GestureEvent& event);
+    void HandleDragEnd();
+    void CreateAnimation();
+    RefPtr<CurveAnimation<double>> CreateAnimation(double from, double to);
+    void HandleCurveStopped();
+    void ScrollOption(double delta);
 
     uint32_t selectedIndex_ = 0;
     std::string selectedValue_;
@@ -167,17 +197,25 @@ private:
     uint32_t currentIndex_ = 0;
     std::vector<std::string> options_;
     int32_t currentChildIndex_ = 0;
-    float currentOffset_ = 0.0f;
+    float deltaSize_ = 0.0f;
     RefPtr<ScrollableEvent> scrollableEvent_;
     double yLast_ = 0.0;
     double yOffset_ = 0.0;
-    Dimension jumpInterval_;
+    double jumpInterval_;
     Size optionSize_;
     Dimension fixHeight_;
     bool isIndexChanged_ = false;
-    float gradientHeight_;
-    float dividerHeight_;
-    float dividerSpacingWidth_;
+
+    RefPtr<PanEvent> panEvent_;
+    bool pressed_ = false;
+    double scrollDelta_ = 0.0;
+    bool animationCreated_ = false;
+    RefPtr<Animator> toController_;
+    RefPtr<Animator> fromController_;
+    RefPtr<CurveAnimation<double>> fromBottomCurve_;
+    RefPtr<CurveAnimation<double>> fromTopCurve_;
+    RefPtr<TextPickerTossAnimationController> tossAnimationController_ =
+        AceType::MakeRefPtr<TextPickerTossAnimationController>();
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerPattern);
 };

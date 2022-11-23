@@ -319,4 +319,18 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
+bool OverlayManager::RemoveOverlay()
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, true);
+    if (rootNode->GetChildren().size() > 1) {
+        // stage node is at index 0
+        rootNode->RemoveChildAtIndex(1);
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        LOGI("overlay removed successfully");
+        return true;
+    }
+    return false;
+}
+
 } // namespace OHOS::Ace::NG

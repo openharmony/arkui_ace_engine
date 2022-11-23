@@ -18,6 +18,7 @@
 
 #include <tuple>
 
+#include "base/geometry/matrix4.h"
 #include "core/components/box/render_box.h"
 #include "core/components/display/display_component.h"
 #include "core/components/popup/popup_element_v2.h"

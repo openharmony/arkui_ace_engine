@@ -112,14 +112,19 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void GridAdaptiveLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    for (int32_t index = 0; index < displayCount_; ++index) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        if (!childWrapper) {
-            continue;
+    int32_t total = layoutWrapper->GetTotalChildCount();
+    for (int32_t index = 0; index < total; ++index) {
+        if (index < displayCount_) {
+            auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+            if (!childWrapper) {
+                continue;
+            }
+            // TODO: add center position when grid item is less than ceil.
+            childWrapper->GetGeometryNode()->SetMarginFrameOffset(CalculateChildOffset(index, layoutWrapper));
+            childWrapper->Layout();
+        } else {
+            layoutWrapper->RemoveChildInRenderTree(index);
         }
-        // TODO: add center position when grid item is less than ceil.
-        childWrapper->GetGeometryNode()->SetMarginFrameOffset(CalculateChildOffset(index, layoutWrapper));
-        childWrapper->Layout();
     }
 
     for (const auto& mainLine : gridLayoutInfo_.gridMatrix_) {

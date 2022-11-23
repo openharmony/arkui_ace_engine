@@ -29,6 +29,7 @@
 #include "adapter/ohos/entrance/utils.h"
 #include "base/log/frame_report.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_task_executor.h"
@@ -67,9 +68,7 @@ void SubwindowOhos::InitContainer()
         auto parentWindowId = Platform::AceContainer::GetContainer(parentContainerId_)->GetWindowId();
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
         sptr<OHOS::Rosen::Window> parentWindow = OHOS::Rosen::Window::Find(parentWindowName);
-        if (parentWindow == nullptr) {
-            return;
-        }
+        CHECK_NULL_VOID(parentWindow);
         auto windowType = parentWindow->GetType();
         if (windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_FLOAT);
@@ -84,26 +83,17 @@ void SubwindowOhos::InitContainer()
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
         window_ = OHOS::Rosen::Window::Create(
             "ARK_APP_SUBWINDOW_" + parentWindowName + std::to_string(windowId_), windowOption);
-        if (window_ == nullptr) {
-            LOGI("create window error return");
-            return;
-        }
+        CHECK_NULL_VOID(window_);
     }
     std::string url = "";
     window_->SetUIContent(url, nullptr, nullptr, false);
     childContainerId_ = SubwindowManager::GetInstance()->GetContainerId(window_->GetWindowId());
     SubwindowManager::GetInstance()->AddParentContainerId(childContainerId_, parentContainerId_);
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-    if (!parentContainer) {
-        LOGE("Get container failed, container is null");
-        return;
-    }
+    CHECK_NULL_VOID(parentContainer);
 
     auto container = Platform::AceContainer::GetContainer(childContainerId_);
-    if (!container) {
-        LOGE("Get container failed, container is null");
-        return;
-    }
+    CHECK_NULL_VOID(container);
 
     container->SetParentId(parentContainerId_);
     container->GetSettings().SetUsingSharedRuntime(true);
@@ -151,19 +141,13 @@ void SubwindowOhos::InitContainer()
     if (container->IsCurrentUseNewPipeline()) {
         auto subPipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(
             Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext());
-        if (!subPipelineContextNG) {
-            LOGE("Get SubPipelineContext failed, pipelineContext is null");
-            return;
-        }
+        CHECK_NULL_VOID(subPipelineContextNG);
         subPipelineContextNG->SetupSubRootElement();
         return;
     }
     auto subPipelineContext =
         DynamicCast<PipelineContext>(Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext());
-    if (!subPipelineContext) {
-        LOGE("Get SubPipelineContext failed, pipelineContext is null");
-        return;
-    }
+    CHECK_NULL_VOID(subPipelineContext);
     subPipelineContext->SetParentPipeline(parentContainer->GetPipelineContext());
     subPipelineContext->SetupSubRootElement();
 }
@@ -172,15 +156,9 @@ void SubwindowOhos::ShowPopup(const RefPtr<Component>& newComponent, bool disabl
 {
     ShowWindow();
     auto stack = GetStack();
-    if (!stack) {
-        LOGE("Get stack failed, it is null");
-        return;
-    }
+    CHECK_NULL_VOID(stack);
     auto popup = AceType::DynamicCast<TweenComponent>(newComponent);
-    if (!popup) {
-        LOGE("Add menu failed, this is not a popup component.");
-        return;
-    }
+    CHECK_NULL_VOID(popup);
     stack->PopPopup(popup->GetId());
     stack->PushComponent(newComponent, disableTouchEvent);
     auto bubble = AceType::DynamicCast<BubbleComponent>(popup->GetChild());
@@ -192,14 +170,10 @@ void SubwindowOhos::ShowPopup(const RefPtr<Component>& newComponent, bool disabl
 bool SubwindowOhos::CancelPopup(const std::string& id)
 {
     auto stack = GetStack();
-    if (!stack) {
-        return false;
-    }
+    CHECK_NULL_RETURN(stack, false);
     stack->PopPopup(id);
     auto context = stack->GetContext().Upgrade();
-    if (!context) {
-        return false;
-    }
+    CHECK_NULL_RETURN(context, false);
     context->FlushPipelineImmediately();
     HideWindow();
     return true;
@@ -253,10 +227,7 @@ void SubwindowOhos::HidePopupNG()
 void SubwindowOhos::ShowWindow()
 {
     LOGI("Show the subwindow");
-    if (!window_) {
-        LOGE("Show window failed, window is null");
-        return;
-    }
+    CHECK_NULL_VOID(window_);
 
     OHOS::Rosen::WMError ret = window_->Show();
 
@@ -272,10 +243,7 @@ void SubwindowOhos::ShowWindow()
 void SubwindowOhos::HideWindow()
 {
     LOGI("Hide the subwindow");
-    if (!window_) {
-        LOGE("Hide window failed, window is null");
-        return;
-    }
+    CHECK_NULL_VOID(window_);
 
     OHOS::Rosen::WMError ret = window_->Hide();
 
@@ -291,10 +259,7 @@ void SubwindowOhos::AddMenu(const RefPtr<Component>& newComponent)
 {
     LOGI("Subwindow push new component start.");
     auto stack = GetStack();
-    if (!stack) {
-        LOGE("Get stack failed, it is null");
-        return;
-    }
+    CHECK_NULL_VOID(stack);
     // Push the component
     stack->PopMenu();
     stack->PushComponent(newComponent);
@@ -309,17 +274,11 @@ void SubwindowOhos::ClearMenu()
 {
     LOGI("Subwindow Clear menu start.");
     auto stack = GetStack();
-    if (!stack) {
-        LOGE("Get stack failed, it is null");
-        return;
-    }
+    CHECK_NULL_VOID(stack);
     // Pop the component
     stack->PopMenu();
     auto context = stack->GetContext().Upgrade();
-    if (!context) {
-        LOGE("Get context failed, it is null");
-        return;
-    }
+    CHECK_NULL_VOID(context);
     context->FlushPipelineImmediately();
     HideWindow();
     LOGI("Subwindow clear menu end.");
@@ -386,26 +345,17 @@ void SubwindowOhos::CloseMenu()
 RefPtr<StackElement> SubwindowOhos::GetStack()
 {
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
-    if (!aceContainer) {
-        LOGE("Get container failed, it is null");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(aceContainer, nullptr);
 
     auto context = DynamicCast<PipelineContext>(aceContainer->GetPipelineContext());
-    if (!context) {
-        LOGE("Get context failed, it is null");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(context, nullptr);
     return context->GetLastStack();
 }
 
 void SubwindowOhos::SetHotAreas(const std::vector<Rect>& rects)
 {
     LOGI("Set hot areas for window.");
-    if (!window_) {
-        LOGE("Set hot areas failed, window is null");
-        return;
-    }
+    CHECK_NULL_VOID(window_);
 
     std::vector<Rosen::Rect> hotAreas;
     Rosen::Rect rosenRect;
@@ -456,10 +406,7 @@ bool SubwindowOhos::InitToastDialogWindow(int32_t width, int32_t height, int32_t
     int32_t dialogId = gToastDialogId.fetch_add(1, std::memory_order_relaxed);
     std::string windowName = "ARK_APP_SUBWINDOW_TOAST_DIALOG_" + std::to_string(dialogId);
     dialogWindow_ = OHOS::Rosen::Window::Create(windowName, windowOption);
-    if (dialogWindow_ == nullptr) {
-        LOGI("create window error return");
-        return false;
-    }
+    CHECK_NULL_RETURN(dialogWindow_, false);
     dialogWindow_->SetLayoutFullScreen(true);
     LOGI("SubwindowOhos::InitToastDialogWindow end");
     return true;
@@ -473,10 +420,7 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
     SubwindowManager::GetInstance()->AddParentContainerId(childContainerId_, parentContainerId_);
 
     auto container = Platform::DialogContainer::GetContainer(childContainerId_);
-    if (!container) {
-        LOGE("Get container failed, container is null");
-        return false;
-    }
+    CHECK_NULL_RETURN(container, false);
     // create ace_view
     auto* flutterAceView = Platform::FlutterAceView::CreateView(childContainerId_, true, true);
     Platform::FlutterAceView::SurfaceCreated(flutterAceView, dialogWindow_);
@@ -510,10 +454,7 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
 #endif
 
     auto pipelineContext = DynamicCast<PipelineContext>(container->GetPipelineContext());
-    if (!pipelineContext) {
-        LOGE("Get pipelineContext failed, pipelineContext is null");
-        return false;
-    }
+    CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->SetupRootElement();
     LOGI("SubwindowOhos::InitToastDialogView end");
     return true;
@@ -523,14 +464,9 @@ bool SubwindowOhos::CreateEventRunner()
 {
     if (!eventLoop_) {
         eventLoop_ = AppExecFwk::EventRunner::Create("Subwindow_Toast_Dialog");
-        if (eventLoop_ == nullptr) {
-            return false;
-        }
-
+        CHECK_NULL_RETURN(eventLoop_, false);
         handler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
-        if (handler_ == nullptr) {
-            return false;
-        }
+        CHECK_NULL_RETURN(handler_, false);
     }
     return true;
 }

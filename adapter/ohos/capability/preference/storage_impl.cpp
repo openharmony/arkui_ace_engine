@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/utils.h"
 #include "storage_impl.h"
 
 namespace OHOS::Ace {
@@ -25,10 +26,7 @@ std::shared_ptr<NativePreferences::Preferences> StorageImpl::GetPreference(const
 void StorageImpl::SetString(const std::string& key, const std::string& value)
 {
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
-    if (!pref) {
-        LOGE("StorageImpl: Preference get null");
-        return;
-    }
+    CHECK_NULL_VOID(pref);
     LOGI("Set preference with key %{public}s, value %{public}s", key.c_str(), value.c_str());
     pref->PutString(key, value);
     pref->Flush();
@@ -37,10 +35,7 @@ void StorageImpl::SetString(const std::string& key, const std::string& value)
 std::string StorageImpl::GetString(const std::string& key)
 {
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
-    if (!pref) {
-        LOGE("StorageImpl: Preference get null");
-        return "";
-    }
+    CHECK_NULL_RETURN(pref, "");
     LOGI("Get preference with key %{public}s", key.c_str());
     return pref->GetString(key, "");
 }
@@ -48,10 +43,7 @@ std::string StorageImpl::GetString(const std::string& key)
 void StorageImpl::Clear()
 {
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
-    if (!pref) {
-        LOGE("StorageImpl: Preference get null");
-        return;
-    }
+    CHECK_NULL_VOID(pref);
     pref->Clear();
     LOGI("StorageImpl: Clear preferences");
     NativePreferences::PreferencesHelper::DeletePreferences(fileName_);
@@ -60,10 +52,7 @@ void StorageImpl::Clear()
 void StorageImpl::Delete(const std::string& key)
 {
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
-    if (!pref) {
-        LOGE("StorageImpl: Preference get null");
-        return;
-    }
+    CHECK_NULL_VOID(pref);
     LOGI("StorageImpl: Delete preference with key %{public}s", key.c_str());
     pref->Delete(key);
     pref->FlushSync();

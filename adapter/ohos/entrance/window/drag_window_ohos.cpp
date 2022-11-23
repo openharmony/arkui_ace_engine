@@ -23,6 +23,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/image/pixel_map.h"
 #include "base/log/log_wrapper.h"
+#include "base/utils/utils.h"
 #include "core/components/text/render_text.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
@@ -90,10 +91,7 @@ void DrawSkImage(SkCanvas* canvas, const RefPtr<PixelMap>& pixmap, int32_t width
     // Step2: Create SkImage and draw it
     sk_sp<SkImage> skImage =
         SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixmap));
-    if (!skImage) {
-        LOGE("sk image is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(skImage);
     SkPaint paint;
     sk_sp<SkColorSpace> colorSpace = skImage->refColorSpace();
 #ifdef USE_SYSTEM_SKIA
@@ -108,10 +106,7 @@ void DrawSkImage(SkCanvas* canvas, const RefPtr<PixelMap>& pixmap, int32_t width
 
 void DrawSkImage(SkCanvas* canvas, const sk_sp<SkImage>& skImage, int32_t width, int32_t height)
 {
-    if (!skImage) {
-        LOGE("sk image is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(skImage);
     SkPaint paint;
     sk_sp<SkColorSpace> colorSpace = skImage->refColorSpace();
 #ifdef USE_SYSTEM_SKIA
@@ -138,10 +133,7 @@ RefPtr<DragWindow> DragWindow::CreateDragWindow(
     option->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING);
     option->SetFocusable(false);
     OHOS::sptr<OHOS::Rosen::Window> dragWindow = OHOS::Rosen::Window::Create(windowName, option);
-    if (!dragWindow) {
-        LOGE("create drag window failed.");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(dragWindow, nullptr);
 
     OHOS::Rosen::WMError ret = dragWindow->Show();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
@@ -155,10 +147,7 @@ RefPtr<DragWindow> DragWindow::CreateDragWindow(
 
 void DragWindowOhos::MoveTo(int32_t x, int32_t y) const
 {
-    if (!dragWindow_) {
-        LOGE("DragWindowOhos::MoveTo, the drag window is null.");
-        return;
-    }
+    CHECK_NULL_VOID(dragWindow_);
 
     OHOS::Rosen::WMError ret = dragWindow_->MoveTo(x + offsetX_ - width_ / 2, y + offsetY_ - height_ / 2);
     if (ret != OHOS::Rosen::WMError::WM_OK) {
@@ -174,10 +163,7 @@ void DragWindowOhos::MoveTo(int32_t x, int32_t y) const
 
 void DragWindowOhos::Destroy() const
 {
-    if (!dragWindow_) {
-        LOGE("DragWindowOhos::Destroy, the drag window is null.");
-        return;
-    }
+    CHECK_NULL_VOID(dragWindow_);
 
     OHOS::Rosen::WMError ret = dragWindow_->Destroy();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
@@ -209,10 +195,7 @@ void DragWindowOhos::DrawFrameNode(const RefPtr<NG::FrameNode>& rootNode)
 
 void DragWindowOhos::DrawPixelMap(const RefPtr<PixelMap>& pixelmap)
 {
-    if (!pixelmap) {
-        LOGE("the pixmap is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(pixelmap);
     auto rect = dragWindow_->GetRequestRect();
     auto surfaceNode = dragWindow_->GetSurfaceNode();
     rsUiDirector_ = Rosen::RSUIDirector::Create();
@@ -235,21 +218,12 @@ void DragWindowOhos::DrawPixelMap(const RefPtr<PixelMap>& pixelmap)
 
 void DragWindowOhos::DrawImage(void* skImage)
 {
-    if (!skImage) {
-        LOGE("Skimage is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(skImage);
     fml::RefPtr<flutter::CanvasImage>* canvasImagePtr =
         reinterpret_cast<fml::RefPtr<flutter::CanvasImage>*>(skImage);
-    if (!canvasImagePtr) {
-        LOGE("CanvasImagePtr is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(canvasImagePtr);
     fml::RefPtr<flutter::CanvasImage> canvasImage = *canvasImagePtr;
-    if (!canvasImage) {
-        LOGE("CanvasImage is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(canvasImage);
     auto rect = dragWindow_->GetRect();
     auto surfaceNode = dragWindow_->GetSurfaceNode();
     rsUiDirector_ = Rosen::RSUIDirector::Create();
@@ -273,10 +247,7 @@ void DragWindowOhos::DrawImage(void* skImage)
 void DragWindowOhos::DrawText(std::shared_ptr<txt::Paragraph> paragraph,
     const Offset& offset, const RefPtr<RenderText>& renderText)
 {
-    if (!paragraph) {
-        LOGE("Paragraph is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(paragraph);
     auto rect = dragWindow_->GetRect();
     auto surfaceNode = dragWindow_->GetSurfaceNode();
     rsUiDirector_ = Rosen::RSUIDirector::Create();

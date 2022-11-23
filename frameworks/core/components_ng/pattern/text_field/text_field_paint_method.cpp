@@ -135,7 +135,6 @@ void TextFieldPaintMethod::PaintCursor(RSCanvas& canvas, PaintWrapper* paintWrap
     brush.SetColor(cursorColor.GetValue());
     canvas.AttachBrush(brush);
     float caretHeight = textFieldPattern->GetTextOrPlaceHolderFontSize();
-    caretHeight += static_cast<float>(CURSOR_PADDING.ConvertToPx()) * 2.0f;
     auto top = static_cast<float>(
         paintWrapper->GetContentOffset().GetY() + (paintWrapper->GetContentSize().Height() - caretHeight) / 2);
     auto cursorOffsetX = textFieldPattern->GetCaretOffsetX();
