@@ -151,7 +151,7 @@ void RadioPattern::HandleMouseEvent(bool isHover)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = false;
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    host->MarkNeedRenderOnly();
 }
 
 void RadioPattern::OnClick()
@@ -181,7 +181,7 @@ void RadioPattern::OnTouchDown()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = true;
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    host->MarkNeedRenderOnly();
 }
 
 void RadioPattern::OnTouchUp()
@@ -189,7 +189,7 @@ void RadioPattern::OnTouchUp()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = false;
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    host->MarkNeedRenderOnly();
 }
 
 void RadioPattern::UpdateState()
@@ -239,9 +239,12 @@ void RadioPattern::UpdateState()
         if (check) {
             UpdateUIStatus(true);
             PlayAnimation(true);
+        } else {
+            isFirstCreated_ = false;
         }
     } else {
         paintProperty->UpdateRadioCheck(false);
+        isFirstCreated_ = false;
     }
 
     if (preCheck_ != check) {
@@ -255,7 +258,7 @@ void RadioPattern::UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode)
     auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
     CHECK_NULL_VOID(radioPaintProperty);
     radioPaintProperty->UpdateRadioCheck(false);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    frameNode->MarkNeedRenderOnly();
 
     if (preCheck_) {
         auto radioEventHub = GetEventHub<RadioEventHub>();
@@ -268,7 +271,7 @@ void RadioPattern::UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode)
 
 void RadioPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool check)
 {
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    frameNode->MarkNeedRenderOnly();
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -281,7 +284,10 @@ void RadioPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bo
 
     auto radioEventHub = GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(radioEventHub);
-    radioEventHub->UpdateChangeEvent(check);
+    if (!isFirstCreated_) {
+        radioEventHub->UpdateChangeEvent(check);
+    }
+    isFirstCreated_ = false;
     if (check) {
         pageEventHub->UpdateRadioGroupValue(radioEventHub->GetGroup(), frameNode->GetId());
     } else {
@@ -358,7 +364,7 @@ void RadioPattern::UpdateUIStatus(bool check)
     uiStatus_ = check ? UIStatus::SELECTED : UIStatus::UNSELECTED;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    host->MarkNeedRenderOnly();
 }
 
 void RadioPattern::UpdateTotalScale(float scale)
@@ -366,7 +372,7 @@ void RadioPattern::UpdateTotalScale(float scale)
     totalScale_ = scale;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    host->MarkNeedRenderOnly();
 }
 
 void RadioPattern::UpdatePointScale(float scale)
@@ -374,7 +380,7 @@ void RadioPattern::UpdatePointScale(float scale)
     pointScale_ = scale;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    host->MarkNeedRenderOnly();
 }
 
 } // namespace OHOS::Ace::NG
