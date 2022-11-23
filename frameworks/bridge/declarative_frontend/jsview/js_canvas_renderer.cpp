@@ -1153,7 +1153,9 @@ void JSCanvasRenderer::JsGetJsonData(const JSCallbackInfo& info)
 
     if (info[0]->IsString()) {
         JSViewAbstract::ParseJsString(info[0], path);
-        if (!isOffscreen_) {
+        if (Container::IsCurrentUseNewPipeline() && !isOffscreen_ && customPaintPattern_) {
+            jsonData = customPaintPattern_->GetJsonData(path);
+        } else if (!isOffscreen_ && pool_) {
             jsonData = pool_->GetJsonData(path);
         }
         auto returnValue = JSVal(ToJSValue(jsonData));
