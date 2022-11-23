@@ -212,7 +212,7 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     DialogProperties properties {};
     properties.alignment = DialogAlignment::CENTER;
     properties.customComponent = PickerText;
-
+    properties.customStyle = true;
     AddEvent(PickerText, info);
     PickerText->SetDialogName("pickerTextDialog");
     PickerText->OpenDialog(properties);
