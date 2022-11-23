@@ -1319,6 +1319,13 @@ int32_t FrontendDelegateDeclarative::GetVersionCode() const
     return manifestParser_->GetAppInfo()->GetVersionCode();
 }
 
+double FrontendDelegateDeclarative::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+    const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+{
+    auto pipelineContext = pipelineContextHolder_.Get();
+    return pipelineContext->MeasureText(text, fontSize, fontStyle, fontWeight, fontFamily, letterSpacing);
+}
+
 void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
 {
     LOGD("FrontendDelegateDeclarative ShowToast.");

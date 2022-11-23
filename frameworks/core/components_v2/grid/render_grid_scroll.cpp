@@ -367,7 +367,7 @@ void RenderGridScroll::SizeChangeOffset(double newWindowHeight)
             return;
         }
         auto position = textFieldManager->GetClickPosition().GetY();
-        double offset = newWindowHeight + GetGlobalPoint().GetY() - position;
+        double offset = newWindowHeight - position;
         if (LessOrEqual(offset, 0.0)) {
             // negative offset to scroll down
             textFieldOffset_ = offset;

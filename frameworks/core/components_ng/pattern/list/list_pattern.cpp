@@ -91,6 +91,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
+    bool isJump = false;
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto listLayoutAlgorithm = DynamicCast<ListLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
@@ -102,6 +103,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         if (!itemPosition_.empty()) {
             currentOffset_ = itemPosition_.begin()->second.startPos;
         }
+        isJump = true;
         jumpIndex_.reset();
     }
     auto finalOffset = listLayoutAlgorithm->GetCurrentOffset();
@@ -124,9 +126,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
     startIndex_ = listLayoutAlgorithm->GetStartIndex();
     endIndex_ = listLayoutAlgorithm->GetEndIndex();
-    if (currentOffset_ != lastOffset_) {
-        ProcessEvent(indexChanged, finalOffset);
-    }
+    ProcessEvent(indexChanged, finalOffset, isJump);
     UpdateScrollBarOffset();
 
     auto host = GetHost();
@@ -135,7 +135,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     return (listLayoutProperty && listLayoutProperty->GetDivider().has_value()) || scrollBar_;
 }
 
-void ListPattern::ProcessEvent(bool indexChanged, float finalOffset)
+void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -143,7 +143,7 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset)
     CHECK_NULL_VOID(listEventHub);
 
     auto onScroll = listEventHub->GetOnScroll();
-    if (onScroll) {
+    if (onScroll && !NearZero(finalOffset)) {
         auto source = GetScrollState();
         auto offsetPX = Dimension(finalOffset);
         auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
@@ -163,8 +163,8 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset)
         }
     }
 
-    bool scrollUpToCrossLine = GreatNotEqual(lastOffset_, 0.0) && LessOrEqual(currentOffset_, 0.0);
-    bool scrollDownToCrossLine = LessNotEqual(lastOffset_, 0.0) && GreatOrEqual(currentOffset_, 0.0);
+    bool scrollUpToCrossLine = (GreatNotEqual(lastOffset_, 0.0) || isJump) && LessOrEqual(currentOffset_, 0.0);
+    bool scrollDownToCrossLine = (LessNotEqual(lastOffset_, 0.0) || isJump) && GreatOrEqual(currentOffset_, 0.0);
     if ((startIndex_ == 0) && (scrollUpToCrossLine || scrollDownToCrossLine)) {
         auto onReachStart = listEventHub->GetOnReachStart();
         if (onReachStart) {
@@ -174,13 +174,21 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset)
     auto onReachEnd = listEventHub->GetOnReachEnd();
     if (onReachEnd) {
         float lastEndPos = endMainPos_ - (currentOffset_ - lastOffset_);
-        bool scrollUpToEnd = GreatNotEqual(lastEndPos, GetMainContentSize()) &&
+        bool scrollUpToEnd = (GreatNotEqual(lastEndPos, GetMainContentSize()) || isJump) &&
             LessOrEqual(endMainPos_, GetMainContentSize());
-        bool scrollDownToEnd = LessNotEqual(lastEndPos, GetMainContentSize()) &&
+        bool scrollDownToEnd = (LessNotEqual(lastEndPos, GetMainContentSize()) || isJump) &&
             GreatOrEqual(endMainPos_, GetMainContentSize());
         if ((endIndex_ == maxListItemIndex_) && (scrollUpToEnd || scrollDownToEnd)) {
             onReachEnd();
         }
+    }
+
+    if (scrollStop_) {
+        auto onScrollStop = listEventHub->GetOnScrollStop();
+        if (onScrollStop) {
+            onScrollStop();
+        }
+        scrollStop_ = false;
     }
 }
 
@@ -287,16 +295,11 @@ bool ListPattern::UpdateCurrentOffset(float offset)
 
 void ListPattern::ProcessScrollEnd()
 {
+    isScrollContent_ = true;
+    scrollStop_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listEventHub = host->GetEventHub<ListEventHub>();
-    CHECK_NULL_VOID(listEventHub);
-    auto onScrollStop = listEventHub->GetOnScrollStop();
-    if (onScrollStop) {
-        onScrollStop();
-    }
-    isScrollContent_ = true;
-    SetScrollStop(true);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 float ListPattern::GetMainContentSize() const
@@ -344,7 +347,6 @@ void ListPattern::InitScrollableEvent()
     auto task = [weak = WeakClaim(this)](double offset, int32_t source) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        pattern->SetScrollStop(false);
         pattern->SetScrollState(source);
         if (source != SCROLL_FROM_START) {
             if (!pattern->isScrollContent_ && pattern->scrollBar_) {

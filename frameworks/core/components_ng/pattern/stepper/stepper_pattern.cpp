@@ -51,6 +51,13 @@ void StepperPattern::OnModifyDone()
     UpdateButtonText();
 }
 
+void StepperPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+}
+
 void StepperPattern::InitButtonClickEvent(const RefPtr<GestureEventHub>& leftGestureHub,
     const RefPtr<GestureEventHub>& rightGestureHub, const RefPtr<FrameNode>& swiperNode)
 {

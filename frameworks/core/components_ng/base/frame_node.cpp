@@ -135,9 +135,7 @@ void FrameNode::InitializePatternAndContext()
     renderContext_->SetHostNode(WeakClaim(this));
     // Initialize FocusHub
     if (pattern_->GetFocusPattern().focusType != FocusType::DISABLE) {
-        auto focusHub = GetOrCreateFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->SetScopeFocusAlgorithm(pattern_->GetScopeFocusAlgorithm());
+        GetOrCreateFocusHub();
     }
 }
 
@@ -206,13 +204,6 @@ void FrameNode::OnAttachToMainTree()
     UINode::OnAttachToMainTree();
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear();
-    if (!hasPendingRequest_) {
-        return;
-    }
-    auto context = GetContext();
-    CHECK_NULL_VOID(context);
-    context->RequestFrame();
-    hasPendingRequest_ = false;
     if (IsResponseRegion() || renderContext_->HasPosition() || renderContext_->HasOffset() ||
         renderContext_->HasAnchor()) {
         auto parent = GetParent();
@@ -224,6 +215,13 @@ void FrameNode::OnAttachToMainTree()
             parent = parent->GetParent();
         }
     }
+    if (!hasPendingRequest_) {
+        return;
+    }
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->RequestFrame();
+    hasPendingRequest_ = false;
 }
 
 void FrameNode::OnDetachFromMainTree()

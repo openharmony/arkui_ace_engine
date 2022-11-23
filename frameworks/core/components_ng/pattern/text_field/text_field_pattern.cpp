@@ -144,7 +144,7 @@ float TextFieldPattern::GetTextOrPlaceHolderFontSize()
     } else {
         fontSize = textFieldTheme ? textFieldTheme->GetFontSize() : DEFAULT_FONT;
     }
-    return static_cast<float>(fontSize.ConvertToPx());
+    return std::min(static_cast<float>(fontSize.ConvertToPx()), contentRect_.Height());
 }
 
 TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS) {}
@@ -880,7 +880,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
-        UpdateTextFieldManager(info.GetTouches().front().GetGlobalLocation());
+        UpdateTextFieldManager(info.GetTouches().front().GetGlobalLocation(), frameRect_.Height());
     } else if (touchType == TouchType::UP) {
         HandleTouchUp();
     }
@@ -958,7 +958,7 @@ void TextFieldPattern::InitClickEvent()
 
 void TextFieldPattern::HandleClickEvent(GestureEvent& info)
 {
-    UpdateTextFieldManager(info.GetGlobalLocation());
+    UpdateTextFieldManager(info.GetGlobalLocation(), frameRect_.Height());
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     if (!focusHub->IsFocusable()) {
         return;
@@ -1069,7 +1069,7 @@ void TextFieldPattern::OnModifyDone()
     }
     obscureTickCountDown_ = OBSCURE_SHOW_TICKS;
     caretHeight_ = GetTextOrPlaceHolderFontSize() + static_cast<float>(CURSOR_PADDING.ConvertToPx()) * 2.0f;
-    utilPadding_ = layoutProperty->CreatePaddingAndBorderWithDefault(basicPaddingLeft_, 0.0f, 0.0f, 0.0f);
+    ProcessPadding();
     if (layoutProperty->GetTypeChangedValue(false)) {
         ClearEditingValue();
         layoutProperty->ResetTypeChanged();
@@ -1077,6 +1077,21 @@ void TextFieldPattern::OnModifyDone()
         redoOperationRecords_.clear();
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void TextFieldPattern::ProcessPadding()
+{
+    auto pipeline = GetHost()->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto themePadding = textFieldTheme->GetPadding();
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    utilPadding_ = layoutProperty->CreatePaddingAndBorderWithDefault(
+        themePadding.Left().ConvertToPx(), themePadding.Top().ConvertToPx(), 0.0f, 0.0f);
 }
 
 void TextFieldPattern::InitEditingValueText(std::string content)
@@ -1128,13 +1143,14 @@ void TextFieldPattern::UpdatePositionOfParagraph(int32_t position)
     textEditingValue_.CursorMoveToPosition(position);
 }
 
-void TextFieldPattern::UpdateTextFieldManager(const Offset& offset)
+void TextFieldPattern::UpdateTextFieldManager(const Offset& offset, float height)
 {
     auto context = GetHost()->GetContext();
     CHECK_NULL_VOID(context);
     auto textFieldManager = DynamicCast<TextFieldManager>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
     textFieldManager->SetClickPosition(offset);
+    textFieldManager->SetHeight(height);
     textFieldManager->SetOnFocusTextField(WeakClaim(this));
 }
 

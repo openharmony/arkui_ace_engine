@@ -20,9 +20,9 @@ namespace {
 std::string ImageRepeatToString(ImageRepeat type)
 {
     static const LinearEnumMapNode<ImageRepeat, std::string> toStringMap[] = {
-        { ImageRepeat::NOREPEAT, "ImageRepeat.NoRepeat" },
-        { ImageRepeat::REPEATX, "ImageRepeat.X" },
-        { ImageRepeat::REPEATY, "ImageRepeat.Y" },
+        { ImageRepeat::NO_REPEAT, "ImageRepeat.NoRepeat" },
+        { ImageRepeat::REPEAT_X, "ImageRepeat.X" },
+        { ImageRepeat::REPEAT_Y, "ImageRepeat.Y" },
         { ImageRepeat::REPEAT, "ImageRepeat.XY" },
     };
     auto idx = BinarySearchFindIndex(toStringMap, ArraySize(toStringMap), type);
@@ -100,7 +100,7 @@ void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     std::string backgroundImage = "NONE";
     if (propBackgroundImage.has_value()) {
         backgroundImage = propBackgroundImage->GetSrc() + ", " +
-                          ImageRepeatToString(propBackgroundImageRepeat.value_or(ImageRepeat::NOREPEAT));
+                          ImageRepeatToString(propBackgroundImageRepeat.value_or(ImageRepeat::NO_REPEAT));
     }
     json->Put("backgroundImage", backgroundImage.c_str());
 

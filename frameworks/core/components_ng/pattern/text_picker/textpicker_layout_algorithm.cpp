@@ -19,6 +19,7 @@
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
+
 void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -29,14 +30,12 @@ void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto size = geometryNode->GetFrameSize();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
-
     auto children = layoutWrapper->GetAllChildrenWithBuild();
-
-    float childStartCoordinate = 0.0;
+    float childStartCoordinate = 0.0f;
     for (const auto& child : children) {
         auto childGeometryNode = child->GetGeometryNode();
         auto childSize = childGeometryNode->GetMarginFrameSize();
-        auto childOffset = padding.Offset() + OffsetF(0.0f, childStartCoordinate + currentOffset_);
+        auto childOffset = OffsetF(0.0f, childStartCoordinate + currentOffset_ + padding.Offset().GetY());
         childGeometryNode->SetMarginFrameOffset(childOffset);
         child->Layout();
         childStartCoordinate += childSize.Height();

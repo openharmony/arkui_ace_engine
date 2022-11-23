@@ -38,7 +38,8 @@ void DatePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     for (const auto& child : children) {
         auto childGeometryNode = child->GetGeometryNode();
         auto childSize = childGeometryNode->GetMarginFrameSize();
-        auto childOffset = padding.Offset() + OffsetF(0.0f, childStartCoordinate + static_cast<float>(currentOffset_));
+        auto childOffset =
+            OffsetF(0.0f, childStartCoordinate + static_cast<float>(currentOffset_) + padding.Offset().GetY());
         childGeometryNode->SetMarginFrameOffset(childOffset);
         child->Layout();
         childStartCoordinate += childSize.Height();

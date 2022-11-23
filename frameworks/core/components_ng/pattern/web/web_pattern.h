@@ -216,6 +216,8 @@ private:
     void OnAttachToFrameNode() override;
     void OnWindowShow() override;
     void OnWindowHide() override;
+    void OnInActive() override;
+    void OnActive() override;
 
     void OnWebSrcUpdate();
     void OnWebDataUpdate();
@@ -318,6 +320,7 @@ private:
     bool isDragging_ = false;
     bool isW3cDragEvent_ = false;
     bool isWindowShow_ = true;
+    bool isActive_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };

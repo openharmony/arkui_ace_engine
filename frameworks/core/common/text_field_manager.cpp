@@ -60,6 +60,16 @@ void TextFieldManager::MovePage(int32_t pageId, const Offset& rootRect, double o
     }
 }
 
+void TextFieldManager::SetHeight(float height)
+{
+    height_ = height;
+}
+
+float TextFieldManager::GetHeight() const
+{
+    return height_;
+}
+
 void TextFieldManager::RemovePageId(int32_t pageId)
 {
     scrollMap_.erase(pageId);

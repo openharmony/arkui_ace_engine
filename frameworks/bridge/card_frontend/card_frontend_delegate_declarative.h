@@ -75,6 +75,9 @@ public:
             updateCardData_(cardData_);
         }
     }
+	
+    double MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+        const std::string& fontWeight, const std::string& fontFamily, double letterSpace) override;
 
     ACE_DISALLOW_COPY_AND_MOVE(CardFrontendDelegateDeclarative);
 

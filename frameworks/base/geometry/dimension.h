@@ -99,7 +99,7 @@ public:
 
     bool IsValid() const
     {
-        return (value_ > 0.0) && (!NearZero(value_));
+        return GreatNotEqual(value_, 0.0);
     }
 
     bool IsNonNegative() const

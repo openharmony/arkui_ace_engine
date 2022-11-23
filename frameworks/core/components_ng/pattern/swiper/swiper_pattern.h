@@ -128,6 +128,9 @@ public:
         swiperParameters_ = swiperParameters;
     }
 
+    void ShowNext();
+    void ShowPrevious();
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -167,8 +170,6 @@ private:
     // Implement of swiper controller
     void SwipeToWithoutAnimation(int32_t index);
     void SwipeTo(int32_t index);
-    void ShowNext();
-    void ShowPrevious();
     void FinishAnimation();
     void StopTranslateAnimation();
 
@@ -192,6 +193,7 @@ private:
     bool IsLoop() const;
     bool IsDisableSwipe() const;
     bool IsShowIndicator() const;
+    float GetTranslateLength() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -215,6 +217,9 @@ private:
     std::optional<int32_t> targetIndex_;
     std::set<int32_t> preItemRange_;
 
+    PanDirection panDirection_;
+    float distance_ = 0.0f;
+
     float currentOffset_ = 0.0f;
 
     bool moveDirection_ = false;
@@ -226,6 +231,7 @@ private:
     ChangeEventPtr changeEvent_;
 
     SwiperParameters swiperParameters_;
+    SizeF maxChildSize_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -473,7 +473,7 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
     DialogProperties properties {};
     properties.alignment = DialogAlignment::CENTER;
     properties.customComponent = datePicker;
-
+    properties.customStyle = true;
     if (pickerType == DatePickerType::DATE) {
         AddEvent(datePicker, info, DatePickerType::DATE);
     } else {
@@ -519,7 +519,7 @@ void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
     ButtonInfo buttonInfo;
     DialogProperties properties;
     properties.alignment = DialogAlignment::CENTER;
-    properties.customStyle = true;
+    properties.customStyle = false;
 
     std::map<std::string, PickerDate> datePickerProperty;
     if (startDate->IsObject()) {
@@ -766,7 +766,7 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     DialogProperties properties {};
     properties.alignment = DialogAlignment::CENTER;
     properties.customComponent = datePicker;
-
+    properties.customStyle = true;
     AddEvent(datePicker, info, DatePickerType::TIME);
     datePicker->SetDialogName("TimePickerDialog");
     datePicker->OpenDialog(properties);
@@ -797,7 +797,7 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
     ButtonInfo buttonInfo;
     DialogProperties properties;
     properties.alignment = DialogAlignment::CENTER;
-    properties.customStyle = true;
+    properties.customStyle = false;
 
     std::map<std::string, PickerTime> timePickerProperty;
     if (selectedTime->IsObject()) {

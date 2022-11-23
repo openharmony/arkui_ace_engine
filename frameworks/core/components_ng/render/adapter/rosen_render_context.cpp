@@ -290,7 +290,7 @@ void RosenRenderContext::PaintBackground()
     auto compressData = skiaCanvasImage->GetCompressData();
     rosenImage->SetCompressData(compressData, skiaCanvasImage->GetUniqueID(), skiaCanvasImage->GetCompressWidth(),
         skiaCanvasImage->GetCompressHeight());
-    rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NOREPEAT)));
+    rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
     rsNode_->SetBgImage(rosenImage);
 
     SizeF renderSize = ImagePainter::CalculateBgImageSize(
@@ -372,13 +372,7 @@ void RosenRenderContext::OnTransformRotateUpdate(const Vector4F& rotate)
 {
     CHECK_NULL_VOID(rsNode_);
     float norm = std::sqrt(std::pow(rotate.x, 2) + std::pow(rotate.y, 2) + std::pow(rotate.z, 2));
-    // pi = 4*atan(1)
-    float angle = rotate.w / 2 * 4 * std::atan(1) / 180.0;
-    float dx = rotate.x * std::sin(angle) / norm;
-    float dy = rotate.y * std::sin(angle) / norm;
-    float dz = rotate.z * std::sin(angle) / norm;
-    float dw = std::cos(angle);
-    rsNode_->SetRotation(Rosen::Quaternion(dx, dy, dz, dw));
+    rsNode_->SetRotation(rotate.w*rotate.x/norm, rotate.w*rotate.y/norm, rotate.w*rotate.z/norm);
     RequestNextFrame();
 }
 

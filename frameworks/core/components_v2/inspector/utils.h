@@ -230,10 +230,10 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
     inline std::string ConvertWrapImageRepeatToString(ImageRepeat repeat)
     {
         static const LinearEnumMapNode<ImageRepeat, std::string> imageRepeatTable[] = {
-            { ImageRepeat::NOREPEAT, "ImageRepeat.NoRepeat" },
+            { ImageRepeat::NO_REPEAT, "ImageRepeat.NoRepeat" },
             { ImageRepeat::REPEAT, "ImageRepeat.XY" },
-            { ImageRepeat::REPEATX, "ImageRepeat.X" },
-            { ImageRepeat::REPEATY, "ImageRepeat.Y" },
+            { ImageRepeat::REPEAT_X, "ImageRepeat.X" },
+            { ImageRepeat::REPEAT_Y, "ImageRepeat.Y" },
         };
 
         auto index = BinarySearchFindIndex(imageRepeatTable, ArraySize(imageRepeatTable), repeat);

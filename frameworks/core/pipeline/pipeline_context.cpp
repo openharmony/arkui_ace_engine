@@ -264,6 +264,13 @@ void PipelineContext::FlushPredictLayout(int64_t deadline)
     }
 }
 
+double PipelineContext::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+    const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+{
+    return OHOS::Ace::RenderCustomPaint::PaintMeasureText(text, fontSize, fontStyle,
+        fontWeight, fontFamily, letterSpacing);
+}
+
 void PipelineContext::FlushFocus()
 {
     CHECK_RUN_ON(UI);
@@ -2178,10 +2185,15 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
             textFieldManager_->MovePage(GetLastPage()->GetPageId(), { newRootWidth, newRootHeight }, offsetHeight);
         }
     }
-    auto frontend = weakFrontend_.Upgrade();
-    if (frontend) {
-        frontend->OnSurfaceChanged(width, height);
-    }
+
+    taskExecutor_->PostTask(
+        [weakFrontend = weakFrontend_, width, height]() {
+            auto frontend = weakFrontend.Upgrade();
+            if (frontend) {
+                frontend->OnSurfaceChanged(width, height);
+            }
+        },
+        TaskExecutor::TaskType::JS);
 
     // init transition clip size when surface changed.
     const auto& pageElement = GetLastPage();
@@ -2867,6 +2879,9 @@ void PipelineContext::WindowFocus(bool isFocus)
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
+    }
+    if (onFocus_ && onShow_) {
+        FlushFocus();
     }
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         LOGD("WindowFocus failed, Window modal is not container.");

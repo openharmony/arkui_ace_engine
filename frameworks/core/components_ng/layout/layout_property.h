@@ -332,7 +332,7 @@ public:
     {
         layoutConstraint_ = layoutProperty->layoutConstraint_;
         contentConstraint_ = layoutProperty->contentConstraint_;
-        *gridProperty_ = *(layoutProperty->gridProperty_);
+        gridProperty_ = layoutProperty->gridProperty_;
     }
 
 protected:
@@ -358,7 +358,7 @@ private:
     std::unique_ptr<MagicItemProperty> magicItemProperty_;
     std::unique_ptr<PositionProperty> positionProperty_;
     std::unique_ptr<FlexItemProperty> flexItemProperty_;
-    std::unique_ptr<GridProperty> gridProperty_;
+    std::optional<GridProperty> gridProperty_;
     std::optional<MeasureType> measureType_;
     std::optional<TextDirection> layoutDirection_;
 

@@ -25,6 +25,7 @@ group("pattern_unittest") {
     "custom_paint:custom_paint_pattern_test_ng",
     "data_panel:data_panel_pattern_test_ng",
     "divider:divider_pattern_test_ng",
+    "dragBar:dragBar_pattern_test_ng",
     "flex:flex_pattern_unit_test",
     "focusHub:focusHub_pattern_test_ng",
     "gauge:gauge_pattern_test_ng",
@@ -34,7 +35,8 @@ group("pattern_unittest") {
     "grid_row:grid_row_pattern_test_ng",
     "image:image_pattern_test_ng",
     "image_animator:image_animator_pattern_test",
-    "indexer:indexer_pattern_test_ng",
+
+    #"indexer:indexer_pattern_test_ng",
     "linear_layout:linear_layout_creator_test_ng",
     "list:list_pattern_test_ng",
     "marquee:marquee_pattern_unit_test",
@@ -53,6 +55,7 @@ group("pattern_unittest") {
     "text_clock:text_clock_pattern_unit_test",
     "textfield:textfield_pattern_test_ng",
     "texttimer:text_timer_pattern_unit_test",
+    "toggle:toggle_pattern_test_ng",
     "video:video_pattern_test_ng",
     "xcomponent:xcomponent_pattern_test_ng",
 

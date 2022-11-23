@@ -509,6 +509,7 @@ void FocusHub::RequestFocus() const
 
 bool FocusHub::RequestNextFocus(bool vertical, bool reverse, const RectF& rect)
 {
+    SetScopeFocusAlgorithm();
     if (!focusAlgorithm_.getNextFocusNode) {
         if (focusAlgorithm_.isVertical != vertical) {
             return false;
@@ -672,6 +673,15 @@ bool FocusHub::CalculatePosition()
     return true;
 }
 
+void FocusHub::SetScopeFocusAlgorithm()
+{
+    auto frame = GetFrameNode();
+    CHECK_NULL_VOID(frame);
+    auto pattern = frame->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    focusAlgorithm_ = pattern->GetScopeFocusAlgorithm();
+}
+
 void FocusHub::OnFocus()
 {
     if (focusType_ == FocusType::NODE) {
@@ -807,6 +817,7 @@ bool FocusHub::AcceptFocusByRectOfLastFocus(const RectF& rect)
         return AcceptFocusByRectOfLastFocusNode(rect);
     }
     if (focusType_ == FocusType::SCOPE) {
+        SetScopeFocusAlgorithm();
         if (focusAlgorithm_.scopeType == ScopeType::FLEX) {
             return AcceptFocusByRectOfLastFocusFlex(rect);
         }

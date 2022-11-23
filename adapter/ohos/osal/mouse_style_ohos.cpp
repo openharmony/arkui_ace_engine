@@ -19,6 +19,7 @@
 #include "struct_multimodal.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 
@@ -30,10 +31,7 @@ RefPtr<MouseStyle> MouseStyle::CreateMouseStyle()
 bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle) const
 {
     auto inputManager = MMI::InputManager::GetInstance();
-    if (inputManager == nullptr) {
-        LOGE("InputManager instance is valid");
-        return false;
-    }
+    CHECK_NULL_RETURN(inputManager, false);
     int32_t MMIPointStyle = 0;
     switch (pointerStyle) {
         case MouseFormat::WEST_EAST:
@@ -62,10 +60,7 @@ bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle)
 int32_t MouseStyleOhos::GetPointerStyle(int32_t windowId, int32_t& pointerStyle) const
 {
     auto inputManager = MMI::InputManager::GetInstance();
-    if (inputManager == nullptr) {
-        LOGE("InputManager instance is valid");
-        return -1;
-    }
+    CHECK_NULL_RETURN(inputManager, -1);
     int32_t getResult = inputManager->GetPointerStyle(windowId, pointerStyle);
     if (getResult == -1) {
         LOGE("GetPointerStyle result is false");

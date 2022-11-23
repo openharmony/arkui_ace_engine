@@ -523,8 +523,13 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     CHECK_NULL_RETURN(delegate_, false);
     CHECK_NULL_RETURN(dirty, false);
     auto geometryNode = dirty->GetGeometryNode();
-    auto drawSize = geometryNode->GetContentSize();
-    drawSize_ = Size(drawSize.Width(), drawSize.Height());
+    auto drawSize = Size(geometryNode->GetContentSize().Width(), geometryNode->GetContentSize().Height());
+    if (drawSize.IsInfinite() || drawSize.IsEmpty()) {
+        LOGE("resize invalid %{public}f, %{public}f", drawSize.Width(), drawSize.Height());
+        return false;
+    }
+
+    drawSize_ = drawSize;
     drawSizeCache_ = drawSize_;
     delegate_->Resize(drawSize_.Width(), drawSize_.Height());
     // first update size to load url.
@@ -1185,5 +1190,29 @@ void WebPattern::OnWindowHide()
     delegate_->HideWebView();
     needOnFocus_ = false;
     isWindowShow_ = false;
+}
+
+void WebPattern::OnInActive()
+{
+    if (!isActive_) {
+        return;
+    }
+
+    LOGI("web OnInActive called");
+    CHECK_NULL_VOID(delegate_);
+    delegate_->OnInactive();
+    isActive_ = false;
+}
+
+void WebPattern::OnActive()
+{
+    if (isActive_) {
+        return;
+    }
+
+    LOGI("web OnActive called");
+    CHECK_NULL_VOID(delegate_);
+    delegate_->OnActive();
+    isActive_ = true;
 }
 } // namespace OHOS::Ace::NG

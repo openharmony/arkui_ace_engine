@@ -220,14 +220,14 @@ inline BoxSizing ConvertStrToBoxSizing(const std::string& value)
 inline ImageRepeat ConvertStrToImageRepeat(const std::string& repeat)
 {
     static const LinearMapNode<ImageRepeat> imageRepeatTable[] = {
-        { "no-repeat", ImageRepeat::NOREPEAT },
+        { "no-repeat", ImageRepeat::NO_REPEAT },
         { "repeat", ImageRepeat::REPEAT },
-        { "repeat-x", ImageRepeat::REPEATX },
-        { "repeat-y", ImageRepeat::REPEATY },
+        { "repeat-x", ImageRepeat::REPEAT_X },
+        { "repeat-y", ImageRepeat::REPEAT_Y },
     };
 
     auto index = BinarySearchFindIndex(imageRepeatTable, ArraySize(imageRepeatTable), repeat.c_str());
-    return index < 0 ? ImageRepeat::NOREPEAT : imageRepeatTable[index].value;
+    return index < 0 ? ImageRepeat::NO_REPEAT : imageRepeatTable[index].value;
 }
 
 inline FontWeight ConvertStrToFontWeight(const std::string& weight)

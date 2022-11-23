@@ -17,6 +17,7 @@
 #include <shared_mutex>
 #include <unistd.h>
 
+#include "base/utils/utils.h"
 #include "base/utils/system_properties.h"
 
 #include "parameter.h"
@@ -140,10 +141,7 @@ bool IsGpuUploadEnabled()
 
 void OnAnimationScaleChanged(const char *key, const char *value, void *context)
 {
-    if (key == nullptr) {
-        LOGE("AnimationScale changes failed. key is null.");
-        return;
-    }
+    CHECK_NULL_VOID(key);
     if (strcmp(key, ANIMATION_SCALE_KEY) != 0) {
         LOGE("AnimationScale key not matched. key: %{public}s", key);
         return;
@@ -239,6 +237,15 @@ int32_t GetAstcPsnrProp()
     return system::GetIntParameter<int>("persist.astc.psnr", 0);
 }
 
+bool IsExtSurfaceEnabled()
+{
+#ifdef EXT_SURFACE_ENABLE
+    return true;
+#else
+    return false;
+#endif
+}
+
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
@@ -271,6 +278,7 @@ bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
 bool SystemProperties::astcEnabled_ = GetAstcEnabled();
 int32_t SystemProperties::astcMax_ = GetAstcMaxErrorProp();
 int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
+bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 
 DeviceType SystemProperties::GetDeviceType()
 {
