@@ -13,22 +13,32 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_FILTER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_FILTER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_MASK_FILTER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_MASK_FILTER_H
 
 #include <memory>
 
 #include "testing_color.h"
-#include "testing_mask_filter.h"
 #include "utils/scalar.h"
 
 namespace OHOS::Ace::Testing {
-class TestingFilter {
-public:
-    TestingFilter() = default;
-    ~TestingFilter() = default;
+using scalar = Rosen::Drawing::scalar;
+enum class BlurType {
+    NORMAL,
+    SOLID,
+    OUTER,
+    INNER,
+};
 
-    void SetMaskFilter(std::shared_ptr<TestingMaskFilter> maskFilter) {}
+class TestingMaskFilter {
+public:
+    TestingMaskFilter() = default;
+    ~TestingMaskFilter() = default;
+
+    static std::shared_ptr<TestingMaskFilter> CreateBlurMaskFilter(BlurType blurType, scalar sigma)
+    {
+        return std::make_shared<TestingMaskFilter>();
+    }
 };
 } // namespace OHOS::Ace::Testing
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_FILTER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_MASK_FILTER_H

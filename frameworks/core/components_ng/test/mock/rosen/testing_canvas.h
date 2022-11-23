@@ -16,13 +16,17 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_CANVAS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_CANVAS_H
 
+#include "draw/clip.h"
 #include "testing_brush.h"
 #include "testing_path.h"
 #include "testing_pen.h"
 #include "utils/point.h"
+#include "utils/round_rect.h"
 
 namespace OHOS::Ace::Testing {
 using Point = Rosen::Drawing::Point;
+using RoundRect = Rosen::Drawing::RoundRect;
+using ClipOp = Rosen::Drawing::ClipOp;
 class TestingCanvas {
 public:
     TestingCanvas() = default;
@@ -32,8 +36,13 @@ public:
     virtual void DrawLine(const Point& startPt, const Point& endPt) {}
     
     virtual void DrawPath(const TestingPath& path) {}
+    virtual void DrawArc(const Rect& oval, scalar startAngle, scalar sweepAngle) {}
+    virtual void DrawRect(const Rect& rect) {}
+
+    virtual void ClipRoundRect(const RoundRect& roundRect, ClipOp op) {}
 
     virtual void Rotate(scalar deg, scalar sx, scalar sy) {}
+    virtual void Translate(scalar dx, scalar dy) {}
 
     virtual TestingCanvas& AttachPen(const TestingPen& pen)
     {
