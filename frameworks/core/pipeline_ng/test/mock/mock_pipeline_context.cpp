@@ -198,4 +198,7 @@ const RefPtr<StageManager>& PipelineContext::GetStageManager()
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
     return stageManager_;
 }
+
+void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback) {}
+
 } // namespace OHOS::Ace::NG
