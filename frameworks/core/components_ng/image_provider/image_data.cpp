@@ -14,22 +14,19 @@
  */
 
 #include "core/components_ng/image_provider/image_data.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 
 size_t ImageData::GetSize() const
 {
-    if (!pixelMap_) {
-        return 0;
-    }
+    CHECK_NULL_RETURN(pixelMap_, 0);
     return pixelMap_->GetByteCount();
 }
 
 const void* ImageData::GetData() const
 {
-    if (!pixelMap_) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(pixelMap_, nullptr);
     return pixelMap_->GetPixels();
 }
 

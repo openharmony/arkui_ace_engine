@@ -15,6 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_use.h"
 
+#include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_declaration.h"
 
 namespace OHOS::Ace::NG {
@@ -34,19 +35,13 @@ RefPtr<SvgNode> SvgUse::Create()
 SkPath SvgUse::AsPath(const Size& viewPort) const
 {
     auto svgContext = svgContext_.Upgrade();
-    if (!svgContext) {
-        LOGE("asPath failed, svgContext is null");
-        return SkPath();
-    }
+    CHECK_NULL_RETURN(svgContext, SkPath());
     if (declaration_->GetHref().empty()) {
         LOGE("href is empty");
         return SkPath();
     }
     auto refSvgNode = svgContext->GetSvgNodeById(declaration_->GetHref());
-    if (!refSvgNode) {
-        LOGE("refSvgNode is null");
-        return SkPath();
-    }
+    CHECK_NULL_RETURN(refSvgNode, SkPath());
     refSvgNode->Inherit(declaration_);
     return refSvgNode->AsPath(viewPort);
 }

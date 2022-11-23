@@ -17,6 +17,7 @@
 
 #include "third_party/skia/include/effects/SkOffsetImageFilter.h"
 
+#include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_fe_offset_declaration.h"
 
 namespace OHOS::Ace::NG {
@@ -37,9 +38,7 @@ void SvgFeOffset::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter, const Color
     ColorInterpolationType& currentColor) const
 {
     auto declaration = AceType::DynamicCast<SvgFeOffsetDeclaration>(declaration_);
-    if (!declaration) {
-        return;
-    }
+    CHECK_NULL_VOID(declaration);
     imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
     imageFilter = SkOffsetImageFilter::Make(declaration->GetDx(), declaration->GetDy(), imageFilter);
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
