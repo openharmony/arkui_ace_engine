@@ -62,7 +62,6 @@ constexpr int32_t SET_HOURS_FOR_THE_SECOND_TIME = 8;
 constexpr int32_t SET_HOURS_FOR_THE_THIRD_TIME = 24;
 constexpr int32_t GET_HOURSWEST_FOR_THE_FIRST_TIME = 24 - 13;
 constexpr int32_t GET_HOURSWEST_FOR_THE_SECOND_TIME = 8;
-constexpr int32_t GET_HOURSWEST_FOR_THE_THIRD_TIME = 0;
 constexpr int32_t TEST_INPUT_ARGS_TWO = 2022;
 constexpr int64_t TEST_INPUT_INT64 = 123456;
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
@@ -151,7 +150,7 @@ HWTEST_F(UtilsTest, UtilsTest002, TestSize.Level1)
     time_t nowTime;
     struct tm* localTime;
     time(&nowTime);
-    localTime = gmtime(&nowTime);
+    localTime = localtime(&nowTime);
     ASSERT_EQ(locaDay.year, localTime->tm_year + DEFAULT_YEAR);
     ASSERT_EQ(locaDay.month, localTime->tm_mon + ADD_ONE);
     ASSERT_EQ(locaDay.day, localTime->tm_mday);
@@ -323,12 +322,16 @@ HWTEST_F(UtilsTest, UtilsTest008, TestSize.Level1)
     } else {
         localTimeHour12 = localTimeHour24;
     }
-    ASSERT_EQ(theTimeOfNow.hoursWest_, GET_HOURSWEST_FOR_THE_THIRD_TIME);
+    struct timeval currentTime;
+    struct timezone timeZone;
+    gettimeofday(&currentTime, &timeZone);
+    auto getHoursWest = timeZone.tz_minuteswest / 60;
+    ASSERT_EQ(theTimeOfNow.hoursWest_, getHoursWest);
     ASSERT_EQ(theTimeOfNow.second_, localTime->tm_sec);
     ASSERT_EQ(theTimeOfNow.minute_, localTime->tm_min);
     ASSERT_EQ(theTimeOfNow.hour12_, localTimeHour12);
     ASSERT_EQ(theTimeOfNow.hour24_, localTimeHour24);
-    ASSERT_EQ(theTimeOfZone.hoursWest_, GET_HOURSWEST_FOR_THE_THIRD_TIME);
+    ASSERT_EQ(theTimeOfZone.hoursWest_, getHoursWest);
     ASSERT_EQ(theTimeOfZone.second_, localTime->tm_sec);
     ASSERT_EQ(theTimeOfZone.minute_, localTime->tm_min);
     ASSERT_EQ(theTimeOfZone.hour12_, localTimeHour12);
