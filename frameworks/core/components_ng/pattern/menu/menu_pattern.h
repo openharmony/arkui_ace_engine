@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_paint_method.h"
+#include "core/components_ng/pattern/menu/navigation_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -52,7 +53,8 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<MenuLayoutAlgorithm>();
+        RefPtr<MenuLayoutAlgorithm> navigationMenu = MakeRefPtr<NavigationMenuLayoutAlgorithm>();
+        return isNavigationMenu_ ? navigationMenu : MakeRefPtr<MenuLayoutAlgorithm>();
     }
 
     void SetIsContextMenu(bool isContextMenu)
@@ -65,12 +67,23 @@ public:
         return isContextMenu_;
     }
 
+    void SetIsNavigationMenu(bool isNavigationMenu)
+    {
+        isNavigationMenu_ = isNavigationMenu;
+    }
+
+    bool IsNavigationMenu() const
+    {
+        return isNavigationMenu_;
+    }
+
 private:
     void OnModifyDone() override;
     void RegisterOnClick();
 
     int32_t targetId_ = -1;
     bool isContextMenu_ = false;
+    bool isNavigationMenu_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

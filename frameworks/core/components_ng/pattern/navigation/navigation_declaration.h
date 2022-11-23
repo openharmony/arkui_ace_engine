@@ -84,6 +84,10 @@ constexpr Dimension FULL_DOUBLE_LINE_TITLEBAR_HEIGHT = 138.0_vp;
 constexpr Dimension HORIZONTAL_MARGIN = 16.0_vp; // ohos_id_elements_margin_horizontal_l
 constexpr Dimension HORIZONTAL_MARGIN_M = 8.0_vp; // ohos_id_elements_margin_horizontal_m
 
+// more button
+constexpr Dimension MORE_BUTTON_CORNER_RADIUS = 8.0_vp;
+constexpr Dimension MENU_AND_BUTTON_SPACE = 8.0_vp;
+
 struct BarItem {
     std::optional<std::string> text;
     std::optional<std::string> icon;

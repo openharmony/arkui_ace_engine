@@ -36,10 +36,10 @@ public:
     static void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap);
     static void SetHideBackButton(bool hideBackButton);
     static void SetCustomMenu(const RefPtr<UINode>& customMenu);
-    static void SetMenuItems(std::list<BarItem>&& menuItems);
+    static void SetMenuItems(std::vector<BarItem>&& menuItems);
     // toolbar
     static void SetHideToolBar(bool hideToolBar);
-    static void SetToolBarItems(std::list<BarItem>&& customToolBarItems);
+    static void SetToolBarItems(std::vector<BarItem>&& customToolBarItems);
     static void SetCustomToolBar(const RefPtr<UINode>& customToolBar);
 
     static void SetNavigationMode(NG::NavigationMode mode);
