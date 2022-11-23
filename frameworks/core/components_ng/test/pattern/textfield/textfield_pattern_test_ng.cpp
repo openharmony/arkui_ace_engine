@@ -66,6 +66,31 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldInsertValue001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextFieldInsertValue002
+ * @tc.desc: Test textfield insert a value and clear it when type changed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldInsertValue002, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(PLACEHOLDER, EMPTY_TEXT_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    textFieldModelNG.SetType(TextInputType::TEXT);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    pattern->InsertValue(INSERT_VALUE_SINGLE_CHAR);
+    EXPECT_EQ(pattern->GetEditingValue().text, INSERT_VALUE_SINGLE_CHAR);
+    EXPECT_EQ(pattern->GetEditingValue().caretPosition, INSERT_VALUE_SINGLE_CHAR.size());
+    auto secNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    textFieldModelNG.SetType(TextInputType::NUMBER);
+    pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->ClearEditingValue();
+    EXPECT_EQ(pattern->GetEditingValue().text.length(), 0);
+}
+
+/**
  * @tc.name: TextFieldDeleteForwardValue001
  * @tc.desc: Test deleting value of textfield.
  * @tc.type: FUNC
