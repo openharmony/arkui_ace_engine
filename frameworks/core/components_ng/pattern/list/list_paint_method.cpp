@@ -27,6 +27,7 @@ void ListPaintMethod::PaintDivider(const DividerInfo& dividerInfo, const Positio
     int32_t laneIdx = 0;
     bool lastIsItemGroup = false;
     bool isFirstItem = (itemPosition.begin()->first == 0);
+    std::list<int32_t> lastLineIndex;
 
     for (const auto& child : itemPosition) {
         if (!isFirstItem) {
@@ -41,9 +42,29 @@ void ListPaintMethod::PaintDivider(const DividerInfo& dividerInfo, const Positio
             OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
             dividerPainter.DrawLine(canvas, offset);
         }
+        if (laneIdx == 0) {
+            lastLineIndex.clear();
+        }
+        lastLineIndex.emplace_back(child.first);
         lastIsItemGroup = child.second.isGroup;
         laneIdx = (lanes <= 1 || (laneIdx + 1) >= lanes || child.second.isGroup) ? 0 : laneIdx + 1;
         isFirstItem = isFirstItem ? laneIdx > 0 : false;
+    }
+    if (!lastLineIndex.empty() && *lastLineIndex.rbegin() < dividerInfo.totalItemCount - 1) {
+        int32_t laneIdx = 0;
+        for (auto index : lastLineIndex) {
+            float mainPos = itemPosition.at(index).endPos + dividerInfo.halfSpaceWidth;
+            float crossPos = dividerInfo.startMargin;
+            if (lanes > 1 && !itemPosition.at(index).isGroup) {
+                crossPos += laneIdx * dividerInfo.crossSize / dividerInfo.lanes;
+                dividerPainter.SetDividerLength(laneLen);
+            } else {
+                dividerPainter.SetDividerLength(crossLen);
+            }
+            OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
+            dividerPainter.DrawLine(canvas, offset);
+            laneIdx++;
+        }
     }
 }
 
@@ -66,6 +87,7 @@ CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* pain
         .halfSpaceWidth = space_ / 2.0f, /* 2.0f half */
         .isVertical = vertical_,
         .lanes = lanes_ > 1 ? lanes_ : 1,
+        .totalItemCount = totalItemCount_,
         .color = divider_.color
     };
 

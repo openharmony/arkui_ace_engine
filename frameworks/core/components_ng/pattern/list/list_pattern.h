@@ -43,10 +43,10 @@ public:
         V2::ItemDivider itemDivider;
         auto divider = listLayoutProperty->GetDivider().value_or(itemDivider);
         auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
-        auto lanes = listLayoutProperty->GetLanes().value_or(1);
         auto drawVertical = (axis == Axis::HORIZONTAL);
-        auto paint =  MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes, spaceWidth_, itemPosition_);
+        auto paint =  MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_, itemPosition_);
         paint->SetScrollBar(AceType::WeakClaim(AceType::RawPtr(scrollBar_)));
+        paint->SetTotalItemCount(maxListItemIndex_ + 1);
         return paint;
     }
 
@@ -134,7 +134,7 @@ public:
         return estimateOffset_ - currentOffset_;
     }
 
-    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool limitDuration = true);
+    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve);
     void ScrollTo(float position);
     void ScrollToIndex(int32_t index, ScrollIndexAlignment align = ScrollIndexAlignment::ALIGN_TOP);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
@@ -199,7 +199,7 @@ private:
     WeakPtr<FrameNode> headerGroupNode_;
     WeakPtr<FrameNode> footerGroupNode_;
     std::map<int32_t, int32_t> lanesItemRange_;
-    int32_t lanes_;
+    int32_t lanes_ = 1;
 };
 } // namespace OHOS::Ace::NG
 
