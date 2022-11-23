@@ -111,7 +111,7 @@ void VideoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             layoutConstraintForImage.UpdateMaxSizeWithCheck(contentSize);
             layoutConstraintForImage.UpdateMinSizeWithCheck(contentSize);
             child->Measure(layoutConstraintForImage);
-        } else if (child->GetHostTag() == V2::ROW_ETS_TAG && layoutProperty->GetControlsValue(false)) {
+        } else if (child->GetHostTag() == V2::ROW_ETS_TAG && layoutProperty->GetControlsValue(true)) {
             auto controlBarHeight = CalControlBarHeight();
             SizeF controlBarSize(contentSize.Width(), controlBarHeight);
             auto layoutConstraintForControlBar = layoutConstraint;
