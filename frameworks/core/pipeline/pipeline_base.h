@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_PIPELINE_BASE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_PIPELINE_BASE_H
 
+#include <atomic>
 #include <functional>
 #include <memory>
 #include <stack>
@@ -137,7 +138,7 @@ public:
 
     virtual AnimationOption GetExplicitAnimationOption() const = 0;
 
-    virtual void Destroy() = 0;
+    virtual void Destroy();
 
     virtual void OnShow() = 0;
 
@@ -559,6 +560,9 @@ public:
         return frontendType_;
     }
 
+    virtual double MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+        const std::string& fontWeight, const std::string& fontFamily, double letterSpacing) = 0;
+
     double GetDensity() const
     {
         return density_;
@@ -647,6 +651,8 @@ public:
         displayWindowRectInfo_ = displayWindowRectInfo;
     }
 
+    virtual void SetContainerWindow(bool isShow) = 0;
+
     // This method can get the coordinates and size of the current window,
     // which can be added to the return value of the GetGlobalOffset method to get the window coordinates of the node.
     const Rect& GetDisplayWindowRectInfo() const
@@ -657,7 +663,37 @@ public:
 
     virtual void FlushUITasks() = 0;
 
+    // for sync animation only
+    AnimationOption GetSyncAnimationOption()
+    {
+        return animationOption_;
+    }
+
+    void SetSyncAnimationOption(const AnimationOption& option)
+    {
+        animationOption_ = option;
+    }
+
+    void SetNextFrameLayoutCallback(std::function<void()>&& callback)
+    {
+        nextFrameLayoutCallback_ = std::move(callback);
+    }
+
+    void SetForegroundCalled(bool isForegroundCalled)
+    {
+        isForegroundCalled_ = isForegroundCalled;
+    }
+
 protected:
+    void TryCallNextFrameLayoutCallback()
+    {
+        if (isForegroundCalled_ && nextFrameLayoutCallback_) {
+            isForegroundCalled_ = false;
+            nextFrameLayoutCallback_();
+            LOGI("nextFrameLayoutCallback called");
+        }
+    }
+
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const
     {
         return false;
@@ -724,6 +760,10 @@ protected:
     RefPtr<Clipboard> clipboard_;
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;
     Rect displayWindowRectInfo_;
+    AnimationOption animationOption_;
+
+    std::function<void()> nextFrameLayoutCallback_ = nullptr;
+    std::atomic<bool> isForegroundCalled_ = false;
 
 private:
     StatusBarEventHandler statusBarBgColorEventHandler_;

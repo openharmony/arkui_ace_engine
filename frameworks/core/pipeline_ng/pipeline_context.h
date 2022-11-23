@@ -46,6 +46,7 @@ public:
         const RefPtr<Frontend>& frontend, int32_t instanceId);
     PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId);
+    PipelineContext() = default;
 
     ~PipelineContext() override = default;
 
@@ -113,6 +114,10 @@ public:
         return {};
     }
 
+    void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback);
+
+    void HandleVisibleAreaChangeEvent();
+
     void Destroy() override;
 
     void OnShow() override;
@@ -129,15 +134,11 @@ public:
 
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
 
+    double MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+        const std::string& fontWeight, const std::string& fontFamily, double letterSpacing) override;
+
     void OnSurfaceChanged(
-        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override
-    {
-        auto frontend = weakFrontend_.Upgrade();
-        if (frontend) {
-            frontend->OnSurfaceChanged(width, height);
-        }
-        SetRootSize(density_, width, height);
-    }
+        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override;
 
     void OnSurfacePositionChanged(int32_t posX, int32_t posY) override {}
 
@@ -174,20 +175,14 @@ public:
 
     const RefPtr<OverlayManager>& GetOverlayManager();
 
-    const RefPtr<SelectOverlayManager>& GetSelectOverlayManager()
-    {
-        return selectOverlayManager_;
-    }
+    const RefPtr<SelectOverlayManager>& GetSelectOverlayManager();
 
     const RefPtr<SharedOverlayManager>& GetSharedOverlayManager()
     {
         return sharedTransitionManager_;
     }
 
-    const RefPtr<DragDropManager>& GetDragDropManager()
-    {
-        return dragDropManager_;
-    }
+    const RefPtr<DragDropManager>& GetDragDropManager();
 
     void FlushBuild() override;
 
@@ -223,18 +218,20 @@ public:
         isNeedShowFocus_ = isNeedShowFocus;
     }
 
+    bool GetOnShow() const
+    {
+        return onShow_;
+    }
+
     bool RequestDefaultFocus();
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
 
-    void SetDrawDelegate(std::unique_ptr<DrawDelegate> delegate)
-    {
-        drawDelegate_ = std::move(delegate);
-    }
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);
     void NotifyMemoryLevel(int32_t level) override;
     void FlushMessages() override;
+    void SetContainerWindow(bool isShow) override;
 
     void FlushUITasks() override
     {
@@ -244,6 +241,8 @@ public:
     void Finish(bool autoFinish) const override;
 
 protected:
+    void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type);
+
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushFocus();
@@ -294,7 +293,8 @@ private:
     std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_;
-    std::unique_ptr<DrawDelegate> drawDelegate_;
+
+    std::unordered_map<int32_t, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
 
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
@@ -308,6 +308,8 @@ private:
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isNeedShowFocus_ = false;
+    bool onShow_ = true;
+    bool onFocus_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

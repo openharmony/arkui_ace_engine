@@ -14,6 +14,7 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_canvas_gradient.h"
+
 #include "bridge/declarative_frontend/jsview/js_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 
@@ -68,7 +69,11 @@ void JSCanvasGradient::addColorStop(const JSCallbackInfo& info)
         std::string jsColor;
         GradientColor color;
         JSViewAbstract::ParseJsString(info[1], jsColor);
-        color.SetColor(Color::FromString(jsColor));
+        Color colorFromString = Color::WHITE;
+        if (!Color::ParseColorString(jsColor, colorFromString)) {
+            LOGE("color is invalid!");
+        }
+        color.SetColor(colorFromString);
         color.SetDimension(offset);
         if (gradient_) {
             gradient_->AddColor(color);

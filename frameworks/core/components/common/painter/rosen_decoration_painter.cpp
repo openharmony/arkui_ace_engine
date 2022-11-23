@@ -1709,7 +1709,6 @@ void RosenDecorationPainter::PaintBoxShadows(
         }
     } else {
         rsNode->SetShadowRadius(0.f);
-        rsNode->SetShadowElevation(0.f);
     }
 }
 
@@ -1725,9 +1724,9 @@ void RosenDecorationPainter::PaintShadow(
     rsNode->SetShadowColor(shadow.GetColor().GetValue());
     rsNode->SetShadowOffsetX(shadow.GetOffset().GetX());
     rsNode->SetShadowOffsetY(shadow.GetOffset().GetY());
-    // rosen requires a non-zero elevation
-    rsNode->SetShadowElevation(shadow.GetElevation());
-    if (!shadow.GetHardwareAcceleration()) {
+    if (shadow.GetHardwareAcceleration()) {
+        rsNode->SetShadowElevation(shadow.GetElevation());
+    } else {
         rsNode->SetShadowRadius(ConvertRadiusToSigma(shadow.GetBlurRadius()));
     }
 }

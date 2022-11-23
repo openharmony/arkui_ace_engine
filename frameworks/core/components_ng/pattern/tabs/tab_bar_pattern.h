@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_BAR_PATTERN_H
 
 #include <optional>
+#include <unordered_map>
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
@@ -32,10 +33,52 @@
 namespace OHOS::Ace::NG {
 
 using TabBarBuilderFunc = std::function<void()>;
-struct TabBarParam {
-    std::string text;
-    std::string icon;
-    TabBarBuilderFunc builder;
+class TabBarParam : public virtual Referenced {
+public:
+    TabBarParam(const std::string& textParam, const std::string& iconParam, TabBarBuilderFunc&& builderParam)
+        : text_(textParam), icon_(iconParam), builder_(std::move(builderParam)) {};
+
+    const std::string& GetIcon() const
+    {
+        return icon_;
+    }
+
+    void SetIcon(const std::string& icon)
+    {
+        icon_ = icon;
+    }
+
+    const std::string& GetText() const
+    {
+        return text_;
+    }
+
+    void SetText(const std::string& text)
+    {
+        text_ = text;
+    }
+
+    bool HasBuilder() const
+    {
+        return builder_ != nullptr;
+    }
+
+    void SetBuilder(TabBarBuilderFunc&& builderParam)
+    {
+        builder_ = std::move(builderParam);
+    }
+
+    void ExecuteBuilder() const
+    {
+        if (builder_ != nullptr) {
+            builder_();
+        }
+    }
+
+private:
+    std::string text_;
+    std::string icon_;
+    TabBarBuilderFunc builder_;
 };
 
 class TabBarPattern : public Pattern {
@@ -58,7 +101,9 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         auto layoutAlgorithm = MakeRefPtr<TabBarLayoutAlgorithm>();
+        layoutAlgorithm->SetChildrenMainSize(childrenMainSize_);
         layoutAlgorithm->SetCurrentOffset(currentOffset_);
+        layoutAlgorithm->SetIndicator(indicator_);
         return layoutAlgorithm;
     }
 
@@ -72,9 +117,43 @@ public:
         return MakeRefPtr<TabBarPaintMethod>();
     }
 
+    void SetChildrenMainSize(float childrenMainSize)
+    {
+        childrenMainSize_ = childrenMainSize;
+    }
+
+    void SetIndicator(int32_t indicator)
+    {
+        indicator_ = indicator;
+    }
+
     void UpdateCurrentOffset(float offset);
 
     void UpdateIndicator(int32_t indicator);
+
+    void UpdateTextColor(int32_t indicator);
+
+    void AddTabBarItemType(int32_t tabContentId, bool isBuilder)
+    {
+        tabBarType_.emplace(std::make_pair(tabContentId, isBuilder));
+    }
+
+    bool IsContainsBuilder();
+
+    void SetAnimationDuration(int32_t animationDuration)
+    {
+        animationDuration_ = animationDuration;
+    }
+
+    void SetTouching(bool isTouching)
+    {
+        touching_ = isTouching;
+    }
+
+    bool IsTouching() const
+    {
+        return touching_;
+    }
 
 private:
     void OnModifyDone() override;
@@ -84,8 +163,14 @@ private:
     void InitClick(const RefPtr<GestureEventHub>& gestureHub);
     void InitScrollable(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouch(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleClick(const GestureEvent& info) const;
+    void HandleClick(const GestureEvent& info);
     void HandleTouchEvent(const TouchLocationInfo& info);
+
+    void HandleTouchDown(int32_t index);
+    void HandleTouchUp(int32_t index);
+    int32_t CalculateSelectedIndex(const Offset& info);
+
+    void PlayPressAnimation(int32_t index, float endOpacityRatio);
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -93,10 +178,18 @@ private:
     RefPtr<SwiperController> swiperController_;
 
     float currentOffset_ = 0.0f;
+    float childrenMainSize_ = 0.0f;
+    int32_t indicator_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
     std::vector<OffsetF> tabItemOffsets_;
+    std::unordered_map<int32_t, bool> tabBarType_;
+    std::optional<int32_t> animationDuration_;
 
     bool isRTL_ = false; // TODO Adapt RTL.
+
+    bool touching_ = false; // whether the item is in touching
+    float hoverOpacity_ = 0.0;
+    int32_t touchingIndex_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

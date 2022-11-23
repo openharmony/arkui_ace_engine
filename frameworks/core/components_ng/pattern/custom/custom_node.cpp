@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
@@ -33,9 +34,7 @@ RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::strin
 
 CustomNode::CustomNode(int32_t nodeId, const std::string& viewKey)
     : UINode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey)
-{
-    SetRemoveSilently(true);
-}
+{}
 
 void CustomNode::Build()
 {
@@ -47,6 +46,7 @@ void CustomNode::Build()
         {
             ACE_SCOPED_TRACE("CustomNode:BuildItem");
             // first create child node and wrapper.
+            ScopedViewStackProcessor scopedViewStackProcessor;
             auto child = renderFunction_();
             if (child) {
                 child->MountToParent(Claim(this));

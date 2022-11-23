@@ -51,10 +51,9 @@ GridSizeType GridContainerUtils::ProcessGridSizeType(const V2::BreakPoints& brea
     } else {
         windowWidth = size.Width();
     }
-    auto context = NG::PipelineContext::GetCurrentContext();
     int index = 0;
     for (const auto& cur : threshold->sizeInfo) {
-        if (context->NormalizeToPx(cur) > windowWidth) {
+        if (cur.ConvertToPx() > windowWidth) {
             break;
         }
         index++;

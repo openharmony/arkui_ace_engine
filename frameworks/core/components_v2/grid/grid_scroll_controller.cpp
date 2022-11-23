@@ -14,6 +14,7 @@
  */
 
 #include "core/components_v2/grid/grid_scroll_controller.h"
+
 #include "core/components_v2/grid/render_grid_scroll.h"
 
 namespace OHOS::Ace::V2 {
@@ -46,7 +47,7 @@ bool GridScrollController::UpdateScrollPosition(const double offset, int32_t sou
     double activeHeight = height * height / estimateHeight;
     if (!NearEqual(height, activeHeight)) {
         double value = offset * estimateHeight / height;
-        ret = callback_(value, source);
+        ret = source == SCROLL_FROM_AXIS ? callback_(offset, source) : callback_(value, source);
     }
     return ret;
 }

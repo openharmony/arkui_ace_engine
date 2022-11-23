@@ -38,6 +38,10 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
+namespace {
+constexpr double VISIBLE_RATIO_MIN = 0.0;
+constexpr double VISIBLE_RATIO_MAX = 1.0;
+}
 namespace OHOS::Ace::NG {
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
@@ -116,6 +120,7 @@ void FrameNode::InitializePatternAndContext()
 {
     eventHub_->AttachHost(WeakClaim(this));
     pattern_->AttachToFrameNode(WeakClaim(this));
+    accessibilityProperty_->SetHost(WeakClaim(this));
     renderContext_->SetRequestFrame([weak = WeakClaim(this)] {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
@@ -130,9 +135,7 @@ void FrameNode::InitializePatternAndContext()
     renderContext_->SetHostNode(WeakClaim(this));
     // Initialize FocusHub
     if (pattern_->GetFocusPattern().focusType != FocusType::DISABLE) {
-        auto focusHub = GetOrCreateFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->SetScopeFocusAlgorithm(pattern_->GetScopeFocusAlgorithm());
+        GetOrCreateFocusHub();
     }
 }
 
@@ -181,17 +184,16 @@ void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
+    // scrollable in AccessibilityProperty
+    ACE_PROPERTY_TO_JSON_VALUE(accessibilityProperty_, AccessibilityProperty);
     ACE_PROPERTY_TO_JSON_VALUE(layoutProperty_, LayoutProperty);
     ACE_PROPERTY_TO_JSON_VALUE(paintProperty_, PaintProperty);
     ACE_PROPERTY_TO_JSON_VALUE(pattern_, Pattern);
     if (renderContext_) {
         renderContext_->ToJsonValue(json);
     }
-    if (pattern_) {
-        pattern_->ToJsonValue(json);
-    }
     if (eventHub_) {
-        pattern_->ToJsonValue(json);
+        eventHub_->ToJsonValue(json);
     }
     FocusToJsonValue(json);
 }
@@ -208,8 +210,8 @@ void FrameNode::OnAttachToMainTree()
     CHECK_NULL_VOID(context);
     context->RequestFrame();
     hasPendingRequest_ = false;
-
-    if (IsResponseRegion()) {
+    if (IsResponseRegion() || renderContext_->HasPosition() || renderContext_->HasOffset() ||
+        renderContext_->HasAnchor()) {
         auto parent = GetParent();
         while (parent) {
             auto frameNode = AceType::DynamicCast<FrameNode>(parent);
@@ -304,6 +306,107 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
 
     // rebuild child render node.
     RebuildRenderContextTree();
+}
+
+void FrameNode::TriggerVisibleAreaChangeCallback(std::list<VisibleCallbackInfo>& callbackInfoList)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+
+    bool curFrameIsActive = true;
+    auto parent = GetParent();
+    while (parent) {
+        auto parentFrame = AceType::DynamicCast<FrameNode>(parent);
+        if (!parentFrame) {
+            parent = parent->GetParent();
+            continue;
+        }
+        if (!parentFrame->isActive_) {
+            curFrameIsActive = false;
+            break;
+        }
+        parent = parent->GetParent();
+    }
+
+    if (!context->GetOnShow() || !IsVisible() || !curFrameIsActive) {
+        if (!NearEqual(lastVisibleRatio_, VISIBLE_RATIO_MIN)) {
+            ProcessAllVisibleCallback(callbackInfoList, VISIBLE_RATIO_MIN);
+            lastVisibleRatio_ = VISIBLE_RATIO_MIN;
+        }
+        return;
+    }
+
+    auto frameRect = renderContext_->GetPaintRectWithTransform();
+    frameRect.SetOffset(GetOffsetRelativeToWindow());
+    auto visibleRect = frameRect;
+    RectF parentRect;
+    auto parentUi = GetParent();
+    while (parentUi) {
+        auto parentFrame = AceType::DynamicCast<FrameNode>(parentUi);
+        if (!parentFrame) {
+            parentUi = parentUi->GetParent();
+            continue;
+        }
+        parentRect = parentFrame->GetRenderContext()->GetPaintRectWithTransform();
+        parentRect.SetOffset(parentFrame->GetOffsetRelativeToWindow());
+        visibleRect = visibleRect.Constrain(parentRect);
+        parentUi = parentUi->GetParent();
+    }
+
+    double currentVisibleRatio =
+        std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect), VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
+    if (!NearEqual(currentVisibleRatio, lastVisibleRatio_)) {
+        ProcessAllVisibleCallback(callbackInfoList, currentVisibleRatio);
+        lastVisibleRatio_ = currentVisibleRatio;
+    }
+}
+
+double FrameNode::CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect)
+{
+    if (!visibleRect.IsValid() || !renderRect.IsValid()) {
+        return 0.0;
+    }
+    return visibleRect.Width() * visibleRect.Height() / (renderRect.Width() * renderRect.Height());
+}
+
+void FrameNode::ProcessAllVisibleCallback(std::list<VisibleCallbackInfo>& callbackInfoList, double currentVisibleRatio)
+{
+    for (auto& nodeCallbackInfo : callbackInfoList) {
+        if (GreatNotEqual(currentVisibleRatio, nodeCallbackInfo.visibleRatio) && !nodeCallbackInfo.isCurrentVisible) {
+            OnVisibleAreaChangeCallback(nodeCallbackInfo, true, currentVisibleRatio);
+            continue;
+        }
+
+        if (LessNotEqual(currentVisibleRatio, nodeCallbackInfo.visibleRatio) && nodeCallbackInfo.isCurrentVisible) {
+            OnVisibleAreaChangeCallback(nodeCallbackInfo, false, currentVisibleRatio);
+            continue;
+        }
+
+        if (NearEqual(currentVisibleRatio, nodeCallbackInfo.visibleRatio) &&
+            NearEqual(nodeCallbackInfo.visibleRatio, VISIBLE_RATIO_MIN)) {
+            if (nodeCallbackInfo.isCurrentVisible) {
+                OnVisibleAreaChangeCallback(nodeCallbackInfo, false, VISIBLE_RATIO_MIN);
+            } else {
+                OnVisibleAreaChangeCallback(nodeCallbackInfo, true, VISIBLE_RATIO_MIN);
+            }
+        } else if (NearEqual(currentVisibleRatio, nodeCallbackInfo.visibleRatio) &&
+                   NearEqual(nodeCallbackInfo.visibleRatio, VISIBLE_RATIO_MAX)) {
+            if (!nodeCallbackInfo.isCurrentVisible) {
+                OnVisibleAreaChangeCallback(nodeCallbackInfo, true, VISIBLE_RATIO_MAX);
+            } else {
+                OnVisibleAreaChangeCallback(nodeCallbackInfo, false, VISIBLE_RATIO_MAX);
+            }
+        }
+    }
+}
+
+void FrameNode::OnVisibleAreaChangeCallback(
+    VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio)
+{
+    callbackInfo.isCurrentVisible = visibleType;
+    if (callbackInfo.callback) {
+        callbackInfo.callback(visibleType, currentVisibleRatio);
+    }
 }
 
 void FrameNode::SetActive(bool active)
@@ -448,11 +551,11 @@ void FrameNode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
 
 RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
-    isLayoutDirtyMarked_ = false;
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
         auto layoutWrapper =
             MakeRefPtr<LayoutWrapper>(WeakClaim(this), MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>());
         layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(nullptr, true, true));
+        isLayoutDirtyMarked_ = false;
         return layoutWrapper;
     }
 
@@ -488,6 +591,7 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
     // check position flag.
     layoutWrapper->SetOutOfLayout(renderContext_->HasPosition());
     layoutWrapper->SetActive(isActive_);
+    isLayoutDirtyMarked_ = false;
     return layoutWrapper;
 }
 
@@ -556,7 +660,9 @@ void FrameNode::RebuildRenderContextTree()
 void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
-    if (IsResponseRegion()) {
+    eventHub_->MarkModifyDone();
+    if (IsResponseRegion() || renderContext_->HasPosition() || renderContext_->HasOffset() ||
+        renderContext_->HasAnchor()) {
         auto parent = GetParent();
         while (parent) {
             auto frameNode = AceType::DynamicCast<FrameNode>(parent);
@@ -722,14 +828,14 @@ bool FrameNode::IsResponseRegion() const
 
 void FrameNode::MarkResponseRegion(bool isResponseRegion)
 {
-    auto gestureHub = eventHub_->GetGestureEventHub();
+    auto gestureHub = eventHub_->GetOrCreateGestureEventHub();
     if (gestureHub) {
         gestureHub->MarkResponseRegion(isResponseRegion);
     }
 }
 
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result)
+    const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
     if (!isActive_ || !eventHub_->IsEnabled()) {
         LOGE("%{public}s is inActive, need't do touch test", GetTag().c_str());
@@ -765,7 +871,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         }
 
         const auto& child = *iter;
-        auto childHitResult = child->TouchTest(globalPoint, localPoint, touchRestrict, newComingTargets);
+        auto childHitResult = child->TouchTest(globalPoint, localPoint, touchRestrict, newComingTargets, touchId);
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
             preventBubbling = true;
             consumed = true;
@@ -797,8 +903,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         if (gestureHub) {
             TouchTestResult finalResult;
             const auto coordinateOffset = globalPoint - localPoint;
-            preventBubbling =
-                gestureHub->ProcessTouchTestHit(coordinateOffset, touchRestrict, newComingTargets, finalResult);
+            preventBubbling = gestureHub->ProcessTouchTestHit(coordinateOffset,
+                touchRestrict, newComingTargets, finalResult, touchId);
             newComingTargets.swap(finalResult);
         }
     }
@@ -807,7 +913,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     result.splice(result.end(), std::move(newComingTargets));
     auto gestureHub = eventHub_->GetGestureEventHub();
     if (gestureHub) {
-        gestureHub->CombineIntoExclusiveRecognizer(globalPoint, localPoint, result);
+        gestureHub->CombineIntoExclusiveRecognizer(globalPoint, localPoint, result, touchId);
     }
 
     // consumed by children and return result.
@@ -867,6 +973,9 @@ bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::
 HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     MouseTestResult& onMouseResult, MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode)
 {
+    if (!isActive_ || !eventHub_->IsEnabled()) {
+        return HitTestResult::OUT_OF_REGION;
+    }
     const auto& rect = renderContext_->GetPaintRectWithTransform();
     LOGD("MouseTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
         GetTag().c_str(), rect.Left(), rect.Top(), rect.Width(), rect.Height());
@@ -880,8 +989,7 @@ HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& pare
     bool preventBubbling = false;
 
     const auto localPoint = parentLocalPoint - rect.GetOffset();
-    const auto& children = GetChildren();
-    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
         const auto& child = *iter;
         auto childHitResult = child->MouseTest(globalPoint, localPoint, onMouseResult, onHoverResult, hoverNode);
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
@@ -1002,6 +1110,21 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
     return offset;
 }
 
+OffsetF FrameNode::GetPaintRectOffset() const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    auto offset = context->GetPaintRectWithTransform().GetOffset();
+    auto parent = GetAncestorNodeOfFrame();
+    while (parent) {
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, OffsetF());
+        offset += renderContext->GetPaintRectWithTransform().GetOffset();
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return offset;
+}
+
 void FrameNode::OnNotifyMemoryLevel(int32_t level)
 {
     pattern_->OnNotifyMemoryLevel(level);
@@ -1012,7 +1135,7 @@ void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType) const
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         AccessibilityEvent event;
         event.type = eventType;
-        event.nodeId = GetId();
+        event.nodeId = GetAccessibilityId();
         PipelineContext::GetCurrentContext()->SendEventToAccessibility(event);
     }
 }

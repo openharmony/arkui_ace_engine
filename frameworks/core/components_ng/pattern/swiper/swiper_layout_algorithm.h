@@ -59,11 +59,6 @@ public:
         totalCount_ = totalCount;
     }
 
-    void ResetTargetIndex()
-    {
-        targetIndex_.reset();
-    }
-
     const std::set<int32_t>& GetItemRange()
     {
         return itemRange_;
@@ -79,8 +74,20 @@ public:
         isLoop_ = isLoop;
     }
 
+    int32_t GetCurrentIndex() const
+    {
+        return currentIndex_;
+    }
+
+    const SizeF& GetMaxChildSize() const
+    {
+        return maxChildSize_;
+    }
+
 private:
-    void InitItemRange();
+    void InitItemRange(LayoutWrapper* layoutWrapper);
+    void AddToItemRange(int32_t index);
+    void LoadItemWithDrag(LayoutWrapper* layoutWrapper);
 
     bool isLoop_ = true;
     int32_t currentIndex_ = 0;
@@ -92,6 +99,7 @@ private:
     std::set<int32_t> itemRange_;
     std::set<int32_t> preItemRange_;
     std::vector<int32_t> inActiveItems_;
+    SizeF maxChildSize_;
 };
 
 } // namespace OHOS::Ace::NG

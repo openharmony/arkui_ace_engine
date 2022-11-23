@@ -142,29 +142,26 @@ void MarqueePattern::OnModifyDone()
 
 void MarqueePattern::OnInActive()
 {
+    isActive_ = false;
     if (IsPlayingAnimation(animatorController_)) {
         startAfterShowed_ = true;
         animatorController_->Pause();
     }
-    isActive_ = false;
 }
 
 void MarqueePattern::OnActive()
 {
+    isActive_ = true;
     if (startAfterShowed_) {
         startAfterShowed_ = false;
         StartMarquee();
     }
-    isActive_ = true;
 }
 
 void MarqueePattern::InitAnimatorController()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
     if (!animatorController_) {
-        animatorController_ = AceType::MakeRefPtr<Animator>(host->GetContext());
+        animatorController_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
         auto weak = AceType::WeakClaim(this);
         animatorController_->AddStartListener(Animator::StatusCallback([weak]() {
             auto marquee = weak.Upgrade();

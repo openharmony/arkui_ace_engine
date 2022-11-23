@@ -35,8 +35,8 @@ protected:
     void OnPreFullScreen(bool isPortrait) override;
     RefPtr<Component> GetRootComponent();
     void UpdateVideoComponent(const RefPtr<VideoComponentV2>& videoComponent);
-    RefPtr<Component> FireFullscreen(
-        bool isFullScreen, const WeakPtr<Player>& player, const WeakPtr<Texture>& texture);
+    RefPtr<Component> FireFullscreen(bool isFullScreen, const WeakPtr<Player>& player, const WeakPtr<Texture>& texture);
+    RefPtr<Component> FireFullscreen(bool isFullScreen, bool isPlaying, const WeakPtr<Texture>& texture);
     RefPtr<Component> GetEventComponents(const RefPtr<Component>& videoChild);
 
 private:
@@ -44,7 +44,6 @@ private:
     RefPtr<VideoComponentV2> videoComponent_;
     RefPtr<Component> originComponent_;
     std::unordered_map<std::string, RefPtr<Component>> map_;
-
 };
 
 } // namespace OHOS::Ace

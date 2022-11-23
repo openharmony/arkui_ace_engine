@@ -72,6 +72,7 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
             auto parentFrame = childFrameNode->GetParent();
             CHECK_NULL_VOID(parentFrame);
             auto index = RemoveNode(childFrameNode, nodeId);
+            childFrameNode->SetUndefinedNodeId();
             CreateSwitch(nodeId);
             ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
             AddNewChild(parentFrame, nodeId, index);
@@ -80,6 +81,7 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
         auto parentFrame = childFrameNode->GetParent();
         CHECK_NULL_VOID(parentFrame);
         auto index = RemoveNode(childFrameNode, nodeId);
+        childFrameNode->SetUndefinedNodeId();
         CreateButton(nodeId);
         ToggleButtonModelNG::SetIsOn(isOn);
         AddNewChild(parentFrame, nodeId, index);
@@ -87,14 +89,15 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
     }
     if (AceType::InstanceOf<SwitchPattern>(pattern)) {
         if (toggleType == ToggleType::SWITCH) {
-            ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
             stack->Push(childFrameNode);
+            ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
             return;
         }
         if (toggleType == ToggleType::CHECKBOX) {
             auto parentFrame = childFrameNode->GetParent();
             CHECK_NULL_VOID(parentFrame);
             auto index = RemoveNode(childFrameNode, nodeId);
+            childFrameNode->SetUndefinedNodeId();
             CheckBoxModelNG checkBoxModelNG;
             CreateCheckbox(nodeId);
             checkBoxModelNG.SetSelect(isOn);
@@ -104,6 +107,7 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
         auto parentFrame = childFrameNode->GetParent();
         CHECK_NULL_VOID(parentFrame);
         auto index = RemoveNode(childFrameNode, nodeId);
+        childFrameNode->SetUndefinedNodeId();
         CreateButton(nodeId);
         ToggleButtonModelNG::SetIsOn(isOn);
         AddNewChild(parentFrame, nodeId, index);
@@ -111,14 +115,15 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
     }
     if (AceType::InstanceOf<ToggleButtonPattern>(pattern)) {
         if (toggleType == ToggleType::BUTTON) {
-            ToggleButtonModelNG::SetIsOn(isOn);
             stack->Push(childFrameNode);
+            ToggleButtonModelNG::SetIsOn(isOn);
             return;
         }
         if (toggleType == ToggleType::CHECKBOX) {
             auto parentFrame = childFrameNode->GetParent();
             CHECK_NULL_VOID(parentFrame);
             auto index = RemoveNode(childFrameNode, nodeId);
+            childFrameNode->SetUndefinedNodeId();
             CheckBoxModelNG checkBoxModelNG;
             CreateCheckbox(nodeId);
             checkBoxModelNG.SetSelect(isOn);
@@ -128,6 +133,7 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
         auto parentFrame = childFrameNode->GetParent();
         CHECK_NULL_VOID(parentFrame);
         auto index = RemoveNode(childFrameNode, nodeId);
+        childFrameNode->SetUndefinedNodeId();
         CreateSwitch(nodeId);
         ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
         AddNewChild(parentFrame, nodeId, index);
@@ -231,9 +237,9 @@ void ToggleModelNG::AddNewChild(const RefPtr<UINode>& parentFrame, int32_t nodeI
 
 int32_t ToggleModelNG::RemoveNode(const RefPtr<FrameNode>& childFrameNode, int32_t nodeId)
 {
+    ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
     auto parentFrame = childFrameNode->GetParent();
     CHECK_NULL_RETURN(parentFrame, 0);
-    childFrameNode->SetRemoveSilently(true);
     return parentFrame->RemoveChildAndReturnIndex(childFrameNode);
 }
 

@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
+#include "core/gestures/gesture_info.h"
 
 #if defined(ENABLE_STANDARD_INPUT)
 #include "commonlibrary/c_utils/base/include/refbase.h"
@@ -270,6 +271,26 @@ public:
     }
     void CaretMoveToLastNewLineChar();
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void InitEditingValueText(std::string content);
+    const TextEditingValueNG& GetTextEditingValue()
+    {
+        return textEditingValue_;
+    }
+
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    void SetInputMethodStatus(bool imeAttached)
+    {
+        imeAttached_ = imeAttached;
+    }
+
+#endif
+    bool HasConnection() const
+    {
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+        return imeAttached_;
+#endif
+        return false;
+    }
 
 private:
     bool IsTextArea();
@@ -280,10 +301,12 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
+    void HandleClickEvent(GestureEvent& info);
 
     void InitFocusEvent();
     void InitTouchEvent();
     void InitLongPressEvent();
+    void InitClickEvent();
 
     void AddScrollEvent();
     void OnTextAreaScroll(float dy);
@@ -328,8 +351,14 @@ private:
     std::string TextInputActionToString() const;
     std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
+    std::string GetTextColor() const;
+    std::string GetCaretColor() const;
     std::string GetPlaceholderColor() const;
     std::string GetFontSize() const;
+    Ace::FontStyle GetItalicFontStyle() const;
+    FontWeight GetFontWeight() const;
+    std::string GetFontFamily() const;
+    TextAlign GetTextAlign() const;
     std::string GetPlaceHolder() const;
     uint32_t GetMaxLength() const;
     std::string GetInputFilter() const;
@@ -337,8 +366,9 @@ private:
     void Delete(int32_t start, int32_t end);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
-    bool FilterWithRegex(const std::string& filter, const std::string& valueToUpdate, std::string& result);
-    void EditingValueFilter(const std::string& valueToUpdate, std::string& result);
+    bool FilterWithRegex(
+        const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
+    void EditingValueFilter(std::string& valueToUpdate, std::string& result);
     float PreferredLineHeight();
     void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
     bool CursorInContentRegion();
@@ -410,6 +440,10 @@ private:
     std::vector<TextSelector> redoTextSelectorRecords_;
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;
+
+#endif
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    bool imeAttached_ = false;
 #endif
     int32_t instanceId_ = -1;
 };

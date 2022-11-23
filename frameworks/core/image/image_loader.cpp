@@ -30,6 +30,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_data.h"
+#include "core/image/flutter_image_cache.h" // TODO: add adapter layer and use FlutterImageCache there
 #include "core/image/image_cache.h"
 
 namespace OHOS::Ace {
@@ -145,13 +146,63 @@ sk_sp<SkData> ImageLoader::LoadDataFromCachedFile(const std::string& uri)
     return nullptr;
 }
 
+sk_sp<SkData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo)
+{
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineCtx, nullptr);
+    auto imageCache = pipelineCtx->GetImageCache();
+    CHECK_NULL_RETURN(imageCache, nullptr);
+    auto cacheData = imageCache->GetCacheImageData(sourceInfo.GetSrc());
+    CHECK_NULL_RETURN(cacheData, nullptr);
+    // TODO: add adapter layer and use [SkiaCachedImageData] there
+    auto skiaCachedImageData = AceType::DynamicCast<SkiaCachedImageData>(cacheData);
+    CHECK_NULL_RETURN(skiaCachedImageData, nullptr);
+    return skiaCachedImageData->imageData;
+}
+
+void ImageLoader::CacheImageDataToImageCache(const std::string& key, const RefPtr<CachedImageData>& imageData)
+{
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineCtx);
+    auto imageCache = pipelineCtx->GetImageCache();
+    CHECK_NULL_VOID(imageCache);
+    imageCache->CacheImageData(key, imageData);
+}
+
+RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string key, const std::string suffix)
+{
+    ACE_FUNCTION_TRACE();
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineCtx, nullptr);
+    auto imageCache = pipelineCtx->GetImageCache();
+    CHECK_NULL_RETURN(imageCache, nullptr);
+    std::string filePath = ImageCache::GetImageCacheFilePath(key) + suffix;
+    auto data = imageCache->GetDataFromCacheFile(filePath);
+    CHECK_NULL_RETURN(data, nullptr);
+    // add adapter layer to replace [SkiaCachedImageData]
+    auto skdata = AceType::DynamicCast<SkiaCachedImageData>(data)->imageData;
+    CHECK_NULL_RETURN(skdata, nullptr);
+    return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&skdata));
+}
+
 RefPtr<NG::ImageData> ImageLoader::GetImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
     if (imageSourceInfo.IsPixmap()) {
         return LoadDecodedImageData(imageSourceInfo, context);
     }
-    sk_sp<SkData> skData = LoadImageData(imageSourceInfo, context);
+    sk_sp<SkData> skData;
+    do {
+        skData = ImageLoader::QueryImageDataFromImageCache(imageSourceInfo);
+        if (skData) {
+            break;
+        }
+        skData = LoadImageData(imageSourceInfo, context);
+        CHECK_NULL_RETURN(skData, nullptr);
+        // TODO: add adapter layer and use [SkiaCachedImageData] there
+        ImageLoader::CacheImageDataToImageCache(
+            imageSourceInfo.GetSrc(), AceType::MakeRefPtr<SkiaCachedImageData>(skData));
+    } while (0);
     return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&skData));
 }
 

@@ -17,6 +17,7 @@
 #include <string>
 
 #include "animator_option.h"
+#include "interfaces/napi/kits/utils/napi_utils.h"
 #include "napi/native_api.h"
 #include "napi/native_engine/native_value.h"
 #include "napi/native_node_api.h"
@@ -34,6 +35,15 @@ namespace OHOS::Ace::Napi {
 static void ParseString(napi_env env, napi_value propertyNapi, std::string& property)
 {
     if (propertyNapi != nullptr) {
+        napi_valuetype valueType = napi_undefined;
+        napi_typeof(env, propertyNapi, &valueType);
+        if (valueType == napi_undefined) {
+            NapiThrow(env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
+            return;
+        } else if (valueType != napi_string) {
+            NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+            return;
+        }
         auto nativeProperty = reinterpret_cast<NativeValue*>(propertyNapi);
         auto resultProperty = nativeProperty->ToString();
         auto nativeStringProperty =
@@ -49,6 +59,15 @@ static void ParseString(napi_env env, napi_value propertyNapi, std::string& prop
 static void ParseInt(napi_env env, napi_value propertyNapi, int32_t& property)
 {
     if (propertyNapi != nullptr) {
+        napi_valuetype valueType = napi_undefined;
+        napi_typeof(env, propertyNapi, &valueType);
+        if (valueType == napi_undefined) {
+            NapiThrow(env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
+            return;
+        } else if (valueType != napi_number) {
+            NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+            return;
+        }
         napi_get_value_int32(env, propertyNapi, &property);
     }
 }
@@ -56,6 +75,15 @@ static void ParseInt(napi_env env, napi_value propertyNapi, int32_t& property)
 static void ParseDouble(napi_env env, napi_value propertyNapi, double& property)
 {
     if (propertyNapi != nullptr) {
+        napi_valuetype valueType = napi_undefined;
+        napi_typeof(env, propertyNapi, &valueType);
+        if (valueType == napi_undefined) {
+            NapiThrow(env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
+            return;
+        } else if (valueType != napi_number) {
+            NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+            return;
+        }
         napi_get_value_double(env, propertyNapi, &property);
     }
 }
@@ -92,6 +120,10 @@ static void ParseAnimatorOption(napi_env env, napi_callback_info info, std::shar
     size_t argc = 1;
     napi_value argv;
     napi_get_cb_info(env, info, &argc, &argv, NULL, NULL);
+    if (argc != 1) {
+        NapiThrow(env, "The number of parameters must be equal to 1.", Framework::ERROR_CODE_PARAM_INVALID);
+        return;
+    }
     napi_value durationNapi = nullptr;
     napi_value easingNapi = nullptr;
     napi_value delayNapi = nullptr;
@@ -111,6 +143,9 @@ static void ParseAnimatorOption(napi_env env, napi_callback_info info, std::shar
         napi_get_named_property(env, argv, "iterations", &iterationsNapi);
         napi_get_named_property(env, argv, "begin", &beginNapi);
         napi_get_named_property(env, argv, "end", &endNapi);
+    } else {
+        NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+        return;
     }
 
     int32_t duration = 0;
@@ -284,12 +319,21 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
     auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(option->begin, option->end, curve);
     // convert onframe function to reference
     napi_ref onframeRef = animatorResult->GetOnframeRef();
+    if (onframeRef) {
+        uint32_t count = 0;
+        napi_reference_unref(env, onframeRef, &count);
+    }
     napi_create_reference(env, onframe, 1, &onframeRef);
+    animatorResult->SetOnframeRef(onframeRef);
     animation->AddListener([env, onframeRef](double value) {
         napi_value ret = nullptr;
         napi_value valueNapi = nullptr;
         napi_value onframe = nullptr;
-        napi_get_reference_value(env, onframeRef, &onframe);
+        auto result = napi_get_reference_value(env, onframeRef, &onframe);
+        if (result != napi_ok || onframe == nullptr) {
+            LOGW("get onframe in callback failed");
+            return;
+        }
         napi_create_double(env, value, &valueNapi);
         napi_call_function(env, NULL, onframe, 1, &valueNapi, &ret);
     });
@@ -325,13 +369,22 @@ static napi_value SetOnfinish(napi_env env, napi_callback_info info)
     }
     // convert onfinish function to reference
     napi_ref onfinishRef = animatorResult->GetOnfinishRef();
+    if (onfinishRef) {
+        uint32_t count = 0;
+        napi_reference_unref(env, onfinishRef, &count);
+    }
     napi_create_reference(env, onfinish, 1, &onfinishRef);
+    animatorResult->SetOnfinishRef(onfinishRef);
     animator->ClearStopListeners();
     animator->AddStopListener([env, onfinishRef] {
         LOGI("JsAnimator: onfinish->AddIdleListener");
         napi_value ret = nullptr;
         napi_value onfinish = nullptr;
-        napi_get_reference_value(env, onfinishRef, &onfinish);
+        auto result = napi_get_reference_value(env, onfinishRef, &onfinish);
+        if (result != napi_ok || onfinish == nullptr) {
+            LOGW("get onfinish in callback failed");
+            return;
+        }
         napi_call_function(env, NULL, onfinish, 0, NULL, &ret);
     });
     napi_value undefined;
@@ -364,13 +417,22 @@ static napi_value SetOncancel(napi_env env, napi_callback_info info)
     }
     // convert oncancel function to reference
     napi_ref oncancelRef = animatorResult->GetOncancelRef();
+    if (oncancelRef) {
+        uint32_t count = 0;
+        napi_reference_unref(env, oncancelRef, &count);
+    }
     napi_create_reference(env, oncancel, 1, &oncancelRef);
+    animatorResult->SetOncancelRef(oncancelRef);
     animator->ClearIdleListeners();
     animator->AddIdleListener([env, oncancelRef] {
         LOGI("JsAnimator: oncancel->AddIdleListener");
         napi_value ret = nullptr;
         napi_value oncancel = nullptr;
-        napi_get_reference_value(env, oncancelRef, &oncancel);
+        auto result = napi_get_reference_value(env, oncancelRef, &oncancel);
+        if (result != napi_ok || oncancel == nullptr) {
+            LOGW("get oncancel in callback failed");
+            return;
+        }
         napi_call_function(env, NULL, oncancel, 0, NULL, &ret);
     });
     napi_value undefined;
@@ -403,13 +465,22 @@ static napi_value SetOnrepeat(napi_env env, napi_callback_info info)
     }
     // convert onrepeat function to reference
     napi_ref onrepeatRef = animatorResult->GetOnrepeatRef();
+    if (onrepeatRef) {
+        uint32_t count = 0;
+        napi_reference_unref(env, onrepeatRef, &count);
+    }
     napi_create_reference(env, onrepeat, 1, &onrepeatRef);
+    animatorResult->SetOnrepeatRef(onrepeatRef);
     animator->ClearRepeatListeners();
     animator->AddRepeatListener([env, onrepeatRef] {
         LOGI("JsAnimator: onrepeat->AddIdleListener");
         napi_value ret = nullptr;
         napi_value onrepeat = nullptr;
-        napi_get_reference_value(env, onrepeatRef, &onrepeat);
+        auto result = napi_get_reference_value(env, onrepeatRef, &onrepeat);
+        if (result != napi_ok || onrepeat == nullptr) {
+            LOGW("get onrepeat in callback failed");
+            return;
+        }
         napi_call_function(env, NULL, onrepeat, 0, NULL, &ret);
     });
     napi_value undefined;

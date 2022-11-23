@@ -15,10 +15,17 @@
 
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
 
+#include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/image_provider/adapter/flutter_image_provider.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
+
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/ui/rs_surface_node.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
+#endif
 
 namespace OHOS::Ace::NG {
 
@@ -52,13 +59,16 @@ RefPtr<CanvasImage> CanvasImage::Create(
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> skImage;
     if (!flutterRenderTaskHolder->ioManager) {
-        skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        skImage =
+            SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     } else {
 #ifndef GPU_DISABLED
         skImage = SkImage::MakeCrossContextFromPixmap(flutterRenderTaskHolder->ioManager->GetResourceContext().get(),
             imagePixmap, true, imagePixmap.colorSpace(), true);
 #else
-        skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        // SkImage needs to hold PixelMap shared_ptr
+        skImage =
+            SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
 #endif
     }
     auto canvasImage = flutter::CanvasImage::Create();
@@ -134,7 +144,7 @@ int32_t SkiaCanvasImage::GetWidth() const
 #ifdef NG_BUILD
     return 0;
 #else
-    return image_->width();
+    return image_->image() ? image_->width() : image_->compressWidth();
 #endif
 }
 
@@ -143,7 +153,7 @@ int32_t SkiaCanvasImage::GetHeight() const
 #ifdef NG_BUILD
     return 0;
 #else
-    return image_->height();
+    return image_->image() ? image_->height() : image_->compressHeight();
 #endif
 }
 
@@ -152,7 +162,39 @@ void SkiaCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, co
     auto image = GetCanvasImage();
     RSImage rsImage(&image);
     RSSamplingOptions options;
+
+#ifdef ENABLE_ROSEN_BACKEND
+    auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
+    if (rsCanvas == nullptr) {
+        canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
+        return;
+    }
+    auto skCanvas = rsCanvas->ExportSkCanvas();
+    if (skCanvas == nullptr) {
+        canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
+        return;
+    }
+    auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
+    if (recordingCanvas == nullptr) {
+        canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
+        return;
+    }
+    SkPaint paint;
+    SkVector radii[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
+    Rosen::RsImageInfo rsImageInfo(
+        (int)(imagePaintConfig_->imageFit_),
+        (int)(imagePaintConfig_->imageRepeat_),
+        radii,
+        1.0,
+        GetUniqueID(),
+        GetCompressWidth(),
+        GetCompressHeight()
+    );
+    auto data = GetCompressData();
+    recordingCanvas->DrawImageWithParm(image, std::move(data), rsImageInfo, paint);
+#else
     canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
+#endif
 }
 
 } // namespace OHOS::Ace::NG

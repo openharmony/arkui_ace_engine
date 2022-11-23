@@ -16,14 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_INDICATOR_SWIPER_INDICATOR_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_INDICATOR_SWIPER_INDICATOR_LAYOUT_PROPERTY_H
 
-#include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
-#include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/scroll_bar.h"
-#include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 struct IndicatorLayoutStyle {

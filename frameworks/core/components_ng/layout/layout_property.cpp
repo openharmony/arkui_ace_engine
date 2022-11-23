@@ -55,7 +55,7 @@ std::string TextDirectionToString(TextDirection type)
     if (idx >= 0) {
         return toStringMap[idx].value;
     }
-    return "Direction.Auto";
+    return "Direction.Ltr";
 }
 } // namespace
 
@@ -70,6 +70,7 @@ void LayoutProperty::Reset()
     positionProperty_.reset();
     measureType_.reset();
     layoutDirection_.reset();
+    propVisibility_.reset();
     CleanDirty();
 }
 
@@ -80,6 +81,19 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ACE_PROPERTY_TO_JSON_VALUE(magicItemProperty_, MagicItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(flexItemProperty_, FlexItemProperty);
     ACE_PROPERTY_TO_JSON_VALUE(borderWidth_, BorderWidthProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(gridProperty_, GridProperty);
+
+    if (padding_) {
+        json->Put("padding", padding_->ToJsonString().c_str());
+    } else {
+        json->Put("padding", "0.0");
+    }
+
+    if (margin_) {
+        json->Put("margin", margin_->ToJsonString().c_str());
+    } else {
+        json->Put("margin", "0.0");
+    }
 
     json->Put("visibility", VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str());
     json->Put("direction", TextDirectionToString(GetLayoutDirection()).c_str());
@@ -124,6 +138,7 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     if (layoutProperty->flexItemProperty_) {
         flexItemProperty_ = std::make_unique<FlexItemProperty>(*layoutProperty->flexItemProperty_);
     }
+    propVisibility_ = layoutProperty->GetVisibility();
     measureType_ = layoutProperty->measureType_;
     layoutDirection_ = layoutProperty->layoutDirection_;
     propertyChangeFlag_ = layoutProperty->propertyChangeFlag_;
@@ -260,6 +275,7 @@ void LayoutProperty::UpdateGridOffset(LayoutWrapper* layoutWrapper)
     if (!gridProperty_ || !gridProperty_->HasContainer()) {
         return;
     }
+
     auto optOffset = gridProperty_->GetOffset();
     if (optOffset == UNDEFINED_DIMENSION) {
         return;

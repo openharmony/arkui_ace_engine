@@ -40,8 +40,6 @@ void ListLanesLayoutAlgorithm::UpdateListItemConstraint(
             contentConstraint.maxSize.SetWidth(crossSize);
             if (minLaneLength_.has_value()) {
                 contentConstraint.minSize.SetWidth(minLaneLength_.value());
-            } else {
-                contentConstraint.minSize.SetWidth(crossSize);
             }
         }
         return;
@@ -63,8 +61,6 @@ void ListLanesLayoutAlgorithm::UpdateListItemConstraint(
         contentConstraint.maxSize.SetHeight(crossSize);
         if (minLaneLength_.has_value()) {
             contentConstraint.minSize.SetHeight(minLaneLength_.value());
-        } else {
-            contentConstraint.minSize.SetHeight(crossSize);
         }
     }
 }

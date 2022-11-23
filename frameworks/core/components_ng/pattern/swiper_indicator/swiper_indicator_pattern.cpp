@@ -15,13 +15,16 @@
 
 #include "core/components_ng/pattern/swiper_indicator/swiper_indicator_pattern.h"
 
-#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
-#include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
+constexpr Dimension INDICATOR_PADDING_DEFAULT = 13.0_vp;
+} // namespace
+
 void SwiperIndicatorPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -33,61 +36,22 @@ void SwiperIndicatorPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto paintProperty = host->GetPaintProperty<SwiperIndicatorPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
 
     auto swiperNode = GetSwiperNode();
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     auto swiperEventHub = swiperPattern->GetEventHub<SwiperEventHub>();
-    auto requestCallBack = [weak = WeakClaim(this), host, swiperPattern](const BaseEventInfo* /*info*/) {
-        auto pattern = weak.Upgrade();
-        auto paintMethod = pattern->GetPaintMethod();
-        CHECK_NULL_VOID(paintMethod);
-        paintMethod->SetCurrentIndex(swiperPattern->GetCurrentIndex());
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    };
-    swiperEventHub->SetIndicatorOnChange(requestCallBack);
-}
 
-void SwiperIndicatorPattern::SetIndicatorSize()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto swiperNode = GetSwiperNode();
-    CHECK_NULL_VOID(swiperNode);
+    swiperEventHub->SetIndicatorOnChange([weak = AceType::WeakClaim(RawPtr(host))]() {
+        auto indicator = weak.Upgrade();
+        CHECK_NULL_VOID(indicator);
+        indicator->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    });
 
-    auto swiperGeometryNode = swiperNode->GetGeometryNode();
-    CHECK_NULL_VOID(swiperGeometryNode);
-    auto frameSize = swiperGeometryNode->GetFrameSize();
-    swiperWidth_= frameSize.Width();
-    swiperHeight_ = frameSize.Height();
-    swiperPaddingLeft_ = swiperGeometryNode->GetPaddingOffset().GetX();
-    swiperPaddingTop_ = swiperGeometryNode->GetPaddingOffset().GetY();
-
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    itemCount_ = swiperPattern->TotalCount();
-    axis_ = swiperPattern->GetDirection();
-    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
-    if (swiperLayoutProperty->GetShowIndicator().has_value()) {
-        showIndicator_ = swiperLayoutProperty->GetShowIndicator().value_or(true);
-    }
-
-    auto indicatorGeometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(indicatorGeometryNode);
-    auto indicatorFrameSize = indicatorGeometryNode->GetFrameSize();
-    auto indicatorWidth = indicatorFrameSize.Width();
-    auto indicatorHeight = indicatorFrameSize.Height();
-    if (indicatorHeight > swiperHeight_) {
-        indicatorHeight = swiperHeight_;
-    }
-    if (indicatorWidth > swiperWidth_) {
-        indicatorWidth = swiperWidth_;
-    }
-    indicatorGeometryNode->SetFrameSize(SizeF { indicatorWidth, indicatorHeight });
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    InitClickEvent(gestureHub);
 }
 
 bool SwiperIndicatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -95,9 +59,53 @@ bool SwiperIndicatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper
     if (!config.frameSizeChange) {
         return false;
     }
-    CHECK_NULL_RETURN(dirty, false);
-    SetIndicatorSize();
     return true;
+}
+
+void SwiperIndicatorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (clickEvent_) {
+        return;
+    }
+    auto clickTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleClick(info);
+        }
+    };
+    clickEvent_ = MakeRefPtr<ClickEvent>(std::move(clickTask));
+    gestureHub->AddClickEvent(clickEvent_);
+}
+
+void SwiperIndicatorPattern::HandleClick(const GestureEvent& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<SwiperIndicatorPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(theme);
+    auto userSize = paintProperty->GetSizeValue(theme->GetSize()).ConvertToPx();
+    if (Negative(userSize)) {
+        userSize = theme->GetSize().ConvertToPx();
+    }
+
+    auto swiperPattern = GetSwiperNode()->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+
+    auto currentIndex = swiperPattern->GetCurrentIndex();
+    auto lengthBeforeCurrentIndex =
+        INDICATOR_PADDING_DEFAULT.ConvertToPx() + (INDICATOR_ITEM_SPACE.ConvertToPx() + userSize) * currentIndex;
+    auto lengthWithCurrentIndex = lengthBeforeCurrentIndex + userSize * 2.0f;
+    auto axis = swiperPattern->GetDirection();
+    auto mainClickOffset = axis == Axis::HORIZONTAL ? info.GetLocalLocation().GetX() : info.GetLocalLocation().GetY();
+    if (mainClickOffset < lengthBeforeCurrentIndex) {
+        swiperPattern->ShowPrevious();
+    } else if (mainClickOffset > lengthWithCurrentIndex) {
+        swiperPattern->ShowNext();
+    }
 }
 
 } // namespace OHOS::Ace::NG

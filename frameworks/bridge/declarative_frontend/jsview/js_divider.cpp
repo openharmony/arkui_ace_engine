@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
 
 #include "bridge/declarative_frontend/jsview/models/divider_model_impl.h"
+#include "core/components/divider/divider_theme.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 
 namespace OHOS::Ace {
@@ -74,6 +75,11 @@ void JSDivider::SetDividerColor(const JSCallbackInfo& info)
     }
     Color dividerColor;
     if (!ParseJsColor(info[0], dividerColor)) {
+        auto theme = GetTheme<DividerTheme>();
+        if (theme) {
+            dividerColor = theme->GetColor();
+        }
+        DividerModel::GetInstance()->DividerColor(dividerColor);
         return;
     }
     DividerModel::GetInstance()->DividerColor(dividerColor);

@@ -18,8 +18,6 @@
 
 #include <functional>
 
-#include "third_party/skia/include/core/SkData.h"
-
 #include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/image_state_manager.h"
@@ -130,12 +128,19 @@ public:
         const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder, bool forceResize = false);
     static void MakeCanvasImageForSVG(const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks);
     static void UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasImage,
-        std::function<void(RefPtr<CanvasImage>)>&& callback, const RefPtr<RenderTaskHolder>& renderTaskHolder);
+        std::function<void(RefPtr<CanvasImage>)>&& callback,
+        const RefPtr<RenderTaskHolder>& renderTaskHolder, const std::string key,
+        const SizeF& resizeTarget, const RefPtr<ImageData>& data);
     static RefPtr<ImageObject> BuildImageObject(const ImageSourceInfo& sourceInfo,
         const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data,
         const std::optional<Color>& svgFillColor, const LoadCallbacks& loadCallbacks, ImageObjectType imageObjectType);
     static ImageObjectType ParseImageObjectType(
         const RefPtr<NG::ImageData>& data, const ImageSourceInfo& imageSourceInfo);
+    static bool QueryImageObjectFromCache(const LoadCallbacks& loadCallbacks, const ImageSourceInfo& sourceInfo);
+    static std::string GenerateCacheKey(const ImageSourceInfo& srcInfo, const NG::SizeF& targetImageSize);
+    static RefPtr<CanvasImage> QueryCanvasImageFromCache(
+        const RefPtr<ImageObject> obj, const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget);
+    static void CacheCanvasImageToImageCache(const RefPtr<CanvasImage>& canvasImage, const std::string& key);
 
 protected:
     static void WrapTaskAndPostTo(

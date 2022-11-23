@@ -30,7 +30,7 @@ public:
     explicit GridLayoutBaseAlgorithm(GridLayoutInfo gridLayoutInfo) : gridLayoutInfo_(std::move(gridLayoutInfo)) {};
     ~GridLayoutBaseAlgorithm() override = default;
 
-    GridLayoutInfo GetGridLayoutInfo()
+    const GridLayoutInfo& GetGridLayoutInfo()
     {
         return std::move(gridLayoutInfo_);
     }

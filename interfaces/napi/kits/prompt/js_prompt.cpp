@@ -14,6 +14,7 @@
  */
 
 #include <string>
+#include <uv.h>
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
 #include "napi/native_api.h"
@@ -44,11 +45,16 @@ napi_value GetReturnObject(napi_env env, std::string callbackString)
 
 static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
 {
+    size_t requireArgc = 1;
     size_t argc = 1;
     napi_value argv = nullptr;
     napi_value thisVar = nullptr;
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
+    if (argc != requireArgc) {
+        NapiThrow(env, "The number of parameters must be equal to 1.", Framework::ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
 
     napi_value messageNApi = nullptr;
     napi_value durationNApi = nullptr;
@@ -87,6 +93,9 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
             NapiThrow(env, "Can not get message from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
+    } else if (valueType == napi_undefined) {
+        NapiThrow(env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
+        return nullptr;
     } else {
         LOGE("The parameter type is incorrect.");
         NapiThrow(env, "The type of message is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
@@ -185,6 +194,8 @@ struct PromptAsyncContext {
     std::string callbackCompleteString;
     napi_deferred deferred = nullptr;
     napi_ref callbackRef = nullptr;
+    int32_t callbackType = -1;
+    int32_t successType = -1;
 };
 
 static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
@@ -305,117 +316,141 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     } else {
         napi_get_undefined(env, &result);
     }
-    napi_value resource = nullptr;
-    napi_create_string_utf8(env, "JSPromptShowDialog", NAPI_AUTO_LENGTH, &resource);
     asyncContext->callbacks.emplace("success");
     asyncContext->callbacks.emplace("cancel");
-    napi_create_async_work(
-        env, nullptr, resource, [](napi_env env, void* data) {},
-        [](napi_env env, napi_status status, void* data) {
-            PromptAsyncContext* asyncContext = (PromptAsyncContext*)data;
-            auto callBack = [env, asyncContext](int32_t callbackType, int32_t successType) {
+
+    auto callBack = [env, asyncContext](int32_t callbackType, int32_t successType) {
+        uv_loop_s* loop = nullptr;
+        if (asyncContext == nullptr) {
+            return;
+        }
+        asyncContext->callbackType = callbackType;
+        asyncContext->successType = successType;
+        napi_get_uv_event_loop(env, &loop);
+        uv_work_t* work = new uv_work_t;
+        work->data = (void*)asyncContext;
+        int rev = uv_queue_work(
+            loop, work, [](uv_work_t* work) {},
+            [](uv_work_t* work, int status) {
+                if (work == nullptr) {
+                    return;
+                }
+
+                PromptAsyncContext* asyncContext = (PromptAsyncContext*)work->data;
+                if (asyncContext == nullptr) {
+                    return;
+                }
+
                 napi_value ret;
                 napi_value successIndex = nullptr;
-                napi_create_int32(env, successType, &successIndex);
+                napi_create_int32(asyncContext->env, asyncContext->successType, &successIndex);
                 napi_value indexObj = nullptr;
-                napi_create_object(env, &indexObj);
-                napi_set_named_property(env, indexObj, "index", successIndex);
+                napi_create_object(asyncContext->env, &indexObj);
+                napi_set_named_property(asyncContext->env, indexObj, "index", successIndex);
                 napi_value result[2] = { 0 };
-                napi_create_object(env, &result[1]);
-                napi_set_named_property(env, result[1], "index", successIndex);
+                napi_create_object(asyncContext->env, &result[1]);
+                napi_set_named_property(asyncContext->env, result[1], "index", successIndex);
                 bool dialogResult = true;
-                switch (callbackType) {
+                switch (asyncContext->callbackType) {
                     case 0:
-                        napi_get_undefined(env, &result[0]);
+                        napi_get_undefined(asyncContext->env, &result[0]);
                         dialogResult = true;
                         break;
                     case 1:
                         napi_value message = nullptr;
-                        napi_create_string_utf8(env, "cancel", strlen("cancel"), &message);
-                        napi_create_error(env, nullptr, message, &result[0]);
+                        napi_create_string_utf8(asyncContext->env, "cancel", strlen("cancel"), &message);
+                        napi_create_error(asyncContext->env, nullptr, message, &result[0]);
                         dialogResult = false;
                         break;
                 }
                 if (asyncContext->deferred) {
                     if (dialogResult) {
-                        napi_resolve_deferred(env, asyncContext->deferred, result[1]);
+                        napi_resolve_deferred(asyncContext->env, asyncContext->deferred, result[1]);
                     } else {
-                        napi_reject_deferred(env, asyncContext->deferred, result[0]);
+                        napi_reject_deferred(asyncContext->env, asyncContext->deferred, result[0]);
                     }
                 } else {
                     napi_value callback = nullptr;
-                    napi_get_reference_value(env, asyncContext->callbackRef, &callback);
-                    napi_call_function(env, nullptr, callback, sizeof(result) / sizeof(result[0]), result, &ret);
-                    napi_delete_reference(env, asyncContext->callbackRef);
+                    napi_get_reference_value(asyncContext->env, asyncContext->callbackRef, &callback);
+                    napi_call_function(
+                        asyncContext->env, nullptr, callback, sizeof(result) / sizeof(result[0]), result, &ret);
+                    napi_delete_reference(asyncContext->env, asyncContext->callbackRef);
                 }
-                napi_delete_async_work(env, asyncContext->work);
+                napi_delete_async_work(asyncContext->env, asyncContext->work);
                 delete asyncContext;
-            };
+                delete work;
+                work = nullptr;
+            });
+        if (rev != 0) {
+            if (work != nullptr) {
+                delete work;
+                work = nullptr;
+            }
+        }
+    };
+
 #ifdef OHOS_STANDARD_SYSTEM
-            // NG
-            if (Container::IsCurrentUseNewPipeline()) {
-                auto delegate = EngineHelper::GetCurrentDelegate();
-                if (delegate) {
-                    delegate->ShowDialog(asyncContext->titleString, asyncContext->messageString, asyncContext->buttons,
-                        asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
-                } else {
-                    LOGE("delegate is null");
-                    // throw internal error
-                    napi_value code = nullptr;
-                    std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
-                    napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
-                    napi_value msg = nullptr;
-                    std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
-                    napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
-                    napi_value error = nullptr;
-                    napi_create_error(env, code, msg, &error);
+    // NG
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto delegate = EngineHelper::GetCurrentDelegate();
+        if (delegate) {
+            delegate->ShowDialog(asyncContext->titleString, asyncContext->messageString, asyncContext->buttons,
+                asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
+        } else {
+            LOGE("delegate is null");
+            // throw internal error
+            napi_value code = nullptr;
+            std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
+            napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
+            napi_value msg = nullptr;
+            std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
+            napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
+            napi_value error = nullptr;
+            napi_create_error(env, code, msg, &error);
 
-                    if (asyncContext->deferred) {
-                        napi_reject_deferred(env, asyncContext->deferred, error);
-                    } else {
-                        napi_value ret1;
-                        napi_value callback = nullptr;
-                        napi_get_reference_value(env, asyncContext->callbackRef, &callback);
-                        napi_call_function(env, nullptr, callback, 1, &error, &ret1);
-                        napi_delete_reference(env, asyncContext->callbackRef);
-                    }
-                }
-            } else if (SubwindowManager::GetInstance() != nullptr) {
-                SubwindowManager::GetInstance()->ShowDialog(asyncContext->titleString, asyncContext->messageString,
-                    asyncContext->buttons, asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
-            }
-#else
-            auto delegate = EngineHelper::GetCurrentDelegate();
-            if (delegate) {
-                delegate->ShowDialog(asyncContext->titleString, asyncContext->messageString,
-                    asyncContext->buttons, asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
+            if (asyncContext->deferred) {
+                napi_reject_deferred(env, asyncContext->deferred, error);
             } else {
-                LOGE("delegate is null");
-                // throw internal error
-                napi_value code = nullptr;
-                std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
-                napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
-                napi_value msg = nullptr;
-                std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR)
-                    + "UI execution context not found.";
-                napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
-                napi_value error = nullptr;
-                napi_create_error(env, code, msg, &error);
-
-                if (asyncContext->deferred) {
-                    napi_reject_deferred(env, asyncContext->deferred, error);
-                } else {
-                    napi_value ret1;
-                    napi_value callback = nullptr;
-                    napi_get_reference_value(env, asyncContext->callbackRef, &callback);
-                    napi_call_function(env, nullptr, callback, 1, &error, &ret1);
-                    napi_delete_reference(env, asyncContext->callbackRef);
-                }
+                napi_value ret1;
+                napi_value callback = nullptr;
+                napi_get_reference_value(env, asyncContext->callbackRef, &callback);
+                napi_call_function(env, nullptr, callback, 1, &error, &ret1);
+                napi_delete_reference(env, asyncContext->callbackRef);
             }
+        }
+    } else if (SubwindowManager::GetInstance() != nullptr) {
+        SubwindowManager::GetInstance()->ShowDialog(asyncContext->titleString, asyncContext->messageString,
+            asyncContext->buttons, asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
+    }
+#else
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (delegate) {
+        delegate->ShowDialog(asyncContext->titleString, asyncContext->messageString,
+            asyncContext->buttons, asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
+    } else {
+        LOGE("delegate is null");
+        // throw internal error
+        napi_value code = nullptr;
+        std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
+        napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
+        napi_value msg = nullptr;
+        std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR)
+            + "UI execution context not found.";
+        napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
+        napi_value error = nullptr;
+        napi_create_error(env, code, msg, &error);
+
+        if (asyncContext->deferred) {
+            napi_reject_deferred(env, asyncContext->deferred, error);
+        } else {
+            napi_value ret1;
+            napi_value callback = nullptr;
+            napi_get_reference_value(env, asyncContext->callbackRef, &callback);
+            napi_call_function(env, nullptr, callback, 1, &error, &ret1);
+            napi_delete_reference(env, asyncContext->callbackRef);
+        }
+    }
 #endif
-        },
-        (void*)asyncContext, &asyncContext->work);
-    napi_queue_async_work(env, asyncContext->work);
     return result;
 }
 
@@ -434,6 +469,8 @@ struct ShowActionMenuAsyncContext {
     std::string callbackCompleteString;
     napi_deferred deferred = nullptr;
     napi_ref callbackRef = nullptr;
+    int32_t callbackType = -1;
+    int32_t successType = -1;
 };
 
 static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
@@ -513,6 +550,17 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                         if (ParseResourceParam(env, textNApi, id, type, params)) {
                             ParseString(id, type, params, textString);
                         }
+                    } else {
+                        delete asyncContext;
+                        asyncContext = nullptr;
+                        if (valueType == napi_undefined) {
+                            NapiThrow(
+                                env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
+                        } else {
+                            NapiThrow(env, "The type of the button text parameter is incorrect.",
+                                Framework::ERROR_CODE_PARAM_INVALID);
+                        }
+                        return nullptr;
                     }
                     napi_typeof(env, colorNApi, &valueType);
                     if (valueType == napi_string) {
@@ -527,10 +575,31 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                         if (ParseResourceParam(env, colorNApi, id, type, params)) {
                             ParseString(id, type, params, colorString);
                         }
+                    } else {
+                        delete asyncContext;
+                        asyncContext = nullptr;
+                        if (valueType == napi_undefined) {
+                            NapiThrow(
+                                env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
+                        } else {
+                            NapiThrow(env, "The type of the button color parameter is incorrect.",
+                                Framework::ERROR_CODE_PARAM_INVALID);
+                        }
+                        return nullptr;
                     }
                     ButtonInfo buttonInfo = { .text = textString, .textColor = colorString };
                     asyncContext->buttons.emplace_back(buttonInfo);
                 }
+            } else {
+                delete asyncContext;
+                asyncContext = nullptr;
+                if (valueType == napi_undefined) {
+                    NapiThrow(env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
+                } else {
+                    NapiThrow(
+                        env, "The type of the button parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+                }
+                return nullptr;
             }
         } else if (valueType == napi_function) {
             napi_create_reference(env, argv[i], 1, &asyncContext->callbackRef);
@@ -547,110 +616,133 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
     } else {
         napi_get_undefined(env, &result);
     }
-    napi_value resource = nullptr;
-    napi_create_string_utf8(env, "JSPromptShowActionMenu", NAPI_AUTO_LENGTH, &resource);
-    napi_create_async_work(
-        env, nullptr, resource, [](napi_env env, void* data) {},
-        [](napi_env env, napi_status status, void* data) {
-            ShowActionMenuAsyncContext* asyncContext = (ShowActionMenuAsyncContext*)data;
-            auto callBack = [env, asyncContext](int32_t callbackType, int32_t successType) {
+
+    auto callBack = [env, asyncContext](int32_t callbackType, int32_t successType) {
+        uv_loop_s* loop = nullptr;
+        if (asyncContext == nullptr) {
+            return;
+        }
+        asyncContext->callbackType = callbackType;
+        asyncContext->successType = successType;
+        napi_get_uv_event_loop(env, &loop);
+        uv_work_t* work = new uv_work_t;
+        work->data = (void*)asyncContext;
+        int rev = uv_queue_work(
+            loop, work, [](uv_work_t* work) {},
+            [](uv_work_t* work, int status) {
+                if (work == nullptr) {
+                    return;
+                }
+
+                ShowActionMenuAsyncContext* asyncContext = (ShowActionMenuAsyncContext*)work->data;
+                if (asyncContext == nullptr) {
+                    return;
+                }
                 napi_value ret;
                 napi_value successIndex = nullptr;
-                napi_create_int32(env, successType, &successIndex);
+                napi_create_int32(asyncContext->env, asyncContext->successType, &successIndex);
                 asyncContext->callbackSuccessString = "showActionMenu:ok";
-                napi_value indexObj = GetReturnObject(env, asyncContext->callbackSuccessString);
-                napi_set_named_property(env, indexObj, "index", successIndex);
+                napi_value indexObj = GetReturnObject(asyncContext->env, asyncContext->callbackSuccessString);
+                napi_set_named_property(asyncContext->env, indexObj, "index", successIndex);
                 napi_value result[2] = { 0 };
-                napi_create_object(env, &result[1]);
-                napi_set_named_property(env, result[1], "index", successIndex);
+                napi_create_object(asyncContext->env, &result[1]);
+                napi_set_named_property(asyncContext->env, result[1], "index", successIndex);
                 bool dialogResult = true;
-                switch (callbackType) {
+                switch (asyncContext->callbackType) {
                     case 0:
-                        napi_get_undefined(env, &result[0]);
+                        napi_get_undefined(asyncContext->env, &result[0]);
                         dialogResult = true;
                         break;
                     case 1:
                         napi_value message = nullptr;
-                        napi_create_string_utf8(env, "cancel", strlen("cancel"), &message);
-                        napi_create_error(env, nullptr, message, &result[0]);
+                        napi_create_string_utf8(asyncContext->env, "cancel", strlen("cancel"), &message);
+                        napi_create_error(asyncContext->env, nullptr, message, &result[0]);
                         dialogResult = false;
                         break;
                 }
                 if (asyncContext->deferred) {
                     if (dialogResult) {
-                        napi_resolve_deferred(env, asyncContext->deferred, result[1]);
+                        napi_resolve_deferred(asyncContext->env, asyncContext->deferred, result[1]);
                     } else {
-                        napi_reject_deferred(env, asyncContext->deferred, result[0]);
+                        napi_reject_deferred(asyncContext->env, asyncContext->deferred, result[0]);
                     }
                 } else {
                     napi_value callback = nullptr;
-                    napi_get_reference_value(env, asyncContext->callbackRef, &callback);
-                    napi_call_function(env, nullptr, callback, sizeof(result) / sizeof(result[0]), result, &ret);
-                    napi_delete_reference(env, asyncContext->callbackRef);
+                    napi_get_reference_value(asyncContext->env, asyncContext->callbackRef, &callback);
+                    napi_call_function(
+                        asyncContext->env, nullptr, callback, sizeof(result) / sizeof(result[0]), result, &ret);
+                    napi_delete_reference(asyncContext->env, asyncContext->callbackRef);
                 }
-                napi_delete_async_work(env, asyncContext->work);
+                napi_delete_async_work(asyncContext->env, asyncContext->work);
                 delete asyncContext;
-            };
+                delete work;
+                work = nullptr;
+            });
+        if (rev != 0) {
+            if (work != nullptr) {
+                delete work;
+                work = nullptr;
+            }
+        }
+    };
+
 #ifdef OHOS_STANDARD_SYSTEM
-            if (Container::IsCurrentUseNewPipeline()) {
-                auto delegate = EngineHelper::GetCurrentDelegate();
-                if (delegate) {
-                    delegate->ShowActionMenu(asyncContext->titleString, asyncContext->buttons, std::move(callBack));
-                } else {
-                    LOGE("delegate is null");
-                    napi_value code = nullptr;
-                    std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
-                    napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
-                    napi_value msg = nullptr;
-                    std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
-                    napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
-                    napi_value error = nullptr;
-                    napi_create_error(env, code, msg, &error);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto delegate = EngineHelper::GetCurrentDelegate();
+        if (delegate) {
+            delegate->ShowActionMenu(asyncContext->titleString, asyncContext->buttons, std::move(callBack));
+        } else {
+            LOGE("delegate is null");
+            napi_value code = nullptr;
+            std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
+            napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
+            napi_value msg = nullptr;
+            std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
+            napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
+            napi_value error = nullptr;
+            napi_create_error(env, code, msg, &error);
 
-                    if (asyncContext->deferred) {
-                        napi_reject_deferred(env, asyncContext->deferred, error);
-                    } else {
-                        napi_value ret1;
-                        napi_value callback = nullptr;
-                        napi_get_reference_value(env, asyncContext->callbackRef, &callback);
-                        napi_call_function(env, nullptr, callback, 1, &error, &ret1);
-                        napi_delete_reference(env, asyncContext->callbackRef);
-                    }
-                }
-            } else if (SubwindowManager::GetInstance() != nullptr) {
-                SubwindowManager::GetInstance()->ShowActionMenu(
-                    asyncContext->titleString, asyncContext->buttons, std::move(callBack));
-            }
-#else
-            auto delegate = EngineHelper::GetCurrentDelegate();
-            if (delegate) {
-                delegate->ShowActionMenu(asyncContext->titleString, asyncContext->buttons, std::move(callBack));
+            if (asyncContext->deferred) {
+                napi_reject_deferred(env, asyncContext->deferred, error);
             } else {
-                LOGE("delegate is null");
-                napi_value code = nullptr;
-                std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
-                napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
-                napi_value msg = nullptr;
-                std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR)
-                    + "UI execution context not found.";
-                napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
-                napi_value error = nullptr;
-                napi_create_error(env, code, msg, &error);
-
-                if (asyncContext->deferred) {
-                    napi_reject_deferred(env, asyncContext->deferred, error);
-                } else {
-                    napi_value ret1;
-                    napi_value callback = nullptr;
-                    napi_get_reference_value(env, asyncContext->callbackRef, &callback);
-                    napi_call_function(env, nullptr, callback, 1, &error, &ret1);
-                    napi_delete_reference(env, asyncContext->callbackRef);
-                }
+                napi_value ret1;
+                napi_value callback = nullptr;
+                napi_get_reference_value(env, asyncContext->callbackRef, &callback);
+                napi_call_function(env, nullptr, callback, 1, &error, &ret1);
+                napi_delete_reference(env, asyncContext->callbackRef);
             }
+        }
+    } else if (SubwindowManager::GetInstance() != nullptr) {
+        SubwindowManager::GetInstance()->ShowActionMenu(
+            asyncContext->titleString, asyncContext->buttons, std::move(callBack));
+    }
+#else
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (delegate) {
+        delegate->ShowActionMenu(asyncContext->titleString, asyncContext->buttons, std::move(callBack));
+    } else {
+        LOGE("delegate is null");
+        napi_value code = nullptr;
+        std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
+        napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
+        napi_value msg = nullptr;
+        std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR)
+            + "UI execution context not found.";
+        napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
+        napi_value error = nullptr;
+        napi_create_error(env, code, msg, &error);
+
+        if (asyncContext->deferred) {
+            napi_reject_deferred(env, asyncContext->deferred, error);
+        } else {
+            napi_value ret1;
+            napi_value callback = nullptr;
+            napi_get_reference_value(env, asyncContext->callbackRef, &callback);
+            napi_call_function(env, nullptr, callback, 1, &error, &ret1);
+            napi_delete_reference(env, asyncContext->callbackRef);
+        }
+    }
 #endif
-        },
-        (void*)asyncContext, &asyncContext->work);
-    napi_queue_async_work(env, asyncContext->work);
     return result;
 }
 

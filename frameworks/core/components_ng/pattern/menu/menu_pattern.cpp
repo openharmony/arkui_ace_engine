@@ -20,11 +20,14 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
+#include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void MenuPattern::OnModifyDone()
 {
+    RegisterOnClick();
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -44,6 +47,34 @@ void MenuPattern::OnModifyDone()
     borderRadius.SetRadius(theme->GetPopupRRectSize());
     renderContext->UpdateBorderRadius(borderRadius);
     renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
+}
+
+// close menu on touch up
+void MenuPattern::RegisterOnClick()
+{
+    auto event = [targetId = targetId_, isContextMenu = isContextMenu_](const TouchEventInfo& info) {
+        auto touches = info.GetTouches();
+        if (touches.empty() || touches.front().GetTouchType() != TouchType::UP) {
+            return;
+        }
+        if (isContextMenu) {
+            SubwindowManager::GetInstance()->HideMenuNG(targetId);
+            return;
+        }
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->HideMenu(targetId);
+        LOGI("closing menu %{public}d", targetId);
+    };
+    auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(event));
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->AddTouchEvent(touchEvent);
 }
 
 } // namespace OHOS::Ace::NG

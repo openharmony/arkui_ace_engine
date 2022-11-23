@@ -70,9 +70,9 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         json->Put("titleMode", GetTitleModeString().c_str());
-        json->Put("hideBackButton", GetHideBackButtonValue(false) ? "true" : "false");
-        json->Put("hideTitleBar", GetHideTitleBarValue(false) ? "true" : "false");
-        json->Put("hideToolBar", GetHideToolBarValue(false) ? "true" : "false");
+        json->Put("hideBackButton", GetHideBackButtonValue(false));
+        json->Put("hideTitleBar", GetHideTitleBarValue(false));
+        json->Put("hideToolBar", GetHideToolBarValue(false));
     }
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleMode, NavigationTitleMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideTitleBar, bool, PROPERTY_UPDATE_MEASURE);

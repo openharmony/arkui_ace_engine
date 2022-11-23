@@ -16,7 +16,9 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 #include <cstdint>
+#include <regex>
 #include <string>
+#include <utility>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -48,7 +50,6 @@
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
-
 #if defined(ENABLE_STANDARD_INPUT)
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 #endif
@@ -59,7 +60,7 @@ constexpr uint32_t TWINKLING_INTERVAL_MS = 500;
 constexpr uint32_t OBSCURE_SHOW_TICKS = 3;
 constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
-const std::string DIGIT_WHITE_LIST = "-[0-9]+(.[0-9]+)?|[0-9]+(.[0-9]+)?";
+const std::string DIGIT_WHITE_LIST = "^[0-9]*$";
 const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
 const std::string EMAIL_WHITE_LIST = "\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
@@ -68,8 +69,8 @@ void RemoveErrorTextFromValue(const std::string& value, const std::string& error
 {
     int32_t valuePtr = 0;
     int32_t errorTextPtr = 0;
-    auto valueSize = static_cast<int32_t>(value.size());
-    auto errorTextSize = static_cast<int32_t>(errorText.size());
+    auto valueSize = static_cast<int32_t>(value.length());
+    auto errorTextSize = static_cast<int32_t>(errorText.length());
     while (errorTextPtr < errorTextSize) {
         while (value[valuePtr] != errorText[errorTextPtr] && valuePtr < valueSize) {
             result += value[valuePtr];
@@ -93,7 +94,7 @@ std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
         result += item;
         result += ",";
     }
-    result = result.substr(0, result.size() - 1);
+    result = result.substr(0, result.length() - 1);
     return result;
 }
 
@@ -151,10 +152,13 @@ TextFieldPattern::~TextFieldPattern()
     }
 
     // If soft keyboard is still exist, close it.
+    if (HasConnection()) {
 #if defined(ENABLE_STANDARD_INPUT)
-    LOGI("Destruction text field, close input method.");
-    MiscServices::InputMethodController::GetInstance()->Close();
+        LOGI("Destruction of text field, close input method.");
+        MiscServices::InputMethodController::GetInstance()->HideTextInput();
+        MiscServices::InputMethodController::GetInstance()->Close();
 #endif
+    }
 }
 
 #if defined(ENABLE_STANDARD_INPUT)
@@ -243,6 +247,7 @@ void TextFieldPattern::UpdateCaretOffsetByLastTouchOffset()
             caretOffsetX_ = textRect_.GetX() + textRect_.Width();
             return;
         } else if (LessOrEqual(GetLastTouchOffset().GetX(), textRect_.GetX())) {
+            textEditingValue_.caretPosition = 0;
             caretOffsetX_ = textRect_.GetX();
             return;
         }
@@ -360,7 +365,7 @@ void TextFieldPattern::UpdateCaretPositionByPressOffset()
         return;
     }
     // skip updating caret if touch position is in the left or right half ellipse parts
-    if (!OffsetInContentRegion(lastTouchOffset_)) {
+    if (!OffsetInContentRegion(lastTouchOffset_)){
         return;
     }
     UpdateCaretOffsetByLastTouchOffset();
@@ -684,7 +689,7 @@ void TextFieldPattern::HandleOnSelectAll()
 {
     auto textSize = GetEditingValue().GetWideText().length();
     UpdateSelection(0, static_cast<int32_t>(textSize));
-    textEditingValue_.caretPosition = static_cast<int32_t>(textEditingValue_.text.size());
+    textEditingValue_.caretPosition = static_cast<int32_t>(textEditingValue_.text.length());
     selectionMode_ = SelectionMode::SELECT_ALL;
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -757,8 +762,8 @@ void TextFieldPattern::HandleOnPaste()
             end = value.caretPosition;
         }
         auto pasteData = data;
-        if (data.size() + value.text.size() > textfield->GetMaxLength()) {
-            pasteData = data.substr(0, textfield->GetMaxLength() - value.text.size());
+        if (data.length() + value.text.length() > textfield->GetMaxLength()) {
+            pasteData = data.substr(0, textfield->GetMaxLength() - value.text.length());
         }
         value.text = value.GetValueBeforePosition(start) + pasteData + value.GetValueAfterPosition(end);
         value.CursorMoveToPosition(start + static_cast<int32_t>(StringUtils::Str8ToStr16(data).length()));
@@ -891,9 +896,11 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
 void TextFieldPattern::HandleTouchUp()
 {
     if (isMousePressed_) {
+        LOGD("TextFieldPattern::HandleTouchUp of mouse");
         isMousePressed_ = false;
         return;
     }
+    LOGD("TextFieldPattern::HandleTouchUp");
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     if (!focusHub->RequestFocusImmediately()) {
         LOGE("Request focus failed, cannot open input method");
@@ -925,6 +932,53 @@ void TextFieldPattern::InitTouchEvent()
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gesture->AddTouchEvent(touchListener_);
+}
+
+void TextFieldPattern::InitClickEvent()
+{
+    if (clickListener_) {
+        return;
+    }
+    auto gesture = GetHost()->GetOrCreateGestureEventHub();
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleClickEvent(info);
+    };
+
+    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gesture->AddClickEvent(clickListener_);
+}
+
+void TextFieldPattern::HandleClickEvent(GestureEvent& info)
+{
+    UpdateTextFieldManager(info.GetGlobalLocation());
+    auto focusHub = GetHost()->GetOrCreateFocusHub();
+    if (!focusHub->IsFocusable()) {
+        return;
+    }
+    StartTwinkling();
+    lastTouchOffset_ = info.GetLocalLocation();
+    caretUpdateType_ = CaretUpdateType::PRESSED;
+    selectionMode_ = SelectionMode::NONE;
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    if (isMousePressed_) {
+        LOGD("TextFieldPattern::HandleTouchUp of mouse");
+        isMousePressed_ = false;
+        return;
+    }
+    LOGD("TextFieldPattern::HandleTouchUp");
+    if (!focusHub->RequestFocusImmediately()) {
+        LOGE("Request focus failed, cannot open input method");
+        StopTwinkling();
+        return;
+    }
+    if (RequestKeyboard(false, true, true)) {
+        auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireOnEditChanged(true);
+    }
 }
 
 void TextFieldPattern::ScheduleCursorTwinkling()
@@ -1001,7 +1055,7 @@ void TextFieldPattern::OnModifyDone()
 #if defined(ENABLE_STANDARD_INPUT)
     UpdateConfiguration();
 #endif
-    InitTouchEvent();
+    InitClickEvent();
     InitFocusEvent();
     InitMouseEvent();
     if (!clipboard_ && context) {
@@ -1010,8 +1064,11 @@ void TextFieldPattern::OnModifyDone()
     obscureTickCountDown_ = OBSCURE_SHOW_TICKS;
     caretHeight_ = GetTextOrPlaceHolderFontSize() + static_cast<float>(CURSOR_PADDING.ConvertToPx()) * 2.0f;
     utilPadding_ = layoutProperty->CreatePaddingAndBorderWithDefault(basicPaddingLeft_, 0.0f, 0.0f, 0.0f);
-    textEditingValue_.text = layoutProperty->GetValueValue("");
-    textEditingValue_.caretPosition = static_cast<int32_t>(textEditingValue_.text.size());
+}
+
+void TextFieldPattern::InitEditingValueText(std::string content)
+{
+    textEditingValue_.text = std::move(content);
 }
 
 void TextFieldPattern::InitMouseEvent()
@@ -1107,6 +1164,7 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose)
             return false;
         }
         inputMethod->HideTextInput();
+        inputMethod->Close();
 #endif
         return true;
     }
@@ -1117,7 +1175,7 @@ void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
 void TextFieldPattern::InsertValue(const std::string& insertValue)
 {
-    if (static_cast<uint32_t>(textEditingValue_.text.size()) >= GetMaxLength()) {
+    if (static_cast<uint32_t>(textEditingValue_.text.length()) >= GetMaxLength()) {
         LOGW("Max length reached");
         return;
     }
@@ -1157,7 +1215,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     } else {
         textEditingValue_.text = result;
     }
-    textEditingValue_.CursorMoveToPosition(caretStart + static_cast<int32_t>(insertValue.size()));
+    textEditingValue_.CursorMoveToPosition(caretStart + static_cast<int32_t>(insertValue.length()));
     // TODO: update obscure pending for password input
     SetEditingValueToProperty(textEditingValue_.text);
     operationRecords_.emplace_back(textEditingValue_);
@@ -1177,17 +1235,26 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnChange(textEditingValue_.text);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-bool TextFieldPattern::FilterWithRegex(const std::string& filter, const std::string& valueToUpdate, std::string& result)
+bool TextFieldPattern::FilterWithRegex(
+    const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape)
 {
     if (filter.empty() || valueToUpdate.empty()) {
         LOGD("Text is empty or filter is empty");
         return false;
     }
-    std::regex filterRegex(filter);
-
-    auto errorText = std::regex_replace(valueToUpdate, filterRegex, "");
+    std::string escapeFilter;
+    if (needToEscape && !TextFieldControllerBase::EscapeString(filter, escapeFilter)) {
+        LOGE("Escape filter string failed");
+        return false;
+    }
+    if (!needToEscape) {
+        escapeFilter = filter;
+    }
+    std::regex filterRegex(escapeFilter);
+    auto errorText = regex_replace(valueToUpdate, filterRegex, "");
     RemoveErrorTextFromValue(valueToUpdate, errorText, result);
     if (!errorText.empty()) {
         auto textFieldEventHub = GetHost()->GetEventHub<TextFieldEventHub>();
@@ -1198,7 +1265,7 @@ bool TextFieldPattern::FilterWithRegex(const std::string& filter, const std::str
     return !errorText.empty();
 }
 
-void TextFieldPattern::EditingValueFilter(const std::string& valueToUpdate, std::string& result)
+void TextFieldPattern::EditingValueFilter(std::string& valueToUpdate, std::string& result)
 {
     auto textFieldLayoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
@@ -1207,6 +1274,11 @@ void TextFieldPattern::EditingValueFilter(const std::string& valueToUpdate, std:
     bool textChanged = false;
     if (!inputFilter.empty()) {
         textChanged |= FilterWithRegex(inputFilter, valueToUpdate, result);
+    }
+    if (textChanged) {
+        valueToUpdate = result;
+        result = "";
+        textChanged = false;
     }
     switch (textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED)) {
         case TextInputType::NUMBER: {
@@ -1297,7 +1369,7 @@ void TextFieldPattern::CursorMoveRight()
 {
     LOGD("Handle cursor move right");
     if (InSelectMode() && selectionMode_ == SelectionMode::SELECT_ALL) {
-        textEditingValue_.caretPosition = static_cast<int32_t>(textEditingValue_.text.size());
+        textEditingValue_.caretPosition = static_cast<int32_t>(textEditingValue_.text.length());
     } else if (InSelectMode()) {
         textEditingValue_.caretPosition = textSelector_.GetEnd();
     } else {
@@ -1398,14 +1470,16 @@ void TextFieldPattern::DeleteForward(int32_t length)
         Delete(textSelector_.GetStart(), textSelector_.GetEnd());
         return;
     }
+    auto start = std::max(textEditingValue_.caretPosition - length, 0);
+    auto end =
+        std::min(textEditingValue_.caretPosition, static_cast<int32_t>(textEditingValue_.GetWideText().length()));
     textEditingValue_.text =
-        textEditingValue_.GetValueBeforePosition(std::max(textEditingValue_.caretPosition - length, 0)) +
-        textEditingValue_.GetValueAfterPosition(std::max(textEditingValue_.caretPosition, 0));
+        textEditingValue_.GetValueBeforePosition(start) + textEditingValue_.GetValueAfterPosition(end);
     textEditingValue_.CursorMoveToPosition(textEditingValue_.caretPosition - length);
     SetEditingValueToProperty(textEditingValue_.text);
     FireEventHubOnChange(GetEditingValue().text);
     selectionMode_ = SelectionMode::NONE;
-    caretUpdateType_ = CaretUpdateType::INPUT;
+    caretUpdateType_ = CaretUpdateType::DEL;
     operationRecords_.emplace_back(textEditingValue_);
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -1413,7 +1487,7 @@ void TextFieldPattern::DeleteForward(int32_t length)
 void TextFieldPattern::DeleteBackward(int32_t length)
 {
     LOGD("Handle DeleteBackward %{public}d characters", length);
-    if (textEditingValue_.caretPosition >= static_cast<int32_t>(textEditingValue_.text.size())) {
+    if (textEditingValue_.caretPosition >= static_cast<int32_t>(textEditingValue_.text.length())) {
         LOGW("Caret position at the end , cannot DeleteBackward");
         return;
     }
@@ -1492,19 +1566,19 @@ void TextFieldPattern::HandleSelectionRight()
 {
     // if currently not in select mode, reset baseOffset and move destinationOffset and caret position
     if (!InSelectMode()) {
-        if (textEditingValue_.caretPosition == static_cast<int32_t>(textEditingValue_.text.size())) {
+        if (textEditingValue_.caretPosition == static_cast<int32_t>(textEditingValue_.text.length())) {
             LOGD("Caret position at the end, cannot update selection to right");
             return;
         }
         textSelector_.baseOffset = textEditingValue_.caretPosition;
         textSelector_.destinationOffset =
-            std::min(textSelector_.baseOffset + 1, static_cast<int32_t>(textEditingValue_.text.size()));
+            std::min(textSelector_.baseOffset + 1, static_cast<int32_t>(textEditingValue_.text.length()));
         textEditingValue_.caretPosition = textSelector_.destinationOffset;
         selectionMode_ = SelectionMode::SELECT;
     } else {
         // if currently not in select mode, move destinationOffset and caret position only
         textSelector_.destinationOffset =
-            std::min(textSelector_.destinationOffset + 1, static_cast<int32_t>(textEditingValue_.text.size()));
+            std::min(textSelector_.destinationOffset + 1, static_cast<int32_t>(textEditingValue_.text.length()));
         textEditingValue_.caretPosition = textSelector_.destinationOffset;
         if (textSelector_.destinationOffset == textSelector_.baseOffset) {
             selectionMode_ = SelectionMode::NONE;
@@ -1514,7 +1588,7 @@ void TextFieldPattern::HandleSelectionRight()
 
 void TextFieldPattern::SetCaretPosition(int32_t position)
 {
-    if (position < 0 || position > static_cast<int32_t>(textEditingValue_.text.size())) {
+    if (position < 0 || position > static_cast<int32_t>(textEditingValue_.text.length())) {
         LOGE("Illegal caret position");
         return;
     }
@@ -1539,26 +1613,14 @@ std::string TextFieldPattern::TextInputTypeToString() const
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
     switch (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED)) {
-        case TextInputType::UNSPECIFIED:
-            return "UNSPECIFIED";
-        case TextInputType::TEXT:
-            return "TEXT";
-        case TextInputType::MULTILINE:
-            return "MULTILINE";
         case TextInputType::NUMBER:
-            return "NUMBER";
-        case TextInputType::PHONE:
-            return "PHONE";
-        case TextInputType::DATETIME:
-            return "DATETIME";
+            return "InputType.Number";
         case TextInputType::EMAIL_ADDRESS:
-            return "EMAIL_ADDRESS";
-        case TextInputType::URL:
-            return "URL";
+            return "InputType.Email";
         case TextInputType::VISIBLE_PASSWORD:
-            return "PASSWORD";
+            return "InputType.Password";
         default:
-            return "NA";
+            return "InputType.Normal";
     }
 }
 
@@ -1567,22 +1629,16 @@ std::string TextFieldPattern::TextInputActionToString() const
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
     switch (GetTextInputActionValue(TextInputAction::NEXT)) {
-        case TextInputAction::UNSPECIFIED:
-            return "UNSPECIFIED";
-        case TextInputAction::DONE:
-            return "DONE";
-        case TextInputAction::END:
-            return "END";
         case TextInputAction::GO:
-            return "GO";
-        case TextInputAction::NEXT:
-            return "NEXT";
+            return "EnterKeyType.Go";
         case TextInputAction::SEARCH:
-            return "SEARCH";
+            return "EnterKeyType.Search";
         case TextInputAction::SEND:
-            return "SEND";
+            return "EnterKeyType.Send";
+        case TextInputAction::NEXT:
+            return "EnterKeyType.Next";
         default:
-            return "NA";
+            return "EnterKeyType.Done";
     }
 }
 
@@ -1596,47 +1652,47 @@ std::string TextFieldPattern::GetPlaceholderFont() const
     CHECK_NULL_RETURN(theme, "");
     auto jsonValue = JsonUtil::Create(true);
     if (layoutProperty->GetPlaceholderItalicFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL) {
-        jsonValue->Put("placeholderItalicFontStyle", "NORMAL");
+        jsonValue->Put("style", "FontStyle.Normal");
     } else {
-        jsonValue->Put("placeholderItalicFontStyle", "ITALIC");
+        jsonValue->Put("style", "FontStyle.Italic");
     }
     // placeholder font size not exist in theme, use normal font size by default
-    jsonValue->Put("placeholderFontSize", GetFontSize().c_str());
+    jsonValue->Put("size", GetFontSize().c_str());
     auto weight = layoutProperty->GetPlaceholderFontWeightValue(theme->GetFontWeight());
     switch (weight) {
         case FontWeight::W100:
-            jsonValue->Put("placeholderFontWeight", "100");
+            jsonValue->Put("weight", "100");
             break;
         case FontWeight::W200:
-            jsonValue->Put("placeholderFontWeight", "200");
+            jsonValue->Put("weight", "200");
             break;
         case FontWeight::W300:
-            jsonValue->Put("placeholderFontWeight", "300");
+            jsonValue->Put("weight", "300");
             break;
         case FontWeight::W400:
-            jsonValue->Put("placeholderFontWeight", "400");
+            jsonValue->Put("weight", "400");
             break;
         case FontWeight::W500:
-            jsonValue->Put("placeholderFontWeight", "500");
+            jsonValue->Put("weight", "500");
             break;
         case FontWeight::W600:
-            jsonValue->Put("placeholderFontWeight", "600");
+            jsonValue->Put("weight", "600");
             break;
         case FontWeight::W700:
-            jsonValue->Put("placeholderFontWeight", "700");
+            jsonValue->Put("weight", "700");
             break;
         case FontWeight::W800:
-            jsonValue->Put("placeholderFontWeight", "800");
+            jsonValue->Put("weight", "800");
             break;
         case FontWeight::W900:
-            jsonValue->Put("placeholderFontWeight", "900");
+            jsonValue->Put("weight", "900");
             break;
         default:
-            jsonValue->Put("weight", V2::ConvertWrapFontWeightToStirng(weight).c_str());
+            jsonValue->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(weight).c_str());
     }
     auto family = layoutProperty->GetPlaceholderFontFamilyValue({ "sans-serif" });
     std::string jsonFamily = ConvertFontFamily(family);
-    jsonValue->Put("family", jsonFamily.c_str());
+    jsonValue->Put("fontFamily", jsonFamily.c_str());
     return jsonValue->ToString();
 }
 
@@ -1646,6 +1702,24 @@ RefPtr<TextFieldTheme> TextFieldPattern::GetTheme() const
     CHECK_NULL_RETURN(context, nullptr);
     auto theme = context->GetTheme<TextFieldTheme>();
     return theme;
+}
+
+std::string TextFieldPattern::GetTextColor() const
+{
+    auto theme = GetTheme();
+    CHECK_NULL_RETURN(theme, "");
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    return layoutProperty->GetTextColorValue(theme->GetTextColor()).ColorToString();
+}
+
+std::string TextFieldPattern::GetCaretColor() const
+{
+    auto theme = GetTheme();
+    CHECK_NULL_RETURN(theme, "");
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, "");
+    return paintProperty->GetCursorColorValue(theme->GetCursorColor()).ColorToString();
 }
 
 std::string TextFieldPattern::GetPlaceholderColor() const
@@ -1663,7 +1737,38 @@ std::string TextFieldPattern::GetFontSize() const
     CHECK_NULL_RETURN(theme, "");
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    return std::to_string(layoutProperty->GetFontSizeValue(theme->GetFontSize()).ConvertToPx());
+    return layoutProperty->GetFontSizeValue(theme->GetFontSize()).ToString();
+}
+
+Ace::FontStyle TextFieldPattern::GetItalicFontStyle() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, Ace::FontStyle::NORMAL);
+    return layoutProperty->GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL);
+}
+
+FontWeight TextFieldPattern::GetFontWeight() const
+{
+    auto theme = GetTheme();
+    CHECK_NULL_RETURN(theme, FontWeight::NORMAL);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, FontWeight::NORMAL);
+    return layoutProperty->GetFontWeightValue(theme->GetFontWeight());
+}
+
+std::string TextFieldPattern::GetFontFamily() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "HarmonyOS Sans");
+    auto family = layoutProperty->GetFontFamilyValue({ "HarmonyOS Sans" });
+    return ConvertFontFamily(family);
+}
+
+TextAlign TextFieldPattern::GetTextAlign() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextAlign::START);
+    return layoutProperty->GetTextAlign().value_or(TextAlign::START);
 }
 
 uint32_t TextFieldPattern::GetMaxLength() const
@@ -1690,9 +1795,17 @@ std::string TextFieldPattern::GetInputFilter() const
 
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    json->Put("placeholder", GetPlaceholderColor().c_str());
+    json->Put("placeholder", GetPlaceHolder().c_str());
     json->Put("text", textEditingValue_.text.c_str());
     json->Put("fontSize", GetFontSize().c_str());
+    json->Put("fontColor", GetTextColor().c_str());
+    json->Put("fontStyle", GetItalicFontStyle() == Ace::FontStyle::NORMAL
+                               ? "FontStyle.Normal"
+                               : "FontStyle.Italic");
+    json->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(GetFontWeight()).c_str());
+    json->Put("fontFamily", GetFontFamily().c_str());
+    json->Put("textAlign", V2::ConvertWrapTextAlignToString(GetTextAlign()).c_str());
+    json->Put("caretColor", GetCaretColor().c_str());
     json->Put("type", TextInputTypeToString().c_str());
     json->Put("placeholderColor", GetPlaceholderColor().c_str());
     json->Put("placeholderFont", GetPlaceholderFont().c_str());

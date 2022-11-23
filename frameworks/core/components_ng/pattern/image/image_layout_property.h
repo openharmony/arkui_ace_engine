@@ -29,7 +29,7 @@ struct ImageSizeStyle {
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
         json->Put("sourceSize", propSourceSize.value_or(SizeF()).ToString().c_str());
-        json->Put("fitOriginalSize", propFitOriginalSize.value_or(true) ? "true" : "false");
+        json->Put("fitOriginalSize", propFitOriginalSize.value_or(false) ? "true" : "false");
         json->Put("autoResize", propAutoResize.value_or(true) ? "true" : "false");
     }
 };
@@ -77,6 +77,15 @@ public:
         json->Put("objectFit", OBJECTFITVALUE[static_cast<int32_t>(propImageFit_.value_or(ImageFit::COVER))]);
         json->Put("syncLoad", propSyncMode_.value_or(false) ? "true" : "false");
         json->Put("copyOption", COPYOPTIONSVALUE[static_cast<int32_t>(propCopyOptions_.value_or(CopyOptions::None))]);
+        std::string src;
+        if (propImageSourceInfo_.has_value()) {
+            src = propImageSourceInfo_->GetSrc();
+            if (src.find("resources") != std::string::npos) {
+                auto num = src.find("resources");
+                src = src.substr(num);
+            }
+        }
+        json->Put("src", src.c_str());
         ACE_PROPERTY_TO_JSON_VALUE(propImageSizeStyle_, ImageSizeStyle);
     }
 

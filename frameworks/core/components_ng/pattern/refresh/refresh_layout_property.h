@@ -53,7 +53,6 @@ public:
         value->propFriction_ = CloneFriction();
         value->propIsRefresh_ = CloneIsRefresh();
         value->propIsShowLastTime_ = CloneIsShowLastTime();
-        value->propRefreshStatus_ = CloneRefreshStatus();
         value->propScrollableOffset_ = CloneScrollableOffset();
         value->propLoadingProcessOffset_ = CloneLoadingProcessOffset();
         value->propTriggerRefreshDistance_ = CloneTriggerRefreshDistance();
@@ -71,13 +70,11 @@ public:
         ResetFriction();
         ResetIsRefresh();
         ResetIsShowLastTime();
-        ResetRefreshStatus();
         ResetScrollableOffset();
         ResetLoadingProcessOffset();
         ResetTriggerRefreshDistance();
     }
 
-    
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
@@ -93,7 +90,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Friction, int32_t, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsRefresh, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowLastTime, bool, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RefreshStatus, RefreshStatus, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollableOffset, OffsetF, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LoadingProcessOffset, OffsetF, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TriggerRefreshDistance, Dimension, PROPERTY_UPDATE_LAYOUT);

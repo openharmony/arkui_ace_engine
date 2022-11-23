@@ -55,11 +55,11 @@ public:
 
 private:
     void OnModifyDone() override;
-
+    void Tick(uint64_t duration);
     void InitTextTimerController();
+
     void InitTimerDisplay();
     void UpdateTextTimer(uint32_t elapsedTime);
-    void Tick(uint64_t duration);
     void FireChangeEvent() const;
 
     void HandleStart();

@@ -20,6 +20,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/render/canvas.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -62,7 +63,7 @@ public:
     virtual float GetAlphabeticBaseline() = 0;
 
     // interfaces for painting
-    virtual void Paint(const RefPtr<Canvas>& canvas, float x, float y) = 0;
+    virtual void Paint(const RSCanvas& canvas, float x, float y) = 0;
 };
 
 } // namespace OHOS::Ace::NG

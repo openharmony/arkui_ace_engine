@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
+#include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 
@@ -56,6 +57,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
+        CalculateCacheRange();
         auto layoutAlgorithm = MakeRefPtr<SwiperLayoutAlgorithm>(currentIndex_, startIndex_, endIndex_);
         layoutAlgorithm->SetCurrentOffset(currentOffset_);
         layoutAlgorithm->SetTargetIndex(targetIndex_);
@@ -76,6 +78,11 @@ public:
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<SwiperEventHub>();
+    }
+
+    int32_t GetCurrentShownIndex() const
+    {
+        return currentIndex_;
     }
 
     RefPtr<SwiperController> GetSwiperController() const
@@ -116,6 +123,14 @@ public:
         }
     }
 
+    void SetSwiperParameters(const SwiperParameters& swiperParameters)
+    {
+        swiperParameters_ = swiperParameters;
+    }
+
+    void ShowNext();
+    void ShowPrevious();
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -137,6 +152,9 @@ private:
     // Init controller of swiper, controller support showNext, showPrevious and finishAnimation interface.
     void InitSwiperController();
 
+    // Init swiper indicator
+    void InitSwiperIndicator();
+
     void HandleDragStart();
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(double dragVelocity);
@@ -152,8 +170,6 @@ private:
     // Implement of swiper controller
     void SwipeToWithoutAnimation(int32_t index);
     void SwipeTo(int32_t index);
-    void ShowNext();
-    void ShowPrevious();
     void FinishAnimation();
     void StopTranslateAnimation();
 
@@ -161,7 +177,7 @@ private:
     void Tick(uint64_t duration);
     void StopAutoPlay();
     void StartAutoPlay();
-    bool IsOutOfBoundary(double mainOffset) const;
+    bool IsOutOfBoundary(float mainOffset) const;
     float MainSize() const;
     void FireChangeEvent() const;
     void CalculateCacheRange();
@@ -176,6 +192,8 @@ private:
     bool IsAutoPlay() const;
     bool IsLoop() const;
     bool IsDisableSwipe() const;
+    bool IsShowIndicator() const;
+    float GetTranslateLength() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -199,6 +217,9 @@ private:
     std::optional<int32_t> targetIndex_;
     std::set<int32_t> preItemRange_;
 
+    PanDirection panDirection_;
+    float distance_ = 0.0f;
+
     float currentOffset_ = 0.0f;
 
     bool moveDirection_ = false;
@@ -208,6 +229,9 @@ private:
     uint64_t elapsedTime_ = 0; // millisecond.
 
     ChangeEventPtr changeEvent_;
+
+    SwiperParameters swiperParameters_;
+    SizeF maxChildSize_;
 };
 } // namespace OHOS::Ace::NG
 

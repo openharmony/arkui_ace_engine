@@ -32,22 +32,48 @@
 
 namespace OHOS::Ace::NG {
 
-void SwiperLayoutAlgorithm::InitItemRange()
+void SwiperLayoutAlgorithm::AddToItemRange(int32_t index)
+{
+    if (index != currentIndex_) {
+        index = isLoop_ ? (index + totalCount_) % totalCount_ : std::clamp(index, 0, totalCount_ - 1);
+        itemRange_.insert(index);
+    }
+}
+
+void SwiperLayoutAlgorithm::LoadItemWithDrag(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
+    auto layoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto axis = layoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
+    auto mainSize = geometryNode->GetFrameSize().MainSize(axis);
+    if (NonPositive(mainSize) || NearZero(currentOffset_)) {
+        return;
+    }
+
+    int32_t nextIndex = currentIndex_;
+    auto loadItems = std::abs(static_cast<int32_t>(floorf(currentOffset_ / mainSize)));
+    do {
+        nextIndex = Positive(currentOffset_) ? (nextIndex - 1) : (nextIndex + 1);
+        AddToItemRange(nextIndex);
+        loadItems--;
+    } while (loadItems >= 0);
+}
+
+void SwiperLayoutAlgorithm::InitItemRange(LayoutWrapper* layoutWrapper)
 {
     ACE_SCOPED_TRACE("SwiperLayoutAlgorithm::InitItemRange");
     itemRange_.clear();
 
+    if (currentIndex_ < 0 || currentIndex_ > totalCount_ - 1) {
+        currentIndex_ = 0;
+    }
+
     /* Load next index while swiping */
-    int32_t nextIndex = currentIndex_;
-    if (GreatNotEqual(currentOffset_, 0)) {
-        --nextIndex;
-    } else if (LessNotEqual(currentOffset_, 0)) {
-        ++nextIndex;
-    }
-    if (nextIndex != currentIndex_) {
-        nextIndex = isLoop_ ? (nextIndex + totalCount_) % totalCount_ : std::clamp(nextIndex, 0, totalCount_ - 1);
-        itemRange_.insert(nextIndex);
-    }
+    LoadItemWithDrag(layoutWrapper);
 
     if (startIndex_ <= endIndex_) {
         for (auto index = startIndex_; index <= endIndex_; ++index) {
@@ -97,22 +123,18 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
 
-    auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
+    auto isSingleCase =
+        (swiperLayoutProperty->GetDisplayCount().has_value() && swiperLayoutProperty->GetDisplayCountValue() == 1) ||
+        (!swiperLayoutProperty->GetDisplayCount().has_value() && SwiperUtils::IsStretch(swiperLayoutProperty));
 
     OptionalSizeF idealSize;
-    if (displayCount == 1) {
-        // single case
-        idealSize =
-            CreateIdealSize(constraint.value(), axis, swiperLayoutProperty->GetMeasureType(MeasureType::MATCH_CONTENT));
-    } else {
-        idealSize = CreateIdealSize(
-            constraint.value(), axis, swiperLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS));
-    }
+    auto measureType = isSingleCase ? MeasureType::MATCH_CONTENT : MeasureType::MATCH_PARENT_MAIN_AXIS;
+    idealSize = CreateIdealSize(constraint.value(), axis, swiperLayoutProperty->GetMeasureType(measureType));
 
     auto padding = swiperLayoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, idealSize);
 
-    InitItemRange();
+    InitItemRange(layoutWrapper);
 
     // Measure children.
     auto layoutConstraint = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, idealSize);
@@ -128,15 +150,16 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         mainSize = std::max(mainSize, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis));
     }
 
+    maxChildSize_ = axis == Axis::HORIZONTAL ? SizeF(mainSize, crossSize) : SizeF(crossSize, mainSize);
+
     // Mark inactive in wrapper.
     for (const auto& index : inActiveItems_) {
         layoutWrapper->RemoveChildInRenderTree(index);
     }
 
-    if (displayCount == 1) {
+    if (isSingleCase) {
         // single case.
-        SizeF maxChildSize = axis == Axis::HORIZONTAL ? SizeF(mainSize, crossSize) : SizeF(crossSize, mainSize);
-        idealSize.UpdateIllegalSizeWithCheck(maxChildSize);
+        idealSize.UpdateIllegalSizeWithCheck(maxChildSize_);
     } else {
         // multi case, update cross size.
         if (axis == Axis::HORIZONTAL) {
@@ -155,6 +178,16 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameSize(idealSize.ConvertToSizeT());
+
+    // Measure swiper indicator
+    if (swiperLayoutProperty->GetShowIndicatorValue(true)) {
+        auto indicatorWrapper = layoutWrapper->GetOrCreateChildByIndex(totalCount_);
+        if (indicatorWrapper) {
+            auto indicatorLayoutConstraint = swiperLayoutProperty->CreateChildConstraint();
+            indicatorLayoutConstraint.parentIdealSize = idealSize;
+            indicatorWrapper->Measure(indicatorLayoutConstraint);
+        }
+    }
 }
 
 void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -165,14 +198,13 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto childrenSize = layoutWrapper->GetTotalChildCount();
     auto itemWidth = (axis == Axis::HORIZONTAL ? (size.Width() / displayCount) : (size.Height() / displayCount));
     auto itemSpace = SwiperUtils::GetItemSpace(swiperLayoutProperty);
     auto padding = swiperLayoutProperty->CreatePaddingAndBorder();
     OffsetF paddingOffset = { padding.left.value_or(0.0f), padding.top.value_or(0.0f) };
 
     // Effect when difference between current index and target index is greater than 1.
-    // eg. Current index is 0, call swipeTo method to jump to index 2,
+    // e.g. Current index is 0, call swipeTo method to jump to index 2,
     // change item's position only 0 and 2, ignore others.
     if (SwiperUtils::IsStretch(swiperLayoutProperty) && targetIndex_.has_value() &&
         std::abs(targetIndex_.value() - currentIndex_) > 1) {
@@ -242,12 +274,20 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                                                 : OffsetF(0, frameSize.Height() + itemSpace));
     }
 
-    // Adjust offset when loop.
+    // Layout swiper indicator
+    if (swiperLayoutProperty->GetShowIndicatorValue(true)) {
+        auto indicatorWrapper = layoutWrapper->GetOrCreateChildByIndex(totalCount_);
+        if (indicatorWrapper) {
+            indicatorWrapper->Layout();
+        }
+    }
+
+    // Adjust offset when looped.
     if (!isLoop_) {
         return;
     }
     if (currentIndex_ == 0 && GreatNotEqual(currentOffset_, 0.0)) {
-        auto lastWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 1);
+        auto lastWrapper = layoutWrapper->GetOrCreateChildByIndex(totalCount_ - 1);
         if (lastWrapper) {
             auto geometryNode = lastWrapper->GetGeometryNode();
             auto frameSize = geometryNode->GetMarginFrameSize();
@@ -255,7 +295,7 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             geometryNode->SetMarginFrameOffset(preOffset + paddingOffset);
             lastWrapper->Layout();
         }
-    } else if (currentIndex_ == childrenSize - 1 && LessNotEqual(currentOffset_, 0.0)) {
+    } else if (currentIndex_ == totalCount_ - 1 && LessNotEqual(currentOffset_, 0.0)) {
         auto firstWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
         if (firstWrapper) {
             auto geometryNode = firstWrapper->GetGeometryNode();

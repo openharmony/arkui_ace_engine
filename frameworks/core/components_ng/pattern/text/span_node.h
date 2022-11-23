@@ -23,7 +23,6 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/gestures/gesture_info.h"
@@ -61,7 +60,7 @@ public:                                                                      \
             return;                                                          \
         }                                                                    \
         spanItem_->fontStyle->Update##name(value);                           \
-        MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);           \
+        RequestTextFlushDirty();                                             \
     }
 
 namespace OHOS::Ace::NG {
@@ -103,7 +102,7 @@ public:
             return;
         }
         spanItem_->content = content;
-        MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        RequestTextFlushDirty();
     }
 
     void UpdateOnClickEvent(GestureEventFunc&& onClick)
@@ -138,6 +137,8 @@ public:
     {
         spanItem_->ToJsonValue(json);
     }
+
+    void RequestTextFlushDirty();
 
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;

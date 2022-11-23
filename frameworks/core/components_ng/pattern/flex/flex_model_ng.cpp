@@ -21,6 +21,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
+#include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -31,26 +32,54 @@ void FlexModelNG::CreateFlexRow()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::FLEX_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<FlexLayoutPattern>(); });
-    stack->Push(frameNode);
+    auto childFrameNode = FrameNode::GetFrameNode(V2::FLEX_ETS_TAG, nodeId);
+    if (!childFrameNode) {
+        auto frameNode = FrameNode::GetOrCreateFrameNode(
+            V2::FLEX_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<FlexLayoutPattern>(); });
+        stack->Push(frameNode);
 
-    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, FlexDirection, FlexDirection::ROW);
-    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAxisAlign, FlexAlign::FLEX_START);
-    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAxisAlign, FlexAlign::FLEX_START);
+        ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, FlexDirection, FlexDirection::ROW);
+        ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAxisAlign, FlexAlign::FLEX_START);
+        ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAxisAlign, FlexAlign::FLEX_START);
+        return;
+    }
+    stack->Push(childFrameNode);
+    auto pattern = childFrameNode->GetPattern<FlexLayoutPattern>();
+    if (!pattern->GetIsWrap()) {
+        return;
+    }
+    // wrap to flex
+    pattern->SetIsWrap(false);
+    auto layoutProperty = pattern->GetLayoutProperty<FlexLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetWrapLayoutAttribute();
 }
 
 void FlexModelNG::CreateWrap()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::FLEX_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<FlexLayoutPattern>(true); });
-    stack->Push(frameNode);
-    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, WrapDirection, WrapDirection::HORIZONTAL);
-    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, Alignment, WrapAlignment::START);
-    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAlignment, WrapAlignment::START);
-    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAlignment, WrapAlignment::START);
+    auto childFrameNode = FrameNode::GetFrameNode(V2::FLEX_ETS_TAG, nodeId);
+    if (!childFrameNode) {
+        auto frameNode = FrameNode::GetOrCreateFrameNode(
+            V2::FLEX_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<FlexLayoutPattern>(true); });
+        stack->Push(frameNode);
+        ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, WrapDirection, WrapDirection::HORIZONTAL);
+        ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, Alignment, WrapAlignment::START);
+        ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAlignment, WrapAlignment::START);
+        ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAlignment, WrapAlignment::START);
+        return;
+    }
+    stack->Push(childFrameNode);
+    auto pattern = childFrameNode->GetPattern<FlexLayoutPattern>();
+    if (pattern->GetIsWrap()) {
+        return;
+    }
+    // flex to wrap
+    pattern->SetIsWrap(true);
+    auto layoutProperty = childFrameNode->GetLayoutProperty<FlexLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetFlexLayoutAttribute();
 }
 
 void FlexModelNG::SetDirection(FlexDirection direction)

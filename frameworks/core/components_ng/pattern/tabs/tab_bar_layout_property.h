@@ -44,6 +44,7 @@ public:
         value->LayoutProperty::UpdateLayoutProperty(AceType::DynamicCast<LayoutProperty>(this));
         value->propTabBarProperty_ = CloneTabBarProperty();
         value->propAxis_ = CloneAxis();
+        value->propIndicator_ = CloneIndicator();
         return value;
     }
 
@@ -52,6 +53,7 @@ public:
         LayoutProperty::Reset();
         ResetTabBarProperty();
         ResetAxis();
+        ResetIndicator();
     }
 
     RectF GetIndicatorRect(int32_t index);
@@ -61,7 +63,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TabBarProperty, TabBarWidth, Dimension, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TabBarProperty, TabBarHeight, Dimension, PROPERTY_UPDATE_LAYOUT);
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Indicator, int32_t, PROPERTY_UPDATE_NORMAL);
 };
 

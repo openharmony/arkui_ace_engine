@@ -41,6 +41,7 @@
 #include "adapter/ohos/entrance/dialog_container.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
+#include "adapter/ohos/entrance/form_utils_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/utils.h"
@@ -53,6 +54,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
+#include "core/common/form_manager.h"
 #include "core/common/plugin_manager.h"
 
 namespace OHOS::Ace {
@@ -215,8 +217,9 @@ public:
 
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask([] {
-            SubwindowManager::GetInstance()->ClearMenu();
+            SubwindowManager::GetInstance()->CloseMenu();
             SubwindowManager::GetInstance()->HideMenuNG();
+            SubwindowManager::GetInstance()->HidePopupNG();
         }, TaskExecutor::TaskType::UI);
     }
 
@@ -271,7 +274,7 @@ void UIContentImpl::DestroyCallback() const
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetNextFrameLayoutCallback(nullptr);
 }
@@ -405,7 +408,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 
     auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
     std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> info;
-
     if (abilityContext) {
         info = abilityContext->GetAbilityInfo();
     } else {
@@ -431,7 +433,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     std::string pageProfile;
     LOGI("Initialize UIContent isModelJson:%{public}s", isModelJson ? "true" : "false");
     if (isModelJson) {
-        std::string hapPath = info->hapPath;
+        std::string hapPath = info != nullptr ? info->hapPath : "";
         LOGI("hapPath:%{public}s", hapPath.c_str());
         // first use hap provider
         if (flutterAssetManager && !hapPath.empty()) {
@@ -557,6 +559,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     } else {
         instanceId_ = gSubWindowInstanceId.fetch_add(1, std::memory_order_relaxed);
     }
+    auto formUtils = std::make_shared<FormUtilsImpl>();
+    FormManager::GetInstance().SetFormUtils(formUtils);
     auto container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true,
         context_, info, std::make_unique<ContentEventCallback>([context = context_] {
             auto sharedContext = context.lock();
@@ -589,7 +593,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     }
     container->SetWindowName(window_->GetWindowName());
     container->SetWindowId(window_->GetWindowId());
-
+    auto token = context->GetToken();
+    container->SetToken(token);
     // Mark the relationship between windowId and containerId, it is 1:1
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
@@ -624,6 +629,15 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         LOGI("Container modal is enabled.");
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
+
+    if (window_->IsFocused()) {
+        LOGI("UIContentImpl: focus again");
+        Focus();
+    }
+    dragWindowListener_ = new DragWindowListener(instanceId_);
+    window_->RegisterDragListener(dragWindowListener_);
+    occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
+    window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
 
     // create ace_view
     auto flutterAceView =
@@ -674,7 +688,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                 nativeEngine->CreateReference(storage, 1), context->GetBindingObject()->Get<NativeReference>());
         }
     }
-    InitWindowCallback(info);
 }
 
 void UIContentImpl::Foreground()
@@ -687,9 +700,9 @@ void UIContentImpl::Foreground()
         LOGE("get container(id=%{public}d) failed", instanceId_);
         return;
     }
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = container->GetPipelineContext();
     if (!pipelineContext) {
-        LOGI("get old pipeline context failed");
+        LOGI("get pipeline context failed");
         return;
     }
     pipelineContext->SetForegroundCalled(true);
@@ -860,10 +873,21 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
         LOGE("UIContentImpl container is null");
         return;
     }
-    auto colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    auto deviceAccess = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
-    auto languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-    container->UpdateConfiguration(colorMode, deviceAccess, languageTag);
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("OnSizeChange: taskExecutor is null.");
+        return;
+    }
+    taskExecutor->PostTask([weakContainer = WeakPtr<Platform::AceContainer>(container), config]() {
+        auto container = weakContainer.Upgrade();
+        if (!container) {
+            return;
+        }
+        auto colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+        auto deviceAccess = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
+        auto languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+        container->UpdateConfiguration(colorMode, deviceAccess, languageTag);
+    }, TaskExecutor::TaskType::UI);
     LOGI("UIContentImpl: UpdateConfiguration called End, name:%{public}s", config->GetName().c_str());
 }
 
@@ -957,64 +981,6 @@ void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector
     pipelineContext->DumpInfo(params, info);
 }
 
-void UIContentImpl::InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info)
-{
-    LOGI("UIContent InitWindowCallback");
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    if (!container) {
-        LOGE("InitWindowCallback failed, container(id=%{public}d) is null.", instanceId_);
-        return;
-    }
-    auto pipelineContext = container->GetPipelineContext();
-    if (!pipelineContext) {
-        LOGE("InitWindowCallback failed, pipelineContext is null.");
-        return;
-    }
-    auto& window = window_;
-    if (!window) {
-        LOGE("InitWindowCallback failed, window is null.");
-        return;
-    }
-    if (window->IsFocused()) {
-        LOGI("UIContentImpl: focus again");
-        Focus();
-    }
-    auto& windowManager = pipelineContext->GetWindowManager();
-    if (windowManager == nullptr) {
-        LOGE("InitWindowCallback failed, windowManager is null.");
-        return;
-    }
-    if (info != nullptr) {
-        windowManager->SetAppLabelId(info->labelId);
-        windowManager->SetAppIconId(info->iconId);
-    }
-
-    windowManager->SetWindowMinimizeCallBack([window]() { window->Minimize(); });
-    windowManager->SetWindowMaximizeCallBack([window]() { window->Maximize(); });
-    windowManager->SetWindowRecoverCallBack([window]() { window->Recover(); });
-    windowManager->SetWindowCloseCallBack([window]() { window->Close(); });
-    windowManager->SetWindowStartMoveCallBack([window]() { window->StartMove(); });
-    windowManager->SetWindowSplitCallBack(
-        [window]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
-    windowManager->SetWindowGetModeCallBack(
-        [window]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
-
-    pipelineContext->SetGetWindowRectImpl([window]() -> Rect {
-        Rect rect;
-        if (!window) {
-            return rect;
-        }
-        auto windowRect = window->GetRect();
-        rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
-        return rect;
-    });
-
-    dragWindowListener_ = new DragWindowListener(instanceId_);
-    window->RegisterDragListener(dragWindowListener_);
-    occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
-    window->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
-}
-
 void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog)
 {
     window_ = window;
@@ -1065,7 +1031,7 @@ void UIContentImpl::SetNextFrameLayoutCallback(std::function<void()>&& callback)
         LOGE("get container(id=%{public}d) failed", instanceId_);
         return;
     }
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = container->GetPipelineContext();
     if (!pipelineContext) {
         LOGE("get pipeline context failed");
         return;

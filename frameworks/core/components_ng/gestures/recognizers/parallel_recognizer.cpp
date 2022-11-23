@@ -30,7 +30,6 @@ void ParallelRecognizer::OnAccepted()
     LOGD("%{public}p parallel gesture recognizer has been accepted", this);
     refereeState_ = RefereeState::SUCCEED;
     if (currentBatchRecognizer_) {
-        currentBatchRecognizer_->SetCoordinateOffset(coordinateOffset_);
         currentBatchRecognizer_->OnAccepted();
         currentBatchRecognizer_.Reset();
     }
@@ -47,7 +46,6 @@ void ParallelRecognizer::OnPending()
     refereeState_ = RefereeState::PENDING;
     LOGD("the parallel gesture recognizer is pending!");
     if (currentBatchRecognizer_) {
-        currentBatchRecognizer_->SetCoordinateOffset(coordinateOffset_);
         currentBatchRecognizer_->OnPending();
         currentBatchRecognizer_.Reset();
     }
@@ -78,7 +76,7 @@ bool ParallelRecognizer::HandleEvent(const TouchEvent& point)
         refereeState_ = RefereeState::DETECTING;
     }
     for (const auto& recognizer : recognizers_) {
-        if (recognizer) {
+        if (recognizer && recognizer->CheckTouchId(point.id)) {
             recognizer->HandleEvent(point);
         }
     }

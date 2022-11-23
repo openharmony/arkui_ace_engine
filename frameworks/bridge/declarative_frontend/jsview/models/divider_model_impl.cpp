@@ -15,8 +15,10 @@
 
 #include "bridge/declarative_frontend/jsview/models/divider_model_impl.h"
 
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/box/box_component.h"
 #include "core/components/divider/divider_component.h"
+#include "core/components/divider/divider_theme.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
@@ -24,6 +26,11 @@ namespace OHOS::Ace::Framework {
 void DividerModelImpl::Create()
 {
     RefPtr<Component> dividerComponent = AceType::MakeRefPtr<OHOS::Ace::DividerComponent>();
+    auto theme = JSViewAbstract::GetTheme<DividerTheme>();
+    if (theme) {
+        auto component = AceType::DynamicCast<OHOS::Ace::DividerComponent>(dividerComponent);
+        component->SetDividerColor(theme->GetColor());
+    }
     ViewStackProcessor::GetInstance()->ClaimElementId(dividerComponent);
     ViewStackProcessor::GetInstance()->Push(dividerComponent);
 }

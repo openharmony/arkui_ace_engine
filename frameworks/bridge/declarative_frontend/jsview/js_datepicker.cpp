@@ -513,7 +513,7 @@ void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
     ButtonInfo buttonInfo;
     DialogProperties properties;
     properties.alignment = DialogAlignment::CENTER;
-    properties.useCustom = false;
+    properties.customStyle = true;
 
     std::map<std::string, PickerDate> datePickerProperty;
     if (startDate->IsObject()) {
@@ -564,7 +564,7 @@ void JSDatePickerDialog::CreateDatePicker(RefPtr<Component>& component, const JS
     if (selectedDate->IsObject()) {
         datePicker->SetSelectedDate(parseSelectedDate);
     }
-    datePicker->SetIsDialog(false);
+    datePicker->SetIsDialog(true);
     datePicker->SetIsCreateDialogComponent(true);
     datePicker->SetShowLunar(isLunar);
 
@@ -580,7 +580,7 @@ void JSDatePickerDialog::CreateTimePicker(RefPtr<Component>& component, const JS
     if (selectedTime->IsObject()) {
         timePicker->SetSelectedTime(ParseTime(selectedTime));
     }
-    timePicker->SetIsDialog(false);
+    timePicker->SetIsDialog(true);
     timePicker->SetIsCreateDialogComponent(true);
     timePicker->SetHour24(isUseMilitaryTime);
     component = timePicker;
@@ -791,7 +791,7 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
     ButtonInfo buttonInfo;
     DialogProperties properties;
     properties.alignment = DialogAlignment::CENTER;
-    properties.useCustom = false;
+    properties.customStyle = true;
 
     std::map<std::string, PickerTime> timePickerProperty;
     if (selectedTime->IsObject()) {
@@ -819,7 +819,7 @@ void JSTimePickerDialog::CreateTimePicker(RefPtr<Component>& component, const JS
     if (selectedTime->IsObject()) {
         timePicker->SetSelectedTime(ParseTime(selectedTime));
     }
-    timePicker->SetIsDialog(false);
+    timePicker->SetIsDialog(true);
     timePicker->SetIsCreateDialogComponent(true);
     timePicker->SetHour24(isUseMilitaryTime);
     component = timePicker;

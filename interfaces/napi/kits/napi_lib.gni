@@ -18,6 +18,7 @@ common_napi_libs = [
   "configuration",
   "device",
   "grid",
+  "measure",
   "mediaquery",
   "prompt",
   "promptaction",

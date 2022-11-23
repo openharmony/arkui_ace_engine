@@ -163,7 +163,8 @@ void ImagePattern::SetImagePaintConfig(
     imagePaintConfig.imageInterpolation_ =
         imageRenderProperty->GetImageInterpolation().value_or(ImageInterpolation::NONE);
     imagePaintConfig.imageRepeat_ = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NOREPEAT);
-    auto pipelineCtx = PipelineContext::GetCurrentContext();
+
+    auto pipelineCtx = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     bool isRightToLeft = pipelineCtx && pipelineCtx->IsRightToLeft();
     imagePaintConfig.needFlipCanvasHorizontally_ =
         isRightToLeft && imageRenderProperty->GetMatchTextDirection().value_or(false);
@@ -216,12 +217,12 @@ void ImagePattern::LoadImageDataIfNeed()
     UpdateInternalResource(currentSourceInfo);
     std::optional<Color> svgFillColorOpt = std::nullopt;
     if (currentSourceInfo.IsSvg()) {
-        svgFillColorOpt = imageRenderProperty->GetSvgFillColor() ? imageRenderProperty->GetSvgFillColor()
-                                                                 : currentSourceInfo.GetFillColor();
+        svgFillColorOpt = imageRenderProperty->GetSvgFillColor().has_value() ? imageRenderProperty->GetSvgFillColor()
+                                                                             : currentSourceInfo.GetFillColor();
     }
+
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != currentSourceInfo ||
-        (currentSourceInfo.IsSvg() && svgFillColorOpt.has_value() &&
-            loadingCtx_->GetSvgFillColor() != svgFillColorOpt)) {
+        (currentSourceInfo.IsSvg() && loadingCtx_->GetSvgFillColor() != svgFillColorOpt)) {
         LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
         loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(currentSourceInfo, std::move(loadNotifier));
         loadingCtx_->SetSvgFillColor(svgFillColorOpt);
@@ -315,7 +316,8 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
     if (!sourceInfo.IsInternalResource()) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -368,7 +370,7 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->ClearDrawCommands();
 
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
     pipeline->FlushMessages();
 }

@@ -84,6 +84,15 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("sepia", propFrontSepia.has_value() ? propFrontSepia->Value() : 0.0);
     json->Put("hueRotate", propFrontHueRotate.has_value() ? propFrontHueRotate.value() : 0.0);
     json->Put("colorBlend", propFrontColorBlend.has_value() ? propFrontColorBlend->ColorToString().c_str() : "");
+
+    json->Put("backdropBlur", propBlurRadius.value_or(0.0_vp).Value());
+    auto jsonShadow = JsonUtil::Create(true);
+    auto shadow = propBackShadow.value_or(Shadow());
+    jsonShadow->Put("radius", std::to_string(shadow.GetBlurRadius()).c_str());
+    jsonShadow->Put("color", shadow.GetColor().ColorToString().c_str());
+    jsonShadow->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
+    jsonShadow->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
+    json->Put("shadow", jsonShadow);
 }
 
 void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -117,7 +126,7 @@ void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         if (!shapeType.empty()) {
             jsonClip->Put("shape", shapeType.c_str());
         }
-        json->Put("clip", jsonClip);
+        json->Put("clip", jsonClip->ToString().c_str());
     } else {
         json->Put("clip", propClipEdge.value_or(false) ? "true" : "false");
     }

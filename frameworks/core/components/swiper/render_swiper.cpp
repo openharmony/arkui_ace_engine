@@ -517,6 +517,12 @@ void RenderSwiper::InitRawDragRecognizer()
                 client->HandleTouchMove(info);
             }
         });
+        rawRecognizer_->SetOnTouchCancel([weak](const TouchEventInfo& info) {
+            auto client = weak.Upgrade();
+            if (client) {
+                client->HandleTouchCancel(info);
+            }
+        });
     }
 }
 
@@ -742,6 +748,14 @@ void RenderSwiper::HandleTouchMove(const TouchEventInfo& info)
             }
         }
     }
+}
+
+// TouchCancel event is triggered by Input, it is similar to touchUp event.
+void RenderSwiper::HandleTouchCancel(const TouchEventInfo& info)
+{
+    LOGI("Handle touchCancel start.");
+    // TouchCancel is same to touchUp.
+    HandleTouchUp(info);
 }
 
 void RenderSwiper::HandleClick(const ClickInfo& clickInfo)
@@ -1132,6 +1146,7 @@ void RenderSwiper::MoveItems(double dragVelocity)
             swiper->RestoreAutoPlay();
             swiper->FireItemChangedEvent(!needRestore);
             swiper->ResetCachedChildren();
+            swiper->ResetIndicatorPosition();
             swiper->UpdateOneItemOpacity(MAX_OPACITY, fromIndex);
             swiper->UpdateOneItemOpacity(MAX_OPACITY, toIndex);
             swiper->ExecuteMoveCallback(swiper->currentIndex_);

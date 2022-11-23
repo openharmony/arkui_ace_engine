@@ -30,14 +30,13 @@ std::optional<SizeF> GaugeLayoutAlgorithm::MeasureContent(
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, std::nullopt);
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto gaugeTheme = pipeline->GetTheme<ProgressTheme>();
-    float defaultThickness = gaugeTheme->GetTrackWidth().ConvertToPx();
+    CHECK_NULL_RETURN(gaugeTheme, std::nullopt);
+    auto defaultThickness = gaugeTheme->GetTrackWidth().ConvertToPx();
     if ((NearEqual(contentConstraint.maxSize.Width(), Size::INFINITE_SIZE))) {
-        float defaultWidth = gaugeTheme->GetTrackWidth().ConvertToPx();
-        defaultWidth = std::min(defaultWidth, contentConstraint.maxSize.Width());
-        return SizeF(defaultWidth, defaultThickness);
+        return SizeF(defaultThickness, defaultThickness);
     }
     if (contentConstraint.selfIdealSize.IsValid()) {
         return contentConstraint.selfIdealSize.ConvertToSizeT();

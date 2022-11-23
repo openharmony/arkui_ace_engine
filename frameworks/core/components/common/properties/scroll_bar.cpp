@@ -234,8 +234,17 @@ Size ScrollBar::GetRootSize() const
     }
 }
 
-void ScrollBar::Reset()
+void ScrollBar::Reset(const RefPtr<ScrollBar>& scrollBar)
 {
+    if (scrollBar) {
+        displayMode_ = scrollBar->GetDisplayMode();
+        backgroundColor_ = scrollBar->GetBackgroundColor();
+        foregroundColor_ = scrollBar->GetForegroundColor();
+        inactiveWidth_ = scrollBar->GetInactiveWidth();
+        normalWidth_ = scrollBar->GetNormalWidth();
+        activeWidth_ = scrollBar->GetActiveWidth();
+        touchWidth_ = scrollBar->GetTouchWidth();
+    }
     if (!barController_) {
         return;
     }

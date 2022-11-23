@@ -21,7 +21,8 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/panel/sliding_panel_view.h"
+#include "core/components_ng/pattern/panel/sliding_panel_model.h"
+#include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -65,7 +66,8 @@ public:
  */
 HWTEST_F(PanelPropertyTestNg, SlidingPanelLayoutPropertyTest001, TestSize.Level1)
 {
-    SlidingPanelView::Create(SLIDING_PANEL_LAYOUT_PROPERTY_SHOW);
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_LAYOUT_PROPERTY_SHOW);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_FALSE(frameNode == nullptr);
     auto slidingPanelLayoutProperty = frameNode->GetLayoutProperty<SlidingPanelLayoutProperty>();
@@ -80,8 +82,9 @@ HWTEST_F(PanelPropertyTestNg, SlidingPanelLayoutPropertyTest001, TestSize.Level1
  */
 HWTEST_F(PanelPropertyTestNg, SlidingPanelLayoutPropertyTest002, TestSize.Level1)
 {
-    SlidingPanelView::Create(SLIDING_PANEL_LAYOUT_PROPERTY_SHOW);
-    SlidingPanelView::SetPanelType(PANEL_TYPE_VALUE);
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_LAYOUT_PROPERTY_SHOW);
+    slidingPanelModelNG.SetPanelType(PANEL_TYPE_VALUE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_EQ(frameNode == nullptr, false);
     auto slidingPanelLayoutProperty = frameNode->GetLayoutProperty<SlidingPanelLayoutProperty>();
@@ -96,8 +99,9 @@ HWTEST_F(PanelPropertyTestNg, SlidingPanelLayoutPropertyTest002, TestSize.Level1
  */
 HWTEST_F(PanelPropertyTestNg, SlidingPanelLayoutPropertyTest003, TestSize.Level1)
 {
-    SlidingPanelView::Create(SLIDING_PANEL_LAYOUT_PROPERTY_SHOW);
-    SlidingPanelView::SetPanelMode(PANEL_MODE_VALUE);
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_LAYOUT_PROPERTY_SHOW);
+    slidingPanelModelNG.SetPanelMode(PANEL_MODE_VALUE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_EQ(frameNode == nullptr, false);
     auto slidingPanelLayoutProperty = frameNode->GetLayoutProperty<SlidingPanelLayoutProperty>();
@@ -112,8 +116,9 @@ HWTEST_F(PanelPropertyTestNg, SlidingPanelLayoutPropertyTest003, TestSize.Level1
  */
 HWTEST_F(PanelPropertyTestNg, SlidingPanelLayoutPropertyTest004, TestSize.Level1)
 {
-    SlidingPanelView::Create(SLIDING_PANEL_LAYOUT_PROPERTY_SHOW);
-    SlidingPanelView::SetHasDragBar(SLIDING_PANEL_LAYOUT_PROPERTY_HAS_DRAG_BAR);
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_LAYOUT_PROPERTY_SHOW);
+    slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_LAYOUT_PROPERTY_HAS_DRAG_BAR);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_EQ(frameNode == nullptr, false);
     auto slidingPanelLayoutProperty = frameNode->GetLayoutProperty<SlidingPanelLayoutProperty>();
@@ -129,8 +134,9 @@ HWTEST_F(PanelPropertyTestNg, SlidingPanelLayoutPropertyTest004, TestSize.Level1
 HWTEST_F(PanelPropertyTestNg, SlidingPanelLayoutPropertyTest005, TestSize.Level1)
 {
     for (const auto& miniHeight : SLIDING_PANEL_LAYOUT_PROPERTY_MINI_HEIGHT) {
-        SlidingPanelView::Create(SLIDING_PANEL_LAYOUT_PROPERTY_SHOW);
-        SlidingPanelView::SetMiniHeight(miniHeight);
+        SlidingPanelModelNG slidingPanelModelNG;
+        slidingPanelModelNG.Create(SLIDING_PANEL_LAYOUT_PROPERTY_SHOW);
+        slidingPanelModelNG.SetMiniHeight(miniHeight);
         auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
         EXPECT_EQ(frameNode == nullptr, false);
         auto slidingPanelLayoutProperty = frameNode->GetLayoutProperty<SlidingPanelLayoutProperty>();
@@ -148,8 +154,9 @@ HWTEST_F(PanelPropertyTestNg, SlidingPanelLayoutPropertyTest005, TestSize.Level1
 HWTEST_F(PanelPropertyTestNg, SlidingPanelLayoutPropertyTest006, TestSize.Level1)
 {
     for (const auto& halfHeight : SLIDING_PANEL_LAYOUT_PROPERTY_HALF_HEIGHT) {
-        SlidingPanelView::Create(SLIDING_PANEL_LAYOUT_PROPERTY_SHOW);
-        SlidingPanelView::SetHalfHeight(halfHeight);
+        SlidingPanelModelNG slidingPanelModelNG;
+        slidingPanelModelNG.Create(SLIDING_PANEL_LAYOUT_PROPERTY_SHOW);
+        slidingPanelModelNG.SetHalfHeight(halfHeight);
         auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
         EXPECT_EQ(frameNode == nullptr, false);
         auto slidingPanelLayoutProperty = frameNode->GetLayoutProperty<SlidingPanelLayoutProperty>();
@@ -167,8 +174,9 @@ HWTEST_F(PanelPropertyTestNg, SlidingPanelLayoutPropertyTest006, TestSize.Level1
 HWTEST_F(PanelPropertyTestNg, SlidingPanelLayoutPropertyTest007, TestSize.Level1)
 {
     for (const auto& fullHeight : SLIDING_PANEL_LAYOUT_PROPERTY_FULL_HEIGHT) {
-        SlidingPanelView::Create(SLIDING_PANEL_LAYOUT_PROPERTY_SHOW);
-        SlidingPanelView::SetFullHeight(fullHeight);
+        SlidingPanelModelNG slidingPanelModelNG;
+        slidingPanelModelNG.Create(SLIDING_PANEL_LAYOUT_PROPERTY_SHOW);
+        slidingPanelModelNG.SetFullHeight(fullHeight);
         auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
         EXPECT_EQ(frameNode == nullptr, false);
         auto slidingPanelLayoutProperty = frameNode->GetLayoutProperty<SlidingPanelLayoutProperty>();

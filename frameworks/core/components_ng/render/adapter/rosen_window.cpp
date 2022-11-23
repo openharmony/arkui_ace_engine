@@ -129,6 +129,11 @@ void RosenWindow::Destroy()
     callbacks_.clear();
 }
 
+void RosenWindow::SetDrawTextAsBitmap(bool useBitmap)
+{
+    Rosen::RSSystemProperties::SetDrawTextAsBitmap(useBitmap);
+}
+
 void RosenWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
 {
     LOGI("Rosenwindow set root frame node");

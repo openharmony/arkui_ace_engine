@@ -74,7 +74,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
     // For root node, the parent local point is the same as global point.
-    frameNode->TouchTest(point, point, touchRestrict, hitTestResult);
+    frameNode->TouchTest(point, point, touchRestrict, hitTestResult, touchPoint.id);
     if (needAppend) {
 #ifdef OHOS_STANDARD_SYSTEM
         for (const auto& entry : hitTestResult) {
@@ -102,7 +102,7 @@ void EventManager::TouchTest(
     // collect
     const NG::PointF point { event.x, event.y };
     // For root node, the parent local point is the same as global point.
-    frameNode->TouchTest(point, point, touchRestrict, axisTouchTestResult_);
+    frameNode->TouchTest(point, point, touchRestrict, axisTouchTestResult_, -1);
 }
 
 void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<TextOverlayManager>& textOverlayManager)
@@ -246,9 +246,23 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& point)
     // If one gesture recognizer has already been won, other gesture recognizers will still be affected by
     // the event, each recognizer needs to filter the extra events by itself.
     if (dispatchSuccess) {
-        for (const auto& entry : iter->second) {
-            if (!entry->HandleMultiContainerEvent(point)) {
-                break;
+        if (Container::IsCurrentUseNewPipeline()) {
+            // Need update here: onTouch/Recognizer need update
+            bool isStopTouchEvent = false;
+            for (const auto& entry : iter->second) {
+                auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
+                if (recognizer) {
+                    entry->HandleMultiContainerEvent(point);
+                }
+                if (!recognizer && !isStopTouchEvent) {
+                    isStopTouchEvent = !entry->HandleMultiContainerEvent(point);
+                }
+            }
+        } else {
+            for (const auto& entry : iter->second) {
+                if (!entry->HandleMultiContainerEvent(point)) {
+                    break;
+                }
             }
         }
     }

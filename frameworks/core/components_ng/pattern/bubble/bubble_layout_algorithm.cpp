@@ -89,10 +89,11 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    InitTargetSizeAndPosition();
     CHECK_NULL_VOID(layoutWrapper);
     auto bubbleProp = DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(bubbleProp);
+    InitProps(bubbleProp);
+    InitTargetSizeAndPosition(bubbleProp);
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;
@@ -100,8 +101,7 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     selfSize_ = layoutWrapper->GetGeometryNode()->GetFrameSize(); // bubble's size
     auto child = children.front();
     childSize_ = child->GetGeometryNode()->GetMarginFrameSize(); // bubble's child's size
-    InitProps(bubbleProp);
-    childOffset_ = GetChildPosition(childSize_, bubbleProp); // bubble's child's offset
+    childOffset_ = GetChildPosition(childSize_, bubbleProp);     // bubble's child's offset
     bool useCustom = bubbleProp->GetUseCustom().value_or(false);
     if (useCustom) { // use custom popupOption
         UpdateCustomChildPosition(bubbleProp);
@@ -418,23 +418,26 @@ void BubbleLayoutAlgorithm::UpdateTouchRegion()
     touchRegion_ = RectF(topLeft, topLeft + bottomRight);
 }
 
-void BubbleLayoutAlgorithm::InitTargetSizeAndPosition()
+void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(const RefPtr<BubbleLayoutProperty>& layoutProp)
 {
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
     auto geometryNode = targetNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     targetSize_ = geometryNode->GetFrameSize();
-    
+    auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
     auto context = targetNode->GetRenderContext();
     CHECK_NULL_VOID(context);
-    if (context->HasPosition()) {
-        OffsetT<Dimension> positionValue = context->GetPosition().value();
-        auto positionX = positionValue.GetX();
-        auto positionY = positionValue.GetY();
-        targetOffset_ = OffsetF(positionX.ConvertToPx(), positionY.ConvertToPx());
-    } else {
-        targetOffset_ = targetNode->GetOffsetRelativeToWindow();
+    targetOffset_ = targetNode->GetPaintRectOffset();
+    // Show in SubWindow
+    if (showInSubWindow) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto overlayManager = pipelineContext->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        auto displayWindowOffset = layoutProp->GetDisplayWindowOffset().value_or(OffsetF());
+        targetOffset_ += displayWindowOffset;
+        auto popupInfo = overlayManager->GetPopupInfo(targetNodeId_);
     }
 }
 

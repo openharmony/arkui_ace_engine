@@ -454,13 +454,13 @@ void RosenRenderImage::ProcessPixmapForPaint()
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> skImage;
     if (!renderTaskHolder_->ioManager) {
-        skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        skImage = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixmap));
     } else {
 #ifndef GPU_DISABLED
         skImage = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
             imagePixmap, true, imagePixmap.colorSpace(), true);
 #else
-        skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        skImage = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixmap));
 #endif
     }
     auto canvasImage = flutter::CanvasImage::Create();
@@ -775,7 +775,8 @@ void RosenRenderImage::CanvasDrawImageRect(
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
     if (GetAdaptiveFrameRectFlag()) {
         recordingCanvas->translate(imageRenderPosition_.GetX() * -1, imageRenderPosition_.GetY() * -1);
-        Rosen::RsImageInfo rsImageInfo(fitNum, repeatNum, radii_, scale_);
+        Rosen::RsImageInfo rsImageInfo(fitNum, repeatNum, radii_, scale_,
+            0, image_->compressWidth(), image_->compressHeight());
         recordingCanvas->DrawImageWithParm(image_->image(), image_->compressData(), rsImageInfo, paint);
         image_->setCompress(nullptr, 0, 0);
         return;

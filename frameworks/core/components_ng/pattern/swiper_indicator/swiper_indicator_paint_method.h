@@ -28,9 +28,8 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT SwiperIndicatorPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SwiperIndicatorPaintMethod, NodePaintMethod)
 public:
-    SwiperIndicatorPaintMethod(float mainDelta, Axis axis, int32_t currentIndex, int32_t itemCount, bool showIndicator)
-        : mainDelta_(mainDelta), axis_(axis), currentIndex_(currentIndex), itemCount_(itemCount),
-          showIndicator_(showIndicator) {};
+    SwiperIndicatorPaintMethod(Axis axis, int32_t currentIndex, int32_t itemCount)
+        : axis_(axis), currentIndex_(currentIndex), itemCount_(itemCount) {};
     ~SwiperIndicatorPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
@@ -40,24 +39,9 @@ public:
         currentIndex_ = index;
     }
 
-    int32_t GetCurrentIndex() const
-    {
-        return currentIndex_;
-    }
-
     void SetItemCount(int32_t itemCount)
     {
         itemCount_ = itemCount;
-    }
-
-    void SetMainDelta(float mainDelta)
-    {
-        mainDelta_ = mainDelta;
-    }
-
-    float GetMainDelta() const
-    {
-        return mainDelta_;
     }
 
     void SetAxis(Axis axis)
@@ -70,22 +54,13 @@ public:
         return axis_;
     }
 
-    void SetShowIndicator(bool showIndicator)
-    {
-        showIndicator_ = showIndicator;
-    }
-
 private:
     void PaintContent(RSCanvas& canvas, const RefPtr<SwiperIndicatorPaintProperty>& paintProperty, SizeF contentSize);
     void PaintMask(
         RSCanvas& canvas, RefPtr<SwiperIndicatorPaintProperty> paintProperty, SizeF contentSize, OffsetF contentOffset);
-    float mainDelta_ = 0.0f;
     Axis axis_ = Axis::HORIZONTAL;
-    RefPtr<OHOS::Ace::SwiperIndicator> indicator_;
-    Offset indicatorPosition_;
     int32_t currentIndex_ = 0;
-    int32_t itemCount_ = 1;
-    bool showIndicator_ = true;
+    int32_t itemCount_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPaintMethod);
 };

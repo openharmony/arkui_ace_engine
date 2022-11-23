@@ -79,6 +79,7 @@ public:
 
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
+    void UpdateInsertText(std::string insertValue);
     // Override TextInputClient
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformDefaultAction();
@@ -103,7 +104,7 @@ public:
     void SetIsOverlayShowed(bool isOverlayShowed, bool needStartTwinkling = true);
     void UpdateFocusAnimation();
     const TextEditingValue& GetEditingValue() const;
-    const TextEditingValue& GetPreEditingValue() const;   
+    const TextEditingValue& GetPreEditingValue() const;
     double GetEditingBoxY() const override;
     double GetEditingBoxTopY() const override;
     bool GetEditingBoxModel() const override;
@@ -389,6 +390,9 @@ protected:
     void HandleMouseHoverEvent(MouseState mouseState) override;
     void AnimateMouseHoverEnter() override;
     void AnimateMouseHoverExit() override;
+    void HandleValueFilter(TextEditingValue& valueBeforeUpdate, TextEditingValue& valueNeedToUpdate);
+    bool FilterWithRegex(std::string& valueToUpdate, const std::string& filter, bool needToEscape = false);
+    void KeyboardEditingValueFilter(TextEditingValue& valueToUpdate);
 
     std::u16string GetTextForDisplay(const std::string& text) const;
 
@@ -485,6 +489,8 @@ protected:
     TextStyle placeHoldStyle_;
     TextStyle editingStyle_;
     std::string text_;
+    std::string insertValue_;
+    bool insertTextUpdated_ = false;
     std::string errorText_;
     TextStyle errorTextStyle_;
     double errorSpacing_ = 0.0;

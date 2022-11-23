@@ -26,16 +26,11 @@ class CanvasPaintMethod : public CustomPaintPaintMethod {
     DECLARE_ACE_TYPE(CanvasPaintMethod, CustomPaintPaintMethod)
 public:
     CanvasPaintMethod() = default;
-    explicit CanvasPaintMethod(const RefPtr<NG::PipelineContext> context)
+    explicit CanvasPaintMethod(const RefPtr<PipelineBase> context)
     {
         context_ = context;
-        isOffscreen_ = false;
-
-        auto currentDartState = flutter::UIDartState::Current();
-        if (!currentDartState) {
-            return;
-        }
-
+        auto* currentDartState = flutter::UIDartState::Current();
+        CHECK_NULL_VOID(currentDartState);
         renderTaskHolder_ = MakeRefPtr<FlutterRenderTaskHolder>(currentDartState->GetSkiaUnrefQueue(),
             currentDartState->GetIOManager(), currentDartState->GetTaskRunners().GetIOTaskRunner());
 
@@ -77,12 +72,13 @@ public:
     double MeasureText(const std::string& text, const PaintState& state);
     double MeasureTextHeight(const std::string& text, const PaintState& state);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
+    void SetTransform(const TransformParam& param) override;
 
 private:
     void PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void CreateBitmap(SizeF contentSize);
 
-    void ImageObjReady(const RefPtr<ImageObject>& imageObj) override;
+    void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
     sk_sp<SkImage> GetImage(const std::string& src) override;
     void SetPaintImage() override {};
@@ -93,11 +89,21 @@ private:
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     bool UpdateParagraph(const OffsetF& offset, const std::string& text, bool isStroke, bool hasShadow = true);
     void UpdateTextStyleForeground(const OffsetF& offset, bool isStroke, txt::TextStyle& txtStyle, bool hasShadow);
+    void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas) override;
+    OffsetF GetContentOffset(PaintWrapper* paintWrapper) const override
+    {
+        return paintWrapper ? paintWrapper->GetContentOffset() : OffsetF(0.0f, 0.0f);
+    }
+    void Path2DRect(const OffsetF& offset, const PathArgs& args) override;
+    SkCanvas* GetRawPtrOfSkCanvas() override
+    {
+        return skCanvas_.get();
+    }
 
     std::list<TaskFunc> tasks_;
     SizeF lastLayoutSize_;
 
-    RefPtr<ImageObject> imageObj_ = nullptr;
+    RefPtr<Ace::ImageObject> imageObj_ = nullptr;
     RefPtr<ImageCache> imageCache_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPaintMethod);

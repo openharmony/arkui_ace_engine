@@ -96,6 +96,8 @@ public:
         return rect;
     }
 
+    virtual void SetDrawTextAsBitmap(bool useBitmap) {}
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;

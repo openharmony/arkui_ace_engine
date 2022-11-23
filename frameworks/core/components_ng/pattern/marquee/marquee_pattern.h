@@ -17,15 +17,12 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MARQUEE_PATTERN_H
 
 #include "base/geometry/ng/offset_t.h"
-#include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/marquee/marquee_event_hub.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_algorithm.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/paragraph.h"
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
@@ -61,13 +58,12 @@ public:
     float CheckAndAdjustPosition(LayoutWrapper* layoutWrapper);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
-protected:
+private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnInActive() override;
     void OnActive() override;
 
-private:
     void InitAnimatorController();
 
     void FireStartEvent() const;
