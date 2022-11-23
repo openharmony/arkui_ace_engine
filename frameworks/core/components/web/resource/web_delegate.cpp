@@ -1988,7 +1988,7 @@ std::string WebDelegate::GetCustomScheme()
     return customScheme;
 }
 
-void WebDelegate::InitWebViewWithSurface()
+void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
 {
     LOGI("Create webview with surface");
     auto context = context_.Upgrade();
