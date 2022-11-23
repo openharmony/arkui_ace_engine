@@ -145,15 +145,15 @@ bool HdcJdwpSimulator::Connect()
             LOGE("connect failed errno:%{public}d", errno);
         } else if (ConnectJpid(this)) {
             char recvBuf[100] = { 0 }; // 100 buf size
-	    bool reRecv = false; 
-	    do {
+            bool reRecv = false; 
+            do {
                 reRecv = false;
                 int ret = recv(cfd, recvBuf, sizeof(recvBuf), 0); // stop when server connect, or retry
                 LOGE("jdwp retry connect server errno:%{public}d, ret:%{public}d", errno, ret);
                 if (errno == EINTR || errno == EAGAIN) {
                     reRecv = true;
                 }
-	    } while (reRecv);
+            } while (reRecv);
         }
         close(ctxPoint_->cfd);
         ctxPoint_->cfd = -1;
