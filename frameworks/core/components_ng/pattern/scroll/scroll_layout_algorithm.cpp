@@ -71,6 +71,7 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!idealSize.Height()) {
         idealSize.SetHeight(childSize.Height());
     }
+
     auto selfSize = idealSize.ConvertToSizeT();
     selfSize.Constrain(constraint->minSize, constraint->maxSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(selfSize);
@@ -96,7 +97,11 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     scrollableDistance_ = GetMainAxisSize(childSize, axis) - GetMainAxisSize(size, axis);
     auto scrollEffect = layoutProperty->GetScrollEdgeEffect();
     if (scrollEffect && scrollEffect->IsRestrictBoundary()) {
-        currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
+        if (scrollableDistance_ > 0.0f) {
+            currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
+        } else {
+            currentOffset_ = std::clamp(currentOffset_, 0.0f, -scrollableDistance_);
+        }
     }
     viewPort_ = size;
     viewPortExtent_ = childSize;
