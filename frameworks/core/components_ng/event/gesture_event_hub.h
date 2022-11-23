@@ -28,6 +28,7 @@
 #include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/event/touch_event.h"
+#include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
 #include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
@@ -176,8 +177,9 @@ public:
 
     bool ActClick();
 
+    void CheckClickActuator();
     // Set by user define, which will replace old one.
-    void SetClickEvent(GestureEventFunc&& clickEvent);
+    void SetUserOnClick(GestureEventFunc&& clickEvent);
 
     void AddClickEvent(const RefPtr<ClickEvent>& clickEvent);
 
@@ -188,6 +190,8 @@ public:
         }
         clickEventActuator_->RemoveClickEvent(clickEvent);
     }
+
+    void BindMenu(GestureEventFunc&& showMenu);
 
     bool IsLongClickable() const
     {
@@ -336,6 +340,9 @@ private:
     // Set by use gesture, priorityGesture and parallelGesture attribute function.
     std::list<RefPtr<NG::Gesture>> gestures_;
     std::list<RefPtr<NGGestureRecognizer>> gestureHierarchy_;
+    
+    // used in bindMenu, need to delete the old callback when bindMenu runs again
+    RefPtr<ClickEvent> showMenu_;
 
     HitTestMode hitTestMode_ = HitTestMode::HTMDEFAULT;
     bool recreateGesture_ = true;

@@ -19,6 +19,7 @@
 #include <list>
 
 #include "base/memory/referenced.h"
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "core/gestures/gesture_info.h"
@@ -47,6 +48,8 @@ public:
 
 private:
     GestureEventFunc callback_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(LongPressEvent);
 };
 
 class ACE_EXPORT LongPressEventActuator : public GestureEventActuator {
@@ -73,6 +76,8 @@ private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     RefPtr<LongPressEvent> longPressEvent_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(LongPressEventActuator);
 };
 
 } // namespace OHOS::Ace::NG

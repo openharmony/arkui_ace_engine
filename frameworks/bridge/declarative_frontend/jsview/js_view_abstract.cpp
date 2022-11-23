@@ -3713,7 +3713,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
     CHECK_NULL_VOID(builderFunc);
 
-    ResponseType responseType = ResponseType::LONGPRESS;
+    ResponseType responseType = ResponseType::LONG_PRESS;
     if (info.Length() == 2 && info[1]->IsNumber()) {
         auto response = info[1]->ToNumber<int32_t>();
         LOGI("Set the responseType is %{public}d.", response);
