@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_TIME_PICKER_COLUMN_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_TIME_PICKER_COLUMN_LAYOUT_ALGORITHM_H
 
+#include "base/i18n/localization.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
@@ -26,11 +27,12 @@ class ACE_EXPORT TimePickerColumnLayoutAlgorithm : public LinearLayoutAlgorithm 
     DECLARE_ACE_TYPE(TimePickerColumnLayoutAlgorithm, LinearLayoutAlgorithm);
 
 public:
-    explicit TimePickerColumnLayoutAlgorithm(float currentOffset) : currentOffset_(currentOffset) {}
+    TimePickerColumnLayoutAlgorithm() = default;
     ~TimePickerColumnLayoutAlgorithm() override = default;
 
     void OnReset() override {}
 
+    void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
     float GetCurrentOffset() const
@@ -38,8 +40,24 @@ public:
         return currentOffset_;
     }
 
+    void SetCurrentOffset(float currentOffset)
+    {
+        currentOffset_ = currentOffset;
+    }
+
+    void SetHour24(bool value)
+    {
+        hour24_ = value;
+    }
+
+    bool GetHour24() const
+    {
+        return hour24_;
+    }
+
 private:
     float currentOffset_ = 0.0f;
+    bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnLayoutAlgorithm);
 };

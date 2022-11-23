@@ -20,7 +20,7 @@
 #include "core/animation/curve.h"
 #include "core/animation/curve_animation.h"
 #include "core/animation/curves.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -30,7 +30,7 @@ class PickerAnimation : public virtual AceType {
 public:
     PickerAnimation() = delete;
     ~PickerAnimation() = default;
-    PickerAnimation(const WeakPtr<PipelineContext>& pipe, double start, double end, int delay, int duration,
+    PickerAnimation(const WeakPtr<PipelineBase>& pipe, double start, double end, int delay, int duration,
         const RefPtr<Curve>& curve, const std::function<void(double)>& callback)
         : start_(start), end_(end), delay_(delay), duration_(duration), pipe_(pipe), curve_(curve), callback_(callback)
     {
@@ -64,7 +64,7 @@ private:
     int delay_ = 0;
     int duration_ = 0;
 
-    WeakPtr<PipelineContext> pipe_;
+    WeakPtr<PipelineBase> pipe_;
     RefPtr<Curve> curve_;
     std::function<void(double)> callback_;
     RefPtr<CurveAnimation<double>> animation_;

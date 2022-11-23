@@ -26,20 +26,24 @@ class ACE_EXPORT DatePickerColumnLayoutAlgorithm : public LinearLayoutAlgorithm 
     DECLARE_ACE_TYPE(DatePickerColumnLayoutAlgorithm, LinearLayoutAlgorithm);
 
 public:
-    explicit DatePickerColumnLayoutAlgorithm(float currentOffset) : currentOffset_(currentOffset) {}
+    DatePickerColumnLayoutAlgorithm() = default;
     ~DatePickerColumnLayoutAlgorithm() override = default;
 
     void OnReset() override {}
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    float GetCurrentOffset() const
+    double GetCurrentOffset() const
     {
         return currentOffset_;
     }
 
+    void SetCurrentOffset(double currentOffset)
+    {
+        currentOffset_ = currentOffset;
+    }
 private:
-    float currentOffset_ = 0.0f;
+    double currentOffset_ = 0.0;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerColumnLayoutAlgorithm);
 };
