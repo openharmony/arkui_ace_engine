@@ -74,7 +74,8 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     float length = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
                        ? contentSize.value().Width()
                        : contentSize.value().Height();
-    sliderLength_ = length >= trackThickness_ ? length - trackThickness_ : 1;
+    sliderLength_ =
+        length >= std::max(trackThickness_, blockDiameter_) ? length - std::max(trackThickness_, blockDiameter_) : 1;
     borderBlank_ = (length - sliderLength_) * static_cast<float>(HALF);
 
     return true;

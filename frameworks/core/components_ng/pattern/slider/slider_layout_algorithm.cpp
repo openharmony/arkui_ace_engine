@@ -64,9 +64,6 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
     Axis direction = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     sliderWidth = std::clamp(sliderWidth, 0.0f, direction == Axis::HORIZONTAL ? height : width);
     float sliderLength = direction == Axis::HORIZONTAL ? width : height;
-    sliderLength = GreatOrEqual(sliderLength, BORDER_BLANK.ConvertToPx())
-                       ? sliderLength - static_cast<float>(BORDER_BLANK.ConvertToPx())
-                       : EXTREMELY_SMALL_SLIDER_LENGTH;
     return direction == Axis::HORIZONTAL ? SizeF(sliderLength, sliderWidth) : SizeF(sliderWidth, sliderLength);
 }
 
