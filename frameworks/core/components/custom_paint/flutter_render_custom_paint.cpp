@@ -497,10 +497,10 @@ void FlutterRenderCustomPaint::ClearRect(const Offset& offset, const Rect& rect)
 
 void FlutterRenderCustomPaint::FillText(const Offset& offset, const std::string& text, double x, double y)
 {
-    if (!UpdateParagraph(offset, text, false)) {
+    if (!UpdateParagraph(offset, text, false, HasShadow())) {
         return;
     }
-    PaintText(offset, x, y, false);
+    PaintText(offset, x, y, false, HasShadow());
 }
 
 void FlutterRenderCustomPaint::StrokeText(const Offset& offset, const std::string& text, double x, double y)
@@ -509,7 +509,7 @@ void FlutterRenderCustomPaint::StrokeText(const Offset& offset, const std::strin
         if (!UpdateParagraph(offset, text, true, true)) {
             return;
         }
-        PaintText(offset, x, y, true);
+        PaintText(offset, x, y, true, true);
     }
 
     if (!UpdateParagraph(offset, text, true)) {
