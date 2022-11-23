@@ -115,7 +115,7 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
 {
     layoutConstraint_ = layoutProperty->layoutConstraint_;
     if (layoutProperty->gridProperty_) {
-        gridProperty_ = std::make_unique<GridProperty>(*layoutProperty->gridProperty_);
+        gridProperty_ = layoutProperty->gridProperty_;
     }
     if (layoutProperty->calcLayoutConstraint_) {
         calcLayoutConstraint_ = std::make_unique<MeasureProperty>(*layoutProperty->calcLayoutConstraint_);
@@ -272,7 +272,7 @@ void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)
 void LayoutProperty::UpdateGridProperty(std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type)
 {
     if (!gridProperty_) {
-        gridProperty_ = std::make_unique<GridProperty>();
+        gridProperty_ = std::make_optional<GridProperty>();
     }
 
     bool isSpanUpdated = (span.has_value() && gridProperty_->UpdateSpan(span.value(), type));

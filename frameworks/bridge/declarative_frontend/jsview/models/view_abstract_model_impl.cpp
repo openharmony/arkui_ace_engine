@@ -490,10 +490,10 @@ void ViewAbstractModelImpl::SetBorderStyle(const std::optional<BorderStyle>& sty
     const std::optional<BorderStyle>& styleBottom)
 {
     auto decoration = GetBackDecoration();
-    BorderStyle left = styleLeft ? styleLeft.value() : BoxComponentHelper::GetBorderStyleLeft(decoration);
-    BorderStyle right = styleRight ? styleRight.value() : BoxComponentHelper::GetBorderStyleRight(decoration);
-    BorderStyle top = styleTop ? styleTop.value() : BoxComponentHelper::GetBorderStyleTop(decoration);
-    BorderStyle bottom = styleBottom ? styleBottom.value() : BoxComponentHelper::GetBorderStyleBottom(decoration);
+    BorderStyle left = styleLeft.value_or(BorderStyle::SOLID);
+    BorderStyle right = styleRight.value_or(BorderStyle::SOLID);
+    BorderStyle top = styleTop.value_or(BorderStyle::SOLID);
+    BorderStyle bottom = styleBottom.value_or(BorderStyle::SOLID);
     auto* stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {

@@ -204,28 +204,45 @@ inline float StringToFloat(const std::string& value)
     }
 }
 
+inline std::string TrimStr(const std::string& str, char cTrim = ' ')
+{
+    auto firstPos = str.find_first_not_of(cTrim);
+    if (firstPos == std::string::npos) {
+        return str;
+    }
+    auto endPos = str.find_last_not_of(cTrim);
+    return str.substr(firstPos, endPos - firstPos + 1);
+}
+
 inline Dimension StringToDimensionWithUnit(const std::string& value, DimensionUnit defaultUnit = DimensionUnit::PX)
 {
     errno = 0;
-    if (std::strcmp(value.c_str(), "auto") == 0) {
+    auto value_str = TrimStr(value);
+    if (std::strcmp(value_str.c_str(), "auto") == 0) {
         return Dimension(0, DimensionUnit::AUTO);
     }
     char* pEnd = nullptr;
-    double result = std::strtod(value.c_str(), &pEnd);
-    if (pEnd == value.c_str() || errno == ERANGE) {
+    double result = std::strtod(value_str.c_str(), &pEnd);
+    std::string str = TrimStr(pEnd);
+
+    if (str.c_str() == value_str.c_str() || errno == ERANGE) {
         return Dimension(0.0, defaultUnit);
-    } else if (pEnd != nullptr) {
-        if (std::strcmp(pEnd, "%") == 0) {
+    } else if (str.c_str() != nullptr) {
+        if (std::strcmp(str.c_str(), "%") == 0) {
             // Parse percent, transfer from [0, 100] to [0, 1]
             return Dimension(result / 100.0, DimensionUnit::PERCENT);
-        } else if (std::strcmp(pEnd, "px") == 0) {
+        } else if (std::strcmp(str.c_str(), "px") == 0) {
             return Dimension(result, DimensionUnit::PX);
-        } else if (std::strcmp(pEnd, "vp") == 0) {
+        } else if (std::strcmp(str.c_str(), "vp") == 0) {
             return Dimension(result, DimensionUnit::VP);
-        } else if (std::strcmp(pEnd, "fp") == 0) {
+        } else if (std::strcmp(str.c_str(), "fp") == 0) {
             return Dimension(result, DimensionUnit::FP);
-        } else if ((pEnd) && (std::strcmp(pEnd, "lpx") == 0)) {
+        } else if (std::strcmp(str.c_str(), "lpx") == 0) {
             return Dimension(result, DimensionUnit::LPX);
+        } else if (std::strcmp(str.c_str(), "") == 0) {
+            return Dimension(result, defaultUnit);
+        } else {
+            return Dimension(0.0, defaultUnit);
         }
     }
     return Dimension(result, defaultUnit);
@@ -242,6 +259,18 @@ inline CalcDimension StringToCalcDimension(const std::string& value, bool useVp 
 
 inline Dimension StringToDimension(const std::string& value, bool useVp = false)
 {
+    return StringToDimensionWithUnit(value, useVp ? DimensionUnit::VP : DimensionUnit::PX);
+}
+
+inline Dimension StringToDimensionWithThemeValue(const std::string& value, bool useVp, const Dimension& themeValue)
+{
+    errno = 0;
+    char* pEnd = nullptr;
+    std::strtod(value.c_str(), &pEnd);
+    if (pEnd == value.c_str() || errno == ERANGE) {
+        return themeValue;
+    }
+
     return StringToDimensionWithUnit(value, useVp ? DimensionUnit::VP : DimensionUnit::PX);
 }
 
@@ -348,16 +377,6 @@ inline std::string DoubleToString(double value, int32_t precision = 2)
 inline void DeleteAllMark(std::string& str, const char mark)
 {
     str.erase(std::remove(str.begin(), str.end(), mark), str.end());
-}
-
-inline std::string TrimStr(const std::string& str, char cTrim = ' ')
-{
-    auto firstPos = str.find_first_not_of(cTrim);
-    if (firstPos == std::string::npos) {
-        return str;
-    }
-    auto endPos = str.find_last_not_of(cTrim);
-    return str.substr(firstPos, endPos - firstPos + 1);
 }
 
 inline void TrimStrLeadingAndTrailing(std::string& str, char cTrim = ' ')

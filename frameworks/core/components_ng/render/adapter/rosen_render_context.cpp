@@ -290,7 +290,7 @@ void RosenRenderContext::PaintBackground()
     auto compressData = skiaCanvasImage->GetCompressData();
     rosenImage->SetCompressData(compressData, skiaCanvasImage->GetUniqueID(), skiaCanvasImage->GetCompressWidth(),
         skiaCanvasImage->GetCompressHeight());
-    rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NOREPEAT)));
+    rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
     rsNode_->SetBgImage(rosenImage);
 
     SizeF renderSize = ImagePainter::CalculateBgImageSize(

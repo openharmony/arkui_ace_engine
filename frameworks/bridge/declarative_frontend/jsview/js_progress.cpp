@@ -161,7 +161,7 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
         strokeWidthDimension = theme->GetTrackThickness();
     }
 
-    if (strokeWidthDimension.Value() <= 0.0) {
+    if (strokeWidthDimension.Value() <= 0.0 || strokeWidthDimension.Unit() == DimensionUnit::PERCENT) {
         strokeWidthDimension = theme->GetTrackThickness();
     }
 
@@ -182,7 +182,8 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
         scaleWidthDimension = theme->GetScaleWidth();
     }
 
-    if ((scaleWidthDimension.Value() <= 0.0) || (scaleWidthDimension.Value() > strokeWidthDimension.Value())) {
+    if ((scaleWidthDimension.Value() <= 0.0) || (scaleWidthDimension.Value() > strokeWidthDimension.Value()) ||
+        scaleWidthDimension.Unit() == DimensionUnit::PERCENT) {
         scaleWidthDimension = theme->GetScaleWidth();
     }
 

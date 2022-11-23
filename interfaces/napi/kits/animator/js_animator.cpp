@@ -17,6 +17,7 @@
 #include <string>
 
 #include "animator_option.h"
+#include "interfaces/napi/kits/utils/napi_utils.h"
 #include "napi/native_api.h"
 #include "napi/native_engine/native_value.h"
 #include "napi/native_node_api.h"
@@ -34,6 +35,15 @@ namespace OHOS::Ace::Napi {
 static void ParseString(napi_env env, napi_value propertyNapi, std::string& property)
 {
     if (propertyNapi != nullptr) {
+        napi_valuetype valueType = napi_undefined;
+        napi_typeof(env, propertyNapi, &valueType);
+        if (valueType == napi_undefined) {
+            NapiThrow(env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
+            return;
+        } else if (valueType != napi_string) {
+            NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+            return;
+        }
         auto nativeProperty = reinterpret_cast<NativeValue*>(propertyNapi);
         auto resultProperty = nativeProperty->ToString();
         auto nativeStringProperty =
@@ -49,6 +59,15 @@ static void ParseString(napi_env env, napi_value propertyNapi, std::string& prop
 static void ParseInt(napi_env env, napi_value propertyNapi, int32_t& property)
 {
     if (propertyNapi != nullptr) {
+        napi_valuetype valueType = napi_undefined;
+        napi_typeof(env, propertyNapi, &valueType);
+        if (valueType == napi_undefined) {
+            NapiThrow(env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
+            return;
+        } else if (valueType != napi_number) {
+            NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+            return;
+        }
         napi_get_value_int32(env, propertyNapi, &property);
     }
 }
@@ -56,6 +75,15 @@ static void ParseInt(napi_env env, napi_value propertyNapi, int32_t& property)
 static void ParseDouble(napi_env env, napi_value propertyNapi, double& property)
 {
     if (propertyNapi != nullptr) {
+        napi_valuetype valueType = napi_undefined;
+        napi_typeof(env, propertyNapi, &valueType);
+        if (valueType == napi_undefined) {
+            NapiThrow(env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
+            return;
+        } else if (valueType != napi_number) {
+            NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+            return;
+        }
         napi_get_value_double(env, propertyNapi, &property);
     }
 }
@@ -92,6 +120,10 @@ static void ParseAnimatorOption(napi_env env, napi_callback_info info, std::shar
     size_t argc = 1;
     napi_value argv;
     napi_get_cb_info(env, info, &argc, &argv, NULL, NULL);
+    if (argc != 1) {
+        NapiThrow(env, "The number of parameters must be equal to 1.", Framework::ERROR_CODE_PARAM_INVALID);
+        return;
+    }
     napi_value durationNapi = nullptr;
     napi_value easingNapi = nullptr;
     napi_value delayNapi = nullptr;
@@ -111,6 +143,9 @@ static void ParseAnimatorOption(napi_env env, napi_callback_info info, std::shar
         napi_get_named_property(env, argv, "iterations", &iterationsNapi);
         napi_get_named_property(env, argv, "begin", &beginNapi);
         napi_get_named_property(env, argv, "end", &endNapi);
+    } else {
+        NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+        return;
     }
 
     int32_t duration = 0;

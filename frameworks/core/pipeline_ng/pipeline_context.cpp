@@ -107,6 +107,12 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
     window_->RequestFrame();
 }
 
+double PipelineContext::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+    const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+{
+    return 0.0;
+}
+
 void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
@@ -409,11 +415,13 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     }
 
     // TODO: add adjust for textFieldManager when ime is show.
-
-    auto frontend = weakFrontend_.Upgrade();
-    if (frontend) {
-        frontend->OnSurfaceChanged(width, height);
-    }
+    taskExecutor_->PostTask([weakFrontend = weakFrontend_, width, height]() {
+        auto frontend = weakFrontend.Upgrade();
+        if (frontend) {
+            frontend->OnSurfaceChanged(width, height);
+        }
+    },
+    TaskExecutor::TaskType::JS);
 
 #ifdef ENABLE_ROSEN_BACKEND
     StartWindowSizeChangeAnimate(width, height, type);
@@ -514,8 +522,10 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
 {
     CHECK_RUN_ON(UI);
     float positionY = 0;
-    auto manager = PipelineBase::GetTextFieldManager();
+    auto manager = DynamicCast<TextFieldManager>(PipelineBase::GetTextFieldManager());
+    float height = 0.0f;
     if (manager) {
+        height = manager->GetHeight();
         positionY = static_cast<float>(manager->GetClickPosition().GetY());
     }
     auto rootSize = rootNode_->GetGeometryNode()->GetFrameSize();
@@ -527,6 +537,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
         SetRootRect(rootSize.Width(), rootSize.Height(), 0);
     } else if (positionY > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {
         SetRootRect(rootSize.Width(), rootSize.Height(), -offsetFix);
+    } else if (positionY + height > rootSize.Height() - keyboardHeight &&
+               positionY < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) {
+        SetRootRect(rootSize.Width(), rootSize.Height(), -height - offsetFix / 2.0f);
     }
 }
 
@@ -896,6 +909,9 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
     }
+    if (onFocus_ && onShow_) {
+        FlushFocus();
+    }
     FlushWindowFocusChangedCallback(isFocus);
 }
 
@@ -908,13 +924,17 @@ void PipelineContext::ShowContainerTitle(bool isShow)
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
     containerNode->GetPattern<ContainerModalPattern>()->ShowTitle(isShow);
+}
+
+void PipelineContext::SetContainerWindow(bool isShow)
+{
 #ifdef ENABLE_ROSEN_BACKEND
     if (!IsJsCard()) {
         auto rsWindow = static_cast<RosenWindow*>(GetWindow());
         if (rsWindow) {
             auto rsUIDirector = rsWindow->GetRsUIDirector();
             if (rsUIDirector) {
-                rsUIDirector->SetContainerWindow(isShow); // set container window show state to render service
+                rsUIDirector->SetContainerWindow(isShow, density_); // set container window show state to render service
             }
         }
     }

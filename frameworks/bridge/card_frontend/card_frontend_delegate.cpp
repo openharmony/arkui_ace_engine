@@ -18,6 +18,7 @@
 #include <string>
 
 #include "base/log/event_report.h"
+#include "base/utils/utils.h"
 #include "core/common/thread_checker.h"
 
 namespace OHOS::Ace::Framework {
@@ -32,10 +33,7 @@ CardFrontendDelegate::~CardFrontendDelegate()
 
 void CardFrontendDelegate::FireCardEvent(const EventMarker& eventMarker, const std::string& params)
 {
-    if (!page_) {
-        LOGE("FireCardEvent failed due to page is null");
-        return;
-    }
+    CHECK_NULL_VOID(page_);
     auto context = page_->GetPipelineContext().Upgrade();
     if (!context) {
         LOGE("FireCardEvent get pipeline context failed");

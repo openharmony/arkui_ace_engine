@@ -135,6 +135,9 @@ public:
     void PostponePageTransition() override;
     void LaunchPageTransition() override;
 
+    double MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+        const std::string& fontWeight, const std::string& fontFamily, double letterSpacing) override;
+
     bool CanPushPage();
 
     bool IsTransitionStop() const;
@@ -825,6 +828,8 @@ public:
     {
         parentPipeline_ = pipeline;
     }
+
+    void SetContainerWindow(bool isShow) override;
 
     void SetAppTitle(const std::string& title) override;
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;

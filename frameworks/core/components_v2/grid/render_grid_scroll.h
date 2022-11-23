@@ -105,7 +105,7 @@ public:
             return;
         }
         if (totalCount_ < totalCount) {
-            reachTail_ = true;
+            reachTail_ = false;
         }
         totalCount_ = totalCount;
         totalCountFlag_ = true;

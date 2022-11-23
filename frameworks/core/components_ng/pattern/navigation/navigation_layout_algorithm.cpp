@@ -34,6 +34,7 @@
 
 namespace OHOS::Ace::NG {
 
+constexpr Dimension WINDOW_WIDTH = 520.0_vp;
 constexpr Dimension DEFAULT_NAV_BAR_WIDTH = 200.0_vp;
 
 namespace {
@@ -186,6 +187,15 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     FitScrollFullWindow(size);
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
+
+    if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::AUTO) {
+        if (size.Width() >= static_cast<float>(WINDOW_WIDTH.ConvertToPx())) {
+            navigationLayoutProperty->UpdateNavigationMode(NavigationMode::SPLIT);
+        } else {
+            navigationLayoutProperty->UpdateNavigationMode(NavigationMode::STACK);
+        }
+    }
+
     auto navBarSize = size;
     auto contentSize = size;
     auto dividerSize = SizeF(0.0f, 0.0f);

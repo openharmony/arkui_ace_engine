@@ -20,6 +20,7 @@
 #include "adapter/ohos/entrance/pa_engine/engine/common/js_backend_engine_loader.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 
@@ -48,9 +49,7 @@ bool PaBackend::Initialize(BackendType type, const RefPtr<TaskExecutor>& taskExe
     taskExecutor->PostTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), delegate = delegate_] {
             auto jsBackendEngine = weakEngine.Upgrade();
-            if (!jsBackendEngine) {
-                return;
-            }
+            CHECK_NULL_VOID(jsBackendEngine);
             jsBackendEngine->Initialize(delegate);
         },
         TaskExecutor::TaskType::JS);
@@ -72,36 +71,28 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
     builder.loadCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                const std::string& url, const OHOS::AAFwk::Want& want) {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return;
-        }
+        CHECK_NULL_VOID(jsBackendEngine);
         jsBackendEngine->LoadJs(url, want);
     };
 
     builder.transferCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                    const RefPtr<JsMessageDispatcher>& dispatcher) {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return;
-        }
+        CHECK_NULL_VOID(jsBackendEngine);
         jsBackendEngine->SetJsMessageDispatcher(dispatcher);
     };
 
     builder.asyncEventCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                      const std::string& eventId, const std::string& param) {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return;
-        }
+        CHECK_NULL_VOID(jsBackendEngine);
         jsBackendEngine->FireAsyncEvent(eventId, param);
     };
 
     builder.syncEventCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                     const std::string& eventId, const std::string& param) {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return;
-        }
+        CHECK_NULL_VOID(jsBackendEngine);
         jsBackendEngine->FireSyncEvent(eventId, param);
     };
 
@@ -109,9 +100,7 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
                                  const OHOS::NativeRdb::ValuesBucket& value,
                                  const CallingInfo& callingInfo) -> int32_t {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return 0;
-        }
+        CHECK_NULL_RETURN(jsBackendEngine, 0);
         return jsBackendEngine->Insert(uri, value, callingInfo);
     };
 
@@ -119,9 +108,7 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
                                const std::string& arg, const AppExecFwk::PacMap& pacMap,
                                const CallingInfo& callingInfo) -> std::shared_ptr<AppExecFwk::PacMap> {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return nullptr;
-        }
+        CHECK_NULL_RETURN(jsBackendEngine, nullptr);
         return jsBackendEngine->Call(method, arg, pacMap, callingInfo);
     };
 
@@ -130,9 +117,7 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
             const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates,
             const CallingInfo& callingInfo) -> std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return nullptr;
-        }
+        CHECK_NULL_RETURN(jsBackendEngine, nullptr);
         return jsBackendEngine->Query(uri, columns, predicates, callingInfo);
     };
 
@@ -141,9 +126,7 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
                                  const OHOS::NativeRdb::DataAbilityPredicates& predicates,
                                  const CallingInfo& callingInfo) -> int32_t {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return 0;
-        }
+        CHECK_NULL_RETURN(jsBackendEngine, 0);
         return jsBackendEngine->Update(uri, value, predicates, callingInfo);
     };
 
@@ -151,9 +134,7 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
                                  const OHOS::NativeRdb::DataAbilityPredicates& predicates,
                                  const CallingInfo& callingInfo) -> int32_t {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return 0;
-        }
+        CHECK_NULL_RETURN(jsBackendEngine, 0);
         return jsBackendEngine->Delete(uri, predicates, callingInfo);
     };
 
@@ -161,18 +142,14 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
                                       const std::vector<OHOS::NativeRdb::ValuesBucket>& values,
                                       const CallingInfo& callingInfo) -> int32_t {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return 0;
-        }
+        CHECK_NULL_RETURN(jsBackendEngine, 0);
         return jsBackendEngine->BatchInsert(uri, values, callingInfo);
     };
 
     builder.getTypeCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                   const Uri& uri, const CallingInfo& callingInfo) -> std::string {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return std::string();
-        }
+        CHECK_NULL_RETURN(jsBackendEngine, std::string());
         return jsBackendEngine->GetType(uri, callingInfo);
     };
 
@@ -180,176 +157,136 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
                                        const std::string& mimeTypeFilter,
                                        const CallingInfo& callingInfo) -> std::vector<std::string> {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return std::vector<std::string>();
-        }
+        CHECK_NULL_RETURN(jsBackendEngine, std::vector<std::string>());
         return jsBackendEngine->GetFileTypes(uri, mimeTypeFilter, callingInfo);
     };
 
     builder.openFileCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                    const Uri& uri, const std::string& mode, const CallingInfo& callingInfo) -> int32_t {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return 0;
-        }
+        CHECK_NULL_RETURN(jsBackendEngine, 0);
         return jsBackendEngine->OpenFile(uri, mode, callingInfo);
     };
 
     builder.openRawFileCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](const Uri& uri,
                                       const std::string& mode, const CallingInfo& callingInfo) -> int32_t {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return 0;
-        }
+        CHECK_NULL_RETURN(jsBackendEngine, 0);
         return jsBackendEngine->OpenRawFile(uri, mode, callingInfo);
     };
 
     builder.normalizeUriCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                        const Uri& uri, const CallingInfo& callingInfo) -> Uri {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return Uri("");
-        }
+        CHECK_NULL_RETURN(jsBackendEngine, Uri(""));
         return jsBackendEngine->NormalizeUri(uri, callingInfo);
     };
 
     builder.denormalizeUriCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                          const Uri& uri, const CallingInfo& callingInfo) -> Uri {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return Uri("");
-        }
+        CHECK_NULL_RETURN(jsBackendEngine, Uri(""));
         return jsBackendEngine->DenormalizeUri(uri, callingInfo);
     };
 
     builder.destroyApplicationCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                              const std::string& packageName) {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return;
-        }
+        CHECK_NULL_VOID(jsBackendEngine);
         jsBackendEngine->DestroyApplication(packageName);
     };
 
     builder.connectCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                   const OHOS::AAFwk::Want& want) -> sptr<IRemoteObject> {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return nullptr;
-        }
+        CHECK_NULL_RETURN(jsBackendEngine, nullptr);
         return jsBackendEngine->OnConnectService(want);
     };
 
     builder.disConnectCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                      const OHOS::AAFwk::Want& want) {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return;
-        }
+        CHECK_NULL_VOID(jsBackendEngine);
         jsBackendEngine->OnDisconnectService(want);
     };
 
     builder.commandCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                   const OHOS::AAFwk::Want& want, int startId) {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return;
-        }
+        CHECK_NULL_VOID(jsBackendEngine);
         jsBackendEngine->OnCommand(want, startId);
     };
 
     builder.createFormCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                      const OHOS::AAFwk::Want& want) {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return;
-        }
+        CHECK_NULL_VOID(jsBackendEngine);
         jsBackendEngine->OnCreate(want);
     };
 
     builder.deleteFormCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](const int64_t formId) {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return;
-        }
+        CHECK_NULL_VOID(jsBackendEngine);
         jsBackendEngine->OnDelete(formId);
     };
 
     builder.triggerEventCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                        const int64_t formId, const std::string& message) {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return;
-        }
+        CHECK_NULL_VOID(jsBackendEngine);
         jsBackendEngine->OnTriggerEvent(formId, message);
     };
 
     builder.updateFormCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](const int64_t formId) {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return;
-        }
+        CHECK_NULL_VOID(jsBackendEngine);
         jsBackendEngine->OnUpdate(formId);
     };
 
     builder.castTemptoNormalCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](const int64_t formId) {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return;
-        }
+        CHECK_NULL_VOID(jsBackendEngine);
         jsBackendEngine->OnCastTemptoNormal(formId);
     };
 
     builder.visibilityChangedCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                             const std::map<int64_t, int32_t>& formEventsMap) {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return;
-        }
+        CHECK_NULL_VOID(jsBackendEngine);
         jsBackendEngine->OnVisibilityChanged(formEventsMap);
     };
 
     builder.acquireStateCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                        const OHOS::AAFwk::Want& want) -> int32_t {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return -1;
-        }
+        CHECK_NULL_RETURN(jsBackendEngine, -1);
         return jsBackendEngine->OnAcquireFormState(want);
     };
 
     builder.commandApplicationCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                              const std::string& intent, int startId) {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return;
-        }
+        CHECK_NULL_VOID(jsBackendEngine);
         jsBackendEngine->OnCommandApplication(intent, startId);
     };
 
     builder.commandCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                   const OHOS::AAFwk::Want& want, int startId) {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return;
-        }
+        CHECK_NULL_VOID(jsBackendEngine);
         jsBackendEngine->OnCommand(want, startId);
     };
 
     builder.shareFormCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                     int64_t formId, OHOS::AAFwk::WantParams& wantParams) {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return false;
-        }
+        CHECK_NULL_RETURN(jsBackendEngine, false);
         return jsBackendEngine->OnShare(formId, wantParams);
     };
 
     builder.dumpHeapSnapshotCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](bool isPrivate) {
         auto jsBackendEngine = weakEngine.Upgrade();
-        if (!jsBackendEngine) {
-            return;
-        }
+        CHECK_NULL_VOID(jsBackendEngine);
         jsBackendEngine->DumpHeapSnapshot(isPrivate);
     };
 
@@ -358,11 +295,8 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
 
     delegate_ = AceType::MakeRefPtr<BackendDelegateImpl>(builder);
 
-    if (jsBackendEngine_) {
-        delegate_->SetGroupJsBridge(jsBackendEngine_->GetGroupJsBridge());
-    } else {
-        LOGE("the js engine is nullptr");
-    }
+    CHECK_NULL_VOID(jsBackendEngine_);
+    delegate_->SetGroupJsBridge(jsBackendEngine_->GetGroupJsBridge());
 }
 
 void PaBackend::UpdateState(Backend::State state)

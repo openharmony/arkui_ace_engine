@@ -77,7 +77,7 @@ void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, co
         return;
     }
 
-    if (titleBarLayoutProperty->GetHideBackButton().value_or(true)) {
+    if (titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
         constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
         backButtonWrapper->Measure(constraint);
         return;
@@ -97,6 +97,7 @@ void TitleBarLayoutAlgorithm::MeasureSubtitle(LayoutWrapper* layoutWrapper, cons
     auto subtitleWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(subtitleWrapper);
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
+    constraint.maxSize.SetHeight(titleBarSize.Height());
 
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
@@ -123,7 +124,7 @@ void TitleBarLayoutAlgorithm::MeasureSubtitle(LayoutWrapper* layoutWrapper, cons
         return;
     }
 
-    if (titleBarLayoutProperty->GetHideBackButton().value_or(true)) {
+    if (titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
         auto occupiedWidth = maxPaddingStart_ + maxPaddingEnd_ + HORIZONTAL_MARGIN;
         constraint.maxSize.SetWidth(titleBarSize.Width() -
             static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
@@ -147,6 +148,12 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
     auto titleWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(titleWrapper);
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
+    constraint.maxSize.SetHeight(titleBarSize.Height());
+
+    if (titleBarLayoutProperty->HasTitleHeight()) {
+        constraint.maxSize.SetHeight(
+            static_cast<float>(titleBarLayoutProperty->GetTitleHeightValue().ConvertToPx()));
+    }
 
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
@@ -173,7 +180,7 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
         return;
     }
 
-    if (titleBarLayoutProperty->GetHideBackButton().value_or(true)) {
+    if (titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
         auto occupiedWidth = maxPaddingStart_ + maxPaddingEnd_ + HORIZONTAL_MARGIN;
         constraint.maxSize.SetWidth(titleBarSize.Width() -
             static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
@@ -244,7 +251,7 @@ void TitleBarLayoutAlgorithm::LayoutBackButton(LayoutWrapper* layoutWrapper, con
         return;
     }
 
-    if (titleBarLayoutProperty->GetHideBackButton().value_or(true)) {
+    if (titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
         OffsetF backButtonOffset = OffsetF(0.0f, 0.0f);
         geometryNode->SetMarginFrameOffset(backButtonOffset);
         backButtonWrapper->Layout();
@@ -275,6 +282,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
     } else {
         offsetY = (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - titleHeight) / 2;
     }
+
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
         TitleBarParentType::NAV_DESTINATION) {
@@ -332,7 +340,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         return;
     }
 
-    if (titleBarLayoutProperty->GetHideBackButton().value_or(true)) {
+    if (titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
         OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), offsetY);
         geometryNode->SetMarginFrameOffset(titleOffset);
         titleWrapper->Layout();
@@ -419,7 +427,7 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
         return;
     }
 
-    if (titleBarLayoutProperty->GetHideBackButton().value_or(true)) {
+    if (titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
         OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), offsetY);
         geometryNode->SetMarginFrameOffset(titleOffset);
         subtitleWrapper->Layout();

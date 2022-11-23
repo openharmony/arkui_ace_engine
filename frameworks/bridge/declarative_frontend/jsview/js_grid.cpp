@@ -87,6 +87,9 @@ void JSGrid::PopGrid(const JSCallbackInfo& /*info*/)
 
 void JSGrid::UseProxy(const JSCallbackInfo& args)
 {
+#ifdef NG_BUILD
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+#else
     auto parentGrid = ViewStackProcessor::GetInstance()->GetTopGrid();
     if (parentGrid == nullptr) {
         LOGE("no parent Grid");
@@ -98,6 +101,7 @@ void JSGrid::UseProxy(const JSCallbackInfo& args)
     LOGD("parent Grid uses proxied code path %{public}s.",
         (parentGrid ? !parentGrid->UseNonProxiedCodePath() ? "yes" : "false" : "no parent grid (error)"));
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(parentGrid ? !parentGrid->UseNonProxiedCodePath() : false)));
+#endif
 }
 
 void JSGrid::SetColumnsTemplate(const std::string& value)
@@ -117,8 +121,9 @@ void JSGrid::SetColumnsGap(const JSCallbackInfo& info)
         return;
     }
     Dimension colGap;
-    if (!ParseJsDimensionVp(info[0], colGap)) {
-        return;
+
+    if (!ParseJsDimensionVp(info[0], colGap) || colGap.Value() < 0) {
+        colGap.SetValue(0.0);
     }
 
     GridModel::GetInstance()->SetColumnsGap(colGap);
@@ -131,8 +136,9 @@ void JSGrid::SetRowsGap(const JSCallbackInfo& info)
         return;
     }
     Dimension rowGap;
-    if (!ParseJsDimensionVp(info[0], rowGap)) {
-        return;
+
+    if (!ParseJsDimensionVp(info[0], rowGap) || rowGap.Value() < 0) {
+        rowGap.SetValue(0.0);
     }
 
     GridModel::GetInstance()->SetRowsGap(rowGap);

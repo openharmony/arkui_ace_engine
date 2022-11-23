@@ -693,6 +693,18 @@ std::string InspectorComposedElement::GetRect()
         rect.SetRect(0, 0, 0, 0);
     }
 
+    if (accessibilityNode_) {
+        auto render = AceType::DynamicCast<RenderTransform>(GetInspectorNode(TransformElement::TypeId()));
+        if (render || accessibilityNode_->GetMatrix4Flag()) {
+            if (render) {
+                auto transformNow = render->GetTransformMatrix(render->GetTransitionPaintRect().GetOffset());
+                accessibilityNode_->SetTransformToChild(transformNow);
+            }
+            Matrix4 transform = accessibilityNode_->GetMatrix4();
+            rect = accessibilityNode_->GetRectWithTransform(rect, transform);
+        }
+    }
+
     strRec = std::to_string(rect.Left())
                  .append(",")
                  .append(std::to_string(rect.Top()))
@@ -828,9 +840,9 @@ std::string InspectorComposedElement::GetBackgroundImage() const
         return "NONE";
     }
     auto imageRepeat = image->GetImageRepeat();
-    if (imageRepeat == ImageRepeat::REPEATX) {
+    if (imageRepeat == ImageRepeat::REPEAT_X) {
         return image->GetSrc() + ", ImageRepeat.X";
-    } else if (imageRepeat == ImageRepeat::REPEATY) {
+    } else if (imageRepeat == ImageRepeat::REPEAT_Y) {
         return image->GetSrc() + ", ImageRepeat.Y";
     } else if (imageRepeat == ImageRepeat::REPEAT) {
         return image->GetSrc() + ", ImageRepeat.XY";

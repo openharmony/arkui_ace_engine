@@ -49,7 +49,7 @@ TextFieldModel* TextFieldModel::GetInstance()
 {
     if (!instance_) {
 #ifdef NG_BUILD
-        instance.reset(new NG::TextFieldModelNG());
+        instance_.reset(new NG::TextFieldModelNG());
 #else
         if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::TextFieldModelNG());

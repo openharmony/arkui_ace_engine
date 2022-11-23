@@ -682,4 +682,14 @@ void WebClientImpl::OnWindowExitByJS()
     CHECK_NULL_VOID(delegate);
     delegate->OnWindowExit();
 }
+
+void ReleaseSurfaceImpl::ReleaseSurface()
+{
+    ContainerScope scope(instanceId_);
+    // if (!surfaceDelegate_) {
+    //     return;
+    // }
+    // SURFACE_DELEGATE
+    // surfaceDelegate_->ReleaseSurface();
+}
 } // namespace OHOS::Ace

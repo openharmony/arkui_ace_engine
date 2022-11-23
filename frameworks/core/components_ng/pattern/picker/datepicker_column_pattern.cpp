@@ -36,7 +36,6 @@ namespace OHOS::Ace::NG {
 namespace {
 
 // TODO datepicker style modification
-constexpr float LAYOUT_WEIGHT = 30.0f;
 constexpr float PADDING_WEIGHT = 10.0f;
 const Dimension FONT_SIZE = Dimension(2.0);
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
@@ -86,7 +85,6 @@ void DatePickerColumnPattern::FlushCurrentOptions()
 
     auto dataPickerLayoutProperty = host->GetLayoutProperty<DataPickerLayoutProperty>();
     CHECK_NULL_VOID(dataPickerLayoutProperty);
-    dataPickerLayoutProperty->UpdateLayoutWeight(LAYOUT_WEIGHT);
     dataPickerLayoutProperty->UpdatePadding(PaddingProperty { CalcLength(PADDING_WEIGHT, DimensionUnit::PX) });
     dataPickerLayoutProperty->UpdateAlignSelf(FlexAlign::CENTER);
 

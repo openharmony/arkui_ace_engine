@@ -16,7 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_FILTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_FILTER_H
 
+#include <memory>
+
 #include "testing_color.h"
+#include "testing_mask_filter.h"
 #include "utils/scalar.h"
 
 namespace OHOS::Ace::Testing {
@@ -24,6 +27,8 @@ class TestingFilter {
 public:
     TestingFilter() = default;
     ~TestingFilter() = default;
+
+    void SetMaskFilter(std::shared_ptr<TestingMaskFilter> maskFilter) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_FILTER_H

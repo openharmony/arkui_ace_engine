@@ -23,7 +23,6 @@ check_file_args = [
 
 if (exec_script(check_file_script, check_file_args, "string") == "True") {
   vendor_configs = {
-    use_ext_surface = true
     import("//foundation/arkui/ace_engine_ext/build/config.gni")
   }
 }

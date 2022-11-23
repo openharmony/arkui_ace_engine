@@ -56,6 +56,8 @@ public:
     void ClearRect(const Offset& offset, const Rect& rect) override;
     void FillText(const Offset& offset, const std::string& text, double x, double y) override;
     void StrokeText(const Offset& offset, const std::string& text, double x, double y) override;
+    static double MeasureTextInner(const std::string& text, double fontSize, int32_t fontStyle,
+        const std::string& fontWeight, const std::string& fontFamily, double letterSpacing);
     double MeasureText(const std::string& text, const PaintState& state) override;
     double MeasureTextHeight(const std::string& text, const PaintState& state) override;
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state) override;

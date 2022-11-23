@@ -87,8 +87,11 @@ public:
     MOCK_METHOD3(SetRootRect, void(double width, double height, double offset));
     MOCK_METHOD0(FlushPipelineWithoutAnimation, void());
     MOCK_METHOD1(OnVirtualKeyboardHeightChange, void(float keyboardHeight));
+    MOCK_METHOD1(SetContainerWindow, void(bool isShow));
 
     static RefPtr<MockPipelineBase> pipeline_;
+    MOCK_METHOD6(MeasureText, double(const std::string& text, double fontSize, int32_t fontStyle,
+        const std::string& fontWeight, const std::string& fontFamily, double letterSpacing));
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_BASE_H

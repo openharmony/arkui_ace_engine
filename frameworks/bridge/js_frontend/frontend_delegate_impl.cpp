@@ -856,6 +856,14 @@ bool FrontendDelegateImpl::IsWebFeature()
     return manifestParser_->IsWebFeature();
 }
 
+double FrontendDelegateImpl::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+    const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+{
+    LOGD("FrontendDelegateImpl MeasureTxt.");
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
+    return pipelineContext->MeasureText(text, fontSize, fontStyle, fontWeight, fontFamily, letterSpacing);
+}
+
 void FrontendDelegateImpl::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
 {
     LOGD("FrontendDelegateImpl ShowToast.");

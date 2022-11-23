@@ -74,6 +74,50 @@ public:
         return ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     }
 
+    void ClearVisualState() override
+    {
+        ViewStackProcessor::GetInstance()->ClearVisualState();
+    }
+
+    void SetVisualState(VisualState state) override
+    {
+        ViewStackProcessor::GetInstance()->SetVisualState(state);
+    }
+
+    void StartGetAccessRecordingFor(int32_t elmtId) override
+    {
+        ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(elmtId);
+    }
+
+    int32_t GetElmtIdToAccountFor() override
+    {
+        return ViewStackProcessor::GetInstance()->GetElmtIdToAccountFor();
+    }
+
+    void SetElmtIdToAccountFor(int32_t elmtId) override
+    {
+        ViewStackProcessor::GetInstance()->SetElmtIdToAccountFor(elmtId);
+    }
+
+    void StopGetAccessRecording() override
+    {
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+
+    void ImplicitPopBeforeContinue() override
+    {
+        if ((ViewStackProcessor::GetInstance()->Size() > 1) &&
+            ViewStackProcessor::GetInstance()->ShouldPopImmediately()) {
+            LOGD("Implicit Pop before continue.");
+            ViewStackProcessor::GetInstance()->Pop();
+            LOGD("Implicit Pop done, top component is %{public}s",
+                AceType::TypeName(ViewStackProcessor::GetInstance()->GetMainComponent()));
+        } else {
+            LOGD("NO Implicit Pop before continue. top component is %{public}s",
+                AceType::TypeName(ViewStackProcessor::GetInstance()->GetMainComponent()));
+        }
+    }
+
 private:
     std::unique_ptr<ScopedViewStackProcessor> scopeStack_;
 };

@@ -315,7 +315,7 @@ void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
         }
     }
     if (layoutWrapperBuilder_) {
-        layoutWrapperBuilder_->SwapDirtyAndUpdateBuildCache();
+        layoutWrapperBuilder_->AdjustGridOffset();
     }
 }
 } // namespace OHOS::Ace::NG

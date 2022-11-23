@@ -31,11 +31,15 @@ std::unique_ptr<ForEachModel> ForEachModel::instance = nullptr;
 ForEachModel* ForEachModel::GetInstance()
 {
     if (!instance) {
+#ifdef NG_BUILD
+        instance.reset(new NG::ForEachModelNG());
+#else
         if (Container::IsCurrentUseNewPipeline()) {
             instance.reset(new NG::ForEachModelNG());
         } else {
             instance.reset(new Framework::ForEachModelImpl());
         }
+#endif
     }
     return instance.get();
 }

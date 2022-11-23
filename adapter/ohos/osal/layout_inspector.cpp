@@ -22,6 +22,7 @@
 #include "wm/window.h"
 
 #include "base/thread/background_task_executor.h"
+#include "base/utils/utils.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/inspector.h"
@@ -35,15 +36,10 @@ bool LayoutInspector::layoutInspectorStatus_ = false;
 void LayoutInspector::SupportInspector()
 {
     auto container = Container::Current();
-    if (!container) {
-        LOGE("container null");
-        return;
-    }
+    CHECK_NULL_VOID(container);
     if (!layoutInspectorStatus_) {
         SetlayoutInspectorStatus();
-        if (!layoutInspectorStatus_) {
-            return;
-        }
+        CHECK_NULL_VOID(layoutInspectorStatus_);
     }
     std::string treeJsonStr;
     GetInspectorTreeJsonStr(treeJsonStr);
@@ -51,15 +47,9 @@ void LayoutInspector::SupportInspector()
         return;
     }
     OHOS::sptr<OHOS::Rosen::Window> window = OHOS::Rosen::Window::GetTopWindowWithId(container->GetWindowId());
-    if (!window) {
-        LOGE("Window is null");
-        return;
-    }
+    CHECK_NULL_VOID(window);
     auto pixelMap = window->Snapshot();
-    if (pixelMap == nullptr) {
-        LOGE("Pixel is null");
-        return;
-    }
+    CHECK_NULL_VOID(pixelMap);
     auto data = (*pixelMap).GetPixels();
     auto height = (*pixelMap).GetHeight();
     auto stride = (*pixelMap).GetRowBytes();
@@ -87,10 +77,7 @@ void LayoutInspector::SupportInspector()
 void LayoutInspector::SetlayoutInspectorStatus()
 {
     auto container = Container::Current();
-    if (!container) {
-        LOGE("container is null");
-        return;
-    }
+    CHECK_NULL_VOID(container);
     if (container->IsUseStageModel()) {
         layoutInspectorStatus_ = OHOS::AbilityRuntime::ConnectServerManager::Get().GetlayoutInspectorStatus();
         return;
@@ -105,10 +92,7 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr)
         treeJsonStr = NG::Inspector::GetInspectorTree();
     } else {
         auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-        if (!pipelineContext) {
-            LOGE("pipelineContext is null");
-            return;
-        }
+        CHECK_NULL_VOID(pipelineContext);
         treeJsonStr = V2::Inspector::GetInspectorTree(pipelineContext);
     }
 }

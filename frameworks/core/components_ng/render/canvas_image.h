@@ -16,23 +16,21 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CANVAS_IMAGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CANVAS_IMAGE_H
 
+#include <memory>
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/noncopyable.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/drawing_forward.h"
 
 namespace OHOS::Ace::NG {
 
 struct ImagePaintConfig {
-    ImagePaintConfig(const RectF& srcRect, const RectF& dstRect) : srcRect_(srcRect), dstRect_(dstRect) {}
-    ImagePaintConfig() = default;
-    ~ImagePaintConfig() = default;
-
     RectF srcRect_;
     RectF dstRect_;
     ImageRenderMode renderMode_ = ImageRenderMode::ORIGINAL;
     ImageInterpolation imageInterpolation_ = ImageInterpolation::NONE;
-    ImageRepeat imageRepeat_ = ImageRepeat::NOREPEAT;
+    ImageRepeat imageRepeat_ = ImageRepeat::NO_REPEAT;
     ImageFit imageFit_ = ImageFit::COVER;
     std::shared_ptr<std::vector<float>> colorFilter_ = nullptr;
     bool needFlipCanvasHorizontally_ = false;
@@ -59,11 +57,21 @@ public:
         const RefPtr<PixelMap>& pixelMap, const RefPtr<RenderTaskHolder>& renderTaskHolder);
     virtual int32_t GetWidth() const = 0;
     virtual int32_t GetHeight() const = 0;
-    void SetImagePaintConfig(const ImagePaintConfig& imagePaintConfig)
+
+    void SetPaintConfig(const ImagePaintConfig& config)
     {
-        imagePaintConfig_ = std::make_unique<ImagePaintConfig>(imagePaintConfig);
+        paintConfig_ = std::make_unique<ImagePaintConfig>(config);
     }
-    std::unique_ptr<ImagePaintConfig> imagePaintConfig_;
+
+    const ImagePaintConfig& GetPaintConfig()
+    {
+        return *paintConfig_;
+    }
+
+private:
+    std::unique_ptr<ImagePaintConfig> paintConfig_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(CanvasImage);
 };
 } // namespace OHOS::Ace::NG
 

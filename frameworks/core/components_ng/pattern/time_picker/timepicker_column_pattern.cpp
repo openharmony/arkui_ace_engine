@@ -30,7 +30,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 // TODO timepicker style modification
-constexpr Dimension LAYOUT_WEIGHT = 30.0_vp;
 constexpr Dimension PADDING_WEIGHT = 10.0_vp;
 const Dimension FONT_SIZE = Dimension(2.0);
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
@@ -89,7 +88,6 @@ void TimePickerColumnPattern::FlushCurrentOptions()
     CHECK_NULL_VOID(parentNode);
     auto dataPickerLayoutProperty = host->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(dataPickerLayoutProperty);
-    dataPickerLayoutProperty->UpdateLayoutWeight(static_cast<float>(LAYOUT_WEIGHT.ConvertToPx()));
     dataPickerLayoutProperty->UpdatePadding(
         PaddingProperty { CalcLength(static_cast<float>(PADDING_WEIGHT.ConvertToPx()), DimensionUnit::PX) });
     dataPickerLayoutProperty->UpdateAlignSelf(FlexAlign::CENTER);

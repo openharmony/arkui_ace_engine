@@ -17,6 +17,7 @@
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
+#include "bridge/declarative_frontend/jsview/js_video.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -28,17 +29,36 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_counter.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_foreach.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_grid.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_grid_item.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_if_else.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_tab_content.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h"
 
 namespace OHOS::Ace::Framework {
@@ -125,6 +145,7 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 void JsBindViews(BindingTarget globalObj)
 {
     JSViewAbstract::JSBind();
+    JSViewStackProcessor::JSBind(globalObj);
     JSContainerBase::JSBind();
     JSView::JSBind(globalObj);
     JSText::JSBind(globalObj);
@@ -138,6 +159,23 @@ void JsBindViews(BindingTarget globalObj)
     JSLocalStorage::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
     JSEnvironment::JSBind(globalObj);
+    JSFlexImpl::JSBind(globalObj);
+    JSSpan::JSBind(globalObj);
+    JSTabs::JSBind(globalObj);
+    JSTabContent::JSBind(globalObj);
+    JSTabsController::JSBind(globalObj);
+    JSForEach::JSBind(globalObj);
+    JSIfElse::JSBind(globalObj);
+    JSDivider::JSBind(globalObj);
+    JSScroll::JSBind(globalObj);
+    JSNavigator::JSBind(globalObj);
+    JSToggle::JSBind(globalObj);
+    JSCounter::JSBind(globalObj);
+    JSVideo::JSBind(globalObj);
+    JSRating::JSBind(globalObj);
+    JSGrid::JSBind(globalObj);
+    JSGridItem::JSBind(globalObj);
+    JSSwiper::JSBind(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

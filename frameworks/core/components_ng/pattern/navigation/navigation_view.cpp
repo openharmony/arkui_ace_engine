@@ -52,7 +52,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-constexpr Dimension WINDOW_WIDTH = 520.0_vp;
 constexpr Dimension DEFAULT_NAV_BAR_WIDTH = 200.0_vp;
 
 RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
@@ -276,13 +275,7 @@ void NavigationView::Create()
 
     stack->Push(navigationGroupNode);
     auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
-    auto context = navigationGroupNode->GetContext();
-    CHECK_NULL_VOID(context);
-    if (context->GetCurrentRootWidth() >= static_cast<float>(WINDOW_WIDTH.ConvertToPx())) {
-        navigationLayoutProperty->UpdateNavigationMode(NavigationMode::SPLIT);
-    } else {
-        navigationLayoutProperty->UpdateNavigationMode(NavigationMode::STACK);
-    }
+    navigationLayoutProperty->UpdateNavigationMode(NavigationMode::AUTO);
     navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
 }
 
@@ -318,6 +311,8 @@ void NavigationView::SetTitle(const std::string& title, bool hasSubTitle)
         // update title content only without changing node
         titleProperty->UpdateContent(title);
         navBarNode->UpdateTitleNodeOperation(ChildNodeOperation::NONE);
+        navBarNode->MarkModifyDone();
+        navBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     } while (false);
     int32_t titleNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -357,6 +352,7 @@ void NavigationView::SetCustomTitle(const RefPtr<UINode>& customTitle)
             navBarNode->SetTitle(customTitle);
             navBarNode->UpdateTitleNodeOperation(ChildNodeOperation::REPLACE);
             navBarNode->MarkModifyDone();
+            navBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
         return;
     }
@@ -394,6 +390,8 @@ void NavigationView::SetSubtitle(const std::string& subtitle)
         }
         subtitleProperty->UpdateContent(subtitle);
         navBarNode->UpdateSubtitleNodeOperation(ChildNodeOperation::NONE);
+        navBarNode->MarkModifyDone();
+        navBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     } while (false);
     int32_t subtitleNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -548,18 +546,7 @@ void NavigationView::SetNavBarWidth(const Dimension& value)
 
 void NavigationView::SetNavigationMode(NavigationMode mode)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto navigationMode = static_cast<NG::NavigationMode>(mode);
-    if (navigationMode == NavigationMode::AUTO) {
-        if (context->GetCurrentRootWidth() >= static_cast<float>(WINDOW_WIDTH.ConvertToPx())) {
-            navigationMode = NavigationMode::SPLIT;
-        } else {
-            navigationMode = NavigationMode::STACK;
-        }
-    }
-    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavigationMode, navigationMode);
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavigationMode, static_cast<NG::NavigationMode>(mode));
 }
 
 void NavigationView::SetNavBarPosition(NG::NavBarPosition mode)
@@ -574,7 +561,16 @@ void NavigationView::SetHideNavBar(bool hideNavBar)
 
 void NavigationView::SetTitleHeight(const Dimension& height)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, TitleBarHeight, height);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    titleBarLayoutProperty->UpdateTitleHeight(height);
 }
 
 void NavigationView::SetHideTitleBar(bool hideTitleBar)
