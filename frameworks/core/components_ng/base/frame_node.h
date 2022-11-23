@@ -107,6 +107,9 @@ public:
 
     void SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty);
 
+    void SetOnAreaChangeCallback(OnAreaChangedFunc&& callback);
+    void TriggerOnAreaChangeCallback();
+
     void TriggerVisibleAreaChangeCallback(std::list<VisibleCallbackInfo>& callbackInfoList);
 
     const RefPtr<GeometryNode>& GetGeometryNode() const
@@ -333,6 +336,9 @@ private:
     RefPtr<RenderContext> renderContext_ = RenderContext::Create();
     RefPtr<EventHub> eventHub_;
     RefPtr<Pattern> pattern_;
+
+    std::unique_ptr<RectF> lastFrameRect_;
+    std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
 
     bool needSyncRenderTree_ = false;
 

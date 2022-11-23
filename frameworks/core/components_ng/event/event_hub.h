@@ -28,6 +28,8 @@
 namespace OHOS::Ace::NG {
 
 class FrameNode;
+using OnAreaChangedFunc =
+    std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>;
 
 // The event hub is mainly used to handle common collections of events, such as gesture events, mouse events, etc.
 class EventHub : public virtual AceType {
@@ -111,8 +113,6 @@ public:
         }
     }
 
-    using OnAreaChangedFunc =
-        std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>;
     void SetOnAreaChanged(OnAreaChangedFunc&& onAreaChanged)
     {
         onAreaChanged_ = std::move(onAreaChanged);
