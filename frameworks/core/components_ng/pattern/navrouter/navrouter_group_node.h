@@ -59,11 +59,13 @@ private:
     void SetDestinationChangeEvent(const RefPtr<UINode>& parent);
     void InitNavigationContent(const RefPtr<UINode>& parent);
     void SetBackButtonEvent(const RefPtr<UINode>& parent);
-    void SetOnStateChangeFalse(const RefPtr<UINode>& preNavDestination, const RefPtr<UINode>& navigation);
+    void SetOnStateChangeFalse(
+        const RefPtr<UINode>& preNavDestination, const RefPtr<UINode>& navigation, bool isBackButton = false);
     void BackToNavBar(const RefPtr<UINode>& parent);
     void BackToPreNavDestination(const RefPtr<UINode>& preNavDestination, const RefPtr<UINode>& navigation);
     void AddBackButtonIconToNavDestination(const RefPtr<UINode>& parent);
     bool CleanNodeInNavigation(const RefPtr<UINode>& parent);
+    void SetBackButtonVisible(const RefPtr<UINode>& navDestination);
 
     RefPtr<UINode> navDestinationNode_;
 };

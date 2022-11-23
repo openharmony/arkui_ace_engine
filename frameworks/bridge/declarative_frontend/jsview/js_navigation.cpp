@@ -238,7 +238,7 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
             }
         }
 
-        if (Container::IsCurrentUseNewPipeline()) {
+        if (!Container::IsCurrentUseNewPipeline()) {
             return;
         }
         JSRef<JSVal> height = jsObj->GetProperty("height");
