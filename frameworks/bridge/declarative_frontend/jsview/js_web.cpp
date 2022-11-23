@@ -1073,7 +1073,7 @@ public:
         JSClass<JSContextMenuParam>::CustomMethod("x", &JSContextMenuParam::GetXCoord);
         JSClass<JSContextMenuParam>::CustomMethod("y", &JSContextMenuParam::GetYCoord);
         JSClass<JSContextMenuParam>::CustomMethod("getLinkUrl", &JSContextMenuParam::GetLinkUrl);
-        JSClass<JSContextMenuParam>::CustomMethod("getUnfilterendLinkUrl", &JSContextMenuParam::GetUnfilteredLinkUrl);
+        JSClass<JSContextMenuParam>::CustomMethod("getUnfilteredLinkUrl", &JSContextMenuParam::GetUnfilteredLinkUrl);
         JSClass<JSContextMenuParam>::CustomMethod("getSourceUrl", &JSContextMenuParam::GetSourceUrl);
         JSClass<JSContextMenuParam>::CustomMethod("existsImageContents", &JSContextMenuParam::HasImageContents);
         JSClass<JSContextMenuParam>::Bind(globalObj, &JSContextMenuParam::Constructor, &JSContextMenuParam::Destructor);
