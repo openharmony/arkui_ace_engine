@@ -180,7 +180,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     if (hasAninmation) {
         RequestFrame();
     }
-    window_->SetDrawTextAsBitmap(false);
     FlushMessages();
     if (onShow_ && onFocus_) {
         FlushFocus();
@@ -464,7 +463,19 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
                 CHECK_NULL_VOID(pipeline);
                 pipeline->SetRootRect(width, height, 0.0);
                 pipeline->FlushUITasks();
+            }, [weak]() {
+                auto pipeline = weak.Upgrade();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->rotationAnimationCount_--;
+                if (pipeline->rotationAnimationCount_ < 0) {
+                    LOGE("PipelineContext::Root node ROTATION animation callback"
+                        "rotationAnimationCount Invalid %{public}d", pipeline->rotationAnimationCount_);
+                }
+                if (pipeline->rotationAnimationCount_ == 0) {
+                    pipeline->window_->SetDrawTextAsBitmap(false);
+                }
             });
+            rotationAnimationCount_++;
             window_->SetDrawTextAsBitmap(true);
             break;
         }

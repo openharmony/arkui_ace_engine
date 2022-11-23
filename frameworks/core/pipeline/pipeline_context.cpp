@@ -684,9 +684,6 @@ void PipelineContext::FlushRender()
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushRender();
     }
-#ifdef ENABLE_ROSEN_BACKEND
-    Rosen::RSSystemProperties::SetDrawTextAsBitmap(false);
-#endif
 }
 
 void PipelineContext::FlushRenderFinish()
@@ -2119,6 +2116,22 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
             Animate(option, curve, [width, height, this]() {
                 SetRootSizeWithWidthHeight(width, height);
                 FlushLayout();
+            }, [weak = AceType::WeakClaim(this)]() {
+                auto pipeline = weak.Upgrade();
+                if (pipeline == nullptr) {
+                    return;
+                }
+                pipeline->rotationAnimationCount_--;
+                if (pipeline->rotationAnimationCount_ < 0) {
+                    LOGE("PipelineContext::Root node ROTATION animation callback"
+                        "rotationAnimationCount Invalid %{public}d", pipeline->rotationAnimationCount_);
+                }
+                if (pipeline->rotationAnimationCount_ == 0) {
+#ifdef ENABLE_ROSEN_BACKEND
+                    // to improve performance, duration rotation animation, draw text as bitmap
+                    Rosen::RSSystemProperties::SetDrawTextAsBitmap(false);
+#endif
+                }
             });
 #ifdef ENABLE_ROSEN_BACKEND
             // to improve performance, duration rotation animation, draw text as bitmap
