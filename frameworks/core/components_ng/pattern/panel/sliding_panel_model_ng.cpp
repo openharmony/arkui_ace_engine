@@ -173,9 +173,13 @@ void SlidingPanelModelNG::Pop()
     auto hasDragBar = layoutProperty->GetHasDragBar().value_or(true);
     auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     CHECK_NULL_VOID(columnNode);
-    auto dragBarNode = columnNode->GetChildren().front();
-    CHECK_NULL_VOID(dragBarNode);
-    auto isFirstChildDragBar = dragBarNode->GetTag() == V2::DRAG_BAR_ETS_TAG;
+
+    auto child = columnNode->GetChildren();
+    bool isFirstChildDragBar = false;
+    if (!child.empty()) {
+        auto firstNode = columnNode->GetChildren().front();
+        isFirstChildDragBar = firstNode->GetTag() == V2::DRAG_BAR_ETS_TAG;
+    }
     if (hasDragBar) {
         if (!isFirstChildDragBar) {
             auto dragBarNode = FrameNode::GetOrCreateFrameNode(V2::DRAG_BAR_ETS_TAG,

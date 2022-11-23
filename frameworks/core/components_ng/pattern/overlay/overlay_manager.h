@@ -85,6 +85,12 @@ public:
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);
 
+    /**  pop overlays (if any) on back press
+    *
+    *    @return    true if popup was removed, false if no overlay exists
+    */
+    bool RemoveOverlay();
+
 private:
     void PopToast();
 

@@ -829,6 +829,8 @@ public:
         parentPipeline_ = pipeline;
     }
 
+    void SetContainerWindow(bool isShow) override;
+
     void SetAppTitle(const std::string& title) override;
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
     void FlushMessages() override;
@@ -1044,6 +1046,8 @@ private:
 
     std::vector<RectCallback> rectCallbackList_;
     std::list<TouchEvent> touchEvents_;
+
+    int32_t rotationAnimationCount_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

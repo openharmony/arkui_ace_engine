@@ -28,7 +28,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
 namespace {
 const float SHADOW_RADIUS_NEGATIVE = -5.0f;
 const float SHADOW_RADIUS_ZERO = 0.0f;

@@ -158,6 +158,20 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     contentWrapper->Layout();
 }
 
+void FitScrollFullWindow(SizeF& frameSize)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (!pipeline) {
+        return;
+    }
+    if (frameSize.Width() == Infinity<float>()) {
+        frameSize.SetWidth(pipeline->GetRootWidth());
+    }
+    if (frameSize.Height() == Infinity<float>()) {
+        frameSize.SetHeight(pipeline->GetRootHeight());
+    }
+}
+
 } // namespace
 
 void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -166,23 +180,22 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(hostNode);
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(navigationLayoutProperty);
+    const auto& constraint = navigationLayoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(constraint);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    auto size = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
+    FitScrollFullWindow(size);
+    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, size);
 
     if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::AUTO) {
-        auto context = hostNode->GetContext();
-        CHECK_NULL_VOID(context);
-        if (context->GetCurrentRootWidth() >= static_cast<float>(WINDOW_WIDTH.ConvertToPx())) {
+        if (size.Width() >= static_cast<float>(WINDOW_WIDTH.ConvertToPx())) {
             navigationLayoutProperty->UpdateNavigationMode(NavigationMode::SPLIT);
         } else {
             navigationLayoutProperty->UpdateNavigationMode(NavigationMode::STACK);
         }
     }
 
-    const auto& constraint = navigationLayoutProperty->GetLayoutConstraint();
-    CHECK_NULL_VOID(constraint);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    auto size = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    MinusPaddingToSize(padding, size);
     auto navBarSize = size;
     auto contentSize = size;
     auto dividerSize = SizeF(0.0f, 0.0f);

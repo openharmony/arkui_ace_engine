@@ -180,7 +180,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     if (hasAninmation) {
         RequestFrame();
     }
-    window_->SetDrawTextAsBitmap(false);
     FlushMessages();
     if (onShow_ && onFocus_) {
         FlushFocus();
@@ -408,11 +407,13 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     }
 
     // TODO: add adjust for textFieldManager when ime is show.
-
-    auto frontend = weakFrontend_.Upgrade();
-    if (frontend) {
-        frontend->OnSurfaceChanged(width, height);
-    }
+    taskExecutor_->PostTask([weakFrontend = weakFrontend_, width, height]() {
+        auto frontend = weakFrontend.Upgrade();
+        if (frontend) {
+            frontend->OnSurfaceChanged(width, height);
+        }
+    },
+    TaskExecutor::TaskType::JS);
 
 #ifdef ENABLE_ROSEN_BACKEND
     StartWindowSizeChangeAnimate(width, height, type);
@@ -462,7 +463,19 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
                 CHECK_NULL_VOID(pipeline);
                 pipeline->SetRootRect(width, height, 0.0);
                 pipeline->FlushUITasks();
+            }, [weak]() {
+                auto pipeline = weak.Upgrade();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->rotationAnimationCount_--;
+                if (pipeline->rotationAnimationCount_ < 0) {
+                    LOGE("PipelineContext::Root node ROTATION animation callback"
+                        "rotationAnimationCount Invalid %{public}d", pipeline->rotationAnimationCount_);
+                }
+                if (pipeline->rotationAnimationCount_ == 0) {
+                    pipeline->window_->SetDrawTextAsBitmap(false);
+                }
             });
+            rotationAnimationCount_++;
             window_->SetDrawTextAsBitmap(true);
             break;
         }
@@ -512,8 +525,10 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
 {
     CHECK_RUN_ON(UI);
     float positionY = 0;
-    auto manager = PipelineBase::GetTextFieldManager();
+    auto manager = DynamicCast<TextFieldManager>(PipelineBase::GetTextFieldManager());
+    float height = 0.0f;
     if (manager) {
+        height = manager->GetHeight();
         positionY = static_cast<float>(manager->GetClickPosition().GetY());
     }
     auto rootSize = rootNode_->GetGeometryNode()->GetFrameSize();
@@ -525,6 +540,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
         SetRootRect(rootSize.Width(), rootSize.Height(), 0);
     } else if (positionY > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {
         SetRootRect(rootSize.Width(), rootSize.Height(), -offsetFix);
+    } else if (positionY + height > rootSize.Height() - keyboardHeight &&
+               positionY < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) {
+        SetRootRect(rootSize.Width(), rootSize.Height(), -height - offsetFix / 2.0f);
     }
 }
 
@@ -536,6 +554,12 @@ bool PipelineContext::OnBackPressed()
     if (!frontend) {
         // return back.
         return false;
+    }
+
+    // if has popup, back press would hide popup and not trigger page back
+    if (overlayManager_->RemoveOverlay()) {
+        LOGI("popup hidden: back press accepted");
+        return true;
     }
 
     auto result = false;
@@ -877,6 +901,9 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
     }
+    if (onFocus_ && onShow_) {
+        FlushFocus();
+    }
     FlushWindowFocusChangedCallback(isFocus);
 }
 
@@ -889,13 +916,17 @@ void PipelineContext::ShowContainerTitle(bool isShow)
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
     containerNode->GetPattern<ContainerModalPattern>()->ShowTitle(isShow);
+}
+
+void PipelineContext::SetContainerWindow(bool isShow)
+{
 #ifdef ENABLE_ROSEN_BACKEND
     if (!IsJsCard()) {
         auto rsWindow = static_cast<RosenWindow*>(GetWindow());
         if (rsWindow) {
             auto rsUIDirector = rsWindow->GetRsUIDirector();
             if (rsUIDirector) {
-                rsUIDirector->SetContainerWindow(isShow); // set container window show state to render service
+                rsUIDirector->SetContainerWindow(isShow, density_); // set container window show state to render service
             }
         }
     }

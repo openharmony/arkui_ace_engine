@@ -29,7 +29,7 @@ struct ImageSizeStyle {
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
         json->Put("sourceSize", propSourceSize.value_or(SizeF()).ToString().c_str());
-        json->Put("fitOriginalSize", propFitOriginalSize.value_or(true) ? "true" : "false");
+        json->Put("fitOriginalSize", propFitOriginalSize.value_or(false) ? "true" : "false");
         json->Put("autoResize", propAutoResize.value_or(true) ? "true" : "false");
     }
 };

@@ -73,7 +73,7 @@ void ImageModelNG::SetMatchTextDirection(bool value)
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, MatchTextDirection, value);
 }
 
-void ImageModelNG::SetFitMaxSize(bool value)
+void ImageModelNG::SetFitOriginSize(bool value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, FitOriginalSize, value);
 }

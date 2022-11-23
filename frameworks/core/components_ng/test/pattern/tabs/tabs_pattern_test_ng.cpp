@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
@@ -410,6 +411,51 @@ HWTEST_F(TabsPatternTestNg, TabsTest008, TestSize.Level1)
     auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
     EXPECT_FALSE(tabBarLayoutProperty == nullptr);
     EXPECT_EQ(tabBarLayoutProperty->GetIndicator().value_or(0), 0);
+}
+
+/**
+ * @tc.name: TabsTest009
+ * @tc.desc: Test gestureHub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsPatternTestNg, TabsTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of tabs.
+     */
+    TabsModelNG instance;
+    instance.Create(BarPosition::START, 1, nullptr, nullptr);
+
+    /**
+     * @tc.steps: step2. create frameNode to get layout properties.
+     * @tc.expected: step2. related function is called.
+     */
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    /**
+     * @tc.steps: step3. get the properties of all settings.
+     * @tc.expected: step3. check whether the properties is correct.
+     */
+    EXPECT_FALSE(tabsFrameNode == nullptr);
+    EXPECT_EQ(tabsFrameNode->GetTag(), V2::TABS_ETS_TAG);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildren().back());
+    EXPECT_FALSE(swiperNode == nullptr);
+    EXPECT_EQ(swiperNode->GetTag(), V2::SWIPER_ETS_TAG);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    EXPECT_FALSE(swiperLayoutProperty == nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildren().front());
+    EXPECT_FALSE(tabBarNode == nullptr);
+    EXPECT_EQ(tabBarNode->GetTag(), V2::TAB_BAR_ETS_TAG);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    EXPECT_FALSE(tabBarPattern == nullptr);
+    auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
+    EXPECT_FALSE(tabBarLayoutProperty == nullptr);
+    EXPECT_EQ(tabBarLayoutProperty->GetIndicator().value_or(0), 0);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    EXPECT_FALSE(swiperPattern == nullptr);
+    auto hub = tabBarPattern->GetEventHub<EventHub>();
+    EXPECT_FALSE(hub == nullptr);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    EXPECT_FALSE(gestureHub == nullptr);
 }
 
 } // namespace OHOS::Ace::NG

@@ -119,7 +119,7 @@ HWTEST_F(ImageModelNgTest, ImageCreator003, TestSize.Level1)
     image.SetSyncMode(SYNCMODE_DEFAULT);
     image.SetCopyOption(COPYOPTIONS_DEFAULT);
     image.SetAutoResize(AUTORESIZE_DEFAULT);
-    image.SetFitMaxSize(FIT_ORIGINAL_SIZE_DEFAULT);
+    image.SetFitOriginSize(FIT_ORIGINAL_SIZE_DEFAULT);
     image.SetImageSourceSize({ Dimension(IMAGE_SOURCESIZE_WIDTH), Dimension(IMAGE_SOURCESIZE_HEIGHT) });
     image.SetImageRenderMode(IMAGE_NO_RENDERMODE);
     image.SetImageInterpolation(IMAGE_NO_INTERPOLATION);

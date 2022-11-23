@@ -440,11 +440,6 @@ public:
 
     std::optional<std::string> GetInspectorKey() const;
 
-    void SetScopeFocusAlgorithm(const ScopeFocusAlgorithm& focusAlgorithm)
-    {
-        focusAlgorithm_ = focusAlgorithm;
-    }
-
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);
@@ -468,6 +463,8 @@ protected:
 
 private:
     bool CalculatePosition();
+
+    void SetScopeFocusAlgorithm();
 
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;

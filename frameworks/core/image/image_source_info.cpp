@@ -128,8 +128,7 @@ ImageSourceInfo::ImageSourceInfo(const std::string& imageSrc, Dimension width, D
     if (count > 1) {
         LOGW("multi image source set, only one will be load.");
     }
-    auto name = src_ + AceApplicationInfo::GetInstance().GetAbilityName();
-    cacheKey_ = std::to_string(std::hash<std::string> {}(name)) + std::to_string(static_cast<int32_t>(resourceId_));
+    GenerateCacheKey();
 }
 
 SrcType ImageSourceInfo::ResolveSrcType() const
@@ -144,6 +143,12 @@ SrcType ImageSourceInfo::ResolveSrcType() const
         return SrcType::RESOURCE_ID;
     }
     return SrcType::UNSUPPORTED;
+}
+
+void ImageSourceInfo::GenerateCacheKey()
+{
+    auto name = src_ + AceApplicationInfo::GetInstance().GetAbilityName();
+    cacheKey_ = std::to_string(std::hash<std::string> {}(name)) + std::to_string(static_cast<int32_t>(resourceId_));
 }
 
 void ImageSourceInfo::SetFillColor(const Color& color)
@@ -175,6 +180,7 @@ void ImageSourceInfo::SetSrc(const std::string& src, std::optional<Color> fillCo
     isSvg_ = IsSVGSource(src_, resourceId_);
     fillColor_ = fillColor;
     pixmap_ = nullptr;
+    GenerateCacheKey();
 }
 
 const std::string& ImageSourceInfo::GetSrc() const
@@ -190,6 +196,7 @@ void ImageSourceInfo::SetResourceId(InternalResource::ResourceId id, std::option
     isSvg_ = IsSVGSource(src_, resourceId_);
     fillColor_ = fillColor;
     pixmap_ = nullptr;
+    GenerateCacheKey();
 }
 
 InternalResource::ResourceId ImageSourceInfo::GetResourceId() const

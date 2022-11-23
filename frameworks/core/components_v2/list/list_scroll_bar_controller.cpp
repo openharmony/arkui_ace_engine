@@ -14,6 +14,7 @@
  */
 
 #include "core/components_v2/list/list_scroll_bar_controller.h"
+
 #include "core/components_v2/list/render_list.h"
 
 namespace OHOS::Ace::V2 {
@@ -49,7 +50,7 @@ bool ListScrollBarController::UpdateScrollPosition(const double offset, int32_t 
     double activeHeight = height * height / estimateHeight;
     if (!NearEqual(height, activeHeight)) {
         double value = offset * estimateHeight / height;
-        ret = callback_(value, source);
+        ret = source == SCROLL_FROM_AXIS ? callback_(offset, source) : callback_(value, source);
     }
     return ret;
 }

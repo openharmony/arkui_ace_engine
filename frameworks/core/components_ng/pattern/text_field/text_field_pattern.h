@@ -343,7 +343,7 @@ private:
     void StopTwinkling();
 
     void SetCaretOffsetXForEmptyText();
-    void UpdateTextFieldManager(const Offset& offset);
+    void UpdateTextFieldManager(const Offset& offset, float height);
     void OnTextInputActionUpdate(TextInputAction value);
 
     std::u16string GetTextForDisplay() const;
@@ -373,6 +373,8 @@ private:
     void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
     bool CursorInContentRegion();
     bool OffsetInContentRegion(const Offset& offset);
+    void ProcessPadding();
+
     RectF frameRect_;
     RectF contentRect_;
     RectF textRect_;

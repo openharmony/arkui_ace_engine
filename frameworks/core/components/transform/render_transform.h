@@ -148,6 +148,15 @@ public:
         }
     }
 
+    Matrix4 GetTransformMatrix(const Offset& offset)
+    {
+        Matrix4 transform = GetTransformByOffset(UpdateWithEffectMatrix(transform_), origin_);
+        if (!offset.IsZero()) {
+            transform = GetTransformByOffset(transform, offset);
+        }
+        return transform;
+    }
+
     // It is only used by rosenrendertransform to force conversion in clickspringeffect (avoid checking).
     virtual void SetPendingUpdateTransformLayer() {}
 
