@@ -15,6 +15,11 @@
 
 #include "core/pipeline_ng/pipeline_context.h"
 
+#include "base/memory/ace_type.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/pattern/navigation/title_bar_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/event/touch_event.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -570,6 +575,38 @@ bool PipelineContext::OnBackPressed()
                 result = false;
                 return;
             }
+            auto context = weakPipelineContext.Upgrade();
+            if (!context) {
+                LOGW("pipelineContext is nullptr");
+                result = false;
+                return;
+            }
+            if (context->GetNavDestinationBackButtonNode()) {
+                auto navDestinationNode =
+                    AceType::DynamicCast<NavDestinationGroupNode>(context->GetNavDestinationBackButtonNode());
+                if (navDestinationNode->GetNavDestinationBackButtonEvent()) {
+                    GestureEvent gestureEvent;
+                    navDestinationNode->GetNavDestinationBackButtonEvent()(gestureEvent);
+                    result = true;
+                }
+            }
+        },
+        TaskExecutor::TaskType::UI);
+    
+    if (result) {
+        // user accept
+        LOGI("CallRouterBackToPopPage(): frontend accept");
+        return true;
+    }
+
+    taskExecutor_->PostSyncTask(
+        [weakFrontend = weakFrontend_, weakPipelineContext = WeakClaim(this), &result]() {
+            auto frontend = weakFrontend.Upgrade();
+            if (!frontend) {
+                LOGW("frontend is nullptr");
+                result = false;
+                return;
+            }
             result = frontend->OnBackPressed();
         },
         TaskExecutor::TaskType::JS);
@@ -581,6 +618,31 @@ bool PipelineContext::OnBackPressed()
     }
     LOGI("CallRouterBackToPopPage(): return platform consumed");
     return false;
+}
+
+RefPtr<FrameNode> PipelineContext::GetNavDestinationBackButtonNode()
+{
+    auto lastPage = stageManager_->GetLastPage();
+    CHECK_NULL_RETURN(lastPage, nullptr);
+    auto navigationNode = lastPage->FindChildNodeOfClass<NavigationGroupNode>();
+    CHECK_NULL_RETURN(navigationNode, nullptr);
+    auto navigationContentNode = navigationNode->GetContentNode();
+    CHECK_NULL_RETURN(navigationContentNode, nullptr);
+    auto navDestinationNode = navigationContentNode->FindChildNodeOfClass<NavDestinationGroupNode>();
+    CHECK_NULL_RETURN(navDestinationNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    CHECK_NULL_RETURN(titleBarNode, nullptr);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    CHECK_NULL_RETURN(backButtonNode, nullptr);
+    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+    if (!backButtonLayoutProperty->HasVisibility()) {
+        return nullptr;
+    }
+
+    if (backButtonLayoutProperty->GetVisibilityValue() != VisibleType::VISIBLE) {
+        return nullptr;
+    }
+    return navDestinationNode;
 }
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)

@@ -168,7 +168,9 @@ void NavRouterGroupNode::SetBackButtonEvent(const RefPtr<UINode>& parent)
     auto backButtonEventHub = backButtonNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(backButtonEventHub);
     auto onBackButtonEvent = [navDestination = navDestination,
-        navigation = navigationNode, navRouter = this](GestureEvent& /*info*/) {
+        navigation = navigationNode, weak = WeakClaim(this)](GestureEvent& /*info*/) {
+        auto navRouter = weak.Upgrade();
+        CHECK_NULL_VOID(navRouter);
         auto layoutProperty = navigation->GetLayoutProperty<NavigationLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         if (layoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {
@@ -195,6 +197,7 @@ void NavRouterGroupNode::SetBackButtonEvent(const RefPtr<UINode>& parent)
         }
         navigation->MarkModifyDone();
     };
+    navDestination->SetNavDestinationBackButtonEvent(onBackButtonEvent);
     auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(onBackButtonEvent));
     if (backButtonEventHub->GetGestureEventHub()) {
         return;
