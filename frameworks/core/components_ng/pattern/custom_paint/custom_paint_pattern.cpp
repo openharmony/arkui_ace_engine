@@ -712,6 +712,11 @@ std::string CustomPaintPattern::ToDataURL(const std::string& args)
     return paintMethod_->ToDataURL(args);
 }
 
+std::string CustomPaintPattern::GetJsonData(const std::string& path)
+{
+    return paintMethod_->GetJsonData(path);
+}
+
 double CustomPaintPattern::GetWidth()
 {
     return canvasSize_->Width();
