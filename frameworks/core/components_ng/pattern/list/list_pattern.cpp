@@ -29,10 +29,6 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
-} // namespace
-
 void ListPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -163,9 +159,10 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
         }
     }
 
-    bool scrollUpToCrossLine = (GreatNotEqual(lastOffset_, 0.0) || isJump) && LessOrEqual(currentOffset_, 0.0);
-    bool scrollDownToCrossLine = (LessNotEqual(lastOffset_, 0.0) || isJump) && GreatOrEqual(currentOffset_, 0.0);
-    if ((startIndex_ == 0) && (scrollUpToCrossLine || scrollDownToCrossLine)) {
+    bool scrollUpToStart = GreatNotEqual(lastOffset_, 0.0) && LessOrEqual(currentOffset_, 0.0);
+    bool scrollDownToStart = LessNotEqual(lastOffset_, 0.0) && GreatOrEqual(currentOffset_, 0.0);
+    bool jumpToStart = isJump && NearZero(currentOffset_);
+    if ((startIndex_ == 0) && (scrollUpToStart || scrollDownToStart || jumpToStart)) {
         auto onReachStart = listEventHub->GetOnReachStart();
         if (onReachStart) {
             onReachStart();
@@ -174,11 +171,11 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
     auto onReachEnd = listEventHub->GetOnReachEnd();
     if (onReachEnd) {
         float lastEndPos = endMainPos_ - (currentOffset_ - lastOffset_);
-        bool scrollUpToEnd = (GreatNotEqual(lastEndPos, GetMainContentSize()) || isJump) &&
-            LessOrEqual(endMainPos_, GetMainContentSize());
-        bool scrollDownToEnd = (LessNotEqual(lastEndPos, GetMainContentSize()) || isJump) &&
-            GreatOrEqual(endMainPos_, GetMainContentSize());
-        if ((endIndex_ == maxListItemIndex_) && (scrollUpToEnd || scrollDownToEnd)) {
+        float mainSize = GetMainContentSize();
+        bool scrollUpToEnd = GreatNotEqual(lastEndPos, mainSize) && LessOrEqual(endMainPos_, mainSize);
+        bool scrollDownToEnd = LessNotEqual(lastEndPos, mainSize) && GreatOrEqual(endMainPos_, mainSize);
+        bool jumpToEnd = isJump && NearEqual(endMainPos_, mainSize);
+        if ((endIndex_ == maxListItemIndex_) && (scrollUpToEnd || scrollDownToEnd || jumpToEnd)) {
             onReachEnd();
         }
     }
@@ -495,7 +492,7 @@ bool ListPattern::HandleDirectionKey(KeyCode code)
     return false;
 }
 
-void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool limitDuration)
+void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve)
 {
     LOGI("AnimateTo:%f, duration:%f", position, duration);
     if (!animator_) {
@@ -515,7 +512,7 @@ void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
         }
     });
     animator_->AddInterpolator(animation);
-    animator_->SetDuration(static_cast<int32_t>(limitDuration ? std::min(duration, SCROLL_MAX_TIME) : duration));
+    animator_->SetDuration(static_cast<int32_t>(duration));
     animator_->Play();
 }
 
