@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+
+/**
+ * SynchedPropertySimpleOneWay
+ * 
+ * all definitions in this file are framework internal
+ */
 class SynchedPropertySimpleOneWay<T> extends ObservedPropertySimpleAbstract<T> {
 
   private wrappedValue_: T;

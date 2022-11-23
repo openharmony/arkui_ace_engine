@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/**
+ * SynchedPropertySimpleTwoWay
+ * 
+ * all definitions in this file are framework internal
+ */
 class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
   implements ISinglePropertyChangeSubscriber<T> {
 

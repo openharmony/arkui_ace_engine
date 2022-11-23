@@ -14,19 +14,31 @@
  */
 
 /**
- * Abstract class that manages subscribing properties
- * that implement the interfaces ISinglePropertyChangeSubscriber
- * and/or IMultiPropertiesChangeSubscriber. Each using @State, @Link, etc
- * decorated varibale in a component will make its own subscription.
- * When the component is created the subscription is added, and when the
- * component is deleted it unsubscribes.
- *
- * About lifecycle: It is legal use for two components with two @State
- * decorated variables to share the same instance to a SubscribaleAbstract
- * object. Each such decorated variable implementation makes its own
+ * 
+ * SubscriableAbstract
+ * 
+ * This class is part of the SDK.
+ * @since 9
+ * 
+ * SubscriableAbstract is an abstract class that manages subscribers 
+ * to value changes. These subscribers are the implementation of 
+ * @State, @Link, @Provide, @Consume decorated variables inside the 
+ * framework. Each using @State, @Link, etc., decorated varibale in 
+ * a @Component will make its own subscription. When the component 
+ * is created the subscription is added, and before the component 
+ * is deleted it unsubscribes
+ * 
+ * An application may extend SubscriableAbstract for a custom class 
+ * that manages state data. @State, @Link, @Provide, @Consume 
+ * decorated variables can hold an Object that is instance of 
+ * SubscribaleAbstract.
+ * 
+ * About lifecycle: It is legal use for two @Components with two @State
+ * decorated variables to share the same SubscribaleAbstract object.
+ * Each such decorated variable implementation makes its own
  * subscription to the SubscribaleAbstract object. Hence, when both variables
- * have unsubscribed the SubscribaleAbstract may do its own de-initilialization.,
- * e.g. release held external resources.
+ * have unsubscribed the SubscribaleAbstract custom class may do its own 
+ * de-initilialization, e.g. release held external resources.
  *
  * How to extend:
  * A subclass manages the get and set to one or several properties on its own.
@@ -37,7 +49,7 @@
  * A subclass must call super() in its constructor to let this base class
  * initialize itself.
  *
- * A subclass must call 'notifyPropertyHasChanged' after the relevant property
+ * A subclass must call 'notifyPropertyHasChanged*(' after the relevant property
  * has changes. The framework will notify all dependent components to re-render.
  *
  * A sub-class may overwrite the 'addOwningProperty' function to add own
@@ -58,7 +70,9 @@ abstract class SubscribaleAbstract {
   private owningProperties_: Set<number>;
 
   /**
-   * make sure the call super from subclass constructor!
+   * make sure to call super() from subclass constructor!
+   * 
+   * @since 9
    */
   constructor() {
     this.owningProperties_ = new Set<number>();
@@ -70,12 +84,13 @@ abstract class SubscribaleAbstract {
    * changed that is used to construct the UI.
    * @param propName name of the change property
    * @param newValue the property value after the change
+   * 
+   * @since 9
    */
   protected notifyPropertyHasChanged(propName: string, newValue: any) {
     stateMgmtConsole.debug(`SubscribaleAbstract: notifyPropertyHasChanged '${propName}'.`)
-    var registry: IPropertySubscriberLookup = SubscriberManager.Get();
     this.owningProperties_.forEach((subscribedId) => {
-      var owningProperty: IPropertySubscriber = registry!.get(subscribedId)
+      var owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId)
       if (owningProperty) {
         if ('hasChanged' in owningProperty) {
           (owningProperty as ISinglePropertyChangeSubscriber<any>).hasChanged(newValue);
@@ -95,6 +110,8 @@ abstract class SubscribaleAbstract {
    * class from its own implementation.
    * @param subscriber new subscriber that implements ISinglePropertyChangeSubscriber
    * and/or IMultiPropertiesChangeSubscriber interfaces
+   * 
+   * @since 9
    */
 
   public addOwningProperty(subscriber: IPropertySubscriber): void {
@@ -108,11 +125,19 @@ abstract class SubscribaleAbstract {
    * class from its own implementation.
    * @param subscriber subscriber that implements ISinglePropertyChangeSubscriber
    * and/or IMultiPropertiesChangeSubscriber interfaces
+   * 
+   * @since 9
    */
   public removeOwningProperty(property: IPropertySubscriber): void {
     return this.removeOwningPropertyById(property.id__());
   }
 
+  /**
+   * Same as @see removeOwningProperty() but by Subscriber id.
+   * @param subscriberId 
+  * 
+  * @since 9
+   */
   public removeOwningPropertyById(subscriberId: number): void {
     stateMgmtConsole.debug(`SubscribaleAbstract: removeOwningProperty '${subscriberId}'.`)
     this.owningProperties_.delete(subscriberId);

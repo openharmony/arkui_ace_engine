@@ -13,22 +13,36 @@
  * limitations under the License.
  */
 
+/**
+ * PersistentStorage
+ * 
+ * Keeps current values of select AppStorage property properties persisted to file.
+ * 
+ * since 9
+ */
+
 class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   private static Storage_: IStorage;
   private static Instance_: PersistentStorage = undefined;
 
   private id_: number;
-  private links_: Map<string, ObservedPropertyAbstract<any>>;
+  private links_: Map<string, SubscribedAbstractProperty<any>>;
 
   /**
    *
    * @param storage method to be used by the framework to set the backend
    * this is to be done during startup
+   * 
+   * internal function, not part of the SDK
+   *
    */
   public static ConfigureBackend(storage: IStorage): void {
     PersistentStorage.Storage_ = storage;
   }
 
+  /**
+   * private, use static functions!
+   */
   private static GetOrCreate(): PersistentStorage {
     if (PersistentStorage.Instance_) {
       // already initialized
@@ -39,6 +53,10 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
     return PersistentStorage.Instance_;
   }
 
+  /**
+   * 
+   * internal function, not part of the SDK
+   */
   public static AboutToBeDeleted(): void {
     if (!PersistentStorage.Instance_) {
       return;
@@ -48,14 +66,43 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
     PersistentStorage.Instance_ = undefined;
   }
 
+
+  /**
+   * Add property 'key' to AppStorage properties whose current value will be 
+   * persistemt.
+   * If AppStorage does not include this property it will be added and initializes 
+   * with given value
+   * 
+   * @since 9
+   * 
+   * @param key property name
+   * @param defaultValue If AppStorage does not include this property it will be initialized with this value
+   * 
+   */
   public static PersistProp<T>(key: string, defaultValue: T): void {
     PersistentStorage.GetOrCreate().persistProp(key, defaultValue);
   }
 
+  /**
+   * Reverse of @see PersistProp
+   * @param key no longer persist the property named key
+   * 
+   * @since 9
+   */
   public static DeleteProp(key: string): void {
     PersistentStorage.GetOrCreate().deleteProp(key);
   }
 
+  /**
+   * Persist given AppStorage properties with given names.
+   * If a property does not exist in AppStorage, add it and initialize it with given value
+   * works as @see PersistProp for multiple properties.
+   * 
+   * @param properties 
+   * 
+   * @since 9
+   * 
+   */
   public static PersistProps(properties: {
     key: string,
     defaultValue: any
@@ -63,6 +110,12 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
     PersistentStorage.GetOrCreate().persistProps(properties);
   }
 
+  /**
+   * Inform persisted AppStorage property names
+   * @returns array of AppStorage keys
+   * 
+   * @since 9
+   */
   public static Keys(): Array<string> {
     let result = [];
     const it = PersistentStorage.GetOrCreate().keys();
@@ -76,10 +129,33 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
     return result;
   }
 
+/**
+  * This methid offers a way to force writing the property value with given
+  * key to persistent storage.
+  * In the general case this is unnecessary as the framework observed changes
+  * and triggers writing to disk by itself. For nested objects (e.g. array of
+  * objects) however changes of a property of a property as not observed. This
+  * is the case where the application needs to signal to the framework.
+  * 
+  * @param key property that has changed
+  * 
+  * @since 9
+  * 
+  */
+ public static NotifyHasChanged(propName: string) {
+  stateMgmtConsole.debug(`PersistentStorage: force writing '${propName}'-
+      '${PersistentStorage.GetOrCreate().links_.get(propName)}' to storage`);
+  PersistentStorage.Storage_.set(propName,
+    PersistentStorage.GetOrCreate().links_.get(propName).get());
+}
+  /**
+   * all following methods are framework internal
+   */
+
   private constructor() {
-    this.links_ = new Map<string, ObservedPropertyAbstract<any>>();
-    this.id_ = SubscriberManager.Get().MakeId();
-    SubscriberManager.Get().add(this);
+    this.links_ = new Map<string, SubscribedAbstractProperty<any>>();
+    this.id_ = SubscriberManager.MakeId();
+    SubscriberManager.Add(this);
   }
 
   private keys(): IterableIterator<string> {
@@ -170,28 +246,12 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
     });
 
     this.links_.clear();
-    SubscriberManager.Get().delete(this.id__());
+    SubscriberManager.Delete(this.id__());
     PersistentStorage.Storage_.clear();
   }
 
   public id__(): number {
     return this.id_;
-  }
-
-  /**
-  * This methid offers a way to force writing the property value with given
-  * key to persistent storage.
-  * In the general case this is unnecessary as the framework observed changes
-  * and triggers writing to disk by itself. For nested objects (e.g. array of
-  * objects) however changes of a property of a property as not observed. This
-  * is the case where the application needs to signal to the framework.
-  * @param key property that has changed
-  */
-  public static NotifyHasChanged(propName: string) {
-    stateMgmtConsole.debug(`PersistentStorage: force writing '${propName}'-
-        '${PersistentStorage.GetOrCreate().links_.get(propName)}' to storage`);
-    PersistentStorage.Storage_.set(propName,
-      PersistentStorage.GetOrCreate().links_.get(propName).get());
   }
 };
 

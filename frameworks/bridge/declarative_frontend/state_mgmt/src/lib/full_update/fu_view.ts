@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/**
+ * View (for full update)
+ * 
+ * all definitions in this file are framework internal
+ */
+
 type ProvidedVarsMap = Map<string, ObservedPropertyAbstract<any>>;
 
 // Nativeview
@@ -73,7 +79,7 @@ abstract class View extends NativeViewFullUpdate implements
 
   constructor(compilerAssignedUniqueChildId: string, parent: View, localStorage?: LocalStorage) {
     super(compilerAssignedUniqueChildId, parent);
-    this.id_ = SubscriberManager.Get().MakeId();
+    this.id_ = SubscriberManager.MakeId();
     this.providedVars_ = parent ? new Map(parent.providedVars_)
       : new Map<string, ObservedPropertyAbstract<any>>();
 
@@ -88,7 +94,7 @@ abstract class View extends NativeViewFullUpdate implements
       stateMgmtConsole.debug(`${this.constructor.name} constructor: Using LocalStorage instance provided via @Entry.`);
     }
 
-    SubscriberManager.Get().add(this);
+    SubscriberManager.Add(this);
     stateMgmtConsole.debug(`${this.constructor.name}: constructor done`);
   }
 
