@@ -28,10 +28,16 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
-
+namespace OHOS::Ace {
+bool SystemProperties::GetDebugEnabled()
+{
+    return false;
+}
+} // namespace OHOS::Ace
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t FOCUS_NODE_SIZE = 2;
@@ -60,12 +66,12 @@ void FocusHubTestNg::TearDownTestSuite()
 
 void FocusHubTestNg::SetUp()
 {
-    GTEST_LOG_(INFO) << "FocusHubTestNg SetUp";
+    MockPipelineBase::SetUp();
 }
 
 void FocusHubTestNg::TearDown()
 {
-    GTEST_LOG_(INFO) << "FocusHubTestNg TearDown";
+    MockPipelineBase::TearDown();
 }
 
 /**
