@@ -49,7 +49,7 @@ bool ListPositionController::AnimateTo(const Dimension& position, float duration
         if (NearZero(duration)) {
             listPattern->ScrollTo(position.ConvertToPx());
         } else {
-            listPattern->AnimateTo(position.ConvertToPx(), duration, curve, true);
+            listPattern->AnimateTo(position.ConvertToPx(), duration, curve);
         }
         return true;
     }
