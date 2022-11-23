@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 
 // create menuWrapper and menu node, update menu props
 std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(const std::string& targetTag, int32_t targetId,
-    bool isNeedUpdateMenuOffset, const NG::OffsetF& offset = NG::OffsetF())
+    bool isNeedUpdateMenuOffset, const NG::OffsetF& offset = NG::OffsetF(), bool isNavigationMenu = false)
 {
     // use wrapper to detect click events outside menu
     auto wrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
@@ -45,6 +45,8 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(const std::string& ta
         layoutProps->UpdateMenuOffset(offset);
     }
 
+    auto menuFrameNode = menuNode->GetPattern<MenuPattern>();
+    menuFrameNode->SetIsNavigationMenu(isNavigationMenu);
     menuNode->MountToParent(wrapperNode);
     menuNode->MarkModifyDone();
 
@@ -53,9 +55,10 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(const std::string& ta
 
 // create menu with menuItems
 RefPtr<FrameNode> MenuView::Create(
-    std::vector<OptionParam>&& params, const std::string& targetTag, int32_t targetId, const NG::OffsetF& offset)
+    std::vector<OptionParam>&& params, const std::string& targetTag, int32_t targetId,
+    const NG::OffsetF& offset, bool isNavigationMenu)
 {
-    auto [wrapperNode, menuNode] = CreateMenu(targetTag, targetId, true, offset);
+    auto [wrapperNode, menuNode] = CreateMenu(targetTag, targetId, true, offset, isNavigationMenu);
     // append options to menu
     for (size_t i = 0; i < params.size(); ++i) {
         auto optionNode = OptionView::CreateMenuOption(params[i].first, std::move(params[i].second), i);

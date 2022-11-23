@@ -80,7 +80,7 @@ void ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<ToolBarIt
     }
 }
 
-void ParseBarItems(const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::list<NG::BarItem>& items)
+void ParseBarItems(const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items)
 {
     auto length = jsArray->Length();
     for (size_t i = 0; i < length; i++) {
@@ -407,7 +407,7 @@ void JSNavigation::SetToolBar(const JSCallbackInfo& info)
         return;
     }
     if (Container::IsCurrentUseNewPipeline()) {
-        std::list<NG::BarItem> toolBarItems;
+        std::vector<NG::BarItem> toolBarItems;
         ParseBarItems(info, JSRef<JSArray>::Cast(itemsValue), toolBarItems);
         NG::NavigationView::SetToolBarItems(std::move(toolBarItems));
         return;
@@ -430,7 +430,7 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
 
     if (info[0]->IsArray()) {
         if (Container::IsCurrentUseNewPipeline()) {
-            std::list<NG::BarItem> menuItems;
+            std::vector<NG::BarItem> menuItems;
             ParseBarItems(info, JSRef<JSArray>::Cast(info[0]), menuItems);
             NG::NavigationView::SetMenuItems(std::move(menuItems));
             return;
