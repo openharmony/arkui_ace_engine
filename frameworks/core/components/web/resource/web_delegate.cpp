@@ -1968,7 +1968,27 @@ void WebDelegate::UpdateSettting(bool useNewPipe)
 }
 
 #if defined(ENABLE_ROSEN_BACKEND)
-void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
+std::string WebDelegate::GetCustomScheme()
+{
+    std::string customScheme;
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        if (webPattern) {
+            auto webData = webPattern->GetCustomScheme();
+            if (webData) {
+                customScheme = webData.value();
+            }
+        }
+    } else {
+        auto webCom = webComponent_.Upgrade();
+        if (webCom) {
+            customScheme = webCom->GetCustomScheme();
+        }
+    }
+    return customScheme;
+}
+
+void WebDelegate::InitWebViewWithSurface()
 {
     LOGI("Create webview with surface");
     auto context = context_.Upgrade();
@@ -1988,6 +2008,12 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             initArgs.web_engine_args_to_add.push_back(
                 std::string("--lang=").append(AceApplicationInfo::GetInstance().GetLanguage() +
                     "-" + AceApplicationInfo::GetInstance().GetCountryOrRegion()));
+            std::string customScheme = delegate->GetCustomScheme();
+            if (!customScheme.empty()) {
+                LOGI("custome scheme %{public}s", customScheme.c_str());
+                initArgs.web_engine_args_to_add.push_back(
+                    std::string("--ohos-custom-scheme=").append(customScheme));
+            }
             sptr<Surface> surface = surfaceWeak.promote();
             CHECK_NULL_VOID(surface);
             delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(surface, initArgs);

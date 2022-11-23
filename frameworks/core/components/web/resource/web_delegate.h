@@ -465,6 +465,7 @@ private:
     void UpdateSettting(bool useNewPipe = false);
 
 #if defined(ENABLE_ROSEN_BACKEND)
+	std::string GetCustomScheme();
     void InitWebViewWithSurface(sptr<Surface> surface);
 #endif
 #endif
