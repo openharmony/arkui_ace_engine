@@ -21,6 +21,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -58,12 +59,12 @@ void DragEventTestNg::TearDownTestSuite()
 
 void DragEventTestNg::SetUp()
 {
-    GTEST_LOG_(INFO) << "DragEventTestNg SetUp";
+    MockPipelineBase::SetUp();
 }
 
 void DragEventTestNg::TearDown()
 {
-    GTEST_LOG_(INFO) << "DragEventTestNg TearDown";
+    MockPipelineBase::TearDown();
 }
 
 /**

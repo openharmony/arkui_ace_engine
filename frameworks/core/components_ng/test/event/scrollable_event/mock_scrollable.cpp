@@ -13,18 +13,14 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/gestures/recognizers/recognizer_group.h"
+#include "core/components/scroll/scrollable.h"
 
-namespace OHOS::Ace::NG {
-void RecognizerGroup::AddChildren(const std::list<RefPtr<NGGestureRecognizer>>& recognizers) {}
+namespace OHOS::Ace {
+Scrollable::~Scrollable() = default;
 
-void RecognizerGroup::OnFlushTouchEventsBegin() {}
+void Scrollable::OnFlushTouchEventsBegin() {}
 
-void RecognizerGroup::OnFlushTouchEventsEnd() {}
+void Scrollable::OnFlushTouchEventsEnd() {}
 
-void RecognizerGroup::OnBeginGestureReferee(int32_t touchId, bool needUpdateChild) {}
-
-void RecognizerGroup::OnFinishGestureReferee(int32_t touchId) {}
-
-void RecognizerGroup::OnResetStatus() {}
-} // namespace OHOS::Ace::NG
+void Scrollable::Initialize(const WeakPtr<PipelineBase>& context) {}
+} // namespace OHOS::Ace

@@ -13,32 +13,28 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
+#include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
 
 namespace OHOS::Ace::NG {
-void ExclusiveRecognizer::OnAccepted() {}
+void SequencedRecognizer::OnAccepted() {}
 
-void ExclusiveRecognizer::OnRejected() {}
+void SequencedRecognizer::OnRejected() {}
 
-void ExclusiveRecognizer::OnPending() {}
+void SequencedRecognizer::OnPending() {}
 
-void ExclusiveRecognizer::OnBlocked() {}
+void SequencedRecognizer::OnBlocked() {}
 
-bool ExclusiveRecognizer::HandleEvent(const TouchEvent& /* point */)
+bool SequencedRecognizer::HandleEvent(const TouchEvent&  /* point */)
 {
     return true;
 }
 
-bool ExclusiveRecognizer::HandleEvent(const AxisEvent& /* event */)
+void SequencedRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal) {}
+
+void SequencedRecognizer::OnResetStatus() {}
+
+bool SequencedRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>&  /* recognizer */)
 {
     return true;
 }
-
-void ExclusiveRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal) {}
-
-bool ExclusiveRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& /* recognizer */)
-{
-    return true;
-}
-void ExclusiveRecognizer::OnResetStatus() {}
 } // namespace OHOS::Ace::NG

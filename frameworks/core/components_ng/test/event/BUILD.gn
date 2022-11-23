@@ -20,6 +20,7 @@ group("event_unittest") {
     "focus_hub:focus_hub_test_ng",
     "input_event_hub:input_event_hub_test_ng",
     "long_press_event:long_press_event_test_ng",
+    "scrollable_event:scrollable_event_test_ng",
     "touch_event:touch_event_test_ng",
   ]
 }
