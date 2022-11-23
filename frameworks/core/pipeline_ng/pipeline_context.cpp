@@ -415,13 +415,14 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     }
 
     // TODO: add adjust for textFieldManager when ime is show.
-    taskExecutor_->PostTask([weakFrontend = weakFrontend_, width, height]() {
-        auto frontend = weakFrontend.Upgrade();
-        if (frontend) {
-            frontend->OnSurfaceChanged(width, height);
-        }
-    },
-    TaskExecutor::TaskType::JS);
+    taskExecutor_->PostTask(
+        [weakFrontend = weakFrontend_, width, height]() {
+            auto frontend = weakFrontend.Upgrade();
+            if (frontend) {
+                frontend->OnSurfaceChanged(width, height);
+            }
+        },
+        TaskExecutor::TaskType::JS);
 
 #ifdef ENABLE_ROSEN_BACKEND
     StartWindowSizeChangeAnimate(width, height, type);
