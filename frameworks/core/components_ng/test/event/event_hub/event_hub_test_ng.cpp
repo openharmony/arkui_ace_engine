@@ -22,10 +22,16 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
-
+namespace OHOS::Ace {
+bool OHOS::Ace::SystemProperties::GetDebugEnabled()
+{
+    return false;
+}
+} // namespace OHOS::Ace
 namespace OHOS::Ace::NG {
 namespace {
 constexpr bool EVENT_HUB_ENABLE = false;
@@ -72,12 +78,12 @@ void EventHubTestNg::TearDownTestSuite()
 
 void EventHubTestNg::SetUp()
 {
-    GTEST_LOG_(INFO) << "EventHubTestNg SetUp";
+    MockPipelineBase::SetUp();
 }
 
 void EventHubTestNg::TearDown()
 {
-    GTEST_LOG_(INFO) << "EventHubTestNg TearDown";
+    MockPipelineBase::TearDown();
 }
 
 /**

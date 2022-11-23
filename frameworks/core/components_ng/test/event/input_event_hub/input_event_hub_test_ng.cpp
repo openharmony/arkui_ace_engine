@@ -22,6 +22,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -64,14 +65,13 @@ void InputEventHubTestNg::TearDownTestSuite()
 
 void InputEventHubTestNg::SetUp()
 {
-    GTEST_LOG_(INFO) << "InputEventHubTestNg SetUp";
+    MockPipelineBase::SetUp();
 }
 
 void InputEventHubTestNg::TearDown()
 {
-    GTEST_LOG_(INFO) << "InputEventHubTestNg TearDown";
+    MockPipelineBase::TearDown();
 }
-
 /**
  * @tc.name: InputEventHubCreateTest001
  * @tc.desc: Create InputEventHub
@@ -207,7 +207,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubAxisEventTest004, TestSize.Level1)
     EXPECT_NE(inputEventHub, nullptr);
 
     /**
-     * @tc.steps: step3. Add OnAxisEvent.
+     * @tc.steps: step2. Add OnAxisEvent.
      * @tc.expected: axisEventActuator_ will be initialized, and the list of inputEvents and the size will be 1.
      */
     OnMouseEventFunc onAxis = [](MouseInfo& info) {};
@@ -217,7 +217,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubAxisEventTest004, TestSize.Level1)
     EXPECT_EQ(inputEventHub->axisEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE);
 
     /**
-     * @tc.steps: step5. Remove OnAxisEvent.
+     * @tc.steps: step3. Remove OnAxisEvent.
      * @tc.expected: onAxisEvent will be remove from the list of inputEvents and the size will be 0. If
      * axisEventActuator_ is nullptr, the function will return directly.
      */
