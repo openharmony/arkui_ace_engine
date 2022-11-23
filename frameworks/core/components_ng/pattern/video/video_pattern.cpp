@@ -927,7 +927,7 @@ void VideoPattern::ChangePlayButtonTag(bool playing, RefPtr<FrameNode>& playBtn)
         }
     };
     auto playBtnEvent = playBtn->GetOrCreateGestureEventHub();
-    playBtnEvent->SetClickEvent(std::move(playClickCallback));
+    playBtnEvent->SetUserOnClick(std::move(playClickCallback));
     auto svgLayoutProperty = playBtn->GetLayoutProperty<ImageLayoutProperty>();
     auto resourceId = playing ? InternalResource::ResourceId::PAUSE_SVG : InternalResource::ResourceId::PLAY_SVG;
     auto svgSourceInfo = ImageSourceInfo("");
@@ -950,7 +950,7 @@ void VideoPattern::ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode
         }
     };
     auto fullScreenBtnEvent = fullScreenBtn->GetOrCreateGestureEventHub();
-    fullScreenBtnEvent->SetClickEvent(std::move(fsClickCallback));
+    fullScreenBtnEvent->SetUserOnClick(std::move(fsClickCallback));
     auto svgLayoutProperty = fullScreenBtn->GetLayoutProperty<ImageLayoutProperty>();
     auto resourceId =
         isFullScreen ? InternalResource::ResourceId::QUIT_FULLSCREEN_SVG : InternalResource::ResourceId::FULLSCREEN_SVG;
