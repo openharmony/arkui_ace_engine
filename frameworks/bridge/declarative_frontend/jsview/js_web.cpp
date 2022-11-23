@@ -1278,6 +1278,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onScroll", &JSWeb::OnScroll);
     JSClass<JSWeb>::StaticMethod("pinchSmoothMode", &JSWeb::PinchSmoothModeEnabled);
     JSClass<JSWeb>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSWeb>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSWeb>::StaticMethod("onWindowNew", &JSWeb::OnWindowNew);
     JSClass<JSWeb>::StaticMethod("onWindowExit", &JSWeb::OnWindowExit);
     JSClass<JSWeb>::StaticMethod("multiWindowAccess", &JSWeb::MultiWindowAccessEnabled);
