@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/common/container.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_PROP_CONVERTOR_MOCK_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_PROP_CONVERTOR_MOCK_H
+
 namespace OHOS::Ace {
-int32_t Container::CurrentId()
-{
-    return 0;
-}
+RSColor ToRSColor(const Color& color);
+RSPoint ToRSPonit(const NG::PointF& point);
+RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap);
 } // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_PROP_CONVERTOR_MOCK_H
