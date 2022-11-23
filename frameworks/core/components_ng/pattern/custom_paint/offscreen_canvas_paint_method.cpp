@@ -610,10 +610,10 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
 
 void OffscreenCanvasPaintMethod::FillText(const std::string& text, double x, double y, const PaintState& state)
 {
-    if (!UpdateOffParagraph(text, false, state)) {
+    if (!UpdateOffParagraph(text, false, state, HasShadow())) {
         return;
     }
-    PaintText(text, x, y, false);
+    PaintText(text, x, y, false, HasShadow());
 }
 
 void OffscreenCanvasPaintMethod::StrokeText(const std::string& text, double x, double y, const PaintState& state)
@@ -622,7 +622,7 @@ void OffscreenCanvasPaintMethod::StrokeText(const std::string& text, double x, d
         if (!UpdateOffParagraph(text, true, state, true)) {
             return;
         }
-        PaintText(text, x, y, true);
+        PaintText(text, x, y, true, true);
     }
 
     if (!UpdateOffParagraph(text, true, state)) {

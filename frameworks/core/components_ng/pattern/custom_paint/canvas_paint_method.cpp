@@ -314,9 +314,9 @@ void CanvasPaintMethod::FillText(PaintWrapper* paintWrapper, const std::string& 
     auto offset = paintWrapper->GetContentOffset();
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
 
-    auto success = UpdateParagraph(offset, text, false);
+    auto success = UpdateParagraph(offset, text, false, HasShadow());
     CHECK_NULL_VOID(success);
-    PaintText(offset, frameSize, x, y, false);
+    PaintText(offset, frameSize, x, y, false, HasShadow());
 }
 
 void CanvasPaintMethod::StrokeText(PaintWrapper* paintWrapper, const std::string& text, double x, double y)
@@ -328,7 +328,7 @@ void CanvasPaintMethod::StrokeText(PaintWrapper* paintWrapper, const std::string
     if (HasShadow()) {
         auto success = UpdateParagraph(offset, text, true, true);
         CHECK_NULL_VOID(success);
-        PaintText(offset, frameSize, x, y, true);
+        PaintText(offset, frameSize, x, y, true, true);
     }
 
     auto success = UpdateParagraph(offset, text, true);

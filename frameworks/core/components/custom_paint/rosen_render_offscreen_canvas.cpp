@@ -1193,10 +1193,10 @@ void RosenRenderOffscreenCanvas::Scale(double x, double y)
 
 void RosenRenderOffscreenCanvas::FillText(const std::string& text, double x, double y, const PaintState& state)
 {
-    if (!UpdateOffParagraph(text, false, state)) {
+    if (!UpdateOffParagraph(text, false, state, HasShadow())) {
         return;
     }
-    PaintText(text, x, y, false);
+    PaintText(text, x, y, false, HasShadow());
 }
 
 void RosenRenderOffscreenCanvas::StrokeText(const std::string& text, double x, double y, const PaintState& state)
@@ -1205,7 +1205,7 @@ void RosenRenderOffscreenCanvas::StrokeText(const std::string& text, double x, d
         if (!UpdateOffParagraph(text, true, state, true)) {
             return;
         }
-        PaintText(text, x, y, true);
+        PaintText(text, x, y, true, true);
     }
 
     if (!UpdateOffParagraph(text, true, state)) {
