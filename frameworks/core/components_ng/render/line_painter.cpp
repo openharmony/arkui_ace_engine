@@ -21,7 +21,7 @@
 #include "core/components_ng/render/shape_painter.h"
 
 namespace OHOS::Ace::NG {
-void LinePainter::DrawLine(RSCanvas& canvas, const LinePaintProperty& linePaintProperty)
+void LinePainter::DrawLine(RSCanvas& canvas, const LinePaintProperty& linePaintProperty, OffsetF offset)
 {
     RSPen pen;
     ShapePainter::SetPan(pen, linePaintProperty);
@@ -30,6 +30,6 @@ void LinePainter::DrawLine(RSCanvas& canvas, const LinePaintProperty& linePaintP
         linePaintProperty.GetStartPointValue().second.ConvertToPx());
     PointF endPoint_ = PointF(linePaintProperty.GetEndPointValue().first.ConvertToPx(),
         linePaintProperty.GetEndPointValue().second.ConvertToPx());
-    canvas.DrawLine(ToRSPonit(startPoint_), ToRSPonit(endPoint_));
+    canvas.DrawLine(ToRSPonit(startPoint_ + offset), ToRSPonit(endPoint_ + offset));
 }
 } // namespace OHOS::Ace::NG
