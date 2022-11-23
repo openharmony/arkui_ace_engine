@@ -52,6 +52,7 @@ public:
 
 private:
     void OnModifyDone() override;
+    void OnAttachToFrameNode() override;
     int32_t TotalCount() const;
 
     void InitButtonClickEvent(const RefPtr<GestureEventHub>& leftGestureHub,
