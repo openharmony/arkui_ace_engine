@@ -16,6 +16,7 @@
 #include "frameworks/core/components_ng/svg/parse/svg_mask.h"
 
 #include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 #include "frameworks/core/components/common/painter/flutter_svg_painter.h"
 #include "frameworks/core/components/declaration/svg/svg_mask_declaration.h"
 
@@ -61,9 +62,7 @@ void SvgMask::OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const
 void SvgMask::OnInitStyle()
 {
     auto declaration = Ace::AceType::DynamicCast<SvgMaskDeclaration>(declaration_);
-    if (!declaration) {
-        return;
-    }
+    CHECK_NULL_VOID(declaration);
     isDefaultMaskUnits_ = (declaration->GetMaskUnits() == "objectBoundingBox");
     isDefalutMaskContentUnits_ = (declaration->GetMaskContentUnits() == "userSpaceOnUse");
     x_ = declaration->GetX();

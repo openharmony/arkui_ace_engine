@@ -17,6 +17,7 @@
 
 #include "third_party/skia/include/effects/SkColorFilterImageFilter.h"
 
+#include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_fe_colormatrix_declaration.h"
 
 namespace OHOS::Ace::NG {
@@ -36,9 +37,7 @@ SvgFeColorMatrix::SvgFeColorMatrix() : SvgFe()
 void SvgFeColorMatrix::OnInitStyle()
 {
     auto declaration = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(declaration_);
-    if (!declaration) {
-        return;
-    }
+    CHECK_NULL_VOID(declaration);
     auto value = declaration->GetValues();
     if (memset_s(matrix_, sizeof(matrix_), 0, sizeof(matrix_)) != EOK) {
         return;
@@ -63,9 +62,7 @@ void SvgFeColorMatrix::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
     const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
 {
     auto declaration = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(declaration_);
-    if (!declaration) {
-        return;
-    }
+    CHECK_NULL_VOID(declaration);
     imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
 
 #ifdef USE_SYSTEM_SKIA
