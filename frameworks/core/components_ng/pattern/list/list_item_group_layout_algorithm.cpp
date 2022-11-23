@@ -31,6 +31,8 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     axis_ = layoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     lanes_ = layoutProperty->GetLanes().value_or(1);
+    minLaneLength_ = layoutProperty->GetLaneMinLengthValue();
+    maxLaneLength_ = layoutProperty->GetLaneMaxLengthValue();
     auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis_);
     auto space = layoutProperty->GetSpace().value_or(Dimension(0));
 
@@ -97,20 +99,38 @@ void ListItemGroupLayoutAlgorithm::UpdateListItemConstraint(const OptionalSizeF&
         contentConstraint.maxSize.SetHeight(Infinity<float>());
         auto width = selfIdealSize.Width();
         if (width.has_value()) {
-            float crossSize = width.value() / lanes_;
+            float crossSize = width.value();
+            if (lanes_ > 1) {
+                crossSize /= lanes_;
+            }
+            if (maxLaneLength_.has_value() && maxLaneLength_.value() < crossSize) {
+                crossSize = maxLaneLength_.value();
+            }
             contentConstraint.percentReference.SetWidth(crossSize);
             contentConstraint.parentIdealSize.SetWidth(crossSize);
             contentConstraint.maxSize.SetWidth(crossSize);
+            if (minLaneLength_.has_value()) {
+                contentConstraint.minSize.SetWidth(minLaneLength_.value());
+            }
         }
         return;
     }
     contentConstraint.maxSize.SetWidth(Infinity<float>());
     auto height = selfIdealSize.Height();
     if (height.has_value()) {
-        float crossSize = height.value() / lanes_;
+        float crossSize = height.value();
+        if (lanes_ > 1) {
+            crossSize /= lanes_;
+        }
+        if (maxLaneLength_.has_value() && maxLaneLength_.value() < crossSize) {
+            crossSize = maxLaneLength_.value();
+        }
         contentConstraint.percentReference.SetHeight(crossSize);
         contentConstraint.parentIdealSize.SetHeight(crossSize);
         contentConstraint.maxSize.SetHeight(crossSize);
+        if (minLaneLength_.has_value()) {
+            contentConstraint.minSize.SetHeight(minLaneLength_.value());
+        }
     }
 }
 

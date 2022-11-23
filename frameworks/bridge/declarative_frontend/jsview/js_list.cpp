@@ -150,20 +150,23 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         ListModel::GetInstance()->SetLanes(laneNum);
         return;
     }
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
-    auto minLengthParam = jsObj->GetProperty("minLength");
-    auto maxLengthParam = jsObj->GetProperty("maxLength");
-    if (minLengthParam->IsNull() || maxLengthParam->IsNull()) {
-        LOGW("minLength and maxLength are not both set");
-        return;
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        auto minLengthParam = jsObj->GetProperty("minLength");
+        auto maxLengthParam = jsObj->GetProperty("maxLength");
+        if (minLengthParam->IsNull() || maxLengthParam->IsNull()) {
+            LOGW("minLength and maxLength are not both set");
+            return;
+        }
+        Dimension minLengthValue;
+        Dimension maxLengthValue;
+        if (!ParseJsDimensionVp(minLengthParam, minLengthValue)
+            || !ParseJsDimensionVp(maxLengthParam, maxLengthValue)) {
+            LOGW("minLength param or maxLength param is invalid");
+            return;
+        }
+        ListModel::GetInstance()->SetLaneConstrain(minLengthValue, maxLengthValue);
     }
-    Dimension minLengthValue;
-    Dimension maxLengthValue;
-    if (!ParseJsDimensionVp(minLengthParam, minLengthValue) || !ParseJsDimensionVp(maxLengthParam, maxLengthValue)) {
-        LOGW("minLength param or maxLength param is invalid");
-        return;
-    }
-    ListModel::GetInstance()->SetLaneConstrain(minLengthValue, maxLengthValue);
 }
 
 void JSList::SetSticky(int32_t sticky)

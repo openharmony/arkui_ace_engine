@@ -25,6 +25,7 @@ CanvasDrawFunction ListItemGroupPaintMethod::GetContentDrawFunction(PaintWrapper
         float crossSize;
         float startMargin;
         float endMargin;
+        float halfSpaceWidth;
         bool isVertical;
         int32_t lanes;
         Color color;
@@ -33,27 +34,28 @@ CanvasDrawFunction ListItemGroupPaintMethod::GetContentDrawFunction(PaintWrapper
         .crossSize = vertical_ ? frameSize.Height() : frameSize.Width(),
         .startMargin = divider_.startMargin.ConvertToPx(),
         .endMargin = divider_.endMargin.ConvertToPx(),
+        .halfSpaceWidth = spaceWidth_ / 2.0f, /* 2.0f half */
         .isVertical = vertical_,
         .lanes = lanes_ > 1 ? lanes_ : 1,
         .color = divider_.color
     };
 
     return [dividerInfo, itemPosition = std::move(itemPosition_)](RSCanvas& canvas) {
+        int32_t lanes = dividerInfo.lanes > 1 ? dividerInfo.lanes : 1;
+        float laneLen = dividerInfo.crossSize / lanes - dividerInfo.startMargin - dividerInfo.endMargin;
         DividerPainter dividerPainter(dividerInfo.constrainStrokeWidth,
-            dividerInfo.crossSize / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin,
-            dividerInfo.isVertical, dividerInfo.color, LineCap::SQUARE);
+            laneLen, dividerInfo.isVertical, dividerInfo.color, LineCap::SQUARE);
         int32_t laneIdx = 0;
-        auto nextItem = itemPosition.begin();
-        auto currItem = itemPosition.begin();
-        for (int32_t i = 0; i < dividerInfo.lanes && nextItem != itemPosition.end(); nextItem++, i++) {}
-        while (nextItem != itemPosition.end()) {
-            auto mainPos = (currItem->second.second + nextItem->second.first) / 2; /* 2:average */
-            auto crossPos = dividerInfo.startMargin + laneIdx * dividerInfo.crossSize / dividerInfo.lanes;
-            OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
-            dividerPainter.DrawLine(canvas, offset);
-            currItem++;
-            nextItem++;
-            laneIdx = (laneIdx + 1) % dividerInfo.lanes;
+        bool isFirstItem = (itemPosition.begin()->first == 0);
+        for (const auto& child : itemPosition) {
+            if (!isFirstItem) {
+                float mainPos = child.second.first - dividerInfo.halfSpaceWidth;
+                float crossPos = dividerInfo.startMargin + laneIdx * dividerInfo.crossSize / lanes;
+                OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
+                dividerPainter.DrawLine(canvas, offset);
+            }
+            laneIdx = (laneIdx + 1) >= lanes ? 0 : laneIdx + 1;
+            isFirstItem = isFirstItem ? laneIdx > 0 : false;
         }
     };
 }
