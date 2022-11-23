@@ -1330,6 +1330,147 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GestureRefereeTest002
+ * @tc.desc: Test GestureReferee CheckNeedBlocked function
+ */
+HWTEST_F(GesturePatternTestNg, GestureRefereeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    GestureScope gestureScope = GestureScope(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr =
+        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), clickRecognizerPtr);
+
+    /**
+     * @tc.steps: step2. call Existed function and compare result
+     * @tc.steps: expected equal
+     */
+    auto result = gestureScope.CheckNeedBlocked(clickRecognizerPtr);
+    EXPECT_EQ(result, false);
+    
+    RefPtr<ClickRecognizer> clickRecognizerPtrNotInsert =
+        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    result = gestureScope.CheckNeedBlocked(clickRecognizerPtrNotInsert);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: GestureRefereeTest003
+ * @tc.desc: Test GestureReferee OnAcceptGesture function
+ */
+HWTEST_F(GesturePatternTestNg, GestureRefereeTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    GestureScope gestureScope = GestureScope(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr =
+        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), clickRecognizerPtr);
+
+    /**
+     * @tc.steps: step2. call OnAcceptGesture function and compare result
+     * @tc.steps: expected equal
+     */
+    gestureScope.OnAcceptGesture(clickRecognizerPtr);
+    EXPECT_EQ(gestureScope.hasGestureAccepted_, true);
+}
+
+/**
+ * @tc.name: GestureRefereeTest004
+ * @tc.desc: Test GestureReferee OnBlockGesture function
+ */
+HWTEST_F(GesturePatternTestNg, GestureRefereeTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    GestureScope gestureScope = GestureScope(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr =
+        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), clickRecognizerPtr);
+
+    /**
+     * @tc.steps: step2. call UnBlockGesture function and compare result
+     * @tc.steps: expected equal
+     */
+    auto result = gestureScope.UnBlockGesture();
+    EXPECT_EQ(result, nullptr);
+
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING_BLOCKED;
+    result = gestureScope.UnBlockGesture();
+    EXPECT_EQ(result, clickRecognizerPtr);
+}
+
+/**
+ * @tc.name: GestureRefereeTest005
+ * @tc.desc: Test GestureReferee IsPending function
+ */
+HWTEST_F(GesturePatternTestNg, GestureRefereeTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    GestureScope gestureScope = GestureScope(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr =
+        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), clickRecognizerPtr);
+
+    /**
+     * @tc.steps: step2. call IsPending function and compare result
+     * @tc.steps: expected equal
+     */
+    auto result = gestureScope.IsPending();
+    EXPECT_EQ(result, false);
+
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    result = gestureScope.IsPending();
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: GestureRefereeTest006
+ * @tc.desc: Test GestureReferee AddGestureToScope function
+ */
+HWTEST_F(GesturePatternTestNg, GestureRefereeTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureReferee.
+     */
+    GestureReferee gestureReferee;
+
+    /**
+     * @tc.steps: step2. call AddGestureToScope function and compare result
+     * @tc.steps: expected equal
+     */
+    TouchTestResult touchTestResult;
+    gestureReferee.AddGestureToScope(0, touchTestResult);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 1);
+}
+
+/**
+ * @tc.name: GestureRefereeTest007
+ * @tc.desc: Test GestureReferee CleanGestureScope function
+ */
+HWTEST_F(GesturePatternTestNg, GestureRefereeTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureReferee.
+     */
+    GestureReferee gestureReferee;
+    
+    /**
+     * @tc.steps: step2. call CleanGestureScope function and compare result
+     * @tc.steps: expected equal
+     */
+    gestureReferee.CleanGestureScope(0);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+}
+
+/**
  * @tc.name: LongPressGestureTest001
  * @tc.desc: Test LongPressGesture CreateRecognizer function
  */
