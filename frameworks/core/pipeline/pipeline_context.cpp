@@ -264,6 +264,13 @@ void PipelineContext::FlushPredictLayout(int64_t deadline)
     }
 }
 
+double PipelineContext::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+    const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+{
+    return OHOS::Ace::RenderCustomPaint::PaintMeasureText(text, fontSize, fontStyle,
+        fontWeight, fontFamily, letterSpacing);
+}
+
 void PipelineContext::FlushFocus()
 {
     CHECK_RUN_ON(UI);
@@ -2179,14 +2186,14 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
         }
     }
 
-    taskExecutor_->PostTask([weakFrontend = weakFrontend_, width, height](){
-        auto frontend = weakFrontend.Upgrade();
-        if (frontend) {
-            frontend->OnSurfaceChanged(width, height);
-        }
-    },
-    TaskExecutor::TaskType::JS);
-
+    taskExecutor_->PostTask(
+        [weakFrontend = weakFrontend_, width, height]() {
+            auto frontend = weakFrontend.Upgrade();
+            if (frontend) {
+                frontend->OnSurfaceChanged(width, height);
+            }
+        },
+        TaskExecutor::TaskType::JS);
 
     // init transition clip size when surface changed.
     const auto& pageElement = GetLastPage();
