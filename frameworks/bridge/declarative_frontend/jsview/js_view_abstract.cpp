@@ -1691,23 +1691,16 @@ void JSViewAbstract::JsPadding(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsMargin(const JSCallbackInfo& info)
 {
-    JSViewAbstract::ParseMarginOrPadding(info, true);
+    ParseMarginOrPadding(info, true);
 }
 
 void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
-        JSCallbackInfoType::OBJECT };
-    if (!CheckJSCallbackInfo("ParseMarginOrPadding", info, checkList)) {
-        return;
-    }
-
-    std::optional<Dimension> left;
-    std::optional<Dimension> right;
-    std::optional<Dimension> top;
-    std::optional<Dimension> bottom;
-
     if (info[0]->IsObject()) {
+        std::optional<Dimension> left;
+        std::optional<Dimension> right;
+        std::optional<Dimension> top;
+        std::optional<Dimension> bottom;
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
 
         Dimension leftDimen;
@@ -1738,7 +1731,8 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
 
     Dimension length;
     if (!ParseJsDimensionVp(info[0], length)) {
-        return;
+        // use default value.
+        length.Reset();
     }
     if (isMargin) {
         ViewAbstractModel::GetInstance()->SetMargin(length);
@@ -1759,18 +1753,17 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
     if (!valueWidth->IsUndefined()) {
         ParseBorderWidth(valueWidth);
     }
-    auto valueColor = object->GetProperty("color");
-    if (!valueColor->IsUndefined()) {
-        ParseBorderColor(valueColor);
-    }
+
+    // use default value when undefined.
+    ParseBorderColor(object->GetProperty("color"));
+
     auto valueRadius = object->GetProperty("radius");
     if (!valueRadius->IsUndefined()) {
         ParseBorderRadius(valueRadius);
     }
-    auto valueStyle = object->GetProperty("style");
-    if (!valueStyle->IsUndefined()) {
-        ParseBorderStyle(valueStyle);
-    }
+    // use default value when undefined.
+    ParseBorderStyle(object->GetProperty("style"));
+
     info.ReturnSelf();
 }
 
@@ -2074,11 +2067,8 @@ void JSViewAbstract::JsBorderColor(const JSCallbackInfo& info)
 void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args)
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
-        LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
-        if (args->IsNull()) {
-            // use default color when color args is null.
-            ViewAbstractModel::GetInstance()->SetBorderColor(Color::BLACK);
-        }
+        LOGI("args(%{public}s) is invalid, use default value.", args->ToString().c_str());
+        ViewAbstractModel::GetInstance()->SetBorderColor(Color::BLACK);
         return;
     }
     std::optional<Color> leftColor;
@@ -2166,26 +2156,21 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args)
 
 void JSViewAbstract::JsBorderStyle(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
-        JSCallbackInfoType::OBJECT };
-    if (!CheckJSCallbackInfo("JsBorderStyle", info, checkList)) {
-        LOGE("args need a string or number or object");
-        return;
-    }
     ParseBorderStyle(info[0]);
 }
 
 void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args)
 {
     if (!args->IsObject() && !args->IsNumber()) {
-        LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
+        LOGI("args(%{public}s) is invalid, use default value.", args->ToString().c_str());
+        ViewAbstractModel::GetInstance()->SetBorderStyle(BorderStyle::SOLID);
         return;
     }
-    std::optional<BorderStyle> styleLeft;
-    std::optional<BorderStyle> styleRight;
-    std::optional<BorderStyle> styleTop;
-    std::optional<BorderStyle> styleBottom;
     if (args->IsObject()) {
+        std::optional<BorderStyle> styleLeft;
+        std::optional<BorderStyle> styleRight;
+        std::optional<BorderStyle> styleTop;
+        std::optional<BorderStyle> styleBottom;
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         auto leftValue = object->GetProperty("left");
         if (!leftValue->IsUndefined() && leftValue->IsNumber()) {
@@ -2204,10 +2189,10 @@ void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args)
             styleBottom = static_cast<BorderStyle>(bottomValue->ToNumber<int32_t>());
         }
         ViewAbstractModel::GetInstance()->SetBorderStyle(styleLeft, styleRight, styleTop, styleBottom);
-    } else {
-        auto borderStyle = static_cast<BorderStyle>(args->ToNumber<int32_t>());
-        ViewAbstractModel::GetInstance()->SetBorderStyle(borderStyle);
+        return;
     }
+    auto borderStyle = static_cast<BorderStyle>(args->ToNumber<int32_t>());
+    ViewAbstractModel::GetInstance()->SetBorderStyle(borderStyle);
 }
 
 void JSViewAbstract::JsBlur(const JSCallbackInfo& info)
