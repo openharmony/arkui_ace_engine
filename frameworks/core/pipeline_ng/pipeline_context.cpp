@@ -193,6 +193,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         FlushFocus();
     }
     HandleVisibleAreaChangeEvent();
+    HandleOnAreaChangeEvent();
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
@@ -878,6 +879,34 @@ void PipelineContext::HandleVisibleAreaChangeEvent()
             continue;
         }
         frameNode->TriggerVisibleAreaChangeCallback(visibleChangeNode.second);
+    }
+}
+
+void PipelineContext::AddOnAreaChangeNode(int32_t nodeId)
+{
+    onAreaChangeNodeIds_.emplace(nodeId);
+}
+
+void PipelineContext::RemoveOnAreaChangeNode(int32_t nodeId)
+{
+    onAreaChangeNodeIds_.erase(nodeId);
+}
+
+void PipelineContext::HandleOnAreaChangeEvent()
+{
+    if (onAreaChangeNodeIds_.empty()) {
+        return;
+    }
+    for (const auto& nodeId : onAreaChangeNodeIds_) {
+        auto uiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
+        if (!uiNode) {
+            continue;
+        }
+        auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+        if (!frameNode) {
+            continue;
+        }
+        frameNode->TriggerOnAreaChangeCallback();
     }
 }
 

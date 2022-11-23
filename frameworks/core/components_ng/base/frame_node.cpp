@@ -41,7 +41,7 @@
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
-}
+} // namespace
 namespace OHOS::Ace::NG {
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
@@ -68,6 +68,8 @@ FrameNode::~FrameNode()
     if (focusHub) {
         focusHub->RemoveSelf(this);
     }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->RemoveOnAreaChangeNode(GetId());
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
@@ -249,13 +251,6 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     bool frameOffsetChange = geometryNode_->GetFrameOffset() != dirty->GetGeometryNode()->GetFrameOffset();
     bool contentSizeChange = geometryNode_->GetContentSize() != dirty->GetGeometryNode()->GetContentSize();
     bool contentOffsetChange = geometryNode_->GetContentOffset() != dirty->GetGeometryNode()->GetContentOffset();
-    bool parentOriginChange =
-        geometryNode_->GetParentGlobalOffset() != dirty->GetGeometryNode()->GetParentGlobalOffset();
-    // fire OnAreaChanged event.
-    if (eventHub_->HasOnAreaChanged() && (frameSizeChange || frameOffsetChange || parentOriginChange)) {
-        eventHub_->FireOnAreaChanged(geometryNode_->GetFrameRect(), geometryNode_->GetParentGlobalOffset(),
-            dirty->GetGeometryNode()->GetFrameRect(), dirty->GetGeometryNode()->GetParentGlobalOffset());
-    }
 
     SetGeometryNode(dirty->GetGeometryNode());
     if (frameSizeChange || frameOffsetChange || (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
@@ -311,6 +306,31 @@ void FrameNode::AdjustGridOffset()
 {
     if (layoutProperty_->UpdateGridOffset(Claim(this))) {
         renderContext_->SyncGeometryProperties(RawPtr(GetGeometryNode()));
+    }
+}
+
+void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
+{
+    if (!lastFrameRect_) {
+        lastFrameRect_ = std::make_unique<RectF>();
+    }
+    if (!lastParentOffsetToWindow_) {
+        lastParentOffsetToWindow_ = std::make_unique<OffsetF>();
+    }
+    eventHub_->SetOnAreaChanged(std::move(callback));
+}
+
+void FrameNode::TriggerOnAreaChangeCallback()
+{
+    if (eventHub_->HasOnAreaChanged() && lastFrameRect_ && lastParentOffsetToWindow_) {
+        auto currFrameRect = geometryNode_->GetFrameRect();
+        auto currParentOffsetToWindow = GetOffsetRelativeToWindow() - currFrameRect.GetOffset();
+        if (currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_) {
+            eventHub_->FireOnAreaChanged(
+                *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
+            *lastFrameRect_ = currFrameRect;
+            *lastParentOffsetToWindow_ = currParentOffsetToWindow;
+        }
     }
 }
 
