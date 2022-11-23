@@ -267,7 +267,7 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, 
 void FlexLayoutAlgorithm::UpdateAllocatedSize(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& crossAxisSize)
 {
     float mainAxisSize = GetChildMainAxisSize(childLayoutWrapper);
-    if (GreatOrEqual(mainAxisSize, Infinity<float>())) {
+    if (GreaterOrEqualToInfinity(mainAxisSize)) {
         mainAxisSize = 0.0f;
     }
     crossAxisSize = std::max(crossAxisSize, GetChildCrossAxisSize(childLayoutWrapper));
@@ -620,7 +620,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         isInfiniteLayout_ = isLinearLayoutFeature_;
     }
     if (!isInfiniteLayout_) {
-        isInfiniteLayout_ = GreatOrEqual(mainAxisSize_, Infinity<float>());
+        isInfiniteLayout_ = GreaterOrEqualToInfinity(mainAxisSize_);
     }
     if (isInfiniteLayout_) {
         LOGD("The main axis size is not defined or infinity, disallow flex and weight mode");
