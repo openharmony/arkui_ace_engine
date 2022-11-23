@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <regex>
 #include <string>
@@ -204,7 +205,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     } else if (caretUpdateType_ == CaretUpdateType::PRESSED) {
         // caret offset updated by gesture will not cause textRect to change offset
         UpdateCaretPositionByPressOffset();
-        return false;
+        return true;
     } else if (caretUpdateType_ == CaretUpdateType::EVENT || caretUpdateType_ == CaretUpdateType::DEL) {
         UpdateCaretOffsetByEvent();
     } else if (caretUpdateType_ == CaretUpdateType::NONE) {
@@ -213,7 +214,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         } else {
             caretOffsetX_ = textRect_.GetX() + textRect_.Width();
         }
-        return false;
+        return true;
     }
     // after new text input or events such as left right key,
     // the procedure will be:
@@ -223,7 +224,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     AdjustTextRectOffsetX();
     AdjustTextAreaOffsetY();
     UpdateSelectionOffset();
-    return false;
+    return true;
 }
 
 bool TextFieldPattern::IsTextArea()
@@ -1617,11 +1618,7 @@ void TextFieldPattern::HandleSelectionRight()
 
 void TextFieldPattern::SetCaretPosition(int32_t position)
 {
-    if (position < 0 || position > static_cast<int32_t>(textEditingValue_.text.length())) {
-        LOGE("Illegal caret position");
-        return;
-    }
-    textEditingValue_.caretPosition = position;
+    textEditingValue_.caretPosition = std::clamp(position, 0, static_cast<int32_t>(textEditingValue_.text.length()));
     selectionMode_ = SelectionMode::NONE;
     caretUpdateType_ = CaretUpdateType::EVENT;
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
