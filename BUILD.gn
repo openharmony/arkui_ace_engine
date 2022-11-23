@@ -153,6 +153,8 @@ ohos_source_set("ace_test_log") {
     "$ace_root/frameworks/base/log/ace_trace.cpp",
   ]
 
+  deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
+
   external_deps = [
     "bounds_checking_function:libsec_shared",
     "hitrace_native:hitrace_meter",
