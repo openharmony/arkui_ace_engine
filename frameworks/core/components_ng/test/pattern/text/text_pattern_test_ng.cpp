@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <functional>
 #include <optional>
 
 #include "gtest/gtest.h"
@@ -21,8 +22,10 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -45,6 +48,19 @@ const Dimension BASELINE_OFFSET_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Ace::TextCase TEXT_CASE_VALUE = Ace::TextCase::LOWERCASE;
 const Dimension ADAPT_MIN_FONT_SIZE_VALUE = Dimension(50, DimensionUnit::PX);
 const Dimension ADAPT_MAX_FONT_SIZE_VALUE = Dimension(200, DimensionUnit::PX);
+const Dimension LETTER_SPACING = Dimension(10, DimensionUnit::PX);
+
+using OnClickCallback = std::function<void(const BaseEventInfo* info)>;
+using DragDropBaseCallback = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
+void onclickFunc(const BaseEventInfo* info) {};
+void onRemoteMessage() {};
+const CopyOptions copyOption = CopyOptions::None;
+DragDropBaseInfo OnDragStartFunction(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)
+{
+    DragDropBaseInfo temp;
+    return temp;
+};
+void OnDragDropFunction(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) {};
 } // namespace
 
 struct TestProperty {
@@ -63,6 +79,7 @@ struct TestProperty {
     std::optional<Ace::TextCase> textCaseValue = std::nullopt;
     std::optional<Dimension> adaptMinFontSize = std::nullopt;
     std::optional<Dimension> adaptMaxFontSize = std::nullopt;
+    std::optional<Dimension> letterSpacing = std::nullopt;
 };
 
 class TextPatternTestNg : public testing::Test {
@@ -131,6 +148,9 @@ RefPtr<FrameNode> TextPatternTestNg::CreateTextParagraph(
     if (testProperty.adaptMaxFontSize.has_value()) {
         textModel.SetAdaptMaxFontSize(testProperty.adaptMaxFontSize.value());
     }
+    if (testProperty.letterSpacing.has_value()) {
+        textModel.SetLetterSpacing(testProperty.letterSpacing.value());
+    }
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // TextView pop
     return AceType::DynamicCast<FrameNode>(element);
@@ -189,5 +209,100 @@ HWTEST_F(TextPatternTestNg, TextFrameNodeCreator001, TestSize.Level1)
     EXPECT_EQ(textStyle.GetAdaptMaxFontSize(), ADAPT_MAX_FONT_SIZE_VALUE);
     EXPECT_EQ(textStyle.GetAdaptTextSize(),
         testProperty.adaptMinFontSize.has_value() || testProperty.adaptMaxFontSize.has_value());
+}
+
+/**
+ * @tc.name: TextFrameNodeCreator002
+ * @tc.desc: Test all the property of text.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, TextFrameNodeCreator002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.letterSpacing = std::make_optional(LETTER_SPACING);
+    auto frameNode = CreateTextParagraph(CREATE_VALUE, testProperty);
+    EXPECT_EQ(frameNode == nullptr, false);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_EQ(layoutProperty == nullptr, false);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    EXPECT_EQ(textLayoutProperty == nullptr, false);
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE);
+    const std::unique_ptr<FontStyle>& fontStyle = textLayoutProperty->GetFontStyle();
+    EXPECT_EQ(fontStyle == nullptr, false);
+    const std::unique_ptr<TextLineStyle>& textLineStyle = textLayoutProperty->GetTextLineStyle();
+    EXPECT_EQ(textLineStyle == nullptr, false);
+    auto textStyle = CreateTextStyleUsingTheme(fontStyle, textLineStyle, nullptr);
+    EXPECT_EQ(textStyle.GetLetterSpacing(), LETTER_SPACING);
+}
+
+/**
+ * @tc.name: TextFrameNodeCreator003
+ * @tc.desc: Test all the fontweight and events of text.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, TextFrameNodeCreator003, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_EQ(frameNode == nullptr, false);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_EQ(layoutProperty == nullptr, false);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    EXPECT_EQ(textLayoutProperty == nullptr, false);
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE);
+    textModelNG.SetFontWeight(FontWeight::LIGHTER);
+    textModelNG.SetLineHeight(LINE_HEIGHT_VALUE);
+    const std::unique_ptr<FontStyle>& fontStyle = textLayoutProperty->GetFontStyle();
+    EXPECT_EQ(textLayoutProperty == nullptr, false);
+    const std::unique_ptr<TextLineStyle>& textLineStyle = textLayoutProperty->GetTextLineStyle();
+    EXPECT_EQ(textLayoutProperty == nullptr, false);
+    TextStyle textStyle = CreateTextStyleUsingTheme(fontStyle, textLineStyle, nullptr);
+
+    textModelNG.SetFontWeight(FontWeight::LIGHTER);
+    textStyle.SetFontWeight(FontWeight::W100);
+    EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W100);
+    textModelNG.SetFontWeight(FontWeight::REGULAR);
+    textStyle.SetFontWeight(FontWeight::W400);
+    EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W400);
+    textModelNG.SetFontWeight(FontWeight::NORMAL);
+    textStyle.SetFontWeight(FontWeight::W400);
+    EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W400);
+    textModelNG.SetFontWeight(FontWeight::MEDIUM);
+    textStyle.SetFontWeight(FontWeight::W500);
+    EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W500);
+    textModelNG.SetFontWeight(FontWeight::BOLD);
+    textStyle.SetFontWeight(FontWeight::W700);
+    EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W700);
+    textModelNG.SetFontWeight(FontWeight::BOLDER);
+    textStyle.SetFontWeight(FontWeight::W900);
+    EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W900);
+
+    textModelNG.SetOnClick(onclickFunc);
+    textModelNG.SetRemoteMessage(onRemoteMessage);
+    textModelNG.SetCopyOption(copyOption);
+    textModelNG.SetOnDragStart(OnDragStartFunction);
+    textModelNG.SetOnDragEnter(OnDragDropFunction);
+    textModelNG.SetOnDragMove(OnDragDropFunction);
+    textModelNG.SetOnDragLeave(OnDragDropFunction);
+    textModelNG.SetOnDrop(OnDragDropFunction);
+}
+
+/**
+ * @tc.name: TextFrameNodeCreator004
+ * @tc.desc: Test TextAccessibilityProperty.cpp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, TextFrameNodeCreator004, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
+    EXPECT_FALSE(textAccessibilityProperty == nullptr);
+    textAccessibilityProperty->SetHost(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    EXPECT_EQ(textAccessibilityProperty->GetText(), CREATE_VALUE);
 }
 } // namespace OHOS::Ace::NG

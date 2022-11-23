@@ -70,7 +70,8 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // calculate main size.
     auto contentConstraint = listLayoutProperty->GetContentLayoutConstraint().value();
     auto contentIdealSize = CreateIdealSize(
-        contentConstraint, axis, listLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS));
+        contentConstraint, axis, listLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS),
+        listLayoutProperty->CreateMargin());
 
     const auto& padding = listLayoutProperty->CreatePaddingAndBorder();
     paddingBeforeContent_ = axis == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
@@ -156,12 +157,14 @@ void ListLayoutAlgorithm::MeasureList(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis)
 {
     int32_t startIndex = 0;
+    int32_t endIndex = 0;
     float startPos = 0.0f;
     float endPos = 0.0f;
     if (!itemPosition_.empty()) {
         startPos = itemPosition_.begin()->second.startPos;
-        endPos = itemPosition_.begin()->second.endPos;
+        endPos = itemPosition_.rbegin()->second.endPos;
         startIndex = std::min(GetStartIndex(), totalItemCount_ - 1);
+        endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
         itemPosition_.clear();
         layoutWrapper->RemoveAllChildInRenderTree();
     }
@@ -194,7 +197,7 @@ void ListLayoutAlgorithm::MeasureList(
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
             }
         } else {
-            LayoutBackward(layoutWrapper, layoutConstraint, axis, startIndex, endPos);
+            LayoutBackward(layoutWrapper, layoutConstraint, axis, endIndex, endPos);
             if (GetEndIndex() < (totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
                 LayoutForward(layoutWrapper, layoutConstraint, axis, GetEndIndex() + 1, GetEndPosition());
             }

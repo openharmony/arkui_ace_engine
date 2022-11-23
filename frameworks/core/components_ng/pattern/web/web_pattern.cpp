@@ -57,7 +57,9 @@ void WebPattern::InitEvent()
 
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+
     InitTouchEvent(gestureHub);
+    InitDragEvent(gestureHub);
 
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -224,6 +226,204 @@ void WebPattern::SendDoubleClickEvent(const MouseClickInfo& info)
         return;
     }
     delegate_->OnMouseEvent(info.x, info.y, MouseButton::LEFT_BUTTON, MouseAction::PRESS, DOUBLE_CLICK_NUM);
+}
+
+bool WebPattern::GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo)
+{
+    if (delegate_) {
+        dragDropInfo.pixelMap = delegate_->GetDragPixelMap();
+    }
+
+    if (dragDropInfo.pixelMap) {
+        LOGI("get w3c drag info success");
+        isW3cDragEvent_ = true;
+        return true;
+    }
+
+    return false;
+}
+
+void WebPattern::InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    auto userOnDragStartFunc = eventHub->GetOnDragStart();
+    auto onDragStartId = [weak = WeakClaim(this), userOnDragStartFunc](const RefPtr<OHOS::Ace::DragEvent>& info,
+                                const std::string& extraParams) -> NG::DragDropInfo {
+        auto pattern = weak.Upgrade();
+        NG::DragDropInfo dragDropInfo;
+        if (pattern) {
+            if (pattern->GenerateDragDropInfo(dragDropInfo)) {
+                return dragDropInfo;
+            }
+
+            LOGI("not w3c drag event, try to get drag info from user callback");
+            if (userOnDragStartFunc) {
+                LOGI("user callback has been set, get from user callback");
+                dragDropInfo = userOnDragStartFunc(info, extraParams);
+                return dragDropInfo;
+            }
+        }
+        return dragDropInfo;
+    };
+
+    // init common drag drop event
+    gestureHub->InitDragDropEvent();
+    // set custom OnDragStart function
+    eventHub->SetOnDragStart(std::move(onDragStartId));
+}
+
+void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (dragEvent_) {
+        return;
+    }
+
+    LOGI("web init DragEvent");
+    InitCommonDragDropEvent(gestureHub);
+
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleDragStart(info);
+        }
+    };
+
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleDragUpdate(info);
+        }
+    };
+
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleDragEnd(info);
+        }
+    };
+
+    auto actionCancelTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleDragCancel();
+        }
+    };
+
+    float distance = DEFAULT_PAN_DISTANCE;
+    auto host = GetHost();
+    if (host) {
+        auto context = host->GetContext();
+        if (context) {
+            distance = static_cast<float>(context->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP)));
+        }
+    }
+
+    dragEvent_ = MakeRefPtr<DragEvent>(
+        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
+    gestureHub->SetCustomDragEvent(dragEvent_, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+}
+
+void WebPattern::HandleDragStart(const GestureEvent& info)
+{
+    isDragging_ = true;
+    if (!isW3cDragEvent_ || !delegate_) {
+        LOGI("drag start, don't need to invoke web delegate interface");
+        return;
+    }
+
+    LOGI("web drag action start");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    if (!pipelineContext) {
+        LOGE("Context is null.");
+        return;
+    }
+
+    int32_t globalX = static_cast<int32_t>(info.GetGlobalPoint().GetX());
+    int32_t globalY = static_cast<int32_t>(info.GetGlobalPoint().GetY());
+    auto viewScale = pipelineContext->GetViewScale();
+    auto offset = GetHostFrameGlobalOffset();
+    int32_t localX = static_cast<int32_t>(globalX - offset.value_or(OffsetF()).GetX());
+    int32_t localY = static_cast<int32_t>(globalY - offset.value_or(OffsetF()).GetY());
+    delegate_->HandleDragEvent(localX * viewScale, localY * viewScale, DragAction::DRAG_ENTER);
+}
+
+void WebPattern::HandleDragUpdate(const GestureEvent& info)
+{
+    if (!isW3cDragEvent_ || !delegate_) {
+        LOGD("drag update, don't need to invoke web delegate interface");
+        return;
+    }
+
+    LOGD("web drag action update");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    if (!pipelineContext) {
+        LOGE("Context is null.");
+        return;
+    }
+
+    int32_t globalX = static_cast<int32_t>(info.GetGlobalPoint().GetX());
+    int32_t globalY = static_cast<int32_t>(info.GetGlobalPoint().GetY());
+    LOGD("web drag position update, x = %{public}d, y = %{public}d", globalX, globalY);
+    auto viewScale = pipelineContext->GetViewScale();
+    auto offset = GetHostFrameGlobalOffset();
+    int32_t localX = static_cast<int32_t>(globalX - offset.value_or(OffsetF()).GetX());
+    int32_t localY = static_cast<int32_t>(globalY - offset.value_or(OffsetF()).GetY());
+    delegate_->HandleDragEvent(localX * viewScale, localY * viewScale, DragAction::DRAG_OVER);
+}
+
+void WebPattern::HandleDragEnd(const GestureEvent& info)
+{
+    isDragging_ = false;
+    if (!isW3cDragEvent_ || !delegate_) {
+        LOGI("drag end, don't need to invoke web delegate interface");
+        return;
+    }
+
+    LOGI("web drag action end");
+    isW3cDragEvent_ = false;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    if (!pipelineContext) {
+        LOGE("Context is null.");
+        return;
+    }
+
+    auto viewScale = pipelineContext->GetViewScale();
+    auto offset = GetHostFrameGlobalOffset();
+    int32_t localX = static_cast<int32_t>(info.GetGlobalPoint().GetX() - offset.value_or(OffsetF()).GetX());
+    int32_t localY = static_cast<int32_t>(info.GetGlobalPoint().GetY() - offset.value_or(OffsetF()).GetY());
+    delegate_->HandleDragEvent(localX * viewScale, localY * viewScale, DragAction::DRAG_DROP);
+    delegate_->HandleDragEvent(localX * viewScale, localY * viewScale, DragAction::DRAG_END);
+}
+
+void WebPattern::HandleDragCancel()
+{
+    isDragging_ = false;
+    if (!isW3cDragEvent_ || !delegate_) {
+        LOGI("drag cancel, don't need to invoke web delegate interface");
+        return;
+    }
+
+    LOGI("web drag cancel");
+    isW3cDragEvent_ = false;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    if (!pipelineContext) {
+        LOGE("Context is null.");
+        return;
+    }
+
+    delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
 }
 
 void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
@@ -566,6 +766,10 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 
 void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
 {
+    if (isDragging_) {
+        return;
+    }
+
     CHECK_NULL_VOID(delegate_);
     std::list<TouchInfo> touchInfos;
     if (!ParseTouchInfo(info, touchInfos)) {

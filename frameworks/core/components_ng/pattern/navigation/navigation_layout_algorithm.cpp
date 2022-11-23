@@ -158,6 +158,20 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     contentWrapper->Layout();
 }
 
+void FitScrollFullWindow(SizeF& frameSize)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (!pipeline) {
+        return;
+    }
+    if (frameSize.Width() == Infinity<float>()) {
+        frameSize.SetWidth(pipeline->GetRootWidth());
+    }
+    if (frameSize.Height() == Infinity<float>()) {
+        frameSize.SetHeight(pipeline->GetRootHeight());
+    }
+}
+
 } // namespace
 
 void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)

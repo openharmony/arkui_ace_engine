@@ -101,7 +101,7 @@ void JSImage::SetMatchTextDirection(bool value)
 
 void JSImage::SetFitOriginalSize(bool value)
 {
-    ImageModel::GetInstance()->SetFitMaxSize(value);
+    ImageModel::GetInstance()->SetFitOriginSize(value);
 }
 
 void JSImage::SetBorder(const Border& border)

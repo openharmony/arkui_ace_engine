@@ -74,6 +74,16 @@ public:
         isLoop_ = isLoop;
     }
 
+    int32_t GetCurrentIndex() const
+    {
+        return currentIndex_;
+    }
+
+    const SizeF& GetMaxChildSize() const
+    {
+        return maxChildSize_;
+    }
+
 private:
     void InitItemRange(LayoutWrapper* layoutWrapper);
     void AddToItemRange(int32_t index);
@@ -89,6 +99,7 @@ private:
     std::set<int32_t> itemRange_;
     std::set<int32_t> preItemRange_;
     std::vector<int32_t> inActiveItems_;
+    SizeF maxChildSize_;
 };
 
 } // namespace OHOS::Ace::NG

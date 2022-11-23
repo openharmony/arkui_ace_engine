@@ -68,6 +68,10 @@ void SwiperLayoutAlgorithm::InitItemRange(LayoutWrapper* layoutWrapper)
     ACE_SCOPED_TRACE("SwiperLayoutAlgorithm::InitItemRange");
     itemRange_.clear();
 
+    if (currentIndex_ < 0 || currentIndex_ > totalCount_ - 1) {
+        currentIndex_ = 0;
+    }
+
     /* Load next index while swiping */
     LoadItemWithDrag(layoutWrapper);
 
@@ -119,17 +123,13 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
 
-    auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
+    auto isSingleCase =
+        (swiperLayoutProperty->GetDisplayCount().has_value() && swiperLayoutProperty->GetDisplayCountValue() == 1) ||
+        (!swiperLayoutProperty->GetDisplayCount().has_value() && SwiperUtils::IsStretch(swiperLayoutProperty));
 
     OptionalSizeF idealSize;
-    if (displayCount == 1) {
-        // single case
-        idealSize =
-            CreateIdealSize(constraint.value(), axis, swiperLayoutProperty->GetMeasureType(MeasureType::MATCH_CONTENT));
-    } else {
-        idealSize = CreateIdealSize(
-            constraint.value(), axis, swiperLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS));
-    }
+    auto measureType = isSingleCase ? MeasureType::MATCH_CONTENT : MeasureType::MATCH_PARENT_MAIN_AXIS;
+    idealSize = CreateIdealSize(constraint.value(), axis, swiperLayoutProperty->GetMeasureType(measureType));
 
     auto padding = swiperLayoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, idealSize);
@@ -150,15 +150,16 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         mainSize = std::max(mainSize, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis));
     }
 
+    maxChildSize_ = axis == Axis::HORIZONTAL ? SizeF(mainSize, crossSize) : SizeF(crossSize, mainSize);
+
     // Mark inactive in wrapper.
     for (const auto& index : inActiveItems_) {
         layoutWrapper->RemoveChildInRenderTree(index);
     }
 
-    if (displayCount == 1) {
+    if (isSingleCase) {
         // single case.
-        SizeF maxChildSize = axis == Axis::HORIZONTAL ? SizeF(mainSize, crossSize) : SizeF(crossSize, mainSize);
-        idealSize.UpdateIllegalSizeWithCheck(maxChildSize);
+        idealSize.UpdateIllegalSizeWithCheck(maxChildSize_);
     } else {
         // multi case, update cross size.
         if (axis == Axis::HORIZONTAL) {

@@ -264,6 +264,13 @@ void PipelineContext::FlushPredictLayout(int64_t deadline)
     }
 }
 
+double PipelineContext::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+    const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+{
+    return OHOS::Ace::RenderCustomPaint::PaintMeasureText(text, fontSize, fontStyle,
+        fontWeight, fontFamily, letterSpacing);
+}
+
 void PipelineContext::FlushFocus()
 {
     CHECK_RUN_ON(UI);
@@ -367,12 +374,16 @@ void PipelineContext::ShowContainerTitle(bool isShow)
     auto containerModal = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
     if (containerModal) {
         containerModal->ShowTitle(isShow);
-#ifdef ENABLE_ROSEN_BACKEND
-        if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-            rsUIDirector_->SetContainerWindow(isShow); // set container window show state to render service
-        }
-#endif
     }
+}
+
+void PipelineContext::SetContainerWindow(bool isShow)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+        rsUIDirector_->SetContainerWindow(isShow, density_); // set container window show state to render service
+    }
+#endif
 }
 
 void PipelineContext::BlurWindowWithDrag(bool isBlur)
@@ -673,9 +684,6 @@ void PipelineContext::FlushRender()
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushRender();
     }
-#ifdef ENABLE_ROSEN_BACKEND
-    Rosen::RSSystemProperties::SetDrawTextAsBitmap(false);
-#endif
 }
 
 void PipelineContext::FlushRenderFinish()
@@ -2108,6 +2116,22 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
             Animate(option, curve, [width, height, this]() {
                 SetRootSizeWithWidthHeight(width, height);
                 FlushLayout();
+            }, [weak = AceType::WeakClaim(this)]() {
+                auto pipeline = weak.Upgrade();
+                if (pipeline == nullptr) {
+                    return;
+                }
+                pipeline->rotationAnimationCount_--;
+                if (pipeline->rotationAnimationCount_ < 0) {
+                    LOGE("PipelineContext::Root node ROTATION animation callback"
+                        "rotationAnimationCount Invalid %{public}d", pipeline->rotationAnimationCount_);
+                }
+                if (pipeline->rotationAnimationCount_ == 0) {
+#ifdef ENABLE_ROSEN_BACKEND
+                    // to improve performance, duration rotation animation, draw text as bitmap
+                    Rosen::RSSystemProperties::SetDrawTextAsBitmap(false);
+#endif
+                }
             });
 #ifdef ENABLE_ROSEN_BACKEND
             // to improve performance, duration rotation animation, draw text as bitmap
@@ -2174,10 +2198,15 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
             textFieldManager_->MovePage(GetLastPage()->GetPageId(), { newRootWidth, newRootHeight }, offsetHeight);
         }
     }
-    auto frontend = weakFrontend_.Upgrade();
-    if (frontend) {
-        frontend->OnSurfaceChanged(width, height);
-    }
+
+    taskExecutor_->PostTask([weakFrontend = weakFrontend_, width, height](){
+        auto frontend = weakFrontend.Upgrade();
+        if (frontend) {
+            frontend->OnSurfaceChanged(width, height);
+        }
+    },
+    TaskExecutor::TaskType::JS);
+
 
     // init transition clip size when surface changed.
     const auto& pageElement = GetLastPage();
@@ -2863,6 +2892,9 @@ void PipelineContext::WindowFocus(bool isFocus)
         RootLostFocus();
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
+    }
+    if (onFocus_ && onShow_) {
+        FlushFocus();
     }
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         LOGD("WindowFocus failed, Window modal is not container.");

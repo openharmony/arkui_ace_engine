@@ -401,41 +401,6 @@ void WebView::SetSearchResultReceiveEventId(OnWebAsyncFunc&& searchResultReceive
     webEventHub->SetOnSearchResultReceiveEvent(std::move(searchResultReceiveEventId));
 }
 
-void WebView::SetOnDragStartId(const OnDragFunc& onDragStartId)
-{
-    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
-    CHECK_NULL_VOID(webEventHub);
-    webEventHub->SetOnDragStartEvent(std::move(onDragStartId));
-}
-
-void WebView::SetOnDragEnterId(const OnDropFunc& onDragEnterId)
-{
-    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
-    CHECK_NULL_VOID(webEventHub);
-    webEventHub->SetOnDragEnterEvent(std::move(onDragEnterId));
-}
-
-void WebView::SetOnDragMoveId(const OnDropFunc& onDragMoveId)
-{
-    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
-    CHECK_NULL_VOID(webEventHub);
-    webEventHub->SetOnDragMoveEvent(std::move(onDragMoveId));
-}
-
-void WebView::SetOnDragLeaveId(const OnDropFunc& onDragLeaveId)
-{
-    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
-    CHECK_NULL_VOID(webEventHub);
-    webEventHub->SetOnDragLeaveEvent(std::move(onDragLeaveId));
-}
-
-void WebView::SetOnDropId(const OnDropFunc& onDropId)
-{
-    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
-    CHECK_NULL_VOID(webEventHub);
-    webEventHub->SetOnDropEvent(std::move(onDropId));
-}
-
 void WebView::SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();

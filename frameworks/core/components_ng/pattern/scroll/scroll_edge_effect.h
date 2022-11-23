@@ -21,6 +21,8 @@
 
 namespace OHOS::Ace::NG {
 
+using HandleOverScrollCallback = std::function<void()>;
+
 class ScrollEdgeEffect : public ScrollEdgeEffectBase {
     DECLARE_ACE_TYPE(ScrollEdgeEffect, ScrollEdgeEffectBase);
 
@@ -31,9 +33,11 @@ public:
 
     ~ScrollEdgeEffect() override = default;
 
-    virtual void HandleOverScroll(Axis axis, float overScroll, float viewPortLength) {}
+    virtual void HandleOverScroll(Axis axis, float overScroll, const SizeF& viewPort) {}
 
-    virtual void Paint(RenderContext& context, const Size& viewPort, const Offset& offset) {}
+    virtual void Paint(RSCanvas& canvas, const SizeF& viewPort, const OffsetF& offset) {}
+
+    virtual void SetHandleOverScrollCallback(const HandleOverScrollCallback& callback) {}
 };
 
 } // namespace OHOS::Ace::NG

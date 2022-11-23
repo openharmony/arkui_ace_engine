@@ -129,6 +129,9 @@ void ContainerModalElement::ShowTitle(bool isShow)
     }
     windowMode_ = context->GetWindowManager()->GetWindowMode();
 
+    // set container window show state to RS
+    context->SetContainerWindow(isShow);
+
     // full screen need to hide border and padding.
     auto containerRenderBox = AceType::DynamicCast<RenderBox>(containerBox->GetRenderNode());
     if (containerRenderBox) {
@@ -251,10 +254,7 @@ void ContainerModalElement::PerformBuild()
 
     // The first time it starts up, it needs to hide title if mode as follows.
     windowMode_ = context_.Upgrade()->GetWindowManager()->GetWindowMode();
-    if (windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN || windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-        windowMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        ShowTitle(false);
-    }
+    ShowTitle(windowMode_ == WindowMode::WINDOW_MODE_FLOATING);
 }
 
 void ContainerModalElement::FlushReload()

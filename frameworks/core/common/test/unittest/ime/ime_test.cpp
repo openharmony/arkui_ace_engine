@@ -693,4 +693,98 @@ HWTEST_F(ImeTest, FormatTest001, TestSize.Level1)
     EXPECT_EQ(newValue.selection.baseOffset, -1);
     EXPECT_EQ(newValue.selection.extentOffset, -1);
 }
+
+/**
+ * @tc.name: FormatTest002
+ * @tc.desc: Test invalid parameters of text length.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImeTest, FormatTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialization parameter, start is less than end, and limit is equal to start.
+     * @tc.expected: step1. Output expected results.
+     */
+    TextEditingValue newValue;
+    TextEditingValue oldValue;
+    LengthLimitingFormatter lengthLimitingFormatter(LESS_THAN_TEXT_LENGTH);
+    newValue.text = TEXT_TEST_VALUE;
+    newValue.selection.baseOffset = LESS_THAN_TEXT_LENGTH;
+    newValue.selection.extentOffset = GREATER_THAN_TEXT_LENGTH;
+
+    lengthLimitingFormatter.Format(oldValue, newValue);
+    EXPECT_EQ(newValue.text, TEXT_TEST_VALUE);
+    EXPECT_EQ(newValue.selection.baseOffset, 6);
+    EXPECT_EQ(newValue.selection.extentOffset, 20);
+}
+
+/**
+ * @tc.name: FormatTest003
+ * @tc.desc: Test basic functions of Format.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImeTest, FormatTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize parameters to make removeBeforeExtent and removeAfterExtent greater than zero.
+     * @tc.expected: step1. Output expected results.
+     */
+    TextEditingValue newValue;
+    TextEditingValue oldValue;
+    LengthLimitingFormatter lengthLimitingFormatter(1);
+    newValue.text = TEXT_TEST_VALUE;
+    newValue.selection.baseOffset = LESS_THAN_TEXT_LENGTH;
+    newValue.selection.extentOffset = 10;
+
+    lengthLimitingFormatter.Format(oldValue, newValue);
+    EXPECT_EQ(newValue.text, "v");
+    EXPECT_EQ(newValue.selection.baseOffset, 0);
+    EXPECT_EQ(newValue.selection.extentOffset, 0);
+}
+
+/**
+ * @tc.name: FormatTest004
+ * @tc.desc: Test remove after extent of format.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImeTest, FormatTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize the parameter to make removeAfterExtent less than or equal to zero.
+     * @tc.expected: step1. Output expected results.
+     */
+    TextEditingValue newValue;
+    TextEditingValue oldValue;
+    LengthLimitingFormatter lengthLimitingFormatter(14);
+    newValue.text = TEXT_TEST_VALUE;
+    newValue.selection.extentOffset = 10;
+
+    lengthLimitingFormatter.Format(oldValue, newValue);
+    EXPECT_EQ(newValue.text, "text_testvalue");
+    EXPECT_EQ(newValue.selection.baseOffset, 9);
+    EXPECT_EQ(newValue.selection.extentOffset, 9);
+}
+
+/**
+ * @tc.name: FormatTest005
+ * @tc.desc: Test invalid parameters of removeBeforeExtent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImeTest, FormatTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize parameters to make removeBeforeExtent less than or equal to zero.
+     * @tc.expected: step1. Output expected results.
+     */
+    TextEditingValue newValue;
+    TextEditingValue oldValue;
+    LengthLimitingFormatter lengthLimitingFormatter(14);
+    newValue.text = TEXT_TEST_VALUE;
+    newValue.selection.extentOffset = 0;
+
+    lengthLimitingFormatter.Format(oldValue, newValue);
+    EXPECT_EQ(newValue.text, "text_test_valu");
+    EXPECT_EQ(newValue.selection.baseOffset, -1);
+    EXPECT_EQ(newValue.selection.extentOffset, 0);
+}
 } // namespace OHOS::Ace

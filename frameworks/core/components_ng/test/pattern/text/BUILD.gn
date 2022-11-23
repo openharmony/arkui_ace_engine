@@ -154,6 +154,7 @@ ohos_unittest("text_pattern_test_ng") {
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
 
     # self
+    "span_pattern_test_ng.cpp",
     "text_layout_test_ng.cpp",
     "text_pattern_test_ng.cpp",
   ]

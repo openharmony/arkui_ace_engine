@@ -85,6 +85,8 @@ void PipelineContext::WindowFocus(bool isFocus) {}
 
 void PipelineContext::ShowContainerTitle(bool isShow) {}
 
+void PipelineContext::SetContainerWindow(bool isShow) {}
+
 void PipelineContext::SetAppBgColor(const Color& color) {}
 
 void PipelineContext::SetAppTitle(const std::string& title) {}
@@ -167,6 +169,12 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 bool PipelineContext::OnBackPressed()
 {
     return false;
+}
+
+double PipelineContext::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+    const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+{
+    return 0.0;
 }
 
 // core/pipeline_ng/pipeline_context.h depends on the specific impl

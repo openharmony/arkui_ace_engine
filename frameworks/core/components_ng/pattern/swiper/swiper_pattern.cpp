@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
+#include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/swiper_indicator/swiper_indicator_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
@@ -81,7 +82,7 @@ void SwiperPattern::OnModifyDone()
 
     InitSwiperIndicator();
     auto childrenSize = TotalCount();
-    if (layoutProperty->GetIndex().has_value() && CurrentIndex() >= 0 && CurrentIndex() < childrenSize) {
+    if (layoutProperty->GetIndex().has_value() && CurrentIndex() >= 0) {
         currentIndex_ = CurrentIndex();
     } else {
         LOGE("index is not valid: %{public}d, items size: %{public}d", CurrentIndex(), childrenSize);
@@ -103,6 +104,38 @@ void SwiperPattern::OnModifyDone()
     if (focusHub) {
         InitOnKeyEvent(focusHub);
     }
+    auto removeSwiperEventCallback = [weak = WeakClaim(this)]() {
+        auto swiperPattern = weak.Upgrade();
+        CHECK_NULL_VOID(swiperPattern);
+        auto host = swiperPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto hub = host->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(hub);
+        auto gestureHub = hub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->RemoveTouchEvent(swiperPattern->touchEvent_);
+        if (!swiperPattern->IsDisableSwipe()) {
+            gestureHub->RemovePanEvent(swiperPattern->panEvent_);
+        }
+    };
+    swiperController_->SetRemoveSwiperEventCallback(std::move(removeSwiperEventCallback));
+
+    auto addSwiperEventCallback = [weak = WeakClaim(this)]() {
+        auto swiperPattern = weak.Upgrade();
+        CHECK_NULL_VOID(swiperPattern);
+        auto host = swiperPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto hub = host->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(hub);
+        auto gestureHub = hub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->AddTouchEvent(swiperPattern->touchEvent_);
+        if (!swiperPattern->IsDisableSwipe()) {
+            gestureHub->AddPanEvent(
+                swiperPattern->panEvent_, swiperPattern->panDirection_, 1, swiperPattern->distance_);
+        }
+    };
+    swiperController_->SetAddSwiperEventCallback(std::move(addSwiperEventCallback));
 }
 
 bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -116,6 +149,8 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto swiperLayoutAlgorithm = DynamicCast<SwiperLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(swiperLayoutAlgorithm, false);
     preItemRange_ = swiperLayoutAlgorithm->GetItemRange();
+    currentIndex_ = swiperLayoutAlgorithm->GetCurrentIndex();
+    maxChildSize_ = swiperLayoutAlgorithm->GetMaxChildSize();
     return GetEdgeEffect() == EdgeEffect::FADE;
 }
 
@@ -196,7 +231,7 @@ void SwiperPattern::SwipeTo(int32_t index)
     }
 
     // TODO Adapt displayCount.
-    auto translateOffset = targetIndex_.value() > currentIndex_ ? -MainSize() : MainSize();
+    auto translateOffset = targetIndex_.value() > currentIndex_ ? -GetTranslateLength() : GetTranslateLength();
     PlayTranslateAnimation(0, translateOffset, targetIndex_.value(), true);
 }
 
@@ -212,7 +247,8 @@ void SwiperPattern::ShowNext()
     StopAutoPlay();
     StopTranslateAnimation();
     if (childrenSize > 0 && GetDisplayCount() != 0) {
-        PlayTranslateAnimation(0, -MainSize() / GetDisplayCount(), (currentIndex_ + 1) % childrenSize, true);
+        auto endPosition = GetTranslateLength();
+        PlayTranslateAnimation(0, -endPosition, (currentIndex_ + 1) % childrenSize, true);
     }
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
@@ -231,8 +267,8 @@ void SwiperPattern::ShowPrevious()
     StopAutoPlay();
     StopTranslateAnimation();
     if (childrenSize > 0 && GetDisplayCount() != 0) {
-        PlayTranslateAnimation(
-            0, MainSize() / GetDisplayCount(), (currentIndex_ + childrenSize - 1) % childrenSize, true);
+        auto endPosition = GetTranslateLength();
+        PlayTranslateAnimation(0, endPosition, (currentIndex_ + childrenSize - 1) % childrenSize, true);
     }
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
@@ -301,6 +337,7 @@ void SwiperPattern::InitSwiperIndicator()
     auto swiperNode = GetHost();
     CHECK_NULL_VOID(swiperNode);
     RefPtr<FrameNode> indicatorNode;
+    CHECK_NULL_VOID(swiperNode->GetLastChild());
     if (swiperNode->GetLastChild()->GetTag() != V2::SWIPER_INDICATOR_ETS_TAG) {
         LOGI("Swiper create new indicator");
         if (!IsShowIndicator()) {
@@ -406,27 +443,26 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         }
     };
 
-    PanDirection panDirection;
     if (GetDirection() == Axis::VERTICAL) {
-        panDirection.type = PanDirection::VERTICAL;
+        panDirection_.type = PanDirection::VERTICAL;
     } else {
-        panDirection.type = PanDirection::HORIZONTAL;
+        panDirection_.type = PanDirection::HORIZONTAL;
     }
     if (panEvent_) {
         gestureHub->RemovePanEvent(panEvent_);
     }
 
-    float distance = DEFAULT_PAN_DISTANCE;
+    distance_ = DEFAULT_PAN_DISTANCE;
     auto host = GetHost();
     if (host) {
         auto context = host->GetContext();
         if (context) {
-            distance = static_cast<float>(context->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP)));
+            distance_ = static_cast<float>(context->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP)));
         }
     }
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
+    gestureHub->AddPanEvent(panEvent_, panDirection_, 1, distance_);
 }
 
 void SwiperPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -521,7 +557,8 @@ void SwiperPattern::Tick(uint64_t duration)
                 scheduler_->Stop();
             }
         } else {
-            PlayTranslateAnimation(0, -MainSize() / displayCount, (currentIndex_ + 1) % childrenSize);
+            auto endPosition = GetTranslateLength();
+            PlayTranslateAnimation(0, -endPosition, (currentIndex_ + 1) % childrenSize);
         }
         elapsedTime_ = 0;
     }
@@ -573,10 +610,6 @@ void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void SwiperPattern::HandleTouchDown()
 {
-    const auto& tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
-    if (tabBarFinishCallback) {
-        tabBarFinishCallback();
-    }
     // Stop translate animation when touch down.
     if (controller_ && controller_->IsRunning()) {
         controller_->Pause();
@@ -610,6 +643,11 @@ void SwiperPattern::HandleDragStart()
     const auto& tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
     if (tabBarFinishCallback) {
         tabBarFinishCallback();
+    }
+
+    const auto& removeEventCallback = swiperController_->GetRemoveTabBarEventCallback();
+    if (removeEventCallback) {
+        removeEventCallback();
     }
 #ifdef OHOS_PLATFORM
     // Increase the cpu frequency when sliding.
@@ -652,6 +690,10 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 
 void SwiperPattern::HandleDragEnd(double dragVelocity)
 {
+    const auto& addEventCallback = swiperController_->GetAddTabBarEventCallback();
+    if (addEventCallback) {
+        addEventCallback();
+    }
     LOGD("Drag end velocity: %{public}lf, currentOffset: %{public}lf", dragVelocity, currentOffset_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -678,7 +720,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
 #endif
     // Play translate animation.
-    auto mainSize = MainSize() / std::max(GetDisplayCount(), 1);
+    auto mainSize = GetTranslateLength();
     if (LessOrEqual(mainSize, 0)) {
         LOGE("Main size is not positive.");
         return;
@@ -957,6 +999,19 @@ int32_t SwiperPattern::TotalCount() const
     CHECK_NULL_RETURN(host, 0);
     // last child is swiper indicator
     return IsShowIndicator() ? host->TotalChildCount() - 1 : host->TotalChildCount();
+}
+
+float SwiperPattern::GetTranslateLength() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0);
+
+    auto layoutProperty = host->GetLayoutProperty<SwiperLayoutProperty>();
+    if (!SwiperUtils::IsStretch(layoutProperty)) {
+        return GetDirection() == Axis::HORIZONTAL ? maxChildSize_.Width() : maxChildSize_.Height();
+    }
+
+    return MainSize() / static_cast<float>(std::max(GetDisplayCount(), 1));
 }
 
 } // namespace OHOS::Ace::NG
