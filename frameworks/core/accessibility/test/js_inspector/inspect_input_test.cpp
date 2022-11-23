@@ -28,6 +28,36 @@ class InspectInputTest : public testing::Test {
 public:
     static void SetUpTestSuite() {};
     static void TearDownTestSuite() {};
+
+    void CheckInputAttrAndStyle(InspectInput& inspectInput, uint16_t attrsSize, uint16_t stylesSize)
+    {
+        uint16_t attrsSizeInsert = 6;
+        uint16_t stylesSizeInsert = 3;
+        uint16_t insertThree = 3;
+        DeviceType deviceType = SystemProperties::GetDeviceType();
+        EXPECT_EQ(inspectInput.attrs_["type"], "text");
+        EXPECT_EQ(inspectInput.attrs_["checked"], "false");
+        EXPECT_EQ(inspectInput.attrs_["enterkeytype"], "default");
+        EXPECT_EQ(inspectInput.attrs_["showcounter"], "false");
+        EXPECT_EQ(inspectInput.attrs_["disabled"], "false");
+        EXPECT_EQ(inspectInput.attrs_["focusable"], "true");
+        if (deviceType == DeviceType::PHONE) {
+            EXPECT_EQ(inspectInput.styles_["color"], "#e6000000");
+            EXPECT_EQ(inspectInput.styles_["font-size"], "16px");
+            EXPECT_EQ(inspectInput.styles_["placeholder-color"], "#99000000");
+            stylesSizeInsert += insertThree;
+        } else if (deviceType == DeviceType::TV) {
+            EXPECT_EQ(inspectInput.styles_["color"], "#e6ffffff");
+            EXPECT_EQ(inspectInput.styles_["font-size"], "18px");
+            EXPECT_EQ(inspectInput.styles_["placeholder-color"], "#99ffffff");
+            stylesSizeInsert += insertThree;
+        }
+        EXPECT_EQ(inspectInput.styles_["allow-scale"], "true");
+        EXPECT_EQ(inspectInput.styles_["font-weight"], "normal");
+        EXPECT_EQ(inspectInput.styles_["font-family"], "sans-serif");
+        EXPECT_EQ(inspectInput.attrs_.size(), attrsSize + attrsSizeInsert);
+        EXPECT_EQ(inspectInput.styles_.size(), stylesSize + stylesSizeInsert);
+    }
 };
 
 /**
@@ -46,7 +76,7 @@ HWTEST_F(InspectInputTest, InspectInputTest001, TestSize.Level1)
 
 /**
  * @tc.name: InspectInputTest002
- * @tc.desc: InspectInput::PackAttrAndStyle
+ * @tc.desc: InspectInput::PackAttrAndStyle-PHONE
  * @tc.type: FUNC
  */
 HWTEST_F(InspectInputTest, InspectInputTest002, TestSize.Level1)
@@ -56,23 +86,111 @@ HWTEST_F(InspectInputTest, InspectInputTest002, TestSize.Level1)
     InspectInput inspectInput(nodeId, tag);
     auto attrsSize = inspectInput.attrs_.size();
     auto stylesSize = inspectInput.styles_.size();
-    uint16_t attrsSizeInsert = 6;
-    uint16_t stylesSizeInsert = 6;
 
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
     inspectInput.PackAttrAndStyle();
-    EXPECT_EQ(inspectInput.attrs_.size(), attrsSize + attrsSizeInsert);
-    EXPECT_EQ(inspectInput.attrs_["type"], "text");
-    EXPECT_EQ(inspectInput.attrs_["checked"], "false");
-    EXPECT_EQ(inspectInput.attrs_["enterkeytype"], "default");
-    EXPECT_EQ(inspectInput.attrs_["showcounter"], "false");
-    EXPECT_EQ(inspectInput.attrs_["disabled"], "false");
-    EXPECT_EQ(inspectInput.attrs_["focusable"], "true");
-    EXPECT_EQ(inspectInput.styles_.size(), stylesSize + stylesSizeInsert);
-    EXPECT_EQ(inspectInput.styles_["color"], "#e6000000");
-    EXPECT_EQ(inspectInput.styles_["font-size"], "16px");
-    EXPECT_EQ(inspectInput.styles_["placeholder-color"], "#99000000");
-    EXPECT_EQ(inspectInput.styles_["allow-scale"], "true");
-    EXPECT_EQ(inspectInput.styles_["font-weight"], "normal");
-    EXPECT_EQ(inspectInput.styles_["font-family"], "sans-serif");
+    CheckInputAttrAndStyle(inspectInput, attrsSize, stylesSize);
+    SystemProperties::SetDeviceType(deviceType);
+}
+
+/**
+ * @tc.name: InspectInputTest003
+ * @tc.desc: InspectInput::PackAttrAndStyle-TV
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectInputTest, InspectInputTest003, TestSize.Level1)
+{
+    NodeId nodeId = -1;
+    std::string tag = "tagTest";
+    InspectInput inspectInput(nodeId, tag);
+    auto attrsSize = inspectInput.attrs_.size();
+    auto stylesSize = inspectInput.styles_.size();
+
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    SystemProperties::SetDeviceType(DeviceType::TV);
+    inspectInput.PackAttrAndStyle();
+    CheckInputAttrAndStyle(inspectInput, attrsSize, stylesSize);
+    SystemProperties::SetDeviceType(deviceType);
+}
+
+/**
+ * @tc.name: InspectInputTest004
+ * @tc.desc: InspectInput::PackAttrAndStyle-WATCH
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectInputTest, InspectInputTest004, TestSize.Level1)
+{
+    NodeId nodeId = -1;
+    std::string tag = "tagTest";
+    InspectInput inspectInput(nodeId, tag);
+    auto attrsSize = inspectInput.attrs_.size();
+    auto stylesSize = inspectInput.styles_.size();
+
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    SystemProperties::SetDeviceType(DeviceType::WATCH);
+    inspectInput.PackAttrAndStyle();
+    CheckInputAttrAndStyle(inspectInput, attrsSize, stylesSize);
+    SystemProperties::SetDeviceType(deviceType);
+}
+
+/**
+ * @tc.name: InspectInputTest005
+ * @tc.desc: InspectInput::PackAttrAndStyle-CAR
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectInputTest, InspectInputTest005, TestSize.Level1)
+{
+    NodeId nodeId = -1;
+    std::string tag = "tagTest";
+    InspectInput inspectInput(nodeId, tag);
+    auto attrsSize = inspectInput.attrs_.size();
+    auto stylesSize = inspectInput.styles_.size();
+
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    SystemProperties::SetDeviceType(DeviceType::CAR);
+    inspectInput.PackAttrAndStyle();
+    CheckInputAttrAndStyle(inspectInput, attrsSize, stylesSize);
+    SystemProperties::SetDeviceType(deviceType);
+}
+
+/**
+ * @tc.name: InspectInputTest006
+ * @tc.desc: InspectInput::PackAttrAndStyle-TABLET
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectInputTest, InspectInputTest006, TestSize.Level1)
+{
+    NodeId nodeId = -1;
+    std::string tag = "tagTest";
+    InspectInput inspectInput(nodeId, tag);
+    auto attrsSize = inspectInput.attrs_.size();
+    auto stylesSize = inspectInput.styles_.size();
+
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    SystemProperties::SetDeviceType(DeviceType::TABLET);
+    inspectInput.PackAttrAndStyle();
+    CheckInputAttrAndStyle(inspectInput, attrsSize, stylesSize);
+    SystemProperties::SetDeviceType(deviceType);
+}
+
+/**
+ * @tc.name: InspectInputTest007
+ * @tc.desc: InspectInput::PackAttrAndStyle-UNKNOWN
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectInputTest, InspectInputTest007, TestSize.Level1)
+{
+    NodeId nodeId = -1;
+    std::string tag = "tagTest";
+    InspectInput inspectInput(nodeId, tag);
+    auto attrsSize = inspectInput.attrs_.size();
+    auto stylesSize = inspectInput.styles_.size();
+
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    SystemProperties::SetDeviceType(DeviceType::UNKNOWN);
+    inspectInput.PackAttrAndStyle();
+    CheckInputAttrAndStyle(inspectInput, attrsSize, stylesSize);
+    SystemProperties::SetDeviceType(deviceType);
 }
 } // namespace OHOS::Ace::Framework
