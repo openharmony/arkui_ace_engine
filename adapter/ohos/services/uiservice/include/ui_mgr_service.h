@@ -69,7 +69,7 @@ private:
     UIServiceRunningState state_;
 
     std::map<std::string, sptr<IUIService>> callbackMap_;
-    std::mutex uiMutex_;
+    std::recursive_mutex uiMutex_;
 };
 }  // namespace Ace
 }  // namespace OHOS

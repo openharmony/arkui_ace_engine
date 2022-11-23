@@ -27,19 +27,24 @@ namespace OHOS::Ace {
 std::unique_ptr<DrawDelegate> RosenRenderPlugin::GetDrawDelegate()
 {
     auto drawDelegate = std::make_unique<DrawDelegate>();
-    drawDelegate->SetDrawRSFrameCallback([this](std::shared_ptr<RSNode>& node, const Rect& dirty) {
-        if (!GetRSNode()) {
-            SyncRSNodeBoundary(true, true);
-        }
-        auto rsNode = GetRSNode();
-        if (node) {
-            node->SetBackgroundColor(Color::TRANSPARENT.GetValue());
-        }
-        rsNode->AddChild(node, -1);
+    drawDelegate->SetDrawRSFrameCallback(
+        [this, weak = WeakClaim(this)](std::shared_ptr<RSNode>& node, const Rect& dirty) {
+            auto sp = weak.Upgrade();
+            if (!sp) {
+                return;
+            }
+            if (!GetRSNode()) {
+                SyncRSNodeBoundary(true, true);
+            }
+            auto rsNode = GetRSNode();
+            if (node) {
+                node->SetBackgroundColor(Color::TRANSPARENT.GetValue());
+            }
+            rsNode->AddChild(node, -1);
 
-        MarkNeedLayout(true, true);
-        MarkNeedRender(true);
-    });
+            MarkNeedLayout(true, true);
+            MarkNeedRender(true);
+        });
     return drawDelegate;
 }
 
