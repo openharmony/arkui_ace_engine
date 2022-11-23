@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/utils.h"
 #include "core/common/anr_thread.h"
 
 #include "xcollie/watchdog.h"
@@ -29,10 +30,7 @@ void AnrThread::Stop() {}
 
 bool AnrThread::PostTaskToTaskRunner(Task&& task, uint32_t delayTime)
 {
-    if (!task) {
-        return false;
-    }
-
+    CHECK_NULL_RETURN(task, false);
     if (delayTime > 0) {
         OHOS::HiviewDFX::Watchdog::GetInstance().RunOneShotTask(
             ARKUI_WATCH_DOG, std::move(task), delayTime * SECOND_TO_MILLISECOND);

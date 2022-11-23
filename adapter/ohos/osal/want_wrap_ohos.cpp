@@ -16,6 +16,7 @@
 #include "want_wrap_ohos.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/utils/utils.h"
 #include "napi_common_want.h"
 
 namespace OHOS::Ace {
@@ -42,9 +43,7 @@ WantWrapOhos::WantWrapOhos(NativeEngine* engine, NativeValue* value)
 void WantWrapOhos::SetWantParamsFromWantWrap(void* want)
 {
     auto destWant = reinterpret_cast<AAFwk::Want*>(want);
-    if (!destWant) {
-        return;
-    }
+    CHECK_NULL_VOID(destWant);
     auto params = want_.GetParams();
     destWant->SetParams(params);
 }

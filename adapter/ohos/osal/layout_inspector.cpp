@@ -22,6 +22,7 @@
 #include "wm/window.h"
 
 #include "base/thread/background_task_executor.h"
+#include "base/utils/utils.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
 #include "core/components_v2/inspector/inspector.h"
@@ -34,15 +35,10 @@ bool LayoutInspector::layoutInspectorStatus_ = false;
 void LayoutInspector::SupportInspector()
 {
     auto container = Container::Current();
-    if (!container) {
-        LOGE("container null");
-        return;
-    }
+    CHECK_NULL_VOID(container);
     if (!layoutInspectorStatus_) {
         SetlayoutInspectorStatus();
-        if (!layoutInspectorStatus_) {
-            return;
-        }
+        CHECK_NULL_VOID(layoutInspectorStatus_);
     }
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!pipelineContext) {
@@ -51,15 +47,9 @@ void LayoutInspector::SupportInspector()
     }
     std::string jsonTreeStr = V2::Inspector::GetInspectorTree(pipelineContext);
     OHOS::sptr<OHOS::Rosen::Window> window = OHOS::Rosen::Window::GetTopWindowWithId(container->GetWindowId());
-    if (!window) {
-        LOGE("GetWindow is null!");
-        return;
-    }
+    CHECK_NULL_VOID(window);
     auto pixelMap = window->Snapshot();
-    if (pixelMap == nullptr) {
-        LOGE("Pixel is null");
-        return;
-    }
+    CHECK_NULL_VOID(pixelMap);
     std::string pixelStr = "";
     auto data = (*pixelMap).GetPixels();
     auto height = (*pixelMap).GetHeight();
@@ -90,10 +80,7 @@ void LayoutInspector::SupportInspector()
 void LayoutInspector::SetlayoutInspectorStatus()
 {
     auto container = Container::Current();
-    if (!container) {
-        LOGE("container is null");
-        return;
-    }
+    CHECK_NULL_VOID(container);
     if (container->IsUseStageModel()) {
         layoutInspectorStatus_ = OHOS::AbilityRuntime::ConnectServerManager::Get().GetlayoutInspectorStatus();
         return;
