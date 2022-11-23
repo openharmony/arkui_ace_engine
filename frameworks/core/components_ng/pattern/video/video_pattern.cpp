@@ -265,7 +265,7 @@ void VideoPattern::OnPrepared(double width, double height, uint32_t duration, ui
     auto videoLayoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
     videoLayoutProperty->UpdateVideoSize(SizeF(static_cast<float>(width), static_cast<float>(height)));
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    auto needControlBar = videoLayoutProperty->GetControlsValue(false);
+    auto needControlBar = videoLayoutProperty->GetControlsValue(true);
 
     duration_ = duration;
     currentPos_ = currentPos;
@@ -364,7 +364,7 @@ void VideoPattern::OnUpdateTime(uint32_t time, int pos) const
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    bool needControlBar = layoutProperty->GetControlsValue(false);
+    bool needControlBar = layoutProperty->GetControlsValue(true);
     if (needControlBar) {
         RefPtr<UINode> controlBar = nullptr;
         auto children = host->GetChildren();
@@ -463,7 +463,7 @@ void VideoPattern::AddControlBarNodeIfNeeded()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto children = host->GetChildren();
-    if (layoutProperty->GetControlsValue(false)) {
+    if (layoutProperty->GetControlsValue(true)) {
         bool isExist = false;
         for (const auto& child : children) {
             if (child->GetTag() == V2::ROW_ETS_TAG) {
@@ -525,7 +525,7 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto offset = geometryNode->GetContentOffset();
     auto controlBarHeight = 0.0f;
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
-    if (layoutProperty->GetControlsValue(false)) {
+    if (layoutProperty->GetControlsValue(true)) {
         controlBarHeight = CalControlBarHeight();
     }
     size.MinusHeight(controlBarHeight);
