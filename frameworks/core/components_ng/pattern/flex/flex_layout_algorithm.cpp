@@ -508,6 +508,12 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
             float ret = 0.0f;
             if (flexItemProperty) {
                 ret = flexItemProperty->GetFlexGrow().value_or(ret);
+                /**
+                 * handle non positive flex grow.
+                 */
+                if (NonPositive(ret)) {
+                    ret = 0.0f;
+                }
             }
             return ret;
         };
@@ -519,6 +525,12 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
             float ret = isLinearLayoutFeature ? 0.0f : 1.0f;
             if (flexItemProperty) {
                 ret = flexItemProperty->GetFlexShrink().value_or(ret);
+                /**
+                 * handle non positive flex shrink.
+                 */
+                if (NonPositive(ret)) {
+                    ret = 0.0f;
+                }
             }
             return ret;
         };
