@@ -89,21 +89,6 @@ public:
         return maxListItemIndex_;
     }
 
-    void SetIsScroll(bool isScroll)
-    {
-        isScroll_ = isScroll;
-    }
-
-    bool GetIsScroll() const
-    {
-        return isScroll_;
-    }
-
-    void SetScrollStop(bool scrollStop)
-    {
-        scrollStop_ = scrollStop;
-    }
-
     void SetScrollState(int32_t scrollState)
     {
         scrollState_ = scrollState;
@@ -173,7 +158,7 @@ private:
 
     SizeF GetContentSize() const;
     float GetMainContentSize() const;
-    void ProcessEvent(bool indexChanged, float finalOffset);
+    void ProcessEvent(bool indexChanged, float finalOffset, bool isJump);
     void CheckScrollable();
     bool IsOutOfBoundary(bool useCurrentDelta = true);
     void InitScrollableEvent();
@@ -208,7 +193,6 @@ private:
     bool isScrollContent_ = true;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
-    bool isScroll_ = false;
     bool scrollStop_ = false;
     int32_t scrollState_ = SCROLL_FROM_NONE;
 
