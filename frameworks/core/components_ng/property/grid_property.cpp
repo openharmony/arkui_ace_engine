@@ -44,8 +44,8 @@ bool GridProperty::UpdateContainer(const RefPtr<Property>& container, const RefP
     auto gridContainer = DynamicCast<GridContainerLayoutProperty>(container);
 
     GridColumnInfo::Builder builder;
-    auto gridContainerInfo = AceType::MakeRefPtr<GridContainerInfo>(gridContainer->GetContainerInfoRef());
-    builder.SetParent(gridContainerInfo);
+    auto containerInfo = AceType::MakeRefPtr<GridContainerInfo>(gridContainer->GetContainerInfoValue());
+    builder.SetParent(containerInfo);
     for (const auto& item : typedPropertySet_) {
         builder.SetSizeColumn(item.type_, item.span_);
         builder.SetOffset(item.offset_, item.type_);
