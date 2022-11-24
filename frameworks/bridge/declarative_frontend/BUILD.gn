@@ -256,6 +256,7 @@ template("declarative_js_engine") {
       "view_stack_processor.cpp",
 
       # Models implemenations for classic fw
+      "jsview/models/animator_model_impl.cpp",
       "jsview/models/checkbox_model_impl.cpp",
       "jsview/models/checkboxgroup_model_impl.cpp",
       "jsview/models/circle_model_impl.cpp",

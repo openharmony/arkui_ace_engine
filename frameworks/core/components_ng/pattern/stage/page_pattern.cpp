@@ -157,4 +157,22 @@ void PagePattern::AddPageTransition(const RefPtr<PageTransitionEffect>& effect)
     pageTransitionEffects_.emplace(effect);
 }
 
+void PagePattern::AddJsAnimator(const std::string& animatorId, const RefPtr<Framework::AnimatorInfo>& animatorInfo)
+{
+    CHECK_NULL_VOID(animatorInfo);
+    auto animator = animatorInfo->GetAnimator();
+    CHECK_NULL_VOID(animator);
+    animator->AttachScheduler(PipelineContext::GetCurrentContext());
+    jsAnimatorMap_[animatorId] = animatorInfo;
+}
+
+RefPtr<Framework::AnimatorInfo> PagePattern::GetJsAnimator(const std::string& animatorId)
+{
+    auto iter = jsAnimatorMap_.find(animatorId);
+    if (iter != jsAnimatorMap_.end()) {
+        return iter->second;
+    }
+    return nullptr;
+}
+
 } // namespace OHOS::Ace::NG
