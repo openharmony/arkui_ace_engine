@@ -272,10 +272,16 @@ void JSSearch::Create(const JSCallbackInfo& info)
         }
         auto param = JSRef<JSObject>::Cast(info[0]);
         std::string placeholder;
+        if (param->GetProperty("placeholder")->IsUndefined()) {
+            tip = "";
+        }
         if (ParseJsString(param->GetProperty("placeholder"), placeholder)) {
             tip = placeholder;
         }
         std::string text;
+        if (param->GetProperty("value")->IsUndefined()) {
+            key = "";
+        }
         if (ParseJsString(param->GetProperty("value"), text)) {
             key = text;
         }

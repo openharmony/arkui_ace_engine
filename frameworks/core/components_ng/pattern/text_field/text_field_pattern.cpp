@@ -1069,6 +1069,7 @@ void TextFieldPattern::OnModifyDone()
 
 void TextFieldPattern::InitEditingValueText(std::string content)
 {
+    textEditingValue_.caretPosition = content.size();
     textEditingValue_.text = std::move(content);
 }
 
