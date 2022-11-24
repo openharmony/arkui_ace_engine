@@ -95,7 +95,7 @@ RefPtr<FrameNode> DividerPatternTestNg::CreateDividerNode(TestProperty& testProp
  * @tc.desc: Test all the property of divider.
  * @tc.type: FUNC
  */
-HWTEST_F(DividerPatternTestNg, DividerFrameNodeCreator001, TestSize.Level1)
+HWTEST_F(DividerPatternTestNg, DividerPatternTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode
@@ -122,7 +122,7 @@ HWTEST_F(DividerPatternTestNg, DividerFrameNodeCreator001, TestSize.Level1)
  * @tc.desc: Test all the layoutAlgorithm of divider
  * @tc.type: FUNC
  */
-HWTEST_F(DividerPatternTestNg, DividerFrameNodeCreator002, TestSize.Level1)
+HWTEST_F(DividerPatternTestNg, DividerPatternTest002, TestSize.Level1)
 {
     bool vertical[2] = { VERTICAL_TRUE, VERTICAL_FALSE };
     testProperty.strokeWidth = STROKE_WIDTH;
@@ -160,7 +160,7 @@ HWTEST_F(DividerPatternTestNg, DividerFrameNodeCreator002, TestSize.Level1)
  * @tc.desc: Test all the pattern of divider
  * @tc.type: FUNC
  */
-HWTEST_F(DividerPatternTestNg, DividerFrameNodeCreator003, TestSize.Level1)
+HWTEST_F(DividerPatternTestNg, DividerPatternTest003, TestSize.Level1)
 {
     RefPtr<DividerLayoutAlgorithm> dividerLayoutAlgorithm = AceType::MakeRefPtr<DividerLayoutAlgorithm>();
     RefPtr<FrameNode> frameNode = CreateDividerNode(testProperty);
