@@ -62,6 +62,11 @@ void SwiperModelNG::SetDisplayMode(SwiperDisplayMode displayMode)
 
 void SwiperModelNG::SetDisplayCount(int32_t displayCount)
 {
+    if (displayCount <= 0) {
+        LOGE("SwiperModelNG::SetDisplayCount displayCount is invalid, return.");
+        return;
+    }
+
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayCount, displayCount);
 }
 
@@ -77,6 +82,11 @@ void SwiperModelNG::SetItemSpace(const Dimension& itemSpace)
 
 void SwiperModelNG::SetCachedCount(int32_t cachedCount)
 {
+    if (cachedCount < 0) {
+        LOGE("SwiperModelNG::SetCachedCount cachedCount is invalid, return.");
+        return;
+    }
+
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, CachedCount, cachedCount);
 }
 

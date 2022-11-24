@@ -204,7 +204,7 @@ void JSSwiper::SetIndex(int32_t index)
 
 void JSSwiper::SetInterval(int32_t interval)
 {
-    if (interval <= 0) {
+    if (interval < 0) {
         LOGE("interval is not valid: %{public}d", interval);
         return;
     }
@@ -451,24 +451,23 @@ void JSSwiperController::Destructor(JSSwiperController* scroller)
 
 void JSSwiperController::FinishAnimation(const JSCallbackInfo& args)
 {
-    if (!args[0]->IsFunction() || !controller_) {
+    if (!controller_) {
         return;
     }
 
-    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onFinish = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("Swiper.finishAnimation");
-        func->Execute();
-    };
+    if (args.Length() > 0 && args[0]->IsFunction()) {
+        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+        auto onFinish = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Swiper.finishAnimation");
+            func->Execute();
+        };
 
-    if (Container::IsCurrentUseNewPipeline()) {
         controller_->SetFinishCallback(onFinish);
         controller_->FinishAnimation();
         return;
     }
 
-    controller_->SetFinishCallback(onFinish);
     controller_->FinishAnimation();
 }
 

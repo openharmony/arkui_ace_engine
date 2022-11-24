@@ -172,6 +172,7 @@ private:
     void SwipeTo(int32_t index);
     void FinishAnimation();
     void StopTranslateAnimation();
+    void StopSpringAnimation();
 
     // Timer tick callback, duration is in millisecond.
     void Tick(uint64_t duration);

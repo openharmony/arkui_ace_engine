@@ -258,6 +258,13 @@ void SwiperPattern::StopTranslateAnimation()
     }
 }
 
+void SwiperPattern::StopSpringAnimation()
+{
+    if (springController_ && !springController_->IsStopped()) {
+        springController_->Stop();
+    }
+}
+
 void SwiperPattern::InitSwiperController()
 {
     if (swiperController_->HasInitialized()) {
@@ -519,7 +526,7 @@ void SwiperPattern::Tick(uint64_t duration)
     }
 
     elapsedTime_ += duration;
-    if (elapsedTime_ >= static_cast<uint64_t>(GetInterval())) {
+    if (elapsedTime_ >= static_cast<uint64_t>(GetInterval()) + static_cast<uint64_t>(GetDuration())) {
         if (currentIndex_ >= childrenSize - 1 && !IsLoop()) {
             LOGD("already last one, stop auto play because not loop");
             if (scheduler_) {
@@ -599,11 +606,11 @@ void SwiperPattern::HandleTouchDown()
 void SwiperPattern::HandleTouchUp()
 {
     if (controller_ && !controller_->IsStopped()) {
-        controller_->Play();
+        controller_->Resume();
     }
 
     if (springController_ && !springController_->IsStopped()) {
-        springController_->Play();
+        springController_->Resume();
     }
 
     StartAutoPlay();
@@ -612,6 +619,7 @@ void SwiperPattern::HandleTouchUp()
 void SwiperPattern::HandleDragStart()
 {
     StopTranslateAnimation();
+    StopSpringAnimation();
 
     const auto& tabBarFinishCallback = swiperController_->GetTabBarFinishCallback();
     if (tabBarFinishCallback) {
@@ -763,6 +771,9 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
         if (restartAutoPlay) {
             swiper->StartAutoPlay();
         }
+        auto host = swiper->GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     });
     controller_->SetDuration(GetDuration());
     controller_->AddInterpolator(translate);
@@ -967,15 +978,12 @@ int32_t SwiperPattern::TotalCount() const
 
 float SwiperPattern::GetTranslateLength() const
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, 0.0);
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0);
 
-    auto layoutProperty = host->GetLayoutProperty<SwiperLayoutProperty>();
-    if (!SwiperUtils::IsStretch(layoutProperty)) {
-        return GetDirection() == Axis::HORIZONTAL ? maxChildSize_.Width() : maxChildSize_.Height();
-    }
-
-    return MainSize() / static_cast<float>(std::max(GetDisplayCount(), 1));
+    auto itemSpace = SwiperUtils::GetItemSpace(layoutProperty);
+    auto translateLength = GetDirection() == Axis::HORIZONTAL ? maxChildSize_.Width() : maxChildSize_.Height();
+    return translateLength + itemSpace;
 }
 
 } // namespace OHOS::Ace::NG
