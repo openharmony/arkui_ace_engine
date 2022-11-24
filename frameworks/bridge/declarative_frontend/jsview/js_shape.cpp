@@ -247,10 +247,8 @@ void JSShape::SetStrokeOpacity(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    double strokeOpacity;
-    if (!ParseJsDouble(info[0], strokeOpacity)) {
-        return;
-    }
+    double strokeOpacity = DEFAULT_OPACITY;
+    ParseJsDouble(info[0], strokeOpacity);
     ShapeModel::GetInstance()->SetStrokeOpacity(strokeOpacity);
 }
 
