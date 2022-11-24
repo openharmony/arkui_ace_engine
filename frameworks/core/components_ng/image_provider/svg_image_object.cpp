@@ -19,19 +19,11 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<SvgImageObject> SvgImageObject::Create(const ImageSourceInfo& sourceInfo,
-    const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data,
-    const std::optional<Color>& svgFillColor, const LoadCallbacks& loadCallbacks)
+RefPtr<SvgImageObject> SvgImageObject::Create(
+    const ImageSourceInfo& sourceInfo, const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data)
 {
-    auto svgImageObj = AceType::MakeRefPtr<NG::SvgImageObject>(
+    return AceType::MakeRefPtr<NG::SvgImageObject>(
         sourceInfo, encodedInfo->GetImageSize(), encodedInfo->GetFrameCount(), data);
-    ImageProvider::MakeSvgDom(svgImageObj, loadCallbacks, svgFillColor);
-    if (!svgImageObj->GetSVGDom()) {
-        // no SvgDom, can not trigger dataReadyCallback_, should return
-        LOGW("svgDom can't be created");
-        return nullptr;
-    }
-    return svgImageObj;
 }
 
 const RefPtr<SvgDomBase>& SvgImageObject::GetSVGDom() const
@@ -40,9 +32,9 @@ const RefPtr<SvgDomBase>& SvgImageObject::GetSVGDom() const
 }
 
 void SvgImageObject::MakeCanvasImage(
-    const LoadCallbacks& loadCallbacks, const SizeF&  /*resizeTarget*/, bool  /*forceResize*/)
+    const LoadCallbacks& loadCallbacks, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool  /*syncLoad*/)
 {
-    ImageProvider::MakeCanvasImageForSVG(WeakClaim(this), loadCallbacks);
+    ImageProvider::MakeSvgCanvasImage(WeakClaim(this), loadCallbacks);
 }
 
 bool SvgImageObject::MakeSvgDom(const std::optional<Color>& svgFillColor)

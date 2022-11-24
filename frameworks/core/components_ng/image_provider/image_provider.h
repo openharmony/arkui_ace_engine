@@ -19,6 +19,7 @@
 #include <functional>
 
 #include "base/geometry/ng/rect_t.h"
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/image_state_manager.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -44,7 +45,6 @@ struct LoadNotifier {
         : dataReadyNotifyTask_(std::move(dataReadyNotifyTask)),
           loadSuccessNotifyTask_(std::move(loadSuccessNotifyTask)), loadFailNotifyTask_(std::move(loadFailNotifyTask))
     {}
-    ~LoadNotifier() = default;
 
     DataReadyNotifyTask dataReadyNotifyTask_;
     LoadSuccessNotifyTask loadSuccessNotifyTask_;
@@ -65,7 +65,6 @@ struct LoadCallbacks {
         : dataReadyCallback_(std::move(dataReadyCallback)), loadSuccessCallback_(std::move(loadSuccessCallback)),
           loadFailCallback_(std::move(loadFailCallback))
     {}
-    ~LoadCallbacks() = default;
 
     DataReadyCallback dataReadyCallback_;
     LoadSuccessCallback loadSuccessCallback_;
@@ -104,6 +103,8 @@ public:
 private:
     SizeF imageSize_;
     int32_t frameCount_ = 1;
+
+    ACE_DISALLOW_COPY_AND_MOVE(ImageEncodedInfo);
 };
 
 struct RenderTaskHolder : public virtual AceType {
@@ -112,42 +113,110 @@ struct RenderTaskHolder : public virtual AceType {
 public:
     RenderTaskHolder() = default;
     ~RenderTaskHolder() override = default;
+
+    ACE_DISALLOW_COPY_AND_MOVE(RenderTaskHolder);
 };
 
+// load & paint images on background threads
+// cache loaded/painted image data in memory
 class ImageProvider : public virtual AceType {
     DECLARE_ACE_TYPE(ImageProvider, AceType);
 
 public:
+    // create RenderTaskHolder for skiaGPUObject
+    // TODO: move to protected
     static RefPtr<RenderTaskHolder> CreateRenderTaskHolder();
-    static void MakeSvgDom(const RefPtr<SvgImageObject>& imageObj, const LoadCallbacks& loadCallbacks,
-        const std::optional<Color>& svgFillColor);
-    static void PrepareImageData(const RefPtr<ImageObject>& imageObj, const LoadCallbacks& loadCallbacks);
+
     static void CreateImageObject(const ImageSourceInfo& sourceInfo, const LoadCallbacks& loadCallbacks,
         const std::optional<Color>& svgFillColor);
+
     static void MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks,
         const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder, bool forceResize = false);
-    static void MakeCanvasImageForSVG(const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks);
-    static void UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasImage,
-        std::function<void(RefPtr<CanvasImage>)>&& callback,
-        const RefPtr<RenderTaskHolder>& renderTaskHolder, const std::string key,
-        const SizeF& resizeTarget, const RefPtr<ImageData>& data);
-    static RefPtr<ImageObject> BuildImageObject(const ImageSourceInfo& sourceInfo,
-        const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data,
-        const std::optional<Color>& svgFillColor, const LoadCallbacks& loadCallbacks, ImageObjectType imageObjectType);
-    static ImageObjectType ParseImageObjectType(
-        const RefPtr<NG::ImageData>& data, const ImageSourceInfo& imageSourceInfo);
-    static bool QueryImageObjectFromCache(const LoadCallbacks& loadCallbacks, const ImageSourceInfo& sourceInfo);
-    static std::string GenerateCacheKey(const ImageSourceInfo& srcInfo, const NG::SizeF& targetImageSize);
-    static RefPtr<CanvasImage> QueryCanvasImageFromCache(
-        const RefPtr<ImageObject> obj, const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget);
-    static void CacheCanvasImageToImageCache(const RefPtr<CanvasImage>& canvasImage, const std::string& key);
+
+    static void MakeSvgCanvasImage(const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks);
 
 protected:
+    // helper function to post task to [TaskType] thread
     static void WrapTaskAndPostTo(
         std::function<void()>&& task, TaskExecutor::TaskType taskType, const char* taskTypeName);
     static void WrapTaskAndPostToUI(std::function<void()>&& task);
     static void WrapTaskAndPostToBackground(std::function<void()>&& task);
     static void WrapTaskAndPostToIO(std::function<void()>&& task);
+
+    static void MakeSvgDom(const RefPtr<SvgImageObject>& imageObj, const LoadFailCallback& failCallback,
+        const std::optional<Color>& svgFillColor, bool sync = false);
+
+    /** Check if data is present in imageObj, if not, load image data.
+     *
+     *    @param imageObj         contains image source and image data
+     *    @param failCallback     State Manager's callback, called when load fails
+     *    @param sync             whether failCallback is called synchronously
+     *    @return                 true if image data is prepared
+     */
+    static bool PrepareImageData(
+        const RefPtr<ImageObject>& imageObj, const LoadFailCallback& failCallback, bool sync = false);
+
+    /** Generate imageObject with sourceInfo, encodedInfo, and data
+     *
+     *    @param sourceInfo   contains image url / pixelMap / InternalResource Id
+     *    @param encodedInfo  contains image size and frame count
+     *    @param sync         runs on UI thread if true, passed to SVG image, used in ImageProvider::MakeSvgDom
+     */
+    static RefPtr<ImageObject> BuildImageObject(const ImageSourceInfo& sourceInfo,
+        const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data,
+        const std::optional<Color>& svgFillColor, const LoadFailCallback& failCallback, ImageObjectType imageObjectType,
+        bool sync = false);
+
+    static ImageObjectType ParseImageObjectType(
+        const RefPtr<NG::ImageData>& data, const ImageSourceInfo& imageSourceInfo);
+
+    // Query imageObj from cache, if hit, notify dataReady and returns true
+    static bool QueryImageObjectFromCache(const LoadCallbacks& loadCallbacks, const ImageSourceInfo& sourceInfo);
+    // Query [CanvasImage] from cache, if hit, notify load success immediately and returns true
+    static bool QueryCanvasImageFromCache(
+        const WeakPtr<ImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget);
+    static void CacheCanvasImage(const RefPtr<CanvasImage>& canvasImage, const std::string& key);
+    static std::string GenerateCacheKey(const ImageSourceInfo& srcInfo, const NG::SizeF& targetImageSize);
+
+    // helper function to create image object from ImageSourceInfo
+    static void CreateImageObjHelper(const ImageSourceInfo& sourceInfo, const LoadCallbacks& loadCallbacks,
+        const std::optional<Color>& svgFillColor, bool sync = false);
+
+    /** Helper function to create canvasImage and upload it to GPU for rendering.
+     *
+     *    @param imageObjWp           weakPtr of imageObj, contains image data
+     *    @param renderTaskHolder     passed in to create SkiaGPUObject
+     */
+    static void MakeCanvasImageHelper(const WeakPtr<ImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks,
+        const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder, bool forceResize,
+        bool sync = false);
+
+    static void UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasImage,
+        std::function<void(RefPtr<CanvasImage>)>&& callback, const RefPtr<RenderTaskHolder>& renderTaskHolder,
+        const std::string& key, const SizeF& resizeTarget, const RefPtr<ImageData>& data, bool syncLoad);
+
+    /** Helper function to update canvas image to ImageObject and run StateManager LoadSuccess callback.
+     *   Called after canvas image is uploaded to GPU successfully.
+     */
+    static void SuccessCallback(const RefPtr<CanvasImage>& canvasImage, const WeakPtr<ImageObject>& objWp,
+        const LoadSuccessCallback& callback, bool sync = false);
+    // helper function to run StateManager LoadFail callback
+    static void FailCallback(const LoadFailCallback& callback, const ImageSourceInfo& sourceInfo,
+        const std::string& errorMsg, bool sync = false);
+};
+
+/**   Overloads ImageProvider to load & paint images synchronously
+ *     runs the whole process on UI thread.
+ */
+class SyncImageProvider : public ImageProvider {
+public:
+    static void CreateImageObject(const ImageSourceInfo& sourceInfo, const LoadCallbacks& loadCallbacks,
+        const std::optional<Color>& svgFillColor);
+
+    static void MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks,
+        const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder, bool forceResize = false);
+
+    static void MakeSvgCanvasImage(const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks);
 };
 
 } // namespace OHOS::Ace::NG
