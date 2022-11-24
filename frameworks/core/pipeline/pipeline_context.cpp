@@ -2456,8 +2456,6 @@ void PipelineContext::Destroy()
 {
     CHECK_RUN_ON(UI);
     LOGI("PipelineContext::Destroy begin.");
-    ClearImageCache();
-    platformResRegister_.Reset();
     rootElement_.Reset();
     composedElementMap_.clear();
     dirtyElements_.clear();
@@ -2480,23 +2478,16 @@ void PipelineContext::Destroy()
     }
     alignDeclarationNodeList_.clear();
     hoverNodes_.clear();
-    drawDelegate_.reset();
     renderFactory_.Reset();
-    eventManager_->ClearResults();
     nodesToNotifyOnPreDraw_.clear();
     nodesNeedDrawOnPixelMap_.clear();
     layoutTransitionNodeSet_.clear();
     explicitAnimators_.clear();
     preTargetRenderNode_.Reset();
-    imageCache_.Reset();
-    fontManager_.Reset();
-    themeManager_.Reset();
     sharedImageManager_.Reset();
-    window_->Destroy();
-    touchPluginPipelineContext_.clear();
     webPaintCallback_.clear();
-    virtualKeyBoardCallback_.clear();
     rectCallbackList_.clear();
+    PipelineBase::Destroy();
     LOGI("PipelineContext::Destroy end.");
 }
 
