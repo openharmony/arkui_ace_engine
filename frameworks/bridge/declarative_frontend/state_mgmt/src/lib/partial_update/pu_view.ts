@@ -286,7 +286,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}'. View needs ${dependentElmtIds.size ? 'update' : 'no update'}.`);
     this.syncInstanceId();
 
-    if (dependentElmtIds.size) {
+    if (dependentElmtIds.size && !this.isFirstRender()) {
       if (!this.dirtDescendantElementIds_.size) {
         // mark Composedelement dirty when first elmtIds are added
         // do not need to do this every time
