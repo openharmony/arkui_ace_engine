@@ -293,22 +293,27 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
 void AceContainer::OnShow(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    if (!container) {
-        LOGE("container is null, OnShow failed.");
-        return;
-    }
-
+    CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+
+    auto front = container->GetFrontend();
+    if (front && !container->IsSubContainer()) {
+        front->UpdateState(Frontend::State::ON_SHOW);
+        WeakPtr<Frontend> weakFrontend = front;
+        taskExecutor->PostTask(
+            [weakFrontend]() {
+                auto frontend = weakFrontend.Upgrade();
+                if (frontend) {
+                    frontend->OnShow();
+                }
+            },
+            TaskExecutor::TaskType::JS);
+    }
+
     taskExecutor->PostTask(
         [container]() {
-            // When it is subContainer, no need call the OnShow,
-            auto front = container->GetFrontend();
-            if (front && !container->IsSubContainer()) {
-                front->UpdateState(Frontend::State::ON_SHOW);
-                front->OnShow();
-            }
             std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap;
             container->GetCardFrontendMap(cardFrontendMap);
             for (const auto& [_, weakCardFront] : cardFrontendMap) {
@@ -330,29 +335,29 @@ void AceContainer::OnShow(int32_t instanceId)
 void AceContainer::OnHide(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    if (!container) {
-        LOGE("container is null, OnHide failed.");
-        return;
-    }
+    CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId);
     auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("taskExecutor is null, OnHide failed.");
-        return;
+    CHECK_NULL_VOID(taskExecutor);
+
+    auto front = container->GetFrontend();
+    if (front && !container->IsSubContainer()) {
+        front->UpdateState(Frontend::State::ON_HIDE);
+        WeakPtr<Frontend> weakFrontend = front;
+        taskExecutor->PostTask(
+            [weakFrontend]() {
+                auto frontend = weakFrontend.Upgrade();
+                if (frontend) {
+                    frontend->OnHide();
+                    frontend->TriggerGarbageCollection();
+                }
+            },
+            TaskExecutor::TaskType::JS);
     }
+
     taskExecutor->PostTask(
         [container]() {
-            auto front = container->GetFrontend();
             auto taskExecutor = container->GetTaskExecutor();
-            if (front && !container->IsSubContainer()) {
-                front->UpdateState(Frontend::State::ON_HIDE);
-                front->OnHide();
-                if (taskExecutor) {
-                    taskExecutor->PostTask(
-                        [front]() { front->TriggerGarbageCollection(); }, TaskExecutor::TaskType::JS);
-                }
-            }
-
             std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap;
             container->GetCardFrontendMap(cardFrontendMap);
             for (const auto& [_, weakCardFront] : cardFrontendMap) {
@@ -380,23 +385,26 @@ void AceContainer::OnHide(int32_t instanceId)
 void AceContainer::OnActive(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    if (!container) {
-        LOGE("container is null, OnActive failed.");
-        return;
-    }
+    CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId);
     auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("taskExecutor is null, OnActive failed.");
-        return;
+    CHECK_NULL_VOID(taskExecutor);
+
+    auto front = container->GetFrontend();
+    if (front && !container->IsSubContainer()) {
+        WeakPtr<Frontend> weakFrontend = front;
+        taskExecutor->PostTask(
+            [weakFrontend] () {
+                auto frontend = weakFrontend.Upgrade();
+                if (frontend) {
+                    frontend->OnActive();
+                }
+            },
+            TaskExecutor::TaskType::JS);
     }
+
     taskExecutor->PostTask(
         [container]() {
-            // When it is subContainer, no need call the OnActive.
-            auto front = container->GetFrontend();
-            if (front && !container->IsSubContainer()) {
-                front->OnActive();
-            }
             auto pipelineContext = container->GetPipelineContext();
             if (!pipelineContext) {
                 LOGE("pipeline context is null, OnActive failed.");
@@ -410,25 +418,26 @@ void AceContainer::OnActive(int32_t instanceId)
 void AceContainer::OnInactive(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    if (!container) {
-        LOGE("container is null, OnInactive failed.");
-        return;
-    }
+    CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId);
     auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("taskExecutor is null, OnInactive failed.");
-        return;
+    CHECK_NULL_VOID(taskExecutor);
+
+    auto front = container->GetFrontend();
+    if (front && !container->IsSubContainer()) {
+        WeakPtr<Frontend> weakFrontend = front;
+        taskExecutor->PostTask(
+            [weakFrontend] () {
+                auto frontend = weakFrontend.Upgrade();
+                if (frontend) {
+                    frontend->OnInactive();
+                }
+            },
+            TaskExecutor::TaskType::JS);
     }
 
     taskExecutor->PostTask(
         [container]() {
-            // When it is subContainer, no need call the OnInactive.
-            auto front = container->GetFrontend();
-            if (front && !container->IsSubContainer()) {
-                front->OnInactive();
-            }
-
             auto pipelineContext = container->GetPipelineContext();
             if (!pipelineContext) {
                 LOGE("pipeline context is null, OnInactive failed.");
