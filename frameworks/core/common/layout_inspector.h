@@ -24,6 +24,7 @@ class LayoutInspector {
 public:
     static void SupportInspector();
     static void SetlayoutInspectorStatus();
+    static void GetInspectorTreeJsonStr(std::string& treeJsonStr);
 private:
     static bool layoutInspectorStatus_;
 };
