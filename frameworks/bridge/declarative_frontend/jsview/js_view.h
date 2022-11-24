@@ -312,6 +312,8 @@ public:
         return false;
     }
 
+    void IsFirstRender(const JSCallbackInfo& info);
+
 private:
     void MarkNeedUpdate() override;
 
