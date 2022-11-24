@@ -29,7 +29,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
 class ViewAbstractTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -163,5 +162,4 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg003, TestSize.Level1)
     EXPECT_EQ(sweepGradientIn, sweepGradientOut);
     EXPECT_EQ(radialGradientIn, radialGradientOut);
 }
-
 } // namespace OHOS::Ace::NG
