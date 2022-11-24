@@ -13,20 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_MOCK_CANVAS_IMAGE__H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_MOCK_CANVAS_IMAGE__H
 
 #include "gmock/gmock.h"
 
-#include "core/components_ng/render/render_context.h"
+#include "core/components_ng/render/canvas_image.h"
 
 namespace OHOS::Ace::NG {
-class MockRenderContext : public RenderContext {
-    DECLARE_ACE_TYPE(MockRenderContext, RenderContext)
+class MockCanvasImage : public CanvasImage {
+    DECLARE_ACE_TYPE(MockCanvasImage, CanvasImage)
 public:
-    ~MockRenderContext() override = default;
-    MOCK_METHOD0(GetCanvas, RefPtr<Canvas>());
-    MOCK_METHOD0(Restore, void());
+    MockCanvasImage() = default;
+    ~MockCanvasImage() override = default;
+    MOCK_METHOD3(DrawToRSCanvas, void(RSCanvas&, const RSRect&, const RSRect&));
+    MOCK_CONST_METHOD0(GetWidth, int32_t());
+    MOCK_CONST_METHOD0(GetHeight, int32_t());
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_MOCK_CANVAS_IMAGE__H
