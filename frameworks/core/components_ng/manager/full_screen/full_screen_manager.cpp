@@ -17,6 +17,8 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/pattern/video/video_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -100,6 +102,24 @@ void FullScreenManager::ExitFullScreen(const RefPtr<FrameNode>& frameNode)
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     parent->RebuildRenderContextTree();
+}
+
+bool FullScreenManager::OnBackPressed()
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, false);
+    auto child = rootNode->GetLastChild();
+    auto frameNode = AceType::DynamicCast<FrameNode>(child);
+    CHECK_NULL_RETURN(frameNode, false);
+    if (frameNode->GetTag() != V2::VIDEO_ETS_TAG) {
+        return false;
+    }
+
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_RETURN(pattern, false);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(pattern);
+    CHECK_NULL_RETURN(videoPattern, false);
+    return videoPattern->OnBackPressed();
 }
 
 } // namespace OHOS::Ace::NG

@@ -100,6 +100,8 @@ public:
         return { FocusType::NODE, true };
     }
 
+    bool OnBackPressed();
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
@@ -162,6 +164,7 @@ private:
     bool muted_ = false;
     bool autoPlay_ = false;
     bool loop_ = false;
+    bool isFullScreen_ = false;
     double progressRate_ = 1.0;
 
     ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);
