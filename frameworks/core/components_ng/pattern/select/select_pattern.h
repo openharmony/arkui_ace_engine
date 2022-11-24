@@ -97,6 +97,8 @@ private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    // change background color when pressed
+    void RegisterOnPress();
     // change background color when hovered
     void RegisterOnHover();
     // add click event to show menu
