@@ -34,7 +34,7 @@ public:
     static void SetCircleRadius(const JSCallbackInfo& info);
     static void SetSideLength(const JSCallbackInfo& info);
     static void SetPathStrokeWidth(const JSCallbackInfo& info);
-    static void SetAutoReset(bool isAutoReset);
+    static void SetAutoReset(const JSCallbackInfo& info);
 
 protected:
     static void SetPatternComplete(const JSCallbackInfo& info);
