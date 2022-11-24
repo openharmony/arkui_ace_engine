@@ -466,7 +466,11 @@ LayoutConstraintF GridScrollLayoutAlgorithm::CreateChildConstraint(float mainSiz
     float heightPercentBase = GreatOrEqual(mainCount_, Infinity<uint32_t>())
                                   ? itemConstraint.percentReference.Height()
                                   : itemConstraint.percentReference.Height() / static_cast<float>(mainCount_);
-    itemConstraint.percentReference = SizeF(widthPercentBase, heightPercentBase);
+    if (axis_ == Axis::VERTICAL) {
+        itemConstraint.percentReference = SizeF(widthPercentBase, itemConstraint.percentReference.Height());
+    } else {
+        itemConstraint.percentReference = SizeF(itemConstraint.percentReference.Width(), heightPercentBase);
+    }
     itemConstraint.maxSize = itemIdealSize;
     itemConstraint.UpdateIllegalSelfMarginSizeWithCheck(axis_ == Axis::VERTICAL
                                                             ? OptionalSizeF(itemCrossSize, std::nullopt)
