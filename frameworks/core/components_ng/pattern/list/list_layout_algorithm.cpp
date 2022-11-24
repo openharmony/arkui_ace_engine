@@ -391,6 +391,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto paddingOffset = OffsetF(left, top);
     float crossSize = GetCrossAxisSize(size, axis);
     totalItemCount_ = layoutWrapper->GetTotalChildCount();
+    listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
     int32_t startIndex = GetStartIndex();
 
     // layout items.
