@@ -270,6 +270,18 @@ inline Dimension StringToDimension(const std::string& value, bool useVp = false)
     return StringToDimensionWithUnit(value, useVp ? DimensionUnit::VP : DimensionUnit::PX);
 }
 
+inline Dimension StringToDimensionWithThemeValue(const std::string& value, bool useVp, const Dimension& themeValue)
+{
+    errno = 0;
+    char* pEnd = nullptr;
+    std::strtod(value.c_str(), &pEnd);
+    if (pEnd == value.c_str() || errno == ERANGE) {
+        return themeValue;
+    }
+
+    return StringToDimensionWithUnit(value, useVp ? DimensionUnit::VP : DimensionUnit::PX);
+}
+
 inline double StringToDegree(const std::string& value)
 {
     // https://developer.mozilla.org/zh-CN/docs/Web/CSS/angle
