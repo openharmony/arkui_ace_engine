@@ -107,7 +107,6 @@ protected:
         value->propValue_ = CloneValue();
         value->propPlaceholderFontStyle_ = ClonePlaceholderFontStyle();
         value->propPlaceholderTextLineStyle_ = ClonePlaceholderTextLineStyle();
-        value->propTextLineStyle_ = ClonePlaceholderTextLineStyle();
         value->propPlaceholder_ = ClonePlaceholder();
         value->propTextInputType_ = CloneTextInputType();
         value->propInputFilter_ = CloneInputFilter();

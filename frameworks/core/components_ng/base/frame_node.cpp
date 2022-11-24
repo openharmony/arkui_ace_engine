@@ -41,7 +41,7 @@
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
-}
+} // namespace
 namespace OHOS::Ace::NG {
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
@@ -155,6 +155,14 @@ void FrameNode::DumpInfo()
     DumpLog::GetInstance().AddDesc(std::string("Visible: ")
                                        .append(std::to_string(static_cast<int32_t>(
                                            layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)))));
+    if (layoutProperty_->GetPaddingProperty()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("Padding: ").append(layoutProperty_->GetPaddingProperty()->ToString().c_str()));
+    }
+    if (layoutProperty_->GetBorderWidthProperty()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("Border: ").append(layoutProperty_->GetBorderWidthProperty()->ToString().c_str()));
+    }
     DumpLog::GetInstance().AddDesc(std::string("compid: ").append(propInspectorId_.value_or("")));
     DumpLog::GetInstance().AddDesc(std::string("ContentConstraint: ")
                                        .append(layoutProperty_->GetContentLayoutConstraint().has_value()

@@ -98,7 +98,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     auto horizontalPaddingSum = pattern->GetHorizontalPaddingSum();
     if (textStyle.GetMaxLines() == 1) {
         // for text input case, need to measure in one line without constraint.
-        paragraph_->Layout(Infinity<float>());
+        paragraph_->Layout(std::numeric_limits<double>::infinity());
     } else {
         // for text area, max width is content width without password icon
         paragraph_->Layout(contentConstraint.maxSize.Width() - horizontalPaddingSum);
@@ -151,6 +151,9 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto textRectOffsetX = pattern->GetPaddingLeft();
     auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
+    auto context = layoutWrapper->GetHostNode()->GetContext();
+    CHECK_NULL_VOID(context);
+    parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
         case TextAlign::START:
             break;
