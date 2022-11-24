@@ -23,5 +23,25 @@ LongPressEventActuator::LongPressEventActuator(const WeakPtr<GestureEventHub>& g
 
 void LongPressEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
-{}
+{
+    if (!longPressRecognizer_) {
+        longPressRecognizer_ = MakeRefPtr<LongPressRecognizer>(isForDrag_, isDisableMouseLeft_);
+    }
+    result.emplace_back(longPressRecognizer_);
+}
+
+GestureEventFunc LongPressEventActuator::GetGestureEventFunc()
+{
+    auto callback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        if (actuator->longPressEvent_) {
+            (*actuator->longPressEvent_)(info);
+        }
+        if (actuator->onAccessibilityEventFunc_) {
+            actuator->onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
+        }
+    };
+    return callback;
+}
 } // namespace OHOS::Ace::NG
