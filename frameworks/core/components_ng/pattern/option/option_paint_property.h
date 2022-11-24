@@ -34,6 +34,7 @@ public:
     {
         auto paintProperty = MakeRefPtr<OptionPaintProperty>();
         paintProperty->propHover_ = CloneHover();
+        paintProperty->propPress_ = ClonePress();
         paintProperty->propNeedDivider_ = CloneNeedDivider();
 
         return paintProperty;
@@ -43,10 +44,12 @@ public:
     {
         PaintProperty::Reset();
         ResetHover();
+        ResetPress();
         ResetNeedDivider();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Hover, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Press, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedDivider, bool, PROPERTY_UPDATE_RENDER);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override

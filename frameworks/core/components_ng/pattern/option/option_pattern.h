@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OPTION_OPTION_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OPTION_OPTION_PATTERN_H
 
+#include <optional>
+
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/option/option_event_hub.h"
@@ -73,11 +75,7 @@ public:
     void SetFontFamily(const std::vector<std::string>& value);
     void SetFontColor(const Color& color);
 
-    const Color& GetBgColor()
-    {
-        return bgColor_;
-    }
-
+    Color GetBgColor();
     // get font props
     Dimension GetFontSize();
     Ace::FontStyle GetItalicFontStyle();
@@ -109,10 +107,12 @@ private:
     void RegisterOnClick();
 
     void RegisterOnTouch();
-    // change option paint props on hover
-    void OnHover(const TouchEventInfo& info);
+    void RegisterOnHover();
+    // change option paint props on press
+    void OnPress(const TouchEventInfo& info);
+    void OnHover(bool isHover);
 
-    Color bgColor_ = Color(OPTION_DEFAULT_BACKGROUND_COLOR);
+    std::optional<Color> bgColor_;
 
     // src of icon image, used in XTS inspector
     std::string iconSrc_;

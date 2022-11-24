@@ -17,6 +17,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
+#include "core/components/divider/divider_theme.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_ng/pattern/shape/rect_paint_property.h"
@@ -30,7 +31,7 @@ CanvasDrawFunction OptionPaintMethod::GetOverlayDrawFunction(PaintWrapper* paint
     return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto option = weak.Upgrade();
         if (option) {
-            // don't paint divider when hovered
+            // don't paint divider when pressed or hovered
             option->PaintDivider(canvas, paintWrapper);
         }
     };
@@ -43,8 +44,9 @@ void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrappe
     CHECK_NULL_VOID(props);
 
     bool needDivider = props->GetNeedDivider().value_or(true);
+    bool press = props->GetPress().value_or(false);
     bool hover = props->GetHover().value_or(false);
-    if (!needDivider || hover) {
+    if (!needDivider || press || hover) {
         return;
     }
 
@@ -57,7 +59,12 @@ void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrappe
     LOGD("drawing option divider with length %{public}f", optionSize.Width() - 2 * horInterval);
 
     RSBrush brush;
-    brush.SetColor(OPTION_DIVIDER_COLOR);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<DividerTheme>();
+    CHECK_NULL_VOID(theme);
+    auto dividerColor = theme->GetColor();
+    brush.SetColor(dividerColor.GetValue());
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
     canvas.DrawPath(path);
