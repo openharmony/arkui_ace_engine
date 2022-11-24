@@ -289,6 +289,13 @@ void WebView::SetUserAgent(const std::string& userAgent)
     webPattern->UpdateUserAgent(userAgent);
 }
 
+void WebView::SetCustomScheme(const std::string& customScheme)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetCustomScheme(customScheme);
+}
+
 void WebView::SetRenderExitedId(OnWebAsyncFunc&& renderExitedId)
 {
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();

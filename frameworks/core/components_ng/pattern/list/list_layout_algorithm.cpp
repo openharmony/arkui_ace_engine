@@ -168,13 +168,13 @@ void ListLayoutAlgorithm::MeasureList(
         itemPosition_.clear();
         layoutWrapper->RemoveAllChildInRenderTree();
     }
+    if (jumpIndex_ && (jumpIndex_.value() < 0 || jumpIndex_.value() >= totalItemCount_)) {
+        LOGW("jump index is illegal, %{public}d, %{public}d", jumpIndex_.value(), totalItemCount_);
+        jumpIndex_.reset();
+    }
     if (jumpIndex_) {
         LOGD("Jump index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
             jumpIndex_.value(), currentOffset_, startMainPos_, endMainPos_);
-        if (jumpIndex_.value() < 0 || jumpIndex_.value() >= totalItemCount_) {
-            LOGW("jump index is illegal, %{public}d, %{public}d", jumpIndex_.value(), totalItemCount_);
-            jumpIndex_ = std::clamp(jumpIndex_.value(), 0, totalItemCount_ - 1);
-        }
         jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value());
         if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_TOP) {
             LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), startMainPos_);

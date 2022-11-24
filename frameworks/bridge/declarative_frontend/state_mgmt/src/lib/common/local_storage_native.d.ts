@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/**
+ * Bindings of the C++ part of LocalStorage implementation
+ * 
+ * non-public / non SDK class
+ */
 declare class NativeLocalStorage {
     constructor();
     static GetShared(): LocalStorage;

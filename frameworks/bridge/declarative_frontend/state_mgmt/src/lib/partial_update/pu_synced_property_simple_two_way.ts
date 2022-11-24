@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/**
+ * SynchedPropertySimpleTwoWayPU
+ * 
+ * all definitions in this file are framework internal
+ */
+
 class SynchedPropertySimpleTwoWayPU<T> extends ObservedPropertySimpleAbstractPU<T>
   implements ISinglePropertyChangeSubscriber<T> {
 
@@ -30,8 +36,10 @@ class SynchedPropertySimpleTwoWayPU<T> extends ObservedPropertySimpleAbstractPU<
   the property.
 */
   aboutToBeDeleted() {
-    this.source_.unlinkSuscriber(this.id__());
-    this.source_ = undefined;
+    if (this.source_) {
+        this.source_.unlinkSuscriber(this.id__());
+        this.source_ = undefined;
+    }
     super.aboutToBeDeleted();
   }
 
@@ -47,18 +55,23 @@ class SynchedPropertySimpleTwoWayPU<T> extends ObservedPropertySimpleAbstractPU<
 
   public getUnmonitored(): T {
     stateMgmtConsole.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored`);
-    return this.source_.getUnmonitored();
+    return (this.source_ ? this.source_.getUnmonitored() : undefined);
   }
 
   // get 'read through` from the ObservedProperty
   public get(): T {
     stateMgmtConsole.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: get`);
     this.notifyPropertyRead();
-    return this.source_.getUnmonitored();
+    return this.getUnmonitored();
   }
 
   // set 'writes through` to the ObservedProperty
   public set(newValue: T): void {
+    if (!this.source_) {
+        stateMgmtConsole.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set, no source, returning.`);
+        return;
+    }
+
     if (this.source_.get() == newValue) {
       stateMgmtConsole.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
       return;

@@ -162,6 +162,9 @@ public:
     void SetSliderMode(SliderMode mode)
     {
         mode_ = mode;
+        if (theme_) {
+            InitStyle(theme_);
+        }
     }
 
     void SetShowTips(bool showTips)
@@ -241,6 +244,7 @@ private:
     RefPtr<RotationController> rotationController_;
     Axis axis_ = Axis::HORIZONTAL;
     Dimension thickness_;
+    RefPtr<SliderTheme> theme_;
     HoverAnimationType animationType_ = HoverAnimationType::NONE;
 };
 

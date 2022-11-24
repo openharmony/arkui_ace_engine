@@ -20,6 +20,7 @@
 #include "base/log/log.h"
 #include "base/utils/macros.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 
@@ -30,9 +31,7 @@ bool AceTraceEnabled()
 
 void AceTraceBegin(const char* name)
 {
-    if (name == nullptr) {
-        return;
-    }
+    CHECK_NULL_VOID(name);
     std::string nameStr(name);
     StartTrace(HITRACE_TAG_ACE, nameStr);
 }
@@ -44,18 +43,14 @@ void AceTraceEnd()
 
 void AceAsyncTraceBegin(int32_t taskId, const char* name)
 {
-    if (name == nullptr) {
-        return;
-    }
+    CHECK_NULL_VOID(name);
     std::string nameStr(name);
     StartAsyncTrace(HITRACE_TAG_ACE, nameStr, taskId);
 }
 
 void AceAsyncTraceEnd(int32_t taskId, const char* name)
 {
-    if (name == nullptr) {
-        return;
-    }
+    CHECK_NULL_VOID(name);
     std::string nameStr(name);
     FinishAsyncTrace(HITRACE_TAG_ACE, nameStr, taskId);
 }

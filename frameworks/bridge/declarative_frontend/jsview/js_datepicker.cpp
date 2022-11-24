@@ -473,7 +473,7 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
     DialogProperties properties {};
     properties.alignment = DialogAlignment::CENTER;
     properties.customComponent = datePicker;
-
+    properties.customStyle = true;
     if (pickerType == DatePickerType::DATE) {
         AddEvent(datePicker, info, DatePickerType::DATE);
     } else {
@@ -766,7 +766,7 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     DialogProperties properties {};
     properties.alignment = DialogAlignment::CENTER;
     properties.customComponent = datePicker;
-
+    properties.customStyle = true;
     AddEvent(datePicker, info, DatePickerType::TIME);
     datePicker->SetDialogName("TimePickerDialog");
     datePicker->OpenDialog(properties);

@@ -13,10 +13,17 @@
  * limitations under the License.
  */
 
+/**
+ * Environment
+ * 
+ * Injects device properties ("environment") into AppStorage 
+ * 
+ */
+
 class Environment {
   private static Instance_: Environment = undefined;
   private static EnvBackend_: IEnvironmentBackend;
-  private props_: Map<string, ObservedPropertyAbstract<any>>;
+  private props_: Map<string, SubscribedAbstractProperty<any>>;
 
   private static GetOrCreate(): Environment {
     if (Environment.Instance_) {

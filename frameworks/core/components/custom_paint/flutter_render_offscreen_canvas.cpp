@@ -1114,10 +1114,10 @@ void FlutterRenderOffscreenCanvas::Scale(double x, double y)
 
 void FlutterRenderOffscreenCanvas::FillText(const std::string& text, double x, double y, const PaintState& state)
 {
-    if (!UpdateOffParagraph(text, false, state)) {
+    if (!UpdateOffParagraph(text, false, state, HasShadow())) {
         return;
     }
-    PaintText(text, x, y, false);
+    PaintText(text, x, y, false, HasShadow());
 }
 
 void FlutterRenderOffscreenCanvas::StrokeText(const std::string& text, double x, double y, const PaintState& state)
@@ -1126,7 +1126,7 @@ void FlutterRenderOffscreenCanvas::StrokeText(const std::string& text, double x,
         if (!UpdateOffParagraph(text, true, state, true)) {
             return;
         }
-        PaintText(text, x, y, true);
+        PaintText(text, x, y, true, true);
     }
 
     if (!UpdateOffParagraph(text, true, state)) {

@@ -17,14 +17,14 @@ class DistributedStorage implements IMultiPropertiesChangeSubscriber {
   private storage_: IStorage;
 
   private id_: number;
-  private links_: Map<string, ObservedPropertyAbstract<any>>;
+  private links_: Map<string, SubscribedAbstractProperty<any>>;
   private aviliable_: boolean;
   private notifier_: (status: string) => void;
 
   public constructor(sessionId: string, notifier: (status: string) => void) {
     this.links_ = new Map<string, ObservedPropertyAbstract<any>>();
-    this.id_ = SubscriberManager.Get().MakeId();
-    SubscriberManager.Get().add(this);
+    this.id_ = SubscriberManager.MakeId();
+    SubscriberManager.Add(this);
     this.aviliable_ = false;
     this.notifier_ = notifier;
   }
@@ -120,7 +120,7 @@ class DistributedStorage implements IMultiPropertiesChangeSubscriber {
     });
 
     this.links_.clear();
-    SubscriberManager.Get().delete(this.id__());
+    SubscriberManager.Delete(this.id__());
   }
 
   public id__(): number {

@@ -82,11 +82,13 @@ void CalculateOffsetOfNewline(const RefPtr<GridColLayoutProperty>& gridCol, int3
 
 } // namespace
 
-void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, SizeF& frameSize)
+void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, float childHeight)
 {
     const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto layoutConstraint = layoutProperty->GetLayoutConstraint();
 
+    auto frameSize = CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
+    frameSize.SetHeight(childHeight);
     frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
 }
@@ -158,8 +160,9 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
 
-    auto maxSize = CreateIdealSize(
-        layoutProperty->GetLayoutConstraint().value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
+    auto maxSize = CreateIdealSize(layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF()),
+        Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
+    CreateChildrenConstraint(maxSize, layoutProperty->GetMarginProperty(), layoutProperty->GetPaddingProperty());
     auto context = NG::PipelineContext::GetCurrentContext();
     auto sizeType = GridContainerUtils::ProcessGridSizeType(
         layoutProperty->GetBreakPointsValue(), Size(maxSize.Width(), maxSize.Height()));
@@ -177,8 +180,8 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureChildren(layoutWrapper, columnUnitWidth_, maxSize.Height(), gutterInDouble_, sizeType, columnNum);
     LOGI("GridRowLayoutAlgorithm::Measure() columnNum=%d, columnUnitWidth_=%f, childrenHeight=%f, sizetype=%d",
         columnNum, columnUnitWidth_, childrenHeight, static_cast<int>(sizeType));
-    maxSize.SetHeight(childrenHeight);
-    MeasureSelf(layoutWrapper, maxSize);
+
+    MeasureSelf(layoutWrapper, childrenHeight);
 }
 
 void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

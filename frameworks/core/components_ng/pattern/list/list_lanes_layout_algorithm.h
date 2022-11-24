@@ -53,6 +53,7 @@ private:
     void ModifyLaneLength(const LayoutConstraintF& layoutConstraint, Axis axis);
     int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t index);
     static int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t index);
+    void SetListItemGroupProperty(const RefPtr<ListItemGroupLayoutProperty>& itemGroup, Axis axis, int32_t lanes);
 
     int32_t lanes_ = 1;
     bool lanesChanged_ = false;

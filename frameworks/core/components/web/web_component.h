@@ -343,6 +343,16 @@ public:
         userAgent_ = std::move(userAgent);
     }
 
+    std::string GetCustomScheme() const
+    {
+        return customScheme_;
+    }
+
+    void SetCustomScheme(std::string cmdLine)
+    {
+        customScheme_ = std::move(cmdLine);
+    }
+
     bool GetContentAccessEnabled() const
     {
         return isContentAccessEnabled_;
@@ -860,6 +870,7 @@ private:
     bool isContentAccessEnabled_ = true;
     bool isFileAccessEnabled_ = true;
     std::string userAgent_;
+    std::string customScheme_;
     WeakPtr<FocusNode> focusElement_;
     bool isOnLineImageAccessEnabled_ = false;
     bool isDomStorageAccessEnabled_ = false;

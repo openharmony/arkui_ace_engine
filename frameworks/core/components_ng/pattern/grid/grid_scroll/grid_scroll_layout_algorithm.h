@@ -77,6 +77,9 @@ private:
     void ModifyCurrentOffsetWhenReachEnd(float mainSize, float crossGap);
     void InitialItemsCrossSize(const RefPtr<GridLayoutProperty>& layoutProperty, const SizeF& frameSize);
 
+    void AdaptToChildMainSize(LayoutWrapper* layoutWrapper, RefPtr<GridLayoutProperty>& gridLayoutProperty,
+        float mainSize, const SizeF& idealSize);
+
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
     int32_t currentMainLineIndex_ = 0;        // it equals to row index in vertical grid

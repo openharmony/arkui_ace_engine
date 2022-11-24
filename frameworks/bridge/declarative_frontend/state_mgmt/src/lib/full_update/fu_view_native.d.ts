@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/**
+ * NativeViewFullUpdate
+ * 
+ * all definitions in this file are framework internal
+ */
+
 declare class NativeViewFullUpdate {
   constructor(compilerAssignedUniqueChildId: string, parent: View);
   markNeedUpdate(): void;

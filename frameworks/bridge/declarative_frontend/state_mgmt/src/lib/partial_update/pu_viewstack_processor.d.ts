@@ -13,8 +13,14 @@
  * limitations under the License.
  */
 
-// real implemntation in C+ and exposed to JS
-// and mock implementation for testing
+/** 
+ * ViewStackProcessor declaration
+ * 
+ * Implemntation in C+ and exposed to JS
+ *
+ * all definitions in this file are framework internal
+ */
+
 declare class ViewStackProcessor {
 
   // make and return new elementId
@@ -57,4 +63,11 @@ declare class ViewStackProcessor {
    * @param elmtId
    */
   public static FinishAndLocalUpdate(elmtId: number): void;
+
+
+  /**
+   * Returns a globally unique id from ElementRegister
+   * JS signatire: MakeUniqueId() : number
+  */
+  public static MakeUniqueId(): number;
 }
