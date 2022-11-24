@@ -139,37 +139,6 @@ if (is_standard_system) {
     deps += [ "//third_party/curl:curl_shared" ]
     sources += [ curl_path + "/thirdparty/curl/libcurl_shared${dylib_suffix}" ]
 
-     # Add dynamic library "hilog"
-    if (use_mac) {
-      hilog_path = get_label_info(
-              "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_mac",
-              "root_out_dir")
-      deps +=
-          [ "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_mac" ]
-      sources +=
-          [ "${hilog_path}/hiviewdfx/hilog_native/libhilog_mac${dylib_suffix}" ]
-    } else if (use_mingw_win) {
-      hilog_path = get_label_info(
-              "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_windows",
-              "root_out_dir")
-      deps += [
-        "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_windows",
-      ]
-      sources += [
-        "${hilog_path}/hiviewdfx/hilog_native/libhilog_windows${dylib_suffix}",
-      ]
-    } else if (use_linux) {
-      hilog_path = get_label_info(
-              "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_linux",
-              "root_out_dir")
-      deps += [
-        "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_linux",
-      ]
-      sources += [
-        "${hilog_path}/hiviewdfx/hilog_native/libhilog_linux${dylib_suffix}",
-      ]
-    }
-
     # Add dynamic library "libsec_shared"
     sec_path =
         get_label_info("//third_party/bounds_checking_function:libsec_shared",
