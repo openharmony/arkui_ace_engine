@@ -135,9 +135,7 @@ void GridModelNG::SetMinCount(int32_t value)
 
 void GridModelNG::SetCellLength(int32_t value)
 {
-    if (value > 0) {
-        ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, CellLength, value);
-    }
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, CellLength, value);
 }
 
 void GridModelNG::SetMultiSelectable(bool value)
