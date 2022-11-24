@@ -34,9 +34,10 @@ void BlankView::Create()
     auto blankNode = FrameNode::GetOrCreateFrameNode(
         V2::BLANK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BlankPattern>(); });
     stack->Push(blankNode);
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexGrow, 1.0f);
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexShrink, 0.0f);
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AlignSelf, FlexAlign::STRETCH);
+    ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexGrow, 1.0f);
+    ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexShrink, 0.0f);
+    ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, AlignSelf, FlexAlign::STRETCH);
+    ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, Height, Dimension(0.0, DimensionUnit::VP));
 }
 
 void BlankView::SetBlankMin(const Dimension& blankMin)
@@ -47,6 +48,15 @@ void BlankView::SetBlankMin(const Dimension& blankMin)
     CHECK_NULL_VOID(layoutProperty);
     // TODO: Use flex basis
     layoutProperty->UpdateMinSize(blankMin);
+}
+
+void BlankView::SetHeight(const Dimension& height)
+{
+    auto blankNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(blankNode);
+    auto layoutProperty = blankNode->GetLayoutProperty<BlankLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateHeight(height);
 }
 
 } // namespace OHOS::Ace::NG
