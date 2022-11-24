@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/stepper/stepper_event_hub.h"
 #include "core/components_ng/pattern/stepper/stepper_layout_algorithm.h"
 #include "core/components_ng/pattern/stepper/stepper_layout_property.h"
+#include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
@@ -27,6 +28,8 @@ class StepperPattern : public Pattern {
     DECLARE_ACE_TYPE(StepperPattern, Pattern);
 
 public:
+    using ChangeEvent = std::function<void(int32_t)>;
+
     StepperPattern() = default;
     ~StepperPattern() override = default;
 
@@ -55,13 +58,15 @@ private:
     void OnAttachToFrameNode() override;
     int32_t TotalCount() const;
 
+    void InitSwiperChangeEvent(const RefPtr<SwiperEventHub>& swiperEventHub);
     void InitButtonClickEvent(const RefPtr<GestureEventHub>& leftGestureHub,
         const RefPtr<GestureEventHub>& rightGestureHub, const RefPtr<FrameNode>& swiperNode);
     void HandlingButtonClickEvent(bool isLeft, const RefPtr<FrameNode>& swiperNode);
-    void UpdateButtonText();
+    void UpdateButtonText(int32_t index);
 
     int32_t index_ = 0;
     int32_t maxIndex_ = 0;
+    std::shared_ptr<ChangeEvent> swiperChangeEvent_;
     RefPtr<ClickEvent> leftClickEvent_;
     RefPtr<ClickEvent> rightClickEvent_;
     ACE_DISALLOW_COPY_AND_MOVE(StepperPattern);
