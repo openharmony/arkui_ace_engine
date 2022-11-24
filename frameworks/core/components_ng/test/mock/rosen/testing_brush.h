@@ -36,6 +36,7 @@ public:
     virtual void SetColor(int c) {}
     virtual void SetShaderEffect(std::shared_ptr<TestingShaderEffect> e) {}
     virtual void SetFilter(const TestingFilter filter) {}
+    virtual void SetAlpha(uint32_t a) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_BRUSH_H
