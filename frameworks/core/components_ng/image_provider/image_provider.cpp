@@ -142,7 +142,8 @@ bool ImageProvider::QueryImageObjectFromCache(const LoadCallbacks& loadCallbacks
         return false;
     }
     RefPtr<ImageObject> imageObj = imageCache->GetCacheImgObjNG(sourceInfo.ToString());
-    if (imageObj) { // if [imageObj] of [sourceInfo] is already in cache, notify data ready immediately
+    if (imageObj && imageObj->GetSourceInfo() == sourceInfo) {
+        // if [imageObj] of [sourceInfo] is already in cache, notify data ready immediately
         loadCallbacks.dataReadyCallback_(sourceInfo, imageObj);
         return true;
     }

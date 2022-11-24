@@ -63,7 +63,7 @@ public:
         paintConfig_ = std::make_unique<ImagePaintConfig>(config);
     }
 
-    const ImagePaintConfig& GetPaintConfig()
+    ImagePaintConfig& GetPaintConfig()
     {
         return *paintConfig_;
     }

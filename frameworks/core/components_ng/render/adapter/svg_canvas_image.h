@@ -27,8 +27,8 @@ public:
     explicit SvgCanvasImage(const RefPtr<SvgDomBase>& svgDom) : svgDom_(svgDom) {}
     ~SvgCanvasImage() override = default;
 
-    void SetSvgImageFit(const ImageFit& imageFit);
-    void SetSvgFillColor(const std::optional<Color>& color);
+    void SetSvgFillColor(const std::optional<Color>& color) {}
+    std::optional<Color> GetSvgFillColor();
 
     void SetSVGDom(const RefPtr<SvgDomBase>& svgDom);
     const RefPtr<SvgDomBase>& GetSVGDom() const;
@@ -47,8 +47,6 @@ public:
 
 private:
     RefPtr<SvgDomBase> svgDom_;
-    ImageFit imageFit_ = ImageFit::COVER;
-    std::optional<Color> color_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -214,11 +214,6 @@ HWTEST_F(ImagePatternTest, SetImagePaintConfig001, TestSize.Level1)
     EXPECT_TRUE(imagePattern->lastAltCanvasImage_->paintConfig_ != nullptr);
     auto altImagePaintConfig = imagePattern->lastAltCanvasImage_->GetPaintConfig();
     EXPECT_EQ(altImagePaintConfig.imageFit_, IMAGE_FIT_DEFAULT);
-    EXPECT_EQ(altImagePaintConfig.renderMode_, IMAGE_RENDERMODE_DEFAULT);
-    EXPECT_EQ(altImagePaintConfig.imageInterpolation_, IMAGE_INTERPOLATION_DEFAULT);
-    EXPECT_EQ(altImagePaintConfig.imageRepeat_, IMAGE_REPEAT_DEFAULT);
-    EXPECT_EQ(*altImagePaintConfig.colorFilter_, COLOR_FILTER_DEFAULT);
-    EXPECT_EQ(altImagePaintConfig.needFlipCanvasHorizontally_, false);
     /**
      * @tc.steps: step4. Image loads successfully, and trigger Pattern->OnImageLoadSuccess.
      */
@@ -230,11 +225,6 @@ HWTEST_F(ImagePatternTest, SetImagePaintConfig001, TestSize.Level1)
     EXPECT_TRUE(imagePattern->lastCanvasImage_->paintConfig_ != nullptr);
     auto imagePaintConfig = imagePattern->lastCanvasImage_->GetPaintConfig();
     EXPECT_EQ(imagePaintConfig.imageFit_, IMAGE_FIT_DEFAULT);
-    EXPECT_EQ(imagePaintConfig.renderMode_, IMAGE_RENDERMODE_DEFAULT);
-    EXPECT_EQ(imagePaintConfig.imageInterpolation_, IMAGE_INTERPOLATION_DEFAULT);
-    EXPECT_EQ(imagePaintConfig.imageRepeat_, IMAGE_REPEAT_DEFAULT);
-    EXPECT_EQ(*imagePaintConfig.colorFilter_, COLOR_FILTER_DEFAULT);
-    EXPECT_EQ(imagePaintConfig.needFlipCanvasHorizontally_, false);
     /**
      * @tc.steps: step5. Image loads successfully, and clear alt data.
      */

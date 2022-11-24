@@ -18,7 +18,6 @@
 #include "utils/rect.h"
 
 namespace OHOS::Ace::NG {
-
 void SvgCanvasImage::SetSVGDom(const RefPtr<SvgDomBase>& svgDom)
 {
     svgDom_ = svgDom;
@@ -29,20 +28,15 @@ const RefPtr<SvgDomBase>& SvgCanvasImage::GetSVGDom() const
     return svgDom_;
 }
 
-void SvgCanvasImage::SetSvgImageFit(const ImageFit& imageFit)
+std::optional<Color> SvgCanvasImage::GetSvgFillColor()
 {
-    imageFit_ = imageFit;
-}
-
-void SvgCanvasImage::SetSvgFillColor(const std::optional<Color>& color)
-{
-    color_ = color;
+    return svgDom_ ? std::nullopt : svgDom_->GetSvgFillColor();
 }
 
 void SvgCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect&  /*dstRect*/)
 {
     CHECK_NULL_VOID(svgDom_);
-    svgDom_->DrawImage(canvas, imageFit_, Size(srcRect.GetWidth(), srcRect.GetHeight()), color_);
+    svgDom_->DrawImage(
+        canvas, GetPaintConfig().imageFit_, Size(srcRect.GetWidth(), srcRect.GetHeight()), GetSvgFillColor());
 }
-
 } // namespace OHOS::Ace::NG

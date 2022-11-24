@@ -14,7 +14,7 @@
  */
 
 #include "gtest/gtest.h"
-
+#define private public
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
@@ -48,6 +48,7 @@ constexpr ImageRenderMode IMAGE_NO_RENDERMODE = ImageRenderMode::ORIGINAL;
 constexpr bool MATCHTEXTDIRECTION_DEFAULT = false;
 const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.jpg";
 const std::string ALT_SRC_URL = "file://data/data/com.example.test/res/exampleAlt.jpg";
+const std::string SVG_SRC_URL = "file://data/data/com.example.test/res/example.svg";
 } // namespace
 
 class ImageModelNgTest : public testing::Test {
@@ -205,5 +206,28 @@ HWTEST_F(ImageModelNgTest, ImageEventTest002, TestSize.Level1)
     EXPECT_EQ(curEvent.GetErrorMessage(), loadImageFailEvent.GetErrorMessage());
     EXPECT_EQ(curEvent.GetComponentWidth(), loadImageFailEvent.GetComponentWidth());
     EXPECT_EQ(curEvent.GetComponentHeight(), loadImageFailEvent.GetComponentHeight());
+}
+
+/**
+ * @tc.name: ImageSvgTest001
+ * @tc.desc: Test svg FillColor is set correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModelNgTest, ImageSvgTest001, TestSize.Level1)
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    image.Create(SVG_SRC_URL, false, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_TRUE(frameNode != nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
+    image.SetImageFill(Color::BLUE);
+    imageSourceInfo.SetFillColor(Color::BLUE);
+    EXPECT_TRUE(imageLayoutProperty->GetImageSourceInfo() != std::nullopt);
+    EXPECT_EQ(imageLayoutProperty->GetImageSourceInfo().value(), imageSourceInfo);
+    EXPECT_EQ(imageLayoutProperty->GetImageSourceInfo()->fillColor_.value(), Color::BLUE);
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value(), Color::BLUE);
 }
 } // namespace OHOS::Ace::NG
