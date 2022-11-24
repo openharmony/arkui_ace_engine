@@ -1127,7 +1127,25 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
 {
     auto offset = geometryNode_->GetFrameOffset();
     auto parent = GetAncestorNodeOfFrame();
+    if (renderContext_ && renderContext_->GetPositionProperty()) {
+        if (renderContext_->GetPositionProperty()->HasPosition()) {
+            offset.SetX(static_cast<float>(renderContext_->GetPositionProperty()->GetPosition()->GetX().Value()));
+            offset.SetY(static_cast<float>(renderContext_->GetPositionProperty()->GetPosition()->GetY().Value()));
+        }
+    }
     while (parent) {
+        auto parentRenderContext = parent->GetRenderContext();
+        if (parentRenderContext && parentRenderContext->GetPositionProperty()) {
+            if (parentRenderContext->GetPositionProperty()->HasPosition()) {
+                offset.AddX(
+                    static_cast<float>(parentRenderContext->GetPositionProperty()->GetPosition()->GetX().Value()));
+                offset.AddY(
+                    static_cast<float>(parentRenderContext->GetPositionProperty()->GetPosition()->GetY().Value()));
+                parent = parent->GetAncestorNodeOfFrame();
+                continue;
+            }
+        }
+
         offset += parent->geometryNode_->GetFrameOffset();
         parent = parent->GetAncestorNodeOfFrame();
     }
