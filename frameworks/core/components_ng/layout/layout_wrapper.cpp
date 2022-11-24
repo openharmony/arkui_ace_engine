@@ -53,9 +53,8 @@ RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool
 
 void LayoutWrapper::SetCacheCount(int32_t cacheCount)
 {
-    if (layoutWrapperBuilder_) {
-        layoutWrapperBuilder_->SetCacheCount(cacheCount);
-    }
+    CHECK_NULL_VOID(layoutWrapperBuilder_);
+    layoutWrapperBuilder_->SetCacheCount(cacheCount);
 }
 
 const std::list<RefPtr<LayoutWrapper>>& LayoutWrapper::GetAllChildrenWithBuild(bool addToRenderTree)
@@ -99,9 +98,8 @@ void LayoutWrapper::RemoveAllChildInRenderTree()
     for (auto& child : childrenMap_) {
         child.second->isActive_ = false;
     }
-    if (layoutWrapperBuilder_) {
-        layoutWrapperBuilder_->RemoveAllChildInRenderTree();
-    }
+    CHECK_NULL_VOID(layoutWrapperBuilder_);
+    layoutWrapperBuilder_->RemoveAllChildInRenderTree();
 }
 
 void LayoutWrapper::ResetHostNode()
@@ -122,31 +120,26 @@ WeakPtr<FrameNode> LayoutWrapper::GetWeakHostNode() const
 std::string LayoutWrapper::GetHostTag() const
 {
     auto host = GetHostNode();
-    if (host) {
-        return host->GetTag();
-    }
-    return "";
+    CHECK_NULL_RETURN(host, "");
+    return host->GetTag();
 }
 
 int32_t LayoutWrapper::GetHostDepth() const
 {
     auto host = GetHostNode();
-    if (host) {
-        return host->GetDepth();
-    }
-    return -1;
+    CHECK_NULL_RETURN(host, -1);
+    return host->GetDepth();
 }
 
 // This will call child and self measure process.
 void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
     auto host = GetHostNode();
-    if (!layoutProperty_ || !geometryNode_ || !host) {
-        LOGE("Measure failed: the layoutProperty_ or geometryNode_ or host is nullptr");
-        return;
-    }
-
-    if (!layoutAlgorithm_ || layoutAlgorithm_->SkipMeasure()) {
+    CHECK_NULL_VOID(layoutProperty_);
+    CHECK_NULL_VOID(geometryNode_);
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(layoutAlgorithm_);
+    if (layoutAlgorithm_->SkipMeasure()) {
         LOGD("%{public}s, depth: %{public}d: the layoutAlgorithm skip measure", host->GetTag().c_str(),
             host->GetDepth());
         return;
@@ -216,12 +209,12 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
 void LayoutWrapper::Layout()
 {
     auto host = GetHostNode();
-    if (!layoutProperty_ || !geometryNode_ || !host) {
-        LOGE("Layout failed: the layoutProperty_ or geometryNode_ or host or frameNode is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(layoutProperty_);
+    CHECK_NULL_VOID(geometryNode_);
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(layoutAlgorithm_);
 
-    if (!layoutAlgorithm_ || layoutAlgorithm_->SkipLayout()) {
+    if (layoutAlgorithm_->SkipLayout()) {
         LOGD(
             "%{public}s, depth: %{public}d: the layoutAlgorithm skip layout", host->GetTag().c_str(), host->GetDepth());
         return;
@@ -302,10 +295,7 @@ void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
     }
 
     auto host = hostNode_.Upgrade();
-    if (!host) {
-        LOGE("the host is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(host);
     host->SwapDirtyLayoutWrapperOnMainThread(Claim(this));
 
     /* Adjust components' position which have been set grid properties */
@@ -314,8 +304,7 @@ void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
             child->GetHostNode()->AdjustGridOffset();
         }
     }
-    if (layoutWrapperBuilder_) {
-        layoutWrapperBuilder_->AdjustGridOffset();
-    }
+    CHECK_NULL_VOID(layoutWrapperBuilder_);
+    layoutWrapperBuilder_->AdjustGridOffset();
 }
 } // namespace OHOS::Ace::NG

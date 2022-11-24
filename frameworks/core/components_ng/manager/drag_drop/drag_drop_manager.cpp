@@ -203,9 +203,7 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
     preTargetFrameNode_ = nullptr;
 
     auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, DragType::COMMON);
-    if (!dragFrameNode) {
-        return;
-    }
+    CHECK_NULL_VOID(dragFrameNode);
 
     auto eventHub = dragFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -304,9 +302,7 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
     preGridTargetFrameNode_ = nullptr;
 
     auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, dragType);
-    if (!dragFrameNode) {
-        return;
-    }
+    CHECK_NULL_VOID(dragFrameNode);
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

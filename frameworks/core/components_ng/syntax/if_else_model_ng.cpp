@@ -40,10 +40,7 @@ void IfElseModelNG::SetBranchId(int32_t value)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto node = AceType::DynamicCast<IfElseNode>(stack->GetMainElementNode());
-    if (node == nullptr) {
-        LOGE("IfElseNode is null, update IfElse failed"); 
-        return;
-    }
+    CHECK_NULL_VOID(node);
     node->SetBranchId(value);
 }
 
@@ -51,10 +48,7 @@ int32_t IfElseModelNG::GetBranchId()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto node = AceType::DynamicCast<IfElseNode>(stack->GetMainElementNode());
-    if (node == nullptr) {
-        LOGE("IfElseNode is null, update IfElse failed"); 
-        return -1;  // invalid branchId
-    }
+    CHECK_NULL_RETURN(node, -1);
     return node->GetBranchId();
 }
 
