@@ -13,21 +13,10 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/pipeline/base/element_register.h"
+#include "core/components_ng/pattern/flex/wrap_layout_algorithm.h"
 
-namespace OHOS::Ace {
-ElementRegister* ElementRegister::GetInstance()
-{
-    return new ElementRegister();
-}
+namespace OHOS::Ace::NG {
+void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper) {}
 
-bool ElementRegister::RemoveItem(ElementIdType elementId)
-{
-    return true;
-}
-
-bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
-{
-    return true;
-}
-} // namespace OHOS::Ace
+void WrapLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper) {}
+} // namespace OHOS::Ace::NG

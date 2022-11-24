@@ -13,21 +13,10 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/pipeline/base/element_register.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 
-namespace OHOS::Ace {
-ElementRegister* ElementRegister::GetInstance()
-{
-    return new ElementRegister();
-}
+namespace OHOS::Ace::NG {
+void ButtonPattern::OnAttachToFrameNode() {}
 
-bool ElementRegister::RemoveItem(ElementIdType elementId)
-{
-    return true;
-}
-
-bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
-{
-    return true;
-}
-} // namespace OHOS::Ace
+void ButtonPattern::OnModifyDone() {}
+} // namespace OHOS::Ace::NG
