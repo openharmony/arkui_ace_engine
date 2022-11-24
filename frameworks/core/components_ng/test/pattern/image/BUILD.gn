@@ -120,7 +120,7 @@ ohos_unittest("image_pattern_test") {
   ]
 
   configs = [
-    "$ace_root:ace_test_config",
+    "$ace_root:ace_unittest_config",
     "$ace_root:ace_test_coverage_config",
     "$ace_root:ace_config",
     "$ace_flutter_engine_root:flutter_config",
