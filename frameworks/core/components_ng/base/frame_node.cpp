@@ -157,6 +157,14 @@ void FrameNode::DumpInfo()
     DumpLog::GetInstance().AddDesc(std::string("Visible: ")
                                        .append(std::to_string(static_cast<int32_t>(
                                            layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)))));
+    if (layoutProperty_->GetPaddingProperty()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("Padding: ").append(layoutProperty_->GetPaddingProperty()->ToString().c_str()));
+    }
+    if (layoutProperty_->GetBorderWidthProperty()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("Border: ").append(layoutProperty_->GetBorderWidthProperty()->ToString().c_str()));
+    }
     DumpLog::GetInstance().AddDesc(std::string("compid: ").append(propInspectorId_.value_or("")));
     DumpLog::GetInstance().AddDesc(std::string("ContentConstraint: ")
                                        .append(layoutProperty_->GetContentLayoutConstraint().has_value()

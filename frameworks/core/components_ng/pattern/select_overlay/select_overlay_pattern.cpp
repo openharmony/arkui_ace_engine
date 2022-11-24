@@ -96,9 +96,17 @@ void SelectOverlayPattern::UpdateHandleHotZone()
     auto hotZone = theme->GetHandleHotZoneRadius().ConvertToPx();
     firstHandleRegion_.SetSize({ hotZone * 2, hotZone * 2 });
     auto firstHandleOffsetX = (info_->firstHandle.paintRect.Left() + info_->firstHandle.paintRect.Right()) / 2;
+    std::vector<DimensionRect> responseRegion;
     if (info_->isSingleHandle) {
         auto firstHandleOffsetY = info_->firstHandle.paintRect.Bottom();
         firstHandleRegion_.SetOffset({ firstHandleOffsetX - hotZone, firstHandleOffsetY });
+        DimensionRect firstHandleRegion;
+        firstHandleRegion.SetSize(
+            { Dimension(firstHandleRegion_.GetSize().Width()), Dimension(firstHandleRegion_.GetSize().Height()) });
+        firstHandleRegion.SetOffset(
+            DimensionOffset(Offset(firstHandleRegion_.GetOffset().GetX(), firstHandleRegion_.GetOffset().GetY())));
+        responseRegion.emplace_back(firstHandleRegion);
+        host->GetOrCreateGestureEventHub()->SetResponseRegion(responseRegion);
         return;
     }
     auto sendHandleOffsetX = (info_->secondHandle.paintRect.Left() + info_->secondHandle.paintRect.Right()) / 2;
@@ -114,7 +122,6 @@ void SelectOverlayPattern::UpdateHandleHotZone()
         auto secondHandleOffsetY = info_->secondHandle.paintRect.Bottom();
         secondHandleRegion_.SetOffset({ sendHandleOffsetX - hotZone, secondHandleOffsetY });
     }
-    std::vector<DimensionRect> responseRegion;
     DimensionRect firstHandleRegion;
     firstHandleRegion.SetSize(
         { Dimension(firstHandleRegion_.GetSize().Width()), Dimension(firstHandleRegion_.GetSize().Height()) });
