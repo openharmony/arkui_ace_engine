@@ -401,8 +401,8 @@ void RenderListItemGroup::PerformLayout()
 
 RefPtr<RenderNode> RenderListItemGroup::GetRenderNode()
 {
-    auto parent = renderBox_.Upgrade();
-    if (parent && AceType::DynamicCast<RenderBox>(parent)) {
+    auto parent = renderNode_.Upgrade();
+    if (parent) {
         return parent;
     }
     return Claim(this);
