@@ -178,6 +178,16 @@ void RenderSingleChildScroll::MoveChildToViewPort(
     JumpToPosition(GetCurrentPosition() + moveDelta);
 }
 
+bool RenderSingleChildScroll::IsDeclarativePara()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return false;
+    }
+
+    return context->GetIsDeclarative();
+}
+
 void RenderSingleChildScroll::PerformLayout()
 {
     if (GetChildren().size() != MAX_CHILD_SIZE) {
@@ -211,6 +221,19 @@ void RenderSingleChildScroll::PerformLayout()
     }
     itemSize = child->GetLayoutSize();
     LOGD("child size after padding: %{public}lf, %{public}lf", itemSize.Width(), itemSize.Height());
+    auto left = child->GetLeft().ConvertToPx();
+    auto top = child->GetTop().ConvertToPx();
+
+    if (!IsDeclarativePara()) {
+        auto childPosition = child->GetChildren().front();
+        if (childPosition) {
+            left = childPosition->GetLeft().ConvertToPx();
+            top = childPosition->GetTop().ConvertToPx();
+        }
+    }
+    itemSize.SetWidth(itemSize.Width() + left);
+    itemSize.SetHeight(itemSize.Height() + top);
+
     auto currentChildMainSize = GetMainSize(child->GetLayoutSize());
     // Mark need force layout with parent if child size changed in semi and dialog window modal.
     if (!NearEqual(childLastMainSize_, -std::numeric_limits<double>::max()) &&
