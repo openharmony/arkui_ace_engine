@@ -69,7 +69,9 @@ FrameNode::~FrameNode()
         focusHub->RemoveSelf(this);
     }
     auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->RemoveOnAreaChangeNode(GetId());
+    if (pipeline) {
+        pipeline->RemoveOnAreaChangeNode(GetId());
+    }
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
