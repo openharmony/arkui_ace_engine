@@ -96,9 +96,7 @@ RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(
 RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId)
 {
     auto frameNode = ElementRegister::GetInstance()->GetSpecificItemById<FrameNode>(nodeId);
-    if (!frameNode) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(frameNode, nullptr);
     if (frameNode->GetTag() != tag) {
         LOGE("the tag is changed");
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
@@ -466,9 +464,7 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
     RefPtr<LayoutWrapper> layoutWrapper;
     UpdateLayoutPropertyFlag();
     layoutWrapper = CreateLayoutWrapper();
-    if (!layoutWrapper) {
-        return std::nullopt;
-    }
+    CHECK_NULL_RETURN(layoutWrapper, std::nullopt);
     auto task = [layoutWrapper, layoutConstraint = GetLayoutConstraint(), forceUseMainThread]() {
         layoutWrapper->SetActive();
         layoutWrapper->SetRootMeasureNode();
@@ -504,9 +500,7 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     }
     ACE_SCOPED_TRACE("CreateRenderTask:PrepareTask");
     auto wrapper = CreatePaintWrapper();
-    if (!wrapper) {
-        return std::nullopt;
-    }
+    CHECK_NULL_RETURN(wrapper, std::nullopt);
     auto task = [wrapper, paintProperty = paintProperty_]() {
         ACE_SCOPED_TRACE("FrameNode::RenderTask");
         wrapper->FlushRender();
