@@ -83,8 +83,8 @@ RefPtr<ComposedComponent> NavigationBarComponentBase::GenerateAccessibilityCompo
         }
         auto box = AceType::MakeRefPtr<BoxComponent>();
         box->SetChild(child);
-		auto composed = AceType::MakeRefPtr<ComposedComponent>(std::to_string(composedId), name, box);
-		composed->MarkNeedUpdate();
+        auto composed = AceType::MakeRefPtr<ComposedComponent>(std::to_string(composedId), name, box);
+        composed->MarkNeedUpdate();
         return composed;
     }
     return nullptr;
