@@ -390,7 +390,7 @@ void ImageLoadingContext::CacheImageObject()
     CHECK_NULL_VOID(pipelineCtx);
     auto imageCache = pipelineCtx->GetImageCache();
     CHECK_NULL_VOID(imageCache);
-    if (imageCache && imageObj_->GetFrameCount() == 1 && !AceType::InstanceOf<PixelMapImageObject>(imageObj_)) {
+    if (imageCache && imageObj_->GetFrameCount() == 1) {
         imageCache->CacheImgObjNG(imageObj_->GetSourceInfo().ToString(), imageObj_);
     }
 }
