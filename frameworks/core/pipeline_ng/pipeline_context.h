@@ -163,6 +163,8 @@ public:
 
     bool OnBackPressed();
 
+    RefPtr<FrameNode> GetNavDestinationBackButtonNode();
+
     void AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode);
 
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
