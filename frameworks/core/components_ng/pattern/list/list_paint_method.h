@@ -32,6 +32,7 @@ struct DividerInfo {
     float halfSpaceWidth;
     bool isVertical;
     int32_t lanes;
+    int32_t totalItemCount;
     Color color;
 };
 
@@ -54,10 +55,16 @@ public:
         scrollBar_ = scrollBar;
     }
 
+    void SetTotalItemCount(int32_t totalItemCount)
+    {
+        totalItemCount_ = totalItemCount;
+    }
+
 private:
     V2::ItemDivider divider_;
     bool vertical_ = false;
     int32_t lanes_ = 1;
+    int32_t totalItemCount_;
     float space_;
     PositionMap itemPosition_;
 

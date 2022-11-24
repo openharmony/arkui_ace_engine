@@ -22,22 +22,6 @@
 
 namespace OHOS::Ace::Framework {
 
-enum class AnimationStatus {
-    INITIAL,
-    RUNNING,
-    PAUSED,
-    STOPPED,
-};
-
-enum class EventOperation {
-    NONE,
-    START,
-    PAUSE,
-    REPEAT,
-    CANCEL,
-    FINISH,
-};
-
 class JSAnimator : public AceType {
     DECLARE_ACE_TYPE(JSAnimator, AceType);
 

@@ -29,13 +29,9 @@ namespace OHOS::Ace::NG {
 void SkPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const ShapePaintProperty& shapePaintProperty)
 {
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
-    if (!rsCanvas) {
-        return;
-    }
+    CHECK_NULL_VOID(rsCanvas);
     auto skCanvas = rsCanvas->ExportSkCanvas();
-    if (!skCanvas) {
-        return;
-    }
+    CHECK_NULL_VOID(skCanvas);
     SkPaint skPen;
     SkPaint skBrush;
     SkPath skPath;

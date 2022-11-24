@@ -180,6 +180,7 @@ public:
 
     void HandleTouchDown();
     void HandleTouchUp();
+    void HandleTouchCancel();
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(const GestureEvent& info);

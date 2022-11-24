@@ -21,6 +21,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/select/select_view.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 
@@ -30,11 +31,11 @@ class ACE_EXPORT MenuView {
 public:
     // create menu with menuItems
     static RefPtr<FrameNode> Create(std::vector<OptionParam>&& params, const std::string& targetTag, int32_t targetId,
-        const NG::OffsetF& offset);
+        const NG::OffsetF& offset, bool isNavigationMenu = false);
 
     // create menu with custom node from a builder
-    static RefPtr<FrameNode> Create(const RefPtr<UINode>& customNode, const std::string& targetTag, int32_t targetId,
-        const NG::OffsetF& offset);
+    static RefPtr<FrameNode> Create(
+        const RefPtr<UINode>& customNode, const std::string& targetTag, int32_t targetId, const NG::OffsetF& offset);
 
     // create select's popup menu
     static RefPtr<FrameNode> Create(

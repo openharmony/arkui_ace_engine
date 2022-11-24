@@ -17,9 +17,11 @@
 #include "core/components_ng/test/mock/render/mock_canvas_image.h"
 
 namespace OHOS::Ace::NG {
-ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& sourceInfo, const LoadNotifier& loadNotifier)
+ImageLoadingContext::ImageLoadingContext(
+    const ImageSourceInfo& sourceInfo, const LoadNotifier& loadNotifier, bool syncLoad)
     : sourceInfo_(sourceInfo), loadNotifier_(loadNotifier),
-      loadCallbacks_(GenerateDataReadyCallback(), GenerateLoadSuccessCallback(), GenerateLoadFailCallback())
+      loadCallbacks_(GenerateDataReadyCallback(), GenerateLoadSuccessCallback(), GenerateLoadFailCallback()),
+      syncLoad_(syncLoad)
 {}
 
 SizeF ImageLoadingContext::CalculateResizeTarget(const SizeF& srcSize, const SizeF& dstSize, const SizeF& rawImageSize)

@@ -41,6 +41,30 @@ OH_NativeXComponent_TouchEventType ConvertNativeXComponentTouchEvent(const Touch
             return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UNKNOWN;
     }
 }
+
+OH_NativeXComponent_TouchPointToolType ConvertNativeXComponentTouchToolType(const SourceTool& toolType)
+{
+    switch (toolType) {
+        case SourceTool::FINGER:
+            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_FINGER;
+        case SourceTool::PEN:
+            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_PEN;
+        case SourceTool::RUBBER:
+            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_RUBBER;
+        case SourceTool::BRUSH:
+            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_BRUSH;
+        case SourceTool::PENCIL:
+            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_PENCIL;
+        case SourceTool::AIRBRUSH:
+            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_AIRBRUSH;
+        case SourceTool::MOUSE:
+            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_MOUSE;
+        case SourceTool::LENS:
+            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_LENS;
+        default:
+            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_UNKNOWN;
+    }
+}
 } // namespace
 
 XComponentPattern::XComponentPattern(const std::string& id, XComponentType type, const std::string& libraryname,
@@ -229,14 +253,16 @@ void XComponentPattern::NativeXComponentOffset(double x, double y)
         TaskExecutor::TaskType::JS);
 }
 
-void XComponentPattern::NativeXComponentDispatchTouchEvent(const OH_NativeXComponent_TouchEvent& touchEvent)
+void XComponentPattern::NativeXComponentDispatchTouchEvent(
+    const OH_NativeXComponent_TouchEvent& touchEvent, const std::vector<XComponentTouchPoint>& xComponentTouchPoints)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->GetTaskExecutor()->PostTask(
-        [nXCompImpl = nativeXComponentImpl_, &nXComp = nativeXComponent_, touchEvent] {
+        [nXCompImpl = nativeXComponentImpl_, &nXComp = nativeXComponent_, touchEvent, xComponentTouchPoints] {
             if (nXComp != nullptr && nXCompImpl) {
                 nXCompImpl->SetTouchEvent(touchEvent);
+                nXCompImpl->SetTouchPoint(xComponentTouchPoints);
                 auto* surface = const_cast<void*>(nXCompImpl->GetSurface());
                 const auto* callback = nXCompImpl->GetCallback();
                 if (callback != nullptr && callback->DispatchTouchEvent != nullptr) {
@@ -351,7 +377,7 @@ void XComponentPattern::InitMouseHoverEvent(const RefPtr<InputEventHub>& inputHu
 
 void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
-    auto touchInfoList = info.GetTouches();
+    auto touchInfoList = info.GetChangedTouches();
     if (touchInfoList.empty()) {
         return;
     }
@@ -371,9 +397,9 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchType = touchInfoList.front().GetTouchType();
     touchEventPoint_.type = ConvertNativeXComponentTouchEvent(touchType);
 
-    SetTouchPoint(touchInfoList, timeStamp, touchType);
+    SetTouchPoint(info.GetTouches(), timeStamp, touchType);
 
-    NativeXComponentDispatchTouchEvent(touchEventPoint_);
+    NativeXComponentDispatchTouchEvent(touchEventPoint_, nativeXComponentTouchPoints_);
 }
 
 void XComponentPattern::HandleMouseEvent(const MouseInfo& info)
@@ -464,6 +490,7 @@ void XComponentPattern::SetTouchPoint(
 {
     touchEventPoint_.numPoints =
         touchInfoList.size() <= OH_MAX_TOUCH_POINTS_NUMBER ? touchInfoList.size() : OH_MAX_TOUCH_POINTS_NUMBER;
+    nativeXComponentTouchPoints_.clear();
     uint32_t index = 0;
     for (auto iterator = touchInfoList.begin(); iterator != touchInfoList.end() && index < OH_MAX_TOUCH_POINTS_NUMBER;
          iterator++) {
@@ -482,6 +509,12 @@ void XComponentPattern::SetTouchPoint(
         ohTouchPoint.timeStamp = timeStamp;
         ohTouchPoint.isPressed = (touchType == TouchType::DOWN);
         touchEventPoint_.touchPoints[index++] = ohTouchPoint;
+        // set tiltX, tiltY and sourceToolType
+        XComponentTouchPoint xcomponentTouchPoint;
+        xcomponentTouchPoint.tiltX = pointTouchInfo.GetTiltX().value_or(0.0f);
+        xcomponentTouchPoint.tiltY = pointTouchInfo.GetTiltY().value_or(0.0f);
+        xcomponentTouchPoint.sourceToolType = ConvertNativeXComponentTouchToolType(pointTouchInfo.GetSourceTool());
+        nativeXComponentTouchPoints_.emplace_back(xcomponentTouchPoint);
     }
     while (index < OH_MAX_TOUCH_POINTS_NUMBER) {
         OH_NativeXComponent_TouchPoint ohTouchPoint;

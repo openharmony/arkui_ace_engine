@@ -100,7 +100,7 @@ std::string Inspector::GetInspectorNodeByKey(const RefPtr<PipelineContext>& cont
     return jsonNode->ToString();
 }
 
-std::string Inspector::GetInspectorTree(const RefPtr<PipelineContext>& context)
+std::string Inspector::GetInspectorTree(const RefPtr<PipelineContext>& context, bool isLayoutInspector)
 {
     auto jsonRoot = JsonUtil::Create(true);
     jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
@@ -188,6 +188,13 @@ std::string Inspector::GetInspectorTree(const RefPtr<PipelineContext>& context)
         jsonNodeArray->Put(nodeJSONValue);
     }
     jsonRoot->Put(INSPECTOR_CHILDREN, jsonNodeArray);
+
+    if (isLayoutInspector) {
+        auto jsonTree = JsonUtil::Create(true);
+        jsonTree->Put("type", "root");
+        jsonTree->Put("content", jsonRoot);
+        return jsonTree->ToString();
+    }
     return jsonRoot->ToString();
 }
 

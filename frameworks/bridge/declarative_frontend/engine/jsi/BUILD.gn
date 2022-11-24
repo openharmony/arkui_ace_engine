@@ -115,9 +115,15 @@ template("declarative_js_engine_ark") {
     ]
 
     if (enable_ng_build) {
-      sources += [ "jsi_view_register_impl_ng.cpp" ]
+      sources += [
+        "jsi_animator_model_ng_build_impl.cpp",
+        "jsi_view_register_impl_ng.cpp",
+      ]
     } else {
-      sources += [ "jsi_view_register_impl.cpp" ]
+      sources += [
+        "jsi_animator_model_ng_impl.cpp",
+        "jsi_view_register_impl.cpp",
+      ]
     }
 
     if (!use_ios) {
@@ -129,7 +135,9 @@ template("declarative_js_engine_ark") {
     if (defined(config.build_for_preview) && config.build_for_preview) {
       deps += [ ":gen_obj_src_abc_mock_system_plugin" ]
       sources += [ "utils/jsi_module_searcher.cpp" ]
-    } else if ((defined(config.build_for_android) && config.build_for_android) || (defined(config.build_for_ios) && config.build_for_ios)) {
+    } else if ((defined(config.build_for_android) &&
+                config.build_for_android) ||
+               (defined(config.build_for_ios) && config.build_for_ios)) {
       sources += [ "jsi_declarative_utils.cpp" ]
       if (enable_ng_build) {
         sources += [

@@ -17,6 +17,7 @@
 
 #include "include/pathops/SkPathOps.h"
 
+#include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_declaration.h"
 
 namespace OHOS::Ace::NG {
@@ -46,9 +47,7 @@ SkPath SvgSvg::AsPath(const Size& viewPort) const
 Size SvgSvg::GetSize() const
 {
     auto declaration = AceType::DynamicCast<SvgDeclaration>(declaration_);
-    if (declaration == nullptr) {
-        return Size();
-    }
+    CHECK_NULL_RETURN(declaration, Size());
 
     return Size(declaration->GetWidth().Value(), declaration->GetHeight().Value());
 }
@@ -56,9 +55,7 @@ Size SvgSvg::GetSize() const
 const Rect& SvgSvg::GetViewBox() const
 {
     auto declaration = AceType::DynamicCast<SvgDeclaration>(declaration_);
-    if (declaration == nullptr) {
-        return Rect();
-    }
+    CHECK_NULL_RETURN(declaration, Rect());
     return declaration->GetViewBox();
 }
 

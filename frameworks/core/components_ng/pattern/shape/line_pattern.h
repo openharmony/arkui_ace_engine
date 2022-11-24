@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/shape/line_layout_algorithm.h"
 #include "core/components_ng/pattern/shape/line_paint_method.h"
 #include "core/components_ng/pattern/shape/line_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_pattern.h"
@@ -31,9 +32,14 @@ public:
     LinePattern() = default;
     ~LinePattern() override = default;
 
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<LineLayoutAlgorithm>();
+    }
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<LinePaintMethod>();
+        return MakeRefPtr<LinePaintMethod>(GetAncestorPaintProperty());
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <regex>
 #include <string>
@@ -1359,6 +1360,7 @@ void TextFieldPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHan
 
 void TextFieldPattern::InitEditingValueText(std::string content)
 {
+    textEditingValue_.caretPosition = content.size();
     textEditingValue_.text = std::move(content);
 }
 
@@ -1886,11 +1888,7 @@ void TextFieldPattern::HandleSelectionRight()
 
 void TextFieldPattern::SetCaretPosition(int32_t position)
 {
-    if (position < 0 || position > static_cast<int32_t>(textEditingValue_.text.length())) {
-        LOGE("Illegal caret position");
-        return;
-    }
-    textEditingValue_.caretPosition = position;
+    textEditingValue_.caretPosition = std::clamp(position, 0, static_cast<int32_t>(textEditingValue_.text.length()));
     selectionMode_ = SelectionMode::NONE;
     caretUpdateType_ = CaretUpdateType::EVENT;
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

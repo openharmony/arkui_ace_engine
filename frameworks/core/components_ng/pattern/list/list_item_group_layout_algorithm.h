@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_ITEM_GROUP_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_ITEM_GROUP_LAYOUT_ALGORITHM_H
 
+#include <optional>
 #include "base/geometry/axis.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -41,6 +42,11 @@ public:
         return itemPosition_;
     }
 
+    float GetSpaceWidth() const
+    {
+        return spaceWidth_;
+    }
+
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -63,6 +69,8 @@ private:
     PositionMap itemPosition_;
     Axis axis_ = Axis::VERTICAL;
     int32_t lanes_ = 1;
+    std::optional<float> minLaneLength_;
+    std::optional<float> maxLaneLength_;
     V2::ListItemAlign itemAlign_ = V2::ListItemAlign::START;
     float spaceWidth_ = 0.0f;
 };

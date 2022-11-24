@@ -26,47 +26,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-SizeF CalculateFitContain(const SizeF& videoSize, const SizeF& layoutSize)
-{
-    double layoutRatio = NearZero(layoutSize.Height()) ? 0.0 : layoutSize.Width() / layoutSize.Height();
-    double sourceRatio = NearZero(videoSize.Height()) ? layoutRatio : videoSize.Width() / videoSize.Height();
-
-    if (NearZero(layoutRatio) || NearZero(sourceRatio)) {
-        return layoutSize;
-    }
-    if (sourceRatio < layoutRatio) {
-        return { static_cast<float>(sourceRatio) * layoutSize.Height(), layoutSize.Height() };
-    }
-    return { layoutSize.Width(), static_cast<float>(layoutSize.Width() / sourceRatio) };
-}
-SizeF CalculateFitFill(const SizeF& layoutSize)
-{
-    return layoutSize;
-}
-SizeF CalculateFitCover(const SizeF& videoSize, const SizeF& layoutSize)
-{
-    double layoutRatio = NearZero(layoutSize.Height()) ? 0.0 : layoutSize.Width() / layoutSize.Height();
-    double sourceRatio = NearZero(videoSize.Height()) ? layoutRatio : videoSize.Width() / videoSize.Height();
-
-    if (NearZero(layoutRatio) || NearZero(sourceRatio)) {
-        return layoutSize;
-    }
-    if (sourceRatio < layoutRatio) {
-        return { layoutSize.Width(), static_cast<float>(layoutSize.Width() / sourceRatio) };
-    }
-    return { static_cast<float>(layoutSize.Height() * sourceRatio), layoutSize.Height() };
-}
-SizeF CalculateFitNone(const SizeF& videoSize)
-{
-    return videoSize;
-}
-SizeF CalculateFitScaleDown(const SizeF& videoSize, const SizeF& layoutSize)
-{
-    if (layoutSize.Width() > videoSize.Width()) {
-        return CalculateFitNone(videoSize);
-    }
-    return CalculateFitContain(videoSize, layoutSize);
-}
 float CalControlBarHeight()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -127,37 +86,9 @@ void VideoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 std::optional<SizeF> VideoLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    auto layoutProperty = DynamicCast<VideoLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto layoutSize = contentConstraint.selfIdealSize.IsValid() ? contentConstraint.selfIdealSize.ConvertToSizeT()
                                                                 : contentConstraint.maxSize;
-    if (!layoutProperty->HasVideoSize()) {
-        LOGW("VideoSize has not set");
-        return layoutSize;
-    }
-    auto videoSize = layoutProperty->GetVideoSizeValue(SizeF(0, 0));
-    LOGD("VideoSize = %{public}s", videoSize.ToString().c_str());
-    auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
-    SizeF contentSize = { 0.0, 0.0 };
-    switch (imageFit) {
-        case ImageFit::CONTAIN:
-            contentSize = CalculateFitContain(videoSize, layoutSize);
-            break;
-        case ImageFit::FILL:
-            contentSize = CalculateFitFill(layoutSize);
-            break;
-        case ImageFit::COVER:
-            contentSize = CalculateFitCover(videoSize, layoutSize);
-            break;
-        case ImageFit::NONE:
-            contentSize = CalculateFitNone(videoSize);
-            break;
-        case ImageFit::SCALE_DOWN:
-            contentSize = CalculateFitScaleDown(videoSize, layoutSize);
-            break;
-        default:
-            contentSize = CalculateFitContain(videoSize, layoutSize);
-    }
-    return contentSize;
+    return layoutSize;
 }
 
 } // namespace OHOS::Ace::NG

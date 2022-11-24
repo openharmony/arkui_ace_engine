@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#include "base/memory/ace_type.h"
 #include "core/components_ng/event/drag_event.h"
+#include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 
@@ -33,5 +35,9 @@ DragEventActuator::DragEventActuator(
 
 void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
-{}
+{
+    // emplace not a NGGestureRecognizer, just for going to a branch
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+    result.emplace_back(touchEventActuator);
+}
 } // namespace OHOS::Ace::NG

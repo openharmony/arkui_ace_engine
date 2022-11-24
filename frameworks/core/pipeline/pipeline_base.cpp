@@ -124,6 +124,7 @@ void PipelineBase::ClearImageCache()
 
 RefPtr<ImageCache> PipelineBase::GetImageCache() const
 {
+    std::shared_lock<std::shared_mutex> lock(imageCacheMutex_);
     return imageCache_;
 }
 
@@ -574,7 +575,10 @@ void PipelineBase::Destroy()
     platformResRegister_.Reset();
     drawDelegate_.reset();
     eventManager_->ClearResults();
-    imageCache_.Reset();
+    {
+        std::unique_lock<std::shared_mutex> lock(imageCacheMutex_);
+        imageCache_.Reset();
+    }
     fontManager_.Reset();
     themeManager_.Reset();
     window_->Destroy();

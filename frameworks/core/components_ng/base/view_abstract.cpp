@@ -361,9 +361,12 @@ void ViewAbstract::SetOnAreaChanged(
     std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>&&
         onAreaChanged)
 {
-    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnAreaChanged(std::move(onAreaChanged));
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetOnAreaChangeCallback(std::move(onAreaChanged));
+    pipeline->AddOnAreaChangeNode(frameNode->GetId());
 }
 
 void ViewAbstract::SetOnVisibleChange(

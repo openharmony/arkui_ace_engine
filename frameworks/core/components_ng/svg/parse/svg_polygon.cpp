@@ -15,6 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_polygon.h"
 
+#include "base/utils/utils.h"
 #include "frameworks/core/components/common/painter/flutter_svg_painter.h"
 #include "frameworks/core/components/declaration/svg/svg_polygon_declaration.h"
 
@@ -41,7 +42,8 @@ SkPath SvgPolygon::AsPath(const Size& viewPort) const
 {
     SkPath path;
     auto declaration = AceType::DynamicCast<SvgPolygonDeclaration>(declaration_);
-    if (declaration == nullptr || declaration->GetPoints().empty()) {
+    CHECK_NULL_RETURN(declaration, path);
+    if (declaration->GetPoints().empty()) {
         return path;
     }
     std::vector<SkPoint> skPoints;

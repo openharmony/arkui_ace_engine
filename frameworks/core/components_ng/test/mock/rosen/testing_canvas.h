@@ -27,6 +27,7 @@ namespace OHOS::Ace::Testing {
 using Point = Rosen::Drawing::Point;
 using RoundRect = Rosen::Drawing::RoundRect;
 using ClipOp = Rosen::Drawing::ClipOp;
+
 class TestingCanvas {
 public:
     TestingCanvas() = default;
@@ -34,7 +35,7 @@ public:
     virtual ~TestingCanvas() = default;
 
     virtual void DrawLine(const Point& startPt, const Point& endPt) {}
-    
+
     virtual void DrawPath(const TestingPath& path) {}
     virtual void DrawArc(const Rect& oval, scalar startAngle, scalar sweepAngle) {}
     virtual void DrawRect(const Rect& rect) {}
@@ -58,7 +59,7 @@ public:
     {
         return *this;
     }
-    
+
     virtual TestingCanvas& DetachBrush()
     {
         return *this;

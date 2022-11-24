@@ -114,6 +114,12 @@ public:
         return {};
     }
 
+    void AddOnAreaChangeNode(int32_t nodeId);
+
+    void RemoveOnAreaChangeNode(int32_t nodeId);
+
+    void HandleOnAreaChangeEvent();
+
     void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback);
 
     void HandleVisibleAreaChangeEvent();
@@ -156,6 +162,8 @@ public:
     }
 
     bool OnBackPressed();
+
+    RefPtr<FrameNode> GetNavDestinationBackButtonNode();
 
     void AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode);
 
@@ -299,6 +307,7 @@ private:
 
     RefPtr<FrameNode> rootNode_;
 
+    std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_map<int32_t, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
 
     RefPtr<StageManager> stageManager_;

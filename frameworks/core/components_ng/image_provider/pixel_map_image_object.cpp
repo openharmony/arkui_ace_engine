@@ -20,7 +20,7 @@
 namespace OHOS::Ace::NG {
 
 void PixelMapImageObject::MakeCanvasImage(
-    const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize)
+    const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool /*forceResize*/, bool /*syncLoad*/)
 {
     // TODO: support un-decoded pixel map that can specify size.
     // For current situation, pixel map is already decoded.
@@ -34,6 +34,9 @@ void PixelMapImageObject::MakeCanvasImage(
     }
     auto renderTaskHolder = ImageProvider::CreateRenderTaskHolder();
     CHECK_NULL_VOID(renderTaskHolder);
+    if (ImageProvider::QueryCanvasImageFromCache(AceType::WeakClaim(this), loadCallbacks, resizeTarget)) {
+        return;
+    }
     SetCanvasImage(CanvasImage::Create(pixmap_, renderTaskHolder));
     loadCallbacks.loadSuccessCallback_(sourceInfo_);
 }

@@ -66,6 +66,7 @@ public:
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
     void TransferFromImageBitmap(PaintWrapper* paintWrapper, const RefPtr<OffscreenCanvasPattern>& offscreenCanvas);
     std::string ToDataURL(const std::string& args);
+    std::string GetJsonData(const std::string& path);
 
     void FillText(PaintWrapper* paintWrapper, const std::string& text, double x, double y);
     void StrokeText(PaintWrapper* paintWrapper, const std::string& text, double x, double y);
@@ -84,10 +85,10 @@ private:
     void SetPaintImage() override {};
 
     void PaintText(
-        const OffsetF& offset, const SizeF& contentSize, double x, double y, bool isStroke, bool hasShadow = true);
+        const OffsetF& offset, const SizeF& contentSize, double x, double y, bool isStroke, bool hasShadow = false);
     double GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
-    bool UpdateParagraph(const OffsetF& offset, const std::string& text, bool isStroke, bool hasShadow = true);
+    bool UpdateParagraph(const OffsetF& offset, const std::string& text, bool isStroke, bool hasShadow = false);
     void UpdateTextStyleForeground(const OffsetF& offset, bool isStroke, txt::TextStyle& txtStyle, bool hasShadow);
     void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas) override;
     OffsetF GetContentOffset(PaintWrapper* paintWrapper) const override

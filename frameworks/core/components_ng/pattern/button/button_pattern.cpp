@@ -83,6 +83,7 @@ void ButtonPattern::InitButtonLabel()
         textLayoutProperty->UpdateFontFamily(layoutProperty->GetFontFamily().value());
     }
     textNode->MarkModifyDone();
+    textNode->MarkDirtyNode();
 }
 
 void ButtonPattern::OnModifyDone()

@@ -57,7 +57,7 @@ void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrappe
     LOGD("drawing option divider with length %{public}f", optionSize.Width() - 2 * horInterval);
 
     RSBrush brush;
-    brush.SetColor(DIVIDER_COLOR);
+    brush.SetColor(OPTION_DIVIDER_COLOR);
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
     canvas.DrawPath(path);

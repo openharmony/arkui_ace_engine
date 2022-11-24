@@ -318,4 +318,16 @@ int32_t ListLanesLayoutAlgorithm::GetLanesFloor(LayoutWrapper* layoutWrapper, in
     }
     return index;
 }
+
+void ListLanesLayoutAlgorithm::SetListItemGroupProperty(const RefPtr<ListItemGroupLayoutProperty>& itemGroup,
+    Axis axis, int32_t lanes)
+{
+    ListLayoutAlgorithm::SetListItemGroupProperty(itemGroup, axis, lanes);
+    if (minLaneLength_) {
+        itemGroup->UpdateLaneMinLength(minLaneLength_.value());
+    }
+    if (maxLaneLength_) {
+        itemGroup->UpdateLaneMaxLength(maxLaneLength_.value());
+    }
+}
 } // namespace OHOS::Ace::NG

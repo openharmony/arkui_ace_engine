@@ -60,6 +60,43 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // update cache info.
     layoutWrapper->SetCacheCount(static_cast<int32_t>(gridLayoutProperty->GetCachedCountValue(1) * crossCount_));
+
+    AdaptToChildMainSize(layoutWrapper, gridLayoutProperty, mainSize, idealSize);
+}
+
+void GridScrollLayoutAlgorithm::AdaptToChildMainSize(LayoutWrapper* layoutWrapper,
+    RefPtr<GridLayoutProperty>& gridLayoutProperty, float mainSize, const SizeF& idealSize)
+{
+    // grid with columnsTemplate/rowsTemplate and maxCount
+    if (!gridLayoutProperty->HasMaxCount()) {
+        return;
+    }
+
+    std::optional<CalcLength> mainAxisIdealSize;
+    const auto& selfLayoutConstraint = gridLayoutProperty->GetCalcLayoutConstraint();
+    if (selfLayoutConstraint && selfLayoutConstraint->selfIdealSize.has_value()) {
+        mainAxisIdealSize = axis_ == Axis::HORIZONTAL ? selfLayoutConstraint->selfIdealSize->Width()
+                                                      : selfLayoutConstraint->selfIdealSize->Height();
+    }
+
+    if (!mainAxisIdealSize.has_value()) {
+        auto frameSize = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
+        auto crossGap = GridUtils::GetCrossGap(gridLayoutProperty, frameSize, axis_);
+        float lengthOfItemsInViewport = 0;
+        for (auto i = gridLayoutInfo_.startMainLineIndex_; i <= gridLayoutInfo_.endMainLineIndex_; i++) {
+            lengthOfItemsInViewport += (gridLayoutInfo_.lineHeightMap_[i] + crossGap);
+        }
+        auto gridMainSize = std::min(lengthOfItemsInViewport, mainSize);
+        // should use minCount * cellLength ?
+        if (axis_ == Axis::HORIZONTAL) {
+            gridMainSize = std::max(gridMainSize, gridLayoutProperty->GetLayoutConstraint()->minSize.Width());
+            layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(gridMainSize, idealSize.Height()));
+        } else {
+            gridMainSize = std::max(gridMainSize, gridLayoutProperty->GetLayoutConstraint()->minSize.Height());
+            layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(idealSize.Width(), gridMainSize));
+        }
+        LOGI("gridMainSize:%{public}f", gridMainSize);
+    }
 }
 
 void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -222,7 +259,7 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
 
     // Step2. Calculate real offset that items can only be moved up by.
     // Hint: [prevOffset_] is a non-positive value
-    if (LessNotEqual(lengthOfItemsInViewport, mainSize)) {
+    if (LessNotEqual(lengthOfItemsInViewport, mainSize) && gridLayoutInfo_.startMainLineIndex_ == 0) {
         gridLayoutInfo_.currentOffset_ = 0;
         gridLayoutInfo_.prevOffset_ = 0;
         return;
@@ -267,7 +304,6 @@ void GridScrollLayoutAlgorithm::MeasureRecordedItems(
         mainLength = 0;
     }
     bool runOutOfRecord = false;
-    int32_t lineRemoved = 0;
     // Measure grid items row by row
     while (LessNotEqual(mainLength, mainSize)) {
         // If [gridMatrix_] does not contain record of line [currentMainLineIndex_], do [FillNewLineBackward]
@@ -305,15 +341,10 @@ void GridScrollLayoutAlgorithm::MeasureRecordedItems(
         // [lineHeightMap_] will take place in [StripItemsOutOfViewport].
         // TODO: inactive items
         if (LessOrEqual(mainLength, 0.0)) {
-            // if no line can be added, no line should be removed
-            if (gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.endMainLineIndex_ + 1 + lineRemoved) !=
-                gridLayoutInfo_.gridMatrix_.end()) {
-                gridLayoutInfo_.currentOffset_ = mainLength;
-                gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-                gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_ + 1;
-                gridLayoutInfo_.startIndex_ = currentIndex + 1;
-                lineRemoved++;
-            }
+            gridLayoutInfo_.currentOffset_ = mainLength;
+            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+            gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_ + 1;
+            gridLayoutInfo_.startIndex_ = currentIndex + 1;
         }
     }
     // Case 1. if this while-loop breaks due to running out of records, the [currentMainLineIndex_] is larger by 1 than
@@ -466,7 +497,11 @@ LayoutConstraintF GridScrollLayoutAlgorithm::CreateChildConstraint(float mainSiz
     float heightPercentBase = GreatOrEqual(mainCount_, Infinity<uint32_t>())
                                   ? itemConstraint.percentReference.Height()
                                   : itemConstraint.percentReference.Height() / static_cast<float>(mainCount_);
-    itemConstraint.percentReference = SizeF(widthPercentBase, heightPercentBase);
+    if (axis_ == Axis::VERTICAL) {
+        itemConstraint.percentReference = SizeF(widthPercentBase, itemConstraint.percentReference.Height());
+    } else {
+        itemConstraint.percentReference = SizeF(itemConstraint.percentReference.Width(), heightPercentBase);
+    }
     itemConstraint.maxSize = itemIdealSize;
     itemConstraint.UpdateIllegalSelfMarginSizeWithCheck(axis_ == Axis::VERTICAL
                                                             ? OptionalSizeF(itemCrossSize, std::nullopt)

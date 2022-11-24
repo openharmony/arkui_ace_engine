@@ -19,6 +19,7 @@
 #include <atomic>
 #include <functional>
 #include <memory>
+#include <shared_mutex>
 #include <stack>
 #include <string>
 #include <utility>
@@ -745,6 +746,7 @@ protected:
     int32_t instanceId_ = 0;
     RefPtr<EventManager> eventManager_;
     RefPtr<ImageCache> imageCache_;
+    mutable std::shared_mutex imageCacheMutex_;
     RefPtr<ThemeManager> themeManager_;
     RefPtr<DataProviderManagerInterface> dataProviderManager_;
     RefPtr<FontManager> fontManager_;
