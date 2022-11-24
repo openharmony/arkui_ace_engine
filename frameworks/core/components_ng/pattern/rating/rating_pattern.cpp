@@ -29,6 +29,7 @@ namespace OHOS::Ace::NG {
 constexpr int32_t RATING_IMAGE_SUCCESS_CODE = 0b111;
 constexpr int32_t DEFAULT_RATING_STAR_NUM = 5;
 constexpr double DEFAULT_RATING_STEP_SIZE = 0.5;
+constexpr double DEFAULT_RATING_TOUCH_STAR_NUMBER = -1;
 
 void RatingPattern::CheckImageInfoHasChangedOrNot(
     int32_t imageFlag, const ImageSourceInfo& sourceInfo, const std::string& lifeCycleTag)
@@ -219,12 +220,12 @@ void RatingPattern::ConstrainsRatingScore()
     }
 
     // Calculate drewScore based on the stepSize, and it is cannot be greater than starNum.
-    double ratingScore = ratingRenderProperty->GetRatingScore().value_or(GetRatingScoreFromTheme().value_or(0.0));
-    double stepSize =
+    const double ratingScore = ratingRenderProperty->GetRatingScore().value_or(GetRatingScoreFromTheme().value_or(0.0));
+    const double stepSize =
         ratingRenderProperty->GetStepSize().value_or(GetStepSizeFromTheme().value_or(DEFAULT_RATING_STEP_SIZE));
-    int32_t starNum =
+    const int32_t starNum =
         ratingLayoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(DEFAULT_RATING_STAR_NUM));
-    double drawScore = fmin(Round(ratingScore / stepSize) * stepSize, static_cast<double>(starNum));
+    const double drawScore = fmin(Round(ratingScore / stepSize) * stepSize, static_cast<double>(starNum));
 
     // do not fire onChange callback when rating is initialized for the first time.
     if (hasInit_ && lastRatingScore_ != drawScore) {
@@ -382,7 +383,7 @@ void RatingPattern::HandleTouchUp()
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
     // Update touch star to 0 to indicate there is no star to be touched.
-    ratingRenderProperty->UpdateTouchStar(0);
+    ratingRenderProperty->UpdateTouchStar(DEFAULT_RATING_TOUCH_STAR_NUMBER);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -395,8 +396,8 @@ void RatingPattern::HandleTouchDown(const Offset& localPosition)
     }
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
-    // calculate the number of star the touch point falls on adn trigger render update.
-    int32_t touchStar = floor(localPosition.GetX() / singleStarDstRect_.Width());
+    // calculate the number of star the touch point falls on and trigger render update.
+    const int32_t touchStar = floor(localPosition.GetX() / singleStarDstRect_.Width());
     ratingRenderProperty->UpdateTouchStar(touchStar);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -496,6 +497,66 @@ void RatingPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 }
 
+void RatingPattern::InitMouseEvent()
+{
+    if (mouseEvent_ && hoverEvent_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto eventHub = GetHost()->GetEventHub<RatingEventHub>();
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleHoverEvent(isHover);
+        }
+    };
+
+    auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleMouseEvent(info);
+        }
+    };
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
+    inputHub->AddOnHoverEvent(hoverEvent_);
+    inputHub->AddOnMouseEvent(mouseEvent_);
+}
+
+void RatingPattern::HandleHoverEvent(bool isHover)
+{
+    isHover_ = isHover;
+    // Remove hover state when rating is not hovered.
+    if (!isHover) {
+        auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
+        CHECK_NULL_VOID(ratingRenderProperty);
+        ratingRenderProperty->UpdateTouchStar(DEFAULT_RATING_TOUCH_STAR_NUMBER);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void RatingPattern::HandleMouseEvent(MouseInfo& info)
+{
+    if (IsIndicator() && !isHover_) {
+        return;
+    }
+    auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
+    CHECK_NULL_VOID(ratingRenderProperty);
+    // calculate the number of star the mouse moved on and trigger render update.
+    ratingRenderProperty->UpdateTouchStar(
+        static_cast<int32_t>(floor(info.GetLocalLocation().GetX() / singleStarDstRect_.Width())));
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void RatingPattern::OnModifyDone()
 {
     // Reset image state code.
@@ -564,6 +625,7 @@ void RatingPattern::OnModifyDone()
     InitTouchEvent(gestureHub);
     InitPanEvent(gestureHub);
     InitClickEvent(gestureHub);
+    InitMouseEvent();
     auto focusHub = host->GetFocusHub();
     if (focusHub) {
         InitOnKeyEvent(focusHub);
