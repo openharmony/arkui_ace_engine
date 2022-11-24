@@ -995,40 +995,36 @@ void WebPattern::RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
     int32_t flags = params->GetEditStateFlags();
     if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) {
         selectInfo.menuCallback.onCut = [weak = AceType::WeakClaim(this), callback]() {
-            if (callback) {
-                callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT,
-                    OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
-            }
+            CHECK_NULL_VOID(callback);
+            callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT,
+                OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
         };
     } else {
         selectInfo.menuInfo.showCut = false;
     }
     if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY) {
         selectInfo.menuCallback.onCopy = [weak = AceType::WeakClaim(this), callback]() {
-            if (callback) {
-                callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY,
-                    OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
-            }
+            CHECK_NULL_VOID(callback);
+            callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY,
+                OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
         };
     } else {
         selectInfo.menuInfo.showCopy = false;
     }
     if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_PASTE) {
         selectInfo.menuCallback.onPaste = [weak = AceType::WeakClaim(this), callback]() {
-            if (callback) {
-                callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_PASTE,
-                    OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
-            }
+            CHECK_NULL_VOID(callback);
+            callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_PASTE,
+                OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
         };
     } else {
         selectInfo.menuInfo.showPaste = false;
     }
     if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_SELECT_ALL) {
         selectInfo.menuCallback.onSelectAll = [weak = AceType::WeakClaim(this), callback]() {
-            if (callback) {
-                callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_SELECT_ALL,
-                    OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
-            }
+            CHECK_NULL_VOID(callback);
+            callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_SELECT_ALL,
+                OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
         };
     } else {
         selectInfo.menuInfo.showCopyAll = false;
