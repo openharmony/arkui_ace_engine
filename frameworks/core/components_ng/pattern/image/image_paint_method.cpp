@@ -36,12 +36,12 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
     CHECK_NULL_RETURN(canvasImage_, nullptr);
     auto offset = paintWrapper->GetContentOffset();
     auto contentSize = paintWrapper->GetContentSize();
-    ImagePainter imagePainter(canvasImage_);
 
     // update render props to ImagePaintConfig
     auto props = DynamicCast<ImageRenderProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_RETURN(props, nullptr);
     UpdatePaintConfig(props);
+    ImagePainter imagePainter(canvasImage_);
     return
         [imagePainter, offset, config = canvasImage_->GetPaintConfig(), contentSize](RSCanvas& canvas) {
             imagePainter.DrawImage(canvas, offset, contentSize, config);
