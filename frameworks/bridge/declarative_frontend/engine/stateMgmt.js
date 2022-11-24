@@ -3711,7 +3711,7 @@ class ViewPU extends NativeViewPartialUpdate {
     viewPropertyHasChanged(varName, dependentElmtIds) {
         
         this.syncInstanceId();
-        if (dependentElmtIds.size) {
+        if (dependentElmtIds.size && !this.isFirstRender()) {
             if (!this.dirtDescendantElementIds_.size) {
                 // mark Composedelement dirty when first elmtIds are added
                 // do not need to do this every time
