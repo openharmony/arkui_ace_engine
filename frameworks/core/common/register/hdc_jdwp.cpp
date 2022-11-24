@@ -155,8 +155,10 @@ bool HdcJdwpSimulator::Connect()
                 }
             } while (reRecv);
         }
-        close(ctxPoint_->cfd);
-        ctxPoint_->cfd = -1;
+        if (ctxPoint_->cfd > -1) {
+            close(ctxPoint_->cfd);
+            ctxPoint_->cfd = -1;
+        }
         sleep(3); // connect per 3 second
     }
     return true;
