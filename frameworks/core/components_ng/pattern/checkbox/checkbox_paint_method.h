@@ -50,6 +50,7 @@ private:
     Color shadowColor_ = Color::WHITE;
     Color clickEffectColor_ = Color::WHITE;
     Color hoverColor_ = Color::WHITE;
+    Color inactivePointColor_ = Color::WHITE;
     Dimension hoverRadius_ = 8.0_vp;
     Dimension hotZoneHorizontalPadding_ = 11.0_vp;
 
