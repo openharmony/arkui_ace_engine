@@ -96,10 +96,10 @@ void ScrollPattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = host->GetPaintProperty<ScrollPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-
+    paintProperty->UpdateScrollBarOffset(currentOffset_, viewPort_, viewPortExtent_, !isScrollContent_);
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     if (axis_ == axis && scrollableEvent_) {
-        LOGD("Direction not changed, need't resister scroll event again.");
+        LOGD("Direction not changed, need's resister scroll event again.");
         return;
     }
 
@@ -400,12 +400,9 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
     if (IsScrollOutOnEdge(delta)) {
         return false;
     }
-    if (!ScrollPageCheck(delta, source)) {
-        return false;
-    }
     auto paintProperty = GetPaintProperty<ScrollPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
-    delta = paintProperty->CalculaltePatternOffset(delta);
+    delta = paintProperty->CalculatePatternOffset(delta);
     // TODO: scrollBar effect!!
     lastOffset_ = currentOffset_;
     currentOffset_ += delta;
