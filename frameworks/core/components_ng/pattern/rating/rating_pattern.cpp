@@ -27,8 +27,6 @@
 
 namespace OHOS::Ace::NG {
 constexpr int32_t RATING_IMAGE_SUCCESS_CODE = 0b111;
-constexpr int32_t DEFAULT_RATING_STAR_NUM = 5;
-constexpr double DEFAULT_RATING_STEP_SIZE = 0.5;
 constexpr double DEFAULT_RATING_TOUCH_STAR_NUMBER = -1;
 
 void RatingPattern::CheckImageInfoHasChangedOrNot(
@@ -159,7 +157,7 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     CHECK_NULL_RETURN(secondaryImageCanvas_, nullptr);
     CHECK_NULL_RETURN(backgroundImageCanvas_, nullptr);
     auto starNum = GetLayoutProperty<RatingLayoutProperty>()->GetStars().value_or(
-        GetStarNumFromTheme().value_or(DEFAULT_RATING_STAR_NUM));
+        GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
     singleStarImagePaintConfig_.srcRect_ = singleStarRect_;
     singleStarImagePaintConfig_.dstRect_ = singleStarDstRect_;
     return MakeRefPtr<RatingPaintMethod>(
@@ -209,7 +207,7 @@ void RatingPattern::ConstrainsRatingScore()
     // constrains ratingScore and StarNum.
     // check if starNum is not positive, assign the value defined in theme.
     if (ratingLayoutProperty->HasStars() && ratingLayoutProperty->GetStars().value() <= 0) {
-        ratingLayoutProperty->UpdateStars(GetStarNumFromTheme().value_or(DEFAULT_RATING_STAR_NUM));
+        ratingLayoutProperty->UpdateStars(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
     }
 
     // if ratingScore < 0, assign the value defined in theme.
@@ -221,10 +219,10 @@ void RatingPattern::ConstrainsRatingScore()
 
     // Calculate drewScore based on the stepSize, and it is cannot be greater than starNum.
     const double ratingScore = ratingRenderProperty->GetRatingScore().value_or(GetRatingScoreFromTheme().value_or(0.0));
-    const double stepSize =
-        ratingRenderProperty->GetStepSize().value_or(GetStepSizeFromTheme().value_or(DEFAULT_RATING_STEP_SIZE));
+    const double stepSize = ratingRenderProperty->GetStepSize().value_or(
+        GetStepSizeFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STEP_SIZE));
     const int32_t starNum =
-        ratingLayoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(DEFAULT_RATING_STAR_NUM));
+        ratingLayoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
     const double drawScore = fmin(Round(ratingScore / stepSize) * stepSize, static_cast<double>(starNum));
 
     // do not fire onChange callback when rating is initialized for the first time.
@@ -238,7 +236,7 @@ void RatingPattern::ConstrainsRatingScore()
     lastRatingScore_ = drawScore;
 }
 
-void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(const double eventPointX)
+void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(double eventPointX, bool isDrag)
 {
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     CHECK_NULL_VOID(ratingLayoutProperty);
@@ -256,7 +254,7 @@ void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(const double eventP
     // step3: calculate the new ratingScore according to the touch point.
     double ratingScore = wholeStarNum + posInSingle;
     const int32_t starNum =
-        ratingLayoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(DEFAULT_RATING_STAR_NUM));
+        ratingLayoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
     const double stepSize = ratingRenderProperty->GetStepSize().value_or(GetStepSizeFromTheme().value_or(0.5));
     // step3.1: constrain ratingScore which cannot be greater than starNum and be less than 0.0.
     ratingScore = ratingScore > starNum ? starNum : ratingScore;
@@ -270,7 +268,9 @@ void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(const double eventP
     }
     // step4: Update the ratingScore saved in renderProperty and update render.
     ratingRenderProperty->UpdateRatingScore(newDrawScore);
-    ratingRenderProperty->UpdateTouchStar(static_cast<int32_t>(wholeStarNum));
+    if (isDrag) {
+        ratingRenderProperty->UpdateTouchStar(static_cast<int32_t>(wholeStarNum));
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -289,7 +289,7 @@ void RatingPattern::HandleDragUpdate(const GestureEvent& info)
     if (IsIndicator()) {
         return;
     }
-    RecalculatedRatingScoreBasedOnEventPoint(info.GetLocalLocation().GetX());
+    RecalculatedRatingScoreBasedOnEventPoint(info.GetLocalLocation().GetX(), true);
 }
 
 void RatingPattern::FireChangeEvent() const
@@ -409,7 +409,7 @@ void RatingPattern::HandleClick(const GestureEvent& info)
     if (IsIndicator()) {
         return;
     }
-    RecalculatedRatingScoreBasedOnEventPoint(info.GetLocalLocation().GetX());
+    RecalculatedRatingScoreBasedOnEventPoint(info.GetLocalLocation().GetX(), false);
     FireChangeEvent();
 }
 
@@ -465,8 +465,8 @@ bool RatingPattern::OnKeyEvent(const KeyEvent& event)
     }
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     double ratingScore = ratingRenderProperty->GetRatingScoreValue();
-    const double stepSize =
-        ratingRenderProperty->GetStepSize().value_or(GetStepSizeFromTheme().value_or(DEFAULT_RATING_STEP_SIZE));
+    const double stepSize = ratingRenderProperty->GetStepSize().value_or(
+        GetStepSizeFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STEP_SIZE));
     if (event.code == KeyCode::KEY_DPAD_LEFT) {
         ratingScore = fmax(ratingScore - stepSize, 0.0);
         ratingRenderProperty->UpdateRatingScore(ratingScore);
@@ -475,8 +475,9 @@ bool RatingPattern::OnKeyEvent(const KeyEvent& event)
         return true;
     }
     if (event.code == KeyCode::KEY_DPAD_RIGHT) {
-        ratingScore = fmin(ratingScore + stepSize, GetLayoutProperty<RatingLayoutProperty>()->GetStars().value_or(
-                                                       GetStarNumFromTheme().value_or(DEFAULT_RATING_STAR_NUM)));
+        ratingScore =
+            fmin(ratingScore + stepSize, GetLayoutProperty<RatingLayoutProperty>()->GetStars().value_or(
+                                             GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM)));
         ratingRenderProperty->UpdateRatingScore(ratingScore);
         auto host = GetHost();
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
