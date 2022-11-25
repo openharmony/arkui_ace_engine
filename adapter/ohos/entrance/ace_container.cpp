@@ -47,7 +47,7 @@
 #include "core/common/text_field_manager.h"
 #include "core/common/window.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -1162,7 +1162,7 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
         ACE_SCOPED_TRACE("OHOS::LoadThemes()");
         LOGD("UIContent load theme");
         ThemeConstants::InitDeviceType();
-        auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+        auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
         pipelineContext->SetThemeManager(themeManager);
         themeManager->InitResource(resourceInfo);
         themeManager->SetColorScheme(colorScheme);

@@ -19,7 +19,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/text/text_theme.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "frameworks/bridge/common/dom/dom_div.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/common/dom/dom_label.h"
@@ -87,7 +87,7 @@ HWTEST_F(DomLabelTest, DomLabelTest001, TestSize.Level1)
      * @tc.steps: step3. Check all the attributes matched with the default values.
      * @tc.expected: step3. All the attributes are matched.
      */
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     RefPtr<TextTheme> theme = themeManager->GetTheme<TextTheme>();
     ASSERT_TRUE(theme);
     EXPECT_TRUE(static_cast<int32_t>(textChild->GetTextStyle().GetTextOverflow()) == DEFAULT_OVER_FLOW);

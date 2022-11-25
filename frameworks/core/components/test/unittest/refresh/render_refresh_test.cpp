@@ -22,6 +22,7 @@
 #include "core/components/refresh/refresh_theme.h"
 #include "core/components/refresh/render_refresh.h"
 #include "core/components/test/unittest/mock/mock_render_common.h"
+#include "core/components/theme/theme_manager_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -36,7 +37,7 @@ constexpr int64_t SEC_TO_NANOSEC = 1000000000;
 constexpr int64_t MILLISEC_TO_MICROSEC = 1000;
 constexpr int64_t VSYNC_INTERVAL_MILLISEC = 16;
 constexpr int64_t VSYNC_INTERVAL_MICROSEC = VSYNC_INTERVAL_MILLISEC * MILLISEC_TO_MICROSEC;
-const RefPtr<ThemeManager> THEME_MANAGER = AceType::MakeRefPtr<ThemeManager>();
+const auto THEME_MANAGER = AceType::MakeRefPtr<ThemeManagerImpl>();
 
 static int64_t GetTickCount()
 {
@@ -311,9 +312,9 @@ HWTEST_F(RenderRefreshTest, RenderRefreshTest007, TestSize.Level1)
     ASSERT_TRUE(renderRefresh_->GetStatus() == RefreshStatus::DRAG);
 
     /**
-    * @tc.steps: step3. handle drag update 200px
-    * @tc.expected: step3. Refresh change status to drag.
-    */
+     * @tc.steps: step3. handle drag update 200px
+     * @tc.expected: step3. Refresh change status to drag.
+     */
     renderRefresh_->HandleDragUpdate(200.0);
     renderRefresh_->PerformLayout();
     ASSERT_TRUE(renderRefresh_->GetStatus() == RefreshStatus::OVER_DRAG);
@@ -335,8 +336,7 @@ HWTEST_F(RenderRefreshTest, RenderRefreshTest008, TestSize.Level1)
 
     RefPtr<TestPulldownEventHandler> eventHandler = AceType::MakeRefPtr<TestPulldownEventHandler>(
         [this, pulldownEventId](const std::string& eventId, const std::string& param) {
-            std::string expectPulldownResult =
-                std::string("\"pulldown\",{\"state\":\"start\"").append("},null");
+            std::string expectPulldownResult = std::string("\"pulldown\",{\"state\":\"start\"").append("},null");
             EXPECT_EQ(param, expectPulldownResult);
             EXPECT_EQ(eventId, pulldownEventId);
         });

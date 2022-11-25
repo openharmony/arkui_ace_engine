@@ -18,6 +18,7 @@
 #include "base/log/log.h"
 #include "core/components/test/json/json_frontend.h"
 #include "core/components/test/unittest/mock/mock_render_depend.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/components_v2/swiper/swiper_element.h"
 #include "core/mock/fake_asset_manager.h"
 #include "core/mock/fake_task_executor.h"
@@ -188,7 +189,7 @@ public:
         }
 
         RefPtr<SwiperComponent> swiperComponent = AceType::MakeRefPtr<SwiperComponent>(componentChildren);
-        auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+        auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
         auto theme = themeManager->GetTheme<SwiperIndicatorTheme>();
         if (theme) {
             auto indicator = AceType::MakeRefPtr<SwiperIndicator>();

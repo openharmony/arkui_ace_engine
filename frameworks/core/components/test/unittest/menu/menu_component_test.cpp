@@ -18,6 +18,7 @@
 #include "base/subwindow/subwindow.h"
 #include "base/utils/utils.h"
 #include "core/components/menu/menu_component.h"
+#include "core/components/theme/theme_manager_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -143,7 +144,7 @@ HWTEST_F(MenuComponentTest, MenuComponent005, TestSize.Level1)
      * @tc.steps: step1. construct the component with text color green.
      */
     auto menu = AceType::MakeRefPtr<MenuComponent>("", "");
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     menu->InitTheme(themeManager);
     TextStyle style;
     style.SetTextColor(Color::GREEN);

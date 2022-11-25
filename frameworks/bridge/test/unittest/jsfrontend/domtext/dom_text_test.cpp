@@ -19,7 +19,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/text/text_theme.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "frameworks/bridge/common/dom/dom_div.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/common/dom/dom_text.h"
@@ -52,7 +52,7 @@ const Dimension TEST_FONT_SIZE_STEP = Dimension(2.0);
 constexpr uint32_t TEST_PREFER_FONT_SIZES_SIZE = 3;
 constexpr uint32_t TEST_FONT_FEATURES_SIZE = 6;
 constexpr uint32_t TEST_FONT_FEATURES_NONE_SIZE = 5;
-const RefPtr<ThemeManager> THEME_MANAGER = AceType::MakeRefPtr<ThemeManager>();
+const RefPtr<ThemeManager> THEME_MANAGER = AceType::MakeRefPtr<ThemeManagerImpl>();
 const std::string JSON_TEXT_STR = ""
                                   "{                                                       "
                                   "  \"tag\": \"text\",                                    "

@@ -43,7 +43,7 @@ void GaugePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const
     CHECK_NULL_VOID(paintWrapper);
     auto paintProperty = DynamicCast<GaugePaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto offset = paintWrapper->GetContentOffset();
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();

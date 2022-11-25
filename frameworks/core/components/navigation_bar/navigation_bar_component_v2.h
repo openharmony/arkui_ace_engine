@@ -19,6 +19,7 @@
 #include "core/components/menu/menu_component.h"
 #include "core/components/navigation_bar/navigation_bar_component_base.h"
 #include "core/components/navigation_bar/navigation_container_component.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/pipeline/base/composed_component.h"
 
 namespace OHOS::Ace {
@@ -26,7 +27,7 @@ namespace OHOS::Ace {
 class NavigationBarBuilder : public NavigationBarComponentBase {
 public:
     NavigationBarBuilder(const RefPtr<NavigationDeclaration>& declaration, ComposeId id, TextDirection direction)
-        : declaration_(declaration), theme_(AceType::MakeRefPtr<ThemeManager>()->GetTheme<NavigationBarTheme>()),
+        : declaration_(declaration), theme_(AceType::MakeRefPtr<ThemeManagerImpl>()->GetTheme<NavigationBarTheme>()),
           id_(id), direction_(direction), menuZoneSize_(theme_->GetMenuZoneSize()),
           menuIconSize_(theme_->GetMenuIconSize())
     {}

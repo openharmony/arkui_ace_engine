@@ -18,7 +18,7 @@
 #include "core/components/button/button_component.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/progress/loading_progress_component.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "frameworks/bridge/common/dom/dom_button.h"
 #include "frameworks/bridge/test/unittest/jsfrontend/dom_node_factory.h"
 
@@ -87,7 +87,7 @@ HWTEST_F(DomButtonTest, SetAttributesAndStyles001, TestSize.Level1)
     auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonButtonStr);
     ASSERT_TRUE(domNodeRoot);
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(domNodeRoot->GetSpecializedComponent());
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     RefPtr<ButtonTheme> buttonTheme = themeManager->GetTheme<ButtonTheme>();
     ASSERT_TRUE(buttonTheme);
     ASSERT_TRUE(buttonComponent);

@@ -19,6 +19,7 @@
 #include "core/components/swiper/swiper_component.h"
 #include "core/components/test/json/color_creator.h"
 #include "core/components/test/json/edge_creator.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
@@ -86,7 +87,7 @@ RefPtr<Component> SwiperCreator::CreateFromJson(const JsonValue& componentJson, 
     auto swiperComponent = AceType::MakeRefPtr<SwiperComponent>(children, showIndicator);
 
     if (showIndicator) {
-        auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+        auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
         auto theme = themeManager->GetTheme<SwiperIndicatorTheme>();
         if (theme) {
             swiperComponent->GetIndicator()->InitStyle(theme);

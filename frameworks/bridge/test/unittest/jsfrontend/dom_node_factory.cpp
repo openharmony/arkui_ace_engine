@@ -23,6 +23,7 @@
 #include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/components/declaration/common/declaration.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/test/unittest/jsfrontend/dom_mock.h"
 #include "frameworks/bridge/test/unittest/jsfrontend/dom_test_constants.h"
@@ -288,7 +289,7 @@ RefPtr<DOMNode> DOMNodeFactory::CreateDOMNodeFromDsl(const std::string& jsonStr)
         auto platformWindow = std::make_unique<MockPlatformWindow>();
         auto window = std::make_unique<Window>(std::move(platformWindow));
         context_ = AceType::MakeRefPtr<PipelineContext>(std::move(window), nullptr, nullptr, nullptr, frontend, 0);
-        context_->SetThemeManager(AceType::MakeRefPtr<ThemeManager>());
+        context_->SetThemeManager(AceType::MakeRefPtr<ThemeManagerImpl>());
     }
 
     domNodeRoot->SetPipelineContext(context_);

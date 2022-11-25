@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 
 #include "core/components/badge/badge_theme.h"
 #include "core/components/button/button_theme.h"
@@ -61,7 +61,6 @@
 
 namespace OHOS::Ace {
 namespace {
-
 template<class T>
 RefPtr<Theme> ThemeBuildFunc(const RefPtr<ThemeConstants>& themeConstants)
 {
@@ -115,16 +114,15 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { IconTheme::TypeId(), &ThemeBuildFunc<IconTheme::Builder> },
     { V2::PatternLockTheme::TypeId(), &ThemeBuildFunc<V2::PatternLockTheme::Builder> }
 };
-
 } // namespace
 
-ThemeManager::ThemeManager()
+ThemeManagerImpl::ThemeManagerImpl()
 {
     auto resAdapter = ResourceAdapter::Create();
     themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(resAdapter);
 }
 
-RefPtr<Theme> ThemeManager::GetTheme(ThemeType type)
+RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type)
 {
     auto findIter = themes_.find(type);
     if (findIter != themes_.end()) {
@@ -140,7 +138,7 @@ RefPtr<Theme> ThemeManager::GetTheme(ThemeType type)
     return theme;
 }
 
-Color ThemeManager::GetBackgroundColor() const
+Color ThemeManagerImpl::GetBackgroundColor() const
 {
     auto findIter = themes_.find(AppTheme::TypeId());
     if (findIter != themes_.end()) {
@@ -164,10 +162,9 @@ Color ThemeManager::GetBackgroundColor() const
     }
 }
 
-void ThemeManager::LoadResourceThemes()
+void ThemeManagerImpl::LoadResourceThemes()
 {
     themes_.clear();
     themeConstants_->LoadTheme(currentThemeId_);
 }
-
 } // namespace OHOS::Ace

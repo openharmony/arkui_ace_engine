@@ -16,12 +16,12 @@
 #define protected public
 #include "core/components/common/properties/color.h"
 #include "core/components/text/text_theme.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 
 namespace OHOS::Ace {
-ThemeManager::ThemeManager() = default;
+ThemeManagerImpl::ThemeManagerImpl() = default;
 
-RefPtr<Theme> ThemeManager::GetTheme(ThemeType type)
+RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type)
 {
     RefPtr<TextTheme> theme = AceType::Claim(new TextTheme());
     theme->textStyle_.SetTextColor(Color::BLACK);
