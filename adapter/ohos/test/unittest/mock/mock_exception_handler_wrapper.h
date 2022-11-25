@@ -19,8 +19,8 @@
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace {
-class MockExceptionHandlerWrapper :public AceType {
-    DECLARE_ACE_TYPE(MockExceptionHandlerWrapper, AceType);     
+class MockExceptionHandlerWrapper : public AceType {
+    DECLARE_ACE_TYPE(MockExceptionHandlerWrapper, AceType);
 public:
     MockExceptionHandlerWrapper() = default;
     ~MockExceptionHandlerWrapper() override = default;

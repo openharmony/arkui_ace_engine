@@ -41,9 +41,9 @@ void ExceptionHandlerTest::TearDown() {}
  */
 HWTEST_F(ExceptionHandlerTest, ExceptionHandlerTest_HandleJsException_001, TestSize.Level1)
 {
-   auto exceptionHandlerWrapper = AceType::MakeRefPtr<MockExceptionHandlerWrapper>();
-   CHECK_PTR_NULL_VOID(exceptionHandlerWrapper);
-   auto result = exceptionHandlerWrapper->HandleJsExceptionWrapper("exceptionMsg");
-   EXPECT_TRUE(result);
+    auto exceptionHandlerWrapper = AceType::MakeRefPtr<MockExceptionHandlerWrapper>();
+    CHECK_PTR_NULL_VOID(exceptionHandlerWrapper);
+    auto result = exceptionHandlerWrapper->HandleJsExceptionWrapper("exceptionMsg");
+    EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace

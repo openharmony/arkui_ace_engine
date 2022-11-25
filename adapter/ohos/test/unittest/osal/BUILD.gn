@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 if (is_standard_system) {
@@ -34,25 +35,27 @@ ohos_unittest("EventReportTest") {
   part_name = ace_engine_part
 }
 
-ohos_unittest("JsAccessibilityManagerTest") {
-  module_out_path = module_output_path
+if (accessibility_enable) {
+  ohos_unittest("JsAccessibilityManagerTest") {
+    module_out_path = module_output_path
 
-  sources = [ "js_accessibility_manager_test.cpp" ]
+    sources = [ "js_accessibility_manager_test.cpp" ]
 
-  configs = [ "$ace_root:ace_test_config" ]
+    configs = [ "$ace_root:ace_test_config" ]
 
-  deps = [
-    "$ace_root/build:ace_ohos_unittest_base",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+    deps = [
+      "$ace_root/build:ace_ohos_unittest_base",
+      "//third_party/googletest:gmock_main",
+      "//third_party/googletest:gtest_main",
+    ]
 
-  external_deps = [
-    "accessibility:accessibilityclient",
-    "accessibility:accessibilityconfig",
-  ]
+    external_deps = [
+      "accessibility:accessibilityclient",
+      "accessibility:accessibilityconfig",
+    ]
 
-  part_name = ace_engine_part
+    part_name = ace_engine_part
+  }
 }
 
 ohos_unittest("AnrThreadTest") {
@@ -87,6 +90,9 @@ group("unittest") {
     ":AnrThreadTest",
     ":EventReportTest",
     ":ExceptionHandlerTest",
-    ":JsAccessibilityManagerTest",
   ]
+
+  if (accessibility_enable) {
+    deps += [ ":JsAccessibilityManagerTest" ]
+  }
 }
