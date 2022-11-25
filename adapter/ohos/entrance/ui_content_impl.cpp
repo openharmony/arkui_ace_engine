@@ -849,12 +849,12 @@ bool UIContentImpl::ProcessBackPressed()
 
 bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
-    LOGI("UIContentImpl::ProcessPointerEvent begin");
+    LOGD("UIContentImpl::ProcessPointerEvent begin");
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
     auto aceView = static_cast<Platform::FlutterAceView*>(container->GetView());
     Platform::FlutterAceView::DispatchTouchEvent(aceView, pointerEvent);
-    LOGI("UIContentImpl::ProcessPointerEvent end");
+    LOGD("UIContentImpl::ProcessPointerEvent end");
     return true;
 }
 

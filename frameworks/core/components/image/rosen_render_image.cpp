@@ -1368,7 +1368,7 @@ void RosenRenderImage::OnVisibleChanged()
             imageObj_->Resume();
         } else {
             imageObj_->Pause();
-            LOGI("pause image when invisible");
+            LOGD("pause image when invisible");
         }
     } else {
         LOGD("OnVisibleChanged: imageObj is null");
