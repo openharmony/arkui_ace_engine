@@ -102,7 +102,7 @@ public:
 
     bool HasInitialized() const
     {
-        return showPrevImpl_ && showNextImpl_ && finishImpl_ && finishCallback_;
+        return showPrevImpl_ && showNextImpl_ && finishImpl_;
     }
 
     void SetTabBarFinishCallback(const CommonFunc& onTabBarFinish)
