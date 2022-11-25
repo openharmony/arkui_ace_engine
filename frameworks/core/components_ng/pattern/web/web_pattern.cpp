@@ -73,9 +73,8 @@ void WebPattern::InitEvent()
     CHECK_NULL_VOID(context);
     auto langTask = [weak = AceType::WeakClaim(this)]() {
         auto WebPattern = weak.Upgrade();
-        if (WebPattern) {
-            WebPattern->UpdateLocale();
-        }
+        CHECK_NULL_VOID(WebPattern);
+        WebPattern->UpdateLocale();
     };
     context->SetConfigChangedCallback(std::move(langTask));
 }
@@ -129,9 +128,8 @@ void WebPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
 
     auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleMouseEvent(info);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleMouseEvent(info);
     };
 
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
@@ -139,9 +137,8 @@ void WebPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
 
     auto axisTask = [weak = WeakClaim(this)](AxisInfo& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleAxisEvent(info);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleAxisEvent(info);
     };
     axisEvent_ = MakeRefPtr<InputEvent>(std::move(axisTask));
     inputHub->AddOnAxisEvent(axisEvent_);
@@ -162,10 +159,7 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
 
 void WebPattern::HandleAxisEvent(AxisInfo& info)
 {
-    if (!delegate_) {
-        LOGE("Delegate_ is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(delegate_);
     auto localLocation = info.GetLocalLocation();
     delegate_->HandleAxisEvent(
         localLocation.GetX(), localLocation.GetY(), info.GetHorizontalAxis(), info.GetVerticalAxis());
@@ -173,11 +167,7 @@ void WebPattern::HandleAxisEvent(AxisInfo& info)
 
 void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 {
-    if (!delegate_) {
-        LOGE("delegate_ is nullptr");
-        return;
-    }
-
+    CHECK_NULL_VOID(delegate_);
     if (info.GetAction() == MouseAction::RELEASE) {
         WebRequestFocus();
     }
@@ -221,10 +211,7 @@ bool WebPattern::HandleDoubleClickEvent(const MouseInfo& info)
 
 void WebPattern::SendDoubleClickEvent(const MouseClickInfo& info)
 {
-    if (!delegate_) {
-        LOGE("Touch cancel delegate_ is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(delegate_);
     delegate_->OnMouseEvent(info.x, info.y, MouseButton::LEFT_BUTTON, MouseAction::PRESS, DOUBLE_CLICK_NUM);
 }
 
@@ -255,17 +242,16 @@ void WebPattern::InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureH
                                 const std::string& extraParams) -> NG::DragDropInfo {
         auto pattern = weak.Upgrade();
         NG::DragDropInfo dragDropInfo;
-        if (pattern) {
-            if (pattern->GenerateDragDropInfo(dragDropInfo)) {
-                return dragDropInfo;
-            }
+        CHECK_NULL_RETURN(pattern, dragDropInfo);
+        if (pattern->GenerateDragDropInfo(dragDropInfo)) {
+            return dragDropInfo;
+        }
 
-            LOGI("not w3c drag event, try to get drag info from user callback");
-            if (userOnDragStartFunc) {
-                LOGI("user callback has been set, get from user callback");
-                dragDropInfo = userOnDragStartFunc(info, extraParams);
-                return dragDropInfo;
-            }
+        LOGI("not w3c drag event, try to get drag info from user callback");
+        if (userOnDragStartFunc) {
+            LOGI("user callback has been set, get from user callback");
+            dragDropInfo = userOnDragStartFunc(info, extraParams);
+            return dragDropInfo;
         }
         return dragDropInfo;
     };
@@ -287,30 +273,26 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragStart(info);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragStart(info);
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragUpdate(info);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragUpdate(info);
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragEnd(info);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragEnd(info);
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragCancel();
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragCancel();
     };
 
     float distance = DEFAULT_PAN_DISTANCE;
@@ -339,11 +321,7 @@ void WebPattern::HandleDragStart(const GestureEvent& info)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
-    if (!pipelineContext) {
-        LOGE("Context is null.");
-        return;
-    }
-
+    CHECK_NULL_VOID(pipelineContext);
     int32_t globalX = static_cast<int32_t>(info.GetGlobalPoint().GetX());
     int32_t globalY = static_cast<int32_t>(info.GetGlobalPoint().GetY());
     auto viewScale = pipelineContext->GetViewScale();
@@ -364,11 +342,7 @@ void WebPattern::HandleDragUpdate(const GestureEvent& info)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
-    if (!pipelineContext) {
-        LOGE("Context is null.");
-        return;
-    }
-
+    CHECK_NULL_VOID(pipelineContext);
     int32_t globalX = static_cast<int32_t>(info.GetGlobalPoint().GetX());
     int32_t globalY = static_cast<int32_t>(info.GetGlobalPoint().GetY());
     LOGD("web drag position update, x = %{public}d, y = %{public}d", globalX, globalY);
@@ -392,11 +366,7 @@ void WebPattern::HandleDragEnd(const GestureEvent& info)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
-    if (!pipelineContext) {
-        LOGE("Context is null.");
-        return;
-    }
-
+    CHECK_NULL_VOID(pipelineContext);
     auto viewScale = pipelineContext->GetViewScale();
     auto offset = GetHostFrameGlobalOffset();
     int32_t localX = static_cast<int32_t>(info.GetGlobalPoint().GetX() - offset.value_or(OffsetF()).GetX());
@@ -418,11 +388,7 @@ void WebPattern::HandleDragCancel()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
-    if (!pipelineContext) {
-        LOGE("Context is null.");
-        return;
-    }
-
+    CHECK_NULL_VOID(pipelineContext);
     delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
 }
 
@@ -430,17 +396,15 @@ void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto focusTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleFocusEvent();
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusEvent();
     };
     focusHub->SetOnFocusInternal(focusTask);
 
     auto blurTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleBlurEvent();
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
     };
     focusHub->SetOnBlurInternal(blurTask);
 
@@ -454,10 +418,7 @@ void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 
 void WebPattern::HandleFocusEvent()
 {
-    if (!delegate_) {
-        LOGE("handle focus delegate_ is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(delegate_);
     isFocus_ = true;
     if (needOnFocus_) {
         delegate_->OnFocus();
@@ -468,10 +429,7 @@ void WebPattern::HandleFocusEvent()
 
 void WebPattern::HandleBlurEvent()
 {
-    if (!delegate_) {
-        LOGE("handle blur delegate_ is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(delegate_);
     isFocus_ = false;
     delegate_->OnBlur();
     OnQuickMenuDismissed();
@@ -496,10 +454,7 @@ bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 
 bool WebPattern::WebOnKeyEvent(const KeyEvent& keyEvent)
 {
-    if (!delegate_) {
-        LOGE("OnKeyEvent delegate_ is nullptr");
-        return false;
-    }
+    CHECK_NULL_RETURN(delegate_, false);
     return delegate_->OnKeyEvent(static_cast<int32_t>(keyEvent.code), static_cast<int32_t>(keyEvent.action));
 }
 
@@ -560,142 +515,122 @@ void WebPattern::OnWebDataUpdate()
 
 void WebPattern::OnJsEnabledUpdate(bool value)
 {
-    if (delegate_) {
-        delegate_->UpdateJavaScriptEnabled(value);
-    }
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdateJavaScriptEnabled(value);
 }
 
 void WebPattern::OnMediaPlayGestureAccessUpdate(bool value)
 {
-    if (delegate_) {
-        delegate_->UpdateMediaPlayGestureAccess(value);
-    }
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdateMediaPlayGestureAccess(value);
 }
 
 void WebPattern::OnFileAccessEnabledUpdate(bool value)
 {
-    if (delegate_) {
-        delegate_->UpdateAllowFileAccess(value);
-    }
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdateAllowFileAccess(value);
 }
 
 void WebPattern::OnOnLineImageAccessEnabledUpdate(bool value)
 {
-    if (delegate_) {
-        delegate_->UpdateBlockNetworkImage(!value);
-    }
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdateBlockNetworkImage(!value);
 }
 
 void WebPattern::OnDomStorageAccessEnabledUpdate(bool value)
 {
-    if (delegate_) {
-        delegate_->UpdateDomStorageEnabled(value);
-    }
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdateDomStorageEnabled(value);
 }
 
 void WebPattern::OnImageAccessEnabledUpdate(bool value)
 {
-    if (delegate_) {
-        delegate_->UpdateLoadsImagesAutomatically(value);
-    }
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdateLoadsImagesAutomatically(value);
 }
 
 void WebPattern::OnMixedModeUpdate(MixedModeContent value)
 {
-    if (delegate_) {
-        delegate_->UpdateMixedContentMode(value);
-    }
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdateMixedContentMode(value);
 }
 
 void WebPattern::OnZoomAccessEnabledUpdate(bool value)
 {
-    if (delegate_) {
-        delegate_->UpdateSupportZoom(value);
-    }
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdateSupportZoom(value);
 }
 
 void WebPattern::OnGeolocationAccessEnabledUpdate(bool value)
 {
-    if (delegate_) {
-        delegate_->UpdateGeolocationEnabled(value);
-    }
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdateGeolocationEnabled(value);
 }
 
 void WebPattern::OnUserAgentUpdate(const std::string& value)
 {
-    if (delegate_) {
-        delegate_->UpdateUserAgent(value);
-    }
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdateUserAgent(value);
 }
 
 void WebPattern::OnCacheModeUpdate(WebCacheMode value)
 {
-    if (delegate_) {
-        delegate_->UpdateCacheMode(value);
-    }
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdateCacheMode(value);
 }
 
 void WebPattern::OnOverviewModeAccessEnabledUpdate(bool value)
 {
-    if (delegate_) {
-        delegate_->UpdateOverviewModeEnabled(value);
-    }
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdateOverviewModeEnabled(value);
 }
 
 void WebPattern::OnFileFromUrlAccessEnabledUpdate(bool value)
 {
-    if (delegate_) {
-        delegate_->UpdateFileFromUrlEnabled(value);
-    }
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdateFileFromUrlEnabled(value);
 }
 
 void WebPattern::OnDatabaseAccessEnabledUpdate(bool value)
 {
-    if (delegate_) {
-        delegate_->UpdateDatabaseEnabled(value);
-    }
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdateDatabaseEnabled(value);
 }
 
 void WebPattern::OnTextZoomRatioUpdate(int32_t value)
 {
-    if (delegate_) {
-        delegate_->UpdateTextZoomRatio(value);
-    }
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdateTextZoomRatio(value);
 }
 
 void WebPattern::OnWebDebuggingAccessEnabledUpdate(bool value)
 {
-    if (delegate_) {
-        delegate_->UpdateWebDebuggingAccess(value);
-    }
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdateWebDebuggingAccess(value);
 }
 
 void WebPattern::OnPinchSmoothModeEnabledUpdate(bool value)
 {
-    if (delegate_) {
-        delegate_->UpdatePinchSmoothModeEnabled(value);
-    }
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdatePinchSmoothModeEnabled(value);
 }
 
 void WebPattern::OnBackgroundColorUpdate(int32_t value)
 {
-    if (delegate_) {
-        delegate_->UpdateBackgroundColor(value);
-    }
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdateBackgroundColor(value);
 }
 
 void WebPattern::OnInitialScaleUpdate(float value)
 {
-    if (delegate_) {
-        delegate_->UpdateInitialScale(value);
-    }
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdateInitialScale(value);
 }
 
 void WebPattern::OnMultiWindowAccessEnabledUpdate(bool value)
 {
-    if (delegate_) {
-        delegate_->UpdateMultiWindowAccess(value);
-    }
+    CHECK_NULL_VOID(delegate_);
+    delegate_->UpdateMultiWindowAccess(value);
 }
 
 void WebPattern::RegistVirtualKeyBoardListener()
@@ -704,16 +639,12 @@ void WebPattern::RegistVirtualKeyBoardListener()
         return;
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (!pipelineContext) {
-        return;
-    }
+    CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetVirtualKeyBoardCallback(
         [weak = AceType::WeakClaim(this)](int32_t width, int32_t height, double keyboard) {
             auto webPattern = weak.Upgrade();
-            if (webPattern) {
-                return webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
-            }
-            return false;
+            CHECK_NULL_RETURN(webPattern, false);
+            return webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
         });
     needUpdateWeb_ = false;
 }
@@ -908,9 +839,7 @@ bool WebPattern::IsTouchHandleValid(
 bool WebPattern::IsTouchHandleShow(
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)
 {
-    if (!handle) {
-        return false;
-    }
+    CHECK_NULL_RETURN(handle, false);
     if (handle->GetAlpha() > 0 &&
         GreatOrEqual(handle->GetY(), static_cast<int32_t>(handle->GetEdgeHeight())) &&
         GreatNotEqual(GetHostFrameSize().value_or(SizeF()).Height(), handle->GetY())) {
@@ -942,9 +871,7 @@ WebOverlayType WebPattern::GetTouchHandleOverlayType(
 std::optional<OffsetF> WebPattern::GetCoordinatePoint()
 {
     auto frameNode = GetHost();
-    if (!frameNode) {
-        return std::nullopt;
-    }
+    CHECK_NULL_RETURN(frameNode, std::nullopt);
     return frameNode->GetOffsetRelativeToWindow();
 }
 
@@ -1130,9 +1057,7 @@ void WebPattern::UpdateTouchHandleForOverlay()
     WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle_,
                                                            startSelectionHandle_,
                                                            endSelectionHandle_);
-    if (!selectOverlayProxy_) {
-        return;
-    }
+    CHECK_NULL_VOID(selectOverlayProxy_);
     if (overlayType == INVALID_OVERLAY) {
         CloseSelectOverlay();
         return;

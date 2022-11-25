@@ -78,15 +78,9 @@ void OverlayManager::PopToast(int32_t toastId)
         return;
     }
     auto toastUnderPop = toastIter->second.Upgrade();
-    if (!toastUnderPop) {
-        LOGI("No toast under pop");
-        return;
-    }
+    CHECK_NULL_VOID(toastUnderPop);
     auto rootNode = rootNodeWeak_.Upgrade();
-    if (!rootNode) {
-        LOGE("No root node in OverlayManager");
-        return;
-    }
+    CHECK_NULL_VOID(rootNode);
     LOGI("begin to pop toast, id is %{public}d", toastUnderPop->GetId());
     rootNode->RemoveChild(toastUnderPop);
     toastMap_.erase(toastId);
