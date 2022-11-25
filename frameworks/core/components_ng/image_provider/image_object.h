@@ -50,7 +50,8 @@ public:
     void ClearData();
     void ClearCanvasImage();
 
-    bool IsSupportCache() const {
+    bool IsSupportCache() const
+    {
         return sourceInfo_.IsSupportCache();
     }
 
