@@ -232,9 +232,11 @@ void SharedOverlayManager::PassengerAboard(
 {
     auto ticket = passenger->GetOffsetRelativeToWindow();
     auto initialPosition = passenger->GetRenderContext()->GetPosition();
+    auto initialFrameOffset = passenger->GetGeometryNode()->GetFrameOffset();
     auto zIndex = passenger->GetRenderContext()->GetZIndex();
     effect->SetPassengerInitZIndex(zIndex);
     effect->SetPassengerInitPos(initialPosition);
+    effect->SetPassengerInitFrameOffset(initialFrameOffset);
     auto passengerHolder = CreateBlankFrameNode(passenger);
     passengerHolder->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
     ReplaceFrameNode(passenger, passengerHolder);
@@ -245,6 +247,7 @@ void SharedOverlayManager::PassengerAboard(
         offset.GetY().ToString().c_str(), effect->GetShareId().c_str());
     passenger->GetRenderContext()->UpdateZIndex(effect->GetZIndex());
     passenger->GetRenderContext()->UpdatePosition(offset);
+    passenger->GetRenderContext()->OnModifyDone();
 }
 
 bool SharedOverlayManager::AboardShuttle(const RefPtr<SharedTransitionEffect>& effect)
@@ -289,13 +292,16 @@ void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& e
             passenger->GetRenderContext()->UpdatePosition(effect->GetPassengerInitPos().value());
         } else {
             passenger->GetRenderContext()->ResetPositionProperty();
+            passenger->GetRenderContext()->OnPositionUpdate(OffsetT<Dimension>());
         }
         if (effect->GetPassengerInitZIndex().has_value()) {
             passenger->GetRenderContext()->UpdateZIndex(effect->GetPassengerInitZIndex().value());
         } else {
             passenger->GetRenderContext()->ResetZIndex();
         }
+        passenger->GetGeometryNode()->SetFrameOffset(effect->GetPassengerInitFrameOffset());
         ReplaceFrameNode(passengerHolder, passenger);
+        passenger->GetRenderContext()->OnModifyDone();
     }
     if (effect->GetType() == SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE) {
         // restore the visibility of dest frameNode
