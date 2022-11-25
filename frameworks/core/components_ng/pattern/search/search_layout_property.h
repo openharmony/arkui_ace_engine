@@ -49,7 +49,7 @@ public:
         json->Put("searchButton", GetSearchButton().value_or("")->c_str());
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SearchButton, std::optional<std::string>, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SearchButton, std::optional<std::string>, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG
