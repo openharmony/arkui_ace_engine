@@ -170,6 +170,8 @@ public:
     void OnMouseSelectUpdate(const Color& fillColor, const Color& strokeColor) override;
     void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) override;
 
+    void OnPositionUpdate(const OffsetT<Dimension>& value) override;
+
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) override;
@@ -195,7 +197,6 @@ private:
     void OnTransformCenterUpdate(const DimensionOffset& value) override;
     void OnTransformRotateUpdate(const Vector4F& value) override;
 
-    void OnPositionUpdate(const OffsetT<Dimension>& value) override;
     void OnOffsetUpdate(const OffsetT<Dimension>& value) override;
     void OnAnchorUpdate(const OffsetT<Dimension>& value) override;
     void OnZIndexUpdate(int32_t value) override;

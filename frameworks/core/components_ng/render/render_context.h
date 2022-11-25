@@ -186,6 +186,8 @@ public:
     virtual void OnMouseSelectUpdate(const Color& fillColor, const Color& strokeColor) {}
     virtual void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) {}
 
+    virtual void OnPositionUpdate(const OffsetT<Dimension>& value) {}
+
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
 
@@ -302,7 +304,6 @@ protected:
     virtual void OnTransformRotateUpdate(const Vector4F& value) {}
     virtual void OnTransformMatrixUpdate(const Matrix4& matrix) {}
 
-    virtual void OnPositionUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnAnchorUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnZIndexUpdate(int32_t value) {}

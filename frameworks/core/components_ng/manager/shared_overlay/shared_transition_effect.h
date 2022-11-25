@@ -77,6 +77,10 @@ public:
     {
         return initialPosition_;
     }
+    OffsetF GetPassengerInitFrameOffset() const
+    {
+        return initialFrameOffset_;
+    }
     const std::optional<int32_t>& GetPassengerInitZIndex() const
     {
         return initialZIndex_;
@@ -93,6 +97,10 @@ public:
     void SetPassengerInitPos(const std::optional<OffsetT<Dimension>>& position)
     {
         initialPosition_ = position;
+    }
+    void SetPassengerInitFrameOffset(const OffsetF& offset)
+    {
+        initialFrameOffset_ = offset;
     }
     void SetPassengerInitZIndex(const std::optional<int32_t>& zIndex)
     {
@@ -114,6 +122,7 @@ protected:
     ShareId shareId_;
     std::shared_ptr<SharedTransitionOption> option_;
     std::optional<OffsetT<Dimension>> initialPosition_;
+    OffsetF initialFrameOffset_;
     std::optional<int32_t> initialZIndex_;
     std::list<std::function<void()>> finishCallbacks_;
 };
