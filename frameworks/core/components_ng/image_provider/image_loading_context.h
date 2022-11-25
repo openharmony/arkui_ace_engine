@@ -33,12 +33,12 @@ class ImageLoadingContext : public AceType {
 
 public:
     // Create an empty ImageObject and initialize state machine when the constructor is called
-    ImageLoadingContext(const ImageSourceInfo& sourceInfo, const LoadNotifier& loadNotifier);
+    ImageLoadingContext(const ImageSourceInfo& sourceInfo, const LoadNotifier& loadNotifier, bool syncLoad = false);
     ~ImageLoadingContext() override = default;
 
     static SizeF CalculateResizeTarget(const SizeF& srcSize, const SizeF& dstSize, const SizeF& rawImageSize);
     static void MakeCanvasImageIfNeed(const RefPtr<ImageLoadingContext>& loadingCtx, const SizeF& dstSize,
-        bool incomingNeedResize, ImageFit incommingImageFit, const std::optional<SizeF>& sourceSize = std::nullopt);
+        bool incomingNeedResize, ImageFit incomingImageFit, const std::optional<SizeF>& sourceSize = std::nullopt);
 
     void RegisterStateChangeCallbacks();
 
@@ -116,11 +116,14 @@ private:
     RectF dstRect_;
     SizeF dstSize_;
     bool needResize_ = true;
+    bool syncLoad_ = false;
     ImageFit imageFit_ = ImageFit::COVER;
     std::optional<Color> svgFillColorOpt_;
     std::unique_ptr<SizeF> sourceSizePtr_ = nullptr;
     bool needAlt_ = true;
     std::function<void()> updateParamsCallback_ = nullptr;
+
+    ACE_DISALLOW_COPY_AND_MOVE(ImageLoadingContext);
 };
 
 } // namespace OHOS::Ace::NG
