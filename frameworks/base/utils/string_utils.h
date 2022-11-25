@@ -250,7 +250,7 @@ inline Dimension StringToDimensionWithUnit(const std::string& value, DimensionUn
         } else if (std::strcmp(str.c_str(), "") == 0) {
             return Dimension(result, defaultUnit);
         } else {
-            return Dimension(0.0, defaultUnit);
+            return Dimension(-1, defaultUnit);
         }
     }
     return Dimension(result, defaultUnit);
