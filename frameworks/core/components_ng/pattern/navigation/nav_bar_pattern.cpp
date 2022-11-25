@@ -39,9 +39,7 @@ namespace OHOS::Ace::NG {
 namespace {
 void BuildTitle(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
-    if (!navBarNode->GetTitle()) {
-        return;
-    }
+    CHECK_NULL_VOID(navBarNode->GetTitle());
     if (navBarNode->GetTitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
         return;
     }
@@ -54,9 +52,7 @@ void BuildTitle(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>
 
 void BuildSubtitle(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
-    if (!navBarNode->GetSubtitle()) {
-        return;
-    }
+    CHECK_NULL_VOID(navBarNode->GetSubtitle());
     if (navBarNode->GetSubtitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
         return;
     }
@@ -69,10 +65,7 @@ void BuildSubtitle(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNo
 
 void BuildMenu(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
-    if (!navBarNode->GetMenu()) {
-        return;
-    }
-
+    CHECK_NULL_VOID(navBarNode->GetMenu());
     if (navBarNode->GetMenuNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
         return;
     }
@@ -145,10 +138,7 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
 
 void MountToolBar(const RefPtr<NavBarNode>& hostNode)
 {
-    if (!hostNode->GetToolBarNode()) {
-        return;
-    }
-
+    CHECK_NULL_VOID(hostNode->GetToolBarNode());
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     auto toolBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetToolBarNode());

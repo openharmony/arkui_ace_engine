@@ -213,10 +213,9 @@ void FormPattern::CreateCardContainer()
             SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([id, weak] {
             auto pattern = weak.Upgrade();
-            if (pattern) {
-                LOGI("card id:%{public}zu", id);
-                pattern->FireOnAcquiredEvent(id);
-            }
+            CHECK_NULL_VOID(pattern);
+            LOGI("card id:%{public}zu", id);
+            pattern->FireOnAcquiredEvent(id);
         });
     });
 }
@@ -331,9 +330,8 @@ void FormPattern::OnActionEvent(const std::string& action) const
         FireOnRouterEvent(eventAction);
     }
 
-    if (formManagerBridge_) {
-        formManagerBridge_->OnActionEvent(action);
-    }
+    CHECK_NULL_VOID(formManagerBridge_);
+    formManagerBridge_->OnActionEvent(action);
 }
 
 bool FormPattern::ISAllowUpdate() const
