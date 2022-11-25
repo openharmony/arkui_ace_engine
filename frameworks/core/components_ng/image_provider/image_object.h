@@ -50,6 +50,11 @@ public:
     void ClearData();
     void ClearCanvasImage();
 
+    bool IsSupportCache() const
+    {
+        return sourceInfo_.IsSupportCache();
+    }
+
     virtual void MakeCanvasImage(
         const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize, bool syncLoad) = 0;
 
