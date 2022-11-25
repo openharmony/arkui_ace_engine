@@ -143,7 +143,7 @@ HWTEST_F(DomRatingTest, CreateDOMNodeFromDsl002, TestSize.Level1)
      * @tc.steps: step3. Verify whether all attributes of ratingComponent are as excepted.
      * @tc.expected: step3. All attributes of ratingComponent are as excepted.
      */
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     RefPtr<RatingTheme> theme = themeManager->GetTheme<RatingTheme>();
     ASSERT_TRUE(theme);
     ASSERT_TRUE(ratingComponent != nullptr);

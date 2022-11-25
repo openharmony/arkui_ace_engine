@@ -24,6 +24,7 @@
 namespace OHOS::Ace::NG {
 constexpr Dimension PRESS_BORDER_RADIUS = 4.0_vp;
 constexpr uint32_t PRESS_COLOR = 0x19000000;
+constexpr double DEFAULT_RATING_TOUCH_STAR_NUMBER = -1;
 
 CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
@@ -32,9 +33,9 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
     CHECK_NULL_RETURN(backgroundImageCanvas_, nullptr);
     auto offset = paintWrapper->GetContentOffset();
 
-    ImagePainter foregroundImagePainter(foregroundImageCanvas_);
-    ImagePainter secondaryImagePainter(secondaryImageCanvas_);
-    ImagePainter backgroundPainter(backgroundImageCanvas_);
+    const ImagePainter foregroundImagePainter(foregroundImageCanvas_);
+    const ImagePainter secondaryImagePainter(secondaryImageCanvas_);
+    const ImagePainter backgroundPainter(backgroundImageCanvas_);
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
@@ -42,21 +43,21 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
     CHECK_NULL_RETURN(ratingTheme, nullptr);
 
     auto ratingRenderProperty = DynamicCast<RatingRenderProperty>(paintWrapper->GetPaintProperty());
-    double drawScore = ratingRenderProperty->GetRatingScoreValue();
-    double stepSize = ratingRenderProperty->GetStepSize().value_or(ratingTheme->GetStepSize());
-    int32_t touchStar = ratingRenderProperty->GetTouchStar().value_or(0);
+    const double drawScore = ratingRenderProperty->GetRatingScoreValue();
+    const double stepSize = ratingRenderProperty->GetStepSize().value_or(ratingTheme->GetStepSize());
+    const int32_t touchStar = ratingRenderProperty->GetTouchStar().value_or(DEFAULT_RATING_TOUCH_STAR_NUMBER);
     return [foregroundImagePainter, secondaryImagePainter, backgroundPainter, drawScore, stepSize, touchStar,
                starNum = starNum_, offset, ImagePaintConfig = singleStarImagePaintConfig_](RSCanvas& canvas) {
         // step1: check if touch down any stars.
-        float singleStarWidth = ImagePaintConfig.dstRect_.Width();
-        float singleStarHeight = ImagePaintConfig.dstRect_.Height();
-        if (touchStar > 0 && touchStar <= starNum) {
+        const float singleStarWidth = ImagePaintConfig.dstRect_.Width();
+        const float singleStarHeight = ImagePaintConfig.dstRect_.Height();
+        if (touchStar >= 0 && touchStar <= starNum) {
             RSBrush rsBrush(PRESS_COLOR);
             rsBrush.SetAntiAlias(true);
-            RSRect rsRect(offset.GetX() + singleStarWidth * static_cast<float>(touchStar), offset.GetY(),
+            const RSRect rsRect(offset.GetX() + singleStarWidth * static_cast<float>(touchStar), offset.GetY(),
                 offset.GetX() + singleStarWidth * static_cast<float>((touchStar + 1)),
                 offset.GetY() + singleStarHeight);
-            RSRoundRect rsRoundRect(rsRect, static_cast<float>(PRESS_BORDER_RADIUS.ConvertToPx()),
+            const RSRoundRect rsRoundRect(rsRect, static_cast<float>(PRESS_BORDER_RADIUS.ConvertToPx()),
                 static_cast<float>(PRESS_BORDER_RADIUS.ConvertToPx()));
             canvas.Save();
             canvas.ClipRoundRect(rsRoundRect, OHOS::Rosen::Drawing::ClipOp::INTERSECT);
@@ -65,9 +66,9 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
         }
 
         // step2: calculate 3 images repeat times.
-        int32_t foregroundImageRepeatNum = ceil(drawScore);
-        double secondaryImageRepeatNum = foregroundImageRepeatNum - drawScore;
-        int32_t backgroundImageRepeatNum = starNum - foregroundImageRepeatNum;
+        const int32_t foregroundImageRepeatNum = ceil(drawScore);
+        const double secondaryImageRepeatNum = foregroundImageRepeatNum - drawScore;
+        const int32_t backgroundImageRepeatNum = starNum - foregroundImageRepeatNum;
         // step3: draw the foreground images.
         canvas.Save();
         auto offsetTemp = offset;

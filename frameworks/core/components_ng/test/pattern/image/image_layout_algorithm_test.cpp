@@ -21,6 +21,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -47,14 +48,17 @@ class ImageLayoutAlgorithmTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
 };
 
-void ImageLayoutAlgorithmTest::SetUpTestCase() {}
-void ImageLayoutAlgorithmTest::TearDownTestCase() {}
-void ImageLayoutAlgorithmTest::SetUp() {}
-void ImageLayoutAlgorithmTest::TearDown() {}
+void ImageLayoutAlgorithmTest::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void ImageLayoutAlgorithmTest::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 /**
  * @tc.name: ImageLayout001
@@ -264,7 +268,7 @@ HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout005, TestSize.Level1)
     layoutConstraintSize1.selfIdealSize.SetWidth(IMAGE_COMPONENTSIZE_WIDTH);
     /**
     //     corresponding ets code:
-    //         Image().Widrh(400).Alt(ALT_SRC_URL)
+    //         Image().Width(400).Alt(ALT_SRC_URL)
     */
     auto imageLayoutAlgorithm1 = AceType::MakeRefPtr<ImageLayoutAlgorithm>(nullptr, altloadingCtx);
     EXPECT_TRUE(imageLayoutAlgorithm1 != nullptr);

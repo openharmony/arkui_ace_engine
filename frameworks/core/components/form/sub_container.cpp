@@ -22,6 +22,7 @@
 #include "adapter/ohos/entrance/utils.h"
 #include "base/utils/utils.h"
 #include "core/common/container_scope.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
 #include "frameworks/core/common/flutter/flutter_asset_manager.h"
 #include "frameworks/core/common/flutter/flutter_task_executor.h"
@@ -185,7 +186,7 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
             flutterAssetManager->PushBack(std::move(assetProvider));
         }
     }
-    if (formSrc.compare(0, 2, "./") == 0) { // 2:length of "./"
+    if (formSrc.compare(0, 2, "./") == 0) {       // 2:length of "./"
         frontend_->SetFormSrc(formSrc.substr(2)); // 2:length of "./"
     } else {
         frontend_->SetFormSrc(formSrc);
@@ -220,7 +221,7 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
     cardResourceInfo.SetResourceConfiguration(resConfig);
     auto cardThemeManager = pipelineContext_->GetThemeManager();
     if (!cardThemeManager) {
-        cardThemeManager = AceType::MakeRefPtr<ThemeManager>();
+        cardThemeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
         pipelineContext_->SetThemeManager(cardThemeManager);
     }
     if (cardThemeManager) {
@@ -282,7 +283,7 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
             auto pattern = formPattern_.Upgrade();
             CHECK_NULL_VOID(pattern);
             auto pipelineContext = DynamicCast<NG::PipelineContext>(pipelineContext_);
-            if(!pipelineContext) {
+            if (!pipelineContext) {
                 LOGE("RunCard failed, pipeline context is nullptr");
                 return;
             }
@@ -299,7 +300,7 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
             auto pattern = formPattern_.Upgrade();
             CHECK_NULL_VOID(pattern);
             auto pipelineContext = DynamicCast<PipelineContext>(pipelineContext_);
-            if(!pipelineContext) {
+            if (!pipelineContext) {
                 LOGE("RunCard failed, pipeline context is nullptr");
                 return;
             }

@@ -43,6 +43,7 @@
 #include "core/animation/scheduler.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/layout_inspector.h"
 #include "core/common/manager_interface.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/thread_checker.h"
@@ -181,6 +182,11 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         drawDelegate_ = nullptr;
     }
     FlushTouchEvents();
+    if (!taskScheduler_.isEmpty()) {
+#if !defined(PREVIEW)
+        LayoutInspector::SupportInspector();
+#endif
+    }
     taskScheduler_.FlushTask();
     auto hasAninmation = window_->FlushCustomAnimation(nanoTimestamp);
     if (hasAninmation) {
@@ -562,6 +568,12 @@ bool PipelineContext::OnBackPressed()
     if (!frontend) {
         // return back.
         return false;
+    }
+
+    // If the tag of the last child of the rootnode is video, exit full screen.
+    if (fullScreenManager_->OnBackPressed()) {
+        LOGI("Exit full screen: back press accepted");
+        return true;
     }
 
     // if has popup, back press would hide popup and not trigger page back

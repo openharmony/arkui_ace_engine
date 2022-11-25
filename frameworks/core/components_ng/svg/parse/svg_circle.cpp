@@ -15,6 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_circle.h"
 
+#include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_circle_declaration.h"
 
 namespace OHOS::Ace::NG {
@@ -35,9 +36,7 @@ SkPath SvgCircle::AsPath(const Size& viewPort) const
 {
     SkPath path;
     auto declaration = AceType::DynamicCast<SvgCircleDeclaration>(declaration_);
-    if (declaration == nullptr) {
-        return path;
-    }
+    CHECK_NULL_RETURN(declaration, path);
     path.addCircle(ConvertDimensionToPx(declaration->GetCx(), viewPort, SvgLengthType::HORIZONTAL),
         ConvertDimensionToPx(declaration->GetCy(), viewPort, SvgLengthType::VERTICAL),
         ConvertDimensionToPx(declaration->GetR(), viewPort, SvgLengthType::OTHER));

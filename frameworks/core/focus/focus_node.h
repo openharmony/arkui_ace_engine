@@ -227,7 +227,7 @@ protected:
 
     virtual void OnFocus()
     {
-        LOGI("FocusNode::OnFocus: Node(%{public}s) on focus", AceType::TypeName(this));
+        LOGD("FocusNode::OnFocus: Node(%{public}s) on focus", AceType::TypeName(this));
         if (onFocusCallback_) {
             onFocusCallback_();
         }
@@ -237,7 +237,7 @@ protected:
     }
     virtual void OnBlur()
     {
-        LOGI("FocusNode::OnFocus: Node(%{public}s) on blur", AceType::TypeName(this));
+        LOGD("FocusNode::OnFocus: Node(%{public}s) on blur", AceType::TypeName(this));
         if (onBlurCallback_) {
             onBlurCallback_();
         }

@@ -207,6 +207,11 @@ inline bool InRegion(double lowerBound, double upperBound, double destNum)
     return LessOrEqual(lowerBound, destNum) && LessOrEqual(destNum, upperBound);
 }
 
+inline bool GreaterOrEqualToInfinity(float num)
+{
+    return GreatOrEqual(num, Infinity<float>() / 2.0f);
+}
+
 inline uint64_t GetMilliseconds()
 {
     auto now = std::chrono::system_clock::now();

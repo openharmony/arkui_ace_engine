@@ -104,6 +104,7 @@ build_component_ng("pattern_ng") {
     "grid_row/grid_row_model_ng.cpp",
     "image/image_layout_algorithm.cpp",
     "image/image_model_ng.cpp",
+    "image/image_paint_method.cpp",
     "image/image_pattern.cpp",
     "image_animator/image_animator_pattern.cpp",
     "image_animator/image_animator_view.cpp",

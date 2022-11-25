@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -59,20 +60,24 @@ class ImagePatternTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
     static RefPtr<FrameNode> CreateImageNode(const std::string& src, const std::string& alt,
         RefPtr<PixelMap> pixMap = nullptr, const Color& svgFillColor = SVG_FILL_COLOR_DEFAULT,
         const ImageFit& imageFit = ImageFit::NONE, const ImageRenderMode& renderMode = ImageRenderMode::TEMPLATE,
         const ImageInterpolation& interpolation = ImageInterpolation::NONE,
-        const ImageRepeat& imageRepeat = ImageRepeat::NOREPEAT, const std::vector<float>& colorFilter = {},
+        const ImageRepeat& imageRepeat = ImageRepeat::NO_REPEAT, const std::vector<float>& colorFilter = {},
         bool matchTextDirection = false);
 };
 
-void ImagePatternTest::SetUpTestCase() {}
-void ImagePatternTest::TearDownTestCase() {}
-void ImagePatternTest::SetUp() {}
-void ImagePatternTest::TearDown() {}
+void ImagePatternTest::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void ImagePatternTest::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
+
 RefPtr<FrameNode> ImagePatternTest::CreateImageNode(const std::string& src, const std::string& alt,
     RefPtr<PixelMap> pixMap, const Color& svgFillColor, const ImageFit& imageFit, const ImageRenderMode& renderMode,
     const ImageInterpolation& interpolation, const ImageRepeat& imageRepeat, const std::vector<float>& colorFilter,
@@ -91,7 +96,7 @@ RefPtr<FrameNode> ImagePatternTest::CreateImageNode(const std::string& src, cons
     if (interpolation != ImageInterpolation::NONE) {
         image.SetImageInterpolation(interpolation);
     }
-    if (imageRepeat != ImageRepeat::NOREPEAT) {
+    if (imageRepeat != ImageRepeat::NO_REPEAT) {
         image.SetImageRepeat(imageRepeat);
     }
     if (!matchTextDirection) {
@@ -203,14 +208,9 @@ HWTEST_F(ImagePatternTest, SetImagePaintConfig001, TestSize.Level1)
     EXPECT_TRUE(imagePattern->lastAltCanvasImage_ != nullptr);
     EXPECT_EQ(*imagePattern->lastAltSrcRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
     EXPECT_EQ(*imagePattern->lastAltDstRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
-    EXPECT_TRUE(imagePattern->lastAltCanvasImage_->imagePaintConfig_ != nullptr);
-    auto altImagePaintConfig = *imagePattern->lastAltCanvasImage_->imagePaintConfig_;
+    EXPECT_TRUE(imagePattern->lastAltCanvasImage_->paintConfig_ != nullptr);
+    auto altImagePaintConfig = *imagePattern->lastAltCanvasImage_->paintConfig_;
     EXPECT_EQ(altImagePaintConfig.imageFit_, IMAGE_FIT_DEFAULT);
-    EXPECT_EQ(altImagePaintConfig.renderMode_, IMAGE_RENDERMODE_DEFAULT);
-    EXPECT_EQ(altImagePaintConfig.imageInterpolation_, IMAGE_INTERPOLATION_DEFAULT);
-    EXPECT_EQ(altImagePaintConfig.imageRepeat_, IMAGE_REPEAT_DEFAULT);
-    EXPECT_EQ(*altImagePaintConfig.colorFilter_, COLOR_FILTER_DEFAULT);
-    EXPECT_EQ(altImagePaintConfig.needFlipCanvasHorizontally_, false);
     /**
      * @tc.steps: step4. Image loads successfully, and trigger Pattern->OnImageLoadSuccess.
      */
@@ -219,14 +219,9 @@ HWTEST_F(ImagePatternTest, SetImagePaintConfig001, TestSize.Level1)
     EXPECT_TRUE(imagePattern->lastCanvasImage_ != nullptr);
     EXPECT_EQ(imagePattern->lastSrcRect_, RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
     EXPECT_EQ(imagePattern->lastDstRect_, RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
-    EXPECT_TRUE(imagePattern->lastCanvasImage_->imagePaintConfig_ != nullptr);
-    auto imagePaintConfig = *imagePattern->lastCanvasImage_->imagePaintConfig_;
+    EXPECT_TRUE(imagePattern->lastCanvasImage_->paintConfig_ != nullptr);
+    auto imagePaintConfig = *imagePattern->lastCanvasImage_->paintConfig_;
     EXPECT_EQ(imagePaintConfig.imageFit_, IMAGE_FIT_DEFAULT);
-    EXPECT_EQ(imagePaintConfig.renderMode_, IMAGE_RENDERMODE_DEFAULT);
-    EXPECT_EQ(imagePaintConfig.imageInterpolation_, IMAGE_INTERPOLATION_DEFAULT);
-    EXPECT_EQ(imagePaintConfig.imageRepeat_, IMAGE_REPEAT_DEFAULT);
-    EXPECT_EQ(*imagePaintConfig.colorFilter_, COLOR_FILTER_DEFAULT);
-    EXPECT_EQ(imagePaintConfig.needFlipCanvasHorizontally_, false);
     /**
      * @tc.steps: step5. Image loads successfully, and clear alt data.
      */

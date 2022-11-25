@@ -2275,7 +2275,7 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& re
     }
     if (jsValue->IsString()) {
         result = StringUtils::StringToDimensionWithUnit(jsValue->ToString(), defaultUnit);
-        return result.IsValid();
+        return result.IsNonNegative();
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
@@ -2293,7 +2293,7 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& re
         type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
         auto value = themeConstants->GetString(resId->ToNumber<uint32_t>());
         result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
-        return result.IsValid();
+        return result.IsNonNegative();
     }
     result = themeConstants->GetDimension(resId->ToNumber<uint32_t>());
     return true;
@@ -2358,8 +2358,7 @@ bool JSViewAbstract::ParseJsDouble(const JSRef<JSVal>& jsValue, double& result)
         return true;
     }
     if (jsValue->IsString()) {
-        result = StringUtils::StringToDouble(jsValue->ToString());
-        return true;
+        return StringUtils::StringToDouble(jsValue->ToString(), result);
     }
     if (jsValue->IsObject()) {
         return ParseResourceToDouble(jsValue, result);
@@ -3713,7 +3712,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
     CHECK_NULL_VOID(builderFunc);
 
-    ResponseType responseType = ResponseType::LONGPRESS;
+    ResponseType responseType = ResponseType::LONG_PRESS;
     if (info.Length() == 2 && info[1]->IsNumber()) {
         auto response = info[1]->ToNumber<int32_t>();
         LOGI("Set the responseType is %{public}d.", response);
@@ -4044,7 +4043,7 @@ bool JSViewAbstract::ParseJsonDimension(
     }
     if (jsonValue->IsString()) {
         result = StringUtils::StringToDimensionWithUnit(jsonValue->GetString(), defaultUnit);
-        return result.IsValid();
+        return result.IsNonNegative();
     }
     auto resVal = JsonUtil::ParseJsonString(jsonValue->ToString());
     auto resId = resVal->GetValue("id");

@@ -88,6 +88,8 @@ public:
 
     void CleanUp();
 
+    bool isEmpty();
+
 private:
     template<typename T>
     struct NodeCompare {

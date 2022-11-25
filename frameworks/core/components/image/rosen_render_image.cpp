@@ -684,7 +684,7 @@ void RosenRenderImage::ApplyBorderRadius(
     // 1. when the image source is a SVG;
     // 2. when image loads fail;
     // 3. when there is a repeat to do;
-    bool clipLayoutSize = sourceInfo_.IsSvg() || (imageRepeat_ != ImageRepeat::NOREPEAT) ||
+    bool clipLayoutSize = sourceInfo_.IsSvg() || (imageRepeat_ != ImageRepeat::NO_REPEAT) ||
         (imageLoadingStatus_ == ImageLoadingStatus::LOAD_FAIL);
     Rect clipRect = clipLayoutSize ? Rect(offset, GetLayoutSize()) : paintRect + offset;
 
@@ -795,7 +795,7 @@ void RosenRenderImage::CanvasDrawImageRect(
 
     Rect realDstRect = paintRect + offset;
 
-    if (imageRepeat_ != ImageRepeat::NOREPEAT) {
+    if (imageRepeat_ != ImageRepeat::NO_REPEAT) {
         DrawImageOnCanvas(scaledSrcRect, realDstRect, paint, canvas);
         return;
     }
@@ -1368,7 +1368,7 @@ void RosenRenderImage::OnVisibleChanged()
             imageObj_->Resume();
         } else {
             imageObj_->Pause();
-            LOGI("pause image when invisible");
+            LOGD("pause image when invisible");
         }
     } else {
         LOGD("OnVisibleChanged: imageObj is null");

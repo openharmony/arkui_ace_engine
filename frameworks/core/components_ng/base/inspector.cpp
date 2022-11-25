@@ -82,10 +82,7 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key)
     CHECK_NULL_RETURN(rootNode, "");
 
     auto inspectorElement = GetInspectorByKey(rootNode, key);
-    if (!inspectorElement) {
-        LOGE("no inspector with key:%{public}s is found", key.c_str());
-        return "";
-    }
+    CHECK_NULL_RETURN(inspectorElement, "");
 
     auto jsonNode = JsonUtil::Create(true);
     jsonNode->Put(INSPECTOR_TYPE, inspectorElement->GetTag().c_str());
@@ -100,15 +97,13 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key)
     return jsonNode->ToString();
 }
 
-std::string Inspector::GetInspectorTree()
+std::string Inspector::GetInspectorTree(bool isLayoutInspector)
 {
     auto jsonRoot = JsonUtil::Create(true);
     jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
 
     auto context = NG::PipelineContext::GetCurrentContext();
-    if (!context) {
-        return jsonRoot->ToString();
-    }
+    CHECK_NULL_RETURN(context, jsonRoot->ToString());
     auto scale = context->GetViewScale();
     auto rootHeight = context->GetRootHeight();
     auto rootWidth = context->GetRootWidth();
@@ -117,9 +112,7 @@ std::string Inspector::GetInspectorTree()
     jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
 
     auto root = context->GetRootElement();
-    if (root == nullptr) {
-        return jsonRoot->ToString();
-    }
+    CHECK_NULL_RETURN(root, jsonRoot->ToString());
 
     std::map<int32_t, std::list<RefPtr<UINode>>> depthElementMap;
     depthElementMap[0].emplace_back(root);
@@ -172,6 +165,13 @@ std::string Inspector::GetInspectorTree()
         jsonChildren->Put(nodeJSONValue);
     }
     jsonRoot->Put(INSPECTOR_CHILDREN, jsonChildren);
+
+    if (isLayoutInspector) {
+        auto jsonTree = JsonUtil::Create(true);
+        jsonTree->Put("type", "root");
+        jsonTree->Put("content", jsonRoot);
+        return jsonTree->ToString();
+    }
     return jsonRoot->ToString();
 }
 
@@ -183,10 +183,7 @@ bool Inspector::SendEventByKey(const std::string& key, int action, const std::st
     CHECK_NULL_RETURN(rootNode, false);
 
     auto inspectorElement = AceType::DynamicCast<FrameNode>(GetInspectorByKey(rootNode, key));
-    if (!inspectorElement) {
-        LOGE("no inspector with key:%{public}s is found", key.c_str());
-        return false;
-    }
+    CHECK_NULL_RETURN(inspectorElement, false);
 
     auto size = inspectorElement->GetGeometryNode()->GetFrameSize();
     auto offset = inspectorElement->GetOffsetRelativeToWindow();

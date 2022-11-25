@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DIVIDER_PAINTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DIVIDER_PAINTER_H
 
+#include <optional>
+
 #include "base/geometry/ng/point_t.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
@@ -45,6 +47,7 @@ public:
     {
         dividerLength_ = length;
     }
+
 private:
     float constrainStrokeWidth_ = 0.0f;
     float dividerLength_ = 0.0f;

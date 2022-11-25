@@ -16,7 +16,7 @@
 #include "gtest/gtest.h"
 
 #include "core/components/theme/theme_constants_defines.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/components/theme/theme_utils.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -58,7 +58,7 @@ HWTEST_F(JsUtilsTest, ParseDimensionId001, TestSize.Level1)
      * @tc.steps: step1. Parse dimension string contains platform id reference.
      * @tc.expected: step1. Dimension parse correctly, equal with value in ThemeConstants.
      */
-    RefPtr<ThemeManager> themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     auto themeConstants = themeManager->GetThemeConstants();
     ASSERT_NE(themeConstants, nullptr);
     const auto& parseResult = ThemeUtils::ParseThemeIdReference(DIMENSION_ID_NORMAL);
@@ -77,7 +77,7 @@ HWTEST_F(JsUtilsTest, ParseDimensionId002, TestSize.Level1)
      * @tc.steps: step1. Parse dimension string contains platform id reference, id not found.
      * @tc.expected: step1. Dimension parse get dimension 0dp.
      */
-    RefPtr<ThemeManager> themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     auto themeConstants = themeManager->GetThemeConstants();
     ASSERT_NE(themeConstants, nullptr);
     const auto& parseResult = ThemeUtils::ParseThemeIdReference(DIMENSION_ID_NOT_FOUND);
@@ -113,7 +113,7 @@ HWTEST_F(JsUtilsTest, ParseDimensionId004, TestSize.Level1)
      * @tc.steps: step1. Parse dimension string contains platform id reference, id not found.
      * @tc.expected: step1. Dimension parse get dimension 0dp.
      */
-    RefPtr<ThemeManager> themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     auto themeConstants = themeManager->GetThemeConstants();
     ASSERT_NE(themeConstants, nullptr);
     const auto& parseResult = ThemeUtils::ParseThemeIdReference(OHOS_THEME_ID_NORMAL);

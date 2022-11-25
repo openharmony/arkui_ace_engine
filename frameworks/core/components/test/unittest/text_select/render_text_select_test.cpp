@@ -23,6 +23,7 @@
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/text_overlay/render_text_overlay.h"
 #include "core/components/text_overlay/text_overlay_component.h"
+#include "core/components/theme/theme_manager_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -291,8 +292,8 @@ public:
         }
     };
     void SetPixelMapData(const RefPtr<PixelMap>& pixmap) override {};
-    virtual void GetPixelMapData(const std::function<void(const RefPtr<PixelMap>&)>& callback,
-        bool syncMode = false) override
+    virtual void GetPixelMapData(
+        const std::function<void(const RefPtr<PixelMap>&)>& callback, bool syncMode = false) override
     {
         if (taskExecutor_) {
             taskExecutor_->PostTask(
@@ -364,7 +365,7 @@ HWTEST_F(RenderTextSelectTest, RenderTextSelectTest001, TestSize.Level1)
      * @tc.steps: step1. construct TextOverlayComponent and RenderTextOverlay.
      * @tc.expected: step1. RenderTextOverlay is setted as theme
      */
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     RefPtr<TextOverlayComponent> textOverlayComponent =
         AceType::MakeRefPtr<TextOverlayComponent>(themeManager, context_->GetAccessibilityManager());
     RefPtr<MockRenderTextOverlay> renderTextOverlay = AceType::MakeRefPtr<MockRenderTextOverlay>();
@@ -385,7 +386,7 @@ HWTEST_F(RenderTextSelectTest, RenderTextSelectTest002, TestSize.Level1)
      * @tc.steps: step1. construct textfield and get the theme.
      * @tc.expected: step1. theme is correct.
      */
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     RefPtr<TextFieldTheme> textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     ASSERT_TRUE(textFieldTheme);
 
@@ -412,7 +413,7 @@ HWTEST_F(RenderTextSelectTest, RenderTextSelectTest003, TestSize.Level1)
      * @tc.steps: step1. construct textfield and get the theme.
      * @tc.expected: step1. theme is correct.
      */
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     RefPtr<TextFieldTheme> textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     ASSERT_TRUE(textFieldTheme);
 
@@ -463,7 +464,7 @@ HWTEST_F(RenderTextSelectTest, RenderTextSelectTest004, TestSize.Level1)
      * @tc.steps: step1. construct textfield and get the theme.
      * @tc.expected: step1. theme is correct.
      */
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     RefPtr<TextFieldTheme> textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     ASSERT_TRUE(textFieldTheme);
 
