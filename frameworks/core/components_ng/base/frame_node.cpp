@@ -156,6 +156,14 @@ void FrameNode::DumpInfo()
         std::string("width: ").append(std::to_string(geometryNode_->GetFrameRect().Width())));
     DumpLog::GetInstance().AddDesc(
         std::string("height: ").append(std::to_string(geometryNode_->GetFrameRect().Height())));
+    if (layoutProperty_->GetPaddingProperty()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("Padding: ").append(layoutProperty_->GetPaddingProperty()->ToString().c_str()));
+    }
+    if (layoutProperty_->GetBorderWidthProperty()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("Border: ").append(layoutProperty_->GetBorderWidthProperty()->ToString().c_str()));
+    }
     DumpLog::GetInstance().AddDesc(std::string("compid: ").append(propInspectorId_.value_or("")));
     DumpLog::GetInstance().AddDesc(std::string("ContentConstraint: ")
                                        .append(layoutProperty_->GetContentLayoutConstraint().has_value()
