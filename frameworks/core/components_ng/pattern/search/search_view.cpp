@@ -40,20 +40,18 @@ RefPtr<TextFieldController> SearchView::Create(const std::optional<std::string>&
     auto frameNode =
         GetOrCreateSearchNode(V2::SEARCH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SearchPattern>(); });
 
-    const Color TRANSPARENT_COLOR = Color(0x00000000);
-    constexpr Dimension FONT_SIZE(20);
-
     bool hasTextFieldNode = frameNode->HasTextFieldNode();
     bool hasImageNode = frameNode->HasImageNode();
     bool hasButtonNode = frameNode->HasButtonNode();
 
     // TextField frameNode
+    auto searchTheme = frameNode->GetContext()->GetTheme<SearchTheme>();
     auto textFieldFrameNode = CreateTextField(frameNode, placeholder, value);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     textFieldPattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     textFieldPattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     auto textInputRenderContext = textFieldFrameNode->GetRenderContext();
-    textInputRenderContext->UpdateBackgroundColor(TRANSPARENT_COLOR);
+    textInputRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     if (!hasTextFieldNode) {
         textFieldFrameNode->MountToParent(frameNode);
         textFieldFrameNode->MarkModifyDone();
@@ -71,21 +69,21 @@ RefPtr<TextFieldController> SearchView::Create(const std::optional<std::string>&
     }
 
     // Button frameNode
-    auto buttonFrameNode = CreateButtonWithLabel(frameNode, "");
-    auto buttonRenderContext = buttonFrameNode->GetRenderContext();
-    buttonRenderContext->UpdateBackgroundColor(TRANSPARENT_COLOR);
-    auto textFrameNode = AceType::DynamicCast<FrameNode>(buttonFrameNode->GetChildren().front());
-    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateTextColor(Color::BLUE);
-    textLayoutProperty->UpdateFontSize(FONT_SIZE);
     if (!hasButtonNode) {
+        auto buttonFrameNode = CreateButton(frameNode);
+        auto buttonRenderContext = buttonFrameNode->GetRenderContext();
+        buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        auto textFrameNode = AceType::DynamicCast<FrameNode>(buttonFrameNode->GetChildren().front());
+        auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
+        textLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
         buttonFrameNode->MountToParent(frameNode);
         buttonFrameNode->MarkModifyDone();
     }
 
     // Set search background
     auto renderContext = frameNode->GetRenderContext();
-    auto textFieldTheme = textFieldFrameNode->GetContext()->GetThemeManager()->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = textFieldFrameNode->GetContext()->GetTheme<TextFieldTheme>();
     renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
     auto radius = textFieldTheme->GetBorderRadius();
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
@@ -295,7 +293,7 @@ RefPtr<FrameNode> SearchView::CreateImage(const RefPtr<SearchNode>& parentNode, 
     return frameNode;
 }
 
-RefPtr<FrameNode> SearchView::CreateButtonWithLabel(const RefPtr<SearchNode>& parentNode, const std::string& label)
+RefPtr<FrameNode> SearchView::CreateButton(const RefPtr<SearchNode>& parentNode)
 {
     auto nodeId = parentNode->GetButtonId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -304,16 +302,7 @@ RefPtr<FrameNode> SearchView::CreateButtonWithLabel(const RefPtr<SearchNode>& pa
     if (frameNode->GetChildren().empty()) {
         auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
         CHECK_NULL_RETURN(textNode, nullptr);
-        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-        textLayoutProperty->UpdateContent(label);
         frameNode->AddChild(textNode);
-    } else {
-        auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-        CHECK_NULL_RETURN(textChild, nullptr);
-        auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-        textLayoutProperty->UpdateContent(label);
     }
     return frameNode;
 }
