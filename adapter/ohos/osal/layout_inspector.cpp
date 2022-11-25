@@ -89,11 +89,11 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr)
 {
     auto container = Container::Current();
     if (container->IsCurrentUseNewPipeline()) {
-        treeJsonStr = NG::Inspector::GetInspectorTree();
+        treeJsonStr = NG::Inspector::GetInspectorTree(true);
     } else {
         auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
         CHECK_NULL_VOID(pipelineContext);
-        treeJsonStr = V2::Inspector::GetInspectorTree(pipelineContext);
+        treeJsonStr = V2::Inspector::GetInspectorTree(pipelineContext, true);
     }
 }
 

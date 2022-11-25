@@ -97,7 +97,7 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key)
     return jsonNode->ToString();
 }
 
-std::string Inspector::GetInspectorTree()
+std::string Inspector::GetInspectorTree(bool isLayoutInspector)
 {
     auto jsonRoot = JsonUtil::Create(true);
     jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
@@ -165,6 +165,13 @@ std::string Inspector::GetInspectorTree()
         jsonChildren->Put(nodeJSONValue);
     }
     jsonRoot->Put(INSPECTOR_CHILDREN, jsonChildren);
+
+    if (isLayoutInspector) {
+        auto jsonTree = JsonUtil::Create(true);
+        jsonTree->Put("type", "root");
+        jsonTree->Put("content", jsonRoot);
+        return jsonTree->ToString();
+    }
     return jsonRoot->ToString();
 }
 
