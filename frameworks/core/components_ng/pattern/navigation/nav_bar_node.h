@@ -81,6 +81,11 @@ public:
         return menu_;
     }
 
+    void SetMenuNode(const RefPtr<UINode>& menuNode)
+    {
+        moreMenuNode_ = menuNode;
+    }
+
     void SetTitleBarNode(const RefPtr<UINode>& title)
     {
         titleBarNode_ = title;
@@ -151,6 +156,7 @@ private:
     RefPtr<UINode> title_;
     RefPtr<UINode> subtitle_;
     RefPtr<UINode> menu_;
+    RefPtr<UINode> moreMenuNode_;
     RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> navBarContentNode_;
     RefPtr<UINode> toolBarNode_;
