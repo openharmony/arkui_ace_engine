@@ -60,7 +60,7 @@ void EventReport::SendEvent(const EventInfo& eventInfo)
     if (packageName.size() > MAX_PACKAGE_NAME_LENGTH) {
         StrTrim(packageName);
     }
-    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventInfo.eventType,
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventInfo.eventType,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
         EVENT_KEY_ERROR_TYPE, eventInfo.errorType,
         EVENT_KEY_PACKAGE_NAME, packageName);
@@ -71,7 +71,7 @@ void EventReport::SendJsCardRenderTimeEvent(
     const std::string& timeType,
     uint64_t timeDelay)
 {
-    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, timeType,
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, timeType,
         OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
         EVENT_KEY_SESSIONID, sessionID,
         STATISTIC_DURATION, timeDelay);
@@ -199,7 +199,7 @@ void EventReport::JsEventReport(int32_t eventType, const std::string& jsonStr)
 void EventReport::JsErrReport(
     const std::string& packageName, const std::string& reason, const std::string& summary)
 {
-    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_NAME_JS_ERROR,
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_NAME_JS_ERROR,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
         EVENT_KEY_PACKAGE_NAME, packageName,
         EVENT_KEY_REASON, reason,
@@ -222,7 +222,7 @@ void EventReport::ANRRawReport(RawEventType type, int32_t uid, const std::string
         eventName = "UI_BLOCK_RECOVERED";
     }
     std::string uidStr = std::to_string(uid);
-    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
         EVENT_KEY_UID, uidStr,
         EVENT_KEY_PACKAGE_NAME, packageName,
@@ -238,7 +238,7 @@ void EventReport::ANRShowDialog(int32_t uid, const std::string& packageName,
     std::string eventName = "UI_BLOCK_DIALOG";
     std::string uidStr = std::to_string(uid);
     std::string pidStr = std::to_string(pid);
-    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
         EVENT_KEY_UID, uidStr,
         EVENT_KEY_PID, pidStr,
@@ -251,7 +251,7 @@ void EventReport::SendEventInner(const EventInfo& eventInfo)
 {
     auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
     StrTrim(packageName);
-    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventInfo.eventType,
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventInfo.eventType,
             OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
             EVENT_KEY_ERROR_TYPE, eventInfo.errorType,
             EVENT_KEY_PACKAGE_NAME, packageName);
