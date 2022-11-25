@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "base/utils/device_type.h"
 
 // Add the following two macro definitions to test the private and protected method.
 #define private public
@@ -28,6 +29,25 @@ class InspectTabBarTest : public testing::Test {
 public:
     static void SetUpTestSuite() {};
     static void TearDownTestSuite() {};
+
+    void CheckTabBarAttrAndStyle(InspectTabBar& inspectTabBar, uint16_t attrsSize, uint16_t stylesSize)
+    {
+        uint16_t attrsSizeInsert = 3;
+        uint16_t stylesSizeInsert = 0;
+        DeviceType deviceType = SystemProperties::GetDeviceType();
+        EXPECT_EQ(inspectTabBar.attrs_["mode"], "scrollable");
+        EXPECT_EQ(inspectTabBar.attrs_["disabled"], "false");
+        EXPECT_EQ(inspectTabBar.attrs_["focusable"], "true");
+        if (deviceType == DeviceType::PHONE) {
+            EXPECT_EQ(inspectTabBar.styles_["height"], "100px");
+            stylesSizeInsert++;
+        } else if (deviceType == DeviceType::TV) {
+            EXPECT_EQ(inspectTabBar.styles_["height"], "60px");
+            stylesSizeInsert++;
+        }
+        EXPECT_EQ(inspectTabBar.attrs_.size(), attrsSize + attrsSizeInsert);
+        EXPECT_EQ(inspectTabBar.styles_.size(), stylesSize + stylesSizeInsert);
+    }
 };
 
 /**
@@ -53,18 +73,16 @@ HWTEST_F(InspectTabBarTest, InspectTabBarTest002, TestSize.Level1)
 {
     NodeId nodeId = -1;
     std::string tag = "tagTest";
-    InspectTabBar inspectTabBar(nodeId, tag);
-    auto attrsSize = inspectTabBar.attrs_.size();
-    auto stylesSize = inspectTabBar.styles_.size();
-    uint16_t attrsSizeInsert = 3;
-    uint16_t stylesSizeInsert = 1;
-
-    inspectTabBar.PackAttrAndStyle();
-    EXPECT_EQ(inspectTabBar.attrs_.size(), attrsSize + attrsSizeInsert);
-    EXPECT_EQ(inspectTabBar.attrs_["mode"], "scrollable");
-    EXPECT_EQ(inspectTabBar.attrs_["disabled"], "false");
-    EXPECT_EQ(inspectTabBar.attrs_["focusable"], "true");
-    EXPECT_EQ(inspectTabBar.styles_.size(), stylesSize + stylesSizeInsert);
-    EXPECT_EQ(inspectTabBar.styles_["height"], "100px");
+    uint16_t typeNum = 6;
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    for (uint16_t i = 0; i < typeNum; i++) {
+        InspectTabBar inspectTabBar(nodeId, tag);
+        auto attrsSize = inspectTabBar.attrs_.size();
+        auto stylesSize = inspectTabBar.styles_.size();
+        SystemProperties::SetDeviceType(static_cast<DeviceType>(i));
+        inspectTabBar.PackAttrAndStyle();
+        CheckTabBarAttrAndStyle(inspectTabBar, attrsSize, stylesSize);
+    }
+    SystemProperties::SetDeviceType(deviceType);
 }
 } // namespace OHOS::Ace::Framework

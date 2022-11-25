@@ -44,7 +44,8 @@ void ScrollPaintMethod::PaintScrollBar(RSCanvas& canvas, PaintWrapper* paintWrap
 
     auto scrollBar = paintProperty->GetScrollBar();
     CHECK_NULL_VOID(scrollBar);
-    if (!scrollBar->NeedScrollBar()) {
+    if (!scrollBar->NeedPaint()) {
+        LOGD("no need paint scroll bar.");
         return;
     }
 

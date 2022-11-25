@@ -2358,8 +2358,7 @@ bool JSViewAbstract::ParseJsDouble(const JSRef<JSVal>& jsValue, double& result)
         return true;
     }
     if (jsValue->IsString()) {
-        result = StringUtils::StringToDouble(jsValue->ToString());
-        return true;
+        return StringUtils::StringToDouble(jsValue->ToString(), result);
     }
     if (jsValue->IsObject()) {
         return ParseResourceToDouble(jsValue, result);

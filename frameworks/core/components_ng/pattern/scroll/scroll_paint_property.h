@@ -134,7 +134,7 @@ public:
         scrollBar_->UpdateScrollBarRegion(Offset(), size, scrollOffset, estimatedHeight);
     }
 
-    float CalculaltePatternOffset(float currentOffset)
+    float CalculatePatternOffset(float currentOffset)
     {
         if (scrollBar_ == nullptr) {
             return currentOffset;

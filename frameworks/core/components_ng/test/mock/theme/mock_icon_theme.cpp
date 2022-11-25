@@ -13,19 +13,30 @@
  * limitations under the License.
  */
 
+#define private public
+#define protected public
+#include "base/memory/ace_type.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components/theme/theme.h"
+#include "core/components/theme/theme_manager.h"
 
 namespace OHOS::Ace {
 
-RefPtr<IconTheme> IconTheme::Builder::Build(const RefPtr<ThemeConstants>& themeConstants) const
+RefPtr<IconTheme> IconTheme::Builder::Build(const RefPtr<ThemeConstants>&  /* themeConstants */) const
 {
     return nullptr;
 }
 
 void IconTheme::Builder::ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<IconTheme>& theme) const {}
 
-std::string IconTheme::GetIconPath(const InternalResource::ResourceId& resourceId) const
+RefPtr<Theme> ThemeManager::GetTheme(ThemeType /* type */)
 {
-    return "";
+    return AceType::MakeRefPtr<IconTheme>();
 }
+
+std::string IconTheme::GetIconPath(const InternalResource::ResourceId& /* resourceId */) const
+{
+    return "resource:///ohos_test_image.svg";
+}
+
 } // namespace OHOS::Ace

@@ -28,7 +28,6 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-
 constexpr double IMAGE_WIDTH_DEFAULT = -1.0;
 constexpr double IMAGE_HEIGHT_DEFAULT = -1.0;
 constexpr double IMAGE_COMPONENTWIDTH_DEFAULT = -1.0;
@@ -48,7 +47,6 @@ constexpr ImageRenderMode IMAGE_NO_RENDERMODE = ImageRenderMode::ORIGINAL;
 constexpr bool MATCHTEXTDIRECTION_DEFAULT = false;
 const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.jpg";
 const std::string ALT_SRC_URL = "file://data/data/com.example.test/res/exampleAlt.jpg";
-
 } // namespace
 
 class ImageModelNgTest : public testing::Test {
@@ -204,5 +202,4 @@ HWTEST_F(ImageModelNgTest, ImageEventTest002, TestSize.Level1)
     EXPECT_EQ(curEvent.GetComponentWidth(), loadImageFailEvent.GetComponentWidth());
     EXPECT_EQ(curEvent.GetComponentHeight(), loadImageFailEvent.GetComponentHeight());
 }
-
 } // namespace OHOS::Ace::NG
