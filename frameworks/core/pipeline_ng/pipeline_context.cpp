@@ -570,6 +570,12 @@ bool PipelineContext::OnBackPressed()
         return false;
     }
 
+    // If the tag of the last child of the rootnode is video, exit full screen.
+    if (fullScreenManager_->OnBackPressed()) {
+        LOGI("Exit full screen: back press accepted");
+        return true;
+    }
+
     // if has popup, back press would hide popup and not trigger page back
     if (overlayManager_->RemoveOverlay()) {
         LOGI("popup hidden: back press accepted");
