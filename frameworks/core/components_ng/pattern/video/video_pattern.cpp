@@ -680,6 +680,7 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
     auto sliderNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, AceType::MakeRefPtr<SliderPattern>());
     CHECK_NULL_RETURN(sliderNode, nullptr);
     auto sliderLayoutProperty = sliderNode->GetLayoutProperty<SliderLayoutProperty>();
+    CHECK_NULL_RETURN(sliderLayoutProperty, nullptr);
 
     auto sliderEdge = videoTheme->GetSliderEdge();
     PaddingProperty padding;
@@ -698,11 +699,11 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
     };
     auto sliderEventHub = sliderNode->GetEventHub<SliderEventHub>();
     sliderEventHub->SetOnChange(std::move(sliderOnChangeEvent));
-    if (duration_ > 0) {
-        auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
-        CHECK_NULL_RETURN(sliderPaintProperty, nullptr);
-        sliderPaintProperty->UpdateMax(static_cast<float>(duration_));
-    }
+
+    auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(sliderPaintProperty, nullptr);
+    sliderPaintProperty->UpdateMax(static_cast<float>(duration_));
+    sliderPaintProperty->UpdateSelectColor(Color::BLACK);
     return sliderNode;
 }
 
