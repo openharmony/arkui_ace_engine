@@ -11,10 +11,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-group("base_unittest") {
-  testonly = true
+import("//build/test.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+
+ohos_unittest("geometry_node_test_ng") {
+  module_out_path = "$test_output_path/base"
+
+  include_dirs = [
+    "//commonlibrary/c_utils/base/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
+  ]
+
+  sources = [ "geometry_node_test_ng.cpp" ]
+
   deps = [
-    "view_abstract:view_abstract_test_ng",
-    "view_stack_processor:view_stack_processor_test_ng",
+    "$ace_root:ace_test_log",
+    "$cjson_root:cjson_static",
+    "//third_party/googletest:gmock_main",
+  ]
+
+  configs = [
+    "$ace_root:ace_test_coverage_config",
+    "$ace_root:ace_unittest_config",
   ]
 }

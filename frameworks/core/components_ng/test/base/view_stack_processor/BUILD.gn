@@ -14,16 +14,15 @@
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-ohos_unittest("gauge_pattern_test_ng") {
-  module_out_path = "$test_output_path/gauge"
+ohos_unittest("view_stack_processor_test_ng") {
+  module_out_path = "$test_output_path/base"
 
   include_dirs = [
     "//commonlibrary/c_utils/base/include",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
   ]
 
-  sources = [
-    # inner
+  sources = [  # inner
     "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",
     "$ace_root/frameworks/base/log/dump_log.cpp",
@@ -43,7 +42,6 @@ ohos_unittest("gauge_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/ui_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_stack_processor.cpp",
-    "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
 
     # components_ng_layout
     "$ace_root/frameworks/core/components_ng/layout/box_layout_algorithm.cpp",
@@ -88,12 +86,7 @@ ohos_unittest("gauge_pattern_test_ng") {
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
 
     # self
-    "$ace_root/frameworks/core/components_ng/pattern/gauge/gauge_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/gauge/gauge_model_ng.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/gauge/gauge_paint_method.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/gauge/gauge_pattern.cpp",
-    "gauge_paint_method_test_ng.cpp",
-    "gauge_pattern_test_ng.cpp",
+    "view_stack_processor_test_ng.cpp",
   ]
 
   deps = [
@@ -103,8 +96,7 @@ ohos_unittest("gauge_pattern_test_ng") {
   ]
 
   configs = [
-    "$ace_root:ace_unittest_config",
     "$ace_root:ace_test_coverage_config",
-    "//commonlibrary/c_utils/base:utils_config",
+    "$ace_root:ace_unittest_config",
   ]
 }
