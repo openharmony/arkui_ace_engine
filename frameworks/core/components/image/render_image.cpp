@@ -697,7 +697,7 @@ void RenderImage::GenerateImageRects(const Size& srcSize, const BackgroundImageS
     int32_t minY = 0;
     int32_t maxX = 0;
     int32_t maxY = 0;
-    if (imageRepeat == ImageRepeat::REPEAT || imageRepeat == ImageRepeat::REPEATX) {
+    if (imageRepeat == ImageRepeat::REPEAT || imageRepeat == ImageRepeat::REPEAT_X) {
         if (LessOrEqual(imageRenderPosition_.GetX(), 0.0)) {
             minX = 0;
             maxX = std::ceil((boxPaintSize_.Width() - imageRenderPosition_.GetX()) / imageRenderSize_.Width());
@@ -707,7 +707,7 @@ void RenderImage::GenerateImageRects(const Size& srcSize, const BackgroundImageS
         }
     }
 
-    if (imageRepeat == ImageRepeat::REPEAT || imageRepeat == ImageRepeat::REPEATY) {
+    if (imageRepeat == ImageRepeat::REPEAT || imageRepeat == ImageRepeat::REPEAT_Y) {
         if (LessOrEqual(imageRenderPosition_.GetY(), 0.0)) {
             minY = 0;
             maxY = std::ceil((boxPaintSize_.Height() - imageRenderPosition_.GetY()) / imageRenderSize_.Height());
@@ -860,7 +860,7 @@ void RenderImage::ClearRenderObject()
     imageLoadingStatus_ = ImageLoadingStatus::UNLOADED;
 
     imageFit_ = ImageFit::COVER;
-    imageRepeat_ = ImageRepeat::NOREPEAT;
+    imageRepeat_ = ImageRepeat::NO_REPEAT;
     rectList_.clear();
     color_.reset();
     sourceInfo_.Reset();

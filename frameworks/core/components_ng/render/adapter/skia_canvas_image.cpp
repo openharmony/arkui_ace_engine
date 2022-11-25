@@ -182,8 +182,8 @@ void SkiaCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, co
     SkPaint paint;
     SkVector radii[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
     Rosen::RsImageInfo rsImageInfo(
-        (int)(imagePaintConfig_->imageFit_),
-        (int)(imagePaintConfig_->imageRepeat_),
+        (int)(GetPaintConfig().imageFit_),
+        (int)(GetPaintConfig().imageRepeat_),
         radii,
         1.0,
         GetUniqueID(),

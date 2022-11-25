@@ -577,7 +577,7 @@ void FlutterRenderImage::ApplyBorderRadius(
     // 1. when the image source is a SVG;
     // 2. when image loads fail;
     // 3. when there is a repeat to do;
-    bool clipLayoutSize = sourceInfo_.IsSvg() || (imageRepeat_ != ImageRepeat::NOREPEAT) ||
+    bool clipLayoutSize = sourceInfo_.IsSvg() || (imageRepeat_ != ImageRepeat::NO_REPEAT) ||
         (imageLoadingStatus_ == ImageLoadingStatus::LOAD_FAIL);
     Rect clipRect = clipLayoutSize ? Rect(offset, GetLayoutSize()) : paintRect + offset;
 
@@ -694,7 +694,7 @@ void FlutterRenderImage::CanvasDrawImageRect(
         }
         return;
     }
-    if (imageRepeat_ != ImageRepeat::NOREPEAT) {
+    if (imageRepeat_ != ImageRepeat::NO_REPEAT) {
         DrawImageOnCanvas(scaledSrcRect, realDstRect, canvas, paint, imageRenderPosition_);
         return;
     }
@@ -768,10 +768,10 @@ void FlutterRenderImage::DrawImageOnCanvas(
             xTileMode = SkTileMode::kRepeat;
             yTileMode = SkTileMode::kRepeat;
             break;
-        case ImageRepeat::REPEATX:
+        case ImageRepeat::REPEAT_X:
             xTileMode = SkTileMode::kRepeat;
             break;
-        case ImageRepeat::REPEATY:
+        case ImageRepeat::REPEAT_Y:
             yTileMode = SkTileMode::kRepeat;
             break;
         default:
