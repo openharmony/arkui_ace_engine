@@ -57,6 +57,7 @@ public:
 
     virtual void Save() {}
     virtual void Restore() {}
+    virtual void DrawCircle(const Point& centerPt, scalar radius) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_CANVAS_H

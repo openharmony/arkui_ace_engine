@@ -108,4 +108,12 @@ RefPtr<MockPipelineBase> MockPipelineBase::GetCurrent()
 {
     return pipeline_;
 }
+
+void PipelineBase::OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+    const std::function<void()>& finishCallBack) {}
+
+bool PipelineBase::CloseImplicitAnimation()
+{
+    return true;
+}
 } // namespace OHOS::Ace

@@ -56,7 +56,7 @@ CanvasDrawFunction RadioPaintMethod::GetContentDrawFunction(PaintWrapper* paintW
 
 void RadioPaintMethod::InitializeParam()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     shadowWidth_ = radioTheme->GetShadowWidth().ConvertToPx();
@@ -69,7 +69,8 @@ void RadioPaintMethod::InitializeParam()
     hotZoneHorizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding();
 }
 
-void RadioPaintMethod::PaintRadio(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& offset) const
+void RadioPaintMethod::PaintRadio(
+    RSCanvas& canvas, bool /* checked */, const SizeF& contentSize, const OffsetF& offset) const
 {
     if (isTouch_) {
         DrawTouchBoard(canvas, contentSize, offset);
