@@ -47,6 +47,19 @@ MiscServices::ShareOption TransitionCopyOption(CopyOptions copyOption)
     return shareOption;
 }
 
+void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
+{
+#ifdef SYSTEM_CLIPBOARD_SUPPORTED
+    bool hasData = false;
+    taskExecutor_->PostSyncTask(
+        [&hasData]() {
+            hasData = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData();
+        },
+        TaskExecutor::TaskType::PLATFORM);
+    callback(hasData);
+#endif
+}
+
 void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption, bool isDragData)
 {
 CHECK_NULL_VOID(taskExecutor_);

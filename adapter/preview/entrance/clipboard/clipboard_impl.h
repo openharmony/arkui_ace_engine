@@ -27,10 +27,10 @@
 
 namespace OHOS::Ace::Platform {
 
-using CallbackSetClipboardData = std::function< void(const std::string&) >;
-using CallbackGetClipboardData = std::function< const std::string(void) >;
-using CallbackSetClipboardPixmapData = std::function< void(const RefPtr<PixelMap>&) >;
-using CallbackGetClipboardPixmapData = std::function< const RefPtr<PixelMap>(void) >;
+using CallbackSetClipboardData = std::function<void(const std::string&)>;
+using CallbackGetClipboardData = std::function<const std::string(void)>;
+using CallbackSetClipboardPixmapData = std::function<void(const RefPtr<PixelMap>&)>;
+using CallbackGetClipboardPixmapData = std::function<const RefPtr<PixelMap>(void)>;
 
 class ACE_FORCE_EXPORT_WITH_PREVIEW ClipboardImpl : public Clipboard {
 public:
@@ -43,6 +43,7 @@ public:
     void SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption = CopyOptions::InApp) override;
     void GetPixelMapData(const std::function<void(const RefPtr<PixelMap>&)>& callback, bool syncMode = false) override;
     void Clear() override;
+    void HasData(const std::function<void(bool hasData)>& callback) override;
     void RegisterCallbackSetClipboardData(CallbackSetClipboardData callback);
     void RegisterCallbackGetClipboardData(CallbackGetClipboardData callback);
     void RegisterCallbackSetClipboardPixmapData(CallbackSetClipboardPixmapData callback);

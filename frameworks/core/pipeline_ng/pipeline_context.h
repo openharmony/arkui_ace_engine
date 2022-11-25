@@ -247,7 +247,10 @@ public:
     }
     // end pipeline, exit app
     void Finish(bool autoFinish) const override;
-
+    RectF GetRootRect()
+    {
+        return rootNode_->GetGeometryNode()->GetFrameRect();
+    }
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type);
 

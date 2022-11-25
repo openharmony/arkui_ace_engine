@@ -58,7 +58,7 @@ constexpr Dimension CURSOR_PADDING = 2.0_vp;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
-enum class CaretUpdateType { PRESSED, DEL, EVENT, INPUT, NONE };
+enum class CaretUpdateType { PRESSED, LONG_PRESSED, DEL, EVENT, HANDLER_MOVE, INPUT, NONE };
 
 class TextFieldPattern : public Pattern, public ValueChangeObserver {
     DECLARE_ACE_TYPE(TextFieldPattern, Pattern, ValueChangeObserver);
@@ -102,7 +102,7 @@ public:
     void UpdateCaretPositionByPressOffset();
     void UpdateSelectionOffset();
 
-    float CalcCursorOffsetXByPosition(int32_t position);
+    OffsetF CalcCursorOffsetByPosition(int32_t position);
 
     bool ComputeOffsetForCaretDownstream(
         const TextEditingValueNG& TextEditingValueNG, int32_t extent, CaretMetrics& result);
@@ -178,27 +178,42 @@ public:
 
     float GetSelectionBaseOffsetX() const
     {
-        return selectionBaseOffsetX_;
+        return textSelector_.selectionBaseOffset.GetX();
     }
 
     float GetSelectionDestinationOffsetX() const
     {
-        return selectionDestinationOffsetX_;
+        return textSelector_.selectionDestinationOffset.GetX();
     }
 
     float GetCaretOffsetX() const
     {
-        return caretOffsetX_;
+        return caretRect_.GetX();
     }
 
     void SetCaretOffsetX(float offsetX)
     {
-        caretOffsetX_ = offsetX;
+        caretRect_.SetLeft(offsetX);
+    }
+
+    const RefPtr<SelectOverlayProxy>& GetSelectOverlay()
+    {
+        return selectOverlayProxy_;
+    }
+
+    void SetSelectOverlay(const RefPtr<SelectOverlayProxy>& proxy)
+    {
+        selectOverlayProxy_ = proxy;
     }
 
     CaretUpdateType GetCaretUpdateType() const
     {
         return caretUpdateType_;
+    }
+
+    void SetCaretUpdateType(CaretUpdateType type)
+    {
+        caretUpdateType_ = type;
     }
 
     float AdjustTextRectOffsetX();
@@ -277,6 +292,8 @@ public:
         return textEditingValue_;
     }
 
+    bool SelectOverlayIsOn();
+    void CloseSelectOverlay();
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     void SetInputMethodStatus(bool imeAttached)
     {
@@ -313,9 +330,15 @@ private:
     void InitMouseEvent();
     void HandleMouseEvent(const MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
-    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
+    void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle);
 
     void CursorMoveOnClick(const Offset& offset);
+
+    void ProcessOverlay();
+    void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
+    void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
+    void OnDetachFromFrameNode(FrameNode* node) override;
+    void UpdateTextSelectorByHandleMove(bool isMovingBase, int32_t position, OffsetF& offsetToParagraphBeginning);
 
     void HandleSelectionUp();
     void HandleSelectionDown();
@@ -336,6 +359,7 @@ private:
     void UpdateDestinationToCaretByEvent();
     void UpdateCaretOffsetByLastTouchOffset();
     bool UpdateCaretPositionByMouseMovement();
+    bool UpdateCaretPosition();
 
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
@@ -346,6 +370,7 @@ private:
     void UpdateTextFieldManager(const Offset& offset, float height);
     void OnTextInputActionUpdate(TextInputAction value);
 
+    // xts
     std::u16string GetTextForDisplay() const;
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
@@ -394,6 +419,7 @@ private:
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<InputEvent> mouseEvent_;
+    RefPtr<LongPressEvent> longPressEvent_;
     CursorPositionType cursorPositionType_ = CursorPositionType::NORMAL;
 
     // What the keyboard should appears.
@@ -402,17 +428,13 @@ private:
     TextInputAction action_ = TextInputAction::UNSPECIFIED;
     TextDirection textDirection_ = TextDirection::LTR;
 
+    OffsetF parentGlobalOffset_;
     Offset lastTouchOffset_;
     float basicPaddingLeft_ = 0.0f;
     PaddingPropertyF utilPadding_;
 
     float baselineOffset_ = 0.0f;
-    float selectionBaseOffsetX_ = 0.0f;
-    float selectionDestinationOffsetX_ = 0.0f;
-    float caretOffsetX_ = 0.0f;
-    float caretOffsetY_ = 0.0f;
-    float caretHeight_ = 0.0f;
-    bool focusRequested_ = false;
+    RectF caretRect_;
     bool cursorVisible_ = false;
     bool focusEventInitialized_ = false;
     bool preferredLineHeightNeedToUpdate = true;
@@ -431,6 +453,7 @@ private:
     RefPtr<TextEditController> textEditingController_;
     TextEditingValueNG textEditingValue_;
     TextSelector textSelector_;
+    RefPtr<SelectOverlayProxy> selectOverlayProxy_;
     std::vector<RSTypographyProperties::TextBox> textBoxes_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPattern);
 

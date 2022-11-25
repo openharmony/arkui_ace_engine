@@ -220,9 +220,6 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, 
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
-    SizeF maxSize(LessOrEqual(realSize.Width(), 0.0f) ? childLayoutConstraint.maxSize.Width() : realSize.Width(),
-        LessOrEqual(realSize.Height(), 0.0f) ? childLayoutConstraint.maxSize.Height() : realSize.Height());
-    childLayoutConstraint.maxSize = maxSize;
     for (const auto& child : children) {
         if (child->IsOutOfLayout()) {
             outOfLayoutChildren_.emplace_back(child);

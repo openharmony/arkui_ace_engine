@@ -20,7 +20,7 @@
 #include "core/common/clipboard/clipboard_proxy.h"
 namespace OHOS::Ace {
 namespace {
-std::string saveData;
+std::optional<std::string> saveData;
 }
 ClipboardProxy* ClipboardProxy::inst_ = nullptr;
 std::mutex ClipboardProxy::mutex_;
@@ -47,7 +47,14 @@ RefPtr<Clipboard> ClipboardProxy::GetClipboard(const RefPtr<TaskExecutor>& taskE
     return clipboard;
 }
 
-void MockClipBoard ::SetData(const std::string& data, CopyOptions copyOption, bool isDragData)
+void MockClipBoard::HasData(const std::function<void(bool hasData)>& callback)
+{
+    if (callback) {
+        callback(saveData.has_value());
+    }
+}
+
+void MockClipBoard::SetData(const std::string& data, CopyOptions copyOption, bool isDragData)
 {
     saveData = data;
     GTEST_LOG_(INFO) << "SetData has called. data is { " << data << " }";
@@ -56,7 +63,7 @@ void MockClipBoard ::SetData(const std::string& data, CopyOptions copyOption, bo
 void MockClipBoard::GetData(const std::function<void(const std::string&)>& callback, bool syncMode)
 {
     if (callback) {
-        callback(saveData);
+        callback(saveData.value_or(""));
     }
     GTEST_LOG_(INFO) << "GetData has called";
 }
