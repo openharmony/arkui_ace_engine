@@ -30,10 +30,13 @@ public:
     {}
     ~StaticImageObject() override = default;
 
-    void MakeCanvasImage(const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize) override;
+    void MakeCanvasImage(
+        const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
 
-    static RefPtr<StaticImageObject> Create(
-        const ImageSourceInfo& sourceInfo, const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data);
+    static RefPtr<StaticImageObject> Create(const ImageSourceInfo& sourceInfo,
+        const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data);
+
+    ACE_DISALLOW_COPY_AND_MOVE(StaticImageObject);
 };
 
 } // namespace OHOS::Ace::NG

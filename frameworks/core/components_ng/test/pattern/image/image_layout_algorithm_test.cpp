@@ -264,7 +264,7 @@ HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout005, TestSize.Level1)
     layoutConstraintSize1.selfIdealSize.SetWidth(IMAGE_COMPONENTSIZE_WIDTH);
     /**
     //     corresponding ets code:
-    //         Image().Widrh(400).Alt(ALT_SRC_URL)
+    //         Image().Width(400).Alt(ALT_SRC_URL)
     */
     auto imageLayoutAlgorithm1 = AceType::MakeRefPtr<ImageLayoutAlgorithm>(nullptr, altloadingCtx);
     EXPECT_TRUE(imageLayoutAlgorithm1 != nullptr);

@@ -222,7 +222,7 @@ void AceAbility::OnStart(const Want& want)
     // TODO: now choose pipeline using param set as package name, later enable for all.
     auto apiCompatibleVersion = abilityContext->GetApplicationInfo()->apiCompatibleVersion;
     auto apiReleaseType = abilityContext->GetApplicationInfo()->apiReleaseType;
-    auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledFa(
+    auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabled(
         AceApplicationInfo::GetInstance().GetPackageName(), apiCompatibleVersion, apiReleaseType);
     LOGI("AceAbility: apiCompatibleVersion: %{public}d, and apiReleaseType: %{public}s, useNewPipe: %{public}d",
         apiCompatibleVersion, apiReleaseType.c_str(), useNewPipe);
