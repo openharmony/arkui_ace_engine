@@ -369,6 +369,16 @@ public:
     {
         return needMaterial_;
     }
+
+    void SetPanActionStart(const GestureEventFunc& onActionUpdate)
+    {
+        onActionStart_ = onActionUpdate;
+    }
+
+    const GestureEventFunc& GetPanActionStart() const
+    {
+        return onActionStart_;
+    }
 private:
     RefPtr<Decoration> backDecoration_;
     RefPtr<Decoration> frontDecoration_;
@@ -379,6 +389,7 @@ private:
     OnTouchEventCallback onTouchMoveId_;
     OnTouchEventCallback onTouchUpId_;
     OnTouchEventCallback onTouchDownId_;
+    GestureEventFunc onActionStart_;
     RefPtr<Gesture> onClickId_;
     RefPtr<Gesture> onLongPressId_;
     std::array<RefPtr<Gesture>, 3> gestures_;
