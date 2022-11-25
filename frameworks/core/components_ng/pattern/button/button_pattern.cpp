@@ -57,15 +57,17 @@ void ButtonPattern::InitButtonLabel()
     CHECK_NULL_VOID(host);
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto label = layoutProperty->GetLabelValue("");
-    if (label.empty()) {
-        LOGI("No label or label is empty, no need to initialize label.");
+    if (!layoutProperty->GetLabel().has_value()) {
+        LOGI("No label, no need to initialize label.");
         return;
     }
+    
     auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    auto label = layoutProperty->GetLabelValue("");
+    textLayoutProperty->UpdateContent(label);
 
     if (layoutProperty->GetFontSize().has_value()) {
         textLayoutProperty->UpdateFontSize(layoutProperty->GetFontSize().value());

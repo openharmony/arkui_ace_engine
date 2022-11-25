@@ -42,12 +42,6 @@ void ButtonView::CreateWithLabel(const std::string& label)
         textNode->SetInternal();
         SetTextDefaultStyle(textNode, label);
         buttonNode->AddChild(textNode);
-    } else {
-        auto textChild = AceType::DynamicCast<FrameNode>(buttonNode->GetChildren().front());
-        ACE_DCHECK(textChild);
-        auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-        ACE_DCHECK(textLayoutProperty);
-        textLayoutProperty->UpdateContent(label);
     }
     auto buttonAccessibilityProperty = buttonNode->GetAccessibilityProperty<ButtonAccessibilityProperty>();
     CHECK_NULL_VOID(buttonAccessibilityProperty);

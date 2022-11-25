@@ -80,12 +80,22 @@ void SearchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto textLayoutProperty = DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateContent(searchButton->value());
+        textLayoutProperty->UpdateMaxLines(1);
 
         PaddingProperty padding;
         padding.SetEdges(CalcLength(searchTheme->GetTextPadding()));
         textLayoutProperty->UpdatePadding(padding);
-
         auto buttonLayoutConstraint = childLayoutConstraint;
+        auto buttonWidth = idealSize.Width() - searchTheme->GetIconHeight().ConvertToPx() -
+                           searchTheme->GetSearchDividerWidth() - 2 * searchTheme->GetIconWidthOffset().ConvertToPx();
+        auto buttonHeight = idealSize.Height();
+        buttonLayoutConstraint.maxSize = SizeF(buttonWidth, buttonHeight);
+        if (buttonWrapper) {
+            buttonWrapper->Measure(buttonLayoutConstraint);
+        }
+    } else {
+        auto buttonLayoutConstraint = childLayoutConstraint;
+        buttonLayoutConstraint.maxSize = SizeF(0.0f, 0.0f);
         if (buttonWrapper) {
             buttonWrapper->Measure(buttonLayoutConstraint);
         }
