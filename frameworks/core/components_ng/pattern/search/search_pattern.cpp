@@ -74,9 +74,8 @@ void SearchPattern::InitSearchController()
 {
     searchController_->SetCaretPosition([weak = WeakClaim(this)](int32_t caretPosition) {
         auto search = weak.Upgrade();
-        if (search) {
-            search->HandleCaretPosition(caretPosition);
-        }
+        CHECK_NULL_VOID(search);
+        search->HandleCaretPosition(caretPosition);
     });
 }
 

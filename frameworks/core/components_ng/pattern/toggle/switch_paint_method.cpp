@@ -35,9 +35,8 @@ CanvasDrawFunction SwitchPaintMethod::GetContentDrawFunction(PaintWrapper* paint
     auto contentOffset = paintWrapper->GetContentOffset();
     auto paintFunc = [weak = WeakClaim(this), paintProperty, contentSize, contentOffset](RSCanvas& canvas) {
         auto switch_ = weak.Upgrade();
-        if (switch_) {
-            switch_->PaintContent(canvas, paintProperty, contentSize, contentOffset);
-        }
+        CHECK_NULL_VOID(switch_);
+        switch_->PaintContent(canvas, paintProperty, contentSize, contentOffset);
     };
 
     return paintFunc;
