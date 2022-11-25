@@ -31,8 +31,8 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     axis_ = layoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     lanes_ = layoutProperty->GetLanes().value_or(1);
-    minLaneLength_ = layoutProperty->GetLaneMinLengthValue();
-    maxLaneLength_ = layoutProperty->GetLaneMaxLengthValue();
+    minLaneLength_ = layoutProperty->GetLaneMinLength();
+    maxLaneLength_ = layoutProperty->GetLaneMaxLength();
     auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis_);
     auto space = layoutProperty->GetSpace().value_or(Dimension(0));
 
