@@ -77,10 +77,11 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
         }
     });
 
-    // handle touch move
-    titleBox->SetOnTouchMoveId([contextWptr = context_](const TouchEventInfo&) {
+    // handle pan move
+    titleBox->SetPanActionStart([contextWptr = context_](const GestureEvent&) {
         auto context = contextWptr.Upgrade();
         if (context) {
+            LOGI("container window start move.");
             context->GetWindowManager()->WindowStartMove();
         }
     });
