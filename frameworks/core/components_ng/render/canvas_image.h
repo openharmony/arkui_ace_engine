@@ -34,7 +34,7 @@ struct ImagePaintConfig {
     ImageFit imageFit_ = ImageFit::COVER;
     std::shared_ptr<std::vector<float>> colorFilter_ = nullptr;
     bool needFlipCanvasHorizontally_ = false;
-    std::shared_ptr<std::vector<PointF>> borderRadiusXY_ = nullptr;
+    std::shared_ptr<std::array<PointF, 4>> borderRadiusXY_ = nullptr;
     bool isSvg_ = false;
 };
 
@@ -46,7 +46,8 @@ class CanvasImage : public virtual AceType {
 public:
     CanvasImage() = default;
     ~CanvasImage() override = default;
-    virtual void DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) = 0;
+    virtual void DrawToRSCanvas(
+        RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const std::array<PointF, 4>& radiusXY) = 0;
 
     static RefPtr<CanvasImage> Create(void* rawImage);
     static RefPtr<CanvasImage> Create();
