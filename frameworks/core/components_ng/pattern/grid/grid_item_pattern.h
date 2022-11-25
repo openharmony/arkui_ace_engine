@@ -54,6 +54,7 @@ public:
         auto layoutProperty = dirty->GetLayoutProperty();
         CHECK_NULL_RETURN(layoutProperty, false);
         auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
+        CHECK_NULL_RETURN(gridItemLayoutProperty, false);
         mainIndex_ = gridItemLayoutProperty->GetMainIndex().value_or(-1);
         crossIndex_ = gridItemLayoutProperty->GetCrossIndex().value_or(-1);
         return false;

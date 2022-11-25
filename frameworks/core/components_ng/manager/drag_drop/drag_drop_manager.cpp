@@ -273,7 +273,6 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     if (!dragFrameNode) {
         if (preGridTargetFrameNode_) {
             FireOnItemDragEvent(preGridTargetFrameNode_, dragType, itemDragInfo, DragEventType::LEAVE, draggedIndex);
-            preGridTargetFrameNode_ = nullptr;
         }
 
         return;
@@ -294,16 +293,10 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     }
 
     FireOnItemDragEvent(dragFrameNode, dragType, itemDragInfo, DragEventType::ENTER, draggedIndex);
-    preGridTargetFrameNode_ = dragFrameNode;
 }
 
 void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t draggedIndex, DragType dragType)
 {
-    preGridTargetFrameNode_ = nullptr;
-
-    auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, dragType);
-    CHECK_NULL_VOID(dragFrameNode);
-
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 
@@ -311,22 +304,44 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
     itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
     itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
 
-    if (dragType == DragType::GRID) {
-        auto eventHub = dragFrameNode->GetEventHub<GridEventHub>();
-        CHECK_NULL_VOID(eventHub);
-
-        if (!eventHub->HasOnItemDrop()) {
-            return;
-        }
-        auto itemFrameNode = eventHub->FindGridItemByPosition(globalX, globalY);
-        int32_t insertIndex = eventHub->GetGridItemIndex(itemFrameNode);
-        eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, insertIndex, true);
-    } else if (dragType == DragType::LIST) {
+    auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, dragType);
+    if (dragType == DragType::LIST) {
         auto eventHub = dragFrameNode->GetEventHub<ListEventHub>();
         CHECK_NULL_VOID(eventHub);
         int32_t insertIndex = eventHub->GetListItemIndexByPosition(globalX, globalY);
         eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, insertIndex, true);
+        preGridTargetFrameNode_ = nullptr;
+        return;
     }
+
+    // dragType == DragType::GRID
+    if (!dragFrameNode) {
+        // drag on one grid and drop on other area
+        if (preGridTargetFrameNode_) {
+            auto eventHub = preGridTargetFrameNode_->GetEventHub<GridEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, -1, false);
+        }
+    } else {
+        auto eventHub = dragFrameNode->GetEventHub<GridEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto itemFrameNode = eventHub->FindGridItemByPosition(globalX, globalY);
+        int32_t insertIndex = eventHub->GetGridItemIndex(itemFrameNode);
+        // drag and drop on the same grid
+        if (dragFrameNode == preGridTargetFrameNode_) {
+            eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, insertIndex, true);
+        } else {
+            // drag and drop on different grid
+            eventHub->FireOnItemDrop(itemDragInfo, -1, insertIndex, true);
+            if (preGridTargetFrameNode_) {
+                auto preEventHub = preGridTargetFrameNode_->GetEventHub<GridEventHub>();
+                CHECK_NULL_VOID(preEventHub);
+                preEventHub->FireOnItemDrop(itemDragInfo, draggedIndex, -1, true);
+            }
+        }
+    }
+
+    preGridTargetFrameNode_ = nullptr;
 }
 
 void DragDropManager::onItemDragCancel()
