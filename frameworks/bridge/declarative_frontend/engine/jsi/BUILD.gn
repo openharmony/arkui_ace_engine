@@ -114,6 +114,8 @@ template("declarative_js_engine_ark") {
       "modules/jsi_timer_module.cpp",
     ]
 
+    sources += [ "jsi_animator_model_ng_impl.cpp" ]
+
     if (!use_ios) {
       deps = [ "//arkcompiler/ets_runtime:libark_jsruntime" ]
     } else {

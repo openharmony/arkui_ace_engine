@@ -22,6 +22,22 @@
 
 namespace OHOS::Ace::Framework {
 
+enum class AnimationStatus {
+    INITIAL,
+    RUNNING,
+    PAUSED,
+    STOPPED,
+};
+
+enum class EventOperation {
+    NONE,
+    START,
+    PAUSE,
+    REPEAT,
+    CANCEL,
+    FINISH,
+};
+
 using AnimatorEventFunc = std::function<void(const float&)>;
 
 class AnimatorInfo : public AceType {
