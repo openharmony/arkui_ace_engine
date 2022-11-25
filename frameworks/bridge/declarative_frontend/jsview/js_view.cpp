@@ -667,6 +667,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
         "deletedElmtIdsHaveBeenPurged", &JSViewPartialUpdate::JsDeletedElmtIdsHaveBeenPurged);
     JSClass<JSViewPartialUpdate>::Method("elmtIdExists", &JSViewPartialUpdate::JsElementIdExists);
     JSClass<JSViewPartialUpdate>::CustomMethod("isLazyItemRender", &JSViewPartialUpdate::JSGetProxiedItemRenderState);
+    JSClass<JSViewPartialUpdate>::CustomMethod("isFirstRender", &JSViewPartialUpdate::IsFirstRender);
     JSClass<JSViewPartialUpdate>::Inherit<JSViewAbstract>();
     JSClass<JSViewPartialUpdate>::Bind(object, ConstructorCallback, DestructorCallback);
 }
@@ -762,6 +763,11 @@ void JSViewPartialUpdate::JSGetProxiedItemRenderState(const JSCallbackInfo& info
 
     // set boolean return value to JS
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
+void JSViewPartialUpdate::IsFirstRender(const JSCallbackInfo& info)
+{
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(isFirstRender_)));
 }
 
 } // namespace OHOS::Ace::Framework
