@@ -17,9 +17,8 @@
 
 #include "gtest/gtest.h"
 
-#include "base/geometry/dimension.h"
-
 #define private public
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
