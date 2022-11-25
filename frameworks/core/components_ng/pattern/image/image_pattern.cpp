@@ -223,7 +223,10 @@ void ImagePattern::LoadImageDataIfNeed()
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != currentSourceInfo ||
         (currentSourceInfo.IsSvg() && loadingCtx_->GetSvgFillColor() != svgFillColorOpt)) {
         LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
-        loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(currentSourceInfo, std::move(loadNotifier));
+
+        bool syncLoad = imageLayoutProperty->GetSyncModeValue(false);
+        loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(currentSourceInfo, std::move(loadNotifier), syncLoad);
+
         loadingCtx_->SetSvgFillColor(svgFillColorOpt);
         loadingCtx_->LoadImageData();
     }

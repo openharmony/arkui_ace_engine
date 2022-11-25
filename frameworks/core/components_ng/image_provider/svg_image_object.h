@@ -30,15 +30,18 @@ public:
     {}
     ~SvgImageObject() override = default;
 
-    static RefPtr<SvgImageObject> Create(const ImageSourceInfo& sourceInfo, const RefPtr<ImageEncodedInfo>& encodedInfo,
-        const RefPtr<ImageData>& data, const std::optional<Color>& svgFillColor, const LoadCallbacks& loadCallbacks);
+    static RefPtr<SvgImageObject> Create(
+        const ImageSourceInfo& sourceInfo, const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data);
     const RefPtr<SvgDomBase>& GetSVGDom() const;
 
-    void MakeCanvasImage(const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize) override;
+    void MakeCanvasImage(
+        const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
     bool MakeSvgDom(const std::optional<Color>& svgFillColor);
 
 private:
     RefPtr<SvgDomBase> svgDomBase_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(SvgImageObject);
 };
 
 } // namespace OHOS::Ace::NG

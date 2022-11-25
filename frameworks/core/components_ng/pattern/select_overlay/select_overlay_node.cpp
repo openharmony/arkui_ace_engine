@@ -74,7 +74,7 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
         { std::nullopt, CalcLength(textOverlayTheme->GetMenuButtonHeight()) });
     button->GetRenderContext()->UpdateBackgroundColor(textOverlayTheme->GetMenuBackgroundColor());
 
-    button->GetOrCreateGestureEventHub()->SetClickEvent([callback, overlayId](GestureEvent& /*info*/) {
+    button->GetOrCreateGestureEventHub()->SetUserOnClick([callback, overlayId](GestureEvent& /*info*/) {
         if (callback) {
             callback();
         }

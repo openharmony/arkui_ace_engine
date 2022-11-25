@@ -51,7 +51,7 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // Calculate grid cell size.
     gridCellSize_ = firstChildSize;
     auto cellLength = gridLayoutProperty->GetCellLength();
-    if (cellLength.has_value()) {
+    if (cellLength.has_value() && cellLength > 0) {
         auto cellLengthInPx = static_cast<float>(Dimension(cellLength.value(), DimensionUnit::VP).ConvertToPx());
         if (axis == Axis::HORIZONTAL) {
             gridCellSize_.SetHeight(cellLengthInPx);

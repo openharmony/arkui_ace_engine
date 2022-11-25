@@ -1532,7 +1532,7 @@ void ViewAbstractModelImpl::BindContextMenu(ResponseType type, std::function<voi
 #endif
             }
         });
-    } else if (type == ResponseType::LONGPRESS) {
+    } else if (type == ResponseType::LONG_PRESS) {
         auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
         RefPtr<Gesture> longGesture = AceType::MakeRefPtr<LongPressGesture>(
             DEFAULT_LONG_PRESS_FINGER, false, DEFAULT_LONG_PRESS_DURATION, false, true);
