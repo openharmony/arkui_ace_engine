@@ -135,6 +135,10 @@ public:
 
     static void MakeSvgCanvasImage(const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks);
 
+    // Query [CanvasImage] from cache, if hit, notify load success immediately and returns true
+    static bool QueryCanvasImageFromCache(
+        const WeakPtr<ImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget);
+
 protected:
     // helper function to post task to [TaskType] thread
     static void WrapTaskAndPostTo(
@@ -172,9 +176,6 @@ protected:
 
     // Query imageObj from cache, if hit, notify dataReady and returns true
     static bool QueryImageObjectFromCache(const LoadCallbacks& loadCallbacks, const ImageSourceInfo& sourceInfo);
-    // Query [CanvasImage] from cache, if hit, notify load success immediately and returns true
-    static bool QueryCanvasImageFromCache(
-        const WeakPtr<ImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget);
     static void CacheCanvasImage(const RefPtr<CanvasImage>& canvasImage, const std::string& key);
     static std::string GenerateCacheKey(const ImageSourceInfo& srcInfo, const NG::SizeF& targetImageSize);
 
