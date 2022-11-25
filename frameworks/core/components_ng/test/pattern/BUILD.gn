@@ -33,6 +33,7 @@ group("pattern_unittest") {
     "grid_container:grid_container_pattern_test_ng",
     "grid_row:grid_row_pattern_test_ng",
     "image:image_pattern_test",
+    "image_animator:image_animator_pattern_test",
     "linear_layout:linear_layout_creator_test_ng",
     "list:list_pattern_test_ng",
     "marquee:marquee_pattern_unit_test",
