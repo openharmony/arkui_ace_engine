@@ -127,6 +127,7 @@ public:
 protected:
     RefPtr<ViewFunctions> jsViewFunction_;
     bool needsUpdate_ = false;
+    bool isAboutToAppearProcessed_ = false;
 
     WeakPtr<AceType> viewNode_;
     // view id for custom view itself
