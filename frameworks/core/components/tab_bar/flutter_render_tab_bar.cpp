@@ -15,6 +15,7 @@
 
 #include "core/components/tab_bar/flutter_render_tab_bar.h"
 
+#include "core/components/flex/render_flex.h"
 #include "core/pipeline/base/flutter_render_context.h"
 
 namespace OHOS::Ace {
@@ -32,8 +33,36 @@ RenderLayer FlutterRenderTabBar::GetRenderLayer()
 
 void FlutterRenderTabBar::Paint(RenderContext& context, const Offset& offset)
 {
-    layer_->SetClip(0.0, GetLayoutSize().Width(), 0.0, GetLayoutSize().Height(), Clip::HARD_EDGE);
+    auto tabsRenderNode = FindTabsNode();
+    CHECK_NULL_VOID(tabsRenderNode);
+    auto tabsLayoutSize = tabsRenderNode->GetLayoutSize();
+    double left = 0.0;
+    double top = 0.0;
+    if (tabsLayoutSize.Width() < GetLayoutSize().Width()) {
+        left = (GetLayoutSize().Width() - tabsLayoutSize.Width()) / 2;
+    }
+    if (GetLayoutSize().Height() > tabsLayoutSize.Height()) {
+        top = (GetLayoutSize().Height() - tabsLayoutSize.Height()) / 2;
+    }
+    layer_->SetClip(left, left + tabsLayoutSize.Width(), top, top + tabsLayoutSize.Height(), Clip::HARD_EDGE);
     RenderTabBar::Paint(context, offset);
+}
+
+RefPtr<RenderNode> FlutterRenderTabBar::FindTabsNode()
+{
+    int32_t count = 0;
+    RefPtr<RenderNode> parent = GetParent().Upgrade();
+    while (parent) {
+        if (count > 3) {
+            return nullptr;
+        }
+        if (AceType::InstanceOf<RenderFlex>(parent)) {
+            return AceType::DynamicCast<RenderNode>(parent);
+        }
+        count++;
+        parent = parent->GetParent().Upgrade();
+    }
+    return nullptr;
 }
 
 } // namespace OHOS::Ace
