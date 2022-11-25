@@ -170,6 +170,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         MinusPaddingToSize(margin, layoutConstraint_->minSize);
         MinusPaddingToSize(margin, layoutConstraint_->percentReference);
         MinusPaddingToSize(margin, layoutConstraint_->selfIdealSize);
+        MinusPaddingToSize(margin, layoutConstraint_->parentIdealSize);
     }
     if (calcLayoutConstraint_) {
         if (calcLayoutConstraint_->maxSize.has_value()) {
@@ -307,7 +308,7 @@ bool LayoutProperty::UpdateGridOffset(const RefPtr<FrameNode>& host)
 void LayoutProperty::CheckSelfIdealSize()
 {
     if (measureType_ == MeasureType::MATCH_PARENT) {
-        layoutConstraint_->UpdateSelfMarginSizeWithCheck(layoutConstraint_->parentIdealSize);
+        layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(layoutConstraint_->parentIdealSize);
     }
     if (!calcLayoutConstraint_) {
         return;
