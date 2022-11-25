@@ -53,7 +53,9 @@ RefPtr<Component> NavigationBarBuilder::BuildMiniLayer()
                 LOGW("context is empty");
                 return;
             }
-            context->CallRouterBackToPopPage();
+            if (!context->CallRouterBackToPopPage()) {
+                context->Finish(false);
+            }
         });
         backButton->SetClickedEventId(clickEventId);
         container->AppendChild(GenerateAccessibilityComposed(StringUtils::StringToInt(id_), "backButton", backButton));
