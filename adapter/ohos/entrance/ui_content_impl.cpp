@@ -221,7 +221,7 @@ public:
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
             [] {
-                SubwindowManager::GetInstance()->CloseMenu();
+                SubwindowManager::GetInstance()->ClearMenu();
                 SubwindowManager::GetInstance()->HideMenuNG();
                 SubwindowManager::GetInstance()->HidePopupNG();
             },
