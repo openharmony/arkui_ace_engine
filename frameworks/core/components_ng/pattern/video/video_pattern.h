@@ -143,8 +143,10 @@ private:
     static RefPtr<FrameNode> CreateSVG();
     static RefPtr<FrameNode> CreateText(uint32_t time);
     RefPtr<FrameNode> CreateSlider();
-    void ChangePlayButtonTag(bool playing, RefPtr<FrameNode>& playBtn);
+    void ChangePlayButtonTag();
+    void ChangePlayButtonTag(RefPtr<FrameNode>& playBtn);
     void ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode>& fullScreenBtn);
+    void ResetStatus();
 
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
@@ -155,7 +157,6 @@ private:
     GestureEventFunc pauseBtnCallBack_;
 
     bool isStop_ = false;
-    bool hasInit_ = false;
     std::string src_;
 
     uint32_t duration_ = 0;
@@ -165,6 +166,8 @@ private:
     bool autoPlay_ = false;
     bool loop_ = false;
     bool isFullScreen_ = false;
+    bool isInitialState_ = true; // Initial state is true. Play or seek will set it to false.
+    bool isPlaying_ = false;
     double progressRate_ = 1.0;
 
     ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);
