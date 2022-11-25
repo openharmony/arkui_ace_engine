@@ -123,9 +123,18 @@ void JSPatternLock::SetSelectedColor(const JSCallbackInfo& info)
 
     PatternLockModel::GetInstance()->SetSelectedColor(selectedColor);
 }
-void JSPatternLock::SetAutoReset(bool isAutoReset)
+void JSPatternLock::SetAutoReset(const JSCallbackInfo& info)
 {
-    PatternLockModel::GetInstance()->SetAutoReset(isAutoReset);
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    if (!info[0]->IsBoolean()) {
+        LOGE("arg is not bool.");
+        PatternLockModel::GetInstance()->SetAutoReset(true);
+        return;
+    }
+    PatternLockModel::GetInstance()->SetAutoReset(info[0]->ToBoolean());
 }
 
 void JSPatternLock::SetPathColor(const JSCallbackInfo& info)
