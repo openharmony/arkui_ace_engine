@@ -24,8 +24,8 @@ group("pattern_unittest") {
     "common_view:common_view_test_ng",
     "custom_paint:custom_paint_pattern_test_ng",
     "data_panel:data_panel_pattern_test_ng",
-    "dragBar:dragBar_pattern_test_ng",
     "divider:divider_pattern_test_ng",
+    "dragBar:dragBar_pattern_test_ng",
     "flex:flex_pattern_unit_test",
     "gauge:gauge_pattern_test_ng",
     "gesture:gesture_pattern_test_ng",
@@ -55,6 +55,7 @@ group("pattern_unittest") {
     "texttimer:text_timer_pattern_unit_test",
     "toggle:toggle_pattern_test_ng",
     "video:video_pattern_test_ng",
+    "web:web_pattern_unit_test",
     "xcomponent:xcomponent_pattern_test_ng",
 
     # "stepper:stepper_pattern_test_ng",

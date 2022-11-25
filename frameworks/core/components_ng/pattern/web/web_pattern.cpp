@@ -129,9 +129,8 @@ void WebPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
 
     auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleMouseEvent(info);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleMouseEvent(info);
     };
 
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
@@ -139,9 +138,8 @@ void WebPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
 
     auto axisTask = [weak = WeakClaim(this)](AxisInfo& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleAxisEvent(info);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleAxisEvent(info);
     };
     axisEvent_ = MakeRefPtr<InputEvent>(std::move(axisTask));
     inputHub->AddOnAxisEvent(axisEvent_);
@@ -430,17 +428,15 @@ void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto focusTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleFocusEvent();
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusEvent();
     };
     focusHub->SetOnFocusInternal(focusTask);
 
     auto blurTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleBlurEvent();
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
     };
     focusHub->SetOnBlurInternal(blurTask);
 
@@ -774,7 +770,6 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
     if (isDragging_) {
         return;
     }
-
     CHECK_NULL_VOID(delegate_);
     std::list<TouchInfo> touchInfos;
     if (!ParseTouchInfo(info, touchInfos)) {
@@ -929,40 +924,36 @@ void WebPattern::RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
     int32_t flags = params->GetEditStateFlags();
     if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) {
         selectInfo.menuCallback.onCut = [weak = AceType::WeakClaim(this), callback]() {
-            if (callback) {
-                callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT,
-                    OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
-            }
+            CHECK_NULL_VOID(callback);
+            callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT,
+                OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
         };
     } else {
         selectInfo.menuInfo.showCut = false;
     }
     if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY) {
         selectInfo.menuCallback.onCopy = [weak = AceType::WeakClaim(this), callback]() {
-            if (callback) {
-                callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY,
-                    OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
-            }
+            CHECK_NULL_VOID(callback);
+            callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY,
+                OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
         };
     } else {
         selectInfo.menuInfo.showCopy = false;
     }
     if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_PASTE) {
         selectInfo.menuCallback.onPaste = [weak = AceType::WeakClaim(this), callback]() {
-            if (callback) {
-                callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_PASTE,
-                    OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
-            }
+            CHECK_NULL_VOID(callback);
+            callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_PASTE,
+                OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
         };
     } else {
         selectInfo.menuInfo.showPaste = false;
     }
     if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_SELECT_ALL) {
         selectInfo.menuCallback.onSelectAll = [weak = AceType::WeakClaim(this), callback]() {
-            if (callback) {
-                callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_SELECT_ALL,
-                    OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
-            }
+            CHECK_NULL_VOID(callback);
+            callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_SELECT_ALL,
+                OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
         };
     } else {
         selectInfo.menuInfo.showCopyAll = false;
