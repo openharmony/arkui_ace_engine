@@ -122,9 +122,6 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     std::string hapPath = resourceInfo.GetHapPath();
     auto resConfig = ConvertConfigToGlobal(resourceInfo.GetResourceConfiguration());
     std::shared_ptr<Global::Resource::ResourceManager> newResMgr(Global::Resource::CreateResourceManager());
-    if (!newResMgr) {
-        LOGW("create resource manager from Global::Resource::CreateResourceManager() failed!");
-    }
     std::string resIndexPath = hapPath.empty() ? (resPath + "resources.index") : hapPath;
     auto resRet = newResMgr->AddResource(resIndexPath.c_str());
     auto configRet = newResMgr->UpdateResConfig(*resConfig);
@@ -145,7 +142,9 @@ void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
         "colorMode=%{publid}d, inputDevice=%{public}d",
         resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType(),
         resConfig->GetColorMode(), resConfig->GetInputDevice());
-    sysResourceManager_->UpdateResConfig(*resConfig);
+    if (sysResourceManager_) {
+        sysResourceManager_->UpdateResConfig(*resConfig);
+    }
     for (auto& resMgr : resourceManagers_) {
         resMgr.second->UpdateResConfig(*resConfig);
     }
@@ -156,13 +155,13 @@ RefPtr<ThemeStyle> ResourceAdapterImpl::GetTheme(int32_t themeId)
 {
     CheckThemeId(themeId);
     auto theme = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
-    auto ret = resourceManager_->GetThemeById(themeId, theme->rawAttrs_);
-    std::string OHFlag = "ohos_"; // fit with resource/base/theme.json and pattern.json
+    constexpr char OHFlag[] = "ohos_"; // fit with resource/base/theme.json and pattern.json
     if (resourceManager_) {
+        auto ret = resourceManager_->GetThemeById(themeId, theme->rawAttrs_);
         for (size_t i = 0; i < sizeof(PATTERN_MAP) / sizeof(PATTERN_MAP[0]); i++) {
             ResourceThemeStyle::RawAttrMap attrMap;
             std::string patternTag = PATTERN_MAP[i];
-            std::string patternName = OHFlag + PATTERN_MAP[i];
+            std::string patternName = std::string(OHFlag) + PATTERN_MAP[i];
             ret = resourceManager_->GetPatternByName(patternName.c_str(), attrMap);
             LOGD("theme pattern[%{public}s, %{public}s], attr size=%{public}zu",
                 patternTag.c_str(), patternName.c_str(), attrMap.size());
@@ -171,9 +170,10 @@ RefPtr<ThemeStyle> ResourceAdapterImpl::GetTheme(int32_t themeId)
             }
             theme->patternAttrs_[patternTag] = attrMap;
         }
+        LOGI("themeId=%{public}d, ret=%{public}d, attr size=%{public}zu, pattern size=%{public}zu",
+            themeId, ret, theme->rawAttrs_.size(), theme->patternAttrs_.size());
     }
-    LOGI("themeId=%{public}d, ret=%{public}d, attr size=%{public}zu, pattern size=%{public}zu",
-        themeId, ret, theme->rawAttrs_.size(), theme->patternAttrs_.size());
+
     if (theme->patternAttrs_.empty() && theme->rawAttrs_.empty()) {
         LOGW("theme resource get failed, use default theme config.");
         return nullptr;
@@ -385,7 +385,9 @@ void ResourceAdapterImpl::UpdateResourceManager(const std::string& bundleName, c
         CHECK_NULL_VOID(context);
         resourceManagers_[{ bundleName, moduleName }] = context->GetResourceManager();
         resourceManager_ = context->GetResourceManager();
-        resourceManager_->UpdateResConfig(*resConfig_);
+        if (resourceManager_) {
+            resourceManager_->UpdateResConfig(*resConfig_);
+        }
     }
 }
 
