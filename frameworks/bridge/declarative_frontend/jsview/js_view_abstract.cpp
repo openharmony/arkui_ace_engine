@@ -2275,7 +2275,7 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& re
     }
     if (jsValue->IsString()) {
         result = StringUtils::StringToDimensionWithUnit(jsValue->ToString(), defaultUnit);
-        return result.IsNonNegative();
+        return true;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
@@ -2293,7 +2293,7 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& re
         type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
         auto value = themeConstants->GetString(resId->ToNumber<uint32_t>());
         result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
-        return result.IsNonNegative();
+        return true;
     }
     result = themeConstants->GetDimension(resId->ToNumber<uint32_t>());
     return true;
@@ -4043,7 +4043,7 @@ bool JSViewAbstract::ParseJsonDimension(
     }
     if (jsonValue->IsString()) {
         result = StringUtils::StringToDimensionWithUnit(jsonValue->GetString(), defaultUnit);
-        return result.IsNonNegative();
+        return true;
     }
     auto resVal = JsonUtil::ParseJsonString(jsonValue->ToString());
     auto resId = resVal->GetValue("id");
