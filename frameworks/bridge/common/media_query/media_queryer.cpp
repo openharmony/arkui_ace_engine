@@ -19,6 +19,7 @@
 #include <regex>
 
 #include "base/log/log.h"
+#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "frameworks/bridge/common/media_query/media_query_info.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -44,9 +45,7 @@ public:
 
     bool ParseCondition(std::smatch& matchResults, const MediaFeature& mediaFeature, MediaError& failReason) const
     {
-        if (!parser_) {
-            return false;
-        }
+        CHECK_NULL_RETURN(parser_, false);
         if (matchResults.size() != matchResultSize_) {
             failReason = MediaError::SYNTAX;
             return false;

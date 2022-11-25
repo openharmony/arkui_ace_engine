@@ -98,13 +98,9 @@ void UpdateChildLayoutConstrainByFlexBasis(
     FlexDirection direction, const RefPtr<LayoutWrapper>& child, LayoutConstraintF& layoutConstraint)
 {
     const auto& flexItemProperty = child->GetLayoutProperty()->GetFlexItemProperty();
-    if (!flexItemProperty) {
-        return;
-    }
+    CHECK_NULL_VOID(flexItemProperty);
     const auto& flexBasis = flexItemProperty->GetFlexBasis();
-    if (!flexBasis) {
-        return;
-    }
+    CHECK_NULL_VOID(flexBasis);
     if (flexBasis->Unit() == DimensionUnit::AUTO) {
         return;
     }
@@ -120,25 +116,19 @@ void UpdateChildLayoutConstrainByFlexBasis(
 float FlexLayoutAlgorithm::GetChildMainAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
     float size = 0.0f;
-    if (!layoutWrapper) {
-        return size;
-    }
+    CHECK_NULL_RETURN(layoutWrapper, size);
     return GetMainAxisSizeHelper(layoutWrapper->GetGeometryNode()->GetMarginFrameSize(), direction_);
 }
 
 float FlexLayoutAlgorithm::GetChildCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
-    if (!layoutWrapper) {
-        return 0.0f;
-    }
+    CHECK_NULL_RETURN(layoutWrapper, 0.0f);
     return GetCrossAxisSizeHelper(layoutWrapper->GetGeometryNode()->GetMarginFrameSize(), direction_);
 }
 
 float FlexLayoutAlgorithm::GetSelfCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
-    if (!layoutWrapper) {
-        return 0.0f;
-    }
+    CHECK_NULL_RETURN(layoutWrapper, 0.0f);
     return GetCrossAxisSizeHelper(layoutWrapper->GetGeometryNode()->GetFrameSize(), direction_);
 }
 
