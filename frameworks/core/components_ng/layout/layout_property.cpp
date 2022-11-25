@@ -254,9 +254,7 @@ void LayoutProperty::CheckAspectRatio()
 
 void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)
 {
-    if (!gridProperty_) {
-        return;
-    }
+    CHECK_NULL_VOID(gridProperty_);
     auto parent = host->GetParent();
     while (parent) {
         if (parent->GetTag() == V2::GRIDCONTAINER_ETS_TAG) {
@@ -272,7 +270,8 @@ void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)
 
 void LayoutProperty::UpdateGridOffset(LayoutWrapper* layoutWrapper)
 {
-    if (!gridProperty_ || !gridProperty_->HasContainer()) {
+    CHECK_NULL_VOID(gridProperty_);
+    if (!gridProperty_->HasContainer()) {
         return;
     }
 
@@ -313,10 +312,7 @@ void LayoutProperty::CheckSelfIdealSize()
 
 LayoutConstraintF LayoutProperty::CreateChildConstraint() const
 {
-    if (!layoutConstraint_) {
-        LOGE("fail to create child constraint due to layoutConstraint_ is null");
-        return {};
-    }
+    CHECK_NULL_RETURN(layoutConstraint_, {});
     auto layoutConstraint = contentConstraint_.value();
     layoutConstraint.parentIdealSize = layoutConstraint.selfIdealSize;
     // update max size when ideal size has value.
@@ -336,10 +332,7 @@ LayoutConstraintF LayoutProperty::CreateChildConstraint() const
 
 void LayoutProperty::UpdateContentConstraint()
 {
-    if (!layoutConstraint_) {
-        LOGE("fail to get content constraint due to layoutConstraint_ is null");
-        return;
-    }
+    CHECK_NULL_VOID(layoutConstraint_);
     contentConstraint_ = layoutConstraint_.value();
     // update percent reference when parent has size.
     if (contentConstraint_->parentIdealSize.Width()) {

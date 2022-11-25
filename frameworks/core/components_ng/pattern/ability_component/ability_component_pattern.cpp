@@ -28,9 +28,8 @@ void AbilityComponentPattern::OnModifyDone()
     CHECK_NULL_VOID(pipelineContext);
     int32_t windowId = pipelineContext->GetWindowId();
     adapter_ = WindowExtensionConnectionProxyNG::CreateAdapter();
-    if (adapter_) {
-        adapter_->ConnectExtension(GetHost(), windowId);
-    }
+    CHECK_NULL_VOID(adapter_);
+    adapter_->ConnectExtension(GetHost(), windowId);
     LOGI("connect to windows extension begin %{public}s", GetHost()->GetTag().c_str());
 }
 
@@ -74,9 +73,8 @@ void AbilityComponentPattern::UpdateWindowRect()
     LOGI("ConnectExtension: %{public}f %{public}f %{public}f %{public}f", offset.GetX(), offset.GetY(), size.Width(),
         size.Height());
     rect.SetRect(offset.GetX() + rect.Left(), offset.GetY() + rect.Top(), size.Width(), size.Height());
-    if (adapter_) {
-        adapter_->UpdateRect(rect);
-    }
+    CHECK_NULL_VOID(adapter_);
+    adapter_->UpdateRect(rect);
 }
 
 } // namespace OHOS::Ace::NG

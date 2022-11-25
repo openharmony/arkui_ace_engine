@@ -55,10 +55,7 @@ public:
         auto task = [weak = originNode_, rsNode = rsSurfaceNode, instanceId = instanceId_]() {
             ContainerScope scope(instanceId);
             auto node = weak.Upgrade();
-            if (!node) {
-                LOGI("node is empty");
-                return;
-            }
+            CHECK_NULL_VOID(node);
             UpdateFrameNodeTree(node, rsNode);
             auto pattern = AceType::DynamicCast<NG::AbilityComponentPattern>(node->GetPattern());
             if (pattern) {
@@ -74,9 +71,7 @@ public:
         auto task = [weak = originNode_, rsNode = rsOriginNode_, instanceId = instanceId_]() {
             ContainerScope scope(instanceId);
             auto node = weak.Upgrade();
-            if (!node) {
-                return;
-            }
+            CHECK_NULL_VOID(node);
             UpdateFrameNodeTree(node, rsNode);
             auto pattern = AceType::DynamicCast<NG::AbilityComponentPattern>(node->GetPattern());
             if (pattern) {
