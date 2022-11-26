@@ -25,4 +25,12 @@ int32_t GridEventHub::GetGridItemIndex(const RefPtr<FrameNode>& /* frameNode */)
 {
     return 0;
 }
+
+void GridEventHub::FireOnItemDragEnter(const ItemDragInfo& /* dragInfo */) {}
+
+void GridEventHub::FireOnItemDragLeave(const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */) {}
+
+void GridEventHub::FireOnItemDrop(
+    const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */, int32_t /* insertIndex */, bool /* isSuccess */)
+{}
 } // namespace OHOS::Ace::NG
