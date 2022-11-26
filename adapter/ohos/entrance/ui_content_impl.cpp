@@ -216,11 +216,13 @@ public:
         }
 
         ContainerScope scope(instanceId_);
-        taskExecutor->PostTask([] {
-            SubwindowManager::GetInstance()->CloseMenu();
-            SubwindowManager::GetInstance()->HideMenuNG();
-            SubwindowManager::GetInstance()->HidePopupNG();
-        }, TaskExecutor::TaskType::UI);
+        taskExecutor->PostTask(
+            [] {
+                SubwindowManager::GetInstance()->ClearMenu();
+                SubwindowManager::GetInstance()->HideMenuNG();
+                SubwindowManager::GetInstance()->HidePopupNG();
+            },
+            TaskExecutor::TaskType::UI);
     }
 
 private:
