@@ -28,15 +28,15 @@ constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 const std::string MEDIA_FEATURE_INFORMATION = "{\"width\":0,"
                                               "\"height\":0,"
                                               "\"aspect-ratio\":1,"
-                                              "\"round-screen\":false,"
-                                              "\"device-width\":0,"
-                                              "\"device-height\":0,"
+                                              "\"round-screen\":true,"
+                                              "\"device-width\":100,"
+                                              "\"device-height\":100,"
                                               "\"resolution\":1,"
                                               "\"orientation\":\"portrait\","
                                               "\"device-type\":\"phone\","
                                               "\"dark-mode\":false,"
-                                              "\"api-version\":0,"
-                                              "\"device-brand\":\"N/A\"}";
+                                              "\"api-version\":10,"
+                                              "\"device-brand\":\"test_brand\"}";
 
 const std::string PHONE_MEDIA_INFO = "{\"width\":0,"
                                      "\"height\":0,"
@@ -175,11 +175,19 @@ HWTEST_F(MediaQueryTest, MediaQueryTest002, TestSize.Level1)
      */
     OHOS::Ace::Framework::MediaFeature mediaFeature = JsonUtil::Create(true);
     mediaFeature->Put("device-type:phone", true);
+
+    SystemProperties systemProperties;
+    systemProperties.InitDeviceInfo(100, 100, 0, 1.0, true);
+    systemProperties.paramDeviceType_ = "phone";
+    systemProperties.apiVersion_ = "10";
+    systemProperties.brand_ = "test_brand";
+    systemProperties.SetDeviceType(DeviceType::PHONE);
+
     const std::string nullCondition = "";
     const std::string conditions = "{\"device-type:phone\":true}";
     MediaQueryer mediaQueryer;
     MediaQueryer::QueryHistory query = { conditions, true };
-    mediaQueryer.queryHistories.insert( { conditions, query } );
+    mediaQueryer.queryHistories.insert({ conditions, query });
     bool result = mediaQueryer.MatchCondition(nullCondition, mediaFeature);
     ASSERT_EQ(result, false);
     auto mediaFeatureStr = mediaQueryer.GetMediaFeature()->ToString();
@@ -216,6 +224,9 @@ HWTEST_F(MediaQueryTest, MediaQueryTest003, TestSize.Level1)
     SystemProperties systemProperties;
     systemProperties.InitDeviceInfo(100, 100, 0, 1.0, true);
     MediaQueryInfo mediaQueryInfo;
+    systemProperties.paramDeviceType_ = "phone";
+    systemProperties.apiVersion_ = "9";
+    systemProperties.SetDeviceType(DeviceType::PHONE);
     auto mediaQueryString = mediaQueryInfo.GetMediaQueryInfo();
     ASSERT_EQ(mediaQueryString, PHONE_MEDIA_INFO);
 
