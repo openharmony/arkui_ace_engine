@@ -78,7 +78,6 @@ void RadioPattern::OnModifyDone()
         layoutProperty->UpdateMargin(margin);
     }
     InitClickEvent();
-    InitTouchEvent();
     InitMouseEvent();
 }
 
