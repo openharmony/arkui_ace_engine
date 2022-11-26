@@ -311,10 +311,23 @@ void RadioPattern::PlayAnimation(bool isOn)
     CHECK_NULL_VOID(host);
     if (!onController_) {
         onController_ = AceType::MakeRefPtr<Animator>(host->GetContext());
+        onController_->AddStopListener(Animator::StatusCallback([weak = AceType::WeakClaim(this)]() {
+            auto radio = weak.Upgrade();
+            if (radio) {
+                radio->UpdateUIStatus(true);
+            }
+        }));
     }
     if (!offController_) {
         offController_ = AceType::MakeRefPtr<Animator>(host->GetContext());
+        offController_->AddStopListener(Animator::StatusCallback([weak = AceType::WeakClaim(this)]() {
+            auto radio = weak.Upgrade();
+            if (radio) {
+                radio->UpdateUIStatus(false);
+            }
+        }));
     }
+    StopTranslateAnimation();
     RefPtr<KeyframeAnimation<float>> shrinkEngine = AceType::MakeRefPtr<KeyframeAnimation<float>>();
     RefPtr<KeyframeAnimation<float>> selectEngine = AceType::MakeRefPtr<KeyframeAnimation<float>>();
     onController_->ClearInterpolators();
@@ -354,16 +367,20 @@ void RadioPattern::PlayAnimation(bool isOn)
         onController_->SetDuration(DEFAULT_RADIO_ANIMATION_DURATION);
         onController_->Play();
     } else {
-        offController_->AddStopListener(Animator::StatusCallback([weak = AceType::WeakClaim(this)]() {
-            auto radio = weak.Upgrade();
-            if (radio) {
-                radio->UpdateUIStatus(false);
-            }
-        }));
         offController_->AddInterpolator(shrinkEngine);
         offController_->AddInterpolator(selectEngine);
         offController_->SetDuration(DEFAULT_RADIO_ANIMATION_DURATION);
         offController_->Play();
+    }
+}
+
+void RadioPattern::StopTranslateAnimation()
+{
+    if (onController_ && !onController_->IsStopped()) {
+        onController_->Stop();
+    }
+    if (offController_ && !offController_->IsStopped()) {
+        offController_->Stop();
     }
 }
 
