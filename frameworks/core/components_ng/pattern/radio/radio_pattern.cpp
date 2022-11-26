@@ -236,17 +236,23 @@ void RadioPattern::UpdateState()
     bool check = false;
     if (paintProperty->HasRadioCheck()) {
         check = paintProperty->GetRadioCheckValue();
+        /*
+         * Do not set isFirstCreated_ to false if the radio is set to true at creation time. The isFirstCreated_ is set
+         * to false in UpdateGroupCheckStatus because isFirstCreated_ is also required to determine if an onChange event
+         * needs to be triggered.
+         */
         if (check) {
             UpdateUIStatus(true);
             PlayAnimation(true);
         } else {
+            // If the radio is set to false, set isFirstCreated_ to false.
             isFirstCreated_ = false;
         }
     } else {
         paintProperty->UpdateRadioCheck(false);
+        // If the radio check is not set, set isFirstCreated_ to false.
         isFirstCreated_ = false;
     }
-
     if (preCheck_ != check) {
         UpdateGroupCheckStatus(host, check);
     }
@@ -287,6 +293,7 @@ void RadioPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bo
     if (!isFirstCreated_) {
         radioEventHub->UpdateChangeEvent(check);
     }
+    // If the radio is set to true at creation time, set isFirstCreated_ to false here.
     isFirstCreated_ = false;
     if (check) {
         pageEventHub->UpdateRadioGroupValue(radioEventHub->GetGroup(), frameNode->GetId());
@@ -294,6 +301,7 @@ void RadioPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bo
         auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
         CHECK_NULL_VOID(radioPaintProperty);
         radioPaintProperty->UpdateRadioCheck(check);
+        PlayAnimation(false);
     }
 }
 
