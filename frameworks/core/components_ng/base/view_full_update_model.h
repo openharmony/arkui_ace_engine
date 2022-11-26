@@ -30,6 +30,7 @@ struct NodeInfo {
     std::string viewId;
     std::function<void()> appearFunc;
     std::function<RefPtr<AceType>()> renderFunc;
+    std::function<void()> removeFunc;
     std::function<void(const RefPtr<AceType>&)> updateNodeFunc;
     std::function<void()> pageTransitionFunc;
     bool isStatic = false;
