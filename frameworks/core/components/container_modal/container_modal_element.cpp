@@ -319,7 +319,9 @@ void ContainerModalElement::Update()
         if (containerElement->CanHideFloatingTitle()) {
             containerElement->controller_->AddStopListener([weak] {
                 auto container = weak.Upgrade();
-                container->floatingTitleDisplay_->UpdateVisibleType(VisibleType::GONE);
+                if (container && container->floatingTitleDisplay_) {
+                    container->floatingTitleDisplay_->UpdateVisibleType(VisibleType::GONE);
+                }
             });
             containerElement->controller_->Backward();
         }
@@ -366,7 +368,9 @@ void ContainerModalElement::Update()
             containerElement->CanHideFloatingTitle()) {
             containerElement->controller_->AddStopListener([weak] {
                 auto container = weak.Upgrade();
-                container->floatingTitleDisplay_->UpdateVisibleType(VisibleType::GONE);
+                if (container && container->floatingTitleDisplay_) {
+                    container->floatingTitleDisplay_->UpdateVisibleType(VisibleType::GONE);
+                }
             });
             containerElement->controller_->Backward();
         }
