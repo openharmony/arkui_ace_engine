@@ -32,6 +32,7 @@ struct ParagraphStyle {
     uint32_t maxLines = 1;
     std::string fontLocale;
     WordBreak wordBreak = WordBreak::NORMAL;
+    TextOverflow textOverflow = TextOverflow::CLIP;
 };
 
 // Paragraph is interface for drawing text and text paragraph.
