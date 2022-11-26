@@ -18,6 +18,7 @@
 
 #include <set>
 #include <string>
+#include "application_info.h"
 
 namespace OHOS::Ace {
 enum class AceNewPipeEnabledType {
@@ -31,8 +32,11 @@ public:
     ~AceNewPipeJudgement() = default;
 
     // Decide if it's a new framework
-    static bool QueryAceNewPipeEnabled(
+    static bool QueryAceNewPipeEnabledFa(
         const std::string& packagename, uint32_t apiCompatibleVersion, const std::string& apiReleaseType);
+    static bool QueryAceNewPipeEnabledStage(const std::string& packagename, uint32_t apiCompatibleVersion,
+        const std::string& apiReleaseType,
+        const std::vector<OHOS::AppExecFwk::Metadata>& metaData);
     // Load acenewpipe.config
     static void InitAceNewPipeConfig();
 
