@@ -30,7 +30,7 @@ namespace {
 constexpr int32_t RADIUS_TO_DIAMETER = 2;
 constexpr float SCALE_ACTIVE_CIRCLE_RADIUS = 16.00 / 14.00;
 constexpr float GRADUAL_CHANGE_POINT = 0.5;
-constexpr double SCALE_SELECTED_CIRCLE_RADIUS = 26.00 / 14.00;
+constexpr float SCALE_SELECTED_CIRCLE_RADIUS = 26.00 / 14.00;
 
 } // namespace
 
@@ -121,7 +121,7 @@ void PatternLockPaintMethod::PaintLockLine(RSCanvas& canvas, const OffsetF& offs
     if (LessOrEqual(pathStrokeWidth_.Value(), 0.0)) {
         return;
     }
-    double handleStrokeWidth = pathStrokeWidth_.ConvertToPx() > sideLength_.ConvertToPx() / PATTERN_LOCK_COL_COUNT ?
+    float handleStrokeWidth = pathStrokeWidth_.ConvertToPx() > sideLength_.ConvertToPx() / PATTERN_LOCK_COL_COUNT ?
         sideLength_.ConvertToPx() / PATTERN_LOCK_COL_COUNT : pathStrokeWidth_.ConvertToPx();
     pathStrokeWidth_ = Dimension(handleStrokeWidth < 0 ? 0 : handleStrokeWidth);
 
@@ -175,7 +175,7 @@ void PatternLockPaintMethod::PaintLockCircle(RSCanvas& canvas, const OffsetF& of
     circleRadius_ = circleRadius_.Unit() ==
         DimensionUnit::PERCENT ? Dimension(circleRadius_.Value() * sideLength_.ConvertToPx()) : circleRadius_;
     const int16_t radiusCount = RADIUS_TO_DIAMETER * PATTERN_LOCK_COL_COUNT;
-    double handleCircleRadius =
+    float handleCircleRadius =
         circleRadius_.ConvertToPx() > (sideLength_.ConvertToPx() / SCALE_SELECTED_CIRCLE_RADIUS / radiusCount) ?
             (sideLength_.ConvertToPx() / SCALE_SELECTED_CIRCLE_RADIUS / radiusCount) : circleRadius_.ConvertToPx();
     circleRadius_ = Dimension(handleCircleRadius < 0 ? 0 : handleCircleRadius);
