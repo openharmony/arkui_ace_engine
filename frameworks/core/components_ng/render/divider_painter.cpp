@@ -27,11 +27,12 @@ void DividerPainter::DrawLine(RSCanvas& canvas, const OffsetF& offset) const
     pen.SetColor(ToRSColor(dividerColor_.value_or(Color::BLACK)));
     canvas.AttachPen(pen);
 
-    auto startPointX = offset.GetX();
-    auto startPointY = offset.GetY();
+    auto dividerWidth = constrainStrokeWidth_ / 2;
+    auto startPointX = offset.GetX() + dividerWidth;
+    auto startPointY = offset.GetY() + dividerWidth;
     PointF start = PointF(startPointX, startPointY);
-    PointF end = vertical_ ? PointF(startPointX, startPointY + dividerLength_)
-                           : PointF(startPointX + dividerLength_, startPointY);
+    PointF end = vertical_ ? PointF(startPointX, startPointY + dividerLength_ - constrainStrokeWidth_)
+                           : PointF(startPointX + dividerLength_ - constrainStrokeWidth_, startPointY);
     canvas.DrawLine(ToRSPonit(start), ToRSPonit(end));
 }
 } // namespace OHOS::Ace::NG
