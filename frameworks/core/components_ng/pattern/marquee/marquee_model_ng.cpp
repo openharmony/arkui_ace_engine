@@ -35,9 +35,9 @@ void MarqueeModelNG::Create()
         frameNode->AddChild(textNode);
     } else {
         auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-        ACE_DCHECK(textChild);
+        CHECK_NULL_VOID(textChild);
         auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-        ACE_DCHECK(textLayoutProperty);
+        CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateContent(std::string(""));
     }
     stack->Push(frameNode);
@@ -46,13 +46,12 @@ void MarqueeModelNG::Create()
 void MarqueeModelNG::SetValue(const std::string& value)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    if (frameNode->GetChildren().empty()) {
-        return;
-    }
+    CHECK_NULL_VOID(frameNode);
+    ACE_DCHECK(!frameNode->GetChildren().empty());
     auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ACE_DCHECK(textChild);
+    CHECK_NULL_VOID(textChild);
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-    ACE_DCHECK(textLayoutProperty);
+    CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateContent(value);
     textChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     textChild->MarkModifyDone();
@@ -86,52 +85,48 @@ void MarqueeModelNG::SetAllowScale(bool allowScale)
 void MarqueeModelNG::SetTextColor(const Color& textColor)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    if (frameNode->GetChildren().empty()) {
-        return;
-    }
+    CHECK_NULL_VOID(frameNode);
+    ACE_DCHECK(!frameNode->GetChildren().empty());
     auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ACE_DCHECK(textChild);
+    CHECK_NULL_VOID(textChild);
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-    ACE_DCHECK(textLayoutProperty);
+    CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(textColor);
 }
 
 void MarqueeModelNG::SetFontSize(const Dimension& fontSize)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    if (frameNode->GetChildren().empty()) {
-        return;
-    }
+    CHECK_NULL_VOID(frameNode);
+    ACE_DCHECK(!frameNode->GetChildren().empty());
     auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ACE_DCHECK(textChild);
+    CHECK_NULL_VOID(textChild);
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-    ACE_DCHECK(textLayoutProperty);
+    CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateFontSize(fontSize);
 }
 
 void MarqueeModelNG::SetFontWeight(const FontWeight& fontWeight)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    if (frameNode->GetChildren().empty()) {
-        return;
-    }
+    CHECK_NULL_VOID(frameNode);
+    ACE_DCHECK(!frameNode->GetChildren().empty());
     auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ACE_DCHECK(textChild);
+    CHECK_NULL_VOID(textChild);
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-    ACE_DCHECK(textLayoutProperty);
+    CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateFontWeight(fontWeight);
 }
 
 void MarqueeModelNG::SetFontFamily(const std::vector<std::string>& fontFamilies)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    if (frameNode->GetChildren().empty()) {
-        return;
-    }
+    CHECK_NULL_VOID(frameNode);
+    ACE_DCHECK(!frameNode->GetChildren().empty());
     auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ACE_DCHECK(textChild);
+    CHECK_NULL_VOID(textChild);
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-    ACE_DCHECK(textLayoutProperty);
+    CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateFontFamily(fontFamilies);
 }
 
