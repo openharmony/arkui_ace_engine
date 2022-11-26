@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG {
 void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& renderProps)
 {
-    auto config = canvasImage_->GetPaintConfig();
+    auto&& config = canvasImage_->GetPaintConfig();
     config.renderMode_ = renderProps->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
     config.imageInterpolation_ = renderProps->GetImageInterpolation().value_or(ImageInterpolation::NONE);
     config.imageRepeat_ = renderProps->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
@@ -36,12 +36,12 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
     CHECK_NULL_RETURN(canvasImage_, nullptr);
     auto offset = paintWrapper->GetContentOffset();
     auto contentSize = paintWrapper->GetContentSize();
-    ImagePainter imagePainter(canvasImage_);
 
     // update render props to ImagePaintConfig
     auto props = DynamicCast<ImageRenderProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_RETURN(props, nullptr);
     UpdatePaintConfig(props);
+    ImagePainter imagePainter(canvasImage_);
     return
         [imagePainter, offset, config = canvasImage_->GetPaintConfig(), contentSize](RSCanvas& canvas) {
             imagePainter.DrawImage(canvas, offset, contentSize, config);

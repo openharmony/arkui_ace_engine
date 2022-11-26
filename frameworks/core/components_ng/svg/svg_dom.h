@@ -45,9 +45,9 @@ public:
 
     SizeF GetContainerSize() const override;
     void SetContainerSize(const SizeF& containerSize) override {}
-    void SetSvgFillColor(const std::optional<Color>& color) override
+    const std::optional<Color>& GetSvgFillColor() override
     {
-        fillColor_ = color;
+        return fillColor_;
     }
 
 protected:
