@@ -160,10 +160,7 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     time_t localTime = (hourWest_ == GetSystemTimeZone()) ? utc : utc - (hourWest_ * TOTAL_SECONDS_OF_HOUR);
 
     auto* timeZoneTime = std::localtime(&localTime);
-    if (timeZoneTime == nullptr) {
-        LOGE("Get localtime failed.");
-        return "";
-    }
+    CHECK_NULL_RETURN(timeZoneTime, "");
     // This is for i18n date time.
     DateTime dateTime;
     dateTime.year = timeZoneTime->tm_year + BASE_YEAR;
