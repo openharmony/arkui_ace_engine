@@ -2253,8 +2253,10 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
         super(owningChildView, thisPropertyName);
         this.changeNotificationIsOngoing_ = false;
         this.linkedParentProperty_ = linkSource;
-        // register to the parent property
-        this.linkedParentProperty_.subscribeMe(this);
+        if (this.linkedParentProperty_) {
+            // register to the parent property
+            this.linkedParentProperty_.subscribeMe(this);
+        }
         // register to the ObservedObject
         ObservedObject.addOwningProperty(this.getObject(), this);
     }
@@ -3193,10 +3195,10 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
         // add a test here that T is a simple type
         // subscribe to receive value chnage updates from source.
         this.source_ = source;
-        this.source_.subscribeMe(this);
         // use own backing store for value to avoid
         // value changes to be propagated back to source
         if (this.source_) {
+            this.source_.subscribeMe(this);
             this.wrappedValue_ = source.getUnmonitored();
         }
     }
