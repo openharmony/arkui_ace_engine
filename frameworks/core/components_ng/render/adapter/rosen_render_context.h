@@ -163,6 +163,8 @@ public:
 
     RectF GetPaintRectWithoutTransform() override;
 
+    virtual void GetPointWithTransform(PointF& point) override;
+
     void ClearDrawCommands() override;
 
     void NotifyTransition(
