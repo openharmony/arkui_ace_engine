@@ -127,6 +127,7 @@ private:
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
     void PlayAnimation(bool isOn);
+    void StopTranslateAnimation();
     void StopAnimation();
     void UpdateTotalScale(float scale);
     void UpdatePointScale(float scale);
