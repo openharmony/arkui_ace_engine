@@ -17,9 +17,16 @@
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr uint32_t FILE_SUFFIX_LEN = 4;
+} // namespace
+
 bool ImageSourceInfo::IsSVGSource(const std::string& src, InternalResource::ResourceId resourceId)
 {
-    return false;
+    // 4 is the length of ".svg".
+    return (src.size() > FILE_SUFFIX_LEN && src.substr(src.size() - FILE_SUFFIX_LEN) == ".svg") ||
+           (src.empty() && resourceId > InternalResource::ResourceId::SVG_START &&
+               resourceId < InternalResource::ResourceId::SVG_END);
 }
 
 bool ImageSourceInfo::IsPngSource(const std::string& src, InternalResource::ResourceId resourceId)

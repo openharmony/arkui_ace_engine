@@ -206,8 +206,7 @@ void ImagePattern::LoadImageDataIfNeed()
     UpdateInternalResource(currentSourceInfo);
     std::optional<Color> svgFillColorOpt = std::nullopt;
     if (currentSourceInfo.IsSvg()) {
-        svgFillColorOpt = imageRenderProperty->GetSvgFillColor().has_value() ? imageRenderProperty->GetSvgFillColor()
-                                                                             : currentSourceInfo.GetFillColor();
+        svgFillColorOpt = currentSourceInfo.GetFillColor();
     }
 
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != currentSourceInfo ||
