@@ -276,7 +276,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest003, TestSize.Level1)
 
 /**
  * @tc.name: GestureEventHubTest004
- * @tc.desc: Test AddClickEvent, SetClickEvent, ActClick & SetFocusClickEvent
+ * @tc.desc: Test AddClickEvent, SetUserOnClick, ActClick & SetFocusClickEvent
  * @tc.type: FUNC
  */
 HWTEST_F(GestureEventHubTestNg, GestureEventHubTest004, TestSize.Level1)
@@ -300,11 +300,11 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest004, TestSize.Level1)
 
     /**
      * @tc.steps: step3. construct two clickCallback
-     *            one is for SetClickEvent, the other is for AddClickEvent
+     *            one is for SetUserOnClick, the other is for AddClickEvent
      */
     std::string msg1;
     auto clickCallback = [&msg1](GestureEvent& /* info */) { msg1 = CHECK_TAG_1; };
-    gestureEventHub->SetClickEvent(clickCallback);
+    gestureEventHub->SetUserOnClick(clickCallback);
     std::string msg2;
     auto clickCallback2 = [&msg2](GestureEvent& /* info */) { msg2 = CHECK_TAG_2; };
     auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback2));
