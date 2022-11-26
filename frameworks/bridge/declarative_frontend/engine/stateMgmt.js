@@ -3190,15 +3190,20 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
 class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
     constructor(source, subscribeMe, info) {
         super(subscribeMe, info);
-        // add a test here that T is a simple type
-        // subscribe to receive value chnage updates from source.
-        this.source_ = source;
-        this.source_.subscribeMe(this);
+        // TODO: add a branch for T being object type
+        if (source && (typeof (source) === "object") && ("notifyHasChanged" in source) && ("subscribeMe" in source)) {
+            // code path for @(Local)StorageProp
+            this.source_ = source;
+            // subscribe to receive value chnage updates from LocalStorge source property
+            this.source_.subscribeMe(this);
+        }
+        else {
+            // code path for @Prop
+            this.source_ = new ObservedPropertySimple(source, this, info);
+        }
         // use own backing store for value to avoid
         // value changes to be propagated back to source
-        if (this.source_) {
-            this.wrappedValue_ = source.getUnmonitored();
-        }
+        this.wrappedValue_ = this.source_.getUnmonitored();
     }
     /*
       like a destructor, need to call this before deleting
@@ -3237,6 +3242,10 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
         
         this.wrappedValue_ = newValue;
         this.notifyHasChanged(newValue);
+    }
+    reset(sourceChangesValue) {
+        
+        this.source_.set(sourceChangesValue);
     }
 }
 /*
