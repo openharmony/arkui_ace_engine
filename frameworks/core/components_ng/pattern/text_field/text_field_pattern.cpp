@@ -284,7 +284,7 @@ void TextFieldPattern::UpdateCaretOffsetByLastTouchOffset()
             return;
         }
     }
-    Offset offset = GetLastTouchOffset() - Offset(textRect_.GetX() - contentRect_.GetX(), 0.0f);
+    Offset offset = GetLastTouchOffset() - Offset(textRect_.GetX(), 0.0f);
     auto position = ConvertTouchOffsetToCaretPosition(offset);
     textEditingValue_.CursorMoveToPosition(position);
     OffsetF offsetToParagraphBeginning = CalcCursorOffsetByPosition(position);
@@ -399,10 +399,6 @@ void TextFieldPattern::UpdateCaretPositionByPressOffset()
     if (GetEditingValue().text.empty()) {
         SetCaretOffsetXForEmptyText();
         caretRect_.SetTop(utilPadding_.Offset().GetY());
-        return;
-    }
-    // skip updating caret if touch position is in the left or right half ellipse parts
-    if (!OffsetInContentRegion(lastTouchOffset_)) {
         return;
     }
     UpdateCaretOffsetByLastTouchOffset();
@@ -1116,6 +1112,11 @@ void TextFieldPattern::OnModifyDone()
         layoutProperty->ResetTypeChanged();
         operationRecords_.clear();
         redoOperationRecords_.clear();
+    }
+    auto maxLength = GetMaxLength();
+    if (GreatOrEqual(textEditingValue_.text.length(), maxLength)) {
+        textEditingValue_.text = textEditingValue_.text.substr(0, maxLength);
+        SetEditingValueToProperty(textEditingValue_.text);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
