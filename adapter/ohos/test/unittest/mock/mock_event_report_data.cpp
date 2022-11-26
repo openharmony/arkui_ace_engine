@@ -15,7 +15,6 @@
 #include "mock_event_report_data.h"
 
 namespace OHOS::Ace {
-
 bool MockEventReportData::SendEvent(const EventInfo& eventInfo)
 {
     EventReport::SendEvent(eventInfo);
