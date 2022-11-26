@@ -111,11 +111,17 @@ RefPtr<MockPipelineBase> MockPipelineBase::GetCurrent()
     return pipeline_;
 }
 
-void PipelineBase::OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
-    const std::function<void()>& finishCallBack) {}
+void PipelineBase::OpenImplicitAnimation(
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallBack)
+{}
 
 bool PipelineBase::CloseImplicitAnimation()
 {
     return true;
+}
+
+RefPtr<Frontend> PipelineBase::GetFrontend() const
+{
+    return nullptr;
 }
 } // namespace OHOS::Ace
