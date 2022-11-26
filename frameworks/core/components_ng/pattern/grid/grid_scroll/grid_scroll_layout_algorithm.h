@@ -43,8 +43,8 @@ public:
 private:
     void FillGridViewportAndMeasureChildren(float mainSize, float crossSize,
         const RefPtr<GridLayoutProperty>& gridLayoutProperty, LayoutWrapper* layoutWrapper);
-    void MeasureRecordedItems(
-        float mainSize, float crossSize, float crossGap, LayoutWrapper* layoutWrapper, float& mainLength);
+    float MeasureRecordedItems(
+        float mainSize, float crossSize, float crossGap, LayoutWrapper* layoutWrapper);
 
     // fill end of viewport
     void FillBlankAtStart(float mainSize, float crossSize, const RefPtr<GridLayoutProperty>& gridLayoutProperty,
@@ -76,6 +76,10 @@ private:
     void StripItemsOutOfViewport(LayoutWrapper* layoutWrapper);
     void ModifyCurrentOffsetWhenReachEnd(float mainSize);
     void InitialItemsCrossSize(const RefPtr<GridLayoutProperty>& layoutProperty, const SizeF& frameSize);
+    bool IsIndexInMatrix(int32_t index);
+    void UpdateGridLayoutInfo(LayoutWrapper* layoutWrapper);
+    void GetTargetIndexInfoWithBenchMark(
+        LayoutWrapper* layoutWrapper, int32_t benchmarkIndex, int32_t mainStartIndex, int32_t targetIndex);
 
     void AdaptToChildMainSize(LayoutWrapper* layoutWrapper, RefPtr<GridLayoutProperty>& gridLayoutProperty,
         float mainSize, const SizeF& idealSize);
