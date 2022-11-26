@@ -348,7 +348,7 @@ void AceAbility::SurfaceChanged(
         return;
     }
     context->GetTaskExecutor()->PostSyncTask(
-        [window, &width, &height]() { FlutterDesktopSetWindowSize(window, width, height); },
+        [window, &width, &height]() { FlutterDesktopWindowSetFrame(window, 0, 0, width, height); },
         TaskExecutor::TaskType::PLATFORM);
     SystemProperties::InitDeviceInfo(
         width, height, orientation == DeviceOrientation::PORTRAIT ? 0 : 1, resolution, runArgs_.isRound);

@@ -87,30 +87,21 @@ void DialogPattern::OnModifyDone()
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
-    InitTouchEvent(gestureHub);
+    InitClickEvent(gestureHub);
 }
 
-void DialogPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
+void DialogPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+    GestureEventFunc task = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleTouchEvent(info);
+        pattern->HandleClick(info);
     };
-    auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
-    gestureHub->AddTouchEvent(touchEvent);
+    auto clickEvent = MakeRefPtr<ClickEvent>(std::move(task));
+    gestureHub->AddClickEvent(clickEvent);
 }
 
-void DialogPattern::HandleTouchEvent(const TouchEventInfo& info)
-{
-    auto touchType = info.GetTouches().front().GetTouchType();
-    auto clickPos = info.GetTouches().front().GetLocalLocation();
-    if (touchType == TouchType::UP) {
-        HandleTouchUp(clickPos);
-    }
-}
-
-void DialogPattern::HandleTouchUp(const Offset& clickPosition)
+void DialogPattern::HandleClick(const GestureEvent& info)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -122,6 +113,7 @@ void DialogPattern::HandleTouchUp(const Offset& clickPosition)
         CHECK_NULL_VOID(content);
         auto contentRect = content->GetGeometryNode()->GetFrameRect();
         // close dialog if clicked outside content rect
+        auto&& clickPosition = info.GetGlobalLocation();
         if (!contentRect.IsInRegion(PointF(clickPosition.GetX(), clickPosition.GetY()))) {
             PopDialog(-1);
         }

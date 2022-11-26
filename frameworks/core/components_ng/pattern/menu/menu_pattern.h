@@ -28,7 +28,7 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
-enum class MenuType { Menu, ContextMenu, NavigationMenu };
+enum class MenuType { MENU, CONTEXT_MENU, NAVIGATION_MENU };
 
 class MenuPattern : public Pattern {
     DECLARE_ACE_TYPE(MenuPattern, Pattern);
@@ -55,17 +55,17 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         RefPtr<MenuLayoutAlgorithm> navigationMenu = MakeRefPtr<NavigationMenuLayoutAlgorithm>();
-        return (type_ == MenuType::NavigationMenu) ? navigationMenu : MakeRefPtr<MenuLayoutAlgorithm>();
+        return (type_ == MenuType::NAVIGATION_MENU) ? navigationMenu : MakeRefPtr<MenuLayoutAlgorithm>();
     }
 
     bool IsContextMenu() const
     {
-        return type_ == MenuType::ContextMenu;
+        return type_ == MenuType::CONTEXT_MENU;
     }
 
     bool IsNavigationMenu() const
     {
-        return type_ == MenuType::NavigationMenu;
+        return type_ == MenuType::NAVIGATION_MENU;
     }
 
 private:
@@ -73,7 +73,7 @@ private:
     void RegisterOnClick();
 
     int32_t targetId_ = -1;
-    MenuType type_;
+    MenuType type_ = MenuType::MENU;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

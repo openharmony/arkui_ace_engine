@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 // create menuWrapper and menu node, update menu props
-std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, MenuType type = MenuType::Menu)
+std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, MenuType type = MenuType::MENU)
 {
     // use wrapper to detect click events outside menu
     auto wrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,

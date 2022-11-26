@@ -54,7 +54,7 @@ void BindMenu(const RefPtr<FrameNode>& menuNode, int32_t targetId, const NG::Off
 
     // pass in menuNode to register it in OverlayManager
     overlayManager->ShowMenu(targetId, offset, menuNode);
-    LOGD("ViewAbstract BindMenu finished %{public}p", AceType::RawPtr(menuNode));
+    LOGD("ViewAbstract BindMenu finished %{public}d", menuNode->GetId());
 }
 } // namespace
 
@@ -267,7 +267,7 @@ void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetClickEvent(std::move(clickEventFunc));
+    gestureHub->SetUserOnClick(std::move(clickEventFunc));
 }
 
 void ViewAbstract::SetOnTouch(TouchEventFunc&& touchEventFunc)
@@ -630,7 +630,7 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     CHECK_NULL_VOID(customNode);
     CHECK_NULL_VOID(targetNode);
 
-    auto type = isContextMenu ? MenuType::ContextMenu : MenuType::Menu;
+    auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;
     auto menuNode = MenuView::Create(customNode, targetNode->GetId(), type);
     if (isContextMenu) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset);

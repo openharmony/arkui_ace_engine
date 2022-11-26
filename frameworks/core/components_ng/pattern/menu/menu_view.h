@@ -31,10 +31,10 @@ class ACE_EXPORT MenuView {
 public:
     // create menu with menuItems
     static RefPtr<FrameNode> Create(
-        std::vector<OptionParam>&& params, int32_t targetId, MenuType type = MenuType::Menu);
+        std::vector<OptionParam>&& params, int32_t targetId, MenuType type = MenuType::MENU);
 
     // create menu with custom node from a builder
-    static RefPtr<FrameNode> Create(const RefPtr<UINode>& customNode, int32_t targetId, MenuType type = MenuType::Menu);
+    static RefPtr<FrameNode> Create(const RefPtr<UINode>& customNode, int32_t targetId, MenuType type = MenuType::MENU);
 
     // create select's popup menu
     static RefPtr<FrameNode> Create(const std::vector<SelectParam>& params, int32_t targetId);

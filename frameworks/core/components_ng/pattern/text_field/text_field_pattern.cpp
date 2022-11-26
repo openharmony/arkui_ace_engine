@@ -1360,7 +1360,6 @@ void TextFieldPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHan
 
 void TextFieldPattern::InitEditingValueText(std::string content)
 {
-    textEditingValue_.caretPosition = content.size();
     textEditingValue_.text = std::move(content);
 }
 

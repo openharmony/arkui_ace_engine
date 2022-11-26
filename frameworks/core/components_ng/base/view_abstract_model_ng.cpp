@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "view_abstract_model_ng.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
 OffsetF GetMenuPosition(const RefPtr<FrameNode>& targetNode)
 {
     // show menu at bottom center point of targetNode
@@ -33,6 +33,7 @@ void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNo
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
     NG::ViewAbstract::BindMenuWithCustomNode(customNode, targetNode, isContextMenu, offset);
 }
+} // namespace
 
 void ViewAbstractModelNG::BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc)
 {
@@ -96,8 +97,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
         };
         auto inputHub = targetNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(inputHub);
-        auto mouseCallback = AceType::MakeRefPtr<InputEvent>(std::move(event));
-        inputHub->AddOnMouseEvent(mouseCallback);
+        inputHub->BindContextMenu(std::move(event));
     } else if (type == ResponseType::LONG_PRESS) {
         // create or show menu on long press
         auto event = [builder = std::move(buildFunc), weakTarget](const GestureEvent& info) mutable {

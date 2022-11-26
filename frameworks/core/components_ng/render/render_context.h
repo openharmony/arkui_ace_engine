@@ -147,6 +147,10 @@ public:
         return {};
     }
 
+    virtual void GetPointWithTransform(PointF& point)
+    {
+    }
+
     virtual RectF GetPaintRectWithoutTransform()
     {
         return {};

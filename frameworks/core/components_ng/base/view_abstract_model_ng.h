@@ -668,7 +668,6 @@ public:
     void SetAccessibilityDescription(const std::string& description) override {}
     void SetAccessibilityImportance(const std::string& importance) override {}
 
-    ACE_DISALLOW_COPY_AND_MOVE(ViewAbstractModelNG);
 };
 } // namespace OHOS::Ace::NG
 

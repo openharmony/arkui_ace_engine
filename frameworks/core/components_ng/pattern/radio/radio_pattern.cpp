@@ -236,17 +236,23 @@ void RadioPattern::UpdateState()
     bool check = false;
     if (paintProperty->HasRadioCheck()) {
         check = paintProperty->GetRadioCheckValue();
+        /*
+         * Do not set isFirstCreated_ to false if the radio is set to true at creation time. The isFirstCreated_ is set
+         * to false in UpdateGroupCheckStatus because isFirstCreated_ is also required to determine if an onChange event
+         * needs to be triggered.
+         */
         if (check) {
             UpdateUIStatus(true);
             PlayAnimation(true);
         } else {
+            // If the radio is set to false, set isFirstCreated_ to false.
             isFirstCreated_ = false;
         }
     } else {
         paintProperty->UpdateRadioCheck(false);
+        // If the radio check is not set, set isFirstCreated_ to false.
         isFirstCreated_ = false;
     }
-
     if (preCheck_ != check) {
         UpdateGroupCheckStatus(host, check);
     }
@@ -287,6 +293,7 @@ void RadioPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bo
     if (!isFirstCreated_) {
         radioEventHub->UpdateChangeEvent(check);
     }
+    // If the radio is set to true at creation time, set isFirstCreated_ to false here.
     isFirstCreated_ = false;
     if (check) {
         pageEventHub->UpdateRadioGroupValue(radioEventHub->GetGroup(), frameNode->GetId());
@@ -294,6 +301,7 @@ void RadioPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bo
         auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
         CHECK_NULL_VOID(radioPaintProperty);
         radioPaintProperty->UpdateRadioCheck(check);
+        PlayAnimation(false);
     }
 }
 
@@ -303,10 +311,23 @@ void RadioPattern::PlayAnimation(bool isOn)
     CHECK_NULL_VOID(host);
     if (!onController_) {
         onController_ = AceType::MakeRefPtr<Animator>(host->GetContext());
+        onController_->AddStopListener(Animator::StatusCallback([weak = AceType::WeakClaim(this)]() {
+            auto radio = weak.Upgrade();
+            if (radio) {
+                radio->UpdateUIStatus(true);
+            }
+        }));
     }
     if (!offController_) {
         offController_ = AceType::MakeRefPtr<Animator>(host->GetContext());
+        offController_->AddStopListener(Animator::StatusCallback([weak = AceType::WeakClaim(this)]() {
+            auto radio = weak.Upgrade();
+            if (radio) {
+                radio->UpdateUIStatus(false);
+            }
+        }));
     }
+    StopTranslateAnimation();
     RefPtr<KeyframeAnimation<float>> shrinkEngine = AceType::MakeRefPtr<KeyframeAnimation<float>>();
     RefPtr<KeyframeAnimation<float>> selectEngine = AceType::MakeRefPtr<KeyframeAnimation<float>>();
     onController_->ClearInterpolators();
@@ -346,16 +367,20 @@ void RadioPattern::PlayAnimation(bool isOn)
         onController_->SetDuration(DEFAULT_RADIO_ANIMATION_DURATION);
         onController_->Play();
     } else {
-        offController_->AddStopListener(Animator::StatusCallback([weak = AceType::WeakClaim(this)]() {
-            auto radio = weak.Upgrade();
-            if (radio) {
-                radio->UpdateUIStatus(false);
-            }
-        }));
         offController_->AddInterpolator(shrinkEngine);
         offController_->AddInterpolator(selectEngine);
         offController_->SetDuration(DEFAULT_RADIO_ANIMATION_DURATION);
         offController_->Play();
+    }
+}
+
+void RadioPattern::StopTranslateAnimation()
+{
+    if (onController_ && !onController_->IsStopped()) {
+        onController_->Stop();
+    }
+    if (offController_ && !offController_->IsStopped()) {
+        offController_->Stop();
     }
 }
 

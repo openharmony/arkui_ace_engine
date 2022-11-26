@@ -36,7 +36,6 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
     position_ = props->GetMenuOffset().value_or(OffsetF());
-    LOGI("ZTE menu position = %s", position_.ToString().c_str());
 }
 
 // Called to perform layout render node and child.

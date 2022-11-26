@@ -893,7 +893,9 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     // etc.), the newComingTargets is the template object to collect child nodes gesture and used by gestureHub to
     // pack gesture group.
     TouchTestResult newComingTargets;
-    const auto localPoint = parentLocalPoint - paintRect.GetOffset();
+    auto tmp  = parentLocalPoint - paintRect.GetOffset();
+    renderContext_->GetPointWithTransform(tmp);
+    const auto localPoint = tmp;
     bool consumed = false;
     for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
         if (GetHitTestMode() == HitTestMode::HTMBLOCK) {

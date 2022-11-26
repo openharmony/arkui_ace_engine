@@ -168,7 +168,6 @@ bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, c
     CHECK_NULL_RETURN(props, false);
     props->UpdateMenuOffset(offset);
     menuFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    LOGI("ZTE update menuOffset = %s", offset.ToString().c_str());
     return true;
 }
 

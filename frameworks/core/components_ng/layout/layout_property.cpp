@@ -170,6 +170,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         MinusPaddingToSize(margin, layoutConstraint_->minSize);
         MinusPaddingToSize(margin, layoutConstraint_->percentReference);
         MinusPaddingToSize(margin, layoutConstraint_->selfIdealSize);
+        MinusPaddingToSize(margin, layoutConstraint_->parentIdealSize);
     }
     if (calcLayoutConstraint_) {
         if (calcLayoutConstraint_->maxSize.has_value()) {
@@ -238,9 +239,17 @@ void LayoutProperty::CheckAspectRatio()
     if (layoutConstraint_->selfIdealSize.Width()) {
         selfWidth = layoutConstraint_->selfIdealSize.Width().value();
         selfHeight = selfWidth.value() / aspectRatio;
+        if (selfHeight > maxHeight) {
+            selfHeight = maxHeight;
+            selfWidth = selfHeight.value() * aspectRatio;
+        }
     } else if (layoutConstraint_->selfIdealSize.Height()) {
         selfHeight = layoutConstraint_->selfIdealSize.Height().value();
         selfWidth = selfHeight.value() * aspectRatio;
+        if (selfWidth > maxWidth) {
+            selfWidth = maxWidth;
+            selfHeight = selfWidth.value() / aspectRatio;
+        }
     }
 
     if (selfHeight) {
@@ -307,7 +316,7 @@ bool LayoutProperty::UpdateGridOffset(const RefPtr<FrameNode>& host)
 void LayoutProperty::CheckSelfIdealSize()
 {
     if (measureType_ == MeasureType::MATCH_PARENT) {
-        layoutConstraint_->UpdateSelfMarginSizeWithCheck(layoutConstraint_->parentIdealSize);
+        layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(layoutConstraint_->parentIdealSize);
     }
     if (!calcLayoutConstraint_) {
         return;
