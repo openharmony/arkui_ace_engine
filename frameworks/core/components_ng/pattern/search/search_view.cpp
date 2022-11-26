@@ -228,14 +228,9 @@ RefPtr<FrameNode> SearchView::CreateTextField(const RefPtr<SearchNode>& parentNo
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXTINPUT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
     if (textFieldLayoutProperty) {
-        if (value) {
-            if (!textFieldLayoutProperty->HasLastValue() || textFieldLayoutProperty->GetLastValue() != value.value()) {
-                pattern->InitEditingValueText(value.value());
-                textFieldLayoutProperty->UpdateLastValue(value.value());
-                textFieldLayoutProperty->UpdateValue(value.value());
-            }
+        if (value && !value.value().empty()) {
+            textFieldLayoutProperty->UpdateValue(value.value());
         }
         if (placeholder) {
             textFieldLayoutProperty->UpdatePlaceholder(placeholder.value());
@@ -243,8 +238,8 @@ RefPtr<FrameNode> SearchView::CreateTextField(const RefPtr<SearchNode>& parentNo
         textFieldLayoutProperty->UpdateMaxLines(1);
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
     }
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
-    pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
