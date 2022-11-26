@@ -26,7 +26,21 @@ void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
 
 GestureEventFunc ClickEventActuator::GetClickEvent()
 {
-    auto func = [](GestureEvent& info) {};
-    return func;
+    auto callback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        for (const auto& callback : actuator->clickEvents_) {
+            if (callback) {
+                (*callback)(info);
+            }
+        }
+        if (actuator->userCallback_) {
+            (*actuator->userCallback_)(info);
+        }
+        if (actuator->onAccessibilityEventFunc_) {
+            actuator->onAccessibilityEventFunc_(AccessibilityEventType::CLICK);
+        }
+    };
+    return callback;
 }
 } // namespace OHOS::Ace::NG

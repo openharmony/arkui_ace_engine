@@ -25,12 +25,23 @@
 namespace OHOS::Ace::Testing {
 using scalar = Rosen::Drawing::scalar;
 using Rect = Rosen::Drawing::Rect;
+enum class TestingPathDirection {
+    CW_DIRECTION,
+    CCW_DIRECTION,
+};
 class TestingPath {
 public:
     TestingPath() = default;
     ~TestingPath() = default;
 
     virtual void AddArc(Rect oval, scalar startAngle, scalar sweepAngle) {}
+    virtual void AddRect(const Rect& rect, TestingPathDirection dir = TestingPathDirection::CW_DIRECTION) {}
+    virtual void AddRect(scalar left, scalar top, scalar right, scalar bottom,
+        TestingPathDirection dir = TestingPathDirection::CW_DIRECTION)
+    {}
+    virtual void AddRoundRect(
+        const Rect& rect, scalar xRadius, scalar yRadius, TestingPathDirection dir = TestingPathDirection::CW_DIRECTION)
+    {}
     virtual void MoveTo(scalar x, scalar y) {}
     virtual void LineTo(scalar x, scalar y) {}
 };

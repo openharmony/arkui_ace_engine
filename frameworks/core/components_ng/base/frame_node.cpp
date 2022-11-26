@@ -41,7 +41,7 @@
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
-}
+} // namespace
 namespace OHOS::Ace::NG {
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
@@ -68,6 +68,10 @@ FrameNode::~FrameNode()
     if (focusHub) {
         focusHub->RemoveSelf(this);
     }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        pipeline->RemoveOnAreaChangeNode(GetId());
+    }
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
@@ -92,9 +96,7 @@ RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(
 RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId)
 {
     auto frameNode = ElementRegister::GetInstance()->GetSpecificItemById<FrameNode>(nodeId);
-    if (!frameNode) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(frameNode, nullptr);
     if (frameNode->GetTag() != tag) {
         LOGE("the tag is changed");
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
@@ -155,6 +157,14 @@ void FrameNode::DumpInfo()
     DumpLog::GetInstance().AddDesc(std::string("Visible: ")
                                        .append(std::to_string(static_cast<int32_t>(
                                            layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)))));
+    if (layoutProperty_->GetPaddingProperty()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("Padding: ").append(layoutProperty_->GetPaddingProperty()->ToString().c_str()));
+    }
+    if (layoutProperty_->GetBorderWidthProperty()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("Border: ").append(layoutProperty_->GetBorderWidthProperty()->ToString().c_str()));
+    }
     DumpLog::GetInstance().AddDesc(std::string("compid: ").append(propInspectorId_.value_or("")));
     DumpLog::GetInstance().AddDesc(std::string("ContentConstraint: ")
                                        .append(layoutProperty_->GetContentLayoutConstraint().has_value()
@@ -204,13 +214,6 @@ void FrameNode::OnAttachToMainTree()
     UINode::OnAttachToMainTree();
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear();
-    if (!hasPendingRequest_) {
-        return;
-    }
-    auto context = GetContext();
-    CHECK_NULL_VOID(context);
-    context->RequestFrame();
-    hasPendingRequest_ = false;
     if (IsResponseRegion() || renderContext_->HasPosition() || renderContext_->HasOffset() ||
         renderContext_->HasAnchor()) {
         auto parent = GetParent();
@@ -222,6 +225,13 @@ void FrameNode::OnAttachToMainTree()
             parent = parent->GetParent();
         }
     }
+    if (!hasPendingRequest_) {
+        return;
+    }
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->RequestFrame();
+    hasPendingRequest_ = false;
 }
 
 void FrameNode::OnDetachFromMainTree()
@@ -251,13 +261,6 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     bool frameOffsetChange = geometryNode_->GetFrameOffset() != dirty->GetGeometryNode()->GetFrameOffset();
     bool contentSizeChange = geometryNode_->GetContentSize() != dirty->GetGeometryNode()->GetContentSize();
     bool contentOffsetChange = geometryNode_->GetContentOffset() != dirty->GetGeometryNode()->GetContentOffset();
-    bool parentOriginChange =
-        geometryNode_->GetParentGlobalOffset() != dirty->GetGeometryNode()->GetParentGlobalOffset();
-    // fire OnAreaChanged event.
-    if (eventHub_->HasOnAreaChanged() && (frameSizeChange || frameOffsetChange || parentOriginChange)) {
-        eventHub_->FireOnAreaChanged(geometryNode_->GetFrameRect(), geometryNode_->GetParentGlobalOffset(),
-            dirty->GetGeometryNode()->GetFrameRect(), dirty->GetGeometryNode()->GetParentGlobalOffset());
-    }
 
     SetGeometryNode(dirty->GetGeometryNode());
     if (frameSizeChange || frameOffsetChange || (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
@@ -313,6 +316,31 @@ void FrameNode::AdjustGridOffset()
 {
     if (layoutProperty_->UpdateGridOffset(Claim(this))) {
         renderContext_->SyncGeometryProperties(RawPtr(GetGeometryNode()));
+    }
+}
+
+void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
+{
+    if (!lastFrameRect_) {
+        lastFrameRect_ = std::make_unique<RectF>();
+    }
+    if (!lastParentOffsetToWindow_) {
+        lastParentOffsetToWindow_ = std::make_unique<OffsetF>();
+    }
+    eventHub_->SetOnAreaChanged(std::move(callback));
+}
+
+void FrameNode::TriggerOnAreaChangeCallback()
+{
+    if (eventHub_->HasOnAreaChanged() && lastFrameRect_ && lastParentOffsetToWindow_) {
+        auto currFrameRect = geometryNode_->GetFrameRect();
+        auto currParentOffsetToWindow = GetOffsetRelativeToWindow() - currFrameRect.GetOffset();
+        if (currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_) {
+            eventHub_->FireOnAreaChanged(
+                *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
+            *lastFrameRect_ = currFrameRect;
+            *lastParentOffsetToWindow_ = currParentOffsetToWindow;
+        }
     }
 }
 
@@ -452,9 +480,7 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
     RefPtr<LayoutWrapper> layoutWrapper;
     UpdateLayoutPropertyFlag();
     layoutWrapper = CreateLayoutWrapper();
-    if (!layoutWrapper) {
-        return std::nullopt;
-    }
+    CHECK_NULL_RETURN(layoutWrapper, std::nullopt);
     auto task = [layoutWrapper, layoutConstraint = GetLayoutConstraint(), forceUseMainThread]() {
         layoutWrapper->SetActive();
         layoutWrapper->SetRootMeasureNode();
@@ -490,9 +516,7 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     }
     ACE_SCOPED_TRACE("CreateRenderTask:PrepareTask");
     auto wrapper = CreatePaintWrapper();
-    if (!wrapper) {
-        return std::nullopt;
-    }
+    CHECK_NULL_RETURN(wrapper, std::nullopt);
     auto task = [wrapper, paintProperty = paintProperty_]() {
         ACE_SCOPED_TRACE("FrameNode::RenderTask");
         wrapper->FlushRender();
@@ -754,20 +778,18 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
     CHECK_NULL_VOID(context);
 
     if (CheckNeedRequestMeasureAndLayout(layoutFlag)) {
+        if (!isMeasureBoundary && IsNeedRequestParentMeasure()) {
+            auto parent = GetAncestorNodeOfFrame();
+            if (parent) {
+                parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+                return;
+            }
+        }
         if (isLayoutDirtyMarked_) {
             LOGD("MarkDirtyNode: isLayoutDirtyMarked is true");
             return;
         }
         isLayoutDirtyMarked_ = true;
-        if (!isMeasureBoundary && IsNeedRequestParentMeasure()) {
-            auto parent = GetAncestorNodeOfFrame();
-            if (parent) {
-                parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-            } else {
-                context->AddDirtyLayoutNode(Claim(this));
-            }
-            return;
-        }
         context->AddDirtyLayoutNode(Claim(this));
         return;
     }
@@ -1111,7 +1133,25 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
 {
     auto offset = geometryNode_->GetFrameOffset();
     auto parent = GetAncestorNodeOfFrame();
+    if (renderContext_ && renderContext_->GetPositionProperty()) {
+        if (renderContext_->GetPositionProperty()->HasPosition()) {
+            offset.SetX(static_cast<float>(renderContext_->GetPositionProperty()->GetPosition()->GetX().Value()));
+            offset.SetY(static_cast<float>(renderContext_->GetPositionProperty()->GetPosition()->GetY().Value()));
+        }
+    }
     while (parent) {
+        auto parentRenderContext = parent->GetRenderContext();
+        if (parentRenderContext && parentRenderContext->GetPositionProperty()) {
+            if (parentRenderContext->GetPositionProperty()->HasPosition()) {
+                offset.AddX(
+                    static_cast<float>(parentRenderContext->GetPositionProperty()->GetPosition()->GetX().Value()));
+                offset.AddY(
+                    static_cast<float>(parentRenderContext->GetPositionProperty()->GetPosition()->GetY().Value()));
+                parent = parent->GetAncestorNodeOfFrame();
+                continue;
+            }
+        }
+
         offset += parent->geometryNode_->GetFrameOffset();
         parent = parent->GetAncestorNodeOfFrame();
     }

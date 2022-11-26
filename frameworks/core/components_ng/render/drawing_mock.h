@@ -16,17 +16,21 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_MOCK_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_MOCK_H
 
+#include "draw/clip.h"
 #include "utils/point.h"
 #include "utils/rect.h"
+#include "utils/round_rect.h"
 #include "utils/scalar.h"
 
+#include "core/components_ng/test/mock/rosen/testing_brush.h"
 #include "core/components_ng/test/mock/rosen/testing_canvas.h"
-#include "core/components_ng/test/mock/rosen/testing_pen.h"
 #include "core/components_ng/test/mock/rosen/testing_color.h"
 #include "core/components_ng/test/mock/rosen/testing_filter.h"
+#include "core/components_ng/test/mock/rosen/testing_mask_filter.h"
 #include "core/components_ng/test/mock/rosen/testing_path.h"
+#include "core/components_ng/test/mock/rosen/testing_path_effect.h"
+#include "core/components_ng/test/mock/rosen/testing_pen.h"
 #include "core/components_ng/test/mock/rosen/testing_shader_effect.h"
-#include "core/components_ng/test/mock/rosen/testing_brush.h"
 
 namespace OHOS::Ace {
 using RSCanvas = Testing::TestingCanvas;
@@ -34,10 +38,19 @@ using RSPen = Testing::TestingPen;
 using RSBrush = Testing::TestingBrush;
 using RSPath = Testing::TestingPath;
 using RSShaderEffect = Testing::TestingShaderEffect;
+using RSPathDashStyle = Testing::TestingPathDashStyle;
+using RSPathDirection = Testing::TestingPathDirection;
+using RSPathEffect = Testing::TestingPathEffect;
 using RSFilter = Testing::TestingFilter;
 using RSColor = Testing::TestingColor;
+using RSMaskFilter = Testing::TestingMaskFilter;
+using RSBlurType = Testing::BlurType;
+using RSTileMode = Testing::TileMode;
+using RSColorQuad = Testing::ColorQuad;
 using RSPoint = Rosen::Drawing::PointF;
 using RSScalar = Rosen::Drawing::scalar;
 using RSRect = Rosen::Drawing::RectF;
+using RSRoundRect = Rosen::Drawing::RoundRect;
+using RSClipOp = Rosen::Drawing::ClipOp;
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_MOCK_H

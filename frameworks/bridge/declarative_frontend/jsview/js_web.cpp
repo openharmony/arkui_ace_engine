@@ -1073,7 +1073,7 @@ public:
         JSClass<JSContextMenuParam>::CustomMethod("x", &JSContextMenuParam::GetXCoord);
         JSClass<JSContextMenuParam>::CustomMethod("y", &JSContextMenuParam::GetYCoord);
         JSClass<JSContextMenuParam>::CustomMethod("getLinkUrl", &JSContextMenuParam::GetLinkUrl);
-        JSClass<JSContextMenuParam>::CustomMethod("getUnfilterendLinkUrl", &JSContextMenuParam::GetUnfilteredLinkUrl);
+        JSClass<JSContextMenuParam>::CustomMethod("getUnfilteredLinkUrl", &JSContextMenuParam::GetUnfilteredLinkUrl);
         JSClass<JSContextMenuParam>::CustomMethod("getSourceUrl", &JSContextMenuParam::GetSourceUrl);
         JSClass<JSContextMenuParam>::CustomMethod("existsImageContents", &JSContextMenuParam::HasImageContents);
         JSClass<JSContextMenuParam>::Bind(globalObj, &JSContextMenuParam::Constructor, &JSContextMenuParam::Destructor);
@@ -1286,6 +1286,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onScroll", &JSWeb::OnScroll);
     JSClass<JSWeb>::StaticMethod("pinchSmoothMode", &JSWeb::PinchSmoothModeEnabled);
     JSClass<JSWeb>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSWeb>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSWeb>::StaticMethod("onWindowNew", &JSWeb::OnWindowNew);
     JSClass<JSWeb>::StaticMethod("onWindowExit", &JSWeb::OnWindowExit);
     JSClass<JSWeb>::StaticMethod("multiWindowAccess", &JSWeb::MultiWindowAccessEnabled);

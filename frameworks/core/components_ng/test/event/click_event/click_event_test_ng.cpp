@@ -24,6 +24,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -65,12 +66,12 @@ void ClickEventTestNg::TearDownTestSuite()
 
 void ClickEventTestNg::SetUp()
 {
-    GTEST_LOG_(INFO) << "ClickEventTestNg SetUp";
+    MockPipelineBase::SetUp();
 }
 
 void ClickEventTestNg::TearDown()
 {
-    GTEST_LOG_(INFO) << "ClickEventTestNg TearDown";
+    MockPipelineBase::TearDown();
 }
 
 /**

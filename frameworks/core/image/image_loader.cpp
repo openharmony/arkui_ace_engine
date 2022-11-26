@@ -358,7 +358,7 @@ sk_sp<SkData> NetworkImageLoader::LoadImageData(
     // 2. if not found. download it.
     std::vector<uint8_t> imageData;
     if (!DownloadManager::GetInstance().Download(uri, imageData) || imageData.empty()) {
-        LOGE("Download image %{private}s failed!", uri.c_str());
+        LOGE("Download network image %{private}s failed!", uri.c_str());
         return nullptr;
     }
     sk_sp<SkData> data = SkData::MakeWithCopy(imageData.data(), imageData.size());

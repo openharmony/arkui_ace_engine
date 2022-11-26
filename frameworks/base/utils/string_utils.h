@@ -19,6 +19,7 @@
 #include <climits>
 #include <cmath>
 #include <codecvt>
+#include <cstring>
 #include <locale>
 #include <sstream>
 #include <string>
@@ -36,6 +37,7 @@ ACE_EXPORT extern const std::wstring DEFAULT_WSTRING;
 ACE_EXPORT extern const std::u16string DEFAULT_USTRING;
 constexpr int32_t TEXT_CASE_LOWERCASE = 1;
 constexpr int32_t TEXT_CASE_UPPERCASE = 2;
+constexpr double PERCENT_VALUE = 100.0;
 
 inline std::u16string Str8ToStr16(const std::string& str)
 {
@@ -169,7 +171,7 @@ inline uint32_t StringToUint(const std::string& value, uint32_t defaultErr = 0)
         return result;
     }
 }
-
+// generic string to double value method without success check
 inline double StringToDouble(const std::string& value)
 {
     char* pEnd = nullptr;
@@ -180,17 +182,23 @@ inline double StringToDouble(const std::string& value)
         return result;
     }
 }
-
-inline bool StringToDouble(const std::string& value, double& res)
+// string to double method with success check, and support for parsing number string with percentage case
+inline bool StringToDouble(const std::string& value, double& result)
 {
     char* pEnd = nullptr;
-    double result = std::strtod(value.c_str(), &pEnd);
+    double res = std::strtod(value.c_str(), &pEnd);
     if (pEnd == value.c_str() || errno == ERANGE) {
         return false;
-    } else {
-        res = result;
-        return true;
+    } else if (pEnd != nullptr) {
+        if (std::strcmp(pEnd, "%") == 0) {
+            result = res / PERCENT_VALUE;
+            return true;
+        } else if (std::strcmp(pEnd, "") == 0) {
+            result = res;
+            return true;
+        }
     }
+    return false;
 }
 
 inline float StringToFloat(const std::string& value)

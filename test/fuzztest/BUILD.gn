@@ -20,6 +20,7 @@ group("fuzztest") {
     "arkressched_fuzzer:ArkResschedFuzzTest",
 
     #"imageApi_fuzzer:ImageApiFuzzTest",
+    "imageloader_fuzzer:ImageLoaderFuzzTest",
     "manifest_fuzzer:ManifestFuzzTest",
     "res2_fuzzer:Res2FuzzTest",
     "res_fuzzer:ResFuzzTest",
@@ -29,7 +30,4 @@ group("fuzztest") {
     "utilengine_fuzzer:UtilEngineFuzzTest",
     "utilmost_fuzzer:UtilMostFuzzTest",
   ]
-  if (!is_asan) {
-    deps += [ "imageloader_fuzzer:ImageLoaderFuzzTest" ]
-  }
 }

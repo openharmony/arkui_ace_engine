@@ -20,6 +20,9 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#ifndef ACE_UNITTEST
+#include "core/components_ng/base/view_abstract.h"
+#endif
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -145,7 +148,21 @@ void ImageModelNG::SetColorFilterMatrix(const std::vector<float>& matrix)
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, matrix);
 }
 
-void ImageModelNG::SetOnDragStart(OnDragStartFunc&& onDragStart) {}
+void ImageModelNG::SetOnDragStart(OnDragStartFunc&& onDragStart)
+{
+#ifndef ACE_UNITTEST
+    auto dragStart = [dragStartFunc = std::move(onDragStart)](
+                         const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
+        auto dragInfo = dragStartFunc(event, extraParams);
+        DragDropInfo info;
+        info.extraInfo = dragInfo.extraInfo;
+        info.pixelMap = dragInfo.pixelMap;
+        info.customNode = AceType::DynamicCast<UINode>(dragInfo.node);
+        return info;
+    };
+    ViewAbstract::SetOnDragStart(std::move(dragStart));
+#endif
+}
 
 void ImageModelNG::SetOnDragEnter(OnDragDropFunc&& onDragEnter) {}
 

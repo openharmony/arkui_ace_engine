@@ -12,26 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <mutex>
-#include <unordered_map>
 
 #include "base/utils/utils.h"
-#include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/modifier_adapter.h"
 
 namespace OHOS::Ace::NG {
-std::shared_ptr<RSModifier> ConvertModifier(const RefPtr<Modifier>& modifier)
-{
-    return nullptr;
-}
-
 void ModifierAdapter::RemoveModifier(int32_t modifierId) {}
-void ContentModifierAdapter::Draw(RSDrawingContext& context) const {}
-
-inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<AnimatablePropertyBase>& property)
-{
-    return nullptr;
-}
-
-void ContentModifierAdapter::AttachProperties() {}
 } // namespace OHOS::Ace::NG

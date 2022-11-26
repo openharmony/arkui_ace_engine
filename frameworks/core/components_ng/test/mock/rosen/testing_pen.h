@@ -16,7 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_PEN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_PEN_H
 
+#include <memory>
+
 #include "testing_color.h"
+#include "testing_filter.h"
+#include "testing_path_effect.h"
+#include "testing_shader_effect.h"
 #include "utils/scalar.h"
 
 namespace OHOS::Ace::Testing {
@@ -37,6 +42,9 @@ public:
     virtual void SetCapStyle(CapStyle cs) {}
     virtual void SetColor(const TestingColor& c) {}
     virtual void SetColor(int c) {}
+    virtual void SetFilter(const TestingFilter& filter) {}
+    virtual void SetShaderEffect(std::shared_ptr<TestingShaderEffect> e) {}
+    virtual void SetPathEffect(std::shared_ptr<TestingPathEffect> e) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_PEN_H

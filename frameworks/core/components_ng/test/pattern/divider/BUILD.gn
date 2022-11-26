@@ -37,8 +37,6 @@ ohos_unittest("divider_pattern_test_ng") {
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",
-    "//third_party/bounds_checking_function/src/secureprintoutput_a.c",
-    "//third_party/bounds_checking_function/src/vsnprintf_s.c",
 
     # components_ng_base
     "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",

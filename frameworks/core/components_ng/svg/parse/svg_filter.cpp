@@ -15,6 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_filter.h"
 
+#include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_filter_declaration.h"
 #include "frameworks/core/components_ng/svg/parse/svg_fe.h"
 
@@ -35,9 +36,7 @@ RefPtr<SvgNode> SvgFilter::Create()
 void SvgFilter::OnInitStyle()
 {
     auto declaration = Ace::AceType::DynamicCast<SvgFilterDeclaration>(declaration_);
-    if (!declaration) {
-        return;
-    }
+    CHECK_NULL_VOID(declaration);
     x_ = declaration->GetX();
     y_ = declaration->GetY();
     height_ = declaration->GetHeight();

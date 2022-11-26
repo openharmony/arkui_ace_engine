@@ -36,6 +36,7 @@ public:
 
     void RequestFullScreen(const RefPtr<FrameNode>& frameNode);
     void ExitFullScreen(const RefPtr<FrameNode>& frameNode);
+    bool OnBackPressed();
 
 private:
     WeakPtr<FrameNode> rootNodeWeak_;

@@ -221,6 +221,13 @@ void FrontendDelegateDeclarativeNG::RegisterFont(const std::string& familyName, 
     pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc);
 }
 
+double FrontendDelegateDeclarativeNG::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+    const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+{
+    auto pipelineContext = pipelineContextHolder_.Get();
+    return pipelineContext->MeasureText(text, fontSize, fontStyle, fontWeight, fontFamily, letterSpacing);
+}
+
 SingleTaskExecutor FrontendDelegateDeclarativeNG::GetAnimationJsTask()
 {
     return SingleTaskExecutor::Make(taskExecutor_, TaskExecutor::TaskType::JS);

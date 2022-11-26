@@ -98,13 +98,9 @@ void UpdateChildLayoutConstrainByFlexBasis(
     FlexDirection direction, const RefPtr<LayoutWrapper>& child, LayoutConstraintF& layoutConstraint)
 {
     const auto& flexItemProperty = child->GetLayoutProperty()->GetFlexItemProperty();
-    if (!flexItemProperty) {
-        return;
-    }
+    CHECK_NULL_VOID(flexItemProperty);
     const auto& flexBasis = flexItemProperty->GetFlexBasis();
-    if (!flexBasis) {
-        return;
-    }
+    CHECK_NULL_VOID(flexBasis);
     if (flexBasis->Unit() == DimensionUnit::AUTO || !flexBasis->IsValid()) {
         return;
     }
@@ -120,25 +116,19 @@ void UpdateChildLayoutConstrainByFlexBasis(
 float FlexLayoutAlgorithm::GetChildMainAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
     float size = 0.0f;
-    if (!layoutWrapper) {
-        return size;
-    }
+    CHECK_NULL_RETURN(layoutWrapper, size);
     return GetMainAxisSizeHelper(layoutWrapper->GetGeometryNode()->GetMarginFrameSize(), direction_);
 }
 
 float FlexLayoutAlgorithm::GetChildCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
-    if (!layoutWrapper) {
-        return 0.0f;
-    }
+    CHECK_NULL_RETURN(layoutWrapper, 0.0f);
     return GetCrossAxisSizeHelper(layoutWrapper->GetGeometryNode()->GetMarginFrameSize(), direction_);
 }
 
 float FlexLayoutAlgorithm::GetSelfCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
-    if (!layoutWrapper) {
-        return 0.0f;
-    }
+    CHECK_NULL_RETURN(layoutWrapper, 0.0f);
     return GetCrossAxisSizeHelper(layoutWrapper->GetGeometryNode()->GetFrameSize(), direction_);
 }
 
@@ -221,9 +211,6 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
-    SizeF maxSize(LessOrEqual(realSize.Width(), 0.0f) ? childLayoutConstraint.maxSize.Width() : realSize.Width(),
-        LessOrEqual(realSize.Height(), 0.0f) ? childLayoutConstraint.maxSize.Height() : realSize.Height());
-    childLayoutConstraint.maxSize = maxSize;
     for (const auto& child : children) {
         if (child->IsOutOfLayout()) {
             outOfLayoutChildren_.emplace_back(child);
@@ -268,7 +255,7 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(
 void FlexLayoutAlgorithm::UpdateAllocatedSize(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& crossAxisSize)
 {
     float mainAxisSize = GetChildMainAxisSize(childLayoutWrapper);
-    if (GreatOrEqual(mainAxisSize, Infinity<float>())) {
+    if (GreaterOrEqualToInfinity(mainAxisSize)) {
         mainAxisSize = 0.0f;
     }
     crossAxisSize = std::max(crossAxisSize, GetChildCrossAxisSize(childLayoutWrapper));
@@ -509,6 +496,12 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
             float ret = 0.0f;
             if (flexItemProperty) {
                 ret = flexItemProperty->GetFlexGrow().value_or(ret);
+                /**
+                 * handle non positive flex grow.
+                 */
+                if (NonPositive(ret)) {
+                    ret = 0.0f;
+                }
             }
             return ret;
         };
@@ -520,6 +513,12 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
             float ret = isLinearLayoutFeature ? 0.0f : 1.0f;
             if (flexItemProperty) {
                 ret = flexItemProperty->GetFlexShrink().value_or(ret);
+                /**
+                 * handle non positive flex shrink.
+                 */
+                if (NonPositive(ret)) {
+                    ret = 0.0f;
+                }
             }
             return ret;
         };
@@ -621,7 +620,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         isInfiniteLayout_ = isLinearLayoutFeature_;
     }
     if (!isInfiniteLayout_) {
-        isInfiniteLayout_ = GreatOrEqual(mainAxisSize_, Infinity<float>());
+        isInfiniteLayout_ = GreaterOrEqualToInfinity(mainAxisSize_);
     }
     if (isInfiniteLayout_) {
         LOGD("The main axis size is not defined or infinity, disallow flex and weight mode");

@@ -43,7 +43,8 @@ public:
         return svgDom_->GetContainerSize().Height();
     }
 
-    void DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) override;
+    void DrawToRSCanvas(
+        RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const std::array<PointF, 4>& radiusXY) override;
 
 private:
     RefPtr<SvgDomBase> svgDom_;

@@ -78,7 +78,7 @@ const std::string& AceApplicationInfo::GetAbilityName() const
     return abilityName_;
 }
 
-int32_t AceApplicationInfo::GetUid() const 
+int32_t AceApplicationInfo::GetUid() const
 {
     return uid_;
 }

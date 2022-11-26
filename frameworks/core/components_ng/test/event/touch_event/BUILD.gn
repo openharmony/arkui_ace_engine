@@ -64,8 +64,9 @@ ohos_unittest("touch_event_test_ng") {
 
   configs = [
     "$ace_root:ace_test_coverage_config",
-    "$ace_root:ace_test_config",
-    "$ace_root:ace_config",
-    "//commonlibrary/c_utils/base:utils_config",
+    "$ace_root:ace_unittest_config",
   ]
+
+  include_dirs =
+      [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include" ]
 }

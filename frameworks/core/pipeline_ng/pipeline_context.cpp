@@ -15,6 +15,11 @@
 
 #include "core/pipeline_ng/pipeline_context.h"
 
+#include "base/memory/ace_type.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/pattern/navigation/title_bar_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/event/touch_event.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -193,6 +198,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         FlushFocus();
     }
     HandleVisibleAreaChangeEvent();
+    HandleOnAreaChangeEvent();
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
@@ -415,13 +421,14 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     }
 
     // TODO: add adjust for textFieldManager when ime is show.
-    taskExecutor_->PostTask([weakFrontend = weakFrontend_, width, height]() {
-        auto frontend = weakFrontend.Upgrade();
-        if (frontend) {
-            frontend->OnSurfaceChanged(width, height);
-        }
-    },
-    TaskExecutor::TaskType::JS);
+    taskExecutor_->PostTask(
+        [weakFrontend = weakFrontend_, width, height]() {
+            auto frontend = weakFrontend.Upgrade();
+            if (frontend) {
+                frontend->OnSurfaceChanged(width, height);
+            }
+        },
+        TaskExecutor::TaskType::JS);
 
 #ifdef ENABLE_ROSEN_BACKEND
     StartWindowSizeChangeAnimate(width, height, type);
@@ -553,6 +560,12 @@ bool PipelineContext::OnBackPressed()
         return false;
     }
 
+    // If the tag of the last child of the rootnode is video, exit full screen.
+    if (fullScreenManager_->OnBackPressed()) {
+        LOGI("Exit full screen: back press accepted");
+        return true;
+    }
+
     // if has popup, back press would hide popup and not trigger page back
     if (overlayManager_->RemoveOverlay()) {
         LOGI("popup hidden: back press accepted");
@@ -560,6 +573,38 @@ bool PipelineContext::OnBackPressed()
     }
 
     auto result = false;
+    taskExecutor_->PostSyncTask(
+        [weakFrontend = weakFrontend_, weakPipelineContext = WeakClaim(this), &result]() {
+            auto frontend = weakFrontend.Upgrade();
+            if (!frontend) {
+                LOGW("frontend is nullptr");
+                result = false;
+                return;
+            }
+            auto context = weakPipelineContext.Upgrade();
+            if (!context) {
+                LOGW("pipelineContext is nullptr");
+                result = false;
+                return;
+            }
+            if (context->GetNavDestinationBackButtonNode()) {
+                auto navDestinationNode =
+                    AceType::DynamicCast<NavDestinationGroupNode>(context->GetNavDestinationBackButtonNode());
+                if (navDestinationNode->GetNavDestinationBackButtonEvent()) {
+                    GestureEvent gestureEvent;
+                    navDestinationNode->GetNavDestinationBackButtonEvent()(gestureEvent);
+                    result = true;
+                }
+            }
+        },
+        TaskExecutor::TaskType::UI);
+    
+    if (result) {
+        // user accept
+        LOGI("CallRouterBackToPopPage(): frontend accept");
+        return true;
+    }
+
     taskExecutor_->PostSyncTask(
         [weakFrontend = weakFrontend_, weakPipelineContext = WeakClaim(this), &result]() {
             auto frontend = weakFrontend.Upgrade();
@@ -579,6 +624,31 @@ bool PipelineContext::OnBackPressed()
     }
     LOGI("CallRouterBackToPopPage(): return platform consumed");
     return false;
+}
+
+RefPtr<FrameNode> PipelineContext::GetNavDestinationBackButtonNode()
+{
+    auto lastPage = stageManager_->GetLastPage();
+    CHECK_NULL_RETURN(lastPage, nullptr);
+    auto navigationNode = lastPage->FindChildNodeOfClass<NavigationGroupNode>();
+    CHECK_NULL_RETURN(navigationNode, nullptr);
+    auto navigationContentNode = navigationNode->GetContentNode();
+    CHECK_NULL_RETURN(navigationContentNode, nullptr);
+    auto navDestinationNode = navigationContentNode->FindChildNodeOfClass<NavDestinationGroupNode>();
+    CHECK_NULL_RETURN(navDestinationNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    CHECK_NULL_RETURN(titleBarNode, nullptr);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    CHECK_NULL_RETURN(backButtonNode, nullptr);
+    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+    if (!backButtonLayoutProperty->HasVisibility()) {
+        return nullptr;
+    }
+
+    if (backButtonLayoutProperty->GetVisibilityValue() != VisibleType::VISIBLE) {
+        return nullptr;
+    }
+    return navDestinationNode;
 }
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
@@ -878,6 +948,34 @@ void PipelineContext::HandleVisibleAreaChangeEvent()
             continue;
         }
         frameNode->TriggerVisibleAreaChangeCallback(visibleChangeNode.second);
+    }
+}
+
+void PipelineContext::AddOnAreaChangeNode(int32_t nodeId)
+{
+    onAreaChangeNodeIds_.emplace(nodeId);
+}
+
+void PipelineContext::RemoveOnAreaChangeNode(int32_t nodeId)
+{
+    onAreaChangeNodeIds_.erase(nodeId);
+}
+
+void PipelineContext::HandleOnAreaChangeEvent()
+{
+    if (onAreaChangeNodeIds_.empty()) {
+        return;
+    }
+    for (const auto& nodeId : onAreaChangeNodeIds_) {
+        auto uiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
+        if (!uiNode) {
+            continue;
+        }
+        auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+        if (!frameNode) {
+            continue;
+        }
+        frameNode->TriggerOnAreaChangeCallback();
     }
 }
 

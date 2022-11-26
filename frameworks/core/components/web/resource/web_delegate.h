@@ -410,10 +410,12 @@ public:
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
 #endif
+#ifdef OHOS_STANDARD_SYSTEM
     void SetWebRendeGlobalPos(const Offset& pos)
     {
         offset_ = pos;
     }
+#endif
 private:
     void InitWebEvent();
     void RegisterWebEvent();

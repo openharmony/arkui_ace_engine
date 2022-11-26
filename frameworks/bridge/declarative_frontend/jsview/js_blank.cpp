@@ -45,11 +45,29 @@ void JSBlank::Create(const JSCallbackInfo& info)
     }
 }
 
+void JSBlank::Height(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsHeight(info);
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::BlankView::SetHeight(value);
+        return;
+    }
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+    if (value > flexItem->GetFlexBasis()) {
+        flexItem->SetFlexBasis(value);
+    }
+}
+
 void JSBlank::JSBind(BindingTarget globalObj)
 {
     JSClass<JSBlank>::Declare("Blank");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSBlank>::StaticMethod("create", &JSBlank::Create, opt);
+    JSClass<JSBlank>::StaticMethod("height", &JSBlank::Height, opt);
     JSClass<JSBlank>::StaticMethod("color", &JSViewAbstract::JsBackgroundColor, opt);
     JSClass<JSBlank>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSBlank>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);

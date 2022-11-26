@@ -95,7 +95,7 @@ void RenderBox::Update(const RefPtr<Component>& component)
     const RefPtr<BoxComponent> box = AceType::DynamicCast<BoxComponent>(component);
     if (box) {
         boxComponent_ = box;
-        needMaterial_ = box->GetNeedMaterial();
+        needMaterial_ |= box->GetNeedMaterial();
         inspectorDirection_ = box->GetInspectorDirection();
         RenderBoxBase::Update(component);
         UpdateBackDecoration(box->GetBackDecoration());
@@ -204,7 +204,16 @@ void RenderBox::Update(const RefPtr<Component>& component)
                 box->onTouchUpId_(touchInfo);
             }
         });
+
+        // for container modal
         touchRecognizer_->SetOnTouchMove(onTouchMoveId_);
+        if (!panRecognizer_) {
+            PanDirection panDirection;
+            panDirection.type = PanDirection::ALL;
+            panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(
+                context, DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
+        }
+        panRecognizer_->SetOnActionStart(box->GetPanActionStart());
     }
     // In each update, the extensions will be updated with new one.
     if (eventExtensions_ && eventExtensions_->HasOnAreaChangeExtension()) {
@@ -1559,6 +1568,10 @@ void RenderBox::OnTouchTestHit(
         touchRecognizer_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(touchRecognizer_);
         MarkIsNotSiblingAddRecognizerToResult(false);
+    }
+    if (panRecognizer_) {
+        panRecognizer_->SetCoordinateOffset(coordinateOffset);
+        result.push_back(panRecognizer_);
     }
     if (onClick_) {
         onClick_->SetCoordinateOffset(coordinateOffset);

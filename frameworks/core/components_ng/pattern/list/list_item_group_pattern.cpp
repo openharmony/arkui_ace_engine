@@ -33,7 +33,7 @@ RefPtr<NodePaintMethod> ListItemGroupPattern::CreateNodePaintMethod()
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     auto lanes = listLayoutProperty->GetLanes().value_or(1);
     auto drawVertical = (axis == Axis::HORIZONTAL);
-    return MakeRefPtr<ListItemGroupPaintMethod>(divider, drawVertical, lanes, itemPosition_);
+    return MakeRefPtr<ListItemGroupPaintMethod>(divider, drawVertical, lanes, spaceWidth_, itemPosition_);
 }
 
 bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -46,6 +46,7 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     auto layoutAlgorithm = DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     itemPosition_ = layoutAlgorithm->GetItemPosition();
+    spaceWidth_ = layoutAlgorithm->GetSpaceWidth();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto listLayoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();

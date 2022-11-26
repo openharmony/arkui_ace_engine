@@ -29,10 +29,6 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
-} // namespace
-
 void ListPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -81,9 +77,8 @@ void ListPattern::OnModifyDone()
     }
     SetScrollBar();
     auto focusHub = host->GetFocusHub();
-    if (focusHub) {
-        InitOnKeyEvent(focusHub);
-    }
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
 }
 
 bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -91,6 +86,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
+    bool isJump = false;
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto listLayoutAlgorithm = DynamicCast<ListLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
@@ -102,6 +98,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         if (!itemPosition_.empty()) {
             currentOffset_ = itemPosition_.begin()->second.startPos;
         }
+        isJump = true;
         jumpIndex_.reset();
     }
     auto finalOffset = listLayoutAlgorithm->GetCurrentOffset();
@@ -124,9 +121,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
     startIndex_ = listLayoutAlgorithm->GetStartIndex();
     endIndex_ = listLayoutAlgorithm->GetEndIndex();
-    if (currentOffset_ != lastOffset_) {
-        ProcessEvent(indexChanged, finalOffset);
-    }
+    ProcessEvent(indexChanged, finalOffset, isJump);
     UpdateScrollBarOffset();
 
     auto host = GetHost();
@@ -135,7 +130,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     return (listLayoutProperty && listLayoutProperty->GetDivider().has_value()) || scrollBar_;
 }
 
-void ListPattern::ProcessEvent(bool indexChanged, float finalOffset)
+void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -143,7 +138,7 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset)
     CHECK_NULL_VOID(listEventHub);
 
     auto onScroll = listEventHub->GetOnScroll();
-    if (onScroll) {
+    if (onScroll && !NearZero(finalOffset)) {
         auto source = GetScrollState();
         auto offsetPX = Dimension(finalOffset);
         auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
@@ -163,9 +158,10 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset)
         }
     }
 
-    bool scrollUpToCrossLine = GreatNotEqual(lastOffset_, 0.0) && LessOrEqual(currentOffset_, 0.0);
-    bool scrollDownToCrossLine = LessNotEqual(lastOffset_, 0.0) && GreatOrEqual(currentOffset_, 0.0);
-    if ((startIndex_ == 0) && (scrollUpToCrossLine || scrollDownToCrossLine)) {
+    bool scrollUpToStart = GreatNotEqual(lastOffset_, 0.0) && LessOrEqual(currentOffset_, 0.0);
+    bool scrollDownToStart = LessNotEqual(lastOffset_, 0.0) && GreatOrEqual(currentOffset_, 0.0);
+    bool jumpToStart = isJump && NearZero(currentOffset_);
+    if ((startIndex_ == 0) && (scrollUpToStart || scrollDownToStart || jumpToStart)) {
         auto onReachStart = listEventHub->GetOnReachStart();
         if (onReachStart) {
             onReachStart();
@@ -174,13 +170,21 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset)
     auto onReachEnd = listEventHub->GetOnReachEnd();
     if (onReachEnd) {
         float lastEndPos = endMainPos_ - (currentOffset_ - lastOffset_);
-        bool scrollUpToEnd = GreatNotEqual(lastEndPos, GetMainContentSize()) &&
-            LessOrEqual(endMainPos_, GetMainContentSize());
-        bool scrollDownToEnd = LessNotEqual(lastEndPos, GetMainContentSize()) &&
-            GreatOrEqual(endMainPos_, GetMainContentSize());
-        if ((endIndex_ == maxListItemIndex_) && (scrollUpToEnd || scrollDownToEnd)) {
+        float mainSize = GetMainContentSize();
+        bool scrollUpToEnd = GreatNotEqual(lastEndPos, mainSize) && LessOrEqual(endMainPos_, mainSize);
+        bool scrollDownToEnd = LessNotEqual(lastEndPos, mainSize) && GreatOrEqual(endMainPos_, mainSize);
+        bool jumpToEnd = isJump && NearEqual(endMainPos_, mainSize);
+        if ((endIndex_ == maxListItemIndex_) && (scrollUpToEnd || scrollDownToEnd || jumpToEnd)) {
             onReachEnd();
         }
+    }
+
+    if (scrollStop_) {
+        auto onScrollStop = listEventHub->GetOnScrollStop();
+        if (onScrollStop) {
+            onScrollStop();
+        }
+        scrollStop_ = false;
     }
 }
 
@@ -203,9 +207,8 @@ void ListPattern::CheckScrollable()
         }
     }
 
-    if (scrollableEvent_) {
-        scrollableEvent_->SetEnabled(scrollable_);
-    }
+    CHECK_NULL_VOID(scrollableEvent_);
+    scrollableEvent_->SetEnabled(scrollable_);
 }
 
 RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
@@ -287,16 +290,11 @@ bool ListPattern::UpdateCurrentOffset(float offset)
 
 void ListPattern::ProcessScrollEnd()
 {
+    isScrollContent_ = true;
+    scrollStop_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listEventHub = host->GetEventHub<ListEventHub>();
-    CHECK_NULL_VOID(listEventHub);
-    auto onScrollStop = listEventHub->GetOnScrollStop();
-    if (onScrollStop) {
-        onScrollStop();
-    }
-    isScrollContent_ = true;
-    SetScrollStop(true);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 float ListPattern::GetMainContentSize() const
@@ -344,7 +342,6 @@ void ListPattern::InitScrollableEvent()
     auto task = [weak = WeakClaim(this)](double offset, int32_t source) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        pattern->SetScrollStop(false);
         pattern->SetScrollState(source);
         if (source != SCROLL_FROM_START) {
             if (!pattern->isScrollContent_ && pattern->scrollBar_) {
@@ -398,10 +395,8 @@ void ListPattern::SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffe
         CHECK_NULL_VOID(springEffect);
         springEffect->SetOutBoundaryCallback([weak = AceType::WeakClaim(this)]() {
             auto list = weak.Upgrade();
-            if (list) {
-                return list->IsOutOfBoundary();
-            }
-            return false;
+            CHECK_NULL_RETURN(list, false);
+            return list->IsOutOfBoundary();
         });
         // add callback to springEdgeEffect
         SetEdgeEffectCallback(scrollEffect);
@@ -413,10 +408,8 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
 {
     scrollEffect->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
-        if (list) {
-            return list->startMainPos_ - list->currentDelta_;
-        }
-        return 0.0;
+        CHECK_NULL_RETURN(list, 0.0);
+        return list->startMainPos_ - list->currentDelta_;
     });
     scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
@@ -434,10 +427,8 @@ void ListPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        if (pattern) {
-            return pattern->OnKeyEvent(event);
-        }
-        return false;
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 }
@@ -493,7 +484,7 @@ bool ListPattern::HandleDirectionKey(KeyCode code)
     return false;
 }
 
-void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool limitDuration)
+void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve)
 {
     LOGI("AnimateTo:%f, duration:%f", position, duration);
     if (!animator_) {
@@ -507,13 +498,12 @@ void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
     auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(GetTotalOffset(), position, curve);
     animation->AddListener([weakScroll = AceType::WeakClaim(this)](float value) {
         auto list = weakScroll.Upgrade();
-        if (list) {
-            list->SetScrollState(SCROLL_FROM_JUMP);
-            list->UpdateCurrentOffset(list->GetTotalOffset() - value);
-        }
+        CHECK_NULL_VOID(list);
+        list->SetScrollState(SCROLL_FROM_JUMP);
+        list->UpdateCurrentOffset(list->GetTotalOffset() - value);
     });
     animator_->AddInterpolator(animation);
-    animator_->SetDuration(static_cast<int32_t>(limitDuration ? std::min(duration, SCROLL_MAX_TIME) : duration));
+    animator_->SetDuration(static_cast<int32_t>(duration));
     animator_->Play();
 }
 
@@ -603,9 +593,7 @@ void ListPattern::SetScrollBar()
 
 void ListPattern::UpdateScrollBarOffset()
 {
-    if (!scrollBar_) {
-        return;
-    }
+    CHECK_NULL_VOID(scrollBar_);
     if (itemPosition_.empty()) {
         return;
     }

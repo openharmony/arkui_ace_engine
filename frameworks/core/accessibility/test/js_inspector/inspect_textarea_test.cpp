@@ -28,6 +28,34 @@ class InspectTextAreaTest : public testing::Test {
 public:
     static void SetUpTestSuite() {};
     static void TearDownTestSuite() {};
+
+    void CheckTextAreaAttrAndStyle(InspectTextArea& inspectTextArea, uint16_t attrsSize, uint16_t stylesSize)
+    {
+        uint16_t attrsSizeInsert = 4;
+        uint16_t stylesSizeInsert = 3;
+        uint16_t insertThree = 3;
+        DeviceType deviceType = SystemProperties::GetDeviceType();
+        EXPECT_EQ(inspectTextArea.attrs_["extend"], "false");
+        EXPECT_EQ(inspectTextArea.attrs_["showcounter"], "false");
+        EXPECT_EQ(inspectTextArea.attrs_["disabled"], "false");
+        EXPECT_EQ(inspectTextArea.attrs_["focusable"], "true");
+        if (deviceType == DeviceType::PHONE) {
+            EXPECT_EQ(inspectTextArea.styles_["color"], "#e6000000");
+            EXPECT_EQ(inspectTextArea.styles_["font-size"], "16px");
+            EXPECT_EQ(inspectTextArea.styles_["placeholder-color"], "#99000000");
+            stylesSizeInsert += insertThree;
+        } else if (deviceType == DeviceType::TV) {
+            EXPECT_EQ(inspectTextArea.styles_["color"], "#e6ffffff");
+            EXPECT_EQ(inspectTextArea.styles_["font-size"], "18px");
+            EXPECT_EQ(inspectTextArea.styles_["placeholder-color"], "#99ffffff");
+            stylesSizeInsert += insertThree;
+        }
+        EXPECT_EQ(inspectTextArea.styles_["allow-scale"], "true");
+        EXPECT_EQ(inspectTextArea.styles_["font-weight"], "normal");
+        EXPECT_EQ(inspectTextArea.styles_["font-family"], "sans-serif");
+        EXPECT_EQ(inspectTextArea.attrs_.size(), attrsSize + attrsSizeInsert);
+        EXPECT_EQ(inspectTextArea.styles_.size(), stylesSize + stylesSizeInsert);
+    }
 };
 
 /**
@@ -53,24 +81,16 @@ HWTEST_F(InspectTextAreaTest, InspectTextAreaTest002, TestSize.Level1)
 {
     NodeId nodeId = -1;
     std::string tag = "tagTest";
-    InspectTextArea inspectTextArea(nodeId, tag);
-    auto attrsSize = inspectTextArea.attrs_.size();
-    auto stylesSize = inspectTextArea.styles_.size();
-    uint16_t attrsSizeInsert = 4;
-    uint16_t stylesSizeInsert = 6;
-
-    inspectTextArea.PackAttrAndStyle();
-    EXPECT_EQ(inspectTextArea.attrs_.size(), attrsSize + attrsSizeInsert);
-    EXPECT_EQ(inspectTextArea.attrs_["extend"], "false");
-    EXPECT_EQ(inspectTextArea.attrs_["showcounter"], "false");
-    EXPECT_EQ(inspectTextArea.attrs_["disabled"], "false");
-    EXPECT_EQ(inspectTextArea.attrs_["focusable"], "true");
-    EXPECT_EQ(inspectTextArea.styles_.size(), stylesSize + stylesSizeInsert);
-    EXPECT_EQ(inspectTextArea.styles_["color"], "#e6000000");
-    EXPECT_EQ(inspectTextArea.styles_["font-size"], "16px");
-    EXPECT_EQ(inspectTextArea.styles_["placeholder-color"], "#99000000");
-    EXPECT_EQ(inspectTextArea.styles_["allow-scale"], "true");
-    EXPECT_EQ(inspectTextArea.styles_["font-weight"], "normal");
-    EXPECT_EQ(inspectTextArea.styles_["font-family"], "sans-serif");
+    uint16_t typeNum = 6;
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    for (uint16_t i = 0; i < typeNum; i++) {
+        InspectTextArea inspectTextArea(nodeId, tag);
+        auto attrsSize = inspectTextArea.attrs_.size();
+        auto stylesSize = inspectTextArea.styles_.size();
+        SystemProperties::SetDeviceType(static_cast<DeviceType>(i));
+        inspectTextArea.PackAttrAndStyle();
+        CheckTextAreaAttrAndStyle(inspectTextArea, attrsSize, stylesSize);
+    }
+    SystemProperties::SetDeviceType(deviceType);
 }
 } // namespace OHOS::Ace::Framework

@@ -18,6 +18,9 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
+#include "frameworks/core/components/navigation_bar/navigation_container_component.h"
+#include "frameworks/core/components_ng/pattern/navigation/navigation_declaration.h"
+
 namespace OHOS::Ace::Framework {
 
 class JSNavigation : public JSContainerBase {
@@ -40,6 +43,11 @@ public:
     static void SetHideNavBar(bool hide);
     static void SetBackButtonIcon(const JSCallbackInfo& info);
     static void SetOnNavBarStateChange(const JSCallbackInfo& info);
+
+    static void ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<ToolBarItem>>& items);
+    static void ParseBarItems(
+        const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items);
+    static bool ParseCommonTitle(const JSRef<JSVal>& jsValue);
 };
 
 } // namespace OHOS::Ace::Framework

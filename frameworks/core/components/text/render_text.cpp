@@ -174,8 +174,29 @@ void RenderText::UpdateAccessibilityText()
     accessibilityNode->SetIsMultiLine(GetTextLines() > 1);
 }
 
+bool RenderText::IsDeclarativePara()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return false;
+    }
+
+    return context->GetIsDeclarative();
+}
+
 void RenderText::PerformLayout()
 {
+    // When the constraint is set, minHeight is reset to 0.0,
+    // and the occupied height is controlled by the parent node box
+    if (IsDeclarativePara()) {
+        LayoutParam layoutParam = GetLayoutParam();
+        auto minWidth = layoutParam.GetMinSize().Width();
+        auto minHeight = layoutParam.GetMinSize().Height();
+        if (GreatNotEqual(minHeight, 0.0f)) {
+            layoutParam.SetMinSize(Size(minWidth, 0.0f));
+            SetLayoutParam(layoutParam);
+        }
+    }
     auto pipelineContext = GetContext().Upgrade();
     if ((textStyle_.IsAllowScale() || textStyle_.GetFontSize().Unit() == DimensionUnit::FP) && pipelineContext &&
         !NearEqual(fontScale_, pipelineContext->GetFontScale())) {

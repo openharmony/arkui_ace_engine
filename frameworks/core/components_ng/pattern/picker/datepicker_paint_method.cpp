@@ -51,9 +51,8 @@ CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
         OffsetF offsetY = OffsetF(0.0f, downLine);
         dividerPainter.DrawLine(canvas, offsetY);
         auto picker = weak.Upgrade();
-        if (picker) {
-            picker->PaintGradient(canvas, frameRect);
-        }
+        CHECK_NULL_VOID(picker);
+        picker->PaintGradient(canvas, frameRect);
     };
 }
 

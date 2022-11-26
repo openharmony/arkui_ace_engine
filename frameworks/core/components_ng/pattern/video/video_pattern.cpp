@@ -53,27 +53,119 @@ constexpr uint32_t CURRENT_POS = 1;
 constexpr uint32_t SLIDER_POS = 2;
 constexpr uint32_t DURATION_POS = 3;
 constexpr uint32_t FULL_SCREEN_POS = 4;
+constexpr int32_t AVERAGE_VALUE = 2;
 enum SliderChangeMode {
     BEGIN = 0,
     MOVING,
     END,
 };
+
 std::string IntTimeToText(uint32_t time)
 {
     bool needShowHour = time > SECONDS_PER_HOUR;
     return Localization::GetInstance()->FormatDuration(time, needShowHour);
 }
-float CalControlBarHeight()
+
+SizeF CalculateFitContain(const SizeF& videoSize, const SizeF& layoutSize)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, 0.0f);
-    auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
-    CHECK_NULL_RETURN(videoTheme, 0.0f);
-    auto controlsHeight =
-        pipelineContext->NormalizeToPx(Dimension(videoTheme->GetBtnSize().Height(), DimensionUnit::VP));
-    controlsHeight += pipelineContext->NormalizeToPx(videoTheme->GetBtnEdge().Top());
-    controlsHeight += pipelineContext->NormalizeToPx(videoTheme->GetBtnEdge().Bottom());
-    return static_cast<float>(controlsHeight);
+    double layoutRatio = NearZero(layoutSize.Height()) ? 0.0 : layoutSize.Width() / layoutSize.Height();
+    double sourceRatio = NearZero(videoSize.Height()) ? layoutRatio : videoSize.Width() / videoSize.Height();
+
+    if (NearZero(layoutRatio) || NearZero(sourceRatio)) {
+        return layoutSize;
+    }
+    if (sourceRatio < layoutRatio) {
+        return { static_cast<float>(sourceRatio) * layoutSize.Height(), layoutSize.Height() };
+    }
+    return { layoutSize.Width(), static_cast<float>(layoutSize.Width() / sourceRatio) };
+}
+
+SizeF CalculateFitFill(const SizeF& layoutSize)
+{
+    return layoutSize;
+}
+
+SizeF CalculateFitCover(const SizeF& videoSize, const SizeF& layoutSize)
+{
+    double layoutRatio = NearZero(layoutSize.Height()) ? 0.0 : layoutSize.Width() / layoutSize.Height();
+    double sourceRatio = NearZero(videoSize.Height()) ? layoutRatio : videoSize.Width() / videoSize.Height();
+
+    if (NearZero(layoutRatio) || NearZero(sourceRatio)) {
+        return layoutSize;
+    }
+    if (sourceRatio < layoutRatio) {
+        return { layoutSize.Width(), static_cast<float>(layoutSize.Width() / sourceRatio) };
+    }
+    return { static_cast<float>(layoutSize.Height() * sourceRatio), layoutSize.Height() };
+}
+
+SizeF CalculateFitNone(const SizeF& videoSize)
+{
+    return videoSize;
+}
+
+SizeF CalculateFitScaleDown(const SizeF& videoSize, const SizeF& layoutSize)
+{
+    if (layoutSize.Width() > videoSize.Width()) {
+        return CalculateFitNone(videoSize);
+    }
+    return CalculateFitContain(videoSize, layoutSize);
+}
+
+SizeF ConstraintSize(const SizeF& contentSize, const SizeF& layoutSize)
+{
+    if (contentSize.Width() <= layoutSize.Width() && contentSize.Height() <= layoutSize.Height()) {
+        return contentSize;
+    }
+
+    double widthRatio = contentSize.Width() / layoutSize.Width();
+    double heightRatio = contentSize.Height() / layoutSize.Height();
+    double rightRatio;
+    if (widthRatio <= 1) {
+        rightRatio = heightRatio;
+    } else if (heightRatio <= 1) {
+        rightRatio = widthRatio;
+    } else {
+        rightRatio = widthRatio > heightRatio ? heightRatio : heightRatio;
+    }
+
+    return { static_cast<float>(contentSize.Width() / rightRatio),
+        static_cast<float>(contentSize.Height() / rightRatio) };
+}
+
+SizeF MeasureVideoContentLayout(const SizeF& layoutSize, const RefPtr<VideoLayoutProperty>& layoutProperty)
+{
+    if (!layoutProperty || !layoutProperty->HasVideoSize()) {
+        LOGW("VideoSize has not set");
+        return layoutSize;
+    }
+
+    auto videoSize = layoutProperty->GetVideoSizeValue(SizeF(0, 0));
+    LOGD("VideoSize = %{public}s", videoSize.ToString().c_str());
+    auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
+    SizeF contentSize = { 0.0, 0.0 };
+    switch (imageFit) {
+        case ImageFit::CONTAIN:
+            contentSize = CalculateFitContain(videoSize, layoutSize);
+            break;
+        case ImageFit::FILL:
+            contentSize = CalculateFitFill(layoutSize);
+            break;
+        case ImageFit::COVER:
+            contentSize = CalculateFitCover(videoSize, layoutSize);
+            break;
+        case ImageFit::NONE:
+            contentSize = CalculateFitNone(videoSize);
+            break;
+        case ImageFit::SCALE_DOWN:
+            contentSize = CalculateFitScaleDown(videoSize, layoutSize);
+            break;
+        default:
+            contentSize = CalculateFitContain(videoSize, layoutSize);
+    }
+
+    // The video frame area should not be greater than the video component area.
+    return ConstraintSize(contentSize, layoutSize);
 }
 } // namespace
 
@@ -265,7 +357,7 @@ void VideoPattern::OnPrepared(double width, double height, uint32_t duration, ui
     auto videoLayoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
     videoLayoutProperty->UpdateVideoSize(SizeF(static_cast<float>(width), static_cast<float>(height)));
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    auto needControlBar = videoLayoutProperty->GetControlsValue(false);
+    auto needControlBar = videoLayoutProperty->GetControlsValue(true);
 
     duration_ = duration;
     currentPos_ = currentPos;
@@ -364,7 +456,7 @@ void VideoPattern::OnUpdateTime(uint32_t time, int pos) const
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    bool needControlBar = layoutProperty->GetControlsValue(false);
+    bool needControlBar = layoutProperty->GetControlsValue(true);
     if (needControlBar) {
         RefPtr<UINode> controlBar = nullptr;
         auto children = host->GetChildren();
@@ -414,7 +506,7 @@ void VideoPattern::OnAttachToFrameNode()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContextForMediaPlayer_->InitContext(false, "MediaPlayerSurface");
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
 }
 
@@ -463,7 +555,7 @@ void VideoPattern::AddControlBarNodeIfNeeded()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto children = host->GetChildren();
-    if (layoutProperty->GetControlsValue(false)) {
+    if (layoutProperty->GetControlsValue(true)) {
         bool isExist = false;
         for (const auto& child : children) {
             if (child->GetTag() == V2::ROW_ETS_TAG) {
@@ -519,17 +611,20 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
+
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
-    auto size = geometryNode->GetContentSize();
-    auto offset = geometryNode->GetContentOffset();
-    auto controlBarHeight = 0.0f;
+    auto videoNodeSize = geometryNode->GetContentSize();
+    auto videoNodeOffset = geometryNode->GetContentOffset();
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
-    if (layoutProperty->GetControlsValue(false)) {
-        controlBarHeight = CalControlBarHeight();
-    }
-    size.MinusHeight(controlBarHeight);
-    renderContextForMediaPlayer_->SetBounds(offset.GetX(), offset.GetY(), size.Width(), size.Height());
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
+    // Change the surface layout for drawing video frames
+    renderContextForMediaPlayer_->SetBounds(
+        videoNodeOffset.GetX() + (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+        videoNodeOffset.GetY() + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+        videoFrameSize.Width(),
+        videoFrameSize.Height());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     host->MarkNeedSyncRenderTree();
@@ -915,26 +1010,50 @@ void VideoPattern::OnFullScreenChange(bool isFullScreen)
 
 void VideoPattern::FullScreen()
 {
+    if (isFullScreen_) {
+        LOGE("The video is already full screen when FullScreen");
+        return;
+    }
+
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    OnFullScreenChange(true);
     auto fullScreenManager = context->GetFullScreenManager();
     CHECK_NULL_VOID(fullScreenManager);
     fullScreenManager->RequestFullScreen(host);
+    isFullScreen_ = true;
+    OnFullScreenChange(true);
 }
 
 void VideoPattern::ExitFullScreen()
 {
+    if (!isFullScreen_) {
+        LOGE("The video is not full screen when ExitFullScreen");
+        return;
+    }
+
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    OnFullScreenChange(false);
     auto fullScreenManager = context->GetFullScreenManager();
     CHECK_NULL_VOID(fullScreenManager);
     fullScreenManager->ExitFullScreen(host);
+    isFullScreen_ = false;
+    OnFullScreenChange(false);
+}
+
+bool VideoPattern::OnBackPressed()
+{
+    if (!isFullScreen_) {
+        LOGE("The video is not full screen when OnBackPressed");
+        return false;
+    }
+
+    LOGI("Exit full screen when OnBackPressed");
+    ExitFullScreen();
+    return true;
 }
 
 } // namespace OHOS::Ace::NG

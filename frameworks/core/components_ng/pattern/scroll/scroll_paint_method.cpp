@@ -27,10 +27,9 @@ CanvasDrawFunction ScrollPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
 {
     auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto scroll = weak.Upgrade();
-        if (scroll) {
-            scroll->PaintScrollBar(canvas, paintWrapper);
-            scroll->PaintScrollEffect(canvas, paintWrapper);
-        }
+        CHECK_NULL_VOID(scroll);
+        scroll->PaintScrollBar(canvas, paintWrapper);
+        scroll->PaintScrollEffect(canvas, paintWrapper);
     };
 
     return paintFunc;
@@ -44,7 +43,8 @@ void ScrollPaintMethod::PaintScrollBar(RSCanvas& canvas, PaintWrapper* paintWrap
 
     auto scrollBar = paintProperty->GetScrollBar();
     CHECK_NULL_VOID(scrollBar);
-    if (!scrollBar->NeedScrollBar()) {
+    if (!scrollBar->NeedPaint()) {
+        LOGD("no need paint scroll bar.");
         return;
     }
 

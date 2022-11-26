@@ -19,6 +19,7 @@
 #include "include/core/SkString.h"
 #include "include/utils/SkParsePath.h"
 
+#include "base/utils/utils.h"
 #include "frameworks/core/components/common/painter/flutter_svg_painter.h"
 #include "frameworks/core/components/transform/render_transform.h"
 #include "frameworks/core/components_ng/svg/parse/svg_gradient.h"
@@ -52,9 +53,7 @@ std::string ParseIdFromUrl(const std::string& url)
 
 void SvgNode::SetAttr(const std::string& name, const std::string& value)
 {
-    if (declaration_ == nullptr) {
-        return;
-    }
+    CHECK_NULL_VOID(declaration_);
     if (!declaration_->SetSpecializedAttr(std::make_pair(name, value))) {
         declaration_->SetAttr({ std::make_pair(name, value) });
     }
@@ -62,9 +61,7 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
 
 void SvgNode::InitStyle(const RefPtr<SvgBaseDeclaration>& parent)
 {
-    if (declaration_ == nullptr) {
-        return;
-    }
+    CHECK_NULL_VOID(declaration_);
     Inherit(parent);
     if (hrefFill_) {
         auto href = declaration_->GetFillState().GetHref();
@@ -128,9 +125,7 @@ bool SvgNode::OnCanvas(RSCanvas& canvas)
 {
     // drawing.h api 不完善，直接取用SkCanvas，后续要重写
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
-    if (rsCanvas == nullptr) {
-        return false;
-    }
+    CHECK_NULL_RETURN(rsCanvas, false);
     skCanvas_ = rsCanvas->ExportSkCanvas();
     return skCanvas_ == nullptr ? false : true;
 }
@@ -138,15 +133,9 @@ bool SvgNode::OnCanvas(RSCanvas& canvas)
 void SvgNode::OnClipPath(RSCanvas& canvas, const Size& viewPort)
 {
     auto svgContext = svgContext_.Upgrade();
-    if (!svgContext) {
-        LOGE("OnClipPath failed, svgContext is null");
-        return;
-    }
+    CHECK_NULL_VOID(svgContext);
     auto refSvgNode = svgContext->GetSvgNodeById(hrefClipPath_);
-    if (!refSvgNode) {
-        LOGE("OnClipPath failed, refSvgNode is null");
-        return;
-    }
+    CHECK_NULL_VOID(refSvgNode);
     auto clipPath = refSvgNode->AsPath(viewPort);
     if (clipPath.isEmpty()) {
         LOGW("OnClipPath abandon, clipPath is empty");
@@ -164,15 +153,9 @@ void SvgNode::OnFilter(RSCanvas& canvas, const Size& viewPort)
 void SvgNode::OnMask(RSCanvas& canvas, const Size& viewPort)
 {
     auto svgContext = svgContext_.Upgrade();
-    if (!svgContext) {
-        LOGE("OnMask failed, svgContext is null");
-        return;
-    }
+    CHECK_NULL_VOID(svgContext);
     auto refMask = svgContext->GetSvgNodeById(hrefMaskId_);
-    if (!refMask) {
-        LOGE("OnMask failed, refMask is null");
-        return;
-    }
+    CHECK_NULL_VOID(refMask);
     refMask->Draw(canvas, viewPort, std::nullopt);
     return;
 }
@@ -232,18 +215,12 @@ double SvgNode::ConvertDimensionToPx(const Dimension& value, double baseValue) c
 std::optional<Gradient> SvgNode::GetGradient(const std::string& href)
 {
     auto svgContext = svgContext_.Upgrade();
-    if (!svgContext) {
-        LOGE("Gradient failed, svgContext is null");
-        return std::nullopt;
-    }
+    CHECK_NULL_RETURN(svgContext, std::nullopt);
     if (href.empty()) {
         return std::nullopt;
     }
     auto refSvgNode = svgContext->GetSvgNodeById(href);
-    if (!refSvgNode) {
-        LOGE("refSvgNode is null");
-        return std::nullopt;
-    }
+    CHECK_NULL_RETURN(refSvgNode, std::nullopt);
     auto svgGradient = DynamicCast<SvgGradient>(refSvgNode);
     if (svgGradient) {
         return std::make_optional(svgGradient->GetGradient());

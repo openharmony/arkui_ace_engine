@@ -17,4 +17,14 @@
 
 namespace OHOS::Ace::NG {
 void RecognizerGroup::AddChildren(const std::list<RefPtr<NGGestureRecognizer>>& recognizers) {}
+
+void RecognizerGroup::OnFlushTouchEventsBegin() {}
+
+void RecognizerGroup::OnFlushTouchEventsEnd() {}
+
+void RecognizerGroup::OnBeginGestureReferee(int32_t touchId, bool needUpdateChild) {}
+
+void RecognizerGroup::OnFinishGestureReferee(int32_t touchId) {}
+
+void RecognizerGroup::OnResetStatus() {}
 } // namespace OHOS::Ace::NG

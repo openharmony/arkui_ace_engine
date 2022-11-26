@@ -44,11 +44,35 @@ void StepperPattern::OnModifyDone()
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
     CHECK_NULL_VOID(swiperNode);
+    auto swiperEventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(swiperEventHub);
     auto stepperLayoutProperty = hostNode->GetLayoutProperty<StepperLayoutProperty>();
     index_ = static_cast<int32_t>(stepperLayoutProperty->GetIndex().value_or(0));
     maxIndex_ = TotalCount() - 1;
+    InitSwiperChangeEvent(swiperEventHub);
     InitButtonClickEvent(leftGestureHub, rightGestureHub, swiperNode);
-    UpdateButtonText();
+    UpdateButtonText(index_);
+}
+
+void StepperPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+}
+
+void StepperPattern::InitSwiperChangeEvent(const RefPtr<SwiperEventHub>& swiperEventHub)
+{
+    ChangeEvent changeEvent = [weak = WeakClaim(this)](int32_t index) {
+        auto stepperPattern = weak.Upgrade();
+        stepperPattern->UpdateButtonText(index);
+    };
+    if (swiperChangeEvent_) {
+        (*swiperChangeEvent_).swap(changeEvent);
+    } else {
+        swiperChangeEvent_ = std::make_shared<ChangeEvent>(std::move(changeEvent));
+        swiperEventHub->AddOnChangeEvent(swiperChangeEvent_);
+    }
 }
 
 void StepperPattern::InitButtonClickEvent(const RefPtr<GestureEventHub>& leftGestureHub,
@@ -57,16 +81,12 @@ void StepperPattern::InitButtonClickEvent(const RefPtr<GestureEventHub>& leftGes
     if (!leftClickEvent_) {
         auto clickEvent = [swiperNode, weak = WeakClaim(this)](const GestureEvent& info) {
             auto stepperPattern = weak.Upgrade();
-            if (!stepperPattern) {
-                return;
-            }
+            CHECK_NULL_VOID(stepperPattern);
             stepperPattern->HandlingButtonClickEvent(true, swiperNode);
             auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-            if (swiperPattern) {
-                auto swiperController = swiperPattern->GetSwiperController();
-                swiperController->ShowPrevious();
-                stepperPattern->UpdateButtonText();
-            }
+            CHECK_NULL_VOID(swiperPattern);
+            auto swiperController = swiperPattern->GetSwiperController();
+            swiperController->ShowPrevious();
         };
         leftGestureHub->RemoveClickEvent(leftClickEvent_);
         leftClickEvent_ = MakeRefPtr<ClickEvent>(std::move(clickEvent));
@@ -76,16 +96,12 @@ void StepperPattern::InitButtonClickEvent(const RefPtr<GestureEventHub>& leftGes
     if (!rightClickEvent_) {
         auto clickEvent = [swiperNode, weak = WeakClaim(this)](const GestureEvent& info) {
             auto stepperPattern = weak.Upgrade();
-            if (!stepperPattern) {
-                return;
-            }
+            CHECK_NULL_VOID(stepperPattern);
             stepperPattern->HandlingButtonClickEvent(false, swiperNode);
             auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-            if (swiperPattern) {
-                auto swiperController = swiperPattern->GetSwiperController();
-                swiperController->ShowNext();
-                stepperPattern->UpdateButtonText();
-            }
+            CHECK_NULL_VOID(swiperPattern);
+            auto swiperController = swiperPattern->GetSwiperController();
+            swiperController->ShowNext();
         };
         rightGestureHub->RemoveClickEvent(rightClickEvent_);
         rightClickEvent_ = MakeRefPtr<ClickEvent>(std::move(clickEvent));
@@ -130,7 +146,7 @@ void StepperPattern::HandlingButtonClickEvent(bool isLeft, const RefPtr<FrameNod
     }
 }
 
-void StepperPattern::UpdateButtonText()
+void StepperPattern::UpdateButtonText(int32_t index)
 {
     auto hostNode = DynamicCast<StepperNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
@@ -148,12 +164,12 @@ void StepperPattern::UpdateButtonText()
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
     CHECK_NULL_VOID(swiperNode);
     // Get the LayoutProperty of the current StepperItemNode
-    index_ = swiperNode->GetPattern<SwiperPattern>()->GetCurrentIndex();
+    index_ = index;
     auto StepperItemNode = DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(static_cast<int32_t>(index_)));
     CHECK_NULL_VOID(StepperItemNode);
     auto stepperItemLayoutProperty = StepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>();
     // Set the text of the leftButton
-    std::string buttonBackText = "< " + Localization::GetInstance()->GetEntryLetters("stepper.back");
+    std::string buttonBackText = Localization::GetInstance()->GetEntryLetters("stepper.back");
     auto leftLabel = stepperItemLayoutProperty->GetLeftLabel().value_or(index_ == 0 ? "" : buttonBackText);
     leftTextNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(leftLabel);
     leftTextNode->MarkModifyDone();
@@ -167,7 +183,7 @@ void StepperPattern::UpdateButtonText()
     } else if (index_ == maxIndex_) {
         rightLabel = stepperItemLayoutProperty->GetRightLabel().value_or(buttonStartText);
     } else {
-        rightLabel = stepperItemLayoutProperty->GetRightLabel().value_or(buttonNextText) + " >";
+        rightLabel = stepperItemLayoutProperty->GetRightLabel().value_or(buttonNextText);
     }
     rightTextNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(rightLabel);
     rightTextNode->MarkModifyDone();

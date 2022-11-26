@@ -91,6 +91,7 @@ void OnTextChangedListenerImpl::HandleKeyboardStatus(MiscServices::KeyboardStatu
 
 void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey functionKey)
 {
+    LOGI("[OnTextChangedListenerImpl] Handle function key %{public}d", static_cast<int32_t>(functionKey));
     auto task = [textField = pattern_, functionKey] {
         auto client = textField.Upgrade();
         if (!client) {
@@ -117,6 +118,7 @@ void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey func
 
 void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
 {
+    LOGI("[OnTextChangedListenerImpl] move cursor %{public}d", static_cast<int32_t>(direction));
     auto task = [textField = pattern_, direction] {
         auto client = textField.Upgrade();
         if (!client) {

@@ -44,6 +44,9 @@ ShapeAbstractModel* ShapeAbstractModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+namespace {
+    constexpr double DEFAULT_OPACITY = 1.0;
+} // namespace
 
 void JSShapeAbstract::SetStrokeDashArray(const JSCallbackInfo& info)
 {
@@ -147,10 +150,8 @@ void JSShapeAbstract::SetStrokeOpacity(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    double strokeOpacity;
-    if (!ParseJsDouble(info[0], strokeOpacity)) {
-        return;
-    }
+    double strokeOpacity = DEFAULT_OPACITY;
+    ParseJsDouble(info[0], strokeOpacity);
     ShapeAbstractModel::GetInstance()->SetStrokeOpacity(strokeOpacity);
 }
 
@@ -160,10 +161,8 @@ void JSShapeAbstract::SetFillOpacity(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    double fillOpacity;
-    if (!ParseJsDouble(info[0], fillOpacity)) {
-        return;
-    }
+    double fillOpacity = DEFAULT_OPACITY;
+    ParseJsDouble(info[0], fillOpacity);
     ShapeAbstractModel::GetInstance()->SetFillOpacity(fillOpacity);
 }
 
@@ -174,7 +173,36 @@ void JSShapeAbstract::SetStrokeWidth(const JSCallbackInfo& info)
         return;
     }
     Dimension lineWidth;
-    if (!ParseJsDimensionVp(info[0], lineWidth)) {
+    // reference string_utils.h StringToDimensionWithUnit()
+    if (info[0]->IsString()) {
+        const std::string& value = info[0]->ToString();
+        errno = 0;
+        char* pEnd = nullptr;
+        double result = std::strtod(value.c_str(), &pEnd);
+
+        if (pEnd == value.c_str() || errno == ERANGE) {
+            lineWidth = Dimension(1.0, DimensionUnit::VP);
+        } else {
+            lineWidth = Dimension(result, DimensionUnit::VP);
+            if (pEnd != nullptr) {
+                if (std::strcmp(pEnd, "%") == 0) {
+                    // Parse percent, transfer from [0, 100] to [0, 1]
+                    lineWidth = Dimension(result / 100.0, DimensionUnit::PERCENT);
+                } else if (std::strcmp(pEnd, "px") == 0) {
+                    lineWidth = Dimension(result, DimensionUnit::PX);
+                } else if (std::strcmp(pEnd, "vp") == 0) {
+                    lineWidth = Dimension(result, DimensionUnit::VP);
+                } else if (std::strcmp(pEnd, "fp") == 0) {
+                    lineWidth = Dimension(result, DimensionUnit::FP);
+                } else if (std::strcmp(pEnd, "lpx") == 0) {
+                    lineWidth = Dimension(result, DimensionUnit::LPX);
+                }
+            }
+        }
+        if (std::strcmp(value.c_str(), "auto") == 0) {
+            lineWidth = Dimension(1.0, DimensionUnit::AUTO);
+        }
+    } else if (!ParseJsDimensionVp(info[0], lineWidth)) {
         return;
     }
     if (GreatOrEqual(lineWidth.Value(), 0.0)) {

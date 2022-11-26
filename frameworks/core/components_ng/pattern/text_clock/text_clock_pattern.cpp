@@ -64,24 +64,23 @@ void TextClockPattern::OnModifyDone()
 
 void TextClockPattern::InitTextClockController()
 {
-    if (textClockController_) {
-        if (textClockController_->HasInitialized()) {
+    CHECK_NULL_VOID(textClockController_);
+    if (textClockController_->HasInitialized()) {
             return;
-        }
-        textClockController_->OnStart([wp = WeakClaim(this)]() {
-            auto textClock = wp.Upgrade();
-            if (textClock) {
-                textClock->isStart_ = true;
-                textClock->UpdateTimeText();
-            }
-        });
-        textClockController_->OnStop([wp = WeakClaim(this)]() {
-            auto textClock = wp.Upgrade();
-            if (textClock) {
-                textClock->isStart_ = false;
-            }
-        });
     }
+    textClockController_->OnStart([wp = WeakClaim(this)]() {
+        auto textClock = wp.Upgrade();
+        if (textClock) {
+            textClock->isStart_ = true;
+            textClock->UpdateTimeText();
+        }
+    });
+    textClockController_->OnStop([wp = WeakClaim(this)]() {
+        auto textClock = wp.Upgrade();
+        if (textClock) {
+            textClock->isStart_ = false;
+        }
+    });
 }
 
 void TextClockPattern::InitUpdateTimeTextCallBack()
@@ -139,7 +138,8 @@ void TextClockPattern::RequestUpdateForNextSecond()
     context->GetTaskExecutor()->PostDelayedTask(
         [wp = WeakClaim(this)] {
             auto textClock = wp.Upgrade();
-            if (!textClock || !textClock->isStart_) {
+            CHECK_NULL_VOID(textClock);
+            if (!textClock->isStart_) {
                 return;
             }
             textClock->UpdateTimeTextCallBack();
@@ -161,10 +161,7 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     time_t localTime = (hourWest_ == GetSystemTimeZone()) ? utc : utc - (hourWest_ * TOTAL_SECONDS_OF_HOUR);
 
     auto* timeZoneTime = std::localtime(&localTime);
-    if (timeZoneTime == nullptr) {
-        LOGE("Get localtime failed.");
-        return "";
-    }
+    CHECK_NULL_RETURN(timeZoneTime, "");
     // This is for i18n date time.
     DateTime dateTime;
     dateTime.year = timeZoneTime->tm_year + BASE_YEAR;

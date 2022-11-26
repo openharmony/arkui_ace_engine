@@ -27,6 +27,8 @@
 
 namespace OHOS::Ace::NG {
 
+using NavDestinationBackButtonEvent = std::function<void(GestureEvent&)>;
+
 class ACE_EXPORT NavDestinationGroupNode : public GroupNode {
     DECLARE_ACE_TYPE(NavDestinationGroupNode, GroupNode)
 public:
@@ -87,6 +89,16 @@ public:
         return preNode_;
     }
 
+    void SetNavDestinationBackButtonEvent(const NavDestinationBackButtonEvent& backButtonEvent)
+    {
+        backButtonEvent_ = backButtonEvent;
+    }
+
+    NavDestinationBackButtonEvent GetNavDestinationBackButtonEvent() const
+    {
+        return backButtonEvent_;
+    }
+
     // custom node checking
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevTitleIsCustom, bool);
     void OnPrevTitleIsCustomUpdate(bool value) {}
@@ -103,6 +115,7 @@ private:
     RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> preNode_;
+    NavDestinationBackButtonEvent backButtonEvent_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -19,10 +19,14 @@
 #include <cstdint>
 
 namespace OHOS::Ace::Testing {
+using ColorQuad = uint32_t;
 class TestingColor {
 public:
     TestingColor(uint32_t r, uint32_t g, uint32_t b, uint32_t a) {}
+    explicit TestingColor(ColorQuad rgba) {}
     ~TestingColor() = default;
+
+    virtual void Color(ColorQuad rgba) noexcept {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_COLOR_H

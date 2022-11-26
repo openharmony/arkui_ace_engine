@@ -63,6 +63,7 @@ group("unittest") {
         "unittest/cardfrontend/domtext:unittest",
         "unittest/cardfrontend/frontend:unittest",
         "unittest/cardfrontend/mediaquery:unittest",
+        "unittest/common/pluginadapter:unittest",
         "unittest/jsfrontend/dompiece:unittest",
 
         #"unittest/jsfrontend/dompopup:unittest",

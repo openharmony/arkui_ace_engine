@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include <array>
 
 #include "base/utils/utils.h"
 #include "core/components/theme/icon_theme.h"
@@ -164,12 +165,12 @@ void ImagePattern::SetImagePaintConfig(
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto borderRadius = host->GetRenderContext()->GetBorderRadius();
-        std::vector<PointF> radiusXY = { { borderRadius->radiusTopLeft->ConvertToPx(),
-                                             borderRadius->radiusTopLeft->ConvertToPx() },
-            { borderRadius->radiusTopRight->ConvertToPx(), borderRadius->radiusTopRight->ConvertToPx() },
-            { borderRadius->radiusBottomLeft->ConvertToPx(), borderRadius->radiusBottomLeft->ConvertToPx() },
-            { borderRadius->radiusBottomRight->ConvertToPx(), borderRadius->radiusBottomRight->ConvertToPx() } };
-        config.borderRadiusXY_ = std::make_shared<std::vector<PointF>>(std::move(radiusXY));
+        std::array<PointF, 4> radiusXY = { PointF(borderRadius->radiusTopLeft->ConvertToPx(),
+                                               borderRadius->radiusTopLeft->ConvertToPx()),
+            PointF(borderRadius->radiusTopRight->ConvertToPx(), borderRadius->radiusTopRight->ConvertToPx()),
+            PointF(borderRadius->radiusBottomLeft->ConvertToPx(), borderRadius->radiusBottomLeft->ConvertToPx()),
+            PointF(borderRadius->radiusBottomRight->ConvertToPx(), borderRadius->radiusBottomRight->ConvertToPx()) };
+        config.borderRadiusXY_ = std::make_shared<std::array<PointF, 4>>(std::move(radiusXY));
     }
     config.isSvg_ = isSvg;
 
@@ -212,7 +213,10 @@ void ImagePattern::LoadImageDataIfNeed()
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != currentSourceInfo ||
         (currentSourceInfo.IsSvg() && loadingCtx_->GetSvgFillColor() != svgFillColorOpt)) {
         LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
-        loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(currentSourceInfo, std::move(loadNotifier));
+
+        bool syncLoad = imageLayoutProperty->GetSyncModeValue(false);
+        loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(currentSourceInfo, std::move(loadNotifier), syncLoad);
+
         loadingCtx_->SetSvgFillColor(svgFillColorOpt);
         loadingCtx_->LoadImageData();
     }

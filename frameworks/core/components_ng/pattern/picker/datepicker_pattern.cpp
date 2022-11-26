@@ -65,15 +65,13 @@ void DatePickerPattern::OnModifyDone()
     FlushColumn();
     SetChangeCallback([weak = WeakClaim(this)](const RefPtr<FrameNode>& tag, bool add, uint32_t index, bool notify) {
         auto refPtr = weak.Upgrade();
-        if (refPtr) {
-            refPtr->HandleColumnChange(tag, add, index, notify);
-        }
+        CHECK_NULL_VOID(refPtr);
+        refPtr->HandleColumnChange(tag, add, index, notify);
     });
     SetEventCallback([weak = WeakClaim(this)](bool refresh) {
         auto refPtr = weak.Upgrade();
-        if (refPtr) {
-            refPtr->FireChangeEvent(refresh);
-        }
+        CHECK_NULL_VOID(refPtr);
+        refPtr->FireChangeEvent(refresh);
     });
     auto focusHub = host->GetFocusHub();
     if (focusHub) {
@@ -141,10 +139,8 @@ void DatePickerPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        if (pattern) {
-            return pattern->OnKeyEvent(event);
-        }
-        return false;
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 }
@@ -248,7 +244,7 @@ void DatePickerPattern::FireChangeEvent(bool refresh) const
     if (refresh) {
         auto datePickerEventHub = GetEventHub<DatePickerEventHub>();
         CHECK_NULL_VOID(datePickerEventHub);
-        auto str = GetSelectedObject(false);
+        auto str = GetSelectedObject(true);
         auto info = std::make_shared<DatePickerChangeEvent>(str);
         datePickerEventHub->FireChangeEvent(info.get());
         datePickerEventHub->FireDialogChangeEvent(str);
@@ -538,12 +534,7 @@ void DatePickerPattern::HandleLunarMonthChange(bool isAdd, uint32_t index)
     }
 
     auto yearColumn = yearNode->GetPattern<DatePickerColumnPattern>();
-
-    if (!yearColumn) {
-        LOGE("year or month column is null.");
-        return;
-    }
-
+    CHECK_NULL_VOID(yearColumn);
     uint32_t nowLunarYear = startDateLunar_.year + yearColumn->GetCurrentIndex();
     auto lunarDate = GetCurrentLunarDate(nowLunarYear);
     if (isAdd && index == 0) {
@@ -579,10 +570,7 @@ void DatePickerPattern::HandleLunarYearChange(bool isAdd, uint32_t index)
     auto children = host->GetChildren();
     auto iter = children.begin();
     auto year = (*iter);
-    if (!year) {
-        LOGE("year column is null.");
-        return;
-    }
+    CHECK_NULL_VOID(year);
     auto yearColumn = DynamicCast<FrameNode>(year);
     uint32_t lastYearIndex = index;
     auto optionCount = GetOptionCount(yearColumn);

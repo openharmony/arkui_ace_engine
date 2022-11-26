@@ -114,6 +114,12 @@ public:
         return {};
     }
 
+    void AddOnAreaChangeNode(int32_t nodeId);
+
+    void RemoveOnAreaChangeNode(int32_t nodeId);
+
+    void HandleOnAreaChangeEvent();
+
     void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback);
 
     void HandleVisibleAreaChangeEvent();
@@ -156,6 +162,8 @@ public:
     }
 
     bool OnBackPressed();
+
+    RefPtr<FrameNode> GetNavDestinationBackButtonNode();
 
     void AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode);
 
@@ -241,7 +249,10 @@ public:
     }
     // end pipeline, exit app
     void Finish(bool autoFinish) const override;
-
+    RectF GetRootRect()
+    {
+        return rootNode_->GetGeometryNode()->GetFrameRect();
+    }
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type);
 
@@ -296,6 +307,7 @@ private:
 
     RefPtr<FrameNode> rootNode_;
 
+    std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_map<int32_t, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
 
     RefPtr<StageManager> stageManager_;
