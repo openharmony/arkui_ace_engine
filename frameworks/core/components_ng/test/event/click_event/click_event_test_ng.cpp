@@ -192,7 +192,7 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest003, TestSize.Level1)
     /**
      * @tc.steps: step4. Invoke OnCollectTouchTarget when clickEvents_ is empty but userCallback_ is not empty.
      * @tc.expected: Add clickRecognizer_ to finalResult, and it's size is equal 0.
-     */    
+     */
     clickEventActuator.RemoveClickEvent(clickEvent);
     clickEventActuator.OnCollectTouchTarget(COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
     EXPECT_FALSE(finalResult.empty());
@@ -204,6 +204,6 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest003, TestSize.Level1)
     clickEventActuator.userCallback_ = nullptr;
     clickEventActuator.AddClickEvent(clickEvent);
     clickEventActuator.OnCollectTouchTarget(COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
-    EXPECT_FALSE(finalResult.empty());   
- }
+    EXPECT_FALSE(finalResult.empty());
+}
 } // namespace OHOS::Ace::NG

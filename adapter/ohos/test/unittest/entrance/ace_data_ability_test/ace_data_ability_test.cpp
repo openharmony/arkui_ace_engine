@@ -87,7 +87,7 @@ HWTEST_F(AceDataAbilityTest, AceDataAbilityTest_003, TestSize.Level1)
     values.PutString("name", std::string("zhangsan"));
     values.PutInt("age", 18);
     values.PutDouble("salary", 100.5);
-    values.PutBlob("blobType", std::vector<uint8_t>{ 1, 2, 3 });
+    values.PutBlob("blobType", std::vector<uint8_t> { 1, 2, 3 });
     if (dataAbility) {
         auto ret = dataAbility->Insert(uri, values);
         EXPECT_EQ(ret, 0);
@@ -109,7 +109,7 @@ HWTEST_F(AceDataAbilityTest, AceDataAbilityTest_004, TestSize.Level1)
     values.PutString("name", std::string("zhangsan"));
     values.PutInt("age", 18);
     values.PutDouble("salary", 100.5);
-    values.PutBlob("blobType", std::vector<uint8_t>{ 1, 2, 3 });
+    values.PutBlob("blobType", std::vector<uint8_t> { 1, 2, 3 });
     if (dataAbility) {
         auto ret = dataAbility->Insert(uri, values);
         EXPECT_EQ(ret, 0);
@@ -120,7 +120,7 @@ HWTEST_F(AceDataAbilityTest, AceDataAbilityTest_004, TestSize.Level1)
     values.PutString("name", std::string("lisi"));
     values.PutInt("age", 20);
     values.PutDouble("salary", 200.5);
-    values.PutBlob("blobType", std::vector<uint8_t>{ 4, 5, 6 });
+    values.PutBlob("blobType", std::vector<uint8_t> { 4, 5, 6 });
     NativeRdb::DataAbilityPredicates predicates;
     if (dataAbility) {
         auto ret = dataAbility->Update(uri, values, predicates);
@@ -180,7 +180,7 @@ HWTEST_F(AceDataAbilityTest, AceDataAbilityTest_007, TestSize.Level1)
     values.PutString("name", std::string("zhangsan"));
     values.PutInt("age", 18);
     values.PutDouble("salary", 100.5);
-    values.PutBlob("blobType", std::vector<uint8_t>{ 1, 2, 3 });
+    values.PutBlob("blobType", std::vector<uint8_t> { 1, 2, 3 });
     valuesBucket.push_back(values);
     if (dataAbility) {
         auto ret = dataAbility->BatchInsert(uri, valuesBucket);

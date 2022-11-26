@@ -38,7 +38,7 @@ void HapAssetProviderTest::TearDown() {}
 
 /**
  * @tc.name: HapAssetProviderTest_001
- * @tc.desc: 
+ * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_001, TestSize.Level1)
@@ -51,12 +51,12 @@ HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_001, TestSize.Level1)
 
 /**
  * @tc.name: HapAssetProviderTest_002
- * @tc.desc: 
+ * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_002, TestSize.Level1)
 {
-    std::string hapPath = ""; 
+    std::string hapPath = "";
     std::vector<std::string> assetBasePaths;
     assetBasePaths.push_back("/system/app/com.ohos.photos/Photos.hap");
     bool result = hapAssetProvider_->Initialize(hapPath, assetBasePaths);
@@ -65,12 +65,12 @@ HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_002, TestSize.Level1)
 
 /**
  * @tc.name: HapAssetProviderTest_003
- * @tc.desc: 
+ * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_003, TestSize.Level1)
 {
-    std::string hapPath = "/system/app/com.ohos.photos/Photos.hap"; 
+    std::string hapPath = "/system/app/com.ohos.photos/Photos.hap";
     std::vector<std::string> assetBasePaths;
     assetBasePaths.push_back("/system/app/com.ohos.photos/Photos.hap");
     HapAssetProvider hapAssetProvider;
@@ -80,7 +80,7 @@ HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_003, TestSize.Level1)
 
 /**
  * @tc.name: HapAssetProviderTest_004
- * @tc.desc: 
+ * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_004, TestSize.Level1)
@@ -92,12 +92,12 @@ HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_004, TestSize.Level1)
 
 /**
  * @tc.name: HapAssetProviderTest_005
- * @tc.desc: 
+ * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_005, TestSize.Level1)
 {
-    std::string hapPath = "/system/app/com.ohos.photos/Photos.hap"; 
+    std::string hapPath = "/system/app/com.ohos.photos/Photos.hap";
     std::vector<std::string> assetBasePaths;
     assetBasePaths.push_back("/error/");
     HapAssetProvider hapAssetProvider;
@@ -110,12 +110,12 @@ HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_005, TestSize.Level1)
 
 /**
  * @tc.name: HapAssetProviderTest_006
- * @tc.desc: 
+ * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_006, TestSize.Level1)
 {
-    std::string hapPath = "/system/app/com.ohos.photos/Photos.hap"; 
+    std::string hapPath = "/system/app/com.ohos.photos/Photos.hap";
     std::vector<std::string> assetBasePaths;
     assetBasePaths.push_back("resources/base/profile/");
     HapAssetProvider hapAssetProvider;
@@ -129,7 +129,7 @@ HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_006, TestSize.Level1)
 
 /**
  * @tc.name: HapAssetProviderTest_007
- * @tc.desc: 
+ * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_007, TestSize.Level1)
@@ -148,7 +148,7 @@ HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_007, TestSize.Level1)
 
 /**
  * @tc.name: HapAssetProviderTest_008
- * @tc.desc: 
+ * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_008, TestSize.Level1)
@@ -167,12 +167,12 @@ HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_008, TestSize.Level1)
 
 /**
  * @tc.name: HapAssetProviderTest_009
- * @tc.desc: 
+ * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_009, TestSize.Level1)
 {
-    std::string hapPath = "/system/app/com.ohos.photos/Photos.hap"; 
+    std::string hapPath = "/system/app/com.ohos.photos/Photos.hap";
     std::vector<std::string> assetBasePaths;
     assetBasePaths.push_back("resources/base/profile/");
     HapAssetProvider hapAssetProvider;

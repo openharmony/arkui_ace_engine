@@ -166,7 +166,7 @@ HWTEST_F(LongPressEventTestNg, LongPressEventActuatorTest002, TestSize.Level1)
      * @tc.steps: step3. Invoke OnCollectTouchTarget when longPressRecognizer_ is not nullptr.
      * @tc.expected:  TouchTestResult size has been increased one.
      */
-    longPressEventActuator->longPressRecognizer_ =  new LongPressRecognizer(false,false);
+    longPressEventActuator->longPressRecognizer_ = new LongPressRecognizer(false, false);
     EXPECT_NE(longPressEventActuator->longPressRecognizer_, nullptr);
     longPressEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, LONG_PRESS_TOUCH_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
