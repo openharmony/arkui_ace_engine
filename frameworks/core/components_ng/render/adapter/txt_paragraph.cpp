@@ -22,7 +22,9 @@
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
+const std::u16string ELLIPSIS = u"\u2026";
+}
 RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
 {
     auto txtFontCollection = DynamicCast<TxtFontCollection>(fontCollection);
@@ -43,6 +45,9 @@ void TxtParagraph::CreateBuilder()
     style.text_align = Constants::ConvertTxtTextAlign(paraStyle_.align);
     style.max_lines = paraStyle_.maxLines;
     style.locale = paraStyle_.fontLocale;
+    if (paraStyle_.textOverflow == TextOverflow::ELLIPSIS) {
+        style.ellipsis = ELLIPSIS;
+    }
 #ifndef NG_BUILD
     // keep WordBreak define same with WordBreakType in minikin
     style.word_break_type = static_cast<minikin::WordBreakType>(paraStyle_.wordBreak);

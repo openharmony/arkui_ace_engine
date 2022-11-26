@@ -106,8 +106,8 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
         .align = textStyle.GetTextAlign(),
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
-        .wordBreak = textStyle.GetWordBreak() };
-
+        .wordBreak = textStyle.GetWordBreak(),
+        .textOverflow = textStyle.GetTextOverflow() };
     paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
     CHECK_NULL_RETURN(paragraph_, false);
     paragraph_->PushStyle(textStyle);
