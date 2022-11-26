@@ -36,10 +36,10 @@ bool LayoutInspector::layoutInspectorStatus_ = false;
 void LayoutInspector::SupportInspector()
 {
     auto container = Container::Current();
-    CHECK_NULL_VOID(container);
+    CHECK_NULL_VOID_NOLOG(container);
     if (!layoutInspectorStatus_) {
         SetlayoutInspectorStatus();
-        CHECK_NULL_VOID(layoutInspectorStatus_);
+        CHECK_NULL_VOID_NOLOG(layoutInspectorStatus_);
     }
     std::string treeJsonStr;
     GetInspectorTreeJsonStr(treeJsonStr);
@@ -77,7 +77,7 @@ void LayoutInspector::SupportInspector()
 void LayoutInspector::SetlayoutInspectorStatus()
 {
     auto container = Container::Current();
-    CHECK_NULL_VOID(container);
+    CHECK_NULL_VOID_NOLOG(container);
     if (container->IsUseStageModel()) {
         layoutInspectorStatus_ = OHOS::AbilityRuntime::ConnectServerManager::Get().GetlayoutInspectorStatus();
         return;
