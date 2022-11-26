@@ -147,7 +147,7 @@ public:
     }
 
     void UpdateConfiguration();
-    void PerformAction(TextInputAction action, bool forceCloseKeyboard = false);
+    void PerformAction(TextInputAction action, bool forceCloseKeyboard = true);
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
     void ClearEditingValue();
@@ -219,19 +219,14 @@ public:
     float AdjustTextRectOffsetX();
     float AdjustTextAreaOffsetY();
 
-    void SetBasicPaddingLeft(float padding)
-    {
-        basicPaddingLeft_ = padding;
-    }
-
     float GetPaddingLeft() const
     {
-        return utilPadding_.left.value_or(basicPaddingLeft_);
+        return utilPadding_.left.value_or(0.0f);
     }
 
     float GetPaddingRight() const
     {
-        return utilPadding_.right.value_or(basicPaddingLeft_);
+        return utilPadding_.right.value_or(0.0f);
     }
 
     const PaddingPropertyF& GetUtilPadding() const
@@ -241,7 +236,12 @@ public:
 
     float GetHorizontalPaddingSum() const
     {
-        return utilPadding_.left.value_or(basicPaddingLeft_) + utilPadding_.right.value_or(basicPaddingLeft_);
+        return utilPadding_.left.value_or(0.0f) + utilPadding_.right.value_or(0.0f);
+    }
+
+    float GetVerticalPaddingSum() const
+    {
+        return utilPadding_.top.value_or(0.0f) + utilPadding_.bottom.value_or(0.0f);
     }
 
     const RectF& GetTextRect()
@@ -430,7 +430,6 @@ private:
 
     OffsetF parentGlobalOffset_;
     Offset lastTouchOffset_;
-    float basicPaddingLeft_ = 0.0f;
     PaddingPropertyF utilPadding_;
 
     float baselineOffset_ = 0.0f;

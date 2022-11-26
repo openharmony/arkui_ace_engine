@@ -165,6 +165,10 @@ void FrameNode::DumpInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("Border: ").append(layoutProperty_->GetBorderWidthProperty()->ToString().c_str()));
     }
+    if (layoutProperty_->GetMarginProperty()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("Margin: ").append(layoutProperty_->GetMarginProperty()->ToString().c_str()));
+    }
     DumpLog::GetInstance().AddDesc(std::string("compid: ").append(propInspectorId_.value_or("")));
     DumpLog::GetInstance().AddDesc(std::string("ContentConstraint: ")
                                        .append(layoutProperty_->GetContentLayoutConstraint().has_value()
