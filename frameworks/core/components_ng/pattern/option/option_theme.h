@@ -25,10 +25,6 @@ namespace OHOS::Ace::NG {
 
 const Dimension ROUND_RADIUS_PHONE = 12.0_vp;
 constexpr float DEFAULT_STROKE_WIDTH = 1.0f;
-constexpr uint32_t OPTION_DIVIDER_COLOR = 0x33000000;
-
-constexpr uint32_t OPTION_DEFAULT_BACKGROUND_COLOR = 0xFFFFFFF;
-constexpr uint32_t DEFAULT_HOVER_BACKGROUND_COLOR = 0x0C000000;
 
 constexpr Dimension VERTICAL_INTERVAL_PHONE = 14.4_vp;
 constexpr Dimension HORIZONTAL_INTERVAL_PHONE = 12.0_vp;
