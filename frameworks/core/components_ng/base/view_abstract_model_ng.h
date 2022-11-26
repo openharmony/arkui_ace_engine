@@ -24,6 +24,7 @@
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -658,105 +659,16 @@ public:
         ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 
-    void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc) override
-    {
-        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        GestureEventFunc event;
-        auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
-        if (!params.empty()) {
-            event = [params, weakTarget](GestureEvent& info) mutable {
-                auto targetNode = weakTarget.Upgrade();
-                CHECK_NULL_VOID(targetNode);
-                auto position = NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
-                // menu already created
-                if (params.empty()) {
-                    NG::ViewAbstract::ShowMenu(targetNode->GetId(), position);
-                    return;
-                }
-                NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, position);
-                params.clear();
-            };
-        } else if (buildFunc) {
-            event = [builderFunc = std::move(buildFunc), weakTarget](const GestureEvent& info) mutable {
-                auto targetNode = weakTarget.Upgrade();
-                CHECK_NULL_VOID(targetNode);
-                CreateCustomMenu(builderFunc, targetNode, false,
-                    NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY()));
-            };
-        } else {
-            LOGE("empty param or null builder");
-            return;
-        }
-        auto gestureHub = targetNode->GetOrCreateGestureEventHub();
-        auto onClick = AceType::MakeRefPtr<NG::ClickEvent>(std::move(event));
-        gestureHub->AddClickEvent(onClick);
+    void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc) override;
 
-        // delete menu when target node is removed from render tree
-        auto eventHub = targetNode->GetEventHub<NG::EventHub>();
-        auto destructor = [id = targetNode->GetId()]() {
-            auto pipeline = NG::PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto overlayManager = pipeline->GetOverlayManager();
-            CHECK_NULL_VOID(overlayManager);
-            overlayManager->DeleteMenu(id);
-        };
-        eventHub->SetOnDisappear(destructor);
-    }
-
-    void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) override
-    {
-        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        CHECK_NULL_VOID(targetNode);
-        auto hub = targetNode->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(hub);
-        auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
-        if (type == ResponseType::RIGHT_CLICK) {
-            OnMouseEventFunc event = [builder = std::move(buildFunc), weakTarget](MouseInfo& info) mutable {
-                auto targetNode = weakTarget.Upgrade();
-                CHECK_NULL_VOID(targetNode);
-                if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
-                    CreateCustomMenu(builder, targetNode, true,
-                        NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY()));
-                    info.SetStopPropagation(true);
-                }
-            };
-            auto inputHub = targetNode->GetOrCreateInputEventHub();
-            CHECK_NULL_VOID(inputHub);
-            mouseCallback_ = AceType::MakeRefPtr<InputEvent>(std::move(event));
-            inputHub->AddOnMouseEvent(mouseCallback_);
-        } else if (type == ResponseType::LONGPRESS) {
-            // create or show menu on long press
-            auto event = [builder = std::move(buildFunc), weakTarget](
-                             const GestureEvent& info) mutable {
-                auto targetNode = weakTarget.Upgrade();
-                CHECK_NULL_VOID(targetNode);
-                CreateCustomMenu(builder, targetNode, true,
-                    NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY()));
-            };
-            auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
-
-            hub->SetLongPressEvent(longPress, false, true);
-        } else {
-            LOGE("The arg responseType is invalid.");
-            return;
-        }
-    }
+    void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) override;
 
     void SetAccessibilityGroup(bool accessible) override {}
     void SetAccessibilityText(const std::string& text) override {}
     void SetAccessibilityDescription(const std::string& description) override {}
     void SetAccessibilityImportance(const std::string& importance) override {}
 
-private:
-    static void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode,
-        bool isContextMenu, const NG::OffsetF& offset)
-    {
-        NG::ScopedViewStackProcessor builderViewStackProcessor;
-        buildFunc();
-        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-        NG::ViewAbstract::BindMenuWithCustomNode(customNode, targetNode, isContextMenu, offset);
-    }
-    RefPtr<InputEvent> mouseCallback_;
+    ACE_DISALLOW_COPY_AND_MOVE(ViewAbstractModelNG);
 };
 } // namespace OHOS::Ace::NG
 
