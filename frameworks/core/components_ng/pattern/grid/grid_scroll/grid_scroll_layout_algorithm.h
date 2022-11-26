@@ -48,7 +48,7 @@ private:
 
     // fill end of viewport
     void FillBlankAtStart(float mainSize, float crossSize, const RefPtr<GridLayoutProperty>& gridLayoutProperty,
-        LayoutWrapper* layoutWrapper, float crossGap);
+        LayoutWrapper* layoutWrapper);
     float FillNewLineForward(float crossSize, float mainSize, const RefPtr<GridLayoutProperty>& gridLayoutProperty,
         LayoutWrapper* layoutWrapper);
 
@@ -74,7 +74,7 @@ private:
     LayoutConstraintF CreateChildConstraint(float mainSize, float crossSize,
         const RefPtr<GridLayoutProperty>& gridLayoutProperty, int32_t crossStart, int32_t crossSpan) const;
     void StripItemsOutOfViewport(LayoutWrapper* layoutWrapper);
-    void ModifyCurrentOffsetWhenReachEnd(float mainSize, float crossGap);
+    void ModifyCurrentOffsetWhenReachEnd(float mainSize);
     void InitialItemsCrossSize(const RefPtr<GridLayoutProperty>& layoutProperty, const SizeF& frameSize);
     bool IsIndexInMatrix(int32_t index);
     void UpdateGridLayoutInfo(LayoutWrapper* layoutWrapper);
@@ -93,6 +93,7 @@ private:
     // Store current index when place children.
     int32_t mainIndex_ = 0;
     int32_t crossIndex_ = 0;
+    float mainGap_ = 0;
 
     // Map structure: [index, crossPosition], store cross position of each item.
     std::map<int32_t, float> itemsCrossPosition_;
