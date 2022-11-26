@@ -49,7 +49,11 @@ constexpr float HEIGHT = 400.0f;
 const OffsetF COORDINATE_OFFSET(WIDTH, HEIGHT);
 const PanDirection PAN_EVENT_DIRECTION = { PanDirection::LEFT };
 constexpr int32_t FINGERS_NUMBER = 0;
+constexpr int32_t FINGERS_NUMBER_SEC = 1;
+constexpr int32_t FINGERS_NUMBER_THIR = 0;
 constexpr float DISTANCE = 3.0f;
+constexpr float DISTANCE_SEC = 5.0f;
+constexpr float DISTANCE_THIR = 1.0f;
 constexpr int32_t DEFAULT_PAN_FINGER = 1;
 constexpr double DEFAULT_PAN_DISTANCE = 5.0;
 } // namespace
@@ -162,5 +166,43 @@ HWTEST_F(PanEventTestNg, PanEventOnCollectTouchTargetTest002, TestSize.Level1)
     EXPECT_NE(panEventActuator->panRecognizer_->getEventTargetImpl_, nullptr);
     EXPECT_EQ(panEventActuator->panRecognizer_->GetCoordinateOffset(), Offset(WIDTH, HEIGHT));
     EXPECT_EQ(result.size(), PAN_EVENT_TEST_RESULT_SIZE_1);
+}
+/**
+ * @tc.name: PanEventOnCollectTouchTargetTest003
+ * @tc.desc: Create PanEvent and invoke OnCollectTouchTarget.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanEventTestNg, PanEventOnCollectTouchTargetTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto panEventActuator = AceType::MakeRefPtr<PanEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), PAN_EVENT_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    EXPECT_NE(panEventActuator, nullptr);
+
+    /**
+     * @tc.steps: step2. Get fingers_ when fingers_ is equal to DEFAULT_PAN_FINGER and distance_ is equal to DEFAULT_PAN_DISTANCE.
+     * @tc.expected:  PanEventActuator's direction, fingers_ and distance_ are equal with the parameters passed in the
+     * constructor.
+     */
+    auto panEventActuatorA = AceType::MakeRefPtr<PanEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), PAN_EVENT_DIRECTION, FINGERS_NUMBER_SEC, DISTANCE_SEC);
+    EXPECT_EQ(panEventActuatorA->fingers_, FINGERS_NUMBER_SEC);
+    EXPECT_EQ(panEventActuatorA->distance_, DISTANCE_SEC);
+
+    /**
+     * @tc.steps: step3. Get fingers_ when fingers_ is less than DEFAULT_PAN_FINGER and distance_ is less than DEFAULT_PAN_DISTANCE.
+     * @tc.expected:  PanEventActuator's direction, fingers_ and distance_ are equal with the parameters passed in the
+     * constructor.
+     */
+     auto panEventActuatorB = AceType::MakeRefPtr<PanEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), PAN_EVENT_DIRECTION, FINGERS_NUMBER_THIR, DISTANCE_THIR);
+    EXPECT_EQ(panEventActuatorB->fingers_, FINGERS_NUMBER_SEC);
+    EXPECT_EQ(panEventActuatorB->distance_, DISTANCE_SEC);
 }
 } // namespace OHOS::Ace::NG

@@ -161,5 +161,15 @@ HWTEST_F(LongPressEventTestNg, LongPressEventActuatorTest002, TestSize.Level1)
         COORDINATE_OFFSET, LONG_PRESS_TOUCH_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
     EXPECT_EQ(longPressEventActuator->longPressRecognizer_->GetCoordinateOffset(), Offset(WIDTH, HEIGHT));
     EXPECT_EQ(result.size(), LONG_PRESS_TEST_RESULT_SIZE_1);
+
+     /**
+     * @tc.steps: step3. Invoke OnCollectTouchTarget when longPressRecognizer_ is not nullptr.
+     * @tc.expected:  TouchTestResult size has been increased one.
+     */
+    longPressEventActuator->longPressRecognizer_ =  new LongPressRecognizer(false,false);
+    EXPECT_NE(longPressEventActuator->longPressRecognizer_, nullptr);
+    longPressEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, LONG_PRESS_TOUCH_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
+    EXPECT_EQ(longPressEventActuator->longPressRecognizer_->GetCoordinateOffset(), Offset(WIDTH, HEIGHT));
 }
 } // namespace OHOS::Ace::NG

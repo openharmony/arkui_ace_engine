@@ -236,5 +236,14 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest003, Test
     scrollableActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
     EXPECT_EQ(result.size(), SCROLL_TEST_RESULT_SIZE_1);
+
+    /**
+     * @tc.steps: step4. OnCollectTouchTarget when initialized_ is true and scrollableEvents_ is not empty.
+     * @tc.expected: gestureEventHub cannot GetFrameNode, InitializeScrollable fuction will return directly.
+     */
+    scrollableActuator->initialized_ = true;
+    scrollableActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
+    EXPECT_EQ(result.size(), SCROLL_TEST_RESULT_SIZE_1);
 }
 } // namespace OHOS::Ace::NG
