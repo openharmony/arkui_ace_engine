@@ -47,7 +47,6 @@ group("pattern_unittest") {
     "select:select_pattern_test_ng",
     "shape:shape_pattern_unit_test",
     "stack:stack_pattern_test_ng",
-    "stepper:stepper_pattern_test_ng",
     "tabs:tabs_pattern_test_ng",
     "text:text_pattern_test_ng",
     "text_clock:text_clock_pattern_unit_test",
