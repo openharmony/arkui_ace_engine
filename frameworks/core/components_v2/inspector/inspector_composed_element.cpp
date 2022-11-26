@@ -122,30 +122,19 @@ const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
 
 const std::unordered_map<std::string, BoolJsonFunc> CREATE_JSON_BOOL_MAP {
     { "enabled", [](const InspectorNode& inspector) { return inspector.GetEnabled(); } },
-    { "clickable", [](const InspectorNode& inspector) { return inspector.GetClickable(); } },
-    { "checkable", [](const InspectorNode& inspector) { return inspector.GetCheckable(); } },
     { "focusable", [](const InspectorNode& inspector) { return inspector.GetFocusable(); } },
-    { "scrollable", [](const InspectorNode& inspector) { return inspector.GetScrollable(); } },
-    { "long-clickable", [](const InspectorNode& inspector) { return inspector.GetLongClickable(); } },
-    { "selected", [](const InspectorNode& inspector) { return inspector.IsSelected(); } },
-    { "password", [](const InspectorNode& inspector) { return inspector.IsPassword(); } },
-    { "checked", [](const InspectorNode& inspector) { return inspector.IsChecked(); } },
-    { "focused", [](const InspectorNode& inspector) { return inspector.IsFocused(); } },
 };
 
 const std::unordered_map<std::string, IntJsonFunc> CREATE_JSON_INT_MAP {
     { "zIndex", [](const InspectorNode& inspector) { return inspector.GetZIndex(); } },
     { "gridSpan", [](const InspectorNode& inspector) { return inspector.GetGridSpan(); } },
-    { "layoutPriority", [](const InspectorNode& inspector) { return inspector.GetLayoutPriority(); } },
     { "layoutWeight", [](const InspectorNode& inspector) { return inspector.GetLayoutWeight(); } },
     { "displayPriority", [](const InspectorNode& inspector) { return inspector.GetDisplayPriority(); } },
 };
 
 const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_JSON_JSON_VALUE_MAP {
-    { "windowBlur", [](const InspectorNode& inspector) { return inspector.GetWindowBlur(); } },
     { "shadow", [](const InspectorNode& inspector) { return inspector.GetShadow(); } },
     { "position", [](const InspectorNode& inspector) { return inspector.GetPosition(); } },
-
     { "offset", [](const InspectorNode& inspector) { return inspector.GetOffset(); } },
     { "size", [](const InspectorNode& inspector) { return inspector.GetSize(); } },
     { "useSizeType", [](const InspectorNode& inspector) { return inspector.GetUseSizeType(); } },
@@ -155,12 +144,31 @@ const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_JSON_JSON_VALUE_
     { "translate", [](const InspectorNode& inspector) { return inspector.GetTranslate(); } },
     { "markAnchor", [](const InspectorNode& inspector) { return inspector.GetMarkAnchor(); } },
     { "mask", [](const InspectorNode& inspector) { return inspector.GetMask(); } },
-    { "useAlign", [](const InspectorNode& inspector) { return inspector.GetUseAlign(); } },
     { "overlay", [](const InspectorNode& inspector) { return inspector.GetOverlay(); } },
     { "border", [](const InspectorNode& inspector) { return inspector.GetUnifyBorder(); } },
     { "linearGradient", [](const InspectorNode& inspector) { return inspector.GetLinearGradient(); } },
     { "sweepGradient", [](const InspectorNode& inspector) { return inspector.GetSweepGradient(); } },
     { "radialGradient", [](const InspectorNode& inspector) { return inspector.GetRadialGradient(); } },
+};
+
+const std::unordered_map<std::string, BoolJsonFunc> CREATE_XTS_BOOL_MAP {
+    { "clickable", [](const InspectorNode& inspector) { return inspector.GetClickable(); } },
+    { "checkable", [](const InspectorNode& inspector) { return inspector.GetCheckable(); } },
+    { "scrollable", [](const InspectorNode& inspector) { return inspector.GetScrollable(); } },
+    { "long-clickable", [](const InspectorNode& inspector) { return inspector.GetLongClickable(); } },
+    { "selected", [](const InspectorNode& inspector) { return inspector.IsSelected(); } },
+    { "password", [](const InspectorNode& inspector) { return inspector.IsPassword(); } },
+    { "checked", [](const InspectorNode& inspector) { return inspector.IsChecked(); } },
+    { "focused", [](const InspectorNode& inspector) { return inspector.IsFocused(); } },
+};
+
+const std::unordered_map<std::string, IntJsonFunc> CREATE_XTS_INT_MAP {
+    { "layoutPriority", [](const InspectorNode& inspector) { return inspector.GetLayoutPriority(); } },
+};
+
+const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_XTS_JSON_VALUE_MAP {
+    { "windowBlur", [](const InspectorNode& inspector) { return inspector.GetWindowBlur(); } },
+    { "useAlign", [](const InspectorNode& inspector) { return inspector.GetUseAlign(); } },
 };
 
 }; // namespace
@@ -238,6 +246,17 @@ std::unique_ptr<JsonValue> InspectorComposedElement::ToJsonObject() const
     for (const auto& value : CREATE_JSON_JSON_VALUE_MAP) {
         resultJson->Put(value.first.c_str(), value.second(*this));
     }
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+    for (const auto& value : CREATE_XTS_BOOL_MAP) {
+        resultJson->Put(value.first.c_str(), value.second(*this));
+    }
+    for (const auto& value : CREATE_XTS_INT_MAP) {
+        resultJson->Put(value.first.c_str(), value.second(*this));
+    }
+    for (const auto& value : CREATE_XTS_JSON_VALUE_MAP) {
+        resultJson->Put(value.first.c_str(), value.second(*this));
+    }
+#endif
     return resultJson;
 }
 
