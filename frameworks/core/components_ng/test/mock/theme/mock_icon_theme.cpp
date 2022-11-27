@@ -34,8 +34,11 @@ RefPtr<Theme> ThemeManager::GetTheme(ThemeType /* type */)
     return AceType::MakeRefPtr<IconTheme>();
 }
 
-std::string IconTheme::GetIconPath(const InternalResource::ResourceId& /* resourceId */) const
+std::string IconTheme::GetIconPath(const InternalResource::ResourceId& resourceId) const
 {
+    if (resourceId == InternalResource::ResourceId::NO_ID) {
+        return std::string();
+    }
     return "resource:///ohos_test_image.svg";
 }
 
