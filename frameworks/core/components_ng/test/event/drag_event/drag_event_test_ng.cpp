@@ -32,8 +32,12 @@ constexpr double GESTURE_EVENT_PROPERTY_VALUE = 10.0;
 const PanDirection DRAG_DIRECTION = { PanDirection::LEFT };
 const TouchRestrict DRAG_TOUCH_RESTRICT = { TouchRestrict::CLICK };
 constexpr int32_t FINGERS_NUMBER = 2;
+constexpr int32_t FINGERS_NUMBER_SEC = 1;
+constexpr int32_t FINGERS_NUMBER_THIR = 0;
 constexpr int32_t TOUCH_TEST_RESULT_SIZE = 1;
 constexpr float DISTANCE = 10.5f;
+constexpr float DISTANCE_SEC = 5.0f;
+constexpr float DISTANCE_THIR = 1.0f;
 const float WIDTH = 400.0f;
 const float HEIGHT = 400.0f;
 const OffsetF COORDINATE_OFFSET(WIDTH, HEIGHT);
@@ -153,6 +157,26 @@ HWTEST_F(DragEventTestNg, DragEventActuatorPropertyTest002, TestSize.Level1)
     EXPECT_EQ(dragEventActuator.GetDirection().type, DRAG_DIRECTION.type);
     EXPECT_EQ(dragEventActuator.fingers_, FINGERS_NUMBER);
     EXPECT_EQ(dragEventActuator.distance_, DISTANCE);
+
+    /**
+     * @tc.steps: step3. Get fingers_ when fingers_ is equal to PAN_FINGER and distance_ is equal to PAN_DISTANCE.
+     * @tc.expected:  DragEventActuator's direction, fingers_ and distance_ are equal with the parameters passed in the
+     * constructor.
+     */
+    DragEventActuator dragEventActuatorA = DragEventActuator(
+    AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER_SEC, DISTANCE_SEC);
+    EXPECT_EQ(dragEventActuatorA.fingers_, FINGERS_NUMBER_SEC);
+    EXPECT_EQ(dragEventActuatorA.distance_, DISTANCE_SEC);
+
+    /**
+     * @tc.steps: step4. Get fingers_ when fingers_ is less than PAN_FINGER and distance_ is less than PAN_DISTANCE.
+     * @tc.expected:  DragEventActuator's direction, fingers_ and distance_ are equal with the parameters passed in the
+     * constructor.
+     */
+    DragEventActuator dragEventActuatorB = DragEventActuator(
+    AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER_THIR, DISTANCE_THIR);
+    EXPECT_EQ(dragEventActuatorB.fingers_, FINGERS_NUMBER_SEC);
+    EXPECT_EQ(dragEventActuatorB.distance_, DISTANCE_SEC);
 
     /**
      * @tc.steps: step3. Create DragEvent and set as DragEventActuator's DragEvent and CustomDragEvent.
