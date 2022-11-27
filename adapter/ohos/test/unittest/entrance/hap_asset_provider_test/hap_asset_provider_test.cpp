@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+
 #include "adapter/ohos/entrance/hap_asset_provider.h"
 
 using namespace testing::ext;
@@ -43,7 +44,7 @@ void HapAssetProviderTest::TearDown() {}
  */
 HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_001, TestSize.Level1)
 {
-    std::string hapPath = "/system/app/com.ohos.photos/Photos.hap"; 
+    std::string hapPath = "/system/app/com.ohos.photos/Photos.hap";
     std::vector<std::string> assetBasePaths;
     bool result = hapAssetProvider_->Initialize(hapPath, assetBasePaths);
     EXPECT_FALSE(result);
@@ -134,7 +135,7 @@ HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_006, TestSize.Level1)
  */
 HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_007, TestSize.Level1)
 {
-    std::string hapPath = "/system/app/com.ohos.photos/Photos.hap"; 
+    std::string hapPath = "/system/app/com.ohos.photos/Photos.hap";
     std::vector<std::string> assetBasePaths;
     assetBasePaths.push_back("resources/base/profile/");
     HapAssetProvider hapAssetProvider;
@@ -142,7 +143,7 @@ HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_007, TestSize.Level1)
     EXPECT_TRUE(result_init);
 
     std::string assetName = "error";
-    std::string result  = hapAssetProvider.GetAssetPath(assetName);
+    std::string result = hapAssetProvider.GetAssetPath(assetName);
     EXPECT_EQ(result, "");
 }
 
@@ -153,7 +154,7 @@ HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_007, TestSize.Level1)
  */
 HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_008, TestSize.Level1)
 {
-    std::string hapPath = "/system/app/com.ohos.photos/Photos.hap"; 
+    std::string hapPath = "/system/app/com.ohos.photos/Photos.hap";
     std::vector<std::string> assetBasePaths;
     assetBasePaths.push_back("resources/base/profile/");
     HapAssetProvider hapAssetProvider;
@@ -161,7 +162,7 @@ HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_008, TestSize.Level1)
     EXPECT_TRUE(result_init);
 
     std::string assetName = "form_config.json";
-    std::string result  = hapAssetProvider.GetAssetPath(assetName);
+    std::string result = hapAssetProvider.GetAssetPath(assetName);
     EXPECT_EQ(result, "/system/app/com.ohos.photos/Photos.hap/resources/base/profile/");
 }
 
@@ -184,4 +185,4 @@ HWTEST_F(HapAssetProviderTest, HapAssetProviderTest_009, TestSize.Level1)
     hapAssetProvider.GetAssetList(path, assetList);
     EXPECT_TRUE(assetList.empty());
 }
-}
+} // namespace OHOS::Ace
