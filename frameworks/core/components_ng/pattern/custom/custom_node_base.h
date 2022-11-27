@@ -57,6 +57,18 @@ public:
         destroyFunc_ = std::move(destroyFunc);
     }
 
+    void SetReloadFunction(std::function<void(bool)>&& reloadFunc)
+    {
+        reloadFunc_ = std::move(reloadFunc);
+    }
+
+    void FireReloadFunction(bool deep)
+    {
+        if (reloadFunc_) {
+            reloadFunc_(deep);
+        }
+    }
+
     void SetPageTransitionFunction(std::function<void()>&& pageTransitionFunc)
     {
         pageTransitionFunc_ = std::move(pageTransitionFunc);
@@ -87,6 +99,7 @@ private:
     std::function<void()> appearFunc_;
     std::function<void()> destroyFunc_;
     std::function<void()> pageTransitionFunc_;
+    std::function<void(bool)> reloadFunc_;
     bool needRebuild_ = false;
 };
 } // namespace OHOS::Ace::NG

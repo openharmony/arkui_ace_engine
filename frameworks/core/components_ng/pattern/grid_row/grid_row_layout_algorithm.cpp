@@ -125,25 +125,32 @@ float GridRowLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, doub
 
         /* Measure child */
         auto span = std::min(gridCol->GetSpan(sizeType), columnNum);
-        OptionalSize<float> ideaSize;
-        ideaSize.SetWidth(columnUnitWidth * span + (span - 1) * gutter.first);
-        LayoutConstraintF parentConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-        parentConstraint.UpdateSelfMarginSizeWithCheck(ideaSize);
-        child->Measure(parentConstraint);
 
         /* Calculate line break */
         NewLineOffset newLineOffset;
         CalculateOffsetOfNewline(gridCol, span, columnNum - offset, columnNum, sizeType, newLineOffset);
 
-        /* accumulate total lines */
+        /* update total height */
         if (newLineOffset.newLineCount > 0) {
             totalHeight += (currentRowHeight * newLineOffset.newLineCount + gutter.second);
+        }
+
+        OptionalSize<float> ideaSize;
+        ideaSize.SetWidth(columnUnitWidth * span + (span - 1) * gutter.first);
+        LayoutConstraintF parentConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+        parentConstraint.UpdateSelfMarginSizeWithCheck(ideaSize);
+        // the max size need to minus the already allocated height.
+        parentConstraint.maxSize.MinusHeight(totalHeight);
+        child->Measure(parentConstraint);
+
+        if (newLineOffset.newLineCount > 0) {
             currentRowHeight = child->GetGeometryNode()->GetFrameSize().Height();
         } else {
             newLineOffset.offset += offset;
             auto childHeight = child->GetGeometryNode()->GetFrameSize().Height();
             currentRowHeight = std::max(currentRowHeight, childHeight);
         }
+
         offset = newLineOffset.offset + newLineOffset.span;
         newLineOffset.offsetY = totalHeight;
         LOGD("GridRowLayoutAlgorithm::MeasureChildren(), height=%f, span=%d, newline=%d, offsetY=%f, offset=%d",
