@@ -63,7 +63,7 @@ public:
     void Draw(Rosen::RSDrawingContext& context) const override
     {
         if (property_) {
-            const Dimension fontSize = Dimension(20.0f);
+            const Dimension fontSize = Dimension(40);
             auto overlayOptions = property_->Get().GetOverlayOptions();
             // create paragraph
             TextStyle textStyle;
