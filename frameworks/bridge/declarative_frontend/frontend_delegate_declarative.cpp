@@ -28,6 +28,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
+#include "base/utils/measure_util.h"
 #include "bridge/common/manifest/manifest_parser.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/ng/page_router_manager.h"
@@ -1319,11 +1320,9 @@ int32_t FrontendDelegateDeclarative::GetVersionCode() const
     return manifestParser_->GetAppInfo()->GetVersionCode();
 }
 
-double FrontendDelegateDeclarative::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
-    const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+double FrontendDelegateDeclarative::MeasureText(const MeasureContext& context)
 {
-    auto pipelineContext = pipelineContextHolder_.Get();
-    return pipelineContext->MeasureText(text, fontSize, fontStyle, fontWeight, fontFamily, letterSpacing);
+    return MeasureUtil::MeasureText(context);
 }
 
 void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)

@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
+#include "base/utils/measure_util.h"
 #include "bridge/declarative_frontend/ng/page_router_manager.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/pipeline/pipeline_context.h"
@@ -174,8 +175,7 @@ public:
         return manifestParser_->GetWindowConfig();
     }
 
-    double MeasureText(const std::string& text, double fontSize, int32_t fontStyle, const std::string& fontWeight,
-        const std::string& fontFamily, double letterSpacing) override;
+    double MeasureText(const MeasureContext& context) override;
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
     void SetToastStopListenerCallback(std::function<void()>&& stopCallback) override;

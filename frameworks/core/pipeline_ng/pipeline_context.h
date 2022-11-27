@@ -140,9 +140,6 @@ public:
 
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
 
-    double MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
-        const std::string& fontWeight, const std::string& fontFamily, double letterSpacing) override;
-
     void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override;
 

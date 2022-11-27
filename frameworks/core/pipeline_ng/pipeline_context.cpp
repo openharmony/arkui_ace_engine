@@ -112,12 +112,6 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
     window_->RequestFrame();
 }
 
-double PipelineContext::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
-    const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
-{
-    return 0.0;
-}
-
 void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);

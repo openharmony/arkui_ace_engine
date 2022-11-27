@@ -42,6 +42,7 @@
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/linear_map.h"
+#include "base/utils/measure_util.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
@@ -518,8 +519,7 @@ void RosenRenderCustomPaint::StrokeText(const Offset& offset, const std::string&
     PaintText(offset, x, y, true);
 }
 
-double RosenRenderCustomPaint::MeasureTextInner(const std::string& text, double fontSize,
-    int32_t fontStyle, const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+double RosenRenderCustomPaint::MeasureTextInner(const MeasureContext& context)
 {
     using namespace Constants;
     txt::ParagraphStyle style;
@@ -531,16 +531,16 @@ double RosenRenderCustomPaint::MeasureTextInner(const std::string& text, double 
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
     std::vector<std::string> fontFamilies;
-    txtStyle.font_size = fontSize;
-    FontStyle fontStyleInt = OHOS::Ace::Framework::ConvertStrToFontStyle(std::to_string(fontStyle));
+    txtStyle.font_size = context.fontSize;
+    FontStyle fontStyleInt = OHOS::Ace::Framework::ConvertStrToFontStyle(std::to_string(context.fontStyle));
     txtStyle.font_style = ConvertTxtFontStyle(fontStyleInt);
-    FontWeight fontWeightStr = StringUtils::StringToFontWeight(fontWeight);
+    FontWeight fontWeightStr = StringUtils::StringToFontWeight(context.fontWeight);
     txtStyle.font_weight = ConvertTxtFontWeight(fontWeightStr);
-    StringUtils::StringSplitter(fontFamily, ',', fontFamilies);
+    StringUtils::StringSplitter(context.fontFamily, ',', fontFamilies);
     txtStyle.font_families = fontFamilies;
-    txtStyle.letter_spacing = letterSpacing;
+    txtStyle.letter_spacing = context.letterSpacing;
     builder->PushStyle(txtStyle);
-    builder->AddText(StringUtils::Str8ToStr16(text));
+    builder->AddText(StringUtils::Str8ToStr16(context.textContent));
     auto paragraph = builder->Build();
     if (!paragraph) {
         return 0.0;
