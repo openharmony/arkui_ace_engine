@@ -308,6 +308,7 @@ public:
 #endif
         return false;
     }
+    float PreferredLineHeight();
 
 private:
     bool IsTextArea();
@@ -394,7 +395,6 @@ private:
     bool FilterWithRegex(
         const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
     void EditingValueFilter(std::string& valueToUpdate, std::string& result);
-    float PreferredLineHeight();
     void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
     bool CursorInContentRegion();
     bool OffsetInContentRegion(const Offset& offset);
