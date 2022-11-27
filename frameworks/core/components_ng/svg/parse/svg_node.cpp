@@ -79,11 +79,13 @@ void SvgNode::InitStyle(const RefPtr<SvgBaseDeclaration>& parent)
         hrefMaskId_ = ParseIdFromUrl(declaration_->GetMaskId());
         hrefFilterId_ = ParseIdFromUrl(declaration_->GetFilterId());
     }
-    if (childStyleTraversed_) {
+    OnInitStyle();
+    // pass down style declaration to children
+    if (passStyle_) {
         for (auto& node : children_) {
-            if (node && node->styleTraversed_) {
-                node->InitStyle(declaration_);
-            }
+            CHECK_NULL_VOID(node);
+            // pass down style only if child inheritStyle_ is true
+            node->InitStyle((node->inheritStyle_) ? declaration_ : nullptr);
         }
     }
 }

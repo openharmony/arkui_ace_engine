@@ -36,12 +36,12 @@ public:
     virtual void PaintMaskLayer(SkCanvas* canvas, const Offset& offset, const Rect& paintRect) {}
     virtual void PaintMaskLayer(RenderContext& context, const Offset& offset, const Rect& paintRect) {}
 
-    bool IsDefalutMaskUnits() const
+    bool IsDefaultMaskUnits() const
     {
         return maskUnits_ == "objectBoundingBox";
     }
 
-    bool IsDefalutMaskContentUnits() const
+    bool IsDefaultMaskContentUnits() const
     {
         // return true if content relative to svg
         return maskContentUnits_ == "userSpaceOnUse";
