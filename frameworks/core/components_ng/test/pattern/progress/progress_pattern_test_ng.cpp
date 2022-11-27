@@ -14,6 +14,7 @@
  */
 
 #include <cstddef>
+#include <memory>
 #include <optional>
 
 #include "gtest/gtest.h"
@@ -81,6 +82,7 @@ constexpr Dimension TEST_PROGRESS_STROKE_WIDTH = 10.0_vp;
 constexpr Dimension TEST_PROGRESS_DEFAULT_WIDTH = 300.0_vp;
 constexpr Dimension TEST_PROGRESS_DEFAULT_DIAMETER = 72.0_vp;
 constexpr Dimension TEST_PROGRESS_SCALE_WIDTH = 2.0_vp;
+constexpr Dimension DEFALUT_STROKE_WIDTH = 2.0_vp;
 
 CreateProperty creatProperty;
 DirtySwapConfig config;
@@ -261,6 +263,64 @@ HWTEST_F(ProgressPatternTestNg, ProgressSetVlaue001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ProgressLayoutAlgorithm001
+ * @tc.desc: Test ProgressLayoutAlgorithm without theme.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressPatternTestNg, ProgressLayoutAlgorithm001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of linear progress.
+     */
+    TestProperty testProperty;
+    creatProperty.progressType = std::make_optional(PROGRESS_TYPE_LINEAR);
+
+    /**
+     * @tc.steps: step2. create progress frameNode and check the proregss properties with expected value .
+     * @tc.expected: step2. get frameNode success and proregss properties equals expected value.
+     */
+    RefPtr<FrameNode> frameNode = CreateProgressParagraph(testProperty);
+    CheckValue(frameNode, testProperty);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    RefPtr<ProgressLayoutProperty> progressLayoutProperty =
+        AceType::DynamicCast<ProgressLayoutProperty>(layoutProperty);
+    EXPECT_NE(progressLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. create contentConstraint.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+    contentConstraint.maxSize.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
+    contentConstraint.selfIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
+    contentConstraint.selfIdealSize.SetHeight(PROGRESS_COMPONENT_HEIGHT);
+
+    /**
+     * @tc.steps: step4. add layoutWrapper to porgress frameNode layoutWrapper.
+     * @tc.expected: step4. create layoutWrapper success.
+     */
+    LayoutWrapper layoutWrapper(frameNode, nullptr, progressLayoutProperty);
+
+    /**
+     * @tc.steps: step5. do linear porgress LayoutAlgorithm Measure and compare values.
+     * @tc.expected: step5. layout result equals expected result.
+     */
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(nullptr));
+    auto progressPattern = frameNode->GetPattern();
+    EXPECT_NE(progressPattern, nullptr);
+    auto progressLayoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
+    EXPECT_NE(progressLayoutAlgorithm, nullptr);
+    auto size = progressLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+
+    EXPECT_NE(size, std::nullopt);
+    EXPECT_EQ(progressLayoutAlgorithm->GetType(), PROGRESS_TYPE_LINEAR);
+    EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), DEFALUT_STROKE_WIDTH.ConvertToPx());
+    EXPECT_EQ(size->Height(), PROGRESS_COMPONENT_WIDTH);
+    EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_HEIGHT);
+}
+
+/**
  * @tc.name: LinearProgressCreator001
  * @tc.desc: Test all the properties of linear progress.
  * @tc.type: FUNC
@@ -287,6 +347,11 @@ HWTEST_F(ProgressPatternTestNg, LinearProgressCreator001, TestSize.Level1)
     RefPtr<ProgressLayoutProperty> progressLayoutProperty =
         AceType::DynamicCast<ProgressLayoutProperty>(layoutProperty);
     EXPECT_NE(progressLayoutProperty, nullptr);
+    RefPtr<ProgressPaintProperty> progressPaintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    EXPECT_NE(progressPaintProperty, nullptr);
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    progressPaintProperty->ToJsonValue(json);
+    EXPECT_NE(json, nullptr);
 
     /**
      * @tc.steps: step3. create contentConstraint.
@@ -427,6 +492,8 @@ HWTEST_F(ProgressPatternTestNg, RingProgressCreator001, TestSize.Level1)
     RefPtr<ProgressLayoutProperty> progressLayoutProperty =
         AceType::DynamicCast<ProgressLayoutProperty>(layoutProperty);
     EXPECT_NE(progressLayoutProperty, nullptr);
+    RefPtr<ProgressPaintProperty> progressPaintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    EXPECT_NE(progressPaintProperty, nullptr);
 
     /**
      * @tc.steps: step3. create contentConstraint.
@@ -446,6 +513,9 @@ HWTEST_F(ProgressPatternTestNg, RingProgressCreator001, TestSize.Level1)
      * @tc.expected: step5. layout result equals expected result.
      */
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    progressPaintProperty->ToJsonValue(json);
+    EXPECT_NE(json, nullptr);
     auto progressPattern = frameNode->GetPattern();
     EXPECT_NE(progressPattern, nullptr);
     auto progressLayoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
@@ -468,6 +538,11 @@ HWTEST_F(ProgressPatternTestNg, RingProgressCreator001, TestSize.Level1)
     size = progressLayoutAlgorithm->MeasureContent(contentConstraint2, &layoutWrapper);
     EXPECT_EQ(size->Height(), PROGRESS_COMPONENT_HEIGHT);
     EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_HEIGHT);
+
+    contentConstraint2.selfIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
+    size = progressLayoutAlgorithm->MeasureContent(contentConstraint2, &layoutWrapper);
+    EXPECT_EQ(size->Height(), PROGRESS_COMPONENT_HEIGHT);
+    EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_WIDTH);
 }
 
 /**
@@ -477,6 +552,9 @@ HWTEST_F(ProgressPatternTestNg, RingProgressCreator001, TestSize.Level1)
  */
 HWTEST_F(ProgressPatternTestNg, ScaleProgressFrameNodeCreator001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create testProperty and set properties of Scale progress.
+     */
     creatProperty.progressType = std::make_optional(PROGRESS_TYPE_SCALE);
 
     TestProperty testProperty;
@@ -486,8 +564,45 @@ HWTEST_F(ProgressPatternTestNg, ScaleProgressFrameNodeCreator001, TestSize.Level
     testProperty.frontColor = std::make_optional(FRONT_COLOR);
     testProperty.bgColor = std::make_optional(BG_COLOR);
 
+    /**
+     * @tc.steps: step2. create progress frameNode and check the proregss properties with expected value .
+     * @tc.expected: step2. get frameNode success and proregss properties equals expected value.
+     */
     RefPtr<FrameNode> frameNode = CreateProgressParagraph(testProperty);
     CheckValue(frameNode, testProperty);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    RefPtr<ProgressLayoutProperty> progressLayoutProperty =
+        AceType::DynamicCast<ProgressLayoutProperty>(layoutProperty);
+    EXPECT_NE(progressLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. create contentConstraint.
+     */
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+    contentConstraint.maxSize.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
+    contentConstraint.selfIdealSize.SetWidth(PROGRESS_COMPONENT_WIDTH);
+    contentConstraint.selfIdealSize.SetHeight(PROGRESS_COMPONENT_HEIGHT);
+
+    /**
+     * @tc.steps: step4. add layoutWrapper to porgress frameNode layoutWrapper.
+     * @tc.expected: step4. create layoutWrapper success.
+     */
+    LayoutWrapper layoutWrapper(frameNode, nullptr, progressLayoutProperty);
+
+    /**
+     * @tc.steps: step5. do ring porgress LayoutAlgorithm Measure and compare values.
+     * @tc.expected: step5. layout result equals expected result.
+     */
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    auto progressLayoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
+    EXPECT_NE(progressLayoutAlgorithm, nullptr);
+    auto size = progressLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_EQ(progressLayoutAlgorithm->GetType(), PROGRESS_TYPE_SCALE);
+    EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), TEST_PROGRESS_STROKE_WIDTH.ConvertToPx());
+    EXPECT_EQ(size->Height(), PROGRESS_COMPONENT_HEIGHT);
+    EXPECT_EQ(size->Width(), PROGRESS_COMPONENT_WIDTH);
 }
 
 /**
@@ -576,11 +691,11 @@ HWTEST_F(ProgressPatternTestNg, CapulseProgressCreator001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ProgressPaintMethod001
- * @tc.desc: Test ProgressPaintMethod.
+ * @tc.name: GetContentDrawFunction
+ * @tc.desc: Test the funtion GetContentDrawFunction in ProgressPaintMethod.
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressPatternTestNg, ProgressPaintMethod001, TestSize.Level1)
+HWTEST_F(ProgressPatternTestNg, GetContentDrawFunction, TestSize.Level1)
 {
     TestProperty testProperty;
     testProperty.strokeWidth = std::make_optional(LARG_STORKE_WIDTH);
@@ -628,18 +743,18 @@ HWTEST_F(ProgressPatternTestNg, ProgressPaintMethod001, TestSize.Level1)
 
 /**
  * @tc.name: ProgressPaintLinear001
- * @tc.desc: Test ProgressPaintMethod.
+ * @tc.desc: Test ProgressPaintMethod about all type.
  * @tc.type: FUNC
  */
 HWTEST_F(ProgressPatternTestNg, ProgressPaintLinear001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create testProperty and set properties.
+     */
     TestProperty testProperty;
     testProperty.strokeWidth = std::make_optional(LARG_STORKE_WIDTH);
     testProperty.scaleCount = std::make_optional(SCALE_COUNT);
     testProperty.scaleWidth = std::make_optional(SCALE_WIDTH);
-    /**
-     * @tc.steps: step1. create testProperty and set properties of ring progress.
-     */
     creatProperty.progressType = std::make_optional(PROGRESS_TYPE_LINEAR);
 
     /**
@@ -662,6 +777,7 @@ HWTEST_F(ProgressPatternTestNg, ProgressPaintLinear001, TestSize.Level1)
     auto progressPaintMethod =
         AceType::MakeRefPtr<ProgressPaintMethod>(PROGRESS_TYPE_LINEAR, LARG_STORKE_WIDTH.ConvertToPx());
     RSCanvas canvas;
+
     /**
      * @tc.steps: step4. call the function named Paint in ProgressPaintMethod when width is lager than hight.
      */
@@ -671,21 +787,36 @@ HWTEST_F(ProgressPatternTestNg, ProgressPaintLinear001, TestSize.Level1)
     progressPaintMethod->PaintMoon(canvas, contentOffset, contentSize);
     progressPaintMethod->PaintCapsule(canvas, contentOffset, contentSize);
     progressPaintMethod->PaintVerticalCapsule(canvas, contentOffset, contentSize);
+
     /**
-     * @tc.steps: step5. call the function named Paint in ProgressPaintMethod when width is less than hight.
+     * @tc.steps: step5. call the function named Paint in ProgressPaintMethod when value has been set as 50.
      */
-    contentSize.SetHeight(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
-    contentSize.SetWidth(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
-    testProperty.scaleWidth = std::make_optional(SCALE_WIDTH);
+    progressPaintMethod->value_ = MAX_VALUE_OF_PROGRESS / NUMBER_OF_TWO;
+    progressPaintMethod->PaintVerticalCapsule(canvas, contentOffset, contentSize);
 
+    /**
+     * @tc.steps: step5. call the function named Paint in ProgressPaintMethod when value has been set as 80.
+     */
+    progressPaintMethod->value_ = MAX_VALUE_OF_PROGRESS - VALUE_OF_PROGRESS;
     progressPaintMethod->PaintLinear(canvas, contentOffset, contentSize);
-
-    progressModel.SetScaleWidth(SCALE_WIDTH * NUMBER_OF_TWO);
-    progressPaintMethod->PaintScaleRing(canvas, contentOffset, contentSize);
-
-    progressModel.SetValue(MAX_VALUE_OF_PROGRESS - VALUE_OF_PROGRESS);
     progressPaintMethod->PaintMoon(canvas, contentOffset, contentSize);
     progressPaintMethod->PaintCapsule(canvas, contentOffset, contentSize);
     progressPaintMethod->PaintVerticalCapsule(canvas, contentOffset, contentSize);
+
+    /**
+     * @tc.steps: step5. call the function named Paint in ProgressPaintMethod when width is less than hight.
+     */
+    contentSize.SetHeight(PROGRESS_COMPONENT_HEIGHT);
+    contentSize.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
+    progressPaintMethod->PaintLinear(canvas, contentOffset, contentSize);
+
+    progressPaintMethod->value_ = VALUE_OF_PROGRESS;
+    progressPaintMethod->PaintLinear(canvas, contentOffset, contentSize);
+
+    progressPaintMethod->value_ = MAX_VALUE_OF_PROGRESS / NUMBER_OF_TWO;
+    progressPaintMethod->PaintCapsule(canvas, contentOffset, contentSize);
+
+    progressPaintMethod->scaleWidth_ = SCALE_WIDTH.ConvertToPx() * NUMBER_OF_TWO;
+    progressPaintMethod->PaintScaleRing(canvas, contentOffset, contentSize);
 }
 } // namespace OHOS::Ace::NG
