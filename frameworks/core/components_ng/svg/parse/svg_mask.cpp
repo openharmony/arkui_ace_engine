@@ -37,8 +37,7 @@ RefPtr<SvgNode> SvgMask::Create()
 void SvgMask::OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
     auto nodeBounds = isDefaultMaskUnits_ ? AsBounds(viewPort) : GetRootViewBox();
-    maskBounds_ = SkRect::MakeXYWH(
-        SkDoubleToScalar(nodeBounds.Left() + ParseUnitsAttr(x_, nodeBounds.Width())),
+    maskBounds_ = SkRect::MakeXYWH(SkDoubleToScalar(nodeBounds.Left() + ParseUnitsAttr(x_, nodeBounds.Width())),
         SkDoubleToScalar(nodeBounds.Top() + ParseUnitsAttr(y_, nodeBounds.Height())),
         SkDoubleToScalar(ParseUnitsAttr(width_, nodeBounds.Width())),
         SkDoubleToScalar(ParseUnitsAttr(height_, nodeBounds.Height())));
@@ -64,7 +63,7 @@ void SvgMask::OnInitStyle()
     auto declaration = Ace::AceType::DynamicCast<SvgMaskDeclaration>(declaration_);
     CHECK_NULL_VOID(declaration);
     isDefaultMaskUnits_ = (declaration->GetMaskUnits() == "objectBoundingBox");
-    isDefalutMaskContentUnits_ = (declaration->GetMaskContentUnits() == "userSpaceOnUse");
+    isDefaultMaskContentUnits_ = (declaration->GetMaskContentUnits() == "userSpaceOnUse");
     x_ = declaration->GetX();
     y_ = declaration->GetY();
     height_ = declaration->GetHeight();

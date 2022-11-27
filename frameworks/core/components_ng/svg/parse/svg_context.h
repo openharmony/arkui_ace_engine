@@ -19,6 +19,7 @@
 #include <unordered_map>
 
 #include "base/memory/ace_type.h"
+#include "base/utils/noncopyable.h"
 #include "frameworks/core/components_ng/svg/parse/svg_node.h"
 
 namespace OHOS::Ace::NG {
@@ -35,7 +36,7 @@ class SvgContext : public AceType {
 
 public:
     SvgContext() = default;
-    ~SvgContext()
+    ~SvgContext() override
     {
         idMapper_.clear();
     }
@@ -132,6 +133,8 @@ private:
     FuncAnimateFlush funcAnimateFlush_ = nullptr;
     Rect rootViewBox_;
     Size viewPort_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(SvgContext);
 };
 
 } // namespace OHOS::Ace::NG

@@ -796,7 +796,7 @@ void RenderSvgBase::PaintMaskLayer(RenderContext& context, const Offset& svg, co
     if (!maskId_.empty()) {
         RefPtr<RenderSvgMask> renderMask = AceType::DynamicCast<RenderSvgMask>(GetMaskFromRoot(maskId_));
         if (renderMask != nullptr) {
-            renderMask->PaintMaskLayer(context, svg, renderMask->IsDefalutMaskUnits() ?
+            renderMask->PaintMaskLayer(context, svg, renderMask->IsDefaultMaskUnits() ?
                 GetPaintBounds(current) : GetViewBoxFromRoot());
         }
     }
@@ -807,7 +807,7 @@ void RenderSvgBase::PaintMaskLayer(RenderContext& context, const Offset& svg, co
     if (!maskId_.empty()) {
         RefPtr<RenderSvgMask> renderMask = AceType::DynamicCast<RenderSvgMask>(GetMaskFromRoot(maskId_));
         if (renderMask != nullptr) {
-            renderMask->PaintMaskLayer(context, svg, renderMask->IsDefalutMaskUnits() ?
+            renderMask->PaintMaskLayer(context, svg, renderMask->IsDefaultMaskUnits() ?
                 bounds : GetViewBoxFromRoot());
         }
     }
