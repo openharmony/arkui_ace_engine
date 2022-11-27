@@ -124,6 +124,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight) {}
 
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
 
+void PipelineContext::FlushReload() {}
+
 const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
 {
     if (selectOverlayManager_) {
