@@ -182,9 +182,6 @@ void TextFieldPattern::UpdateConfiguration()
 
 bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (config.skipMeasure || dirty->SkipMeasureContent()) {
-        return false;
-    }
     contentRect_ = dirty->GetGeometryNode()->GetContentRect();
     frameRect_ = dirty->GetGeometryNode()->GetFrameRect();
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
@@ -217,6 +214,11 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 // return: true if text rect offset will NOT be further changed by caret position
 bool TextFieldPattern::UpdateCaretPosition()
 {
+    auto focusHub = GetHost()->GetOrCreateFocusHub();
+    if (focusHub && !focusHub->IsCurrentFocus()) {
+        CloseSelectOverlay();
+        return true;
+    }
     // text input has higher priority than events such as mouse press
     if (caretUpdateType_ == CaretUpdateType::INPUT) {
         UpdateCaretPositionByTextEdit();
@@ -378,6 +380,7 @@ void TextFieldPattern::UpdateCaretPositionByTextEdit()
 void TextFieldPattern::SetCaretOffsetXForEmptyText()
 {
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    caretRect_.SetTop(textRect_.GetY());
     switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
         case TextAlign::START:
             caretRect_.SetLeft(textRect_.GetX());
@@ -688,7 +691,6 @@ bool TextFieldPattern::HandleKeyEvent(const KeyEvent& keyEvent)
                 HandleOnCut();
             }
         }
-        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     return true;
 }
@@ -705,11 +707,14 @@ void TextFieldPattern::HandleOnUndoAction()
     if (operationRecords_.empty()) {
         LOGD("No record left, clear");
         ClearEditingValue();
-    } else {
-        textEditingValue_ = operationRecords_.back();
-        SetEditingValueToProperty(textEditingValue_.text);
-        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
     }
+    textEditingValue_ = operationRecords_.back();
+    SetEditingValueToProperty(textEditingValue_.text);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
+                                                                                      : PROPERTY_UPDATE_MEASURE);
     FireEventHubOnChange(GetEditingValue().text);
 }
 
@@ -723,7 +728,10 @@ void TextFieldPattern::HandleOnRedoAction()
     redoOperationRecords_.pop_back();
     operationRecords_.push_back(textEditingValue_);
     SetEditingValueToProperty(textEditingValue_.text);
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
+                                                                                      : PROPERTY_UPDATE_MEASURE);
     FireEventHubOnChange(GetEditingValue().text);
 }
 
@@ -734,7 +742,7 @@ void TextFieldPattern::HandleOnSelectAll()
     textEditingValue_.caretPosition = static_cast<int32_t>(textEditingValue_.text.length());
     selectionMode_ = SelectionMode::SELECT_ALL;
     caretUpdateType_ = CaretUpdateType::EVENT;
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void TextFieldPattern::HandleOnCopy()
@@ -825,7 +833,7 @@ void TextFieldPattern::HandleOnPaste()
             CHECK_NULL_VOID(eventHub);
             eventHub->FireOnPaste(data);
             textfield->FireEventHubOnChange(data);
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             return;
         }
 
@@ -833,7 +841,8 @@ void TextFieldPattern::HandleOnPaste()
         CHECK_NULL_VOID(eventHub);
         eventHub->FireOnPaste(data);
         textfield->FireEventHubOnChange(data);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
+                                                                                     : PROPERTY_UPDATE_MEASURE);
     };
     clipboard_->GetData(pasteCallback);
 }
@@ -874,7 +883,7 @@ void TextFieldPattern::HandleOnCut()
         CHECK_NULL_VOID(eventHub);
         eventHub->FireOnCut(selectedText);
         FireEventHubOnChange(selectedText);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         return;
     }
 
@@ -882,7 +891,8 @@ void TextFieldPattern::HandleOnCut()
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnCut(selectedText);
     FireEventHubOnChange(selectedText);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
+                                                                                 : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::UpdateSelection(int32_t both)
@@ -934,7 +944,7 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
     lastTouchOffset_ = offset;
     caretUpdateType_ = CaretUpdateType::PRESSED;
     selectionMode_ = SelectionMode::NONE;
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void TextFieldPattern::HandleTouchUp()
@@ -1005,7 +1015,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     lastTouchOffset_ = info.GetLocalLocation();
     caretUpdateType_ = CaretUpdateType::PRESSED;
     selectionMode_ = SelectionMode::NONE;
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
     if (isMousePressed_) {
         LOGD("TextFieldPattern::HandleTouchUp of mouse");
@@ -1117,7 +1127,8 @@ void TextFieldPattern::OnModifyDone()
         operationRecords_.clear();
         redoOperationRecords_.clear();
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
+                                                                                     : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::ProcessPadding()
@@ -1157,7 +1168,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     lastTouchOffset_ = info.GetLocalLocation();
     caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
     selectionMode_ = SelectionMode::SELECT;
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void TextFieldPattern::ProcessOverlay()
@@ -1399,7 +1410,7 @@ void TextFieldPattern::HandleMouseEvent(const MouseInfo& info)
         }
         caretUpdateType_ = CaretUpdateType::EVENT;
         lastTouchOffset_ = info.GetLocalLocation();
-        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
 
@@ -1455,6 +1466,11 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose)
         StopTwinkling();
         LOGI("Request close soft keyboard");
 #if defined(ENABLE_STANDARD_INPUT)
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+        if (!imeAttached_) {
+            return false;
+        }
+#endif
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (!inputMethod) {
             LOGE("Request close soft keyboard failed because input method is null.");
@@ -1535,7 +1551,10 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnChange(textEditingValue_.text);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
+                                                                                 : PROPERTY_UPDATE_MEASURE);
 }
 
 bool TextFieldPattern::FilterWithRegex(
@@ -1662,7 +1681,7 @@ void TextFieldPattern::CursorMoveLeft()
         textEditingValue_.CursorMoveLeft();
     }
     selectionMode_ = SelectionMode::NONE;
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void TextFieldPattern::CursorMoveRight()
@@ -1676,7 +1695,7 @@ void TextFieldPattern::CursorMoveRight()
         textEditingValue_.CursorMoveRight();
     }
     selectionMode_ = SelectionMode::NONE;
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void TextFieldPattern::CursorMoveUp()
@@ -1712,7 +1731,10 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
     selectionMode_ = SelectionMode::NONE;
     caretUpdateType_ = CaretUpdateType::INPUT;
     operationRecords_.emplace_back(textEditingValue_);
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
+                                                                                 : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::SetEditingValueToProperty(const std::string& newValueText)
@@ -1729,7 +1751,10 @@ void TextFieldPattern::ClearEditingValue()
     textEditingValue_.Reset();
     SetEditingValueToProperty("");
     operationRecords_.emplace_back(textEditingValue_);
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
+                                                                                 : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard)
@@ -1781,7 +1806,10 @@ void TextFieldPattern::DeleteForward(int32_t length)
     selectionMode_ = SelectionMode::NONE;
     caretUpdateType_ = CaretUpdateType::DEL;
     operationRecords_.emplace_back(textEditingValue_);
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
+                                                                                 : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::DeleteBackward(int32_t length)
@@ -1802,7 +1830,10 @@ void TextFieldPattern::DeleteBackward(int32_t length)
     selectionMode_ = SelectionMode::NONE;
     caretUpdateType_ = CaretUpdateType::INPUT;
     operationRecords_.emplace_back(textEditingValue_);
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
+                                                                                 : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::HandleSelectionUp()
@@ -1891,7 +1922,7 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
     textEditingValue_.caretPosition = std::clamp(position, 0, static_cast<int32_t>(textEditingValue_.text.length()));
     selectionMode_ = SelectionMode::NONE;
     caretUpdateType_ = CaretUpdateType::EVENT;
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void TextFieldPattern::CaretMoveToLastNewLineChar()
