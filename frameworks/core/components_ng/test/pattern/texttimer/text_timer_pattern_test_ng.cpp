@@ -37,7 +37,7 @@ const std::string TEXT_TIMER_FORMAT = "HH:mm:ss.SS";
 const std::string FORMAT_DATA = "08:00:00";
 const std::string UTC_1 = "1000000000000";
 const std::string UTC_2 = "2000000000000";
-const std::string ELAPSED_TIME_1 = "200";
+const std::string ELAPSED_TIME_1 = "100";
 const std::string ELAPSED_TIME_2 = "200";
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
@@ -138,8 +138,10 @@ HWTEST_F(TextTimerPatternTestNg, TextTimerTest001, TestSize.Level1)
     EXPECT_EQ(textTimerLayoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(textTimerLayoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
 
+    textTimerLayoutProperty->UpdateFontFamily(FONT_FAMILY_VALUE);
     auto json = JsonUtil::Create(true);
-    layoutProperty->ToJsonValue(json);
+    textTimerLayoutProperty->ToJsonValue(json);
+    EXPECT_EQ(textTimerLayoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
 }
 
 /**
@@ -188,18 +190,47 @@ HWTEST_F(TextTimerPatternTestNg, TextTimerTest002, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetContent(), FORMAT_DATA);
 
     /**
-     * @tc.steps: step5. get controller and create layout property and event.
-     * @tc.expected: step5. related function is called.
+     * @tc.steps: step5. get controller to call callback function.
      */
     auto controller = pattern->GetTextTimerController();
     EXPECT_NE(controller, nullptr);
+
+    /**
+     * @tc.steps: step6. when the running status in scheduler is false, call related functions.
+     * @tc.expected: step6. Check whether relevant parameters are correct.
+     */
+    pattern->scheduler_->isRunning_ = false;
+    pattern->elapsedTime_ = 1;
     controller->Start();
+    pattern->scheduler_->isRunning_ = false;
     controller->Reset();
+    pattern->scheduler_->isRunning_ = false;
     controller->Pause();
-    auto timerLayoutProperty = pattern->CreateLayoutProperty();
-    EXPECT_NE(timerLayoutProperty, nullptr);
-    auto event = pattern->CreateEventHub();
-    EXPECT_NE(event, nullptr);
+    EXPECT_EQ(pattern->elapsedTime_, 0);
+
+    /**
+     * @tc.steps: step7. when the running status in scheduler is true, call related functions.
+     * @tc.expected: step7. Check whether relevant parameters are correct.
+     */
+    pattern->scheduler_->isRunning_ = true;
+    pattern->elapsedTime_ = 1;
+    controller->Start();
+    pattern->scheduler_->isRunning_ = true;
+    controller->Pause();
+    pattern->scheduler_->isRunning_ = true;
+    controller->Reset();
+    EXPECT_EQ(pattern->elapsedTime_, 0);
+
+    /**
+     * @tc.steps: step8. when scheduler is nullptr, call related functions.
+     * @tc.expected: step8. Check whether relevant parameters are correct.
+     */
+    pattern->scheduler_ = nullptr;
+    pattern->elapsedTime_ = 1;
+    controller->Start();
+    controller->Pause();
+    controller->Reset();
+    EXPECT_EQ(pattern->elapsedTime_, 0);
 }
 
 /**
