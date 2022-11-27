@@ -998,8 +998,10 @@ bool JSViewAbstract::ParseJsDimensionRect(const JSRef<JSVal>& jsValue, Dimension
     Dimension heightDimen = result.GetHeight();
     auto s1 = width->ToString();
     auto s2 = height->ToString();
-    if (s1.find('-') != std::string::npos || s2.find('-') != std::string::npos) {
+    if (s1.find('-') != std::string::npos) {
         width = JSRef<JSVal>::Make(ToJSValue("100%"));
+    }
+    if (s2.find('-') != std::string::npos) {
         height = JSRef<JSVal>::Make(ToJSValue("100%"));
     }
     if (ParseJsDimension(x, xDimen, DimensionUnit::VP)) {
