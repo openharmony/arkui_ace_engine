@@ -26,6 +26,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -187,6 +188,13 @@ void FlexLayoutAlgorithm::InitFlexProperties(LayoutWrapper* layoutWrapper)
     textDir_ = layoutProperty->GetLayoutDirection();
     if (textDir_ == TextDirection::AUTO) {
         textDir_ = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
+    }
+    /**
+     * FIXME: FlexLayoutAlgorithm, as the parent class, should not handle the special logic of the subclass LinearLayout.
+     */
+    if (isLinearLayoutFeature_) {
+        bool isVertical = DynamicCast<LinearLayoutProperty>(layoutWrapper->GetLayoutProperty())->IsVertical();
+        direction_ = isVertical ? FlexDirection::COLUMN : FlexDirection::ROW;
     }
 }
 
@@ -600,6 +608,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
      */
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
     const auto& measureType = layoutWrapper->GetLayoutProperty()->GetMeasureType();
+    InitFlexProperties(layoutWrapper);
     Axis axis = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) ? Axis::HORIZONTAL
                                                                                                : Axis::VERTICAL;
     auto realSize = CreateIdealSize(layoutConstraint.value(), axis, measureType).ConvertToSizeT();
@@ -607,7 +616,6 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
         return;
     }
-    InitFlexProperties(layoutWrapper);
     mainAxisSize_ = GetMainAxisSizeHelper(realSize, direction_);
     /**
      * The user has not set the main axis size
@@ -661,6 +669,10 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     AdjustTotalAllocatedSize(layoutWrapper);
 
+    /**
+     * FIXME: For Row and Column, the main axis size is wrapContent.
+     * And, FlexLayoutAlgorithm, as the parent class, should not handle the special logic of the subclass LinearLayout.
+     */
     if (isInfiniteLayout_) {
         mainAxisSize_ = allocatedSize_;
     }
