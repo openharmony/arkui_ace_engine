@@ -608,7 +608,7 @@ bool PipelineContext::OnBackPressed()
             }
         },
         TaskExecutor::TaskType::UI);
-    
+
     if (result) {
         // user accept
         LOGI("CallRouterBackToPopPage(): frontend accept");
@@ -1078,6 +1078,21 @@ void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
     containerNode->GetPattern<ContainerModalPattern>()->SetAppIcon(icon);
+}
+
+void PipelineContext::FlushReload()
+{
+    LOGI("PipelineContext::FlushReload.");
+    AnimationOption option;
+    const int32_t duration = 400;
+    option.SetDuration(duration);
+    option.SetCurve(Curves::FRICTION);
+    AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->stageManager_->ReloadStage();
+        pipeline->FlushUITasks();
+    });
 }
 
 void PipelineContext::Destroy()

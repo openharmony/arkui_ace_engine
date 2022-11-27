@@ -533,6 +533,13 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         jsView->pendingUpdateTasks_.clear();
     };
 
+    auto reloadFunction = [weak = AceType::WeakClaim(this)](bool deep) {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
+        jsView->jsViewFunction_->ExecuteReload(deep);
+    };
+
     auto pageTransitionFunction = [weak = AceType::WeakClaim(this)]() {
         auto jsView = weak.Upgrade();
         if (!jsView || !jsView->jsViewFunction_) {
@@ -565,6 +572,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         .removeFunc = std::move(removeFunction),
         .updateNodeFunc = std::move(updateViewNodeFunction),
         .pageTransitionFunc = std::move(pageTransitionFunction),
+        .reloadFunc = std::move(reloadFunction),
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout(),
         .isStatic = IsStatic() };
 
