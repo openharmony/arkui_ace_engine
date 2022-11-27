@@ -52,9 +52,6 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     color_ = indexerLayoutProperty->GetColor().value_or(Color(INDEXER_LIST_COLOR));
     selectedColor_ = indexerLayoutProperty->GetSelectedColor().value_or(Color(INDEXER_LIST_ACTIVE_COLOR));
     popupColor_ = indexerLayoutProperty->GetPopupColor().value_or(Color(BUBBLE_FONT_COLOR));
-    selectedBackgroundColor_ = indexerLayoutProperty->GetSelectedBackgroundColor()
-        .value_or(Color(INDEXER_ACTIVE_BG_COLOR));
-    popupBackground_ = indexerLayoutProperty->GetPopupBackground().value_or(Color(BUBBLE_BG_COLOR));
     usingPopup_ = indexerLayoutProperty->GetUsingPopup().value_or(false);
     TextStyle textStyle;
     selectedFont_ = indexerLayoutProperty->GetSelectedFont().value_or(textStyle);
@@ -97,8 +94,6 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
             auto childFrameNode = childWrapper->GetHostNode();
             auto childRenderContext = childFrameNode->GetRenderContext();
-            childRenderContext->BlendBgColor(selectedBackgroundColor_);
-
             Dimension radius = Dimension(NG::BOX_RADIUS);
             BorderRadiusProperty borderRadius { radius, radius, radius, radius };
             childRenderContext->UpdateBorderRadius(borderRadius);

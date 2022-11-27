@@ -215,6 +215,8 @@ HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator002, TestSize.Level1)
     EXPECT_NE(layoutProperty, nullptr);
     RefPtr<IndexerLayoutProperty> indexerLayoutProperty = AceType::DynamicCast<IndexerLayoutProperty>(layoutProperty);
     EXPECT_NE(indexerLayoutProperty, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<IndexerPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
 
     /**
      * @tc.steps: step3. compare indexer properties and expected value.

@@ -71,8 +71,6 @@ private:
     Color color_ = Color::BLACK;
     Color selectedColor_ = Color::BLACK;
     Color popupColor_ = Color::BLACK;
-    Color selectedBackgroundColor_ = Color::BLACK;
-    Color popupBackground_ = Color::BLACK;
     bool usingPopup_ = false;
     TextStyle selectedFont_;
     TextStyle popupFont_;
