@@ -13,21 +13,14 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/pipeline/base/element_register.h"
+#include "core/components/scroll/scrollable.h"
 
 namespace OHOS::Ace {
-ElementRegister* ElementRegister::GetInstance()
-{
-    return new ElementRegister();
-}
+Scrollable::~Scrollable() = default;
 
-bool ElementRegister::RemoveItem(ElementIdType elementId)
-{
-    return true;
-}
+void Scrollable::OnFlushTouchEventsBegin() {}
 
-bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
-{
-    return true;
-}
+void Scrollable::OnFlushTouchEventsEnd() {}
+
+void Scrollable::Initialize(const WeakPtr<PipelineBase>& context) {}
 } // namespace OHOS::Ace
