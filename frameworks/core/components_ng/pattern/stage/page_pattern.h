@@ -117,6 +117,8 @@ public:
 
     void BuildSharedTransitionMap();
 
+    void ReloadPage();
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
