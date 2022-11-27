@@ -538,11 +538,9 @@ void ListPattern::ScrollToIndex(int32_t index, ScrollIndexAlignment align)
 void ListPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType)
 {
     LOGI("ScrollToEdge:%{public}zu", scrollEdgeType);
-    if (((scrollEdgeType == ScrollEdgeType::SCROLL_TOP) && GetDirection() == Axis::VERTICAL) ||
-        ((scrollEdgeType == ScrollEdgeType::SCROLL_LEFT) && GetDirection() == Axis::HORIZONTAL)) {
+    if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
         ScrollToIndex(0, ScrollIndexAlignment::ALIGN_TOP);
-    } else if (((scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) && GetDirection() == Axis::VERTICAL) ||
-        ((scrollEdgeType == ScrollEdgeType::SCROLL_RIGHT) && GetDirection() == Axis::HORIZONTAL)) {
+    } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
         ScrollToIndex(maxListItemIndex_, ScrollIndexAlignment::ALIGN_BUTTON);
     }
 }
