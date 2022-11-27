@@ -36,6 +36,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -994,7 +995,12 @@ bool JSViewAbstract::ParseJsDimensionRect(const JSRef<JSVal>& jsValue, Dimension
     Dimension yDimen = result.GetOffset().GetY();
     Dimension widthDimen = result.GetWidth();
     Dimension heightDimen = result.GetHeight();
-
+    auto s1 = width->ToString();
+    auto s2 = height->ToString();
+    if (s1.find('-') != std::string::npos || s2.find('-') != std::string::npos) {
+        width = JSRef<JSVal>::Make(ToJSValue("100%"));
+        height = JSRef<JSVal>::Make(ToJSValue("100%"));
+    }
     if (ParseJsDimension(x, xDimen, DimensionUnit::VP)) {
         auto offset = result.GetOffset();
         offset.SetX(xDimen);
