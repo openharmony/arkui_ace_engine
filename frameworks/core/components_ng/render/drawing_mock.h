@@ -22,6 +22,7 @@
 #include "utils/round_rect.h"
 #include "utils/scalar.h"
 
+#include "core/components_ng/test/mock/rosen/testing_bitmap.h"
 #include "core/components_ng/test/mock/rosen/testing_brush.h"
 #include "core/components_ng/test/mock/rosen/testing_canvas.h"
 #include "core/components_ng/test/mock/rosen/testing_color.h"
@@ -43,6 +44,10 @@ using RSMaskFilter = Testing::TestingMaskFilter;
 using RSBlurType = Testing::BlurType;
 using RSTileMode = Testing::TileMode;
 using RSColorQuad = Testing::ColorQuad;
+using RSBitmap = Testing::TestingBitmap;
+using RSBitmapFormat = Testing::BitmapFormat;
+using RSColorType = Testing::ColorType;
+using RSAlphaType = Testing::AlphaType;
 using RSPoint = Rosen::Drawing::PointF;
 using RSScalar = Rosen::Drawing::scalar;
 using RSRect = Rosen::Drawing::RectF;
