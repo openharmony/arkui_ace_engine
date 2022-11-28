@@ -208,16 +208,16 @@ HWTEST_F(EventReportTest, EventReportTest_JsErrReport_001, TestSize.Level1)
 HWTEST_F(EventReportTest, EventReportTest_ANRRawReport_001, TestSize.Level1)
 {
     CHECK_PTR_NULL_VOID(eventReportData_);
-    int32_t defalut_uid = 1000;
-    auto result = eventReportData_->ANRRawReport(RawEventType::WARNING, defalut_uid, "EventReportTest",
+    int32_t default_uid = 1000;
+    auto result = eventReportData_->ANRRawReport(RawEventType::WARNING, default_uid, "EventReportTest",
         "EventReportTest", " ");
     EXPECT_TRUE(result);
 
-    result = eventReportData_->ANRRawReport(RawEventType::FREEZE, defalut_uid, "EventReportTest",
+    result = eventReportData_->ANRRawReport(RawEventType::FREEZE, default_uid, "EventReportTest",
         "EventReportTest", " ");
     EXPECT_TRUE(result);
 
-    result = eventReportData_->ANRRawReport(RawEventType::RECOVER, defalut_uid, "EventReportTest",
+    result = eventReportData_->ANRRawReport(RawEventType::RECOVER, default_uid, "EventReportTest",
         "EventReportTest", " ");
     EXPECT_TRUE(result);
 }
@@ -230,8 +230,8 @@ HWTEST_F(EventReportTest, EventReportTest_ANRRawReport_001, TestSize.Level1)
 HWTEST_F(EventReportTest, EventReportTest_ANRShowDialog_001, TestSize.Level1)
 {
     CHECK_PTR_NULL_VOID(eventReportData_);
-    int32_t defalut_uid = 1000;
-    auto result = eventReportData_->ANRShowDialog(defalut_uid, "EventReportTest", "EventReportTest", "");
+    int32_t default_uid = 1000;
+    auto result = eventReportData_->ANRShowDialog(default_uid, "EventReportTest", "EventReportTest", "");
     EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace

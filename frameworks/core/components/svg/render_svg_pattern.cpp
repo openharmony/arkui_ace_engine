@@ -46,7 +46,7 @@ void RenderSvgPattern::Update(const RefPtr<Component> &component)
 
 double RenderSvgPattern::ParseUnitsAttr(const Dimension& attr, double value) const
 {
-    if (IsDefalutPatternUnits()) {
+    if (IsDefaultPatternUnits()) {
         // only support decimal or percent
         if (attr.Unit() == DimensionUnit::PERCENT) {
             return value * attr.Value();
