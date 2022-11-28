@@ -15,12 +15,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_MOUSE_SELECT_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_MOUSE_SELECT_MODIFIER_H
 
-#include "core/components_ng/render/adapter/rosen_foreground_modifier.h"
+#include "render_service_client/core/modifier/rs_extended_modifier.h"
+
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 
 namespace OHOS::Ace::NG {
 
-class MouseSelectModifier : public RSForegroundStyleModifier {
+class MouseSelectModifier : public Rosen::RSForegroundStyleModifier {
 public:
     MouseSelectModifier() = default;
     ~MouseSelectModifier() override = default;
