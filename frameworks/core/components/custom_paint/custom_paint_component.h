@@ -104,6 +104,7 @@ public:
     void BeginPath();
     void ClosePath();
     void Restore();
+    void ResetTransform();
     void Save();
     void Rotate(double angle);
     void Scale(double x, double y);

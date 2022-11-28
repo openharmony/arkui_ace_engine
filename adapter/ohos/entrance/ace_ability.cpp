@@ -21,6 +21,7 @@
 #include "ability_process.h"
 #include "display_type.h"
 #include "dm/display_manager.h"
+#include "form_utils_impl.h"
 #include "init_data.h"
 #include "ipc_skeleton.h"
 #include "res_config.h"
@@ -47,7 +48,7 @@
 #include "core/common/frontend.h"
 #include "core/common/plugin_manager.h"
 #include "core/common/plugin_utils.h"
-
+#include "core/common/form_manager.h"
 namespace OHOS {
 namespace Ace {
 namespace {
@@ -347,7 +348,8 @@ void AceAbility::OnStart(const Want& want)
 
     auto pluginUtils = std::make_shared<PluginUtilsImpl>();
     PluginManager::GetInstance().SetAceAbility(this, pluginUtils);
-
+    auto formUtils = std::make_shared<FormUtilsImpl>();
+    FormManager::GetInstance().SetFormUtils(formUtils);
     // create container
     Platform::AceContainer::CreateContainer(abilityId_, frontendType, isArkApp, srcPath, shared_from_this(),
         std::make_unique<AcePlatformEventCallback>([this]() { TerminateAbility(); },
@@ -363,6 +365,7 @@ void AceAbility::OnStart(const Want& want)
         LOGE("container is null, set configuration failed.");
         return;
     }
+    container->SetToken(token_);
     auto aceResCfg = container->GetResourceConfiguration();
     aceResCfg.SetOrientation(SystemProperties::GetDeviceOrientation());
     aceResCfg.SetDensity(SystemProperties::GetResolution());

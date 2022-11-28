@@ -71,9 +71,8 @@ void IndexerPattern::OnModifyDone()
     }
 
     auto focusHub = host->GetFocusHub();
-    if (focusHub) {
-        InitOnKeyEvent(focusHub);
-    }
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
 }
 
 bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -108,16 +107,15 @@ void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto onActionUpdate = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            if (info.GetInputEventType() == InputEventType::AXIS) {
-                if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
-                    pattern->MoveIndexByStep(-1);
-                } else if (LessNotEqual(info.GetMainDelta(), 0.0)) {
-                    pattern->MoveIndexByStep(1);
-                }
-            } else {
-                pattern->MoveIndexByOffset(info.GetLocalLocation(), false);
+        CHECK_NULL_VOID(pattern);
+        if (info.GetInputEventType() == InputEventType::AXIS) {
+            if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
+                pattern->MoveIndexByStep(-1);
+            } else if (LessNotEqual(info.GetMainDelta(), 0.0)) {
+                pattern->MoveIndexByStep(1);
             }
+        } else {
+            pattern->MoveIndexByOffset(info.GetLocalLocation(), false);
         }
     };
 
@@ -352,10 +350,8 @@ void IndexerPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        if (pattern) {
-            return pattern->OnKeyEvent(event);
-        }
-        return false;
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 }

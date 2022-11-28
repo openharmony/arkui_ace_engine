@@ -98,9 +98,9 @@ void UpdateChildLayoutConstrainByFlexBasis(
     FlexDirection direction, const RefPtr<LayoutWrapper>& child, LayoutConstraintF& layoutConstraint)
 {
     const auto& flexItemProperty = child->GetLayoutProperty()->GetFlexItemProperty();
-    CHECK_NULL_VOID(flexItemProperty);
+    CHECK_NULL_VOID_NOLOG(flexItemProperty);
     const auto& flexBasis = flexItemProperty->GetFlexBasis();
-    CHECK_NULL_VOID(flexBasis);
+    CHECK_NULL_VOID_NOLOG(flexBasis);
     if (flexBasis->Unit() == DimensionUnit::AUTO || !flexBasis->IsValid()) {
         return;
     }
@@ -116,19 +116,19 @@ void UpdateChildLayoutConstrainByFlexBasis(
 float FlexLayoutAlgorithm::GetChildMainAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
     float size = 0.0f;
-    CHECK_NULL_RETURN(layoutWrapper, size);
+    CHECK_NULL_RETURN_NOLOG(layoutWrapper, size);
     return GetMainAxisSizeHelper(layoutWrapper->GetGeometryNode()->GetMarginFrameSize(), direction_);
 }
 
 float FlexLayoutAlgorithm::GetChildCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
-    CHECK_NULL_RETURN(layoutWrapper, 0.0f);
+    CHECK_NULL_RETURN_NOLOG(layoutWrapper, 0.0f);
     return GetCrossAxisSizeHelper(layoutWrapper->GetGeometryNode()->GetMarginFrameSize(), direction_);
 }
 
 float FlexLayoutAlgorithm::GetSelfCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
-    CHECK_NULL_RETURN(layoutWrapper, 0.0f);
+    CHECK_NULL_RETURN_NOLOG(layoutWrapper, 0.0f);
     return GetCrossAxisSizeHelper(layoutWrapper->GetGeometryNode()->GetFrameSize(), direction_);
 }
 
@@ -495,6 +495,12 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
             float ret = 0.0f;
             if (flexItemProperty) {
                 ret = flexItemProperty->GetFlexGrow().value_or(ret);
+                /**
+                 * handle non positive flex grow.
+                 */
+                if (NonPositive(ret)) {
+                    ret = 0.0f;
+                }
             }
             return ret;
         };
@@ -506,6 +512,12 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
             float ret = isLinearLayoutFeature ? 0.0f : 1.0f;
             if (flexItemProperty) {
                 ret = flexItemProperty->GetFlexShrink().value_or(ret);
+                /**
+                 * handle non positive flex shrink.
+                 */
+                if (NonPositive(ret)) {
+                    ret = 0.0f;
+                }
             }
             return ret;
         };

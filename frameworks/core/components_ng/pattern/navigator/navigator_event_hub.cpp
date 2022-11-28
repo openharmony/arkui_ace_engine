@@ -15,6 +15,7 @@
 
 #include "navigator_event_hub.h"
 
+#include "base/utils/utils.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
@@ -22,10 +23,7 @@ namespace OHOS::Ace::NG {
 void NavigatorEventHub::NavigatePage()
 {
     auto delegate = EngineHelper::GetCurrentDelegate();
-    if (!delegate) {
-        LOGE("get jsi delegate failed");
-        return;
-    }
+    CHECK_NULL_VOID(delegate);
     switch (type_) {
         case NavigatorType::PUSH:
             delegate->Push(url_, params_);

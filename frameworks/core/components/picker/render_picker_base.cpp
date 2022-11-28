@@ -351,7 +351,8 @@ void RenderPickerBase::LayoutBoxes()
     outBox_->Layout(layout);
     double x = (outBox_->GetLayoutSize().Width() - innerSize.Width()) / 2.0; // place center
     double y = 0.0;
-    if (theme->GetShowButtons()) {
+    auto deviceType = SystemProperties::GetDeviceType();
+    if (theme->GetShowButtons() && deviceType == DeviceType::PHONE) {
         y = (outBox_->GetLayoutSize().Height() - innerSize.Height() -
              NormalizeToPx(theme->GetButtonTopPadding())); // place bottom
     } else {

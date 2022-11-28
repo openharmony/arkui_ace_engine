@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 
@@ -31,21 +32,17 @@ bool CheckScrollable(const RefPtr<Pattern>& pattern)
 float GetScrollableDistance(RefPtr<Pattern> pattern)
 {
     auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-    if (scrollPattern) {
-        return scrollPattern->GetScrollableDistance();
-    }
     // TO DO for grid/list
-    return 0.0f;
+    CHECK_NULL_RETURN(scrollPattern, 0.0f);
+    return scrollPattern->GetScrollableDistance();
 }
 
 float GetScrollOffset(RefPtr<Pattern> pattern)
 {
     auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-    if (scrollPattern) {
-        return scrollPattern->GetCurrentPosition();
-    }
     // TO DO for grid/list
-    return 0.0f;
+    CHECK_NULL_RETURN(scrollPattern, 0.0f);
+    return scrollPattern->GetCurrentPosition();
 }
 }
 
@@ -87,10 +84,7 @@ void ScrollBarProxy::UnRegisterScrollBar(const WeakPtr<ScrollBarPattern>& scroll
 void ScrollBarProxy::NotifyScrollableNode(float distance, const WeakPtr<ScrollBarPattern>& weakScrollBar) const
 {
     auto scrollBar = weakScrollBar.Upgrade();
-    if (!scrollBar) {
-        LOGE("scrollBar has been released.");
-        return;
-    }
+    CHECK_NULL_VOID(scrollBar);
     float controlDistance = scrollBar->GetScrollableDistance();
 
     for (const auto& node : scrollableNodes_) {

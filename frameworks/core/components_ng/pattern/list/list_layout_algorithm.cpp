@@ -211,10 +211,7 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
 {
     bool isGroup = false;
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
-    if (!wrapper) {
-        LOGI("the start %{public}d index wrapper is null", currentIndex + 1);
-        return 0;
-    }
+    CHECK_NULL_RETURN(wrapper, 0);
     ++currentIndex;
     auto itemGroup = GetListItemGroup(wrapper);
     if (itemGroup) {
@@ -236,10 +233,7 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
 {
     bool isGroup = false;
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex - 1);
-    if (!wrapper) {
-        LOGI("the %{public}d wrapper is null", currentIndex - 1);
-        return 0;
-    }
+    CHECK_NULL_RETURN(wrapper, 0);
     --currentIndex;
     auto itemGroup = GetListItemGroup(wrapper);
     if (itemGroup) {

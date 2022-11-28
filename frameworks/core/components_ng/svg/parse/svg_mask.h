@@ -43,7 +43,7 @@ private:
     Dimension height_ = Dimension(1.2, DimensionUnit::PERCENT); // masking area width default value
     Dimension width_ = Dimension(1.2, DimensionUnit::PERCENT); // masking area height default  value
     bool isDefaultMaskUnits_ = true;
-    bool isDefalutMaskContentUnits_ = true;
+    bool isDefaultMaskContentUnits_ = true;
 
     SkRect maskBounds_;
     int canvasLayerCount_ = -1;

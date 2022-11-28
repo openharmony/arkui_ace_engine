@@ -27,13 +27,11 @@ namespace OHOS::Ace::NG {
 void ListPositionController::JumpTo(int32_t index, int32_t source)
 {
     auto pattern = scroll_.Upgrade();
-    if (pattern) {
-        auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
-        if (listPattern) {
-            LOGW("jumpTo is not supported now");
-            listPattern->ScrollToIndex(index);
-        }
-    }
+    CHECK_NULL_VOID(pattern);
+    auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
+    CHECK_NULL_VOID(listPattern);
+    LOGW("jumpTo is not supported now");
+    listPattern->ScrollToIndex(index);
 }
 
 bool ListPositionController::AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve)
@@ -73,13 +71,10 @@ void ListPositionController::ScrollBy(double pixelX, double pixelY, bool smooth)
 Axis ListPositionController::GetScrollDirection() const
 {
     auto pattern = scroll_.Upgrade();
-    if (pattern) {
-        auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
-        if (listPattern) {
-            return listPattern->GetDirection();
-        }
-    }
-    return Axis::NONE;
+    CHECK_NULL_RETURN(pattern, Axis::NONE);
+    auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
+    CHECK_NULL_RETURN(listPattern, Axis::NONE);
+    return listPattern->GetDirection();
 }
 
 void ListPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
@@ -106,9 +101,7 @@ Offset ListPositionController::GetCurrentOffset() const
 {
     auto pattern = scroll_.Upgrade();
     auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
-    if (!listPattern) {
-        return Offset::Zero();
-    }
+    CHECK_NULL_RETURN(listPattern, Offset::Zero());
     auto pxOffset = listPattern->GetCurrentOffset();
     // need to reverse the coordinate
     auto x = Dimension(pxOffset.GetX(), DimensionUnit::PX);

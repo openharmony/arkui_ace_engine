@@ -72,7 +72,7 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
 
 void CheckBoxLayoutAlgorithm::InitializeParam()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkBoxTheme);

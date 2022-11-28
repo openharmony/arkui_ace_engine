@@ -203,6 +203,8 @@ const RefPtr<StageManager>& PipelineContext::GetStageManager()
     return stageManager_;
 }
 
+void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback) {}
+
 const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 {
     return nullptr;
