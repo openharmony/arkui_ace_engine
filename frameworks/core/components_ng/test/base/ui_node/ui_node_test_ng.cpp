@@ -12,28 +12,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <memory>
+#include <ostream>
+#include <utility>
 
 #include "gtest/gtest.h"
 
 #define protected public
 #define private public
 
+#include "base/log/dump_log.h"
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/property/property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-const auto ONE = FrameNode::CreateFrameNode("one", 1, AceType::MakeRefPtr<Pattern>(), true);
-const auto TWO = FrameNode::CreateFrameNode("two", 2, AceType::MakeRefPtr<Pattern>());
-const auto THREE = FrameNode::CreateFrameNode("three", 3, AceType::MakeRefPtr<Pattern>());
-const auto FOUR = FrameNode::CreateFrameNode("four", 4, AceType::MakeRefPtr<Pattern>());
+const RefPtr<FrameNode> ONE = FrameNode::CreateFrameNode("one", 1, AceType::MakeRefPtr<Pattern>(), true);
+const RefPtr<FrameNode> TWO = FrameNode::CreateFrameNode("two", 2, AceType::MakeRefPtr<Pattern>());
+const RefPtr<FrameNode> THREE = FrameNode::CreateFrameNode("three", 3, AceType::MakeRefPtr<Pattern>());
+const RefPtr<FrameNode> FOUR = FrameNode::CreateFrameNode("four", 4, AceType::MakeRefPtr<Pattern>());
+const RefPtr<FrameNode> FIVE = FrameNode::CreateFrameNode("five", 5, AceType::MakeRefPtr<Pattern>());
+const RefPtr<FrameNode> F_ONE = FrameNode::CreateFrameNode("one", 5, AceType::MakeRefPtr<Pattern>());
 } // namespace
 
 class UINodeTestNg : public testing::Test {
@@ -153,5 +162,124 @@ HWTEST_F(UINodeTestNg, UINodeTestNg004, TestSize.Level1)
         auto result = ONE->GetFocusParent();
         EXPECT_EQ(result, frameNodes[i]);
     }
+}
+
+/**
+ * @tc.name: UINodeTestNg005
+ * @tc.desc: Test ui node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. GetFocusChildren
+     * @tc.expected: step1. THREE's children size is 2
+     */
+    std::list<RefPtr<FrameNode>> children;
+    auto eventHubTwo = AceType::MakeRefPtr<EventHub>();
+    auto focusHubTwo = AceType::MakeRefPtr<FocusHub>(eventHubTwo, FocusType::NODE);
+    auto eventHubFour = AceType::MakeRefPtr<EventHub>();
+    auto focusHubFour = AceType::MakeRefPtr<FocusHub>(eventHubFour, FocusType::DISABLE);
+    eventHubTwo->focusHub_ = focusHubTwo;
+    TWO->eventHub_ = eventHubTwo;
+    eventHubFour->focusHub_ = focusHubFour;
+    FOUR->eventHub_ = eventHubFour;
+    THREE->AddChild(TWO, 1, false);
+    THREE->AddChild(FOUR, 1, false);
+    THREE->GetFocusChildren(children);
+    EXPECT_EQ(THREE->children_.size(), 2);
+    THREE->Clean();
+}
+
+/**
+ * @tc.name: UINodeTestNg006
+ * @tc.desc: Test ui node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. AttachToMainTree and DetachFromMainTree
+     * @tc.expected: step1. onMainTree_ is false
+     */
+    bool mainTrees[2] = { true, false };
+    TWO->AddChild(THREE, 1, false);
+    for (int i = 0; i < 2; ++i) {
+        TWO->onMainTree_ = mainTrees[i];
+        TWO->AttachToMainTree();
+        TWO->DetachFromMainTree();
+        EXPECT_FALSE(TWO->onMainTree_);
+    }
+}
+
+/**
+ * @tc.name: UINodeTestNg007
+ * @tc.desc: Test ui node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. MovePosition
+     * @tc.expected: step1. children_.size is 2
+     */
+    int32_t slots[3] = { -1, 1, 3 };
+    THREE->AddChild(FOUR, 1, false);
+    THREE->AddChild(FIVE, 1, false);
+    TWO->parent_ = THREE;
+    for (int i = 0; i < 3; ++i) {
+        TWO->MovePosition(slots[i]);
+    }
+    EXPECT_EQ(TWO->children_.size(), 2);
+}
+
+/**
+ * @tc.name: UINodeTestNg008
+ * @tc.desc: Test ui node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg008, TestSize.Level1)
+{
+    PropertyChangeFlag FLAG = 1;
+    ONE->children_.clear();
+    TWO->children_.clear();
+    THREE->children_.clear();
+    ONE->AddChild(TWO, 1, false);
+    ONE->parent_ = THREE;
+    ONE->UINode::UpdateLayoutPropertyFlag();
+    ONE->UINode::AdjustParentLayoutFlag(FLAG);
+    ONE->UINode::MarkNeedSyncRenderTree();
+    ONE->UINode::RebuildRenderContextTree();
+    ONE->DumpTree(0);
+    EXPECT_EQ(ONE->children_.size(), 1);
+    auto pipeline = UINode::GetContext();
+    EXPECT_NE(pipeline, nullptr);
+}
+
+/**
+ * @tc.name: UINodeTestNg009
+ * @tc.desc: Test ui node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. FrameCount and GetChildIndexById
+     * @tc.expected: step1. count is 2, pos is 0
+     */
+    int32_t count = ONE->FrameCount();
+    EXPECT_EQ(count, 1);
+    int32_t id1 = ONE->GetChildIndexById(4);
+    int32_t id2 = ONE->GetChildIndexById(2);
+    EXPECT_EQ(id1, -1);
+    EXPECT_EQ(id2, 0);
+    /**
+     * @tc.steps: step2. GetChildFlatIndex
+     * @tc.expected: step2. count is 2, pos is 0
+     */
+    auto pair1 = ONE->GetChildFlatIndex(1);
+    EXPECT_EQ(pair1.second, 0);
+    auto pair2 = ONE->GetChildFlatIndex(2);
+    EXPECT_EQ(pair2.second, 0);
 }
 } // namespace OHOS::Ace::NG
