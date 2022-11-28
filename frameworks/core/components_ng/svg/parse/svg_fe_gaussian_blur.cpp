@@ -38,7 +38,7 @@ void SvgFeGaussianBlur::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
     const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
 {
     auto declaration = AceType::DynamicCast<SvgFeGaussianBlurDeclaration>(declaration_);
-    CHECK_NULL_VOID(declaration);
+    CHECK_NULL_VOID_NOLOG(declaration);
     imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
     imageFilter = SkBlurImageFilter::Make(
         declaration->GetStdDeviation(), declaration->GetStdDeviation(), imageFilter, nullptr);

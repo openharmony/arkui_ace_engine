@@ -263,7 +263,7 @@ void LayoutProperty::CheckAspectRatio()
 
 void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)
 {
-    CHECK_NULL_VOID(gridProperty_);
+    CHECK_NULL_VOID_NOLOG(gridProperty_);
     auto parent = host->GetParent();
     while (parent) {
         if (parent->GetTag() == V2::GRIDCONTAINER_ETS_TAG) {
@@ -279,7 +279,7 @@ void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)
 
 void LayoutProperty::UpdateGridOffset(LayoutWrapper* layoutWrapper)
 {
-    CHECK_NULL_VOID(gridProperty_);
+    CHECK_NULL_VOID_NOLOG(gridProperty_);
     if (!gridProperty_->HasContainer()) {
         return;
     }

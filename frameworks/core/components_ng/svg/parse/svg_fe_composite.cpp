@@ -38,7 +38,7 @@ void SvgFeComposite::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
     const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
 {
     auto declaration = AceType::DynamicCast<SvgFeCompositeDeclaration>(declaration_);
-    CHECK_NULL_VOID(declaration);
+    CHECK_NULL_VOID_NOLOG(declaration);
     if (declaration->GetOperatorType() != FeOperatorType::FE_ARITHMETIC) {
         // this version skia not support SkBlendImageFilters
         return;

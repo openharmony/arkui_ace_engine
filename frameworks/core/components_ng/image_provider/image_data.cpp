@@ -20,13 +20,13 @@ namespace OHOS::Ace::NG {
 
 size_t ImageData::GetSize() const
 {
-    CHECK_NULL_RETURN(pixelMap_, 0);
+    CHECK_NULL_RETURN_NOLOG(pixelMap_, 0);
     return pixelMap_->GetByteCount();
 }
 
 const void* ImageData::GetData() const
 {
-    CHECK_NULL_RETURN(pixelMap_, nullptr);
+    CHECK_NULL_RETURN_NOLOG(pixelMap_, nullptr);
     return pixelMap_->GetPixels();
 }
 

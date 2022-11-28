@@ -24,7 +24,7 @@ namespace OHOS::Ace::NG {
 
 void InitFilterColor(const RefPtr<SvgFeDeclaration>& fe, ColorInterpolationType& currentColor)
 {
-    CHECK_NULL_VOID(fe);
+    CHECK_NULL_VOID_NOLOG(fe);
 
     if (fe->GetIn() == FeInType::SOURCE_GRAPHIC) {
         currentColor = ColorInterpolationType::SRGB;
