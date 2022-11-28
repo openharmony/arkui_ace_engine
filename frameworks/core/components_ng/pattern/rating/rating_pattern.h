@@ -79,7 +79,16 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyle::INNER_BORDER };
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, FocusPattern());
+        auto ratingTheme = pipeline->GetTheme<RatingTheme>();
+        CHECK_NULL_RETURN(ratingTheme, FocusPattern());
+        auto focusWidth = ratingTheme->GetFocusBorderWidth();
+
+        FocusPaintParam focusPaintParams;
+        focusPaintParams.SetPaintWidth(focusWidth);
+
+        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
 private:
@@ -104,6 +113,8 @@ private:
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+    void PaintFocusState(double ratingScore);
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
 
     // Init mouse event
     void InitMouseEvent();

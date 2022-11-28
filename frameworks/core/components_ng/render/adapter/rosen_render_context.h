@@ -72,7 +72,14 @@ public:
 
     void BlendBorderColor(const Color& color) override;
 
-    void PaintFocusState(Dimension focusPaddingVp) override;
+    // Paint focus state by component's setting. It will paint along the paintRect
+    void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth) override;
+    // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
+    void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
+        const Dimension& paintWidth) override;
+    // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
+    void PaintFocusState(
+        const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth) override;
 
     void ClearFocusState() override;
 

@@ -871,53 +871,84 @@ void RosenRenderContext::BlendBorderColor(const Color& color)
     RequestNextFrame();
 }
 
-void RosenRenderContext::PaintFocusState(Dimension focusPaddingVp)
+void RosenRenderContext::PaintFocusState(
+    const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth)
 {
+    LOGD("PaintFocusState rect is (%{public}f, %{public}f, %{public}f, %{public}f). Color is %{public}s, PainWidth is "
+         "%{public}s",
+        paintRect.GetRect().Left(), paintRect.GetRect().Top(), paintRect.GetRect().Width(),
+        paintRect.GetRect().Height(), paintColor.ColorToString().c_str(), paintWidth.ToString().c_str());
     CHECK_NULL_VOID(rsNode_);
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto appTheme = context->GetTheme<AppTheme>();
-    CHECK_NULL_VOID(appTheme);
-    Color focusColor = appTheme->GetFocusColor();
-    auto focusWidth = appTheme->GetFocusWidthVp().ConvertToPx();
 
-    auto borderPaddingPx = static_cast<float>(focusPaddingVp.ConvertToPx());
-    auto borderWidthPx = static_cast<float>(focusWidth);
+    auto borderWidthPx = static_cast<float>(paintWidth.ConvertToPx());
 
-    auto frame = rsNode_->GetStagingProperties().GetFrame();
-    auto bounds = rsNode_->GetStagingProperties().GetBounds();
-    auto borderRadius = rsNode_->GetStagingProperties().GetCornerRadius();
-    auto rectLeft = -borderPaddingPx;
-    auto rectTop = -borderPaddingPx;
-    auto rectRight = rectLeft + bounds.z_ + 2 * borderPaddingPx;
-    auto rectBottom = rectTop + bounds.w_ + 2 * borderPaddingPx;
-    auto radiusTopLeft = borderRadius.x_ + borderPaddingPx;
-    auto radiusTopRight = borderRadius.y_ + borderPaddingPx;
-    auto radiusButtonLeft = borderRadius.w_ + borderPaddingPx;
-    auto radiusButtonRight = borderRadius.z_ + borderPaddingPx;
-    auto rect = rosen::Rect(rectLeft, rectTop, rectRight, rectBottom);
-
-    if (focusStateModifier_) {
-        rsNode_->AddModifier(focusStateModifier_);
-        focusStateModifier_->SetRoundRect(rect, radiusTopLeft, radiusTopRight, radiusButtonLeft, radiusButtonRight);
-        return;
-    }
-
-    auto paintTask = [focusColor, borderWidthPx](const RSRoundRect& rrect, RSCanvas& rsCanvas) mutable {
-        // auto rrect = ToRS
+    auto paintTask = [paintColor, borderWidthPx](const RSRoundRect& rrect, RSCanvas& rsCanvas) mutable {
         RSPen pen;
         pen.SetAntiAlias(true);
-        pen.SetColor(ToRSColor(focusColor));
+        pen.SetColor(ToRSColor(paintColor));
         pen.SetWidth(borderWidthPx);
         rsCanvas.AttachPen(pen);
         rsCanvas.DrawRoundRect(rrect);
     };
-
-    focusStateModifier_ = std::make_shared<FocusStateModifier>();
-    focusStateModifier_->SetRoundRect(rect, radiusTopLeft, radiusTopRight, radiusButtonLeft, radiusButtonRight);
+    if (!focusStateModifier_) {
+        // TODO: Add property data
+        focusStateModifier_ = std::make_shared<FocusStateModifier>();
+    }
+    focusStateModifier_->SetRoundRect(paintRect);
     focusStateModifier_->SetPaintTask(std::move(paintTask));
     rsNode_->AddModifier(focusStateModifier_);
     RequestNextFrame();
+}
+
+void RosenRenderContext::PaintFocusState(
+    const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth)
+{
+    LOGD("PaintFocusState rect is (%{public}f, %{public}f, %{public}f, %{public}f). focusPadding is %{public}s, Color "
+         "is %{public}s, PainWidth is %{public}s",
+        paintRect.GetRect().Left(), paintRect.GetRect().Top(), paintRect.GetRect().Width(),
+        paintRect.GetRect().Height(), focusPaddingVp.ToString().c_str(), paintColor.ColorToString().c_str(),
+        paintWidth.ToString().c_str());
+
+    auto borderPaddingPx = static_cast<float>(focusPaddingVp.ConvertToPx());
+    auto focusPaintRectLeft = paintRect.GetRect().Left() - borderPaddingPx;
+    auto focusPaintRectTop = paintRect.GetRect().Top() - borderPaddingPx;
+    auto focusPaintRectWidth = paintRect.GetRect().Width() + 2 * borderPaddingPx;
+    auto focusPaintRectHeight = paintRect.GetRect().Height() + 2 * borderPaddingPx;
+
+    EdgeF diffRadius = { borderPaddingPx, borderPaddingPx };
+    auto focusPaintCornerTopLeft = paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS) + diffRadius;
+    auto focusPaintCornerTopRight = paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS) + diffRadius;
+    auto focusPaintCornerBottomLeft = paintRect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS) + diffRadius;
+    auto focusPaintCornerBottomRight = paintRect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS) + diffRadius;
+
+    RoundRect focusPaintRect;
+    focusPaintRect.SetRect(RectF(focusPaintRectLeft, focusPaintRectTop, focusPaintRectWidth, focusPaintRectHeight));
+    focusPaintRect.SetCornerRadius(
+        RoundRect::CornerPos::TOP_LEFT_POS, focusPaintCornerTopLeft.x, focusPaintCornerTopLeft.y);
+    focusPaintRect.SetCornerRadius(
+        RoundRect::CornerPos::TOP_RIGHT_POS, focusPaintCornerTopRight.x, focusPaintCornerTopRight.y);
+    focusPaintRect.SetCornerRadius(
+        RoundRect::CornerPos::BOTTOM_LEFT_POS, focusPaintCornerBottomLeft.x, focusPaintCornerBottomLeft.y);
+    focusPaintRect.SetCornerRadius(
+        RoundRect::CornerPos::BOTTOM_RIGHT_POS, focusPaintCornerBottomRight.x, focusPaintCornerBottomRight.y);
+
+    PaintFocusState(focusPaintRect, paintColor, paintWidth);
+}
+
+void RosenRenderContext::PaintFocusState(
+    const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth)
+{
+    const auto& bounds = rsNode_->GetStagingProperties().GetBounds();
+    const auto& radius = rsNode_->GetStagingProperties().GetCornerRadius();
+
+    RoundRect frameRect;
+    frameRect.SetRect(RectF(0, 0, bounds.z_, bounds.w_));
+    frameRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, radius.x_, radius.x_);
+    frameRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, radius.y_, radius.y_);
+    frameRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, radius.z_, radius.z_);
+    frameRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, radius.w_, radius.w_);
+
+    PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth);
 }
 
 void RosenRenderContext::ClearFocusState()
