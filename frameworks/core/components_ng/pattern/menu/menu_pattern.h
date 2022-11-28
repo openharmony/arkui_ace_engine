@@ -28,12 +28,13 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+enum class MenuType { MENU, CONTEXT_MENU, NAVIGATION_MENU };
 
 class MenuPattern : public Pattern {
     DECLARE_ACE_TYPE(MenuPattern, Pattern);
 
 public:
-    explicit MenuPattern(int32_t targetId) : targetId_(targetId) {};
+    explicit MenuPattern(int32_t targetId, MenuType type) : targetId_(targetId), type_(type) {}
     ~MenuPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -54,27 +55,17 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         RefPtr<MenuLayoutAlgorithm> navigationMenu = MakeRefPtr<NavigationMenuLayoutAlgorithm>();
-        return isNavigationMenu_ ? navigationMenu : MakeRefPtr<MenuLayoutAlgorithm>();
-    }
-
-    void SetIsContextMenu(bool isContextMenu)
-    {
-        isContextMenu_ = isContextMenu;
+        return (type_ == MenuType::NAVIGATION_MENU) ? navigationMenu : MakeRefPtr<MenuLayoutAlgorithm>();
     }
 
     bool IsContextMenu() const
     {
-        return isContextMenu_;
-    }
-
-    void SetIsNavigationMenu(bool isNavigationMenu)
-    {
-        isNavigationMenu_ = isNavigationMenu;
+        return type_ == MenuType::CONTEXT_MENU;
     }
 
     bool IsNavigationMenu() const
     {
-        return isNavigationMenu_;
+        return type_ == MenuType::NAVIGATION_MENU;
     }
 
 private:
@@ -82,8 +73,7 @@ private:
     void RegisterOnClick();
 
     int32_t targetId_ = -1;
-    bool isContextMenu_ = false;
-    bool isNavigationMenu_ = false;
+    MenuType type_ = MenuType::MENU;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };
