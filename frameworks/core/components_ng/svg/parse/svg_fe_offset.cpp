@@ -38,7 +38,7 @@ void SvgFeOffset::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter, const Color
     ColorInterpolationType& currentColor) const
 {
     auto declaration = AceType::DynamicCast<SvgFeOffsetDeclaration>(declaration_);
-    CHECK_NULL_VOID(declaration);
+    CHECK_NULL_VOID_NOLOG(declaration);
     imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
     imageFilter = SkOffsetImageFilter::Make(declaration->GetDx(), declaration->GetDy(), imageFilter);
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
