@@ -93,6 +93,11 @@ public:
         preGroup_ = group;
     }
 
+    void SetLastSelect(bool select)
+    {
+        lastSelect_ = select;
+    }
+
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::NODE, true, FocusStyle::OUTER_BORDER };
@@ -134,6 +139,7 @@ private:
 
     std::optional<std::string> preName_;
     std::optional<std::string> preGroup_;
+    bool lastSelect_ = false;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
