@@ -13,10 +13,8 @@
  * limitations under the License.
  */
 
-#include <optional>
-
 #include "gtest/gtest.h"
-
+#define private public
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
@@ -575,5 +573,35 @@ HWTEST_F(ImageLayoutAlgorithmTest, ImageLayout011, TestSize.Level1)
     EXPECT_TRUE(imageLayoutAlgorithm != nullptr);
     auto size = imageLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
     EXPECT_FALSE(size == std::nullopt);
+}
+
+/**
+ * @tc.name: ImageLayoutFunction001
+ * @tc.desc: Verify that ImageLayoutAlgorithm's Layout can carry out successfully.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageLayoutAlgorithmTest, ImageLayoutFunction001, TestSize.Level1)
+{
+    auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
+    EXPECT_TRUE(imageLayoutProperty != nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_TRUE(geometryNode != nullptr);
+    LayoutWrapper layoutWrapper(nullptr, geometryNode, imageLayoutProperty);
+    /**
+     * @tc.cases: case1. layoutWrapper->GetGeometryNode()->GetContent() == nullptr, func will return.
+     */
+    auto loadingCtx =
+        AceType::MakeRefPtr<ImageLoadingContext>(ImageSourceInfo(), LoadNotifier(nullptr, nullptr, nullptr));
+    auto imageLayoutAlgorithm = AceType::MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx, loadingCtx);
+    imageLayoutAlgorithm->Layout(&layoutWrapper);
+    /**
+     * @tc.cases: case2. layoutWrapper->GetGeometryNode()->GetContent() is true, func success.
+     */
+
+    geometryNode->SetContentSize(SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
+    imageLayoutAlgorithm->Layout(&layoutWrapper);
+    EXPECT_EQ(loadingCtx->imageFit_, ImageFit::COVER);
+    EXPECT_EQ(loadingCtx->needResize_, true);
+    EXPECT_EQ(loadingCtx->dstSize_, SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
 }
 } // namespace OHOS::Ace::NG
