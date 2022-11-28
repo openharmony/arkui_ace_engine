@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,7 @@ public:
     virtual void Save() {}
     virtual void Restore() {}
     virtual void DrawCircle(const Point& centerPt, scalar radius) {}
+    virtual void DrawRoundRect(const RoundRect& roundRect) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_CANVAS_H
