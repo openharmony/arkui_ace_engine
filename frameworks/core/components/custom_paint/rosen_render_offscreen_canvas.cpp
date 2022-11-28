@@ -1078,8 +1078,8 @@ void RosenRenderOffscreenCanvas::Path2DRect(const PathArgs& args)
 {
     double left = args.para1;
     double top = args.para2;
-    double right = args.para3;
-    double bottom = args.para4;
+    double right = args.para3 + args.para1;
+    double bottom = args.para4 + args.para2;
     skPath2d_.addRect(SkRect::MakeLTRB(left, top, right, bottom));
 }
 
