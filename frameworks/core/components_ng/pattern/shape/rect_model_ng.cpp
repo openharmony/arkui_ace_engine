@@ -104,7 +104,7 @@ template<class T>
 void RectModelNG::SetCallbackRadius(
     const RefPtr<T>& component, const Dimension& radiusX, const Dimension& radiusY, int32_t index)
 {
-    CHECK_NULL_VOID(component);
+    CHECK_NULL_VOID_NOLOG(component);
     Radius newRadius = Radius(Dimension(radiusX), Dimension(radiusY));
     switch (index) {
         case TOP_LEFT_RADIUS:

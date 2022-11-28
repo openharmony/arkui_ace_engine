@@ -47,7 +47,7 @@ SkPath SvgSvg::AsPath(const Size& viewPort) const
 Size SvgSvg::GetSize() const
 {
     auto declaration = AceType::DynamicCast<SvgDeclaration>(declaration_);
-    CHECK_NULL_RETURN(declaration, Size());
+    CHECK_NULL_RETURN_NOLOG(declaration, Size());
 
     return Size(declaration->GetWidth().Value(), declaration->GetHeight().Value());
 }
@@ -55,7 +55,7 @@ Size SvgSvg::GetSize() const
 const Rect& SvgSvg::GetViewBox() const
 {
     auto declaration = AceType::DynamicCast<SvgDeclaration>(declaration_);
-    CHECK_NULL_RETURN(declaration, Rect());
+    CHECK_NULL_RETURN_NOLOG(declaration, Rect());
     return declaration->GetViewBox();
 }
 

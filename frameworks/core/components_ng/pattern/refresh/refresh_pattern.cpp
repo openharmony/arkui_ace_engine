@@ -156,8 +156,8 @@ void RefreshPattern::HandleDragUpdate(float delta)
     if (host->TotalChildCount() < CHILD_COUNT) {
         return;
     }
-    CHECK_NULL_VOID(progressChild_);
-    CHECK_NULL_VOID(textChild_);
+    CHECK_NULL_VOID_NOLOG(progressChild_);
+    CHECK_NULL_VOID_NOLOG(textChild_);
     auto diameter = static_cast<float>(GetLoadingDiameter());
     auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
