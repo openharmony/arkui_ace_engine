@@ -287,6 +287,7 @@ public:
     void CaretMoveToLastNewLineChar();
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     void InitEditingValueText(std::string content);
+    void InitCaretPosition(std::string content);
     const TextEditingValueNG& GetTextEditingValue()
     {
         return textEditingValue_;

@@ -1363,6 +1363,11 @@ void TextFieldPattern::InitEditingValueText(std::string content)
     textEditingValue_.text = std::move(content);
 }
 
+void TextFieldPattern::InitCaretPosition(std::string content)
+{
+    textEditingValue_.caretPosition = content.length();
+}
+
 void TextFieldPattern::InitMouseEvent()
 {
     if (mouseEvent_) {
