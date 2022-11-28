@@ -66,7 +66,7 @@ void TimePickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRe
     if (NearZero(gradientHeight)) {
         return;
     }
-
+    auto height = static_cast<float>((frameRect.Height() - theme->GetDividerSpacing().ConvertToPx()) / 2);
     // Paint gradient rect over the picker content.
     SkPaint paint;
     SkPoint beginPoint = SkPoint::Make(SkDoubleToScalar(0.0f), SkDoubleToScalar(0.0f));
@@ -77,8 +77,8 @@ void TimePickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRe
 
     Color middleColor = endColor.ChangeAlpha(0);
     SkColor colors[] = { endColor.GetValue(), middleColor.GetValue(), middleColor.GetValue(), endColor.GetValue() };
-    const float stopPositions[] = { 0.0f, gradientHeight / frameRect.Bottom(),
-        (frameRect.Bottom() - gradientHeight) / frameRect.Bottom(), 1.0f };
+    const float stopPositions[] = { 0.0f, height / frameRect.Bottom(),
+        (frameRect.Bottom() - height) / frameRect.Bottom(), 1.0f };
 #ifdef USE_SYSTEM_SKIA
     paint.setShader(
         SkGradientShader::MakeLinear(points, colors, stopPositions, std::size(colors), SkShader::kClamp_TileMode));

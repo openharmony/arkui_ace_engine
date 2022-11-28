@@ -36,14 +36,53 @@ void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto height = static_cast<float>(
         pickerTheme->GetGradientHeight().ConvertToPx() * 4 + pickerTheme->GetDividerSpacing().ConvertToPx());
-    auto width = static_cast<float>((pickerTheme->GetDividerSpacing() * DIVIDER_SIZE).ConvertToPx());
 
-    frameSize.SetWidth(width);
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+
+    auto width = layoutConstraint->parentIdealSize.Width();
+    auto children = layoutWrapper->GetHostNode()->GetParent()->GetChildren();
+    float pickerWidth = 0.0f;
+    if (width.has_value()) {
+        pickerWidth = width.value() / static_cast<float>(children.size());
+    } else {
+        pickerWidth = static_cast<float>((pickerTheme->GetDividerSpacing() * DIVIDER_SIZE).ConvertToPx());
+    }
+
+    frameSize.SetWidth(pickerWidth);
     frameSize.SetHeight(height);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Measure(layoutConstraint);
+        child->Measure(layoutChildConstraint);
+    }
+    MeasureText(layoutWrapper, frameSize);
+}
+
+void TimePickerColumnLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, const SizeF& size)
+{
+    auto totalChild = layoutWrapper->GetTotalChildCount();
+    for (int32_t index = 0; index < totalChild; index++) {
+        auto child = layoutWrapper->GetOrCreateChildByIndex(index);
+        ChangeAmPmTextStyle(index, totalChild, size, child);
+    }
+}
+
+void TimePickerColumnLayoutAlgorithm::ChangeAmPmTextStyle(
+    uint32_t index, uint32_t showOptionCount, const SizeF& size, const RefPtr<LayoutWrapper>& childLayoutWrapper)
+{
+    SizeF frameSize = { -1.0f, -1.0f };
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    frameSize.SetWidth(size.Width());
+    uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
+    if (index == selectedIndex) {
+        frameSize.SetHeight(static_cast<float>(pickerTheme->GetDividerSpacing().ConvertToPx()));
+        childLayoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
+    } else {
+        frameSize.SetHeight(static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()));
+        childLayoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
     }
 }
 
@@ -68,7 +107,7 @@ void TimePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(firstChild);
         auto firstGeometryNode = firstChild->GetGeometryNode();
         CHECK_NULL_VOID(firstGeometryNode);
-        childStartCoordinate += (pickerTheme->GetDividerSpacing()).Value();
+        childStartCoordinate += static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx());
     }
     for (const auto& child : children) {
         auto childGeometryNode = child->GetGeometryNode();
