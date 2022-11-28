@@ -779,9 +779,9 @@ HWTEST_F(ListPatternTestNg, ListTest009, TestSize.Level1)
     listLayoutAlgorithm.jumpIndex_ = JUMP_INDEX_SPECIAL_CASE2;
     
     listLayoutAlgorithm.Measure(&layoutWrapper);
-    int32_t layoutNumber = LIST_HEIGHT_LIMIT / LIST_ITEM_HEIGHT;
-    for (int32_t index = END_INDEX - 1; index >= END_INDEX - layoutNumber; index--) {
-        EXPECT_EQ(listLayoutAlgorithm.itemPosition_[index].startPos, LIST_ITEM_HEIGHT * (index + 1 - END_INDEX));
+    int32_t expected = LIST_HEIGHT_LIMIT / LIST_ITEM_HEIGHT;
+    for (int32_t index = START_INDEX; index < expected; index++) {
+        EXPECT_EQ(listLayoutAlgorithm.itemPosition_[index].startPos, LIST_ITEM_HEIGHT * index);
     }
 }
 
