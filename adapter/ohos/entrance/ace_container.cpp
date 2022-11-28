@@ -300,12 +300,12 @@ void AceContainer::OnShow(int32_t instanceId)
 
     auto front = container->GetFrontend();
     if (front && !container->IsSubContainer()) {
-        front->UpdateState(Frontend::State::ON_SHOW);
         WeakPtr<Frontend> weakFrontend = front;
         taskExecutor->PostTask(
             [weakFrontend]() {
                 auto frontend = weakFrontend.Upgrade();
                 if (frontend) {
+                    frontend->UpdateState(Frontend::State::ON_SHOW);
                     frontend->OnShow();
                 }
             },
@@ -342,12 +342,12 @@ void AceContainer::OnHide(int32_t instanceId)
 
     auto front = container->GetFrontend();
     if (front && !container->IsSubContainer()) {
-        front->UpdateState(Frontend::State::ON_HIDE);
         WeakPtr<Frontend> weakFrontend = front;
         taskExecutor->PostTask(
             [weakFrontend]() {
                 auto frontend = weakFrontend.Upgrade();
                 if (frontend) {
+                    frontend->UpdateState(Frontend::State::ON_HIDE);
                     frontend->OnHide();
                     frontend->TriggerGarbageCollection();
                 }
@@ -397,6 +397,7 @@ void AceContainer::OnActive(int32_t instanceId)
             [weakFrontend] () {
                 auto frontend = weakFrontend.Upgrade();
                 if (frontend) {
+                    frontend->UpdateState(Frontend::State::ON_ACTIVE);
                     frontend->OnActive();
                 }
             },
@@ -430,6 +431,7 @@ void AceContainer::OnInactive(int32_t instanceId)
             [weakFrontend] () {
                 auto frontend = weakFrontend.Upgrade();
                 if (frontend) {
+                    frontend->UpdateState(Frontend::State::ON_ACTIVE);
                     frontend->OnInactive();
                 }
             },
