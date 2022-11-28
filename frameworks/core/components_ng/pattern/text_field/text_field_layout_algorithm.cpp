@@ -110,17 +110,17 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
         paragraph_->Layout(std::ceil(paragraphNewWidth));
     }
-    auto height = textContent.empty()
-                      ? contentConstraint.maxSize.Height() - verticalPaddingSum
-                      : std::min(static_cast<float>(paragraph_->GetHeight()), contentConstraint.maxSize.Height());
+    auto preferredHeight = static_cast<float>(paragraph_->GetHeight());
+    if (textContent.empty()) {
+        preferredHeight = pattern->PreferredLineHeight();
+    }
+    preferredHeight = std::min(preferredHeight, contentConstraint.maxSize.Height() - verticalPaddingSum);
 
     // check password image size.
     if (!showPasswordIcon) {
-        textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), height));
+        textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
         imageRect_.SetSize(SizeF());
-        auto contentSize = contentConstraint.maxSize;
-        MinusPaddingToSize(pattern->GetUtilPadding(), contentSize);
-        return SizeF(contentSize.Width(), height);
+        return SizeF(contentConstraint.maxSize.Width() - horizontalPaddingSum, preferredHeight);
     }
 
     float imageHeight = 0.0f;
@@ -135,12 +135,12 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         imageRect_.SetSize(SizeF(0.0f, 0.0f));
         return SizeF(contentConstraint.maxSize.Width(), imageHeight);
     }
-    height = std::min(static_cast<float>(paragraph_->GetHeight()), contentConstraint.maxSize.Height());
+    preferredHeight = std::min(static_cast<float>(paragraph_->GetHeight()), contentConstraint.maxSize.Height());
     textRect_.SetSize(SizeF(std::min(static_cast<float>(paragraph_->GetLongestLine()),
                                 contentConstraint.maxSize.Width() - horizontalPaddingSum - imageSize),
-        static_cast<float>(height)));
+        static_cast<float>(preferredHeight)));
     imageRect_.SetSize(SizeF(imageSize, imageSize));
-    return SizeF(contentConstraint.maxSize.Width(), std::max(imageSize, height));
+    return SizeF(contentConstraint.maxSize.Width(), std::max(imageSize, preferredHeight));
 }
 
 void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
