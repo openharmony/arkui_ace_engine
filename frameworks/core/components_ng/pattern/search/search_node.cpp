@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/search/search_node.h"
 
+#include "base/utils/utils.h"
+
 namespace OHOS::Ace::NG {
 
 void SearchNode::AddChildToGroup(const RefPtr<UINode>& child)
@@ -26,9 +28,8 @@ void SearchNode::AddChildToGroup(const RefPtr<UINode>& child)
 
     searchChildren_.emplace(child->GetId());
     auto searchNode = GetChildren().back();
-    if (searchNode) {
-        child->MountToParent(searchNode);
-    }
+    CHECK_NULL_VOID(searchNode);
+    child->MountToParent(searchNode);
 }
 
 } // namespace OHOS::Ace::NG

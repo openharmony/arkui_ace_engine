@@ -59,15 +59,13 @@ void TimePickerRowPattern::OnModifyDone()
     FlushColumn();
     SetChangeCallback([weak = WeakClaim(this)](const RefPtr<FrameNode>& tag, bool add, uint32_t index, bool notify) {
         auto refPtr = weak.Upgrade();
-        if (refPtr) {
-            refPtr->HandleColumnChange(tag, add, index, notify);
-        }
+        CHECK_NULL_VOID(refPtr);
+        refPtr->HandleColumnChange(tag, add, index, notify);
     });
     SetEventCallback([weak = WeakClaim(this)](bool refresh) {
         auto refPtr = weak.Upgrade();
-        if (refPtr) {
-            refPtr->FireChangeEvent(refresh);
-        }
+        CHECK_NULL_VOID(refPtr);
+        refPtr->FireChangeEvent(refresh);
     });
     auto focusHub = host->GetFocusHub();
     if (focusHub) {

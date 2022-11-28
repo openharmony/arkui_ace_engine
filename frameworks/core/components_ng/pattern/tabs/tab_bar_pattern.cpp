@@ -33,6 +33,7 @@ namespace {
 
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr float CLICK_OPACITY_RATIO = 0.1;
+constexpr double HOVER_OPACITY_RATIO = 0.05;
 constexpr float CLICKED_RADIUS = 8.0;
 
 } // namespace
@@ -116,6 +117,95 @@ void TabBarPattern::InitTouch(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->AddTouchEvent(touchEvent_);
 }
 
+void TabBarPattern::InitHoverEvent()
+{
+    if (hoverEvent_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = GetHost()->GetEventHub<EventHub>();
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleHoverEvent(isHover);
+        }
+    };
+    hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
+    inputHub->AddOnHoverEvent(hoverEvent_);
+}
+
+void TabBarPattern::InitMouseEvent()
+{
+    if (mouseEvent_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = GetHost()->GetEventHub<EventHub>();
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    auto mouseTask = [weak = WeakClaim(this)](const MouseInfo& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleMouseEvent(info);
+        }
+    };
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnMouseEvent(mouseEvent_);
+}
+
+void TabBarPattern::HandleMouseEvent(const MouseInfo& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto totalCount = host->TotalChildCount();
+    auto index = CalculateSelectedIndex(info.GetLocalLocation());
+    if (index < 0 || index >= totalCount) {
+        return;
+    }
+    auto mouseAction = info.GetAction();
+    if (mouseAction == MouseAction::MOVE || mouseAction == MouseAction::WINDOW_ENTER) {
+        if (!hoverIndex_.has_value()) {
+            HandleHoverOnEvent(index);
+            hoverIndex_ = index;
+            return;
+        }
+        if (hoverIndex_.value() != index) {
+            HandleMoveAway(hoverIndex_.value());
+            HandleHoverOnEvent(index);
+            hoverIndex_ = index;
+            return;
+        }
+        return;
+    }
+    if (mouseAction == MouseAction::WINDOW_LEAVE) {
+        HandleMoveAway(hoverIndex_.value());
+        return;
+    }
+}
+
+void TabBarPattern::HandleHoverEvent(bool isHover)
+{
+    isHover_ = isHover;
+    touching_ = false;
+    if (!isHover_ && hoverIndex_.has_value()) {
+        HandleMoveAway(hoverIndex_.value());
+        hoverIndex_.reset();
+    }
+}
+
+void TabBarPattern::HandleHoverOnEvent(int32_t index)
+{
+    PlayPressAnimation(index, HOVER_OPACITY_RATIO);
+}
+
+void TabBarPattern::HandleMoveAway(int32_t index)
+{
+    PlayPressAnimation(index, 0.0f);
+}
+
 void TabBarPattern::OnModifyDone()
 {
     auto host = GetHost();
@@ -132,6 +222,8 @@ void TabBarPattern::OnModifyDone()
         InitScrollable(gestureHub);
     }
     InitTouch(gestureHub);
+    InitHoverEvent();
+    InitMouseEvent();
 
     auto removeEventCallback = [weak = WeakClaim(this)]() {
         auto tabBarPattern = weak.Upgrade();
@@ -241,10 +333,8 @@ void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
         if (touchType == TouchType::DOWN) {
             HandleTouchDown(index);
             touchingIndex_ = index;
-        } else if (touchType == TouchType::UP) {
-            HandleTouchUp(touchingIndex_);
-        } else if (touchType == TouchType::CANCEL) {
-            HandleTouchUp(touchingIndex_);
+        } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+            HandleTouchUp(index);
         }
     }
 }
@@ -315,7 +405,14 @@ void TabBarPattern::HandleTouchUp(int32_t index)
     }
     if (IsTouching()) {
         SetTouching(false);
-        PlayPressAnimation(index, 0.0f);
+        if (hoverIndex_.has_value()) {
+            if (touchingIndex_ == index) {
+                PlayPressAnimation(index, HOVER_OPACITY_RATIO);
+                return;
+            }
+            return;
+        }
+        PlayPressAnimation(touchingIndex_, 0.0f);
     }
 }
 

@@ -154,10 +154,7 @@ void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (usingPopup_) {
         auto offset = paddingOffset;
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(itemCount_);
-        if (!childWrapper) {
-            LOGI("indexerLayoutAlgorithm wrapper is out of boundary");
-            return;
-        }
+        CHECK_NULL_VOID(childWrapper);
 
         OffsetF bubblePosition = OffsetF(popupPositionX, popupPositionY);
         offset = offset + bubblePosition;

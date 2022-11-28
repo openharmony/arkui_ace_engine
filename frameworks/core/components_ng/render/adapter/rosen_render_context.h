@@ -38,6 +38,7 @@ namespace OHOS::Ace::NG {
 class BorderImageModifier;
 class MouseSelectModifier;
 class PageTransitionEffect;
+class OverlayTextModifier;
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext)
 public:
@@ -270,6 +271,7 @@ private:
     std::optional<TransformMatrixModifier> transformMatrixModifier_;
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
+    std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };

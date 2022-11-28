@@ -147,7 +147,7 @@ public:
     }
 
     void UpdateConfiguration();
-    void PerformAction(TextInputAction action, bool forceCloseKeyboard = false);
+    void PerformAction(TextInputAction action, bool forceCloseKeyboard = true);
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
     void ClearEditingValue();
@@ -219,19 +219,14 @@ public:
     float AdjustTextRectOffsetX();
     float AdjustTextAreaOffsetY();
 
-    void SetBasicPaddingLeft(float padding)
-    {
-        basicPaddingLeft_ = padding;
-    }
-
     float GetPaddingLeft() const
     {
-        return utilPadding_.left.value_or(basicPaddingLeft_);
+        return utilPadding_.left.value_or(0.0f);
     }
 
     float GetPaddingRight() const
     {
-        return utilPadding_.right.value_or(basicPaddingLeft_);
+        return utilPadding_.right.value_or(0.0f);
     }
 
     const PaddingPropertyF& GetUtilPadding() const
@@ -241,7 +236,12 @@ public:
 
     float GetHorizontalPaddingSum() const
     {
-        return utilPadding_.left.value_or(basicPaddingLeft_) + utilPadding_.right.value_or(basicPaddingLeft_);
+        return utilPadding_.left.value_or(0.0f) + utilPadding_.right.value_or(0.0f);
+    }
+
+    float GetVerticalPaddingSum() const
+    {
+        return utilPadding_.top.value_or(0.0f) + utilPadding_.bottom.value_or(0.0f);
     }
 
     const RectF& GetTextRect()
@@ -308,6 +308,7 @@ public:
 #endif
         return false;
     }
+    float PreferredLineHeight();
 
 private:
     bool IsTextArea();
@@ -394,7 +395,6 @@ private:
     bool FilterWithRegex(
         const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
     void EditingValueFilter(std::string& valueToUpdate, std::string& result);
-    float PreferredLineHeight();
     void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
     bool CursorInContentRegion();
     bool OffsetInContentRegion(const Offset& offset);
@@ -408,12 +408,12 @@ private:
     TextStyle lineHeightMeasureUtilTextStyle_;
     std::shared_ptr<RSParagraph> lineHeightMeasureUtilParagraph_;
 
-    RefPtr<ImageLoadingContext> ShowPasswordImageLoadingCtx_;
-    RefPtr<ImageLoadingContext> HidePasswordImageLoadingCtx_;
+    RefPtr<ImageLoadingContext> showPasswordImageLoadingCtx_;
+    RefPtr<ImageLoadingContext> hidePasswordImageLoadingCtx_;
 
     // password icon image related
-    RefPtr<CanvasImage> ShowPasswordImageCanvas_;
-    RefPtr<CanvasImage> HidePasswordImageCanvas_;
+    RefPtr<CanvasImage> showPasswordImageCanvas_;
+    RefPtr<CanvasImage> hidePasswordImageCanvas_;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -430,7 +430,6 @@ private:
 
     OffsetF parentGlobalOffset_;
     Offset lastTouchOffset_;
-    float basicPaddingLeft_ = 0.0f;
     PaddingPropertyF utilPadding_;
 
     float baselineOffset_ = 0.0f;

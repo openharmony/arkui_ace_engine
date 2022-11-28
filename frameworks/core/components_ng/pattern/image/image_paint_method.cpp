@@ -22,7 +22,7 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     config.renderMode_ = renderProps->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
     config.imageInterpolation_ = renderProps->GetImageInterpolation().value_or(ImageInterpolation::NONE);
     config.imageRepeat_ = renderProps->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
-    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    auto pipelineCtx = PipelineBase::GetCurrentContext();
     bool isRightToLeft = pipelineCtx && pipelineCtx->IsRightToLeft();
     config.needFlipCanvasHorizontally_ = isRightToLeft && renderProps->GetMatchTextDirection().value_or(false);
     auto colorFilterMatrix = renderProps->GetColorFilter();
