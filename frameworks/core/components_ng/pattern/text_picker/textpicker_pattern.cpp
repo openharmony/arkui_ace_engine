@@ -367,7 +367,7 @@ void TextPickerPattern::UpdateScrollDelta(double delta)
     SetCurrentOffset(delta);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void TextPickerPattern::UpdateToss(double offsetY)
