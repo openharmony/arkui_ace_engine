@@ -112,7 +112,7 @@ private:
     std::vector<std::string> arrayValue_;
     int32_t itemCount_ = 0;
     int32_t selected_ = 0;
-    int32_t storeSelected_ = 0;
+    int32_t storeSelected_ = -1;
     int32_t childHoverIndex_ = -1;
     int32_t childFocusIndex_ = -1;
     int32_t childPressIndex_ = -1;
