@@ -172,11 +172,12 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest008, TestSize.Lev
     EXPECT_NE(manager_, nullptr);
     int32_t nodeId = 0;
     std::string tag = "tag";
-    bool result = true;
+    bool result = false;
     RefPtr<AccessibilityNode> node = AceType::MakeRefPtr<AccessibilityNode>(nodeId, tag);
+    result = manager_->ClearCurrentFocus();
     result = manager_->ClearAccessibilityFocus(node);
     EXPECT_NE(manager_, nullptr);
-    EXPECT_EQ(result, false);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -190,11 +191,13 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest009, TestSize.Lev
     EXPECT_NE(manager_, nullptr);
     int32_t nodeId = -1;
     std::string tag = "tag";
-    bool result = true;
+    bool result = false;
     RefPtr<AccessibilityNode> node = AceType::MakeRefPtr<AccessibilityNode>(nodeId, tag);
+    node->SetActionAccessibilityFocusImpl([](bool isFocus) {});
+    result = manager_->ClearCurrentFocus();
     result = manager_->ClearAccessibilityFocus(node);
     EXPECT_NE(manager_, nullptr);
-    EXPECT_EQ(result, false);
+    EXPECT_TRUE(result);
 }
 
 /**
@@ -208,11 +211,13 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest010, TestSize.Lev
     EXPECT_NE(manager_, nullptr);
     int32_t nodeId = 0;
     std::string tag = "tag";
-    bool result = true;
+    bool result = false;
     RefPtr<AccessibilityNode> node = AceType::MakeRefPtr<AccessibilityNode>(nodeId, tag);
+    node->SetActionAccessibilityFocusImpl([](bool isFocus) {});
+    result = manager_->ClearCurrentFocus();
     result = manager_->RequestAccessibilityFocus(node);
     EXPECT_NE(manager_, nullptr);
-    EXPECT_EQ(result, false);
+    EXPECT_TRUE(result);
 }
 
 /**
@@ -226,11 +231,12 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest011, TestSize.Lev
     EXPECT_NE(manager_, nullptr);
     int32_t nodeId = -1;
     std::string tag = "tag";
-    bool result = true;
+    bool result = false;
     RefPtr<AccessibilityNode> node = AceType::MakeRefPtr<AccessibilityNode>(nodeId, tag);
+    result = manager_->ClearCurrentFocus();
     result = manager_->RequestAccessibilityFocus(node);
     EXPECT_NE(manager_, nullptr);
-    EXPECT_EQ(result, false);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -297,5 +303,426 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest015, TestSize.Lev
         MockAccessibilityElementOperatorCallback();
     manager_->SetFocusMoveSearchResult(mockCallback, nodeInfo, 0);
     EXPECT_NE(manager_, nullptr);
+}
+
+/**
+ * @tc.name: JsAccessibilityManagerTest016
+ * @tc.desc: SetFindFocusedElementInfoResult
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest016, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    manager_->Register(true);
+    Accessibility::AccessibilityElementInfo nodeInfo;
+    MockAccessibilityElementOperatorCallback mockCallback =
+        MockAccessibilityElementOperatorCallback();
+    manager_->SetFindFocusedElementInfoResult(mockCallback, nodeInfo, 0);
+    EXPECT_NE(manager_, nullptr);
+}
+
+/**
+ * @tc.name: JsAccessibilityManagerTest017
+ * @tc.desc: SetFindFocusedElementInfoResult
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest017, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    manager_->Register(false);
+    Accessibility::AccessibilityElementInfo nodeInfo;
+    MockAccessibilityElementOperatorCallback mockCallback =
+        MockAccessibilityElementOperatorCallback();
+    manager_->SetFindFocusedElementInfoResult(mockCallback, nodeInfo, 0);
+    EXPECT_NE(manager_, nullptr);
+}
+
+/**
+ * @tc.name: JsAccessibilityManagerTest018
+ * @tc.desc: SetSearchElementInfoByTextResult
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest018, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    manager_->Register(true);
+    Accessibility::AccessibilityElementInfo nodeInfo;
+    std::list<Accessibility::AccessibilityElementInfo> nodeInfoList;
+    nodeInfoList.emplace_back(nodeInfo);
+    MockAccessibilityElementOperatorCallback mockCallback =
+        MockAccessibilityElementOperatorCallback();
+    manager_->SetSearchElementInfoByTextResult(mockCallback, nodeInfoList, 0);
+    EXPECT_NE(manager_, nullptr);
+}
+
+/**
+ * @tc.name: JsAccessibilityManagerTest019
+ * @tc.desc: SetSearchElementInfoByTextResult
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest019, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    manager_->Register(false);
+    Accessibility::AccessibilityElementInfo nodeInfo;
+    std::list<Accessibility::AccessibilityElementInfo> nodeInfoList;
+    nodeInfoList.emplace_back(nodeInfo);
+    MockAccessibilityElementOperatorCallback mockCallback =
+        MockAccessibilityElementOperatorCallback();
+    manager_->SetSearchElementInfoByTextResult(mockCallback, nodeInfoList, 0);
+    EXPECT_NE(manager_, nullptr);
+}
+
+/**
+ * @tc.name: JsAccessibilityManagerTest020
+ * @tc.desc: SetSearchElementInfoByAccessibilityIdResult
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest020, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    manager_->Register(true);
+    Accessibility::AccessibilityElementInfo nodeInfo;
+    std::list<Accessibility::AccessibilityElementInfo> nodeInfoList;
+    nodeInfoList.emplace_back(nodeInfo);
+    MockAccessibilityElementOperatorCallback mockCallback =
+        MockAccessibilityElementOperatorCallback();
+    manager_->SetSearchElementInfoByAccessibilityIdResult(mockCallback, nodeInfoList, 0);
+    EXPECT_NE(manager_, nullptr);
+}
+
+/**
+ * @tc.name: JsAccessibilityManagerTest021
+ * @tc.desc: SetSearchElementInfoByAccessibilityIdResult
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest021, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    manager_->Register(false);
+    Accessibility::AccessibilityElementInfo nodeInfo;
+    std::list<Accessibility::AccessibilityElementInfo> nodeInfoList;
+    nodeInfoList.emplace_back(nodeInfo);
+    MockAccessibilityElementOperatorCallback mockCallback =
+        MockAccessibilityElementOperatorCallback();
+    manager_->SetSearchElementInfoByAccessibilityIdResult(mockCallback, nodeInfoList, 0);
+    EXPECT_NE(manager_, nullptr);
+}
+
+/**
+ * @tc.name: JsAccessibilityManagerTest022
+ * @tc.desc: GetNextFocusableNode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest022, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    int32_t nodeId0 = 0;
+    std::string tag = "tag";
+    RefPtr<AccessibilityNode> result = nullptr;
+    std::list<RefPtr<AccessibilityNode>> nodeList;
+    RefPtr<AccessibilityNode> node0 = AceType::MakeRefPtr<AccessibilityNode>(nodeId0, tag);
+    result = manager_->GetNextFocusableNode(nodeList, node0);
+    EXPECT_NE(manager_, nullptr);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: JsAccessibilityManagerTest023
+ * @tc.desc: GetNextFocusableNode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest023, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    int32_t nodeId0 = 0;
+    std::string tag = "tag";
+    RefPtr<AccessibilityNode> result = nullptr;
+    std::list<RefPtr<AccessibilityNode>> nodeList;
+    RefPtr<AccessibilityNode> node0 = AceType::MakeRefPtr<AccessibilityNode>(nodeId0, tag);
+    nodeList.emplace_back(node0);
+    result = manager_->GetNextFocusableNode(nodeList, node0);
+    EXPECT_NE(manager_, nullptr);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: JsAccessibilityManagerTest024
+ * @tc.desc: GetNextFocusableNode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest024, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    int32_t nodeId0 = 0;
+    int32_t nodeId1 = 1;
+    std::string tag = "tag";
+    RefPtr<AccessibilityNode> result = nullptr;
+    std::list<RefPtr<AccessibilityNode>> nodeList;
+    RefPtr<AccessibilityNode> node0 = AceType::MakeRefPtr<AccessibilityNode>(nodeId0, tag);
+    RefPtr<AccessibilityNode> node1 = AceType::MakeRefPtr<AccessibilityNode>(nodeId1, tag);
+    nodeList.emplace_back(node1);
+    result = manager_->GetNextFocusableNode(nodeList, node0);
+    EXPECT_NE(manager_, nullptr);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: JsAccessibilityManagerTest025
+ * @tc.desc: GetNextFocusableNode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest025, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    int32_t nodeId0 = 0;
+    int32_t nodeId1 = 1;
+    std::string tag = "tag";
+    RefPtr<AccessibilityNode> result = nullptr;
+    std::list<RefPtr<AccessibilityNode>> nodeList;
+    RefPtr<AccessibilityNode> node0 = AceType::MakeRefPtr<AccessibilityNode>(nodeId0, tag);
+    RefPtr<AccessibilityNode> node1 = AceType::MakeRefPtr<AccessibilityNode>(nodeId1, tag);
+    nodeList.emplace_back(node0);
+    nodeList.emplace_back(node1);
+    result = manager_->GetNextFocusableNode(nodeList, node0);
+    EXPECT_NE(manager_, nullptr);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: JsAccessibilityManagerTest026
+ * @tc.desc: GetPreviousFocusableNode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest026, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    int32_t nodeId0 = 0;
+    std::string tag = "tag";
+    RefPtr<AccessibilityNode> result = nullptr;
+    std::list<RefPtr<AccessibilityNode>> nodeList;
+    RefPtr<AccessibilityNode> node0 = AceType::MakeRefPtr<AccessibilityNode>(nodeId0, tag);
+    result = manager_->GetPreviousFocusableNode(nodeList, node0);
+    EXPECT_NE(manager_, nullptr);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: JsAccessibilityManagerTest027
+ * @tc.desc: GetPreviousFocusableNode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest027, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    int32_t nodeId0 = 0;
+    std::string tag = "tag";
+    RefPtr<AccessibilityNode> result = nullptr;
+    std::list<RefPtr<AccessibilityNode>> nodeList;
+    RefPtr<AccessibilityNode> node0 = AceType::MakeRefPtr<AccessibilityNode>(nodeId0, tag);
+    nodeList.emplace_back(node0);
+    result = manager_->GetPreviousFocusableNode(nodeList, node0);
+    EXPECT_NE(manager_, nullptr);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: JsAccessibilityManagerTest028
+ * @tc.desc: GetPreviousFocusableNode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest028, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    int32_t nodeId0 = 0;
+    int32_t nodeId1 = 1;
+    std::string tag = "tag";
+    RefPtr<AccessibilityNode> result = nullptr;
+    std::list<RefPtr<AccessibilityNode>> nodeList;
+    RefPtr<AccessibilityNode> node0 = AceType::MakeRefPtr<AccessibilityNode>(nodeId0, tag);
+    RefPtr<AccessibilityNode> node1 = AceType::MakeRefPtr<AccessibilityNode>(nodeId1, tag);
+    nodeList.emplace_back(node1);
+    result = manager_->GetPreviousFocusableNode(nodeList, node0);
+    EXPECT_NE(manager_, nullptr);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: JsAccessibilityManagerTest029
+ * @tc.desc: GetPreviousFocusableNode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest029, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    int32_t nodeId0 = 0;
+    int32_t nodeId1 = 1;
+    std::string tag = "tag";
+    RefPtr<AccessibilityNode> result = nullptr;
+    std::list<RefPtr<AccessibilityNode>> nodeList;
+    RefPtr<AccessibilityNode> node0 = AceType::MakeRefPtr<AccessibilityNode>(nodeId0, tag);
+    RefPtr<AccessibilityNode> node1 = AceType::MakeRefPtr<AccessibilityNode>(nodeId1, tag);
+    nodeList.emplace_back(node0);
+    nodeList.emplace_back(node1);
+    result = manager_->GetPreviousFocusableNode(nodeList, node0);
+    EXPECT_NE(manager_, nullptr);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: JsAccessibilityManagerTest030
+ * @tc.desc: AddFocusableNode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest030, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    int32_t nodeId0 = 0;
+    size_t nodeListSize = 1;
+    std::string tag = "tag";
+    std::list<RefPtr<AccessibilityNode>> nodeList;
+    RefPtr<AccessibilityNode> node0 = AceType::MakeRefPtr<AccessibilityNode>(nodeId0, tag);
+    manager_->AddFocusableNode(nodeList, node0);
+    EXPECT_NE(manager_, nullptr);
+    EXPECT_EQ(nodeList.size(), nodeListSize);
+}
+
+/**
+ * @tc.name: JsAccessibilityManagerTest031
+ * @tc.desc: AddFocusableNode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest031, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    int32_t nodeId0 = 0;
+    size_t nodeListSize = 0;
+    std::string tag = "tag";
+    std::list<RefPtr<AccessibilityNode>> nodeList;
+    RefPtr<AccessibilityNode> node0 = AceType::MakeRefPtr<AccessibilityNode>(nodeId0, tag);
+    node0->SetVisible(false);
+    manager_->AddFocusableNode(nodeList, node0);
+    EXPECT_NE(manager_, nullptr);
+    EXPECT_EQ(nodeList.size(), nodeListSize);
+}
+
+/**
+ * @tc.name: JsAccessibilityManagerTest032
+ * @tc.desc: AddFocusableNode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest032, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    int32_t nodeId0 = 0;
+    int32_t childNodeId0 = 10;
+    size_t nodeListSize = 2;
+    std::string tag = "tag";
+    std::string child= "child";
+    std::list<RefPtr<AccessibilityNode>> nodeList;
+    std::list<RefPtr<AccessibilityNode>> childNodeList;
+    RefPtr<AccessibilityNode> node0 = AceType::MakeRefPtr<AccessibilityNode>(nodeId0, tag);
+    RefPtr<AccessibilityNode> childNode0 = AceType::MakeRefPtr<AccessibilityNode>(childNodeId0, child);
+    childNodeList.emplace_back(childNode0);
+    node0->ResetChildList(childNodeList);
+    manager_->AddFocusableNode(nodeList, node0);
+    EXPECT_NE(manager_, nullptr);
+    EXPECT_EQ(nodeList.size(), nodeListSize);
+}
+
+/**
+ * @tc.name: JsAccessibilityManagerTest033
+ * @tc.desc: AddFocusableNode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest033, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    int32_t nodeId0 = 0;
+    int32_t childNodeId0 = 10;
+    size_t nodeListSize = 1;
+    std::string tag = "tag";
+    std::string child= "child";
+    std::list<RefPtr<AccessibilityNode>> nodeList;
+    std::list<RefPtr<AccessibilityNode>> childNodeList;
+    RefPtr<AccessibilityNode> node0 = AceType::MakeRefPtr<AccessibilityNode>(nodeId0, tag);
+    RefPtr<AccessibilityNode> childNode0 = AceType::MakeRefPtr<AccessibilityNode>(childNodeId0, child);
+    childNodeList.emplace_back(childNode0);
+    node0->ResetChildList(childNodeList);
+    node0->SetAccessible(true);
+    manager_->AddFocusableNode(nodeList, node0);
+    EXPECT_NE(manager_, nullptr);
+    EXPECT_EQ(nodeList.size(), nodeListSize);
+}
+
+/**
+ * @tc.name: JsAccessibilityManagerTest034
+ * @tc.desc: AddFocusableNode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest034, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    int32_t nodeId0 = 0;
+    int32_t childNodeId0 = 10;
+    size_t nodeListSize = 0;
+    std::string tag = "tag";
+    std::string child= "child";
+    std::list<RefPtr<AccessibilityNode>> nodeList;
+    std::list<RefPtr<AccessibilityNode>> childNodeList;
+    RefPtr<AccessibilityNode> node0 = AceType::MakeRefPtr<AccessibilityNode>(nodeId0, tag);
+    RefPtr<AccessibilityNode> childNode0 = AceType::MakeRefPtr<AccessibilityNode>(childNodeId0, child);
+    childNodeList.emplace_back(childNode0);
+    node0->ResetChildList(childNodeList);
+    node0->SetImportantForAccessibility("no-hide-descendants");
+    manager_->AddFocusableNode(nodeList, node0);
+    EXPECT_NE(manager_, nullptr);
+    EXPECT_EQ(nodeList.size(), nodeListSize);
+}
+
+/**
+ * @tc.name: JsAccessibilityManagerTest035
+ * @tc.desc: AddFocusableNode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest035, TestSize.Level1)
+{
+    EXPECT_NE(manager_, nullptr);
+    int32_t nodeId0 = 0;
+    int32_t childNodeId0 = 10;
+    size_t nodeListSize = 0;
+    std::string tag = "tag";
+    std::string child= "child";
+    std::list<RefPtr<AccessibilityNode>> nodeList;
+    std::list<RefPtr<AccessibilityNode>> childNodeList;
+    RefPtr<AccessibilityNode> node0 = AceType::MakeRefPtr<AccessibilityNode>(nodeId0, tag);
+    RefPtr<AccessibilityNode> childNode0 = AceType::MakeRefPtr<AccessibilityNode>(childNodeId0, child);
+    childNodeList.emplace_back(childNode0);
+    node0->ResetChildList(childNodeList);
+    node0->SetAccessible(true);
+    node0->SetImportantForAccessibility("no-hide-descendants");
+    manager_->AddFocusableNode(nodeList, node0);
+    EXPECT_NE(manager_, nullptr);
+    EXPECT_EQ(nodeList.size(), nodeListSize);
 }
 } // namespace OHOS::Ace::Framework
