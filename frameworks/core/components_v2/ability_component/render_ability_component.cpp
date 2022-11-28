@@ -105,7 +105,9 @@ void RenderAbilityComponent::ConnectOrUpdateExtension()
         adapter_->UpdateRect(currentRect_);
         return;
     }
-    adapter_ = WindowExtensionConnectionProxy::CreateAdapter();
+    if (!adapter_) {
+        adapter_ = WindowExtensionConnectionProxy::CreateAdapter();
+    }
     int32_t windowId = pipelineContext->GetWindowId();
     adapter_->ConnectExtension(component_->GetWant(), currentRect_, AceType::Claim(this), windowId);
 }
