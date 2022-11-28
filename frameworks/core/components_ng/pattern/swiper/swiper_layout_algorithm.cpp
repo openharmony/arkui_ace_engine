@@ -243,8 +243,8 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     // Layout items behind current item.
-    OffsetF preOffset = (axis == Axis::HORIZONTAL ? OffsetF(-itemSpace / 2 + currentOffset_, 0)
-                                                  : OffsetF(0, -itemSpace / 2 + currentOffset_));
+    OffsetF preOffset = (axis == Axis::HORIZONTAL ? OffsetF(-itemSpace + currentOffset_, 0)
+                                                  : OffsetF(0, -itemSpace + currentOffset_));
     for (const auto& index : preItems) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!wrapper) {
@@ -259,8 +259,8 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     // Layout items after current item.
-    OffsetF nextOffset = (axis == Axis::HORIZONTAL ? OffsetF(itemSpace / 2 + currentOffset_, 0)
-                                                   : OffsetF(0, itemSpace / 2 + currentOffset_));
+    OffsetF nextOffset = (axis == Axis::HORIZONTAL ? OffsetF(currentOffset_, 0)
+                                                   : OffsetF(0, currentOffset_));
     for (const auto& index : nextItems) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!wrapper) {

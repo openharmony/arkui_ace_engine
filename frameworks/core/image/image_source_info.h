@@ -72,6 +72,11 @@ public:
     const RefPtr<PixelMap>& GetPixmap() const;
     std::string GetCacheKey() const;
 
+    bool IsSupportCache() const
+    {
+        return !src_.empty() || resourceId_ != InternalResource::ResourceId::NO_ID;
+    }
+
 private:
     SrcType ResolveSrcType() const;
     void GenerateCacheKey();

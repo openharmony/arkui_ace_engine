@@ -377,8 +377,13 @@ void RenderSwiper::PerformLayout()
         swiperWidth_ = (axis_ == Axis::HORIZONTAL) ? maxWidth + halfSpace : maxWidth;
         swiperHeight_ = (axis_ == Axis::HORIZONTAL) ? maxHeight : maxHeight + halfSpace;
     } else {
-        swiperWidth_ = (isLinearLayout ? maxWidth : layoutSize.Width()) + 2.0 * halfSpace;
+        swiperWidth_ = (isLinearLayout ? maxWidth : layoutSize.Width());
         swiperHeight_ = (isLinearLayout ? maxHeight : layoutSize.Height());
+        if (axis_ == Axis::HORIZONTAL) {
+            swiperWidth_ += 2.0 * halfSpace;
+        } else {
+            swiperHeight_ += 2.0 * halfSpace;
+        }
     }
 
     if (isLinearLayout) {

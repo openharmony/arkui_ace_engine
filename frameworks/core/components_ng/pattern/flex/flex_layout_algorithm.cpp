@@ -720,6 +720,17 @@ void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         LOGD("FlexLayoutAlgorithm::Layout, children is empty");
         return;
     }
+    auto layoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    space_ = static_cast<float>(layoutProperty->GetSpaceValue({}).ConvertToPx());
+    direction_ = layoutProperty->GetFlexDirection().value_or(FlexDirection::ROW);
+    mainAxisAlign_ = layoutProperty->GetMainAxisAlignValue(FlexAlign::FLEX_START);
+    crossAxisAlign_ =
+        layoutProperty->GetCrossAxisAlignValue(isLinearLayoutFeature_ ? FlexAlign::CENTER : FlexAlign::FLEX_START);
+    textDir_ = layoutProperty->GetLayoutDirection();
+    if (textDir_ == TextDirection::AUTO) {
+        textDir_ = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
+    }
     auto contentSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, contentSize);

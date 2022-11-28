@@ -31,9 +31,8 @@ CanvasDrawFunction SearchPaintMethod::GetContentDrawFunction(PaintWrapper* paint
 {
     auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto search = weak.Upgrade();
-        if (search) {
-            search->PaintSearch(canvas, paintWrapper);
-        }
+        CHECK_NULL_VOID(search);
+        search->PaintSearch(canvas, paintWrapper);
     };
     return paintFunc;
 }

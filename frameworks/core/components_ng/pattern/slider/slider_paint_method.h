@@ -29,6 +29,8 @@ class ACE_EXPORT SliderPaintMethod : public NodePaintMethod {
 
 public:
     static constexpr float HALF = 0.5f;
+    static constexpr Dimension CIRCLE_SHADOW_WIDTH = 1.0_vp;
+    static constexpr Dimension HOT_CIRCLE_SHADOW_WIDTH = 6.0_vp;
     struct Parameters {
         float trackThickness = 0.0f;
         float blockDiameter = 0.0f;
@@ -36,6 +38,7 @@ public:
         float borderBlank = 0.0f;
         float stepRatio = 0.0f;
         float valueRatio = 0.0f;
+        bool hotFlag = false;
     };
     explicit SliderPaintMethod(const Parameters& parameters) : parameters_(parameters) {};
     ~SliderPaintMethod() override = default;
@@ -55,8 +58,10 @@ private:
 
     struct CirclePenAndSize {
         RSPen pen;
+        RSPen shadowPen;
         PointF center;
         float radius;
+        float shadowRadius;
     };
 
     LinePenAndSize GetBackgroundPen(const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset,

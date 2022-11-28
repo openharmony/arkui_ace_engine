@@ -216,9 +216,8 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
     pageFocusHub->SetParentFocusable(false);
 
     auto context = PipelineContext::GetCurrentContext();
-    if (context) {
-        context->SetIsNeedShowFocus(false);
-    }
+    CHECK_NULL_VOID(context);
+    context->SetIsNeedShowFocus(false);
 }
 
 void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType)
@@ -239,9 +238,8 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
     pageFocusHub->RequestFocus();
 
     auto context = PipelineContext::GetCurrentContext();
-    if (context) {
-        context->SetIsNeedShowFocus(false);
-    }
+    CHECK_NULL_VOID(context);
+    context->SetIsNeedShowFocus(false);
 }
 
 RefPtr<FrameNode> StageManager::GetLastPage()
@@ -278,6 +276,22 @@ void StageManager::StartSharedTransition(
     auto sharedTransitionManager = pipeline->GetSharedOverlayManager();
     CHECK_NULL_VOID(sharedTransitionManager);
     sharedTransitionManager->StartSharedTransition(outNode, inNode);
+}
+
+void StageManager::ReloadStage()
+{
+    const auto& children = stageNode_->GetChildren();
+    for (const auto& child : children) {
+        auto frameNode = DynamicCast<FrameNode>(child);
+        if (!frameNode) {
+            continue;
+        }
+        auto pagePattern = frameNode->GetPattern<PagePattern>();
+        if (!pagePattern) {
+            continue;
+        }
+        pagePattern->ReloadPage();
+    }
 }
 
 } // namespace OHOS::Ace::NG

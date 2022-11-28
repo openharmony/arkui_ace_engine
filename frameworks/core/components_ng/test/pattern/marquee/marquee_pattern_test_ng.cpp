@@ -776,4 +776,104 @@ HWTEST_F(MarqueePatternTestNg, MarqueeTest008, TestSize.Level1)
     EXPECT_EQ(pattern->startAfterShowed_, false);
     EXPECT_EQ(pattern->startAfterLayout_, false);
 }
+
+/**
+ * @tc.name: MarqueeTest009
+ * @tc.desc: When the width of marquee and child is 0, and the direction of marquee is right, verify the correlation
+ *           function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueeTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and get marquee frameNode.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::MARQUEE_COMPONENT_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+
+    /**
+     * @tc.steps: step2. create marquee layoutWrapper and set marquee layoutAlgorithm.
+     * @tc.expected: step2. related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    EXPECT_NE(pattern, nullptr);
+    auto marqueeLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    EXPECT_NE(marqueeLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(marqueeLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. create and get marquee children frameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+    EXPECT_NE(textFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step4. create marquee layoutWrapper
+     * @tc.expected: step4. related function is called.
+     */
+    RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(textGeometryNode, nullptr);
+    RefPtr<LayoutWrapper> const textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    EXPECT_NE(textLayoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step5. set child size and set child layoutAlgorithm.
+     * @tc.expected: step5. related function is called.
+     */
+    textLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
+    auto textLayoutAlgorithm = textFrameNode->GetPattern<TextPattern>()->CreateLayoutAlgorithm();
+    EXPECT_NE(textLayoutAlgorithm, nullptr);
+    textLayoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(textLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step6. create child layout constraint and update it.
+     */
+    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = CONTAINER_SIZE;
+    textLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+
+    /**
+     * @tc.steps: step7. do not set the size of marquee to update layout constraint.
+     *
+     *    corresponding ets code:
+     *         marquee({ src: 'marquee', start: false })
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.selfIdealSize.SetSize(SizeF(0.0f, 0.0f));
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+
+    /**
+     * @tc.steps: step8. add child and calculate the size and offset.
+     */
+    frameNode->AddChild(textFrameNode);
+    layoutWrapper.AppendChild(textLayoutWrapper);
+    marqueeLayoutAlgorithm->Measure(&layoutWrapper);
+    marqueeLayoutAlgorithm->Layout(&layoutWrapper);
+    textFrameNode->SetGeometryNode(textLayoutWrapper->GetGeometryNode());
+    frameNode->SetGeometryNode(layoutWrapper.GetGeometryNode());
+
+    /**
+     * @tc.steps: step9. when marquee direction is right and playStatus is false, verify the correlation function.
+     * @tc.expected: step9. Check whether the relevant parameters are correct.
+     */
+    pattern->direction_ = MarqueeDirection::RIGHT;
+    pattern->playStatus_ = false;
+    pattern->isNeedMarquee_ = true;
+    pattern->InitAnimatorController();
+    pattern->UpdateAnimation();
+    EXPECT_EQ(pattern->needAnimation_, false);
+    pattern->needAnimation_ = false;
+    pattern->startAfterShowed_ = false;
+    pattern->OnActive();
+    EXPECT_EQ(pattern->isActive_, true);
+    pattern->startAfterShowed_ = true;
+    pattern->OnActive();
+    EXPECT_EQ(pattern->startAfterShowed_, false);
+    EXPECT_EQ(pattern->animatorController_->GetStatus(), Animator::Status::IDLE);
+}
 } // namespace OHOS::Ace::NG

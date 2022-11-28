@@ -20,10 +20,13 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
+#include "core/components/theme/theme_attributes.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
+#include "core/components/theme/theme_style.h"
 
 namespace OHOS::Ace {
 class IndexerTheme : public virtual Theme {
@@ -35,68 +38,206 @@ public:
     public:
         Builder() = default;
         ~Builder() = default;
-        RefPtr<IndexerTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
+        RefPtr<IndexerTheme> Build(const RefPtr<ThemeConstants>& themeConstants)
         {
             RefPtr<IndexerTheme> theme = AceType::Claim(new IndexerTheme());
             if (!themeConstants) {
                 LOGE("Build AppTheme error, themeConstants is null!");
                 return theme;
             }
-            theme->color_ = themeConstants->GetColor(THEME_INDEXER_COLOR);
-            theme->selectedColor_ = themeConstants->GetColor(THEME_INDEXER_SELECTED_COLOR);
-            theme->popupColor_ = themeConstants->GetColor(THEME_INDEXER_POPUP_COLOR);
-            theme->selectedBackgroundColor_ = themeConstants->GetColor(THEME_INDEXER_SELECT_BACKGROUND_COLOR);
-            theme->popupBackgroundColor_ = themeConstants->GetColor(THEME_INDEXER_POPUP_BACKGROUND_COLOR);
-            theme->font_.SetFontSize(themeConstants->GetDimension(THEME_INDEXER_FONT_SIZE));
-            theme->popupFont_.SetFontSize(themeConstants->GetDimension(THEME_INDEXER_POPUP_FONT_SIZE));
-            theme->selectedFont_.SetFontSize(themeConstants->GetDimension(THEME_INDEXER_SELECTED_FONT_SIZE));
+            ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
     };
-    const Color& GetColor() const
+
+    const Color& GetDefaultTextColor() const
     {
-        return color_;
+        return defaultTextColor_;
     }
-    const Color& GetSelectedColor() const
+    const Color& GetSelectedTextColor() const
     {
-        return selectedColor_;
+        return selectedTextColor_;
     }
-    const Color& GetPopupColor() const
+    const Color& GetPopupTextColor() const
     {
-        return popupColor_;
+        return popupTextColor_;
+    }
+    const Dimension& GetPopupTextSize() const
+    {
+        return popupTextSize_;
     }
     const Color& GetPopupBackgroundColor() const
     {
         return popupBackgroundColor_;
     }
+    const Color& GetPopupSeparateColor() const
+    {
+        return popupSeparateColor_;
+    }
     const Color& GetSeclectedBackgroundColor() const
     {
         return selectedBackgroundColor_;
     }
-    const TextStyle& GetSelectedFont() const
+    const Dimension& GetPopupAreaSize_() const
     {
-        return selectedFont_;
+        return popupAreaSize_;
     }
-    const TextStyle& GetPopupFont() const
+    const Dimension& GetHoverRadiusSize_() const
     {
-        return popupFont_;
+        return hoverRadiusSize_;
     }
-    const TextStyle& GetFont() const
+    const Dimension& GetHoverBgAreaSize() const
     {
-        return font_;
+        return hoverBgAreaSize_;
     }
+    const Color& GetHoverBgAreaColor() const
+    {
+        return hoverBgAreaColor_;
+    }
+    const Dimension& GetHoverTextSize() const
+    {
+        return hoverTextSize_;
+    }
+    const Color& GetHoverTextColor() const
+    {
+        return hoverTextColor_;
+    }
+    const Dimension& GetHoverTextAlpha() const
+    {
+        return hoverTextAlpha_;
+    }
+    const Color& GetSlipHoverBackgroundColor() const
+    {
+        return slipHoverBackgroundColor_;
+    }
+    const Color& GetFocusBgOutlineColor() const
+    {
+        return focusBgOutlineColor_;
+    }
+    const Dimension& GetFocusBgOutlineSize() const
+    {
+        return focusBgOutlineSize_;
+    }
+    const TextStyle& GetSelectTextStyle() const
+    {
+        return seletctTextStyle_;
+    }
+    const TextStyle& GetDefaultTextStyle() const
+    {
+        return defaultTextStyle_;
+    }
+    const TextStyle& GetPopupTextStyle() const
+    {
+        return popupTextStyle_;
+    }
+    static constexpr double SLIP_BACKGROUND_OPACITY = 0.05;
+    static constexpr float TEXT_PADDING_LEFT = 12.0f;
+    static constexpr float TEXT_PADDING_TOP = 6.0f;
 
 protected:
     IndexerTheme() = default;
 
-    Color color_;
-    Color selectedColor_;
-    Color popupColor_;
+    Color defaultTextColor_;
+    Color selectedTextColor_;
+    Color popupTextColor_;
+    Dimension popupTextSize_;
     Color selectedBackgroundColor_;
     Color popupBackgroundColor_;
-    TextStyle selectedFont_;
-    TextStyle popupFont_;
-    TextStyle font_;
+    Color popupSeparateColor_;
+    Dimension popupAreaSize_;
+    Dimension hoverRadiusSize_;
+    Dimension hoverBgAreaSize_;
+    Color hoverBgAreaColor_;
+    Dimension hoverTextSize_;
+    Color hoverTextColor_;
+    Dimension hoverTextAlpha_;
+    Color slipHoverBackgroundColor_;
+    Color focusBgOutlineColor_;
+    Dimension focusBgOutlineSize_;
+    TextStyle seletctTextStyle_;
+    TextStyle defaultTextStyle_;
+    TextStyle popupTextStyle_;
+
+private:
+    static void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<IndexerTheme>& theme)
+    {
+        if (!themeStyle) {
+            return;
+        }
+        auto indexerPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_INDEXER, nullptr);
+        if (!indexerPattern) {
+            LOGE("Pattern of indexer is null, please check!");
+            return;
+        }
+        theme->defaultTextColor_ = indexerPattern->GetAttr<Color>("default_text_color", Color(DEFAULT_TEXT_COLOR))
+                                       .ChangeOpacity(TEXT_COLOR_OPACITY);
+        theme->selectedTextColor_ = indexerPattern->GetAttr<Color>("selected_text_color", Color(SELECT_TEXT_COLOR));
+        theme->popupTextColor_ = indexerPattern->GetAttr<Color>("popup_text_color", Color(POPUP_TEXT_COLOR));
+        theme->popupTextSize_ =
+            indexerPattern->GetAttr<Dimension>("popup_text_size", Dimension(POPUP_TEXT_SIZE, DimensionUnit::VP));
+        theme->selectedBackgroundColor_ =
+            indexerPattern->GetAttr<Color>("selected_background_color", Color(SELECT_BACKGROUD_COLOR))
+                .ChangeOpacity(SELECT_BACKGROUND_OPACITY);
+        theme->popupBackgroundColor_ =
+            indexerPattern->GetAttr<Color>("popup_background_color", Color(POPUP_BACKGROUND_COLOR));
+        theme->popupSeparateColor_ =
+            indexerPattern->GetAttr<Color>("popup_separator_color", Color(POPUP_SEPARATOR_COLOR));
+        theme->popupAreaSize_ =
+            indexerPattern->GetAttr<Dimension>("popup_area_size", Dimension(POPUP_AREA_SIZE, DimensionUnit::VP));
+        theme->hoverRadiusSize_ =
+            indexerPattern->GetAttr<Dimension>("hover_radius_size", Dimension(HOVER_RADIUS_SIZE, DimensionUnit::VP));
+        theme->hoverBgAreaSize_ =
+            indexerPattern->GetAttr<Dimension>("hover_bg_area_size", Dimension(HOVER_BG_AREA_SIZE, DimensionUnit::VP));
+        theme->hoverBgAreaColor_ = indexerPattern->GetAttr<Color>("hover_bg_area_color", Color(HOVER_BG_AREA_COLOR));
+        theme->hoverTextSize_ =
+            indexerPattern->GetAttr<Dimension>("hover_text_size", Dimension(HOVER_TEXT_SIZE, DimensionUnit::FP));
+        theme->hoverTextColor_ =
+            indexerPattern->GetAttr<Color>("hover_text_color", Color::RED).ChangeOpacity(TEXT_COLOR_OPACITY);
+        theme->hoverTextAlpha_ =
+            indexerPattern->GetAttr<Dimension>("hover_text_alpha", Dimension(HOVER_TEXT_ALPHA, DimensionUnit::PX));
+        theme->slipHoverBackgroundColor_ =
+            indexerPattern->GetAttr<Color>("slip_hover_background_color", Color(SLIP_HOVER_BACKGROUD_COLOR))
+                .ChangeOpacity(SLIP_BACKGROUND_OPACITY);
+        theme->focusBgOutlineColor_ =
+            indexerPattern->GetAttr<Color>("focus_bg_outline_color", Color(FOCUS_BG_OUTLINE_COLOR));
+        theme->focusBgOutlineSize_ = indexerPattern->GetAttr<Dimension>(
+            "focus_bg_outline_size", Dimension(FOCUS_BG_OUTLINE_SIZE, DimensionUnit::VP));
+        theme->seletctTextStyle_.SetFontSize(
+            indexerPattern->GetAttr<Dimension>("hover_text_size", Dimension(HOVER_TEXT_SIZE, DimensionUnit::FP)));
+        theme->seletctTextStyle_.SetTextColor(
+            indexerPattern->GetAttr<Color>("selected_text_color", Color(SELECT_TEXT_COLOR)));
+        theme->seletctTextStyle_.SetFontWeight(FontWeight::REGULAR);
+        theme->defaultTextStyle_.SetFontSize(
+            indexerPattern->GetAttr<Dimension>("hover_text_size", Dimension(HOVER_TEXT_SIZE, DimensionUnit::FP)));
+        theme->defaultTextStyle_.SetTextColor(
+            indexerPattern->GetAttr<Color>("default_text_color", Color(DEFAULT_TEXT_COLOR))
+                .ChangeOpacity(TEXT_COLOR_OPACITY));
+        theme->defaultTextStyle_.SetFontWeight(FontWeight::REGULAR);
+        theme->popupTextStyle_.SetFontSize(
+            indexerPattern->GetAttr<Dimension>("popup_text_size", Dimension(POPUP_TEXT_SIZE, DimensionUnit::VP)));
+        theme->popupTextStyle_.SetTextColor(
+            indexerPattern->GetAttr<Color>("popup_text_color", Color(POPUP_TEXT_COLOR)));
+        theme->popupTextStyle_.SetFontWeight(FontWeight::MEDIUM);
+    }
+    static constexpr uint32_t DEFAULT_TEXT_COLOR = 0x99000000;
+    static constexpr uint32_t SELECT_TEXT_COLOR = 0xff007dff;
+    static constexpr uint32_t POPUP_TEXT_COLOR = 0xff007dff;
+    static constexpr float POPUP_TEXT_SIZE = 24.0;
+    static constexpr uint32_t SELECT_BACKGROUD_COLOR = 0x33007dff;
+    static constexpr uint32_t POPUP_BACKGROUND_COLOR = 0xffffffff;
+    static constexpr uint32_t POPUP_SEPARATOR_COLOR = 0x33182431;
+    static constexpr float POPUP_AREA_SIZE = 56.0f;
+    static constexpr float HOVER_RADIUS_SIZE = 6.0f;
+    static constexpr float HOVER_BG_AREA_SIZE = 16.0f;
+    static constexpr uint32_t HOVER_BG_AREA_COLOR = 0x0c182431;
+    static constexpr float HOVER_TEXT_SIZE = 12.0f;
+    static constexpr uint32_t HOVER_TEXT_COLOR = 0xff182431;
+    static constexpr float HOVER_TEXT_ALPHA = 0.6f;
+    static constexpr uint32_t SLIP_HOVER_BACKGROUD_COLOR = 0x000000;
+    static constexpr uint32_t FOCUS_BG_OUTLINE_COLOR = 0xff007dff;
+    static constexpr float FOCUS_BG_OUTLINE_SIZE = 2.0f;
+    static constexpr float TEXT_COLOR_OPACITY = 0.6f;
+    static constexpr float SELECT_BACKGROUND_OPACITY = 0.1f;
 };
 } // namespace OHOS::Ace
 #endif

@@ -81,15 +81,12 @@ void StepperPattern::InitButtonClickEvent(const RefPtr<GestureEventHub>& leftGes
     if (!leftClickEvent_) {
         auto clickEvent = [swiperNode, weak = WeakClaim(this)](const GestureEvent& info) {
             auto stepperPattern = weak.Upgrade();
-            if (!stepperPattern) {
-                return;
-            }
+            CHECK_NULL_VOID(stepperPattern);
             stepperPattern->HandlingButtonClickEvent(true, swiperNode);
             auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-            if (swiperPattern) {
-                auto swiperController = swiperPattern->GetSwiperController();
-                swiperController->ShowPrevious();
-            }
+            CHECK_NULL_VOID(swiperPattern);
+            auto swiperController = swiperPattern->GetSwiperController();
+            swiperController->ShowPrevious();
         };
         leftGestureHub->RemoveClickEvent(leftClickEvent_);
         leftClickEvent_ = MakeRefPtr<ClickEvent>(std::move(clickEvent));
@@ -99,15 +96,12 @@ void StepperPattern::InitButtonClickEvent(const RefPtr<GestureEventHub>& leftGes
     if (!rightClickEvent_) {
         auto clickEvent = [swiperNode, weak = WeakClaim(this)](const GestureEvent& info) {
             auto stepperPattern = weak.Upgrade();
-            if (!stepperPattern) {
-                return;
-            }
+            CHECK_NULL_VOID(stepperPattern);
             stepperPattern->HandlingButtonClickEvent(false, swiperNode);
             auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-            if (swiperPattern) {
-                auto swiperController = swiperPattern->GetSwiperController();
-                swiperController->ShowNext();
-            }
+            CHECK_NULL_VOID(swiperPattern);
+            auto swiperController = swiperPattern->GetSwiperController();
+            swiperController->ShowNext();
         };
         rightGestureHub->RemoveClickEvent(rightClickEvent_);
         rightClickEvent_ = MakeRefPtr<ClickEvent>(std::move(clickEvent));

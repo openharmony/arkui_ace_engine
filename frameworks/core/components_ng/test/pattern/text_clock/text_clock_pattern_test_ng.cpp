@@ -35,6 +35,7 @@ inline const std::string CLOCK_FORMAT = "hms";
 inline const std::string UTC_1 = "1000000000000";
 inline const std::string UTC_2 = "2000000000000";
 inline const std::string FORMAT_DATA = "08:00:00";
+inline const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 } // namespace
 
 struct TestProperty {
@@ -104,8 +105,10 @@ HWTEST_F(TextClockPatternTestNg, TextClockTest001, TestSize.Level1)
     EXPECT_EQ(textClockLayoutProperty->GetFormat(), CLOCK_FORMAT);
     EXPECT_EQ(textClockLayoutProperty->GetHoursWest(), HOURS_WEST);
 
+    textClockLayoutProperty->UpdateFontFamily(FONT_FAMILY_VALUE);
     auto json = JsonUtil::Create(true);
-    layoutProperty->ToJsonValue(json);
+    textClockLayoutProperty->ToJsonValue(json);
+    EXPECT_EQ(textClockLayoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
 }
 
 /**
@@ -153,6 +156,20 @@ HWTEST_F(TextClockPatternTestNg, TextClockTest002, TestSize.Level1)
     EXPECT_NE(clockLayoutProperty, nullptr);
     auto event = pattern->CreateEventHub();
     EXPECT_NE(event, nullptr);
+
+    /**
+     * @tc.steps: step5. garbage branch coverage.
+     * @tc.expected: step5. related function is called.
+     */
+    pattern->isStart_ = false;
+    pattern->UpdateTimeText();
+    pattern->textClockController_ = nullptr;
+    pattern->InitUpdateTimeTextCallBack();
+    pattern->timeCallback_ = nullptr;
+    pattern->UpdateTimeTextCallBack();
+    EXPECT_EQ(pattern->textClockController_, nullptr);
+    EXPECT_EQ(pattern->timeCallback_, nullptr);
+    EXPECT_EQ(layoutProperty->GetContent(), FORMAT_DATA);
 }
 
 /**

@@ -372,7 +372,7 @@ void RosenRenderContext::OnTransformRotateUpdate(const Vector4F& rotate)
 {
     CHECK_NULL_VOID(rsNode_);
     float norm = std::sqrt(std::pow(rotate.x, 2) + std::pow(rotate.y, 2) + std::pow(rotate.z, 2));
-    rsNode_->SetRotation(rotate.w*rotate.x/norm, rotate.w*rotate.y/norm, rotate.w*rotate.z/norm);
+    rsNode_->SetRotation(rotate.w * rotate.x / norm, rotate.w * rotate.y / norm, rotate.w * rotate.z / norm);
     RequestNextFrame();
 }
 
@@ -443,6 +443,14 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     auto newSize = SizeF(oldSize.Width() * scale[0], oldSize.Height() * scale[1]);
     rect.SetSize(newSize);
     return rect;
+}
+
+void RosenRenderContext::GetPointWithTransform(PointF& point)
+{
+    // TODO: add rotation and center support
+    auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    auto scale = rsNode_->GetStagingProperties().GetScale();
+    point = PointF((point.GetX() - translate[0]) / scale[0], (point.GetY() - translate[1]) / scale[1]);
 }
 
 RectF RosenRenderContext::GetPaintRectWithoutTransform()
@@ -1578,9 +1586,13 @@ void RosenRenderContext::PaintOverlayText()
     auto& overlay = GetOrCreateOverlay();
     if (overlay->HasOverlayText()) {
         auto overlayText = overlay->GetOverlayTextValue();
-        auto modifier = std::make_shared<OverlayTextModifier>();
-        modifier->SetCustomData(NG::OverlayTextData(overlayText));
-        rsNode_->AddModifier(modifier);
+        if (modifier_) {
+            modifier_->SetCustomData(NG::OverlayTextData(overlayText));
+        } else {
+            modifier_ = std::make_shared<OverlayTextModifier>();
+            rsNode_->AddModifier(modifier_);
+            modifier_->SetCustomData(NG::OverlayTextData(overlayText));
+        }
     }
 }
 

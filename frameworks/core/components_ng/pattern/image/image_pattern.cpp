@@ -206,8 +206,7 @@ void ImagePattern::LoadImageDataIfNeed()
     UpdateInternalResource(currentSourceInfo);
     std::optional<Color> svgFillColorOpt = std::nullopt;
     if (currentSourceInfo.IsSvg()) {
-        svgFillColorOpt = imageRenderProperty->GetSvgFillColor().has_value() ? imageRenderProperty->GetSvgFillColor()
-                                                                             : currentSourceInfo.GetFillColor();
+        svgFillColorOpt = currentSourceInfo.GetFillColor();
     }
 
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != currentSourceInfo ||
@@ -360,8 +359,7 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->ClearDrawCommands();
-
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->FlushMessages();
 }

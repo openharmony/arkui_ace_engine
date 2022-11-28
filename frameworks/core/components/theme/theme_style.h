@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_STYLE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_STYLE_H
 
+#include <string>
 #include <type_traits>
 #include <unordered_map>
 #include <variant>

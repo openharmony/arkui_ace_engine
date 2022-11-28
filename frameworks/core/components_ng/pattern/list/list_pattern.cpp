@@ -77,9 +77,8 @@ void ListPattern::OnModifyDone()
     }
     SetScrollBar();
     auto focusHub = host->GetFocusHub();
-    if (focusHub) {
-        InitOnKeyEvent(focusHub);
-    }
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
 }
 
 bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -208,9 +207,8 @@ void ListPattern::CheckScrollable()
         }
     }
 
-    if (scrollableEvent_) {
-        scrollableEvent_->SetEnabled(scrollable_);
-    }
+    CHECK_NULL_VOID(scrollableEvent_);
+    scrollableEvent_->SetEnabled(scrollable_);
 }
 
 RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
@@ -397,10 +395,8 @@ void ListPattern::SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffe
         CHECK_NULL_VOID(springEffect);
         springEffect->SetOutBoundaryCallback([weak = AceType::WeakClaim(this)]() {
             auto list = weak.Upgrade();
-            if (list) {
-                return list->IsOutOfBoundary();
-            }
-            return false;
+            CHECK_NULL_RETURN(list, false);
+            return list->IsOutOfBoundary();
         });
         // add callback to springEdgeEffect
         SetEdgeEffectCallback(scrollEffect);
@@ -412,10 +408,8 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
 {
     scrollEffect->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
-        if (list) {
-            return list->startMainPos_ - list->currentDelta_;
-        }
-        return 0.0;
+        CHECK_NULL_RETURN(list, 0.0);
+        return list->startMainPos_ - list->currentDelta_;
     });
     scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
@@ -433,10 +427,8 @@ void ListPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        if (pattern) {
-            return pattern->OnKeyEvent(event);
-        }
-        return false;
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 }
@@ -506,10 +498,9 @@ void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
     auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(GetTotalOffset(), position, curve);
     animation->AddListener([weakScroll = AceType::WeakClaim(this)](float value) {
         auto list = weakScroll.Upgrade();
-        if (list) {
-            list->SetScrollState(SCROLL_FROM_JUMP);
-            list->UpdateCurrentOffset(list->GetTotalOffset() - value);
-        }
+        CHECK_NULL_VOID(list);
+        list->SetScrollState(SCROLL_FROM_JUMP);
+        list->UpdateCurrentOffset(list->GetTotalOffset() - value);
     });
     animator_->AddInterpolator(animation);
     animator_->SetDuration(static_cast<int32_t>(duration));
@@ -538,11 +529,9 @@ void ListPattern::ScrollToIndex(int32_t index, ScrollIndexAlignment align)
 void ListPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType)
 {
     LOGI("ScrollToEdge:%{public}zu", scrollEdgeType);
-    if (((scrollEdgeType == ScrollEdgeType::SCROLL_TOP) && GetDirection() == Axis::VERTICAL) ||
-        ((scrollEdgeType == ScrollEdgeType::SCROLL_LEFT) && GetDirection() == Axis::HORIZONTAL)) {
+    if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
         ScrollToIndex(0, ScrollIndexAlignment::ALIGN_TOP);
-    } else if (((scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) && GetDirection() == Axis::VERTICAL) ||
-        ((scrollEdgeType == ScrollEdgeType::SCROLL_RIGHT) && GetDirection() == Axis::HORIZONTAL)) {
+    } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
         ScrollToIndex(maxListItemIndex_, ScrollIndexAlignment::ALIGN_BUTTON);
     }
 }
@@ -602,9 +591,7 @@ void ListPattern::SetScrollBar()
 
 void ListPattern::UpdateScrollBarOffset()
 {
-    if (!scrollBar_) {
-        return;
-    }
+    CHECK_NULL_VOID(scrollBar_);
     if (itemPosition_.empty()) {
         return;
     }

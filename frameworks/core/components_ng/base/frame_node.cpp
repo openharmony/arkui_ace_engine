@@ -165,6 +165,10 @@ void FrameNode::DumpInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("Border: ").append(layoutProperty_->GetBorderWidthProperty()->ToString().c_str()));
     }
+    if (layoutProperty_->GetMarginProperty()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("Margin: ").append(layoutProperty_->GetMarginProperty()->ToString().c_str()));
+    }
     DumpLog::GetInstance().AddDesc(std::string("compid: ").append(propInspectorId_.value_or("")));
     DumpLog::GetInstance().AddDesc(std::string("ContentConstraint: ")
                                        .append(layoutProperty_->GetContentLayoutConstraint().has_value()
@@ -778,20 +782,18 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
     CHECK_NULL_VOID(context);
 
     if (CheckNeedRequestMeasureAndLayout(layoutFlag)) {
+        if (!isMeasureBoundary && IsNeedRequestParentMeasure()) {
+            auto parent = GetAncestorNodeOfFrame();
+            if (parent) {
+                parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+                return;
+            }
+        }
         if (isLayoutDirtyMarked_) {
             LOGD("MarkDirtyNode: isLayoutDirtyMarked is true");
             return;
         }
         isLayoutDirtyMarked_ = true;
-        if (!isMeasureBoundary && IsNeedRequestParentMeasure()) {
-            auto parent = GetAncestorNodeOfFrame();
-            if (parent) {
-                parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-            } else {
-                context->AddDirtyLayoutNode(Claim(this));
-            }
-            return;
-        }
         context->AddDirtyLayoutNode(Claim(this));
         return;
     }
@@ -895,7 +897,9 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     // etc.), the newComingTargets is the template object to collect child nodes gesture and used by gestureHub to
     // pack gesture group.
     TouchTestResult newComingTargets;
-    const auto localPoint = parentLocalPoint - paintRect.GetOffset();
+    auto tmp  = parentLocalPoint - paintRect.GetOffset();
+    renderContext_->GetPointWithTransform(tmp);
+    const auto localPoint = tmp;
     bool consumed = false;
     for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
         if (GetHitTestMode() == HitTestMode::HTMBLOCK) {

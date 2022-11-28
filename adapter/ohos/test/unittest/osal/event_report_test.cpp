@@ -12,8 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include <gtest/gtest.h>
+#include "adapter/ohos/test/unittest/mock/common.h"
 #include "adapter/ohos/test/unittest/mock/mock_event_report_data.h"
 #include "frameworks/core/common/ace_application_info.h"
 
@@ -57,10 +56,7 @@ void EventReportTest::TearDown()
  */
 HWTEST_F(EventReportTest, EventReportTest_SendEvent_001, TestSize.Level1)
 {
-    EXPECT_TRUE(eventReportData_);
-    if (!eventReportData_) {
-        return;
-    }
+    CHECK_PTR_NULL_VOID(eventReportData_);
     auto result = eventReportData_->SendEvent(EVENT_INFO);
     EXPECT_TRUE(result);
 }
@@ -72,10 +68,7 @@ HWTEST_F(EventReportTest, EventReportTest_SendEvent_001, TestSize.Level1)
  */
 HWTEST_F(EventReportTest, EventReportTest_SendEvent_002, TestSize.Level1)
 {
-    EXPECT_TRUE(eventReportData_);
-    if (!eventReportData_) {
-        return;
-    }
+    CHECK_PTR_NULL_VOID(eventReportData_);
     auto result = eventReportData_->SendEvent(EVENT_INFO);
     EXPECT_TRUE(result);
 }
@@ -87,10 +80,7 @@ HWTEST_F(EventReportTest, EventReportTest_SendEvent_002, TestSize.Level1)
  */
 HWTEST_F(EventReportTest, EventReportTest_SendJsCardRenderTimeEvent_001, TestSize.Level1)
 {
-    EXPECT_TRUE(eventReportData_);
-    if (!eventReportData_) {
-        return;
-    }
+    CHECK_PTR_NULL_VOID(eventReportData_);
     uint64_t timeDelay = 0;
     auto result = eventReportData_->SendJsCardRenderTimeEvent("sessionID", "timeType", timeDelay);
     EXPECT_TRUE(result);
@@ -103,10 +93,7 @@ HWTEST_F(EventReportTest, EventReportTest_SendJsCardRenderTimeEvent_001, TestSiz
  */
 HWTEST_F(EventReportTest, EventReportTest_SendComponentException_001, TestSize.Level1)
 {
-    EXPECT_TRUE(eventReportData_);
-    if (!eventReportData_) {
-        return;
-    }
+    CHECK_PTR_NULL_VOID(eventReportData_);
     auto result = eventReportData_->SendComponentException(ComponentExcepType::DOM_NODE_NOT_FOUND);
     EXPECT_TRUE(result);
 }
@@ -118,10 +105,7 @@ HWTEST_F(EventReportTest, EventReportTest_SendComponentException_001, TestSize.L
  */
 HWTEST_F(EventReportTest, EventReportTest_SendAPIChannelException_001, TestSize.Level1)
 {
-    EXPECT_TRUE(eventReportData_);
-    if (!eventReportData_) {
-        return;
-    }
+    CHECK_PTR_NULL_VOID(eventReportData_);
     auto result = eventReportData_->SendAPIChannelException(APIChannelExcepType::SET_FUNCTION_ERR);
     EXPECT_TRUE(result);
 }
@@ -133,10 +117,7 @@ HWTEST_F(EventReportTest, EventReportTest_SendAPIChannelException_001, TestSize.
  */
 HWTEST_F(EventReportTest, EventReportTest_SendJsException_001, TestSize.Level1)
 {
-    EXPECT_TRUE(eventReportData_);
-    if (!eventReportData_) {
-        return;
-    }
+    CHECK_PTR_NULL_VOID(eventReportData_);
     auto result = eventReportData_->SendJsException(JsExcepType::CREATE_DOM_BODY_ERR);
     EXPECT_TRUE(result);
 }
@@ -148,10 +129,7 @@ HWTEST_F(EventReportTest, EventReportTest_SendJsException_001, TestSize.Level1)
  */
 HWTEST_F(EventReportTest, EventReportTest_SendAnimationException_001, TestSize.Level1)
 {
-    EXPECT_TRUE(eventReportData_);
-    if (!eventReportData_) {
-        return;
-    }
+    CHECK_PTR_NULL_VOID(eventReportData_);
     auto result = eventReportData_->SendAnimationException(AnimationExcepType::ANIMATION_PAGE_ERR);
     EXPECT_TRUE(result);
 }
@@ -163,10 +141,7 @@ HWTEST_F(EventReportTest, EventReportTest_SendAnimationException_001, TestSize.L
  */
 HWTEST_F(EventReportTest, EventReportTest_SendInternalException_001, TestSize.Level1)
 {
-    EXPECT_TRUE(eventReportData_);
-    if (!eventReportData_) {
-        return;
-    }
+    CHECK_PTR_NULL_VOID(eventReportData_);
     auto result = eventReportData_->SendInternalException(InternalExcepType::CHANGE_LOCALE_ERR);
     EXPECT_TRUE(result);
 }
@@ -178,10 +153,7 @@ HWTEST_F(EventReportTest, EventReportTest_SendInternalException_001, TestSize.Le
  */
 HWTEST_F(EventReportTest, EventReportTest_SendAccessibilityException_001, TestSize.Level1)
 {
-    EXPECT_TRUE(eventReportData_);
-    if (!eventReportData_) {
-        return;
-    }
+    CHECK_PTR_NULL_VOID(eventReportData_);
     auto result = eventReportData_->SendAccessibilityException(AccessibilityExcepType::GET_NODE_ERR);
     EXPECT_TRUE(result);
 }
@@ -193,10 +165,7 @@ HWTEST_F(EventReportTest, EventReportTest_SendAccessibilityException_001, TestSi
  */
 HWTEST_F(EventReportTest, EventReportTest_SendFormException_001, TestSize.Level1)
 {
-    EXPECT_TRUE(eventReportData_);
-    if (!eventReportData_) {
-        return;
-    }
+    CHECK_PTR_NULL_VOID(eventReportData_);
     auto result = eventReportData_->SendFormException(FormExcepType::UPDATE_PAGE_ERR);
     EXPECT_TRUE(result);
 }
@@ -208,10 +177,7 @@ HWTEST_F(EventReportTest, EventReportTest_SendFormException_001, TestSize.Level1
  */
 HWTEST_F(EventReportTest, EventReportTest_JsEventReport_001, TestSize.Level1)
 {
-    EXPECT_TRUE(eventReportData_);
-    if (!eventReportData_) {
-        return;
-    }
+    CHECK_PTR_NULL_VOID(eventReportData_);
     int32_t eventType = -1;
     std::string jsonStr = "bundle_name: EventReportTest, test_dir: event_report_test,"
         "test_case: EventReportTest_JsEventReport_001";
@@ -226,10 +192,7 @@ HWTEST_F(EventReportTest, EventReportTest_JsEventReport_001, TestSize.Level1)
  */
 HWTEST_F(EventReportTest, EventReportTest_JsErrReport_001, TestSize.Level1)
 {
-    EXPECT_TRUE(eventReportData_);
-    if (!eventReportData_) {
-        return;
-    }
+    CHECK_PTR_NULL_VOID(eventReportData_);
     std::string packageName = "EventReportTest";
     std::string reason = "reason";
     std::string summary = "summary";
@@ -244,10 +207,7 @@ HWTEST_F(EventReportTest, EventReportTest_JsErrReport_001, TestSize.Level1)
  */
 HWTEST_F(EventReportTest, EventReportTest_ANRRawReport_001, TestSize.Level1)
 {
-    EXPECT_TRUE(eventReportData_);
-    if (!eventReportData_) {
-        return;
-    }
+    CHECK_PTR_NULL_VOID(eventReportData_);
     int32_t defalut_uid = 1000;
     auto result = eventReportData_->ANRRawReport(RawEventType::WARNING, defalut_uid, "EventReportTest",
         "EventReportTest", " ");
@@ -269,10 +229,7 @@ HWTEST_F(EventReportTest, EventReportTest_ANRRawReport_001, TestSize.Level1)
  */
 HWTEST_F(EventReportTest, EventReportTest_ANRShowDialog_001, TestSize.Level1)
 {
-    EXPECT_TRUE(eventReportData_);
-    if (!eventReportData_) {
-        return;
-    }
+    CHECK_PTR_NULL_VOID(eventReportData_);
     int32_t defalut_uid = 1000;
     auto result = eventReportData_->ANRShowDialog(defalut_uid, "EventReportTest", "EventReportTest", "");
     EXPECT_TRUE(result);

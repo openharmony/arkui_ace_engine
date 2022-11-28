@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 
+#include "base/utils/utils.h"
 #include "core/animation/curve_animation.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -36,10 +37,7 @@ void ScrollBar::InitTheme()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
-    if (theme == nullptr) {
-        LOGW("ScrollBarTheme is null");
-        return;
-    }
+    CHECK_NULL_VOID(theme);
     SetInactiveWidth(theme->GetNormalWidth());
     SetNormalWidth(theme->GetNormalWidth());
     SetActiveWidth(theme->GetActiveWidth());
@@ -185,10 +183,7 @@ double ScrollBar::CalcPatternOffset(double scrollBarOffset)
 double ScrollBar::NormalizeToPx(const Dimension& dimension) const
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (!pipelineContext) {
-        LOGE("NormalizeToPx failed");
-        return 0.0;
-    }
+    CHECK_NULL_RETURN(pipelineContext, 0.0);
     return pipelineContext->NormalizeToPx(dimension);
 }
 

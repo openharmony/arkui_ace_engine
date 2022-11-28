@@ -28,30 +28,26 @@ void ListEventHub::InitItemDragEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto eventHub = weak.Upgrade();
-        if (eventHub) {
-            eventHub->HandleOnItemDragStart(info);
-        }
+        CHECK_NULL_VOID(eventHub);
+        eventHub->HandleOnItemDragStart(info);
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto eventHub = weak.Upgrade();
-        if (eventHub) {
-            eventHub->HandleOnItemDragUpdate(info);
-        }
+        CHECK_NULL_VOID(eventHub);
+        eventHub->HandleOnItemDragUpdate(info);
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto eventHub = weak.Upgrade();
-        if (eventHub) {
-            eventHub->HandleOnItemDragEnd(info);
-        }
+        CHECK_NULL_VOID(eventHub);
+        eventHub->HandleOnItemDragEnd(info);
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto eventHub = weak.Upgrade();
-        if (eventHub) {
-            eventHub->HandleOnItemDragCancel();
-        }
+        CHECK_NULL_VOID(eventHub);
+        eventHub->HandleOnItemDragCancel();
     };
 
     auto dragEvent = MakeRefPtr<DragEvent>(

@@ -19,13 +19,18 @@
 
 #include "gtest/gtest.h"
 
+#include "base/memory/ace_type.h"
+
+#define private public
 #include "base/geometry/dimension.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/toggle_button_event_hub.h"
 #include "core/components_ng/pattern/button/toggle_button_paint_property.h"
+#include "core/components_ng/pattern/button/toggle_button_pattern.h"
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
+#include "core/components_ng/pattern/toggle/switch_event_hub.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 #include "core/components_ng/pattern/toggle/toggle_model.h"
@@ -96,6 +101,37 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest001, TestSize.Level1)
     EXPECT_FALSE(paintProperty == nullptr);
     EXPECT_EQ(paintProperty->GetCheckBoxSelect(), IS_ON);
     EXPECT_EQ(paintProperty->GetCheckBoxSelectedColor(), SELECTED_COLOR);
+    ViewStackProcessor::GetInstance()->ClearStack();
+
+    // update different toggle type
+    for (size_t i = 0; i < TOGGLE_TYPE.size(); ++i) {
+        ToggleModelNG toggleModelNG;
+        toggleModelNG.Create(TOGGLE_TYPE[1], IS_ON);
+
+        auto isOn = i % 2 == 0 ? true : false;
+        toggleModelNG.Create(TOGGLE_TYPE[i], isOn);
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        EXPECT_FALSE(frameNode == nullptr);
+
+        auto pattern = frameNode->GetPattern();
+        EXPECT_FALSE(pattern == nullptr);
+        if (AceType::InstanceOf<CheckBoxPattern>(pattern)) {
+            auto paintProperty = pattern->GetPaintProperty<CheckBoxPaintProperty>();
+            EXPECT_FALSE(paintProperty == nullptr);
+            EXPECT_EQ(paintProperty->GetCheckBoxSelect(), isOn);
+        }
+        if (AceType::InstanceOf<SwitchPattern>(pattern)) {
+            auto paintProperty = pattern->GetPaintProperty<SwitchPaintProperty>();
+            EXPECT_FALSE(paintProperty == nullptr);
+            EXPECT_EQ(paintProperty->GetIsOn(), isOn);
+        }
+        if (AceType::InstanceOf<ToggleButtonPattern>(pattern)) {
+            auto paintProperty = pattern->GetPaintProperty<ToggleButtonPaintProperty>();
+            EXPECT_FALSE(paintProperty == nullptr);
+            EXPECT_EQ(paintProperty->GetIsOn(), isOn);
+        }
+        ViewStackProcessor::GetInstance()->ClearStack();
+    }
 }
 
 /**
@@ -157,7 +193,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest003, TestSize.Level1)
 
 /**
  * @tc.name: TogglePatternTest004
- * @tc.desc: test  toggle created SetWidth SetHeight SetBackgroundColor.
+ * @tc.desc: test toggle created SetWidth SetHeight SetBackgroundColor.
  * @tc.type: FUNC
  */
 HWTEST_F(TogglePatternTestNg, TogglePatternTest004, TestSize.Level1)
@@ -189,7 +225,7 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest004, TestSize.Level1)
 
 /**
  * @tc.name: TogglePatternTest005
- * @tc.desc: Test event function of toggle with checkboc.
+ * @tc.desc: Test event function of toggle with checkbox.
  * @tc.type: FUNC
  */
 HWTEST_F(TogglePatternTestNg, TogglePatternTest005, TestSize.Level1)
@@ -200,16 +236,11 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest005, TestSize.Level1)
     ToggleModelNG toggleModelNG;
     toggleModelNG.Create(TOGGLE_TYPE[0], IS_ON);
     toggleModelNG.SetSelectedColor(SELECTED_COLOR);
-    auto checkBoxFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(checkBoxFrameNode == nullptr);
-    EXPECT_EQ(checkBoxFrameNode->GetTag(), V2::CHECKBOX_ETS_TAG);
 
     /**
-     * @tc.steps: step2. set bubble event.
+     * @tc.steps: step2. set toggle event.
      * @tc.expected: step2. function is called.
      */
-    auto eventHub = checkBoxFrameNode->GetEventHub<CheckBoxEventHub>();
-    EXPECT_FALSE(eventHub == nullptr);
     bool stateChange = true;
     auto onChange = [&stateChange](bool flag) { stateChange = flag; };
     toggleModelNG.OnChange(onChange);
@@ -218,6 +249,11 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest005, TestSize.Level1)
      * @tc.steps: step3. call the event entry function.
      * @tc.expected: step3. check whether the value is correct.
      */
+    auto checkBoxFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(checkBoxFrameNode == nullptr);
+    EXPECT_EQ(checkBoxFrameNode->GetTag(), V2::CHECKBOX_ETS_TAG);
+    auto eventHub = checkBoxFrameNode->GetEventHub<CheckBoxEventHub>();
+    EXPECT_FALSE(eventHub == nullptr);
     eventHub->UpdateChangeEvent(false);
     EXPECT_EQ(stateChange, false);
 
@@ -238,16 +274,11 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest006, TestSize.Level1)
     ToggleModelNG toggleModelNG;
     toggleModelNG.Create(TOGGLE_TYPE[1], IS_ON);
     toggleModelNG.SetSelectedColor(SELECTED_COLOR);
-    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(buttonFrameNode == nullptr);
-    EXPECT_EQ(buttonFrameNode->GetTag(), V2::TOGGLE_ETS_TAG);
 
     /**
-     * @tc.steps: step2. set bubble event.
+     * @tc.steps: step2. set toggle event.
      * @tc.expected: step2. function is called.
      */
-    auto eventHub = buttonFrameNode->GetEventHub<ToggleButtonEventHub>();
-    EXPECT_FALSE(eventHub == nullptr);
     bool stateChange = true;
     auto onChange = [&stateChange](bool flag) { stateChange = flag; };
     toggleModelNG.OnChange(onChange);
@@ -256,9 +287,50 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest006, TestSize.Level1)
      * @tc.steps: step3. call the event entry function.
      * @tc.expected: step3. check whether the value is correct.
      */
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(buttonFrameNode == nullptr);
+    EXPECT_EQ(buttonFrameNode->GetTag(), V2::TOGGLE_ETS_TAG);
+    auto eventHub = buttonFrameNode->GetEventHub<ToggleButtonEventHub>();
+    EXPECT_FALSE(eventHub == nullptr);
     eventHub->UpdateChangeEvent(false);
     EXPECT_EQ(stateChange, false);
 
+    eventHub->UpdateChangeEvent(true);
+    EXPECT_EQ(stateChange, true);
+}
+
+/**
+ * @tc.name: TogglePatternTest007
+ * @tc.desc: Test event function of toggle with switch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, TogglePatternTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    toggleModelNG.SetSelectedColor(SELECTED_COLOR);
+    toggleModelNG.SetSwitchPointColor(SWITCH_POINT_COLOR);
+
+    /**
+     * @tc.steps: step2. set toggle event.
+     * @tc.expected: step2. function is called.
+     */
+    bool stateChange = true;
+    auto onChange = [&stateChange](bool flag) { stateChange = flag; };
+    toggleModelNG.OnChange(onChange);
+
+    /**
+     * @tc.steps: step3. call the event entry function.
+     * @tc.expected: step3. check whether the value is correct.
+     */
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(switchFrameNode == nullptr);
+    EXPECT_EQ(switchFrameNode->GetTag(), V2::TOGGLE_ETS_TAG);
+    auto eventHub = switchFrameNode->GetEventHub<SwitchEventHub>();
+    EXPECT_FALSE(eventHub == nullptr);
     eventHub->UpdateChangeEvent(true);
     EXPECT_EQ(stateChange, true);
 }

@@ -25,6 +25,7 @@ class ACE_EXPORT BlankView {
 public:
     static void Create();
     static void SetBlankMin(const Dimension& blankMin);
+    static void SetHeight(const Dimension& height);
 };
 
 } // namespace OHOS::Ace::NG

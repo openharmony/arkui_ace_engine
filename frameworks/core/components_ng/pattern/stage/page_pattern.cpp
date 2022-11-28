@@ -125,6 +125,15 @@ void PagePattern::BuildSharedTransitionMap()
     IterativeAddToSharedMap(host, sharedTransitionMap_);
 }
 
+void PagePattern::ReloadPage()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto customNode = DynamicCast<CustomNodeBase>(host->GetFirstChild());
+    CHECK_NULL_VOID(customNode);
+    customNode->FireReloadFunction(true);
+}
+
 RefPtr<PageTransitionEffect> PagePattern::FindPageTransitionEffect(PageTransitionType type)
 {
     RefPtr<PageTransitionEffect> result;

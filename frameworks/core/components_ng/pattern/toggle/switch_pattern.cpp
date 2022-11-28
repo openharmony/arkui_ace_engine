@@ -160,7 +160,7 @@ RefPtr<Curve> SwitchPattern::GetCurve() const
 
 int32_t SwitchPattern::GetDuration() const
 {
-    const int32_t DEFAULT_DURATION = 400;
+    const int32_t DEFAULT_DURATION = 250;
     auto switchPaintProperty = GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_RETURN(switchPaintProperty, DEFAULT_DURATION);
     return switchPaintProperty->GetDuration().value_or(DEFAULT_DURATION);
@@ -191,12 +191,11 @@ void SwitchPattern::OnChange()
 
 float SwitchPattern::GetSwitchWidth() const
 {
-    const float switchGap = 2.0f;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
-    auto switchWidth = geometryNode->GetContentSize().Width() - geometryNode->GetContentSize().Height() + switchGap;
+    auto switchWidth = geometryNode->GetContentSize().Width() - geometryNode->GetContentSize().Height();
     return switchWidth;
 }
 
@@ -244,37 +243,33 @@ void SwitchPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGD("Pan event start");
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            if (info.GetInputEventType() == InputEventType::AXIS) {
-                return;
-            }
+        CHECK_NULL_VOID(pattern);
+        if (info.GetInputEventType() == InputEventType::AXIS) {
+            return;
         }
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragUpdate(info);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragUpdate(info);
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGD("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            if (info.GetInputEventType() == InputEventType::AXIS) {
-                return;
-            }
-            pattern->HandleDragEnd();
+        CHECK_NULL_VOID(pattern);
+        if (info.GetInputEventType() == InputEventType::AXIS) {
+            return;
         }
+        pattern->HandleDragEnd();
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         LOGD("Pan event cancel");
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragEnd();
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragEnd();
     };
 
     PanDirection panDirection;
@@ -342,9 +337,8 @@ void SwitchPattern::InitMouseEvent()
 
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleMouseEvent(isHover);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleMouseEvent(isHover);
     };
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnHoverEvent(mouseEvent_);

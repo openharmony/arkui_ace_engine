@@ -124,6 +124,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight) {}
 
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
 
+void PipelineContext::FlushReload() {}
+
 const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
 {
     if (selectOverlayManager_) {
@@ -203,4 +205,8 @@ const RefPtr<StageManager>& PipelineContext::GetStageManager()
 
 void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback) {}
 
+const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

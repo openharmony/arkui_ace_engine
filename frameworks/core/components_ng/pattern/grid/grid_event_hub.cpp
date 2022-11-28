@@ -148,6 +148,8 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
     dragDropProxy_ = manager->CreateAndShowDragWindow(customNode, info);
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->OnItemDragStart(info, GetFrameNode());
+    itemFrameNode->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+    draggingItem_ = itemFrameNode;
 }
 
 void GridEventHub::HandleOnItemDragUpdate(const GestureEvent& info)
@@ -171,6 +173,14 @@ void GridEventHub::HandleOnItemDragEnd(const GestureEvent& info)
     dragDropProxy_->DestroyDragWindow();
     dragDropProxy_ = nullptr;
     draggedIndex_ = 0;
+    if (draggingItem_) {
+        if (itemRemoved_) {
+            itemRemoved_ = false;
+        } else {
+            draggingItem_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+        }
+        draggingItem_ = nullptr;
+    }
 }
 
 void GridEventHub::HandleOnItemDragCancel()
@@ -184,6 +194,40 @@ void GridEventHub::HandleOnItemDragCancel()
     dragDropProxy_->DestroyDragWindow();
     dragDropProxy_ = nullptr;
     draggedIndex_ = 0;
+    if (draggingItem_) {
+        draggingItem_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+        draggingItem_ = nullptr;
+    }
 }
 
+void GridEventHub::FireOnItemDragEnter(const ItemDragInfo& dragInfo)
+{
+    if (draggingItem_) {
+        itemRemoved_ = false;
+    }
+    if (onItemDragEnter_) {
+        onItemDragEnter_(dragInfo);
+    }
+}
+
+void GridEventHub::FireOnItemDragLeave(const ItemDragInfo& dragInfo, int32_t itemIndex)
+{
+    if (draggingItem_) {
+        itemRemoved_ = true;
+    }
+    if (onItemDragLeave_) {
+        onItemDragLeave_(dragInfo, itemIndex);
+    }
+}
+
+void GridEventHub::FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess)
+{
+    if (draggingItem_ && !isSuccess) {
+        itemRemoved_ = false;
+        draggingItem_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+    }
+    if (onItemDrop_) {
+        onItemDrop_(dragInfo, itemIndex, insertIndex, isSuccess);
+    }
+}
 } // namespace OHOS::Ace::NG

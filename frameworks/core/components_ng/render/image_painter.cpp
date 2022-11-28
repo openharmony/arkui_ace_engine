@@ -111,9 +111,6 @@ void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const S
     const ImagePaintConfig& imagePaintConfig) const
 {
     CHECK_NULL_VOID(canvasImage_);
-    auto svgCanvasImage = AceType::DynamicCast<SvgCanvasImage>(canvasImage_);
-    CHECK_NULL_VOID(svgCanvasImage);
-    svgCanvasImage->SetSvgImageFit(imagePaintConfig.imageFit_);
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
 

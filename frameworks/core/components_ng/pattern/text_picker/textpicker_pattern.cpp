@@ -78,9 +78,8 @@ void TextPickerPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
-    if (focusHub) {
-        InitOnKeyEvent(focusHub);
-    }
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
 }
 
 void TextPickerPattern::OnColumnsBuilding()
@@ -217,32 +216,28 @@ void TextPickerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         LOGI("Pan event start");
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragStart(event);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragStart(event);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragMove(event);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragMove(event);
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            if (info.GetInputEventType() == InputEventType::AXIS) {
-                return;
-            }
-            pattern->HandleDragEnd();
+        CHECK_NULL_VOID(pattern);
+        if (info.GetInputEventType() == InputEventType::AXIS) {
+            return;
         }
+        pattern->HandleDragEnd();
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         LOGI("Pan event cancel");
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragEnd();
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragEnd();
     };
     PanDirection panDirection;
     panDirection.type = PanDirection::VERTICAL;
@@ -335,11 +330,8 @@ RefPtr<CurveAnimation<double>> TextPickerPattern::CreateAnimation(double from, d
     auto curve = AceType::MakeRefPtr<CurveAnimation<double>>(from, to, Curves::FRICTION);
     curve->AddListener(Animation<double>::ValueCallback([weak](double value) {
         auto column = weak.Upgrade();
-        if (column) {
-            column->ScrollOption(value);
-        } else {
-            LOGE("timepicker column is null.");
-        }
+        CHECK_NULL_VOID(column);
+        column->ScrollOption(value);
     }));
     return curve;
 }
@@ -516,10 +508,8 @@ void TextPickerPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        if (pattern) {
-            return pattern->OnKeyEvent(event);
-        }
-        return false;
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 }
