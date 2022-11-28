@@ -381,21 +381,8 @@ void AceAbility::SurfaceChanged(
         TaskExecutor::TaskType::PLATFORM);
     SystemProperties::InitDeviceInfo(
         width, height, orientation == DeviceOrientation::PORTRAIT ? 0 : 1, resolution, runArgs_.isRound);
-    DeviceConfig deviceConfig = runArgs_.deviceConfig;
-    deviceConfig.orientation = orientation;
-    deviceConfig.density = resolution;
-    container->UpdateDeviceConfig(deviceConfig);
     viewPtr->NotifyDensityChanged(resolution);
     viewPtr->NotifySurfaceChanged(width, height);
-    if ((orientation != runArgs_.deviceConfig.orientation && configChanges_.watchOrientation) ||
-        (resolution != runArgs_.deviceConfig.density && configChanges_.watchDensity) ||
-        ((width != runArgs_.deviceWidth || height != runArgs_.deviceHeight) && configChanges_.watchLayout)) {
-        container->NativeOnConfigurationUpdated(ACE_INSTANCE_ID);
-    }
-    runArgs_.deviceConfig.orientation = orientation;
-    runArgs_.deviceConfig.density = resolution;
-    runArgs_.deviceWidth = width;
-    runArgs_.deviceHeight = height;
 }
 
 void AceAbility::ReplacePage(const std::string& url, const std::string& params)
