@@ -87,14 +87,28 @@ HWTEST_F(RadioPatternTestNg, RadioPaintPropertyTest001, TestSize.Level1)
  */
 HWTEST_F(RadioPatternTestNg, RadioEventHubPropertyTest002, TestSize.Level1)
 {
+    /**
+     * @tc.cases: case1. RadioPattern can Create without value or group.
+     */
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.Create(std::nullopt, std::nullopt);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_FALSE(frameNode == nullptr);
     auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     EXPECT_FALSE(eventHub == nullptr);
-    EXPECT_EQ(eventHub->GetValue(), NAME);
-    EXPECT_EQ(eventHub->GetGroup(), GROUP_NAME);
+    EXPECT_TRUE(eventHub->GetValue().empty());
+    EXPECT_TRUE(eventHub->GetGroup().empty());
+    /**
+     * @tc.cases: case2. RadioPattern can Create with value and group.
+     */
+    RadioModelNG radioModelNG2;
+    radioModelNG2.Create(NAME, GROUP_NAME);
+    auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto eventHub2 = frameNode2->GetEventHub<NG::RadioEventHub>();
+    EXPECT_FALSE(eventHub2 == nullptr);
+    EXPECT_EQ(eventHub2->GetValue(), NAME);
+    EXPECT_EQ(eventHub2->GetGroup(), GROUP_NAME);
 }
 
 /**
