@@ -141,12 +141,12 @@ void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float popupPositionX = 0.0f;
     float popupPositionY = 0.0f;
     if (indexerLayoutProperty->GetPopupPositionX().has_value()) {
-        popupPositionX = indexerLayoutProperty->GetPopupPositionX().value() + itemSizeRender_ * half;
+        popupPositionX = indexerLayoutProperty->GetPopupPositionX().value();
     } else {
         if (alignStyle_ == NG::AlignStyle::LEFT) {
             popupPositionX = -NG::BUBBLE_POSITION_X + itemSizeRender_ * half;
         } else {
-            popupPositionX = NG::BUBBLE_POSITION_X + itemSizeRender_ * half;
+            popupPositionX = NG::BUBBLE_POSITION_X - itemSizeRender_ * half;
         }
     }
     popupPositionY = indexerLayoutProperty->GetPopupPositionY().value_or(NG::BUBBLE_POSITION_Y);
