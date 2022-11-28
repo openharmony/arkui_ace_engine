@@ -12,13 +12,14 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_config.gni")
 
 group("unittest") {
   testonly = true
-  deps = []
-  deps += [
-    "entrance:unittest",
-    "osal:unittest",
+  deps = [
+    "ace_application_info_test:unittest",
+    "ace_data_ability_test:unittest",
+    "ace_form_ability_test:unittest",
+    "entrance_utils_test:unittest",
+    "hap_asset_provider_test:unittest",
   ]
 }

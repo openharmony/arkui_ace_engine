@@ -11,14 +11,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-group("unittest") {
-  testonly = true
-  deps = []
-  deps += [
-    "entrance:unittest",
-    "osal:unittest",
-  ]
+if (is_standard_system) {
+  entrance_root_path = "ace_engine/adapter/ohos/entrance"
+} else {
+  entrance_root_path = "ace_engine_full/adapter/ohos/entrance"
 }
+
+entrance_mock_path = "$ace_root/adapter/ohos/test/unittest/entrance/mock"
+
+relational_store_napi_path =
+    "foundation/distributeddatamgr/relational_store/interfaces/inner_api"
