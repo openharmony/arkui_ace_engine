@@ -61,7 +61,7 @@ void SvgMask::OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const
 void SvgMask::OnInitStyle()
 {
     auto declaration = Ace::AceType::DynamicCast<SvgMaskDeclaration>(declaration_);
-    CHECK_NULL_VOID(declaration);
+    CHECK_NULL_VOID_NOLOG(declaration);
     isDefaultMaskUnits_ = (declaration->GetMaskUnits() == "objectBoundingBox");
     isDefaultMaskContentUnits_ = (declaration->GetMaskContentUnits() == "userSpaceOnUse");
     x_ = declaration->GetX();

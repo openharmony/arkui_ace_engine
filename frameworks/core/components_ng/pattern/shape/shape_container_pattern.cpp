@@ -36,7 +36,7 @@ void ShapeContainerPattern::ViewPortTansform()
     auto curFrameNode = GetHost();
     auto renderContext = curFrameNode->GetRenderContext();
     auto geoNode = curFrameNode->GetGeometryNode();
-    CHECK_NULL_VOID(geoNode);
+    CHECK_NULL_VOID_NOLOG(geoNode);
     SizeF sizeF = geoNode->GetContentSize();
     auto containerPaintProperty = curFrameNode->GetPaintProperty<ContainerPaintProperty>();
     if (containerPaintProperty->HasShapeViewBox() && containerPaintProperty->GetShapeViewBoxValue().IsValid()) {
@@ -62,7 +62,7 @@ void ShapeContainerPattern::OnModifyDone()
 
 void ShapeContainerPattern::MarkChildrenDirty(RefPtr<FrameNode> curentFrameNode)
 {
-    CHECK_NULL_VOID(curentFrameNode);
+    CHECK_NULL_VOID_NOLOG(curentFrameNode);
     if (curentFrameNode->GetChildren().empty()) {
         return;
     }

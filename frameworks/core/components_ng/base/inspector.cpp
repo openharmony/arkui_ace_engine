@@ -103,7 +103,7 @@ std::string Inspector::GetInspectorTree(bool isLayoutInspector)
     jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
 
     auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(context, jsonRoot->ToString());
+    CHECK_NULL_RETURN_NOLOG(context, jsonRoot->ToString());
     auto scale = context->GetViewScale();
     auto rootHeight = context->GetRootHeight();
     auto rootWidth = context->GetRootWidth();
@@ -112,7 +112,7 @@ std::string Inspector::GetInspectorTree(bool isLayoutInspector)
     jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
 
     auto root = context->GetRootElement();
-    CHECK_NULL_RETURN(root, jsonRoot->ToString());
+    CHECK_NULL_RETURN_NOLOG(root, jsonRoot->ToString());
 
     std::map<int32_t, std::list<RefPtr<UINode>>> depthElementMap;
     depthElementMap[0].emplace_back(root);
