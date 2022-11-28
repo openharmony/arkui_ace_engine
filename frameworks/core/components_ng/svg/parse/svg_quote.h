@@ -61,8 +61,8 @@ protected:
     {
         hrefFill_ = true;
         hrefRender_ = false;
-        childStyleTraversed_ = true;
-        styleTraversed_ = false;
+        passStyle_ = true;
+        inheritStyle_ = false;
         drawTraversed_ = false;
     }
 };
