@@ -147,9 +147,7 @@ void PluginPattern::InitPluginManagerDelegate()
         uiTaskExecutor.PostTask([id, data, weak] {
             auto plugin = weak.Upgrade();
             CHECK_NULL_VOID(plugin);
-            if (plugin) {
-                plugin->GetPluginSubContainer()->UpdatePlugin(data);
-            }
+            plugin->GetPluginSubContainer()->UpdatePlugin(data);
         });
     });
     pluginManagerBridge_->AddPluginErrorCallback(
@@ -279,9 +277,8 @@ void PluginPattern::OnActionEvent(const std::string& action) const
         return;
     }
 
-    if (pluginManagerBridge_) {
-        pluginManagerBridge_->OnActionEvent(action);
-    }
+    CHECK_NULL_VOID(pluginManagerBridge_);
+    pluginManagerBridge_->OnActionEvent(action);
 }
 
 bool PluginPattern::ISAllowUpdate() const
@@ -329,11 +326,7 @@ std::string PluginPattern::GetPackagePathByWant(const WeakPtr<PluginPattern>& we
 {
     std::string packagePathStr;
     auto pluginPattern = weak.Upgrade();
-    if (!pluginPattern) {
-        LOGE("pluginPattern is nullptr.");
-        return packagePathStr;
-    }
-
+    CHECK_NULL_RETURN(pluginPattern, packagePathStr);
     std::vector<std::string> strList;
     pluginPattern->SplitString(info.bundleName, '/', strList);
 
@@ -354,9 +347,7 @@ std::string PluginPattern::GetPackagePathByAbsolutePath(
 {
     std::string packagePathStr;
     auto pluginPattern = weak.Upgrade();
-    if (!pluginPattern) {
-        return packagePathStr;
-    }
+    CHECK_NULL_RETURN(pluginPattern, packagePathStr);
     std::string assets = "assets/js/";
     size_t posAssets = info.pluginName.rfind(assets);
     if (posAssets != std::string::npos) {
@@ -382,11 +373,7 @@ std::string PluginPattern::GetPackagePathByAbsolutePath(
 void PluginPattern::GetModuleNameByWant(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info) const
 {
     auto pluginPattern = weak.Upgrade();
-    if (!pluginPattern) {
-        LOGE("pluginPattern is nullptr.");
-        return;
-    }
-
+    CHECK_NULL_VOID(pluginPattern);
     std::vector<std::string> strList;
     pluginPattern->SplitString(info.pluginName, '&', strList);
     if (strList.empty()) {
@@ -414,10 +401,7 @@ std::string PluginPattern::GerPackagePathByBms(const WeakPtr<PluginPattern>& wea
 {
     std::string packagePathStr;
     auto pluginPattern = weak.Upgrade();
-    if (!pluginPattern) {
-        LOGE("pluginPattern is nullptr.");
-        return packagePathStr;
-    }
+    CHECK_NULL_RETURN(pluginPattern, packagePathStr);
     auto bms = PluginComponentManager::GetInstance()->GetBundleManager();
     if (!bms) {
         LOGE("Bms bundleManager is nullptr.");

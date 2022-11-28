@@ -243,37 +243,33 @@ void SwitchPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGD("Pan event start");
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            if (info.GetInputEventType() == InputEventType::AXIS) {
-                return;
-            }
+        CHECK_NULL_VOID(pattern);
+        if (info.GetInputEventType() == InputEventType::AXIS) {
+            return;
         }
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragUpdate(info);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragUpdate(info);
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGD("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            if (info.GetInputEventType() == InputEventType::AXIS) {
-                return;
-            }
-            pattern->HandleDragEnd();
+        CHECK_NULL_VOID(pattern);
+        if (info.GetInputEventType() == InputEventType::AXIS) {
+            return;
         }
+        pattern->HandleDragEnd();
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         LOGD("Pan event cancel");
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragEnd();
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragEnd();
     };
 
     PanDirection panDirection;
@@ -341,9 +337,8 @@ void SwitchPattern::InitMouseEvent()
 
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleMouseEvent(isHover);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleMouseEvent(isHover);
     };
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnHoverEvent(mouseEvent_);
