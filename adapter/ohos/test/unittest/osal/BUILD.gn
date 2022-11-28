@@ -82,6 +82,18 @@ ohos_unittest("ExceptionHandlerTest") {
   part_name = ace_engine_part
 }
 
+ohos_unittest("FrameReportTest") {
+  module_out_path = module_output_path
+
+  sources = [ "frame_report_test.cpp" ]
+
+  configs = [ "$ace_root:ace_test_config" ]
+
+  deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
+
+  part_name = ace_engine_part
+}
+
 group("unittest") {
   testonly = true
   deps = []
@@ -90,6 +102,7 @@ group("unittest") {
     ":AnrThreadTest",
     ":EventReportTest",
     ":ExceptionHandlerTest",
+    ":FrameReportTest",
   ]
 
   if (accessibility_enable) {
