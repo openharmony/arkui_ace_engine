@@ -200,4 +200,9 @@ const RefPtr<StageManager>& PipelineContext::GetStageManager()
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
     return stageManager_;
 }
+
+const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG
