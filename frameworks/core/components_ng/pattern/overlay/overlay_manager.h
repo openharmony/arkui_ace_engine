@@ -60,12 +60,10 @@ public:
         return popupMap_[targetId];
     }
 
-    void ShowMenu(
-        int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr, bool isContextMenu = false);
+    void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void HideMenu(int32_t targetId);
     void DeleteMenu(int32_t targetId);
-    void ShowMenuInSubWindow(int32_t targetId, bool isMenu = true, const NG::OffsetF& offset = NG::OffsetF(),
-        RefPtr<FrameNode> menu = nullptr, bool isContextMenu = false);
+    void ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void CleanMenuInSubWindow();
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
@@ -86,15 +84,22 @@ public:
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);
 
     /**  pop overlays (if any) on back press
-    *
-    *    @return    true if popup was removed, false if no overlay exists
-    */
+     *
+     *   @return    true if popup was removed, false if no overlay exists
+     */
     bool RemoveOverlay();
 
 private:
     void PopToast();
 
     WeakPtr<FrameNode> toast_;
+
+    /**  find/register menu node and update menu's display position
+     *
+     *   @return     true if process is successful
+     */
+    bool ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset);
+
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     // K: target frameNode ID, V: menuNode
