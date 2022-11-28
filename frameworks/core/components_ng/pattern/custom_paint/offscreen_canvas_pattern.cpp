@@ -291,12 +291,10 @@ void OffscreenCanvasPattern::SetMiterLimit(double limit)
 void OffscreenCanvasPattern::SetTextAlign(TextAlign align)
 {
     offscreenPaintMethod_->SetTextAlign(align);
-    offscreenPaintMethod_->SetTextAlign(align);
 }
 
 void OffscreenCanvasPattern::SetTextBaseline(TextBaseline baseline)
 {
-    offscreenPaintMethod_->SetTextBaseline(baseline);
     offscreenPaintMethod_->SetTextBaseline(baseline);
 }
 
@@ -348,24 +346,20 @@ void OffscreenCanvasPattern::SetStrokeColor(const Color& color)
 void OffscreenCanvasPattern::SetFontWeight(FontWeight weight)
 {
     offscreenPaintMethod_->SetFontWeight(weight);
-    offscreenPaintMethod_->SetFontWeight(weight);
 }
 
 void OffscreenCanvasPattern::SetFontStyle(FontStyle style)
 {
-    offscreenPaintMethod_->SetFontStyle(style);
     offscreenPaintMethod_->SetFontStyle(style);
 }
 
 void OffscreenCanvasPattern::SetFontFamilies(const std::vector<std::string>& fontFamilies)
 {
     offscreenPaintMethod_->SetFontFamilies(fontFamilies);
-    offscreenPaintMethod_->SetFontFamilies(fontFamilies);
 }
 
 void OffscreenCanvasPattern::SetFontSize(const Dimension& size)
 {
-    offscreenPaintMethod_->SetFontSize(size);
     offscreenPaintMethod_->SetFontSize(size);
 }
 

@@ -31,7 +31,7 @@ RefPtr<CustomPaintPattern> CustomPaintView::Create()
         V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CustomPaintPattern>(); });
     stack->Push(frameNode);
     auto pattern = frameNode->GetPattern<CustomPaintPattern>();
-    return pattern ? pattern : nullptr;
+    return pattern;
 }
 
 void CustomPaintView::SetOnReady(ReadyEvent&& onReady)
