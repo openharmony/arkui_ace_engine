@@ -41,8 +41,6 @@ public:
         value->propColor_ = CloneColor();
         value->propSelectedColor_ = CloneSelectedColor();
         value->propPopupColor_ = ClonePopupColor();
-        value->propSelectedBackgroundColor_ = CloneSelectedBackgroundColor();
-        value->propPopupBackground_ = ClonePopupBackground();
         value->propUsingPopup_ = CloneUsingPopup();
         value->propSelectedFont_ = CloneSelectedFont();
         value->propPopupFont_ = ClonePopupFont();
@@ -62,8 +60,6 @@ public:
         ResetColor();
         ResetSelectedColor();
         ResetPopupColor();
-        ResetSelectedBackgroundColor();
-        ResetPopupBackground();
         ResetUsingPopup();
         ResetSelectedFont();
         ResetPopupFont();
@@ -81,9 +77,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Color, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupColor, Color, PROPERTY_UPDATE_MEASURE);
-    // TODO: selectedBackground和popupBackground需要放到PAINT_PROPERTY
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedBackgroundColor, Color, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupBackground, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UsingPopup, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedFont, TextStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupFont, TextStyle, PROPERTY_UPDATE_MEASURE);

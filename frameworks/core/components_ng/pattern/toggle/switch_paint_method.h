@@ -39,9 +39,10 @@ private:
 
     void DrawTouchBoard(RSCanvas& canvas, const OffsetF& offset) const;
     void DrawHoverBoard(RSCanvas& canvas, const OffsetF& offset) const;
+    float GetSwitchWidth(const SizeF& contentSize) const;
     float mainDelta_ = 0.0f;
-    float defaltWidth_ = 0.0f;
-    float defaultHeight_ = 0.0f;
+    float actualWidth_ = 0.0f;
+    float actualHeight_ = 0.0f;
     float pointRadius_ = 0.0f;
     const float radiusGap_ = 2.0f;
     bool enabled_ = true;

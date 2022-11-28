@@ -61,6 +61,9 @@ CanvasDrawFunction SliderPaintMethod::GetContentDrawFunction(PaintWrapper* paint
         canvas.AttachPen(circle.pen);
         canvas.DrawCircle(ToRSPonit(circle.center), circle.radius);
         canvas.DetachPen();
+        canvas.AttachPen(circle.shadowPen);
+        canvas.DrawCircle(ToRSPonit(circle.center), circle.shadowRadius);
+        canvas.DetachPen();
     };
 }
 
@@ -184,6 +187,12 @@ SliderPaintMethod::CirclePenAndSize SliderPaintMethod::GetCirclePen(
                     offset.GetY() + parameters_.borderBlank + parameters_.sliderLength - sliderSelectLength);
     }
     circlePenAndSize.radius = parameters_.blockDiameter * HALF * HALF;
+
+    circlePenAndSize.shadowPen.SetColor(ToRSColor(theme->GetBlockHoverColor()));
+    auto shadowWidth = parameters_.hotFlag ? static_cast<float>(HOT_CIRCLE_SHADOW_WIDTH.ConvertToPx())
+                                           : static_cast<float>(CIRCLE_SHADOW_WIDTH.ConvertToPx());
+    circlePenAndSize.shadowPen.SetWidth(shadowWidth);
+    circlePenAndSize.shadowRadius = (parameters_.blockDiameter + shadowWidth) * HALF;
     return circlePenAndSize;
 }
 
