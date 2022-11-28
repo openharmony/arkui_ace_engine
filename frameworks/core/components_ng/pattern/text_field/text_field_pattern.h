@@ -408,12 +408,12 @@ private:
     TextStyle lineHeightMeasureUtilTextStyle_;
     std::shared_ptr<RSParagraph> lineHeightMeasureUtilParagraph_;
 
-    RefPtr<ImageLoadingContext> ShowPasswordImageLoadingCtx_;
-    RefPtr<ImageLoadingContext> HidePasswordImageLoadingCtx_;
+    RefPtr<ImageLoadingContext> showPasswordImageLoadingCtx_;
+    RefPtr<ImageLoadingContext> hidePasswordImageLoadingCtx_;
 
     // password icon image related
-    RefPtr<CanvasImage> ShowPasswordImageCanvas_;
-    RefPtr<CanvasImage> HidePasswordImageCanvas_;
+    RefPtr<CanvasImage> showPasswordImageCanvas_;
+    RefPtr<CanvasImage> hidePasswordImageCanvas_;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
