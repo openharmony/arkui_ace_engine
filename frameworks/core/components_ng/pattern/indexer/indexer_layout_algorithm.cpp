@@ -34,7 +34,6 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto indexerLayoutProperty = AceType::DynamicCast<IndexerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(indexerLayoutProperty);
-
     if (indexerLayoutProperty->GetArrayValue().has_value()) {
         arrayValue_ = indexerLayoutProperty->GetArrayValue().value();
         itemCount_ = arrayValue_.size();
@@ -43,7 +42,6 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         selected_ = indexerLayoutProperty->GetSelected().value();
     }
     isInitialized_ = true;
-
     LayoutConstraintF layoutConstraint;
     if (indexerLayoutProperty->GetLayoutConstraint().has_value()) {
         layoutConstraint = indexerLayoutProperty->GetLayoutConstraint().value();
@@ -52,9 +50,12 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     usingPopup_ = indexerLayoutProperty->GetUsingPopup().value_or(false);
     auto itemSize = indexerLayoutProperty->GetItemSize().value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP));
-    itemSize_ = ConvertToPx(itemSize, layoutConstraint.scaleProperty, maxSize.Height()).value();
+    if (GreatNotEqual(itemSize.ConvertToPx(), 0.0)) {
+        itemSize_ = ConvertToPx(itemSize, layoutConstraint.scaleProperty, maxSize.Height()).value();
+    } else {
+        itemSize_ = 0.0f;
+    }
     alignStyle_ = indexerLayoutProperty->GetAlignStyle().value_or(NG::AlignStyle::RIGHT);
-
     if (itemCount_ <= 0) {
         LOGE("AlphabetIndexer arrayValue size is less than 0");
         return;

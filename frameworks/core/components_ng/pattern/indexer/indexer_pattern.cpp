@@ -403,6 +403,7 @@ void IndexerPattern::ApplyIndexChanged()
                 paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSeclectedBackgroundColor()));
             auto randius = indexerTheme->GetHoverRadiusSize_();
             childRenderContext->UpdateBorderRadius({ randius, randius, randius, randius });
+            childRenderContext->SetClipToFrame(true);
             auto selectedFont = layoutProperty->GetSelectedFont().value_or(indexerTheme->GetSelectTextStyle());
             nodeLayoutProperty->UpdateFontSize(selectedFont.GetFontSize());
             auto fontWeight = selectedFont.GetFontWeight();
@@ -473,8 +474,6 @@ void IndexerPattern::ApplyIndexChanged()
                     auto listItemNode = FrameNode::GetOrCreateFrameNode(
                         V2::LIST_ITEM_ETS_TAG, -1, []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr); });
                     listItemNode->AddChild(textNode);
-                    auto listItemRenderContext = listItemNode->GetRenderContext();
-                    listItemRenderContext->SetClipToFrame(true);
                     listItemNode->MarkModifyDone();
                     listNode->AddChild(listItemNode);
                     popupDataIndex++;
