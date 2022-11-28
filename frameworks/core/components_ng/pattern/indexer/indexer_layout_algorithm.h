@@ -28,7 +28,7 @@ class ACE_EXPORT IndexerLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(IndexerLayoutAlgorithm, LayoutAlgorithm);
 
 public:
-    IndexerLayoutAlgorithm(int32_t popupSize) : popupSize_(popupSize) {}
+    IndexerLayoutAlgorithm(uint32_t popupSize) : popupSize_(popupSize) {}
 
     ~IndexerLayoutAlgorithm() override = default;
 
@@ -66,7 +66,7 @@ private:
 
     std::vector<std::string> arrayValue_;
     bool isInitialized_ = false;
-    int32_t popupSize_ = 0;
+    uint32_t popupSize_ = 0;
     int32_t itemCount_ = 0;
     int32_t selected_ = 0;
     bool usingPopup_ = false;
