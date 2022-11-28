@@ -309,8 +309,11 @@ void CheckBoxPattern::UpdateState()
     bool isSelected = false;
     if (paintProperty->HasCheckBoxSelect()) {
         isSelected = paintProperty->GetCheckBoxSelectValue();
-        UpdateUIStatus(isSelected);
-        UpdateAnimation(isSelected);
+        if (lastSelect_ != isSelected) {
+            UpdateUIStatus(isSelected);
+            UpdateAnimation(isSelected);
+            SetLastSelect(isSelected);
+        }
     }
     UpdateCheckBoxGroupStatus(host, checkBoxGroupMap, isSelected);
 }

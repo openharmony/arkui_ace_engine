@@ -409,6 +409,7 @@ void CheckBoxGroupPattern::UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNo
                     auto pattern = node->GetPattern<CheckBoxPattern>();
                     pattern->UpdateUIStatus(select);
                     pattern->UpdateAnimation(select);
+                    pattern->SetLastSelect(select);
                     eventHub->UpdateChangeEvent(select);
                 }
             }
@@ -417,6 +418,7 @@ void CheckBoxGroupPattern::UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNo
                 auto pattern = node->GetPattern<CheckBoxPattern>();
                 pattern->UpdateUIStatus(select);
                 pattern->UpdateAnimation(select);
+                pattern->SetLastSelect(select);
                 eventHub->UpdateChangeEvent(select);
             }
         }
