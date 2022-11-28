@@ -357,21 +357,6 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         }
         jsEngine->OnNewWant(data);
     };
-    const auto& onActiveCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
-        auto jsEngine = weakEngine.Upgrade();
-        if (!jsEngine) {
-            return;
-        }
-        jsEngine->OnActive();
-    };
-
-    const auto& onInactiveCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
-        auto jsEngine = weakEngine.Upgrade();
-        if (!jsEngine) {
-            return;
-        }
-        jsEngine->OnInactive();
-    };
 
     const auto& onConfigurationUpdatedCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                                      const std::string& data) {
@@ -478,9 +463,8 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
         timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback, onWindowDisplayModeChangedCallBack,
         onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack, onRestoreAbilityStateCallBack, onNewWantCallBack,
-        onActiveCallBack, onInactiveCallBack, onMemoryLevelCallBack, onStartContinuationCallBack,
-        onCompleteContinuationCallBack, onRemoteTerminatedCallBack, onSaveDataCallBack, onRestoreDataCallBack,
-        externalEventCallback);
+        onMemoryLevelCallBack, onStartContinuationCallBack, onCompleteContinuationCallBack, onRemoteTerminatedCallBack,
+        onSaveDataCallBack, onRestoreDataCallBack, externalEventCallback);
     if (disallowPopLastPage_) {
         delegate_->DisallowPopLastPage();
     }
@@ -675,23 +659,10 @@ void DeclarativeFrontend::LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, st
 
 void DeclarativeFrontend::UpdateState(Frontend::State state)
 {
-    if (!delegate_) {
+    if (!delegate_ || state == Frontend::State::ON_CREATE) {
         return;
     }
-    switch (state) {
-        case Frontend::State::ON_CREATE:
-            break;
-        case Frontend::State::ON_SHOW:
-        case Frontend::State::ON_HIDE:
-            delegate_->UpdateApplicationState(delegate_->GetAppID(), state);
-            break;
-        case Frontend::State::ON_DESTROY:
-            delegate_->OnApplicationDestroy(delegate_->GetAppID());
-            break;
-        default:
-            LOGE("error State: %d", state);
-            break;
-    }
+    delegate_->UpdateApplicationState(delegate_->GetAppID(), state);
 }
 
 void DeclarativeFrontend::OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data)
@@ -774,18 +745,11 @@ void DeclarativeFrontend::OnActive()
 {
     if (delegate_) {
         foregroundFrontend_ = true;
-        delegate_->OnActive();
         delegate_->InitializeAccessibilityCallback();
     }
 }
 
-void DeclarativeFrontend::OnInactive()
-{
-    if (delegate_) {
-        delegate_->OnInactive();
-        delegate_->OnSuspended();
-    }
-}
+void DeclarativeFrontend::OnInactive() {}
 
 bool DeclarativeFrontend::OnStartContinuation()
 {
