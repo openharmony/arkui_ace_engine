@@ -184,7 +184,9 @@ void ImageProvider::MakeCanvasImageHelper(const WeakPtr<ImageObject>& objWp, con
     CHECK_NULL_VOID(obj && renderTaskHolder);
     auto flutterRenderTaskHolder = DynamicCast<FlutterRenderTaskHolder>(renderTaskHolder);
     CHECK_NULL_VOID(flutterRenderTaskHolder);
-    ImageProvider::PrepareImageData(obj, loadCallbacks.loadFailCallback_, sync);
+    if (!ImageProvider::PrepareImageData(obj, loadCallbacks.loadFailCallback_, sync)) {
+        return;
+    };
     // resize image
     auto skiaImageData = DynamicCast<SkiaImageData>(obj->GetData());
     CHECK_NULL_VOID(skiaImageData && skiaImageData->GetSkData());
