@@ -247,6 +247,12 @@ void CanvasTaskPool::BeginPath()
     PushTask(task);
 }
 
+void CanvasTaskPool::ResetTransform()
+{
+    auto task = [](RenderCustomPaint& interface, const Offset& offset) { interface.ResetTransform(); };
+    PushTask(task);
+}
+
 void CanvasTaskPool::ClosePath()
 {
     auto task = [](RenderCustomPaint& interface, const Offset& offset) { interface.ClosePath(); };

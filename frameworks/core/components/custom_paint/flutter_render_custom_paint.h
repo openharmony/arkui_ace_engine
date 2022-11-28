@@ -73,6 +73,7 @@ public:
     void ClosePath() override;
     void Restore() override;
     void Save() override;
+    void ResetTransform() override;
     void Rotate(double angle) override;
     void Scale(double x, double y) override;
     void SetTransform(const TransformParam& param) override;

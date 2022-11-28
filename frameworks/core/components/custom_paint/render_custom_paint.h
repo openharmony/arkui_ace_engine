@@ -96,6 +96,7 @@ public:
     virtual void Clip() = 0;
     virtual void Clip(const RefPtr<CanvasPath2D>& path) = 0;
     virtual void BeginPath() = 0;
+    virtual void ResetTransform() = 0;
     virtual void ClosePath() = 0;
 
     // in render node, restore and save are used for clip and matrix operation
