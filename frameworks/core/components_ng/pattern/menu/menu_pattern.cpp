@@ -52,7 +52,7 @@ void MenuPattern::OnModifyDone()
 // close menu on touch up
 void MenuPattern::RegisterOnClick()
 {
-    auto event = [targetId = targetId_, isContextMenu = isContextMenu_](const TouchEventInfo& info) {
+    auto event = [targetId = targetId_, isContextMenu = IsContextMenu()](const TouchEventInfo& info) {
         auto touches = info.GetTouches();
         if (touches.empty() || touches.front().GetTouchType() != TouchType::UP) {
             return;
