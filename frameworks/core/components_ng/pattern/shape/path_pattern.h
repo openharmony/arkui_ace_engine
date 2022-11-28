@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/shape/path_layout_algorithm.h"
 #include "core/components_ng/pattern/shape/path_paint_method.h"
 #include "core/components_ng/pattern/shape/path_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_layout_algorithm.h"
@@ -42,6 +43,11 @@ public:
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
         return MakeRefPtr<PathPaintProperty>();
+    }
+
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<PathLayoutAlgorithm>();
     }
 
 private:
