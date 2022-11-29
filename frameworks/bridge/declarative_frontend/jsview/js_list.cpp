@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/list/list_model.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 
 namespace OHOS::Ace {
 
@@ -82,9 +83,13 @@ void JSList::SetScroller(RefPtr<JSScroller> scroller)
         scroller->SetController(listController);
 
         // Init scroll bar proxy.
-        auto proxy = AceType::DynamicCast<ScrollBarProxy>(scroller->GetScrollBarProxy());
+        auto proxy = scroller->GetScrollBarProxy();
         if (!proxy) {
-            proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+            if (Container::IsCurrentUseNewPipeline()) {
+                proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+            } else {
+                proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+            }
             scroller->SetScrollBarProxy(proxy);
         }
         ListModel::GetInstance()->SetScroller(listController, proxy);
