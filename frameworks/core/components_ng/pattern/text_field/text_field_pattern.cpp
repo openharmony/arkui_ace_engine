@@ -189,10 +189,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     auto textFieldLayoutAlgorithm = DynamicCast<TextFieldLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(textFieldLayoutAlgorithm, false);
     auto paragraph = textFieldLayoutAlgorithm->GetParagraph();
-    if (!paragraph) {
-        LOGD("OnDirtyLayoutWrapperSwap paragraph is null");
-        return false;
-    }
+    CHECK_NULL_RETURN(paragraph, false);
     paragraph_ = paragraph;
     textRect_ = textFieldLayoutAlgorithm->GetTextRect();
     imageRect_ = textFieldLayoutAlgorithm->GetImageRect();
@@ -568,10 +565,7 @@ bool TextFieldPattern::ComputeOffsetForCaretDownstream(
 
 int32_t TextFieldPattern::ConvertTouchOffsetToCaretPosition(const Offset& localOffset)
 {
-    if (!paragraph_) {
-        LOGW("Paragraph is empty");
-        return 0;
-    }
+    CHECK_NULL_RETURN(paragraph_, 0);
     return static_cast<int32_t>(
         paragraph_->GetGlyphPositionAtCoordinateWithCluster(localOffset.GetX(), localOffset.GetY()).pos_);
 }
@@ -599,9 +593,8 @@ void TextFieldPattern::InitFocusEvent()
     auto focusHub = host->GetOrCreateFocusHub();
     auto blurTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleBlurEvent();
-        }
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleBlurEvent();
     };
     focusHub->SetOnBlurInternal(blurTask);
 
@@ -789,9 +782,7 @@ void TextFieldPattern::HandleOnPaste()
             return;
         }
         auto textfield = weak.Upgrade();
-        if (!textfield) {
-            return;
-        }
+        CHECK_NULL_VOID_NOLOG(textfield);
         auto layoutProperty = textfield->GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) == CopyOptions::None) {
@@ -976,9 +967,8 @@ void TextFieldPattern::InitTouchEvent()
     CHECK_NULL_VOID(gesture);
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleTouchEvent(info);
-        }
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleTouchEvent(info);
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gesture->AddTouchEvent(touchListener_);
@@ -1046,16 +1036,12 @@ void TextFieldPattern::ScheduleCursorTwinkling()
     auto weak = WeakClaim(this);
     cursorTwinklingTask_.Reset([weak] {
         auto client = weak.Upgrade();
-        if (client) {
-            client->OnCursorTwinkling();
-        }
+        CHECK_NULL_VOID_NOLOG(client);
+        client->OnCursorTwinkling();
     });
     auto taskExecutor = context->GetTaskExecutor();
-    if (taskExecutor) {
-        taskExecutor->PostDelayedTask(cursorTwinklingTask_, TaskExecutor::TaskType::UI, twinklingInterval_);
-    } else {
-        LOGE("the task executor is nullptr");
-    }
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(cursorTwinklingTask_, TaskExecutor::TaskType::UI, twinklingInterval_);
 }
 
 void TextFieldPattern::StartTwinkling()
@@ -1283,9 +1269,7 @@ void TextFieldPattern::OnDetachFromFrameNode(FrameNode* node)
 
 void TextFieldPattern::CloseSelectOverlay()
 {
-    if (!selectOverlayProxy_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);
     selectOverlayProxy_->Close();
 }
 

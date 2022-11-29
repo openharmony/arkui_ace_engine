@@ -22,6 +22,7 @@
 
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -42,10 +43,7 @@ ThumbnailNapiEntry GetThumbnailNapiEntry()
 #endif
         auto napiPluginPath = prefix.append(napiPluginName);
         void* handle = dlopen(napiPluginPath.c_str(), RTLD_LAZY);
-        if (handle == nullptr) {
-            LOGE("Failed to open shared library %{public}s, reason: %{public}s", napiPluginPath.c_str(), dlerror());
-            return nullptr;
-        }
+        CHECK_NULL_RETURN(handle, nullptr);
         thumbnailNapiEntry = reinterpret_cast<ThumbnailNapiEntry>(dlsym(handle, "OHOS_MEDIA_NativeGetThumbnail"));
         if (thumbnailNapiEntry == nullptr) {
             dlclose(handle);
@@ -69,20 +67,11 @@ DataAbilityHelperStandard::DataAbilityHelperStandard(const std::shared_ptr<OHOS:
         dataAbilityThumbnailQueryImpl_ = [runtimeContextWp = runtimeContext_](
                                              const std::string& uri) -> std::unique_ptr<Media::PixelMap> {
             ThumbnailNapiEntry thumbnailNapiEntry = GetThumbnailNapiEntry();
-            if (!thumbnailNapiEntry) {
-                LOGE("thumbnailNapiEntry is null");
-                return nullptr;
-            }
+            CHECK_NULL_RETURN(thumbnailNapiEntry, nullptr);
             auto runtimeContextSptr = runtimeContextWp.lock();
-            if (runtimeContextSptr == nullptr) {
-                LOGE("runtimeContext lock fail, uri: %{private}s", uri.c_str());
-                return nullptr;
-            }
+            CHECK_NULL_RETURN(runtimeContextSptr, nullptr);
             void* resPtr = thumbnailNapiEntry(uri.c_str(), &runtimeContextSptr);
-            if (resPtr == nullptr) {
-                LOGW("resPtr from native thumbnail is nullptr, uri: %{private}s", uri.c_str());
-                return nullptr;
-            }
+            CHECK_NULL_RETURN(resPtr, nullptr);
             return std::unique_ptr<Media::PixelMap>(reinterpret_cast<Media::PixelMap*>(resPtr));
         };
 #endif
@@ -93,17 +82,9 @@ DataAbilityHelperStandard::DataAbilityHelperStandard(const std::shared_ptr<OHOS:
 
 void* DataAbilityHelperStandard::QueryThumbnailResFromDataAbility(const std::string& uri)
 {
-    if (!dataAbilityThumbnailQueryImpl_) {
-        LOGW("no impl for thumbnail data query, please make sure you are using thumbnail resource on stage mode. "
-             "uri: %{private}s",
-            uri.c_str());
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(dataAbilityThumbnailQueryImpl_, nullptr);
     pixmap_ = dataAbilityThumbnailQueryImpl_(uri);
-    if (!pixmap_) {
-        LOGW("pixel map from thumb nail is nullptr, uri: %{public}s", uri.c_str());
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(pixmap_, nullptr);
     return reinterpret_cast<void*>(&pixmap_);
 }
 
@@ -133,11 +114,8 @@ int32_t DataAbilityHelperStandard::OpenFileWithDataAbility(const std::string& ur
         }
     }
 
-    if (dataAbilityHelper_) {
-        return dataAbilityHelper_->OpenFile(uri, mode);
-    }
-    LOGE("DataAbilityHelperStandard::OpenFile fail, data ability helper is not exist.");
-    return -1;
+    CHECK_NULL_RETURN(dataAbilityHelper_, -1);
+    return dataAbilityHelper_->OpenFile(uri, mode);
 }
 
 int32_t DataAbilityHelperStandard::OpenFileWithDataShare(const std::string& uriStr, const std::string& mode)
@@ -147,12 +125,9 @@ int32_t DataAbilityHelperStandard::OpenFileWithDataShare(const std::string& uriS
         dataShareHelper_ = DataShare::DataShareHelper::Creator(context->GetToken(), uriStr);
     }
 
-    if (dataShareHelper_) {
-        Uri uri = Uri(uriStr);
-        return dataShareHelper_->OpenFile(uri, mode);
-    }
-    LOGE("DataAbilityHelperStandard::OpenFile fail, data share helper is not exist.");
-    return -1;
+    CHECK_NULL_RETURN(dataShareHelper_, -1);
+    Uri uri = Uri(uriStr);
+    return dataShareHelper_->OpenFile(uri, mode);
 }
 
 } // namespace OHOS::Ace

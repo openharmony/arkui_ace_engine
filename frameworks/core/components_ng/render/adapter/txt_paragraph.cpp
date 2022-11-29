@@ -82,9 +82,8 @@ void TxtParagraph::AddText(const std::u16string& text)
 
 void TxtParagraph::Build()
 {
-    if (builder_) {
-        paragraph_ = builder_->Build();
-    }
+    CHECK_NULL_VOID_NOLOG(builder_);
+    paragraph_ = builder_->Build();
 }
 
 void TxtParagraph::Reset()

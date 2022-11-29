@@ -25,6 +25,8 @@
 #include "key_event.h"
 #include "pointer_event.h"
 
+#include "base/utils/utils.h"
+
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
@@ -382,13 +384,9 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEv
     settings.idle_notification_callback = [instanceId](int64_t deadline) {
         ContainerScope scope(instanceId);
         auto container = Container::Current();
-        if (!container) {
-            return;
-        }
+        CHECK_NULL_VOID_NOLOG(container);
         auto context = container->GetPipelineContext();
-        if (!context) {
-            return;
-        }
+        CHECK_NULL_VOID_NOLOG(context);
         context->GetTaskExecutor()->PostTask(
             [context, deadline]() { context->OnIdle(deadline); }, TaskExecutor::TaskType::UI);
     };
@@ -401,14 +399,8 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEv
 
 void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen::Window> window)
 {
-    if (window == nullptr) {
-        LOGE("FlutterAceView::SurfaceCreated, window is nullptr");
-        return;
-    }
-    if (view == nullptr) {
-        LOGE("FlutterAceView::SurfaceCreated, view is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(window);
+    CHECK_NULL_VOID(view);
     LOGD(">>> FlutterAceView::SurfaceCreated, pWnd:%{public}p", &(*window));
     auto platformView = view->GetShellHolder()->GetPlatformView();
     LOGD("FlutterAceView::SurfaceCreated, GetPlatformView");
@@ -423,11 +415,7 @@ void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen
 void FlutterAceView::SurfaceChanged(
     FlutterAceView* view, int32_t width, int32_t height, int32_t orientation, WindowSizeChangeReason type)
 {
-    if (view == nullptr) {
-        LOGE("FlutterAceView::SurfaceChanged, view is nullptr");
-        return;
-    }
-
+    CHECK_NULL_VOID(view);
     view->NotifySurfaceChanged(width, height, type);
     auto platformView = view->GetShellHolder()->GetPlatformView();
     LOGD("FlutterAceView::SurfaceChanged, GetPlatformView");
@@ -440,21 +428,18 @@ void FlutterAceView::SurfaceChanged(
 
 void FlutterAceView::SurfacePositionChanged(FlutterAceView* view, int32_t posX, int32_t posY)
 {
-    if (view != nullptr) {
-        view->NotifySurfacePositionChanged(posX, posY);
-    }
+    CHECK_NULL_VOID_NOLOG(view);
+    view->NotifySurfacePositionChanged(posX, posY);
 }
 
 void FlutterAceView::SetViewportMetrics(FlutterAceView* view, const flutter::ViewportMetrics& metrics)
 {
-    if (view) {
-        view->NotifyDensityChanged(metrics.device_pixel_ratio);
-        view->NotifySystemBarHeightChanged(metrics.physical_padding_top, metrics.physical_view_inset_bottom);
-        auto platformView = view->GetShellHolder()->GetPlatformView();
-        if (platformView) {
-            platformView->SetViewportMetrics(metrics);
-        }
-    }
+    CHECK_NULL_VOID_NOLOG(view);
+    view->NotifyDensityChanged(metrics.device_pixel_ratio);
+    view->NotifySystemBarHeightChanged(metrics.physical_padding_top, metrics.physical_view_inset_bottom);
+    auto platformView = view->GetShellHolder()->GetPlatformView();
+    CHECK_NULL_VOID_NOLOG(platformView);
+    platformView->SetViewportMetrics(metrics);
 }
 
 void FlutterAceView::DispatchTouchEvent(FlutterAceView* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -479,20 +464,14 @@ void FlutterAceView::DispatchTouchEvent(FlutterAceView* view, const std::shared_
 
 bool FlutterAceView::DispatchKeyEvent(FlutterAceView* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    if (view != nullptr) {
-        return view->ProcessKeyEvent(keyEvent);
-    }
-    LOGE("view is null, return false!");
-    return false;
+    CHECK_NULL_RETURN(view, false);
+    return view->ProcessKeyEvent(keyEvent);
 }
 
 bool FlutterAceView::DispatchRotationEvent(FlutterAceView* view, float rotationValue)
 {
-    if (view) {
-        return view->ProcessRotationEvent(rotationValue);
-    }
-    LOGE("view is null, return false!");
-    return false;
+    CHECK_NULL_RETURN(view, false);
+    return view->ProcessRotationEvent(rotationValue);
 }
 
 void FlutterAceView::RegisterTouchEventCallback(TouchEventCallback&& callback)
@@ -548,15 +527,12 @@ void FlutterAceView::SetShellHolder(std::unique_ptr<flutter::OhosShellHolder> ho
 
 void FlutterAceView::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    if (!pointerEvent) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(pointerEvent);
     TouchEvent touchPoint = ConvertTouchEvent(pointerEvent);
     auto markProcess = [pointerEvent]() {
-        if (pointerEvent) {
-            LOGI("Mark %{public}d id Touch Event Processed", pointerEvent->GetPointerId());
-            pointerEvent->MarkProcessed();
-        }
+        CHECK_NULL_VOID_NOLOG(pointerEvent);
+        LOGI("Mark %{public}d id Touch Event Processed", pointerEvent->GetPointerId());
+        pointerEvent->MarkProcessed();
     };
     if (touchPoint.type != TouchType::UNKNOWN) {
         if (touchEventCallback_) {
@@ -570,10 +546,8 @@ void FlutterAceView::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>&
 void FlutterAceView::ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& action)
 {
     LOGD("ProcessDragEvent");
-
-    if (dragEventCallback_) {
-        dragEventCallback_(x, y, action);
-    }
+    CHECK_NULL_VOID_NOLOG(dragEventCallback_);
+    dragEventCallback_(x, y, action);
 }
 
 void FlutterAceView::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -583,15 +557,13 @@ void FlutterAceView::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>&
         ConvertMouseEvent(pointerEvent, event);
     }
     auto markProcess = [pointerEvent]() {
-        if (pointerEvent) {
-            LOGI("Mark %{public}d id Mouse Event Processed", pointerEvent->GetPointerId());
-            pointerEvent->MarkProcessed();
-        }
+        CHECK_NULL_VOID_NOLOG(pointerEvent);
+        LOGI("Mark %{public}d id Mouse Event Processed", pointerEvent->GetPointerId());
+        pointerEvent->MarkProcessed();
     };
 
-    if (mouseEventCallback_) {
-        mouseEventCallback_(event, markProcess);
-    }
+    CHECK_NULL_VOID_NOLOG(mouseEventCallback_);
+    mouseEventCallback_(event, markProcess);
 }
 
 void FlutterAceView::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -601,22 +573,18 @@ void FlutterAceView::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& 
         ConvertAxisEvent(pointerEvent, event);
     }
     auto markProcess = [pointerEvent]() {
-        if (pointerEvent) {
-            LOGI("Mark %{public}d id Axis Event Processed", pointerEvent->GetPointerId());
-            pointerEvent->MarkProcessed();
-        }
+        CHECK_NULL_VOID_NOLOG(pointerEvent);
+        LOGI("Mark %{public}d id Axis Event Processed", pointerEvent->GetPointerId());
+        pointerEvent->MarkProcessed();
     };
 
-    if (axisEventCallback_) {
-        axisEventCallback_(event, markProcess);
-    }
+    CHECK_NULL_VOID_NOLOG(axisEventCallback_);
+    axisEventCallback_(event, markProcess);
 }
 
 bool FlutterAceView::ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    if (!keyEventCallback_) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(keyEventCallback_, false);
     KeyEvent event;
     ConvertKeyEvent(keyEvent, event);
     return keyEventCallback_(event);
@@ -629,12 +597,8 @@ const void* FlutterAceView::GetNativeWindowById(uint64_t textureId)
 
 bool FlutterAceView::ProcessRotationEvent(float rotationValue)
 {
-    if (!rotationEventCallBack_) {
-        return false;
-    }
-
+    CHECK_NULL_RETURN_NOLOG(rotationEventCallBack_, false);
     RotationEvent event { .value = rotationValue * ROTATION_DIVISOR };
-
     return rotationEventCallBack_(event);
 }
 
@@ -688,22 +652,16 @@ void FlutterAceView::InitCacheFilePath(const std::string& path)
 bool FlutterAceView::IsLastPage() const
 {
     auto container = AceEngine::Get().GetContainer(instanceId_);
-    if (!container) {
-        return false;
-    }
-
+    CHECK_NULL_RETURN_NOLOG(container, false);
     ContainerScope scope(instanceId_);
     auto context = container->GetPipelineContext();
-    if (!context) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(context, false);
     auto taskExecutor = context->GetTaskExecutor();
 
     bool isLastPage = false;
-    if (taskExecutor) {
-        taskExecutor->PostSyncTask(
-            [context, &isLastPage]() { isLastPage = context->IsLastPage(); }, TaskExecutor::TaskType::UI);
-    }
+    CHECK_NULL_RETURN_NOLOG(taskExecutor, isLastPage);
+    taskExecutor->PostSyncTask(
+        [context, &isLastPage]() { isLastPage = context->IsLastPage(); }, TaskExecutor::TaskType::UI);
     return isLastPage;
 }
 
@@ -761,17 +719,11 @@ std::unique_ptr<DrawDelegate> FlutterAceView::GetDrawDelegate()
     auto drawDelegate = std::make_unique<DrawDelegate>();
 
     drawDelegate->SetDrawFrameCallback([this](RefPtr<Flutter::Layer>& layer, const Rect& dirty) {
-        if (!layer) {
-            LOGE("layer is nullptr");
-            return;
-        }
+        CHECK_NULL_VOID(layer);
         RefPtr<Flutter::FlutterSceneBuilder> flutterSceneBuilder = AceType::MakeRefPtr<Flutter::FlutterSceneBuilder>();
         layer->AddToScene(*flutterSceneBuilder, 0.0, 0.0);
         auto scene = flutterSceneBuilder->Build();
-        if (!flutter::UIDartState::Current()) {
-            LOGE("uiDartState is nullptr");
-            return;
-        }
+        CHECK_NULL_VOID(flutter::UIDartState::Current());
         auto window = flutter::UIDartState::Current()->window();
         if (window != nullptr && window->client() != nullptr) {
             window->client()->Render(scene.get());
@@ -850,10 +802,7 @@ void FlutterAceView::InitIOManager(RefPtr<TaskExecutor> taskExecutor)
         return;
     }
     auto state = flutter::UIDartState::Current()->GetStateById(instanceId_);
-    if (state == nullptr) {
-        LOGE("state is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(state);
     fml::WeakPtr<flutter::ShellIOManager> ioManager = state->GetIOManager();
     taskExecutor->PostSyncTask(
         [surface, shareContext, ioManager]() {

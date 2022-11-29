@@ -45,10 +45,8 @@ RefPtr<GeometryNode> FocusHub::GetGeometryNode() const
 std::optional<std::string> FocusHub::GetInspectorKey() const
 {
     auto frameNode = GetFrameNode();
-    if (frameNode) {
-        return frameNode->GetInspectorId();
-    }
-    return std::nullopt;
+    CHECK_NULL_RETURN_NOLOG(frameNode, std::nullopt);
+    return frameNode->GetInspectorId();
 }
 
 RefPtr<FocusHub> FocusHub::GetParentFocusHub(FrameNode* node) const
@@ -58,11 +56,9 @@ RefPtr<FocusHub> FocusHub::GetParentFocusHub(FrameNode* node) const
         return parentNode ? parentNode->GetFocusHub() : nullptr;
     }
     auto frameNode = GetFrameNode();
-    if (frameNode) {
-        auto parentNode = frameNode->GetFocusParent();
-        return parentNode ? parentNode->GetFocusHub() : nullptr;
-    }
-    return nullptr;
+    CHECK_NULL_RETURN_NOLOG(frameNode, nullptr);
+    auto parentNode = frameNode->GetFocusParent();
+    return parentNode ? parentNode->GetFocusHub() : nullptr;
 }
 
 std::string FocusHub::GetFrameName() const
@@ -208,9 +204,8 @@ void FocusHub::LostSelfFocus()
 void FocusHub::RemoveSelf(FrameNode* node)
 {
     auto parent = GetParentFocusHub(node);
-    if (parent) {
-        parent->RemoveChild(this);
-    }
+    CHECK_NULL_VOID_NOLOG(parent);
+    parent->RemoveChild(this);
 }
 
 void FocusHub::RemoveChild(FocusHub* focusNode)
@@ -931,10 +926,8 @@ bool FocusHub::IsFocusableByTab()
 bool FocusHub::IsFocusableNodeByTab()
 {
     auto parent = GetParentFocusHub();
-    if (parent) {
-        return (GetTabIndex() == 0) && (parent->GetTabIndex() == 0);
-    }
-    return GetTabIndex() == 0;
+    CHECK_NULL_RETURN_NOLOG(parent, GetTabIndex() == 0);
+    return (GetTabIndex() == 0) && (parent->GetTabIndex() == 0);
 }
 
 bool FocusHub::IsFocusableScopeByTab()
@@ -1057,10 +1050,7 @@ RefPtr<FocusHub> FocusHub::GetChildFocusNodeById(const std::string& id)
 bool FocusHub::RequestFocusImmediatelyById(const std::string& id)
 {
     auto focusNode = GetChildFocusNodeById(id);
-    if (!focusNode) {
-        LOGW("Can not find focus node by id: %{public}s", id.c_str());
-        return false;
-    }
+    CHECK_NULL_RETURN(focusNode, false);
     if (!focusNode->IsFocusableWholePath()) {
         return false;
     }
@@ -1095,10 +1085,7 @@ bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusHu
     if (event.code != KeyCode::KEY_TAB || event.action != KeyAction::DOWN) {
         return false;
     }
-    if (!curPage) {
-        LOGE("Current page node is not exit. Can't handle focus by tabIndex.");
-        return false;
-    }
+    CHECK_NULL_RETURN(curPage, false);
     TabIndexNodeList tabIndexNodes;
     tabIndexNodes.clear();
     curPage->CollectTabIndexNodes(tabIndexNodes);

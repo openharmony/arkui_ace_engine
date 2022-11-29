@@ -78,10 +78,9 @@ void RosenRenderContext::StartRecording()
 {
     CHECK_NULL_VOID(rsNode_);
     auto rsCanvasNode = rsNode_->ReinterpretCastTo<Rosen::RSCanvasNode>();
-    if (rsCanvasNode) {
-        rosenCanvas_ = Canvas::Create(
-            rsCanvasNode->BeginRecording(ceil(rsCanvasNode->GetPaintWidth()), ceil(rsCanvasNode->GetPaintHeight())));
-    }
+    CHECK_NULL_VOID_NOLOG(rsCanvasNode);
+    rosenCanvas_ = Canvas::Create(
+        rsCanvasNode->BeginRecording(ceil(rsCanvasNode->GetPaintWidth()), ceil(rsCanvasNode->GetPaintHeight())));
 }
 
 void RosenRenderContext::StartPictureRecording(float x, float y, float width, float height)
@@ -109,16 +108,13 @@ void RosenRenderContext::OnNodeAppear()
 {
     // because when call this function, the size of frameNode is not calculated. We need frameNode size
     // to calculate the pivot, so just mark need to perform appearing transition.
-    if (propTransitionAppearing_) {
-        firstTransitionIn_ = true;
-    }
+    CHECK_NULL_VOID_NOLOG(propTransitionAppearing_);
+    firstTransitionIn_ = true;
 }
 
 void RosenRenderContext::OnNodeDisappear(FrameNode* host)
 {
-    if (!propTransitionDisappearing_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(propTransitionDisappearing_);
     CHECK_NULL_VOID(rsNode_);
     LOGD("rsNode disappear transition, rsNode:%{public}p", rsNode_.get());
     CHECK_NULL_VOID(host);
@@ -470,9 +466,8 @@ void RosenRenderContext::NotifyTransition(
     AnimationUtils::Animate(
         option,
         [rsNode = rsNode_, isTransitionIn, effect]() {
-            if (rsNode) {
-                rsNode->NotifyTransition(effect, isTransitionIn);
-            }
+            CHECK_NULL_VOID_NOLOG(rsNode);
+            rsNode->NotifyTransition(effect, isTransitionIn);
         },
         option.GetOnFinishEvent());
 }
@@ -480,9 +475,7 @@ void RosenRenderContext::NotifyTransition(
 void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn)
 {
     auto& transOptions = isTransitionIn ? propTransitionAppearing_ : propTransitionDisappearing_;
-    if (transOptions == nullptr) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(transOptions);
     CHECK_NULL_VOID(rsNode_);
     SetTransitionPivot(frameSize, isTransitionIn);
     auto effect = GetRSTransitionWithoutType(*transOptions);
@@ -497,9 +490,8 @@ void RosenRenderContext::OpacityAnimation(const AnimationOption& option, double 
     AnimationUtils::Animate(
         option,
         [rsNode = rsNode_, endAlpha = end]() {
-            if (rsNode) {
-                rsNode->SetAlpha(endAlpha);
-            }
+            CHECK_NULL_VOID_NOLOG(rsNode);
+            rsNode->SetAlpha(endAlpha);
         },
         option.GetOnFinishEvent());
 }
@@ -985,9 +977,7 @@ const std::shared_ptr<Rosen::RSNode>& RosenRenderContext::GetRSNode()
 
 sk_sp<SkPicture> RosenRenderContext::FinishRecordingAsPicture()
 {
-    if (!recorder_) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN_NOLOG(recorder_, nullptr);
     return recorder_->finishRecordingAsPicture();
 }
 
@@ -1146,9 +1136,8 @@ void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
     protocol.SetDuration(themeDuration);
     RSNode::Animate(protocol, Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2f, 0.0f, 0.2f, 1.0f),
         [rsNode = rsNode_, highlightEnd]() {
-            if (rsNode) {
-                rsNode->SetBackgroundColor(highlightEnd.GetValue());
-            }
+            CHECK_NULL_VOID_NOLOG(rsNode);
+            rsNode->SetBackgroundColor(highlightEnd.GetValue());
         });
     hoveredColor_ = hoverColorTo;
     isHoveredBoard_ = isHovered;

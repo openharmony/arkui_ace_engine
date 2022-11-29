@@ -35,10 +35,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNo
     ContainerScope scope(instanceId_);
 
     ACE_FUNCTION_TRACE();
-    if (!renderNode) {
-        LOGW("renderNode is null.");
-        return;
-    }
+    CHECK_NULL_VOID(renderNode);
     // first clean.
     referee_->CleanGestureScope(touchPoint.id);
     // collect
@@ -66,10 +63,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     ContainerScope scope(instanceId_);
 
     ACE_FUNCTION_TRACE();
-    if (!frameNode) {
-        LOGW("frameNode is null.");
-        return;
-    }
+    CHECK_NULL_VOID(frameNode);
     // collect
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
@@ -95,10 +89,7 @@ void EventManager::TouchTest(
     ContainerScope scope(instanceId_);
 
     ACE_FUNCTION_TRACE();
-    if (!frameNode) {
-        LOGW("frameNode is null.");
-        return;
-    }
+    CHECK_NULL_VOID(frameNode);
     // collect
     const NG::PointF point { event.x, event.y };
     // For root node, the parent local point is the same as global point.
@@ -111,17 +102,11 @@ void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<
         return;
     }
     const Point point { touchPoint.x, touchPoint.y, touchPoint.sourceType };
-    if (!textOverlayManager) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(textOverlayManager);
     auto textOverlayBase = textOverlayManager->GetTextOverlayBase();
-    if (!textOverlayBase) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(textOverlayBase);
     auto targetNode = textOverlayManager->GetTargetNode();
-    if (!targetNode) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(targetNode);
     for (auto& rect : textOverlayManager->GetTextOverlayRect()) {
         if (rect.IsInRegion(point)) {
             inSelectedRect_ = true;
@@ -184,10 +169,7 @@ void EventManager::TouchTest(
     ContainerScope scope(instanceId_);
 
     ACE_FUNCTION_TRACE();
-    if (!renderNode) {
-        LOGW("renderNode is null.");
-        return;
-    }
+    CHECK_NULL_VOID(renderNode);
     // collect
     const Point point { event.x, event.y, event.sourceType };
     // For root node, the parent local point is the same as global point.
@@ -354,10 +336,7 @@ bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::Fr
 
 void EventManager::MouseTest(const MouseEvent& event, const RefPtr<RenderNode>& renderNode)
 {
-    if (!renderNode) {
-        LOGW("renderNode is null.");
-        return;
-    }
+    CHECK_NULL_VOID(renderNode);
     const Point point { event.x, event.y };
     MouseHoverTestList hitTestResult;
     WeakPtr<RenderNode> hoverNode = nullptr;
@@ -459,10 +438,7 @@ bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
 
 void EventManager::MouseTest(const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode)
 {
-    if (!frameNode) {
-        LOGW("renderNode is null.");
-        return;
-    }
+    CHECK_NULL_VOID(frameNode);
     const NG::PointF point { event.x, event.y };
     MouseTestResult mouseTestResult;
     MouseTestResult hoverTestResult;
@@ -557,10 +533,7 @@ bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
 
 void EventManager::AxisTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode)
 {
-    if (!renderNode) {
-        LOGW("renderNode is null.");
-        return;
-    }
+    CHECK_NULL_VOID(renderNode);
     const Point point { event.x, event.y };
     WeakPtr<RenderNode> axisNode = nullptr;
     renderNode->AxisDetect(point, point, axisNode, event.GetDirection());
@@ -579,10 +552,7 @@ bool EventManager::DispatchAxisEvent(const AxisEvent& event)
 
 void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode)
 {
-    if (!frameNode) {
-        LOGW("renderNode is null.");
-        return;
-    }
+    CHECK_NULL_VOID(frameNode);
     const NG::PointF point { event.x, event.y };
     frameNode->AxisTest(point, point, axisTestResults_);
 }
@@ -605,11 +575,7 @@ bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
 bool EventManager::DispatchRotationEvent(
     const RotationEvent& event, const RefPtr<RenderNode>& renderNode, const RefPtr<RenderNode>& requestFocusNode)
 {
-    if (!renderNode) {
-        LOGW("renderNode is null.");
-        return false;
-    }
-
+    CHECK_NULL_RETURN(renderNode, false);
     if (requestFocusNode && renderNode->RotationMatchTest(requestFocusNode)) {
         LOGD("RotationMatchTest: dispatch rotation to request node.");
         return requestFocusNode->RotationTestForward(event);

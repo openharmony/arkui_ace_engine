@@ -21,6 +21,7 @@
 
 #include "base/json/json_util.h"
 #include "base/log/log.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/ace_page.h"
@@ -115,9 +116,7 @@ void ConnectServerManager::InitConnectServer()
 
 void ConnectServerManager::CloseConnectServerSo()
 {
-    if (handlerConnectServerSo_ == nullptr) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(handlerConnectServerSo_);
     dlclose(handlerConnectServerSo_);
     handlerConnectServerSo_ = nullptr;
 }
@@ -137,10 +136,7 @@ void ConnectServerManager::SetDebugMode()
 void ConnectServerManager::StopConnectServer()
 {
     LOGD("Stop connect server");
-    if (handlerConnectServerSo_ == nullptr) {
-        LOGE("handlerConnectServerSo_ is null");
-        return;
-    }
+    CHECK_NULL_VOID(handlerConnectServerSo_);
     StopServer stopServer = reinterpret_cast<StopServer>(dlsym(handlerConnectServerSo_, "StopServer"));
     if (stopServer == nullptr) {
         LOGE("stopServer = NULL, dlerror = %s", dlerror());

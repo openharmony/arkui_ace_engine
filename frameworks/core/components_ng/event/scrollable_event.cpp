@@ -69,18 +69,14 @@ void ScrollableActuator::InitializeScrollable()
 
 void ScrollableActuator::AddScrollEdgeEffect(const Axis& axis, const RefPtr<ScrollEdgeEffect>& effect)
 {
-    if (!effect) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(effect);
     scrollEffects_[axis] = effect;
     initialized_ = false;
 }
 
 bool ScrollableActuator::RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& effect)
 {
-    if (!effect) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(effect, false);
     for (auto iter = scrollEffects_.begin(); iter != scrollEffects_.end(); ++iter) {
         if (effect == iter->second) {
             scrollEffects_.erase(iter);
