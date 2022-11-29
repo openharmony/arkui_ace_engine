@@ -49,10 +49,9 @@ void ContentModifierAdapter::Draw(RSDrawingContext& context) const
     // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
     RSCanvas canvas(&skCanvas);
-    if (modifier_) {
-        DrawingContext context_ = { canvas, context.width, context.height };
-        modifier_->onDraw(context_);
-    }
+    CHECK_NULL_VOID_NOLOG(modifier_);
+    DrawingContext context_ = { canvas, context.width, context.height };
+    modifier_->onDraw(context_);
 }
 
 #define CONVERT_PROP(prop, srcType, propType)                                                     \

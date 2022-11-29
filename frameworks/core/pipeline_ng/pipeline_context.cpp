@@ -517,10 +517,7 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
     LOGI("SetRootRect width %{public}f, height %{public}f, %{public}f", width, height, offset);
     CHECK_RUN_ON(UI);
     UpdateRootSizeAndScale(width, height);
-    if (!rootNode_) {
-        LOGE("rootNode_ is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(rootNode_);
     GridSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
     GridSystemManager::GetInstance().OnSurfaceChanged(width);
     SizeF sizeF { static_cast<float>(width), static_cast<float>(height) };
@@ -798,10 +795,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 void PipelineContext::FlushTouchEvents()
 {
     CHECK_RUN_ON(UI);
-    if (!rootNode_) {
-        LOGE("root node is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(rootNode_);
     {
         eventManager_->FlushTouchEventsBegin(touchEvents_);
         std::unordered_set<int32_t> moveEventIds;

@@ -77,9 +77,8 @@ OHOS::Media::PlaybackRateMode ConvertToMediaPlaybackSpeed(float speed)
 } // namespace
 RosenMediaPlayer::~RosenMediaPlayer()
 {
-    if (mediaPlayer_) {
-        mediaPlayer_->Release();
-    }
+    CHECK_NULL_VOID_NOLOG(mediaPlayer_);
+    mediaPlayer_->Release();
 }
 
 void RosenMediaPlayer::CreateMediaPlayer()

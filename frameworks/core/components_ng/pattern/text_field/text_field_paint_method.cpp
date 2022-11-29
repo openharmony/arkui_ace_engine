@@ -86,10 +86,9 @@ CanvasDrawFunction TextFieldPaintMethod::GetOverlayDrawFunction(PaintWrapper* pa
 {
     return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto textField = weak.Upgrade();
-        if (textField) {
-            textField->PaintCursor(canvas, paintWrapper);
-            textField->PaintSelection(canvas, paintWrapper);
-        }
+        CHECK_NULL_VOID_NOLOG(textField);
+        textField->PaintCursor(canvas, paintWrapper);
+        textField->PaintSelection(canvas, paintWrapper);
     };
 }
 

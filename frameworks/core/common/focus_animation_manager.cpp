@@ -15,6 +15,7 @@
 
 #include "core/common/focus_animation_manager.h"
 
+#include "base/utils/utils.h"
 #include "core/components/focus_animation/render_focus_animation.h"
 #include "core/components/shadow/render_shadow.h"
 #include "core/components/shadow/shadow_element.h"
@@ -30,10 +31,7 @@ void FocusAnimationManager::SetFocusAnimationProperties(
         return;
     }
     auto focusAnimation = useRoot_ ? rootFocusAnimationStack_.top().Upgrade() : focusAnimationStack_.top().Upgrade();
-    if (!focusAnimation) {
-        LOGE("focusAnimation get failed");
-        return;
-    }
+    CHECK_NULL_VOID(focusAnimation);
     if (useRoot_) {
         auto renderFocusAnimation = focusAnimationStack_.top().Upgrade();
         if (renderFocusAnimation) {
@@ -55,25 +53,16 @@ void FocusAnimationManager::CancelFocusAnimation() const
         return;
     }
     auto focusAnimation = useRoot_ ? rootFocusAnimationStack_.top().Upgrade() : focusAnimationStack_.top().Upgrade();
-    if (!focusAnimation) {
-        LOGE("focusAnimation get failed");
-        return;
-    }
+    CHECK_NULL_VOID(focusAnimation);
     focusAnimation->CancelFocusAnimation();
 }
 
 void FocusAnimationManager::PushFocusAnimationElement(const RefPtr<Element>& element)
 {
     auto focusElement = AceType::DynamicCast<FocusAnimationElement>(element);
-    if (!focusElement) {
-        LOGE("fail to get FocusAnimationElement");
-        return;
-    }
+    CHECK_NULL_VOID(focusElement);
     auto renderFocus = AceType::DynamicCast<RenderFocusAnimation>(focusElement->GetRenderNode());
-    if (!renderFocus) {
-        LOGE("fail to get RenderFocusAnimation");
-        return;
-    }
+    CHECK_NULL_VOID(renderFocus);
     renderFocus->SetPaintRect(availableRect_);
     if (focusElement->IsRoot()) {
         if (!rootFocusAnimationStack_.empty()) {
@@ -125,10 +114,7 @@ void FocusAnimationManager::StartFocusAnimation() const
         return;
     }
     auto focusAnimation = focusAnimationStack_.top().Upgrade();
-    if (!focusAnimation) {
-        LOGE("focusAnimation get failed");
-        return;
-    }
+    CHECK_NULL_VOID(focusAnimation);
     focusAnimation->StartFocusAnimation();
 }
 
@@ -139,10 +125,7 @@ void FocusAnimationManager::StopFocusAnimation() const
         return;
     }
     auto focusAnimation = focusAnimationStack_.top().Upgrade();
-    if (!focusAnimation) {
-        LOGE("focusAnimation get failed");
-        return;
-    }
+    CHECK_NULL_VOID(focusAnimation);
     focusAnimation->StopFocusAnimation();
 }
 
@@ -154,25 +137,16 @@ void FocusAnimationManager::SetFocusAnimationProperties(
         return;
     }
     auto focusAnimation = focusAnimationStack_.top().Upgrade();
-    if (!focusAnimation) {
-        LOGE("focusAnimation get failed");
-        return;
-    }
+    CHECK_NULL_VOID(focusAnimation);
     focusAnimation->SetFocusAnimationProperties(rrect, color, offset, clipRect);
 }
 
 void FocusAnimationManager::PushShadow(const RefPtr<Element>& element)
 {
     auto shadowElement = AceType::DynamicCast<ShadowElement>(element);
-    if (!shadowElement) {
-        LOGE("fail to get shadowElement");
-        return;
-    }
+    CHECK_NULL_VOID(shadowElement);
     auto renderShadow = AceType::DynamicCast<RenderShadow>(shadowElement->GetRenderNode());
-    if (!renderShadow) {
-        LOGE("fail to get renderShadow");
-        return;
-    }
+    CHECK_NULL_VOID(renderShadow);
     shadowStack_.push(renderShadow);
 }
 
@@ -192,10 +166,7 @@ void FocusAnimationManager::SetShadowProperties(const RRect& rrect, const Offset
         return;
     }
     auto shadow = shadowStack_.top().Upgrade();
-    if (!shadow) {
-        LOGE("shadow get failed");
-        return;
-    }
+    CHECK_NULL_VOID(shadow);
     shadow->SetShadowProperties(rrect, offset);
 }
 
@@ -206,10 +177,7 @@ void FocusAnimationManager::SetShadowProperties(const RRect& rrect, const Offset
         return;
     }
     auto shadow = shadowStack_.top().Upgrade();
-    if (!shadow) {
-        LOGE("shadow get failed");
-        return;
-    }
+    CHECK_NULL_VOID(shadow);
     shadow->SetShadowProperties(rrect, offset, clipRect);
 }
 
@@ -220,10 +188,7 @@ void FocusAnimationManager::CancelShadow() const
         return;
     }
     auto shadow = shadowStack_.top().Upgrade();
-    if (!shadow) {
-        LOGE("shadow get failed");
-        return;
-    }
+    CHECK_NULL_VOID(shadow);
     shadow->CancelShadow();
 }
 
@@ -233,10 +198,7 @@ RefPtr<RenderFocusAnimation> FocusAnimationManager::GetRenderFocusAnimation() co
         return nullptr;
     }
     auto focusAnimation = useRoot_ ? rootFocusAnimationStack_.top().Upgrade() : focusAnimationStack_.top().Upgrade();
-    if (!focusAnimation) {
-        LOGE("focusAnimation get failed");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(focusAnimation, nullptr);
     return focusAnimation;
 }
 
@@ -258,10 +220,7 @@ void FocusAnimationManager::SetIsKeyEvent(bool isKeyEvent)
         return;
     }
     auto focusAnimation = useRoot_ ? rootFocusAnimationStack_.top().Upgrade() : focusAnimationStack_.top().Upgrade();
-    if (!focusAnimation) {
-        LOGE("focusAnimation get failed");
-        return;
-    }
+    CHECK_NULL_VOID(focusAnimation);
     focusAnimation->SetIsKeyEvent(isKeyEvent);
 }
 

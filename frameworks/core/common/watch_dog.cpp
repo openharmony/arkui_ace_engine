@@ -163,9 +163,8 @@ ThreadWatcher::ThreadWatcher(int32_t instanceId, TaskExecutor::TaskType type, bo
     AnrThread::PostTaskToTaskRunner(
         [weak = Referenced::WeakClaim(this)]() {
             auto sp = weak.Upgrade();
-            if (sp) {
-                sp->Check();
-            }
+            CHECK_NULL_VOID_NOLOG(sp);
+            sp->Check();
         },
         NORMAL_CHECK_PERIOD);
 }
@@ -186,16 +185,15 @@ void ThreadWatcher::BuriedBomb(uint64_t bombId)
 void ThreadWatcher::DefusingBomb()
 {
     auto taskExecutor = taskExecutor_.Upgrade();
-    if (taskExecutor) {
-        taskExecutor->PostTask(
-            [weak = Referenced::WeakClaim(this)]() {
-                auto sp = weak.Upgrade();
-                if (sp) {
-                    sp->DefusingTopBomb();
-                }
-            },
-            type_);
-    }
+    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    taskExecutor->PostTask(
+        [weak = Referenced::WeakClaim(this)]() {
+            auto sp = weak.Upgrade();
+            if (sp) {
+                sp->DefusingTopBomb();
+            }
+        },
+        type_);
 }
 
 void ThreadWatcher::DefusingTopBomb()
@@ -292,9 +290,8 @@ void ThreadWatcher::Check()
     AnrThread::PostTaskToTaskRunner(
         [weak = Referenced::WeakClaim(this)]() {
             auto sp = weak.Upgrade();
-            if (sp) {
-                sp->Check();
-            }
+            CHECK_NULL_VOID_NOLOG(sp);
+            sp->Check();
         },
         period);
 }
@@ -317,10 +314,7 @@ bool ThreadWatcher::IsThreadStuck()
 {
     bool res = false;
     auto taskExecutor = taskExecutor_.Upgrade();
-    if (!taskExecutor) {
-        LOGW("taskExecutor is null");
-        return false;
-    }
+    CHECK_NULL_RETURN(taskExecutor, false);
     uint32_t taskId = taskExecutor->GetTotalTaskNum(type_);
     if (useUIAsJSThread_) {
         taskId += taskExecutor->GetTotalTaskNum(TaskExecutor::TaskType::JS);
@@ -390,9 +384,8 @@ void ThreadWatcher::PostCheckTask()
         taskExecutor->PostTask(
             [weak = Referenced::WeakClaim(this)]() {
                 auto sp = weak.Upgrade();
-                if (sp) {
-                    sp->TagIncrease();
-                }
+                CHECK_NULL_VOID_NOLOG(sp);
+                sp->TagIncrease();
             },
             type_);
         std::unique_lock<std::shared_mutex> lock(mutex_);

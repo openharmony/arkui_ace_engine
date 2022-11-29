@@ -17,20 +17,18 @@
 
 #include "base/log/log.h"
 #include "base/utils/macros.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 
 Window::Window(std::unique_ptr<PlatformWindow> platformWindow) : platformWindow_(std::move(platformWindow))
 {
-    if (platformWindow_ != nullptr) {
-        auto&& callback = [this](uint64_t nanoTimestamp, uint32_t frameCount) {
-            OnVsync(nanoTimestamp, frameCount);
-        };
-        platformWindow_->RegisterVsyncCallback(callback);
-        LOGI("Window Created success.");
-    } else {
-        LOGE("Window Created failed, platformWindow is nullptr.");
-    }
+    CHECK_NULL_VOID(platformWindow_);
+    auto&& callback = [this](uint64_t nanoTimestamp, uint32_t frameCount) {
+        OnVsync(nanoTimestamp, frameCount);
+    };
+    platformWindow_->RegisterVsyncCallback(callback);
+    LOGI("Window Created success.");
 }
 
 void Window::RequestFrame()
@@ -48,10 +46,7 @@ void Window::RequestFrame()
 
 void Window::SetRootRenderNode(const RefPtr<RenderNode>& root)
 {
-    if (platformWindow_ == nullptr) {
-        LOGE("SetRootRenderNode failed, platformWindow is nullptr.");
-        return;
-    }
+    CHECK_NULL_VOID(platformWindow_);
     platformWindow_->SetRootRenderNode(root);
 }
 
