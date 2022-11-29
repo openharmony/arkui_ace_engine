@@ -24,6 +24,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
+#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -66,6 +67,7 @@ void IndexerPattern::OnModifyDone()
     }
     InitInputEvent();
     if (!touchListener_) {
+        CHECK_NULL_VOID(gesture);
         auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
             auto indexerPattern = weak.Upgrade();
             CHECK_NULL_VOID(indexerPattern);
@@ -74,12 +76,9 @@ void IndexerPattern::OnModifyDone()
             } else if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
                 indexerPattern->OnTouchUp(info);
             }
-            indexerPattern->SetIsTouch(true);
         };
         touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-        if (gesture) {
-            gesture->AddTouchEvent(touchListener_);
-        }
+        gesture->AddTouchEvent(touchListener_);
     }
     InitOnKeyEvent();
 }
@@ -340,6 +339,9 @@ void IndexerPattern::ResetStatus()
 }
 void IndexerPattern::ApplyIndexChanged()
 {
+    if (selected_ >= itemCount_ || selected_ < 0) {
+        selected_ = 0;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
@@ -384,20 +386,21 @@ void IndexerPattern::ApplyIndexChanged()
         if (index == childFocusIndex_ || index == selected_) {
             auto childRenderContext = childNode->GetRenderContext();
             if (index == childFocusIndex_) {
-                auto boaderWidth = indexerTheme->GetFocusBgOutlineSize().ConvertToPx();
-                BorderWidthPropertyF borderWidthProperty { boaderWidth, boaderWidth, boaderWidth, boaderWidth };
-                childRenderContext->UpdateBorderWidthF(borderWidthProperty);
-                childRenderContext->UpdateBorderColor({ indexerTheme->GetFocusBgOutlineColor() });
+                auto borderWidth = indexerTheme->GetFocusBgOutlineSize();
+                nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
+                auto borderColor = indexerTheme->GetFocusBgOutlineColor();
+                childRenderContext->UpdateBorderColor({ borderColor, borderColor, borderColor, borderColor });
             } else {
-                childRenderContext->UpdateBorderWidthF({ 0, 0, 0, 0 });
+                Dimension borderWidth;
+                nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
                 childRenderContext->ResetBlendBorderColor();
             }
             nodeLayoutProperty->UpdateTextColor(
                 layoutProperty->GetSelectedColor().value_or(indexerTheme->GetSelectedTextColor()));
             childRenderContext->BlendBgColor(
                 paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSeclectedBackgroundColor()));
-            auto randius = indexerTheme->GetHoverRadiusSize_();
-            childRenderContext->UpdateBorderRadius({ randius, randius, randius, randius });
+            auto radius = indexerTheme->GetHoverRadiusSize();
+            childRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
             auto selectedFont = layoutProperty->GetSelectedFont().value_or(indexerTheme->GetSelectTextStyle());
             nodeLayoutProperty->UpdateFontSize(selectedFont.GetFontSize());
             auto fontWeight = selectedFont.GetFontWeight();
@@ -405,18 +408,24 @@ void IndexerPattern::ApplyIndexChanged()
             childRenderContext->SetClipToBounds(true);
             childNode->MarkModifyDone();
         } else if (index == itemCount_) {
-            auto randius = BUBBLE_BOX_RADIUS;
             if (isInitialized_ && layoutProperty->GetUsingPopup().value_or(false)) {
                 auto popupColor = layoutProperty->GetPopupColor().value_or(indexerTheme->GetPopupTextColor());
                 auto popupBackground =
                     paintProperty->GetPopupBackground().value_or(indexerTheme->GetPopupBackgroundColor());
                 auto popupFont = layoutProperty->GetPopupFont().value_or(indexerTheme->GetPopupTextStyle());
                 std::vector<std::string> arrayValueSelected = {};
-                auto popupDataValue = popupData.value_or(arrayValueSelected);
-                popupDataValue.insert(std::begin(popupDataValue), arrayValue_[selected_]);
+                std::vector<std::string> popupDataValue;
+                if (!popupData.has_value() || !popupData->data()) {
+                    popupDataValue = {};
+                } else {
+                    popupDataValue = popupData.value();
+                }
+                popupDataValue.insert(popupDataValue.begin(), arrayValue_[selected_]);
                 popupSize_ =
                     (popupDataValue.size() < INDEXER_BUBBLE_MAXSIZE ? popupDataValue.size() : INDEXER_BUBBLE_MAXSIZE);
                 auto listNode = AceType::DynamicCast<FrameNode>(iter);
+                auto listLayoutproperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+                listLayoutproperty->UpdateListItemAlign(V2::ListItemAlign::CENTER);
                 listNode->Clean();
                 int32_t popupDataIndex = 0;
                 for (const auto& data : popupDataValue) {
@@ -439,30 +448,18 @@ void IndexerPattern::ApplyIndexChanged()
                     auto fontWeight = popupFont.GetFontWeight();
                     textNodeLayoutProperty->UpdateFontWeight(fontWeight);
                     textNodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-                    CalcLength width = CalcLength(Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP));
-                    CalcLength height = CalcLength(Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP));
                     auto textNodeRenderContext = textNode->GetRenderContext();
                     textNodeRenderContext->UpdateBackgroundColor(popupBackground);
-                    if (popupDataValue.size() <= 1 || popupDataIndex == INDEXER_BUBBLE_MAXSIZE - 1 ||
-                        (popupDataIndex == static_cast<int32_t>(popupDataValue.size() - 1))) {
-                        textNodeRenderContext->ResetBorder();
-                    } else {
-                        BorderWidthPropertyF borderWidthProperty { 0, 0, 0,
-                            Dimension(1.0, DimensionUnit::VP).ConvertToPx() };
-                        textNodeRenderContext->UpdateBorderWidthF(borderWidthProperty);
-                        textNodeRenderContext->UpdateBorderColor({ indexerTheme->GetPopupSeparateColor() });
-                    }
+                    Dimension radius;
+                    radius.SetValue(Dimension(BUBBLE_BOX_RADIUS, DimensionUnit::VP).ConvertToPx());
+                    Dimension randiusZero;
                     if (popupDataValue.size() == 1) {
-                        textNodeRenderContext->UpdateBorderRadius(
-                            { Dimension(randius, DimensionUnit::VP), Dimension(randius, DimensionUnit::VP),
-                                Dimension(randius, DimensionUnit::VP), Dimension(randius, DimensionUnit::VP) });
+                        textNodeRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
                     } else {
                         if (popupDataIndex == 0) {
-                            textNodeRenderContext->UpdateBorderRadius({ Dimension(randius, DimensionUnit::VP),
-                                Dimension(randius, DimensionUnit::VP), Dimension(0), Dimension(0) });
+                            textNodeRenderContext->UpdateBorderRadius({ radius, radius, randiusZero, randiusZero });
                         } else if (popupDataIndex == (popupSize_ - 1)) {
-                            textNodeRenderContext->UpdateBorderRadius({ Dimension(0), Dimension(0),
-                                Dimension(randius, DimensionUnit::VP), Dimension(randius, DimensionUnit::VP) });
+                            textNodeRenderContext->UpdateBorderRadius({ randiusZero, randiusZero, radius, radius });
                         }
                     }
                     textNode->MarkModifyDone();
@@ -475,9 +472,9 @@ void IndexerPattern::ApplyIndexChanged()
                 }
                 auto listRenderContext = listNode->GetRenderContext();
                 listRenderContext->UpdateBackShadow(ShadowConfig::DefaultShadowL);
-                listRenderContext->UpdateBorderRadius(
-                    { Dimension(randius, DimensionUnit::VP), Dimension(randius, DimensionUnit::VP),
-                        Dimension(randius, DimensionUnit::VP), Dimension(randius, DimensionUnit::VP) });
+                Dimension radius;
+                radius.SetValue(Dimension(BUBBLE_BOX_RADIUS, DimensionUnit::VP).ConvertToPx());
+                listRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
                 listNode->MarkModifyDone();
                 listNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                 BeginBubbleAnimation(listNode);
@@ -486,16 +483,21 @@ void IndexerPattern::ApplyIndexChanged()
             auto childRenderContext = childNode->GetRenderContext();
             CHECK_NULL_VOID(childRenderContext);
             if (index == childHoverIndex_ || index == childPressIndex_) {
-                auto radiusSize = indexerTheme->GetHoverRadiusSize_();
+                auto radiusSize = indexerTheme->GetHoverRadiusSize();
                 childRenderContext->UpdateBorderRadius({ radiusSize, radiusSize, radiusSize, radiusSize });
                 childRenderContext->BlendBgColor(indexerTheme->GetHoverBgAreaColor());
                 nodeLayoutProperty->UpdateTextColor(indexerTheme->GetHoverTextColor());
             } else {
                 childRenderContext->ResetBlendBgColor();
-                childRenderContext->UpdateBorderRadius({ Dimension(0), Dimension(0), Dimension(0), Dimension(0) });
+                Dimension radiusZeroSize;
+                childRenderContext->UpdateBorderRadius(
+                    { radiusZeroSize, radiusZeroSize, radiusZeroSize, radiusZeroSize });
                 nodeLayoutProperty->UpdateTextColor(
                     layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor()));
             }
+            Dimension borderWidth;
+            nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
+            childRenderContext->ResetBlendBorderColor();
             nodeLayoutProperty->UpdateFontSize(
                 layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle()).GetFontSize());
             nodeLayoutProperty->UpdateFontWeight(
@@ -514,7 +516,7 @@ void IndexerPattern::InitOnKeyEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto focusHub = host->GetOrCreateFocusHub();
+    auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();

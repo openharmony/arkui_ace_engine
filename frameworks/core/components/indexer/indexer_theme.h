@@ -78,11 +78,11 @@ public:
     {
         return selectedBackgroundColor_;
     }
-    const Dimension& GetPopupAreaSize_() const
+    const Dimension& GetPopupAreaSize() const
     {
         return popupAreaSize_;
     }
-    const Dimension& GetHoverRadiusSize_() const
+    const Dimension& GetHoverRadiusSize() const
     {
         return hoverRadiusSize_;
     }
@@ -174,7 +174,7 @@ private:
         theme->selectedTextColor_ = indexerPattern->GetAttr<Color>("selected_text_color", Color(SELECT_TEXT_COLOR));
         theme->popupTextColor_ = indexerPattern->GetAttr<Color>("popup_text_color", Color(POPUP_TEXT_COLOR));
         theme->popupTextSize_ =
-            indexerPattern->GetAttr<Dimension>("popup_text_size", Dimension(POPUP_TEXT_SIZE, DimensionUnit::VP));
+            indexerPattern->GetAttr<Dimension>("popup_text_size", Dimension(POPUP_TEXT_SIZE, DimensionUnit::FP));
         theme->selectedBackgroundColor_ =
             indexerPattern->GetAttr<Color>("selected_background_color", Color(SELECT_BACKGROUD_COLOR))
                 .ChangeOpacity(SELECT_BACKGROUND_OPACITY);
