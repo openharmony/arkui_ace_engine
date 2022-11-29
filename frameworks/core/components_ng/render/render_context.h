@@ -98,7 +98,15 @@ public:
 
     virtual void BlendBorderColor(const Color& color) {}
 
-    virtual void PaintFocusState(Dimension focusPaddingVp) {}
+    // Paint focus state by component's setting. It will paint along the paintRect
+    virtual void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth) {}
+    // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
+    virtual void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
+        const Dimension& paintWidth)
+    {}
+    // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
+    virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth)
+    {}
 
     virtual void ClearFocusState() {}
 
@@ -147,9 +155,7 @@ public:
         return {};
     }
 
-    virtual void GetPointWithTransform(PointF& point)
-    {
-    }
+    virtual void GetPointWithTransform(PointF& point) {}
 
     virtual RectF GetPaintRectWithoutTransform()
     {

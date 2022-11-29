@@ -653,6 +653,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         scalePoint.type);
     eventManager_->SetInstanceId(GetInstanceId());
     if (scalePoint.type == TouchType::DOWN) {
+        isNeedShowFocus_ = false;
+        auto rootFocusHub = rootNode_->GetFocusHub();
+        if (rootFocusHub) {
+            rootFocusHub->ClearAllFocusState();
+        }
+
         LOGD("receive touch down event, first use touch test to collect touch event target");
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
@@ -808,7 +814,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     LOGD(
         "MouseEvent (x,y): (%{public}f,%{public}f), button: %{public}d, action: %{public}d, pressedButtons: %{public}d",
-        scaleEvent.x, scaleEvent.y, scaleEvent.action, scaleEvent.button, scaleEvent.pressedButtons);
+        scaleEvent.x, scaleEvent.y, scaleEvent.button, scaleEvent.action, scaleEvent.pressedButtons);
     eventManager_->MouseTest(scaleEvent, rootNode_);
     eventManager_->DispatchMouseEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverEventNG(scaleEvent);
@@ -824,7 +830,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         isNeedShowFocus_ = true;
         auto rootFocusHub = rootNode_->GetFocusHub();
         if (rootFocusHub) {
-            rootFocusHub->PaintFocusState();
+            rootFocusHub->PaintAllFocusState();
         }
         return true;
     }

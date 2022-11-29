@@ -45,14 +45,22 @@ public:
         paintTask_(roundRect_, rsCanvas);
     }
 
-    void SetRoundRect(const rosen::Rect& rect, float topLeftRadius, float topRightRadius, float bottomLeftRadius,
-        float bottomRightRadius)
+    void SetRoundRect(const RoundRect& rect)
     {
-        roundRect_.SetRect(rect);
-        roundRect_.SetCornerRadius(rosen::RoundRect::CornerPos::TOP_LEFT_POS, topLeftRadius, topLeftRadius);
-        roundRect_.SetCornerRadius(rosen::RoundRect::CornerPos::TOP_RIGHT_POS, topRightRadius, topRightRadius);
-        roundRect_.SetCornerRadius(rosen::RoundRect::CornerPos::BOTTOM_LEFT_POS, bottomLeftRadius, bottomLeftRadius);
-        roundRect_.SetCornerRadius(rosen::RoundRect::CornerPos::BOTTOM_RIGHT_POS, bottomRightRadius, bottomRightRadius);
+        roundRect_.SetRect(
+            rosen::Rect(rect.GetRect().Left(), rect.GetRect().Top(), rect.GetRect().Right(), rect.GetRect().Bottom()));
+        roundRect_.SetCornerRadius(rosen::RoundRect::CornerPos::TOP_LEFT_POS,
+            rect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).x,
+            rect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).y);
+        roundRect_.SetCornerRadius(rosen::RoundRect::CornerPos::TOP_RIGHT_POS,
+            rect.GetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS).x,
+            rect.GetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS).y);
+        roundRect_.SetCornerRadius(rosen::RoundRect::CornerPos::BOTTOM_LEFT_POS,
+            rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS).x,
+            rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS).y);
+        roundRect_.SetCornerRadius(rosen::RoundRect::CornerPos::BOTTOM_RIGHT_POS,
+            rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).x,
+            rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).y);
     }
 
     void SetPaintTask(const std::function<void(const RSRoundRect&, RSCanvas&)>& paintTask)

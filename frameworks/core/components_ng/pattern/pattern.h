@@ -234,7 +234,7 @@ public:
 
     virtual FocusPattern GetFocusPattern() const
     {
-        return { FocusType::DISABLE, false, FocusStyle::NONE };
+        return { FocusType::DISABLE, false, FocusStyleType::NONE };
     }
 
     virtual ScopeFocusAlgorithm GetScopeFocusAlgorithm()
