@@ -158,7 +158,7 @@ private:
     Size formerRawImageSize_;
     bool imageDataNotReady_ = false;
 
-    ImageSourceInfo curSourceInfo_;
+    ImageSourceInfo src_;
     ImageObjSuccessCallback imageObjSuccessCallback_;
     UploadSuccessCallback uploadSuccessCallback_;
     FailedCallback failedCallback_;
