@@ -139,6 +139,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isTouch_ = false;
     bool isHover_ = false;
+    bool isClick_ = false;
     bool isFirstCreated_ = true;
     // animation control
     RefPtr<Animator> controller_;
