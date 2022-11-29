@@ -158,23 +158,24 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
         }
     }
 
-    bool scrollUpToStart = GreatNotEqual(lastOffset_, 0.0) && LessOrEqual(currentOffset_, 0.0);
-    bool scrollDownToStart = LessNotEqual(lastOffset_, 0.0) && GreatOrEqual(currentOffset_, 0.0);
-    bool jumpToStart = isJump && NearZero(currentOffset_);
-    if ((startIndex_ == 0) && (scrollUpToStart || scrollDownToStart || jumpToStart)) {
-        auto onReachStart = listEventHub->GetOnReachStart();
-        if (onReachStart) {
+    auto onReachStart = listEventHub->GetOnReachStart();
+    if (onReachStart && (startIndex_ == 0)) {
+        float lastStartPos = startMainPos_ - (currentOffset_ - lastOffset_);
+        bool scrollUpToStart = GreatNotEqual(lastStartPos, 0.0) && LessOrEqual(startMainPos_, 0.0);
+        bool scrollDownToStart = LessNotEqual(lastStartPos, 0.0) && GreatOrEqual(startMainPos_, 0.0);
+        bool jumpToStart = isJump && NearZero(startMainPos_);
+        if (scrollUpToStart || scrollDownToStart || jumpToStart) {
             onReachStart();
         }
     }
     auto onReachEnd = listEventHub->GetOnReachEnd();
-    if (onReachEnd) {
+    if (onReachEnd && (endIndex_ == maxListItemIndex_)) {
         float lastEndPos = endMainPos_ - (currentOffset_ - lastOffset_);
         float mainSize = GetMainContentSize();
         bool scrollUpToEnd = GreatNotEqual(lastEndPos, mainSize) && LessOrEqual(endMainPos_, mainSize);
         bool scrollDownToEnd = LessNotEqual(lastEndPos, mainSize) && GreatOrEqual(endMainPos_, mainSize);
         bool jumpToEnd = isJump && NearEqual(endMainPos_, mainSize);
-        if ((endIndex_ == maxListItemIndex_) && (scrollUpToEnd || scrollDownToEnd || jumpToEnd)) {
+        if (scrollUpToEnd || scrollDownToEnd || jumpToEnd) {
             onReachEnd();
         }
     }
