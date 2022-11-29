@@ -237,38 +237,34 @@ void VideoPattern::RegisterMediaPlayerEvent()
     auto&& positionUpdatedEvent = [videoPattern, uiTaskExecutor](uint32_t currentPos) {
         uiTaskExecutor.PostSyncTask([&videoPattern, currentPos] {
             auto video = videoPattern.Upgrade();
-            if (video != nullptr) {
-                video->OnCurrentTimeChange(currentPos);
-            }
+            CHECK_NULL_VOID_NOLOG(video);
+            video->OnCurrentTimeChange(currentPos);
         });
     };
 
     auto&& stateChangedEvent = [videoPattern, uiTaskExecutor](PlaybackStatus status) {
         uiTaskExecutor.PostSyncTask([&videoPattern, status] {
             auto video = videoPattern.Upgrade();
-            if (video) {
-                LOGD("OnPlayerStatus");
-                video->OnPlayerStatus(status);
-            }
+            CHECK_NULL_VOID_NOLOG(video);
+            LOGD("OnPlayerStatus");
+            video->OnPlayerStatus(status);
         });
     };
 
     auto&& errorEvent = [videoPattern, uiTaskExecutor]() {
         uiTaskExecutor.PostTask([&videoPattern] {
             auto video = videoPattern.Upgrade();
-            if (video) {
-                LOGD("OnError");
-                video->OnError("");
-            }
+            CHECK_NULL_VOID_NOLOG(video);
+            LOGD("OnError");
+            video->OnError("");
         });
     };
 
     auto&& resolutionChangeEvent = [videoPattern, uiTaskExecutor]() {
         uiTaskExecutor.PostSyncTask([&videoPattern] {
             auto video = videoPattern.Upgrade();
-            if (video) {
-                video->OnResolutionChange();
-            }
+            CHECK_NULL_VOID_NOLOG(video);
+            video->OnResolutionChange();
         });
     };
 
@@ -644,8 +640,7 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     renderContextForMediaPlayer_->SetBounds(
         videoNodeOffset.GetX() + (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
         videoNodeOffset.GetY() + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
-        videoFrameSize.Width(),
-        videoFrameSize.Height());
+        videoFrameSize.Width(), videoFrameSize.Height());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     host->MarkNeedSyncRenderTree();
@@ -654,7 +649,7 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 
 RefPtr<FrameNode> VideoPattern::CreateControlBar()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
@@ -691,7 +686,7 @@ RefPtr<FrameNode> VideoPattern::CreateControlBar()
 }
 RefPtr<FrameNode> VideoPattern::CreateSlider()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
@@ -730,7 +725,7 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
 
 RefPtr<FrameNode> VideoPattern::CreateText(uint32_t time)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
@@ -756,7 +751,7 @@ RefPtr<FrameNode> VideoPattern::CreateText(uint32_t time)
 
 RefPtr<FrameNode> VideoPattern::CreateSVG()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
@@ -793,65 +788,57 @@ void VideoPattern::SetMethodCall()
     videoController->SetStartImpl([weak = WeakClaim(this), uiTaskExecutor]() {
         uiTaskExecutor.PostTask([weak]() {
             auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->Start();
-            }
+            CHECK_NULL_VOID(pattern);
+            pattern->Start();
         });
     });
     videoController->SetPausetImpl([weak = WeakClaim(this), uiTaskExecutor]() {
         uiTaskExecutor.PostTask([weak]() {
             auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->Pause();
-            }
+            CHECK_NULL_VOID(pattern);
+            pattern->Pause();
         });
     });
     videoController->SetStopImpl([weak = WeakClaim(this), uiTaskExecutor]() {
         uiTaskExecutor.PostTask([weak]() {
             auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->Stop();
-            }
+            CHECK_NULL_VOID(pattern);
+            pattern->Stop();
         });
     });
     videoController->SetSeekToImpl([weak = WeakClaim(this), uiTaskExecutor](float pos, SeekMode seekMode) {
         uiTaskExecutor.PostTask([weak, pos, seekMode]() {
             auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->SetCurrentTime(pos, seekMode);
-            }
+            CHECK_NULL_VOID(pattern);
+            pattern->SetCurrentTime(pos, seekMode);
         });
     });
     videoController->SetRequestFullscreenImpl([weak = WeakClaim(this), uiTaskExecutor](bool isFullScreen) {
         uiTaskExecutor.PostTask([weak, isFullScreen]() {
             auto pattern = weak.Upgrade();
-            if (pattern) {
-                if (isFullScreen) {
-                    pattern->FullScreen();
-                } else {
-                    pattern->ExitFullScreen();
-                }
+            CHECK_NULL_VOID(pattern);
+            if (isFullScreen) {
+                pattern->FullScreen();
+            } else {
+                pattern->ExitFullScreen();
             }
         });
     });
     videoController->SetExitFullscreenImpl([weak = WeakClaim(this), uiTaskExecutor](bool isSync) {
         if (isSync) {
             auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->ExitFullScreen();
-            }
+            CHECK_NULL_VOID(pattern);
+            pattern->ExitFullScreen();
             return;
         }
         uiTaskExecutor.PostTask([weak]() {
             auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->ExitFullScreen();
-            }
+            CHECK_NULL_VOID(pattern);
+            pattern->ExitFullScreen();
         });
     });
-    if (videoControllerV2_) {
-        videoControllerV2_->AddVideoController(videoController);
-    }
+    CHECK_NULL_VOID_NOLOG(videoControllerV2_);
+    videoControllerV2_->AddVideoController(videoController);
 }
 
 void VideoPattern::Start()
@@ -947,16 +934,15 @@ void VideoPattern::ChangePlayButtonTag()
 void VideoPattern::ChangePlayButtonTag(RefPtr<FrameNode>& playBtn)
 {
     CHECK_NULL_VOID(playBtn);
-    auto playClickCallback =
-        [weak = WeakClaim(this), playing = isPlaying_] (GestureEvent& /* info */) {
-            auto videoPattern = weak.Upgrade();
-            CHECK_NULL_VOID(videoPattern);
-            if (playing) {
-                videoPattern->Pause();
-            } else {
-                videoPattern->Start();
-            }
-        };
+    auto playClickCallback = [weak = WeakClaim(this), playing = isPlaying_](GestureEvent& /* info */) {
+        auto videoPattern = weak.Upgrade();
+        CHECK_NULL_VOID(videoPattern);
+        if (playing) {
+            videoPattern->Pause();
+        } else {
+            videoPattern->Start();
+        }
+    };
     auto playBtnEvent = playBtn->GetOrCreateGestureEventHub();
     playBtnEvent->SetUserOnClick(std::move(playClickCallback));
     auto svgLayoutProperty = playBtn->GetLayoutProperty<ImageLayoutProperty>();
