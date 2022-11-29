@@ -38,10 +38,10 @@ void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNo
 void ViewAbstractModelNG::BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc)
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    GestureEventFunc event;
+    GestureEventFunc showMenu;
     auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
     if (!params.empty()) {
-        event = [params, weakTarget](GestureEvent& /* info */) mutable {
+        showMenu = [params, weakTarget](GestureEvent& /* info */) mutable {
             auto targetNode = weakTarget.Upgrade();
             CHECK_NULL_VOID(targetNode);
             // menu already created
@@ -53,7 +53,7 @@ void ViewAbstractModelNG::BindMenu(std::vector<NG::OptionParam>&& params, std::f
             params.clear();
         };
     } else if (buildFunc) {
-        event = [builderFunc = std::move(buildFunc), weakTarget](const GestureEvent& /* info */) mutable {
+        showMenu = [builderFunc = std::move(buildFunc), weakTarget](const GestureEvent& /* info */) mutable {
             auto targetNode = weakTarget.Upgrade();
             CHECK_NULL_VOID(targetNode);
             CreateCustomMenu(builderFunc, targetNode, false, GetMenuPosition(targetNode));
@@ -63,8 +63,7 @@ void ViewAbstractModelNG::BindMenu(std::vector<NG::OptionParam>&& params, std::f
         return;
     }
     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
-    auto onClick = AceType::MakeRefPtr<NG::ClickEvent>(std::move(event));
-    gestureHub->AddClickEvent(onClick);
+    gestureHub->BindMenu(std::move(showMenu));
 
     // delete menu when target node is removed from render tree
     auto eventHub = targetNode->GetEventHub<NG::EventHub>();
