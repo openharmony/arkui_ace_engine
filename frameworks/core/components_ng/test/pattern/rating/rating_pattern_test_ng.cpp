@@ -12,13 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 
 #include "gtest/gtest.h"
 #include "third_party/libpng/png.h"
 
 #include "base/memory/ace_type.h"
+#include "core/components_ng/test/mock/render/mock_canvas_image.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/image/image_source_info.h"
 
@@ -60,13 +61,17 @@ constexpr double RATING_STEP_SIZE = 0.7;
 const float CONTAINER_WIDTH = 300.0f;
 const float CONTAINER_HEIGHT = 300.0f;
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
+const float INVALID_CONTAINER_WIDTH = -300.0f;
+const float INVALID_CONTAINER_HEIGHT = -300.0f;
+const SizeF INVALID_CONTAINER_SIZE(INVALID_CONTAINER_WIDTH, INVALID_CONTAINER_HEIGHT);
 const std::string RESOURCE_URL = "resource:///ohos_test_image.svg";
 const std::string IMAGE_SOURCE_INFO_STRING = "empty source";
 const int32_t RATING_FOREGROUND_FLAG = 0b001;
 const int32_t RATING_SECONDARY_FLAG = 0b010;
 const int32_t RATING_BACKGROUND_FLAG = 0b100;
-const int32_t INVALID_IMAGE_FLAG = 0b100;
+const int32_t INVALID_IMAGE_FLAG = 0b111;
 const std::string RATING_IMAGE_LOAD_FAILED = "ImageDataFailed";
+const std::string RATING_IMAGE_LOAD_SUCCESS = "ImageDataSuccess";
 constexpr int32_t RATING_IMAGE_SUCCESS_CODE = 0b111;
 const InternalResource::ResourceId FOREGROUND_IMAGE_RESOURCE_ID = InternalResource::ResourceId::RATE_STAR_BIG_ON_SVG;
 const InternalResource::ResourceId SECONDARY_IMAGE_RESOURCE_ID = InternalResource::ResourceId::RATE_STAR_BIG_OFF_SVG;
@@ -76,28 +81,28 @@ const std::string RATING_SECONDARY_IMAGE_KEY = "secondaryImageSourceInfo";
 const std::string RATING_BACKGROUND_IMAGE_KEY = "backgroundImageSourceInfo";
 } // namespace
 
-class RatingPropertyTestNg : public testing::Test {
+class RatingPatternTestNg : public testing::Test {
 public:
-    static void SetUpTestSuite();
-    static void TearDownTestSuite();
+    static void SetUpTestCase();
+    static void TearDownTestCase();
 };
 
-void RatingPropertyTestNg::SetUpTestSuite()
+void RatingPatternTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
 }
 
-void RatingPropertyTestNg::TearDownTestSuite()
+void RatingPatternTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
 }
 
 /**
- * @tc.name: RatingLayoutPropertyTest001
+ * @tc.name: RatingCreateTest001
  * @tc.desc: Create Rating.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPropertyTestNg, RatingLayoutPropertyTest001, TestSize.Level1)
+HWTEST_F(RatingPatternTestNg, RatingCreateTest001, TestSize.Level1)
 {
     RatingModelNG rating;
     rating.Create();
@@ -111,7 +116,7 @@ HWTEST_F(RatingPropertyTestNg, RatingLayoutPropertyTest001, TestSize.Level1)
  * @tc.desc: Test rating indicator, starStyle and starNum default value.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPropertyTestNg, RatingLayoutPropertyTest002, TestSize.Level1)
+HWTEST_F(RatingPatternTestNg, RatingLayoutPropertyTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Rating without parameters.
@@ -130,7 +135,7 @@ HWTEST_F(RatingPropertyTestNg, RatingLayoutPropertyTest002, TestSize.Level1)
      * @tc.expected: indicator and starNum used the values defined in theme.
      */
     EXPECT_EQ(ratingLayoutProperty->GetIndicator().value_or(false), DEFAULT_RATING_INDICATOR);
-    EXPECT_EQ(ratingLayoutProperty->GetStars().value_or(5), DEFAULT_STAR_NUM);
+    EXPECT_EQ(ratingLayoutProperty->GetStars().value_or(DEFAULT_STAR_NUM), DEFAULT_STAR_NUM);
 
     /**
      * @tc.steps: step3. Invoke UpdateInternalResource.
@@ -164,7 +169,7 @@ HWTEST_F(RatingPropertyTestNg, RatingLayoutPropertyTest002, TestSize.Level1)
  * @tc.desc: Test setting indicator, starStyle and starNum.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPropertyTestNg, RatingLayoutPropertyTest003, TestSize.Level1)
+HWTEST_F(RatingPatternTestNg, RatingLayoutPropertyTest003, TestSize.Level1)
 {
     RatingModelNG rating;
     rating.Create();
@@ -196,7 +201,7 @@ HWTEST_F(RatingPropertyTestNg, RatingLayoutPropertyTest003, TestSize.Level1)
  * @tc.desc: Test rating ratingScore and stepSize default value.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPropertyTestNg, RatingRenderPropertyTest004, TestSize.Level1)
+HWTEST_F(RatingPatternTestNg, RatingRenderPropertyTest004, TestSize.Level1)
 {
     RatingModelNG rating;
     rating.Create();
@@ -215,7 +220,7 @@ HWTEST_F(RatingPropertyTestNg, RatingRenderPropertyTest004, TestSize.Level1)
  * @tc.desc: Test setting rating ratingScore(drawScore) and stepSize.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPropertyTestNg, RatingRenderPropertyTest005, TestSize.Level1)
+HWTEST_F(RatingPatternTestNg, RatingRenderPropertyTest005, TestSize.Level1)
 {
     RatingModelNG rating;
     rating.Create();
@@ -237,7 +242,7 @@ HWTEST_F(RatingPropertyTestNg, RatingRenderPropertyTest005, TestSize.Level1)
  * @tc.desc: Test setting out-of-bounds ratingScore and starNum values.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPropertyTestNg, RatingConstrainsPropertyTest006, TestSize.Level1)
+HWTEST_F(RatingPatternTestNg, RatingConstrainsPropertyTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create Rating with its the ratingScore and starNums are both negative.
@@ -302,13 +307,16 @@ HWTEST_F(RatingPropertyTestNg, RatingConstrainsPropertyTest006, TestSize.Level1)
  * @tc.desc: Invoke GetImageSourceInfoFromTheme and ready, success and fail callback functions.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPropertyTestNg, RatingPatternGetImageSourceFromThemeTest007, TestSize.Level1)
+HWTEST_F(RatingPatternTestNg, RatingPatternGetImageSourceFromThemeTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create RatingModelNG.
      */
     RatingModelNG rating;
     rating.Create();
+    rating.SetBackgroundSrc(RATING_BACKGROUND_URL);
+    rating.SetForegroundSrc(RATING_FOREGROUND_URL);
+    rating.SetSecondarySrc(RATING_SECONDARY_URL);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
@@ -328,12 +336,14 @@ HWTEST_F(RatingPropertyTestNg, RatingPatternGetImageSourceFromThemeTest007, Test
     /**
      * @tc.steps: step2. Invoke CheckImageInfoHasChangedOrNot.
      */
-    ratingPattern->CheckImageInfoHasChangedOrNot(
-        RATING_FOREGROUND_FLAG, ImageSourceInfo(RATING_FOREGROUND_URL), RATING_IMAGE_LOAD_FAILED);
-    ratingPattern->CheckImageInfoHasChangedOrNot(
-        RATING_SECONDARY_FLAG, ImageSourceInfo(RATING_SECONDARY_URL), RATING_IMAGE_LOAD_FAILED);
-    ratingPattern->CheckImageInfoHasChangedOrNot(
-        RATING_BACKGROUND_FLAG, ImageSourceInfo(RATING_BACKGROUND_URL), RATING_IMAGE_LOAD_FAILED);
+    std::string lifeCycleTags[] = { RATING_IMAGE_LOAD_FAILED, RATING_IMAGE_LOAD_SUCCESS };
+    for (std::string tag : lifeCycleTags) {
+        ratingPattern->CheckImageInfoHasChangedOrNot(
+            RATING_FOREGROUND_FLAG, ImageSourceInfo(RATING_FOREGROUND_URL), tag);
+        ratingPattern->CheckImageInfoHasChangedOrNot(RATING_SECONDARY_FLAG, ImageSourceInfo(RATING_SECONDARY_URL), tag);
+        ratingPattern->CheckImageInfoHasChangedOrNot(
+            RATING_BACKGROUND_FLAG, ImageSourceInfo(RATING_BACKGROUND_URL), tag);
+    }
 
     /**
      * @tc.steps: step3. Invoke OnImageLoadSuccess when the foreground, secondary and background image has been loaded
@@ -361,7 +371,7 @@ HWTEST_F(RatingPropertyTestNg, RatingPatternGetImageSourceFromThemeTest007, Test
  * @tc.desc: Invoke ToJsonValue function.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPropertyTestNg, RatingPatternToJsonValueTest008, TestSize.Level1)
+HWTEST_F(RatingPatternTestNg, RatingPatternToJsonValueTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create RatingModelNG.
@@ -377,40 +387,44 @@ HWTEST_F(RatingPropertyTestNg, RatingPatternToJsonValueTest008, TestSize.Level1)
     EXPECT_NE(ratingPattern, nullptr);
 
     /**
+     * @tc.steps: step3. Invoke ToJsonValue when the foreground, secondary and background image are not used in theme.
+     * @tc.expected: ImageSourceInfo src is users defined when create component.
+     */
+    EXPECT_FALSE(ratingPattern->isForegroundImageInfoFromTheme_);
+    EXPECT_FALSE(ratingPattern->isSecondaryImageInfoFromTheme_);
+    EXPECT_FALSE(ratingPattern->isSecondaryImageInfoFromTheme_);
+    auto json = JsonUtil::Create(true);
+    ratingPattern->ToJsonValue(json);
+
+    EXPECT_EQ(json->GetValue(RATING_FOREGROUND_IMAGE_KEY)->GetString(), RATING_FOREGROUND_URL);
+    EXPECT_EQ(json->GetValue(RATING_SECONDARY_IMAGE_KEY)->GetString(), RATING_SECONDARY_URL);
+    EXPECT_EQ(json->GetValue(RATING_BACKGROUND_IMAGE_KEY)->GetString(), RATING_BACKGROUND_URL);
+
+    /**
      * @tc.steps: step2. Invoke ToJsonValue when the foreground, secondary and background image are used in theme.
      * @tc.expected: ImageSourceInfo src is null.
      */
     ratingPattern->isForegroundImageInfoFromTheme_ = true;
     ratingPattern->isSecondaryImageInfoFromTheme_ = true;
     ratingPattern->isBackgroundImageInfoFromTheme_ = true;
-    auto json = JsonUtil::Create(true);
-    ratingPattern->ToJsonValue(json);
+    auto json2 = JsonUtil::Create(true);
+    ratingPattern->ToJsonValue(json2);
 
-    EXPECT_EQ(json->GetValue(RATING_FOREGROUND_IMAGE_KEY)->GetString(), IMAGE_SOURCE_INFO_STRING);
-    EXPECT_EQ(json->GetValue(RATING_SECONDARY_IMAGE_KEY)->GetString(), IMAGE_SOURCE_INFO_STRING);
-    EXPECT_EQ(json->GetValue(RATING_BACKGROUND_IMAGE_KEY)->GetString(), IMAGE_SOURCE_INFO_STRING);
-
-    /**
-     * @tc.steps: step3. Invoke ToJsonValue when the foreground, secondary and background image are not used in theme.
-     * @tc.expected: ImageSourceInfo src is users defined when create component.
-     */
-    ratingPattern->isForegroundImageInfoFromTheme_ = false;
-    ratingPattern->isSecondaryImageInfoFromTheme_ = false;
-    ratingPattern->isBackgroundImageInfoFromTheme_ = false;
-    ratingPattern->ToJsonValue(json);
-
-    EXPECT_EQ(json->GetValue(RATING_FOREGROUND_IMAGE_KEY)->GetString(), IMAGE_SOURCE_INFO_STRING);
-    EXPECT_EQ(json->GetValue(RATING_SECONDARY_IMAGE_KEY)->GetString(), IMAGE_SOURCE_INFO_STRING);
-    EXPECT_EQ(json->GetValue(RATING_BACKGROUND_IMAGE_KEY)->GetString(), IMAGE_SOURCE_INFO_STRING);
+    EXPECT_EQ(json2->GetValue(RATING_FOREGROUND_IMAGE_KEY)->GetString(), IMAGE_SOURCE_INFO_STRING);
+    EXPECT_EQ(json2->GetValue(RATING_SECONDARY_IMAGE_KEY)->GetString(), IMAGE_SOURCE_INFO_STRING);
+    EXPECT_EQ(json2->GetValue(RATING_BACKGROUND_IMAGE_KEY)->GetString(), IMAGE_SOURCE_INFO_STRING);
 }
 
 /**
  * @tc.name: RatingMeasureTest009
- * @tc.desc: Test rating measure and layout function
+ * @tc.desc: Test rating measure and layout function and invoke OnDirtyLayoutWrapperSwap function.
  * @tc.type: FUNC
  */
-HWTEST_F(RatingPropertyTestNg, RatingMeasureTest009, TestSize.Level1)
+HWTEST_F(RatingPatternTestNg, RatingMeasureTest009, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     */
     RatingModelNG rating;
     rating.Create();
     rating.SetStepSize(RATING_STEP_SIZE);
@@ -418,8 +432,10 @@ HWTEST_F(RatingPropertyTestNg, RatingMeasureTest009, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
 
-    // Create LayoutWrapper and set ratingLayoutAlgorithm.
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set ratingLayoutAlgorithm.
+     */
+    const RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
     LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto ratingLayoutProperty = frameNode->GetLayoutProperty<RatingLayoutProperty>();
@@ -432,31 +448,88 @@ HWTEST_F(RatingPropertyTestNg, RatingMeasureTest009, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RatingTheme>()));
-    // Rating without setting height and width.
+
+    /**
+     * @tc.steps: step3. Invoke MeasureContent when the size has not been defined.
+     * @tc.expected: Use the size defined in ratingTheme.
+     */
     const LayoutConstraintF layoutConstraint;
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
-    // Calculate the size and offset.
-    ratingLayoutAlgorithm->Measure(&layoutWrapper);
-    ratingLayoutAlgorithm->Layout(&layoutWrapper);
-    // Test the default size set in theme and the offset.
     auto ratingTheme = AceType::MakeRefPtr<RatingTheme>();
     EXPECT_NE(ratingTheme, nullptr);
-    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize(),
+    EXPECT_EQ(ratingLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper),
         SizeF(ratingTheme->GetRatingHeight().ConvertToPx(), ratingTheme->GetRatingWidth().ConvertToPx()));
-    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameOffset(), OffsetF(0.0, 0.0));
 
+    /**
+     * @tc.steps: step4. Invoke MeasureContent when the size has been defined.
+     * @tc.expected: Use the size defined before.
+     */
+    LayoutConstraintF layoutConstraintSize;
     /**
     //     corresponding ets code:
     //         Rating().width(300).height(300)
     */
-    LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetSize(CONTAINER_SIZE);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize);
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
-    ratingLayoutAlgorithm->Measure(&layoutWrapper);
-    // Test the size set by codes.
-    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize(), SizeF(CONTAINER_SIZE));
-}
+    EXPECT_EQ(ratingLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper), CONTAINER_SIZE);
 
+    /**
+     * @tc.steps: step5. Invoke MeasureContent when the size is negative.
+     * @tc.expected: Use the size defined in theme.
+     */
+    layoutConstraintSize.selfIdealSize.SetSize(INVALID_CONTAINER_SIZE);
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    EXPECT_EQ(ratingLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper),
+        SizeF(ratingTheme->GetRatingHeight().ConvertToPx(), ratingTheme->GetRatingWidth().ConvertToPx()));
+
+    /**
+     * @tc.steps: step6. Invoke Layout when contentSize is valid.
+     */
+    geometryNode->SetContentSize(CONTAINER_SIZE);
+    ratingLayoutAlgorithm->Layout(&layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameOffset(), OffsetF(0.0, 0.0));
+
+    /**
+     * @tc.steps: step7. Invoke OnDirtyLayoutWrapperSwap when the skipMeasure and skipMeasureContent values are
+     * different.
+     * @tc.expected: OnDirtyLayoutWrapperSwap return the false.
+     */
+    DirtySwapConfig config;
+    auto layoutWrapper2 = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    layoutWrapper2->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(ratingLayoutAlgorithm));
+    bool skipMeasureChanges[2] = { true, false };
+    bool skipMeasureContentChanges[2] = { true, false };
+    for (bool skipMeasure : skipMeasureChanges) {
+        for (bool skipMeasureContent : skipMeasureContentChanges) {
+            config.skipMeasure = skipMeasure;
+            layoutWrapper2->skipMeasureContent_ = skipMeasureContent;
+            EXPECT_FALSE(ratingPattern->OnDirtyLayoutWrapperSwap(layoutWrapper2, config));
+        }
+    }
+
+    /**
+     * @tc.steps: step8. Invoke OnDirtyLayoutWrapperSwap when the canvas images are nullptr or not.
+     * @tc.expected: OnDirtyLayoutWrapperSwap return the true only when the canvas images all have been initialized.
+     */
+    auto canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
+    const RefPtr<CanvasImage> canvasImages[2] = { nullptr, canvasImage };
+    for (const auto& foregroundCanvasImage : canvasImages) {
+        for (const auto& secondaryCanvasImage : canvasImages) {
+            for (const auto& backgroundCanvasImage : canvasImages) {
+                ratingPattern->foregroundImageCanvas_ = foregroundCanvasImage;
+                ratingPattern->secondaryImageCanvas_ = secondaryCanvasImage;
+                ratingPattern->backgroundImageCanvas_ = backgroundCanvasImage;
+                if (ratingPattern->foregroundImageCanvas_ && ratingPattern->secondaryImageCanvas_ &&
+                    ratingPattern->backgroundImageCanvas_) {
+                    EXPECT_TRUE(ratingPattern->OnDirtyLayoutWrapperSwap(layoutWrapper2, config));
+                } else {
+                    EXPECT_FALSE(ratingPattern->OnDirtyLayoutWrapperSwap(layoutWrapper2, config));
+                }
+            }
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

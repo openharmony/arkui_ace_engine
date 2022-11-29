@@ -586,9 +586,8 @@ void RatingPattern::OnModifyDone()
     InitClickEvent(gestureHub);
     InitMouseEvent();
     auto focusHub = host->GetFocusHub();
-    if (focusHub) {
-        InitOnKeyEvent(focusHub);
-    }
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
 }
 
 // XTS inspector code
