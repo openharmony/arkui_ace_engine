@@ -203,6 +203,7 @@ public:
     virtual void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) {}
 
     virtual void OnPositionUpdate(const OffsetT<Dimension>& value) {}
+    virtual void OnZIndexUpdate(int32_t value) {}
 
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
@@ -322,7 +323,6 @@ protected:
 
     virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnAnchorUpdate(const OffsetT<Dimension>& value) {}
-    virtual void OnZIndexUpdate(int32_t value) {}
 
     virtual void OnClipShapeUpdate(const RefPtr<BasicShape>& basicShape) {}
     virtual void OnClipEdgeUpdate(bool isClip) {}

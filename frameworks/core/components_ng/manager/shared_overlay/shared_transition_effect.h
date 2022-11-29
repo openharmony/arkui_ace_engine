@@ -158,8 +158,6 @@ private:
     bool CreateTranslateAnimation(const RefPtr<FrameNode>& src, const RefPtr<FrameNode>& dest);
     bool CreateSizeAnimation(const RefPtr<FrameNode>& src, const RefPtr<FrameNode>& dest);
     bool CreateOpacityAnimation(const RefPtr<FrameNode>& src, const RefPtr<FrameNode>& dest);
-    void CreateWidthAnimation(const RefPtr<FrameNode>& src, float start, float end);
-    void CreateHeightAnimation(const RefPtr<FrameNode>& src, float start, float end);
     VisibleType destVisible_ = VisibleType::VISIBLE;
 };
 
