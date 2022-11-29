@@ -128,18 +128,12 @@ void RenderImage::Update(const RefPtr<Component>& component)
     copyOption_ = image->GetCopyOption();
 
     // this value is used for update frequency with same image source info.
-    LOGD("sourceInfo %{public}s", newSrc_.ToString().c_str());
+    LOGD("sourceInfo %{public}s", sourceInfo_.ToString().c_str());
     LOGD("inComingSource %{public}s", inComingSource.ToString().c_str());
     LOGD("imageLoadingStatus_: %{public}d", static_cast<int32_t>(imageLoadingStatus_));
-    // check if inComingSource is already loading
-    proceedLastLoading_ = newSrc_.IsValid() && newSrc_ == inComingSource;
-    // MEMORY srcType always reloads
-    proceedLastLoading_ = proceedLastLoading_ && inComingSource.GetSrcType() != SrcType::MEMORY;
-    // perform layout only if loading new image
-    if (!proceedLastLoading_) {
-        newSrc_ = inComingSource;
-        MarkNeedLayout(newSrc_.IsSvg());
-    }
+    proceedPreviousLoading_ = sourceInfo_.IsValid() && sourceInfo_ == inComingSource;
+    sourceInfo_ = inComingSource;
+    MarkNeedLayout(sourceInfo_.IsSvg());
 }
 
 void RenderImage::UpdateThemeIcon(ImageSourceInfo& sourceInfo)
@@ -170,7 +164,7 @@ void RenderImage::OnTouchTestHit(
     }
 
     if (copyOption_ != CopyOptions::None && imageLoadingStatus_ == ImageLoadingStatus::LOAD_SUCCESS
-        && !newSrc_.IsSvg()) {
+        && !sourceInfo_.IsSvg()) {
         if (!textOverlayRecognizer_) {
             textOverlayRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(context_);
             textOverlayRecognizer_->SetOnLongPress([weak = WeakClaim(this)](const LongPressInfo& info) {
@@ -210,7 +204,7 @@ void RenderImage::OnLongPress(const LongPressInfo& longPressInfo)
 bool RenderImage::HandleMouseEvent(const MouseEvent& event)
 {
     if (copyOption_ == CopyOptions::None || imageLoadingStatus_ != ImageLoadingStatus::LOAD_SUCCESS
-        || newSrc_.IsSvg()) {
+        || sourceInfo_.IsSvg()) {
         return false;
     }
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
@@ -334,19 +328,19 @@ void RenderImage::HandleOnCopy()
         return;
     }
     auto renderImage = AceType::Claim(this);
-    auto type = newSrc_.GetSrcType();
+    auto type = sourceInfo_.GetSrcType();
     switch (type) {
         case SrcType::PIXMAP: {
-            clipboard_->SetPixelMapData(newSrc_.GetPixmap(), copyOption_);
+            clipboard_->SetPixelMapData(sourceInfo_.GetPixmap(), copyOption_);
             break;
         }
         case SrcType::BASE64: {
-            clipboard_->SetData(newSrc_.GetSrc(), copyOption_);
+            clipboard_->SetData(sourceInfo_.GetSrc(), copyOption_);
             break;
         }
         case SrcType::DATA_ABILITY_DECODED:
         case SrcType::DATA_ABILITY: {
-            clipboard_->SetData(newSrc_.GetSrc(), copyOption_);
+            clipboard_->SetData(sourceInfo_.GetSrc(), copyOption_);
             break;
         }
         default: {
@@ -869,7 +863,7 @@ void RenderImage::ClearRenderObject()
     imageRepeat_ = ImageRepeat::NO_REPEAT;
     rectList_.clear();
     color_.reset();
-    newSrc_.Reset();
+    sourceInfo_.Reset();
     singleWidth_ = 0.0;
     displaySrcWidth_ = 0.0;
     scale_ = 1.0;
@@ -890,7 +884,7 @@ void RenderImage::ClearRenderObject()
     height_ = Dimension();
     rawImageSize_ = Size();
     renderAltImage_ = nullptr;
-    proceedLastLoading_ = false;
+    proceedPreviousLoading_ = false;
     imageUpdateFunc_ = nullptr;
     imageRenderFunc_ = nullptr;
     background_ = false;

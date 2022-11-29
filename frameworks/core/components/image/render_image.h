@@ -67,14 +67,14 @@ public:
     }
     void SetImageSrc(const std::string& imageSrc)
     {
-        if (imageSrc != newSrc_.GetSrc()) {
-            newSrc_.SetSrc(imageSrc);
+        if (imageSrc != sourceInfo_.GetSrc()) {
+            sourceInfo_.SetSrc(imageSrc);
             FetchImageObject();
         }
     }
     const std::string& GetImageSrc() const
     {
-        return newSrc_.GetSrc();
+        return sourceInfo_.GetSrc();
     }
     const std::string& GetImageAlt() const
     {
@@ -109,7 +109,7 @@ public:
 
     Size GetImageSourceSize() const
     {
-        return newSrc_.GetSourceSize();
+        return sourceInfo_.GetSourceSize();
     }
 
     ImageInterpolation GetImageInterpolation() const
@@ -393,8 +393,8 @@ protected:
     bool directPaint_ = false;
     int32_t retryCnt_ = 0;
     std::list<std::function<void()>> imageLayoutCallbacks_;
-    bool proceedLastLoading_ = false;
-    ImageSourceInfo newSrc_;
+    bool proceedPreviousLoading_ = false;
+    ImageSourceInfo sourceInfo_;
     void* pixmapRawPtr_ = nullptr;
     bool syncMode_ = false;
     Border border_;
