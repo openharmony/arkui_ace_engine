@@ -101,7 +101,10 @@ public:
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
 
-    void SetBuildAfterCallback(const std::function<void()>& callback) override {}
+    void SetBuildAfterCallback(const std::function<void()>& callback) override
+    {
+        buildFinishCallbacks_.emplace_back(callback);
+    }
 
     void SaveExplicitAnimationOption(const AnimationOption& option) override {}
 

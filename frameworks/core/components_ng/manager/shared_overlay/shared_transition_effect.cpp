@@ -175,55 +175,37 @@ bool SharedTransitionExchange::CreateSizeAnimation(const RefPtr<FrameNode>& src,
     }
     LOGI("Get Size, share id: %{public}s. src: %{public}s, dest: %{public}s", GetShareId().c_str(),
         srcSize.ToString().c_str(), destSize.ToString().c_str());
-    CreateWidthAnimation(src, srcSize.Width(), destSize.Width());
-    CreateHeightAnimation(src, srcSize.Height(), destSize.Height());
+    if (NearEqual(srcSize, destSize)) {
+        return true;
+    }
+    const auto& magicProperty = src->GetLayoutProperty()->GetMagicItemProperty();
+    auto initAspectRatio = magicProperty ? magicProperty->GetAspectRatio() : std::nullopt;
+    auto sizeAnimation = AceType::MakeRefPtr<CurveAnimation<SizeF>>(srcSize, destSize, option_->curve);
+    auto sizeListener = [weakFrame = WeakPtr<FrameNode>(src), setAspect = initAspectRatio.has_value()](
+                            const SizeF& size) {
+        auto src = weakFrame.Upgrade();
+        CHECK_NULL_VOID(src);
+        src->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(size.Width()), CalcLength(size.Height())));
+        if (setAspect) {
+            src->GetLayoutProperty()->UpdateAspectRatio(size.Width() / size.Height());
+        }
+        src->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    };
+    sizeAnimation->AddListener(sizeListener);
+    controller_->AddInterpolator(sizeAnimation);
+    finishCallbacks_.emplace_back(
+        [weakFrame = WeakPtr<FrameNode>(src),
+            initSize = CalcSize(CalcLength(srcSize.Width()), CalcLength(srcSize.Height())), initAspectRatio]() {
+            auto src = weakFrame.Upgrade();
+            CHECK_NULL_VOID(src);
+            src->GetLayoutProperty()->UpdateUserDefinedIdealSize(initSize);
+            if (initAspectRatio.has_value()) {
+                src->GetLayoutProperty()->UpdateAspectRatio(initAspectRatio.value());
+            }
+            src->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        });
     return true;
-}
-
-void SharedTransitionExchange::CreateWidthAnimation(const RefPtr<FrameNode>& src, float start, float end)
-{
-    if (NearEqual(start, end)) {
-        return;
-    }
-    auto widthAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(start, end, option_->curve);
-    auto widthListener = [weakNode = WeakPtr<FrameNode>(src)](const float& width) {
-        auto src = weakNode.Upgrade();
-        CHECK_NULL_VOID(src);
-        src->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), std::nullopt));
-        src->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    };
-    widthAnimation->AddListener(widthListener);
-    controller_->AddInterpolator(widthAnimation);
-    finishCallbacks_.emplace_back([weakFrame = WeakPtr<FrameNode>(src), initialWidth = start]() {
-        auto src = weakFrame.Upgrade();
-        CHECK_NULL_VOID(src);
-        LOGD("set initial width:%{public}f", initialWidth);
-        src->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(CalcLength(initialWidth), std::nullopt));
-        src->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    });
-}
-
-void SharedTransitionExchange::CreateHeightAnimation(const RefPtr<FrameNode>& src, float start, float end)
-{
-    if (NearEqual(start, end)) {
-        return;
-    }
-    auto heightAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(start, end, option_->curve);
-    auto heightListener = [weakFrame = WeakPtr<FrameNode>(src)](const float& height) {
-        auto src = weakFrame.Upgrade();
-        CHECK_NULL_VOID(src);
-        src->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(height)));
-        src->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    };
-    heightAnimation->AddListener(heightListener);
-    controller_->AddInterpolator(heightAnimation);
-    finishCallbacks_.emplace_back([weakFrame = WeakPtr<FrameNode>(src), initialHeight = start]() {
-        auto src = weakFrame.Upgrade();
-        CHECK_NULL_VOID(src);
-        LOGD("set initial height:%{public}f", initialHeight);
-        src->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(initialHeight)));
-        src->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    });
 }
 
 bool SharedTransitionExchange::CreateOpacityAnimation(const RefPtr<FrameNode>& src, const RefPtr<FrameNode>& dest)
