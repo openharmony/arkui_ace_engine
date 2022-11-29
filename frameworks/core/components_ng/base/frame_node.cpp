@@ -136,7 +136,7 @@ void FrameNode::InitializePatternAndContext()
     });
     renderContext_->SetHostNode(WeakClaim(this));
     // Initialize FocusHub
-    if (pattern_->GetFocusPattern().focusType != FocusType::DISABLE) {
+    if (pattern_->GetFocusPattern().GetFocusType() != FocusType::DISABLE) {
         GetOrCreateFocusHub();
     }
 }
@@ -1105,7 +1105,9 @@ RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub() const
     if (!pattern_) {
         return eventHub_->GetOrCreateFocusHub();
     }
-    return eventHub_->GetOrCreateFocusHub(pattern_->GetFocusPattern().focusType, pattern_->GetFocusPattern().focusable);
+    return eventHub_->GetOrCreateFocusHub(pattern_->GetFocusPattern().GetFocusType(),
+        pattern_->GetFocusPattern().GetFocusable(), pattern_->GetFocusPattern().GetStyleType(),
+        pattern_->GetFocusPattern().GetFocusPaintParams());
 }
 
 void FrameNode::OnWindowShow()

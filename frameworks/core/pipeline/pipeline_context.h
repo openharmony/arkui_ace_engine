@@ -426,7 +426,7 @@ public:
 
     void SetClickPosition(const Offset& position) const;
 
-    void RootLostFocus() const;
+    void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
     void FlushFocus();
 

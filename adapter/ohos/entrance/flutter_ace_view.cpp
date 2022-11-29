@@ -289,8 +289,9 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
         return;
     }
 
-    event.x = item.GetWindowX();
-    event.y = item.GetWindowY();
+    event.id = item.GetPointerId();
+    event.x = static_cast<float>(item.GetWindowX());
+    event.y = static_cast<float>(item.GetWindowY());
     event.horizontalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL);
     event.verticalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL);
     event.pinchAxisScale = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH);
@@ -302,9 +303,10 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
     event.time = time;
-    LOGD("ConvertAxisEvent: (x,y): (%{public}f,%{public}f). HorizontalAxis: %{public}f. VerticalAxis: %{public}f. "
+    LOGD("ConvertAxisEvent: id: %{public}d, (x,y): (%{public}f,%{public}f). HorizontalAxis: %{public}f. VerticalAxis: "
+         "%{public}f. "
          "Action: %{public}d. DeviceType: %{public}d. Time: %{public}lld",
-        event.x, event.y, event.horizontalAxis, event.verticalAxis, event.action, event.sourceType,
+        event.id, event.x, event.y, event.horizontalAxis, event.verticalAxis, event.action, event.sourceType,
         (long long)pointerEvent->GetActionTime());
 }
 

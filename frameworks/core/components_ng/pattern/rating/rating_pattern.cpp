@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/rating/rating_paint_method.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/canvas_image.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
@@ -458,6 +459,49 @@ void RatingPattern::UpdateInternalResource(ImageSourceInfo& sourceInfo, int32_t 
     }
 }
 
+void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto property = GetPaintProperty<RatingRenderProperty>();
+    CHECK_NULL_VOID(property);
+    auto ratingScore = property->GetRatingScoreValue();
+    auto singleStarWith = singleStarDstRect_.Width();
+    auto wholeStarNum = fmax(ceil(ratingScore) - 1, 0.0);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto ratingTheme = pipeline->GetTheme<RatingTheme>();
+    CHECK_NULL_VOID(ratingTheme);
+    auto radius = ratingTheme->GetFocusBorderRadius();
+
+    paintRect.SetRect(RectF(
+        static_cast<float>(wholeStarNum) * singleStarWith, 0.0f, singleStarWith, singleStarDstRect_.Height()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
+        static_cast<RSScalar>(radius.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
+        static_cast<RSScalar>(radius.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
+        static_cast<RSScalar>(radius.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
+        static_cast<RSScalar>(radius.ConvertToPx()));
+}
+
+void RatingPattern::PaintFocusState(double ratingScore)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    RoundRect focusRect;
+    GetInnerFocusPaintRect(focusRect);
+
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->PaintInnerFocusState(focusRect);
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 bool RatingPattern::OnKeyEvent(const KeyEvent& event)
 {
     if (event.action != KeyAction::DOWN) {
@@ -470,8 +514,7 @@ bool RatingPattern::OnKeyEvent(const KeyEvent& event)
     if (event.code == KeyCode::KEY_DPAD_LEFT) {
         ratingScore = fmax(ratingScore - stepSize, 0.0);
         ratingRenderProperty->UpdateRatingScore(ratingScore);
-        auto host = GetHost();
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        PaintFocusState(ratingScore);
         return true;
     }
     if (event.code == KeyCode::KEY_DPAD_RIGHT) {
@@ -479,8 +522,7 @@ bool RatingPattern::OnKeyEvent(const KeyEvent& event)
             fmin(ratingScore + stepSize, GetLayoutProperty<RatingLayoutProperty>()->GetStars().value_or(
                                              GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM)));
         ratingRenderProperty->UpdateRatingScore(ratingScore);
-        auto host = GetHost();
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        PaintFocusState(ratingScore);
         return true;
     }
     return false;
@@ -496,6 +538,14 @@ void RatingPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
         return false;
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+
+    auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            pattern->GetInnerFocusPaintRect(paintRect);
+        }
+    };
+    focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
 }
 
 void RatingPattern::InitMouseEvent()

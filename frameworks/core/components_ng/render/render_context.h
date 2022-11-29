@@ -98,6 +98,18 @@ public:
 
     virtual void BlendBorderColor(const Color& color) {}
 
+    // Paint focus state by component's setting. It will paint along the paintRect
+    virtual void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth) {}
+    // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
+    virtual void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
+        const Dimension& paintWidth)
+    {}
+    // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
+    virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth)
+    {}
+
+    virtual void ClearFocusState() {}
+
     virtual void UpdateBorderWidthF(const BorderWidthPropertyF& value) {}
 
     // clip node without padding

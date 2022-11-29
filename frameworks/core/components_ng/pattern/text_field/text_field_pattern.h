@@ -143,7 +143,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
     }
 
     void UpdateConfiguration();
