@@ -19,6 +19,7 @@
 
 #include "base/log/event_report.h"
 #include "base/utils/utils.h"
+#include "base/utils/measure_util.h"
 #include "core/common/thread_checker.h"
 
 namespace OHOS::Ace::Framework {
@@ -71,8 +72,7 @@ void CardFrontendDelegateDeclarative::FireCardAction(const std::string& action)
         TaskExecutor::TaskType::UI); // eTSCard UI == Main JS/UI/PLATFORM
 }
 
-double CardFrontendDelegateDeclarative::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
-    const std::string& fontWeight, const std::string& fontFamily, double letterSpace)
+double CardFrontendDelegateDeclarative::MeasureText(const MeasureContext& context)
     {
         return 0.0;
     }

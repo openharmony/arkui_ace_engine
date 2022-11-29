@@ -38,6 +38,7 @@
 #include "base/image/pixel_map.h"
 #include "base/json/json_util.h"
 #include "base/utils/linear_map.h"
+#include "base/utils/measure_util.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/components/calendar/flutter_render_calendar.h"
@@ -518,8 +519,7 @@ void FlutterRenderCustomPaint::StrokeText(const Offset& offset, const std::strin
     PaintText(offset, x, y, true);
 }
 
-double FlutterRenderCustomPaint::MeasureTextInner(const std::string& text, double fontSize,
-    int32_t fontStyle, const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+double FlutterRenderCustomPaint::MeasureTextInner(const MeasureContext& context)
 {
     return 0.0;
 }

@@ -20,6 +20,7 @@
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
 #include "base/thread/background_task_executor.h"
+#include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
@@ -221,11 +222,9 @@ void FrontendDelegateDeclarativeNG::RegisterFont(const std::string& familyName, 
     pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc);
 }
 
-double FrontendDelegateDeclarativeNG::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
-    const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+double FrontendDelegateDeclarativeNG::MeasureText(const MeasureContext& context)
 {
-    auto pipelineContext = pipelineContextHolder_.Get();
-    return pipelineContext->MeasureText(text, fontSize, fontStyle, fontWeight, fontFamily, letterSpacing);
+    return MeasureUtil::MeasureText(context);
 }
 
 SingleTaskExecutor FrontendDelegateDeclarativeNG::GetAnimationJsTask()

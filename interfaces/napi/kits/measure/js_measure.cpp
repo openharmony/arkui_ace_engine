@@ -21,6 +21,7 @@
 #include "interfaces/napi/kits/utils/napi_utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/js_frontend/engine/common/js_engine.h"
+#include "frameworks/base/utils/measure_util.h"
 
 namespace OHOS::Ace::Napi {
 static int32_t HandleFontStyle(napi_value fontStyleNApi, napi_env env)
@@ -161,12 +162,18 @@ static napi_value JSMeasureText(napi_env env, napi_callback_info info)
     std::string textContent = HandleStringType(textContentNApi, env);
     std::string fontWeight = HandleStringType(fontWeightNApi, env);
     std::string fontFamily = HandleStringType(fontFamilyNApi, env);
+    MeasureContext context;
+    context.textContent = textContent;
+    context.fontSize = fontSizeNum;
+    context.fontStyle = fontStyle;
+    context.fontWeight = fontWeight;
+    context.fontFamily = fontFamily;
+    context.letterSpacing = letterSpace;
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
         return nullptr;
     }
-    double textWidth =
-        delegate->MeasureText(textContent, fontSizeNum, fontStyle, fontWeight, fontFamily, letterSpace);
+    double textWidth = delegate->MeasureText(context);
     napi_create_double(env, textWidth, &result);
     return result;
 }

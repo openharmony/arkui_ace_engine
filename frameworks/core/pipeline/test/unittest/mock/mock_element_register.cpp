@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components/custom_paint/render_custom_paint.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -100,12 +99,6 @@ std::unordered_set<ElementIdType>& ElementRegister::GetRemovedItems()
 }
 
 void ElementRegister::ClearRemovedItems(ElementIdType elmtId) {}
-
-double RenderCustomPaint::PaintMeasureText(const std::string& text, double fontSize, int32_t fontStyle,
-    const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
-{
-    return 0.0;
-}
 
 void ElementRegister::Clear()
 {
