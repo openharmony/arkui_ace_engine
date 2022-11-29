@@ -92,6 +92,8 @@ private:
 
     bool IsOutOfBoundary(double mainOffset) const;
 
+    RectF GetHotZoneRect(bool isOriginal) const;
+
     void OnClick();
 
     RefPtr<PanEvent> panEvent_;
