@@ -726,7 +726,12 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
     const auto localPoint = transformPoint - GetPaintRect().GetOffset();
     bool dispatchSuccess = DispatchTouchTestToChildren(localPoint, globalPoint, touchRestrict, result);
     auto beforeSize = result.size();
-    for (const auto& rect : GetTouchRectList()) {
+    std::vector<Rect> vrect;
+    if (IsResponseRegion()) {
+        vrect = responseRegionList_;
+    }
+    vrect.emplace_back(paintRect_);
+    for (const auto& rect : vrect) {
         if (touchable_ && rect.IsInRegion(transformPoint)) {
             // Calculates the coordinate offset in this node.
             globalPoint_ = globalPoint;
