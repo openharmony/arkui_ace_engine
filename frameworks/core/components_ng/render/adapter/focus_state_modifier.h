@@ -20,7 +20,6 @@
 #include "render_service_client/core/ui/rs_node.h"
 
 #include "core/components_ng/property/gradient_property.h"
-#include "core/components_ng/render/adapter/rosen_foreground_modifier.h"
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 
 namespace OHOS::Ace::NG {

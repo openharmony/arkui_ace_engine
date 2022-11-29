@@ -160,7 +160,7 @@ RefPtr<Curve> SwitchPattern::GetCurve() const
 
 int32_t SwitchPattern::GetDuration() const
 {
-    const int32_t DEFAULT_DURATION = 400;
+    const int32_t DEFAULT_DURATION = 250;
     auto switchPaintProperty = GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_RETURN(switchPaintProperty, DEFAULT_DURATION);
     return switchPaintProperty->GetDuration().value_or(DEFAULT_DURATION);
@@ -191,12 +191,11 @@ void SwitchPattern::OnChange()
 
 float SwitchPattern::GetSwitchWidth() const
 {
-    const float switchGap = 2.0f;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
-    auto switchWidth = geometryNode->GetContentSize().Width() - geometryNode->GetContentSize().Height() + switchGap;
+    auto switchWidth = geometryNode->GetContentSize().Width() - geometryNode->GetContentSize().Height();
     return switchWidth;
 }
 

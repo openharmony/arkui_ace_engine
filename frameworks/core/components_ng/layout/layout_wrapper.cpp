@@ -53,7 +53,7 @@ RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool
 
 void LayoutWrapper::SetCacheCount(int32_t cacheCount)
 {
-    CHECK_NULL_VOID(layoutWrapperBuilder_);
+    CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
     layoutWrapperBuilder_->SetCacheCount(cacheCount);
 }
 
@@ -120,14 +120,14 @@ WeakPtr<FrameNode> LayoutWrapper::GetWeakHostNode() const
 std::string LayoutWrapper::GetHostTag() const
 {
     auto host = GetHostNode();
-    CHECK_NULL_RETURN(host, "");
+    CHECK_NULL_RETURN_NOLOG(host, "");
     return host->GetTag();
 }
 
 int32_t LayoutWrapper::GetHostDepth() const
 {
     auto host = GetHostNode();
-    CHECK_NULL_RETURN(host, -1);
+    CHECK_NULL_RETURN_NOLOG(host, -1);
     return host->GetDepth();
 }
 
@@ -304,7 +304,7 @@ void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
             child->GetHostNode()->AdjustGridOffset();
         }
     }
-    CHECK_NULL_VOID(layoutWrapperBuilder_);
+    CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
     layoutWrapperBuilder_->AdjustGridOffset();
 }
 } // namespace OHOS::Ace::NG

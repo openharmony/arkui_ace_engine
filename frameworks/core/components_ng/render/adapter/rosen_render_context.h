@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_RENDER_CONTEXT_H
 
 #include <cstdint>
+#include <memory>
 #include <optional>
 
 #include "render_service_client/core/ui/rs_node.h"
@@ -32,6 +33,7 @@
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/rosen_modifier_property.h"
+#include "core/components_ng/render/adapter/graphics_modifier.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -39,6 +41,7 @@ class BorderImageModifier;
 class MouseSelectModifier;
 class FocusStateModifier;
 class PageTransitionEffect;
+class OverlayTextModifier;
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext)
 public:
@@ -244,11 +247,26 @@ private:
     void PaintClip(const SizeF& frameSize);
     void PaintGradient(const SizeF& frameSize);
     void PaintGraphics();
-    void OnPaintGraphics();
     void PaintOverlayText();
     void PaintBorderImage();
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
+
+    // helper function to check if paint rect is valid
+    bool RectIsNull();
+
+    /** Set data to the modifier and bind it to rsNode_
+     *   If [modifier] not initialized, initialize it and add it to rsNode
+     *
+     *   @param modifier     shared_ptr to a member modifier
+     *   @param data         passed to SetCustomData, set to the modifier
+     */
+    template<typename T, typename D>
+    void SetModifier(std::shared_ptr<T>& modifier, D data);
+
+    // helper function to update one of the graphic effects
+    template<typename T, typename D>
+    void UpdateGraphic(std::shared_ptr<T>& modifier, D data);
 
     RectF AdjustPaintRect();
 
@@ -270,12 +288,23 @@ private:
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
 
-    std::shared_ptr<BorderImageModifier> borderImageModifier_ = nullptr;
-    std::shared_ptr<MouseSelectModifier> mouseSelectModifier_ = nullptr;
-    std::shared_ptr<FocusStateModifier> focusStateModifier_ = nullptr;
+    std::shared_ptr<BorderImageModifier> borderImageModifier_;
+    std::shared_ptr<MouseSelectModifier> mouseSelectModifier_;
+    std::shared_ptr<FocusStateModifier> focusStateModifier_;
     std::optional<TransformMatrixModifier> transformMatrixModifier_;
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
+    std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
+
+    // graphics modifiers
+    std::shared_ptr<GrayScaleModifier> grayScaleModifier_;
+    std::shared_ptr<BrightnessModifier> brightnessModifier_;
+    std::shared_ptr<ContrastModifier> contrastModifier_;
+    std::shared_ptr<SaturateModifier> saturateModifier_;
+    std::shared_ptr<SepiaModifier> sepiaModifier_;
+    std::shared_ptr<InvertModifier> invertModifier_;
+    std::shared_ptr<HueRotateModifier> hueRotateModifier_;
+    std::shared_ptr<ColorBlendModifier> colorBlendModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };

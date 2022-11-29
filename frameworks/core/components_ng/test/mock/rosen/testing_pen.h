@@ -44,6 +44,10 @@ public:
     virtual void SetColor(int c) {}
     virtual void SetFilter(const TestingFilter& filter) {}
     virtual void SetShaderEffect(std::shared_ptr<TestingShaderEffect> e) {}
+    virtual std::shared_ptr<TestingShaderEffect> GetShaderEffect()
+    {
+        return std::make_shared<TestingShaderEffect>();
+    }
     virtual void SetPathEffect(std::shared_ptr<TestingPathEffect> e) {}
 };
 } // namespace OHOS::Ace::Testing

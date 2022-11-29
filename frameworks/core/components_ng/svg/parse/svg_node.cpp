@@ -53,7 +53,7 @@ std::string ParseIdFromUrl(const std::string& url)
 
 void SvgNode::SetAttr(const std::string& name, const std::string& value)
 {
-    CHECK_NULL_VOID(declaration_);
+    CHECK_NULL_VOID_NOLOG(declaration_);
     if (!declaration_->SetSpecializedAttr(std::make_pair(name, value))) {
         declaration_->SetAttr({ std::make_pair(name, value) });
     }
@@ -61,7 +61,7 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
 
 void SvgNode::InitStyle(const RefPtr<SvgBaseDeclaration>& parent)
 {
-    CHECK_NULL_VOID(declaration_);
+    CHECK_NULL_VOID_NOLOG(declaration_);
     Inherit(parent);
     if (hrefFill_) {
         auto href = declaration_->GetFillState().GetHref();
@@ -79,11 +79,13 @@ void SvgNode::InitStyle(const RefPtr<SvgBaseDeclaration>& parent)
         hrefMaskId_ = ParseIdFromUrl(declaration_->GetMaskId());
         hrefFilterId_ = ParseIdFromUrl(declaration_->GetFilterId());
     }
-    if (childStyleTraversed_) {
+    OnInitStyle();
+    // pass down style declaration to children
+    if (passStyle_) {
         for (auto& node : children_) {
-            if (node && node->styleTraversed_) {
-                node->InitStyle(declaration_);
-            }
+            CHECK_NULL_VOID(node);
+            // pass down style only if child inheritStyle_ is true
+            node->InitStyle((node->inheritStyle_) ? declaration_ : nullptr);
         }
     }
 }
@@ -125,7 +127,7 @@ bool SvgNode::OnCanvas(RSCanvas& canvas)
 {
     // drawing.h api 不完善，直接取用SkCanvas，后续要重写
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
-    CHECK_NULL_RETURN(rsCanvas, false);
+    CHECK_NULL_RETURN_NOLOG(rsCanvas, false);
     skCanvas_ = rsCanvas->ExportSkCanvas();
     return skCanvas_ == nullptr ? false : true;
 }

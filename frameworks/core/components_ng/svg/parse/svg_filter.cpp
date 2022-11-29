@@ -36,7 +36,7 @@ RefPtr<SvgNode> SvgFilter::Create()
 void SvgFilter::OnInitStyle()
 {
     auto declaration = Ace::AceType::DynamicCast<SvgFilterDeclaration>(declaration_);
-    CHECK_NULL_VOID(declaration);
+    CHECK_NULL_VOID_NOLOG(declaration);
     x_ = declaration->GetX();
     y_ = declaration->GetY();
     height_ = declaration->GetHeight();

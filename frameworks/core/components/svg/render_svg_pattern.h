@@ -33,12 +33,12 @@ public:
     void PerformLayout() override;
     bool PrepareSelfAnimation(const RefPtr<SvgAnimate>& svgAnimate) override;
 
-    bool IsDefalutPatternUnits() const
+    bool IsDefaultPatternUnits() const
     {
         return patternUnits_ == "objectBoundingBox";
     }
 
-    bool IsDefalutPatternContentUnits() const
+    bool IsDefaultPatternContentUnits() const
     {
         // return true if content relative to svg
         return patternContentUnits_ == "userSpaceOnUse";

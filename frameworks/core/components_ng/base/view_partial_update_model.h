@@ -37,6 +37,7 @@ struct NodeInfoPU {
     std::function<void()> pageTransitionFunc;
     std::function<void(NG::LayoutWrapper*)> measureFunc;
     std::function<void(NG::LayoutWrapper*)> layoutFunc;
+    std::function<void(bool)> reloadFunc;
 
     bool hasMeasureOrLayout = false;
     bool isStatic = false;

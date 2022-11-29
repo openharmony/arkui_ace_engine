@@ -205,6 +205,18 @@ shared_ptr<JsValue> AppSetImageFileCacheSize(const shared_ptr<JsRuntime>& runtim
     return runtime->NewNull();
 }
 
+shared_ptr<JsValue> AppRequestFullWindow(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    return runtime->NewNull();
+}
+
+shared_ptr<JsValue> AppScreenOnVisible(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    return runtime->NewNull();
+}
+
 void InitAppModule(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& moduleObj)
 {
     moduleObj->SetProperty(runtime, APP_GET_INFO, runtime->NewFunction(AppGetInfo));
@@ -213,6 +225,9 @@ void InitAppModule(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& mo
     moduleObj->SetProperty(
         runtime, APP_SET_IMAGE_RAWDATA_CACHE_SIZE, runtime->NewFunction(AppSetImageRawDataCacheSize));
     moduleObj->SetProperty(runtime, APP_SET_IMAGE_FILE_CACHE_SIZE, runtime->NewFunction(AppSetImageFileCacheSize));
+
+    moduleObj->SetProperty(runtime, APP_REQUEST_FULL_WINDOW, runtime->NewFunction(AppRequestFullWindow));
+    moduleObj->SetProperty(runtime, APP_SCREEN_ON_VISIBLE, runtime->NewFunction(AppScreenOnVisible));
 }
 
 } // namespace OHOS::Ace::Framework

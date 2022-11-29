@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
@@ -363,11 +364,6 @@ void IndexerPattern::ApplyIndexChanged()
     if (onRequestPopupData && (selected_ >= 0) && (selected_ < itemCount_)) {
         popupData = onRequestPopupData(selected_);
     }
-    if (popupData.has_value() && popupData.value().size() > 0) {
-        popupSize_ = popupData.value().size();
-    } else {
-        popupSize_ = 0;
-    }
     auto onPopupSelected = indexerEventHub->GetOnPopupSelected();
     if (onPopupSelected && (selected_ >= 0) && (selected_ < itemCount_)) {
         onPopupSelected(selected_);
@@ -407,6 +403,7 @@ void IndexerPattern::ApplyIndexChanged()
                 paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSeclectedBackgroundColor()));
             auto randius = indexerTheme->GetHoverRadiusSize_();
             childRenderContext->UpdateBorderRadius({ randius, randius, randius, randius });
+            childRenderContext->SetClipToFrame(true);
             auto selectedFont = layoutProperty->GetSelectedFont().value_or(indexerTheme->GetSelectTextStyle());
             nodeLayoutProperty->UpdateFontSize(selectedFont.GetFontSize());
             auto fontWeight = selectedFont.GetFontWeight();
@@ -422,6 +419,8 @@ void IndexerPattern::ApplyIndexChanged()
                 std::vector<std::string> arrayValueSelected = {};
                 auto popupDataValue = popupData.value_or(arrayValueSelected);
                 popupDataValue.insert(std::begin(popupDataValue), arrayValue_[selected_]);
+                popupSize_ =
+                    (popupDataValue.size() < INDEXER_BUBBLE_MAXSIZE ? popupDataValue.size() : INDEXER_BUBBLE_MAXSIZE);
                 auto listNode = AceType::DynamicCast<FrameNode>(iter);
                 listNode->Clean();
                 int32_t popupDataIndex = 0;
@@ -436,6 +435,10 @@ void IndexerPattern::ApplyIndexChanged()
                         textNodeLayoutProperty->UpdateTextColor(
                             layoutProperty->GetSelectedColor().value_or(indexerTheme->GetDefaultTextColor()));
                     }
+                    auto textPaddingLeft = Dimension(IndexerTheme::TEXT_PADDING_LEFT, DimensionUnit::VP).ConvertToPx();
+                    auto textPaddingTop = Dimension(IndexerTheme::TEXT_PADDING_TOP, DimensionUnit::VP).ConvertToPx();
+                    textNodeLayoutProperty->UpdatePadding({ CalcLength(textPaddingLeft), CalcLength(textPaddingLeft),
+                        CalcLength(textPaddingTop), CalcLength(textPaddingTop) });
                     auto fontSize = popupFont.GetFontSize();
                     textNodeLayoutProperty->UpdateFontSize(fontSize);
                     auto fontWeight = popupFont.GetFontWeight();
@@ -443,7 +446,6 @@ void IndexerPattern::ApplyIndexChanged()
                     textNodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
                     CalcLength width = CalcLength(Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP));
                     CalcLength height = CalcLength(Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP));
-                    textNodeLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
                     auto textNodeRenderContext = textNode->GetRenderContext();
                     textNodeRenderContext->UpdateBackgroundColor(popupBackground);
                     if (popupDataValue.size() <= 1 || popupDataIndex == INDEXER_BUBBLE_MAXSIZE - 1 ||
@@ -463,14 +465,11 @@ void IndexerPattern::ApplyIndexChanged()
                         if (popupDataIndex == 0) {
                             textNodeRenderContext->UpdateBorderRadius({ Dimension(randius, DimensionUnit::VP),
                                 Dimension(randius, DimensionUnit::VP), Dimension(0), Dimension(0) });
-                        } else if (popupDataIndex ==
-                                   ((popupDataValue.size() < INDEXER_BUBBLE_MAXSIZE ? popupDataValue.size()
-                                                                                    : INDEXER_BUBBLE_MAXSIZE) -1)) {
+                        } else if (popupDataIndex == (popupSize_ - 1)) {
                             textNodeRenderContext->UpdateBorderRadius({ Dimension(0), Dimension(0),
                                 Dimension(randius, DimensionUnit::VP), Dimension(randius, DimensionUnit::VP) });
                         }
                     }
-                    textNodeRenderContext->SetClipToFrame(true);
                     textNode->MarkModifyDone();
                     auto listItemNode = FrameNode::GetOrCreateFrameNode(
                         V2::LIST_ITEM_ETS_TAG, -1, []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr); });

@@ -287,6 +287,7 @@ public:
     void CaretMoveToLastNewLineChar();
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     void InitEditingValueText(std::string content);
+    void InitCaretPosition(std::string content);
     const TextEditingValueNG& GetTextEditingValue()
     {
         return textEditingValue_;
@@ -308,6 +309,7 @@ public:
 #endif
         return false;
     }
+    float PreferredLineHeight();
 
 private:
     bool IsTextArea();
@@ -394,7 +396,6 @@ private:
     bool FilterWithRegex(
         const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
     void EditingValueFilter(std::string& valueToUpdate, std::string& result);
-    float PreferredLineHeight();
     void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
     bool CursorInContentRegion();
     bool OffsetInContentRegion(const Offset& offset);
@@ -408,12 +409,12 @@ private:
     TextStyle lineHeightMeasureUtilTextStyle_;
     std::shared_ptr<RSParagraph> lineHeightMeasureUtilParagraph_;
 
-    RefPtr<ImageLoadingContext> ShowPasswordImageLoadingCtx_;
-    RefPtr<ImageLoadingContext> HidePasswordImageLoadingCtx_;
+    RefPtr<ImageLoadingContext> showPasswordImageLoadingCtx_;
+    RefPtr<ImageLoadingContext> hidePasswordImageLoadingCtx_;
 
     // password icon image related
-    RefPtr<CanvasImage> ShowPasswordImageCanvas_;
-    RefPtr<CanvasImage> HidePasswordImageCanvas_;
+    RefPtr<CanvasImage> showPasswordImageCanvas_;
+    RefPtr<CanvasImage> hidePasswordImageCanvas_;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;

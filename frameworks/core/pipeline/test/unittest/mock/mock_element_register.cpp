@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/pipeline/base/element_register.h"
+#include "core/components_ng/base/ui_node.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace {
 thread_local ElementRegister* ElementRegister::instance_ = nullptr;
@@ -36,6 +37,15 @@ RefPtr<AceType> ElementRegister::GetNodeById(ElementIdType elementId)
     return nullptr;
 }
 
+RefPtr<NG::UINode> ElementRegister::GetUINodeById(ElementIdType elementId)
+{
+    if (elementId == ElementRegister::UndefinedElementId) {
+        return nullptr;
+    }
+    auto iter = itemMap_.find(elementId);
+    return iter == itemMap_.end() ? nullptr : AceType::DynamicCast<NG::UINode>(iter->second).Upgrade();
+}
+
 RefPtr<V2::ElementProxy> ElementRegister::GetElementProxyById(ElementIdType elementId)
 {
     return nullptr;
@@ -48,7 +58,11 @@ bool ElementRegister::Exists(ElementIdType elementId)
 
 bool ElementRegister::AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>& referenced)
 {
-    return false;
+    auto result = itemMap_.emplace(elmtId, referenced);
+    if (!result.second) {
+        LOGE("Duplicate elmtId %{public}d error.", elmtId);
+    }
+    return result.second;
 }
 
 bool ElementRegister::AddElement(const RefPtr<Element>& element)
@@ -61,14 +75,12 @@ bool ElementRegister::AddElementProxy(const WeakPtr<V2::ElementProxy>& elementPr
     return false;
 }
 
-RefPtr<NG::UINode> ElementRegister::GetUINodeById(ElementIdType elementId)
-{
-    return nullptr;
-}
-
 bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
 {
-    return false;
+    if (!node || (node->GetId() == ElementRegister::UndefinedElementId)) {
+        return false;
+    }
+    return AddReferenced(node->GetId(), node);
 }
 
 bool ElementRegister::RemoveItem(ElementIdType elementId)
@@ -87,7 +99,6 @@ std::unordered_set<ElementIdType>& ElementRegister::GetRemovedItems()
 }
 
 void ElementRegister::ClearRemovedItems(ElementIdType elmtId) {}
-
 
 void ElementRegister::Clear()
 {

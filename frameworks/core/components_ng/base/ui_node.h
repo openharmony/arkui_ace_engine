@@ -82,11 +82,17 @@ public:
 
     RefPtr<UINode> GetLastChild()
     {
+        if (children_.empty()) {
+            return nullptr;
+        }
         return children_.back();
     }
 
     RefPtr<UINode> GetFirstChild()
     {
+        if (children_.empty()) {
+            return nullptr;
+        }
         return children_.front();
     }
 

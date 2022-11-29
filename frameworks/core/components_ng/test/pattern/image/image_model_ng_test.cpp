@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -49,6 +50,7 @@ constexpr bool MATCHTEXTDIRECTION_DEFAULT = false;
 const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.jpg";
 const std::string ALT_SRC_URL = "file://data/data/com.example.test/res/exampleAlt.jpg";
 const std::string SVG_SRC_URL = "file://data/data/com.example.test/res/example.svg";
+const std::string SVG_ALT_URL = "file://data/data/com.example.test/res/exampleAlt.svg";
 } // namespace
 
 class ImageModelNgTest : public testing::Test {
@@ -222,6 +224,7 @@ HWTEST_F(ImageModelNgTest, ImageSvgTest001, TestSize.Level1)
     EXPECT_TRUE(frameNode != nullptr);
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
+    image.SetAlt(SVG_ALT_URL);
     image.SetImageFill(Color::BLUE);
     imageSourceInfo.SetFillColor(Color::BLUE);
     EXPECT_TRUE(imageLayoutProperty->GetImageSourceInfo() != std::nullopt);
@@ -229,5 +232,12 @@ HWTEST_F(ImageModelNgTest, ImageSvgTest001, TestSize.Level1)
     EXPECT_EQ(imageLayoutProperty->GetImageSourceInfo()->fillColor_.value(), Color::BLUE);
     auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
     EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value(), Color::BLUE);
+    frameNode->MarkModifyDone();
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_TRUE(imagePattern != nullptr);
+    EXPECT_TRUE(imagePattern->loadingCtx_ != nullptr);
+    EXPECT_EQ(imagePattern->loadingCtx_->GetSourceInfo().GetSrc(), SVG_SRC_URL);
+    EXPECT_TRUE(imagePattern->altLoadingCtx_ != nullptr);
+    EXPECT_EQ(imagePattern->altLoadingCtx_->GetSourceInfo().GetSrc(), SVG_ALT_URL);
 }
 } // namespace OHOS::Ace::NG
