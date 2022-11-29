@@ -635,7 +635,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest032, TestSize.Lev
     int32_t childNodeId0 = 10;
     size_t nodeListSize = 2;
     std::string tag = "tag";
-    std::string child= "child";
+    std::string child = "child";
     std::list<RefPtr<AccessibilityNode>> nodeList;
     std::list<RefPtr<AccessibilityNode>> childNodeList;
     RefPtr<AccessibilityNode> node0 = AceType::MakeRefPtr<AccessibilityNode>(nodeId0, tag);
@@ -660,7 +660,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest033, TestSize.Lev
     int32_t childNodeId0 = 10;
     size_t nodeListSize = 1;
     std::string tag = "tag";
-    std::string child= "child";
+    std::string child = "child";
     std::list<RefPtr<AccessibilityNode>> nodeList;
     std::list<RefPtr<AccessibilityNode>> childNodeList;
     RefPtr<AccessibilityNode> node0 = AceType::MakeRefPtr<AccessibilityNode>(nodeId0, tag);
@@ -686,7 +686,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManagerTest034, TestSize.Lev
     int32_t childNodeId0 = 10;
     size_t nodeListSize = 0;
     std::string tag = "tag";
-    std::string child= "child";
+    std::string child = "child";
     std::list<RefPtr<AccessibilityNode>> nodeList;
     std::list<RefPtr<AccessibilityNode>> childNodeList;
     RefPtr<AccessibilityNode> node0 = AceType::MakeRefPtr<AccessibilityNode>(nodeId0, tag);
