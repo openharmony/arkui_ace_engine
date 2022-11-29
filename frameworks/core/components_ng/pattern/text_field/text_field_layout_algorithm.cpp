@@ -98,7 +98,6 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         imageSize = std::min(imageSize, contentConstraint.selfIdealSize.Height().value());
     }
     auto horizontalPaddingSum = pattern->GetHorizontalPaddingSum();
-    auto verticalPaddingSum = pattern->GetVerticalPaddingSum();
     if (textStyle.GetMaxLines() == 1 && !showPlaceHolder) {
         // for text input case, need to measure in one line without constraint.
         paragraph_->Layout(std::numeric_limits<double>::infinity());
@@ -114,7 +113,6 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (textContent.empty()) {
         preferredHeight = pattern->PreferredLineHeight();
     }
-    preferredHeight = std::min(preferredHeight, contentConstraint.maxSize.Height() - verticalPaddingSum);
 
     // check password image size.
     if (!showPasswordIcon) {
