@@ -25,10 +25,10 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/gestures/gesture_group.h"
 #include "core/components_ng/gestures/gesture_referee.h"
-#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/long_press_gesture.h"
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/gestures/pinch_gesture.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
@@ -3188,18 +3188,25 @@ HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest004, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     TouchEvent touchEvent;
-    swipeRecognizer.refereeState_ = RefereeState::FAIL;
-    swipeRecognizer.downEvents_[touchEvent.id] = touchEvent;
     touchEvent.x = 0;
     touchEvent.y = 1;
-    swipeRecognizer.HandleTouchUpEvent(touchEvent);
+    swipeRecognizer.refereeState_ = RefereeState::FAIL;
+    swipeRecognizer.downEvents_[touchEvent.id] = touchEvent;
+    swipeRecognizer.HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), 0);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), 0);
+    EXPECT_EQ(swipeRecognizer.lastTouchEvent_.id, touchEvent.id);
+
+    swipeRecognizer.refereeState_ = RefereeState::DETECTING;
+    swipeRecognizer.downEvents_[touchEvent.id] = touchEvent;
+    swipeRecognizer.HandleTouchMoveEvent(touchEvent);
     EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), touchEvent.x);
     EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), touchEvent.y);
     EXPECT_EQ(swipeRecognizer.lastTouchEvent_.id, touchEvent.id);
 
     AxisEvent axisEvent;
     swipeRecognizer.refereeState_ = RefereeState::FAIL;
-    swipeRecognizer.HandleTouchUpEvent(axisEvent);
+    swipeRecognizer.HandleTouchMoveEvent(axisEvent);
     EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), axisEvent.x);
     EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), axisEvent.y);
     EXPECT_EQ(swipeRecognizer.axisVerticalTotal_, 0);
@@ -3222,25 +3229,61 @@ HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest005, TestSize.Level1)
     
     /**
      * @tc.steps: step2. call CheckAngle function
+     * @tc.steps: case1: prevAngle has value, prevAngle - angle > 45
      * @tc.expected: step2. result equals.
      */
     swipeRecognizer.prevAngle_ = std::make_optional(VERTICAL_ANGLE);
     auto result = swipeRecognizer.CheckAngle(0);
     EXPECT_EQ(result, false);
     
+    /**
+     * @tc.steps: step2. call CheckAngle function
+     * @tc.steps: case2: prevAngle has value, prevAngle - angle < 45
+     * @tc.expected: step2. result equals.
+     */
     swipeRecognizer.prevAngle_ = std::make_optional(VERTICAL_ANGLE);
     result = swipeRecognizer.CheckAngle(VERTICAL_ANGLE);
     EXPECT_EQ(result, true);
 
-    swipeRecognizer.prevAngle_ = std::make_optional(VERTICAL_ANGLE);
+    /**
+     * @tc.steps: step2. call CheckAngle function
+     * @tc.steps: case2: prevAngle has no value, direction is HORIZONTAL, angle > 45
+     * @tc.expected: step2. result equals.
+     */
+    swipeRecognizer.prevAngle_ = std::optional<double>();
     swipeRecognizer.direction_.type = SwipeDirection::HORIZONTAL;
     result = swipeRecognizer.CheckAngle(VERTICAL_ANGLE);
     EXPECT_EQ(result, false);
 
+    /**
+     * @tc.steps: step2. call CheckAngle function
+     * @tc.steps: case3: prevAngle has no value, direction is HORIZONTAL, angle < 45
+     * @tc.expected: step2. result equals.
+     */
+    swipeRecognizer.prevAngle_ = std::optional<double>();
+    swipeRecognizer.direction_.type = SwipeDirection::HORIZONTAL;
+    result = swipeRecognizer.CheckAngle(0);
+    EXPECT_EQ(result, true);
+
+    /**
+     * @tc.steps: step2. call CheckAngle function
+     * @tc.steps: case4: prevAngle has no value, direction is VERTICAL, angle > 135
+     * @tc.expected: step2. result equals.
+     */
     swipeRecognizer.prevAngle_ = std::make_optional(VERTICAL_ANGLE);
     swipeRecognizer.direction_.type = SwipeDirection::VERTICAL;
     result = swipeRecognizer.CheckAngle(HORIZONTAL_ANGLE);
     EXPECT_EQ(result, false);
+
+    /**
+     * @tc.steps: step2. call CheckAngle function
+     * @tc.steps: case5: prevAngle has no value, direction is VERTICAL, angle < 135
+     * @tc.expected: step2. result equals.
+     */
+    swipeRecognizer.prevAngle_ = std::make_optional(VERTICAL_ANGLE);
+    swipeRecognizer.direction_.type = SwipeDirection::VERTICAL;
+    result = swipeRecognizer.CheckAngle(VERTICAL_ANGLE);
+    EXPECT_EQ(result, true);
 }
 
 /**
@@ -3287,17 +3330,134 @@ HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest007, TestSize.Level1)
     
     /**
      * @tc.steps: step2. call ReconcileFrom function
+     * @tc.steps: case1: input is nullptr
      * @tc.expected: step2. result equals.
      */
     auto result = swipeRecognizer.ReconcileFrom(nullptr);
     EXPECT_EQ(result, false);
 
+    /**
+     * @tc.steps: step2. call ReconcileFrom function
+     * @tc.steps: case2: input is same
+     * @tc.expected: step2. result equals.
+     */
     result = swipeRecognizer.ReconcileFrom(swipeRecognizerPtr);
     EXPECT_EQ(result, true);
 
-    swipeRecognizer.fingers_ = 1;
+    /**
+     * @tc.steps: step2. call ReconcileFrom function
+     * @tc.steps: case3: curr->fingers != fingers
+     * @tc.expected: step2. result equals.
+     */
+    swipeRecognizer.fingers_ = swipeRecognizerPtr->fingers_ + 1;
     result = swipeRecognizer.ReconcileFrom(swipeRecognizerPtr);
-    EXPECT_EQ(result, true);
+    EXPECT_EQ(result, false);
+
+    /**
+     * @tc.steps: step2. call ReconcileFrom function
+     * @tc.steps: case4: curr->fingers = fingers, direction type not same
+     * @tc.expected: step2. result equals.
+     */
+    swipeRecognizer.fingers_ = swipeRecognizerPtr->fingers_;
+    swipeRecognizer.direction_.type = SwipeDirection::HORIZONTAL;
+    result = swipeRecognizer.ReconcileFrom(swipeRecognizerPtr);
+    EXPECT_EQ(result, false);
+
+    /**
+     * @tc.steps: step2. call ReconcileFrom function
+     * @tc.steps: case5:direction type is same, speed is not same
+     * @tc.expected: step2. result equals.
+     */
+    swipeRecognizer.fingers_ = swipeRecognizerPtr->fingers_;
+    swipeRecognizer.direction_.type = swipeRecognizerPtr->direction_.type;
+    swipeRecognizer.speed_ = 1;
+    result = swipeRecognizer.ReconcileFrom(swipeRecognizerPtr);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: SwipeRecognizerTest008
+ * @tc.desc: Test SwipeRecognizer function: HandleTouchCancelEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    SwipeRecognizer swipeRecognizer =
+        SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    
+    /**
+     * @tc.steps: step2. call HandleTouchCancelEvent function
+     * @tc.expected: step2. result equals.
+     */
+    swipeRecognizer.refereeState_ = RefereeState::SUCCEED;
+    TouchEvent touchEvent;
+    swipeRecognizer.HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer.refereeState_, RefereeState::SUCCEED);
+}
+
+/**
+ * @tc.name: SwipeRecognizerTest009
+ * @tc.desc: Test SwipeRecognizer function: SendCallbackMsg
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    SwipeRecognizer swipeRecognizer =
+        SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case1: callback is null
+     * @tc.expected: step2. result equals.
+     */
+    swipeRecognizer.SendCallbackMsg(nullptr);
+    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case2: callback is ptr, have no tiltX and tileY
+     * @tc.expected: step2. result equals.
+     */
+    std::unique_ptr<GestureEventFunc> onAction;
+    TouchEvent touchEvent1;
+    swipeRecognizer.deviceType_ = SourceType::MOUSE;
+    swipeRecognizer.lastTouchEvent_ = touchEvent1;
+    swipeRecognizer.SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case3: callback is ptr, have tiltX and no tileY
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent2;
+    touchEvent2.tiltX = 0;
+    swipeRecognizer.deviceType_ = SourceType::TOUCH;
+    swipeRecognizer.lastTouchEvent_ = touchEvent2;
+    swipeRecognizer.SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case4: callback is ptr, have tiltX and tileY
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent3;
+    touchEvent3.tiltX = 0;
+    touchEvent3.tiltY = 0;
+    swipeRecognizer.deviceType_ = SourceType::TOUCH;
+    swipeRecognizer.lastTouchEvent_ = touchEvent3;
+    swipeRecognizer.prevAngle_ = std::make_optional(0);
+    swipeRecognizer.SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 0);
 }
 
 /**
@@ -3366,6 +3526,18 @@ HWTEST_F(GesturePatternTestNg, GestureGroupTest001, TestSize.Level1)
     gestureGroup.mode_ = GestureMode::End;
     groupRecognizer =  gestureGroup.CreateRecognizer();
     EXPECT_EQ(groupRecognizer, nullptr);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case6: GestureMode::Sequence, have onActionCancelId_
+     */
+    gestureGroup.priority_ = GesturePriority::Low;
+    gestureGroup.gestureMask_ = GestureMask::Normal;
+    gestureGroup.mode_ = GestureMode::Sequence;
+    std::unique_ptr<GestureEventNoParameter> onActionCancelId;
+    gestureGroup.onActionCancelId_ = std::move(onActionCancelId);
+    groupRecognizer =  gestureGroup.CreateRecognizer();
+    EXPECT_NE(groupRecognizer, nullptr);
 }
 
 /**
@@ -3384,12 +3556,27 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. call Existed function and compare result
+     * @tc.steps: case1: input is ptr, have input
      * @tc.steps: expected equal
      */
     auto result = gestureScope.Existed(clickRecognizerPtr);
     EXPECT_EQ(result, true);
 
+    /**
+     * @tc.steps: step2. call Existed function and compare result
+     * @tc.steps: case2: input is nullptr
+     * @tc.steps: expected equal
+     */
     result = gestureScope.Existed(nullptr);
+    EXPECT_EQ(result, false);
+
+    /**
+     * @tc.steps: step2. call Existed function and compare result
+     * @tc.steps: case3: recognizers is empty
+     * @tc.steps: expected equal
+     */
+    gestureScope.recognizers_.clear();
+    result = gestureScope.Existed(clickRecognizerPtr);
     EXPECT_EQ(result, false);
 }
 
@@ -3409,16 +3596,31 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest002, TestSize.Level1)
 
     /**
      * @tc.steps: step2. call Existed function and compare result
+     * @tc.steps: case1: member == input
      * @tc.steps: expected equal
      */
     auto result = gestureScope.CheckNeedBlocked(clickRecognizerPtr);
     EXPECT_EQ(result, false);
     
+    /**
+     * @tc.steps: step2. call Existed function and compare result
+     * @tc.steps: case1: member != input, refereeState is PENDING
+     * @tc.steps: expected equal
+     */
     RefPtr<ClickRecognizer> clickRecognizerPtrNotInsert =
         AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
     result = gestureScope.CheckNeedBlocked(clickRecognizerPtrNotInsert);
     EXPECT_EQ(result, true);
+
+    /**
+     * @tc.steps: step2. call Existed function and compare result
+     * @tc.steps: case3: recognizers is empty
+     * @tc.steps: expected equal
+     */
+    gestureScope.recognizers_.clear();
+    result = gestureScope.CheckNeedBlocked(clickRecognizerPtr);
+    EXPECT_EQ(result, false);
 }
 
 /**
@@ -3437,8 +3639,37 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest003, TestSize.Level1)
 
     /**
      * @tc.steps: step2. call OnAcceptGesture function and compare result
+     * @tc.steps: case1: gesture == recognizer
      * @tc.steps: expected equal
      */
+    gestureScope.OnAcceptGesture(clickRecognizerPtr);
+    EXPECT_EQ(gestureScope.hasGestureAccepted_, true);
+
+    /**
+     * @tc.steps: step2. call OnAcceptGesture function and compare result
+     * @tc.steps: case2: gesture != recognizer
+     * @tc.steps: expected equal
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtrNotInsert =
+        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    gestureScope.OnAcceptGesture(clickRecognizerPtrNotInsert);
+    EXPECT_EQ(gestureScope.hasGestureAccepted_, true);
+
+    /**
+     * @tc.steps: step2. call OnAcceptGesture function and compare result
+     * @tc.steps: case3: recognizers is empty
+     * @tc.steps: expected equal
+     */
+    gestureScope.recognizers_.clear();
+    gestureScope.OnAcceptGesture(clickRecognizerPtr);
+    EXPECT_EQ(gestureScope.hasGestureAccepted_, true);
+
+    /**
+     * @tc.steps: step2. call OnAcceptGesture function and compare result
+     * @tc.steps: case4: recognizers have nullptr
+     * @tc.steps: expected equal
+     */
+    gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), nullptr);
     gestureScope.OnAcceptGesture(clickRecognizerPtr);
     EXPECT_EQ(gestureScope.hasGestureAccepted_, true);
 }
@@ -3508,9 +3739,41 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest006, TestSize.Level1)
 
     /**
      * @tc.steps: step2. call AddGestureToScope function and compare result
+     * @tc.steps: case1: cannot find touchId
      * @tc.steps: expected equal
      */
     TouchTestResult touchTestResult;
+    gestureReferee.AddGestureToScope(0, touchTestResult);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 1);
+
+    /**
+     * @tc.steps: step2. call AddGestureToScope function and compare result
+     * @tc.steps: case2: can find touchId, result is empty
+     * @tc.steps: expected equal
+     */
+    gestureReferee.gestureScopes_.clear();
+    gestureReferee.gestureScopes_[0] = AceType::MakeRefPtr<GestureScope>(0);
+    gestureReferee.AddGestureToScope(0, touchTestResult);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 1);
+
+    /**
+     * @tc.steps: step2. call AddGestureToScope function and compare result
+     * @tc.steps: case3: can find touchId, result have nullptr
+     * @tc.steps: expected equal
+     */
+    touchTestResult.insert(touchTestResult.end(), nullptr);
+    gestureReferee.AddGestureToScope(0, touchTestResult);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 1);
+
+    /**
+     * @tc.steps: step2. call AddGestureToScope function and compare result
+     * @tc.steps: case4: can find touchId, result have ptr
+     * @tc.steps: expected equal
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr =
+        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    touchTestResult.clear();
+    touchTestResult.insert(touchTestResult.end(), clickRecognizerPtr);
     gestureReferee.AddGestureToScope(0, touchTestResult);
     EXPECT_EQ(gestureReferee.gestureScopes_.size(), 1);
 }
@@ -3528,10 +3791,406 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest007, TestSize.Level1)
     
     /**
      * @tc.steps: step2. call CleanGestureScope function and compare result
+     * @tc.steps: case1: gestureScope is empty
      * @tc.steps: expected equal
      */
     gestureReferee.CleanGestureScope(0);
     EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call CleanGestureScope function and compare result
+     * @tc.steps: case2: gestureScope is not empty, scope is not PENDING
+     * @tc.steps: expected equal
+     */
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr =
+        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    gestureScope->recognizers_.insert(gestureScope->recognizers_.end(), clickRecognizerPtr);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    gestureReferee.CleanGestureScope(0);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call CleanGestureScope function and compare result
+     * @tc.steps: case3: gestureScope is not empty, scope is PENDING
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    gestureScope->recognizers_.clear();
+    gestureScope->recognizers_.insert(gestureScope->recognizers_.end(), clickRecognizerPtr);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    gestureReferee.CleanGestureScope(0);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 1);
+}
+
+/**
+ * @tc.name: GestureRefereeTest008
+ * @tc.desc: Test GestureReferee AddMember function
+ */
+HWTEST_F(GesturePatternTestNg, GestureRefereeTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    GestureScope gestureScope = GestureScope(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr =
+        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), clickRecognizerPtr);
+
+    /**
+     * @tc.steps: step2. call AddMember function and compare result
+     * @tc.steps: case1: is existed
+     * @tc.steps: expected equal
+     */
+    gestureScope.AddMember(clickRecognizerPtr);
+    EXPECT_EQ(gestureScope.recognizers_.size(), 1);
+
+    /**
+     * @tc.steps: step2. call AddMember function and compare result
+     * @tc.steps: expected equal
+     */
+    gestureScope.recognizers_.clear();
+    gestureScope.AddMember(clickRecognizerPtr);
+    EXPECT_EQ(gestureScope.recognizers_.size(), 1);
+}
+
+/**
+ * @tc.name: GestureRefereeTest009
+ * @tc.desc: Test GestureReferee Close function
+ */
+HWTEST_F(GesturePatternTestNg, GestureRefereeTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    GestureScope gestureScope = GestureScope(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr =
+        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), clickRecognizerPtr);
+
+    /**
+     * @tc.steps: step2. call Close function and compare result
+     * @tc.steps: case1: have ptr
+     * @tc.steps: expected equal
+     */
+    gestureScope.Close();
+    EXPECT_EQ(gestureScope.recognizers_.size(), 1);
+
+    /**
+     * @tc.steps: step2. call OnAcceptGesture function and compare result
+     * @tc.steps: case2: recognizers_ is empty
+     * @tc.steps: expected equal
+     */
+    gestureScope.recognizers_.clear();
+    gestureScope.Close();
+    EXPECT_EQ(gestureScope.recognizers_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call OnAcceptGesture function and compare result
+     * @tc.steps: case3: recognizers_ have nullptr
+     * @tc.steps: expected equal
+     */
+    gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), nullptr);
+    gestureScope.Close();
+    EXPECT_EQ(gestureScope.recognizers_.size(), 1);
+}
+
+/**
+ * @tc.name: GestureRefereeTest010
+ * @tc.desc: Test GestureReferee Adjudicate function
+ */
+HWTEST_F(GesturePatternTestNg, GestureRefereeTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    GestureReferee gestureReferee;
+    RefPtr<ClickRecognizer> clickRecognizerPtr =
+        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case1: disposal is ACCEPT
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    gestureReferee.Adjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case2: disposal is PENDING
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    gestureReferee.Adjudicate(clickRecognizerPtr, GestureDisposal::PENDING);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case3: disposal is REJECT
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    gestureReferee.Adjudicate(clickRecognizerPtr, GestureDisposal::REJECT);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case4: disposal is NONE
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    gestureReferee.Adjudicate(clickRecognizerPtr, GestureDisposal::NONE);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+}
+
+/**
+ * @tc.name: GestureRefereeTest011
+ * @tc.desc: Test GestureReferee HandleAcceptDisposal function
+ */
+HWTEST_F(GesturePatternTestNg, GestureRefereeTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    GestureReferee gestureReferee;
+    RefPtr<ClickRecognizer> clickRecognizerPtr =
+        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case1: refereeState is SUCCEED
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    gestureReferee.HandleAcceptDisposal(clickRecognizerPtr);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case2: refereeState is PENDING, gestureScopes_ is empty
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    gestureReferee.HandleAcceptDisposal(clickRecognizerPtr);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case3: refereeState is PENDING, gestureScopes_ is not empty
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureScope->recognizers_.insert(gestureScope->recognizers_.end(), clickRecognizerPtr);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    gestureReferee.HandleAcceptDisposal(clickRecognizerPtr);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 1);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case4: refereeState is PENDING, gestureScopes_ is not empty, isDelay
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    gestureScope->isDelay_ = true;
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    gestureReferee.HandleAcceptDisposal(clickRecognizerPtr);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case5: refereeState is PENDING, gestureScopes_ is not empty, !isDelay
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    gestureScope->isDelay_ = false;
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    gestureReferee.HandleAcceptDisposal(clickRecognizerPtr);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 1);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case6: refereeState is FAIL
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::FAIL;
+    gestureReferee.HandleAcceptDisposal(clickRecognizerPtr);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 1);
+}
+
+/**
+ * @tc.name: GestureRefereeTest012
+ * @tc.desc: Test GestureReferee HandlePendingDisposal function
+ */
+HWTEST_F(GesturePatternTestNg, GestureRefereeTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    GestureReferee gestureReferee;
+    RefPtr<ClickRecognizer> clickRecognizerPtr =
+        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case1: refereeState is PENDING
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    gestureReferee.HandlePendingDisposal(clickRecognizerPtr);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case2: refereeState is SUCCEED, gestureScopes_ is empty
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    gestureReferee.HandlePendingDisposal(clickRecognizerPtr);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case3: refereeState is SUCCEED, gestureScopes_ is not empty
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureScope->recognizers_.insert(gestureScope->recognizers_.end(), clickRecognizerPtr);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    gestureReferee.HandlePendingDisposal(clickRecognizerPtr);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 1);
+}
+
+/**
+ * @tc.name: GestureRefereeTest013
+ * @tc.desc: Test GestureReferee HandleRejectDisposal function
+ */
+HWTEST_F(GesturePatternTestNg, GestureRefereeTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    GestureReferee gestureReferee;
+    RefPtr<ClickRecognizer> clickRecognizerPtr =
+        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case1: refereeState is FAIL
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::FAIL;
+    gestureReferee.HandleRejectDisposal(clickRecognizerPtr);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case2: refereeState is PENDING, gestureScopes_ is empty
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    gestureReferee.HandleRejectDisposal(clickRecognizerPtr);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case3: refereeState is PENDING, gestureScopes_ is not empty
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureScope->recognizers_.insert(gestureScope->recognizers_.end(), clickRecognizerPtr);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    gestureReferee.HandleRejectDisposal(clickRecognizerPtr);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 1);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case4: refereeState is PENDING_BLOCKED, gestureScopes_ is not empty
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING_BLOCKED;
+    gestureScope->recognizers_.clear();
+    gestureScope->recognizers_.insert(gestureScope->recognizers_.end(), clickRecognizerPtr);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    gestureReferee.HandleRejectDisposal(clickRecognizerPtr);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 1);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case5: refereeState is SUCCEED_BLOCKED, gestureScopes_ is not empty
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    gestureScope->recognizers_.clear();
+    gestureScope->recognizers_.insert(gestureScope->recognizers_.end(), clickRecognizerPtr);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    gestureReferee.HandleRejectDisposal(clickRecognizerPtr);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 1);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case6: refereeState is PENDING, gestureScopes_ is not empty, isDelay
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    gestureScope->recognizers_.clear();
+    gestureScope->recognizers_.insert(gestureScope->recognizers_.end(), clickRecognizerPtr);
+    gestureScope->isDelay_ = true;
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    gestureReferee.HandleRejectDisposal(clickRecognizerPtr);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case7: refereeState is PENDING, gestureScopes_ is not empty, isDelay
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    gestureScope->recognizers_.clear();
+    gestureScope->recognizers_.insert(gestureScope->recognizers_.end(), clickRecognizerPtr);
+    gestureScope->isDelay_ = false;
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    gestureReferee.HandleRejectDisposal(clickRecognizerPtr);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 1);
+}
+
+/**
+ * @tc.name: GestureRefereeTest014
+ * @tc.desc: Test GestureReferee HasGestureAccepted function
+ */
+HWTEST_F(GesturePatternTestNg, GestureRefereeTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    GestureReferee gestureReferee;
+    bool result = false;
+    
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case1: gestureScopes_ is not empty
+     * @tc.steps: expected equal
+     */
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    result = gestureReferee.HasGestureAccepted(0);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 1);
+    EXPECT_EQ(result, false);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case1: gestureScopes_ is empty
+     * @tc.steps: expected equal
+     */
+    gestureReferee.gestureScopes_.clear();
+    result = gestureReferee.HasGestureAccepted(0);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+    EXPECT_EQ(result, false);
 }
 
 /**
@@ -3552,8 +4211,27 @@ HWTEST_F(GesturePatternTestNg, LongPressGestureTest001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case1: onActionId, onActionEndId, onActionCancelId not existed
      */
     auto longPressRecognizer =
+        AceType::DynamicCast<LongPressRecognizer>(longPressGesture.CreateRecognizer());
+    EXPECT_NE(longPressRecognizer, nullptr);
+    EXPECT_EQ(longPressRecognizer->repeat_, false);
+    EXPECT_EQ(longPressRecognizer->duration_, LONG_PRESS_DURATION);
+    EXPECT_EQ(longPressRecognizer->isForDrag_, false);
+    EXPECT_EQ(longPressRecognizer->isDisableMouseLeft_, false);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case2: onActionId, onActionEndId, onActionCancelId existed
+     */
+    std::unique_ptr<GestureEventFunc> onActionId;
+    std::unique_ptr<GestureEventFunc> onActionEndId;
+    std::unique_ptr<GestureEventNoParameter> onActionCancelId;
+    longPressGesture.onActionId_ = std::move(onActionId);
+    longPressGesture.onActionEndId_ = std::move(onActionEndId);
+    longPressGesture.onActionCancelId_ = std::move(onActionCancelId);
+    longPressRecognizer =
         AceType::DynamicCast<LongPressRecognizer>(longPressGesture.CreateRecognizer());
     EXPECT_NE(longPressRecognizer, nullptr);
     EXPECT_EQ(longPressRecognizer->repeat_, false);
@@ -3589,14 +4267,30 @@ HWTEST_F(GesturePatternTestNg, RotationGestureTest001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case1: functions are not existed
      */
     rotationGesture.priority_ = GesturePriority::Low;
     rotationGesture.gestureMask_ = GestureMask::Normal;
-    auto rotationRecognizer =
-        AceType::DynamicCast<RotationRecognizer>(rotationGesture.CreateRecognizer());
+    auto rotationRecognizer = AceType::DynamicCast<RotationRecognizer>(rotationGesture.CreateRecognizer());
     EXPECT_NE(rotationRecognizer, nullptr);
     EXPECT_EQ(rotationRecognizer->GetPriority(), GesturePriority::Low);
     EXPECT_EQ(rotationRecognizer->GetPriorityMask(), GestureMask::Normal);
+
+    // /**
+    //  * @tc.steps: step2. call CreateRecognizer function and compare result
+    //  * @tc.steps: case2: functions are existed
+    //  */
+    std::unique_ptr<GestureEventFunc> onActionStartId;
+    std::unique_ptr<GestureEventFunc> onActionUpdateId;
+    std::unique_ptr<GestureEventFunc> onActionEndId;
+    std::unique_ptr<GestureEventNoParameter> onActionCancelId;
+    rotationGesture.onActionStartId_ = std::move(onActionStartId);
+    rotationGesture.onActionUpdateId_ = std::move(onActionUpdateId);
+    rotationGesture.onActionEndId_ = std::move(onActionEndId);
+    rotationGesture.onActionCancelId_ = std::move(onActionCancelId);
+    rotationRecognizer = AceType::DynamicCast<RotationRecognizer>(rotationGesture.CreateRecognizer());
+    EXPECT_EQ(rotationRecognizer->priority_, rotationGesture.priority_);
+    EXPECT_EQ(rotationRecognizer->priorityMask_, rotationGesture.gestureMask_);
 }
 
 /**
@@ -3613,12 +4307,22 @@ HWTEST_F(GesturePatternTestNg, TapGestureTest001, TestSize.Level1)
     
     /**
      * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case1: not have onActionId
      */
     tapGesture.priority_ = GesturePriority::Low;
     tapGesture.gestureMask_ = GestureMask::Normal;
-    auto tapRecognizer =
-        AceType::DynamicCast<ClickRecognizer>(tapGesture.CreateRecognizer());
+    auto tapRecognizer = AceType::DynamicCast<ClickRecognizer>(tapGesture.CreateRecognizer());
     EXPECT_NE(tapRecognizer, nullptr);
+    EXPECT_EQ(tapRecognizer->GetPriority(), GesturePriority::Low);
+    EXPECT_EQ(tapRecognizer->GetPriorityMask(), GestureMask::Normal);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case2: have onActionId
+     */
+    std::unique_ptr<GestureEventFunc> onActionId;
+    tapGesture.onActionId_ = std::move(onActionId);
+    tapRecognizer = AceType::DynamicCast<ClickRecognizer>(tapGesture.CreateRecognizer());
     EXPECT_EQ(tapRecognizer->GetPriority(), GesturePriority::Low);
     EXPECT_EQ(tapRecognizer->GetPriorityMask(), GestureMask::Normal);
 }
