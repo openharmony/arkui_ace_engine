@@ -97,8 +97,7 @@ private:
 
     bool IsOutOfBoundary(double mainOffset) const;
 
-    RectF GetHotZoneRect() const;
-    RectF GetOriginalHotZoneRect() const;
+    RectF GetHotZoneRect(bool isOriginal) const;
 
     void OnClick();
 
