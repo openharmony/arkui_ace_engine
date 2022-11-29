@@ -174,12 +174,9 @@ void CheckBoxGroupPattern::OnClick()
     CHECK_NULL_VOID(paintProperty);
     bool isSelected = false;
     auto status = paintProperty->GetSelectStatus();
-    if (status == CheckBoxGroupPaintProperty::SelectStatus::ALL) {
-        isSelected = false;
-    } else {
-        isSelected = true;
-    }
+    isSelected = status != CheckBoxGroupPaintProperty::SelectStatus::ALL;
     paintProperty->UpdateCheckBoxGroupSelect(isSelected);
+    isClick_ = true;
     UpdateState();
 }
 
@@ -304,28 +301,34 @@ void CheckBoxGroupPattern::UpdateState()
                 UpdateUIStatus(selectAll);
             }
         }
-    } else {
-        if (preGroup.value() != group) {
-            pageEventHub->RemoveCheckBoxFromGroup(preGroup.value(), host->GetId());
-            pageEventHub->AddCheckBoxGroupToGroup(group, host->GetId());
+        isFirstCreated_ = false;
+        pattern->SetPreGroup(group);
+        return;
+    }
+    if (preGroup.value() != group) {
+        pageEventHub->RemoveCheckBoxFromGroup(preGroup.value(), host->GetId());
+        pageEventHub->AddCheckBoxGroupToGroup(group, host->GetId());
+        pattern->SetPreGroup(group);
+        return;
+    }
+    auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!paintProperty->HasCheckBoxGroupSelect()) {
+        return;
+    }
+    bool isSelected = paintProperty->GetCheckBoxGroupSelectValue();
+    paintProperty->ResetCheckBoxGroupSelect();
+
+    // Setting selectAll to false when clicked requires processing, changing selectAll to false dynamically does
+    // not require processing
+    if (isClick_ || isSelected) {
+        if (pattern->GetIsAddToMap()) {
+            UpdateGroupCheckStatus(host, isSelected);
         } else {
-            auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
-            CHECK_NULL_VOID(paintProperty);
-            if (!paintProperty->HasCheckBoxGroupSelect()) {
-                pattern->SetPreGroup(group);
-                return;
-            }
-            bool isSelected = paintProperty->GetCheckBoxGroupSelectValue();
-            paintProperty->ResetCheckBoxGroupSelect();
-            if (pattern->GetIsAddToMap()) {
-                UpdateGroupCheckStatus(host, isSelected);
-            } else {
-                UpdateRepeatedGroupStatus(host, isSelected);
-            }
+            UpdateRepeatedGroupStatus(host, isSelected);
         }
     }
-    isFirstCreated_ = false;
-    pattern->SetPreGroup(group);
+    isClick_ = false;
 }
 
 void CheckBoxGroupPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool select)
