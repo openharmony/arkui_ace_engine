@@ -306,6 +306,7 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
 
     auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, dragType);
     if (dragType == DragType::LIST) {
+        CHECK_NULL_VOID(dragFrameNode);
         auto eventHub = dragFrameNode->GetEventHub<ListEventHub>();
         CHECK_NULL_VOID(eventHub);
         int32_t insertIndex = eventHub->GetListItemIndexByPosition(globalX, globalY);
