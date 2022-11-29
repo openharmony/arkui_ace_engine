@@ -30,7 +30,7 @@ namespace {
 ReportDataFunc LoadReportDataFunc()
 {
     auto handle = dlopen(RES_SCHED_CLIENT_SO.c_str(), RTLD_NOW);
-    CHECK_NULL_RETURN(handle, nullptr);
+    CHECK_NULL_RETURN_NOLOG(handle, nullptr);
     auto func = reinterpret_cast<ReportDataFunc>(dlsym(handle, "ReportData"));
     if (func == nullptr) {
         dlclose(handle);

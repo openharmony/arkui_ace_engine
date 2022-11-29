@@ -47,7 +47,7 @@ void SliderPattern::OnModifyDone()
     InitClickEvent(gestureHub);
     InitPanEvent(gestureHub);
     auto focusHub = hub->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID_NOLOG(focusHub);
     InitOnKeyEvent(focusHub);
 }
 
@@ -87,7 +87,7 @@ void SliderPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
     }
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleTouchEvent(info);
     };
     gestureHub->RemoveTouchEvent(touchEvent_);
@@ -113,7 +113,7 @@ void SliderPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
     }
     auto clickEvent = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandlingGestureEvent(info);
         pattern->FireChangeEvent(SliderChangeMode::Click);
     };
@@ -173,25 +173,25 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     direction_ = GetDirection();
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandlingGestureEvent(info);
         pattern->FireChangeEvent(SliderChangeMode::Begin);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandlingGestureEvent(info);
         pattern->FireChangeEvent(SliderChangeMode::Moving);
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandledGestureEvent();
         pattern->FireChangeEvent(SliderChangeMode::End);
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandledGestureEvent();
         pattern->FireChangeEvent(SliderChangeMode::End);
     };
@@ -211,7 +211,7 @@ void SliderPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_RETURN(pattern, false);
+        CHECK_NULL_RETURN_NOLOG(pattern, false);
         return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));

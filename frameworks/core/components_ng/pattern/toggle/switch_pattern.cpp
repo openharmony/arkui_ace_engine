@@ -265,7 +265,7 @@ void SwitchPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGD("Pan event start");
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         if (info.GetInputEventType() == InputEventType::AXIS) {
             return;
         }
@@ -273,14 +273,14 @@ void SwitchPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleDragUpdate(info);
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGD("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         if (info.GetInputEventType() == InputEventType::AXIS) {
             return;
         }
@@ -290,7 +290,7 @@ void SwitchPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         LOGD("Pan event cancel");
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleDragEnd();
     };
 
@@ -359,7 +359,7 @@ void SwitchPattern::InitMouseEvent()
 
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleMouseEvent(isHover);
     };
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));

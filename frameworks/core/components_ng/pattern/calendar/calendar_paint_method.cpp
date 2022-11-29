@@ -63,7 +63,7 @@ void DrawCalendarText(
     }
 
     auto paragraph = GetTextParagraph(newText, textStyle);
-    CHECK_NULL_VOID(paragraph);
+    CHECK_NULL_VOID_NOLOG(paragraph);
     const auto& offset = boxRect.GetOffset();
     paragraph->Layout(boxRect.Width());
     double textWidth = paragraph->GetMaxIntrinsicWidth();

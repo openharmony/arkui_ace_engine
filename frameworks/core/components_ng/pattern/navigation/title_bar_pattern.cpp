@@ -102,7 +102,7 @@ void TitleBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGI("Pan event start");
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         if (info.GetInputEventType() == InputEventType::AXIS) {
             return;
         }
@@ -111,7 +111,7 @@ void TitleBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         if (info.GetInputEventType() == InputEventType::AXIS) {
             return;
         }
@@ -121,7 +121,7 @@ void TitleBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         if (info.GetInputEventType() == InputEventType::AXIS) {
             return;
         }
@@ -131,7 +131,7 @@ void TitleBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         LOGI("Pan event cancel");
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleDragEnd(0.0);
     };
 
@@ -265,7 +265,7 @@ void TitleBarPattern::SetDefaultTitleFontSize()
 {
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(titleBarNode);
-    CHECK_NULL_VOID(titleBarNode->GetTitle());
+    CHECK_NULL_VOID_NOLOG(titleBarNode->GetTitle());
     auto titleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
     CHECK_NULL_VOID(titleNode);
     auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();

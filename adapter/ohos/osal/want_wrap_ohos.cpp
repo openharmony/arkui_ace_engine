@@ -43,7 +43,7 @@ WantWrapOhos::WantWrapOhos(NativeEngine* engine, NativeValue* value)
 void WantWrapOhos::SetWantParamsFromWantWrap(void* want)
 {
     auto destWant = reinterpret_cast<AAFwk::Want*>(want);
-    CHECK_NULL_VOID(destWant);
+    CHECK_NULL_VOID_NOLOG(destWant);
     auto params = want_.GetParams();
     destWant->SetParams(params);
 }
