@@ -55,6 +55,11 @@ public:
         LinearLayoutProperty::Reset();
     }
 
+    void SetContainerInfo(const GridContainerInfo& info)
+    {
+        propContainerInfo_ = info;
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     void UpdateChild(RefPtr<GridProperty>& child, const GridContainerInfo& info);
