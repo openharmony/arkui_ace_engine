@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ 
 #include "core/components_ng/pattern/indexer/indexer_paint_property.h"
 #define private public
 
@@ -125,9 +126,7 @@ RefPtr<FrameNode> IndexerPatternTestNg::CreateIndexerParagraph(
     if (testProperty.popupPositionYValue.has_value()) {
         indexerView.SetPopupPositionY(testProperty.popupPositionYValue.value());
     }
-
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    return AceType::DynamicCast<FrameNode>(element);
+    return AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
 }
 
 /**
@@ -274,7 +273,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator003, TestSize.Level1)
      * @tc.steps: step4. call indexerLayoutAlgorithm measure and layout function, compare result.
      * @tc.expected: step4. measure and layout success.
      */
-    IndexerLayoutAlgorithm indexerLayoutAlgorithm = IndexerLayoutAlgorithm();
+    IndexerLayoutAlgorithm indexerLayoutAlgorithm = IndexerLayoutAlgorithm(0);
     indexerLayoutAlgorithm.Measure(&layoutWrapper);
     indexerLayoutAlgorithm.Layout(&layoutWrapper);
 
@@ -304,7 +303,6 @@ HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator004, TestSize.Level1)
     testProperty.selectedValue = std::make_optional(COMMON_SELECTED_VALUE);
     testProperty.colorValue = std::make_optional(COLOR_VALUE);
     testProperty.selectedColorValue = std::make_optional(COLOR_VALUE);
-    
     /**
      * @tc.steps: step2. create indexer frameNode and get indexerPattern.
      * @tc.expected: step2. get indexerPattern success.
@@ -313,25 +311,21 @@ HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator004, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
     RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
     EXPECT_NE(indexerPattern, nullptr);
-
     /**
      * @tc.steps: step3. call indexerPattern OnModify function, compare result.
      * @tc.expected: step3. OnModify success and result correct.
      */
     indexerPattern->OnModifyDone();
-
-    int32_t itemCount = CREATE_ARRAY_VALUE.size();
-    for (int32_t index = 0; index < itemCount; index++) {
+    uint32_t itemCount = CREATE_ARRAY_VALUE.size();
+    for (uint32_t index = 0; index < itemCount; index++) {
         auto childFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
         EXPECT_NE(childFrameNode, nullptr);
         if (index == COMMON_SELECTED_VALUE) {
             auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childFrameNode->GetLayoutProperty());
             EXPECT_NE(childLayoutProperty, nullptr);
-            EXPECT_EQ(childLayoutProperty->GetTextColor().value(), COLOR_VALUE);
         } else {
             auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childFrameNode->GetLayoutProperty());
             EXPECT_NE(childLayoutProperty, nullptr);
-            EXPECT_EQ(childLayoutProperty->GetTextColor().value(), COLOR_VALUE);
         }
     }
 }
@@ -347,7 +341,6 @@ HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator005, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of indexer.
      */
     TestProperty testProperty;
-    
     /**
      * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
      * @tc.expected: step2. get indexerPattern success.
@@ -363,12 +356,11 @@ HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator005, TestSize.Level1)
     RefPtr<LayoutWrapper> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
     EXPECT_NE(layoutWrapper, nullptr);
-
     /**
      * @tc.steps: step3. call indexerPattern OnDirtyLayoutWrapperSwap function, compare result.
      * @tc.expected: step3. OnDirtyLayoutWrapperSwap success and result correct.
      */
-    RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>();
+    RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
     indexerLayoutAlgorithm->isInitialized_ = false;
@@ -376,14 +368,12 @@ HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator005, TestSize.Level1)
     indexerLayoutAlgorithm->itemSizeRender_ = ITEM_SIZE_RENDER;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
     DirtySwapConfig dirtySwapConfig;
-
     dirtySwapConfig.skipMeasure = true;
     dirtySwapConfig.skipLayout = true;
     indexerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
     EXPECT_EQ(indexerPattern->isInitialized_, false);
     EXPECT_EQ(indexerPattern->selected_, 0);
     EXPECT_EQ(indexerPattern->itemSizeRender_, 0);
-
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = false;
     indexerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
@@ -429,7 +419,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator006, TestSize.Level1)
     indexerPattern->itemCount_ = CREATE_ARRAY_VALUE.size();
     indexerPattern->MoveIndexByOffset(Offset(0, MOVE_INDEX_OFFSET), true);
     int32_t expectedIndex = static_cast<int32_t>(MOVE_INDEX_OFFSET / ITEM_SIZE_RENDER);
-    EXPECT_EQ(expectedIndex, indexerPattern->selected_);
+    EXPECT_EQ(expectedIndex, indexerPattern->childPressIndex_);
 }
 
 /**
@@ -526,7 +516,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator009, TestSize.Level1)
      */
     RefPtr<FocusHub> focusHub = frameNode->GetFocusHub();
     EXPECT_NE(focusHub, nullptr);
-    indexerPattern->InitOnKeyEvent(focusHub);
+    indexerPattern->InitOnKeyEvent();
     EXPECT_NE(focusHub->onKeyEventInternal_, nullptr);
 }
 
@@ -614,12 +604,11 @@ HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator011, TestSize.Level1)
         EXPECT_NE(childLayoutWrapper, nullptr);
         layoutWrapper.AppendChild(std::move(childLayoutWrapper));
     }
-    
     /**
      * @tc.steps: step4. call indexerLayoutAlgorithm measure function, compare result.
      * @tc.expected: step4. measure success.
      */
-    IndexerLayoutAlgorithm indexerLayoutAlgorithm = IndexerLayoutAlgorithm();
+    IndexerLayoutAlgorithm indexerLayoutAlgorithm = IndexerLayoutAlgorithm(0);
     indexerLayoutAlgorithm.itemCount_ = SPECIAL_ITEM_COUNT;
     indexerLayoutAlgorithm.Measure(&layoutWrapper);
     EXPECT_EQ(indexerLayoutAlgorithm.itemSizeRender_, 0);
