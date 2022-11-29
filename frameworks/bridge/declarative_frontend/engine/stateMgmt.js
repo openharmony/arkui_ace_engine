@@ -66,7 +66,7 @@
  *
  * @since 9
  */
-class LocalStorage extends NativeLocalStorage {
+ class LocalStorage extends NativeLocalStorage {
     /**
      * Construct new instance of LocalStorage
      * initialzie with all properties and their values that Object.keys(params) returns
@@ -3106,8 +3106,8 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
     constructor(linkSource, owningChildView, thisPropertyName) {
         super(owningChildView, thisPropertyName);
         this.changeNotificationIsOngoing_ = false;
-        this.linkedParentProperty_ = linkSource;
-        if (this.linkedParentProperty_) {
+        if (linkSource) {
+            this.linkedParentProperty_ = linkSource;
             // register to the parent property
             this.linkedParentProperty_.subscribeMe(this);
             // register to the ObservedObject
@@ -3193,8 +3193,8 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
         super(subscribeMe, info);
         // add a test here that T is a simple type
         // subscribe to receive value chnage updates from source.
-        this.source_ = source;
-        if (this.source_) {
+        if (source) {
+            this.source_ = source;
             this.source_.subscribeMe(this);
             // use own backing store for value to avoid
             // value changes to be propagated back to source
@@ -3491,6 +3491,15 @@ class ViewPU extends NativeViewPartialUpdate {
     // super class will call this function from
     // its aboutToBeDeleted implementation
     aboutToBeDeletedInternal() {
+        // When a custom component is deleted, need to notify the C++ side to clean the corresponding deletion cache Map,
+        // because after the deletion, can no longer clean the RemoveIds cache on the C++ side through the 
+        // updateDirtyElements function.
+        let removedElmtIds = [];
+        this.updateFuncByElmtId.forEach((value, key) => {
+            this.purgeVariableDependenciesOnElmtId(key);
+            removedElmtIds.push(key);
+        });
+        this.deletedElmtIdsHaveBeenPurged(removedElmtIds);
         this.updateFuncByElmtId.clear();
         this.watchedProps.clear();
         this.providedVars_.clear();

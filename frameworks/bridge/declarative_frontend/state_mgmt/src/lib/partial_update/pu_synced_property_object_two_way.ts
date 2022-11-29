@@ -29,12 +29,14 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
     owningChildView: IPropertySubscriber,
     thisPropertyName: PropertyInfo) {
     super(owningChildView, thisPropertyName);
-    this.linkedParentProperty_ = linkSource;
-    // register to the parent property
-    this.linkedParentProperty_.subscribeMe(this);
-
-    // register to the ObservedObject
-    ObservedObject.addOwningProperty(this.linkedParentProperty_.get(), this);
+    if (linkSource) {
+      this.linkedParentProperty_ = linkSource;
+      // register to the parent property
+      this.linkedParentProperty_.subscribeMe(this);
+  
+      // register to the ObservedObject
+      ObservedObject.addOwningProperty(this.linkedParentProperty_.get(), this);
+    }
   }
 
   /*
