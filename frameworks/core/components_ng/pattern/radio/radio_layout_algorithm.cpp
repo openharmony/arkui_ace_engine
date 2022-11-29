@@ -35,7 +35,7 @@ std::optional<SizeF> RadioLayoutAlgorithm::MeasureContent(
 {
     InitializeParam();
     // Case 1: Width and height are set in the front end.
-    if (contentConstraint.selfIdealSize.IsValid()) {
+    if (contentConstraint.selfIdealSize.IsValid() && contentConstraint.selfIdealSize.IsNonNegative()) {
         auto height = contentConstraint.selfIdealSize.Height().value();
         auto width = contentConstraint.selfIdealSize.Width().value();
         auto length = std::min(width, height);

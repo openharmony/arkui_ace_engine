@@ -78,6 +78,7 @@ void CheckBoxGroupPaintMethod::InitializeParam()
     hoverColor_ = checkBoxTheme->GetHoverColor();
     hoverRadius_ = checkBoxTheme->GetHoverRadius();
     hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
+    hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
 }
 
 void CheckBoxGroupPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWrapper) const
@@ -101,6 +102,10 @@ void CheckBoxGroupPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* pai
     paintOffset += OffsetF(strokeOffset, strokeOffset);
     contentSize.SetWidth(contentSize.Width() - borderWidth_);
     contentSize.SetHeight(contentSize.Height() - borderWidth_);
+    if (isTouch_ || isHover_) {
+        paintOffset.SetX(paintOffset.GetX() + hotZoneHorizontalPadding_.ConvertToPx());
+        paintOffset.SetY(paintOffset.GetY() + hotZoneVerticalPadding_.ConvertToPx());
+    }
     if (isTouch_) {
         DrawTouchBoard(canvas, contentSize, paintOffset);
     }
@@ -288,9 +293,9 @@ void CheckBoxGroupPaintMethod::DrawTouchBoard(RSCanvas& canvas, const SizeF& siz
     brush.SetColor(ToRSColor(Color(clickEffectColor_)));
     brush.SetAntiAlias(true);
     float originX = offset.GetX() - hotZoneHorizontalPadding_.ConvertToPx();
-    float originY = offset.GetY() - hotZoneHorizontalPadding_.ConvertToPx();
+    float originY = offset.GetY() - hotZoneVerticalPadding_.ConvertToPx();
     float endX = size.Width() + originX + 2 * hotZoneHorizontalPadding_.ConvertToPx();
-    float endY = size.Height() + originY + 2 * hotZoneHorizontalPadding_.ConvertToPx();
+    float endY = size.Height() + originY + 2 * hotZoneVerticalPadding_.ConvertToPx();
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, hoverRadius_.ConvertToPx(), hoverRadius_.ConvertToPx());
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(rrect);
@@ -302,9 +307,9 @@ void CheckBoxGroupPaintMethod::DrawHoverBoard(RSCanvas& canvas, const SizeF& siz
     brush.SetColor(ToRSColor(Color(hoverColor_)));
     brush.SetAntiAlias(true);
     float originX = offset.GetX() - hotZoneHorizontalPadding_.ConvertToPx();
-    float originY = offset.GetY() - hotZoneHorizontalPadding_.ConvertToPx();
+    float originY = offset.GetY() - hotZoneVerticalPadding_.ConvertToPx();
     float endX = size.Width() + originX + 2 * hotZoneHorizontalPadding_.ConvertToPx();
-    float endY = size.Height() + originY + 2 * hotZoneHorizontalPadding_.ConvertToPx();
+    float endY = size.Height() + originY + 2 * hotZoneVerticalPadding_.ConvertToPx();
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, hoverRadius_.ConvertToPx(), hoverRadius_.ConvertToPx());
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(rrect);

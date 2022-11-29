@@ -62,6 +62,8 @@ void CheckBoxPattern::OnModifyDone()
         margin.bottom = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
         layoutProperty->UpdateMargin(margin);
     }
+    hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
+    hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
     InitClickEvent();
     InitTouchEvent();
     InitMouseEvent();
@@ -77,9 +79,9 @@ void CheckBoxPattern::InitClickEvent()
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto radioPattern = weak.Upgrade();
-        CHECK_NULL_VOID(radioPattern);
-        radioPattern->OnClick();
+        auto checkboxPattern = weak.Upgrade();
+        CHECK_NULL_VOID(checkboxPattern);
+        checkboxPattern->OnClick();
     };
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gesture->AddClickEvent(clickListener_);
@@ -95,13 +97,13 @@ void CheckBoxPattern::InitTouchEvent()
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
-        auto radioPattern = weak.Upgrade();
-        CHECK_NULL_VOID(radioPattern);
+        auto checkboxPattern = weak.Upgrade();
+        CHECK_NULL_VOID(checkboxPattern);
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
-            radioPattern->OnTouchDown();
+            checkboxPattern->OnTouchDown();
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
-            radioPattern->OnTouchUp();
+            checkboxPattern->OnTouchUp();
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
@@ -136,6 +138,19 @@ void CheckBoxPattern::HandleMouseEvent(bool isHover)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = false;
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
+    auto frameSize = geometryNode->GetFrameSize();
+    if (isHover_ && originalPaintRect.GetSize() == frameSize) {
+        originalPaintRect = GetHotZoneRect(true);
+        renderContext->SyncGeometryProperties(originalPaintRect);
+    } else if (!isHover_ && originalPaintRect.GetSize() != frameSize) {
+        originalPaintRect = GetHotZoneRect(false);
+    }
+    renderContext->SyncGeometryProperties(originalPaintRect);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -163,6 +178,16 @@ void CheckBoxPattern::OnTouchDown()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = true;
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
+    auto frameSize = geometryNode->GetFrameSize();
+    if (originalPaintRect.GetSize() == frameSize) {
+        originalPaintRect = GetHotZoneRect(true);
+    }
+    renderContext->SyncGeometryProperties(originalPaintRect);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -171,6 +196,16 @@ void CheckBoxPattern::OnTouchUp()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = false;
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto paintRect = renderContext->GetPaintRectWithoutTransform();
+    auto frameSize = geometryNode->GetFrameSize();
+    if (paintRect.GetSize() != frameSize && !isHover_) {
+        paintRect = GetHotZoneRect(false);
+    }
+    renderContext->SyncGeometryProperties(paintRect);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -496,6 +531,32 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
         checkBoxGroupNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
     groupPaintProperty->SetIsCheckBoxCallbackDealed(true);
+}
+
+RectF CheckBoxPattern::GetHotZoneRect(bool isOriginal) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, {});
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, {});
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, {});
+    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
+    auto offset = originalPaintRect.GetOffset();
+    double actualWidth = 0.0;
+    double actualHeight = 0.0;
+    if (isOriginal) {
+        actualWidth = geometryNode->GetFrameSize().Width() + hotZoneHorizontalPadding_.ConvertToPx() * 2;
+        actualHeight = geometryNode->GetFrameSize().Height() + hotZoneVerticalPadding_.ConvertToPx() * 2;
+        offset.SetX(offset.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
+        offset.SetY(offset.GetY() - hotZoneVerticalPadding_.ConvertToPx());
+    } else {
+        actualWidth = geometryNode->GetFrameSize().Width();
+        actualHeight = geometryNode->GetFrameSize().Height();
+        offset.SetX(offset.GetX() + hotZoneHorizontalPadding_.ConvertToPx());
+        offset.SetY(offset.GetY() + hotZoneVerticalPadding_.ConvertToPx());
+    }
+    return RectF(offset, SizeF(actualWidth, actualHeight));
 }
 
 } // namespace OHOS::Ace::NG
