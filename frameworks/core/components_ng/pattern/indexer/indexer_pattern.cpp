@@ -464,7 +464,7 @@ void IndexerPattern::ApplyIndexChanged()
                         if (popupDataIndex == 0) {
                             textNodeRenderContext->UpdateBorderRadius({ Dimension(randius, DimensionUnit::VP),
                                 Dimension(randius, DimensionUnit::VP), Dimension(0), Dimension(0) });
-                        } else if (popupDataIndex == (popupSize_ - 1)) {
+                        } else if (popupDataIndex == (static_cast<int32_t>(popupSize_ - 1))) {
                             textNodeRenderContext->UpdateBorderRadius({ Dimension(0), Dimension(0),
                                 Dimension(randius, DimensionUnit::VP), Dimension(randius, DimensionUnit::VP) });
                         }
