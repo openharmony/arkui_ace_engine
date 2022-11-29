@@ -242,7 +242,9 @@ void RadioPattern::UpdateState()
          */
         if (check) {
             UpdateUIStatus(true);
-            PlayAnimation(true);
+            if (!isFirstCreated_) {
+                PlayAnimation(true);
+            }
         } else {
             // If the radio is set to false, set isFirstCreated_ to false.
             isFirstCreated_ = false;

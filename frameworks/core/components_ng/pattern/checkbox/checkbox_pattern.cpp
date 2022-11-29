@@ -485,7 +485,7 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
             checkBoxGroupPattern->UpdateUIStatus(true);
         } else if (allIsSame && !paintProperty->GetCheckBoxSelectValue()) {
             groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::NONE);
-            checkBoxGroupPattern->UpdateUIStatus(false);
+            checkBoxGroupPattern->ResetUIStatus();
         } else {
             groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::PART);
             checkBoxGroupPattern->ResetUIStatus();
