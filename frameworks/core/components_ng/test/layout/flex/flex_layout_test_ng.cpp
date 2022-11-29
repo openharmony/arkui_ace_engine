@@ -2346,7 +2346,7 @@ HWTEST_F(FlexLayoutTestNg, FlexRowLayoutTest017, TestSize.Level1)
 HWTEST_F(FlexLayoutTestNg, FlexColumnLayoutTest004, TestSize.Level1)
 {
     auto columnFrameNode =
-        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(true));
     EXPECT_FALSE(columnFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
@@ -2485,7 +2485,7 @@ HWTEST_F(FlexLayoutTestNg, FlexColumnLayoutTest004, TestSize.Level1)
 HWTEST_F(FlexLayoutTestNg, FlexColumnLayoutTest005, TestSize.Level1)
 {
     auto columnFrameNode =
-        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(true));
     EXPECT_FALSE(columnFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
@@ -2631,7 +2631,7 @@ HWTEST_F(FlexLayoutTestNg, FlexColumnLayoutTest005, TestSize.Level1)
 HWTEST_F(FlexLayoutTestNg, FlexColumnLayoutTest006, TestSize.Level1)
 {
     auto columnFrameNode =
-        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(true));
     EXPECT_FALSE(columnFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
@@ -2931,7 +2931,7 @@ HWTEST_F(FlexLayoutTestNg, FlexRowLayoutTest019, TestSize.Level1)
  */
 HWTEST_F(FlexLayoutTestNg, FlexColumnLayoutTest007, TestSize.Level1)
 {
-    auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(true));
     EXPECT_FALSE(rowFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);

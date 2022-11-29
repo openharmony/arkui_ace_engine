@@ -20,6 +20,8 @@ TextLayoutAlgorithm::TextLayoutAlgorithm() = default;
 
 void TextLayoutAlgorithm::OnReset() {}
 
+void TextLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper) {}
+
 std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {

@@ -26,8 +26,8 @@
 #include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
@@ -190,7 +190,8 @@ void FlexLayoutAlgorithm::InitFlexProperties(LayoutWrapper* layoutWrapper)
         textDir_ = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
     }
     /**
-     * FIXME: FlexLayoutAlgorithm, as the parent class, should not handle the special logic of the subclass LinearLayout.
+     * FlexLayoutAlgorithm, as the parent class, should not handle the special logic of the subclass
+     * LinearLayout.
      */
     if (isLinearLayoutFeature_) {
         bool isVertical = DynamicCast<LinearLayoutProperty>(layoutWrapper->GetLayoutProperty())->IsVertical();
@@ -669,7 +670,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     AdjustTotalAllocatedSize(layoutWrapper);
 
     /**
-     * FIXME: For Row and Column, the main axis size is wrapContent.
+     * For Row and Column, the main axis size is wrapContent.
      * And, FlexLayoutAlgorithm, as the parent class, should not handle the special logic of the subclass LinearLayout.
      */
     if (isInfiniteLayout_) {

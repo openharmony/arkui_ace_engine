@@ -29,6 +29,27 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+/**
+ * The baseline information needs to be calculated based on contentOffsetY.
+ */
+float GetContentOffsetY(LayoutWrapper* layoutWrapper)
+{
+    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto offsetY = padding.top.value_or(0);
+    auto align = Alignment::CENTER;
+    if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
+        align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
+    }
+    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+    if (content) {
+        offsetY += Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align).GetY();
+    }
+    return offsetY;
+}
+} // namespace
+
 TextLayoutAlgorithm::TextLayoutAlgorithm() = default;
 
 void TextLayoutAlgorithm::OnReset() {}
@@ -95,9 +116,20 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     }
     float heightFinal =
         std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
-    auto baselineDistance = paragraph_->GetAlphabeticBaseline() + std::max(GetBaselineOffset(), 0.0f);
-    layoutWrapper->GetGeometryNode()->SetBaselineDistance(baselineDistance);
     return SizeF(static_cast<float>(GetTextWidth()), heightFinal);
+}
+
+void TextLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    BoxLayoutAlgorithm::Measure(layoutWrapper);
+    auto baselineDistance = 0.0f;
+    if (paragraph_) {
+        baselineDistance = paragraph_->GetAlphabeticBaseline() + std::max(GetBaselineOffset(), 0.0f);
+    }
+    if (!NearZero(baselineDistance, 0.0f)) {
+        baselineDistance += GetContentOffsetY(layoutWrapper);
+    }
+    layoutWrapper->GetGeometryNode()->SetBaselineDistance(baselineDistance);
 }
 
 bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content)
