@@ -94,14 +94,14 @@ void RosenRenderImage::InitializeCallbacks()
                 info.ToString().c_str());
             return;
         }
-        if (renderImage->sourceInfo_ == info) {
+        if (renderImage->newSrc_ == info) {
             LOGD("image obj ready info : %{public}s", info.ToString().c_str());
             renderImage->ImageObjReady(imageObj);
             return;
         }
         LOGW("imageObjSuccessCallback: image source info verify fail. sourceInfo: %{private}s, "
              "callback source info: %{private}s",
-            renderImage->sourceInfo_.ToString().c_str(), info.ToString().c_str());
+            renderImage->newSrc_.ToString().c_str(), info.ToString().c_str());
     };
 
     failedCallback_ = [weak = AceType::WeakClaim(this)](ImageSourceInfo info, const std::string& errorMsg) {
@@ -111,20 +111,20 @@ void RosenRenderImage::InitializeCallbacks()
                 info.ToString().c_str());
             return;
         }
-        if (info != renderImage->sourceInfo_) {
+        if (info != renderImage->newSrc_) {
             LOGW("image source not matched now source: %{private}s vs callback source: %{private}s.",
-                renderImage->sourceInfo_.ToString().c_str(), info.ToString().c_str());
+                renderImage->newSrc_.ToString().c_str(), info.ToString().c_str());
             return;
         }
         auto context = renderImage->GetContext().Upgrade();
         if (!context) {
             LOGE("context is null when handle image load fail callback. sourceInfo: %{private}s",
-                renderImage->sourceInfo_.ToString().c_str());
+                renderImage->newSrc_.ToString().c_str());
             return;
         }
         auto isDeclarative = context->GetIsDeclarative();
         if (!isDeclarative && !renderImage->syncMode_ && renderImage->RetryLoading()) {
-            LOGI("retry loading. sourceInfo: %{private}s", renderImage->sourceInfo_.ToString().c_str());
+            LOGI("retry loading. sourceInfo: %{private}s", renderImage->newSrc_.ToString().c_str());
             return;
         }
         renderImage->ImageObjFailed(errorMsg);
@@ -139,13 +139,13 @@ void RosenRenderImage::InitializeCallbacks()
                 sourceInfo.ToString().c_str());
             return;
         }
-        if (renderImage->sourceInfo_ == sourceInfo) {
+        if (renderImage->newSrc_ == sourceInfo) {
             renderImage->ImageDataPaintSuccess(image);
             return;
         }
         LOGW("paintDataSuccessCallback: image source info verify fail. sourceInfo: %{private}s, callback source info: "
              "%{private}s",
-            renderImage->sourceInfo_.ToString().c_str(), sourceInfo.ToString().c_str());
+            renderImage->newSrc_.ToString().c_str(), sourceInfo.ToString().c_str());
     };
 
     onPostBackgroundTask_ = [weak = AceType::WeakClaim(this)](CancelableTask task) {
@@ -158,7 +158,7 @@ void RosenRenderImage::InitializeCallbacks()
 
 void RosenRenderImage::ImageObjReady(const RefPtr<ImageObject>& imageObj)
 {
-    LOGD("image obj ready info : %{public}s", sourceInfo_.ToString().c_str());
+    LOGD("image obj ready info : %{public}s", newSrc_.ToString().c_str());
     imageObj_ = imageObj;
     auto imageSize = imageObj_->GetImageSize();
     bool canStartUploadImageObj = !autoResize_ && (imageObj_->GetFrameCount() == 1);
@@ -169,8 +169,8 @@ void RosenRenderImage::ImageObjReady(const RefPtr<ImageObject>& imageObj)
         resizeScale_ = Size(1.0, 1.0);
     }
     if (!imageObj_->IsSvg()) {
-        if (sourceInfo_.IsSourceDimensionValid()) {
-            rawImageSize_ = sourceInfo_.GetSourceSize();
+        if (newSrc_.IsSourceDimensionValid()) {
+            rawImageSize_ = newSrc_.GetSourceSize();
             forceResize_ = true;
         } else {
             rawImageSize_ = imageSize;
@@ -204,15 +204,15 @@ void RosenRenderImage::ImageObjReady(const RefPtr<ImageObject>& imageObj)
 
 void RosenRenderImage::ImageObjFailed(const std::string& errorMsg)
 {
-    LOGW("image load failed, sourceInfo : %{private}s", sourceInfo_.ToString().c_str());
+    LOGW("image load failed, sourceInfo : %{private}s", newSrc_.ToString().c_str());
     currentDstRectList_.clear();
     imageSizeForEvent_ = Size();
     image_ = nullptr;
     imageObj_ = nullptr;
-    curSourceInfo_ = sourceInfo_;
+    src_ = newSrc_;
     skiaDom_ = nullptr;
     svgDom_ = nullptr;
-    proceedPreviousLoading_ = false;
+    proceedLastLoading_ = false;
     imageLoadingStatus_ = ImageLoadingStatus::LOAD_FAIL;
     retryCnt_ = 0;
     FireLoadEvent(imageSizeForEvent_, errorMsg);
@@ -282,22 +282,27 @@ void RosenRenderImage::UpdatePixmap(const RefPtr<PixelMap>& pixmap)
 void RosenRenderImage::Update(const RefPtr<Component>& component)
 {
     RenderImage::Update(component);
-    // curImageSrc represents the picture currently shown and imageSrc represents next picture to be shown
-    imageLoadingStatus_ = (sourceInfo_ != curSourceInfo_) ? ImageLoadingStatus::UPDATING : imageLoadingStatus_;
+    // MEMORY srcType always triggers reload on update
+    imageLoadingStatus_ = (newSrc_.GetSrcType() == SrcType::MEMORY || newSrc_ != src_)
+                              ? ImageLoadingStatus::UPDATING
+                              : imageLoadingStatus_;
     UpdateRenderAltImage(component);
-    if (proceedPreviousLoading_) {
+    if (proceedLastLoading_) {
         LOGD("Proceed previous loading, imageSrc is %{private}s, image loading status: %{public}d",
-            sourceInfo_.ToString().c_str(), imageLoadingStatus_);
+            newSrc_.ToString().c_str(), imageLoadingStatus_);
         return;
     }
 
-    if (sourceInfo_ != curSourceInfo_ && curSourceInfo_.IsValid()) {
-        rawImageSize_ = Size();
-    } else if (curSourceInfo_.IsValid()) {
-        rawImageSize_ = formerRawImageSize_;
+    // reset raw image size when updating image src (Memory type always needs reset)
+    if (src_.IsValid()) {
+        if (newSrc_ != src_ || newSrc_.GetSrcType() == SrcType::MEMORY) {
+            rawImageSize_ = Size();
+        } else {
+            rawImageSize_ = formerRawImageSize_;
+        }
     }
 
-    if (sourceInfo_.IsSvg()) {
+    if (newSrc_.IsSvg()) {
         auto imageObject = QueryCacheSvgImageObject();
         if (imageObject != nullptr) {
             imageObj_ = imageObject;
@@ -312,7 +317,7 @@ void RosenRenderImage::Update(const RefPtr<Component>& component)
 
 std::function<void()> RosenRenderImage::GenerateThumbnailLoadTask()
 {
-    return [sourceInfo = sourceInfo_, pipelineContext = GetContext(), weak = AceType::WeakClaim(this),
+    return [sourceInfo = newSrc_, pipelineContext = GetContext(), weak = AceType::WeakClaim(this),
                id = Container::CurrentId()]() {
         ContainerScope scope(id);
         auto context = pipelineContext.Upgrade();
@@ -367,7 +372,7 @@ std::function<void()> RosenRenderImage::GenerateThumbnailLoadTask()
 
 void RosenRenderImage::FetchImageObject()
 {
-    LOGD("fetch obj : %{public}s", sourceInfo_.ToString().c_str());
+    LOGD("fetch obj : %{public}s", newSrc_.ToString().c_str());
     auto context = GetContext().Upgrade();
     if (!context) {
         LOGE("pipeline context is null!");
@@ -378,22 +383,22 @@ void RosenRenderImage::FetchImageObject()
         LOGE("frontend is null!");
         return;
     }
-    if (!sourceInfo_.IsValid()) {
-        LOGW("Invalid image source. sourceInfo_ is %{private}s", sourceInfo_.ToString().c_str());
+    if (!newSrc_.IsValid()) {
+        LOGW("Invalid image source. sourceInfo_ is %{private}s", newSrc_.ToString().c_str());
         if (context->GetIsDeclarative()) {
             ImageObjFailed("Invalid image source, input of src may be null, please check.");
         }
         return;
     }
     rawImageSizeUpdated_ = false;
-    SrcType srcType = sourceInfo_.GetSrcType();
+    SrcType srcType = newSrc_.GetSrcType();
     switch (srcType) {
         case SrcType::DATA_ABILITY_DECODED: {
             BackgroundTaskExecutor::GetInstance().PostTask(GenerateThumbnailLoadTask());
             break;
         }
         case SrcType::PIXMAP: {
-            UpdatePixmap(sourceInfo_.GetPixmap());
+            UpdatePixmap(newSrc_.GetPixmap());
             break;
         }
         case SrcType::MEMORY: {
@@ -402,9 +407,9 @@ void RosenRenderImage::FetchImageObject()
         }
         default: {
             bool syncMode = (context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD &&
-                                sourceInfo_.GetSrcType() != SrcType::NETWORK) ||
+                                newSrc_.GetSrcType() != SrcType::NETWORK) ||
                             syncMode_;
-            ImageProvider::FetchImageObject(sourceInfo_, imageObjSuccessCallback_, uploadSuccessCallback_,
+            ImageProvider::FetchImageObject(newSrc_, imageObjSuccessCallback_, uploadSuccessCallback_,
                 failedCallback_, GetContext(), syncMode, useSkiaSvg_, autoResize_, renderTaskHolder_,
                 onPostBackgroundTask_);
             break;
@@ -417,10 +422,10 @@ void RosenRenderImage::UpdateSharedMemoryImage(const RefPtr<PipelineContext>& co
     auto sharedImageManager = context->GetSharedImageManager();
     if (!sharedImageManager) {
         LOGE("sharedImageManager is null when image try loading memory image, sourceInfo_: %{private}s",
-            sourceInfo_.ToString().c_str());
+            newSrc_.ToString().c_str());
         return;
     }
-    auto nameOfSharedImage = ImageLoader::RemovePathHead(sourceInfo_.GetSrc());
+    auto nameOfSharedImage = ImageLoader::RemovePathHead(newSrc_.GetSrc());
     if (sharedImageManager->IsResourceToReload(nameOfSharedImage, AceType::WeakClaim(this))) {
         // This case means that the image to load is a memory image and its data is not ready.
         // Add [this] to [providerMapToReload_] so that it will be notified to start loading image.
@@ -476,7 +481,7 @@ void RosenRenderImage::ProcessPixmapForPaint()
         return;
     }
     // pixelMap render finished
-    curSourceInfo_ = sourceInfo_;
+    src_ = newSrc_;
     imageLoadingStatus_ = ImageLoadingStatus::LOAD_SUCCESS;
     FireLoadEvent(rawImageSize_);
     RemoveChild(renderAltImage_);
@@ -560,7 +565,7 @@ void RosenRenderImage::CacheSvgImageObject()
     }
     auto imageCache = context->GetImageCache();
     if (imageCache) {
-        imageCache->CacheImgObj(sourceInfo_.GetCacheKey(), imageObj_);
+        imageCache->CacheImgObj(newSrc_.GetCacheKey(), imageObj_);
     }
 }
 
@@ -576,7 +581,7 @@ RefPtr<ImageObject> RosenRenderImage::QueryCacheSvgImageObject()
         LOGE("image cached is null!");
         return nullptr;
     }
-    return imageCache->GetCacheImgObj(sourceInfo_.GetCacheKey());
+    return imageCache->GetCacheImgObj(newSrc_.GetCacheKey());
 }
 
 void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
@@ -590,7 +595,7 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
         renderAltImage_->SetDirectPaint(directPaint_);
         renderAltImage_->RenderWithContext(context, offset);
     }
-    if (sourceInfo_.GetSrcType() != SrcType::PIXMAP) {
+    if (newSrc_.GetSrcType() != SrcType::PIXMAP) {
         UpLoadImageDataForPaint();
     }
     auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
@@ -641,7 +646,7 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
 #endif
         return;
     }
-    if (sourceInfo_.IsSvg()) {
+    if (newSrc_.IsSvg()) {
         if (svgDom_) {
             canvas->translate(static_cast<float>(offset.GetX()), static_cast<float>(offset.GetY()));
             svgDom_->PaintDirectly(context, offset, imageFit_, GetLayoutSize());
@@ -766,7 +771,7 @@ void RosenRenderImage::CanvasDrawImageRect(
     if (!image_ || (!image_->image() && !image_->compressData())) {
         imageDataNotReady_ = true;
         LOGD("image data is not ready, rawImageSize_: %{public}s, image source: %{private}s",
-            rawImageSize_.ToString().c_str(), sourceInfo_.ToString().c_str());
+            rawImageSize_.ToString().c_str(), newSrc_.ToString().c_str());
         return;
     }
 #ifdef OHOS_PLATFORM
@@ -785,7 +790,7 @@ void RosenRenderImage::CanvasDrawImageRect(
                     (imageLoadingStatus_ == ImageLoadingStatus::UPDATING));
     Rect scaledSrcRect = isLoading ? currentSrcRect_ : srcRect_;
 
-    if (sourceInfo_.IsValid() && imageObj_ && (imageObj_->GetFrameCount() == 1)) {
+    if (newSrc_.IsValid() && imageObj_ && (imageObj_->GetFrameCount() == 1)) {
         Size sourceSize = (image_ ? Size(image_->width(), image_->height()) : Size());
         // calculate srcRect that matches the real image source size
         // note that gif doesn't do resize, so gif does not need to recalculate
@@ -811,8 +816,8 @@ void RosenRenderImage::CanvasDrawImageRect(
 #endif
 }
 
-void RosenRenderImage::DrawImageOnCanvas(const Rect& srcRect, const Rect& dstRect, const SkPaint& paint,
-    SkCanvas* canvas) const
+void RosenRenderImage::DrawImageOnCanvas(
+    const Rect& srcRect, const Rect& dstRect, const SkPaint& paint, SkCanvas* canvas) const
 {
 #ifdef OHOS_PLATFORM
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
@@ -906,7 +911,7 @@ void RosenRenderImage::PaintBgImage(const std::shared_ptr<RSNode>& rsNode)
 
 bool RosenRenderImage::NeedUploadImageObjToGpu()
 {
-    bool sourceChange = sourceInfo_ != curSourceInfo_;
+    bool sourceChange = newSrc_ != src_;
     bool newSourceCallLoadImage = (sourceChange && rawImageSize_.IsValid() && srcRect_.IsValid() &&
                                    (rawImageSizeUpdated_ && imageLoadingStatus_ != ImageLoadingStatus::LOADING) &&
                                    imageLoadingStatus_ != ImageLoadingStatus::LOAD_FAIL);
@@ -945,7 +950,7 @@ void RosenRenderImage::UploadImageObjToGpuForRender(const RefPtr<ImageObject>& i
 
 void RosenRenderImage::UpdateData(const std::string& uri, const std::vector<uint8_t>& memData)
 {
-    if (uri != sourceInfo_.GetSrc()) {
+    if (uri != newSrc_.GetSrc()) {
         return;
     }
     auto skData = SkData::MakeWithCopy(memData.data(), memData.size());
@@ -953,7 +958,7 @@ void RosenRenderImage::UpdateData(const std::string& uri, const std::vector<uint
         LOGE("memory data is null. update data failed. uri: %{private}s", uri.c_str());
         return;
     }
-    if (sourceInfo_.IsSvg()) {
+    if (newSrc_.IsSvg()) {
         PaintSVGImage(skData, true);
         return;
     }
@@ -967,8 +972,7 @@ void RosenRenderImage::UpdateData(const std::string& uri, const std::vector<uint
     if (!context) {
         return;
     }
-    auto ImageObj =
-        ImageObject::BuildImageObject(sourceInfo_, context, skData, useSkiaSvg_);
+    auto ImageObj = ImageObject::BuildImageObject(newSrc_, context, skData, useSkiaSvg_);
     if (!ImageObj) {
         LOGW("image object is null");
         return;
@@ -1038,7 +1042,7 @@ void RosenRenderImage::OnHiddenChanged(bool hidden)
         if (imageObj_ && imageObj_->GetFrameCount() > 1) {
             LOGI("Animated image Pause");
             imageObj_->Pause();
-        } else if (sourceInfo_.GetSrcType() != SrcType::MEMORY) {
+        } else if (newSrc_.GetSrcType() != SrcType::MEMORY) {
             CancelBackgroundTasks();
         }
     } else {
@@ -1047,9 +1051,9 @@ void RosenRenderImage::OnHiddenChanged(bool hidden)
             imageObj_->Resume();
         } else if (backgroundTaskCanceled_) {
             backgroundTaskCanceled_ = false;
-            if (sourceInfo_.GetSrcType() == SrcType::MEMORY) {
+            if (newSrc_.GetSrcType() == SrcType::MEMORY) {
                 LOGE("memory image: %{public}s should not be notified to resume loading.",
-                    sourceInfo_.ToString().c_str());
+                    newSrc_.ToString().c_str());
             }
             imageLoadingStatus_ = ImageLoadingStatus::UNLOADED;
             FetchImageObject();
@@ -1084,13 +1088,13 @@ void RosenRenderImage::PaintSVGImage(const sk_sp<SkData>& skData, bool onlyLayou
     auto failedCallback = [svgImageWeak = AceType::WeakClaim(this)]() {
         auto svgImage = svgImageWeak.Upgrade();
         if (svgImage) {
-            LOGE("svg data wrong: %{private}s", svgImage->sourceInfo_.ToString().c_str());
+            LOGE("svg data wrong: %{private}s", svgImage->newSrc_.ToString().c_str());
             // if Upgrade fail, just callback with nullptr
             svgImage->ImageObjFailed("SVG data may be broken, please check the SVG file.");
         }
     };
     SkColorEx skColor;
-    auto fillColor = sourceInfo_.GetFillColor();
+    auto fillColor = newSrc_.GetFillColor();
     if (fillColor.has_value()) {
         skColor.color = fillColor.value().GetValue();
         skColor.valid = 1;
@@ -1152,18 +1156,18 @@ void RosenRenderImage::DrawSVGImageCustom(RenderContext& context, const Offset& 
 
 void RosenRenderImage::UpdateLoadSuccessState()
 {
-    LOGD("update success state info: %{public}s", sourceInfo_.ToString().c_str());
+    LOGD("update success state info: %{public}s", newSrc_.ToString().c_str());
     imageLoadingStatus_ = ImageLoadingStatus::LOAD_SUCCESS;
     if (!imageObj_) {
         LOGE("image obj is null");
         return;
     }
     auto currentFrameCount = imageObj_->GetFrameCount();
-    if ((!sourceInfo_.IsSvg() && currentFrameCount == 1) || (currentFrameCount > 1 && curSourceInfo_ != sourceInfo_)) {
+    if ((!newSrc_.IsSvg() && currentFrameCount == 1) || (currentFrameCount > 1 && src_ != newSrc_)) {
         FireLoadEvent(imageSizeForEvent_);
     }
     // alt_image has empty imageAlt_, then mark the parent needs render
-    if ((currentFrameCount > 1 && curSourceInfo_ != sourceInfo_) || imageAlt_.empty()) {
+    if ((currentFrameCount > 1 && src_ != newSrc_) || imageAlt_.empty()) {
         auto parent = GetParent().Upgrade();
         if (parent) {
             parent->MarkNeedRender();
@@ -1174,7 +1178,7 @@ void RosenRenderImage::UpdateLoadSuccessState()
     }
 
     currentSrcRect_ = srcRect_;
-    curSourceInfo_ = sourceInfo_;
+    src_ = newSrc_;
     formerRawImageSize_ = rawImageSize_;
     forceResize_ = false;
     retryCnt_ = 0;
@@ -1185,7 +1189,7 @@ void RosenRenderImage::UpdateLoadSuccessState()
         MarkNeedLayout();
         return;
     }
-    proceedPreviousLoading_ = false;
+    proceedLastLoading_ = false;
     rawImageSizeUpdated_ = false;
     MarkNeedRender();
 }
@@ -1195,7 +1199,7 @@ void RosenRenderImage::UpdateRenderAltImage(const RefPtr<Component>& component)
     const RefPtr<ImageComponent> image = AceType::DynamicCast<ImageComponent>(component);
     if (!image) {
         LOGE("image component is null when try update alt image, sourceInfo_: %{private}s",
-            sourceInfo_.ToString().c_str());
+            newSrc_.ToString().c_str());
         return;
     }
     bool imageAltValid = !imageAlt_.empty() && (imageAlt_ != IMAGE_ALT_BLANK);
@@ -1228,10 +1232,10 @@ bool RosenRenderImage::MaybeRelease()
 
 void RosenRenderImage::ClearRenderObject()
 {
-    LOGD("Clear obj %{public}s", curSourceInfo_.ToString().c_str());
+    LOGD("Clear obj %{public}s", src_.ToString().c_str());
     RenderImage::ClearRenderObject();
     CancelBackgroundTasks();
-    curSourceInfo_.Reset();
+    src_.Reset();
     image_ = nullptr;
     formerRawImageSize_ = { 0.0, 0.0 };
     imageObj_ = nullptr;
@@ -1242,7 +1246,7 @@ void RosenRenderImage::ClearRenderObject()
 
 bool RosenRenderImage::IsSourceWideGamut() const
 {
-    if (sourceInfo_.IsSvg() || !image_ || !image_->image()) {
+    if (newSrc_.IsSvg() || !image_ || !image_->image()) {
         return false;
     }
     return ImageProvider::IsWideGamut(image_->image()->refColorSpace());
@@ -1250,14 +1254,14 @@ bool RosenRenderImage::IsSourceWideGamut() const
 
 bool RosenRenderImage::RetryLoading()
 {
-    if (!sourceInfo_.IsValid()) {
+    if (!newSrc_.IsValid()) {
         LOGW("sourceInfo is invalid, no need retry loading. sourceInfo: %{private}s. retry loading time: %{public}d",
-            sourceInfo_.ToString().c_str(), retryCnt_);
+            newSrc_.ToString().c_str(), retryCnt_);
         return false;
     }
     if (retryCnt_++ > 5) { // retry loading 5 times at most
         LOGW("Retry time has reached 5, stop retry loading, please check fail reason. imageSrc: %{private}s",
-            sourceInfo_.ToString().c_str());
+            newSrc_.ToString().c_str());
         return false;
     }
 
@@ -1265,29 +1269,28 @@ bool RosenRenderImage::RetryLoading()
         imageObj_->UploadToGpuForRender(
             GetContext(), renderTaskHolder_, uploadSuccessCallback_, failedCallback_, resizeTarget_, forceResize_);
         LOGW("Retry loading time: %{public}d, trigger by LoadImage fail, imageSrc: %{private}s", retryCnt_,
-            sourceInfo_.ToString().c_str());
+            newSrc_.ToString().c_str());
         return true;
     }
     // case when the fail event is triggered by GetImageSize, do GetImageSize again
     auto context = GetContext().Upgrade();
     if (!context) {
         LOGE("pipeline context is null while trying to get image size again. imageSrc: %{private}s",
-            sourceInfo_.ToString().c_str());
+            newSrc_.ToString().c_str());
         return false;
     }
     auto frontend = context->GetFrontend();
     if (!frontend) {
         LOGE("frontend is null while trying to get image size again. imageSrc: %{private}s",
-            sourceInfo_.ToString().c_str());
+            newSrc_.ToString().c_str());
         return false;
     }
-    bool syncMode = context->IsBuildingFirstPage() &&
-                    frontend->GetType() == FrontendType::JS_CARD &&
-                    sourceInfo_.GetSrcType() != SrcType::NETWORK;
-    ImageProvider::FetchImageObject(sourceInfo_, imageObjSuccessCallback_, uploadSuccessCallback_, failedCallback_,
+    bool syncMode = context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD &&
+                    newSrc_.GetSrcType() != SrcType::NETWORK;
+    ImageProvider::FetchImageObject(newSrc_, imageObjSuccessCallback_, uploadSuccessCallback_, failedCallback_,
         GetContext(), syncMode, useSkiaSvg_, autoResize_, renderTaskHolder_, onPostBackgroundTask_);
     LOGW("Retry loading time: %{public}d, triggered by GetImageSize fail, imageSrc: %{private}s", retryCnt_,
-        sourceInfo_.ToString().c_str());
+        newSrc_.ToString().c_str());
     return true;
 }
 
@@ -1394,7 +1397,7 @@ RefPtr<PixelMap> RosenRenderImage::GetPixmapFromSkImage()
     return PixelMap::ConvertSkImageToPixmap(addr, length, width, height);
 }
 
-SkPixmap RosenRenderImage::CloneSkPixmap(SkPixmap &srcPixmap)
+SkPixmap RosenRenderImage::CloneSkPixmap(SkPixmap& srcPixmap)
 {
     SkImageInfo dstImageInfo = SkImageInfo::Make(srcPixmap.info().width(), srcPixmap.info().height(),
         SkColorType::kBGRA_8888_SkColorType, srcPixmap.alphaType());
