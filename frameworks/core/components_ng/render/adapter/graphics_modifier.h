@@ -22,193 +22,109 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/render/adapter/rosen_foreground_modifier.h"
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
 
 namespace OHOS::Ace::NG {
 
 using RSDrawingContext = Rosen::RSDrawingContext;
 
-class GrayScaleModifier : public RSForegroundStyleModifier {
+// common parent class of graphic effect modifiers
+class GraphicModifier : public Rosen::RSForegroundStyleModifier {
 public:
-    GrayScaleModifier() = default;
-    ~GrayScaleModifier() override = default;
-
-    void Draw(RSDrawingContext& context) const override
-    {
-        SkiaDecorationPainter::PaintGrayScale(
-            SizeF(context.width, context.height), context.canvas, property_->Get());
-    }
-
     void SetCustomData(const float data)
     {
-        if (property_ == nullptr) {
+        if (!property_) {
             property_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(data);
             AttachProperty(property_);
         } else {
+            LOGD("changing modifier property %f", data);
             property_->Set(data);
         }
     }
 
-private:
+protected:
     std::shared_ptr<Rosen::RSAnimatableProperty<float>> property_;
 };
 
-class BrightnessModifier : public RSForegroundStyleModifier {
+class GrayScaleModifier : public GraphicModifier {
 public:
-    BrightnessModifier() = default;
-    ~BrightnessModifier() override = default;
-
     void Draw(RSDrawingContext& context) const override
     {
-        SkiaDecorationPainter::PaintBrightness(
-            SizeF(context.width, context.height), context.canvas, property_->Get());
-    }
-
-    void SetCustomData(const float data)
-    {
-        if (property_ == nullptr) {
-            property_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(data);
-            AttachProperty(property_);
-        } else {
-            property_->Set(data);
+        if (property_) {
+            SkiaDecorationPainter::PaintGrayScale(
+                SizeF(context.width, context.height), context.canvas, property_->Get());
         }
     }
-
-private:
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>> property_;
 };
 
-class ContrastModifier : public RSForegroundStyleModifier {
+class BrightnessModifier : public GraphicModifier {
 public:
-    ContrastModifier() = default;
-    ~ContrastModifier() override = default;
-
     void Draw(RSDrawingContext& context) const override
     {
-        SkiaDecorationPainter::PaintContrast(
-            SizeF(context.width, context.height), context.canvas, property_->Get());
-    }
-
-    void SetCustomData(const float data)
-    {
-        if (property_ == nullptr) {
-            property_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(data);
-            AttachProperty(property_);
-        } else {
-            property_->Set(data);
+        if (property_) {
+            SkiaDecorationPainter::PaintBrightness(
+                SizeF(context.width, context.height), context.canvas, property_->Get());
         }
     }
-
-private:
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>> property_;
 };
 
-class SaturateModifier : public RSForegroundStyleModifier {
+class ContrastModifier : public GraphicModifier {
 public:
-    SaturateModifier() = default;
-    ~SaturateModifier() override = default;
-
     void Draw(RSDrawingContext& context) const override
     {
-        SkiaDecorationPainter::PaintSaturate(
-            SizeF(context.width, context.height), context.canvas, property_->Get());
-    }
-
-    void SetCustomData(const float data)
-    {
-        if (property_ == nullptr) {
-            property_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(data);
-            AttachProperty(property_);
-        } else {
-            property_->Set(data);
+        if (property_) {
+            SkiaDecorationPainter::PaintContrast(
+                SizeF(context.width, context.height), context.canvas, property_->Get());
         }
     }
-
-private:
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>> property_;
 };
 
-class SepiaModifier : public RSForegroundStyleModifier {
+class SaturateModifier : public GraphicModifier {
 public:
-    SepiaModifier() = default;
-    ~SepiaModifier() override = default;
-
     void Draw(RSDrawingContext& context) const override
     {
-        SkiaDecorationPainter::PaintSepia(
-            SizeF(context.width, context.height), context.canvas, property_->Get());
-    }
-
-    void SetCustomData(const float data)
-    {
-        if (property_ == nullptr) {
-            property_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(data);
-            AttachProperty(property_);
-        } else {
-            property_->Set(data);
+        if (property_) {
+            SkiaDecorationPainter::PaintSaturate(
+                SizeF(context.width, context.height), context.canvas, property_->Get());
         }
     }
-
-private:
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>> property_;
 };
 
-class InvertModifier : public RSForegroundStyleModifier {
+class SepiaModifier : public GraphicModifier {
 public:
-    InvertModifier() = default;
-    ~InvertModifier() override = default;
-
     void Draw(RSDrawingContext& context) const override
     {
-        SkiaDecorationPainter::PaintInvert(
-            SizeF(context.width, context.height), context.canvas, property_->Get());
-    }
-
-    void SetCustomData(const float data)
-    {
-        if (property_ == nullptr) {
-            property_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(data);
-            AttachProperty(property_);
-        } else {
-            property_->Set(data);
+        if (property_) {
+            SkiaDecorationPainter::PaintSepia(SizeF(context.width, context.height), context.canvas, property_->Get());
         }
     }
-
-private:
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>> property_;
 };
 
-class HueRotateModifier : public RSForegroundStyleModifier {
+class InvertModifier : public GraphicModifier {
 public:
-    HueRotateModifier() = default;
-    ~HueRotateModifier() override = default;
-
     void Draw(RSDrawingContext& context) const override
     {
-        SkiaDecorationPainter::PaintHueRotate(
-            SizeF(context.width, context.height), context.canvas, property_->Get());
-    }
-
-    void SetCustomData(const float data)
-    {
-        if (property_ == nullptr) {
-            property_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(data);
-            AttachProperty(property_);
-        } else {
-            property_->Set(data);
+        if (property_) {
+            SkiaDecorationPainter::PaintInvert(SizeF(context.width, context.height), context.canvas, property_->Get());
         }
     }
+};
 
-private:
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>> property_;
+class HueRotateModifier : public GraphicModifier {
+public:
+    void Draw(RSDrawingContext& context) const override
+    {
+        if (property_) {
+            SkiaDecorationPainter::PaintHueRotate(
+                SizeF(context.width, context.height), context.canvas, property_->Get());
+        }
+    }
 };
 
 class ColorBlend : public Rosen::RSAnimatableArithmetic<ColorBlend> {
 public:
     ColorBlend() = default;
     explicit ColorBlend(const Color& color) : colorBlend_(color) {}
-    ~ColorBlend() override = default;
 
     ColorBlend Add(const ColorBlend& value) const override
     {
@@ -234,33 +150,33 @@ public:
     {
         return colorBlend_;
     }
-
-private:
     Color colorBlend_;
 };
 
-class ColorBlendModifier : public RSForegroundStyleModifier {
+class ColorBlendModifier : public Rosen::RSForegroundStyleModifier {
 public:
-    ColorBlendModifier() = default;
-    ~ColorBlendModifier() override = default;
-
     void Draw(RSDrawingContext& context) const override
     {
-        SkiaDecorationPainter::PaintColorBlend(
-            SizeF(context.width, context.height), context.canvas, property_->Get().GetColor());
+        if (property_) {
+            SkiaDecorationPainter::PaintColorBlend(
+                SizeF(context.width, context.height), context.canvas, property_->Get().GetColor());
+        }
+    }
+
+    Rosen::RSModifierType GetModifierType() const override
+    {
+        return Rosen::RSModifierType::FOREGROUND_STYLE;
     }
 
     void SetCustomData(const ColorBlend& data)
     {
-        if (property_ == nullptr) {
+        if (!property_) {
             property_ = std::make_shared<Rosen::RSAnimatableProperty<ColorBlend>>(data);
             AttachProperty(property_);
         } else {
             property_->Set(data);
         }
     }
-
-private:
     std::shared_ptr<Rosen::RSAnimatableProperty<ColorBlend>> property_;
 };
 } // namespace OHOS::Ace::NG
