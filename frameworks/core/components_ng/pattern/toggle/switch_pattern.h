@@ -65,6 +65,11 @@ public:
         return paintMethod;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
+    }
+
 private:
     void OnModifyDone() override;
     void UpdateCurrentOffset(float offset);

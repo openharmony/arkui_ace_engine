@@ -37,6 +37,7 @@
 namespace OHOS::Ace::NG {
 class BorderImageModifier;
 class MouseSelectModifier;
+class FocusStateModifier;
 class PageTransitionEffect;
 class OverlayTextModifier;
 class RosenRenderContext : public RenderContext {
@@ -68,6 +69,17 @@ public:
     void ResetBlendBorderColor() override;
 
     void BlendBorderColor(const Color& color) override;
+
+    // Paint focus state by component's setting. It will paint along the paintRect
+    void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth) override;
+    // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
+    void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
+        const Dimension& paintWidth) override;
+    // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
+    void PaintFocusState(
+        const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth) override;
+
+    void ClearFocusState() override;
 
     RefPtr<Canvas> GetCanvas() override;
     void Restore() override;
@@ -268,6 +280,7 @@ private:
 
     std::shared_ptr<BorderImageModifier> borderImageModifier_ = nullptr;
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_ = nullptr;
+    std::shared_ptr<FocusStateModifier> focusStateModifier_;
     std::optional<TransformMatrixModifier> transformMatrixModifier_;
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;

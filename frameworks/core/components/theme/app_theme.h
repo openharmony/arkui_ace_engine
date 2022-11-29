@@ -102,6 +102,36 @@ public:
         hoverDuration_ = duration;
     }
 
+    Color GetFocusColor() const
+    {
+        return focusColor_;
+    }
+
+    void SetFocusColor(const Color& focusColor)
+    {
+        focusColor_ = focusColor;
+    }
+
+    Dimension GetFocusWidthVp() const
+    {
+        return focusWidthVp_;
+    }
+
+    void SetFocusWidthVp(const Dimension& focusWidthVp)
+    {
+        focusWidthVp_ = Dimension(focusWidthVp.ConvertToVp(), DimensionUnit::VP);
+    }
+
+    Dimension GetFocusOutPaddingVp() const
+    {
+        return focusOutPaddingVp_;
+    }
+
+    void SetFocusOutPaddingVp(const Dimension& focusOutPaddingVp)
+    {
+        focusOutPaddingVp_ = Dimension(focusOutPaddingVp.ConvertToVp(), DimensionUnit::VP);
+    }
+
 protected:
     AppTheme() = default;
 
@@ -114,6 +144,12 @@ private:
     Color hoverHighlightStart_ = Color::TRANSPARENT;
     Color hoverHighlightEnd_ = Color::FromRGBO(0, 0, 0, 0.05);  // HoverEffect.HighLight change transparency from 100% to 5%
     int32_t hoverDuration_ = 250;                               // HoverEffect animation duration
+
+    // Focus State parameters
+    // TODO: these parameters need put in theme.csv
+    Color focusColor_ = Color(0xFF254FF7);                      // General focus state color
+    Dimension focusWidthVp_ = 2.0_vp;                           // General focus border width
+    Dimension focusOutPaddingVp_ = 2.0_vp;                      // General distance between focus border and component border
 };
 
 } // namespace OHOS::Ace

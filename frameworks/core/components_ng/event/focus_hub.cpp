@@ -21,6 +21,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/dump_log.h"
 #include "core/common/ace_application_info.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -186,9 +187,10 @@ void FocusHub::UpdateAccessibilityFocusInfo()
     // Need update
 }
 
-void FocusHub::LostFocus()
+void FocusHub::LostFocus(BlurReason reason)
 {
     if (IsCurrentFocus()) {
+        blurReason_ = reason;
         currentFocus_ = false;
         UpdateAccessibilityFocusInfo();
         OnBlur();
@@ -712,32 +714,24 @@ void FocusHub::OnFocusNode()
     if (onFocusCallback) {
         onFocusCallback();
     }
-    auto context = PipelineContext::GetCurrentContext();
-    if (context && context->GetIsNeedShowFocus() && focusType_ == FocusType::NODE) {
-        auto frameNode = GetFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        auto renderContext = frameNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->BlendBorderColor(Color(0xFF254FF7));
-    }
+    PaintFocusState();
 }
+
 void FocusHub::OnBlurNode()
 {
     LOGI("FocusHub: Node(%{public}s) on blur", GetFrameName().c_str());
     if (onBlurInternal_) {
         onBlurInternal_();
     }
+    if (onBlurReasonInternal_) {
+        LOGI("FocusHub: Node(%{public}s) 's blur reason is %{public}d", GetFrameName().c_str(), blurReason_);
+        onBlurReasonInternal_(blurReason_);
+    }
     auto onBlurCallback = GetOnBlurCallback();
     if (onBlurCallback) {
         onBlurCallback();
     }
-    if (focusType_ == FocusType::NODE) {
-        auto frameNode = GetFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        auto renderContext = frameNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->ResetBlendBorderColor();
-    }
+    ClearFocusState();
 }
 
 void FocusHub::OnFocusScope()
@@ -773,7 +767,126 @@ void FocusHub::OnBlurScope()
     FlushChildrenFocusHub();
     OnBlurNode();
     if (itLastFocusNode_ != focusNodes_.end() && *itLastFocusNode_) {
-        (*itLastFocusNode_)->LostFocus();
+        (*itLastFocusNode_)->LostFocus(blurReason_);
+    }
+}
+
+void FocusHub::PaintFocusState()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (focusStyleType_ == FocusStyleType::NONE || !context->GetIsNeedShowFocus()) {
+        return;
+    }
+
+    if (focusStyleType_ == FocusStyleType::CUSTOM_REGION) {
+        CHECK_NULL_VOID(getInnerFocusRectFunc_);
+        RoundRect focusRectInner;
+        getInnerFocusRectFunc_(focusRectInner);
+        PaintInnerFocusState(focusRectInner);
+        return;
+    }
+
+    auto appTheme = context->GetTheme<AppTheme>();
+    CHECK_NULL_VOID(appTheme);
+    Color paintColor;
+    if (HasPaintColor()) {
+        paintColor = GetPaintColor();
+    } else {
+        paintColor = appTheme->GetFocusColor();
+    }
+    Dimension paintWidth;
+    if (HasPaintWidth()) {
+        paintWidth = GetPaintWidth();
+    } else {
+        paintWidth = appTheme->GetFocusWidthVp();
+    }
+
+    if (focusStyleType_ == FocusStyleType::CUSTOM_BORDER) {
+        if (!HasPaintRect()) {
+            LOGE("PaintFocusState: frame rect has no value while focus style is CUSTOMIZE");
+            return;
+        }
+        renderContext->PaintFocusState(GetPaintRect(), paintColor, paintWidth);
+        return;
+    }
+
+    Dimension focusPaddingVp = Dimension(0.0, DimensionUnit::VP);
+    if (HasFocusPadding()) {
+        focusPaddingVp = GetFocusPadding();
+    } else {
+        if (focusStyleType_ == FocusStyleType::INNER_BORDER) {
+            focusPaddingVp = -appTheme->GetFocusWidthVp();
+        } else if (focusStyleType_ == FocusStyleType::OUTER_BORDER) {
+            focusPaddingVp = appTheme->GetFocusOutPaddingVp();
+        }
+    }
+    if (HasPaintRect()) {
+        renderContext->PaintFocusState(GetPaintRect(), focusPaddingVp, paintColor, paintWidth);
+    } else {
+        renderContext->PaintFocusState(focusPaddingVp, paintColor, paintWidth);
+    }
+}
+
+void FocusHub::PaintAllFocusState()
+{
+    PaintFocusState();
+    FlushChildrenFocusHub();
+    if (itLastFocusNode_ != focusNodes_.end() && *itLastFocusNode_) {
+        (*itLastFocusNode_)->PaintAllFocusState();
+    }
+}
+
+void FocusHub::PaintInnerFocusState(const RoundRect& paintRect)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!context->GetIsNeedShowFocus()) {
+        return;
+    }
+    auto appTheme = context->GetTheme<AppTheme>();
+    CHECK_NULL_VOID(appTheme);
+    Color paintColor;
+    if (HasPaintColor()) {
+        paintColor = GetPaintColor();
+    } else {
+        paintColor = appTheme->GetFocusColor();
+    }
+    Dimension paintWidth;
+    if (HasPaintWidth()) {
+        paintWidth = GetPaintWidth();
+    } else {
+        paintWidth = appTheme->GetFocusWidthVp();
+    }
+    renderContext->ClearFocusState();
+    renderContext->PaintFocusState(paintRect, paintColor, paintWidth);
+}
+
+void FocusHub::ClearFocusState()
+{
+    if (!currentFocus_ && focusStyleType_ != FocusStyleType::NONE) {
+        auto frameNode = GetFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->ClearFocusState();
+    }
+}
+
+void FocusHub::ClearAllFocusState()
+{
+    ClearFocusState();
+    FlushChildrenFocusHub();
+    if (itLastFocusNode_ != focusNodes_.end() && *itLastFocusNode_) {
+        (*itLastFocusNode_)->ClearAllFocusState();
     }
 }
 
