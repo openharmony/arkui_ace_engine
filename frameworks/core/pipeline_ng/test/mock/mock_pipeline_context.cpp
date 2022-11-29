@@ -57,11 +57,12 @@ float PipelineContext::GetCurrentRootHeight()
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
-    return AceType::MakeRefPtr<PipelineContext>();
+    static RefPtr<PipelineContext> pipeline = AceType::MakeRefPtr<PipelineContext>();
+    return pipeline;
 }
 
 // non-static method
-void PipelineContext::PipelineContext::SetupRootElement() {}
+void PipelineContext::SetupRootElement() {}
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
 
