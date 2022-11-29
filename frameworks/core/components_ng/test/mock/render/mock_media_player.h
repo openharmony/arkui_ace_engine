@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_MEDIA_PLAYER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_MEDIA_PLAYER_H
 
+#include <stdint.h>
 #include "gmock/gmock.h"
 
 #include "core/components_ng/render/media_player.h"
@@ -25,6 +26,11 @@ class MockMediaPlayer : public MediaPlayer {
     DECLARE_ACE_TYPE(MockMediaPlayer, MediaPlayer)
 public:
     ~MockMediaPlayer() override = default;
+
+    MOCK_METHOD0(IsMediaPlayerValid, bool());
+    MOCK_METHOD1(SetSource, bool(const std::string&));
+    MOCK_METHOD0(SetSurface, int32_t());
+    MOCK_METHOD0(PrepareAsync, int32_t());
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_MEDIA_PLAYER_H
