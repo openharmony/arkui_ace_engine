@@ -22,6 +22,7 @@
 
 #include "accessibility_config.h"
 #include "accessibility_element_operator.h"
+#include "accessibility_event_info.h"
 #include "accessibility_state_event.h"
 
 #include "core/accessibility/accessibility_manager.h"
@@ -73,7 +74,8 @@ public:
     virtual bool UnsubscribeStateObserver(const int eventType);
     virtual int RegisterInteractionOperation(const int windowId);
     virtual void DeregisterInteractionOperation();
-    virtual bool SendAccessibilitySyncEvent(const AccessibilityEvent& accessibilityEvent);
+    virtual bool SendAccessibilitySyncEvent(
+        const AccessibilityEvent& accessibilityEvent, Accessibility::AccessibilityEventInfo& eventInfo);
 
     void SearchElementInfoByAccessibilityId(const int32_t elementId, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode);
