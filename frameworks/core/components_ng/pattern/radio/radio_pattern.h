@@ -132,6 +132,7 @@ private:
     void UpdateTotalScale(float scale);
     void UpdatePointScale(float scale);
     void UpdateUIStatus(bool check);
+    RectF GetHotZoneRect(bool isOriginal) const;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -148,6 +149,7 @@ private:
     float totalScale_ = 1.0f;
     float pointScale_ = 0.5f;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
+    Dimension hotZoneHorizontalPadding_ = 11.0_vp;
 
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };

@@ -72,16 +72,21 @@ void RadioPaintMethod::InitializeParam()
 void RadioPaintMethod::PaintRadio(
     RSCanvas& canvas, bool /* checked */, const SizeF& contentSize, const OffsetF& offset) const
 {
+    OffsetF paintOffset = offset;
+    if (isTouch_ || isHover_) {
+        paintOffset.SetX(offset.GetX() + hotZoneHorizontalPadding_.ConvertToPx());
+        paintOffset.SetY(offset.GetY() + hotZoneHorizontalPadding_.ConvertToPx());
+    }
     if (isTouch_) {
-        DrawTouchBoard(canvas, contentSize, offset);
+        DrawTouchBoard(canvas, contentSize, paintOffset);
     }
     if (isHover_) {
-        DrawHoverBoard(canvas, contentSize, offset);
+        DrawHoverBoard(canvas, contentSize, paintOffset);
     }
 
     float outCircleRadius = contentSize.Width() / 2 - INNER_PADDING.ConvertToPx();
-    float centerX = outCircleRadius + offset.GetX() + INNER_PADDING.ConvertToPx();
-    float centerY = outCircleRadius + offset.GetY() + INNER_PADDING.ConvertToPx();
+    float centerX = outCircleRadius + paintOffset.GetX() + INNER_PADDING.ConvertToPx();
+    float centerY = outCircleRadius + paintOffset.GetY() + INNER_PADDING.ConvertToPx();
     if (uiStatus_ == UIStatus::SELECTED) {
         // draw stroke border
         RSPen pen;
