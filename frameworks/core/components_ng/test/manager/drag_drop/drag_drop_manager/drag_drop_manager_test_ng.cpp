@@ -596,7 +596,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest009, TestSize.Level1)
      *                   case: gridDragFrameNodes_ is empty & preGridTargetFrameNode_ is not null
      * @tc.expected: step4. frameNode's onItemDragLeave_ will be called
      *                      itemInfoLeave will be assigned to ITEM_INFO_LEAVE
-     *                      and preGridTargetFrameNode_ will be assigned to null
      *                      DragWindow.MoveTo() will be called with printing a log
      */
     dragDropManager->OnItemDragStart(GLOBAL_X, GLOBAL_Y, frameNode);
@@ -605,7 +604,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest009, TestSize.Level1)
     dragDropManager->OnItemDragMove(GLOBAL_X, GLOBAL_Y, DRAGGED_INDEX, DRAG_TYPE_GRID);
     EXPECT_EQ(itemInfoLeave, ITEM_INFO_LEAVE);
     preGridTargetNode = dragDropManager->preGridTargetFrameNode_;
-    EXPECT_FALSE(preGridTargetNode);
+    EXPECT_TRUE(preGridTargetNode);
 
     /**
      * @tc.steps: step5. call AddGridDragFrameNode
@@ -661,7 +660,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest009, TestSize.Level1)
      *                   case: gridDragFrameNodes_ is not empty & preGridTargetFrameNode_ is null
      * @tc.expected: step8. frameNode's onDragItemEnter_ will be called
      *                      itemInfoEnter will be assigned to ITEM_INFO_ENTER
-     *                      preGridTargetFrameNode_ is assigned to frameNode
      *                      DragWindow.MoveTo() will be called with printing a log
      */
     dragDropManager->onItemDragCancel();
@@ -670,10 +668,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest009, TestSize.Level1)
     itemInfoEnter = "";
     dragDropManager->OnItemDragMove(GLOBAL_X, GLOBAL_Y, DRAGGED_INDEX, DRAG_TYPE_GRID);
     EXPECT_EQ(itemInfoEnter, ITEM_INFO_ENTER);
-    preGridTargetNode = dragDropManager->preGridTargetFrameNode_;
-    ASSERT_TRUE(preGridTargetNode);
-    preGridTargetNodeTag = preGridTargetNode->GetTag();
-    EXPECT_EQ(preGridTargetNodeTag, GRID_TAG);
 }
 
 /**
@@ -736,7 +730,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest010, TestSize.Level1)
      *                   case: listDragFrameNodes_ is empty & preGridTargetFrameNode_ is not null
      * @tc.expected: step4. frameNode's onItemDragLeave_ will be called
      *                      itemInfoLeave will be assigned to ITEM_INFO_LEAVE
-     *                      and preGridTargetFrameNode_ will be assigned to null
      *                      DragWindow.MoveTo() will be called with printing a log
      */
     dragDropManager->OnItemDragStart(GLOBAL_X, GLOBAL_Y, frameNode);
@@ -745,7 +738,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest010, TestSize.Level1)
     dragDropManager->OnItemDragMove(GLOBAL_X, GLOBAL_Y, DRAGGED_INDEX, DRAG_TYPE_LIST);
     EXPECT_EQ(itemInfoLeave, ITEM_INFO_LEAVE);
     preGridTargetNode = dragDropManager->preGridTargetFrameNode_;
-    EXPECT_FALSE(preGridTargetNode);
+    EXPECT_TRUE(preGridTargetNode);
 
     /**
      * @tc.steps: step5. call AddGridDragFrameNode
@@ -800,7 +793,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest010, TestSize.Level1)
      *                   case: listDragFrameNodes_ is not empty & preGridTargetFrameNode_ is null
      * @tc.expected: step8. frameNode's onDragItemEnter_ will be called
      *                      itemInfoEnter will be assigned to ITEM_INFO_ENTER
-     *                      preGridTargetFrameNode_ will be assigned to frameNode
      *                      DragWindow.MoveTo() will be called with printing a log
      */
     dragDropManager->onItemDragCancel();
@@ -808,9 +800,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest010, TestSize.Level1)
     itemInfoEnter = "";
     dragDropManager->OnItemDragMove(GLOBAL_X, GLOBAL_Y, DRAGGED_INDEX, DRAG_TYPE_LIST);
     EXPECT_EQ(itemInfoEnter, ITEM_INFO_ENTER);
-    ASSERT_TRUE(dragDropManager->preGridTargetFrameNode_);
-    preGridTargetNodeTag = dragDropManager->preGridTargetFrameNode_->GetTag();
-    EXPECT_EQ(preGridTargetNodeTag, LIST_TAG);
 }
 
 /**
@@ -1012,7 +1001,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest013, TestSize.Level1)
      * @tc.steps: step3. call OnItemDragEnd
      *                   case: listDragFrameNodes_ is empty
      * @tc.expected: step3. preGridTargetFrameNode_ is null
-     *                      (still use preGridTargetFrameNode_, maybe a bug)
      */
     dragDropManager->OnItemDragEnd(GLOBAL_X, GLOBAL_Y, DRAGGED_INDEX, DRAG_TYPE_LIST);
     auto preGridTargetFrameNode = dragDropManager->preGridTargetFrameNode_;
@@ -1034,6 +1022,8 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest013, TestSize.Level1)
     auto onItemDrop = [&itemDropInfo](const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */,
                           int32_t /* insertIndex */, bool /* isSuccess */) { itemDropInfo = EXTRA_INFO; };
     eventHub->SetOnItemDrop(onItemDrop);
+    dragDropManager->preGridTargetFrameNode_ = frameNode;
+    EXPECT_TRUE(dragDropManager->preGridTargetFrameNode_);
     dragDropManager->OnItemDragEnd(GLOBAL_X, GLOBAL_Y, DRAGGED_INDEX, DRAG_TYPE_LIST);
     EXPECT_EQ(itemDropInfo, EXTRA_INFO);
     preGridTargetFrameNode = dragDropManager->preGridTargetFrameNode_;
