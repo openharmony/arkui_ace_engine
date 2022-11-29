@@ -68,7 +68,7 @@ HWTEST_F(PatternLockPaintMethodTestNg, PatternLockPaintMethodTest001, TestSize.L
      */
     std::vector<PatternLockCell> vecCell;
     OffsetF offset;
-    PatternLockPaintMethod paintMethod(vecCell, offset, false);
+    auto paintMethod = AceType::MakeRefPtr<PatternLockPaintMethod>(vecCell, offset, false);
     /**
      * @tc.step: step2. create Draw Function and call it.
      */
@@ -77,11 +77,11 @@ HWTEST_F(PatternLockPaintMethodTestNg, PatternLockPaintMethodTest001, TestSize.L
     geometryNode->SetContentSize(SizeF());
     auto patternLockPaintProperty = AceType::MakeRefPtr<PatternLockPaintProperty>();
     PaintWrapper paintWrapper(nullptr, geometryNode, patternLockPaintProperty);
-    auto drawFunc = paintMethod.GetContentDrawFunction(&paintWrapper);
+    auto drawFunc = paintMethod->GetContentDrawFunction(&paintWrapper);
     EXPECT_TRUE(drawFunc != nullptr);
     Testing::MockCanvas canvas;
-    EXPECT_CALL(canvas, Restore()).Times(0);
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(0);
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
     drawFunc(canvas);
 }
 

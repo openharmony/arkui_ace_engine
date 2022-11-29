@@ -13,30 +13,25 @@
  * limitations under the License.
  */
 
-#include <optional>
-
 #include "gtest/gtest.h"
-
+#define private public
+#define protected public
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/patternlock/patternlock_model_ng.h"
-#include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
-#include "core/components_v2/pattern_lock/pattern_lock_component.h"
-// Add the following two macro definitions to test the private and protected method.
-#define private public
-#define protected public
-
-#include "core/components_ng/pattern/patternlock/patternlock_pattern.h"
 #include "core/components_ng/pattern/patternlock/patternlock_paint_method.h"
+#include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
+#include "core/components_ng/pattern/patternlock/patternlock_pattern.h"
+#include "core/components_v2/pattern_lock/pattern_lock_component.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const Dimension SIDE_LENGTH = 300.0_vp;
-const Dimension SET_SIDE_LENGTH = 400.0_vp;
 const Dimension CIRCLE_RADIUS = 14.0_vp;
 const Color REGULAR_COLOR = Color::BLACK;
 const Color SELECTED_COLOR = Color::BLACK;
@@ -60,14 +55,19 @@ class PatternLockPropertyTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
+    void SetUp() override {}
+    void TearDown() override {}
 };
 
-void PatternLockPropertyTestNg::SetUpTestCase() {}
-void PatternLockPropertyTestNg::TearDownTestCase() {}
-void PatternLockPropertyTestNg::SetUp() {}
-void PatternLockPropertyTestNg::TearDown() {}
+void PatternLockPropertyTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void PatternLockPropertyTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 /**
  * @tc.name: PatternLockPaintPropertyTest001
@@ -209,6 +209,16 @@ HWTEST_F(PatternLockPropertyTestNg, PatternLockPatternTest003, TestSize.Level1)
     EXPECT_EQ(pattern->isMoveEventValid_, false);
     EXPECT_EQ(pattern->choosePoint_.empty(), true);
     EXPECT_EQ(pattern->cellCenter_, OffsetF(0, 0));
+
+    /**
+     * @tc.steps: step4. PatternLock Init PatternLockController.
+     */
+    pattern->InitPatternLockController();
+    EXPECT_FALSE(pattern->patternLockController_->resetImpl_ == nullptr);
+    pattern->patternLockController_->resetImpl_();
+    EXPECT_EQ(pattern->isMoveEventValid_, false);
+    EXPECT_EQ(pattern->choosePoint_.empty(), true);
+    EXPECT_EQ(pattern->cellCenter_, OffsetF(0, 0));
 }
 
 /**
@@ -245,6 +255,11 @@ HWTEST_F(PatternLockPropertyTestNg, PatternLockPatternTest004, TestSize.Level1)
     patternLockPaintProperty->Reset();
     bool result2 = pattern->CheckAutoReset();
     EXPECT_EQ(result2, true);
+    pattern->autoReset_ = false;
+    pattern->choosePoint_ = { PatternLockCell(1, 2) };
+    pattern->isMoveEventValid_ = false;
+    bool result3 = pattern->CheckAutoReset();
+    EXPECT_EQ(result3, false);
 }
 
 /**
@@ -259,7 +274,6 @@ HWTEST_F(PatternLockPropertyTestNg, PatternLockPatternTest005, TestSize.Level1)
      */
     PatternLockModelNG patternLockModelNG;
     auto controller = patternLockModelNG.Create();
-
     /**
      * @tc.steps: step2. Get PatternLock pattern object
      */
@@ -267,20 +281,48 @@ HWTEST_F(PatternLockPropertyTestNg, PatternLockPatternTest005, TestSize.Level1)
     EXPECT_FALSE(frameNode == nullptr);
     auto pattern = frameNode->GetPattern<PatternLockPattern>();
     EXPECT_FALSE(pattern == nullptr);
-
     /**
      * @tc.steps: step3. Set PatternLock pattern variable and call AddPassPoint
      * @tc.expected: step3. Check the return value of PatternLock pattern method AddPassPoint
+     */
+    /**
+     * @tc.case: case1: choosePoint_ vec is empty.
+     */
+    pattern->AddPassPoint(1, 2);
+    EXPECT_TRUE(pattern->choosePoint_.empty());
+    /**
+     * @tc.case: case2: choosePoint_ vec is not empty.
      */
     pattern->choosePoint_.push_back(PatternLockCell(1, 1));
     pattern->AddPassPoint(1, 2);
     EXPECT_EQ(pattern->choosePoint_.back().GetRow(), 1);
     EXPECT_EQ(pattern->choosePoint_.back().GetColumn(), 1);
+    /**
+     * @tc.case: case3: lastPoint(1, 2), add Point(2, 2), no passPoint.
+     */
     pattern->choosePoint_.clear();
     pattern->choosePoint_.push_back(PatternLockCell(1, 2));
-    pattern->AddPassPoint(1, 1);
+    pattern->AddPassPoint(2, 2);
     EXPECT_EQ(pattern->choosePoint_.back().GetRow(), 2);
     EXPECT_EQ(pattern->choosePoint_.back().GetColumn(), 1);
+    /**
+     * @tc.case: case4: lastPoint(0, 2), add Point(2, 2), passPoint(1, 2)
+     */
+    pattern->choosePoint_.clear();
+    pattern->choosePoint_.push_back(PatternLockCell(0, 2));
+    pattern->AddPassPoint(2, 2);
+    EXPECT_EQ(pattern->choosePoint_.back().GetColumn(), 1);
+    EXPECT_EQ(pattern->choosePoint_.back().GetRow(), 2);
+    EXPECT_EQ(pattern->choosePoint_.size(), 2);
+    /**
+     * @tc.case: case5: lastPoint(2, 2), add Point(0, 0), passPoint(1, 1)
+     */
+    pattern->choosePoint_.clear();
+    pattern->choosePoint_.push_back(PatternLockCell(2, 2));
+    pattern->AddPassPoint(0, 0);
+    EXPECT_EQ(pattern->choosePoint_.back().GetColumn(), 1);
+    EXPECT_EQ(pattern->choosePoint_.back().GetRow(), 1);
+    EXPECT_EQ(pattern->choosePoint_.size(), 2);
 }
 
 /**
@@ -358,6 +400,21 @@ HWTEST_F(PatternLockPropertyTestNg, PatternLockPatternTest007, TestSize.Level1)
     offset.SetY(offsetY);
     bool result3 = pattern->AddChoosePoint(offset, 1, 1);
     EXPECT_EQ(result3, false);
+
+    /**
+     * @tc.cases: when distance is valid, Point(x, y) will AddChoosePoint.
+     */
+    patternLockPaintProperty->UpdateSideLength(SIDE_LENGTH);
+    patternLockPaintProperty->UpdateCircleRadius(Dimension(200.0));
+    bool result4 = pattern->AddChoosePoint(offset, 1, 1);
+    EXPECT_EQ(result4, true);
+    EXPECT_EQ(pattern->choosePoint_.size(), 1);
+    bool result5 = pattern->AddChoosePoint(offset, 1, 1);
+    EXPECT_EQ(pattern->choosePoint_.size(), 1);
+    EXPECT_EQ(result5, true);
+    bool result6 = pattern->AddChoosePoint(offset, 1, 2);
+    EXPECT_EQ(pattern->choosePoint_.size(), 2);
+    EXPECT_EQ(result6, true);
 }
 
 /**
@@ -571,179 +628,11 @@ HWTEST_F(PatternLockPropertyTestNg, PatternLockPatternTest012, TestSize.Level1)
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     pattern->InitTouchEvent(gestureHub, pattern->touchDownListener_);
     EXPECT_FALSE(pattern->touchDownListener_ == nullptr);
+    auto touchEvent = gestureHub->touchEventActuator_->touchEvents_.back();
+    EXPECT_FALSE(touchEvent == nullptr);
+    auto info = TouchEventInfo("");
+    touchEvent->callback_(info);
     pattern->InitTouchEvent(gestureHub, pattern->touchDownListener_);
+    EXPECT_EQ(gestureHub->touchEventActuator_->touchEvents_.back(), touchEvent);
 }
-
-/**
- * @tc.name: PatternLockMeasureTest013
- * @tc.desc: Test PatternLock Measure method.
- * @tc.type: FUNC
- */
-HWTEST_F(PatternLockPropertyTestNg, PatternLockMeasureTest013, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init PatternLock node
-     */
-    PatternLockModelNG patternLockModelNG;
-    auto controller = patternLockModelNG.Create();
-
-    /**
-     * @tc.steps: step2. Create LayoutWrapper and set patternLockLayoutAlgorithm.
-     */
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(geometryNode == nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    auto pattern = frameNode->GetPattern<PatternLockPattern>();
-    EXPECT_FALSE(pattern == nullptr);
-    auto patternLockLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
-    EXPECT_FALSE(patternLockLayoutAlgorithm == nullptr);
-    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(patternLockLayoutAlgorithm));
-
-    /**
-     * @tc.steps: step3. Test PatternLock Measure method
-     * @tc.expected: step3. Check the PatternLock framesize value
-     */
-    // PatternLock without setting height and width.
-    const LayoutConstraintF layoutConstraint;
-    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
-    // Calculate the size and offset.
-    patternLockLayoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(
-        layoutWrapper.GetGeometryNode()->GetFrameSize(), SizeF(SIDE_LENGTH.ConvertToPx(), SIDE_LENGTH.ConvertToPx()));
-
-    /**
-    //     corresponding ets code:
-    //         PatternLock(this.patternLockController).sideLength(400)
-    */
-    LayoutConstraintF layoutConstraintSize;
-    layoutConstraintSize.selfIdealSize.SetSize(SizeF(SET_SIDE_LENGTH.ConvertToPx(), SET_SIDE_LENGTH.ConvertToPx()));
-    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize);
-    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
-    patternLockLayoutAlgorithm->Measure(&layoutWrapper);
-    // Test the size set by codes.
-    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize(),
-        SizeF(SET_SIDE_LENGTH.ConvertToPx(), SET_SIDE_LENGTH.ConvertToPx()));
-}
-
-/**
- * @tc.name: PatternLockPaintTest014
- * @tc.desc: Test PatternLock paint method CheckChoosePointIsLastIndex.
- * @tc.type: FUNC
- */
-HWTEST_F(PatternLockPropertyTestNg, PatternLockPaintTest014, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init PatternLock node
-     */
-    PatternLockModelNG patternLockModelNG;
-    auto controller = patternLockModelNG.Create();
-
-    /**
-     * @tc.steps: step2. Get PatternLock pattern object and create paintMethod object
-     */
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
-    auto pattern = frameNode->GetPattern<PatternLockPattern>();
-    EXPECT_FALSE(pattern == nullptr);
-    auto paintMethod = AceType::DynamicCast<PatternLockPaintMethod>(pattern->CreateNodePaintMethod());
-    EXPECT_FALSE(paintMethod == nullptr);
-
-    /**
-     * @tc.steps: step3. Set PatternLock paintMethod variable and call CheckChoosePointIsLastIndex
-     * @tc.expected: step3. Check the return of PatternLock method CheckChoosePointIsLastIndex
-     */
-    auto result1 = paintMethod->CheckChoosePointIsLastIndex(1, 1, 1);
-    EXPECT_EQ(result1, false);
-    paintMethod->choosePoint_.emplace_back(PatternLockCell(1, 1));
-    auto result2 = paintMethod->CheckChoosePointIsLastIndex(1, 1, 1);
-    EXPECT_EQ(result2, true);
-    paintMethod->choosePoint_.emplace_back(PatternLockCell(2, 1));
-    auto result3 = paintMethod->CheckChoosePointIsLastIndex(1, 1, 1);
-    EXPECT_EQ(result3, false);
-    paintMethod->choosePoint_.clear();
-}
-
-/**
- * @tc.name: PatternLockPaintTest015
- * @tc.desc: Test PatternLock paint method CheckChoosePoint.
- * @tc.type: FUNC
- */
-HWTEST_F(PatternLockPropertyTestNg, PatternLockPaintTest015, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init PatternLock node
-     */
-    PatternLockModelNG patternLockModelNG;
-    auto controller = patternLockModelNG.Create();
-
-    /**
-     * @tc.steps: step2. Get PatternLock pattern object and create paintMethod object
-     */
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
-    auto pattern = frameNode->GetPattern<PatternLockPattern>();
-    EXPECT_FALSE(pattern == nullptr);
-    auto paintMethod = AceType::DynamicCast<PatternLockPaintMethod>(pattern->CreateNodePaintMethod());
-    EXPECT_FALSE(paintMethod == nullptr);
-
-    /**
-     * @tc.steps: step3. Set PatternLock paintMethod variable and call CheckChoosePoint
-     * @tc.expected: step3. Check the return of PatternLock method CheckChoosePoint
-     */
-    auto result1 = paintMethod->CheckChoosePoint(1, 1);
-    EXPECT_EQ(result1, false);
-    paintMethod->choosePoint_.emplace_back(PatternLockCell(1, 1));
-    auto result2 = paintMethod->CheckChoosePoint(1, 1);
-    EXPECT_EQ(result2, true);
-    paintMethod->choosePoint_.clear();
-    paintMethod->choosePoint_.emplace_back(PatternLockCell(2, 1));
-    auto result3 = paintMethod->CheckChoosePoint(1, 1);
-    EXPECT_EQ(result3, false);
-    paintMethod->choosePoint_.clear();
-}
-
-/**
- * @tc.name: PatternLockPaintTest016
- * @tc.desc: Test PatternLock paint method GetCircleCenterByXY.
- * @tc.type: FUNC
- */
-HWTEST_F(PatternLockPropertyTestNg, PatternLockPaintTest016, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init PatternLock node
-     */
-    PatternLockModelNG patternLockModelNG;
-    auto controller = patternLockModelNG.Create();
-
-    /**
-     * @tc.steps: step2. Get PatternLock pattern object and create paintMethod object
-     */
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
-    auto pattern = frameNode->GetPattern<PatternLockPattern>();
-    EXPECT_FALSE(pattern == nullptr);
-    auto paintMethod = AceType::DynamicCast<PatternLockPaintMethod>(pattern->CreateNodePaintMethod());
-    EXPECT_FALSE(paintMethod == nullptr);
-
-    /**
-     * @tc.steps: step3. Set PatternLock paintMethod variable and call GetCircleCenterByXY
-     * @tc.expected: step3. Check the return of PatternLock method GetCircleCenterByXY
-     */
-    paintMethod->sideLength_ = SIDE_LENGTH;
-    float offsetX = 0.0f;
-    float offsetY = 0.0f;
-    OffsetF offset(offsetX, offsetY);
-    auto center1 = paintMethod->GetCircleCenterByXY(offset, 1 , 1);
-    EXPECT_EQ(center1.GetX(), 0.0);
-    EXPECT_EQ(center1.GetY(), 0.0);
-    offset.SetX(10.0f);
-    offset.SetY(20.0f);
-    auto center2 = paintMethod->GetCircleCenterByXY(offset, 1 , 1);
-    EXPECT_EQ(center2.GetX(), 10);
-    EXPECT_EQ(center2.GetY(), 20);
-}
-
 } // namespace OHOS::Ace::NG

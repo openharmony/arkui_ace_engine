@@ -57,9 +57,8 @@ void PatternLockPattern::InitTouchEvent(RefPtr<GestureEventHub>& gestureHub, Ref
     }
     auto touchDownTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleTouchEvent(info);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleTouchEvent(info);
     };
     if (touchDownListener) {
         gestureHub->RemoveTouchEvent(touchDownListener);
@@ -72,9 +71,8 @@ void PatternLockPattern::InitPatternLockController()
 {
     patternLockController_->SetResetImpl([weak = WeakClaim(this)]() {
         auto patternLock = weak.Upgrade();
-        if (patternLock) {
-            patternLock->HandleReset();
-        }
+        CHECK_NULL_VOID(patternLock);
+        patternLock->HandleReset();
     });
 }
 
