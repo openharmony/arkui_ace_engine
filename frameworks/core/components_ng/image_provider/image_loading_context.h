@@ -54,7 +54,10 @@ public:
     const RectF& GetDstRect() const;
     const RectF& GetSrcRect() const;
     ImageFit GetImageFit() const;
-    RefPtr<CanvasImage> GetCanvasImage() const;
+
+    bool HasCanvasImage() const;
+    RefPtr<CanvasImage> MoveCanvasImage();
+
     const ImageSourceInfo& GetSourceInfo() const;
     const SizeF& GetDstSize() const;
     bool GetNeedResize() const;

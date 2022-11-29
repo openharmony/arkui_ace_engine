@@ -24,9 +24,14 @@ void ImageObject::SetCanvasImage(const RefPtr<CanvasImage>& canvasImage)
     canvasImage_ = canvasImage;
 }
 
-const RefPtr<CanvasImage>& ImageObject::GetCanvasImage() const
+bool ImageObject::HasCanvasImage() const
 {
     return canvasImage_;
+}
+
+RefPtr<CanvasImage> ImageObject::MoveCanvasImage()
+{
+    return std::move(canvasImage_);
 }
 
 std::string ImageObject::GenerateCacheKey(const ImageSourceInfo& srcInfo, const SizeF& targetImageSize)
