@@ -592,8 +592,10 @@ void ListPattern::SetScrollBar()
 
 void ListPattern::UpdateScrollBarOffset()
 {
-    CHECK_NULL_VOID(scrollBar_);
     if (itemPosition_.empty()) {
+        return;
+    }
+    if (!scrollBar_ && !scrollBarProxy_) {
         return;
     }
     SizeF ContentSize = GetContentSize();
@@ -602,8 +604,19 @@ void ListPattern::UpdateScrollBarOffset()
     float currentOffset = itemsSize / itemPosition_.size() * itemPosition_.begin()->first - startMainPos_;
     Offset scrollOffset = { currentOffset, currentOffset }; // fit for w/h switched.
     auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1);
-    scrollBar_->SetDriving(!isScrollContent_);
-    scrollBar_->UpdateScrollBarRegion(Offset(), size, scrollOffset, estimatedHeight);
+
+    // inner scrollbar
+    if (scrollBar_) {
+        scrollBar_->SetDriving(!isScrollContent_);
+        scrollBar_->UpdateScrollBarRegion(Offset(), size, scrollOffset, estimatedHeight);
+    }
+
+    // outer scrollbar
+    if (scrollBarProxy_) {
+        scrollableDistance_ = estimatedHeight - GetMainContentSize();
+        currentPosition_ = -currentOffset;
+        scrollBarProxy_->NotifyScrollBar(AceType::WeakClaim(this));
+    }
 }
 
 void ListPattern::RegisterScrollBarEventTask()
@@ -645,6 +658,25 @@ void ListPattern::RegisterScrollBarEventTask()
         }
     });
     gestureHub->AddTouchEvent(touchEvent_);
+}
+
+void ListPattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy)
+{
+    CHECK_NULL_VOID(scrollBarProxy);
+    auto scrollFunction = [weak = WeakClaim(this)](double offset, int32_t source) {
+        if (source != SCROLL_FROM_START) {
+            auto pattern = weak.Upgrade();
+            if (!pattern || pattern->GetDirection() == Axis::NONE) {
+                return false;
+            }
+            pattern->SetScrollState(source);
+            return pattern->UpdateCurrentOffset(offset);
+        }
+        return true;
+    };
+    ScrollableNodeInfo nodeInfo = { AceType::WeakClaim(this), std::move(scrollFunction) };
+    scrollBarProxy->RegisterScrollableNode(nodeInfo);
+    scrollBarProxy_ = scrollBarProxy;
 }
 
 } // namespace OHOS::Ace::NG
