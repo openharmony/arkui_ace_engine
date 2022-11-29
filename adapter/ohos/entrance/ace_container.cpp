@@ -421,7 +421,7 @@ void AceContainer::OnInactive(int32_t instanceId)
             [weakFrontend] () {
                 auto frontend = weakFrontend.Upgrade();
                 if (frontend) {
-                    frontend->UpdateState(Frontend::State::ON_ACTIVE);
+                    frontend->UpdateState(Frontend::State::ON_INACTIVE);
                     frontend->OnInactive();
                 }
             },
