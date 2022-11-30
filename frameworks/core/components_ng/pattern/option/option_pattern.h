@@ -98,6 +98,11 @@ public:
         return iconSrc_;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+    }
+
 private:
     void OnModifyDone() override;
 
