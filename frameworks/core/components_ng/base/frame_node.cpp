@@ -816,6 +816,11 @@ void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& vis
     }
 }
 
+void FrameNode::OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList)
+{
+    allList.emplace_back(Claim(this));
+}
+
 bool FrameNode::IsMeasureBoundary()
 {
     return isMeasureBoundary_ || pattern_->IsMeasureBoundary();
@@ -891,7 +896,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     // newComingTargets is the template object to collect child nodes gesture and used by gestureHub to pack gesture
     // group.
     TouchTestResult newComingTargets;
-    auto tmp  = parentLocalPoint - paintRect.GetOffset();
+    auto tmp = parentLocalPoint - paintRect.GetOffset();
     renderContext_->GetPointWithTransform(tmp);
     const auto localPoint = tmp;
     bool consumed = false;
