@@ -167,9 +167,9 @@ void AceContainer::Destroy()
             frontend->UpdateState(Frontend::State::ON_DESTROY);
             frontend->Destroy();
         } else {
+            frontend->UpdateState(Frontend::State::ON_DESTROY);
             taskExecutor_->PostTask(
                 [frontend]() {
-                    frontend->UpdateState(Frontend::State::ON_DESTROY);
                     frontend->Destroy();
                 },
                 TaskExecutor::TaskType::JS);

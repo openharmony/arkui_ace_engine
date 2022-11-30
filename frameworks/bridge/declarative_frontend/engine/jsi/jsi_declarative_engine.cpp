@@ -1501,7 +1501,8 @@ void JsiDeclarativeEngine::DestroyApplication(const std::string& packageName)
 
 void JsiDeclarativeEngine::UpdateApplicationState(const std::string& packageName, Frontend::State state)
 {
-    LOGI("JsiDeclarativeEngine UpdateApplicationState, packageName %{public}s", packageName.c_str());
+    LOGI("JsiDeclarativeEngine UpdateApplicationState, packageName %{public}s, state: %{public}d",
+        packageName.c_str(), static_cast<int32_t>(state));
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
     if (!runtime) {
         LOGE("update app state failed, runtime is null.");
