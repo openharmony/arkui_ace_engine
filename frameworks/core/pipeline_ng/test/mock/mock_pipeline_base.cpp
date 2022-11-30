@@ -15,6 +15,7 @@
 
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
+#include "core/pipeline_ng/test/mock/mock_interface.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -25,12 +26,6 @@ constexpr double DISPLAY_HEIGHT = 1280;
 } // namespace
 class Window : public AceType {
     DECLARE_ACE_TYPE(Window, AceType);
-};
-class FontManager : public AceType {
-    DECLARE_ACE_TYPE(FontManager, AceType);
-};
-class ManagerInterface : public AceType {
-    DECLARE_ACE_TYPE(ManagerInterface, AceType);
 };
 class Frontend : public AceType {
     DECLARE_ACE_TYPE(Frontend, AceType);
