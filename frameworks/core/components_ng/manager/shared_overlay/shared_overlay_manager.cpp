@@ -89,6 +89,12 @@ void SharedOverlayManager::StartSharedTransition(const RefPtr<FrameNode>& pageSr
         AceType::RawPtr(pageDest));
     CHECK_NULL_VOID(pageSrc);
     CHECK_NULL_VOID(pageDest);
+    auto patternSrc = pageSrc->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(patternSrc);
+    auto patternDest = pageDest->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(patternDest);
+    patternSrc->BuildSharedTransitionMap();
+    patternDest->BuildSharedTransitionMap();
     PrepareSharedTransition(pageSrc, pageDest);
     auto pipeline = PipelineBase::GetCurrentContext();
     for (const auto& effect : effects_) {
@@ -97,7 +103,7 @@ void SharedOverlayManager::StartSharedTransition(const RefPtr<FrameNode>& pageSr
             LOGI("effect start, shareId = %{public}s, id = %{public}d", effect->GetShareId().c_str(),
                 effect->GetController()->GetId());
             controller->SetFillMode(FillMode::FORWARDS);
-            controller->SetAllowRunningAsynchronously(false);
+            controller->SetAllowRunningAsynchronously(true);
             controller->AttachScheduler(pipeline);
             controller->Forward();
         }
@@ -298,9 +304,12 @@ void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& e
             passenger->GetRenderContext()->UpdateZIndex(effect->GetPassengerInitZIndex().value());
         } else {
             passenger->GetRenderContext()->ResetZIndex();
+            passenger->GetRenderContext()->OnZIndexUpdate(0);
         }
         passenger->GetGeometryNode()->SetFrameOffset(effect->GetPassengerInitFrameOffset());
         ReplaceFrameNode(passengerHolder, passenger);
+        // The callback is to restore the parameters used by passenger in the animation
+        effect->PerformFinishCallback();
         passenger->GetRenderContext()->OnModifyDone();
     }
     if (effect->GetType() == SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE) {
@@ -309,7 +318,6 @@ void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& e
         auto destVisible = exchangeEffect->GetInitialDestVisible();
         exchangeEffect->SetVisibleToDest(destVisible);
     }
-    effect->PerformFinishCallback();
     auto iter = std::find(effects_.begin(), effects_.end(), effect);
     if (iter != effects_.end()) {
         effects_.erase(iter);

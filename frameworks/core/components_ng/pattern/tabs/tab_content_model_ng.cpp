@@ -50,6 +50,7 @@ void TabContentModelNG::Create(std::function<void()>&& deepRenderFunc)
     auto nodeId = stack->ClaimNodeId();
     auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
         CHECK_NULL_RETURN(deepRenderFunc, nullptr);
+        ScopedViewStackProcessor scopedViewStackProcessor;
         deepRenderFunc();
         auto deepChild = ViewStackProcessor::GetInstance()->Finish();
         auto parent = FrameNode::GetFrameNode(V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId);

@@ -285,7 +285,9 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 
 void PipelineContext::FlushBuild()
 {
+    isRebuildFinished_ = false;
     FlushDirtyNodeUpdate();
+    isRebuildFinished_ = true;
     FlushBuildFinishCallbacks();
 }
 

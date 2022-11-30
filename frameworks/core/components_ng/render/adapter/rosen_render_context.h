@@ -188,6 +188,7 @@ public:
     void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) override;
 
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;
+    void OnZIndexUpdate(int32_t value) override;
 
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
@@ -216,7 +217,6 @@ private:
 
     void OnOffsetUpdate(const OffsetT<Dimension>& value) override;
     void OnAnchorUpdate(const OffsetT<Dimension>& value) override;
-    void OnZIndexUpdate(int32_t value) override;
 
     void OnClipShapeUpdate(const RefPtr<BasicShape>& basicShape) override;
     void OnClipEdgeUpdate(bool isClip) override;

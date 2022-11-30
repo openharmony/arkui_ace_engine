@@ -119,6 +119,8 @@ public:
 
     void ReloadPage();
 
+    void SetFirstBuildCallback(std::function<void()>&& buildCallback);
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
@@ -134,9 +136,11 @@ private:
     std::function<void()> onPageHide_;
     std::function<bool()> OnBackPressed_;
     std::function<void()> pageTransitionFunc_;
+    std::function<void()> firstBuildCallback_;
     std::stack<RefPtr<PageTransitionEffect>> pageTransitionEffects_;
 
     bool isOnShow_ = false;
+    bool isFirstLoad_ = true;
 
     SharedTransitionMap sharedTransitionMap_;
     JSAnimatorMap jsAnimatorMap_;
