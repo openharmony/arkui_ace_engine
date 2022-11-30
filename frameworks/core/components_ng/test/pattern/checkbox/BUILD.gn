@@ -31,6 +31,7 @@ ohos_unittest("checkbox_pattern_test_ng") {
     "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_container_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_system_manager.cpp",
+
     # "$ace_root/frameworks/core/components/common/layout/screen_system_manager.cpp",
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
