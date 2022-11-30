@@ -29,6 +29,7 @@ class TestingBrush {
 public:
     TestingBrush() = default;
     ~TestingBrush() = default;
+    explicit TestingBrush(int rgba) noexcept {};
 
     virtual void SetAntiAlias(bool aa) {}
     virtual void SetWidth(scalar width) {}

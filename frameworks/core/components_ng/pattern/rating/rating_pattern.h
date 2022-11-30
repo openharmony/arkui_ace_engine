@@ -28,16 +28,16 @@
 
 namespace OHOS::Ace::NG {
 
-#define ACE_DEFINE_RATING_GET_PROPERTY_FROM_THEME(name, type)            \
-    static std::optional<type> Get##name##FromTheme()                    \
-    {                                                                    \
-        do {                                                             \
-            auto pipelineContext = PipelineContext::GetCurrentContext(); \
-            CHECK_NULL_RETURN(pipelineContext, std::nullopt);            \
-            auto ratingTheme = pipelineContext->GetTheme<RatingTheme>(); \
-            CHECK_NULL_RETURN(ratingTheme, std::nullopt);                \
-            return ratingTheme->Get##name();                             \
-        } while (false);                                                 \
+#define ACE_DEFINE_RATING_GET_PROPERTY_FROM_THEME(name, type)     \
+    static std::optional<type> Get##name##FromTheme()             \
+    {                                                             \
+        do {                                                      \
+            auto pipeline = PipelineBase::GetCurrentContext();    \
+            CHECK_NULL_RETURN(pipeline, std::nullopt);            \
+            auto ratingTheme = pipeline->GetTheme<RatingTheme>(); \
+            CHECK_NULL_RETURN(ratingTheme, std::nullopt);         \
+            return ratingTheme->Get##name();                      \
+        } while (false);                                          \
     }
 
 class RatingPattern : public Pattern {
