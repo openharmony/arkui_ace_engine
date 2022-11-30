@@ -136,6 +136,7 @@ private:
     void UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& frameNode,
         std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap, bool isSelected);
     void CheckBoxGroupIsTrue();
+    RectF GetHotZoneRect(bool isOriginal) const;
 
     std::optional<std::string> preName_;
     std::optional<std::string> preGroup_;
@@ -152,6 +153,8 @@ private:
     RefPtr<CurveAnimation<float>> translate_;
     float shapeScale_ = 1.0f;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
+    Dimension hotZoneHorizontalPadding_ = 11.0_vp;
+    Dimension hotZoneVerticalPadding_ = 11.0_vp;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxPattern);
 };
