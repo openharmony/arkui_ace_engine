@@ -27,13 +27,13 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
     super(subscribeMe, info);
     // add a test here that T is a simple type
     // subscribe to receive value chnage updates from source.
-    this.source_ = source;
-    this.source_.subscribeMe(this);
+    if (source) {
+      this.source_ = source;
+      this.source_.subscribeMe(this);
 
-    // use own backing store for value to avoid
-    // value changes to be propagated back to source
-    if (this.source_) {
-        this.wrappedValue_ = source.getUnmonitored();
+      // use own backing store for value to avoid
+      // value changes to be propagated back to source
+      this.wrappedValue_ = source.getUnmonitored();
     }
   }
 
