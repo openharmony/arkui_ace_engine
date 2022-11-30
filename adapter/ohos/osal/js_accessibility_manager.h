@@ -75,7 +75,7 @@ public:
     virtual int RegisterInteractionOperation(const int windowId);
     virtual void DeregisterInteractionOperation();
     virtual bool SendAccessibilitySyncEvent(
-        const AccessibilityEvent& accessibilityEvent, Accessibility::AccessibilityEventInfo& eventInfo);
+        const AccessibilityEvent& accessibilityEvent, Accessibility::AccessibilityEventInfo eventInfo);
 
     void SearchElementInfoByAccessibilityId(const int32_t elementId, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode);
