@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "base/geometry/dimension.h"
 #define private public
 #include "gtest/gtest.h"
 
@@ -28,10 +29,12 @@
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
+#include "frameworks/core/components_ng/pattern/text/text_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
-
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -61,13 +64,23 @@ constexpr Dimension showTimeDistance = Dimension(DEFAULT_PARAM, DimensionUnit::P
 } // namespace
 class RefreshPatternTestNg : public testing::Test {
 public:
-    static void SetUpTestSuite() {};
-    static void TearDownTestSuite() {};
+    static void SetUpTestCase();
+    static void TearDownTestCase();
 
 protected:
     static RefPtr<FrameNode> CreateRefreshNode();
     static RefPtr<FrameNode> CreateRefreshNodeAndInitParam();
 };
+
+void RefreshPatternTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void RefreshPatternTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 RefPtr<FrameNode> RefreshPatternTestNg::CreateRefreshNode()
 {
@@ -250,7 +263,7 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest004, TestSize.Level1)
     RefPtr<RefreshLayoutProperty> layoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
     /**
-     * @tc.steps: step3. test param model interface of refresh.
+     * @tc.steps: step2. test param model interface of refresh.
      */
     EXPECT_EQ(layoutProperty->GetLoadingDistanceValue(Dimension(0, DimensionUnit::PX)), loadingDistance);
     EXPECT_EQ(layoutProperty->GetRefreshDistanceValue(Dimension(0, DimensionUnit::PX)), refreshDistance);
@@ -538,5 +551,73 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest010, TestSize.Level1)
     layoutProperty->UpdateScrollableOffset(OffsetF(0.0f, 0.0f));
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
     EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::INACTIVE));
+}
+
+/**
+ * @tc.name: RefreshTest011
+ * @tc.desc: Test RefreshModelNG will pop according to different child node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest011, TestSize.Level1)
+{
+    /**
+     * @tc.cases: case1. refreshNode has less than two child node.
+     */
+    RefreshModelNG modelNG;
+    modelNG.Create();
+    modelNG.SetIsShowLastTime(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto refreshRenderProperty = frameNode->GetPaintProperty<RefreshRenderProperty>();
+    EXPECT_FALSE(refreshRenderProperty == nullptr);
+    refreshRenderProperty->UpdateTimeText("TimeText");
+    modelNG.Pop();
+    EXPECT_EQ(refreshRenderProperty->GetLastTimeTextValue(), "");
+    EXPECT_EQ(refreshRenderProperty->GetTimeTextValue(), "");
+    /**
+     * @tc.cases: case2. refreshNode has more than one child node.
+     */
+    modelNG.Create();
+    auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    EXPECT_FALSE(frameNode2 == nullptr);
+    auto textChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+    EXPECT_FALSE(textChild == nullptr);
+    frameNode2->AddChild(textChild);
+    auto loadingProgressChild =
+        FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG, -1, AceType::MakeRefPtr<LoadingProgressPattern>());
+    EXPECT_FALSE(loadingProgressChild == nullptr);
+    frameNode2->AddChild(loadingProgressChild);
+    modelNG.Pop();
+    EXPECT_TRUE(frameNode2->TotalChildCount() >= 2);
+    auto refreshRenderProperty2 = frameNode2->GetPaintProperty<RefreshRenderProperty>();
+    EXPECT_FALSE(refreshRenderProperty2 == nullptr);
+    EXPECT_EQ(refreshRenderProperty2->GetLastTimeText(), std::nullopt);
+    EXPECT_EQ(refreshRenderProperty2->GetTimeText(), std::nullopt);
+}
+
+/**
+ * @tc.name: RefreshTest012
+ * @tc.desc: Verify that can successfully set other properties of refresh.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest012, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.SetRefreshing(true);
+    modelNG.SetUseOffset(true);
+    modelNG.SetIndicatorOffset(Dimension(DEFAULT_INDICATOR_OFFSET));
+    modelNG.SetFriction(DEFAULT_FRICTION_RATIO);
+    modelNG.IsRefresh(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
+    EXPECT_FALSE(refreshLayoutProperty == nullptr);
+    auto refreshRenderProperty = frameNode->GetPaintProperty<RefreshRenderProperty>();
+    EXPECT_FALSE(refreshRenderProperty == nullptr);
+    EXPECT_EQ(refreshRenderProperty->GetIsRefreshingValue(), true);
+    EXPECT_EQ(refreshLayoutProperty->GetIsUseOffsetValue(), true);
+    EXPECT_EQ(refreshLayoutProperty->GetIndicatorOffsetValue().ConvertToPx(), DEFAULT_INDICATOR_OFFSET);
+    EXPECT_EQ(refreshLayoutProperty->GetFrictionValue(), DEFAULT_FRICTION_RATIO);
+    EXPECT_EQ(refreshLayoutProperty->GetIsRefreshValue(), true);
 }
 } // namespace OHOS::Ace::NG
