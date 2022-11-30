@@ -221,13 +221,18 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             break;
         }
         auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(childLayoutWrapper->GetLayoutProperty());
-        if (!childLayoutProperty) {
-            break;
+        int32_t itemRowStart = -1;
+        int32_t itemColStart = -1;
+        int32_t itemRowSpan = 1;
+        int32_t itemColSpan = 1;
+
+        if (childLayoutProperty) {
+            itemRowStart = childLayoutProperty->GetRowStart().value_or(-1);
+            itemColStart = childLayoutProperty->GetColumnStart().value_or(-1);
+            itemRowSpan = std::max(childLayoutProperty->GetRowEnd().value_or(-1) - itemRowStart + 1, 1);
+            itemColSpan = std::max(childLayoutProperty->GetColumnEnd().value_or(-1) - itemColStart + 1, 1);
         }
-        int32_t itemRowStart = childLayoutProperty->GetRowStart().value_or(-1);
-        int32_t itemColStart = childLayoutProperty->GetColumnStart().value_or(-1);
-        int32_t itemRowSpan = std::max(childLayoutProperty->GetRowEnd().value_or(-1) - itemRowStart + 1, 1);
-        int32_t itemColSpan = std::max(childLayoutProperty->GetColumnEnd().value_or(-1) - itemColStart + 1, 1);
+
         if (itemRowStart >= 0 && itemRowStart < mainCount_ && itemColStart >= 0 && itemColStart < crossCount_ &&
             CheckGridPlaced(itemIndex, itemRowStart, itemColStart, itemRowSpan, itemColSpan)) {
             childLayoutWrapper->Measure(CreateChildConstraint(
