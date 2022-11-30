@@ -203,11 +203,11 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         SetPivot(xPivot, yPivot);
     }
 
-    if (bgLoadingCtx_ && bgLoadingCtx_->GetCanvasImage()) {
+    if (bgLoadingCtx_ && bgLoadingCtx_->HasCanvasImage()) {
         PaintBackground();
     }
 
-    if (bdImageLoadingCtx_ && bdImageLoadingCtx_->GetCanvasImage()) {
+    if (bdImageLoadingCtx_ && bdImageLoadingCtx_->HasCanvasImage()) {
         PaintBorderImage();
     }
 
@@ -276,19 +276,19 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
 
 void RosenRenderContext::PaintBackground()
 {
-    if (GetBackground() == nullptr || GetBackground()->GetBackgroundImage() == std::nullopt) {
+    CHECK_NULL_VOID(GetBackground() && GetBackground()->GetBackgroundImage());
+    CHECK_NULL_VOID(rsNode_ && bgLoadingCtx_);
+    if (!bgLoadingCtx_->HasCanvasImage()) {
         return;
     }
-    CHECK_NULL_VOID(rsNode_);
-    CHECK_NULL_VOID(bgLoadingCtx_);
-    auto skiaCanvasImage = DynamicCast<SkiaCanvasImage>(bgLoadingCtx_->GetCanvasImage());
+    auto skiaCanvasImage = DynamicCast<SkiaCanvasImage>(bgLoadingCtx_->MoveCanvasImage());
     CHECK_NULL_VOID(skiaCanvasImage);
     auto skImage = skiaCanvasImage->GetCanvasImage();
     auto rosenImage = std::make_shared<Rosen::RSImage>();
     rosenImage->SetImage(skImage);
     auto compressData = skiaCanvasImage->GetCompressData();
-    rosenImage->SetCompressData(compressData, skiaCanvasImage->GetUniqueID(),
-        skiaCanvasImage->GetCompressWidth(), skiaCanvasImage->GetCompressHeight());
+    rosenImage->SetCompressData(compressData, skiaCanvasImage->GetUniqueID(), skiaCanvasImage->GetCompressWidth(),
+        skiaCanvasImage->GetCompressHeight());
     rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
     rsNode_->SetBgImage(rosenImage);
 
@@ -589,32 +589,30 @@ void RosenRenderContext::PaintBorderImage()
 {
     CHECK_NULL_VOID(rsNode_);
     auto paintBorderImageTask = [weak = WeakClaim(this)](std::shared_ptr<SkCanvas> canvas) {
-        auto rosenRenderContext = weak.Upgrade();
-        CHECK_NULL_VOID(rosenRenderContext);
-        CHECK_NULL_VOID(rosenRenderContext->GetBorderImage());
-        CHECK_NULL_VOID(rosenRenderContext->bdImageLoadingCtx_);
-        auto skiaCanvasImage = DynamicCast<SkiaCanvasImage>(rosenRenderContext->bdImageLoadingCtx_->GetCanvasImage());
+        auto renderCtx = weak.Upgrade();
+        CHECK_NULL_VOID(renderCtx && renderCtx->GetBorderImage());
+        CHECK_NULL_VOID(renderCtx->bdImageLoadingCtx_);
+        if (!renderCtx->bdImageLoadingCtx_->HasCanvasImage()) {
+            return;
+        }
+
+        auto skiaCanvasImage = DynamicCast<SkiaCanvasImage>(renderCtx->bdImageLoadingCtx_->MoveCanvasImage());
         CHECK_NULL_VOID(skiaCanvasImage);
         auto skImage = skiaCanvasImage->GetCanvasImage();
-        auto layoutProperty = rosenRenderContext->GetHost()->GetLayoutProperty();
+        auto layoutProperty = renderCtx->GetHost()->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
-        auto paintRect = rosenRenderContext->GetPaintRectWithoutTransform();
+        auto paintRect = renderCtx->GetPaintRectWithoutTransform();
         if (NearZero(paintRect.Width()) || NearZero(paintRect.Height())) {
             return;
         }
         auto borderWidthProperty = layoutProperty->GetBorderWidthProperty()
-                                ? (*layoutProperty->GetBorderWidthProperty())
-                                : BorderWidthProperty();
+                                       ? (*layoutProperty->GetBorderWidthProperty())
+                                       : BorderWidthProperty();
         RSImage rsImage(&skImage);
         RSCanvas rsCanvas(&canvas);
-        BorderImagePainter borderImagePainter(
-            layoutProperty->GetBorderWidthProperty() != nullptr,
-            *rosenRenderContext->GetBdImage(),
-            borderWidthProperty,
-            paintRect.GetSize(),
-            rsImage,
-            PipelineBase::GetCurrentContext()->GetDipScale()
-        );
+        BorderImagePainter borderImagePainter(layoutProperty->GetBorderWidthProperty() != nullptr,
+            *renderCtx->GetBdImage(), borderWidthProperty, paintRect.GetSize(), rsImage,
+            PipelineBase::GetCurrentContext()->GetDipScale());
         borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), rsCanvas);
     };
 
@@ -710,16 +708,14 @@ void RosenRenderContext::PaintBorderImageGradient()
     CHECK_NULL_VOID(layoutProperty);
 
     auto borderImageProperty = *GetBdImage();
-    auto borderWidthProperty = layoutProperty->GetBorderWidthProperty()
-                                    ? (*layoutProperty->GetBorderWidthProperty())
-                                    : BorderWidthProperty();
+    auto borderWidthProperty =
+        layoutProperty->GetBorderWidthProperty() ? (*layoutProperty->GetBorderWidthProperty()) : BorderWidthProperty();
     bool hasBorderWidthProperty = layoutProperty->GetBorderWidthProperty() != nullptr;
     auto paintTask = [paintSize, borderImageProperty, borderWidthProperty, hasBorderWidthProperty](
                          const NG::Gradient& gradient, RSCanvas& rsCanvas) mutable {
         auto rsImage = SkiaDecorationPainter::CreateBorderImageGradient(gradient, paintSize);
-        BorderImagePainter borderImagePainter(hasBorderWidthProperty,
-            borderImageProperty, borderWidthProperty, paintSize, rsImage,
-            PipelineBase::GetCurrentContext()->GetDipScale());
+        BorderImagePainter borderImagePainter(hasBorderWidthProperty, borderImageProperty, borderWidthProperty,
+            paintSize, rsImage, PipelineBase::GetCurrentContext()->GetDipScale());
         borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), rsCanvas);
     };
 
@@ -1516,8 +1512,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
     }
     if (transitionIn) {
         AnimationUtils::Animate(
-            option, [rsNode = rsNode_, effect]() { rsNode->NotifyTransition(effect, true); },
-            onFinish);
+            option, [rsNode = rsNode_, effect]() { rsNode->NotifyTransition(effect, true); }, onFinish);
     } else {
         auto wrappedFinish = [onFinish, weak = WeakPtr<FrameNode>(host)]() {
             auto host = weak.Upgrade();
@@ -1529,8 +1524,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
             }
         };
         AnimationUtils::Animate(
-            option, [rsNode = rsNode_, effect]() { rsNode->NotifyTransition(effect, false); },
-            wrappedFinish);
+            option, [rsNode = rsNode_, effect]() { rsNode->NotifyTransition(effect, false); }, wrappedFinish);
     }
     return true;
 }

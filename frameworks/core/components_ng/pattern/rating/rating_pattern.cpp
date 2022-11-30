@@ -117,18 +117,18 @@ void RatingPattern::OnImageLoadSuccess(int32_t imageFlag)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (imageFlag == 0b001) {
-        foregroundImageCanvas_ = foregroundImageLoadingCtx_->GetCanvasImage();
+        foregroundImageCanvas_ = foregroundImageLoadingCtx_->MoveCanvasImage();
         singleStarRect_ = foregroundImageLoadingCtx_->GetSrcRect();
         singleStarDstRect_ = foregroundImageLoadingCtx_->GetDstRect();
         imageSuccessStateCode_ = imageFlag | imageSuccessStateCode_;
     }
     if (imageFlag == 0b010) {
-        secondaryImageCanvas_ = secondaryImageLoadingCtx_->GetCanvasImage();
+        secondaryImageCanvas_ = secondaryImageLoadingCtx_->MoveCanvasImage();
         imageSuccessStateCode_ = imageFlag | imageSuccessStateCode_;
     }
 
     if (imageFlag == 0b100) {
-        backgroundImageCanvas_ = backgroundImageLoadingCtx_->GetCanvasImage();
+        backgroundImageCanvas_ = backgroundImageLoadingCtx_->MoveCanvasImage();
         imageSuccessStateCode_ = imageFlag | imageSuccessStateCode_;
     }
     // only when foreground, secondary and background image are all loaded successfully, mark dirty to update rendering.
