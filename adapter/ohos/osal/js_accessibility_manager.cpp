@@ -908,7 +908,7 @@ void JsAccessibilityManager::InitializeCallback()
 }
 
 bool JsAccessibilityManager::SendAccessibilitySyncEvent(
-    const AccessibilityEvent& accessibilityEvent, AccessibilityEventInfo& eventInfo)
+    const AccessibilityEvent& accessibilityEvent, AccessibilityEventInfo eventInfo)
 {
     if (!IsRegister()) {
         return false;
@@ -967,7 +967,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
     eventInfo.SetWindowId(windowId);
 
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), accessibilityEvent, &eventInfo] {
+        [weak = WeakClaim(this), accessibilityEvent, eventInfo] {
             auto jsAccessibilityManager = weak.Upgrade();
             CHECK_NULL_VOID(jsAccessibilityManager);
             jsAccessibilityManager->SendAccessibilitySyncEvent(accessibilityEvent, eventInfo);
