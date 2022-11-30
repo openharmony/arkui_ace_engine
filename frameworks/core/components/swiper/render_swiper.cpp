@@ -3451,4 +3451,17 @@ void RenderSwiper::ApplyRestoreInfo()
     SetRestoreInfo("");
 }
 
+void RenderSwiper::UpdateChildrenVisible()
+{
+    auto swiperGlobalRect = GetRectBasedWindowTopLeft();
+    const auto& children = GetChildren();
+    for (const auto& child : children) {
+        child->SetVisible(false);
+        auto childGlobalRect = child->GetRectBasedWindowTopLeft();
+        if (swiperGlobalRect.IsIntersectByCommonSideWith(childGlobalRect)) {
+            child->SetVisible(true);
+        }
+    }
+}
+
 } // namespace OHOS::Ace
