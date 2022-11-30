@@ -188,7 +188,7 @@ HWTEST_F(WebPatternTest, OnModifyDoneTest001, TestSize.Level1)
     g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
     g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_HIDE;
     g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
-    g_webPattern->UpdateWebLayoutSize();
+    g_webPattern->UpdateWebLayoutSize(width, height);
 #endif
 }
 
