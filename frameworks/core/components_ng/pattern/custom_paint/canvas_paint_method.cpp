@@ -103,6 +103,11 @@ void CanvasPaintMethod::PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWr
         CreateBitmap(frameSize);
         lastLayoutSize_.SetSizeT(frameSize);
     }
+    if (!skCanvas_) {
+        LOGW("skCanvas_ is null");
+        return;
+    }
+
     auto viewScale = context_->GetViewScale();
     skCanvas_->scale(viewScale, viewScale);
 
