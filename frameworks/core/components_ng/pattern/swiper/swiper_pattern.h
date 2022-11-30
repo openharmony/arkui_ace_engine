@@ -64,6 +64,8 @@ public:
         layoutAlgorithm->SetTotalCount(TotalCount());
         layoutAlgorithm->SetPreItemRange(preItemRange_);
         layoutAlgorithm->SetIsLoop(IsLoop());
+        layoutAlgorithm->SetMaxChildSize(maxChildSize_);
+        layoutAlgorithm->SetDisplayCount(GetDisplayCount());
         return layoutAlgorithm;
     }
 
