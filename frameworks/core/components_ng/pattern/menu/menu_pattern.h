@@ -72,6 +72,7 @@ private:
     void OnModifyDone() override;
     void RegisterOnClick();
 
+    RefPtr<TouchEventImpl> onClick_;
     int32_t targetId_ = -1;
     MenuType type_ = MenuType::MENU;
 

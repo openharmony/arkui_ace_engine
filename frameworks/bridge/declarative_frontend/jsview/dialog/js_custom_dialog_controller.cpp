@@ -347,7 +347,9 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
                 this->isShown_ = isShown;
             }
         };
-        dialogNode_ = overlayManager->ShowDialog(dialogProperties_, customNode, false);
+        auto dialog = overlayManager->ShowDialog(dialogProperties_, customNode, false);
+        CHECK_NULL_VOID(dialog);
+        dialogId_ = dialog->GetId();
         return;
     }
 
@@ -397,7 +399,7 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
         CHECK_NULL_VOID(context);
         auto overlayManager = context->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
-        overlayManager->CloseDialog(dialogNode_);
+        overlayManager->CloseDialog(dialogId_);
         return;
     }
 

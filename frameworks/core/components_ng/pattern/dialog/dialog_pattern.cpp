@@ -87,7 +87,9 @@ void DialogPattern::OnModifyDone()
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
-    InitClickEvent(gestureHub);
+    if (!onClick_) {
+        InitClickEvent(gestureHub);
+    }
 }
 
 void DialogPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -97,8 +99,8 @@ void DialogPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
         CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleClick(info);
     };
-    auto clickEvent = MakeRefPtr<ClickEvent>(std::move(task));
-    gestureHub->AddClickEvent(clickEvent);
+    onClick_ = MakeRefPtr<ClickEvent>(std::move(task));
+    gestureHub->AddClickEvent(onClick_);
 }
 
 void DialogPattern::HandleClick(const GestureEvent& info)

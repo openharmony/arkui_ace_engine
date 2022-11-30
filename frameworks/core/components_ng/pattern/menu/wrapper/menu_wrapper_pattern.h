@@ -54,6 +54,7 @@ private:
 
     void HideMenu(const RefPtr<FrameNode>& menu) const;
 
+    RefPtr<TouchEventImpl> onTouch_;
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;
 
