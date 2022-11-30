@@ -31,6 +31,7 @@
 #include "core/components_ng/test/mock/rosen/testing_path.h"
 #include "core/components_ng/test/mock/rosen/testing_pen.h"
 #include "core/components_ng/test/mock/rosen/testing_shader_effect.h"
+#include "core/components_ng/test/mock/rosen/testing_camera3d.h"
 
 namespace OHOS::Ace {
 using RSCanvas = Testing::TestingCanvas;
@@ -53,5 +54,7 @@ using RSScalar = Rosen::Drawing::scalar;
 using RSRect = Rosen::Drawing::RectF;
 using RSRoundRect = Rosen::Drawing::RoundRect;
 using RSClipOp = Rosen::Drawing::ClipOp;
+using RSCamera3D = Testing::TestingCamera3D;
+using RSMatrix = Testing::TestingMatrix;
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_MOCK_H
