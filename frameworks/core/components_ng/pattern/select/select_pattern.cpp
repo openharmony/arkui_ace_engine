@@ -48,7 +48,7 @@ constexpr uint32_t SELECT_ITSELF_TEXT_LINES = 1;
 constexpr Dimension SELECT_BORDER = 20.0_vp;
 const Edge SELECT_PADDING = Edge(8.0, 9.25, 8.0, 9.25, DimensionUnit::VP);
 constexpr Dimension SPINNER_WIDTH = 10.0_vp;
-constexpr Dimension SPINNER_HEIGHT = 7.0_vp;
+constexpr Dimension SPINNER_HEIGHT = 10.0_vp;
 constexpr Dimension SELECT_MENU_PADDING = 4.0_vp;
 
 } // namespace
