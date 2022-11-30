@@ -442,6 +442,32 @@ void VideoPattern::OnCompletion()
     eventHub->FireFinishEvent(param);
 }
 
+bool VideoPattern::HasPlayer() const
+{
+    return mediaPlayer_ != nullptr;
+}
+
+void VideoPattern::HiddenChange(bool hidden)
+{
+    if (isPlaying_ && hidden && HasPlayer()) {
+        pastPlayingStatus_ = isPlaying_;
+        Pause();
+        return;
+    }
+
+    if (!hidden && pastPlayingStatus_) {
+        pastPlayingStatus_ = false;
+        Start();
+    }
+}
+
+void VideoPattern::OnVisibleChange(bool isVisible)
+{
+    if (hiddenChangeEvent_) {
+        hiddenChangeEvent_(!isVisible);
+    }
+}
+
 void VideoPattern::UpdateLooping()
 {
     if (mediaPlayer_->IsMediaPlayerValid()) {
@@ -529,6 +555,14 @@ void VideoPattern::OnAttachToFrameNode()
 
 void VideoPattern::OnModifyDone()
 {
+    if (!hiddenChangeEvent_) {
+        SetHiddenChangeEvent([weak = WeakClaim(this)](bool hidden) {
+            auto videoPattern = weak.Upgrade();
+            if (videoPattern) {
+                videoPattern->HiddenChange(hidden);
+            }
+        });
+    }
     AddPreviewNodeIfNeeded();
     // Create the control bar
     AddControlBarNodeIfNeeded();
