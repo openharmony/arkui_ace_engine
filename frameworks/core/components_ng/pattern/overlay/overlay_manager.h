@@ -81,7 +81,10 @@ public:
     void ShowTextDialog(const DialogProperties& dialogProps, uint32_t selected, const Dimension& height,
         const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DialogTextEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);
+    // close dialog by FrameNode ID
+    void CloseDialog(int32_t id);
 
     /**  pop overlays (if any) on back press
      *
