@@ -81,10 +81,10 @@ void StepperPattern::InitButtonClickEvent(const RefPtr<GestureEventHub>& leftGes
     if (!leftClickEvent_) {
         auto clickEvent = [swiperNode, weak = WeakClaim(this)](const GestureEvent& info) {
             auto stepperPattern = weak.Upgrade();
-            CHECK_NULL_VOID(stepperPattern);
+            CHECK_NULL_VOID_NOLOG(stepperPattern);
             stepperPattern->HandlingButtonClickEvent(true, swiperNode);
             auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-            CHECK_NULL_VOID(swiperPattern);
+            CHECK_NULL_VOID_NOLOG(swiperPattern);
             auto swiperController = swiperPattern->GetSwiperController();
             swiperController->ShowPrevious();
         };
@@ -96,10 +96,10 @@ void StepperPattern::InitButtonClickEvent(const RefPtr<GestureEventHub>& leftGes
     if (!rightClickEvent_) {
         auto clickEvent = [swiperNode, weak = WeakClaim(this)](const GestureEvent& info) {
             auto stepperPattern = weak.Upgrade();
-            CHECK_NULL_VOID(stepperPattern);
+            CHECK_NULL_VOID_NOLOG(stepperPattern);
             stepperPattern->HandlingButtonClickEvent(false, swiperNode);
             auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-            CHECK_NULL_VOID(swiperPattern);
+            CHECK_NULL_VOID_NOLOG(swiperPattern);
             auto swiperController = swiperPattern->GetSwiperController();
             swiperController->ShowNext();
         };

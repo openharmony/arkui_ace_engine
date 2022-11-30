@@ -27,9 +27,9 @@ namespace OHOS::Ace::NG {
 void ScrollPositionController::JumpTo(int32_t index, int32_t source)
 {
     auto pattern = scroll_.Upgrade();
-    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_VOID_NOLOG(pattern);
     auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-    CHECK_NULL_VOID(scrollPattern);
+    CHECK_NULL_VOID_NOLOG(scrollPattern);
     LOGW("jumpTo is not supported now");
 }
 
@@ -62,18 +62,18 @@ void ScrollPositionController::ScrollBy(double pixelX, double pixelY, bool smoot
 double ScrollPositionController::GetCurrentPosition() const
 {
     auto pattern = scroll_.Upgrade();
-    CHECK_NULL_RETURN(pattern, 0.0);
+    CHECK_NULL_RETURN_NOLOG(pattern, 0.0);
     auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-    CHECK_NULL_RETURN(scrollPattern, 0.0);
+    CHECK_NULL_RETURN_NOLOG(scrollPattern, 0.0);
     return scrollPattern->GetCurrentPosition();
 }
 
 Axis ScrollPositionController::GetScrollDirection() const
 {
     auto pattern = scroll_.Upgrade();
-    CHECK_NULL_RETURN(pattern, Axis::NONE);
+    CHECK_NULL_RETURN_NOLOG(pattern, Axis::NONE);
     auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-    CHECK_NULL_RETURN(scrollPattern, Axis::NONE);
+    CHECK_NULL_RETURN_NOLOG(scrollPattern, Axis::NONE);
     return scrollPattern->GetAxis();
 }
 
@@ -101,7 +101,7 @@ Offset ScrollPositionController::GetCurrentOffset() const
 {
     auto pattern = scroll_.Upgrade();
     auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-    CHECK_NULL_RETURN(scrollPattern, Offset::Zero());
+    CHECK_NULL_RETURN_NOLOG(scrollPattern, Offset::Zero());
     auto pxOffset = scrollPattern->GetCurrentOffset();
     // need to reverse the coordinate
     auto x = Dimension(-pxOffset.GetX(), DimensionUnit::PX);

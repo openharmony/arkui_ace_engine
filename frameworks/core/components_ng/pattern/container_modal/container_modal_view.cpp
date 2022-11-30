@@ -90,7 +90,7 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
         auto touchEventHub = containerTitleRow->GetOrCreateGestureEventHub();
         CHECK_NULL_RETURN(touchEventHub, nullptr);
         touchEventHub->SetTouchEvent([windowManager](TouchEventInfo& info) {
-            CHECK_NULL_VOID(windowManager);
+            CHECK_NULL_VOID_NOLOG(windowManager);
             windowManager->WindowStartMove();
         });
 
@@ -144,13 +144,13 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
     // add leftSplit / maxRecover / minimize / close button
     containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT,
         [windowManager](GestureEvent& info) {
-            CHECK_NULL_VOID(windowManager);
+            CHECK_NULL_VOID_NOLOG(windowManager);
             LOGI("left split button clicked");
             windowManager->FireWindowSplitCallBack();
         }));
     containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
         [windowManager](GestureEvent& info) {
-            CHECK_NULL_VOID(windowManager);
+            CHECK_NULL_VOID_NOLOG(windowManager);
             auto mode = windowManager->GetWindowMode();
             if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
                 LOGI("recover button clicked");
@@ -162,13 +162,13 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
         }));
     containerTitleRow->AddChild(BuildControlButton(
         InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, [windowManager](GestureEvent& info) {
-            CHECK_NULL_VOID(windowManager);
+            CHECK_NULL_VOID_NOLOG(windowManager);
             LOGI("minimize button clicked");
             windowManager->WindowMinimize();
         }));
     containerTitleRow->AddChild(BuildControlButton(
         InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE, [windowManager](GestureEvent& info) {
-            CHECK_NULL_VOID(windowManager);
+            CHECK_NULL_VOID_NOLOG(windowManager);
             LOGI("close button clicked");
             windowManager->WindowClose();
         }, true));
