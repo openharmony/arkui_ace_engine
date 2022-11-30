@@ -644,10 +644,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
 
-    if (window_->IsFocused()) {
-        LOGI("UIContentImpl: focus again");
-        Focus();
-    }
     dragWindowListener_ = new DragWindowListener(instanceId_);
     window_->RegisterDragListener(dragWindowListener_);
     occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
@@ -683,6 +679,13 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     } else {
         Platform::AceContainer::SetViewNew(flutterAceView, density, 0, 0, window_);
     }
+
+    // after frontend initialize
+    if (window_->IsFocused()) {
+        LOGI("UIContentImpl: focus again");
+        Focus();
+    }
+
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
     // Set sdk version in module json mode
     if (isModelJson) {
