@@ -252,6 +252,8 @@ bool TextFieldPattern::UpdateCaretPosition()
             caretRect_.SetLeft(textRect_.GetX() + textRect_.Width());
         }
         return true;
+    } else if (caretUpdateType_ == CaretUpdateType::HANDLER_MOVE) {
+        return true;
     }
     return false;
 }
@@ -1137,6 +1139,7 @@ void TextFieldPattern::OnModifyDone()
     InitLongPressEvent();
     InitFocusEvent();
     InitMouseEvent();
+    context->AddOnAreaChangeNode(host->GetId());
     if (!clipboard_ && context) {
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
     }
@@ -1215,10 +1218,12 @@ void TextFieldPattern::ProcessOverlay()
         return;
     }
     selectionMode_ = SelectionMode::SELECT;
-    if (textEditingValue_.caretPosition == 0) {
-        UpdateSelection(0, 1);
-    } else {
-        UpdateSelection(textEditingValue_.caretPosition - 1, textEditingValue_.caretPosition);
+    if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
+        if (textEditingValue_.caretPosition == 0) {
+            UpdateSelection(0, 1);
+        } else {
+            UpdateSelection(textEditingValue_.caretPosition - 1, textEditingValue_.caretPosition);
+        }
     }
     OffsetF firstHandleOffset(
         CalcCursorOffsetByPosition(textSelector_.GetStart()).GetX() + textRect_.GetX() + parentGlobalOffset_.GetX(),
@@ -1345,7 +1350,7 @@ void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
     OffsetF offsetToParagraphBeginning = CalcCursorOffsetByPosition(position);
     caretRect_.SetOffset(offsetToParagraphBeginning + OffsetF(textRect_.GetOffset().GetX(), 0.0f));
     selectionMode_ = SelectionMode::SELECT;
-    caretUpdateType_ = CaretUpdateType::NONE;
+    caretUpdateType_ = CaretUpdateType::HANDLER_MOVE;
     UpdateTextSelectorByHandleMove(isFirstHandle, position, offsetToParagraphBeginning);
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -1389,7 +1394,7 @@ void TextFieldPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHan
     SelectHandleInfo info;
     info.paintRect = newHandle;
     selectionMode_ = SelectionMode::SELECT;
-    caretUpdateType_ = CaretUpdateType::NONE;
+    caretUpdateType_ = CaretUpdateType::HANDLER_MOVE;
     if (isFirstHandle) {
         selectOverlayProxy_->UpdateFirstSelectHandleInfo(info);
         return;
@@ -1817,6 +1822,39 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
 }
 
 void TextFieldPattern::OnValueChanged(bool needFireChangeEvent, bool needFireSelectChangeEvent) {}
+
+void TextFieldPattern::OnAreaChangedInner()
+{
+    if (!SelectOverlayIsOn()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto parentGlobalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
+    if (parentGlobalOffset != parentGlobalOffset_) {
+        parentGlobalOffset_ = parentGlobalOffset;
+        ProcessOverlay();
+        selectionMode_ = SelectionMode::SELECT;
+        textSelector_.selectionBaseOffset.SetX(
+            CalcCursorOffsetByPosition(textSelector_.GetStart()).GetX() + textRect_.GetX());
+        textSelector_.selectionDestinationOffset.SetX(
+            CalcCursorOffsetByPosition(textSelector_.GetEnd()).GetX() + textRect_.GetX());
+        UpdateSelection(textSelector_.GetStart(), textSelector_.GetEnd());
+    }
+}
+
+void TextFieldPattern::OnVisibleChange(bool isVisible)
+{
+    if (!isVisible) {
+        LOGI("TextField is not visible");
+        caretUpdateType_ = CaretUpdateType::INPUT;
+        selectionMode_ = SelectionMode::NONE;
+        CloseKeyboard(true);
+        CloseSelectOverlay();
+    }
+}
 
 void TextFieldPattern::DeleteForward(int32_t length)
 {

@@ -457,10 +457,11 @@ RefPtr<FrameNode> LayoutProperty::GetHost() const
     return host_.Upgrade();
 }
 
-void LayoutProperty::OnVisibilityUpdate(VisibleType /* visible */) const
+void LayoutProperty::OnVisibilityUpdate(VisibleType visible) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    host->OnVisibleChange(visible == VisibleType::VISIBLE);
     auto parent = host->GetAncestorNodeOfFrame();
     if (parent) {
         parent->MarkNeedSyncRenderTree();
