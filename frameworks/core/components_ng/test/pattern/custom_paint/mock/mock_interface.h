@@ -13,23 +13,19 @@
  * limitations under the License.
  */
 
-#include "base/memory/referenced.h"
-#include "core/components_ng/render/render_context.h"
-#include "core/components_ng/pattern/container_modal/container_modal_view.h"
-#include "core/components_ng/manager/full_screen/full_screen_manager.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_CUSTOM_PAINT_MOCK_INTERFACE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_CUSTOM_PAINT_MOCK_INTERFACE_H
 
-namespace OHOS::Ace::NG {
-class MockRenderContext : public RenderContext {
-public:
-    RefPtr<Canvas> GetCanvas() override
-    {
-        return nullptr;
-    }
-    void Restore() {}
+#include "gmock/gmock.h"
+#include "base/memory/ace_type.h"
+
+namespace OHOS::Ace {
+class FontManager : public AceType {
+    DECLARE_ACE_TYPE(FontManager, AceType);
 };
 
-RefPtr<RenderContext> RenderContext::Create()
-{
-    return AceType::MakeRefPtr<MockRenderContext>();
-}
-} // namespace OHOS::Ace::NG
+class ManagerInterface : public AceType {
+    DECLARE_ACE_TYPE(ManagerInterface, AceType);
+};
+} // namespace OHOS::Ace
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_CUSTOM_PAINT_MOCK_INTERFACE_H

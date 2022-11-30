@@ -19,22 +19,22 @@
 #define private public
 #define protected public
 
-#include "core/components_ng/render/drawing_forward.h"
-#include "render_service_base/include/modifier/rs_render_modifier.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/ace_engine.h"
-#include "base/test/unittest/geometry/mock_container.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline/base/element_register.h"
-#include "mock_schedule_task.h"
-#include "mock_window.h"
-#include "mock_frontend.h"
-#include "mock_task_executor.h"
+#include "core/pipeline_ng/test/mock/mock_container.h"
+#include "core/pipeline_ng/test/unittest/mock_schedule_task.h"
+#include "core/pipeline_ng/test/mock/mock_window.h"
+#include "core/pipeline_ng/test/mock/mock_frontend.h"
+#include "core/pipeline_ng/test/unittest/mock_task_executor.h"
 
 using namespace testing;
 using namespace testing::ext;
