@@ -235,6 +235,8 @@ public:
 
     virtual void SetActive(bool active);
 
+    virtual void OnVisibleChange(bool isVisible);
+
     bool IsOnMainTree() const
     {
         return onMainTree_;

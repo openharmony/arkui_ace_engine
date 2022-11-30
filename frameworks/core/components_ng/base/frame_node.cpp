@@ -238,6 +238,14 @@ void FrameNode::OnAttachToMainTree()
     hasPendingRequest_ = false;
 }
 
+void FrameNode::OnVisibleChange(bool isVisible)
+{
+    pattern_->OnVisibleChange(isVisible);
+    for (const auto& child: GetChildren()) {
+        child->OnVisibleChange(isVisible);
+    }
+}
+
 void FrameNode::OnDetachFromMainTree()
 {
     eventHub_->FireOnDisappear();
@@ -346,6 +354,7 @@ void FrameNode::TriggerOnAreaChangeCallback()
             *lastParentOffsetToWindow_ = currParentOffsetToWindow;
         }
     }
+    pattern_->OnAreaChangedInner();
 }
 
 void FrameNode::TriggerVisibleAreaChangeCallback(std::list<VisibleCallbackInfo>& callbackInfoList)
