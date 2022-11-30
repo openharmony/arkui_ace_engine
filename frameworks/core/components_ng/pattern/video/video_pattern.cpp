@@ -879,9 +879,8 @@ void VideoPattern::Start()
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_))] {
         auto mediaPlayer = weak.Upgrade();
-        if (mediaPlayer) {
-            mediaPlayer->Play();
-        }
+        CHECK_NULL_VOID(mediaPlayer);
+        mediaPlayer->Play();
     });
 }
 
