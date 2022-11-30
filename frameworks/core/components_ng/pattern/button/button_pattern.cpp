@@ -33,7 +33,9 @@ void ButtonPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     SetDefaultAttributes(host, pipeline);
     host->GetRenderContext()->SetClipToFrame(true);
-    clickedColor_ = pipeline->GetTheme<ButtonTheme>()->GetClickedColor();
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    clickedColor_ = buttonTheme->GetClickedColor();
 }
 
 void ButtonPattern::SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, const RefPtr<PipelineBase>& pipeline)

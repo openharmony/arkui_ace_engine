@@ -88,7 +88,6 @@ public:
 
 protected:
     RefPtr<FrameNode> CreateLabelButtonParagraph(const std::string& createValue, const TestProperty& testProperty);
-    RefPtr<FrameNode> CreateChildButtonParagraph(const std::string& createValue, const TestProperty& testProperty);
 };
 
 void ButtonPatternTestNg::SetUpTestCase()
@@ -144,7 +143,7 @@ RefPtr<FrameNode> ButtonPatternTestNg::CreateLabelButtonParagraph(
         ButtonView::SetBorderRadius(testProperty.borderRadius.value());
     }
 
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // TextView pop
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     return AceType::DynamicCast<FrameNode>(element);
 }
 
@@ -176,11 +175,15 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest002, TestSize.Level1)
 {
     TestProperty testProperty;
     testProperty.typeValue = std::make_optional(BUTTON_TYPE_CUSTOM_VALUE);
+    // create button without label
     ButtonView::Create(BUTTON_ETS_TAG);
     ButtonView::SetType(testProperty.typeValue.value());
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     EXPECT_EQ(frameNode == nullptr, false);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    EXPECT_EQ(buttonPattern == nullptr, false);
+    buttonPattern->InitButtonLabel();
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     EXPECT_EQ(layoutProperty == nullptr, false);
     RefPtr<ButtonLayoutProperty> buttonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(layoutProperty);
@@ -290,6 +293,9 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest006, TestSize.Level1)
      * @tc.steps: step2. get pattern and update frameNode.
      * @tc.expected: step2. related function is called.
      */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    EXPECT_FALSE(buttonPattern == nullptr);
+    buttonPattern->OnModifyDone();
     auto buttonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
     EXPECT_FALSE(buttonLayoutProperty == nullptr);
     // update layout property
@@ -298,12 +304,18 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest006, TestSize.Level1)
     buttonLayoutProperty->UpdateFontWeight(BUTTON_BOLD_FONT_WEIGHT_VALUE);
     buttonLayoutProperty->UpdateFontColor(FONT_COLOR);
     buttonLayoutProperty->UpdateFontFamily(FONT_FAMILY_VALUE);
+    buttonLayoutProperty->UpdateFontStyle(BUTTON_ITALIC_FONT_STYLE_VALUE);
 
     /**
-     * @tc.steps: step3. frameNode markOnModifyDone.
+     * @tc.steps: step3. buttonPattern OnModifyDone.
      * @tc.expected: step3. check whether the properties is correct.
      */
-    frameNode->MarkModifyDone();
+
+    // set touchEventActuator_
+    auto touchCallback = [](TouchEventInfo& info) {};
+    auto touchEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    buttonPattern->touchListener_ = touchEvent;
+    buttonPattern->OnModifyDone();
     auto text = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
     EXPECT_FALSE(text == nullptr);
     auto textLayoutProp = text->GetLayoutProperty<TextLayoutProperty>();
@@ -327,34 +339,24 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest007, TestSize.Level1)
      * @tc.steps: step1. create bubble and get frameNode.
      */
     TestProperty testProperty;
-    testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
     auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
     EXPECT_FALSE(frameNode == nullptr);
-
-    auto textNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, 10, AceType::MakeRefPtr<TextPattern>());
-    EXPECT_FALSE(textNode == nullptr);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateContent(CREATE_VALUE);
-    // buttonNode add the second child
-    frameNode->AddChild(textNode);
-
-    /**
-     * @tc.steps: step2. get pattern and update frameNode.
-     * @tc.expected: step2. related function is called.
-     */
-    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
-    EXPECT_FALSE(buttonPattern == nullptr);
-    auto buttonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
-    EXPECT_FALSE(buttonLayoutProperty == nullptr);
-    buttonLayoutProperty->UpdateType(BUTTON_TYPE_CAPSULE_VALUE);
-    frameNode->MarkModifyDone();
 
     /**
      * @tc.steps: test buttonPattern OnTouchDown OnTouchUp function.
      * @tc.expected: step3. check whether the function is executed.
      */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    EXPECT_FALSE(buttonPattern == nullptr);
+    buttonPattern->OnTouchDown();
+    buttonPattern->OnTouchUp();
+
+    // frameNode SetStateEffect
+    auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEventHub);
+    buttonEventHub->SetStateEffect(STATE_EFFECT);
+    buttonPattern->isSetClickedColor_ = true;
+    buttonPattern->clickedColor_ = FONT_COLOR;
     buttonPattern->OnTouchDown();
     buttonPattern->OnTouchUp();
 }
