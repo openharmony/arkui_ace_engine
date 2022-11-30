@@ -183,8 +183,8 @@ void SwiperPattern::CalculateCacheRange()
         startIndex_ = std::max(currentIndex_ - cacheCount, 0);
         endIndex_ = std::min(currentIndex_ + displayCount + cacheCount - 1, totalCount - 1);
     } else {
-        startIndex_ = (totalCount + currentIndex_ - cacheCount) % totalCount;
-        endIndex_ = (currentIndex_ + cacheCount) % totalCount;
+        startIndex_ = (currentIndex_ - cacheCount + totalCount) % totalCount;
+        endIndex_ = (currentIndex_ + displayCount + cacheCount - 1 + totalCount) % totalCount;
     }
 
     LOGD("Cache range [%{public}d - %{public}d], totalCount: %{public}d", startIndex_, endIndex_, totalCount);

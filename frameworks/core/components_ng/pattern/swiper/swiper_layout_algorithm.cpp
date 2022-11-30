@@ -35,32 +35,65 @@ namespace OHOS::Ace::NG {
 void SwiperLayoutAlgorithm::AddToItemRange(int32_t index)
 {
     if (index != currentIndex_) {
-        index = isLoop_ ? (index + totalCount_) % totalCount_ : std::clamp(index, 0, totalCount_ - 1);
+        index = ClampIndex(index);
         itemRange_.insert(index);
     }
 }
 
-void SwiperLayoutAlgorithm::LoadItemWithDrag(LayoutWrapper* layoutWrapper)
+int32_t SwiperLayoutAlgorithm::ClampIndex(int32_t index)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
+    return isLoop_ ? (index + totalCount_) % totalCount_ : std::clamp(index, 0, totalCount_ - 1);
+}
 
-    auto layoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(layoutProperty);
-    auto axis = layoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
-    auto mainSize = geometryNode->GetFrameSize().MainSize(axis);
-    if (NonPositive(mainSize) || NearZero(currentOffset_)) {
+void SwiperLayoutAlgorithm::LoadItemWithDrag(float translateLength)
+{
+    if (NonPositive(translateLength) || NearZero(currentOffset_)) {
         return;
     }
 
     int32_t nextIndex = currentIndex_;
-    auto loadItems = std::abs(static_cast<int32_t>(floorf(currentOffset_ / mainSize)));
+    auto loadItems = std::abs(static_cast<int32_t>(floorf(currentOffset_ / translateLength)));
     do {
         nextIndex = Positive(currentOffset_) ? (nextIndex - 1) : (nextIndex + 1);
         AddToItemRange(nextIndex);
         loadItems--;
     } while (loadItems >= 0);
+}
+
+void SwiperLayoutAlgorithm::InitInActiveItems(float translateLength)
+{
+    // inActiveItems collect items which exist in preItemRange_, but not exist in itemRange_,
+    // need remove these items from wrapper.
+    inActiveItems_.clear();
+
+    // Collect the same item in itemRange_ and preItemRange_.
+    std::vector<int32_t> intersection;
+    set_intersection(itemRange_.begin(), itemRange_.end(), preItemRange_.begin(), preItemRange_.end(),
+        inserter(intersection, intersection.begin()));
+
+    // Collect difference items between preItemRange_ and intersection.
+    set_difference(preItemRange_.begin(), preItemRange_.end(), intersection.begin(), intersection.end(),
+        inserter(inActiveItems_, inActiveItems_.begin()));
+
+    std::set<int32_t> activeItems;
+    auto firstIndex = currentIndex_;
+    if (!NearZero(currentOffset_) && Positive(translateLength)) {
+        auto loadItems = std::abs(static_cast<int32_t>(floorf(currentOffset_ / translateLength)));
+        firstIndex = Positive(currentOffset_) ? (firstIndex - loadItems - 1) : (firstIndex + loadItems - 1);
+        firstIndex = ClampIndex(firstIndex);
+    }
+
+    auto displayCount = NearZero(currentOffset_) ? displayCount_ : displayCount_ + 1;
+    for (int32_t i = 0; i <= displayCount; i++) {
+        activeItems.insert(ClampIndex(firstIndex + i));
+    }
+
+    if (activeItems.empty()) {
+        return;
+    }
+
+    set_difference(itemRange_.begin(), itemRange_.end(), activeItems.begin(), activeItems.end(),
+        inserter(inActiveItems_, inActiveItems_.begin()));
 }
 
 void SwiperLayoutAlgorithm::InitItemRange(LayoutWrapper* layoutWrapper)
@@ -72,8 +105,17 @@ void SwiperLayoutAlgorithm::InitItemRange(LayoutWrapper* layoutWrapper)
         currentIndex_ = 0;
     }
 
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto axis = layoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
+    auto itemSpace = SwiperUtils::GetItemSpace(layoutProperty);
+    auto translateLength = axis == Axis::HORIZONTAL ? maxChildSize_.Width() : maxChildSize_.Height();
+    translateLength += itemSpace;
+
     /* Load next index while swiping */
-    LoadItemWithDrag(layoutWrapper);
+    LoadItemWithDrag(translateLength);
 
     if (startIndex_ <= endIndex_) {
         for (auto index = startIndex_; index <= endIndex_; ++index) {
@@ -92,22 +134,7 @@ void SwiperLayoutAlgorithm::InitItemRange(LayoutWrapper* layoutWrapper)
         itemRange_.insert(targetIndex_.value());
     }
 
-    if (preItemRange_.empty()) {
-        return;
-    }
-
-    // inActiveItems collect items which exist in preItemRange_, but not exist in itemRange_,
-    // need remove these items from wrapper.
-    inActiveItems_.clear();
-
-    // Collect the same item in itemRange_ and preItemRange_.
-    std::vector<int32_t> intersection;
-    set_intersection(itemRange_.begin(), itemRange_.end(), preItemRange_.begin(), preItemRange_.end(),
-        inserter(intersection, intersection.begin()));
-
-    // Collect difference items between preItemRange_ and intersection.
-    set_difference(preItemRange_.begin(), preItemRange_.end(), intersection.begin(), intersection.end(),
-        inserter(inActiveItems_, inActiveItems_.begin()));
+    InitInActiveItems(translateLength);
 }
 
 void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -151,11 +178,6 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     maxChildSize_ = axis == Axis::HORIZONTAL ? SizeF(mainSize, crossSize) : SizeF(crossSize, mainSize);
-
-    // Mark inactive in wrapper.
-    for (const auto& index : inActiveItems_) {
-        layoutWrapper->RemoveChildInRenderTree(index);
-    }
 
     if (isSingleCase) {
         // single case.
@@ -280,6 +302,14 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         if (indicatorWrapper) {
             indicatorWrapper->Layout();
         }
+    }
+
+    // Mark inactive in wrapper.
+    for (const auto& index : inActiveItems_) {
+        if (swiperLayoutProperty->GetShowIndicatorValue(true) && index == totalCount_) {
+            continue;
+        }
+        layoutWrapper->RemoveChildInRenderTree(index);
     }
 
     // Adjust offset when looped.
