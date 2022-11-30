@@ -187,16 +187,15 @@ void IndexerPattern::InitChildInputEvent()
     CHECK_NULL_VOID(host);
     for (int32_t i = 0; i < itemCount_; i++) {
         auto child = DynamicCast<FrameNode>(host->GetChildAtIndex(i));
-        if (child) {
-            auto childHoverCallback = [weak = WeakClaim(this), index = i](bool isHovered) {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->OnChildHover(index, isHovered);
-            };
-            auto childOnHoverEvent = MakeRefPtr<InputEvent>(childHoverCallback);
-            auto childInputEventHub = child->GetOrCreateInputEventHub();
-            childInputEventHub->AddOnHoverEvent(childOnHoverEvent);
-        }
+        CHECK_NULL_VOID(child);
+        auto childHoverCallback = [weak = WeakClaim(this), index = i](bool isHovered) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnChildHover(index, isHovered);
+        };
+        auto childOnHoverEvent = MakeRefPtr<InputEvent>(childHoverCallback);
+        auto childInputEventHub = child->GetOrCreateInputEventHub();
+        childInputEventHub->AddOnHoverEvent(childOnHoverEvent);
     };
 }
 
@@ -241,13 +240,9 @@ void IndexerPattern::MoveIndexByOffset(const Offset& offset, bool isRepeatCalled
 int32_t IndexerPattern::GetSelectChildIndex(const Offset& offset)
 {
     auto host = GetHost();
-    if (!host) {
-        return -1;
-    }
+    CHECK_NULL_RETURN(host, -1);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
-    if (!layoutProperty) {
-        return -1;
-    }
+    CHECK_NULL_RETURN(layoutProperty, -1);
 
     auto size = SizeF(itemSizeRender_, itemSizeRender_ * static_cast<float>(itemCount_));
     auto padding = layoutProperty->CreatePaddingAndBorder();
@@ -403,11 +398,11 @@ void IndexerPattern::ApplyIndexChanged()
                 paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSeclectedBackgroundColor()));
             auto randius = indexerTheme->GetHoverRadiusSize_();
             childRenderContext->UpdateBorderRadius({ randius, randius, randius, randius });
-            childRenderContext->SetClipToFrame(true);
             auto selectedFont = layoutProperty->GetSelectedFont().value_or(indexerTheme->GetSelectTextStyle());
             nodeLayoutProperty->UpdateFontSize(selectedFont.GetFontSize());
             auto fontWeight = selectedFont.GetFontWeight();
             nodeLayoutProperty->UpdateFontWeight(fontWeight);
+            childRenderContext->SetClipToBounds(true);
             childNode->MarkModifyDone();
         } else if (index == itemCount_) {
             auto randius = BUBBLE_BOX_RADIUS;
