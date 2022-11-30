@@ -53,6 +53,7 @@ private:
     Color inactivePointColor_ = Color::WHITE;
     Dimension hoverRadius_ = 8.0_vp;
     Dimension hotZoneHorizontalPadding_ = 11.0_vp;
+    Dimension hotZoneVerticalPadding_ = 11.0_vp;
 
     bool enabled_ = true;
     bool isTouch_ = false;
