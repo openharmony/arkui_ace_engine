@@ -50,11 +50,12 @@ RefPtr<ScrollControllerBase> ListModelImpl::CreateScrollController()
     return AceType::MakeRefPtr<V2::ListPositionController>();
 }
 
-void ListModelImpl::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollBarProxy> proxy)
+void ListModelImpl::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy)
 {
     auto listScroller = AceType::DynamicCast<V2::ListPositionController>(scroller);
     JSViewSetProperty(&V2::ListComponent::SetScrollController, listScroller);
-    JSViewSetProperty(&V2::ListComponent::SetScrollBarProxy, proxy);
+    auto scrollBarProxy = AceType::DynamicCast<ScrollBarProxy>(proxy);
+    JSViewSetProperty(&V2::ListComponent::SetScrollBarProxy, scrollBarProxy);
 }
 
 void ListModelImpl::SetListDirection(Axis axis)
