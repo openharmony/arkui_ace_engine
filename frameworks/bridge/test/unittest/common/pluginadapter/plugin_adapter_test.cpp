@@ -16,7 +16,7 @@
 #include "gtest/gtest.h"
 
 #define private public
-#include "core/pipeline_ng/test/mock/mock_container.h"
+#include "base/test/unittest/geometry/mock_container.h"
 #include "bridge/common/plugin_adapter/plugin_bridge.h"
 #include "core/common/container.h"
 #include "core/common/ace_engine.h"
