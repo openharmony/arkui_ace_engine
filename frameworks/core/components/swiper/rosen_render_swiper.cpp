@@ -50,6 +50,7 @@ void RosenRenderSwiper::Update(const RefPtr<Component>& component)
 
 void RosenRenderSwiper::Paint(RenderContext& context, const Offset& offset)
 {
+    UpdateChildrenVisible();
     RenderNode::Paint(context, offset);
 
     if (auto rsNode = static_cast<RosenRenderContext*>(&context)->GetRSNode()) {
