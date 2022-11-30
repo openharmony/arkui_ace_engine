@@ -78,7 +78,10 @@ void SwitchPattern::OnModifyDone()
     }
     auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_VOID(switchPaintProperty);
-    if (!isOn_.has_value()) {
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    if (!isOn_.has_value() || (isOn_.has_value() && NearZero(geometryNode->GetContentSize().Width()) &&
+                                  NearZero(geometryNode->GetContentSize().Height()))) {
         isOn_ = switchPaintProperty->GetIsOnValue();
     }
     auto isOn = switchPaintProperty->GetIsOnValue();
