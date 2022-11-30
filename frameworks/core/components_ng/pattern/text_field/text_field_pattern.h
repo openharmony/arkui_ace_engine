@@ -323,6 +323,7 @@ void SetNeedCloseOverlay(bool needClose)
 private:
     bool IsTextArea();
     void HandleBlurEvent();
+    void HandleFocusEvent();
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     void HandleDirectionalKey(const KeyEvent& keyEvent);

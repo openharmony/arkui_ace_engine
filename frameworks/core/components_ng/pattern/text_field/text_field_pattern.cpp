@@ -616,6 +616,11 @@ const TextEditingValueNG& TextFieldPattern::GetEditingValue() const
     return textEditingValue_;
 }
 
+void TextFieldPattern::HandleFocusEvent()
+{
+    StartTwinkling();
+}
+
 void TextFieldPattern::InitFocusEvent()
 {
     if (focusEventInitialized_) {
@@ -624,6 +629,13 @@ void TextFieldPattern::InitFocusEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetOrCreateFocusHub();
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleFocusEvent();
+        }
+    };
+    focusHub->SetOnFocusInternal(focusTask);
     auto blurTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         if (pattern) {
