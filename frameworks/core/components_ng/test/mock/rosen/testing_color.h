@@ -18,13 +18,21 @@
 
 #include <cstdint>
 
+#include "utils/scalar.h"
+
 namespace OHOS::Ace::Testing {
+using scalar = Rosen::Drawing::scalar;
 using ColorQuad = uint32_t;
 class TestingColor {
 public:
     TestingColor(uint32_t r, uint32_t g, uint32_t b, uint32_t a) {}
     explicit TestingColor(ColorQuad rgba) {}
     ~TestingColor() = default;
+    scalar GetAlphaF()
+    {
+        return scalar();
+    }
+    void SetAlphaF(scalar a) {}
 
     virtual void Color(ColorQuad rgba) noexcept {}
 };
