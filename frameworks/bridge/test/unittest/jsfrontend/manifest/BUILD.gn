@@ -50,6 +50,26 @@ ohos_unittest("ManifestRouterTest") {
   part_name = ace_engine_part
 }
 
+ohos_unittest("ManifestParserTest") {
+  module_out_path = module_output_path
+
+  sources = [ "manifest_parser_test.cpp" ]
+
+  configs = [
+    ":config_manifest_test",
+    "$ace_root:ace_test_config",
+  ]
+
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "//third_party/googletest:gmock_main",
+  ]
+
+  external_deps = [ "ability_base:configuration" ]
+
+  part_name = ace_engine_part
+}
+
 config("config_manifest_test") {
   visibility = [ ":*" ]
   include_dirs = [ "$ace_root" ]
@@ -60,6 +80,7 @@ group("unittest") {
   deps = []
 
   deps += [
+    ":ManifestParserTest",
     ":ManifestRouterTest",
     ":ManifestWindowTest",
   ]

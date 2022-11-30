@@ -34,6 +34,9 @@ const std::string PAGES_LIST = "                              "
                                "              ]               "
                                "}";
 
+const std::string INDEX_JS = "index.js";
+const std::string FIRST_JS = "first.js";
+const std::string SECOND_JS = "second.js";
 } // namespace
 
 class ManifestRouterTest : public testing::Test {
@@ -96,7 +99,7 @@ HWTEST_F(ManifestRouterTest, ManifestRouterTest002, TestSize.Level1)
 
     std::string uri = "/";
     auto result = manifestRouter->GetPagePath(uri);
-    ASSERT_EQ(result, "index.js");
+    ASSERT_EQ(result, INDEX_JS);
 
     uri = "aaa";
     result = manifestRouter->GetPagePath(uri);
@@ -104,7 +107,41 @@ HWTEST_F(ManifestRouterTest, ManifestRouterTest002, TestSize.Level1)
 
     uri = "first";
     result = manifestRouter->GetPagePath(uri);
-    ASSERT_EQ(result, "first.js");
+    ASSERT_EQ(result, FIRST_JS);
 }
 
+/**
+* @tc.name: ManifestRouterTest003
+* @tc.desc: ManifestRouter get path with empty uri or uri which contains correct suffix
+* @tc.type: FUNC
+*/
+HWTEST_F(ManifestRouterTest, ManifestRouterTest003, TestSize.Level1)
+{
+    std::string uri;
+    auto manifestRouter = AceType::MakeRefPtr<ManifestRouter>();
+    auto result = manifestRouter->GetPagePath(uri);
+    auto entry = manifestRouter->GetEntry(".js");
+    ASSERT_EQ(result, "");
+    ASSERT_EQ(entry, "");
+
+    auto rootJson = JsonUtil::ParseJsonString(PAGES_LIST);
+    manifestRouter->RouterParse(rootJson);
+    uri = "/";
+    result = manifestRouter->GetPagePath(uri, ".js");
+    entry = manifestRouter->GetEntry(".js");
+    ASSERT_EQ(result, INDEX_JS);
+    ASSERT_EQ(entry, INDEX_JS);
+
+    uri = "/etc";
+    result = manifestRouter->GetPagePath(uri, ".js");
+    ASSERT_EQ(result, "");
+
+    uri = "first";
+    result = manifestRouter->GetPagePath(uri, ".js");
+    ASSERT_EQ(result, FIRST_JS);
+
+    uri = "second.js";
+    result = manifestRouter->GetPagePath(uri, ".js");
+    ASSERT_EQ(result, SECOND_JS);
+}
 } // namespace OHOS::Ace
