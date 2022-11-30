@@ -150,6 +150,8 @@ public:
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true);
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
+    void OnAreaChangedInner() override;
+    void OnVisibleChange(bool isVisible) override;
     void ClearEditingValue();
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
