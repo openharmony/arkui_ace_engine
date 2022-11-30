@@ -91,7 +91,7 @@ void ImagePattern::OnImageLoadSuccess()
         geometryNode->GetFrameSize().Height(), 1);
     imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
     // update src data
-    lastCanvasImage_ = loadingCtx_->GetCanvasImage();
+    lastCanvasImage_ = loadingCtx_->MoveCanvasImage();
     lastSrcRect_ = loadingCtx_->GetSrcRect();
     lastDstRect_ = loadingCtx_->GetDstRect();
     SetImagePaintConfig(lastCanvasImage_, lastSrcRect_, lastDstRect_, loadingCtx_->GetSourceInfo().IsSvg());
@@ -292,7 +292,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        pattern->lastAltCanvasImage_ = pattern->altLoadingCtx_->GetCanvasImage();
+        pattern->lastAltCanvasImage_ = pattern->altLoadingCtx_->MoveCanvasImage();
         pattern->lastAltSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
         pattern->lastAltDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
         pattern->SetImagePaintConfig(pattern->lastAltCanvasImage_, *pattern->lastAltSrcRect_, *pattern->lastAltDstRect_,
