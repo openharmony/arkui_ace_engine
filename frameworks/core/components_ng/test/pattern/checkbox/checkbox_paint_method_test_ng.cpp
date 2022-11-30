@@ -36,6 +36,8 @@ constexpr float SHAPE_SCALE_HALF = 0.5f;
 constexpr float SHAPE_SCALE = 1.0f;
 constexpr float COMPONENT_WIDTH = 200.0;
 constexpr float COMPONENT_HEIGHT = 210.0;
+constexpr float COMPONENT_WIDTH_INVALID = -1.0;
+constexpr float COMPONENT_HEIGHT_INVALID = -1.0;
 constexpr double DEFAULT_WIDTH = 100.0;
 constexpr double DEFAULT_HEIGHT = 110.0;
 constexpr Dimension DEFAULT_WIDTH_DIMENSION = Dimension(DEFAULT_WIDTH);
@@ -474,4 +476,117 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest005, TestSize.Lev
     EXPECT_EQ(size.value(), SizeF(length, length));
 }
 
+/**
+ * @tc.name: CheckBoxLayoutAlgorithmTest006
+ * @tc.desc: Verify that CheckBoxLayoutAlgorithm's MeasureContent can get contentSize
+             when Width and height are set in the front end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest006, TestSize.Level1)
+{
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<CheckboxTheme>()));
+
+    LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
+    CheckBoxLayoutAlgorithm checkBoxLayoutAlgorithm;
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH_INVALID);
+    layoutConstraintSize.selfIdealSize.SetHeight(COMPONENT_HEIGHT_INVALID);
+    auto size = checkBoxLayoutAlgorithm.MeasureContent(layoutConstraintSize, &layoutWrapper);
+    EXPECT_FALSE(size == std::nullopt);
+    EXPECT_EQ(size.value(), SizeF(0, 0));
+}
+
+/**
+ * @tc.name: CheckBoxLayoutAlgorithmTest007
+ * @tc.desc: Verify that CheckBoxLayoutAlgorithm's MeasureContent can get contentSize
+             when Width and height are set in the front end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest007, TestSize.Level1)
+{
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<CheckboxTheme>()));
+
+    LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
+    CheckBoxLayoutAlgorithm checkBoxLayoutAlgorithm;
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH_INVALID);
+    auto size = checkBoxLayoutAlgorithm.MeasureContent(layoutConstraintSize, &layoutWrapper);
+    EXPECT_FALSE(size == std::nullopt);
+    EXPECT_EQ(size.value(), SizeF(0, 0));
+}
+
+/**
+ * @tc.name: CheckBoxLayoutAlgorithmTest008
+ * @tc.desc: Verify that CheckBoxLayoutAlgorithm's MeasureContent can get contentSize
+             when Width and height are set in the front end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest008, TestSize.Level1)
+{
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<CheckboxTheme>()));
+
+    LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
+    CheckBoxLayoutAlgorithm checkBoxLayoutAlgorithm;
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.selfIdealSize.SetHeight(COMPONENT_HEIGHT_INVALID);
+    auto size = checkBoxLayoutAlgorithm.MeasureContent(layoutConstraintSize, &layoutWrapper);
+    EXPECT_FALSE(size == std::nullopt);
+    EXPECT_EQ(size.value(), SizeF(0, 0));
+}
+
+/**
+ * @tc.name: CheckBoxPaintMethodTest009
+ * @tc.desc: Test CheckBox PaintMethod DrawTouchBoard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest009, TestSize.Level1)
+{
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_TRUE(geometryNode != nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    EXPECT_TRUE(checkBoxPaintProperty != nullptr);
+    checkBoxPaintProperty->UpdateCheckBoxSelectedColor(ACTIVE_COLOR);
+    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+
+    CheckBoxPaintMethod checkBoxPaintMethod(false, true, false, 0.0, UIStatus::FOCUS);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillOnce(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(1);
+    checkBoxPaintMethod.PaintCheckBox(canvas, &paintWrapper);
+}
+
+/**
+ * @tc.name: CheckBoxPaintMethodTest010
+ * @tc.desc: Test CheckBox PaintMethod DrawTouchBoard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest010, TestSize.Level1)
+{
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_TRUE(geometryNode != nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    EXPECT_TRUE(checkBoxPaintProperty != nullptr);
+    checkBoxPaintProperty->UpdateCheckBoxSelectedColor(ACTIVE_COLOR);
+    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+
+    CheckBoxPaintMethod checkBoxPaintMethod(true, true, false, 0.0, UIStatus::FOCUS);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillOnce(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(1);
+    checkBoxPaintMethod.enabled_ = true;
+    checkBoxPaintMethod.PaintCheckBox(canvas, &paintWrapper);
+}
 } // namespace OHOS::Ace::NG
