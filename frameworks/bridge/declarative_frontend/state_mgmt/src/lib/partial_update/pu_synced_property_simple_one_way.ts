@@ -18,15 +18,14 @@
  * all definitions in this file are framework internal
  */
 
-class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<T> {
+class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<T>
+  implements ISinglePropertyChangeSubscriber<T>  {
 
   private wrappedValue_: T;
   private source_: ObservedPropertyAbstract<T>;
 
-  constructor(source: ObservedPropertyAbstract<T> | T, subscribeMe?: IPropertySubscriber, info?: PropertyInfo) {
-    super(subscribeMe, info);
-
-    // TODO: add a branch for T being object type
+  constructor(source: ObservedPropertyAbstract<T> | T, subscribeMe?: IPropertySubscriber, thisPropertyName?: PropertyInfo) {
+    super(subscribeMe, thisPropertyName);
 
     if (source && (typeof (source) === "object") && ("notifyHasChanged" in source) && ("subscribeMe" in source)) {
       // code path for @(Local)StorageProp
@@ -35,7 +34,7 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
       this.source_.subscribeMe(this);
     } else {
       // code path for @Prop
-      this.source_ = new ObservedPropertySimple<T>(source as T, this, info);
+      this.source_ = new ObservedPropertySimple<T>(source as T, this, thisPropertyName);
     }
 
     // use own backing store for value to avoid
@@ -49,16 +48,17 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
   */
   aboutToBeDeleted() {
     if (this.source_) {
-        this.source_.unlinkSuscriber(this.id__());
-        this.source_ = undefined;
+      this.source_.unlinkSuscriber(this.id__());
+      this.source_ = undefined;
     }
     super.aboutToBeDeleted();
   }
 
 
-  // this object is subscriber to  source
+  // implements  ISinglePropertyChangeSubscriber<T>:
+  // this object is subscriber to this.source_
   // when source notifies a change, copy its value to local backing store
-  hasChanged(newValue: T): void {
+  public hasChanged(newValue: T): void {
     stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`)
     this.wrappedValue_ = newValue;
     this.notifyHasChanged(newValue);
@@ -88,9 +88,10 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
     this.notifyHasChanged(newValue);
   }
 
-  public reset(sourceChangesValue: T): void {
-    stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: reset from '${this.wrappedValue_} to '${sourceChangesValue}'.`);
-    this.source_.set(sourceChangesValue);
+  public reset(sourceChangedValue: T): void {
+    stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: reset from '${this.wrappedValue_} to '${sourceChangedValue}'.`);
+    // if set causes an actual change, then, ObservedPropertySimple source_ will call hasChanged
+    this.source_.set(sourceChangedValue);
   }
 }
 
