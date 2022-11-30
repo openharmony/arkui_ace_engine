@@ -595,6 +595,15 @@ void SwiperPattern::StartAutoPlay()
     }
 }
 
+void SwiperPattern::OnVisibleChange(bool isVisible)
+{
+    if (isVisible) {
+        StartAutoPlay();
+    } else {
+        StopAutoPlay();
+    }
+}
+
 void SwiperPattern::UpdateCurrentOffset(float offset)
 {
     currentOffset_ = currentOffset_ + offset;

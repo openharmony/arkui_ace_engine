@@ -131,6 +131,8 @@ public:
     void ShowNext();
     void ShowPrevious();
 
+    void OnVisibleChange(bool isVisible) override;
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
