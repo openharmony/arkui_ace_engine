@@ -78,8 +78,7 @@ void GridPattern::OnModifyDone()
     CHECK_NULL_VOID(gridLayoutProperty);
     gridLayoutInfo_.axis_ = gridLayoutProperty->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
     isConfigScrollable_ = gridLayoutProperty->IsConfiguredScrollable();
-
-    if (gridLayoutProperty->GetColumnsTemplate().has_value() && gridLayoutProperty->GetRowsTemplate().has_value()) {
+    if (!isConfigScrollable_) {
         LOGD("use fixed grid template");
         return;
     }
