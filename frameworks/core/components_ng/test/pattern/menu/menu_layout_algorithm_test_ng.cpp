@@ -185,7 +185,7 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg009, TestSize.Level
     RefPtr<Pattern> pattern = AceType::MakeRefPtr<Pattern>();
     MenuView menuView;
     std::vector<SelectParam> params;
-    params.emplace_back("A","B");
+    params.emplace_back("A", "B");
     int32_t targetId = 1;
     auto frameNode = menuView.Create(params, targetId);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
