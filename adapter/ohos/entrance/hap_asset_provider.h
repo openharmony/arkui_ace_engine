@@ -25,7 +25,7 @@
 #include "core/common/flutter/flutter_asset_manager.h"
 
 #include "flutter/fml/mapping.h"
-#include "runtime_extractor.h"
+#include "extractor.h"
 
 namespace OHOS::Ace {
 
@@ -49,7 +49,7 @@ public:
 private:
     mutable std::mutex mutex_;
     std::string hapPath_;
-    std::shared_ptr<AbilityRuntime::RuntimeExtractor> runtimeExtractor_;
+    std::shared_ptr<AbilityBase::Extractor> runtimeExtractor_;
     std::vector<std::string> assetBasePaths_;
 };
 
