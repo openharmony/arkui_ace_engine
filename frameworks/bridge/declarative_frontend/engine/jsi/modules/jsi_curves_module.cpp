@@ -67,12 +67,12 @@ shared_ptr<JsValue> CurvesInitInternal(const shared_ptr<JsRuntime>& runtime, con
     }
 
     auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
+    int32_t pageId = -1;
     if (page == nullptr) {
-        LOGE("page is nullptr");
-        return runtime->NewNull();
+        LOGW("page is nullptr");
+    } else {
+        pageId = page->GetPageId();
     }
-
-    int32_t pageId = page->GetPageId();
     curveObj->SetProperty(runtime, "__pageId", runtime->NewInt32(pageId));
     return curveObj;
 }
@@ -220,11 +220,12 @@ shared_ptr<JsValue> ParseCurves(const shared_ptr<JsRuntime>& runtime, const shar
         return curveObj;
     }
     auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
+    int32_t pageId = -1;
     if (page == nullptr) {
-        LOGE("page is nullptr");
-        return runtime->NewNull();
+        LOGW("page is nullptr");
+    } else {
+        pageId = page->GetPageId();
     }
-    int32_t pageId = page->GetPageId();
     curveObj->SetProperty(runtime, "__pageId", runtime->NewInt32(pageId));
     return curveObj;
 }
