@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/thread/cancelable_callback.h"
+#include "base/utils/measure_util.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
 #include "frameworks/bridge/common/utils/pipeline_context_holder.h"
@@ -82,8 +83,7 @@ public:
     const std::string& GetVersionName() const override;
     int32_t GetVersionCode() const override;
 
-    double MeasureText(const std::string& text, double fontSize, int32_t fontStyle, const std::string& fontWeight,
-        const std::string& fontFamily, double letterSpacing) override;
+    double MeasureText(const MeasureContext& context) override;
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override {}
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,

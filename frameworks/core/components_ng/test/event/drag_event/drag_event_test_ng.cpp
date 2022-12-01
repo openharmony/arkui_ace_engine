@@ -153,7 +153,6 @@ HWTEST_F(DragEventTestNg, DragEventActuatorPropertyTest002, TestSize.Level1)
     EXPECT_EQ(dragEventActuator.GetDirection().type, DRAG_DIRECTION.type);
     EXPECT_EQ(dragEventActuator.fingers_, FINGERS_NUMBER);
     EXPECT_EQ(dragEventActuator.distance_, DISTANCE);
-
     /**
      * @tc.steps: step3. Create DragEvent and set as DragEventActuator's DragEvent and CustomDragEvent.
      * @tc.expected:  Get DragEventActuator's DragEvent and CustomDragEvent which are equal with the DragEvent create

@@ -78,7 +78,8 @@ LoadSuccessCallback ImageLoadingContext::GenerateLoadSuccessCallback()
 
 void ImageLoadingContext::OnLoadSuccess(const ImageSourceInfo& sourceInfo)
 {
-    RectF rect { 0, 0, GetSourceInfo().GetSourceSize().Width(), GetSourceInfo().GetSourceSize().Height() };
+    sourceInfo_ = sourceInfo;
+    RectF rect { 0, 0, sourceInfo_.GetSourceSize().Width(), sourceInfo_.GetSourceSize().Height() };
     dstRect_ = rect;
     srcRect_ = rect;
     if (loadNotifier_.dataReadyNotifyTask_) {
@@ -112,7 +113,7 @@ const RectF& ImageLoadingContext::GetSrcRect() const
     return srcRect_;
 }
 
-RefPtr<CanvasImage> ImageLoadingContext::GetCanvasImage() const
+RefPtr<CanvasImage> ImageLoadingContext::MoveCanvasImage()
 {
     return MakeRefPtr<MockCanvasImage>();
 }
@@ -121,7 +122,11 @@ void ImageLoadingContext::LoadImageData() {}
 
 void ImageLoadingContext::MakeCanvasImageIfNeed(const RefPtr<ImageLoadingContext>& loadingCtx, const SizeF& dstSize,
     bool incomingNeedResize, ImageFit incommingImageFit, const std::optional<SizeF>& sourceSize)
-{}
+{
+    loadingCtx->dstSize_ = dstSize;
+    loadingCtx->imageFit_ = incommingImageFit;
+    loadingCtx->needResize_ = incomingNeedResize;
+}
 
 void ImageLoadingContext::MakeCanvasImage(
     const SizeF& dstSize, bool needResize, ImageFit imageFit, const std::optional<SizeF>& sourceSize)

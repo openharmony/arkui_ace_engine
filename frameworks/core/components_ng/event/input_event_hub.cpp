@@ -16,6 +16,7 @@
 #include "core/components_ng/event/input_event_hub.h"
 
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/event/input_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -53,4 +54,15 @@ bool InputEventHub::ProcessAxisTestHit(const OffsetF& coordinateOffset, AxisTest
     }
     return false;
 }
+
+// register showMenu callback (always replace)
+void InputEventHub::BindContextMenu(OnMouseEventFunc&& showMenu)
+{
+    if (showMenu_) {
+        RemoveOnMouseEvent(showMenu_);
+    }
+    showMenu_ = MakeRefPtr<InputEvent>(std::move(showMenu));
+    AddOnMouseEvent(showMenu_);
+}
+
 } // namespace OHOS::Ace::NG

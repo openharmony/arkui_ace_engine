@@ -170,6 +170,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         MinusPaddingToSize(margin, layoutConstraint_->minSize);
         MinusPaddingToSize(margin, layoutConstraint_->percentReference);
         MinusPaddingToSize(margin, layoutConstraint_->selfIdealSize);
+        MinusPaddingToSize(margin, layoutConstraint_->parentIdealSize);
     }
     if (calcLayoutConstraint_) {
         if (calcLayoutConstraint_->maxSize.has_value()) {
@@ -238,9 +239,17 @@ void LayoutProperty::CheckAspectRatio()
     if (layoutConstraint_->selfIdealSize.Width()) {
         selfWidth = layoutConstraint_->selfIdealSize.Width().value();
         selfHeight = selfWidth.value() / aspectRatio;
+        if (selfHeight > maxHeight) {
+            selfHeight = maxHeight;
+            selfWidth = selfHeight.value() * aspectRatio;
+        }
     } else if (layoutConstraint_->selfIdealSize.Height()) {
         selfHeight = layoutConstraint_->selfIdealSize.Height().value();
         selfWidth = selfHeight.value() * aspectRatio;
+        if (selfWidth > maxWidth) {
+            selfWidth = maxWidth;
+            selfHeight = selfWidth.value() / aspectRatio;
+        }
     }
 
     if (selfHeight) {
@@ -254,7 +263,7 @@ void LayoutProperty::CheckAspectRatio()
 
 void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)
 {
-    CHECK_NULL_VOID(gridProperty_);
+    CHECK_NULL_VOID_NOLOG(gridProperty_);
     auto parent = host->GetAncestorNodeOfFrame();
     while (parent) {
         if (parent->GetTag() == V2::GRIDCONTAINER_ETS_TAG) {
@@ -282,7 +291,7 @@ void LayoutProperty::UpdateGridProperty(std::optional<int32_t> span, std::option
 
 bool LayoutProperty::UpdateGridOffset(const RefPtr<FrameNode>& host)
 {
-    CHECK_NULL_RETURN(gridProperty_, false);
+    CHECK_NULL_RETURN_NOLOG(gridProperty_, false);
     auto optOffset = gridProperty_->GetOffset();
     if (optOffset == UNDEFINED_DIMENSION) {
         return false;
@@ -307,7 +316,7 @@ bool LayoutProperty::UpdateGridOffset(const RefPtr<FrameNode>& host)
 void LayoutProperty::CheckSelfIdealSize()
 {
     if (measureType_ == MeasureType::MATCH_PARENT) {
-        layoutConstraint_->UpdateSelfMarginSizeWithCheck(layoutConstraint_->parentIdealSize);
+        layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(layoutConstraint_->parentIdealSize);
     }
     if (!calcLayoutConstraint_) {
         return;
@@ -448,10 +457,11 @@ RefPtr<FrameNode> LayoutProperty::GetHost() const
     return host_.Upgrade();
 }
 
-void LayoutProperty::OnVisibilityUpdate(VisibleType /* visible */) const
+void LayoutProperty::OnVisibilityUpdate(VisibleType visible) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    host->OnVisibleChange(visible == VisibleType::VISIBLE);
     auto parent = host->GetAncestorNodeOfFrame();
     if (parent) {
         parent->MarkNeedSyncRenderTree();

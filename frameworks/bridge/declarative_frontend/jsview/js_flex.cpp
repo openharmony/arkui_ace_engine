@@ -104,7 +104,10 @@ void JSFlex::JsHeight(const JSCallbackInfo& info)
 
 void JSFlex::SetHeight(const JSRef<JSVal>& jsValue)
 {
-    JSViewAbstract::JsHeight(jsValue);
+    if (!JSViewAbstract::JsHeight(jsValue)) {
+        // JsHeight return false, just return.
+        return;
+    }
     FlexModel::GetInstance()->SetHasHeight();
 }
 
@@ -120,7 +123,10 @@ void JSFlex::JsWidth(const JSCallbackInfo& info)
 
 void JSFlex::SetWidth(const JSRef<JSVal>& jsValue)
 {
-    JSViewAbstract::JsWidth(jsValue);
+    if (!JSViewAbstract::JsWidth(jsValue)) {
+        // JsWidth return false, just return.
+        return;
+    }
     FlexModel::GetInstance()->SetHasWidth();
 }
 

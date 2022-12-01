@@ -226,7 +226,7 @@ public:
     bool LoadPageSource(const std::string& url) override;
 
     bool LoadCard(const std::string& url, int64_t cardId) override;
-                 
+
     // Update running page
     void UpdateRunningPage(const RefPtr<JsAcePage>& page) override;
 

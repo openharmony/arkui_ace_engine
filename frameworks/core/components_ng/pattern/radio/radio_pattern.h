@@ -96,7 +96,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyle::OUTER_BORDER };
+        return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -127,10 +127,12 @@ private:
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
     void PlayAnimation(bool isOn);
+    void StopTranslateAnimation();
     void StopAnimation();
     void UpdateTotalScale(float scale);
     void UpdatePointScale(float scale);
     void UpdateUIStatus(bool check);
+    RectF GetHotZoneRect(bool isOriginal) const;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -147,6 +149,7 @@ private:
     float totalScale_ = 1.0f;
     float pointScale_ = 0.5f;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
+    Dimension hotZoneHorizontalPadding_ = 11.0_vp;
 
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };

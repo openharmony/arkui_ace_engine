@@ -59,6 +59,7 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
@@ -110,12 +111,6 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
     dirtyNodes_.emplace(dirtyNode);
     hasIdleTasks_ = true;
     window_->RequestFrame();
-}
-
-double PipelineContext::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
-    const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
-{
-    return 0.0;
 }
 
 void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
@@ -286,7 +281,9 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 
 void PipelineContext::FlushBuild()
 {
+    isRebuildFinished_ = false;
     FlushDirtyNodeUpdate();
+    isRebuildFinished_ = true;
     FlushBuildFinishCallbacks();
 }
 
@@ -529,7 +526,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
 {
     CHECK_RUN_ON(UI);
     float positionY = 0;
-    auto manager = DynamicCast<TextFieldManager>(PipelineBase::GetTextFieldManager());
+    auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
     float height = 0.0f;
     if (manager) {
         height = manager->GetHeight();
@@ -598,7 +595,7 @@ bool PipelineContext::OnBackPressed()
             }
         },
         TaskExecutor::TaskType::UI);
-    
+
     if (result) {
         // user accept
         LOGI("CallRouterBackToPopPage(): frontend accept");
@@ -659,6 +656,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         scalePoint.type);
     eventManager_->SetInstanceId(GetInstanceId());
     if (scalePoint.type == TouchType::DOWN) {
+        isNeedShowFocus_ = false;
+        auto rootFocusHub = rootNode_->GetFocusHub();
+        if (rootFocusHub) {
+            rootFocusHub->ClearAllFocusState();
+        }
+
         LOGD("receive touch down event, first use touch test to collect touch event target");
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
@@ -814,7 +817,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     LOGD(
         "MouseEvent (x,y): (%{public}f,%{public}f), button: %{public}d, action: %{public}d, pressedButtons: %{public}d",
-        scaleEvent.x, scaleEvent.y, scaleEvent.action, scaleEvent.button, scaleEvent.pressedButtons);
+        scaleEvent.x, scaleEvent.y, scaleEvent.button, scaleEvent.action, scaleEvent.pressedButtons);
     eventManager_->MouseTest(scaleEvent, rootNode_);
     eventManager_->DispatchMouseEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverEventNG(scaleEvent);
@@ -830,7 +833,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         isNeedShowFocus_ = true;
         auto rootFocusHub = rootNode_->GetFocusHub();
         if (rootFocusHub) {
-            rootFocusHub->PaintFocusState();
+            rootFocusHub->PaintAllFocusState();
         }
         return true;
     }
@@ -1079,6 +1082,21 @@ void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
     containerNode->GetPattern<ContainerModalPattern>()->SetAppIcon(icon);
+}
+
+void PipelineContext::FlushReload()
+{
+    LOGI("PipelineContext::FlushReload.");
+    AnimationOption option;
+    const int32_t duration = 400;
+    option.SetDuration(duration);
+    option.SetCurve(Curves::FRICTION);
+    AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->stageManager_->ReloadStage();
+        pipeline->FlushUITasks();
+    });
 }
 
 void PipelineContext::Destroy()

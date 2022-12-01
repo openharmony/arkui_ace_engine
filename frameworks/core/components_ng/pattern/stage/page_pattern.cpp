@@ -52,6 +52,12 @@ void PagePattern::OnAttachToFrameNode()
 
 bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*wrapper*/, const DirtySwapConfig& /*config*/)
 {
+    if (isFirstLoad_) {
+        isFirstLoad_ = false;
+        if (firstBuildCallback_) {
+            firstBuildCallback_();
+        }
+    }
     return false;
 }
 
@@ -72,6 +78,7 @@ void PagePattern::ProcessHideState()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetActive(false);
+    host->OnVisibleChange(false);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
@@ -83,6 +90,7 @@ void PagePattern::ProcessShowState()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetActive(true);
+    host->OnVisibleChange(true);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
@@ -123,6 +131,15 @@ void PagePattern::BuildSharedTransitionMap()
     CHECK_NULL_VOID(host);
     sharedTransitionMap_.clear();
     IterativeAddToSharedMap(host, sharedTransitionMap_);
+}
+
+void PagePattern::ReloadPage()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto customNode = DynamicCast<CustomNodeBase>(host->GetFirstChild());
+    CHECK_NULL_VOID(customNode);
+    customNode->FireReloadFunction(true);
 }
 
 RefPtr<PageTransitionEffect> PagePattern::FindPageTransitionEffect(PageTransitionType type)
@@ -173,6 +190,15 @@ RefPtr<Framework::AnimatorInfo> PagePattern::GetJsAnimator(const std::string& an
         return iter->second;
     }
     return nullptr;
+}
+
+void PagePattern::SetFirstBuildCallback(std::function<void()>&& buildCallback)
+{
+    if (isFirstLoad_) {
+        firstBuildCallback_ = std::move(buildCallback);
+    } else if (buildCallback) {
+        buildCallback();
+    }
 }
 
 } // namespace OHOS::Ace::NG

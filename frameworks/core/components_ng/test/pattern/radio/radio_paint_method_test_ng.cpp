@@ -35,8 +35,11 @@ const OffsetF CONTENT_OFFSET = OffsetF(50.0, 60.0);
 constexpr bool CHECKED = true;
 constexpr float POINT_SCALE = 0.5f;
 constexpr float POINT_SCALE_INVALID = 1.0f;
+constexpr float POINT_SCALE_INVALID_0 = 0.0f;
 constexpr float COMPONENT_WIDTH = 200.0;
 constexpr float COMPONENT_HEIGHT = 210.0;
+constexpr float COMPONENT_WIDTH_INVALID = -1.0;
+constexpr float COMPONENT_HEIGHT_INVALID = -1.0;
 constexpr double DEFAULT_WIDTH = 100.0;
 constexpr double DEFAULT_HEIGHT = 110.0;
 constexpr Dimension DEFAULT_WIDTH_DIMENSION = Dimension(DEFAULT_WIDTH);
@@ -353,5 +356,84 @@ HWTEST_F(RadioPaintMethodTestNg, RadioLayoutAlgorithmTest005, TestSize.Level1)
     auto length = std::min(radioLayoutAlgorithm.defaultWidth_ - 2 * radioLayoutAlgorithm.horizontalPadding_,
         radioLayoutAlgorithm.defaultHeight_ - 2 * radioLayoutAlgorithm.verticalPadding_);
     EXPECT_EQ(size.value(), SizeF(length, length));
+}
+
+/**
+ * @tc.name: RadioLayoutAlgorithmTest006
+ * @tc.desc: Verify that RadioLayoutAlgorithm's MeasureContent can get contentSize
+             when Width and height are set in the front end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPaintMethodTestNg, RadioLayoutAlgorithmTest006, TestSize.Level1)
+{
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
+    LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH_INVALID);
+    layoutConstraintSize.selfIdealSize.SetHeight(COMPONENT_HEIGHT_INVALID);
+    auto size = radioLayoutAlgorithm.MeasureContent(layoutConstraintSize, &layoutWrapper);
+    EXPECT_FALSE(size == std::nullopt);
+    EXPECT_EQ(size.value(), SizeF(0, 0));
+}
+
+/**
+ * @tc.name: RadioLayoutAlgorithmTest007
+ * @tc.desc: Verify that RadioLayoutAlgorithm's MeasureContent can get contentSize
+             when The front end only sets width.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPaintMethodTestNg, RadioLayoutAlgorithmTest007, TestSize.Level1)
+{
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
+    LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH_INVALID);
+    auto size = radioLayoutAlgorithm.MeasureContent(layoutConstraintSize, &layoutWrapper);
+    EXPECT_FALSE(size == std::nullopt);
+    EXPECT_EQ(size.value(), SizeF(0, 0));
+}
+
+/**
+ * @tc.name: RadioLayoutAlgorithmTest008
+ * @tc.desc: Verify that RadioLayoutAlgorithm's MeasureContent can get contentSize
+             when The front end only sets height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPaintMethodTestNg, RadioLayoutAlgorithmTest008, TestSize.Level1)
+{
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
+    LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.selfIdealSize.SetHeight(COMPONENT_HEIGHT_INVALID);
+    auto size = radioLayoutAlgorithm.MeasureContent(layoutConstraintSize, &layoutWrapper);
+    EXPECT_FALSE(size == std::nullopt);
+    EXPECT_EQ(size.value(), SizeF(0, 0));
+}
+
+/**
+ * @tc.name: RadioPaintMethodTest009
+ * @tc.desc: Test Radio PaintMethod will paintRadio when UIStatus is SELECTED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPaintMethodTestNg, RadioPaintMethodTest009, TestSize.Level1)
+{
+    RadioPaintMethod radioPaintMethod(true, false, false, 0.0, POINT_SCALE_INVALID_0, UIStatus::SELECTED);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(4));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    radioPaintMethod.PaintRadio(canvas, false, CONTENT_SIZE, CONTENT_OFFSET);
 }
 } // namespace OHOS::Ace::NG

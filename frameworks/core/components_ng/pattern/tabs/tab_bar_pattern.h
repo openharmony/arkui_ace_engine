@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_method.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
+#include "core/event/mouse_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -163,6 +164,13 @@ private:
     void InitClick(const RefPtr<GestureEventHub>& gestureHub);
     void InitScrollable(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouch(const RefPtr<GestureEventHub>& gestureHub);
+    void InitHoverEvent();
+    void InitMouseEvent();
+
+    void HandleMouseEvent(const MouseInfo& info);
+    void HandleHoverEvent(bool isHover);
+    void HandleHoverOnEvent(int32_t index);
+    void HandleMoveAway(int32_t index);
     void HandleClick(const GestureEvent& info);
     void HandleTouchEvent(const TouchLocationInfo& info);
 
@@ -175,6 +183,8 @@ private:
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ScrollableEvent> scrollableEvent_;
+    RefPtr<InputEvent> mouseEvent_;
+    RefPtr<InputEvent> hoverEvent_;
     RefPtr<SwiperController> swiperController_;
 
     float currentOffset_ = 0.0f;
@@ -188,8 +198,10 @@ private:
     bool isRTL_ = false; // TODO Adapt RTL.
 
     bool touching_ = false; // whether the item is in touching
+    bool isHover_ = false;
     float hoverOpacity_ = 0.0;
     int32_t touchingIndex_ = 0;
+    std::optional<int32_t> hoverIndex_;
 };
 } // namespace OHOS::Ace::NG
 

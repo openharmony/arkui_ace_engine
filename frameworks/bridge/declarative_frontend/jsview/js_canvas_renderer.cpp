@@ -2422,16 +2422,22 @@ void JSCanvasRenderer::JsClearRect(const JSCallbackInfo& info)
         Rect rect = Rect(x, y, width, height);
 
         if (Container::IsCurrentUseNewPipeline()) {
-            if (isOffscreen_) {
+            if (isOffscreen_ && offscreenCanvasPattern_) {
                 offscreenCanvasPattern_->ClearRect(rect);
-            } else {
+                return;
+            }
+            if (!isOffscreen_ && customPaintPattern_) {
                 customPaintPattern_->ClearRect(rect);
+                return;
             }
         } else {
-            if (isOffscreen_) {
+            if (isOffscreen_ && offscreenCanvas_) {
                 offscreenCanvas_->ClearRect(rect);
-            } else {
+                return;
+            }
+            if (!isOffscreen_ && pool_) {
                 pool_->ClearRect(rect);
+                return;
             }
         }
     }

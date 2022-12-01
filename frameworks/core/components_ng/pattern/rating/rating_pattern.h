@@ -28,16 +28,16 @@
 
 namespace OHOS::Ace::NG {
 
-#define ACE_DEFINE_RATING_GET_PROPERTY_FROM_THEME(name, type)            \
-    static std::optional<type> Get##name##FromTheme()                    \
-    {                                                                    \
-        do {                                                             \
-            auto pipelineContext = PipelineContext::GetCurrentContext(); \
-            CHECK_NULL_RETURN(pipelineContext, std::nullopt);            \
-            auto ratingTheme = pipelineContext->GetTheme<RatingTheme>(); \
-            CHECK_NULL_RETURN(ratingTheme, std::nullopt);                \
-            return ratingTheme->Get##name();                             \
-        } while (false);                                                 \
+#define ACE_DEFINE_RATING_GET_PROPERTY_FROM_THEME(name, type)     \
+    static std::optional<type> Get##name##FromTheme()             \
+    {                                                             \
+        do {                                                      \
+            auto pipeline = PipelineBase::GetCurrentContext();    \
+            CHECK_NULL_RETURN(pipeline, std::nullopt);            \
+            auto ratingTheme = pipeline->GetTheme<RatingTheme>(); \
+            CHECK_NULL_RETURN(ratingTheme, std::nullopt);         \
+            return ratingTheme->Get##name();                      \
+        } while (false);                                          \
     }
 
 class RatingPattern : public Pattern {
@@ -79,7 +79,16 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyle::INNER_BORDER };
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, FocusPattern());
+        auto ratingTheme = pipeline->GetTheme<RatingTheme>();
+        CHECK_NULL_RETURN(ratingTheme, FocusPattern());
+        auto focusWidth = ratingTheme->GetFocusBorderWidth();
+
+        FocusPaintParam focusPaintParams;
+        focusPaintParams.SetPaintWidth(focusWidth);
+
+        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
 private:
@@ -104,6 +113,8 @@ private:
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+    void PaintFocusState(double ratingScore);
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
 
     // Init mouse event
     void InitMouseEvent();

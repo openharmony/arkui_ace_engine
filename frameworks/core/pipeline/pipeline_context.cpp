@@ -264,13 +264,6 @@ void PipelineContext::FlushPredictLayout(int64_t deadline)
     }
 }
 
-double PipelineContext::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
-    const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
-{
-    return OHOS::Ace::RenderCustomPaint::PaintMeasureText(text, fontSize, fontStyle,
-        fontWeight, fontFamily, letterSpacing);
-}
-
 void PipelineContext::FlushFocus()
 {
     CHECK_RUN_ON(UI);
@@ -1813,7 +1806,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     LOGD(
         "MouseEvent (x,y): (%{public}f,%{public}f), button: %{public}d, action: %{public}d, pressedButtons: %{public}d",
-        scaleEvent.x, scaleEvent.y, scaleEvent.action, scaleEvent.button, scaleEvent.pressedButtons);
+        scaleEvent.x, scaleEvent.y, scaleEvent.button, scaleEvent.action, scaleEvent.pressedButtons);
     if (event.action == MouseAction::PRESS && event.button != MouseButton::LEFT_BUTTON) {
         eventManager_->HandleOutOfRectCallback(
             { scaleEvent.x, scaleEvent.y, scaleEvent.sourceType }, rectCallbackList_);

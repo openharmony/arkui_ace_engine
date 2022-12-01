@@ -107,8 +107,7 @@ SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, Meas
  * @param measureType the measure info.
  * @return SizeF the node size info.
  */
-OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType,
-    const MarginPropertyF& margin = MarginPropertyF());
+OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType);
 
 /**
  * @brief Create max size for children which is parent's max size minus margin and padding.

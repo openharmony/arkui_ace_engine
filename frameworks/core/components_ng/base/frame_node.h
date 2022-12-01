@@ -285,6 +285,8 @@ public:
     void OnDetachFromMainTree() override;
     void OnAttachToMainTree() override;
 
+    void OnVisibleChange(bool isVisible) override;
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;

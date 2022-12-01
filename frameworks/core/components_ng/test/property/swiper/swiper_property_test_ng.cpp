@@ -72,8 +72,8 @@ const std::vector<Dimension> SWIPER_PAINT_PROPERTY_ITEM_SPACE = { SWIPER_PAINT_P
                                                                   SWIPER_PAINT_PROPERTY_ITEM_SPACE_2,
                                                                   SWIPER_PAINT_PROPERTY_ITEM_SPACE_3 };
                                                                 
-const std::vector<int32_t> SWIPER_PAINT_PROPERTY_CACHED_COUNT = { -2, 1, 5, 10 };
-const std::vector<int32_t> SWIPER_PAINT_PROPERTY_DISPLAY_COUNT = { -2, 0, 2, 10 };
+const std::vector<int32_t> SWIPER_PAINT_PROPERTY_CACHED_COUNT = { 2, 1, 5, 10 };
+const std::vector<int32_t> SWIPER_PAINT_PROPERTY_DISPLAY_COUNT = { 2, 5, 3, 10 };
 const bool SWIPER_LAYOUT_PROPERTY_SHOW_DISABLE_SWIPE = true;
 
 const std::vector<Axis> SWIPER_PAINT_PROPERTY_DIRECTION = { Axis::HORIZONTAL,

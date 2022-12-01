@@ -140,7 +140,7 @@ void BackendDelegateImpl::LoadPa(const std::string& url, const OHOS::AAFwk::Want
         taskExecutor_->PostTask(
             [weak = AceType::WeakClaim(this), url, want] {
                 auto delegate = weak.Upgrade();
-                CHECK_NULL_VOID(delegate);
+                CHECK_NULL_VOID_NOLOG(delegate);
                 delegate->loadJs_(url, want);
             },
             TaskExecutor::TaskType::JS);
@@ -295,7 +295,7 @@ void BackendDelegateImpl::OnApplicationCommand(const std::string& intent, int st
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), intent, startId] {
             auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID_NOLOG(delegate);
             delegate->commandApplication_(intent, startId);
         },
         TaskExecutor::TaskType::JS);

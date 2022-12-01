@@ -38,6 +38,20 @@
         }                                                               \
     } while (0)
 
+#define CHECK_NULL_VOID_NOLOG(ptr) \
+    do {                           \
+        if (!(ptr)) {              \
+            return;                \
+        }                          \
+    } while (0)                    \
+
+#define CHECK_NULL_RETURN_NOLOG(ptr, ret) \
+    do {                                  \
+        if (!(ptr)) {                     \
+            return ret;                   \
+        }                                 \
+    } while (0)                           \
+
 #define PRIMITIVE_CAT(x, y) x##y
 #define CAT(x, y) PRIMITIVE_CAT(x, y)
 

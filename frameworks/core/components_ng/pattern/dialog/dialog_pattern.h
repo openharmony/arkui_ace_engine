@@ -80,9 +80,8 @@ public:
 
 private:
     void OnModifyDone() override;
-    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleTouchEvent(const TouchEventInfo& info);
-    void HandleTouchUp(const Offset& clickPosition);
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleClick(const GestureEvent& info);
     void PopDialog(int32_t buttonIdx);
 
     // set render context properties of content frame

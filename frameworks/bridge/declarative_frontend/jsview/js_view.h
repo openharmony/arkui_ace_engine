@@ -127,6 +127,7 @@ public:
 protected:
     RefPtr<ViewFunctions> jsViewFunction_;
     bool needsUpdate_ = false;
+    bool isAboutToAppearProcessed_ = false;
 
     WeakPtr<AceType> viewNode_;
     // view id for custom view itself
@@ -240,6 +241,12 @@ private:
     // a set of valid view ids on a render function execution
     // its cleared after cleaning up the abandoned child.
     std::unordered_set<std::string> lastAccessedViewIds_;
+
+    // The C++ JSView object owns a reference to the JS Object
+    // AssignNewView assigns the JS View
+    // Destroy deleted the ref, and thereby triggers the deletion
+    // GC -> JS View Object -> JSView C++ Object
+    JSRef<JSObject> jsViewObject_;
 };
 
 class JSViewPartialUpdate : public JSView {

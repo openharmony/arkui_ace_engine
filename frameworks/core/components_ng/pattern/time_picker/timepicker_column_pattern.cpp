@@ -33,7 +33,6 @@ namespace {
 constexpr Dimension PADDING_WEIGHT = 10.0_vp;
 const Dimension FONT_SIZE = Dimension(2.0);
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
-const int32_t DIVIDER_SIZE = 2;
 const int32_t CHILD_SIZE = 3;
 const float TEXT_HEIGHT_NUMBER = 3.0f;
 const float TEXT_HOUR24_HEIGHT_NUMBER = 9.0f;
@@ -65,7 +64,7 @@ void TimePickerColumnPattern::OnModifyDone()
 {
     auto host = GetHost();
     auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID_NOLOG(focusHub);
     InitOnKeyEvent(focusHub);
 }
 
@@ -143,16 +142,19 @@ void TimePickerColumnPattern::ChangeAmPmTextStyle(
         textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
         textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateFontSize(selectedOptionSize);
-        textLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(
-            CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE), CalcLength(pickerTheme->GetDividerSpacing())));
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
     }
-    if (index != selectedIndex && showOptionCount == CHILD_SIZE) {
+    if (index == 0 && showOptionCount == CHILD_SIZE) {
         textLayoutProperty->UpdateFontSize(normalOptionSize);
         textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
-        textLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(
-            CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE), CalcLength(pickerTheme->GetGradientHeight())));
+        textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
+    }
+    if (index == showOptionCount - 1 && showOptionCount == CHILD_SIZE) {
+        textLayoutProperty->UpdateFontSize(normalOptionSize);
+        textLayoutProperty->UpdateMaxLines(1);
+        textLayoutProperty->UpdateAlignment(Alignment::CENTER);
+        textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
     }
 }
 
@@ -174,16 +176,12 @@ void TimePickerColumnPattern::ChangeTextStyle(
             textLayoutProperty->UpdateFontSize(focusOptionSize);
         }
         textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(
-            CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE), CalcLength(pickerTheme->GetGradientHeight())));
         textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
     }
     if (index == selectedIndex && showOptionCount != CHILD_SIZE) {
         textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
         textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateFontSize(selectedOptionSize);
-        textLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(
-            CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE), CalcLength(pickerTheme->GetDividerSpacing())));
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
     }
     if (index > selectedIndex && showOptionCount != CHILD_SIZE) {
@@ -193,8 +191,6 @@ void TimePickerColumnPattern::ChangeTextStyle(
             textLayoutProperty->UpdateFontSize(focusOptionSize);
         }
         textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(
-            CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE), CalcLength(pickerTheme->GetGradientHeight())));
         textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
     }
 }
@@ -207,18 +203,18 @@ void TimePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         LOGI("Pan event start");
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleDragStart(event);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleDragMove(event);
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         if (info.GetInputEventType() == InputEventType::AXIS) {
             return;
         }
@@ -227,7 +223,7 @@ void TimePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         LOGI("Pan event cancel");
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleDragEnd();
     };
     PanDirection panDirection;
@@ -355,7 +351,7 @@ void TimePickerColumnPattern::UpdateScrollDelta(double delta)
     SetCurrentOffset(delta);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void TimePickerColumnPattern::UpdateToss(double offsetY)
@@ -468,7 +464,7 @@ void TimePickerColumnPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_RETURN(pattern, false);
+        CHECK_NULL_RETURN_NOLOG(pattern, false);
         return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));

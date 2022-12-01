@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint8_t ENABLED_ALPHA = 255;
 constexpr uint8_t DISABLED_ALPHA = 102;
-const Color TRANSPARENT_COLOR = Color(0x00000000);
+constexpr Dimension INNER_PADDING = 2.0_vp;
 } // namespace
 
 CanvasDrawFunction RadioPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
@@ -72,15 +72,21 @@ void RadioPaintMethod::InitializeParam()
 void RadioPaintMethod::PaintRadio(
     RSCanvas& canvas, bool /* checked */, const SizeF& contentSize, const OffsetF& offset) const
 {
+    OffsetF paintOffset = offset;
+    if (isTouch_ || isHover_) {
+        paintOffset.SetX(offset.GetX() + hotZoneHorizontalPadding_.ConvertToPx());
+        paintOffset.SetY(offset.GetY() + hotZoneHorizontalPadding_.ConvertToPx());
+    }
     if (isTouch_) {
-        DrawTouchBoard(canvas, contentSize, offset);
+        DrawTouchBoard(canvas, contentSize, paintOffset);
     }
     if (isHover_) {
-        DrawHoverBoard(canvas, contentSize, offset);
+        DrawHoverBoard(canvas, contentSize, paintOffset);
     }
-    float outCircleRadius = contentSize.Width() / 2;
-    float centerX = outCircleRadius + offset.GetX();
-    float centerY = outCircleRadius + offset.GetY();
+
+    float outCircleRadius = contentSize.Width() / 2 - INNER_PADDING.ConvertToPx();
+    float centerX = outCircleRadius + paintOffset.GetX() + INNER_PADDING.ConvertToPx();
+    float centerY = outCircleRadius + paintOffset.GetY() + INNER_PADDING.ConvertToPx();
     if (uiStatus_ == UIStatus::SELECTED) {
         // draw stroke border
         RSPen pen;
@@ -113,7 +119,7 @@ void RadioPaintMethod::PaintRadio(
     } else if (uiStatus_ == UIStatus::UNSELECTED) {
         RSPen pen;
         RSBrush brush;
-        brush.SetColor(ToRSColor(TRANSPARENT_COLOR));
+        brush.SetColor(ToRSColor(Color::TRANSPARENT));
         brush.SetAntiAlias(true);
         canvas.AttachBrush(brush);
         canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius - borderWidth_ / 2.0);

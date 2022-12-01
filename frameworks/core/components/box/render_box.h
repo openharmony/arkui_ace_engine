@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_RENDER_BOX_H
 
 #include "base/image/pixel_map.h"
-#include "base/window/drag_window.h"
 #include "core/animation/animator.h"
 #include "core/animation/keyframe_animation.h"
 #include "core/components/box/box_component.h"
@@ -26,10 +25,10 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/image/render_image.h"
-#include "core/event/axis_event.h"
 #include "core/gestures/click_recognizer.h"
-#include "core/gestures/pan_recognizer.h"
+#include "core/event/axis_event.h"
 #include "core/gestures/raw_recognizer.h"
+#include "base/window/drag_window.h"
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
@@ -272,7 +271,6 @@ private:
     RefPtr<GestureRecognizer> onLongPress_;
     RefPtr<GestureRecognizer> parallelRecognizer_;
     RefPtr<RawRecognizer> touchRecognizer_;
-    RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<StateAttributes<BoxStateAttribute>> stateAttributeList_;
     OnHoverCallback onHover_;
     OnMouseCallback onMouse_;

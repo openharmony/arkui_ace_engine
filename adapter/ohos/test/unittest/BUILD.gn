@@ -17,5 +17,8 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 group("unittest") {
   testonly = true
   deps = []
-  deps += [ "osal:unittest" ]
+  deps += [
+    "entrance:unittest",
+    "osal:unittest",
+  ]
 }

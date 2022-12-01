@@ -102,7 +102,7 @@ void EventManager::TouchTest(
     // collect
     const NG::PointF point { event.x, event.y };
     // For root node, the parent local point is the same as global point.
-    frameNode->TouchTest(point, point, touchRestrict, axisTouchTestResult_, -1);
+    frameNode->TouchTest(point, point, touchRestrict, axisTouchTestResult_, event.id);
 }
 
 void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<TextOverlayManager>& textOverlayManager)
@@ -280,6 +280,15 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
 {
     ContainerScope scope(instanceId_);
 
+    if (event.action == AxisAction::BEGIN) {
+        // first collect gesture into gesture referee.
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (refereeNG_) {
+                refereeNG_->AddGestureToScope(event.id, axisTouchTestResult_);
+            }
+        }
+    }
+
     ACE_FUNCTION_TRACE();
     for (const auto& entry : axisTouchTestResult_) {
         if (!entry->HandleEvent(event)) {
@@ -287,7 +296,12 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
         }
     }
     if (event.action == AxisAction::END || event.action == AxisAction::NONE) {
-        axisTouchTestResult_.clear();
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (refereeNG_) {
+                refereeNG_->CleanGestureScope(event.id);
+            }
+            axisTouchTestResult_.clear();
+        }
     }
     return true;
 }

@@ -551,12 +551,13 @@ public:
         handler_ = eventInfo.GetWebWindowNewHandler();
     }
 
-    static RefPtr<WebController> PopController(int32_t id)
+    static JSRef<JSObject> PopController(int32_t id)
     {
+        LOGI("PopController");
         auto iter = controller_map_.find(id);
         if (iter == controller_map_.end()) {
             LOGI("JSWebWindowNewHandler not find web controller");
-            return nullptr;
+            return JSRef<JSVal>::Make();
         }
         auto controller = iter->second;
         controller_map_.erase(iter);
@@ -571,12 +572,8 @@ public:
             return;
         }
         if (handler_) {
-            auto paramObject = JSRef<JSObject>::Cast(args[0]);
-            auto controller = paramObject->Unwrap<JSWebController>();
-            if (controller) {
-                controller_map_.insert(
-                    std::pair<int32_t, RefPtr<WebController>>(handler_->GetId(), controller->GetController()));
-            }
+            auto controller = JSRef<JSObject>::Cast(args[0]);
+            controller_map_.insert(std::pair<int32_t, JSRef<JSObject>>(handler_->GetId(), controller));
         }
     }
 
@@ -596,9 +593,9 @@ private:
     }
 
     RefPtr<WebWindowNewHandler> handler_;
-    static std::unordered_map<int32_t, RefPtr<WebController>> controller_map_;
+    static std::unordered_map<int32_t, JSRef<JSObject>> controller_map_;
 };
-std::unordered_map<int32_t, RefPtr<WebController>> JSWebWindowNewHandler::controller_map_;
+std::unordered_map<int32_t, JSRef<JSObject>> JSWebWindowNewHandler::controller_map_;
 
 class JSWebResourceError : public Referenced {
 public:
@@ -3537,14 +3534,21 @@ JSRef<JSVal> WindowNewEventToJSValue(const WebWindowNewEvent& eventInfo)
 
 bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo)
 {
+    LOGI("HandleWindowNewEvent");
     if (eventInfo == nullptr) {
+        LOGE("EventInfo is nullptr");
         return false;
     }
     auto handler = eventInfo->GetWebWindowNewHandler();
     if (handler && !handler->IsFrist()) {
         auto controller = JSWebWindowNewHandler::PopController(handler->GetId());
-        if (controller) {
-            handler->SetWebController(controller->GetWebId());
+        if (!controller.IsEmpty()) {
+            auto getWebIdFunction = controller->GetProperty("innerGetWebId");
+            if (getWebIdFunction->IsFunction()) {
+                auto func = JSRef<JSFunc>::Cast(getWebIdFunction);
+                auto webId = func->Call(controller, 0, {});
+                handler->SetWebController(webId->ToNumber<int32_t>());
+            }
         }
         return false;
     }

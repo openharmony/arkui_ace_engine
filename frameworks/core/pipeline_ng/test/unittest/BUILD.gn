@@ -1,0 +1,364 @@
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+
+if (is_standard_system) {
+  module_output_path = "ace_engine/graphicalbasicability/pipeline_ng"
+} else {
+  module_output_path = "ace_engine_full/graphicalbasicability/pipeline_ng"
+}
+
+ohos_unittest("pipeline_ng_test") {
+  module_out_path = module_output_path
+
+  sources = [
+    # animation
+    "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
+    "$ace_root/frameworks/core/animation/cubic_curve.cpp",
+    "$ace_root/frameworks/core/animation/curves.cpp",
+    "$ace_root/frameworks/core/animation/friction_motion.cpp",
+    "$ace_root/frameworks/core/animation/property_animation.cpp",
+    "$ace_root/frameworks/core/animation/scroll_motion.cpp",
+
+    # accessibility
+    "$ace_root/frameworks/core/accessibility/accessibility_node.cpp",
+
+    # animation
+    "$ace_root/frameworks/core/animation/animatable_data.cpp",
+    "$ace_root/frameworks/core/animation/animatable_properties.cpp",
+    "$ace_root/frameworks/core/animation/scheduler.cpp",
+    "$ace_root/frameworks/core/animation/spring_model.cpp",
+    "$ace_root/frameworks/core/animation/spring_motion.cpp",
+
+    #base
+    "$ace_root/adapter/ohos/osal/frame_trace_adapter_impl.cpp",
+    "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/adapter/ohos/osal/ressched_report.cpp",
+    "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
+    "$ace_root/frameworks/base/geometry/animatable_matrix4.cpp",
+    "$ace_root/frameworks/base/geometry/dimension.cpp",
+    "$ace_root/frameworks/base/geometry/least_square_impl.cpp",
+    "$ace_root/frameworks/base/geometry/matrix3.cpp",
+    "$ace_root/frameworks/base/geometry/matrix4.cpp",
+    "$ace_root/frameworks/base/geometry/quaternion.cpp",
+    "$ace_root/frameworks/base/geometry/transform_util.cpp",
+    "$ace_root/frameworks/base/json/json_util.cpp",
+    "$ace_root/frameworks/base/log/ace_tracker.cpp",
+    "$ace_root/frameworks/base/log/dump_log.cpp",
+    "$ace_root/frameworks/base/memory/memory_monitor.cpp",
+    "$ace_root/frameworks/base/ressched/ressched_report.cpp",
+    "$ace_root/frameworks/base/thread/background_task_executor.cpp",
+    "$ace_root/frameworks/base/utils/base_id.cpp",
+    "$ace_root/frameworks/base/utils/string_expression.cpp",
+    "$ace_root/frameworks/base/utils/time_util.cpp",
+
+    # common
+    "$ace_root/frameworks/core/common/ace_application_info.cpp",
+    "$ace_root/frameworks/core/common/ace_engine.cpp",
+    "$ace_root/frameworks/core/common/clipboard/clipboard_proxy.cpp",
+    "$ace_root/frameworks/core/common/container.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/common/event_manager.cpp",
+    "$ace_root/frameworks/core/common/flutter/flutter_task_executor.cpp",
+    "$ace_root/frameworks/core/common/focus_animation_manager.cpp",
+    "$ace_root/frameworks/core/common/font_manager.cpp",
+    "$ace_root/frameworks/core/common/text_field_manager.cpp",
+    "$ace_root/frameworks/core/common/thread_checker.cpp",
+    "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
+    "$ace_root/frameworks/core/common/window.cpp",
+
+    # components
+    "$ace_root/frameworks/core/components/box/box_component.cpp",
+    "$ace_root/frameworks/core/components/display/display_component.cpp",
+    "$ace_root/frameworks/core/components/overlay/overlay_component.cpp",
+    "$ace_root/frameworks/core/components/page/page_component.cpp",
+    "$ace_root/frameworks/core/components/root/root_component.cpp",
+    "$ace_root/frameworks/core/components/transform/transform_component.cpp",
+    "$ace_root/frameworks/core/components/tween/tween_component.cpp",
+    "$ace_root/frameworks/core/pipeline/base/component.cpp",
+    "$ace_root/frameworks/core/pipeline/base/composed_component.cpp",
+
+    # elements
+    "$ace_root/frameworks/core/components/box/box_element.cpp",
+    "$ace_root/frameworks/core/components/bubble/bubble_element.cpp",
+    "$ace_root/frameworks/core/components/display/display_element.cpp",
+    "$ace_root/frameworks/core/components/flex/flex_element.cpp",
+    "$ace_root/frameworks/core/components/page/page_element.cpp",
+    "$ace_root/frameworks/core/components/page_transition/page_transition_component.cpp",
+    "$ace_root/frameworks/core/components/page_transition/page_transition_element.cpp",
+    "$ace_root/frameworks/core/components/root/root_element.cpp",
+    "$ace_root/frameworks/core/components/stack/stack_element.cpp",
+    "$ace_root/frameworks/core/components/stage/stage_element.cpp",
+    "$ace_root/frameworks/core/components/transition/transition_element.cpp",
+    "$ace_root/frameworks/core/components/tween/tween_element.cpp",
+    "$ace_root/frameworks/core/pipeline/base/component_group_element.cpp",
+    "$ace_root/frameworks/core/pipeline/base/composed_element.cpp",
+    "$ace_root/frameworks/core/pipeline/base/element.cpp",
+    "$ace_root/frameworks/core/pipeline/base/render_element.cpp",
+    "$ace_root/frameworks/core/pipeline/base/sole_child_element.cpp",
+
+    # others
+    "$ace_root/frameworks/core/components/theme/app_theme.cpp",
+    "$ace_root/frameworks/core/components/theme/theme_attributes.cpp",
+    "$ace_root/frameworks/core/components/theme/theme_constants.cpp",
+    "$ace_root/frameworks/core/components/theme/theme_manager_impl.cpp",
+    "$ace_root/frameworks/core/components/theme/theme_utils.cpp",
+    "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
+    "$ace_root/frameworks/core/event/multimodal/multimodal_manager.cpp",
+    "$ace_root/frameworks/core/event/multimodal/multimodal_scene.cpp",
+    "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
+
+    # focus
+    "$ace_root/frameworks/core/focus/focus_node.cpp",
+
+    # gestures
+    "$ace_root/frameworks/core/gestures/click_recognizer.cpp",
+    "$ace_root/frameworks/core/gestures/drag_recognizer.cpp",
+    "$ace_root/frameworks/core/gestures/exclusive_recognizer.cpp",
+    "$ace_root/frameworks/core/gestures/gesture_recognizer.cpp",
+    "$ace_root/frameworks/core/gestures/gesture_referee.cpp",
+    "$ace_root/frameworks/core/gestures/long_press_recognizer.cpp",
+    "$ace_root/frameworks/core/gestures/multi_fingers_recognizer.cpp",
+    "$ace_root/frameworks/core/gestures/pan_recognizer.cpp",
+    "$ace_root/frameworks/core/gestures/parallel_recognizer.cpp",
+    "$ace_root/frameworks/core/gestures/raw_recognizer.cpp",
+    "$ace_root/frameworks/core/gestures/sequenced_recognizer.cpp",
+    "$ace_root/frameworks/core/gestures/swipe_recognizer.cpp",
+    "$ace_root/frameworks/core/gestures/timeout_recognizer.cpp",
+    "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
+
+    # image
+    "$ace_root/frameworks/core/image/flutter_image_cache.cpp",
+    "$ace_root/frameworks/core/image/image_cache.cpp",
+    "$ace_root/frameworks/core/image/image_source_info.cpp",
+
+    # layout
+    "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",
+    "$ace_root/frameworks/core/components/common/layout/grid_container_info.cpp",
+    "$ace_root/frameworks/core/components/common/layout/grid_system_manager.cpp",
+    "$ace_root/frameworks/core/components/common/layout/screen_system_manager.cpp",
+
+    # properties
+    "$ace_root/frameworks/core/components/common/painter/flutter_svg_painter.cpp",
+    "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
+    "$ace_root/frameworks/core/components/common/properties/border.cpp",
+    "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
+    "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/frameworks/core/components/common/properties/decoration.cpp",
+    "$ace_root/frameworks/core/components/common/properties/edge.cpp",
+    "$ace_root/frameworks/core/components/common/properties/motion_path_evaluator.cpp",
+    "$ace_root/frameworks/core/components/common/properties/page_transition_option.cpp",
+    "$ace_root/frameworks/core/components/common/properties/scroll_bar.cpp",
+    "$ace_root/frameworks/core/components/common/properties/shadow.cpp",
+    "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
+
+    # rendering
+    "$ace_root/frameworks/core/components/box/render_box.cpp",
+    "$ace_root/frameworks/core/components/box/render_box_base.cpp",
+    "$ace_root/frameworks/core/components/bubble/render_bubble.cpp",
+    "$ace_root/frameworks/core/components/display/render_display.cpp",
+    "$ace_root/frameworks/core/components/focus_animation/render_focus_animation.cpp",
+    "$ace_root/frameworks/core/components/proxy/render_proxy.cpp",
+    "$ace_root/frameworks/core/components/refresh/render_refresh.cpp",
+    "$ace_root/frameworks/core/components/root/render_root.cpp",
+    "$ace_root/frameworks/core/components/scroll/render_multi_child_scroll.cpp",
+    "$ace_root/frameworks/core/components/scroll/render_scroll.cpp",
+    "$ace_root/frameworks/core/components/scroll/render_single_child_scroll.cpp",
+    "$ace_root/frameworks/core/components/scroll/scroll_bar_controller.cpp",
+    "$ace_root/frameworks/core/components/stack/render_stack.cpp",
+    "$ace_root/frameworks/core/components/stage/render_stage.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_font_manager.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_node_factory.cpp",
+    "$ace_root/frameworks/core/components/touch_listener/render_touch_listener.cpp",
+    "$ace_root/frameworks/core/components/transform/render_transform.cpp",
+    "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
+    "$ace_root/frameworks/core/components_v2/list/render_list.cpp",
+    "$ace_root/frameworks/core/pipeline/base/render_node.cpp",
+
+    #mock
+    "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_container_modal_compoment.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_container_modal_element.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_drag_drop_event.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_icon_theme.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_text_field.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_semi_modal_element.cpp",
+    "$ace_root/frameworks/core/components_v2/test/mock/mock_inspector_composed_element.cpp",
+    "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
+    "$ace_root/frameworks/core/mock/mock_animator.cpp",
+    "$ace_root/frameworks/core/mock/mock_frame_report.cpp",
+    "$ace_root/frameworks/core/mock/mock_image_loader.cpp",
+    "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
+    "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
+    "$ace_root/frameworks/core/mock/mock_text_editing_value.cpp",
+    "$ace_root/frameworks/core/mock/mock_text_overlay_component.cpp",
+    "$ace_root/frameworks/core/mock/mock_text_overlay_manager.cpp",
+    "$ace_root/frameworks/core/mock/mock_trace_id_impl.cpp",
+    "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
+    "$ace_root/frameworks/core/pipeline/base/element_register.cpp",
+    "$ace_root/frameworks/core/pipeline/test/unittest/mock/mock_layout_inspector.cpp",
+
+    # base
+    "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",
+    "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
+    "$ace_root/frameworks/core/components_ng/base/inspector.cpp",
+    "$ace_root/frameworks/core/components_ng/base/ui_node.cpp",
+    "$ace_root/frameworks/core/components_ng/base/view_abstract.cpp",
+    "$ace_root/frameworks/core/components_ng/base/view_full_update_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/base/view_partial_update_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/base/view_stack_processor.cpp",
+
+    #event
+    "$ace_root/frameworks/core/components_ng/event/click_event.cpp",
+    "$ace_root/frameworks/core/components_ng/event/drag_event.cpp",
+    "$ace_root/frameworks/core/components_ng/event/event_hub.cpp",
+    "$ace_root/frameworks/core/components_ng/event/focus_hub.cpp",
+    "$ace_root/frameworks/core/components_ng/event/gesture_event_hub.cpp",
+    "$ace_root/frameworks/core/components_ng/event/input_event.cpp",
+    "$ace_root/frameworks/core/components_ng/event/input_event_hub.cpp",
+    "$ace_root/frameworks/core/components_ng/event/long_press_event.cpp",
+    "$ace_root/frameworks/core/components_ng/event/pan_event.cpp",
+    "$ace_root/frameworks/core/components_ng/event/scrollable_event.cpp",
+    "$ace_root/frameworks/core/components_ng/event/touch_event.cpp",
+
+    # layout
+    "$ace_root/frameworks/core/components_ng/layout/box_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/layout_property.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_manager.cpp",
+
+    # pattern
+    "$ace_root/frameworks/core/components_ng/pattern/container_modal/container_modal_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_measure_layout_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_base.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/overlay/overlay_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/stage/page_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/stage/stage_manager.cpp",
+
+    # property
+    "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
+    "$ace_root/frameworks/core/components_ng/property/gradient_property.cpp",
+    "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",
+    "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
+    "$ace_root/frameworks/core/components_ng/property/property.cpp",
+
+    # gestures
+    "$ace_root/frameworks/core/components_ng/gestures/gesture_group.cpp",
+    "$ace_root/frameworks/core/components_ng/gestures/gesture_referee.cpp",
+    "$ace_root/frameworks/core/components_ng/gestures/long_press_gesture.cpp",
+    "$ace_root/frameworks/core/components_ng/gestures/pan_gesture.cpp",
+    "$ace_root/frameworks/core/components_ng/gestures/pinch_gesture.cpp",
+    "$ace_root/frameworks/core/components_ng/gestures/rotation_gesture.cpp",
+    "$ace_root/frameworks/core/components_ng/gestures/swipe_gesture.cpp",
+    "$ace_root/frameworks/core/components_ng/gestures/tap_gesture.cpp",
+
+    # recognizers
+    "$ace_root/frameworks/core/components_ng/gestures/recognizers/click_recognizer.cpp",
+    "$ace_root/frameworks/core/components_ng/gestures/recognizers/exclusive_recognizer.cpp",
+    "$ace_root/frameworks/core/components_ng/gestures/recognizers/gesture_recognizer.cpp",
+    "$ace_root/frameworks/core/components_ng/gestures/recognizers/long_press_recognizer.cpp",
+    "$ace_root/frameworks/core/components_ng/gestures/recognizers/multi_fingers_recognizer.cpp",
+    "$ace_root/frameworks/core/components_ng/gestures/recognizers/pan_recognizer.cpp",
+    "$ace_root/frameworks/core/components_ng/gestures/recognizers/parallel_recognizer.cpp",
+    "$ace_root/frameworks/core/components_ng/gestures/recognizers/pinch_recognizer.cpp",
+    "$ace_root/frameworks/core/components_ng/gestures/recognizers/recognizer_group.cpp",
+    "$ace_root/frameworks/core/components_ng/gestures/recognizers/rotation_recognizer.cpp",
+    "$ace_root/frameworks/core/components_ng/gestures/recognizers/sequenced_recognizer.cpp",
+    "$ace_root/frameworks/core/components_ng/gestures/recognizers/swipe_recognizer.cpp",
+
+    # render
+    "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
+    "$ace_root/frameworks/core/components_ng/render/render_context.cpp",
+
+    # mock
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animation_utils.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_property.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_container_modal_view.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_full_screen_manager.cpp",
+
+    # test file
+    "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/pipeline_context.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
+
+    # self
+    "$ace_root/frameworks/core/pipeline_ng/test/unittest/pipeline_context_test.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/test/unittest/ui_task_scheduler_test.cpp",
+  ]
+
+  if (is_wearable_product) {
+    sources += [ "$root_out_dir/arkui/framework/core/components/theme/theme_constants_watch.cpp" ]
+  } else {
+    sources += [ "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp" ]
+  }
+
+  include_dirs = [
+    "//foundation/graphic/graphic_2d/interfaces/inner_api/common",
+    "//foundation/graphic/graphic_2d/interfaces/inner_api/composer",
+    "//foundation/graphic/graphic_2d/interfaces/inner_api/surface",
+    "//foundation/graphic/graphic_2d/rosen/modules",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+    "//foundation/graphic/graphic_2d/rosen/modules/composer/vsync/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client/core",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
+    "//foundation/multimedia/image_framework/interfaces/innerkits/include",
+    "//foundation/window/window_manager/interfaces/innerkits",
+    "//drivers/peripheral/display/interfaces/include",
+    "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf",
+    "//commonlibrary/c_utils/base/include",
+    "$ace_root",
+    "$ace_root/frameworks",
+  ]
+
+  defines = [
+    "ENABLE_ROSEN_BACKEND",
+    "OHOS_PLATFORM",
+  ]
+
+  deps = [
+    "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
+    "$ace_flutter_engine_root/icu:ace_libicu_ohos",
+    "$ace_flutter_engine_root/skia:ace_skia_ohos",
+    "$ace_root/frameworks/base/resource:ace_resource",
+    "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "$cjson_root:cjson_static",
+    "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf:frame_trace_intf",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+
+  cflags_cc = [ "-w" ]
+
+  configs = [
+    "$ace_root:ace_test_coverage_config",
+    "$ace_root:ace_config",
+  ]
+}

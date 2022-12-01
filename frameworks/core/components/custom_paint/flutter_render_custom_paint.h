@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_FLUTTER_RENDER_CUSTOM_PAINT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_FLUTTER_RENDER_CUSTOM_PAINT_H
 
+#include "base/utils/measure_util.h"
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/lib/ui/painting/path.h"
 #include "flutter/third_party/txt/src/txt/paragraph.h"
@@ -50,8 +51,7 @@ public:
     void ClearRect(const Offset& offset, const Rect& rect) override;
     void FillText(const Offset& offset, const std::string& text, double x, double y) override;
     void StrokeText(const Offset& offset, const std::string& text, double x, double y) override;
-    static double MeasureTextInner(const std::string& text, double fontSize, int32_t fontStyle,
-        const std::string& fontWeight, const std::string& fontFamily, double letterSpacing);
+    static double MeasureTextInner(const MeasureContext& context);
     double MeasureText(const std::string& text, const PaintState& state) override;
     double MeasureTextHeight(const std::string& text, const PaintState& state) override;
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state) override;

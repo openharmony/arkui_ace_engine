@@ -91,7 +91,7 @@ void ImagePattern::OnImageLoadSuccess()
         geometryNode->GetFrameSize().Height(), 1);
     imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
     // update src data
-    lastCanvasImage_ = loadingCtx_->GetCanvasImage();
+    lastCanvasImage_ = loadingCtx_->MoveCanvasImage();
     lastSrcRect_ = loadingCtx_->GetSrcRect();
     lastDstRect_ = loadingCtx_->GetDstRect();
     SetImagePaintConfig(lastCanvasImage_, lastSrcRect_, lastDstRect_, loadingCtx_->GetSourceInfo().IsSvg());
@@ -206,8 +206,7 @@ void ImagePattern::LoadImageDataIfNeed()
     UpdateInternalResource(currentSourceInfo);
     std::optional<Color> svgFillColorOpt = std::nullopt;
     if (currentSourceInfo.IsSvg()) {
-        svgFillColorOpt = imageRenderProperty->GetSvgFillColor().has_value() ? imageRenderProperty->GetSvgFillColor()
-                                                                             : currentSourceInfo.GetFillColor();
+        svgFillColorOpt = currentSourceInfo.GetFillColor();
     }
 
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != currentSourceInfo ||
@@ -293,7 +292,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        pattern->lastAltCanvasImage_ = pattern->altLoadingCtx_->GetCanvasImage();
+        pattern->lastAltCanvasImage_ = pattern->altLoadingCtx_->MoveCanvasImage();
         pattern->lastAltSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
         pattern->lastAltDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
         pattern->SetImagePaintConfig(pattern->lastAltCanvasImage_, *pattern->lastAltSrcRect_, *pattern->lastAltDstRect_,
@@ -360,8 +359,7 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->ClearDrawCommands();
-
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->FlushMessages();
 }

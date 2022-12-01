@@ -96,7 +96,7 @@ RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(
 RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId)
 {
     auto frameNode = ElementRegister::GetInstance()->GetSpecificItemById<FrameNode>(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
+    CHECK_NULL_RETURN_NOLOG(frameNode, nullptr);
     if (frameNode->GetTag() != tag) {
         LOGE("the tag is changed");
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
@@ -136,7 +136,7 @@ void FrameNode::InitializePatternAndContext()
     });
     renderContext_->SetHostNode(WeakClaim(this));
     // Initialize FocusHub
-    if (pattern_->GetFocusPattern().focusType != FocusType::DISABLE) {
+    if (pattern_->GetFocusPattern().GetFocusType() != FocusType::DISABLE) {
         GetOrCreateFocusHub();
     }
 }
@@ -164,6 +164,10 @@ void FrameNode::DumpInfo()
     if (layoutProperty_->GetBorderWidthProperty()) {
         DumpLog::GetInstance().AddDesc(
             std::string("Border: ").append(layoutProperty_->GetBorderWidthProperty()->ToString().c_str()));
+    }
+    if (layoutProperty_->GetMarginProperty()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("Margin: ").append(layoutProperty_->GetMarginProperty()->ToString().c_str()));
     }
     DumpLog::GetInstance().AddDesc(std::string("compid: ").append(propInspectorId_.value_or("")));
     DumpLog::GetInstance().AddDesc(std::string("ContentConstraint: ")
@@ -232,6 +236,14 @@ void FrameNode::OnAttachToMainTree()
     CHECK_NULL_VOID(context);
     context->RequestFrame();
     hasPendingRequest_ = false;
+}
+
+void FrameNode::OnVisibleChange(bool isVisible)
+{
+    pattern_->OnVisibleChange(isVisible);
+    for (const auto& child: GetChildren()) {
+        child->OnVisibleChange(isVisible);
+    }
 }
 
 void FrameNode::OnDetachFromMainTree()
@@ -342,6 +354,7 @@ void FrameNode::TriggerOnAreaChangeCallback()
             *lastParentOffsetToWindow_ = currParentOffsetToWindow;
         }
     }
+    pattern_->OnAreaChangedInner();
 }
 
 void FrameNode::TriggerVisibleAreaChangeCallback(std::list<VisibleCallbackInfo>& callbackInfoList)
@@ -480,7 +493,7 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
     RefPtr<LayoutWrapper> layoutWrapper;
     UpdateLayoutPropertyFlag();
     layoutWrapper = CreateLayoutWrapper();
-    CHECK_NULL_RETURN(layoutWrapper, std::nullopt);
+    CHECK_NULL_RETURN_NOLOG(layoutWrapper, std::nullopt);
     auto task = [layoutWrapper, layoutConstraint = GetLayoutConstraint(), forceUseMainThread]() {
         layoutWrapper->SetActive();
         layoutWrapper->SetRootMeasureNode();
@@ -516,7 +529,7 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     }
     ACE_SCOPED_TRACE("CreateRenderTask:PrepareTask");
     auto wrapper = CreatePaintWrapper();
-    CHECK_NULL_RETURN(wrapper, std::nullopt);
+    CHECK_NULL_RETURN_NOLOG(wrapper, std::nullopt);
     auto task = [wrapper, paintProperty = paintProperty_]() {
         ACE_SCOPED_TRACE("FrameNode::RenderTask");
         wrapper->FlushRender();
@@ -893,7 +906,9 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     // etc.), the newComingTargets is the template object to collect child nodes gesture and used by gestureHub to
     // pack gesture group.
     TouchTestResult newComingTargets;
-    const auto localPoint = parentLocalPoint - paintRect.GetOffset();
+    auto tmp  = parentLocalPoint - paintRect.GetOffset();
+    renderContext_->GetPointWithTransform(tmp);
+    const auto localPoint = tmp;
     bool consumed = false;
     for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
         if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
@@ -1105,8 +1120,9 @@ RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub() const
     if (!pattern_) {
         return eventHub_->GetOrCreateFocusHub();
     }
-    return eventHub_->GetOrCreateFocusHub(pattern_->GetFocusPattern().focusType, pattern_->GetFocusPattern().focusable,
-        pattern_->GetFocusPattern().focusState);
+    return eventHub_->GetOrCreateFocusHub(pattern_->GetFocusPattern().GetFocusType(),
+        pattern_->GetFocusPattern().GetFocusable(), pattern_->GetFocusPattern().GetStyleType(),
+        pattern_->GetFocusPattern().GetFocusPaintParams());
 }
 
 void FrameNode::OnWindowShow()

@@ -53,9 +53,12 @@ HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg001, TestSize.Level1)
      * @tc.steps: step1. push isCustomView = false
      * @tc.expected: step1. removeSilently_ is false
      */
-    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT, false);
-    auto node = ViewStackProcessor::GetInstance()->Finish();
-    EXPECT_FALSE(node->removeSilently_);
+    bool customViews[2] = { true, false };
+    for (int i = 0; i < 2; ++i) {
+        ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT, customViews[i]);
+        auto node = ViewStackProcessor::GetInstance()->Finish();
+        EXPECT_EQ(node->removeSilently_, customViews[i]);
+    }
 }
 
 /**
@@ -94,8 +97,9 @@ HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg003, TestSize.Level1)
      * @tc.steps: step1. ImplicitPopBeforeContinue
      * @tc.expected: step1. frameNode's isMeasureBoundary_ is false
      */
-    FRAME_NODE_ROOT->onMainTree_ = true;
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->FlushImplicitAnimation();
+    FRAME_NODE_ROOT->onMainTree_ = true;
     ViewStackProcessor::GetInstance()->FlushImplicitAnimation();
     ViewStackProcessor::GetInstance()->FlushRerenderTask();
     EXPECT_FALSE(FRAME_NODE_ROOT->isMeasureBoundary_);
@@ -142,8 +146,8 @@ HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg005, TestSize.Level1)
      * @tc.steps: step1. push key one and two
      * @tc.expected: step1. GetKey is "one_two"
      */
-    const std::string keyOne = "one";
-    const std::string keyTwo = "two";
+    const std::string keyOne("one");
+    const std::string keyTwo("two");
     ViewStackProcessor::GetInstance()->PushKey(keyOne);
     ViewStackProcessor::GetInstance()->PushKey(keyTwo);
     EXPECT_EQ(strcmp(ViewStackProcessor::GetInstance()->GetKey().c_str(), "one_two"), 0);

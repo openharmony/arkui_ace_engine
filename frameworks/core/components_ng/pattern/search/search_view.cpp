@@ -233,6 +233,7 @@ RefPtr<FrameNode> SearchView::CreateTextField(const RefPtr<SearchNode>& parentNo
         if (value) {
             if (!textFieldLayoutProperty->HasLastValue() || textFieldLayoutProperty->GetLastValue() != value.value()) {
                 pattern->InitEditingValueText(value.value());
+                pattern->InitCaretPosition(value.value());
                 textFieldLayoutProperty->UpdateLastValue(value.value());
                 textFieldLayoutProperty->UpdateValue(value.value());
             }

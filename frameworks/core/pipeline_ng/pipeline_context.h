@@ -101,7 +101,10 @@ public:
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
 
-    void SetBuildAfterCallback(const std::function<void()>& callback) override {}
+    void SetBuildAfterCallback(const std::function<void()>& callback) override
+    {
+        buildFinishCallbacks_.emplace_back(callback);
+    }
 
     void SaveExplicitAnimationOption(const AnimationOption& option) override {}
 
@@ -139,9 +142,6 @@ public:
     void SetAppTitle(const std::string& title) override;
 
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
-
-    double MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
-        const std::string& fontWeight, const std::string& fontFamily, double letterSpacing) override;
 
     void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override;
@@ -253,6 +253,9 @@ public:
     {
         return rootNode_->GetGeometryNode()->GetFrameRect();
     }
+
+    void FlushReload() override;
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type);
 

@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_PATTERN_H
 
 #include <cstdint>
+#include <string>
+#include <utility>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -131,7 +133,11 @@ public:
     }
 
     const TextEditingValueNG& GetEditingValue() const;
-
+    void UpdateEditingValue(std::string value, int32_t caretPosition)
+    {
+        textEditingValue_.text = std::move(value);
+        textEditingValue_.caretPosition = caretPosition;
+    }
     void SetEditingValueToProperty(const std::string& newValueText);
 
     void UpdatePositionOfParagraph(int32_t pos);
@@ -143,13 +149,15 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyle::INNER_BORDER };
+        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
     }
 
     void UpdateConfiguration();
-    void PerformAction(TextInputAction action, bool forceCloseKeyboard = false);
+    void PerformAction(TextInputAction action, bool forceCloseKeyboard = true);
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
+    void OnAreaChangedInner() override;
+    void OnVisibleChange(bool isVisible) override;
     void ClearEditingValue();
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
@@ -219,19 +227,14 @@ public:
     float AdjustTextRectOffsetX();
     float AdjustTextAreaOffsetY();
 
-    void SetBasicPaddingLeft(float padding)
-    {
-        basicPaddingLeft_ = padding;
-    }
-
     float GetPaddingLeft() const
     {
-        return utilPadding_.left.value_or(basicPaddingLeft_);
+        return utilPadding_.left.value_or(0.0f);
     }
 
     float GetPaddingRight() const
     {
-        return utilPadding_.right.value_or(basicPaddingLeft_);
+        return utilPadding_.right.value_or(0.0f);
     }
 
     const PaddingPropertyF& GetUtilPadding() const
@@ -241,7 +244,12 @@ public:
 
     float GetHorizontalPaddingSum() const
     {
-        return utilPadding_.left.value_or(basicPaddingLeft_) + utilPadding_.right.value_or(basicPaddingLeft_);
+        return utilPadding_.left.value_or(0.0f) + utilPadding_.right.value_or(0.0f);
+    }
+
+    float GetVerticalPaddingSum() const
+    {
+        return utilPadding_.top.value_or(0.0f) + utilPadding_.bottom.value_or(0.0f);
     }
 
     const RectF& GetTextRect()
@@ -287,6 +295,7 @@ public:
     void CaretMoveToLastNewLineChar();
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     void InitEditingValueText(std::string content);
+    void InitCaretPosition(std::string content);
     const TextEditingValueNG& GetTextEditingValue()
     {
         return textEditingValue_;
@@ -308,10 +317,15 @@ public:
 #endif
         return false;
     }
-
+    float PreferredLineHeight();
+void SetNeedCloseOverlay(bool needClose)
+{
+    needCloseOverlay_ = needClose;
+}
 private:
     bool IsTextArea();
     void HandleBlurEvent();
+    void HandleFocusEvent();
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     void HandleDirectionalKey(const KeyEvent& keyEvent);
@@ -394,7 +408,6 @@ private:
     bool FilterWithRegex(
         const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
     void EditingValueFilter(std::string& valueToUpdate, std::string& result);
-    float PreferredLineHeight();
     void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
     bool CursorInContentRegion();
     bool OffsetInContentRegion(const Offset& offset);
@@ -408,12 +421,12 @@ private:
     TextStyle lineHeightMeasureUtilTextStyle_;
     std::shared_ptr<RSParagraph> lineHeightMeasureUtilParagraph_;
 
-    RefPtr<ImageLoadingContext> ShowPasswordImageLoadingCtx_;
-    RefPtr<ImageLoadingContext> HidePasswordImageLoadingCtx_;
+    RefPtr<ImageLoadingContext> showPasswordImageLoadingCtx_;
+    RefPtr<ImageLoadingContext> hidePasswordImageLoadingCtx_;
 
     // password icon image related
-    RefPtr<CanvasImage> ShowPasswordImageCanvas_;
-    RefPtr<CanvasImage> HidePasswordImageCanvas_;
+    RefPtr<CanvasImage> showPasswordImageCanvas_;
+    RefPtr<CanvasImage> hidePasswordImageCanvas_;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -430,7 +443,6 @@ private:
 
     OffsetF parentGlobalOffset_;
     Offset lastTouchOffset_;
-    float basicPaddingLeft_ = 0.0f;
     PaddingPropertyF utilPadding_;
 
     float baselineOffset_ = 0.0f;
@@ -439,6 +451,7 @@ private:
     bool focusEventInitialized_ = false;
     bool preferredLineHeightNeedToUpdate = true;
     bool isMousePressed_ = false;
+    bool needCloseOverlay_ = true;
 
     SelectionMode selectionMode_ = SelectionMode::NONE;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;

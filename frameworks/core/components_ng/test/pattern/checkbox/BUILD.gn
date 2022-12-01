@@ -67,8 +67,7 @@ ohos_unittest("checkbox_pattern_test_ng") {
     # components_ng_pattern
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/stage/page_event_hub.cpp",
-
-    # "$ace_root/frameworks/core/components_ng/pattern/stage/stage_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/stage/page_pattern.cpp",
 
     # components_ng_render
     "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
@@ -96,7 +95,6 @@ ohos_unittest("checkbox_pattern_test_ng") {
 
     # mock
     "$ace_root/frameworks/base/test/mock/ressched/mock_ressched_report.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/base/mock_stage_manager.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_drawing_convertor.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
@@ -117,6 +115,7 @@ ohos_unittest("checkbox_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.cpp",
     "checkbox_paint_method_test_ng.cpp",
     "checkbox_pattern_test_ng.cpp",
+    "mock_stage_manager.cpp",
   ]
 
   deps = [

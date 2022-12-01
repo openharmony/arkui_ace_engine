@@ -43,6 +43,9 @@ public:
     MOCK_METHOD0(Restore, void());
     MOCK_METHOD2(DrawCircle, void(const Point& centerPt, scalar radius));
     MOCK_METHOD1(DrawRoundRect, void(const RoundRect& roundRect));
+    MOCK_METHOD3(DrawBitmap, void(const TestingBitmap& bitmap, const scalar px, const scalar py));
+    MOCK_METHOD1(DrawBackground, void(const TestingBrush& brush));
+    MOCK_METHOD2(ClipRect, void(const Rect& rect, ClipOp op));
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_CANVAS_H

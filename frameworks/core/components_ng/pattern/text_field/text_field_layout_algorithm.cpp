@@ -80,12 +80,14 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(pattern, std::nullopt);
     TextStyle textStyle;
     std::string textContent;
+    bool showPlaceHolder = false;
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
         UpdateTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle);
         textContent = textFieldLayoutProperty->GetValueValue("");
     } else {
         UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle);
         textContent = textFieldLayoutProperty->GetPlaceholderValue("");
+        showPlaceHolder = true;
     }
     CreateParagraph(textStyle, textContent);
 
@@ -96,7 +98,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         imageSize = std::min(imageSize, contentConstraint.selfIdealSize.Height().value());
     }
     auto horizontalPaddingSum = pattern->GetHorizontalPaddingSum();
-    if (textStyle.GetMaxLines() == 1) {
+    if (textStyle.GetMaxLines() == 1 && !showPlaceHolder) {
         // for text input case, need to measure in one line without constraint.
         paragraph_->Layout(std::numeric_limits<double>::infinity());
     } else {
@@ -107,14 +109,16 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
         paragraph_->Layout(std::ceil(paragraphNewWidth));
     }
-    auto height = std::min(static_cast<float>(paragraph_->GetHeight()), contentConstraint.maxSize.Height());
+    auto preferredHeight = static_cast<float>(paragraph_->GetHeight());
+    if (textContent.empty()) {
+        preferredHeight = pattern->PreferredLineHeight();
+    }
+
     // check password image size.
     if (!showPasswordIcon) {
-        textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), height));
+        textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
         imageRect_.SetSize(SizeF());
-        auto contentSize = contentConstraint.maxSize;
-        MinusPaddingToSize(pattern->GetUtilPadding(), contentSize);
-        return SizeF(contentSize.Width(), height);
+        return SizeF(contentConstraint.maxSize.Width() - horizontalPaddingSum, preferredHeight);
     }
 
     float imageHeight = 0.0f;
@@ -129,12 +133,12 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         imageRect_.SetSize(SizeF(0.0f, 0.0f));
         return SizeF(contentConstraint.maxSize.Width(), imageHeight);
     }
-    height = std::min(static_cast<float>(paragraph_->GetHeight()), contentConstraint.maxSize.Height());
+    preferredHeight = std::min(static_cast<float>(paragraph_->GetHeight()), contentConstraint.maxSize.Height());
     textRect_.SetSize(SizeF(std::min(static_cast<float>(paragraph_->GetLongestLine()),
                                 contentConstraint.maxSize.Width() - horizontalPaddingSum - imageSize),
-        static_cast<float>(height)));
+        static_cast<float>(preferredHeight)));
     imageRect_.SetSize(SizeF(imageSize, imageSize));
-    return SizeF(contentConstraint.maxSize.Width(), std::max(imageSize, height));
+    return SizeF(contentConstraint.maxSize.Width(), std::max(imageSize, preferredHeight));
 }
 
 void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -218,7 +222,8 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
     Dimension fontSize;
-    if (layoutProperty->HasFontSize() && layoutProperty->GetPlaceholderFontSizeValue(Dimension()).IsNonNegative()) {
+    if (layoutProperty->HasPlaceholderFontSize() &&
+        layoutProperty->GetPlaceholderFontSizeValue(Dimension()).IsNonNegative()) {
         fontSize = layoutProperty->GetPlaceholderFontSizeValue(Dimension());
     } else {
         fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();

@@ -40,6 +40,22 @@ void NavigatorEventHub::NavigatePage()
     LOGD("navigate success");
 }
 
+void NavigatorEventHub::SetActive(bool active)
+{
+    if (active) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this)] {
+                auto eventHub = weak.Upgrade();
+                CHECK_NULL_VOID(eventHub);
+                eventHub->NavigatePage();
+            },
+            TaskExecutor::TaskType::JS);
+    }
+    active_ = active;
+}
+
 std::string NavigatorEventHub::GetNavigatorType() const
 {
     switch (type_) {

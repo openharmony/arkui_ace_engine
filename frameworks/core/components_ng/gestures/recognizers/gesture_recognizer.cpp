@@ -32,7 +32,7 @@ RefPtr<GestureReferee> GetCurrentGestureReferee()
     CHECK_NULL_RETURN(context, nullptr);
 
     auto eventManager = context->GetEventManager();
-    CHECK_NULL_RETURN(eventManager, nullptr);
+    CHECK_NULL_RETURN_NOLOG(eventManager, nullptr);
     return eventManager->GetGestureRefereeNG();
 }
 
@@ -69,7 +69,8 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
             deviceId_ = event.deviceId;
             deviceType_ = event.sourceType;
             HandleTouchDownEvent(event);
-            break;
+            // When scroll one step. Axis events are 'BEGIN' and 'END'. So do not need process 'break;'
+            [[fallthrough]];
         case AxisAction::UPDATE:
             HandleTouchMoveEvent(event);
             break;

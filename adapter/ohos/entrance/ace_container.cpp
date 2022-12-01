@@ -48,6 +48,7 @@
 #include "core/common/window.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager_impl.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -166,9 +167,9 @@ void AceContainer::Destroy()
             frontend->UpdateState(Frontend::State::ON_DESTROY);
             frontend->Destroy();
         } else {
+            frontend->UpdateState(Frontend::State::ON_DESTROY);
             taskExecutor_->PostTask(
                 [frontend]() {
-                    frontend->UpdateState(Frontend::State::ON_DESTROY);
                     frontend->Destroy();
                 },
                 TaskExecutor::TaskType::JS);
@@ -290,12 +291,12 @@ void AceContainer::OnShow(int32_t instanceId)
 
     auto front = container->GetFrontend();
     if (front && !container->IsSubContainer()) {
-        front->UpdateState(Frontend::State::ON_SHOW);
         WeakPtr<Frontend> weakFrontend = front;
         taskExecutor->PostTask(
             [weakFrontend]() {
                 auto frontend = weakFrontend.Upgrade();
                 if (frontend) {
+                    frontend->UpdateState(Frontend::State::ON_SHOW);
                     frontend->OnShow();
                 }
             },
@@ -332,12 +333,12 @@ void AceContainer::OnHide(int32_t instanceId)
 
     auto front = container->GetFrontend();
     if (front && !container->IsSubContainer()) {
-        front->UpdateState(Frontend::State::ON_HIDE);
         WeakPtr<Frontend> weakFrontend = front;
         taskExecutor->PostTask(
             [weakFrontend]() {
                 auto frontend = weakFrontend.Upgrade();
                 if (frontend) {
+                    frontend->UpdateState(Frontend::State::ON_HIDE);
                     frontend->OnHide();
                     frontend->TriggerGarbageCollection();
                 }
@@ -387,6 +388,7 @@ void AceContainer::OnActive(int32_t instanceId)
             [weakFrontend] () {
                 auto frontend = weakFrontend.Upgrade();
                 if (frontend) {
+                    frontend->UpdateState(Frontend::State::ON_ACTIVE);
                     frontend->OnActive();
                 }
             },
@@ -420,6 +422,7 @@ void AceContainer::OnInactive(int32_t instanceId)
             [weakFrontend] () {
                 auto frontend = weakFrontend.Upgrade();
                 if (frontend) {
+                    frontend->UpdateState(Frontend::State::ON_INACTIVE);
                     frontend->OnInactive();
                 }
             },
@@ -1053,12 +1056,13 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
         LOGI("New pipeline version creating...");
         pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
             std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+        pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
     } else {
         pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
             std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+        pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
     }
     pipelineContext_->SetRootSize(density, width, height);
-    pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
     pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
     pipelineContext_->SetWindowId(windowId);
     pipelineContext_->SetWindowModal(windowModal_);

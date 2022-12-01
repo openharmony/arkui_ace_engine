@@ -56,57 +56,19 @@ void MenuWrapperPattern::OnModifyDone()
         CHECK_NULL_VOID(host);
         auto pattern = host->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(pattern);
-        auto touch = info.GetTouches().front();
         // get menu frame node (child of menu wrapper)
-        auto menuNode = host->GetChildAtIndex(0);
+        auto menuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
         CHECK_NULL_VOID(menuNode);
-        auto menuFrameNode = DynamicCast<FrameNode>(menuNode);
-        CHECK_NULL_VOID(menuFrameNode);
 
         // get menuNode's touch region
-        auto menuGeometryNode = menuFrameNode->GetGeometryNode();
-        CHECK_NULL_VOID(menuGeometryNode);
-        auto menuZone = menuGeometryNode->GetFrameRect();
+        auto menuZone = menuNode->GetGeometryNode()->GetFrameRect();
         const auto& position = info.GetTouches().front().GetGlobalLocation();
         // if DOWN-touched outside the menu region, then hide menu
         if (!menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
-            pattern->HideMenu(menuFrameNode);
+            pattern->HideMenu(menuNode);
         }
     };
     auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(callback));
     gestureHub->AddTouchEvent(touchEvent);
 }
-
-bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/)
-{
-    // setup contextMenu's subWindow hotZone
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-
-    auto menuNode = host->GetChildAtIndex(0);
-    CHECK_NULL_RETURN(menuNode, false);
-    if (!InstanceOf<FrameNode>(menuNode)) {
-        LOGW("MenuWrapper's child is not a Menu! type = %{public}s", menuNode->GetTag().c_str());
-        return false;
-    }
-    auto menuFrameNode = DynamicCast<FrameNode>(menuNode);
-    CHECK_NULL_RETURN(menuFrameNode, false);
-    auto menuGeometryNode = menuFrameNode->GetGeometryNode();
-    CHECK_NULL_RETURN(menuGeometryNode, false);
-    auto menuZone = menuGeometryNode->GetFrameRect();
-    auto menuPattern = menuFrameNode->GetPattern<MenuPattern>();
-    CHECK_NULL_RETURN(menuPattern, false);
-
-    if (menuPattern->IsContextMenu()) {
-        std::vector<Rect> rects;
-        rects.emplace_back(Rect(Offset(menuFrameNode->GetOffsetRelativeToWindow().GetX(),
-                                    menuFrameNode->GetOffsetRelativeToWindow().GetY()),
-            Size(menuZone.Width(), menuZone.Height())));
-        SubwindowManager::GetInstance()->SetHotAreas(rects);
-    }
-    return true;
-}
-
 } // namespace OHOS::Ace::NG

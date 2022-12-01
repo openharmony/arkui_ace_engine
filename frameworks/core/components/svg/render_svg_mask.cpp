@@ -45,7 +45,7 @@ void RenderSvgMask::Update(const RefPtr<Component> &component)
 
 double RenderSvgMask::ParseUnitsAttr(const Dimension& attr, double value)
 {
-    if (IsDefalutMaskUnits()) {
+    if (IsDefaultMaskUnits()) {
         // only support decimal or percent
         if (attr.Unit() == DimensionUnit::PERCENT) {
             return value * attr.Value();

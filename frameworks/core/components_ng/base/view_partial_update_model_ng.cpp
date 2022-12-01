@@ -59,6 +59,7 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
     customNode->SetUpdateFunction(std::move(info.updateFunc));
     customNode->SetDestroyFunction(std::move(info.removeFunc));
     customNode->SetPageTransitionFunction(std::move(info.pageTransitionFunc));
+    customNode->SetReloadFunction(std::move(info.reloadFunc));
     return customNode;
 }
 

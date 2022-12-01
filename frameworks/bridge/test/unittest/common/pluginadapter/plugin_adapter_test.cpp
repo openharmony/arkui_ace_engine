@@ -15,7 +15,8 @@
 
 #include "gtest/gtest.h"
 
-#include "base/test/unittest/geometry/mock_container.h"
+#define private public
+#include "core/pipeline_ng/test/mock/mock_container.h"
 #include "bridge/common/plugin_adapter/plugin_bridge.h"
 #include "core/common/container.h"
 #include "core/common/ace_engine.h"
@@ -25,32 +26,38 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::Framework {
 namespace {
-const std::string INFO_STR_ONE = "{\"brand\":\"default\","
-                                 "\"manufacturer\":\"default\","
-                                 "\"model\":\"ohos\","
-                                 "\"product\":\"OpenHarmony 3.2\","
+const std::string INFO_STR_ONE = "{\"brand\":\"test_brand\","
+                                 "\"manufacturer\":\"test_manufacturer\","
+                                 "\"model\":\"test\","
+                                 "\"product\":\"phone 1.0\","
                                  "\"apiVersion\":9,"
-                                 "\"releaseType\":\"Canary1\","
-                                 "\"deviceType\":\"default\","
+                                 "\"releaseType\":\"Beta\","
+                                 "\"deviceType\":\"PHONE\","
                                  "\"language\":\"zh-Hans\","
                                  "\"region\":\"CN\","
                                  "\"windowWidth\":100,"
                                  "\"windowHeight\":100,"
                                  "\"screenDensity\":1,"
                                  "\"screenShape\":\"circle\"}";
-const std::string INFO_STR_TWO = "{\"brand\":\"default\","
-                                 "\"manufacturer\":\"default\","
-                                 "\"model\":\"ohos\","
-                                 "\"product\":\"OpenHarmony 3.2\","
-                                 "\"apiVersion\":9,"
-                                 "\"releaseType\":\"Canary1\","
-                                 "\"deviceType\":\"default\","
+
+const std::string INFO_STR_TWO = "{\"brand\":\"test_brand\","
+                                 "\"manufacturer\":\"test_manufacturer\","
+                                 "\"model\":\"test\","
+                                 "\"product\":\"phone 2.0\","
+                                 "\"apiVersion\":10,"
+                                 "\"releaseType\":\"Beta\","
+                                 "\"deviceType\":\"PHONE\","
                                  "\"language\":\"zh-Hans\","
                                  "\"region\":\"CN\","
                                  "\"windowWidth\":50,"
                                  "\"windowHeight\":50,"
                                  "\"screenDensity\":1,"
                                  "\"screenShape\":\"rect\"}";
+
+const std::string INFO_STR_DEFAULT = "{\"language\":\"zh-Hans\","
+                                     "\"region\":\"CN\","
+                                     "\"screenDensity\":1,"
+                                     "\"screenShape\":\"rect\"}";
 } // namespace
 
 class PluginAdapterTest : public testing::Test {
@@ -74,19 +81,13 @@ void PluginAdapterTest::TearDown() {}
 HWTEST_F(PluginAdapterTest, GetDevInfoTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Initialize device information.
+     * @tc.steps: step1. Use default device information.
      * @tc.expected: step1. Get the device information as expected.
      */
-    SystemProperties systemPro;
-    systemPro.InitDeviceInfo(100, 100, 1, 1.0, true);
     PluginBridge pluginBridge;
-    auto container = AceType::MakeRefPtr<MockContainer>();
-    EXPECT_CALL(*container, GetViewWidth()).Times(2).WillOnce(Return(100)).WillOnce(Return(50));
-    EXPECT_CALL(*container, GetViewHeight()).Times(2).WillOnce(Return(100)).WillOnce(Return(50));
-    AceEngine::Get().AddContainer(-1, container);
     auto infoPair = pluginBridge.GetDeviceInfo();
-    EXPECT_EQ(infoPair.first, INFO_STR_ONE);
-    EXPECT_EQ(infoPair.second, true);
+    EXPECT_EQ(infoPair.first, INFO_STR_DEFAULT);
+    EXPECT_EQ(infoPair.second, false);
 }
 
 /**
@@ -101,7 +102,44 @@ HWTEST_F(PluginAdapterTest, GetDevInfoTest002, TestSize.Level1)
      * @tc.expected: step1. Get the device information as expected.
      */
     SystemProperties systemPro;
+    systemPro.InitDeviceInfo(100, 100, 1, 1.0, true);
+    systemPro.brand_ = "test_brand";
+    systemPro.manufacturer_ = "test_manufacturer";
+    systemPro.product_ = "phone 1.0";
+    systemPro.apiVersion_ = "9";
+    systemPro.releaseType_ = "Beta";
+    systemPro.model_ = "test";
+    systemPro.paramDeviceType_ = "PHONE";
+    PluginBridge pluginBridge;
+    auto container = AceType::MakeRefPtr<MockContainer>();
+    EXPECT_CALL(*container, GetViewWidth()).Times(2).WillOnce(Return(100)).WillOnce(Return(50));
+    EXPECT_CALL(*container, GetViewHeight()).Times(2).WillOnce(Return(100)).WillOnce(Return(50));
+    AceEngine::Get().AddContainer(-1, container);
+    auto infoPair = pluginBridge.GetDeviceInfo();
+    EXPECT_EQ(infoPair.first, INFO_STR_ONE);
+    EXPECT_EQ(infoPair.second, true);
+}
+
+/**
+ * @tc.name: GetDevInfoTest003
+ * @tc.desc: Initialize device information
+ * @tc.type: FUNC
+ */
+HWTEST_F(PluginAdapterTest, GetDevInfoTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize device information.
+     * @tc.expected: step1. Get the device information as expected.
+     */
+    SystemProperties systemPro;
     systemPro.InitDeviceInfo(100, 100, 1, 1.0, false);
+    systemPro.brand_ = "test_brand";
+    systemPro.manufacturer_ = "test_manufacturer";
+    systemPro.product_ = "phone 2.0";
+    systemPro.apiVersion_ = "10";
+    systemPro.releaseType_ = "Beta";
+    systemPro.model_ = "test";
+    systemPro.paramDeviceType_ = "PHONE";
     PluginBridge pluginBridge;
     auto container = AceType::MakeRefPtr<MockContainer>();
     AceEngine::Get().AddContainer(-1, container);

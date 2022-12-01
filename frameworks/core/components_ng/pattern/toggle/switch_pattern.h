@@ -67,7 +67,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyle::OUTER_BORDER };
+        return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
     }
 
 private:
@@ -96,6 +96,8 @@ private:
     void HandleDragEnd();
 
     bool IsOutOfBoundary(double mainOffset) const;
+
+    RectF GetHotZoneRect(bool isOriginal) const;
 
     void OnClick();
 

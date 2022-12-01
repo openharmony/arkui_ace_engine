@@ -18,7 +18,6 @@
 
 #include <utility>
 
-#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -66,10 +65,17 @@ public:
     }
 
     const RefPtr<FocusHub>& GetOrCreateFocusHub(
-        FocusType type = FocusType::DISABLE, bool focusable = false, FocusStyle focusState = FocusStyle::NONE)
+        FocusType type = FocusType::DISABLE,
+        bool focusable = false,
+        FocusStyleType focusStyleType = FocusStyleType::NONE,
+        const std::unique_ptr<FocusPaintParam>& paintParamsPtr = nullptr)
     {
         if (!focusHub_) {
-            focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this), type, focusable, focusState);
+            focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this), type, focusable);
+            focusHub_->SetFocusStyleType(focusStyleType);
+            if (paintParamsPtr) {
+                focusHub_->SetFocusPaintParamsPtr(paintParamsPtr);
+            }
         }
         return focusHub_;
     }

@@ -16,6 +16,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -56,11 +57,14 @@ float PipelineContext::GetCurrentRootHeight()
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
-    return AceType::MakeRefPtr<PipelineContext>();
+    static RefPtr<PipelineContext> pipeline = AceType::MakeRefPtr<PipelineContext>();
+    return pipeline;
 }
 
 // non-static method
-void PipelineContext::PipelineContext::SetupRootElement() {}
+void PipelineContext::AddWindowFocusChangedCallback(int32_t nodeId) {}
+
+void PipelineContext::SetupRootElement() {}
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
 
@@ -124,6 +128,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight) {}
 
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
 
+void PipelineContext::FlushReload() {}
+
 const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
 {
     if (selectOverlayManager_) {
@@ -178,12 +184,6 @@ bool PipelineContext::OnBackPressed()
     return false;
 }
 
-double PipelineContext::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
-    const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
-{
-    return 0.0;
-}
-
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
 void UITaskScheduler::FlushTask() {}
 
@@ -195,12 +195,15 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty) {}
 
 const RefPtr<StageManager>& PipelineContext::GetStageManager()
 {
-    auto stageNode = MakeRefPtr<FrameNode>(
-        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
+    auto stageNode = MakeRefPtr<FrameNode>(V2::PAGE_ETS_TAG, -1, MakeRefPtr<PagePattern>(nullptr), true);
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
     return stageManager_;
 }
 
 void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback) {}
 
+const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

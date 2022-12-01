@@ -122,7 +122,7 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest002, TestSize.Level1)
     auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(callback1));
     clickEventActuator.userCallback_ = clickEvent;
     GestureEventFunc callback2 = [](GestureEvent& info) {};
-    clickEventActuator.ReplaceClickEvent(std::move(callback2));
+    clickEventActuator.SetUserCallback(std::move(callback2));
     EXPECT_NE(clickEventActuator.userCallback_, nullptr);
 
     /**
