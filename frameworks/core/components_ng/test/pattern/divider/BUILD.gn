@@ -14,7 +14,6 @@
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-
 ohos_unittest("divider_pattern_test_ng") {
   module_out_path = "$test_output_path/divider"
 
