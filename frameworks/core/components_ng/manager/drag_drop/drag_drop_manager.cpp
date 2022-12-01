@@ -18,6 +18,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
+#include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -283,7 +284,12 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
         CHECK_NULL_VOID(eventHub);
 
         auto itemFrameNode = eventHub->FindGridItemByPosition(globalX, globalY);
-        int32_t insertIndex = eventHub->GetGridItemIndex(itemFrameNode);
+        int32_t insertIndex = -1;
+        if (!itemFrameNode && eventHub->CheckPostionInGrid(globalX, globalY)) {
+            insertIndex = eventHub->GetFrameNodeChildSize();
+        } else {
+            insertIndex = eventHub->GetGridItemIndex(itemFrameNode);
+        }
         FireOnItemDragEvent(dragFrameNode, dragType, itemDragInfo, DragEventType::MOVE, draggedIndex, insertIndex);
         return;
     }
@@ -327,7 +333,12 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
         auto eventHub = dragFrameNode->GetEventHub<GridEventHub>();
         CHECK_NULL_VOID(eventHub);
         auto itemFrameNode = eventHub->FindGridItemByPosition(globalX, globalY);
-        int32_t insertIndex = eventHub->GetGridItemIndex(itemFrameNode);
+        int32_t insertIndex = -1;
+        if (!itemFrameNode && eventHub->CheckPostionInGrid(globalX, globalY)) {
+            insertIndex = eventHub->GetFrameNodeChildSize();
+        } else {
+            insertIndex = eventHub->GetGridItemIndex(itemFrameNode);
+        }
         // drag and drop on the same grid
         if (dragFrameNode == preGridTargetFrameNode_) {
             eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, insertIndex, true);

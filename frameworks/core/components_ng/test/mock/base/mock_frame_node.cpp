@@ -50,6 +50,7 @@ void FrameNode::MarkNeedRenderOnly() {}
 void FrameNode::MarkNeedRender(bool isRenderBoundary) {}
 void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag) {}
 void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) {}
+void FrameNode::OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) {}
 void FrameNode::UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapper>& self, bool forceMeasure, bool forceLayout) {}
 void FrameNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) {}
 void FrameNode::UpdateLayoutPropertyFlag() {}

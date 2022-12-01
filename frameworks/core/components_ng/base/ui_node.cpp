@@ -320,6 +320,13 @@ void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleL
     }
 }
 
+void UINode::GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList)
+{
+    for (const auto& child : children_) {
+        child->OnGenerateOneDepthAllFrame(visibleList);
+    }
+}
+
 RefPtr<PipelineContext> UINode::GetContext()
 {
     return PipelineContext::GetCurrentContext();
