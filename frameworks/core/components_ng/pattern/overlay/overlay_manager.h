@@ -104,6 +104,9 @@ private:
      */
     bool ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset);
 
+    void FocusDialog(const RefPtr<FrameNode>& dialogNode);
+    void BlurDialog();
+
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     // K: target frameNode ID, V: menuNode

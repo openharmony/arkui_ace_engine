@@ -250,6 +250,7 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     CHECK_NULL_RETURN(rootNode, nullptr);
     dialog->MountToParent(rootNode);
     LOGD("dialog mounted to root node");
+    FocusDialog(dialog);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return dialog;
 }
@@ -264,6 +265,7 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps,
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     dialogNode->MountToParent(rootNode);
+    FocusDialog(dialogNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -277,6 +279,7 @@ void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps,
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     dialogNode->MountToParent(rootNode);
+    FocusDialog(dialogNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -290,6 +293,7 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, uint32_
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     dialogNode->MountToParent(rootNode);
+    FocusDialog(dialogNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -299,6 +303,7 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     rootNode->RemoveChild(dialogNode);
+    BlurDialog();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -311,6 +316,7 @@ void OverlayManager::CloseDialog(int32_t id)
     if (index >= 0) {
         rootNode->RemoveChildAtIndex(index);
     }
+    BlurDialog();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -326,6 +332,37 @@ bool OverlayManager::RemoveOverlay()
         return true;
     }
     return false;
+}
+
+void OverlayManager::FocusDialog(const RefPtr<FrameNode>& dialogNode)
+{
+    LOGI("OverlayManager::FocusDialog when dialog show");
+    CHECK_NULL_VOID(dialogNode);
+    auto focusHub = dialogNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto pageNode = stageManager->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
+    auto pageFocusHub = pageNode->GetFocusHub();
+    CHECK_NULL_VOID(pageFocusHub);
+    focusHub->RequestFocusImmediately();
+    pageFocusHub->LostFocus();
+}
+
+void OverlayManager::BlurDialog()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto pageNode = stageManager->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
+    auto pageFocusHub = pageNode->GetFocusHub();
+    CHECK_NULL_VOID(pageFocusHub);
+    pageFocusHub->RequestFocus();
 }
 
 } // namespace OHOS::Ace::NG
