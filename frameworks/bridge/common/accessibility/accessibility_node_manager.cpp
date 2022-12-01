@@ -809,8 +809,17 @@ void AccessibilityNodeManager::DumpTree(int32_t depth, NodeId nodeID)
     DumpLog::GetInstance().AddDesc("text: " + node->GetText());
     DumpLog::GetInstance().AddDesc("top: " + std::to_string(node->GetTop() + GetWindowTop(node->GetWindowId())));
     DumpLog::GetInstance().AddDesc("left: " + std::to_string(node->GetLeft() + GetWindowLeft(node->GetWindowId())));
-    DumpLog::GetInstance().AddDesc("width: " + std::to_string(node->GetWidth()));
-    DumpLog::GetInstance().AddDesc("height: " + std::to_string(node->GetHeight()));
+    if (node->GetTag() == "SideBarContainer") {
+        Rect sideBarRect = node->GetRect();
+        for (const auto& childNode : node->GetChildList()) {
+            sideBarRect = sideBarRect.CombineRect(childNode->GetRect());
+        }
+        DumpLog::GetInstance().AddDesc("width: " + std::to_string(sideBarRect.Width()));
+        DumpLog::GetInstance().AddDesc("height: " + std::to_string(sideBarRect.Height()));
+    } else {
+        DumpLog::GetInstance().AddDesc("width: " + std::to_string(node->GetWidth()));
+        DumpLog::GetInstance().AddDesc("height: " + std::to_string(node->GetHeight()));
+    }
     DumpLog::GetInstance().AddDesc("visible: " + std::to_string(node->GetShown() && node->GetVisible()));
     DumpLog::GetInstance().AddDesc("clickable: " + std::to_string(node->GetClickableState()));
     DumpLog::GetInstance().AddDesc("checkable: " + std::to_string(node->GetCheckableState()));
