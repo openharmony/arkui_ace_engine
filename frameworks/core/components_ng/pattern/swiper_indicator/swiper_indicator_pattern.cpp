@@ -82,7 +82,7 @@ void SwiperIndicatorPattern::HandleClick(const GestureEvent& info)
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<SwiperIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(theme);
