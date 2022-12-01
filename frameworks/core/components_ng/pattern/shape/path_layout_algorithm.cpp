@@ -24,6 +24,10 @@
 #include "core/components_ng/pattern/shape/path_paint_property.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const Dimension DEFAULT_STROKE_WIDTH(1, DimensionUnit::PX);
+} // namespace
+
 std::optional<SizeF> PathLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
@@ -35,6 +39,9 @@ std::optional<SizeF> PathLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(host, std::nullopt);
     auto paintProperty = host->GetPaintProperty<PathPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, std::nullopt);
+    if (propertiesFromAncestor_) {
+        paintProperty->UpdateShapeProperty(propertiesFromAncestor_);
+    }
 
     auto pathCommands = paintProperty->GetCommandsValue("");
     CHECK_NULL_RETURN(!pathCommands.empty(), SizeF());
@@ -47,7 +54,7 @@ std::optional<SizeF> PathLayoutAlgorithm::MeasureContent(
     if (NearZero(right) && NearZero(bottom)) {
         return SizeF();
     }
-    auto lineWidth = static_cast<float>(paintProperty->GetStrokeWidthValue().ConvertToPx());
+    auto lineWidth = static_cast<float>(paintProperty->GetStrokeWidthValue(DEFAULT_STROKE_WIDTH).ConvertToPx());
     if (NearZero(right)) {
         right += lineWidth;
     }
