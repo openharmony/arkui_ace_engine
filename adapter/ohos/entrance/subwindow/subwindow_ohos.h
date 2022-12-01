@@ -115,8 +115,8 @@ private:
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
     int32_t targetId_ = -1;
-    int32_t popupTargetId_ = -1;
     bool isToastWindow_ = false;
+    int32_t popupTargetId_ = -1;
     bool isShowed_ = false;
 };
 
