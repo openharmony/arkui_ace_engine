@@ -174,11 +174,7 @@ void GridEventHub::HandleOnItemDragEnd(const GestureEvent& info)
     dragDropProxy_ = nullptr;
     draggedIndex_ = 0;
     if (draggingItem_) {
-        if (itemRemoved_) {
-            itemRemoved_ = false;
-        } else {
-            draggingItem_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-        }
+        draggingItem_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
         draggingItem_ = nullptr;
     }
 }
@@ -202,9 +198,6 @@ void GridEventHub::HandleOnItemDragCancel()
 
 void GridEventHub::FireOnItemDragEnter(const ItemDragInfo& dragInfo)
 {
-    if (draggingItem_) {
-        itemRemoved_ = false;
-    }
     if (onItemDragEnter_) {
         onItemDragEnter_(dragInfo);
     }
@@ -212,9 +205,6 @@ void GridEventHub::FireOnItemDragEnter(const ItemDragInfo& dragInfo)
 
 void GridEventHub::FireOnItemDragLeave(const ItemDragInfo& dragInfo, int32_t itemIndex)
 {
-    if (draggingItem_) {
-        itemRemoved_ = true;
-    }
     if (onItemDragLeave_) {
         onItemDragLeave_(dragInfo, itemIndex);
     }
@@ -222,8 +212,7 @@ void GridEventHub::FireOnItemDragLeave(const ItemDragInfo& dragInfo, int32_t ite
 
 void GridEventHub::FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess)
 {
-    if (draggingItem_ && !isSuccess) {
-        itemRemoved_ = false;
+    if (draggingItem_) {
         draggingItem_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     }
     if (onItemDrop_) {
