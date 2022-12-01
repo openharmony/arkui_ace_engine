@@ -49,12 +49,6 @@ const OffsetF CONTENT_OFFSET = OffsetF(50.0, 60.0);
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
-
-// const Color ACTIVE_COLOR = Color::BLACK;
-// const Color INACTIVE_COLOR = Color::GREEN;
-// const Color SHADOW_COLOR = Color::RED;
-// const Color CLICK_EFFECT_COLOR = Color::WHITE;
-// const Color HOVER_COLOR = Color::GRAY;
 } // namespace
 class SwiperIndicatorPatternTestNg : public testing::Test {
 public:
