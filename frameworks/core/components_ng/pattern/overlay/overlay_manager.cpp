@@ -302,6 +302,18 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
+void OverlayManager::CloseDialog(int32_t id)
+{
+    LOGI("OverlayManager::CloseDialog");
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto index = rootNode->GetChildIndexById(id);
+    if (index >= 0) {
+        rootNode->RemoveChildAtIndex(index);
+    }
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
 bool OverlayManager::RemoveOverlay()
 {
     auto rootNode = rootNodeWeak_.Upgrade();

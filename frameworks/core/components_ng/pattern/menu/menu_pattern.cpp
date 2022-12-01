@@ -26,7 +26,9 @@
 namespace OHOS::Ace::NG {
 void MenuPattern::OnModifyDone()
 {
-    RegisterOnClick();
+    if (!onClick_) {
+        RegisterOnClick();
+    }
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -68,13 +70,13 @@ void MenuPattern::RegisterOnClick()
         overlayManager->HideMenu(targetId);
         LOGI("closing menu %{public}d", targetId);
     };
-    auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(event));
+    onClick_ = MakeRefPtr<TouchEventImpl>(std::move(event));
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->AddTouchEvent(touchEvent);
+    gestureHub->AddTouchEvent(onClick_);
 }
 
 } // namespace OHOS::Ace::NG
