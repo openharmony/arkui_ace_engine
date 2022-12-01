@@ -3500,20 +3500,6 @@ HWTEST_F(GesturePatternTestNg, RotationRecognizerTest002, TestSize.Level1)
     rotationRecognizer.HandleTouchCancelEvent(touchEvent);
     EXPECT_EQ(rotationRecognizer.refereeState_, RefereeState::SUCCEED);
     EXPECT_EQ(rotationRecognizer.resultAngle_, 0);
-
-    /**
-     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
-     * @tc.steps: case3: touchPoints.size < fingers
-     * @tc.expected: step2. result equals.
-     */
-    rotationRecognizer.fingers_ = FINGER_NUMBER;
-    rotationRecognizer.refereeState_ = RefereeState::FAIL;
-    rotationRecognizer.HandleTouchDownEvent(touchEvent);
-    rotationRecognizer.HandleTouchUpEvent(touchEvent);
-    rotationRecognizer.HandleTouchMoveEvent(touchEvent);
-    rotationRecognizer.HandleTouchCancelEvent(touchEvent);
-    EXPECT_EQ(rotationRecognizer.refereeState_, RefereeState::FAIL);
-    EXPECT_EQ(rotationRecognizer.resultAngle_, 0);
 }
 
 /**
@@ -3608,49 +3594,43 @@ HWTEST_F(GesturePatternTestNg, RotationRecognizerTest006, TestSize.Level1)
 
     /**
      * @tc.steps: step2. call SendCallbackMsg function and compare result.
-     * @tc.steps: case1: onAction is no, *onAction is no
+     * @tc.steps: case1: callback is null
+     * @tc.expected: step2. result equals.
+     */
+    rotationRecognizer.SendCallbackMsg(nullptr);
+    EXPECT_EQ(rotationRecognizer.touchPoints_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case2: callback is ptr, have no tiltX and tileY
      * @tc.expected: step2. result equals.
      */
     std::unique_ptr<GestureEventFunc> onAction;
-    rotationRecognizer.SendCallbackMsg(onAction);
-    EXPECT_EQ(rotationRecognizer.touchPoints_.size(), 0);
-
-    /**
-     * @tc.steps: step2. call SendCallbackMsg function and compare result.
-     * @tc.steps: case2: onAction is yes, *onAction is no
-     * @tc.expected: step2. result equals.
-     */
-    onAction = std::make_unique<GestureEventFunc>();
-    rotationRecognizer.SendCallbackMsg(onAction);
-    EXPECT_EQ(rotationRecognizer.touchPoints_.size(), 0);
-
-    /**
-     * @tc.steps: step2. call SendCallbackMsg function and compare result.
-     * @tc.steps: case3: onAction is yes, *onAction is yes, touchEvent is empty
-     * @tc.expected: step2. result equals.
-     */
-    onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
-    rotationRecognizer.SendCallbackMsg(onAction);
-    EXPECT_EQ(rotationRecognizer.touchPoints_.size(), 0);
-
-    /**
-     * @tc.steps: step2. call SendCallbackMsg function and compare result.
-     * @tc.steps: case4: touchEvent is not empty, have no X and Y
-     * @tc.expected: step2. result equals.
-     */
-    TouchEvent touchEvent;
-    rotationRecognizer.touchPoints_[touchEvent.id] = touchEvent;
+    TouchEvent touchEvent1;
+    rotationRecognizer.touchPoints_[touchEvent1.id] = touchEvent1;
     rotationRecognizer.SendCallbackMsg(onAction);
     EXPECT_EQ(rotationRecognizer.touchPoints_.size(), 1);
 
     /**
      * @tc.steps: step2. call SendCallbackMsg function and compare result.
-     * @tc.steps: case4: touchEvent is not empty, have no X and Y
+     * @tc.steps: case3: callback is ptr, have no tiltX
      * @tc.expected: step2. result equals.
      */
-    touchEvent.tiltX = 0.0f;
-    touchEvent.tiltY = 0.0f;
-    rotationRecognizer.touchPoints_[touchEvent.id] = touchEvent;
+    TouchEvent touchEvent2;
+    touchEvent2.tiltY = 0.0f;
+    rotationRecognizer.touchPoints_[touchEvent2.id] = touchEvent2;
+    rotationRecognizer.SendCallbackMsg(onAction);
+    EXPECT_EQ(rotationRecognizer.touchPoints_.size(), 1);
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case4: callback is ptr, have tiltX and tiltY
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent3;
+    touchEvent3.tiltX = 0.0f;
+    touchEvent3.tiltY = 0.0f;
+    rotationRecognizer.touchPoints_[touchEvent3.id] = touchEvent3;
     rotationRecognizer.SendCallbackMsg(onAction);
     EXPECT_EQ(rotationRecognizer.touchPoints_.size(), 1);
 }
@@ -3919,26 +3899,6 @@ HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest004, TestSize.Level1)
     sequencedRecognizer.disposal_ = GestureDisposal::PENDING;
     sequencedRecognizer.OnBlocked();
     EXPECT_EQ(sequencedRecognizer.refereeState_, RefereeState::PENDING_BLOCKED);
-
-    /**
-     * @tc.steps: step2. call OnBlocked function and compare result.
-     * @tc.steps: case5: recognizers_ is not empty nullptr, disposal is ACCEPT
-     * @tc.expected: step2. result equals.
-     */
-    sequencedRecognizer.disposal_ = GestureDisposal::ACCEPT;
-    sequencedRecognizer.recognizers_.clear();
-    sequencedRecognizer.recognizers_.push_back(nullptr);
-    sequencedRecognizer.OnBlocked();
-    EXPECT_EQ(sequencedRecognizer.refereeState_, RefereeState::SUCCEED_BLOCKED);
-
-    /**
-     * @tc.steps: step2. call OnBlocked function and compare result.
-     * @tc.steps: case6: recognizers_ is not empty nullptr, disposal is PENDING
-     * @tc.expected: step2. result equals.
-     */
-    sequencedRecognizer.disposal_ = GestureDisposal::PENDING;
-    sequencedRecognizer.OnBlocked();
-    EXPECT_EQ(sequencedRecognizer.refereeState_, RefereeState::PENDING_BLOCKED);
 }
 
 /**
@@ -4091,17 +4051,6 @@ HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest007, TestSize.Level1)
      */
     touchEvent.type = TouchType::DOWN;
     sequencedRecognizer.refereeState_ = RefereeState::PENDING;
-    result = sequencedRecognizer.HandleEvent(touchEvent);
-    EXPECT_EQ(result, true);
-
-    /**
-     * @tc.steps: step2. call HandleEvent function and compare result.
-     * @tc.steps: case11: point.type = DOWN, size > 1
-     * @tc.expected: step2. result equals.
-     */
-    touchEvent.type = TouchType::DOWN;
-    sequencedRecognizer.touchPoints_[0] = touchEvent;
-    sequencedRecognizer.touchPoints_[1] = touchEvent;
     result = sequencedRecognizer.HandleEvent(touchEvent);
     EXPECT_EQ(result, true);
 }
