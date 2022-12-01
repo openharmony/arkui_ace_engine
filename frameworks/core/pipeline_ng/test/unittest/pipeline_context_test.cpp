@@ -888,4 +888,101 @@ HWTEST_F(PipelineContextTest, PipelineContextTest021, TestSize.Level1)
     context_->OnAxisEvent(event);
     EXPECT_EQ(eventManager->GetInstanceId(), DEFAULT_INT1);
 }
+
+/**
+ * @tc.name: PipelineContextTest022
+ * @tc.desc: Test the function OnKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTest, PipelineContextTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    context_->SetupRootElement();
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    context_->SetEventManager(eventManager);
+    KeyEvent event;
+
+    /**
+     * @tc.steps2: Call the function OnKeyEvent with isNeedShowFocus_ = false, action = KeyAction::DOWN and
+     #             pressedCodes = { KeyCode::KEY_TAB }.
+     * @tc.expected: The return value of OnKeyEvent is true.
+     */
+    context_->SetIsNeedShowFocus(false);
+    event.action = KeyAction::DOWN;
+    event.pressedCodes = { KeyCode::KEY_TAB };
+    EXPECT_TRUE(context_->OnKeyEvent(event));
+    EXPECT_TRUE(context_->GetIsNeedShowFocus());
+
+    /**
+     * @tc.steps3: Call the function OnKeyEvent with isNeedShowFocus_ = false, action = KeyAction::DOWN and
+     #             pressedCodes = { KeyCode::KEY_DPAD_UP }.
+     * @tc.expected: The return value of OnKeyEvent is true.
+     */
+    context_->SetIsNeedShowFocus(false);
+    event.pressedCodes = { KeyCode::KEY_DPAD_UP };
+    eventManager->SetInstanceId(DEFAULT_INT0);
+    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_FALSE(context_->GetIsNeedShowFocus());
+
+    /**
+     * @tc.steps4: Call the function OnKeyEvent with isNeedShowFocus_ = false, action = KeyAction::UP and
+     #             pressedCodes = { KeyCode::KEY_CLEAR }.
+     * @tc.expected: The return value of OnKeyEvent is true.
+     */
+    eventManager->SetInstanceId(DEFAULT_INT0);
+    context_->SetIsNeedShowFocus(false);
+    event.action = KeyAction::UP;
+    event.pressedCodes = { KeyCode::KEY_CLEAR };
+    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_FALSE(context_->GetIsNeedShowFocus());
+
+    /**
+     * @tc.steps4: Call the function OnKeyEvent with isNeedShowFocus_ = true, action = KeyAction::UP and
+     #             pressedCodes = { KeyCode::KEY_CLEAR }.
+     * @tc.expected: The return value of OnKeyEvent is false.
+     */
+    eventManager->SetInstanceId(DEFAULT_INT1);
+    context_->SetIsNeedShowFocus(true);
+    event.action = KeyAction::UP;
+    event.pressedCodes = { KeyCode::KEY_CLEAR };
+    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_TRUE(context_->GetIsNeedShowFocus());
+}
+
+/**
+ * @tc.name: PipelineContextTest023
+ * @tc.desc: Test the function OnMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTest, PipelineContextTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    context_->SetupRootElement();
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    context_->SetEventManager(eventManager);
+    MouseEvent event;
+    event.x = DEFAULT_INT1;
+
+    /**
+     * @tc.steps2: Call the function OnMouseEvent with action = MouseAction::HOVER
+     *             and button == MouseButton::BACK_BUTTON.
+     * @tc.expected: The instanceId is unequal to 4.
+     */
+    event.action = MouseAction::HOVER;
+    event.button = MouseButton::BACK_BUTTON;
+    event.pressedButtons = DEFAULT_INT0;
+    eventManager->SetInstanceId(DEFAULT_INT0);
+    context_->OnMouseEvent(event);
+    EXPECT_EQ(eventManager->GetInstanceId(), DEFAULT_INT4);
+}
 } // namespace OHOS::Ace::NG
