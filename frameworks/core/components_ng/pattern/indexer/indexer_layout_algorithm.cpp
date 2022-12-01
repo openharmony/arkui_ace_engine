@@ -49,7 +49,8 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     SizeF maxSize = layoutConstraint.maxSize;
 
     usingPopup_ = indexerLayoutProperty->GetUsingPopup().value_or(false);
-    auto itemSize = indexerLayoutProperty->GetItemSize().value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP));
+    auto indexerItemSize = Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP);
+    auto itemSize = indexerLayoutProperty->GetItemSize().value_or(indexerItemSize);
     if (GreatNotEqual(itemSize.ConvertToPx(), 0.0)) {
         itemSize_ = ConvertToPx(itemSize, layoutConstraint.scaleProperty, maxSize.Height()).value();
     } else {
@@ -86,6 +87,10 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (usingPopup_) {
         auto popupListWrapper = layoutWrapper->GetOrCreateChildByIndex(itemCount_);
         CHECK_NULL_VOID(popupListWrapper);
+        if (popupSize_ == 1) {
+            auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
+            childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(bubbleSize, bubbleSize));
+        }
         popupListWrapper->Measure(childLayoutConstraint);
         uint32_t listWidth = 0;
         uint32_t listHeight = 0;
