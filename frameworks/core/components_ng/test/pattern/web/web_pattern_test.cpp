@@ -22,7 +22,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/frontend.h"
+#include "core/components/web/resource/web_delegate.h"
 #include "core/common/window.h"
+#include "core/event/touch_event.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -181,6 +183,7 @@ HWTEST_F(WebPatternTest, OnModifyDoneTest001, TestSize.Level1)
     int32_t width = 1;
     int32_t height = 1;
     double keyboard = 0;
+    g_webPattern->isFocus_ = false;
     g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
     g_webPattern->isFocus_ = true;
     g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
@@ -189,6 +192,29 @@ HWTEST_F(WebPatternTest, OnModifyDoneTest001, TestSize.Level1)
     g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_HIDE;
     g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
     g_webPattern->UpdateWebLayoutSize(width, height);
+    TouchEventInfo info("test");
+    info.changedTouches_.clear();
+    g_webPattern->touchEvent_->callback_(info);
+    TouchLocationInfo touch(1);
+    info.changedTouches_.emplace_back(touch);
+    g_webPattern->touchEvent_->callback_(info);
+
+    info.SetSourceDevice(SourceType::NONE);
+    g_webPattern->touchEvent_->callback_(info);
+    info.SetSourceDevice(SourceType::TOUCH);
+    g_webPattern->touchEvent_->callback_(info);
+
+    touch.SetTouchType(TouchType::DOWN);
+    g_webPattern->touchEvent_->callback_(info);
+
+    touch.SetTouchType(TouchType::MOVE);
+    g_webPattern->touchEvent_->callback_(info);
+
+    touch.SetTouchType(TouchType::UP);
+    g_webPattern->touchEvent_->callback_(info);
+
+    touch.SetTouchType(TouchType::CANCEL);
+    g_webPattern->touchEvent_->callback_(info);
 #endif
 }
 
@@ -201,6 +227,7 @@ HWTEST_F(WebPatternTest, HandleTouchDownTest002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     int32_t fingerId = 0;
+    g_webPattern->OnModifyDone();
     TouchLocationInfo info("webtest", fingerId);
     TouchEventInfo event("webtest");
     g_webPattern->HandleTouchDown(event, true);
@@ -358,6 +385,9 @@ HWTEST_F(WebPatternTest, UpdateTouchHandleForOverlayTest007, TestSize.Level1)
     g_webPattern->endSelectionHandle_.reset();
     g_webPattern->UpdateTouchHandleForOverlay();
 
+    int32_t selectOverlayId = 1;
+    g_webPattern->selectOverlayProxy_ = new SelectOverlayProxy(selectOverlayId);
+    g_webPattern->UpdateTouchHandleForOverlay();
     g_webPattern->insertHandle_.reset();
     g_webPattern->startSelectionHandle_ = std::make_shared<NWebTouchHandleStateMock>();
     g_webPattern->endSelectionHandle_ = std::make_shared<NWebTouchHandleStateMock>();
@@ -390,7 +420,17 @@ HWTEST_F(WebPatternTest, OnOverviewModeAccessEnabledUpdateTest008, TestSize.Leve
     g_webPattern->OnBackgroundColorUpdate(value);
     g_webPattern->OnInitialScaleUpdate(scale);
     g_webPattern->OnMultiWindowAccessEnabledUpdate(true);
-
+    GestureEvent info;
+    g_webPattern->isW3cDragEvent_ = false;
+    g_webPattern->HandleDragStart(info);
+    g_webPattern->isW3cDragEvent_ = true;
+    g_webPattern->HandleDragStart(info);
+    DragDropInfo dragDropInfo;
+    bool result = g_webPattern->GenerateDragDropInfo(dragDropInfo);
+    EXPECT_FALSE(result);
+    g_webPattern->delegate_->pixelMap_ = nullptr;
+    result = g_webPattern->GenerateDragDropInfo(dragDropInfo);
+    EXPECT_FALSE(result);
     RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
     RefPtr<WebPattern> webPattern = AceType::MakeRefPtr<WebPattern>("test", controller);
     EXPECT_NE(webPattern, nullptr);
@@ -403,10 +443,94 @@ HWTEST_F(WebPatternTest, OnOverviewModeAccessEnabledUpdateTest008, TestSize.Leve
     webPattern->OnBackgroundColorUpdate(value);
     webPattern->OnInitialScaleUpdate(scale);
     webPattern->OnMultiWindowAccessEnabledUpdate(true);
+    webPattern->isW3cDragEvent_ = true;
+    webPattern->HandleDragStart(info);
+    webPattern->isW3cDragEvent_ = false;
+    webPattern->HandleDragStart(info);
+    result = webPattern->GenerateDragDropInfo(dragDropInfo);
+    EXPECT_FALSE(result);
     g_webPattern->RegistVirtualKeyBoardListener();
     g_webPattern->needUpdateWeb_ = false;
     g_webPattern->RegistVirtualKeyBoardListener();
     g_webPattern->OnQuickMenuDismissed();
 #endif
 }
-} // namespace OHOS::Ace::NG
+
+/**
+ * @tc.name: HandleDoubleClickEventTest009
+ * @tc.desc: Test HandleDoubleClickEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, HandleDoubleClickEventTest009, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    MouseInfo info;
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetAction(MouseAction::NONE);
+    std::queue<MouseClickInfo> empty;
+    swap(empty, g_webPattern->doubleClickQueue_);
+    g_webPattern->HandleDoubleClickEvent(info);
+    g_webPattern->HandleDoubleClickEvent(info);
+#endif
+}
+
+/**
+ * @tc.name: HandleDragUpdateTest010
+ * @tc.desc: Test HandleDragUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, HandleDragUpdateTest010, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    g_webPattern->OnModifyDone();
+    GestureEvent info;
+    g_webPattern->isW3cDragEvent_ = false;
+    g_webPattern->HandleDragUpdate(info);
+    g_webPattern->HandleDragCancel();
+    g_webPattern->HandleDragEnd(info);
+    g_webPattern->isW3cDragEvent_ = true;
+    g_webPattern->HandleDragUpdate(info);
+    g_webPattern->HandleDragCancel();
+    g_webPattern->HandleDragEnd(info);
+    g_webPattern->needUpdateWeb_ = false;
+    g_webPattern->RegistVirtualKeyBoardListener();
+   
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    RefPtr<WebPattern> webPattern = AceType::MakeRefPtr<WebPattern>("test", controller);
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->isW3cDragEvent_ = true;
+    webPattern->HandleDragUpdate(info);
+    g_webPattern->HandleDragEnd(info);
+    g_webPattern->HandleDragCancel();
+    webPattern->isW3cDragEvent_ = false;
+    webPattern->HandleDragUpdate(info);
+    g_webPattern->HandleDragEnd(info);
+    g_webPattern->HandleDragCancel();
+#endif
+}
+
+/**
+ * @tc.name: OnWindowShowTest011
+ * @tc.desc: Test OnWindowShow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, OnWindowShowTest011, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    g_webPattern->OnModifyDone();
+    g_webPattern->isWindowShow_ = true;
+    g_webPattern->OnWindowShow();
+    g_webPattern->OnWindowHide();
+    g_webPattern->isWindowShow_ = false;
+    g_webPattern->OnWindowHide();
+    g_webPattern->OnWindowShow();
+
+    g_webPattern->isActive_ = true;
+    g_webPattern->OnActive();
+    g_webPattern->OnInActive();
+    g_webPattern->isActive_ = false;
+    g_webPattern->OnInActive();
+    g_webPattern->OnActive();
+#endif
+}
+}
