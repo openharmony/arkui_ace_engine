@@ -52,6 +52,12 @@ void PagePattern::OnAttachToFrameNode()
 
 bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*wrapper*/, const DirtySwapConfig& /*config*/)
 {
+    if (isFirstLoad_) {
+        isFirstLoad_ = false;
+        if (firstBuildCallback_) {
+            firstBuildCallback_();
+        }
+    }
     return false;
 }
 
@@ -182,6 +188,15 @@ RefPtr<Framework::AnimatorInfo> PagePattern::GetJsAnimator(const std::string& an
         return iter->second;
     }
     return nullptr;
+}
+
+void PagePattern::SetFirstBuildCallback(std::function<void()>&& buildCallback)
+{
+    if (isFirstLoad_) {
+        firstBuildCallback_ = std::move(buildCallback);
+    } else if (buildCallback) {
+        buildCallback();
+    }
 }
 
 } // namespace OHOS::Ace::NG
