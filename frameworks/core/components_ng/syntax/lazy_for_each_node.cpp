@@ -15,12 +15,6 @@
 
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 
-#include <algorithm>
-#include <cstdint>
-#include <iterator>
-#include <optional>
-#include <utility>
-
 #include "base/memory/referenced.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
@@ -139,6 +133,7 @@ void LazyForEachNode::OnDataReloaded()
     startIndex_ = -1;
     endIndex_ = -1;
     ids_.clear();
+    NotifyDataCountChanged(0);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
@@ -169,6 +164,7 @@ void LazyForEachNode::OnDataAdded(size_t index)
         ids_.insert(iter, std::nullopt);
     }
     endIndex_++;
+    NotifyDataCountChanged(insertIndex);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
@@ -198,6 +194,7 @@ void LazyForEachNode::OnDataDeleted(size_t index)
         ids_.erase(iter);
     }
     endIndex_--;
+    NotifyDataCountChanged(deletedIndex);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
@@ -225,6 +222,7 @@ void LazyForEachNode::OnDataMoved(size_t from, size_t to)
         LOGI("both out of range, ignored");
         return;
     }
+    NotifyDataCountChanged(startIndex_ + std::min(from, to));
     if (fromOutOfRange && !toOutOfRange) {
         auto iter = ids_.begin();
         std::advance(iter, toIndex - startIndex_);
@@ -249,4 +247,11 @@ void LazyForEachNode::OnDataMoved(size_t from, size_t to)
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
+void LazyForEachNode::NotifyDataCountChanged(size_t index)
+{
+    auto parent = GetParent();
+    if (parent) {
+        parent->ChildrenUpdatedFrom(static_cast<int32_t>(index));
+    }
+}
 } // namespace OHOS::Ace::NG
