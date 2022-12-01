@@ -141,11 +141,8 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
-        if (jsView->viewNode_.Invalid()) {
-            if (jsView->jsViewFunction_) {
-                jsView->jsViewFunction_->ExecuteAppear();
-            }
-            jsView->isAboutToAppearProcessed_ = true;
+        if (jsView->viewNode_.Invalid() && jsView->jsViewFunction_) {
+            jsView->jsViewFunction_->ExecuteAppear();
         }
     };
 
@@ -174,9 +171,8 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
 
     auto removeFunction = [weak = AceType::WeakClaim(this)]() -> void {
         auto jsView = weak.Upgrade();
-        if (jsView) {
-            jsView->Destroy(nullptr);
-            jsView->viewNode_.Reset();
+        if (jsView && jsView->jsViewFunction_) {
+            jsView->jsViewFunction_->ExecuteDisappear();
         }
     };
 
@@ -216,10 +212,9 @@ void JSViewFullUpdate::Destroy(JSView* parentCustomView)
 {
     LOGD("JSViewFullUpdate::Destroy start");
     DestroyChild(parentCustomView);
-    if (isAboutToAppearProcessed_) {
+    {
         ACE_SCORING_EVENT("Component[" + viewId_ + "].Disappear");
         jsViewFunction_->ExecuteDisappear();
-        isAboutToAppearProcessed_ = false;
     }
     {
         ACE_SCORING_EVENT("Component[" + viewId_ + "].AboutToBeDeleted");
