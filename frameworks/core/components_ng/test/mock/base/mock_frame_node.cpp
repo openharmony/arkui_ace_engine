@@ -35,6 +35,7 @@ void FrameNode::SetActive(bool active)
 {
     isActive_ = active;
 }
+void FrameNode::OnVisibleChange(bool isVisible) {}
 void FrameNode::PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType) {}
 void FrameNode::RebuildRenderContextTree() {}
 void FrameNode::MarkModifyDone()

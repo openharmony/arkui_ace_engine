@@ -437,6 +437,13 @@ void UINode::SetActive(bool active)
     }
 }
 
+void UINode::OnVisibleChange(bool isVisible)
+{
+    for (const auto& child: GetChildren()) {
+        child->OnVisibleChange(isVisible);
+    }
+}
+
 std::pair<bool, int32_t> UINode::GetChildFlatIndex(int32_t id)
 {
     if (GetId() == id) {

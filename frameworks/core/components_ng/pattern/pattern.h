@@ -256,6 +256,9 @@ public:
     // get XTS inspector value
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 
+    virtual void OnAreaChangedInner() {}
+    virtual void OnVisibleChange(bool isVisible) {}
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
