@@ -16,6 +16,7 @@
 #include "core/common/plugin_manager.h"
 
 #include "base/log/log.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 std::shared_ptr<PluginUtils> PluginManager::pluginUtils_ = nullptr;
@@ -91,10 +92,7 @@ int64_t PluginManager::GetPluginSubContainerId()
 int32_t PluginManager::StartAbility(
     const std::string& bundleName, const std::string& abilityName, const std::string& params)
 {
-    if (!pluginUtils_) {
-        LOGE("PluginUtils is nullptr.");
-        return -1;
-    }
+    CHECK_NULL_RETURN(pluginUtils_, -1);
     return pluginUtils_->StartAbility(bundleName, abilityName, params);
 }
 

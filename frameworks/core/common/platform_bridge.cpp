@@ -16,6 +16,7 @@
 #include "core/common/platform_bridge.h"
 
 #include "base/log/log.h"
+#include "base/utils/utils.h"
 #include "frameworks/bridge/codec/function_call.h"
 #include "frameworks/bridge/codec/standard_function_codec.h"
 
@@ -41,11 +42,8 @@ void PlatformBridge::SendMessage(const std::vector<CodecData>& args, const Platf
     codec.EncodeFunctionCall(functionCall, dataBuf);
 
     auto dispatcher = dispatcher_.Upgrade();
-    if (dispatcher) {
-        dispatcher->Dispatch(INTERNAL_MODULE_GROUP, std::move(dataBuf), callbackId, true);
-    } else {
-        LOGE("SendMessage failed: dispatcher is null");
-    }
+    CHECK_NULL_VOID(dispatcher);
+    dispatcher->Dispatch(INTERNAL_MODULE_GROUP, std::move(dataBuf), callbackId, true);
 }
 
 void PlatformBridge::HandleCallback(int32_t callbackId, std::vector<uint8_t>&& messageData)

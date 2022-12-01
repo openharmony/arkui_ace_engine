@@ -77,10 +77,7 @@ void ScrollBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // Measure child.
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    if (!childWrapper) {
-        LOGI("There is no child.");
-        return;
-    }
+    CHECK_NULL_VOID(childWrapper);
     childWrapper->Measure(childLayoutConstraint);
 
     // Use child size when self idea size of scroll is not setted.

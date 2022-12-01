@@ -22,6 +22,7 @@
 #include "base/log/log.h"
 #include "base/memory/memory_monitor.h"
 #include "base/thread/background_task_executor.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_page.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
@@ -129,30 +130,26 @@ RefPtr<Container> AceEngine::GetContainer(int32_t instanceId)
 
 void AceEngine::RegisterToWatchDog(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor, bool useUIAsJSThread)
 {
-    if (watchDog_) {
-        watchDog_->Register(instanceId, taskExecutor, useUIAsJSThread);
-    }
+    CHECK_NULL_VOID_NOLOG(watchDog_);
+    watchDog_->Register(instanceId, taskExecutor, useUIAsJSThread);
 }
 
 void AceEngine::UnRegisterFromWatchDog(int32_t instanceId)
 {
-    if (watchDog_) {
-        watchDog_->Unregister(instanceId);
-    }
+    CHECK_NULL_VOID_NOLOG(watchDog_);
+    watchDog_->Unregister(instanceId);
 }
 
 void AceEngine::BuriedBomb(int32_t instanceId, uint64_t bombId)
 {
-    if (watchDog_) {
-        watchDog_->BuriedBomb(instanceId, bombId);
-    }
+    CHECK_NULL_VOID_NOLOG(watchDog_);
+    watchDog_->BuriedBomb(instanceId, bombId);
 }
 
 void AceEngine::DefusingBomb(int32_t instanceId)
 {
-    if (watchDog_) {
-        watchDog_->DefusingBomb(instanceId);
-    }
+    CHECK_NULL_VOID_NOLOG(watchDog_);
+    watchDog_->DefusingBomb(instanceId);
 }
 
 void AceEngine::TriggerGarbageCollection()
@@ -185,9 +182,7 @@ void AceEngine::TriggerGarbageCollection()
 
 void AceEngine::NotifyContainers(const std::function<void(const RefPtr<Container>&)>& callback)
 {
-    if (!callback) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(callback);
     std::shared_lock<std::shared_mutex> lock(mutex_);
     for (const auto& [first, second] : containerMap_) {
         // first = container ID

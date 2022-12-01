@@ -28,12 +28,11 @@ constexpr int32_t SURFACE_QUEUE_SIZE = 5;
 } // namespace
 RosenRenderSurface::~RosenRenderSurface()
 {
-    if (producerSurface_) {
-        auto* surfaceUtils = SurfaceUtils::GetInstance();
-        auto ret = surfaceUtils->Remove(producerSurface_->GetUniqueId());
-        if (ret != SurfaceError::SURFACE_ERROR_OK) {
-            LOGE("remove surface error: %{public}d", ret);
-        }
+    CHECK_NULL_VOID_NOLOG(producerSurface_);
+    auto* surfaceUtils = SurfaceUtils::GetInstance();
+    auto ret = surfaceUtils->Remove(producerSurface_->GetUniqueId());
+    if (ret != SurfaceError::SURFACE_ERROR_OK) {
+        LOGE("remove surface error: %{public}d", ret);
     }
 }
 
@@ -45,9 +44,8 @@ void RosenRenderSurface::InitSurface()
     auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
     auto surfaceNode =
         OHOS::Rosen::RSBaseNode::ReinterpretCast<OHOS::Rosen::RSSurfaceNode>(rosenRenderContext->GetRSNode());
-    if (surfaceNode) {
-        producerSurface_ = surfaceNode->GetSurface();
-    }
+    CHECK_NULL_VOID_NOLOG(surfaceNode);
+    producerSurface_ = surfaceNode->GetSurface();
 }
 
 void RosenRenderSurface::UpdateXComponentConfig()
@@ -77,10 +75,9 @@ void RosenRenderSurface::SetRenderContext(const RefPtr<RenderContext>& renderCon
 
 void RosenRenderSurface::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight)
 {
-    if (producerSurface_) {
-        producerSurface_->SetUserData("SURFACE_WIDTH", std::to_string(surfaceWidth));
-        producerSurface_->SetUserData("SURFACE_HEIGHT", std::to_string(surfaceHeight));
-    }
+    CHECK_NULL_VOID_NOLOG(producerSurface_);
+    producerSurface_->SetUserData("SURFACE_WIDTH", std::to_string(surfaceWidth));
+    producerSurface_->SetUserData("SURFACE_HEIGHT", std::to_string(surfaceHeight));
 }
 
 bool RosenRenderSurface::IsSurfaceValid() const
@@ -95,11 +92,8 @@ void RosenRenderSurface::CreateNativeWindow()
 
 void RosenRenderSurface::AdjustNativeWindowSize(uint32_t width, uint32_t height)
 {
-    if (nativeWindow_) {
-        NativeWindowHandleOpt(nativeWindow_, SET_BUFFER_GEOMETRY, width, height);
-    } else {
-        LOGE("nativeWindow is null");
-    }
+    CHECK_NULL_VOID(nativeWindow_);
+    NativeWindowHandleOpt(nativeWindow_, SET_BUFFER_GEOMETRY, width, height);
 }
 
 std::string RosenRenderSurface::GetUniqueId() const

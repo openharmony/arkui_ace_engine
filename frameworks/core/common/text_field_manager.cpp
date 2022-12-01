@@ -15,6 +15,7 @@
 
 #include "core/common/text_field_manager.h"
 
+#include "base/utils/utils.h"
 #include "core/components/scroll/render_scroll.h"
 #include "core/components/scroll/scroll_element.h"
 #include "core/pipeline/base/composed_element.h"
@@ -41,14 +42,9 @@ void TextFieldManager::MovePage(int32_t pageId, const Offset& rootRect, double o
         return;
     }
     auto scrollElement = iter->second.Upgrade();
-    if (!scrollElement) {
-        return;
-    }
-
+    CHECK_NULL_VOID_NOLOG(scrollElement);
     const auto& scroll = AceType::DynamicCast<RenderScroll>(scrollElement->GetRenderNode());
-    if (!scroll) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(scroll);
     if (GreatNotEqual(position_.GetY(), rootRect.GetY())) {
         hasMove_ = true;
         scroll->SetNeedMove(true);
@@ -83,14 +79,10 @@ const Offset& TextFieldManager::GetClickPosition()
 bool TextFieldManager::UpdatePanelForVirtualKeyboard(double offsetY, double fullHeight)
 {
     auto onFocusTextField = onFocusTextField_.Upgrade();
-    if (!onFocusTextField) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(onFocusTextField, false);
 #ifndef NG_BUILD
     auto slidingPanelParent = onFocusTextField->GetSlidingPanelAncest();
-    if (!slidingPanelParent) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(slidingPanelParent, false);
     if (GreatNotEqual(onFocusTextField->GetPaintRect().Height() +
         onFocusTextField->GetGlobalOffset().GetY(), fullHeight)) {
         LOGI("Raising panel with offset %{public}f",
@@ -107,14 +99,10 @@ bool TextFieldManager::UpdatePanelForVirtualKeyboard(double offsetY, double full
 bool TextFieldManager::ResetSlidingPanelParentHeight()
 {
     auto onFocusTextField = onFocusTextField_.Upgrade();
-    if (!onFocusTextField) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(onFocusTextField, false);
 #ifndef NG_BUILD
     auto slidingPanelParent = onFocusTextField->GetSlidingPanelAncest();
-    if (!slidingPanelParent) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(slidingPanelParent, false);
     slidingPanelParent->UpdatePanelHeightByCurrentMode();
 #endif
     return true;
