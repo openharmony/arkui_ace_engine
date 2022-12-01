@@ -35,6 +35,9 @@ std::optional<SizeF> PathLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(host, std::nullopt);
     auto paintProperty = host->GetPaintProperty<PathPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, std::nullopt);
+    if (propertiesFromAncestor_) {
+        paintProperty->UpdateShapeProperty(propertiesFromAncestor_);
+    }
 
     auto pathCommands = paintProperty->GetCommandsValue("");
     CHECK_NULL_RETURN(!pathCommands.empty(), SizeF());
@@ -47,7 +50,7 @@ std::optional<SizeF> PathLayoutAlgorithm::MeasureContent(
     if (NearZero(right) && NearZero(bottom)) {
         return SizeF();
     }
-    auto lineWidth = static_cast<float>(paintProperty->GetStrokeWidthValue().ConvertToPx());
+    auto lineWidth = static_cast<float>(paintProperty->GetStrokeWidthValue(1.0_px).ConvertToPx());
     if (NearZero(right)) {
         right += lineWidth;
     }
