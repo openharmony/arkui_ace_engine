@@ -22,17 +22,11 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/scroll_bar.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-
-struct ScrollBarProperty {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarMode, DisplayMode);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarWidth, Dimension);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarColor, Color);
-};
 
 class ACE_EXPORT GridLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(GridLayoutProperty, LayoutProperty);
@@ -54,7 +48,6 @@ public:
         value->propMaxCount_ = CloneMaxCount();
         value->propMinCount_ = CloneMinCount();
         value->propCellLength_ = CloneCellLength();
-        value->propScrollBarProperty_ = CloneScrollBarProperty();
         return value;
     }
 
@@ -70,7 +63,6 @@ public:
         ResetMaxCount();
         ResetMinCount();
         ResetCellLength();
-        ResetScrollBarProperty();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -138,11 +130,6 @@ public:
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Editable, bool, PROPERTY_UPDATE_LAYOUT);
-
-    ACE_DEFINE_PROPERTY_GROUP(ScrollBarProperty, ScrollBarProperty);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarMode, DisplayMode, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarColor, Color, PROPERTY_UPDATE_RENDER);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutProperty);
