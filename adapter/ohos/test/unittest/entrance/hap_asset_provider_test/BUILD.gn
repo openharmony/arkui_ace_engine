@@ -32,13 +32,15 @@ ohos_unittest("HapAssetProviderTest") {
   deps = [
     "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
     "$ability_runtime_path/frameworks/native/ability/native:data_ability_helper",
-    "$ability_runtime_path/frameworks/native/runtime:runtime_extractor",
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_root/adapter/ohos/osal:ace_osal_ohos",
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/bridge:framework_bridge_ohos",
     "$ace_root/frameworks/core:ace_core_ohos",
   ]
+
+  external_deps = [ "ability_base:extractortool" ]
+
   part_name = ace_engine_part
 }
 
