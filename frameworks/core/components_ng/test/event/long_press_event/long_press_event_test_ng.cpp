@@ -127,6 +127,11 @@ HWTEST_F(LongPressEventTestNg, LongPressEventActuatorTest002, TestSize.Level1)
         COORDINATE_OFFSET, LONG_PRESS_TOUCH_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
     EXPECT_EQ(result.size(), LONG_PRESS_TEST_RESULT_SIZE);
     EXPECT_EQ(longPressEventActuator->longPressRecognizer_, nullptr);
+    /**
+     * @tc.steps: step2.1. Execute callback when longPressEvent_ and onAccessibilityEventFunc_ are nullptr.
+     */
+    GestureEvent info;
+    longPressEventActuator->GetGestureEventFunc()(info);
 
     /**
      * @tc.steps: step3. Create LongPressEvent.
@@ -153,13 +158,20 @@ HWTEST_F(LongPressEventTestNg, LongPressEventActuatorTest002, TestSize.Level1)
     EXPECT_EQ(longPressEventActuator->isDisableMouseLeft_, true);
 
     /**
-     * @tc.steps: step2. Invoke OnCollectTouchTarget when longPressEvent_ is not nullptr.
+     * @tc.steps: step6. Invoke OnCollectTouchTarget when longPressEvent_ is not nullptr but longPressRecognizer_ is nullptr.
      * @tc.expected:  TouchTestResult size has been increased one.
      */
     EXPECT_EQ(longPressEventActuator->longPressRecognizer_, nullptr);
+    longPressEventActuator->longPressRecognizer_ = nullptr;
     longPressEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, LONG_PRESS_TOUCH_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
     EXPECT_EQ(longPressEventActuator->longPressRecognizer_->GetCoordinateOffset(), Offset(WIDTH, HEIGHT));
     EXPECT_EQ(result.size(), LONG_PRESS_TEST_RESULT_SIZE_1);
+    /**
+     * @tc.steps: step6.1. Execute callback when longPressEvent_ and onAccessibilityEventFunc_ are not nullptr.
+     */
+    const OnAccessibilityEventFunc onAccessibility = [](AccessibilityEventType type) {};
+    longPressEventActuator->SetOnAccessibility(onAccessibility);
+    longPressEventActuator->GetGestureEventFunc()(info);
 }
 } // namespace OHOS::Ace::NG

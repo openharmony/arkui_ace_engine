@@ -125,5 +125,4 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     result.emplace_back(SequencedRecognizer_);
 }
-
 } // namespace OHOS::Ace::NG
