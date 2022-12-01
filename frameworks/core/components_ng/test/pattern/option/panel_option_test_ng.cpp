@@ -24,7 +24,7 @@
 #include "frameworks/core/components_ng/layout/layout_wrapper.h"
 #include "frameworks/core/components_ng/property/geometry_property.h"
 #include "frameworks/core/components_ng/property/measure_property.h"
-#undef priate
+#undef private
 #undef protected
 
 #include "gtest/gtest.h"
