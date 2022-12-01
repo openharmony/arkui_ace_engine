@@ -40,6 +40,7 @@ group("pattern_unittest") {
     "marquee:marquee_pattern_unit_test",
     "panel:panel_pattern_test_ng",
     "patternlock:patternlock_pattern_test_ng",
+    "progress:progress_pattern_test_ng",
     "qrcode:qrcode_pattern_test_ng",
     "radio:radio_pattern_test_ng",
     "rating:rating_pattern_test_ng",
