@@ -468,7 +468,7 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
         }
     }
 
-    CHECK_NULL_VOID(checkBoxGroupNode);
+    CHECK_NULL_VOID_NOLOG(checkBoxGroupNode);
     auto groupPaintProperty = checkBoxGroupNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
     if (groupPaintProperty->GetIsCheckBoxCallbackDealed()) {
         return;
