@@ -426,9 +426,8 @@ template("declarative_js_engine") {
     }
 
     if (defined(config.window_scene_support) && config.window_scene_support) {
-      sources += []
+      sources += [ "jsview/window_scene/js_host_window_scene.cpp" ]
     }
-
 
     deps += [ "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform" ]
 
