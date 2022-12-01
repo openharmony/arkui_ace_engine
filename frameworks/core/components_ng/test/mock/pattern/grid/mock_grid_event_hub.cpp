@@ -31,6 +31,11 @@ int32_t GridEventHub::GetGridItemIndex(const RefPtr<FrameNode>& /* frameNode */)
     return 0;
 }
 
+int GetFrameNodeChildSize()
+{
+    return 0;
+}
+
 void GridEventHub::FireOnItemDragEnter(const ItemDragInfo& /* dragInfo */) {}
 
 void GridEventHub::FireOnItemDragLeave(const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */) {}

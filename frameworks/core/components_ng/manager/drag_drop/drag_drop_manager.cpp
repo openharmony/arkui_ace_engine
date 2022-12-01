@@ -286,8 +286,7 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
         auto itemFrameNode = eventHub->FindGridItemByPosition(globalX, globalY);
         int32_t insertIndex = -1;
         if (!itemFrameNode && eventHub->CheckPostionInGrid(globalX, globalY)) {
-            auto pattern = AceType::DynamicCast<GridPattern>(eventHub->GetFrameNode()->GetPattern());
-            insertIndex = pattern->GetGridLayoutInfo().childrenCount_;
+            insertIndex = eventHub->GetFrameNodeChildSize();
         } else {
             insertIndex = eventHub->GetGridItemIndex(itemFrameNode);
         }
@@ -335,8 +334,7 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
         auto itemFrameNode = eventHub->FindGridItemByPosition(globalX, globalY);
         int32_t insertIndex = -1;
         if (!itemFrameNode && eventHub->CheckPostionInGrid(globalX, globalY)) {
-            auto pattern = AceType::DynamicCast<GridPattern>(eventHub->GetFrameNode()->GetPattern());
-            insertIndex = pattern->GetGridLayoutInfo().childrenCount_;
+            insertIndex = eventHub->GetFrameNodeChildSize();
         } else {
             insertIndex = eventHub->GetGridItemIndex(itemFrameNode);
         }

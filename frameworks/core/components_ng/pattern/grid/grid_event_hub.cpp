@@ -67,6 +67,15 @@ bool GridEventHub::CheckPostionInGrid(float x, float y)
     return size.IsInRegion(PointF(x, y));
 }
 
+int GridEventHub::GetFrameNodeChildSize()
+{
+    auto host = GetFrameNode();
+    CHECK_NULL_RETURN(host, 0);
+    auto pattern = AceType::DynamicCast<GridPattern>(host->GetPattern());
+    CHECK_NULL_RETURN(pattern, 0);
+    return pattern->GetGridLayoutInfo().childrenCount_;
+}
+
 RefPtr<FrameNode> GridEventHub::FindGridItemByPosition(float x, float y)
 {
     auto host = GetFrameNode();
