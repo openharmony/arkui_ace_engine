@@ -16,9 +16,8 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 import(
     "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
 
-ohos_unittest("text_pattern_test_ng") {
-  module_out_path = "$test_output_path/text"
-
+ohos_unittest("container_modal_test_ng") {
+  module_out_path = "$test_output_path/container_modal"
   include_dirs = [
     "//commonlibrary/c_utils/base/include",
     "//third_party/flutter/skia",
@@ -43,7 +42,6 @@ ohos_unittest("text_pattern_test_ng") {
   ]
 
   sources = [
-    # inner
     "$ace_root/adapter/ohos/osal/ace_trace.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/adapter/preview/osal/ressched_report.cpp",
@@ -82,6 +80,8 @@ ohos_unittest("text_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/button/button_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/button/button_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/divider/divider_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/divider/divider_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_node.cpp",
@@ -96,6 +96,7 @@ ohos_unittest("text_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/text/text_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_styles.cpp",
+    "$ace_root/frameworks/core/components_ng/render/divider_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/text/mock/mock_text_layout_adapter.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
@@ -136,14 +137,41 @@ ohos_unittest("text_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/recognizer_group.cpp",
 
     # mock
+    "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
+    "$ace_root/frameworks/core/animation/cubic_curve.cpp",
+    "$ace_root/frameworks/core/animation/curves.cpp",
+    "$ace_root/frameworks/core/components/theme/theme_constants.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/image/image_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/image/image_paint_method.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/image/image_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/bar_item_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/bar_item_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/bar_item_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/nav_bar_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/nav_bar_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/nav_bar_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_group_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_view.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/title_bar_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/title_bar_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/title_bar_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_localization.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_view_stack_processor.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/drag_drop/mock_drag_drop_manager.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/drag_drop/mock_drag_drop_proxy.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_source_info.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animation_utils.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_canvas.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_drawing_convertor.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_pixel_map.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
-    "$ace_root/frameworks/core/components_ng/test/pattern/text/mock/mock_text_theme.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/theme/mock_icon_theme.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/text/mock/mock_txt_font_collection.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/text/mock/mock_txt_paragraph.cpp",
     "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
@@ -154,16 +182,14 @@ ohos_unittest("text_pattern_test_ng") {
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
 
     # self
-    "span_pattern_test_ng.cpp",
-    "text_layout_test_ng.cpp",
-    "text_pattern_test_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/container_modal/container_modal_pattern.cpp",
+    "container_modal_pattern_test_ng.cpp",
   ]
 
   external_deps = [
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
   ]
-
   deps = [
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_flutter_engine_root/skia:ace_skia_ohos",

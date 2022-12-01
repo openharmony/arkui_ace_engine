@@ -62,6 +62,8 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 }
 
 // non-static method
+void PipelineContext::AddWindowFocusChangedCallback(int32_t nodeId) {}
+
 void PipelineContext::SetupRootElement() {}
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
