@@ -298,15 +298,5 @@ void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
         return;
     }
     host->SwapDirtyLayoutWrapperOnMainThread(Claim(this));
-
-    /* Adjust components' position which have been set grid properties */
-    for (const auto& child : children_) {
-        if (child && child->GetHostNode()) {
-            child->GetHostNode()->AdjustGridOffset();
-        }
-    }
-    if (layoutWrapperBuilder_) {
-        layoutWrapperBuilder_->AdjustGridOffset();
-    }
 }
 } // namespace OHOS::Ace::NG
