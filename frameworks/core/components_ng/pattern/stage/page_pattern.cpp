@@ -78,6 +78,7 @@ void PagePattern::ProcessHideState()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetActive(false);
+    host->OnVisibleChange(false);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
@@ -89,6 +90,7 @@ void PagePattern::ProcessShowState()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetActive(true);
+    host->OnVisibleChange(true);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
