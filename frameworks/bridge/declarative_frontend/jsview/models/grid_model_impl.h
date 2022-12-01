@@ -24,14 +24,14 @@ namespace OHOS::Ace::Framework {
 class GridModelImpl : public OHOS::Ace::GridModel {
 public:
     void Create(
-        const RefPtr<ScrollControllerBase>& positionController, const RefPtr<ScrollBarProxy>& scrollBarProxy) override;
+        const RefPtr<ScrollControllerBase>& positionController, const RefPtr<ScrollProxy>& scrollBarProxy) override;
     void Pop() override;
     void SetColumnsTemplate(const std::string& value) override;
     void SetRowsTemplate(const std::string& value) override;
     void SetColumnsGap(const Dimension& value) override;
     void SetRowsGap(const Dimension& value) override;
     void SetGridHeight(const Dimension& value) override;
-    void SetScrollBarMode(DisplayMode value) override;
+    void SetScrollBarMode(int32_t value) override;
     void SetScrollBarColor(const std::string& value) override;
     void SetScrollBarWidth(const std::string& value) override;
     void SetCachedCount(int32_t value) override;
@@ -52,6 +52,7 @@ public:
     void SetOnItemDragLeave(std::function<void(const ItemDragInfo&, int32_t)>&& value) override;
     void SetOnItemDrop(std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)>&& value) override;
     RefPtr<ScrollControllerBase> CreatePositionController() override;
+    RefPtr<ScrollProxy> CreateScrollBarProxy() override;
 };
 
 } // namespace OHOS::Ace::Framework
