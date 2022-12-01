@@ -20,7 +20,7 @@
 
 #include "core/components/chart/chart_component.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/pipeline/base/render_component.h"
 
 namespace OHOS::Ace {

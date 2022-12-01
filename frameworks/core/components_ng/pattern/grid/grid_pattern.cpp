@@ -481,11 +481,7 @@ bool GridPattern::UpdateStartIndex(uint32_t index)
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    int32_t startMainLineIndex = index / gridLayoutInfo_.crossCount_;
-    gridLayoutInfo_.currentOffset_ = 0;
-    gridLayoutInfo_.startMainLineIndex_ = startMainLineIndex;
-    gridLayoutInfo_.startIndex_ = startMainLineIndex * gridLayoutInfo_.crossCount_;
-    gridLayoutInfo_.endIndex_ = gridLayoutInfo_.startIndex_ - 1;
+    gridLayoutInfo_.jumpIndex_ = index;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }

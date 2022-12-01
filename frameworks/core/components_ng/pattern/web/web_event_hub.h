@@ -108,56 +108,6 @@ public:
         return propOnMouseEvent_;
     }
 
-    void SetOnDragStartEvent(const OnDragFunc& propOnDragStartEvent)
-    {
-        propOnDragStartEvent_ = propOnDragStartEvent;
-    }
-
-    const OnDragFunc& GetOnDragEvent() const
-    {
-        return propOnDragStartEvent_;
-    }
-
-    void SetOnDragEnterEvent(const OnDropFunc& propOnDragEnterEvent)
-    {
-        propOnDragEnterEvent_ = propOnDragEnterEvent;
-    }
-
-    const OnDropFunc& GetOnDragEnterEvent() const
-    {
-        return propOnDragEnterEvent_;
-    }
-
-    void SetOnDragMoveEvent(const OnDropFunc& propOnDragMoveEvent)
-    {
-        propOnDragMoveEvent_ = propOnDragMoveEvent;
-    }
-
-    const OnDropFunc& GetOnDragMoveEvent() const
-    {
-        return propOnDragMoveEvent_;
-    }
-
-    void SetOnDragLeaveEvent(const OnDropFunc& propOnDragLeaveEvent)
-    {
-        propOnDragLeaveEvent_ = propOnDragLeaveEvent;
-    }
-
-    const OnDropFunc& GetOnDragLeaveEvent() const
-    {
-        return propOnDragLeaveEvent_;
-    }
-
-    void SetOnDropEvent(const OnDropFunc& propOnDropEvent)
-    {
-        propOnDropEvent_ = propOnDropEvent;
-    }
-
-    const OnDropFunc& GetOnDropEvent() const
-    {
-        return propOnDropEvent_;
-    }
-
     ACE_WEB_EVENT_PROPERTY(OnPageStarted, void);
     ACE_WEB_EVENT_PROPERTY(OnPageFinished, void);
     ACE_WEB_EVENT_PROPERTY(OnHttpErrorReceive, void);

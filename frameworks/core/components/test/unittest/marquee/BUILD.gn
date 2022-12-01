@@ -197,7 +197,7 @@ ohos_unittest("RenderMarqueeTest") {
     "$ace_root/frameworks/core/components/theme/app_theme.cpp",
     "$ace_root/frameworks/core/components/theme/theme_attributes.cpp",
     "$ace_root/frameworks/core/components/theme/theme_constants.cpp",
-    "$ace_root/frameworks/core/components/theme/theme_manager.cpp",
+    "$ace_root/frameworks/core/components/theme/theme_manager_impl.cpp",
     "$ace_root/frameworks/core/components/theme/theme_utils.cpp",
     "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
     "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",

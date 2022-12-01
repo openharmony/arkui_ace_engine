@@ -135,6 +135,9 @@ public:
     void PostponePageTransition() override;
     void LaunchPageTransition() override;
 
+    double MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+        const std::string& fontWeight, const std::string& fontFamily, double letterSpacing) override;
+
     bool CanPushPage();
 
     bool IsTransitionStop() const;
@@ -423,7 +426,7 @@ public:
 
     void SetClickPosition(const Offset& position) const;
 
-    void RootLostFocus() const;
+    void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
     void FlushFocus();
 
@@ -826,6 +829,8 @@ public:
         parentPipeline_ = pipeline;
     }
 
+    void SetContainerWindow(bool isShow) override;
+
     void SetAppTitle(const std::string& title) override;
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
     void FlushMessages() override;
@@ -1041,6 +1046,8 @@ private:
 
     std::vector<RectCallback> rectCallbackList_;
     std::list<TouchEvent> touchEvents_;
+
+    int32_t rotationAnimationCount_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

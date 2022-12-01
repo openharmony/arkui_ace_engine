@@ -36,6 +36,28 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+
+// common function to bind menu
+void BindMenu(const RefPtr<FrameNode>& menuNode, int32_t targetId, const NG::OffsetF& offset)
+{
+    LOGD("ViewAbstract::BindMenu");
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    // pass in menuNode to register it in OverlayManager
+    overlayManager->ShowMenu(targetId, offset, menuNode);
+    LOGD("ViewAbstract BindMenu finished %{public}d", menuNode->GetId());
+}
+} // namespace
+
 void ViewAbstract::SetWidth(const CalcLength& width)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -158,6 +180,9 @@ void ViewAbstract::SetFlexGrow(float value)
 
 void ViewAbstract::SetFlexBasis(const Dimension& value)
 {
+    if (LessNotEqual(value.Value(), 0.0f)) {
+        return;
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, value);
 }
 
@@ -242,7 +267,7 @@ void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetClickEvent(std::move(clickEventFunc));
+    gestureHub->SetUserOnClick(std::move(clickEventFunc));
 }
 
 void ViewAbstract::SetOnTouch(TouchEventFunc&& touchEventFunc)
@@ -358,9 +383,25 @@ void ViewAbstract::SetOnAreaChanged(
     std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>&&
         onAreaChanged)
 {
-    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnAreaChanged(std::move(onAreaChanged));
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetOnAreaChangeCallback(std::move(onAreaChanged));
+    pipeline->AddOnAreaChangeNode(frameNode->GetId());
+}
+
+void ViewAbstract::SetOnVisibleChange(
+    std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    for (const auto& ratio : ratioList) {
+        pipeline->AddVisibleAreaChangeNode(frameNode, ratio, onVisibleChange);
+    }
 }
 
 void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
@@ -569,24 +610,6 @@ void ViewAbstract::BindPopup(
     overlayManager->UpdatePopupNode(targetId, popupInfo);
 }
 
-// common function to bind menu
-void BindMenu(const RefPtr<FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset)
-{
-    LOGD("ViewAbstract::BindMenu");
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-
-    // pass in menuNode to register it in OverlayManager
-    overlayManager->ShowMenu(targetId, offset, menuNode);
-    LOGD("ViewAbstract BindMenu finished %{public}p", AceType::RawPtr(menuNode));
-}
-
 void ViewAbstract::BindMenuWithItems(
     std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode, const NG::OffsetF& offset)
 {
@@ -596,7 +619,7 @@ void ViewAbstract::BindMenuWithItems(
         LOGD("menu params is empty");
         return;
     }
-    auto menuNode = MenuView::Create(std::move(params), targetNode->GetTag(), targetNode->GetId(), offset);
+    auto menuNode = MenuView::Create(std::move(params), targetNode->GetId());
     BindMenu(menuNode, targetNode->GetId(), offset);
 }
 
@@ -607,7 +630,8 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     CHECK_NULL_VOID(customNode);
     CHECK_NULL_VOID(targetNode);
 
-    auto menuNode = MenuView::Create(customNode, targetNode->GetTag(), targetNode->GetId(), offset);
+    auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;
+    auto menuNode = MenuView::Create(customNode, targetNode->GetId(), type);
     if (isContextMenu) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset);
         return;
@@ -631,7 +655,7 @@ void ViewAbstract::ShowMenu(int32_t targetId, const NG::OffsetF& offset, bool is
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
 
-    overlayManager->ShowMenu(targetId, offset, nullptr, isContextMenu);
+    overlayManager->ShowMenu(targetId, offset, nullptr);
 }
 
 void ViewAbstract::SetBackdropBlur(const Dimension& radius)

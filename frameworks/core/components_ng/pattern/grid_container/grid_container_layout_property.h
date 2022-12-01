@@ -55,21 +55,16 @@ public:
         LinearLayoutProperty::Reset();
     }
 
+    void SetContainerInfo(const GridContainerInfo& info)
+    {
+        propContainerInfo_ = info;
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     void UpdateChild(RefPtr<GridProperty>& child, const GridContainerInfo& info);
     void RegistGridChild(const RefPtr<FrameNode>& child);
     void BuildWidth(float width);
-
-    GridContainerInfo& GetContainerInfoRef()
-    {
-        return propContainerInfo_.value();
-    }
-
-    void SwapchildrenFramenode(const RefPtr<GridContainerLayoutProperty>& other)
-    {
-        childrenFramenode_.swap(other->childrenFramenode_);
-    }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(ContainerInfo, GridContainerInfo, PROPERTY_UPDATE_NORMAL);
 

@@ -29,6 +29,7 @@ public:
     explicit MockClipBoard(const RefPtr<TaskExecutor>& taskExecutor) : Clipboard(taskExecutor) {}
     ~MockClipBoard() override = default;
 
+    void HasData(const std::function<void(bool hasData)>& callback) override;
     void SetData(const std::string& data, CopyOptions copyOption, bool isDragData) override;
     void GetData(const std::function<void(const std::string&)>& callback, bool syncMode) override;
 

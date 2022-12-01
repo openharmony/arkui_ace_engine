@@ -122,11 +122,17 @@ public:
 
     void OnContextAttached() {}
 
+    // register showMenu callback (always replace)
+    void BindContextMenu(OnMouseEventFunc&& showMenu);
+
 private:
     WeakPtr<EventHub> eventHub_;
     RefPtr<InputEventActuator> mouseEventActuator_;
     RefPtr<InputEventActuator> hoverEventActuator_;
     RefPtr<InputEventActuator> axisEventActuator_;
+
+    RefPtr<InputEvent> showMenu_;
+
     HoverEffectType hoverEffectType_ = HoverEffectType::UNKNOWN;
 };
 

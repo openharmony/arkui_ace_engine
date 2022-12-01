@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "base/utils/utils.h"
+#include "core/components/picker/picker_base_component.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -48,23 +49,30 @@ void DatePickerPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
+bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    if (!config.frameSizeChange) {
+        return false;
+    }
+    CHECK_NULL_RETURN(dirty, false);
+    return true;
+}
+
 void DatePickerPattern::OnModifyDone()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     FlushColumn();
     SetChangeCallback([weak = WeakClaim(this)](const RefPtr<FrameNode>& tag, bool add, uint32_t index, bool notify) {
         auto refPtr = weak.Upgrade();
-        if (refPtr) {
-            refPtr->HandleColumnChange(tag, add, index, notify);
-        }
+        CHECK_NULL_VOID(refPtr);
+        refPtr->HandleColumnChange(tag, add, index, notify);
     });
     SetEventCallback([weak = WeakClaim(this)](bool refresh) {
         auto refPtr = weak.Upgrade();
-        if (refPtr) {
-            refPtr->FireChangeEvent(refresh);
-        }
+        CHECK_NULL_VOID(refPtr);
+        refPtr->FireChangeEvent(refresh);
     });
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
     if (focusHub) {
         InitOnKeyEvent(focusHub);
@@ -131,10 +139,8 @@ void DatePickerPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        if (pattern) {
-            return pattern->OnKeyEvent(event);
-        }
-        return false;
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 }
@@ -528,12 +534,7 @@ void DatePickerPattern::HandleLunarMonthChange(bool isAdd, uint32_t index)
     }
 
     auto yearColumn = yearNode->GetPattern<DatePickerColumnPattern>();
-
-    if (!yearColumn) {
-        LOGE("year or month column is null.");
-        return;
-    }
-
+    CHECK_NULL_VOID(yearColumn);
     uint32_t nowLunarYear = startDateLunar_.year + yearColumn->GetCurrentIndex();
     auto lunarDate = GetCurrentLunarDate(nowLunarYear);
     if (isAdd && index == 0) {
@@ -569,10 +570,7 @@ void DatePickerPattern::HandleLunarYearChange(bool isAdd, uint32_t index)
     auto children = host->GetChildren();
     auto iter = children.begin();
     auto year = (*iter);
-    if (!year) {
-        LOGE("year column is null.");
-        return;
-    }
+    CHECK_NULL_VOID(year);
     auto yearColumn = DynamicCast<FrameNode>(year);
     uint32_t lastYearIndex = index;
     auto optionCount = GetOptionCount(yearColumn);
@@ -794,12 +792,12 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
         startDateLunar_ = SolarToLunar(startDefaultDateSolar_);
         endDateLunar_ = SolarToLunar(endDefaultDateSolar_);
     }
-    auto startYear = GetStartDateLunar().year;
-    auto endYear = GetEndDateLunar().year;
-    auto startMonth = GetStartDateLunar().month;
-    auto endMonth = GetEndDateLunar().month;
-    auto startDay = GetStartDateLunar().day;
-    auto endDay = GetEndDateLunar().day;
+    auto startYear = startDateLunar_.year;
+    auto endYear = endDateLunar_.year;
+    auto startMonth = startDateLunar_.month;
+    auto endMonth = endDateLunar_.month;
+    auto startDay = startDateLunar_.day;
+    auto endDay = endDateLunar_.day;
     uint32_t maxDay = GetLunarMaxDay(current.year, current.month, current.isLeapMonth);
     if (startYear < endYear) {
         startMonth = 1;

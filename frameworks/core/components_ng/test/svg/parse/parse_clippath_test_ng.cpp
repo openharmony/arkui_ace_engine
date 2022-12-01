@@ -23,6 +23,8 @@
 #include "core/components_ng/svg/parse/svg_defs.h"
 #include "core/components_ng/svg/parse/svg_svg.h"
 #include "core/components_ng/svg/svg_dom.h"
+#include "core/components_ng/test/svg/parse/svg_const.h"
+#include "core/components/common/layout/constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -30,7 +32,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::string SVG_LABEL =
-    "<svg width=\"120\" height=\"120\" viewPort=\"0 0 120 120\" version=\"1.1\"><defs><clipPath id=\"myClip\"><circle "
+    "<svg width=\"120\" height=\"120\" viewBox=\"0 0 120 120\" version=\"1.1\"><defs><clipPath id=\"myClip\"><circle "
     "cx=\"30\" cy=\"30\" r=\"20\"/><circle cx=\"70\" cy=\"70\" r=\"30\"/></clipPath></defs><rect x=\"10\" y=\"10\" "
     "width=\"100\" height=\"100\" clip-path=\"url(#myClip)\" fill=\"red\" /></svg>";
 const std::string ID = "myClip";
@@ -55,5 +57,9 @@ HWTEST_F(ParseClipPathTestNg, ParseTest001, TestSize.Level1)
     auto svgClipPath = AceType::DynamicCast<SvgClipPath>(svgDefs->children_.at(0));
     EXPECT_NE(svgClipPath, nullptr);
     EXPECT_STREQ(svgClipPath->nodeId_.c_str(), ID.c_str());
+    RSCanvas rSCanvas;
+    svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size(IMAGE_COPONENT_WIDTH, IMAGE_COPONENT_HEIGHT), Color::RED);
+    EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
+    EXPECT_EQ(svgDom->viewBox_.IsValid(), true);
 }
 } // namespace OHOS::Ace::NG

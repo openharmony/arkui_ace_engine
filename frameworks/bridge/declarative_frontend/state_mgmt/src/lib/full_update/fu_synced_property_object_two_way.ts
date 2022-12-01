@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/**
+ * SynchedPropertyObjectTwoWay
+ * 
+ * all definitions in this file are framework internal
+ */
 class SynchedPropertyObjectTwoWay<C extends Object>
   extends ObservedPropertyObjectAbstract<C>
   implements ISinglePropertyChangeSubscriber<C> {
@@ -37,21 +42,25 @@ class SynchedPropertyObjectTwoWay<C extends Object>
   the property.
   */
   aboutToBeDeleted() {
-    // unregister from parent of this link
-    this.linkedParentProperty_.unlinkSuscriber(this.id__());
-
-    // unregister from the ObservedObject
-    ObservedObject.removeOwningProperty(this.getObject(), this);
+    if (this.linkedParentProperty_) {
+        // unregister from parent of this link
+        this.linkedParentProperty_.unlinkSuscriber(this.id__());
+    
+        // unregister from the ObservedObject
+        ObservedObject.removeOwningProperty(this.getObject(), this);
+    }
     super.aboutToBeDeleted();
   }
 
   private getObject(): C {
     this.notifyPropertyRead();
-    return this.linkedParentProperty_.get();
+    return (this.linkedParentProperty_ ? this.linkedParentProperty_.get() : undefined);
   }
 
   private setObject(newValue: C): void {
-    this.linkedParentProperty_.set(newValue)
+    if (this.linkedParentProperty_) {
+        this.linkedParentProperty_.set(newValue)
+    }
   }
 
   // this object is subscriber to ObservedObject

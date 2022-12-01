@@ -73,6 +73,11 @@ public:
         isInitialSubtitle_ = isInitialSubtitle;
     }
 
+    void SetMinTitleHeight(float minTitleHeight)
+    {
+        minTitleHeight_ = minTitleHeight;
+    }
+
     float GetMinTitleHeight() const
     {
         return minTitleHeight_;

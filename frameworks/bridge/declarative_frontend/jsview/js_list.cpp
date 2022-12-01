@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/list/list_model.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 
 namespace OHOS::Ace {
 
@@ -82,9 +83,13 @@ void JSList::SetScroller(RefPtr<JSScroller> scroller)
         scroller->SetController(listController);
 
         // Init scroll bar proxy.
-        auto proxy = AceType::DynamicCast<ScrollBarProxy>(scroller->GetScrollBarProxy());
+        auto proxy = scroller->GetScrollBarProxy();
         if (!proxy) {
-            proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+            if (Container::IsCurrentUseNewPipeline()) {
+                proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+            } else {
+                proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+            }
             scroller->SetScrollBarProxy(proxy);
         }
         ListModel::GetInstance()->SetScroller(listController, proxy);
@@ -150,20 +155,23 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         ListModel::GetInstance()->SetLanes(laneNum);
         return;
     }
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
-    auto minLengthParam = jsObj->GetProperty("minLength");
-    auto maxLengthParam = jsObj->GetProperty("maxLength");
-    if (minLengthParam->IsNull() || maxLengthParam->IsNull()) {
-        LOGW("minLength and maxLength are not both set");
-        return;
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        auto minLengthParam = jsObj->GetProperty("minLength");
+        auto maxLengthParam = jsObj->GetProperty("maxLength");
+        if (minLengthParam->IsNull() || maxLengthParam->IsNull()) {
+            LOGW("minLength and maxLength are not both set");
+            return;
+        }
+        Dimension minLengthValue;
+        Dimension maxLengthValue;
+        if (!ParseJsDimensionVp(minLengthParam, minLengthValue)
+            || !ParseJsDimensionVp(maxLengthParam, maxLengthValue)) {
+            LOGW("minLength param or maxLength param is invalid");
+            return;
+        }
+        ListModel::GetInstance()->SetLaneConstrain(minLengthValue, maxLengthValue);
     }
-    Dimension minLengthValue;
-    Dimension maxLengthValue;
-    if (!ParseJsDimensionVp(minLengthParam, minLengthValue) || !ParseJsDimensionVp(maxLengthParam, maxLengthValue)) {
-        LOGW("minLength param or maxLength param is invalid");
-        return;
-    }
-    ListModel::GetInstance()->SetLaneConstrain(minLengthValue, maxLengthValue);
 }
 
 void JSList::SetSticky(int32_t sticky)

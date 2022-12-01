@@ -147,7 +147,19 @@ Size RosenRenderShape::CreatePath()
         return Size();
     }
     auto skRect = path_.getBounds();
-    return Size(skRect.right(), skRect.bottom());
+    auto width = skRect.width();
+    auto height = skRect.height();
+    if (NearZero(width) && NearZero(height)) {
+        return Size();
+    }
+    auto lineWidth = strokeState_.GetLineWidth();
+    if (NearZero(width)) {
+        width = lineWidth.ConvertToPx();
+    }
+    if (NearZero(height)) {
+        height = lineWidth.ConvertToPx();
+    }
+    return Size(width, height);
 }
 
 void RosenRenderShape::Paint(RenderContext& context, const Offset& offset)

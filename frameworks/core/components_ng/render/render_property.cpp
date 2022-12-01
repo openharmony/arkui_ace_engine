@@ -20,9 +20,9 @@ namespace {
 std::string ImageRepeatToString(ImageRepeat type)
 {
     static const LinearEnumMapNode<ImageRepeat, std::string> toStringMap[] = {
-        { ImageRepeat::NOREPEAT, "ImageRepeat.NoRepeat" },
-        { ImageRepeat::REPEATX, "ImageRepeat.X" },
-        { ImageRepeat::REPEATY, "ImageRepeat.Y" },
+        { ImageRepeat::NO_REPEAT, "ImageRepeat.NoRepeat" },
+        { ImageRepeat::REPEAT_X, "ImageRepeat.X" },
+        { ImageRepeat::REPEAT_Y, "ImageRepeat.Y" },
         { ImageRepeat::REPEAT, "ImageRepeat.XY" },
     };
     auto idx = BinarySearchFindIndex(toStringMap, ArraySize(toStringMap), type);
@@ -84,6 +84,15 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("sepia", propFrontSepia.has_value() ? propFrontSepia->Value() : 0.0);
     json->Put("hueRotate", propFrontHueRotate.has_value() ? propFrontHueRotate.value() : 0.0);
     json->Put("colorBlend", propFrontColorBlend.has_value() ? propFrontColorBlend->ColorToString().c_str() : "");
+
+    json->Put("backdropBlur", propBlurRadius.value_or(0.0_vp).Value());
+    auto jsonShadow = JsonUtil::Create(true);
+    auto shadow = propBackShadow.value_or(Shadow());
+    jsonShadow->Put("radius", std::to_string(shadow.GetBlurRadius()).c_str());
+    jsonShadow->Put("color", shadow.GetColor().ColorToString().c_str());
+    jsonShadow->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
+    jsonShadow->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
+    json->Put("shadow", jsonShadow);
 }
 
 void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -91,7 +100,7 @@ void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     std::string backgroundImage = "NONE";
     if (propBackgroundImage.has_value()) {
         backgroundImage = propBackgroundImage->GetSrc() + ", " +
-                          ImageRepeatToString(propBackgroundImageRepeat.value_or(ImageRepeat::NOREPEAT));
+                          ImageRepeatToString(propBackgroundImageRepeat.value_or(ImageRepeat::NO_REPEAT));
     }
     json->Put("backgroundImage", backgroundImage.c_str());
 

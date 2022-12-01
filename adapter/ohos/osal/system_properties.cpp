@@ -17,6 +17,7 @@
 #include <shared_mutex>
 #include <unistd.h>
 
+#include "base/utils/utils.h"
 #include "base/utils/system_properties.h"
 
 #include "parameter.h"
@@ -140,10 +141,7 @@ bool IsGpuUploadEnabled()
 
 void OnAnimationScaleChanged(const char *key, const char *value, void *context)
 {
-    if (key == nullptr) {
-        LOGE("AnimationScale changes failed. key is null.");
-        return;
-    }
+    CHECK_NULL_VOID(key);
     if (strcmp(key, ANIMATION_SCALE_KEY) != 0) {
         LOGE("AnimationScale key not matched. key: %{public}s", key);
         return;

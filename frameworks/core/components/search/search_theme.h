@@ -196,6 +196,11 @@ public:
         return searchDividerColor_;
     }
 
+    const Color& GetSearchButtonTextColor() const
+    {
+        return searchButtonTextColor_;
+    }
+
 protected:
     SearchTheme() = default;
 
@@ -222,6 +227,7 @@ private:
     Dimension iconHeight_ = 16.0_vp;
     Dimension iconWidthOffset_ = 14.0_vp;
     Color searchDividerColor_ = Color(0x33000000);
+    Color searchButtonTextColor_ = Color(0xFF254FF7);
 };
 
 } // namespace OHOS::Ace

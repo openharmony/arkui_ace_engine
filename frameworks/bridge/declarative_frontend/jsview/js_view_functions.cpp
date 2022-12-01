@@ -170,17 +170,26 @@ void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
     jsMeasureFunc_.Lock()->Call(jsObject_.Lock(), 2, params);
 }
 
+void ViewFunctions::ExecuteReload(bool deep)
+{
+    ACE_SCOPED_TRACE("ViewFunctions::ExecuteReload");
+    auto func = jsReloadFunc_.Lock();
+    if (!func.IsEmpty()) {
+        JSRef<JSVal> params[1];
+        params[0] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(deep)));
+        func->Call(jsObject_.Lock(), 1, params);
+    } else {
+        LOGE("the reload func is null");
+    }
+}
+
 #else
 
-void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper)
-{
-    return;
-}
+void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper) {}
 
-void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
-{
-    return;
-}
+void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper) {}
+
+void ViewFunctions::ExecuteReload(bool deep) {}
 
 #endif
 
@@ -206,6 +215,13 @@ void ViewFunctions::InitViewFunctions(
             jsRerenderFunc_ = JSRef<JSFunc>::Cast(jsRerenderFunc);
         } else {
             LOGE("View lacks mandatory 'rerender()' function, fatal internal error.");
+        }
+
+        JSRef<JSVal> jsReloadFunc = jsObject->GetProperty("forceCompleteRerender");
+        if (jsReloadFunc->IsFunction()) {
+            jsReloadFunc_ = JSRef<JSFunc>::Cast(jsReloadFunc);
+        } else {
+            LOGE("View lacks mandatory 'forceCompleteRerender()' function, fatal internal error.");
         }
     }
 

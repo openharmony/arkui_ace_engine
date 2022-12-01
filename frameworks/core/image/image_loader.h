@@ -48,6 +48,11 @@ public:
     static std::string RemovePathHead(const std::string& uri);
     static RefPtr<ImageLoader> CreateImageLoader(const ImageSourceInfo& imageSourceInfo);
     static sk_sp<SkData> LoadDataFromCachedFile(const std::string& uri);
+    // TODO: maybe it's more approriate to move these interfaces to [ImageCache] with definition in abstract layer and
+    // implementation in adapter layer
+    static sk_sp<SkData> QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo);
+    static void CacheImageDataToImageCache(const std::string& key, const RefPtr<CachedImageData>& imageData);
+    static RefPtr<NG::ImageData> LoadImageDataFromFileCache(const std::string key, const std::string suffix);
 };
 
 // File image provider: read image from file.

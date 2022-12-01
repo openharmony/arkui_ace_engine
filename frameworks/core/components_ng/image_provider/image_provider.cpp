@@ -23,6 +23,7 @@
 #include "core/components_ng/image_provider/svg_image_object.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/image/image_loader.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -51,19 +52,20 @@ WRAP_TASK_AND_POST_TO(UI, UI);
 WRAP_TASK_AND_POST_TO(BACKGROUND, Background);
 WRAP_TASK_AND_POST_TO(IO, IO);
 
-void ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj, const LoadCallbacks& loadCallbacks)
+bool ImageProvider::PrepareImageData(
+    const RefPtr<ImageObject>& imageObj, const LoadFailCallback& failCallback, bool sync)
 {
-    CHECK_NULL_VOID(imageObj);
-    // if image object has no skData, reload data.
+    CHECK_NULL_RETURN(imageObj, false);
+    // data already loaded
     if (imageObj->GetData()) {
-        return;
+        return true;
     }
-    std::string errorMessage("");
+    // if image object has no skData, reload data.
+    std::string errorMessage;
     do {
         auto imageLoader = ImageLoader::CreateImageLoader(imageObj->GetSourceInfo());
         if (!imageLoader) {
-            LOGE("Fail to create image loader. source info: %{private}s", imageObj->GetSourceInfo().ToString().c_str());
-            errorMessage = "Image source type is not supported";
+            errorMessage = "Fail to create image loader. Image source type is not supported";
             break;
         }
         auto newLoadedData = imageLoader->GetImageData(
@@ -72,16 +74,13 @@ void ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj, const 
             errorMessage = "Fail to load data, please check if data source is invalid";
             break;
         }
+        // load data success
         imageObj->SetData(newLoadedData);
+        return true;
     } while (false);
-    if (!imageObj->GetData()) {
-        auto notifyLoadFailTask = [errorMsg = std::move(errorMessage), sourceInfo = imageObj->GetSourceInfo(),
-                                      loadCallbacks] {
-            loadCallbacks.loadFailCallback_(sourceInfo, errorMsg, ImageLoadingCommand::MAKE_CANVAS_IMAGE_FAIL);
-        };
-        ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadFailTask));
-        return;
-    }
+    // fail to load data
+    FailCallback(failCallback, imageObj->GetSourceInfo(), errorMessage, sync);
+    return false;
 }
 
 RefPtr<ImageEncodedInfo> ImageEncodedInfo::CreateImageEncodedInfo(
@@ -117,8 +116,7 @@ ImageObjectType ImageProvider::ParseImageObjectType(
     const RefPtr<NG::ImageData>& data, const ImageSourceInfo& imageSourceInfo)
 {
     if (!data) {
-        LOGW(
-            "data is null when try ParseImageObjectType, sourceInfo: %{public}s", imageSourceInfo.ToString().c_str());
+        LOGW("data is null when try ParseImageObjectType, sourceInfo: %{public}s", imageSourceInfo.ToString().c_str());
         return ImageObjectType::UNKNOWN;
     }
     if (imageSourceInfo.IsSvg()) {
@@ -130,104 +128,176 @@ ImageObjectType ImageProvider::ParseImageObjectType(
     return ImageObjectType::STATIC_IMAGE_OBJECT;
 }
 
-void ImageProvider::CreateImageObject(
-    const ImageSourceInfo& sourceInfo, const LoadCallbacks& loadCallbacks, const std::optional<Color>& svgFillColor)
+bool ImageProvider::QueryImageObjectFromCache(const LoadCallbacks& loadCallbacks, const ImageSourceInfo& sourceInfo)
 {
-    auto createImageObjectTask = [sourceInfo, loadCallbacks, svgFillColor] {
-        // step1: load image data
-        auto imageLoader = ImageLoader::CreateImageLoader(sourceInfo);
-        if (!imageLoader) {
-            LOGE("Fail to create image loader. source info: %{public}s", sourceInfo.ToString().c_str());
-            std::string errorMessage("Image source type not supported");
-            auto notifyLoadFailTask = [errorMsg = std::move(errorMessage), sourceInfo, loadCallbacks] {
-                loadCallbacks.loadFailCallback_(sourceInfo, errorMsg, ImageLoadingCommand::LOAD_DATA_FAIL);
-            };
-            ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadFailTask));
-            return;
-        }
-        RefPtr<ImageData> data =
-            imageLoader->GetImageData(sourceInfo, WeakClaim(RawPtr(NG::PipelineContext::GetCurrentContext())));
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineCtx, false);
+    auto imageCache = pipelineCtx->GetImageCache();
+    CHECK_NULL_RETURN(imageCache, false);
+    RefPtr<ImageObject> imageObj = imageCache->GetCacheImgObjNG(sourceInfo.ToString());
+    if (imageObj && imageObj->GetSourceInfo() == sourceInfo) {
+        // if [imageObj] of [sourceInfo] is already in cache, notify data ready immediately
+        loadCallbacks.dataReadyCallback_(sourceInfo, imageObj);
+        return true;
+    }
+    return false;
+}
 
-        // step2: make codec to determine which ImageObject to create
-        auto imageObjectType = ImageProvider::ParseImageObjectType(data, sourceInfo);
-        auto encodedInfo = ImageEncodedInfo::CreateImageEncodedInfo(data, sourceInfo, imageObjectType);
-        if (!encodedInfo) {
-            LOGE("Fail to make encoded info. source info: %{public}s", sourceInfo.ToString().c_str());
-            std::string errorMessage("Image data is broken.");
-            auto notifyLoadFailTask = [errorMsg = std::move(errorMessage), sourceInfo, loadCallbacks] {
-                loadCallbacks.loadFailCallback_(sourceInfo, errorMsg, ImageLoadingCommand::LOAD_DATA_FAIL);
-            };
-            ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadFailTask));
-            return;
-        }
+// helper function to run StateManager LoadFail callback
+void ImageProvider::FailCallback(
+    const LoadFailCallback& callback, const ImageSourceInfo& sourceInfo, const std::string& errorMsg, bool sync)
+{
+    if (sync) {
+        callback(sourceInfo, errorMsg, ImageLoadingCommand::LOAD_DATA_FAIL);
+        return;
+    }
+    auto notifyLoadFailTask = [sourceInfo, callback, errorMsg] {
+        callback(sourceInfo, errorMsg, ImageLoadingCommand::LOAD_DATA_FAIL);
+    };
+    ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadFailTask));
+}
 
-        // step3: build ImageObject accroding to encoded info
-        RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(
-            sourceInfo, encodedInfo, data, svgFillColor, loadCallbacks, imageObjectType);
-        if (!imageObj) {
-            return;
-        }
+void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, const WeakPtr<ImageObject>& objWp,
+    const LoadSuccessCallback& callback, bool sync)
+{
+    // when upload success, update canvas image to ImageObject and trigger loadSuccessCallback_
+    auto notifyLoadSuccessTask = [objWp, callback, canvasImage] {
+        auto obj = objWp.Upgrade();
+        CHECK_NULL_VOID(obj);
+        obj->SetCanvasImage(canvasImage);
+        obj->SetData(nullptr); // clear raw image data
+        callback(obj->GetSourceInfo());
+    };
+    if (sync) {
+        notifyLoadSuccessTask();
+    } else {
+        ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadSuccessTask));
+    }
+}
+
+void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& sourceInfo, const LoadCallbacks& loadCallbacks,
+    const std::optional<Color>& svgFillColor, bool sync)
+{
+    // TODO: use PrepareImageData function instead
+    // step1: load image data
+    auto imageLoader = ImageLoader::CreateImageLoader(sourceInfo);
+    if (!imageLoader) {
+        std::string errorMessage("Fail to create image loader, Image source type not supported");
+        FailCallback(loadCallbacks.loadFailCallback_, sourceInfo, errorMessage, sync);
+        return;
+    }
+    RefPtr<ImageData> data =
+        imageLoader->GetImageData(sourceInfo, WeakClaim(RawPtr(NG::PipelineContext::GetCurrentContext())));
+
+    // step2: make codec to determine which ImageObject to create
+    auto imageObjectType = ImageProvider::ParseImageObjectType(data, sourceInfo);
+    auto encodedInfo = ImageEncodedInfo::CreateImageEncodedInfo(data, sourceInfo, imageObjectType);
+    if (!encodedInfo) {
+        std::string errorMessage("Fail to make encoded info, Image data is broken.");
+        FailCallback(loadCallbacks.loadFailCallback_, sourceInfo, errorMessage, sync);
+        return;
+    }
+
+    // step3: build ImageObject according to encoded info
+    RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(
+        sourceInfo, encodedInfo, data, svgFillColor, loadCallbacks.loadFailCallback_, imageObjectType, sync);
+    if (!imageObj) {
+        FailCallback(loadCallbacks.loadFailCallback_, sourceInfo, "Fail to build image object", sync);
+    }
+    if (sync) {
+        loadCallbacks.dataReadyCallback_(sourceInfo, imageObj);
+    } else {
         auto notifyDataReadyTask = [loadCallbacks, imageObj, sourceInfo] {
             loadCallbacks.dataReadyCallback_(sourceInfo, imageObj);
         };
         ImageProvider::WrapTaskAndPostToUI(std::move(notifyDataReadyTask));
+    }
+}
+
+void ImageProvider::CreateImageObject(
+    const ImageSourceInfo& sourceInfo, const LoadCallbacks& loadCallbacks, const std::optional<Color>& svgFillColor)
+{
+    if (ImageProvider::QueryImageObjectFromCache(loadCallbacks, sourceInfo)) {
+        return;
+    }
+    auto createImageObjectTask = [sourceInfo, loadCallbacks, svgFillColor] {
+        CreateImageObjHelper(sourceInfo, loadCallbacks, svgFillColor);
     };
     ImageProvider::WrapTaskAndPostToBackground(std::move(createImageObjectTask));
 }
 
+void SyncImageProvider::CreateImageObject(
+    const ImageSourceInfo& sourceInfo, const LoadCallbacks& loadCallbacks, const std::optional<Color>& svgFillColor)
+{
+    if (ImageProvider::QueryImageObjectFromCache(loadCallbacks, sourceInfo)) {
+        return;
+    }
+    ImageProvider::CreateImageObjHelper(sourceInfo, loadCallbacks, svgFillColor, true);
+}
+
 RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& sourceInfo,
     const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data,
-    const std::optional<Color>& svgFillColor, const LoadCallbacks& loadCallbacks, ImageObjectType imageObjectType)
+    const std::optional<Color>& svgFillColor, const LoadFailCallback& failCallback, ImageObjectType imageObjectType,
+    bool sync)
 {
     switch (imageObjectType) {
         case ImageObjectType::STATIC_IMAGE_OBJECT:
             return StaticImageObject::Create(sourceInfo, encodedInfo, data);
+        // pixelMap always synchronous
         case ImageObjectType::PIXEL_MAP_IMAGE_OBJECT:
             return PixelMapImageObject::Create(sourceInfo, encodedInfo, data);
-        case ImageObjectType::SVG_IMAGE_OBJECT:
-            return SvgImageObject::Create(sourceInfo, encodedInfo, data, svgFillColor, loadCallbacks);
+        case ImageObjectType::SVG_IMAGE_OBJECT: {
+            // SVG object needs to make SVG dom during creation
+            auto svgImageObj = SvgImageObject::Create(sourceInfo, encodedInfo, data);
+            ImageProvider::MakeSvgDom(svgImageObj, failCallback, svgFillColor, sync);
+            CHECK_NULL_RETURN(svgImageObj->GetSVGDom(), nullptr);
+            return svgImageObj;
+        }
         case ImageObjectType::UNKNOWN:
             LOGE("Unknown ImageObject type, sourceInfo: %{public}s", sourceInfo.ToString().c_str());
+            [[fallthrough]];
         default:
             return nullptr;
     }
 }
 
-void ImageProvider::MakeSvgDom(const RefPtr<SvgImageObject>& imageObj, const LoadCallbacks& loadCallbacks,
-    const std::optional<Color>& svgFillColor)
+void ImageProvider::MakeSvgDom(const RefPtr<SvgImageObject>& imageObj, const LoadFailCallback& failCallback,
+    const std::optional<Color>& svgFillColor, bool sync)
 {
     CHECK_NULL_VOID(imageObj);
     // if image object has no skData, reload data.
-    ImageProvider::PrepareImageData(imageObj, loadCallbacks);
+    ImageProvider::PrepareImageData(imageObj, failCallback, sync);
     // get SVGImageDOM
     if (!imageObj->MakeSvgDom(svgFillColor)) {
-        LOGE("svg image MakeFromStream fail! source info: %{private}s", imageObj->GetSourceInfo().ToString().c_str());
-        std::string errorMessage;
-        auto notifyLoadFailTask = [errorMsg = std::move(errorMessage), loadCallbacks,
-                                      sourceInfo = imageObj->GetSourceInfo()] {
-            loadCallbacks.loadFailCallback_(sourceInfo, errorMsg, ImageLoadingCommand::LOAD_DATA_FAIL);
-        };
-        ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadFailTask));
+        std::string errorMessage("svg image MakeFromStream fail!");
+        FailCallback(failCallback, imageObj->GetSourceInfo(), errorMessage, sync);
         return;
     }
 }
 
-void ImageProvider::MakeCanvasImageForSVG(const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks)
+void ImageProvider::MakeSvgCanvasImage(const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks)
 {
-    auto canvasImageMakingTask = [objWp = imageObjWp, loadCallbacks] {
-        // update SVGSkiaDom to ImageObject and trigger loadSuccessCallback_
-        auto notifyLoadSuccessTask = [objWp, loadCallbacks] {
-            auto obj = objWp.Upgrade();
-            CHECK_NULL_VOID(obj);
-            CHECK_NULL_VOID(obj->GetSVGDom());
-            // upload canvasImage, in order to set svgDom
-            obj->SetCanvasImage(MakeRefPtr<NG::SvgCanvasImage>(obj->GetSVGDom()));
-            loadCallbacks.loadSuccessCallback_(obj->GetSourceInfo());
-        };
-        ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadSuccessTask));
+    auto notifyLoadSuccessTask = [imageObjWp, loadCallbacks] {
+        SyncImageProvider::MakeSvgCanvasImage(imageObjWp, loadCallbacks);
     };
-    // TODO: add sync load
-    ImageProvider::WrapTaskAndPostToBackground(std::move(canvasImageMakingTask));
+    ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadSuccessTask));
+}
+
+// update SVGSkiaDom to ImageObject and trigger loadSuccessCallback_
+void SyncImageProvider::MakeSvgCanvasImage(
+    const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks)
+{
+    auto obj = imageObjWp.Upgrade();
+    CHECK_NULL_VOID(obj && obj->GetSVGDom());
+    // upload canvasImage, in order to set svgDom
+    obj->SetCanvasImage(MakeRefPtr<NG::SvgCanvasImage>(obj->GetSVGDom()));
+    loadCallbacks.loadSuccessCallback_(obj->GetSourceInfo());
+}
+
+std::string ImageProvider::GenerateCacheKey(const ImageSourceInfo& srcInfo, const NG::SizeF& targetImageSize)
+{
+    return srcInfo.GetCacheKey() + std::to_string(static_cast<int32_t>(targetImageSize.Width())) +
+           std::to_string(static_cast<int32_t>(targetImageSize.Height()));
 }
 
 } // namespace OHOS::Ace::NG

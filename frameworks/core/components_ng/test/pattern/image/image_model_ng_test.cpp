@@ -14,21 +14,22 @@
  */
 
 #include "gtest/gtest.h"
-
+#define private public
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-
 constexpr double IMAGE_WIDTH_DEFAULT = -1.0;
 constexpr double IMAGE_HEIGHT_DEFAULT = -1.0;
 constexpr double IMAGE_COMPONENTWIDTH_DEFAULT = -1.0;
@@ -41,28 +42,32 @@ constexpr ImageFit IMAGE_FIT_DEFAULT = ImageFit::COVER;
 constexpr bool SYNCMODE_DEFAULT = false;
 constexpr CopyOptions COPYOPTIONS_DEFAULT = CopyOptions::None;
 constexpr bool AUTORESIZE_DEFAULT = true;
-constexpr bool FITORIGINALSIZE_DEFAULT = true;
-constexpr ImageRepeat IMAGE_NO_REPEAT = ImageRepeat::NOREPEAT;
+constexpr bool FIT_ORIGINAL_SIZE_DEFAULT = true;
+constexpr ImageRepeat IMAGE_NO_REPEAT = ImageRepeat::NO_REPEAT;
 constexpr ImageInterpolation IMAGE_NO_INTERPOLATION = ImageInterpolation::NONE;
 constexpr ImageRenderMode IMAGE_NO_RENDERMODE = ImageRenderMode::ORIGINAL;
 constexpr bool MATCHTEXTDIRECTION_DEFAULT = false;
 const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.jpg";
 const std::string ALT_SRC_URL = "file://data/data/com.example.test/res/exampleAlt.jpg";
-
+const std::string SVG_SRC_URL = "file://data/data/com.example.test/res/example.svg";
+const std::string SVG_ALT_URL = "file://data/data/com.example.test/res/exampleAlt.svg";
 } // namespace
 
 class ImageModelNgTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
 };
 
-void ImageModelNgTest::SetUpTestCase() {}
-void ImageModelNgTest::TearDownTestCase() {}
-void ImageModelNgTest::SetUp() {}
-void ImageModelNgTest::TearDown() {}
+void ImageModelNgTest::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void ImageModelNgTest::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 /**
  * @tc.name: ImageCreator001
@@ -119,7 +124,7 @@ HWTEST_F(ImageModelNgTest, ImageCreator003, TestSize.Level1)
     image.SetSyncMode(SYNCMODE_DEFAULT);
     image.SetCopyOption(COPYOPTIONS_DEFAULT);
     image.SetAutoResize(AUTORESIZE_DEFAULT);
-    image.SetFitMaxSize(FITORIGINALSIZE_DEFAULT);
+    image.SetFitOriginSize(FIT_ORIGINAL_SIZE_DEFAULT);
     image.SetImageSourceSize({ Dimension(IMAGE_SOURCESIZE_WIDTH), Dimension(IMAGE_SOURCESIZE_HEIGHT) });
     image.SetImageRenderMode(IMAGE_NO_RENDERMODE);
     image.SetImageInterpolation(IMAGE_NO_INTERPOLATION);
@@ -138,7 +143,7 @@ HWTEST_F(ImageModelNgTest, ImageCreator003, TestSize.Level1)
     EXPECT_EQ(imageLayoutProperty->GetCopyOptionsValue(), COPYOPTIONS_DEFAULT);
     EXPECT_TRUE(imageLayoutProperty->GetImageSizeStyle() != nullptr);
     EXPECT_EQ(imageLayoutProperty->GetAutoResize().value(), AUTORESIZE_DEFAULT);
-    EXPECT_EQ(imageLayoutProperty->GetFitOriginalSize().value(), FITORIGINALSIZE_DEFAULT);
+    EXPECT_EQ(imageLayoutProperty->GetFitOriginalSize().value(), FIT_ORIGINAL_SIZE_DEFAULT);
     EXPECT_EQ(imageLayoutProperty->GetSourceSize().value(),
         SizeF(static_cast<float>(Dimension(IMAGE_SOURCESIZE_WIDTH).ConvertToPx()),
             static_cast<float>(Dimension(IMAGE_SOURCESIZE_HEIGHT).ConvertToPx())));
@@ -205,4 +210,34 @@ HWTEST_F(ImageModelNgTest, ImageEventTest002, TestSize.Level1)
     EXPECT_EQ(curEvent.GetComponentHeight(), loadImageFailEvent.GetComponentHeight());
 }
 
+/**
+ * @tc.name: ImageSvgTest001
+ * @tc.desc: Test svg FillColor is set correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModelNgTest, ImageSvgTest001, TestSize.Level1)
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    image.Create(SVG_SRC_URL, false, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_TRUE(frameNode != nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
+    image.SetAlt(SVG_ALT_URL);
+    image.SetImageFill(Color::BLUE);
+    imageSourceInfo.SetFillColor(Color::BLUE);
+    EXPECT_TRUE(imageLayoutProperty->GetImageSourceInfo() != std::nullopt);
+    EXPECT_EQ(imageLayoutProperty->GetImageSourceInfo().value(), imageSourceInfo);
+    EXPECT_EQ(imageLayoutProperty->GetImageSourceInfo()->fillColor_.value(), Color::BLUE);
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value(), Color::BLUE);
+    frameNode->MarkModifyDone();
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_TRUE(imagePattern != nullptr);
+    EXPECT_TRUE(imagePattern->loadingCtx_ != nullptr);
+    EXPECT_EQ(imagePattern->loadingCtx_->GetSourceInfo().GetSrc(), SVG_SRC_URL);
+    EXPECT_TRUE(imagePattern->altLoadingCtx_ != nullptr);
+    EXPECT_EQ(imagePattern->altLoadingCtx_->GetSourceInfo().GetSrc(), SVG_ALT_URL);
+}
 } // namespace OHOS::Ace::NG

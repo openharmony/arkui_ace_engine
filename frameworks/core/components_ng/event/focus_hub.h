@@ -52,13 +52,165 @@ enum class FocusStep : int32_t {
 };
 using GetNextFocusNodeFunc = std::function<void(FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&)>;
 
-struct FocusPattern final {
-    FocusPattern() = default;
-    FocusPattern(FocusType focusType, bool focusable) : focusType(focusType), focusable(focusable) {}
-    ~FocusPattern() = default;
+enum class FocusStyleType : int32_t {
+    NONE = -1,
+    INNER_BORDER = 0,
+    OUTER_BORDER = 1,
+    CUSTOM_BORDER = 2,
+    CUSTOM_REGION = 3,
+};
 
-    FocusType focusType = FocusType::DISABLE;
-    bool focusable = false;
+class ACE_EXPORT FocusPaintParam : public virtual AceType {
+    DECLARE_ACE_TYPE(FocusPaintParam, AceType)
+
+public:
+    FocusPaintParam() = default;
+    ~FocusPaintParam() override = default;
+
+    bool HasPaintRect() const
+    {
+        return paintRect.has_value();
+    }
+    const RoundRect& GetPaintRect() const
+    {
+        return paintRect.value();
+    }
+
+    bool HasPaintColor() const
+    {
+        return paintColor.has_value();
+    }
+    const Color& GetPaintColor() const
+    {
+        return paintColor.value();
+    }
+
+    bool HasPaintWidth() const
+    {
+        return paintWidth.has_value();
+    }
+    const Dimension& GetPaintWidth() const
+    {
+        return paintWidth.value();
+    }
+
+    bool HasFocusPadding() const
+    {
+        return focusPadding.has_value();
+    }
+    const Dimension& GetFocusPadding() const
+    {
+        return focusPadding.value();
+    }
+    void SetPaintRect(const RoundRect& rect)
+    {
+        paintRect = rect;
+    }
+    void SetPaintColor(const Color& color)
+    {
+        paintColor = color;
+    }
+    void SetPaintWidth(const Dimension& width)
+    {
+        paintWidth = width;
+    }
+    void SetFocusPadding(const Dimension& padding)
+    {
+        focusPadding = padding;
+    }
+
+private:
+    std::optional<RoundRect> paintRect;
+    std::optional<Color> paintColor;
+    std::optional<Dimension> paintWidth;
+    std::optional<Dimension> focusPadding;
+};
+
+class ACE_EXPORT FocusPattern : public virtual AceType {
+    DECLARE_ACE_TYPE(FocusPattern, AceType)
+
+public:
+    explicit FocusPattern() = default;
+    FocusPattern(FocusType focusType, bool focusable) : focusType_(focusType), focusable_(focusable) {}
+    FocusPattern(FocusType focusType, bool focusable, FocusStyleType styleType)
+        : focusType_(focusType), focusable_(focusable), styleType_(styleType)
+    {}
+    FocusPattern(FocusType focusType, bool focusable, FocusStyleType styleType, const FocusPaintParam& paintParams)
+        : focusType_(focusType), focusable_(focusable), styleType_(styleType)
+    {
+        if (!paintParams_) {
+            paintParams_ = std::make_unique<FocusPaintParam>();
+        }
+        if (paintParams.HasPaintRect()) {
+            paintParams_->SetPaintRect(paintParams.GetPaintRect());
+        }
+        if (paintParams.HasPaintColor()) {
+            paintParams_->SetPaintColor(paintParams.GetPaintColor());
+        }
+        if (paintParams.HasPaintWidth()) {
+            paintParams_->SetPaintWidth(paintParams.GetPaintWidth());
+        }
+        if (paintParams.HasFocusPadding()) {
+            paintParams_->SetFocusPadding(paintParams.GetFocusPadding());
+        }
+    }
+    ~FocusPattern() override = default;
+
+    FocusType GetFocusType() const
+    {
+        return focusType_;
+    }
+    void SetSetFocusType(FocusType type)
+    {
+        focusType_ = type;
+    }
+
+    bool GetFocusable() const
+    {
+        return focusable_;
+    }
+    void SetSetFocusable(bool focusable)
+    {
+        focusable_ = focusable;
+    }
+
+    FocusStyleType GetStyleType() const
+    {
+        return styleType_;
+    }
+    void SetStyleType(FocusStyleType styleType)
+    {
+        styleType_ = styleType;
+    }
+
+    const std::unique_ptr<FocusPaintParam>& GetFocusPaintParams() const
+    {
+        return paintParams_;
+    }
+    void SetFocusPaintParams(const FocusPaintParam& paintParams)
+    {
+        if (!paintParams_) {
+            paintParams_ = std::make_unique<FocusPaintParam>();
+        }
+        if (paintParams.HasPaintRect()) {
+            paintParams_->SetPaintRect(paintParams.GetPaintRect());
+        }
+        if (paintParams.HasPaintColor()) {
+            paintParams_->SetPaintColor(paintParams.GetPaintColor());
+        }
+        if (paintParams.HasPaintWidth()) {
+            paintParams_->SetPaintWidth(paintParams.GetPaintWidth());
+        }
+        if (paintParams.HasFocusPadding()) {
+            paintParams_->SetFocusPadding(paintParams.GetFocusPadding());
+        }
+    }
+
+private:
+    FocusType focusType_ = FocusType::DISABLE;
+    bool focusable_ = false;
+    FocusStyleType styleType_ = FocusStyleType::NONE;
+    std::unique_ptr<FocusPaintParam> paintParams_ = nullptr;
 };
 
 struct ScopeFocusAlgorithm final {
@@ -197,6 +349,98 @@ public:
     {}
     ~FocusHub() override = default;
 
+    void SetFocusStyleType(FocusStyleType type)
+    {
+        focusStyleType_ = type;
+    }
+    void SetFocusPaintParamsPtr(const std::unique_ptr<FocusPaintParam>& paramsPtr)
+    {
+        CHECK_NULL_VOID(paramsPtr);
+        if (!focusPaintParamsPtr_) {
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
+        }
+        if (paramsPtr->HasPaintRect()) {
+            focusPaintParamsPtr_->SetPaintRect(paramsPtr->GetPaintRect());
+        }
+        if (paramsPtr->HasPaintColor()) {
+            focusPaintParamsPtr_->SetPaintColor(paramsPtr->GetPaintColor());
+        }
+        if (paramsPtr->HasPaintWidth()) {
+            focusPaintParamsPtr_->SetPaintWidth(paramsPtr->GetPaintWidth());
+        }
+        if (paramsPtr->HasFocusPadding()) {
+            focusPaintParamsPtr_->SetFocusPadding(paramsPtr->GetFocusPadding());
+        }
+    }
+
+    bool HasPaintRect() const
+    {
+        return focusPaintParamsPtr_ ? focusPaintParamsPtr_->HasPaintRect() : false;
+    }
+    RoundRect GetPaintRect() const
+    {
+        CHECK_NULL_RETURN(focusPaintParamsPtr_, RoundRect());
+        return focusPaintParamsPtr_->GetPaintRect();
+    }
+
+    bool HasPaintColor() const
+    {
+        return focusPaintParamsPtr_ ? focusPaintParamsPtr_->HasPaintColor() : false;
+    }
+    const Color& GetPaintColor() const
+    {
+        CHECK_NULL_RETURN(focusPaintParamsPtr_, Color::TRANSPARENT);
+        return focusPaintParamsPtr_->GetPaintColor();
+    }
+
+    bool HasPaintWidth() const
+    {
+        return focusPaintParamsPtr_ ? focusPaintParamsPtr_->HasPaintWidth() : false;
+    }
+    Dimension GetPaintWidth() const
+    {
+        CHECK_NULL_RETURN(focusPaintParamsPtr_, Dimension());
+        return focusPaintParamsPtr_->GetPaintWidth();
+    }
+
+    bool HasFocusPadding() const
+    {
+        return focusPaintParamsPtr_ ? focusPaintParamsPtr_->HasFocusPadding() : false;
+    }
+    Dimension GetFocusPadding() const
+    {
+        CHECK_NULL_RETURN(focusPaintParamsPtr_, Dimension());
+        return focusPaintParamsPtr_->GetFocusPadding();
+    }
+    void SetPaintRect(const RoundRect& rect)
+    {
+        if (!focusPaintParamsPtr_) {
+            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+        }
+        focusPaintParamsPtr_->SetPaintRect(rect);
+    }
+    void SetPaintColor(const Color& color)
+    {
+        if (!focusPaintParamsPtr_) {
+            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+        }
+        focusPaintParamsPtr_->SetPaintColor(color);
+    }
+    void SetPaintWidth(const Dimension& width)
+    {
+        if (!focusPaintParamsPtr_) {
+            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+        }
+        focusPaintParamsPtr_->SetPaintWidth(width);
+    }
+    void SetFocusPadding(const Dimension& padding)
+    {
+        if (!focusPaintParamsPtr_) {
+            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+        }
+        focusPaintParamsPtr_->SetFocusPadding(padding);
+    }
+
     RefPtr<FrameNode> GetFrameNode() const;
     RefPtr<GeometryNode> GetGeometryNode() const;
     RefPtr<FocusHub> GetParentFocusHub(FrameNode* node = nullptr) const;
@@ -208,7 +452,7 @@ public:
     void UpdateAccessibilityFocusInfo();
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);
 
-    void LostFocus();
+    void LostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH);
     void LostSelfFocus();
     void RemoveSelf(FrameNode* frameNode);
     void RemoveChild(FocusHub* focusNode);
@@ -326,6 +570,10 @@ public:
     {
         onBlurInternal_ = std::move(onBlurInternal);
     }
+    void SetOnBlurReasonInternal(OnBlurReasonFunc&& onBlurReasonInternal)
+    {
+        onBlurReasonInternal_ = std::move(onBlurReasonInternal);
+    }
     void SetOnPreFocusCallback(OnPreFocusFunc&& onPreFocusCallback)
     {
         onPreFocusCallback_ = std::move(onPreFocusCallback);
@@ -440,9 +688,15 @@ public:
 
     std::optional<std::string> GetInspectorKey() const;
 
-    void SetScopeFocusAlgorithm(const ScopeFocusAlgorithm& focusAlgorithm)
+    void PaintFocusState();
+    void PaintAllFocusState();
+    void ClearFocusState();
+    void ClearAllFocusState();
+    void PaintInnerFocusState(const RoundRect& paintRect);
+
+    void SetInnerFocusPaintRectCallback(const std::function<void(RoundRect&)>& callback)
     {
-        focusAlgorithm_ = focusAlgorithm;
+        getInnerFocusRectFunc_ = callback;
     }
 
 protected:
@@ -469,8 +723,11 @@ protected:
 private:
     bool CalculatePosition();
 
+    void SetScopeFocusAlgorithm();
+
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
+    OnBlurReasonFunc onBlurReasonInternal_;
     OnKeyEventFunc onKeyEventInternal_;
     OnPreFocusFunc onPreFocusCallback_;
 
@@ -491,8 +748,13 @@ private:
     bool show_ { true };
 
     FocusType focusType_ = FocusType::DISABLE;
+    FocusStyleType focusStyleType_ = FocusStyleType::NONE;
+    std::unique_ptr<FocusPaintParam> focusPaintParamsPtr_;
+    std::function<void(RoundRect&)> getInnerFocusRectFunc_;
+
     RectF rectFromOrigin_;
     ScopeFocusAlgorithm focusAlgorithm_;
+    BlurReason blurReason_ = BlurReason::FOCUS_SWITCH;
 };
 } // namespace OHOS::Ace::NG
 

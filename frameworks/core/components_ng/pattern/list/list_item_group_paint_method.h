@@ -29,9 +29,9 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ListItemGroupPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ListItemGroupPaintMethod, NodePaintMethod)
 public:
-    ListItemGroupPaintMethod(const V2::ItemDivider& divider, bool vertical, int32_t lanes,
+    ListItemGroupPaintMethod(const V2::ItemDivider& divider, bool vertical, int32_t lanes, float spaceWidth,
         ListItemGroupLayoutAlgorithm::PositionMap& itemPosition)
-        : divider_(divider), vertical_(vertical), lanes_(lanes), itemPosition_(itemPosition)
+        : divider_(divider), vertical_(vertical), lanes_(lanes), spaceWidth_(spaceWidth), itemPosition_(itemPosition)
     {}
     ~ListItemGroupPaintMethod() override = default;
 
@@ -41,6 +41,7 @@ private:
     V2::ItemDivider divider_;
     bool vertical_ = false;
     int32_t lanes_ = 1;
+    float spaceWidth_ = 0.0f;
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
 };
 } // namespace OHOS::Ace::NG

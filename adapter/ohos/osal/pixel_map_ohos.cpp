@@ -16,6 +16,7 @@
 #include "pixel_map_ohos.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 
@@ -74,7 +75,7 @@ RefPtr<PixelMap> PixelMap::CreatePixelMap(void* rawPtr)
     }
     return AceType::MakeRefPtr<PixelMapOhos>(*pixmapPtr);
 }
- 
+
 RefPtr<PixelMap> PixelMap::CreatePixelMapFromDataAbility(void* uniquePtr)
 {
     std::unique_ptr<Media::PixelMap>* pixmapPtr = reinterpret_cast<std::unique_ptr<Media::PixelMap>*>(uniquePtr);
@@ -88,82 +89,57 @@ RefPtr<PixelMap> PixelMap::CreatePixelMapFromDataAbility(void* uniquePtr)
 
 int32_t PixelMapOhos::GetWidth() const
 {
-    if (!pixmap_) {
-        LOGE("pixmap is nullptr, return default width.");
-        return 0;
-    }
+    CHECK_NULL_RETURN(pixmap_, 0);
     return pixmap_->GetWidth();
 }
 
 int32_t PixelMapOhos::GetHeight() const
 {
-    if (!pixmap_) {
-        LOGE("pixmap is nullptr, return default height.");
-        return 0;
-    }
+    CHECK_NULL_RETURN(pixmap_, 0);
     return pixmap_->GetHeight();
 }
 
 const uint8_t* PixelMapOhos::GetPixels() const
 {
-    if (!pixmap_) {
-        LOGE("pixmap is nullptr, return default address of pixels.");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(pixmap_, nullptr);
     return pixmap_->GetPixels();
 }
 
 PixelFormat PixelMapOhos::GetPixelFormat() const
 {
-    if (!pixmap_) {
-        LOGE("pixmap is nullptr, return default pixel format.");
-        return PixelFormat::UNKNOWN;
-    }
+    CHECK_NULL_RETURN(pixmap_, PixelFormat::UNKNOWN);
     return PixelFormatConverter(pixmap_->GetPixelFormat());
 }
 
 AlphaType PixelMapOhos::GetAlphaType() const
 {
-    if (!pixmap_) {
-        LOGE("pixmap is nullptr, return default alpha type.");
-        return AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
-    }
+    CHECK_NULL_RETURN(pixmap_, AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN);
     return AlphaTypeConverter(pixmap_->GetAlphaType());
 }
 
 int32_t PixelMapOhos::GetRowBytes() const
 {
-    if (!pixmap_) {
-        LOGE("pixmap is nullptr, return default row bytes.");
-        return 0;
-    }
+    CHECK_NULL_RETURN(pixmap_, 0);
     return pixmap_->GetRowBytes();
 }
 
 int32_t PixelMapOhos::GetByteCount() const
 {
-    if (!pixmap_) {
-        return 0;
-    }
+    CHECK_NULL_RETURN(pixmap_, 0);
     return pixmap_->GetByteCount();
 }
 
 void* PixelMapOhos::GetPixelManager() const
 {
     Media::InitializationOptions opts;
-    if (!pixmap_) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(pixmap_, nullptr);
     auto newPixelMap = Media::PixelMap::Create(*pixmap_, opts);
     return reinterpret_cast<void*>(new Media::PixelMapManager(newPixelMap.release()));
 }
 
 void* PixelMapOhos::GetRawPixelMapPtr() const
 {
-    if (!pixmap_) {
-        LOGE("pixmap is nullptr, raw pixel map pointer is nullptr.");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(pixmap_, nullptr);
     return pixmap_.get();
 }
 
@@ -182,18 +158,15 @@ std::shared_ptr<Media::PixelMap> PixelMapOhos::GetPixelMapSharedPtr()
     return pixmap_;
 }
 
-RefPtr<PixelMap> PixelMap::ConvertSkImageToPixmap(const uint32_t *colors, uint32_t colorLength,
-    int32_t width, int32_t height)
+RefPtr<PixelMap> PixelMap::ConvertSkImageToPixmap(
+    const uint32_t* colors, uint32_t colorLength, int32_t width, int32_t height)
 {
     Media::InitializationOptions opts;
     opts.size.width = width;
     opts.size.height = height;
     opts.editable = true;
     std::unique_ptr<Media::PixelMap> pixmap = Media::PixelMap::Create(colors, colorLength, opts);
-    if (!pixmap) {
-        LOGE("fail to create media pixelmap");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(pixmap, nullptr);
     std::shared_ptr<Media::PixelMap> sharedPixelmap(pixmap.release());
     return AceType::MakeRefPtr<PixelMapOhos>(sharedPixelmap);
 }

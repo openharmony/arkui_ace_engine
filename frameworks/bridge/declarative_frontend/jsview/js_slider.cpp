@@ -97,6 +97,8 @@ void JSSlider::Create(const JSCallbackInfo& info)
 
     if (!info[0]->IsObject()) {
         LOGE("slider create error, info is non-valid");
+        SliderModel::GetInstance()->Create(
+            static_cast<float>(value), static_cast<float>(step), static_cast<float>(min), static_cast<float>(max));
         return;
     }
 
@@ -177,7 +179,7 @@ void JSSlider::SetThickness(const JSCallbackInfo& info)
         return;
     }
     if (LessNotEqual(value.Value(), 0.0)) {
-        value.SetValue(0.0);
+        return;
     }
     SliderModel::GetInstance()->SetThickness(value);
 }

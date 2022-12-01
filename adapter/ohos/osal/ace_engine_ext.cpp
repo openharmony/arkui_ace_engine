@@ -18,6 +18,7 @@
 #include <dlfcn.h>
 
 #include "base/log/log.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -31,10 +32,7 @@ const std::string DRAG_EXTENSION_SO_PATH = "system/lib/module/autorun/libhmos_dr
 void CallDragExtFunc()
 {
     auto handle = dlopen(DRAG_EXTENSION_SO_PATH.c_str(), RTLD_LAZY);
-    if (handle == nullptr) {
-        LOGE("Failed to open drag extension library, reason: %{public}s", dlerror());
-        return;
-    }
+    CHECK_NULL_VOID(handle);
     auto dragFunc = reinterpret_cast<DragExtFunc>(dlsym(handle, "StartDragService"));
     if (dragFunc == nullptr) {
         LOGE("Failed to get drag extension func");

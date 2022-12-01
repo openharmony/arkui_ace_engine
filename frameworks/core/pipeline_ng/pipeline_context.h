@@ -101,7 +101,10 @@ public:
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
 
-    void SetBuildAfterCallback(const std::function<void()>& callback) override {}
+    void SetBuildAfterCallback(const std::function<void()>& callback) override
+    {
+        buildFinishCallbacks_.emplace_back(callback);
+    }
 
     void SaveExplicitAnimationOption(const AnimationOption& option) override {}
 
@@ -113,6 +116,16 @@ public:
     {
         return {};
     }
+
+    void AddOnAreaChangeNode(int32_t nodeId);
+
+    void RemoveOnAreaChangeNode(int32_t nodeId);
+
+    void HandleOnAreaChangeEvent();
+
+    void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback);
+
+    void HandleVisibleAreaChangeEvent();
 
     void Destroy() override;
 
@@ -129,6 +142,9 @@ public:
     void SetAppTitle(const std::string& title) override;
 
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
+
+    double MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+        const std::string& fontWeight, const std::string& fontFamily, double letterSpacing) override;
 
     void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override;
@@ -149,6 +165,8 @@ public:
     }
 
     bool OnBackPressed();
+
+    RefPtr<FrameNode> GetNavDestinationBackButtonNode();
 
     void AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode);
 
@@ -175,10 +193,7 @@ public:
         return sharedTransitionManager_;
     }
 
-    const RefPtr<DragDropManager>& GetDragDropManager()
-    {
-        return dragDropManager_;
-    }
+    const RefPtr<DragDropManager>& GetDragDropManager();
 
     void FlushBuild() override;
 
@@ -214,14 +229,21 @@ public:
         isNeedShowFocus_ = isNeedShowFocus;
     }
 
+    bool GetOnShow() const
+    {
+        return onShow_;
+    }
+
     bool RequestDefaultFocus();
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
+    void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);
     void NotifyMemoryLevel(int32_t level) override;
     void FlushMessages() override;
+    void SetContainerWindow(bool isShow) override;
 
     void FlushUITasks() override
     {
@@ -229,6 +251,12 @@ public:
     }
     // end pipeline, exit app
     void Finish(bool autoFinish) const override;
+    RectF GetRootRect()
+    {
+        return rootNode_->GetGeometryNode()->GetFrameRect();
+    }
+
+    void FlushReload() override;
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type);
@@ -284,6 +312,9 @@ private:
 
     RefPtr<FrameNode> rootNode_;
 
+    std::unordered_set<int32_t> onAreaChangeNodeIds_;
+    std::unordered_map<int32_t, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
+
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
     RefPtr<FullScreenManager> fullScreenManager_;
@@ -293,9 +324,12 @@ private:
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     uint32_t nextScheduleTaskId_ = 0;
+    int32_t rotationAnimationCount_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isNeedShowFocus_ = false;
+    bool onShow_ = true;
+    bool onFocus_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

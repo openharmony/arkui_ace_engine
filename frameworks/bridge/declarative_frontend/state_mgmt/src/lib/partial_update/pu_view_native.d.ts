@@ -13,11 +13,17 @@
  * limitations under the License.
  */
 
+/**
+ * NativeViewPartialUpdate aka JSViewPartialUpdate C++ class exposed to JS
+ * 
+ *  all definitions in this file are framework internal
+ */
 declare class NativeViewPartialUpdate {
   constructor(    );
   markNeedUpdate(): void;
   findChildById(compilerAssignedUniqueChildId: string): View;
   syncInstanceId(): void;
+  isFirstRender(): boolean;
   restoreInstanceId(): void;
   static create(newView: NativeViewPartialUpdate): void;
   finishUpdateFunc(elmtId: number): void;

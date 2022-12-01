@@ -18,6 +18,7 @@
 #include "core/components/checkable/checkable_component.h"
 #include "core/components/test/json/color_creator.h"
 #include "core/pipeline/base/constants.h"
+#include "core/components/theme/theme_manager_impl.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -68,7 +69,7 @@ RefPtr<Component> CheckableCreator::CreateFromJson(const JsonValue& componentJso
 {
     LOGD("CreateFromJson checkable");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     if (classType == CHECKBOX_NAME) {
         RefPtr<CheckboxTheme> theme =
             AceType::DynamicCast<CheckboxTheme>(themeManager->GetTheme(CheckboxTheme::TypeId()));

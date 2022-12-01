@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/search/search_pattern.h"
 
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components/search/search_theme.h"
 
@@ -41,6 +42,9 @@ void SearchPattern::OnModifyDone()
     imageFrameNode->MarkModifyDone();
     auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(2));
     CHECK_NULL_VOID(buttonFrameNode);
+    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateLabel(searchButton_);
     buttonFrameNode->MarkModifyDone();
     // Image click event
     if (imageClickListener_) {
@@ -74,9 +78,8 @@ void SearchPattern::InitSearchController()
 {
     searchController_->SetCaretPosition([weak = WeakClaim(this)](int32_t caretPosition) {
         auto search = weak.Upgrade();
-        if (search) {
-            search->HandleCaretPosition(caretPosition);
-        }
+        CHECK_NULL_VOID(search);
+        search->HandleCaretPosition(caretPosition);
     });
 }
 

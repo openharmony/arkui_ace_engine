@@ -98,6 +98,9 @@ RefPtr<FrameNode> CounterModelNG::CreateContentNodeChild(int32_t contentId, cons
         V2::ROW_ETS_TAG, contentId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     contentNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::CENTER);
     contentNode->GetLayoutProperty()->UpdateLayoutWeight(1);
+    contentNode->GetRenderContext()->SetClipToFrame(true);
+    contentNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(std::nullopt, CalcLength(counterTheme->GetHeight())));
     contentNode->GetLayoutProperty()->UpdateBorderWidth(counterTheme->GetBorderWidth());
     contentNode->GetRenderContext()->UpdateBorderStyle(counterTheme->GetBorderStyle());
     contentNode->GetRenderContext()->UpdateBorderColor(counterTheme->GetBorderColor());
@@ -116,7 +119,7 @@ void CounterModelNG::SetOnInc(CounterEventFunc&& onInc)
     CHECK_NULL_VOID(addNode);
     auto gestureHub = addNode->GetOrCreateGestureEventHub();
     GestureEventFunc gestureEventFunc = [clickEvent = std::move(onInc)](GestureEvent& /*unused*/) { clickEvent(); };
-    gestureHub->SetClickEvent(std::move(gestureEventFunc));
+    gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }
 void CounterModelNG::SetOnDec(CounterEventFunc&& onDec)
 {
@@ -128,7 +131,7 @@ void CounterModelNG::SetOnDec(CounterEventFunc&& onDec)
     CHECK_NULL_VOID(subNode);
     auto gestureHub = subNode->GetOrCreateGestureEventHub();
     GestureEventFunc gestureEventFunc = [clickEvent = std::move(onDec)](GestureEvent& /*unused*/) { clickEvent(); };
-    gestureHub->SetClickEvent(std::move(gestureEventFunc));
+    gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }
 
 void CounterModelNG::SetHeight(const Dimension& value)
@@ -144,6 +147,13 @@ void CounterModelNG::SetHeight(const Dimension& value)
     CHECK_NULL_VOID(subNode);
     auto subLayoutProperty = subNode->GetLayoutProperty();
     subLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(value), CalcLength(value)));
+
+    int32_t contentId = frameNode->GetPattern<CounterPattern>()->GetContentId();
+    auto contentNode = AceType::DynamicCast<FrameNode>(
+        frameNode->GetChildAtIndex(frameNode->GetChildIndexById(contentId)));
+    CHECK_NULL_VOID(contentNode);
+    auto contentLayoutProperty = contentNode->GetLayoutProperty();
+    contentLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));
 
     int32_t addId = frameNode->GetPattern<CounterPattern>()->GetAddId();
     auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));

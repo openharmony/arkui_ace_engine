@@ -43,7 +43,6 @@ void ListLayoutAlgorithm::UpdateListItemConstraint(
         auto width = selfIdealSize.Width();
         if (width.has_value()) {
             contentConstraint.maxSize.SetWidth(width.value());
-            contentConstraint.minSize.SetWidth(width.value());
         }
         return;
     }
@@ -51,7 +50,6 @@ void ListLayoutAlgorithm::UpdateListItemConstraint(
     auto height = selfIdealSize.Height();
     if (height.has_value()) {
         contentConstraint.maxSize.SetHeight(height.value());
-        contentConstraint.minSize.SetHeight(height.value());
     }
 }
 
@@ -72,7 +70,8 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // calculate main size.
     auto contentConstraint = listLayoutProperty->GetContentLayoutConstraint().value();
     auto contentIdealSize = CreateIdealSize(
-        contentConstraint, axis, listLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS));
+        contentConstraint, axis, listLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS),
+        listLayoutProperty->CreateMargin());
 
     const auto& padding = listLayoutProperty->CreatePaddingAndBorder();
     paddingBeforeContent_ = axis == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
@@ -97,9 +96,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         currentOffset_ = currentDelta_;
         startMainPos_ = currentOffset_;
         endMainPos_ = currentOffset_ + contentMainSize_;
-        LOGD("pre start index: %{public}d, pre end index: %{public}d, offset is %{public}f, startMainPos: %{public}f, "
-             "endMainPos: %{public}f",
-            preStartIndex_, preEndIndex_, currentOffset_, startMainPos_, endMainPos_);
         stickyStyle_ = listLayoutProperty->GetStickyStyle().value_or(V2::StickyStyle::NONE);
         auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis);
         auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
@@ -111,15 +107,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             if (dividerSpace.has_value()) {
                 spaceWidth_ = std::max(spaceWidth_, dividerSpace.value());
             }
-        }
-
-        if (!itemPosition_.empty()) {
-            preStartPos_ = itemPosition_.begin()->second.startPos;
-            preEndPos_ = itemPosition_.rbegin()->second.endPos;
-            preStartIndex_ = std::min(GetStartIndex(), totalItemCount_ - 1);
-            preEndIndex_ = std::min(GetEndIndex(), totalItemCount_ - 1);
-            itemPosition_.clear();
-            layoutWrapper->RemoveAllChildInRenderTree();
         }
 
         CalculateLanes(listLayoutProperty, layoutConstraint, axis);
@@ -169,39 +156,51 @@ void ListLayoutAlgorithm::CalculateEstimateOffset()
 void ListLayoutAlgorithm::MeasureList(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis)
 {
+    int32_t startIndex = 0;
+    int32_t endIndex = 0;
+    float startPos = 0.0f;
+    float endPos = 0.0f;
+    if (!itemPosition_.empty()) {
+        startPos = itemPosition_.begin()->second.startPos;
+        endPos = itemPosition_.rbegin()->second.endPos;
+        startIndex = std::min(GetStartIndex(), totalItemCount_ - 1);
+        endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
+        itemPosition_.clear();
+        layoutWrapper->RemoveAllChildInRenderTree();
+    }
+    if (jumpIndex_ && (jumpIndex_.value() < 0 || jumpIndex_.value() >= totalItemCount_)) {
+        LOGW("jump index is illegal, %{public}d, %{public}d", jumpIndex_.value(), totalItemCount_);
+        jumpIndex_.reset();
+    }
     if (jumpIndex_) {
-        if (totalItemCount_ == 0) {
-            LOGI("child size is empty");
-            return;
-        }
-        if (jumpIndex_.value() < 0 || jumpIndex_.value() >= totalItemCount_) {
-            LOGW("jump index is illegal, %{public}d, %{public}d", jumpIndex_.value(), totalItemCount_);
-            jumpIndex_ = std::clamp(jumpIndex_.value(), 0, totalItemCount_ - 1);
-        }
+        LOGD("Jump index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
+            jumpIndex_.value(), currentOffset_, startMainPos_, endMainPos_);
         jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value());
         if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_TOP) {
             LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), startMainPos_);
-            float endPos = itemPosition_.begin()->second.startPos - spaceWidth_;
-            if (jumpIndex_.value() > 0 && GreatNotEqual(endPos, startMainPos_)) {
-                LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, endPos);
+            if (jumpIndex_.value() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
+                LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, GetStartPosition());
             }
         } else if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_BUTTON) {
             LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), endMainPos_);
-            float startPos = itemPosition_.rbegin()->second.endPos + spaceWidth_;
-            if (jumpIndex_.value() < totalItemCount_ - 1 && LessNotEqual(startPos, endMainPos_)) {
-                LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() + 1, startPos);
+            if (jumpIndex_.value() < totalItemCount_ - 1 && LessNotEqual(GetEndPosition(), endMainPos_)) {
+                LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() + 1, GetEndPosition());
             }
         }
         CalculateEstimateOffset();
-    } else if (NonNegative(currentOffset_)) {
-        LayoutForward(layoutWrapper, layoutConstraint, axis, preStartIndex_, preStartPos_);
-        if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
-            LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
-        }
     } else {
-        LayoutBackward(layoutWrapper, layoutConstraint, axis, preEndIndex_, preEndPos_);
-        if (GetEndIndex() < (totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
-            LayoutForward(layoutWrapper, layoutConstraint, axis, GetEndIndex() + 1, GetEndPosition());
+        LOGD("StartIndex index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
+            startIndex, currentOffset_, startMainPos_, endMainPos_);
+        if (NonNegative(currentOffset_)) {
+            LayoutForward(layoutWrapper, layoutConstraint, axis, startIndex, startPos);
+            if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
+                LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
+            }
+        } else {
+            LayoutBackward(layoutWrapper, layoutConstraint, axis, endIndex, endPos);
+            if (GetEndIndex() < (totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
+                LayoutForward(layoutWrapper, layoutConstraint, axis, GetEndIndex() + 1, GetEndPosition());
+            }
         }
     }
     GetHeaderFooterGroupNode(layoutWrapper);
@@ -212,10 +211,7 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
 {
     bool isGroup = false;
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
-    if (!wrapper) {
-        LOGI("the start %{public}d index wrapper is null", currentIndex + 1);
-        return 0;
-    }
+    CHECK_NULL_RETURN(wrapper, 0);
     ++currentIndex;
     auto itemGroup = GetListItemGroup(wrapper);
     if (itemGroup) {
@@ -237,10 +233,7 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
 {
     bool isGroup = false;
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex - 1);
-    if (!wrapper) {
-        LOGI("the %{public}d wrapper is null", currentIndex - 1);
-        return 0;
-    }
+    CHECK_NULL_RETURN(wrapper, 0);
     --currentIndex;
     auto itemGroup = GetListItemGroup(wrapper);
     if (itemGroup) {
@@ -392,6 +385,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto paddingOffset = OffsetF(left, top);
     float crossSize = GetCrossAxisSize(size, axis);
     totalItemCount_ = layoutWrapper->GetTotalChildCount();
+    listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
     int32_t startIndex = GetStartIndex();
 
     // layout items.

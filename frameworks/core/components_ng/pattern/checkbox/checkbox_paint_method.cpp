@@ -40,7 +40,6 @@ constexpr float CHECK_MARK_MIDDLE_X_POSITION = 0.44f;
 constexpr float CHECK_MARK_MIDDLE_Y_POSITION = 0.68f;
 constexpr float CHECK_MARK_END_X_POSITION = 0.76f;
 constexpr float CHECK_MARK_END_Y_POSITION = 0.33f;
-const Color TRANSPARENT_COLOR = Color(0x00000000);
 constexpr float CHECK_MARK_LEFT_ANIMATION_PERCENT = 0.45;
 constexpr float CHECK_MARK_RIGHT_ANIMATION_PERCENT = 0.55;
 constexpr float DEFAULT_MAX_CHECKBOX_SHAPE_SCALE = 1.0;
@@ -62,7 +61,7 @@ CanvasDrawFunction CheckBoxPaintMethod::GetContentDrawFunction(PaintWrapper* pai
 
 void CheckBoxPaintMethod::InitializeParam()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkBoxTheme);
@@ -71,11 +70,13 @@ void CheckBoxPaintMethod::InitializeParam()
     checkStroke_ = checkBoxTheme->GetCheckStroke().ConvertToPx();
     activeColor_ = checkBoxTheme->GetActiveColor();
     inactiveColor_ = checkBoxTheme->GetInactiveColor();
+    inactivePointColor_ = checkBoxTheme->GetInactivePointColor();
     shadowColor_ = checkBoxTheme->GetShadowColor();
     clickEffectColor_ = checkBoxTheme->GetClickEffectColor();
     hoverColor_ = checkBoxTheme->GetHoverColor();
     hoverRadius_ = checkBoxTheme->GetHoverRadius();
     hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
+    hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
 }
 
 void CheckBoxPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWrapper) const
@@ -84,10 +85,6 @@ void CheckBoxPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWra
     auto paintProperty = DynamicCast<CheckBoxPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
     auto contentSize = paintWrapper->GetContentSize();
-    bool isSelected = false;
-    if (paintProperty->HasCheckBoxSelect()) {
-        isSelected = paintProperty->GetCheckBoxSelectValue();
-    }
     auto color = activeColor_;
     if (paintProperty->HasCheckBoxSelectedColor()) {
         color = paintProperty->GetCheckBoxSelectedColorValue();
@@ -102,6 +99,10 @@ void CheckBoxPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWra
     paintOffset += OffsetF(strokeOffset, strokeOffset);
     contentSize.SetWidth(contentSize.Width() - borderWidth_);
     contentSize.SetHeight(contentSize.Height() - borderWidth_);
+    if (isTouch_ || isHover_) {
+        paintOffset.SetX(paintOffset.GetX() + hotZoneHorizontalPadding_.ConvertToPx());
+        paintOffset.SetY(paintOffset.GetY() + hotZoneVerticalPadding_.ConvertToPx());
+    }
     if (isTouch_) {
         DrawTouchBoard(canvas, contentSize, paintOffset);
     }
@@ -128,7 +129,7 @@ void CheckBoxPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWra
         DrawAnimationOnToOff(canvas, paintOffset, pen, contentSize);
     } else if (uiStatus_ == UIStatus::UNSELECTED) {
         pen.SetColor(ToRSColor(inactiveColor_));
-        brush.SetColor(ToRSColor(TRANSPARENT_COLOR));
+        brush.SetColor(ToRSColor(inactivePointColor_));
         if (!enabled_) {
             pen.SetColor(ToRSColor(inactiveColor_.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
         }
@@ -257,9 +258,9 @@ void CheckBoxPaintMethod::DrawTouchBoard(RSCanvas& canvas, const SizeF& size, co
     brush.SetColor(ToRSColor(Color(clickEffectColor_)));
     brush.SetAntiAlias(true);
     float originX = offset.GetX() - hotZoneHorizontalPadding_.ConvertToPx();
-    float originY = offset.GetY() - hotZoneHorizontalPadding_.ConvertToPx();
+    float originY = offset.GetY() - hotZoneVerticalPadding_.ConvertToPx();
     float endX = size.Width() + originX + 2 * hotZoneHorizontalPadding_.ConvertToPx();
-    float endY = size.Height() + originY + 2 * hotZoneHorizontalPadding_.ConvertToPx();
+    float endY = size.Height() + originY + 2 * hotZoneVerticalPadding_.ConvertToPx();
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, hoverRadius_.ConvertToPx(), hoverRadius_.ConvertToPx());
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(rrect);
@@ -271,9 +272,9 @@ void CheckBoxPaintMethod::DrawHoverBoard(RSCanvas& canvas, const SizeF& size, co
     brush.SetColor(ToRSColor(Color(hoverColor_)));
     brush.SetAntiAlias(true);
     float originX = offset.GetX() - hotZoneHorizontalPadding_.ConvertToPx();
-    float originY = offset.GetY() - hotZoneHorizontalPadding_.ConvertToPx();
+    float originY = offset.GetY() - hotZoneVerticalPadding_.ConvertToPx();
     float endX = size.Width() + originX + 2 * hotZoneHorizontalPadding_.ConvertToPx();
-    float endY = size.Height() + originY + 2 * hotZoneHorizontalPadding_.ConvertToPx();
+    float endY = size.Height() + originY + 2 * hotZoneVerticalPadding_.ConvertToPx();
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, hoverRadius_.ConvertToPx(), hoverRadius_.ConvertToPx());
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(rrect);

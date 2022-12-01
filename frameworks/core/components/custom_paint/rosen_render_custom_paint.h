@@ -56,6 +56,8 @@ public:
     void ClearRect(const Offset& offset, const Rect& rect) override;
     void FillText(const Offset& offset, const std::string& text, double x, double y) override;
     void StrokeText(const Offset& offset, const std::string& text, double x, double y) override;
+    static double MeasureTextInner(const std::string& text, double fontSize, int32_t fontStyle,
+        const std::string& fontWeight, const std::string& fontFamily, double letterSpacing);
     double MeasureText(const std::string& text, const PaintState& state) override;
     double MeasureTextHeight(const std::string& text, const PaintState& state) override;
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state) override;
@@ -75,6 +77,7 @@ public:
     void Clip(const RefPtr<CanvasPath2D>& path) override;
     void BeginPath() override;
     void ClosePath() override;
+    void ResetTransform() override;
     void Restore() override;
     void Save() override;
     void Rotate(double angle) override;
@@ -102,8 +105,8 @@ public:
 private:
     void InitImagePaint();
     void InitPaintBlend(SkPaint& paint);
-    bool UpdateParagraph(const Offset& offset, const std::string& text, bool isStroke, bool hasShadow = true);
-    void PaintText(const Offset& offset, double x, double y, bool isStroke, bool hasShadow = true);
+    bool UpdateParagraph(const Offset& offset, const std::string& text, bool isStroke, bool hasShadow = false);
+    void PaintText(const Offset& offset, double x, double y, bool isStroke, bool hasShadow = false);
     double GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     SkPaint GetStrokePaint();

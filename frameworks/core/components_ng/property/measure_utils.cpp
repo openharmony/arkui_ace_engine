@@ -15,6 +15,7 @@
 
 #include "core/components_ng/property/measure_utils.h"
 
+#include <memory>
 #include <optional>
 
 #include "base/geometry/ng/size_t.h"
@@ -263,7 +264,8 @@ SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, Meas
     return optional.ConvertToSizeT();
 }
 
-OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType)
+OptionalSizeF CreateIdealSize(
+    const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, const MarginPropertyF& margin)
 {
     OptionalSizeF idealSize;
     do {
@@ -284,7 +286,9 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
             if (!selfSize) {
                 auto parentCrossSize = GetCrossAxisSize(layoutConstraint.parentIdealSize, axis);
                 if (parentCrossSize) {
-                    SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
+                    float marginValue = (axis == Axis::VERTICAL ? margin.left.value_or(0) + margin.right.value_or(0)
+                                                                : margin.top.value_or(0) + margin.bottom.value_or(0));
+                    SetCrossAxisSize(parentCrossSize.value() - marginValue, axis, idealSize);
                 } else {
                     parentCrossSize = GetCrossAxisSize(layoutConstraint.maxSize, axis);
                     SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
@@ -298,7 +302,9 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
             auto parentMainSize = GetMainAxisSize(layoutConstraint.parentIdealSize, axis);
             if (!selfSize) {
                 if (parentMainSize) {
-                    SetMainAxisSize(parentMainSize.value(), axis, idealSize);
+                    float marginValue = (axis == Axis::VERTICAL ? margin.top.value_or(0) + margin.bottom.value_or(0)
+                                                                : margin.left.value_or(0) + margin.right.value_or(0));
+                    SetMainAxisSize(parentMainSize.value() - marginValue, axis, idealSize);
                 } else {
                     parentMainSize = GetMainAxisSize(layoutConstraint.maxSize, axis);
                     SetMainAxisSize(parentMainSize.value(), axis, idealSize);
@@ -308,5 +314,32 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
         }
     } while (false);
     return idealSize;
+}
+
+void CreateChildrenConstraint(
+    SizeF& size, const std::unique_ptr<MarginProperty>& margin, const std::unique_ptr<PaddingProperty>& padding)
+{
+    float width = 0;
+    float height = 0;
+
+    if (margin) {
+        float marginLeft = margin->left.has_value() ? margin->left->GetDimension().ConvertToPx() : 0;
+        float marginRight = margin->right.has_value() ? margin->right->GetDimension().ConvertToPx() : 0;
+        float marginTop = margin->top.has_value() ? margin->top->GetDimension().ConvertToPx() : 0;
+        float marginBottom = margin->bottom.has_value() ? margin->bottom->GetDimension().ConvertToPx() : 0;
+        width += (marginLeft + marginRight);
+        height += (marginTop + marginBottom);
+    }
+    if (padding) {
+        float paddingLeft = padding->left.has_value() ? padding->left->GetDimension().ConvertToPx() : 0;
+        float paddingRight = padding->right.has_value() ? padding->right->GetDimension().ConvertToPx() : 0;
+        float paddingTop = padding->top.has_value() ? padding->top->GetDimension().ConvertToPx() : 0;
+        float paddingBottom = padding->bottom.has_value() ? padding->bottom->GetDimension().ConvertToPx() : 0;
+        width += (paddingLeft + paddingRight);
+        height += (paddingTop + paddingBottom);
+    }
+
+    size.SetHeight(size.Height() - height);
+    size.SetWidth(size.Width() - width);
 }
 } // namespace OHOS::Ace::NG

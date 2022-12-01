@@ -577,10 +577,16 @@ private:
     SourceType keySource_ = SourceType::NONE;
 };
 
+enum class BlurReason : int32_t {
+    FOCUS_SWITCH = 0,
+    WINDOW_BLUR = 1,
+};
+
 using OnKeyEventFunc = std::function<bool(const KeyEvent&)>;
 using OnKeyCallbackFunc = std::function<void(KeyEventInfo&)>;
 using OnFocusFunc = std::function<void()>;
 using OnBlurFunc = std::function<void()>;
+using OnBlurReasonFunc = std::function<void(BlurReason reason)>;
 using OnPreFocusFunc = std::function<void()>;
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_KEY_EVENT_H

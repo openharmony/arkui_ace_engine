@@ -17,7 +17,7 @@
 
 #include "core/components/stage/stage_element.h"
 #include "core/components/test/json/json_frontend.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/mock/fake_asset_manager.h"
 #include "core/mock/fake_task_executor.h"
 #include "core/mock/mock_resource_register.h"
@@ -54,7 +54,7 @@ RefPtr<PipelineContext> MockRenderCommon::GetMockContext()
         std::move(window), taskExecutor, assetManager, resRegister, fakeFrontend, 0);
     pipelineContext->SetRootHeight(2049.0);
     pipelineContext->SetupRootElement();
-    pipelineContext->SetThemeManager(AceType::MakeRefPtr<ThemeManager>());
+    pipelineContext->SetThemeManager(AceType::MakeRefPtr<ThemeManagerImpl>());
     auto stageElement = pipelineContext->GetStageElement();
     if (!stageElement) {
         return pipelineContext;

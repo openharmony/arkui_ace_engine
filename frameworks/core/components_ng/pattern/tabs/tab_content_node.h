@@ -21,7 +21,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT TabContentNode : public FrameNode {
-    DECLARE_ACE_TYPE(TabsContentNode, FrameNode);
+    DECLARE_ACE_TYPE(TabContentNode, FrameNode);
 
 public:
     TabContentNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false)

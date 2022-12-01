@@ -38,7 +38,7 @@ public:
     {
         auto blockDiameter = hotFlag_ ? blockDiameter_ * BLOCK_DIAMETER_SCALE : blockDiameter_;
         SliderPaintMethod::Parameters paintParameters { trackThickness_, blockDiameter, sliderLength_, borderBlank_,
-            static_cast<float>(stepRatio_), static_cast<float>(valueRatio_) };
+            static_cast<float>(stepRatio_), static_cast<float>(valueRatio_), hotFlag_ };
         return MakeRefPtr<SliderPaintMethod>(paintParameters);
     }
 
@@ -66,7 +66,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
     }
 
 private:

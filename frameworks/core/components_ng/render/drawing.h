@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_H
 
+#ifndef ACE_UNITTEST
 #include "draw/canvas.h"
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 #include "image/image.h"
@@ -26,7 +27,6 @@
 #include "utils/scalar.h"
 
 namespace OHOS::Ace {
-
 using RSCanvas = Rosen::Drawing::Canvas;
 using RSImage = Rosen::Drawing::Image;
 using RSBrush = Rosen::Drawing::Brush;
@@ -69,5 +69,7 @@ using RSColorQuad = rosen::ColorQuad;
 using RSShaderEffect = rosen::ShaderEffect;
 using RSTileMode = rosen::TileMode;
 } // namespace OHOS::Ace
-
+#else
+#include "core/components_ng/render/drawing_mock.h"
+#endif
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_H

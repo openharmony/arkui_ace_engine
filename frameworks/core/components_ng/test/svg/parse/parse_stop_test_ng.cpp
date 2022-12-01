@@ -26,6 +26,8 @@
 #include "core/components_ng/svg/parse/svg_stop.h"
 #include "core/components_ng/svg/parse/svg_svg.h"
 #include "core/components_ng/svg/svg_dom.h"
+#include "core/components_ng/test/svg/parse/svg_const.h"
+#include "core/components/common/layout/constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -67,5 +69,9 @@ HWTEST_F(ParseStopTestNg, ParseTest001, TestSize.Level1)
     auto gradientColor = svgStopDeclaration->GetGradientColor();
     EXPECT_FLOAT_EQ(gradientColor.GetOpacity(), STOP_OPACITY);
     EXPECT_STREQ(gradientColor.GetColor().ColorToString().c_str(), Color::FromRGB(255, 255, 0).ColorToString().c_str());
+    RSCanvas rSCanvas;
+    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COPONENT_WIDTH, IMAGE_COPONENT_HEIGHT), Color::RED);
+    EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
+    EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }
 } // namespace OHOS::Ace::NG

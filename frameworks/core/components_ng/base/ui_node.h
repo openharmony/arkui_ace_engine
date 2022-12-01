@@ -82,11 +82,17 @@ public:
 
     RefPtr<UINode> GetLastChild()
     {
+        if (children_.empty()) {
+            return nullptr;
+        }
         return children_.back();
     }
 
     RefPtr<UINode> GetFirstChild()
     {
+        if (children_.empty()) {
+            return nullptr;
+        }
         return children_.front();
     }
 
@@ -238,6 +244,26 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
     void OnInspectorIdUpdate(const std::string& /*unused*/) {}
+
+    template<typename T>
+    RefPtr<T> FindChildNodeOfClass()
+    {
+        const auto& children = GetChildren();
+        for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+            auto& child = *iter;
+
+            auto target = child->FindChildNodeOfClass<T>();
+            if (target) {
+                return target;
+            }
+        }
+
+        RefPtr<UINode> uiNode = AceType::Claim<UINode>(this);
+        if (AceType::InstanceOf<T>(uiNode)) {
+            return AceType::DynamicCast<T>(uiNode);
+        }
+        return nullptr;
+    }
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()

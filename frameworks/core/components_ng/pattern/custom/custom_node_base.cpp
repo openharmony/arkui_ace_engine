@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 
 #include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -39,10 +40,7 @@ void CustomNodeBase::Update()
 void CustomNodeBase::MarkNeedUpdate()
 {
     auto context = PipelineContext::GetCurrentContext();
-    if (!context) {
-        LOGE("context is nullptr, fail to push async task");
-        return;
-    }
+    CHECK_NULL_VOID(context);
     if (needRebuild_) {
         return;
     }

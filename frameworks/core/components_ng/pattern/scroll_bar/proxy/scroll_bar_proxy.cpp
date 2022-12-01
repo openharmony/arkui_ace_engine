@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 
+#include "base/utils/utils.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 
@@ -24,8 +26,8 @@ constexpr int32_t SCROLL_FROM_BAR = 6; // Source type of scroll.
 
 bool CheckScrollable(const RefPtr<Pattern>& pattern)
 {
-    return AceType::InstanceOf<ScrollPattern>(pattern);
-    // TO DO for grid/list
+    return AceType::InstanceOf<ScrollPattern>(pattern) || AceType::InstanceOf<ListPattern>(pattern);
+    // TO DO for grid
 }
 
 float GetScrollableDistance(RefPtr<Pattern> pattern)
@@ -34,7 +36,11 @@ float GetScrollableDistance(RefPtr<Pattern> pattern)
     if (scrollPattern) {
         return scrollPattern->GetScrollableDistance();
     }
-    // TO DO for grid/list
+    auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
+    if (listPattern) {
+        return listPattern->GetScrollableDistance();
+    }
+    // TO DO for grid
     return 0.0f;
 }
 
@@ -42,12 +48,17 @@ float GetScrollOffset(RefPtr<Pattern> pattern)
 {
     auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
     if (scrollPattern) {
+        CHECK_NULL_RETURN(scrollPattern, 0.0f);
         return scrollPattern->GetCurrentPosition();
     }
-    // TO DO for grid/list
+    auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
+    if (listPattern) {
+        return listPattern->GetCurrentPosition();
+    }
+    // TO DO for grid
     return 0.0f;
 }
-}
+} // namespace
 
 void ScrollBarProxy::RegisterScrollableNode(const ScrollableNodeInfo& scrollableNode)
 {
@@ -87,10 +98,7 @@ void ScrollBarProxy::UnRegisterScrollBar(const WeakPtr<ScrollBarPattern>& scroll
 void ScrollBarProxy::NotifyScrollableNode(float distance, const WeakPtr<ScrollBarPattern>& weakScrollBar) const
 {
     auto scrollBar = weakScrollBar.Upgrade();
-    if (!scrollBar) {
-        LOGE("scrollBar has been released.");
-        return;
-    }
+    CHECK_NULL_VOID(scrollBar);
     float controlDistance = scrollBar->GetScrollableDistance();
 
     for (const auto& node : scrollableNodes_) {

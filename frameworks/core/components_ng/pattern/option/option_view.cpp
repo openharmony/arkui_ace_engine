@@ -47,6 +47,7 @@ RefPtr<FrameNode> Create(int32_t index)
     auto props = node->GetPaintProperty<OptionPaintProperty>();
     CHECK_NULL_RETURN(props, nullptr);
     props->UpdateHover(false);
+    props->UpdatePress(false);
     return node;
 }
 

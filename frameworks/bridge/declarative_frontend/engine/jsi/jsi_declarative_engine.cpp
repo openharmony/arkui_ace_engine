@@ -1499,13 +1499,32 @@ void JsiDeclarativeEngine::DestroyApplication(const std::string& packageName)
 
 void JsiDeclarativeEngine::UpdateApplicationState(const std::string& packageName, Frontend::State state)
 {
-    LOGD("JsiDeclarativeEngine UpdateApplicationState, packageName %{public}s", packageName.c_str());
-    if (state == Frontend::State::ON_SHOW) {
-        CallAppFunc("onShow");
-    } else if (state == Frontend::State::ON_HIDE) {
-        CallAppFunc("onHide");
-    } else {
-        LOGW("unsupported state");
+    LOGI("JsiDeclarativeEngine UpdateApplicationState, packageName %{public}s, state: %{public}d",
+        packageName.c_str(), static_cast<int32_t>(state));
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("update app state failed, runtime is null.");
+        return;
+    }
+    switch (state) {
+        case Frontend::State::ON_SHOW:
+            CallAppFunc("onShow");
+            break;
+        case Frontend::State::ON_HIDE:
+            CallAppFunc("onHide");
+            break;
+        case Frontend::State::ON_ACTIVE:
+            CallAppFunc("onActive");
+            break;
+        case Frontend::State::ON_INACTIVE:
+            CallAppFunc("onInactive");
+            break;
+        case Frontend::State::ON_DESTROY:
+            CallAppFunc("onDestroy");
+            break;
+        default:
+            LOGW("unsupported state: %{public}d", state);
+            return;
     }
 }
 
@@ -1643,7 +1662,6 @@ void JsiDeclarativeEngine::OnActive()
         LOGE("onActive failed, runtime is null.");
         return;
     }
-
     CallAppFunc("onActive");
 }
 
@@ -1655,7 +1673,6 @@ void JsiDeclarativeEngine::OnInactive()
         LOGE("OnInactive failed, runtime is null.");
         return;
     }
-
     CallAppFunc("onInactive");
 }
 

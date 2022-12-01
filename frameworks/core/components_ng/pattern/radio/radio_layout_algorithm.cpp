@@ -35,7 +35,7 @@ std::optional<SizeF> RadioLayoutAlgorithm::MeasureContent(
 {
     InitializeParam();
     // Case 1: Width and height are set in the front end.
-    if (contentConstraint.selfIdealSize.IsValid()) {
+    if (contentConstraint.selfIdealSize.IsValid() && contentConstraint.selfIdealSize.IsNonNegative()) {
         auto height = contentConstraint.selfIdealSize.Height().value();
         auto width = contentConstraint.selfIdealSize.Width().value();
         auto length = std::min(width, height);
@@ -69,13 +69,13 @@ std::optional<SizeF> RadioLayoutAlgorithm::MeasureContent(
 
 void RadioLayoutAlgorithm::InitializeParam()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto checkBoxTheme = pipeline->GetTheme<RadioTheme>();
-    CHECK_NULL_VOID(checkBoxTheme);
-    defaultWidth_ = checkBoxTheme->GetDefaultWidth().ConvertToPx();
-    defaultHeight_ = checkBoxTheme->GetDefaultHeight().ConvertToPx();
-    horizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding().ConvertToPx();
-    verticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding().ConvertToPx();
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    CHECK_NULL_VOID(radioTheme);
+    defaultWidth_ = radioTheme->GetDefaultWidth().ConvertToPx();
+    defaultHeight_ = radioTheme->GetDefaultHeight().ConvertToPx();
+    horizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding().ConvertToPx();
+    verticalPadding_ = radioTheme->GetHotZoneVerticalPadding().ConvertToPx();
 }
 } // namespace OHOS::Ace::NG

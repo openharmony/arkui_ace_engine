@@ -15,6 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_rect.h"
 
+#include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_rect_declaration.h"
 
 namespace OHOS::Ace::NG {
@@ -34,9 +35,7 @@ RefPtr<SvgNode> SvgRect::Create()
 SkPath SvgRect::AsPath(const Size& viewPort) const
 {
     auto declaration = AceType::DynamicCast<SvgRectDeclaration>(declaration_);
-    if (declaration == nullptr) {
-        return SkPath();
-    }
+    CHECK_NULL_RETURN_NOLOG(declaration, SkPath());
     double rx = 0.0;
     if (GreatOrEqual(declaration->GetRx().Value(), 0.0)) {
         rx = ConvertDimensionToPx(declaration->GetRx(), viewPort, SvgLengthType::HORIZONTAL);

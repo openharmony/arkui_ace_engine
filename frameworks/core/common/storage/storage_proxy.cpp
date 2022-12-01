@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/utils.h"
 #include "core/common/storage/storage_proxy.h"
 
 namespace OHOS::Ace {
@@ -39,18 +40,14 @@ void StorageProxy::SetDistributedDelegate(std::unique_ptr<StorageInterface>&& de
 
 RefPtr<Storage> StorageProxy::GetStorage(const RefPtr<TaskExecutor>& taskExecutor) const
 {
-    if (!delegate_) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(delegate_, nullptr);
     return delegate_->GetStorage(taskExecutor);
 }
 
 RefPtr<Storage> StorageProxy::GetStorage(const std::string& sessionId,
     std::function<void(const std::string&)>&& notifier, const RefPtr<TaskExecutor>& taskExecutor) const
 {
-    if (!distributedDelegate_) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(distributedDelegate_, nullptr);
     return distributedDelegate_->GetStorage(sessionId, std::move(notifier), taskExecutor);
 }
 

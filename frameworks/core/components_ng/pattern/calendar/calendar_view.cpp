@@ -53,10 +53,11 @@ void CalendarView::Create(const CalendarData& calendarData)
     CHECK_NULL_VOID(swiperPaintProperty);
     swiperPaintProperty->UpdateLoop(true);
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
-    swiperPaintProperty->UpdateDisableSwipe(false);
+    swiperPaintProperty->UpdateDisableSwipe(true);
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
     swiperLayoutProperty->UpdateIndex(1);
+    swiperLayoutProperty->UpdateShowIndicator(false);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     auto swiperController = swiperPattern->GetSwiperController();

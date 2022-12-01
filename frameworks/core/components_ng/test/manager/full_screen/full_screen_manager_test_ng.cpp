@@ -22,8 +22,9 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
-#include "frameworks/core/components_ng/manager/full_screen/full_screen_manager.h"
-#include "frameworks/core/components_ng/pattern/pattern.h"
+#include "core/components_ng/manager/full_screen/full_screen_manager.h"
+#include "core/components_ng/pattern/pattern.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -43,11 +44,19 @@ const float ROOT_HEIGHT = 1.0f;
 
 class FullScreenManagerTestNg : public testing::Test {
 public:
-    static void SetUpTestSuite() {};
-    static void TearDownTestSuite() {};
-
-protected:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
 };
+
+void FullScreenManagerTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void FullScreenManagerTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 /**
  * @tc.name: FullScreenManagerTest001

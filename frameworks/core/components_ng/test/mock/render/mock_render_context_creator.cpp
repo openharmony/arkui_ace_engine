@@ -14,10 +14,11 @@
  */
 
 #include "core/components_ng/render/render_context.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<RenderContext> RenderContext::Create()
 {
-    return nullptr;
+    return AceType::MakeRefPtr<MockRenderContext>();
 }
 } // namespace OHOS::Ace::NG

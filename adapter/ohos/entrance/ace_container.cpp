@@ -47,7 +47,7 @@
 #include "core/common/text_field_manager.h"
 #include "core/common/window.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -176,9 +176,9 @@ void AceContainer::Destroy()
             frontend->UpdateState(Frontend::State::ON_DESTROY);
             frontend->Destroy();
         } else {
+            frontend->UpdateState(Frontend::State::ON_DESTROY);
             taskExecutor_->PostTask(
                 [frontend]() {
-                    frontend->UpdateState(Frontend::State::ON_DESTROY);
                     frontend->Destroy();
                 },
                 TaskExecutor::TaskType::JS);
@@ -293,22 +293,27 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
 void AceContainer::OnShow(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    if (!container) {
-        LOGE("container is null, OnShow failed.");
-        return;
-    }
-
+    CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+
+    auto front = container->GetFrontend();
+    if (front && !container->IsSubContainer()) {
+        WeakPtr<Frontend> weakFrontend = front;
+        taskExecutor->PostTask(
+            [weakFrontend]() {
+                auto frontend = weakFrontend.Upgrade();
+                if (frontend) {
+                    frontend->UpdateState(Frontend::State::ON_SHOW);
+                    frontend->OnShow();
+                }
+            },
+            TaskExecutor::TaskType::JS);
+    }
+
     taskExecutor->PostTask(
         [container]() {
-            // When it is subContainer, no need call the OnShow,
-            auto front = container->GetFrontend();
-            if (front && !container->IsSubContainer()) {
-                front->UpdateState(Frontend::State::ON_SHOW);
-                front->OnShow();
-            }
             std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap;
             container->GetCardFrontendMap(cardFrontendMap);
             for (const auto& [_, weakCardFront] : cardFrontendMap) {
@@ -330,29 +335,29 @@ void AceContainer::OnShow(int32_t instanceId)
 void AceContainer::OnHide(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    if (!container) {
-        LOGE("container is null, OnHide failed.");
-        return;
-    }
+    CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId);
     auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("taskExecutor is null, OnHide failed.");
-        return;
+    CHECK_NULL_VOID(taskExecutor);
+
+    auto front = container->GetFrontend();
+    if (front && !container->IsSubContainer()) {
+        WeakPtr<Frontend> weakFrontend = front;
+        taskExecutor->PostTask(
+            [weakFrontend]() {
+                auto frontend = weakFrontend.Upgrade();
+                if (frontend) {
+                    frontend->UpdateState(Frontend::State::ON_HIDE);
+                    frontend->OnHide();
+                    frontend->TriggerGarbageCollection();
+                }
+            },
+            TaskExecutor::TaskType::JS);
     }
+
     taskExecutor->PostTask(
         [container]() {
-            auto front = container->GetFrontend();
             auto taskExecutor = container->GetTaskExecutor();
-            if (front && !container->IsSubContainer()) {
-                front->UpdateState(Frontend::State::ON_HIDE);
-                front->OnHide();
-                if (taskExecutor) {
-                    taskExecutor->PostTask(
-                        [front]() { front->TriggerGarbageCollection(); }, TaskExecutor::TaskType::JS);
-                }
-            }
-
             std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap;
             container->GetCardFrontendMap(cardFrontendMap);
             for (const auto& [_, weakCardFront] : cardFrontendMap) {
@@ -380,23 +385,27 @@ void AceContainer::OnHide(int32_t instanceId)
 void AceContainer::OnActive(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    if (!container) {
-        LOGE("container is null, OnActive failed.");
-        return;
-    }
+    CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId);
     auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("taskExecutor is null, OnActive failed.");
-        return;
+    CHECK_NULL_VOID(taskExecutor);
+
+    auto front = container->GetFrontend();
+    if (front && !container->IsSubContainer()) {
+        WeakPtr<Frontend> weakFrontend = front;
+        taskExecutor->PostTask(
+            [weakFrontend] () {
+                auto frontend = weakFrontend.Upgrade();
+                if (frontend) {
+                    frontend->UpdateState(Frontend::State::ON_ACTIVE);
+                    frontend->OnActive();
+                }
+            },
+            TaskExecutor::TaskType::JS);
     }
+
     taskExecutor->PostTask(
         [container]() {
-            // When it is subContainer, no need call the OnActive.
-            auto front = container->GetFrontend();
-            if (front && !container->IsSubContainer()) {
-                front->OnActive();
-            }
             auto pipelineContext = container->GetPipelineContext();
             if (!pipelineContext) {
                 LOGE("pipeline context is null, OnActive failed.");
@@ -410,25 +419,27 @@ void AceContainer::OnActive(int32_t instanceId)
 void AceContainer::OnInactive(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    if (!container) {
-        LOGE("container is null, OnInactive failed.");
-        return;
-    }
+    CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId);
     auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("taskExecutor is null, OnInactive failed.");
-        return;
+    CHECK_NULL_VOID(taskExecutor);
+
+    auto front = container->GetFrontend();
+    if (front && !container->IsSubContainer()) {
+        WeakPtr<Frontend> weakFrontend = front;
+        taskExecutor->PostTask(
+            [weakFrontend] () {
+                auto frontend = weakFrontend.Upgrade();
+                if (frontend) {
+                    frontend->UpdateState(Frontend::State::ON_INACTIVE);
+                    frontend->OnInactive();
+                }
+            },
+            TaskExecutor::TaskType::JS);
     }
 
     taskExecutor->PostTask(
         [container]() {
-            // When it is subContainer, no need call the OnInactive.
-            auto front = container->GetFrontend();
-            if (front && !container->IsSubContainer()) {
-                front->OnInactive();
-            }
-
             auto pipelineContext = container->GetPipelineContext();
             if (!pipelineContext) {
                 LOGE("pipeline context is null, OnInactive failed.");
@@ -1153,7 +1164,7 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
         ACE_SCOPED_TRACE("OHOS::LoadThemes()");
         LOGD("UIContent load theme");
         ThemeConstants::InitDeviceType();
-        auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+        auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
         pipelineContext->SetThemeManager(themeManager);
         themeManager->InitResource(resourceInfo);
         themeManager->SetColorScheme(colorScheme);

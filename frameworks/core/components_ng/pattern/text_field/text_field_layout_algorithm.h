@@ -19,6 +19,7 @@
 #include <string>
 #include <utility>
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/rect.h"
 #include "base/memory/referenced.h"
 #include "core/components/text_field/textfield_theme.h"
@@ -77,6 +78,11 @@ public:
         caretOffsetX_ = offsetX;
     }
 
+    const OffsetF& GetParentGlobalOffset() const
+    {
+        return parentGlobalOffset_;
+    }
+
     static TextDirection GetTextDirection(const std::string& content);
 
     static void UpdateTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
@@ -101,6 +107,7 @@ private:
     RectF frameRect_;
     RectF textRect_;
     RectF imageRect_;
+    OffsetF parentGlobalOffset_;
 
     float caretOffsetX_ = 0.0f;
 

@@ -92,7 +92,7 @@ void JSButton::SetFontStyle(int32_t value)
         return;
     }
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::SetItalicFontStyle(fontStyles[value]);
+        NG::ButtonView::SetFontStyle(fontStyles[value]);
         return;
     }
     auto textComponent = GetTextComponent();
@@ -134,10 +134,12 @@ void JSButton::SetTextColor(const JSCallbackInfo& info)
     }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
-        return;
+        LOGI("Set text color is invalid, use default text color.");
+        auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+        textColor = buttonTheme->GetTextStyle().GetTextColor();
     }
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::SetTextColor(textColor);
+        NG::ButtonView::SetFontColor(textColor);
         return;
     }
     auto textComponent = GetTextComponent();
@@ -263,7 +265,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
         auto textComponent = AceType::MakeRefPtr<TextComponent>(label);
         auto buttonTheme = GetTheme<ButtonTheme>();
         auto textStyle = buttonTheme ? buttonTheme->GetTextStyle() : textComponent->GetTextStyle();
-        textStyle.SetMaxLines(buttonTheme->GetTextMaxLines());
+        textStyle.SetMaxLines(buttonTheme ? buttonTheme->GetTextMaxLines() : 1);
         textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
         textComponent->SetTextStyle(textStyle);
         auto padding = AceType::MakeRefPtr<PaddingComponent>();
@@ -680,7 +682,8 @@ void JSButton::JsRadius(const JSCallbackInfo& info)
         return;
     }
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetBorderRadius(radius);
+        NG::ButtonView::SetBorderRadius(radius);
+        return;
     }
     auto stack = ViewStackProcessor::GetInstance();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());

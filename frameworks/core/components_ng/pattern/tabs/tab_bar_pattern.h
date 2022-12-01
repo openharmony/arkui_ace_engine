@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_method.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
+#include "core/event/mouse_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -140,6 +141,21 @@ public:
 
     bool IsContainsBuilder();
 
+    void SetAnimationDuration(int32_t animationDuration)
+    {
+        animationDuration_ = animationDuration;
+    }
+
+    void SetTouching(bool isTouching)
+    {
+        touching_ = isTouching;
+    }
+
+    bool IsTouching() const
+    {
+        return touching_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -148,12 +164,27 @@ private:
     void InitClick(const RefPtr<GestureEventHub>& gestureHub);
     void InitScrollable(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouch(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleClick(const GestureEvent& info) const;
+    void InitHoverEvent();
+    void InitMouseEvent();
+
+    void HandleMouseEvent(const MouseInfo& info);
+    void HandleHoverEvent(bool isHover);
+    void HandleHoverOnEvent(int32_t index);
+    void HandleMoveAway(int32_t index);
+    void HandleClick(const GestureEvent& info);
     void HandleTouchEvent(const TouchLocationInfo& info);
+
+    void HandleTouchDown(int32_t index);
+    void HandleTouchUp(int32_t index);
+    int32_t CalculateSelectedIndex(const Offset& info);
+
+    void PlayPressAnimation(int32_t index, float endOpacityRatio);
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ScrollableEvent> scrollableEvent_;
+    RefPtr<InputEvent> mouseEvent_;
+    RefPtr<InputEvent> hoverEvent_;
     RefPtr<SwiperController> swiperController_;
 
     float currentOffset_ = 0.0f;
@@ -162,8 +193,15 @@ private:
     Axis axis_ = Axis::HORIZONTAL;
     std::vector<OffsetF> tabItemOffsets_;
     std::unordered_map<int32_t, bool> tabBarType_;
+    std::optional<int32_t> animationDuration_;
 
     bool isRTL_ = false; // TODO Adapt RTL.
+
+    bool touching_ = false; // whether the item is in touching
+    bool isHover_ = false;
+    float hoverOpacity_ = 0.0;
+    int32_t touchingIndex_ = 0;
+    std::optional<int32_t> hoverIndex_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -19,7 +19,6 @@
 #include <functional>
 #include <string>
 
-#include "core/components/box/drag_drop_event.h"
 #include "core/components/web/web_property.h"
 
 namespace OHOS::Ace::NG {
@@ -67,6 +66,7 @@ public:
     static void SetZoomAccessEnabled(bool isZoomAccessEnabled);
     static void SetGeolocationAccessEnabled(bool isGeolocationAccessEnabled);
     static void SetUserAgent(const std::string& userAgent);
+    static void SetCustomScheme(const std::string& customScheme);
     static void SetRenderExitedId(OnWebAsyncFunc&& renderExitedId);
     static void SetRefreshAccessedHistoryId(OnWebAsyncFunc&& refreshAccessedHistoryId);
     static void SetCacheMode(WebCacheMode mode);
@@ -83,16 +83,14 @@ public:
     static void SetBackgroundColor(int32_t backgroundColor);
     static void SetInitialScale(float scale);
     static void SetSearchResultReceiveEventId(OnWebAsyncFunc&& searchResultReceiveEventId);
-    static void SetOnDragStartId(const OnDragFunc& onDragStartId);
-    static void SetOnDragEnterId(const OnDropFunc& onDragEnterId);
-    static void SetOnDragMoveId(const OnDropFunc& onDragMoveId);
-    static void SetOnDragLeaveId(const OnDropFunc& onDragLeaveId);
-    static void SetOnDropId(const OnDropFunc& onDropId);
     static void SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     static void SetWindowNewEvent(OnWebAsyncFunc&& windowNewEventId);
     static void SetWindowExitEventId(OnWebAsyncFunc&& windowExitEventId);
     static void SetMultiWindowAccessEnabled(bool isMultiWindowAccessEnabled);
     static void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback);
+
+private:
+    static void RegisterPipelineCallback(int32_t nodeId);
 };
 } // namespace OHOS::Ace::NG
 

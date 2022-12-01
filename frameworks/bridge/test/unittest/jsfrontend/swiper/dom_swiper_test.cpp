@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 
 #include "core/components/common/layout/constants.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/common/dom/dom_swiper.h"
 #include "frameworks/bridge/test/unittest/jsfrontend/dom_node_factory.h"
@@ -287,7 +288,7 @@ HWTEST_F(DomSwiperTest, DomSwiperCreatorTest005, TestSize.Level1)
     auto indicator = swiperComponent->GetIndicator();
     EXPECT_TRUE(indicator);
     if (indicator) {
-        auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+        auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
         RefPtr<SwiperIndicatorTheme> theme = themeManager->GetTheme<SwiperIndicatorTheme>();
         EXPECT_TRUE(indicator->GetSize() == theme->GetSize());
         EXPECT_EQ(indicator->GetColor(), theme->GetColor());

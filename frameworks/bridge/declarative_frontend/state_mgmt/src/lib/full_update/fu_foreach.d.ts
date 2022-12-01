@@ -13,11 +13,17 @@
  * limitations under the License.
  */
 
-// regular ForEach ===========================
+/**
 
-// Note: the API for ForEach with partial update and with full update 
-// are different. Only this declaration file or the one for partial update
-// can be used. Using both would lead to syntax error.
+ full update ForEach 
+
+ all definitions in this file are framework internal
+
+ Note: the API for ForEach with partial update and with full update 
+ are different. Only this declaration file or the one for partial update
+ can be used. Using both would lead to syntax error.
+
+*/
 
 declare class ForEach {
   static create(compilerGenId: string,

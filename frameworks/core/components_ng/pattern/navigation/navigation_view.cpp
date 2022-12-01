@@ -23,6 +23,8 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
@@ -30,6 +32,7 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
@@ -43,6 +46,8 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/components_ng/pattern/navigator/navigator_pattern.h"
+#include "core/components_ng/pattern/option/option_view.h"
+#include "core/components_ng/pattern/select/select_view.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -52,7 +57,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-constexpr Dimension WINDOW_WIDTH = 520.0_vp;
 constexpr Dimension DEFAULT_NAV_BAR_WIDTH = 200.0_vp;
 
 RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
@@ -106,7 +110,68 @@ void UpdateBarItemNodeWithItem(const RefPtr<BarItemNode>& barItemNode, const Bar
     barItemNode->MarkModifyDone();
 }
 
-void UpdateOldBarItems(const RefPtr<UINode>& oldBarContainer, const std::list<BarItem>& newBarItems)
+void BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode)
+{
+    int32_t imageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageNodeId, AceType::MakeRefPtr<ImagePattern>());
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+
+    auto info = ImageSourceInfo("");
+    info.SetResourceId(theme->GetMoreResourceId());
+    imageLayoutProperty->UpdateImageSourceInfo(info);
+
+    auto iconSize = theme->GetMenuIconSize();
+    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+    imageNode->MarkModifyDone();
+
+    barItemNode->SetIconNode(imageNode);
+    barItemNode->AddChild(imageNode);
+
+    auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
+    barItemNode->MarkModifyDone();
+}
+
+void BuildMoreItemNodeAction(const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& barMenuNode)
+{
+    auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    auto context = PipelineContext::GetCurrentContext();
+    auto clickCallback = [weakContext = AceType::WeakClaim(AceType::RawPtr(context)), id = barItemNode->GetId(),
+                             weakMenu = AceType::WeakClaim(AceType::RawPtr(barMenuNode)),
+                             weakBarItemNode = AceType::WeakClaim(AceType::RawPtr(barItemNode))]() {
+        auto context = weakContext.Upgrade();
+        CHECK_NULL_VOID(context);
+
+        auto overlayManager = context->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+
+        auto menu = weakMenu.Upgrade();
+        CHECK_NULL_VOID(menu);
+
+        auto barItemNode = weakBarItemNode.Upgrade();
+        CHECK_NULL_VOID(barItemNode);
+
+        auto imageNode = barItemNode->GetChildAtIndex(0);
+        CHECK_NULL_VOID(imageNode);
+
+        auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
+        CHECK_NULL_VOID(imageFrameNode);
+        auto imgOffset = imageFrameNode->GetOffsetRelativeToWindow();
+        auto imageSize = imageFrameNode->GetGeometryNode()->GetFrameSize();
+
+        imgOffset.SetX(imgOffset.GetX() + imageSize.Width());
+        imgOffset.SetY(imgOffset.GetY() + imageSize.Height() + static_cast<float>(MENU_AND_BUTTON_SPACE.ConvertToPx()));
+        overlayManager->ShowMenu(id, imgOffset, menu);
+    };
+    eventHub->SetItemAction(clickCallback);
+}
+
+void UpdateOldBarItems(const RefPtr<UINode>& oldBarContainer, const std::vector<BarItem>& newBarItems)
 {
     auto oldBarItems = oldBarContainer->GetChildren();
     auto prevChildrenSize = static_cast<int32_t>(oldBarItems.size());
@@ -312,6 +377,8 @@ void NavigationView::SetTitle(const std::string& title, bool hasSubTitle)
         // update title content only without changing node
         titleProperty->UpdateContent(title);
         navBarNode->UpdateTitleNodeOperation(ChildNodeOperation::NONE);
+        navBarNode->MarkModifyDone();
+        navBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     } while (false);
     int32_t titleNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -322,7 +389,7 @@ void NavigationView::SetTitle(const std::string& title, bool hasSubTitle)
 
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    textLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
+    textLayoutProperty->UpdateFontSize(MAX_TITLE_FONT_SIZE);
     textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
     textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
     if (!hasSubTitle) {
@@ -351,6 +418,7 @@ void NavigationView::SetCustomTitle(const RefPtr<UINode>& customTitle)
             navBarNode->SetTitle(customTitle);
             navBarNode->UpdateTitleNodeOperation(ChildNodeOperation::REPLACE);
             navBarNode->MarkModifyDone();
+            navBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
         return;
     }
@@ -388,6 +456,8 @@ void NavigationView::SetSubtitle(const std::string& subtitle)
         }
         subtitleProperty->UpdateContent(subtitle);
         navBarNode->UpdateSubtitleNodeOperation(ChildNodeOperation::NONE);
+        navBarNode->MarkModifyDone();
+        navBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     } while (false);
     int32_t subtitleNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -405,7 +475,7 @@ void NavigationView::SetSubtitle(const std::string& subtitle)
     navBarNode->MarkModifyDone();
 }
 
-void NavigationView::SetMenuItems(std::list<BarItem>&& menuItems)
+void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -433,13 +503,40 @@ void NavigationView::SetMenuItems(std::list<BarItem>&& menuItems)
     auto rowProperty = menuNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(rowProperty);
     rowProperty->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
+
+    auto theme = NavigationGetTheme();
+    auto mostMenuItemCount = theme->GetMostMenuItemCountInBar();
+    bool needMoreButton = menuItems.size() > mostMenuItemCount ? true : false;
+    int32_t count = 0;
+    std::vector<OptionParam> params;
     for (const auto& menuItem : menuItems) {
+        ++count;
+        if (needMoreButton && (count > mostMenuItemCount - 1)) {
+            params.push_back(std::make_pair(menuItem.text.value(), menuItem.action));
+        } else {
+            int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+            auto barItemNode = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, barItemNodeId);
+            barItemNode->InitializePatternAndContext();
+            UpdateBarItemNodeWithItem(barItemNode, menuItem);
+            menuNode->AddChild(barItemNode);
+        }
+    }
+
+    // build more button
+    if (needMoreButton) {
         int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto barItemNode = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, barItemNodeId);
         barItemNode->InitializePatternAndContext();
-        UpdateBarItemNodeWithItem(barItemNode, menuItem);
+
+        BuildMoreIemNode(barItemNode);
+
+        OffsetF offset(0, 0);
+        auto barMenuNode = MenuView::Create(std::move(params), barItemNodeId, MenuType::NAVIGATION_MENU);
+        BuildMoreItemNodeAction(barItemNode, barMenuNode);
         menuNode->AddChild(barItemNode);
+        navBarNode->SetMenuNode(barMenuNode);
     }
+
     navBarNode->SetMenu(menuNode);
     navBarNode->UpdatePrevMenuIsCustom(false);
     navBarNode->MarkModifyDone();
@@ -513,11 +610,17 @@ void NavigationView::SetTitleMode(NavigationTitleMode mode)
 
         int32_t backButtonNodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto backButtonNode =
-            FrameNode::CreateFrameNode(V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::MakeRefPtr<TextPattern>());
-        auto textLayoutProperty = backButtonNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateContent(BACK_BUTTON);
+            FrameNode::CreateFrameNode(V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::MakeRefPtr<ImagePattern>());
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_VOID(theme);
+        ImageSourceInfo imageSourceInfo;
+        imageSourceInfo.SetResourceId(theme->GetBackResourceId());
+        auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(backButtonLayoutProperty);
+        backButtonLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+        backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         backButtonNode->MountToParent(navigator);
+        backButtonNode->MarkModifyDone();
 
         navBarNode->SetBackButton(navigator);
         navBarNode->UpdateBackButtonNodeOperation(ChildNodeOperation::ADD);
@@ -536,18 +639,7 @@ void NavigationView::SetNavBarWidth(const Dimension& value)
 
 void NavigationView::SetNavigationMode(NavigationMode mode)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto navigationMode = static_cast<NG::NavigationMode>(mode);
-    if (navigationMode == NavigationMode::AUTO) {
-        if (context->GetCurrentRootWidth() >= static_cast<float>(WINDOW_WIDTH.ConvertToPx())) {
-            navigationMode = NavigationMode::SPLIT;
-        } else {
-            navigationMode = NavigationMode::STACK;
-        }
-    }
-    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavigationMode, navigationMode);
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavigationMode, static_cast<NG::NavigationMode>(mode));
 }
 
 void NavigationView::SetNavBarPosition(NG::NavBarPosition mode)
@@ -562,7 +654,16 @@ void NavigationView::SetHideNavBar(bool hideNavBar)
 
 void NavigationView::SetTitleHeight(const Dimension& height)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, TitleBarHeight, height);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    titleBarLayoutProperty->UpdateTitleHeight(height);
 }
 
 void NavigationView::SetHideTitleBar(bool hideTitleBar)
@@ -601,7 +702,7 @@ void NavigationView::SetHideToolBar(bool hideToolBar)
     navBarLayoutProperty->UpdateHideToolBar(hideToolBar);
 }
 
-void NavigationView::SetToolBarItems(std::list<BarItem>&& toolBarItems)
+void NavigationView::SetToolBarItems(std::vector<BarItem>&& toolBarItems)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);

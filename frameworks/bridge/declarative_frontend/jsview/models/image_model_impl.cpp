@@ -83,7 +83,7 @@ void ImageModelImpl::SetMatchTextDirection(bool value)
     }
 }
 
-void ImageModelImpl::SetFitMaxSize(bool value)
+void ImageModelImpl::SetFitOriginSize(bool value)
 {
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (image) {

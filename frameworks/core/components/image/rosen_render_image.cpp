@@ -454,13 +454,13 @@ void RosenRenderImage::ProcessPixmapForPaint()
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> skImage;
     if (!renderTaskHolder_->ioManager) {
-        skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        skImage = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixmap));
     } else {
 #ifndef GPU_DISABLED
         skImage = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
             imagePixmap, true, imagePixmap.colorSpace(), true);
 #else
-        skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        skImage = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixmap));
 #endif
     }
     auto canvasImage = flutter::CanvasImage::Create();
@@ -684,7 +684,7 @@ void RosenRenderImage::ApplyBorderRadius(
     // 1. when the image source is a SVG;
     // 2. when image loads fail;
     // 3. when there is a repeat to do;
-    bool clipLayoutSize = sourceInfo_.IsSvg() || (imageRepeat_ != ImageRepeat::NOREPEAT) ||
+    bool clipLayoutSize = sourceInfo_.IsSvg() || (imageRepeat_ != ImageRepeat::NO_REPEAT) ||
         (imageLoadingStatus_ == ImageLoadingStatus::LOAD_FAIL);
     Rect clipRect = clipLayoutSize ? Rect(offset, GetLayoutSize()) : paintRect + offset;
 
@@ -775,7 +775,8 @@ void RosenRenderImage::CanvasDrawImageRect(
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
     if (GetAdaptiveFrameRectFlag()) {
         recordingCanvas->translate(imageRenderPosition_.GetX() * -1, imageRenderPosition_.GetY() * -1);
-        Rosen::RsImageInfo rsImageInfo(fitNum, repeatNum, radii_, scale_);
+        Rosen::RsImageInfo rsImageInfo(fitNum, repeatNum, radii_, scale_,
+            0, image_->compressWidth(), image_->compressHeight());
         recordingCanvas->DrawImageWithParm(image_->image(), image_->compressData(), rsImageInfo, paint);
         image_->setCompress(nullptr, 0, 0);
         return;
@@ -794,7 +795,7 @@ void RosenRenderImage::CanvasDrawImageRect(
 
     Rect realDstRect = paintRect + offset;
 
-    if (imageRepeat_ != ImageRepeat::NOREPEAT) {
+    if (imageRepeat_ != ImageRepeat::NO_REPEAT) {
         DrawImageOnCanvas(scaledSrcRect, realDstRect, paint, canvas);
         return;
     }
@@ -1367,7 +1368,7 @@ void RosenRenderImage::OnVisibleChanged()
             imageObj_->Resume();
         } else {
             imageObj_->Pause();
-            LOGI("pause image when invisible");
+            LOGD("pause image when invisible");
         }
     } else {
         LOGD("OnVisibleChanged: imageObj is null");

@@ -15,9 +15,14 @@
 
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr double DISPLAY_WIDTH = 720;
+constexpr double DISPLAY_HEIGHT = 1280;
+} // namespace
 class Window : public AceType {
     DECLARE_ACE_TYPE(Window, AceType);
 };
@@ -35,6 +40,8 @@ class OffscreenCanvas : public AceType {
 };
 enum class FrontendType {};
 
+RefPtr<MockPipelineBase> MockPipelineBase::pipeline_;
+
 void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) {}
 
 void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) {}
@@ -45,9 +52,7 @@ void PipelineBase::SetRootSize(double density, int32_t width, int32_t height) {}
 
 RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
 {
-    auto pipeline = AceType::MakeRefPtr<MockPipelineBase>();
-    pipeline->SetThemeManager(AceType::MakeRefPtr<ThemeManager>());
-    return pipeline;
+    return MockPipelineBase::GetCurrent();
 }
 
 double PipelineBase::NormalizeToPx(const Dimension& /* dimension */) const
@@ -62,15 +67,61 @@ uint64_t PipelineBase::GetTimeFromExternalTimer()
     return 1;
 }
 
+void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskType type) {}
+
+void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type) {}
+
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {
     return nullptr;
 }
 
+bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
+    const std::function<void()>& propertyCallback, const std::function<void()>& finishCallback)
+{
+    return true;
+}
+
 void PipelineBase::Destroy() {}
+
+double PipelineBase::ConvertPxToVp(const Dimension& /* dimension */) const
+{
+    return 1.0f;
+}
+
+void PipelineBase::RequestFrame() {}
 
 Rect PipelineBase::GetCurrentWindowRect() const
 {
-    return { 0.0f, 0.0f, 1.0f, 1.0f };
+    return { 0., 0., DISPLAY_WIDTH, DISPLAY_HEIGHT };
+}
+
+void MockPipelineBase::SetUp()
+{
+    pipeline_ = AceType::MakeRefPtr<MockPipelineBase>();
+}
+
+void MockPipelineBase::TearDown()
+{
+    pipeline_ = nullptr;
+}
+
+RefPtr<MockPipelineBase> MockPipelineBase::GetCurrent()
+{
+    return pipeline_;
+}
+
+void PipelineBase::OpenImplicitAnimation(
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallBack)
+{}
+
+bool PipelineBase::CloseImplicitAnimation()
+{
+    return true;
+}
+
+RefPtr<Frontend> PipelineBase::GetFrontend() const
+{
+    return nullptr;
 }
 } // namespace OHOS::Ace

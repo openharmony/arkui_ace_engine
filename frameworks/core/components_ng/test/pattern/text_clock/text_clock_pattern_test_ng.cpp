@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#define private public
 #include <optional>
 #include <string>
 
@@ -29,10 +30,12 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-inline constexpr int32_t HOURS_WEST = -8;
+constexpr int32_t HOURS_WEST = -8;
 inline const std::string CLOCK_FORMAT = "hms";
 inline const std::string UTC_1 = "1000000000000";
 inline const std::string UTC_2 = "2000000000000";
+inline const std::string FORMAT_DATA = "08:00:00";
+inline const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 } // namespace
 
 struct TestProperty {
@@ -101,6 +104,11 @@ HWTEST_F(TextClockPatternTestNg, TextClockTest001, TestSize.Level1)
      */
     EXPECT_EQ(textClockLayoutProperty->GetFormat(), CLOCK_FORMAT);
     EXPECT_EQ(textClockLayoutProperty->GetHoursWest(), HOURS_WEST);
+
+    textClockLayoutProperty->UpdateFontFamily(FONT_FAMILY_VALUE);
+    auto json = JsonUtil::Create(true);
+    textClockLayoutProperty->ToJsonValue(json);
+    EXPECT_EQ(textClockLayoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
 }
 
 /**
@@ -113,23 +121,55 @@ HWTEST_F(TextClockPatternTestNg, TextClockTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. create textclock and get frameNode.
      */
-    TextClockModelNG textClockModel;
-    textClockModel.Create();
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTCLOCK_COMPONENT_TAG, 1, []() { return AceType::MakeRefPtr<TextClockPattern>(); });
     EXPECT_NE(frameNode, nullptr);
 
     /**
-     * @tc.steps: step2. get pattern and create layout property, event, controller.
+     * @tc.steps: step2. get pattern and create layout property.
      * @tc.expected: step2. related function is called.
      */
     auto pattern = frameNode->GetPattern<TextClockPattern>();
     EXPECT_NE(pattern, nullptr);
-    auto layoutProperty = pattern->CreateLayoutProperty();
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
-    auto event = pattern->CreateEventHub();
-    EXPECT_NE(event, nullptr);
+
+    /**
+     * @tc.steps: step3. call OnModifyDone and UpdateTimeTextCallBack function when default properties.
+     * @tc.expected: step3. check whether the content is correct.
+     */
+    pattern->InitTextClockController();
+    pattern->OnModifyDone();
+    pattern->UpdateTimeTextCallBack();
+    EXPECT_EQ(layoutProperty->GetContent(), FORMAT_DATA);
+
+    /**
+     * @tc.steps: step4. get controller and create layout property and event.
+     * @tc.expected: step4. related function is called.
+     */
     auto controller = pattern->GetTextClockController();
     EXPECT_NE(controller, nullptr);
+    controller->Start();
+    controller->Stop();
+    EXPECT_EQ(layoutProperty->GetContent(), FORMAT_DATA);
+    auto clockLayoutProperty = pattern->CreateLayoutProperty();
+    EXPECT_NE(clockLayoutProperty, nullptr);
+    auto event = pattern->CreateEventHub();
+    EXPECT_NE(event, nullptr);
+
+    /**
+     * @tc.steps: step5. garbage branch coverage.
+     * @tc.expected: step5. related function is called.
+     */
+    pattern->isStart_ = false;
+    pattern->UpdateTimeText();
+    pattern->textClockController_ = nullptr;
+    pattern->InitUpdateTimeTextCallBack();
+    pattern->timeCallback_ = nullptr;
+    pattern->UpdateTimeTextCallBack();
+    EXPECT_EQ(pattern->textClockController_, nullptr);
+    EXPECT_EQ(pattern->timeCallback_, nullptr);
+    EXPECT_EQ(layoutProperty->GetContent(), FORMAT_DATA);
 }
 
 /**

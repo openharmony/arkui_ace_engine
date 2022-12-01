@@ -45,7 +45,7 @@ using RemoteCallback = std::function<void(const BaseEventInfo* info)>;
 
 enum class ResponseType : int32_t {
     RIGHT_CLICK = 0,
-    LONGPRESS,
+    LONG_PRESS,
 };
 
 class ACE_EXPORT ViewAbstractModel {

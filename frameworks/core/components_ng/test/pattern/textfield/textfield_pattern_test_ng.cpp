@@ -34,8 +34,10 @@ namespace {
 const std::string PLACEHOLDER = "DEFAULT PLACEHOLDER";
 const std::string EMPTY_TEXT_VALUE;
 const std::string TEXT_VALUE = "DEFAULT_TEXT";
+const std::string INSERT_VALUE_SINGLE_NUMBER = "1";
 const std::string INSERT_VALUE_SINGLE_CHAR = "X";
 const std::string LOWERCASE_FILTER = "[a-z]";
+const std::string NUMBER_FILTER = "^[0-9]*$";
 const int32_t CARET_POSITION_1 = 10;
 const int32_t DELETE_LENGTH_1 = 1;
 } // namespace
@@ -61,6 +63,31 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldInsertValue001, TestSize.Level1)
     pattern->InsertValue(INSERT_VALUE_SINGLE_CHAR);
     EXPECT_EQ(pattern->GetEditingValue().text, INSERT_VALUE_SINGLE_CHAR);
     EXPECT_EQ(pattern->GetEditingValue().caretPosition, INSERT_VALUE_SINGLE_CHAR.size());
+}
+
+/**
+ * @tc.name: TextFieldInsertValue002
+ * @tc.desc: Test textfield insert a value and clear it when type changed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldInsertValue002, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(PLACEHOLDER, EMPTY_TEXT_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    textFieldModelNG.SetType(TextInputType::TEXT);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    pattern->InsertValue(INSERT_VALUE_SINGLE_CHAR);
+    EXPECT_EQ(pattern->GetEditingValue().text, INSERT_VALUE_SINGLE_CHAR);
+    EXPECT_EQ(pattern->GetEditingValue().caretPosition, INSERT_VALUE_SINGLE_CHAR.size());
+    auto secNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    textFieldModelNG.SetType(TextInputType::NUMBER);
+    pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->ClearEditingValue();
+    EXPECT_EQ(pattern->GetEditingValue().text.length(), 0);
 }
 
 /**
@@ -123,6 +150,49 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldFilter001, TestSize.Level1)
     pattern->InsertValue(INSERT_VALUE_SINGLE_CHAR);
     EXPECT_EQ(pattern->GetEditingValue().text, EMPTY_TEXT_VALUE);
     EXPECT_EQ(pattern->GetEditingValue().caretPosition, EMPTY_TEXT_VALUE.size());
+}
+
+/**
+ * @tc.name: TextFieldFilter002
+ * @tc.desc: Test textfield filter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldFilter002, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(PLACEHOLDER, EMPTY_TEXT_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_FALSE(layoutProperty == nullptr);
+    layoutProperty->UpdateInputFilter(NUMBER_FILTER);
+    pattern->InsertValue(INSERT_VALUE_SINGLE_NUMBER);
+    EXPECT_EQ(pattern->GetEditingValue().text, INSERT_VALUE_SINGLE_NUMBER);
+    EXPECT_EQ(pattern->GetEditingValue().caretPosition, INSERT_VALUE_SINGLE_NUMBER.size());
+}
+
+/**
+ * @tc.name: TextareaMoveCaret001
+ * @tc.desc: Test textarea move caret.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextareaMoveCaret001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    auto controller = AccessibilityManager::DynamicCast<TextFieldController>(
+        textFieldModelNG.CreateTextArea(PLACEHOLDER, EMPTY_TEXT_VALUE));
+    EXPECT_FALSE(controller == nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->InsertValue(TEXT_VALUE);
+    EXPECT_EQ(pattern->GetEditingValue().text, TEXT_VALUE);
+    controller->CaretPosition(CARET_POSITION_1);
+    // inserting text value length larger than caret position
+    EXPECT_EQ(pattern->GetEditingValue().caretPosition, CARET_POSITION_1);
 }
 
 } // namespace OHOS::Ace::NG

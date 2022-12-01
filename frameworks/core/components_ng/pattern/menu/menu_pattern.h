@@ -21,18 +21,20 @@
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_paint_method.h"
+#include "core/components_ng/pattern/menu/navigation_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+enum class MenuType { MENU, CONTEXT_MENU, NAVIGATION_MENU };
 
 class MenuPattern : public Pattern {
     DECLARE_ACE_TYPE(MenuPattern, Pattern);
 
 public:
-    explicit MenuPattern(int32_t targetId) : targetId_(targetId) {};
+    explicit MenuPattern(int32_t targetId, MenuType type) : targetId_(targetId), type_(type) {}
     ~MenuPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -52,17 +54,18 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<MenuLayoutAlgorithm>();
-    }
-
-    void SetIsContextMenu(bool isContextMenu)
-    {
-        isContextMenu_ = isContextMenu;
+        RefPtr<MenuLayoutAlgorithm> navigationMenu = MakeRefPtr<NavigationMenuLayoutAlgorithm>();
+        return (type_ == MenuType::NAVIGATION_MENU) ? navigationMenu : MakeRefPtr<MenuLayoutAlgorithm>();
     }
 
     bool IsContextMenu() const
     {
-        return isContextMenu_;
+        return type_ == MenuType::CONTEXT_MENU;
+    }
+
+    bool IsNavigationMenu() const
+    {
+        return type_ == MenuType::NAVIGATION_MENU;
     }
 
 private:
@@ -70,7 +73,7 @@ private:
     void RegisterOnClick();
 
     int32_t targetId_ = -1;
-    bool isContextMenu_ = false;
+    MenuType type_ = MenuType::MENU;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

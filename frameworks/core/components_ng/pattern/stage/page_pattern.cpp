@@ -52,6 +52,12 @@ void PagePattern::OnAttachToFrameNode()
 
 bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*wrapper*/, const DirtySwapConfig& /*config*/)
 {
+    if (isFirstLoad_) {
+        isFirstLoad_ = false;
+        if (firstBuildCallback_) {
+            firstBuildCallback_();
+        }
+    }
     return false;
 }
 
@@ -125,6 +131,15 @@ void PagePattern::BuildSharedTransitionMap()
     IterativeAddToSharedMap(host, sharedTransitionMap_);
 }
 
+void PagePattern::ReloadPage()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto customNode = DynamicCast<CustomNodeBase>(host->GetFirstChild());
+    CHECK_NULL_VOID(customNode);
+    customNode->FireReloadFunction(true);
+}
+
 RefPtr<PageTransitionEffect> PagePattern::FindPageTransitionEffect(PageTransitionType type)
 {
     RefPtr<PageTransitionEffect> result;
@@ -155,6 +170,33 @@ RefPtr<PageTransitionEffect> PagePattern::GetTopTransition() const
 void PagePattern::AddPageTransition(const RefPtr<PageTransitionEffect>& effect)
 {
     pageTransitionEffects_.emplace(effect);
+}
+
+void PagePattern::AddJsAnimator(const std::string& animatorId, const RefPtr<Framework::AnimatorInfo>& animatorInfo)
+{
+    CHECK_NULL_VOID(animatorInfo);
+    auto animator = animatorInfo->GetAnimator();
+    CHECK_NULL_VOID(animator);
+    animator->AttachScheduler(PipelineContext::GetCurrentContext());
+    jsAnimatorMap_[animatorId] = animatorInfo;
+}
+
+RefPtr<Framework::AnimatorInfo> PagePattern::GetJsAnimator(const std::string& animatorId)
+{
+    auto iter = jsAnimatorMap_.find(animatorId);
+    if (iter != jsAnimatorMap_.end()) {
+        return iter->second;
+    }
+    return nullptr;
+}
+
+void PagePattern::SetFirstBuildCallback(std::function<void()>&& buildCallback)
+{
+    if (isFirstLoad_) {
+        firstBuildCallback_ = std::move(buildCallback);
+    } else if (buildCallback) {
+        buildCallback();
+    }
 }
 
 } // namespace OHOS::Ace::NG

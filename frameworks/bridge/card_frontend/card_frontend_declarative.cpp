@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "base/log/event_report.h"
+#include "base/utils/utils.h"
 #include "core/common/thread_checker.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
@@ -67,9 +68,8 @@ void CardFrontendDeclarative::Destroy()
 void CardFrontendDeclarative::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
     auto pipelineContext = DynamicCast<NG::PipelineContext>(context);
-    if (!delegate_ || !pipelineContext) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
     eventHandler_ = AceType::MakeRefPtr<CardEventHandlerDeclarative>(delegate_);
 
     holder_.Attach(context);
@@ -126,9 +126,7 @@ void CardFrontendDeclarative::OnPageLoaded(const RefPtr<Framework::JsAcePage>& p
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), page, jsCommands] {
             auto frontend = weak.Upgrade();
-            if (!frontend) {
-                return;
-            }
+            CHECK_NULL_VOID_NOLOG(frontend);
             // Flush all JS commands.
             for (const auto& command : *jsCommands) {
                 command->Execute(page);

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include <array>
 
 #include "base/utils/utils.h"
 #include "core/components/theme/icon_theme.h"
@@ -94,7 +95,6 @@ void ImagePattern::OnImageLoadSuccess()
     lastSrcRect_ = loadingCtx_->GetSrcRect();
     lastDstRect_ = loadingCtx_->GetDstRect();
     SetImagePaintConfig(lastCanvasImage_, lastSrcRect_, lastDstRect_, loadingCtx_->GetSourceInfo().IsSvg());
-    CHECK_NULL_VOID(lastCanvasImage_->imagePaintConfig_);
     // clear alt data
     altLoadingCtx_ = nullptr;
     lastAltCanvasImage_ = nullptr;
@@ -152,48 +152,37 @@ void ImagePattern::OnImageLoadFail()
 void ImagePattern::SetImagePaintConfig(
     const RefPtr<CanvasImage>& canvasImage, const RectF& lastSrcRect_, const RectF& lastDstRect_, bool isSvg)
 {
-    auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(imageRenderProperty);
-    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
+    auto renderProps = GetPaintProperty<ImageRenderProperty>();
+    auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(renderProps && layoutProps);
 
-    ImagePaintConfig imagePaintConfig(lastSrcRect_, lastDstRect_);
-    imagePaintConfig.imageFit_ = imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER);
-    imagePaintConfig.renderMode_ = imageRenderProperty->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
-    imagePaintConfig.imageInterpolation_ =
-        imageRenderProperty->GetImageInterpolation().value_or(ImageInterpolation::NONE);
-    imagePaintConfig.imageRepeat_ = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NOREPEAT);
-
-    auto pipelineCtx = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-    bool isRightToLeft = pipelineCtx && pipelineCtx->IsRightToLeft();
-    imagePaintConfig.needFlipCanvasHorizontally_ =
-        isRightToLeft && imageRenderProperty->GetMatchTextDirection().value_or(false);
-    auto colorFilterMatrix = imageRenderProperty->GetColorFilter();
-    if (colorFilterMatrix.has_value()) {
-        imagePaintConfig.colorFilter_ = std::make_shared<std::vector<float>>(colorFilterMatrix.value());
-    }
-    if (imageRenderProperty->GetNeedBorderRadiusValue(false)) {
+    ImagePaintConfig config {
+        .srcRect_ = lastSrcRect_,
+        .dstRect_ = lastDstRect_,
+    };
+    config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
+    if (renderProps->GetNeedBorderRadiusValue(false)) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto borderRadius = host->GetRenderContext()->GetBorderRadius();
-        std::vector<PointF> radiusXY = { { borderRadius->radiusTopLeft->ConvertToPx(),
-                                             borderRadius->radiusTopLeft->ConvertToPx() },
-            { borderRadius->radiusTopRight->ConvertToPx(), borderRadius->radiusTopRight->ConvertToPx() },
-            { borderRadius->radiusBottomLeft->ConvertToPx(), borderRadius->radiusBottomLeft->ConvertToPx() },
-            { borderRadius->radiusBottomRight->ConvertToPx(), borderRadius->radiusBottomRight->ConvertToPx() } };
-        imagePaintConfig.borderRadiusXY_ = std::make_shared<std::vector<PointF>>(std::move(radiusXY));
+        std::array<PointF, 4> radiusXY = { PointF(borderRadius->radiusTopLeft->ConvertToPx(),
+                                               borderRadius->radiusTopLeft->ConvertToPx()),
+            PointF(borderRadius->radiusTopRight->ConvertToPx(), borderRadius->radiusTopRight->ConvertToPx()),
+            PointF(borderRadius->radiusBottomLeft->ConvertToPx(), borderRadius->radiusBottomLeft->ConvertToPx()),
+            PointF(borderRadius->radiusBottomRight->ConvertToPx(), borderRadius->radiusBottomRight->ConvertToPx()) };
+        config.borderRadiusXY_ = std::make_shared<std::array<PointF, 4>>(std::move(radiusXY));
     }
-    imagePaintConfig.isSvg_ = isSvg;
+    config.isSvg_ = isSvg;
 
-    canvasImage->SetImagePaintConfig(imagePaintConfig);
+    canvasImage->SetPaintConfig(config);
 }
 
 RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 {
-    if (lastCanvasImage_ && lastCanvasImage_->imagePaintConfig_) {
+    if (lastCanvasImage_) {
         return MakeRefPtr<ImagePaintMethod>(lastCanvasImage_);
     }
-    if (lastAltCanvasImage_ && lastAltCanvasImage_->imagePaintConfig_ && lastAltDstRect_ && lastAltSrcRect_) {
+    if (lastAltCanvasImage_ && lastAltDstRect_ && lastAltSrcRect_) {
         return MakeRefPtr<ImagePaintMethod>(lastAltCanvasImage_);
     }
     return nullptr;
@@ -217,14 +206,16 @@ void ImagePattern::LoadImageDataIfNeed()
     UpdateInternalResource(currentSourceInfo);
     std::optional<Color> svgFillColorOpt = std::nullopt;
     if (currentSourceInfo.IsSvg()) {
-        svgFillColorOpt = imageRenderProperty->GetSvgFillColor().has_value() ? imageRenderProperty->GetSvgFillColor()
-                                                                             : currentSourceInfo.GetFillColor();
+        svgFillColorOpt = currentSourceInfo.GetFillColor();
     }
 
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != currentSourceInfo ||
         (currentSourceInfo.IsSvg() && loadingCtx_->GetSvgFillColor() != svgFillColorOpt)) {
         LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
-        loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(currentSourceInfo, std::move(loadNotifier));
+
+        bool syncLoad = imageLayoutProperty->GetSyncModeValue(false);
+        loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(currentSourceInfo, std::move(loadNotifier), syncLoad);
+
         loadingCtx_->SetSvgFillColor(svgFillColorOpt);
         loadingCtx_->LoadImageData();
     }
@@ -306,7 +297,6 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         pattern->lastAltDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
         pattern->SetImagePaintConfig(pattern->lastAltCanvasImage_, *pattern->lastAltSrcRect_, *pattern->lastAltDstRect_,
             pattern->altLoadingCtx_->GetSourceInfo().IsSvg());
-        CHECK_NULL_VOID(pattern->lastAltCanvasImage_->imagePaintConfig_);
     };
     return task;
 }
@@ -316,8 +306,7 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
     if (!sourceInfo.IsInternalResource()) {
         return;
     }
-    
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -369,8 +358,7 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->ClearDrawCommands();
-
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->FlushMessages();
 }

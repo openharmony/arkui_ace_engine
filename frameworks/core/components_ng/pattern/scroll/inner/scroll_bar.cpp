@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 
+#include "base/utils/utils.h"
 #include "core/animation/curve_animation.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -36,10 +37,7 @@ void ScrollBar::InitTheme()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
-    if (theme == nullptr) {
-        LOGW("ScrollBarTheme is null");
-        return;
-    }
+    CHECK_NULL_VOID(theme);
     SetInactiveWidth(theme->GetNormalWidth());
     SetNormalWidth(theme->GetNormalWidth());
     SetActiveWidth(theme->GetActiveWidth());
@@ -107,7 +105,7 @@ void ScrollBar::SetRectTrickRegion(const Offset& offset, const Size& size,
         }
         double lastMainOffset =
             std::max(positionMode_ == PositionMode::BOTTOM ? lastOffset.GetX() : lastOffset.GetY(), 0.0);
-        offsetScale_ = (mainSize - activeSize) / (estimatedHeight - mainSize);
+        offsetScale_ = (barRegionSize - activeSize) / (estimatedHeight - mainSize);
         double activeMainOffset = offsetScale_ * lastMainOffset;
         activeMainOffset = std::min(activeMainOffset, barRegionSize - activeSize);
         double normalWidth = NormalizeToPx(normalWidth_);
@@ -166,7 +164,7 @@ bool ScrollBar::NeedScrollBar() const
 
 bool ScrollBar::NeedPaint() const
 {
-    return NeedScrollBar() && isScrollable_;
+    return NeedScrollBar() && isScrollable_ && GreatNotEqual(normalWidth_.Value(), 0.0);
 }
 
 double ScrollBar::GetNormalWidthToPx() const
@@ -185,10 +183,7 @@ double ScrollBar::CalcPatternOffset(double scrollBarOffset)
 double ScrollBar::NormalizeToPx(const Dimension& dimension) const
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (!pipelineContext) {
-        LOGE("NormalizeToPx failed");
-        return 0.0;
-    }
+    CHECK_NULL_RETURN(pipelineContext, 0.0);
     return pipelineContext->NormalizeToPx(dimension);
 }
 

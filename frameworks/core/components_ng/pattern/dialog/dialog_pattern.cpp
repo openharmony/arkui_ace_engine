@@ -57,7 +57,7 @@ constexpr Dimension SHEET_DIVIDER_WIDTH = 1.0_px;
 constexpr Dimension SHEET_LIST_PADDING = 24.0_vp;
 const CalcLength SHEET_IMAGE_SIZE(40.0_vp);
 
-RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& color)
+RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& colorStr)
 {
     auto textNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
@@ -67,8 +67,10 @@ RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& c
     auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, nullptr);
     textProps->UpdateContent(text);
-    if (!color.empty()) {
-        textProps->UpdateTextColor(Color::FromString(color));
+    // update text color
+    Color color;
+    if (Color::ParseColorString(colorStr, color)) {
+        textProps->UpdateTextColor(color);
     } else {
         textProps->UpdateTextColor(Color::BLUE);
     }
@@ -85,42 +87,33 @@ void DialogPattern::OnModifyDone()
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
-    InitTouchEvent(gestureHub);
+    InitClickEvent(gestureHub);
 }
 
-void DialogPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
+void DialogPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+    GestureEventFunc task = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleTouchEvent(info);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleClick(info);
     };
-    auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
-    gestureHub->AddTouchEvent(touchEvent);
+    auto clickEvent = MakeRefPtr<ClickEvent>(std::move(task));
+    gestureHub->AddClickEvent(clickEvent);
 }
 
-void DialogPattern::HandleTouchEvent(const TouchEventInfo& info)
-{
-    auto touchType = info.GetTouches().front().GetTouchType();
-    auto clickPos = info.GetTouches().front().GetLocalLocation();
-    if (touchType == TouchType::UP) {
-        HandleTouchUp(clickPos);
-    }
-}
-
-void DialogPattern::HandleTouchUp(const Offset& clickPosition)
+void DialogPattern::HandleClick(const GestureEvent& info)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto dialogRenderProp = host->GetPaintProperty<DialogRenderProperty>();
-    CHECK_NULL_VOID(dialogRenderProp);
-    auto autoCancel = dialogRenderProp->GetAutoCancel().value_or(true);
+    auto props = host->GetLayoutProperty<DialogLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    auto autoCancel = props->GetAutoCancel().value_or(true);
     if (autoCancel) {
         auto content = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
         CHECK_NULL_VOID(content);
         auto contentRect = content->GetGeometryNode()->GetFrameRect();
         // close dialog if clicked outside content rect
+        auto&& clickPosition = info.GetGlobalLocation();
         if (!contentRect.IsInRegion(PointF(clickPosition.GetX(), clickPosition.GetY()))) {
             PopDialog(-1);
         }
@@ -212,7 +205,7 @@ void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
         sheetContainer->MarkModifyDone();
     }
 
-    // Make Menu node if hasMenu
+    // Make Menu node if hasMenu (actionMenu)
     if (dialogProperties.isMenu) {
         auto menu = BuildMenu(dialogProperties.buttons);
         CHECK_NULL_VOID(menu);
@@ -340,11 +333,19 @@ RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t 
     BindCloseCallBack(hub, index);
 
     // update background color
+    auto renderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
     if (params.isBgColorSetted) {
-        auto renderContext = buttonNode->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, nullptr);
         renderContext->UpdateBackgroundColor(params.bgColor);
+    } else {
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     }
+
+    // set flex grow to fill horizontal space
+    auto layoutProps = buttonNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProps, nullptr);
+    layoutProps->UpdateFlexGrow(1.0);
+
     buttonNode->SetInternal();
     return buttonNode;
 }
@@ -354,15 +355,16 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(const std::vector<ButtonInfo>& but
 {
     auto Id = ElementRegister::GetInstance()->MakeUniqueId();
     RefPtr<FrameNode> container;
-    if (buttons.size() == 1) {
+    if (buttons.size() <= 2) {
         container = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, Id, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     } else {
-        container = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, Id, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-        if (container) {
-            auto layoutProps = container->GetLayoutProperty<LinearLayoutProperty>();
-            layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
-            layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-        }
+        // if more than 2 buttons, use vertical layout
+        container = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, Id, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    }
+    if (container) {
+        auto layoutProps = container->GetLayoutProperty<LinearLayoutProperty>();
+        layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
+        layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     }
 
     CHECK_NULL_RETURN(container, nullptr);

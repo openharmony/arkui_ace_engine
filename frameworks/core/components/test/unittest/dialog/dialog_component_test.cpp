@@ -26,6 +26,7 @@
 #include "core/components/padding/padding_component.h"
 #include "core/components/scroll/scroll_component.h"
 #include "core/components/text/text_component.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/components/transition/transition_component.h"
 #include "core/components/wrap/wrap_component.h"
 
@@ -42,7 +43,7 @@ const Edge PADDING_TITLE = Edge(Dimension(20.0, DimensionUnit::VP));
 const Edge PADDING_CONTENT = Edge(Dimension(10.0, DimensionUnit::VP));
 const Edge PADDING_DEFAULT = Edge(Dimension(24.0, DimensionUnit::VP));
 const Edge PADDING_ACTIONS = Edge(24.0, 18.0, 24.0, 10.0, DimensionUnit::VP);
-const RefPtr<ThemeManager> THEME_MANAGER = AceType::MakeRefPtr<ThemeManager>();
+const auto THEME_MANAGER = AceType::MakeRefPtr<ThemeManagerImpl>();
 
 } // namespace
 

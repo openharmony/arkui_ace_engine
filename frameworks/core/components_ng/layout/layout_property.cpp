@@ -70,6 +70,7 @@ void LayoutProperty::Reset()
     positionProperty_.reset();
     measureType_.reset();
     layoutDirection_.reset();
+    propVisibility_.reset();
     CleanDirty();
 }
 
@@ -137,6 +138,7 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     if (layoutProperty->flexItemProperty_) {
         flexItemProperty_ = std::make_unique<FlexItemProperty>(*layoutProperty->flexItemProperty_);
     }
+    propVisibility_ = layoutProperty->GetVisibility();
     measureType_ = layoutProperty->measureType_;
     layoutDirection_ = layoutProperty->layoutDirection_;
     propertyChangeFlag_ = layoutProperty->propertyChangeFlag_;
@@ -168,6 +170,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         MinusPaddingToSize(margin, layoutConstraint_->minSize);
         MinusPaddingToSize(margin, layoutConstraint_->percentReference);
         MinusPaddingToSize(margin, layoutConstraint_->selfIdealSize);
+        MinusPaddingToSize(margin, layoutConstraint_->parentIdealSize);
     }
     if (calcLayoutConstraint_) {
         if (calcLayoutConstraint_->maxSize.has_value()) {
@@ -236,9 +239,17 @@ void LayoutProperty::CheckAspectRatio()
     if (layoutConstraint_->selfIdealSize.Width()) {
         selfWidth = layoutConstraint_->selfIdealSize.Width().value();
         selfHeight = selfWidth.value() / aspectRatio;
+        if (selfHeight > maxHeight) {
+            selfHeight = maxHeight;
+            selfWidth = selfHeight.value() * aspectRatio;
+        }
     } else if (layoutConstraint_->selfIdealSize.Height()) {
         selfHeight = layoutConstraint_->selfIdealSize.Height().value();
         selfWidth = selfHeight.value() * aspectRatio;
+        if (selfWidth > maxWidth) {
+            selfWidth = maxWidth;
+            selfHeight = selfWidth.value() / aspectRatio;
+        }
     }
 
     if (selfHeight) {
@@ -252,9 +263,7 @@ void LayoutProperty::CheckAspectRatio()
 
 void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)
 {
-    if (!gridProperty_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(gridProperty_);
     auto parent = host->GetParent();
     while (parent) {
         if (parent->GetTag() == V2::GRIDCONTAINER_ETS_TAG) {
@@ -270,7 +279,8 @@ void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)
 
 void LayoutProperty::UpdateGridOffset(LayoutWrapper* layoutWrapper)
 {
-    if (!gridProperty_ || !gridProperty_->HasContainer()) {
+    CHECK_NULL_VOID_NOLOG(gridProperty_);
+    if (!gridProperty_->HasContainer()) {
         return;
     }
 
@@ -294,7 +304,7 @@ void LayoutProperty::UpdateGridOffset(LayoutWrapper* layoutWrapper)
 void LayoutProperty::CheckSelfIdealSize()
 {
     if (measureType_ == MeasureType::MATCH_PARENT) {
-        layoutConstraint_->UpdateSelfMarginSizeWithCheck(layoutConstraint_->parentIdealSize);
+        layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(layoutConstraint_->parentIdealSize);
     }
     if (!calcLayoutConstraint_) {
         return;
@@ -311,10 +321,7 @@ void LayoutProperty::CheckSelfIdealSize()
 
 LayoutConstraintF LayoutProperty::CreateChildConstraint() const
 {
-    if (!layoutConstraint_) {
-        LOGE("fail to create child constraint due to layoutConstraint_ is null");
-        return {};
-    }
+    CHECK_NULL_RETURN(layoutConstraint_, {});
     auto layoutConstraint = contentConstraint_.value();
     layoutConstraint.parentIdealSize = layoutConstraint.selfIdealSize;
     // update max size when ideal size has value.
@@ -334,10 +341,7 @@ LayoutConstraintF LayoutProperty::CreateChildConstraint() const
 
 void LayoutProperty::UpdateContentConstraint()
 {
-    if (!layoutConstraint_) {
-        LOGE("fail to get content constraint due to layoutConstraint_ is null");
-        return;
-    }
+    CHECK_NULL_VOID(layoutConstraint_);
     contentConstraint_ = layoutConstraint_.value();
     // update percent reference when parent has size.
     if (contentConstraint_->parentIdealSize.Width()) {

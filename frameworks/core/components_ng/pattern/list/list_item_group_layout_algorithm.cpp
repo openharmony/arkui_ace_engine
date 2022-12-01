@@ -31,6 +31,8 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     axis_ = layoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     lanes_ = layoutProperty->GetLanes().value_or(1);
+    minLaneLength_ = layoutProperty->GetLaneMinLength();
+    maxLaneLength_ = layoutProperty->GetLaneMaxLength();
     auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis_);
     auto space = layoutProperty->GetSpace().value_or(Dimension(0));
 
@@ -97,20 +99,38 @@ void ListItemGroupLayoutAlgorithm::UpdateListItemConstraint(const OptionalSizeF&
         contentConstraint.maxSize.SetHeight(Infinity<float>());
         auto width = selfIdealSize.Width();
         if (width.has_value()) {
-            float crossSize = width.value() / lanes_;
+            float crossSize = width.value();
+            if (lanes_ > 1) {
+                crossSize /= lanes_;
+            }
+            if (maxLaneLength_.has_value() && maxLaneLength_.value() < crossSize) {
+                crossSize = maxLaneLength_.value();
+            }
             contentConstraint.percentReference.SetWidth(crossSize);
             contentConstraint.parentIdealSize.SetWidth(crossSize);
             contentConstraint.maxSize.SetWidth(crossSize);
+            if (minLaneLength_.has_value()) {
+                contentConstraint.minSize.SetWidth(minLaneLength_.value());
+            }
         }
         return;
     }
     contentConstraint.maxSize.SetWidth(Infinity<float>());
     auto height = selfIdealSize.Height();
     if (height.has_value()) {
-        float crossSize = height.value() / lanes_;
+        float crossSize = height.value();
+        if (lanes_ > 1) {
+            crossSize /= lanes_;
+        }
+        if (maxLaneLength_.has_value() && maxLaneLength_.value() < crossSize) {
+            crossSize = maxLaneLength_.value();
+        }
         contentConstraint.percentReference.SetHeight(crossSize);
         contentConstraint.parentIdealSize.SetHeight(crossSize);
         contentConstraint.maxSize.SetHeight(crossSize);
+        if (minLaneLength_.has_value()) {
+            contentConstraint.minSize.SetHeight(minLaneLength_.value());
+        }
     }
 }
 
@@ -120,10 +140,7 @@ int32_t ListItemGroupLayoutAlgorithm::MeasureALine(LayoutWrapper* layoutWrapper,
     int32_t cnt = 0;
     for (int32_t i = 0; i < lanes_; i++) {
         auto wrapper = GetListItem(layoutWrapper, currentIndex + i);
-        if (!wrapper) {
-            LOGI("the start %{public}d index wrapper is null", currentIndex + i);
-            return cnt;
-        }
+        CHECK_NULL_RETURN(wrapper, cnt);
         cnt++;
         {
             ACE_SCOPED_TRACE("ListItemGroup::MeasureListItem:%d", currentIndex + i);
@@ -239,18 +256,17 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooter(LayoutWrapper* layoutWrapp
 void ListItemGroupLayoutAlgorithm::LayoutIndex(const RefPtr<LayoutWrapper>& wrapper, const OffsetF& paddingOffset,
     float crossSize, float startPos)
 {
-    if (wrapper) {
-        auto offset = paddingOffset;
-        float childCrossSize = GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
-        float laneCrossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
-        if (axis_ == Axis::VERTICAL) {
-            offset = offset + OffsetF(laneCrossOffset, startPos);
-        } else {
-            offset = offset + OffsetF(startPos, laneCrossOffset);
-        }
-        wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
-        wrapper->Layout();
+    CHECK_NULL_VOID(wrapper);
+    auto offset = paddingOffset;
+    float childCrossSize = GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
+    float laneCrossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
+    if (axis_ == Axis::VERTICAL) {
+        offset = offset + OffsetF(laneCrossOffset, startPos);
+    } else {
+        offset = offset + OffsetF(startPos, laneCrossOffset);
     }
+    wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
+    wrapper->Layout();
 }
 
 float ListItemGroupLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float childCrossSize)

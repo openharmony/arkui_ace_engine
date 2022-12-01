@@ -19,6 +19,7 @@
 #include <atomic>
 #include <functional>
 #include <memory>
+#include <shared_mutex>
 #include <stack>
 #include <string>
 #include <utility>
@@ -560,6 +561,9 @@ public:
         return frontendType_;
     }
 
+    virtual double MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+        const std::string& fontWeight, const std::string& fontFamily, double letterSpacing) = 0;
+
     double GetDensity() const
     {
         return density_;
@@ -647,6 +651,8 @@ public:
     {
         displayWindowRectInfo_ = displayWindowRectInfo;
     }
+
+    virtual void SetContainerWindow(bool isShow) = 0;
 
     // This method can get the coordinates and size of the current window,
     // which can be added to the return value of the GetGlobalOffset method to get the window coordinates of the node.
@@ -736,6 +742,7 @@ protected:
     int32_t instanceId_ = 0;
     RefPtr<EventManager> eventManager_;
     RefPtr<ImageCache> imageCache_;
+    mutable std::shared_mutex imageCacheMutex_;
     RefPtr<ThemeManager> themeManager_;
     RefPtr<DataProviderManagerInterface> dataProviderManager_;
     RefPtr<FontManager> fontManager_;

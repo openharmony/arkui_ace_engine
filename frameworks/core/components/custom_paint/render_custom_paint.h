@@ -74,6 +74,8 @@ public:
 
     virtual void FillText(const Offset& offset, const std::string& text, double x, double y) = 0;
     virtual void StrokeText(const Offset& offset, const std::string& text, double x, double y) = 0;
+    static double PaintMeasureText(const std::string& text, double fontSize, int32_t fontStyle,
+        const std::string& fontWeight, const std::string& fontFamily, double letterSpacing);
     virtual double MeasureText(const std::string& text, const PaintState& state) = 0;
     virtual double MeasureTextHeight(const std::string& text, const PaintState& state) = 0;
     virtual TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state) = 0;
@@ -94,6 +96,7 @@ public:
     virtual void Clip() = 0;
     virtual void Clip(const RefPtr<CanvasPath2D>& path) = 0;
     virtual void BeginPath() = 0;
+    virtual void ResetTransform() = 0;
     virtual void ClosePath() = 0;
 
     // in render node, restore and save are used for clip and matrix operation

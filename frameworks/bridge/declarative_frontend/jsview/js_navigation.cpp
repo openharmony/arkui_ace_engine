@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/navigation_bar/navigation_bar_component_v2.h"
@@ -40,7 +41,9 @@ JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent&
                                                               : static_cast<int32_t>(NavigationTitleMode::FULL)));
 }
 
-void ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<ToolBarItem>>& items)
+} // namespace
+
+void JSNavigation::ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<ToolBarItem>>& items)
 {
     auto length = jsArray->Length();
     for (size_t i = 0; i < length; i++) {
@@ -58,9 +61,11 @@ void ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<ToolBarIt
         }
 
         auto itemIconObject = itemObject->GetProperty("icon");
-        if (itemIconObject->IsString()) {
-            toolBarItem->icon = itemIconObject->ToString();
+        std::string icon;
+        if (!ParseJsMedia(itemIconObject, icon)) {
+            LOGE("iconValue is null");
         }
+        toolBarItem->icon = icon;
 
         auto itemActionValue = itemObject->GetProperty("action");
         if (itemActionValue->IsFunction()) {
@@ -80,7 +85,8 @@ void ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<ToolBarIt
     }
 }
 
-void ParseBarItems(const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::list<NG::BarItem>& items)
+void JSNavigation::ParseBarItems(
+    const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items)
 {
     auto length = jsArray->Length();
     for (size_t i = 0; i < length; i++) {
@@ -116,7 +122,7 @@ void ParseBarItems(const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, st
     }
 }
 
-bool ParseCommonTitle(const JSRef<JSVal>& jsValue)
+bool JSNavigation::ParseCommonTitle(const JSRef<JSVal>& jsValue)
 {
     if (!Container::IsCurrentUseNewPipeline()) {
         return false;
@@ -137,8 +143,6 @@ bool ParseCommonTitle(const JSRef<JSVal>& jsValue)
     }
     return isCommonTitle;
 }
-
-} // namespace
 
 void JSNavigation::Create()
 {
@@ -238,7 +242,7 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
             }
         }
 
-        if (Container::IsCurrentUseNewPipeline()) {
+        if (!Container::IsCurrentUseNewPipeline()) {
             return;
         }
         JSRef<JSVal> height = jsObj->GetProperty("height");
@@ -407,7 +411,7 @@ void JSNavigation::SetToolBar(const JSCallbackInfo& info)
         return;
     }
     if (Container::IsCurrentUseNewPipeline()) {
-        std::list<NG::BarItem> toolBarItems;
+        std::vector<NG::BarItem> toolBarItems;
         ParseBarItems(info, JSRef<JSArray>::Cast(itemsValue), toolBarItems);
         NG::NavigationView::SetToolBarItems(std::move(toolBarItems));
         return;
@@ -430,7 +434,7 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
 
     if (info[0]->IsArray()) {
         if (Container::IsCurrentUseNewPipeline()) {
-            std::list<NG::BarItem> menuItems;
+            std::vector<NG::BarItem> menuItems;
             ParseBarItems(info, JSRef<JSArray>::Cast(info[0]), menuItems);
             NG::NavigationView::SetMenuItems(std::move(menuItems));
             return;

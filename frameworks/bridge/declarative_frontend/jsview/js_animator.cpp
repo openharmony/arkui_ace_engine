@@ -16,17 +16,36 @@
 #include "bridge/declarative_frontend/jsview/js_animator.h"
 
 #include "base/log/ace_scoring_log.h"
-#include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_animator_function.h"
-#include "core/common/container.h"
+#include "bridge/declarative_frontend/jsview/models/animator_model_impl.h"
+#include "core/components_ng/pattern/animator/animator_model.h"
+#include "core/components_ng/pattern/animator/animator_model_ng.h"
 
-#ifdef USE_V8_ENGINE
-#include "bridge/declarative_frontend/engine/v8/v8_declarative_engine.h"
-#elif USE_QUICKJS_ENGINE
-#include "bridge/declarative_frontend/engine/quickjs/qjs_declarative_engine_instance.h"
-#elif USE_ARK_ENGINE
-#include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
+namespace OHOS::Ace {
+
+std::unique_ptr<AnimatorModel> AnimatorModel::instance_ = nullptr;
+
+AnimatorModel* AnimatorModel::GetInstance()
+{
+#ifdef USE_QUICKJS_ENGINE
+    return nullptr;
+#else
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new Framework::AnimatorModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new Framework::AnimatorModelNG());
+        } else {
+            instance_.reset(new Framework::AnimatorModelImpl());
+        }
 #endif
+    }
+    return instance_.get();
+#endif
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -34,111 +53,6 @@ namespace {
 constexpr int32_t FRICTION_MOTION_LENGTH = 3;
 constexpr int32_t SPRING_MOTION_LENGTH = 4;
 constexpr int32_t SCROLL_MOTION_LENGTH = 5;
-
-RefPtr<JsAcePage> GetCurrentPage()
-{
-#ifdef USE_V8_ENGINE
-    auto isolate = V8DeclarativeEngineInstance::GetV8Isolate();
-    auto page = V8DeclarativeEngineInstance::GetStagingPage(isolate);
-    return page;
-
-#elif USE_QUICKJS_ENGINE
-    auto context = QJSContext::Current();
-    auto page = QJSDeclarativeEngineInstance::GetRunningPage(context);
-    return page;
-#elif USE_ARK_ENGINE
-    auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
-    return page;
-#endif
-    return nullptr;
-}
-
-RefPtr<AnimatorInfo> GetAnimatorInfo(const std::string& animatorId, const RefPtr<JsAcePage>& page)
-{
-    if (!page) {
-        LOGE("page is nullptr");
-        return nullptr;
-    }
-    auto animatorInfo = page->GetAnimatorInfo(animatorId);
-    return animatorInfo;
-}
-
-RefPtr<PipelineContext> GetCurrentContext()
-{
-    auto container = Container::Current();
-    if (!container) {
-        LOGW("container is null");
-        return nullptr;
-    }
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    if (!pipelineContext) {
-        LOGE("pipelineContext is null!");
-        return nullptr;
-    }
-    return pipelineContext;
-}
-
-void AddEventListener(
-    const EventMarker& event, EventOperation operation, const std::string& animatorId, const JSCallbackInfo& info)
-{
-    auto page = GetCurrentPage();
-    auto animatorInfo = GetAnimatorInfo(animatorId, page);
-    if (!animatorInfo) {
-        LOGE("animatorInfo is nullptr");
-        return;
-    }
-    auto animator = animatorInfo->GetAnimator();
-    if (!animator) {
-        LOGE("animator is nullptr");
-        return;
-    }
-    auto pipelineContext = GetCurrentContext();
-    if (!pipelineContext) {
-        LOGE("context is nullptr");
-        return;
-    }
-    WeakPtr<PipelineContext> context = WeakPtr<PipelineContext>(pipelineContext);
-    switch (operation) {
-        case EventOperation::START:
-            animator->ClearStartListeners();
-            if (!event.IsEmpty()) {
-                animator->AddStartListener(
-                    [event, weakContext = context] { AceAsyncEvent<void()>::Create(event, weakContext)(); });
-            }
-            break;
-        case EventOperation::PAUSE:
-            animator->ClearPauseListeners();
-            if (!event.IsEmpty()) {
-                animator->AddPauseListener(
-                    [event, weakContext = context] { AceAsyncEvent<void()>::Create(event, weakContext)(); });
-            }
-            break;
-        case EventOperation::REPEAT:
-            animator->ClearRepeatListeners();
-            if (!event.IsEmpty()) {
-                animator->AddRepeatListener(
-                    [event, weakContext = context] { AceAsyncEvent<void()>::Create(event, weakContext)(); });
-            }
-            break;
-        case EventOperation::CANCEL:
-            animator->ClearIdleListeners();
-            if (!event.IsEmpty()) {
-                animator->AddIdleListener(
-                    [event, weakContext = context] { AceAsyncEvent<void()>::Create(event, weakContext)(); });
-            }
-            break;
-        case EventOperation::FINISH:
-            animator->ClearStopListeners();
-            if (!event.IsEmpty()) {
-                animator->AddStopListener(
-                    [event, weakContext = context] { AceAsyncEvent<void()>::Create(event, weakContext)(); });
-            }
-            break;
-        case EventOperation::NONE:
-        default:
-            break;
-    }
-}
 
 void AddFrameListener(const RefPtr<AnimatorInfo>& animatorInfo, const RefPtr<KeyframeAnimation<double>>& animation)
 {
@@ -211,6 +125,20 @@ bool CreateAnimation(
     }
 }
 
+std::function<void()> GetEventCallback(const JSCallbackInfo& info, const std::string& name)
+{
+    if (!info[0]->IsFunction()) {
+        LOGE("info[0] is not a function.");
+        return nullptr;
+    }
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    return [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), name]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT(name);
+        func->Execute();
+    };
+}
+
 } // namespace
 
 std::string JSAnimator::animatorId_;
@@ -263,33 +191,15 @@ void JSAnimator::Create(const JSCallbackInfo& info)
         return;
     }
     animatorId_ = info[0]->ToString();
-    auto page = GetCurrentPage();
-    if (!page) {
-        LOGE("page is nullptr");
-        return;
-    }
-    auto animatorInfo = GetAnimatorInfo(animatorId_, page);
-    if (!animatorInfo) {
-        animatorInfo = AceType::MakeRefPtr<AnimatorInfo>();
-        auto animator = AceType::MakeRefPtr<Animator>();
-        animatorInfo->SetAnimator(animator);
-        page->AddAnimatorInfo(animatorId_, animatorInfo);
-    }
+    AnimatorModel::GetInstance()->Create(animatorId_);
 }
 
 void JSAnimator::SetState(int32_t state)
 {
-    auto page = GetCurrentPage();
-    auto animatorInfo = GetAnimatorInfo(animatorId_, page);
-    if (!animatorInfo) {
-        LOGE("animatorInfo is nullptr");
-        return;
-    }
+    auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
+    CHECK_NULL_VOID(animatorInfo);
     auto animator = animatorInfo->GetAnimator();
-    if (!animator) {
-        LOGE("animator is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(animator);
     auto operation = static_cast<AnimationStatus>(state);
     HandleAnimatorInfo(animatorInfo, animator);
     if (!CreateAnimation(animatorInfo, animator, operation)) {
@@ -315,8 +225,7 @@ void JSAnimator::SetState(int32_t state)
 
 void JSAnimator::SetDuration(int32_t duration)
 {
-    auto page = GetCurrentPage();
-    auto animatorInfo = GetAnimatorInfo(animatorId_, page);
+    auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
         LOGE("animatorInfo is nullptr");
         return;
@@ -336,8 +245,7 @@ void JSAnimator::SetCurve(const JSCallbackInfo& info)
         return;
     }
     auto value = info[0]->ToString();
-    auto page = GetCurrentPage();
-    auto animatorInfo = GetAnimatorInfo(animatorId_, page);
+    auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
         LOGE("animatorInfo is nullptr");
         return;
@@ -348,8 +256,7 @@ void JSAnimator::SetCurve(const JSCallbackInfo& info)
 
 void JSAnimator::SetDelay(int32_t delay)
 {
-    auto page = GetCurrentPage();
-    auto animatorInfo = GetAnimatorInfo(animatorId_, page);
+    auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
         LOGE("animatorInfo is nullptr");
         return;
@@ -359,8 +266,7 @@ void JSAnimator::SetDelay(int32_t delay)
 
 void JSAnimator::SetFillMode(int32_t fillMode)
 {
-    auto page = GetCurrentPage();
-    auto animatorInfo = GetAnimatorInfo(animatorId_, page);
+    auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
         LOGE("animatorInfo is nullptr");
         return;
@@ -370,8 +276,7 @@ void JSAnimator::SetFillMode(int32_t fillMode)
 
 void JSAnimator::SetIteration(int32_t iteration)
 {
-    auto page = GetCurrentPage();
-    auto animatorInfo = GetAnimatorInfo(animatorId_, page);
+    auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
         LOGE("animatorInfo is nullptr");
         return;
@@ -381,8 +286,7 @@ void JSAnimator::SetIteration(int32_t iteration)
 
 void JSAnimator::SetPlayMode(int32_t playMode)
 {
-    auto page = GetCurrentPage();
-    auto animatorInfo = GetAnimatorInfo(animatorId_, page);
+    auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
         LOGE("animatorInfo is nullptr");
         return;
@@ -403,8 +307,7 @@ void JSAnimator::SetMotion(const JSCallbackInfo& info)
     }
 
     RefPtr<Motion> motion = rawMotion->GetMotion();
-    auto page = GetCurrentPage();
-    auto animatorInfo = GetAnimatorInfo(animatorId_, page);
+    auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
         LOGE("animatorInfo is nullptr");
         return;
@@ -414,32 +317,32 @@ void JSAnimator::SetMotion(const JSCallbackInfo& info)
 
 void JSAnimator::OnStart(const JSCallbackInfo& info)
 {
-    auto startEvent = GetEventMarker(info);
-    AddEventListener(startEvent, EventOperation::START, animatorId_, info);
+    auto callback = GetEventCallback(info, "Animator.onStart");
+    AnimatorModel::GetInstance()->AddEventListener(std::move(callback), EventOperation::START, animatorId_);
 }
 
 void JSAnimator::OnPause(const JSCallbackInfo& info)
 {
-    auto pauseEvent = GetEventMarker(info);
-    AddEventListener(pauseEvent, EventOperation::PAUSE, animatorId_, info);
+    auto callback = GetEventCallback(info, "Animator.onPause");
+    AnimatorModel::GetInstance()->AddEventListener(std::move(callback), EventOperation::PAUSE, animatorId_);
 }
 
 void JSAnimator::OnRepeat(const JSCallbackInfo& info)
 {
-    auto repeatEvent = GetEventMarker(info);
-    AddEventListener(repeatEvent, EventOperation::REPEAT, animatorId_, info);
+    auto callback = GetEventCallback(info, "Animator.onRepeat");
+    AnimatorModel::GetInstance()->AddEventListener(std::move(callback), EventOperation::REPEAT, animatorId_);
 }
 
 void JSAnimator::OnCancel(const JSCallbackInfo& info)
 {
-    auto cancelEvent = GetEventMarker(info);
-    AddEventListener(cancelEvent, EventOperation::CANCEL, animatorId_, info);
+    auto callback = GetEventCallback(info, "Animator.onCancel");
+    AnimatorModel::GetInstance()->AddEventListener(std::move(callback), EventOperation::CANCEL, animatorId_);
 }
 
 void JSAnimator::OnFinish(const JSCallbackInfo& info)
 {
-    auto finishEvent = GetEventMarker(info);
-    AddEventListener(finishEvent, EventOperation::FINISH, animatorId_, info);
+    auto callback = GetEventCallback(info, "Animator.onFinish");
+    AnimatorModel::GetInstance()->AddEventListener(std::move(callback), EventOperation::FINISH, animatorId_);
 }
 
 void JSAnimator::OnFrame(const JSCallbackInfo& info)
@@ -454,28 +357,12 @@ void JSAnimator::OnFrame(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("Animator.onFrame");
         func->Execute(progress);
     };
-    auto page = GetCurrentPage();
-    auto animatorInfo = GetAnimatorInfo(animatorId_, page);
+    auto animatorInfo = AnimatorModel::GetInstance()->GetAnimatorInfo(animatorId_);
     if (!animatorInfo) {
         LOGE("animatorInfo is nullptr");
         return;
     }
     animatorInfo->SetFrameEvent(OnFrameEvent);
-}
-
-EventMarker JSAnimator::GetEventMarker(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsFunction()) {
-        LOGE("info[0] is not a function.");
-        return EventMarker();
-    }
-    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto eventMarker = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("Animator.onClick");
-        func->Execute();
-    });
-    return eventMarker;
 }
 
 void JSSpringProp::ConstructorCallback(const JSCallbackInfo& info)

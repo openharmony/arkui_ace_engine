@@ -29,4 +29,29 @@ std::shared_ptr<Localization> Localization::GetInstance()
     static auto instance = std::make_shared<Localization>();
     return instance;
 }
+
+std::string Localization::FormatDuration(uint32_t duration, const std::string& format)
+{
+    return "08:00:00";
+}
+
+const std::string Localization::FormatDateTime(DateTime dateTime, const std::string& format)
+{
+    return "08:00:00";
+}
+
+std::string Localization::GetEntryLetters(const std::string& lettersIndex)
+{
+    return "";
+}
+
+std::string Localization::GetErrorDescription(const std::string& errorIndex)
+{
+    return "";
+}
+
+const std::string Localization::FormatDuration(uint32_t duration, bool needShowHour)
+{
+    return "08:00:00";
+}
 } // namespace OHOS::Ace

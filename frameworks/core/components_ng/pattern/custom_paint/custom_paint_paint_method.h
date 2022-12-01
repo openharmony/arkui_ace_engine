@@ -64,7 +64,7 @@ public:
     void Restore();
     void Scale(double x, double y);
     void Rotate(double angle);
-    void SetTransform(const TransformParam& param);
+    virtual void SetTransform(const TransformParam& param) = 0;
     void ResetTransform();
     void Transform(const TransformParam& param);
     void Translate(double x, double y);
@@ -260,7 +260,7 @@ protected:
     void Path2DLineTo(const OffsetF& offset, const PathArgs& args);
     void Path2DArc(const OffsetF& offset, const PathArgs& args);
     void Path2DArcTo(const OffsetF& offset, const PathArgs& args);
-    void Path2DRect(const OffsetF& offset, const PathArgs& args);
+    virtual void Path2DRect(const OffsetF& offset, const PathArgs& args) = 0;
     void Path2DEllipse(const OffsetF& offset, const PathArgs& args);
     void Path2DBezierCurveTo(const OffsetF& offset, const PathArgs& args);
     void Path2DQuadraticCurveTo(const OffsetF& offset, const PathArgs& args);
@@ -269,10 +269,16 @@ protected:
     void InitImagePaint();
     void InitImageCallbacks();
     virtual void SetPaintImage() = 0;
-    virtual void ImageObjReady(const RefPtr<ImageObject>& imageObj) = 0;
+    virtual void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) = 0;
     virtual void ImageObjFailed() = 0;
     virtual sk_sp<SkImage> GetImage(const std::string& src) = 0;
     void DrawSvgImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage);
+    virtual SkCanvas* GetRawPtrOfSkCanvas() = 0;
+    virtual void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas) = 0;
+    virtual OffsetF GetContentOffset(PaintWrapper* paintWrapper) const
+    {
+        return OffsetF(0.0f, 0.0f);
+    }
 
     PaintState fillState_;
     StrokePaintState strokeState_;
@@ -287,7 +293,6 @@ protected:
     std::string smoothingQuality_ = "low";
     bool antiAlias_ = false;
     Shadow shadow_;
-    bool isOffscreen_ = false;
     std::unique_ptr<txt::Paragraph> paragraph_;
 
     RefPtr<PipelineBase> context_;

@@ -85,7 +85,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     } else if (GreatOrEqual(menuPosition.GetX() + menuWidth, overlayWidth)) {
         menuPosition.SetX(overlayWidth - menuWidth - theme->GetDefaultMenuPositionX());
     }
-    if (LessNotEqual(menuPosition.GetY(), 0.0)) {
+    if (LessNotEqual(menuPosition.GetY(), menuHeight)) {
         menuPosition.SetY(
             static_cast<float>(firstHandleRect.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
     }

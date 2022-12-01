@@ -20,6 +20,7 @@
 #include "flutter/runtime/window_manager.h"
 
 #include "base/log/log.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_view.h"
 #include "core/pipeline/base/render_node.h"
 
@@ -27,11 +28,8 @@ namespace OHOS::Ace {
 
 std::unique_ptr<PlatformWindow> PlatformWindow::Create(AceView* view)
 {
-    if (view != nullptr) {
-        return std::make_unique<Platform::FlutterWindow>(view->GetInstanceId());
-    } else {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN_NOLOG(view, nullptr);
+    return std::make_unique<Platform::FlutterWindow>(view->GetInstanceId());
 }
 
 namespace Platform {
@@ -52,11 +50,10 @@ void FlutterWindow::Destroy()
 void FlutterWindow::RequestFrame()
 {
     auto window = flutter::WindowManager::GetWindow(instanceId_);
-    if (window != nullptr) {
-        window->ScheduleFrame();
-        if (!window->HasBeginFrameCallback()) {
-            window->SetBeginFrameCallback(std::bind(&FlutterWindow::OnVsyncCallback, this, std::placeholders::_1));
-        }
+    CHECK_NULL_VOID_NOLOG(window);
+    window->ScheduleFrame();
+    if (!window->HasBeginFrameCallback()) {
+        window->SetBeginFrameCallback(std::bind(&FlutterWindow::OnVsyncCallback, this, std::placeholders::_1));
     }
 }
 

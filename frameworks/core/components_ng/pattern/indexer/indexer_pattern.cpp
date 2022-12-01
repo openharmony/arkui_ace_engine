@@ -15,14 +15,24 @@
 
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
 
+#include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/common/properties/shadow_config.h"
+#include "core/components/indexer/indexer_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/property.h"
+#include "core/event/mouse_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -42,6 +52,7 @@ void IndexerPattern::OnModifyDone()
     if (layoutProperty->GetSelected().has_value() && storeSelected_ != layoutProperty->GetSelected().value()) {
         storeSelected_ = layoutProperty->GetSelected().value();
         selected_ = storeSelected_;
+        ResetStatus();
         if (storeSelected_ >= itemCount_) {
             storeSelected_ = 0;
             selected_ = 0;
@@ -53,13 +64,15 @@ void IndexerPattern::OnModifyDone()
     if (gesture) {
         InitPanEvent(gesture);
     }
-
+    InitInputEvent();
     if (!touchListener_) {
         auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
             auto indexerPattern = weak.Upgrade();
             CHECK_NULL_VOID(indexerPattern);
             if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
                 indexerPattern->OnTouchDown(info);
+            } else if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+                indexerPattern->OnTouchUp(info);
             }
             indexerPattern->SetIsTouch(true);
         };
@@ -68,11 +81,7 @@ void IndexerPattern::OnModifyDone()
             gesture->AddTouchEvent(touchListener_);
         }
     }
-
-    auto focusHub = host->GetFocusHub();
-    if (focusHub) {
-        InitOnKeyEvent(focusHub);
-    }
+    InitOnKeyEvent();
 }
 
 bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -87,6 +96,7 @@ bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     isInitialized_ = indexerLayoutAlgorithm->GetIsInitialized();
     selected_ = indexerLayoutAlgorithm->GetSelected();
     itemSizeRender_ = indexerLayoutAlgorithm->GetItemSizeRender();
+    ResetStatus();
     return false;
 }
 
@@ -107,16 +117,15 @@ void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto onActionUpdate = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            if (info.GetInputEventType() == InputEventType::AXIS) {
-                if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
-                    pattern->MoveIndexByStep(-1);
-                } else if (LessNotEqual(info.GetMainDelta(), 0.0)) {
-                    pattern->MoveIndexByStep(1);
-                }
-            } else {
-                pattern->MoveIndexByOffset(info.GetLocalLocation(), false);
+        CHECK_NULL_VOID(pattern);
+        if (info.GetInputEventType() == InputEventType::AXIS) {
+            if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
+                pattern->MoveIndexByStep(-1);
+            } else if (LessNotEqual(info.GetMainDelta(), 0.0)) {
+                pattern->MoveIndexByStep(1);
             }
+        } else {
+            pattern->MoveIndexByOffset(info.GetLocalLocation(), false);
         }
     };
 
@@ -131,9 +140,79 @@ void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, 0.0);
 }
 
+void IndexerPattern::OnHover(bool isHover)
+{
+    isHover_ = isHover;
+    isTouch_ = false;
+    ApplyIndexChanged();
+}
+
+void IndexerPattern::OnChildHover(int32_t index, bool isHover)
+{
+    if (isHover) {
+        childHoverIndex_ = index;
+    } else {
+        childHoverIndex_ = -1;
+    }
+    ApplyIndexChanged();
+}
+
+void IndexerPattern::InitInputEvent()
+{
+    if (isInputEventRegisted_) {
+        return;
+    }
+    isInputEventRegisted_ = true;
+    InitCurrentInputEvent();
+    InitChildInputEvent();
+}
+
+void IndexerPattern::InitCurrentInputEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hoverCallback = [weak = WeakClaim(this)](bool isHovered) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnHover(isHovered);
+    };
+    auto hoverEvent = MakeRefPtr<InputEvent>(hoverCallback);
+    auto inputGesture = host->GetOrCreateInputEventHub();
+    inputGesture->AddOnHoverEvent(hoverEvent);
+}
+
+void IndexerPattern::InitChildInputEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    for (int32_t i = 0; i < itemCount_; i++) {
+        auto child = DynamicCast<FrameNode>(host->GetChildAtIndex(i));
+        CHECK_NULL_VOID(child);
+        auto childHoverCallback = [weak = WeakClaim(this), index = i](bool isHovered) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnChildHover(index, isHovered);
+        };
+        auto childOnHoverEvent = MakeRefPtr<InputEvent>(childHoverCallback);
+        auto childInputEventHub = child->GetOrCreateInputEventHub();
+        childInputEventHub->AddOnHoverEvent(childOnHoverEvent);
+    };
+}
+
 void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
 {
     MoveIndexByOffset(info.GetTouches().front().GetLocalLocation());
+}
+
+void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
+{
+    childPressIndex_ = -1;
+    auto nextSelectIndex = GetSelectChildIndex(info.GetTouches().front().GetLocalLocation());
+    if (nextSelectIndex != selected_) {
+        selected_ = nextSelectIndex;
+        ResetStatus();
+    }
+    ApplyIndexChanged();
 }
 
 void IndexerPattern::MoveIndexByOffset(const Offset& offset, bool isRepeatCalled)
@@ -147,43 +226,82 @@ void IndexerPattern::MoveIndexByOffset(const Offset& offset, bool isRepeatCalled
         LOGE("AlphabetIndexer arrayValue size is less than 0");
         return;
     }
+    auto nextSelectIndex = GetSelectChildIndex(offset);
+    if (!isRepeatCalled && nextSelectIndex == childPressIndex_) {
+        return;
+    }
+    childPressIndex_ = nextSelectIndex;
+    childFocusIndex_ = -1;
+    childHoverIndex_ = -1;
+    LOGD("Move to index: %{public}d", childPressIndex_);
+    ApplyIndexChanged();
+}
+
+int32_t IndexerPattern::GetSelectChildIndex(const Offset& offset)
+{
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, -1);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_RETURN(layoutProperty, -1);
 
     auto size = SizeF(itemSizeRender_, itemSizeRender_ * static_cast<float>(itemCount_));
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto top = padding.top.value_or(0.0f);
-
     auto nextSelectIndex = static_cast<int32_t>((offset.GetY() - top) / itemSizeRender_);
     nextSelectIndex = std::clamp(nextSelectIndex, 0, itemCount_ - 1);
-    if (!isRepeatCalled && nextSelectIndex == selected_) {
-        return;
+    return nextSelectIndex;
+}
+
+bool IndexerPattern::KeyIndexByStep(int32_t step)
+{
+    auto nextSected = GetSkipChildIndex(step);
+    childFocusIndex_ = nextSected;
+    if (nextSected >= 0) {
+        selected_ = nextSected;
     }
-    selected_ = nextSelectIndex;
-    LOGD("Move to index: %{public}d", selected_);
+    childPressIndex_ = -1;
+    childHoverIndex_ = -1;
     ApplyIndexChanged();
+    return nextSected >= 0;
+}
+
+int32_t IndexerPattern::GetSkipChildIndex(int32_t step)
+{
+    auto nextSelected = selected_ + step;
+    if (nextSelected < 0 || nextSelected >= itemCount_) {
+        return -1;
+    }
+    return nextSelected;
 }
 
 bool IndexerPattern::MoveIndexByStep(int32_t step)
 {
-    auto nextSelected = selected_ + step;
-    LOGD("Move index by step: %{public}d, Move index from %{public}d to %{public}d", step, selected_, nextSelected);
-    if (nextSelected < 0 || nextSelected >= itemCount_) {
-        LOGW("Next select index: %{public}d is out of bounds[0, %{public}d))", nextSelected, itemCount_);
-        return false;
+    auto nextSected = GetSkipChildIndex(step);
+    if (nextSected >= 0) {
+        selected_ = nextSected;
     }
-    selected_ = nextSelected;
-    LOGD("Move to index: %{public}d", selected_);
+    ResetStatus();
     ApplyIndexChanged();
-    return true;
+    return nextSected >= 0;
 }
 
 bool IndexerPattern::MoveIndexBySearch(const std::string& searchStr)
 {
-    LOGD("Move index by search string: %{public}s", searchStr.c_str());
+    auto nextSelectIndex = GetFocusChildIndex(searchStr);
+    if (nextSelectIndex >= 0) {
+        selected_ = nextSelectIndex;
+    }
+
+    childFocusIndex_ = nextSelectIndex;
+    childHoverIndex_ = -1;
+    childPressIndex_ = -1;
+    ApplyIndexChanged();
+    return nextSelectIndex >= 0;
+}
+
+int32_t IndexerPattern::GetFocusChildIndex(const std::string& searchStr)
+{
     int32_t nextSelectIndex = -1;
     for (auto i = selected_ + 1; i < itemCount_; ++i) {
         const auto& indexValue = arrayValue_.at(i);
@@ -196,10 +314,7 @@ bool IndexerPattern::MoveIndexBySearch(const std::string& searchStr)
         }
     }
     if (nextSelectIndex >= 0 && nextSelectIndex < itemCount_) {
-        selected_ = nextSelectIndex;
-        LOGD("Find string: %{public}s at index: %{public}d. Move to it.", searchStr.c_str(), selected_);
-        ApplyIndexChanged();
-        return true;
+        return nextSelectIndex;
     }
     for (auto i = 0; i < selected_; ++i) {
         const auto& indexValue = arrayValue_.at(i);
@@ -212,15 +327,17 @@ bool IndexerPattern::MoveIndexBySearch(const std::string& searchStr)
         }
     }
     if (nextSelectIndex >= 0 && nextSelectIndex < itemCount_) {
-        selected_ = nextSelectIndex;
-        LOGD("Find string: %{public}s at index: %{public}d. Move to it.", searchStr.c_str(), selected_);
-        ApplyIndexChanged();
-        return true;
+        return nextSelectIndex;
     }
-    LOGD("Search string: %{public}s does not exist.", searchStr.c_str());
-    return false;
+    return -1;
 }
 
+void IndexerPattern::ResetStatus()
+{
+    childHoverIndex_ = -1;
+    childFocusIndex_ = -1;
+    childPressIndex_ = -1;
+}
 void IndexerPattern::ApplyIndexChanged()
 {
     auto host = GetHost();
@@ -230,7 +347,8 @@ void IndexerPattern::ApplyIndexChanged()
 
     auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
-        
+    auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
     auto onSelected = indexerEventHub->GetOnSelected();
     if (onSelected && (selected_ >= 0) && (selected_ < itemCount_)) {
         onSelected(selected_);
@@ -241,75 +359,110 @@ void IndexerPattern::ApplyIndexChanged()
     if (onRequestPopupData && (selected_ >= 0) && (selected_ < itemCount_)) {
         popupData = onRequestPopupData(selected_);
     }
-
     auto onPopupSelected = indexerEventHub->GetOnPopupSelected();
     if (onPopupSelected && (selected_ >= 0) && (selected_ < itemCount_)) {
         onPopupSelected(selected_);
     }
-        
-    auto color = layoutProperty->GetColor().value_or(Color(INDEXER_LIST_COLOR));
-    auto selectedColor = layoutProperty->GetSelectedColor().value_or(Color(INDEXER_LIST_ACTIVE_COLOR));
-    auto popupColor = layoutProperty->GetPopupColor().value_or(Color(BUBBLE_FONT_COLOR));
-    auto selectedBackgroundColor = layoutProperty->GetSelectedBackgroundColor()
-        .value_or(Color(INDEXER_ACTIVE_BG_COLOR));
-    auto popupBackground = layoutProperty->GetPopupBackground().value_or(Color(BUBBLE_BG_COLOR));
-    auto usingPopup = layoutProperty->GetUsingPopup().value_or(false);
-    TextStyle textStyle;
-    auto selectedFont = layoutProperty->GetSelectedFont().value_or(textStyle);
-    auto popupFont = layoutProperty->GetPopupFont().value_or(textStyle);
-    auto font = layoutProperty->GetFont().value_or(textStyle);
 
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    auto currentRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(currentRenderContext);
+    if (isHover_) {
+        currentRenderContext->BlendBgColor(
+            indexerTheme->GetSlipHoverBackgroundColor().ChangeOpacity(IndexerTheme::SLIP_BACKGROUND_OPACITY));
+    } else {
+        currentRenderContext->ResetBlendBgColor();
+    }
     int32_t index = 0;
     auto childrenNode = host->GetChildren();
     for (auto& iter : childrenNode) {
         auto childNode = AceType::DynamicCast<FrameNode>(iter);
         auto nodeLayoutProperty = childNode->GetLayoutProperty<TextLayoutProperty>();
-        if (index == selected_) {
-            nodeLayoutProperty->UpdateTextColor(selectedColor);
-            auto fontSize = selectedFont.GetFontSize();
-            nodeLayoutProperty->UpdateFontSize(fontSize);
+        if (index == childFocusIndex_ || index == selected_) {
+            auto childRenderContext = childNode->GetRenderContext();
+            if (index == childFocusIndex_) {
+                auto boaderWidth = indexerTheme->GetFocusBgOutlineSize().ConvertToPx();
+                BorderWidthPropertyF borderWidthProperty { boaderWidth, boaderWidth, boaderWidth, boaderWidth };
+                childRenderContext->UpdateBorderWidthF(borderWidthProperty);
+                childRenderContext->UpdateBorderColor({ indexerTheme->GetFocusBgOutlineColor() });
+            } else {
+                childRenderContext->UpdateBorderWidthF({ 0, 0, 0, 0 });
+                childRenderContext->ResetBlendBorderColor();
+            }
+            nodeLayoutProperty->UpdateTextColor(
+                layoutProperty->GetSelectedColor().value_or(indexerTheme->GetSelectedTextColor()));
+            childRenderContext->BlendBgColor(
+                paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSeclectedBackgroundColor()));
+            auto randius = indexerTheme->GetHoverRadiusSize_();
+            childRenderContext->UpdateBorderRadius({ randius, randius, randius, randius });
+            auto selectedFont = layoutProperty->GetSelectedFont().value_or(indexerTheme->GetSelectTextStyle());
+            nodeLayoutProperty->UpdateFontSize(selectedFont.GetFontSize());
             auto fontWeight = selectedFont.GetFontWeight();
             nodeLayoutProperty->UpdateFontWeight(fontWeight);
-            auto childRenderContext = childNode->GetRenderContext();
-            childRenderContext->BlendBgColor(selectedBackgroundColor);
+            childRenderContext->SetClipToBounds(true);
+            childNode->MarkModifyDone();
         } else if (index == itemCount_) {
-            if (usingPopup) {
+            auto randius = BUBBLE_BOX_RADIUS;
+            if (isInitialized_ && layoutProperty->GetUsingPopup().value_or(false)) {
+                auto popupColor = layoutProperty->GetPopupColor().value_or(indexerTheme->GetPopupTextColor());
+                auto popupBackground =
+                    paintProperty->GetPopupBackground().value_or(indexerTheme->GetPopupBackgroundColor());
+                auto popupFont = layoutProperty->GetPopupFont().value_or(indexerTheme->GetPopupTextStyle());
                 std::vector<std::string> arrayValueSelected = {};
                 auto popupDataValue = popupData.value_or(arrayValueSelected);
                 popupDataValue.insert(std::begin(popupDataValue), arrayValue_[selected_]);
-
+                popupSize_ =
+                    (popupDataValue.size() < INDEXER_BUBBLE_MAXSIZE ? popupDataValue.size() : INDEXER_BUBBLE_MAXSIZE);
                 auto listNode = AceType::DynamicCast<FrameNode>(iter);
                 listNode->Clean();
                 int32_t popupDataIndex = 0;
-                for (const auto& data: popupDataValue) {
-                    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1,
-                        AceType::MakeRefPtr<TextPattern>());
+                for (const auto& data : popupDataValue) {
+                    auto textNode =
+                        FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
                     auto textNodeLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
                     textNodeLayoutProperty->UpdateContent(data);
-                    textNodeLayoutProperty->UpdateTextColor(popupColor);
+                    if (popupDataIndex == 0) {
+                        textNodeLayoutProperty->UpdateTextColor(popupColor);
+                    } else {
+                        textNodeLayoutProperty->UpdateTextColor(
+                            layoutProperty->GetSelectedColor().value_or(indexerTheme->GetDefaultTextColor()));
+                    }
+                    auto textPaddingLeft = Dimension(IndexerTheme::TEXT_PADDING_LEFT, DimensionUnit::VP).ConvertToPx();
+                    auto textPaddingTop = Dimension(IndexerTheme::TEXT_PADDING_TOP, DimensionUnit::VP).ConvertToPx();
+                    textNodeLayoutProperty->UpdatePadding({ CalcLength(textPaddingLeft), CalcLength(textPaddingLeft),
+                        CalcLength(textPaddingTop), CalcLength(textPaddingTop) });
                     auto fontSize = popupFont.GetFontSize();
                     textNodeLayoutProperty->UpdateFontSize(fontSize);
                     auto fontWeight = popupFont.GetFontWeight();
                     textNodeLayoutProperty->UpdateFontWeight(fontWeight);
-
-                    CalcLength width = CalcLength(Dimension(BUBBLE_BOX_SIZE));
-                    CalcLength height = CalcLength(Dimension(BUBBLE_BOX_SIZE));
-                    textNodeLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
-
+                    textNodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+                    CalcLength width = CalcLength(Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP));
+                    CalcLength height = CalcLength(Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP));
                     auto textNodeRenderContext = textNode->GetRenderContext();
-                    textNodeRenderContext->BlendBgColor(popupBackground);
-
-                    Dimension radius = Dimension(NG::BUBBLE_BOX_RADIUS);
-                    if (popupDataValue.size() <= 1) {
-                        BorderRadiusProperty borderRadius { radius, radius, radius, radius };
-                        textNodeRenderContext->UpdateBorderRadius(borderRadius);
+                    textNodeRenderContext->UpdateBackgroundColor(popupBackground);
+                    if (popupDataValue.size() <= 1 || popupDataIndex == INDEXER_BUBBLE_MAXSIZE - 1 ||
+                        (popupDataIndex == static_cast<int32_t>(popupDataValue.size() - 1))) {
+                        textNodeRenderContext->ResetBorder();
+                    } else {
+                        BorderWidthPropertyF borderWidthProperty { 0, 0, 0,
+                            Dimension(1.0, DimensionUnit::VP).ConvertToPx() };
+                        textNodeRenderContext->UpdateBorderWidthF(borderWidthProperty);
+                        textNodeRenderContext->UpdateBorderColor({ indexerTheme->GetPopupSeparateColor() });
+                    }
+                    if (popupDataValue.size() == 1) {
+                        textNodeRenderContext->UpdateBorderRadius(
+                            { Dimension(randius, DimensionUnit::VP), Dimension(randius, DimensionUnit::VP),
+                                Dimension(randius, DimensionUnit::VP), Dimension(randius, DimensionUnit::VP) });
                     } else {
                         if (popupDataIndex == 0) {
-                            BorderRadiusProperty borderRadius { radius, radius, Dimension(0), Dimension(0) };
-                            textNodeRenderContext->UpdateBorderRadius(borderRadius);
-                        } else if (popupDataIndex == INDEXER_BUBBLE_MAXSIZE - 1) {
-                            BorderRadiusProperty borderRadius { Dimension(0), Dimension(0), radius, radius };
-                            textNodeRenderContext->UpdateBorderRadius(borderRadius);
+                            textNodeRenderContext->UpdateBorderRadius({ Dimension(randius, DimensionUnit::VP),
+                                Dimension(randius, DimensionUnit::VP), Dimension(0), Dimension(0) });
+                        } else if (popupDataIndex == (static_cast<int32_t>(popupSize_ - 1))) {
+                            textNodeRenderContext->UpdateBorderRadius({ Dimension(0), Dimension(0),
+                                Dimension(randius, DimensionUnit::VP), Dimension(randius, DimensionUnit::VP) });
                         }
                     }
                     textNode->MarkModifyDone();
@@ -317,39 +470,58 @@ void IndexerPattern::ApplyIndexChanged()
                         V2::LIST_ITEM_ETS_TAG, -1, []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr); });
                     listItemNode->AddChild(textNode);
                     listItemNode->MarkModifyDone();
-                    
                     listNode->AddChild(listItemNode);
                     popupDataIndex++;
                 }
+                auto listRenderContext = listNode->GetRenderContext();
+                listRenderContext->UpdateBackShadow(ShadowConfig::DefaultShadowL);
+                listRenderContext->UpdateBorderRadius(
+                    { Dimension(randius, DimensionUnit::VP), Dimension(randius, DimensionUnit::VP),
+                        Dimension(randius, DimensionUnit::VP), Dimension(randius, DimensionUnit::VP) });
                 listNode->MarkModifyDone();
                 listNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                 BeginBubbleAnimation(listNode);
             }
         } else {
-            nodeLayoutProperty->UpdateTextColor(color);
-            auto fontSize = font.GetFontSize();
-            nodeLayoutProperty->UpdateFontSize(fontSize);
-            auto fontWeight = font.GetFontWeight();
-            nodeLayoutProperty->UpdateFontWeight(fontWeight);
-
             auto childRenderContext = childNode->GetRenderContext();
-            childRenderContext->ResetBlendBgColor();
+            CHECK_NULL_VOID(childRenderContext);
+            if (index == childHoverIndex_ || index == childPressIndex_) {
+                auto radiusSize = indexerTheme->GetHoverRadiusSize_();
+                childRenderContext->UpdateBorderRadius({ radiusSize, radiusSize, radiusSize, radiusSize });
+                childRenderContext->BlendBgColor(indexerTheme->GetHoverBgAreaColor());
+                nodeLayoutProperty->UpdateTextColor(indexerTheme->GetHoverTextColor());
+            } else {
+                childRenderContext->ResetBlendBgColor();
+                childRenderContext->UpdateBorderRadius({ Dimension(0), Dimension(0), Dimension(0), Dimension(0) });
+                nodeLayoutProperty->UpdateTextColor(
+                    layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor()));
+            }
+            nodeLayoutProperty->UpdateFontSize(
+                layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle()).GetFontSize());
+            nodeLayoutProperty->UpdateFontWeight(
+                layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle()).GetFontWeight());
+            childNode->MarkModifyDone();
         }
         index++;
     }
-
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void IndexerPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+void IndexerPattern::InitOnKeyEvent()
 {
+    if (isKeyEventRegisted_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        if (pattern) {
-            return pattern->OnKeyEvent(event);
-        }
-        return false;
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->OnKeyEvent(event);
     };
+    isKeyEventRegisted_ = true;
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 }
 
@@ -359,15 +531,22 @@ bool IndexerPattern::OnKeyEvent(const KeyEvent& event)
         return false;
     }
     if (event.code == KeyCode::KEY_DPAD_UP) {
-        return MoveIndexByStep(-1);
+        return KeyIndexByStep(-1);
     }
     if (event.code == KeyCode::KEY_DPAD_DOWN) {
-        return MoveIndexByStep(1);
+        return KeyIndexByStep(1);
     }
     if (!event.IsCombinationKey() && (event.IsLetterKey() || event.IsNumberKey())) {
         return MoveIndexBySearch(event.ConvertCodeToString());
     }
+    OnKeyEventDisapear();
     return false;
+}
+
+void IndexerPattern::OnKeyEventDisapear()
+{
+    ResetStatus();
+    ApplyIndexChanged();
 }
 
 void IndexerPattern::BeginBubbleAnimation(RefPtr<FrameNode> animationNode)

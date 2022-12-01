@@ -130,20 +130,24 @@ private:
     void UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNode,
         std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap, const std::string& group,
         bool select);
+    RectF GetHotZoneRect(bool isOriginal) const;
 
     std::optional<std::string> preGroup_;
     bool isAddToMap_ = true;
-
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
     bool isTouch_ = false;
     bool isHover_ = false;
+    bool isClick_ = false;
+    bool isFirstCreated_ = true;
     // animation control
     RefPtr<Animator> controller_;
     RefPtr<CurveAnimation<float>> translate_;
     float shapeScale_ = 1.0f;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
+    Dimension hotZoneHorizontalPadding_ = 11.0_vp;
+    Dimension hotZoneVerticalPadding_ = 11.0_vp;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupPattern);
 };

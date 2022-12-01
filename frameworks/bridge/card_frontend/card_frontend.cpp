@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "base/log/event_report.h"
+#include "base/utils/utils.h"
 #include "core/common/thread_checker.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -57,9 +58,8 @@ void CardFrontend::Destroy()
 void CardFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
     auto pipelineContext = DynamicCast<PipelineContext>(context);
-    if (!delegate_ || !pipelineContext) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
     eventHandler_ = AceType::MakeRefPtr<CardEventHandler>(delegate_);
     pipelineContext->RegisterEventHandler(eventHandler_);
     holder_.Attach(context);
@@ -132,9 +132,7 @@ std::string CardFrontend::GetFormSrcPath(const std::string& uri, const std::stri
 
 RefPtr<AcePage> CardFrontend::GetPage(int32_t pageId) const
 {
-    if (!delegate_) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN_NOLOG(delegate_, nullptr);
     return delegate_->GetPage();
 }
 
@@ -151,9 +149,7 @@ WindowConfig& CardFrontend::GetWindowConfig()
 void CardFrontend::LoadPage(const std::string& urlPath, const std::string& params)
 {
     CHECK_RUN_ON(JS);
-    if (!delegate_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(delegate_);
     auto page = delegate_->CreatePage(0, urlPath);
     page->SetPageParams(params);
     page->SetFlushCallback([weak = WeakClaim(this)](const RefPtr<Framework::JsAcePage>& page) {
@@ -177,10 +173,7 @@ void CardFrontend::ParsePage(const RefPtr<PipelineBase>& context, const std::str
 {
     CHECK_RUN_ON(JS);
     auto rootBody = Framework::ParseFileData(pageContent);
-    if (!rootBody) {
-        LOGE("parse index json error");
-        return;
-    }
+    CHECK_NULL_VOID(rootBody);
 
     const auto& rootTemplate = rootBody->GetValue("template");
     parseJsCard_ = AceType::MakeRefPtr<Framework::JsCardParser>(context, assetManager_, std::move(rootBody));
@@ -210,9 +203,7 @@ void CardFrontend::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), page, jsCommands] {
             auto frontend = weak.Upgrade();
-            if (!frontend) {
-                return;
-            }
+            CHECK_NULL_VOID_NOLOG(frontend);
             // Flush all JS commands.
             for (const auto& command : *jsCommands) {
                 command->Execute(page);
@@ -315,25 +306,16 @@ void CardFrontend::SetColorMode(ColorMode colorMode)
 
 void CardFrontend::RebuildAllPages()
 {
-    if (!delegate_) {
-        LOGI("the delegate is null");
-        return;
-    }
+    CHECK_NULL_VOID(delegate_);
     auto page = delegate_->GetPage();
     taskExecutor_->PostTask(
         [weakPage = WeakPtr<Framework::JsAcePage>(page)] {
             auto page = weakPage.Upgrade();
-            if (!page) {
-                return;
-            }
+            CHECK_NULL_VOID_NOLOG(page);
             auto domDoc = page->GetDomDocument();
-            if (!domDoc) {
-                return;
-            }
+            CHECK_NULL_VOID_NOLOG(domDoc);
             auto rootNode = domDoc->GetDOMNodeById(domDoc->GetRootNodeId());
-            if (!rootNode) {
-                return;
-            }
+            CHECK_NULL_VOID_NOLOG(rootNode);
             rootNode->UpdateStyleWithChildren();
         },
         TaskExecutor::TaskType::UI);
@@ -354,10 +336,7 @@ void CardFrontend::OnSurfaceChanged(int32_t width, int32_t height)
 void CardFrontend::HandleSurfaceChanged(int32_t width, int32_t height)
 {
     CHECK_RUN_ON(JS);
-    if (!parseJsCard_) {
-        LOGE("the parser is null");
-        return;
-    }
+    CHECK_NULL_VOID(parseJsCard_);
     parseJsCard_->OnSurfaceChanged(width, height);
     OnMediaFeatureUpdate();
 }
@@ -365,10 +344,8 @@ void CardFrontend::HandleSurfaceChanged(int32_t width, int32_t height)
 void CardFrontend::OnMediaFeatureUpdate()
 {
     CHECK_RUN_ON(JS);
-    if (!delegate_ || !parseJsCard_) {
-        LOGE("the delegate or parser is null");
-        return;
-    }
+    CHECK_NULL_VOID(delegate_);
+    CHECK_NULL_VOID(parseJsCard_);
     parseJsCard_->UpdateStyle(delegate_->GetPage());
 }
 

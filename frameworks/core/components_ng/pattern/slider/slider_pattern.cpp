@@ -47,9 +47,8 @@ void SliderPattern::OnModifyDone()
     InitClickEvent(gestureHub);
     InitPanEvent(gestureHub);
     auto focusHub = hub->GetFocusHub();
-    if (focusHub) {
-        InitOnKeyEvent(focusHub);
-    }
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
 }
 
 bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool /*skipLayout*/)
@@ -74,7 +73,8 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     float length = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
                        ? contentSize.value().Width()
                        : contentSize.value().Height();
-    sliderLength_ = length >= trackThickness_ ? length - trackThickness_ : 1;
+    sliderLength_ =
+        length >= std::max(trackThickness_, blockDiameter_) ? length - std::max(trackThickness_, blockDiameter_) : 1;
     borderBlank_ = (length - sliderLength_) * static_cast<float>(HALF);
 
     return true;
@@ -87,9 +87,8 @@ void SliderPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
     }
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleTouchEvent(info);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleTouchEvent(info);
     };
     gestureHub->RemoveTouchEvent(touchEvent_);
     touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
@@ -114,10 +113,9 @@ void SliderPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
     }
     auto clickEvent = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandlingGestureEvent(info);
-            pattern->FireChangeEvent(SliderChangeMode::Click);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandlingGestureEvent(info);
+        pattern->FireChangeEvent(SliderChangeMode::Click);
     };
     gestureHub->RemoveClickEvent(clickEvent_);
     clickEvent_ = MakeRefPtr<ClickEvent>(std::move(clickEvent));
@@ -151,8 +149,8 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     auto frameOffset = GetHostFrameOffset();
     CHECK_NULL_VOID(frameOffset.has_value());
     float length = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
-                       ? static_cast<float>(localLocation->GetX()) - frameOffset.value().GetX()
-                       : static_cast<float>(localLocation->GetY()) - frameOffset.value().GetY();
+                       ? static_cast<float>(localLocation->GetX())
+                       : static_cast<float>(localLocation->GetY());
     float touchLength = sliderPaintProperty->GetReverse().value_or(false) ? borderBlank_ + sliderLength_ - length
                                                                           : length - borderBlank_;
     float min = sliderPaintProperty->GetMin().value_or(0.0f);
@@ -161,10 +159,10 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     CHECK_NULL_VOID(sliderLength_ != 0);
     valueRatio_ = touchLength / sliderLength_;
     CHECK_NULL_VOID(stepRatio_ != 0);
-    valueRatio_ = std::round(valueRatio_ / stepRatio_) * stepRatio_;
+    valueRatio_ = NearEqual(valueRatio_, 1) ? 1 : std::round(valueRatio_ / stepRatio_) * stepRatio_;
     float oldValue = value_;
     value_ = valueRatio_ * (max - min) + min;
-    valueChangeFlag_ = NearEqual(oldValue, value_);
+    valueChangeFlag_ = !NearEqual(oldValue, value_);
 }
 
 void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -175,31 +173,27 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     direction_ = GetDirection();
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandlingGestureEvent(info);
-            pattern->FireChangeEvent(SliderChangeMode::Begin);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandlingGestureEvent(info);
+        pattern->FireChangeEvent(SliderChangeMode::Begin);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandlingGestureEvent(info);
-            pattern->FireChangeEvent(SliderChangeMode::Moving);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandlingGestureEvent(info);
+        pattern->FireChangeEvent(SliderChangeMode::Moving);
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandledGestureEvent();
-            pattern->FireChangeEvent(SliderChangeMode::End);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandledGestureEvent();
+        pattern->FireChangeEvent(SliderChangeMode::End);
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandledGestureEvent();
-            pattern->FireChangeEvent(SliderChangeMode::End);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandledGestureEvent();
+        pattern->FireChangeEvent(SliderChangeMode::End);
     };
     if (panEvent_) {
         gestureHub->RemovePanEvent(panEvent_);
@@ -217,10 +211,8 @@ void SliderPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        if (pattern) {
-            return pattern->OnKeyEvent(event);
-        }
-        return false;
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 }

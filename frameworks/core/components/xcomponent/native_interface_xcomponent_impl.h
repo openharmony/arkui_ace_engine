@@ -18,9 +18,18 @@
 
 #include <string>
 #include <unistd.h>
+#include <vector>
+
+#include "interfaces/native/native_interface_xcomponent.h"
 
 #include "base/memory/ace_type.h"
-#include "interfaces/native/native_interface_xcomponent.h"
+
+struct XComponentTouchPoint {
+    float tiltX = 0.0f;
+    float tiltY = 0.0f;
+    OH_NativeXComponent_TouchPointToolType sourceToolType =
+        OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_UNKNOWN;
+};
 
 namespace OHOS::Ace {
 class NativeXComponentImpl : public virtual AceType {
@@ -116,6 +125,11 @@ public:
         touchEvent_ = touchEvent;
     }
 
+    void SetTouchPoint(const std::vector<XComponentTouchPoint>& xComponentTouchPoints)
+    {
+        touchPoints_ = xComponentTouchPoints;
+    }
+
     void SetMouseEvent(const OH_NativeXComponent_MouseEvent mouseEvent)
     {
         mouseEvent_ = mouseEvent;
@@ -131,22 +145,38 @@ public:
         return mouseEvent_;
     }
 
-    void SetToolType(size_t pointIndex, OH_NativeXComponent_TouchPointToolType toolType) {}
+    void SetToolType(size_t pointIndex, OH_NativeXComponent_TouchPointToolType toolType)
+    {
+        if (pointIndex >= OH_MAX_TOUCH_POINTS_NUMBER || pointIndex >= touchPoints_.size()) {
+            return;
+        }
+        touchPoints_[pointIndex].sourceToolType = toolType;
+    }
 
     OH_NativeXComponent_TouchPointToolType GetToolType(size_t pointIndex) const
     {
-        return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_UNKNOWN;
+        if (pointIndex >= OH_MAX_TOUCH_POINTS_NUMBER || pointIndex >= touchPoints_.size()) {
+            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_UNKNOWN;
+        }
+        return touchPoints_[pointIndex].sourceToolType;
     }
 
     float GetTiltX(size_t pointIndex) const
     {
-        return 0.0;
+        if (pointIndex >= OH_MAX_TOUCH_POINTS_NUMBER || pointIndex >= touchPoints_.size()) {
+            return 0.0f;
+        }
+        return touchPoints_[pointIndex].tiltX;
     }
 
     float GetTiltY(size_t pointIndex) const
     {
-        return 0.0;
+        if (pointIndex >= OH_MAX_TOUCH_POINTS_NUMBER || pointIndex >= touchPoints_.size()) {
+            return 0.0f;
+        }
+        return touchPoints_[pointIndex].tiltY;
     }
+
 private:
     std::string xcomponentId_;
     void* window_ = nullptr;
@@ -158,8 +188,9 @@ private:
     OH_NativeXComponent_MouseEvent mouseEvent_;
     OH_NativeXComponent_Callback* callback_ = nullptr;
     OH_NativeXComponent_MouseEvent_Callback* mouseEventCallback_ = nullptr;
+    std::vector<XComponentTouchPoint> touchPoints_;
 };
-}
+} // namespace OHOS::Ace
 
 struct OH_NativeXComponent {
     explicit OH_NativeXComponent(OHOS::Ace::NativeXComponentImpl* xComponentImpl) : xcomponentImpl_(xComponentImpl) {}

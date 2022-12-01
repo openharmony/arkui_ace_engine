@@ -24,6 +24,7 @@
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -103,7 +104,8 @@ public:
 
     void SetPadding(const Dimension& value) override
     {
-        ViewAbstract::SetPadding(NG::CalcLength(value));
+        // padding must great or equal zero.
+        ViewAbstract::SetPadding(NG::CalcLength(value.IsNonNegative() ? value : Dimension()));
     }
 
     void SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
@@ -111,16 +113,16 @@ public:
     {
         NG::PaddingProperty paddings;
         if (top.has_value()) {
-            paddings.top = NG::CalcLength(top.value());
+            paddings.top = NG::CalcLength(top.value().IsNonNegative() ? top.value() : Dimension());
         }
         if (bottom.has_value()) {
-            paddings.bottom = NG::CalcLength(bottom.value());
+            paddings.bottom = NG::CalcLength(bottom.value().IsNonNegative() ? bottom.value() : Dimension());
         }
         if (left.has_value()) {
-            paddings.left = NG::CalcLength(left.value());
+            paddings.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : Dimension());
         }
         if (right.has_value()) {
-            paddings.right = NG::CalcLength(right.value());
+            paddings.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : Dimension());
         }
         ViewAbstract::SetPadding(paddings);
     }
@@ -205,10 +207,10 @@ public:
         const std::optional<BorderStyle>& styleTop, const std::optional<BorderStyle>& styleBottom) override
     {
         NG::BorderStyleProperty borderStyles;
-        borderStyles.styleLeft = styleLeft;
-        borderStyles.styleRight = styleRight;
-        borderStyles.styleTop = styleTop;
-        borderStyles.styleBottom = styleBottom;
+        borderStyles.styleLeft = styleLeft.value_or(BorderStyle::SOLID);
+        borderStyles.styleRight = styleRight.value_or(BorderStyle::SOLID);
+        borderStyles.styleTop = styleTop.value_or(BorderStyle::SOLID);
+        borderStyles.styleBottom = styleBottom.value_or(BorderStyle::SOLID);
         ViewAbstract::SetBorderStyle(borderStyles);
     }
 
@@ -568,7 +570,9 @@ public:
 
     void SetOnVisibleChange(
         std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) override
-    {}
+    {
+        ViewAbstract::SetOnVisibleChange(std::move(onVisibleChange), ratios);
+    }
 
     void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
@@ -655,106 +659,15 @@ public:
         ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 
-    void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc) override
-    {
-        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        GestureEventFunc event;
-        if (!params.empty()) {
-            event = [params, targetNode](GestureEvent& info) mutable {
-                auto position = NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
-                // menu already created
-                if (params.empty()) {
-                    NG::ViewAbstract::ShowMenu(targetNode->GetId(), position);
-                    return;
-                }
-                NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, position);
-                params.clear();
-            };
-        } else if (buildFunc) {
-            event = [builderFunc = std::move(buildFunc), targetNode](const GestureEvent& info) mutable {
-                CreateCustomMenu(builderFunc, targetNode, false,
-                    NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY()));
-            };
-        } else {
-            LOGE("empty param or null builder");
-            return;
-        }
-        auto gestureHub = targetNode->GetOrCreateGestureEventHub();
-        auto onClick = AceType::MakeRefPtr<NG::ClickEvent>(std::move(event));
-        gestureHub->AddClickEvent(onClick);
+    void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc) override;
 
-        // delete menu when target node is removed from render tree
-        auto eventHub = targetNode->GetEventHub<NG::EventHub>();
-        auto destructor = [id = targetNode->GetId()]() {
-            auto pipeline = NG::PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto overlayManager = pipeline->GetOverlayManager();
-            CHECK_NULL_VOID(overlayManager);
-            overlayManager->DeleteMenu(id);
-        };
-        eventHub->SetOnDisappear(destructor);
-    }
-
-    void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) override
-    {
-        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        CHECK_NULL_VOID(targetNode);
-        auto hub = targetNode->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(hub);
-
-        if (type == ResponseType::RIGHT_CLICK) {
-            OnMouseEventFunc event = [builder = std::move(buildFunc), weak = Referenced::WeakClaim(Referenced::RawPtr(
-                                                                          targetNode))](MouseInfo& info) mutable {
-                auto targetNode = weak.Upgrade();
-                if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
-                    CreateCustomMenu(builder, targetNode, true,
-                        NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY()));
-                    info.SetStopPropagation(true);
-                }
-            };
-            auto inputHub = targetNode->GetOrCreateInputEventHub();
-            CHECK_NULL_VOID(inputHub);
-            mouseCallback_ = AceType::MakeRefPtr<InputEvent>(std::move(event));
-            inputHub->AddOnMouseEvent(mouseCallback_);
-        } else if (type == ResponseType::LONGPRESS) {
-            // create or show menu on long press
-            auto event = [builder = std::move(buildFunc), weak = Referenced::WeakClaim(Referenced::RawPtr(targetNode))](
-                             const GestureEvent& info) mutable {
-                auto targetNode = weak.Upgrade();
-                CreateCustomMenu(builder, targetNode, true,
-                    NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY()));
-            };
-            auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
-
-            hub->SetLongPressEvent(longPress, false, true);
-        } else {
-            LOGE("The arg responseType is invalid.");
-            return;
-        }
-    }
+    void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) override;
 
     void SetAccessibilityGroup(bool accessible) override {}
     void SetAccessibilityText(const std::string& text) override {}
     void SetAccessibilityDescription(const std::string& description) override {}
     void SetAccessibilityImportance(const std::string& importance) override {}
 
-private:
-    static void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode,
-        bool isContextMenu, const NG::OffsetF& offset)
-    {
-        // builder already executed, just show menu
-        if (!buildFunc) {
-            NG::ViewAbstract::ShowMenu(targetNode->GetId(), offset, isContextMenu);
-            return;
-        }
-        NG::ScopedViewStackProcessor builderViewStackProcessor;
-        buildFunc();
-        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-        NG::ViewAbstract::BindMenuWithCustomNode(customNode, targetNode, isContextMenu, offset);
-        // nullify builder
-        buildFunc = nullptr;
-    }
-    RefPtr<InputEvent> mouseCallback_;
 };
 } // namespace OHOS::Ace::NG
 

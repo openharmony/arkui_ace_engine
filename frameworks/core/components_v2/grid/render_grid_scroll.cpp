@@ -372,7 +372,7 @@ void RenderGridScroll::SizeChangeOffset(double newWindowHeight)
             return;
         }
         auto position = textFieldManager->GetClickPosition().GetY();
-        double offset = newWindowHeight + GetGlobalPoint().GetY() - position;
+        double offset = newWindowHeight - position;
         if (LessOrEqual(offset, 0.0)) {
             // negative offset to scroll down
             textFieldOffset_ = offset;
@@ -767,7 +767,7 @@ void RenderGridScroll::CalculateViewPort()
             }
             // request new item until the blank is filled up
             blank -= BuildLazyGridLayout(*mainCount_, blank);
-            if (blank < 0) {
+            if (LessOrEqual(blank, 0)) {
                 return;
             }
             blank = blank - firstItemOffset_;

@@ -14,11 +14,19 @@
  */
 
 #include "core/image/image_source_info.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr uint32_t FILE_SUFFIX_LEN = 4;
+} // namespace
+
 bool ImageSourceInfo::IsSVGSource(const std::string& src, InternalResource::ResourceId resourceId)
 {
-    return false;
+    // 4 is the length of ".svg".
+    return (src.size() > FILE_SUFFIX_LEN && src.substr(src.size() - FILE_SUFFIX_LEN) == ".svg") ||
+           (src.empty() && resourceId > InternalResource::ResourceId::SVG_START &&
+               resourceId < InternalResource::ResourceId::SVG_END);
 }
 
 bool ImageSourceInfo::IsPngSource(const std::string& src, InternalResource::ResourceId resourceId)
@@ -52,26 +60,53 @@ SrcType ImageSourceInfo::ResolveSrcType() const
     return SrcType::FILE;
 }
 
-void ImageSourceInfo::SetFillColor(const Color& color) {}
+void ImageSourceInfo::SetFillColor(const Color& color)
+{
+    fillColor_.emplace(color.GetValue());
+}
 
 bool ImageSourceInfo::operator==(const ImageSourceInfo& info) const
 {
-    return true;
+    // only svg uses fillColor
+    if (isSvg_ && fillColor_ != info.fillColor_) {
+        return false;
+    }
+    if (sourceWidth_ != info.sourceWidth_ || sourceHeight_ != info.sourceHeight_) {
+        return false;
+    }
+    return ((!pixmap_ && !info.pixmap_) || (pixmap_ && info.pixmap_ && pixmap_ == info.pixmap_)) && src_ == info.src_ &&
+           resourceId_ == info.resourceId_;
 }
 
 bool ImageSourceInfo::operator!=(const ImageSourceInfo& info) const
 {
-    return true;
+    return !(operator==(info));
 }
 
-void ImageSourceInfo::SetSrc(const std::string& src, std::optional<Color> fillColor) {}
+void ImageSourceInfo::SetSrc(const std::string& src, std::optional<Color> fillColor)
+{
+    src_ = src;
+    srcType_ = ResolveURIType(src_);
+    resourceId_ = InternalResource::ResourceId::NO_ID;
+    isSvg_ = IsSVGSource(src_, resourceId_);
+    fillColor_ = fillColor;
+    pixmap_ = nullptr;
+}
 
 const std::string& ImageSourceInfo::GetSrc() const
 {
     return src_;
 }
 
-void ImageSourceInfo::SetResourceId(InternalResource::ResourceId id, std::optional<Color> fillColor) {}
+void ImageSourceInfo::SetResourceId(InternalResource::ResourceId id, std::optional<Color> fillColor)
+{
+    resourceId_ = id;
+    srcType_ = SrcType::RESOURCE_ID;
+    src_.clear();
+    isSvg_ = IsSVGSource(src_, resourceId_);
+    fillColor_ = fillColor;
+    pixmap_ = nullptr;
+}
 
 InternalResource::ResourceId ImageSourceInfo::GetResourceId() const
 {
@@ -82,7 +117,7 @@ void ImageSourceInfo::SetPixMap(const RefPtr<PixelMap>& pixmap, std::optional<Co
 
 bool ImageSourceInfo::IsInternalResource() const
 {
-    return true;
+    return src_.empty() && resourceId_ != InternalResource::ResourceId::NO_ID && !pixmap_;
 }
 
 bool ImageSourceInfo::IsValid() const

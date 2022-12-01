@@ -20,7 +20,7 @@
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT DividerPaintMethod : public NodePaintMethod {
@@ -32,7 +32,7 @@ public:
     ~DividerPaintMethod() override = default;
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, nullptr);
         auto theme = pipeline->GetTheme<DividerTheme>();
         CHECK_NULL_RETURN(theme, nullptr);

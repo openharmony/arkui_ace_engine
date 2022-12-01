@@ -58,7 +58,7 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentHeight = contentSize.Height();
     }
     if (!frameSize.Height().has_value()) {
-        frameSize.SetHeight(std::max(GetTextFieldDefaultHeight(), contentHeight));
+        frameSize.SetHeight(std::min(GetTextFieldDefaultHeight(), contentHeight));
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
     frameRect_ =
@@ -80,12 +80,14 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(pattern, std::nullopt);
     TextStyle textStyle;
     std::string textContent;
+    bool showPlaceHolder = false;
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
         UpdateTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle);
         textContent = textFieldLayoutProperty->GetValueValue("");
     } else {
         UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle);
         textContent = textFieldLayoutProperty->GetPlaceholderValue("");
+        showPlaceHolder = true;
     }
     CreateParagraph(textStyle, textContent);
 
@@ -96,9 +98,9 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         imageSize = std::min(imageSize, contentConstraint.selfIdealSize.Height().value());
     }
     auto horizontalPaddingSum = pattern->GetHorizontalPaddingSum();
-    if (textStyle.GetMaxLines() == 1) {
+    if (textStyle.GetMaxLines() == 1 && !showPlaceHolder) {
         // for text input case, need to measure in one line without constraint.
-        paragraph_->Layout(Infinity<float>());
+        paragraph_->Layout(std::numeric_limits<double>::infinity());
     } else {
         // for text area, max width is content width without password icon
         paragraph_->Layout(contentConstraint.maxSize.Width() - horizontalPaddingSum);
@@ -107,14 +109,16 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
         paragraph_->Layout(std::ceil(paragraphNewWidth));
     }
-    auto height = std::min(static_cast<float>(paragraph_->GetHeight()), contentConstraint.maxSize.Height());
+    auto preferredHeight = static_cast<float>(paragraph_->GetHeight());
+    if (textContent.empty()) {
+        preferredHeight = pattern->PreferredLineHeight();
+    }
+
     // check password image size.
     if (!showPasswordIcon) {
-        textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), height));
+        textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
         imageRect_.SetSize(SizeF());
-        auto contentSize = contentConstraint.maxSize;
-        MinusPaddingToSize(pattern->GetUtilPadding(), contentSize);
-        return SizeF(contentSize.Width(), height);
+        return SizeF(contentConstraint.maxSize.Width() - horizontalPaddingSum, preferredHeight);
     }
 
     float imageHeight = 0.0f;
@@ -129,12 +133,12 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         imageRect_.SetSize(SizeF(0.0f, 0.0f));
         return SizeF(contentConstraint.maxSize.Width(), imageHeight);
     }
-    height = std::min(static_cast<float>(paragraph_->GetHeight()), contentConstraint.maxSize.Height());
+    preferredHeight = std::min(static_cast<float>(paragraph_->GetHeight()), contentConstraint.maxSize.Height());
     textRect_.SetSize(SizeF(std::min(static_cast<float>(paragraph_->GetLongestLine()),
                                 contentConstraint.maxSize.Width() - horizontalPaddingSum - imageSize),
-        static_cast<float>(height)));
+        static_cast<float>(preferredHeight)));
     imageRect_.SetSize(SizeF(imageSize, imageSize));
-    return SizeF(contentConstraint.maxSize.Width(), std::max(imageSize, height));
+    return SizeF(contentConstraint.maxSize.Width(), std::max(imageSize, preferredHeight));
 }
 
 void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -151,6 +155,9 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto textRectOffsetX = pattern->GetPaddingLeft();
     auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
+    auto context = layoutWrapper->GetHostNode()->GetContext();
+    CHECK_NULL_VOID(context);
+    parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
         case TextAlign::START:
             break;
@@ -186,7 +193,15 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
-    textStyle.SetFontSize(layoutProperty->GetFontSizeValue(theme ? theme->GetFontSize() : textStyle.GetFontSize()));
+
+    Dimension fontSize;
+    if (layoutProperty->HasFontSize() && layoutProperty->GetFontSizeValue(Dimension()).IsNonNegative()) {
+        fontSize = layoutProperty->GetFontSizeValue(Dimension());
+    } else {
+        fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();
+    }
+    textStyle.SetFontSize(fontSize);
+
     textStyle.SetFontWeight(
         layoutProperty->GetFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
     textStyle.SetTextColor(layoutProperty->GetTextColorValue(theme ? theme->GetTextColor() : textStyle.GetTextColor()));
@@ -206,8 +221,14 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
-    textStyle.SetFontSize(
-        layoutProperty->GetPlaceholderFontSizeValue(theme ? theme->GetFontSize() : textStyle.GetFontSize()));
+    Dimension fontSize;
+    if (layoutProperty->HasPlaceholderFontSize() &&
+        layoutProperty->GetPlaceholderFontSizeValue(Dimension()).IsNonNegative()) {
+        fontSize = layoutProperty->GetPlaceholderFontSizeValue(Dimension());
+    } else {
+        fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();
+    }
+    textStyle.SetFontSize(fontSize);
     textStyle.SetFontWeight(
         layoutProperty->GetPlaceholderFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
     textStyle.SetTextColor(

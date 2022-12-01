@@ -73,7 +73,6 @@ void TextFieldModelNG::CreateNode(
     auto radius = textFieldTheme->GetBorderRadius();
     SetCaretColor(textFieldTheme->GetCursorColor());
     // TODO: basic padding check ux
-    pattern->SetBasicPaddingLeft(static_cast<float>(radius.GetX().ConvertToPx() / 2.0f));
     pattern->InitEditingValueText(textFieldLayoutProperty->GetValueValue(""));
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
@@ -102,6 +101,12 @@ RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextArea(
 
 void TextFieldModelNG::SetType(TextInputType value)
 {
+    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    if (layoutProperty->HasTextInputType() && layoutProperty->GetTextInputTypeValue() != value) {
+        layoutProperty->UpdateTypeChanged(true);
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextInputType, value);
 }
 
@@ -112,7 +117,7 @@ void TextFieldModelNG::SetPlaceholderColor(const Color& value)
 
 void TextFieldModelNG::SetPlaceholderFont(const Font& value)
 {
-    if (value.fontSize.has_value() && value.fontSize.value().IsNonNegative()) {
+    if (value.fontSize.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderFontSize, value.fontSize.value());
     }
     if (value.fontStyle) {
@@ -153,9 +158,6 @@ void TextFieldModelNG::SetMaxLines(uint32_t value)
 }
 void TextFieldModelNG::SetFontSize(const Dimension& value)
 {
-    if (value.IsNegative()) {
-        return;
-    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontSize, value);
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredLineHeightNeedToUpdate, true);
 }

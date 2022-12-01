@@ -11,7 +11,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ *  * ViewPU - View for Partial Update
+ *  
+* all definitions in this file are framework internal
+*/
+
+/**
+ * WeakRef
+ * ref to an Object that does not prevent the Object from getting GC'ed
+ * current version of tsc does not know about WeakRef
+ * but Ark runtime supports it
+ *
  */
+declare class WeakRef<T extends Object> {
+  constructor(o: T);
+  deref(): T;
+}
 
 type ProvidedVarsMapPU = Map<string, ObservedPropertyAbstractPU<any>>;
 
@@ -27,7 +43,15 @@ type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
 abstract class ViewPU extends NativeViewPartialUpdate
   implements IViewPropertiesChangeSubscriber {
 
+  // Array.sort() converts array items to string to compare them, sigh!
+  static readonly compareNumber = (a: number, b: number): number => {
+    return (a < b) ? -1 : (a > b) ? 1 : 0;
+  };
+
   private id_: number;
+
+  private parent_: ViewPU = undefined;
+  private childrenWeakrefMap_ = new Map<number, WeakRef<ViewPU>>();
 
   private watchedProps: Map<string, (propName: string) => void>
     = new Map<string, (propName: string) => void>();
@@ -83,9 +107,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
    *    - localStorage do not specify, will inherit from parent View.
    *
   */
-  constructor(parent: ViewPU, localStorage?: LocalStorage) {
+  constructor(parent: ViewPU, localStorage: LocalStorage, elmtId : number = -1) {
     super();
-    this.id_ = SubscriberManager.Get().MakeId();
+    // if set use the elmtId also as the ViewPU object's subscribable id.
+    // these matching is requiremrnt for updateChildViewById(elmtId) being able to
+    // find the child ViewPU object by given elmtId
+    this.id_= elmtId == -1 ? SubscriberManager.MakeId() : elmtId;
     this.providedVars_ = parent ? new Map(parent.providedVars_)
       : new Map<string, ObservedPropertyAbstractPU<any>>();
 
@@ -95,12 +122,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
       stateMgmtConsole.debug(`${this.constructor.name} constructor: Using LocalStorage instance of the parent View.`);
       this.setCardId(parent.getCardId());
       this.localStorage_ = parent.localStorage_;
+      parent.addChild(this);
     } else if (localStorage) {
       this.localStorage_ = localStorage;
       stateMgmtConsole.debug(`${this.constructor.name} constructor: Using LocalStorage instance provided via @Entry.`);
     }
 
-    SubscriberManager.Get().add(this);
+    SubscriberManager.Add(this);
     stateMgmtConsole.debug(`${this.constructor.name}(${this.id__()}): constructor done`);
   }
 
@@ -130,14 +158,127 @@ abstract class ViewPU extends NativeViewPartialUpdate
     this.updateFuncByElmtId.clear();
     this.watchedProps.clear();
     this.providedVars_.clear();
+    if (this.parent_) {
+      this.parent_.removeChild(this);
+    }
+  }
+
+  private setParent(parent: ViewPU) {
+    if (this.parent_ && parent) {
+      stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).setChild: changing parent to '${parent.constructor.name}', id ${parent.id__()} (unsafe operation)`);
+    }
+    this.parent_ = parent;
+  }
+
+  /**
+   * add given child and set 'this' as its parent
+   * @param child child to add
+   * @returns returns false if child with given child's id already exists
+   * 
+   * framework internal function
+   * Note: Use of WeakRef ensures child and parent do not generate a cycle dependency.
+   * The add. Set<ids> is required to reliably tell what children still exist.
+   */
+  public addChild(child: ViewPU): boolean {
+    if (this.childrenWeakrefMap_.has(child.id__())) {
+      stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).addChild '${child.constructor.name}' id already exists ${child.id__()} !`);
+      return false;
+    }
+    this.childrenWeakrefMap_.set(child.id__(), new WeakRef(child));
+    child.setParent(this);
+    return true;
+  }
+
+  /**
+   * remove given child and remove 'this' as its parent
+   * @param child child to add
+   * @returns returns false if child with given child's id does not exist
+   */
+  public removeChild(child: ViewPU): boolean {
+    const hasBeenDeleted = this.childrenWeakrefMap_.delete(child.id__());
+    if (!hasBeenDeleted) {
+      stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).removeChild '${child.constructor.name}', child id ${child.id__()} not known!`);
+    } else {
+      child.setParent(undefined);
+    }
+    return hasBeenDeleted;
+  }
+
+  /**
+   * Retrieve child by given id
+   * @param id 
+   * @returns child if in map and weak ref can still be downreferenced
+   */
+  public getChildById(id: number) {
+    const childWeakRef = this.childrenWeakrefMap_.get(id);
+    return childWeakRef ? childWeakRef.deref() : undefined;
   }
 
   protected abstract purgeVariableDependenciesOnElmtId(removedElmtId: number);
   protected abstract initialRender(): void;
   protected abstract rerender(): void;
+  protected updateStateVars(params: {}) : void {
+    stateMgmtConsole.warn("ViewPU.updateStateVars unimplemented. Pls upgrade to latest eDSL transpiler version.")
+  }
 
   protected initialRenderView(): void {
     this.initialRender();
+  }
+
+  /**
+   * force a complete rerender / update by executing all update functions
+   * exec a regular rerender first
+   * 
+   * @param deep recurse all children as well
+   * 
+   * framework internal functions, apps must not call
+   */
+  public forceCompleteRerender(deep: boolean = false): void {
+    stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).forceCompleteRerender - start.`);
+
+    // request list of all (gloabbly) deleted elmtIds;
+    let deletedElmtIds: number[] = [];
+    this.getDeletedElemtIds(deletedElmtIds);
+
+    // see which elmtIds are managed by this View
+    // and clean up all book keeping for them
+    this.purgeDeletedElmtIds(deletedElmtIds);
+
+    Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => {
+      const updateFunc: UpdateFunc = this.updateFuncByElmtId.get(elmtId);
+      if (updateFunc == undefined) {
+        stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
+      } else {
+        updateFunc(elmtId, /* isFirstRender */ false);
+        this.finishUpdateFunc(elmtId);
+      }
+    });
+
+    if (deep) {
+      this.childrenWeakrefMap_.forEach((weakRefChild: WeakRef<ViewPU>) => {
+        const child = weakRefChild.deref();
+        if (child) {
+          (child as ViewPU).forceCompleteRerender(true);
+        }
+      });
+    }
+    stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).forceCompleteRerender - end`);
+  }
+
+  public updateStateVarsOfChildByElmtId(elmtId, params: Object) : void {
+    stateMgmtConsole.debug(`ViewPU('${this.constructor.name}', ${this.id__()}).updateChildViewById(${elmtId}) - start`);
+
+    if (elmtId<0) {
+      stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).updateChildViewById(${elmtId}) - invalid elmtId - internal error!`);
+      return ;
+    }
+    let child : ViewPU = this.getChildById(elmtId);
+    if (!child) {
+      stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).updateChildViewById(${elmtId}) - no child with this elmtId - internal error!`);
+      return;
+    }
+    child.updateStateVars(params);
+    stateMgmtConsole.debug(`ViewPU('${this.constructor.name}', ${this.id__()}).updateChildViewById(${elmtId}) - end`);
   }
 
   // implements IMultiPropertiesChangeSubscriber
@@ -145,7 +286,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}'. View needs ${dependentElmtIds.size ? 'update' : 'no update'}.`);
     this.syncInstanceId();
 
-    if (dependentElmtIds.size) {
+    if (dependentElmtIds.size && !this.isFirstRender()) {
       if (!this.dirtDescendantElementIds_.size) {
         // mark Composedelement dirty when first elmtIds are added
         // do not need to do this every time
@@ -241,12 +382,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       return;
     }
 
-    // Array.sort() converts array items to string to compare them, sigh!
-    var compareNumber = (a: number, b: number): number => {
-      return (a < b) ? -1 : (a > b) ? 1 : 0;
-    };
-
-    stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}:  updateDirtyElements: sorted dirty elmtIds: ${JSON.stringify(Array.from(this.dirtDescendantElementIds_).sort(compareNumber))}, starting ....`);
+    stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}:  updateDirtyElements: sorted dirty elmtIds: ${JSON.stringify(Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber))}, starting ....`);
 
     // request list of all (gloabbly) deleteelmtIds;
     let deletedElmtIds: number[] = [];
@@ -259,7 +395,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     // process all elmtIds marked as needing update in ascending order.
     // ascending order ensures parent nodes will be updated before their children
     // prior cleanup ensure no already deleted Elements have their update func executed
-    Array.from(this.dirtDescendantElementIds_).sort(compareNumber).forEach(elmtId => {
+    Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
       // do not process an Element that has been marked to be deleted
       const updateFunc: UpdateFunc = this.updateFuncByElmtId.get(elmtId);
       if (updateFunc == undefined) {

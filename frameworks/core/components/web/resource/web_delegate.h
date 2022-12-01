@@ -354,6 +354,8 @@ public:
     RefPtr<PixelMap> GetDragPixelMap();
     std::string GetUrl();
     void UpdateLocale();
+    void OnInactive();
+    void OnActive();
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -426,8 +428,6 @@ private:
     void AddJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList);
     void RemoveJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList);
     void SetWebViewJavaScriptResultCallBack(const WebController::JavaScriptCallBackImpl&& javaScriptCallBackImpl);
-    void OnInactive();
-    void OnActive();
     void Zoom(float factor);
     bool ZoomIn();
     bool ZoomOut();
@@ -465,6 +465,7 @@ private:
     void UpdateSettting(bool useNewPipe = false);
 
 #if defined(ENABLE_ROSEN_BACKEND)
+    std::string GetCustomScheme();
     void InitWebViewWithSurface(sptr<Surface> surface);
 #endif
 #endif

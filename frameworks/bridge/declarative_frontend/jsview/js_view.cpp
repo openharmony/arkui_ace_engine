@@ -141,8 +141,11 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
-        if (jsView->viewNode_.Invalid() && jsView->jsViewFunction_) {
-            jsView->jsViewFunction_->ExecuteAppear();
+        if (jsView->viewNode_.Invalid()) {
+            if (jsView->jsViewFunction_) {
+                jsView->jsViewFunction_->ExecuteAppear();
+            }
+            jsView->isAboutToAppearProcessed_ = true;
         }
     };
 
@@ -169,9 +172,18 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
         }
     };
 
+    auto removeFunction = [weak = AceType::WeakClaim(this)]() -> void {
+        auto jsView = weak.Upgrade();
+        if (jsView) {
+            jsView->Destroy(nullptr);
+            jsView->viewNode_.Reset();
+        }
+    };
+
     NodeInfo info = { .viewId = viewId_,
         .appearFunc = std::move(appearFunc),
         .renderFunc = std::move(renderFunction),
+        .removeFunc = std::move(removeFunction),
         .updateNodeFunc = std::move(updateViewNodeFunction),
         .isStatic = IsStatic() };
 
@@ -204,9 +216,10 @@ void JSViewFullUpdate::Destroy(JSView* parentCustomView)
 {
     LOGD("JSViewFullUpdate::Destroy start");
     DestroyChild(parentCustomView);
-    {
+    if (isAboutToAppearProcessed_) {
         ACE_SCORING_EVENT("Component[" + viewId_ + "].Disappear");
         jsViewFunction_->ExecuteDisappear();
+        isAboutToAppearProcessed_ = false;
     }
     {
         ACE_SCORING_EVENT("Component[" + viewId_ + "].AboutToBeDeleted");
@@ -266,22 +279,38 @@ void JSViewFullUpdate::FindChildById(const JSCallbackInfo& info)
 void JSViewFullUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
 {
     std::string viewId = info[0]->ToString();
-    if (id_ == viewId) {
+    if (viewId_ == viewId) {
         info.SetReturnValue(this);
         return;
     }
-    for (auto i : customViewChildren_) {
-        std::string childId = i.first;
-        auto pos = i.first.find_last_of('_');
-        if (pos != std::string::npos) {
-            childId = i.first.substr(pos + 1);
-        }
-        if (childId == viewId) {
-            info.SetReturnValue(i.second);
-            return;
+    JSRef<JSObject> targetView = JSRef<JSObject>::New();
+    for (auto&& child : customViewChildren_) {
+        if (GetChildByViewId(viewId, child.second, targetView)) {
+            break;
         }
     }
-    LOGE("find child failed %{public}s", viewId.c_str());
+    auto view = targetView->Unwrap<JSViewFullUpdate>();
+    if (view) {
+        LOGD("find targetView success");
+        info.SetReturnValue(targetView);
+    }
+    return;
+}
+
+bool JSViewFullUpdate::GetChildByViewId(
+    const std::string& viewId, JSRef<JSObject>& childView, JSRef<JSObject>& targetView)
+{
+    auto* view = childView->Unwrap<JSViewFullUpdate>();
+    if (view && view->viewId_ == viewId) {
+        targetView = childView;
+        return true;
+    }
+    for (auto&& child : view->customViewChildren_) {
+        if (GetChildByViewId(viewId, child.second, targetView)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void JSViewFullUpdate::ConstructorCallback(const JSCallbackInfo& info)
@@ -517,6 +546,13 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         jsView->pendingUpdateTasks_.clear();
     };
 
+    auto reloadFunction = [weak = AceType::WeakClaim(this)](bool deep) {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
+        jsView->jsViewFunction_->ExecuteReload(deep);
+    };
+
     auto pageTransitionFunction = [weak = AceType::WeakClaim(this)]() {
         auto jsView = weak.Upgrade();
         if (!jsView || !jsView->jsViewFunction_) {
@@ -549,6 +585,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         .removeFunc = std::move(removeFunction),
         .updateNodeFunc = std::move(updateViewNodeFunction),
         .pageTransitionFunc = std::move(pageTransitionFunction),
+        .reloadFunc = std::move(reloadFunction),
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout(),
         .isStatic = IsStatic() };
 
@@ -651,6 +688,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
         "deletedElmtIdsHaveBeenPurged", &JSViewPartialUpdate::JsDeletedElmtIdsHaveBeenPurged);
     JSClass<JSViewPartialUpdate>::Method("elmtIdExists", &JSViewPartialUpdate::JsElementIdExists);
     JSClass<JSViewPartialUpdate>::CustomMethod("isLazyItemRender", &JSViewPartialUpdate::JSGetProxiedItemRenderState);
+    JSClass<JSViewPartialUpdate>::CustomMethod("isFirstRender", &JSViewPartialUpdate::IsFirstRender);
     JSClass<JSViewPartialUpdate>::Inherit<JSViewAbstract>();
     JSClass<JSViewPartialUpdate>::Bind(object, ConstructorCallback, DestructorCallback);
 }
@@ -746,6 +784,11 @@ void JSViewPartialUpdate::JSGetProxiedItemRenderState(const JSCallbackInfo& info
 
     // set boolean return value to JS
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
+void JSViewPartialUpdate::IsFirstRender(const JSCallbackInfo& info)
+{
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(isFirstRender_)));
 }
 
 } // namespace OHOS::Ace::Framework

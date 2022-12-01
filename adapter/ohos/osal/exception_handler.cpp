@@ -14,6 +14,7 @@
  */
 
 #include "base/log/exception_handler.h"
+#include "base/utils/utils.h"
 
 #include "app_mgr_client.h"
 #include "application_data_manager.h"
@@ -24,10 +25,7 @@ namespace OHOS::Ace {
 static void KillApplicationByUid()
 {
     auto appMgrClient = std::make_unique<AppExecFwk::AppMgrClient>();
-    if (appMgrClient == nullptr) {
-        LOGE("failed to get appMgrClient");
-        return;
-    }
+    CHECK_NULL_VOID(appMgrClient);
     auto result = appMgrClient->ConnectAppMgrService();
     if (result != AppExecFwk::AppMgrResultCode::RESULT_OK) {
         LOGE("failed to ConnectAppMgrService %{public}d", result);

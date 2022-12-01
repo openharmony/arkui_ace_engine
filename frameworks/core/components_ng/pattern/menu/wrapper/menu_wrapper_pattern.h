@@ -51,7 +51,6 @@ public:
 
 private:
     void OnModifyDone() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
     void HideMenu(const RefPtr<FrameNode>& menu) const;
 

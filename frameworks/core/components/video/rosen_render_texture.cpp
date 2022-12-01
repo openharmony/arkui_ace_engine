@@ -72,9 +72,8 @@ void RosenRenderTexture::SyncGeometryProperties()
     }
 
     auto offset = GetPaintOffset() + Offset(alignmentX_, alignmentY_);
-    auto size = drawSize_ - Size(0.0, controlsHeight_);
-    rsNode->SetBounds(offset.GetX(), offset.GetY(), size.Width(), size.Height());
-    LOGI("SetBounds position: %{public}s, size: %{public}s", offset.ToString().c_str(), size.ToString().c_str());
+    rsNode->SetBounds(offset.GetX(), offset.GetY(), drawSize_.Width(), drawSize_.Height());
+    LOGI("SetBounds position: %{public}s, size: %{public}s", offset.ToString().c_str(), drawSize_.ToString().c_str());
 }
 
 void RosenRenderTexture::InitGaussianFuzzyParas()

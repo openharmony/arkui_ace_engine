@@ -18,30 +18,115 @@ import(
 
 ohos_unittest("ability_component_pattern_test_ng") {
   module_out_path = "$test_output_path/ability_component"
+  include_dirs = [
+    "//third_party/flutter/skia/src",
+    "//third_party/jsoncpp/include",
+    "//third_party/bounds_checking_function/include",
+    "//base/account/os_account/interfaces/innerkits/osaccount/native/include",
+    "//foundation/window/window_manager/interfaces/innerkits/extension",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include/draw",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+    "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
+    "//foundation/multimodalinput/input/interfaces/native/innerkits/proxy/include",
+    "//foundation/ability/ability_runtime/interfaces/inner_api/ability_manager/include",
+    "//foundation/barrierfree/accessibility/services/aams/test/mock/include",
+  ]
+  sources = [
+    # inner
+    "$ace_root/adapter/ohos/capability/window_connection_ng/window_extension_connection_ohos_ng.cpp",
+    "$ace_root/adapter/ohos/capability/window_connection_ng/window_extension_connection_proxy_ng.cpp",
+    "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/frameworks/base/geometry/dimension.cpp",
+    "$ace_root/frameworks/base/geometry/matrix4.cpp",
+    "$ace_root/frameworks/base/json/json_util.cpp",
+    "$ace_root/frameworks/base/utils/string_utils.cpp",
+    "$ace_root/frameworks/core/animation/scheduler.cpp",
 
-  sources = [ "ability_component_pattern_test_ng.cpp" ]
+    # common
+    "$ace_root/frameworks/core/common/ace_application_info.cpp",
+    "$ace_root/frameworks/core/common/ace_engine.cpp",
+    "$ace_root/frameworks/core/common/container.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
+    "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/frameworks/core/components_ng/event/event_hub.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ability_component/ability_component_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ability_component/ability_component_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ability_component/ability_component_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
+    "$ace_root/frameworks/core/components_ng/property/property.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_render_context.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/skia_decoration_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/border_image_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/render/drawing_prop_convertor.cpp",
+    "$ace_root/frameworks/core/components_ng/render/render_context.cpp",
+    "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
 
+    # mock
+    "$ace_root/frameworks/core/components_ng/test/mock/base/mock_frame_node.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/base/mock_localization.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/base/mock_ui_node.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/base/mock_view_stack_processor.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/layout/mock_box_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/layout/mock_layout_property.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/ability_component/mock_window_connection.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/mock_pattern.h",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_property.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_rosen_modier_adapter.cpp",
+    "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
+    "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
+    "//foundation/barrierfree/accessibility/services/aams/test/mock/src/mock_os_account_manager.cpp",
+
+    # self
+    "ability_component_pattern_test_ng.cpp",
+  ]
+
+  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps += [
+    "ability_base:want",
+    "ability_runtime:ability_manager",
+    "hitrace_native:hitrace_meter",
+    "input:libmmi-client",
+    "ipc:ipc_core",
+    "window_manager:libwindow_extension_client",
+  ]
   deps = [
-    "$ace_root/adapter/ohos/capability:ace_capability_ohos",
-    "$ace_root/build:ace_ohos_unittest_base",
-    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+    "$ace_flutter_engine_root/skia:ace_skia_ohos",
+    "$cjson_root:cjson_static",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/window/window_manager/wm:libwm",
+    "//third_party/googletest:gmock_main",
   ]
 
   configs = [
-    ":config_ability_component_test",
+    "$ace_root:ace_test_config",
+    "$ace_root:ace_test_coverage_config",
     "$ace_root:ace_config",
-  ]
-}
-
-config("config_ability_component_test") {
-  visibility = [ ":*" ]
-  include_dirs = [
+    "$ace_flutter_engine_root:flutter_config",
+    "$ace_flutter_engine_root/skia:skia_config",
     "//commonlibrary/c_utils/base:utils_config",
-    "$ace_root",
-    "$ace_root/frameworks",
+    "//foundation/graphic/graphic_2d/utils/buffer_handle:buffer_handle_public_config",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:export_config",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text_config",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config",
+    "//foundation/window/window_manager/extension/extension_connection:libwindow_extension_client_private_config",
+    "//foundation/window/window_manager/extension/extension_connection:libextension_connection_public_config",
+    "//foundation/window/window_manager/resources/config/build:coverage_flags",
+    "//foundation/barrierfree/accessibility/frameworks/aafwk/test:module_private_config",
+  ]
+  defines = [
+    "ENABLE_ROSEN_BACKEND",
+    "OS_ACCOUNT_EXISTS",
   ]
 }
-
 group("ability_component_pattern_unit_test") {
   testonly = true
   deps = [ ":ability_component_pattern_test_ng" ]

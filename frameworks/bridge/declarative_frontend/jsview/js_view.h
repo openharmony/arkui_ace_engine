@@ -127,6 +127,7 @@ public:
 protected:
     RefPtr<ViewFunctions> jsViewFunction_;
     bool needsUpdate_ = false;
+    bool isAboutToAppearProcessed_ = false;
 
     WeakPtr<AceType> viewNode_;
     // view id for custom view itself
@@ -173,6 +174,7 @@ public:
 
     void FindChildById(const JSCallbackInfo& info);
     void FindChildByIdForPreview(const JSCallbackInfo& info);
+    bool GetChildByViewId(const std::string& viewId, JSRef<JSObject>& childView, JSRef<JSObject>& targetView);
 
     void ExecuteUpdateWithValueParams(const std::string& jsonData) override
     {
@@ -304,6 +306,8 @@ public:
     {
         return false;
     }
+
+    void IsFirstRender(const JSCallbackInfo& info);
 
 private:
     void MarkNeedUpdate() override;

@@ -67,7 +67,18 @@ void OnTextChangedListenerImpl::DeleteForward(int32_t length)
     PostTaskToUI(task);
 }
 
-void OnTextChangedListenerImpl::SetKeyboardStatus(bool status) {}
+void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
+{
+    LOGI("[OnTextChangedListenerImpl] SetKeyboardStatus status: %{public}d", status);
+    auto task = [textField = pattern_, status] {
+        auto client = textField.Upgrade();
+        if (client) {
+            ContainerScope scope(client->GetInstanceId());
+            client->SetInputMethodStatus(status);
+        }
+    };
+    PostTaskToUI(task);
+}
 
 void OnTextChangedListenerImpl::SendKeyEventFromInputMethod(const MiscServices::KeyEvent& event) {}
 
@@ -80,6 +91,7 @@ void OnTextChangedListenerImpl::HandleKeyboardStatus(MiscServices::KeyboardStatu
 
 void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey functionKey)
 {
+    LOGI("[OnTextChangedListenerImpl] Handle function key %{public}d", static_cast<int32_t>(functionKey));
     auto task = [textField = pattern_, functionKey] {
         auto client = textField.Upgrade();
         if (!client) {
@@ -106,6 +118,7 @@ void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey func
 
 void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
 {
+    LOGI("[OnTextChangedListenerImpl] move cursor %{public}d", static_cast<int32_t>(direction));
     auto task = [textField = pattern_, direction] {
         auto client = textField.Upgrade();
         if (!client) {

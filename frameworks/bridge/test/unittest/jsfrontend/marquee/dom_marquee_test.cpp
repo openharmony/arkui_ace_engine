@@ -18,6 +18,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/common/dom/dom_marquee.h"
 #include "frameworks/bridge/test/unittest/jsfrontend/dom_node_factory.h"
@@ -149,7 +150,7 @@ HWTEST_F(DomMarqueeTest, DomMarqueeCreateFromDsl002, TestSize.Level1)
     EXPECT_EQ(marquee->GetValue(), "");
 
     const auto& textStyle = marquee->GetTextStyle();
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     auto themeConstants = themeManager->GetThemeConstants();
     ASSERT_NE(themeConstants, nullptr);
     EXPECT_EQ(textStyle.GetTextColor().GetValue(), themeConstants->GetColor(THEME_OHOS_COLOR_TEXT_PRIMARY).GetValue());

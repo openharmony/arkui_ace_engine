@@ -17,14 +17,17 @@
 
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
-ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& sourceInfo, const LoadNotifier& loadNotifier)
+ImageLoadingContext::ImageLoadingContext(
+    const ImageSourceInfo& sourceInfo, const LoadNotifier& loadNotifier, bool syncLoad)
     : sourceInfo_(sourceInfo), loadNotifier_(loadNotifier),
-      loadCallbacks_(GenerateDataReadyCallback(), GenerateLoadSuccessCallback(), GenerateLoadFailCallback())
+      loadCallbacks_(GenerateDataReadyCallback(), GenerateLoadSuccessCallback(), GenerateLoadFailCallback()),
+      syncLoad_(syncLoad)
 {
     stateManager_ = MakeRefPtr<ImageStateManager>();
     RegisterStateChangeCallbacks();
@@ -88,10 +91,15 @@ void ImageLoadingContext::RestoreLoadingParams()
 EnterStateTask ImageLoadingContext::CreateOnDataLoadingTask()
 {
     auto task = [weakCtx = WeakClaim(this)]() {
-        auto imageLoadingContext = weakCtx.Upgrade();
-        CHECK_NULL_VOID(imageLoadingContext);
-        ImageProvider::CreateImageObject(imageLoadingContext->sourceInfo_, imageLoadingContext->loadCallbacks_,
-            imageLoadingContext->GetSvgFillColor());
+        auto loadingCtx = weakCtx.Upgrade();
+        CHECK_NULL_VOID(loadingCtx);
+        if (loadingCtx->syncLoad_) {
+            SyncImageProvider::CreateImageObject(
+                loadingCtx->sourceInfo_, loadingCtx->loadCallbacks_, loadingCtx->svgFillColorOpt_);
+        } else {
+            ImageProvider::CreateImageObject(
+                loadingCtx->sourceInfo_, loadingCtx->loadCallbacks_, loadingCtx->svgFillColorOpt_);
+        }
     };
     return task;
 }
@@ -144,8 +152,8 @@ EnterStateTask ImageLoadingContext::CreateOnMakeCanvasImageTask()
             imageLoadingContext->srcRect_, imageLoadingContext->dstRect_);
 
         // step4: [MakeCanvasImage] according to [resizeTarget]
-        imageLoadingContext->imageObj_->MakeCanvasImage(
-            imageLoadingContext->loadCallbacks_, resizeTarget, imageLoadingContext->GetSourceSize().has_value());
+        imageLoadingContext->imageObj_->MakeCanvasImage(imageLoadingContext->loadCallbacks_, resizeTarget,
+            imageLoadingContext->GetSourceSize().has_value(), imageLoadingContext->syncLoad_);
     };
     return task;
 }
@@ -157,6 +165,7 @@ EnterStateTask ImageLoadingContext::CreateOnLoadSuccessTask()
         CHECK_NULL_VOID(imageLoadingContext);
         if (imageLoadingContext->loadNotifier_.loadSuccessNotifyTask_) {
             imageLoadingContext->loadNotifier_.loadSuccessNotifyTask_(imageLoadingContext->GetSourceInfo());
+            imageLoadingContext->CacheImageObject();
         }
         imageLoadingContext->needAlt_ = false;
     };
@@ -235,6 +244,7 @@ void ImageLoadingContext::OnLoadFail(
             sourceInfo.ToString().c_str(), sourceInfo_.ToString().c_str());
         return;
     }
+    LOGI("Image LoadFail, source = %{private}s, reason: %{public}s", sourceInfo.ToString().c_str(), errorMsg.c_str());
     stateManager_->HandleCommand(command);
 }
 
@@ -259,11 +269,11 @@ void ImageLoadingContext::LoadImageData()
 }
 
 void ImageLoadingContext::MakeCanvasImageIfNeed(const RefPtr<ImageLoadingContext>& loadingCtx, const SizeF& dstSize,
-    bool incomingNeedResize, ImageFit incommingImageFit, const std::optional<SizeF>& sourceSize)
+    bool incomingNeedResize, ImageFit incomingImageFit, const std::optional<SizeF>& sourceSize)
 {
     CHECK_NULL_VOID(loadingCtx);
     bool needMakeCanvasImage = incomingNeedResize != loadingCtx->GetNeedResize() ||
-                               dstSize != loadingCtx->GetDstSize() || incommingImageFit != loadingCtx->GetImageFit() ||
+                               dstSize != loadingCtx->GetDstSize() || incomingImageFit != loadingCtx->GetImageFit() ||
                                sourceSize != loadingCtx->GetSourceSize();
     // do [MakeCanvasImage] only when:
     // 1. [autoResize] changes
@@ -271,15 +281,15 @@ void ImageLoadingContext::MakeCanvasImageIfNeed(const RefPtr<ImageLoadingContext
     // 3. [ImageFit] changes
     // 4. [sourceSize] changes
     if (needMakeCanvasImage) {
-        loadingCtx->MakeCanvasImage(dstSize, incomingNeedResize, incommingImageFit, sourceSize);
+        loadingCtx->MakeCanvasImage(dstSize, incomingNeedResize, incomingImageFit, sourceSize);
     }
 }
 
 void ImageLoadingContext::MakeCanvasImage(
     const SizeF& dstSize, bool needResize, ImageFit imageFit, const std::optional<SizeF>& sourceSize)
 {
-    // Because calling of this interface does not guarantee the excution of [MakeCanvasImage], so in order to avoid
-    // updating params before they are not actually used, caputure the params in a function. This funtion will only run
+    // Because calling of this interface does not guarantee the execution of [MakeCanvasImage], so in order to avoid
+    // updating params before they are not actually used, capture the params in a function. This function will only run
     // when it actually do [MakeCanvasImage], i.e. doing the update in [OnMakeCanvasImageTask]
     updateParamsCallback_ = [wp = WeakClaim(this), dstSize, needResize, imageFit, sourceSize]() {
         auto loadingCtx = wp.Upgrade();
@@ -372,6 +382,17 @@ void ImageLoadingContext::ResetLoading()
 void ImageLoadingContext::ResumeLoading()
 {
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_DATA);
+}
+
+void ImageLoadingContext::CacheImageObject()
+{
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineCtx);
+    auto imageCache = pipelineCtx->GetImageCache();
+    CHECK_NULL_VOID(imageCache);
+    if (imageCache && imageObj_->GetFrameCount() == 1 && imageObj_->IsSupportCache()) {
+        imageCache->CacheImgObjNG(imageObj_->GetSourceInfo().ToString(), imageObj_);
+    }
 }
 
 } // namespace OHOS::Ace::NG

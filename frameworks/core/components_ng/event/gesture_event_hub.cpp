@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
 #include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
@@ -404,26 +405,39 @@ void GestureEventHub::SetFocusClickEvent(GestureEventFunc&& clickEvent)
     }
 }
 
-void GestureEventHub::SetClickEvent(GestureEventFunc&& clickEvent)
+// helper function to ensure clickActuator is initialized
+void GestureEventHub::CheckClickActuator()
 {
     if (!clickEventActuator_) {
         clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
         clickEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
     }
-    clickEventActuator_->ReplaceClickEvent(std::move(clickEvent));
+}
+
+void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent)
+{
+    CheckClickActuator();
+    clickEventActuator_->SetUserCallback(std::move(clickEvent));
 
     SetFocusClickEvent(clickEventActuator_->GetClickEvent());
 }
 
 void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
 {
-    if (!clickEventActuator_) {
-        clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
-        clickEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
-    }
+    CheckClickActuator();
     clickEventActuator_->AddClickEvent(clickEvent);
 
     SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+}
+
+// replace last showMenu callback
+void GestureEventHub::BindMenu(GestureEventFunc&& showMenu)
+{
+    if (showMenu_) {
+        RemoveClickEvent(showMenu_);
+    }
+    showMenu_ = MakeRefPtr<ClickEvent>(std::move(showMenu));
+    AddClickEvent(showMenu_);
 }
 
 OnAccessibilityEventFunc GestureEventHub::GetOnAccessibilityEventFunc()

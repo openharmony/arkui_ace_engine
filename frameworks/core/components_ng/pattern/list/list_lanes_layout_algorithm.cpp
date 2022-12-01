@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
@@ -40,8 +41,6 @@ void ListLanesLayoutAlgorithm::UpdateListItemConstraint(
             contentConstraint.maxSize.SetWidth(crossSize);
             if (minLaneLength_.has_value()) {
                 contentConstraint.minSize.SetWidth(minLaneLength_.value());
-            } else {
-                contentConstraint.minSize.SetWidth(crossSize);
             }
         }
         return;
@@ -63,8 +62,6 @@ void ListLanesLayoutAlgorithm::UpdateListItemConstraint(
         contentConstraint.maxSize.SetHeight(crossSize);
         if (minLaneLength_.has_value()) {
             contentConstraint.minSize.SetHeight(minLaneLength_.value());
-        } else {
-            contentConstraint.minSize.SetHeight(crossSize);
         }
     }
 }
@@ -267,18 +264,14 @@ float ListLanesLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float 
 int32_t ListLanesLayoutAlgorithm::FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t index)
 {
     auto wrapper  = layoutWrapper->GetOrCreateChildByIndex(index, false);
-    if (!wrapper) {
-        return index;
-    }
+    CHECK_NULL_RETURN(wrapper, index);
     auto itemGroup = GetListItemGroup(wrapper);
     if (itemGroup) {
         return index;
     }
     for (int32_t idx = index; idx > startIndex; idx--) {
         auto wrapper  = layoutWrapper->GetOrCreateChildByIndex(idx - 1, false);
-        if (!wrapper) {
-            return idx;
-        }
+        CHECK_NULL_RETURN(wrapper, idx);
         auto itemGroup = GetListItemGroup(wrapper);
         if (itemGroup) {
             return idx;
@@ -321,5 +314,17 @@ int32_t ListLanesLayoutAlgorithm::GetLanesFloor(LayoutWrapper* layoutWrapper, in
         return index - (index - startIndex) % lanes_;
     }
     return index;
+}
+
+void ListLanesLayoutAlgorithm::SetListItemGroupProperty(const RefPtr<ListItemGroupLayoutProperty>& itemGroup,
+    Axis axis, int32_t lanes)
+{
+    ListLayoutAlgorithm::SetListItemGroupProperty(itemGroup, axis, lanes);
+    if (minLaneLength_) {
+        itemGroup->UpdateLaneMinLength(minLaneLength_.value());
+    }
+    if (maxLaneLength_) {
+        itemGroup->UpdateLaneMaxLength(maxLaneLength_.value());
+    }
 }
 } // namespace OHOS::Ace::NG

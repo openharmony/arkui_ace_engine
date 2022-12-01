@@ -37,7 +37,7 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components/video/video_theme.h"
 
@@ -96,7 +96,7 @@ HWTEST_F(ThemeManagerTest, GlobalTheme001, TestSize.Level1)
      * @tc.steps: step1. Get global AppTheme from ThemeManager, check whether is nullptr.
      * @tc.expected: step1. Global AppTheme is not nullptr.
      */
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     RefPtr<AppTheme> theme = themeManager->GetTheme<AppTheme>();
     EXPECT_TRUE(theme);
 }
@@ -113,7 +113,7 @@ HWTEST_F(ThemeManagerTest, GlobalTheme002, TestSize.Level1)
      * @tc.steps: step1. Get all components' theme from ThemeManager, check each whether is nullptr.
      * @tc.expected: step1. Each components' theme is not nullptr, and typeId is correct.
      */
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     for (const auto& [name, themeType] : COMPONENTS_THEMES) {
         auto theme = themeManager->GetTheme(themeType);
         EXPECT_TRUE(theme) << "Theme not found: " << name;

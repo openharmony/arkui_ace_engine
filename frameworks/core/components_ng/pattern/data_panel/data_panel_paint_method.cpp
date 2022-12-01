@@ -30,6 +30,7 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -50,7 +51,7 @@ DataPanelModifier::DataPanelModifier() : date_(AceType::MakeRefPtr<AnimatablePro
     AttachProperty(date_);
 }
 
-void PaintRainbowFilterMask(RSCanvas& canvas, double factor, ArcData arcData)
+void DataPanelModifier::PaintRainbowFilterMask(RSCanvas& canvas, double factor, ArcData arcData) const
 {
     float thickness = arcData.thickness;
     float radius = arcData.radius - SHADOW_BLUR_RADIUS;
@@ -141,7 +142,7 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset, flo
 
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     ArcData arcData;
     arcData.center = Offset(context.width / 2.0f, context.height / 2.0f);
@@ -215,7 +216,7 @@ void DataPanelModifier::PaintLinearProgress(DrawingContext& context, OffsetF off
     }
     auto height = context.height;
     auto widthSegment = offset.GetX();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     auto theme = pipelineContext->GetTheme<DataPanelTheme>();
     auto colors = theme->GetColorsArray();
     PaintBackground(canvas, offset, totalWidth, height);
@@ -261,7 +262,6 @@ void DataPanelModifier::PaintColorSegment(RSCanvas& canvas, OffsetF offset, floa
     segmentEndPoint.SetX(rect.GetRight());
     segmentEndPoint.SetY(rect.GetBottom());
     RSPoint segmentPoint[2] = { segmentStartPoint, segmentEndPoint };
-    RSColor segmentColor[2] = { segmentStartColor.GetValue(), segmentEndColor.GetValue() };
     std::vector<float> pos { 0.0f, 1.0f };
     std::vector<RSColorQuad> colors { segmentStartColor.GetValue(), segmentEndColor.GetValue() };
     brush.SetShaderEffect(

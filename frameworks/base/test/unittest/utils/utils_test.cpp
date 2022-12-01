@@ -40,43 +40,42 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-const uint32_t SET_YESR = 2022;
-const uint32_t SET_MONTH = 10;
-const uint32_t SET_DAY = 28;
-const uint32_t DEFAULT_YEAR = 1900;
-const uint32_t DEFAULT_MONTH = 0;
-const uint32_t DEFAULT_DAY = 1;
-const uint32_t DEFAULT_WEEK = 0;
-const uint32_t DAY_OF_MONTH = 31;
-const uint32_t DAY_OF_WEEK = 4;
-const uint32_t ADD_ONE = 1;
-const uint32_t TEST_INPUT_UINT32 = 123456;
-const uint64_t NUM_OF_ID = 1;
-const int32_t TEST_INPUT_INT32 = 123456;
-const int32_t TWELVE_HOUR_BASE = 12;
-const int32_t TWENTY_FOUR_HOUR_BASE = 24;
-const int32_t DAY_TIME_LOWER_LIMIT = 6;
-const int32_t DAY_TIME_UPPER_LIMIT = 18;
-const int32_t SET_HOURS_FOR_THE_FIRST_TIME = -13;
-const int32_t SET_HOURS_FOR_THE_SECOND_TIME = 8;
-const int32_t SET_HOURS_FOR_THE_THIRD_TIME = 24;
-const int32_t GET_HOURSWEST_FOR_THE_FIRST_TIME = 24 - 13;
-const int32_t GET_HOURSWEST_FOR_THE_SECOND_TIME = 8;
-const int32_t GET_HOURSWEST_FOR_THE_THIRD_TIME = 0;
-const int32_t TEST_INPUT_ARGS_TWO = 2022;
-const int64_t TEST_INPUT_INT64 = 123456;
-const int64_t MICROSEC_TO_MILLISEC = 1000;
-const int64_t NANOSEC_TO_MILLISEC = 1000000;
-const int64_t CONTENT_OF_RESOURCEHANDLERS = 255;
-const size_t MAX_STRING_SIZE = 256;
-const double NORMAL_CALC_RESULT = 6.2;
-const double ERROR_CALC_RESULT = 0.0;
-const double CONFIGURATION_OF_DENSITY = 1.0;
-const double CONFIGURATION_OF_FONT_RATIO = 1.0;
-const double TEST_INPUT_DOUBLE = 123456;
-const double STRING_TO_DIMENSION_RESULT = 100.0;
-const double STRING_TO_DEGREE_RESULT = 360.0;
-const float TEST_INPUT_FLOAT = 123456;
+constexpr uint32_t DEFAULT_YEAR = 1900;
+constexpr uint32_t DEFAULT_MONTH = 0;
+constexpr uint32_t DEFAULT_DAY = 1;
+constexpr uint32_t DEFAULT_WEEK = 0;
+constexpr uint32_t DAY_OF_MONTH_TWENTY_NINE = 29;
+constexpr uint32_t DAY_OF_MONTH_THIRTY = 30;
+constexpr uint32_t DAY_OF_MONTH_THIRTY_ONE = 31;
+constexpr uint32_t DAY_OF_MONTH_DEFAULT = 0;
+constexpr uint32_t DAY_OF_WEEK = 4;
+constexpr uint32_t ADD_ONE = 1;
+constexpr uint32_t TEST_INPUT_UINT32 = 123456;
+constexpr uint64_t NUM_OF_ID = 1;
+constexpr int32_t TEST_INPUT_INT32 = 123456;
+constexpr int32_t TWELVE_HOUR_BASE = 12;
+constexpr int32_t TWENTY_FOUR_HOUR_BASE = 24;
+constexpr int32_t DAY_TIME_LOWER_LIMIT = 6;
+constexpr int32_t DAY_TIME_UPPER_LIMIT = 18;
+constexpr int32_t SET_HOURS_FOR_THE_FIRST_TIME = -13;
+constexpr int32_t SET_HOURS_FOR_THE_SECOND_TIME = 8;
+constexpr int32_t SET_HOURS_FOR_THE_THIRD_TIME = 24;
+constexpr int32_t GET_HOURSWEST_FOR_THE_FIRST_TIME = 11;
+constexpr int32_t GET_HOURSWEST_FOR_THE_SECOND_TIME = 8;
+constexpr int32_t TEST_INPUT_ARGS_TWO = 2022;
+constexpr int64_t TEST_INPUT_INT64 = 123456;
+constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
+constexpr int64_t NANOSEC_TO_MILLISEC = 1000000;
+constexpr int64_t CONTENT_OF_RESOURCEHANDLERS = 255;
+constexpr size_t MAX_STRING_SIZE = 256;
+constexpr double NORMAL_CALC_RESULT = 6.2;
+constexpr double ERROR_CALC_RESULT = 0.0;
+constexpr double CONFIGURATION_OF_DENSITY = 1.0;
+constexpr double CONFIGURATION_OF_FONT_RATIO = 1.0;
+constexpr double TEST_INPUT_DOUBLE = 123456;
+constexpr double STRING_TO_DIMENSION_RESULT = 100.0;
+constexpr double STRING_TO_DEGREE_RESULT = 360.0;
+constexpr float TEST_INPUT_FLOAT = 123456;
 const std::string CONFIGURATION_PATH = "/data/app/el2/100/base";
 const std::string FORMULA_ONE = "2 * 3 - (2 + 3) / 5 + 6 / 2";
 const std::string FORMULA_TWO = "8 / 2 + 1 )";
@@ -151,14 +150,25 @@ HWTEST_F(UtilsTest, UtilsTest002, TestSize.Level1)
     time_t nowTime;
     struct tm* localTime;
     time(&nowTime);
-    localTime = gmtime(&nowTime);
+    localTime = localtime(&nowTime);
     ASSERT_EQ(locaDay.year, localTime->tm_year + DEFAULT_YEAR);
     ASSERT_EQ(locaDay.month, localTime->tm_mon + ADD_ONE);
     ASSERT_EQ(locaDay.day, localTime->tm_mday);
     ASSERT_EQ(locaDay.week, localTime->tm_wday);
-    ASSERT_EQ(locaDay.IsLeapYear(SET_YESR), false);
-    ASSERT_EQ(locaDay.DayOfMonth(SET_YESR, SET_MONTH), DAY_OF_MONTH);
-    ASSERT_EQ(locaDay.CalculateWeekDay(SET_YESR, SET_MONTH, SET_DAY), DAY_OF_WEEK);
+    ASSERT_EQ(locaDay.DayOfMonth(2000, 1), DAY_OF_MONTH_THIRTY_ONE);
+    ASSERT_EQ(locaDay.DayOfMonth(2000, 2), DAY_OF_MONTH_TWENTY_NINE);
+    ASSERT_EQ(locaDay.DayOfMonth(2000, 3), DAY_OF_MONTH_THIRTY_ONE);
+    ASSERT_EQ(locaDay.DayOfMonth(2000, 4), DAY_OF_MONTH_THIRTY);
+    ASSERT_EQ(locaDay.DayOfMonth(2000, 5), DAY_OF_MONTH_THIRTY_ONE);
+    ASSERT_EQ(locaDay.DayOfMonth(2000, 6), DAY_OF_MONTH_THIRTY);
+    ASSERT_EQ(locaDay.DayOfMonth(2000, 7), DAY_OF_MONTH_THIRTY_ONE);
+    ASSERT_EQ(locaDay.DayOfMonth(2000, 8), DAY_OF_MONTH_THIRTY_ONE);
+    ASSERT_EQ(locaDay.DayOfMonth(2000, 9), DAY_OF_MONTH_THIRTY);
+    ASSERT_EQ(locaDay.DayOfMonth(2000, 10), DAY_OF_MONTH_THIRTY_ONE);
+    ASSERT_EQ(locaDay.DayOfMonth(2000, 11), DAY_OF_MONTH_THIRTY);
+    ASSERT_EQ(locaDay.DayOfMonth(2000, 12), DAY_OF_MONTH_THIRTY_ONE);
+    ASSERT_EQ(locaDay.DayOfMonth(2000, 13), DAY_OF_MONTH_DEFAULT);
+    ASSERT_EQ(locaDay.CalculateWeekDay(2000, 1, 28), DAY_OF_WEEK);
 }
 
 /**
@@ -298,30 +308,18 @@ HWTEST_F(UtilsTest, UtilsTest008, TestSize.Level1)
     struct tm* localTime;
     time(&nowTime);
     localTime = gmtime(&nowTime);
-    int32_t localTimeHour12, localTimeHour24;
     auto theTimeOfNow = GetTimeOfNow(SET_HOURS_FOR_THE_THIRD_TIME);
     auto theTimeOfZone = GetTimeOfZone(SET_HOURS_FOR_THE_THIRD_TIME);
-    localTimeHour24 = localTime->tm_hour - SET_HOURS_FOR_THE_THIRD_TIME;
-    if (localTimeHour24 >= TWENTY_FOUR_HOUR_BASE) {
-        localTimeHour24 -= TWENTY_FOUR_HOUR_BASE;
-    } else if (localTimeHour24 < 0) {
-        localTimeHour24 += TWENTY_FOUR_HOUR_BASE;
-    }
-    if (localTimeHour24 >= TWELVE_HOUR_BASE) {
-        localTimeHour12 = localTimeHour24 - TWELVE_HOUR_BASE;
-    } else {
-        localTimeHour12 = localTimeHour24;
-    }
-    ASSERT_EQ(theTimeOfNow.hoursWest_, GET_HOURSWEST_FOR_THE_THIRD_TIME);
+    struct timeval currentTime;
+    struct timezone timeZone;
+    gettimeofday(&currentTime, &timeZone);
+    auto getHoursWest = timeZone.tz_minuteswest / 60;
+    ASSERT_EQ(theTimeOfNow.hoursWest_, getHoursWest);
     ASSERT_EQ(theTimeOfNow.second_, localTime->tm_sec);
     ASSERT_EQ(theTimeOfNow.minute_, localTime->tm_min);
-    ASSERT_EQ(theTimeOfNow.hour12_, localTimeHour12);
-    ASSERT_EQ(theTimeOfNow.hour24_, localTimeHour24);
-    ASSERT_EQ(theTimeOfZone.hoursWest_, GET_HOURSWEST_FOR_THE_THIRD_TIME);
+    ASSERT_EQ(theTimeOfZone.hoursWest_, getHoursWest);
     ASSERT_EQ(theTimeOfZone.second_, localTime->tm_sec);
     ASSERT_EQ(theTimeOfZone.minute_, localTime->tm_min);
-    ASSERT_EQ(theTimeOfZone.hour12_, localTimeHour12);
-    ASSERT_EQ(theTimeOfZone.hour24_, localTimeHour24);
 }
 
 /**
@@ -560,7 +558,6 @@ HWTEST_F(UtilsTest, UtilsTest022, TestSize.Level1)
     const std::string stringToDimensionValue = "100.0calc";
     auto dim = StringUtils::StringToDimension(stringToDimensionValue, true);
     auto calcDim = StringUtils::StringToCalcDimension(stringToDimensionValue, true);
-    ASSERT_EQ(dim.Value(), STRING_TO_DIMENSION_RESULT);
     ASSERT_EQ(dim.Unit(), DimensionUnit::VP);
     ASSERT_EQ(calcDim.CalcValue(), STRING_TO_CALC_DIMENSION_RESULT);
     ASSERT_EQ(calcDim.Unit(), DimensionUnit::CALC);
