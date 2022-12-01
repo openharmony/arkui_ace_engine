@@ -97,6 +97,7 @@ public:
     }
 
     void GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList);
+    void GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList);
 
     int32_t GetChildIndexById(int32_t id);
 
@@ -275,6 +276,13 @@ protected:
     {
         for (const auto& child : children_) {
             child->OnGenerateOneDepthVisibleFrame(visibleList);
+        }
+    }
+
+    virtual void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList)
+    {
+        for (const auto& child : children_) {
+            child->OnGenerateOneDepthAllFrame(allList);
         }
     }
 

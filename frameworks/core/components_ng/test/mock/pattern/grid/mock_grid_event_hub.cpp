@@ -21,6 +21,11 @@ RefPtr<FrameNode> GridEventHub::FindGridItemByPosition(float /* x */, float /* y
     return nullptr;
 }
 
+bool GridEventHub::CheckPostionInGrid(float x, float y)
+{
+    return false;
+}
+
 int32_t GridEventHub::GetGridItemIndex(const RefPtr<FrameNode>& /* frameNode */)
 {
     return 0;

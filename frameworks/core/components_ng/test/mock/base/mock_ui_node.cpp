@@ -35,6 +35,7 @@ void UINode::OnAttachToMainTree() {}
 void UINode::DumpTree(int32_t depth) {}
 void UINode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) {}
 void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) {}
+void UINode::GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) {}
 void UINode::Build() {}
 void UINode::SetActive(bool active) {}
 

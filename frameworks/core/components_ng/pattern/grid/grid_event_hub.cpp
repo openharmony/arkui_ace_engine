@@ -17,8 +17,10 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 
@@ -57,6 +59,14 @@ void GridEventHub::InitItemDragEvent(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->SetDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
+bool GridEventHub::CheckPostionInGrid(float x, float y)
+{
+    auto host = GetFrameNode();
+    CHECK_NULL_RETURN(host, false);
+    auto size = host->GetGeometryNode()->GetFrameRect();
+    return size.IsInRegion(PointF(x, y));
+}
+
 RefPtr<FrameNode> GridEventHub::FindGridItemByPosition(float x, float y)
 {
     auto host = GetFrameNode();
@@ -64,7 +74,7 @@ RefPtr<FrameNode> GridEventHub::FindGridItemByPosition(float x, float y)
 
     std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes;
     std::list<RefPtr<FrameNode>> children;
-    host->GenerateOneDepthVisibleFrame(children);
+    host->GenerateOneDepthAllFrame(children);
     for (const auto& child : children) {
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
@@ -148,7 +158,7 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
     dragDropProxy_ = manager->CreateAndShowDragWindow(customNode, info);
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->OnItemDragStart(info, GetFrameNode());
-    itemFrameNode->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+    itemFrameNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
     draggingItem_ = itemFrameNode;
 }
 

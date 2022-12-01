@@ -220,7 +220,11 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (!childLayoutWrapper) {
             break;
         }
-        auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(childLayoutWrapper->GetLayoutProperty());
+        auto layoutProperty = childLayoutWrapper->GetLayoutProperty();
+        if (!layoutProperty) {
+            break;
+        }
+        auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(layoutProperty);
         int32_t itemRowStart = -1;
         int32_t itemColStart = -1;
         int32_t itemRowSpan = 1;
