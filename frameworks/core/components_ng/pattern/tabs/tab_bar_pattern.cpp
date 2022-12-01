@@ -31,7 +31,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-constexpr int32_t HOVER_ANIMATION_DURATION = 250;
+constexpr int32_t HOVER_ANIMATION_DURATION = 40;
 constexpr float CLICK_OPACITY_RATIO = 0.1;
 constexpr double HOVER_OPACITY_RATIO = 0.05;
 constexpr float CLICKED_RADIUS = 8.0;
@@ -158,6 +158,9 @@ void TabBarPattern::InitMouseEvent()
 
 void TabBarPattern::HandleMouseEvent(const MouseInfo& info)
 {
+    if (IsContainsBuilder()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto totalCount = host->TotalChildCount();
@@ -188,6 +191,9 @@ void TabBarPattern::HandleMouseEvent(const MouseInfo& info)
 
 void TabBarPattern::HandleHoverEvent(bool isHover)
 {
+    if (IsContainsBuilder()) {
+        return;
+    }
     isHover_ = isHover;
     touching_ = false;
     if (!isHover_ && hoverIndex_.has_value()) {
@@ -323,6 +329,9 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
 
 void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
 {
+    if (IsContainsBuilder()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto totalCount = host->TotalChildCount();
