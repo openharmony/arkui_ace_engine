@@ -41,6 +41,7 @@ group("pattern_unittest") {
     "linear_layout:linear_layout_creator_test_ng",
     "list:list_pattern_test_ng",
     "marquee:marquee_pattern_unit_test",
+    "menu:menu_layout_algorithm_unit_test",
     "navigation:navigation_pattern_test_ng",
     "navigator:navigator_event_hub_test_ng",
     "option:panel_option_test_ng",
