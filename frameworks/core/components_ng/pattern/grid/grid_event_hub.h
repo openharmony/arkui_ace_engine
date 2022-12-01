@@ -123,7 +123,6 @@ private:
     RefPtr<DragDropProxy> dragDropProxy_;
     int32_t draggedIndex_ = 0;
     RefPtr<FrameNode> draggingItem_;
-    bool itemRemoved_ = false;
 };
 
 } // namespace OHOS::Ace::NG
