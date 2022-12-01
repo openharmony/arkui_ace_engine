@@ -410,16 +410,16 @@ void DialogContainer::DumpHeapSnapshot(bool isPrivate)
 }
 void DialogContainer::SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window>& uiWindow)
 {
-    CHECK_NULL_VOID(uiWindow);
+    CHECK_NULL_VOID_NOLOG(uiWindow);
     auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(instanceId));
-    CHECK_NULL_VOID(container);
+    CHECK_NULL_VOID_NOLOG(container);
     container->SetUIWindowInner(uiWindow);
 }
 
 sptr<OHOS::Rosen::Window> DialogContainer::GetUIWindow(int32_t instanceId)
 {
     auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(instanceId));
-    CHECK_NULL_RETURN(container, nullptr);
+    CHECK_NULL_RETURN_NOLOG(container, nullptr);
     return container->GetUIWindowInner();
 }
 
