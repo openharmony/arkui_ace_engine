@@ -267,6 +267,12 @@ public:
         return nullptr;
     }
 
+    void ChildrenUpdatedFrom(int32_t index);
+    int32_t GetChildrenUpdated() const
+    {
+        return childrenUpdatedFrom_;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -304,6 +310,7 @@ private:
     bool onMainTree_ = false;
     bool removeSilently_ = true;
 
+    int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UINode);

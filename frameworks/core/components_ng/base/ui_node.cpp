@@ -15,10 +15,6 @@
 
 #include "core/components_ng/base/ui_node.h"
 
-#include <algorithm>
-#include <cstdint>
-#include <iterator>
-
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
@@ -470,4 +466,9 @@ std::pair<bool, int32_t> UINode::GetChildFlatIndex(int32_t id)
     return std::pair<bool, int32_t>(false, count);
 }
 
+// for Grid refresh GridItems
+void UINode::ChildrenUpdatedFrom(int32_t index)
+{
+    childrenUpdatedFrom_ = index;
+}
 } // namespace OHOS::Ace::NG
