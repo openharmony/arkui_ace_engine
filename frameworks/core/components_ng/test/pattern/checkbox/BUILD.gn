@@ -95,7 +95,6 @@ ohos_unittest("checkbox_pattern_test_ng") {
 
     # mock
     "$ace_root/frameworks/base/test/mock/ressched/mock_ressched_report.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/base/mock_stage_manager.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_drawing_convertor.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
@@ -116,6 +115,7 @@ ohos_unittest("checkbox_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.cpp",
     "checkbox_paint_method_test_ng.cpp",
     "checkbox_pattern_test_ng.cpp",
+    "mock_stage_manager.cpp",
   ]
 
   deps = [
