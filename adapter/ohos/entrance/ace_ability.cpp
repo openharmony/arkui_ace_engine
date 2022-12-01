@@ -206,7 +206,8 @@ void AceAbility::OnStart(const Want& want)
     abilityId_ = g_instanceId++;
     static std::once_flag onceFlag;
     auto abilityContext = GetAbilityContext();
-    std::call_once(onceFlag, [abilityContext]() {
+    auto cacheDir = abilityContext->GetCacheDir();
+    std::call_once(onceFlag, [abilityContext, cacheDir]() {
         LOGI("Initialize for current process.");
         SetHwIcuDirectory();
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
@@ -215,7 +216,7 @@ void AceAbility::OnStart(const Want& want)
         AceApplicationInfo::GetInstance().SetDataFileDirPath(abilityContext->GetFilesDir());
         AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
         AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
-        ImageCache::SetImageCacheFilePath(abilityContext->GetCacheDir());
+        ImageCache::SetImageCacheFilePath(cacheDir);
         ImageCache::SetCacheFileInfo();
         AceEngine::InitJsDumpHeadSignal();
     });
@@ -232,11 +233,10 @@ void AceAbility::OnStart(const Want& want)
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
         rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-        if (rsUiDirector) {
-            rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
-            rsUiDirector->SetCacheDir(abilityContext->GetCacheDir());
-            rsUiDirector->Init();
-        }
+        auto surfaceNode = window->GetSurfaceNode();
+        rsUiDirector->SetRSSurfaceNode(surfaceNode);
+        rsUiDirector->SetCacheDir(cacheDir);
+        rsUiDirector->Init();
     }
 #endif
     std::shared_ptr<AceAbility> self = std::static_pointer_cast<AceAbility>(shared_from_this());
