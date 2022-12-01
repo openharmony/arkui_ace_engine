@@ -15,11 +15,14 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> ContainerModalView::Create(RefPtr<FrameNode>& content)
 {
-    return nullptr;
+    auto containerModalNode = FrameNode::CreateFrameNode(
+        "ContainerModal", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ContainerModalPattern>());
+    return containerModalNode;
 }
 
 RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNode, bool isFloatingTitle)

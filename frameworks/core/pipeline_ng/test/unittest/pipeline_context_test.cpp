@@ -14,6 +14,7 @@
  */
 #include <cstdint>
 #include "gtest/gtest.h"
+#include "core/components/common/layout/constants.h"
 
 // Add the following two macro definitions to test the private and protected method.
 #define private public
@@ -22,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/ace_engine.h"
+#include "core/common/event_manager.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
@@ -34,7 +36,8 @@
 #include "core/pipeline_ng/test/unittest/mock_schedule_task.h"
 #include "core/pipeline_ng/test/mock/mock_window.h"
 #include "core/pipeline_ng/test/mock/mock_frontend.h"
-#include "core/pipeline_ng/test/unittest/mock_task_executor.h"
+#include "core/pipeline_ng/test/mock/mock_task_executor.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -42,7 +45,10 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_INSTANCE_ID = 0;
+constexpr int32_t DEFAULT_INT0 = 0;
 constexpr int32_t DEFAULT_INT1 = 1;
+constexpr int32_t DEFAULT_INT3 = 3;
+constexpr int32_t DEFAULT_INT4 = 4;
 constexpr int32_t DEFAULT_INT10 = 10;
 constexpr uint32_t DEFAULT_SIZE1 = 1;
 constexpr uint32_t DEFAULT_SIZE2 = 2;
@@ -62,16 +68,33 @@ public:
     void SetUp() override;
     void TearDown() override;
 private:
-    const static ElementIdType frameNodeId_;
-    const static ElementIdType customNodeId_;
+    static ElementIdType frameNodeId_;
+    static ElementIdType customNodeId_;
+    static RefPtr<FrameNode> frameNode_;
+    static RefPtr<CustomNode> customNode_;
+    static RefPtr<PipelineContext> context_;
 };
 
-const ElementIdType PipelineContextTest::frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
-const ElementIdType PipelineContextTest::customNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
+ElementIdType PipelineContextTest::frameNodeId_ = 0;
+ElementIdType PipelineContextTest::customNodeId_ = 0;
+RefPtr<FrameNode> PipelineContextTest::frameNode_ = nullptr;
+RefPtr<CustomNode> PipelineContextTest::customNode_ = nullptr;
+RefPtr<PipelineContext> PipelineContextTest::context_ = nullptr;
 
 void PipelineContextTest::SetUpTestSuite()
 {
     GTEST_LOG_(INFO) << "PipelineContextTest SetUpTestSuite";
+    frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
+    customNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
+    frameNode_ = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
+    // AddUINode is called in the function.
+    customNode_ = CustomNode::CreateCustomNode(customNodeId_, TEST_TAG);
+    ElementRegister::GetInstance()->AddUINode(frameNode_);
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    context_ = AceType::MakeRefPtr<PipelineContext>(std::make_unique<MockWindow>(),
+        AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
+    RefPtr<Container> container = AceType::MakeRefPtr<MockContainer>(context_);
+    AceEngine::Get().AddContainer(DEFAULT_INSTANCE_ID, container);
 }
 
 void PipelineContextTest::TearDownTestSuite()
@@ -100,28 +123,22 @@ HWTEST_F(PipelineContextTest, PipelineContextTest001, TestSize.Level1)
      * @tc.steps1: initialize parameters.
      * @tc.expected: All pointer is non-null.
      */
-    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
-    ASSERT_NE(frameNode, nullptr);
-    auto customNode = CustomNode::CreateCustomNode(customNodeId_, TEST_TAG);
-    ASSERT_NE(customNode, nullptr);
+    ASSERT_NE(context_, nullptr);
     bool flagUpdate = false;
-    customNode->SetUpdateFunction([&flagUpdate]() { flagUpdate = true; });
-    auto context = AceType::MakeRefPtr<PipelineContext>(
-        std::make_unique<MockWindow>(), nullptr, nullptr, nullptr, DEFAULT_INSTANCE_ID);
-    ASSERT_NE(context, nullptr);
-    context->AddDirtyCustomNode(customNode);
+    customNode_->SetUpdateFunction([&flagUpdate] () { flagUpdate = true; });
+    context_->AddDirtyCustomNode(customNode_);
 
     /**
      * @tc.steps2: Call the function FlushDirtyNodeUpdate.
      * @tc.expected: The flagUpdate is changed to true.
      */
-    context->FlushDirtyNodeUpdate();
+    context_->FlushDirtyNodeUpdate();
     EXPECT_TRUE(flagUpdate);
 }
 
 /**
  * @tc.name: PipelineContextTest002
- * @tc.desc: Test the function FlushVsync, AddVisibleAreaChangeNode and HandleVisibleAreaChangeEvent.
+ * @tc.desc: Test the function FlushVsync, AddVisibleAreaChangeNode, HandleVisibleAreaChangeEvent and .
  * @tc.type: FUNC
  */
 HWTEST_F(PipelineContextTest, PipelineContextTest002, TestSize.Level1)
@@ -130,47 +147,53 @@ HWTEST_F(PipelineContextTest, PipelineContextTest002, TestSize.Level1)
      * @tc.steps1: initialize parameters.
      * @tc.expected: All pointer is non-null.
      */
+    ASSERT_NE(context_, nullptr);
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
     auto mockWindow = std::make_unique<MockWindow>();
+    Mock::AllowLeak(mockWindow.get());
     EXPECT_CALL(*mockWindow, FlushCustomAnimation(NANO_TIME_STAMP))
         .Times(AtLeast(1))
         .WillOnce(testing::Return(true))
         .WillRepeatedly(testing::Return(false));
-    auto context = AceType::MakeRefPtr<PipelineContext>(
-        std::move(mockWindow), nullptr, nullptr, nullptr, DEFAULT_INSTANCE_ID);
-    ASSERT_NE(context, nullptr);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
-    auto customNode = CustomNode::CreateCustomNode(customNodeId_, TEST_TAG);
-    ElementRegister::GetInstance()->AddUINode(frameNode);
-    ElementRegister::GetInstance()->AddUINode(customNode);
-    context->rootNode_ = frameNode;
+    context_->window_ = std::move(mockWindow);
+    context_->SetupRootElement();
 
     /**
-     * @tc.steps2: Call the function AddVisibleAreaChangeNode.
-     * @tc.expected: The drawDelegate_ is null.
+     * @tc.steps2: Call the function AddOnAreaChangeNode.
      */
-    context->AddVisibleAreaChangeNode(frameNode, DEFAULT_DOUBLE1, nullptr);
-    EXPECT_EQ(context->visibleAreaChangeNodes_.size(), DEFAULT_SIZE1);
-    context->visibleAreaChangeNodes_[customNode->GetId()] = std::list<VisibleCallbackInfo>();
-    context->visibleAreaChangeNodes_[ElementRegister::UndefinedElementId] = std::list<VisibleCallbackInfo>();
-    EXPECT_EQ(context->visibleAreaChangeNodes_.size(), DEFAULT_SIZE3);
+    context_->visibleAreaChangeNodes_.clear();
+    context_->AddOnAreaChangeNode(frameNode_->GetId());
+    context_->AddOnAreaChangeNode(customNode_->GetId());
+    context_->AddOnAreaChangeNode(ElementRegister::UndefinedElementId);
 
     /**
-     * @tc.steps3: Call the function FlushVsync with isEtsCard=false.
+     * @tc.steps3: Call the function AddVisibleAreaChangeNode.
      * @tc.expected: The drawDelegate_ is null.
      */
-    context->onShow_ = false;
-    context->SetIsEtsCard(false);
-    context->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
-    EXPECT_EQ(context->drawDelegate_, nullptr);
+    context_->onAreaChangeNodeIds_.clear();
+    context_->AddVisibleAreaChangeNode(frameNode_, DEFAULT_DOUBLE1, nullptr);
+    EXPECT_EQ(context_->visibleAreaChangeNodes_.size(), DEFAULT_SIZE1);
+    context_->visibleAreaChangeNodes_[customNode_->GetId()] = std::list<VisibleCallbackInfo>();
+    context_->visibleAreaChangeNodes_[ElementRegister::UndefinedElementId] = std::list<VisibleCallbackInfo>();
+    EXPECT_EQ(context_->visibleAreaChangeNodes_.size(), DEFAULT_SIZE3);
 
     /**
      * @tc.steps4: Call the function FlushVsync with isEtsCard=false.
+     * @tc.expected: The drawDelegate_ is null.
+     */
+    context_->onShow_ = false;
+    context_->SetIsEtsCard(false);
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+    EXPECT_EQ(context_->drawDelegate_, nullptr);
+
+    /**
+     * @tc.steps5: Call the function FlushVsync with isEtsCard=false.
      * @tc.expected: The drawDelegate_ is non-null.
      */
-    context->onFocus_ = false;
-    context->SetDrawDelegate(std::make_unique<DrawDelegate>());
-    context->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
-    EXPECT_NE(context->drawDelegate_, nullptr);
+    context_->onFocus_ = false;
+    context_->SetDrawDelegate(std::make_unique<DrawDelegate>());
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+    EXPECT_NE(context_->drawDelegate_, nullptr);
 }
 
 /**
@@ -184,42 +207,37 @@ HWTEST_F(PipelineContextTest, PipelineContextTest003, TestSize.Level1)
      * @tc.steps1: initialize parameters.
      * @tc.expected: All pointer is non-null.
      */
+    ASSERT_NE(context_, nullptr);
     ContainerScope scope(DEFAULT_INSTANCE_ID);
-    auto context = AceType::MakeRefPtr<PipelineContext>(std::make_unique<MockWindow>(),
-        AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
-    RefPtr<Container> container = AceType::MakeRefPtr<MockContainer>(context);
-    AceEngine::Get().AddContainer(DEFAULT_INSTANCE_ID, container);
-    ASSERT_NE(context, nullptr);
-    context->SetupRootElement();
+    context_->SetupRootElement();
 
     /**
      * @tc.steps2: Add dirty layout and render nodes to taskScheduler_ to test functions
      *             FlushLayoutTask and FlushRenderTask of the UITaskScheduler.
      */
-    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
-    context->taskScheduler_.AddDirtyLayoutNode(frameNode);
-    context->taskScheduler_.dirtyLayoutNodes_[frameNode->GetPageId()].emplace(nullptr);
-    context->taskScheduler_.AddDirtyRenderNode(frameNode);
-    context->taskScheduler_.dirtyRenderNodes_[frameNode->GetPageId()].emplace(nullptr);
+    context_->taskScheduler_.AddDirtyLayoutNode(frameNode_);
+    context_->taskScheduler_.dirtyLayoutNodes_[frameNode_->GetPageId()].emplace(nullptr);
+    context_->taskScheduler_.AddDirtyRenderNode(frameNode_);
+    context_->taskScheduler_.dirtyRenderNodes_[frameNode_->GetPageId()].emplace(nullptr);
 
     /**
      * @tc.steps3: Call the function FlushVsync with isEtsCard=true.
      * @tc.expected: The drawDelegate_ is null.
      */
-    context->onShow_ = true;
-    context->onFocus_ = false;
-    context->SetIsEtsCard(true);
-    context->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
-    EXPECT_EQ(context->drawDelegate_, nullptr);
+    context_->onShow_ = true;
+    context_->onFocus_ = false;
+    context_->SetIsEtsCard(true);
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+    EXPECT_EQ(context_->drawDelegate_, nullptr);
 
     /**
      * @tc.steps4: Call the function FlushVsync with isEtsCard=true.
      * @tc.expected: The drawDelegate_ is non-null.
      */
-    context->onFocus_ = true;
-    context->SetDrawDelegate(std::make_unique<DrawDelegate>());
-    context->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
-    EXPECT_EQ(context->drawDelegate_, nullptr);
+    context_->onFocus_ = true;
+    context_->SetDrawDelegate(std::make_unique<DrawDelegate>());
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+    EXPECT_EQ(context_->drawDelegate_, nullptr);
 }
 
 /**
@@ -233,16 +251,14 @@ HWTEST_F(PipelineContextTest, PipelineContextTest004, TestSize.Level1)
      * @tc.steps1: initialize parameters.
      * @tc.expected: All pointer is non-null.
      */
-    auto context = AceType::MakeRefPtr<PipelineContext>(
-        std::make_unique<MockWindow>(), nullptr, nullptr, nullptr, DEFAULT_INSTANCE_ID);
-    ASSERT_NE(context, nullptr);
+    ASSERT_NE(context_, nullptr);
 
     /**
      * @tc.steps2: Call the function FlushAnimation with empty scheduleTasks_.
      * @tc.expected: The scheduleTasks_ is null.
      */
-    context->FlushAnimation(NANO_TIME_STAMP);
-    EXPECT_TRUE(context->scheduleTasks_.empty());
+    context_->FlushAnimation(NANO_TIME_STAMP);
+    EXPECT_TRUE(context_->scheduleTasks_.empty());
 
     /**
      * @tc.steps3: Call the function FlushAnimation with unempty scheduleTasks_.
@@ -250,9 +266,9 @@ HWTEST_F(PipelineContextTest, PipelineContextTest004, TestSize.Level1)
      */
     auto scheduleTask = AceType::MakeRefPtr<MockScheduleTask>();
     EXPECT_NE(scheduleTask->GetNanoTimestamp(), NANO_TIME_STAMP);
-    context->AddScheduleTask(scheduleTask);
-    context->AddScheduleTask(nullptr);
-    context->FlushAnimation(NANO_TIME_STAMP);
+    context_->AddScheduleTask(scheduleTask);
+    context_->AddScheduleTask(nullptr);
+    context_->FlushAnimation(NANO_TIME_STAMP);
     EXPECT_EQ(scheduleTask->GetNanoTimestamp(), NANO_TIME_STAMP);
 }
 
@@ -268,19 +284,15 @@ HWTEST_F(PipelineContextTest, PipelineContextTest005, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ContainerScope scope(DEFAULT_INSTANCE_ID);
-    auto context = AceType::MakeRefPtr<PipelineContext>(std::make_unique<MockWindow>(),
-        AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
-    RefPtr<Container> container = AceType::MakeRefPtr<MockContainer>(context);
-    AceEngine::Get().AddContainer(DEFAULT_INSTANCE_ID, container);
-    ASSERT_NE(context, nullptr);
-    context->SetupRootElement();
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
 
     /**
      * @tc.steps2: Call the function FlushFocus.
      * @tc.expected: The dirtyFocusNode_ is changed to nullptr.
      */
-    context->FlushFocus();
-    EXPECT_EQ(context->dirtyFocusNode_.Upgrade(), nullptr);
+    context_->FlushFocus();
+    EXPECT_EQ(context_->dirtyFocusNode_.Upgrade(), nullptr);
 }
 
 /**
@@ -294,18 +306,16 @@ HWTEST_F(PipelineContextTest, PipelineContextTest006, TestSize.Level1)
      * @tc.steps1: initialize parameters.
      * @tc.expected: All pointer is non-null.
      */
+    ASSERT_NE(context_, nullptr);
     bool flagCbk = false;
-    auto context = AceType::MakeRefPtr<PipelineContext>(
-        std::make_unique<MockWindow>(), nullptr, nullptr, nullptr, DEFAULT_INSTANCE_ID);
-    ASSERT_NE(context, nullptr);
-    context->AddBuildFinishCallBack(nullptr);
-    context->AddBuildFinishCallBack([&flagCbk]() { flagCbk = true; });
+    context_->AddBuildFinishCallBack(nullptr);
+    context_->AddBuildFinishCallBack([&flagCbk]() { flagCbk = true; });
 
     /**
      * @tc.steps2: Call the function FlushBuildFinishCallbacks.
      * @tc.expected: The flagCbk is changed to true.
      */
-    context->FlushBuildFinishCallbacks();
+    context_->FlushBuildFinishCallbacks();
     EXPECT_TRUE(flagCbk);
 }
 
@@ -321,28 +331,24 @@ HWTEST_F(PipelineContextTest, PipelineContextTest007, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ContainerScope scope(DEFAULT_INSTANCE_ID);
-    auto context = AceType::MakeRefPtr<PipelineContext>(std::make_unique<MockWindow>(),
-        AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
-    RefPtr<Container> container = AceType::MakeRefPtr<MockContainer>(context);
-    AceEngine::Get().AddContainer(DEFAULT_INSTANCE_ID, container);
-    ASSERT_NE(context, nullptr);
+    ASSERT_NE(context_, nullptr);
     /**
      * @tc.steps2: Call the function SetupRootElement with isJsCard_ = true.
      * @tc.expected: The stageManager_ is non-null.
      */
-    context->SetIsJsCard(true);
-    context->windowModal_ = WindowModal::NORMAL;
-    context->SetupRootElement();
-    EXPECT_NE(context->stageManager_, nullptr);
+    context_->SetIsJsCard(true);
+    context_->windowModal_ = WindowModal::NORMAL;
+    context_->SetupRootElement();
+    EXPECT_NE(context_->stageManager_, nullptr);
 
     /**
      * @tc.steps3: Call the function SetupRootElement with isJsCard_ = false.
      * @tc.expected: The stageManager_ is non-null.
      */
-    context->SetIsJsCard(false);
-    context->windowModal_ = WindowModal::CONTAINER_MODAL;
-    context->SetupRootElement();
-    EXPECT_NE(context->stageManager_, nullptr);
+    context_->SetIsJsCard(false);
+    context_->windowModal_ = WindowModal::CONTAINER_MODAL;
+    context_->SetupRootElement();
+    EXPECT_NE(context_->stageManager_, nullptr);
 }
 
 /**
@@ -357,27 +363,23 @@ HWTEST_F(PipelineContextTest, PipelineContextTest008, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ContainerScope scope(DEFAULT_INSTANCE_ID);
-    auto context = AceType::MakeRefPtr<PipelineContext>(std::make_unique<MockWindow>(),
-        AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
-    RefPtr<Container> container = AceType::MakeRefPtr<MockContainer>(context);
-    AceEngine::Get().AddContainer(DEFAULT_INSTANCE_ID, container);
-    ASSERT_NE(context, nullptr);
+    ASSERT_NE(context_, nullptr);
 
     /**
      * @tc.steps2: Call the function SetupSubRootElement with isJsCard_ = true.
      * @tc.expected: The stageManager_ is non-null.
      */
-    context->SetIsJsCard(true);
-    context->SetupSubRootElement();
-    EXPECT_NE(context->stageManager_, nullptr);
+    context_->SetIsJsCard(true);
+    context_->SetupSubRootElement();
+    EXPECT_NE(context_->stageManager_, nullptr);
 
     /**
      * @tc.steps3: Call the function SetupSubRootElement with isJsCard_ = false.
      * @tc.expected: The stageManager_ is non-null.
      */
-    context->SetIsJsCard(false);
-    context->SetupSubRootElement();
-    EXPECT_NE(context->stageManager_, nullptr);
+    context_->SetIsJsCard(false);
+    context_->SetupSubRootElement();
+    EXPECT_NE(context_->stageManager_, nullptr);
 }
 
 /**
@@ -392,29 +394,25 @@ HWTEST_F(PipelineContextTest, PipelineContextTest009, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ContainerScope scope(DEFAULT_INSTANCE_ID);
-    auto context = AceType::MakeRefPtr<PipelineContext>(std::make_unique<MockWindow>(),
-        AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, AceType::MakeRefPtr<MockFrontend>(), DEFAULT_INSTANCE_ID);
-    RefPtr<Container> container = AceType::MakeRefPtr<MockContainer>(context);
-    AceEngine::Get().AddContainer(DEFAULT_INSTANCE_ID, container);
-    ASSERT_NE(context, nullptr);
-    context->rootWidth_ = DEFAULT_INT10;
-    context->rootHeight_ = DEFAULT_INT10;
+    ASSERT_NE(context_, nullptr);
+    context_->rootWidth_ = DEFAULT_INT10;
+    context_->rootHeight_ = DEFAULT_INT10;
     bool flagCbk = false;
 
     /**
      * @tc.steps2: Call the function OnSurfaceChanged with DEFAULT_INT10.
      * @tc.expected: The flagCbk is changed to true.
      */
-    context->SetForegroundCalled(true);
-    context->SetNextFrameLayoutCallback([&flagCbk] () { flagCbk = !flagCbk; });
-    context->OnSurfaceChanged(DEFAULT_INT10, DEFAULT_INT10, WindowSizeChangeReason::CUSTOM_ANIMATION);
+    context_->SetForegroundCalled(true);
+    context_->SetNextFrameLayoutCallback([&flagCbk] () { flagCbk = !flagCbk; });
+    context_->OnSurfaceChanged(DEFAULT_INT10, DEFAULT_INT10, WindowSizeChangeReason::CUSTOM_ANIMATION);
     EXPECT_TRUE(flagCbk);
 
     /**
      * @tc.steps3: Call the function OnSurfaceChanged with width = 1, height = 1 and weakFrontend_ = null.
      * @tc.expected: The flagCbk is not changed.
      */
-    context->OnSurfaceChanged(DEFAULT_INT1, DEFAULT_INT1);
+    context_->OnSurfaceChanged(DEFAULT_INT1, DEFAULT_INT1);
     EXPECT_TRUE(flagCbk);
 
     /**
@@ -422,10 +420,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest009, TestSize.Level1)
      * @tc.expected: The width_ and height_ of frontend is changed to DEFAULT_INT1.
      */
     auto frontend = AceType::MakeRefPtr<MockFrontend>();
-    context->weakFrontend_ = frontend;
-    context->OnSurfaceChanged(DEFAULT_INT1, DEFAULT_INT1);
+    context_->weakFrontend_ = frontend;
+    context_->OnSurfaceChanged(DEFAULT_INT1, DEFAULT_INT1);
     EXPECT_EQ(frontend->GetWidth(), DEFAULT_INT1);
     EXPECT_EQ(frontend->GetHeight(), DEFAULT_INT1);
+    context_->weakFrontend_.Reset();
 }
 
 /**
@@ -439,29 +438,27 @@ HWTEST_F(PipelineContextTest, PipelineContextTest010, TestSize.Level1)
      * @tc.steps1: initialize parameters.
      * @tc.expected: All pointer is non-null.
      */
-    auto context = AceType::MakeRefPtr<PipelineContext>(
-        std::make_unique<MockWindow>(), nullptr, nullptr, nullptr, DEFAULT_INSTANCE_ID);
-    ASSERT_NE(context, nullptr);
-    context->density_ = DEFAULT_DOUBLE1;
-    context->dipScale_ = DEFAULT_DOUBLE1;
+    ASSERT_NE(context_, nullptr);
+    context_->density_ = DEFAULT_DOUBLE1;
+    context_->dipScale_ = DEFAULT_DOUBLE1;
 
     /**
      * @tc.steps2: Call the function OnSurfaceDensityChanged with viewScale_ = 0.0.
      * @tc.expected: The density_ is changed to density.
      */
-    context->viewScale_ = 0.0;
-    context->OnSurfaceDensityChanged(DEFAULT_DOUBLE4);
-    EXPECT_DOUBLE_EQ(context->GetDensity(), DEFAULT_DOUBLE4);
-    EXPECT_DOUBLE_EQ(context->GetDipScale(), DEFAULT_DOUBLE1);
+    context_->viewScale_ = 0.0;
+    context_->OnSurfaceDensityChanged(DEFAULT_DOUBLE4);
+    EXPECT_DOUBLE_EQ(context_->GetDensity(), DEFAULT_DOUBLE4);
+    EXPECT_DOUBLE_EQ(context_->GetDipScale(), DEFAULT_DOUBLE1);
 
     /**
      * @tc.steps2: Call the function OnSurfaceDensityChanged with viewScale_ = 0.0.
      * @tc.expected: The density_ is changed to density.
      */
-    context->viewScale_ = DEFAULT_DOUBLE2;
-    context->OnSurfaceDensityChanged(DEFAULT_DOUBLE4);
-    EXPECT_DOUBLE_EQ(context->GetDensity(), DEFAULT_DOUBLE4);
-    EXPECT_DOUBLE_EQ(context->GetDipScale(), DEFAULT_DOUBLE2);
+    context_->viewScale_ = DEFAULT_DOUBLE2;
+    context_->OnSurfaceDensityChanged(DEFAULT_DOUBLE4);
+    EXPECT_DOUBLE_EQ(context_->GetDensity(), DEFAULT_DOUBLE4);
+    EXPECT_DOUBLE_EQ(context_->GetDipScale(), DEFAULT_DOUBLE2);
 }
 
 /**
@@ -475,12 +472,8 @@ HWTEST_F(PipelineContextTest, PipelineContextTest011, TestSize.Level1)
      * @tc.steps1: initialize parameters.
      * @tc.expected: All pointer is non-null.
      */
-    auto context = AceType::MakeRefPtr<PipelineContext>(
-        std::make_unique<MockWindow>(), nullptr, nullptr, nullptr, DEFAULT_INSTANCE_ID);
-    ASSERT_NE(context, nullptr);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
-    ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(context_, nullptr);
+    auto eventHub = frameNode_->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -490,8 +483,8 @@ HWTEST_F(PipelineContextTest, PipelineContextTest011, TestSize.Level1)
      * @tc.expected: The FocusType of dirtyFocusNode_ is changed to FocusType::NODE.
      */
     focusHub->SetFocusType(FocusType::NODE);
-    context->AddDirtyFocus(frameNode);
-    auto dirtyFocusNode = context->dirtyFocusNode_.Upgrade();
+    context_->AddDirtyFocus(frameNode_);
+    auto dirtyFocusNode = context_->dirtyFocusNode_.Upgrade();
     ASSERT_NE(dirtyFocusNode, nullptr);
     EXPECT_EQ(dirtyFocusNode->GetFocusType(), FocusType::NODE);
 
@@ -500,8 +493,8 @@ HWTEST_F(PipelineContextTest, PipelineContextTest011, TestSize.Level1)
      * @tc.expected: The FocusType of dirtyFocusScope_ is changed to FocusType::SCOPE.
      */
     focusHub->SetFocusType(FocusType::SCOPE);
-    context->AddDirtyFocus(frameNode);
-    auto dirtyFocusScope = context->dirtyFocusScope_.Upgrade();
+    context_->AddDirtyFocus(frameNode_);
+    auto dirtyFocusScope = context_->dirtyFocusScope_.Upgrade();
     ASSERT_NE(dirtyFocusScope, nullptr);
     EXPECT_EQ(dirtyFocusScope->GetFocusType(), FocusType::SCOPE);
 }
@@ -517,37 +510,49 @@ HWTEST_F(PipelineContextTest, PipelineContextTest012, TestSize.Level1)
      * @tc.steps1: initialize parameters.
      * @tc.expected: All pointer is non-null.
      */
-    ElementRegister::GetInstance()->RemoveItem(customNodeId_);
-    ElementRegister::GetInstance()->RemoveItem(frameNodeId_);
+    ASSERT_NE(context_, nullptr);
     ContainerScope scope(DEFAULT_INSTANCE_ID);
-    auto context = AceType::MakeRefPtr<PipelineContext>(std::make_unique<MockWindow>(),
-        AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
-    RefPtr<Container> container = AceType::MakeRefPtr<MockContainer>(context);
-    AceEngine::Get().AddContainer(DEFAULT_INSTANCE_ID, container);
-    ASSERT_NE(context, nullptr);
-    context->SetupRootElement();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
-    ASSERT_NE(frameNode, nullptr);
-    ElementRegister::GetInstance()->AddUINode(frameNode);
-    context->AddWindowFocusChangedCallback(ElementRegister::UndefinedElementId);
-    context->AddWindowFocusChangedCallback(frameNodeId_);
-    EXPECT_EQ(context->onWindowFocusChangedCallbacks_.size(), DEFAULT_SIZE2);
+    context_->SetupRootElement();
+    context_->onWindowFocusChangedCallbacks_.clear();
+    context_->AddWindowFocusChangedCallback(ElementRegister::UndefinedElementId);
+    context_->AddWindowFocusChangedCallback(frameNodeId_);
+    EXPECT_EQ(context_->onWindowFocusChangedCallbacks_.size(), DEFAULT_SIZE2);
 
     /**
-     * @tc.steps2: Call the function WindowFocus with "true".
+     * @tc.steps2: Call the function WindowFocus with "true" and onShow_ = true.
      * @tc.expected: The onFocus_ is changed to true and the size of onWindowFocusChangedCallbacks_ is change to 1.
      */
-    context->WindowFocus(true);
-    EXPECT_TRUE(context->onFocus_);
-    EXPECT_EQ(context->onWindowFocusChangedCallbacks_.size(), DEFAULT_SIZE1);
+    context_->WindowFocus(true);
+    context_->onShow_ = true;
+    EXPECT_TRUE(context_->onFocus_);
+    EXPECT_EQ(context_->onWindowFocusChangedCallbacks_.size(), DEFAULT_SIZE1);
 
     /**
-     * @tc.steps3: Call the function WindowFocus with "false".
+     * @tc.steps3: Call the function WindowFocus with "true" and onShow_ = false.
+     * @tc.expected: The onFocus_ is changed to true and the size of onWindowFocusChangedCallbacks_ is change to 1.
+     */
+    context_->WindowFocus(true);
+    context_->onShow_ = false;
+    EXPECT_TRUE(context_->onFocus_);
+    EXPECT_EQ(context_->onWindowFocusChangedCallbacks_.size(), DEFAULT_SIZE1);
+
+    /**
+     * @tc.steps4: Call the function WindowFocus with "false" and onShow_ = true.
      * @tc.expected: The onFocus_ is changed to false.
      */
-    context->WindowFocus(false);
-    EXPECT_FALSE(context->onFocus_);
-    EXPECT_EQ(context->onWindowFocusChangedCallbacks_.size(), DEFAULT_SIZE1);
+    context_->WindowFocus(false);
+    context_->onShow_ = true;
+    EXPECT_FALSE(context_->onFocus_);
+    EXPECT_EQ(context_->onWindowFocusChangedCallbacks_.size(), DEFAULT_SIZE1);
+
+    /**
+     * @tc.steps5: Call the function WindowFocus with "false" and onShow_ = false.
+     * @tc.expected: The onFocus_ is changed to false.
+     */
+    context_->WindowFocus(false);
+    context_->onShow_ = false;
+    EXPECT_FALSE(context_->onFocus_);
+    EXPECT_EQ(context_->onWindowFocusChangedCallbacks_.size(), DEFAULT_SIZE1);
 }
 
 /**
@@ -561,22 +566,18 @@ HWTEST_F(PipelineContextTest, PipelineContextTest013, TestSize.Level1)
      * @tc.steps1: initialize parameters.
      * @tc.expected: All pointer is non-null.
      */
-    auto customNode = CustomNode::CreateCustomNode(customNodeId_, TEST_TAG);
-    ASSERT_NE(customNode, nullptr);
-    ElementRegister::GetInstance()->AddUINode(customNode);
-    auto context = AceType::MakeRefPtr<PipelineContext>(
-        std::make_unique<MockWindow>(), nullptr, nullptr, nullptr, DEFAULT_INSTANCE_ID);
-    ASSERT_NE(context, nullptr);
-    context->AddNodesToNotifyMemoryLevel(ElementRegister::UndefinedElementId);
-    context->AddNodesToNotifyMemoryLevel(customNodeId_);
-    EXPECT_EQ(context->nodesToNotifyMemoryLevel_.size(), DEFAULT_SIZE2);
+    ASSERT_NE(context_, nullptr);
+    context_->nodesToNotifyMemoryLevel_.clear();
+    context_->AddNodesToNotifyMemoryLevel(ElementRegister::UndefinedElementId);
+    context_->AddNodesToNotifyMemoryLevel(customNodeId_);
+    EXPECT_EQ(context_->nodesToNotifyMemoryLevel_.size(), DEFAULT_SIZE2);
 
     /**
      * @tc.steps2: Call the function NotifyMemoryLevel with "1".
      * @tc.expected: The size of nodesToNotifyMemoryLevel_ is change to 1.
      */
-    context->NotifyMemoryLevel(DEFAULT_INT1);
-    EXPECT_EQ(context->nodesToNotifyMemoryLevel_.size(), DEFAULT_SIZE1);
+    context_->NotifyMemoryLevel(DEFAULT_INT1);
+    EXPECT_EQ(context_->nodesToNotifyMemoryLevel_.size(), DEFAULT_SIZE1);
 }
 
 /**
@@ -590,24 +591,22 @@ HWTEST_F(PipelineContextTest, PipelineContextTest014, TestSize.Level1)
      * @tc.steps1: initialize parameters.
      * @tc.expected: All pointer is non-null.
      */
+    ASSERT_NE(context_, nullptr);
     bool flagCbk = false;
-    auto context = AceType::MakeRefPtr<PipelineContext>(
-        std::make_unique<MockWindow>(), nullptr, nullptr, nullptr, DEFAULT_INSTANCE_ID);
-    ASSERT_NE(context, nullptr);
 
     /**
      * @tc.steps2: Call the function OnIdle.
      * @tc.expected: The value of flagCbk remains unchanged.
      */
-    context->AddPredictTask([&flagCbk] (int64_t deadline) { flagCbk = true; });
-    context->OnIdle(0);
+    context_->AddPredictTask([&flagCbk] (int64_t deadline) { flagCbk = true; });
+    context_->OnIdle(0);
     EXPECT_FALSE(flagCbk);
 
     /**
      * @tc.steps3: Call the function OnIdle.
      * @tc.expected: The flagCbk is changed to true.
      */
-    context->OnIdle(NANO_TIME_STAMP);
+    context_->OnIdle(NANO_TIME_STAMP);
     EXPECT_TRUE(flagCbk);
 }
 
@@ -622,25 +621,23 @@ HWTEST_F(PipelineContextTest, PipelineContextTest015, TestSize.Level1)
      * @tc.steps1: initialize parameters.
      * @tc.expected: All pointer is non-null.
      */
+    ASSERT_NE(context_, nullptr);
     bool flagCbk = false;
-    auto context = AceType::MakeRefPtr<PipelineContext>(
-        std::make_unique<MockWindow>(), nullptr, nullptr, nullptr, DEFAULT_INSTANCE_ID);
-    ASSERT_NE(context, nullptr);
 
     /**
      * @tc.steps2: Call the function Finish.
      * @tc.expected: The value of flagCbk remains unchanged.
      */
-    context->SetFinishEventHandler(nullptr);
-    context->Finish(false);
+    context_->SetFinishEventHandler(nullptr);
+    context_->Finish(false);
     EXPECT_FALSE(flagCbk);
 
     /**
      * @tc.steps3: Call the function Finish.
      * @tc.expected: The flagCbk is changed to true.
      */
-    context->SetFinishEventHandler([&flagCbk] () { flagCbk = true; });
-    context->Finish(false);
+    context_->SetFinishEventHandler([&flagCbk] () { flagCbk = true; });
+    context_->Finish(false);
     EXPECT_TRUE(flagCbk);
 }
 
@@ -655,31 +652,240 @@ HWTEST_F(PipelineContextTest, PipelineContextTest016, TestSize.Level1)
      * @tc.steps1: initialize parameters.
      * @tc.expected: All pointer is non-null.
      */
-    auto customNode = CustomNode::CreateCustomNode(customNodeId_, TEST_TAG);
-    ASSERT_NE(customNode, nullptr);
-    ElementRegister::GetInstance()->AddUINode(customNode);
-    auto context = AceType::MakeRefPtr<PipelineContext>(
-        std::make_unique<MockWindow>(), nullptr, nullptr, nullptr, DEFAULT_INSTANCE_ID);
-    ASSERT_NE(context, nullptr);
-    context->rootNode_ = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
-    context->AddWindowStateChangedCallback(ElementRegister::UndefinedElementId);
-    context->AddWindowStateChangedCallback(customNodeId_);
-    EXPECT_EQ(context->onWindowStateChangedCallbacks_.size(), DEFAULT_SIZE2);
+    ASSERT_NE(context_, nullptr);
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    context_->SetupRootElement();
+    context_->onWindowStateChangedCallbacks_.clear();
+    context_->AddWindowStateChangedCallback(ElementRegister::UndefinedElementId);
+    context_->AddWindowStateChangedCallback(customNodeId_);
+    EXPECT_EQ(context_->onWindowStateChangedCallbacks_.size(), DEFAULT_SIZE2);
 
     /**
      * @tc.steps2: Call the function OnShow.
      * @tc.expected: The onShow_ is changed to true and the size of onWindowStateChangedCallbacks_ is change to 1.
      */
-    context->OnShow();
-    EXPECT_TRUE(context->onShow_);
-    EXPECT_EQ(context->onWindowStateChangedCallbacks_.size(), DEFAULT_SIZE1);
+    context_->OnShow();
+    EXPECT_TRUE(context_->onShow_);
+    EXPECT_EQ(context_->onWindowStateChangedCallbacks_.size(), DEFAULT_SIZE1);
 
     /**
      * @tc.steps3: Call the function OnHide.
      * @tc.expected: The onShow_ is changed to false.
      */
-    context->OnHide();
-    EXPECT_FALSE(context->onShow_);
-    EXPECT_EQ(context->onWindowStateChangedCallbacks_.size(), DEFAULT_SIZE1);
+    context_->OnHide();
+    EXPECT_FALSE(context_->onShow_);
+    EXPECT_EQ(context_->onWindowStateChangedCallbacks_.size(), DEFAULT_SIZE1);
+}
+
+/**
+ * @tc.name: PipelineContextTest017
+ * @tc.desc: Test functions OnDragEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTest, PipelineContextTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    context_->SetupRootElement();
+    auto manager = context_->GetDragDropManager();
+
+    /**
+     * @tc.steps2: Call the function OnDragEvent with isDragged_=true, currentId_=DEFAULT_INT1 and DRAG_EVENT_END.
+     * @tc.expected: The currentId_ is equal to DEFAULT_INT1.
+     */
+    manager->isDragged_ = true;
+    manager->currentId_ = DEFAULT_INT1;
+    context_->OnDragEvent(DEFAULT_INT1, DEFAULT_INT1, DragEventAction::DRAG_EVENT_END);
+    EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
+
+    /**
+     * @tc.steps3: Call the function OnDragEvent with isDragged_=false, currentId_=DEFAULT_INT1 and DRAG_EVENT_END.
+     * @tc.expected: The currentId_ is equal to DEFAULT_INT1.
+     */
+    manager->isDragged_ = false;
+    manager->currentId_ = DEFAULT_INT1;
+    context_->OnDragEvent(DEFAULT_INT10, DEFAULT_INT10, DragEventAction::DRAG_EVENT_END);
+    EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
+
+    /**
+     * @tc.steps4: Call the function OnDragEvent with isDragged_=false, currentId_=DEFAULT_INT1 and DRAG_EVENT_MOVE.
+     * @tc.expected: The currentId_ is changed to DEFAULT_INT10.
+     */
+    manager->isDragged_ = false;
+    manager->currentId_ = DEFAULT_INT1;
+    context_->OnDragEvent(DEFAULT_INT10, DEFAULT_INT10, DragEventAction::DRAG_EVENT_MOVE);
+    EXPECT_EQ(manager->currentId_, DEFAULT_INT10);
+}
+
+/**
+ * @tc.name: PipelineContextTest018
+ * @tc.desc: Test the function ShowContainerTitle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTest, PipelineContextTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    context_->windowModal_ = WindowModal::CONTAINER_MODAL;
+    context_->SetupRootElement();
+    ASSERT_NE(context_->rootNode_, nullptr);
+    auto containerNode = AceType::DynamicCast<FrameNode>(context_->rootNode_->GetChildren().front());
+    ASSERT_NE(containerNode, nullptr);
+    auto pattern = containerNode->GetPattern<ContainerModalPattern>();
+    ASSERT_NE(containerNode, nullptr);
+
+    /**
+     * @tc.steps2: Call the function ShowContainerTitle with windowModal_ = WindowModal::DIALOG_MODAL.
+     * @tc.expected: The moveX_ is unchanged.
+     */
+    pattern->moveX_ = DEFAULT_DOUBLE2;
+    context_->windowModal_ = WindowModal::DIALOG_MODAL;
+    context_->ShowContainerTitle(true);
+    EXPECT_DOUBLE_EQ(pattern->moveX_, DEFAULT_DOUBLE2);
+
+    /**
+     * @tc.steps3: Call the function ShowContainerTitle with windowModal_ = WindowModal::CONTAINER_MODAL.
+     * @tc.expected: The moveX_ is unchanged.
+     */
+    pattern->moveX_ = DEFAULT_DOUBLE2;
+    context_->windowModal_ = WindowModal::CONTAINER_MODAL;
+    context_->ShowContainerTitle(true);
+    EXPECT_DOUBLE_EQ(pattern->moveX_, DEFAULT_DOUBLE1);
+}
+
+/**
+ * @tc.name: PipelineContextTest019
+ * @tc.desc: Test the function SetAppTitle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTest, PipelineContextTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    context_->windowModal_ = WindowModal::CONTAINER_MODAL;
+    context_->SetupRootElement();
+    ASSERT_NE(context_->rootNode_, nullptr);
+    auto containerNode = AceType::DynamicCast<FrameNode>(context_->rootNode_->GetChildren().front());
+    ASSERT_NE(containerNode, nullptr);
+    auto pattern = containerNode->GetPattern<ContainerModalPattern>();
+    ASSERT_NE(containerNode, nullptr);
+
+    /**
+     * @tc.steps2: Call the function ShowContainerTitle with windowModal_ = WindowModal::DIALOG_MODAL.
+     * @tc.expected: The moveX_ is unchanged.
+     */
+    pattern->moveX_ = DEFAULT_DOUBLE2;
+    context_->windowModal_ = WindowModal::DIALOG_MODAL;
+    context_->SetAppTitle(TEST_TAG);
+    EXPECT_DOUBLE_EQ(pattern->moveX_, DEFAULT_DOUBLE2);
+
+
+    /**
+     * @tc.steps3: Call the function ShowContainerTitle with windowModal_ = WindowModal::CONTAINER_MODAL.
+     * @tc.expected: The moveX_ is unchanged.
+     */
+    pattern->moveX_ = DEFAULT_DOUBLE2;
+    context_->windowModal_ = WindowModal::CONTAINER_MODAL;
+    context_->SetAppTitle(TEST_TAG);
+    EXPECT_DOUBLE_EQ(pattern->moveX_, DEFAULT_DOUBLE1);
+}
+
+/**
+ * @tc.name: PipelineContextTest020
+ * @tc.desc: Test the function SetAppIcon.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTest, PipelineContextTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    context_->windowModal_ = WindowModal::CONTAINER_MODAL;
+    context_->SetupRootElement();
+    ASSERT_NE(context_->rootNode_, nullptr);
+    auto containerNode = AceType::DynamicCast<FrameNode>(context_->rootNode_->GetChildren().front());
+    ASSERT_NE(containerNode, nullptr);
+    auto pattern = containerNode->GetPattern<ContainerModalPattern>();
+    ASSERT_NE(containerNode, nullptr);
+
+    /**
+     * @tc.steps2: Call the function SetAppIcon with windowModal_ = WindowModal::DIALOG_MODAL.
+     * @tc.expected: The moveX_ is unchanged.
+     */
+    pattern->moveX_ = DEFAULT_DOUBLE2;
+    context_->windowModal_ = WindowModal::DIALOG_MODAL;
+    context_->SetAppIcon(nullptr);
+    EXPECT_DOUBLE_EQ(pattern->moveX_, DEFAULT_DOUBLE2);
+
+
+    /**
+     * @tc.steps3: Call the function SetAppIcon with windowModal_ = WindowModal::CONTAINER_MODAL.
+     * @tc.expected: The moveX_ is unchanged.
+     */
+    pattern->moveX_ = DEFAULT_DOUBLE2;
+    context_->windowModal_ = WindowModal::CONTAINER_MODAL;
+    context_->SetAppIcon(nullptr);
+    EXPECT_DOUBLE_EQ(pattern->moveX_, DEFAULT_DOUBLE1);
+}
+
+/**
+ * @tc.name: PipelineContextTest021
+ * @tc.desc: Test the function OnAxisEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTest, PipelineContextTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    AxisEvent event;
+    event.x = DEFAULT_DOUBLE1;
+    context_->viewScale_ = DEFAULT_DOUBLE1;
+
+    /**
+     * @tc.steps2: Call the function OnAxisEvent with action = AxisAction::BEGIN.
+     * @tc.expected: The instanceId is changed to 4.
+     */
+    event.action = AxisAction::BEGIN;
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    context_->SetEventManager(eventManager);
+    eventManager->SetInstanceId(DEFAULT_INT0);
+    context_->OnAxisEvent(event);
+    EXPECT_EQ(context_->eventManager_->GetInstanceId(), DEFAULT_INT4);
+
+    /**
+     * @tc.steps3: Call the function OnAxisEvent with action = AxisAction::UPDATE.
+     * @tc.expected: The instanceId is changed to 3.
+     */
+    event.action = AxisAction::UPDATE;
+    eventManager->SetInstanceId(DEFAULT_INT0);
+    context_->OnAxisEvent(event);
+    EXPECT_EQ(eventManager->GetInstanceId(), DEFAULT_INT3);
+
+    /**
+     * @tc.steps4: Call the function OnAxisEvent with action = AxisAction::END.
+     * @tc.expected: The instanceId is changed to 1.
+     */
+    event.action = AxisAction::END;
+    eventManager->SetInstanceId(DEFAULT_INT0);
+    context_->OnAxisEvent(event);
+    EXPECT_EQ(eventManager->GetInstanceId(), DEFAULT_INT1);
 }
 } // namespace OHOS::Ace::NG
