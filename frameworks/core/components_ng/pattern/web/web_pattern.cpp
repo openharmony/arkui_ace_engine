@@ -660,6 +660,7 @@ void WebPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    RegistVirtualKeyBoardListener();
     if (!delegate_) {
         // first create case,
         delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "");
@@ -706,14 +707,14 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
     if (!isFocus_) {
         if (isVirtualKeyBoardShow_ == VkState::VK_SHOW) {
             drawSize_.SetSize(drawSizeCache_);
-            UpdateWebLayoutSize();
+            UpdateWebLayoutSize(width, height);
             isVirtualKeyBoardShow_ = VkState::VK_HIDE;
         }
         return false;
     }
     if (NearZero(keyboard)) {
         drawSize_.SetSize(drawSizeCache_);
-        UpdateWebLayoutSize();
+        UpdateWebLayoutSize(width, height);
         isVirtualKeyBoardShow_ = VkState::VK_HIDE;
     } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
         drawSizeCache_.SetSize(drawSize_);
@@ -722,13 +723,13 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
             return true;
         }
         drawSize_.SetHeight(height - keyboard - GetCoordinatePoint()->GetY());
-        UpdateWebLayoutSize();
+        UpdateWebLayoutSize(width, height);
         isVirtualKeyBoardShow_ = VkState::VK_SHOW;
     }
     return true;
 }
 
-void WebPattern::UpdateWebLayoutSize()
+void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height)
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -737,6 +738,9 @@ void WebPattern::UpdateWebLayoutSize()
     rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
     frameNode->GetRenderContext()->SyncGeometryProperties(rect);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->SetRootRect(width, height, 0);
 }
 
 void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
