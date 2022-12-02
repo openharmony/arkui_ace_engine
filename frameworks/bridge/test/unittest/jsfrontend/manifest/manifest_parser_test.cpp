@@ -19,8 +19,9 @@
 #include "core/common/ace_engine.h"
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
 
-#include "base/test/unittest/geometry/mock_container.h"
-#include "base/test/unittest/geometry/mock_pipeline_base.h"
+#include "core/pipeline_ng/test/mock/mock_interface.h"
+#include "core/pipeline_ng/test/mock/mock_container.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #include "frameworks/core/components_ng/test/mock/resource/mock_resource_adapter.h"
 #include "frameworks/core/components_ng/test/mock/theme/mock_theme_manager.h"
 

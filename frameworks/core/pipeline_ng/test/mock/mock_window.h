@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_NG_TEST_UNITTEST_MOCK_WINDOW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_NG_TEST_UNITTEST_MOCK_WINDOW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_NG_TEST_MOCK_MOCK_WINDOW_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_NG_TEST_MOCK_MOCK_WINDOW_H
 
 #include "gmock/gmock-function-mocker.h"
 #include "gmock/gmock.h"
@@ -31,5 +31,5 @@ public:
     MOCK_METHOD(void, RecordFrameTime, (uint64_t timeStamp, const std::string& name), (override));
     MOCK_METHOD(bool, FlushCustomAnimation, (uint64_t timeStamp), (override));
 };
-} // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_NG_TEST_UNITTEST_MOCK_WINDOW_H
+} // namespace OHOS::Ace::NG
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_NG_TEST_MOCK_MOCK_WINDOW_H
