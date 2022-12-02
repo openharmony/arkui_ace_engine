@@ -23,27 +23,30 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
-#include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/grid/grid_position_controller.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
-void GridModelNG::Create(
-    const RefPtr<ScrollControllerBase>& positionController, const RefPtr<ScrollBarProxy>& scrollBarProxy)
+void GridModelNG::Create(const RefPtr<ScrollControllerBase>& positionController, const RefPtr<ScrollProxy>& scrollProxy)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::GRID_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridPattern>(); });
     stack->Push(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
     if (positionController) {
-        auto pattern = frameNode->GetPattern<GridPattern>();
-        CHECK_NULL_VOID(pattern);
         auto controller = AceType::DynamicCast<GridPositionController>(positionController);
         pattern->SetPositionController(controller);
+    }
+    if (scrollProxy) {
+        auto scrollBarProxy = AceType::DynamicCast<NG::ScrollBarProxy>(scrollProxy);
+        pattern->SetScrollBarProxy(scrollBarProxy);
     }
 }
 
@@ -91,19 +94,20 @@ void GridModelNG::SetGridHeight(const Dimension& value)
     ViewAbstract::SetHeight(NG::CalcLength(value));
 }
 
-void GridModelNG::SetScrollBarMode(DisplayMode value)
+void GridModelNG::SetScrollBarMode(int32_t value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollBarMode, value);
+    auto displayMode = static_cast<NG::DisplayMode>(value);
+    ACE_UPDATE_PAINT_PROPERTY(GridPaintProperty, ScrollBarMode, displayMode);
 }
 
 void GridModelNG::SetScrollBarColor(const std::string& value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollBarColor, Color::FromString(value));
+    ACE_UPDATE_PAINT_PROPERTY(GridPaintProperty, ScrollBarColor, Color::FromString(value));
 }
 
 void GridModelNG::SetScrollBarWidth(const std::string& value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(value));
+    ACE_UPDATE_PAINT_PROPERTY(GridPaintProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(value));
 }
 
 void GridModelNG::SetCachedCount(int32_t value)
@@ -258,6 +262,11 @@ bool GridModelNG::CheckTemplate(const std::string& value)
 RefPtr<ScrollControllerBase> GridModelNG::CreatePositionController()
 {
     return AceType::MakeRefPtr<GridPositionController>();
+}
+
+RefPtr<ScrollProxy> GridModelNG::CreateScrollBarProxy()
+{
+    return AceType::MakeRefPtr<NG::ScrollBarProxy>();
 }
 
 } // namespace OHOS::Ace::NG

@@ -62,7 +62,7 @@ const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDi
 void JSGrid::Create(const JSCallbackInfo& info)
 {
     RefPtr<ScrollControllerBase> positionController;
-    RefPtr<ScrollBarProxy> scrollBarProxy;
+    RefPtr<ScrollProxy> scrollBarProxy;
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSScroller* jsScroller = JSRef<JSObject>::Cast(info[0])->Unwrap<JSScroller>();
         if (jsScroller) {
@@ -70,9 +70,9 @@ void JSGrid::Create(const JSCallbackInfo& info)
             jsScroller->SetController(positionController);
 
             // Init scroll bar proxy.
-            scrollBarProxy = AceType::DynamicCast<ScrollBarProxy>(jsScroller->GetScrollBarProxy());
+            scrollBarProxy = jsScroller->GetScrollBarProxy();
             if (!scrollBarProxy) {
-                scrollBarProxy = AceType::MakeRefPtr<ScrollBarProxy>();
+                scrollBarProxy = GridModel::GetInstance()->CreateScrollBarProxy();
                 jsScroller->SetScrollBarProxy(scrollBarProxy);
             }
         }
@@ -235,7 +235,7 @@ void JSGrid::SetScrollBar(int32_t displayMode)
         LOGE("Param is not valid");
         return;
     }
-    GridModel::GetInstance()->SetScrollBarMode(DISPLAY_MODE[displayMode]);
+    GridModel::GetInstance()->SetScrollBarMode(displayMode);
 }
 
 void JSGrid::SetScrollBarColor(const std::string& color)
