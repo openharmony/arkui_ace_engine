@@ -30,6 +30,6 @@ void LinePainter::DrawLine(RSCanvas& canvas, const LinePaintProperty& linePaintP
         linePaintProperty.GetStartPointValue().second.ConvertToPx());
     PointF endPoint_ = PointF(linePaintProperty.GetEndPointValue().first.ConvertToPx(),
         linePaintProperty.GetEndPointValue().second.ConvertToPx());
-    canvas.DrawLine(ToRSPonit(startPoint_ + offset), ToRSPonit(endPoint_ + offset));
+    canvas.DrawLine(ToRSPoint(startPoint_ + offset), ToRSPoint(endPoint_ + offset));
 }
 } // namespace OHOS::Ace::NG

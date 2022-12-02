@@ -48,7 +48,7 @@ CanvasDrawFunction SliderPaintMethod::GetContentDrawFunction(PaintWrapper* paint
     return [background = backgroundPenAndSize, marker = markerPenAndPath, select = selectPenAndSize,
                circle = circlePenAndSize](RSCanvas& canvas) {
         canvas.AttachPen(background.pen);
-        canvas.DrawLine(ToRSPonit(background.start), ToRSPonit(background.end));
+        canvas.DrawLine(ToRSPoint(background.start), ToRSPoint(background.end));
         canvas.DetachPen();
         if (marker.has_value()) {
             canvas.AttachPen(marker.value().pen);
@@ -56,13 +56,13 @@ CanvasDrawFunction SliderPaintMethod::GetContentDrawFunction(PaintWrapper* paint
             canvas.DetachPen();
         }
         canvas.AttachPen(select.pen);
-        canvas.DrawLine(ToRSPonit(select.start), ToRSPonit(select.end));
+        canvas.DrawLine(ToRSPoint(select.start), ToRSPoint(select.end));
         canvas.DetachPen();
         canvas.AttachPen(circle.pen);
-        canvas.DrawCircle(ToRSPonit(circle.center), circle.radius);
+        canvas.DrawCircle(ToRSPoint(circle.center), circle.radius);
         canvas.DetachPen();
         canvas.AttachPen(circle.shadowPen);
-        canvas.DrawCircle(ToRSPonit(circle.center), circle.shadowRadius);
+        canvas.DrawCircle(ToRSPoint(circle.center), circle.shadowRadius);
         canvas.DetachPen();
     };
 }

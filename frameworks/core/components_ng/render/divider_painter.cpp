@@ -33,6 +33,6 @@ void DividerPainter::DrawLine(RSCanvas& canvas, const OffsetF& offset) const
     PointF start = PointF(startPointX, startPointY);
     PointF end = vertical_ ? PointF(startPointX, startPointY + dividerLength_ - constrainStrokeWidth_)
                            : PointF(startPointX + dividerLength_ - constrainStrokeWidth_, startPointY);
-    canvas.DrawLine(ToRSPonit(start), ToRSPonit(end));
+    canvas.DrawLine(ToRSPoint(start), ToRSPoint(end));
 }
 } // namespace OHOS::Ace::NG

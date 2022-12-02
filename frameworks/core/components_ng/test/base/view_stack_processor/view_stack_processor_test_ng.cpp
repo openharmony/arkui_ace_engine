@@ -57,7 +57,7 @@ HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg001, TestSize.Level1)
     for (int i = 0; i < 2; ++i) {
         ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT, customViews[i]);
         auto node = ViewStackProcessor::GetInstance()->Finish();
-        EXPECT_EQ(node->removeSilently_, customViews[i]);
+        EXPECT_FALSE(node->removeSilently_);
     }
 }
 

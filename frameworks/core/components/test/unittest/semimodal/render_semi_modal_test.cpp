@@ -16,8 +16,11 @@
 #include "gtest/gtest.h"
 
 #include "base/log/log.h"
+#include "base/test/mock/mock_asset_manager.h"
+#include "base/test/mock/mock_task_executor.h"
 #include "base/utils/utils.h"
 #include "core/animation/card_transition_controller.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #include "core/components/box/box_component.h"
 #include "core/components/focus_animation/render_focus_animation.h"
 #include "core/components/focus_collaboration/focus_collaboration_component.h"
@@ -29,9 +32,6 @@
 #include "core/components/test/json/json_frontend.h"
 #include "core/components/test/unittest/mock/mock_render_common.h"
 #include "core/components/test/unittest/mock/window_mock.h"
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/fake_task_executor.h"
-#include "core/mock/mock_resource_register.h"
 #include "core/pipeline/pipeline_context.h"
 
 using namespace testing;
@@ -39,7 +39,6 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-
 constexpr int32_t NANOSECOND_TO_MILLISECOND = 1000000;
 constexpr int32_t FRAME_TIME_IN_MILLISECOND = 100;
 constexpr int32_t TEST_SURFACE_WIDTH = 1080;
@@ -52,7 +51,6 @@ int32_t g_pageId = 0; // for alloc page id.
 class MockRenderFocusAnimation : public RenderFocusAnimation {};
 class MockRenderShadow : public RenderShadow {};
 class MockRenderDragBar : public RenderDragBar {};
-
 } // namespace
 
 Platform::JniEnvironment::JniEnvironment() {}
@@ -293,5 +291,4 @@ HWTEST_F(RenderSemiModalTest, SemiModalAnimationTest005, TestSize.Level1)
     EXPECT_TRUE(dragBar != nullptr);
     EXPECT_TRUE(dragBar->GetPanelMode() == PanelMode::FULL);
 }
-
 } // namespace OHOS::Ace

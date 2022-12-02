@@ -15,28 +15,26 @@
 
 #include "gtest/gtest.h"
 
+#include "base/test/mock/mock_asset_manager.h"
 #include "core/components/test/unittest/mock/mock_render_common.h"
-#include "core/mock/fake_asset_manager.h"
 #define private public
 #define protected public
-#include "frameworks/bridge/card_frontend/card_frontend.h"
-#include "frameworks/bridge/card_frontend/js_card_parser.h"
+#include "bridge/card_frontend/card_frontend.h"
+#include "bridge/card_frontend/js_card_parser.h"
 #undef private
 #undef protected
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/core/mock/fake_task_executor.h"
+#include "base/test/mock/mock_task_executor.h"
+#include "bridge/common/utils/utils.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::Framework {
 namespace {
-
 constexpr int32_t COMMAND_SIZE = 1;
 constexpr int32_t DEVICE_WIDTH = 720;
 constexpr int32_t DEVICE_HEIGHT = 1280;
 constexpr double_t DENSITY = 1.5;
-
 } // namespace
 
 class CardFrontendTest : public testing::Test {

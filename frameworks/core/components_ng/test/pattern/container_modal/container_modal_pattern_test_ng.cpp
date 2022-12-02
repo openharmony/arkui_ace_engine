@@ -36,6 +36,7 @@ public:
     static void SetUpTestCase();
     static void TearDownTestCase();
 };
+
 void ContainerModalPatternTestNg::SetUpTestCase()
 {
     const std::string tag = "test";
@@ -51,11 +52,11 @@ void ContainerModalPatternTestNg::TearDownTestCase()
 }
 
 /**
- * @tc.name: ContainerModalPatternTest_001
+ * @tc.name: ContainerModalPatternTest001
  * @tc.desc: Test IsMeasureBoundary and IsAtomicNode.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest_001, TestSize.Level1)
+HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest001, TestSize.Level1)
 {
     auto containerModalPattern = AceType::MakeRefPtr<ContainerModalPattern>();
     EXPECT_TRUE(containerModalPattern->IsMeasureBoundary());
@@ -63,11 +64,11 @@ HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest_001, TestSize.Le
 }
 
 /**
- * @tc.name: ContainerModalPatternTest_002
+ * @tc.name: ContainerModalPatternTest002
  * @tc.desc: Test OnWindowFocused and OnWindowUnfocused.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest_002, TestSize.Level1)
+HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest002, TestSize.Level1)
 {
     auto containerModalPattern = AceType::MakeRefPtr<ContainerModalPattern>();
     std::string tag = "test";
@@ -85,11 +86,11 @@ HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest_002, TestSize.Le
 }
 
 /**
- * @tc.name: ContainerModalPatternTest_003
+ * @tc.name: ContainerModalPatternTest003
  * @tc.desc: Test InitContainerEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest_003, TestSize.Level1)
+HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest003, TestSize.Level1)
 {
     std::string tag = "test";
     auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
@@ -108,11 +109,11 @@ HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest_003, TestSize.Le
 }
 
 /**
- * @tc.name: ContainerModalPatternTest_004
+ * @tc.name: ContainerModalPatternTest004
  * @tc.desc: Test ShowTitle is true.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest_004, TestSize.Level1)
+HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest004, TestSize.Level1)
 {
     std::string tag = "test";
     auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
@@ -140,11 +141,11 @@ HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest_004, TestSize.Le
 }
 
 /**
- * @tc.name: ContainerModalPatternTest_005
+ * @tc.name: ContainerModalPatternTest005
  * @tc.desc: Test ShowTitle is false.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest_005, TestSize.Level1)
+HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest005, TestSize.Level1)
 {
     std::string tag = "test";
     auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
@@ -172,11 +173,11 @@ HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest_005, TestSize.Le
 }
 
 /**
- * @tc.name: ContainerModalPatternTest_006
+ * @tc.name: ContainerModalPatternTest006
  * @tc.desc: Test ShowTitle CHECK_NULL_VOID.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest_006, TestSize.Level1)
+HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest006, TestSize.Level1)
 {
     ContainerModalPattern containerModalPattern;
     containerModalPattern.ShowTitle(false);
@@ -208,11 +209,11 @@ HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest_006, TestSize.Le
 }
 
 /**
- * @tc.name: ContainerModalPatternTest_007
+ * @tc.name: ContainerModalPatternTest007
  * @tc.desc: Test SetAppIcon.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest_007, TestSize.Level1)
+HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest007, TestSize.Level1)
 {
     std::string tag = "test";
     auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
@@ -243,11 +244,11 @@ HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest_007, TestSize.Le
 }
 
 /**
- * @tc.name: ContainerModalPatternTest_008
+ * @tc.name: ContainerModalPatternTest008
  * @tc.desc: Test OnModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest_008, TestSize.Level1)
+HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest008, TestSize.Level1)
 {
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
@@ -258,11 +259,11 @@ HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest_008, TestSize.Le
 }
 
 /**
- * @tc.name: ContainerModalPatternTest_009
+ * @tc.name: ContainerModalPatternTest009
  * @tc.desc: Test ChangeFloatingTitle.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest_009, TestSize.Level1)
+HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest009, TestSize.Level1)
 {
     auto containerModalPattern = AceType::MakeRefPtr<ContainerModalPattern>();
 
@@ -273,13 +274,13 @@ HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest_009, TestSize.Le
 }
 
 /**
- * @tc.name: ContainerModalPatternTest_0010
+ * @tc.name: ContainerModalPatternTest010
  * @tc.desc: Test ChangeTitleButtonIcon.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest_0010, TestSize.Level1)
+HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest010, TestSize.Level1)
 {
-    std::string tag = "Butten";
+    std::string tag = "Button";
     auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
     frameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
     ViewStackProcessor::GetInstance()->Push(frameNode);

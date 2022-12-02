@@ -41,11 +41,13 @@ struct BitmapFormat {
 class TestingBitmap {
 public:
     TestingBitmap() = default;
-    virtual ~TestingBitmap() = default;
+    ~TestingBitmap() = default;
+
     virtual void* GetPixels()
     {
         return nullptr;
     }
+
     virtual void Build(const int width, const int height, const BitmapFormat& format) {}
 };
 } // namespace OHOS::Ace::Testing

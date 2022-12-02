@@ -17,18 +17,17 @@
 
 #include "gtest/gtest.h"
 
-#include "core/common/ace_engine.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "core/pipeline_ng/test/mock/mock_interface.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#include "core/pipeline_ng/test/mock/mock_container.h"
-
+#include "core/common/ace_engine.h"
+#include "core/common/test/mock/mock_container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/test/pattern/custom_paint/common_constants.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_interface.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 // Add the following two macro definitions to test the private and protected method.
 #define private public
@@ -41,12 +40,10 @@
 #include "core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_view.h"
 
-
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
 class CustomPaintPatternTestNg : public testing::Test {
 public:
     // Create the pointer of the class CustomPaintPattern
@@ -119,7 +116,7 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg001, TestSize.Level1)
      * @tc.steps3: Set the onReadEvent as the function which changes the value of flagEventCbk.
      * @tc.expected: The value of flagEventCbk will be modified to false.
      */
-    CustomPaintView::SetOnReady([&flagEventCbk] () { flagEventCbk = true; });
+    CustomPaintView::SetOnReady([&flagEventCbk]() { flagEventCbk = true; });
     eventHub->FireReadyEvent();
     EXPECT_TRUE(flagEventCbk);
 }
@@ -328,8 +325,7 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg006, TestSize.Level1)
      * @tc.steps2: Call the function GetImageData.
      * @tc.expected: The dirtyWidth and dirtyHeight of the return value are equal to the input value.
      */
-    auto imageData = customPattern->GetImageData(
-        DEFAULT_DOUBLE1, DEFAULT_DOUBLE1, DEFAULT_DOUBLE1, DEFAULT_DOUBLE1);
+    auto imageData = customPattern->GetImageData(DEFAULT_DOUBLE1, DEFAULT_DOUBLE1, DEFAULT_DOUBLE1, DEFAULT_DOUBLE1);
     EXPECT_DOUBLE_EQ(imageData->dirtyWidth, DEFAULT_DOUBLE1);
     EXPECT_DOUBLE_EQ(imageData->dirtyHeight, DEFAULT_DOUBLE1);
 
@@ -347,8 +343,7 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg006, TestSize.Level1)
      * @tc.expected: The dirtyWidth and dirtyHeight of the return value are equal to the input value.
      */
     customPattern1->Save(); // Make sure entering the second if-branch
-    auto imageData1 = customPattern1->GetImageData(
-        DEFAULT_DOUBLE1, DEFAULT_DOUBLE1, DEFAULT_DOUBLE1, DEFAULT_DOUBLE1);
+    auto imageData1 = customPattern1->GetImageData(DEFAULT_DOUBLE1, DEFAULT_DOUBLE1, DEFAULT_DOUBLE1, DEFAULT_DOUBLE1);
     EXPECT_DOUBLE_EQ(imageData1->dirtyWidth, DEFAULT_DOUBLE1);
     EXPECT_DOUBLE_EQ(imageData1->dirtyHeight, DEFAULT_DOUBLE1);
 }
