@@ -37,26 +37,20 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    static void PrintGridMatrix(const std::map<int32_t, std::map<int32_t, uint32_t>>& gridMatrix);
+    static void PrintGridMatrix(const std::map<int32_t, std::map<int32_t, int32_t>>& gridMatrix);
     static void PrintLineHeightMap(const std::map<int32_t, float>& lineHeightMap);
 
 private:
-    void FillGridViewportAndMeasureChildren(float mainSize, float crossSize,
-        const RefPtr<GridLayoutProperty>& gridLayoutProperty, LayoutWrapper* layoutWrapper);
-    float MeasureRecordedItems(
-        float mainSize, float crossSize, float crossGap, LayoutWrapper* layoutWrapper);
-
-    // fill end of viewport
-    void FillBlankAtStart(float mainSize, float crossSize, const RefPtr<GridLayoutProperty>& gridLayoutProperty,
-        LayoutWrapper* layoutWrapper);
-    float FillNewLineForward(float crossSize, float mainSize, const RefPtr<GridLayoutProperty>& gridLayoutProperty,
-        LayoutWrapper* layoutWrapper);
+    void FillGridViewportAndMeasureChildren(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
+    float MeasureRecordedItems(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
 
     // fill start of viewport
-    void FillBlankAtEnd(float mainSize, float crossSize, const RefPtr<GridLayoutProperty>& gridLayoutProperty,
-        LayoutWrapper* layoutWrapper, float& mainLength);
-    float FillNewLineBackward(float crossSize, float mainSize, const RefPtr<GridLayoutProperty>& gridLayoutProperty,
-        LayoutWrapper* layoutWrapper);
+    bool FillBlankAtStart(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
+    float FillNewLineForward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
+
+    // fill end of viewport
+    void FillBlankAtEnd(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
+    float FillNewLineBackward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
 
     // Measure grid item which not exist in grid matrix already, need to place it and save to grid matrix.
     int32_t MeasureChild(const SizeF& frameSize, int32_t itemIndex, LayoutWrapper* layoutWrapper,
@@ -84,15 +78,14 @@ private:
     void AdaptToChildMainSize(LayoutWrapper* layoutWrapper, RefPtr<GridLayoutProperty>& gridLayoutProperty,
         float mainSize, const SizeF& idealSize);
 
+    int32_t GetStartingItem(LayoutWrapper* layoutWrapper, int32_t currentIndex) const;
+
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
     int32_t currentMainLineIndex_ = 0;        // it equals to row index in vertical grid
     std::map<int32_t, float> itemsCrossSize_; // grid item's size in cross axis.
     Axis axis_ = Axis::VERTICAL;
 
-    // Store current index when place children.
-    int32_t mainIndex_ = 0;
-    int32_t crossIndex_ = 0;
     float mainGap_ = 0;
 
     // Map structure: [index, crossPosition], store cross position of each item.
