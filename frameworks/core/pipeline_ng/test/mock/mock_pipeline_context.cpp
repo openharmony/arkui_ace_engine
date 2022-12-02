@@ -204,6 +204,11 @@ void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback) {
 
 const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 {
-    return nullptr;
+    if (fullScreenManager_) {
+        return fullScreenManager_;
+    }
+    auto root = AceType::MakeRefPtr<FrameNode>("ROOT", -1, AceType::MakeRefPtr<Pattern>(), true);
+    fullScreenManager_ = AceType::MakeRefPtr<FullScreenManager>(root);
+    return fullScreenManager_;
 }
 } // namespace OHOS::Ace::NG
