@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_PATTERN_H
 
 #include <cstdint>
+#include <string>
+#include <utility>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -131,7 +133,11 @@ public:
     }
 
     const TextEditingValueNG& GetEditingValue() const;
-
+    void UpdateEditingValue(std::string value, int32_t caretPosition)
+    {
+        textEditingValue_.text = std::move(value);
+        textEditingValue_.caretPosition = caretPosition;
+    }
     void SetEditingValueToProperty(const std::string& newValueText);
 
     void UpdatePositionOfParagraph(int32_t pos);
@@ -312,10 +318,15 @@ public:
         return false;
     }
     float PreferredLineHeight();
+    void SetNeedCloseOverlay(bool needClose)
+    {
+        needCloseOverlay_ = needClose;
+    }
 
 private:
     bool IsTextArea();
     void HandleBlurEvent();
+    void HandleFocusEvent();
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     void HandleDirectionalKey(const KeyEvent& keyEvent);
@@ -441,6 +452,7 @@ private:
     bool focusEventInitialized_ = false;
     bool preferredLineHeightNeedToUpdate = true;
     bool isMousePressed_ = false;
+    bool needCloseOverlay_ = true;
 
     SelectionMode selectionMode_ = SelectionMode::NONE;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;

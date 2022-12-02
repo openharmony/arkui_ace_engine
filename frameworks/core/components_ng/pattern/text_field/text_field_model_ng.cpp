@@ -40,25 +40,16 @@ void TextFieldModelNG::CreateNode(
     stack->Push(frameNode);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    if (textFieldLayoutProperty) {
-        if (value) {
-            if (value->empty()) {
-                if (textFieldLayoutProperty->HasValue()) {
-                    textFieldLayoutProperty->UpdateValue(value.value());
-                }
-            } else {
-                textFieldLayoutProperty->UpdateValue(value.value());
-            }
-        }
-        if (placeholder) {
-            textFieldLayoutProperty->UpdatePlaceholder(placeholder.value());
-        }
-        if (!isTextArea) {
-            textFieldLayoutProperty->UpdateMaxLines(1);
-            textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
-        }
-    }
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto textEditingValue = pattern->GetTextEditingValue();
+    if (value.has_value() && value.value() != textEditingValue.text) {
+        pattern->InitEditingValueText(value.value());
+    }
+    textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
+    if (!isTextArea) {
+        textFieldLayoutProperty->UpdateMaxLines(1);
+        textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
+    }
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
@@ -73,7 +64,6 @@ void TextFieldModelNG::CreateNode(
     auto radius = textFieldTheme->GetBorderRadius();
     SetCaretColor(textFieldTheme->GetCursorColor());
     // TODO: basic padding check ux
-    pattern->InitEditingValueText(textFieldLayoutProperty->GetValueValue(""));
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
     textFieldLayoutProperty->UpdateCopyOptions(CopyOptions::Distributed);
