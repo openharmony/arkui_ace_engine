@@ -91,6 +91,9 @@ void SwitchPattern::OnModifyDone()
     InitPanEvent(gestureHub);
     InitTouchEvent();
     InitMouseEvent();
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
 }
 
 void SwitchPattern::UpdateCurrentOffset(float offset)
@@ -153,6 +156,25 @@ void SwitchPattern::PlayTranslateAnimation(float startPos, float endPos)
     controller_->SetDuration(GetDuration());
     controller_->AddInterpolator(translate);
     controller_->Play();
+}
+
+bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    if (config.skipMeasure && config.skipLayout) {
+        return false;
+    }
+
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
+    auto switchLayoutAlgorithm = DynamicCast<SwitchLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(switchLayoutAlgorithm, false);
+
+    auto height = switchLayoutAlgorithm->GetHeight();
+    auto width = switchLayoutAlgorithm->GetWidth();
+
+    width_ = width;
+    height_ = height;
+    return true;
 }
 
 RefPtr<Curve> SwitchPattern::GetCurve() const
@@ -366,6 +388,37 @@ void SwitchPattern::InitMouseEvent()
     };
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnHoverEvent(mouseEvent_);
+}
+
+void SwitchPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            pattern->GetInnerFocusPaintRect(paintRect);
+        }
+    };
+    focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+}
+
+void SwitchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
+{
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
+    CHECK_NULL_VOID(switchTheme);
+    auto focusPaintPadding = switchTheme->GetFocusPaintPadding().ConvertToPx();
+
+    auto height = height_ + focusPaintPadding * 2;
+    auto width = width_ + focusPaintPadding * 2;
+    auto radio = height / 2.0;
+    auto Rect = RectF(-focusPaintPadding, -focusPaintPadding, width, height);
+
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, radio, radio);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, radio, radio);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, radio, radio);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, radio, radio);
+    paintRect.SetRect(Rect);
 }
 
 void SwitchPattern::HandleMouseEvent(bool isHover)

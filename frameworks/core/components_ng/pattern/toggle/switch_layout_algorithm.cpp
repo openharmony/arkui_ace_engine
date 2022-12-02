@@ -67,6 +67,9 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
         width = frameWidth;
     }
 
+    width_ = width;
+    height_ = height;
+
     return SizeF(width, height);
 }
 
