@@ -158,7 +158,8 @@ HWTEST_F(LongPressEventTestNg, LongPressEventActuatorTest002, TestSize.Level1)
     EXPECT_EQ(longPressEventActuator->isDisableMouseLeft_, true);
 
     /**
-     * @tc.steps: step6. Invoke OnCollectTouchTarget when longPressEvent_ is not nullptr but longPressRecognizer_ is nullptr.
+     * @tc.steps: step6. Invoke OnCollectTouchTarget when longPressEvent_ is not nullptr but longPressRecognizer_ is
+     * nullptr.
      * @tc.expected:  TouchTestResult size has been increased one.
      */
     EXPECT_EQ(longPressEventActuator->longPressRecognizer_, nullptr);
