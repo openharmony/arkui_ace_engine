@@ -68,12 +68,12 @@ bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNod
 bool EventManager::DispatchTabIndexEventNG(
     const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode, const RefPtr<NG::FrameNode>& curPage)
 {
-    return true;
+    return !instanceId_;
 }
 
 bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode)
 {
-    return true;
+    return false;
 }
 
 void EventManager::MouseTest(const MouseEvent& event, const RefPtr<RenderNode>& renderNode) {}
@@ -116,6 +116,7 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<RenderNode>& re
 
 bool EventManager::DispatchAxisEvent(const AxisEvent& event)
 {
+    SetInstanceId(GetInstanceId() + static_cast<int32_t>(event.x));
     return true;
 }
 
