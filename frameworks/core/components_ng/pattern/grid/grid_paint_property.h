@@ -23,7 +23,6 @@
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
-
 struct ScrollBarProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarMode, DisplayMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarWidth, Dimension);
@@ -63,7 +62,6 @@ private:
     Dimension GetBarWidth() const;
     std::string GetBarStateString() const;
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif

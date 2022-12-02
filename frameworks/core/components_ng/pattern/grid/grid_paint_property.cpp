@@ -19,7 +19,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
 void GridPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     PaintProperty::ToJsonValue(json);

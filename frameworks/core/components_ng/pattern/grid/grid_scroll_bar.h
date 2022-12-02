@@ -63,7 +63,6 @@ private:
     float estimatedHeight_ = 0.0f;
     float offset_ = 0.0f;
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_SCROLL_BAR_H
