@@ -98,17 +98,18 @@ HWTEST_F(EventHubTestNg, EventHubCreateTest001, TestSize.Level1)
      * @tc.expected: eventHub is not null.
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    EXPECT_TRUE(eventHub != nullptr);
+    eventHub->MarkModifyDone();
+    EXPECT_NE(eventHub, nullptr);
 
     /**
      * @tc.steps: step2. Get EventHub's properties.
      * @tc.expected: These properties are null when GetOrCreateEventHub functions have not been invoked.
      */
-    EXPECT_TRUE(eventHub->GetGestureEventHub() == nullptr);
-    EXPECT_TRUE(eventHub->GetInputEventHub() == nullptr);
-    EXPECT_TRUE(eventHub->GetFocusHub() == nullptr);
-    EXPECT_TRUE(eventHub->GetFrameNode() == nullptr);
-    EXPECT_TRUE(eventHub->GetOnDragStart() == nullptr);
+    EXPECT_EQ(eventHub->GetGestureEventHub(), nullptr);
+    EXPECT_EQ(eventHub->GetInputEventHub(), nullptr);
+    EXPECT_EQ(eventHub->GetFocusHub(), nullptr);
+    EXPECT_EQ(eventHub->GetFrameNode(), nullptr);
+    EXPECT_EQ(eventHub->GetOnDragStart(), nullptr);
 
     /**
      * @tc.steps: step3. Test EventHub's default properties.
@@ -131,7 +132,7 @@ HWTEST_F(EventHubTestNg, EventHubPropertyTest002, TestSize.Level1)
      * @tc.expected: eventHub is not null.
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    EXPECT_TRUE(eventHub != nullptr);
+    EXPECT_NE(eventHub, nullptr);
 
     /**
      * @tc.steps: step2. Invoke GetOrCreateEventHub functions.
@@ -140,9 +141,9 @@ HWTEST_F(EventHubTestNg, EventHubPropertyTest002, TestSize.Level1)
     eventHub->GetOrCreateGestureEventHub();
     eventHub->GetOrCreateInputEventHub();
     eventHub->GetOrCreateFocusHub();
-    EXPECT_TRUE(eventHub->GetGestureEventHub() != nullptr);
-    EXPECT_TRUE(eventHub->GetInputEventHub() != nullptr);
-    EXPECT_TRUE(eventHub->GetFocusHub() != nullptr);
+    EXPECT_NE(eventHub->GetGestureEventHub(), nullptr);
+    EXPECT_NE(eventHub->GetInputEventHub(), nullptr);
+    EXPECT_NE(eventHub->GetFocusHub(), nullptr);
 
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     eventHub->AttachHost(frameNode);
@@ -164,7 +165,7 @@ HWTEST_F(EventHubTestNg, EventHubPropertyTest003, TestSize.Level1)
      * @tc.expected: eventHub is not null.
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    EXPECT_TRUE(eventHub != nullptr);
+    EXPECT_NE(eventHub, nullptr);
 
     /**
      * @tc.steps: step2. Set EventHub OnAreaChanged function and fire it.
@@ -218,7 +219,7 @@ HWTEST_F(EventHubTestNg, EventHubDragEventsTest004, TestSize.Level1)
      * @tc.expected: eventHub is not null.
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    EXPECT_TRUE(eventHub != nullptr);
+    EXPECT_NE(eventHub, nullptr);
 
     /**
      * @tc.steps: step2. Set EventHub OnDragStart event and fire it.
@@ -233,7 +234,7 @@ HWTEST_F(EventHubTestNg, EventHubDragEventsTest004, TestSize.Level1)
     };
     eventHub->SetOnDragStart(OnDragStartFunc);
     EXPECT_TRUE(eventHub->HasOnDragStart());
-    EXPECT_TRUE(eventHub->GetOnDragStart() != nullptr);
+    EXPECT_NE(eventHub->GetOnDragStart(), nullptr);
     eventHub->GetOnDragStart()(dragEvent, DRAG_STARR_EVENT_TYPE);
     EXPECT_EQ(dragEventType, DRAG_STARR_EVENT_TYPE);
 
