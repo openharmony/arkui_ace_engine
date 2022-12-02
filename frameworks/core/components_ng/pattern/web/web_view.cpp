@@ -453,4 +453,60 @@ void WebView::SetJsProxyCallback(JsProxyCallback&& jsProxyCallback)
     CHECK_NULL_VOID(webPattern);
     webPattern->SetJsProxyCallback(std::move(jsProxyCallback));
 }
+
+void WebView::SetWebCursiveFont(const std::string& cursiveFontFamily)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebCursiveFont(cursiveFontFamily);
+}
+
+void WebView::SetWebFantasyFont(const std::string& fantasyFontFamily)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebFantasyFont(fantasyFontFamily);
+}
+
+void WebView::SetWebSansSerifFont(const std::string& sansSerifFontFamily)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebSansSerifFont(sansSerifFontFamily);
+}
+
+void WebView::SetWebSerifFont(const std::string& serifFontFamily)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebSerifFont(serifFontFamily);
+}
+
+void WebView::SetWebStandardFont(const std::string& standardFontFamily)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebStandardFont(standardFontFamily);
+}
+
+void WebView::SetDefaultFixedFontSize(int32_t defaultFixedFontSize)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateDefaultFixedFontSize(defaultFixedFontSize);
+}
+
+void WebView::SetDefaultFontSize(int32_t defaultFontSize)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateDefaultFontSize(defaultFontSize);
+}
+
+void WebView::SetMinFontSize(int32_t minFontSize)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateMinFontSize(minFontSize);
+}
 } // namespace OHOS::Ace::NG

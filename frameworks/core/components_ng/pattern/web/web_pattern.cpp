@@ -633,6 +633,62 @@ void WebPattern::OnMultiWindowAccessEnabledUpdate(bool value)
     delegate_->UpdateMultiWindowAccess(value);
 }
 
+void WebPattern::OnWebCursiveFontUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateWebCursiveFont(value);
+    }
+}
+
+void WebPattern::OnWebFantasyFontUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateWebFantasyFont(value);
+    }
+}
+
+void WebPattern::OnWebSansSerifFontUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateWebSansSerifFont(value);
+    }
+}
+
+void WebPattern::OnWebSerifFontUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateWebSerifFont(value);
+    }
+}
+
+void WebPattern::OnWebStandardFontUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateWebStandardFont(value);
+    }
+}
+
+void WebPattern::OnDefaultFixedFontSizeUpdate(int32_t value)
+{
+    if (delegate_) {
+        delegate_->UpdateDefaultFixedFontSize(value);
+    }
+}
+
+void WebPattern::OnDefaultFontSizeUpdate(int32_t value)
+{
+    if (delegate_) {
+        delegate_->UpdateDefaultFontSize(value);
+    }
+}
+
+void WebPattern::OnMinFontSizeUpdate(int32_t value)
+{
+    if (delegate_) {
+        delegate_->UpdateMinFontSize(value);
+    }
+}
+
 void WebPattern::RegistVirtualKeyBoardListener()
 {
     if (!needUpdateWeb_) {
@@ -683,6 +739,14 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateMediaPlayGestureAccess(GetMediaPlayGestureAccessValue(true));
         delegate_->UpdatePinchSmoothModeEnabled(GetPinchSmoothModeEnabledValue(false));
         delegate_->UpdateMultiWindowAccess(GetMultiWindowAccessEnabledValue(false));
+        delegate_->UpdateWebCursiveFont(GetWebCursiveFontValue(DEFAULT_CURSIVE_FONT_FAMILY));
+        delegate_->UpdateWebFantasyFont(GetWebFantasyFontValue(DEFAULT_FANTASY_FONT_FAMILY));
+        delegate_->UpdateWebSansSerifFont(GetWebSansSerifFontValue(DEFAULT_SANS_SERIF_FONT_FAMILY));
+        delegate_->UpdateWebSerifFont(GetWebSerifFontValue(DEFAULT_SERIF_FONT_FAMILY));
+        delegate_->UpdateWebStandardFont(GetWebStandardFontValue(DEFAULT_STANDARD_FONT_FAMILY));
+        delegate_->UpdateDefaultFixedFontSize(GetDefaultFixedFontSizeValue(DEFAULT_FIXED_FONT_SIZE));
+        delegate_->UpdateDefaultFontSize(GetDefaultFontSizeValue(DEFAULT_FONT_SIZE));
+        delegate_->UpdateMinFontSize(GetMinFontSizeValue(DEFAULT_MINIMUM_FONT_SIZE));
         if (GetUserAgent()) {
             delegate_->UpdateUserAgent(GetUserAgent().value());
         }

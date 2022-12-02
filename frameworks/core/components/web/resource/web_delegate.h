@@ -331,6 +331,14 @@ public:
     void UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     void UpdateMediaPlayGestureAccess(bool isNeedGestureAccess);
     void UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled);
+    void UpdateWebCursiveFont(const std::string& cursiveFontFamily);
+    void UpdateWebFantasyFont(const std::string& fantasyFontFamily);
+    void UpdateWebSansSerifFont(const std::string& sansSerifFontFamily);
+    void UpdateWebSerifFont(const std::string& serifFontFamily);
+    void UpdateWebStandardFont(const std::string& standardFontFamily);
+    void UpdateDefaultFixedFontSize(int32_t size);
+    void UpdateDefaultFontSize(int32_t defaultFontSize);
+    void UpdateMinFontSize(int32_t minFontSize);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);

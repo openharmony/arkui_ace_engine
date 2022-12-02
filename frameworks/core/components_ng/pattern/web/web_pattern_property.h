@@ -45,6 +45,15 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(InitialScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(PinchSmoothModeEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MultiWindowAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(WebCursiveFont, std::string);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(WebFantasyFont, std::string);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(WebSansSerifFont, std::string);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(WebSerifFont, std::string);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(WebStandardFont, std::string);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DefaultFixedFontSize, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DefaultFontSize, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(MinFontSize, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockNetwork, bool);
 };
 
 } // namespace OHOS::Ace::NG
