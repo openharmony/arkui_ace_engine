@@ -24,6 +24,37 @@
 #include "utils/scalar.h"
 
 namespace OHOS::Ace::Testing {
+enum class BlendMode {
+    CLEAR,
+    SRC,
+    DST,
+    SRC_OVER,
+    DST_OVER,
+    SRC_IN,
+    DST_IN,
+    SRC_OUT,
+    DST_OUT,
+    SRC_ATOP,
+    DST_ATOP,
+    XOR,
+    PLUS,
+    MODULATE,
+    SCREEN,
+    OVERLAY,
+    DARKEN,
+    LIGHTEN,
+    COLOR_DODGE,
+    COLOR_BURN,
+    HARD_LIGHT,
+    SOFT_LIGHT,
+    DIFFERENCE,
+    EXCLUSION,
+    MULTIPLY,
+    HUE,
+    STATURATION,
+    COLOR,
+    LUMINOSITY,
+};
 using scalar = Rosen::Drawing::scalar;
 class TestingBrush {
 public:
@@ -38,6 +69,7 @@ public:
     virtual void SetShaderEffect(std::shared_ptr<TestingShaderEffect> e) {}
     virtual void SetFilter(const TestingFilter filter) {}
     virtual void SetAlpha(uint32_t a) {}
+    virtual void SetBlendMode(BlendMode mode) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_BRUSH_H

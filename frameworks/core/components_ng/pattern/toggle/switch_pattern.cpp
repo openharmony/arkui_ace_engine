@@ -27,7 +27,7 @@
 #include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 void SwitchPattern::OnAttachToFrameNode()
@@ -55,13 +55,12 @@ void SwitchPattern::OnModifyDone()
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-
     if (!layoutProperty->GetMarginProperty()) {
         MarginProperty margin;
         margin.left = CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value());
@@ -129,7 +128,9 @@ void SwitchPattern::PlayTranslateAnimation(float startPos, float endPos)
     }));
 
     if (!controller_) {
-        controller_ = AceType::MakeRefPtr<Animator>(host->GetContext());
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        controller_ = AceType::MakeRefPtr<Animator>(pipeline);
     }
     controller_->ClearStopListeners();
     controller_->ClearInterpolators();
@@ -432,7 +433,7 @@ RectF SwitchPattern::GetHotZoneRect(bool isOriginal) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, {});
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, {});
     auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_RETURN(switchTheme, {});
