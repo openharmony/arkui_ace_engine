@@ -1259,7 +1259,7 @@ void TextFieldPattern::ShowSelectOverlay(
         if (secondHandle.has_value()) {
             selectInfo.secondHandle.paintRect = secondHandle.value();
         }
-        selectInfo.isSingleHandle = !firstHandle.has_value() && !secondHandle.has_value();
+        selectInfo.isSingleHandle = !firstHandle.has_value() || !secondHandle.has_value();
         selectInfo.onHandleMove = [weak](const RectF& handleRect, bool isFirst) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -1690,6 +1690,7 @@ float TextFieldPattern::PreferredLineHeight()
     paraStyle.maxLines_ = lineHeightMeasureUtilTextStyle_.GetMaxLines();
     paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
     paraStyle.wordBreakType_ = ToRSWordBreakType(lineHeightMeasureUtilTextStyle_.GetWordBreak());
+    paraStyle.fontSize_ = lineHeightMeasureUtilTextStyle_.GetFontSize().ConvertToPx();
     if (lineHeightMeasureUtilTextStyle_.GetTextOverflow() == TextOverflow::ELLIPSIS) {
         paraStyle.ellipsis_ = RSParagraphStyle::ELLIPSIS;
     }
@@ -1700,7 +1701,7 @@ float TextFieldPattern::PreferredLineHeight()
     builder->AddText(StringUtils::Str8ToStr16(textContent));
     builder->Pop();
     lineHeightMeasureUtilParagraph_ = builder->Build();
-    lineHeightMeasureUtilParagraph_->Layout(Size::INFINITE_SIZE);
+    lineHeightMeasureUtilParagraph_->Layout(std::numeric_limits<double>::infinity());
     layoutProperty->UpdatePreferredLineHeightNeedToUpdate(false);
     return static_cast<float>(lineHeightMeasureUtilParagraph_->GetHeight());
 }
