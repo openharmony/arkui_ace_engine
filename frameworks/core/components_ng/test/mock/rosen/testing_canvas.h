@@ -75,6 +75,8 @@ public:
     virtual void Restore() {}
     virtual void DrawCircle(const Point& centerPt, scalar radius) {}
     virtual void DrawRoundRect(const RoundRect& roundRect) {}
+    virtual void DrawBackground(const TestingBrush& brush) {}
+    virtual void ClipRect(const Rect& rect, ClipOp op) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_CANVAS_H
