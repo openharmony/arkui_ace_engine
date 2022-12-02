@@ -331,6 +331,7 @@ void CheckBoxPattern::UpdateState()
             if (isSelected || (!isSelected && !isFirstCreated_)) {
                 UpdateUIStatus(isSelected);
             }
+            SetLastSelect(isSelected);
         }
         isFirstCreated_ = false;
         pattern->SetPreGroup(group);
