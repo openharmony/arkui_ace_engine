@@ -28,6 +28,7 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr uint32_t COLUMN_CHILD_NUM = 2;
+constexpr uint32_t TITLE_POSITION = 1;
 constexpr uint32_t SPLIT_BUTTON_POSITION = 2;
 constexpr uint32_t BLUR_WINDOW_RADIUS = 100;
 constexpr uint32_t TITLE_POPUP_TIME = 200;        // 200ms
@@ -550,8 +551,18 @@ void ContainerModalElement::SetAppTitle(const std::string& title)
     CHECK_NULL_VOID(containerModalComponent_);
     auto textComponent = containerModalComponent_->GetTitleLabel();
     CHECK_NULL_VOID(textComponent);
+    if (textComponent->GetData() == title) {
+        LOGI("set same title, skip, title is %{public}s", title.c_str());
+        return;
+    }
     textComponent->SetData(title);
-    FlushReload();
+    bool isFloatingTitle = windowMode_ != WindowMode::WINDOW_MODE_FLOATING;
+    auto renderTitle = GetTitleRender(isFloatingTitle);
+    CHECK_NULL_VOID(renderTitle);
+    renderTitle->Update(textComponent);
+    renderTitle->MarkNeedRender();
+    LOGI("set app title successfully, title:%{public}s, isFloatingTitle:%{public}d", title.c_str(),
+        static_cast<int>(isFloatingTitle));
 }
 
 void ContainerModalElement::SetAppIcon(const RefPtr<PixelMap>& icon)
@@ -561,7 +572,45 @@ void ContainerModalElement::SetAppIcon(const RefPtr<PixelMap>& icon)
     CHECK_NULL_VOID(imageComponent);
     imageComponent->SetSrc("");
     imageComponent->SetPixmap(icon);
-    FlushReload();
+    bool isFloatingTitle = windowMode_ != WindowMode::WINDOW_MODE_FLOATING;
+    auto renderIcon = GetIconRender(isFloatingTitle);
+    CHECK_NULL_VOID(renderIcon);
+    renderIcon->Update(imageComponent);
+    renderIcon->MarkNeedRender();
+    LOGI("set app icon successfully, isFloatingTitle:%{public}d", static_cast<int>(isFloatingTitle));
+}
+
+RefPtr<RenderText> ContainerModalElement::GetTitleRender(bool isFloatingTitle)
+{
+    auto titleBoxElement = isFloatingTitle ? floatingTitleBox_ : titleBox_;
+    CHECK_NULL_RETURN(titleBoxElement, nullptr);
+    auto rowElement = AceType::DynamicCast<RowElement>(titleBoxElement->GetFirstChild());
+    CHECK_NULL_RETURN(rowElement, nullptr);
+    auto renderRow = AceType::DynamicCast<RenderFlex>(rowElement->GetRenderNode());
+    CHECK_NULL_RETURN(renderRow, nullptr);
+    const auto& children = renderRow->GetChildren();
+    if (children.size() <= TITLE_POSITION) {
+        LOGW("row children size is wrong");
+        return nullptr;
+    }
+    auto iterator = renderRow->GetChildren().begin();
+    std::advance(iterator, TITLE_POSITION);
+    auto title = AceType::DynamicCast<RenderText>(*iterator);
+    return title;
+}
+
+RefPtr<RenderImage> ContainerModalElement::GetIconRender(bool isFloatingTitle)
+{
+    auto titleBoxElement = isFloatingTitle ? floatingTitleBox_ : titleBox_;
+    CHECK_NULL_RETURN(titleBoxElement, nullptr);
+    auto rowElement = AceType::DynamicCast<RowElement>(titleBoxElement->GetFirstChild());
+    CHECK_NULL_RETURN(rowElement, nullptr);
+    auto renderRow = AceType::DynamicCast<RenderFlex>(rowElement->GetRenderNode());
+    CHECK_NULL_RETURN(renderRow, nullptr);
+    auto renderPadding = AceType::DynamicCast<RenderPadding>(renderRow->GetFirstChild());
+    CHECK_NULL_RETURN(renderPadding, nullptr);
+    auto icon = AceType::DynamicCast<RenderImage>(renderPadding->GetFirstChild());
+    return icon;
 }
 
 } // namespace OHOS::Ace
