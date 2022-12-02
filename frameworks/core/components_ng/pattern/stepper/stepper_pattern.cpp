@@ -83,10 +83,6 @@ void StepperPattern::InitButtonClickEvent(const RefPtr<GestureEventHub>& leftGes
             auto stepperPattern = weak.Upgrade();
             CHECK_NULL_VOID_NOLOG(stepperPattern);
             stepperPattern->HandlingButtonClickEvent(true, swiperNode);
-            auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-            CHECK_NULL_VOID_NOLOG(swiperPattern);
-            auto swiperController = swiperPattern->GetSwiperController();
-            swiperController->ShowPrevious();
         };
         leftGestureHub->RemoveClickEvent(leftClickEvent_);
         leftClickEvent_ = MakeRefPtr<ClickEvent>(std::move(clickEvent));
@@ -98,10 +94,6 @@ void StepperPattern::InitButtonClickEvent(const RefPtr<GestureEventHub>& leftGes
             auto stepperPattern = weak.Upgrade();
             CHECK_NULL_VOID_NOLOG(stepperPattern);
             stepperPattern->HandlingButtonClickEvent(false, swiperNode);
-            auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-            CHECK_NULL_VOID_NOLOG(swiperPattern);
-            auto swiperController = swiperPattern->GetSwiperController();
-            swiperController->ShowNext();
         };
         rightGestureHub->RemoveClickEvent(rightClickEvent_);
         rightClickEvent_ = MakeRefPtr<ClickEvent>(std::move(clickEvent));
@@ -133,8 +125,13 @@ void StepperPattern::HandlingButtonClickEvent(bool isLeft, const RefPtr<FrameNod
     }
     auto labelStatus =
         StepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetLabelStatus().value_or("normal");
-    if (!isLeft && labelStatus == "skip") {
+    if (labelStatus == "disabled" || labelStatus == "waiting") {
+        return;
+    }
+
+    if (labelStatus == "skip") {
         stepperHub->FireSkipEvent();
+        return;
     }
     if (!isLeft && index_ < maxIndex_) {
         stepperHub->FireChangeEvent(index_, std::clamp<int32_t>(index_ + 1, 0, maxIndex_));
@@ -144,6 +141,11 @@ void StepperPattern::HandlingButtonClickEvent(bool isLeft, const RefPtr<FrameNod
         stepperHub->FireChangeEvent(index_, std::clamp<int32_t>(index_ - 1, 0, maxIndex_));
         stepperHub->FirePreviousEvent(index_, std::clamp<int32_t>(index_ - 1, 0, maxIndex_));
     }
+
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto swiperController = swiperPattern->GetSwiperController();
+    isLeft ? swiperController->ShowPrevious() : swiperController->ShowNext();
 }
 
 void StepperPattern::UpdateButtonText(int32_t index)
