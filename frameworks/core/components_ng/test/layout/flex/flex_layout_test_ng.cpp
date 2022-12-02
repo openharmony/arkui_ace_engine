@@ -2349,7 +2349,7 @@ HWTEST_F(FlexLayoutTestNg, FlexRowLayoutTest017, TestSize.Level1)
 HWTEST_F(FlexLayoutTestNg, FlexColumnLayoutTest004, TestSize.Level1)
 {
     auto columnFrameNode =
-        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(true));
     EXPECT_FALSE(columnFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
@@ -2488,7 +2488,7 @@ HWTEST_F(FlexLayoutTestNg, FlexColumnLayoutTest004, TestSize.Level1)
 HWTEST_F(FlexLayoutTestNg, FlexColumnLayoutTest005, TestSize.Level1)
 {
     auto columnFrameNode =
-        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(true));
     EXPECT_FALSE(columnFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
@@ -2634,7 +2634,7 @@ HWTEST_F(FlexLayoutTestNg, FlexColumnLayoutTest005, TestSize.Level1)
 HWTEST_F(FlexLayoutTestNg, FlexColumnLayoutTest006, TestSize.Level1)
 {
     auto columnFrameNode =
-        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(true));
     EXPECT_FALSE(columnFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
@@ -2934,7 +2934,7 @@ HWTEST_F(FlexLayoutTestNg, FlexRowLayoutTest019, TestSize.Level1)
  */
 HWTEST_F(FlexLayoutTestNg, FlexColumnLayoutTest007, TestSize.Level1)
 {
-    auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(true));
     EXPECT_FALSE(rowFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
@@ -3360,8 +3360,8 @@ HWTEST_F(FlexLayoutTestNg, FlexRowLayoutTest012, TestSize.Level1)
     childLayoutConstraint.maxSize = CONTAINER_SIZE;
     childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
     /* corresponding ets code:
-        Flex() {
-            Flex() {
+        Row() {
+            Row() {
                 Blank()
                 .width(100)
                 .height(40)
@@ -3393,12 +3393,14 @@ HWTEST_F(FlexLayoutTestNg, FlexRowLayoutTest012, TestSize.Level1)
     RefPtr<LayoutWrapper> secondLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(secondFrameNode, secondGeometryNode, secondFrameNode->GetLayoutProperty());
     secondLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    auto secondBoxLayoutAlgorithm = secondFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    EXPECT_FALSE(secondBoxLayoutAlgorithm == nullptr);
     secondLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
     // update layout weight for the grandchild node
     secondLayoutWrapper->GetLayoutProperty()->UpdateLayoutWeight(1);
     secondLayoutWrapper->SetLayoutAlgorithm(
-        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(secondBoxLayoutAlgorithm));
     firstFrameNode->AddChild(secondFrameNode);
     firstLayoutWrapper->AppendChild(secondLayoutWrapper);
     rowLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
