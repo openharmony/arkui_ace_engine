@@ -36,7 +36,7 @@ public:
 
 private:
     Size Measure() override;
-
+    void SyncFocusGeometryProperties();
     void UpdateLayer();
     void PaintButtonAnimation();
     void MeasureButtonSize();
