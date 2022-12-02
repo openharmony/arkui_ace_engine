@@ -36,10 +36,12 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::vector<std::string> CREATE_ARRAY_VALUE = {"A", "B", "C", "D", "E", "F", "G", "H",
     "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+const std::vector<std::string> EMPTY_ARRAY_VALUE = {};
 constexpr int32_t CREATE_SELECTED_VALUE = 0;
 constexpr int32_t SELECTED_VALUE = 0;
 constexpr int32_t SPECIAL_SELECTED_VALUE = -1;
 constexpr int32_t COMMON_SELECTED_VALUE = 1;
+constexpr int32_t LARGE_SELECTED_VALUE = 100;
 constexpr int32_t MOVE_INDEX_STEP = 1;
 constexpr int32_t MOVE_INDEX_SEARCH = 1;
 constexpr int32_t SPECIAL_ITEM_COUNT = 0;
@@ -130,11 +132,11 @@ RefPtr<FrameNode> IndexerPatternTestNg::CreateIndexerParagraph(
 }
 
 /**
- * @tc.name: IndexerFrameNodeCreator001
+ * @tc.name: IndexerViewTest001
  * @tc.desc: Test all the properties of indexer.
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator001, TestSize.Level1)
+HWTEST_F(IndexerPatternTestNg, IndexerViewTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create testProperty and set properties of indexer.
@@ -191,11 +193,11 @@ HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator001, TestSize.Level1)
 }
 
 /**
- * @tc.name: IndexerFrameNodeCreator002
+ * @tc.name: IndexerViewTest002
  * @tc.desc: Test special value properties of indexer.
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator002, TestSize.Level1)
+HWTEST_F(IndexerPatternTestNg, IndexerViewTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create testProperty and set properties of indexer.
@@ -224,11 +226,649 @@ HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator002, TestSize.Level1)
 }
 
 /**
- * @tc.name: IndexerFrameNodeCreator003
+ * @tc.name: IndexerPattern001
+ * @tc.desc: Test indexer pattern onModifyDone function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, IndexerPattern001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     */
+    TestProperty testProperty;
+    testProperty.usingPopupValue = std::make_optional(true);
+    testProperty.selectedValue = std::make_optional(COMMON_SELECTED_VALUE);
+    testProperty.colorValue = std::make_optional(COLOR_VALUE);
+    testProperty.selectedColorValue = std::make_optional(COLOR_VALUE);
+    /**
+     * @tc.steps: step2. create indexer frameNode and get indexerPattern.
+     * @tc.expected: step2. get indexerPattern success.
+     */
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
+    EXPECT_NE(indexerPattern, nullptr);
+    /**
+     * @tc.steps: step3. call indexerPattern OnModify function, compare result.
+     * @tc.expected: step3. OnModify success and result correct.
+     */
+    indexerPattern->OnModifyDone();
+    uint32_t itemCount = CREATE_ARRAY_VALUE.size();
+    for (uint32_t index = 0; index < itemCount; index++) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
+        EXPECT_NE(childFrameNode, nullptr);
+        if (index == COMMON_SELECTED_VALUE) {
+            auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childFrameNode->GetLayoutProperty());
+            EXPECT_NE(childLayoutProperty, nullptr);
+        } else {
+            auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childFrameNode->GetLayoutProperty());
+            EXPECT_NE(childLayoutProperty, nullptr);
+        }
+    }
+}
+
+/**
+ * @tc.name: IndexerPattern002
+ * @tc.desc: Test indexer pattern onModifyDone function, special cases
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, IndexerPattern002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     * @tc.steps: case1: indexer is empty, not selected
+     */
+    TestProperty testProperty1;
+    RefPtr<FrameNode> frameNode1 = CreateIndexerParagraph(EMPTY_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty1);
+    EXPECT_NE(frameNode1, nullptr);
+    RefPtr<IndexerPattern> indexerPattern1 = AceType::DynamicCast<IndexerPattern>(frameNode1->GetPattern());
+    EXPECT_NE(indexerPattern1, nullptr);
+    
+    indexerPattern1->OnModifyDone();
+    EXPECT_EQ(indexerPattern1->itemCount_, 0);
+
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     * @tc.steps: case2: indexer is not empty, selected == storedSelected
+     */
+    TestProperty testProperty2;
+    testProperty2.selectedValue = std::make_optional(SELECTED_VALUE);
+    RefPtr<FrameNode> frameNode2 = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty2);
+    EXPECT_NE(frameNode2, nullptr);
+    RefPtr<IndexerPattern> indexerPattern2 = AceType::DynamicCast<IndexerPattern>(frameNode2->GetPattern());
+    EXPECT_NE(indexerPattern2, nullptr);
+    
+    indexerPattern2->OnModifyDone();
+    EXPECT_EQ(indexerPattern2->selected_, 0);
+
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     * @tc.steps: case3: indexer is not empty, selected != storedSelected, selected > itemCount
+     */
+    TestProperty testProperty3;
+    testProperty3.selectedValue = std::make_optional(LARGE_SELECTED_VALUE);
+    RefPtr<FrameNode> frameNode3 = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty3);
+    EXPECT_NE(frameNode3, nullptr);
+    RefPtr<IndexerPattern> indexerPattern3 = AceType::DynamicCast<IndexerPattern>(frameNode3->GetPattern());
+    EXPECT_NE(indexerPattern3, nullptr);
+    
+    indexerPattern3->OnModifyDone();
+    EXPECT_EQ(indexerPattern3->selected_, 0);
+
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     * @tc.steps: case4: set gesture
+     */
+    frameNode3->GetOrCreateGestureEventHub();
+    indexerPattern3->OnModifyDone();
+    EXPECT_EQ(indexerPattern3->selected_, 0);
+    EXPECT_NE(frameNode3->GetOrCreateGestureEventHub(), nullptr);
+}
+
+/**
+ * @tc.name: IndexerPattern003
+ * @tc.desc: Test indexer pattern OnDirtyLayoutWrapperSwap function. include special value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, IndexerPattern003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     */
+    TestProperty testProperty;
+    /**
+     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
+     * @tc.expected: step2. get indexerPattern success.
+     */
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
+    EXPECT_NE(indexerPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    EXPECT_NE(layoutWrapper, nullptr);
+    RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
+    indexerLayoutAlgorithm->isInitialized_ = false;
+    indexerLayoutAlgorithm->selected_ = COMMON_SELECTED_VALUE;
+    indexerLayoutAlgorithm->itemSizeRender_ = ITEM_SIZE_RENDER;
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    DirtySwapConfig dirtySwapConfig;
+
+    /**
+     * @tc.steps: step3. call indexerPattern OnDirtyLayoutWrapperSwap function, compare result.
+     * @tc.steps: case1: skipMeasure and skipLayout
+     * @tc.expected: step3. OnDirtyLayoutWrapperSwap success and result correct.
+     */
+    dirtySwapConfig.skipMeasure = true;
+    dirtySwapConfig.skipLayout = true;
+    indexerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    EXPECT_EQ(indexerPattern->isInitialized_, false);
+    EXPECT_EQ(indexerPattern->selected_, 0);
+    EXPECT_EQ(indexerPattern->itemSizeRender_, 0);
+
+    /**
+     * @tc.steps: step3. call indexerPattern OnDirtyLayoutWrapperSwap function, compare result.
+     * @tc.steps: case2: !skipMeasure and !skipLayout
+     * @tc.expected: step3. OnDirtyLayoutWrapperSwap success and result correct.
+     */
+    dirtySwapConfig.skipMeasure = false;
+    dirtySwapConfig.skipLayout = false;
+    indexerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    EXPECT_EQ(indexerPattern->isInitialized_, false);
+    EXPECT_EQ(indexerPattern->selected_, COMMON_SELECTED_VALUE);
+    EXPECT_EQ(indexerPattern->itemSizeRender_, ITEM_SIZE_RENDER);
+
+    /**
+     * @tc.steps: step3. call indexerPattern OnDirtyLayoutWrapperSwap function, compare result.
+     * @tc.steps: case3: skipMeasure and !skipLayout
+     * @tc.expected: step3. OnDirtyLayoutWrapperSwap success and result correct.
+     */
+    dirtySwapConfig.skipMeasure = true;
+    dirtySwapConfig.skipLayout = false;
+    indexerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    EXPECT_EQ(indexerPattern->isInitialized_, false);
+    EXPECT_EQ(indexerPattern->selected_, COMMON_SELECTED_VALUE);
+    EXPECT_EQ(indexerPattern->itemSizeRender_, ITEM_SIZE_RENDER);
+
+    /**
+     * @tc.steps: step3. call indexerPattern OnDirtyLayoutWrapperSwap function, compare result.
+     * @tc.steps: case4: !skipMeasure and skipLayout
+     * @tc.expected: step3. OnDirtyLayoutWrapperSwap success and result correct.
+     */
+    dirtySwapConfig.skipMeasure = false;
+    dirtySwapConfig.skipLayout = true;
+    indexerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    EXPECT_EQ(indexerPattern->isInitialized_, false);
+    EXPECT_EQ(indexerPattern->selected_, COMMON_SELECTED_VALUE);
+    EXPECT_EQ(indexerPattern->itemSizeRender_, ITEM_SIZE_RENDER);
+}
+
+/**
+ * @tc.name: IndexerPattern004
+ * @tc.desc: Test indexer pattern InitPanEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, IndexerPattern004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     */
+    TestProperty testProperty;
+    
+    /**
+     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
+     * @tc.steps: case1: no panEvent
+     * @tc.expected: step2. get indexerPattern success.
+     */
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
+    EXPECT_NE(indexerPattern, nullptr);
+    indexerPattern->panEvent_ = nullptr;
+
+    RefPtr<GestureEventHub> gestureEvent = frameNode->GetOrCreateGestureEventHub();
+    indexerPattern->InitPanEvent(gestureEvent);
+    EXPECT_NE(indexerPattern->panEvent_, nullptr);
+
+    /**
+     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
+     * @tc.steps: case2: have panEvent
+     * @tc.expected: step2. get indexerPattern success.
+     */
+    indexerPattern->InitPanEvent(gestureEvent);
+    EXPECT_NE(indexerPattern->panEvent_, nullptr);
+}
+
+/**
+ * @tc.name: IndexerPattern005
+ * @tc.desc: Test indexer pattern OnChildHover function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, IndexerPattern005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     */
+    TestProperty testProperty;
+    
+    /**
+     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
+     * @tc.steps: case1: isHover
+     * @tc.expected: step2. get indexerPattern success.
+     */
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
+    EXPECT_NE(indexerPattern, nullptr);
+
+    indexerPattern->OnChildHover(COMMON_SELECTED_VALUE, true);
+    EXPECT_EQ(indexerPattern->childHoverIndex_, COMMON_SELECTED_VALUE);
+    
+    /**
+     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
+     * @tc.steps: case2: !isHover
+     * @tc.expected: step2. get indexerPattern success.
+     */
+    indexerPattern->OnChildHover(COMMON_SELECTED_VALUE, false);
+    EXPECT_EQ(indexerPattern->childHoverIndex_, -1);
+}
+
+/**
+ * @tc.name: IndexerPattern006
+ * @tc.desc: Test indexer pattern InitInputEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, IndexerPattern006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     */
+    TestProperty testProperty;
+    
+    /**
+     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
+     * @tc.steps: case1: isInputEventRegisted_ = false
+     * @tc.expected: step2. get indexerPattern success.
+     */
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
+    EXPECT_NE(indexerPattern, nullptr);
+
+    indexerPattern->isInputEventRegisted_ = false;
+    indexerPattern->InitInputEvent();
+    EXPECT_EQ(indexerPattern->isInputEventRegisted_, true);
+    
+    /**
+     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
+     * @tc.steps: case2: isInputEventRegisted_ = true
+     * @tc.expected: step2. get indexerPattern success.
+     */
+    indexerPattern->InitInputEvent();
+    EXPECT_EQ(indexerPattern->isInputEventRegisted_, true);
+}
+
+/**
+ * @tc.name: IndexerPattern007
+ * @tc.desc: Test indexer pattern InitChildInputEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, IndexerPattern007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     */
+    TestProperty testProperty;
+    
+    /**
+     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
+     * @tc.steps: case1: isInputEventRegisted_ = false
+     * @tc.expected: step2. get indexerPattern success.
+     */
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
+    EXPECT_NE(indexerPattern, nullptr);
+
+    indexerPattern->itemCount_ = CREATE_ARRAY_VALUE.size();
+    indexerPattern->InitChildInputEvent();
+    EXPECT_EQ(indexerPattern->itemCount_, CREATE_ARRAY_VALUE.size());
+}
+
+/**
+ * @tc.name: IndexerPattern008
+ * @tc.desc: Test indexer pattern MoveIndexByOffset function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, IndexerPattern008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     */
+    TestProperty testProperty;
+    
+    /**
+     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
+     * @tc.expected: step2. get indexerPattern success.
+     */
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
+    EXPECT_NE(indexerPattern, nullptr);
+    
+    /**
+     * @tc.steps: step3. call indexerPattern MoveIndexByOffset function, compare result.
+     * @tc.steps: case1: itemSizeRender is 0, return
+     * @tc.expected: step3. MoveIndexByOffset success and result correct.
+     */
+    indexerPattern->itemSizeRender_ = 0;
+    indexerPattern->MoveIndexByOffset(Offset(0, MOVE_INDEX_OFFSET), true);
+    EXPECT_EQ(indexerPattern->childPressIndex_, -1);
+
+    /**
+     * @tc.steps: step3. call indexerPattern MoveIndexByOffset function, compare result.
+     * @tc.steps: case2: itemSizeRender is 1, itemCount is 0, return
+     * @tc.expected: step3. MoveIndexByOffset success and result correct.
+     */
+    indexerPattern->itemSizeRender_ = 1;
+    indexerPattern->itemCount_ = 0;
+    indexerPattern->MoveIndexByOffset(Offset(0, MOVE_INDEX_OFFSET), true);
+    EXPECT_EQ(indexerPattern->childPressIndex_, -1);
+
+    /**
+     * @tc.steps: step3. call indexerPattern MoveIndexByOffset function, compare result.
+     * @tc.steps: case3: itemSizeRender > 0, itemCount > 0, isRepeatCalled true, next != child
+     * @tc.expected: step3. MoveIndexByOffset success and result correct.
+     */
+    indexerPattern->itemSizeRender_ = ITEM_SIZE_RENDER;
+    indexerPattern->itemCount_ = CREATE_ARRAY_VALUE.size();
+    indexerPattern->MoveIndexByOffset(Offset(0, MOVE_INDEX_OFFSET), true);
+    int32_t expectedIndex = static_cast<int32_t>(MOVE_INDEX_OFFSET / ITEM_SIZE_RENDER);
+    EXPECT_EQ(expectedIndex, indexerPattern->childPressIndex_);
+
+    /**
+     * @tc.steps: step3. call indexerPattern MoveIndexByOffset function, compare result.
+     * @tc.steps: case4: itemSizeRender > 0, itemCount > 0, isRepeatCalled true, next == child
+     * @tc.expected: step3. MoveIndexByOffset success and result correct.
+     */
+    indexerPattern->MoveIndexByOffset(Offset(0, 0), true);
+    EXPECT_EQ(indexerPattern->childPressIndex_, 0);
+
+    /**
+     * @tc.steps: step3. call indexerPattern MoveIndexByOffset function, compare result.
+     * @tc.steps: case5: itemSizeRender > 0, itemCount > 0, isRepeatCalled false, next == child
+     * @tc.expected: step3. MoveIndexByOffset success and result correct.
+     */
+    indexerPattern->MoveIndexByOffset(Offset(0, 0), true);
+    EXPECT_EQ(indexerPattern->childPressIndex_, 0);
+
+    /**
+     * @tc.steps: step3. call indexerPattern MoveIndexByOffset function, compare result.
+     * @tc.steps: case5: itemSizeRender > 0, itemCount > 0, isRepeatCalled false, next != child
+     * @tc.expected: step3. MoveIndexByOffset success and result correct.
+     */
+    indexerPattern->MoveIndexByOffset(Offset(0, MOVE_INDEX_OFFSET), true);
+    EXPECT_EQ(expectedIndex, indexerPattern->childPressIndex_);
+}
+
+/**
+ * @tc.name: IndexerPattern009
+ * @tc.desc: Test indexer pattern KeyIndexByStep function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, IndexerPattern009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     */
+    TestProperty testProperty;
+    
+    /**
+     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
+     * @tc.expected: step2. get indexerPattern success.
+     */
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
+    EXPECT_NE(indexerPattern, nullptr);
+    indexerPattern->selected_ = COMMON_SELECTED_VALUE;
+
+    /**
+     * @tc.steps: step3. call indexerPattern KeyIndexByStep function, compare result.
+     * @tc.expected: step3. KeyIndexByStep success and result correct.
+     */
+    bool result = false;
+    indexerPattern->itemCount_ = 0;
+    result = indexerPattern->KeyIndexByStep(MOVE_INDEX_STEP);
+    EXPECT_EQ(result, false);
+
+    indexerPattern->itemCount_ = CREATE_ARRAY_VALUE.size();
+    result = indexerPattern->KeyIndexByStep(MOVE_INDEX_STEP);
+    EXPECT_EQ(indexerPattern->selected_, COMMON_SELECTED_VALUE + MOVE_INDEX_STEP);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: IndexerPattern010
+ * @tc.desc: Test indexer pattern GetSkipChildIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, IndexerPattern010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     */
+    TestProperty testProperty;
+    
+    /**
+     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
+     * @tc.expected: step2. get indexerPattern success.
+     */
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
+    EXPECT_NE(indexerPattern, nullptr);
+    
+    /**
+     * @tc.steps: step3. call indexerPattern GetSkipChildIndex function, compare result.
+     * @tc.steps: case1: nextSelected < 0
+     * @tc.expected: step3. GetSkipChildIndex success and result correct.
+     */
+    indexerPattern->selected_ = 0;
+    auto result = indexerPattern->GetSkipChildIndex(-1);
+    EXPECT_EQ(result, -1);
+
+    /**
+     * @tc.steps: step3. call indexerPattern GetSkipChildIndex function, compare result.
+     * @tc.steps: case1: nextSelected > 0, nextSelected < itemCount
+     * @tc.expected: step3. GetSkipChildIndex success and result correct.
+     */
+    indexerPattern->selected_ = 0;
+    indexerPattern->itemCount_ = CREATE_ARRAY_VALUE.size();
+    result = indexerPattern->GetSkipChildIndex(1);
+    EXPECT_EQ(result, 1);
+
+    /**
+     * @tc.steps: step3. call indexerPattern GetSkipChildIndex function, compare result.
+     * @tc.steps: case1: nextSelected > itemCount
+     * @tc.expected: step3. GetSkipChildIndex success and result correct.
+     */
+    indexerPattern->selected_ = 0;
+    indexerPattern->itemCount_ = CREATE_ARRAY_VALUE.size();
+    result = indexerPattern->GetSkipChildIndex(indexerPattern->itemCount_ + 1);
+    EXPECT_EQ(result, -1);
+}
+
+/**
+ * @tc.name: IndexerPattern011
+ * @tc.desc: Test indexer pattern MoveIndexByStep function. include special case.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, IndexerPattern011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     */
+    TestProperty testProperty;
+    
+    /**
+     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
+     * @tc.expected: step2. get indexerPattern success.
+     */
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
+    EXPECT_NE(indexerPattern, nullptr);
+    indexerPattern->selected_ = COMMON_SELECTED_VALUE;
+
+    /**
+     * @tc.steps: step3. call indexerPattern MoveIndexByStep function, compare result.
+     * @tc.expected: step3. MoveIndexByStep success and result correct.
+     */
+    bool result = false;
+    indexerPattern->itemCount_ = 0;
+    result = indexerPattern->MoveIndexByStep(MOVE_INDEX_STEP);
+    EXPECT_EQ(result, false);
+
+    indexerPattern->itemCount_ = CREATE_ARRAY_VALUE.size();
+    result = indexerPattern->MoveIndexByStep(MOVE_INDEX_STEP);
+    EXPECT_EQ(indexerPattern->selected_, COMMON_SELECTED_VALUE + MOVE_INDEX_STEP);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: IndexerPattern012
+ * @tc.desc: Test indexer pattern MoveIndexBySearch function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, IndexerPattern012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     */
+    TestProperty testProperty;
+    
+    /**
+     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
+     * @tc.expected: step2. get indexerPattern success.
+     */
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
+    EXPECT_NE(indexerPattern, nullptr);
+    indexerPattern->selected_ = COMMON_SELECTED_VALUE;
+
+    /**
+     * @tc.steps: step3. call indexerPattern MoveIndexBySearch function, compare result.
+     * @tc.steps: case1: search Move_index_search
+     * @tc.expected: step3. MoveIndexBySearch success and result correct.
+     */
+    indexerPattern->MoveIndexBySearch(CREATE_ARRAY_VALUE[MOVE_INDEX_SEARCH]);
+    EXPECT_EQ(indexerPattern->selected_, MOVE_INDEX_SEARCH);
+
+    /**
+     * @tc.steps: step3. call indexerPattern MoveIndexBySearch function, compare result.
+     * @tc.steps: case2: search Move_index_search + 1
+     * @tc.expected: step3. MoveIndexBySearch success and result correct.
+     */
+    indexerPattern->MoveIndexBySearch(CREATE_ARRAY_VALUE[MOVE_INDEX_SEARCH + 1]);
+    EXPECT_EQ(indexerPattern->selected_, MOVE_INDEX_SEARCH + 1);
+
+    /**
+     * @tc.steps: step3. call indexerPattern MoveIndexBySearch function, compare result.
+     * @tc.steps: case2: search Move_index_search - 1
+     * @tc.expected: step3. MoveIndexBySearch success and result correct.
+     */
+    indexerPattern->MoveIndexBySearch(CREATE_ARRAY_VALUE[MOVE_INDEX_SEARCH - 1]);
+    EXPECT_EQ(indexerPattern->selected_, MOVE_INDEX_SEARCH - 1);
+}
+
+/**
+ * @tc.name: IndexerPattern013
+ * @tc.desc: Test indexer pattern InitOnKeyEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, IndexerPattern013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     */
+    TestProperty testProperty;
+    
+    /**
+     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
+     * @tc.expected: step2. get indexerPattern success.
+     */
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
+    EXPECT_NE(indexerPattern, nullptr);
+    
+    /**
+     * @tc.steps: step3. call indexerPattern InitOnKeyEvent function, compare result.
+     * @tc.expected: step3. InitOnKeyEvent success and result correct.
+     */
+    RefPtr<FocusHub> focusHub = frameNode->GetFocusHub();
+    EXPECT_NE(focusHub, nullptr);
+    indexerPattern->InitOnKeyEvent();
+    EXPECT_NE(focusHub->onKeyEventInternal_, nullptr);
+}
+
+/**
+ * @tc.name: IndexerPattern014
+ * @tc.desc: Test indexer pattern OnKeyEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, IndexerPattern014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     */
+    TestProperty testProperty;
+    
+    /**
+     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
+     * @tc.expected: step2. get indexerPattern success.
+     */
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
+    EXPECT_NE(indexerPattern, nullptr);
+    indexerPattern->selected_ = COMMON_SELECTED_VALUE;
+
+    /**
+     * @tc.steps: step3. call indexerPattern OnKeyEvent function, compare result.
+     * @tc.expected: step3. OnKeyEvent success and result correct.
+     */
+    KeyEvent keyEvent = KeyEvent(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
+    bool result = indexerPattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(result, true);
+
+    keyEvent = KeyEvent(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN);
+    result = indexerPattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(result, true);
+
+    keyEvent = KeyEvent(KeyCode::KEY_UNKNOWN, KeyAction::DOWN);
+    result = indexerPattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(result, false);
+
+    keyEvent = KeyEvent(KeyCode::KEY_UNKNOWN, KeyAction::UNKNOWN);
+    result = indexerPattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: IndexerAlgorithmTest001
  * @tc.desc: Test indexer algorithm Measure function and Layout function.
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator003, TestSize.Level1)
+HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create testProperty and set properties of indexer.
@@ -287,286 +927,11 @@ HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator003, TestSize.Level1)
 }
 
 /**
- * @tc.name: IndexerFrameNodeCreator004
- * @tc.desc: Test indexer pattern onModifyDone function.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create testProperty and set properties of indexer.
-     */
-    TestProperty testProperty;
-    testProperty.usingPopupValue = std::make_optional(true);
-    testProperty.selectedValue = std::make_optional(COMMON_SELECTED_VALUE);
-    testProperty.colorValue = std::make_optional(COLOR_VALUE);
-    testProperty.selectedColorValue = std::make_optional(COLOR_VALUE);
-    /**
-     * @tc.steps: step2. create indexer frameNode and get indexerPattern.
-     * @tc.expected: step2. get indexerPattern success.
-     */
-    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
-    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
-    /**
-     * @tc.steps: step3. call indexerPattern OnModify function, compare result.
-     * @tc.expected: step3. OnModify success and result correct.
-     */
-    indexerPattern->OnModifyDone();
-    uint32_t itemCount = CREATE_ARRAY_VALUE.size();
-    for (uint32_t index = 0; index < itemCount; index++) {
-        auto childFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
-        EXPECT_NE(childFrameNode, nullptr);
-        if (index == COMMON_SELECTED_VALUE) {
-            auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childFrameNode->GetLayoutProperty());
-            EXPECT_NE(childLayoutProperty, nullptr);
-        } else {
-            auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childFrameNode->GetLayoutProperty());
-            EXPECT_NE(childLayoutProperty, nullptr);
-        }
-    }
-}
-
-/**
- * @tc.name: IndexerFrameNodeCreator005
- * @tc.desc: Test indexer pattern OnDirtyLayoutWrapperSwap function. include special value.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator005, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create testProperty and set properties of indexer.
-     */
-    TestProperty testProperty;
-    /**
-     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
-     * @tc.expected: step2. get indexerPattern success.
-     */
-    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
-    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(geometryNode, nullptr);
-    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
-    EXPECT_NE(layoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
-    EXPECT_NE(layoutWrapper, nullptr);
-    /**
-     * @tc.steps: step3. call indexerPattern OnDirtyLayoutWrapperSwap function, compare result.
-     * @tc.expected: step3. OnDirtyLayoutWrapperSwap success and result correct.
-     */
-    RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
-    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
-        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->isInitialized_ = false;
-    indexerLayoutAlgorithm->selected_ = COMMON_SELECTED_VALUE;
-    indexerLayoutAlgorithm->itemSizeRender_ = ITEM_SIZE_RENDER;
-    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
-    DirtySwapConfig dirtySwapConfig;
-    dirtySwapConfig.skipMeasure = true;
-    dirtySwapConfig.skipLayout = true;
-    indexerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
-    EXPECT_EQ(indexerPattern->isInitialized_, false);
-    EXPECT_EQ(indexerPattern->selected_, 0);
-    EXPECT_EQ(indexerPattern->itemSizeRender_, 0);
-    dirtySwapConfig.skipMeasure = false;
-    dirtySwapConfig.skipLayout = false;
-    indexerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
-    EXPECT_EQ(indexerPattern->isInitialized_, false);
-    EXPECT_EQ(indexerPattern->selected_, COMMON_SELECTED_VALUE);
-    EXPECT_EQ(indexerPattern->itemSizeRender_, ITEM_SIZE_RENDER);
-}
-
-/**
- * @tc.name: IndexerFrameNodeCreator006
- * @tc.desc: Test indexer pattern MoveIndexByOffset function. include special value.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator006, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create testProperty and set properties of indexer.
-     */
-    TestProperty testProperty;
-    
-    /**
-     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
-     * @tc.expected: step2. get indexerPattern success.
-     */
-    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
-    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
-    
-    /**
-     * @tc.steps: step3. call indexerPattern MoveIndexByOffset function, compare result.
-     * @tc.expected: step3. MoveIndexByOffset success and result correct.
-     */
-    indexerPattern->itemSizeRender_ = 0;
-    indexerPattern->MoveIndexByOffset(Offset(0, MOVE_INDEX_OFFSET), true);
-    EXPECT_EQ(indexerPattern->selected_, 0);
-
-    indexerPattern->itemCount_ = 0;
-    indexerPattern->MoveIndexByOffset(Offset(0, MOVE_INDEX_OFFSET), true);
-    EXPECT_EQ(indexerPattern->selected_, 0);
-
-    indexerPattern->itemSizeRender_ = ITEM_SIZE_RENDER;
-    indexerPattern->itemCount_ = CREATE_ARRAY_VALUE.size();
-    indexerPattern->MoveIndexByOffset(Offset(0, MOVE_INDEX_OFFSET), true);
-    int32_t expectedIndex = static_cast<int32_t>(MOVE_INDEX_OFFSET / ITEM_SIZE_RENDER);
-    EXPECT_EQ(expectedIndex, indexerPattern->childPressIndex_);
-}
-
-/**
- * @tc.name: IndexerFrameNodeCreator007
- * @tc.desc: Test indexer pattern MoveIndexByStep function. include special case.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator007, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create testProperty and set properties of indexer.
-     */
-    TestProperty testProperty;
-    
-    /**
-     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
-     * @tc.expected: step2. get indexerPattern success.
-     */
-    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
-    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
-    indexerPattern->selected_ = COMMON_SELECTED_VALUE;
-
-    /**
-     * @tc.steps: step3. call indexerPattern MoveIndexByStep function, compare result.
-     * @tc.expected: step3. MoveIndexByStep success and result correct.
-     */
-    bool result = false;
-    indexerPattern->itemCount_ = 0;
-    result = indexerPattern->MoveIndexByStep(MOVE_INDEX_STEP);
-    EXPECT_EQ(result, false);
-
-    indexerPattern->itemCount_ = CREATE_ARRAY_VALUE.size();
-    result = indexerPattern->MoveIndexByStep(MOVE_INDEX_STEP);
-    EXPECT_EQ(indexerPattern->selected_, COMMON_SELECTED_VALUE + MOVE_INDEX_STEP);
-    EXPECT_EQ(result, true);
-}
-
-/**
- * @tc.name: IndexerFrameNodeCreator008
- * @tc.desc: Test indexer pattern MoveIndexBySearch function.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator008, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create testProperty and set properties of indexer.
-     */
-    TestProperty testProperty;
-    
-    /**
-     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
-     * @tc.expected: step2. get indexerPattern success.
-     */
-    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
-    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
-    indexerPattern->selected_ = COMMON_SELECTED_VALUE;
-
-    /**
-     * @tc.steps: step3. call indexerPattern MoveIndexBySearch function, compare result.
-     * @tc.expected: step3. MoveIndexBySearch success and result correct.
-     */
-    indexerPattern->MoveIndexBySearch(CREATE_ARRAY_VALUE[MOVE_INDEX_SEARCH]);
-    EXPECT_EQ(indexerPattern->selected_, MOVE_INDEX_SEARCH);
-}
-
-/**
- * @tc.name: IndexerFrameNodeCreator009
- * @tc.desc: Test indexer pattern InitOnKeyEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator009, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create testProperty and set properties of indexer.
-     */
-    TestProperty testProperty;
-    
-    /**
-     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
-     * @tc.expected: step2. get indexerPattern success.
-     */
-    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
-    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
-    
-    /**
-     * @tc.steps: step3. call indexerPattern InitOnKeyEvent function, compare result.
-     * @tc.expected: step3. InitOnKeyEvent success and result correct.
-     */
-    RefPtr<FocusHub> focusHub = frameNode->GetFocusHub();
-    EXPECT_NE(focusHub, nullptr);
-    indexerPattern->InitOnKeyEvent();
-    EXPECT_NE(focusHub->onKeyEventInternal_, nullptr);
-}
-
-/**
- * @tc.name: IndexerFrameNodeCreator010
- * @tc.desc: Test indexer pattern OnKeyEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator010, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create testProperty and set properties of indexer.
-     */
-    TestProperty testProperty;
-    
-    /**
-     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
-     * @tc.expected: step2. get indexerPattern success.
-     */
-    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
-    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
-    indexerPattern->selected_ = COMMON_SELECTED_VALUE;
-
-    /**
-     * @tc.steps: step3. call indexerPattern OnKeyEvent function, compare result.
-     * @tc.expected: step3. OnKeyEvent success and result correct.
-     */
-    KeyEvent keyEvent = KeyEvent(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
-    bool result = indexerPattern->OnKeyEvent(keyEvent);
-    EXPECT_EQ(result, true);
-
-    keyEvent = KeyEvent(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN);
-    result = indexerPattern->OnKeyEvent(keyEvent);
-    EXPECT_EQ(result, true);
-
-    keyEvent = KeyEvent(KeyCode::KEY_UNKNOWN, KeyAction::DOWN);
-    result = indexerPattern->OnKeyEvent(keyEvent);
-    EXPECT_EQ(result, false);
-
-    keyEvent = KeyEvent(KeyCode::KEY_UNKNOWN, KeyAction::UNKNOWN);
-    result = indexerPattern->OnKeyEvent(keyEvent);
-    EXPECT_EQ(result, false);
-}
-
-/**
- * @tc.name: IndexerFrameNodeCreator011
+ * @tc.name: IndexerAlgorithmTest002
  * @tc.desc: Test indexer algorithm Measure function and Layout function, using special case.
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator011, TestSize.Level1)
+HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create testProperty and set properties of indexer.
@@ -613,6 +978,48 @@ HWTEST_F(IndexerPatternTestNg, IndexerFrameNodeCreator011, TestSize.Level1)
 
     indexerLayoutAlgorithm.itemSize_ = SPECIAL_ITEM_SIZE_VALUE.Value();
     indexerLayoutAlgorithm.Measure(&layoutWrapper);
+    EXPECT_EQ(indexerLayoutAlgorithm.itemSizeRender_, 0);
+}
+
+/**
+ * @tc.name: IndexerAlgorithmTest003
+ * @tc.desc: Test indexer algorithm Layout function, using special case.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     */
+    TestProperty testProperty;
+    testProperty.popupPositionXValue = std::make_optional(POPUP_POSITIONX_VALUE);
+    testProperty.popupPositionYValue = std::make_optional(POPUP_POSITIONY_VALUE);
+
+    /**
+     * @tc.steps: step2. create indexer frameNode and get indexerLayoutProperty.
+     * @tc.expected: step2. get indexerLayoutProperty success.
+     */
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    geometryNode->SetFrameSize(SizeF(1, 1));
+    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
+    
+    /**
+     * @tc.steps: step4. call indexerLayoutAlgorithm layout function, compare result.
+     * @tc.expected: step4. layout success.
+     */
+    IndexerLayoutAlgorithm indexerLayoutAlgorithm = IndexerLayoutAlgorithm(0);
+    
+    indexerLayoutAlgorithm.itemSize_ = 0;
+    indexerLayoutAlgorithm.Layout(&layoutWrapper);
+    EXPECT_EQ(indexerLayoutAlgorithm.itemSizeRender_, 0);
+
+    indexerLayoutAlgorithm.alignStyle_ = AlignStyle::LEFT;
+    indexerLayoutAlgorithm.Layout(&layoutWrapper);
     EXPECT_EQ(indexerLayoutAlgorithm.itemSizeRender_, 0);
 }
 } // namespace OHOS::Ace::NG
