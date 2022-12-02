@@ -23,18 +23,24 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
   private wrappedValue_: T;
   private source_: ObservedPropertyAbstract<T>;
 
-  constructor(source: ObservedPropertyAbstract<T>, subscribeMe?: IPropertySubscriber, info?: PropertyInfo) {
+  constructor(source: ObservedPropertyAbstract<T> | T, subscribeMe?: IPropertySubscriber, info?: PropertyInfo) {
     super(subscribeMe, info);
-    // add a test here that T is a simple type
-    // subscribe to receive value chnage updates from source.
-    if (source) {
-      this.source_ = source;
-      this.source_.subscribeMe(this);
+    
+    // TODO: add a branch for T being object type
 
-      // use own backing store for value to avoid
-      // value changes to be propagated back to source
-      this.wrappedValue_ = source.getUnmonitored();
+    if (source && (typeof (source) === "object") && ("notifyHasChanged" in source) && ("subscribeMe" in source)) {
+      // code path for @(Local)StorageProp
+      this.source_ = source as ObservedPropertyAbstract<T>;
+      // subscribe to receive value chnage updates from LocalStorge source property
+      this.source_.subscribeMe(this);
+    } else {
+      // code path for @Prop
+      this.source_ = new ObservedPropertySimple<T>(source as T, this, info);
     }
+
+    // use own backing store for value to avoid
+    // value changes to be propagated back to source
+    this.wrappedValue_ = this.source_.getUnmonitored();
   }
 
   /*
@@ -80,6 +86,11 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
     stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: set from '${this.wrappedValue_} to '${newValue}'.`);
     this.wrappedValue_ = newValue;
     this.notifyHasChanged(newValue);
+  }
+
+  public reset(sourceChangesValue: T): void {
+    stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: reset from '${this.wrappedValue_} to '${sourceChangesValue}'.`);
+    this.source_.set(sourceChangesValue);
   }
 }
 
