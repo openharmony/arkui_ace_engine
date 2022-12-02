@@ -36,6 +36,7 @@ struct CachedImage {
     explicit CachedImage(const fml::RefPtr<flutter::CanvasImage>& image) : imagePtr(image) {}
     fml::RefPtr<flutter::CanvasImage> imagePtr;
 #endif
+    uint32_t uniqueId = 0;
 };
 
 struct SkiaCachedImageData : public CachedImageData {
