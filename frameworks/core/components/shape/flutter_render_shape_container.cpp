@@ -52,6 +52,12 @@ RenderLayer FlutterRenderShapeContainer::GetRenderLayer()
 void FlutterRenderShapeContainer::Paint(RenderContext& context, const Offset& offset)
 {
     if (mesh_.size() == 0) {
+        auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width(), GetLayoutSize().Height(),
+            SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+        skOffBitmap_.allocPixels(imageInfo);
+        skOffBitmap_.eraseColor(SK_ColorTRANSPARENT);
+        skOffCanvas_ = std::make_unique<SkCanvas>(skOffBitmap_);
+
         double viewBoxWidth = NormalizePercentToPx(viewBox_.Width(), false);
         double viewBoxHeight = NormalizePercentToPx(viewBox_.Height(), true);
         double viewBoxLeft = NormalizePercentToPx(viewBox_.Left(), false);
