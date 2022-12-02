@@ -432,7 +432,7 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
     auto info = KeyEventInfo(keyEvent);
     auto onKeyEventCallback = GetOnKeyCallback();
     if (!onKeyEventCallback) {
-        return false;
+        return retInternal;
     }
     LOGD("FocusHub::OnKeyEvent: Do key callback on %{public}s with key event{ Code(%{public}d), "
          "Action(%{public}d), "
