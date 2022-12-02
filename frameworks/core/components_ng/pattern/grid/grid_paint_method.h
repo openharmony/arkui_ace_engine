@@ -17,11 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_PAINT_METHOD_H
 
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT GridPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(GridPaintMethod, NodePaintMethod)
 public:
@@ -29,14 +27,7 @@ public:
 
     ~GridPaintMethod() override = default;
 
-    CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* /* paintWrapper */) override
-    {
-        return [weak = scrollBar_](RSCanvas& canvas) {
-            auto scrollBar = weak.Upgrade();
-            CHECK_NULL_VOID(scrollBar);
-            ScrollBarPainter::PaintRectBar(canvas, scrollBar, UINT8_MAX);
-        };
-    }
+    CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* /* paintWrapper */) override;
 
 private:
     WeakPtr<ScrollBar> scrollBar_;

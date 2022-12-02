@@ -16,11 +16,15 @@
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
 namespace OHOS::Ace::NG {
+GridPattern::~GridPattern() {}
 void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
-
 void GridPattern::OnAttachToFrameNode() {}
-
 void GridPattern::OnModifyDone() {}
+
+RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
+{
+    return nullptr;
+}
 
 RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 {
@@ -36,5 +40,10 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(
 WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep /* step */, const WeakPtr<FocusHub>& /* currentFocusNode */)
 {
     return nullptr;
+}
+
+CanvasDrawFunction GridPaintMethod::GetForegroundDrawFunction(PaintWrapper* /* paintWrapper */)
+{
+    return [](RSCanvas& canvas) {};
 }
 } // namespace OHOS::Ace::NG

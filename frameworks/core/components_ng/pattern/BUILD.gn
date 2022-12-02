@@ -91,6 +91,7 @@ build_component_ng("pattern_ng") {
     "grid/grid_layout/grid_layout_algorithm.cpp",
     "grid/grid_layout_property.cpp",
     "grid/grid_model_ng.cpp",
+    "grid/grid_paint_method.cpp",
     "grid/grid_paint_property.cpp",
     "grid/grid_pattern.cpp",
     "grid/grid_position_controller.cpp",

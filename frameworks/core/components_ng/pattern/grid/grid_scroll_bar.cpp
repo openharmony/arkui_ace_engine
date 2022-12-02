@@ -15,12 +15,9 @@
 
 #include "core/components_ng/pattern/grid/grid_scroll_bar.h"
 
-#include <memory>
-
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
-
 GridScrollBar::~GridScrollBar()
 {
     CHECK_NULL_VOID_NOLOG(touchEvent_);
@@ -88,21 +85,6 @@ void GridScrollBar::CreateInnerBar()
         pattern->scrollBar_->OnInnerBarTouch(info);
     });
     gestureHub->AddTouchEvent(touchEvent_);
-
-    // if (scrollEvent_) {
-    //     gestureHub->RemoveScrollableEvent(scrollEvent_);
-    // }
-    // scrollEvent_ = AceType::MakeRefPtr<ScrollableEvent>(gridPattern->gridLayoutInfo_.axis_);
-    // scrollEvent_->SetScrollPositionCallback([weak = pattern_](double offset, int32_t source) -> bool {
-    //     auto pattern = weak.Upgrade();
-    //     CHECK_NULL_RETURN(pattern, false);
-    //     CHECK_NULL_RETURN(pattern->scrollBar_, false);
-    //     if (source == SCROLL_FROM_UPDATE) {
-    //         return pattern->scrollBar_->OnInnerBarScroll(offset);
-    //     }
-    //     return false;
-    // });
-    // gestureHub->AddScrollableEvent(scrollEvent_);
 }
 
 bool GridScrollBar::SetInnerBarProperties(const RefPtr<GridPattern>& gridPattern)
@@ -198,5 +180,4 @@ void GridScrollBar::UpdateBarOffset(const RefPtr<LayoutWrapper>& layoutWrapper)
         scrollBarProxy_->NotifyScrollBar(pattern_);
     }
 }
-
 } // namespace OHOS::Ace::NG
