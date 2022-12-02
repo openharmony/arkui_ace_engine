@@ -130,6 +130,11 @@ public:
         return hoverRadius_;
     }
 
+    const Dimension& GetFocusPaintPadding() const
+    {
+        return focusPaintPadding_;
+    }
+
 protected:
     CheckableTheme() = default;
 
@@ -150,6 +155,7 @@ protected:
     Dimension borderWidth_;
     Dimension shadowWidth_;
     Dimension hoverRadius_;
+    Dimension focusPaintPadding_;
     double aspectRatio_ = 1.0;
     double radioInnerSizeRatio_ = 0.5;
     bool needFocus_ = true;
@@ -304,6 +310,7 @@ public:
             theme->hoverRadius_ = switchPattern->GetAttr<Dimension>("hover_border_radius", 0.0_vp);
             theme->inactivePointColor_ = switchPattern->GetAttr<Color>("fg_color_unchecked", Color::RED);
             theme->clickEffectColor_ = switchPattern->GetAttr<Color>("click_effect_color", Color::RED);
+            theme->focusPaintPadding_ = switchPattern->GetAttr<Dimension>("focus_paint_padding", 0.0_vp);
 
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
