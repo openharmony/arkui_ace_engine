@@ -99,7 +99,9 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     CHECK_NULL_RETURN(pagePattern, false);
     stagePattern_->currentPageIndex_ = pagePattern->GetPageInfo()->GetPageId();
     if (needTransition) {
-        pagePattern->SetFirstBuildCallback([outPageNode, inPageNode = node]() {
+        pagePattern->SetFirstBuildCallback([outPageNode, weakIn = WeakPtr<FrameNode>(node)]() {
+            auto inPageNode = weakIn.Upgrade();
+            // outPageNode need to perform the onHide function so we keep its RefPtr
             StartTransition(outPageNode, inPageNode, RouteType::PUSH);
         });
     }
