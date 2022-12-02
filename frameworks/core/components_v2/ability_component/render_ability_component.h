@@ -46,6 +46,7 @@ public:
 
     void FireConnect()
     {
+        adapter_->UpdateRect(currentRect_);
         hasConnectionToAbility_ = true;
         if (component_) {
             component_->FireOnConnected();
