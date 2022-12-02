@@ -44,7 +44,8 @@ constexpr char BUTTON_CUT[] = "textoverlay.cut";
 constexpr char BUTTON_COPY[] = "textoverlay.copy";
 constexpr char BUTTON_PASTE[] = "textoverlay.paste";
 
-RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void()>& callback, int32_t overlayId)
+RefPtr<FrameNode> BuildButton(
+    const std::string& data, const std::function<void()>& callback, int32_t overlayId, bool isSelectAll = false)
 {
     auto button = FrameNode::GetOrCreateFrameNode("SelectMenuButton", ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -74,7 +75,7 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
         { std::nullopt, CalcLength(textOverlayTheme->GetMenuButtonHeight()) });
     button->GetRenderContext()->UpdateBackgroundColor(textOverlayTheme->GetMenuBackgroundColor());
 
-    button->GetOrCreateGestureEventHub()->SetUserOnClick([callback, overlayId](GestureEvent& /*info*/) {
+    button->GetOrCreateGestureEventHub()->SetUserOnClick([callback, overlayId, isSelectAll](GestureEvent& /*info*/) {
         if (callback) {
             callback();
         }
@@ -83,7 +84,9 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetSelectOverlayManager();
         CHECK_NULL_VOID(overlayManager);
-        overlayManager->DestroySelectOverlay(overlayId);
+        if (!isSelectAll) {
+            overlayManager->DestroySelectOverlay(overlayId);
+        }
     });
     button->MarkModifyDone();
     return button;
@@ -159,8 +162,8 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
             button->MountToParent(selectMenu_);
         }
         if (info->menuInfo.showCopyAll) {
-            auto button = BuildButton(
-                Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL), info->menuCallback.onSelectAll, GetId());
+            auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL),
+                info->menuCallback.onSelectAll, GetId(), true);
             button->MountToParent(selectMenu_);
         }
         if (info->menuInfo.showCut) {
