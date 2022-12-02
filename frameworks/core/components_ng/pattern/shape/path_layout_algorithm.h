@@ -16,8 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_PATH_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_PATH_LAYOUT_ALGORITHM_H
 
-#include "frameworks/core/components_ng/layout/layout_wrapper.h"
-#include "frameworks/core/components_ng/pattern/shape/shape_layout_algorithm.h"
+#include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/shape/shape_layout_algorithm.h"
+#include "core/components_ng/pattern/shape/shape_paint_property.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT PathLayoutAlgorithm : public ShapeLayoutAlgorithm {
@@ -25,12 +26,16 @@ class ACE_EXPORT PathLayoutAlgorithm : public ShapeLayoutAlgorithm {
 
 public:
     PathLayoutAlgorithm() = default;
+    explicit PathLayoutAlgorithm(const RefPtr<ShapePaintProperty>& shapePaintProperty)
+        : propertiesFromAncestor_(shapePaintProperty)
+    {}
     ~PathLayoutAlgorithm() override = default;
 
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
 private:
+    RefPtr<ShapePaintProperty> propertiesFromAncestor_;
     ACE_DISALLOW_COPY_AND_MOVE(PathLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
