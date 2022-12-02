@@ -21,18 +21,10 @@
 namespace OHOS::Ace::NG {
 void NavigatorPattern::OnModifyDone()
 {
-    // navigate immediately if active_ is set to true
-    auto eventHub = GetEventHub<NavigatorEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    if (eventHub->GetActive()) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->GetTaskExecutor()->PostTask([eventHub] {
-            eventHub->NavigatePage();
-        },
-        TaskExecutor::TaskType::JS);
+    // only register click event once
+    if (clickListener_) {
+        return;
     }
-
     // register click event
     auto host = GetHost();
     CHECK_NULL_VOID(host);
