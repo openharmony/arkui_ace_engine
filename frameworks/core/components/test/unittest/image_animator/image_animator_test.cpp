@@ -17,7 +17,10 @@
 
 #include "adapter/aosp/entrance/java/jni/jni_environment.h"
 #include "base/log/log.h"
+#include "base/test/mock/mock_asset_manager.h"
+#include "base/test/mock/mock_task_executor.h"
 #include "core/animation/card_transition_controller.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #include "core/components/box/box_component.h"
 #include "core/components/image/image_animator_component.h"
 #include "core/components/image/image_animator_element.h"
@@ -25,16 +28,12 @@
 #include "core/components/test/json/json_frontend.h"
 #include "core/components/test/unittest/mock/render_mock.h"
 #include "core/components/test/unittest/mock/window_mock.h"
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/fake_task_executor.h"
-#include "core/mock/mock_resource_register.h"
 #include "core/pipeline/pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
-
 Platform::JniEnvironment::JniEnvironment() {}
 
 Platform::JniEnvironment::~JniEnvironment() = default;
@@ -622,5 +621,4 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest010, TestSize.Level1)
     EXPECT_EQ(240, render->GetWidth());
     EXPECT_EQ(240, render->GetHeight());
 }
-
 } // namespace OHOS::Ace

@@ -30,6 +30,6 @@ void CirclePainter::DrawCircle(RSCanvas& canvas, float radius, const ShapePaintP
     canvas.AttachPen(pen);
     canvas.AttachBrush(brush);
     PointF centerPoint = PointF(radius, radius);
-    canvas.DrawCircle(ToRSPonit(centerPoint), radius);
+    canvas.DrawCircle(ToRSPoint(centerPoint), radius);
 }
 } // namespace OHOS::Ace::NG

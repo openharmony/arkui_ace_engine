@@ -17,25 +17,26 @@
 #include <sys/types.h>
 
 #include "gtest/gtest.h"
-#include "core/common/ace_engine.h"
+
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "core/pipeline_ng/test/mock/mock_interface.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#include "core/pipeline_ng/test/mock/mock_container.h"
+#include "core/common/ace_engine.h"
+#include "core/common/test/mock/mock_container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/test/pattern/custom_paint/common_constants.h"
 #include "core/components_ng/test/pattern/custom_paint/mock/mock_paragraph.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_interface.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
 
-#include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
+#include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -47,6 +48,7 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+
 private:
     static RefPtr<CanvasPaintMethod> paintMethod_;
 };
@@ -151,7 +153,7 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg002, TestSize.Level1)
     EXPECT_DOUBLE_EQ(paintMethod_->fillState_.GetPattern().GetImageHeight(), IDEAL_HEIGHT);
     EXPECT_EQ(paintMethod_->fillState_.GetPattern().GetImgSrc(), IMAGE_SRC);
     EXPECT_EQ(paintMethod_->fillState_.GetPattern().GetRepetition(), REPETITION_STR);
-    
+
     Ace::Gradient gradient;
     paintMethod_->SetFillGradient(gradient);
     EXPECT_FALSE(paintMethod_->fillState_.GetGradient().GetRepeat());
@@ -373,7 +375,7 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg006, TestSize.Level1)
      */
     EXPECT_DOUBLE_EQ(paintMethod_->GetAlignOffset(TextAlign::LEFT, paragraph), DEFAULT_DOUBLE0);
     EXPECT_DOUBLE_EQ(paintMethod_->GetAlignOffset(TextAlign::RIGHT, paragraph), -DEFAULT_DOUBLE10);
-    EXPECT_DOUBLE_EQ(paintMethod_->GetAlignOffset(TextAlign::CENTER, paragraph), -DEFAULT_DOUBLE10/2);
+    EXPECT_DOUBLE_EQ(paintMethod_->GetAlignOffset(TextAlign::CENTER, paragraph), -DEFAULT_DOUBLE10 / 2);
     EXPECT_DOUBLE_EQ(paintMethod_->GetAlignOffset(TextAlign::JUSTIFY, paragraph), DEFAULT_DOUBLE0);
     EXPECT_DOUBLE_EQ(paintMethod_->GetAlignOffset(TextAlign::START, paragraph), DEFAULT_DOUBLE0);
     EXPECT_DOUBLE_EQ(paintMethod_->GetAlignOffset(TextAlign::END, paragraph), -DEFAULT_DOUBLE10);

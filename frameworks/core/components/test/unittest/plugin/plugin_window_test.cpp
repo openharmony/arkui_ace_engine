@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include <gmock/gmock.h>
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "base/test/mock/mock_asset_manager.h"
+#include "base/test/mock/mock_task_executor.h"
 #include "core/common/frontend.h"
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/fake_task_executor.h"
-#include "core/mock/mock_resource_register.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #include "core/components/plugin/plugin_window.h"
 
 using namespace testing;

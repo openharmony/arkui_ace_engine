@@ -15,15 +15,15 @@
 
 #include "gtest/gtest.h"
 
+#include "base/test/mock/mock_asset_manager.h"
 #include "core/components/test/unittest/mock/mock_render_common.h"
-#include "core/mock/fake_asset_manager.h"
 #define private public
 #define protected public
-#include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
+#include "bridge/card_frontend/card_frontend_declarative.h"
 #undef private
 #undef protected
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/core/mock/fake_task_executor.h"
+#include "base/test/mock/mock_task_executor.h"
+#include "bridge/common/utils/utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -288,5 +288,4 @@ HWTEST_F(CardFrontendDeclarativeTest, OnMediaFeatureUpdate001, TestSize.Level1)
     ASSERT_NE(cardFrontend->manifestParser_, nullptr);
     ASSERT_EQ(cardFrontend->type_, FrontendType::JS_CARD);
 }
-
 } // namespace OHOS::Ace::Framework

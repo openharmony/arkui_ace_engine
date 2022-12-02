@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "gtest/gtest.h"
 
 #include "core/common/flutter/flutter_task_executor.h"
@@ -24,8 +23,8 @@
 #undef private
 #undef protected
 
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/mock_resource_register.h"
+#include "base/test/mock/mock_asset_manager.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #include "frameworks/bridge/plugin_frontend/plugin_frontend.h"
 
 using namespace testing;
@@ -99,7 +98,7 @@ HWTEST_F(PluginComponentTest, FlutterRenderPluginCreateRenderNode001, TestSize.L
     RefPtr<PluginComponent> pluginComponent = AceType::MakeRefPtr<PluginComponent>();
     EXPECT_TRUE(pluginComponent != nullptr);
 
-     /**
+    /**
      * @tc.steps: step2. Get Draw Delegate.
      * @tc.expected: step2. Get Draw Delegate success.
      */

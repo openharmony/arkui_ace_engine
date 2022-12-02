@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "gtest/gtest.h"
 
 #include "core/common/flutter/flutter_task_executor.h"
@@ -22,9 +21,9 @@
 #include "core/components/plugin/plugin_element.h"
 #undef private
 #undef protected
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/mock_resource_register.h"
-#include "frameworks/bridge/plugin_frontend/plugin_frontend.h"
+#include "base/test/mock/mock_asset_manager.h"
+#include "bridge/plugin_frontend/plugin_frontend.h"
+#include "core/common/test/mock/mock_resource_register.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -90,7 +89,7 @@ HWTEST_F(PluginElementTest, PluginElementPerformBuild001, TestSize.Level1)
      */
     PluginElement element;
 
-     /**
+    /**
      * @tc.steps: step2. Perform Build.
      * @tc.expected: step2. Perform Build success.
      */

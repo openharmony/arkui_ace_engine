@@ -16,15 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_MOCK_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_MOCK_H
 
-#include "draw/clip.h"
-#include "utils/point.h"
-#include "utils/rect.h"
-#include "utils/round_rect.h"
-#include "utils/scalar.h"
-
 #include "core/components_ng/test/mock/rosen/testing_bitmap.h"
 #include "core/components_ng/test/mock/rosen/testing_brush.h"
-#include "core/components_ng/test/mock/rosen/testing_camera3d.h"
+#include "core/components_ng/test/mock/rosen/testing_camera.h"
 #include "core/components_ng/test/mock/rosen/testing_canvas.h"
 #include "core/components_ng/test/mock/rosen/testing_color.h"
 #include "core/components_ng/test/mock/rosen/testing_filter.h"
@@ -32,6 +26,7 @@
 #include "core/components_ng/test/mock/rosen/testing_path.h"
 #include "core/components_ng/test/mock/rosen/testing_path_effect.h"
 #include "core/components_ng/test/mock/rosen/testing_pen.h"
+#include "core/components_ng/test/mock/rosen/testing_point.h"
 #include "core/components_ng/test/mock/rosen/testing_shader_effect.h"
 
 namespace OHOS::Ace {
@@ -48,18 +43,18 @@ using RSColor = Testing::TestingColor;
 using RSMaskFilter = Testing::TestingMaskFilter;
 using RSBlurType = Testing::BlurType;
 using RSTileMode = Testing::TileMode;
-using RSColorQuad = Testing::ColorQuad;
 using RSBitmap = Testing::TestingBitmap;
 using RSBitmapFormat = Testing::BitmapFormat;
 using RSColorType = Testing::ColorType;
 using RSAlphaType = Testing::AlphaType;
 using RSBlendMode = Testing::BlendMode;
-using RSPoint = Rosen::Drawing::PointF;
-using RSScalar = Rosen::Drawing::scalar;
-using RSRect = Rosen::Drawing::RectF;
-using RSRoundRect = Rosen::Drawing::RoundRect;
-using RSClipOp = Rosen::Drawing::ClipOp;
-using RSCamera3D = Testing::TestingCamera3D;
+using RSCamera3D = Testing::TestingCamera;
 using RSMatrix = Testing::TestingMatrix;
+using RSClipOp = Testing::ClipOp;
+using RSPoint = Testing::TestingPoint;
+using RSRect = Testing::TestingRect;
+using RSRoundRect = Testing::TestingRoundRect;
+using RSColorQuad = uint32_t;
+using RSScalar = float;
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_MOCK_H

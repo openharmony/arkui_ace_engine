@@ -15,19 +15,20 @@
 
 #include <memory>
 
+#include "gtest/gtest.h"
+
 #define private public
 #define protected public
+#include "base/geometry/ng/rect_t.h"
+#include "core/components/common/properties/alignment.h"
+#include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/option/option_layout_algorithm.h"
-#include "frameworks/base/geometry/ng/rect_t.h"
-#include "frameworks/core/components/common/properties/alignment.h"
-#include "frameworks/core/components_ng/base/geometry_node.h"
-#include "frameworks/core/components_ng/layout/layout_wrapper.h"
-#include "frameworks/core/components_ng/property/geometry_property.h"
-#include "frameworks/core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/geometry_property.h"
+#include "core/components_ng/property/measure_property.h"
 #undef private
 #undef protected
 
-#include "gtest/gtest.h"
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {

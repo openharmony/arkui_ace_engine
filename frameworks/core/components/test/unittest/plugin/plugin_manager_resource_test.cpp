@@ -21,9 +21,9 @@
 #include "core/components/plugin/resource/plugin_manager_resource.h"
 #undef private
 #undef protected
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/mock_resource_register.h"
-#include "frameworks/bridge/plugin_frontend/plugin_frontend.h"
+#include "base/test/mock/mock_asset_manager.h"
+#include "bridge/plugin_frontend/plugin_frontend.h"
+#include "core/common/test/mock/mock_resource_register.h"
 
 using namespace testing;
 using namespace testing::ext;
