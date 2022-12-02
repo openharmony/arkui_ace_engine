@@ -87,11 +87,19 @@ public:
     virtual uint32_t GetUniqueID() const
     {
 #ifndef NG_BUILD
+        if (image_ && image_->image()) {
+            return image_->image()->uniqueID();
+        }
         return uniqueId_;
 #endif
         return 0;
     }
-    
+    virtual void SetUniqueID(uint32_t id)
+    {
+#ifndef NG_BUILD
+        uniqueId_ = id;
+#endif
+    }
 #ifndef NG_BUILD
     virtual fml::RefPtr<flutter::CanvasImage> GetFlutterCanvasImage() const
     {
