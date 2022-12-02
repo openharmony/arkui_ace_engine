@@ -28,7 +28,6 @@ namespace OHOS::Ace::Testing {
 using Point = Rosen::Drawing::Point;
 using RoundRect = Rosen::Drawing::RoundRect;
 using ClipOp = Rosen::Drawing::ClipOp;
-
 class TestingCanvas {
 public:
     TestingCanvas() = default;
