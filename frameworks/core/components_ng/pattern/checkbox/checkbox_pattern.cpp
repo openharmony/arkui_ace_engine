@@ -56,10 +56,10 @@ void CheckBoxPattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
     if (!layoutProperty->GetMarginProperty()) {
         MarginProperty margin;
-        margin.left = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
-        margin.right = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
-        margin.top = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
-        margin.bottom = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
+        margin.left = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding());
+        margin.right = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding());
+        margin.top = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding());
+        margin.bottom = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding());
         layoutProperty->UpdateMargin(margin);
     }
     hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
@@ -119,7 +119,7 @@ void CheckBoxPattern::InitMouseEvent()
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-    auto eventHub = GetHost()->GetEventHub<CheckBoxEventHub>();
+    auto eventHub = host->GetEventHub<CheckBoxEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
 
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
@@ -474,6 +474,7 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
     if (groupPaintProperty->GetIsCheckBoxCallbackDealed()) {
         return;
     }
+    // All checkboxes do not set select status.
     if (allSelectIsNull) {
         if (groupPaintProperty->HasCheckBoxGroupSelect() && groupPaintProperty->GetCheckBoxGroupSelectValue()) {
             groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
@@ -493,9 +494,11 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
                 auto checkBoxPattern = node->GetPattern<CheckBoxPattern>();
                 CHECK_NULL_VOID(checkBoxPattern);
                 checkBoxPattern->UpdateUIStatus(true);
+                checkBoxPattern->SetLastSelect(true);
             }
         }
     }
+    // Some checkboxes set select status.
     if (!allSelectIsNull) {
         bool allIsSame = true;
         bool selfSelect = paintProperty->GetCheckBoxSelectValue();
