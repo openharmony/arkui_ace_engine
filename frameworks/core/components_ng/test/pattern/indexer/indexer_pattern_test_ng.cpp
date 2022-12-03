@@ -649,6 +649,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern009, TestSize.Level1)
     EXPECT_EQ(result, false);
 
     indexerPattern->itemCount_ = CREATE_ARRAY_VALUE.size();
+    indexerPattern->selected_ = COMMON_SELECTED_VALUE;
     result = indexerPattern->KeyIndexByStep(MOVE_INDEX_STEP);
     EXPECT_EQ(indexerPattern->selected_, COMMON_SELECTED_VALUE + MOVE_INDEX_STEP);
     EXPECT_EQ(result, true);
@@ -737,6 +738,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern011, TestSize.Level1)
     EXPECT_EQ(result, false);
 
     indexerPattern->itemCount_ = CREATE_ARRAY_VALUE.size();
+    indexerPattern->selected_ = COMMON_SELECTED_VALUE;
     result = indexerPattern->MoveIndexByStep(MOVE_INDEX_STEP);
     EXPECT_EQ(indexerPattern->selected_, COMMON_SELECTED_VALUE + MOVE_INDEX_STEP);
     EXPECT_EQ(result, true);
