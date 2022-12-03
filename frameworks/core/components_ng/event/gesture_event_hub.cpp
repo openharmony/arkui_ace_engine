@@ -339,8 +339,8 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     event->SetX(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
     event->SetY(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
-    auto extraParams = JsonUtil::Create(true);
-    auto dragDropInfo = (eventHub->GetOnDragStart())(event, extraParams->ToString());
+    auto extraParams = eventHub->GetDragExtraParams(std::string(), info.GetGlobalPoint(), DragEventType::START);
+    auto dragDropInfo = (eventHub->GetOnDragStart())(event, extraParams);
 
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);

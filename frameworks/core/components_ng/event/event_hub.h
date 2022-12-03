@@ -201,6 +201,15 @@ public:
         return static_cast<bool>(onDrop_);
     }
 
+    virtual std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType isStart)
+    {
+        auto json = JsonUtil::Create(true);
+        if (!extraInfo.empty()) {
+            json->Put("extraInfo", extraInfo.c_str());
+        }
+        return json->ToString();
+    }
+
     bool IsEnabled() const
     {
         return enabled_;
