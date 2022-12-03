@@ -15,10 +15,6 @@
 
 #include "gtest/gtest.h"
 
-#include "core/components_ng/gestures/long_press_gesture.h"
-#include "core/components_ng/gestures/pan_gesture.h"
-#include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
-
 #define private public
 
 #include "base/geometry/axis.h"
@@ -29,6 +25,10 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/event/touch_event.h"
+#include "core/components_ng/gestures/long_press_gesture.h"
+#include "core/components_ng/gestures/pan_gesture.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/gestures/gesture_info.h"
@@ -264,14 +264,16 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest003, TestSize.Level1)
     /**
      * @tc.steps: step4. call ProcessTouchTestHit again
      *            case: nodeParallelRecognizer_  & externalParallelRecognizer_ is existed
-     * @tc.expected: ProcessTouchTestHit return false,  innerTargets 4 elements & finalResult have 6 elements
+     * @tc.expected: ProcessTouchTestHit return false,  innerTargets 4 elements & finalResult have 5 elements
      */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
     flag = gestureEventHub->ProcessTouchTestHit(COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID);
     EXPECT_FALSE(flag);
     sizeOfInnerTargets = static_cast<int32_t>(innerTargets.size());
     sizeOfFinalResult = static_cast<int32_t>(finalResult.size());
     EXPECT_EQ(sizeOfInnerTargets, 4);
-    EXPECT_EQ(sizeOfFinalResult, 6);
+    EXPECT_EQ(sizeOfFinalResult, 5);
 }
 
 /**
@@ -656,5 +658,98 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest009, TestSize.Level1)
     auto sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
     EXPECT_EQ(sizeGestures, 0);
     EXPECT_EQ(sizeGestureHierarchy, 1);
+}
+
+/**
+ * @tc.name: GestureEventHubTest010
+ * @tc.desc: Test ProcessTouchTestHierarchy
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+
+    /**
+     * @tc.steps: step2. call ProcessTouchTestHierarchy
+     *            case: innerRecognizers & gestureHierarchy_ is empty, current is null
+     * @tc.expected: finalResult is empty
+     */
+    TouchRestrict touchRestrict;
+    std::list<RefPtr<NGGestureRecognizer>> innerTargets;
+    TouchTestResult finalResult;
+
+    gestureEventHub->externalExclusiveRecognizer_.push_back(nullptr);
+    gestureEventHub->externalParallelRecognizer_.push_back(nullptr);
+    EXPECT_EQ(static_cast<int32_t>(gestureEventHub->externalExclusiveRecognizer_.size()), 1);
+    EXPECT_EQ(static_cast<int32_t>(gestureEventHub->externalParallelRecognizer_.size()), 1);
+
+    gestureEventHub->ProcessTouchTestHierarchy(COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID);
+    EXPECT_TRUE(finalResult.empty());
+
+    /**
+     * @tc.steps: step3. call ProcessTouchTestHierarchy several
+     *            case: innerRecognizers & gestureHierarchy_ is not all empty
+     * @tc.expected: finalResult's size has increased by 1 per call
+     */
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGERS, 1); // priority == GesturePriority::Low
+    innerTargets.emplace_back(clickRecognizer);
+
+    gestureEventHub->gestureHierarchy_.emplace_back(nullptr);
+    auto clickRecognizer2 = AceType::MakeRefPtr<ClickRecognizer>(FINGERS, 1);
+    clickRecognizer2->SetPriorityMask(GestureMask::IgnoreInternal);           // current will assigned to this
+    auto clickRecognizer3 = AceType::MakeRefPtr<ClickRecognizer>(FINGERS, 1); // priority == GesturePriority::High
+    clickRecognizer3->SetPriority(GesturePriority::High);
+    auto clickRecognizer4 = AceType::MakeRefPtr<ClickRecognizer>(FINGERS, 1); // priority == GesturePriority::Parallel
+    clickRecognizer4->SetPriority(GesturePriority::Parallel);
+    auto clickRecognizer5 = AceType::MakeRefPtr<ClickRecognizer>(FINGERS, 1); // priority == GesturePriority::Parallel
+    clickRecognizer5->SetPriority(GesturePriority::Parallel);
+
+    gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer);
+    gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer4);
+    gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer2);
+    gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer3);
+    gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer5);
+
+    gestureEventHub->ProcessTouchTestHierarchy(COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID);
+    auto sizeOfFinalResult = static_cast<int32_t>(finalResult.size());
+    EXPECT_EQ(sizeOfFinalResult, 1);
+
+    auto clickRecognizer6 = AceType::MakeRefPtr<ClickRecognizer>(FINGERS, 1); // priority == GesturePriority::Low
+    std::list<RefPtr<NGGestureRecognizer>> innerTargets2;
+    innerTargets2.emplace_back(clickRecognizer);
+    innerTargets2.emplace_back(clickRecognizer6);
+    gestureEventHub->ProcessTouchTestHierarchy(COORDINATE_OFFSET, touchRestrict, innerTargets2, finalResult, TOUCH_ID);
+    sizeOfFinalResult = static_cast<int32_t>(finalResult.size());
+    EXPECT_EQ(sizeOfFinalResult, 2);
+
+    std::list<RefPtr<NGGestureRecognizer>> innerTargets3;
+    innerTargets3.emplace_back(clickRecognizer);
+    innerTargets3.emplace_back(clickRecognizer6);
+    gestureEventHub->ProcessTouchTestHierarchy(COORDINATE_OFFSET, touchRestrict, innerTargets3, finalResult, TOUCH_ID);
+    sizeOfFinalResult = static_cast<int32_t>(finalResult.size());
+    EXPECT_EQ(sizeOfFinalResult, 3);
+
+    std::list<RefPtr<NGGestureRecognizer>> innerTargets4;
+    gestureEventHub->gestureHierarchy_.clear();
+    gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer4);
+    gestureEventHub->ProcessTouchTestHierarchy(COORDINATE_OFFSET, touchRestrict, innerTargets4, finalResult, TOUCH_ID);
+    sizeOfFinalResult = static_cast<int32_t>(finalResult.size());
+    EXPECT_EQ(sizeOfFinalResult, 4);
+
+    std::list<RefPtr<NGGestureRecognizer>> innerTargets5;
+    gestureEventHub->gestureHierarchy_.clear();
+    gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer);
+    gestureEventHub->ProcessTouchTestHierarchy(COORDINATE_OFFSET, touchRestrict, innerTargets5, finalResult, TOUCH_ID);
+    sizeOfFinalResult = static_cast<int32_t>(finalResult.size());
+    EXPECT_EQ(sizeOfFinalResult, 5);
 }
 } // namespace OHOS::Ace::NG
