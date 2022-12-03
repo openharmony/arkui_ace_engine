@@ -17,18 +17,21 @@
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+bool onBackPressedFlag = false;
+}
 void FullScreenManager::RequestFullScreen(const RefPtr<FrameNode>& frameNode)
 {
-    return;
+    onBackPressedFlag = true;
 }
 
 void FullScreenManager::ExitFullScreen(const RefPtr<FrameNode>& frameNode)
 {
-    return;
+    onBackPressedFlag = false;
 }
 
 bool FullScreenManager::OnBackPressed()
 {
-    return true;
+    return onBackPressedFlag;
 }
 } // namespace OHOS::Ace::NG

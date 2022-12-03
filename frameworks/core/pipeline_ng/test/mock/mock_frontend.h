@@ -95,7 +95,6 @@ public:
 
     WindowConfig& GetWindowConfig() override
     {
-        windowConfig_.designWidth = 0;
         return windowConfig_;
     }
     
