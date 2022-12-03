@@ -113,7 +113,7 @@ const RectF& ImageLoadingContext::GetSrcRect() const
     return srcRect_;
 }
 
-RefPtr<CanvasImage> ImageLoadingContext::GetCanvasImage() const
+RefPtr<CanvasImage> ImageLoadingContext::MoveCanvasImage()
 {
     return MakeRefPtr<MockCanvasImage>();
 }

@@ -427,14 +427,14 @@ HWTEST_F(ImagePatternTest, ImagePatternCreateNodePaintMethod001, TestSize.Level1
     /**
      * @tc.cases: case2. When SrcImage load successfully, it will Create SrcImage's NodePaintMethod.
      */
-    imagePattern->lastCanvasImage_ = imagePattern->loadingCtx_->GetCanvasImage();
+    imagePattern->lastCanvasImage_ = imagePattern->loadingCtx_->MoveCanvasImage();
     EXPECT_TRUE(imagePattern->CreateNodePaintMethod() != nullptr);
     /**
      * @tc.cases: case3. When AltImage load successfully and altImage Rect is valid, it will Create AltImage's
      *                   NodePaintMethod.
      */
     imagePattern->lastCanvasImage_ = nullptr;
-    imagePattern->lastAltCanvasImage_ = imagePattern->altLoadingCtx_->GetCanvasImage();
+    imagePattern->lastAltCanvasImage_ = imagePattern->altLoadingCtx_->MoveCanvasImage();
     EXPECT_TRUE(imagePattern->CreateNodePaintMethod() == nullptr);
     imagePattern->lastAltSrcRect_ = std::make_unique<RectF>(RectF());
     EXPECT_TRUE(imagePattern->CreateNodePaintMethod() == nullptr);
@@ -487,7 +487,7 @@ HWTEST_F(ImagePatternTest, ImagePaintMethod001, TestSize.Level1)
 
 /**
  * @tc.name: OnDirtyLayoutWrapperSwap001
- * @tc.desc: Test OnDirtyLayoutWrapperSwap funciton.
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap function.
  * @tc.type: FUNC
  */
 HWTEST_F(ImagePatternTest, OnDirtyLayoutWrapperSwap001, TestSize.Level1)

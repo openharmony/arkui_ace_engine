@@ -258,9 +258,14 @@ const RectF& ImageLoadingContext::GetSrcRect() const
     return srcRect_;
 }
 
-RefPtr<CanvasImage> ImageLoadingContext::GetCanvasImage() const
+bool ImageLoadingContext::HasCanvasImage() const
 {
-    return imageObj_ ? imageObj_->GetCanvasImage() : nullptr;
+    return imageObj_ && imageObj_->HasCanvasImage();
+}
+
+RefPtr<CanvasImage> ImageLoadingContext::MoveCanvasImage()
+{
+    return imageObj_->MoveCanvasImage();
 }
 
 void ImageLoadingContext::LoadImageData()
