@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 #include <cstdint>
+
 #include "gtest/gtest.h"
+
 #include "core/components/common/layout/constants.h"
 
 // Add the following two macro definitions to test the private and protected method.
@@ -24,20 +26,20 @@
 #include "base/memory/referenced.h"
 #include "core/common/ace_engine.h"
 #include "core/common/event_manager.h"
-#include "core/components_ng/render/drawing_forward.h"
+#include "core/common/test/mock/mock_container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/test/mock/mock_container.h"
-#include "core/pipeline_ng/test/unittest/mock_schedule_task.h"
-#include "core/pipeline_ng/test/mock/mock_window.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_frontend.h"
 #include "core/pipeline_ng/test/mock/mock_task_executor.h"
-#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
+#include "core/pipeline_ng/test/mock/mock_window.h"
+#include "core/pipeline_ng/test/unittest/mock_schedule_task.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -67,6 +69,7 @@ public:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
+
 private:
     static ElementIdType frameNodeId_;
     static ElementIdType customNodeId_;
@@ -91,8 +94,8 @@ void PipelineContextTest::SetUpTestSuite()
     customNode_ = CustomNode::CreateCustomNode(customNodeId_, TEST_TAG);
     ElementRegister::GetInstance()->AddUINode(frameNode_);
     ContainerScope scope(DEFAULT_INSTANCE_ID);
-    context_ = AceType::MakeRefPtr<PipelineContext>(std::make_unique<MockWindow>(),
-        AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
+    context_ = AceType::MakeRefPtr<PipelineContext>(
+        std::make_unique<MockWindow>(), AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
     RefPtr<Container> container = AceType::MakeRefPtr<MockContainer>(context_);
     AceEngine::Get().AddContainer(DEFAULT_INSTANCE_ID, container);
 }
@@ -125,7 +128,7 @@ HWTEST_F(PipelineContextTest, PipelineContextTest001, TestSize.Level1)
      */
     ASSERT_NE(context_, nullptr);
     bool flagUpdate = false;
-    customNode_->SetUpdateFunction([&flagUpdate] () { flagUpdate = true; });
+    customNode_->SetUpdateFunction([&flagUpdate]() { flagUpdate = true; });
     context_->AddDirtyCustomNode(customNode_);
 
     /**
@@ -404,7 +407,7 @@ HWTEST_F(PipelineContextTest, PipelineContextTest009, TestSize.Level1)
      * @tc.expected: The flagCbk is changed to true.
      */
     context_->SetForegroundCalled(true);
-    context_->SetNextFrameLayoutCallback([&flagCbk] () { flagCbk = !flagCbk; });
+    context_->SetNextFrameLayoutCallback([&flagCbk]() { flagCbk = !flagCbk; });
     context_->OnSurfaceChanged(DEFAULT_INT10, DEFAULT_INT10, WindowSizeChangeReason::CUSTOM_ANIMATION);
     EXPECT_TRUE(flagCbk);
 
@@ -598,7 +601,7 @@ HWTEST_F(PipelineContextTest, PipelineContextTest014, TestSize.Level1)
      * @tc.steps2: Call the function OnIdle.
      * @tc.expected: The value of flagCbk remains unchanged.
      */
-    context_->AddPredictTask([&flagCbk] (int64_t deadline) { flagCbk = true; });
+    context_->AddPredictTask([&flagCbk](int64_t deadline) { flagCbk = true; });
     context_->OnIdle(0);
     EXPECT_FALSE(flagCbk);
 
@@ -636,7 +639,7 @@ HWTEST_F(PipelineContextTest, PipelineContextTest015, TestSize.Level1)
      * @tc.steps3: Call the function Finish.
      * @tc.expected: The flagCbk is changed to true.
      */
-    context_->SetFinishEventHandler([&flagCbk] () { flagCbk = true; });
+    context_->SetFinishEventHandler([&flagCbk]() { flagCbk = true; });
     context_->Finish(false);
     EXPECT_TRUE(flagCbk);
 }
@@ -791,7 +794,6 @@ HWTEST_F(PipelineContextTest, PipelineContextTest019, TestSize.Level1)
     context_->SetAppTitle(TEST_TAG);
     EXPECT_DOUBLE_EQ(pattern->moveX_, DEFAULT_DOUBLE2);
 
-
     /**
      * @tc.steps3: Call the function ShowContainerTitle with windowModal_ = WindowModal::CONTAINER_MODAL.
      * @tc.expected: The moveX_ is unchanged.
@@ -831,7 +833,6 @@ HWTEST_F(PipelineContextTest, PipelineContextTest020, TestSize.Level1)
     context_->windowModal_ = WindowModal::DIALOG_MODAL;
     context_->SetAppIcon(nullptr);
     EXPECT_DOUBLE_EQ(pattern->moveX_, DEFAULT_DOUBLE2);
-
 
     /**
      * @tc.steps3: Call the function SetAppIcon with windowModal_ = WindowModal::CONTAINER_MODAL.

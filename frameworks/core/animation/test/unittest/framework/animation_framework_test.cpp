@@ -17,23 +17,22 @@
 
 #include "adapter/aosp/entrance/java/jni/jni_environment.h"
 #include "base/log/log.h"
+#include "base/test/mock/mock_asset_manager.h"
+#include "base/test/mock/mock_task_executor.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/friction_motion.h"
 #include "core/animation/scroll_motion.h"
 #include "core/animation/spring_motion.h"
-#include "core/animation/test/unittest/mock/animation_mock.h"
-#include "core/animation/test/unittest/mock/animation_test_utils.h"
+#include "core/animation/test/mock/mock_animation.h"
+#include "core/animation/test/mock/mock_animation_util.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #include "core/components/test/json/json_frontend.h"
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/fake_task_executor.h"
-#include "core/mock/mock_resource_register.h"
 #include "core/pipeline/pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
-
 CardTransitionController::CardTransitionController(const WeakPtr<PipelineContext>& context) {}
 
 void CardTransitionController::RegisterTransitionListener() {}
@@ -3746,5 +3745,4 @@ HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest028, TestSize.Level1)
     EXPECT_NEAR(5.0f, flushEventMock_->keyframeAnimationValue_, FLT_EPSILON);
     EXPECT_FALSE(flushEventMock_->animationStopStatus_);
 }
-
 } // namespace OHOS::Ace

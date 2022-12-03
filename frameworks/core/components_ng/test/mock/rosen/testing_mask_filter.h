@@ -19,10 +19,8 @@
 #include <memory>
 
 #include "testing_color.h"
-#include "utils/scalar.h"
 
 namespace OHOS::Ace::Testing {
-using scalar = Rosen::Drawing::scalar;
 enum class BlurType {
     NORMAL,
     SOLID,
@@ -35,7 +33,7 @@ public:
     TestingMaskFilter() = default;
     ~TestingMaskFilter() = default;
 
-    static std::shared_ptr<TestingMaskFilter> CreateBlurMaskFilter(BlurType blurType, scalar sigma)
+    static std::shared_ptr<TestingMaskFilter> CreateBlurMaskFilter(BlurType /* blurType */, float /* sigma */)
     {
         return std::make_shared<TestingMaskFilter>();
     }

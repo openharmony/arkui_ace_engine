@@ -16,9 +16,12 @@
 #include "gtest/gtest.h"
 
 #include "base/log/log.h"
+#include "base/test/mock/mock_asset_manager.h"
+#include "base/test/mock/mock_task_executor.h"
 #include "base/utils/system_properties.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/curve_animation.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #include "core/components/box/box_component.h"
 #include "core/components/page/page_element.h"
 #include "core/components/page_transition/page_transition_component.h"
@@ -30,9 +33,6 @@
 #include "core/components/test/unittest/mock/transition_mock.h"
 #include "core/components/test/unittest/mock/window_mock.h"
 #include "core/components/tween/tween_element.h"
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/fake_task_executor.h"
-#include "core/mock/mock_resource_register.h"
 #include "core/pipeline/pipeline_context.h"
 
 using namespace testing;
@@ -40,7 +40,6 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-
 constexpr int32_t NANOSECOND_TO_MILLISECOND = 1000000;
 constexpr int32_t FRAME_TIME_IN_MILLISECOND = 200;
 constexpr int32_t TEST_SURFACE_WIDTH = 1080;
@@ -73,7 +72,6 @@ public:
 };
 
 TransitionRecord g_transitionRecord;
-
 } // namespace
 
 CardTransitionController::CardTransitionController(const WeakPtr<PipelineContext>& context) {}
@@ -1395,5 +1393,4 @@ HWTEST_F(TransitionElementTest, PopPageCardTransitionTest002, TestSize.Level1)
     CheckPopPageCardOpacityFrames();
     frameTimeMs_ = FRAME_TIME_IN_MILLISECOND;
 }
-
 } // namespace OHOS::Ace

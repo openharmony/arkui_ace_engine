@@ -25,7 +25,6 @@ group("unittest") {
   } else if (!is_asan) {
     deps += [
       "unittest/geometry:GeometryTest",
-      "unittest/subwindow:unittest",
       "unittest/utils:unittest",
     ]
   }

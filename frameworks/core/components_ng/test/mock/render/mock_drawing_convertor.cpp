@@ -21,7 +21,7 @@ RSColor ToRSColor(const Color& color)
     return RSColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
 }
 
-RSPoint ToRSPonit(const NG::PointF& point)
+RSPoint ToRSPoint(const NG::PointF& point)
 {
     return RSPoint(point.GetX(), point.GetY());
 }

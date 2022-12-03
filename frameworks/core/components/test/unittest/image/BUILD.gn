@@ -73,11 +73,11 @@ ohos_unittest("RenderImageTest") {
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/focus_animation_manager.cpp",
     "$ace_root/frameworks/core/common/font_manager.cpp",
+    "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/common/thread_checker.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
     "$ace_root/frameworks/core/components/display/display_component.cpp",
     "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
-    "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/pipeline/base/composed_component.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_context.cpp",
 
@@ -118,6 +118,7 @@ ohos_unittest("RenderImageTest") {
     "$ace_root/frameworks/core/image/image_source_info.cpp",
 
     # rendering
+    "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
     "$ace_root/frameworks/core/components/box/render_box.cpp",
     "$ace_root/frameworks/core/components/refresh/render_refresh.cpp",
@@ -130,7 +131,6 @@ ohos_unittest("RenderImageTest") {
     "$ace_root/frameworks/core/components/stage/render_stage.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_font_manager.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_node_factory.cpp",
-    "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/pipeline/base/render_node.cpp",
     "image_test_utils.cpp",
     "render_image_test.cpp",
@@ -166,11 +166,11 @@ ohos_unittest("RenderImageTest") {
     "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
 
     #mock
+    "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
+    "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
-    "$ace_root/frameworks/core/mock/mock_image_loader.cpp",
-    "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
-    "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
+    "$ace_root/frameworks/core/image/test/mock/mock_image_loader.cpp",
   ]
 
   # add sources only needed by wearable like watch.
