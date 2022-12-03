@@ -27,7 +27,7 @@
 namespace OHOS::Ace::Framework {
 
 void GridModelImpl::Create(
-    const RefPtr<ScrollControllerBase>& positionController, const RefPtr<ScrollBarProxy>& scrollBarProxy)
+    const RefPtr<ScrollControllerBase>& positionController, const RefPtr<ScrollProxy>& scrollProxy)
 {
     auto controller = AceType::DynamicCast<V2::GridPositionController>(positionController);
     std::list<RefPtr<OHOS::Ace::Component>> componentChildren;
@@ -38,6 +38,7 @@ void GridModelImpl::Create(
     if (controller) {
         gridComponent->SetController(controller);
     }
+    auto scrollBarProxy = AceType::DynamicCast<ScrollBarProxy>(scrollProxy);
     if (scrollBarProxy) {
         gridComponent->SetScrollBarProxy(scrollBarProxy);
     }
@@ -96,12 +97,13 @@ void GridModelImpl::SetGridHeight(const Dimension& value)
     }
 }
 
-void GridModelImpl::SetScrollBarMode(DisplayMode value)
+void GridModelImpl::SetScrollBarMode(int32_t value)
 {
+    auto displayMode = static_cast<DisplayMode>(value);
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
     CHECK_NULL_VOID(grid);
-    grid->SetScrollBar(value);
+    grid->SetScrollBar(displayMode);
 }
 
 void GridModelImpl::SetScrollBarColor(const std::string& value)
@@ -260,6 +262,11 @@ void GridModelImpl::SetOnItemDrop(std::function<void(const ItemDragInfo&, int32_
 RefPtr<ScrollControllerBase> GridModelImpl::CreatePositionController()
 {
     return AceType::MakeRefPtr<V2::GridPositionController>();
+}
+
+RefPtr<ScrollProxy> GridModelImpl::CreateScrollBarProxy()
+{
+    return AceType::MakeRefPtr<ScrollBarProxy>();
 }
 
 } // namespace OHOS::Ace::Framework

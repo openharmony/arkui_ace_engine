@@ -84,9 +84,7 @@ class ScrollBar final : public AceType {
 
 public:
     ScrollBar();
-    explicit ScrollBar(
-        DisplayMode displayMode,
-        ShapeMode shapeMode = ShapeMode::RECT,
+    explicit ScrollBar(DisplayMode displayMode, ShapeMode shapeMode = ShapeMode::RECT,
         PositionMode positionMode = PositionMode::RIGHT);
     ~ScrollBar() override = default;
 
@@ -306,9 +304,9 @@ private:
     Rect touchRegion_;
     Rect barRect_;
     Rect activeRect_;
-    Dimension minHeight_; // this is min static height
+    Dimension minHeight_;        // this is min static height
     Dimension minDynamicHeight_; // this is min dynamic height when on the top or bottom
-    Dimension reservedHeight_; // this is reservedHeight on the bottom
+    Dimension reservedHeight_;   // this is reservedHeight on the bottom
     Dimension inactiveWidth_;
     Dimension activeWidth_;
     Dimension normalWidth_;

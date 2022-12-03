@@ -13,10 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/grid/grid_layout_property.h"
-#include "core/components_ng/pattern/grid/grid_paint_property.h"
+#include "core/components_ng/pattern/grid/grid_paint_method.h"
+
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_painter.h"
 
 namespace OHOS::Ace::NG {
-void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {};
-void GridPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+CanvasDrawFunction GridPaintMethod::GetForegroundDrawFunction(PaintWrapper* /* paintWrapper */)
+{
+    return [weak = scrollBar_](RSCanvas& canvas) {
+        auto scrollBar = weak.Upgrade();
+        CHECK_NULL_VOID(scrollBar);
+        ScrollBarPainter::PaintRectBar(canvas, scrollBar, UINT8_MAX);
+    };
+}
 } // namespace OHOS::Ace::NG
