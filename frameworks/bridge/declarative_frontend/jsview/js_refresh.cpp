@@ -70,7 +70,8 @@ void JSRefresh::Create(const JSCallbackInfo& info)
         if (offset.Value() <= 0.0) {
             refreshComponent->SetRefreshDistance(theme->GetRefreshDistance());
         } else {
-            refreshComponent->SetRefreshDistance(offset);
+            refreshComponent->SetUseOffset(true);
+            refreshComponent->SetIndicatorOffset(offset);
         }
     }
 
