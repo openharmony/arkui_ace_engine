@@ -28,6 +28,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+
 namespace {
 const Color BG_COLOR = Color(0xfff1f3f5);
 } // namespace
@@ -49,10 +50,8 @@ void SlidingPanelModelNG::Create(bool isShow)
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelType, PanelType::FOLDABLE_BAR); // default value
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HasDragBar, true);                   // default value
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelMode, PanelMode::HALF);         // default value
-    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, IsShow, true);
+    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, IsShow, isShow);
 
-    auto type = isShow ? VisibleType::VISIBLE : VisibleType::GONE;
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, type);
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext) {
         renderContext->UpdateBackgroundColor(BG_COLOR);
@@ -124,7 +123,6 @@ void SlidingPanelModelNG::SetFullHeight(const Dimension& fullHeight)
 
 void SlidingPanelModelNG::SetIsShow(bool isShow)
 {
-    NG::ViewAbstract::SetVisibility(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, IsShow, isShow);
 }
 
