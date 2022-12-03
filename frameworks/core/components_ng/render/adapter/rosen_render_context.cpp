@@ -32,6 +32,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
+#include "core/common/container.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
@@ -1605,7 +1606,8 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
         AnimationUtils::Animate(
             option, [rsNode = rsNode_, effect]() { rsNode->NotifyTransition(effect, true); }, onFinish);
     } else {
-        auto wrappedFinish = [onFinish, weak = WeakPtr<FrameNode>(host)]() {
+        auto wrappedFinish = [onFinish, weak = WeakPtr<FrameNode>(host), instanceId = Container::CurrentId()]() {
+            ContainerScope scope(instanceId);
             auto host = weak.Upgrade();
             if (host) {
                 host->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
