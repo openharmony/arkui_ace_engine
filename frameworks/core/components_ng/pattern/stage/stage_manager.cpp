@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -40,7 +41,8 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     auto pagePattern = page->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
     if (transitionType == PageTransitionType::EXIT_PUSH || transitionType == PageTransitionType::EXIT_POP) {
-        pagePattern->TriggerPageTransition(transitionType, [page]() {
+        pagePattern->TriggerPageTransition(transitionType, [page, instanceId = Container::CurrentId()]() {
+            ContainerScope scope(instanceId);
             LOGI("pageTransition exit finish");
             CHECK_NULL_VOID(page);
             auto pattern = page->GetPattern<PagePattern>();
