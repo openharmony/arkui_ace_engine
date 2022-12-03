@@ -316,6 +316,11 @@ template("declarative_js_engine") {
       "jsview/models/view_partial_update_model_impl.cpp",
     ]
 
+    if (defined(config.model_component_support) &&
+        config.model_component_support) {
+      sources += [ "jsview/models/model_view_impl.cpp" ]
+    }
+
     # rich components needed by phone and TV. wearable like watch do not need them
     if (defined(config.rich_components_support) &&
         config.rich_components_support) {
