@@ -185,8 +185,6 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     columnUnitWidth_ = GridContainerUtils::ProcessColumnWidth(gutterInDouble_, columnNum, maxSize.Width());
     float childrenHeight =
         MeasureChildren(layoutWrapper, columnUnitWidth_, maxSize.Height(), gutterInDouble_, sizeType, columnNum);
-    LOGI("GridRowLayoutAlgorithm::Measure() columnNum=%d, columnUnitWidth_=%f, childrenHeight=%f, sizetype=%d",
-        columnNum, columnUnitWidth_, childrenHeight, static_cast<int>(sizeType));
 
     MeasureSelf(layoutWrapper, childrenHeight);
 }

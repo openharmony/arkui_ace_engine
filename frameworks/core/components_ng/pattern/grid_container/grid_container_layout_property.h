@@ -30,7 +30,10 @@ class ACE_EXPORT GridContainerLayoutProperty : public LinearLayoutProperty {
     DECLARE_ACE_TYPE(GridContainerLayoutProperty, LinearLayoutProperty);
 
 public:
-    GridContainerLayoutProperty() : LinearLayoutProperty(true) {}
+    GridContainerLayoutProperty() : LinearLayoutProperty(true)
+    {
+        reserveProperty_ = WeakClaim(this);
+    }
 
     ~GridContainerLayoutProperty() override = default;
 
@@ -55,24 +58,36 @@ public:
         LinearLayoutProperty::Reset();
     }
 
-    void SetContainerInfo(const GridContainerInfo& info)
-    {
-        propContainerInfo_ = info;
-    }
-
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     void UpdateChild(RefPtr<GridProperty>& child, const GridContainerInfo& info);
     void RegistGridChild(const RefPtr<FrameNode>& child);
     void BuildWidth(float width);
+    void SetReserveObj(const RefPtr<GridContainerLayoutProperty>& obj)
+    {
+        reserveProperty_ = obj;
+    }
+    RefPtr<GridContainerLayoutProperty> GetReserveObj()
+    {
+        auto obj = reserveProperty_.Upgrade();
+        return obj ? obj : Claim(this);
+    }
+    void SetGlobalOffset(const OffsetF& offset)
+    {
+        globalOffset_ = offset;
+    }
+    const OffsetF& GetGlobalOffset()
+    {
+        return globalOffset_;
+    }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(ContainerInfo, GridContainerInfo, PROPERTY_UPDATE_NORMAL);
 
 private:
     void OnContainerInfoUpdate(const GridContainerInfo& info);
-
     std::vector<WeakPtr<FrameNode>> childrenFramenode_;
-
+    WeakPtr<GridContainerLayoutProperty> reserveProperty_; // the layout property that will be active on next vsync
+    OffsetF globalOffset_;
     ACE_DISALLOW_COPY_AND_MOVE(GridContainerLayoutProperty);
 };
 } // namespace OHOS::Ace::NG

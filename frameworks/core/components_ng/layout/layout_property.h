@@ -298,20 +298,9 @@ public:
     }
 
     void UpdateGridProperty(
-        std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type = GridSizeType::UNDEFINED)
-    {
-        if (!gridProperty_) {
-            gridProperty_ = std::make_unique<GridProperty>();
-        }
+        std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type = GridSizeType::UNDEFINED);
 
-        bool isSpanUpdated = (span.has_value() && gridProperty_->UpdateSpan(span.value(), type));
-        bool isOffsetUpdated = (offset.has_value() && gridProperty_->UpdateOffset(offset.value(), type));
-        if (isSpanUpdated || isOffsetUpdated) {
-            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
-        }
-    }
-
-    void UpdateGridOffset(LayoutWrapper* layoutWrapper);
+    bool UpdateGridOffset(const RefPtr<FrameNode>& host);
 
     void BuildGridProperty(const RefPtr<FrameNode>& host);
 
@@ -343,6 +332,8 @@ public:
     {
         layoutConstraint_ = layoutProperty->layoutConstraint_;
         contentConstraint_ = layoutProperty->contentConstraint_;
+        gridProperty_ =
+            (layoutProperty->gridProperty_) ? std::make_unique<GridProperty>(*layoutProperty->gridProperty_) : nullptr;
     }
 
 protected:

@@ -20,6 +20,7 @@
 
 #include "property.h"
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/grid_column_info.h"
@@ -97,6 +98,8 @@ public:
     {
         return container_;
     }
+
+    OffsetF GetContainerPosition();
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 

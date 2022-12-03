@@ -41,8 +41,8 @@ Dimension GridProperty::GetOffset()
 
 bool GridProperty::UpdateContainer(const RefPtr<Property>& container, const RefPtr<AceType>& host)
 {
-    auto gridContainer = DynamicCast<GridContainerLayoutProperty>(container);
-
+    auto currentContainer = DynamicCast<GridContainerLayoutProperty>(container);
+    auto gridContainer = currentContainer->GetReserveObj();
     GridColumnInfo::Builder builder;
     auto containerInfo = AceType::MakeRefPtr<GridContainerInfo>(gridContainer->GetContainerInfoValue());
     builder.SetParent(containerInfo);
@@ -53,7 +53,7 @@ bool GridProperty::UpdateContainer(const RefPtr<Property>& container, const RefP
     gridInfo_ = builder.Build();
     container_ = container;
 
-    gridContainer->RegistGridChild(DynamicCast<FrameNode>(host));
+    currentContainer->RegistGridChild(DynamicCast<FrameNode>(host));
     return true;
 }
 
@@ -118,6 +118,16 @@ bool GridProperty::SetOffset(GridSizeType type, int32_t offset)
     }
     item->offset_ = offset;
     return true;
+}
+
+OffsetF GridProperty::GetContainerPosition()
+{
+    if (container_) {
+        auto container = DynamicCast<GridContainerLayoutProperty>(container_);
+        auto framenode = container->GetHost();
+        return framenode->GetOffsetRelativeToWindow();
+    }
+    return OffsetF();
 }
 
 void GridProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
