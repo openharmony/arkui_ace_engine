@@ -293,30 +293,26 @@ void GestureEventHub::InitDragDropEvent()
 {
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto gestureEventHub = weak.Upgrade();
-        if (gestureEventHub) {
-            gestureEventHub->HandleOnDragStart(info);
-        }
+        CHECK_NULL_VOID_NOLOG(gestureEventHub);
+        gestureEventHub->HandleOnDragStart(info);
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto gestureEventHub = weak.Upgrade();
-        if (gestureEventHub) {
-            gestureEventHub->HandleOnDragUpdate(info);
-        }
+        CHECK_NULL_VOID_NOLOG(gestureEventHub);
+        gestureEventHub->HandleOnDragUpdate(info);
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto gestureEventHub = weak.Upgrade();
-        if (gestureEventHub) {
-            gestureEventHub->HandleOnDragEnd(info);
-        }
+        CHECK_NULL_VOID_NOLOG(gestureEventHub);
+        gestureEventHub->HandleOnDragEnd(info);
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto gestureEventHub = weak.Upgrade();
-        if (gestureEventHub) {
-            gestureEventHub->HandleOnDragCancel();
-        }
+        CHECK_NULL_VOID_NOLOG(gestureEventHub);
+        gestureEventHub->HandleOnDragCancel();
     };
 
     auto dragEvent = MakeRefPtr<DragEvent>(

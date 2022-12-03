@@ -152,9 +152,6 @@ const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
 
 const RefPtr<DragDropManager>& PipelineContext::GetDragDropManager()
 {
-    if (dragDropManager_) {
-        return dragDropManager_;
-    }
     dragDropManager_ = AceType::MakeRefPtr<DragDropManager>();
     return dragDropManager_;
 }
