@@ -126,6 +126,7 @@ JSViewFullUpdate::JSViewFullUpdate(const std::string& viewId, JSRef<JSObject> js
 {
     viewId_ = viewId;
     jsViewFunction_ = AceType::MakeRefPtr<ViewFunctions>(jsObject, jsRenderFunction);
+    jsViewObject_ = jsObject;
     LOGD("JSViewFullUpdate constructor");
 }
 
@@ -220,6 +221,7 @@ void JSViewFullUpdate::Destroy(JSView* parentCustomView)
         ACE_SCORING_EVENT("Component[" + viewId_ + "].AboutToBeDeleted");
         jsViewFunction_->ExecuteAboutToBeDeleted();
     }
+    jsViewObject_.Reset();
     LOGD("JSViewFullUpdate::Destroy end");
 }
 
@@ -275,7 +277,7 @@ void JSViewFullUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
 {
     std::string viewId = info[0]->ToString();
     if (viewId_ == viewId) {
-        info.SetReturnValue(this);
+        info.SetReturnValue(jsViewObject_);
         return;
     }
     JSRef<JSObject> targetView = JSRef<JSObject>::New();
