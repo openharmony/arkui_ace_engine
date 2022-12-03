@@ -83,8 +83,6 @@ public:
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
 
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);
-    // close dialog by FrameNode ID
-    void CloseDialog(int32_t id);
 
     /**  pop overlays (if any) on back press
      *
@@ -105,6 +103,10 @@ private:
 
     void FocusDialog(const RefPtr<FrameNode>& dialogNode);
     void BlurDialog();
+
+    // helper functions to show/hide popups with animation
+    void Show(const RefPtr<FrameNode>& node);
+    void Pop(const RefPtr<FrameNode>& node);
 
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
