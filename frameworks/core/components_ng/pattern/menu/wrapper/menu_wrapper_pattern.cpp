@@ -47,9 +47,18 @@ void MenuWrapperPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto gestureHub = host->GetOrCreateGestureEventHub();
 
+    // if already initialized touch event
+    if (onTouch_) {
+        return;
+    }
     // hide menu when touched outside the menu region
     auto callback = [weak = WeakClaim(RawPtr(host))](const TouchEventInfo& info) {
         if (info.GetTouches().empty()) {
+            return;
+        }
+        auto touch = info.GetTouches().front();
+        // filter out other touch types
+        if (touch.GetTouchType() != TouchType::DOWN) {
             return;
         }
         auto host = weak.Upgrade();
@@ -62,13 +71,13 @@ void MenuWrapperPattern::OnModifyDone()
 
         // get menuNode's touch region
         auto menuZone = menuNode->GetGeometryNode()->GetFrameRect();
-        const auto& position = info.GetTouches().front().GetGlobalLocation();
+        const auto& position = touch.GetGlobalLocation();
         // if DOWN-touched outside the menu region, then hide menu
         if (!menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
             pattern->HideMenu(menuNode);
         }
     };
-    auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(callback));
-    gestureHub->AddTouchEvent(touchEvent);
+    onTouch_ = MakeRefPtr<TouchEventImpl>(std::move(callback));
+    gestureHub->AddTouchEvent(onTouch_);
 }
 } // namespace OHOS::Ace::NG
