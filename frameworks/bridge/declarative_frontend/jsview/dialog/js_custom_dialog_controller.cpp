@@ -341,6 +341,7 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         jsBuilderFunction_->Execute();
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         CHECK_NULL_VOID(customNode);
+        customNode->Build();
 
         dialogProperties_.onStatusChanged = [this](bool isShown) {
             if (!isShown) {
