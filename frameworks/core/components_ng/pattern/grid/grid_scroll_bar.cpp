@@ -177,7 +177,7 @@ void GridScrollBar::UpdateBarOffset(const RefPtr<LayoutWrapper>& layoutWrapper)
     if (scrollBarProxy_) {
         float mainHeight = (info.axis_ == Axis::HORIZONTAL) ? mainSize.Width() : mainSize.Height();
         estimatedHeight_ -= mainHeight;
-        scrollBarProxy_->NotifyScrollBar(pattern_);
+        // will stop grid layout when delete item, scrollBarProxy_->NotifyScrollBar(pattern_);
     }
 }
 } // namespace OHOS::Ace::NG
