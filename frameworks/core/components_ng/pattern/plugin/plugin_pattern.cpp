@@ -52,6 +52,16 @@ ErrCode GetActiveAccountIds(std::vector<int32_t>& userIds)
 }
 } // namespace
 
+PluginPattern::~PluginPattern()
+{
+    auto currentId = pluginSubContainer_->GetInstanceId();
+    PluginManager::GetInstance().RemovePluginSubContainer(currentId);
+    PluginManager::GetInstance().RemovePluginParentContainer(currentId);
+    pluginManagerBridge_.Reset();
+    pluginSubContainer_->Destroy();
+    pluginSubContainer_.Reset();
+}
+
 void PluginPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -177,7 +187,15 @@ void PluginPattern::CreatePluginSubContainer()
     auto layoutProperty = host->GetLayoutProperty<PluginLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
+    auto parentcontainerId = Container::CurrentId();
+    while (parentcontainerId >= MIN_PLUGIN_SUBCONTAINER_ID) {
+        parentcontainerId = PluginManager::GetInstance().GetPluginParentContainerId(parentcontainerId);
+    }
+
     if (pluginSubContainer_) {
+        auto currentId = pluginSubContainer_->GetInstanceId();
+        PluginManager::GetInstance().RemovePluginSubContainer(currentId);
+        PluginManager::GetInstance().RemovePluginParentContainer(currentId);
         pluginSubContainer_->Destroy();
         pluginSubContainer_.Reset();
     }
@@ -186,8 +204,8 @@ void PluginPattern::CreatePluginSubContainer()
     CHECK_NULL_VOID(pluginSubContainer_);
 
     PluginManager::GetInstance().AddPluginSubContainer(pluginSubContainerId_, pluginSubContainer_);
-    PluginManager::GetInstance().AddPluginParentContainer(pluginSubContainerId_, Container::CurrentId());
-    flutter::UIDartState::Current()->AddPluginParentContainer(pluginSubContainerId_, Container::CurrentId());
+    PluginManager::GetInstance().AddPluginParentContainer(pluginSubContainerId_, parentcontainerId);
+    flutter::UIDartState::Current()->AddPluginParentContainer(pluginSubContainerId_, parentcontainerId);
     pluginSubContainer_->Initialize();
     pluginSubContainer_->SetPluginPattern(WeakClaim(this));
     pluginSubContainer_->SetPluginNode(GetHost());

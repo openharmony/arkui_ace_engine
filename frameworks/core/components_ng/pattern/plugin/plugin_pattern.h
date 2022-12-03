@@ -34,7 +34,7 @@ class PluginPattern : public Pattern {
 
 public:
     PluginPattern() = default;
-    ~PluginPattern() override = default;
+    ~PluginPattern() override;
 
     void OnActionEvent(const std::string& action) const;
 
