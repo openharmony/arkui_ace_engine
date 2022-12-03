@@ -50,4 +50,11 @@ void GridItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("columnEnd", std::to_string(propColumnEnd_.value_or(0)).c_str());
 }
 
+int32_t GridItemLayoutProperty::GetCustomCrossIndex(Axis axis) const
+{
+    if (axis == Axis::VERTICAL) {
+        return propColumnStart_.value_or(-1);
+    }
+    return propRowStart_.value_or(-1);
+}
 } // namespace OHOS::Ace::NG

@@ -108,7 +108,7 @@ void ForEachNode::CompareAndUpdateChildren()
             // node is a part the tree.
             // OnDetachFromMainTree to be called while node
             // still part of the tree, we need to find
-            // posiiton in the tab tab for the tab.
+            // position in the tab tab for the tab.
             AddChild(iter->second, DEFAULT_NODE_SLOT, true);
             // Remove and trigger all Detach callback.
             RemoveChild(iter->second);
@@ -116,13 +116,18 @@ void ForEachNode::CompareAndUpdateChildren()
     }
 
     if (IsOnMainTree()) {
-        for (auto newChild : additionalChildComps) {
+        for (const auto& newChild : additionalChildComps) {
             newChild->AttachToMainTree();
         }
     }
     
     tempChildren_.clear();
     tempIds_.clear();
+
+    auto parent = GetParent();
+    if (parent) {
+        parent->ChildrenUpdatedFrom(0);
+    }
 }
 
 void ForEachNode::FlushUpdateAndMarkDirty()
