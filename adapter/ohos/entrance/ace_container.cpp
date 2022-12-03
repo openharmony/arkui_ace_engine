@@ -18,6 +18,7 @@
 #include <functional>
 
 #include "ability_info.h"
+
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
@@ -298,7 +299,9 @@ void AceContainer::OnShow(int32_t instanceId)
     ContainerScope scope(instanceId);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-
+    if (!container->UpdateState(Frontend::State::ON_SHOW)) {
+        return;
+    }
     auto front = container->GetFrontend();
     if (front && !container->IsSubContainer()) {
         WeakPtr<Frontend> weakFrontend = front;
@@ -340,7 +343,9 @@ void AceContainer::OnHide(int32_t instanceId)
     ContainerScope scope(instanceId);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-
+    if (!container->UpdateState(Frontend::State::ON_HIDE)) {
+        return;
+    }
     auto front = container->GetFrontend();
     if (front && !container->IsSubContainer()) {
         WeakPtr<Frontend> weakFrontend = front;
