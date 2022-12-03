@@ -15,11 +15,16 @@
 
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
+#include <memory>
+
 #include "base/geometry/axis.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_paint_property.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_scroll_bar.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
 
@@ -31,6 +36,11 @@ constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
 constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
 constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
 } // namespace
+
+GridPattern::~GridPattern()
+{
+    delete scrollBar_;
+}
 
 RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 {
@@ -61,6 +71,14 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     return MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
 }
 
+RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
+{
+    if (scrollBar_ && scrollBar_->GetInnerScrollBar()) {
+        return MakeRefPtr<GridPaintMethod>(scrollBar_->GetInnerScrollBar());
+    }
+    return Pattern::CreateNodePaintMethod();
+}
+
 void GridPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -78,12 +96,20 @@ void GridPattern::OnModifyDone()
     CHECK_NULL_VOID(gridLayoutProperty);
     gridLayoutInfo_.axis_ = gridLayoutProperty->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
     isConfigScrollable_ = gridLayoutProperty->IsConfiguredScrollable();
-
-    if (gridLayoutProperty->GetColumnsTemplate().has_value() && gridLayoutProperty->GetRowsTemplate().has_value()) {
+    if (!isConfigScrollable_) {
         LOGD("use fixed grid template");
         return;
     }
     AddScrollEvent();
+
+    auto gridPaintProperty = GetPaintProperty<GridPaintProperty>();
+    CHECK_NULL_VOID(gridPaintProperty);
+    if (gridPaintProperty->GetScrollBarProperty()) {
+        if (!scrollBar_) {
+            scrollBar_ = new GridScrollBar(Claim(this));
+        }
+        scrollBar_->CreateInnerBar();
+    }
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -263,12 +289,14 @@ void GridPattern::AddScrollEvent()
     }
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(gridLayoutInfo_.axis_);
     auto scrollCallback = [weak = WeakClaim(this)](double offset, int32_t source) {
-        auto gridPattern = weak.Upgrade();
-        if (!gridPattern) {
-            LOGE("grid pattern upgrade fail when try handle scroll event.");
-            return false;
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        if (source == SCROLL_FROM_UPDATE && pattern->scrollBar_) {
+            if (pattern->scrollBar_->OnInnerBarScroll(offset)) {
+                return true;
+            }
         }
-        return gridPattern->OnScrollCallback(static_cast<float>(offset), source);
+        return pattern->OnScrollCallback(static_cast<float>(offset), source);
     };
     scrollableEvent_->SetScrollPositionCallback(std::move(scrollCallback));
     gestureHub->AddScrollableEvent(scrollableEvent_);
@@ -331,6 +359,10 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     gridLayoutInfo_ = gridLayoutInfo;
     gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
+
+    if (scrollBar_) {
+        scrollBar_->UpdateBarOffset(dirty);
+    }
     return false;
 }
 
@@ -518,6 +550,24 @@ bool GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
     animator_->SetDuration(std::min(duration, SCROLL_MAX_TIME));
     animator_->Play();
     return true;
+}
+
+void GridPattern::SetScrollBarProxy(const RefPtr<NG::ScrollBarProxy>& scrollBarProxy)
+{
+    if (!scrollBar_) {
+        scrollBar_ = new GridScrollBar(Claim(this));
+    }
+    scrollBar_->CreateBarProxy(scrollBarProxy);
+}
+
+float GridPattern::GetScrollableDistance() const
+{
+    return scrollBar_ ? scrollBar_->GetEstimatedHeight() : 0.0f;
+}
+
+float GridPattern::GetCurrentPosition() const
+{
+    return scrollBar_ ? -scrollBar_->GetOffset() : 0.0f;
 }
 
 } // namespace OHOS::Ace::NG

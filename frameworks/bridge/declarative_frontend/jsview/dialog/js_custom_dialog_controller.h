@@ -47,12 +47,15 @@ private:
     JSView* ownerView_ = nullptr;
     bool isShown_ = false;
     bool pending_ = false;
+
+    // NG
+    int32_t dialogId_ = -1;
+
     DialogProperties dialogProperties_;
     RefPtr<JsFunction> jsBuilderFunction_;
     RefPtr<JsFunction> jsCancelFunction_;
     RefPtr<Component> customDialog_;
     RefPtr<DialogComponent> dialogComponent_;
-    RefPtr<NG::FrameNode> dialogNode_;
     std::list<DialogOperation> dialogOperation_;
 };
 

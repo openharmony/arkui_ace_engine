@@ -48,6 +48,7 @@
 #include "core/common/window.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager_impl.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -1057,12 +1058,13 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
         LOGI("New pipeline version creating...");
         pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
             std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+        pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
     } else {
         pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
             std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+        pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
     }
     pipelineContext_->SetRootSize(density, width, height);
-    pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
     pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
     pipelineContext_->SetWindowId(windowId);
     pipelineContext_->SetWindowModal(windowModal_);

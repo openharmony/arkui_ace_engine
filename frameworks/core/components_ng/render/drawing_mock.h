@@ -24,6 +24,7 @@
 
 #include "core/components_ng/test/mock/rosen/testing_bitmap.h"
 #include "core/components_ng/test/mock/rosen/testing_brush.h"
+#include "core/components_ng/test/mock/rosen/testing_camera3d.h"
 #include "core/components_ng/test/mock/rosen/testing_canvas.h"
 #include "core/components_ng/test/mock/rosen/testing_color.h"
 #include "core/components_ng/test/mock/rosen/testing_filter.h"
@@ -32,7 +33,6 @@
 #include "core/components_ng/test/mock/rosen/testing_path_effect.h"
 #include "core/components_ng/test/mock/rosen/testing_pen.h"
 #include "core/components_ng/test/mock/rosen/testing_shader_effect.h"
-#include "core/components_ng/test/mock/rosen/testing_camera3d.h"
 
 namespace OHOS::Ace {
 using RSCanvas = Testing::TestingCanvas;
@@ -53,6 +53,7 @@ using RSBitmap = Testing::TestingBitmap;
 using RSBitmapFormat = Testing::BitmapFormat;
 using RSColorType = Testing::ColorType;
 using RSAlphaType = Testing::AlphaType;
+using RSBlendMode = Testing::BlendMode;
 using RSPoint = Rosen::Drawing::PointF;
 using RSScalar = Rosen::Drawing::scalar;
 using RSRect = Rosen::Drawing::RectF;

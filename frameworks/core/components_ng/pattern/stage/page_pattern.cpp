@@ -56,6 +56,7 @@ bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*wrappe
         isFirstLoad_ = false;
         if (firstBuildCallback_) {
             firstBuildCallback_();
+            firstBuildCallback_ = nullptr;
         }
     }
     return false;

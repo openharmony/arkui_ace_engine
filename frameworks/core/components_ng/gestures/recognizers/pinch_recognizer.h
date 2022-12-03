@@ -62,6 +62,7 @@ private:
     TimeStamp time_;
     TouchEvent lastTouchEvent_;
     bool isFlushTouchEventsEnd_ = false;
+    bool isPinchEnd_ = false;
 };
 
 } // namespace OHOS::Ace::NG

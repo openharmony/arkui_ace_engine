@@ -35,6 +35,9 @@ std::optional<SizeF> PathLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(host, std::nullopt);
     auto paintProperty = host->GetPaintProperty<PathPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, std::nullopt);
+    if (propertiesFromAncestor_) {
+        paintProperty->UpdateShapeProperty(propertiesFromAncestor_);
+    }
 
     auto pathCommands = paintProperty->GetCommandsValue("");
     CHECK_NULL_RETURN(!pathCommands.empty(), SizeF());
@@ -42,18 +45,18 @@ std::optional<SizeF> PathLayoutAlgorithm::MeasureContent(
     bool ret = SkParsePath::FromSVGString(pathCommands.c_str(), &skPath);
     CHECK_NULL_RETURN(ret, SizeF());
     auto skRect = skPath.getBounds();
-    auto width = skRect.width();
-    auto height = skRect.height();
-    if (NearZero(width) && NearZero(height)) {
+    auto right = skRect.right();
+    auto bottom = skRect.bottom();
+    if (NearZero(right) && NearZero(bottom)) {
         return SizeF();
     }
-    auto lineWidth = static_cast<float>(paintProperty->GetStrokeWidthValue().ConvertToPx());
-    if (NearZero(width)) {
-        width += lineWidth;
+    auto lineWidth = static_cast<float>(paintProperty->GetStrokeWidthValue(1.0_px).ConvertToPx());
+    if (NearZero(right)) {
+        right += lineWidth;
     }
-    if (NearZero(height)) {
-        height += lineWidth;
+    if (NearZero(bottom)) {
+        bottom += lineWidth;
     }
-    return SizeF(width, height);
+    return SizeF(right, bottom);
 }
 } // namespace OHOS::Ace::NG

@@ -88,6 +88,11 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch up event");
+
+    if (isPinchEnd_) {
+        return;
+    }
+
     lastTouchEvent_ = event;
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -96,6 +101,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
     if (refereeState_ == RefereeState::SUCCEED) {
         SendCallbackMsg(onActionEnd_);
+        isPinchEnd_ = true;
     }
 }
 
@@ -107,6 +113,11 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch move event");
+
+    if (isPinchEnd_) {
+        return;
+    }
+
     touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
     currentDev_ = ComputeAverageDeviation();
@@ -215,6 +226,7 @@ Offset PinchRecognizer::ComputePinchCenter()
 void PinchRecognizer::OnResetStatus()
 {
     MultiFingersRecognizer::OnResetStatus();
+    isPinchEnd_ = false;
 }
 
 void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)

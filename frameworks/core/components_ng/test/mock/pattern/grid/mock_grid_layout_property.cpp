@@ -14,7 +14,9 @@
  */
 
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_paint_property.h"
 
 namespace OHOS::Ace::NG {
 void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {};
+void GridPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 } // namespace OHOS::Ace::NG

@@ -20,43 +20,61 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/common/manager_interface.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT TextFieldManager : public ManagerInterface {
-    DECLARE_ACE_TYPE(TextFieldManager, ManagerInterface);
+class ACE_EXPORT TextFieldManagerNG : public ManagerInterface {
+    DECLARE_ACE_TYPE(TextFieldManagerNG, ManagerInterface);
 
 public:
-    TextFieldManager() = default;
-    ~TextFieldManager() override = default;
+    TextFieldManagerNG() = default;
+    ~TextFieldManagerNG() override = default;
 
-    void SetClickPosition(const Offset& position) override;
-    const Offset& GetClickPosition() override;
-    void MovePage(int32_t pageId, const Offset& rootRect, double offsetHeight) override;
-    void RemovePageId(int32_t pageId) override;
+    void SetClickPosition(const Offset& position) override
+    {
+        position_ = position;
+    }
+    const Offset& GetClickPosition() override
+    {
+        return position_;
+    }
+    void MovePage(int32_t pageId, const Offset& rootRect, double offsetHeight) override {}
+    void RemovePageId(int32_t pageId) override {}
 
-    WeakPtr<TextFieldPattern>& GetOnFocusTextField()
+    WeakPtr<Pattern>& GetOnFocusTextField()
     {
         return onFocusTextField_;
     }
 
-    void SetOnFocusTextField(const WeakPtr<TextFieldPattern>& onFocusTextField);
+    void SetOnFocusTextField(const WeakPtr<Pattern>& onFocusTextField)
+    {
+        onFocusTextField_ = onFocusTextField;
+    }
 
-    void ClearOnFocusTextField();
+    void ClearOnFocusTextField()
+    {
+        onFocusTextField_ = nullptr;
+    }
 
     bool ResetSlidingPanelParentHeight();
 
     bool UpdatePanelForVirtualKeyboard(double offsetY, double fullHeight);
-    void SetHeight(float height);
+    void SetHeight(float height)
+    {
+        height_ = height;
+    }
 
-    float GetHeight() const;
+    float GetHeight() const
+    {
+        return height_;
+    }
 
 private:
     bool hasMove_ = false;
     Offset position_;
     float height_ = 0.0f;
-    WeakPtr<TextFieldPattern> onFocusTextField_;
+    WeakPtr<Pattern> onFocusTextField_;
 };
 
 } // namespace OHOS::Ace::NG

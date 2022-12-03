@@ -102,6 +102,7 @@ private:
 
     RefPtr<DialogTheme> dialogTheme_;
     RefPtr<UINode> customNode_;
+    RefPtr<ClickEvent> onClick_;
 
     // XTS inspector values
     std::string message_;

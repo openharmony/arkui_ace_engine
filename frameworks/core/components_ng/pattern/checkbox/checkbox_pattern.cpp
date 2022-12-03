@@ -331,6 +331,7 @@ void CheckBoxPattern::UpdateState()
             if (isSelected || (!isSelected && !isFirstCreated_)) {
                 UpdateUIStatus(isSelected);
             }
+            SetLastSelect(isSelected);
         }
         isFirstCreated_ = false;
         pattern->SetPreGroup(group);
@@ -468,7 +469,7 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
         }
     }
 
-    CHECK_NULL_VOID(checkBoxGroupNode);
+    CHECK_NULL_VOID_NOLOG(checkBoxGroupNode);
     auto groupPaintProperty = checkBoxGroupNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
     if (groupPaintProperty->GetIsCheckBoxCallbackDealed()) {
         return;

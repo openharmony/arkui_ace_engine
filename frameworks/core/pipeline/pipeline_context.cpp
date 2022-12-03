@@ -1747,13 +1747,13 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 bool PipelineContext::RequestDefaultFocus()
 {
     auto curPageElement = GetLastPage();
-    CHECK_NULL_RETURN(curPageElement, false);
+    CHECK_NULL_RETURN_NOLOG(curPageElement, false);
     if (curPageElement->IsFocused()) {
         return false;
     }
     curPageElement->SetIsFocused(true);
     auto defaultFocusNode = curPageElement->GetChildDefaultFocusNode();
-    CHECK_NULL_RETURN(defaultFocusNode, false);
+    CHECK_NULL_RETURN_NOLOG(defaultFocusNode, false);
     if (!defaultFocusNode->IsFocusableWholePath()) {
         return false;
     }
