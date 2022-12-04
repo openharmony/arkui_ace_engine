@@ -710,7 +710,8 @@ RefPtr<FrameNode> VideoPattern::CreateControlBar()
 
     auto fullScreenButton = CreateSVG();
     CHECK_NULL_RETURN(fullScreenButton, nullptr);
-    ChangeFullScreenButtonTag(false, fullScreenButton);
+    SetFullScreenButtonCallBack(fullScreenButton);
+    ChangeFullScreenButtonTag(isFullScreen_, fullScreenButton);
     controlBar->AddChild(fullScreenButton);
 
     auto renderContext = controlBar->GetRenderContext();
@@ -806,8 +807,8 @@ RefPtr<FrameNode> VideoPattern::CreateSVG()
     auto btnSize = videoTheme->GetBtnSize();
     SizeF size { static_cast<float>(btnSize.Width()), static_cast<float>(btnSize.Height()) };
     svgLayoutProperty->UpdateMarginSelfIdealSize(size);
-    auto width = pipelineContext->NormalizeToPx(Dimension(btnSize.Width(), DimensionUnit::VP));
-    auto height = pipelineContext->NormalizeToPx(Dimension(btnSize.Height(), DimensionUnit::VP));
+    auto width = Dimension(btnSize.Width(), DimensionUnit::VP).ConvertToPx();
+    auto height = Dimension(btnSize.Height(), DimensionUnit::VP).ConvertToPx();
     CalcSize idealSize = { CalcLength(width), CalcLength(height) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
@@ -990,10 +991,10 @@ void VideoPattern::ChangePlayButtonTag(RefPtr<FrameNode>& playBtn)
     playBtn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void VideoPattern::ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode>& fullScreenBtn)
+void VideoPattern::SetFullScreenButtonCallBack(RefPtr<FrameNode>& fullScreenBtn)
 {
     CHECK_NULL_VOID(fullScreenBtn);
-    auto fsClickCallback = [weak = WeakClaim(this), isFullScreen](GestureEvent& /*info*/) {
+    auto fsClickCallback = [weak = WeakClaim(this), &isFullScreen = isFullScreen_](GestureEvent& /* info */) {
         auto videoPattern = weak.Upgrade();
         CHECK_NULL_VOID(videoPattern);
         if (isFullScreen) {
@@ -1004,6 +1005,11 @@ void VideoPattern::ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode
     };
     auto fullScreenBtnEvent = fullScreenBtn->GetOrCreateGestureEventHub();
     fullScreenBtnEvent->SetUserOnClick(std::move(fsClickCallback));
+}
+
+void VideoPattern::ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode>& fullScreenBtn)
+{
+    CHECK_NULL_VOID(fullScreenBtn);
     auto svgLayoutProperty = fullScreenBtn->GetLayoutProperty<ImageLayoutProperty>();
     auto resourceId =
         isFullScreen ? InternalResource::ResourceId::QUIT_FULLSCREEN_SVG : InternalResource::ResourceId::FULLSCREEN_SVG;
