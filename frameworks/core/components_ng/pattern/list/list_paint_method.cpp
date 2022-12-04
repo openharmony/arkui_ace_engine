@@ -31,8 +31,8 @@ void ListPaintMethod::PaintDivider(const DividerInfo& dividerInfo, const Positio
 
     for (const auto& child : itemPosition) {
         if (!isFirstItem) {
-            float mainPos = child.second.startPos - dividerInfo.halfSpaceWidth;
-            float crossPos = dividerInfo.startMargin;
+            float mainPos = child.second.startPos - dividerInfo.halfSpaceWidth + dividerInfo.mainPadding;
+            float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
             if (lanes > 1 && !lastIsItemGroup && !child.second.isGroup) {
                 crossPos += laneIdx * dividerInfo.crossSize / dividerInfo.lanes;
                 dividerPainter.SetDividerLength(laneLen);
@@ -53,8 +53,8 @@ void ListPaintMethod::PaintDivider(const DividerInfo& dividerInfo, const Positio
     if (!lastLineIndex.empty() && *lastLineIndex.rbegin() < dividerInfo.totalItemCount - 1) {
         int32_t laneIdx = 0;
         for (auto index : lastLineIndex) {
-            float mainPos = itemPosition.at(index).endPos + dividerInfo.halfSpaceWidth;
-            float crossPos = dividerInfo.startMargin;
+            float mainPos = itemPosition.at(index).endPos + dividerInfo.halfSpaceWidth + dividerInfo.mainPadding;
+            float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
             if (lanes > 1 && !itemPosition.at(index).isGroup) {
                 crossPos += laneIdx * dividerInfo.crossSize / dividerInfo.lanes;
                 dividerPainter.SetDividerLength(laneLen);
@@ -78,13 +78,17 @@ static void PaintScrollBar(const WeakPtr<ScrollBar>& weakScrollBar, RSCanvas& ca
 CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
     const auto& geometryNode = paintWrapper->GetGeometryNode();
-    auto frameSize = geometryNode->GetFrameSize();
+    auto frameSize = geometryNode->GetPaddingSize();
+    OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
+    Axis axis = vertical_ ? Axis::VERTICAL : Axis::HORIZONTAL;
     DividerInfo dividerInfo = {
         .constrainStrokeWidth = divider_.strokeWidth.ConvertToPx(),
         .crossSize = vertical_ ? frameSize.Height() : frameSize.Width(),
         .startMargin = divider_.startMargin.ConvertToPx(),
         .endMargin = divider_.endMargin.ConvertToPx(),
         .halfSpaceWidth = space_ / 2.0f, /* 2.0f half */
+        .mainPadding = paddingOffset.GetMainOffset(axis),
+        .crossPadding = paddingOffset.GetCrossOffset(axis),
         .isVertical = vertical_,
         .lanes = lanes_ > 1 ? lanes_ : 1,
         .totalItemCount = totalItemCount_,

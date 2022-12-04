@@ -30,6 +30,8 @@ struct DividerInfo {
     float startMargin;
     float endMargin;
     float halfSpaceWidth;
+    float mainPadding;
+    float crossPadding;
     bool isVertical;
     int32_t lanes;
     int32_t totalItemCount;
