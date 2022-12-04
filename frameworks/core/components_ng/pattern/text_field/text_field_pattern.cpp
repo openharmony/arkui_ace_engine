@@ -1676,7 +1676,7 @@ float TextFieldPattern::PreferredLineHeight()
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);
     std::string textContent;
     // use text or placeHolder value if exists, space otherwise
-    if (!layoutProperty->GetValueValue("").empty()) {
+    if (!layoutProperty->GetValueValue("").empty() || layoutProperty->GetPlaceholderValue("").empty()) {
         TextFieldLayoutAlgorithm::UpdateTextStyle(layoutProperty, textFieldTheme, lineHeightMeasureUtilTextStyle_);
         textContent = layoutProperty->GetValueValue(" ");
     } else {
