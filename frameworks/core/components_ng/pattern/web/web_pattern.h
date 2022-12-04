@@ -218,6 +218,7 @@ private:
     void OnWindowHide() override;
     void OnInActive() override;
     void OnActive() override;
+    void OnVisibleChange(bool isVisible) override;
 
     void OnWebSrcUpdate();
     void OnWebDataUpdate();
