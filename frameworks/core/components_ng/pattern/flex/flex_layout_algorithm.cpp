@@ -326,7 +326,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
             /**
              * The main axis size of the element with layoutWeight of 0 is larger than the Flex main axis size
              */
-            if (allocatedSize_ - space_ > mainAxisSize_) {
+            if (allocatedSize_ - space_ > mainAxisSize_ && magicNodes_.size() > 1) {
                 for (const auto& child : childList) {
                     allocatedSize_ -= GetChildMainAxisSize(child.layoutWrapper);
                     allocatedSize_ -= space_;
@@ -358,7 +358,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                 if (LessOrEqual(childLayoutWeight, 0.0)) {
                     continue;
                 }
-                float childCalcSize = spacePerWeight * childLayoutWeight;
+                float childCalcSize = std::max(spacePerWeight * childLayoutWeight, 0.0f);
                 if (GetMainAxisSizeHelper(childConstraint.minSize, direction_) > childCalcSize) {
                     isExceed = true;
                 }
@@ -371,7 +371,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                 isExceed = true;
                 auto& lowPriorityChildList = magicNodes_.begin()->second;
                 for (const auto& child : lowPriorityChildList) {
-                    allocatedSize_ -= GetChildCrossAxisSize(child.layoutWrapper);
+                    allocatedSize_ -= GetChildMainAxisSize(child.layoutWrapper);
                     allocatedSize_ -= space_;
                     child.layoutWrapper->SetActive(false);
                     child.layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
@@ -392,7 +392,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
             for (auto& child : childList) {
                 auto childLayoutWrapper = child.layoutWrapper;
                 if (!childLayoutWrapper->IsActive()) {
-                    break;
+                    continue;
                 }
                 float childLayoutWeight = 0.0f;
                 const auto& childMagicItemProperty = childLayoutWrapper->GetLayoutProperty()->GetMagicItemProperty();
