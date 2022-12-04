@@ -1140,7 +1140,7 @@ void WebPattern::OnActive()
     isActive_ = true;
 }
 
-void OnVisibleChange(bool isVisible)
+void WebPattern::OnVisibleChange(bool isVisible)
 {
     if (!IsVisible) {
         LOGI("web is not visible");
