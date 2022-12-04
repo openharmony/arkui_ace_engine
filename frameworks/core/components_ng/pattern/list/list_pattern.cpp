@@ -33,7 +33,7 @@ void ListPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
+    host->GetRenderContext()->SetClipToBounds(true);
 }
 
 void ListPattern::OnModifyDone()
