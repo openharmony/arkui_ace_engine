@@ -334,7 +334,7 @@ void PipelineContext::SetupRootElement()
     }
 #endif
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
-    overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
+    overlayManager_ = MakeRefPtr<OverlayManager>(DynamicCast<FrameNode>(stageNode->GetParent()));
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
