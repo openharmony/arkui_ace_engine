@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/video/video_pattern.h"
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
@@ -805,7 +806,9 @@ RefPtr<FrameNode> VideoPattern::CreateSVG()
     auto btnSize = videoTheme->GetBtnSize();
     SizeF size { static_cast<float>(btnSize.Width()), static_cast<float>(btnSize.Height()) };
     svgLayoutProperty->UpdateMarginSelfIdealSize(size);
-    CalcSize idealSize = { CalcLength(btnSize.Width()), CalcLength(btnSize.Height()) };
+    auto width = pipelineContext->NormalizeToPx(Dimension(btnSize.Width(), DimensionUnit::VP));
+    auto height = pipelineContext->NormalizeToPx(Dimension(btnSize.Height(), DimensionUnit::VP));
+    CalcSize idealSize = { CalcLength(width), CalcLength(height) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     layoutConstraint.maxSize = idealSize;
