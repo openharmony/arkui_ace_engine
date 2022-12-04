@@ -31,7 +31,7 @@ void MakeNodeMapById(const std::list<RefPtr<UINode>>& nodes, const std::list<std
     ACE_DCHECK(ids.size() == nodes.size());
     auto idsIter = ids.begin();
     auto nodeIter = nodes.begin();
-    while (idsIter != ids.end()) {
+    while (idsIter != ids.end() && nodeIter != nodes.end()) {
         result.emplace(*idsIter, *nodeIter);
         ++idsIter;
         ++nodeIter;
@@ -96,7 +96,9 @@ void ForEachNode::CompareAndUpdateChildren()
         } else {
             auto iter = oldNodeByIdMap.find(newId);
             // the ID was used before, only need to update the child position.
-            AddChild(iter->second, DEFAULT_NODE_SLOT, true);
+            if (iter != oldNodeByIdMap.end() && iter->second) {
+                AddChild(iter->second, DEFAULT_NODE_SLOT, true);
+            }
             oldIdsSet.erase(oldIdIt);
         }
     }
