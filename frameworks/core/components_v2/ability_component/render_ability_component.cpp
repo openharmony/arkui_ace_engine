@@ -24,7 +24,9 @@ namespace OHOS::Ace::V2 {
 
 RenderAbilityComponent::~RenderAbilityComponent()
 {
-    adapter_->RemoveExtension();
+    if (adapter_) {
+        adapter_->RemoveExtension();
+    }
 
     auto context = context_.Upgrade();
     if (!context || callbackId_ <= 0) {
@@ -101,15 +103,17 @@ void RenderAbilityComponent::ConnectOrUpdateExtension()
             NormalizeToPx(CONTAINER_TITLE_HEIGHT));
     }
     currentRect_.SetOffset(globalOffset + parentWindowOffset + containerModalOffset);
-    if (hasConnectionToAbility_) {
-        adapter_->UpdateRect(currentRect_);
-        return;
-    }
+
     if (!adapter_) {
         adapter_ = WindowExtensionConnectionProxy::CreateAdapter();
+        int32_t windowId = pipelineContext->GetWindowId();
+        adapter_->ConnectExtension(component_->GetWant(), currentRect_, AceType::Claim(this), windowId);
+        return;
     }
-    int32_t windowId = pipelineContext->GetWindowId();
-    adapter_->ConnectExtension(component_->GetWant(), currentRect_, AceType::Claim(this), windowId);
+
+    if (hasConnectionToAbility_) {
+        adapter_->UpdateRect(currentRect_);
+    }
 }
 
 } // namespace OHOS::Ace::V2
