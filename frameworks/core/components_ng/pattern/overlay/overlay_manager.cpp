@@ -64,7 +64,8 @@ void OverlayManager::Pop(const RefPtr<FrameNode>& node)
     AnimationOption option;
     option.SetCurve(Curves::SMOOTH);
     option.SetDuration(ANIMATION_DUR);
-    option.SetOnFinishEvent([root, node] {
+    option.SetOnFinishEvent([root, node, id = Container::CurrentId()] {
+        ContainerScope scope(id);
         root->RemoveChild(node);
         root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     });
@@ -78,7 +79,7 @@ void OverlayManager::ShowToast(
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto rootNode = rootNodeWeak_.Upgrade();
+    auto rootNode = context->GetRootElement();
     CHECK_NULL_VOID(rootNode);
 
     // only one toast
@@ -114,7 +115,9 @@ void OverlayManager::PopToast(int32_t toastId)
     }
     auto toastUnderPop = toastIter->second.Upgrade();
     CHECK_NULL_VOID(toastUnderPop);
-    auto rootNode = rootNodeWeak_.Upgrade();
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto rootNode = context->GetRootElement();
     CHECK_NULL_VOID(rootNode);
     LOGI("begin to pop toast, id is %{public}d", toastUnderPop->GetId());
     rootNode->RemoveChild(toastUnderPop);
