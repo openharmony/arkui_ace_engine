@@ -397,7 +397,11 @@ void SubwindowOhos::GetToastDialogWindowProperty(
 bool SubwindowOhos::InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY, bool isToast)
 {
     OHOS::sptr<OHOS::Rosen::WindowOption> windowOption = new OHOS::Rosen::WindowOption();
-    windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    if (isToast) {
+        windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_TOAST);
+    } else {
+        windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    }
     windowOption->SetWindowRect({ posX, posY, width, height });
     windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
     windowOption->SetFocusable(!isToast);
