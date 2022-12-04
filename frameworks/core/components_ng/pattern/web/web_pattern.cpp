@@ -1145,7 +1145,7 @@ void WebPattern::OnActive()
 
 void WebPattern::OnVisibleChange(bool isVisible)
 {
-    if (!IsVisible) {
+    if (!isVisible) {
         LOGI("web is not visible");
         CloseSelectOverlay();
     }
