@@ -76,6 +76,11 @@ public:
         return hasGestureAccepted_;
     }
 
+    void SetQueryStateFunc(const std::function<void(size_t)>& queryStateFunc)
+    {
+        queryStateFunc_ = queryStateFunc;
+    }
+
 private:
     bool Existed(const RefPtr<NGGestureRecognizer>& recognizer);
     std::list<WeakPtr<NGGestureRecognizer>> recognizers_;
@@ -83,6 +88,8 @@ private:
     size_t touchId_ = 0;
     bool isDelay_ = false;
     bool hasGestureAccepted_ = false;
+
+    std::function<void(size_t)> queryStateFunc_;
 };
 
 class GestureReferee : public virtual AceType {
@@ -103,6 +110,11 @@ public:
 
     bool HasGestureAccepted(size_t touchId) const;
 
+    void SetQueryStateFunc(std::function<void(size_t)>&& queryStateFunc)
+    {
+        queryStateFunc_ = queryStateFunc;
+    }
+
 private:
     void HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
     void HandlePendingDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
@@ -110,6 +122,8 @@ private:
 
     // Stores gesture recognizer collection according to Id.
     std::unordered_map<size_t, RefPtr<GestureScope>> gestureScopes_;
+
+    std::function<void(size_t)> queryStateFunc_;
 };
 
 } // namespace OHOS::Ace::NG
