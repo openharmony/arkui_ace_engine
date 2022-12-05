@@ -257,7 +257,6 @@ private:
     void OnWebStandardFontUpdate(const std::string& value);
     void OnDefaultFixedFontSizeUpdate(int32_t value);
     void OnDefaultFontSizeUpdate(int32_t value);
-    void OnDefaultEncodingUpdate(const std::string& value);
     void OnMinFontSizeUpdate(int32_t value);
 
     void InitEvent();

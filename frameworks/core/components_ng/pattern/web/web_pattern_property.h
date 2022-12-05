@@ -53,7 +53,6 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DefaultFixedFontSize, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DefaultFontSize, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MinFontSize, int32_t);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockNetwork, bool);
 };
 
 } // namespace OHOS::Ace::NG
