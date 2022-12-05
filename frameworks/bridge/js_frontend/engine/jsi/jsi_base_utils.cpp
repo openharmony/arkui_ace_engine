@@ -285,6 +285,7 @@ std::string JsiBaseUtils::TranslateStack(const std::string& stackStr, const std:
             break;
         }
         temp.replace(openBracePos, closeBracePos - openBracePos + 1, sourceInfo);
+        replace(temp.begin(), temp.end(), '\\', '/');
         ans = ans + temp + "\n";
     }
     if (ans.empty()) {
@@ -339,6 +340,7 @@ std::string JsiBaseUtils::TranslateBySourceMap(const std::string& stackStr, cons
             break;
         }
         temp.replace(openBracePos, closeBracePos - openBracePos + 1, sourceInfo);
+        replace(temp.begin(), temp.end(), '\\', '/');
         ans = ans + temp + "\n";
     }
     if (ans.empty()) {
