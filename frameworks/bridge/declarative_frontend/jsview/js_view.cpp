@@ -193,6 +193,7 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
 
 RefPtr<AceType> JSViewFullUpdate::InternalRender()
 {
+    JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     needsUpdate_ = false;
     RenderJSExecution();
     CleanUpAbandonedChild();
