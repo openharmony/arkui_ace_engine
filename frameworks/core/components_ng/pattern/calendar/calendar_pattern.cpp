@@ -301,10 +301,19 @@ void CalendarPattern::JumpTo(const RefPtr<FrameNode>& preFrameNode, const RefPtr
 
 void CalendarPattern::FlushFocus(ObtainedMonth& obtainedMonth)
 {
-    if (!obtainedMonth.days.empty()) {
-        for (auto& day : obtainedMonth.days) {
-            day.focused = false;
+    if (obtainedMonth.days.empty()) {
+        LOGE("month data is empty");
+        return;
+    }
+    bool flag = false;
+    for (auto& day : obtainedMonth.days) {
+        day.focused = day.month.year == calendarDay_.month.year && day.month.month == calendarDay_.month.month &&
+                      day.day == calendarDay_.day;
+        if (!flag && day.focused == true) {
+            flag = true;
         }
+    }
+    if (!flag) {
         obtainedMonth.days[0].focused = true;
     }
 }
