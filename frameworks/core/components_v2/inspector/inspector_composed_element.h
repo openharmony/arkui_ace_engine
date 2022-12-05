@@ -243,6 +243,20 @@ public:
     void UpdateEventTarget(BaseEventInfo& info) const override;
 
     std::pair<Rect, Offset> GetCurrentRectAndOrigin() const override;
+    std::pair<Rect, Offset> GetLastRectAndOrigin() override
+    {
+        if (!lastRectOriginPtr_) {
+            lastRectOriginPtr_ = std::make_unique<std::pair<Rect, Offset>>();
+        }
+        return *lastRectOriginPtr_;
+    }
+    void UpdateLastRectAndOrigin(const std::pair<Rect, Offset>& curRectOrigin) override
+    {
+        if (!lastRectOriginPtr_) {
+            lastRectOriginPtr_ = std::make_unique<std::pair<Rect, Offset>>();
+        }
+        *lastRectOriginPtr_ = curRectOrigin;
+    }
 
     bool IsRectValid() const
     {
@@ -287,6 +301,7 @@ private:
     double CalculateCurrentVisibleRatio(const Rect& visibleRect, const Rect& renderRect);
     bool isRectValid_;
     std::string key_;
+    std::unique_ptr<std::pair<Rect, Offset>> lastRectOriginPtr_;
 };
 
 } // namespace OHOS::Ace::V2
