@@ -43,7 +43,7 @@ public:
     void UpdateModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_VOID(loadingProgressModifier_);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto progressTheme = pipeline->GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(progressTheme);
