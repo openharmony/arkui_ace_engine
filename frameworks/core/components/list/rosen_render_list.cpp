@@ -20,7 +20,7 @@ namespace OHOS::Ace {
 
 void RosenRenderList::Paint(RenderContext& context, const Offset& offset)
 {
-    RenderNode::Paint(context, offset);
+    RenderList::PaintItems(context, offset);
     PaintStickyItem(context, offset);
 }
 
