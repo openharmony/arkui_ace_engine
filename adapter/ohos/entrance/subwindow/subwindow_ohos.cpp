@@ -296,6 +296,10 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t tar
 
 void SubwindowOhos::HideMenuNG()
 {
+    if (!isShowed_) {
+        return;
+    }
+    isShowed_ = false;
     LOGI("SubwindowOhos::HideMenuNG");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
@@ -303,13 +307,15 @@ void SubwindowOhos::HideMenuNG()
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-    overlay->CleanMenuInSubWindow();
-    context->FlushPipelineImmediately();
-    HideWindow();
+    overlay->HideMenuInSubWindow();
 }
 
 void SubwindowOhos::HideMenuNG(int32_t targetId)
 {
+    if (!isShowed_) {
+        return;
+    }
+    isShowed_ = false;
     LOGI("SubwindowOhos::HideMenuNG for target id %{public}d", targetId);
     targetId_ = targetId;
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -318,7 +324,19 @@ void SubwindowOhos::HideMenuNG(int32_t targetId)
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-    overlay->HideMenu(targetId_);
+    overlay->HideMenuInSubWindow(targetId_);
+}
+
+void SubwindowOhos::ClearMenuNG()
+{
+    LOGI("SubwindowOhos::ClearMenuNG");
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->CleanMenuInSubWindow();
     context->FlushPipelineImmediately();
     HideWindow();
 }

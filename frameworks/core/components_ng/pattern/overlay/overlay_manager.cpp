@@ -74,6 +74,20 @@ void OverlayManager::Pop(const RefPtr<FrameNode>& node)
     ctx->OpacityAnimation(option, 1.0, 0.0);
 }
 
+void OverlayManager::PopInSubwindow(const RefPtr<FrameNode>& node)
+{
+    AnimationOption option;
+    option.SetCurve(Curves::SMOOTH);
+    option.SetDuration(ANIMATION_DUR);
+    option.SetOnFinishEvent([id = Container::CurrentId()] {
+        ContainerScope scope(id);
+        SubwindowManager::GetInstance()->ClearMenuNG();
+    });
+    auto ctx = node->GetRenderContext();
+    CHECK_NULL_VOID(ctx);
+    ctx->OpacityAnimation(option, 1.0, 0.0);
+}
+
 void OverlayManager::ShowToast(
     const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft)
 {
@@ -245,6 +259,32 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     LOGI("menuNode mounted in subwindow");
 }
 
+void OverlayManager::HideMenuInSubWindow(int32_t targetId)
+{
+    LOGI("OverlayManager::HideMenuInSubWindow");
+    if (menuMap_.find(targetId) == menuMap_.end()) {
+        LOGW("OverlayManager: menuNode %{public}d not found in map", targetId);
+        return;
+    }
+    auto node = menuMap_[targetId];
+    CHECK_NULL_VOID(node);
+    PopInSubwindow(node);
+}
+
+void OverlayManager::HideMenuInSubWindow()
+{
+    LOGI("OverlayManager::HideMenuInSubWindow from close");
+    if (menuMap_.empty()) {
+        LOGW("OverlayManager: menuMap is empty");
+        return;
+    }
+    auto rootNode = rootNodeWeak_.Upgrade();
+    for (const auto& child: rootNode->GetChildren()) {
+        auto node = DynamicCast<FrameNode>(child);
+        PopInSubwindow(node);
+    }
+}
+
 void OverlayManager::HideMenu(int32_t targetId)
 {
     LOGI("OverlayManager::HideMenuNode");
@@ -291,12 +331,8 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps,
 {
     auto dialogNode = DatePickerDialogView::Show(
         dialogProps, std::move(datePickerProperty), isLunar, std::move(dialogEvent), std::move(dialogCancelEvent));
-    CHECK_NULL_VOID(dialogNode);
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
-    dialogNode->MountToParent(rootNode);
+    Show(dialogNode);
     FocusDialog(dialogNode);
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps,

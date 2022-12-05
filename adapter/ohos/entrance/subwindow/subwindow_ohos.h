@@ -62,6 +62,7 @@ public:
     bool CancelPopup(const std::string& id) override;
     void CloseMenu() override;
     void ClearMenu() override;
+    void ClearMenuNG() override;
 
     void SetHotAreas(const std::vector<Rect>& rects) override;
 
