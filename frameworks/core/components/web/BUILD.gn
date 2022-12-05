@@ -49,8 +49,11 @@ build_component("web") {
     configs = [ ":ohos_web_config" ]
     deps = [
       "$ability_runtime_path/frameworks/native/appkit:appkit_native",
+      "//foundation/graphic/graphic_2d:libsurface",
       "//foundation/window/window_manager/utils:libwmutil",
       "//foundation/window/window_manager/wm:libwm",
+      "//third_party/EGL:libEGL",
+      "//third_party/openGLES:libGLES",
     ]
     external_deps = [ "webview:libnweb" ]
   }

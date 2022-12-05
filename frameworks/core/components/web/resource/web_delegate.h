@@ -26,12 +26,16 @@
 #include <ui/rs_surface_node.h>
 #endif
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <GLES3/gl3.h>
 #include "base/image/pixel_map.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/web/resource/web_client_impl.h"
 #include "core/components/web/resource/web_resource.h"
 #include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
+#include "surface_delegate.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "nweb_handler.h"
 #include "nweb_helper.h"
@@ -43,6 +47,14 @@
 #endif
 
 namespace OHOS::Ace {
+
+typedef struct WindowsSurfaceInfoTag {
+    void* window;
+    EGLDisplay display;
+    EGLContext context;
+    EGLSurface surface;
+} WindowsSurfaceInfo;
+
 class WebMessagePortOhos : public WebMessagePort {
     DECLARE_ACE_TYPE(WebMessagePortOhos, WebMessagePort)
 
@@ -254,6 +266,20 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebControllerHandler> handler_;
 };
 
+class WebSurfaceCallback : public OHOS::SurfaceDelegate::ISurfaceCallback {
+
+public:
+    WebSurfaceCallback(const WeakPtr<WebDelegate>& delegate) : delegate_(delegate) {}
+    ~WebSurfaceCallback() = default;
+
+    void OnSurfaceCreated(const OHOS::sptr<OHOS::Surface>& surface) override;
+    void OnSurfaceChanged(const OHOS::sptr<OHOS::Surface>& surface, int32_t width, int32_t height) override;
+    void OnSurfaceDestroyed() override;
+private:
+    WeakPtr<WebDelegate> delegate_;
+
+};
+
 enum class DragAction {
     DRAG_START = 0,
     DRAG_ENTER,
@@ -406,6 +432,12 @@ public:
     void RequestFocus();
     void SetDrawSize(const Size& drawSize);
     void SetEnhanceSurfaceFlag(const bool& isEnhanceSurface);
+    EGLConfig GLGetConfig(int version, EGLDisplay eglDisplay);
+    void GLContextInit(void* window);
+    sptr<OHOS::SurfaceDelegate> GetSurfaceDelegateClient();
+    void SetBoundsOrRezise(const Size& drawSize, const Offset& offset);
+    Offset GetWebRenderGlobalPos();
+    bool InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
@@ -533,7 +565,15 @@ private:
     Size drawSize_;
     Offset offset_;
     bool isEnhanceSurface_ = false;
-    void *enhanceSurfaceInfo_ = nullptr;
+    sptr<WebSurfaceCallback> surfaceCallback_;
+    sptr<OHOS::SurfaceDelegate> surfaceDelegate_;
+    EGLNativeWindowType mEglWindow;
+    EGLDisplay mEGLDisplay = EGL_NO_DISPLAY;
+    EGLConfig mEGLConfig = nullptr;
+    EGLContext mEGLContext = EGL_NO_CONTEXT;
+    EGLContext mSharedEGLContext = EGL_NO_CONTEXT;
+    EGLSurface mEGLSurface = nullptr;
+    WindowsSurfaceInfo surfaceInfo_;
 #endif
 };
 

@@ -82,6 +82,8 @@ const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
 const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 } // namespace
 
+#define EGLCONFIG_VERSION 3
+
 void WebMessagePortOhos::SetPortHandle(std::string& handle)
 {
     handle_ = handle;
@@ -1384,20 +1386,17 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
     auto eventHub = webPattern ? webPattern->GetWebEventHub() : nullptr;
     auto useNewPipe = Container::IsCurrentUseNewPipeline();
     if (useNewPipe && !webPattern && !eventHub) {
-        state_ = State::CREATEFAILED;
-        OnError(NTC_ERROR, "fail to call WebDelegate::Create due to webComponent is null");
+        LOGE("fail to call WebDelegate::Create due to webComponent is null");
         return false;
     }
     if (!useNewPipe && !webCom) {
-        state_ = State::CREATEFAILED;
-        OnError(NTC_ERROR, "fail to call WebDelegate::Create due to webComponent is null");
+        LOGE("fail to call WebDelegate::Create due to webComponent is null");
         return false;
     }
     context_ = context;
     auto pipelineContext = context.Upgrade();
     if (!pipelineContext) {
-        state_ = State::CREATEFAILED;
-        OnError(NTC_ERROR, "fail to call WebDelegate::Create due to context is null");
+        LOGE("fail to call WebDelegate::Create due to context is null");
         return false;
     }
     state_ = State::CREATED;
@@ -1466,6 +1465,139 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
     return true;
 }
 
+void WebSurfaceCallback::OnSurfaceCreated(const sptr<OHOS::Surface>& surface)
+{
+    LOGI("WebSurfaceCallback::OnSurfaceCreated");
+}
+
+void WebSurfaceCallback::OnSurfaceChanged(const sptr<OHOS::Surface>& surface, int32_t width, int32_t height)
+{
+    LOGD("WebSurfaceCallback::OnSurfaceChanged");
+    auto delegate = delegate_.Upgrade();
+    if (!delegate) {
+        LOGE("WebSurfaceCallback::OnSurfaceChanged get delegate fail");
+        return;
+    }
+    LOGD("OnSurfaceChanged w:%{public}d, h:%{public}d", width, height);
+    delegate->Resize((double)width, (double)height);
+}
+
+void WebSurfaceCallback::OnSurfaceDestroyed()
+{
+    LOGI("WebSurfaceCallback::OnSurfaceDestroyed");
+}
+
+EGLConfig WebDelegate::GLGetConfig(int version, EGLDisplay eglDisplay)
+{
+    int attribList[] = {
+        EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+        EGL_RED_SIZE, 8,
+        EGL_GREEN_SIZE, 8,
+        EGL_BLUE_SIZE, 8,
+        EGL_ALPHA_SIZE, 8,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+        EGL_NONE
+    };
+    EGLConfig configs = NULL;
+    int configsNum;
+    if (!eglChooseConfig(eglDisplay, attribList, &configs, 1, &configsNum)) {
+        LOGE("eglChooseConfig ERROR");
+        return NULL;
+    }
+    return configs;
+}
+
+void WebDelegate::GLContextInit(void* window)
+{
+    if (!window) {
+        LOGE("unable to get EGL window.");
+        return;
+    }
+    LOGD("GLContextInit window = %{public}p", window);
+    mEglWindow = static_cast<EGLNativeWindowType>(window);
+
+    // 1. create sharedcontext
+    mEGLDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    if (mEGLDisplay == EGL_NO_DISPLAY) {
+        LOGE("unable to get EGL display.");
+        return;
+    }
+
+    EGLint eglMajVers, eglMinVers;
+    if (!eglInitialize(mEGLDisplay, &eglMajVers, &eglMinVers)) {
+        mEGLDisplay = EGL_NO_DISPLAY;
+        LOGE("unable to initialize display");
+        return;
+    }
+
+    mEGLConfig = GLGetConfig(EGLCONFIG_VERSION, mEGLDisplay);
+    if (mEGLConfig == nullptr) {
+        LOGE("GLContextInit config ERROR");
+        return;
+    }
+
+    // 2. Create EGL Surface from Native Window
+    mEGLSurface = eglCreateWindowSurface(mEGLDisplay, mEGLConfig, mEglWindow, nullptr);
+    if (mEGLSurface == nullptr) {
+        LOGE("eglCreateContext eglSurface is null");
+        return;
+    }
+
+    // 3. Create EGLContext from
+    int attrib3_list[] = {
+        EGL_CONTEXT_CLIENT_VERSION, 2,
+        EGL_NONE
+    };
+
+    mEGLContext = eglCreateContext(mEGLDisplay, mEGLConfig, mSharedEGLContext, attrib3_list);
+
+    if (!eglMakeCurrent(mEGLDisplay, mEGLSurface, mEGLSurface, mEGLContext)) {
+        LOGE("eglMakeCurrent error = %{public}d", eglGetError());
+        return;
+    }
+
+    glViewport(offset_.GetX(), offset_.GetY(), drawSize_.Width(), drawSize_.Height());
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glFlush();
+    glFinish();
+    eglSwapBuffers(mEGLDisplay, mEGLSurface);
+}
+bool WebDelegate::InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context)
+{
+    auto pipelineContext = context.Upgrade();
+    if (!pipelineContext) {
+        LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create due to context is null");
+        return false;
+    }
+    int32_t windowId = pipelineContext->GetWindowId();
+    surfaceDelegate_ = new OHOS::SurfaceDelegate(windowId);
+    if (surfaceDelegate_ == nullptr) {
+        LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create surfaceDelegate is null");
+        return false;
+    }
+    surfaceCallback_ = new WebSurfaceCallback(AceType::WeakClaim(this));
+    if (surfaceCallback_ == nullptr) {
+        LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create surfaceCallback is null");
+        return false;
+    }
+    surfaceDelegate_->AddSurfaceCallback(surfaceCallback_);
+    surfaceDelegate_->CreateSurface();
+    SetBoundsOrRezise(drawSize_, offset_);
+    auto aNativeSurface = surfaceDelegate_->GetNativeWindow();
+    if (aNativeSurface == nullptr) {
+        LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create get NativeWindow is null");
+        return false;
+    }
+    GLContextInit(aNativeSurface);
+    surfaceInfo_.window = aNativeSurface;
+    surfaceInfo_.display = mEGLDisplay;
+    surfaceInfo_.context = mEGLContext;
+    surfaceInfo_.surface = mEGLSurface;
+    return true;
+}
+
 void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context)
 {
     if (!PrepareInitOHOSWeb(context)) {
@@ -1475,7 +1607,10 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context)
     if (!isCreateWebView_) {
         isCreateWebView_ = true;
         if (isEnhanceSurface_) {
-            // GLContextInit(nullptr);
+            if (!InitWebSurfaceDelegate(context)) {
+                LOGE("init web surfacedelegate failed");
+                return;
+            }
             InitWebViewWithSurface();
         } else {
 #ifdef ENABLE_ROSEN_BACKEND
@@ -2046,7 +2181,7 @@ void WebDelegate::InitWebViewWithSurface()
             if (isEnhanceSurface) {
                 LOGI("Create webview with isEnhanceSurface");
                 delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
-                    delegate->enhanceSurfaceInfo_,
+                    (void *)(&delegate->surfaceInfo_),
                     initArgs);
             } else {
 #ifdef ENABLE_ROSEN_BACKEND
@@ -2073,6 +2208,8 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->UpdateSettting(Container::IsCurrentUseNewPipeline());
             delegate->RunSetWebIdCallback();
             delegate->RunJsProxyCallback();
+            auto releaseSurfaceListenerImpl = std::make_shared<ReleaseSurfaceImpl>(Container::CurrentId());
+            releaseSurfaceListenerImpl->SetSurfaceDelegate(delegate->GetSurfaceDelegateClient());
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -3430,6 +3567,33 @@ void WebDelegate::SetEnhanceSurfaceFlag(const bool& isEnhanceSurface)
     isEnhanceSurface_ = isEnhanceSurface;
 }
 
+sptr<OHOS::SurfaceDelegate> WebDelegate::GetSurfaceDelegateClient()
+{
+    return surfaceDelegate_;
+}
+
+void WebDelegate::SetBoundsOrRezise(const Size& drawSize, const Offset& offset)
+{
+    if ((drawSize.Width() == 0) && (drawSize.Height() == 0)) {
+        LOGE("WebDelegate::SetBoundsOrRezise width and height error");
+        return;
+    }
+    if (isEnhanceSurface_) {
+        if (surfaceDelegate_) {
+            LOGD("WebDelegate::SetBounds: x:%{public}d, y:%{public}d, w::%{public}d, h:%{public}d",
+                (int32_t)offset.GetX(), (int32_t)offset.GetY(),
+                (int32_t)drawSize.Width(), (int32_t)drawSize.Height());
+            surfaceDelegate_->SetBounds(offset.GetX(), (int32_t)offset.GetY(), drawSize.Width(), drawSize.Height());
+        }
+    } else {
+        Resize(drawSize.Width(), drawSize.Height());
+    }
+}
+
+Offset WebDelegate::GetWebRenderGlobalPos()
+{
+    return offset_;
+}
 #ifdef ENABLE_ROSEN_BACKEND
 void WebDelegate::SetSurface(const sptr<Surface>& surface)
 {
