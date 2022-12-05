@@ -81,8 +81,8 @@ HWTEST_F(PluginWindowTest, PluginWindowRequestFrameTest001, TestSize.Level1)
      */
     auto platformWindow = PlatformWindow::Create(nullptr);
     auto mockPluginWindow = std::make_unique<MockPluginWindow>(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     auto fakeFrontend = Frontend::CreateDefault();
 
@@ -111,8 +111,8 @@ HWTEST_F(PluginWindowTest, PluginWindowSetVsyncCallbackTest001, TestSize.Level1)
     GTEST_LOG_(INFO) << "PluginWindowRequestFrameTest001 is begain";
     auto platformWindow = PlatformWindow::Create(nullptr);
     auto mockPluginWindow = std::make_unique<MockPluginWindow>(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     auto fakeFrontend = Frontend::CreateDefault();
 

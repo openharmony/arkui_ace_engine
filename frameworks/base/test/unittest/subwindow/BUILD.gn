@@ -25,7 +25,7 @@ ohos_unittest("SubwindowManagerTest") {
 
   sources = [
     "//foundation/arkui/ace_engine/frameworks/base/test/mock/mock_subwindow_ohos.cpp",
-    "//foundation/arkui/ace_engine/frameworks/core/mock/mock_container.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/common/test/mock/mock_container.cpp",
     "subwindow_manager_test.cpp",
   ]
 
