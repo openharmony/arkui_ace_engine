@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/property/rosen_modifier_property.h"
+#include "core/components_ng/render/adapter/rosen_modifier_property.h"
 
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
-
 template<typename T>
 bool CreateOrSetModifierValue(std::shared_ptr<Rosen::RSAnimatableProperty<T>>& property, const T& value)
 {
@@ -77,5 +76,4 @@ void AddOrChangeQuaternionModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
         rsNode->AddModifier(modifier);
     }
 }
-
 } // namespace OHOS::Ace::NG

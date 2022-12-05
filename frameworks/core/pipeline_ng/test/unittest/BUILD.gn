@@ -297,6 +297,7 @@ ohos_unittest("pipeline_ng_test") {
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_property.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_container_modal_view.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_full_screen_manager.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_shared_overlay_manager.cpp",
 
     # test file
     "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",

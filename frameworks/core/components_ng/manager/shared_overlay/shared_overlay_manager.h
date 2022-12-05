@@ -34,6 +34,7 @@ public:
     ~SharedOverlayManager() override = default;
 
     void StartSharedTransition(const RefPtr<FrameNode>& pageSrc, const RefPtr<FrameNode>& pageDest);
+    bool OnBackPressed();
 
 private:
     void PrepareSharedTransition(const RefPtr<FrameNode>& pageSrc, const RefPtr<FrameNode>& pageDest);
