@@ -55,6 +55,7 @@ private:
 
     float shadowWidth_ = 1.5f;
     float borderWidth_ = 1.5f;
+    Color pointColor_ = Color::WHITE;
     Color activeColor_ = Color::BLUE;
     Color inactiveColor_ = Color::WHITE;
     Color shadowColor_ = Color::RED;

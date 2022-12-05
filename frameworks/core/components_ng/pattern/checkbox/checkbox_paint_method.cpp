@@ -68,6 +68,7 @@ void CheckBoxPaintMethod::InitializeParam()
     borderWidth_ = checkBoxTheme->GetBorderWidth().ConvertToPx();
     borderRadius_ = checkBoxTheme->GetBorderRadius().ConvertToPx();
     checkStroke_ = checkBoxTheme->GetCheckStroke().ConvertToPx();
+    pointColor_ = checkBoxTheme->GetPointColor();
     activeColor_ = checkBoxTheme->GetActiveColor();
     inactiveColor_ = checkBoxTheme->GetInactiveColor();
     inactivePointColor_ = checkBoxTheme->GetInactivePointColor();
@@ -99,11 +100,9 @@ void CheckBoxPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWra
     paintOffset += OffsetF(strokeOffset, strokeOffset);
     contentSize.SetWidth(contentSize.Width() - borderWidth_);
     contentSize.SetHeight(contentSize.Height() - borderWidth_);
-    if (isTouch_ || isHover_) {
+    if (isTouch_) {
         paintOffset.SetX(paintOffset.GetX() + hotZoneHorizontalPadding_.ConvertToPx());
         paintOffset.SetY(paintOffset.GetY() + hotZoneVerticalPadding_.ConvertToPx());
-    }
-    if (isTouch_) {
         DrawTouchBoard(canvas, contentSize, paintOffset);
     }
     if (isHover_) {
@@ -112,7 +111,7 @@ void CheckBoxPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWra
     if (uiStatus_ == UIStatus::OFF_TO_ON) {
         brush.SetColor(ToRSColor(color));
         brush.SetAntiAlias(true);
-        pen.SetColor(ToRSColor(Color::WHITE));
+        pen.SetColor(ToRSColor(pointColor_));
         if (!enabled_) {
             brush.SetColor(ToRSColor(color.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
         }
@@ -121,7 +120,7 @@ void CheckBoxPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWra
     } else if (uiStatus_ == UIStatus::ON_TO_OFF) {
         brush.SetColor(ToRSColor(color));
         brush.SetAntiAlias(true);
-        pen.SetColor(ToRSColor(Color::WHITE));
+        pen.SetColor(ToRSColor(pointColor_));
         if (!enabled_) {
             brush.SetColor(ToRSColor(color.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
         }
