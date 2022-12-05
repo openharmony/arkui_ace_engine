@@ -43,6 +43,12 @@ RenderTabBarItem::RenderTabBarItem() : RenderBox()
             sp->HandleTouchUp();
         }
     });
+    touchRecognizer_->SetOnTouchCancel([wp = AceType::WeakClaim(this)](const TouchEventInfo&) {
+        auto sp = wp.Upgrade();
+        if (sp) {
+            sp->HandleTouchUp();
+        }
+    });
 }
 
 void RenderTabBarItem::HandleTouchDown()
