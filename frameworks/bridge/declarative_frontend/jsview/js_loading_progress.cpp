@@ -15,28 +15,33 @@
 
 #include "bridge/declarative_frontend/jsview/js_loading_progress.h"
 
+#include "bridge/declarative_frontend/jsview/models/loading_progress_model_impl.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/progress/loading_progress_component.h"
-#include "core/components/progress/progress_component.h"
-#include "core/components/track/track_component.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_view.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_model.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 
-namespace OHOS::Ace::Framework {
+namespace OHOS::Ace {
+std::unique_ptr<LoadingProgressModel> LoadingProgressModel::instance_ = nullptr;
 
-void JSLoadingProgress::Create()
+LoadingProgressModel* LoadingProgressModel::GetInstance()
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::LoadingProgressView::Create();
-        return;
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::LoadingProgressModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::LoadingProgressModelNG());
+        } else {
+            instance_.reset(new Framework::LoadingProgressModelImpl());
+        }
+#endif
     }
-
-    RefPtr<LoadingProgressComponent> loadingProgressComponent =
-        AceType::MakeRefPtr<OHOS::Ace::LoadingProgressComponent>();
-    ViewStackProcessor::GetInstance()->ClaimElementId(loadingProgressComponent);
-    ViewStackProcessor::GetInstance()->Push(loadingProgressComponent);
+    return instance_.get();
 }
 
+} // namespace OHOS::Ace
+
+namespace OHOS::Ace::Framework {
 void JSLoadingProgress::JSBind(BindingTarget globalObj)
 {
     JSClass<JSLoadingProgress>::Declare("LoadingProgress");
@@ -48,6 +53,11 @@ void JSLoadingProgress::JSBind(BindingTarget globalObj)
     JSClass<JSLoadingProgress>::Bind(globalObj);
 }
 
+void JSLoadingProgress::Create()
+{
+    LoadingProgressModel::GetInstance()->Create();
+}
+
 void JSLoadingProgress::SetColor(const JSCallbackInfo& info)
 {
     Color progressColor;
@@ -55,14 +65,6 @@ void JSLoadingProgress::SetColor(const JSCallbackInfo& info)
         return;
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::LoadingProgressView::SetColor(progressColor);
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto loadingProgress = AceType::DynamicCast<LoadingProgressComponent>(component);
-    loadingProgress->SetProgressColor(progressColor);
+    LoadingProgressModel::GetInstance()->SetColor(progressColor);
 }
-
 }; // namespace OHOS::Ace::Framework

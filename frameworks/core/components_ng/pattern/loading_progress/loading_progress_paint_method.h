@@ -20,7 +20,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/base/modifier.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_modifer.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_modifier.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
 #include "core/components_ng/render/node_paint_method.h"
 
