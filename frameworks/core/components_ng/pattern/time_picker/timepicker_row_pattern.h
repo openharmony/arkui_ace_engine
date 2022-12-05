@@ -98,19 +98,6 @@ public:
         return titleId_.value();
     }
 
-    bool HasButtonTitleNode() const
-    {
-        return ButtonTitleId_.has_value();
-    }
-
-    int32_t GetButtonTitleId()
-    {
-        if (!ButtonTitleId_.has_value()) {
-            ButtonTitleId_ = ElementRegister::GetInstance()->MakeUniqueId();
-        }
-        return ButtonTitleId_.value();
-    }
-
     uint32_t GetShowCount() const
     {
         return showCount_;
@@ -133,6 +120,19 @@ public:
             return nullptr;
         }
         return options_[frmeNode][index];
+    }
+
+    bool HasDividerNode() const
+    {
+        return DividerId_.has_value();
+    }
+
+    int32_t GetDividerId()
+    {
+        if (!DividerId_.has_value()) {
+            DividerId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return DividerId_.value();
     }
 
     const std::vector<std::string>& GetAllOptions(const RefPtr<FrameNode>& frmeNode)
@@ -271,6 +271,8 @@ private:
     std::optional<int32_t> minuteId_;
     std::optional<int32_t> titleId_;
     std::optional<int32_t> ButtonTitleId_;
+    std::optional<int32_t> DividerId_;
+
     bool hasSecond_ = false;
     std::vector<RefPtr<FrameNode>> timePickerColumns_;
     std::vector<std::string> vecAmPm_ = Localization::GetInstance()->GetAmPmStrings();

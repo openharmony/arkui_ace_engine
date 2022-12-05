@@ -31,7 +31,6 @@ namespace OHOS::Ace::NG {
 namespace {
 // TODO datepicker style modification
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
-const int32_t DIVIDER_SIZE = 2;
 const Dimension FONT_SIZE = Dimension(2.0);
 const int32_t ANIMATION_ZERO_TO_OUTER = 200; // 200ms for animation that from zero to outer.
 const int32_t ANIMATION_OUTER_TO_ZERO = 150; // 150ms for animation that from outer to zero.
@@ -137,11 +136,9 @@ void TextPickerPattern::FlushCurrentOptions()
     if (child.size() != showCount) {
         return;
     }
-
     auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
     auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-    auto height = CalculateHeight();
     for (uint32_t index = 0; index < showCount; index++) {
         uint32_t optionIndex = (totalOptionCount + currentIndex + index - selectedIndex) % totalOptionCount;
         auto optionValue = textPickerPattern->GetOption(optionIndex);
@@ -159,18 +156,14 @@ void TextPickerPattern::FlushCurrentOptions()
             } else {
                 textLayoutProperty->UpdateFontSize(focusOptionSize);
             }
-            textLayoutProperty->UpdateMaxLines(1);
-            textLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE), CalcLength(height)));
             textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
+            textLayoutProperty->UpdateMaxLines(1);
         }
         if (index == middleIndex) {
             textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
             textLayoutProperty->UpdateMaxLines(1);
-            textLayoutProperty->UpdateFontSize(selectedOptionSize);
-            textLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE), CalcLength(height)));
             textLayoutProperty->UpdateAlignment(Alignment::CENTER);
+            textLayoutProperty->UpdateFontSize(selectedOptionSize);
         }
         if (index > middleIndex) {
             if (index == showCount - 1) {
@@ -178,11 +171,10 @@ void TextPickerPattern::FlushCurrentOptions()
             } else {
                 textLayoutProperty->UpdateFontSize(focusOptionSize);
             }
-            textLayoutProperty->UpdateMaxLines(1);
-            textLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE), CalcLength(height)));
             textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
+            textLayoutProperty->UpdateMaxLines(1);
         }
+        
         iter++;
         int32_t diffIndex = static_cast<int32_t>(index) - static_cast<int32_t>(selectedIndex);
         int32_t virtualIndex = static_cast<int32_t>(currentIndex) + diffIndex;
@@ -401,14 +393,14 @@ double TextPickerPattern::CalculateHeight()
             return height;
         }
         if (defaultPickerItemHeightValue.Unit() == DimensionUnit::PERCENT) {
-            height = pickerTheme->GetGradientHeight().Value() * defaultPickerItemHeightValue.Value();
+            height = pickerTheme->GetGradientHeight().ConvertToPx() * defaultPickerItemHeightValue.ConvertToPx();
         } else {
             height = context->NormalizeToPx(defaultPickerItemHeightValue);
         }
     } else {
-        height = pickerTheme->GetGradientHeight().Value();
+        height = pickerTheme->GetDividerSpacing().ConvertToPx();
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return height;
 }
 

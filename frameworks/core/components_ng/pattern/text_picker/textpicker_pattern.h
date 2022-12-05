@@ -48,6 +48,7 @@ public:
     {
         auto layoutAlgorithm = MakeRefPtr<TextPickerLayoutAlgorithm>();
         layoutAlgorithm->SetCurrentOffset(GetCurrentOffset());
+        layoutAlgorithm->SetDefaultPickerItemHeight(CalculateHeight());
         return layoutAlgorithm;
     }
 
