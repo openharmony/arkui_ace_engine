@@ -15,14 +15,14 @@
 
 #include "gtest/gtest.h"
 
+#include "base/test/mock/mock_asset_manager.h"
 #include "core/components/test/unittest/mock/mock_render_common.h"
-#include "core/mock/fake_asset_manager.h"
 #define private public
 #define protected public
-#include "frameworks/bridge/card_frontend/card_frontend_delegate.h"
+#include "bridge/card_frontend/card_frontend_delegate.h"
 #undef private
 #undef protected
-#include "frameworks/bridge/common/utils/utils.h"
+#include "bridge/common/utils/utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -81,5 +81,4 @@ HWTEST_F(CardFrontendDelegateTest, GetPage001, TestSize.Level1)
     auto page = cardFrontendDelegate->GetPage();
     ASSERT_NE(page, nullptr);
 }
-
 } // namespace OHOS::Ace::Framework

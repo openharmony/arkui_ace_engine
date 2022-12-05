@@ -16,15 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_PATH_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_PATH_H
 
-#include <memory>
-#include <string>
-
-#include "utils/rect.h"
-#include "utils/scalar.h"
+#include "testing_rect.h"
 
 namespace OHOS::Ace::Testing {
-using scalar = Rosen::Drawing::scalar;
-using Rect = Rosen::Drawing::Rect;
 enum class TestingPathDirection {
     CW_DIRECTION,
     CCW_DIRECTION,
@@ -35,17 +29,19 @@ public:
     TestingPath() = default;
     ~TestingPath() = default;
 
-    virtual void AddArc(Rect oval, scalar startAngle, scalar sweepAngle) {}
-    virtual void AddRect(const Rect& rect, TestingPathDirection dir = TestingPathDirection::CW_DIRECTION) {}
-    virtual void AddRect(scalar left, scalar top, scalar right, scalar bottom,
-        TestingPathDirection dir = TestingPathDirection::CW_DIRECTION)
-    {}
-    virtual void AddRoundRect(
-        const Rect& rect, scalar xRadius, scalar yRadius, TestingPathDirection dir = TestingPathDirection::CW_DIRECTION)
+    virtual void AddArc(TestingRect oval, float startAngle, float sweepAngle) {}
+    virtual void AddRect(const TestingRect& rect, TestingPathDirection dir = TestingPathDirection::CW_DIRECTION) {}
+
+    virtual void AddRect(
+        float left, float top, float right, float bottom, TestingPathDirection dir = TestingPathDirection::CW_DIRECTION)
     {}
 
-    virtual void MoveTo(scalar x, scalar y) {}
-    virtual void LineTo(scalar x, scalar y) {}
+    virtual void AddRoundRect(const TestingRect& rect, float xRadius, float yRadius,
+        TestingPathDirection dir = TestingPathDirection::CW_DIRECTION)
+    {}
+
+    virtual void MoveTo(float xs, float ys) {}
+    virtual void LineTo(float xs, float ys) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_PATH_H

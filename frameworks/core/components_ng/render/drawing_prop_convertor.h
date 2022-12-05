@@ -25,10 +25,10 @@
 
 #ifndef ACE_UNITTEST
 namespace OHOS::Ace {
+RSPoint ToRSPoint(const NG::PointF& point);
 RSColor ToRSColor(const Color& color);
 RSColor ToRSColor(const LinearColor& color);
 RSRect ToRSRect(const NG::RectF& rect);
-RSPoint ToRSPonit(const NG::PointF& point);
 RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap);
 
 rosen::TextDirection ToRSTextDirection(const TextDirection& txtDir);

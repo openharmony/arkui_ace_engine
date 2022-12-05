@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_PATH_EFFECT_H
 
 #include <memory>
+
 #include "testing_brush.h"
 #include "testing_path.h"
 
@@ -30,10 +31,11 @@ class TestingPathEffect {
 public:
     TestingPathEffect() = default;
     ~TestingPathEffect() = default;
+
     static std::shared_ptr<TestingPathEffect> CreatePathDashEffect(
-        const TestingPath& path, scalar advance, scalar phase, TestingPathDashStyle style)
+        const TestingPath& /* path */, float /* advance */, float /* phase */, TestingPathDashStyle /* style */)
     {
-        return std::make_unique<TestingPathEffect>();
+        return std::make_shared<TestingPathEffect>();
     }
 };
 } // namespace OHOS::Ace::Testing

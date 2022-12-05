@@ -14,11 +14,10 @@
  */
 #include "core/components_ng/pattern/rating/rating_paint_method.h"
 
-#include "draw/canvas.h"
-
 #include "base/geometry/ng/offset_t.h"
 #include "core/components/rating/rating_theme.h"
 #include "core/components_ng/pattern/rating/rating_render_property.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -60,7 +59,7 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
             const RSRoundRect rsRoundRect(rsRect, static_cast<float>(PRESS_BORDER_RADIUS.ConvertToPx()),
                 static_cast<float>(PRESS_BORDER_RADIUS.ConvertToPx()));
             canvas.Save();
-            canvas.ClipRoundRect(rsRoundRect, OHOS::Rosen::Drawing::ClipOp::INTERSECT);
+            canvas.ClipRoundRect(rsRoundRect, RSClipOp::INTERSECT);
             canvas.DrawBackground(rsBrush);
             canvas.Restore();
         }
@@ -74,9 +73,9 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
         auto offsetTemp = offset;
         auto contentSize = SizeF(singleStarWidth, singleStarHeight);
         // step2.1: calculate the clip area in order to display the secondary image.
-        auto clipRect1 = OHOS::Rosen::Drawing::RectF(offset.GetX(), offsetTemp.GetY(),
+        auto clipRect1 = RSRect(offset.GetX(), offsetTemp.GetY(),
             static_cast<float>(offset.GetX() + singleStarWidth * drawScore), offset.GetY() + singleStarHeight);
-        canvas.ClipRect(clipRect1, OHOS::Rosen::Drawing::ClipOp::INTERSECT);
+        canvas.ClipRect(clipRect1, RSClipOp::INTERSECT);
         for (int32_t i = 0; i < foregroundImageRepeatNum; i++) {
             foregroundImagePainter.DrawImage(canvas, offsetTemp, contentSize, ImagePaintConfig);
             offsetTemp.SetX(static_cast<float>(offsetTemp.GetX() + singleStarWidth));
@@ -86,12 +85,11 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
         // step3: if drawScore is a decimal, it needs to draw the secondary image.
         if (secondaryImageRepeatNum != 0) {
             canvas.Save();
-            auto clipRect2 = OHOS::Rosen::Drawing::RectF(
-                static_cast<float>(offset.GetX() + singleStarWidth * drawScore), offsetTemp.GetY(),
+            auto clipRect2 = RSRect(static_cast<float>(offset.GetX() + singleStarWidth * drawScore), offsetTemp.GetY(),
                 static_cast<float>(offset.GetX() + singleStarWidth * static_cast<float>(foregroundImageRepeatNum)),
                 offset.GetY() + singleStarHeight);
             // step3.1: calculate the clip area which already occupied by the foreground image.
-            canvas.ClipRect(clipRect2, OHOS::Rosen::Drawing::ClipOp::INTERSECT);
+            canvas.ClipRect(clipRect2, RSClipOp::INTERSECT);
             offsetTemp.SetX(static_cast<float>(offsetTemp.GetX() - singleStarWidth));
             secondaryImagePainter.DrawImage(canvas, offsetTemp, contentSize, ImagePaintConfig);
             offsetTemp.SetX(offsetTemp.GetX() + ImagePaintConfig.dstRect_.Width());

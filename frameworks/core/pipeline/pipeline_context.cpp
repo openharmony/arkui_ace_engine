@@ -54,10 +54,10 @@
 #include "core/common/event_manager.h"
 #include "core/common/font_manager.h"
 #include "core/common/frontend.h"
+#include "core/common/layout_inspector.h"
 #include "core/common/manager_interface.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/thread_checker.h"
-#include "core/common/layout_inspector.h"
 #include "core/components/checkable/render_checkable.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/container_modal/container_modal_component.h"
@@ -136,7 +136,7 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
     const RefPtr<Frontend>& frontend, int32_t instanceId)
     : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId,
-        (std::move(platformResRegister))),
+          (std::move(platformResRegister))),
       timeProvider_(g_defaultTimeProvider)
 {
     RegisterEventHandler(frontend->GetEventHandler());
@@ -267,8 +267,7 @@ void PipelineContext::FlushPredictLayout(int64_t deadline)
 double PipelineContext::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
     const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
 {
-    return OHOS::Ace::RenderCustomPaint::PaintMeasureText(text, fontSize, fontStyle,
-        fontWeight, fontFamily, letterSpacing);
+    return RenderCustomPaint::PaintMeasureText(text, fontSize, fontStyle, fontWeight, fontFamily, letterSpacing);
 }
 
 void PipelineContext::FlushFocus()
@@ -2113,26 +2112,30 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
             option.SetDuration(duration);
             auto curve = MakeRefPtr<CubicCurve>(0.2, 0.0, 0.2, 1.0); // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
             option.SetCurve(curve);
-            Animate(option, curve, [width, height, this]() {
-                SetRootSizeWithWidthHeight(width, height);
-                FlushLayout();
-            }, [weak = AceType::WeakClaim(this)]() {
-                auto pipeline = weak.Upgrade();
-                if (pipeline == nullptr) {
-                    return;
-                }
-                pipeline->rotationAnimationCount_--;
-                if (pipeline->rotationAnimationCount_ < 0) {
-                    LOGE("PipelineContext::Root node ROTATION animation callback"
-                        "rotationAnimationCount Invalid %{public}d", pipeline->rotationAnimationCount_);
-                }
-                if (pipeline->rotationAnimationCount_ == 0) {
+            Animate(
+                option, curve,
+                [width, height, this]() {
+                    SetRootSizeWithWidthHeight(width, height);
+                    FlushLayout();
+                },
+                [weak = AceType::WeakClaim(this)]() {
+                    auto pipeline = weak.Upgrade();
+                    if (pipeline == nullptr) {
+                        return;
+                    }
+                    pipeline->rotationAnimationCount_--;
+                    if (pipeline->rotationAnimationCount_ < 0) {
+                        LOGE("PipelineContext::Root node ROTATION animation callback"
+                             "rotationAnimationCount Invalid %{public}d",
+                            pipeline->rotationAnimationCount_);
+                    }
+                    if (pipeline->rotationAnimationCount_ == 0) {
 #ifdef ENABLE_ROSEN_BACKEND
-                    // to improve performance, duration rotation animation, draw text as bitmap
-                    Rosen::RSSystemProperties::SetDrawTextAsBitmap(false);
+                        // to improve performance, duration rotation animation, draw text as bitmap
+                        Rosen::RSSystemProperties::SetDrawTextAsBitmap(false);
 #endif
-                }
-            });
+                    }
+                });
 #ifdef ENABLE_ROSEN_BACKEND
             // to improve performance, duration rotation animation, draw text as bitmap
             Rosen::RSSystemProperties::SetDrawTextAsBitmap(true);
@@ -2199,14 +2202,14 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
         }
     }
 
-    taskExecutor_->PostTask([weakFrontend = weakFrontend_, width, height](){
-        auto frontend = weakFrontend.Upgrade();
-        if (frontend) {
-            frontend->OnSurfaceChanged(width, height);
-        }
-    },
-    TaskExecutor::TaskType::JS);
-
+    taskExecutor_->PostTask(
+        [weakFrontend = weakFrontend_, width, height]() {
+            auto frontend = weakFrontend.Upgrade();
+            if (frontend) {
+                frontend->OnSurfaceChanged(width, height);
+            }
+        },
+        TaskExecutor::TaskType::JS);
 
     // init transition clip size when surface changed.
     const auto& pageElement = GetLastPage();
@@ -2602,7 +2605,7 @@ bool PipelineContext::RequestFocus(const RefPtr<Element>& targetElement)
 bool PipelineContext::RequestFocus(const std::string& targetNodeId)
 {
     CHECK_NULL_RETURN(rootElement_, false);
-    auto currentFocusChecked =  rootElement_->RequestFocusImmediatelyById(targetNodeId);
+    auto currentFocusChecked = rootElement_->RequestFocusImmediatelyById(targetNodeId);
     if (!isSubPipeline_ || currentFocusChecked) {
         LOGI("Request focus finish currentFocus is %{public}d", currentFocusChecked);
         return currentFocusChecked;

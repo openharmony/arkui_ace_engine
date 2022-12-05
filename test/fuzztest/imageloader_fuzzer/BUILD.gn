@@ -46,11 +46,11 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_root/frameworks/base/utils/base_id.cpp",
 
     # properties
+    "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/components/common/properties/border.cpp",
     "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
-    "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
 
     # theme
     "$ace_root/frameworks/core/components/theme/app_theme.cpp",
@@ -77,14 +77,14 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_root/frameworks/core/common/window.cpp",
 
     # event
+    "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
-    "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
 
     #"theme_constants_test.cpp",
     "$ace_root/frameworks/core/components/test/unittest/theme/theme_mock.cpp",
 
     # mock
-    #"$ace_root/frameworks/core/mock/mock_system_properties.cpp",
+    #"$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
 
     #fuzz
     "$ace_root/adapter/ohos/entrance/file_asset_provider.cpp",
@@ -100,6 +100,7 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
 
     #"$ace_root/frameworks/base/resource/internal_resource.cpp",
     "$ace_root/frameworks/base/log/ace_tracker.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_download_manager.cpp",
     "$ace_root/frameworks/core/common/event_manager.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
     "$ace_root/frameworks/core/components_ng/gestures/gesture_referee.cpp",
@@ -110,7 +111,6 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_root/frameworks/core/image/image_object.cpp",
     "$ace_root/frameworks/core/image/image_provider.cpp",
     "$ace_root/frameworks/core/image/image_source_info.cpp",
-    "$ace_root/frameworks/core/mock/mock_download_manager.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
     "imageloader_fuzzer.cpp",
   ]
@@ -149,7 +149,7 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
   sources += [
     "$ace_root/adapter/ohos/osal/frame_trace_adapter_impl.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
-    "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
+    "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
   ]
   part_name = ace_engine_part
 
