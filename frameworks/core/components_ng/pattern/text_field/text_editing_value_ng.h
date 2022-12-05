@@ -65,7 +65,7 @@ struct TextEditingValueNG {
 
     std::string GetValueAfterCursor() const
     {
-        if (caretPosition >= static_cast<int32_t>(GetWideText().length()) || caretPosition < 0) {
+        if (caretPosition > static_cast<int32_t>(GetWideText().length()) || caretPosition < 0) {
             return "";
         }
         return StringUtils::ToString(GetWideText().substr(caretPosition));
