@@ -1287,6 +1287,14 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onWindowNew", &JSWeb::OnWindowNew);
     JSClass<JSWeb>::StaticMethod("onWindowExit", &JSWeb::OnWindowExit);
     JSClass<JSWeb>::StaticMethod("multiWindowAccess", &JSWeb::MultiWindowAccessEnabled);
+    JSClass<JSWeb>::StaticMethod("webCursiveFont", &JSWeb::WebCursiveFont);
+    JSClass<JSWeb>::StaticMethod("webFantasyFont", &JSWeb::WebFantasyFont);
+    JSClass<JSWeb>::StaticMethod("webSansSerifFont", &JSWeb::WebSansSerifFont);
+    JSClass<JSWeb>::StaticMethod("webSerifFont", &JSWeb::WebSerifFont);
+    JSClass<JSWeb>::StaticMethod("webStandardFont", &JSWeb::WebStandardFont);
+    JSClass<JSWeb>::StaticMethod("defaultFixedFontSize", &JSWeb::DefaultFixedFontSize);
+    JSClass<JSWeb>::StaticMethod("defaultFontSize", &JSWeb::DefaultFontSize);
+    JSClass<JSWeb>::StaticMethod("minFontSize", &JSWeb::MinFontSize);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -3657,5 +3665,69 @@ void JSWeb::MultiWindowAccessEnabled(bool isMultiWindowAccessEnable)
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     CHECK_NULL_VOID(webComponent);
     webComponent->SetMultiWindowAccessEnabled(isMultiWindowAccessEnable);
+}
+
+void JSWeb::WebCursiveFont(const std::string& cursiveFontFamily)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetWebCursiveFont(cursiveFontFamily);
+        return;
+    }
+}
+
+void JSWeb::WebFantasyFont(const std::string& fantasyFontFamily)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetWebFantasyFont(fantasyFontFamily);
+        return;
+    }
+}
+
+void JSWeb::WebSansSerifFont(const std::string& sansSerifFontFamily)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetWebSansSerifFont(sansSerifFontFamily);
+        return;
+    }
+}
+
+void JSWeb::WebSerifFont(const std::string& serifFontFamily)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetWebSerifFont(serifFontFamily);
+        return;
+    }
+}
+
+void JSWeb::WebStandardFont(const std::string& standardFontFamily)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetWebStandardFont(standardFontFamily);
+        return;
+    }
+}
+
+void JSWeb::DefaultFixedFontSize(int32_t defaultFixedFontSize)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetDefaultFixedFontSize(defaultFixedFontSize);
+        return;
+    }
+}
+
+void JSWeb::DefaultFontSize(int32_t defaultFontSize)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetDefaultFontSize(defaultFontSize);
+        return;
+    }
+}
+
+void JSWeb::MinFontSize(int32_t minFontSize)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetMinFontSize(minFontSize);
+        return;
+    }
 }
 } // namespace OHOS::Ace::Framework
