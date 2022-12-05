@@ -43,9 +43,9 @@ public:
     static void SetShowHoliday(bool showHoliday);
     static void SetShowLunar(bool showLunar);
     static void SetNeedSlide(bool needSlide);
-    static void SetStartOfWeek(int32_t startOfWeek);
+    static void SetStartOfWeek(const JSCallbackInfo& info);
     static void SetWorkDays(const std::string& workDays);
-    static void SetDirection(int32_t dir);
+    static void SetDirection(const JSCallbackInfo& info);
     static void SetCurrentDayStyle(const JSCallbackInfo& info);
     static void SetNonCurrentDayStyle(const JSCallbackInfo& info);
     static void SetTodayStyle(const JSCallbackInfo& info);
