@@ -339,7 +339,8 @@ void SwitchPattern::InitTouchEvent()
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             switchPattern->OnTouchDown();
         }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
+            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
             switchPattern->OnTouchUp();
         }
     };
