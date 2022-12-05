@@ -49,7 +49,7 @@ private:
     bool pending_ = false;
 
     // NG
-    int32_t dialogId_ = -1;
+    WeakPtr<NG::FrameNode> dialog_;
 
     DialogProperties dialogProperties_;
     RefPtr<JsFunction> jsBuilderFunction_;
