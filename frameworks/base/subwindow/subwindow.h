@@ -45,6 +45,7 @@ public:
     virtual bool CancelPopup(const std::string& id) = 0;
     virtual void CloseMenu() = 0;
     virtual void ClearMenu() {};
+    virtual void ClearMenuNG() = 0;
 
     // Add interface for hot regions
     virtual void SetHotAreas(const std::vector<Rect>& rects) {};
