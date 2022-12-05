@@ -42,7 +42,7 @@ LoadingProgressModifier::LoadingProgressModifier()
 
 void LoadingProgressModifier::DrawRing(DrawingContext& context, float date, float scale_) const
 {
-    RSCanvas canvas = context.canvas;
+    auto& canvas = context.canvas;
     float width_ = context.width;
     float height_ = context.height;
     float ringRadius_ = scale_ * RING_RADIUS.ConvertToPx();
@@ -61,7 +61,7 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, float date, floa
 void LoadingProgressModifier::DrawOrbit(DrawingContext& context, float date, float scale_) const
 {
     constexpr uint32_t pointCounts = 20;
-    RSCanvas canvas = context.canvas;
+    auto& canvas = context.canvas;
     float width_ = context.width;
     float height_ = context.height;
     double angle = TOTAL_ANGLE * date / FULL_COUNT;

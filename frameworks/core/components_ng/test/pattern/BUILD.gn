@@ -40,6 +40,7 @@ group("pattern_unittest") {
     "indexer:indexer_pattern_test_ng",
     "linear_layout:linear_layout_creator_test_ng",
     "list:list_pattern_test_ng",
+    "loading_progress:loading_progress_pattern_test_ng",
     "marquee:marquee_pattern_unit_test",
     "menu:menu_layout_algorithm_unit_test",
     "navigation:navigation_pattern_test_ng",

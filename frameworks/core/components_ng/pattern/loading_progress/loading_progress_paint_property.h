@@ -48,7 +48,7 @@ public:
     {
         PaintProperty::ToJsonValue(json);
 
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto progressTheme = pipeline->GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(progressTheme);
