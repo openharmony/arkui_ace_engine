@@ -80,7 +80,7 @@ void OverlayManager::ShowToast(
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto rootNode = rootNodeWeak_.Upgrade();
+    auto rootNode = context->GetRootElement();
     CHECK_NULL_VOID(rootNode);
 
     // only one toast
@@ -110,7 +110,9 @@ void OverlayManager::PopToast()
 {
     auto toastUnderPop = toast_.Upgrade();
     CHECK_NULL_VOID(toastUnderPop);
-    auto rootNode = rootNodeWeak_.Upgrade();
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto rootNode = context->GetRootElement();
     CHECK_NULL_VOID(rootNode);
     LOGI("begin to pop toast, id is %{public}d", toastUnderPop->GetId());
     rootNode->RemoveChild(toastUnderPop);
