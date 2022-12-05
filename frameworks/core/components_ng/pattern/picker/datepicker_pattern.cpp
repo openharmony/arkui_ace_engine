@@ -63,28 +63,23 @@ void DatePickerPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     FlushColumn();
+    ShowTitle(GetTitleId());
     SetChangeCallback([weak = WeakClaim(this)](const RefPtr<FrameNode>& tag, bool add, uint32_t index, bool notify) {
         auto refPtr = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(refPtr);
         refPtr->HandleColumnChange(tag, add, index, notify);
     });
-    SetEventCallback([weak = WeakClaim(this)](bool refresh) {
+    SetEventCallback([weak = WeakClaim(this), titleId = GetTitleId()](bool refresh) {
         auto refPtr = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(refPtr);
         refPtr->FireChangeEvent(refresh);
+        if (refresh) {
+            refPtr->ShowTitle(titleId);
+        }
     });
     auto focusHub = host->GetFocusHub();
     if (focusHub) {
         InitOnKeyEvent(focusHub);
-    }
-    if (HasTitleNode()) {
-        auto textTitleNode = FrameNode::GetOrCreateFrameNode(
-            V2::TEXT_ETS_TAG, GetTitleId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-        auto dateStr = GetCurrentDate();
-        CHECK_NULL_VOID(textTitleNode);
-        auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateContent(dateStr.ToString(false));
     }
 }
 
@@ -248,6 +243,20 @@ void DatePickerPattern::FireChangeEvent(bool refresh) const
         auto info = std::make_shared<DatePickerChangeEvent>(str);
         datePickerEventHub->FireChangeEvent(info.get());
         datePickerEventHub->FireDialogChangeEvent(str);
+    }
+}
+
+void DatePickerPattern::ShowTitle(int32_t titleId)
+{
+    if (HasTitleNode()) {
+        auto textTitleNode = FrameNode::GetOrCreateFrameNode(
+            V2::TEXT_ETS_TAG, titleId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+        auto dateStr = GetCurrentDate();
+        CHECK_NULL_VOID(textTitleNode);
+        auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateContent(dateStr.ToString(false));
+        textTitleNode->MarkModifyDone();
     }
 }
 

@@ -37,6 +37,10 @@ public:
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static void SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
     static RefPtr<FrameNode> CreateTitleButtonNode(const RefPtr<FrameNode>& dateNode);
+    static RefPtr<FrameNode> CreateDividerNode(const RefPtr<FrameNode>& dateNode);
+    static RefPtr<FrameNode> CreateConfirmNode(const RefPtr<FrameNode>& dateNode, DialogEvent& acceptEvent);
+    static RefPtr<FrameNode> CreateCancelNode(NG::DialogGestureEvent& cancelEvent);
+    static RefPtr<FrameNode> CreateBoxNode();
 };
 } // namespace OHOS::Ace::NG
 
