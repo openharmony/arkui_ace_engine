@@ -129,7 +129,8 @@ void CheckBoxGroupPattern::InitTouchEvent()
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             checkboxPattern->OnTouchDown();
         }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
+            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
             checkboxPattern->OnTouchUp();
         }
     };
