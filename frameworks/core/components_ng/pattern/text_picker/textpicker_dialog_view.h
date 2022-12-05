@@ -32,11 +32,14 @@ public:
     static void SetSelected(const RefPtr<TextPickerPattern>& textPickerPattern, uint32_t value = 0);
     static void SetRange(const RefPtr<TextPickerPattern>& textPickerPattern, const std::vector<std::string>& value);
     static void SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onChange);
-    static void SetDefaultPickerItemHeight(const Dimension& value = Dimension(0));
+    static void SetDefaultPickerItemHeight(const Dimension& value);
     static void SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onChange);
     static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& frameNode,
     std::map<std::string, NG::DialogTextEvent> dialogEvent,
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+    static RefPtr<FrameNode> CreateDividerNode(const RefPtr<FrameNode>& dateNode);
+    static RefPtr<FrameNode> CreateConfirmNode(const RefPtr<FrameNode>& dateNode, DialogEvent& acceptEvent);
+    static RefPtr<FrameNode> CreateCancelNode(NG::DialogGestureEvent& cancelEvent);
 };
 } // namespace OHOS::Ace::NG
 

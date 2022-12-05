@@ -145,13 +145,11 @@ void TimePickerColumnPattern::ChangeAmPmTextStyle(
     if (index == 0 && showOptionCount == CHILD_SIZE) {
         textLayoutProperty->UpdateFontSize(normalOptionSize);
         textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateAlignment(Alignment::CENTER);
         textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
     }
     if (index == showOptionCount - 1 && showOptionCount == CHILD_SIZE) {
         textLayoutProperty->UpdateFontSize(normalOptionSize);
         textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateAlignment(Alignment::CENTER);
         textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
     }
 }

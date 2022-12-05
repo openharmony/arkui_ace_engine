@@ -19,13 +19,17 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
+#include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
+const int32_t DIVIDER_MARGIN = 2;
 } // namespace
 
 RefPtr<FrameNode> TextPickerDialogView::Show(const DialogProperties& dialogProperties, uint32_t selected,
@@ -65,17 +69,54 @@ RefPtr<FrameNode> TextPickerDialogView::Show(const DialogProperties& dialogPrope
     }
     SetRange(textPickerPattern, getRangeVector);
     SetSelected(textPickerPattern, selected);
-    SetDefaultPickerItemHeight(height);
+    if (height.Value() > 0) {
+        SetDefaultPickerItemHeight(height);
+    }
     auto changeEvent = dialogEvent["changeId"];
     SetDialogChange(textPickerNode, std::move(changeEvent));
     auto contentRow = CreateButtonNode(textPickerNode, dialogEvent, std::move(dialogCancelEvent));
     ViewStackProcessor::GetInstance()->Finish();
 
     textPickerNode->MountToParent(contentColumn);
-    contentRow->MountToParent(contentColumn);
+
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
+    CHECK_NULL_RETURN(dialogNode, nullptr);
+    auto event = [dialogNode](const GestureEvent& /* info */) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        auto overlayManager = pipeline->GetOverlayManager();
+        overlayManager->CloseDialog(dialogNode);
+    };
+    for (const auto& child : contentRow->GetChildren()) {
+        auto firstChild = AceType::DynamicCast<FrameNode>(child);
+        auto gesturHub = firstChild->GetOrCreateGestureEventHub();
+        auto onClick = AceType::MakeRefPtr<NG::ClickEvent>(event);
+        gesturHub->AddClickEvent(onClick);
+    }
+    contentRow->AddChild(CreateDividerNode(textPickerNode), 1);
+    contentRow->MountToParent(contentColumn);
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return dialogNode;
+}
+
+RefPtr<FrameNode> TextPickerDialogView::CreateDividerNode(const RefPtr<FrameNode>& dateNode)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    auto dividerNode = FrameNode::GetOrCreateFrameNode(V2::DIVIDER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    auto dividerRenderContext = dividerNode->GetRenderContext();
+    CHECK_NULL_RETURN(dividerRenderContext, nullptr);
+    dividerRenderContext->UpdateBackgroundColor(dialogTheme->GetDividerColor());
+
+    MarginProperty margin;
+    margin.top = CalcLength(dialogTheme->GetDividerPadding().Top());
+    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+    dividerNode->GetLayoutProperty()->UpdateMargin(margin);
+    dividerNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(dialogTheme->GetDividerHeight())));
+
+    return dividerNode;
 }
 
 RefPtr<FrameNode> TextPickerDialogView::CreateButtonNode(const RefPtr<FrameNode>& frameNode,
@@ -86,6 +127,27 @@ RefPtr<FrameNode> TextPickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
     auto cancelEvent = dialogCancelEvent["cancelId"];
     auto contentRow = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    CHECK_NULL_RETURN(contentRow, nullptr);
+    auto layoutProps = contentRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProps, nullptr);
+    layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
+    layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+
+    auto buttonCancelNode = CreateCancelNode(cancelEvent);
+    auto buttonConfirmNode = CreateConfirmNode(frameNode, acceptEvent);
+
+    buttonCancelNode->MountToParent(contentRow);
+    buttonConfirmNode->MountToParent(contentRow);
+    return contentRow;
+}
+
+RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(const RefPtr<FrameNode>& dateNode, DialogEvent& acceptEvent)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+
     auto buttonConfirmNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textConfirmNode = FrameNode::CreateFrameNode(
@@ -95,35 +157,84 @@ RefPtr<FrameNode> TextPickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    auto buttonConfirmEventHub = buttonConfirmNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_RETURN(buttonConfirmEventHub, nullptr);
+    buttonConfirmEventHub->SetStateEffect(true);
+
+    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
+    buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
+    auto buttonConfirmRenderContext = buttonConfirmNode->GetRenderContext();
+    buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+
+    MarginProperty margin;
+    margin.right = CalcLength(dialogTheme->GetDividerHeight() * DIVIDER_MARGIN);
+    margin.top = CalcLength(dialogTheme->GetDividerHeight());
+    margin.bottom = CalcLength(dialogTheme->GetDividerHeight());
+    buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
+
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto eventConfirmHub = buttonConfirmNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventConfirmHub, nullptr);
-    SetDialogAcceptEvent(frameNode, std::move(acceptEvent));
-    auto clickCallback = [frameNode](const GestureEvent& /*info*/) {
-        auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(dateNode, nullptr);
+    SetDialogAcceptEvent(dateNode, std::move(acceptEvent));
+    auto clickCallback = [dateNode](const GestureEvent& /* info */) {
+        auto pickerPattern = dateNode->GetPattern<TextPickerPattern>();
+        CHECK_NULL_VOID(pickerPattern);
         auto str = pickerPattern->GetSelectedObject(false);
-        auto timePickerEventHub = pickerPattern->GetEventHub<TextPickerEventHub>();
-        CHECK_NULL_VOID(timePickerEventHub);
-        timePickerEventHub->FireDialogAcceptEvent(str);
+        auto textPickerEventHub = pickerPattern->GetEventHub<TextPickerEventHub>();
+        CHECK_NULL_VOID(textPickerEventHub);
+        textPickerEventHub->FireDialogAcceptEvent(str);
     };
-    eventConfirmHub->AddClickEvent(AccessibilityManager::MakeRefPtr<NG::ClickEvent>(clickCallback));
+    eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(clickCallback));
+    buttonConfirmNode->MarkModifyDone();
+    return buttonConfirmNode;
+}
 
+RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(NG::DialogGestureEvent& cancelEvent)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_RETURN(buttonCancelNode, nullptr);
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textCancelNode, nullptr);
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textCancelLayoutProperty, nullptr);
     textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     textCancelNode->MountToParent(buttonCancelNode);
     auto eventCancelHub = buttonCancelNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventCancelHub, nullptr);
-    eventCancelHub->AddClickEvent(AccessibilityManager::MakeRefPtr<NG::ClickEvent>(std::move(cancelEvent)));
+    eventCancelHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(cancelEvent)));
 
-    buttonCancelNode->MountToParent(contentRow);
-    buttonConfirmNode->MountToParent(contentRow);
-    return contentRow;
+    auto buttonCancelEventHub = buttonCancelNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_RETURN(buttonCancelEventHub, nullptr);
+    buttonCancelEventHub->SetStateEffect(true);
+
+    MarginProperty margin;
+    margin.left = CalcLength(dialogTheme->GetDividerHeight() * DIVIDER_MARGIN);
+    margin.top = CalcLength(dialogTheme->GetDividerHeight());
+    margin.bottom = CalcLength(dialogTheme->GetDividerHeight());
+    buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
+
+    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
+    buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    buttonCancelLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
+
+    auto buttonCancelRenderContext = buttonCancelNode->GetRenderContext();
+    buttonCancelRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonCancelNode->MarkModifyDone();
+    return buttonCancelNode;
 }
 
 void TextPickerDialogView::SetSelected(const RefPtr<TextPickerPattern>& textPickerPattern, uint32_t value)
