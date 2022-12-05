@@ -17,24 +17,32 @@
 
 #include "base/log/ace_trace.h"
 #include "frameworks/bridge/common/utils/utils.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_renderer.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
 constexpr Dimension DEFAULT_FONT_SIZE = 30.0_px;
+constexpr double DEFAULT_OFFSET = 25;
+constexpr double DEFAULT_HEIGHT = 30;
 }
 
 void CreateMockComponent(const std::string inspectorTag)
 {
-    auto textComponent = AceType::MakeRefPtr<TextComponent>("This component is not supported on PC Preview.");
-    auto textStyle = textComponent->GetTextStyle();
-    textStyle.SetFontSize(DEFAULT_FONT_SIZE);
-    textComponent->SetTextStyle(textStyle);
-    textComponent->SetInspectorTag(inspectorTag);
-    ViewStackProcessor::GetInstance()->Push(textComponent);
+    RefPtr<OHOS::Ace::CustomPaintComponent> mockComponent = AceType::MakeRefPtr<OHOS::Ace::CustomPaintComponent>();
+    auto jsContext = Referenced::MakeRefPtr<JSRenderingContext>();
+    jsContext->SetAnti(true);
+    jsContext->SetComponent(mockComponent->GetTaskPool());
+    jsContext->SetAntiAlias();
+    mockComponent->GetTaskPool()->UpdateFontSize(DEFAULT_FONT_SIZE);
+    mockComponent->GetTaskPool()->FillText("This component is not supported on PC preview.", Offset(0, DEFAULT_OFFSET));
+    mockComponent->SetInspectorTag(inspectorTag);
+    ViewStackProcessor::GetInstance()->Push(mockComponent);
 
     RefPtr<BoxComponent> mountBox = ViewStackProcessor::GetInstance()->GetBoxComponent();
     mountBox->SetColor(Color::FromString("#808080"));
+    mountBox->SetHeight(DEFAULT_HEIGHT);
 }
 
 void JSForm::Create(const JSCallbackInfo& info)
