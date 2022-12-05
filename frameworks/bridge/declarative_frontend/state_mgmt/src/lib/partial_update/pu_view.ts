@@ -550,14 +550,14 @@ abstract class ViewPU extends NativeViewPartialUpdate
     ) as ObservedPropertyAbstractPU<T>;
   }
 
-
-  public createStorageProp<T>(storagePropName: string, defaultValue: T,
-    viewVariableName: string): SynchedPropertySimpleOneWayPU<T> {
+  public createStorageProp<T>(storagePropName: string, defaultValue: T, viewVariableName: string): ObservedPropertyAbstractPU<T> {
     return AppStorage.__CreateSync<T>(storagePropName, defaultValue,
-      <T>(source: ObservedPropertyAbstract<T>) => (source instanceof ObservedPropertySimple)
-        ? new SynchedPropertySimpleOneWayPU<T>(source, this, viewVariableName)
-        : undefined
-    ) as SynchedPropertySimpleOneWayPU<T>;
+      <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
+        ? undefined
+        : (source instanceof ObservedPropertySimple)
+          ? new SynchedPropertySimpleOneWayPU<T>(source, this, viewVariableName)
+          : new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
+    ) as ObservedPropertyAbstractPU<T>;
   }
 
   public createLocalStorageLink<T>(storagePropName: string, defaultValue: T,
@@ -571,13 +571,14 @@ abstract class ViewPU extends NativeViewPartialUpdate
     ) as ObservedPropertyAbstractPU<T>;
   }
 
-
   public createLocalStorageProp<T>(storagePropName: string, defaultValue: T,
-    viewVariableName: string): SynchedPropertySimpleOneWayPU<T> {
+    viewVariableName: string): ObservedPropertyAbstractPU<T> {
     return this.localStorage_.__createSync<T>(storagePropName, defaultValue,
-      <T>(source: ObservedPropertyAbstract<T>) => (source instanceof ObservedPropertySimple)
-        ? new SynchedPropertySimpleOneWayPU<T>(source, this, viewVariableName)
-        : undefined
-    ) as SynchedPropertySimpleOneWayPU<T>;
+      <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
+        ? undefined
+        : (source instanceof ObservedPropertySimple)
+          ? new SynchedPropertySimpleOneWayPU<T>(source, this, viewVariableName)
+          : new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
+    ) as ObservedPropertyAbstractPU<T>;
   }
 }
