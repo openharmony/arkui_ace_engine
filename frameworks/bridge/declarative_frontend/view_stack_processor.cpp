@@ -341,6 +341,7 @@ RefPtr<FocusableComponent> ViewStackProcessor::GetFocusableComponent(bool create
     if (createIfNotExist) {
         RefPtr<FocusableComponent> focusableComponent = AceType::MakeRefPtr<OHOS::Ace::FocusableComponent>();
         wrappingComponentsMap.emplace("focusable", focusableComponent);
+        Component::MergeRSNode(focusableComponent);
         return focusableComponent;
     }
     return nullptr;
