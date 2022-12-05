@@ -217,7 +217,7 @@ HWTEST_F(TouchEventTestNg, TouchEventActuatorHandleAndDispatchTest004, TestSize.
     auto touchEvent2 = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback2));
     touchEventActuator->AddTouchEvent(touchEvent2);
     touchEventActuator->AddTouchEvent(nullptr);
-    EXPECT_EQ(touchEventActuator->touchEvents_.size(), TOUCH_EVENTS_SIZE);
+    EXPECT_EQ(touchEventActuator->touchEvents_.size(), TOUCH_EVENTS_SIZE_2);
 
     /**
      * @tc.steps: step6. Invoke HandleEvent when touchEvents_ and userCallback_ is not empty.
