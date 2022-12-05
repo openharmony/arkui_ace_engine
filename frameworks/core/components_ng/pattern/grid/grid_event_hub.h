@@ -110,6 +110,8 @@ public:
     void HandleOnItemDragCancel();
     RefPtr<FrameNode> FindGridItemByPosition(float x, float y);
     int32_t GetGridItemIndex(const RefPtr<FrameNode>& frameNode);
+    bool CheckPostionInGrid(float x, float y);
+    int GetFrameNodeChildSize();
 
 private:
     bool GetEditable() const;
