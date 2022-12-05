@@ -143,7 +143,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 LOGE("Layout item wrapper of index: %{public}d is null, please check.", itemIdex);
                 continue;
             }
-            auto frSize = itemsCrossSize_.at(itemIdex % static_cast<int32_t>(crossCount_));
+            auto frSize = itemsCrossSize_.at(iter->first);
             SizeF blockSize = gridLayoutProperty->IsVertical() ? SizeF(frSize, lineHeight) : SizeF(lineHeight, frSize);
             auto translate = Alignment::GetAlignPosition(
                 blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), Alignment::CENTER);
@@ -544,9 +544,14 @@ float GridScrollLayoutAlgorithm::FillNewLineForward(float crossSize, float mainS
     auto currentIndex = gridLayoutInfo_.startIndex_;
     // TODO: shoule we use policy of adaptive layout according to size of [GridItem] ?
     if (gridLayoutInfo_.startMainLineIndex_ - 1 < 0) {
-        LOGI("startMainLineIndex: %{public}d is already the first line, no forward line to make",
-            gridLayoutInfo_.startMainLineIndex_);
-        return lineHeight;
+        if (currentIndex == 0) {
+            LOGI("startMainLineIndex: %{public}d is already the first line, no forward line to make",
+                gridLayoutInfo_.startMainLineIndex_);
+            return lineHeight;
+        } else {
+            // add more than one line
+            UpdateMatrixForAddedItems();
+        }
     }
     gridLayoutInfo_.startMainLineIndex_--;
     bool doneCreateNewLine = false;
@@ -559,15 +564,20 @@ float GridScrollLayoutAlgorithm::FillNewLineForward(float crossSize, float mainS
         gridLayoutInfo_.endIndex_ = firstItem - 1;
 
         while (gridLayoutInfo_.endIndex_ < currentIndex - 1) {
-            auto lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, true);
+            lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, true);
             if (LessNotEqual(lineHeight, 0.0)) {
                 gridLayoutInfo_.reachEnd_ = true;
                 break;
             }
         }
+        // delete more than one line items
+        auto deletedLineCount = gridLayoutInfo_.startMainLineIndex_ - currentMainLineIndex_;
+        if (deletedLineCount != 0) {
+            UpdateMatrixForDeletedItems(deletedLineCount);
+        }
 
         gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_;
-        gridLayoutInfo_.endMainLineIndex_ = endMainLineIndex;
+        gridLayoutInfo_.endMainLineIndex_ = endMainLineIndex - deletedLineCount;
         gridLayoutInfo_.endIndex_ = endIndex;
     }
     gridMatrixIter = gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.startMainLineIndex_);
@@ -602,6 +612,42 @@ float GridScrollLayoutAlgorithm::FillNewLineForward(float crossSize, float mainS
     return lineHeight;
 }
 
+void GridScrollLayoutAlgorithm::UpdateMatrixForDeletedItems(int32_t deletedLineCount)
+{
+    LOGI("deletedLineCount:%{public}d", deletedLineCount);
+    decltype(gridLayoutInfo_.lineHeightMap_) gridLineHeightMap(std::move(gridLayoutInfo_.lineHeightMap_));
+    decltype(gridLayoutInfo_.gridMatrix_) gridMatrix(std::move(gridLayoutInfo_.gridMatrix_));
+    for (const auto& item : gridMatrix) {
+        if (item.first == 0) {
+            gridLayoutInfo_.gridMatrix_[item.first] = item.second;
+        } else {
+            gridLayoutInfo_.gridMatrix_[item.first - deletedLineCount] = item.second;
+        }
+    }
+    for (const auto& item : gridLineHeightMap) {
+        if (item.first == 0) {
+            gridLayoutInfo_.lineHeightMap_[item.first] = item.second;
+        } else {
+            gridLayoutInfo_.lineHeightMap_[item.first - deletedLineCount] = item.second;
+        }
+    }
+}
+
+void GridScrollLayoutAlgorithm::UpdateMatrixForAddedItems()
+{
+    LOGI("add more than one line");
+    decltype(gridLayoutInfo_.lineHeightMap_) gridLineHeightMap(std::move(gridLayoutInfo_.lineHeightMap_));
+    decltype(gridLayoutInfo_.gridMatrix_) gridMatrix(std::move(gridLayoutInfo_.gridMatrix_));
+    for (const auto& item : gridMatrix) {
+        gridLayoutInfo_.gridMatrix_[item.first + 1] = item.second;
+    }
+    for (const auto& item : gridLineHeightMap) {
+        gridLayoutInfo_.lineHeightMap_[item.first + 1] = item.second;
+    }
+    gridLayoutInfo_.startMainLineIndex_ = gridLayoutInfo_.startMainLineIndex_ + 1;
+    gridLayoutInfo_.endMainLineIndex_ = gridLayoutInfo_.endMainLineIndex_ + 1;
+}
+
 float GridScrollLayoutAlgorithm::FillNewLineBackward(
     float crossSize, float mainSize, LayoutWrapper* layoutWrapper, bool reverse)
 {
@@ -632,7 +678,8 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
         auto frameSize = axis_ == Axis::VERTICAL ? SizeF(crossSize, mainSize) : SizeF(mainSize, crossSize);
         auto crossSpan = MeasureChild(frameSize, currentIndex, layoutWrapper, itemWrapper, false);
         if (crossSpan < 0) {
-            // try nex item
+            // try next item
+            LOGI("skip item too big to be placed");
             --i;
             ++currentIndex;
             continue;
