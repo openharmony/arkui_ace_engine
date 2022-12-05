@@ -78,8 +78,8 @@ RefPtr<PipelineContext> DisplayTestUtils::GetMockContext()
 {
     auto platformWindow = std::make_unique<MockWindow>(nullptr);
     auto window = std::make_unique<Window>(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     auto fakeFrontend = Frontend::CreateDefault();
     return AceType::MakeRefPtr<PipelineContext>(

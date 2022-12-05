@@ -20,7 +20,7 @@
 #include "base/thread/task_executor.h"
 
 namespace OHOS::Ace {
-class FakeTaskExecutor final : public TaskExecutor {
+class MockTaskExecutor final : public TaskExecutor {
 public:
     bool WillRunOnCurrentThread(TaskType type) const final
     {

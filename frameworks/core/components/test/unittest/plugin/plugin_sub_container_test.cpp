@@ -54,7 +54,7 @@ RefPtr<PipelineContext> PluginSubContainerTest::GetPipelineContext(const RefPtr<
     taskExecutor->InitJsThread(true);
     gTaskExecutor = taskExecutor;
 
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     return AceType::MakeRefPtr<PipelineContext>(
         std::move(window), taskExecutor, assetManager, resRegister, frontend, 0);
@@ -75,7 +75,7 @@ HWTEST_F(PluginSubContainerTest, PluginSubContainerDestroyTest001, TestSize.Leve
     PluginSubContainer pluginSubContainer(pipelineContext);
     pluginSubContainer.pipelineContext_ = pipelineContext;
     pluginSubContainer.taskExecutor_ = Referenced::MakeRefPtr<FlutterTaskExecutor>();
-    pluginSubContainer.assetManager_ = Referenced::MakeRefPtr<FakeAssetManager>();
+    pluginSubContainer.assetManager_ = Referenced::MakeRefPtr<MockAssetManager>();
     EXPECT_TRUE(pluginSubContainer.pipelineContext_ != nullptr);
     EXPECT_TRUE(pluginSubContainer.taskExecutor_ != nullptr);
     EXPECT_TRUE(pluginSubContainer.assetManager_ != nullptr);
