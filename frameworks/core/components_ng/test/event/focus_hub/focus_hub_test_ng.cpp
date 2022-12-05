@@ -42,8 +42,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t FOCUS_NODE_SIZE = 2;
 constexpr int32_t NODE_SIZE = 0;
-const BlurReason BLUR_RESSON_FOCUS_SWITCH = BlurReason::FOCUS_SWITCH;
-const BlurReason BLUR_RESSON_WINDOW_BLUR = BlurReason::WINDOW_BLUR;
+const BlurReason BLUR_REASON_FOCUS_SWITCH = BlurReason::FOCUS_SWITCH;
+const BlurReason BLUR_REASON_WINDOW_BLUR = BlurReason::WINDOW_BLUR;
 } // namespace
 
 class FocusHubTestNg : public testing::Test {
@@ -259,8 +259,8 @@ HWTEST_F(FocusHubTestNg, FocusHubLostFocusTest005, TestSize.Level1)
      * @tc.expected: currentFocus_ is false.
      */
     focusHub->currentFocus_ = true;
-    focusHub->LostFocus(BLUR_RESSON_FOCUS_SWITCH);
-    EXPECT_EQ(focusHub->blurReason_, BLUR_RESSON_FOCUS_SWITCH);
+    focusHub->LostFocus(BLUR_REASON_FOCUS_SWITCH);
+    EXPECT_EQ(focusHub->blurReason_, BLUR_REASON_FOCUS_SWITCH);
     EXPECT_FALSE(focusHub->currentFocus_);
 
     /**
@@ -269,8 +269,8 @@ HWTEST_F(FocusHubTestNg, FocusHubLostFocusTest005, TestSize.Level1)
      */
     focusHub->currentFocus_ = true;
     focusHub->focusType_ = FocusType::NODE;
-    focusHub->LostFocus(BLUR_RESSON_WINDOW_BLUR);
-    EXPECT_EQ(focusHub->blurReason_, BLUR_RESSON_WINDOW_BLUR);
+    focusHub->LostFocus(BLUR_REASON_WINDOW_BLUR);
+    EXPECT_EQ(focusHub->blurReason_, BLUR_REASON_WINDOW_BLUR);
     EXPECT_FALSE(focusHub->currentFocus_);
 
     /**
@@ -279,7 +279,7 @@ HWTEST_F(FocusHubTestNg, FocusHubLostFocusTest005, TestSize.Level1)
      */
     focusHub->currentFocus_ = true;
     focusHub->focusType_ = FocusType::SCOPE;
-    focusHub->LostFocus(BLUR_RESSON_WINDOW_BLUR);
+    focusHub->LostFocus(BLUR_REASON_WINDOW_BLUR);
     EXPECT_FALSE(focusHub->currentFocus_);
 }
 

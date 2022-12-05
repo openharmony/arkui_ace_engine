@@ -40,15 +40,15 @@ constexpr float MARQUEE_WIDTH_500 = 500.0f;
 constexpr float MARQUEE_HEIGHT_100 = 100.0f;
 constexpr float CHILD_WIDTH_600 = 600.0f;
 constexpr float CHILD_HEIGHT_50 = 50.0f;
-constexpr float RK3568_WIDTH = 720.0f;
-constexpr float RK3568_HEIGHT = 1136.0f;
+constexpr float DEVICE_WIDTH = 720.0f;
+constexpr float DEVICE_HEIGHT = 1136.0f;
 constexpr float CHILD_OFFSET_LEFT = 0.0f;
-constexpr float CHILD_OFFSET_RIGHT = RK3568_WIDTH - CHILD_WIDTH_600;
-constexpr float CHILD_OFFSET_CENTER = (RK3568_WIDTH - CHILD_WIDTH_600) / 2;
+constexpr float CHILD_OFFSET_RIGHT = DEVICE_WIDTH - CHILD_WIDTH_600;
+constexpr float CHILD_OFFSET_CENTER = (DEVICE_WIDTH - CHILD_WIDTH_600) / 2;
 constexpr double MARQUEE_SCROLL_AMOUNT = 10.0;
 constexpr int32_t MARQUEE_LOOP = 3;
 const std::string MARQUEE_SRC = "marquee";
-const SizeF CONTAINER_SIZE(RK3568_WIDTH, RK3568_HEIGHT);
+const SizeF CONTAINER_SIZE(DEVICE_WIDTH, DEVICE_HEIGHT);
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const Ace::FontWeight FONT_WEIGHT_VALUE = Ace::FontWeight::W100;
@@ -407,7 +407,7 @@ HWTEST_F(MarqueePatternTestNg, MarqueeTest005, TestSize.Level1)
      */
     auto childPosition = pattern->CheckAndAdjustPosition(&layoutWrapper);
     EXPECT_EQ(childPosition, 0.0f);
-    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize(), SizeF(RK3568_WIDTH, CHILD_HEIGHT_50));
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize(), SizeF(DEVICE_WIDTH, CHILD_HEIGHT_50));
 
     /**
      * @tc.steps: step11. get child layoutWrapper to check framesize and offset.
@@ -416,7 +416,7 @@ HWTEST_F(MarqueePatternTestNg, MarqueeTest005, TestSize.Level1)
     auto childLayoutWrapper = layoutWrapper.GetOrCreateChildByIndex(0);
     EXPECT_NE(childLayoutWrapper, nullptr);
     EXPECT_EQ(childLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(CHILD_WIDTH_600, CHILD_HEIGHT_50));
-    EXPECT_EQ(childLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), (RK3568_WIDTH - CHILD_WIDTH_600) / 2);
+    EXPECT_EQ(childLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), (DEVICE_WIDTH - CHILD_WIDTH_600) / 2);
 }
 
 /**

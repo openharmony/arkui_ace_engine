@@ -353,3 +353,14 @@ build_component_ng("pattern_ability_component_ng") {
     "ability_component/ability_component_pattern.cpp",
   ]
 }
+
+build_component_ng("pattern_model_component_ng") {
+  sources = [
+    "model/model_adapter_wrapper.cpp",
+    "model/model_layout_algorithm.cpp",
+    "model/model_paint_method.cpp",
+    "model/model_pattern.cpp",
+    "model/model_touch_handler.cpp",
+    "model/model_view_ng.cpp",
+  ]
+}

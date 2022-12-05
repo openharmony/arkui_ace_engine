@@ -21,7 +21,22 @@ namespace {
 std::string ITEM_DRAG_START("OnItemDragStart");
 std::string ON_DRAG_START("OnDragStart");
 constexpr int32_t CURRENT_ID = 1;
+int64_t g_proxyId = 0;
 } // namespace
+
+RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
+    const RefPtr<PixelMap>& pixelMap, const GestureEvent& info)
+{
+    currentId_ = ++g_proxyId;
+    return MakeRefPtr<DragDropProxy>(currentId_);
+}
+
+RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
+    const RefPtr<UINode>& customNode, const GestureEvent& info)
+{
+    currentId_ = ++g_proxyId;
+    return MakeRefPtr<DragDropProxy>(currentId_);
+}
 
 bool DragDropManager::CheckDragDropProxy(int64_t id) const
 {

@@ -19,12 +19,9 @@
 #include <memory>
 
 #include "testing_color.h"
-#include "utils/point.h"
-#include "utils/scalar.h"
+#include "testing_point.h"
 
 namespace OHOS::Ace::Testing {
-using scalar = Rosen::Drawing::scalar;
-using Point = Rosen::Drawing::Point;
 enum class TileMode {
     CLAMP,
     REPEAT,
@@ -35,14 +32,16 @@ public:
     TestingShaderEffect() = default;
     ~TestingShaderEffect() = default;
 
-    static std::shared_ptr<TestingShaderEffect> CreateSweepGradient(const Point& centerPt,
-        const std::vector<uint32_t>& colors, const std::vector<scalar>& pos, TileMode mode, scalar startAngle,
-        scalar endAngle)
+    static std::shared_ptr<TestingShaderEffect> CreateSweepGradient(const TestingPoint& /* centerPt */,
+        const std::vector<uint32_t>& /* colors */, const std::vector<float>& /* pos */, TileMode /* mode */,
+        float /* startAngle */, float /* endAngle */)
     {
         return std::make_shared<TestingShaderEffect>();
     }
-    static std::shared_ptr<TestingShaderEffect> CreateLinearGradient(const Point& startPt, const Point& endPt,
-        const std::vector<ColorQuad>& colors, const std::vector<scalar>& pos, TileMode mode)
+
+    static std::shared_ptr<TestingShaderEffect> CreateLinearGradient(const TestingPoint& /* startPt */,
+        const TestingPoint& /* endPt */, const std::vector<uint32_t>& /* colors */, const std::vector<float>& /* pos */,
+        TileMode /* mode */)
     {
         return std::make_shared<TestingShaderEffect>();
     }

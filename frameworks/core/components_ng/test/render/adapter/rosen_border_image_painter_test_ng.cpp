@@ -32,7 +32,7 @@
 #include "frameworks/core/components_ng/render/canvas.h"
 #include "frameworks/core/components_ng/render/render_context.h"
 #include "frameworks/core/components_ng/test/mock/render/mock_render_context.h"
-#undef priate
+#undef private
 #undef protected
 
 #include "gtest/gtest.h"

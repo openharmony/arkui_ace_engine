@@ -757,7 +757,7 @@ void DialogBuilder::BuildButtons(const RefPtr<ThemeManager>& themeManager, const
             buttonComponent =
                 ButtonBuilder::Build(themeManager, button.text, buttonTextStyle, buttonTextStyle.GetTextColor(), true);
         }
-        buttonComponent->SetBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+        buttonComponent->SetBackgroundColor(Color::TRANSPARENT);
         if (SystemProperties::GetDeviceType() == DeviceType::CAR) {
             buttonComponent->SetHeight(dialogTheme->GetButtonHeight());
             buttonComponent->SetRectRadius(dialogTheme->GetButtonHeight() / 2.0);

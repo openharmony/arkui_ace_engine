@@ -18,8 +18,6 @@
 
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar_painter.h"
-#include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_v2/list/list_properties.h"
 
@@ -30,6 +28,8 @@ struct DividerInfo {
     float startMargin;
     float endMargin;
     float halfSpaceWidth;
+    float mainPadding;
+    float crossPadding;
     bool isVertical;
     int32_t lanes;
     int32_t totalItemCount;

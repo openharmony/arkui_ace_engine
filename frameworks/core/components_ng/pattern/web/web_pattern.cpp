@@ -1203,4 +1203,12 @@ void WebPattern::OnActive()
     delegate_->OnActive();
     isActive_ = true;
 }
+
+void WebPattern::OnVisibleChange(bool isVisible)
+{
+    if (!isVisible) {
+        LOGI("web is not visible");
+        CloseSelectOverlay();
+    }
+}
 } // namespace OHOS::Ace::NG

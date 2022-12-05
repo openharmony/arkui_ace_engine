@@ -35,15 +35,15 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float RK3568_WIDTH = 720.0f;
-constexpr float RK3568_HEIGHT = 1136.0f;
+constexpr float DEVICE_WIDTH = 720.0f;
+constexpr float DEVICE_HEIGHT = 1136.0f;
 constexpr float GRID_POSITION = 100.0f;
 constexpr float GRID_DURATION = 200.0f;
 constexpr int32_t GRID_MAX_COUNT = 10;
 constexpr int32_t GRID_MIN_COUNT = 1;
 constexpr int32_t GRID_CELL_LENGTH = 200;
 constexpr float GRID_SCROLL_OFFSET = 1.0f;
-const SizeF CONTAINER_SIZE(RK3568_WIDTH, RK3568_HEIGHT);
+const SizeF CONTAINER_SIZE(DEVICE_WIDTH, DEVICE_HEIGHT);
 const Dimension GRID_COLUMNS_GAP = Dimension(10, DimensionUnit::PX);
 const Dimension GRID_ROWS_GAP = Dimension(5, DimensionUnit::PX);
 const std::string GRID_DIRECTION_ROW = "GridDirection.Row";

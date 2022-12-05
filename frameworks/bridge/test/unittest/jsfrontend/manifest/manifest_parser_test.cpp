@@ -1,29 +1,28 @@
 /*
-* Copyright (c) 2022 Huawei Device Co., Ltd.
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "gtest/gtest.h"
 
 #include "base/memory/ace_type.h"
+#include "bridge/common/manifest/manifest_parser.h"
 #include "core/common/ace_engine.h"
-#include "frameworks/bridge/common/manifest/manifest_parser.h"
-
+#include "core/common/test/mock/mock_container.h"
+#include "core/components/test/mock/mock_resource_adapter.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_interface.h"
-#include "core/pipeline_ng/test/mock/mock_container.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#include "frameworks/core/components_ng/test/mock/resource/mock_resource_adapter.h"
-#include "frameworks/core/components_ng/test/mock/theme/mock_theme_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -104,10 +103,10 @@ const std::string MANIFEST_BAD_FORMAT = "                                       
 
 class ManifestParserTest : public testing::Test {
 public:
-   static void SetUpTestCase();
-   static void TearDownTestCase();
-   void SetUp();
-   void TearDown();
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
 };
 
 void ManifestParserTest::SetUpTestCase() {}
@@ -116,10 +115,10 @@ void ManifestParserTest::SetUp() {}
 void ManifestParserTest::TearDown() {}
 
 /**
-* @tc.name: ManifestParserTest001
-* @tc.desc: Parse the manifest with wrong format
-* @tc.type: FUNC
-*/
+ * @tc.name: ManifestParserTest001
+ * @tc.desc: Parse the manifest with wrong format
+ * @tc.type: FUNC
+ */
 HWTEST_F(ManifestParserTest, ManifestParserTest001, TestSize.Level1)
 {
     /**
@@ -146,7 +145,7 @@ HWTEST_F(ManifestParserTest, ManifestParserTest001, TestSize.Level1)
     EXPECT_EQ(manifestParser.GetAppInfo()->GetAppName(), MANIFEST_APP_NAME);
     EXPECT_EQ(manifestParser.GetWidget()->GetWidgetNum(), 0);
     EXPECT_EQ(manifestParser.GetWindowConfig().designWidth, DEFAULT_DESIGN_WIDTH);
-    
+
     /**
      * @tc.steps: step3. Parse the manifest that lacks some information.
      * @tc.expected: step3. Get the information as expected.
@@ -163,10 +162,10 @@ HWTEST_F(ManifestParserTest, ManifestParserTest001, TestSize.Level1)
 }
 
 /**
-* @tc.name: ManifestParserTest002
-* @tc.desc: Parse the manifest with correct format
-* @tc.type: FUNC
-*/
+ * @tc.name: ManifestParserTest002
+ * @tc.desc: Parse the manifest with correct format
+ * @tc.type: FUNC
+ */
 HWTEST_F(ManifestParserTest, ManifestParserTest002, TestSize.Level1)
 {
     /**
@@ -208,4 +207,4 @@ HWTEST_F(ManifestParserTest, ManifestParserTest002, TestSize.Level1)
     EXPECT_EQ(manifestParser.IsWebFeature(), true);
     EXPECT_EQ(manifestParser.IsUseLiteStyle(), true);
 }
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::Framework

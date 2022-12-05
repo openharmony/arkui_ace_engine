@@ -139,6 +139,9 @@ std::string JsiBaseUtils::GenerateSummaryBody(
 ErrorPos JsiBaseUtils::GetErrorPos(const std::string& rawStack)
 {
     uint32_t lineEnd = rawStack.find("\n") - 1;
+    if (lineEnd < 1) {
+        return std::make_pair(0, 0);
+    }
     if (rawStack[lineEnd - 1] == '?') {
         return std::make_pair(0, 0);
     }
@@ -249,23 +252,24 @@ std::string JsiBaseUtils::TranslateStack(const std::string& stackStr, const std:
     const std::string openBrace = "(";
     std::string ans;
     std::string tempStack = stackStr;
+    // find per line of stack
+    std::vector<std::string> res;
+    ExtractEachInfo(tempStack, res);
+
     std::string runningPageTag = "app_.js";
     auto appFlag = static_cast<int32_t>(tempStack.find(runningPageTag));
     bool isAppPage = appFlag > 0 && appMap;
     if (!isAppPage) {
         std::string tag = std::as_const(pageUrl);
         std::string str = tag;
-        if (tag.find("\\") == std::string::npos) {
-            str = tag.replace(tag.find("/"), 1, "\\");
+        if (res[0].find('/') == std::string::npos) {
+            replace(str.begin(), str.end(), '/', '\\');
         }
         char* ch = strrchr((char*)str.c_str(), '.');
         int index = ch - str.c_str();
         str.insert(index, "_");
         runningPageTag = str;
     }
-    // find per line of stack
-    std::vector<std::string> res;
-    ExtractEachInfo(tempStack, res);
 
     // collect error info first
     for (uint32_t i = 0; i < res.size(); i++) {

@@ -17,8 +17,11 @@
 
 #include "adapter/aosp/entrance/java/jni/jni_environment.h"
 #include "base/log/log.h"
+#include "base/test/mock/mock_asset_manager.h"
+#include "base/test/mock/mock_task_executor.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/keyframe_animation.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #include "core/components/box/box_component.h"
 #include "core/components/page_transition/page_transition_component.h"
 #include "core/components/test/json/json_frontend.h"
@@ -29,16 +32,12 @@
 #include "core/components/transition/transition_component.h"
 #include "core/components/transition/transition_element.h"
 #include "core/components/tween/tween_element.h"
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/fake_task_executor.h"
-#include "core/mock/mock_resource_register.h"
 #include "core/pipeline/pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
-
 Platform::JniEnvironment::JniEnvironment() {}
 
 Platform::JniEnvironment::~JniEnvironment() = default;
@@ -64,7 +63,6 @@ Platform::JniEnvironment& Platform::JniEnvironment::GetInstance()
 }
 
 namespace {
-
 constexpr int32_t NANOSECOND_TO_MILLISECOND = 1000000;
 constexpr int32_t FRAME_TIME_IN_MILLISECOND = 10;
 constexpr int32_t TEST_TRANSITION_WIDTH = 300;
@@ -104,7 +102,6 @@ void CreateColorKeyFrame(TweenOption& transitionOption, Color end)
     colorAnimation->AddKeyframe(keyframe2);
     transitionOption.SetColorAnimation(colorAnimation);
 }
-
 } // namespace
 
 class TransitionPropertyElementTest : public testing::Test {
@@ -340,5 +337,4 @@ HWTEST_F(TransitionPropertyElementTest, TransitionPropertyTest005, TestSize.Leve
     EXPECT_TRUE(box);
     EXPECT_EQ(box->GetColor(), Color::BLACK);
 }
-
 } // namespace OHOS::Ace

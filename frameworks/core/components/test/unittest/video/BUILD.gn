@@ -46,9 +46,9 @@ ohos_unittest("RenderTextureTest") {
   module_out_path = module_output_path
 
   sources = [
+    "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_common.cpp",
-    "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
     "render_texture_test.cpp",
     "texture_test_utils.cpp",
   ]

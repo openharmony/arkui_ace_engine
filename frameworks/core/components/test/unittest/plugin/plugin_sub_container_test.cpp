@@ -14,17 +14,18 @@
  */
 
 #include "gtest/gtest.h"
+
 #include "base/i18n/localization.h"
 #include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/frontend.h"
 #define private public
 #define protected public
-#include "core/components/plugin/plugin_sub_container.h"
 #include "core/components/plugin/plugin_element.h"
+#include "core/components/plugin/plugin_sub_container.h"
 #undef private
 #undef protected
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/mock_resource_register.h"
+#include "base/test/mock/mock_asset_manager.h"
+#include "core/common/test/mock/mock_resource_register.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -275,12 +276,12 @@ HWTEST_F(PluginSubContainerTest, PluginSubContainerUpdatePluginTest002, TestSize
  */
 HWTEST_F(PluginSubContainerTest, PluginSubContainerSetAssetManager001, TestSize.Level1)
 {
- /**
+    /**
      * @tc.steps: step1. Build a PluginSubContainer.
      */
     RefPtr<PluginFrontend> pluginFrontend = Referenced::MakeRefPtr<PluginFrontend>();
     auto pipelineContext = PluginSubContainerTest::GetPipelineContext(pluginFrontend);
-    RefPtr <PluginSubContainer> pluginSubContainer = Referenced::MakeRefPtr<PluginSubContainer>(pipelineContext);
+    RefPtr<PluginSubContainer> pluginSubContainer = Referenced::MakeRefPtr<PluginSubContainer>(pipelineContext);
 
     /**
      * @tc.steps: step2. Set Asset Manager.
@@ -300,7 +301,7 @@ HWTEST_F(PluginSubContainerTest, PluginSubContaineRunPlugin001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. SetLocale.
-    */
+     */
     Localization::GetInstance()->SetLocale("en", "US", "", "", "en-US");
 
     /**
@@ -308,7 +309,7 @@ HWTEST_F(PluginSubContainerTest, PluginSubContaineRunPlugin001, TestSize.Level1)
      */
     RefPtr<PluginFrontend> pluginFrontend = Referenced::MakeRefPtr<PluginFrontend>();
     auto pipelineContext = PluginSubContainerTest::GetPipelineContext(pluginFrontend);
-    RefPtr <PluginSubContainer> pluginSubContainer = Referenced::MakeRefPtr<PluginSubContainer>(pipelineContext);
+    RefPtr<PluginSubContainer> pluginSubContainer = Referenced::MakeRefPtr<PluginSubContainer>(pipelineContext);
     RefPtr<PluginElement> pluginElement = AceType::MakeRefPtr<PluginElement>();
     pluginElement->SetRenderNode(pluginElement->CreateRenderNode());
     pluginElement->pluginSubContainer_ = pluginSubContainer;
@@ -338,7 +339,7 @@ HWTEST_F(PluginSubContainerTest, PluginSubContaineRunPlugin002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. SetLocale.
-    */
+     */
     Localization::GetInstance()->SetLocale("en", "US", "", "", "en-US");
 
     /**
@@ -346,7 +347,7 @@ HWTEST_F(PluginSubContainerTest, PluginSubContaineRunPlugin002, TestSize.Level1)
      */
     RefPtr<PluginFrontend> pluginFrontend = Referenced::MakeRefPtr<PluginFrontend>();
     auto pipelineContext = PluginSubContainerTest::GetPipelineContext(pluginFrontend);
-    RefPtr <PluginSubContainer> pluginSubContainer = Referenced::MakeRefPtr<PluginSubContainer>(pipelineContext);
+    RefPtr<PluginSubContainer> pluginSubContainer = Referenced::MakeRefPtr<PluginSubContainer>(pipelineContext);
 
     /**
      * @tc.steps: step3. Initialize.
@@ -371,7 +372,7 @@ HWTEST_F(PluginSubContainerTest, PluginSubContaineRunPlugin003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. SetLocale.
-    */
+     */
     Localization::GetInstance()->SetLocale("en", "US", "", "", "en-US");
 
     /**
@@ -379,7 +380,7 @@ HWTEST_F(PluginSubContainerTest, PluginSubContaineRunPlugin003, TestSize.Level1)
      */
     RefPtr<PluginFrontend> pluginFrontend = Referenced::MakeRefPtr<PluginFrontend>();
     auto pipelineContext = PluginSubContainerTest::GetPipelineContext(pluginFrontend);
-    RefPtr <PluginSubContainer> pluginSubContainer = Referenced::MakeRefPtr<PluginSubContainer>(pipelineContext);
+    RefPtr<PluginSubContainer> pluginSubContainer = Referenced::MakeRefPtr<PluginSubContainer>(pipelineContext);
     RefPtr<PluginElement> pluginElement = AceType::MakeRefPtr<PluginElement>();
     pluginElement->pluginSubContainer_ = pluginSubContainer;
     pluginSubContainer->SetPluginElement(pluginElement);

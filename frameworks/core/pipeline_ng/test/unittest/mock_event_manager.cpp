@@ -14,18 +14,21 @@
  */
 
 #include "core/common/event_manager.h"
+#include "core/pipeline_ng/test/unittest/common_constants.h"
 
 namespace OHOS::Ace {
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
-    const TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend) {}
+    const TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
+{}
 
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
-    const TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend) {}
+    const TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
+{}
 
 void EventManager::TouchTest(
     const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict)
 {
-    SetInstanceId(GetInstanceId() + static_cast<int32_t>(event.x));
+    SetInstanceId(instanceId_ | TOUCH_TEST_FLAG);
 }
 
 void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<TextOverlayManager>& textOverlayManager)
@@ -34,23 +37,22 @@ void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<
 void EventManager::HandleOutOfRectCallback(const Point& point, std::vector<RectCallback>& rectCallbackList) {}
 
 void EventManager::TouchTest(
-    const AxisEvent& event, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict) {}
+    const AxisEvent& event, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict)
+{}
 
 void EventManager::FlushTouchEventsBegin(const std::list<TouchEvent>& touchEvents) {}
 
-void EventManager::FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents)
-{
-}
+void EventManager::FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents) {}
 
 bool EventManager::DispatchTouchEvent(const TouchEvent& point)
 {
-    SetInstanceId(GetInstanceId() + static_cast<int32_t>(point.x));
+    SetInstanceId(instanceId_ | DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG);
     return true;
 }
 
 bool EventManager::DispatchTouchEvent(const AxisEvent& event)
 {
-    SetInstanceId(GetInstanceId() + static_cast<int32_t>(event.x));
+    SetInstanceId(instanceId_ | DISPATCH_TOUCH_EVENT_AXIS_EVENT_FLAG);
     return true;
 }
 
@@ -92,23 +94,23 @@ bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
 
 void EventManager::MouseTest(const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode)
 {
-    SetInstanceId(GetInstanceId() + static_cast<int32_t>(event.x));
+    SetInstanceId(instanceId_ | MOUSE_TEST_FLAG);
 }
 
 bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
 {
-    SetInstanceId(GetInstanceId() + static_cast<int32_t>(event.x));
+    SetInstanceId(instanceId_ | DISPATCH_MOUSE_EVENT_NG_FLAG);
     return true;
 }
 
 void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event)
 {
-    SetInstanceId(GetInstanceId() + static_cast<int32_t>(event.x));
+    SetInstanceId(instanceId_ | DISPATCH_MOUSE_HOVER_ANIMATION_NG_FLAG);
 }
 
 bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
 {
-    SetInstanceId(GetInstanceId() + static_cast<int32_t>(event.x));
+    SetInstanceId(instanceId_ | DISPATCH_MOUSE_HOVER_EVENT_NG_FLAG);
     return true;
 }
 
@@ -116,18 +118,18 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<RenderNode>& re
 
 bool EventManager::DispatchAxisEvent(const AxisEvent& event)
 {
-    SetInstanceId(GetInstanceId() + static_cast<int32_t>(event.x));
+    SetInstanceId(instanceId_ | DISPATCH_AXIS_EVENT_FLAG);
     return true;
 }
 
 void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode)
 {
-    SetInstanceId(GetInstanceId() + static_cast<int32_t>(event.x));
+    SetInstanceId(instanceId_ | AXIS_TEST_FLAG);
 }
 
 bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
 {
-    SetInstanceId(GetInstanceId() + static_cast<int32_t>(event.x));
+    SetInstanceId(instanceId_ | DISPATCH_AXIS_EVENT_NG_FLAG);
     return true;
 }
 

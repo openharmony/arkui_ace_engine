@@ -341,15 +341,14 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         jsBuilderFunction_->Execute();
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         CHECK_NULL_VOID(customNode);
+        customNode->Build();
 
         dialogProperties_.onStatusChanged = [this](bool isShown) {
             if (!isShown) {
                 this->isShown_ = isShown;
             }
         };
-        auto dialog = overlayManager->ShowDialog(dialogProperties_, customNode, false);
-        CHECK_NULL_VOID(dialog);
-        dialogId_ = dialog->GetId();
+        dialog_ = overlayManager->ShowDialog(dialogProperties_, customNode, false);
         return;
     }
 
@@ -385,6 +384,11 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
     LOGI("JSCustomDialogController(JsCloseDialog)");
 
     if (Container::IsCurrentUseNewPipeline()) {
+        auto dialog = dialog_.Upgrade();
+        if (!dialog) {
+            LOGW("dialog is null");
+            return;
+        }
         auto container = Container::Current();
         auto currentId = Container::CurrentId();
         CHECK_NULL_VOID(container);
@@ -399,7 +403,7 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
         CHECK_NULL_VOID(context);
         auto overlayManager = context->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
-        overlayManager->CloseDialog(dialogId_);
+        overlayManager->CloseDialog(dialog);
         return;
     }
 

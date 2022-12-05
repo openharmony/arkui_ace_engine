@@ -267,7 +267,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
         }
         LOGD("LayoutForward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
-    } while (LessNotEqual(currentEndPos, endMainPos_));
+    } while (LessNotEqual(currentEndPos, endMainPos_ + paddingAfterContent_));
 
     if (overScrollFeature_) {
         LOGD("during over scroll, just return in LayoutForward");
@@ -308,7 +308,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
 
     // Mark inactive in wrapper.
     for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {
-        if (GreatOrEqual(pos->second.endPos, startMainPos_)) {
+        if (GreatOrEqual(pos->second.endPos, startMainPos_ - paddingBeforeContent_)) {
             break;
         }
         LOGI("recycle item:%{public}d", pos->first);
@@ -335,7 +335,7 @@ void ListLayoutAlgorithm::LayoutBackward(
         }
         LOGD("LayoutBackward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
-    } while (GreatNotEqual(currentStartPos, startMainPos_));
+    } while (GreatNotEqual(currentStartPos, startMainPos_ - paddingBeforeContent_));
 
     if (overScrollFeature_) {
         LOGD("during over scroll, just return in LayoutBackward");
@@ -361,7 +361,7 @@ void ListLayoutAlgorithm::LayoutBackward(
     // Mark inactive in wrapper.
     std::list<int32_t> removeIndexes;
     for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
-        if (LessOrEqual(pos->second.startPos, endMainPos_)) {
+        if (LessOrEqual(pos->second.startPos, endMainPos_ + paddingAfterContent_)) {
             break;
         }
         layoutWrapper->RemoveChildInRenderTree(pos->first);
