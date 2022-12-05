@@ -18,7 +18,6 @@
 #include "base/log/log.h"
 #include "core/components/common/layout/grid_system_manager.h"
 
-
 namespace OHOS::Ace {
 
 /* set offset by grid column number */

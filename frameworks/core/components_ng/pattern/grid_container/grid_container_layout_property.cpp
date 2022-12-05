@@ -24,7 +24,7 @@ void GridContainerLayoutProperty::RegistGridChild(const RefPtr<FrameNode>& child
     childrenFramenode_.emplace_back(child);
 }
 
-void GridContainerLayoutProperty::OnContainerInfoUpdate(const GridContainerInfo& info)
+void GridContainerLayoutProperty::OnContainerInfoUpdate(const GridContainerInfo& /* info */)
 {
     LOGD("GridContainer layout info update.");
     auto p = childrenFramenode_.begin();
