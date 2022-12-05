@@ -60,11 +60,9 @@ public:
         return MakeRefPtr<ButtonAccessibilityProperty>();
     }
 
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyle::OUTER_BORDER };
+        return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
     }
 
     void SetClickedColor(const Color& color)
@@ -80,6 +78,8 @@ protected:
 private:
     void OnTouchDown();
     void OnTouchUp();
+    void InitButtonLabel();
+    static void SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, const RefPtr<PipelineBase>& pipeline);
     Color clickedColor_;
     Color backgroundColor_;
     bool isSetClickedColor_ = false;

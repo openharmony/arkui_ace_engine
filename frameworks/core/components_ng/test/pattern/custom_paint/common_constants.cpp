@@ -16,7 +16,6 @@
 #include "core/components_ng/test/pattern/custom_paint/common_constants.h"
 
 namespace OHOS::Ace::NG {
-
 const float IDEAL_WIDTH = 300.0f;
 const float IDEAL_HEIGHT = 300.0f;
 const SizeF IDEAL_SIZE(IDEAL_WIDTH, IDEAL_HEIGHT);
@@ -33,6 +32,11 @@ const int32_t CANVAS_WIDTH = 300;
 const int32_t CANVAS_HEIGHT = 300;
 const int32_t DEFAULT_INSTANCE_ID = 0;
 
+const double DEFAULT_DOUBLE0 = 0.0;
+const double DEFAULT_DOUBLE1 = 1.0;
+const double DEFAULT_DOUBLE2 = 2.0;
+const double DEFAULT_DOUBLE10 = 10.0;
+
 const std::string URL_PREFIX = "data:";
 const std::string IMAGE_PNG = "image/png";
 const std::string IMAGE_JPEG = "image/jpeg";
@@ -42,16 +46,25 @@ const std::string NULL_STR;
 const std::string DEFAULT_STR = "default";
 const std::string IMAGE_SRC = "common/images/test.png";
 const std::string REPETITION_STR = "repetition";
+
 const std::vector<std::string> CANDIDATE_STRINGS = {
     "aaaaaaaaaaaa",
     "bbbbbb",
     "abcdefg"
 };
 
-const double DEFAULT_DOUBLE0 = 0.0;
-const double DEFAULT_DOUBLE1 = 1.0;
-const double DEFAULT_DOUBLE2 = 2.0;
-const double DEFAULT_DOUBLE10 = 10.0;
+const std::vector<std::string> FUNCTION_NAMES = {
+    "grayscale",
+    "sepia",
+    "invert",
+    "opacity",
+    "brightness",
+    "contrast",
+    "blur",
+    "drop-shadow",
+    "saturate",
+    "hue-rotate"
+};
 
 const std::vector<double> CANDIDATE_DOUBLES = { 0.0, 1.0, 10.0, 100.0, 1000.0 };
 
@@ -168,5 +181,4 @@ const std::vector<SkPath::FillType> CANDIDATE_SKPATH_FILL_TYPES = {
     SkPath::FillType::kWinding_FillType,
     SkPath::FillType::kEvenOdd_FillType
 };
-
 } // namespace OHOS::Ace::NG

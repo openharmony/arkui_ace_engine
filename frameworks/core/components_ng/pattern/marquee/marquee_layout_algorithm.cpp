@@ -48,7 +48,7 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         // Use idea size first if it is valid.
         frameSize.UpdateSizeWithCheck(layoutConstraint->selfIdealSize);
         if (frameSize.IsValid()) {
-            childFrameSize = lastChildFrame;
+            childFrameSize = child->GetGeometryNode()->GetMarginFrameSize();
             break;
         }
 

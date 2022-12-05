@@ -42,9 +42,7 @@ namespace {
 void BuildTitle(
     const RefPtr<NavDestinationGroupNode>& navDestinationNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
-    if (!navDestinationNode->GetTitle()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(navDestinationNode->GetTitle());
     if (navDestinationNode->GetTitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
         return;
     }
@@ -58,9 +56,7 @@ void BuildTitle(
 void BuildSubtitle(
     const RefPtr<NavDestinationGroupNode>& navDestinationNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
-    if (!navDestinationNode->GetSubtitle()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(navDestinationNode->GetSubtitle());
     if (navDestinationNode->GetSubtitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
         return;
     }

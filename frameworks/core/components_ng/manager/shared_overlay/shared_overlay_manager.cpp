@@ -89,6 +89,12 @@ void SharedOverlayManager::StartSharedTransition(const RefPtr<FrameNode>& pageSr
         AceType::RawPtr(pageDest));
     CHECK_NULL_VOID(pageSrc);
     CHECK_NULL_VOID(pageDest);
+    auto patternSrc = pageSrc->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(patternSrc);
+    auto patternDest = pageDest->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(patternDest);
+    patternSrc->BuildSharedTransitionMap();
+    patternDest->BuildSharedTransitionMap();
     PrepareSharedTransition(pageSrc, pageDest);
     auto pipeline = PipelineBase::GetCurrentContext();
     for (const auto& effect : effects_) {
@@ -97,7 +103,7 @@ void SharedOverlayManager::StartSharedTransition(const RefPtr<FrameNode>& pageSr
             LOGI("effect start, shareId = %{public}s, id = %{public}d", effect->GetShareId().c_str(),
                 effect->GetController()->GetId());
             controller->SetFillMode(FillMode::FORWARDS);
-            controller->SetAllowRunningAsynchronously(false);
+            controller->SetAllowRunningAsynchronously(true);
             controller->AttachScheduler(pipeline);
             controller->Forward();
         }
@@ -232,9 +238,11 @@ void SharedOverlayManager::PassengerAboard(
 {
     auto ticket = passenger->GetOffsetRelativeToWindow();
     auto initialPosition = passenger->GetRenderContext()->GetPosition();
+    auto initialFrameOffset = passenger->GetGeometryNode()->GetFrameOffset();
     auto zIndex = passenger->GetRenderContext()->GetZIndex();
     effect->SetPassengerInitZIndex(zIndex);
     effect->SetPassengerInitPos(initialPosition);
+    effect->SetPassengerInitFrameOffset(initialFrameOffset);
     auto passengerHolder = CreateBlankFrameNode(passenger);
     passengerHolder->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
     ReplaceFrameNode(passenger, passengerHolder);
@@ -245,6 +253,7 @@ void SharedOverlayManager::PassengerAboard(
         offset.GetY().ToString().c_str(), effect->GetShareId().c_str());
     passenger->GetRenderContext()->UpdateZIndex(effect->GetZIndex());
     passenger->GetRenderContext()->UpdatePosition(offset);
+    passenger->GetRenderContext()->OnModifyDone();
 }
 
 bool SharedOverlayManager::AboardShuttle(const RefPtr<SharedTransitionEffect>& effect)
@@ -289,13 +298,19 @@ void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& e
             passenger->GetRenderContext()->UpdatePosition(effect->GetPassengerInitPos().value());
         } else {
             passenger->GetRenderContext()->ResetPositionProperty();
+            passenger->GetRenderContext()->OnPositionUpdate(OffsetT<Dimension>());
         }
         if (effect->GetPassengerInitZIndex().has_value()) {
             passenger->GetRenderContext()->UpdateZIndex(effect->GetPassengerInitZIndex().value());
         } else {
             passenger->GetRenderContext()->ResetZIndex();
+            passenger->GetRenderContext()->OnZIndexUpdate(0);
         }
+        passenger->GetGeometryNode()->SetFrameOffset(effect->GetPassengerInitFrameOffset());
         ReplaceFrameNode(passengerHolder, passenger);
+        // The callback is to restore the parameters used by passenger in the animation
+        effect->PerformFinishCallback();
+        passenger->GetRenderContext()->OnModifyDone();
     }
     if (effect->GetType() == SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE) {
         // restore the visibility of dest frameNode
@@ -303,7 +318,6 @@ void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& e
         auto destVisible = exchangeEffect->GetInitialDestVisible();
         exchangeEffect->SetVisibleToDest(destVisible);
     }
-    effect->PerformFinishCallback();
     auto iter = std::find(effects_.begin(), effects_.end(), effect);
     if (iter != effects_.end()) {
         effects_.erase(iter);

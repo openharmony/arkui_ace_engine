@@ -22,7 +22,9 @@
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
+const std::u16string ELLIPSIS = u"\u2026";
+}
 RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
 {
     auto txtFontCollection = DynamicCast<TxtFontCollection>(fontCollection);
@@ -43,6 +45,9 @@ void TxtParagraph::CreateBuilder()
     style.text_align = Constants::ConvertTxtTextAlign(paraStyle_.align);
     style.max_lines = paraStyle_.maxLines;
     style.locale = paraStyle_.fontLocale;
+    if (paraStyle_.textOverflow == TextOverflow::ELLIPSIS) {
+        style.ellipsis = ELLIPSIS;
+    }
 #ifndef NG_BUILD
     // keep WordBreak define same with WordBreakType in minikin
     style.word_break_type = static_cast<minikin::WordBreakType>(paraStyle_.wordBreak);
@@ -77,9 +82,8 @@ void TxtParagraph::AddText(const std::u16string& text)
 
 void TxtParagraph::Build()
 {
-    if (builder_) {
-        paragraph_ = builder_->Build();
-    }
+    CHECK_NULL_VOID_NOLOG(builder_);
+    paragraph_ = builder_->Build();
 }
 
 void TxtParagraph::Reset()
@@ -147,12 +151,10 @@ size_t TxtParagraph::GetLineCount()
     return paragraphTxt->GetLineCount();
 }
 
-void TxtParagraph::Paint(const RefPtr<Canvas>& canvas, float x, float y)
+void TxtParagraph::Paint(const RSCanvas& canvas, float x, float y)
 {
     CHECK_NULL_VOID(paragraph_);
-    auto skiaCanvas = AceType::DynamicCast<SkiaCanvas>(canvas);
-    CHECK_NULL_VOID(skiaCanvas);
-    auto* skCanvas = skiaCanvas->RawCanvas();
+    SkCanvas* skCanvas = canvas.GetImpl<RSSkCanvas>()->ExportSkCanvas();
     CHECK_NULL_VOID(skCanvas);
     paragraph_->Paint(skCanvas, x, y);
 }

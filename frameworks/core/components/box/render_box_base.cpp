@@ -537,6 +537,16 @@ void RenderBoxBase::SetChildLayoutParam()
     }
 }
 
+bool RenderBoxBase::IsDeclarativePara()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return false;
+    }
+
+    return context->GetIsDeclarative();
+}
+
 void RenderBoxBase::ConvertPaddingForLayoutInBox()
 {
     if (!layoutInBox_) {
@@ -614,6 +624,11 @@ void RenderBoxBase::CalculateSelfLayoutSize()
         }
     } else {
         height = childSize_.Height() + padding_.GetLayoutSize().Height() + borderSize.Height();
+        if (IsDeclarativePara()) {
+            if (height < selfMinHeight_) {
+                height = selfMinHeight_;
+            }
+        }
     }
 
     const static int32_t PLATFORM_VERSION_SIX = 6;

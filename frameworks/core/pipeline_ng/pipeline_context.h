@@ -101,7 +101,10 @@ public:
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
 
-    void SetBuildAfterCallback(const std::function<void()>& callback) override {}
+    void SetBuildAfterCallback(const std::function<void()>& callback) override
+    {
+        buildFinishCallbacks_.emplace_back(callback);
+    }
 
     void SaveExplicitAnimationOption(const AnimationOption& option) override {}
 
@@ -113,6 +116,16 @@ public:
     {
         return {};
     }
+
+    void AddOnAreaChangeNode(int32_t nodeId);
+
+    void RemoveOnAreaChangeNode(int32_t nodeId);
+
+    void HandleOnAreaChangeEvent();
+
+    void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback);
+
+    void HandleVisibleAreaChangeEvent();
 
     void Destroy() override;
 
@@ -131,14 +144,7 @@ public:
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
 
     void OnSurfaceChanged(
-        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override
-    {
-        auto frontend = weakFrontend_.Upgrade();
-        if (frontend) {
-            frontend->OnSurfaceChanged(width, height);
-        }
-        SetRootSize(density_, width, height);
-    }
+        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override;
 
     void OnSurfacePositionChanged(int32_t posX, int32_t posY) override {}
 
@@ -156,6 +162,8 @@ public:
     }
 
     bool OnBackPressed();
+
+    RefPtr<FrameNode> GetNavDestinationBackButtonNode();
 
     void AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode);
 
@@ -218,10 +226,17 @@ public:
         isNeedShowFocus_ = isNeedShowFocus;
     }
 
+    bool GetOnShow() const
+    {
+        return onShow_;
+    }
+
     bool RequestDefaultFocus();
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
+
+    void SetContainerWindow(bool isShow) override;
 
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);
@@ -234,8 +249,16 @@ public:
     }
     // end pipeline, exit app
     void Finish(bool autoFinish) const override;
+    RectF GetRootRect()
+    {
+        return rootNode_->GetGeometryNode()->GetFrameRect();
+    }
+
+    void FlushReload() override;
 
 protected:
+    void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type);
+
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushFocus();
@@ -286,6 +309,9 @@ private:
     std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_;
+
+    std::unordered_set<int32_t> onAreaChangeNodeIds_;
+    std::unordered_map<int32_t, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
 
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;

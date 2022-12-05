@@ -302,6 +302,11 @@ int32_t SwiperComponent::GetCachedSize() const
 
 void SwiperComponent::SetCachedSize(int32_t cachedSize)
 {
+    // cachedCount is only useful in lazy loading scenario.
+    if (cachedSize <= 0) {
+        LOGE("cachedCount must be a positive integer");
+        return;
+    }
     declaration_->SetCachedSize(cachedSize);
 }
 

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#define private public
 #include "gtest/gtest.h"
 
 #include "base/memory/ace_type.h"
@@ -192,6 +192,9 @@ HWTEST_F(AbilityComponentPatternTestNg, AbilityComponentTest004, TestSize.Level1
      */
     RefPtr<AbilityComponentPattern> pattern = frameNode->GetPattern<AbilityComponentPattern>();
     EXPECT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    pattern->OnActive();
+    pattern->OnInActive();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());

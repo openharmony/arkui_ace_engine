@@ -227,7 +227,7 @@ protected:
 
     virtual void OnFocus()
     {
-        LOGI("FocusNode::OnFocus: Node(%{public}s) on focus", AceType::TypeName(this));
+        LOGD("FocusNode::OnFocus: Node(%{public}s) on focus", AceType::TypeName(this));
         if (onFocusCallback_) {
             onFocusCallback_();
         }
@@ -237,7 +237,7 @@ protected:
     }
     virtual void OnBlur()
     {
-        LOGI("FocusNode::OnBlur: Node(%{public}s) on blur", AceType::TypeName(this));
+        LOGD("FocusNode::OnBlur: Node(%{public}s) on blur", AceType::TypeName(this));
         OnBlur(blurReason_);
         if (onBlurCallback_) {
             onBlurCallback_();
@@ -248,7 +248,7 @@ protected:
     }
     virtual void OnBlur(BlurReason reason)
     {
-        LOGI("FocusNode: (%{public}s) 's blur reason is %{public}d", AceType::TypeName(this), reason);
+        LOGD("FocusNode: (%{public}s) 's blur reason is %{public}d", AceType::TypeName(this), reason);
     }
     virtual void OnFocusMove(KeyCode keyCode)
     {

@@ -283,6 +283,8 @@ void RenderLoadingProgress::SetLoadingMode(int32_t mode)
         return;
     }
     if (ringController_ && cometController_) {
+        ringController_->Stop();
+        cometController_->Stop();
         ringController_->ClearStopListeners();
         cometController_->ClearStopListeners();
         ringController_->Finish();

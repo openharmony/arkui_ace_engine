@@ -21,9 +21,9 @@
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT ProgressLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ProgressLayoutProperty, LayoutProperty);
 
@@ -52,7 +52,7 @@ public:
     {
         LayoutProperty::ToJsonValue(json);
 
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto progressTheme = pipeline->GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(progressTheme);

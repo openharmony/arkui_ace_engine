@@ -433,7 +433,7 @@ shared_ptr<JsValue> JsiAnimatorBridgeUtils::JsAnimatorReset(shared_ptr<JsRuntime
     shared_ptr<JsValue> paramObj = argv[0]->GetElement(runtime, 0);
     if (!paramObj || !paramObj->IsObject(runtime)) {
         LOGE("JsAnimatorUpdate failed, first argument is not an object!");
-        runtime->ThrowError("Parameter error. The type of the parameter 1 is not object.", ERROR_CODE_PARAM_INVALID);
+        runtime->ThrowError("Parameter error. The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
         return runtime->NewUndefined();
     }
     int32_t len = 0;

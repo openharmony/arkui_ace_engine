@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -36,7 +37,7 @@ struct TestProperty {
 };
 namespace {
 const bool VERTICAL_TRUE = true;
-const bool VERTICAL_FALSE = true;
+const bool VERTICAL_FALSE = false;
 const Color DIVIDER_COLOR = Color(0xff000000);
 const Dimension STROKE_WIDTH = Dimension(1.0);
 const Ace::LineCap LINE_CAP = Ace::LineCap::BUTT;
@@ -49,11 +50,25 @@ DirtySwapConfig config;
 class DividerPatternTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
-    static void TearDownTestCase() {}
+    static void TearDownTestCase();
 
 protected:
     static RefPtr<FrameNode> CreateDividerNode(TestProperty& testProperty);
 };
+
+void DividerPatternTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+    testProperty.vertical = VERTICAL_TRUE;
+    testProperty.dividerColor = DIVIDER_COLOR;
+    testProperty.strokeWidth = STROKE_WIDTH;
+    testProperty.lineCap = LINE_CAP;
+}
+
+void DividerPatternTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 RefPtr<FrameNode> DividerPatternTestNg::CreateDividerNode(TestProperty& testProperty)
 {
@@ -75,20 +90,12 @@ RefPtr<FrameNode> DividerPatternTestNg::CreateDividerNode(TestProperty& testProp
     return AceType::DynamicCast<FrameNode>(element);
 }
 
-void DividerPatternTestNg::SetUpTestCase()
-{
-    testProperty.vertical = VERTICAL_TRUE;
-    testProperty.dividerColor = DIVIDER_COLOR;
-    testProperty.strokeWidth = STROKE_WIDTH;
-    testProperty.lineCap = LINE_CAP;
-}
-
 /**
  * @tc.name: DividerFrameNodeCreator001
  * @tc.desc: Test all the property of divider.
  * @tc.type: FUNC
  */
-HWTEST_F(DividerPatternTestNg, DividerFrameNodeCreator001, TestSize.Level1)
+HWTEST_F(DividerPatternTestNg, DividerPatternTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode
@@ -115,7 +122,7 @@ HWTEST_F(DividerPatternTestNg, DividerFrameNodeCreator001, TestSize.Level1)
  * @tc.desc: Test all the layoutAlgorithm of divider
  * @tc.type: FUNC
  */
-HWTEST_F(DividerPatternTestNg, DividerFrameNodeCreator002, TestSize.Level1)
+HWTEST_F(DividerPatternTestNg, DividerPatternTest002, TestSize.Level1)
 {
     bool vertical[2] = { VERTICAL_TRUE, VERTICAL_FALSE };
     testProperty.strokeWidth = STROKE_WIDTH;
@@ -124,9 +131,10 @@ HWTEST_F(DividerPatternTestNg, DividerFrameNodeCreator002, TestSize.Level1)
     layoutConstraintF.maxSize = MAX_SIZE;
     RefPtr<DividerLayoutAlgorithm> dividerLayoutAlgorithm = AceType::MakeRefPtr<DividerLayoutAlgorithm>();
     /**
-    * @tc.steps: step1. layout algorithm measureContent method about vertical
-    * @tc.expected: step1. vertical is false or true, the constrainSize is (1.0, 100.0)
-    */
+     * @tc.steps: step1. layout algorithm measureContent method about vertical
+     * @tc.expected: step1. vertical is false or true, the constrainSize is (1.0, 100.0)
+     */
+    SizeF sizes[2] = {{1.0f, 100.0f}, {100.f, 1.0f}};
     for (int32_t i = 0; i < 2; ++i) {
         testProperty.vertical = vertical[i];
         RefPtr<FrameNode> frameNode = CreateDividerNode(testProperty);
@@ -137,12 +145,12 @@ HWTEST_F(DividerPatternTestNg, DividerFrameNodeCreator002, TestSize.Level1)
         EXPECT_NE(layoutProperty, nullptr);
         LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
         auto constrainSize = dividerLayoutAlgorithm->MeasureContent(layoutConstraintF, &layoutWrapper);
-        EXPECT_EQ(constrainSize.value(), SizeF(1.0f, 100.0f));
+        EXPECT_EQ(constrainSize.value(), sizes[i]);
     }
     /**
-    * @tc.steps: step2. layout algorithm test
-    * @tc.expected: step2. constrainStrokeWidth is 1.0f, dividerLength is 100.0f, and vertical is false
-    */
+     * @tc.steps: step2. layout algorithm test
+     * @tc.expected: step2. constrainStrokeWidth is 1.0f, dividerLength is 100.0f, and vertical is false
+     */
     EXPECT_EQ(dividerLayoutAlgorithm->GetConstrainStrokeWidth(), 1.0f);
     EXPECT_EQ(dividerLayoutAlgorithm->GetDividerLength(), 100.0f);
     EXPECT_EQ(dividerLayoutAlgorithm->GetVertical(), VERTICAL_FALSE);
@@ -153,7 +161,7 @@ HWTEST_F(DividerPatternTestNg, DividerFrameNodeCreator002, TestSize.Level1)
  * @tc.desc: Test all the pattern of divider
  * @tc.type: FUNC
  */
-HWTEST_F(DividerPatternTestNg, DividerFrameNodeCreator003, TestSize.Level1)
+HWTEST_F(DividerPatternTestNg, DividerPatternTest003, TestSize.Level1)
 {
     RefPtr<DividerLayoutAlgorithm> dividerLayoutAlgorithm = AceType::MakeRefPtr<DividerLayoutAlgorithm>();
     RefPtr<FrameNode> frameNode = CreateDividerNode(testProperty);
@@ -165,20 +173,25 @@ HWTEST_F(DividerPatternTestNg, DividerFrameNodeCreator003, TestSize.Level1)
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
     EXPECT_NE(layoutWrapper, nullptr);
     bool skipMeasures[2] = { false, true };
+    bool isSwaps[4] = {true, false, false, false};
     /**
-    * @tc.steps: step1. OnDirtyLayoutWrapperSwap test
-    * @tc.expected: step1. adjust skipMeasure and config, OnDirtyLayoutWrapperSwap return true, false
-    */
-    for (int32_t i = 0; i < 2; ++i) {
+     * @tc.steps: step1. OnDirtyLayoutWrapperSwap test
+     * @tc.expected: step1. adjust skipMeasure and config, OnDirtyLayoutWrapperSwap return true, false
+     */
+    int k = 0;
+    for (int i = 0; i < 2; ++i) {
         config.skipMeasure = skipMeasures[i];
-        auto layoutAlgorithmWrapper =
-            AceType::MakeRefPtr<LayoutAlgorithmWrapper>(dividerLayoutAlgorithm, skipMeasures[i]);
-        layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
-        layoutWrapper->skipMeasureContent_ = skipMeasures[i];
-        auto pattern = frameNode->GetPattern<DividerPattern>();
-        EXPECT_NE(pattern, nullptr);
-        auto isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-        EXPECT_EQ(isSwap, !skipMeasures[i]);
+        for (int j = 0; j < 2; ++j) {
+            auto layoutAlgorithmWrapper =
+                AceType::MakeRefPtr<LayoutAlgorithmWrapper>(dividerLayoutAlgorithm, skipMeasures[j]);
+            layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+            layoutWrapper->skipMeasureContent_ = skipMeasures[j];
+            auto pattern = frameNode->GetPattern<DividerPattern>();
+            EXPECT_NE(pattern, nullptr);
+            auto isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+            EXPECT_EQ(isSwap, isSwaps[k]);
+            k++;
+        }
     }
 }
 } // namespace OHOS::Ace::NG

@@ -34,6 +34,7 @@
 
 namespace OHOS::Ace::NG {
 
+constexpr Dimension WINDOW_WIDTH = 520.0_vp;
 constexpr Dimension DEFAULT_NAV_BAR_WIDTH = 200.0_vp;
 
 namespace {
@@ -160,9 +161,7 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
 void FitScrollFullWindow(SizeF& frameSize)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
-    if (!pipeline) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(pipeline);
     if (frameSize.Width() == Infinity<float>()) {
         frameSize.SetWidth(pipeline->GetRootWidth());
     }
@@ -186,10 +185,22 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     FitScrollFullWindow(size);
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
+
+    navigationMode_ = navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO);
+    if (navigationLayoutProperty->GetNavigationModeValue(navigationMode_) == NavigationMode::AUTO) {
+        if (size.Width() >= static_cast<float>(WINDOW_WIDTH.ConvertToPx())) {
+            navigationMode_ = NavigationMode::SPLIT;
+            navigationLayoutProperty->UpdateNavigationMode(navigationMode_);
+        } else {
+            navigationMode_ = NavigationMode::STACK;
+            navigationLayoutProperty->UpdateNavigationMode(navigationMode_);
+        }
+    }
+
     auto navBarSize = size;
     auto contentSize = size;
     auto dividerSize = SizeF(0.0f, 0.0f);
-    if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT) {
+    if (navigationLayoutProperty->GetNavigationModeValue(navigationMode_) == NavigationMode::SPLIT) {
         float navBarWidth = 0.0f;
         float contentWidth = 0.0f;
         float dividerWidth = 0.0f;

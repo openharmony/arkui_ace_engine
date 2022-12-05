@@ -22,6 +22,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/memory/referenced.h"
+#include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/source_map.h"
 #include "bridge/common/utils/utils.h"
@@ -562,6 +563,8 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, c
     LOGI("PageRouterManager LoadPage[%{public}d]: %{public}s.", pageId, target.url.c_str());
     auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(pageId, target.url, target.path, params);
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(entryPageInfo);
+    std::unordered_map<std::string, std::string> reportData { { "pageUrl", target.url } };
+    ResSchedReportScope reportScope("push_page", reportData);
     auto pageNode =
         FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
     pageNode->SetHostPageId(pageId);

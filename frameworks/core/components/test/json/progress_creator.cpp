@@ -18,7 +18,7 @@
 #include "base/log/log.h"
 #include "core/components/progress/progress_component.h"
 #include "core/components/progress/progress_theme.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
@@ -63,7 +63,7 @@ RefPtr<Component> ProgressCreator::CreateFromJson(const JsonValue& componentJson
         type = static_cast<ProgressType>(progressTypeJson->GetInt());
     }
     auto progressComponent = AceType::MakeRefPtr<ProgressComponent>(min, value, cachedValue, max, type);
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     auto theme = themeManager->GetTheme<ProgressTheme>();
     if (theme) {
         progressComponent->InitStyle(theme);

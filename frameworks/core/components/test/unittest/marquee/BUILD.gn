@@ -89,10 +89,10 @@ ohos_unittest("RenderMarqueeTest") {
     "$ace_root/frameworks/core/common/focus_animation_manager.cpp",
     "$ace_root/frameworks/core/common/font_loader.cpp",
     "$ace_root/frameworks/core/common/font_manager.cpp",
+    "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/common/thread_checker.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
     "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
-    "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_context.cpp",
 
     # components
@@ -195,21 +195,21 @@ ohos_unittest("RenderMarqueeTest") {
     "$ace_root/frameworks/core/pipeline/base/render_node.cpp",
 
     # theme
+    "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/components/theme/app_theme.cpp",
     "$ace_root/frameworks/core/components/theme/theme_attributes.cpp",
     "$ace_root/frameworks/core/components/theme/theme_constants.cpp",
-    "$ace_root/frameworks/core/components/theme/theme_manager.cpp",
+    "$ace_root/frameworks/core/components/theme/theme_manager_impl.cpp",
     "$ace_root/frameworks/core/components/theme/theme_utils.cpp",
-    "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
     "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
     "render_marquee_test.cpp",
 
     # mock
+    "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
+    "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
-    "$ace_root/frameworks/core/mock/mock_image_loader.cpp",
-    "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
-    "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
+    "$ace_root/frameworks/core/image/test/mock/mock_image_loader.cpp",
   ]
 
   # add sources only needed by wearable like watch.

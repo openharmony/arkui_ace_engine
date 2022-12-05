@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
 
+#include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/image_provider/adapter/flutter_image_provider.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -58,13 +59,16 @@ RefPtr<CanvasImage> CanvasImage::Create(
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> skImage;
     if (!flutterRenderTaskHolder->ioManager) {
-        skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        skImage =
+            SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     } else {
 #ifndef GPU_DISABLED
         skImage = SkImage::MakeCrossContextFromPixmap(flutterRenderTaskHolder->ioManager->GetResourceContext().get(),
             imagePixmap, true, imagePixmap.colorSpace(), true);
 #else
-        skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        // SkImage needs to hold PixelMap shared_ptr
+        skImage =
+            SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
 #endif
     }
     auto canvasImage = flutter::CanvasImage::Create();
@@ -153,7 +157,8 @@ int32_t SkiaCanvasImage::GetHeight() const
 #endif
 }
 
-void SkiaCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect)
+void SkiaCanvasImage::DrawToRSCanvas(
+    RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const std::array<PointF, 4>& radiusXY)
 {
     auto image = GetCanvasImage();
     RSImage rsImage(&image);
@@ -177,9 +182,24 @@ void SkiaCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, co
     }
     SkPaint paint;
     SkVector radii[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
+    if (radiusXY.size() == 4) {
+        radii[SkRRect::kUpperLeft_Corner].set(
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperLeft_Corner].GetX(), 0.0f)),
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperLeft_Corner].GetY(), 0.0f)));
+        radii[SkRRect::kUpperRight_Corner].set(
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperRight_Corner].GetX(), 0.0f)),
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperRight_Corner].GetY(), 0.0f)));
+        radii[SkRRect::kLowerLeft_Corner].set(
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerRight_Corner].GetX(), 0.0f)),
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerRight_Corner].GetY(), 0.0f)));
+        radii[SkRRect::kLowerRight_Corner].set(
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerLeft_Corner].GetX(), 0.0f)),
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerLeft_Corner].GetY(), 0.0f)));
+    }
+    recordingCanvas->ClipAdaptiveRRect(radii);
     Rosen::RsImageInfo rsImageInfo(
-        (int)(imagePaintConfig_->imageFit_),
-        (int)(imagePaintConfig_->imageRepeat_),
+        (int)(GetPaintConfig().imageFit_),
+        (int)(GetPaintConfig().imageRepeat_),
         radii,
         1.0,
         GetUniqueID(),
@@ -192,5 +212,4 @@ void SkiaCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, co
     canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
 #endif
 }
-
 } // namespace OHOS::Ace::NG

@@ -379,9 +379,7 @@ void RelativeContainerLayoutAlgorithm::CalcHorizontalLayoutParam(AlignDirection 
 {
     auto childWrapper = idNodeMap_[nodeName];
     auto childLayoutProperty = childWrapper->GetLayoutProperty();
-    if (!childLayoutProperty) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(childLayoutProperty);
     const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
     auto parentSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     switch (alignRule.horizontal) {
@@ -414,9 +412,7 @@ void RelativeContainerLayoutAlgorithm::CalcVerticalLayoutParam(AlignDirection al
 {
     auto childWrapper = idNodeMap_[nodeName];
     auto childLayoutProperty = childWrapper->GetLayoutProperty();
-    if (!childLayoutProperty) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(childLayoutProperty);
     const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
     auto parentSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     switch (alignRule.vertical) {

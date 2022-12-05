@@ -20,7 +20,11 @@ ohos_unittest("CardFrontendTest") {
   module_out_path = module_output_path
 
   sources = [
+    "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_common.cpp",
     "../card_test_factory.cpp",
+    "card_frontend_declarative_test.cpp",
+    "card_frontend_delegate_test.cpp",
     "card_frontend_test.cpp",
   ]
 

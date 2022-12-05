@@ -16,11 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_PEN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_PEN_H
 
+#include <memory>
+
 #include "testing_color.h"
-#include "utils/scalar.h"
+#include "testing_filter.h"
+#include "testing_path_effect.h"
+#include "testing_shader_effect.h"
 
 namespace OHOS::Ace::Testing {
-using scalar = Rosen::Drawing::scalar;
 class TestingPen {
 public:
     enum class CapStyle {
@@ -32,10 +35,19 @@ public:
     TestingPen() = default;
     ~TestingPen() = default;
 
-    virtual void SetAntiAlias(bool aa) = 0;
-    virtual void SetWidth(scalar width) = 0;
-    virtual void SetCapStyle(CapStyle cs) = 0;
-    virtual void SetColor(const TestingColor& c) = 0;
+    virtual void SetAntiAlias(bool aa) {}
+    virtual void SetWidth(float width) {}
+    virtual void SetCapStyle(CapStyle cap) {}
+    virtual void SetColor(const TestingColor& color) {}
+    virtual void SetColor(int color) {}
+    virtual void SetFilter(const TestingFilter& filter) {}
+    virtual void SetShaderEffect(std::shared_ptr<TestingShaderEffect> effect) {}
+    virtual void SetPathEffect(std::shared_ptr<TestingPathEffect> effect) {}
+
+    virtual std::shared_ptr<TestingShaderEffect> GetShaderEffect()
+    {
+        return std::make_shared<TestingShaderEffect>();
+    }
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_PEN_H

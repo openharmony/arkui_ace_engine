@@ -111,12 +111,9 @@ if (is_standard_system) {
     deps = []
     sources = []
 
-    # The two dynamic libraries here are used for local testing of the previewer.
+    # The dynamic library here is used for local testing of the previewer.
     if (enable_glfw_window) {
-      deps += [
-        "$ace_root/adapter/preview/entrance/samples:previewer_demo",
-        "$ace_root/adapter/preview/entrance/test:test_bridge",
-      ]
+      deps += [ "$ace_root/adapter/preview/entrance/samples:previewer_demo" ]
     }
 
     # Add some resources

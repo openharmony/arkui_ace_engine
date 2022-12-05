@@ -32,16 +32,15 @@ ohos_unittest("full_screen_manager_test_ng") {
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
 
     # mock
+    "$ace_root/frameworks/core/common/test/mock/mock_container.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_frame_node.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_ui_node.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/layout/mock_box_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/layout/mock_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_container.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_theme_manager.cpp",
 
     # self
     "full_screen_manager_test_ng.cpp",

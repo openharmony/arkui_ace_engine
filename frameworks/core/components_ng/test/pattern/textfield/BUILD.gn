@@ -70,7 +70,182 @@ config("config_textfield_test") {
   ]
 }
 
+ohos_unittest("on_text_changed_listener_impl_test_ng") {
+  module_out_path = "$test_output_path/textfield"
+  platform = "ohos"
+  sources = [
+    "on_text_changed_listener_impl_test_ng.cpp",
+    "textfield_test_ng_utils.cpp",
+  ]
+
+  include_dirs = [
+    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+    "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
+    "//third_party/bounds_checking_function/include",
+    "//base/inputmethod/imf/frameworks/inputmethod_controller/include",
+    "//base/inputmethod/imf/frameworks/inputmethod_ability/include",
+    "//base/inputmethod/imf/services/include",
+    "//commonlibrary/c_utils/base/include",
+  ]
+
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+  ]
+
+  if (enable_ng_build) {
+    deps += [
+      "$ace_flutter_engine_root_new:third_party_flutter_engine_dev_ohos",
+      "$ace_flutter_engine_root_new/third_party/skia:ace_skia_dev_ohos",
+    ]
+  } else {
+    deps += [
+      "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
+      "$ace_flutter_engine_root/skia:ace_skia_ohos",
+    ]
+  }
+
+  if (platform == "ohos") {
+    deps += [
+      "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
+    ]
+  } else {
+    deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
+  }
+
+  configs = [
+    ":config_textfield_test",
+    "$ace_root:ace_config",
+  ]
+}
+
+ohos_unittest("textfield_layout_property_test_ng") {
+  module_out_path = "$test_output_path/textfield"
+  platform = "ohos"
+  include_dirs = [
+    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+    "//third_party/bounds_checking_function/include",
+  ]
+
+  sources = [
+    "textfield_layout_property_test_ng.cpp",
+    "textfield_test_ng_utils.cpp",
+  ]
+
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+  ]
+
+  if (enable_ng_build) {
+    deps += [
+      "$ace_flutter_engine_root_new:third_party_flutter_engine_dev_ohos",
+      "$ace_flutter_engine_root_new/third_party/skia:ace_skia_dev_ohos",
+    ]
+  } else {
+    deps += [
+      "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
+      "$ace_flutter_engine_root/skia:ace_skia_ohos",
+    ]
+  }
+
+  if (platform == "ohos") {
+    deps += [
+      "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
+    ]
+  } else {
+    deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
+  }
+
+  configs = [
+    ":config_textfield_test",
+    "$ace_root:ace_config",
+  ]
+}
+
+ohos_unittest("text_editing_value_test_ng") {
+  module_out_path = "$test_output_path/textfield"
+  include_dirs = []
+
+  sources = [ "text_editing_value_test_ng.cpp" ]
+
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+  ]
+
+  configs = [
+    ":config_textfield_test",
+    "$ace_root:ace_config",
+  ]
+}
+
+ohos_unittest("textfield_model_test_ng") {
+  module_out_path = "$test_output_path/textfield"
+  platform = "ohos"
+  include_dirs = [
+    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+    "//third_party/bounds_checking_function/include",
+  ]
+
+  sources = [
+    "textfield_model_test_ng.cpp",
+    "textfield_test_ng_utils.cpp",
+  ]
+
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+  ]
+
+  if (enable_ng_build) {
+    deps += [
+      "$ace_flutter_engine_root_new:third_party_flutter_engine_dev_ohos",
+      "$ace_flutter_engine_root_new/third_party/skia:ace_skia_dev_ohos",
+    ]
+  } else {
+    deps += [
+      "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
+      "$ace_flutter_engine_root/skia:ace_skia_ohos",
+    ]
+  }
+
+  if (platform == "ohos") {
+    deps += [
+      "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
+    ]
+  } else {
+    deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
+  }
+
+  configs = [
+    ":config_textfield_test",
+    "$ace_root:ace_config",
+  ]
+}
+
 group("textfield_pattern_unit_test") {
   testonly = true
-  deps = [ ":textfield_pattern_test_ng" ]
+  deps = [
+    ":on_text_changed_listener_impl_test_ng",
+    ":text_editing_value_test_ng",
+    ":textfield_layout_property_test_ng",
+    ":textfield_model_test_ng",
+    ":textfield_pattern_test_ng",
+  ]
 }

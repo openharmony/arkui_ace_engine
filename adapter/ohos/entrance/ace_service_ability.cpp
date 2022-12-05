@@ -23,6 +23,7 @@
 #include "adapter/ohos/entrance/platform_event_callback.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/log/log.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/backend.h"
 
@@ -42,9 +43,8 @@ public:
     void OnFinish() const override
     {
         LOGI("ServicePlatformEventCallback OnFinish");
-        if (onFinish_) {
-            onFinish_();
-        }
+        CHECK_NULL_VOID_NOLOG(onFinish_);
+        onFinish_();
     }
 
     void OnStatusBarBgColorChanged(uint32_t color) override
@@ -76,9 +76,7 @@ void AceServiceAbility::OnStart(const OHOS::AAFwk::Want& want)
     // get asset
     auto packagePathStr = GetBundleCodePath();
     auto moduleInfo = GetHapModuleInfo();
-    if (!moduleInfo) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(moduleInfo);
     packagePathStr += "/" + moduleInfo->package + "/";
 
     // init service

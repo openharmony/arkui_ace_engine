@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/measure_util.h"
 #include "flutter_render_custom_paint.h"
 #include "rosen_render_custom_paint.h"
 
@@ -27,6 +28,19 @@ RefPtr<RenderNode> RenderCustomPaint::Create()
 #endif
     } else {
         return AceType::MakeRefPtr<FlutterRenderCustomPaint>();
+    }
+}
+
+double RenderCustomPaint::PaintMeasureText(const MeasureContext& context)
+{
+    if (SystemProperties::GetRosenBackendEnabled()) {
+#ifdef ENABLE_ROSEN_BACKEND
+        return RosenRenderCustomPaint::MeasureTextInner(context);
+#else
+        return 0.0;
+#endif
+    } else {
+        return 0.0;
     }
 }
 } // namespace OHOS::Ace

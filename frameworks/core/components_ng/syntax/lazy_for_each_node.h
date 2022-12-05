@@ -81,6 +81,8 @@ private:
         builder_->UnregisterDataChangeListener(Claim(this));
     }
 
+    void NotifyDataCountChanged(size_t index);
+
     // The index values of the start and end of the current children nodes and the corresponding keys.
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;

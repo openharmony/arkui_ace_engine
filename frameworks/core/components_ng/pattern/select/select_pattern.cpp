@@ -48,13 +48,15 @@ constexpr uint32_t SELECT_ITSELF_TEXT_LINES = 1;
 constexpr Dimension SELECT_BORDER = 20.0_vp;
 const Edge SELECT_PADDING = Edge(8.0, 9.25, 8.0, 9.25, DimensionUnit::VP);
 constexpr Dimension SPINNER_WIDTH = 10.0_vp;
-constexpr Dimension SPINNER_HEIGHT = 7.0_vp;
+constexpr Dimension SPINNER_HEIGHT = 10.0_vp;
+constexpr Dimension SELECT_MENU_PADDING = 4.0_vp;
 
 } // namespace
 
 void SelectPattern::OnModifyDone()
 {
     RegisterOnClick();
+    RegisterOnPress();
     RegisterOnHover();
     CreateSelectedCallback();
 }
@@ -79,6 +81,7 @@ void SelectPattern::RegisterOnClick()
         CHECK_NULL_VOID(select);
         auto offset = selectNode->GetPaintRectOffset();
         offset.AddY(select->GetSelectSize().Height());
+        offset.AddY(SELECT_MENU_PADDING.ConvertToVp());
         overlayManager->ShowMenu(id, offset, menu);
         // menuNode already registered, nullify
         menu.Reset();
@@ -92,18 +95,51 @@ void SelectPattern::RegisterOnClick()
 void SelectPattern::RegisterOnHover()
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inputHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto mouseCallback = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        // update hover status, repaint background color
+        if (isHover) {
+            auto hoverColor = theme->GetHoverColor();
+            renderContext->UpdateBackgroundColor(hoverColor);
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        } else {
+            auto bgColor = theme->GetBackgroundColor();
+            renderContext->UpdateBackgroundColor(bgColor);
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+    };
+    auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseCallback));
+    inputHub->AddOnHoverEvent(mouseEvent);
+}
+
+// change background color when pressed
+void SelectPattern::RegisterOnPress()
+{
+    auto host = GetHost();
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         auto host = pattern->GetHost();
         auto theme = host->GetContext()->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(pattern);
         auto touchType = info.GetTouches().front().GetTouchType();
-        // update hover status, repaint background color
+        // update press status, repaint background color
         if (touchType == TouchType::DOWN) {
-            LOGD("triggers option hover");
+            LOGD("triggers option press");
             auto renderContext = host->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
-            renderContext->UpdateBackgroundColor(theme->GetHoverColor());
+            renderContext->UpdateBackgroundColor(theme->GetClickedColor());
         }
         if (touchType == TouchType::UP) {
             auto renderContext = host->GetRenderContext();
@@ -203,6 +239,10 @@ void SelectPattern::BuildChild()
     auto spinnerLayoutProperty = spinner->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(spinnerLayoutProperty);
     spinnerLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    auto spinnerRenderProperty = spinner->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(spinnerRenderProperty);
+    auto spinnerColor = theme->GetFontColor();
+    spinnerRenderProperty->UpdateSvgFillColor(spinnerColor);
     CalcSize idealSize = { CalcLength(SPINNER_WIDTH), CalcLength(SPINNER_HEIGHT) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
@@ -455,6 +495,15 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
     }
     if (selectedBgColor_.has_value()) {
         newSelected->SetBgColor(selectedBgColor_.value());
+    } else {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
+        auto selectedColor = theme->GetSelectedColor();
+        newSelected->SetBgColor(selectedColor);
     }
 }
 
@@ -467,7 +516,7 @@ void SelectPattern::UpdateText(int32_t index)
     auto newSelected = options_[index]->GetPattern<OptionPattern>();
     CHECK_NULL_VOID(newSelected);
     textProps->UpdateContent(newSelected->GetText());
-    textProps->UpdateForceRender(true);
+    text_->MarkModifyDone();
     LOGD("new text = %s", newSelected->GetText().c_str());
     auto host = GetHost();
     CHECK_NULL_VOID(host);

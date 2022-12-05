@@ -62,9 +62,7 @@ float CalculateOffsetByFriction(float extentOffset, float delta, float friction)
 
 void ScrollPattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy)
 {
-    if (!scrollBarProxy) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(scrollBarProxy);
     auto scrollFunction = [weak = WeakClaim(this)](double offset, int32_t source) {
         if (source != SCROLL_FROM_START) {
             auto pattern = weak.Upgrade();
@@ -85,7 +83,7 @@ void ScrollPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
+    host->GetRenderContext()->SetClipToBounds(true);
 }
 
 void ScrollPattern::OnModifyDone()
@@ -96,10 +94,10 @@ void ScrollPattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = host->GetPaintProperty<ScrollPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-
+    paintProperty->UpdateScrollBarOffset(currentOffset_, viewPort_, viewPortExtent_, !isScrollContent_);
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     if (axis_ == axis && scrollableEvent_) {
-        LOGD("Direction not changed, need't resister scroll event again.");
+        LOGD("Direction not changed, need's resister scroll event again.");
         return;
     }
 
@@ -244,7 +242,15 @@ bool ScrollPattern::ScrollPageCheck(float delta, int32_t source)
     return true;
 }
 
-void ScrollPattern::HandleScrollEffect() {}
+void ScrollPattern::HandleScrollEffect()
+{
+    // handle edge effect
+    CHECK_NULL_VOID_NOLOG(scrollEffect_);
+    auto overScroll = scrollEffect_->CalculateOverScroll(lastOffset_, ReachMaxCount());
+    if (!NearZero(overScroll)) {
+        scrollEffect_->HandleOverScroll(axis_, overScroll, viewPort_);
+    }
+}
 
 void ScrollPattern::HandleScrollBarOutBoundary() {}
 
@@ -301,23 +307,20 @@ void ScrollPattern::ValidateOffset(int32_t source)
 
 void ScrollPattern::HandleScrollPosition(float scroll, int32_t scrollState)
 {
-    if (!scrollableEvent_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(scrollableEvent_);
     const auto& onScroll = scrollableEvent_->GetOnScrollCallback();
-    if (onScroll) {
-        // not consider async call
-        Dimension scrollX(0, DimensionUnit::VP);
-        Dimension scrollY(0, DimensionUnit::VP);
-        Dimension scrollPx(scroll, DimensionUnit::PX);
-        auto scrollVpValue = scrollPx.ConvertToVp();
-        if (axis_ == Axis::HORIZONTAL) {
-            scrollX.SetValue(scrollVpValue);
-        } else {
-            scrollY.SetValue(scrollVpValue);
-        }
-        onScroll(scrollX, scrollY);
+    CHECK_NULL_VOID_NOLOG(onScroll);
+    // not consider async call
+    Dimension scrollX(0, DimensionUnit::VP);
+    Dimension scrollY(0, DimensionUnit::VP);
+    Dimension scrollPx(scroll, DimensionUnit::PX);
+    auto scrollVpValue = scrollPx.ConvertToVp();
+    if (axis_ == Axis::HORIZONTAL) {
+        scrollX.SetValue(scrollVpValue);
+    } else {
+        scrollY.SetValue(scrollVpValue);
     }
+    onScroll(scrollX, scrollY);
 }
 
 bool ScrollPattern::IsCrashTop() const
@@ -352,9 +355,7 @@ void ScrollPattern::HandleCrashTop() const
     auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     const auto& onScrollEdge = eventHub->GetScrollEdgeEvent();
-    if (!onScrollEdge) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(onScrollEdge);
     // not consider async call
     if (axis_ == Axis::HORIZONTAL) {
         onScrollEdge(ScrollEdge::LEFT);
@@ -370,9 +371,7 @@ void ScrollPattern::HandleCrashBottom() const
     auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     const auto& onScrollEdge = eventHub->GetScrollEdgeEvent();
-    if (!onScrollEdge) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(onScrollEdge);
     if (axis_ == Axis::HORIZONTAL) {
         onScrollEdge(ScrollEdge::RIGHT);
         return;
@@ -391,12 +390,9 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
     if (IsScrollOutOnEdge(delta)) {
         return false;
     }
-    if (!ScrollPageCheck(delta, source)) {
-        return false;
-    }
     auto paintProperty = GetPaintProperty<ScrollPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
-    delta = paintProperty->CalculaltePatternOffset(delta);
+    delta = paintProperty->CalculatePatternOffset(delta);
     // TODO: scrollBar effect!!
     lastOffset_ = currentOffset_;
     currentOffset_ += delta;
@@ -453,9 +449,8 @@ void ScrollPattern::AnimateTo(float position, float duration, const RefPtr<Curve
     auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(currentOffset_, position, curve);
     animation->AddListener([weakScroll = AceType::WeakClaim(this)](float value) {
         auto scroll = weakScroll.Upgrade();
-        if (scroll) {
-            scroll->DoJump(value);
-        }
+        CHECK_NULL_VOID_NOLOG(scroll);
+        scroll->DoJump(value);
     });
     animator_->AddInterpolator(animation);
     animator_->SetDuration(static_cast<int32_t>(limitDuration ? std::min(duration, SCROLL_MAX_TIME) : duration));
@@ -463,9 +458,8 @@ void ScrollPattern::AnimateTo(float position, float duration, const RefPtr<Curve
     animator_->Play();
     // TODO: expand stop listener
     animator_->AddStopListener([onFinish]() {
-        if (onFinish) {
-            onFinish();
-        }
+        CHECK_NULL_VOID_NOLOG(onFinish);
+        onFinish();
     });
 }
 
@@ -524,10 +518,8 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
 {
     scrollEffect->SetCurrentPositionCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto scroll = weakScroll.Upgrade();
-        if (scroll) {
-            return scroll->GetCurrentPosition();
-        }
-        return 0.0;
+        CHECK_NULL_RETURN_NOLOG(scroll, 0.0);
+        return scroll->GetCurrentPosition();
     });
     scrollEffect->SetLeadingCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto scroll = weakScroll.Upgrade();
@@ -561,9 +553,7 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
 
 void ScrollPattern::RemoveScrollEdgeEffect()
 {
-    if (!scrollEffect_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(scrollEffect_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
@@ -575,18 +565,29 @@ void ScrollPattern::RemoveScrollEdgeEffect()
 
 void ScrollPattern::SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect)
 {
-    if (scrollEffect && scrollEffect->IsSpringEffect()) {
-        auto springEffect = AceType::DynamicCast<ScrollSpringEffect>(scrollEffect);
-        CHECK_NULL_VOID(springEffect);
-        springEffect->SetOutBoundaryCallback([weakScroll = AceType::WeakClaim(this)]() {
-            auto scroll = weakScroll.Upgrade();
-            if (scroll) {
+    if (scrollEffect) {
+        if (scrollEffect->IsSpringEffect()) {
+            auto springEffect = AceType::DynamicCast<ScrollSpringEffect>(scrollEffect);
+            CHECK_NULL_VOID(springEffect);
+            springEffect->SetOutBoundaryCallback([weakScroll = AceType::WeakClaim(this)]() {
+                auto scroll = weakScroll.Upgrade();
+                CHECK_NULL_RETURN_NOLOG(scroll, false);
                 return scroll->IsOutOfBoundary();
-            }
-            return false;
-        });
-        // add callback to springEdgeEffect
-        SetEdgeEffectCallback(scrollEffect);
+            });
+            // add callback to springEdgeEffect
+            SetEdgeEffectCallback(scrollEffect);
+        }
+        if (scrollEffect->IsFadeEffect()) {
+            scrollEffect->SetHandleOverScrollCallback([weakScroll = AceType::WeakClaim(this)]() -> void {
+                auto scroll = weakScroll.Upgrade();
+                CHECK_NULL_VOID_NOLOG(scroll);
+                auto host = scroll->GetHost();
+                CHECK_NULL_VOID_NOLOG(host);
+                host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            });
+            SetEdgeEffectCallback(scrollEffect);
+            scrollEffect->InitialEdgeEffect();
+        }
     }
     RemoveScrollEdgeEffect();
     scrollEffect_ = scrollEffect;

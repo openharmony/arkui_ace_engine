@@ -27,6 +27,7 @@ public:
     ~MockRenderContext() override = default;
     MOCK_METHOD0(GetCanvas, RefPtr<Canvas>());
     MOCK_METHOD0(Restore, void());
+    MOCK_METHOD4(SetBounds, void(float, float, float, float));
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H

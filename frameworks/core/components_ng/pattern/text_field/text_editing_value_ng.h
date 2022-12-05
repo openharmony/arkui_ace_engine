@@ -47,53 +47,53 @@ struct TextEditingValueNG {
 
     void CursorMoveRight()
     {
-        caretPosition = std::min(static_cast<int32_t>(text.size()), caretPosition + 1);
+        caretPosition = std::min(static_cast<int32_t>(GetWideText().length()), caretPosition + 1);
     }
 
     void CursorMoveToPosition(int32_t position)
     {
-        caretPosition = std::clamp(position, 0, static_cast<int32_t>(text.size()));
+        caretPosition = std::clamp(position, 0, static_cast<int32_t>(GetWideText().length()));
     }
 
     std::string GetValueBeforeCursor() const
     {
-        if (caretPosition > static_cast<int32_t>(text.size()) || caretPosition <= 0) {
+        if (caretPosition > static_cast<int32_t>(GetWideText().length()) || caretPosition <= 0) {
             return "";
         }
-        return  StringUtils::ToString(GetWideText().substr(0, caretPosition));
+        return StringUtils::ToString(GetWideText().substr(0, caretPosition));
     }
 
     std::string GetValueAfterCursor() const
     {
-        if (caretPosition >= static_cast<int32_t>(text.size()) || caretPosition < 0) {
+        if (caretPosition >= static_cast<int32_t>(GetWideText().length()) || caretPosition < 0) {
             return "";
         }
-        return  StringUtils::ToString(GetWideText().substr(caretPosition));
+        return StringUtils::ToString(GetWideText().substr(caretPosition));
     }
 
     std::string GetValueBeforePosition(int32_t position) const
     {
-        position = std::clamp(position, 0, static_cast<int32_t>(text.size()));
+        position = std::clamp(position, 0, static_cast<int32_t>(GetWideText().length()));
         LOGD("GetValueBeforePosition %{public}d", position);
-        return  StringUtils::ToString(GetWideText().substr(0, position));
+        return StringUtils::ToString(GetWideText().substr(0, position));
     }
 
     std::string GetValueAfterPosition(int32_t position) const
     {
-        position = std::clamp(position, 0, static_cast<int32_t>(text.size()));
+        position = std::clamp(position, 0, static_cast<int32_t>(GetWideText().length()));
         LOGD("GetValueAfterPosition %{public}d", position);
-        return  StringUtils::ToString(GetWideText().substr(position));
+        return StringUtils::ToString(GetWideText().substr(position));
     }
 
     std::string GetSelectedText(int32_t start, int32_t end) const
     {
-        if (start < 0 || end > static_cast<int32_t>(text.size()) || start >= end) {
+        if (start < 0 || end > static_cast<int32_t>(GetWideText().length()) || start >= end) {
             LOGE("Get selected boundary is invalid");
             return "";
         }
         auto min = std::min(start, end);
         auto max = std::max(start, end);
-        return  StringUtils::ToString(GetWideText().substr(min, max));
+        return StringUtils::ToString(GetWideText().substr(min, max - min));
     }
 
     std::string ToString() const

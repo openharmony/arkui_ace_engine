@@ -146,7 +146,7 @@ public:
     static bool ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue, Color& result);
     static bool ParseJsString(const JSRef<JSVal>& jsValue, std::string& result);
     static bool ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& result);
-
+    static bool ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result);
     static bool ParseJsBool(const JSRef<JSVal>& jsValue, bool& result);
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, uint32_t& result);
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, int32_t& result);

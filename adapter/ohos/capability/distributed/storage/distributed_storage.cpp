@@ -20,6 +20,7 @@
 #include "objectstore_errors.h"
 
 #include "base/log/log.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace {
@@ -33,9 +34,8 @@ public:
 
     void OnChanged(const std::string& sessionid, const std::vector<std::string>& changedData) override
     {
-        if (onChange_) {
-            onChange_(sessionid, changedData);
-        }
+        CHECK_NULL_VOID_NOLOG(onChange_);
+        onChange_(sessionid, changedData);
     }
 
 private:
@@ -51,9 +51,8 @@ public:
     void OnChanged(const std::string& sessionId, const std::string& networkId, const std::string& onlineStatus) override
     {
         LOGI("DistributedObjectStatusNotifier [%{public}s-%{public}s]", sessionId.c_str(), onlineStatus.c_str());
-        if (onNotify_) {
-            onNotify_(sessionId, onlineStatus);
-        }
+        CHECK_NULL_VOID_NOLOG(onNotify_);
+        onNotify_(sessionId, onlineStatus);
     }
 
 private:
@@ -69,11 +68,7 @@ DistributedObjectPtr::DistributedObjectPtr(const std::string& sessionId, OnDataC
     }
     OHOS::ObjectStore::DistributedObjectStore* store =
         OHOS::ObjectStore::DistributedObjectStore::GetInstance(bundleName);
-    if (store == nullptr) {
-        LOGE("DistributedObjectStore GetInstance failed!");
-        return;
-    }
-
+    CHECK_NULL_VOID(store);
     static std::once_flag onceFlag;
     std::call_once(onceFlag, [store]() {
         auto callback = [](const std::string& sessionId, const std::string& onlineStatus) {
@@ -86,10 +81,7 @@ DistributedObjectPtr::DistributedObjectPtr(const std::string& sessionId, OnDataC
     if (ret != OHOS::ObjectStore::SUCCESS) {
         LOGW("DistributedObjectStore get object[%{private}s] failed, try to create", sessionId.c_str());
         object_ = store->CreateObject(sessionId);
-        if (object_ == nullptr) {
-            LOGE("DistributedObjectStore CreateObject failed!");
-            return;
-        }
+        CHECK_NULL_VOID(object_);
     }
 
     sessionId_ = sessionId;
@@ -108,10 +100,7 @@ DistributedObjectPtr::~DistributedObjectPtr()
         std::string bundleName = AceApplicationInfo::GetInstance().GetProcessName();
         OHOS::ObjectStore::DistributedObjectStore* store =
             OHOS::ObjectStore::DistributedObjectStore::GetInstance(bundleName);
-        if (store == nullptr) {
-            LOGE("DistributedObjectStore GetInstance failed!");
-            return;
-        }
+        CHECK_NULL_VOID(store);
         uint32_t ret = store->UnWatch(object_);
         if (ret != OHOS::ObjectStore::SUCCESS) {
             LOGE("DistributedObjectStore UnWatch failed!, err=[%{private}u]", ret);
@@ -290,9 +279,7 @@ Storage::DataType DistributedStorage::GetDataType(const std::string& key)
 
 void DistributedStorage::NotifyStatus(const std::string& status)
 {
-    if (!taskExecutor_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(taskExecutor_);
     LOGI("DistributedStorage::NotifyStatus [%{public}s-%{public}s]", sessionId_.c_str(), status.c_str());
     taskExecutor_->PostTask(
         [weak = WeakClaim(this), status] {

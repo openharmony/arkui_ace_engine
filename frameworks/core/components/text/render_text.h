@@ -172,6 +172,7 @@ protected:
     std::optional<TextAlign> alignment_;
 
 private:
+    bool IsDeclarativePara();
     void HandleTouchEvent(GestureType type, const Offset& touchPosition);
     void HandleClick(const ClickInfo& info);
     void HandleRemoteMessage(const ClickInfo& info);

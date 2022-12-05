@@ -93,10 +93,17 @@ public:
     // Get functions for unit tests
     const std::vector<RefPtr<FrameNode>>& GetOptions();
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+    }
+
 private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    // change background color when pressed
+    void RegisterOnPress();
     // change background color when hovered
     void RegisterOnHover();
     // add click event to show menu

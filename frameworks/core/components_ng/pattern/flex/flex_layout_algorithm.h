@@ -67,7 +67,7 @@ public:
 
 private:
     void InitFlexProperties(LayoutWrapper* layoutWrapper);
-    void TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, const SizeF& realSize, const PaddingPropertyF& padding);
+    void TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, const SizeF& realSize);
     void UpdateAllocatedSize(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossAxisSize);
     float GetChildMainAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     float GetChildCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const;

@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 
 #include "core/components/theme/theme_constants.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/components/theme/theme_constants_defines.h"
 #include "frameworks/bridge/common/dom/dom_slider.h"
 #include "frameworks/bridge/test/unittest/jsfrontend/dom_node_factory.h"
@@ -62,7 +63,7 @@ constexpr double TEST_MIN_VALUE_009 = 10.0;
 constexpr double TEST_MAX_VALUE_009 = 50.0;
 constexpr double TEST_STEP_VALUE_009 = 40.0;
 constexpr double TEST_VALUE_VALUE_009 = 20.0;
-const RefPtr<ThemeManager> THEME_MANAGER = AceType::MakeRefPtr<ThemeManager>();
+const auto THEME_MANAGER = AceType::MakeRefPtr<ThemeManagerImpl>();
 
 } // namespace
 

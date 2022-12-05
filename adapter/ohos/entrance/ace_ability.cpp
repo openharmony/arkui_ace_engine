@@ -21,6 +21,7 @@
 #include "ability_process.h"
 #include "display_type.h"
 #include "dm/display_manager.h"
+#include "form_utils_impl.h"
 #include "init_data.h"
 #include "ipc_skeleton.h"
 #include "res_config.h"
@@ -47,7 +48,7 @@
 #include "core/common/frontend.h"
 #include "core/common/plugin_manager.h"
 #include "core/common/plugin_utils.h"
-
+#include "core/common/form_manager.h"
 namespace OHOS {
 namespace Ace {
 namespace {
@@ -114,17 +115,15 @@ public:
     void OnFinish() const override
     {
         LOGI("AcePlatformEventCallback OnFinish");
-        if (onFinish_) {
-            onFinish_();
-        }
+        CHECK_NULL_VOID_NOLOG(onFinish_);
+        onFinish_();
     }
 
     void OnStartAbility(const std::string& address) override
     {
         LOGI("AcePlatformEventCallback OnStartAbility");
-        if (onStartAbility_) {
-            onStartAbility_(address);
-        }
+        CHECK_NULL_VOID_NOLOG(onStartAbility_);
+        onStartAbility_(address);
     }
 
     void OnStatusBarBgColorChanged(uint32_t color) override
@@ -205,7 +204,8 @@ void AceAbility::OnStart(const Want& want)
     abilityId_ = g_instanceId++;
     static std::once_flag onceFlag;
     auto abilityContext = GetAbilityContext();
-    std::call_once(onceFlag, [abilityContext]() {
+    auto cacheDir = abilityContext->GetCacheDir();
+    std::call_once(onceFlag, [abilityContext, cacheDir]() {
         LOGI("Initialize for current process.");
         SetHwIcuDirectory();
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
@@ -214,7 +214,7 @@ void AceAbility::OnStart(const Want& want)
         AceApplicationInfo::GetInstance().SetDataFileDirPath(abilityContext->GetFilesDir());
         AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
         AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
-        ImageCache::SetImageCacheFilePath(abilityContext->GetCacheDir());
+        ImageCache::SetImageCacheFilePath(cacheDir);
         ImageCache::SetCacheFileInfo();
         AceEngine::InitJsDumpHeadSignal();
     });
@@ -222,7 +222,7 @@ void AceAbility::OnStart(const Want& want)
     // TODO: now choose pipeline using param set as package name, later enable for all.
     auto apiCompatibleVersion = abilityContext->GetApplicationInfo()->apiCompatibleVersion;
     auto apiReleaseType = abilityContext->GetApplicationInfo()->apiReleaseType;
-    auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabled(
+    auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledFa(
         AceApplicationInfo::GetInstance().GetPackageName(), apiCompatibleVersion, apiReleaseType);
     LOGI("AceAbility: apiCompatibleVersion: %{public}d, and apiReleaseType: %{public}s, useNewPipe: %{public}d",
         apiCompatibleVersion, apiReleaseType.c_str(), useNewPipe);
@@ -231,11 +231,10 @@ void AceAbility::OnStart(const Want& want)
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
         rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-        if (rsUiDirector) {
-            rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
-            rsUiDirector->SetCacheDir(abilityContext->GetCacheDir());
-            rsUiDirector->Init();
-        }
+        auto surfaceNode = window->GetSurfaceNode();
+        rsUiDirector->SetRSSurfaceNode(surfaceNode);
+        rsUiDirector->SetCacheDir(cacheDir);
+        rsUiDirector->Init();
     }
 #endif
     std::shared_ptr<AceAbility> self = std::static_pointer_cast<AceAbility>(shared_from_this());
@@ -297,9 +296,7 @@ void AceAbility::OnStart(const Want& want)
 
     auto packagePathStr = GetBundleCodePath();
     auto moduleInfo = GetHapModuleInfo();
-    if (moduleInfo == nullptr) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(moduleInfo);
     packagePathStr += "/" + moduleInfo->package + "/";
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
     std::string srcPath;
@@ -347,7 +344,8 @@ void AceAbility::OnStart(const Want& want)
 
     auto pluginUtils = std::make_shared<PluginUtilsImpl>();
     PluginManager::GetInstance().SetAceAbility(this, pluginUtils);
-
+    auto formUtils = std::make_shared<FormUtilsImpl>();
+    FormManager::GetInstance().SetFormUtils(formUtils);
     // create container
     Platform::AceContainer::CreateContainer(abilityId_, frontendType, srcPath, shared_from_this(),
         std::make_unique<AcePlatformEventCallback>([this]() { TerminateAbility(); },
@@ -359,10 +357,8 @@ void AceAbility::OnStart(const Want& want)
             }),
         false, useNewPipe);
     auto container = Platform::AceContainer::GetContainer(abilityId_);
-    if (!container) {
-        LOGE("container is null, set configuration failed.");
-        return;
-    }
+    CHECK_NULL_VOID(container);
+    container->SetToken(token_);
     auto aceResCfg = container->GetResourceConfiguration();
     aceResCfg.SetOrientation(SystemProperties::GetDeviceOrientation());
     aceResCfg.SetDensity(SystemProperties::GetResolution());
@@ -469,9 +465,7 @@ void AceAbility::OnStart(const Want& want)
         context->SetActionEventHandler(actionEventHandler);
         context->SetGetWindowRectImpl([window]() -> Rect {
             Rect rect;
-            if (!window) {
-                return rect;
-            }
+            CHECK_NULL_RETURN_NOLOG(window, rect);
             auto windowRect = window->GetRect();
             rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
             return rect;
@@ -583,21 +577,13 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
     Platform::AceContainer::OnConfigurationUpdated(abilityId_, configuration.GetName());
 
     auto container = Platform::AceContainer::GetContainer(abilityId_);
-    if (!container) {
-        LOGE("AceAbility container is null");
-        return;
-    }
+    CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("OnSizeChange: taskExecutor is null.");
-        return;
-    }
+    CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [weakContainer = WeakPtr<Platform::AceContainer>(container), configuration]() {
             auto container = weakContainer.Upgrade();
-            if (!container) {
-                return;
-            }
+            CHECK_NULL_VOID_NOLOG(container);
             auto colorMode = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
             auto deviceAccess = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
             auto languageTag = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
@@ -686,10 +672,7 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
         rect.posX_, rect.posY_);
     SystemProperties::SetDeviceOrientation(rect.height_ >= rect.width_ ? 0 : 1);
     auto container = Platform::AceContainer::GetContainer(abilityId_);
-    if (!container) {
-        LOGE("OnSizeChange: container is null.");
-        return;
-    }
+    CHECK_NULL_VOID(container);
     container->SetWindowPos(rect.posX_, rect.posY_);
     auto pipelineContext = container->GetPipelineContext();
     if (pipelineContext) {
@@ -697,17 +680,11 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
             Rect(Offset(rect.posX_, rect.posY_), Size(rect.width_, rect.height_)));
     }
     auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("OnSizeChange: taskExecutor is null.");
-        return;
-    }
+    CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [rect, density = density_, reason, container]() {
             auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
-            if (!flutterAceView) {
-                LOGE("OnSizeChange: flutterAceView is null.");
-                return;
-            }
+            CHECK_NULL_VOID(flutterAceView);
             flutter::ViewportMetrics metrics;
             metrics.physical_width = rect.width_;
             metrics.physical_height = rect.height_;
@@ -723,23 +700,14 @@ void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode)
 {
     LOGI("OnModeChange, window mode is %{public}d", mode);
     auto container = Platform::AceContainer::GetContainer(abilityId_);
-    if (!container) {
-        LOGE("OnModeChange failed, get container(id=%{public}d) failed", abilityId_);
-        return;
-    }
+    CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("OnModeChange failed: taskExecutor is null.");
-        return;
-    }
+    CHECK_NULL_VOID(taskExecutor);
     ContainerScope scope(abilityId_);
     taskExecutor->PostTask(
         [container, mode]() {
             auto pipelineContext = container->GetPipelineContext();
-            if (!pipelineContext) {
-                LOGE("OnModeChange failed, pipeline context is null.");
-                return;
-            }
+            CHECK_NULL_VOID(pipelineContext);
             pipelineContext->ShowContainerTitle(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING);
         },
         TaskExecutor::TaskType::UI);
@@ -753,23 +721,15 @@ void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& i
     LOGI("AceAbility::OccupiedAreaChange rect:%{public}s type: %{public}d", keyboardRect.ToString().c_str(), type);
     if (type == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT) {
         auto container = Platform::AceContainer::GetContainer(abilityId_);
-        if (!container) {
-            LOGE("container may be destroyed.");
-            return;
-        }
+        CHECK_NULL_VOID(container);
         auto taskExecutor = container->GetTaskExecutor();
-        if (!taskExecutor) {
-            LOGE("OnSizeChange: taskExecutor is null.");
-            return;
-        }
-
+        CHECK_NULL_VOID(taskExecutor);
         ContainerScope scope(abilityId_);
         taskExecutor->PostTask(
             [container, keyboardRect] {
                 auto context = container->GetPipelineContext();
-                if (context) {
-                    context->OnVirtualKeyboardAreaChange(keyboardRect);
-                }
+                CHECK_NULL_VOID_NOLOG(context);
+                context->OnVirtualKeyboardAreaChange(keyboardRect);
             },
             TaskExecutor::TaskType::UI);
     }
@@ -778,22 +738,15 @@ void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& i
 void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     auto container = Platform::AceContainer::GetContainer(abilityId_);
-    if (!container) {
-        LOGE("container may be destroyed.");
-        return;
-    }
+    CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("OnSizeChange: taskExecutor is null.");
-        return;
-    }
+    CHECK_NULL_VOID(taskExecutor);
     ContainerScope scope(abilityId_);
     taskExecutor->PostSyncTask(
         [container, params, &info] {
             auto context = container->GetPipelineContext();
-            if (context != nullptr) {
-                context->DumpInfo(params, info);
-            }
+            CHECK_NULL_VOID_NOLOG(context);
+            context->DumpInfo(params, info);
         },
         TaskExecutor::TaskType::UI);
 }
@@ -802,16 +755,9 @@ void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
 {
     LOGI("AceAbility::OnDrag called ");
     auto container = Platform::AceContainer::GetContainer(abilityId_);
-    if (!container) {
-        LOGE("container may be destroyed.");
-        return;
-    }
+    CHECK_NULL_VOID(container);
     auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
-    if (!flutterAceView) {
-        LOGE("AceAbility::OnDrag flutterAceView is null");
-        return;
-    }
-
+    CHECK_NULL_VOID(flutterAceView);
     DragEventAction action;
     switch (event) {
         case OHOS::Rosen::DragEvent::DRAG_EVENT_END:
@@ -835,15 +781,9 @@ void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
 bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
 {
     auto container = Platform::AceContainer::GetContainer(abilityId_);
-    if (!container) {
-        LOGE("OnPointerInputEvent: container may be destroyed.");
-        return false;
-    }
+    CHECK_NULL_RETURN(container, false);
     auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
-    if (!flutterAceView) {
-        LOGE("OnPointerInputEvent: flutterAceView is null.");
-        return false;
-    }
+    CHECK_NULL_RETURN(flutterAceView, false);
     flutterAceView->DispatchTouchEvent(flutterAceView, pointerEvent);
     return true;
 }
@@ -851,15 +791,9 @@ bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerE
 bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
 {
     auto container = Platform::AceContainer::GetContainer(abilityId_);
-    if (!container) {
-        LOGE("OnInputEvent: container may be destroyed.");
-        return false;
-    }
+    CHECK_NULL_RETURN(container, false);
     auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
-    if (!flutterAceView) {
-        LOGI("OnInputEvent: flutterAceView is null, keyboard event does not take effect.");
-        return false;
-    }
+    CHECK_NULL_RETURN(flutterAceView, false);
     int32_t keyCode = keyEvent->GetKeyCode();
     int32_t keyAction = keyEvent->GetKeyAction();
     if (keyCode == MMI::KeyEvent::KEYCODE_BACK && keyAction == MMI::KeyEvent::KEY_ACTION_UP) {
@@ -889,23 +823,14 @@ void AceAbility::SetBackgroundColor(uint32_t color)
 {
     LOGI("AceAbilityHandler::SetBackgroundColor color is %{public}u", color);
     auto container = Platform::AceContainer::GetContainer(abilityId_);
-    if (!container) {
-        LOGE("SetBackgroundColor failed: container is null.");
-        return;
-    }
+    CHECK_NULL_VOID(container);
     ContainerScope scope(abilityId_);
     auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("SetBackgroundColor failed: taskExecutor is null.");
-        return;
-    }
+    CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostSyncTask(
         [container, bgColor = color]() {
             auto pipelineContext = container->GetPipelineContext();
-            if (!pipelineContext) {
-                LOGE("SetBackgroundColor failed, pipeline context is null.");
-                return;
-            }
+            CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetAppBgColor(Color(bgColor));
         },
         TaskExecutor::TaskType::UI);
@@ -914,28 +839,16 @@ void AceAbility::SetBackgroundColor(uint32_t color)
 uint32_t AceAbility::GetBackgroundColor()
 {
     auto container = Platform::AceContainer::GetContainer(abilityId_);
-    if (!container) {
-        LOGE("AceAbilityHandler GetBackgroundColor failed: container is null. return 0x000000");
-        return 0x000000;
-    }
+    CHECK_NULL_RETURN(container, 0x000000);
     auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("AceAbilityHandler GetBackgroundColor failed: taskExecutor is null.");
-        return 0x000000;
-    }
+    CHECK_NULL_RETURN(taskExecutor, 0x000000);
     ContainerScope scope(abilityId_);
     uint32_t bgColor = 0x000000;
     taskExecutor->PostSyncTask(
         [&bgColor, container]() {
-            if (!container) {
-                LOGE("Post sync task GetBackgroundColor failed: container is null. return 0x000000");
-                return;
-            }
+            CHECK_NULL_VOID(container);
             auto pipelineContext = container->GetPipelineContext();
-            if (!pipelineContext) {
-                LOGE("Post sync task GetBackgroundColor failed: pipeline is null. return 0x000000");
-                return;
-            }
+            CHECK_NULL_VOID(pipelineContext);
             bgColor = pipelineContext->GetAppBgColor().GetValue();
         },
         TaskExecutor::TaskType::UI);

@@ -11,32 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_config.gni")
-import(
-    "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
-
-ohos_unittest("view_abstract_test_ng") {
-  module_out_path = "$test_output_path/common"
-
-  sources = [ "view_abstract_test_ng.cpp" ]
-
-  deps = [
-    "$ace_root/build:ace_ohos_unittest_base",
-    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//third_party/googletest:gmock_main",
-  ]
-
-  configs = [
-    "$ace_root:ace_test_coverage_config",
-    "$ace_root:ace_test_config",
-    "$ace_root:ace_config",
-    "//commonlibrary/c_utils/base:utils_config",
-  ]
-}
-
 group("base_unittest") {
   testonly = true
-  deps = [ ":view_abstract_test_ng" ]
+  deps = [
+    "geometry_node:geometry_node_test_ng",
+    "inspector:inspector_test_ng",
+    "ui_node:ui_node_test_ng",
+    "view_abstract:view_abstract_test_ng",
+    "view_stack_processor:view_stack_processor_test_ng",
+  ]
 }

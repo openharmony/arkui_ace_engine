@@ -51,16 +51,37 @@ RenderLayer FlutterRenderShapeContainer::GetRenderLayer()
 
 void FlutterRenderShapeContainer::Paint(RenderContext& context, const Offset& offset)
 {
-    const auto renderContext = static_cast<FlutterRenderContext*>(&context);
-    flutter::Canvas* canvas = renderContext->GetCanvas();
-    if (!canvas) {
-        return;
+    if (mesh_.size() == 0) {
+        auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width(), GetLayoutSize().Height(),
+            SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+        skOffBitmap_.allocPixels(imageInfo);
+        skOffBitmap_.eraseColor(SK_ColorTRANSPARENT);
+        skOffCanvas_ = std::make_unique<SkCanvas>(skOffBitmap_);
+
+        double viewBoxWidth = NormalizePercentToPx(viewBox_.Width(), false);
+        double viewBoxHeight = NormalizePercentToPx(viewBox_.Height(), true);
+        double viewBoxLeft = NormalizePercentToPx(viewBox_.Left(), false);
+        double viewBoxTop = NormalizePercentToPx(viewBox_.Top(), true);
+        if (!GetLayoutSize().IsInfinite() && GreatNotEqual(viewBoxWidth, 0.0) && GreatNotEqual(viewBoxHeight, 0.0)) {
+            double scale = std::min(GetLayoutSize().Width() / viewBoxWidth, GetLayoutSize().Height() / viewBoxHeight);
+            double tx = GetLayoutSize().Width() * 0.5 - (viewBoxWidth * 0.5 + viewBoxLeft) * scale;
+            double ty = GetLayoutSize().Height() * 0.5 - (viewBoxHeight * 0.5 + viewBoxTop) * scale;
+            skOffCanvas_->scale(scale, scale);
+            skOffCanvas_->translate(tx, ty);
+        }
+        RenderNode::Paint(context, offset);
+    } else {
+        const auto renderContext = static_cast<FlutterRenderContext*>(&context);
+        flutter::Canvas* canvas = renderContext->GetCanvas();
+        if (!canvas) {
+            return;
+        }
+        skCanvas_ = canvas->canvas();
+        if (!skCanvas_) {
+            return;
+        }
+        BitmapMesh(context, offset);
     }
-    skCanvas_ = canvas->canvas();
-    if (!skCanvas_) {
-        return;
-    }
-    BitmapMesh(context, offset);
 }
 
 RefPtr<FlutterRenderShape> FlutterRenderShapeContainer::GetShapeChild(const RefPtr<RenderNode>& node, Offset& offset)

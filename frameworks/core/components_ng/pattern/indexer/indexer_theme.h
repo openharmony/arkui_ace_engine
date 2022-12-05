@@ -38,7 +38,7 @@ inline constexpr double DEFAULT_OPACITY_IN_PERCENT = 1.0;
 inline constexpr double NINETY_OPACITY_IN_PERCENT = 0.9;
 inline constexpr double ZERO_OPACITY_IN_PERCENT = 0.0;
 inline constexpr int32_t INDEXER_BUBBLE_ANIMATION_DURATION = 3000;
-inline constexpr int32_t INDEXER_BUBBLE_MAXSIZE = 6;
+inline constexpr uint32_t INDEXER_BUBBLE_MAXSIZE = 6;
 // data for list mode
 inline constexpr double INDEXER_LIST_ITEM_TEXT_SIZE = 12.0; // list mode, font size (FP)
 inline constexpr uint32_t INDEXER_LIST_COLOR = 0x99000000;
@@ -64,6 +64,7 @@ inline constexpr double INDEXER_CIRCLE_ITEM_SHADOW_RADIUS = 27.0; // circle mode
 inline constexpr double BUBBLE_BOX_SIZE_CIRCLE = 46.0;
 inline constexpr double BUBBLE_FONT_SIZE_CIRCLE = 19.0;
 inline constexpr uint32_t INDEXER_ACTIVE_BG_COLOR = 0x1F0A59F7;
+inline constexpr float TEXTVIEW_MIN_SIZE = 42.0f;
 
 enum class AlignStyle {
     LEFT = 0,

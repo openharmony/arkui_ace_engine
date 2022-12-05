@@ -36,11 +36,13 @@
 #include "nweb_handler.h"
 #include "nweb_helper.h"
 #include "nweb_hit_testresult.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "surface.h"
+#endif
 #include "window.h"
 #endif
 
 namespace OHOS::Ace {
-
 class WebMessagePortOhos : public WebMessagePort {
     DECLARE_ACE_TYPE(WebMessagePortOhos, WebMessagePort)
 
@@ -303,12 +305,8 @@ public:
 #ifdef OHOS_STANDARD_SYSTEM
     // TODO: add to separate this file into three file, base file, component impl and ng impl.
     void InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<NG::RenderSurface>& surface);
-#ifdef ENABLE_ROSEN_BACKEND
-    void InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface> surface = nullptr);
-#else
     void InitOHOSWeb(const WeakPtr<PipelineBase>& context);
-#endif
-    void PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context);
+    bool PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context);
     void InitWebViewWithWindow();
     void ShowWebView();
     void HideWebView();
@@ -359,6 +357,8 @@ public:
     RefPtr<PixelMap> GetDragPixelMap();
     std::string GetUrl();
     void UpdateLocale();
+    void OnInactive();
+    void OnActive();
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -404,7 +404,18 @@ public:
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();
-
+    void SetDrawSize(const Size& drawSize);
+    void SetEnhanceSurfaceFlag(const bool& isEnhanceSurface);
+#if defined(ENABLE_ROSEN_BACKEND)
+    void SetSurface(const sptr<Surface>& surface);
+    sptr<Surface> surface_ = nullptr;
+#endif
+#ifdef OHOS_STANDARD_SYSTEM
+    void SetWebRendeGlobalPos(const Offset& pos)
+    {
+        offset_ = pos;
+    }
+#endif
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -431,8 +442,6 @@ private:
     void AddJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList);
     void RemoveJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList);
     void SetWebViewJavaScriptResultCallBack(const WebController::JavaScriptCallBackImpl&& javaScriptCallBackImpl);
-    void OnInactive();
-    void OnActive();
     void Zoom(float factor);
     bool ZoomIn();
     bool ZoomOut();
@@ -469,10 +478,8 @@ private:
 
     void UpdateSettting(bool useNewPipe = false);
 
-#if defined(ENABLE_ROSEN_BACKEND)
     std::string GetCustomScheme();
-    void InitWebViewWithSurface(sptr<Surface> surface);
-#endif
+    void InitWebViewWithSurface();
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -520,8 +527,13 @@ private:
 
     std::string bundlePath_;
     std::string bundleDataPath_;
+    std::string hapPath_;
     RefPtr<PixelMap> pixelMap_ = nullptr;
     bool isRefreshPixelMap_ = false;
+    Size drawSize_;
+    Offset offset_;
+    bool isEnhanceSurface_ = false;
+    void *enhanceSurfaceInfo_ = nullptr;
 #endif
 };
 

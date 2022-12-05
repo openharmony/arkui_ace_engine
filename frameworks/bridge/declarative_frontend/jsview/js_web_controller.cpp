@@ -61,7 +61,7 @@ std::shared_ptr<WebJSValue> ParseValue(const JSRef<JSVal>& resultValue, std::sha
         webviewValue->SetString(resultValue->ToString());
     } else if (resultValue->IsNumber()) {
         webviewValue->SetType(WebJSValue::Type::DOUBLE);
-        webviewValue->SetInt(resultValue->ToNumber<double>());
+        webviewValue->SetDouble(resultValue->ToNumber<double>());
     } else if (resultValue->IsArray() || resultValue->IsObject() || resultValue->IsUndefined()) {
         webviewValue->SetType(WebJSValue::Type::NONE);
         webviewValue->error_ = static_cast<int>(WebJavaScriptBridgeError::OBJECT_IS_GONE);

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_FLUTTER_RENDER_CUSTOM_PAINT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_FLUTTER_RENDER_CUSTOM_PAINT_H
 
+#include "base/utils/measure_util.h"
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/lib/ui/painting/path.h"
 #include "flutter/third_party/txt/src/txt/paragraph.h"
@@ -50,6 +51,7 @@ public:
     void ClearRect(const Offset& offset, const Rect& rect) override;
     void FillText(const Offset& offset, const std::string& text, double x, double y) override;
     void StrokeText(const Offset& offset, const std::string& text, double x, double y) override;
+    static double MeasureTextInner(const MeasureContext& context);
     double MeasureText(const std::string& text, const PaintState& state) override;
     double MeasureTextHeight(const std::string& text, const PaintState& state) override;
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state) override;
@@ -93,8 +95,8 @@ public:
 private:
     void InitImagePaint();
     void InitCachePaint();
-    bool UpdateParagraph(const Offset& offset, const std::string& text, bool isStroke, bool hasShadow = true);
-    void PaintText(const Offset& offset, double x, double y, bool isStroke, bool hasShadow = true);
+    bool UpdateParagraph(const Offset& offset, const std::string& text, bool isStroke, bool hasShadow = false);
+    void PaintText(const Offset& offset, double x, double y, bool isStroke, bool hasShadow = false);
     double GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     SkPaint GetStrokePaint();

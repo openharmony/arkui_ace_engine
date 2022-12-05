@@ -122,7 +122,7 @@ struct DialogProperties {
     std::string title;                    // title of dialog.
     std::string content;                  // message of dialog.
     bool autoCancel = true;               // pop dialog when click mask if autoCancel is true.
-    bool customStyle = false;             // whether use custom style.
+    bool customStyle = false;             // when true, dialog doesn't paint background or constraint child size.
     bool isMenu = false;
     std::vector<ButtonInfo> buttons;
     std::unordered_map<std::string, EventMarker> callbacks; // <callback type(success, cancel, complete), eventId>
@@ -131,7 +131,6 @@ struct DialogProperties {
     DialogAlignment alignment = DialogAlignment::DEFAULT;   // Alignment of dialog.
     DimensionOffset offset;                                 // Offset which base on alignment of Dialog.
     int32_t gridCount = 0;
-    bool useCustom = true;
 
     // These ids is used for AlertDialog of declarative.
     EventMarker primaryId;   // first button's callback.

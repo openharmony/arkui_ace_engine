@@ -20,6 +20,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/animation/animator_info.h"
 #include "core/animation/page_transition_common.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
@@ -29,6 +30,7 @@
 namespace OHOS::Ace::NG {
 
 using SharedTransitionMap = std::unordered_map<ShareId, WeakPtr<FrameNode>>;
+using JSAnimatorMap = std::unordered_map<std::string, RefPtr<Framework::AnimatorInfo>>;
 // PagePattern is the base class for page root render node.
 class ACE_EXPORT PagePattern : public Pattern {
     DECLARE_ACE_TYPE(PagePattern, Pattern);
@@ -110,7 +112,14 @@ public:
         return sharedTransitionMap_;
     }
 
+    void AddJsAnimator(const std::string& animatorId, const RefPtr<Framework::AnimatorInfo>& animatorInfo);
+    RefPtr<Framework::AnimatorInfo> GetJsAnimator(const std::string& animatorId);
+
     void BuildSharedTransitionMap();
+
+    void ReloadPage();
+
+    void SetFirstBuildCallback(std::function<void()>&& buildCallback);
 
 private:
     void OnAttachToFrameNode() override;
@@ -127,11 +136,14 @@ private:
     std::function<void()> onPageHide_;
     std::function<bool()> OnBackPressed_;
     std::function<void()> pageTransitionFunc_;
+    std::function<void()> firstBuildCallback_;
     std::stack<RefPtr<PageTransitionEffect>> pageTransitionEffects_;
 
     bool isOnShow_ = false;
+    bool isFirstLoad_ = true;
 
     SharedTransitionMap sharedTransitionMap_;
+    JSAnimatorMap jsAnimatorMap_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PagePattern);
 };

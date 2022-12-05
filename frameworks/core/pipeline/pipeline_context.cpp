@@ -367,12 +367,16 @@ void PipelineContext::ShowContainerTitle(bool isShow)
     auto containerModal = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
     if (containerModal) {
         containerModal->ShowTitle(isShow);
-#ifdef ENABLE_ROSEN_BACKEND
-        if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-            rsUIDirector_->SetContainerWindow(isShow); // set container window show state to render service
-        }
-#endif
     }
+}
+
+void PipelineContext::SetContainerWindow(bool isShow)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+        rsUIDirector_->SetContainerWindow(isShow, density_); // set container window show state to render service
+    }
+#endif
 }
 
 void PipelineContext::BlurWindowWithDrag(bool isBlur)
@@ -556,15 +560,6 @@ void PipelineContext::FlushLayout()
     TryCallNextFrameLayoutCallback();
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushLayout();
-    }
-}
-
-void PipelineContext::TryCallNextFrameLayoutCallback()
-{
-    if (isForegroundCalled_ && nextFrameLayoutCallback_) {
-        isForegroundCalled_ = false;
-        nextFrameLayoutCallback_();
-        LOGI("nextFrameLayoutCallback called");
     }
 }
 
@@ -1748,13 +1743,13 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 bool PipelineContext::RequestDefaultFocus()
 {
     auto curPageElement = GetLastPage();
-    CHECK_NULL_RETURN(curPageElement, false);
+    CHECK_NULL_RETURN_NOLOG(curPageElement, false);
     if (curPageElement->IsFocused()) {
         return false;
     }
     curPageElement->SetIsFocused(true);
     auto defaultFocusNode = curPageElement->GetChildDefaultFocusNode();
-    CHECK_NULL_RETURN(defaultFocusNode, false);
+    CHECK_NULL_RETURN_NOLOG(defaultFocusNode, false);
     if (!defaultFocusNode->IsFocusableWholePath()) {
         return false;
     }
@@ -1811,7 +1806,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     LOGD(
         "MouseEvent (x,y): (%{public}f,%{public}f), button: %{public}d, action: %{public}d, pressedButtons: %{public}d",
-        scaleEvent.x, scaleEvent.y, scaleEvent.action, scaleEvent.button, scaleEvent.pressedButtons);
+        scaleEvent.x, scaleEvent.y, scaleEvent.button, scaleEvent.action, scaleEvent.pressedButtons);
     if (event.action == MouseAction::PRESS && event.button != MouseButton::LEFT_BUTTON) {
         eventManager_->HandleOutOfRectCallback(
             { scaleEvent.x, scaleEvent.y, scaleEvent.sourceType }, rectCallbackList_);
@@ -2183,10 +2178,15 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
             textFieldManager_->MovePage(GetLastPage()->GetPageId(), { newRootWidth, newRootHeight }, offsetHeight);
         }
     }
-    auto frontend = weakFrontend_.Upgrade();
-    if (frontend) {
-        frontend->OnSurfaceChanged(width, height);
-    }
+
+    taskExecutor_->PostTask(
+        [weakFrontend = weakFrontend_, width, height]() {
+            auto frontend = weakFrontend.Upgrade();
+            if (frontend) {
+                frontend->OnSurfaceChanged(width, height);
+            }
+        },
+        TaskExecutor::TaskType::JS);
 
     // init transition clip size when surface changed.
     const auto& pageElement = GetLastPage();
@@ -2465,8 +2465,6 @@ void PipelineContext::Destroy()
 {
     CHECK_RUN_ON(UI);
     LOGI("PipelineContext::Destroy begin.");
-    ClearImageCache();
-    platformResRegister_.Reset();
     rootElement_.Reset();
     composedElementMap_.clear();
     dirtyElements_.clear();
@@ -2489,23 +2487,16 @@ void PipelineContext::Destroy()
     }
     alignDeclarationNodeList_.clear();
     hoverNodes_.clear();
-    drawDelegate_.reset();
     renderFactory_.Reset();
-    eventManager_->ClearResults();
     nodesToNotifyOnPreDraw_.clear();
     nodesNeedDrawOnPixelMap_.clear();
     layoutTransitionNodeSet_.clear();
     explicitAnimators_.clear();
     preTargetRenderNode_.Reset();
-    imageCache_.Reset();
-    fontManager_.Reset();
-    themeManager_.Reset();
     sharedImageManager_.Reset();
-    window_->Destroy();
-    touchPluginPipelineContext_.clear();
     webPaintCallback_.clear();
-    virtualKeyBoardCallback_.clear();
     rectCallbackList_.clear();
+    PipelineBase::Destroy();
     LOGI("PipelineContext::Destroy end.");
 }
 
@@ -2872,6 +2863,9 @@ void PipelineContext::WindowFocus(bool isFocus)
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
+    }
+    if (onFocus_ && onShow_) {
+        FlushFocus();
     }
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         LOGD("WindowFocus failed, Window modal is not container.");

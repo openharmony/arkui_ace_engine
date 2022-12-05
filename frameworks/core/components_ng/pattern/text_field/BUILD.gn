@@ -18,7 +18,6 @@ build_component_ng("text_field_pattern_ng") {
   sources = [
     "text_field_controller.cpp",
     "text_field_layout_algorithm.cpp",
-    "text_field_manager.cpp",
     "text_field_model_ng.cpp",
     "text_field_paint_method.cpp",
     "text_field_pattern.cpp",

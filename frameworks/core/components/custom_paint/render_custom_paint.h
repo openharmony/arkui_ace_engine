@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_RENDER_CUSTOM_PAINT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_RENDER_CUSTOM_PAINT_H
 
+#include "base/utils/measure_util.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components/custom_paint/canvas_render_context_base.h"
 #include "core/components/custom_paint/custom_paint_component.h"
@@ -74,6 +75,7 @@ public:
 
     virtual void FillText(const Offset& offset, const std::string& text, double x, double y) = 0;
     virtual void StrokeText(const Offset& offset, const std::string& text, double x, double y) = 0;
+    static double PaintMeasureText(const MeasureContext& context);
     virtual double MeasureText(const std::string& text, const PaintState& state) = 0;
     virtual double MeasureTextHeight(const std::string& text, const PaintState& state) = 0;
     virtual TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state) = 0;

@@ -487,7 +487,7 @@ void RenderSceneViewer::PassGeometries(const std::vector<RefPtr<OHOS::Render3D::
 #endif
             auto delegate = weak.Upgrade();
             if (delegate) {
-                delegate->sceneViewerAdapter_.AddGeometries(geometries);
+                delegate->sceneViewerAdapter_.UpdateGeometries(geometries);
             }
         });
     } else {

@@ -43,10 +43,7 @@ std::unique_ptr<RSParagraph> GetTextParagraph(const std::string& text, const ros
 {
     RSParagraphStyle style;
     auto fontCollection = RSFontCollection::GetInstance(false);
-    if (!fontCollection) {
-        LOGW("MeasureText: fontCollection is null");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(fontCollection, nullptr);
     std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::CreateRosenBuilder(style, fontCollection);
     builder->PushStyle(textStyle);
     builder->AddText(StringUtils::Str8ToStr16(text));
@@ -66,9 +63,7 @@ void DrawCalendarText(
     }
 
     auto paragraph = GetTextParagraph(newText, textStyle);
-    if (!paragraph) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(paragraph);
     const auto& offset = boxRect.GetOffset();
     paragraph->Layout(boxRect.Width());
     double textWidth = paragraph->GetMaxIntrinsicWidth();

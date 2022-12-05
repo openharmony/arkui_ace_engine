@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #define private public
+#define protected public
 
 #include <optional>
 
@@ -30,6 +31,7 @@
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -54,6 +56,12 @@ constexpr float LIST_WIDTH_CONSTRAINT_CASE2_VALUE = 60.0f;
 constexpr float LIST_HEIGHT_LIMIT = 200.0f;
 constexpr float LIST_ITEM_GROUP_HEAD_VALUE = 50.0f;
 constexpr float LIST_ITEM_GROUP_FOOT_VALUE = 50.0f;
+constexpr float CROSS_SIZE_CASE = 100.0f;
+constexpr float CHILD_CROSS_SIZE_CASE1 = 100.0f;
+constexpr float CHILD_CROSS_SIZE_CASE2 = 80.0f;
+constexpr float MAX_LANE_LENGTH_CASE1 = 3.0f;
+constexpr float MAX_LANE_LENGTH_CASE2 = 9.9f;
+constexpr float MIN_LANE_LENGTH_CASE = 0.1f;
 constexpr Dimension SPACE_VALUE = Dimension(10, DimensionUnit::PX);
 constexpr Dimension LANE_MIN_LENGTH_CASE1_VALUE = Dimension(40, DimensionUnit::PX);
 constexpr Dimension LANE_MAX_LENGTH_CASE1_VALUE = Dimension(60, DimensionUnit::PX);
@@ -158,11 +166,11 @@ RefPtr<FrameNode> ListPatternTestNg::CreateListItemGroupParagraph(
 }
 
 /**
- * @tc.name: ListFrameNodeCreator001
+ * @tc.name: ListTest001
  * @tc.desc: Test all the properties of list.
  * @tc.type: FUNC
  */
-HWTEST_F(ListPatternTestNg, ListFrameNodeCreator001, TestSize.Level1)
+HWTEST_F(ListPatternTestNg, ListTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create testProperty and set properties of list.
@@ -215,11 +223,11 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListFrameNodeCreator002
+ * @tc.name: ListTest002
  * @tc.desc: Test list measure and layout function, set space initialIndex direction cachedCount.
  * @tc.type: FUNC
  */
-HWTEST_F(ListPatternTestNg, ListFrameNodeCreator002, TestSize.Level1)
+HWTEST_F(ListPatternTestNg, ListTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create testProperty and set properties of list.
@@ -292,11 +300,11 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator002, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListFrameNodeCreator003
+ * @tc.name: ListTest003
  * @tc.desc: Test list measure and layout function, set direction lanes listItemAlign.
  * @tc.type: FUNC
  */
-HWTEST_F(ListPatternTestNg, ListFrameNodeCreator003, TestSize.Level1)
+HWTEST_F(ListPatternTestNg, ListTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create testProperty and set properties of list.
@@ -364,11 +372,11 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator003, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListFrameNodeCreator004
+ * @tc.name: ListTest004
  * @tc.desc: Test list measure and layout function, set direction laneConstraint{laneMinLength, laneMaxLength} case1.
  * @tc.type: FUNC
  */
-HWTEST_F(ListPatternTestNg, ListFrameNodeCreator004, TestSize.Level1)
+HWTEST_F(ListPatternTestNg, ListTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create testProperty and set properties of list.
@@ -439,11 +447,11 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator004, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListFrameNodeCreator005
+ * @tc.name: ListTest005
  * @tc.desc: Test list measure and layout function, set direction laneConstraint{laneMinLength, laneMaxLength} case2.
  * @tc.type: FUNC
  */
-HWTEST_F(ListPatternTestNg, ListFrameNodeCreator005, TestSize.Level1)
+HWTEST_F(ListPatternTestNg, ListTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create testProperty and set properties of list.
@@ -514,11 +522,11 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator005, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListFrameNodeCreator006
+ * @tc.name: ListTest006
  * @tc.desc: Test list measure and layout function, set direction, special direction(Axis::HORIZONTAL).
  * @tc.type: FUNC
  */
-HWTEST_F(ListPatternTestNg, ListFrameNodeCreator006, TestSize.Level1)
+HWTEST_F(ListPatternTestNg, ListTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create testProperty and set properties of list.
@@ -587,11 +595,11 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator006, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListFrameNodeCreator007
+ * @tc.name: ListTest007
  * @tc.desc: Test list measure function, set direction, jumpIndex_ set JUMP_INDEX.
  * @tc.type: FUNC
  */
-HWTEST_F(ListPatternTestNg, ListFrameNodeCreator007, TestSize.Level1)
+HWTEST_F(ListPatternTestNg, ListTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create testProperty and set properties of list.
@@ -651,11 +659,11 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator007, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListFrameNodeCreator008
+ * @tc.name: ListTest008
  * @tc.desc: Test list measure and layout function, special case: jumpIndex < 0. List jump to top.
  * @tc.type: FUNC
  */
-HWTEST_F(ListPatternTestNg, ListFrameNodeCreator008, TestSize.Level1)
+HWTEST_F(ListPatternTestNg, ListTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create testProperty and set properties of list.
@@ -713,11 +721,11 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator008, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListFrameNodeCreator009
+ * @tc.name: ListTest009
  * @tc.desc: Test list measure and layout function, special case: jumpIndex > listItemCount.
  * @tc.type: FUNC
  */
-HWTEST_F(ListPatternTestNg, ListFrameNodeCreator009, TestSize.Level1)
+HWTEST_F(ListPatternTestNg, ListTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create testProperty and set properties of list.
@@ -772,18 +780,18 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator009, TestSize.Level1)
     listLayoutAlgorithm.jumpIndex_ = JUMP_INDEX_SPECIAL_CASE2;
     
     listLayoutAlgorithm.Measure(&layoutWrapper);
-    int32_t layoutNumber = LIST_HEIGHT_LIMIT / LIST_ITEM_HEIGHT;
-    for (int32_t index = END_INDEX - 1; index >= END_INDEX - layoutNumber; index--) {
-        EXPECT_EQ(listLayoutAlgorithm.itemPosition_[index].startPos, LIST_ITEM_HEIGHT * (index + 1 - END_INDEX));
+    int32_t expected = LIST_HEIGHT_LIMIT / LIST_ITEM_HEIGHT;
+    for (int32_t index = START_INDEX; index < expected; index++) {
+        EXPECT_EQ(listLayoutAlgorithm.itemPosition_[index].startPos, LIST_ITEM_HEIGHT * index);
     }
 }
 
 /**
- * @tc.name: ListFrameNodeCreator010
+ * @tc.name: ListTest010
  * @tc.desc: Test list measure function, special case: list has no listItem.
  * @tc.type: FUNC
  */
-HWTEST_F(ListPatternTestNg, ListFrameNodeCreator010, TestSize.Level1)
+HWTEST_F(ListPatternTestNg, ListTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create testProperty and set properties of list.
@@ -826,11 +834,226 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator010, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListFrameNodeCreator011
+ * @tc.name: ListTest011
+ * @tc.desc: Test list UpdateListItemConstraint function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listLayoutAlgorithm and input.
+     */
+    ListLayoutAlgorithm listLayoutAlgorithm;
+    OptionalSizeF selfIdealSize;
+    LayoutConstraintF contentConstraint;
+    Axis axis;
+    
+    /**
+     * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
+     * @tc.steps: case1: axis is VERTICAL, selfIdealSize has no value
+     * @tc.expected: step2. contentConstraint width equals expected result.
+     */
+    axis = Axis::VERTICAL;
+    listLayoutAlgorithm.UpdateListItemConstraint(axis, selfIdealSize, contentConstraint);
+    EXPECT_EQ(contentConstraint.maxSize.Width(), Infinity<float>());
+    
+    /**
+     * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
+     * @tc.steps: case2: axis is VERTICAL, selfIdealSize has value
+     * @tc.expected: step2. contentConstraint width equals expected result.
+     */
+    selfIdealSize.SetWidth(LIST_ITEM_WIDTH);
+    listLayoutAlgorithm.UpdateListItemConstraint(axis, selfIdealSize, contentConstraint);
+    EXPECT_EQ(contentConstraint.maxSize.Width(), LIST_ITEM_WIDTH);
+
+    /**
+     * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
+     * @tc.steps: case3: axis is HORIZONTAL, selfIdealSize has no value
+     * @tc.expected: step2. contentConstraint width equals expected result.
+     */
+    axis = Axis::HORIZONTAL;
+    listLayoutAlgorithm.UpdateListItemConstraint(axis, selfIdealSize, contentConstraint);
+    EXPECT_EQ(contentConstraint.maxSize.Height(), Infinity<float>());
+    
+    /**
+     * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
+     * @tc.steps: case4: axis is HORIZONTAL, selfIdealSize has value
+     * @tc.expected: step2. contentConstraint width equals expected result.
+     */
+    selfIdealSize.SetHeight(LIST_ITEM_HEIGHT);
+    listLayoutAlgorithm.UpdateListItemConstraint(axis, selfIdealSize, contentConstraint);
+    EXPECT_EQ(contentConstraint.maxSize.Height(), LIST_ITEM_HEIGHT);
+}
+
+/**
+ * @tc.name: ListTest012
+ * @tc.desc: Test list CalculateEstimateOffset function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listLayoutAlgorithm and input.
+     */
+    ListLayoutAlgorithm listLayoutAlgorithm;
+    
+    /**
+     * @tc.steps: step2. call function and compare.
+     * @tc.steps: case1: itemPosition is empty
+     * @tc.expected: step2. estimateOffset equals 0.
+     */
+    listLayoutAlgorithm.CalculateEstimateOffset();
+    EXPECT_EQ(listLayoutAlgorithm.estimateOffset_, 0);
+
+    /**
+     * @tc.steps: step2. create itemPosition, call function and compare.
+     * @tc.steps: case2: normal case.
+     * @tc.expected: step2. estimateOffset equals expected.
+     */
+    for (int32_t index = START_INDEX; index < END_INDEX; index++) {
+        ListItemInfo listItemInfo;
+        listItemInfo.startPos = index * LIST_ITEM_HEIGHT;
+        listItemInfo.endPos = (index + 1) * LIST_ITEM_HEIGHT;
+        listItemInfo.isGroup = false;
+        listLayoutAlgorithm.itemPosition_[index] = listItemInfo;
+    }
+
+    listLayoutAlgorithm.CalculateEstimateOffset();
+    EXPECT_EQ(listLayoutAlgorithm.estimateOffset_, START_INDEX * LIST_ITEM_HEIGHT);
+}
+
+/**
+ * @tc.name: ListTest013
+ * @tc.desc: Test list CalculateLaneCrossOffset function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create layoutAlgorithm.
+     * @tc.expected: step1. getLayoutAlgorithm.
+     */
+    ListLayoutAlgorithm listLayoutAlgorithm;
+    
+    /**
+     * @tc.steps: step2. call CalculateLaneCrossOffset function and compare.
+     * @tc.steps: case1: crossSize == childCrossSize
+     * @tc.expected: step2. function result equals expected result.
+     */
+    auto result = listLayoutAlgorithm.CalculateLaneCrossOffset(
+        CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE1);
+    EXPECT_EQ(result, 0);
+    
+    /**
+     * @tc.steps: step2. call CalculateLaneCrossOffset function and compare.
+     * @tc.steps: case2: crossSize > childCrossSize, itemAlign_ is START
+     * @tc.expected: step2. function result equals expected result.
+     */
+    listLayoutAlgorithm.listItemAlign_ = OHOS::Ace::V2::ListItemAlign::START;
+    result = listLayoutAlgorithm.CalculateLaneCrossOffset(
+        CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
+    EXPECT_EQ(result, 0);
+
+    /**
+     * @tc.steps: step2. call CalculateLaneCrossOffset function and compare.
+     * @tc.steps: case3: crossSize > childCrossSize, itemAlign_ is CENTER
+     * @tc.expected: step2. function result equals expected result.
+     */
+    constexpr float half = 0.5f;
+    listLayoutAlgorithm.listItemAlign_ = OHOS::Ace::V2::ListItemAlign::CENTER;
+    result = listLayoutAlgorithm.CalculateLaneCrossOffset(
+        CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
+    EXPECT_EQ(result, half * (CROSS_SIZE_CASE - CHILD_CROSS_SIZE_CASE2));
+
+    /**
+     * @tc.steps: step2. call CalculateLaneCrossOffset function and compare.
+     * @tc.steps: case4: crossSize > childCrossSize, itemAlign_ is END
+     * @tc.expected: step2. function result equals expected result.
+     */
+    listLayoutAlgorithm.listItemAlign_ = OHOS::Ace::V2::ListItemAlign::END;
+    result = listLayoutAlgorithm.CalculateLaneCrossOffset(
+        CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
+    EXPECT_EQ(result, CROSS_SIZE_CASE - CHILD_CROSS_SIZE_CASE2);
+}
+
+/**
+ * @tc.name: ListTest014
+ * @tc.desc: Test list GetHeaderFooterGroupNode function. Only have head and foot.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of list.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    testProperty.cachedCountValue = std::make_optional(CACHED_COUNT_VALUE);
+    
+    /**
+     * @tc.steps: step2. create list frameNode and layoutWrapper.
+     * @tc.expected: step2. create layoutWrapper success.
+     */
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.Reset();
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateContentConstraint();
+    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
+    
+    /**
+     * @tc.steps: step3. add head layoutWrapper to listItemGroup frameNode layoutWrapper.
+     * @tc.expected: step3. create layoutWrapper success.
+     */
+    auto headFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0,
+        AceType::MakeRefPtr<Pattern>());
+    ViewStackProcessor::GetInstance()->Push(headFrameNode);
+    RefPtr<GeometryNode> headGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    headGeometryNode->SetFrameSize(SizeF(LIST_ITEM_GROUP_HEAD_VALUE, LIST_ITEM_GROUP_HEAD_VALUE));
+    RefPtr<LayoutProperty> headLayoutProperty = headFrameNode->GetLayoutProperty();
+    RefPtr<LayoutWrapper> headLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        headFrameNode, headGeometryNode, headLayoutProperty);
+    layoutWrapper.AppendChild(std::move(headLayoutWrapper));
+
+    /**
+     * @tc.steps: step4. add foot layoutWrapper to listItemGroup frameNode layoutWrapper.
+     * @tc.expected: step4. create layoutWrapper success.
+     */
+    auto footFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0,
+        AceType::MakeRefPtr<Pattern>());
+    ViewStackProcessor::GetInstance()->Push(footFrameNode);
+    RefPtr<GeometryNode> footGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    footGeometryNode->SetFrameSize(SizeF(LIST_ITEM_GROUP_FOOT_VALUE, LIST_ITEM_GROUP_FOOT_VALUE));
+    RefPtr<LayoutProperty> footLayoutProperty = footFrameNode->GetLayoutProperty();
+    RefPtr<LayoutWrapper> footLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        footFrameNode, footGeometryNode, footLayoutProperty);
+    layoutWrapper.AppendChild(std::move(footLayoutWrapper));
+
+    /**
+     * @tc.steps: step5. do layoutAlgorithm Measure and compare values.
+     * @tc.expected: step5. layout result equals expected result.
+     */
+    ListLayoutAlgorithm listLayoutAlgorithm;
+    listLayoutAlgorithm.Measure(&layoutWrapper);
+    listLayoutAlgorithm.itemPosition_.begin()->second.isGroup = true;
+    listLayoutAlgorithm.itemPosition_.rbegin()->second.isGroup = true;
+    listLayoutAlgorithm.stickyStyle_ = V2::StickyStyle::HEADER;
+    listLayoutAlgorithm.GetHeaderFooterGroupNode(&layoutWrapper);
+    EXPECT_NE(listLayoutAlgorithm.headerGroupNode_.Upgrade(), nullptr);
+    EXPECT_NE(listLayoutAlgorithm.footerGroupNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: ListItemGroupTest001
  * @tc.desc: Test all the properties of listItemGroup.
  * @tc.type: FUNC
  */
-HWTEST_F(ListPatternTestNg, ListFrameNodeCreator011, TestSize.Level1)
+HWTEST_F(ListPatternTestNg, ListItemGroupTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create listItemGroupTestProperty and set properties of listItemGroup.
@@ -868,11 +1091,11 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator011, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListFrameNodeCreator012
+ * @tc.name: ListItemGroupTest002
  * @tc.desc: Test listItemGroup measure and layout function. ListItemGroup only has listItem.
  * @tc.type: FUNC
  */
-HWTEST_F(ListPatternTestNg, ListFrameNodeCreator012, TestSize.Level1)
+HWTEST_F(ListPatternTestNg, ListItemGroupTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create listItemGroupTestProperty and set properties of it.
@@ -945,11 +1168,11 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator012, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListFrameNodeCreator013
+ * @tc.name: ListItemGroupTest003
  * @tc.desc: Test listItemGroup measure function. ListItemGroup has listItem and head.
  * @tc.type: FUNC
  */
-HWTEST_F(ListPatternTestNg, ListFrameNodeCreator013, TestSize.Level1)
+HWTEST_F(ListPatternTestNg, ListItemGroupTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create listItemGroupTestProperty and set properties of it.
@@ -1020,11 +1243,11 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator013, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListFrameNodeCreator014
+ * @tc.name: ListItemGroupTest004
  * @tc.desc: Test listItemGroup measure function. ListItemGroup has listItem and foot.
  * @tc.type: FUNC
  */
-HWTEST_F(ListPatternTestNg, ListFrameNodeCreator014, TestSize.Level1)
+HWTEST_F(ListPatternTestNg, ListItemGroupTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create listItemGroupTestProperty and set properties of it.
@@ -1093,11 +1316,11 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator014, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListFrameNodeCreator015
+ * @tc.name: ListItemGroupTest005
  * @tc.desc: Test listItemGroup measure function. ListItemGroup has listItem and head and foot.
  * @tc.type: FUNC
  */
-HWTEST_F(ListPatternTestNg, ListFrameNodeCreator015, TestSize.Level1)
+HWTEST_F(ListPatternTestNg, ListItemGroupTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create listItemGroupTestProperty and set properties of it.
@@ -1177,11 +1400,11 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator015, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListFrameNodeCreator016
+ * @tc.name: ListItemGroupTest006
  * @tc.desc: Test listItemGroup measure function. Special Case: listItemGroup has only head and foot.
  * @tc.type: FUNC
  */
-HWTEST_F(ListPatternTestNg, ListFrameNodeCreator016, TestSize.Level1)
+HWTEST_F(ListPatternTestNg, ListItemGroupTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create listItemGroupTestProperty and set properties of it.
@@ -1245,11 +1468,520 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator016, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListFrameNodeCreator017
+ * @tc.name: ListItemGroupTest007
+ * @tc.desc: Test listItemGroup measure and layout function. ListItemGroup has divider.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListItemGroupTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listItemGroupTestProperty and set properties of it.
+     */
+    ListItemGroupTestProperty listItemGroupTestProperty;
+    listItemGroupTestProperty.spaceValue = std::make_optional(SPACE_VALUE);
+    V2::ItemDivider itemDivider = V2::ItemDivider();
+    itemDivider.strokeWidth = DIVIDER_STROKE_WIDTH_VALUE;
+    itemDivider.startMargin = DIVIDER_START_MARGIN_VALUE;
+    itemDivider.endMargin = DIVIDER_END_MARGIN_VALUE;
+    itemDivider.color = DIVIDER_COLOR_VALUE;
+    listItemGroupTestProperty.itemDividerValue = std::make_optional(itemDivider);
+    
+    /**
+     * @tc.steps: step2. create listItemGroup frameNode and layoutWrapper.
+     * @tc.expected: step2. create layoutWrapper success.
+     */
+    RefPtr<FrameNode> frameNode = CreateListItemGroupParagraph(listItemGroupTestProperty);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.Reset();
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateContentConstraint();
+    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
+
+    /**
+     * @tc.steps: step3. add listItem layoutWrapper to listItemGroup frameNode layoutWrapper.
+     * @tc.expected: step3. create layoutWrapper success.
+     */
+    for (int32_t index = START_INDEX; index < END_INDEX; index++) {
+        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0,
+            AceType::MakeRefPtr<Pattern>());
+        ViewStackProcessor::GetInstance()->Push(childFrameNode);
+        RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+        EXPECT_NE(childGeometryNode, nullptr);
+        childGeometryNode->SetFrameSize(SizeF(LIST_ITEM_WIDTH, LIST_ITEM_HEIGHT));
+        RefPtr<LayoutProperty> childLayoutProperty = childFrameNode->GetLayoutProperty();
+        EXPECT_NE(childLayoutProperty, nullptr);
+        RefPtr<LayoutWrapper> childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+            childFrameNode, childGeometryNode, childLayoutProperty);
+        layoutWrapper.AppendChild(std::move(childLayoutWrapper));
+    }
+
+    /**
+     * @tc.steps: step4. do layoutAlgorithm Measure and compare values.
+     * @tc.expected: step4. layout result equals expected result.
+     */
+    auto listItemGroupLayoutAlgorithm = ListItemGroupLayoutAlgorithm(-1, -1, 0);
+    
+    listItemGroupLayoutAlgorithm.Measure(&layoutWrapper);
+    for (int32_t index = START_INDEX; index < END_INDEX; index++) {
+        EXPECT_EQ(listItemGroupLayoutAlgorithm.itemPosition_[index].first,
+            index * (DIVIDER_STROKE_WIDTH_VALUE.Value() + LIST_ITEM_HEIGHT));
+        EXPECT_EQ(listItemGroupLayoutAlgorithm.itemPosition_[index].second,
+            index * (DIVIDER_STROKE_WIDTH_VALUE.Value() + LIST_ITEM_HEIGHT) + LIST_ITEM_HEIGHT);
+    }
+    
+    /**
+     * @tc.steps: step4. do layoutAlgorithm Layout and compare values.
+     * @tc.expected: step4. layout result equals expected result.
+     */
+    listItemGroupLayoutAlgorithm.Layout(&layoutWrapper);
+    for (int32_t index = START_INDEX; index < END_INDEX; index++) {
+        auto childWrapper = layoutWrapper.GetOrCreateChildByIndex(index);
+        auto childGeometryNode = childWrapper->GetGeometryNode();
+        EXPECT_NE(childGeometryNode, nullptr);
+        auto frameOffset = childGeometryNode->GetMarginFrameOffset();
+        EXPECT_EQ(frameOffset.GetX(), 0);
+        EXPECT_EQ(frameOffset.GetY(),
+            index * (DIVIDER_STROKE_WIDTH_VALUE.Value() + LIST_ITEM_HEIGHT));
+    }
+}
+
+/**
+ * @tc.name: ListItemGroupTest008
+ * @tc.desc: Test listItemGroup UpdateListItemConstraint function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListItemGroupTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create layoutAlgorithm.
+     * @tc.expected: step1. getLayoutAlgorithm.
+     */
+    auto listItemGroupLayoutAlgorithm = ListItemGroupLayoutAlgorithm(-1, -1, 0);
+    OptionalSizeF selfIdealSize;
+    LayoutConstraintF contentConstraint;
+    listItemGroupLayoutAlgorithm.axis_ = Axis::VERTICAL;
+    listItemGroupLayoutAlgorithm.lanes_ = 1;
+    
+    /**
+     * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
+     * @tc.steps: case1: axis is VERTICAL, selfIdealSize has no value
+     * @tc.expected: step2. contentConstraint width equals expected result.
+     */
+    listItemGroupLayoutAlgorithm.UpdateListItemConstraint(selfIdealSize, contentConstraint);
+    EXPECT_EQ(contentConstraint.maxSize.Width(), Infinity<float>());
+    
+    /**
+     * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
+     * @tc.steps: case2: axis is VERTICAL, selfIdealSize has value
+     * @tc.expected: step2. contentConstraint width equals expected result.
+     */
+    selfIdealSize.SetWidth(LIST_ITEM_WIDTH);
+    listItemGroupLayoutAlgorithm.UpdateListItemConstraint(selfIdealSize, contentConstraint);
+    EXPECT_EQ(contentConstraint.percentReference.Width(), LIST_ITEM_WIDTH);
+    EXPECT_EQ(contentConstraint.parentIdealSize.Width(), LIST_ITEM_WIDTH);
+    EXPECT_EQ(contentConstraint.maxSize.Width(), LIST_ITEM_WIDTH);
+
+    /**
+     * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
+     * @tc.steps: case3: axis is HORIZONTAL, selfIdealSize has no value
+     * @tc.expected: step2. contentConstraint width equals expected result.
+     */
+    listItemGroupLayoutAlgorithm.axis_ = Axis::HORIZONTAL;
+    listItemGroupLayoutAlgorithm.UpdateListItemConstraint(selfIdealSize, contentConstraint);
+    EXPECT_EQ(contentConstraint.maxSize.Height(), Infinity<float>());
+    
+    /**
+     * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
+     * @tc.steps: case4: axis is HORIZONTAL, selfIdealSize has value
+     * @tc.expected: step2. contentConstraint width equals expected result.
+     */
+    selfIdealSize.SetHeight(LIST_ITEM_HEIGHT);
+    listItemGroupLayoutAlgorithm.UpdateListItemConstraint(selfIdealSize, contentConstraint);
+    EXPECT_EQ(contentConstraint.percentReference.Height(), LIST_ITEM_HEIGHT);
+    EXPECT_EQ(contentConstraint.parentIdealSize.Height(), LIST_ITEM_HEIGHT);
+    EXPECT_EQ(contentConstraint.maxSize.Height(), LIST_ITEM_HEIGHT);
+}
+
+/**
+ * @tc.name: ListItemGroupTest009
+ * @tc.desc: Test listItemGroup CalculateLaneCrossOffset function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListItemGroupTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create layoutAlgorithm.
+     * @tc.expected: step1. getLayoutAlgorithm.
+     */
+    auto listItemGroupLayoutAlgorithm = ListItemGroupLayoutAlgorithm(-1, -1, 0);
+    
+    /**
+     * @tc.steps: step2. call CalculateLaneCrossOffset function and compare.
+     * @tc.steps: case1: crossSize == childCrossSize
+     * @tc.expected: step2. function result equals expected result.
+     */
+    auto result = listItemGroupLayoutAlgorithm.CalculateLaneCrossOffset(
+        CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE1);
+    EXPECT_EQ(result, 0);
+    
+    /**
+     * @tc.steps: step2. call CalculateLaneCrossOffset function and compare.
+     * @tc.steps: case2: crossSize > childCrossSize, itemAlign_ is START
+     * @tc.expected: step2. function result equals expected result.
+     */
+    listItemGroupLayoutAlgorithm.itemAlign_ = OHOS::Ace::V2::ListItemAlign::START;
+    result = listItemGroupLayoutAlgorithm.CalculateLaneCrossOffset(
+        CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
+    EXPECT_EQ(result, 0);
+
+    /**
+     * @tc.steps: step2. call CalculateLaneCrossOffset function and compare.
+     * @tc.steps: case3: crossSize > childCrossSize, itemAlign_ is CENTER
+     * @tc.expected: step2. function result equals expected result.
+     */
+    constexpr float half = 0.5f;
+    listItemGroupLayoutAlgorithm.itemAlign_ = OHOS::Ace::V2::ListItemAlign::CENTER;
+    result = listItemGroupLayoutAlgorithm.CalculateLaneCrossOffset(
+        CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
+    EXPECT_EQ(result, half * (CROSS_SIZE_CASE - CHILD_CROSS_SIZE_CASE2));
+
+    /**
+     * @tc.steps: step2. call CalculateLaneCrossOffset function and compare.
+     * @tc.steps: case4: crossSize > childCrossSize, itemAlign_ is END
+     * @tc.expected: step2. function result equals expected result.
+     */
+    listItemGroupLayoutAlgorithm.itemAlign_ = OHOS::Ace::V2::ListItemAlign::END;
+    result = listItemGroupLayoutAlgorithm.CalculateLaneCrossOffset(
+        CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
+    EXPECT_EQ(result, CROSS_SIZE_CASE - CHILD_CROSS_SIZE_CASE2);
+}
+
+/**
+ * @tc.name: ListLanesTest001
+ * @tc.desc: Test listLanes UpdateListItemConstraint function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListLanesTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create layoutAlgorithm.
+     * @tc.expected: step1. getLayoutAlgorithm.
+     */
+    ListLanesLayoutAlgorithm listLanesLayoutAlgorithm;
+    OptionalSizeF selfIdealSize;
+    LayoutConstraintF contentConstraint;
+    Axis axis = Axis::VERTICAL;
+    listLanesLayoutAlgorithm.lanes_ = LANES_VALUE;
+    
+    /**
+     * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
+     * @tc.steps: case1: axis is VERTICAL, selfIdealSize has no value
+     * @tc.expected: step2. contentConstraint width equals expected result.
+     */
+    listLanesLayoutAlgorithm.UpdateListItemConstraint(axis, selfIdealSize, contentConstraint);
+    EXPECT_EQ(contentConstraint.maxSize.Width(), Infinity<float>());
+    
+    /**
+     * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
+     * @tc.steps: case2: axis is VERTICAL, selfIdealSize has value
+     * @tc.expected: step2. contentConstraint width equals expected result.
+     */
+    selfIdealSize.SetWidth(LIST_ITEM_WIDTH);
+    listLanesLayoutAlgorithm.UpdateListItemConstraint(axis, selfIdealSize, contentConstraint);
+    EXPECT_EQ(contentConstraint.percentReference.Width(), LIST_ITEM_WIDTH / LANES_VALUE);
+    EXPECT_EQ(contentConstraint.parentIdealSize.Width(), LIST_ITEM_WIDTH / LANES_VALUE);
+    EXPECT_EQ(contentConstraint.maxSize.Width(), LIST_ITEM_WIDTH / LANES_VALUE);
+
+    /**
+     * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
+     * @tc.steps: case3: axis is VERTICAL, selfIdealSize has value, maxLaneLength has value
+     * @tc.expected: step2. contentConstraint width equals expected result.
+     */
+    selfIdealSize.SetWidth(LIST_ITEM_WIDTH);
+    listLanesLayoutAlgorithm.maxLaneLength_ = MAX_LANE_LENGTH_CASE1;
+    listLanesLayoutAlgorithm.UpdateListItemConstraint(axis, selfIdealSize, contentConstraint);
+    EXPECT_EQ(contentConstraint.percentReference.Width(), MAX_LANE_LENGTH_CASE1);
+    EXPECT_EQ(contentConstraint.parentIdealSize.Width(), MAX_LANE_LENGTH_CASE1);
+    EXPECT_EQ(contentConstraint.maxSize.Width(), MAX_LANE_LENGTH_CASE1);
+
+    /**
+     * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
+     * @tc.steps: case4: axis is VERTICAL, selfIdealSize has value, minLaneLength has value
+     * @tc.expected: step2. contentConstraint width equals expected result.
+     */
+    selfIdealSize.SetWidth(LIST_ITEM_WIDTH);
+    listLanesLayoutAlgorithm.minLaneLength_ = MIN_LANE_LENGTH_CASE;
+    listLanesLayoutAlgorithm.UpdateListItemConstraint(axis, selfIdealSize, contentConstraint);
+    EXPECT_EQ(contentConstraint.minSize.Width(), MIN_LANE_LENGTH_CASE);
+}
+
+/**
+ * @tc.name: ListLanesTest002
+ * @tc.desc: Test listLanes UpdateListItemConstraint function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListLanesTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create layoutAlgorithm.
+     * @tc.expected: step1. getLayoutAlgorithm.
+     */
+    ListLanesLayoutAlgorithm listLanesLayoutAlgorithm;
+    OptionalSizeF selfIdealSize;
+    LayoutConstraintF contentConstraint;
+    Axis axis = Axis::HORIZONTAL;
+    listLanesLayoutAlgorithm.lanes_ = LANES_VALUE;
+    
+    /**
+     * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
+     * @tc.steps: case1: axis is HORIZONTAL, selfIdealSize has no value
+     * @tc.expected: step2. contentConstraint height equals expected result.
+     */
+    listLanesLayoutAlgorithm.UpdateListItemConstraint(axis, selfIdealSize, contentConstraint);
+    EXPECT_EQ(contentConstraint.maxSize.Height(), Infinity<float>());
+    
+    /**
+     * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
+     * @tc.steps: case2: axis is HORIZONTAL, selfIdealSize has value
+     * @tc.expected: step2. contentConstraint Height equals expected result.
+     */
+    selfIdealSize.SetHeight(LIST_ITEM_HEIGHT);
+    listLanesLayoutAlgorithm.UpdateListItemConstraint(axis, selfIdealSize, contentConstraint);
+    EXPECT_EQ(contentConstraint.percentReference.Height(), LIST_ITEM_HEIGHT / LANES_VALUE);
+    EXPECT_EQ(contentConstraint.parentIdealSize.Height(), LIST_ITEM_HEIGHT / LANES_VALUE);
+    EXPECT_EQ(contentConstraint.maxSize.Height(), LIST_ITEM_HEIGHT / LANES_VALUE);
+
+    /**
+     * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
+     * @tc.steps: case3: axis is HORIZONTAL, selfIdealSize has value, maxLaneLength has value
+     * @tc.expected: step2. contentConstraint height equals expected result.
+     */
+    selfIdealSize.SetHeight(LIST_ITEM_HEIGHT);
+    listLanesLayoutAlgorithm.maxLaneLength_ = MAX_LANE_LENGTH_CASE2;
+    listLanesLayoutAlgorithm.UpdateListItemConstraint(axis, selfIdealSize, contentConstraint);
+    EXPECT_EQ(contentConstraint.percentReference.Height(), MAX_LANE_LENGTH_CASE2);
+    EXPECT_EQ(contentConstraint.parentIdealSize.Height(), MAX_LANE_LENGTH_CASE2);
+    EXPECT_EQ(contentConstraint.maxSize.Height(), MAX_LANE_LENGTH_CASE2);
+
+    /**
+     * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
+     * @tc.steps: case4: axis is HORIZONTAL, selfIdealSize has value, minLaneLength has value
+     * @tc.expected: step2. contentConstraint Height equals expected result.
+     */
+    selfIdealSize.SetHeight(LIST_ITEM_HEIGHT);
+    listLanesLayoutAlgorithm.minLaneLength_ = MIN_LANE_LENGTH_CASE;
+    listLanesLayoutAlgorithm.UpdateListItemConstraint(axis, selfIdealSize, contentConstraint);
+    EXPECT_EQ(contentConstraint.minSize.Height(), MIN_LANE_LENGTH_CASE);
+}
+
+/**
+ * @tc.name: ListLanesTest003
+ * @tc.desc: Test listLanes ModifyLaneLength function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListLanesTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create layoutAlgorithm.
+     * @tc.expected: step1. getLayoutAlgorithm.
+     */
+    ListLanesLayoutAlgorithm listLanesLayoutAlgorithm;
+    LayoutConstraintF contentConstraint;
+    Axis axis = Axis::VERTICAL;
+
+    /**
+     * @tc.steps: step2. call modifyLanLength function and compare.
+     * @tc.steps: case1: max = min = 0
+     * @tc.expected: step2. result equals expected result.
+     */
+    listLanesLayoutAlgorithm.maxLaneLength_ = 0;
+    listLanesLayoutAlgorithm.minLaneLength_ = 0;
+    contentConstraint.maxSize = SizeF(LIST_ITEM_WIDTH, LIST_ITEM_HEIGHT);
+    listLanesLayoutAlgorithm.ModifyLaneLength(contentConstraint, axis);
+    EXPECT_EQ(listLanesLayoutAlgorithm.maxLaneLength_.value(), LIST_ITEM_WIDTH);
+    EXPECT_EQ(listLanesLayoutAlgorithm.minLaneLength_.value(), LIST_ITEM_WIDTH);
+
+    /**
+     * @tc.steps: step2. call modifyLanLength function and compare.
+     * @tc.steps: case2: max = 1, min = 0
+     * @tc.expected: step2. result equals expected result.
+     */
+    listLanesLayoutAlgorithm.maxLaneLength_ = 1;
+    listLanesLayoutAlgorithm.minLaneLength_ = LIST_ITEM_WIDTH;
+    contentConstraint.maxSize = SizeF(LIST_ITEM_WIDTH, LIST_ITEM_HEIGHT);
+    listLanesLayoutAlgorithm.ModifyLaneLength(contentConstraint, axis);
+    EXPECT_EQ(listLanesLayoutAlgorithm.maxLaneLength_.value(), LIST_ITEM_WIDTH);
+    EXPECT_EQ(listLanesLayoutAlgorithm.minLaneLength_.value(), LIST_ITEM_WIDTH);
+}
+
+/**
+ * @tc.name: ListLanesTest004
+ * @tc.desc: Test listLanes CalculateLaneCrossOffset function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListLanesTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create layoutAlgorithm.
+     * @tc.expected: step1. getLayoutAlgorithm.
+     */
+    ListLanesLayoutAlgorithm listLanesLayoutAlgorithm;
+    
+    /**
+     * @tc.steps: step2. call calculateLaneCrossOffset function and compare.
+     * @tc.steps: case1: special case, lanes_ <= 0
+     * @tc.expected: step2. result equals expected result.
+     */
+    listLanesLayoutAlgorithm.lanes_ = 0;
+    auto result = listLanesLayoutAlgorithm.CalculateLaneCrossOffset(
+        CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
+    EXPECT_EQ(result, 0);
+
+    /**
+     * @tc.steps: step2. call calculateLaneCrossOffset function and compare.
+     * @tc.steps: case2: normal case, lanes_ > 0
+     * @tc.expected: step2. result equals expected result.
+     */
+    listLanesLayoutAlgorithm.lanes_ = LANES_VALUE;
+    result = listLanesLayoutAlgorithm.CalculateLaneCrossOffset(
+        CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE1);
+    EXPECT_EQ(result, (CROSS_SIZE_CASE - CHILD_CROSS_SIZE_CASE1) / LANES_VALUE);
+}
+
+/**
+ * @tc.name: ListLanesTest005
+ * @tc.desc: Test listLanes LayoutALineBackward function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListLanesTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create layoutAlgorithm.
+     * @tc.expected: step1. getLayoutAlgorithm.
+     */
+    ListLanesLayoutAlgorithm listLanesLayoutAlgorithm;
+
+    /**
+     * @tc.steps: step1. create testProperty and set properties of list.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    /**
+     * @tc.steps: step2. create list frameNode and layoutWrapper.
+     * @tc.expected: step2. create layoutWrapper success.
+     */
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.Reset();
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateContentConstraint();
+    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
+
+    /**
+     * @tc.steps: step3. add listItem layoutWrapper to list frameNode layoutWrapper.
+     * @tc.expected: step3. create layoutWrapper success.
+     */
+    for (int32_t index = START_INDEX; index < END_INDEX; index++) {
+        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0,
+            AceType::MakeRefPtr<Pattern>());
+        EXPECT_NE(childFrameNode, nullptr);
+        ViewStackProcessor::GetInstance()->Push(childFrameNode);
+        RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+        EXPECT_NE(childGeometryNode, nullptr);
+        childGeometryNode->SetFrameSize(SizeF(LIST_ITEM_WIDTH, LIST_ITEM_HEIGHT));
+        RefPtr<LayoutProperty> childLayoutProperty = childFrameNode->GetLayoutProperty();
+        EXPECT_NE(childLayoutProperty, nullptr);
+        RefPtr<LayoutWrapper> childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+            childFrameNode, childGeometryNode, childLayoutProperty);
+        layoutWrapper.AppendChild(std::move(childLayoutWrapper));
+    }
+
+    int32_t currentIndex = END_INDEX;
+    float endPos = LIST_HEIGHT_LIMIT;
+    float startPos = 0;
+    listLanesLayoutAlgorithm.lanes_ = LANES_VALUE;
+    auto result = listLanesLayoutAlgorithm.LayoutALineBackward(
+        &layoutWrapper, layoutConstraint, Axis::VERTICAL, currentIndex, endPos, startPos);
+    EXPECT_EQ(result, (END_INDEX - START_INDEX) % LANES_VALUE);
+}
+
+/**
+ * @tc.name: ListLanesTest006
+ * @tc.desc: Test listLanes FindLanesStartIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListLanesTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create layoutAlgorithm.
+     * @tc.expected: step1. getLayoutAlgorithm.
+     */
+    ListLanesLayoutAlgorithm listLanesLayoutAlgorithm;
+
+    /**
+     * @tc.steps: step1. create testProperty and set properties of list.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    /**
+     * @tc.steps: step2. create list frameNode and layoutWrapper.
+     * @tc.expected: step2. create layoutWrapper success.
+     */
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.Reset();
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateContentConstraint();
+    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
+
+    /**
+     * @tc.steps: step3. add listItem layoutWrapper to list frameNode layoutWrapper.
+     * @tc.expected: step3. create layoutWrapper success.
+     */
+    for (int32_t index = START_INDEX; index < END_INDEX; index++) {
+        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0,
+            AceType::MakeRefPtr<Pattern>());
+        EXPECT_NE(childFrameNode, nullptr);
+        ViewStackProcessor::GetInstance()->Push(childFrameNode);
+        RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+        EXPECT_NE(childGeometryNode, nullptr);
+        childGeometryNode->SetFrameSize(SizeF(LIST_ITEM_WIDTH, LIST_ITEM_HEIGHT));
+        RefPtr<LayoutProperty> childLayoutProperty = childFrameNode->GetLayoutProperty();
+        EXPECT_NE(childLayoutProperty, nullptr);
+        RefPtr<LayoutWrapper> childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+            childFrameNode, childGeometryNode, childLayoutProperty);
+        layoutWrapper.AppendChild(std::move(childLayoutWrapper));
+    }
+
+    listLanesLayoutAlgorithm.lanes_ = 1;
+    auto result = listLanesLayoutAlgorithm.FindLanesStartIndex(&layoutWrapper, END_INDEX);
+    EXPECT_EQ(result, 0);
+
+    listLanesLayoutAlgorithm.lanes_ = LANES_VALUE;
+    result = listLanesLayoutAlgorithm.FindLanesStartIndex(&layoutWrapper, START_INDEX);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: ListEvent001
  * @tc.desc: Test list eventHub function. ListEventHub getDirection.
  * @tc.type: FUNC
  */
-HWTEST_F(ListPatternTestNg, ListFrameNodeCreator017, TestSize.Level1)
+HWTEST_F(ListPatternTestNg, ListEvent001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create listTestProperty and set properties of it.
@@ -1276,11 +2008,11 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator017, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListFrameNodeCreator018
+ * @tc.name: ListEvent002
  * @tc.desc: Test list eventHub function. ListEventHub::InitItemDragEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(ListPatternTestNg, ListFrameNodeCreator018, TestSize.Level1)
+HWTEST_F(ListPatternTestNg, ListEvent002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create listTestProperty and set properties of it.
@@ -1309,12 +2041,12 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator018, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListFrameNodeCreator019
+ * @tc.name: ListEvent003
  * @tc.desc: Test list eventHub function. Functions have:
  * @tc.desc: HandleOnItemDragStart, HandleOnItemDragUpdate, HandleOnItemDragEnd, HandleOnItemDragCancel.
  * @tc.type: FUNC
  */
-HWTEST_F(ListPatternTestNg, ListFrameNodeCreator019, TestSize.Level1)
+HWTEST_F(ListPatternTestNg, ListEvent003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create listTestProperty and set properties of it.
@@ -1359,12 +2091,12 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator019, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListFrameNodeCreator020
+ * @tc.name: ListEvent004
  * @tc.desc: Test list eventHub function. Functions have:
  * @tc.desc: HandleOnItemDragStart, HandleOnItemDragUpdate, HandleOnItemDragEnd, HandleOnItemDragCancel.
  * @tc.type: FUNC
  */
-HWTEST_F(ListPatternTestNg, ListFrameNodeCreator020, TestSize.Level1)
+HWTEST_F(ListPatternTestNg, ListEvent004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create listTestProperty and set properties of it.
@@ -1406,6 +2138,185 @@ HWTEST_F(ListPatternTestNg, ListFrameNodeCreator020, TestSize.Level1)
     listEventHub->HandleOnItemDragStart(gestureEvent);
     listEventHub->HandleOnItemDragCancel();
     EXPECT_EQ(listEventHub->dragDropProxy_, nullptr);
+}
+
+/**
+ * @tc.name: ListPatternTest001
+ * @tc.desc: Test list pattern OnModifyDone function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPatternTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    auto hub = frameNode->GetEventHub<EventHub>();
+    EXPECT_NE(hub, nullptr);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    EXPECT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. create list frameNode and eventHub.
+     * @tc.steps: case1: !isInitialized_, !scrollableEvent_, !scrollEffect_
+     * @tc.expected: step2. equal.
+     */
+    listPattern->isInitialized_ = false;
+    listPattern->scrollableEvent_ = nullptr;
+    listPattern->scrollEffect_ = nullptr;
+    listPattern->OnModifyDone();
+    EXPECT_EQ(listPattern->isInitialized_, true);
+    EXPECT_NE(listPattern->scrollableEvent_, nullptr);
+
+    /**
+     * @tc.steps: step2. create list frameNode and eventHub.
+     * @tc.steps: case2: axis not same
+     * @tc.expected: step2. equal.
+     */
+    listPattern->scrollableEvent_->axis_ = Axis::NONE;
+    listPattern->OnModifyDone();
+    EXPECT_EQ(listPattern->scrollableEvent_->axis_, Axis::VERTICAL);
+    
+    /**
+     * @tc.steps: step2. create list frameNode and eventHub.
+     * @tc.steps: case3: axis same, !scrollEffect_
+     * @tc.expected: step2. equal.
+     */
+    listPattern->scrollEffect_ = nullptr;
+    listPattern->OnModifyDone();
+    EXPECT_NE(listPattern->scrollEffect_, nullptr);
+    
+    /**
+     * @tc.steps: step2. create list frameNode and eventHub.
+     * @tc.steps: case3: axis same, scrollEffect_, scrollEffect = NONE
+     * @tc.expected: step2. equal.
+     */
+    listPattern->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
+    listPattern->OnModifyDone();
+    EXPECT_NE(listPattern->scrollEffect_, nullptr);
+    
+    /**
+     * @tc.steps: step2. create list frameNode and eventHub.
+     * @tc.steps: case4: axis same, scrollEffect_, scrollEffect = SPRING
+     * @tc.expected: step2. equal.
+     */
+    listPattern->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
+    listPattern->OnModifyDone();
+    EXPECT_NE(listPattern->scrollEffect_, nullptr);
+}
+
+/**
+ * @tc.name: ListPatternTest002
+ * @tc.desc: Test list pattern OnModifyDone function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPatternTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step2. create list frameNode and eventHub.
+     * @tc.steps: case5: edgeEffect NONE, !scrollEffect
+     * @tc.expected: step2. equal.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    testProperty.edgeEffectValue = std::make_optional(EDGE_EFFECT_VALUE);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+
+    listPattern->scrollEffect_ = nullptr;
+    listPattern->OnModifyDone();
+    EXPECT_EQ(listPattern->scrollEffect_, nullptr);
+    
+    /**
+     * @tc.steps: step2. create list frameNode and eventHub.
+     * @tc.steps: case6: edgeEffect NONE, scrollEffect
+     * @tc.expected: step2. equal.
+     */
+    listPattern->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
+    listPattern->OnModifyDone();
+    EXPECT_NE(listPattern->scrollEffect_, nullptr);
+}
+
+/**
+ * @tc.name: ListPatternTest003
+ * @tc.desc: Test list pattern OnDirtyLayoutWrapperSwap function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPatternTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    DirtySwapConfig config;
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    bool result = false;
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case1: config.skipMeasure && config.skipLayout, return
+     * @tc.expected: step2. equal.
+     */
+    config.skipMeasure = true;
+    config.skipLayout = true;
+    result = listPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(result, false);
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case2: config.skipMeasure, !config.skipLayout, !jumpIndex_
+     * @tc.expected: step2. equal.
+     */
+    config.skipMeasure = true;
+    config.skipLayout = false;
+    result = listPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(result, false);
+    
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case3: !config.skipMeasure, config.skipLayout, jumpIndex_, itemPosition empty
+     * @tc.expected: step2. equal.
+     */
+    config.skipMeasure = false;
+    config.skipLayout = true;
+    listPattern->jumpIndex_ = JUMP_INDEX;
+    listPattern->itemPosition_.clear();
+    result = listPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(result, false);
+    
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case4: !config.skipMeasure, !config.skipLayout, jumpIndex_, itemPosition not empty
+     * @tc.expected: step2. equal.
+     */
+    config.skipMeasure = false;
+    config.skipLayout = false;
+    listPattern->jumpIndex_ = JUMP_INDEX;
+    listPattern->itemPosition_.clear();
+    ListItemInfo listItemInfo;
+    listPattern->itemPosition_[0] = listItemInfo;
+    result = listPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(result, false);
 }
 } // namespace OHOS::Ace::NG
 

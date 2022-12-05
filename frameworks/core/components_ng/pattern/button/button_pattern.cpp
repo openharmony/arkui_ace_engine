@@ -15,50 +15,79 @@
 
 #include "core/components_ng/pattern/button/button_pattern.h"
 
-#include "base/geometry/axis.h"
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/utils/macros.h"
 #include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/scroll/scrollable.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 void ButtonPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    SetDefaultAttributes(host, pipeline);
     host->GetRenderContext()->SetClipToFrame(true);
-    clickedColor_ = pipeline->GetTheme<ButtonTheme>()->GetClickedColor();
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    clickedColor_ = buttonTheme->GetClickedColor();
 }
 
-bool ButtonPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+void ButtonPattern::SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, const RefPtr<PipelineBase>& pipeline)
 {
-    if (!config.frameSizeChange) {
-        return false;
-    }
-    auto buttonLayoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(buttonLayoutProperty, false);
+    auto renderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
 
-    CHECK_NULL_RETURN(dirty, false);
+    // Init button default style
+    buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor());
+    buttonLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(buttonTheme->GetHeight())));
+}
+
+void ButtonPattern::InitButtonLabel()
+{
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CAPSULE ||
-        buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
-        Dimension radius(dirty->GetGeometryNode()->GetFrameSize().Height() / 2.0f);
-        BorderRadiusProperty borderRadius { radius, radius, radius, radius };
-        // TODO Dynamic and new border radius
-        host->GetRenderContext()->UpdateBorderRadius(borderRadius);
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->GetLabel().has_value()) {
+        LOGI("No label, no need to initialize label.");
+        return;
     }
-    return false;
+    
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto label = layoutProperty->GetLabelValue("");
+    textLayoutProperty->UpdateContent(label);
+
+    if (layoutProperty->GetFontSize().has_value()) {
+        textLayoutProperty->UpdateFontSize(layoutProperty->GetFontSize().value());
+    }
+    if (layoutProperty->GetFontWeight().has_value()) {
+        textLayoutProperty->UpdateFontWeight(layoutProperty->GetFontWeight().value());
+    }
+    if (layoutProperty->GetFontColor().has_value()) {
+        textLayoutProperty->UpdateTextColor(layoutProperty->GetFontColor().value());
+    }
+    if (layoutProperty->GetFontStyle().has_value()) {
+        textLayoutProperty->UpdateItalicFontStyle(layoutProperty->GetFontStyle().value());
+    }
+    if (layoutProperty->GetFontFamily().has_value()) {
+        textLayoutProperty->UpdateFontFamily(layoutProperty->GetFontFamily().value());
+    }
+    textNode->MarkModifyDone();
+    textNode->MarkDirtyNode();
 }
 
 void ButtonPattern::OnModifyDone()
@@ -66,24 +95,10 @@ void ButtonPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    auto buttonLayoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
+    InitButtonLabel();
 
-    auto layoutProperty = host->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetPositionProperty()) {
-        layoutProperty->UpdateAlignment(
-            layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));
-    } else {
-        layoutProperty->UpdateAlignment(Alignment::CENTER);
-    }
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-
-    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
-    if (textNode) {
-        textNode->MarkModifyDone();
-    }
 
     if (touchListener_) {
         return;

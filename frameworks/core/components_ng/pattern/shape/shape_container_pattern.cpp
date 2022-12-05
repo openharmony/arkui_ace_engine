@@ -16,6 +16,7 @@
 #include <algorithm>
 
 #include "base/geometry/ng/rect_t.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/shape/shape_container_pattern.h"
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
 
@@ -35,9 +36,7 @@ void ShapeContainerPattern::ViewPortTansform()
     auto curFrameNode = GetHost();
     auto renderContext = curFrameNode->GetRenderContext();
     auto geoNode = curFrameNode->GetGeometryNode();
-    if (!geoNode) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(geoNode);
     SizeF sizeF = geoNode->GetContentSize();
     auto containerPaintProperty = curFrameNode->GetPaintProperty<ContainerPaintProperty>();
     if (containerPaintProperty->HasShapeViewBox() && containerPaintProperty->GetShapeViewBoxValue().IsValid()) {
@@ -63,7 +62,8 @@ void ShapeContainerPattern::OnModifyDone()
 
 void ShapeContainerPattern::MarkChildrenDirty(RefPtr<FrameNode> curentFrameNode)
 {
-    if (!curentFrameNode || curentFrameNode->GetChildren().empty()) {
+    CHECK_NULL_VOID_NOLOG(curentFrameNode);
+    if (curentFrameNode->GetChildren().empty()) {
         return;
     }
     auto children = curentFrameNode->GetChildren();

@@ -21,6 +21,7 @@
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/measure_util.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/common/media_query/media_query_info.h"
@@ -107,6 +108,11 @@ public:
     virtual const std::string& GetAppName() const = 0;
     virtual const std::string& GetVersionName() const = 0;
     virtual int32_t GetVersionCode() const = 0;
+
+    // ----------------
+    // system.measure
+    // ----------------
+    virtual double MeasureText(const MeasureContext& context) = 0;
 
     // ----------------
     // system.prompt

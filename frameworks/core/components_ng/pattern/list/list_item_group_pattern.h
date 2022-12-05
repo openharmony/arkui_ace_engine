@@ -97,6 +97,7 @@ private:
     int32_t itemStartIndex_ = 0;
 
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
+    float spaceWidth_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListItemGroupPattern);
 };

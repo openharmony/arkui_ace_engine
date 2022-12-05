@@ -49,10 +49,7 @@ DragEventActuator::DragEventActuator(
 void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
-    if (!userCallback_) {
-        return;
-    }
-
+    CHECK_NULL_VOID_NOLOG(userCallback_);
     auto actionStart = [weak = WeakClaim(this)](GestureEvent& info) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
@@ -128,5 +125,4 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     result.emplace_back(SequencedRecognizer_);
 }
-
 } // namespace OHOS::Ace::NG

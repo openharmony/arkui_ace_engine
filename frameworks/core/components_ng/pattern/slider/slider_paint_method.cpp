@@ -48,7 +48,7 @@ CanvasDrawFunction SliderPaintMethod::GetContentDrawFunction(PaintWrapper* paint
     return [background = backgroundPenAndSize, marker = markerPenAndPath, select = selectPenAndSize,
                circle = circlePenAndSize](RSCanvas& canvas) {
         canvas.AttachPen(background.pen);
-        canvas.DrawLine(ToRSPonit(background.start), ToRSPonit(background.end));
+        canvas.DrawLine(ToRSPoint(background.start), ToRSPoint(background.end));
         canvas.DetachPen();
         if (marker.has_value()) {
             canvas.AttachPen(marker.value().pen);
@@ -56,10 +56,13 @@ CanvasDrawFunction SliderPaintMethod::GetContentDrawFunction(PaintWrapper* paint
             canvas.DetachPen();
         }
         canvas.AttachPen(select.pen);
-        canvas.DrawLine(ToRSPonit(select.start), ToRSPonit(select.end));
+        canvas.DrawLine(ToRSPoint(select.start), ToRSPoint(select.end));
         canvas.DetachPen();
         canvas.AttachPen(circle.pen);
-        canvas.DrawCircle(ToRSPonit(circle.center), circle.radius);
+        canvas.DrawCircle(ToRSPoint(circle.center), circle.radius);
+        canvas.DetachPen();
+        canvas.AttachPen(circle.shadowPen);
+        canvas.DrawCircle(ToRSPoint(circle.center), circle.shadowRadius);
         canvas.DetachPen();
     };
 }
@@ -91,6 +94,7 @@ SliderPaintMethod::MarkerPenAndPath SliderPaintMethod::GetMarkerPen(
     const RefPtr<SliderTheme>& theme) const
 {
     MarkerPenAndPath markerPenAndPath;
+    markerPenAndPath.pen.SetAntiAlias(true);
     markerPenAndPath.pen.SetColor(ToRSColor(theme->GetMarkerColor()));
     markerPenAndPath.pen.SetWidth(static_cast<float>(theme->GetMarkerSize().ConvertToPx()));
     markerPenAndPath.pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
@@ -168,6 +172,7 @@ SliderPaintMethod::CirclePenAndSize SliderPaintMethod::GetCirclePen(
     float sliderSelectLength =
         std::clamp(parameters_.sliderLength * parameters_.valueRatio, 0.0f, parameters_.sliderLength);
     CirclePenAndSize circlePenAndSize;
+    circlePenAndSize.pen.SetAntiAlias(true);
     circlePenAndSize.pen.SetColor(ToRSColor(sliderPaintProperty->GetBlockColor().value_or(theme->GetBlockColor())));
     circlePenAndSize.pen.SetWidth(parameters_.blockDiameter * HALF);
     if (!sliderPaintProperty->GetReverse().value_or(false)) {
@@ -184,6 +189,13 @@ SliderPaintMethod::CirclePenAndSize SliderPaintMethod::GetCirclePen(
                     offset.GetY() + parameters_.borderBlank + parameters_.sliderLength - sliderSelectLength);
     }
     circlePenAndSize.radius = parameters_.blockDiameter * HALF * HALF;
+
+    circlePenAndSize.shadowPen.SetAntiAlias(true);
+    circlePenAndSize.shadowPen.SetColor(ToRSColor(theme->GetBlockHoverColor()));
+    auto shadowWidth = parameters_.hotFlag ? static_cast<float>(HOT_CIRCLE_SHADOW_WIDTH.ConvertToPx())
+                                           : static_cast<float>(CIRCLE_SHADOW_WIDTH.ConvertToPx());
+    circlePenAndSize.shadowPen.SetWidth(shadowWidth);
+    circlePenAndSize.shadowRadius = (parameters_.blockDiameter + shadowWidth) * HALF;
     return circlePenAndSize;
 }
 

@@ -112,11 +112,16 @@ void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
     host->PostIdleTask(std::move(idleIndexes));
 }
 
+void LazyLayoutWrapperBuilder::AdjustGridOffset()
+{
+    for (const auto& wrapper : childWrappers_) {
+        wrapper->GetHostNode()->AdjustGridOffset();
+    }
+}
+
 int32_t LazyLayoutWrapperBuilder::OnGetTotalCount()
 {
-    if (!builder_) {
-        return 0;
-    }
+    CHECK_NULL_RETURN_NOLOG(builder_, 0);
     return builder_->GetTotalCount();
 }
 

@@ -107,6 +107,11 @@ public:
 
     void SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty);
 
+    void SetOnAreaChangeCallback(OnAreaChangedFunc&& callback);
+    void TriggerOnAreaChangeCallback();
+
+    void TriggerVisibleAreaChangeCallback(std::list<VisibleCallbackInfo>& callbackInfoList);
+
     const RefPtr<GeometryNode>& GetGeometryNode() const
     {
         return geometryNode_;
@@ -255,6 +260,8 @@ public:
 
     OffsetF GetPaintRectOffset() const;
 
+    void AdjustGridOffset();
+
     void SetActive(bool active) override;
 
     bool IsActive() const
@@ -278,6 +285,8 @@ public:
     void OnDetachFromMainTree() override;
     void OnAttachToMainTree() override;
 
+    void OnVisibleChange(bool isVisible) override;
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
@@ -293,6 +302,7 @@ private:
     RefPtr<PaintWrapper> CreatePaintWrapper();
 
     void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) override;
+    void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) override;
 
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
@@ -306,6 +316,11 @@ private:
     bool GetTouchable() const;
     std::vector<RectF> GetResponseRegionList(const RectF& rect);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
+
+    void ProcessAllVisibleCallback(std::list<VisibleCallbackInfo>& callbackInfoList, double currentVisibleRatio);
+    void OnVisibleAreaChangeCallback(
+        VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio);
+    double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
 
     struct ZIndexComparator {
         bool operator()(const RefPtr<FrameNode>& left, const RefPtr<FrameNode>& right) const
@@ -327,6 +342,9 @@ private:
     RefPtr<EventHub> eventHub_;
     RefPtr<Pattern> pattern_;
 
+    std::unique_ptr<RectF> lastFrameRect_;
+    std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
+
     bool needSyncRenderTree_ = false;
 
     bool isLayoutDirtyMarked_ = false;
@@ -336,6 +354,8 @@ private:
 
     bool isActive_ = false;
     bool isResponseRegion_ = false;
+
+    double lastVisibleRatio_ = 0.0;
 
     // internal node such as Text in Button CreateWithLabel
     // should not seen by preview inspector or accessibility

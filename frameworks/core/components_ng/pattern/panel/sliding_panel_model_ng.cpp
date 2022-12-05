@@ -50,11 +50,8 @@ void SlidingPanelModelNG::Create(bool isShow)
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelType, PanelType::FOLDABLE_BAR); // default value
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HasDragBar, true);                   // default value
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelMode, PanelMode::HALF);         // default value
-    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, IsShow, true);
+    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, IsShow, isShow);
 
-    auto type = isShow ? VisibleType::VISIBLE : VisibleType::GONE;
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, type);
-    SetIsShow(isShow);
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext) {
         renderContext->UpdateBackgroundColor(BG_COLOR);
@@ -126,7 +123,6 @@ void SlidingPanelModelNG::SetFullHeight(const Dimension& fullHeight)
 
 void SlidingPanelModelNG::SetIsShow(bool isShow)
 {
-    NG::ViewAbstract::SetVisibility(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, IsShow, isShow);
 }
 
@@ -175,9 +171,13 @@ void SlidingPanelModelNG::Pop()
     auto hasDragBar = layoutProperty->GetHasDragBar().value_or(true);
     auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     CHECK_NULL_VOID(columnNode);
-    auto dragBarNode = columnNode->GetChildren().front();
-    CHECK_NULL_VOID(dragBarNode);
-    auto isFirstChildDragBar = dragBarNode->GetTag() == V2::DRAG_BAR_ETS_TAG;
+
+    auto child = columnNode->GetChildren();
+    bool isFirstChildDragBar = false;
+    if (!child.empty()) {
+        auto firstNode = columnNode->GetChildren().front();
+        isFirstChildDragBar = firstNode->GetTag() == V2::DRAG_BAR_ETS_TAG;
+    }
     if (hasDragBar) {
         if (!isFirstChildDragBar) {
             auto dragBarNode = FrameNode::GetOrCreateFrameNode(V2::DRAG_BAR_ETS_TAG,

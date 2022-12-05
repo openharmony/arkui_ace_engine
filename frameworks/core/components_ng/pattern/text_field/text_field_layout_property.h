@@ -51,6 +51,7 @@ public:
         ResetInputFilter();
         ResetShowPasswordIcon();
         ResetCopyOptions();
+        ResetLastValue();
     }
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
@@ -93,8 +94,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InputFilter, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowPasswordIcon, bool, PROPERTY_UPDATE_MEASURE);
 
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TypeChanged, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOptions, CopyOptions, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreferredLineHeightNeedToUpdate, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LastValue, std::string, PROPERTY_UPDATE_MEASURE);
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
@@ -106,12 +109,12 @@ protected:
         value->propValue_ = CloneValue();
         value->propPlaceholderFontStyle_ = ClonePlaceholderFontStyle();
         value->propPlaceholderTextLineStyle_ = ClonePlaceholderTextLineStyle();
-        value->propTextLineStyle_ = ClonePlaceholderTextLineStyle();
         value->propPlaceholder_ = ClonePlaceholder();
         value->propTextInputType_ = CloneTextInputType();
         value->propInputFilter_ = CloneInputFilter();
         value->propShowPasswordIcon_ = CloneShowPasswordIcon();
         value->propCopyOptions_ = CloneCopyOptions();
+        value->propLastValue_ = CloneLastValue();
     }
 
 private:

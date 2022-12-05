@@ -22,6 +22,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/thread/cancelable_callback.h"
+#include "base/utils/measure_util.h"
 #include "core/common/frontend.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/components/dialog/dialog_component.h"
@@ -243,6 +244,8 @@ public:
     int32_t GetMinPlatformVersion() override;
     bool IsUseLiteStyle();
     bool IsWebFeature();
+
+    double MeasureText(const MeasureContext& context) override;
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,

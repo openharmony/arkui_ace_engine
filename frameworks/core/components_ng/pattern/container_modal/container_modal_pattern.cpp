@@ -53,11 +53,16 @@ void ContainerModalPattern::ShowTitle(bool isShow)
     CHECK_NULL_VOID(columnNode);
     auto titleNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
     CHECK_NULL_VOID(titleNode);
-    auto contentNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
+    auto stackNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
+    CHECK_NULL_VOID(stackNode);
+    auto contentNode = AceType::DynamicCast<FrameNode>(stackNode->GetChildren().front());
     CHECK_NULL_VOID(contentNode);
     auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
     CHECK_NULL_VOID(floatingTitleNode);
     windowMode_ = PipelineContext::GetCurrentContext()->GetWindowManager()->GetWindowMode();
+
+    // set container window show state to RS
+    PipelineContext::GetCurrentContext()->SetContainerWindow(isShow);
 
     // update container modal padding and border
     auto layoutProperty = containerNode->GetLayoutProperty();
@@ -83,17 +88,17 @@ void ContainerModalPattern::ShowTitle(bool isShow)
     borderColor.SetColor(isShow ? CONTAINER_BORDER_COLOR : Color::TRANSPARENT);
     renderContext->UpdateBorderColor(borderColor);
 
-    // update stage content border
-    auto contentLayoutProperty = contentNode->GetLayoutProperty();
-    CHECK_NULL_VOID(contentLayoutProperty);
-    contentLayoutProperty->UpdateLayoutWeight(1.0f);
+    // update stack content border
+    auto stackLayoutProperty = stackNode->GetLayoutProperty();
+    CHECK_NULL_VOID(stackLayoutProperty);
+    stackLayoutProperty->UpdateLayoutWeight(1.0f);
 
-    auto contentRenderContext = contentNode->GetRenderContext();
-    CHECK_NULL_VOID(contentRenderContext);
+    auto stackRenderContext = stackNode->GetRenderContext();
+    CHECK_NULL_VOID(stackRenderContext);
     BorderRadiusProperty stageBorderRadius;
     stageBorderRadius.SetRadius(isShow ? CONTAINER_INNER_RADIUS : 0.0_vp);
-    contentRenderContext->UpdateBorderRadius(stageBorderRadius);
-    contentRenderContext->SetClipToBounds(true);
+    stackRenderContext->UpdateBorderRadius(stageBorderRadius);
+    stackRenderContext->SetClipToBounds(true);
 
     auto titleLayoutProperty = titleNode->GetLayoutProperty();
     CHECK_NULL_VOID(titleLayoutProperty);
@@ -119,18 +124,13 @@ void ContainerModalPattern::InitContainerEvent()
     CHECK_NULL_VOID(context);
 
     auto titlePopupDistance = TITLE_POPUP_DISTANCE * containerNode->GetContext()->GetDensity();
-    TranslateOptions translate;
-    translate.y = Dimension(-titlePopupDistance);
-    TransitionOptions transOptions;
-    transOptions.UpdateTranslate(translate);
-
     AnimationOption option;
     option.SetDuration(TITLE_POPUP_DURATION);
     option.SetCurve(Curves::EASE_IN_OUT);
 
     // init touch event
-    touchEventHub->SetTouchEvent([floatingLayoutProperty, context, option, transOptions, titlePopupDistance,
-                                     weak = WeakClaim(this)](TouchEventInfo& info) {
+    touchEventHub->SetTouchEvent([floatingLayoutProperty, context, option, titlePopupDistance, weak = WeakClaim(this)](
+                                     TouchEventInfo& info) {
         auto container = weak.Upgrade();
         CHECK_NULL_VOID(container);
         if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() <= titlePopupDistance) {
@@ -151,8 +151,11 @@ void ContainerModalPattern::InitContainerEvent()
             // step3. If the horizontal distance of the touch move does not exceed 10px and the vertical distance
             // exceeds 20px, the floating title will be displayed.
             if (deltaMoveX <= MOVE_POPUP_DISTANCE_X && deltaMoveY >= MOVE_POPUP_DISTANCE_Y) {
+                context->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
                 floatingLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-                context->NotifyTransition(option, transOptions, true);
+                AnimationUtils::Animate(option, [context]() {
+                    context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+                });
             }
             return;
         }
@@ -162,29 +165,33 @@ void ContainerModalPattern::InitContainerEvent()
         if (floatingLayoutProperty->GetVisibilityValue() != VisibleType::VISIBLE) {
             return;
         }
-        // TODO: transition out animation
         // step4. Touch other area to hide floating title.
-        floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        AnimationUtils::Animate(option, [context, titlePopupDistance]() {
+                context->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
+            }, [floatingLayoutProperty]() { floatingLayoutProperty->UpdateVisibility(VisibleType::GONE); });
     });
 
     // init mouse event
     auto mouseEventHub = containerNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(mouseEventHub);
-    mouseEventHub->SetMouseEvent([floatingLayoutProperty, context, option, transOptions, titlePopupDistance,
-                                     weak = WeakClaim(this)](MouseInfo& info) {
+    mouseEventHub->SetMouseEvent([floatingLayoutProperty, context, option, titlePopupDistance, weak = WeakClaim(this)](
+                                     MouseInfo& info) {
         auto container = weak.Upgrade();
         CHECK_NULL_VOID(container);
         if (info.GetAction() != MouseAction::MOVE) {
             return;
         }
         if (info.GetLocalLocation().GetY() <= MOUSE_MOVE_POPUP_DISTANCE && container->CanShowFloatingTitle()) {
+            context->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
             floatingLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-            context->NotifyTransition(option, transOptions, true);
+            AnimationUtils::Animate(option, [context]() { context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f }); });
         }
 
         if (info.GetLocalLocation().GetY() >= titlePopupDistance &&
             floatingLayoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
-            floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
+            AnimationUtils::Animate(option, [context, titlePopupDistance]() {
+                    context->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
+                }, [floatingLayoutProperty]() { floatingLayoutProperty->UpdateVisibility(VisibleType::GONE); });
         }
     });
 }
@@ -366,10 +373,7 @@ void ContainerModalPattern::SetAppTitle(const std::string& title)
 
 void ContainerModalPattern::SetAppIcon(const RefPtr<PixelMap>& icon)
 {
-    if (icon == nullptr) {
-        LOGE("SetAppIcon failed, icon PixelMap is null.");
-        return;
-    }
+    CHECK_NULL_VOID(icon);
     LOGI("SetAppIcon successfully");
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetPixMap(icon);

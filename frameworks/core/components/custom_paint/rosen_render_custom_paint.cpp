@@ -38,11 +38,14 @@
 #include "third_party/skia/include/utils/SkParsePath.h"
 
 #include "base/i18n/localization.h"
+#include "base/image/pixel_map.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/linear_map.h"
+#include "base/utils/measure_util.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
 #include "core/components/calendar/rosen_render_calendar.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
@@ -495,10 +498,10 @@ void RosenRenderCustomPaint::ClearRect(const Offset& offset, const Rect& rect)
 
 void RosenRenderCustomPaint::FillText(const Offset& offset, const std::string& text, double x, double y)
 {
-    if (!UpdateParagraph(offset, text, false)) {
+    if (!UpdateParagraph(offset, text, false, HasShadow())) {
         return;
     }
-    PaintText(offset, x, y, false);
+    PaintText(offset, x, y, false, HasShadow());
 }
 
 void RosenRenderCustomPaint::StrokeText(const Offset& offset, const std::string& text, double x, double y)
@@ -507,13 +510,43 @@ void RosenRenderCustomPaint::StrokeText(const Offset& offset, const std::string&
         if (!UpdateParagraph(offset, text, true, true)) {
             return;
         }
-        PaintText(offset, x, y, true);
+        PaintText(offset, x, y, true, true);
     }
 
     if (!UpdateParagraph(offset, text, true)) {
         return;
     }
     PaintText(offset, x, y, true);
+}
+
+double RosenRenderCustomPaint::MeasureTextInner(const MeasureContext& context)
+{
+    using namespace Constants;
+    txt::ParagraphStyle style;
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+    if (!fontCollection) {
+        LOGW("fontCollection is null");
+        return 0.0;
+    }
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
+    std::vector<std::string> fontFamilies;
+    txtStyle.font_size = context.fontSize;
+    FontStyle fontStyleInt = OHOS::Ace::Framework::ConvertStrToFontStyle(std::to_string(context.fontStyle));
+    txtStyle.font_style = ConvertTxtFontStyle(fontStyleInt);
+    FontWeight fontWeightStr = StringUtils::StringToFontWeight(context.fontWeight);
+    txtStyle.font_weight = ConvertTxtFontWeight(fontWeightStr);
+    StringUtils::StringSplitter(context.fontFamily, ',', fontFamilies);
+    txtStyle.font_families = fontFamilies;
+    txtStyle.letter_spacing = context.letterSpacing;
+    builder->PushStyle(txtStyle);
+    builder->AddText(StringUtils::Str8ToStr16(context.textContent));
+    auto paragraph = builder->Build();
+    if (!paragraph) {
+        return 0.0;
+    }
+    paragraph->Layout(Size::INFINITE_SIZE);
+    return paragraph->GetMaxIntrinsicWidth();
 }
 
 double RosenRenderCustomPaint::MeasureText(const std::string& text, const PaintState& state)
@@ -1551,13 +1584,13 @@ void RosenRenderCustomPaint::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Canva
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> image;
     if (!renderTaskHolder_->ioManager) {
-        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     } else {
 #ifndef GPU_DISABLED
         image = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
             imagePixmap, true, imagePixmap.colorSpace(), true);
 #else
-        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
 #endif
     }
     if (!image) {

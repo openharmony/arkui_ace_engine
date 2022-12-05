@@ -15,11 +15,15 @@
 
 #include "core/components_ng/pattern/list/list_model_ng.h"
 
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/list/list_paint_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -48,16 +52,22 @@ RefPtr<ScrollControllerBase> ListModelNG::CreateScrollController()
     return AceType::MakeRefPtr<NG::ListPositionController>();
 }
 
-void ListModelNG::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollBarProxy> proxy)
+void ListModelNG::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy)
 {
     auto list = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ListPattern>();
     CHECK_NULL_VOID(list);
     list->SetPositionController(AceType::DynamicCast<ListPositionController>(scroller));
+    list->SetScrollBarProxy(AceType::DynamicCast<ScrollBarProxy>(proxy));
 }
 
 void ListModelNG::SetListDirection(Axis axis)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ListDirection, axis);
+}
+
+void ListModelNG::SetScrollBar(Ace::DisplayMode scrollBar)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ListPaintProperty, BarDisplayMode, static_cast<DisplayMode>(scrollBar));
 }
 
 void ListModelNG::SetEdgeEffect(EdgeEffect edgeEffect)

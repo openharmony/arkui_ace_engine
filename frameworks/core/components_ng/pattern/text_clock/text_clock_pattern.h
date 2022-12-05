@@ -58,14 +58,14 @@ public:
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
-
-    std::string GetCurrentFormatDateTime();
     void InitTextClockController();
+    void UpdateTimeTextCallBack();
+
     void InitUpdateTimeTextCallBack();
     void UpdateTimeText();
-    void UpdateTimeTextCallBack();
     void RequestUpdateForNextSecond();
     void FireChangeEvent() const;
+    std::string GetCurrentFormatDateTime();
 
     std::string GetFormat() const;
     int32_t GetHoursWest() const;

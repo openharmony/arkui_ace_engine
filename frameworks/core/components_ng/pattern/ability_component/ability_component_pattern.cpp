@@ -27,10 +27,9 @@ void AbilityComponentPattern::OnModifyDone()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     int32_t windowId = pipelineContext->GetWindowId();
-    adapter_ = WindowExtensionConnectionProxy::CreateAdapter();
-    if (adapter_) {
-        adapter_->ConnectExtension(GetHost(), windowId);
-    }
+    adapter_ = WindowExtensionConnectionProxyNG::CreateAdapter();
+    CHECK_NULL_VOID_NOLOG(adapter_);
+    adapter_->ConnectExtension(GetHost(), windowId);
     LOGI("connect to windows extension begin %{public}s", GetHost()->GetTag().c_str());
 }
 
@@ -67,16 +66,15 @@ void AbilityComponentPattern::UpdateWindowRect()
     CHECK_NULL_VOID(host);
     auto size = host->GetGeometryNode()->GetFrameSize();
     auto offset = host->GetGeometryNode()->GetFrameOffset() + host->GetOffsetRelativeToWindow();
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto rect = pipeline->GetDisplayWindowRectInfo();
 
     LOGI("ConnectExtension: %{public}f %{public}f %{public}f %{public}f", offset.GetX(), offset.GetY(), size.Width(),
         size.Height());
     rect.SetRect(offset.GetX() + rect.Left(), offset.GetY() + rect.Top(), size.Width(), size.Height());
-    if (adapter_) {
-        adapter_->UpdateRect(rect);
-    }
+    CHECK_NULL_VOID_NOLOG(adapter_);
+    adapter_->UpdateRect(rect);
 }
 
 } // namespace OHOS::Ace::NG

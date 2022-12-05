@@ -53,13 +53,12 @@ void ListItemGroupModelNG::SetHeader(std::function<void()>&& header)
         header();
         headerNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
-    if (headerNode) {
-        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->AddHeader(headerNode);
-    }
+    CHECK_NULL_VOID_NOLOG(headerNode);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddHeader(headerNode);
 }
 
 void ListItemGroupModelNG::SetFooter(std::function<void()>&& footer)
@@ -70,12 +69,11 @@ void ListItemGroupModelNG::SetFooter(std::function<void()>&& footer)
         footer();
         footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
-    if (footerNode) {
-        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->AddFooter(footerNode);
-    }
+    CHECK_NULL_VOID_NOLOG(footerNode);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddFooter(footerNode);
 }
 } // namespace OHOS::Ace::NG

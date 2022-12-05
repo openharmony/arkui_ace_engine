@@ -42,21 +42,25 @@ class SynchedPropertyObjectTwoWay<C extends Object>
   the property.
   */
   aboutToBeDeleted() {
-    // unregister from parent of this link
-    this.linkedParentProperty_.unlinkSuscriber(this.id__());
-
-    // unregister from the ObservedObject
-    ObservedObject.removeOwningProperty(this.getObject(), this);
+    if (this.linkedParentProperty_) {
+        // unregister from parent of this link
+        this.linkedParentProperty_.unlinkSuscriber(this.id__());
+    
+        // unregister from the ObservedObject
+        ObservedObject.removeOwningProperty(this.getObject(), this);
+    }
     super.aboutToBeDeleted();
   }
 
   private getObject(): C {
     this.notifyPropertyRead();
-    return this.linkedParentProperty_.get();
+    return (this.linkedParentProperty_ ? this.linkedParentProperty_.get() : undefined);
   }
 
   private setObject(newValue: C): void {
-    this.linkedParentProperty_.set(newValue)
+    if (this.linkedParentProperty_) {
+        this.linkedParentProperty_.set(newValue)
+    }
   }
 
   // this object is subscriber to ObservedObject
@@ -108,7 +112,7 @@ class SynchedPropertyObjectTwoWay<C extends Object>
   }
   public createProp(subscribeOwner?: IPropertySubscriber,
     linkPropName?: PropertyInfo): ObservedPropertyAbstract<C> {
-    throw new Error("Creating a 'Prop' proerty is unsuppoeted for Object type prperty value.");
+    throw new Error("Creating a 'Prop' property is unsupported for Object type property value.");
   }
 
 }

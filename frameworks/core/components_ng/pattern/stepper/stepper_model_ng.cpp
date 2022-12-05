@@ -49,7 +49,7 @@ void StepperModelNG::Create(uint32_t index)
     }
 
     if (!hasLeftButton) {
-        std::string buttonText = "< " + Localization::GetInstance()->GetEntryLetters("stepper.back");
+        std::string buttonText = Localization::GetInstance()->GetEntryLetters("stepper.back");
         auto leftButtonNode = CreateButtonChild(leftButtonId, buttonText, stepperTheme);
         leftButtonNode->MountToParent(stepperNode);
     }
@@ -114,10 +114,11 @@ RefPtr<FrameNode> StepperModelNG::CreateSwiperChild(int32_t id, uint32_t index)
         FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG, id, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     swiperPaintProperty->UpdateLoop(false);
-    swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
+    swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::NONE);
     swiperPaintProperty->UpdateDisableSwipe(true);
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateCachedCount(0);
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndex(static_cast<int32_t>(index));
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
     swiperNode->MarkModifyDone();
 
     return swiperNode;

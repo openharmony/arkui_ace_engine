@@ -13,24 +13,31 @@
  * limitations under the License.
  */
 
+#include <optional>
 #include "gtest/gtest.h"
+#include "base/geometry/ng/rect_t.h"
 
 #define private public
 #define protected public
-
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/image_provider/image_state_manager.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/test/mock/render/mock_canvas_image.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr double RADIUS_DEFAULT = 300.0;
 constexpr double IMAGE_FRAMESIZE_WIDTH = 400.0;
 constexpr double IMAGE_FRAMESIZE_HEIGHT = 500.0;
 constexpr double IMAGE_SOURCESIZE_WIDTH = 300.0;
@@ -51,26 +58,36 @@ const std::vector<float> COLOR_FILTER_DEFAULT = { 1.0, 2.0, 3.0 };
 const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
 const std::string ALT_SRC_URL = "file://data/data/com.example.test/res/exampleAlt.jpg";
 const std::string RESOURCE_URL = "resource:///ohos_test_image.svg";
+const std::string PNG_IMAGE = "/common/media/aaa.png";
+const std::string WEB_IMAGE =
+    "https://img2.baidu.com/it/u=3999091694,1705560228&fm=253&fmt=auto&app=120&f=JPEG?w=1280&h=800";
+
 } // namespace
 
 class ImagePatternTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
     static RefPtr<FrameNode> CreateImageNode(const std::string& src, const std::string& alt,
         RefPtr<PixelMap> pixMap = nullptr, const Color& svgFillColor = SVG_FILL_COLOR_DEFAULT,
         const ImageFit& imageFit = ImageFit::NONE, const ImageRenderMode& renderMode = ImageRenderMode::TEMPLATE,
         const ImageInterpolation& interpolation = ImageInterpolation::NONE,
-        const ImageRepeat& imageRepeat = ImageRepeat::NOREPEAT, const std::vector<float>& colorFilter = {},
+        const ImageRepeat& imageRepeat = ImageRepeat::NO_REPEAT, const std::vector<float>& colorFilter = {},
         bool matchTextDirection = false);
+    static RefPtr<FrameNode> CreateSyncImageNode();
+    static RefPtr<FrameNode> CreateSyncWebImageNode();
 };
 
-void ImagePatternTest::SetUpTestCase() {}
-void ImagePatternTest::TearDownTestCase() {}
-void ImagePatternTest::SetUp() {}
-void ImagePatternTest::TearDown() {}
+void ImagePatternTest::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void ImagePatternTest::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
+
 RefPtr<FrameNode> ImagePatternTest::CreateImageNode(const std::string& src, const std::string& alt,
     RefPtr<PixelMap> pixMap, const Color& svgFillColor, const ImageFit& imageFit, const ImageRenderMode& renderMode,
     const ImageInterpolation& interpolation, const ImageRepeat& imageRepeat, const std::vector<float>& colorFilter,
@@ -89,10 +106,10 @@ RefPtr<FrameNode> ImagePatternTest::CreateImageNode(const std::string& src, cons
     if (interpolation != ImageInterpolation::NONE) {
         image.SetImageInterpolation(interpolation);
     }
-    if (imageRepeat != ImageRepeat::NOREPEAT) {
+    if (imageRepeat != ImageRepeat::NO_REPEAT) {
         image.SetImageRepeat(imageRepeat);
     }
-    if (!matchTextDirection) {
+    if (matchTextDirection) {
         image.SetMatchTextDirection(matchTextDirection);
     }
     if (!colorFilter.empty()) {
@@ -106,6 +123,28 @@ RefPtr<FrameNode> ImagePatternTest::CreateImageNode(const std::string& src, cons
     return frameNode;
 }
 
+RefPtr<FrameNode> ImagePatternTest::CreateSyncImageNode()
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    image.Create(PNG_IMAGE, true, pixMap);
+    image.SetAlt(ALT_SRC_URL);
+    image.SetSyncMode(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    return frameNode;
+}
+
+RefPtr<FrameNode> ImagePatternTest::CreateSyncWebImageNode()
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    image.Create(WEB_IMAGE, true, pixMap);
+    image.SetAlt(ALT_SRC_URL);
+    image.SetSyncMode(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    return frameNode;
+}
+
 /**
  * @tc.name: ImagePatternCreator001
  * @tc.desc: Create ImagePattern.
@@ -114,6 +153,33 @@ RefPtr<FrameNode> ImagePatternTest::CreateImageNode(const std::string& src, cons
 HWTEST_F(ImagePatternTest, ImagePatternCreator001, TestSize.Level1)
 {
     auto frameNode = ImagePatternTest::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_TRUE(imagePattern != nullptr);
+    imagePattern->CacheImageObject();
+}
+
+/**
+ * @tc.name: ImagePatternCreator002
+ * @tc.desc: Create ImagePattern with sync load.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTest, ImagePatternCreator002, TestSize.Level1)
+{
+    auto frameNode = ImagePatternTest::CreateSyncImageNode();
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_TRUE(imagePattern != nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternCreator003
+ * @tc.desc: Create ImagePattern with web image and sync mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTest, ImagePatternCreator003, TestSize.Level1)
+{
+    auto frameNode = ImagePatternTest::CreateSyncWebImageNode();
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     EXPECT_TRUE(imagePattern != nullptr);
@@ -142,6 +208,10 @@ HWTEST_F(ImagePatternTest, ImagePatternModifyDone001, TestSize.Level1)
  */
 HWTEST_F(ImagePatternTest, UpdateInternalResource001, TestSize.Level1)
 {
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<IconTheme>()));
     auto frameNode = ImagePatternTest::CreateImageNode("", ALT_SRC_URL);
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
@@ -155,7 +225,13 @@ HWTEST_F(ImagePatternTest, UpdateInternalResource001, TestSize.Level1)
     EXPECT_TRUE(imageLayoutProperty != nullptr);
     EXPECT_EQ(imageLayoutProperty->GetImageSourceInfo()->IsInternalResource(), false);
     /**
-    //     case2 : imageSource is internal resource, and it can successfully load correct resource Icon.
+    //     case2 : imageSource is an invalid internal resource, and it will not set IconPath.
+    */
+    sourceInfo.SetResourceId(InternalResource::ResourceId::NO_ID);
+    imagePattern->UpdateInternalResource(sourceInfo);
+    EXPECT_EQ(imageLayoutProperty->GetImageSourceInfo()->GetSrc(), "");
+    /**
+    //     case3 : imageSource is internal resource, and it can successfully load correct resource Icon.
     */
     sourceInfo.SetResourceId(InternalResource::ResourceId::PLAY_SVG);
     imagePattern->UpdateInternalResource(sourceInfo);
@@ -164,7 +240,7 @@ HWTEST_F(ImagePatternTest, UpdateInternalResource001, TestSize.Level1)
 
 /**
  * @tc.name: SetImagePaintConfig001
- * @tc.desc: When Image upload successfully, Imagepattern will set ImagePaintConfit to CanvaImage.
+ * @tc.desc: When Image upload successfully, Imagepattern will set ImagePaintConfig to CanvaImage.
  * @tc.type: FUNC
  */
 HWTEST_F(ImagePatternTest, SetImagePaintConfig001, TestSize.Level1)
@@ -201,14 +277,9 @@ HWTEST_F(ImagePatternTest, SetImagePaintConfig001, TestSize.Level1)
     EXPECT_TRUE(imagePattern->lastAltCanvasImage_ != nullptr);
     EXPECT_EQ(*imagePattern->lastAltSrcRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
     EXPECT_EQ(*imagePattern->lastAltDstRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
-    EXPECT_TRUE(imagePattern->lastAltCanvasImage_->imagePaintConfig_ != nullptr);
-    auto altImagePaintConfig = *imagePattern->lastAltCanvasImage_->imagePaintConfig_;
+    EXPECT_TRUE(imagePattern->lastAltCanvasImage_->paintConfig_ != nullptr);
+    auto altImagePaintConfig = imagePattern->lastAltCanvasImage_->GetPaintConfig();
     EXPECT_EQ(altImagePaintConfig.imageFit_, IMAGE_FIT_DEFAULT);
-    EXPECT_EQ(altImagePaintConfig.renderMode_, IMAGE_RENDERMODE_DEFAULT);
-    EXPECT_EQ(altImagePaintConfig.imageInterpolation_, IMAGE_INTERPOLATION_DEFAULT);
-    EXPECT_EQ(altImagePaintConfig.imageRepeat_, IMAGE_REPEAT_DEFAULT);
-    EXPECT_EQ(*altImagePaintConfig.colorFilter_, COLOR_FILTER_DEFAULT);
-    EXPECT_EQ(altImagePaintConfig.needFlipCanvasHorizontally_, false);
     /**
      * @tc.steps: step4. Image loads successfully, and trigger Pattern->OnImageLoadSuccess.
      */
@@ -217,14 +288,9 @@ HWTEST_F(ImagePatternTest, SetImagePaintConfig001, TestSize.Level1)
     EXPECT_TRUE(imagePattern->lastCanvasImage_ != nullptr);
     EXPECT_EQ(imagePattern->lastSrcRect_, RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
     EXPECT_EQ(imagePattern->lastDstRect_, RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
-    EXPECT_TRUE(imagePattern->lastCanvasImage_->imagePaintConfig_ != nullptr);
-    auto imagePaintConfig = *imagePattern->lastCanvasImage_->imagePaintConfig_;
+    EXPECT_TRUE(imagePattern->lastCanvasImage_->paintConfig_ != nullptr);
+    auto imagePaintConfig = imagePattern->lastCanvasImage_->GetPaintConfig();
     EXPECT_EQ(imagePaintConfig.imageFit_, IMAGE_FIT_DEFAULT);
-    EXPECT_EQ(imagePaintConfig.renderMode_, IMAGE_RENDERMODE_DEFAULT);
-    EXPECT_EQ(imagePaintConfig.imageInterpolation_, IMAGE_INTERPOLATION_DEFAULT);
-    EXPECT_EQ(imagePaintConfig.imageRepeat_, IMAGE_REPEAT_DEFAULT);
-    EXPECT_EQ(*imagePaintConfig.colorFilter_, COLOR_FILTER_DEFAULT);
-    EXPECT_EQ(imagePaintConfig.needFlipCanvasHorizontally_, false);
     /**
      * @tc.steps: step5. Image loads successfully, and clear alt data.
      */
@@ -232,6 +298,46 @@ HWTEST_F(ImagePatternTest, SetImagePaintConfig001, TestSize.Level1)
     EXPECT_EQ(imagePattern->lastAltCanvasImage_, nullptr);
     EXPECT_EQ(imagePattern->lastAltSrcRect_, nullptr);
     EXPECT_EQ(imagePattern->lastAltDstRect_, nullptr);
+}
+
+/**
+ * @tc.name: SetImagePaintConfig002
+ * @tc.desc: Verify that Imagepattern will set correct ImagePaintConfig to CanvaImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTest, SetImagePaintConfig002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode and CanvasImage.
+     */
+    auto frameNode = ImagePatternTest::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
+    auto canvasImage = AceType::MakeRefPtr<MockCanvasImage>();
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(RADIUS_DEFAULT));
+    frameNode->GetRenderContext()->UpdateBorderRadius(borderRadius);
+    /**
+     * @tc.steps: step2. get ImagePattern and set RadiusProperty.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_TRUE(imagePattern != nullptr);
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    EXPECT_TRUE(imageRenderProperty != nullptr);
+    imageRenderProperty->UpdateNeedBorderRadius(true);
+    /**
+     * @tc.steps: step3. start set ImagePaintConfig and Verify it will be set correctly.
+     */
+    imagePattern->SetImagePaintConfig(canvasImage, RectF(), RectF(), true);
+    EXPECT_TRUE(canvasImage->paintConfig_ != nullptr);
+    auto paintConfig = canvasImage->GetPaintConfig();
+    EXPECT_EQ(paintConfig.srcRect_, RectF());
+    EXPECT_EQ(paintConfig.dstRect_, RectF());
+    EXPECT_EQ(paintConfig.imageFit_, ImageFit::COVER);
+    EXPECT_EQ(paintConfig.isSvg_, true);
+    EXPECT_TRUE(paintConfig.borderRadiusXY_ != nullptr);
+    for (auto point : *paintConfig.borderRadiusXY_) {
+        EXPECT_EQ(point, PointF(RADIUS_DEFAULT, RADIUS_DEFAULT));
+    }
 }
 
 /**
@@ -308,5 +414,156 @@ HWTEST_F(ImagePatternTest, ImagePatternCallback002, TestSize.Level1)
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT), "",
         ImageLoadingCommand::LOAD_DATA_FAIL);
     EXPECT_TRUE(imagePattern->lastCanvasImage_ == nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternOnNotifyMemoryLevelFunction001
+ * @tc.desc: Verify that ImagePattern can do different data cleaning operation according to level.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTest, ImagePatternOnNotifyMemoryLevelFunction001, TestSize.Level1)
+{
+    auto frameNode = ImagePatternTest::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_TRUE(imagePattern != nullptr);
+    imagePattern->loadingCtx_ = nullptr;
+    imagePattern->altLoadingCtx_ = nullptr;
+    /**
+     * @tc.cases: case1. Before Image load and ImagePattern windowHide, Image doesn't need resetLoading.
+     */
+    imagePattern->OnWindowHide();
+    imagePattern->OnNotifyMemoryLevel(0);
+    EXPECT_TRUE(imagePattern->isShow_ == false);
+    EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
+    EXPECT_EQ(imagePattern->lastCanvasImage_, nullptr);
+    EXPECT_EQ(imagePattern->altLoadingCtx_, nullptr);
+    EXPECT_EQ(imagePattern->lastAltCanvasImage_, nullptr);
+    /**
+     * @tc.cases: case2. ImagePattern windowShow and OnNotifyMemoryLevel function will return.
+     */
+    imagePattern->OnWindowShow();
+    imagePattern->OnNotifyMemoryLevel(0);
+    EXPECT_TRUE(imagePattern->isShow_ == true);
+    /**
+     * @tc.cases: case3. After Image load and ImagePattern windowHide, pattern will clean data and reset params.
+     */
+    imagePattern->OnWindowHide();
+    imagePattern->OnNotifyMemoryLevel(0);
+    EXPECT_TRUE(imagePattern->isShow_ == false);
+    EXPECT_EQ(imagePattern->lastCanvasImage_, nullptr);
+    EXPECT_EQ(imagePattern->lastSrcRect_, RectF());
+    EXPECT_EQ(imagePattern->lastDstRect_, RectF());
+    EXPECT_EQ(imagePattern->altLoadingCtx_, nullptr);
+    EXPECT_EQ(imagePattern->lastAltCanvasImage_, nullptr);
+    EXPECT_EQ(imagePattern->lastAltSrcRect_, nullptr);
+    EXPECT_EQ(imagePattern->lastAltDstRect_, nullptr);
+}
+
+/**
+ * @tc.name: ImagePatternCreateNodePaintMethod001
+ * @tc.desc: When ImageComponent load successfully, it will Create NodePaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTest, ImagePatternCreateNodePaintMethod001, TestSize.Level1)
+{
+    auto frameNode = ImagePatternTest::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_TRUE(imagePattern != nullptr);
+    frameNode->MarkModifyDone();
+    EXPECT_TRUE(imagePattern->loadingCtx_ != nullptr);
+    EXPECT_TRUE(imagePattern->altLoadingCtx_ != nullptr);
+    /**
+     * @tc.cases: case1. When SrcImage and AltImage load failed, it will not Create Image NodePaintMethod.
+     */
+    EXPECT_TRUE(imagePattern->CreateNodePaintMethod() == nullptr);
+    /**
+     * @tc.cases: case2. When SrcImage load successfully, it will Create SrcImage's NodePaintMethod.
+     */
+    imagePattern->lastCanvasImage_ = imagePattern->loadingCtx_->MoveCanvasImage();
+    EXPECT_TRUE(imagePattern->CreateNodePaintMethod() != nullptr);
+    /**
+     * @tc.cases: case3. When AltImage load successfully and altImage Rect is valid, it will Create AltImage's
+     *                   NodePaintMethod.
+     */
+    imagePattern->lastCanvasImage_ = nullptr;
+    imagePattern->lastAltCanvasImage_ = imagePattern->altLoadingCtx_->MoveCanvasImage();
+    EXPECT_TRUE(imagePattern->CreateNodePaintMethod() == nullptr);
+    imagePattern->lastAltDstRect_ = std::make_unique<RectF>(RectF());
+    EXPECT_TRUE(imagePattern->CreateNodePaintMethod() == nullptr);
+    imagePattern->lastAltSrcRect_ = std::make_unique<RectF>(RectF());
+    imagePattern->lastAltDstRect_.reset();
+    EXPECT_TRUE(imagePattern->CreateNodePaintMethod() == nullptr);
+    imagePattern->lastAltDstRect_ = std::make_unique<RectF>(RectF());
+    EXPECT_TRUE(imagePattern->CreateNodePaintMethod() != nullptr);
+}
+
+/**
+ * @tc.name: ImagePaintMethod001
+ * @tc.desc: ImagePaintMethod can get ContentDrawFunction and UpdatePaintConfig correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTest, ImagePaintMethod001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImagePatternTest::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr, SVG_FILL_COLOR_DEFAULT,
+        IMAGE_FIT_DEFAULT, IMAGE_RENDERMODE_DEFAULT, IMAGE_INTERPOLATION_DEFAULT, IMAGE_REPEAT_DEFAULT,
+        COLOR_FILTER_DEFAULT, MATCHTEXTDIRECTION_DEFAULT);
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
+    /**
+     * @tc.steps: step2. create ImagePaintMethod.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_TRUE(imagePattern != nullptr);
+    imagePattern->lastCanvasImage_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->lastCanvasImage_->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethod imagePaintMethod(imagePattern->lastCanvasImage_);
+    /**
+     * @tc.steps: step3. ImagePaintMethod GetContentDrawFunction.
+     */
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    EXPECT_TRUE(imageRenderProperty != nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(IMAGE_FRAMESIZE_WIDTH, IMAGE_FRAMESIZE_HEIGHT));
+    geometryNode->SetFrameOffset(OffsetF(IMAGE_FRAMESIZE_WIDTH, IMAGE_FRAMESIZE_HEIGHT));
+    PaintWrapper paintWrapper(nullptr, geometryNode, imageRenderProperty);
+    auto pipeLine = PipelineBase::GetCurrentContext();
+    pipeLine->SetIsRightToLeft(true);
+    auto paintMethod = imagePaintMethod.GetContentDrawFunction(&paintWrapper);
+    EXPECT_TRUE(imagePaintMethod.canvasImage_ != nullptr);
+    EXPECT_TRUE(paintMethod != nullptr);
+    EXPECT_EQ(imagePaintMethod.canvasImage_->paintConfig_->renderMode_, IMAGE_RENDERMODE_DEFAULT);
+    EXPECT_EQ(imagePaintMethod.canvasImage_->paintConfig_->imageInterpolation_, IMAGE_INTERPOLATION_DEFAULT);
+    EXPECT_EQ(imagePaintMethod.canvasImage_->paintConfig_->imageRepeat_, IMAGE_REPEAT_DEFAULT);
+    EXPECT_EQ(imagePaintMethod.canvasImage_->paintConfig_->needFlipCanvasHorizontally_, MATCHTEXTDIRECTION_DEFAULT);
+    EXPECT_EQ(*imagePaintMethod.canvasImage_->paintConfig_->colorFilter_, COLOR_FILTER_DEFAULT);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap001
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTest, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
+{
+    auto frameNode = ImagePatternTest::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_TRUE(imagePattern != nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(nullptr, nullptr, nullptr);
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(nullptr);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    layoutWrapper->skipMeasureContent_ = true;
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    EXPECT_FALSE(imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    layoutWrapper->skipMeasureContent_ = false;
+    config.skipMeasure = true;
+    EXPECT_FALSE(imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    config.skipMeasure = false;
+    EXPECT_EQ(imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config), imagePattern->lastCanvasImage_);
 }
 } // namespace OHOS::Ace::NG

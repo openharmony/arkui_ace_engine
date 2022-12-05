@@ -40,7 +40,20 @@ ohos_unittest("bubble_layout_test_ng") {
     "$ace_root/frameworks/core/components_ng/property:ace_core_components_property_ng_ohos",
     "$ace_root/frameworks/core/components_ng/render:ace_core_components_render_ng_ohos",
     "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_ohos",
+    "//third_party/googletest:gmock_main",
   ]
+
+  if (enable_ng_build) {
+    deps += [
+      "$ace_flutter_engine_root_new:third_party_flutter_engine_dev_ohos",
+      "$ace_flutter_engine_root_new/third_party/skia:ace_skia_dev_ohos",
+    ]
+  } else {
+    deps += [
+      "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
+      "$ace_flutter_engine_root/skia:ace_skia_ohos",
+    ]
+  }
 
   part_name = ace_engine_part
   configs = [

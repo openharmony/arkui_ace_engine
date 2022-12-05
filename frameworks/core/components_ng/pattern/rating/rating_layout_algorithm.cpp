@@ -30,22 +30,14 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
     }
 
     // case 2: Using the theme's height and width by default if rating component is not set size.
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, std::nullopt);
-    auto ratingTheme = pipelineContext->GetTheme<RatingTheme>();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, std::nullopt);
+    auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_RETURN(ratingTheme, std::nullopt);
 
     SizeF componentSize;
-    auto ratingLayoutProperty = DynamicCast<RatingLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    // case 2.1: Rating use the mini size specified in the theme, when it is used as indicator.
-    bool indicator = ratingLayoutProperty->GetIndicator().value_or(false);
-    if (!indicator) {
-        componentSize.SetHeight(static_cast<float>(ratingTheme->GetRatingHeight().ConvertToPx()));
-        componentSize.SetWidth(static_cast<float>(ratingTheme->GetRatingWidth().ConvertToPx()));
-    } else {
-        componentSize.SetHeight(static_cast<float>(ratingTheme->GetRatingMiniHeight().ConvertToPx()));
-        componentSize.SetWidth(static_cast<float>(ratingTheme->GetRatingMiniWidth().ConvertToPx()));
-    }
+    componentSize.SetHeight(static_cast<float>(ratingTheme->GetRatingHeight().ConvertToPx()));
+    componentSize.SetWidth(static_cast<float>(ratingTheme->GetRatingWidth().ConvertToPx()));
     return contentConstraint.Constrain(componentSize);
 }
 

@@ -22,6 +22,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/thread/cancelable_callback.h"
+#include "base/utils/measure_util.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
@@ -141,6 +142,8 @@ public:
     {
         return manifestParser_->GetWindowConfig();
     }
+
+    double MeasureText(const MeasureContext& context) override;
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
     void ShowDialog(const std::string& title, const std::string& message,

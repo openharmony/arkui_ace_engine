@@ -367,7 +367,7 @@ void RenderGridScroll::SizeChangeOffset(double newWindowHeight)
             return;
         }
         auto position = textFieldManager->GetClickPosition().GetY();
-        double offset = newWindowHeight + GetGlobalPoint().GetY() - position;
+        double offset = newWindowHeight - position;
         if (LessOrEqual(offset, 0.0)) {
             // negative offset to scroll down
             textFieldOffset_ = offset;
@@ -762,7 +762,7 @@ void RenderGridScroll::CalculateViewPort()
             }
             // request new item until the blank is filled up
             blank -= BuildLazyGridLayout(*mainCount_, blank);
-            if (blank < 0) {
+            if (LessOrEqual(blank, 0)) {
                 return;
             }
             blank = blank - firstItemOffset_;
@@ -1205,6 +1205,17 @@ void RenderGridScroll::InitScrollBar()
     }
     if (scrollBar_) {
         scrollBar_->SetDisplayMode(component_->GetScrollBar());
+        if (!component_->GetScrollBarWidth().empty()) {
+            const auto& width = StringUtils::StringToDimension(component_->GetScrollBarWidth());
+            scrollBar_->SetInactiveWidth(width);
+            scrollBar_->SetNormalWidth(width);
+            scrollBar_->SetActiveWidth(width);
+            scrollBar_->SetTouchWidth(width);
+        }
+        if (!component_->GetScrollBarColor().empty()) {
+            scrollBarColor_ = Color::FromString(component_->GetScrollBarColor());
+            scrollBar_->SetForegroundColor(scrollBarColor_);
+        }
         scrollBar_->Reset();
         return;
     }

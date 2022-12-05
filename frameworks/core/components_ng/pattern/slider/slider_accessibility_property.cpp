@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/slider/slider_accessibility_property.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 
@@ -22,27 +23,22 @@ namespace OHOS::Ace::NG {
 std::string SliderAccessibilityProperty::GetText() const
 {
     auto frameNode = host_.Upgrade();
-    if (frameNode) {
-        auto sliderProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-        if (sliderProperty) {
-            return std::to_string(sliderProperty->GetValue().value_or(0));
-        }
-    }
-    return "";
+    CHECK_NULL_RETURN_NOLOG(frameNode, "");
+    auto sliderProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN_NOLOG(sliderProperty, "");
+    return std::to_string(sliderProperty->GetValue().value_or(0));
 }
 
 AccessibilityValue SliderAccessibilityProperty::GetAccessibilityValue() const
 {
     AccessibilityValue result;
     auto frameNode = host_.Upgrade();
-    if (frameNode) {
-        auto sliderProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-        if (sliderProperty) {
-            result.min = sliderProperty->GetMin().value_or(0);
-            result.max = sliderProperty->GetMax().value_or(100.0f);
-            result.current = sliderProperty->GetValue().value_or(0);
-        }
-    }
+    CHECK_NULL_RETURN_NOLOG(frameNode, result);
+    auto sliderProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN_NOLOG(sliderProperty, result);
+    result.min = sliderProperty->GetMin().value_or(0);
+    result.max = sliderProperty->GetMax().value_or(100.0f);
+    result.current = sliderProperty->GetValue().value_or(0);
     return result;
 }
 } // namespace OHOS::Ace::NG

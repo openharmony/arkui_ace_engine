@@ -35,6 +35,7 @@
 #include "third_party/skia/include/utils/SkParsePath.h"
 
 #include "base/i18n/localization.h"
+#include "base/image/pixel_map.h"
 #include "base/log/log.h"
 #include "base/utils/string_utils.h"
 #include "core/components/common/painter/flutter_decoration_painter.h"
@@ -451,13 +452,13 @@ void FlutterRenderOffscreenCanvas::DrawPixelMap(RefPtr<PixelMap> pixelMap, const
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> image;
     if (!renderTaskHolder_->ioManager) {
-        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     } else {
 #ifndef GPU_DISABLED
         image = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
             imagePixmap, true, imagePixmap.colorSpace(), true);
 #else
-        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
 #endif
     }
     if (!image) {
@@ -1120,10 +1121,10 @@ void FlutterRenderOffscreenCanvas::Scale(double x, double y)
 
 void FlutterRenderOffscreenCanvas::FillText(const std::string& text, double x, double y, const PaintState& state)
 {
-    if (!UpdateOffParagraph(text, false, state)) {
+    if (!UpdateOffParagraph(text, false, state, HasShadow())) {
         return;
     }
-    PaintText(text, x, y, false);
+    PaintText(text, x, y, false, HasShadow());
 }
 
 void FlutterRenderOffscreenCanvas::StrokeText(const std::string& text, double x, double y, const PaintState& state)
@@ -1132,7 +1133,7 @@ void FlutterRenderOffscreenCanvas::StrokeText(const std::string& text, double x,
         if (!UpdateOffParagraph(text, true, state, true)) {
             return;
         }
-        PaintText(text, x, y, true);
+        PaintText(text, x, y, true, true);
     }
 
     if (!UpdateOffParagraph(text, true, state)) {

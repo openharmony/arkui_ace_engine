@@ -41,8 +41,9 @@ public:
     void FireChangeEvent(bool isVisible) const
     {
         if (changeEvent_) {
-            auto visibleStr = std::to_string(isVisible);
-            changeEvent_(visibleStr);
+            auto json = JsonUtil::Create(true);
+            json->Put("isVisible", isVisible);
+            changeEvent_(json->ToString());
         }
     }
 

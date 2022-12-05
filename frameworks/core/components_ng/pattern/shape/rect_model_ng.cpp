@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/shape/rect_model_ng.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/rect_pattern.h"
@@ -103,9 +104,7 @@ template<class T>
 void RectModelNG::SetCallbackRadius(
     const RefPtr<T>& component, const Dimension& radiusX, const Dimension& radiusY, int32_t index)
 {
-    if (!component) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(component);
     Radius newRadius = Radius(Dimension(radiusX), Dimension(radiusY));
     switch (index) {
         case TOP_LEFT_RADIUS:

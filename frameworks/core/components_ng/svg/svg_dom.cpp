@@ -17,6 +17,7 @@
 
 #include "include/core/SkClipOp.h"
 
+#include "base/utils/utils.h"
 #include "frameworks/core/components_ng/svg/parse/svg_circle.h"
 #include "frameworks/core/components_ng/svg/parse/svg_clip_path.h"
 #include "frameworks/core/components_ng/svg/parse/svg_defs.h"
@@ -78,10 +79,7 @@ SvgDom::SvgDom()
     attrCallback_ = [weakSvgDom = AceType::WeakClaim(this)](
                         const std::string& styleName, const std::pair<std::string, std::string>& attrPair) {
         auto svgDom = weakSvgDom.Upgrade();
-        if (!svgDom) {
-            LOGE("svg dom is null");
-            return;
-        }
+        CHECK_NULL_VOID(svgDom);
         if (svgDom->svgContext_) {
             svgDom->svgContext_->PushStyle(styleName, attrPair);
         }
@@ -106,17 +104,14 @@ RefPtr<SvgDom> SvgDom::CreateSvgDom(SkStream& svgStream, const std::optional<Col
 bool SvgDom::ParseSvg(SkStream& svgStream)
 {
     SkDOM xmlDom;
-    if (svgContext_ == nullptr || !xmlDom.build(svgStream)) {
+    CHECK_NULL_RETURN_NOLOG(svgContext_, false);
+    if (!xmlDom.build(svgStream)) {
         return false;
     }
     root_ = TranslateSvgNode(xmlDom, xmlDom.getRootNode(), nullptr);
-    if (root_ == nullptr) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(root_, false);
     auto svg = AceType::DynamicCast<SvgSvg>(root_);
-    if (svg == nullptr) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(svg, false);
     svgSize_ = svg->GetSize();
     viewBox_ = svg->GetViewBox();
     svgContext_->SetRootViewBox(viewBox_);
@@ -128,9 +123,7 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
 {
     const char* element = dom.getName(xmlNode);
     if (dom.getType(xmlNode) == SkDOM::kText_Type) {
-        if (parent == nullptr) {
-            return nullptr;
-        }
+        CHECK_NULL_RETURN_NOLOG(parent, nullptr);
         if (AceType::InstanceOf<SvgStyle>(parent)) {
             SvgStyle::ParseCssStyle(element, attrCallback_);
         } else {
@@ -143,9 +136,7 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
         return nullptr;
     }
     RefPtr<SvgNode> node = TAG_FACTORIES[elementIter].value();
-    if (!node) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN_NOLOG(node, nullptr);
     node->SetContext(svgContext_);
     ParseAttrs(dom, xmlNode, node);
     for (auto* child = dom.getFirstChild(xmlNode, nullptr); child; child = dom.getNextSibling(child)) {
@@ -170,10 +161,7 @@ void SvgDom::ParseAttrs(const SkDOM& xmlDom, const SkDOM::Node* xmlNode, const R
 void SvgDom::ParseIdAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string& value)
 {
     auto svgNode = weakSvgNode.Upgrade();
-    if (!svgNode) {
-        LOGE("ParseIdAttr failed, svgNode is null");
-        return;
-    }
+    CHECK_NULL_VOID(svgNode);
     svgNode->SetNodeId(value);
     svgNode->SetAttr(DOM_ID, value);
     svgContext_->Push(value, svgNode);
@@ -182,10 +170,7 @@ void SvgDom::ParseIdAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string&
 void SvgDom::ParseFillAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string& value)
 {
     auto svgNode = weakSvgNode.Upgrade();
-    if (!svgNode) {
-        LOGE("ParseFillAttr failed, svgNode is null");
-        return;
-    }
+    CHECK_NULL_VOID(svgNode);
     if (fillColor_) {
         std::stringstream stream;
         stream << std::hex << fillColor_.value().GetValue();
@@ -199,10 +184,7 @@ void SvgDom::ParseFillAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::strin
 void SvgDom::ParseClassAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string& value)
 {
     auto svgNode = weakSvgNode.Upgrade();
-    if (!svgNode) {
-        LOGE("ParseClassAttr failed, svgNode is null");
-        return;
-    }
+    CHECK_NULL_VOID(svgNode);
     std::vector<std::string> styleNameVector;
     StringUtils::SplitStr(value, " ", styleNameVector);
     for (const auto& styleName : styleNameVector) {
@@ -219,10 +201,7 @@ void SvgDom::ParseClassAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::stri
 void SvgDom::ParseStyleAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string& value)
 {
     auto svgNode = weakSvgNode.Upgrade();
-    if (!svgNode) {
-        LOGE("ParseStyleAttr failed, svgNode is null");
-        return;
-    }
+    CHECK_NULL_VOID(svgNode);
     std::vector<std::string> attrPairVector;
     StringUtils::SplitStr(value, ";", attrPairVector);
     for (const auto& attrPair : attrPairVector) {
@@ -259,9 +238,7 @@ void SvgDom::SetAttrValue(const std::string& name, const std::string& value, con
 
 void SvgDom::SetFunction(const FuncNormalizeToPx& funcNormalizeToPx, const FuncAnimateFlush& funcAnimateFlush)
 {
-    if (svgContext_ == nullptr) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(svgContext_);
     svgContext_->SetFuncNormalizeToPx(funcNormalizeToPx);
     svgContext_->SetFuncAnimateFlush(funcAnimateFlush);
 }
@@ -269,9 +246,7 @@ void SvgDom::SetFunction(const FuncNormalizeToPx& funcNormalizeToPx, const FuncA
 void SvgDom::DrawImage(
     RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>& color)
 {
-    if (root_ == nullptr) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(root_);
     canvas.Save();
     // viewBox scale and imageFit scale
     FitImage(canvas, imageFit, layout);

@@ -1,0 +1,50 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import(
+    "//foundation/arkui/ace_engine/adapter/ohos/test/unittest/entrance/entrance.gni")
+
+ohos_unittest("HapAssetProviderTest") {
+  module_out_path = "$entrance_root_path/hap_asset_provider_test"
+
+  include_dirs = [
+    "$entrance_mock_path",
+    "$ace_root/adapter/ohos/entrance/",
+  ]
+  sources = [ "hap_asset_provider_test.cpp" ]
+
+  configs = [ "$ace_root:ace_test_config" ]
+
+  public_deps = [ "//foundation/arkui/ace_engine/adapter/ohos/entrance:ace_ohos_standard_entrance" ]
+
+  deps = [
+    "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
+    "$ability_runtime_path/frameworks/native/ability/native:data_ability_helper",
+    "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
+    "$ace_root/adapter/ohos/osal:ace_osal_ohos",
+    "$ace_root/frameworks/base:ace_base_ohos",
+    "$ace_root/frameworks/bridge:framework_bridge_ohos",
+    "$ace_root/frameworks/core:ace_core_ohos",
+  ]
+
+  external_deps = [ "ability_base:extractortool" ]
+
+  part_name = ace_engine_part
+}
+
+group("unittest") {
+  testonly = true
+  deps = [ ":HapAssetProviderTest" ]
+}

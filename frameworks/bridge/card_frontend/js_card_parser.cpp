@@ -19,6 +19,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/resource/ace_res_config.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "frameworks/base/log/event_report.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -74,7 +75,8 @@ std::unique_ptr<JsonValue> GetJsonValue(
     const std::vector<std::string>& keys, const std::unique_ptr<JsonValue>& fileData)
 {
     auto it = keys.begin();
-    if (!fileData || !fileData->IsValid() || !fileData->Contains(*it)) {
+    CHECK_NULL_RETURN_NOLOG(fileData, nullptr);
+    if (!fileData->IsValid() || !fileData->Contains(*it)) {
         return nullptr;
     }
     auto data = fileData->GetValue(*it);
@@ -109,7 +111,8 @@ std::string GetDeviceDpi(double dpi)
 
 void GetAttrOptionsSeriesPoint(const std::unique_ptr<JsonValue>& jsonPoint, PointInfo& pointInfo)
 {
-    if (!jsonPoint || !jsonPoint->IsValid() || !jsonPoint->IsObject()) {
+    CHECK_NULL_VOID_NOLOG(jsonPoint);
+    if (!jsonPoint->IsValid() || !jsonPoint->IsObject()) {
         return;
     }
 
@@ -165,7 +168,8 @@ void GetAttrOptionsSeriesPoint(const std::unique_ptr<JsonValue>& jsonPoint, Poin
 
 void GetChartAttrOptionsSeriesLineStyle(const std::unique_ptr<JsonValue>& jsonLineStyle, ChartOptions& options)
 {
-    if (!jsonLineStyle || !jsonLineStyle->IsValid() || !jsonLineStyle->IsObject()) {
+    CHECK_NULL_VOID_NOLOG(jsonLineStyle);
+    if (!jsonLineStyle->IsValid() || !jsonLineStyle->IsObject()) {
         return;
     }
 
@@ -184,7 +188,8 @@ void GetChartAttrOptionsSeriesLineStyle(const std::unique_ptr<JsonValue>& jsonLi
 
 void GetChartAttrOptionsSeries(const std::unique_ptr<JsonValue>& jsonSeries, ChartOptions& options)
 {
-    if (!jsonSeries || !jsonSeries->IsValid()) {
+    CHECK_NULL_VOID_NOLOG(jsonSeries);
+    if (!jsonSeries->IsValid()) {
         return;
     }
     auto child = jsonSeries->GetChild();
@@ -229,7 +234,8 @@ void GetChartAttrOptionsSeries(const std::unique_ptr<JsonValue>& jsonSeries, Cha
 
 void GetAttrOptionsAxis(const std::unique_ptr<JsonValue>& jsonAxis, AxisOption& axisOption)
 {
-    if (!jsonAxis || !jsonAxis->IsValid() || !jsonAxis->IsObject()) {
+    CHECK_NULL_VOID(jsonAxis);
+    if (!jsonAxis->IsValid() || !jsonAxis->IsObject()) {
         return;
     }
 
@@ -279,7 +285,8 @@ void GetAttrOptionsAxis(const std::unique_ptr<JsonValue>& jsonAxis, AxisOption& 
 
 void GetAttrOptions(const std::unique_ptr<JsonValue>& jsonOption, ChartOptions& options)
 {
-    if (!jsonOption || !jsonOption->IsValid() || !jsonOption->IsObject()) {
+    CHECK_NULL_VOID_NOLOG(jsonOption);
+    if (!jsonOption->IsValid() || !jsonOption->IsObject()) {
         return;
     }
     auto child = jsonOption->GetChild();
@@ -339,7 +346,8 @@ void ParseTextPlacement(const std::string& val, TextInfo& textInfo)
 
 void GetAttrDataSetData(const std::unique_ptr<JsonValue>& jsonData, MainChart& dataset)
 {
-    if (!jsonData || !jsonData->IsValid() || !jsonData->IsArray()) {
+    CHECK_NULL_VOID_NOLOG(jsonData);
+    if (!jsonData->IsValid() || !jsonData->IsArray()) {
         return;
     }
     std::vector<LineInfo> line;
@@ -389,7 +397,8 @@ void GetAttrDataSetData(const std::unique_ptr<JsonValue>& jsonData, MainChart& d
 
 void GetAttrDataset(const std::unique_ptr<JsonValue>& jsonDataSet, MainChart& dataset)
 {
-    if (!jsonDataSet || !jsonDataSet->IsValid()) {
+    CHECK_NULL_VOID_NOLOG(jsonDataSet);
+    if (!jsonDataSet->IsValid()) {
         return;
     }
     auto data = jsonDataSet->GetChild();
@@ -410,7 +419,8 @@ void GetAttrDataset(const std::unique_ptr<JsonValue>& jsonDataSet, MainChart& da
 
 void GetAttrDatasets(const std::unique_ptr<JsonValue>& jsonDataSets, std::vector<MainChart>& datasets)
 {
-    if (!jsonDataSets || !jsonDataSets->IsValid() || !jsonDataSets->IsArray()) {
+    CHECK_NULL_VOID_NOLOG(jsonDataSets);
+    if (!jsonDataSets->IsValid() || !jsonDataSets->IsArray()) {
         return;
     }
     for (int32_t i = 0; i < jsonDataSets->GetArraySize(); ++i) {
@@ -425,7 +435,8 @@ void GetAttrDatasets(const std::unique_ptr<JsonValue>& jsonDataSets, std::vector
 
 void ParseSegmentObject(const std::unique_ptr<JsonValue>& jsonDataSet, Segment& segment)
 {
-    if (!jsonDataSet || !jsonDataSet->IsValid()) {
+    CHECK_NULL_VOID_NOLOG(jsonDataSet);
+    if (!jsonDataSet->IsValid()) {
         return;
     }
     auto data = jsonDataSet->GetChild();
@@ -450,7 +461,8 @@ void ParseSegmentObject(const std::unique_ptr<JsonValue>& jsonDataSet, Segment& 
 
 void ParseSegments(const std::unique_ptr<JsonValue>& jsonDataSets, std::vector<Segment>& datasets)
 {
-    if (!jsonDataSets || !jsonDataSets->IsValid()) {
+    CHECK_NULL_VOID_NOLOG(jsonDataSets);
+    if (!jsonDataSets->IsValid()) {
         return;
     }
     if (jsonDataSets->IsObject()) {
@@ -471,7 +483,8 @@ void ParseSegments(const std::unique_ptr<JsonValue>& jsonDataSets, std::vector<S
 
 void GetBadgeConfig(const std::unique_ptr<JsonValue>& jsonDataSets, BadgeConfig& badgeConfig)
 {
-    if (!jsonDataSets || !jsonDataSets->IsValid()) {
+    CHECK_NULL_VOID_NOLOG(jsonDataSets);
+    if (!jsonDataSets->IsValid()) {
         return;
     }
     auto data = jsonDataSets->GetChild();
@@ -513,7 +526,8 @@ bool GetStrValue(const std::string& key, std::stack<std::string>& keyStack)
 {
     auto topKey = keyStack.top();
     auto data = JsonUtil::ParseJsonString(topKey);
-    if (!data || !data->IsValid() || !data->Contains(key)) {
+    CHECK_NULL_RETURN_NOLOG(data, false);
+    if (!data->IsValid() || !data->Contains(key)) {
         return false;
     }
     keyStack.pop();
@@ -527,8 +541,9 @@ bool GetIndexValue(const std::string& key, std::stack<std::string>& keyStack)
 {
     auto topValue = keyStack.top();
     auto data = JsonUtil::ParseJsonString(topValue);
+    CHECK_NULL_RETURN_NOLOG(data, false);
     auto index = StringToInt(key);
-    if (!data || !data->IsValid() || !data->IsArray() || (data->IsArray() && index >= data->GetArraySize())) {
+    if (!data->IsValid() || !data->IsArray() || (data->IsArray() && index >= data->GetArraySize())) {
         return false;
     }
     keyStack.pop();
@@ -599,11 +614,10 @@ bool IsMultiVariable(const std::string& value)
 
 void JsCardParser::UpdateProps(const std::string& key, std::string value, const std::unique_ptr<JsonValue>& propsJson)
 {
-    if (!propsJson) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(propsJson);
     auto propsObject = propsJson->GetValue(key);
-    if (!propsObject || !propsObject->IsValid()) {
+    CHECK_NULL_VOID_NOLOG(propsObject);
+    if (!propsObject->IsValid()) {
         return;
     }
     if (IsVariable(value)) {
@@ -621,7 +635,8 @@ void JsCardParser::ParseAttributes(const std::unique_ptr<JsonValue>& rootJson, i
     const std::unique_ptr<JsonValue>& dataJson, const std::unique_ptr<JsonValue>& propsJson)
 {
     auto attrList = rootJson->GetValue("attr");
-    if (!attrList || !attrList->IsValid()) {
+    CHECK_NULL_VOID_NOLOG(attrList);
+    if (!attrList->IsValid()) {
         return;
     }
     auto attr = attrList->GetChild();
@@ -706,7 +721,8 @@ bool JsCardParser::GetShownValue(
 
 bool JsCardParser::GetRepeatData(std::unique_ptr<JsonValue>& repeatValue, std::string& key)
 {
-    if (!repeatValue || !repeatValue->IsValid()) {
+    CHECK_NULL_RETURN(repeatValue, false);
+    if (!repeatValue->IsValid()) {
         LOGE("GetRepeatData failed, repeat value is invalid.");
         return false;
     }
@@ -724,7 +740,8 @@ bool JsCardParser::GetRepeatData(std::unique_ptr<JsonValue>& repeatValue, std::s
 
 void JsCardParser::SetRepeatItemValue(uint32_t index, const std::unique_ptr<JsonValue>& repeatValue, bool hasKeyValue)
 {
-    if (!repeatValue || !repeatValue->IsValid()) {
+    CHECK_NULL_VOID(repeatValue);
+    if (!repeatValue->IsValid()) {
         LOGE("SetRepeatItemValue failed, repeat value is invalid.");
         return;
     }
@@ -736,9 +753,7 @@ void JsCardParser::SetRepeatItemValue(uint32_t index, const std::unique_ptr<Json
                                         : repeatJson_->Put(REPEAT_INDEX.c_str(), idx.c_str());
     repeatJson_->Contains(REPEAT_ITEM) ? repeatJson_->Replace(REPEAT_ITEM.c_str(), itemValue)
                                        : repeatJson_->Put(REPEAT_ITEM.c_str(), itemValue);
-    if (!hasKeyValue) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(hasKeyValue);
     // update the user-defined index and item value.
     if (!repeatIndex_.empty()) {
         repeatJson_->Contains(repeatIndex_) ? repeatJson_->Replace(repeatIndex_.c_str(), idx.c_str())
@@ -752,7 +767,8 @@ void JsCardParser::SetRepeatItemValue(uint32_t index, const std::unique_ptr<Json
 
 void JsCardParser::ParseRepeatIndexItem(const std::unique_ptr<JsonValue>& repeatValue)
 {
-    if (!repeatValue || !repeatValue->IsValid()) {
+    CHECK_NULL_VOID(repeatValue);
+    if (!repeatValue->IsValid()) {
         LOGE("ParseRepeatIndexItem failed, repeat value is invalid.");
         return;
     }
@@ -777,7 +793,8 @@ void JsCardParser::LoadResImageUrl(const std::string& jsonFile, const std::strin
     // Path only print relative path
     LOGI("load res image file is %{public}s", jsonFile.c_str());
     auto content = resourceJson_->GetValue(jsonFile);
-    if (!content || !content->IsValid()) {
+    CHECK_NULL_VOID(content);
+    if (!content->IsValid()) {
         LOGE("LoadResImageUrl failed, content is invalid.");
         return;
     }
@@ -831,15 +848,10 @@ bool JsCardParser::GetI18nData(std::string& value)
     StringUtils::StringSplitter(value, '.', keys);
     std::vector<std::string> files;
     auto context = context_.Upgrade();
-    if (!context) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(context, false);
 
     auto assetManager = assetManager_.Upgrade();
-    if (!assetManager) {
-        LOGE("Get i18n files fail!");
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(assetManager, false);
     assetManager->GetAssetList(I18N_FOLDER, files);
 
     std::vector<std::string> fileNameList;
@@ -925,7 +937,8 @@ void JsCardParser::ParseInlineStyles(
     const std::unique_ptr<JsonValue>& rootJson, std::vector<std::pair<std::string, std::string>>& styles)
 {
     auto styleList = rootJson->GetValue("style");
-    if (!styleList || !styleList->IsValid()) {
+    CHECK_NULL_VOID_NOLOG(styleList);
+    if (!styleList->IsValid()) {
         return;
     }
     auto style = styleList->GetChild();
@@ -947,7 +960,8 @@ bool JsCardParser::SelectStyle(const std::string& className, const std::unique_p
     std::vector<std::pair<std::string, std::string>>& styles)
 {
     auto styleDetail = styleClass->GetValue(className);
-    if (!styleDetail || !styleDetail->IsValid()) {
+    CHECK_NULL_RETURN_NOLOG(styleDetail, false);
+    if (!styleDetail->IsValid()) {
         return false;
     }
     auto style = styleDetail->GetChild();
@@ -984,7 +998,8 @@ void JsCardParser::SelectMediaQueryStyle(
 void JsCardParser::RegisterFont(const std::string& fontFamily)
 {
     auto fontFaceValue = styleJson_->GetValue("@FONT-FACE");
-    if (!fontFaceValue || !fontFaceValue->IsValid()) {
+    CHECK_NULL_VOID_NOLOG(fontFaceValue);
+    if (!fontFaceValue->IsValid()) {
         return;
     }
     auto fontFace = fontFaceValue->GetChild();
@@ -1008,7 +1023,8 @@ void JsCardParser::RegisterFont(const std::string& fontFamily)
 void JsCardParser::PreUpdateMethodToAction(const std::unique_ptr<JsonValue>& rootJson)
 {
     auto eventList = rootJson->GetValue("events");
-    if (!eventList || !eventList->IsValid()) {
+    CHECK_NULL_VOID_NOLOG(eventList);
+    if (!eventList->IsValid()) {
         return;
     }
     auto event = eventList->GetChild();
@@ -1027,7 +1043,8 @@ void JsCardParser::ParseEvents(const std::unique_ptr<JsonValue>& rootJson, const
 {
     LOGD("ParseEvents json:%{public}s", eventJson->ToString().c_str());
     auto eventList = rootJson->GetValue("events");
-    if (!eventList || !eventList->IsValid()) {
+    CHECK_NULL_VOID_NOLOG(eventList);
+    if (!eventList->IsValid()) {
         return;
     }
     auto event = eventList->GetChild();
@@ -1052,7 +1069,8 @@ void JsCardParser::ParseEvents(const std::unique_ptr<JsonValue>& rootJson, const
 std::string JsCardParser::GetEventAction(const std::string& action, const std::string& actionType, int32_t nodeId)
 {
     auto actionDetail = JsonUtil::ParseJsonString(action);
-    if (!actionDetail || !actionDetail->IsValid()) {
+    CHECK_NULL_RETURN(actionDetail, "");
+    if (!actionDetail->IsValid()) {
         LOGE("GetEventAction: action detail is invalid");
         return "";
     }
@@ -1091,7 +1109,8 @@ void JsCardParser::ReplaceParam(const std::unique_ptr<JsonValue>& node)
 void JsCardParser::LoadMediaQueryStyle()
 {
     auto media = styleJson_->GetValue("@MEDIA");
-    if (!media || !media->IsValid()) {
+    CHECK_NULL_VOID_NOLOG(media);
+    if (!media->IsValid()) {
         return;
     }
     static const std::string CONDITION_KEY = "condition";
@@ -1128,9 +1147,7 @@ void JsCardParser::LoadMediaQueryStyle()
 void JsCardParser::GetResourceValue(const std::string& path)
 {
     auto assetManager = assetManager_.Upgrade();
-    if (!assetManager) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(assetManager);
     std::string content;
     if (GetAssetContentImpl(assetManager, path, content) && !content.empty()) {
         auto jsonBody = ParseFileData(content);
@@ -1155,16 +1172,19 @@ void JsCardParser::LoadImageInfo()
 void JsCardParser::UpdatePageData(const std::string& dataList, const RefPtr<JsAcePage>& page)
 {
     LOGI("update data is %{private}s card hap path %{public}s", dataList.c_str(), cardHapPath_.c_str());
-    if (!page || dataList.empty()) {
+    CHECK_NULL_VOID(page);
+    if (dataList.empty()) {
         LOGE("update data is null");
         return;
     }
     const auto& rootData = JsonUtil::ParseJsonString(dataList);
-    if (!rootData || !rootData->IsValid()) {
+    CHECK_NULL_VOID_NOLOG(rootData);
+    if (!rootData->IsValid()) {
         return;
     }
     auto data = rootData->GetChild();
-    if (!data || !data->IsValid()) {
+    CHECK_NULL_VOID(data);
+    if (!data->IsValid()) {
         LOGE("update card data error");
         return;
     }
@@ -1179,10 +1199,7 @@ void JsCardParser::UpdatePageData(const std::string& dataList, const RefPtr<JsAc
 
 void JsCardParser::UpdateStyle(const RefPtr<JsAcePage>& page)
 {
-    if (!page) {
-        LOGE("update color mode error");
-        return;
-    }
+    CHECK_NULL_VOID(page);
     SetUpdateStatus(page);
 }
 
@@ -1268,7 +1285,8 @@ void JsCardParser::UpdateDomNode(const RefPtr<Framework::JsAcePage>& page, const
     const std::unique_ptr<JsonValue>& styleJson, const std::unique_ptr<JsonValue>& propsJson)
 {
     LOGD("UpdateDomNode root json: %{public}s", rootJson->ToString().c_str());
-    if (!page || !rootJson->IsValid()) {
+    CHECK_NULL_VOID(page);
+    if (!rootJson->IsValid()) {
         LOGE("fail to UpdateDomNode due to page or root is invalid");
         return;
     }
@@ -1303,7 +1321,8 @@ void JsCardParser::UpdateDomNode(const RefPtr<Framework::JsAcePage>& page, const
         auto customJsonProps = customJson->GetValue("props");
         auto customJsonStyle = customJson->GetValue("styles");
         auto attrList = rootJson->GetValue("attr");
-        if (!attrList || !attrList->IsValid()) {
+        CHECK_NULL_VOID_NOLOG(attrList);
+        if (!attrList->IsValid()) {
             return;
         }
         auto attr = attrList->GetChild();
@@ -1472,9 +1491,7 @@ bool JsCardParser::ParseLogicalExpression(std::string& value, const std::unique_
 
 bool JsCardParser::GetAndParseProps(std::string& value, const std::unique_ptr<JsonValue>& propsJson)
 {
-    if (!propsJson) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(propsJson, false);
     if (ParsePropsArray(value, propsJson) || ParsePropsVariable(value, propsJson)) {
         return true;
     }
@@ -1484,7 +1501,8 @@ bool JsCardParser::GetAndParseProps(std::string& value, const std::unique_ptr<Js
 bool JsCardParser::ParsePropsVariable(std::string& value, const std::unique_ptr<JsonValue>& propsJson)
 {
     auto propsObject = propsJson->GetValue(value);
-    if (!propsObject || !propsObject->IsValid()) {
+    CHECK_NULL_RETURN(propsObject, false);
+    if (!propsObject->IsValid()) {
         LOGI("GetAndParseProps propsObject is empty or propsObject->IsValid()");
         return false;
     }
@@ -1520,7 +1538,8 @@ bool JsCardParser::ParsePropsArray(std::string& value, const std::unique_ptr<Jso
         return false;
     }
     auto propsObject = propsJson->GetValue(arrayParam);
-    if (!propsObject || !propsObject->IsValid()) {
+    CHECK_NULL_RETURN(propsObject, false);
+    if (!propsObject->IsValid()) {
         LOGI("GetAndParseProps propsObject is empty or propsObject->IsValid()");
         return false;
     }
@@ -1567,15 +1586,14 @@ bool JsCardParser::GetVariable(std::string& value, const std::unique_ptr<JsonVal
         return false;
     }
 
-    if (!dataJson) {
-        return false;
-    }
+    CHECK_NULL_RETURN(dataJson, false);
     LOGD("GetVariable value :%{private}s dataJson:%{private}s", value.c_str(), dataJson->ToString().c_str());
     auto dataValue = dataJson->GetValue(key);
     if (isRepeat_) {
         dataValue = repeatJson_->GetValue(key);
     }
-    if (!dataValue || !dataValue->IsValid()) {
+    CHECK_NULL_RETURN_NOLOG(dataValue, false);
+    if (!dataValue->IsValid()) {
         return false;
     }
     value = dataValue->IsString() ? dataValue->GetString() : dataValue->ToString();
@@ -1643,7 +1661,8 @@ void JsCardParser::CreateDomNode(const RefPtr<Framework::JsAcePage>& page, const
     int32_t parentId, const std::unique_ptr<JsonValue>& dataJson, const std::unique_ptr<JsonValue>& actionJson,
     const std::unique_ptr<JsonValue>& styleJson, const std::unique_ptr<JsonValue>& propsJson, bool isNewNode)
 {
-    if (!page || !rootJson->IsValid()) {
+    CHECK_NULL_VOID(page);
+    if (!rootJson->IsValid()) {
         LOGE("fail to CreateDomNode due to page or root is invalid");
         EventReport::SendFormException(FormExcepType::CREATE_NODE_ERR);
         return;
@@ -1680,7 +1699,8 @@ void JsCardParser::CreateDomNode(const RefPtr<Framework::JsAcePage>& page, const
         auto customJsonActions = customJson->GetValue("actions");
         auto customJsonStyle = customJson->GetValue("styles");
         auto attrList = rootJson->GetValue("attr");
-        if (!attrList || !attrList->IsValid()) {
+        CHECK_NULL_VOID_NOLOG(attrList);
+        if (!attrList->IsValid()) {
             return;
         }
         auto attr = attrList->GetChild();
@@ -1736,7 +1756,8 @@ void JsCardParser::CreateRepeatDomNode(
     const RefPtr<Framework::JsAcePage>& page, const std::unique_ptr<JsonValue>& rootJson, int32_t parentId)
 {
     auto repeatValue = rootJson->GetValue("repeat");
-    if (!repeatValue || !repeatValue->IsValid()) {
+    CHECK_NULL_VOID(repeatValue);
+    if (!repeatValue->IsValid()) {
         LOGE("CreateRepeatDomNode failed, repeat value is invalid.");
         return;
     }
@@ -1772,7 +1793,8 @@ void JsCardParser::CreateRepeatDomNode(
 
 void JsCardParser::GetClockConfig(const std::unique_ptr<JsonValue>& jsonDataSets, ClockConfig& clockConfig)
 {
-    if (!jsonDataSets || !jsonDataSets->IsValid()) {
+    CHECK_NULL_VOID_NOLOG(jsonDataSets);
+    if (!jsonDataSets->IsValid()) {
         return;
     }
     auto data = jsonDataSets->GetChild();
@@ -1948,7 +1970,8 @@ void JsCardParser::ParseVersionAndUpdateData()
 {
     LOGI("parse version info and update data field");
     auto versionJson = rootBody_->GetValue("apiVersion");
-    if (!versionJson || !versionJson->IsValid()) {
+    CHECK_NULL_VOID_NOLOG(versionJson);
+    if (!versionJson->IsValid()) {
         return;
     }
     auto child = versionJson->GetChild();
@@ -1988,10 +2011,10 @@ bool JsCardParser::Initialize()
     eventJson_ = rootBody_->GetValue("actions");
     dataJson_ = rootBody_->GetValue("data");
 
-    if (!rootJson_ || !styleJson_ || !eventJson_ || !dataJson_) {
-        LOGE("the json template is nullptr");
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(rootJson_, false);
+    CHECK_NULL_RETURN_NOLOG(styleJson_, false);
+    CHECK_NULL_RETURN_NOLOG(eventJson_, false);
+    CHECK_NULL_RETURN_NOLOG(dataJson_, false);
     if (!rootJson_->IsValid() || !styleJson_->IsValid() || !eventJson_->IsValid() || !dataJson_->IsValid()) {
         LOGE("the json template is error");
         return false;

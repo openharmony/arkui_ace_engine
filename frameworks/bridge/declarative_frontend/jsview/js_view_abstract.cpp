@@ -1700,23 +1700,16 @@ void JSViewAbstract::JsPadding(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsMargin(const JSCallbackInfo& info)
 {
-    JSViewAbstract::ParseMarginOrPadding(info, true);
+    ParseMarginOrPadding(info, true);
 }
 
 void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
-        JSCallbackInfoType::OBJECT };
-    if (!CheckJSCallbackInfo("ParseMarginOrPadding", info, checkList)) {
-        return;
-    }
-
-    std::optional<Dimension> left;
-    std::optional<Dimension> right;
-    std::optional<Dimension> top;
-    std::optional<Dimension> bottom;
-
     if (info[0]->IsObject()) {
+        std::optional<Dimension> left;
+        std::optional<Dimension> right;
+        std::optional<Dimension> top;
+        std::optional<Dimension> bottom;
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
 
         Dimension leftDimen;
@@ -1747,7 +1740,8 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
 
     Dimension length;
     if (!ParseJsDimensionVp(info[0], length)) {
-        return;
+        // use default value.
+        length.Reset();
     }
     if (isMargin) {
         ViewAbstractModel::GetInstance()->SetMargin(length);
@@ -1768,18 +1762,17 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
     if (!valueWidth->IsUndefined()) {
         ParseBorderWidth(valueWidth);
     }
-    auto valueColor = object->GetProperty("color");
-    if (!valueColor->IsUndefined()) {
-        ParseBorderColor(valueColor);
-    }
+
+    // use default value when undefined.
+    ParseBorderColor(object->GetProperty("color"));
+
     auto valueRadius = object->GetProperty("radius");
     if (!valueRadius->IsUndefined()) {
         ParseBorderRadius(valueRadius);
     }
-    auto valueStyle = object->GetProperty("style");
-    if (!valueStyle->IsUndefined()) {
-        ParseBorderStyle(valueStyle);
-    }
+    // use default value when undefined.
+    ParseBorderStyle(object->GetProperty("style"));
+
     info.ReturnSelf();
 }
 
@@ -2083,11 +2076,8 @@ void JSViewAbstract::JsBorderColor(const JSCallbackInfo& info)
 void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args)
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
-        LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
-        if (args->IsNull()) {
-            // use default color when color args is null.
-            ViewAbstractModel::GetInstance()->SetBorderColor(Color::BLACK);
-        }
+        LOGI("args(%{public}s) is invalid, use default value.", args->ToString().c_str());
+        ViewAbstractModel::GetInstance()->SetBorderColor(Color::BLACK);
         return;
     }
     std::optional<Color> leftColor;
@@ -2175,26 +2165,21 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args)
 
 void JSViewAbstract::JsBorderStyle(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
-        JSCallbackInfoType::OBJECT };
-    if (!CheckJSCallbackInfo("JsBorderStyle", info, checkList)) {
-        LOGE("args need a string or number or object");
-        return;
-    }
     ParseBorderStyle(info[0]);
 }
 
 void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args)
 {
     if (!args->IsObject() && !args->IsNumber()) {
-        LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
+        LOGI("args(%{public}s) is invalid, use default value.", args->ToString().c_str());
+        ViewAbstractModel::GetInstance()->SetBorderStyle(BorderStyle::SOLID);
         return;
     }
-    std::optional<BorderStyle> styleLeft;
-    std::optional<BorderStyle> styleRight;
-    std::optional<BorderStyle> styleTop;
-    std::optional<BorderStyle> styleBottom;
     if (args->IsObject()) {
+        std::optional<BorderStyle> styleLeft;
+        std::optional<BorderStyle> styleRight;
+        std::optional<BorderStyle> styleTop;
+        std::optional<BorderStyle> styleBottom;
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         auto leftValue = object->GetProperty("left");
         if (!leftValue->IsUndefined() && leftValue->IsNumber()) {
@@ -2213,10 +2198,10 @@ void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args)
             styleBottom = static_cast<BorderStyle>(bottomValue->ToNumber<int32_t>());
         }
         ViewAbstractModel::GetInstance()->SetBorderStyle(styleLeft, styleRight, styleTop, styleBottom);
-    } else {
-        auto borderStyle = static_cast<BorderStyle>(args->ToNumber<int32_t>());
-        ViewAbstractModel::GetInstance()->SetBorderStyle(borderStyle);
+        return;
     }
+    auto borderStyle = static_cast<BorderStyle>(args->ToNumber<int32_t>());
+    ViewAbstractModel::GetInstance()->SetBorderStyle(borderStyle);
 }
 
 void JSViewAbstract::JsBlur(const JSCallbackInfo& info)
@@ -2340,33 +2325,54 @@ bool JSViewAbstract::ParseJsDimensionPx(const JSRef<JSVal>& jsValue, Dimension& 
     return ParseJsDimension(jsValue, result, DimensionUnit::PX);
 }
 
-bool JSViewAbstract::ParseJsDouble(const JSRef<JSVal>& jsValue, double& result)
+bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result)
 {
-    if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    if (jsObj->IsEmpty()) {
+        LOGW("jsObj is nullptr");
         return false;
     }
+    JSRef<JSVal> id = jsObj->GetProperty("id");
+    JSRef<JSVal> type = jsObj->GetProperty("type");
+    if (!id->IsNumber() || !type->IsNumber()) {
+        LOGW("at least one of id and type is not number");
+        return false;
+    }
+    auto themeConstants = GetThemeConstants(jsObj);
+    auto resId = id->ToNumber<uint32_t>();
+    auto resType = type->ToNumber<uint32_t>();
+    if (!themeConstants) {
+        LOGW("themeConstants is nullptr");
+        return false;
+    }
+    if (resType == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto numberString = themeConstants->GetString(resId);
+        return StringUtils::StringToDouble(numberString, result);
+    }
+    if (resType == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        result = themeConstants->GetInt(resId);
+        return true;
+    }
+    if (resType == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        result = themeConstants->GetDouble(resId);
+        return true;
+    }
+    return false;
+}
+
+bool JSViewAbstract::ParseJsDouble(const JSRef<JSVal>& jsValue, double& result)
+{
     if (jsValue->IsNumber()) {
         result = jsValue->ToNumber<double>();
         return true;
     }
     if (jsValue->IsString()) {
-        result = StringUtils::StringToDouble(jsValue->ToString());
-        return true;
+        return StringUtils::StringToDouble(jsValue->ToString(), result);
     }
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (!resId->IsNumber()) {
-        LOGW("resId is not number");
-        return false;
+    if (jsValue->IsObject()) {
+        return ParseResourceToDouble(jsValue, result);
     }
-
-    auto themeConstants = GetThemeConstants(jsObj);
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
-        return false;
-    }
-    result = themeConstants->GetDouble(resId->ToNumber<uint32_t>());
-    return true;
+    return false;
 }
 
 bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
@@ -3712,7 +3718,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
     CHECK_NULL_VOID(builderFunc);
 
-    ResponseType responseType = ResponseType::LONGPRESS;
+    ResponseType responseType = ResponseType::LONG_PRESS;
     if (info.Length() == 2 && info[1]->IsNumber()) {
         auto response = info[1]->ToNumber<int32_t>();
         LOGI("Set the responseType is %{public}d.", response);
@@ -4373,6 +4379,7 @@ void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
     auto ratioArray = JSRef<JSArray>::Cast(info[0]);
     size_t size = ratioArray->Length();
     std::vector<double> ratioVec(size);
+    ratioVec.clear();
     for (size_t i = 0; i < size; i++) {
         double ratio = 0.0;
         ParseJsDouble(ratioArray->GetValueAt(i), ratio);

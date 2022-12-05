@@ -79,7 +79,6 @@ public:
     void ShowArrow(bool show);
     void ShowInPanelMode(PanelMode mode);
     void UpdateDrawPoint();
-    void SetStatusBarHeight(float height);
 
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const TouchLocationInfo& info);
@@ -95,8 +94,6 @@ private:
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void DoStyleAnimation(
         const OffsetT<Dimension>& left, const OffsetT<Dimension>& center, const OffsetT<Dimension>& right);
-    void FadingOut();
-    void Stretching();
 
     RefPtr<TouchEventImpl> touchEvent_;
     OffsetF iconOffset_;

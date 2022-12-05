@@ -78,27 +78,23 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragStart();
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragStart();
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragUpdate(static_cast<float>(info.GetMainDelta()));
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragUpdate(static_cast<float>(info.GetMainDelta()));
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragEnd();
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragEnd();
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragCancel();
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragCancel();
     };
     PanDirection panDirection;
     panDirection.type = PanDirection::VERTICAL;
@@ -148,7 +144,7 @@ void RefreshPattern::HandleDragUpdate(float delta)
     auto refreshLayoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(refreshLayoutProperty);
     auto refreshRenderProperty = host->GetPaintProperty<RefreshRenderProperty>();
-    CHECK_NULL_VOID(refreshLayoutProperty);
+    CHECK_NULL_VOID(refreshRenderProperty);
     UpdateScrollableOffset(delta);
     refreshLayoutProperty->UpdateLoadingProcessOffset(GetLoadingOffset());
     refreshLayoutProperty->UpdateShowTimeOffset(GetShowTimeOffset());
@@ -156,9 +152,8 @@ void RefreshPattern::HandleDragUpdate(float delta)
     if (host->TotalChildCount() < CHILD_COUNT) {
         return;
     }
-    if (!progressChild_ || !textChild_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(progressChild_);
+    CHECK_NULL_VOID_NOLOG(textChild_);
     auto diameter = static_cast<float>(GetLoadingDiameter());
     auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
@@ -199,7 +194,7 @@ void RefreshPattern::HandleDragEnd()
     auto refreshLayoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(refreshLayoutProperty);
     auto refreshRenderProperty = host->GetPaintProperty<RefreshRenderProperty>();
-    CHECK_NULL_VOID(refreshLayoutProperty);
+    CHECK_NULL_VOID(refreshRenderProperty);
     if (refreshStatus != RefreshStatus::DONE && refreshStatus != RefreshStatus::INACTIVE) {
         auto scrollableOffset = refreshLayoutProperty->GetScrollableOffsetValue();
         auto triggerRefreshDistance = refreshLayoutProperty->GetTriggerRefreshDistanceValue();

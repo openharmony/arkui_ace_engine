@@ -58,7 +58,7 @@ public:
     float GetAlphabeticBaseline() override;
 
     // interfaces for painting
-    void Paint(const RefPtr<Canvas>& canvas, float x, float y) override;
+    void Paint(const RSCanvas& canvas, float x, float y) override;
 
 private:
     void CreateBuilder();

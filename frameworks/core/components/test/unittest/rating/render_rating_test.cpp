@@ -15,25 +15,24 @@
 
 #include "gtest/gtest.h"
 
+#include "base/test/mock/mock_asset_manager.h"
+#include "base/test/mock/mock_task_executor.h"
 #include "base/utils/system_properties.h"
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/fake_task_executor.h"
-#include "frameworks/core/components/rating/rating_component.h"
-#include "frameworks/core/components/test/json/json_frontend.h"
-#include "frameworks/core/event/key_event.h"
-#include "frameworks/core/image/image_object.h"
-#include "frameworks/core/mock/mock_resource_register.h"
+#include "core/common/test/mock/mock_resource_register.h"
+#include "core/components/rating/rating_component.h"
+#include "core/components/test/json/json_frontend.h"
+#include "core/event/key_event.h"
+#include "core/image/image_object.h"
 #define protected public
-#include "frameworks/core/components/rating/render_rating.h"
-#include "frameworks/core/components/test/unittest/mock/mock_render_depend.h"
-#include "frameworks/core/components/text_overlay/text_overlay_component.h"
+#include "core/components/rating/render_rating.h"
+#include "core/components/test/unittest/mock/mock_render_depend.h"
+#include "core/components/text_overlay/text_overlay_component.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-
 using RatingEventCallback = std::function<void(const std::string&, const std::string&)>;
 using UpdateRatingCallback = std::function<void(const RefPtr<RatingComponent>&)>;
 const UpdateRatingCallback EMPTY_CALLBACK;
@@ -89,7 +88,6 @@ public:
 private:
     RatingEventCallback eventCallback_;
 };
-
 } // namespace
 
 class MockImageCache : public ImageCache {
@@ -573,5 +571,4 @@ HWTEST_F(RatingComponentTest, RatingUpdate003, TestSize.Level1)
     ASSERT_TRUE(renderRating->starNum_ == TEST_RATING_STAR_NUM);
     ASSERT_TRUE(renderRating->ratingScore_ == TEST_RATING_STAR_NUM); // ratingScore is limited to starNum
 }
-
 } // namespace OHOS::Ace

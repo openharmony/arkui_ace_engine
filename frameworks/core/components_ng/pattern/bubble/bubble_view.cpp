@@ -144,14 +144,6 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     customNode->MountToParent(columnNode);
-    auto customContext = AceType::DynamicCast<FrameNode>(customNode)->GetRenderContext();
-    auto borderRadius = BorderRadiusProperty();
-    if (customContext) {
-        borderRadius = customContext->GetBorderRadius().value_or(BorderRadiusProperty());
-    }
-    auto radius = Radius(borderRadius.radiusBottomLeft.value_or(Dimension()));
-    auto paintProps = popupNode->GetPaintProperty<BubbleRenderProperty>();
-    paintProps->UpdateBorderRadius(radius);
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext) {
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);

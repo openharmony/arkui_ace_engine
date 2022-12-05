@@ -15,6 +15,8 @@
 
 #include "core/common/font_loader.h"
 
+#include "base/utils/utils.h"
+
 namespace OHOS::Ace {
 
 FontLoader::FontLoader(const std::string& familyName, const std::string& familySrc)
@@ -27,9 +29,7 @@ const std::string& FontLoader::GetFamilyName() const
 
 void FontLoader::SetOnLoaded(const WeakPtr<RenderNode>& node, const std::function<void()>& callback)
 {
-    if (!callback) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(callback);
     if (isLoaded_) {
         callback();
     } else {

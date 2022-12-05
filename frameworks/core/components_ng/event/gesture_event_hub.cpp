@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
 #include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
@@ -292,30 +293,26 @@ void GestureEventHub::InitDragDropEvent()
 {
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto gestureEventHub = weak.Upgrade();
-        if (gestureEventHub) {
-            gestureEventHub->HandleOnDragStart(info);
-        }
+        CHECK_NULL_VOID_NOLOG(gestureEventHub);
+        gestureEventHub->HandleOnDragStart(info);
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto gestureEventHub = weak.Upgrade();
-        if (gestureEventHub) {
-            gestureEventHub->HandleOnDragUpdate(info);
-        }
+        CHECK_NULL_VOID_NOLOG(gestureEventHub);
+        gestureEventHub->HandleOnDragUpdate(info);
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto gestureEventHub = weak.Upgrade();
-        if (gestureEventHub) {
-            gestureEventHub->HandleOnDragEnd(info);
-        }
+        CHECK_NULL_VOID_NOLOG(gestureEventHub);
+        gestureEventHub->HandleOnDragEnd(info);
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto gestureEventHub = weak.Upgrade();
-        if (gestureEventHub) {
-            gestureEventHub->HandleOnDragCancel();
-        }
+        CHECK_NULL_VOID_NOLOG(gestureEventHub);
+        gestureEventHub->HandleOnDragCancel();
     };
 
     auto dragEvent = MakeRefPtr<DragEvent>(
@@ -399,73 +396,74 @@ void GestureEventHub::SetFocusClickEvent(GestureEventFunc&& clickEvent)
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
     auto focusHub = eventHub->GetFocusHub();
-    if (focusHub) {
-        focusHub->SetOnClickCallback(std::move(clickEvent));
-    }
+    CHECK_NULL_VOID_NOLOG(focusHub);
+    focusHub->SetOnClickCallback(std::move(clickEvent));
 }
 
-void GestureEventHub::SetClickEvent(GestureEventFunc&& clickEvent)
+// helper function to ensure clickActuator is initialized
+void GestureEventHub::CheckClickActuator()
 {
     if (!clickEventActuator_) {
         clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
         clickEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
     }
-    clickEventActuator_->ReplaceClickEvent(std::move(clickEvent));
+}
+
+void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent)
+{
+    CheckClickActuator();
+    clickEventActuator_->SetUserCallback(std::move(clickEvent));
 
     SetFocusClickEvent(clickEventActuator_->GetClickEvent());
 }
 
 void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
 {
-    if (!clickEventActuator_) {
-        clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
-        clickEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
-    }
+    CheckClickActuator();
     clickEventActuator_->AddClickEvent(clickEvent);
 
     SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+}
+
+// replace last showMenu callback
+void GestureEventHub::BindMenu(GestureEventFunc&& showMenu)
+{
+    if (showMenu_) {
+        RemoveClickEvent(showMenu_);
+    }
+    showMenu_ = MakeRefPtr<ClickEvent>(std::move(showMenu));
+    AddClickEvent(showMenu_);
 }
 
 OnAccessibilityEventFunc GestureEventHub::GetOnAccessibilityEventFunc()
 {
     auto callback = [weak = WeakClaim(this)](AccessibilityEventType eventType) {
         auto gestureHub = weak.Upgrade();
-        if (!gestureHub) {
-            return;
-        }
+        CHECK_NULL_VOID_NOLOG(gestureHub);
         auto node = gestureHub->GetFrameNode();
-        if (node) {
-            node->OnAccessibilityEvent(eventType);
-        }
+        CHECK_NULL_VOID_NOLOG(node);
+        node->OnAccessibilityEvent(eventType);
     };
     return callback;
 }
 
 bool GestureEventHub::ActClick()
 {
-    if (!clickEventActuator_) {
-        return false;
-    }
-
+    CHECK_NULL_RETURN_NOLOG(clickEventActuator_, false);
     auto click = clickEventActuator_->GetClickEvent();
-    if (click) {
-        GestureEvent info;
-        click(info);
-    }
+    CHECK_NULL_RETURN_NOLOG(click, true);
+    GestureEvent info;
+    click(info);
     return true;
 }
 
 bool GestureEventHub::ActLongClick()
 {
-    if (!longPressEventActuator_) {
-        return false;
-    }
-
+    CHECK_NULL_RETURN_NOLOG(longPressEventActuator_, false);
     auto click = longPressEventActuator_->GetGestureEventFunc();
-    if (click) {
-        GestureEvent info;
-        click(info);
-    }
+    CHECK_NULL_RETURN_NOLOG(click, true);
+    GestureEvent info;
+    click(info);
     return true;
 }
 } // namespace OHOS::Ace::NG

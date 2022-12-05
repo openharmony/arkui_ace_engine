@@ -17,9 +17,11 @@
 #include "core/components_ng/test/mock/render/mock_canvas_image.h"
 
 namespace OHOS::Ace::NG {
-ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& sourceInfo, const LoadNotifier& loadNotifier)
+ImageLoadingContext::ImageLoadingContext(
+    const ImageSourceInfo& sourceInfo, const LoadNotifier& loadNotifier, bool syncLoad)
     : sourceInfo_(sourceInfo), loadNotifier_(loadNotifier),
-      loadCallbacks_(GenerateDataReadyCallback(), GenerateLoadSuccessCallback(), GenerateLoadFailCallback())
+      loadCallbacks_(GenerateDataReadyCallback(), GenerateLoadSuccessCallback(), GenerateLoadFailCallback()),
+      syncLoad_(syncLoad)
 {}
 
 SizeF ImageLoadingContext::CalculateResizeTarget(const SizeF& srcSize, const SizeF& dstSize, const SizeF& rawImageSize)
@@ -76,7 +78,8 @@ LoadSuccessCallback ImageLoadingContext::GenerateLoadSuccessCallback()
 
 void ImageLoadingContext::OnLoadSuccess(const ImageSourceInfo& sourceInfo)
 {
-    RectF rect { 0, 0, GetSourceInfo().GetSourceSize().Width(), GetSourceInfo().GetSourceSize().Height() };
+    sourceInfo_ = sourceInfo;
+    RectF rect { 0, 0, sourceInfo_.GetSourceSize().Width(), sourceInfo_.GetSourceSize().Height() };
     dstRect_ = rect;
     srcRect_ = rect;
     if (loadNotifier_.dataReadyNotifyTask_) {
@@ -110,7 +113,7 @@ const RectF& ImageLoadingContext::GetSrcRect() const
     return srcRect_;
 }
 
-RefPtr<CanvasImage> ImageLoadingContext::GetCanvasImage() const
+RefPtr<CanvasImage> ImageLoadingContext::MoveCanvasImage()
 {
     return MakeRefPtr<MockCanvasImage>();
 }
@@ -119,7 +122,11 @@ void ImageLoadingContext::LoadImageData() {}
 
 void ImageLoadingContext::MakeCanvasImageIfNeed(const RefPtr<ImageLoadingContext>& loadingCtx, const SizeF& dstSize,
     bool incomingNeedResize, ImageFit incommingImageFit, const std::optional<SizeF>& sourceSize)
-{}
+{
+    loadingCtx->dstSize_ = dstSize;
+    loadingCtx->imageFit_ = incommingImageFit;
+    loadingCtx->needResize_ = incomingNeedResize;
+}
 
 void ImageLoadingContext::MakeCanvasImage(
     const SizeF& dstSize, bool needResize, ImageFit imageFit, const std::optional<SizeF>& sourceSize)

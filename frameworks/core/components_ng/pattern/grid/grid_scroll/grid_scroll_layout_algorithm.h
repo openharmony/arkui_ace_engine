@@ -37,26 +37,21 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    static void PrintGridMatrix(const std::map<int32_t, std::map<int32_t, uint32_t>>& gridMatrix);
+    static void PrintGridMatrix(const std::map<int32_t, std::map<int32_t, int32_t>>& gridMatrix);
     static void PrintLineHeightMap(const std::map<int32_t, float>& lineHeightMap);
 
 private:
-    void FillGridViewportAndMeasureChildren(float mainSize, float crossSize,
-        const RefPtr<GridLayoutProperty>& gridLayoutProperty, LayoutWrapper* layoutWrapper);
-    void MeasureRecordedItems(
-        float mainSize, float crossSize, float crossGap, LayoutWrapper* layoutWrapper, float& mainLength);
-
-    // fill end of viewport
-    void FillBlankAtStart(float mainSize, float crossSize, const RefPtr<GridLayoutProperty>& gridLayoutProperty,
-        LayoutWrapper* layoutWrapper, float crossGap);
-    float FillNewLineForward(float crossSize, float mainSize, const RefPtr<GridLayoutProperty>& gridLayoutProperty,
-        LayoutWrapper* layoutWrapper);
+    void FillGridViewportAndMeasureChildren(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
+    float MeasureRecordedItems(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
+    bool UseCurrentLines(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
 
     // fill start of viewport
-    void FillBlankAtEnd(float mainSize, float crossSize, const RefPtr<GridLayoutProperty>& gridLayoutProperty,
-        LayoutWrapper* layoutWrapper, float& mainLength);
-    float FillNewLineBackward(float crossSize, float mainSize, const RefPtr<GridLayoutProperty>& gridLayoutProperty,
-        LayoutWrapper* layoutWrapper);
+    bool FillBlankAtStart(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
+    float FillNewLineForward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
+
+    // fill end of viewport
+    void FillBlankAtEnd(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
+    float FillNewLineBackward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper, bool reverse);
 
     // Measure grid item which not exist in grid matrix already, need to place it and save to grid matrix.
     int32_t MeasureChild(const SizeF& frameSize, int32_t itemIndex, LayoutWrapper* layoutWrapper,
@@ -74,8 +69,17 @@ private:
     LayoutConstraintF CreateChildConstraint(float mainSize, float crossSize,
         const RefPtr<GridLayoutProperty>& gridLayoutProperty, int32_t crossStart, int32_t crossSpan) const;
     void StripItemsOutOfViewport(LayoutWrapper* layoutWrapper);
-    void ModifyCurrentOffsetWhenReachEnd(float mainSize, float crossGap);
+    void ModifyCurrentOffsetWhenReachEnd(float mainSize);
     void InitialItemsCrossSize(const RefPtr<GridLayoutProperty>& layoutProperty, const SizeF& frameSize);
+    bool IsIndexInMatrix(int32_t index);
+    void UpdateGridLayoutInfo(LayoutWrapper* layoutWrapper);
+    void GetTargetIndexInfoWithBenchMark(
+        LayoutWrapper* layoutWrapper, int32_t benchmarkIndex, int32_t mainStartIndex, int32_t targetIndex);
+
+    void AdaptToChildMainSize(LayoutWrapper* layoutWrapper, RefPtr<GridLayoutProperty>& gridLayoutProperty,
+        float mainSize, const SizeF& idealSize);
+
+    int32_t GetStartingItem(LayoutWrapper* layoutWrapper, int32_t currentIndex) const;
 
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
@@ -83,9 +87,7 @@ private:
     std::map<int32_t, float> itemsCrossSize_; // grid item's size in cross axis.
     Axis axis_ = Axis::VERTICAL;
 
-    // Store current index when place children.
-    int32_t mainIndex_ = 0;
-    int32_t crossIndex_ = 0;
+    float mainGap_ = 0;
 
     // Map structure: [index, crossPosition], store cross position of each item.
     std::map<int32_t, float> itemsCrossPosition_;

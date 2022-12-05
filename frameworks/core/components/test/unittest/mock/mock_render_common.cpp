@@ -15,15 +15,14 @@
 
 #include "core/components/test/unittest/mock/mock_render_common.h"
 
+#include "base/test/mock/mock_asset_manager.h"
+#include "base/test/mock/mock_task_executor.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #include "core/components/stage/stage_element.h"
 #include "core/components/test/json/json_frontend.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/fake_task_executor.h"
-#include "core/mock/mock_resource_register.h"
+#include "core/components/theme/theme_manager_impl.h"
 
 namespace OHOS::Ace {
-
 #ifndef OHOS_STANDARD_SYSTEM
 Platform::JniEnvironment::JniEnvironment() {}
 
@@ -54,7 +53,7 @@ RefPtr<PipelineContext> MockRenderCommon::GetMockContext()
         std::move(window), taskExecutor, assetManager, resRegister, fakeFrontend, 0);
     pipelineContext->SetRootHeight(2049.0);
     pipelineContext->SetupRootElement();
-    pipelineContext->SetThemeManager(AceType::MakeRefPtr<ThemeManager>());
+    pipelineContext->SetThemeManager(AceType::MakeRefPtr<ThemeManagerImpl>());
     auto stageElement = pipelineContext->GetStageElement();
     if (!stageElement) {
         return pipelineContext;
@@ -66,5 +65,4 @@ RefPtr<PipelineContext> MockRenderCommon::GetMockContext()
     renderStage->SetLayoutSize(Size(1080.0, 2049.0)); // same with root size.
     return pipelineContext;
 }
-
 } // namespace OHOS::Ace

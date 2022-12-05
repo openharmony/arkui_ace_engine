@@ -224,9 +224,9 @@ enum class MarqueeDirection {
 };
 
 enum class ImageRepeat {
-    NOREPEAT = 0,
-    REPEATX,
-    REPEATY,
+    NO_REPEAT = 0,
+    REPEAT_X,
+    REPEAT_Y,
     REPEAT,
 };
 
@@ -327,9 +327,9 @@ enum class KeyDirection {
 
 const ImageRepeat IMAGE_REPEATS[] = {
     ImageRepeat::REPEAT,
-    ImageRepeat::REPEATX,
-    ImageRepeat::REPEATY,
-    ImageRepeat::NOREPEAT,
+    ImageRepeat::REPEAT_X,
+    ImageRepeat::REPEAT_Y,
+    ImageRepeat::NO_REPEAT,
 };
 
 enum class WindowModal : int32_t {

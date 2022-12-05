@@ -46,10 +46,14 @@ public:
 
     SizeF GetContainerSize() const override;
     void SetContainerSize(const SizeF& containerSize) override;
-    void SetSvgFillColor(const std::optional<Color>& color) override {}
+    const std::optional<Color>& GetSvgFillColor() override
+    {
+        return svgColor_;
+    }
 
 private:
     sk_sp<SkSVGDOM> skiaDom_;
+    std::optional<Color> svgColor_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -28,6 +28,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
+#include "base/utils/measure_util.h"
 #include "bridge/common/manifest/manifest_parser.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/ng/page_router_manager.h"
@@ -124,7 +125,6 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
     const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
     const OnSaveAbilityStateCallBack& onSaveAbilityStateCallBack,
     const OnRestoreAbilityStateCallBack& onRestoreAbilityStateCallBack, const OnNewWantCallBack& onNewWantCallBack,
-    const OnActiveCallBack& onActiveCallBack, const OnInactiveCallBack& onInactiveCallBack,
     const OnMemoryLevelCallBack& onMemoryLevelCallBack, const OnStartContinuationCallBack& onStartContinuationCallBack,
     const OnCompleteContinuationCallBack& onCompleteContinuationCallBack,
     const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack, const OnSaveDataCallBack& onSaveDataCallBack,
@@ -137,9 +137,8 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
       requestAnimationCallback_(requestAnimationCallback), jsCallback_(jsCallback),
       onWindowDisplayModeChanged_(onWindowDisplayModeChangedCallBack),
       onConfigurationUpdated_(onConfigurationUpdatedCallBack), onSaveAbilityState_(onSaveAbilityStateCallBack),
-      onRestoreAbilityState_(onRestoreAbilityStateCallBack), onNewWant_(onNewWantCallBack), onActive_(onActiveCallBack),
-      onInactive_(onInactiveCallBack), onMemoryLevel_(onMemoryLevelCallBack),
-      onStartContinuationCallBack_(onStartContinuationCallBack),
+      onRestoreAbilityState_(onRestoreAbilityStateCallBack), onNewWant_(onNewWantCallBack),
+      onMemoryLevel_(onMemoryLevelCallBack), onStartContinuationCallBack_(onStartContinuationCallBack),
       onCompleteContinuationCallBack_(onCompleteContinuationCallBack),
       onRemoteTerminatedCallBack_(onRemoteTerminatedCallBack), onSaveDataCallBack_(onSaveDataCallBack),
       onRestoreDataCallBack_(onRestoreDataCallBack), manifestParser_(AceType::MakeRefPtr<ManifestParser>()),
@@ -503,11 +502,6 @@ void FrontendDelegateDeclarative::NotifyAppStorage(
         TaskExecutor::TaskType::JS);
 }
 
-void FrontendDelegateDeclarative::OnSuspended()
-{
-    FireAsyncEvent("_root", std::string("\"viewsuspended\",null,null"), std::string(""));
-}
-
 void FrontendDelegateDeclarative::OnBackGround()
 {
     taskExecutor_->PostTask(
@@ -626,16 +620,6 @@ void FrontendDelegateDeclarative::GetPluginsUsed(std::string& data)
         LOGW("read failed, will load all the system plugin");
         data = "All";
     }
-}
-
-void FrontendDelegateDeclarative::OnActive()
-{
-    taskExecutor_->PostTask([onActive = onActive_]() { onActive(); }, TaskExecutor::TaskType::JS);
-}
-
-void FrontendDelegateDeclarative::OnInactive()
-{
-    taskExecutor_->PostTask([onInactive = onInactive_]() { onInactive(); }, TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateDeclarative::OnNewRequest(const std::string& data)
@@ -1317,6 +1301,11 @@ const std::string& FrontendDelegateDeclarative::GetVersionName() const
 int32_t FrontendDelegateDeclarative::GetVersionCode() const
 {
     return manifestParser_->GetAppInfo()->GetVersionCode();
+}
+
+double FrontendDelegateDeclarative::MeasureText(const MeasureContext& context)
+{
+    return MeasureUtil::MeasureText(context);
 }
 
 void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)

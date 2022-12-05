@@ -22,6 +22,7 @@
 #include "include/core/SkPath.h"
 
 #include "base/memory/ace_type.h"
+#include "base/utils/noncopyable.h"
 #include "core/components/declaration/svg/svg_base_declaration.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/parse/svg_context.h"
@@ -75,7 +76,7 @@ public:
         return {};
     }
 
-    const Rect AsBounds(const Size& viewPort) const
+    Rect AsBounds(const Size& viewPort) const
     {
         auto bounds = AsPath(viewPort).getBounds();
         return { bounds.left(), bounds.top(), bounds.width(), bounds.height() };
@@ -123,8 +124,8 @@ protected:
     {
         hrefFill_ = false;
         hrefRender_ = false;
-        childStyleTraversed_ = false;
-        styleTraversed_ = false;
+        passStyle_ = false;
+        inheritStyle_ = false;
         drawTraversed_ = false;
     }
 
@@ -142,11 +143,13 @@ protected:
 
     bool hrefFill_ = true;   // 需要根据svg_xx特殊处理
     bool hrefRender_ = true; // 需要根据svg_xx特殊处理
-    bool childStyleTraversed_ = true; // 样式继承传递时，是否传递给子标签， 图形标签 circle/path/line/... = false
-    bool styleTraversed_ = true; // 样式继承传递时，是否支持被遍历 mask/defs/pattern/filter = false
+    bool passStyle_ = true; // 样式继承传递时，是否传递给子标签， 图形标签 circle/path/line/... = false
+    bool inheritStyle_ = true; // 样式继承传递时，是否支持被遍历 mask/defs/pattern/filter = false
     bool drawTraversed_ = true;  // 绘制时，是否支持被遍历 mask/defs/pattern/filter = false
 
     SkCanvas* skCanvas_ = nullptr;
+
+    ACE_DISALLOW_COPY_AND_MOVE(SvgNode);
 };
 
 } // namespace OHOS::Ace::NG

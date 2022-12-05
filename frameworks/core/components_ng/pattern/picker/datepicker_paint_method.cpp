@@ -26,9 +26,7 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-
 constexpr float DIVIDER_LINE_WIDTH = 1.0f;
-
 } // namespace
 
 CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
@@ -42,20 +40,19 @@ CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     auto geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
     auto frameRect = geometryNode->GetFrameRect();
-    return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, frameRect = frameRect,
-               dividerSpacing = dividerSpacing, dividerColor = dividerColor](RSCanvas& canvas) {
+    return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, frameRect, dividerSpacing, dividerColor](
+               RSCanvas& canvas) {
         DividerPainter dividerPainter(dividerLineWidth, frameRect.Width(), false, dividerColor, LineCap::SQUARE);
-        double upperLine = frameRect.Height() / 2.0 - dividerSpacing / 2.0;
-        double downLine = frameRect.Height() / 2.0 + dividerSpacing / 2.0;
+        double upperLine = (frameRect.Height() - dividerSpacing) / 2.0;
+        double downLine = (frameRect.Height() + dividerSpacing) / 2.0;
 
         OffsetF offset = OffsetF(0.0f, upperLine);
         dividerPainter.DrawLine(canvas, offset);
         OffsetF offsetY = OffsetF(0.0f, downLine);
         dividerPainter.DrawLine(canvas, offsetY);
         auto picker = weak.Upgrade();
-        if (picker) {
-            picker->PaintGradient(canvas, frameRect);
-        }
+        CHECK_NULL_VOID_NOLOG(picker);
+        picker->PaintGradient(canvas, frameRect);
     };
 }
 

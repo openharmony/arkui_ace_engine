@@ -31,11 +31,47 @@ void FlutterRenderWeb::OnPaintFinish()
     if (!delegate_) {
         return;
     }
-    if (!isCreateWebView_) {
-        isCreateWebView_ = true;
-        delegate_->InitWebViewWithWindow();
-    }
 }
+
+RenderLayer FlutterRenderWeb::GetRenderLayer()
+{
+    if (!isEnhanceSurface_) {
+        return nullptr;
+    }
+    if (!holeLayer_) {
+        holeLayer_ = AceType::MakeRefPtr<HoleLayer>(drawSize_.Width(), drawSize_.Height());
+    } else {
+        holeLayer_->SetSize(drawSize_.Width(), drawSize_.Height());
+    }
+    holeLayer_->SetOffset(GetCoordinatePoint().GetY(), GetCoordinatePoint().GetY());
+
+    return AceType::RawPtr(holeLayer_);
+}
+
+void FlutterRenderWeb::Paint(RenderContext& context, const Offset& offset)
+{
+    if (!isEnhanceSurface_) {
+        return;
+    }
+    LOGI("FlutterRenderWeb::Paint");
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("Paint context null");
+        return;
+    }
+    if (pipelineContext->GetIsDragStart()) {
+        drawSize_ = Size(1.0, 1.0);
+    }
+    if (drawSize_.Width() == Size::INFINITE_SIZE || drawSize_.Height() == Size::INFINITE_SIZE) {
+        LOGE("Web drawSize height or width is invalid");
+        return;
+    }
+    if (delegate_) {
+        delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+    }
+    RenderNode::Paint(context, offset);
+}
+
 #endif
 
 } // namespace OHOS::Ace

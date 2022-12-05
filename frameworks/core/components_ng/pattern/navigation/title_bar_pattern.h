@@ -102,6 +102,8 @@ public:
     }
 
 private:
+    void OnAttachToFrameNode() override;
+
     // Init pan recognizer to move items when drag update, play translate animation when drag end.
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(const GestureEvent& info);

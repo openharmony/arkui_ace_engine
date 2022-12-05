@@ -18,7 +18,6 @@
 
 #include <utility>
 
-#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -28,6 +27,8 @@
 namespace OHOS::Ace::NG {
 
 class FrameNode;
+using OnAreaChangedFunc =
+    std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>;
 
 // The event hub is mainly used to handle common collections of events, such as gesture events, mouse events, etc.
 class EventHub : public virtual AceType {
@@ -64,10 +65,17 @@ public:
     }
 
     const RefPtr<FocusHub>& GetOrCreateFocusHub(
-        FocusType type = FocusType::DISABLE, bool focusable = false, FocusStyle focusState = FocusStyle::NONE)
+        FocusType type = FocusType::DISABLE,
+        bool focusable = false,
+        FocusStyleType focusStyleType = FocusStyleType::NONE,
+        const std::unique_ptr<FocusPaintParam>& paintParamsPtr = nullptr)
     {
         if (!focusHub_) {
-            focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this), type, focusable, focusState);
+            focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this), type, focusable);
+            focusHub_->SetFocusStyleType(focusStyleType);
+            if (paintParamsPtr) {
+                focusHub_->SetFocusPaintParamsPtr(paintParamsPtr);
+            }
         }
         return focusHub_;
     }
@@ -112,8 +120,6 @@ public:
         }
     }
 
-    using OnAreaChangedFunc =
-        std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>;
     void SetOnAreaChanged(OnAreaChangedFunc&& onAreaChanged)
     {
         onAreaChanged_ = std::move(onAreaChanged);

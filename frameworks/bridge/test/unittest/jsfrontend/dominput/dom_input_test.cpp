@@ -23,7 +23,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/text_field_component.h"
 #include "core/components/text_field/textfield_theme.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/common/dom/dom_input.h"
 #include "frameworks/bridge/test/unittest/jsfrontend/dom_node_factory.h"
@@ -59,7 +59,7 @@ const std::string INPUT_VALUE_VALUE = "input value";
 const Dimension INPUT_WIDTH_VALUE = Dimension(100, DimensionUnit::PX);
 const Dimension INPUT_HEIGHT_VALUE = Dimension(50, DimensionUnit::PX);
 const Dimension BUTTON_WIDTH_INIT = Dimension(-1.0, DimensionUnit::PX);
-const RefPtr<ThemeManager> THEME_MANAGER = AceType::MakeRefPtr<ThemeManager>();
+const RefPtr<ThemeManager> THEME_MANAGER = AceType::MakeRefPtr<ThemeManagerImpl>();
 
 } // namespace
 

@@ -18,6 +18,8 @@
 #include <string>
 
 #include "base/log/event_report.h"
+#include "base/utils/utils.h"
+#include "base/utils/measure_util.h"
 #include "core/common/thread_checker.h"
 
 namespace OHOS::Ace::Framework {
@@ -45,10 +47,7 @@ void CardFrontendDelegateDeclarative::RunCard(const std::string& url,
             auto pageRouterManager = weakPageRouterManager.Upgrade();
             CHECK_NULL_VOID(pageRouterManager);
             auto container = Container::Current();
-            if (!container) {
-                LOGE("RunCard host container null");
-                return;
-            }
+            CHECK_NULL_VOID(container);
             container->SetCardPipeline(weakCardPipeline, cardId);
             pageRouterManager->RunCard(url, params, cardId);
         },
@@ -72,5 +71,10 @@ void CardFrontendDelegateDeclarative::FireCardAction(const std::string& action)
         },
         TaskExecutor::TaskType::UI); // eTSCard UI == Main JS/UI/PLATFORM
 }
+
+double CardFrontendDelegateDeclarative::MeasureText(const MeasureContext& context)
+    {
+        return 0.0;
+    }
 
 } // namespace OHOS::Ace::Framework

@@ -153,6 +153,9 @@ protected:
     Size drawSize_;
     Size drawSizeCache_;
     bool isUrlLoaded_ = false;
+    Size preDrawSize_;
+    Offset prePosition_;
+    bool isEnhanceSurface_ = false;
 
 private:
 #ifdef OHOS_STANDARD_SYSTEM
@@ -179,6 +182,7 @@ private:
         const DragItemInfo& dragItemInfo);
     void OnDragWindowMoveEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info);
     void OnDragWindowDropEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info);
+    void UpdateGlobalPos();
 
     RefPtr<RawRecognizer> touchRecognizer_ = nullptr;
     OnMouseCallback onMouse_;

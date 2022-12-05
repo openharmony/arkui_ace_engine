@@ -34,6 +34,7 @@
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/components_ng/image_provider/svg_image_object.h"
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
+#include "core/image/flutter_image_cache.h"
 #include "core/image/image_compressor.h"
 #include "core/image/image_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -121,9 +122,7 @@ RefPtr<ImageEncodedInfo> ImageEncodedInfo::CreateImageEncodedInfoForStaticImage(
     auto skiaImageData = DynamicCast<SkiaImageData>(data);
     CHECK_NULL_RETURN(skiaImageData, nullptr);
     auto codec = SkCodec::MakeFromData(skiaImageData->GetSkData());
-    if (!codec) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN_NOLOG(codec, nullptr);
     int32_t totalFrames = 1;
     SizeF imageSize;
     totalFrames = codec->getFrameCount();
@@ -149,70 +148,110 @@ RefPtr<ImageEncodedInfo> ImageEncodedInfo::CreateImageEncodedInfoForSvg(const Re
     return MakeRefPtr<ImageEncodedInfo>(SizeF(), totalFrames);
 }
 
+bool ImageProvider::QueryCanvasImageFromCache(
+    const WeakPtr<ImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget)
+{
+    // Query [CanvasImage] from cache, if hit, notify load success immediately and returns true
+    auto obj = imageObjWp.Upgrade();
+    CHECK_NULL_RETURN(obj, false);
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    if (!pipelineCtx || !pipelineCtx->GetImageCache()) {
+        return false;
+    }
+    auto key = GenerateCacheKey(obj->GetSourceInfo(), resizeTarget);
+    auto cacheImage =
+        pipelineCtx->GetImageCache()->GetCacheImage(key);
+    CHECK_NULL_RETURN_NOLOG(cacheImage, false);
+#ifdef NG_BUILD
+    auto canvasImage = cacheImage->imagePtr;
+#else
+    auto flutterCanvasImage = cacheImage->imagePtr;
+    auto canvasImage = CanvasImage::Create(&flutterCanvasImage);
+    auto skiaCanvasImage = DynamicCast<SkiaCanvasImage>(canvasImage);
+    CHECK_NULL_RETURN(skiaCanvasImage, false);
+    skiaCanvasImage->SetUniqueID(cacheImage->uniqueId);
+#endif
+    LOGD("[ImageCache][CanvasImage] succeed find canvas image from cache: %{public}s", key.c_str());
+    if (canvasImage) {
+        obj->SetCanvasImage(canvasImage);
+        loadCallbacks.loadSuccessCallback_(obj->GetSourceInfo());
+        return true;
+    }
+    return false;
+}
+
+void ImageProvider::MakeCanvasImageHelper(const WeakPtr<ImageObject>& objWp, const LoadCallbacks& loadCallbacks,
+    const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder, bool forceResize, bool sync)
+{
+    auto obj = objWp.Upgrade();
+    CHECK_NULL_VOID(obj && renderTaskHolder);
+    auto flutterRenderTaskHolder = DynamicCast<FlutterRenderTaskHolder>(renderTaskHolder);
+    CHECK_NULL_VOID(flutterRenderTaskHolder);
+    if (!ImageProvider::PrepareImageData(obj, loadCallbacks.loadFailCallback_, sync)) {
+        return;
+    };
+    // resize image
+    auto skiaImageData = DynamicCast<SkiaImageData>(obj->GetData());
+    CHECK_NULL_VOID(skiaImageData && skiaImageData->GetSkData());
+    auto rawImage = SkImage::MakeFromEncoded(skiaImageData->GetSkData());
+    if (!rawImage) {
+        std::string errorMessage(
+            "Static image MakeFromEncoded fail! The image format is not supported, please check image format.");
+        ImageProvider::FailCallback(loadCallbacks.loadFailCallback_, obj->GetSourceInfo(), errorMessage, sync);
+        return;
+    }
+    // get compressed image for file cache
+    auto key = ImageObject::GenerateCacheKey(obj->GetSourceInfo(), resizeTarget);
+    sk_sp<SkImage> image = rawImage;
+    auto compressFileData = ImageLoader::LoadImageDataFromFileCache(key, ".astc");
+    if (!compressFileData) {
+        image = ResizeSkImage(rawImage, obj->GetSourceInfo().GetSrc(), resizeTarget, forceResize);
+    }
+    // create gpu object
+    flutter::SkiaGPUObject<SkImage> skiaGpuObjSkImage({ image, flutterRenderTaskHolder->unrefQueue });
+#ifdef NG_BUILD
+    auto canvasImage = CanvasImage::Create();
+    auto flutterImage = AceType::DynamicCast<NG::FlutterCanvasImage>(canvasImage);
+    if (flutterImage) {
+        flutterImage->SetImage(std::move(skiaGpuObjSkImage));
+    }
+#else
+    // make flutter image
+    auto flutterCanvasImage = flutter::CanvasImage::Create();
+    CHECK_NULL_VOID(flutterCanvasImage);
+    flutterCanvasImage->set_image(std::move(skiaGpuObjSkImage));
+    auto canvasImage = CanvasImage::Create(&flutterCanvasImage);
+    ImageProvider::CacheCanvasImage(canvasImage, GenerateCacheKey(obj->GetSourceInfo(), resizeTarget));
+#endif
+    // upload
+    auto uploadTask = [objWp, loadCallbacks, sync](const RefPtr<CanvasImage>& canvasImage) {
+        SuccessCallback(canvasImage, objWp, loadCallbacks.loadSuccessCallback_, sync);
+    };
+    ImageProvider::UploadImageToGPUForRender(
+        canvasImage, std::move(uploadTask), renderTaskHolder, key, resizeTarget, compressFileData, false);
+}
+
 void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks,
     const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder, bool forceResize)
 {
-    auto canvasImageMakingTask = [objWp = imageObjWp, loadCallbacks, resizeTarget, renderTaskHolder, forceResize] {
-        auto obj = objWp.Upgrade();
-        CHECK_NULL_VOID(obj);
-        CHECK_NULL_VOID(renderTaskHolder);
-        auto flutterRenderTaskHolder = DynamicCast<FlutterRenderTaskHolder>(renderTaskHolder);
-        CHECK_NULL_VOID(flutterRenderTaskHolder);
-        // TODO: add cache
-        ImageProvider::PrepareImageData(obj, loadCallbacks);
-        // resize image
-        auto skiaImageData = DynamicCast<SkiaImageData>(obj->GetData());
-        ACE_DCHECK(skiaImageData);
-        auto rawImage = SkImage::MakeFromEncoded(skiaImageData->GetSkData());
-        if (!rawImage) {
-            LOGE(
-                "static image MakeFromEncoded fail! source info: %{private}s", obj->GetSourceInfo().ToString().c_str());
-            std::string errorMessage("The image format is not supported, please check image format.");
-            auto notifyLoadFailTask = [errorMsg = std::move(errorMessage), loadCallbacks,
-                                          sourceInfo = obj->GetSourceInfo()] {
-                loadCallbacks.loadFailCallback_(sourceInfo, errorMsg, ImageLoadingCommand::MAKE_CANVAS_IMAGE_FAIL);
-            };
-            ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadFailTask));
-            return;
-        }
-        // upload to gpu for render
-        auto key = ImageObject::GenerateCacheKey(obj->GetSourceInfo(), resizeTarget);
-        sk_sp<SkImage> image = rawImage;
-        auto compressFileData = ImageLoader::LoadImageDataFromFileCache(key, ".astc");
-        if (!compressFileData) {
-            image = ResizeSkImage(rawImage, obj->GetSourceInfo().GetSrc(), resizeTarget, forceResize);
-        }
-        flutter::SkiaGPUObject<SkImage> skiaGpuObjSkImage({ image, flutterRenderTaskHolder->unrefQueue });
-#ifdef NG_BUILD
-        auto canvasImage = CanvasImage::Create();
-        auto flutterImage = AceType::DynamicCast<NG::FlutterCanvasImage>(canvasImage);
-        if (flutterImage) {
-            flutterImage->SetImage(std::move(skiaGpuObjSkImage));
-        }
-#else
-        auto flutterCanvasImage = flutter::CanvasImage::Create();
-        flutterCanvasImage->set_image(std::move(skiaGpuObjSkImage));
-        auto canvasImage = CanvasImage::Create(&flutterCanvasImage);
-#endif
-        auto uploadTask = [objWp, loadCallbacks](const RefPtr<CanvasImage>& canvasImage) {
-            // when upload success, update canvas image to ImageObject and trigger loadSuccessCallback_
-            auto obj = objWp.Upgrade();
-            CHECK_NULL_VOID(obj);
-            auto notifyLoadSuccessTask = [objWp, loadCallbacks, canvasImage] {
-                auto obj = objWp.Upgrade();
-                CHECK_NULL_VOID(obj);
-                obj->SetCanvasImage(canvasImage);
-                obj->SetData(nullptr); // clear raw image data
-                loadCallbacks.loadSuccessCallback_(obj->GetSourceInfo());
-            };
-            ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadSuccessTask));
-        };
-        ImageProvider::UploadImageToGPUForRender(canvasImage, std::move(uploadTask), renderTaskHolder,
-            key, resizeTarget, compressFileData);
-    };
-    // TODO: add sync load
-    ImageProvider::WrapTaskAndPostToBackground(std::move(canvasImageMakingTask));
+    if (QueryCanvasImageFromCache(imageObjWp, loadCallbacks, resizeTarget)) {
+        return;
+    }
+    // If [CanvasImage] not in cache, post task to make canvas image
+    ImageProvider::WrapTaskAndPostToBackground(
+        [objWp = imageObjWp, loadCallbacks, resizeTarget, renderTaskHolder, forceResize] {
+            ImageProvider::MakeCanvasImageHelper(objWp, loadCallbacks, resizeTarget, renderTaskHolder, forceResize);
+        });
 }
+
+void SyncImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks,
+    const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder, bool forceResize)
+{
+    if (QueryCanvasImageFromCache(imageObjWp, loadCallbacks, resizeTarget)) {
+        return;
+    }
+    ImageProvider::MakeCanvasImageHelper(imageObjWp, loadCallbacks, resizeTarget, renderTaskHolder, forceResize, true);
+};
 
 RefPtr<RenderTaskHolder> ImageProvider::CreateRenderTaskHolder()
 {
@@ -233,10 +272,8 @@ RefPtr<RenderTaskHolder> ImageProvider::CreateRenderTaskHolder()
 
 void ImageProvider::UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasImage,
     std::function<void(RefPtr<CanvasImage>)>&& callback, const RefPtr<RenderTaskHolder>& renderTaskHolder,
-    const std::string key, const SizeF& resizeTarget, const RefPtr<ImageData>& data)
+    const std::string& key, const SizeF& resizeTarget, const RefPtr<ImageData>& data, bool syncLoad)
 {
-    callback(canvasImage);
-    return;
     CHECK_NULL_VOID(renderTaskHolder);
     auto flutterRenderTaskHolder = DynamicCast<FlutterRenderTaskHolder>(renderTaskHolder);
     CHECK_NULL_VOID(flutterRenderTaskHolder);
@@ -255,8 +292,7 @@ void ImageProvider::UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasI
         CHECK_NULL_VOID(skiaImageData);
         auto skdata = skiaImageData->GetSkData();
         auto stripped = ImageCompressor::StripFileHeader(skdata);
-        LOGI("use astc cache %{public}s %{public}d×%{public}d", key.c_str(),
-            dstWidth, dstHeight);
+        LOGI("use astc cache %{public}s %{public}d×%{public}d", key.c_str(), dstWidth, dstHeight);
         skiaCanvasImage->SetCompressData(stripped, dstWidth, dstHeight);
         skiaCanvasImage->ReplaceSkImage({ nullptr, flutterRenderTaskHolder->unrefQueue });
         callback(skiaCanvasImage);
@@ -267,8 +303,7 @@ void ImageProvider::UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasI
         return;
     }
 
-    auto task = [callback, flutterRenderTaskHolder, skiaCanvasImage,
-        id = Container::CurrentId(), src = key] {
+    auto task = [callback, flutterRenderTaskHolder, skiaCanvasImage, id = Container::CurrentId(), src = key] {
         ContainerScope scope(id);
         if (!flutterRenderTaskHolder) {
             LOGW("flutterRenderTaskHolder has been released.");
@@ -303,8 +338,8 @@ void ImageProvider::UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasI
             }
             auto releaseTask = ImageCompressor::GetInstance()->ScheduleReleaseTask();
             if (flutterRenderTaskHolder->ioTaskRunner) {
-                flutterRenderTaskHolder->ioTaskRunner->PostDelayedTask(releaseTask,
-                    fml::TimeDelta::FromMilliseconds(ImageCompressor::releaseTimeMs));
+                flutterRenderTaskHolder->ioTaskRunner->PostDelayedTask(
+                    releaseTask, fml::TimeDelta::FromMilliseconds(ImageCompressor::releaseTimeMs));
             } else {
                 ImageProvider::WrapTaskAndPostToBackground(std::move(releaseTask));
             }
@@ -313,7 +348,29 @@ void ImageProvider::UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasI
         // Trigger purge cpu bitmap resource, after image upload to gpu.
         SkGraphics::PurgeResourceCache();
     };
-    ImageProvider::WrapTaskAndPostToBackground(std::move(task));
+    if (syncLoad) {
+        task();
+    } else {
+        ImageProvider::WrapTaskAndPostToBackground(std::move(task));
+    }
+#endif
+}
+
+void ImageProvider::CacheCanvasImage(const RefPtr<CanvasImage>& canvasImage, const std::string& key)
+{
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    if (!pipelineCtx || !pipelineCtx->GetImageCache()) {
+        return;
+    }
+#ifdef NG_BUILD
+    pipelineCtx->GetImageCache()->CacheImage(key, std::make_shared<CachedImage>(canvasImage));
+#else
+    auto skiaCanvasImage = AceType::DynamicCast<SkiaCanvasImage>(canvasImage);
+    CHECK_NULL_VOID_NOLOG(skiaCanvasImage);
+    LOGD("[ImageCache][CanvasImage] succeed caching image: %{public}s", key.c_str());
+    auto cached = std::make_shared<CachedImage>(skiaCanvasImage->GetFlutterCanvasImage());
+    cached->uniqueId = skiaCanvasImage->GetUniqueID();
+    pipelineCtx->GetImageCache()->CacheImage(key, cached);
 #endif
 }
 

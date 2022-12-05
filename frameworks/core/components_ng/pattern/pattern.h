@@ -234,7 +234,7 @@ public:
 
     virtual FocusPattern GetFocusPattern() const
     {
-        return { FocusType::DISABLE, false, FocusStyle::NONE };
+        return { FocusType::DISABLE, false, FocusStyleType::NONE };
     }
 
     virtual ScopeFocusAlgorithm GetScopeFocusAlgorithm()
@@ -255,6 +255,9 @@ public:
 
     // get XTS inspector value
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+
+    virtual void OnAreaChangedInner() {}
+    virtual void OnVisibleChange(bool isVisible) {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

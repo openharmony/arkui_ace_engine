@@ -28,16 +28,16 @@
 
 namespace OHOS::Ace::NG {
 
-#define ACE_DEFINE_RATING_GET_PROPERTY_FROM_THEME(name, type)            \
-    static std::optional<type> Get##name##FromTheme()                    \
-    {                                                                    \
-        do {                                                             \
-            auto pipelineContext = PipelineContext::GetCurrentContext(); \
-            CHECK_NULL_RETURN(pipelineContext, std::nullopt);            \
-            auto ratingTheme = pipelineContext->GetTheme<RatingTheme>(); \
-            CHECK_NULL_RETURN(ratingTheme, std::nullopt);                \
-            return ratingTheme->Get##name();                             \
-        } while (false);                                                 \
+#define ACE_DEFINE_RATING_GET_PROPERTY_FROM_THEME(name, type)     \
+    static std::optional<type> Get##name##FromTheme()             \
+    {                                                             \
+        do {                                                      \
+            auto pipeline = PipelineBase::GetCurrentContext();    \
+            CHECK_NULL_RETURN(pipeline, std::nullopt);            \
+            auto ratingTheme = pipeline->GetTheme<RatingTheme>(); \
+            CHECK_NULL_RETURN(ratingTheme, std::nullopt);         \
+            return ratingTheme->Get##name();                      \
+        } while (false);                                          \
     }
 
 class RatingPattern : public Pattern {
@@ -79,7 +79,16 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyle::INNER_BORDER };
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, FocusPattern());
+        auto ratingTheme = pipeline->GetTheme<RatingTheme>();
+        CHECK_NULL_RETURN(ratingTheme, FocusPattern());
+        auto focusWidth = ratingTheme->GetFocusBorderWidth();
+
+        FocusPaintParam focusPaintParams;
+        focusPaintParams.SetPaintWidth(focusWidth);
+
+        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
 private:
@@ -101,9 +110,16 @@ private:
     // Init touch event, update render when click.
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
 
-    // Init on key event
+    // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+    void PaintFocusState(double ratingScore);
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
+
+    // Init mouse event
+    void InitMouseEvent();
+    void HandleMouseEvent(MouseInfo& info);
+    void HandleHoverEvent(bool isHover);
 
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd();
@@ -111,13 +127,15 @@ private:
     void HandleTouchUp();
     void HandleClick(const GestureEvent& info);
     void FireChangeEvent() const;
-    void RecalculatedRatingScoreBasedOnEventPoint(double eventPointX);
+    void RecalculatedRatingScoreBasedOnEventPoint(double eventPointX, bool isDrag);
     bool IsIndicator();
     void UpdateInternalResource(ImageSourceInfo& sourceInfo, int32_t imageFlag);
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ClickEvent> clickEvent_;
+    RefPtr<InputEvent> hoverEvent_;
+    RefPtr<InputEvent> mouseEvent_;
 
     DataReadyNotifyTask CreateDataReadyCallback(int32_t imageFlag);
     LoadSuccessNotifyTask CreateLoadSuccessCallback(int32_t imageFlag);
@@ -136,6 +154,7 @@ private:
     int32_t imageReadyStateCode_ = 0;
     int32_t imageSuccessStateCode_ = 0;
     bool hasInit_ = false;
+    bool isHover_ = false;
     double lastRatingScore_ = 0.0;
 
     bool isForegroundImageInfoFromTheme_ = false;

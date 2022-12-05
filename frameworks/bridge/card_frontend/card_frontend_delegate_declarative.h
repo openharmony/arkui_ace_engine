@@ -20,6 +20,7 @@
 
 #include "frameworks/base/memory/ace_type.h"
 #include "frameworks/base/utils/noncopyable.h"
+#include "frameworks/base/utils/measure_util.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
 #include "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h"
@@ -75,6 +76,8 @@ public:
             updateCardData_(cardData_);
         }
     }
+	
+    double MeasureText(const MeasureContext& context) override;
 
     ACE_DISALLOW_COPY_AND_MOVE(CardFrontendDelegateDeclarative);
 

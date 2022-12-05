@@ -20,6 +20,7 @@
 #include "core/components/picker/render_picker_base.h"
 #include "core/components/picker/render_picker_column.h"
 #include "core/components/picker/render_picker_option.h"
+#include "core/components/theme/theme_manager_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -41,7 +42,7 @@ constexpr uint32_t TEST_LEAP_YEAR_MAX_DAY = 29u;
 constexpr uint32_t TEST_OTHER_YEAR_MAX_DAY = 28u;
 const std::string TEST_OPTION_TEXT = "new option text";
 const std::string TEST_COLUMN_TAG = "year";
-const RefPtr<ThemeManager> THEME_MANAGER = AceType::MakeRefPtr<ThemeManager>();
+const auto THEME_MANAGER = AceType::MakeRefPtr<ThemeManagerImpl>();
 
 } // namespace
 

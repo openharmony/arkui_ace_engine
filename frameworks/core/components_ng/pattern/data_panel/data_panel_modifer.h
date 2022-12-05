@@ -111,6 +111,7 @@ public:
     };
 
 private:
+    void PaintRainbowFilterMask(RSCanvas& canvas, double factor, ArcData arcData) const;
     RefPtr<AnimatablePropertyFloat> date_;
     std::vector<double> values_;
     double max_;

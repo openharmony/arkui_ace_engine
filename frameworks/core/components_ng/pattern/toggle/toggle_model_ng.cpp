@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
@@ -89,8 +90,8 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
     }
     if (AceType::InstanceOf<SwitchPattern>(pattern)) {
         if (toggleType == ToggleType::SWITCH) {
-            ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
             stack->Push(childFrameNode);
+            ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
             return;
         }
         if (toggleType == ToggleType::CHECKBOX) {

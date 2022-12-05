@@ -24,8 +24,10 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 
 namespace OHOS::Ace {
-
-std::unique_ptr<ShapeModel> ShapeModel::instance_ = nullptr;
+namespace {
+constexpr double DEFAULT_OPACITY = 1.0;
+} // namespace
+std::unique_ptr<ShapeModel> ShapeModel::instance_;
 
 ShapeModel* ShapeModel::GetInstance()
 {
@@ -86,7 +88,7 @@ void JSShape::SetViewPort(const JSCallbackInfo& info)
         ParseJsDimensionVp(widthValue, dimWidth);
         Dimension dimHeight;
         ParseJsDimensionVp(heightValue, dimHeight);
-        ShapeModel::GetInstance()->SetViewPort(dimLeft,dimTop,dimWidth,dimHeight);
+        ShapeModel::GetInstance()->SetViewPort(dimLeft, dimTop, dimWidth, dimHeight);
     }
     info.SetReturnValue(info.This());
 }
@@ -180,10 +182,8 @@ void JSShape::SetStroke(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Color strokeColor;
-    if (!ParseJsColor(info[0], strokeColor)) {
-        return;
-    }
+    Color strokeColor = Color::TRANSPARENT;
+    ParseJsColor(info[0], strokeColor);
     ShapeModel::GetInstance()->SetStroke(strokeColor);
 }
 
@@ -247,10 +247,8 @@ void JSShape::SetStrokeOpacity(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    double strokeOpacity;
-    if (!ParseJsDouble(info[0], strokeOpacity)) {
-        return;
-    }
+    double strokeOpacity = DEFAULT_OPACITY;
+    ParseJsDouble(info[0], strokeOpacity);
     ShapeModel::GetInstance()->SetStrokeOpacity(strokeOpacity);
 }
 
@@ -260,10 +258,8 @@ void JSShape::SetFillOpacity(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    double fillOpacity;
-    if (!ParseJsDouble(info[0], fillOpacity)) {
-        return;
-    }
+    double fillOpacity = DEFAULT_OPACITY;
+    ParseJsDouble(info[0], fillOpacity);
     ShapeModel::GetInstance()->SetFillOpacity(fillOpacity);
 }
 

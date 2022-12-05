@@ -14,8 +14,13 @@
  */
 
 #include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS ::Ace {
 class Window : public AceType {
@@ -52,11 +57,14 @@ float PipelineContext::GetCurrentRootHeight()
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
-    return AceType::MakeRefPtr<PipelineContext>();
+    static RefPtr<PipelineContext> pipeline = AceType::MakeRefPtr<PipelineContext>();
+    return pipeline;
 }
 
 // non-static method
-void PipelineContext::PipelineContext::SetupRootElement() {}
+void PipelineContext::AddWindowFocusChangedCallback(int32_t nodeId) {}
+
+void PipelineContext::SetupRootElement() {}
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
 
@@ -74,6 +82,8 @@ void PipelineContext::OnShow() {}
 
 void PipelineContext::OnHide() {}
 
+void PipelineContext::RemoveOnAreaChangeNode(int32_t nodeId) {}
+
 void PipelineContext::AddWindowStateChangedCallback(int32_t nodeId) {}
 
 void PipelineContext::RemoveWindowStateChangedCallback(int32_t nodeId) {}
@@ -85,6 +95,8 @@ void PipelineContext::RemoveNodesToNotifyMemoryLevel(int32_t nodeId) {}
 void PipelineContext::WindowFocus(bool isFocus) {}
 
 void PipelineContext::ShowContainerTitle(bool isShow) {}
+
+void PipelineContext::SetContainerWindow(bool isShow) {}
 
 void PipelineContext::SetAppBgColor(const Color& color) {}
 
@@ -114,6 +126,10 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight) {}
 
+void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
+
+void PipelineContext::FlushReload() {}
+
 const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
 {
     if (selectOverlayManager_) {
@@ -136,9 +152,6 @@ const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
 
 const RefPtr<DragDropManager>& PipelineContext::GetDragDropManager()
 {
-    if (dragDropManager_) {
-        return dragDropManager_;
-    }
     dragDropManager_ = AceType::MakeRefPtr<DragDropManager>();
     return dragDropManager_;
 }
@@ -176,4 +189,23 @@ UITaskScheduler::~UITaskScheduler() = default;
 void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty) {}
 
 void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty) {}
+
+const RefPtr<StageManager>& PipelineContext::GetStageManager()
+{
+    auto stageNode = MakeRefPtr<FrameNode>(V2::PAGE_ETS_TAG, -1, MakeRefPtr<PagePattern>(nullptr), true);
+    stageManager_ = MakeRefPtr<StageManager>(stageNode);
+    return stageManager_;
+}
+
+void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback) {}
+
+const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
+{
+    if (fullScreenManager_) {
+        return fullScreenManager_;
+    }
+    auto root = AceType::MakeRefPtr<FrameNode>("ROOT", -1, AceType::MakeRefPtr<Pattern>(), true);
+    fullScreenManager_ = AceType::MakeRefPtr<FullScreenManager>(root);
+    return fullScreenManager_;
+}
 } // namespace OHOS::Ace::NG

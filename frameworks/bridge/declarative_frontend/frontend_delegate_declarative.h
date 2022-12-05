@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
+#include "base/utils/measure_util.h"
 #include "bridge/declarative_frontend/ng/page_router_manager.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/pipeline/pipeline_context.h"
@@ -67,7 +68,6 @@ public:
         const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
         const OnSaveAbilityStateCallBack& onSaveAbilityStateCallBack,
         const OnRestoreAbilityStateCallBack& onRestoreAbilityStateCallBack, const OnNewWantCallBack& onNewWantCallBack,
-        const OnActiveCallBack& onActiveCallBack, const OnInactiveCallBack& onInactiveCallBack,
         const OnMemoryLevelCallBack& onMemoryLevelCallBack,
         const OnStartContinuationCallBack& onStartContinuationCallBack,
         const OnCompleteContinuationCallBack& onCompleteContinuationCallBack,
@@ -97,7 +97,6 @@ public:
     void OnSaveAbilityState(std::string& data);
     void OnRestoreAbilityState(const std::string& data);
     void OnNewWant(const std::string& data);
-    void OnSuspended();
     bool OnStartContinuation();
     void OnCompleteContinuation(int32_t code);
     void OnMemoryLevel(int32_t level);
@@ -105,8 +104,6 @@ public:
     void GetPluginsUsed(std::string& data);
     bool OnRestoreData(const std::string& data);
     void OnRemoteTerminated();
-    void OnActive();
-    void OnInactive();
     void OnNewRequest(const std::string& data);
     void SetColorMode(ColorMode colorMode);
     void CallPopPage();
@@ -173,6 +170,8 @@ public:
     {
         return manifestParser_->GetWindowConfig();
     }
+
+    double MeasureText(const MeasureContext& context) override;
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
     void SetToastStopListenerCallback(std::function<void()>&& stopCallback) override;
@@ -390,8 +389,6 @@ private:
     OnSaveAbilityStateCallBack onSaveAbilityState_;
     OnRestoreAbilityStateCallBack onRestoreAbilityState_;
     OnNewWantCallBack onNewWant_;
-    OnActiveCallBack onActive_;
-    OnInactiveCallBack onInactive_;
     OnMemoryLevelCallBack onMemoryLevel_;
     OnStartContinuationCallBack onStartContinuationCallBack_;
     OnCompleteContinuationCallBack onCompleteContinuationCallBack_;

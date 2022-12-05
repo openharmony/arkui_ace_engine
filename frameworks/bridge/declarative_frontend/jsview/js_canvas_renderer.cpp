@@ -1153,7 +1153,9 @@ void JSCanvasRenderer::JsGetJsonData(const JSCallbackInfo& info)
 
     if (info[0]->IsString()) {
         JSViewAbstract::ParseJsString(info[0], path);
-        if (!isOffscreen_) {
+        if (Container::IsCurrentUseNewPipeline() && !isOffscreen_ && customPaintPattern_) {
+            jsonData = customPaintPattern_->GetJsonData(path);
+        } else if (!isOffscreen_ && pool_) {
             jsonData = pool_->GetJsonData(path);
         }
         auto returnValue = JSVal(ToJSValue(jsonData));
@@ -2420,16 +2422,22 @@ void JSCanvasRenderer::JsClearRect(const JSCallbackInfo& info)
         Rect rect = Rect(x, y, width, height);
 
         if (Container::IsCurrentUseNewPipeline()) {
-            if (isOffscreen_) {
+            if (isOffscreen_ && offscreenCanvasPattern_) {
                 offscreenCanvasPattern_->ClearRect(rect);
-            } else {
+                return;
+            }
+            if (!isOffscreen_ && customPaintPattern_) {
                 customPaintPattern_->ClearRect(rect);
+                return;
             }
         } else {
-            if (isOffscreen_) {
+            if (isOffscreen_ && offscreenCanvas_) {
                 offscreenCanvas_->ClearRect(rect);
-            } else {
+                return;
+            }
+            if (!isOffscreen_ && pool_) {
                 pool_->ClearRect(rect);
+                return;
             }
         }
     }

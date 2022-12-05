@@ -15,6 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_gradient.h"
 
+#include "base/utils/utils.h"
 #include "frameworks/core/components_ng/svg/parse/svg_stop.h"
 
 namespace OHOS::Ace::NG {
@@ -46,9 +47,7 @@ void SvgGradient::SetAttr(const std::string& name, const std::string& value)
 void SvgGradient::OnAppendChild(const RefPtr<SvgNode>& child)
 {
     auto svgStop = AceType::DynamicCast<SvgStop>(child);
-    if (svgStop == nullptr) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(svgStop);
     gradientDeclaration_->AddGradientColor(svgStop->GetGradientColor());
 }
 

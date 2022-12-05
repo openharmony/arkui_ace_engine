@@ -33,7 +33,6 @@ constexpr int32_t SCROLL_TOUCH_DOWN = 1;
 constexpr int32_t SCROLL_TOUCH_UP = 2;
 constexpr double SCROLL_RATIO = 0.52;
 constexpr float SCROLL_BY_SPEED = 250.0f; // move 250 pixels per second
-constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
 constexpr double UNIT_CONVERT = 1000.0;   // 1s convert to 1000ms
 constexpr double ROTATE_FACTOR = -1.0;    // pixels factor per angle
 
@@ -769,7 +768,7 @@ void RenderScroll::AnimateTo(double position, float duration, const RefPtr<Curve
         }
     });
     animator_->AddInterpolator(animation);
-    animator_->SetDuration(limitDuration ? std::min(duration, SCROLL_MAX_TIME) : duration);
+    animator_->SetDuration(duration);
     animator_->ClearStopListeners();
     animator_->Play();
     auto weakScroll = AceType::WeakClaim(this);
@@ -909,7 +908,7 @@ void RenderScroll::SetBarCallBack(bool isVertical)
                 return;
             }
             scroll->scrollBarOpacity_ = value;
-            scroll->MarkNeedLayout(true);
+            scroll->MarkNeedRender();
         };
         auto&& scrollEndCallback = [weakScroll = AceType::WeakClaim(this), isVertical]() {
             auto scroll = weakScroll.Upgrade();

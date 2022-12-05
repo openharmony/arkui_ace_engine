@@ -52,6 +52,8 @@ RefPtr<AceType> ViewFullUpdateModelImpl::CreateNode(NodeInfo&& info)
                 return AceType::DynamicCast<Component>(node);
             };
             element->SetRenderFunction(std::move(renderFunction));
+            auto removeFunc = nodeInfo.removeFunc;
+            element->SetRemoveFunction(std::move(removeFunc));
             if (nodeInfo.pageTransitionFunc) {
                 auto pageTransitionFunction = [transitionFunc = nodeInfo.pageTransitionFunc]() -> RefPtr<Component> {
                     transitionFunc();

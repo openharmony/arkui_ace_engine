@@ -16,6 +16,7 @@
 #include "core/image/apng/apng_image_decoder.h"
 #include <cstdlib>
 #include <cstdio>
+#include <securec.h>
 #include <string>
 #include <cmath>
 #include "png.h"
@@ -502,7 +503,7 @@ static uint8_t *png_copy_frame_data_at_index(const uint8_t *data,
 
     uint32_t data_offset = 0;
     bool inserted = false;
-    memcpy(frame_data, data, PngHeadLength); // PNG File Header
+    memcpy_s(frame_data, PngHeadLength, data, PngHeadLength); // PNG File Header
     data_offset += PngHeadLength;
     for (uint32_t i = 0; i < info->apngSharedChunkNum; i++) {
         uint32_t shared_chunk_index = info->apngSharedChunkIndexs[i];
@@ -517,8 +518,8 @@ static uint8_t *png_copy_frame_data_at_index(const uint8_t *data,
                     *((uint32_t *) (frame_data + data_offset)) = swap_endian_uint32(
                         insert_chunk_info->length - PngFOURCCLen);
                     *((uint32_t *) (frame_data + data_offset + PngFOURCCLen)) = FOUR_CC('I', 'D', 'A', 'T');
-                    memcpy(frame_data + data_offset + PngHeadLength, data + insert_chunk_info->offset + Byte12,
-                        insert_chunk_info->length - PngFOURCCLen);
+                    memcpy_s(frame_data + data_offset + PngHeadLength, insert_chunk_info->length - PngFOURCCLen,
+                        data + insert_chunk_info->offset + Byte12, insert_chunk_info->length - PngFOURCCLen);
                     uint32_t crc = (uint32_t) crc32(0,
                                                     frame_data + data_offset + PngFOURCCLen,
                                                     insert_chunk_info->length);
@@ -526,8 +527,8 @@ static uint8_t *png_copy_frame_data_at_index(const uint8_t *data,
                         swap_endian_uint32(crc);
                     data_offset += insert_chunk_info->length + PngHeadLength;
                 } else { // IDAT
-                    memcpy(frame_data + data_offset, data + insert_chunk_info->offset,
-                        insert_chunk_info->length + Byte12);
+                    memcpy_s(frame_data + data_offset, insert_chunk_info->length + Byte12,
+                        data + insert_chunk_info->offset, insert_chunk_info->length + Byte12);
                     data_offset += insert_chunk_info->length + Byte12;
                 }
             }
@@ -535,16 +536,17 @@ static uint8_t *png_copy_frame_data_at_index(const uint8_t *data,
 
         if (shared_chunk_info->fourcc == FOUR_CC('I', 'H', 'D', 'R')) {
             uint8_t tmp[Byte25] = {0};
-            memcpy(tmp, data + shared_chunk_info->offset, Byte25);
+            memcpy_s(tmp, Byte25, data + shared_chunk_info->offset, Byte25);
             PngChunkIHDR IHDR = info->header;
             IHDR.width = frame_info->frameControl.width;
             IHDR.height = frame_info->frameControl.height;
             png_chunk_IHDR_write(&IHDR, tmp + PngHeadLength);
             *((uint32_t *) (tmp + Byte21)) = swap_endian_uint32((uint32_t) crc32(0, tmp + PngFOURCCLen, Byte17));
-            memcpy(frame_data + data_offset, tmp, Byte25);
+            memcpy_s(frame_data + data_offset, Byte25, tmp, Byte25);
             data_offset += Byte25;
         } else {
-            memcpy(frame_data + data_offset, data + shared_chunk_info->offset, shared_chunk_info->length + Byte12);
+            memcpy_s(frame_data + data_offset, shared_chunk_info->length + Byte12,
+                data + shared_chunk_info->offset, shared_chunk_info->length + Byte12);
             data_offset += shared_chunk_info->length + Byte12;
         }
     }
@@ -597,7 +599,7 @@ bool PNGImageDecoder::isApng()
         return false;
     }
 
-    memcpy(buffer, byteDatas, headSize);
+    memcpy_s(buffer, headSize, byteDatas, headSize);
 
     // check if is not png image
     if (png_sig_compare((png_bytep) buffer, (png_size_t) 0, headSize)) {
@@ -804,7 +806,7 @@ uint8_t *PNGImageDecoder::GetFrameData(uint32_t index, uint32_t *size, bool oldW
     uint32_t dataOffset = 0;
     bool inserted = false;
     // PNG File Header
-    memcpy(frameData, data, PngHeadLength);
+    memcpy_s(frameData, PngHeadLength, data, PngHeadLength);
     dataOffset += PngHeadLength;
 
     for (uint32_t i = 0; i < pngInfo_->apngSharedChunkNum; i++) {
@@ -824,16 +826,16 @@ uint8_t *PNGImageDecoder::GetFrameData(uint32_t index, uint32_t *size, bool oldW
                     *((uint32_t *) (frameData + dataOffset)) = swap_endian_uint32(
                             insertChunkInfo->length - PngFOURCCLen);
                     *((uint32_t *) (frameData + dataOffset + PngFOURCCLen)) = FOUR_CC('I', 'D', 'A', 'T');
-                    memcpy(frameData + dataOffset + PngHeadLength, data + insertChunkInfo->offset + Byte12,
-                           insertChunkInfo->length - PngFOURCCLen);
+                    memcpy_s(frameData + dataOffset + PngHeadLength, insertChunkInfo->length - PngFOURCCLen,
+                        data + insertChunkInfo->offset + Byte12, insertChunkInfo->length - PngFOURCCLen);
                     uint32_t crc = (uint32_t) crc32(0, frameData + dataOffset + PngFOURCCLen,
                                                     insertChunkInfo->length);
                     *((uint32_t *) (frameData + dataOffset + insertChunkInfo->length +
                                     PngFOURCCLen)) = swap_endian_uint32(crc);
                     dataOffset += insertChunkInfo->length + PngHeadLength;
                 } else { // IDAT
-                    memcpy(frameData + dataOffset, data + insertChunkInfo->offset,
-                           insertChunkInfo->length + Byte12);
+                    memcpy_s(frameData + dataOffset, insertChunkInfo->length + Byte12,
+                        data + insertChunkInfo->offset, insertChunkInfo->length + Byte12);
                     dataOffset += insertChunkInfo->length + Byte12;
                 }
             }
@@ -841,16 +843,17 @@ uint8_t *PNGImageDecoder::GetFrameData(uint32_t index, uint32_t *size, bool oldW
 
         if (sharedChunkInfo->fourcc == FOUR_CC('I', 'H', 'D', 'R')) {
             uint8_t tmp[Byte25] = {0};
-            memcpy(tmp, data + sharedChunkInfo->offset, Byte25);
+            memcpy_s(tmp, Byte25, data + sharedChunkInfo->offset, Byte25);
             PngChunkIHDR IHDR = pngInfo_->header;
             IHDR.width = frameInfo->frameControl.width;
             IHDR.height = frameInfo->frameControl.height;
             png_chunk_IHDR_write(&IHDR, tmp + PngHeadLength);
             *((uint32_t *) (tmp + Byte21)) = swap_endian_uint32((uint32_t) crc32(0, tmp + PngFOURCCLen, Byte17));
-            memcpy(frameData + dataOffset, tmp, Byte25);
+            memcpy_s(frameData + dataOffset, Byte25, tmp, Byte25);
             dataOffset += Byte25;
         } else {
-            memcpy(frameData + dataOffset, data + sharedChunkInfo->offset, sharedChunkInfo->length + Byte12);
+            memcpy_s(frameData + dataOffset, sharedChunkInfo->length + Byte12,
+                data + sharedChunkInfo->offset, sharedChunkInfo->length + Byte12);
             dataOffset += sharedChunkInfo->length + Byte12;
         }
     }

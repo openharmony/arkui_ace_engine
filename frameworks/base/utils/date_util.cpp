@@ -18,6 +18,8 @@
 #include <chrono>
 #include <ctime>
 
+#include "base/utils/utils.h"
+
 namespace OHOS::Ace {
 
 Date Date::Current()
@@ -25,9 +27,7 @@ Date Date::Current()
     Date date;
     auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     auto local = std::localtime(&now);
-    if (local == nullptr) {
-        return date;
-    }
+    CHECK_NULL_RETURN_NOLOG(local, date);
     date.year = static_cast<uint32_t>(local->tm_year) + 1900; // local date start from 1900
     date.month = static_cast<uint32_t>(local->tm_mon) + 1;    // local month start from 0 to 11, need add one.
     date.day = static_cast<uint32_t>(local->tm_mday);

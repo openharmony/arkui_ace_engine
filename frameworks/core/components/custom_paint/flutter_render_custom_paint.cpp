@@ -35,8 +35,10 @@
 #include "third_party/skia/include/utils/SkParsePath.h"
 
 #include "base/i18n/localization.h"
+#include "base/image/pixel_map.h"
 #include "base/json/json_util.h"
 #include "base/utils/linear_map.h"
+#include "base/utils/measure_util.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/components/calendar/flutter_render_calendar.h"
@@ -496,10 +498,10 @@ void FlutterRenderCustomPaint::ClearRect(const Offset& offset, const Rect& rect)
 
 void FlutterRenderCustomPaint::FillText(const Offset& offset, const std::string& text, double x, double y)
 {
-    if (!UpdateParagraph(offset, text, false)) {
+    if (!UpdateParagraph(offset, text, false, HasShadow())) {
         return;
     }
-    PaintText(offset, x, y, false);
+    PaintText(offset, x, y, false, HasShadow());
 }
 
 void FlutterRenderCustomPaint::StrokeText(const Offset& offset, const std::string& text, double x, double y)
@@ -508,13 +510,18 @@ void FlutterRenderCustomPaint::StrokeText(const Offset& offset, const std::strin
         if (!UpdateParagraph(offset, text, true, true)) {
             return;
         }
-        PaintText(offset, x, y, true);
+        PaintText(offset, x, y, true, true);
     }
 
     if (!UpdateParagraph(offset, text, true)) {
         return;
     }
     PaintText(offset, x, y, true);
+}
+
+double FlutterRenderCustomPaint::MeasureTextInner(const MeasureContext& context)
+{
+    return 0.0;
 }
 
 double FlutterRenderCustomPaint::MeasureText(const std::string& text, const PaintState& state)
@@ -1456,13 +1463,13 @@ void FlutterRenderCustomPaint::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Can
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> image;
     if (!renderTaskHolder_->ioManager) {
-        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     } else {
 #ifndef GPU_DISABLED
         image = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
             imagePixmap, true, imagePixmap.colorSpace(), true);
 #else
-        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
 #endif
     }
     if (!image) {

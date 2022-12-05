@@ -37,52 +37,91 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const int ANIMATION_DUR = 200;
+} // namespace
+
+void OverlayManager::Show(const RefPtr<FrameNode>& node)
+{
+    auto root = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(root && node);
+    node->MountToParent(root);
+    root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+
+    AnimationOption option;
+    option.SetCurve(Curves::SMOOTH);
+    option.SetDuration(ANIMATION_DUR);
+    auto ctx = node->GetRenderContext();
+    CHECK_NULL_VOID(ctx);
+    ctx->OpacityAnimation(option, 0.0, 1.0);
+}
+
+void OverlayManager::Pop(const RefPtr<FrameNode>& node)
+{
+    auto root = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(root && node);
+
+    AnimationOption option;
+    option.SetCurve(Curves::SMOOTH);
+    option.SetDuration(ANIMATION_DUR);
+    option.SetOnFinishEvent([root, node, id = Container::CurrentId()] {
+        ContainerScope scope(id);
+        root->RemoveChild(node);
+        root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    });
+    auto ctx = node->GetRenderContext();
+    CHECK_NULL_VOID(ctx);
+    ctx->OpacityAnimation(option, 1.0, 0.0);
+}
 
 void OverlayManager::ShowToast(
     const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft)
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto rootNode = rootNodeWeak_.Upgrade();
+    auto rootNode = context->GetRootElement();
     CHECK_NULL_VOID(rootNode);
 
     // only one toast
-    if (!toast_.Invalid()) {
-        rootNode->RemoveChild(toast_.Upgrade());
-        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    for (auto [id, toastNodeWeak] : toastMap_) {
+        rootNode->RemoveChild(toastNodeWeak.Upgrade());
     }
+    toastMap_.clear();
 
     auto toastNode = ToastView::CreateToastNode(message, bottom, isRightToLeft);
+    auto toastId = toastNode->GetId();
     CHECK_NULL_VOID(toastNode);
 
     // mount to parent
     toastNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    toast_ = toastNode;
+    toastMap_[toastId] = toastNode;
 
     context->GetTaskExecutor()->PostDelayedTask(
-        [weak = WeakClaim(this)] {
+        [weak = WeakClaim(this), toastId] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->PopToast();
+            overlayManager->PopToast(toastId);
         },
         TaskExecutor::TaskType::UI, duration);
 }
 
-void OverlayManager::PopToast()
+void OverlayManager::PopToast(int32_t toastId)
 {
-    auto toastUnderPop = toast_.Upgrade();
-    if (!toastUnderPop) {
-        LOGE("No toast under pop");
+    auto toastIter = toastMap_.find(toastId);
+    if (toastIter == toastMap_.end()) {
+        LOGI("No toast under pop");
         return;
     }
-    auto rootNode = rootNodeWeak_.Upgrade();
-    if (!rootNode) {
-        LOGE("No root node in OverlayManager");
-        return;
-    }
+    auto toastUnderPop = toastIter->second.Upgrade();
+    CHECK_NULL_VOID(toastUnderPop);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
     LOGI("begin to pop toast, id is %{public}d", toastUnderPop->GetId());
     rootNode->RemoveChild(toastUnderPop);
+    toastMap_.erase(toastId);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -143,8 +182,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void OverlayManager::ShowMenu(
-    int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu, bool isContextMenu)
+bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset)
 {
     if (!menu) {
         // get existing menuNode
@@ -159,18 +197,24 @@ void OverlayManager::ShowMenu(
         menuMap_[targetId] = menu;
         LOGI("menuNode %{public}d added to map", targetId);
     }
-    CHECK_NULL_VOID(menu);
+    CHECK_NULL_RETURN(menu, false);
     auto menuChild = menu->GetChildAtIndex(0);
-    CHECK_NULL_VOID(menuChild);
+    CHECK_NULL_RETURN(menuChild, false);
     auto menuFrameNode = DynamicCast<FrameNode>(menuChild);
-    auto menuPattern = menuFrameNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    menuPattern->SetIsContextMenu(isContextMenu);
 
     auto props = menuFrameNode->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(props);
+    CHECK_NULL_RETURN(props, false);
     props->UpdateMenuOffset(offset);
+    menuFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    return true;
+}
 
+void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu)
+{
+    if (!ShowMenuHelper(menu, targetId, offset)) {
+        LOGW("show menu failed");
+        return;
+    }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     auto rootChildren = rootNode->GetChildren();
@@ -179,43 +223,19 @@ void OverlayManager::ShowMenu(
     if (iter != rootChildren.end()) {
         LOGW("menuNode already appended");
     } else {
-        menu->MountToParent(rootNode);
+        Show(menu);
         menu->MarkModifyDone();
-        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         LOGI("menuNode mounted");
     }
 }
 
 // subwindow only contains one menu instance.
-void OverlayManager::ShowMenuInSubWindow(
-    int32_t targetId, bool isMenu, const NG::OffsetF& offset, RefPtr<FrameNode> menu, bool isContextMenu)
+void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu)
 {
-    if (!menu) {
-        // get existing menuNode
-        auto it = menuMap_.find(targetId);
-        if (it != menuMap_.end()) {
-            menu = it->second;
-        } else {
-            LOGW("menuNode doesn't exists %{public}d", targetId);
-        }
-    } else {
-        // creating new menu
-        menuMap_[targetId] = menu;
-        LOGI("menuNode %{public}d added to map", targetId);
+    if (!ShowMenuHelper(menu, targetId, offset)) {
+        LOGW("show menu failed");
+        return;
     }
-    CHECK_NULL_VOID(menu);
-    auto menuChild = menu->GetChildAtIndex(0);
-    CHECK_NULL_VOID(menuChild);
-    auto menuFrameNode = DynamicCast<FrameNode>(menuChild);
-    auto menuPattern = menuFrameNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    menuPattern->SetIsContextMenu(isContextMenu);
-    auto props = menuFrameNode->GetLayoutProperty<MenuLayoutProperty>();
-    if (isMenu && props) {
-        props->UpdateMenuOffset(offset);
-        menuFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
-    CHECK_NULL_VOID(props);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     rootNode->Clean();
@@ -228,14 +248,11 @@ void OverlayManager::ShowMenuInSubWindow(
 void OverlayManager::HideMenu(int32_t targetId)
 {
     LOGI("OverlayManager::HideMenuNode");
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
     if (menuMap_.find(targetId) == menuMap_.end()) {
         LOGW("OverlayManager: menuNode %{public}d not found in map", targetId);
         return;
     }
-    rootNode->RemoveChild(menuMap_[targetId]);
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    Pop(menuMap_[targetId]);
 }
 
 void OverlayManager::DeleteMenu(int32_t targetId)
@@ -263,11 +280,8 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
 {
     LOGI("OverlayManager::ShowDialog");
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_RETURN(rootNode, nullptr);
-    dialog->MountToParent(rootNode);
-    LOGD("dialog mounted to root node");
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    Show(dialog);
+    FocusDialog(dialog);
     return dialog;
 }
 
@@ -281,6 +295,7 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps,
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     dialogNode->MountToParent(rootNode);
+    FocusDialog(dialogNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -290,11 +305,8 @@ void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps,
 {
     auto dialogNode = TimePickerDialogView::Show(dialogProps, std::move(timePickerProperty), isUseMilitaryTime,
         std::move(dialogEvent), std::move(dialogCancelEvent));
-    CHECK_NULL_VOID(dialogNode);
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
-    dialogNode->MountToParent(rootNode);
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    Show(dialogNode);
+    FocusDialog(dialogNode);
 }
 
 void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, uint32_t selected, const Dimension& height,
@@ -303,20 +315,60 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, uint32_
 {
     auto dialogNode = TextPickerDialogView::Show(
         dialogProps, selected, height, getRangeVector, std::move(dialogEvent), std::move(dialogCancelEvent));
-    CHECK_NULL_VOID(dialogNode);
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
-    dialogNode->MountToParent(rootNode);
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    Show(dialogNode);
+    FocusDialog(dialogNode);
 }
 
 void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
 {
     LOGI("OverlayManager::CloseDialog");
+    Pop(dialogNode);
+    BlurDialog();
+}
+
+bool OverlayManager::RemoveOverlay()
+{
     auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
-    rootNode->RemoveChild(dialogNode);
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    CHECK_NULL_RETURN(rootNode, true);
+    if (rootNode->GetChildren().size() > 1) {
+        // stage node is at index 0
+        rootNode->RemoveChildAtIndex(1);
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        LOGI("overlay removed successfully");
+        return true;
+    }
+    return false;
+}
+
+void OverlayManager::FocusDialog(const RefPtr<FrameNode>& dialogNode)
+{
+    LOGI("OverlayManager::FocusDialog when dialog show");
+    CHECK_NULL_VOID(dialogNode);
+    auto focusHub = dialogNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto pageNode = stageManager->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
+    auto pageFocusHub = pageNode->GetFocusHub();
+    CHECK_NULL_VOID(pageFocusHub);
+    focusHub->RequestFocusImmediately();
+    pageFocusHub->LostFocus();
+}
+
+void OverlayManager::BlurDialog()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto pageNode = stageManager->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
+    auto pageFocusHub = pageNode->GetFocusHub();
+    CHECK_NULL_VOID(pageFocusHub);
+    pageFocusHub->RequestFocus();
 }
 
 } // namespace OHOS::Ace::NG

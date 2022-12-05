@@ -27,7 +27,7 @@ public:
     explicit HdcJdwpSimulator(string pkgName);
     ~HdcJdwpSimulator();
     bool Connect();
-    void FreeContext();
+    void Disconnect();
 
 protected:
     struct ContextJdwpSimulator {
@@ -42,10 +42,11 @@ private:
         uint32_t pid;
     };
     void *MallocContext();
-    static void ConnectJpid(void *param);
-    static void SendToJpid(int fd, const uint8_t *buf, const int bufLen);
+    static bool ConnectJpid(void *param);
+    static bool SendToJpid(int fd, const uint8_t *buf, const int bufLen);
     HCtxJdwpSimulator ctxPoint_;
     string pkgName_;
+    bool disconnectFlag_;
 };
 } // namespace OHOS::Ace
 #endif  // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_REGISTER_HDC_JDWP_H

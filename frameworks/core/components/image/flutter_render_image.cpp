@@ -22,6 +22,7 @@
 #include "third_party/skia/include/core/SkShader.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
 
+#include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
 
 #include "core/common/frontend.h"
@@ -401,7 +402,7 @@ void FlutterRenderImage::ProcessPixmapForPaint()
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> skImage;
     if (!renderTaskHolder_->ioManager) {
-        skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        skImage = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixmap));
     } else {
 #ifndef GPU_DISABLED
         skImage = SkImage::MakeCrossContextFromPixmap(
@@ -576,7 +577,7 @@ void FlutterRenderImage::ApplyBorderRadius(
     // 1. when the image source is a SVG;
     // 2. when image loads fail;
     // 3. when there is a repeat to do;
-    bool clipLayoutSize = sourceInfo_.IsSvg() || (imageRepeat_ != ImageRepeat::NOREPEAT) ||
+    bool clipLayoutSize = sourceInfo_.IsSvg() || (imageRepeat_ != ImageRepeat::NO_REPEAT) ||
         (imageLoadingStatus_ == ImageLoadingStatus::LOAD_FAIL);
     Rect clipRect = clipLayoutSize ? Rect(offset, GetLayoutSize()) : paintRect + offset;
 
@@ -693,7 +694,7 @@ void FlutterRenderImage::CanvasDrawImageRect(
         }
         return;
     }
-    if (imageRepeat_ != ImageRepeat::NOREPEAT) {
+    if (imageRepeat_ != ImageRepeat::NO_REPEAT) {
         DrawImageOnCanvas(scaledSrcRect, realDstRect, canvas, paint, imageRenderPosition_);
         return;
     }
@@ -767,10 +768,10 @@ void FlutterRenderImage::DrawImageOnCanvas(
             xTileMode = SkTileMode::kRepeat;
             yTileMode = SkTileMode::kRepeat;
             break;
-        case ImageRepeat::REPEATX:
+        case ImageRepeat::REPEAT_X:
             xTileMode = SkTileMode::kRepeat;
             break;
-        case ImageRepeat::REPEATY:
+        case ImageRepeat::REPEAT_Y:
             yTileMode = SkTileMode::kRepeat;
             break;
         default:

@@ -82,15 +82,22 @@ public:
 
     RefPtr<UINode> GetLastChild()
     {
+        if (children_.empty()) {
+            return nullptr;
+        }
         return children_.back();
     }
 
     RefPtr<UINode> GetFirstChild()
     {
+        if (children_.empty()) {
+            return nullptr;
+        }
         return children_.front();
     }
 
     void GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList);
+    void GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList);
 
     int32_t GetChildIndexById(int32_t id);
 
@@ -229,6 +236,8 @@ public:
 
     virtual void SetActive(bool active);
 
+    virtual void OnVisibleChange(bool isVisible);
+
     bool IsOnMainTree() const
     {
         return onMainTree_;
@@ -238,6 +247,32 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
     void OnInspectorIdUpdate(const std::string& /*unused*/) {}
+
+    template<typename T>
+    RefPtr<T> FindChildNodeOfClass()
+    {
+        const auto& children = GetChildren();
+        for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+            auto& child = *iter;
+
+            auto target = child->FindChildNodeOfClass<T>();
+            if (target) {
+                return target;
+            }
+        }
+
+        RefPtr<UINode> uiNode = AceType::Claim<UINode>(this);
+        if (AceType::InstanceOf<T>(uiNode)) {
+            return AceType::DynamicCast<T>(uiNode);
+        }
+        return nullptr;
+    }
+
+    void ChildrenUpdatedFrom(int32_t index);
+    int32_t GetChildrenUpdated() const
+    {
+        return childrenUpdatedFrom_;
+    }
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -249,6 +284,13 @@ protected:
     {
         for (const auto& child : children_) {
             child->OnGenerateOneDepthVisibleFrame(visibleList);
+        }
+    }
+
+    virtual void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList)
+    {
+        for (const auto& child : children_) {
+            child->OnGenerateOneDepthAllFrame(allList);
         }
     }
 
@@ -276,6 +318,7 @@ private:
     bool onMainTree_ = false;
     bool removeSilently_ = true;
 
+    int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UINode);

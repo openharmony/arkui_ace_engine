@@ -210,12 +210,15 @@ public:
 private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
-    void UpdateWebLayoutSize();
+    void UpdateWebLayoutSize(int32_t width, int32_t height);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void OnAttachToFrameNode() override;
     void OnWindowShow() override;
     void OnWindowHide() override;
+    void OnInActive() override;
+    void OnActive() override;
+    void OnVisibleChange(bool isVisible) override;
 
     void OnWebSrcUpdate();
     void OnWebDataUpdate();
@@ -272,10 +275,12 @@ private:
 
     bool IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
     bool IsTouchHandleShow(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
+#ifdef OHOS_STANDARD_SYSTEM
     WebOverlayType GetTouchHandleOverlayType(
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
+#endif
     void RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
@@ -318,6 +323,7 @@ private:
     bool isDragging_ = false;
     bool isW3cDragEvent_ = false;
     bool isWindowShow_ = true;
+    bool isActive_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };

@@ -56,7 +56,7 @@ void SwiperIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto paintProperty = frameNode->GetPaintProperty<SwiperIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(theme);

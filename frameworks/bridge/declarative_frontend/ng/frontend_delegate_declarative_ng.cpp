@@ -20,6 +20,7 @@
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
 #include "base/thread/background_task_executor.h"
+#include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
@@ -219,6 +220,11 @@ void FrontendDelegateDeclarativeNG::ChangeLocale(const std::string& language, co
 void FrontendDelegateDeclarativeNG::RegisterFont(const std::string& familyName, const std::string& familySrc)
 {
     pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc);
+}
+
+double FrontendDelegateDeclarativeNG::MeasureText(const MeasureContext& context)
+{
+    return MeasureUtil::MeasureText(context);
 }
 
 SingleTaskExecutor FrontendDelegateDeclarativeNG::GetAnimationJsTask()

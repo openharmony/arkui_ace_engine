@@ -71,7 +71,7 @@ public:
     Frontend() = default;
     ~Frontend() override = default;
 
-    enum class State { ON_CREATE, ON_DESTROY, ON_SHOW, ON_HIDE };
+    enum class State { ON_CREATE, ON_DESTROY, ON_SHOW, ON_HIDE, ON_ACTIVE, ON_INACTIVE, UNDEFINE };
 
     static RefPtr<Frontend> Create();
     static RefPtr<Frontend> CreateDefault();
@@ -255,6 +255,7 @@ public:
 protected:
     bool disallowPopLastPage_ = false;
     FrontendDialogCallback dialogCallback_ = nullptr;
+    State state_ = State::UNDEFINE;
 };
 
 } // namespace OHOS::Ace

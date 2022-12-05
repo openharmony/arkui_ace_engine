@@ -13,11 +13,95 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/pipeline/base/element_register.h"
+#include "core/components_ng/base/ui_node.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace {
+thread_local ElementRegister* ElementRegister::instance_ = nullptr;
+
 ElementRegister* ElementRegister::GetInstance()
 {
-    return new ElementRegister();
+    if (ElementRegister::instance_ == nullptr) {
+        ElementRegister::instance_ = new ElementRegister();
+    }
+    return (ElementRegister::instance_);
+}
+
+RefPtr<Element> ElementRegister::GetElementById(ElementIdType /*elementId*/)
+{
+    return nullptr;
+}
+
+RefPtr<AceType> ElementRegister::GetNodeById(ElementIdType /*elementId*/)
+{
+    return nullptr;
+}
+
+RefPtr<NG::UINode> ElementRegister::GetUINodeById(ElementIdType elementId)
+{
+    if (elementId == ElementRegister::UndefinedElementId) {
+        return nullptr;
+    }
+    return nullptr;
+}
+
+RefPtr<V2::ElementProxy> ElementRegister::GetElementProxyById(ElementIdType /*elementId*/)
+{
+    return nullptr;
+}
+
+bool ElementRegister::Exists(ElementIdType /*elementId*/)
+{
+    return false;
+}
+
+bool ElementRegister::AddReferenced(ElementIdType elementId, const WeakPtr<AceType>& referenced)
+{
+    auto result = itemMap_.emplace(elementId, referenced);
+    if (!result.second) {
+        LOGE("Duplicate elementId %{public}d error.", elementId);
+    }
+    return result.second;
+}
+
+bool ElementRegister::AddElement(const RefPtr<Element>& /*element*/)
+{
+    return false;
+}
+
+bool ElementRegister::AddElementProxy(const WeakPtr<V2::ElementProxy>& /*elementProxy*/)
+{
+    return false;
+}
+
+bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
+{
+    if (!node || (node->GetId() == ElementRegister::UndefinedElementId)) {
+        return false;
+    }
+    return AddReferenced(node->GetId(), node);
+}
+
+bool ElementRegister::RemoveItem(ElementIdType /*elementId*/)
+{
+    return true;
+}
+
+bool ElementRegister::RemoveItemSilently(ElementIdType /*elementId*/)
+{
+    return true;
+}
+
+std::unordered_set<ElementIdType>& ElementRegister::GetRemovedItems()
+{
+    return removedItems_;
+}
+
+void ElementRegister::ClearRemovedItems(ElementIdType elementId) {}
+
+void ElementRegister::Clear()
+{
+    itemMap_.clear();
+    removedItems_.clear();
 }
 } // namespace OHOS::Ace

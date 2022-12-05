@@ -16,19 +16,65 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_CANVAS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_CANVAS_H
 
+#include "testing_bitmap.h"
+#include "testing_brush.h"
+#include "testing_path.h"
 #include "testing_pen.h"
-#include "utils/point.h"
+#include "testing_point.h"
+#include "testing_rect.h"
+#include "testing_round_rect.h"
 
 namespace OHOS::Ace::Testing {
-using Point = Rosen::Drawing::Point;
+enum class ClipOp {
+    DIFFERENCE,
+    INTERSECT,
+    UNION,
+    XOR,
+    REVERSE_DIFFERENCE,
+    REPLACE,
+};
+
 class TestingCanvas {
 public:
     TestingCanvas() = default;
     explicit TestingCanvas(void* rawCanvas) {}
     virtual ~TestingCanvas() = default;
 
-    virtual void DrawLine(const Point& startPt, const Point& endPt) = 0;
-    virtual TestingCanvas& AttachPen(const TestingPen& pen) = 0;
+    virtual void DrawLine(const TestingPoint& startPt, const TestingPoint& endPt) {}
+    virtual void DrawPath(const TestingPath& path) {}
+    virtual void DrawArc(const TestingRect& oval, float startAngle, float sweepAngle) {}
+    virtual void DrawRect(const TestingRect& rect) {}
+    virtual void ClipRoundRect(const TestingRoundRect& roundRect, ClipOp op) {}
+    virtual void Rotate(float deg, float sx, float sy) {}
+    virtual void Translate(float dx, float dy) {}
+    virtual void DrawBitmap(const TestingBitmap& bitmap, const float px, const float py) {}
+
+    virtual TestingCanvas& AttachPen(const TestingPen& pen)
+    {
+        return *this;
+    }
+
+    virtual TestingCanvas& AttachBrush(const TestingBrush& brush)
+    {
+        return *this;
+    }
+
+    virtual TestingCanvas& DetachPen()
+    {
+        return *this;
+    }
+
+    virtual TestingCanvas& DetachBrush()
+    {
+        return *this;
+    }
+
+    virtual void Save() {}
+    virtual void Restore() {}
+    virtual void DrawCircle(const TestingPoint& center, float radius) {}
+    virtual void DrawRoundRect(const TestingRoundRect& roundRect) {}
+    virtual void DrawBackground(const TestingBrush& brush) {}
+    virtual void ClipRect(const TestingRect& rect, ClipOp op) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_CANVAS_H

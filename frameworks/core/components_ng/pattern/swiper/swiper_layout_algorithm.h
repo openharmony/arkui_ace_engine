@@ -74,8 +74,32 @@ public:
         isLoop_ = isLoop;
     }
 
+    int32_t GetCurrentIndex() const
+    {
+        return currentIndex_;
+    }
+
+    const SizeF& GetMaxChildSize() const
+    {
+        return maxChildSize_;
+    }
+
+    void SetMaxChildSize(const SizeF& maxChildSize)
+    {
+        maxChildSize_ = maxChildSize;
+    }
+
+    void SetDisplayCount(int32_t displayCount)
+    {
+        displayCount_ = displayCount;
+    }
+
 private:
-    void InitItemRange();
+    void InitItemRange(LayoutWrapper* layoutWrapper);
+    void AddToItemRange(int32_t index);
+    void LoadItemWithDrag(float translateLength);
+    void InitInActiveItems(float translateLength);
+    int32_t ClampIndex(int32_t index);
 
     bool isLoop_ = true;
     int32_t currentIndex_ = 0;
@@ -84,9 +108,11 @@ private:
     std::optional<int32_t> targetIndex_;
     float currentOffset_ = 0.0f;
     int32_t totalCount_ = 0;
+    int32_t displayCount_ = 0;
     std::set<int32_t> itemRange_;
     std::set<int32_t> preItemRange_;
     std::vector<int32_t> inActiveItems_;
+    SizeF maxChildSize_;
 };
 
 } // namespace OHOS::Ace::NG

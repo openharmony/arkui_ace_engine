@@ -25,22 +25,25 @@ ohos_unittest("ThemeManagerTest") {
 
   sources = [
     #base
+    "$ace_root/frameworks/base/json/json_util.cpp",
     "$ace_root/frameworks/base/log/ace_trace.cpp",
-    "$ace_root/frameworks/core/mock/mock_ace_container.cpp",
+    "$ace_root/frameworks/base/resource/ace_res_config.cpp",
+    "$ace_root/frameworks/base/resource/ace_res_key_parser.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_ace_container.cpp",
 
     # properties
+    "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/components/common/properties/border.cpp",
     "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
-    "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
 
     # theme
     "$ace_root/frameworks/core/components/theme/app_theme.cpp",
     "$ace_root/frameworks/core/components/theme/icon_theme.cpp",
     "$ace_root/frameworks/core/components/theme/theme_attributes.cpp",
     "$ace_root/frameworks/core/components/theme/theme_constants.cpp",
-    "$ace_root/frameworks/core/components/theme/theme_manager.cpp",
+    "$ace_root/frameworks/core/components/theme/theme_manager_impl.cpp",
     "$ace_root/frameworks/core/components/theme/theme_utils.cpp",
     "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
 
@@ -60,8 +63,8 @@ ohos_unittest("ThemeManagerTest") {
     "$ace_root/frameworks/core/common/window.cpp",
 
     # event
+    "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
-    "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
     "theme_manager_test.cpp",
     "theme_mock.cpp",
   ]
@@ -87,6 +90,7 @@ ohos_unittest("ThemeManagerTest") {
   deps = [
     "$ace_root/adapter/ohos/osal:ace_osal_ohos",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "$cjson_root:cjson_static",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -94,7 +98,7 @@ ohos_unittest("ThemeManagerTest") {
     sources += [
       "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
       "$ace_root/frameworks/bridge/common/utils/utils.cpp",
-      "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
+      "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
     ]
     deps += [ "$ace_root/frameworks/base:ace_base_ohos" ]
     external_deps = [
@@ -131,17 +135,17 @@ ohos_unittest("ThemeConstantsTest") {
     "$ace_root/frameworks/base/utils/base_id.cpp",
 
     # properties
+    "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/components/common/properties/border.cpp",
     "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
-    "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
 
     # theme
     "$ace_root/frameworks/core/components/theme/app_theme.cpp",
     "$ace_root/frameworks/core/components/theme/theme_attributes.cpp",
     "$ace_root/frameworks/core/components/theme/theme_constants.cpp",
-    "$ace_root/frameworks/core/components/theme/theme_manager.cpp",
+    "$ace_root/frameworks/core/components/theme/theme_manager_impl.cpp",
     "$ace_root/frameworks/core/components/theme/theme_utils.cpp",
     "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
 
@@ -163,13 +167,13 @@ ohos_unittest("ThemeConstantsTest") {
     "$ace_root/frameworks/core/common/window.cpp",
 
     # event
+    "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
-    "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
     "theme_constants_test.cpp",
     "theme_mock.cpp",
 
     # mock
-    "$ace_root/frameworks/core/mock/mock_system_properties.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
   ]
 
   # add sources only needed by wearable like watch.
@@ -211,7 +215,7 @@ ohos_unittest("ThemeConstantsTest") {
   external_deps += [ "c_utils:utils" ]
   sources += [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
-    "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
+    "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
   ]
   part_name = ace_engine_part
 }

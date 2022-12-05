@@ -17,6 +17,7 @@
 
 #include "core/components/checkable/checkable_component.h"
 #include "core/components/test/json/checkable_creator.h"
+#include "core/components/theme/theme_manager_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -44,7 +45,7 @@ const std::string CHECKABLE_PROPERTIES = "  \"onChanged\": \"changeId001\",     
                                          "  \"className\": \"Color\",                  "
                                          "  \"value\":  123456789                      "
                                          "  },                                         ";
-const RefPtr<ThemeManager> THEME_MANAGER = AceType::MakeRefPtr<ThemeManager>();
+const auto THEME_MANAGER = AceType::MakeRefPtr<ThemeManagerImpl>();
 
 RefPtr<Component> CreateCheckableComponent(const std::string& testJson)
 {

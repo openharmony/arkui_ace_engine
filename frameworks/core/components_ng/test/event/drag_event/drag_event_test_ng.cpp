@@ -21,21 +21,26 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr double GESTURE_EVENT_PROPERTY_DEFAULT_VALUE = 0.0;
 constexpr double GESTURE_EVENT_PROPERTY_VALUE = 10.0;
 const PanDirection DRAG_DIRECTION = { PanDirection::LEFT };
 const TouchRestrict DRAG_TOUCH_RESTRICT = { TouchRestrict::CLICK };
 constexpr int32_t FINGERS_NUMBER = 2;
 constexpr int32_t TOUCH_TEST_RESULT_SIZE = 1;
+constexpr int32_t TOUCH_TEST_RESULT_SIZE_2 = 2;
 constexpr float DISTANCE = 10.5f;
-const float WIDTH = 400.0f;
-const float HEIGHT = 400.0f;
+constexpr float WIDTH = 400.0f;
+constexpr float HEIGHT = 400.0f;
 const OffsetF COORDINATE_OFFSET(WIDTH, HEIGHT);
+constexpr int32_t FINGERS_NUMBER_GREATER_THAN_DEFAULT = 2;
+constexpr float DISTANCE_GREATER_THAN_DEFAULT = 6.0f;
 } // namespace
 
 class DragEventTestNg : public testing::Test {
@@ -58,12 +63,12 @@ void DragEventTestNg::TearDownTestSuite()
 
 void DragEventTestNg::SetUp()
 {
-    GTEST_LOG_(INFO) << "DragEventTestNg SetUp";
+    MockPipelineBase::SetUp();
 }
 
 void DragEventTestNg::TearDown()
 {
-    GTEST_LOG_(INFO) << "DragEventTestNg TearDown";
+    MockPipelineBase::TearDown();
 }
 
 /**
@@ -145,16 +150,26 @@ HWTEST_F(DragEventTestNg, DragEventActuatorPropertyTest002, TestSize.Level1)
         AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
 
     /**
-     * @tc.steps: step2. Get DragEventActuator direction, fingers_ and distance_.
+     * @tc.steps: step2. Create DragEventActuator when fingers number and distance are both greater than the default.
+     * @tc.expected: panEventActuator is initialized with the fingers_ and distance_ defined before.
+     */
+    auto dragEventActuator2 =
+        AceType::MakeRefPtr<DragEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION,
+            FINGERS_NUMBER_GREATER_THAN_DEFAULT, DISTANCE_GREATER_THAN_DEFAULT);
+    EXPECT_NE(dragEventActuator2, nullptr);
+    EXPECT_EQ(dragEventActuator2->fingers_, FINGERS_NUMBER_GREATER_THAN_DEFAULT);
+    EXPECT_EQ(dragEventActuator2->distance_, DISTANCE_GREATER_THAN_DEFAULT);
+
+    /**
+     * @tc.steps: step3. Get DragEventActuator direction, fingers_ and distance_.
      * @tc.expected:  DragEventActuator's direction, fingers_ and distance_ are equal with the parameters passed in the
      * constructor.
      */
     EXPECT_EQ(dragEventActuator.GetDirection().type, DRAG_DIRECTION.type);
     EXPECT_EQ(dragEventActuator.fingers_, FINGERS_NUMBER);
     EXPECT_EQ(dragEventActuator.distance_, DISTANCE);
-
     /**
-     * @tc.steps: step3. Create DragEvent and set as DragEventActuator's DragEvent and CustomDragEvent.
+     * @tc.steps: step4. Create DragEvent and set as DragEventActuator's DragEvent and CustomDragEvent.
      * @tc.expected:  Get DragEventActuator's DragEvent and CustomDragEvent which are equal with the DragEvent create
      * before.
      */
@@ -183,7 +198,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorOnCollectTouchTargetTest003, TestSize
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-    DragEventActuator dragEventActuator = DragEventActuator(
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
         AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
 
     /**
@@ -191,39 +206,86 @@ HWTEST_F(DragEventTestNg, DragEventActuatorOnCollectTouchTargetTest003, TestSize
      * @tc.expected:  userCallback_ is null and return directly.
      */
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
-    EXPECT_FALSE(getEventTargetImpl == nullptr);
+    EXPECT_NE(getEventTargetImpl, nullptr);
     TouchTestResult finalResult;
-    dragEventActuator.OnCollectTouchTarget(COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
-    EXPECT_TRUE(dragEventActuator.panRecognizer_->onActionStart_ == nullptr);
-    EXPECT_TRUE(dragEventActuator.panRecognizer_->onActionStart_ == nullptr);
-    EXPECT_TRUE(dragEventActuator.panRecognizer_->onActionUpdate_ == nullptr);
-    EXPECT_TRUE(dragEventActuator.panRecognizer_->onActionEnd_ == nullptr);
-    EXPECT_TRUE(dragEventActuator.panRecognizer_->onActionCancel_ == nullptr);
+    dragEventActuator->OnCollectTouchTarget(COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    EXPECT_EQ(dragEventActuator->panRecognizer_->onActionStart_, nullptr);
+    EXPECT_EQ(dragEventActuator->panRecognizer_->onActionStart_, nullptr);
+    EXPECT_EQ(dragEventActuator->panRecognizer_->onActionUpdate_, nullptr);
+    EXPECT_EQ(dragEventActuator->panRecognizer_->onActionEnd_, nullptr);
+    EXPECT_EQ(dragEventActuator->panRecognizer_->onActionCancel_, nullptr);
     EXPECT_TRUE(finalResult.empty());
 
     /**
      * @tc.steps: step3. Create DragEvent and set as DragEventActuator's DragEvent.
      * @tc.expected: DragEventActuator's userCallback_ is not null.
      */
-    GestureEventFunc actionStart = [](GestureEvent& info) {};
-    GestureEventFunc actionUpdate = [](GestureEvent& info) {};
-    GestureEventFunc actionEnd = [](GestureEvent& info) {};
-    GestureEventNoParameter actionCancel = []() {};
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    GestureEventFunc actionStart = [&unknownPropertyValue](
+                                       GestureEvent& info) { unknownPropertyValue = info.GetScale(); };
+    GestureEventFunc actionUpdate = [&unknownPropertyValue](
+                                        GestureEvent& info) { unknownPropertyValue = info.GetScale(); };
+    GestureEventFunc actionEnd = [&unknownPropertyValue](
+                                     GestureEvent& info) { unknownPropertyValue = info.GetScale(); };
+    GestureEventNoParameter actionCancel = [&unknownPropertyValue]() {
+        unknownPropertyValue = GESTURE_EVENT_PROPERTY_VALUE;
+    };
     auto dragEvent = AceType::MakeRefPtr<DragEvent>(
         std::move(actionStart), std::move(actionUpdate), std::move(actionEnd), std::move(actionCancel));
-    dragEventActuator.ReplaceDragEvent(dragEvent);
-    EXPECT_TRUE(dragEventActuator.userCallback_ != nullptr);
+    dragEventActuator->ReplaceDragEvent(dragEvent);
+    dragEventActuator->SetCustomDragEvent(dragEvent);
+    EXPECT_NE(dragEventActuator->userCallback_, nullptr);
 
     /**
-     * @tc.steps: step3. Invoke OnCollectTouchTarget when userCallback_ is not null.
+     * @tc.steps: step4. Invoke OnCollectTouchTarget when userCallback_ is not null.
      * @tc.expected: panRecognizer_ action and finalResult will be assigned value.
      */
-    dragEventActuator.OnCollectTouchTarget(COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    dragEventActuator->OnCollectTouchTarget(COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
 
-    EXPECT_FALSE(dragEventActuator.panRecognizer_->onActionStart_ == nullptr);
-    EXPECT_FALSE(dragEventActuator.panRecognizer_->onActionUpdate_ == nullptr);
-    EXPECT_FALSE(dragEventActuator.panRecognizer_->onActionEnd_ == nullptr);
-    EXPECT_FALSE(dragEventActuator.panRecognizer_->onActionCancel_ == nullptr);
+    EXPECT_NE(dragEventActuator->panRecognizer_->onActionStart_, nullptr);
+    EXPECT_NE(dragEventActuator->panRecognizer_->onActionUpdate_, nullptr);
+    EXPECT_NE(dragEventActuator->panRecognizer_->onActionEnd_, nullptr);
+    EXPECT_NE(dragEventActuator->panRecognizer_->onActionCancel_, nullptr);
     EXPECT_TRUE(finalResult.size() == TOUCH_TEST_RESULT_SIZE);
+
+    /**
+     * @tc.steps: step5. Invoke OnCollectTouchTarget when SequencedRecognizer_ is null.
+     * @tc.expected: Result size will be increased by one.
+     */
+    dragEventActuator->SequencedRecognizer_ = nullptr;
+    dragEventActuator->OnCollectTouchTarget(COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    EXPECT_TRUE(finalResult.size() == TOUCH_TEST_RESULT_SIZE_2);
+
+    /**
+     * @tc.steps: step6. Invoke onActionStart, onActionUpdate, onActionEnd, onActionCancel when the onActionStart
+     * function exists.
+     * @tc.expected: The functions have been executed and the unknownPropertyValue has been assigned the correct
+     * value.
+     */
+    GestureEvent info = GestureEvent();
+    info.SetScale(GESTURE_EVENT_PROPERTY_VALUE);
+    (*(dragEventActuator->panRecognizer_->onActionStart_))(info);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    (*(dragEventActuator->panRecognizer_->onActionUpdate_))(info);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    (*(dragEventActuator->panRecognizer_->onActionEnd_))(info);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    (*(dragEventActuator->panRecognizer_->onActionCancel_))();
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+
+    /**
+     * @tc.steps: step7. Invoke onActionStart, onActionUpdate, onActionEnd, onActionCancel when the onActionStart
+     * function not exist.
+     * @tc.expected: The functions have not been executed.
+     */
+    auto dragEventNullptr = AceType::MakeRefPtr<DragEvent>(nullptr, nullptr, nullptr, nullptr);
+    dragEventActuator->ReplaceDragEvent(dragEventNullptr);
+    dragEventActuator->SetCustomDragEvent(dragEventNullptr);
+    unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    (*(dragEventActuator->panRecognizer_->onActionStart_))(info);
+    (*(dragEventActuator->panRecognizer_->onActionUpdate_))(info);
+    (*(dragEventActuator->panRecognizer_->onActionEnd_))(info);
+    (*(dragEventActuator->panRecognizer_->onActionCancel_))();
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
 }
 } // namespace OHOS::Ace::NG

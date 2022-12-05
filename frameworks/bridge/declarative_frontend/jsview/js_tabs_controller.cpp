@@ -53,7 +53,11 @@ void JSTabsController::Destructor(JSTabsController* controller)
 
 RefPtr<TabController> JSTabsController::CreateController()
 {
+#ifdef NG_BUILD
+    return nullptr;
+#else
     return TabController::GetController(++g_tabControllerId);
+#endif
 }
 
 void JSTabsController::ChangeIndex(int32_t index)
@@ -62,9 +66,11 @@ void JSTabsController::ChangeIndex(int32_t index)
         swiperController_->SwipeToWithoutAnimation(index);
     }
 
+#ifndef NG_BUILD
     if (controller_) {
         controller_->SetIndexByController(index, false);
     }
+#endif
 }
 
 } // namespace OHOS::Ace::Framework

@@ -28,9 +28,9 @@ void IndexerView::Create(const std::vector<std::string>& arrayValue, int32_t sel
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::INDEXER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
-    
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::INDEXER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
+
     frameNode->Clean();
     int32_t indexerSize = arrayValue.size();
     for (int32_t index = 0; index < indexerSize; index++) {
@@ -44,7 +44,7 @@ void IndexerView::Create(const std::vector<std::string>& arrayValue, int32_t sel
     auto indexerPopupNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<ListPattern>());
     CHECK_NULL_VOID(indexerPopupNode);
     frameNode->AddChild(indexerPopupNode);
-    
+
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, ArrayValue, arrayValue);
     if (selected >= 0 && selected < indexerSize) {
@@ -71,12 +71,12 @@ void IndexerView::SetPopupColor(const Color& popupColor)
 
 void IndexerView::SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SelectedBackgroundColor, selectedBackgroundColor);
+    ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, SelectedBackgroundColor, selectedBackgroundColor);
 }
 
 void IndexerView::SetPopupBackground(const Color& popupBackground)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupBackground, popupBackground);
+    ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, PopupBackground, popupBackground);
 }
 
 void IndexerView::SetUsingPopup(bool usingPopup)

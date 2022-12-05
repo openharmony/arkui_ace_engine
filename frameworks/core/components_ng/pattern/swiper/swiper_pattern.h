@@ -64,6 +64,8 @@ public:
         layoutAlgorithm->SetTotalCount(TotalCount());
         layoutAlgorithm->SetPreItemRange(preItemRange_);
         layoutAlgorithm->SetIsLoop(IsLoop());
+        layoutAlgorithm->SetMaxChildSize(maxChildSize_);
+        layoutAlgorithm->SetDisplayCount(GetDisplayCount());
         return layoutAlgorithm;
     }
 
@@ -128,6 +130,11 @@ public:
         swiperParameters_ = swiperParameters;
     }
 
+    void ShowNext();
+    void ShowPrevious();
+
+    void OnVisibleChange(bool isVisible) override;
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -167,16 +174,15 @@ private:
     // Implement of swiper controller
     void SwipeToWithoutAnimation(int32_t index);
     void SwipeTo(int32_t index);
-    void ShowNext();
-    void ShowPrevious();
     void FinishAnimation();
     void StopTranslateAnimation();
+    void StopSpringAnimation();
 
     // Timer tick callback, duration is in millisecond.
     void Tick(uint64_t duration);
     void StopAutoPlay();
     void StartAutoPlay();
-    bool IsOutOfBoundary(double mainOffset) const;
+    bool IsOutOfBoundary(float mainOffset) const;
     float MainSize() const;
     void FireChangeEvent() const;
     void CalculateCacheRange();
@@ -192,6 +198,7 @@ private:
     bool IsLoop() const;
     bool IsDisableSwipe() const;
     bool IsShowIndicator() const;
+    float GetTranslateLength() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -215,6 +222,9 @@ private:
     std::optional<int32_t> targetIndex_;
     std::set<int32_t> preItemRange_;
 
+    PanDirection panDirection_;
+    float distance_ = 0.0f;
+
     float currentOffset_ = 0.0f;
 
     bool moveDirection_ = false;
@@ -226,6 +236,7 @@ private:
     ChangeEventPtr changeEvent_;
 
     SwiperParameters swiperParameters_;
+    SizeF maxChildSize_;
 };
 } // namespace OHOS::Ace::NG
 

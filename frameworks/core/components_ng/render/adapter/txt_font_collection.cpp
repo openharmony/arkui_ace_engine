@@ -36,11 +36,7 @@ RefPtr<FontCollection> FontCollection::Current()
     CHECK_NULL_RETURN(window, nullptr);
     return AceType::MakeRefPtr<TxtFontCollection>(window->GetFontCollection());
 #else
-    if (!flutter::UIDartState::Current()) {
-        LOGE("uiDartState is null");
-        return nullptr;
-    }
-
+    CHECK_NULL_RETURN(flutter::UIDartState::Current(), nullptr);
     auto window = flutter::UIDartState::Current()->window();
     CHECK_NULL_RETURN(window, nullptr);
     CHECK_NULL_RETURN(window->client(), nullptr);

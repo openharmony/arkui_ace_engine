@@ -27,14 +27,13 @@
 #include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 void SwitchPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
 }
 
 bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
@@ -56,13 +55,12 @@ void SwitchPattern::OnModifyDone()
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-
     if (!layoutProperty->GetMarginProperty()) {
         MarginProperty margin;
         margin.left = CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value());
@@ -79,27 +77,20 @@ void SwitchPattern::OnModifyDone()
     }
     auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_VOID(switchPaintProperty);
-    if (!isOn_.has_value()) {
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    if (!isOn_.has_value() || (isOn_.has_value() && NearZero(geometryNode->GetContentSize().Width()) &&
+                                  NearZero(geometryNode->GetContentSize().Height()))) {
         isOn_ = switchPaintProperty->GetIsOnValue();
     }
     auto isOn = switchPaintProperty->GetIsOnValue();
     if (isOn != isOn_.value()) {
         OnChange();
     }
-    if (clickListener_) {
-        return;
-    }
-    auto gesture = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto switchPattern = weak.Upgrade();
-        CHECK_NULL_VOID(switchPattern);
-        switchPattern->OnClick();
-    };
-
-    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gesture->AddClickEvent(clickListener_);
+    InitClickEvent();
     InitPanEvent(gestureHub);
+    InitTouchEvent();
+    InitMouseEvent();
 }
 
 void SwitchPattern::UpdateCurrentOffset(float offset)
@@ -137,7 +128,9 @@ void SwitchPattern::PlayTranslateAnimation(float startPos, float endPos)
     }));
 
     if (!controller_) {
-        controller_ = AceType::MakeRefPtr<Animator>(host->GetContext());
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        controller_ = AceType::MakeRefPtr<Animator>(pipeline);
     }
     controller_->ClearStopListeners();
     controller_->ClearInterpolators();
@@ -171,7 +164,7 @@ RefPtr<Curve> SwitchPattern::GetCurve() const
 
 int32_t SwitchPattern::GetDuration() const
 {
-    const int32_t DEFAULT_DURATION = 400;
+    const int32_t DEFAULT_DURATION = 250;
     auto switchPaintProperty = GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_RETURN(switchPaintProperty, DEFAULT_DURATION);
     return switchPaintProperty->GetDuration().value_or(DEFAULT_DURATION);
@@ -202,12 +195,11 @@ void SwitchPattern::OnChange()
 
 float SwitchPattern::GetSwitchWidth() const
 {
-    const float switchGap = 2.0f;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
-    auto switchWidth = geometryNode->GetContentSize().Width() - geometryNode->GetContentSize().Height() + switchGap;
+    auto switchWidth = geometryNode->GetContentSize().Width() - geometryNode->GetContentSize().Height();
     return switchWidth;
 }
 
@@ -230,6 +222,42 @@ void SwitchPattern::OnClick()
     OnChange();
 }
 
+void SwitchPattern::OnTouchDown()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    isTouch_ = true;
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
+    auto frameSize = geometryNode->GetFrameSize();
+    if (originalPaintRect.GetSize() == frameSize) {
+        originalPaintRect = GetHotZoneRect(true);
+    }
+    renderContext->SyncGeometryProperties(originalPaintRect);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SwitchPattern::OnTouchUp()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    isTouch_ = false;
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto paintRect = renderContext->GetPaintRectWithoutTransform();
+    auto frameSize = geometryNode->GetFrameSize();
+    if (paintRect.GetSize() != frameSize && !isHover_) {
+        paintRect = GetHotZoneRect(false);
+    }
+    renderContext->SyncGeometryProperties(paintRect);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void SwitchPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     if (panEvent_) {
@@ -239,37 +267,33 @@ void SwitchPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGD("Pan event start");
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            if (info.GetInputEventType() == InputEventType::AXIS) {
-                return;
-            }
+        CHECK_NULL_VOID_NOLOG(pattern);
+        if (info.GetInputEventType() == InputEventType::AXIS) {
+            return;
         }
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragUpdate(info);
-        }
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleDragUpdate(info);
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGD("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            if (info.GetInputEventType() == InputEventType::AXIS) {
-                return;
-            }
-            pattern->HandleDragEnd();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        if (info.GetInputEventType() == InputEventType::AXIS) {
+            return;
         }
+        pattern->HandleDragEnd();
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         LOGD("Pan event cancel");
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragEnd();
-        }
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleDragEnd();
     };
 
     PanDirection panDirection;
@@ -279,6 +303,90 @@ void SwitchPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
+}
+
+void SwitchPattern::InitClickEvent()
+{
+    if (clickListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto switchPattern = weak.Upgrade();
+        CHECK_NULL_VOID(switchPattern);
+        switchPattern->OnClick();
+    };
+
+    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gesture->AddClickEvent(clickListener_);
+}
+
+void SwitchPattern::InitTouchEvent()
+{
+    if (touchListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto switchPattern = weak.Upgrade();
+        CHECK_NULL_VOID(switchPattern);
+        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            switchPattern->OnTouchDown();
+        }
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+            switchPattern->OnTouchUp();
+        }
+    };
+    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gesture->AddTouchEvent(touchListener_);
+}
+
+void SwitchPattern::InitMouseEvent()
+{
+    if (mouseEvent_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto eventHub = GetHost()->GetEventHub<SwitchEventHub>();
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+
+    auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleMouseEvent(isHover);
+    };
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnHoverEvent(mouseEvent_);
+}
+
+void SwitchPattern::HandleMouseEvent(bool isHover)
+{
+    isHover_ = isHover;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    isTouch_ = false;
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
+    auto frameSize = geometryNode->GetFrameSize();
+    if (isHover_ && originalPaintRect.GetSize() == frameSize) {
+        originalPaintRect = GetHotZoneRect(true);
+    } else if (!isHover_ && originalPaintRect.GetSize() != frameSize) {
+        originalPaintRect = GetHotZoneRect(false);
+    }
+    renderContext->SyncGeometryProperties(originalPaintRect);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SwitchPattern::HandleDragUpdate(const GestureEvent& info)
@@ -319,6 +427,42 @@ void SwitchPattern::HandleDragEnd()
 bool SwitchPattern::IsOutOfBoundary(double mainOffset) const
 {
     return mainOffset < 0 || mainOffset > GetSwitchWidth();
+}
+
+RectF SwitchPattern::GetHotZoneRect(bool isOriginal) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, {});
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, {});
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    CHECK_NULL_RETURN(switchTheme, {});
+    auto defaultWidth = switchTheme->GetDefaultWidth().ConvertToPx();
+    auto defaultHeight = switchTheme->GetDefaultHeight().ConvertToPx();
+    auto defaultWidthGap =
+        defaultWidth - (switchTheme->GetWidth() - switchTheme->GetHotZoneHorizontalPadding() * 2).ConvertToPx();
+    auto defaultHeightGap =
+        defaultHeight - (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, {});
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, {});
+    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
+    auto offset = originalPaintRect.GetOffset();
+    double actualWidth = 0.0;
+    double actualHeight = 0.0;
+    if (isOriginal) {
+        actualWidth = geometryNode->GetFrameSize().Width() + defaultWidthGap;
+        actualHeight = geometryNode->GetFrameSize().Height() + defaultHeightGap;
+        offset.SetX(offset.GetX() - defaultWidthGap / 2);
+        offset.SetY(offset.GetY() - defaultHeightGap / 2);
+    } else {
+        actualWidth = geometryNode->GetFrameSize().Width();
+        actualHeight = geometryNode->GetFrameSize().Height();
+        offset.SetX(offset.GetX() + defaultWidthGap / 2);
+        offset.SetY(offset.GetY() + defaultHeightGap / 2);
+    }
+    return RectF(offset, SizeF(actualWidth, actualHeight));
 }
 
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONTAINER_H
 
 #include <functional>
+#include <mutex>
 #include <unordered_map>
 
 #include "base/memory/ace_type.h"
@@ -129,6 +130,11 @@ public:
 
     virtual void ProcessScreenOffEvents() {}
 
+    virtual std::string GetHapPath() const
+    {
+        return "";
+    }
+
     void SetCreateTime(std::chrono::time_point<std::chrono::high_resolution_clock> time)
     {
         createTime_ = time;
@@ -168,6 +174,8 @@ public:
     {
         return cardHapPath_;
     }
+
+    bool UpdateState(const Frontend::State& state);
 
     Settings& GetSettings()
     {
@@ -260,6 +268,8 @@ protected:
     bool firstUpdateData_ = true;
     std::string cardHapPath_;
     bool useNewPipeline_ = false;
+    std::mutex stateMutex_;
+    Frontend::State state_ = Frontend::State::UNDEFINE;
 
 private:
     std::string moduleName_;

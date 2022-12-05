@@ -99,7 +99,7 @@ void ImagePainter::DrawImage(
         DrawSVGImage(canvas, offset, contentSize, imagePaintConfig);
         return;
     }
-    if (imagePaintConfig.imageRepeat_ == ImageRepeat::NOREPEAT) {
+    if (imagePaintConfig.imageRepeat_ == ImageRepeat::NO_REPEAT) {
         DrawStaticImage(canvas, offset, imagePaintConfig);
         return;
     }
@@ -111,9 +111,6 @@ void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const S
     const ImagePaintConfig& imagePaintConfig) const
 {
     CHECK_NULL_VOID(canvasImage_);
-    auto svgCanvasImage = AceType::DynamicCast<SvgCanvasImage>(canvasImage_);
-    CHECK_NULL_VOID(svgCanvasImage);
-    svgCanvasImage->SetSvgImageFit(imagePaintConfig.imageFit_);
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
 
@@ -123,7 +120,8 @@ void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const S
 
     RectF srcRect;
     srcRect.SetSize(svgContainerSize);
-    canvasImage_->DrawToRSCanvas(canvas, ToRSRect(srcRect), ToRSRect(imagePaintConfig.dstRect_));
+    canvasImage_->DrawToRSCanvas(
+        canvas, ToRSRect(srcRect), ToRSRect(imagePaintConfig.dstRect_), std::array<PointF, 4>());
     canvas.Restore();
 }
 
@@ -147,23 +145,16 @@ void ImagePainter::DrawStaticImage(
     }
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
-    if (imagePaintConfig.borderRadiusXY_) {
-        RSRect rsRect(ToRSRect(imagePaintConfig.dstRect_));
-        std::vector<RSPoint> radiusXY;
-        for (auto radiusPoint : *imagePaintConfig.borderRadiusXY_) {
-            radiusXY.emplace_back(RSPoint(radiusPoint.GetX(), radiusPoint.GetY()));
-        }
-        RSRoundRect roundRect(rsRect, radiusXY);
-        canvas.ClipRoundRect(roundRect, rosen::ClipOp::INTERSECT);
-    }
+
     if (imagePaintConfig.needFlipCanvasHorizontally_) {
         ImagePainter::FlipHorizontal(canvas, offset.GetX(), imagePaintConfig.dstRect_.Width());
     }
 
     brush.SetFilter(filter);
     canvas.AttachBrush(brush);
-    // need add recordingCanvas's ClipAdaptiveRRect operation.
-    canvasImage_->DrawToRSCanvas(canvas, ToRSRect(imagePaintConfig.srcRect_), ToRSRect(imagePaintConfig.dstRect_));
+    // include recordingCanvas's ClipAdaptiveRRect operation.
+    canvasImage_->DrawToRSCanvas(canvas, ToRSRect(imagePaintConfig.srcRect_), ToRSRect(imagePaintConfig.dstRect_),
+        imagePaintConfig.borderRadiusXY_ ? *imagePaintConfig.borderRadiusXY_ : std::array<PointF, 4>());
     canvas.Restore();
 }
 
@@ -178,7 +169,7 @@ void ImagePainter::FlipHorizontal(RSCanvas& canvas, double horizontalOffset, dou
 void ImagePainter::DrawImageWithRepeat(
     RSCanvas& canvas, const ImagePaintConfig& imagePaintConfig, const RectF& contentRect) const
 {
-    if (imagePaintConfig.imageRepeat_ == ImageRepeat::NOREPEAT) {
+    if (imagePaintConfig.imageRepeat_ == ImageRepeat::NO_REPEAT) {
         return;
     }
     auto offset = contentRect.GetOffset();
@@ -187,9 +178,9 @@ void ImagePainter::DrawImageWithRepeat(
     float singleImageWidth = imagePaintConfig.dstRect_.Width();
     float singleImageHeight = imagePaintConfig.dstRect_.Height();
     bool imageRepeatX =
-        imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT || imagePaintConfig.imageRepeat_ == ImageRepeat::REPEATX;
+        imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT || imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT_X;
     bool imageRepeatY =
-        imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT || imagePaintConfig.imageRepeat_ == ImageRepeat::REPEATY;
+        imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT || imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT_Y;
     std::vector<uint32_t> dirRepeatNum = {
         static_cast<uint32_t>(ceil(imagePaintConfig.dstRect_.GetY() / singleImageHeight)),
         static_cast<uint32_t>((ceil((contentHeight - imagePaintConfig.dstRect_.GetY()) / singleImageHeight))) - 1,

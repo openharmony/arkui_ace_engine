@@ -34,6 +34,7 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
     CHECK_NULL_VOID(backButtonLayoutProperty);
 
     if (!titleBarLayoutProperty->HasNoPixMap()) {
+        backButtonNode->MarkModifyDone();
         return;
     }
 
@@ -50,6 +51,28 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
     }
 }
 
+void MountTitle(const RefPtr<TitleBarNode>& hostNode)
+{
+    auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    auto titleNode = AceType::DynamicCast<FrameNode>(hostNode->GetTitle());
+    CHECK_NULL_VOID(titleNode);
+    auto titleLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(titleLayoutProperty);
+    titleNode->MarkModifyDone();
+}
+
+void MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
+{
+    auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    auto subtitleNode = AceType::DynamicCast<FrameNode>(hostNode->GetSubtitle());
+    CHECK_NULL_VOID(subtitleNode);
+    auto titleLayoutProperty = subtitleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(titleLayoutProperty);
+    subtitleNode->MarkModifyDone();
+}
+
 }
 
 void TitleBarPattern::OnModifyDone()
@@ -57,6 +80,8 @@ void TitleBarPattern::OnModifyDone()
     auto hostNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     MountBackButton(hostNode);
+    MountTitle(hostNode);
+    MountSubTitle(hostNode);
 
     // navBar title bar
     auto titleBarLayoutProperty = AceType::DynamicCast<TitleBarLayoutProperty>(hostNode->GetLayoutProperty());
@@ -77,41 +102,37 @@ void TitleBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGI("Pan event start");
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            if (info.GetInputEventType() == InputEventType::AXIS) {
-                return;
-            }
-            pattern->HandleDragStart(info);
+        CHECK_NULL_VOID_NOLOG(pattern);
+        if (info.GetInputEventType() == InputEventType::AXIS) {
+            return;
         }
+        pattern->HandleDragStart(info);
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            if (info.GetInputEventType() == InputEventType::AXIS) {
-                return;
-            }
-            pattern->HandleDragUpdate(info);
+        CHECK_NULL_VOID_NOLOG(pattern);
+        if (info.GetInputEventType() == InputEventType::AXIS) {
+            return;
         }
+        pattern->HandleDragUpdate(info);
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            if (info.GetInputEventType() == InputEventType::AXIS) {
-                return;
-            }
-            pattern->HandleDragEnd(info.GetMainVelocity());
+        CHECK_NULL_VOID_NOLOG(pattern);
+        if (info.GetInputEventType() == InputEventType::AXIS) {
+            return;
         }
+        pattern->HandleDragEnd(info.GetMainVelocity());
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         LOGI("Pan event cancel");
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragEnd(0.0);
-        }
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleDragEnd(0.0);
     };
 
     if (panEvent_) {
@@ -244,9 +265,7 @@ void TitleBarPattern::SetDefaultTitleFontSize()
 {
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(titleBarNode);
-    if (!titleBarNode->GetTitle()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(titleBarNode->GetTitle());
     auto titleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
     CHECK_NULL_VOID(titleNode);
     auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
@@ -262,9 +281,7 @@ void TitleBarPattern::SetDefaultSubtitleOpacity()
 {
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(titleBarNode);
-    if (!titleBarNode->GetSubtitle()) {
-        return;
-    }
+    CHECK_NULL_VOID(titleBarNode->GetSubtitle());
     auto subtitleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
     CHECK_NULL_VOID(subtitleNode);
     auto context = subtitleNode->GetRenderContext();
@@ -358,6 +375,13 @@ bool TitleBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     isInitialSubtitle_ = titleBarLayoutAlgorithm->IsInitialSubtitle();
     minTitleHeight_ = titleBarLayoutAlgorithm->GetMinTitleHeight();
     return true;
+}
+
+void TitleBarPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToFrame(true);
 }
 
 } // namespace OHOS::Ace::NG

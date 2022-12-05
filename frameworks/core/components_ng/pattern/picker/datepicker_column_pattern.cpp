@@ -36,7 +36,6 @@ namespace OHOS::Ace::NG {
 namespace {
 
 // TODO datepicker style modification
-constexpr float LAYOUT_WEIGHT = 30.0f;
 constexpr float PADDING_WEIGHT = 10.0f;
 const Dimension FONT_SIZE = Dimension(2.0);
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
@@ -86,7 +85,6 @@ void DatePickerColumnPattern::FlushCurrentOptions()
 
     auto dataPickerLayoutProperty = host->GetLayoutProperty<DataPickerLayoutProperty>();
     CHECK_NULL_VOID(dataPickerLayoutProperty);
-    dataPickerLayoutProperty->UpdateLayoutWeight(LAYOUT_WEIGHT);
     dataPickerLayoutProperty->UpdatePadding(PaddingProperty { CalcLength(PADDING_WEIGHT, DimensionUnit::PX) });
     dataPickerLayoutProperty->UpdateAlignSelf(FlexAlign::CENTER);
 
@@ -226,32 +224,28 @@ void DatePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         LOGI("Pan event start");
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragStart(event);
-        }
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleDragStart(event);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragMove(event);
-        }
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleDragMove(event);
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            if (info.GetInputEventType() == InputEventType::AXIS) {
-                return;
-            }
-            pattern->HandleDragEnd();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        if (info.GetInputEventType() == InputEventType::AXIS) {
+            return;
         }
+        pattern->HandleDragEnd();
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         LOGI("Pan event cancel");
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragEnd();
-        }
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleDragEnd();
     };
     PanDirection panDirection;
     panDirection.type = PanDirection::VERTICAL;
@@ -325,11 +319,8 @@ void DatePickerColumnPattern::CreateAnimation()
     auto weak = AceType::WeakClaim(this);
     toController_->AddStopListener([weak]() {
         auto column = weak.Upgrade();
-        if (column) {
-            column->HandleCurveStopped();
-        } else {
-            LOGE("render picker column is null.");
-        }
+        CHECK_NULL_VOID(column);
+        column->HandleCurveStopped();
     });
     fromBottomCurve_ = CreateAnimation(jumpInterval_, 0.0);
     fromTopCurve_ = CreateAnimation(0.0 - jumpInterval_, 0.0);
@@ -344,11 +335,8 @@ RefPtr<CurveAnimation<double>> DatePickerColumnPattern::CreateAnimation(double f
     auto curve = AceType::MakeRefPtr<CurveAnimation<double>>(from, to, Curves::FRICTION);
     curve->AddListener(Animation<double>::ValueCallback([weak](double value) {
         auto column = weak.Upgrade();
-        if (column) {
-            column->ScrollOption(value);
-        } else {
-            LOGE("datepicker column is null.");
-        }
+        CHECK_NULL_VOID(column);
+        column->ScrollOption(value);
     }));
     return curve;
 }
@@ -384,7 +372,7 @@ void DatePickerColumnPattern::UpdateScrollDelta(double delta)
     SetCurrentOffset(delta);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void DatePickerColumnPattern::UpdateToss(double offsetY)

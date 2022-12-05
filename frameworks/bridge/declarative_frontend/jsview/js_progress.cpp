@@ -161,7 +161,7 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
         strokeWidthDimension = theme->GetTrackThickness();
     }
 
-    if (strokeWidthDimension.Value() <= 0.0) {
+    if (strokeWidthDimension.Value() <= 0.0 || strokeWidthDimension.Unit() == DimensionUnit::PERCENT) {
         strokeWidthDimension = theme->GetTrackThickness();
     }
 
@@ -171,6 +171,8 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
     auto scaleCount = jsScaleCount->IsNumber() ? jsScaleCount->ToNumber<int32_t>() : theme->GetScaleNumber();
     if (scaleCount > 0.0) {
         ProgressModel::GetInstance()->SetScaleCount(scaleCount);
+    } else {
+        ProgressModel::GetInstance()->SetScaleCount(theme->GetScaleNumber());
     }
 
     Dimension scaleWidthDimension;
@@ -180,7 +182,8 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
         scaleWidthDimension = theme->GetScaleWidth();
     }
 
-    if ((scaleWidthDimension.Value() <= 0.0) || (scaleWidthDimension.Value() > strokeWidthDimension.Value())) {
+    if ((scaleWidthDimension.Value() <= 0.0) || (scaleWidthDimension.Value() > strokeWidthDimension.Value()) ||
+        scaleWidthDimension.Unit() == DimensionUnit::PERCENT) {
         scaleWidthDimension = theme->GetScaleWidth();
     }
 

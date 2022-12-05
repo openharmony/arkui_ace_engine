@@ -332,7 +332,10 @@ template("ace_core_source_set") {
 
     if (defined(config.model_component_support) &&
         config.model_component_support) {
-      deps += [ "$ace_root/frameworks/core/components/scene_viewer:ace_core_components_scene_viewer_$platform" ]
+      deps += [
+        "$ace_root/frameworks/core/components/scene_viewer:ace_core_components_scene_viewer_$platform",
+        "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_model_component_ng_$platform",
+      ]
     }
 
     deps += [
@@ -637,13 +640,14 @@ template("ace_core_ng_source_set") {
       "components/font/font_loader_creator.cpp",
       "components/font/font_manager_creator.cpp",
       "components/panel/sliding_events.cpp",
+      "components/picker/picker_animation.cpp",
       "components/picker/picker_data.cpp",
       "components/scroll/scrollable.cpp",
       "components/theme/app_theme.cpp",
       "components/theme/icon_theme.cpp",
       "components/theme/theme_attributes.cpp",
       "components/theme/theme_constants.cpp",
-      "components/theme/theme_manager.cpp",
+      "components/theme/theme_manager_impl.cpp",
       "components/theme/theme_utils.cpp",
 
       # v2 inspector

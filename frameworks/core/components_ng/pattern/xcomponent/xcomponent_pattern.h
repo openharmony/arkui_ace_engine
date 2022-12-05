@@ -114,7 +114,8 @@ public:
     void NativeXComponentOffset(double x, double y);
     void NativeXComponentChange(float width, float height);
     void NativeXComponentDestroy();
-    void NativeXComponentDispatchTouchEvent(const OH_NativeXComponent_TouchEvent& touchEvent);
+    void NativeXComponentDispatchTouchEvent(const OH_NativeXComponent_TouchEvent& touchEvent,
+        const std::vector<XComponentTouchPoint>& xComponentTouchPoints);
     void NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent);
 
     void XComponentSizeInit(float textureWidth, float textureHeight);
@@ -183,6 +184,7 @@ private:
     OH_NativeXComponent_TouchEvent touchEventPoint_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> mouseHoverEvent_;
+    std::vector<XComponentTouchPoint> nativeXComponentTouchPoints_;
 };
 } // namespace OHOS::Ace::NG
 

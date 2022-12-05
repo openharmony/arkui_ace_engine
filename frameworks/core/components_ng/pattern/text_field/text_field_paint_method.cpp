@@ -62,10 +62,9 @@ CanvasDrawFunction TextFieldPaintMethod::GetOverlayDrawFunction(PaintWrapper* pa
 {
     return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto textField = weak.Upgrade();
-        if (textField) {
-            textField->PaintCursor(canvas, paintWrapper);
-            textField->PaintSelection(canvas, paintWrapper);
-        }
+        CHECK_NULL_VOID_NOLOG(textField);
+        textField->PaintCursor(canvas, paintWrapper);
+        textField->PaintSelection(canvas, paintWrapper);
     };
 }
 
@@ -135,7 +134,6 @@ void TextFieldPaintMethod::PaintCursor(RSCanvas& canvas, PaintWrapper* paintWrap
     brush.SetColor(cursorColor.GetValue());
     canvas.AttachBrush(brush);
     float caretHeight = textFieldPattern->GetTextOrPlaceHolderFontSize();
-    caretHeight += static_cast<float>(CURSOR_PADDING.ConvertToPx()) * 2.0f;
     auto top = static_cast<float>(
         paintWrapper->GetContentOffset().GetY() + (paintWrapper->GetContentSize().Height() - caretHeight) / 2);
     auto cursorOffsetX = textFieldPattern->GetCaretOffsetX();

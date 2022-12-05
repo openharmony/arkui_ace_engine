@@ -20,7 +20,7 @@
 #include <sstream>
 #include <string>
 
-#include "runtime_extractor.h"
+#include "extractor.h"
 
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"
@@ -65,8 +65,7 @@ std::string GetStringFromFile(const std::string& packagePathStr, const std::stri
 
 std::string GetStringFromHap(const std::string& hapPath, const std::string& fileName)
 {
-    std::shared_ptr<AbilityRuntime::RuntimeExtractor> runtimeExtractor =
-        AbilityRuntime::RuntimeExtractor::Create(hapPath);
+    std::shared_ptr<AbilityBase::Extractor> runtimeExtractor = AbilityBase::Extractor::Create(hapPath);
     if (!runtimeExtractor) {
         LOGE("read file %{public}s error\n", hapPath.c_str());
         return "";

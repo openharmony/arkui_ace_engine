@@ -85,12 +85,7 @@ public:
         return nullptr;
     }
 
-    void FireOnItemDragEnter(const ItemDragInfo& dragInfo) const
-    {
-        if (onItemDragEnter_) {
-            onItemDragEnter_(dragInfo);
-        }
-    }
+    void FireOnItemDragEnter(const ItemDragInfo& dragInfo);
 
     void FireOnItemDragMove(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) const
     {
@@ -99,19 +94,9 @@ public:
         }
     }
 
-    void FireOnItemDragLeave(const ItemDragInfo& dragInfo, int32_t itemIndex) const
-    {
-        if (onItemDragLeave_) {
-            onItemDragLeave_(dragInfo, itemIndex);
-        }
-    }
+    void FireOnItemDragLeave(const ItemDragInfo& dragInfo, int32_t itemIndex);
 
-    void FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) const
-    {
-        if (onItemDrop_) {
-            onItemDrop_(dragInfo, itemIndex, insertIndex, isSuccess);
-        }
-    }
+    void FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess);
 
     bool HasOnItemDrop() const
     {
@@ -125,6 +110,8 @@ public:
     void HandleOnItemDragCancel();
     RefPtr<FrameNode> FindGridItemByPosition(float x, float y);
     int32_t GetGridItemIndex(const RefPtr<FrameNode>& frameNode);
+    bool CheckPostionInGrid(float x, float y);
+    int GetFrameNodeChildSize();
 
 private:
     bool GetEditable() const;
@@ -137,6 +124,7 @@ private:
     ItemDropFunc onItemDrop_;
     RefPtr<DragDropProxy> dragDropProxy_;
     int32_t draggedIndex_ = 0;
+    RefPtr<FrameNode> draggingItem_;
 };
 
 } // namespace OHOS::Ace::NG

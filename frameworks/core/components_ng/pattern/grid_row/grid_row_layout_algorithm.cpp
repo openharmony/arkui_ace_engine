@@ -82,11 +82,13 @@ void CalculateOffsetOfNewline(const RefPtr<GridColLayoutProperty>& gridCol, int3
 
 } // namespace
 
-void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, SizeF& frameSize)
+void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, float childHeight)
 {
     const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto layoutConstraint = layoutProperty->GetLayoutConstraint();
 
+    auto frameSize = CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
+    frameSize.SetHeight(childHeight);
     frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
 }
@@ -123,25 +125,32 @@ float GridRowLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, doub
 
         /* Measure child */
         auto span = std::min(gridCol->GetSpan(sizeType), columnNum);
-        OptionalSize<float> ideaSize;
-        ideaSize.SetWidth(columnUnitWidth * span + (span - 1) * gutter.first);
-        LayoutConstraintF parentConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-        parentConstraint.UpdateSelfMarginSizeWithCheck(ideaSize);
-        child->Measure(parentConstraint);
 
         /* Calculate line break */
         NewLineOffset newLineOffset;
         CalculateOffsetOfNewline(gridCol, span, columnNum - offset, columnNum, sizeType, newLineOffset);
 
-        /* accumulate total lines */
+        /* update total height */
         if (newLineOffset.newLineCount > 0) {
             totalHeight += (currentRowHeight * newLineOffset.newLineCount + gutter.second);
+        }
+
+        OptionalSize<float> ideaSize;
+        ideaSize.SetWidth(columnUnitWidth * span + (span - 1) * gutter.first);
+        LayoutConstraintF parentConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+        parentConstraint.UpdateSelfMarginSizeWithCheck(ideaSize);
+        // the max size need to minus the already allocated height.
+        parentConstraint.maxSize.MinusHeight(totalHeight);
+        child->Measure(parentConstraint);
+
+        if (newLineOffset.newLineCount > 0) {
             currentRowHeight = child->GetGeometryNode()->GetFrameSize().Height();
         } else {
             newLineOffset.offset += offset;
             auto childHeight = child->GetGeometryNode()->GetFrameSize().Height();
             currentRowHeight = std::max(currentRowHeight, childHeight);
         }
+
         offset = newLineOffset.offset + newLineOffset.span;
         newLineOffset.offsetY = totalHeight;
         LOGD("GridRowLayoutAlgorithm::MeasureChildren(), height=%f, span=%d, newline=%d, offsetY=%f, offset=%d",
@@ -158,8 +167,9 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
 
-    auto maxSize = CreateIdealSize(
-        layoutProperty->GetLayoutConstraint().value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
+    auto maxSize = CreateIdealSize(layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF()),
+        Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
+    CreateChildrenConstraint(maxSize, layoutProperty->GetMarginProperty(), layoutProperty->GetPaddingProperty());
     auto context = NG::PipelineContext::GetCurrentContext();
     auto sizeType = GridContainerUtils::ProcessGridSizeType(
         layoutProperty->GetBreakPointsValue(), Size(maxSize.Width(), maxSize.Height()));
@@ -177,8 +187,8 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureChildren(layoutWrapper, columnUnitWidth_, maxSize.Height(), gutterInDouble_, sizeType, columnNum);
     LOGI("GridRowLayoutAlgorithm::Measure() columnNum=%d, columnUnitWidth_=%f, childrenHeight=%f, sizetype=%d",
         columnNum, columnUnitWidth_, childrenHeight, static_cast<int>(sizeType));
-    maxSize.SetHeight(childrenHeight);
-    MeasureSelf(layoutWrapper, maxSize);
+
+    MeasureSelf(layoutWrapper, childrenHeight);
 }
 
 void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
