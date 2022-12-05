@@ -323,6 +323,18 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     RebuildRenderContextTree();
 }
 
+void FrameNode::AdjustGridOffset()
+{
+    if (!isActive_) {
+        return;
+    }
+    if (layoutProperty_->UpdateGridOffset(Claim(this))) {
+        renderContext_->UpdateOffset(OffsetT<Dimension>());
+        renderContext_->UpdateAnchor(OffsetT<Dimension>());
+        renderContext_->SyncGeometryProperties(RawPtr(GetGeometryNode()));
+    }
+}
+
 void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
 {
     if (!lastFrameRect_) {

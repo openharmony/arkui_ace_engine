@@ -55,7 +55,7 @@ void MeasureLayout(RefPtr<LayoutWrapper>& container, RefPtr<LayoutWrapper>& text
     auto textAlgorithm = text->GetLayoutAlgorithm();
     textAlgorithm->Measure(AceType::RawPtr(text));
     textAlgorithm->Layout(AceType::RawPtr(text));
-    textLayoutProperty->UpdateGridOffset(AceType::RawPtr(text));
+    textLayoutProperty->UpdateGridOffset(textLayoutProperty->GetHost());
 }
 
 } // namespace
