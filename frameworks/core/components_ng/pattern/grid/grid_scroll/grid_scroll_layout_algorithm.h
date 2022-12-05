@@ -48,6 +48,8 @@ private:
     // fill start of viewport
     bool FillBlankAtStart(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     float FillNewLineForward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
+    void UpdateMatrixForDeletedItems(int32_t deletedLineCount);
+    void UpdateMatrixForAddedItems();
 
     // fill end of viewport
     void FillBlankAtEnd(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
