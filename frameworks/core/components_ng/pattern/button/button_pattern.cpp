@@ -63,7 +63,7 @@ void ButtonPattern::InitButtonLabel()
         LOGI("No label, no need to initialize label.");
         return;
     }
-    
+
     auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -109,7 +109,8 @@ void ButtonPattern::OnModifyDone()
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             buttonPattern->OnTouchDown();
         }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
+            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
             buttonPattern->OnTouchUp();
         }
     };
