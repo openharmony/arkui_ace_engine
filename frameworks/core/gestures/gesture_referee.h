@@ -58,6 +58,21 @@ public:
         queryStateFunc_ = queryStateFunc;
     }
 
+    const std::list<WeakPtr<GestureRecognizer>>& GetHighRecognizers() const
+    {
+        return highRecognizers_;
+    }
+
+    const std::list<WeakPtr<GestureRecognizer>>& GetLowRecognizers() const
+    {
+        return lowRecognizers_;
+    }
+
+    const std::list<WeakPtr<GestureRecognizer>>& GetParallelRecognizers() const
+    {
+        return parallelRecognizers_;
+    }
+
 private:
     bool Existed(const RefPtr<GestureRecognizer>& recognizer);
     const std::list<WeakPtr<GestureRecognizer>>& GetMembersByRecognizer(const RefPtr<GestureRecognizer>& recognizer);
@@ -104,6 +119,11 @@ public:
     void SetQueryStateFunc(std::function<bool(size_t)>&& queryStateFunc)
     {
         queryStateFunc_ = queryStateFunc;
+    }
+
+    const std::unordered_map<size_t, GestureScope>& GetGestureScope() const
+    {
+        return gestureScopes_;
     }
 
 private:

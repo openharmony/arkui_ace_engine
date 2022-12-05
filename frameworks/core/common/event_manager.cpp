@@ -653,6 +653,45 @@ EventManager::EventManager()
         return refereeNG->HasGestureAccepted(touchId);
     };
     referee_->SetQueryStateFunc(std::move(callback));
+
+    auto cleanReferee = [weak = WeakClaim(this)](size_t touchId) -> void {
+        auto eventManager = weak.Upgrade();
+        CHECK_NULL_VOID(eventManager);
+        auto referee = eventManager->referee_;
+        CHECK_NULL_VOID(referee);
+        auto gestureScope = referee->GetGestureScope();
+        const auto iter = gestureScope.find(touchId);
+        if (iter == gestureScope.end()) {
+            return;
+        }
+
+        auto highRecognizers = iter->second.GetHighRecognizers();
+        auto lowRecognizers = iter->second.GetLowRecognizers();
+        auto parallelRecognizers = iter->second.GetParallelRecognizers();
+
+        for (const auto& weak : highRecognizers) {
+            auto gesture = weak.Upgrade();
+            if (gesture) {
+                gesture->OnRejected(touchId);
+            }
+        }
+
+        for (const auto& weak : lowRecognizers) {
+            auto gesture = weak.Upgrade();
+            if (gesture) {
+                gesture->OnRejected(touchId);
+            }
+        }
+
+        for (const auto& weak : parallelRecognizers) {
+            auto gesture = weak.Upgrade();
+            if (gesture) {
+                gesture->OnRejected(touchId);
+            }
+        }
+        
+    };
+    refereeNG_->SetQueryStateFunc(std::move(cleanReferee));
 }
 
 } // namespace OHOS::Ace
