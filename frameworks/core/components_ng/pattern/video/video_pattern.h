@@ -155,6 +155,7 @@ private:
     RefPtr<FrameNode> CreateSlider();
     void ChangePlayButtonTag();
     void ChangePlayButtonTag(RefPtr<FrameNode>& playBtn);
+    void SetFullScreenButtonCallBack(RefPtr<FrameNode>& fullScreenBtn);
     void ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode>& fullScreenBtn);
     void ResetStatus();
     void HiddenChange(bool hidden);
