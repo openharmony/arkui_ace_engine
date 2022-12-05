@@ -63,8 +63,11 @@ public:
     }
 
     bool OnDirtyLayoutWrapperSwap(
-        const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/) override
+        const RefPtr<LayoutWrapper>& dirty, bool /*skipMeasure*/, bool /*skipLayout*/) override
     {
+        auto geometryNode = dirty->GetGeometryNode();
+        offset_ = geometryNode->GetContentOffset();
+        size_ = geometryNode->GetContentSize();
         return true;
     }
 
@@ -108,6 +111,7 @@ public:
         uiStatus_ = UIStatus::UNSELECTED;
     }
 
+    FocusPattern GetFocusPattern() const override;
     void UpdateAnimation(bool check);
     void UpdateUIStatus(bool check);
 
@@ -131,6 +135,9 @@ private:
         std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap, const std::string& group,
         bool select);
     RectF GetHotZoneRect(bool isOriginal) const;
+    // Init key event
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
 
     std::optional<std::string> preGroup_;
     bool isAddToMap_ = true;
@@ -148,6 +155,8 @@ private:
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_ = 11.0_vp;
     Dimension hotZoneVerticalPadding_ = 11.0_vp;
+    OffsetF offset_;
+    SizeF size_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupPattern);
 };

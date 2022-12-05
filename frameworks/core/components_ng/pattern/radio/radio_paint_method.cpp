@@ -61,6 +61,7 @@ void RadioPaintMethod::InitializeParam()
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     shadowWidth_ = radioTheme->GetShadowWidth().ConvertToPx();
     borderWidth_ = radioTheme->GetBorderWidth().ConvertToPx();
+    pointColor_ = radioTheme->GetPointColor();
     activeColor_ = radioTheme->GetActiveColor();
     inactiveColor_ = radioTheme->GetInactiveColor();
     shadowColor_ = radioTheme->GetShadowColor();
@@ -73,20 +74,18 @@ void RadioPaintMethod::PaintRadio(
     RSCanvas& canvas, bool /* checked */, const SizeF& contentSize, const OffsetF& offset) const
 {
     OffsetF paintOffset = offset;
-    if (isTouch_ || isHover_) {
+    if (isTouch_) {
         paintOffset.SetX(offset.GetX() + hotZoneHorizontalPadding_.ConvertToPx());
         paintOffset.SetY(offset.GetY() + hotZoneHorizontalPadding_.ConvertToPx());
-    }
-    if (isTouch_) {
         DrawTouchBoard(canvas, contentSize, paintOffset);
     }
     if (isHover_) {
         DrawHoverBoard(canvas, contentSize, paintOffset);
     }
 
-    float outCircleRadius = contentSize.Width() / 2 - INNER_PADDING.ConvertToPx();
-    float centerX = outCircleRadius + paintOffset.GetX() + INNER_PADDING.ConvertToPx();
-    float centerY = outCircleRadius + paintOffset.GetY() + INNER_PADDING.ConvertToPx();
+    float outCircleRadius = contentSize.Width() / 2 - INNER_PADDING.ConvertToPx() - borderWidth_ / 2.0;
+    float centerX = paintOffset.GetX() + contentSize.Width() / 2;
+    float centerY = paintOffset.GetY() + contentSize.Width() / 2;
     if (uiStatus_ == UIStatus::SELECTED) {
         // draw stroke border
         RSPen pen;
@@ -110,10 +109,10 @@ void RadioPaintMethod::PaintRadio(
             canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * pointScale_ + shadowWidth_);
         }
         // draw inner circle
-        brush.SetColor(ToRSColor(Color::WHITE));
+        brush.SetColor(ToRSColor(pointColor_));
         canvas.AttachBrush(brush);
         canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * pointScale_);
-        pen.SetColor(ToRSColor(Color::WHITE));
+        pen.SetColor(ToRSColor(pointColor_));
         canvas.AttachPen(pen);
         canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * pointScale_);
     } else if (uiStatus_ == UIStatus::UNSELECTED) {
