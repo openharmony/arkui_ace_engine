@@ -559,6 +559,12 @@ bool PipelineContext::OnBackPressed()
         return true;
     }
 
+    // if has sharedTransition, back press will stop the sharedTransition
+    if (sharedTransitionManager_->OnBackPressed()) {
+        LOGI("sharedTransition stop: back press accepted");
+        return true;
+    }
+
     // if has popup, back press would hide popup and not trigger page back
     if (overlayManager_->RemoveOverlay()) {
         LOGI("popup hidden: back press accepted");

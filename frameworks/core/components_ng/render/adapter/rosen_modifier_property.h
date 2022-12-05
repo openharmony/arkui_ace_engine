@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_ROSEN_MODIFIER_PROPERTY_H
-#define FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_ROSEN_MODIFIER_PROPERTY_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_RENDER_ADAPTER_ROSEN_MODIFIER_PROPERTY_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_RENDER_ADAPTER_ROSEN_MODIFIER_PROPERTY_H
 
 #include "render_service_client/core/modifier/rs_property_modifier.h"
 #include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace::NG {
-
 template<typename T>
 bool CreateOrSetModifierValue(std::shared_ptr<Rosen::RSAnimatableProperty<T>>& property, const T& value);
 
@@ -55,7 +54,6 @@ struct SharedTransitionModifier {
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY;
     std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>> translateXYValue;
 };
-
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_ROSEN_MODIFIER_PROPERTY_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_RENDER_ADAPTER_ROSEN_MODIFIER_PROPERTY_H
