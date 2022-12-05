@@ -614,7 +614,11 @@ const TextEditingValueNG& TextFieldPattern::GetEditingValue() const
 
 void TextFieldPattern::HandleFocusEvent()
 {
-    StartTwinkling();
+    caretUpdateType_ = CaretUpdateType::EVENT;
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
+                                                                                      : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::InitFocusEvent()
@@ -1322,7 +1326,7 @@ bool TextFieldPattern::SelectOverlayIsOn()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    CHECK_NULL_RETURN(selectOverlayProxy_, false);
+    CHECK_NULL_RETURN_NOLOG(selectOverlayProxy_, false);
     auto overlayId = selectOverlayProxy_->GetSelectOverlayId();
     return pipeline->GetSelectOverlayManager()->HasSelectOverlay(overlayId);
 }
