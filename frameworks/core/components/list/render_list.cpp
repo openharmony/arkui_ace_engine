@@ -805,4 +805,27 @@ void RenderList::SetOnRotateCallback(const RefPtr<ListComponent>& component)
     }
     rotationEvent_ = AceAsyncEvent<void(const RotationEvent&)>::Create(onRotateId, context_);
 }
+
+int32_t RenderList::GetItemIndex(const RefPtr<RenderNode>& node)
+{
+    for (const auto& child : items_) {
+        if (child.second == node) {
+            return child.first;
+        }
+    }
+    return 0;
+}
+
+void RenderList::PaintItems(RenderContext& context, const Offset& offset)
+{
+    auto childList = GetChildren();
+    childList.sort([wp = WeakClaim(this)](RefPtr<RenderNode>& node1, RefPtr<RenderNode>& node2) {
+        auto list = wp.Upgrade();
+        if (list) {
+            return list->GetItemIndex(node1) < list->GetItemIndex(node2);
+        }
+        return true;
+    });
+    PaintChildList(childList, context, offset);
+}
 } // namespace OHOS::Ace
