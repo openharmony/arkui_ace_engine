@@ -211,4 +211,6 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
     fullScreenManager_ = AceType::MakeRefPtr<FullScreenManager>(root);
     return fullScreenManager_;
 }
+
+void PipelineContext::AddPredictTask(PredictTask&& task) {}
 } // namespace OHOS::Ace::NG
