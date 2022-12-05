@@ -722,6 +722,7 @@ void RenderStepper::DoStepperToAnimation(int32_t fromIndex, int32_t toIndex, boo
             stepper->FireItemEvent(stepper->outItemIndex_, false);
             stepper->FireItemEvent(stepper->currentIndex_, true);
             stepper->isAnimation_ = false;
+            stepper->MarkNeedLayout();
         }
     });
     isAnimation_ = true;
