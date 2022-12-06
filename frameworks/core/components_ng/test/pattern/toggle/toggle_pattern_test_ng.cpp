@@ -591,11 +591,6 @@ HWTEST_F(TogglePatternTestNg, ToggleLayoutTest001, TestSize.Level1)
     // set switchTheme to themeManager before using themeManager to get switchTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).Times(1);
-    LayoutConstraintF layoutConstraintSize;
-    layoutConstraintSize.maxSize = CONTAINER_SIZE;
-    auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
-    EXPECT_EQ(switchSize->Width(), 0);
 
     // update switchTheme values
     auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
@@ -603,6 +598,12 @@ HWTEST_F(TogglePatternTestNg, ToggleLayoutTest001, TestSize.Level1)
     switchTheme->height_ = TOGGLE_HEIGH;
     switchTheme->hotZoneHorizontalPadding_ = ZERO;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.maxSize = CONTAINER_SIZE;
+    auto switchSize = switchLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
+    EXPECT_EQ(switchSize->Width(), 36);
+
     LayoutConstraintF layoutConstraintSizeFirst;
     layoutConstraintSizeFirst.maxSize = SizeF(30, 10);
 
