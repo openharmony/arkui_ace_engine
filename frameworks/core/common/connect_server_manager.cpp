@@ -26,6 +26,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/ace_page.h"
 #include "core/common/container.h"
+#include "core/common/layout_inspector.h"
 #include "core/event/ace_event_handler.h"
 
 
@@ -35,14 +36,17 @@ namespace {
 
 using StartServer = bool (*)(const std::string& packageName);
 using SendMessage = void (*)(const std::string& message);
+using SendLayoutMessage = void (*)(const std::string& message);
 using StopServer = void (*)(const std::string& packageName);
 using StoreMessage = void (*)(int32_t instanceId, const std::string& message);
 using StoreInspectorInfo = void (*)(const std::string& jsonTreeStr, const std::string& jsonSnapshotStr);
 using RemoveMessage = void (*)(int32_t instanceId);
 using WaitForDebugger = bool (*)();
-using SetSwitchCallBack = void (*)(const std::function<void(bool)>& setSwitchStatus);
+using SetSwitchCallBack = void (*)(const std::function<void(bool)>& setStatus,
+    const std::function<void(int32_t)>& createLayoutInfo, int32_t instanceId);
 
 SendMessage g_sendMessage = nullptr;
+SendLayoutMessage g_sendLayoutMessage = nullptr;
 RemoveMessage g_removeMessage = nullptr;
 StoreInspectorInfo g_storeInspectorInfo = nullptr;
 StoreMessage g_storeMessage = nullptr;
@@ -82,8 +86,8 @@ bool ConnectServerManager::InitFunc()
     g_sendMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
     g_storeMessage = reinterpret_cast<StoreMessage>(dlsym(handlerConnectServerSo_, "StoreMessage"));
     g_removeMessage = reinterpret_cast<RemoveMessage>(dlsym(handlerConnectServerSo_, "RemoveMessage"));
-    g_setSwitchCallBack = reinterpret_cast<SetSwitchCallBack>(
-        dlsym(handlerConnectServerSo_, "SetSwitchCallBack"));
+    g_setSwitchCallBack = reinterpret_cast<SetSwitchCallBack>(dlsym(handlerConnectServerSo_, "SetSwitchCallBack"));
+    g_sendLayoutMessage = reinterpret_cast<SendLayoutMessage>(dlsym(handlerConnectServerSo_, "SendLayoutMessage"));
     g_storeInspectorInfo = reinterpret_cast<StoreInspectorInfo>(dlsym(handlerConnectServerSo_, "StoreInspectorInfo"));
     g_waitForDebugger = reinterpret_cast<WaitForDebugger>(dlsym(handlerConnectServerSo_, "WaitForDebugger"));
     if (g_sendMessage == nullptr || g_storeMessage == nullptr || g_removeMessage == nullptr) {
@@ -91,7 +95,8 @@ bool ConnectServerManager::InitFunc()
         return false;
     }
 
-    if (g_storeInspectorInfo ==  nullptr || g_setSwitchCallBack == nullptr || g_waitForDebugger == nullptr) {
+    if (g_storeInspectorInfo == nullptr || g_setSwitchCallBack == nullptr || g_waitForDebugger == nullptr ||
+        g_sendLayoutMessage == nullptr) {
         CloseConnectServerSo();
         return false;
     }
@@ -167,13 +172,16 @@ void ConnectServerManager::AddInstance(int32_t instanceId, const std::string& in
     } else { // if not connected, message will be stored and sent later when "connected" coming.
         g_storeMessage(instanceId, message);
     }
-    g_setSwitchCallBack(std::bind(&ConnectServerManager::SetLayoutInspectorStatus, this, std::placeholders::_1));
+    CHECK_NULL_VOID(createLayoutInfo_);
+    g_setSwitchCallBack([this](bool status) { setStatus_(status); },
+        [this](int32_t containerId) { createLayoutInfo_(containerId); }, instanceId);
 }
 
 void ConnectServerManager::SendInspector(const std::string& jsonTreeStr, const std::string& jsonSnapshotStr)
 {
-    g_sendMessage(jsonTreeStr);
-    g_sendMessage(jsonSnapshotStr);
+    LOGI("ConnectServerManager SendInspector Start");
+    g_sendLayoutMessage(jsonTreeStr);
+    g_sendLayoutMessage(jsonSnapshotStr);
     g_storeInspectorInfo(jsonTreeStr, jsonSnapshotStr);
 }
 
@@ -213,4 +221,15 @@ std::string ConnectServerManager::GetInstanceMapMessage(const char* messageType,
     return message->ToString();
 }
 
+void ConnectServerManager::SetLayoutInspectorCallback(
+    const std::function<void(int32_t)>& createLayoutInfo, const std::function<void(bool)>& setStatus)
+{
+    createLayoutInfo_ = createLayoutInfo;
+    setStatus_ = setStatus;
+}
+
+std::function<void(int32_t)> ConnectServerManager::GetLayoutInspectorCallback()
+{
+    return createLayoutInfo_;
+}
 } // namespace OHOS::Ace

@@ -49,6 +49,7 @@
 #include "core/common/plugin_manager.h"
 #include "core/common/plugin_utils.h"
 #include "core/common/form_manager.h"
+#include "core/common/layout_inspector.h"
 namespace OHOS {
 namespace Ace {
 namespace {
@@ -491,6 +492,7 @@ void AceAbility::OnStart(const Want& want)
     if (!remoteData_.empty()) {
         Platform::AceContainer::OnRestoreData(abilityId_, remoteData_);
     }
+    LayoutInspector::SetCallback(abilityId_);
     LOGI("AceAbility::OnStart called End");
 }
 
