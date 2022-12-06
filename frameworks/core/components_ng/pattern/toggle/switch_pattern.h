@@ -19,6 +19,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/size.h"
 #include "base/memory/referenced.h"
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -67,8 +68,20 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
+        FocusPaintParam focusPaintParams;
+
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, FocusPattern());
+        auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
+        CHECK_NULL_RETURN(switchTheme, FocusPattern());
+        auto focusPaintcolor = switchTheme->GetActiveColor();
+        focusPaintParams.SetPaintColor(focusPaintcolor);
+        focusPaintParams.SetFocusPadding(Dimension(2.0_vp));
+
+        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
+
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
 private:
     void OnModifyDone() override;
@@ -91,6 +104,10 @@ private:
     void InitClickEvent();
     void InitTouchEvent();
     void InitMouseEvent();
+
+    // Init key event
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
 
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd();
@@ -115,6 +132,8 @@ private:
     bool isTouch_ = false;
     bool isHover_ = false;
 
+    float width_ = 0.0f;
+    float height_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
 };
 } // namespace OHOS::Ace::NG
