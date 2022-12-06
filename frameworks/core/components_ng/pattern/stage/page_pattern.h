@@ -60,6 +60,9 @@ public:
 
     bool OnBackPressed() const
     {
+        if (isPageInTransition_) {
+            return true;
+        }
         if (OnBackPressed_) {
             return OnBackPressed_();
         }
@@ -121,6 +124,11 @@ public:
 
     void SetFirstBuildCallback(std::function<void()>&& buildCallback);
 
+    void SetPageInTransition(bool pageTransition)
+    {
+        isPageInTransition_ = pageTransition;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
@@ -141,6 +149,7 @@ private:
 
     bool isOnShow_ = false;
     bool isFirstLoad_ = true;
+    bool isPageInTransition_ = false;
 
     SharedTransitionMap sharedTransitionMap_;
     JSAnimatorMap jsAnimatorMap_;
