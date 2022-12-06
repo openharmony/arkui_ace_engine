@@ -75,7 +75,7 @@ public:
 
 private:
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType);
-    void FireOnDragEvent(const RefPtr<FrameNode>& frameNode, const RefPtr<OHOS::Ace::DragEvent>& event,
+    void FireOnDragEvent(const RefPtr<FrameNode>& frameNode, const Point& point,
         DragEventType type, const std::string& extraInfo);
     void FireOnItemDragEvent(const RefPtr<FrameNode>& frameNode, DragType dragType,
         const OHOS::Ace::ItemDragInfo& itemDragInfo, DragEventType type,

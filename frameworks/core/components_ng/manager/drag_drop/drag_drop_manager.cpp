@@ -16,6 +16,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/point.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
@@ -167,19 +168,13 @@ void DragDropManager::OnDragStart(float globalX, float globalY, const RefPtr<Fra
 
 void DragDropManager::OnDragMove(float globalX, float globalY, const std::string& extraInfo)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-
     UpdateDragWindowPosition(static_cast<int32_t>(globalX), static_cast<int32_t>(globalY));
-
-    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    event->SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
-    event->SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
+    Point point(globalX, globalY);
 
     auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, DragType::COMMON);
     if (!dragFrameNode) {
         if (preTargetFrameNode_) {
-            FireOnDragEvent(preTargetFrameNode_, event, DragEventType::LEAVE, extraInfo);
+            FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
             preTargetFrameNode_ = nullptr;
         }
 
@@ -187,15 +182,15 @@ void DragDropManager::OnDragMove(float globalX, float globalY, const std::string
     }
 
     if (dragFrameNode == preTargetFrameNode_) {
-        FireOnDragEvent(dragFrameNode, event, DragEventType::MOVE, extraInfo);
+        FireOnDragEvent(dragFrameNode, point, DragEventType::MOVE, extraInfo);
         return;
     }
 
     if (preTargetFrameNode_) {
-        FireOnDragEvent(preTargetFrameNode_, event, DragEventType::LEAVE, extraInfo);
+        FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
     }
 
-    FireOnDragEvent(dragFrameNode, event, DragEventType::ENTER, extraInfo);
+    FireOnDragEvent(dragFrameNode, point, DragEventType::ENTER, extraInfo);
     preTargetFrameNode_ = dragFrameNode;
 }
 
@@ -219,8 +214,8 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     event->SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
     event->SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
-
-    eventHub->FireOnDrop(event, extraInfo);
+    auto extraParams = eventHub->GetDragExtraParams(extraInfo, Point(globalX, globalY), DragEventType::DROP);
+    eventHub->FireOnDrop(event, extraParams);
     draggedFrameNode_ = nullptr;
 }
 
@@ -230,24 +225,31 @@ void DragDropManager::onDragCancel()
     draggedFrameNode_ = nullptr;
 }
 
-void DragDropManager::FireOnDragEvent(const RefPtr<FrameNode>& frameNode, const RefPtr<OHOS::Ace::DragEvent>& event,
+void DragDropManager::FireOnDragEvent(const RefPtr<FrameNode>& frameNode, const Point& point,
     DragEventType type, const std::string& extraInfo)
 {
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
+    auto extraParams = eventHub->GetDragExtraParams(extraInfo, point, type);
+    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    event->SetX(pipeline->ConvertPxToVp(Dimension(point.GetX(), DimensionUnit::PX)));
+    event->SetY(pipeline->ConvertPxToVp(Dimension(point.GetY(), DimensionUnit::PX)));
 
     switch (type) {
         case DragEventType::ENTER:
-            eventHub->FireOnDragEnter(event, extraInfo);
+            eventHub->FireOnDragEnter(event, extraParams);
             break;
         case DragEventType::MOVE:
-            eventHub->FireOnDragMove(event, extraInfo);
+            eventHub->FireOnDragMove(event, extraParams);
             break;
         case DragEventType::LEAVE:
-            eventHub->FireOnDragLeave(event, extraInfo);
+            eventHub->FireOnDragLeave(event, extraParams);
             break;
         case DragEventType::DROP:
-            eventHub->FireOnDrop(event, extraInfo);
+            eventHub->FireOnDrop(event, extraParams);
             break;
         default:
             break;
