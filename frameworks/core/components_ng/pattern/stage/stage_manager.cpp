@@ -41,6 +41,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     auto pagePattern = page->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
     page->GetEventHub<EventHub>()->SetEnabled(false);
+    pagePattern->SetPageInTransition(true);
     if (transitionType == PageTransitionType::EXIT_PUSH || transitionType == PageTransitionType::EXIT_POP) {
         pagePattern->TriggerPageTransition(transitionType, [page, instanceId = Container::CurrentId()]() {
             ContainerScope scope(instanceId);
@@ -50,14 +51,21 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             auto pattern = page->GetPattern<PagePattern>();
             CHECK_NULL_VOID(pattern);
             pattern->OnHide();
+            pattern->SetPageInTransition(false);
         });
         return;
     }
-    pagePattern->TriggerPageTransition(transitionType, [weak = WeakPtr<FrameNode>(page)]() {
-        auto page = weak.Upgrade();
-        CHECK_NULL_VOID(page);
-        page->GetEventHub<EventHub>()->SetEnabled(true);
-    });
+    pagePattern->TriggerPageTransition(
+        transitionType, [weak = WeakPtr<FrameNode>(page), instanceId = Container::CurrentId()]() {
+            ContainerScope scope(instanceId);
+            LOGI("pageTransition in finish");
+            auto page = weak.Upgrade();
+            CHECK_NULL_VOID(page);
+            page->GetEventHub<EventHub>()->SetEnabled(true);
+            auto pattern = page->GetPattern<PagePattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetPageInTransition(false);
+        });
 }
 
 void StartTransition(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage, RouteType type)
