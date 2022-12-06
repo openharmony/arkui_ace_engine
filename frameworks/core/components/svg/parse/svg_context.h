@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_PARSE_SVG_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_PARSE_SVG_CONTEXT_H
 
+#include <string>
 #include <unordered_map>
 
 #include "base/memory/ace_type.h"
@@ -79,6 +80,22 @@ public:
         }
     }
 
+    void addMaskReferUrl(std::string maskId)
+    {
+        if (maskId.empty()) {
+            return;
+        }
+        urlMaskIdSet_.emplace(maskId);
+    }
+
+    bool IfIdInMaskReferSet(std::string maskId)
+    {
+        if (maskId.empty()) {
+            return false;
+        }
+        return urlMaskIdSet_.find(maskId) != urlMaskIdSet_.end();
+    }
+
     void SetSvgRoot(const RefPtr<RenderSvgBase>& renderNode)
     {
         root_ = renderNode;
@@ -91,6 +108,7 @@ public:
 
 private:
     std::unordered_map<std::string, RefPtr<SvgNode>> idMapper_;
+    std::set<std::string> urlMaskIdSet_;
     ClassStyleMap styleMap_;
     RefPtr<RenderSvgBase> root_ = nullptr;
 };
