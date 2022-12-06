@@ -22,19 +22,21 @@
 
 namespace OHOS::Ace::V2 {
 
-class TabsElement : public ComponentGroupElement {
-    DECLARE_ACE_TYPE(TabsElement, ComponentGroupElement);
+class TabsElement : public ComponentGroupElement, public FocusGroup {
+    DECLARE_ACE_TYPE(TabsElement, FocusGroup, ComponentGroupElement);
 public:
     void PerformBuild() override;
     void AddPendingTabBarItem(const RefPtr<TabBarItemComponent>& item)
     {
         tabBarPendingItems_.push_back(item);
     }
+    bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
 
 private:
     // In case TabBar is at the end position, we create TabBarItems before
     // TabBar itself and have to store them here till TabBar created.
     std::vector<RefPtr<TabBarItemComponent>> tabBarPendingItems_;
+    bool isVertical_ = true;
 };
 
 } // namespace OHOS::Ace::V2

@@ -41,6 +41,18 @@ void TabsElement::PerformBuild()
         }
     }
     tabBarPendingItems_.clear();
+    auto tabsComponent = AceType::DynamicCast<TabsComponent>(component_);
+    CHECK_NULL_VOID(tabsComponent);
+    isVertical_ = (tabsComponent->GetDirection() == FlexDirection::COLUMN ||
+                       tabsComponent->GetDirection() == FlexDirection::COLUMN_REVERSE);
+}
+
+bool TabsElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect)
+{
+    if (isVertical_ != vertical) {
+        return false;
+    }
+    return GoToNextFocus(reverse, rect);
 }
 
 } // namespace OHOS::Ace::V2
