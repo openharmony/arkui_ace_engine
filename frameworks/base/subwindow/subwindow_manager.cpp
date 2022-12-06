@@ -184,6 +184,14 @@ void SubwindowManager::HideMenuNG()
     }
 }
 
+void SubwindowManager::ClearMenuNG()
+{
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        subwindow->ClearMenuNG();
+    }
+}
+
 void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo)
 {
     auto containerId = Container::CurrentId();
