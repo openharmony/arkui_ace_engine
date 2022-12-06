@@ -39,6 +39,16 @@ public:
         return false;
     }
 
+    bool GetIsStartMove() const
+    {
+        return isStartMove_;
+    }
+
+    void SetIsStartMove(bool isStartMove)
+    {
+        isStartMove_ = isStartMove;
+    }
+
     void OnAttachToFrameNode() override
     {
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -77,6 +87,7 @@ private:
     WindowMode windowMode_;
     float moveX_ = 0.0f;
     float moveY_ = 0.0f;
+    bool isStartMove_ = false;
 };
 
 } // namespace OHOS::Ace::NG
