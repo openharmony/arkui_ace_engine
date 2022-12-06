@@ -56,17 +56,13 @@ void SwiperIndicatorPattern::OnModifyDone()
 
 bool SwiperIndicatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (!config.frameSizeChange) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
     return true;
 }
 
 void SwiperIndicatorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    if (clickEvent_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!clickEvent_);
     auto clickTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);

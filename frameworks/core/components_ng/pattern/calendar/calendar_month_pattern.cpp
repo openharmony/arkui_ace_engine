@@ -41,9 +41,7 @@ void CalendarMonthPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (clickListener_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!clickListener_);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     auto obtainedMonth = obtainedMonth_;
