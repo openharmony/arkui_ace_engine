@@ -20,29 +20,9 @@
 
 namespace OHOS::Ace {
 RefPtr<DragWindow> DragWindow::CreateDragWindow(
-    const std::string& windowName, int32_t x, int32_t y, uint32_t width, uint32_t height)
+    const std::string& /* windowName */, int32_t /* x */, int32_t /* y */, uint32_t /* width */, uint32_t /* height */)
 {
-    return AceType::MakeRefPtr<MockDragWindow>();
-}
-
-void MockDragWindow::MoveTo(int32_t x, int32_t y) const
-{
-    GTEST_LOG_(INFO) << "DragWindow move to "
-                     << "(" << x << ", " << y << ").";
-}
-
-void MockDragWindow::DrawPixelMap(const RefPtr<PixelMap>& pixelmap)
-{
-    GTEST_LOG_(INFO) << "DrawPixelMap has called";
-}
-
-void MockDragWindow::DrawFrameNode(const RefPtr<NG::FrameNode>& rootNode)
-{
-    GTEST_LOG_(INFO) << "DrawFrameNode has called";
-}
-
-void MockDragWindow::Destroy() const
-{
-    GTEST_LOG_(INFO) << "Destroy has called";
+    static RefPtr<DragWindow> dragWindow = AceType::MakeRefPtr<MockDragWindow>();
+    return dragWindow;
 }
 } // namespace OHOS::Ace

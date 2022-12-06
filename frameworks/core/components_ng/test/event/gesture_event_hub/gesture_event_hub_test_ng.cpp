@@ -21,6 +21,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/test/mock/mock_drag_window.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/pan_event.h"
@@ -56,6 +57,7 @@ const std::string CHECK_TAG_1("HELLO");
 const std::string CHECK_TAG_2("WORLD");
 const PointF GLOBAL_POINT { 20.0f, 20.0f };
 const PointF LOCAL_POINT { 15.0f, 15.0f };
+RefPtr<DragWindow> MOCK_DRAG_WINDOW;
 } // namespace
 
 class GestureEventHubTestNg : public testing::Test {
@@ -68,11 +70,13 @@ public:
 
 void GestureEventHubTestNg::SetUpTestSuite()
 {
+    MOCK_DRAG_WINDOW = DragWindow::CreateDragWindow("", 0, 0, 0, 0);
     GTEST_LOG_(INFO) << "GestureEventHubTestNg SetUpTestCase";
 }
 
 void GestureEventHubTestNg::TearDownTestSuite()
 {
+    MOCK_DRAG_WINDOW = nullptr;
     GTEST_LOG_(INFO) << "GestureEventHubTestNg TearDownTestCase";
 }
 
@@ -532,6 +536,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest008, TestSize.Level1)
      *            case: dragDropInfo.customNode is not null
      * @tc.expected: dragDropProxy_ is not null.
      */
+    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
     gestureEventHub->HandleOnDragStart(info);
     EXPECT_TRUE(gestureEventHub->dragDropProxy_);
 
@@ -559,6 +564,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest008, TestSize.Level1)
      *            case: dragDropInfo.pixelMap is not null
      * @tc.expected: dragDropProxy_ is not null.
      */
+    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawPixelMap(_)).Times(1);
     gestureEventHub2->HandleOnDragStart(info);
     EXPECT_TRUE(gestureEventHub2->dragDropProxy_);
 
@@ -567,6 +573,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest008, TestSize.Level1)
      *            case: dragDropProxy_ need to reset
      * @tc.expected: dragDropProxy_ is not null.
      */
+    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawPixelMap(_)).Times(1);
     gestureEventHub2->HandleOnDragStart(info);
     EXPECT_TRUE(gestureEventHub2->dragDropProxy_);
 
@@ -603,6 +610,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest008, TestSize.Level1)
         msg1 = CHECK_TAG_1;
     };
     eventHub->SetOnDrop(std::move(onDrop));
+    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
     gestureEventHub->HandleOnDragStart(info);
     gestureEventHub->HandleOnDragEnd(info);
     EXPECT_FALSE(gestureEventHub->dragDropProxy_);
