@@ -282,12 +282,17 @@ private:
     DataReadyNotifyTask CreateBorderImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBorderImageLoadSuccessCallback();
 
+    RefPtr<ImageLoadingContext> bgLoadingCtx_;
+    RefPtr<CanvasImage> bgImage_;
+
+    RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
+    RefPtr<CanvasImage> bdImage_;
+
     std::shared_ptr<Rosen::RSNode> rsNode_;
     SkPictureRecorder* recorder_ = nullptr;
-    RefPtr<ImageLoadingContext> bgLoadingCtx_;
-    RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
     RefPtr<Canvas> recordingCanvas_;
     RefPtr<Canvas> rosenCanvas_;
+
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;
     bool isPositionChanged_ = false;
