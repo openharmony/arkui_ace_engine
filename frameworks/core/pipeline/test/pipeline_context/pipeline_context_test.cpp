@@ -55,7 +55,7 @@ const std::string THREADFOURTH = "thread_4";
 
 RefPtr<PipelineContext> ConstructContext(const RefPtr<Frontend>& frontend)
 {
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
     auto platformWindow = PlatformWindow::Create(nullptr);
     auto window = std::make_unique<Window>(std::move(platformWindow));
     auto context = AceType::MakeRefPtr<PipelineContext>(std::move(window), taskExecutor, nullptr, nullptr, frontend, 0);

@@ -21,9 +21,9 @@
 #include "core/image/image_loader.h"
 
 namespace OHOS::Ace {
-void AnimationMock::OnPostFlush()
+void MockAnimation::OnPostFlush()
 {
-    LOGD("AnimationMock PostFlush start");
+    LOGD("MockAnimation PostFlush start");
     postFlushCallTimes_++;
     CreateInterpolators();
     AddListeners();
@@ -31,10 +31,10 @@ void AnimationMock::OnPostFlush()
     setRepeatSucc_ = animator_->SetIteration(iteration_);
     animator_->SetStartDelay(startDelay_);
     ExecuteOperation();
-    LOGD("AnimationMock PostFlush end");
+    LOGD("MockAnimation PostFlush end");
 }
 
-void AnimationMock::ExecuteOperation()
+void MockAnimation::ExecuteOperation()
 {
     switch (operation_) {
         case AnimationOperation::PLAY:
@@ -58,20 +58,20 @@ void AnimationMock::ExecuteOperation()
     }
 }
 
-void AnimationMock::AddListeners()
+void MockAnimation::AddListeners()
 {
     auto weak = AceType::WeakClaim(this);
     animator_->AddStartListener([weak]() {
         auto simulator = weak.Upgrade();
         if (simulator) {
-            LOGD("AnimationMock vsync triggered. start listener called.");
+            LOGD("MockAnimation vsync triggered. start listener called.");
             simulator->animationStartStatus_ = true;
         }
     });
     animator_->AddStopListener([weak]() {
         auto simulator = weak.Upgrade();
         if (simulator) {
-            LOGD("AnimationMock vsync triggered. stop listener called.");
+            LOGD("MockAnimation vsync triggered. stop listener called.");
             simulator->animationStopStatus_ = true;
             simulator->animationIntStopValue_ = simulator->animationIntValue_;
         }
@@ -79,34 +79,34 @@ void AnimationMock::AddListeners()
     animator_->AddRepeatListener([weak]() {
         auto simulator = weak.Upgrade();
         if (simulator) {
-            LOGD("AnimationMock vsync triggered. repeat listener called.");
+            LOGD("MockAnimation vsync triggered. repeat listener called.");
             ++(simulator->repeatDoneTimes_);
         }
     });
     animator_->AddIdleListener([weak]() {
         auto simulator = weak.Upgrade();
         if (simulator) {
-            LOGD("AnimationMock vsync triggered. idle listener called.");
+            LOGD("MockAnimation vsync triggered. idle listener called.");
             simulator->animationIdleStatus_ = true;
         }
     });
     animator_->AddPauseListener([weak]() {
         auto simulator = weak.Upgrade();
         if (simulator) {
-            LOGD("AnimationMock vsync triggered. resume listener called.");
+            LOGD("MockAnimation vsync triggered. resume listener called.");
             simulator->animationPauseStatus_ = true;
         }
     });
 }
 
-void AnimationMock::CreatePictureInterpolators()
+void MockAnimation::CreatePictureInterpolators()
 {
     auto weak = AceType::WeakClaim(this);
     if (pictureInt_) {
         pictureInt_->AddListener([weak](const int& value) {
             auto simulator = weak.Upgrade();
             if (simulator) {
-                LOGD("AnimationMock vsync triggered. pictureIntValue_ int value: %{public}d", value);
+                LOGD("MockAnimation vsync triggered. pictureIntValue_ int value: %{public}d", value);
                 simulator->pictureIntValue_ = value;
             }
         });
@@ -116,7 +116,7 @@ void AnimationMock::CreatePictureInterpolators()
         pictureString_->AddListener([weak](const std::string& value) {
             auto simulator = weak.Upgrade();
             if (simulator) {
-                LOGD("AnimationMock vsync triggered. pictureStringValue_ int value: %{public}s", value.data());
+                LOGD("MockAnimation vsync triggered. pictureStringValue_ int value: %{public}s", value.data());
                 simulator->pictureStringValue_ = value;
             }
         });
@@ -124,40 +124,40 @@ void AnimationMock::CreatePictureInterpolators()
     }
 }
 
-void AnimationMock::CreateInterpolators()
+void MockAnimation::CreateInterpolators()
 {
     auto weak = AceType::WeakClaim(this);
     if (animationInt_) {
         animationInt_->AddListener([weak](const int& value) {
             auto simulator = weak.Upgrade();
             if (simulator) {
-                LOGD("AnimationMock vsync triggered. int value: %{public}d", value);
+                LOGD("MockAnimation vsync triggered. int value: %{public}d", value);
                 simulator->animationIntValue_ = value;
             }
         });
-        LOGD("AnimationMock PostFlush. animationInt_ has been added.");
+        LOGD("MockAnimation PostFlush. animationInt_ has been added.");
         animator_->AddInterpolator(animationInt_);
     }
     if (animationFloat_) {
         animationFloat_->AddListener([weak](const float& value) {
             auto simulator = weak.Upgrade();
             if (simulator) {
-                LOGD("AnimationMock vsync triggered. float value: %{public}f", value);
+                LOGD("MockAnimation vsync triggered. float value: %{public}f", value);
                 simulator->animationFloatValue_ = value;
             }
         });
-        LOGD("AnimationMock PostFlush. animationFloat_ has been add.");
+        LOGD("MockAnimation PostFlush. animationFloat_ has been add.");
         animator_->AddInterpolator(animationFloat_);
     }
     if (keyframeAnimation_) {
         keyframeAnimation_->AddListener([weak](const float& value) {
             auto simulator = weak.Upgrade();
             if (simulator) {
-                LOGD("AnimationMock vsync triggered. keyframeAnimation_ float value: %{public}f", value);
+                LOGD("MockAnimation vsync triggered. keyframeAnimation_ float value: %{public}f", value);
                 simulator->keyframeAnimationValue_ = value;
             }
         });
-        LOGD("AnimationMock PostFlush. keyframeAnimation_ has been added.");
+        LOGD("MockAnimation PostFlush. keyframeAnimation_ has been added.");
         animator_->AddInterpolator(keyframeAnimation_);
     }
     if (animationColor_) {
@@ -172,17 +172,17 @@ void AnimationMock::CreateInterpolators()
     CreatePictureInterpolators();
 }
 
-const RefPtr<Animator>& AnimationMock::GetAnimator() const
+const RefPtr<Animator>& MockAnimation::GetAnimator() const
 {
     return animator_;
 }
 
-double AnimationMock::GetPositionResult() const
+double MockAnimation::GetPositionResult() const
 {
     return positionResult_;
 }
 
-void AnimationMock::SetPositionResult(double positionResult)
+void MockAnimation::SetPositionResult(double positionResult)
 {
     positionResult_ = positionResult;
 }

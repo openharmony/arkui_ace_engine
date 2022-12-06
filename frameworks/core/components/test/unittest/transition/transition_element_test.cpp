@@ -140,8 +140,8 @@ public:
         std::unique_ptr<PlatformWindow> platformWindow = TweenTestUtils::CreatePlatformWindow();
         platformWindowRaw_ = reinterpret_cast<MockPlatformWindow*>(platformWindow.get());
         auto window = TweenTestUtils::CreateWindow(std::move(platformWindow));
-        auto taskExecutor = AceType::MakeRefPtr<FakeTaskExecutor>();
-        auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+        auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+        auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
         auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
         RefPtr<Frontend> frontend = Frontend::CreateDefault();
         context_ = AceType::MakeRefPtr<PipelineContext>(
