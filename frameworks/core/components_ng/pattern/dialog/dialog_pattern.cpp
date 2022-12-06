@@ -153,6 +153,7 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     BorderRadiusProperty radius;
     radius.SetRadius(theme->GetRadius().GetX());
     contentRenderContext->UpdateBorderRadius(radius);
+    contentRenderContext->SetClipToBounds(true);
 }
 
 void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
