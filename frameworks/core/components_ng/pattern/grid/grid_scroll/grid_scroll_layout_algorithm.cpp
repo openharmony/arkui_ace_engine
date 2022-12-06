@@ -52,7 +52,6 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float mainSize = GetMainAxisSize(idealSize, axis);
     float crossSize = GetCrossAxisSize(idealSize, axis);
     FillGridViewportAndMeasureChildren(mainSize, crossSize, layoutWrapper);
-    StripItemsOutOfViewport(layoutWrapper);
 
     // update cache info.
     layoutWrapper->SetCacheCount(static_cast<int32_t>(gridLayoutProperty->GetCachedCountValue(1) * crossCount_));
@@ -515,8 +514,7 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
             mainLength += (lineHeight + mainGap_);
         }
         // If a line moves up out of viewport, update [startIndex_], [currentOffset_] and [startMainLineIndex_], and
-        // delete record in [gridMatrix_] and [lineHeightMap_]. The strip operation of [gridMatrix_] and
-        // [lineHeightMap_] will take place in [StripItemsOutOfViewport].
+        // delete record in [gridMatrix_] and [lineHeightMap_].
         // TODO: inactive items
         if (LessOrEqual(mainLength, 0.0)) {
             gridLayoutInfo_.currentOffset_ = mainLength;
@@ -716,31 +714,6 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
         gridLayoutInfo_.endMainLineIndex_ = currentMainLineIndex_;
     }
     return lineHeight;
-}
-
-void GridScrollLayoutAlgorithm::StripItemsOutOfViewport(LayoutWrapper* layoutWrapper)
-{
-    // Erase records that are out of viewport.
-    if (gridLayoutInfo_.lineHeightMap_.empty() || gridLayoutInfo_.gridMatrix_.empty()) {
-        return;
-    }
-    // 1. Erase records that are on top of viewport.
-    for (auto iter = gridLayoutInfo_.gridMatrix_.begin();
-         iter != gridLayoutInfo_.gridMatrix_.end() && iter->first < gridLayoutInfo_.startMainLineIndex_; ++iter) {
-        for (auto& item : iter->second) {
-            layoutWrapper->RemoveChildInRenderTree(item.second);
-        }
-    }
-    // 2. Erase records that are on bottom of viewport.
-    // remove from rbegin or LazyLayoutWrapperBuilder will create item and then remove
-    for (auto iter = gridLayoutInfo_.gridMatrix_.rbegin();
-         iter != gridLayoutInfo_.gridMatrix_.rend() && iter->first > gridLayoutInfo_.endMainLineIndex_; ++iter) {
-        for (auto item = iter->second.rbegin(); item != iter->second.rend(); ++item) {
-            layoutWrapper->RemoveChildInRenderTree(item->second);
-        }
-    }
-
-    LOGD("grid item size : %{public}d", static_cast<int32_t>(gridLayoutInfo_.gridMatrix_.size()));
 }
 
 LayoutConstraintF GridScrollLayoutAlgorithm::CreateChildConstraint(float mainSize, float crossSize,
