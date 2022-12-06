@@ -264,7 +264,7 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
                 imageSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        ctx->bgImage_ = ctx->bgLoadingCtx_->MoveCanvasImage();
+        ctx->bgImage_ = DynamicCast<SkiaCanvasImage>(ctx->bgLoadingCtx_->MoveCanvasImage());
         CHECK_NULL_VOID(ctx->bgImage_);
         if (ctx->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
             ctx->PaintBackground();
