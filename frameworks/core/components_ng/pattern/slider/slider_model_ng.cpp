@@ -73,7 +73,7 @@ void SliderModelNG::SetShowSteps(bool value)
 }
 void SliderModelNG::SetShowTips(bool value)
 {
-    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, ShowTips, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, ShowTips, value);
 }
 void SliderModelNG::SetThickness(const Dimension& value)
 {
