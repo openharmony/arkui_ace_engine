@@ -28,9 +28,7 @@ FlutterRenderContext::~FlutterRenderContext()
 
 void FlutterRenderContext::StartRecording()
 {
-    if (!flutterNode_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(flutterNode_);
     if (IsRecording()) {
         return;
     }
@@ -71,18 +69,14 @@ void FlutterRenderContext::SyncGeometryProperties(GeometryNode* geometryNode)
 {
     const auto& frameRect = geometryNode->GetFrameRect();
     LOGD("SyncGeometryProperties frameRect:%s", frameRect.ToString().c_str());
-    if (!flutterNode_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(flutterNode_);
     flutterNode_->SetFrameRect(frameRect);
 }
 
 void FlutterRenderContext::OnBackgroundColorUpdate(const Color& value)
 {
     LOGD("UpdateBgColor color:%s", value.ColorToString().c_str());
-    if (!flutterNode_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(flutterNode_);
     flutterNode_->SetBgColor(value);
     RequestNextFrame();
 }
@@ -112,9 +106,7 @@ RefPtr<Canvas> FlutterRenderContext::GetCanvas()
 
 sk_sp<SkPicture> FlutterRenderContext::FinishRecordingAsPicture()
 {
-    if (!recorder_) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN_NOLOG(recorder_, nullptr);
     return recorder_->finishRecordingAsPicture();
 }
 
@@ -129,9 +121,7 @@ void FlutterRenderContext::Restore()
 void FlutterRenderContext::RebuildFrame(FrameNode* node, const std::list<RefPtr<FrameNode>>& children)
 {
     LOGD("RebuildFrame");
-    if (!flutterNode_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(flutterNode_);
     flutterNode_->ClearChildren();
     for (const auto& child : children) {
         auto flutterRenderContext = DynamicCast<FlutterRenderContext>(child->GetRenderContext());

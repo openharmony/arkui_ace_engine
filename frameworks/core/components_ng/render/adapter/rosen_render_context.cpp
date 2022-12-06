@@ -138,9 +138,7 @@ void RosenRenderContext::SetPivot(float xPivot, float yPivot)
 void RosenRenderContext::SetTransitionPivot(const SizeF& frameSize, bool transitionIn)
 {
     auto& transitionEffect = transitionIn ? propTransitionAppearing_ : propTransitionDisappearing_;
-    if (!transitionEffect) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(transitionEffect);
     float xPivot = 0.0f;
     float yPivot = 0.0f;
     if (transitionEffect->HasRotate()) {
@@ -158,9 +156,8 @@ void RosenRenderContext::SetTransitionPivot(const SizeF& frameSize, bool transit
 void RosenRenderContext::InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode)
 {
     // skip if useExternalNode is true or node already created
-    if (useExternalNode || rsNode_ != nullptr) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!useExternalNode);
+    CHECK_NULL_VOID_NOLOG(!rsNode_);
 
     // create proper RSNode base on input
     if (surfaceName.has_value()) {
@@ -722,9 +719,7 @@ void RosenRenderContext::OnModifyDone()
         LOGD("first modify, make change in SyncGeometryProperties");
         return;
     }
-    if (!isPositionChanged_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(isPositionChanged_);
     auto rect = AdjustPaintRect();
     if (!rect.GetSize().IsPositive()) {
         return;
@@ -1291,9 +1286,7 @@ void RosenRenderContext::SetModifier(std::shared_ptr<T>& modifier, D data)
 template<typename T, typename D>
 void RosenRenderContext::UpdateGraphic(std::shared_ptr<T>& modifier, D data)
 {
-    if (RectIsNull()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!RectIsNull());
     LOGD("updating graphic effect");
     SetModifier(modifier, data);
     RequestNextFrame();
@@ -1650,9 +1643,9 @@ void RosenRenderContext::SetSharedTranslate(float xTranslate, float yTranslate)
 
 void RosenRenderContext::ResetSharedTranslate()
 {
-    if (!sharedTransitionModifier_ || !sharedTransitionModifier_->translateXY || !rsNode_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(sharedTransitionModifier_);
+    CHECK_NULL_VOID_NOLOG(sharedTransitionModifier_->translateXY);
+    CHECK_NULL_VOID_NOLOG(rsNode_);
     rsNode_->RemoveModifier(sharedTransitionModifier_->translateXY);
     sharedTransitionModifier_->translateXYValue = nullptr;
     sharedTransitionModifier_->translateXY = nullptr;

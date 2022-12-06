@@ -95,9 +95,7 @@ void TitleBarPattern::OnModifyDone()
 
 void TitleBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    if (panEvent_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!panEvent_);
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGI("Pan event start");
