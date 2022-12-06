@@ -60,11 +60,13 @@ void DrawArc(RenderContext& context, const RenderRingInfo& trackInfo)
     paint.setStrokeWidth(thickness);
     paint.setStrokeCap(SkPaint::kRound_Cap);
 
+    const double degreeOffset = -90;
     canvas->drawArc({ trackInfo.center.GetX() + (thickness / 2) - trackInfo.radius,
                         trackInfo.center.GetY() + (thickness / 2) - trackInfo.radius,
                         trackInfo.center.GetX() + trackInfo.radius - (thickness / 2),
                         trackInfo.center.GetY() + trackInfo.radius - (thickness / 2) },
-        trackInfo.clockwise * trackInfo.startDegree, trackInfo.clockwise * trackInfo.sweepDegree, false, paint);
+        trackInfo.clockwise * trackInfo.startDegree + degreeOffset,
+        trackInfo.clockwise * trackInfo.sweepDegree, false, paint);
 }
 } // namespace
 
@@ -80,8 +82,7 @@ void RosenRenderCircularTrack::Paint(RenderContext& context, const Offset& offse
         return;
     }
     canvas->save();
-    // change the start point to the top.
-    canvas->rotate(-90.0, data.center.GetX(), data.center.GetY());
+
     // draw background
     data.color = GetBackgroundColor();
     DrawArc(context, data);
