@@ -72,7 +72,6 @@ HWTEST_F(PanelPropertyTestNg, SlidingPanelLayoutPropertyTest001, TestSize.Level1
     EXPECT_FALSE(frameNode == nullptr);
     auto slidingPanelLayoutProperty = frameNode->GetLayoutProperty<SlidingPanelLayoutProperty>();
     EXPECT_FALSE(slidingPanelLayoutProperty == nullptr);
-    EXPECT_EQ(slidingPanelLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE), VisibleType::GONE);
 }
 
 /**
