@@ -515,122 +515,142 @@ void WebPattern::OnWebDataUpdate()
 
 void WebPattern::OnJsEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateJavaScriptEnabled(value);
+    if (delegate_) {
+        delegate_->UpdateJavaScriptEnabled(value);
+    }
 }
 
 void WebPattern::OnMediaPlayGestureAccessUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateMediaPlayGestureAccess(value);
+    if (delegate_) {
+        delegate_->UpdateMediaPlayGestureAccess(value);
+    }
 }
 
 void WebPattern::OnFileAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateAllowFileAccess(value);
+    if (delegate_) {
+        delegate_->UpdateAllowFileAccess(value);
+    }
 }
 
 void WebPattern::OnOnLineImageAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateBlockNetworkImage(!value);
+    if (delegate_) {
+        delegate_->UpdateBlockNetworkImage(!value);
+    }
 }
 
 void WebPattern::OnDomStorageAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateDomStorageEnabled(value);
+    if (delegate_) {
+        delegate_->UpdateDomStorageEnabled(value);
+    }
 }
 
 void WebPattern::OnImageAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateLoadsImagesAutomatically(value);
+    if (delegate_) {
+        delegate_->UpdateLoadsImagesAutomatically(value);
+    }
 }
 
 void WebPattern::OnMixedModeUpdate(MixedModeContent value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateMixedContentMode(value);
+    if (delegate_) {
+        delegate_->UpdateMixedContentMode(value);
+    }
 }
 
 void WebPattern::OnZoomAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateSupportZoom(value);
+    if (delegate_) {
+        delegate_->UpdateSupportZoom(value);
+    }
 }
 
 void WebPattern::OnGeolocationAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateGeolocationEnabled(value);
+    if (delegate_) {
+        delegate_->UpdateGeolocationEnabled(value);
+    }
 }
 
 void WebPattern::OnUserAgentUpdate(const std::string& value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateUserAgent(value);
+    if (delegate_) {
+        delegate_->UpdateUserAgent(value);
+    }
 }
 
 void WebPattern::OnCacheModeUpdate(WebCacheMode value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateCacheMode(value);
+    if (delegate_) {
+        delegate_->UpdateCacheMode(value);
+    }
 }
 
 void WebPattern::OnOverviewModeAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateOverviewModeEnabled(value);
+    if (delegate_) {
+        delegate_->UpdateOverviewModeEnabled(value);
+    }
 }
 
 void WebPattern::OnFileFromUrlAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateFileFromUrlEnabled(value);
+    if (delegate_) {
+        delegate_->UpdateFileFromUrlEnabled(value);
+    }
 }
 
 void WebPattern::OnDatabaseAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateDatabaseEnabled(value);
+    if (delegate_) {
+        delegate_->UpdateDatabaseEnabled(value);
+    }
 }
 
 void WebPattern::OnTextZoomRatioUpdate(int32_t value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateTextZoomRatio(value);
+    if (delegate_) {
+        delegate_->UpdateTextZoomRatio(value);
+    }
 }
 
 void WebPattern::OnWebDebuggingAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateWebDebuggingAccess(value);
+    if (delegate_) {
+        delegate_->UpdateWebDebuggingAccess(value);
+    }
 }
 
 void WebPattern::OnPinchSmoothModeEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdatePinchSmoothModeEnabled(value);
+    if (delegate_) {
+        delegate_->UpdatePinchSmoothModeEnabled(value);
+    }
 }
 
 void WebPattern::OnBackgroundColorUpdate(int32_t value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateBackgroundColor(value);
+    if (delegate_) {
+        delegate_->UpdateBackgroundColor(value);
+    }
 }
 
 void WebPattern::OnInitialScaleUpdate(float value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateInitialScale(value);
+    if (delegate_) {
+        delegate_->UpdateInitialScale(value);
+    }
 }
 
 void WebPattern::OnMultiWindowAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateMultiWindowAccess(value);
+    if (delegate_) {
+        delegate_->UpdateMultiWindowAccess(value);
+    }
 }
 
 void WebPattern::RegistVirtualKeyBoardListener()
