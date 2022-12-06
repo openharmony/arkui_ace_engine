@@ -13,8 +13,6 @@
 
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-import(
-    "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
 
 ohos_unittest("focus_hub_test_ng") {
   module_out_path = "$test_output_path/event/focus_hub"
@@ -40,6 +38,7 @@ ohos_unittest("focus_hub_test_ng") {
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
 
     # mock
+    "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_container.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/gesture/recognizers/mock_exclusive_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/gesture/recognizers/mock_gesture_recognizer.cpp",
@@ -57,7 +56,6 @@ ohos_unittest("focus_hub_test_ng") {
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
-    "mock_ace_application_info.cpp",
 
     # self
     "focus_hub_test_ng.cpp",
@@ -73,7 +71,4 @@ ohos_unittest("focus_hub_test_ng") {
     "$ace_root:ace_test_coverage_config",
     "$ace_root:ace_unittest_config",
   ]
-
-  include_dirs =
-      [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include" ]
 }
