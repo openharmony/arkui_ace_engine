@@ -76,12 +76,16 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
     const RefPtr<Frontend>& frontend, int32_t instanceId)
     : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId)
-{}
+{
+    window_->OnHide();
+}
 
 PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
     : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId)
-{}
+{
+    window_->OnHide();
+}
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {

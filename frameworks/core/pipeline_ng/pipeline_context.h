@@ -328,7 +328,7 @@ private:
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isNeedShowFocus_ = false;
-    bool onShow_ = true;
+    bool onShow_ = false;
     bool onFocus_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
