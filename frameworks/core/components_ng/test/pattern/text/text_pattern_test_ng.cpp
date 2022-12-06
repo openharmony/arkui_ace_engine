@@ -500,7 +500,7 @@ HWTEST_F(TextPatternTestNg, ShowSelectOverlay001, TestSize.Level1)
     RectF firstHandle;
     RectF secondHandle;
     pattern->ShowSelectOverlay(firstHandle, secondHandle);
-    EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
+    EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
 }
 
 /**
