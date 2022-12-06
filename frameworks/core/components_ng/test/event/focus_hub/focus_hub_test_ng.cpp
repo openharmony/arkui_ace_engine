@@ -12,22 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define private public
-#define protected public
 #include <cstdint>
 
 #include "gtest/gtest.h"
+
+// Add the following two macro definitions to test the private and protected method.
+#define private public
+#define protected public
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
@@ -64,15 +68,9 @@ void FocusHubTestNg::TearDownTestSuite()
     GTEST_LOG_(INFO) << "FocusHubTestNg TearDownTestCase";
 }
 
-void FocusHubTestNg::SetUp()
-{
-    MockPipelineBase::SetUp();
-}
+void FocusHubTestNg::SetUp() {}
 
-void FocusHubTestNg::TearDown()
-{
-    MockPipelineBase::TearDown();
-}
+void FocusHubTestNg::TearDown() {}
 
 /**
  * @tc.name: FocusHubCreateTest001
@@ -323,5 +321,363 @@ HWTEST_F(FocusHubTestNg, FocusHubHandleKeyEventTest006, TestSize.Level1)
     focusHub->focusType_ = FocusType::SCOPE;
     focusHub->currentFocus_ = true;
     EXPECT_FALSE(focusHub->HandleKeyEvent(keyEvent));
+}
+
+/**
+ * @tc.name: FocusHubTestNg007
+ * @tc.desc: Test the function IsFocusableScope.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg007, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    focusHub->show_ = true;
+    focusHub->focusable_ = true;
+    focusHub->parentFocusable_ = true;
+
+    /**
+     * @tc.steps2: call the function SetEnabled with false
+     * @tc.expected: The return value of IsFocusableScope is false.
+     */
+    eventHub->SetEnabled(false);
+    EXPECT_FALSE(focusHub->IsFocusableScope());
+
+    /**
+     * @tc.steps3: call the function SetEnabled with true.
+     * @tc.expected: The return value of IsFocusableScope is false.
+     */
+    eventHub->SetEnabled(true);
+    EXPECT_FALSE(focusHub->IsFocusableScope());
+}
+
+/**
+ * @tc.name: FocusHubTestNg008
+ * @tc.desc: Test the function SetFocusable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg008, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+
+    /**
+     * @tc.steps2: call the function SetFocusable with true
+     * @tc.expected: The value of focusable_ is true.
+     */
+    focusHub->SetFocusable(true);
+    EXPECT_TRUE(focusHub->focusable_);
+
+    /**
+     * @tc.steps3: call the function SetFocusable with false
+     * @tc.expected: The value of focusable_ is false.
+     */
+    focusHub->SetFocusable(false);
+    EXPECT_FALSE(focusHub->focusable_);
+}
+
+/**
+ * @tc.name: FocusHubTestNg009
+ * @tc.desc: Test the function IsFocusable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg009, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    eventHub->SetEnabled(false);
+
+    /**
+     * @tc.steps2: call the function IsFocusable with FocusType::NODE
+     * @tc.expected: The return value of IsFocusable is false.
+     */
+    focusHub->SetFocusType(FocusType::NODE);
+    EXPECT_FALSE(focusHub->IsFocusable());
+
+    /**
+     * @tc.steps3: call the function IsFocusable with FocusType::SCOPE
+     * @tc.expected: The return value of IsFocusable is false.
+     */
+    focusHub->SetFocusType(FocusType::SCOPE);
+    EXPECT_FALSE(focusHub->IsFocusable());
+
+    /**
+     * @tc.steps4: call the function IsFocusable with FocusType::DISABLE
+     * @tc.expected: The return value of IsFocusable is false.
+     */
+    focusHub->SetFocusType(FocusType::DISABLE);
+    EXPECT_FALSE(focusHub->IsFocusable());
+}
+
+/**
+ * @tc.name: FocusHubTestNg010
+ * @tc.desc: Test the function RequestFocusImmediately.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0010, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    /**
+     * @tc.steps2: call the function SetFocusType with currentFocus_ = false.
+     * @tc.expected: The return value of RequestFocusImmediately is false.
+     */
+    context->SetIsFocusingByTab(true);
+    focusHub->SetFocusType(FocusType::DISABLE);
+    EXPECT_FALSE(focusHub->RequestFocusImmediately());
+
+    /**
+     * @tc.steps3: call the function SetFocusType with currentFocus_ = true
+     * @tc.expected: The return value of RequestFocusImmediately is true.
+     */
+    context->SetIsFocusingByTab(false);
+    focusHub->SetFocusType(FocusType::DISABLE);
+    focusHub->currentFocus_ = true;
+    EXPECT_TRUE(focusHub->RequestFocusImmediately());
+}
+
+/**
+ * @tc.name: FocusHubTestNg011
+ * @tc.desc: Test the function LostFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0011, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+
+    /**
+     * @tc.steps2: call the function LostFocus with currentFocus_ = false.
+     * @tc.expected: The value of blurReason_ is changed to BlurReason::WINDOW_BLUR.
+     */
+    focusHub->blurReason_ = BlurReason::WINDOW_BLUR;
+    focusHub->currentFocus_ = false;
+    focusHub->LostFocus(BlurReason::FOCUS_SWITCH);
+    EXPECT_EQ(focusHub->blurReason_, BlurReason::WINDOW_BLUR);
+
+    /**
+     * @tc.steps3: call the function LostFocus with currentFocus_ = true.
+     * @tc.expected: The value of blurReason_ is changed to BlurReason::FOCUS_SWITCH.
+     */
+    focusHub->currentFocus_ = true;
+    focusHub->LostFocus(BlurReason::FOCUS_SWITCH);
+    EXPECT_EQ(focusHub->blurReason_, BlurReason::FOCUS_SWITCH);
+}
+
+/**
+ * @tc.name: FocusHubTestNg012
+ * @tc.desc: Test the function LostSelfFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0012, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+
+    /**
+     * @tc.steps2: call the function LostSelfFocus with currentFocus_ = false.
+     * @tc.expected: The value of focusable_ is changed to false.
+     */
+    focusHub->currentFocus_ = false;
+    focusHub->SetFocusable(false);
+    focusHub->LostSelfFocus();
+    EXPECT_FALSE(focusHub->focusable_);
+
+    /**
+     * @tc.steps3: call the function LostSelfFocus with currentFocus_ = true.
+     * @tc.expected: The value of focusable_ is changed to true.
+     */
+    focusHub->currentFocus_ = true;
+    focusHub->LostSelfFocus();
+    EXPECT_TRUE(focusHub->focusable_);
+}
+
+/**
+ * @tc.name: FocusHubTestNg013
+ * @tc.desc: Test the function SetShow, SetEnabled, SetEnabledNode and SetEnabledScope.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0013, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    /**
+     * @tc.steps2: call the function SetShow with FocusType::NODE.
+     * @tc.expected: The value of show_ is changed to true.
+     */
+    focusHub->SetFocusType(FocusType::NODE);
+    focusHub->SetShow(true);
+    focusHub->SetEnabled(true);
+    EXPECT_TRUE(focusHub->show_);
+
+    /**
+     * @tc.steps3: call the function SetShow with FocusType::SCOPE.
+     * @tc.expected: The value of show_ is changed to false.
+     */
+    focusHub->SetFocusType(FocusType::SCOPE);
+    focusHub->SetShow(false);
+    focusHub->SetEnabled(false);
+    EXPECT_FALSE(focusHub->show_);
+
+    /**
+     * @tc.steps4: call the function SetShow with FocusType::DISABLE.
+     * @tc.expected: The value of show_ is changed to false.
+     */
+    focusHub->SetFocusType(FocusType::DISABLE);
+    focusHub->SetShow(true);
+    focusHub->SetEnabled(true);
+    EXPECT_FALSE(focusHub->show_);
+}
+
+/**
+ * @tc.name: FocusHubTestNg014
+ * @tc.desc: Test functions OnFocus, OnFocusNode and OnFocusScope.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0014, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+
+    /**
+     * @tc.steps2: call the function OnFocus with FocusType::SCOPE.
+     * @tc.expected: The focusNodes_ is empty.
+     */
+    focusHub->SetFocusType(FocusType::SCOPE);
+    focusHub->OnFocus();
+    EXPECT_TRUE(focusHub->focusNodes_.empty());
+
+    /**
+     * @tc.steps3: call the function OnFocus with FocusType::NODE.
+     * @tc.expected: The flagCbk1 and flagCbk2 are changed to true.
+     */
+    focusHub->SetFocusType(FocusType::NODE);
+    focusHub->OnFocus();
+    bool flagCbk1 = false;
+    bool flagCbk2 = false;
+    focusHub->onFocusInternal_ = [&flagCbk1]() { flagCbk1 = !flagCbk1; };
+    focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
+    focusHub->focusCallbackEvents_->SetOnFocusCallback([&flagCbk2]() { flagCbk2 = !flagCbk2; });
+    focusHub->OnFocus();
+    EXPECT_TRUE(flagCbk1);
+    EXPECT_TRUE(flagCbk2);
+}
+
+/**
+ * @tc.name: FocusHubTestNg015
+ * @tc.desc: Test functions OnBlur, OnBlurNode and OnBlurScope.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0015, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+
+    /**
+     * @tc.steps2: call the function OnBlur with FocusType::NODE.
+     * @tc.expected: The flagCbk1 and flagCbk2 are changed to true.
+     */
+    focusHub->SetFocusType(FocusType::NODE);
+    focusHub->OnBlur();
+    bool flagCbk1 = false;
+    bool flagCbk2 = false;
+    BlurReason flagReason = BlurReason::WINDOW_BLUR;
+    focusHub->onBlurInternal_ = [&flagCbk1]() { flagCbk1 = !flagCbk1; };
+    focusHub->onBlurReasonInternal_ = [&flagReason](BlurReason reason) { flagReason = reason; };
+    focusHub->SetOnBlurCallback([&flagCbk2]() { flagCbk2 = !flagCbk2; });
+    focusHub->OnBlur();
+    EXPECT_TRUE(flagCbk1);
+    EXPECT_TRUE(flagCbk2);
+    EXPECT_EQ(flagReason, BlurReason::FOCUS_SWITCH);
+
+    /**
+     * @tc.steps3: call the function OnBlur with FocusType::SCOPE.
+     * @tc.expected: The flagCbk1 and flagCbk2 are changed to true.
+     */
+    focusHub->SetFocusType(FocusType::SCOPE);
+    focusHub->OnFocus();
+    flagCbk1 = false;
+    flagCbk2 = false;
+    flagReason = BlurReason::WINDOW_BLUR;
+    focusHub->onBlurInternal_ = [&flagCbk1]() { flagCbk1 = !flagCbk1; };
+    focusHub->onBlurReasonInternal_ = [&flagReason](BlurReason reason) { flagReason = reason; };
+    focusHub->SetOnBlurCallback([&flagCbk2]() { flagCbk2 = !flagCbk2; });
+    focusHub->OnBlur();
+    EXPECT_TRUE(flagCbk1);
+    EXPECT_TRUE(flagCbk2);
+    EXPECT_EQ(flagReason, BlurReason::FOCUS_SWITCH);
+}
+
+/**
+ * @tc.name: FocusHubTestNg016
+ * @tc.desc: Test the function OnKeyEvent, OnKeyEventScope and OnKeyEventNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0016, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_SPACE;
+
+    /**
+     * @tc.steps2: call the function OnKeyEvent with FocusType::NODE.
+     * @tc.expected: The return value of OnKeyEvent is false.
+     */
+    focusHub->SetFocusType(FocusType::NODE);
+    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+
+    /**
+     * @tc.steps3: call the function OnKeyEvent with FocusType::SCOPE.
+     * @tc.expected: The return value of OnKeyEvent is false.
+     */
+    focusHub->SetFocusType(FocusType::SCOPE);
+    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+
+    /**
+     * @tc.steps4: call the function OnKeyEvent with FocusType::DISABLE.
+     * @tc.expected: The return value of OnKeyEvent is false.
+     */
+    focusHub->SetFocusType(FocusType::DISABLE);
+    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
 }
 } // namespace OHOS::Ace::NG
