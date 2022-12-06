@@ -43,7 +43,7 @@ void FlutterRenderList::Paint(RenderContext& context, const Offset& offset)
     } else {
         layer_->SetClip(0.0, viewPort_.Width(), 0.0, viewPort_.Height(), Clip::HARD_EDGE);
     }
-    RenderNode::Paint(context, offset);
+    RenderList::PaintItems(context, offset);
     PaintStickyItem(context, offset);
 }
 
