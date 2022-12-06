@@ -392,16 +392,17 @@ HWTEST_F(WebPatternTest, UpdateTouchHandleForOverlayTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnOverviewModeAccessEnabledUpdateTest008
+ * @tc.name: OnOverviewUpdateTest008
  * @tc.desc: Test OnOverviewModeAccessEnabledUpdate.
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternTest, OnOverviewModeAccessEnabledUpdateTest008, TestSize.Level1)
+HWTEST_F(WebPatternTest, OnOverviewUpdateTest008, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     g_webPattern->OnModifyDone();
     int32_t value = 0;
     float scale = 0;
+    EXPECT_NE(g_webPattern->delegate_, nullptr);
     g_webPattern->OnPinchSmoothModeEnabledUpdate(true);
     g_webPattern->OnWebDebuggingAccessEnabledUpdate(true);
     g_webPattern->OnTextZoomRatioUpdate(value);
