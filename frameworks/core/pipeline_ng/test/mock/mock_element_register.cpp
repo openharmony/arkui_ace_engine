@@ -32,9 +32,13 @@ RefPtr<Element> ElementRegister::GetElementById(ElementIdType /*elementId*/)
     return nullptr;
 }
 
-RefPtr<AceType> ElementRegister::GetNodeById(ElementIdType /*elementId*/)
+RefPtr<AceType> ElementRegister::GetNodeById(ElementIdType elementId)
 {
-    return nullptr;
+    if (elementId == ElementRegister::UndefinedElementId) {
+        return nullptr;
+    }
+    auto position = itemMap_.find(elementId);
+    return position == itemMap_.end() ? nullptr : position->second.Upgrade();
 }
 
 RefPtr<NG::UINode> ElementRegister::GetUINodeById(ElementIdType elementId)
@@ -42,7 +46,8 @@ RefPtr<NG::UINode> ElementRegister::GetUINodeById(ElementIdType elementId)
     if (elementId == ElementRegister::UndefinedElementId) {
         return nullptr;
     }
-    return nullptr;
+    auto iter = itemMap_.find(elementId);
+    return iter == itemMap_.end() ? nullptr : AceType::DynamicCast<NG::UINode>(iter->second).Upgrade();
 }
 
 RefPtr<V2::ElementProxy> ElementRegister::GetElementProxyById(ElementIdType /*elementId*/)
@@ -58,9 +63,6 @@ bool ElementRegister::Exists(ElementIdType /*elementId*/)
 bool ElementRegister::AddReferenced(ElementIdType elementId, const WeakPtr<AceType>& referenced)
 {
     auto result = itemMap_.emplace(elementId, referenced);
-    if (!result.second) {
-        LOGE("Duplicate elementId %{public}d error.", elementId);
-    }
     return result.second;
 }
 
@@ -87,9 +89,12 @@ bool ElementRegister::RemoveItem(ElementIdType /*elementId*/)
     return true;
 }
 
-bool ElementRegister::RemoveItemSilently(ElementIdType /*elementId*/)
+bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
 {
-    return true;
+    if (elementId == ElementRegister::UndefinedElementId) {
+        return false;
+    }
+    return itemMap_.erase(elementId);
 }
 
 std::unordered_set<ElementIdType>& ElementRegister::GetRemovedItems()
