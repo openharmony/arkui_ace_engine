@@ -15,8 +15,12 @@
 
 #include "gtest/gtest.h"
 
+#define protected public
+#define private public
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_view.h"
 
 using namespace testing;
@@ -45,5 +49,138 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_001, TestSize.Level1)
     RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
         frameNode->GetLayoutProperty<NavigationLayoutProperty>();
     EXPECT_FALSE(navigationLayoutProperty == nullptr);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_002
+ * @tc.desc: Test REPLACE navigator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_002, TestSize.Level1)
+{
+    NavigationView navigationView;
+    navigationView.Create();
+    navigationView.SetTitle("navigationView", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    EXPECT_FALSE(navigationLayoutProperty == nullptr);
+
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    EXPECT_NE(hostNode, nullptr);
+
+    NavigationPattern navigationPattern;
+    navigationPattern.OnModifyDone();
+}
+
+/**
+ * @tc.name: NavigationPatternTest_003
+ * @tc.desc: Test REPLACE navigator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_003, TestSize.Level1)
+{
+    NavigationView navigationView;
+    navigationView.Create();
+    navigationView.SetTitle("navigationView", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    EXPECT_FALSE(navigationLayoutProperty == nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    EXPECT_NE(hostNode, nullptr);
+
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    EXPECT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    EXPECT_NE(layoutWrapper, nullptr);
+
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    config.skipLayout = true;
+    bool result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(result, false);
+
+    config.skipLayout = false;
+    result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(result, false);
+
+    config.skipMeasure = false;
+    result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(result, false);
+
+    config.skipLayout = true;
+    result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_004
+ * @tc.desc: Test REPLACE navigator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_004, TestSize.Level1)
+{
+    NavigationView navigationView;
+    navigationView.Create();
+    navigationView.SetTitle("navigationView", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    EXPECT_FALSE(navigationLayoutProperty == nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    EXPECT_NE(hostNode, nullptr);
+
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    EXPECT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    EXPECT_NE(layoutWrapper, nullptr);
+    
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    config.skipLayout = true;
+    bool result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(result, false);
+
+    auto setNavigation = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(setNavigation);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_005
+ * @tc.desc: Test REPLACE navigator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_005, TestSize.Level1)
+{
+    NavigationView navigationView;
+    navigationView.Create();
+    navigationView.SetTitle("navigationView", false);
+
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    navigationView.SetCustomTitle(frameNode);
+    RefPtr<UINode> uiNode = nullptr;
+    navigationView.SetCustomTitle(uiNode);
+
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    EXPECT_FALSE(navigationLayoutProperty == nullptr);
+    
+    navigationView.SetTitleMode(NavigationTitleMode::FREE);
+    navigationView.SetTitleMode(NavigationTitleMode::FULL);
+    navigationView.SetTitleMode(NavigationTitleMode::MINI);
 }
 }
