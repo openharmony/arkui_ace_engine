@@ -18,13 +18,13 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -36,7 +36,8 @@
 #include "core/components_ng/render/paint_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/pipeline/pipeline_base.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -98,9 +99,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
 
     // Create child
     RefPtr<FrameNode> child;
-    if (useCustom) {
-        LOGI("CreateBubbleNode, UseCustom");
-    } else if (primaryButton.showButton || secondaryButton.showButton) {
+    if (primaryButton.showButton || secondaryButton.showButton) {
         child = CreateCombinedChild(param, popupId, targetId);
         popupPaintProp->UpdateAutoCancel(false);
     } else {
@@ -213,11 +212,9 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(const RefPtr<PopupParam>& para
     message->MountToParent(columnNode);
     auto buttonRow = BubbleView::CreateButtons(param, popupId, targetId);
     buttonRow->MountToParent(columnNode);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto popupTheme = themeManager->GetTheme<PopupTheme>();
+    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, nullptr);
     auto padding = popupTheme->GetPadding();
     PaddingProperty columnPadding;
@@ -260,7 +257,7 @@ RefPtr<FrameNode> BubbleView::CreateButton(
     if (!buttonParam.showButton) {
         return nullptr;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
     CHECK_NULL_RETURN(buttonTheme, nullptr);

@@ -14,7 +14,6 @@
 group("property_unittest") {
   testonly = true
   deps = [
-    "bubble:bubble_property_test_ng",
     "panel:panel_property_test_ng",
     "swiper:swiper_property_test_ng",
   ]
