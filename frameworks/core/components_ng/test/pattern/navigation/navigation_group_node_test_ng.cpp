@@ -35,7 +35,6 @@
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
-
 namespace {
 const int32_t testdata = 10;
 } // namespace
@@ -61,8 +60,8 @@ HWTEST_F(NavigationGroupNodeTestNg, NavigationGroupNodeTestNg_001, TestSize.Leve
     auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>();
     OHOS::Ace::NG::NavigationGroupNode navigationGroupNode(tag, nodeId, patternCreator);
     auto res = navigationGroupNode.GetFrameNode(tag, nodeId);
-    EXPECT_EQ(res,nullptr);
-    navigationGroupNode.GetOrCreateGroupNode(tag,nodeId,nullptr);
+    EXPECT_EQ(res, nullptr);
+    navigationGroupNode.GetOrCreateGroupNode(tag, nodeId, nullptr);
 }
 
 /**
@@ -82,11 +81,10 @@ HWTEST_F(NavigationGroupNodeTestNg, NavigationGroupNodeTestNg_002, TestSize.Leve
     navigationGroupNode.isFirstNavDestination_ = false;
     std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
     json->isRoot_ = true;
-    EXPECT_NE(json,nullptr);
+    EXPECT_NE(json, nullptr);
     RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(tag, nodeId, patternCreator);
     navigationGroupNode.SetNavBarNode(navBarNode);
-    EXPECT_NE(AceType::DynamicCast<OHOS::Ace::NG::NavBarNode>(navigationGroupNode.GetNavBarNode()),nullptr);
+    EXPECT_NE(AceType::DynamicCast<OHOS::Ace::NG::NavBarNode>(navigationGroupNode.GetNavBarNode()), nullptr);
     navigationGroupNode.ToJsonValue(json);
 }
-
 } // namespace OHOS::Ace::NG
