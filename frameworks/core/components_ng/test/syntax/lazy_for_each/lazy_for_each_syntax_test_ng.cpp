@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#define private public
 #include <optional>
 #include <utility>
 
@@ -21,11 +20,14 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+
+#define private public
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_ng/test/mock/syntax/mock_lazy_for_each_actuator.h"
 #include "core/components_ng/test/mock/syntax/mock_lazy_for_each_builder.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -89,12 +91,12 @@ void LazyForEachSyntaxTestNg::TearDownTestSuite()
 
 void LazyForEachSyntaxTestNg::SetUp()
 {
-    GTEST_LOG_(INFO) << "LazyForEachSyntaxTestNg SetUp";
+    MockPipelineBase::SetUp();
 }
 
 void LazyForEachSyntaxTestNg::TearDown()
 {
-    GTEST_LOG_(INFO) << "LazyForEachSyntaxTestNg TearDown";
+    MockPipelineBase::TearDown();
 }
 
 /**
@@ -502,8 +504,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxWrapperBuilderTest009, TestSize.L
     lazyForEachNode->AdjustLayoutWrapperTree(parentLayoutWrapper, false, false);
     auto lazyLayoutWrapperBuilder =
         AceType::DynamicCast<LazyLayoutWrapperBuilder>(parentLayoutWrapper->layoutWrapperBuilder_);
-
-    EXPECT_EQ(parentLayoutWrapper->GetTotalChildCount(), 0);
+    EXPECT_EQ(parentLayoutWrapper->GetTotalChildCount(), LAZY_FOR_EACH_NODE_IDS.size());
     EXPECT_EQ(lazyLayoutWrapperBuilder->preNodeIds_, LAZY_FOR_EACH_NODE_IDS);
 }
 } // namespace OHOS::Ace::NG

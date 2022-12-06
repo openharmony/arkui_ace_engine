@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_SYNTAX_MOCK_LAZY_FOR_EACH_BUILDER_H
 
 #include "base/memory/ace_type.h"
+#define private public
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
 #include "core/components_ng/test/mock/syntax/mock_lazy_for_each_actuator.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -33,7 +34,7 @@ public:
 protected:
     int32_t OnGetTotalCount() override
     {
-        return 0;
+        return static_cast<int32_t>(generatedItem_.size());
     }
     std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(
         int32_t index, const std::unordered_map<std::string, RefPtr<NG::UINode>>& /* cachedItems */) override
