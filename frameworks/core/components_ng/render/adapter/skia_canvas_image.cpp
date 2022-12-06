@@ -41,44 +41,6 @@ RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
 #endif
 }
 
-RefPtr<CanvasImage> CanvasImage::Create(
-    const RefPtr<PixelMap>& pixelMap, const RefPtr<RenderTaskHolder>& renderTaskHolder)
-{
-#ifndef NG_BUILD
-    // TODO: use [PixelMap] as data source when rs provides interface like
-    // DrawBitmapRect(Media::PixelMap* pixelMap, const Rect& dstRect, const Rect& srcRect, ...)
-    // now we make [SkImage] from [PixelMap] and use [drawImageRect] to draw image
-
-    auto flutterRenderTaskHolder = DynamicCast<FlutterRenderTaskHolder>(renderTaskHolder);
-    CHECK_NULL_RETURN(flutterRenderTaskHolder, nullptr);
-
-    // Step1: Create SkPixmap
-    auto imageInfo = SkiaCanvasImage::MakeSkImageInfoFromPixelMap(pixelMap);
-    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
-
-    // Step2: Create SkImage and draw it, using gpu or cpu
-    sk_sp<SkImage> skImage;
-    if (!flutterRenderTaskHolder->ioManager) {
-        skImage =
-            SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
-    } else {
-#ifndef GPU_DISABLED
-        skImage = SkImage::MakeCrossContextFromPixmap(flutterRenderTaskHolder->ioManager->GetResourceContext().get(),
-            imagePixmap, true, imagePixmap.colorSpace(), true);
-#else
-        // SkImage needs to hold PixelMap shared_ptr
-        skImage =
-            SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
-#endif
-    }
-    auto canvasImage = flutter::CanvasImage::Create();
-    canvasImage->set_image(flutter::SkiaGPUObject<SkImage>(skImage, flutterRenderTaskHolder->unrefQueue));
-    return CanvasImage::Create(&canvasImage);
-#else
-    return AceType::MakeRefPtr<SkiaCanvasImage>();
-#endif
-}
-
 SkImageInfo SkiaCanvasImage::MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap)
 {
     SkColorType colorType = PixelFormatToSkColorType(pixmap);
