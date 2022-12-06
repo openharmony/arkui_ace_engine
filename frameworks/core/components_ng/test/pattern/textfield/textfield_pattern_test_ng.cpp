@@ -18,21 +18,23 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "textfield_test_ng_utils.h"
+#define private public
+#define protected public
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#undef private
+#undef protected
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string PLACEHOLDER = "DEFAULT PLACEHOLDER";
-const std::string EMPTY_TEXT_VALUE;
 const std::string TEXT_VALUE = "DEFAULT_TEXT";
 const std::string INSERT_VALUE_SINGLE_NUMBER = "1";
 const std::string INSERT_VALUE_SINGLE_CHAR = "X";
@@ -45,8 +47,35 @@ class TextFieldPatternTestNg : public testing::Test {
 public:
     static void SetUpTestCase() {};
     static void TearDownTestCase() {};
+    void SetUp() override;
+    void TearDown() override;
+    RefPtr<TextFieldPattern> GetTextFieldPattern();
+    RefPtr<TextFieldLayoutProperty> GetLayoutPropertyFromHost(const RefPtr<TextFieldPattern>& pattern);
+    RefPtr<FrameNode> host_;
 };
 
+void TextFieldPatternTestNg::SetUp() {}
+
+void TextFieldPatternTestNg::TearDown()
+{
+    host_ = nullptr;
+}
+
+RefPtr<TextFieldPattern> TextFieldPatternTestNg::GetTextFieldPattern()
+{
+    host_ = TextFieldTestNgUtils::CreatTextFieldNode();
+    return host_ ? host_->GetPattern<TextFieldPattern>() : nullptr;
+}
+
+RefPtr<TextFieldLayoutProperty> TextFieldPatternTestNg::GetLayoutPropertyFromHost(
+    const RefPtr<TextFieldPattern>& pattern)
+{
+    if (pattern && pattern->GetHost()) {
+        return pattern->GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    }
+    GetTextFieldPattern();
+    return host_ ? host_->GetLayoutProperty<TextFieldLayoutProperty>() : nullptr;
+}
 /**
  * @tc.name: TextFieldInsertValue001
  * @tc.desc: Test inserting value of textfield.
@@ -195,4 +224,162 @@ HWTEST_F(TextFieldPatternTestNg, TextareaMoveCaret001, TestSize.Level1)
     EXPECT_EQ(pattern->GetEditingValue().caretPosition, CARET_POSITION_1);
 }
 
+/**
+ * @tc.name: FilterWithRegex001
+ * @tc.desc: test FilterWithRegex
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, FilterWithRegex001, TestSize.Level1)
+{
+    auto textFieldPattern = GetTextFieldPattern();
+    if (!textFieldPattern) {
+        EXPECT_FALSE(textFieldPattern == nullptr);
+        return;
+    }
+    std::string result;
+    auto funcReturn = textFieldPattern->FilterWithRegex("test", "filter_valuetest", result, true);
+    EXPECT_TRUE(funcReturn);
+    EXPECT_EQ("test", result);
+}
+
+/**
+ * @tc.name: FilterWithRegex002
+ * @tc.desc: test FilterWithRegex
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, FilterWithRegex002, TestSize.Level2)
+{
+    auto textFieldPattern = GetTextFieldPattern();
+    if (!textFieldPattern) {
+        EXPECT_FALSE(textFieldPattern == nullptr);
+        return;
+    }
+    std::string result;
+    auto funcReturn = textFieldPattern->FilterWithRegex("filter_value", "", result, true);
+    EXPECT_FALSE(funcReturn);
+    funcReturn = textFieldPattern->FilterWithRegex("filter_value", "", result);
+    EXPECT_FALSE(funcReturn);
+    EXPECT_TRUE(result.empty());
+    funcReturn = textFieldPattern->FilterWithRegex("", "", result);
+    EXPECT_FALSE(funcReturn);
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: EditingValueFilter001
+ * @tc.desc: test EditingValueFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, EditingValueFilter001, TestSize.Level1)
+{
+    auto textFieldPattern = GetTextFieldPattern();
+    if (!textFieldPattern) {
+        EXPECT_FALSE(textFieldPattern == nullptr);
+        return;
+    }
+    auto layoutProperty = GetLayoutPropertyFromHost(textFieldPattern);
+    if (!layoutProperty) {
+        EXPECT_FALSE(layoutProperty == nullptr);
+        return;
+    }
+    layoutProperty->UpdateTextInputType(TextInputType::NUMBER);
+    std::string result;
+    std::string valueToUpdate = "filter_value1test";
+    textFieldPattern->EditingValueFilter(valueToUpdate, result);
+    EXPECT_EQ(valueToUpdate, "filter_value1test");
+    layoutProperty->UpdateInputFilter("test");
+    textFieldPattern->EditingValueFilter(valueToUpdate, result);
+    EXPECT_EQ(valueToUpdate, "test");
+}
+
+/**
+ * @tc.name: EditingValueFilter002
+ * @tc.desc: test EditingValueFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, EditingValueFilter002, TestSize.Level1)
+{
+    auto textFieldPattern = GetTextFieldPattern();
+    if (!textFieldPattern) {
+        EXPECT_FALSE(textFieldPattern == nullptr);
+        return;
+    }
+    auto layoutProperty = GetLayoutPropertyFromHost(textFieldPattern);
+    if (!layoutProperty) {
+        EXPECT_FALSE(layoutProperty == nullptr);
+        return;
+    }
+    layoutProperty->UpdateTextInputType(TextInputType::PHONE);
+    std::string result;
+    std::string valueToUpdate = "filter_value\\dtest";
+    layoutProperty->UpdateInputFilter("test");
+    textFieldPattern->EditingValueFilter(valueToUpdate, result);
+    EXPECT_EQ(valueToUpdate, "test");
+}
+
+/**
+ * @tc.name: EditingValueFilter003
+ * @tc.desc: test EditingValueFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, EditingValueFilter003, TestSize.Level1)
+{
+    auto textFieldPattern = GetTextFieldPattern();
+    if (!textFieldPattern) {
+        EXPECT_FALSE(textFieldPattern == nullptr);
+        return;
+    }
+    auto layoutProperty = GetLayoutPropertyFromHost(textFieldPattern);
+    if (!layoutProperty) {
+        EXPECT_FALSE(layoutProperty == nullptr);
+        return;
+    }
+    layoutProperty->UpdateTextInputType(TextInputType::EMAIL_ADDRESS);
+    std::string result;
+    std::string valueToUpdate = "filter_valuew+test";
+    layoutProperty->UpdateInputFilter("test");
+    textFieldPattern->EditingValueFilter(valueToUpdate, result);
+    EXPECT_EQ(valueToUpdate, "test");
+}
+
+/**
+ * @tc.name: EditingValueFilter004
+ * @tc.desc: test EditingValueFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, EditingValueFilter004, TestSize.Level1)
+{
+    auto textFieldPattern = GetTextFieldPattern();
+    if (!textFieldPattern) {
+        EXPECT_FALSE(textFieldPattern == nullptr);
+        return;
+    }
+    auto layoutProperty = GetLayoutPropertyFromHost(textFieldPattern);
+    if (!layoutProperty) {
+        EXPECT_FALSE(layoutProperty == nullptr);
+        return;
+    }
+    layoutProperty->UpdateTextInputType(TextInputType::URL);
+    std::string result;
+    std::string valueToUpdate = "filter_value//test";
+    layoutProperty->UpdateInputFilter("test");
+    textFieldPattern->EditingValueFilter(valueToUpdate, result);
+    EXPECT_EQ(valueToUpdate, "test");
+}
+
+/**
+ * @tc.name: GetTextOrPlaceHolderFontSize001
+ * @tc.desc: test GetTextOrPlaceHolderFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetTextOrPlaceHolderFontSize001, TestSize.Level2)
+{
+    auto textFieldPattern = GetTextFieldPattern();
+    if (!textFieldPattern) {
+        EXPECT_FALSE(textFieldPattern == nullptr);
+        return;
+    }
+    auto size = textFieldPattern->GetTextOrPlaceHolderFontSize();
+    EXPECT_EQ(size, 0.0f);
+}
 } // namespace OHOS::Ace::NG
