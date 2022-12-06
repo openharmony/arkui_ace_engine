@@ -2267,6 +2267,8 @@ HWTEST_F(ListPatternTestNg, ListPatternTest003, TestSize.Level1)
     EXPECT_NE(layoutProperty, nullptr);
     RefPtr<LayoutWrapper> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutAlgorithm> layoutAlgorithm = layoutWrapper->GetLayoutAlgorithm();
+    layoutWrapper->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm);
     DirtySwapConfig config;
     RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     EXPECT_NE(listPattern, nullptr);
@@ -2317,6 +2319,1207 @@ HWTEST_F(ListPatternTestNg, ListPatternTest003, TestSize.Level1)
     listPattern->itemPosition_[0] = listItemInfo;
     result = listPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: ListPatternTest004
+ * @tc.desc: Test list pattern ProcessEvent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPatternTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    auto listEventHub = frameNode->GetEventHub<ListEventHub>();
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case1: !onScroll, finalOffset!=0; !indexChanged,
+     * @tc.steps: !onReachStart, startIndex!=0; !onReachEnd, endIndex!=max; !scrollStop, !onScrollStop
+     * @tc.expected: step2. equal.
+     */
+    listPattern->ProcessEvent(false, 1, false);
+    EXPECT_EQ(listPattern->scrollStop_, false);
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case2: !onScroll, finalOffset=0; indexChanged, !onScrollIndex,
+     * @tc.steps: !onReachStart, startIndex=0; !onReachEnd, endIndex=max; scrollStop, !onScrollStop
+     * @tc.expected: step2. equal.
+     */
+    listPattern->startIndex_ = 0;
+    listPattern->endIndex_ = listPattern->maxListItemIndex_;
+    listPattern->scrollStop_ = true;
+    listPattern->ProcessEvent(true, 0, false);
+    EXPECT_EQ(listPattern->scrollStop_, false);
+    
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case3: onScroll, finalOffset!=0; indexChanged, onScrollIndex,
+     * @tc.steps: onReachStart, startIndex!=0; onReachEnd, endIndex!=max; scrollStop, !onScrollStop
+     * @tc.expected: step2. equal.
+     */
+    listEventHub->SetOnScroll([](Dimension, V2::ScrollState) {});
+    listEventHub->SetOnScrollIndex([](int32_t, int32_t) {});
+    listEventHub->SetOnReachStart([]() {});
+    listPattern->startIndex_ = 1;
+    listEventHub->SetOnReachEnd([]() {});
+    listPattern->endIndex_ = listPattern->maxListItemIndex_ - 1;
+    listPattern->scrollStop_ = true;
+    listPattern->ProcessEvent(true, 1, false);
+    EXPECT_EQ(listPattern->scrollStop_, false);
+    
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case4: onScroll, finalOffset=0, SCROLL_FROM_UPDATE
+     * @tc.steps: onReachStart, startIndex=0; onReachEnd, endIndex=max; scrollStop, onScrollStop
+     * @tc.expected: step2. equal.
+     */
+    listPattern->scrollState_ = SCROLL_FROM_UPDATE;
+    listPattern->startIndex_ = 0;
+    listPattern->endIndex_ = listPattern->maxListItemIndex_;
+    listEventHub->SetOnScrollStop([]() {});
+    listPattern->ProcessEvent(true, 0, false);
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case5: onScroll, finalOffset=0, SCROLL_FROM_ANIMATION
+     * @tc.steps: onReachStart, startIndex=0; onReachEnd, endIndex=max; scrollStop, onScrollStop
+     * @tc.expected: step2. equal.
+     */
+    listPattern->scrollState_ = SCROLL_FROM_ANIMATION;
+    listPattern->ProcessEvent(true, 0, false);
+    
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case6: onScroll, finalOffset=0, SCROLL_FROM_ANIMATION_SPRING
+     * @tc.steps: onReachStart, startIndex=0; onReachEnd, endIndex=max; scrollStop, onScrollStop
+     * @tc.expected: step2. equal.
+     */
+    listPattern->scrollState_ = SCROLL_FROM_ANIMATION_SPRING;
+    listPattern->ProcessEvent(true, 0, false);
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case7: onScroll, finalOffset=0, SCROLL_FROM_BAR
+     * @tc.steps: onReachStart, startIndex=0; onReachEnd, endIndex=max; scrollStop, onScrollStop
+     * @tc.expected: step2. equal.
+     */
+    listPattern->scrollState_ = SCROLL_FROM_BAR;
+    listPattern->ProcessEvent(true, 0, false);
+}
+
+/**
+ * @tc.name: ListPatternTest005
+ * @tc.desc: Test list pattern CheckScrollable function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPatternTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    ListItemInfo listItemInfo;
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case1: itemPosition.empty
+     * @tc.expected: step2. equal.
+     */
+    listPattern->CheckScrollable();
+    EXPECT_EQ(listPattern->scrollable_, false);
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case2: itemPosition not empty, begin!= 0, rbegin != max
+     * @tc.expected: step2. equal.
+     */
+    listPattern->itemPosition_.clear();
+    listPattern->itemPosition_[1] = listItemInfo;
+    listPattern->maxListItemIndex_ = LIST_ITEM_NUMBER;
+    listPattern->CheckScrollable();
+    EXPECT_EQ(listPattern->scrollable_, true);
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case3: itemPosition not empty, begin!= 0, rbegin = max
+     * @tc.expected: step2. equal.
+     */
+    listPattern->itemPosition_.clear();
+    listPattern->itemPosition_[LIST_ITEM_NUMBER] = listItemInfo;
+    listPattern->maxListItemIndex_ = LIST_ITEM_NUMBER;
+    listPattern->CheckScrollable();
+    EXPECT_EQ(listPattern->scrollable_, true);
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case4: itemPosition not empty, begin= 0, rbegin != max
+     * @tc.expected: step2. equal.
+     */
+    listPattern->itemPosition_.clear();
+    listPattern->itemPosition_[0] = listItemInfo;
+    listPattern->maxListItemIndex_ = LIST_ITEM_NUMBER;
+    listPattern->CheckScrollable();
+    EXPECT_EQ(listPattern->scrollable_, true);
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case2: itemPosition not empty, first = 0, rbegin = max
+     * @tc.expected: step2. equal.
+     */
+    listPattern->itemPosition_.clear();
+    listPattern->itemPosition_[0] = listItemInfo;
+    listPattern->itemPosition_[LIST_ITEM_NUMBER] = listItemInfo;
+    listPattern->maxListItemIndex_ = LIST_ITEM_NUMBER;
+    listPattern->CheckScrollable();
+    EXPECT_EQ(listPattern->scrollable_, false);
+}
+
+/**
+ * @tc.name: ListPatternTest006
+ * @tc.desc: Test list pattern CreateLayoutAlgorithm function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPatternTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    RefPtr<LayoutAlgorithm> result;
+    
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case1: no lanes, no LaneMin, no LaneMax, no jumpIndex_, not outOfBoundary
+     * @tc.expected: step2. equal.
+     */
+    result = listPattern->CreateLayoutAlgorithm();
+    EXPECT_NE(result, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case2: no lanes, no LaneMin, no LaneMax, have jumpIndex_, is outOfBoundary
+     * @tc.expected: step2. equal.
+     */
+    listPattern->jumpIndex_ = INITIAL_INDEX_VALUE;
+    listPattern->startMainPos_ = 1;
+    result = listPattern->CreateLayoutAlgorithm();
+    EXPECT_NE(result, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case3: have lanes, laneMinLength, laneMaxLength
+     * @tc.expected: step2. equal.
+     */
+    TestProperty testProperty1;
+    testProperty1.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    testProperty1.lanesValue = std::make_optional(LANES_VALUE);
+    testProperty1.laneMinLengthValue = std::make_optional(LANE_MIN_LENGTH_CASE1_VALUE);
+    testProperty1.laneMaxlengthValue = std::make_optional(LANE_MAX_LENGTH_CASE1_VALUE);
+    
+    RefPtr<FrameNode> frameNode1 = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode1, nullptr);
+    RefPtr<ListPattern> listPattern1 = AceType::DynamicCast<ListPattern>(frameNode1->GetPattern());
+    EXPECT_NE(listPattern1, nullptr);
+}
+
+/**
+ * @tc.name: ListPatternTest007
+ * @tc.desc: Test list pattern UpdateCurrentOffset function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPatternTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    bool result;
+    
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case1: no scrollEffect, !isScrollContent
+     * @tc.expected: step2. equal.
+     */
+    listPattern->isScrollContent_ = false;
+    result = listPattern->UpdateCurrentOffset(0);
+    EXPECT_NE(result, false);
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case2: no scrollEffect, isScrollContent
+     * @tc.expected: step2. equal.
+     */
+    listPattern->isScrollContent_ = true;
+    result = listPattern->UpdateCurrentOffset(0);
+    EXPECT_NE(result, false);
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case3: scrollEffect not Spring, !isScrollContent
+     * @tc.expected: step2. equal.
+     */
+    listPattern->isScrollContent_ = false;
+    listPattern->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::FADE);
+    result = listPattern->UpdateCurrentOffset(0);
+    EXPECT_NE(result, false);
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case4: scrollEffect Spring, !isScrollContent
+     * @tc.expected: step2. equal.
+     */
+    listPattern->isScrollContent_ = false;
+    listPattern->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
+    result = listPattern->UpdateCurrentOffset(0);
+    EXPECT_NE(result, false);
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case4: scrollEffect Spring, isScrollContent
+     * @tc.expected: step2. equal.
+     */
+    listPattern->isScrollContent_ = true;
+    listPattern->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
+    result = listPattern->UpdateCurrentOffset(0);
+    EXPECT_NE(result, false);
+}
+
+/**
+ * @tc.name: ListPatternTest008
+ * @tc.desc: Test list pattern UpdateCurrentOffset function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPatternTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    bool result;
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case4: scrollEffect Spring, isScrollContent, no header, no footer, UPDATE
+     * @tc.expected: step2. equal.
+     */
+    listPattern->isScrollContent_ = true;
+    listPattern->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
+    listPattern->scrollState_ = SCROLL_FROM_UPDATE;
+    result = listPattern->UpdateCurrentOffset(0);
+    EXPECT_NE(result, false);
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case5: have header, have footer, !UPDATE
+     * @tc.expected: step2. equal.
+     */
+    WeakPtr<FrameNode> weak = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    listPattern->headerGroupNode_ = weak;
+    listPattern->footerGroupNode_ = weak;
+    listPattern->scrollState_ = SCROLL_FROM_BAR;
+    result = listPattern->UpdateCurrentOffset(0);
+    EXPECT_NE(result, false);
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case6: begin is 0, startPos > 0
+     * @tc.expected: step2. equal.
+     */
+    ListItemInfo listItemInfo;
+    listPattern->itemPosition_.clear();
+    listPattern->itemPosition_[0] = listItemInfo;
+    listPattern->startMainPos_ = 1;
+    result = listPattern->UpdateCurrentOffset(0);
+    EXPECT_NE(result, false);
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case7: begin is not 0, startPos > 0
+     * @tc.expected: step2. equal.
+     */
+    listPattern->itemPosition_.clear();
+    listPattern->itemPosition_[1] = listItemInfo;
+    listPattern->startMainPos_ = 1;
+    result = listPattern->UpdateCurrentOffset(0);
+    EXPECT_NE(result, false);
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case7: begin is 0, startPos = 0
+     * @tc.expected: step2. equal.
+     */
+    listPattern->itemPosition_.clear();
+    listPattern->itemPosition_[0] = listItemInfo;
+    listPattern->startMainPos_ = 0;
+    result = listPattern->UpdateCurrentOffset(0);
+    EXPECT_NE(result, false);
+
+    /**
+     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
+     * @tc.steps: case7: begin is not 0, startPos = 0
+     * @tc.expected: step2. equal.
+     */
+    listPattern->itemPosition_.clear();
+    listPattern->itemPosition_[1] = listItemInfo;
+    listPattern->startMainPos_ = 0;
+    result = listPattern->UpdateCurrentOffset(0);
+    EXPECT_NE(result, false);
+}
+
+/**
+ * @tc.name: ListPatternTest009
+ * @tc.desc: Test list pattern IsOutOfBoundary function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPatternTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    bool result;
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case1: itemPosition is empty
+     * @tc.expected: step2. equal.
+     */
+    result = listPattern->IsOutOfBoundary(0);
+    EXPECT_EQ(result, false);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case5: have header, have footer, !UPDATE
+     * @tc.expected: step2. equal.
+     */
+    ListItemInfo listItemInfo;
+    listPattern->itemPosition_[0] = listItemInfo;
+    result = listPattern->IsOutOfBoundary(0);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: ListPatternTest010
+ * @tc.desc: Test list pattern SetScrollEdgeEffect function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPatternTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    RefPtr<ScrollEdgeEffect> scrollEffect;
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case1: scrollEffect is nullptr
+     * @tc.expected: step2. equal.
+     */
+    listPattern->SetScrollEdgeEffect(nullptr);
+    EXPECT_NE(listPattern->scrollEffect_, nullptr);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case2: have scrollEffect, FADE
+     * @tc.expected: step2. equal.
+     */
+    scrollEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::FADE);
+    listPattern->SetScrollEdgeEffect(scrollEffect);
+    EXPECT_NE(listPattern->scrollEffect_, false);
+}
+
+/**
+ * @tc.name: ListPatternTest011
+ * @tc.desc: Test list pattern OnKeyEvent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPatternTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    RefPtr<ScrollEdgeEffect> scrollEffect;
+    bool result = false;
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case1: KeyAction::DOWN
+     * @tc.expected: step2. equal.
+     */
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::UP;
+    result = listPattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(result, false);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case2: KeyAction::UP
+     * @tc.expected: step2. equal.
+     */
+    keyEvent.action = KeyAction::DOWN;
+    result = listPattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(result, false);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case3: KeyCode::KEY_PAGE_DOWN
+     * @tc.expected: step2. equal.
+     */
+    keyEvent.code = KeyCode::KEY_PAGE_DOWN;
+    result = listPattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(result, true);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case4: KeyCode::KEY_DPAD_RIGHT
+     * @tc.expected: step2. equal.
+     */
+    keyEvent.code = KeyCode::KEY_DPAD_RIGHT;
+    result = listPattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(result, true);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case5: KeyCode::KEY_DPAD_CENTER
+     * @tc.expected: step2. equal.
+     */
+    keyEvent.code = KeyCode::KEY_DPAD_CENTER;
+    result = listPattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: ListPatternTest012
+ * @tc.desc: Test list pattern HandleDirectionKey function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPatternTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    bool result = false;
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case1: VERTICAL, KEY_DPAD_UP, next = scroll
+     * @tc.expected: step2. equal.
+     */
+    listPattern->scrollIndex_ = 0;
+    result = listPattern->HandleDirectionKey(KeyCode::KEY_DPAD_UP);
+    EXPECT_EQ(result, false);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case1: VERTICAL, KEY_DPAD_DOWN, next = scroll
+     * @tc.expected: step2. equal.
+     */
+    listPattern->maxListItemIndex_ = 1;
+    listPattern->scrollIndex_ = 1;
+    result = listPattern->HandleDirectionKey(KeyCode::KEY_DPAD_DOWN);
+    EXPECT_EQ(result, false);
+
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty1;
+    testProperty1.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE2_VALUE);
+    
+    RefPtr<FrameNode> frameNode1 = CreateListParagraph(testProperty1);
+    EXPECT_NE(frameNode1, nullptr);
+    RefPtr<ListPattern> listPattern1 = AceType::DynamicCast<ListPattern>(frameNode1->GetPattern());
+    EXPECT_NE(listPattern1, nullptr);
+    
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case3: HORIZONTAL, KEY_DPAD_LEFT, next != scroll
+     * @tc.expected: step2. equal.
+     */
+    listPattern1->scrollIndex_ = 1;
+    result = listPattern1->HandleDirectionKey(KeyCode::KEY_DPAD_LEFT);
+    EXPECT_EQ(result, true);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case4: HORIZONTAL, KEY_DPAD_RIGHT, next != scroll
+     * @tc.expected: step2. equal.
+     */
+    listPattern1->maxListItemIndex_ = LIST_ITEM_NUMBER;
+    listPattern1->scrollIndex_ = 1;
+    result = listPattern1->HandleDirectionKey(KeyCode::KEY_DPAD_RIGHT);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: ListPatternTest013
+ * @tc.desc: Test list pattern AnimateTo function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPatternTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case1: animator is nullptr
+     * @tc.expected: step2. equal.
+     */
+    listPattern->animator_ = nullptr;
+    listPattern->AnimateTo(0, 0, nullptr);
+    EXPECT_NE(listPattern->animator_, nullptr);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case2: animator is STOPPED
+     * @tc.expected: step2. equal.
+     */
+    listPattern->animator_ = AceType::MakeRefPtr<Animator>();
+    listPattern->animator_->status_ = Animator::Status::STOPPED;
+    listPattern->AnimateTo(0, 0, nullptr);
+    EXPECT_NE(listPattern->animator_, nullptr);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case2: animator is RUNNING
+     * @tc.expected: step2. equal.
+     */
+    listPattern->animator_ = AceType::MakeRefPtr<Animator>();
+    listPattern->animator_->status_ = Animator::Status::RUNNING;
+    listPattern->AnimateTo(0, 0, nullptr);
+    EXPECT_NE(listPattern->animator_, nullptr);
+}
+
+/**
+ * @tc.name: ListPatternTest014
+ * @tc.desc: Test list pattern ScrollToIndex function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPatternTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case1: index < 0
+     * @tc.expected: step2. equal.
+     */
+    listPattern->ScrollToIndex(-1);
+    EXPECT_NE(listPattern->jumpIndex_, -1);
+    
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case2: 0 < index < max
+     * @tc.expected: step2. equal.
+     */
+    listPattern->maxListItemIndex_ = LIST_ITEM_NUMBER;
+    listPattern->ScrollToIndex(1);
+    EXPECT_EQ(listPattern->jumpIndex_, 1);
+    
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case3: index > max
+     * @tc.expected: step2. equal.
+     */
+    listPattern->maxListItemIndex_ = LIST_ITEM_NUMBER;
+    listPattern->ScrollToIndex(LIST_ITEM_NUMBER + 1);
+    EXPECT_NE(listPattern->jumpIndex_, LIST_ITEM_NUMBER + 1);
+}
+
+/**
+ * @tc.name: ListPatternTest015
+ * @tc.desc: Test list pattern ScrollToEdge function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPatternTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case1: ScrollEdgeType::SCROLL_TOP
+     * @tc.expected: step2. equal.
+     */
+    listPattern->ScrollToEdge(ScrollEdgeType::SCROLL_TOP);
+    EXPECT_EQ(listPattern->jumpIndex_, 0);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case1: ScrollEdgeType::SCROLL_TOP
+     * @tc.expected: step2. equal.
+     */
+    listPattern->maxListItemIndex_ = LIST_ITEM_NUMBER;
+    listPattern->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    EXPECT_EQ(listPattern->jumpIndex_, LIST_ITEM_NUMBER);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case1: ScrollEdgeType::SCROLL_LEFT
+     * @tc.expected: step2. equal.
+     */
+    listPattern->maxListItemIndex_ = LIST_ITEM_NUMBER;
+    listPattern->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT);
+    EXPECT_EQ(listPattern->jumpIndex_, LIST_ITEM_NUMBER);
+}
+
+/**
+ * @tc.name: ListPatternTest016
+ * @tc.desc: Test list pattern GetCurrentOffset function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPatternTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    Offset result;
+    
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case1: VERTICAL
+     * @tc.expected: step2. equal.
+     */
+    listPattern->estimateOffset_ = 1;
+    result = listPattern->GetCurrentOffset();
+    EXPECT_EQ(result.GetX(), 0);
+    EXPECT_EQ(result.GetY(), 1);
+
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty1;
+    testProperty1.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE2_VALUE);
+    
+    RefPtr<FrameNode> frameNode1 = CreateListParagraph(testProperty1);
+    EXPECT_NE(frameNode1, nullptr);
+    RefPtr<ListPattern> listPattern1 = AceType::DynamicCast<ListPattern>(frameNode1->GetPattern());
+    EXPECT_NE(listPattern1, nullptr);
+    
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case1: VERTICAL
+     * @tc.expected: step2. equal.
+     */
+    listPattern1->estimateOffset_ = 1;
+    result = listPattern1->GetCurrentOffset();
+    EXPECT_EQ(result.GetX(), 1);
+    EXPECT_EQ(result.GetY(), 0);
+}
+
+/**
+ * @tc.name: ListPatternTest017
+ * @tc.desc: Test list pattern SetScrollBar function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPatternTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case1: DisplayMode::OFF, no scrollBar, no touchEvent, !isInitialized_
+     * @tc.expected: step2. equal.
+     */
+    listPattern->scrollBar_ = nullptr;
+    listPattern->touchEvent_ = nullptr;
+    listPattern->isInitialized_ = false;
+    listPattern->SetScrollBar();
+    EXPECT_EQ(listPattern->scrollBar_, nullptr);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case2: DisplayMode::OFF, has scrollBar, has touchEvent, isInitialized_
+     * @tc.expected: step2. equal.
+     */
+    listPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    listPattern->touchEvent_ = AceType::MakeRefPtr<TouchEventImpl>([](TouchEventInfo) {});
+    listPattern->isInitialized_ = true;
+    listPattern->SetScrollBar();
+    EXPECT_EQ(listPattern->scrollBar_, nullptr);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case3: DisplayMode::ON, !scrollBar
+     * @tc.expected: step2. equal.
+     */
+    auto listPaintProperty = frameNode->GetPaintProperty<ListPaintProperty>();
+    EXPECT_NE(listPaintProperty, nullptr);
+    listPaintProperty->UpdateBarDisplayMode(DisplayMode::ON);
+    listPattern->scrollBar_ = nullptr;
+    listPattern->SetScrollBar();
+    EXPECT_NE(listPattern->scrollBar_, nullptr);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case3: DisplayMode::ON, scrollBar, displayMode not same
+     * @tc.expected: step2. equal.
+     */
+    listPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    listPattern->scrollBar_->displayMode_ = DisplayMode::OFF;
+    listPattern->SetScrollBar();
+    EXPECT_NE(listPattern->scrollBar_, nullptr);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case3: DisplayMode::ON, scrollBar, displayMode same
+     * @tc.expected: step2. equal.
+     */
+    listPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    listPattern->scrollBar_->displayMode_ = DisplayMode::ON;
+    listPattern->SetScrollBar();
+    EXPECT_NE(listPattern->scrollBar_, nullptr);
+}
+
+/**
+ * @tc.name: ListPatternTest018
+ * @tc.desc: Test list pattern UpdateScrollBarOffset function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPatternTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case1: itemPosition is empty
+     * @tc.expected: step2. equal.
+     */
+    listPattern->itemPosition_.clear();
+    listPattern->UpdateScrollBarOffset();
+    EXPECT_EQ(listPattern->itemPosition_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case2: itemPosition not empty, !scrollBar, !scrollBarProxy
+     * @tc.expected: step2. equal.
+     */
+    ListItemInfo listItemInfo;
+    listPattern->itemPosition_.clear();
+    listPattern->itemPosition_[0] = listItemInfo;
+    listPattern->scrollBar_ = nullptr;
+    listPattern->scrollBarProxy_ = nullptr;
+    EXPECT_EQ(listPattern->itemPosition_.size(), 1);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case3: itemPosition not empty, scrollBar, !scrollBarProxy
+     * @tc.expected: step2. equal.
+     */
+    listPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    listPattern->scrollBarProxy_ = nullptr;
+    EXPECT_EQ(listPattern->itemPosition_.size(), 1);
+    EXPECT_EQ(listPattern->scrollBar_->isDriving_, !listPattern->isScrollContent_);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case4: itemPosition not empty, !scrollBar, scrollBarProxy
+     * @tc.expected: step2. equal.
+     */
+    listPattern->scrollBar_ = nullptr;
+    listPattern->scrollBarProxy_ = AceType::MakeRefPtr<ScrollBarProxy>();
+    EXPECT_EQ(listPattern->itemPosition_.size(), 1);
+    EXPECT_EQ(listPattern->currentPosition_, 0);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case5: itemPosition not empty, scrollBar, scrollBarProxy
+     * @tc.expected: step2. equal.
+     */
+    listPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    listPattern->scrollBarProxy_ = AceType::MakeRefPtr<ScrollBarProxy>();
+    EXPECT_EQ(listPattern->itemPosition_.size(), 1);
+    EXPECT_EQ(listPattern->scrollBar_->isDriving_, !listPattern->isScrollContent_);
+    EXPECT_EQ(listPattern->currentPosition_, 0);
+}
+
+/**
+ * @tc.name: ListPositionControllerTest001
+ * @tc.desc: Test list positionController AnimateTo function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPositionControllerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(Axis::NONE);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<ListPattern> listPattern =
+        AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    RefPtr<ListPositionController> positionController =
+        AceType::MakeRefPtr<ListPositionController>();
+    EXPECT_NE(positionController, nullptr);
+    bool result = false;
+    
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case1: !listPattern
+     * @tc.expected: step2. equal.
+     */
+    result = positionController->AnimateTo(Dimension(0), 0, nullptr);
+    EXPECT_EQ(
+        AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
+    EXPECT_EQ(result, false);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case2: listPattern, direction is NONE
+     * @tc.expected: step2. equal.
+     */
+    positionController->scroll_ = AceType::WeakClaim(AceType::RawPtr(listPattern));
+    result = positionController->AnimateTo(Dimension(0), 0, nullptr);
+    EXPECT_NE(
+        AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: ListPositionControllerTest002
+ * @tc.desc: Test list positionController AnimateTo function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPositionControllerTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(Axis::VERTICAL);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<ListPattern> listPattern =
+        AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    RefPtr<ListPositionController> positionController =
+        AceType::MakeRefPtr<ListPositionController>();
+    EXPECT_NE(positionController, nullptr);
+    bool result = false;
+    positionController->scroll_ = AceType::WeakClaim(AceType::RawPtr(listPattern));
+    Dimension position;
+    
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case3: Unit is PERCENT, return
+     * @tc.expected: step2. equal.
+     */
+    position = Dimension(1, DimensionUnit::PERCENT);
+    result = positionController->AnimateTo(position, 0, nullptr);
+    EXPECT_NE(
+        AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
+    EXPECT_EQ(result, false);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case4: Unit is not PERCENT, duration = 0
+     * @tc.expected: step2. equal.
+     */
+    position = Dimension(1, DimensionUnit::PX);
+    result = positionController->AnimateTo(position, 0, nullptr);
+    EXPECT_NE(
+        AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
+    EXPECT_EQ(result, true);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case5: Unit is not PERCENT, duration != 0
+     * @tc.expected: step2. equal.
+     */
+    position = Dimension(1, DimensionUnit::PX);
+    result = positionController->AnimateTo(position, 1, nullptr);
+    EXPECT_NE(
+        AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: ListPositionControllerTest003
+ * @tc.desc: Test list positionController ScrollBy function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPositionControllerTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(Axis::VERTICAL);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<ListPattern> listPattern =
+        AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    RefPtr<ListPositionController> positionController =
+        AceType::MakeRefPtr<ListPositionController>();
+    EXPECT_NE(positionController, nullptr);
+    positionController->scroll_ = AceType::WeakClaim(AceType::RawPtr(listPattern));
+    
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case1: VERTICAL
+     * @tc.expected: step2. equal.
+     */
+    positionController->ScrollBy(0, 0, true);
+    EXPECT_EQ(listPattern->currentPosition_, 0);
+
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty1;
+    testProperty1.listDirectionValue = std::make_optional(Axis::HORIZONTAL);
+    
+    RefPtr<FrameNode> frameNode1 = CreateListParagraph(testProperty1);
+    EXPECT_NE(frameNode1, nullptr);
+    RefPtr<ListPattern> listPattern1 =
+        AceType::DynamicCast<ListPattern>(frameNode1->GetPattern());
+    EXPECT_NE(listPattern1, nullptr);
+    RefPtr<ListPositionController> positionController1 =
+        AceType::MakeRefPtr<ListPositionController>();
+    EXPECT_NE(positionController1, nullptr);
+    positionController1->scroll_ = AceType::WeakClaim(AceType::RawPtr(listPattern1));
+    
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case1: VERTICAL
+     * @tc.expected: step2. equal.
+     */
+    positionController1->ScrollBy(0, 0, true);
+    EXPECT_EQ(listPattern1->currentPosition_, 0);
+}
+
+/**
+ * @tc.name: ListPositionControllerTest004
+ * @tc.desc: Test list positionController ScrollToEdge ScrollPage function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPositionControllerTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(Axis::NONE);
+    
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<ListPattern> listPattern =
+        AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    EXPECT_NE(listPattern, nullptr);
+    RefPtr<ListPositionController> positionController =
+        AceType::MakeRefPtr<ListPositionController>();
+    EXPECT_NE(positionController, nullptr);
+    
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case1: no listPattern
+     * @tc.expected: step2. equal.
+     */
+    positionController->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    positionController->ScrollPage(true, true);
+    EXPECT_EQ(
+        AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
+    
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case2: listPattern, direction is NONE
+     * @tc.expected: step2. equal.
+     */
+    positionController->scroll_ = AceType::WeakClaim(AceType::RawPtr(listPattern));
+    positionController->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    positionController->ScrollPage(true, true);
+    EXPECT_NE(
+        AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
+
+    /**
+     * @tc.steps: step1. create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty1;
+    testProperty1.listDirectionValue = std::make_optional(Axis::VERTICAL);
+    
+    RefPtr<FrameNode> frameNode1 = CreateListParagraph(testProperty1);
+    EXPECT_NE(frameNode1, nullptr);
+    RefPtr<ListPattern> listPattern1 =
+        AceType::DynamicCast<ListPattern>(frameNode1->GetPattern());
+    EXPECT_NE(listPattern1, nullptr);
+    RefPtr<ListPositionController> positionController1 =
+        AceType::MakeRefPtr<ListPositionController>();
+    EXPECT_NE(positionController1, nullptr);
+
+    /**
+     * @tc.steps: step2. call function
+     * @tc.steps: case3: listPattern, direction is not NONE
+     * @tc.expected: step2. equal.
+     */
+    positionController1->scroll_ = AceType::WeakClaim(AceType::RawPtr(listPattern1));
+    positionController1->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    positionController1->ScrollPage(true, true);
+    EXPECT_NE(
+        AceType::DynamicCast<ListPattern>(positionController1->scroll_.Upgrade()), nullptr);
 }
 } // namespace OHOS::Ace::NG
 
