@@ -441,17 +441,11 @@ void ContainerModalElement::ChangeFloatingTitleIcon(bool isFocus)
         splitButton = AceType::DynamicCast<RenderPadding>(*iterator);
     }
 
-    if (windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        auto floatingTitleChildrenRow = AceType::MakeRefPtr<RowComponent>(
-            FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(true, isFocus));
-        floatingTitleChildrenRow->SetUpdateType(UpdateType::REBUILD);
-        rowElement->SetUpdateComponent(floatingTitleChildrenRow);
-    } else {
-        auto titleChildrenRow = AceType::MakeRefPtr<RowComponent>(
-            FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(false, isFocus));
-        titleChildrenRow->SetUpdateType(UpdateType::REBUILD);
-        rowElement->SetUpdateComponent(titleChildrenRow);
-    }
+    auto floatingTitleChildrenRow = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER,
+        containerModalComponent_->BuildTitleChildren(true, isFocus, windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN));
+    floatingTitleChildrenRow->SetUpdateType(UpdateType::REBUILD);
+    rowElement->SetUpdateComponent(floatingTitleChildrenRow);
+
     if (splitButton) {
         splitButton->SetHidden(windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     }
