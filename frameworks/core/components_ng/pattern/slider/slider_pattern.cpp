@@ -16,12 +16,17 @@
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 
 #include "base/geometry/offset.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/slider/slider_accessibility_property.h"
+#include "core/components_ng/pattern/slider/tip_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float HALF = 0.5;
+constexpr Dimension HOT_CIRCLE_SHADOW_WIDTH = 6.0_vp;
 } // namespace
 
 void SliderPattern::OnModifyDone()
@@ -32,11 +37,12 @@ void SliderPattern::OnModifyDone()
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    auto layoutProperty = host->GetLayoutProperty();
+    auto layoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateAlignment(Alignment::CENTER);
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
+    showTips_ = layoutProperty->GetShowTips().value_or(false);
     value_ = sliderPaintProperty->GetValue().value_or(0.0f);
     float min = sliderPaintProperty->GetMin().value_or(0.0f);
     float max = sliderPaintProperty->GetMax().value_or(100.0f);
@@ -73,8 +79,10 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     float length = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
                        ? contentSize.value().Width()
                        : contentSize.value().Height();
-    sliderLength_ =
-        length >= std::max(trackThickness_, blockDiameter_) ? length - std::max(trackThickness_, blockDiameter_) : 1;
+    borderBlank_ = std::max(trackThickness_,
+                            blockDiameter_ + static_cast<float>(HOT_CIRCLE_SHADOW_WIDTH.ConvertToPx()) +
+                            static_cast<float>(HOT_CIRCLE_SHADOW_WIDTH.ConvertToPx()));
+    sliderLength_ = length >= borderBlank_ ? length - borderBlank_ : 1;
     borderBlank_ = (length - sliderLength_) * static_cast<float>(HALF);
 
     return true;
@@ -100,10 +108,59 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
         hotFlag_ = true;
+        if (showTips_) {
+            bubbleFlag_ = true;
+            UpdateCircleCenterOffset();
+            CreateAndSetBubbleNode();
+        }
     } else if (touchType == TouchType::UP) {
         hotFlag_ = false;
+        if (bubbleFlag_) {
+            RemoveBubbleNode();
+            bubbleFlag_ = false;
+        }
     }
-    UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    UpdateMarkDirtyNode(showTips_ ? PROPERTY_UPDATE_MEASURE : PROPERTY_UPDATE_RENDER);
+}
+
+void SliderPattern::CreateAndSetBubbleNode()
+{
+    CHECK_NULL_VOID(!HasBubbleNode());
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sliderTheme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(sliderTheme);
+
+    std::string content = std::to_string(static_cast<int>(std::round(valueRatio_ * 100.0f))) + '%';
+
+    auto tipNode = FrameNode::GetOrCreateFrameNode(
+        V2::POPUP_ETS_TAG, GetBubbleId(), []() { return AceType::MakeRefPtr<TipPattern>(); });
+    tipNode->GetLayoutProperty<TipLayoutProperty>()->UpdateDirection(direction_);
+    tipNode->GetLayoutProperty<TipLayoutProperty>()->UpdatePadding(sliderTheme->GetTipTextPadding());
+    tipNode->GetPaintProperty<TipPaintProperty>()->UpdateDirection(direction_);
+    tipNode->GetPaintProperty<TipPaintProperty>()->UpdateColor(sliderTheme->GetTipColor());
+    tipNode->MountToParent(frameNode);
+
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    textNode->GetRenderContext()->UpdateBackgroundColor(sliderTheme->GetTipColor());
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(content);
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(sliderTheme->GetTipTextColor());
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontSize(sliderTheme->GetTipFontSize());
+    textNode->MarkModifyDone();
+    textNode->MountToParent(tipNode);
+    UpdateMarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SliderPattern::RemoveBubbleNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChildAtIndex(0);
+    UpdateMarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    bubbleId_ = std::nullopt;
 }
 
 void SliderPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -128,6 +185,7 @@ void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
         info.GetMainDelta() > 0.0 ? MoveStep(-1) : MoveStep(1);
     } else {
         UpdateValueByLocalLocation(info.GetLocalLocation());
+        UpdateCircleCenterOffset();
     }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -146,8 +204,6 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_VOID(sliderLayoutProperty);
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
-    auto frameOffset = GetHostFrameOffset();
-    CHECK_NULL_VOID(frameOffset.has_value());
     float length = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
                        ? static_cast<float>(localLocation->GetX())
                        : static_cast<float>(localLocation->GetY());
@@ -163,6 +219,45 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     float oldValue = value_;
     value_ = valueRatio_ * (max - min) + min;
     valueChangeFlag_ = !NearEqual(oldValue, value_);
+    UpdateTipsValue();
+}
+
+void SliderPattern::UpdateTipsValue()
+{
+    CHECK_NULL_VOID_NOLOG(valueChangeFlag_);
+    CHECK_NULL_VOID_NOLOG(showTips_);
+    CHECK_NULL_VOID(HasBubbleNode());
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto bubbleNode = frameNode->GetChildAtIndex(0);
+    CHECK_NULL_VOID(bubbleNode);
+    auto textNode = DynamicCast<FrameNode>(bubbleNode->GetChildAtIndex(0));
+    CHECK_NULL_VOID(textNode);
+    std::string content = std::to_string(static_cast<int>(std::round(valueRatio_ * 100.0f))) + '%';
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(content);
+    textNode->MarkModifyDone();
+}
+
+void SliderPattern::UpdateCircleCenterOffset()
+{
+    CHECK_NULL_VOID_NOLOG(showTips_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto frameSize = GetHostFrameSize();
+    CHECK_NULL_VOID(frameSize.has_value());
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
+    auto touchLength = valueRatio_ * sliderLength_;
+    auto touchOffset = sliderPaintProperty->GetReverse().value_or(false) ? sliderLength_ - touchLength + borderBlank_
+                                                                         : touchLength + borderBlank_;
+    if (sliderPaintProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
+        circleCenter_.SetX(touchOffset);
+        circleCenter_.SetY(frameSize->Height() * HALF);
+    } else {
+        circleCenter_.SetX(frameSize->Width() * HALF);
+        circleCenter_.SetY(touchOffset);
+    }
+    UpdateMarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)

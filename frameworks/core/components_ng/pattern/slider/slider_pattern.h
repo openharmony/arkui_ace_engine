@@ -36,8 +36,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto blockDiameter = hotFlag_ ? blockDiameter_ * BLOCK_DIAMETER_SCALE : blockDiameter_;
-        SliderPaintMethod::Parameters paintParameters { trackThickness_, blockDiameter, sliderLength_, borderBlank_,
+        SliderPaintMethod::Parameters paintParameters { trackThickness_, blockDiameter_, sliderLength_, borderBlank_,
             static_cast<float>(stepRatio_), static_cast<float>(valueRatio_), hotFlag_ };
         return MakeRefPtr<SliderPaintMethod>(paintParameters);
     }
@@ -54,7 +53,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<SliderLayoutAlgorithm>();
+        return MakeRefPtr<SliderLayoutAlgorithm>(bubbleFlag_, circleCenter_);
     }
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
@@ -69,10 +68,28 @@ public:
         return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
     }
 
+    bool HasBubbleNode() const
+    {
+        return bubbleId_.has_value();
+    }
+
+    int32_t GetBubbleId()
+    {
+        if (!bubbleId_.has_value()) {
+            bubbleId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return bubbleId_.value();
+    }
+
 private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
+    void UpdateCircleCenterOffset();
+    void UpdateTipsValue();
+    void CreateAndSetBubbleNode();
+    void RemoveBubbleNode();
+    
     void UpdateMarkDirtyNode(const PropertyChangeFlag& Flag);
     Axis GetDirection() const;
 
@@ -93,6 +110,7 @@ private:
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
     float value_ = 0.0f;
+    bool showTips_ = false;
     bool hotFlag_ = false;
     bool valueChangeFlag_ = false;
 
@@ -100,6 +118,7 @@ private:
     float valueRatio_ = 0.0f;
     float sliderLength_ = 0.0f;
     float borderBlank_ = 0.0f;
+    OffsetF circleCenter_ = { 0, 0 };
 
     float trackThickness_ = 0.0f;
     float blockDiameter_ = 0.0f;
@@ -108,6 +127,9 @@ private:
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<PanEvent> panEvent_;
     RefPtr<ClickEvent> clickEvent_;
+
+    std::optional<int32_t> bubbleId_;
+    bool bubbleFlag_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
 };
