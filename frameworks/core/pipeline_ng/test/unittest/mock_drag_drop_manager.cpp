@@ -58,7 +58,7 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
 
 void DragDropManager::onDragCancel() {}
 
-void DragDropManager::FireOnDragEvent(const RefPtr<FrameNode>& frameNode, const RefPtr<OHOS::Ace::DragEvent>& event,
+void DragDropManager::FireOnDragEvent(const RefPtr<FrameNode>& frameNode, const Point& point,
     DragEventType type, const std::string& extraInfo) {}
 
 void DragDropManager::OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode) {}
