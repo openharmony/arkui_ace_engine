@@ -16,13 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_EVENT_HUB_H
 
+#include <stdint.h>
 #include "base/memory/ace_type.h"
+#include "core/components/hyperlink/hyperlink_resources.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_v2/list/list_component.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t INVALID_IDX = -1;
 class ListEventHub : public EventHub {
     DECLARE_ACE_TYPE(ListEventHub, EventHub)
 
@@ -184,6 +187,25 @@ public:
         if (onItemDropEvent_) {
             onItemDropEvent_(dragInfo, itemIndex, insertIndex, isSuccess);
         }
+    }
+
+    std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType drag) override
+    {
+        auto json = JsonUtil::Create(true);
+        if (drag == DragEventType::START) {
+            int32_t index = GetListItemIndexByPosition(point.GetX(), point.GetY());
+            json->Put("selectedIndex", index);
+        } else if (drag == DragEventType::DROP || drag == DragEventType::MOVE) {
+            int32_t index = GetListItemIndexByPosition(point.GetX(), point.GetY());
+            json->Put("insertIndex", index);
+        } else {
+            int32_t index = INVALID_IDX;
+            json->Put("selectedIndex", index);
+        }
+        if (!extraInfo.empty()) {
+            json->Put("extraInfo", extraInfo.c_str());
+        }
+        return json->ToString();
     }
 
     void InitItemDragEvent(const RefPtr<GestureEventHub>& gestureHub);
