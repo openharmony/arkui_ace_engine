@@ -88,15 +88,15 @@ public:
         std::unique_ptr<PlatformWindow> platformWindow = AnimationTestUtils::CreatePlatformWindow();
         platformWindowRaw_ = reinterpret_cast<MockPlatformWindow*>(platformWindow.get());
         auto window = AnimationTestUtils::CreateWindow(std::move(platformWindow));
-        auto taskExecutor = AceType::MakeRefPtr<FakeTaskExecutor>();
-        auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+        auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+        auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
         auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
         RefPtr<Frontend> frontend = Frontend::CreateDefault();
         context_ = AceType::MakeRefPtr<PipelineContext>(
             std::move(window), taskExecutor, assetManager, resRegister, frontend, 0);
         context_->SetTimeProvider(
             [this] { return this->platformWindowRaw_->GetCurrentTimestampNano() + NANOSECOND_TO_MILLISECOND * 10; });
-        flushEventMock_ = AceType::MakeRefPtr<AnimationMock>();
+        flushEventMock_ = AceType::MakeRefPtr<MockAnimation>();
 
         context_->SetupRootElement();
         context_->OnSurfaceChanged(100, 200);
@@ -373,7 +373,7 @@ public:
 
 protected:
     RefPtr<PipelineContext> context_;
-    RefPtr<AnimationMock> flushEventMock_;
+    RefPtr<MockAnimation> flushEventMock_;
     MockPlatformWindow* platformWindowRaw_ = nullptr;
 };
 

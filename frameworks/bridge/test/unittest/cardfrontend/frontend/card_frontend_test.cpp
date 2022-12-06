@@ -2630,7 +2630,7 @@ HWTEST_F(CardFrontendTest, JsCardParserGetClockConfig005, TestSize.Level1)
 HWTEST_F(CardFrontendTest, CardFrontendInitialize001, TestSize.Level1)
 {
     auto cardFrontend = AceType::MakeRefPtr<CardFrontend>();
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
     cardFrontend->Initialize(FrontendType::JS_CARD, taskExecutor);
     ASSERT_NE(cardFrontend->taskExecutor_, nullptr);
     ASSERT_NE(cardFrontend->delegate_, nullptr);
@@ -2646,7 +2646,7 @@ HWTEST_F(CardFrontendTest, CardFrontendInitialize001, TestSize.Level1)
 HWTEST_F(CardFrontendTest, CardFrontendDestroy001, TestSize.Level1)
 {
     auto cardFrontend = AceType::MakeRefPtr<CardFrontend>();
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
     cardFrontend->Initialize(FrontendType::JS_CARD, taskExecutor);
     ASSERT_NE(cardFrontend->taskExecutor_, nullptr);
     ASSERT_NE(cardFrontend->delegate_, nullptr);
@@ -2666,7 +2666,7 @@ HWTEST_F(CardFrontendTest, CardFrontendDestroy001, TestSize.Level1)
 HWTEST_F(CardFrontendTest, CardFrontendAttachPipelineContext001, TestSize.Level1)
 {
     auto cardFrontend = AceType::MakeRefPtr<CardFrontend>();
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
     cardFrontend->Initialize(FrontendType::JS_CARD, taskExecutor);
     ASSERT_NE(cardFrontend->taskExecutor_, nullptr);
     ASSERT_NE(cardFrontend->delegate_, nullptr);
@@ -2687,13 +2687,13 @@ HWTEST_F(CardFrontendTest, CardFrontendAttachPipelineContext001, TestSize.Level1
 HWTEST_F(CardFrontendTest, CardFrontendSetAssetManager001, TestSize.Level1)
 {
     auto cardFrontend = AceType::MakeRefPtr<CardFrontend>();
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
     cardFrontend->Initialize(FrontendType::JS_CARD, taskExecutor);
     ASSERT_NE(cardFrontend->taskExecutor_, nullptr);
     ASSERT_NE(cardFrontend->delegate_, nullptr);
     ASSERT_NE(cardFrontend->manifestParser_, nullptr);
     ASSERT_EQ(cardFrontend->type_, FrontendType::JS_CARD);
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     cardFrontend->SetAssetManager(assetManager);
     ASSERT_NE(cardFrontend->assetManager_, nullptr);
 }
@@ -2706,7 +2706,7 @@ HWTEST_F(CardFrontendTest, CardFrontendSetAssetManager001, TestSize.Level1)
 HWTEST_F(CardFrontendTest, CardFrontendParseManifest001, TestSize.Level1)
 {
     auto cardFrontend = AceType::MakeRefPtr<CardFrontend>();
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
     cardFrontend->Initialize(FrontendType::JS_CARD, taskExecutor);
     ASSERT_NE(cardFrontend->taskExecutor_, nullptr);
     ASSERT_NE(cardFrontend->delegate_, nullptr);
@@ -2727,7 +2727,7 @@ HWTEST_F(CardFrontendTest, CardFrontendParseManifest001, TestSize.Level1)
 HWTEST_F(CardFrontendTest, CardFrontendRunPage001, TestSize.Level1)
 {
     auto cardFrontend = AceType::MakeRefPtr<CardFrontend>();
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
     cardFrontend->Initialize(FrontendType::JS_CARD, taskExecutor);
     ASSERT_NE(cardFrontend->taskExecutor_, nullptr);
     ASSERT_NE(cardFrontend->delegate_, nullptr);
@@ -2751,7 +2751,7 @@ HWTEST_F(CardFrontendTest, CardFrontendRunPage001, TestSize.Level1)
 HWTEST_F(CardFrontendTest, CardFrontendGetFormSrcPath001, TestSize.Level1)
 {
     auto cardFrontend = AceType::MakeRefPtr<CardFrontend>();
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
     cardFrontend->Initialize(FrontendType::JS_CARD, taskExecutor);
     ASSERT_NE(cardFrontend->taskExecutor_, nullptr);
     ASSERT_NE(cardFrontend->delegate_, nullptr);
@@ -2775,7 +2775,7 @@ HWTEST_F(CardFrontendTest, CardFrontendGetFormSrcPath001, TestSize.Level1)
 HWTEST_F(CardFrontendTest, CardFrontendGetPage001, TestSize.Level1)
 {
     auto cardFrontend = AceType::MakeRefPtr<CardFrontend>();
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
     cardFrontend->Initialize(FrontendType::JS_CARD, taskExecutor);
     ASSERT_NE(cardFrontend->taskExecutor_, nullptr);
     ASSERT_NE(cardFrontend->delegate_, nullptr);
@@ -2793,7 +2793,7 @@ HWTEST_F(CardFrontendTest, CardFrontendGetPage001, TestSize.Level1)
 HWTEST_F(CardFrontendTest, CardFrontendGetWindowConfig001, TestSize.Level1)
 {
     auto cardFrontend = AceType::MakeRefPtr<CardFrontend>();
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
     cardFrontend->Initialize(FrontendType::JS_CARD, taskExecutor);
     ASSERT_NE(cardFrontend->taskExecutor_, nullptr);
     ASSERT_NE(cardFrontend->delegate_, nullptr);
@@ -2814,7 +2814,7 @@ HWTEST_F(CardFrontendTest, CardFrontendGetWindowConfig001, TestSize.Level1)
 HWTEST_F(CardFrontendTest, CardFrontendLoadPage001, TestSize.Level1)
 {
     auto cardFrontend = AceType::MakeRefPtr<CardFrontend>();
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
     cardFrontend->Initialize(FrontendType::JS_CARD, taskExecutor);
     ASSERT_NE(cardFrontend->taskExecutor_, nullptr);
     ASSERT_NE(cardFrontend->delegate_, nullptr);
@@ -2838,7 +2838,7 @@ HWTEST_F(CardFrontendTest, CardFrontendLoadPage001, TestSize.Level1)
 HWTEST_F(CardFrontendTest, CardFrontendParsePage001, TestSize.Level1)
 {
     auto cardFrontend = AceType::MakeRefPtr<CardFrontend>();
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
     cardFrontend->Initialize(FrontendType::JS_CARD, taskExecutor);
     ASSERT_NE(cardFrontend->taskExecutor_, nullptr);
     ASSERT_NE(cardFrontend->delegate_, nullptr);
@@ -2867,7 +2867,7 @@ HWTEST_F(CardFrontendTest, CardFrontendParsePage001, TestSize.Level1)
 HWTEST_F(CardFrontendTest, CardFrontendUpdateData001, TestSize.Level1)
 {
     auto cardFrontend = AceType::MakeRefPtr<CardFrontend>();
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
     cardFrontend->Initialize(FrontendType::JS_CARD, taskExecutor);
     ASSERT_NE(cardFrontend->taskExecutor_, nullptr);
     ASSERT_NE(cardFrontend->delegate_, nullptr);
@@ -2889,7 +2889,7 @@ HWTEST_F(CardFrontendTest, CardFrontendUpdateData001, TestSize.Level1)
 HWTEST_F(CardFrontendTest, CardFrontendUpdatePageData001, TestSize.Level1)
 {
     auto cardFrontend = AceType::MakeRefPtr<CardFrontend>();
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
     cardFrontend->Initialize(FrontendType::JS_CARD, taskExecutor);
     ASSERT_NE(cardFrontend->taskExecutor_, nullptr);
     ASSERT_NE(cardFrontend->delegate_, nullptr);
@@ -2912,7 +2912,7 @@ HWTEST_F(CardFrontendTest, CardFrontendUpdatePageData001, TestSize.Level1)
 HWTEST_F(CardFrontendTest, CardFrontendSetColorMode001, TestSize.Level1)
 {
     auto cardFrontend = AceType::MakeRefPtr<CardFrontend>();
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
     cardFrontend->Initialize(FrontendType::JS_CARD, taskExecutor);
     ASSERT_NE(cardFrontend->taskExecutor_, nullptr);
     ASSERT_NE(cardFrontend->delegate_, nullptr);
@@ -2930,7 +2930,7 @@ HWTEST_F(CardFrontendTest, CardFrontendSetColorMode001, TestSize.Level1)
 HWTEST_F(CardFrontendTest, CardFrontendRebuildAllPages001, TestSize.Level1)
 {
     auto cardFrontend = AceType::MakeRefPtr<CardFrontend>();
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
     cardFrontend->Initialize(FrontendType::JS_CARD, taskExecutor);
     ASSERT_NE(cardFrontend->taskExecutor_, nullptr);
     ASSERT_NE(cardFrontend->delegate_, nullptr);
@@ -2951,7 +2951,7 @@ HWTEST_F(CardFrontendTest, CardFrontendRebuildAllPages001, TestSize.Level1)
 HWTEST_F(CardFrontendTest, CardFrontendOnSurfaceChanged001, TestSize.Level1)
 {
     auto cardFrontend = AceType::MakeRefPtr<CardFrontend>();
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
     cardFrontend->Initialize(FrontendType::JS_CARD, taskExecutor);
     ASSERT_NE(cardFrontend->taskExecutor_, nullptr);
     ASSERT_NE(cardFrontend->delegate_, nullptr);
@@ -2974,7 +2974,7 @@ HWTEST_F(CardFrontendTest, CardFrontendOnSurfaceChanged001, TestSize.Level1)
 HWTEST_F(CardFrontendTest, CardFrontendHandleSurfaceChanged001, TestSize.Level1)
 {
     auto cardFrontend = AceType::MakeRefPtr<CardFrontend>();
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
     cardFrontend->Initialize(FrontendType::JS_CARD, taskExecutor);
     ASSERT_NE(cardFrontend->taskExecutor_, nullptr);
     ASSERT_NE(cardFrontend->delegate_, nullptr);
@@ -2997,7 +2997,7 @@ HWTEST_F(CardFrontendTest, CardFrontendHandleSurfaceChanged001, TestSize.Level1)
 HWTEST_F(CardFrontendTest, CardFrontendOnMediaFeatureUpdate001, TestSize.Level1)
 {
     auto cardFrontend = AceType::MakeRefPtr<CardFrontend>();
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
     cardFrontend->Initialize(FrontendType::JS_CARD, taskExecutor);
     ASSERT_NE(cardFrontend->taskExecutor_, nullptr);
     ASSERT_NE(cardFrontend->delegate_, nullptr);

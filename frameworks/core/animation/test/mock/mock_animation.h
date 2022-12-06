@@ -25,12 +25,12 @@
 #include "core/components/common/properties/tween_option.h"
 
 namespace OHOS::Ace {
-class AnimationMock : public FlushEvent {
-    DECLARE_ACE_TYPE(AnimationMock, FlushEvent);
+class MockAnimation : public FlushEvent {
+    DECLARE_ACE_TYPE(MockAnimation, FlushEvent);
 
 public:
-    AnimationMock() = default;
-    ~AnimationMock() override = default;
+    MockAnimation() = default;
+    ~MockAnimation() override = default;
 
     void OnPostFlush() override;
 
