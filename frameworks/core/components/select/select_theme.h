@@ -216,6 +216,7 @@ public:
     {
         return selectedColor_;
     }
+
     void SetSelectedColor(const Color& value)
     {
         selectedColor_ = value;

@@ -1438,6 +1438,7 @@ GestureEventFunc CreateMenuEventWithParams(
             optionComponent->SetText(textComponent);
             optionComponent->SetValue(param.first);
             optionComponent->SetCustomizedCallback(param.second);
+            optionComponent->SetSelectedBackgroundColor(optionTheme->GetSelectedColor());
             menuComponent->AppendOption(optionComponent);
         }
 
