@@ -201,11 +201,11 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         SetPivot(xPivot, yPivot);
     }
 
-    if (bgLoadingCtx_ && bgImage_) {
+    if (bgLoadingCtx_ && bgLoadingCtx_->HasCanvasImage()) {
         PaintBackground();
     }
 
-    if (bdImageLoadingCtx_ && bdImage_) {
+    if (bdImageLoadingCtx_ && bdImageLoadingCtx_->HasCanvasImage()) {
         PaintBorderImage();
     }
 
@@ -256,19 +256,17 @@ DataReadyNotifyTask RosenRenderContext::CreateBgImageDataReadyCallback()
 LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
 {
     auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
-        auto ctx = weak.Upgrade();
-        CHECK_NULL_VOID(ctx);
-        auto imageSourceInfo = ctx->GetBackgroundImage().value_or(ImageSourceInfo(""));
+        auto rosenRenderContext = weak.Upgrade();
+        CHECK_NULL_VOID(rosenRenderContext);
+        auto imageSourceInfo = rosenRenderContext->GetBackgroundImage().value_or(ImageSourceInfo(""));
         if (imageSourceInfo != sourceInfo) {
             LOGW("sourceInfo does not match, ignore current callback. current: %{public}s vs callback's: %{public}s",
                 imageSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        ctx->bgImage_ = DynamicCast<SkiaCanvasImage>(ctx->bgLoadingCtx_->MoveCanvasImage());
-        CHECK_NULL_VOID(ctx->bgImage_);
-        if (ctx->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
-            ctx->PaintBackground();
-            ctx->RequestNextFrame();
+        if (rosenRenderContext->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
+            rosenRenderContext->PaintBackground();
+            rosenRenderContext->RequestNextFrame();
         }
     };
     return task;
@@ -277,16 +275,18 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
 void RosenRenderContext::PaintBackground()
 {
     CHECK_NULL_VOID(GetBackground() && GetBackground()->GetBackgroundImage());
-    auto image = DynamicCast<SkiaCanvasImage>(bgImage_);
-    CHECK_NULL_VOID(rsNode_ && bgLoadingCtx_ && image);
-    auto skImage = image->GetCanvasImage();
-    CHECK_NULL_VOID(skImage);
-
+    CHECK_NULL_VOID(rsNode_ && bgLoadingCtx_);
+    if (!bgLoadingCtx_->HasCanvasImage()) {
+        return;
+    }
+    auto skiaCanvasImage = DynamicCast<SkiaCanvasImage>(bgLoadingCtx_->MoveCanvasImage());
+    CHECK_NULL_VOID(skiaCanvasImage);
+    auto skImage = skiaCanvasImage->GetCanvasImage();
     auto rosenImage = std::make_shared<Rosen::RSImage>();
     rosenImage->SetImage(skImage);
-    auto compressData = image->GetCompressData();
-    rosenImage->SetCompressData(
-        compressData, image->GetUniqueID(), image->GetCompressWidth(), image->GetCompressHeight());
+    auto compressData = skiaCanvasImage->GetCompressData();
+    rosenImage->SetCompressData(compressData, skiaCanvasImage->GetUniqueID(), skiaCanvasImage->GetCompressWidth(),
+        skiaCanvasImage->GetCompressHeight());
     rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
     rsNode_->SetBgImage(rosenImage);
 
@@ -577,25 +577,30 @@ void RosenRenderContext::PaintBorderImage()
 {
     CHECK_NULL_VOID(rsNode_);
     auto paintBorderImageTask = [weak = WeakClaim(this)](std::shared_ptr<SkCanvas> canvas) {
-        auto ctx = weak.Upgrade();
-        CHECK_NULL_VOID(ctx && ctx->GetBorderImage());
-        CHECK_NULL_VOID(ctx->bdImageLoadingCtx_ && ctx->bdImage_);
+        auto renderCtx = weak.Upgrade();
+        CHECK_NULL_VOID(renderCtx && renderCtx->GetBorderImage());
+        CHECK_NULL_VOID(renderCtx->bdImageLoadingCtx_);
+        if (!renderCtx->bdImageLoadingCtx_->HasCanvasImage()) {
+            return;
+        }
 
-        auto layoutProperty = ctx->GetHost()->GetLayoutProperty();
+        auto skiaCanvasImage = DynamicCast<SkiaCanvasImage>(renderCtx->bdImageLoadingCtx_->MoveCanvasImage());
+        CHECK_NULL_VOID(skiaCanvasImage);
+        auto skImage = skiaCanvasImage->GetCanvasImage();
+        auto layoutProperty = renderCtx->GetHost()->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
-        auto paintRect = ctx->GetPaintRectWithoutTransform();
+        auto paintRect = renderCtx->GetPaintRectWithoutTransform();
         if (NearZero(paintRect.Width()) || NearZero(paintRect.Height())) {
             return;
         }
         auto borderWidthProperty = layoutProperty->GetBorderWidthProperty()
                                        ? (*layoutProperty->GetBorderWidthProperty())
                                        : BorderWidthProperty();
-        auto image = DynamicCast<SkiaCanvasImage>(ctx->bdImage_)->GetCanvasImage();
-        CHECK_NULL_VOID(image);
-        RSImage rsImage(&image);
+        RSImage rsImage(&skImage);
         RSCanvas rsCanvas(&canvas);
-        BorderImagePainter borderImagePainter(layoutProperty->GetBorderWidthProperty() != nullptr, *ctx->GetBdImage(),
-            borderWidthProperty, paintRect.GetSize(), rsImage, PipelineBase::GetCurrentContext()->GetDipScale());
+        BorderImagePainter borderImagePainter(layoutProperty->GetBorderWidthProperty() != nullptr,
+            *renderCtx->GetBdImage(), borderWidthProperty, paintRect.GetSize(), rsImage,
+            PipelineBase::GetCurrentContext()->GetDipScale());
         borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), rsCanvas);
     };
 
@@ -621,19 +626,17 @@ DataReadyNotifyTask RosenRenderContext::CreateBorderImageDataReadyCallback()
 LoadSuccessNotifyTask RosenRenderContext::CreateBorderImageLoadSuccessCallback()
 {
     auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
-        auto ctx = weak.Upgrade();
-        CHECK_NULL_VOID(ctx);
-        auto imageSourceInfo = ctx->GetBorderImageSource().value_or(ImageSourceInfo(""));
+        auto rosenRenderContext = weak.Upgrade();
+        CHECK_NULL_VOID(rosenRenderContext);
+        auto imageSourceInfo = rosenRenderContext->GetBorderImageSource().value_or(ImageSourceInfo(""));
         if (imageSourceInfo != sourceInfo) {
             LOGW("sourceInfo does not match, ignore current callback. current: %{public}s vs callback's: %{public}s",
                 imageSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        ctx->bdImage_ = ctx->bdImageLoadingCtx_->MoveCanvasImage();
-        CHECK_NULL_VOID(ctx->bdImage_);
-        if (ctx->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
-            ctx->PaintBorderImage();
-            ctx->RequestNextFrame();
+        if (rosenRenderContext->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
+            rosenRenderContext->PaintBorderImage();
+            rosenRenderContext->RequestNextFrame();
         }
     };
     return task;
