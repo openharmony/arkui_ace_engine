@@ -28,14 +28,13 @@ public:
     MockDragWindow() = default;
     ~MockDragWindow() override = default;
 
-    void MoveTo(int32_t x, int32_t y) const override;
-    void DrawPixelMap(const RefPtr<PixelMap>& pixelMap) override;
-    void DrawFrameNode(const RefPtr<NG::FrameNode>& rootNode) override;
-    void Destroy() const override;
-
     MOCK_METHOD1(DrawImage, void(void* skImage));
     MOCK_METHOD3(DrawText,
         void(std::shared_ptr<txt::Paragraph> paragraph_, const Offset& offset, const RefPtr<RenderText>& renderText));
+    MOCK_METHOD1(DrawPixelMap, void(const RefPtr<PixelMap>&));
+    MOCK_METHOD1(DrawFrameNode, void(const RefPtr<NG::FrameNode>&));
+    MOCK_CONST_METHOD2(MoveTo, void(int32_t, int32_t));
+    MOCK_CONST_METHOD0(Destroy, void());
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_TEST_MOCK_MOCK_DRAG_WINDOW_H
