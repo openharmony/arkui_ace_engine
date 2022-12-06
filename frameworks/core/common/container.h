@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONTAINER_H
 
 #include <functional>
+#include <mutex>
 #include <unordered_map>
 
 #include "base/memory/ace_type.h"
@@ -169,6 +170,8 @@ public:
         return cardHapPath_;
     }
 
+    bool UpdateState(const Frontend::State& state);
+
     Settings& GetSettings()
     {
         return settings_;
@@ -260,6 +263,8 @@ protected:
     bool firstUpdateData_ = true;
     std::string cardHapPath_;
     bool useNewPipeline_ = false;
+    std::mutex stateMutex_;
+    Frontend::State state_ = Frontend::State::ON_HIDE;
 
 private:
     std::string moduleName_;
