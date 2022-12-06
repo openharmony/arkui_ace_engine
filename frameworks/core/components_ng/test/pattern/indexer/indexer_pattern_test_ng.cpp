@@ -443,6 +443,50 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern004, TestSize.Level1)
      */
     indexerPattern->InitPanEvent(gestureEvent);
     EXPECT_NE(indexerPattern->panEvent_, nullptr);
+    
+    /**
+     * @tc.steps: step3. carry actions.
+     * @tc.steps: case1: AXIS, mainDelta is 0
+     * @tc.expected: step3. get indexerPattern success.
+     */
+    GestureEvent gestureEvent1;
+    gestureEvent1.inputEventType_ = InputEventType::AXIS;
+    gestureEvent1.mainDelta_ = 0;
+    indexerPattern->panEvent_->actionStart_(gestureEvent1);
+    indexerPattern->panEvent_->actionUpdate_(gestureEvent1);
+    EXPECT_NE(indexerPattern->panEvent_, nullptr);
+
+    /**
+     * @tc.steps: step3. carry actions.
+     * @tc.steps: case2: AXIS, mainDelta is 1
+     * @tc.expected: step3. get indexerPattern success.
+     */
+    gestureEvent1.inputEventType_ = InputEventType::AXIS;
+    gestureEvent1.mainDelta_ = 1;
+    indexerPattern->panEvent_->actionStart_(gestureEvent1);
+    indexerPattern->panEvent_->actionUpdate_(gestureEvent1);
+    EXPECT_NE(indexerPattern->panEvent_, nullptr);
+
+    /**
+     * @tc.steps: step3. carry actions.
+     * @tc.steps: case3: AXIS, mainDelta is -1
+     * @tc.expected: step3. get indexerPattern success.
+     */
+    gestureEvent1.inputEventType_ = InputEventType::AXIS;
+    gestureEvent1.mainDelta_ = -1;
+    indexerPattern->panEvent_->actionStart_(gestureEvent1);
+    indexerPattern->panEvent_->actionUpdate_(gestureEvent1);
+    EXPECT_NE(indexerPattern->panEvent_, nullptr);
+
+    /**
+     * @tc.steps: step3. carry actions.
+     * @tc.steps: case4: KEYBOARD
+     * @tc.expected: step3. get indexerPattern success.
+     */
+    gestureEvent1.inputEventType_ = InputEventType::KEYBOARD;
+    indexerPattern->panEvent_->actionStart_(gestureEvent1);
+    indexerPattern->panEvent_->actionUpdate_(gestureEvent1);
+    EXPECT_NE(indexerPattern->panEvent_, nullptr);
 }
 
 /**
@@ -863,6 +907,81 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern014, TestSize.Level1)
     keyEvent = KeyEvent(KeyCode::KEY_UNKNOWN, KeyAction::UNKNOWN);
     result = indexerPattern->OnKeyEvent(keyEvent);
     EXPECT_EQ(result, false);
+
+    keyEvent = KeyEvent(KeyCode::KEY_1, KeyAction::DOWN);
+    result = indexerPattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(result, false);
+
+    keyEvent = KeyEvent(KeyCode::KEY_B, KeyAction::DOWN);
+    result = indexerPattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(result, false);
+
+    keyEvent = KeyEvent(KeyCode::KEY_B, KeyAction::DOWN);
+    keyEvent.pressedCodes = {KeyCode::KEY_A, KeyCode::KEY_B};
+    result = indexerPattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(result, false);
+
+    keyEvent = KeyEvent(KeyCode::KEY_UNKNOWN, KeyAction::DOWN);
+    keyEvent.pressedCodes = {KeyCode::KEY_A, KeyCode::KEY_B};
+    result = indexerPattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: IndexerPattern015
+ * @tc.desc: Test indexer pattern ApplyIndexChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, IndexerPattern015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     */
+    TestProperty testProperty;
+    
+    /**
+     * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
+     * @tc.expected: step2. get indexerPattern success.
+     */
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
+    EXPECT_NE(indexerPattern, nullptr);
+    auto indexerEventHub = frameNode->GetEventHub<IndexerEventHub>();
+    CHECK_NULL_VOID(indexerEventHub);
+    
+    /**
+     * @tc.steps: step3. call indexerPattern ApplyIndexChange function, compare result.
+     * @tc.steps: case1: have onSelected, onRequestPopupData, onPopupSelected, selected < 0
+     * @tc.expected: step3. OnKeyEvent success and result correct.
+     */
+    indexerEventHub->SetOnSelected([](int32_t) {});
+    indexerEventHub->SetOnRequestPopupData([](int32_t) {return std::vector<std::string>();});
+    indexerEventHub->SetOnPopupSelected([](int32_t) {});
+    indexerPattern->selected_ = -1;
+    indexerPattern->itemCount_ = CREATE_ARRAY_VALUE.size();
+    indexerPattern->ApplyIndexChanged();
+    EXPECT_NE(indexerPattern->selected_, -1);
+
+    /**
+     * @tc.steps: step3. call indexerPattern ApplyIndexChange function, compare result.
+     * @tc.steps: case2: have onSelected, onRequestPopupData, onPopupSelected, selected = 1
+     * @tc.expected: step3. OnKeyEvent success and result correct.
+     */
+    indexerPattern->selected_ = 1;
+    indexerPattern->itemCount_ = CREATE_ARRAY_VALUE.size();
+    indexerPattern->ApplyIndexChanged();
+    EXPECT_EQ(indexerPattern->selected_, 1);
+
+    /**
+     * @tc.steps: step3. call indexerPattern ApplyIndexChange function, compare result.
+     * @tc.steps: case3: have onSelected, onRequestPopupData, onPopupSelected, selected > size
+     * @tc.expected: step3. OnKeyEvent success and result correct.
+     */
+    indexerPattern->selected_ = CREATE_ARRAY_VALUE.size() + 1;
+    indexerPattern->itemCount_ = CREATE_ARRAY_VALUE.size();
+    indexerPattern->ApplyIndexChanged();
+    EXPECT_NE(indexerPattern->selected_, 1);
 }
 
 /**
@@ -896,7 +1015,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest001, TestSize.Level1)
      * @tc.expected: step3. create indexer layoutWrapper success.
      */
     int32_t itemCount = CREATE_ARRAY_VALUE.size();
-    for (int32_t index = 0; index < itemCount; index++) {
+    for (int32_t index = 0; index <= itemCount; index++) {
         auto childFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
         EXPECT_NE(childFrameNode, nullptr);
         auto childGeometryNode = childFrameNode->GetGeometryNode();
@@ -957,7 +1076,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest002, TestSize.Level1)
      * @tc.expected: step3. create indexer layoutWrapper success.
      */
     int32_t itemCount = CREATE_ARRAY_VALUE.size();
-    for (int32_t index = 0; index < itemCount; index++) {
+    for (int32_t index = 0; index <= itemCount; index++) {
         auto childFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
         EXPECT_NE(childFrameNode, nullptr);
         auto childGeometryNode = childFrameNode->GetGeometryNode();
@@ -1020,9 +1139,82 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest003, TestSize.Level1)
     indexerLayoutAlgorithm.Layout(&layoutWrapper);
     EXPECT_EQ(indexerLayoutAlgorithm.itemSizeRender_, 0);
 
+    indexerLayoutAlgorithm.itemSize_ = CREATE_ARRAY_VALUE.size();
     indexerLayoutAlgorithm.alignStyle_ = AlignStyle::LEFT;
     indexerLayoutAlgorithm.Layout(&layoutWrapper);
     EXPECT_EQ(indexerLayoutAlgorithm.itemSizeRender_, 0);
+
+    indexerLayoutAlgorithm.alignStyle_ = AlignStyle::RIGHT;
+    indexerLayoutAlgorithm.Layout(&layoutWrapper);
+    EXPECT_EQ(indexerLayoutAlgorithm.itemSizeRender_, 0);
+}
+
+/**
+ * @tc.name: IndexerAlgorithmTest004
+ * @tc.desc: Test indexer algorithm Measure function, using special case.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     */
+    TestProperty testProperty;
+    testProperty.popupPositionXValue = std::make_optional(POPUP_POSITIONX_VALUE);
+    testProperty.popupPositionYValue = std::make_optional(POPUP_POSITIONY_VALUE);
+    testProperty.itemSizeValue = std::make_optional(ITEM_SIZE_VALUE);
+    testProperty.usingPopupValue = false;
+
+    /**
+     * @tc.steps: step2. create indexer frameNode and get indexerLayoutProperty.
+     * @tc.expected: step2. get indexerLayoutProperty success.
+     */
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_NE(layoutProperty, nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
+    IndexerLayoutAlgorithm indexerLayoutAlgorithm = IndexerLayoutAlgorithm(0);
+
+    /**
+     * @tc.steps: step4. call indexerLayoutAlgorithm measure function, compare result.
+     * @tc.steps: case1: no idealSize
+     * @tc.expected: step4. layout success.
+     */
+    indexerLayoutAlgorithm.Measure(&layoutWrapper);
+    EXPECT_EQ(indexerLayoutAlgorithm.itemSizeRender_, ITEM_SIZE_VALUE.Value());
+
+    /**
+     * @tc.steps: step1. create testProperty and set properties of indexer.
+     */
+    TestProperty testProperty1;
+    testProperty1.popupPositionXValue = std::make_optional(POPUP_POSITIONX_VALUE);
+    testProperty1.popupPositionYValue = std::make_optional(POPUP_POSITIONY_VALUE);
+    testProperty1.itemSizeValue = std::make_optional(ITEM_SIZE_VALUE);
+    testProperty1.usingPopupValue = true;
+
+    /**
+     * @tc.steps: step2. create indexer frameNode and get indexerLayoutProperty.
+     * @tc.expected: step2. get indexerLayoutProperty success.
+     */
+    RefPtr<FrameNode> frameNode1 = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty1);
+    EXPECT_NE(frameNode1, nullptr);
+    RefPtr<GeometryNode> geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode1, nullptr);
+    RefPtr<LayoutProperty> layoutProperty1 = frameNode1->GetLayoutProperty();
+    EXPECT_NE(layoutProperty1, nullptr);
+    LayoutWrapper layoutWrapper1 = LayoutWrapper(frameNode1, geometryNode1, layoutProperty1);
+    IndexerLayoutAlgorithm indexerLayoutAlgorithm1 = IndexerLayoutAlgorithm(0);
+
+    /**
+     * @tc.steps: step4. call indexerLayoutAlgorithm measure function, compare result.
+     * @tc.steps: case1: no idealSize
+     * @tc.expected: step4. layout success.
+     */
+    indexerLayoutAlgorithm1.Measure(&layoutWrapper1);
+    EXPECT_EQ(indexerLayoutAlgorithm1.itemSizeRender_, ITEM_SIZE_VALUE.Value());
 }
 } // namespace OHOS::Ace::NG
 
