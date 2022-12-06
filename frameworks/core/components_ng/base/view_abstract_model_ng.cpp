@@ -107,7 +107,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
         };
         auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
 
-        hub->SetLongPressEvent(longPress, false, true);
+        hub->SetLongPressEvent(longPress, false, true, 280);
     } else {
         LOGE("The arg responseType is invalid.");
         return;
