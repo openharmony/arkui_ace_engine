@@ -210,6 +210,7 @@ void FlutterRenderTextField::PaintDecoration(
     pipelineContext->AddDirtyLayoutNode(AceType::Claim(this));
 
     Size deflateSize = ComputeDeflateSizeOfErrorAndCountText();
+    decoration_->SetBackgroundColor(inactiveBgColor_);
     RefPtr<FlutterDecorationPainter> decorationPainter = AceType::MakeRefPtr<FlutterDecorationPainter>(
         decoration_, GetPaintRect() - deflateSize, size - deflateSize, pipelineContext->GetDipScale());
     decorationPainter->PaintDecoration(offset, canvas, context);
