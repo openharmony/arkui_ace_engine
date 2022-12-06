@@ -799,6 +799,8 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest010, TestSize.Level1)
         .Times(2)
         .WillOnce(Return(false))
         .WillOnce(Return(true));
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), GetVideoWidth()).Times(1);
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), GetVideoHeight()).Times(1);
     // case1: MediaPlayer is invalid
     pattern->OnPlayerStatus(PlaybackStatus::PREPARED);
     EXPECT_EQ(pauseCheck, VIDEO_PAUSE_EVENT);
@@ -1266,5 +1268,73 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest014, TestSize.Level1)
         SetBounds(75.0f, 0.0f, 250.0f, 400.0f))
         .Times(1);
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+}
+
+/**
+ * @tc.name: VideoPatternTest015
+ * @tc.desc: Test OnResolutionChange & OnHiddenChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoPropertyTestNg, VideoPatternTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video
+     * @tc.expected: step1. Create Video successfully
+     */
+    auto frameNode = CreateVideoNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. Call OnResolutionChange
+     * @tc.expected: step2. related functions will be called
+     */
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
+        .Times(2)
+        .WillOnce(Return(false))
+        .WillOnce(Return(true));
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), GetVideoWidth()).Times(1);
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), GetVideoHeight()).Times(1);
+    pattern->OnResolutionChange();
+    pattern->OnResolutionChange();
+
+    /**
+     * @tc.steps: step3. Call OnVisibleChange several times
+     * @tc.expected: step3. related functions will be called
+     */
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(false));
+    pattern->OnModifyDone();
+
+    pattern->hiddenChangeEvent_ = nullptr;
+    pattern->OnVisibleChange(false); // case: hiddenChangeEvent_ is null
+
+    pattern->OnModifyDone(); // after that, hiddenChangeEvent is not null
+
+    pattern->isPlaying_ = false;
+    pattern->OnVisibleChange(false); // case: isPlaying_=false, hidden=true, mediaPlayer is not null
+    EXPECT_FALSE(pattern->pastPlayingStatus_);
+
+    pattern->isPlaying_ = true;
+    pattern->OnVisibleChange(false); // case: isPlaying_=true, hidden=true, mediaPlayer is not null
+    EXPECT_TRUE(pattern->pastPlayingStatus_);
+
+    pattern->isPlaying_ = false;
+    pattern->OnVisibleChange(false); // // case: isPlaying_=false, hidden = true, pastPlayingStatus_ = true
+
+    pattern->isPlaying_ = true;
+    pattern->OnVisibleChange(true); // case: isPlaying_=true, hidden = false, pastPlayingStatus_ = true
+    EXPECT_FALSE(pattern->pastPlayingStatus_);
+
+    pattern->OnVisibleChange(true); // case: isPlaying_=true, hidden = false, pastPlayingStatus_ = false
+    EXPECT_FALSE(pattern->pastPlayingStatus_);
+
+    pattern->mediaPlayer_ = nullptr;
+    pattern->isPlaying_ = true;
+    pattern->OnVisibleChange(false); // case: isPlaying_=true, hidden=true, mediaPlayer is null
+    pattern->OnVisibleChange(true);  // case: isPlaying_=true, hidden=false, mediaPlayer is null
+    EXPECT_FALSE(pattern->pastPlayingStatus_);
 }
 } // namespace OHOS::Ace::NG
