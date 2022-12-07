@@ -79,7 +79,7 @@ public:
     bool HandleMouseEvent(const MouseEvent& event) override;
     void SendDoubleClickEvent(const MouseClickInfo& info);
     bool HandleDoubleClickEvent(const MouseEvent& event);
-    void HandleKeyEvent(const KeyEvent& keyEvent);
+    bool HandleKeyEvent(const KeyEvent& keyEvent);
 
 #ifdef OHOS_STANDARD_SYSTEM
     void OnAppShow() override;
@@ -121,7 +121,7 @@ public:
     void HandleAxisEvent(const AxisEvent& event) override;
     bool IsAxisScrollable(AxisDirection direction) override;
     WeakPtr<RenderNode> CheckAxisNode() override;
-    
+
     void SetWebIsFocus(bool isFocus)
     {
         isFocus_ = isFocus;
@@ -187,6 +187,7 @@ private:
     RefPtr<RawRecognizer> touchRecognizer_ = nullptr;
     OnMouseCallback onMouse_;
     OnKeyEventCallback onKeyEvent_;
+    std::function<bool(KeyEventInfo& keyEventInfo)> onPreKeyEvent_;
     RefPtr<TextOverlayComponent> textOverlay_;
     WeakPtr<StackElement> stackElement_;
     std::function<void(const OverlayShowOption&, float, float)> updateHandlePosition_ = nullptr;

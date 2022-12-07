@@ -197,6 +197,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MultiWindowAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebCursiveFont, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebFantasyFont, std::string);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebFixedFont, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebSansSerifFont, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebSerifFont, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebStandardFont, std::string);
@@ -253,6 +254,7 @@ private:
     void OnMultiWindowAccessEnabledUpdate(bool value);
     void OnWebCursiveFontUpdate(const std::string& value);
     void OnWebFantasyFontUpdate(const std::string& value);
+    void OnWebFixedFontUpdate(const std::string& value);
     void OnWebSerifFontUpdate(const std::string& value);
     void OnWebSansSerifFontUpdate(const std::string& value);
     void OnWebStandardFontUpdate(const std::string& value);

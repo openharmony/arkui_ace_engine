@@ -164,7 +164,6 @@ public:
         std::shared_ptr<NWeb::NWebControllerHandler> handler) override;
     void OnWindowExitByJS() override;
     void OnPageVisible(const std::string& url) override;
-    bool OnPreKeyEvent(std::shared_ptr<NWeb::NWebKeyEvent> event) override;
     void OnDataResubmission(std::shared_ptr<NWeb::NWebDataResubmissionCallback> handler) override;
     void OnPageIcon(
         const void* data,
@@ -172,6 +171,7 @@ public:
         size_t height,
         NWeb::ImageColorType color_type,
         NWeb::ImageAlphaType alpha_type) override;
+    void OnDesktopIconUrl(const std::string& icon_url, bool precomposed) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {

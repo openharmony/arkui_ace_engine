@@ -1154,33 +1154,6 @@ private:
     std::string url_;
 };
 
-class ACE_EXPORT WebKeyEvent : public AceType {
-    DECLARE_ACE_TYPE(WebKeyEvent, AceType)
-
-public:
-    WebKeyEvent() = default;
-    ~WebKeyEvent() = default;
-    virtual int32_t GetAction() = 0;
-    virtual int32_t GetKeyCode() = 0;
-};
-
-class ACE_EXPORT WebInterceptKeyEvent : public BaseEventInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(WebInterceptKeyEvent, BaseEventInfo);
-
-public:
-    WebInterceptKeyEvent(const RefPtr<WebKeyEvent>& result)
-        : BaseEventInfo("WebInterceptKeyEvent"), result_(result) {}
-    ~WebInterceptKeyEvent() = default;
-
-    const RefPtr<WebKeyEvent>& GetResult() const
-    {
-        return result_;
-    }
-
-private:
-    RefPtr<WebKeyEvent> result_;
-};
-
 class ACE_EXPORT DataResubmitted : public AceType {
     DECLARE_ACE_TYPE(DataResubmitted, AceType)
 
@@ -1216,11 +1189,11 @@ public:
     WebFaviconReceived() = default;
     ~WebFaviconReceived() = default;
 
-    virtual const void* GetData();
-    virtual size_t GetWidth();
-    virtual size_t GetHeight();
-    virtual int GetColorType();
-    virtual int GetAlphaType();
+    virtual const void* GetData() = 0;
+    virtual size_t GetWidth() = 0;
+    virtual size_t GetHeight() = 0;
+    virtual int GetColorType() = 0;
+    virtual int GetAlphaType() = 0;
 };
 
 class ACE_EXPORT FaviconReceivedEvent : public BaseEventInfo {
@@ -1238,6 +1211,31 @@ public:
 
 private:
     RefPtr<WebFaviconReceived> handler_;
+};
+
+class ACE_EXPORT TouchIconUrlEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(TouchIconUrlEvent, BaseEventInfo);
+
+public:
+    TouchIconUrlEvent(const std::string& iconUrl, bool precomposed)
+        : BaseEventInfo("TouchIconUrlEvent"), url_(iconUrl), precomposed_(precomposed)
+    {}
+
+    ~TouchIconUrlEvent() = default;
+
+    const std::string& GetUrl() const
+    {
+        return url_;
+    }
+
+    bool GetPreComposed() const
+    {
+        return precomposed_;
+    }
+
+private:
+    std::string url_;
+    bool precomposed_;
 };
 } // namespace OHOS::Ace
 

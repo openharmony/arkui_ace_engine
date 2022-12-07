@@ -89,6 +89,7 @@ void RenderWeb::Update(const RefPtr<Component>& component)
 
     onMouse_ = web->GetOnMouseEventCallback();
     onKeyEvent_ = web->GetOnKeyEventCallback();
+    onPreKeyEvent_ = web->GetOnInterceptKeyEventCallback();
     RegistVirtualKeyBoardListener();
     web_ = web;
     if (delegate_) {
@@ -231,7 +232,7 @@ void RenderWeb::OnMouseEvent(const MouseEvent& event)
     }
 
     auto localLocation = event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
-    if (!HandleDoubleClickEvent(event)) { 
+    if (!HandleDoubleClickEvent(event)) {
         delegate_->OnMouseEvent(localLocation.GetX(), localLocation.GetY(), event.button, event.action, SINGLE_CLICK_NUM);
     }
 
@@ -270,14 +271,16 @@ bool RenderWeb::HandleMouseEvent(const MouseEvent& event)
     return info.IsStopPropagation();
 }
 
-void RenderWeb::HandleKeyEvent(const KeyEvent& keyEvent)
+bool RenderWeb::HandleKeyEvent(const KeyEvent& keyEvent)
 {
-    if (!onKeyEvent_) {
-        LOGW("RenderWeb::HandleKeyEvent, key event callback is null");
-        return;
-    }
     KeyEventInfo info(keyEvent);
-    onKeyEvent_(info);
+    if (onKeyEvent_) {
+        onKeyEvent_(info);
+    }
+    if (onPreKeyEvent_) {
+        return onPreKeyEvent_(info);
+    }
+    return false;
 }
 
 void RenderWeb::PerformLayout()

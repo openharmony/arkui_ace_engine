@@ -106,6 +106,7 @@ public:
     static void MultiWindowAccessEnabled(bool isMultiWindowAccessEnable);
     static void WebCursiveFont(const std::string& cursiveFontFamily);
     static void WebFantasyFont(const std::string& fantasyFontFamily);
+    static void WebFixedFont(const std::string& fixedFontFamily);
     static void WebSansSerifFont(const std::string& sansSerifFontFamily);
     static void WebSerifFont(const std::string& serifFontFamily);
     static void WebStandardFont(const std::string& standardFontFamily);
@@ -117,6 +118,7 @@ public:
     static void OnInterceptKeyEvent(const JSCallbackInfo& args);
     static void OnDataResubmitted(const JSCallbackInfo& args);
     static void OnFaviconReceived(const JSCallbackInfo& args);
+    static void OnTouchIconUrlReceived(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

@@ -254,19 +254,6 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebControllerHandler> handler_;
 };
 
-class InterceptKeyEventOhos : public WebKeyEvent {
-    DECLARE_ACE_TYPE(InterceptKeyEventOhos, WebKeyEvent)
-
-public:
-    InterceptKeyEventOhos(std::shared_ptr<OHOS::NWeb::NWebKeyEvent> result) : result_(result) {}
-
-    int32_t GetAction() override;
-    int32_t GetKeyCode() override;
-
-private:
-    std::shared_ptr<OHOS::NWeb::NWebKeyEvent> result_;
-};
-
 class DataResubmittedOhos : public DataResubmitted {
     DECLARE_ACE_TYPE(DataResubmittedOhos, DataResubmitted)
 
@@ -382,6 +369,7 @@ public:
     void UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled);
     void UpdateWebCursiveFont(const std::string& cursiveFontFamily);
     void UpdateWebFantasyFont(const std::string& fantasyFontFamily);
+    void UpdateWebFixedFont(const std::string& fixedFontFamily);
     void UpdateWebSansSerifFont(const std::string& sansSerifFontFamily);
     void UpdateWebSerifFont(const std::string& serifFontFamily);
     void UpdateWebStandardFont(const std::string& standardFontFamily);
@@ -460,10 +448,10 @@ public:
         const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler);
     void OnWindowExit();
     void OnPageVisible(const std::string& url);
-    bool OnInterceptKeyEvent(const std::shared_ptr<BaseEventInfo>& info);
     void OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler);
     void OnFaviconReceived(const void* data, size_t width, size_t height, OHOS::NWeb::ImageColorType color_type,
         OHOS::NWeb::ImageAlphaType alpha_type);
+    void OnTouchIconUrl(const std::string& iconUrl, bool precomposed);
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();
@@ -588,6 +576,7 @@ private:
     EventCallbackV2 onSearchResultReceiveV2_;
     EventCallbackV2 onWindowExitV2_;
     EventCallbackV2 onPageVisibleV2_;
+    EventCallbackV2 onTouchIconUrlV2_;
 
     std::string bundlePath_;
     std::string bundleDataPath_;

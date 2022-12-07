@@ -602,54 +602,6 @@ private:
 };
 std::unordered_map<int32_t, JSRef<JSObject>> JSWebWindowNewHandler::controller_map_;
 
-class JSWebInterceptKeyEvent : public Referenced {
-public:
-    static void JSBind(BindingTarget globalObj)
-    {
-        JSClass<JSWebInterceptKeyEvent>::Declare("KeyEvent");
-        JSClass<JSWebInterceptKeyEvent>::CustomMethod("getAction", &JSWebInterceptKeyEvent::GetAction);
-        JSClass<JSWebInterceptKeyEvent>::CustomMethod("getKeyCode", &JSWebInterceptKeyEvent::GetKeyCode);
-        JSClass<JSWebInterceptKeyEvent>::Bind(
-            globalObj, &JSWebInterceptKeyEvent::Constructor, &JSWebInterceptKeyEvent::Destructor);
-    }
-
-    void SetResult(const RefPtr<WebKeyEvent>& result)
-    {
-        result_ = result;
-    }
-
-    void GetAction(const JSCallbackInfo& args)
-    {
-        auto action = JSVal(ToJSValue(result_->GetAction()));
-        auto descriptionRef = JSRef<JSVal>::Make(action);
-        args.SetReturnValue(descriptionRef);
-    }
-
-    void GetKeyCode(const JSCallbackInfo& args)
-    {
-        auto keyCode = JSVal(ToJSValue(result_->GetKeyCode()));
-        auto descriptionRef = JSRef<JSVal>::Make(keyCode);
-        args.SetReturnValue(descriptionRef);
-    }
-
-private:
-    static void Constructor(const JSCallbackInfo& args)
-    {
-        auto jsWebKeyEvent = Referenced::MakeRefPtr<JSWebInterceptKeyEvent>();
-        jsWebKeyEvent->IncRefCount();
-        args.SetReturnValue(Referenced::RawPtr(jsWebKeyEvent));
-    }
-
-    static void Destructor(JSWebInterceptKeyEvent* jsWebKeyEvent)
-    {
-        if (jsWebKeyEvent != nullptr) {
-            jsWebKeyEvent->DecRefCount();
-        }
-    }
-
-    RefPtr<WebKeyEvent> result_;
-};
-
 class JSDataResubmitted : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -949,6 +901,7 @@ public:
         JSClass<JSWebResourceRequest>::Declare("WebResourceRequest");
         JSClass<JSWebResourceRequest>::CustomMethod("getRequestUrl", &JSWebResourceRequest::GetRequestUrl);
         JSClass<JSWebResourceRequest>::CustomMethod("getRequestHeader", &JSWebResourceRequest::GetRequestHeader);
+        JSClass<JSWebResourceRequest>::CustomMethod("getRequestMethod", &JSWebResourceRequest::GetRequestMethod);
         JSClass<JSWebResourceRequest>::CustomMethod("isRequestGesture", &JSWebResourceRequest::IsRequestGesture);
         JSClass<JSWebResourceRequest>::CustomMethod("isMainFrame", &JSWebResourceRequest::IsMainFrame);
         JSClass<JSWebResourceRequest>::CustomMethod("isRedirect", &JSWebResourceRequest::IsRedirect);
@@ -982,6 +935,13 @@ public:
     {
         auto url = JSVal(ToJSValue(request_->GetUrl()));
         auto descriptionRef = JSRef<JSVal>::Make(url);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetRequestMethod(const JSCallbackInfo& args)
+    {
+        auto method = JSVal(ToJSValue(request_->GetMethod()));
+        auto descriptionRef = JSRef<JSVal>::Make(method);
         args.SetReturnValue(descriptionRef);
     }
 
@@ -1388,6 +1348,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("multiWindowAccess", &JSWeb::MultiWindowAccessEnabled);
     JSClass<JSWeb>::StaticMethod("webCursiveFont", &JSWeb::WebCursiveFont);
     JSClass<JSWeb>::StaticMethod("webFantasyFont", &JSWeb::WebFantasyFont);
+    JSClass<JSWeb>::StaticMethod("webFixedFont", &JSWeb::WebFixedFont);
     JSClass<JSWeb>::StaticMethod("webSansSerifFont", &JSWeb::WebSansSerifFont);
     JSClass<JSWeb>::StaticMethod("webSerifFont", &JSWeb::WebSerifFont);
     JSClass<JSWeb>::StaticMethod("webStandardFont", &JSWeb::WebStandardFont);
@@ -1399,6 +1360,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onInterceptKeyEvent", &JSWeb::OnInterceptKeyEvent);
     JSClass<JSWeb>::StaticMethod("onDataResubmitted", &JSWeb::OnDataResubmitted);
     JSClass<JSWeb>::StaticMethod("onFaviconReceived", &JSWeb::OnFaviconReceived);
+    JSClass<JSWeb>::StaticMethod("onTouchIconUrlReceived", &JSWeb::OnTouchIconUrlReceived);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -1417,7 +1379,6 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSContextMenuParam::JSBind(globalObj);
     JSContextMenuResult::JSBind(globalObj);
     JSWebWindowNewHandler::JSBind(globalObj);
-    JSWebInterceptKeyEvent::JSBind(globalObj);
     JSDataResubmitted::JSBind(globalObj);
 }
 
@@ -2701,7 +2662,7 @@ void JSWeb::CustomSchemes(const JSCallbackInfo& args)
     std::string cmdLine;
     for (size_t i = 0; i < array->Length(); i++) {
         auto obj = JSRef<JSObject>::Cast(array->GetValueAt(i));
-        auto schemeName  = obj->GetProperty("schemeName");
+        auto schemeName = obj->GetProperty("schemeName");
         auto isCors = obj->GetProperty("isSupportCors");
         auto isFetch = obj->GetProperty("isSupportFetch");
         if (!schemeName->IsString() || !isCors->IsBoolean() || !isFetch->IsBoolean()) {
@@ -3789,6 +3750,14 @@ void JSWeb::WebFantasyFont(const std::string& fantasyFontFamily)
     }
 }
 
+void JSWeb::WebFixedFont(const std::string& fixedFontFamily)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetWebFixedFont(fixedFontFamily);
+        return;
+    }
+}
+
 void JSWeb::WebSansSerifFont(const std::string& sansSerifFontFamily)
 {
     if (Container::IsCurrentUseNewPipeline()) {
@@ -3878,50 +3847,49 @@ void JSWeb::OnPageVisible(const JSCallbackInfo& args)
     }
 }
 
-JSRef<JSVal> WebInterceptKeyEventToJSValue(const WebInterceptKeyEvent& eventInfo)
-{
-    JSRef<JSObject> obj = JSRef<JSObject>::New();
-    JSRef<JSObject> resultObj = JSClass<JSWebInterceptKeyEvent>::NewInstance();
-    auto jsWebKeyEvent = Referenced::Claim(resultObj->Unwrap<JSWebInterceptKeyEvent>());
-    if (!jsWebKeyEvent) {
-        LOGE("jsWebKeyEvent is nullptr");
-        return JSRef<JSVal>::Cast(obj);
-    }
-    jsWebKeyEvent->SetResult(eventInfo.GetResult());
-    return JSRef<JSVal>::Cast(resultObj);
-}
-
 void JSWeb::OnInterceptKeyEvent(const JSCallbackInfo& args)
 {
+    LOGI("JSWeb OnInterceptKeyEvent");
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         LOGE("Param is invalid, it is not a function");
         return;
     }
-    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebInterceptKeyEvent, 1>>(
-        JSRef<JSFunc>::Cast(args[0]), WebInterceptKeyEventToJSValue);
+
+    RefPtr<JsKeyFunction> jsOnPreKeyEventFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
     if (Container::IsCurrentUseNewPipeline()) {
         auto instanceId = Container::CurrentId();
-        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
-                              const std::shared_ptr<BaseEventInfo>& info) -> bool {
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnPreKeyEventFunc), instanceId](
+                              KeyEventInfo& keyEventInfo) -> bool {
             ContainerScope scope(instanceId);
-            auto context = PipelineBase::GetCurrentContext();
-            CHECK_NULL_RETURN(context, false);
             bool result = false;
-            context->PostSyncEvent([execCtx, func = func, info, &result]() {
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_RETURN(context, result);
+            context->PostSyncEvent([execCtx, func = func, &keyEventInfo, &result]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                auto* eventInfo = TypeInfoHelper::DynamicCast<WebInterceptKeyEvent>(info.get());
-                JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
-                if (message->IsBoolean()) {
-                    result = message->ToBoolean();
-                } else {
-                    result = false;
+                JSRef<JSVal> obj = func->ExecuteWithValue(keyEventInfo);
+                if (obj->IsBoolean()) {
+                    result = obj->ToBoolean();
                 }
             });
             return result;
         };
-        NG::WebView::SetOnInterceptKeyEventImpl(std::move(uiCallback));
+        NG::WebView::SetOnInterceptKeyEventCallback(std::move(uiCallback));
         return;
     }
+    auto onKeyEventId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnPreKeyEventFunc)](
+                            KeyEventInfo& keyEventInfo) -> bool {
+        bool result = false;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, result);
+        ACE_SCORING_EVENT("onPreKeyEvent");
+        JSRef<JSVal> obj = func->ExecuteWithValue(keyEventInfo);
+        if (obj->IsBoolean()) {
+            result = obj->ToBoolean();
+        }
+        return result;
+    };
+
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetOnInterceptKeyEventCallback(onKeyEventId);
 }
 
 JSRef<JSVal> DataResubmittedEventToJSValue(const DataResubmittedEvent& eventInfo)
@@ -4067,6 +4035,40 @@ void JSWeb::OnFaviconReceived(const JSCallbackInfo& args)
             });
         };
         NG::WebView::SetFaviconReceivedId(std::move(uiCallback));
+        return;
+    }
+}
+
+JSRef<JSVal> TouchIconUrlEventToJSValue(const TouchIconUrlEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("url", eventInfo.GetUrl());
+    obj->SetProperty("preComposed", eventInfo.GetPreComposed());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnTouchIconUrlReceived(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<TouchIconUrlEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), TouchIconUrlEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<TouchIconUrlEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetTouchIconUrlId(std::move(uiCallback));
         return;
     }
 }

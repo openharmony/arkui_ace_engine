@@ -692,29 +692,6 @@ void WebClientImpl::OnPageVisible(const std::string& url)
     delegate->OnPageVisible(url);
 }
 
-bool WebClientImpl::OnPreKeyEvent(std::shared_ptr<NWeb::NWebKeyEvent> event)
-{
-    LOGI("OnPreKeyEvent");
-    ContainerScope scope(instanceId_);
-    bool jsResult = false;
-    auto param = std::make_shared<WebInterceptKeyEvent>(AceType::MakeRefPtr<InterceptKeyEventOhos>(event));
-    auto task = Container::CurrentTaskExecutor();
-    if (task == nullptr) {
-        LOGW("can't get task executor");
-        return false;
-    }
-    task->PostSyncTask([webClient = this, &param, &jsResult] {
-            if (!webClient) {
-                return;
-            }
-            auto delegate = webClient->webDelegate_.Upgrade();
-            if (delegate) {
-                jsResult = delegate->OnInterceptKeyEvent(param);
-            }
-        }, OHOS::Ace::TaskExecutor::TaskType::JS);
-    return jsResult;
-}
-
 void WebClientImpl::OnDataResubmission(std::shared_ptr<NWeb::NWebDataResubmissionCallback> handler)
 {
     LOGI("OnDataResubmission");
@@ -736,6 +713,15 @@ void WebClientImpl::OnPageIcon(const void* data,
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     delegate->OnFaviconReceived(data, width, width, color_type, alpha_type);
+}
+
+void WebClientImpl::OnDesktopIconUrl(const std::string& icon_url, bool precomposed)
+{
+    LOGI("OnDesktopIconUrl");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnTouchIconUrl(icon_url, precomposed);
 }
 
 void ReleaseSurfaceImpl::ReleaseSurface()

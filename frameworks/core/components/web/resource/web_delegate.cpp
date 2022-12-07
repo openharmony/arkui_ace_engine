@@ -433,22 +433,6 @@ int32_t WebWindowNewHandlerOhos::GetId() const
     return -1;
 }
 
-int32_t InterceptKeyEventOhos::GetAction()
-{
-    if (result_) {
-        return result_->action_;
-    }
-    return -1;
-}
-
-int32_t InterceptKeyEventOhos::GetKeyCode()
-{
-    if (result_) {
-        return result_->keyCode_;
-    }
-    return -1;
-}
-
 void DataResubmittedOhos::Resend()
 {
     if (handler_) {
@@ -1518,6 +1502,7 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
                                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                                 webCom->GetWindowExitEventId(), oldContext);
         onPageVisibleV2_ = useNewPipe ? eventHub->GetOnPageVisibleEvent() : nullptr;
+        onTouchIconUrlV2_ = useNewPipe ? eventHub->GetOnTouchIconUrlEvent() : nullptr;
     }
     return true;
 }
@@ -2529,6 +2514,25 @@ void WebDelegate::UpdateWebFantasyFont(const std::string& fantasyFontFamily)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdateWebFixedFont(const std::string& fixedFontFamily)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), fixedFontFamily]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutFixedFontFamilyName(fixedFontFamily);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::UpdateWebSansSerifFont(const std::string& sansSerifFontFamily)
 {
     auto context = context_.Upgrade();
@@ -3427,20 +3431,6 @@ void WebDelegate::OnPageVisible(const std::string& url)
     }
 }
 
-bool WebDelegate::OnInterceptKeyEvent(const std::shared_ptr<BaseEventInfo>& info)
-{
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto webPattern = webPattern_.Upgrade();
-        CHECK_NULL_RETURN(webPattern, false);
-        auto webEventHub = webPattern->GetWebEventHub();
-        CHECK_NULL_RETURN(webEventHub, false);
-        auto propOnInterceptKeyEvent = webEventHub->GetOnInterceptKeyEvent();
-        CHECK_NULL_RETURN(propOnInterceptKeyEvent, false);
-        return propOnInterceptKeyEvent(info);
-    }
-    return false;
-}
-
 void WebDelegate::OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler)
 {
     auto param = std::make_shared<DataResubmittedEvent>(AceType::MakeRefPtr<DataResubmittedOhos>(handler));
@@ -3478,6 +3468,13 @@ void WebDelegate::OnFaviconReceived(
         CHECK_NULL_VOID(propOnFaviconReceivedEvent);
         propOnFaviconReceivedEvent(param);
         return;
+    }
+}
+
+void WebDelegate::OnTouchIconUrl(const std::string& iconUrl, bool precomposed)
+{
+    if (onTouchIconUrlV2_) {
+        onTouchIconUrlV2_(std::make_shared<TouchIconUrlEvent>(iconUrl, precomposed));
     }
 }
 
