@@ -76,6 +76,7 @@ public:
     virtual void DrawRoundRect(const TestingRoundRect& roundRect) {}
     virtual void DrawBackground(const TestingBrush& brush) {}
     virtual void ClipRect(const TestingRect& rect, ClipOp op) {}
+    virtual void Scale(float sx, float sy) {}
     virtual void ClipPath(const TestingPath& path, ClipOp op) {}
 };
 } // namespace OHOS::Ace::Testing

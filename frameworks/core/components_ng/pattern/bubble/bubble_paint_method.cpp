@@ -16,8 +16,6 @@
 
 #include <vector>
 
-#include "foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include/draw/path.h"
-
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/rect.h"
@@ -40,7 +38,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-
 constexpr Dimension BEZIER_WIDTH_HALF = 16.0_vp;
 constexpr Dimension BEZIER_HORIZON_OFFSET_FIRST = 1.3_vp;
 constexpr Dimension BEZIER_HORIZON_OFFSET_SECOND = 3.2_vp;
