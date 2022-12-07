@@ -515,10 +515,15 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
         }
         // If a line moves up out of viewport, update [startIndex_], [currentOffset_] and [startMainLineIndex_], and
         // delete record in [gridMatrix_] and [lineHeightMap_].
-        // TODO: inactive items
         if (LessOrEqual(mainLength, 0.0)) {
             gridLayoutInfo_.currentOffset_ = mainLength;
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+            auto iter = gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.startMainLineIndex_);
+            if (iter != gridLayoutInfo_.gridMatrix_.end()) {
+                for (auto& item : iter->second) {
+                    layoutWrapper->RemoveChildInRenderTree(item.second);
+                }
+            }
             gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_ + 1;
             gridLayoutInfo_.startIndex_ = currentIndex + 1;
         }
@@ -528,7 +533,18 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     // Case 2. if this while-loop stops due to false result of [LessNotEqual(mainLength, mainSize)], the
     // [currentMainLineIndex_] is exactly the real main line index. Update [endMainLineIndex_] when the recorded items
     // are done measured.
+    auto oldEnd = gridLayoutInfo_.endMainLineIndex_;
     gridLayoutInfo_.endMainLineIndex_ = runOutOfRecord ? --currentMainLineIndex_ : currentMainLineIndex_;
+    // Erase records that are on bottom of viewport.
+    // remove from rbegin or LazyLayoutWrapperBuilder will create item and then remove
+    for (auto i = oldEnd; i > gridLayoutInfo_.endMainLineIndex_; --i) {
+        auto iter = gridLayoutInfo_.gridMatrix_.find(oldEnd);
+        if (iter != gridLayoutInfo_.gridMatrix_.end()) {
+            for (auto item = iter->second.rbegin(); item != iter->second.rend(); ++item) {
+                layoutWrapper->RemoveChildInRenderTree(item->second);
+            }
+        }
+    }
     return runOutOfRecord;
 }
 
