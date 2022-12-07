@@ -195,7 +195,7 @@ ohos_unittest("navigation_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/navigator/navigator_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/render/image_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/theme/mock_icon_theme.cpp",
+    "$ace_root/frameworks/core/components_ng/test/pattern/image/mock_icon_theme.cpp",
 
     # self
     "bar_item_node_test_ng.cpp",
