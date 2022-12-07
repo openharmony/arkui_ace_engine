@@ -166,6 +166,7 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
 
+    void MarkDirtyNodeSelf();
     SizeF GetContentSize() const;
     float GetMainContentSize() const;
     void ProcessEvent(bool indexChanged, float finalOffset, bool isJump);
@@ -209,8 +210,7 @@ private:
     bool scrollStop_ = false;
     int32_t scrollState_ = SCROLL_FROM_NONE;
 
-    WeakPtr<FrameNode> headerGroupNode_;
-    WeakPtr<FrameNode> footerGroupNode_;
+    std::list<WeakPtr<FrameNode>> itemGroupList_;
     std::map<int32_t, int32_t> lanesItemRange_;
     int32_t lanes_ = 1;
 };
