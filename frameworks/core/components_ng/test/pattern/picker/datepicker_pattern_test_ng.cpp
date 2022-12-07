@@ -120,7 +120,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternOnAttachToFrameNode001, TestSize.
     datePickerPattern->AttachToFrameNode(frameNode);
     datePickerPattern->OnAttachToFrameNode();
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
 }
 
 /**
@@ -143,7 +143,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternOnDirtyLayoutWrapperSwap001, Test
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     DirtySwapConfig config;
     auto ret = datePickerPattern->OnDirtyLayoutWrapperSwap(nullptr, config);
     EXPECT_EQ(ret, false);
@@ -151,7 +151,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternOnDirtyLayoutWrapperSwap001, Test
     ret = datePickerPattern->OnDirtyLayoutWrapperSwap(nullptr, config);
     EXPECT_EQ(ret, false);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(geometryNode , nullptr);
+    EXPECT_NE(geometryNode, nullptr);
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     ret = datePickerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_EQ(ret, true);
@@ -177,7 +177,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternOnModifyDone001, TestSize.Level1)
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     datePickerPattern->OnModifyDone();
 
     auto children = host->GetChildren();
@@ -216,7 +216,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternOnModifyDone002, TestSize.Level1)
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     datePickerPattern->titleId_ = std::make_optional(0);
     datePickerPattern->OnModifyDone();
 
@@ -256,7 +256,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleColumnChange001, TestSize.L
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     datePickerPattern->HandleColumnChange(frameNode, false, 1, false);
 }
 
@@ -304,7 +304,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternOnKeyEvent001, TestSize.Level1)
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     KeyEvent event;
     event.action = KeyAction::UP;
     datePickerPattern->OnKeyEvent(event);
@@ -330,7 +330,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternOnKeyEvent002, TestSize.Level1)
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     KeyEvent event;
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_DPAD_UP;
@@ -357,7 +357,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternOnKeyEvent003, TestSize.Level1)
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     KeyEvent event;
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_DPAD_DOWN;
@@ -384,7 +384,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternOnKeyEvent004, TestSize.Level1)
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     KeyEvent event;
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_BACK;
@@ -411,7 +411,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleDirectionKey001, TestSize.L
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     KeyCode code = KeyCode::KEY_DPAD_UP;
     datePickerPattern->HandleDirectionKey(code);
 }
@@ -436,7 +436,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleDirectionKey002, TestSize.L
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     KeyCode code = KeyCode::KEY_DPAD_DOWN;
     datePickerPattern->HandleDirectionKey(code);
 }
@@ -461,7 +461,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleDirectionKey003, TestSize.L
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     KeyCode code = KeyCode::KEY_BACK;
     datePickerPattern->HandleDirectionKey(code);
 }
@@ -486,7 +486,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternGetAllChildNode001, TestSize.Leve
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     EXPECT_EQ(host->GetChildren().size(), 3UL);
     auto child = datePickerPattern->GetAllChildNode();
     EXPECT_EQ(child.size(), 3UL);
@@ -525,7 +525,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternGetAllChildNode002, TestSize.Leve
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     EXPECT_EQ(host->GetChildren().size(), 6UL);
     auto child = datePickerPattern->GetAllChildNode();
     EXPECT_EQ(child.size(), 0UL);
@@ -565,7 +565,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternGetAllChildNode003, TestSize.Leve
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     EXPECT_EQ(host->GetChildren().size(), 3UL);
     auto child = datePickerPattern->GetAllChildNode();
     EXPECT_EQ(child.size(), 0UL);
@@ -605,7 +605,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternGetAllChildNode004, TestSize.Leve
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     EXPECT_EQ(host->GetChildren().size(), 3UL);
     auto child = datePickerPattern->GetAllChildNode();
     EXPECT_EQ(child.size(), 0UL);
@@ -645,7 +645,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternGetAllChildNode005, TestSize.Leve
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     EXPECT_EQ(host->GetChildren().size(), 3UL);
     auto child = datePickerPattern->GetAllChildNode();
     EXPECT_EQ(child.size(), 0UL);
@@ -671,7 +671,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternFlushColumn001, TestSize.Level1)
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     EXPECT_EQ(host->GetChildren().size(), 3UL);
     datePickerPattern->FlushColumn();
 }
@@ -710,7 +710,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternFlushColumn002, TestSize.Level1)
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     EXPECT_EQ(host->GetChildren().size(), 3UL);
     datePickerPattern->FlushColumn();
 }
@@ -749,7 +749,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternFlushColumn003, TestSize.Level1)
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     EXPECT_EQ(host->GetChildren().size(), 3UL);
     datePickerPattern->FlushColumn();
 }
@@ -788,7 +788,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternFlushColumn004, TestSize.Level1)
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     EXPECT_EQ(host->GetChildren().size(), 3UL);
     datePickerPattern->FlushColumn();
 }
@@ -813,7 +813,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternFlushColumn005, TestSize.Level1)
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     EXPECT_EQ(host->GetChildren().size(), 3UL);
     auto property = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     EXPECT_NE(property, nullptr);
@@ -855,7 +855,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternOnDataLinking001, TestSize.Level1
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     EXPECT_EQ(host->GetChildren().size(), 3UL);
     std::vector<RefPtr<FrameNode>> resultTags;
     datePickerPattern->OnDataLinking(yearFrameNodeChild, false, 1, resultTags);
@@ -883,7 +883,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternFireChangeEvent001, TestSize.Leve
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     datePickerPattern->FireChangeEvent(false);
     datePickerPattern->FireChangeEvent(true);
 }
@@ -908,7 +908,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleDayChange001, TestSize.Leve
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     std::vector<RefPtr<FrameNode>> resultTags;
     datePickerPattern->SetShowLunar(true);
     datePickerPattern->HandleDayChange(false, 1, resultTags);
@@ -934,7 +934,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleDayChange002, TestSize.Leve
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     std::vector<RefPtr<FrameNode>> resultTags;
     datePickerPattern->SetShowLunar(false);
     datePickerPattern->HandleDayChange(false, 1, resultTags);
@@ -960,7 +960,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleSolarDayChange001, TestSize
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     datePickerPattern->HandleSolarDayChange(false, 0);
     datePickerPattern->HandleSolarDayChange(true, 0);
     datePickerPattern->HandleSolarDayChange(false, 1);
@@ -1001,7 +1001,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleSolarDayChange002, TestSize
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     datePickerPattern->HandleSolarDayChange(false, 0);
     datePickerPattern->HandleSolarDayChange(true, 0);
     datePickerPattern->HandleSolarDayChange(false, 1);
@@ -1028,7 +1028,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleLunarDayChange001, TestSize
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     datePickerPattern->HandleLunarDayChange(false, 0);
     datePickerPattern->HandleLunarDayChange(true, 0);
     datePickerPattern->HandleLunarDayChange(false, 1);
@@ -1055,7 +1055,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleReduceLunarDayChange001, Te
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     datePickerPattern->HandleReduceLunarDayChange(0);
     datePickerPattern->HandleReduceLunarDayChange(1);
 }
@@ -1080,7 +1080,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleReduceLunarDayChange002, Te
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     datePickerPattern->HandleReduceLunarDayChange(0);
     datePickerPattern->HandleReduceLunarDayChange(1);
 }
@@ -1105,7 +1105,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleYearChange001, TestSize.Lev
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     std::vector<RefPtr<FrameNode>> resultTags;
     datePickerPattern->SetShowLunar(true);
     datePickerPattern->HandleYearChange(false, 0, resultTags);
@@ -1134,7 +1134,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleYearChange002, TestSize.Lev
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     std::vector<RefPtr<FrameNode>> resultTags;
     datePickerPattern->SetShowLunar(false);
     datePickerPattern->HandleYearChange(false, 0, resultTags);
@@ -1163,7 +1163,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleMonthChange001, TestSize.Le
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     std::vector<RefPtr<FrameNode>> resultTags;
     datePickerPattern->SetShowLunar(true);
     datePickerPattern->HandleMonthChange(false, 0, resultTags);
@@ -1192,7 +1192,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleMonthChange002, TestSize.Le
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     std::vector<RefPtr<FrameNode>> resultTags;
     datePickerPattern->SetShowLunar(false);
     datePickerPattern->HandleMonthChange(false, 0, resultTags);
@@ -1221,7 +1221,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleSolarMonthChange001, TestSi
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     datePickerPattern->HandleSolarMonthChange(false, 0);
     datePickerPattern->HandleSolarMonthChange(false, 1);
 }
@@ -1246,7 +1246,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleLunarMonthChange001, TestSi
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     datePickerPattern->HandleLunarMonthChange(false, 0);
     datePickerPattern->HandleLunarMonthChange(false, 1);
 }
@@ -1271,7 +1271,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleLunarYearChange001, TestSiz
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     datePickerPattern->HandleLunarYearChange(false, 0);
     datePickerPattern->HandleLunarYearChange(false, 1);
 }
@@ -1310,7 +1310,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternGetCurrentLunarDate001, TestSize.
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     LunarDate lunarResult;
     auto ret = datePickerPattern->GetCurrentLunarDate(CURRENT_YEAR);
     EXPECT_NE(ret, lunarResult);
@@ -1350,7 +1350,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternGetCurrentLunarDate002, TestSize.
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     LunarDate lunarResult;
     auto ret = datePickerPattern->GetCurrentLunarDate(CURRENT_YEAR);
     EXPECT_NE(ret, lunarResult);
@@ -1390,7 +1390,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternGetCurrentLunarDate003, TestSize.
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     LunarDate lunarResult;
     auto ret = datePickerPattern->GetCurrentLunarDate(CURRENT_YEAR);
     EXPECT_NE(ret, lunarResult);
@@ -1431,7 +1431,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternGetCurrentDate001, TestSize.Level
     datePickerPattern->AttachToFrameNode(frameNode);
     datePickerPattern->SetShowLunar(true);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     PickerDate currentDate;
     auto ret = datePickerPattern->GetCurrentDate();
     EXPECT_EQ(ret.GetYear(), currentDate.GetYear());
@@ -1474,7 +1474,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternGetCurrentDate002, TestSize.Level
     datePickerPattern->SetShowLunar(false);
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     PickerDate currentDate;
     auto ret = datePickerPattern->GetCurrentDate();
     EXPECT_EQ(ret.GetYear(), currentDate.GetYear());
@@ -1517,7 +1517,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternGetCurrentDate003, TestSize.Level
     datePickerPattern->SetShowLunar(false);
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     PickerDate currentDate;
     auto ret = datePickerPattern->GetCurrentDate();
     EXPECT_EQ(ret.GetYear(), currentDate.GetYear());
@@ -1545,7 +1545,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternLunarDateCompare001, TestSize.Lev
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
 
     LunarDate left;
     left.year = CURRENT_YEAR;
@@ -1688,7 +1688,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternGetYear001, TestSize.Level1)
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     auto ret = datePickerPattern->GetYear(START_YEAR_BEFORE);
     EXPECT_EQ(ret, "");
     ret = datePickerPattern->GetYear(START_YEAR);
@@ -1719,7 +1719,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternGetSolarMonth001, TestSize.Level1
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     auto ret = datePickerPattern->GetSolarMonth(0);
     EXPECT_EQ(ret, "");
     ret = datePickerPattern->GetSolarMonth(1);
@@ -1750,7 +1750,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternGetSolarDay001, TestSize.Level1)
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     auto ret = datePickerPattern->GetSolarDay(0);
     EXPECT_EQ(ret, "");
     ret = datePickerPattern->GetSolarDay(1);
@@ -1781,7 +1781,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternGetLunarMonth001, TestSize.Level1
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     auto ret = datePickerPattern->GetLunarMonth(0, false);
     EXPECT_EQ(ret, "");
     ret = datePickerPattern->GetLunarMonth(1, false);
@@ -1821,7 +1821,7 @@ HWTEST_F(PickerPatternTestNg, DatePickerPatternGetLunarDay001, TestSize.Level1)
     auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
     datePickerPattern->AttachToFrameNode(frameNode);
     auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);;
+    EXPECT_NE(host, nullptr);
     auto ret = datePickerPattern->GetLunarDay(0);
     EXPECT_EQ(ret, "");
     ret = datePickerPattern->GetLunarDay(1);
