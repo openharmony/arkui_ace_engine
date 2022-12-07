@@ -121,10 +121,7 @@ bool PluginPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 void PluginPattern::InitPluginManagerDelegate()
 {
-    if (pluginManagerBridge_) {
-        LOGD("PluginInfo manager bridge is already initialized.");
-        return;
-    }
+    CHECK_NULL_VOID(!pluginManagerBridge_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();

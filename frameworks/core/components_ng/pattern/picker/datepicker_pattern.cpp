@@ -51,9 +51,7 @@ void DatePickerPattern::OnAttachToFrameNode()
 
 bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (!config.frameSizeChange) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
     CHECK_NULL_RETURN(dirty, false);
     return true;
 }
@@ -90,10 +88,7 @@ void DatePickerPattern::OnModifyDone()
 
 void DatePickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify)
 {
-    if (!GetHost()) {
-        LOGE("host is null.");
-        return;
-    }
+    CHECK_NULL_VOID(GetHost());
     std::vector<RefPtr<FrameNode>> tags;
     OnDataLinking(tag, isAdd, index, tags);
     for (const auto& tag : tags) {
@@ -192,10 +187,9 @@ std::unordered_map<std::string, RefPtr<FrameNode>> DatePickerPattern::GetAllChil
     auto monthNode = DynamicCast<FrameNode>(month);
     auto dayNode = DynamicCast<FrameNode>(day);
 
-    if (!yearNode || !monthNode || !dayNode) {
-        LOGE("year or month or day Node is null.");
-        return allChildNode;
-    }
+    CHECK_NULL_RETURN(yearNode, allChildNode);
+    CHECK_NULL_RETURN(monthNode, allChildNode);
+    CHECK_NULL_RETURN(dayNode, allChildNode);
     allChildNode["year"] = yearNode;
     allChildNode["month"] = monthNode;
     allChildNode["day"] = dayNode;
@@ -220,10 +214,9 @@ void DatePickerPattern::FlushColumn()
     auto yearNode = allChildNode["year"];
     auto monthNode = allChildNode["month"];
     auto dayNode = allChildNode["day"];
-    if (!yearNode || !monthNode || !dayNode) {
-        LOGE("year or month or day column is null.");
-        return;
-    }
+    CHECK_NULL_VOID(yearNode);
+    CHECK_NULL_VOID(monthNode);
+    CHECK_NULL_VOID(dayNode);
     auto yearColumnPattern = yearNode->GetPattern<DatePickerColumnPattern>();
     CHECK_NULL_VOID(yearColumnPattern);
     auto monthColumnPattern = monthNode->GetPattern<DatePickerColumnPattern>();
@@ -258,10 +251,9 @@ void DatePickerPattern::OnDataLinking(
     auto yearNode = allChildNode["year"];
     auto monthNode = allChildNode["month"];
     auto dayNode = allChildNode["day"];
-    if (!yearNode || !monthNode || !dayNode) {
-        LOGE("year or month or day column is null.");
-        return;
-    }
+    CHECK_NULL_VOID(yearNode);
+    CHECK_NULL_VOID(monthNode);
+    CHECK_NULL_VOID(dayNode);
     if (tag == yearNode) {
         HandleYearChange(isAdd, index, resultTags);
         return;
@@ -285,10 +277,9 @@ void DatePickerPattern::HandleDayChange(bool isAdd, uint32_t index, std::vector<
     auto yearNode = allChildNode["year"];
     auto monthNode = allChildNode["month"];
     auto dayNode = allChildNode["day"];
-    if (!yearNode || !monthNode || !dayNode) {
-        LOGE("year or month or day column is null.");
-        return;
-    }
+    CHECK_NULL_VOID(yearNode);
+    CHECK_NULL_VOID(monthNode);
+    CHECK_NULL_VOID(dayNode);
     if (IsShowLunar()) {
         HandleLunarDayChange(isAdd, index);
     } else {
@@ -306,10 +297,9 @@ void DatePickerPattern::HandleSolarDayChange(bool isAdd, uint32_t index)
     auto monthNode = allChildNode["month"];
     auto dayNode = allChildNode["day"];
 
-    if (!yearNode || !monthNode || !dayNode) {
-        LOGE("year or month or day column is null.");
-        return;
-    }
+    CHECK_NULL_VOID(yearNode);
+    CHECK_NULL_VOID(monthNode);
+    CHECK_NULL_VOID(dayNode);
     auto yearDatePickerColumnPattern = yearNode->GetPattern<DatePickerColumnPattern>();
     auto monthDatePickerColumnPattern = monthNode->GetPattern<DatePickerColumnPattern>();
     auto dayDatePickerColumnPattern = dayNode->GetPattern<DatePickerColumnPattern>();
@@ -365,10 +355,9 @@ void DatePickerPattern::HandleReduceLunarDayChange(uint32_t index)
     auto monthNode = allChildNode["month"];
     auto dayNode = allChildNode["day"];
 
-    if (!yearNode || !monthNode || !dayNode) {
-        LOGE("year or month or day column is null.");
-        return;
-    }
+    CHECK_NULL_VOID(yearNode);
+    CHECK_NULL_VOID(monthNode);
+    CHECK_NULL_VOID(dayNode);
 
     auto yearDatePickerColumnPattern = yearNode->GetPattern<DatePickerColumnPattern>();
     auto monthDatePickerColumnPattern = monthNode->GetPattern<DatePickerColumnPattern>();
@@ -416,10 +405,9 @@ void DatePickerPattern::HandleAddLunarDayChange(uint32_t index)
     auto monthNode = allChildNode["month"];
     auto dayNode = allChildNode["day"];
 
-    if (!yearNode || !monthNode || !dayNode) {
-        LOGE("year or month or day column is null.");
-        return;
-    }
+    CHECK_NULL_VOID(yearNode);
+    CHECK_NULL_VOID(monthNode);
+    CHECK_NULL_VOID(dayNode);
 
     auto yearDatePickerColumnPattern = yearNode->GetPattern<DatePickerColumnPattern>();
     auto monthDatePickerColumnPattern = monthNode->GetPattern<DatePickerColumnPattern>();
@@ -463,10 +451,9 @@ void DatePickerPattern::HandleYearChange(bool isAdd, uint32_t index, std::vector
     auto monthNode = allChildNode["month"];
     auto dayNode = allChildNode["day"];
 
-    if (!yearNode || !monthNode || !dayNode) {
-        LOGE("year or month or day column is null.");
-        return;
-    }
+    CHECK_NULL_VOID(yearNode);
+    CHECK_NULL_VOID(monthNode);
+    CHECK_NULL_VOID(dayNode);
     if (IsShowLunar()) {
         HandleLunarYearChange(isAdd, index);
     } else {
@@ -484,10 +471,9 @@ void DatePickerPattern::HandleMonthChange(bool isAdd, uint32_t index, std::vecto
     auto monthNode = allChildNode["month"];
     auto dayNode = allChildNode["day"];
 
-    if (!yearNode || !monthNode || !dayNode) {
-        LOGE("year or month or day column is null.");
-        return;
-    }
+    CHECK_NULL_VOID(yearNode);
+    CHECK_NULL_VOID(monthNode);
+    CHECK_NULL_VOID(dayNode);
     if (IsShowLunar()) {
         HandleLunarMonthChange(isAdd, index);
     } else {
@@ -528,10 +514,9 @@ void DatePickerPattern::HandleLunarMonthChange(bool isAdd, uint32_t index)
     auto monthNode = allChildNode["month"];
     auto dayNode = allChildNode["day"];
 
-    if (!yearNode || !monthNode || !dayNode) {
-        LOGE("year or month or day column is null.");
-        return;
-    }
+    CHECK_NULL_VOID(yearNode);
+    CHECK_NULL_VOID(monthNode);
+    CHECK_NULL_VOID(dayNode);
 
     auto yearColumn = yearNode->GetPattern<DatePickerColumnPattern>();
     CHECK_NULL_VOID(yearColumn);
@@ -614,10 +599,9 @@ LunarDate DatePickerPattern::GetCurrentLunarDate(uint32_t lunarYear) const
     auto yearColumn = DynamicCast<FrameNode>(year);
     auto monthColumn = DynamicCast<FrameNode>(month);
     auto dayColumn = DynamicCast<FrameNode>(day);
-    if (!yearColumn || !monthColumn || !dayColumn) {
-        LOGE("year or month or day column is null.");
-        return lunarResult;
-    }
+    CHECK_NULL_RETURN_NOLOG(yearColumn, lunarResult);
+    CHECK_NULL_RETURN_NOLOG(monthColumn, lunarResult);
+    CHECK_NULL_RETURN_NOLOG(dayColumn, lunarResult);
 
     auto yearDatePickerColumnPattern = yearColumn->GetPattern<DatePickerColumnPattern>();
     auto monthDatePickerColumnPattern = monthColumn->GetPattern<DatePickerColumnPattern>();
@@ -685,10 +669,9 @@ PickerDate DatePickerPattern::GetCurrentDate() const
     auto yearColumn = DynamicCast<FrameNode>(year);
     auto monthColumn = DynamicCast<FrameNode>(month);
     auto dayColumn = DynamicCast<FrameNode>(day);
-    if (!yearColumn || !monthColumn || !dayColumn) {
-        LOGE("year or month or day column is null.");
-        return currentDate;
-    }
+    CHECK_NULL_RETURN_NOLOG(yearColumn, currentDate);
+    CHECK_NULL_RETURN_NOLOG(monthColumn, currentDate);
+    CHECK_NULL_RETURN_NOLOG(dayColumn, currentDate);
     auto yearDatePickerColumnPattern = yearColumn->GetPattern<DatePickerColumnPattern>();
     auto monthDatePickerColumnPattern = monthColumn->GetPattern<DatePickerColumnPattern>();
     auto dayDatePickerColumnPattern = dayColumn->GetPattern<DatePickerColumnPattern>();
@@ -770,10 +753,9 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
         }
         index++;
     }
-    if (!yearColumn || !monthColumn || !dayColumn) {
-        LOGE("year or month or day column is null.");
-        return;
-    }
+    CHECK_NULL_VOID(yearColumn);
+    CHECK_NULL_VOID(monthColumn);
+    CHECK_NULL_VOID(dayColumn);
     auto dataPickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(dataPickerRowLayoutProperty);
     startDateLunar_ = dataPickerRowLayoutProperty->GetStartDate().value_or(SolarToLunar(startDateSolar_));
@@ -890,10 +872,9 @@ void DatePickerPattern::SolarColumnsBuilding(const PickerDate& current)
         }
         index++;
     }
-    if (!yearColumn || !monthColumn || !dayColumn) {
-        LOGE("year or month or day column is null.");
-        return;
-    }
+    CHECK_NULL_VOID(yearColumn);
+    CHECK_NULL_VOID(monthColumn);
+    CHECK_NULL_VOID(dayColumn);
     auto dataPickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(dataPickerRowLayoutProperty);
     startDateSolar_ = LunarToSolar(dataPickerRowLayoutProperty->GetStartDate().value_or(SolarToLunar(startDateSolar_)));
@@ -1034,9 +1015,7 @@ PickerDate DatePickerPattern::LunarToSolar(const LunarDate& date) const
 
 void DatePickerPattern::Init()
 {
-    if (inited_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!inited_);
     years_.resize(201);      // year from 1900 to 2100,count is 201
     solarMonths_.resize(12); // solar month from 1 to 12,count is 12
     solarDays_.resize(31);   // solar day from 1 to 31, count is 31

@@ -138,25 +138,21 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
     popupMap_[targetId] = popupInfo;
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    if (!popupInfo.markNeedUpdate || !popupInfo.popupNode) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(popupInfo.markNeedUpdate);
+    CHECK_NULL_VOID_NOLOG(popupInfo.popupNode);
+
     popupMap_[targetId].markNeedUpdate = false;
     auto rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.begin(), rootChildren.end(), popupInfo.popupNode);
     if (iter != rootChildren.end()) {
         // Pop popup
-        if (!popupInfo.isCurrentOnShow) {
-            return;
-        }
+        CHECK_NULL_VOID_NOLOG(popupInfo.isCurrentOnShow);
         LOGI("begin pop");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
         rootNode->RemoveChild(popupMap_[targetId].popupNode);
     } else {
         // Push popup
-        if (popupInfo.isCurrentOnShow) {
-            return;
-        }
+        CHECK_NULL_VOID_NOLOG(!popupInfo.isCurrentOnShow);
         LOGI("begin push");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(true);
         popupMap_[targetId].popupNode->MountToParent(rootNode);
@@ -170,9 +166,8 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     popupMap_[targetId] = popupInfo;
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    if (!popupInfo.markNeedUpdate || !popupInfo.popupNode) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(popupInfo.markNeedUpdate);
+    CHECK_NULL_VOID_NOLOG(popupInfo.popupNode);
     popupMap_[targetId].markNeedUpdate = false;
     auto rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.begin(), rootChildren.end(), popupInfo.popupNode);
@@ -180,9 +175,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
         LOGW("OverlayManager: popupNode is not found in rootChildren");
         return;
     }
-    if (!popupInfo.isCurrentOnShow) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(popupInfo.isCurrentOnShow);
     LOGI("begin pop");
     popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
     rootNode->RemoveChild(popupMap_[targetId].popupNode);
