@@ -602,6 +602,7 @@ const TextEditingValueNG& TextFieldPattern::GetEditingValue() const
 
 void TextFieldPattern::HandleFocusEvent()
 {
+    LOGI("TextField %{public}d on focus", GetHost()->GetId());
     caretUpdateType_ = CaretUpdateType::EVENT;
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -643,6 +644,8 @@ void TextFieldPattern::HandleBlurEvent()
     LOGI("TextField %{public}d OnBlur", GetHost()->GetId());
     StopTwinkling();
     CloseKeyboard(true);
+    auto pos = static_cast<int32_t>(textEditingValue_.GetWideText().length());
+    UpdateSelection(pos, pos);
     auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnEditChanged(false);
     CloseSelectOverlay();
@@ -1180,6 +1183,13 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     lastTouchOffset_ = info.GetLocalLocation();
     caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
     selectionMode_ = SelectionMode::SELECT;
+    LOGI("TextField %{public}d handle long press", GetHost()->GetId());
+    auto focusHub = GetHost()->GetOrCreateFocusHub();
+    if (!focusHub->RequestFocusImmediately()) {
+        LOGE("Long press request focus failed");
+        StopTwinkling();
+        return;
+    }
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -1406,13 +1416,36 @@ void TextFieldPattern::InitMouseEvent()
 
 void TextFieldPattern::HandleMouseEvent(const MouseInfo& info)
 {
+    auto focusHub = GetHost()->GetOrCreateFocusHub();
     if (info.GetAction() == MouseAction::PRESS) {
+        if (!focusHub->IsFocusable()) {
+            return;
+        }
         isMousePressed_ = true;
-        HandleTouchDown(info.GetLocalLocation());
+        StartTwinkling();
+        lastTouchOffset_ = info.GetLocalLocation();
+        caretUpdateType_ = CaretUpdateType::PRESSED;
+        selectionMode_ = SelectionMode::NONE;
+        if (!focusHub->RequestFocusImmediately()) {
+            LOGE("Request focus failed, cannot open input method");
+            StopTwinkling();
+            return;
+        }
+        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         return;
     }
     if (info.GetAction() == MouseAction::RELEASE) {
+        caretUpdateType_ = CaretUpdateType::PRESSED;
         isMousePressed_ = false;
+        if (!focusHub->IsCurrentFocus()) {
+            return;
+        }
+        if (RequestKeyboard(false, true, true)) {
+            auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->FireOnEditChanged(true);
+            GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
     }
 
     if (info.GetAction() == MouseAction::MOVE) {
