@@ -87,6 +87,7 @@ public:
     static void SetWindowNewEvent(OnWebAsyncFunc&& windowNewEventId);
     static void SetWindowExitEventId(OnWebAsyncFunc&& windowExitEventId);
     static void SetMultiWindowAccessEnabled(bool isMultiWindowAccessEnabled);
+    static void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback);
     static void SetWebCursiveFont(const std::string& cursiveFontFamily);
     static void SetWebFantasyFont(const std::string& fantasyFontFamily);
     static void SetWebSansSerifFont(const std::string& sansSerif);
@@ -95,7 +96,11 @@ public:
     static void SetDefaultFixedFontSize(int32_t defaultFixedFontSize);
     static void SetDefaultFontSize(int32_t defaultFontSize);
     static void SetMinFontSize(int32_t minFontSize);
-    static void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback);
+    static void SetBlockNetwork(bool isNetworkBlocked);
+    static void SetPageVisibleId(OnWebAsyncFunc&& pageVisibleId);
+    static void SetOnInterceptKeyEventImpl(OnWebSyncFunc&& onInterceptKeyEventImpl);
+    static void SetDataResubmittedId(OnWebAsyncFunc&& DataResubmittedId);
+    static void SetFaviconReceivedId(OnWebAsyncFunc&& faviconReceivedId);
 
 private:
     static void RegisterPipelineCallback(int32_t nodeId);

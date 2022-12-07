@@ -254,6 +254,55 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebControllerHandler> handler_;
 };
 
+class InterceptKeyEventOhos : public WebKeyEvent {
+    DECLARE_ACE_TYPE(InterceptKeyEventOhos, WebKeyEvent)
+
+public:
+    InterceptKeyEventOhos(std::shared_ptr<OHOS::NWeb::NWebKeyEvent> result) : result_(result) {}
+
+    int32_t GetAction() override;
+    int32_t GetKeyCode() override;
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebKeyEvent> result_;
+};
+
+class DataResubmittedOhos : public DataResubmitted {
+    DECLARE_ACE_TYPE(DataResubmittedOhos, DataResubmitted)
+
+public:
+    DataResubmittedOhos(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler) : handler_(handler) {}
+    void Resend() override;
+    void Cancel() override;
+private:
+    std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler_;
+};
+
+class FaviconReceivedOhos : public WebFaviconReceived {
+    DECLARE_ACE_TYPE(FaviconReceivedOhos, WebFaviconReceived)
+
+public:
+    FaviconReceivedOhos(
+        const void* data,
+        size_t width,
+        size_t height,
+        OHOS::NWeb::ImageColorType color_type,
+        OHOS::NWeb::ImageAlphaType alpha_type)
+        : data_(data), width_(width), height_(height), color_type_(color_type), alpha_type_(alpha_type)  {}
+    const void* GetData() override;
+    size_t GetWidth() override;
+    size_t GetHeight() override;
+    int GetColorType() override;
+    int GetAlphaType() override;
+
+private:
+    const void* data_ = nullptr;
+    size_t width_ = 0;
+    size_t height_ = 0;
+    OHOS::NWeb::ImageColorType color_type_ = OHOS::NWeb::ImageColorType::COLOR_TYPE_UNKNOWN;
+    OHOS::NWeb::ImageAlphaType alpha_type_ = OHOS::NWeb::ImageAlphaType::ALPHA_TYPE_UNKNOWN;
+};
+
 enum class DragAction {
     DRAG_START = 0,
     DRAG_ENTER,
@@ -339,6 +388,7 @@ public:
     void UpdateDefaultFixedFontSize(int32_t size);
     void UpdateDefaultFontSize(int32_t defaultFontSize);
     void UpdateMinFontSize(int32_t minFontSize);
+    void UpdateBlockNetwork(bool isNetworkBlocked);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
@@ -409,6 +459,11 @@ public:
     void OnWindowNew(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
         const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler);
     void OnWindowExit();
+    void OnPageVisible(const std::string& url);
+    bool OnInterceptKeyEvent(const std::shared_ptr<BaseEventInfo>& info);
+    void OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler);
+    void OnFaviconReceived(const void* data, size_t width, size_t height, OHOS::NWeb::ImageColorType color_type,
+        OHOS::NWeb::ImageAlphaType alpha_type);
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();
@@ -532,6 +587,7 @@ private:
     EventCallbackV2 onPermissionRequestV2_;
     EventCallbackV2 onSearchResultReceiveV2_;
     EventCallbackV2 onWindowExitV2_;
+    EventCallbackV2 onPageVisibleV2_;
 
     std::string bundlePath_;
     std::string bundleDataPath_;

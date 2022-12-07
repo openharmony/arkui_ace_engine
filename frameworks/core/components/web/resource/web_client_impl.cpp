@@ -683,6 +683,61 @@ void WebClientImpl::OnWindowExitByJS()
     delegate->OnWindowExit();
 }
 
+void WebClientImpl::OnPageVisible(const std::string& url)
+{
+    LOGI("OnPageVisible");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnPageVisible(url);
+}
+
+bool WebClientImpl::OnPreKeyEvent(std::shared_ptr<NWeb::NWebKeyEvent> event)
+{
+    LOGI("OnPreKeyEvent");
+    ContainerScope scope(instanceId_);
+    bool jsResult = false;
+    auto param = std::make_shared<WebInterceptKeyEvent>(AceType::MakeRefPtr<InterceptKeyEventOhos>(event));
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGW("can't get task executor");
+        return false;
+    }
+    task->PostSyncTask([webClient = this, &param, &jsResult] {
+            if (!webClient) {
+                return;
+            }
+            auto delegate = webClient->webDelegate_.Upgrade();
+            if (delegate) {
+                jsResult = delegate->OnInterceptKeyEvent(param);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS);
+    return jsResult;
+}
+
+void WebClientImpl::OnDataResubmission(std::shared_ptr<NWeb::NWebDataResubmissionCallback> handler)
+{
+    LOGI("OnDataResubmission");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    CHECK_NULL_VOID(handler);
+    delegate->OnDataResubmitted(handler);
+}
+
+void WebClientImpl::OnPageIcon(const void* data,
+                               size_t width,
+                               size_t height,
+                               NWeb::ImageColorType color_type,
+                               NWeb::ImageAlphaType alpha_type)
+{
+    LOGI("OnPageIcon");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnFaviconReceived(data, width, width, color_type, alpha_type);
+}
+
 void ReleaseSurfaceImpl::ReleaseSurface()
 {
     ContainerScope scope(instanceId_);

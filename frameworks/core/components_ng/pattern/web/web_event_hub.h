@@ -137,6 +137,10 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnSearchResultReceive, void);
     ACE_WEB_EVENT_PROPERTY(OnWindowNew, void);
     ACE_WEB_EVENT_PROPERTY(OnWindowExit, void);
+    ACE_WEB_EVENT_PROPERTY(OnPageVisible, void);
+    ACE_WEB_EVENT_PROPERTY(OnInterceptKey, bool);
+    ACE_WEB_EVENT_PROPERTY(OnDataResubmitted, void);
+    ACE_WEB_EVENT_PROPERTY(OnFaviconReceived, void);
 
 private:
     std::function<void(KeyEventInfo& keyEventInfo)> propOnKeyEvent_;

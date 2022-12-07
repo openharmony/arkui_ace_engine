@@ -509,4 +509,39 @@ void WebView::SetMinFontSize(int32_t minFontSize)
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateMinFontSize(minFontSize);
 }
+
+void WebView::SetBlockNetwork(bool isNetworkBlocked)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateBlockNetwork(isNetworkBlocked);
+}
+
+void WebView::SetPageVisibleId(OnWebAsyncFunc&& pageVisibleId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnPageVisibleEvent(std::move(pageVisibleId));
+}
+
+void WebView::SetOnInterceptKeyEventImpl(OnWebSyncFunc&& onInterceptKeyEventImpl)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnInterceptKeyEvent(std::move(onInterceptKeyEventImpl));
+}
+
+void WebView::SetDataResubmittedId(OnWebAsyncFunc&& dataResubmittedId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnDataResubmittedEvent(std::move(dataResubmittedId));
+}
+
+void WebView::SetFaviconReceivedId(OnWebAsyncFunc&& faviconReceivedId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFaviconReceivedEvent(std::move(faviconReceivedId));
+}
 } // namespace OHOS::Ace::NG

@@ -709,6 +709,13 @@ void WebPattern::OnMinFontSizeUpdate(int32_t value)
     }
 }
 
+void WebPattern::OnBlockNetworkUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateBlockNetwork(value);
+    }
+}
+
 void WebPattern::RegistVirtualKeyBoardListener()
 {
     if (!needUpdateWeb_) {
@@ -767,6 +774,9 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateDefaultFixedFontSize(GetDefaultFixedFontSizeValue(DEFAULT_FIXED_FONT_SIZE));
         delegate_->UpdateDefaultFontSize(GetDefaultFontSizeValue(DEFAULT_FONT_SIZE));
         delegate_->UpdateMinFontSize(GetMinFontSizeValue(DEFAULT_MINIMUM_FONT_SIZE));
+        if(GetBlockNetwork()) {
+            delegate_->UpdateBlockNetwork(GetBlockNetwork().value());
+        }
         if (GetUserAgent()) {
             delegate_->UpdateUserAgent(GetUserAgent().value());
         }

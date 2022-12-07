@@ -433,6 +433,61 @@ int32_t WebWindowNewHandlerOhos::GetId() const
     return -1;
 }
 
+int32_t InterceptKeyEventOhos::GetAction()
+{
+    if (result_) {
+        return result_->action_;
+    }
+    return -1;
+}
+
+int32_t InterceptKeyEventOhos::GetKeyCode()
+{
+    if (result_) {
+        return result_->keyCode_;
+    }
+    return -1;
+}
+
+void DataResubmittedOhos::Resend()
+{
+    if (handler_) {
+        handler_->Resend();
+    }
+}
+
+void DataResubmittedOhos::Cancel()
+{
+     if (handler_) {
+        handler_->Cancel();
+    }
+}
+
+const void* FaviconReceivedOhos::GetData()
+{
+    return data_;
+}
+
+size_t FaviconReceivedOhos::GetWidth()
+{
+    return width_;
+}
+
+size_t FaviconReceivedOhos::GetHeight()
+{
+    return height_;
+}
+
+int FaviconReceivedOhos::GetColorType()
+{
+    return static_cast<int>(color_type_);
+}
+
+int FaviconReceivedOhos::GetAlphaType()
+{
+    return static_cast<int>(alpha_type_);
+}
+
 WebDelegate::~WebDelegate()
 {
     ReleasePlatformResource();
@@ -1462,6 +1517,7 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onWindowExitV2_ = useNewPipe ? eventHub->GetOnWindowExitEvent()
                                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                                 webCom->GetWindowExitEventId(), oldContext);
+        onPageVisibleV2_ = useNewPipe ? eventHub->GetOnPageVisibleEvent() : nullptr;
     }
     return true;
 }
@@ -2587,6 +2643,25 @@ void WebDelegate::UpdateMinFontSize(int32_t minFontSize)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdateBlockNetwork(bool isNetworkBlocked)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isNetworkBlocked]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutBlockNetwork(isNetworkBlocked);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::LoadUrl()
 {
     auto context = context_.Upgrade();
@@ -3342,6 +3417,67 @@ void WebDelegate::OnWindowExit()
 {
     if (onWindowExitV2_) {
         onWindowExitV2_(std::make_shared<WebWindowExitEvent>());
+    }
+}
+
+void WebDelegate::OnPageVisible(const std::string& url)
+{
+    if (onPageVisibleV2_) {
+        onPageVisibleV2_(std::make_shared<PageVisibleEvent>(url));
+    }
+}
+
+bool WebDelegate::OnInterceptKeyEvent(const std::shared_ptr<BaseEventInfo>& info)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_RETURN(webPattern, false);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_RETURN(webEventHub, false);
+        auto propOnInterceptKeyEvent = webEventHub->GetOnInterceptKeyEvent();
+        CHECK_NULL_RETURN(propOnInterceptKeyEvent, false);
+        return propOnInterceptKeyEvent(info);
+    }
+    return false;
+}
+
+void WebDelegate::OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler)
+{
+    auto param = std::make_shared<DataResubmittedEvent>(AceType::MakeRefPtr<DataResubmittedOhos>(handler));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnDataResubmittedEvent = webEventHub->GetOnDataResubmittedEvent();
+        CHECK_NULL_VOID(propOnDataResubmittedEvent);
+        propOnDataResubmittedEvent(param);
+        return;
+    }
+}
+
+void WebDelegate::OnFaviconReceived(
+    const void* data,
+    size_t width,
+    size_t height,
+    OHOS::NWeb::ImageColorType color_type,
+    OHOS::NWeb::ImageAlphaType alpha_type)
+{
+    auto param = std::make_shared<FaviconReceivedEvent>(AceType::MakeRefPtr<FaviconReceivedOhos>(
+                     data,
+                     width,
+                     height,
+                     color_type,
+                     alpha_type));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnFaviconReceivedEvent = webEventHub->GetOnFaviconReceivedEvent();
+        CHECK_NULL_VOID(propOnFaviconReceivedEvent);
+        propOnFaviconReceivedEvent(param);
+        return;
     }
 }
 

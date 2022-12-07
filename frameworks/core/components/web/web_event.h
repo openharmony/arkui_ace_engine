@@ -1134,6 +1134,111 @@ public:
     WebWindowExitEvent() : BaseEventInfo("WebWindowExitEvent") {}
     ~WebWindowExitEvent() = default;
 };
+
+class ACE_EXPORT PageVisibleEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(PageVisibleEvent, BaseEventInfo);
+
+public:
+    PageVisibleEvent(const std::string& url)
+        : BaseEventInfo("PageVisibleEvent"), url_(url)
+    {}
+
+    ~PageVisibleEvent() = default;
+
+    const std::string& GetUrl() const
+    {
+        return url_;
+    }
+
+private:
+    std::string url_;
+};
+
+class ACE_EXPORT WebKeyEvent : public AceType {
+    DECLARE_ACE_TYPE(WebKeyEvent, AceType)
+
+public:
+    WebKeyEvent() = default;
+    ~WebKeyEvent() = default;
+    virtual int32_t GetAction() = 0;
+    virtual int32_t GetKeyCode() = 0;
+};
+
+class ACE_EXPORT WebInterceptKeyEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebInterceptKeyEvent, BaseEventInfo);
+
+public:
+    WebInterceptKeyEvent(const RefPtr<WebKeyEvent>& result)
+        : BaseEventInfo("WebInterceptKeyEvent"), result_(result) {}
+    ~WebInterceptKeyEvent() = default;
+
+    const RefPtr<WebKeyEvent>& GetResult() const
+    {
+        return result_;
+    }
+
+private:
+    RefPtr<WebKeyEvent> result_;
+};
+
+class ACE_EXPORT DataResubmitted : public AceType {
+    DECLARE_ACE_TYPE(DataResubmitted, AceType)
+
+public:
+    DataResubmitted() = default;
+    ~DataResubmitted() = default;
+
+    virtual void Resend() = 0;
+    virtual void Cancel() = 0;
+};
+
+class ACE_EXPORT DataResubmittedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(DataResubmittedEvent, BaseEventInfo);
+
+public:
+    DataResubmittedEvent(const RefPtr<DataResubmitted>& handler)
+        : BaseEventInfo("DataResubmittedEvent"), handler_(handler) {}
+    ~DataResubmittedEvent() = default;
+
+    const RefPtr<DataResubmitted>& GetHandler() const
+    {
+        return handler_;
+    }
+
+private:
+    RefPtr<DataResubmitted> handler_;
+};
+
+class ACE_EXPORT WebFaviconReceived : public AceType {
+    DECLARE_ACE_TYPE(WebFaviconReceived, AceType)
+
+public:
+    WebFaviconReceived() = default;
+    ~WebFaviconReceived() = default;
+
+    virtual const void* GetData();
+    virtual size_t GetWidth();
+    virtual size_t GetHeight();
+    virtual int GetColorType();
+    virtual int GetAlphaType();
+};
+
+class ACE_EXPORT FaviconReceivedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(FaviconReceivedEvent, BaseEventInfo);
+
+public:
+    FaviconReceivedEvent(const RefPtr<WebFaviconReceived>& handler)
+        : BaseEventInfo("FaviconReceivedEvent"), handler_(handler) {}
+    ~FaviconReceivedEvent() = default;
+
+    const RefPtr<WebFaviconReceived>& GetHandler() const
+    {
+        return handler_;
+    }
+
+private:
+    RefPtr<WebFaviconReceived> handler_;
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_EVENT_H
