@@ -42,7 +42,7 @@ public:
     RefPtr<Element> CreateElement() override;
     RefPtr<RenderNode> CreateRenderNode() override;
     void BuildInnerChild();
-    std::list<RefPtr<Component>> BuildTitleChildren(bool isFloating, bool isFocus = true);
+    std::list<RefPtr<Component>> BuildTitleChildren(bool isFloating, bool isFocus = true, bool isFullWindow = true);
 
     RefPtr<ImageComponent> GetTitleIcon() const
     {
@@ -83,6 +83,7 @@ private:
     bool hideSplit_ = false;
     bool hideMaximize_ = false;
     bool hideMinimize_ = false;
+    bool isStartMove_ = false;
 };
 
 } // namespace OHOS::Ace
