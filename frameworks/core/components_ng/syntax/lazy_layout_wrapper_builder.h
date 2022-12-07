@@ -75,6 +75,8 @@ private:
     std::optional<int32_t> endIndex_;
     std::list<std::optional<std::string>> nodeIds_;
 
+    std::optional<std::string> GetKeyByIndexFromPreNodes(int32_t index);
+
     std::list<RefPtr<LayoutWrapper>> childWrappers_;
 
     bool forceMeasure_ = false;
