@@ -61,6 +61,11 @@ public:
         useCatchMode_ = useCatchMode;
     }
 
+    void SetDuration(int32_t duration)
+    {
+        duration_ = duration;
+    }
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
