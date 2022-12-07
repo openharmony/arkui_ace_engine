@@ -44,6 +44,17 @@ bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (isOn_.value()) {
         currentOffset_ = GetSwitchWidth();
     }
+
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
+    auto switchLayoutAlgorithm = DynamicCast<SwitchLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(switchLayoutAlgorithm, false);
+
+    auto height = switchLayoutAlgorithm->GetHeight();
+    auto width = switchLayoutAlgorithm->GetWidth();
+
+    width_ = width;
+    height_ = height;
     return true;
 }
 
@@ -156,25 +167,6 @@ void SwitchPattern::PlayTranslateAnimation(float startPos, float endPos)
     controller_->SetDuration(GetDuration());
     controller_->AddInterpolator(translate);
     controller_->Play();
-}
-
-bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
-{
-    if (config.skipMeasure && config.skipLayout) {
-        return false;
-    }
-
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-    auto switchLayoutAlgorithm = DynamicCast<SwitchLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(switchLayoutAlgorithm, false);
-
-    auto height = switchLayoutAlgorithm->GetHeight();
-    auto width = switchLayoutAlgorithm->GetWidth();
-
-    width_ = width;
-    height_ = height;
-    return true;
 }
 
 RefPtr<Curve> SwitchPattern::GetCurve() const
