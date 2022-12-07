@@ -204,6 +204,7 @@ ohos_unittest("navigation_pattern_test_ng") {
     "nav_bar_node_test_ng.cpp",
     "navigation_group_node_test_ng.cpp",
     "navigation_pattern_test_ng.cpp",
+    "navigation_view_test_ng.cpp",
     "title_bar_node_test_ng.cpp",
     "title_bar_pattern_test_ng.cpp",
   ]
