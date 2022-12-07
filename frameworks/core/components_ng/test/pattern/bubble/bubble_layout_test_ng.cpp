@@ -19,6 +19,7 @@
 #include "gtest/gtest.h"
 
 #define private public
+#define protected public
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
@@ -40,19 +41,15 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
 namespace {
 constexpr bool BUBBLE_PROPERTY_SHOW = true;
 const std::string BUBBLE_MESSAGE = "Hello World";
 const std::string BUBBLE_NEW_MESSAGE = "Good";
-constexpr Dimension BUBBLE_PAINT_PROPERTY_ARROW_OFFSET = 20.0_px;
 constexpr bool BUBBLE_LAYOUT_PROPERTY_SHOW_IN_SUBWINDOW = true;
 constexpr bool BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_TRUE = true;
 constexpr bool BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_FALSE = false;
 constexpr bool BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_TRUE = true;
 constexpr bool BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_FALSE = false;
-const Color BUBBLE_PAINT_PROPERTY_MASK_COLOR = Color::BLUE;
-const Color BUBBLE_PAINT_PROPERTY_BACK_GROUND_COLOR = Color::RED;
 constexpr float ZERO = 0.0f;
 constexpr float NOPADDING = 0.0f;
 constexpr float BUBBLE_WIDTH = 100.0f;
@@ -97,13 +94,13 @@ public:
     void TearDown() override;
 
 protected:
-    static RefPtr<FrameNode> CreateTargetNode();
+    static RefPtr<FrameNode> GetTargetNode();
 };
 
 void BubbleLayoutTestNg::SetUp() {}
 void BubbleLayoutTestNg::TearDown() {}
 
-PaddingProperty CreatePadding(float left, float top, float right, float bottom)
+PaddingProperty GetPadding(float left, float top, float right, float bottom)
 {
     PaddingProperty padding;
     padding.left = CalcLength(left);
@@ -113,7 +110,7 @@ PaddingProperty CreatePadding(float left, float top, float right, float bottom)
     return padding;
 }
 
-RefPtr<FrameNode> BubbleLayoutTestNg::CreateTargetNode()
+RefPtr<FrameNode> BubbleLayoutTestNg::GetTargetNode()
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -122,177 +119,29 @@ RefPtr<FrameNode> BubbleLayoutTestNg::CreateTargetNode()
 
 /**
  * @tc.name: BubbleLayoutTest001
- * @tc.desc: Test popupParam of bubble.
- * @tc.type: FUNC
- */
-HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest001, TestSize.Level1)
-{
-    auto popupParam = AceType::MakeRefPtr<PopupParam>();
-    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    EXPECT_FALSE(frameNode == nullptr);
-    ViewAbstract::BindPopup(popupParam, frameNode, nullptr);
-    auto isShow = popupParam->IsShow();
-    EXPECT_EQ(isShow, BUBBLE_PROPERTY_SHOW);
-}
-
-/**
- * @tc.name: BubbleLayoutTest002
- * @tc.desc: Test CreateCustomBubbleNode of bubble and Update.
- * @tc.type: FUNC
- */
-HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest002, TestSize.Level1)
-{
-    // set value to popupParam
-    auto popupParam = AceType::MakeRefPtr<PopupParam>();
-    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
-    popupParam->SetMessage(BUBBLE_MESSAGE);
-    popupParam->SetArrowOffset(BUBBLE_PAINT_PROPERTY_ARROW_OFFSET);
-    popupParam->SetShowInSubWindow(BUBBLE_LAYOUT_PROPERTY_SHOW_IN_SUBWINDOW);
-    popupParam->SetEnableArrow(BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_TRUE);
-    popupParam->SetPlacement(Placement::BOTTOM_RIGHT);
-    popupParam->SetUseCustomComponent(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_TRUE);
-    popupParam->SetMaskColor(BUBBLE_PAINT_PROPERTY_MASK_COLOR);
-    popupParam->SetHasAction(false);
-    popupParam->SetBackgroundColor(BUBBLE_PAINT_PROPERTY_BACK_GROUND_COLOR);
-
-    // create customBubbleNode
-    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    EXPECT_FALSE(targetNode == nullptr);
-    auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    EXPECT_FALSE(rowFrameNode == nullptr);
-    auto blankFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
-    EXPECT_FALSE(blankFrameNode == nullptr);
-    rowFrameNode->AddChild(blankFrameNode);
-    auto popupNode =
-        BubbleView::CreateCustomBubbleNode(targetNode->GetTag(), targetNode->GetId(), rowFrameNode, popupParam);
-    EXPECT_FALSE(popupNode == nullptr);
-
-    // update customBubbleNode
-    auto popupId = popupNode->GetId();
-    popupParam->SetPlacement(Placement::LEFT);
-    popupParam->SetMessage(BUBBLE_NEW_MESSAGE);
-    popupParam->SetHasAction(true);
-    BubbleView::UpdatePopupParam(popupId, popupParam, targetNode);
-}
-
-/**
- * @tc.name: BubbleLayoutTest003
- * @tc.desc: Test CreateBubbleNode with message and Update.
- * @tc.type: FUNC
- */
-HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest003, TestSize.Level1)
-{
-    // set value to popupParam
-    auto popupParam = AceType::MakeRefPtr<PopupParam>();
-    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
-    popupParam->SetMessage(BUBBLE_MESSAGE);
-    popupParam->SetArrowOffset(BUBBLE_PAINT_PROPERTY_ARROW_OFFSET);
-    popupParam->SetShowInSubWindow(BUBBLE_LAYOUT_PROPERTY_SHOW_IN_SUBWINDOW);
-    popupParam->SetEnableArrow(BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_FALSE);
-    popupParam->SetPlacement(Placement::BOTTOM_RIGHT);
-    popupParam->SetUseCustomComponent(false);
-    popupParam->SetMaskColor(BUBBLE_PAINT_PROPERTY_MASK_COLOR);
-    popupParam->SetHasAction(false);
-    popupParam->SetBackgroundColor(BUBBLE_PAINT_PROPERTY_BACK_GROUND_COLOR);
-
-    // create bubbleNode
-    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    EXPECT_FALSE(targetNode == nullptr);
-    auto targetTag = targetNode->GetTag();
-    auto targetId = targetNode->GetId();
-    auto popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, popupParam);
-    EXPECT_FALSE(popupNode == nullptr);
-    auto firstTextNode = BubbleView::CreateMessage(popupParam->GetMessage(), popupParam->IsUseCustom());
-    EXPECT_FALSE(firstTextNode == nullptr);
-
-    // update BubbleNode
-    auto popupId = popupNode->GetId();
-    popupParam->SetPlacement(Placement::LEFT);
-    popupParam->SetMessage(BUBBLE_NEW_MESSAGE);
-    popupParam->SetUseCustomComponent(!popupParam->IsUseCustom());
-    popupParam->SetHasAction(true);
-    BubbleView::UpdatePopupParam(popupId, popupParam, targetNode);
-    auto secondTextNode = BubbleView::CreateMessage(popupParam->GetMessage(), popupParam->IsUseCustom());
-    EXPECT_FALSE(secondTextNode == nullptr);
-}
-
-/**
- * @tc.name: BubbleLayoutTest004
- * @tc.desc: Test CreateBubbleNode with CreateCombinedChild and Update.
- * @tc.type: FUNC
- */
-HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest004, TestSize.Level1)
-{
-    // set value to popupParam
-    auto popupParam = AceType::MakeRefPtr<PopupParam>();
-    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
-    popupParam->SetMessage(BUBBLE_MESSAGE);
-    popupParam->SetShowInSubWindow(BUBBLE_LAYOUT_PROPERTY_SHOW_IN_SUBWINDOW);
-    popupParam->SetEnableArrow(BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_TRUE);
-    popupParam->SetPlacement(Placement::BOTTOM_RIGHT);
-    popupParam->SetUseCustomComponent(false);
-    popupParam->SetHasAction(false);
-    ButtonProperties primaryProperties;
-    primaryProperties.showButton = false;
-    primaryProperties.value = BUBBLE_MESSAGE;
-    popupParam->SetPrimaryButtonProperties(primaryProperties);
-    ButtonProperties secondProperties;
-    secondProperties.showButton = false;
-    secondProperties.value = BUBBLE_NEW_MESSAGE;
-    popupParam->SetSecondaryButtonProperties(secondProperties);
-
-    // create bubbleNode
-    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    EXPECT_FALSE(targetNode == nullptr);
-    auto targetTag = targetNode->GetTag();
-    auto targetId = targetNode->GetId();
-    auto popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, popupParam);
-    EXPECT_FALSE(popupNode == nullptr);
-    auto popupId = popupNode->GetId();
-    auto textNode = BubbleView::CreateMessage(popupParam->GetMessage(), popupParam->IsUseCustom());
-    EXPECT_FALSE(textNode == nullptr);
-
-    // update BubbleNode
-    popupParam->SetPlacement(Placement::LEFT);
-    popupParam->SetMessage(BUBBLE_NEW_MESSAGE);
-    popupParam->SetUseCustomComponent(!popupParam->IsUseCustom());
-    popupParam->SetHasAction(true);
-    BubbleView::UpdatePopupParam(popupId, popupParam, targetNode);
-    auto secondTextNode = BubbleView::CreateMessage(popupParam->GetMessage(), popupParam->IsUseCustom());
-    EXPECT_FALSE(secondTextNode == nullptr);
-}
-
-/**
- * @tc.name: BubbleLayoutTest005
  * @tc.desc: Test BubbleNode layout
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest005, TestSize.Level1)
+HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest001, TestSize.Level1)
 {
     // create targetNode and popupNode
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
     popupParam->SetMessage(BUBBLE_MESSAGE);
-    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    EXPECT_FALSE(targetNode == nullptr);
+    auto targetNode = GetTargetNode();
+    EXPECT_NE(targetNode, nullptr);
     auto targetTag = targetNode->GetTag();
     auto targetId = targetNode->GetId();
     auto popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, popupParam);
-    EXPECT_FALSE(popupNode == nullptr);
+    EXPECT_NE(popupNode, nullptr);
 
     // create layoutWrapper and update it
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(geometryNode == nullptr);
+    EXPECT_NE(geometryNode, nullptr);
     RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
         popupNode, geometryNode, AceType::DynamicCast<BubbleLayoutProperty>(popupNode->GetLayoutProperty()));
     auto layoutProperty = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
-    EXPECT_FALSE(layoutProperty == nullptr);
+    EXPECT_NE(layoutProperty, nullptr);
     // update layoutProperty
     layoutProperty->UpdateEnableArrow(true);
     layoutProperty->UpdateUseCustom(false);
@@ -301,7 +150,7 @@ HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest005, TestSize.Level1)
     layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(BUBBLE_WIDTH), CalcLength(BUBBLE_HEIGHT)));
     auto popupLayoutAlgorithm = popupNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
-    EXPECT_FALSE(popupLayoutAlgorithm == nullptr);
+    EXPECT_NE(popupLayoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(popupLayoutAlgorithm));
 
     LayoutConstraintF parentLayoutConstraint;
@@ -324,11 +173,11 @@ HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: BubbleLayoutTest006
+ * @tc.name: BubbleLayoutTest002
  * @tc.desc: Test Bubble Layout
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest006, TestSize.Level1)
+HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.
@@ -337,13 +186,12 @@ HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest006, TestSize.Level1)
     popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
     popupParam->SetMessage(BUBBLE_MESSAGE);
     popupParam->SetUseCustomComponent(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_FALSE);
-    auto targetNode = CreateTargetNode();
-    auto targetId = targetNode->GetId();
-    auto targetTag = targetNode->GetTag();
+    auto targetNode = GetTargetNode();
+    EXPECT_NE(targetNode, nullptr);
     auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode =
-        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
-    EXPECT_FALSE(frameNode == nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetNode->GetId(), targetNode->GetTag()));
+    EXPECT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
@@ -375,8 +223,6 @@ HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest006, TestSize.Level1)
     parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
     parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
 
-    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
-    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
 
@@ -391,11 +237,11 @@ HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: BubbleLayoutTest007
+ * @tc.name: BubbleLayoutTest003
  * @tc.desc: Test the Bubble created by message Measure and Layout
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest007, TestSize.Level1)
+HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.
@@ -404,7 +250,7 @@ HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest007, TestSize.Level1)
     popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
     popupParam->SetMessage(BUBBLE_MESSAGE);
     popupParam->SetUseCustomComponent(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_FALSE);
-    auto targetNode = CreateTargetNode();
+    auto targetNode = GetTargetNode();
     auto targetId = targetNode->GetId();
     auto targetTag = targetNode->GetTag();
     auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -445,8 +291,6 @@ HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest007, TestSize.Level1)
     parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
     parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
 
-    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
-    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
 
@@ -466,7 +310,6 @@ HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest007, TestSize.Level1)
     textLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     textLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(BUBBLE_WIDTH), CalcLength(BUBBLE_HEIGHT)));
-    textLayoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
     auto boxLayoutAlgorithm = textFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
     textLayoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
@@ -479,21 +322,21 @@ HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest007, TestSize.Level1)
      */
     bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(BUBBLE_WIDTH, BUBBLE_HEIGHT));
+    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(0, 0));
     EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
 }
 
 /**
- * @tc.name: BubbleLayoutTest008
+ * @tc.name: BubbleLayoutTest004
  * @tc.desc: Test  Bubble UpdateTouchRegion in different arrowPlacement
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest008, TestSize.Level1)
+HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.
      */
-    auto targetNode = CreateTargetNode();
+    auto targetNode = GetTargetNode();
     auto targetId = targetNode->GetId();
     auto targetTag = targetNode->GetTag();
     auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
