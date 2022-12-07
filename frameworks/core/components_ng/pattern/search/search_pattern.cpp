@@ -47,9 +47,7 @@ void SearchPattern::OnModifyDone()
     buttonLayoutProperty->UpdateLabel(searchButton_);
     buttonFrameNode->MarkModifyDone();
     // Image click event
-    if (imageClickListener_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!imageClickListener_);
     auto imageGesture = imageFrameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(imageGesture);
     auto imageClickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
@@ -60,9 +58,7 @@ void SearchPattern::OnModifyDone()
     imageClickListener_ = MakeRefPtr<ClickEvent>(std::move(imageClickCallback));
     imageGesture->AddClickEvent(imageClickListener_);
     // Button click event
-    if (buttonClickListener_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!buttonClickListener_);
     auto buttonGesture = buttonFrameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(buttonGesture);
     auto buttonClickCallback = [weak = WeakClaim(this)](GestureEvent& info) {

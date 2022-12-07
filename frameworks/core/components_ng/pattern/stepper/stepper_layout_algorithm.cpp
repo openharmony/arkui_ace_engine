@@ -110,9 +110,9 @@ void StepperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto rightButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(2);
     CHECK_NULL_VOID(rightButtonWrapper);
     auto rightButtonTextWrapper = rightButtonWrapper->GetOrCreateChildByIndex(0);
-    if (!swiperWrapper || !leftButtonWrapper || !rightButtonWrapper) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(swiperWrapper);
+    CHECK_NULL_VOID_NOLOG(leftButtonWrapper);
+    CHECK_NULL_VOID_NOLOG(rightButtonWrapper);
     // Set swiper offset
     OffsetF swiperOffset = { 0.0f, 0.0f };
     swiperWrapper->GetGeometryNode()->SetMarginFrameOffset(swiperOffset);

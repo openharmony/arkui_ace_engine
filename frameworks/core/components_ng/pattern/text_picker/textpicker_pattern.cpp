@@ -63,9 +63,7 @@ void TextPickerPattern::OnAttachToFrameNode()
 
 bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (!config.frameSizeChange) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
     CHECK_NULL_RETURN(dirty, false);
     return true;
 }
@@ -202,9 +200,7 @@ void TextPickerPattern::FlushCurrentOptions()
 
 void TextPickerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    if (panEvent_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!panEvent_);
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         LOGI("Pan event start");
         auto pattern = weak.Upgrade();
@@ -240,9 +236,8 @@ void TextPickerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void TextPickerPattern::HandleDragStart(const GestureEvent& event)
 {
-    if (!GetHost() || !GetToss()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(GetHost());
+    CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
     yOffset_ = event.GetGlobalPoint().GetY();
     toss->SetStart(yOffset_);
@@ -256,13 +251,10 @@ void TextPickerPattern::HandleDragMove(const GestureEvent& event)
         InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0));
         return;
     }
-    if (!pressed_) {
-        LOGE("not pressed.");
-        return;
-    }
-    if (!GetHost() || !GetToss()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(pressed_);
+
+    CHECK_NULL_VOID_NOLOG(GetHost());
+    CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
     double offsetY = event.GetGlobalPoint().GetY();
     if (NearEqual(offsetY, yLast_, 1.0)) { // if changing less than 1.0, no need to handle
@@ -275,9 +267,8 @@ void TextPickerPattern::HandleDragMove(const GestureEvent& event)
 void TextPickerPattern::HandleDragEnd()
 {
     pressed_ = false;
-    if (!GetHost() || !GetToss()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(GetHost());
+    CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
     if (!NotLoopOptions() && toss->Play()) {
         return;
@@ -295,9 +286,7 @@ void TextPickerPattern::HandleDragEnd()
 }
 void TextPickerPattern::CreateAnimation()
 {
-    if (animationCreated_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!animationCreated_);
     toController_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
     toController_->SetDuration(ANIMATION_ZERO_TO_OUTER); // 200ms for animation that from zero to outer.
     auto weak = AceType::WeakClaim(this);
@@ -330,10 +319,7 @@ RefPtr<CurveAnimation<double>> TextPickerPattern::CreateAnimation(double from, d
 
 void TextPickerPattern::HandleCurveStopped()
 {
-    if (!animationCreated_) {
-        LOGE("animation not created.");
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(animationCreated_);
     if (NearZero(scrollDelta_)) {
         return;
     }
@@ -431,9 +417,7 @@ void TextPickerPattern::UpdateColumnChildPosition(double offsetY)
 {
     yLast_ = offsetY;
     double dragDelta = yLast_ - yOffset_;
-    if (!CanMove(LessNotEqual(dragDelta, 0))) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(CanMove(LessNotEqual(dragDelta, 0)));
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -453,9 +437,7 @@ void TextPickerPattern::UpdateColumnChildPosition(double offsetY)
 
 bool TextPickerPattern::CanMove(bool isDown) const
 {
-    if (!NotLoopOptions()) {
-        return true;
-    }
+    CHECK_NULL_RETURN_NOLOG(NotLoopOptions(), true);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     int totalOptionCount = static_cast<int>(GetOptionCount());
@@ -479,10 +461,8 @@ bool TextPickerPattern::InnerHandleScroll(bool isDown)
     CHECK_NULL_RETURN(host, false);
     auto totalOptionCount = GetOptionCount();
 
-    if (!host || !totalOptionCount) {
-        LOGE("options is empty.");
-        return false;
-    }
+    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_RETURN(totalOptionCount, false);
 
     uint32_t currentIndex = GetCurrentIndex();
     if (isDown) {

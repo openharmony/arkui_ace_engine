@@ -100,9 +100,7 @@ void PagePattern::ProcessShowState()
 
 void PagePattern::OnShow()
 {
-    if (isOnShow_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!isOnShow_);
     isOnShow_ = true;
     ProcessShowState();
     auto context = PipelineContext::GetCurrentContext();
@@ -114,9 +112,7 @@ void PagePattern::OnShow()
 
 void PagePattern::OnHide()
 {
-    if (!isOnShow_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(isOnShow_);
     isOnShow_ = false;
     ProcessHideState();
     auto context = PipelineContext::GetCurrentContext();
