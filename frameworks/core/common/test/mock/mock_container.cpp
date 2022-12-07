@@ -20,4 +20,10 @@ int32_t Container::CurrentId()
 {
     return 0;
 }
+
+RefPtr<Container> Container::GetActive()
+{
+    RefPtr<Container> activeContainer;
+    return activeContainer;
+}
 } // namespace OHOS::Ace
