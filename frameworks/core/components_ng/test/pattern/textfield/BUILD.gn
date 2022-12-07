@@ -19,7 +19,10 @@ import(
 ohos_unittest("textfield_pattern_test_ng") {
   module_out_path = "$test_output_path/textfield"
   platform = "ohos"
-  sources = [ "textfield_pattern_test_ng.cpp" ]
+  sources = [
+    "textfield_pattern_test_ng.cpp",
+    "textfield_test_ng_utils.cpp",
+  ]
 
   deps = [
     "$ace_root/build:ace_ohos_unittest_base",
