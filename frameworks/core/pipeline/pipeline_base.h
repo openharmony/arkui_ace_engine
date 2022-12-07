@@ -351,6 +351,8 @@ public:
 
     void ClearImageCache();
 
+    void SetImageCache(const RefPtr<ImageCache>& imageChache);
+
     RefPtr<ImageCache> GetImageCache() const;
 
     Window* GetWindow()

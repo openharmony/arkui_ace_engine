@@ -50,6 +50,9 @@ extern const std::string URL_PREFIX;
 extern const std::string IMAGE_PNG;
 extern const std::string IMAGE_JPEG;
 extern const std::string IMAGE_WEBP;
+extern const std::string QUALITY_0;
+extern const std::string QUALITY_50;
+extern const std::string QUALITY_100;
 
 extern const std::string NULL_STR;
 extern const std::string DEFAULT_STR;

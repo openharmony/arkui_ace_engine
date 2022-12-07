@@ -17,6 +17,10 @@
 
 #include "gtest/gtest.h"
 
+// Add the following two macro definitions to test the private and protected method.
+#define private public
+#define protected public
+
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/ace_engine.h"
@@ -28,11 +32,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_interface.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-
-// Add the following two macro definitions to test the private and protected method.
-#define private public
-#define protected public
-
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_event_hub.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_layout_algorithm.h"
@@ -187,14 +187,16 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg003, TestSize.Level1)
     auto layoutAlgorithm = customPattern->CreateLayoutAlgorithm();
     ASSERT_NE(layoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    layoutWrapper->GetLayoutAlgorithm()->SetNeedLayout();
     DirtySwapConfig config;
 
     /**
      * @tc.steps2: Call the function OnDirtyLayoutWrapperSwap with config.skipMeasure = false.
      * @tc.expected: The return value is equal to true.
      */
+    layoutWrapper->skipMeasureContent_ = true;
     config.skipMeasure = false;
-    EXPECT_TRUE(customPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    EXPECT_FALSE(customPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
 
     /**
      * @tc.steps3: Call the function OnDirtyLayoutWrapperSwap with config.skipMeasure = true.
@@ -204,24 +206,19 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg003, TestSize.Level1)
     EXPECT_FALSE(customPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
 
     /**
-     * @tc.steps4: Call the function SetCanvasSize with IDEAL_SIZE.
-     * @tc.expected: The return value of GetWidth and GetHeight are equal to the corresponding value of IDEAL_SIZE.
+     * @tc.steps4: Call the function OnDirtyLayoutWrapperSwap with config.skipMeasure = false.
+     * @tc.expected: The return value is equal to true.
      */
-    customPattern->SetCanvasSize(IDEAL_SIZE);
-    EXPECT_DOUBLE_EQ(customPattern->GetWidth(), IDEAL_WIDTH);
-    EXPECT_DOUBLE_EQ(customPattern->GetHeight(), IDEAL_HEIGHT);
+    layoutWrapper->skipMeasureContent_ = false;
+    config.skipMeasure = false;
+    EXPECT_TRUE(customPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
 
     /**
-     * @tc.steps5: Call the function SetLineDash and SetLineDashOffset.
-     * @tc.expected: The value of GetLineDash().dashOffset is equal to DEFAULT_DOUBLE10.
-     *               The value of GetLineDash().lineDash is equal to CANDIDATE_DOUBLES.
+     * @tc.steps5: Call the function OnDirtyLayoutWrapperSwap with config.skipMeasure = true.
+     * @tc.expected: The return value is equal to false.
      */
-    paintMethod->SetLineDash(CANDIDATE_DOUBLES);
-    paintMethod->SetLineDashOffset(DEFAULT_DOUBLE10);
-    EXPECT_DOUBLE_EQ(customPattern->GetLineDash().dashOffset, DEFAULT_DOUBLE10);
-    for (uint32_t i = 1; i < CANDIDATE_DOUBLES.size(); ++i) {
-        EXPECT_DOUBLE_EQ(paintMethod->GetLineDash().lineDash[i], CANDIDATE_DOUBLES[i]);
-    }
+    config.skipMeasure = true;
+    EXPECT_FALSE(customPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
 }
 
 /**

@@ -45,7 +45,7 @@ RefPtr<PipelineContext> PluginElementTest::GetPipelineContext(const RefPtr<Plugi
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     taskExecutor->InitPlatformThread();
     taskExecutor->InitJsThread(true);
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     return AceType::MakeRefPtr<PipelineContext>(
         std::move(window), taskExecutor, assetManager, resRegister, frontend, 0);

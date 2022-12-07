@@ -559,9 +559,8 @@ void VideoPattern::OnModifyDone()
     if (!hiddenChangeEvent_) {
         SetHiddenChangeEvent([weak = WeakClaim(this)](bool hidden) {
             auto videoPattern = weak.Upgrade();
-            if (videoPattern) {
-                videoPattern->HiddenChange(hidden);
-            }
+            CHECK_NULL_VOID_NOLOG(videoPattern);
+            videoPattern->HiddenChange(hidden);
         });
     }
     AddPreviewNodeIfNeeded();

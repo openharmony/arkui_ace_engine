@@ -18,7 +18,13 @@
 
 #include "base/memory/ace_type.h"
 
-namespace OHOS::Ace {
+namespace OHOS {
+
+namespace Media {
+class PixelMap;
+}
+
+namespace Ace {
 
 enum class PixelFormat : int32_t {
     UNKNOWN = 0,
@@ -60,12 +66,17 @@ public:
     virtual void* GetRawPixelMapPtr() const = 0;
     virtual std::string GetId() = 0;
     virtual std::string GetModifyId() = 0;
+    virtual std::shared_ptr<Media::PixelMap> GetPixelMapSharedPtr()
+    {
+        return nullptr;
+    }
 
     static void* GetReleaseContext(const RefPtr<PixelMap>& pixelMap);
     // passed to SkImage to release PixelMap shared_ptr
     static void ReleaseProc(const void* /* pixels */, void* context);
 };
 
-} // namespace OHOS::Ace
+} // namespace Ace
+} // namespace OHOS
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_IMAGE_ACE_PIXEL_MAP_H

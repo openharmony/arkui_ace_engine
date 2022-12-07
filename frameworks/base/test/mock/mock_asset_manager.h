@@ -19,9 +19,9 @@
 #include "base/resource/asset_manager.h"
 
 namespace OHOS::Ace {
-class FakeAsset final : public Asset {
+class MockAsset final : public Asset {
 public:
-    ~FakeAsset() override = default;
+    ~MockAsset() override = default;
 
     size_t GetSize() const override
     {
@@ -34,9 +34,9 @@ public:
     }
 };
 
-class FakeAssetManager final : public AssetManager {
+class MockAssetManager final : public AssetManager {
 public:
-    ~FakeAssetManager() override = default;
+    ~MockAssetManager() override = default;
 
     void PushFront(RefPtr<AssetProvider> provider) override {}
 
