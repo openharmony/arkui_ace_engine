@@ -51,7 +51,7 @@ void DatePickerView::CreateDatePicker()
     auto monthId = datePickerPattern->GetMonthId();
     auto dayId = datePickerPattern->GetDayId();
 
-    auto context = dateNode->GetContext();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
