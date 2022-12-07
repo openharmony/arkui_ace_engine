@@ -196,6 +196,18 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
+void OverlayManager::ErasePopup(int32_t targetId)
+{
+    if (popupMap_.find(targetId) != popupMap_.end()) {
+        LOGI("Erase popup id %{public}d when destroyed.", targetId);
+        auto rootNode = rootNodeWeak_.Upgrade();
+        CHECK_NULL_VOID(rootNode);
+        rootNode->RemoveChild(popupMap_[targetId].popupNode);
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        popupMap_.erase(targetId);
+    }
+}
+
 bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset)
 {
     if (!menu) {
@@ -279,7 +291,7 @@ void OverlayManager::HideMenuInSubWindow()
         return;
     }
     auto rootNode = rootNodeWeak_.Upgrade();
-    for (const auto& child: rootNode->GetChildren()) {
+    for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
         PopInSubwindow(node);
     }
