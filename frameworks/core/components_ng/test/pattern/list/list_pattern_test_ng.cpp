@@ -978,7 +978,7 @@ HWTEST_F(ListPatternTestNg, ListTest013, TestSize.Level1)
 
 /**
  * @tc.name: ListTest014
- * @tc.desc: Test list GetHeaderFooterGroupNode function. Only have head and foot.
+ * @tc.desc: Test list CreateItemGroupList function. Only have head and foot.
  * @tc.type: FUNC
  */
 HWTEST_F(ListPatternTestNg, ListTest014, TestSize.Level1)
@@ -1043,9 +1043,10 @@ HWTEST_F(ListPatternTestNg, ListTest014, TestSize.Level1)
     listLayoutAlgorithm.itemPosition_.begin()->second.isGroup = true;
     listLayoutAlgorithm.itemPosition_.rbegin()->second.isGroup = true;
     listLayoutAlgorithm.stickyStyle_ = V2::StickyStyle::HEADER;
-    listLayoutAlgorithm.GetHeaderFooterGroupNode(&layoutWrapper);
-    EXPECT_NE(listLayoutAlgorithm.headerGroupNode_.Upgrade(), nullptr);
-    EXPECT_NE(listLayoutAlgorithm.footerGroupNode_.Upgrade(), nullptr);
+    listLayoutAlgorithm.CreateItemGroupList(&layoutWrapper);
+    auto& itemGroupList = listLayoutAlgorithm.GetItemGroupList();
+    EXPECT_NE(itemGroupList.begin()->Upgrade(), nullptr);
+    EXPECT_NE(itemGroupList.rbegin()->Upgrade(), nullptr);
 }
 
 /**
@@ -2678,8 +2679,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest008, TestSize.Level1)
      * @tc.expected: step2. equal.
      */
     WeakPtr<FrameNode> weak = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    listPattern->headerGroupNode_ = weak;
-    listPattern->footerGroupNode_ = weak;
+    listPattern->itemGroupList_.push_back(weak);
     listPattern->scrollState_ = SCROLL_FROM_BAR;
     result = listPattern->UpdateCurrentOffset(0);
     EXPECT_NE(result, false);
