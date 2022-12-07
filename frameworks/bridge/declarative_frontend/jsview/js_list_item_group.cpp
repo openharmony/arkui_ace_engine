@@ -76,21 +76,13 @@ void JSListItemGroup::Create(const JSCallbackInfo& args)
 
 void JSListItemGroup::SetDivider(const JSCallbackInfo& args)
 {
-    do {
-        if (args.Length() < 1 || !args[0]->IsObject()) {
-            LOGW("Invalid params");
-            break;
-        }
-
+    if (args.Length() >= 1 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-        Dimension strokeWidth;
-        if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), strokeWidth) && strokeWidth.IsValid()) {
-            LOGW("Invalid strokeWidth of divider");
-            break;
-        }
-
         V2::ItemDivider divider;
-        divider.strokeWidth = strokeWidth;
+        if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)) {
+            LOGW("Invalid strokeWidth of divider");
+            divider.strokeWidth.Reset();
+        }
         if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
             // Failed to get color from param, using default color defined in theme
             RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();
@@ -102,7 +94,7 @@ void JSListItemGroup::SetDivider(const JSCallbackInfo& args)
         ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin);
 
         ListItemGroupModel::GetInstance()->SetDivider(divider);
-    } while (false);
+    }
 
     args.ReturnSelf();
 }
