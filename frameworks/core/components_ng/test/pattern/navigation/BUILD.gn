@@ -164,9 +164,9 @@ ohos_unittest("navigation_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_drawing_convertor.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
+    "$ace_root/frameworks/core/components_ng/test/pattern/text/mock/mock_text_theme.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/text/mock/mock_txt_font_collection.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/text/mock/mock_txt_paragraph.cpp",
-    "$ace_root/frameworks/core/components_ng/test/pattern/text/mock/mock_text_theme.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
@@ -195,7 +195,7 @@ ohos_unittest("navigation_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/navigator/navigator_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/render/image_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
-    "$ace_root/frameworks/core/components_ng/test/pattern/image/mock_icon_theme.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/theme/mock_icon_theme.cpp",
 
     # self
     "bar_item_node_test_ng.cpp",
