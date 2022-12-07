@@ -215,5 +215,9 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
     return fullScreenManager_;
 }
 
+const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
+{
+    return overlayManager_;
+}
 void PipelineContext::AddPredictTask(PredictTask&& task) {}
 } // namespace OHOS::Ace::NG

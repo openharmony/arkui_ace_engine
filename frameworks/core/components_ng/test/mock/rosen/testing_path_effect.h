@@ -37,6 +37,11 @@ public:
     {
         return std::make_shared<TestingPathEffect>();
     }
+
+    static std::shared_ptr<TestingPathEffect> CreateDashPathEffect(const float intervals[], int count, float phase)
+    {
+        return std::make_shared<TestingPathEffect>();
+    }
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_PATH_EFFECT_H
