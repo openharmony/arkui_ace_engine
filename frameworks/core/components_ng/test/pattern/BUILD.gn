@@ -19,6 +19,7 @@ group("pattern_unittest") {
     "blank:blank_pattern_unit_test",
     "bubble:bubble_pattern_test_ng",
     "button:button_pattern_test_ng",
+    "calendar:calendar_pattern_test_ng",
     "checkbox:checkbox_pattern_test_ng",
     "checkboxgroup:checkboxgroup_pattern_test_ng",
     "common_view:common_view_test_ng",
