@@ -31,6 +31,23 @@ void FlutterRenderWeb::OnPaintFinish()
     if (!delegate_) {
         return;
     }
+
+    position_ = GetGlobalOffset();
+    if (!isCreateWebView_) {
+        isCreateWebView_ = true;
+        prePosition_ = position_;
+        preDrawSize_ = drawSize_;
+        return;
+    }
+
+    if (NearEqual(prePosition_.GetX(), position_.GetX()) &&
+        NearEqual(prePosition_.GetY(), position_.GetY()) &&
+        NearEqual(preDrawSize_.Width(), drawSize_.Width()) &&
+        NearEqual(preDrawSize_.Height(), drawSize_.Height())) {
+    } else {
+        delegate_->SetBoundsOrRezise(drawSize_, position_);
+    }
+    LOGI("FlutterRenderWeb::OnPaintFinish");
 }
 
 RenderLayer FlutterRenderWeb::GetRenderLayer()
@@ -67,7 +84,7 @@ void FlutterRenderWeb::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     if (delegate_) {
-        delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+        delegate_->SetBoundsOrRezise(drawSize_, delegate_->GetWebRenderGlobalPos());
     }
     RenderNode::Paint(context, offset);
 }

@@ -48,6 +48,14 @@ build_component("text_overlay_for_web") {
     "text_overlay_manager.cpp",
   ]
 
+  if (is_standard_system) {
+    deps = [
+      "//foundation/graphic/graphic_2d:libsurface",
+      "//third_party/EGL:libEGL",
+      "//third_party/openGLES:libGLES",
+    ]
+  }
+
   rosen_sources = [ "rosen_render_text_overlay.cpp" ]
 
   standard_web_configs = [ ":ohos_text_overlay_web_config" ]
