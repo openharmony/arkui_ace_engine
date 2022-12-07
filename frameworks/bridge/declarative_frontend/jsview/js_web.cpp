@@ -609,7 +609,8 @@ public:
         JSClass<JSWebInterceptKeyEvent>::Declare("KeyEvent");
         JSClass<JSWebInterceptKeyEvent>::CustomMethod("getAction", &JSWebInterceptKeyEvent::GetAction);
         JSClass<JSWebInterceptKeyEvent>::CustomMethod("getKeyCode", &JSWebInterceptKeyEvent::GetKeyCode);
-        JSClass<JSWebInterceptKeyEvent>::Bind(globalObj, &JSWebInterceptKeyEvent::Constructor, &JSWebInterceptKeyEvent::Destructor);
+        JSClass<JSWebInterceptKeyEvent>::Bind(
+            globalObj, &JSWebInterceptKeyEvent::Constructor, &JSWebInterceptKeyEvent::Destructor);
     }
 
     void SetResult(const RefPtr<WebKeyEvent>& result)
@@ -671,8 +672,8 @@ public:
         }
     }
 
-   void Cancel(const JSCallbackInfo& args)
-   {
+    void Cancel(const JSCallbackInfo& args)
+    {
         if (dataResubmitted_) {
             dataResubmitted_->Cancel();
         }
@@ -3844,7 +3845,6 @@ void JSWeb::BlockNetwork(bool isNetworkBlocked)
     }
 }
 
-
 JSRef<JSVal> PageVisibleEventToJSValue(const PageVisibleEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -3964,56 +3964,56 @@ void JSWeb::OnDataResubmitted(const JSCallbackInfo& args)
     }
 }
 
-JSRef<JSObject> FaviconReceivedEventToJSValue(const FaviconReceivedEvent& eventInfo)
+Media::PixelFormat GetPixelFormat(NWeb::ImageColorType color_type){
+    Media::PixelFormat pixelFormat;
+    switch (color_type) {
+        case NWeb::ImageColorType::COLOR_TYPE_UNKNOWN:
+            pixelFormat = Media::PixelFormat::UNKNOWN;
+            break;
+        case NWeb::ImageColorType::COLOR_TYPE_RGBA_8888:
+            pixelFormat = Media::PixelFormat::RGBA_8888;
+            break;
+        case NWeb::ImageColorType::COLOR_TYPE_BGRA_8888:
+            pixelFormat = Media::PixelFormat::BGRA_8888;
+            break;
+        default:
+            pixelFormat = Media::PixelFormat::UNKNOWN;
+            break;
+    }
+    return pixelFormat;
+}
+
+Media::AlphaType GetAlphaType(NWeb::ImageAlphaType alpha_type)
+{
+    Media::AlphaType alphaType;
+    switch (alpha_type) {
+        case NWeb::ImageAlphaType::ALPHA_TYPE_UNKNOWN:
+            alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+            break;
+        case NWeb::ImageAlphaType::ALPHA_TYPE_OPAQUE:
+            alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+            break;
+        case NWeb::ImageAlphaType::ALPHA_TYPE_PREMULTIPLIED:
+            alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
+            break;
+        case NWeb::ImageAlphaType::ALPHA_TYPE_POSTMULTIPLIED:
+            alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL;
+            break;
+        default:
+            alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+            break;
+    }
+    return alphaType;
+}
+
+JSRef<JSObject> CreateJSPixelMap(const void* data, size_t width, size_t height, int color_type, int alpha_type)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
-    auto engine = EngineHelper::GetCurrentEngine();
-    if (!engine) {
-        LOGE("engine is null");
-        return JSRef<JSVal>::Cast(obj);
-    }
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-    auto data = eventInfo.GetHandler()->GetData();
-    size_t width = eventInfo.GetHandler()->GetWidth();
-    size_t height = eventInfo.GetHandler()->GetHeight();
-    auto color_type = eventInfo.GetHandler()->GetColorType();
-    auto alpha_type = eventInfo.GetHandler()->GetAlphaType();
-
     Media::InitializationOptions opt;
     opt.size.width = static_cast<int32_t>(width);
     opt.size.height = static_cast<int32_t>(height);
-    switch (NWeb::ImageColorType(color_type)) {
-        case NWeb::ImageColorType::COLOR_TYPE_UNKNOWN:
-            opt.pixelFormat = Media::PixelFormat::UNKNOWN;
-            break;
-        case NWeb::ImageColorType::COLOR_TYPE_RGBA_8888:
-            opt.pixelFormat = Media::PixelFormat::RGBA_8888;
-            break;
-        case NWeb::ImageColorType::COLOR_TYPE_BGRA_8888:
-            opt.pixelFormat = Media::PixelFormat::BGRA_8888;
-            break;
-        default:
-            opt.pixelFormat = Media::PixelFormat::UNKNOWN;
-            break;
-    }
-    switch (NWeb::ImageAlphaType(alpha_type)) {
-        case NWeb::ImageAlphaType::ALPHA_TYPE_UNKNOWN:
-            opt.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
-            break;
-        case NWeb::ImageAlphaType::ALPHA_TYPE_OPAQUE:
-            opt.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
-            break;
-        case NWeb::ImageAlphaType::ALPHA_TYPE_PREMULTIPLIED:
-            opt.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
-            break;
-        case NWeb::ImageAlphaType::ALPHA_TYPE_POSTMULTIPLIED:
-            opt.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL;
-            break;
-        default:
-            opt.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
-            break;
-    }
+    opt.pixelFormat = GetPixelFormat(NWeb::ImageColorType(color_type));
+    opt.alphaType = GetAlphaType(NWeb::ImageAlphaType(alpha_type));
     opt.editable = true;
     auto pixelMap = Media::PixelMap::Create(opt);
     if (pixelMap == nullptr) {
@@ -4024,10 +4024,28 @@ JSRef<JSObject> FaviconReceivedEventToJSValue(const FaviconReceivedEvent& eventI
     uint64_t bufferSize = stride * height;
     pixelMap->WritePixels(static_cast<const uint8_t *>(data), bufferSize);
     std::shared_ptr<Media::PixelMap> pixelMapToJs(pixelMap.release());
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        LOGE("engine is null");
+        return JSRef<JSVal>::Cast(obj);
+    }
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
     napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMapToJs);
     NativeValue* nativeValue = reinterpret_cast<NativeValue*>(napiValue);
-    auto jsValue = JsConverter::ConvertNativeValueToJsVal(nativeValue);
-    obj->SetPropertyObject("favicon", jsValue);
+    return JsConverter::ConvertNativeValueToJsVal(nativeValue);
+}
+
+JSRef<JSObject> FaviconReceivedEventToJSValue(const FaviconReceivedEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    auto data = eventInfo.GetHandler()->GetData();
+    size_t width = eventInfo.GetHandler()->GetWidth();
+    size_t height = eventInfo.GetHandler()->GetHeight();
+    int color_type = eventInfo.GetHandler()->GetColorType();
+    int alpha_type = eventInfo.GetHandler()->GetAlphaType();
+    JSRef<JSObject> jsPixelMap = CreateJSPixelMap(data, width, height, color_type, alpha_type);
+    obj->SetPropertyObject("favicon", jsPixelMap);
     return JSRef<JSObject>::Cast(obj);
 }
 
