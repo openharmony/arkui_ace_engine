@@ -26,12 +26,10 @@ void GridItemLayoutProperty::ResetGridLayoutInfoAndMeasure() const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
     auto uiNode = DynamicCast<UINode>(host);
     while (uiNode->GetTag() != V2::GRID_ETS_TAG) {
         uiNode = uiNode->GetParent();
-        CHECK_NULL_VOID(uiNode);
+        CHECK_NULL_VOID_NOLOG(uiNode);
     }
     auto grid = DynamicCast<FrameNode>(uiNode);
     CHECK_NULL_VOID(grid);
