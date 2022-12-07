@@ -70,6 +70,11 @@ void RosenRenderShapeContainer::PerformLayout()
 
 void RosenRenderShapeContainer::Paint(RenderContext& context, const Offset& offset)
 {
+    const auto renderContext = static_cast<RosenRenderContext*>(&context);
+    skCanvas_ = renderContext->GetCanvas();
+    if (!skCanvas_) {
+        return;
+    }
     if (mesh_.size() == 0) {
         auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width(), GetLayoutSize().Height(),
             SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
@@ -88,13 +93,20 @@ void RosenRenderShapeContainer::Paint(RenderContext& context, const Offset& offs
             skOffCanvas_->scale(scale, scale);
             skOffCanvas_->translate(tx, ty);
         }
-        RenderNode::Paint(context, offset);
-    } else {
-        const auto renderContext = static_cast<RosenRenderContext*>(&context);
-        skCanvas_ = renderContext->GetCanvas();
-        if (!skCanvas_) {
-            return;
+        const auto& children = GetChildren();
+        for (const auto& item : SortChildrenByZIndex(children)) {
+            Offset childOffset = offset;
+            RefPtr<RosenRenderShape> renderShape = GetShapeChild(item, childOffset);
+            if (renderShape) {
+                renderShape->PaintOnCanvas(skOffCanvas_.get(), childOffset);
+                continue;
+            }
+            RenderNode::Paint(context, offset);
         }
+        if (column_ == 0 && row_ == 0) {
+            skCanvas_->drawBitmap(skOffBitmap_, 0, 0);
+        }
+    } else {
         BitmapMesh(context, offset);
     }
 }
