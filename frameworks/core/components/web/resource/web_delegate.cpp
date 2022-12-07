@@ -458,8 +458,8 @@ void DataResubmittedOhos::Resend()
 
 void DataResubmittedOhos::Cancel()
 {
-     if (handler_) {
-         handler_->Cancel();
+    if (handler_) {
+        handler_->Cancel();
     }
 }
 

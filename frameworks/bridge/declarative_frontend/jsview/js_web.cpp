@@ -3964,7 +3964,8 @@ void JSWeb::OnDataResubmitted(const JSCallbackInfo& args)
     }
 }
 
-Media::PixelFormat GetPixelFormat(NWeb::ImageColorType color_type){
+Media::PixelFormat GetPixelFormat(NWeb::ImageColorType color_type)
+{
     Media::PixelFormat pixelFormat;
     switch (color_type) {
         case NWeb::ImageColorType::COLOR_TYPE_UNKNOWN:
@@ -4006,9 +4007,15 @@ Media::AlphaType GetAlphaType(NWeb::ImageAlphaType alpha_type)
     return alphaType;
 }
 
-JSRef<JSObject> CreateJSPixelMap(const void* data, size_t width, size_t height, int color_type, int alpha_type)
+JSRef<JSObject> FaviconReceivedEventToJSValue(const FaviconReceivedEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
+    auto data = eventInfo.GetHandler()->GetData();
+    size_t width = eventInfo.GetHandler()->GetWidth();
+    size_t height = eventInfo.GetHandler()->GetHeight();
+    int color_type = eventInfo.GetHandler()->GetColorType();
+    int alpha_type = eventInfo.GetHandler()->GetAlphaType();
+
     Media::InitializationOptions opt;
     opt.size.width = static_cast<int32_t>(width);
     opt.size.height = static_cast<int32_t>(height);
@@ -4033,18 +4040,7 @@ JSRef<JSObject> CreateJSPixelMap(const void* data, size_t width, size_t height, 
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
     napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMapToJs);
     NativeValue* nativeValue = reinterpret_cast<NativeValue*>(napiValue);
-    return JsConverter::ConvertNativeValueToJsVal(nativeValue);
-}
-
-JSRef<JSObject> FaviconReceivedEventToJSValue(const FaviconReceivedEvent& eventInfo)
-{
-    JSRef<JSObject> obj = JSRef<JSObject>::New();
-    auto data = eventInfo.GetHandler()->GetData();
-    size_t width = eventInfo.GetHandler()->GetWidth();
-    size_t height = eventInfo.GetHandler()->GetHeight();
-    int color_type = eventInfo.GetHandler()->GetColorType();
-    int alpha_type = eventInfo.GetHandler()->GetAlphaType();
-    JSRef<JSObject> jsPixelMap = CreateJSPixelMap(data, width, height, color_type, alpha_type);
+    auto jsPixelMap =  JsConverter::ConvertNativeValueToJsVal(nativeValue);
     obj->SetPropertyObject("favicon", jsPixelMap);
     return JSRef<JSObject>::Cast(obj);
 }
