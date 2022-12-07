@@ -48,6 +48,14 @@ void WebPattern::OnAttachToFrameNode()
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
 }
 
+void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(delegate_);
+    isFocus_ = false;
+    delegate_->OnBlur();
+    OnQuickMenuDismissed();
+}
+
 void WebPattern::InitEvent()
 {
     auto host = GetHost();
