@@ -54,6 +54,7 @@ public:
 
     void UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo);
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
+    void ErasePopup(int32_t targetId);
 
     const PopupInfo& GetPopupInfo(int32_t targetId)
     {
