@@ -22,13 +22,13 @@
 #include "frameworks/core/components_ng/base/ui_node.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/components_ng/pattern/button/toggle_button_model_ng.h"
+#include "frameworks/core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "frameworks/core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "frameworks/core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "frameworks/core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "frameworks/core/components_ng/pattern/navigation/navigation_view.h"
 #include "frameworks/core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#include "frameworks/core/components_ng/pattern/navigation/nav_bar_node.h"
 #undef private
 #undef protected
 
@@ -38,11 +38,10 @@ namespace OHOS::Ace::NG {
 namespace {
 const int32_t testdata = 10;
 } // namespace
-
 class NavigationGroupNodeTestNg : public testing::Test {
 public:
-    static void SetUpTestSuite() {} ;
-    static void TearDownTestSuite() {} ;
+    static void SetUpTestSuite() {};
+    static void TearDownTestSuite() {};
 };
 
 /**
@@ -58,7 +57,7 @@ HWTEST_F(NavigationGroupNodeTestNg, NavigationGroupNodeTestNg_001, TestSize.Leve
     const std::string tag = "test";
     int32_t nodeId = testdata;
     auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>();
-    OHOS::Ace::NG::NavigationGroupNode navigationGroupNode(tag, nodeId, patternCreator);
+    NavigationGroupNode navigationGroupNode(tag, nodeId, patternCreator);
     auto res = navigationGroupNode.GetFrameNode(tag, nodeId);
     EXPECT_EQ(res, nullptr);
     navigationGroupNode.GetOrCreateGroupNode(tag, nodeId, nullptr);
@@ -77,7 +76,7 @@ HWTEST_F(NavigationGroupNodeTestNg, NavigationGroupNodeTestNg_002, TestSize.Leve
     const std::string tag = "test";
     int32_t nodeId = testdata;
     auto patternCreator = AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>();
-    OHOS::Ace::NG::NavigationGroupNode navigationGroupNode(tag, nodeId, patternCreator);
+    NavigationGroupNode navigationGroupNode(tag, nodeId, patternCreator);
     navigationGroupNode.isFirstNavDestination_ = false;
     std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
     json->isRoot_ = true;

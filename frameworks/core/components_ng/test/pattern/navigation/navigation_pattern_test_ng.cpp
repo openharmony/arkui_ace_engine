@@ -45,15 +45,15 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_001, TestSize.Level1)
     navigationView.SetTitle("navigationView", false);
 
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    EXPECT_NE(frameNode, nullptr);
     RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
         frameNode->GetLayoutProperty<NavigationLayoutProperty>();
-    EXPECT_FALSE(navigationLayoutProperty == nullptr);
+    EXPECT_NE(navigationLayoutProperty, nullptr);
 }
 
 /**
  * @tc.name: NavigationPatternTest_002
- * @tc.desc: Test REPLACE navigator.
+ * @tc.desc: Test NavigationPattern OnModifyDone.
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_002, TestSize.Level1)
@@ -62,10 +62,10 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_002, TestSize.Level1)
     navigationView.Create();
     navigationView.SetTitle("navigationView", false);
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    EXPECT_NE(frameNode, nullptr);
     RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
         frameNode->GetLayoutProperty<NavigationLayoutProperty>();
-    EXPECT_FALSE(navigationLayoutProperty == nullptr);
+    EXPECT_NE(navigationLayoutProperty, nullptr);
 
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     EXPECT_NE(hostNode, nullptr);
@@ -76,7 +76,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_002, TestSize.Level1)
 
 /**
  * @tc.name: NavigationPatternTest_003
- * @tc.desc: Test REPLACE navigator.
+ * @tc.desc: Various situations of Test NavigationPattern OnDirtyLayoutWrapperSwap.
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_003, TestSize.Level1)
@@ -85,13 +85,13 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_003, TestSize.Level1)
     navigationView.Create();
     navigationView.SetTitle("navigationView", false);
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    EXPECT_NE(frameNode, nullptr);
     RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
         frameNode->GetLayoutProperty<NavigationLayoutProperty>();
-    EXPECT_FALSE(navigationLayoutProperty == nullptr);
+    EXPECT_NE(navigationLayoutProperty, nullptr);
+
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     EXPECT_NE(hostNode, nullptr);
-
     RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
     EXPECT_NE(pattern, nullptr);
     pattern->OnModifyDone();
@@ -103,25 +103,23 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_003, TestSize.Level1)
     DirtySwapConfig config;
     config.skipMeasure = true;
     config.skipLayout = true;
-    bool result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_EQ(result, false);
-
+    std::vector<DirtySwapConfig> configValue;
+    configValue.push_back(config);
     config.skipLayout = false;
-    result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_EQ(result, false);
-
+    configValue.push_back(config);
     config.skipMeasure = false;
-    result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_EQ(result, false);
-
+    configValue.push_back(config);
     config.skipLayout = true;
-    result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_EQ(result, false);
+    configValue.push_back(config);
+
+    for (auto &iter : configValue) {
+        EXPECT_EQ(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, iter), false);
+    }
 }
 
 /**
  * @tc.name: NavigationPatternTest_004
- * @tc.desc: Test REPLACE navigator.
+ * @tc.desc: Test Two level nesting of layoutWrapper.
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_004, TestSize.Level1)
@@ -130,10 +128,10 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_004, TestSize.Level1)
     navigationView.Create();
     navigationView.SetTitle("navigationView", false);
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    EXPECT_NE(frameNode, nullptr);
     RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
         frameNode->GetLayoutProperty<NavigationLayoutProperty>();
-    EXPECT_FALSE(navigationLayoutProperty == nullptr);
+    EXPECT_NE(navigationLayoutProperty, nullptr);
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     EXPECT_NE(hostNode, nullptr);
 
@@ -170,17 +168,13 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_005, TestSize.Level1)
     navigationView.SetTitle("navigationView", false);
 
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    EXPECT_NE(frameNode, nullptr);
     navigationView.SetCustomTitle(frameNode);
     RefPtr<UINode> uiNode = nullptr;
     navigationView.SetCustomTitle(uiNode);
 
     RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
         frameNode->GetLayoutProperty<NavigationLayoutProperty>();
-    EXPECT_FALSE(navigationLayoutProperty == nullptr);
-    
-    navigationView.SetTitleMode(NavigationTitleMode::FREE);
-    navigationView.SetTitleMode(NavigationTitleMode::FULL);
-    navigationView.SetTitleMode(NavigationTitleMode::MINI);
+    EXPECT_NE(navigationLayoutProperty, nullptr);
 }
 }
