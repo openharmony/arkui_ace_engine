@@ -114,6 +114,8 @@ void RenderBox::Update(const RefPtr<Component>& component)
             onClick_ = tapGesture->CreateRecognizer(context_);
             onClick_->SetIsExternalGesture(true);
             SetAccessibilityClickImpl();
+        } else {
+            onClick_ = nullptr;
         }
         if (!box->GetRemoteMessageEvent().IsEmpty() && !tapGesture) {
             onClick_ = AceType::MakeRefPtr<ClickRecognizer>();
