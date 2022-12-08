@@ -203,11 +203,6 @@ int32_t RosenMediaPlayer::PrepareAsync()
     return mediaPlayer_->PrepareAsync();
 }
 
-int32_t RosenMediaPlayer::Prepare()
-{
-    return mediaPlayer_->Prepare();
-}
-
 bool RosenMediaPlayer::IsPlaying()
 {
     return mediaPlayer_->IsPlaying();
