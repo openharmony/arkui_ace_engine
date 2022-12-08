@@ -18,11 +18,31 @@
 #ifdef NG_BUILD
 #include "ace_shell/shell/common/window_manager.h"
 #endif
-
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+// returns maximum size of image component
+// if maxSize is infinite, match screen size and retain aspectRatio
+SizeF GetLayoutMaxSize(const RefPtr<LayoutProperty>& props, float aspectRatio)
+{
+    if (NearZero(aspectRatio)) {
+        return SizeF(0.0, 0.0);
+    }
+    SizeF maxSize = props->GetLayoutConstraint()->maxSize;
+    // infinite size not allowed
+    if (GreaterOrEqualToInfinity(maxSize.Width())) {
+        maxSize.SetHeight(PipelineContext::GetCurrentRootHeight());
+        maxSize.SetWidth(maxSize.Height() * aspectRatio);
+    } else if (GreaterOrEqualToInfinity(maxSize.Height())) {
+        maxSize.SetWidth(PipelineContext::GetCurrentRootWidth());
+        maxSize.SetHeight(maxSize.Width() / aspectRatio);
+    }
+    return maxSize;
+}
+} // namespace
 
 std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
@@ -41,17 +61,21 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
     // if image data is valid, use image source, or use altImage data
     auto imageLoadingContext = loadingCtx_ ? loadingCtx_ : altLoadingCtx_;
     auto rawImageSize = imageLoadingContext->GetImageSize();
-    SizeF componentSize(rawImageSize);
+    SizeF size(rawImageSize);
     do {
+        auto aspectRatio = static_cast<float>(Size::CalcRatio(rawImageSize));
+        if (NearZero(aspectRatio)) {
+            LOGW("image aspectRatio is 0");
+            return std::nullopt;
+        }
         // case 2.1: image component is not set with size, use image source size as image component size
-        //          if isFitMaxSize is true, use image source size as image component size
-        //          if isFitMaxSize is false, use the parent component LayoutConstraint size as image component size
-        const auto& imageLayoutProperty = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
-        SizeF layoutConstraintMaxSize = imageLayoutProperty->GetLayoutConstraint()->maxSize;
-        bool fitOriginalSize = imageLayoutProperty->GetFitOriginalSize().value_or(false);
+        //          if fitOriginalSize is true, use image source size as image component size
+        //          if fitOriginalSize is false, use the parent component LayoutConstraint size as image component size
+        const auto& props = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        bool fitOriginalSize = props->GetFitOriginalSize().value_or(false);
         if (contentConstraint.selfIdealSize.IsNull()) {
             if (!fitOriginalSize) {
-                componentSize.SetSizeT(layoutConstraintMaxSize);
+                size.SetSizeT(GetLayoutMaxSize(props, aspectRatio));
             }
             break;
         }
@@ -60,22 +84,21 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
         //          keep the principle of making the component aspect ratio and the image source aspect ratio the same.
         //          the fitOriginSize is only useful in case 2.1.
         auto sizeSet = contentConstraint.selfIdealSize.ConvertToSizeT();
-        componentSize.SetSizeT(sizeSet);
+        size.SetSizeT(sizeSet);
         uint8_t sizeSetStatus = Negative(sizeSet.Width()) << 1 | Negative(sizeSet.Height());
-        double aspectRatio = Size::CalcRatio(rawImageSize);
         switch (sizeSetStatus) {
             case 0b01: // width is positive and height is negative
-                componentSize.SetHeight(static_cast<float>(sizeSet.Width() / aspectRatio));
+                size.SetHeight(sizeSet.Width() / aspectRatio);
                 break;
             case 0b10: // width is negative and height is positive
-                componentSize.SetWidth(static_cast<float>(sizeSet.Height() * aspectRatio));
+                size.SetWidth(sizeSet.Height() * aspectRatio);
                 break;
             case 0b11: // both width and height are negative
             default:
                 break;
         }
     } while (false);
-    return contentConstraint.Constrain(componentSize);
+    return contentConstraint.Constrain(size);
 }
 
 void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
