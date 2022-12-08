@@ -95,16 +95,19 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0,    0,  // red
 void ImagePainter::DrawImage(
     RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize, const ImagePaintConfig& imagePaintConfig) const
 {
+    if (!imagePaintConfig.dstRect_.IsValid()) {
+        LOGW("image dstRect isn't valid");
+        return;
+    }
+
     if (imagePaintConfig.isSvg_) {
         DrawSVGImage(canvas, offset, contentSize, imagePaintConfig);
-        return;
-    }
-    if (imagePaintConfig.imageRepeat_ == ImageRepeat::NO_REPEAT) {
+    } else if (imagePaintConfig.imageRepeat_ == ImageRepeat::NO_REPEAT) {
         DrawStaticImage(canvas, offset, imagePaintConfig);
-        return;
+    } else {
+        RectF rect(offset.GetX(), offset.GetY(), contentSize.Width(), contentSize.Height());
+        DrawImageWithRepeat(canvas, imagePaintConfig, rect);
     }
-    DrawImageWithRepeat(
-        canvas, imagePaintConfig, RectF(offset.GetX(), offset.GetY(), contentSize.Width(), contentSize.Height()));
 }
 
 void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& svgContainerSize,
@@ -181,16 +184,15 @@ void ImagePainter::DrawImageWithRepeat(
         imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT || imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT_X;
     bool imageRepeatY =
         imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT || imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT_Y;
-    std::vector<uint32_t> dirRepeatNum = {
-        static_cast<uint32_t>(ceil(imagePaintConfig.dstRect_.GetY() / singleImageHeight)),
+    std::vector<uint32_t> dirRepeatNum = { static_cast<uint32_t>(
+                                               ceil(imagePaintConfig.dstRect_.GetY() / singleImageHeight)),
         static_cast<uint32_t>((ceil((contentHeight - imagePaintConfig.dstRect_.GetY()) / singleImageHeight))) - 1,
         static_cast<uint32_t>(ceil(imagePaintConfig.dstRect_.GetX() / singleImageWidth)),
         imageRepeatX ? static_cast<uint32_t>(ceil((contentWidth - imagePaintConfig.dstRect_.GetX()) / singleImageWidth))
                      : 1 };
 
     canvas.Save();
-    auto clipRect = RSRect(offset.GetX(), offset.GetY(),
-        static_cast<float>(offset.GetX() + contentWidth),
+    auto clipRect = RSRect(offset.GetX(), offset.GetY(), static_cast<float>(offset.GetX() + contentWidth),
         static_cast<float>(offset.GetY() + contentHeight));
     canvas.ClipRect(clipRect, OHOS::Rosen::Drawing::ClipOp::INTERSECT);
     uint32_t up = 0;
