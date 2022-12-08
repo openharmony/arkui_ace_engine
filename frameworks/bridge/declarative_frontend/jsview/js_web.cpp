@@ -4043,7 +4043,7 @@ JSRef<JSVal> TouchIconUrlEventToJSValue(const TouchIconUrlEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("url", eventInfo.GetUrl());
-    obj->SetProperty("preComposed", eventInfo.GetPreComposed());
+    obj->SetProperty("precomposed", eventInfo.GetPreComposed());
     return JSRef<JSVal>::Cast(obj);
 }
 
