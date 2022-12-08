@@ -146,9 +146,6 @@ protected:
     static void WrapTaskAndPostToBackground(std::function<void()>&& task);
     static void WrapTaskAndPostToIO(std::function<void()>&& task);
 
-    static void MakeSvgDom(const RefPtr<SvgImageObject>& imageObj, const LoadFailCallback& failCallback,
-        const std::optional<Color>& svgFillColor, bool sync = false);
-
     /** Check if data is present in imageObj, if not, load image data.
      *
      *    @param imageObj         contains image source and image data
@@ -166,9 +163,7 @@ protected:
      *    @param sync         runs on UI thread if true, passed to SVG image, used in ImageProvider::MakeSvgDom
      */
     static RefPtr<ImageObject> BuildImageObject(const ImageSourceInfo& sourceInfo,
-        const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data,
-        const std::optional<Color>& svgFillColor, const LoadFailCallback& failCallback, ImageObjectType imageObjectType,
-        bool sync = false);
+        const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data, ImageObjectType imageObjectType);
 
     static ImageObjectType ParseImageObjectType(
         const RefPtr<NG::ImageData>& data, const ImageSourceInfo& imageSourceInfo);
@@ -215,8 +210,6 @@ public:
 
     static void MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks,
         const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder, bool forceResize = false);
-
-    static void MakeSvgCanvasImage(const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks);
 };
 
 } // namespace OHOS::Ace::NG
