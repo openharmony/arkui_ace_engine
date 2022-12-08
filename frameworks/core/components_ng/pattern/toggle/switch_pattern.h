@@ -81,8 +81,6 @@ public:
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-
 private:
     void OnModifyDone() override;
     void UpdateCurrentOffset(float offset);

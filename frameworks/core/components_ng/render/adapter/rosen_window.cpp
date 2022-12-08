@@ -76,14 +76,9 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
 
 void RosenWindow::RequestFrame()
 {
-    if (!onShow_) {
-        LOGD("window is not show, stop request frame");
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(onShow_);
     CHECK_RUN_ON(UI);
-    if (isRequestVsync_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!isRequestVsync_);
     LOGD("request next vsync");
     if (rsWindow_) {
         rsWindow_->RequestVsync(vsyncCallback_);

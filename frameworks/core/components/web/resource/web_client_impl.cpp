@@ -727,10 +727,9 @@ void WebClientImpl::OnDesktopIconUrl(const std::string& icon_url, bool precompos
 void ReleaseSurfaceImpl::ReleaseSurface()
 {
     ContainerScope scope(instanceId_);
-    // if (!surfaceDelegate_) {
-    //     return;
-    // }
-    // SURFACE_DELEGATE
-    // surfaceDelegate_->ReleaseSurface();
+    if (!surfaceDelegate_) {
+        return;
+    }
+    surfaceDelegate_->ReleaseSurface();
 }
 } // namespace OHOS::Ace

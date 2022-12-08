@@ -93,7 +93,7 @@ HWTEST_F(FocusHubTestNg, FocusHubCreateTest001, TestSize.Level1)
      * @tc.expected: eventHub can be updated, but cannot get frameNode and its related properties.
      */
     auto eventHub2 = AceType::MakeRefPtr<EventHub>();
-    auto focusHub2 = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub2)));
+    auto focusHub2 = AceType::MakeRefPtr<FocusHub>(eventHub2);
     EXPECT_TRUE(focusHub2 != nullptr);
     EXPECT_TRUE(focusHub2->GetFrameNode() == nullptr);
     EXPECT_TRUE(focusHub2->GetGeometryNode() == nullptr);
@@ -119,7 +119,7 @@ HWTEST_F(FocusHubTestNg, FocusHubCreateTest001, TestSize.Level1)
      */
     auto nodeParent = AceType::MakeRefPtr<FrameNode>(V2::BLANK_ETS_TAG, -1, AceType::MakeRefPtr<FlexLayoutPattern>());
     nodeParent->GetOrCreateFocusHub();
-    node.SetParent(AceType::WeakClaim(AceType::RawPtr(nodeParent)));
+    node.SetParent(nodeParent);
     EXPECT_TRUE(focusHub2->GetParentFocusHub(&node) != nullptr);
 }
 
@@ -137,7 +137,7 @@ HWTEST_F(FocusHubTestNg, FocusHubCreateTest002, TestSize.Level1)
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     eventHub->AttachHost(frameNode);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
     EXPECT_TRUE(focusHub->GetFrameNode() != nullptr);
     EXPECT_TRUE(focusHub->GetGeometryNode() != nullptr);
     EXPECT_EQ(focusHub->GetFrameName(), V2::TEXT_ETS_TAG);
@@ -155,9 +155,9 @@ HWTEST_F(FocusHubTestNg, FocusHubCreateTest002, TestSize.Level1)
      */
     auto nodeParent = AceType::MakeRefPtr<FrameNode>(V2::BLANK_ETS_TAG, -1, AceType::MakeRefPtr<FlexLayoutPattern>());
     nodeParent->GetOrCreateFocusHub();
-    frameNode->SetParent(AceType::WeakClaim(AceType::RawPtr(nodeParent)));
+    frameNode->SetParent(nodeParent);
     eventHub->AttachHost(frameNode);
-    auto focusHub2 = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto focusHub2 = AceType::MakeRefPtr<FocusHub>(eventHub);
     EXPECT_TRUE(focusHub2->GetParentFocusHub() != nullptr);
 }
 
@@ -184,7 +184,7 @@ HWTEST_F(FocusHubTestNg, FocusHubFlushChildrenFocusHubTest003, TestSize.Level1)
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
 
     /**
      * @tc.steps: step3. Invoke FlushChildrenFocusHub to get the focusable children.
@@ -216,14 +216,14 @@ HWTEST_F(FocusHubTestNg, FocusHubRemoveSelfTest004, TestSize.Level1)
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto nodeParent = AceType::MakeRefPtr<FrameNode>(V2::BLANK_ETS_TAG, -1, AceType::MakeRefPtr<FlexLayoutPattern>());
     nodeParent->GetOrCreateFocusHub();
-    frameNode->SetParent(AceType::WeakClaim(AceType::RawPtr(nodeParent)));
+    frameNode->SetParent(nodeParent);
 
     /**
      * @tc.steps: step2. Create FocusHub.
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
 
     /**
      * @tc.steps: step3. Remove self.
@@ -250,7 +250,7 @@ HWTEST_F(FocusHubTestNg, FocusHubLostFocusTest005, TestSize.Level1)
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
 
     /**
      * @tc.steps: step3. Invoke LostFocus, when FocusType is DISABLE and  the blur reason is FOCUS_SWITCH.
@@ -304,7 +304,7 @@ HWTEST_F(FocusHubTestNg, FocusHubHandleKeyEventTest006, TestSize.Level1)
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
 
     /**
      * @tc.steps: step3. Focus hub does not currently focused and FocusType is DISABLE.
@@ -679,5 +679,320 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0016, TestSize.Level1)
      */
     focusHub->SetFocusType(FocusType::DISABLE);
     EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+}
+
+/**
+ * @tc.name: FocusHubTestNg017
+ * @tc.desc: Test the function HandleFocusByTabIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0017, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    KeyEvent keyEvent;
+
+    /**
+     * @tc.steps2: call the function HandleFocusByTabIndex with code != KeyCode::KEY_TAB and action != KeyAction::DOWN.
+     * @tc.expected: The return value of HandleFocusByTabIndex is false.
+     */
+    keyEvent.action = KeyAction::UNKNOWN;
+    keyEvent.code = KeyCode::KEY_UNKNOWN;
+    EXPECT_FALSE(focusHub->HandleFocusByTabIndex(keyEvent, nullptr));
+
+    /**
+     * @tc.steps3: call the function HandleFocusByTabIndex with code != KeyCode::KEY_TAB and action == KeyAction::DOWN.
+     * @tc.expected: The return value of HandleFocusByTabIndex is false.
+     */
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_UNKNOWN;
+    EXPECT_FALSE(focusHub->HandleFocusByTabIndex(keyEvent, nullptr));
+
+    /**
+     * @tc.steps4: call the function HandleFocusByTabIndex with code == KeyCode::KEY_TAB and action != KeyAction::DOWN.
+     * @tc.expected: The return value of HandleFocusByTabIndex is false.
+     */
+    keyEvent.action = KeyAction::UNKNOWN;
+    keyEvent.code = KeyCode::KEY_TAB;
+    EXPECT_FALSE(focusHub->HandleFocusByTabIndex(keyEvent, nullptr));
+
+    /**
+     * @tc.steps5: call the function HandleFocusByTabIndex with code == KeyCode::KEY_TAB and action == KeyAction::DOWN
+     *             and curPage == null.
+     * @tc.expected: The return value of HandleFocusByTabIndex is false.
+     */
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_TAB;
+    EXPECT_FALSE(focusHub->HandleFocusByTabIndex(keyEvent, nullptr));
+
+    /**
+     * @tc.steps6: call the function HandleFocusByTabIndex with code == KeyCode::KEY_TAB and action == KeyAction::DOWN
+     *             and curPage == focusHub.
+     * @tc.expected: The return value of HandleFocusByTabIndex is false.
+     */
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_TAB;
+    EXPECT_FALSE(focusHub->HandleFocusByTabIndex(keyEvent, focusHub));
+}
+
+/**
+ * @tc.name: FocusHubTestNg018
+ * @tc.desc: Test the function HandleFocusByTabIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0018, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    KeyEvent keyEvent;
+
+    /**
+     * @tc.steps2: call the function GetFocusingTabNodeIdx with the empty TabIndexNodeList.
+     * @tc.expected: The return value of the function is NONE_TAB_FOCUSED_INDEX.
+     */
+    TabIndexNodeList tabIndexNodes;
+    EXPECT_EQ(focusHub->GetFocusingTabNodeIdx(tabIndexNodes), NONE_TAB_FOCUSED_INDEX);
+
+    /**
+     * @tc.steps3: call the function GetFocusingTabNodeIdx with the unempty TabIndexNodeList.
+     * @tc.expected: The return value of the function is DEFAULT_TAB_FOCUSED_INDEX.
+     */
+    tabIndexNodes.emplace_back(focusHub->GetTabIndex(), focusHub);
+    focusHub->isFirstFocusInPage_ = true;
+    EXPECT_EQ(focusHub->GetFocusingTabNodeIdx(tabIndexNodes), DEFAULT_TAB_FOCUSED_INDEX);
+    EXPECT_FALSE(focusHub->isFirstFocusInPage_);
+
+    /**
+     * @tc.steps4: call the function GetFocusingTabNodeIdx with the unempty TabIndexNodeList.
+     * @tc.expected: The return value of the function is 0.
+     */
+    focusHub->isFirstFocusInPage_ = false;
+    focusHub->currentFocus_ = true;
+    EXPECT_EQ(focusHub->GetFocusingTabNodeIdx(tabIndexNodes), 0);
+
+    /**
+     * @tc.steps5: call the function GetFocusingTabNodeIdx with the unempty TabIndexNodeList.
+     * @tc.expected: The return value of the function is NONE_TAB_FOCUSED_INDEX.
+     */
+    focusHub->isFirstFocusInPage_ = false;
+    focusHub->currentFocus_ = false;
+    EXPECT_EQ(focusHub->GetFocusingTabNodeIdx(tabIndexNodes), NONE_TAB_FOCUSED_INDEX);
+}
+
+/**
+ * @tc.name: FocusHubTestNg019
+ * @tc.desc: Test the function RequestFocusImmediatelyById and GetChildFocusNodeById.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0019, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+
+    /**
+     * @tc.steps2: call the function RequestFocusImmediatelyById with the empty id.
+     * @tc.expected: The return value of the function is false.
+     */
+    const std::string nullStr("");
+    EXPECT_FALSE(focusHub->RequestFocusImmediatelyById(nullStr));
+
+    /**
+     * @tc.steps3: call the function RequestFocusImmediatelyById with the idStr.
+     * @tc.expected: The return value of the function is false.
+     */
+    const std::string idStr(V2::TEXT_ETS_TAG);
+    EXPECT_FALSE(focusHub->RequestFocusImmediatelyById(idStr));
+
+    /**
+     * @tc.steps4: call the function RequestFocusImmediatelyById with the idStr and FocusType::NODE.
+     * @tc.expected: The return value of the function is false.
+     */
+    focusHub->SetFocusType(FocusType::NODE);
+    EXPECT_FALSE(focusHub->RequestFocusImmediatelyById(idStr));
+
+    /**
+     * @tc.steps5: call the function RequestFocusImmediatelyById with the idStr and FocusType::SCOPE.
+     * @tc.expected: The return value of the function is false.
+     */
+    focusHub->SetFocusType(FocusType::SCOPE);
+    EXPECT_FALSE(focusHub->RequestFocusImmediatelyById(idStr));
+}
+
+/**
+ * @tc.name: FocusHubTestNg020
+ * @tc.desc: Test the function GetChildFocusNodeByType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0020, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->SetEnabled(true);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+
+    /**
+     * @tc.steps2: call the function GetChildFocusNodeByType with FocusNodeType::DEFAULT.
+     * @tc.expected: The return value of the function is focusHub.
+     */
+    focusHub->SetFocusType(FocusType::NODE);
+    focusHub->show_ = true;
+    focusHub->focusable_ = true;
+    focusHub->parentFocusable_ = true;
+    focusHub->SetIsDefaultFocus(true);
+    EXPECT_EQ(focusHub->GetChildFocusNodeByType(FocusNodeType::DEFAULT), focusHub);
+
+    /**
+     * @tc.steps3: call the function GetChildFocusNodeByType with FocusNodeType::DEFAULT and show_ = false.
+     * @tc.expected: The return value of the function is nullptr.
+     */
+    focusHub->show_ = false;
+    EXPECT_EQ(focusHub->GetChildFocusNodeByType(FocusNodeType::DEFAULT), nullptr);
+
+    /**
+     * @tc.steps4: call the function GetChildFocusNodeByType with FocusNodeType::DEFAULT and IsDefaultFocus = false.
+     * @tc.expected: The return value of the function is nullptr.
+     */
+    focusHub->SetIsDefaultFocus(false);
+    EXPECT_EQ(focusHub->GetChildFocusNodeByType(FocusNodeType::DEFAULT), nullptr);
+
+    /**
+     * @tc.steps5: call the function GetChildFocusNodeByType with FocusNodeType::DEFAULT and show_ = true.
+     * @tc.expected: The return value of the function is focusHub.
+     */
+    focusHub->show_ = true;
+    focusHub->SetIsDefaultGroupFocus(true);
+    EXPECT_EQ(focusHub->GetChildFocusNodeByType(FocusNodeType::GROUP_DEFAULT), focusHub);
+
+    /**
+     * @tc.steps6: call the function GetChildFocusNodeByType with FocusNodeType::DEFAULT and show_ = false.
+     * @tc.expected: The return value of the function is nullptr.
+     */
+    focusHub->show_ = false;
+    EXPECT_EQ(focusHub->GetChildFocusNodeByType(FocusNodeType::GROUP_DEFAULT), nullptr);
+
+    /**
+     * @tc.steps7: call the function GetChildFocusNodeByType with FocusNodeType::DEFAULT and show_ = true and
+     *             IsDefaultGroupFocus = false.
+     * @tc.expected: The return value of the function is nullptr.
+     */
+    focusHub->show_ = true;
+    focusHub->SetIsDefaultGroupFocus(false);
+    EXPECT_EQ(focusHub->GetChildFocusNodeByType(FocusNodeType::GROUP_DEFAULT), nullptr);
+
+    /**
+     * @tc.steps8: call the function GetChildFocusNodeByType with FocusType::SCOPE.
+     * @tc.expected: The return value of the function is nullptr.
+     */
+    focusHub->SetFocusType(FocusType::SCOPE);
+    EXPECT_EQ(focusHub->GetChildFocusNodeByType(FocusNodeType::GROUP_DEFAULT), nullptr);
+}
+
+/**
+ * @tc.name: FocusHubTestNg021
+ * @tc.desc: Test the function GoToFocusByTabNodeIdx.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0021, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->SetEnabled(true);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+
+    /**
+     * @tc.steps2: call the function GoToFocusByTabNodeIdx with the empty TabIndexNodeList.
+     * @tc.expected: The return value of the function is false.
+     */
+    TabIndexNodeList tabIndexNodes;
+    EXPECT_FALSE(focusHub->GoToFocusByTabNodeIdx(tabIndexNodes, 0));
+
+    /**
+     * @tc.steps3: call the function GoToFocusByTabNodeIdx with the unempty TabIndexNodeList.
+     * @tc.expected: The return value of the function is false.
+     */
+    tabIndexNodes.emplace_back(focusHub->GetTabIndex(), nullptr);
+    EXPECT_FALSE(focusHub->GoToFocusByTabNodeIdx(tabIndexNodes, 0));
+
+    /**
+     * @tc.steps4: call the function GoToFocusByTabNodeIdx with the unempty TabIndexNodeList.
+     * @tc.expected: The return value of the function is false.
+     */
+    tabIndexNodes.emplace_back(focusHub->GetTabIndex(), focusHub);
+    EXPECT_FALSE(focusHub->GoToFocusByTabNodeIdx(tabIndexNodes, 1));
+
+    /**
+     * @tc.steps5: call the function GoToFocusByTabNodeIdx with the unempty TabIndexNodeList.
+     * @tc.expected: The return value of the function is false.
+     */
+    focusHub->SetIsDefaultGroupHasFocused(false);
+    focusHub->SetFocusType(FocusType::SCOPE);
+    EXPECT_FALSE(focusHub->GoToFocusByTabNodeIdx(tabIndexNodes, 1));
+
+    /**
+     * @tc.steps6: call the function GoToFocusByTabNodeIdx with the unempty TabIndexNodeList.
+     * @tc.expected: The return value of the function is false.
+     */
+    focusHub->SetIsDefaultGroupHasFocused(true);
+    focusHub->SetFocusType(FocusType::NODE);
+    EXPECT_FALSE(focusHub->GoToFocusByTabNodeIdx(tabIndexNodes, 1));
+
+    /**
+     * @tc.steps7: call the function GoToFocusByTabNodeIdx with the unempty TabIndexNodeList.
+     * @tc.expected: The return value of the function is true.
+     */
+    focusHub->show_ = true;
+    focusHub->focusable_ = true;
+    focusHub->parentFocusable_ = true;
+    EXPECT_TRUE(focusHub->GoToFocusByTabNodeIdx(tabIndexNodes, 1));
+}
+
+/**
+ * @tc.name: FocusHubTestNg022
+ * @tc.desc: Test the function IsFocusableByTab, IsFocusableNodeByTab and IsFocusableScopeByTab.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0022, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+
+    /**
+     * @tc.steps2: call the function IsFocusableByTab with FocusType::NODE.
+     * @tc.expected: The return value of the function is true.
+     */
+    focusHub->SetFocusType(FocusType::NODE);
+    EXPECT_TRUE(focusHub->IsFocusableByTab());
+
+    /**
+     * @tc.steps3: call the function IsFocusableByTab with FocusType::SCOPE.
+     * @tc.expected: The return value of the function is true.
+     */
+    focusHub->SetFocusType(FocusType::SCOPE);
+    EXPECT_TRUE(focusHub->IsFocusableByTab());
+
+    /**
+     * @tc.steps4: call the function IsFocusableByTab with FocusType::DISABLE.
+     * @tc.expected: The return value of the function is false.
+     */
+    focusHub->SetFocusType(FocusType::DISABLE);
+    EXPECT_FALSE(focusHub->IsFocusableByTab());
 }
 } // namespace OHOS::Ace::NG

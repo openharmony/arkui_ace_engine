@@ -108,8 +108,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     currentDelta_ = 0.0f;
     startMainPos_ = listLayoutAlgorithm->GetStartPosition();
     endMainPos_ = listLayoutAlgorithm->GetEndPosition();
-    headerGroupNode_ = listLayoutAlgorithm->GetHeaderGroupNode();
-    footerGroupNode_ = listLayoutAlgorithm->GetFooterGroupNode();
+    itemGroupList_.swap(listLayoutAlgorithm->GetItemGroupList());
     auto lanesLayoutAlgorithm = DynamicCast<ListLanesLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     if (lanesLayoutAlgorithm) {
         lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
@@ -256,17 +255,7 @@ bool ListPattern::UpdateCurrentOffset(float offset)
         }
     }
     currentDelta_ = currentDelta_ - offset;
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto header = headerGroupNode_.Upgrade();
-    if (header) {
-        header->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
-    auto footer = footerGroupNode_.Upgrade();
-    if (footer) {
-        footer->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
+    MarkDirtyNodeSelf();
     if (!IsOutOfBoundary() || !scrollable_) {
         return true;
     }
@@ -289,13 +278,28 @@ bool ListPattern::UpdateCurrentOffset(float offset)
     return true;
 }
 
+void ListPattern::MarkDirtyNodeSelf()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    for (const auto& weak : itemGroupList_) {
+        auto itemGroup = weak.Upgrade();
+        if (!itemGroup) {
+            continue;
+        }
+        auto layoutProperty = itemGroup->GetLayoutProperty();
+        if (layoutProperty) {
+            layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    }
+}
+
 void ListPattern::ProcessScrollEnd()
 {
     isScrollContent_ = true;
     scrollStop_ = true;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    MarkDirtyNodeSelf();
 }
 
 float ListPattern::GetMainContentSize() const
@@ -521,9 +525,7 @@ void ListPattern::ScrollToIndex(int32_t index, ScrollIndexAlignment align)
     if (index >= 0 && index <= maxListItemIndex_) {
         jumpIndex_ = index;
         scrollIndexAlignment_ = align;
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        MarkDirtyNodeSelf();
     }
 }
 
@@ -633,8 +635,6 @@ void ListPattern::RegisterScrollBarEventTask()
     touchEvent_ = MakeRefPtr<TouchEventImpl>([weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
         auto scrollBar = pattern->scrollBar_;
         CHECK_NULL_VOID(scrollBar);
         if (info.GetTouches().empty()) {
@@ -650,11 +650,11 @@ void ListPattern::RegisterScrollBarEventTask()
                 scrollBar->SetPressed(false);
                 pattern->isScrollContent_ = true;
             }
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            pattern->MarkDirtyNodeSelf();
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
             scrollBar->SetPressed(false);
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            pattern->MarkDirtyNodeSelf();
         }
     });
     gestureHub->AddTouchEvent(touchEvent_);

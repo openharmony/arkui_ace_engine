@@ -42,4 +42,9 @@ RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap)
     }
     return capStyle;
 }
+
+RSRect ToRSRect(const NG::RectF& rect)
+{
+    return RSRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom());
+}
 } // namespace OHOS::Ace

@@ -48,9 +48,8 @@ void MenuWrapperPattern::OnModifyDone()
     auto gestureHub = host->GetOrCreateGestureEventHub();
 
     // if already initialized touch event
-    if (onTouch_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!onTouch_);
+
     // hide menu when touched outside the menu region
     auto callback = [weak = WeakClaim(RawPtr(host))](const TouchEventInfo& info) {
         if (info.GetTouches().empty()) {

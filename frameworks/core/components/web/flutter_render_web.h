@@ -38,6 +38,7 @@ private:
     void PerformLayout() override;
 #if !defined(PREVIEW) and defined(OHOS_STANDARD_SYSTEM)
     RefPtr<Flutter::HoleLayer> holeLayer_;
+    bool isCreateWebView_ = false;
 #endif
 };
 

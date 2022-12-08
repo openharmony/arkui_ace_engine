@@ -31,10 +31,7 @@ FlutterWindow::FlutterWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id) : ta
 
 void FlutterWindow::RequestFrame()
 {
-    if (!onShow_) {
-        LOGD("window is not show, stop request frame");
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(onShow_);
 
     CHECK_RUN_ON(UI);
     auto window = flutter::ace::WindowManager::GetWindow(id_);

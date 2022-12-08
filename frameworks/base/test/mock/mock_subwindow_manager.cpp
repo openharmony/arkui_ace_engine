@@ -13,18 +13,22 @@
  * limitations under the License.
  */
 
-#include "core/common/container.h"
-
+#include "base/subwindow/subwindow_manager.h"
 namespace OHOS::Ace {
+std::shared_ptr<SubwindowManager> SubwindowManager::instance_;
 
-int32_t Container::CurrentId()
+std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
 {
-    return 0;
+    if (!instance_) {
+        instance_ = std::make_shared<SubwindowManager>();
+    }
+    return instance_;
 }
 
-RefPtr<Container> Container::GetActive()
+void SubwindowManager::HidePopupNG(int32_t targetId)
 {
-    RefPtr<Container> activeContainer;
-    return activeContainer;
+    LOGI("SubwindowManager::HidePopupNG MOCK");
 }
+
+void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) {}
 } // namespace OHOS::Ace
