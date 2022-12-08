@@ -273,6 +273,7 @@ public:
     DataResubmittedOhos(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler) : handler_(handler) {}
     void Resend() override;
     void Cancel() override;
+
 private:
     std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler_;
 };
@@ -300,6 +301,7 @@ private:
     size_t height_ = 0;
     OHOS::NWeb::ImageColorType color_type_ = OHOS::NWeb::ImageColorType::COLOR_TYPE_UNKNOWN;
     OHOS::NWeb::ImageAlphaType alpha_type_ = OHOS::NWeb::ImageAlphaType::ALPHA_TYPE_UNKNOWN;
+};
 
 class WebSurfaceCallback : public OHOS::SurfaceDelegate::ISurfaceCallback {
 
