@@ -89,7 +89,6 @@ private:
     void OnImageDataReady();
     void OnImageLoadFail();
     void OnImageLoadSuccess();
-    void CacheImageObject();
     void SetImagePaintConfig(
         const RefPtr<CanvasImage>& canvasImage, const RectF& lastSrcRect_, const RectF& lastDstRect_, bool isSvg);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
@@ -103,7 +102,7 @@ private:
     LoadFailNotifyTask CreateLoadFailCallbackForAlt();
 
     RefPtr<ImageLoadingContext> loadingCtx_;
-    RefPtr<CanvasImage> lastCanvasImage_;
+    RefPtr<CanvasImage> image_;
     RectF lastDstRect_;
     RectF lastSrcRect_;
 
@@ -111,7 +110,7 @@ private:
 
     // clear alt data after [OnImageLoadSuccess] being called
     RefPtr<ImageLoadingContext> altLoadingCtx_;
-    RefPtr<CanvasImage> lastAltCanvasImage_;
+    RefPtr<CanvasImage> altImage_;
     std::unique_ptr<RectF> lastAltDstRect_;
     std::unique_ptr<RectF> lastAltSrcRect_;
 
