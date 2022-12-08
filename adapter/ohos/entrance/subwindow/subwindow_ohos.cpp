@@ -226,6 +226,10 @@ void SubwindowOhos::ShowWindow()
     LOGI("Show the subwindow");
     CHECK_NULL_VOID(window_);
 
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    CHECK_NULL_VOID(defaultDisplay);
+    window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+
     OHOS::Rosen::WMError ret = window_->Show();
 
     if (ret != OHOS::Rosen::WMError::WM_OK) {
