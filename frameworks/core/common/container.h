@@ -264,7 +264,7 @@ protected:
     std::string cardHapPath_;
     bool useNewPipeline_ = false;
     std::mutex stateMutex_;
-    Frontend::State state_ = Frontend::State::ON_HIDE;
+    Frontend::State state_ = Frontend::State::UNDEFINED;
 
 private:
     std::string moduleName_;
