@@ -128,7 +128,14 @@ void SlidingPanelModelNG::SetIsShow(bool isShow)
 
 void SlidingPanelModelNG::SetBackgroundMask(const Color& backgroundMask)
 {
-    NG::ViewAbstract::SetBackgroundColor(backgroundMask);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProp = frameNode->GetLayoutProperty<SlidingPanelLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    auto isShow = layoutProp->GetIsShow().value();
+    if (isShow) {
+        ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, backgroundMask);
+    }
 }
 
 // Set the color of the panel content area
