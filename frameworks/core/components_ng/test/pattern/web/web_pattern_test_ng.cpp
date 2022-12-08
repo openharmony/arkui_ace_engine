@@ -91,6 +91,9 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_002, TestSize.Level1)
     webPattern->HandleFocusEvent();
     webPattern->OnWebSrcUpdate();
     webPattern->OnWebDataUpdate();
+    webPattern->isUrlLoaded_ = true;
+    webPattern->OnWebSrcUpdate();
+    webPattern->OnWebDataUpdate();
     webPattern->OnJsEnabledUpdate(true);
     webPattern->OnMediaPlayGestureAccessUpdate(true);
     webPattern->OnFileAccessEnabledUpdate(true);
