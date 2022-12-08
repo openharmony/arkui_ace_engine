@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"
 
+#include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -30,6 +31,7 @@
 namespace OHOS::Ace::NG {
 
 namespace {
+const Dimension PANEL_RADIUS = 32.0_vp;
 const Color BG_COLOR = Color(0xfff1f3f5);
 } // namespace
 
@@ -55,6 +57,10 @@ void SlidingPanelModelNG::Create(bool isShow)
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext) {
         renderContext->UpdateBackgroundColor(BG_COLOR);
+        BorderRadiusProperty radius;
+        radius.radiusTopLeft = PANEL_RADIUS;
+        radius.radiusTopRight = PANEL_RADIUS;
+        renderContext->UpdateBorderRadius(radius);
     }
 }
 
