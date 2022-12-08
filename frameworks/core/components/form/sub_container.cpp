@@ -201,7 +201,6 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
         pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
             std::move(window), taskExecutor_, assetManager_, nullptr, frontend_, instanceId_);
     }
-    pipelineContext_->SetImageCache(outSidePipelineContext_.Upgrade()->GetImageCache());
     ContainerScope scope(instanceId_);
     density_ = outSidePipelineContext_.Upgrade()->GetDensity();
     auto eventManager = outSidePipelineContext_.Upgrade()->GetEventManager();
