@@ -167,8 +167,8 @@ public:
         const void* data,
         size_t width,
         size_t height,
-        NWeb::ImageColorType color_type,
-        NWeb::ImageAlphaType alpha_type) override;
+        NWeb::ImageColorType colorType,
+        NWeb::ImageAlphaType alphaType) override;
     void OnDesktopIconUrl(const std::string& icon_url, bool precomposed) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)

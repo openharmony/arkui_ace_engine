@@ -466,12 +466,12 @@ size_t FaviconReceivedOhos::GetHeight()
 
 int FaviconReceivedOhos::GetColorType()
 {
-    return static_cast<int>(color_type_);
+    return static_cast<int>(colorType_);
 }
 
 int FaviconReceivedOhos::GetAlphaType()
 {
-    return static_cast<int>(alpha_type_);
+    return static_cast<int>(alphaType_);
 }
 
 WebDelegate::~WebDelegate()
@@ -3587,15 +3587,15 @@ void WebDelegate::OnFaviconReceived(
     const void* data,
     size_t width,
     size_t height,
-    OHOS::NWeb::ImageColorType color_type,
-    OHOS::NWeb::ImageAlphaType alpha_type)
+    OHOS::NWeb::ImageColorType colorType,
+    OHOS::NWeb::ImageAlphaType alphaType)
 {
     auto param = std::make_shared<FaviconReceivedEvent>(AceType::MakeRefPtr<FaviconReceivedOhos>(
                      data,
                      width,
                      height,
-                     color_type,
-                     alpha_type));
+                     colorType,
+                     alphaType));
     if (Container::IsCurrentUseNewPipeline()) {
         auto webPattern = webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);

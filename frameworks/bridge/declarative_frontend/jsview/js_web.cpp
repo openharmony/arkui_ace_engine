@@ -3932,10 +3932,10 @@ void JSWeb::OnDataResubmitted(const JSCallbackInfo& args)
     }
 }
 
-Media::PixelFormat GetPixelFormat(NWeb::ImageColorType color_type)
+Media::PixelFormat GetPixelFormat(NWeb::ImageColorType colorType)
 {
     Media::PixelFormat pixelFormat;
-    switch (color_type) {
+    switch (colorType) {
         case NWeb::ImageColorType::COLOR_TYPE_UNKNOWN:
             pixelFormat = Media::PixelFormat::UNKNOWN;
             break;
@@ -3952,27 +3952,27 @@ Media::PixelFormat GetPixelFormat(NWeb::ImageColorType color_type)
     return pixelFormat;
 }
 
-Media::AlphaType GetAlphaType(NWeb::ImageAlphaType alpha_type)
+Media::AlphaType GetAlphaType(NWeb::ImageAlphaType alphaType)
 {
-    Media::AlphaType alphaType;
-    switch (alpha_type) {
+    Media::AlphaType imageAlphaType;
+    switch (alphaType) {
         case NWeb::ImageAlphaType::ALPHA_TYPE_UNKNOWN:
-            alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
             break;
         case NWeb::ImageAlphaType::ALPHA_TYPE_OPAQUE:
-            alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
             break;
         case NWeb::ImageAlphaType::ALPHA_TYPE_PREMULTIPLIED:
-            alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
+            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
             break;
         case NWeb::ImageAlphaType::ALPHA_TYPE_POSTMULTIPLIED:
-            alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL;
+            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL;
             break;
         default:
-            alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
             break;
     }
-    return alphaType;
+    return imageAlphaType;
 }
 
 JSRef<JSObject> FaviconReceivedEventToJSValue(const FaviconReceivedEvent& eventInfo)
@@ -3981,14 +3981,14 @@ JSRef<JSObject> FaviconReceivedEventToJSValue(const FaviconReceivedEvent& eventI
     auto data = eventInfo.GetHandler()->GetData();
     size_t width = eventInfo.GetHandler()->GetWidth();
     size_t height = eventInfo.GetHandler()->GetHeight();
-    int color_type = eventInfo.GetHandler()->GetColorType();
-    int alpha_type = eventInfo.GetHandler()->GetAlphaType();
+    int colorType = eventInfo.GetHandler()->GetColorType();
+    int alphaType = eventInfo.GetHandler()->GetAlphaType();
 
     Media::InitializationOptions opt;
     opt.size.width = static_cast<int32_t>(width);
     opt.size.height = static_cast<int32_t>(height);
-    opt.pixelFormat = GetPixelFormat(NWeb::ImageColorType(color_type));
-    opt.alphaType = GetAlphaType(NWeb::ImageAlphaType(alpha_type));
+    opt.pixelFormat = GetPixelFormat(NWeb::ImageColorType(colorType));
+    opt.alphaType = GetAlphaType(NWeb::ImageAlphaType(alphaType));
     opt.editable = true;
     auto pixelMap = Media::PixelMap::Create(opt);
     if (pixelMap == nullptr) {

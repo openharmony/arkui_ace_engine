@@ -705,14 +705,14 @@ void WebClientImpl::OnDataResubmission(std::shared_ptr<NWeb::NWebDataResubmissio
 void WebClientImpl::OnPageIcon(const void* data,
                                size_t width,
                                size_t height,
-                               NWeb::ImageColorType color_type,
-                               NWeb::ImageAlphaType alpha_type)
+                               NWeb::ImageColorType colorType,
+                               NWeb::ImageAlphaType alphaType)
 {
     LOGI("OnPageIcon");
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
-    delegate->OnFaviconReceived(data, width, width, color_type, alpha_type);
+    delegate->OnFaviconReceived(data, width, width, colorType, alphaType);
 }
 
 void WebClientImpl::OnDesktopIconUrl(const std::string& icon_url, bool precomposed)

@@ -286,9 +286,9 @@ public:
         const void* data,
         size_t width,
         size_t height,
-        OHOS::NWeb::ImageColorType color_type,
-        OHOS::NWeb::ImageAlphaType alpha_type)
-        : data_(data), width_(width), height_(height), color_type_(color_type), alpha_type_(alpha_type)  {}
+        OHOS::NWeb::ImageColorType colorType,
+        OHOS::NWeb::ImageAlphaType alphaType)
+        : data_(data), width_(width), height_(height), colorType_(colorType), alphaType_(alphaType)  {}
     const void* GetData() override;
     size_t GetWidth() override;
     size_t GetHeight() override;
@@ -299,8 +299,8 @@ private:
     const void* data_ = nullptr;
     size_t width_ = 0;
     size_t height_ = 0;
-    OHOS::NWeb::ImageColorType color_type_ = OHOS::NWeb::ImageColorType::COLOR_TYPE_UNKNOWN;
-    OHOS::NWeb::ImageAlphaType alpha_type_ = OHOS::NWeb::ImageAlphaType::ALPHA_TYPE_UNKNOWN;
+    OHOS::NWeb::ImageColorType colorType_ = OHOS::NWeb::ImageColorType::COLOR_TYPE_UNKNOWN;
+    OHOS::NWeb::ImageAlphaType alphaType_ = OHOS::NWeb::ImageAlphaType::ALPHA_TYPE_UNKNOWN;
 };
 
 class WebSurfaceCallback : public OHOS::SurfaceDelegate::ISurfaceCallback {
@@ -476,8 +476,8 @@ public:
     void OnWindowExit();
     void OnPageVisible(const std::string& url);
     void OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler);
-    void OnFaviconReceived(const void* data, size_t width, size_t height, OHOS::NWeb::ImageColorType color_type,
-        OHOS::NWeb::ImageAlphaType alpha_type);
+    void OnFaviconReceived(const void* data, size_t width, size_t height, OHOS::NWeb::ImageColorType colorType,
+        OHOS::NWeb::ImageAlphaType alphaType);
     void OnTouchIconUrl(const std::string& iconUrl, bool precomposed);
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
