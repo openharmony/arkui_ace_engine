@@ -999,7 +999,6 @@ void RenderWeb::OnDragWindowMoveEvent(RefPtr<PipelineContext> pipelineContext, c
 {
     int32_t globalX = static_cast<int32_t>(info.GetGlobalPoint().GetX());
     int32_t globalY = static_cast<int32_t>(info.GetGlobalPoint().GetY());
-    LOGD("drag window position update, x = %{public}d, y = %{public}d", globalX, globalY);
     dragWindow_->MoveTo(globalX, globalY);
     if (isW3cDragEvent_ && delegate_) {
         LOGD("w3c drag update");

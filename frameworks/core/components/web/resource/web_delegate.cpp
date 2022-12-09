@@ -1513,7 +1513,6 @@ void WebSurfaceCallback::OnSurfaceCreated(const sptr<OHOS::Surface>& surface)
 
 void WebSurfaceCallback::OnSurfaceChanged(const sptr<OHOS::Surface>& surface, int32_t width, int32_t height)
 {
-    LOGD("WebSurfaceCallback::OnSurfaceChanged");
     auto delegate = delegate_.Upgrade();
     if (!delegate) {
         LOGE("WebSurfaceCallback::OnSurfaceChanged get delegate fail");
