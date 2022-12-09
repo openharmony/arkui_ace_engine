@@ -18,23 +18,41 @@
 #include "base/log/ace_trace.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_renderer.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
 constexpr Dimension DEFAULT_FONT_SIZE = 30.0_px;
+constexpr double DEFAULT_OFFSET = 25;
+constexpr double DEFAULT_HEIGHT = 30;
 }
 
 void CreateMockComponent(const std::string inspectorTag)
 {
-    auto textComponent = AceType::MakeRefPtr<TextComponent>("This component is not supported on PC Preview.");
-    auto textStyle = textComponent->GetTextStyle();
-    textStyle.SetFontSize(DEFAULT_FONT_SIZE);
-    textComponent->SetTextStyle(textStyle);
-    textComponent->SetInspectorTag(inspectorTag);
-    ViewStackProcessor::GetInstance()->Push(textComponent);
-
+    const std::string hintText("This component is not supported on PC preview.");
+    RefPtr<CustomPaintComponent> mockComponent = AceType::MakeRefPtr<CustomPaintComponent>();
+    mockComponent->SetInspectorTag(inspectorTag);
+    auto jsContext = Referenced::MakeRefPtr<JSRenderingContext>();
+    jsContext->SetAnti(true);
+    jsContext->SetComponent(mockComponent->GetTaskPool());
+    jsContext->SetAntiAlias();
+    ViewStackProcessor::GetInstance()->Push(mockComponent);
     RefPtr<BoxComponent> mountBox = ViewStackProcessor::GetInstance()->GetBoxComponent();
     mountBox->SetColor(Color::FromString("#808080"));
+    mountBox->SetHeight(DEFAULT_HEIGHT);
+
+    auto readyEvent_ = EventMarker([mockComponent, hintText]() {
+        if (mockComponent) {
+            mockComponent->GetTaskPool()->UpdateFontSize(DEFAULT_FONT_SIZE);
+            mockComponent->GetTaskPool()->FillText(hintText, Offset(0, DEFAULT_OFFSET));
+        }
+    });
+    auto container = Container::Current();
+    if (container) {
+        auto context = container->GetPipelineContext();
+        mockComponent->SetOnReadyEvent(readyEvent_, context);
+    }
 }
 
 void JSForm::Create(const JSCallbackInfo& info)
