@@ -45,13 +45,14 @@ void SearchPaintMethod::PaintSearch(RSCanvas& canvas, PaintWrapper* paintWrapper
         auto searchTheme = pipelineContext->GetTheme<SearchTheme>();
         CHECK_NULL_VOID(searchTheme);
         auto iconHeight = searchTheme->GetIconHeight();
-        auto dividerSpace = searchTheme->GetDividerSpace();
+        auto dividerSpace = searchTheme->GetDividerSideSpace().ConvertToPx();
+        auto searchSpace = searchTheme->GetSearchButtonSpacing().ConvertToPx();
         auto searchDividerWidth = searchTheme->GetSearchDividerWidth();
         auto searchDividerColor = searchTheme->GetSearchDividerColor();
         auto searchSize = paintWrapper->GetGeometryNode()->GetFrameSize();
         // Paint divider.
         double dividerVerticalOffset = (searchSize.Height() - iconHeight.ConvertToPx()) / 2.0;
-        double dividerHorizontalOffset = searchSize.Width() - buttonSize_.Width() - dividerSpace;
+        double dividerHorizontalOffset = searchSize.Width() - buttonSize_.Width() - dividerSpace - searchSpace;
         OffsetF dividerOffset = OffsetF(dividerHorizontalOffset, dividerVerticalOffset);
         float originX = dividerOffset.GetX();
         float originY = dividerOffset.GetY();

@@ -318,10 +318,13 @@ public:
         return false;
     }
     float PreferredLineHeight();
-void SetNeedCloseOverlay(bool needClose)
-{
-    needCloseOverlay_ = needClose;
-}
+    void SetNeedCloseOverlay(bool needClose)
+    {
+        needCloseOverlay_ = needClose;
+    }
+    
+    void SearchRequestKeyboard();
+
 private:
     bool IsTextArea();
     void HandleBlurEvent();

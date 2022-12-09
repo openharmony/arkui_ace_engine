@@ -537,7 +537,7 @@ FocusPattern CheckBoxGroupPattern::GetFocusPattern() const
     CHECK_NULL_RETURN(pipeline, FocusPattern());
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_RETURN(checkBoxTheme, FocusPattern());
-    auto activeColor = checkBoxTheme->GetFocusColor();
+    auto activeColor = checkBoxTheme->GetActiveColor();
     FocusPaintParam focusPaintParam;
     focusPaintParam.SetPaintColor(activeColor);
     return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
