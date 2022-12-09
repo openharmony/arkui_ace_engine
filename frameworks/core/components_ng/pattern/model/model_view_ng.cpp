@@ -15,7 +15,9 @@
 
 #include "core/components_ng/pattern/model/model_view_ng.h"
 
+#include "base/geometry/dimension.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/model/model_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -113,4 +115,23 @@ void ModelViewNG::AddCustomRender(const RefPtr<OHOS::Render3D::SVCustomRenderDes
 {
     LOGD("MODEL_NG: NOT IMPLEMENTED YET");
 }
+
+void ModelViewNG::SetWidth(Dimension& width)
+{
+    LOGD("MODEL_NG: ModelViewNG::SetWidth() %f", width.Value());
+    if (LessNotEqual(width.Value(), 0.0)) {
+        width.SetValue(0.0);
+    }
+    ViewAbstract::SetWidth(CalcLength(width));
+}
+
+void ModelViewNG::SetHeight(Dimension& height)
+{
+    LOGD("MODEL_NG: ModelViewNG::SetHeight() %f", height.Value());
+    if (LessNotEqual(height.Value(), 0.0)) {
+        height.SetValue(0.0);
+    }
+    ViewAbstract::SetHeight(CalcLength(height));
+}
+
 } // namespace OHOS::Ace::NG
