@@ -69,7 +69,7 @@ private:
     double colSpace_ = 0.0;
     double dailyFiveRowSpace_ = 0.0;
     bool showHoliday_ = true;
-    bool showLunar_ = true;
+    bool showLunar_ = false;
     uint32_t startOfWeek_ = 64;
     double weekFontSize_ = 0.0;
     double dayFontSize_ = 0.0;
