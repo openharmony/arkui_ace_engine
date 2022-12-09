@@ -78,6 +78,8 @@ protected:
 private:
     void OnTouchDown();
     void OnTouchUp();
+    void InitMouseEvent();
+    void HandleMouseEvent(bool isHover);
     void InitButtonLabel();
     static void SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, const RefPtr<PipelineBase>& pipeline);
     Color clickedColor_;
@@ -85,6 +87,7 @@ private:
     bool isSetClickedColor_ = false;
 
     RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<InputEvent> mouseEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ButtonPattern);
 };
