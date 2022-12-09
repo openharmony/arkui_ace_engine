@@ -96,9 +96,16 @@ void PixelMapImage::DrawToRSCanvas(
             SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerLeft_Corner].GetY(), 0.0f)));
     }
     recordingCanvas->ClipAdaptiveRRect(radii);
-    recordingCanvas->DrawPixelMapRect(pixelMap_->GetPixelMapSharedPtr(),
-        SkRect::MakeXYWH(srcRect.GetLeft(), srcRect.GetTop(), srcRect.GetWidth(), srcRect.GetHeight()),
-        SkRect::MakeXYWH(dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetWidth(), dstRect.GetHeight()), &paint);
+    Rosen::RsImageInfo rsImageInfo(
+        (int)(GetPaintConfig().imageFit_),
+        (int)(GetPaintConfig().imageRepeat_),
+        radii,
+        1.0,
+        0,
+        0,
+        0
+    );
+    recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, paint);
 #endif
 }
 
