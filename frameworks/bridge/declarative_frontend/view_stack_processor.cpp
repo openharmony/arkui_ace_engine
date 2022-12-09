@@ -441,13 +441,6 @@ void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomV
 
 bool ViewStackProcessor::ShouldPopImmediately()
 {
-// Pop the non-pop mock component immediately on the preview
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    auto inspectorTag = GetMainComponent()->GetInspectorTag();
-    if (inspectorTag == "XComponentComponent" || inspectorTag == "WebComponent") {
-        return true;
-    }
-#endif
     auto type = AceType::TypeName(GetMainComponent());
     auto componentGroup = AceType::DynamicCast<ComponentGroup>(GetMainComponent());
     auto multiComposedComponent = AceType::DynamicCast<MultiComposedComponent>(GetMainComponent());
