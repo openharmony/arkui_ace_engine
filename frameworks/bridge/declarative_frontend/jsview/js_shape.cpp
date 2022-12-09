@@ -19,6 +19,9 @@
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+constexpr double DEFAULT_OPACITY = 1.0;
+}
 
 void JSShape::Create(const JSCallbackInfo& info)
 {
@@ -197,10 +200,8 @@ void JSShape::SetStroke(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    Color strokeColor;
-    if (!ParseJsColor(info[0], strokeColor)) {
-        return;
-    }
+    Color strokeColor = Color::TRANSPARENT;
+    ParseJsColor(info[0], strokeColor);
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
     if (component) {
@@ -311,10 +312,8 @@ void JSShape::SetStrokeOpacity(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    double strokeOpacity;
-    if (!ParseJsDouble(info[0], strokeOpacity)) {
-        return;
-    }
+    double strokeOpacity = DEFAULT_OPACITY;
+    ParseJsDouble(info[0], strokeOpacity);
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
     if (component) {
@@ -329,10 +328,8 @@ void JSShape::SetFillOpacity(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    double fillOpacity;
-    if (!ParseJsDouble(info[0], fillOpacity)) {
-        return;
-    }
+    double fillOpacity = DEFAULT_OPACITY;
+    ParseJsDouble(info[0], fillOpacity);
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
     if (component) {

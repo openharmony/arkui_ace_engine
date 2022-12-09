@@ -35,6 +35,7 @@ ACE_EXPORT extern const std::wstring DEFAULT_WSTRING;
 ACE_EXPORT extern const std::u16string DEFAULT_USTRING;
 constexpr int32_t TEXT_CASE_LOWERCASR = 1;
 constexpr int32_t TEXT_CASE_UPPERCASR = 2;
+constexpr double PERCENT_VALUE = 100.0;
 
 inline std::u16string Str8ToStr16(const std::string& str)
 {
@@ -178,6 +179,25 @@ inline double StringToDouble(const std::string& value)
     } else {
         return result;
     }
+}
+
+// string to double method with success check, and support for parsing number string with percentage case
+inline bool StringToDouble(const std::string& value, double& result)
+{
+    char* pEnd = nullptr;
+    double res = std::strtod(value.c_str(), &pEnd);
+    if (!pEnd || pEnd == value.c_str() || errno == ERANGE) {
+        return false;
+    }
+    if (std::strcmp(pEnd, "%") == 0) {
+        result = res / PERCENT_VALUE;
+        return true;
+    }
+    if (std::strcmp(pEnd, "") == 0) {
+        result = res;
+        return true;
+    }
+    return false;
 }
 
 inline float StringToFloat(const std::string& value)
