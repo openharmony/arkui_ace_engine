@@ -72,6 +72,10 @@ void OverlayManager::Pop(const RefPtr<FrameNode>& node)
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
     ctx->OpacityAnimation(option, 1.0, 0.0);
+    // start animation immediately
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RequestFrame();
 }
 
 void OverlayManager::PopInSubwindow(const RefPtr<FrameNode>& node)
