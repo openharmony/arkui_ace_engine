@@ -2189,7 +2189,6 @@ std::string WebDelegate::GetCustomScheme()
 
 void WebDelegate::InitWebViewWithSurface()
 {
-    LOGI("Create webview with surface");
     auto context = context_.Upgrade();
     if (!context) {
         return;
