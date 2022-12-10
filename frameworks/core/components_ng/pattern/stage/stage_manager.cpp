@@ -52,6 +52,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             CHECK_NULL_VOID(pattern);
             pattern->SetPageInTransition(false);
         });
+        pagePattern->ProcessHideState();
         return;
     }
     pagePattern->TriggerPageTransition(
@@ -63,7 +64,6 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             page->GetEventHub<EventHub>()->SetEnabled(true);
             auto pattern = page->GetPattern<PagePattern>();
             CHECK_NULL_VOID(pattern);
-            pattern->OnShow();
             pattern->SetPageInTransition(false);
         });
 }
@@ -264,13 +264,18 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
     return true;
 }
 
-void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType /* transitionType */)
+void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType transitionType)
 {
     auto pageNode = DynamicCast<FrameNode>(node);
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
     pagePattern->OnHide();
+    if (transitionType == PageTransitionType::NONE) {
+        // If there is a page transition, this function should execute after page transition,
+        // otherwise the page will not be visible
+        pagePattern->ProcessHideState();
+    }
 
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);
@@ -287,10 +292,9 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    pageNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-    if (transitionType == PageTransitionType::NONE) {
-        pagePattern->OnShow();
-    }
+    pagePattern->OnShow();
+    // With or without a page transition, we need to make the coming page visible first
+    pagePattern->ProcessShowState();
 
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);
