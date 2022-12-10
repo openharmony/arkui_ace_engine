@@ -1575,23 +1575,9 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
         option.SetCurve(Curves::LINEAR);
         option.SetDuration(pageTransitionDuration);
     }
-    if (transitionIn) {
-        AnimationUtils::Animate(
-            option, [rsNode = rsNode_, effect]() { rsNode->NotifyTransition(effect, true); }, onFinish);
-    } else {
-        auto wrappedFinish = [onFinish, weak = WeakPtr<FrameNode>(host), instanceId = Container::CurrentId()]() {
-            ContainerScope scope(instanceId);
-            auto host = weak.Upgrade();
-            if (host) {
-                host->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-            }
-            if (onFinish) {
-                onFinish();
-            }
-        };
-        AnimationUtils::Animate(
-            option, [rsNode = rsNode_, effect]() { rsNode->NotifyTransition(effect, false); }, wrappedFinish);
-    }
+    AnimationUtils::Animate(
+        option, [rsNode = rsNode_, effect, transitionIn]() { rsNode->NotifyTransition(effect, transitionIn); },
+        onFinish);
     return true;
 }
 

@@ -129,14 +129,14 @@ public:
         isPageInTransition_ = pageTransition;
     }
 
+    // Mark current page node invisible in render tree.
+    void ProcessHideState();
+    // Mark current page node visible in render tree.
+    void ProcessShowState();
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
-
-    // Mark current page node inactive state to show in render tree.
-    void ProcessHideState();
-    // Mark current page node active state to show in render tree.
-    void ProcessShowState();
 
     RefPtr<PageInfo> pageInfo_;
 
