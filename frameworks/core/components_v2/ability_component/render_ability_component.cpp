@@ -84,7 +84,7 @@ void RenderAbilityComponent::Paint(RenderContext& context, const Offset& offset)
 
 void RenderAbilityComponent::ConnectOrUpdateExtension()
 {
-    Offset globalOffset = GetGlobalOffset();
+    Offset globalOffset = GetGlobalOffsetExternal();
     if (currentRect_.GetOffset() == globalOffset && !needLayout_ && hasConnectionToAbility_) {
         return;
     }
@@ -113,6 +113,14 @@ void RenderAbilityComponent::ConnectOrUpdateExtension()
 
     if (hasConnectionToAbility_) {
         adapter_->UpdateRect(currentRect_);
+    }
+}
+
+void RenderAbilityComponent::OnPaintFinish()
+{
+    if (globalOffsetExternal_ != GetGlobalOffsetExternal()) {
+        globalOffsetExternal_ = GetGlobalOffsetExternal();
+        ConnectOrUpdateExtension();
     }
 }
 
