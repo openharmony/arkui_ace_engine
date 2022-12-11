@@ -322,9 +322,49 @@ public:
     {
         needCloseOverlay_ = needClose;
     }
+    const RefPtr<ImageLoadingContext>& GetShowPasswordIconCtx() const
+    {
+        return showPasswordImageLoadingCtx_;
+    }
+
+    const RefPtr<CanvasImage>& GetShowPasswordIconCanvasImage() const
+    {
+        return showPasswordCanvasImage_;
+    }
+
+    const RefPtr<ImageLoadingContext>& GetHidePasswordIconCtx() const
+    {
+        return hidePasswordImageLoadingCtx_;
+    }
+
+    const RefPtr<CanvasImage>& GetHidePasswordIconCanvasImage() const
+    {
+        return hidePasswordCanvasImage_;
+    }
+
+    bool GetTextObscured() const
+    {
+        return textObscured_;
+    }
+
+    void SetTextObscured(bool obscured)
+    {
+        textObscured_ = obscured;
+    }
+
+    static std::u16string CreateObscuredText(int32_t len);
+    bool IsTextArea();
+    const RectF& GetImageRect()
+    {
+        return imageRect_;
+    }
+
+    const ImagePaintConfig& GetPasswordIconPaintConfig()
+    {
+        return passwordIconPaintConfig_;
+    }
 
 private:
-    bool IsTextArea();
     void HandleBlurEvent();
     void HandleFocusEvent();
     bool OnKeyEvent(const KeyEvent& event);
@@ -414,6 +454,16 @@ private:
     bool OffsetInContentRegion(const Offset& offset);
     void ProcessPadding();
 
+    void ProcessPasswordIcon();
+    void UpdateInternalResource(ImageSourceInfo& sourceInfo);
+    ImageSourceInfo GetImageSourceInfoFromTheme(bool checkHidePasswordIcon);
+    LoadSuccessNotifyTask CreateLoadSuccessCallback(bool checkHidePasswordIcon);
+    DataReadyNotifyTask CreateDataReadyCallback(bool checkHidePasswordIcon);
+    LoadFailNotifyTask CreateLoadFailCallback(bool checkHidePasswordIcon);
+    void OnImageDataReady(bool checkHidePasswordIcon);
+    void OnImageLoadSuccess(bool checkHidePasswordIcon);
+    void OnImageLoadFail(bool checkHidePasswordIcon);
+
     RectF frameRect_;
     RectF contentRect_;
     RectF textRect_;
@@ -426,8 +476,10 @@ private:
     RefPtr<ImageLoadingContext> hidePasswordImageLoadingCtx_;
 
     // password icon image related
-    RefPtr<CanvasImage> showPasswordImageCanvas_;
-    RefPtr<CanvasImage> hidePasswordImageCanvas_;
+    RefPtr<CanvasImage> showPasswordCanvasImage_;
+    RefPtr<CanvasImage> hidePasswordCanvasImage_;
+
+    ImagePaintConfig passwordIconPaintConfig_;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -453,6 +505,7 @@ private:
     bool preferredLineHeightNeedToUpdate = true;
     bool isMousePressed_ = false;
     bool needCloseOverlay_ = true;
+    bool textObscured_ = true;
 
     SelectionMode selectionMode_ = SelectionMode::NONE;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;

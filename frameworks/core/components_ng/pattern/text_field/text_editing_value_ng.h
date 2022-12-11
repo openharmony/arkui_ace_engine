@@ -77,7 +77,7 @@ struct TextEditingValueNG {
     {
         auto wideText = GetWideText();
         position = std::clamp(position, 0, static_cast<int32_t>(wideText.length()));
-        LOGD("GetValueBeforePosition %{public}d", position);
+        LOGI("GetValueBeforePosition %{public}d", position);
         return StringUtils::ToString(wideText.substr(0, position));
     }
 
@@ -85,7 +85,7 @@ struct TextEditingValueNG {
     {
         auto wideText = GetWideText();
         position = std::clamp(position, 0, static_cast<int32_t>(wideText.length()));
-        LOGD("GetValueAfterPosition %{public}d", position);
+        LOGI("GetValueAfterPosition %{public}d", position);
         return StringUtils::ToString(wideText.substr(position));
     }
 

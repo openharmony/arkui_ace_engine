@@ -39,6 +39,7 @@
 #include "core/common/ime/text_selection.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
@@ -52,6 +53,7 @@
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/image/image_source_info.h"
 #if defined(ENABLE_STANDARD_INPUT)
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 #endif
@@ -103,6 +105,17 @@ std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
 
 } // namespace
 
+std::u16string TextFieldPattern::CreateObscuredText(int32_t len)
+{
+    std::u16string obscuredText;
+    if (Localization::GetInstance()->GetLanguage() == "ar") { // ar is the abbreviation of Arabic.
+        obscuredText = std::u16string(len, OBSCURING_CHARACTER_FOR_AR);
+    } else {
+        obscuredText = std::u16string(len, OBSCURING_CHARACTER);
+    }
+    return obscuredText;
+}
+
 std::u16string TextFieldPattern::GetTextForDisplay() const
 {
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -114,12 +127,7 @@ std::u16string TextFieldPattern::GetTextForDisplay() const
         return txtContent;
     }
 
-    std::u16string obscured;
-    if (Localization::GetInstance()->GetLanguage() == "ar") { // ar is the abbreviation of Arabic.
-        obscured = std::u16string(len, OBSCURING_CHARACTER_FOR_AR);
-    } else {
-        obscured = std::u16string(len, OBSCURING_CHARACTER);
-    }
+    auto obscured = CreateObscuredText(len);
     int32_t posBeforeCursor =
         InSelectMode() ? textSelector_.destinationOffset - 1 : textEditingValue_.caretPosition - 1;
     if (obscureTickCountDown_ > 0 && posBeforeCursor >= 0 && static_cast<size_t>(posBeforeCursor) < obscured.length()) {
@@ -646,9 +654,11 @@ void TextFieldPattern::HandleBlurEvent()
     CloseKeyboard(true);
     auto pos = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     UpdateSelection(pos, pos);
+    selectionMode_ = SelectionMode::NONE;
     auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnEditChanged(false);
     CloseSelectOverlay();
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
@@ -1030,6 +1040,16 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     lastTouchOffset_ = info.GetLocalLocation();
     caretUpdateType_ = CaretUpdateType::PRESSED;
     selectionMode_ = SelectionMode::NONE;
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    if (lastTouchOffset_.GetX() > frameRect_.Width() - imageRect_.Width() - GetPaddingRight() &&
+        layoutProperty->GetShowPasswordIcon().value_or(false) &&
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD) {
+        textObscured_ = !textObscured_;
+        ProcessPasswordIcon();
+        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        caretUpdateType_ = CaretUpdateType::EVENT;
+        return;
+    }
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
     if (isMousePressed_) {
@@ -1124,6 +1144,7 @@ void TextFieldPattern::OnModifyDone()
     InitLongPressEvent();
     InitFocusEvent();
     InitMouseEvent();
+    ProcessPasswordIcon();
     context->AddOnAreaChangeNode(host->GetId());
     if (!clipboard_ && context) {
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
@@ -1131,7 +1152,10 @@ void TextFieldPattern::OnModifyDone()
     obscureTickCountDown_ = OBSCURE_SHOW_TICKS;
     ProcessPadding();
     caretRect_.SetWidth(static_cast<float>(CURSOR_WIDTH.ConvertToPx()));
-    caretRect_.SetHeight(GetTextOrPlaceHolderFontSize() + static_cast<float>(CURSOR_PADDING.ConvertToPx()) * 2.0f);
+    caretRect_.SetHeight(GetTextOrPlaceHolderFontSize());
+    if (textEditingValue_.caretPosition == 0) {
+        caretRect_.SetLeft(GetPaddingLeft());
+    }
     CloseSelectOverlay();
     if (layoutProperty->GetTypeChangedValue(false)) {
         ClearEditingValue();
@@ -1529,6 +1553,141 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose)
         return true;
     }
     return false;
+}
+
+void TextFieldPattern::ProcessPasswordIcon()
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::VISIBLE_PASSWORD) {
+        return;
+    }
+    bool showPasswordIcon = layoutProperty->GetShowPasswordIconValue(true);
+    if (!showPasswordIcon) {
+        return;
+    }
+    if ((!layoutProperty->HasHidePasswordSourceInfo() || !hidePasswordImageLoadingCtx_) && textObscured_) {
+        ImageSourceInfo hidePasswordSourceInfo = GetImageSourceInfoFromTheme(textObscured_);
+        UpdateInternalResource(hidePasswordSourceInfo);
+        LoadNotifier hideIconLoadNotifier(CreateDataReadyCallback(textObscured_),
+            CreateLoadSuccessCallback(textObscured_), CreateLoadFailCallback(textObscured_));
+        hidePasswordImageLoadingCtx_ =
+            AceType::MakeRefPtr<ImageLoadingContext>(hidePasswordSourceInfo, std::move(hideIconLoadNotifier));
+        hidePasswordImageLoadingCtx_->LoadImageData();
+        return;
+    }
+    if ((!layoutProperty->HasShowPasswordSourceInfo() || !showPasswordImageLoadingCtx_) && !textObscured_) {
+        ImageSourceInfo showPasswordSourceInfo = GetImageSourceInfoFromTheme(textObscured_);
+        UpdateInternalResource(showPasswordSourceInfo);
+        LoadNotifier showIconLoadNotifier(CreateDataReadyCallback(textObscured_),
+            CreateLoadSuccessCallback(textObscured_), CreateLoadFailCallback(textObscured_));
+        showPasswordImageLoadingCtx_ =
+            AceType::MakeRefPtr<ImageLoadingContext>(showPasswordSourceInfo, std::move(showIconLoadNotifier));
+        showPasswordImageLoadingCtx_->LoadImageData();
+        return;
+    }
+}
+
+ImageSourceInfo TextFieldPattern::GetImageSourceInfoFromTheme(bool checkHidePasswordIcon)
+{
+    auto context = GetHost()->GetContext();
+    CHECK_NULL_RETURN(context, {});
+    ImageSourceInfo imageSourceInfo;
+    auto theme = context->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(theme, imageSourceInfo);
+    ImageSourceInfo srcInfo;
+    if (checkHidePasswordIcon) {
+        imageSourceInfo.SetResourceId(InternalResource::ResourceId::HIDE_PASSWORD_SVG);
+        return imageSourceInfo;
+    }
+    imageSourceInfo.SetResourceId(InternalResource::ResourceId::SHOW_PASSWORD_SVG);
+    return imageSourceInfo;
+}
+
+void TextFieldPattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
+{
+    CHECK_NULL_VOID_NOLOG(sourceInfo.IsInternalResource());
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto iconTheme = pipeline->GetTheme<IconTheme>();
+    CHECK_NULL_VOID(iconTheme);
+    auto iconPath = iconTheme->GetIconPath(sourceInfo.GetResourceId());
+    if (iconPath.empty()) {
+        LOGE("Icon path empty");
+        return;
+    }
+    sourceInfo.SetSrc(iconPath);
+    sourceInfo.SetDimension(DEFAULT_FONT, DEFAULT_FONT);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (textObscured_) {
+        layoutProperty->UpdateHidePasswordSourceInfo(sourceInfo);
+        return;
+    }
+    layoutProperty->UpdateShowPasswordSourceInfo(sourceInfo);
+}
+
+LoadSuccessNotifyTask TextFieldPattern::CreateLoadSuccessCallback(bool checkHidePasswordIcon)
+{
+    auto task = [weak = WeakClaim(this), checkHidePasswordIcon](const ImageSourceInfo& /* sourceInfo */) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnImageLoadSuccess(checkHidePasswordIcon);
+    };
+    return task;
+}
+
+DataReadyNotifyTask TextFieldPattern::CreateDataReadyCallback(bool checkHidePasswordIcon)
+{
+    auto task = [weak = WeakClaim(this), checkHidePasswordIcon](const ImageSourceInfo& /* sourceInfo */) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnImageDataReady(checkHidePasswordIcon);
+    };
+    return task;
+}
+
+LoadFailNotifyTask TextFieldPattern::CreateLoadFailCallback(bool checkHidePasswordIcon)
+{
+    auto task = [weak = WeakClaim(this), checkHidePasswordIcon](const ImageSourceInfo& /* sourceInfo */) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnImageLoadFail(checkHidePasswordIcon);
+    };
+    return task;
+}
+
+void TextFieldPattern::OnImageLoadFail(bool checkHidePasswordIcon)
+{
+    LOGE("Image data load fail for %{public}s", checkHidePasswordIcon ? "hide icon" : "show icon");
+}
+
+void TextFieldPattern::OnImageDataReady(bool checkHidePasswordIcon)
+{
+    ACE_SCOPED_TRACE("TextFieldPattern::OnImageDataReady");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    LOGI("Image data ready for %{public}s", checkHidePasswordIcon ? "hide icon" : "show icon");
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void TextFieldPattern::OnImageLoadSuccess(bool checkHidePasswordIcon)
+{
+    ACE_SCOPED_TRACE("TextFieldPattern::OnImageLoadSuccess");
+    if (checkHidePasswordIcon) {
+        LOGI("Load hide icon successfully");
+        hidePasswordCanvasImage_ = hidePasswordImageLoadingCtx_->MoveCanvasImage();
+        passwordIconPaintConfig_.srcRect_ = hidePasswordImageLoadingCtx_->GetSrcRect();
+        passwordIconPaintConfig_.dstRect_ = hidePasswordImageLoadingCtx_->GetDstRect();
+        passwordIconPaintConfig_.isSvg_ = true;
+        return;
+    }
+    LOGI("Load show icon successfully");
+    showPasswordCanvasImage_ = showPasswordImageLoadingCtx_->MoveCanvasImage();
+    passwordIconPaintConfig_.srcRect_ = showPasswordImageLoadingCtx_->GetSrcRect();
+    passwordIconPaintConfig_.dstRect_ = showPasswordImageLoadingCtx_->GetDstRect();
+    passwordIconPaintConfig_.isSvg_ = true;
 }
 
 void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}

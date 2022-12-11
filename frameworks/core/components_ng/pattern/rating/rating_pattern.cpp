@@ -440,8 +440,8 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(ratingTheme);
     auto radius = ratingTheme->GetFocusBorderRadius();
 
-    paintRect.SetRect(RectF(
-        static_cast<float>(wholeStarNum) * singleStarWith, 0.0f, singleStarWith, singleStarDstRect_.Height()));
+    paintRect.SetRect(
+        RectF(static_cast<float>(wholeStarNum) * singleStarWith, 0.0f, singleStarWith, singleStarDstRect_.Height()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
         static_cast<RSScalar>(radius.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
