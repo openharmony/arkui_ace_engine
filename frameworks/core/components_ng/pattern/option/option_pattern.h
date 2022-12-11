@@ -103,10 +103,10 @@ public:
         return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
     }
 
+    void UpdateNextNodeDivider(bool needDivider);
+
 private:
     void OnModifyDone() override;
-
-    void UpdateNextNodeDivider(bool needDivider);
 
     // register option's callback
     void RegisterOnClick();

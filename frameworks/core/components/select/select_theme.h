@@ -30,6 +30,7 @@ constexpr double SELECT_OPTION_LEFT_LENGTH = 16.0;
 constexpr double SELECT_OPTION_TOP_LENGTH = 15.0;
 constexpr double SELECT_OPTION_RIGHT_LENGTH = 16.0;
 constexpr double SELECT_OPTION_BOTTOM_LENGTH = 15.0;
+constexpr Dimension OPTION_MIN_HEIGHT = 48.0_vp;
 /**
  * SelectTheme defines color and styles of SelectComponent. SelectTheme should be build
  * using SelectTheme::Builder.
@@ -89,6 +90,7 @@ public:
             theme->optionPadding_ = Edge(SELECT_OPTION_LEFT_LENGTH, SELECT_OPTION_TOP_LENGTH,
                 SELECT_OPTION_RIGHT_LENGTH, SELECT_OPTION_BOTTOM_LENGTH, DimensionUnit::VP);
             theme->optionInterval_ = theme->isTV_ ? Dimension(6.0, DimensionUnit::VP) : 0.0_vp;
+            theme->optionMinHeight_ = OPTION_MIN_HEIGHT;
             theme->tvFocusTextColor_ = Color(0xE6000000);
             theme->tvNormalBackColor_ = Color(0x33FFFFFF);
             theme->tvBackColor_ = (theme->isTV_ ? Color(0x99000000) : Color::TRANSPARENT);
@@ -117,6 +119,7 @@ public:
                 return;
             }
 
+            theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, theme->fontSize_);
             theme->fontColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->fontColor_);
             theme->clickedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_CLICKED, theme->clickedColor_);
             theme->selectedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_SELECTED, theme->selectedColor_);
@@ -164,6 +167,7 @@ public:
         theme->selectHideTime_ = selectHideTime_;
         theme->optionPadding_ = optionPadding_;
         theme->optionInterval_ = optionInterval_;
+        theme->optionMinHeight_ = optionMinHeight_;
         theme->tvFocusTextColor_ = tvFocusTextColor_;
         theme->tvNormalBackColor_ = tvNormalBackColor_;
         theme->tvBackColor_ = tvBackColor_;
@@ -464,6 +468,11 @@ public:
         return optionInterval_;
     }
 
+    const Dimension& GetOptionMinHeight() const
+    {
+        return optionMinHeight_;
+    }
+
     const Color& GetTvFocusTextColor() const
     {
         return tvFocusTextColor_;
@@ -544,6 +553,7 @@ private:
     Dimension verticalSpacing_;
     Dimension contentSpacing_;
     Dimension optionInterval_;
+    Dimension optionMinHeight_;
 
     Color tvFocusTextColor_;
     Color tvNormalBackColor_;

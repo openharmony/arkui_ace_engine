@@ -14,8 +14,12 @@
  */
 #include "core/components_ng/pattern/option/option_view.h"
 
+#include "base/geometry/dimension.h"
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components/select/select_theme.h"
+#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
@@ -60,6 +64,13 @@ RefPtr<FrameNode> CreateText(const std::string& value, const RefPtr<FrameNode>& 
 
     auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProperty, nullptr);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto theme = AceType::DynamicCast<PipelineBase>(pipeline)->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+
+    textProperty->UpdateFontSize(theme->GetFontSize());
     textProperty->UpdateContent(value);
     textNode->MountToParent(parent);
     textNode->MarkModifyDone();
@@ -88,6 +99,17 @@ RefPtr<FrameNode> OptionView::CreateSelectOption(const std::string& value, const
     auto option = Create(index);
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    auto minOptionHeight = theme->GetOptionMinHeight();
+
+    auto rowProps = row->GetLayoutProperty<LayoutProperty>();
+    CalcSize calcSize;
+    calcSize.SetHeight(CalcLength(minOptionHeight));
+    rowProps->UpdateCalcMinSize(calcSize);
     row->MountToParent(option);
 
     // create icon node
