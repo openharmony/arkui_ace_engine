@@ -451,17 +451,20 @@ bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
     CHECK_NULL_RETURN(host, ret);
     auto eventHub = host->GetEventHub<WebEventHub>();
     CHECK_NULL_RETURN(eventHub, ret);
-    auto keyEventCallback = eventHub->GetOnKeyEvent();
-    CHECK_NULL_RETURN(keyEventCallback, ret);
+
     KeyEventInfo info(keyEvent);
-    keyEventCallback(info);
+    auto keyEventCallback = eventHub->GetOnKeyEvent();
+    if (keyEventCallback) {
+        keyEventCallback(info);
+    }
 
     auto preKeyEventCallback = eventHub->GetOnPreKeyEvent();
-    CHECK_NULL_RETURN(preKeyEventCallback, ret);
-    ret = preKeyEventCallback(info);
-    if (ret) {
-        LOGI("keyevent consumed in hap");
-        return ret;
+    if (preKeyEventCallback) {
+        ret = preKeyEventCallback(info);
+        if (ret) {
+            LOGI("keyevent consumed in hap");
+            return ret;
+        }
     }
 
     ret = WebOnKeyEvent(keyEvent);
