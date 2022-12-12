@@ -37,6 +37,7 @@ double GridColumnInfo::GetWidth() const
     }
     auto sizeType = parent_->GetSizeType();
     uint32_t columns = IsValid(sizeType) ? columns_[sizeType] : 0;
+    columns = columns > 0 ? columns : columns_[GridSizeType::UNDEFINED];
     return (columns <= 0) ? 0.0 : GetWidth(columns);
 }
 
@@ -67,7 +68,7 @@ double GridColumnInfo::GetMaxWidth() const
             columns = columns_[sizeType];
         }
     }
-
+    columns = columns > 0 ? columns : columns_[GridSizeType::UNDEFINED];
     return GetWidth(columns);
 }
 
