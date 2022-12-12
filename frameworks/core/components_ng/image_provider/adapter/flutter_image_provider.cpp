@@ -180,13 +180,13 @@ void ImageProvider::MakeCanvasImageHelper(const WeakPtr<ImageObject>& objWp, con
     const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder, bool forceResize, bool sync)
 {
     auto obj = objWp.Upgrade();
-    CHECK_NULL_VOID(obj && renderTaskHolder);
+    CHECK_NULL_VOID(obj && obj->GetData() && renderTaskHolder);
     auto flutterRenderTaskHolder = DynamicCast<FlutterRenderTaskHolder>(renderTaskHolder);
     CHECK_NULL_VOID(flutterRenderTaskHolder);
-    CHECK_NULL_VOID_NOLOG(ImageProvider::PrepareImageData(obj, loadCallbacks.loadFailCallback_, sync));
+    CHECK_NULL_VOID_NOLOG(ImageProvider::PrepareImageData(obj));
     // resize image
     auto skiaImageData = DynamicCast<SkiaImageData>(obj->GetData());
-    CHECK_NULL_VOID(skiaImageData && skiaImageData->GetSkData());
+    CHECK_NULL_VOID(skiaImageData && skiaImageData->GetSkData().get());
     auto rawImage = SkImage::MakeFromEncoded(skiaImageData->GetSkData());
     if (!rawImage) {
         std::string errorMessage(
@@ -215,6 +215,7 @@ void ImageProvider::MakeCanvasImageHelper(const WeakPtr<ImageObject>& objWp, con
     CHECK_NULL_VOID(flutterCanvasImage);
     flutterCanvasImage->set_image(std::move(skiaGpuObjSkImage));
     auto canvasImage = CanvasImage::Create(&flutterCanvasImage);
+    CHECK_NULL_VOID(canvasImage);
     ImageProvider::CacheCanvasImage(canvasImage, GenerateCacheKey(obj->GetSourceInfo(), resizeTarget));
 #endif
     // upload
