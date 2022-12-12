@@ -78,6 +78,7 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
 {
     auto containerTitleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    containerTitleRow->UpdateInspectorId("ContainerModalTitleRow");
     auto layoutProperty = containerTitleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     layoutProperty->UpdateUserDefinedIdealSize(
