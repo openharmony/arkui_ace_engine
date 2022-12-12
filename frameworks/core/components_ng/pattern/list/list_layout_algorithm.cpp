@@ -55,7 +55,7 @@ void ListLayoutAlgorithm::UpdateListItemConstraint(
 
 void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    if (overScrollFeature_ && !layoutWrapper->CheckChildNeedForceMeasureAndLayout()) {
+    if (overScrollFeature_ && !layoutWrapper->CheckChildNeedForceMeasureAndLayout() && !HasItemGroup()) {
         LOGD("in over scroll case");
         return;
     }
@@ -202,7 +202,7 @@ void ListLayoutAlgorithm::MeasureList(
             }
         }
     }
-    GetHeaderFooterGroupNode(layoutWrapper);
+    CreateItemGroupList(layoutWrapper);
 }
 
 int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
@@ -254,6 +254,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
 {
     float currentEndPos = startPos;
     float currentStartPos = 0.0f;
+    float endMainPos = overScrollFeature_ ? startPos + contentMainSize_ : endMainPos_;
     auto currentIndex = startIndex - 1;
     do {
         currentStartPos = currentEndPos;
@@ -267,14 +268,13 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
         }
         LOGD("LayoutForward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
-    } while (LessNotEqual(currentEndPos, endMainPos_ + paddingAfterContent_));
+    } while (LessNotEqual(currentEndPos, endMainPos + paddingAfterContent_));
 
     if (overScrollFeature_) {
         LOGD("during over scroll, just return in LayoutForward");
         return;
     }
 
-    bool normalToOverScroll = false;
     // adjust offset.
     if (LessNotEqual(currentEndPos, endMainPos_) && !itemPosition_.empty()) {
         auto firstItemTop = itemPosition_.begin()->second.startPos;
@@ -293,17 +293,10 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
             if (!canOverScroll_ || jumpIndex_.has_value()) {
                 currentOffset_ = currentEndPos - contentMainSize_;
                 LOGD("LayoutForward: adjust offset to %{public}f", currentOffset_);
-                startMainPos_ = currentOffset_;
-                endMainPos_ = currentEndPos;
-            } else {
-                normalToOverScroll = true;
             }
+            startMainPos_ = currentEndPos - contentMainSize_;
+            endMainPos_ = currentEndPos;
         }
-    }
-
-    if (normalToOverScroll) {
-        LOGD("in normal status to overScroll state, ignore inactive operation in LayoutForward");
-        return;
     }
 
     // Mark inactive in wrapper.
@@ -322,6 +315,7 @@ void ListLayoutAlgorithm::LayoutBackward(
 {
     float currentStartPos = endPos;
     float currentEndPos = 0.0f;
+    float startMainPos = overScrollFeature_ ? endPos - contentMainSize_ : startMainPos_;
     auto currentIndex = endIndex + 1;
     do {
         currentEndPos = currentStartPos;
@@ -335,29 +329,22 @@ void ListLayoutAlgorithm::LayoutBackward(
         }
         LOGD("LayoutBackward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
-    } while (GreatNotEqual(currentStartPos, startMainPos_ - paddingBeforeContent_));
+    } while (GreatNotEqual(currentStartPos, startMainPos - paddingBeforeContent_));
 
     if (overScrollFeature_) {
         LOGD("during over scroll, just return in LayoutBackward");
         return;
     }
 
-    bool normalToOverScroll = false;
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
     if (GreatNotEqual(currentStartPos, startMainPos_)) {
         if (!canOverScroll_ || jumpIndex_.has_value()) {
             currentOffset_ = currentStartPos;
-            endMainPos_ = currentOffset_ + contentMainSize_;
-            startMainPos_ = currentStartPos;
-        } else {
-            normalToOverScroll = true;
         }
+        endMainPos_ = currentStartPos + contentMainSize_;
+        startMainPos_ = currentStartPos;
     }
 
-    if (normalToOverScroll) {
-        LOGD("in normal status to overScroll state, ignore inactive operation in LayoutBackward");
-        return;
-    }
     // Mark inactive in wrapper.
     std::list<int32_t> removeIndexes;
     for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
@@ -380,9 +367,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
-    auto left = padding.left.value_or(0.0f);
-    auto top = padding.top.value_or(0.0f);
-    auto paddingOffset = OffsetF(left, top);
+    auto paddingOffset = padding.Offset();
     float crossSize = GetCrossAxisSize(size, axis);
     totalItemCount_ = layoutWrapper->GetTotalChildCount();
     listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
@@ -460,21 +445,22 @@ void ListLayoutAlgorithm::SetListItemGroupProperty(const RefPtr<ListItemGroupLay
     itemGroup->UpdateListMainSize(contentMainSize_);
 }
 
-void ListLayoutAlgorithm::GetHeaderFooterGroupNode(LayoutWrapper* layoutWrapper)
+void ListLayoutAlgorithm::CreateItemGroupList(LayoutWrapper* layoutWrapper)
 {
-    if (!itemPosition_.empty() && stickyStyle_ != V2::StickyStyle::NONE) {
-        if (itemPosition_.begin()->second.isGroup) {
-            auto headerWrapper = layoutWrapper->GetOrCreateChildByIndex(itemPosition_.begin()->first);
-            if (headerWrapper) {
-                headerGroupNode_ = headerWrapper->GetWeakHostNode();
-            }
-        }
-        if (itemPosition_.size() > 1 && itemPosition_.rbegin()->second.isGroup) {
-            auto footerWrapper = layoutWrapper->GetOrCreateChildByIndex(itemPosition_.rbegin()->first);
-            if (footerWrapper) {
-                footerGroupNode_ = footerWrapper->GetWeakHostNode();
+    itemGroupList_.clear();
+    if (stickyStyle_ != V2::StickyStyle::NONE) {
+        for (const auto& item : itemPosition_) {
+            if (item.second.isGroup) {
+                auto wrapper = layoutWrapper->GetOrCreateChildByIndex(item.first);
+                itemGroupList_.push_back(wrapper->GetWeakHostNode());
             }
         }
     }
+}
+
+bool ListLayoutAlgorithm::HasItemGroup()
+{
+    return std::any_of(itemPosition_.begin(), itemPosition_.end(),
+        [](const auto& item) { return item.second.isGroup; });
 }
 } // namespace OHOS::Ace::NG

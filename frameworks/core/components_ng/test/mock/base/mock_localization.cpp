@@ -40,6 +40,11 @@ const std::string Localization::FormatDateTime(DateTime dateTime, const std::str
     return "08:00:00";
 }
 
+const std::string Localization::FormatDateTime(DateTime dateTime, DateTimeStyle dateStyle, DateTimeStyle timeStyle)
+{
+    return "08:00:00";
+}
+
 std::string Localization::GetEntryLetters(const std::string& lettersIndex)
 {
     return "";
@@ -53,5 +58,27 @@ std::string Localization::GetErrorDescription(const std::string& errorIndex)
 const std::string Localization::FormatDuration(uint32_t duration, bool needShowHour)
 {
     return "08:00:00";
+}
+
+std::vector<std::string> Localization::GetMonths(bool isShortType, const std::string& calendarType)
+{
+    std::vector<std::string> months;
+    return months;
+}
+
+std::string Localization::GetLunarMonth(uint32_t month, bool isLeapMonth)
+{
+    return "";
+}
+
+std::string Localization::GetLunarDay(uint32_t dayOfMonth)
+{
+    return "";
+}
+
+LunarDate Localization::GetLunarDate(Date date)
+{
+    LunarDate dateRet;
+    return dateRet;
 }
 } // namespace OHOS::Ace

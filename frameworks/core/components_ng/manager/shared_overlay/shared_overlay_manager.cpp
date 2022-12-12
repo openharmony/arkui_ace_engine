@@ -333,7 +333,6 @@ bool SharedOverlayManager::OnBackPressed()
             break;
         }
     }
-    ClearAllEffects();
     return inSharedTransition;
 }
 

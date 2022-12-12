@@ -41,6 +41,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     auto pagePattern = page->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
     page->GetEventHub<EventHub>()->SetEnabled(false);
+    pagePattern->SetPageInTransition(true);
     if (transitionType == PageTransitionType::EXIT_PUSH || transitionType == PageTransitionType::EXIT_POP) {
         pagePattern->TriggerPageTransition(transitionType, [page, instanceId = Container::CurrentId()]() {
             ContainerScope scope(instanceId);
@@ -49,15 +50,22 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             page->GetEventHub<EventHub>()->SetEnabled(true);
             auto pattern = page->GetPattern<PagePattern>();
             CHECK_NULL_VOID(pattern);
-            pattern->OnHide();
+            pattern->SetPageInTransition(false);
         });
+        pagePattern->ProcessHideState();
         return;
     }
-    pagePattern->TriggerPageTransition(transitionType, [weak = WeakPtr<FrameNode>(page)]() {
-        auto page = weak.Upgrade();
-        CHECK_NULL_VOID(page);
-        page->GetEventHub<EventHub>()->SetEnabled(true);
-    });
+    pagePattern->TriggerPageTransition(
+        transitionType, [weak = WeakPtr<FrameNode>(page), instanceId = Container::CurrentId()]() {
+            ContainerScope scope(instanceId);
+            LOGI("pageTransition in finish");
+            auto page = weak.Upgrade();
+            CHECK_NULL_VOID(page);
+            page->GetEventHub<EventHub>()->SetEnabled(true);
+            auto pattern = page->GetPattern<PagePattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetPageInTransition(false);
+        });
 }
 
 void StartTransition(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage, RouteType type)
@@ -262,8 +270,11 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
+    pagePattern->OnHide();
     if (transitionType == PageTransitionType::NONE) {
-        pagePattern->OnHide();
+        // If there is a page transition, this function should execute after page transition,
+        // otherwise the page will not be visible
+        pagePattern->ProcessHideState();
     }
 
     auto pageFocusHub = pageNode->GetFocusHub();
@@ -275,14 +286,15 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
     context->SetIsNeedShowFocus(false);
 }
 
-void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType /* transitionType */)
+void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType)
 {
     auto pageNode = DynamicCast<FrameNode>(node);
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    pageNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     pagePattern->OnShow();
+    // With or without a page transition, we need to make the coming page visible first
+    pagePattern->ProcessShowState();
 
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);

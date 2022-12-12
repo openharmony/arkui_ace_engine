@@ -53,6 +53,7 @@ constexpr int32_t DEFAULT_FONT_SIZE = 16;
 constexpr int32_t DEFAULT_MINIMUM_FONT_SIZE = 8;
 const std::string DEFAULT_CURSIVE_FONT_FAMILY = "cursive";
 const std::string DEFAULT_FANTASY_FONT_FAMILY = "fantasy";
+const std::string DEFAULT_FIXED_fONT_FAMILY = "monospace";
 const std::string DEFAULT_SANS_SERIF_FONT_FAMILY = "sans-serif";
 const std::string DEFAULT_SERIF_FONT_FAMILY = "serif";
 const std::string DEFAULT_STANDARD_FONT_FAMILY = "sans-serif";

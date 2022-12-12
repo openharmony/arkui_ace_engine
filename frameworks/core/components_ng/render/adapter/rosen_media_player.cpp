@@ -83,7 +83,10 @@ RosenMediaPlayer::~RosenMediaPlayer()
 
 void RosenMediaPlayer::CreateMediaPlayer()
 {
-    CHECK_NULL_VOID(!mediaPlayer_);
+    if (mediaPlayer_) {
+        LOGE("CreateMediaPlayer has exist");
+        return;
+    }
     mediaPlayer_ = OHOS::Media::PlayerFactory::CreatePlayer();
     CHECK_NULL_VOID(mediaPlayer_);
 }

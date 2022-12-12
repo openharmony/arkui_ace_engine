@@ -41,6 +41,11 @@ public:
 
     virtual void MoveTo(float xs, float ys) {}
     virtual void LineTo(float xs, float ys) {}
+    virtual void AddCircle(
+        float dx, float dy, float radius, TestingPathDirection dir = TestingPathDirection::CW_DIRECTION)
+    {}
+    virtual void Reset() {}
+    virtual void Close() {}
     virtual void QuadTo(float ctrlPtX, float ctrlPtY, float endPtX, float endPtY) {}
     virtual void ArcTo(float rx, float ry, float angle, TestingPathDirection direction, float endX, float endY) {}
 };

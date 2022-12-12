@@ -978,7 +978,7 @@ HWTEST_F(ListPatternTestNg, ListTest013, TestSize.Level1)
 
 /**
  * @tc.name: ListTest014
- * @tc.desc: Test list GetHeaderFooterGroupNode function. Only have head and foot.
+ * @tc.desc: Test list CreateItemGroupList function. Only have head and foot.
  * @tc.type: FUNC
  */
 HWTEST_F(ListPatternTestNg, ListTest014, TestSize.Level1)
@@ -1043,9 +1043,10 @@ HWTEST_F(ListPatternTestNg, ListTest014, TestSize.Level1)
     listLayoutAlgorithm.itemPosition_.begin()->second.isGroup = true;
     listLayoutAlgorithm.itemPosition_.rbegin()->second.isGroup = true;
     listLayoutAlgorithm.stickyStyle_ = V2::StickyStyle::HEADER;
-    listLayoutAlgorithm.GetHeaderFooterGroupNode(&layoutWrapper);
-    EXPECT_NE(listLayoutAlgorithm.headerGroupNode_.Upgrade(), nullptr);
-    EXPECT_NE(listLayoutAlgorithm.footerGroupNode_.Upgrade(), nullptr);
+    listLayoutAlgorithm.CreateItemGroupList(&layoutWrapper);
+    auto& itemGroupList = listLayoutAlgorithm.GetItemGroupList();
+    EXPECT_NE(itemGroupList.begin()->Upgrade(), nullptr);
+    EXPECT_NE(itemGroupList.rbegin()->Upgrade(), nullptr);
 }
 
 /**
@@ -2678,8 +2679,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest008, TestSize.Level1)
      * @tc.expected: step2. equal.
      */
     WeakPtr<FrameNode> weak = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    listPattern->headerGroupNode_ = weak;
-    listPattern->footerGroupNode_ = weak;
+    listPattern->itemGroupList_.push_back(weak);
     listPattern->scrollState_ = SCROLL_FROM_BAR;
     result = listPattern->UpdateCurrentOffset(0);
     EXPECT_NE(result, false);
@@ -2776,7 +2776,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest009, TestSize.Level1)
 
 /**
  * @tc.name: ListPatternTest010
- * @tc.desc: Test list pattern SetScrollEdgeEffect function
+ * @tc.desc: Test list pattern SetEdgeEffect function
  * @tc.type: FUNC
  */
 HWTEST_F(ListPatternTestNg, ListPatternTest010, TestSize.Level1)
@@ -2797,24 +2797,46 @@ HWTEST_F(ListPatternTestNg, ListPatternTest010, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
     RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     EXPECT_NE(listPattern, nullptr);
-    RefPtr<ScrollEdgeEffect> scrollEffect;
 
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    auto listEventHub = AceType::DynamicCast<ListEventHub>(eventHub);
+    EXPECT_NE(listEventHub, nullptr);
+    auto gestureHub = listEventHub->GetOrCreateGestureEventHub();
+    EXPECT_NE(gestureHub, nullptr);
     /**
      * @tc.steps: step2. call function
-     * @tc.steps: case1: scrollEffect is nullptr
-     * @tc.expected: step2. equal.
+     * @tc.steps: case1: EdgeEffect is NONE
+     * @tc.expected: step2. scrollEffect_ is nullptr.
      */
-    listPattern->SetScrollEdgeEffect(nullptr);
-    EXPECT_NE(listPattern->scrollEffect_, nullptr);
+    listPattern->SetEdgeEffect(gestureHub, EdgeEffect::NONE);
+    EXPECT_EQ(listPattern->scrollEffect_, nullptr);
 
     /**
      * @tc.steps: step2. call function
      * @tc.steps: case2: have scrollEffect, FADE
-     * @tc.expected: step2. equal.
+     * @tc.expected: step2. EdgeEffect is Fade.
      */
-    scrollEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::FADE);
-    listPattern->SetScrollEdgeEffect(scrollEffect);
-    EXPECT_NE(listPattern->scrollEffect_, false);
+    listPattern->SetEdgeEffect(gestureHub, EdgeEffect::FADE);
+    EXPECT_NE(listPattern->scrollEffect_, nullptr);
+    EXPECT_EQ(listPattern->scrollEffect_->IsFadeEffect(), true);
+
+    /**
+     * @tc.steps: step3. call function
+     * @tc.steps: case3: have scrollEffect, SPRING
+     * @tc.expected: step3. EdgeEffect is Spring.
+     */
+    listPattern->SetEdgeEffect(gestureHub, EdgeEffect::SPRING);
+    EXPECT_NE(listPattern->scrollEffect_, nullptr);
+    EXPECT_EQ(listPattern->scrollEffect_->IsSpringEffect(), true);
+
+    /**
+     * @tc.steps: step4. call function
+     * @tc.steps: case4: have scrollEffect, FADE
+     * @tc.expected: step4. IsFadeEffect is nullptr.
+     */
+    listPattern->SetEdgeEffect(gestureHub, EdgeEffect::NONE);
+    EXPECT_EQ(listPattern->scrollEffect_, nullptr);
 }
 
 /**

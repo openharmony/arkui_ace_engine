@@ -60,6 +60,9 @@ public:
 
     bool OnBackPressed() const
     {
+        if (isPageInTransition_) {
+            return true;
+        }
         if (OnBackPressed_) {
             return OnBackPressed_();
         }
@@ -121,14 +124,19 @@ public:
 
     void SetFirstBuildCallback(std::function<void()>&& buildCallback);
 
+    void SetPageInTransition(bool pageTransition)
+    {
+        isPageInTransition_ = pageTransition;
+    }
+
+    // Mark current page node invisible in render tree.
+    void ProcessHideState();
+    // Mark current page node visible in render tree.
+    void ProcessShowState();
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
-
-    // Mark current page node inactive state to show in render tree.
-    void ProcessHideState();
-    // Mark current page node active state to show in render tree.
-    void ProcessShowState();
 
     RefPtr<PageInfo> pageInfo_;
 
@@ -141,6 +149,7 @@ private:
 
     bool isOnShow_ = false;
     bool isFirstLoad_ = true;
+    bool isPageInTransition_ = false;
 
     SharedTransitionMap sharedTransitionMap_;
     JSAnimatorMap jsAnimatorMap_;

@@ -80,6 +80,7 @@ void PagePattern::ProcessHideState()
     CHECK_NULL_VOID(host);
     host->SetActive(false);
     host->OnVisibleChange(false);
+    host->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
@@ -92,6 +93,7 @@ void PagePattern::ProcessShowState()
     CHECK_NULL_VOID(host);
     host->SetActive(true);
     host->OnVisibleChange(true);
+    host->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
@@ -100,11 +102,8 @@ void PagePattern::ProcessShowState()
 
 void PagePattern::OnShow()
 {
-    if (isOnShow_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!isOnShow_);
     isOnShow_ = true;
-    ProcessShowState();
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     if (onPageShow_) {
@@ -114,11 +113,8 @@ void PagePattern::OnShow()
 
 void PagePattern::OnHide()
 {
-    if (!isOnShow_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(isOnShow_);
     isOnShow_ = false;
-    ProcessHideState();
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     if (onPageHide_) {

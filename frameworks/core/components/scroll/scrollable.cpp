@@ -345,6 +345,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         if (scrollEndCallback_) {
             scrollEndCallback_();
         }
+        currentVelocity_ = 0.0;
         return;
     }
     if (outBoundaryCallback_ && outBoundaryCallback_() && scrollOverCallback_) {

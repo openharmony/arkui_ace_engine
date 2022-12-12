@@ -15,18 +15,13 @@
 
 #include "gtest/gtest.h"
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "textfield_test_ng_utils.h"
 #define private public
 #define protected public
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "textfield_test_ng_utils.h"
 #undef private
 #undef protected
 
@@ -381,5 +376,217 @@ HWTEST_F(TextFieldPatternTestNg, GetTextOrPlaceHolderFontSize001, TestSize.Level
     }
     auto size = textFieldPattern->GetTextOrPlaceHolderFontSize();
     EXPECT_EQ(size, 0.0f);
+}
+
+/**
+ * @tc.name: UpdateCaretPosition001
+ * @tc.desc: test UpdateCaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition001, TestSize.Level1)
+{
+    auto textFieldPattern = GetTextFieldPattern();
+    if (!textFieldPattern) {
+        EXPECT_FALSE(textFieldPattern == nullptr);
+        return;
+    }
+    host_->GetOrCreateFocusHub()->currentFocus_ = true;
+    textFieldPattern->SetCaretUpdateType(CaretUpdateType::INPUT);
+    EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
+}
+
+/**
+ * @tc.name: UpdateCaretPosition002
+ * @tc.desc: test UpdateCaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition002, TestSize.Level1)
+{
+    auto textFieldPattern = GetTextFieldPattern();
+    if (!textFieldPattern) {
+        EXPECT_FALSE(textFieldPattern == nullptr);
+        return;
+    }
+    host_->GetOrCreateFocusHub()->currentFocus_ = true;
+    textFieldPattern->SetCaretUpdateType(CaretUpdateType::PRESSED);
+    EXPECT_TRUE(textFieldPattern->UpdateCaretPosition());
+    textFieldPattern->SetCaretUpdateType(CaretUpdateType::LONG_PRESSED);
+    EXPECT_TRUE(textFieldPattern->UpdateCaretPosition());
+}
+
+/**
+ * @tc.name: UpdateCaretPosition003
+ * @tc.desc: test UpdateCaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition003, TestSize.Level1)
+{
+    auto textFieldPattern = GetTextFieldPattern();
+    if (!textFieldPattern) {
+        EXPECT_FALSE(textFieldPattern == nullptr);
+        return;
+    }
+    host_->GetOrCreateFocusHub()->currentFocus_ = true;
+    textFieldPattern->SetCaretUpdateType(CaretUpdateType::NONE);
+    EXPECT_TRUE(textFieldPattern->UpdateCaretPosition());
+    textFieldPattern->SetCaretUpdateType(CaretUpdateType::NONE);
+    EXPECT_TRUE(textFieldPattern->UpdateCaretPosition());
+}
+
+/**
+ * @tc.name: UpdateCaretPosition004
+ * @tc.desc: test UpdateCaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition004, TestSize.Level1)
+{
+    auto textFieldPattern = GetTextFieldPattern();
+    if (!textFieldPattern) {
+        EXPECT_FALSE(textFieldPattern == nullptr);
+        return;
+    }
+    host_->GetOrCreateFocusHub()->currentFocus_ = true;
+    textFieldPattern->SetCaretUpdateType(CaretUpdateType::PRESSED);
+    EXPECT_TRUE(textFieldPattern->UpdateCaretPosition());
+    textFieldPattern->SetCaretUpdateType(CaretUpdateType::LONG_PRESSED);
+    EXPECT_TRUE(textFieldPattern->UpdateCaretPosition());
+}
+
+/**
+ * @tc.name: UpdateCaretPosition005
+ * @tc.desc: test UpdateCaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition005, TestSize.Level2)
+{
+    auto textFieldPattern = GetTextFieldPattern();
+    if (!textFieldPattern) {
+        EXPECT_FALSE(textFieldPattern == nullptr);
+        return;
+    }
+    EXPECT_TRUE(textFieldPattern->UpdateCaretPosition());
+    host_->GetOrCreateFocusHub()->currentFocus_ = true;
+    textFieldPattern->SetCaretUpdateType(CaretUpdateType::DEL);
+    EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
+}
+
+/**
+ * @tc.name: IsTextArea001
+ * @tc.desc: test IsTextArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, IsTextArea001, TestSize.Level1)
+{
+    auto textFieldPattern = GetTextFieldPattern();
+    if (!textFieldPattern) {
+        EXPECT_FALSE(textFieldPattern == nullptr);
+        return;
+    }
+    auto layoutProperty = GetLayoutPropertyFromHost(textFieldPattern);
+    if (!layoutProperty) {
+        EXPECT_FALSE(layoutProperty == nullptr);
+        return;
+    }
+    EXPECT_FALSE(textFieldPattern->IsTextArea());
+    layoutProperty->UpdateMaxLines(1);
+    EXPECT_FALSE(textFieldPattern->IsTextArea());
+    layoutProperty->UpdateMaxLines(2);
+    EXPECT_TRUE(textFieldPattern->IsTextArea());
+}
+
+/**
+ * @tc.name: UpdateDestinationToCaretByEvent001
+ * @tc.desc: test UpdateDestinationToCaretByEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateDestinationToCaretByEvent001, TestSize.Level1)
+{
+    auto textFieldPattern = GetTextFieldPattern();
+    if (!textFieldPattern) {
+        EXPECT_FALSE(textFieldPattern == nullptr);
+        return;
+    }
+    textFieldPattern->isMousePressed_ = true;
+    textFieldPattern->UpdateEditingValue(TEXT_VALUE, static_cast<int32_t>(TEXT_VALUE.size()));
+    textFieldPattern->UpdateDestinationToCaretByEvent();
+    EXPECT_EQ(textFieldPattern->GetSelectMode(), SelectionMode::SELECT);
+}
+
+/**
+ * @tc.name: UpdateCaretOffsetByLastTouchOffset001
+ * @tc.desc: test UpdateCaretOffsetByLastTouchOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateCaretOffsetByLastTouchOffset001, TestSize.Level1)
+{
+    auto textFieldPattern = GetTextFieldPattern();
+    if (!textFieldPattern) {
+        EXPECT_FALSE(textFieldPattern == nullptr);
+        return;
+    }
+    SizeF contentSize(730.0, 160.0);
+    SizeF textSize(720.0, 150.0);
+    textFieldPattern->contentRect_.Reset();
+    textFieldPattern->textRect_.Reset();
+    textFieldPattern->caretRect_.Reset();
+    textFieldPattern->contentRect_.SetSize(contentSize);
+    textFieldPattern->textRect_.SetSize(textSize);
+    textFieldPattern->InitEditingValueText(TEXT_VALUE);
+    textFieldPattern->lastTouchOffset_ = Offset(725.0, 0.0);
+    textFieldPattern->UpdateCaretOffsetByLastTouchOffset();
+    EXPECT_EQ(textFieldPattern->GetTextEditingValue().caretPosition, TEXT_VALUE.length());
+    EXPECT_EQ(textFieldPattern->GetCaretOffsetX(), textSize.Width());
+}
+
+/**
+ * @tc.name: UpdateCaretOffsetByLastTouchOffset002
+ * @tc.desc: test UpdateCaretOffsetByLastTouchOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateCaretOffsetByLastTouchOffset002, TestSize.Level1)
+{
+    auto textFieldPattern = GetTextFieldPattern();
+    if (!textFieldPattern) {
+        EXPECT_FALSE(textFieldPattern == nullptr);
+        return;
+    }
+    SizeF contentSize(730.0, 160.0);
+    SizeF textSize(720.0, 150.0);
+    OffsetF textOffset(10.0, 0.0);
+    textFieldPattern->contentRect_.Reset();
+    textFieldPattern->textRect_.Reset();
+    textFieldPattern->caretRect_.Reset();
+    textFieldPattern->contentRect_.SetSize(contentSize);
+    textFieldPattern->textRect_.SetSize(textSize);
+    textFieldPattern->textRect_.SetOffset(textOffset);
+    textFieldPattern->InitEditingValueText(TEXT_VALUE);
+    textFieldPattern->UpdateCaretOffsetByLastTouchOffset();
+    EXPECT_EQ(textFieldPattern->GetTextEditingValue().caretPosition, 0);
+    EXPECT_EQ(textFieldPattern->GetCaretOffsetX(), textOffset.GetX());
+}
+
+/**
+ * @tc.name: UpdateCaretOffsetByLastTouchOffset003
+ * @tc.desc: test UpdateCaretOffsetByLastTouchOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateCaretOffsetByLastTouchOffset003, TestSize.Level2)
+{
+    auto textFieldPattern = GetTextFieldPattern();
+    if (!textFieldPattern) {
+        EXPECT_FALSE(textFieldPattern == nullptr);
+        return;
+    }
+    SizeF contentSize(710.0, 160.0);
+    SizeF textSize(720.0, 150.0);
+    textFieldPattern->contentRect_.Reset();
+    textFieldPattern->textRect_.Reset();
+    textFieldPattern->caretRect_.Reset();
+    textFieldPattern->contentRect_.SetSize(contentSize);
+    textFieldPattern->textRect_.SetSize(textSize);
+    textFieldPattern->InitEditingValueText(TEXT_VALUE);
+    textFieldPattern->UpdateCaretOffsetByLastTouchOffset();
+    EXPECT_EQ(textFieldPattern->GetTextEditingValue().caretPosition, 0);
+    EXPECT_EQ(textFieldPattern->GetCaretOffsetX(), 0.0);
 }
 } // namespace OHOS::Ace::NG

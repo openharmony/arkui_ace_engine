@@ -47,6 +47,7 @@ public:
     using Method = std::string;
     using SetWebIdCallback = std::function<void(int32_t)>;
     using JsProxyCallback = std::function<void()>;
+    using PreKeyEventCallback = std::function<bool(KeyEventInfo& keyEventInfo)>;
 
     WebComponent() = default;
     explicit WebComponent(const std::string& type);
@@ -840,6 +841,16 @@ public:
         }
     }
 
+    void SetOnInterceptKeyEventCallback(const PreKeyEventCallback& onPreKeyEventId)
+    {
+        onPreKeyEvent_ = onPreKeyEventId;
+    }
+
+    PreKeyEventCallback GetOnInterceptKeyEventCallback() const
+    {
+        return onPreKeyEvent_;
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
@@ -898,6 +909,7 @@ private:
     OnDropFunc onDragLeaveId_;
     OnDropFunc onDropId_;
     bool isPinchSmoothModeEnabled_ = false;
+    PreKeyEventCallback onPreKeyEvent_;
 };
 
 } // namespace OHOS::Ace
