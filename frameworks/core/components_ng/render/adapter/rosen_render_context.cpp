@@ -273,17 +273,17 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
 
 void RosenRenderContext::PaintBackground()
 {
-    CHECK_NULL_VOID(GetBackground() && GetBackground()->GetBackgroundImage());
     auto image = DynamicCast<SkiaCanvasImage>(bgImage_);
     CHECK_NULL_VOID(bgLoadingCtx_ && image);
-    auto skImage = image->GetCanvasImage();
-    CHECK_NULL_VOID(skImage);
 
     auto rosenImage = std::make_shared<Rosen::RSImage>();
-    rosenImage->SetImage(skImage);
     auto compressData = image->GetCompressData();
-    rosenImage->SetCompressData(
-        compressData, image->GetUniqueID(), image->GetCompressWidth(), image->GetCompressHeight());
+    if (compressData) {
+        rosenImage->SetCompressData(
+            compressData, image->GetUniqueID(), image->GetCompressWidth(), image->GetCompressHeight());
+    } else {
+        rosenImage->SetImage(image->GetCanvasImage());
+    }
     rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
     rsNode_->SetBgImage(rosenImage);
 
