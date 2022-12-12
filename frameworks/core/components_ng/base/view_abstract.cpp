@@ -607,6 +607,12 @@ void ViewAbstract::BindPopup(
         SubwindowManager::GetInstance()->ShowPopupNG(targetId, popupInfo);
         return;
     }
+    auto destroyCallback = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager)), targetId]() {
+        auto overlay = weakOverlayManger.Upgrade();
+        CHECK_NULL_VOID(overlay);
+        overlay->ErasePopup(targetId);
+    };
+    targetNode->PushDestroyCallback(destroyCallback);
     overlayManager->UpdatePopupNode(targetId, popupInfo);
 }
 
