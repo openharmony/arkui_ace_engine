@@ -27,7 +27,6 @@ class GridElement : public RenderElement, public FocusGroup, public FlushEvent, 
     DECLARE_ACE_TYPE(GridElement, RenderElement, FocusGroup, FlushEvent);
 
 public:
-    void Update() override;
     void PerformBuild() override;
     bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
 
