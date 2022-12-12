@@ -1134,6 +1134,109 @@ public:
     WebWindowExitEvent() : BaseEventInfo("WebWindowExitEvent") {}
     ~WebWindowExitEvent() = default;
 };
+
+class ACE_EXPORT PageVisibleEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(PageVisibleEvent, BaseEventInfo);
+
+public:
+    PageVisibleEvent(const std::string& url)
+        : BaseEventInfo("PageVisibleEvent"), url_(url)
+    {}
+
+    ~PageVisibleEvent() = default;
+
+    const std::string& GetUrl() const
+    {
+        return url_;
+    }
+
+private:
+    std::string url_;
+};
+
+class ACE_EXPORT DataResubmitted : public AceType {
+    DECLARE_ACE_TYPE(DataResubmitted, AceType)
+
+public:
+    DataResubmitted() = default;
+    ~DataResubmitted() = default;
+
+    virtual void Resend() = 0;
+    virtual void Cancel() = 0;
+};
+
+class ACE_EXPORT DataResubmittedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(DataResubmittedEvent, BaseEventInfo);
+
+public:
+    DataResubmittedEvent(const RefPtr<DataResubmitted>& handler)
+        : BaseEventInfo("DataResubmittedEvent"), handler_(handler) {}
+    ~DataResubmittedEvent() = default;
+
+    const RefPtr<DataResubmitted>& GetHandler() const
+    {
+        return handler_;
+    }
+
+private:
+    RefPtr<DataResubmitted> handler_;
+};
+
+class ACE_EXPORT WebFaviconReceived : public AceType {
+    DECLARE_ACE_TYPE(WebFaviconReceived, AceType)
+
+public:
+    WebFaviconReceived() = default;
+    ~WebFaviconReceived() = default;
+
+    virtual const void* GetData() = 0;
+    virtual size_t GetWidth() = 0;
+    virtual size_t GetHeight() = 0;
+    virtual int GetColorType() = 0;
+    virtual int GetAlphaType() = 0;
+};
+
+class ACE_EXPORT FaviconReceivedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(FaviconReceivedEvent, BaseEventInfo);
+
+public:
+    FaviconReceivedEvent(const RefPtr<WebFaviconReceived>& handler)
+        : BaseEventInfo("FaviconReceivedEvent"), handler_(handler) {}
+    ~FaviconReceivedEvent() = default;
+
+    const RefPtr<WebFaviconReceived>& GetHandler() const
+    {
+        return handler_;
+    }
+
+private:
+    RefPtr<WebFaviconReceived> handler_;
+};
+
+class ACE_EXPORT TouchIconUrlEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(TouchIconUrlEvent, BaseEventInfo);
+
+public:
+    TouchIconUrlEvent(const std::string& iconUrl, bool precomposed)
+        : BaseEventInfo("TouchIconUrlEvent"), url_(iconUrl), precomposed_(precomposed)
+    {}
+
+    ~TouchIconUrlEvent() = default;
+
+    const std::string& GetUrl() const
+    {
+        return url_;
+    }
+
+    bool GetPreComposed() const
+    {
+        return precomposed_;
+    }
+
+private:
+    std::string url_;
+    bool precomposed_;
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_EVENT_H

@@ -435,6 +435,45 @@ int32_t WebWindowNewHandlerOhos::GetId() const
     return -1;
 }
 
+void DataResubmittedOhos::Resend()
+{
+    if (handler_) {
+        handler_->Resend();
+    }
+}
+
+void DataResubmittedOhos::Cancel()
+{
+    if (handler_) {
+        handler_->Cancel();
+    }
+}
+
+const void* FaviconReceivedOhos::GetData()
+{
+    return data_;
+}
+
+size_t FaviconReceivedOhos::GetWidth()
+{
+    return width_;
+}
+
+size_t FaviconReceivedOhos::GetHeight()
+{
+    return height_;
+}
+
+int FaviconReceivedOhos::GetColorType()
+{
+    return static_cast<int>(colorType_);
+}
+
+int FaviconReceivedOhos::GetAlphaType()
+{
+    return static_cast<int>(alphaType_);
+}
+
 WebDelegate::~WebDelegate()
 {
     ReleasePlatformResource();
@@ -1461,6 +1500,8 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onWindowExitV2_ = useNewPipe ? eventHub->GetOnWindowExitEvent()
                                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                                 webCom->GetWindowExitEventId(), oldContext);
+        onPageVisibleV2_ = useNewPipe ? eventHub->GetOnPageVisibleEvent() : nullptr;
+        onTouchIconUrlV2_ = useNewPipe ? eventHub->GetOnTouchIconUrlEvent() : nullptr;
     }
     return true;
 }
@@ -1472,7 +1513,6 @@ void WebSurfaceCallback::OnSurfaceCreated(const sptr<OHOS::Surface>& surface)
 
 void WebSurfaceCallback::OnSurfaceChanged(const sptr<OHOS::Surface>& surface, int32_t width, int32_t height)
 {
-    LOGD("WebSurfaceCallback::OnSurfaceChanged");
     auto delegate = delegate_.Upgrade();
     if (!delegate) {
         LOGE("WebSurfaceCallback::OnSurfaceChanged get delegate fail");
@@ -2149,7 +2189,6 @@ std::string WebDelegate::GetCustomScheme()
 
 void WebDelegate::InitWebViewWithSurface()
 {
-    LOGI("Create webview with surface");
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -2610,6 +2649,25 @@ void WebDelegate::UpdateWebFantasyFont(const std::string& fantasyFontFamily)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdateWebFixedFont(const std::string& fixedFontFamily)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), fixedFontFamily]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutFixedFontFamilyName(fixedFontFamily);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::UpdateWebSansSerifFont(const std::string& sansSerifFontFamily)
 {
     auto context = context_.Upgrade();
@@ -2718,6 +2776,25 @@ void WebDelegate::UpdateMinFontSize(int32_t minFontSize)
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
                 if (setting) {
                     setting->PutFontSizeLowerLimit(minFontSize);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateBlockNetwork(bool isNetworkBlocked)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isNetworkBlocked]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutBlockNetwork(isNetworkBlocked);
                 }
             }
         },
@@ -3479,6 +3556,60 @@ void WebDelegate::OnWindowExit()
 {
     if (onWindowExitV2_) {
         onWindowExitV2_(std::make_shared<WebWindowExitEvent>());
+    }
+}
+
+void WebDelegate::OnPageVisible(const std::string& url)
+{
+    if (onPageVisibleV2_) {
+        onPageVisibleV2_(std::make_shared<PageVisibleEvent>(url));
+    }
+}
+
+void WebDelegate::OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler)
+{
+    auto param = std::make_shared<DataResubmittedEvent>(AceType::MakeRefPtr<DataResubmittedOhos>(handler));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnDataResubmittedEvent = webEventHub->GetOnDataResubmittedEvent();
+        CHECK_NULL_VOID(propOnDataResubmittedEvent);
+        propOnDataResubmittedEvent(param);
+        return;
+    }
+}
+
+void WebDelegate::OnFaviconReceived(
+    const void* data,
+    size_t width,
+    size_t height,
+    OHOS::NWeb::ImageColorType colorType,
+    OHOS::NWeb::ImageAlphaType alphaType)
+{
+    auto param = std::make_shared<FaviconReceivedEvent>(AceType::MakeRefPtr<FaviconReceivedOhos>(
+                     data,
+                     width,
+                     height,
+                     colorType,
+                     alphaType));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnFaviconReceivedEvent = webEventHub->GetOnFaviconReceivedEvent();
+        CHECK_NULL_VOID(propOnFaviconReceivedEvent);
+        propOnFaviconReceivedEvent(param);
+        return;
+    }
+}
+
+void WebDelegate::OnTouchIconUrl(const std::string& iconUrl, bool precomposed)
+{
+    if (onTouchIconUrlV2_) {
+        onTouchIconUrlV2_(std::make_shared<TouchIconUrlEvent>(iconUrl, precomposed));
     }
 }
 
