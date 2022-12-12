@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_FRAME_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_FRAME_NODE_H
 
+#include <functional>
 #include <list>
 #include <utility>
 
@@ -287,6 +288,11 @@ public:
 
     void OnVisibleChange(bool isVisible) override;
 
+    void PushDestroyCallback(std::function<void()>&& callback)
+    {
+        destroyCallbacks_.emplace_back(callback);
+    }
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
@@ -334,6 +340,8 @@ private:
     // sort in ZIndex.
     std::multiset<RefPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
+
+    std::list<std::function<void()>> destroyCallbacks_;
 
     RefPtr<AccessibilityProperty> accessibilityProperty_;
     RefPtr<LayoutProperty> layoutProperty_;
