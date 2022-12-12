@@ -49,7 +49,7 @@ ohos_unittest("full_screen_manager_test_ng") {
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
 
   deps = [
-    "$cjson_root:cjson_static",
+    "$cjson_root:cjson",
     "//third_party/googletest:gmock_main",
   ]
 

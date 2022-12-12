@@ -78,7 +78,7 @@ ohos_unittest("FocusTest") {
   ]
 
   deps = [
-    "$cjson_root:cjson_static",
+    "$cjson_root:cjson",
     "//third_party/googletest:gtest_main",
   ]
   if (is_standard_system) {

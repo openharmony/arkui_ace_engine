@@ -99,7 +99,7 @@ ohos_unittest("qrcode_pattern_test_ng") {
 
   deps = [
     "$ace_root:ace_test_log",
-    "$cjson_root:cjson_static",
+    "$cjson_root:cjson",
     "//foundation/arkui/ace_engine/frameworks/core/components/qrcode:qrcodegen",
     "//third_party/googletest:gmock_main",
   ]

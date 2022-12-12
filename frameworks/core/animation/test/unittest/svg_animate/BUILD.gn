@@ -214,7 +214,7 @@ ohos_unittest("SvgAnimateTest") {
   deps = [
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "$cjson_root:cjson_static",
+    "$cjson_root:cjson",
     "//third_party/googletest:gtest_main",
   ]
 
