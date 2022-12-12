@@ -1815,6 +1815,16 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     eventManager_->DispatchMouseEvent(scaleEvent);
     eventManager_->DispatchMouseHoverAnimation(scaleEvent);
     eventManager_->DispatchMouseHoverEvent(scaleEvent);
+#ifdef ENABLE_ROSEN_BACKEND
+    std::chrono::high_resolution_clock::duration epoch_time = event.time.time_since_epoch();
+    auto eventTimestamp = std::chrono::duration_cast<std::chrono::nanoseconds>(epoch_time);
+    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+        std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
+                                      ? AceApplicationInfo::GetInstance().GetPackageName()
+                                      : AceApplicationInfo::GetInstance().GetProcessName();
+        rsUIDirector_->SetTimeStamp(eventTimestamp.count(), abilityName);
+    }
+#endif
     FlushMessages();
 }
 
