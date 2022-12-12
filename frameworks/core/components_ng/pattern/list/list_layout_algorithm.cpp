@@ -254,7 +254,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
 {
     float currentEndPos = startPos;
     float currentStartPos = 0.0f;
-    float endMainPos = overScrollFeature_ ? startPos + contentMainSize_ : endMainPos_;
+    float endMainPos = overScrollFeature_ ? std::max(startPos + contentMainSize_, endMainPos_) : endMainPos_;
     auto currentIndex = startIndex - 1;
     do {
         currentStartPos = currentEndPos;
@@ -315,7 +315,7 @@ void ListLayoutAlgorithm::LayoutBackward(
 {
     float currentStartPos = endPos;
     float currentEndPos = 0.0f;
-    float startMainPos = overScrollFeature_ ? endPos - contentMainSize_ : startMainPos_;
+    float startMainPos = overScrollFeature_ ? std::min(endPos - contentMainSize_, startMainPos_) : startMainPos_;
     auto currentIndex = endIndex + 1;
     do {
         currentEndPos = currentStartPos;
