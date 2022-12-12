@@ -54,12 +54,14 @@ public:
         json->Put("style",
             SLIDER_MODE_TO_STRING.at(static_cast<int32_t>(GetSliderMode().value_or(SliderModel::SliderMode::OUTSET)))
                 .c_str());
+        json->Put("showTips", GetShowTips().value_or(false) ? "true" : "false");
     }
 
     ACE_DEFINE_PROPERTY_GROUP(SliderLayoutStyle, SliderLayoutStyle)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutStyle, Direction, Axis, PROPERTY_UPDATE_MEASURE)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutStyle, Thickness, Dimension, PROPERTY_UPDATE_MEASURE)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutStyle, SliderMode, SliderModel::SliderMode, PROPERTY_UPDATE_MEASURE)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutStyle, ShowTips, bool, PROPERTY_UPDATE_MEASURE)
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SliderLayoutProperty);
 };

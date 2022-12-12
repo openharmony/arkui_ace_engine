@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/video/video_pattern.h"
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
@@ -558,9 +559,8 @@ void VideoPattern::OnModifyDone()
     if (!hiddenChangeEvent_) {
         SetHiddenChangeEvent([weak = WeakClaim(this)](bool hidden) {
             auto videoPattern = weak.Upgrade();
-            if (videoPattern) {
-                videoPattern->HiddenChange(hidden);
-            }
+            CHECK_NULL_VOID_NOLOG(videoPattern);
+            videoPattern->HiddenChange(hidden);
         });
     }
     AddPreviewNodeIfNeeded();
@@ -709,7 +709,8 @@ RefPtr<FrameNode> VideoPattern::CreateControlBar()
 
     auto fullScreenButton = CreateSVG();
     CHECK_NULL_RETURN(fullScreenButton, nullptr);
-    ChangeFullScreenButtonTag(false, fullScreenButton);
+    SetFullScreenButtonCallBack(fullScreenButton);
+    ChangeFullScreenButtonTag(isFullScreen_, fullScreenButton);
     controlBar->AddChild(fullScreenButton);
 
     auto renderContext = controlBar->GetRenderContext();
@@ -805,7 +806,9 @@ RefPtr<FrameNode> VideoPattern::CreateSVG()
     auto btnSize = videoTheme->GetBtnSize();
     SizeF size { static_cast<float>(btnSize.Width()), static_cast<float>(btnSize.Height()) };
     svgLayoutProperty->UpdateMarginSelfIdealSize(size);
-    CalcSize idealSize = { CalcLength(btnSize.Width()), CalcLength(btnSize.Height()) };
+    auto width = Dimension(btnSize.Width(), DimensionUnit::VP).ConvertToPx();
+    auto height = Dimension(btnSize.Height(), DimensionUnit::VP).ConvertToPx();
+    CalcSize idealSize = { CalcLength(width), CalcLength(height) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     layoutConstraint.maxSize = idealSize;
@@ -882,7 +885,7 @@ void VideoPattern::Start()
         return;
     }
 
-    if (isStop_ && mediaPlayer_->Prepare() != 0) {
+    if (isStop_ && mediaPlayer_->PrepareAsync() != 0) {
         LOGE("Player has not prepared");
         return;
     }
@@ -987,10 +990,10 @@ void VideoPattern::ChangePlayButtonTag(RefPtr<FrameNode>& playBtn)
     playBtn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void VideoPattern::ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode>& fullScreenBtn)
+void VideoPattern::SetFullScreenButtonCallBack(RefPtr<FrameNode>& fullScreenBtn)
 {
     CHECK_NULL_VOID(fullScreenBtn);
-    auto fsClickCallback = [weak = WeakClaim(this), isFullScreen](GestureEvent& /*info*/) {
+    auto fsClickCallback = [weak = WeakClaim(this), &isFullScreen = isFullScreen_](GestureEvent& /* info */) {
         auto videoPattern = weak.Upgrade();
         CHECK_NULL_VOID(videoPattern);
         if (isFullScreen) {
@@ -1001,6 +1004,11 @@ void VideoPattern::ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode
     };
     auto fullScreenBtnEvent = fullScreenBtn->GetOrCreateGestureEventHub();
     fullScreenBtnEvent->SetUserOnClick(std::move(fsClickCallback));
+}
+
+void VideoPattern::ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode>& fullScreenBtn)
+{
+    CHECK_NULL_VOID(fullScreenBtn);
     auto svgLayoutProperty = fullScreenBtn->GetLayoutProperty<ImageLayoutProperty>();
     auto resourceId =
         isFullScreen ? InternalResource::ResourceId::QUIT_FULLSCREEN_SVG : InternalResource::ResourceId::FULLSCREEN_SVG;

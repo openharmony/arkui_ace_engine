@@ -30,17 +30,12 @@ public:
     ~ConnectServerManager();
     static ConnectServerManager& Get();
     void SetDebugMode();
-    void SetLayoutInspectorStatus(bool status)
-    {
-        layoutInspectorStatus_ = status;
-    }
-    bool GetlayoutInspectorStatus() const
-    {
-        return layoutInspectorStatus_;
-    }
     void AddInstance(int32_t instanceId, const std::string& instanceName = "PandaDebugger");
     void SendInspector(const std::string& jsonTreeStr, const std::string& jsonSnapshotStr);
     void RemoveInstance(int32_t instanceId);
+    void SetLayoutInspectorCallback(
+        const std::function<void(int32_t)>& createLayoutInfo, const std::function<void(bool)>& setStatus);
+    std::function<void(int32_t)> GetLayoutInspectorCallback();
 
 private:
     ConnectServerManager();
@@ -52,11 +47,11 @@ private:
 
     mutable std::mutex mutex_;
     bool isDebugVersion_;
-    bool layoutInspectorStatus_ = false;
     void* handlerConnectServerSo_;
     std::string packageName_;
     std::unordered_map<int32_t, std::string> instanceMap_;
-
+    std::function<void(int32_t)> createLayoutInfo_;
+    std::function<void(int32_t)> setStatus_;
     ACE_DISALLOW_COPY_AND_MOVE(ConnectServerManager);
 };
 

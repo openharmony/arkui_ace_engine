@@ -262,7 +262,8 @@ void RenderSceneViewer::Paint(RenderContext& context, const Offset& offset)
         LOGE("ACE-3D RenderSceneViewer::Paint() GetContext failed.");
     }
 
-    PaintTextureLayer(context, offset);
+    // Texture layer position is (0,0) w.r.t to RenderNode.
+    PaintTextureLayer(context, Offset(0.0, 0.0));
     RenderNode::Paint(context, offset);
 
     if ((animating_ || handlesNotReady_) && pipeline_context) {
@@ -487,7 +488,7 @@ void RenderSceneViewer::PassGeometries(const std::vector<RefPtr<OHOS::Render3D::
 #endif
             auto delegate = weak.Upgrade();
             if (delegate) {
-                delegate->sceneViewerAdapter_.AddGeometries(geometries);
+                delegate->sceneViewerAdapter_.UpdateGeometries(geometries);
             }
         });
     } else {

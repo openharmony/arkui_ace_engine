@@ -56,4 +56,14 @@ void Container::UpdateCurrent(int32_t id)
     ContainerScope::UpdateCurrent(id);
 }
 
+bool Container::UpdateState(const Frontend::State& state)
+{
+    std::lock_guard<std::mutex> lock(stateMutex_);
+    if (state_ == state) {
+        return false;
+    }
+    state_ = state;
+    return true;
+}
+
 } // namespace OHOS::Ace

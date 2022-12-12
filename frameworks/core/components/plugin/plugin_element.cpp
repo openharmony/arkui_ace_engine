@@ -47,6 +47,7 @@ ErrCode GetActiveAccountIds(std::vector<int32_t>& userIds)
 
 PluginElement::~PluginElement()
 {
+    PluginManager::GetInstance().RemovePluginSubContainer(pluginSubContainerId_);
     PluginManager::GetInstance().RemovePluginParentContainer(pluginSubContainerId_);
     pluginManagerBridge_.Reset();
     pluginSubContainer_->Destroy();
@@ -230,7 +231,13 @@ void PluginElement::OnActionEvent(const std::string& action) const
 
 void PluginElement::RunPluginContainer()
 {
+    auto parentcontainerId = Container::CurrentId();
+    while (parentcontainerId >= MIN_PLUGIN_SUBCONTAINER_ID) {
+        parentcontainerId = PluginManager::GetInstance().GetPluginParentContainerId(parentcontainerId);
+    }
     if (pluginSubContainer_) {
+        PluginManager::GetInstance().RemovePluginSubContainer(pluginSubContainerId_);
+        PluginManager::GetInstance().RemovePluginParentContainer(pluginSubContainerId_);
         pluginSubContainer_->Destroy();
         pluginSubContainer_.Reset();
     }
@@ -248,8 +255,8 @@ void PluginElement::RunPluginContainer()
 
     pluginSubContainerId_ = PluginManager::GetInstance().GetPluginSubContainerId();
     PluginManager::GetInstance().AddPluginSubContainer(pluginSubContainerId_, pluginSubContainer_);
-    PluginManager::GetInstance().AddPluginParentContainer(pluginSubContainerId_, Container::CurrentId());
-    flutter::UIDartState::Current()->AddPluginParentContainer(pluginSubContainerId_, Container::CurrentId());
+    PluginManager::GetInstance().AddPluginParentContainer(pluginSubContainerId_, parentcontainerId);
+    flutter::UIDartState::Current()->AddPluginParentContainer(pluginSubContainerId_, parentcontainerId);
     pluginSubContainer_->SetInstanceId(pluginSubContainerId_);
     pluginSubContainer_->Initialize();
     pluginSubContainer_->SetPluginComponent(component_);

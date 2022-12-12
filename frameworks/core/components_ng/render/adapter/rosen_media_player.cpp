@@ -83,7 +83,10 @@ RosenMediaPlayer::~RosenMediaPlayer()
 
 void RosenMediaPlayer::CreateMediaPlayer()
 {
-    CHECK_NULL_VOID(mediaPlayer_);
+    if (mediaPlayer_) {
+        LOGE("CreateMediaPlayer has exist");
+        return;
+    }
     mediaPlayer_ = OHOS::Media::PlayerFactory::CreatePlayer();
     CHECK_NULL_VOID(mediaPlayer_);
 }
@@ -201,11 +204,6 @@ int32_t RosenMediaPlayer::SetSurface()
 int32_t RosenMediaPlayer::PrepareAsync()
 {
     return mediaPlayer_->PrepareAsync();
-}
-
-int32_t RosenMediaPlayer::Prepare()
-{
-    return mediaPlayer_->Prepare();
 }
 
 bool RosenMediaPlayer::IsPlaying()

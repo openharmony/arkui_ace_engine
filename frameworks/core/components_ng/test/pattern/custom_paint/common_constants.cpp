@@ -41,6 +41,9 @@ const std::string URL_PREFIX = "data:";
 const std::string IMAGE_PNG = "image/png";
 const std::string IMAGE_JPEG = "image/jpeg";
 const std::string IMAGE_WEBP = "image/webp";
+const std::string QUALITY_0 = "0";
+const std::string QUALITY_50 = "0.5";
+const std::string QUALITY_100 = "1.0";
 
 const std::string NULL_STR;
 const std::string DEFAULT_STR = "default";

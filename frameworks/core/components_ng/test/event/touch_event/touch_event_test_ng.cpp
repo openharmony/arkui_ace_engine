@@ -43,6 +43,7 @@ constexpr float HEIGHT = 400.0f;
 const OffsetF COORDINATE_OFFSET(WIDTH, HEIGHT);
 const std::string TOUCH_EVENT_INFO_TYPE = "onTouchDown";
 const std::vector<TouchPoint> POINTERS = { TouchPoint(), TouchPoint(), TouchPoint() };
+const std::vector<TouchPoint> POINTERS_2 = { { .tiltX = TILT_X_VALUE, .tiltY = TILT_Y_VALUE } };
 } // namespace
 
 class TouchEventTestNg : public testing::Test {
@@ -215,7 +216,8 @@ HWTEST_F(TouchEventTestNg, TouchEventActuatorHandleAndDispatchTest004, TestSize.
     TouchEventFunc callback2 = callback;
     auto touchEvent2 = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback2));
     touchEventActuator->AddTouchEvent(touchEvent2);
-    EXPECT_EQ(touchEventActuator->touchEvents_.size(), TOUCH_EVENTS_SIZE);
+    touchEventActuator->AddTouchEvent(nullptr);
+    EXPECT_EQ(touchEventActuator->touchEvents_.size(), TOUCH_EVENTS_SIZE_2);
 
     /**
      * @tc.steps: step6. Invoke HandleEvent when touchEvents_ and userCallback_ is not empty.
@@ -233,5 +235,13 @@ HWTEST_F(TouchEventTestNg, TouchEventActuatorHandleAndDispatchTest004, TestSize.
     TouchEventFunc callback3 = [](TouchEventInfo& info) { info.SetStopPropagation(STOP_PROPAGATION_VALUE); };
     touchEventActuator->ReplaceTouchEvent(std::move(callback3));
     EXPECT_FALSE(touchEventActuator->HandleEvent(touchEvent));
+
+    /**
+     * @tc.steps: step8. Invoke HandleEvent when touchEvents_ has nullptr event and userCallback_ is nullptr.
+     * @tc.expected: HandleEvent return true;
+     */
+    touchEventActuator->userCallback_ = nullptr;
+    const TouchEvent touchEvent3 { .pointers = POINTERS_2 };
+    EXPECT_TRUE(touchEventActuator->HandleEvent(touchEvent3));
 }
 } // namespace OHOS::Ace::NG

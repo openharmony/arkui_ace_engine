@@ -45,8 +45,8 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float RK3568_WIDTH = 720.0f;
-constexpr float RK3568_HEIGHT = 1136.0f;
+constexpr float DEVICE_WIDTH = 720.0f;
+constexpr float DEVICE_HEIGHT = 1136.0f;
 constexpr float SCROLL_FLOAT_10 = 10.0f;
 constexpr float SCROLL_FLOAT_50 = 50.0f;
 constexpr float SCROLL_FLOAT_99 = 99.0f;
@@ -62,7 +62,7 @@ constexpr double SCROLL_DOUBLE_NEGATIVE_10 = -10.0;
 constexpr double SCROLL_DOUBLE_NEGATIVE_99 = -99.0;
 constexpr double SCROLL_DOUBLE_NEGATIVE_100 = -100.0;
 constexpr int32_t SCROLL_INT32_1000 = 1000;
-const SizeF CONTAINER_SIZE(RK3568_WIDTH, RK3568_HEIGHT);
+const SizeF CONTAINER_SIZE(DEVICE_WIDTH, DEVICE_HEIGHT);
 const SizeF SCROLL_CHILD_SIZE(500.0f, 1000.0f);
 const SizeF SCROLL_VIEW_PORT(1.0f, 1.0f);
 const Dimension SCROLL_BAR_WIDTH = Dimension(20.1, DimensionUnit::PX);

@@ -105,10 +105,10 @@ void DataPanelModifier::PaintRainbowFilterMask(RSCanvas& canvas, double factor, 
             progress / START_COLOR_TRANSITION_EDGE)
                         .GetValue();
         gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-            ToRSPonit(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
+            ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
     } else {
         gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-            ToRSPonit(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
+            ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
     }
 
     canvas.Save();
@@ -122,7 +122,7 @@ void DataPanelModifier::PaintRainbowFilterMask(RSCanvas& canvas, double factor, 
     canvas.Save();
     canvas.Rotate(-QUARTER_CIRCLE, center.GetX(), center.GetY());
     gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-        ToRSPonit(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
+        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
     canvas.AttachPen(gradientPaint);
     canvas.DrawPath(path);
     canvas.DetachPen();
@@ -350,10 +350,10 @@ void DataPanelModifier::PaintProgress(
             Color::LineColorTransition(arcData.endColor, arcData.startColor, progress / START_COLOR_TRANSITION_EDGE)
                 .GetValue();
         gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-            ToRSPonit(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
+            ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
     } else {
         gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-            ToRSPonit(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
+            ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
     }
 
     canvas.Save();
@@ -367,7 +367,7 @@ void DataPanelModifier::PaintProgress(
     canvas.Save();
     canvas.Rotate(-QUARTER_CIRCLE, center.GetX(), center.GetY());
     gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-        ToRSPonit(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
+        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
     canvas.AttachPen(gradientPaint);
     canvas.DrawPath(path);
     canvas.DetachPen();

@@ -27,7 +27,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t PAN_FINGER = 1;
 constexpr double PAN_DISTANCE = 5.0;
-constexpr int32_t LONG_PRESS_DURATION = 150;
+constexpr int32_t LONG_PRESS_DURATION = 300;
 } // namespace
 
 DragEventActuator::DragEventActuator(
@@ -125,5 +125,4 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     result.emplace_back(SequencedRecognizer_);
 }
-
 } // namespace OHOS::Ace::NG

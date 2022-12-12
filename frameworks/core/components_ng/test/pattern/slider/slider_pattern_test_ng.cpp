@@ -129,7 +129,6 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg002, TestSize.Level1)
     sliderModelNG.SetMinLabel(MIN_LABEL);
     sliderModelNG.SetMaxLabel(MAX_LABEL);
     sliderModelNG.SetShowSteps(BOOL_VAULE);
-    sliderModelNG.SetShowTips(BOOL_VAULE);
     sliderModelNG.SetThickness(WIDTH);
     std::function<void(float, int32_t)> eventOnChange = [](float floatValue, int32_t intValue) {};
     sliderModelNG.SetOnChange(std::move(eventOnChange));
@@ -152,7 +151,6 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg002, TestSize.Level1)
     EXPECT_EQ(sliderPaintProperty->GetTrackBackgroundColor(), TEST_COLOR);
     EXPECT_EQ(sliderPaintProperty->GetSelectColor(), TEST_COLOR);
     EXPECT_EQ(sliderPaintProperty->GetShowSteps(), BOOL_VAULE);
-    EXPECT_EQ(sliderPaintProperty->GetShowTips(), BOOL_VAULE);
 }
 
 /**

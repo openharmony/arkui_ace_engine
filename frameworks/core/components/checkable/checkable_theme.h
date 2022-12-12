@@ -311,6 +311,7 @@ public:
             theme->hoverRadius_ = switchPattern->GetAttr<Dimension>("hover_border_radius", 0.0_vp);
             theme->inactivePointColor_ = switchPattern->GetAttr<Color>("fg_color_unchecked", Color::RED);
             theme->clickEffectColor_ = switchPattern->GetAttr<Color>("click_effect_color", Color::RED);
+            theme->focusPaintPadding_ = switchPattern->GetAttr<Dimension>("focus_paint_padding", 0.0_vp);
 
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;

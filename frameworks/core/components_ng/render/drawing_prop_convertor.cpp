@@ -35,7 +35,7 @@ RSRect ToRSRect(const NG::RectF& rect)
     return RSRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom());
 }
 
-RSPoint ToRSPonit(const NG::PointF& point)
+RSPoint ToRSPoint(const NG::PointF& point)
 {
     return RSPoint(point.GetX(), point.GetY());
 }

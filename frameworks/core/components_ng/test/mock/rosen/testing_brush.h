@@ -21,23 +21,53 @@
 #include "testing_color.h"
 #include "testing_filter.h"
 #include "testing_shader_effect.h"
-#include "utils/scalar.h"
 
 namespace OHOS::Ace::Testing {
-using scalar = Rosen::Drawing::scalar;
+enum class BlendMode {
+    CLEAR,
+    SRC,
+    DST,
+    SRC_OVER,
+    DST_OVER,
+    SRC_IN,
+    DST_IN,
+    SRC_OUT,
+    DST_OUT,
+    SRC_ATOP,
+    DST_ATOP,
+    XOR,
+    PLUS,
+    MODULATE,
+    SCREEN,
+    OVERLAY,
+    DARKEN,
+    LIGHTEN,
+    COLOR_DODGE,
+    COLOR_BURN,
+    HARD_LIGHT,
+    SOFT_LIGHT,
+    DIFFERENCE,
+    EXCLUSION,
+    MULTIPLY,
+    HUE,
+    STATURATION,
+    COLOR,
+    LUMINOSITY,
+};
 class TestingBrush {
 public:
     TestingBrush() = default;
     ~TestingBrush() = default;
     explicit TestingBrush(int rgba) noexcept {};
 
-    virtual void SetAntiAlias(bool aa) {}
-    virtual void SetWidth(scalar width) {}
-    virtual void SetColor(const TestingColor& c) {}
-    virtual void SetColor(int c) {}
-    virtual void SetShaderEffect(std::shared_ptr<TestingShaderEffect> e) {}
+    virtual void SetAntiAlias(bool alias) {}
+    virtual void SetWidth(float width) {}
+    virtual void SetColor(const TestingColor& color) {}
+    virtual void SetColor(int color) {}
+    virtual void SetShaderEffect(std::shared_ptr<TestingShaderEffect> effect) {}
     virtual void SetFilter(const TestingFilter filter) {}
-    virtual void SetAlpha(uint32_t a) {}
+    virtual void SetBlendMode(BlendMode mode) {}
+    virtual void SetAlpha(uint32_t alpha) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_BRUSH_H

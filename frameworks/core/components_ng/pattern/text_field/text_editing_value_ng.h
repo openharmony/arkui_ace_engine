@@ -57,43 +57,48 @@ struct TextEditingValueNG {
 
     std::string GetValueBeforeCursor() const
     {
-        if (caretPosition > static_cast<int32_t>(GetWideText().length()) || caretPosition <= 0) {
+        auto wideText = GetWideText();
+        if (caretPosition > static_cast<int32_t>(wideText.length()) || caretPosition <= 0) {
             return "";
         }
-        return StringUtils::ToString(GetWideText().substr(0, caretPosition));
+        return StringUtils::ToString(wideText.substr(0, caretPosition));
     }
 
     std::string GetValueAfterCursor() const
     {
-        if (caretPosition >= static_cast<int32_t>(GetWideText().length()) || caretPosition < 0) {
+        auto wideText = GetWideText();
+        if (caretPosition > static_cast<int32_t>(wideText.length()) || caretPosition < 0) {
             return "";
         }
-        return StringUtils::ToString(GetWideText().substr(caretPosition));
+        return StringUtils::ToString(wideText.substr(caretPosition));
     }
 
     std::string GetValueBeforePosition(int32_t position) const
     {
-        position = std::clamp(position, 0, static_cast<int32_t>(GetWideText().length()));
+        auto wideText = GetWideText();
+        position = std::clamp(position, 0, static_cast<int32_t>(wideText.length()));
         LOGD("GetValueBeforePosition %{public}d", position);
-        return StringUtils::ToString(GetWideText().substr(0, position));
+        return StringUtils::ToString(wideText.substr(0, position));
     }
 
     std::string GetValueAfterPosition(int32_t position) const
     {
-        position = std::clamp(position, 0, static_cast<int32_t>(GetWideText().length()));
+        auto wideText = GetWideText();
+        position = std::clamp(position, 0, static_cast<int32_t>(wideText.length()));
         LOGD("GetValueAfterPosition %{public}d", position);
-        return StringUtils::ToString(GetWideText().substr(position));
+        return StringUtils::ToString(wideText.substr(position));
     }
 
     std::string GetSelectedText(int32_t start, int32_t end) const
     {
-        if (start < 0 || end > static_cast<int32_t>(GetWideText().length()) || start >= end) {
+        auto wideText = GetWideText();
+        if (start < 0 || end > static_cast<int32_t>(wideText.length()) || start >= end) {
             LOGE("Get selected boundary is invalid");
             return "";
         }
         auto min = std::min(start, end);
         auto max = std::max(start, end);
-        return StringUtils::ToString(GetWideText().substr(min, max - min));
+        return StringUtils::ToString(wideText.substr(min, max - min));
     }
 
     std::string ToString() const

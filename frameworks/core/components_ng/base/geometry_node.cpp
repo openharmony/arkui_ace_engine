@@ -25,6 +25,7 @@ void GeometryNode::Reset()
 {
     frame_.Reset();
     margin_.reset();
+    padding_.reset();
     content_.reset();
     parentGlobalOffset_.Reset();
     parentLayoutConstraint_.reset();
@@ -36,6 +37,9 @@ RefPtr<GeometryNode> GeometryNode::Clone() const
     node->frame_ = frame_;
     if (margin_) {
         node->margin_ = std::make_unique<MarginPropertyF>(*margin_);
+    }
+    if (padding_) {
+        node->padding_ = std::make_unique<MarginPropertyF>(*padding_);
     }
     if (content_) {
         node->content_ = std::make_unique<GeometryProperty>(*content_);

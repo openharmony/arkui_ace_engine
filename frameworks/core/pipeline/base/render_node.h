@@ -542,6 +542,7 @@ public:
 
     virtual void RenderWithContext(RenderContext& context, const Offset& offset);
     virtual void Paint(RenderContext& context, const Offset& offset);
+    void PaintChildList(const std::list<RefPtr<RenderNode>>& childList, RenderContext& context, const Offset& offset);
     virtual void PaintChild(const RefPtr<RenderNode>& child, RenderContext& context, const Offset& offset);
 
     virtual void OnPaintFinish() {}

@@ -592,7 +592,7 @@ void RenderSwiper::UpdateIndex(int32_t index)
         if (index >= itemCount_) {
             index = itemCount_ - 1;
         }
-        if (swiper_) {
+        if (swiper_ && !swiper_->GetLazyForEachComponent()) {
             if (index_ != index) {
                 swipeToIndex_ = index; // swipe to animation need to start after perform layout
                 index_ = index;
@@ -600,6 +600,7 @@ void RenderSwiper::UpdateIndex(int32_t index)
         } else {
             // render node first update index
             currentIndex_ = index;
+            LOGI("update index to: %{public}d", index);
         }
     }
 }
@@ -3215,7 +3216,10 @@ void RenderSwiper::RemoveChildByIndex(int32_t index)
 
 void RenderSwiper::OnDataSourceUpdated(int32_t totalCount, int32_t startIndex)
 {
-    items_.clear();
+    decltype(items_) items(std::move(items_));
+    for (auto&& item : items) {
+        deleteChildByIndex_(item.first);
+    }
     UpdateItemCount(totalCount);
     MarkNeedLayout(true);
 }
@@ -3451,17 +3455,19 @@ void RenderSwiper::ApplyRestoreInfo()
     SetRestoreInfo("");
 }
 
-void RenderSwiper::UpdateChildrenVisible()
+std::list<RefPtr<RenderNode>> RenderSwiper::GetPaintChildList()
 {
+    std::list<RefPtr<RenderNode>> childList;
     auto swiperGlobalRect = GetRectBasedWindowTopLeft();
     const auto& children = GetChildren();
     for (const auto& child : children) {
-        child->SetVisible(false);
         auto childGlobalRect = child->GetRectBasedWindowTopLeft();
         if (swiperGlobalRect.IsIntersectByCommonSideWith(childGlobalRect)) {
-            child->SetVisible(true);
+            childList.emplace_back(child);
         }
     }
+
+    return childList;
 }
 
 } // namespace OHOS::Ace

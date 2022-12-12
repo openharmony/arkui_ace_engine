@@ -18,6 +18,7 @@
 #include <functional>
 
 #include "ability_info.h"
+
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
@@ -82,11 +83,9 @@ const char* GetDeclarativeSharedLibrary()
 
 } // namespace
 
-AceContainer::AceContainer(int32_t instanceId, FrontendType type,
-    std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
-    bool useCurrentEventRunner, bool useNewPipeline)
-    : instanceId_(instanceId), type_(type), aceAbility_(aceAbility),
-      useCurrentEventRunner_(useCurrentEventRunner)
+AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
+    std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner, bool useNewPipeline)
+    : instanceId_(instanceId), type_(type), aceAbility_(aceAbility), useCurrentEventRunner_(useCurrentEventRunner)
 {
     ACE_DCHECK(callback);
     if (useNewPipeline) {
@@ -280,7 +279,9 @@ void AceContainer::OnShow(int32_t instanceId)
     ContainerScope scope(instanceId);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-
+    if (!container->UpdateState(Frontend::State::ON_SHOW)) {
+        return;
+    }
     auto front = container->GetFrontend();
     if (front && !container->IsSubContainer()) {
         WeakPtr<Frontend> weakFrontend = front;
@@ -322,7 +323,9 @@ void AceContainer::OnHide(int32_t instanceId)
     ContainerScope scope(instanceId);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-
+    if (!container->UpdateState(Frontend::State::ON_HIDE)) {
+        return;
+    }
     auto front = container->GetFrontend();
     if (front && !container->IsSubContainer()) {
         WeakPtr<Frontend> weakFrontend = front;

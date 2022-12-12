@@ -100,7 +100,8 @@ void FlutterNode::Dump(int32_t depth)
 
 void FlutterNode::GenBackgroundLayer()
 {
-    if (bgColor_ == Color::TRANSPARENT || frameRect_.IsEmpty() || !needUpdateBackgroud_) {
+    CHECK_NULL_VOID_NOLOG(needUpdateBackgroud_);
+    if (bgColor_ == Color::TRANSPARENT || frameRect_.IsEmpty()) {
         return;
     }
     auto recorder = std::make_unique<SkPictureRecorder>();
@@ -118,9 +119,7 @@ void FlutterNode::GenBackgroundLayer()
 
 std::shared_ptr<flutter::PictureLayer> FlutterNode::CreatePictureLayer(sk_sp<SkPicture> picture, int32_t instanceId)
 {
-    if (!picture) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN_NOLOG(picture, nullptr);
     auto window = flutter::ace::WindowManager::GetWindow(instanceId);
     CHECK_NULL_RETURN(window, nullptr);
     return std::make_shared<flutter::PictureLayer>(SkPoint::Make(0, 0), window->CreateGPUObject(picture), false, false);

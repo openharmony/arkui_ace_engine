@@ -82,6 +82,8 @@ const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
 const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 } // namespace
 
+#define EGLCONFIG_VERSION 3
+
 void WebMessagePortOhos::SetPortHandle(std::string& handle)
 {
     handle_ = handle;
@@ -431,6 +433,45 @@ int32_t WebWindowNewHandlerOhos::GetId() const
         return handler_->GetId();
     }
     return -1;
+}
+
+void DataResubmittedOhos::Resend()
+{
+    if (handler_) {
+        handler_->Resend();
+    }
+}
+
+void DataResubmittedOhos::Cancel()
+{
+    if (handler_) {
+        handler_->Cancel();
+    }
+}
+
+const void* FaviconReceivedOhos::GetData()
+{
+    return data_;
+}
+
+size_t FaviconReceivedOhos::GetWidth()
+{
+    return width_;
+}
+
+size_t FaviconReceivedOhos::GetHeight()
+{
+    return height_;
+}
+
+int FaviconReceivedOhos::GetColorType()
+{
+    return static_cast<int>(colorType_);
+}
+
+int FaviconReceivedOhos::GetAlphaType()
+{
+    return static_cast<int>(alphaType_);
 }
 
 WebDelegate::~WebDelegate()
@@ -1384,20 +1425,17 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
     auto eventHub = webPattern ? webPattern->GetWebEventHub() : nullptr;
     auto useNewPipe = Container::IsCurrentUseNewPipeline();
     if (useNewPipe && !webPattern && !eventHub) {
-        state_ = State::CREATEFAILED;
-        OnError(NTC_ERROR, "fail to call WebDelegate::Create due to webComponent is null");
+        LOGE("fail to call WebDelegate::Create due to webComponent is null");
         return false;
     }
     if (!useNewPipe && !webCom) {
-        state_ = State::CREATEFAILED;
-        OnError(NTC_ERROR, "fail to call WebDelegate::Create due to webComponent is null");
+        LOGE("fail to call WebDelegate::Create due to webComponent is null");
         return false;
     }
     context_ = context;
     auto pipelineContext = context.Upgrade();
     if (!pipelineContext) {
-        state_ = State::CREATEFAILED;
-        OnError(NTC_ERROR, "fail to call WebDelegate::Create due to context is null");
+        LOGE("fail to call WebDelegate::Create due to context is null");
         return false;
     }
     state_ = State::CREATED;
@@ -1462,7 +1500,141 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onWindowExitV2_ = useNewPipe ? eventHub->GetOnWindowExitEvent()
                                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                                 webCom->GetWindowExitEventId(), oldContext);
+        onPageVisibleV2_ = useNewPipe ? eventHub->GetOnPageVisibleEvent() : nullptr;
+        onTouchIconUrlV2_ = useNewPipe ? eventHub->GetOnTouchIconUrlEvent() : nullptr;
     }
+    return true;
+}
+
+void WebSurfaceCallback::OnSurfaceCreated(const sptr<OHOS::Surface>& surface)
+{
+    LOGI("WebSurfaceCallback::OnSurfaceCreated");
+}
+
+void WebSurfaceCallback::OnSurfaceChanged(const sptr<OHOS::Surface>& surface, int32_t width, int32_t height)
+{
+    auto delegate = delegate_.Upgrade();
+    if (!delegate) {
+        LOGE("WebSurfaceCallback::OnSurfaceChanged get delegate fail");
+        return;
+    }
+    LOGD("OnSurfaceChanged w:%{public}d, h:%{public}d", width, height);
+    delegate->Resize((double)width, (double)height);
+}
+
+void WebSurfaceCallback::OnSurfaceDestroyed()
+{
+    LOGI("WebSurfaceCallback::OnSurfaceDestroyed");
+}
+
+EGLConfig WebDelegate::GLGetConfig(int version, EGLDisplay eglDisplay)
+{
+    int attribList[] = {
+        EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+        EGL_RED_SIZE, 8,
+        EGL_GREEN_SIZE, 8,
+        EGL_BLUE_SIZE, 8,
+        EGL_ALPHA_SIZE, 8,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+        EGL_NONE
+    };
+    EGLConfig configs = NULL;
+    int configsNum;
+    if (!eglChooseConfig(eglDisplay, attribList, &configs, 1, &configsNum)) {
+        LOGE("eglChooseConfig ERROR");
+        return NULL;
+    }
+    return configs;
+}
+
+void WebDelegate::GLContextInit(void* window)
+{
+    if (!window) {
+        LOGE("unable to get EGL window.");
+        return;
+    }
+    LOGD("GLContextInit window = %{public}p", window);
+    mEglWindow = static_cast<EGLNativeWindowType>(window);
+
+    // 1. create sharedcontext
+    mEGLDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    if (mEGLDisplay == EGL_NO_DISPLAY) {
+        LOGE("unable to get EGL display.");
+        return;
+    }
+
+    EGLint eglMajVers, eglMinVers;
+    if (!eglInitialize(mEGLDisplay, &eglMajVers, &eglMinVers)) {
+        mEGLDisplay = EGL_NO_DISPLAY;
+        LOGE("unable to initialize display");
+        return;
+    }
+
+    mEGLConfig = GLGetConfig(EGLCONFIG_VERSION, mEGLDisplay);
+    if (mEGLConfig == nullptr) {
+        LOGE("GLContextInit config ERROR");
+        return;
+    }
+
+    // 2. Create EGL Surface from Native Window
+    mEGLSurface = eglCreateWindowSurface(mEGLDisplay, mEGLConfig, mEglWindow, nullptr);
+    if (mEGLSurface == nullptr) {
+        LOGE("eglCreateContext eglSurface is null");
+        return;
+    }
+
+    // 3. Create EGLContext from
+    int attrib3_list[] = {
+        EGL_CONTEXT_CLIENT_VERSION, 2,
+        EGL_NONE
+    };
+
+    mEGLContext = eglCreateContext(mEGLDisplay, mEGLConfig, mSharedEGLContext, attrib3_list);
+
+    if (!eglMakeCurrent(mEGLDisplay, mEGLSurface, mEGLSurface, mEGLContext)) {
+        LOGE("eglMakeCurrent error = %{public}d", eglGetError());
+        return;
+    }
+
+    glViewport(offset_.GetX(), offset_.GetY(), drawSize_.Width(), drawSize_.Height());
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glFlush();
+    glFinish();
+    eglSwapBuffers(mEGLDisplay, mEGLSurface);
+}
+bool WebDelegate::InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context)
+{
+    auto pipelineContext = context.Upgrade();
+    if (!pipelineContext) {
+        LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create due to context is null");
+        return false;
+    }
+    int32_t windowId = pipelineContext->GetWindowId();
+    surfaceDelegate_ = new OHOS::SurfaceDelegate(windowId);
+    if (surfaceDelegate_ == nullptr) {
+        LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create surfaceDelegate is null");
+        return false;
+    }
+    surfaceCallback_ = new WebSurfaceCallback(AceType::WeakClaim(this));
+    if (surfaceCallback_ == nullptr) {
+        LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create surfaceCallback is null");
+        return false;
+    }
+    surfaceDelegate_->AddSurfaceCallback(surfaceCallback_);
+    surfaceDelegate_->CreateSurface();
+    SetBoundsOrRezise(drawSize_, offset_);
+    auto aNativeSurface = surfaceDelegate_->GetNativeWindow();
+    if (aNativeSurface == nullptr) {
+        LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create get NativeWindow is null");
+        return false;
+    }
+    GLContextInit(aNativeSurface);
+    surfaceInfo_.window = aNativeSurface;
+    surfaceInfo_.display = mEGLDisplay;
+    surfaceInfo_.context = mEGLContext;
+    surfaceInfo_.surface = mEGLSurface;
     return true;
 }
 
@@ -1475,7 +1647,10 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context)
     if (!isCreateWebView_) {
         isCreateWebView_ = true;
         if (isEnhanceSurface_) {
-            // GLContextInit(nullptr);
+            if (!InitWebSurfaceDelegate(context)) {
+                LOGE("init web surfacedelegate failed");
+                return;
+            }
             InitWebViewWithSurface();
         } else {
 #ifdef ENABLE_ROSEN_BACKEND
@@ -2014,7 +2189,6 @@ std::string WebDelegate::GetCustomScheme()
 
 void WebDelegate::InitWebViewWithSurface()
 {
-    LOGI("Create webview with surface");
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -2046,7 +2220,7 @@ void WebDelegate::InitWebViewWithSurface()
             if (isEnhanceSurface) {
                 LOGI("Create webview with isEnhanceSurface");
                 delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
-                    delegate->enhanceSurfaceInfo_,
+                    (void *)(&delegate->surfaceInfo_),
                     initArgs);
             } else {
 #ifdef ENABLE_ROSEN_BACKEND
@@ -2073,6 +2247,8 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->UpdateSettting(Container::IsCurrentUseNewPipeline());
             delegate->RunSetWebIdCallback();
             delegate->RunJsProxyCallback();
+            auto releaseSurfaceListenerImpl = std::make_shared<ReleaseSurfaceImpl>(Container::CurrentId());
+            releaseSurfaceListenerImpl->SetSurfaceDelegate(delegate->GetSurfaceDelegateClient());
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -2430,6 +2606,196 @@ void WebDelegate::UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled)
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
                 setting->PutMultiWindowAccess(isMultiWindowAccessEnabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateWebCursiveFont(const std::string& cursiveFontFamily)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), cursiveFontFamily]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutCursiveFontFamilyName(cursiveFontFamily);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateWebFantasyFont(const std::string& fantasyFontFamily)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), fantasyFontFamily]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutFantasyFontFamilyName(fantasyFontFamily);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateWebFixedFont(const std::string& fixedFontFamily)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), fixedFontFamily]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutFixedFontFamilyName(fixedFontFamily);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateWebSansSerifFont(const std::string& sansSerifFontFamily)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), sansSerifFontFamily]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutSansSerifFontFamilyName(sansSerifFontFamily);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateWebSerifFont(const std::string& serifFontFamily)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), serifFontFamily]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutSerifFontFamilyName(serifFontFamily);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateWebStandardFont(const std::string& standardFontFamily)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), standardFontFamily]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutStandardFontFamilyName(standardFontFamily);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateDefaultFixedFontSize(int32_t defaultFixedFontSize)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), defaultFixedFontSize]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutDefaultFixedFontSize(defaultFixedFontSize);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateDefaultFontSize(int32_t defaultFontSize)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), defaultFontSize]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutDefaultFontSize(defaultFontSize);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateMinFontSize(int32_t minFontSize)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), minFontSize]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutFontSizeLowerLimit(minFontSize);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateBlockNetwork(bool isNetworkBlocked)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isNetworkBlocked]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutBlockNetwork(isNetworkBlocked);
+                }
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -3193,6 +3559,60 @@ void WebDelegate::OnWindowExit()
     }
 }
 
+void WebDelegate::OnPageVisible(const std::string& url)
+{
+    if (onPageVisibleV2_) {
+        onPageVisibleV2_(std::make_shared<PageVisibleEvent>(url));
+    }
+}
+
+void WebDelegate::OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler)
+{
+    auto param = std::make_shared<DataResubmittedEvent>(AceType::MakeRefPtr<DataResubmittedOhos>(handler));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnDataResubmittedEvent = webEventHub->GetOnDataResubmittedEvent();
+        CHECK_NULL_VOID(propOnDataResubmittedEvent);
+        propOnDataResubmittedEvent(param);
+        return;
+    }
+}
+
+void WebDelegate::OnFaviconReceived(
+    const void* data,
+    size_t width,
+    size_t height,
+    OHOS::NWeb::ImageColorType colorType,
+    OHOS::NWeb::ImageAlphaType alphaType)
+{
+    auto param = std::make_shared<FaviconReceivedEvent>(AceType::MakeRefPtr<FaviconReceivedOhos>(
+                     data,
+                     width,
+                     height,
+                     colorType,
+                     alphaType));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnFaviconReceivedEvent = webEventHub->GetOnFaviconReceivedEvent();
+        CHECK_NULL_VOID(propOnFaviconReceivedEvent);
+        propOnFaviconReceivedEvent(param);
+        return;
+    }
+}
+
+void WebDelegate::OnTouchIconUrl(const std::string& iconUrl, bool precomposed)
+{
+    if (onTouchIconUrlV2_) {
+        onTouchIconUrlV2_(std::make_shared<TouchIconUrlEvent>(iconUrl, precomposed));
+    }
+}
+
 RefPtr<PixelMap> WebDelegate::GetDragPixelMap()
 {
     if (isRefreshPixelMap_) {
@@ -3430,6 +3850,33 @@ void WebDelegate::SetEnhanceSurfaceFlag(const bool& isEnhanceSurface)
     isEnhanceSurface_ = isEnhanceSurface;
 }
 
+sptr<OHOS::SurfaceDelegate> WebDelegate::GetSurfaceDelegateClient()
+{
+    return surfaceDelegate_;
+}
+
+void WebDelegate::SetBoundsOrRezise(const Size& drawSize, const Offset& offset)
+{
+    if ((drawSize.Width() == 0) && (drawSize.Height() == 0)) {
+        LOGE("WebDelegate::SetBoundsOrRezise width and height error");
+        return;
+    }
+    if (isEnhanceSurface_) {
+        if (surfaceDelegate_) {
+            LOGD("WebDelegate::SetBounds: x:%{public}d, y:%{public}d, w::%{public}d, h:%{public}d",
+                (int32_t)offset.GetX(), (int32_t)offset.GetY(),
+                (int32_t)drawSize.Width(), (int32_t)drawSize.Height());
+            surfaceDelegate_->SetBounds(offset.GetX(), (int32_t)offset.GetY(), drawSize.Width(), drawSize.Height());
+        }
+    } else {
+        Resize(drawSize.Width(), drawSize.Height());
+    }
+}
+
+Offset WebDelegate::GetWebRenderGlobalPos()
+{
+    return offset_;
+}
 #ifdef ENABLE_ROSEN_BACKEND
 void WebDelegate::SetSurface(const sptr<Surface>& surface)
 {

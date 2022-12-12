@@ -15,20 +15,18 @@
 
 #include "core/components/test/unittest/display/display_test_utils.h"
 
+#include "base/test/mock/mock_asset_manager.h"
+#include "base/test/mock/mock_task_executor.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #include "core/components/box/box_component.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/test/json/json_frontend.h"
 #include "core/components/text/text_component.h"
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/fake_task_executor.h"
-#include "core/mock/mock_resource_register.h"
 
 namespace OHOS::Ace {
 namespace {
-
 constexpr double RECT_WIDTH = 1080.0;
 constexpr double RECT_HEIGHT = 2244.0;
-
 } // namespace
 
 RefPtr<RenderRoot> DisplayTestUtils::CreateRenderRoot()
@@ -80,12 +78,11 @@ RefPtr<PipelineContext> DisplayTestUtils::GetMockContext()
 {
     auto platformWindow = std::make_unique<MockWindow>(nullptr);
     auto window = std::make_unique<Window>(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     auto fakeFrontend = Frontend::CreateDefault();
     return AceType::MakeRefPtr<PipelineContext>(
         std::move(window), taskExecutor, assetManager, resRegister, fakeFrontend, 0);
 }
-
 } // namespace OHOS::Ace

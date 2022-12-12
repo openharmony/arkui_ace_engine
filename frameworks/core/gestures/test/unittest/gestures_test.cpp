@@ -17,7 +17,10 @@
 
 #include "mock/gesture_mock.h"
 
+#include "base/test/mock/mock_asset_manager.h"
+#include "base/test/mock/mock_task_executor.h"
 #include "core/common/platform_window.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #include "core/common/window.h"
 #include "core/gestures/click_recognizer.h"
 #include "core/gestures/drag_recognizer.h"
@@ -28,9 +31,6 @@
 #include "core/gestures/raw_recognizer.h"
 #include "core/gestures/rotation_recognizer.h"
 #include "core/gestures/velocity_tracker.h"
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/fake_task_executor.h"
-#include "core/mock/mock_resource_register.h"
 #include "core/pipeline/pipeline_context.h"
 
 using namespace testing::ext;
@@ -1546,8 +1546,8 @@ HWTEST_F(GesturesTest, PanRecognizer001, TestSize.Level1)
      */
     std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
     auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
 
@@ -1628,8 +1628,8 @@ HWTEST_F(GesturesTest, PanRecognizer002, TestSize.Level1)
      */
     std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
     auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
 
@@ -1711,8 +1711,8 @@ HWTEST_F(GesturesTest, PanRecognizer003, TestSize.Level1)
      */
     std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
     auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
 
@@ -1794,8 +1794,8 @@ HWTEST_F(GesturesTest, PanRecognizer004, TestSize.Level1)
      */
     std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
     auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
 
@@ -1896,8 +1896,8 @@ HWTEST_F(GesturesTest, PanRecognizer005, TestSize.Level1)
      */
     std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
     auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
 
@@ -2003,8 +2003,8 @@ HWTEST_F(GesturesTest, PinchRecognizer001, TestSize.Level1)
      */
     std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
     auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
 
@@ -2102,8 +2102,8 @@ HWTEST_F(GesturesTest, PinchRecognizer002, TestSize.Level1)
      */
     std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
     auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
 
@@ -2226,8 +2226,8 @@ HWTEST_F(GesturesTest, RotationRecognizer001, TestSize.Level1)
      */
     std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
     auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
 
@@ -2315,8 +2315,8 @@ HWTEST_F(GesturesTest, RotationRecognizer002, TestSize.Level1)
      */
     std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
     auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
 
@@ -2425,8 +2425,8 @@ HWTEST_F(GesturesTest, MultiLongPressRecognizer001, TestSize.Level1)
      */
     std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
     auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
 
@@ -2491,8 +2491,8 @@ HWTEST_F(GesturesTest, MultiLongPressRecognizer002, TestSize.Level1)
      */
     std::unique_ptr<PlatformWindow> platformWindow = GestureTestUtils::CreatePlatformWindow();
     auto window = GestureTestUtils::CreateWindow(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     auto fakeFrontend = AceType::MakeRefPtr<Framework::MockFrontend>();
 

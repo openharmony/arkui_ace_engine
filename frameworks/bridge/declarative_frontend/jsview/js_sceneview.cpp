@@ -17,15 +17,39 @@
 
 #include "base/geometry/quaternion.h"
 #include "base/geometry/vec3.h"
+#include "bridge/declarative_frontend/jsview/models/model_view_impl.h"
+#include "core/components_ng/pattern/model/model_view_ng.h"
 #include "core/components/scene_viewer/scene_viewer_component.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
-
-#include "foundation/graphic/graphic_2d/interfaces/inner_api/surface/window.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/custom/custom_render_descriptor.h"
+#include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/geometry/cone.h"
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/geometry/cube.h"
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/geometry/sphere.h"
-#include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/geometry/cone.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<ModelView> ModelView::instance_ = nullptr;
+
+ModelView* ModelView::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::ModelViewNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            LOGD("ModelView::GetInstance() NG Pipeline");
+            instance_.reset(new NG::ModelViewNG());
+        } else {
+            LOGD("ModelView::GetInstance() NOT NG Pipeline");
+            instance_.reset(new Framework::ModelViewImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
@@ -64,10 +88,7 @@ void JSSceneView::JsSetHandleCameraMove(const JSCallbackInfo& info)
     }
 
     bool value = info[0]->ToBoolean();
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto svCoponent = AceType::DynamicCast<SceneViewerComponent>(stack->GetMainComponent());
-    svCoponent->SetHandleCameraMove(value);
+    ModelView::GetInstance()->SetHandleCameraMove(value);
 }
 
 void JSSceneView::Create(const JSCallbackInfo& info)
@@ -78,28 +99,19 @@ void JSSceneView::Create(const JSCallbackInfo& info)
         return;
     }
 
-    auto svComponent = AceType::MakeRefPtr<OHOS::Ace::SceneViewerComponent>();
     std::string srcPath;
     auto parseOk = ParseJsMedia(info[0], srcPath);
-    LOGD("srcPath after ParseJsMedia(): %s", srcPath.c_str());
-    if (parseOk) {
-        svComponent->SetGltfSrc(srcPath);
-    } else {
+    if (!parseOk) {
         LOGW("JSSceneView::Create() arg parsing failed.");
+        return;
     }
 
-    ViewStackProcessor::GetInstance()->Push(svComponent);
+    LOGD("srcPath after ParseJsMedia(): %s", srcPath.c_str());
+    ModelView::GetInstance()->Create(srcPath);
 }
 
 void JSSceneView::JSCamera(const JSCallbackInfo& info)
 {
-    auto top = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto component = AceType::DynamicCast<OHOS::Ace::SceneViewerComponent>(top);
-    if (!component) {
-        LOGE("Can not set camera. Component is not SceneViewComponent");
-        return;
-    }
-
     // Parse the info object.
     if (info.Length() <= 0 || !info[0]->IsObject()) {
         LOGE("JSSceneView: arg is invalid.");
@@ -135,7 +147,7 @@ void JSSceneView::JSCamera(const JSCallbackInfo& info)
         LOGD("fovD: %f", fovD);
     }
 
-    component->SetCameraFrustum(zNear, zFar, fovD);
+    ModelView::GetInstance()->SetCameraFrustum(zNear, zFar, fovD);
 
     // positionInAngles
     if (argsPtrItem->Contains("positionInAngles")) {
@@ -147,7 +159,7 @@ void JSSceneView::JSCamera(const JSCallbackInfo& info)
         LOGD("positionInAngles: x: %f, y: %f, z: %f, distance: %f,", x, y, z, distance);
         bool isAngularPosition = true;
         // Angles and distance are animatable.
-        component->SetCameraPosition(
+        ModelView::GetInstance()->SetCameraPosition(
             AnimatableFloat(x, animOption), AnimatableFloat(y, animOption),
             AnimatableFloat(z, animOption), AnimatableFloat(distance, animOption), isAngularPosition);
     }
@@ -161,7 +173,7 @@ void JSSceneView::JSCamera(const JSCallbackInfo& info)
         LOGD("position: x: %f, y: %f, z: %f", x, y, z);
         bool isAngularPosition = false;
         // Angles and distance are animatable.
-        component->SetCameraPosition(
+        ModelView::GetInstance()->SetCameraPosition(
             AnimatableFloat(x, animOption), AnimatableFloat(y, animOption),
             AnimatableFloat(z, animOption), AnimatableFloat(0.0, animOption), isAngularPosition);
     }
@@ -175,7 +187,7 @@ void JSSceneView::JSCamera(const JSCallbackInfo& info)
         auto w = rotationArgs->GetDouble("w", 1.0);
         LOGD("rotation: x: %f, y: %f, z: %f, w: %f", x, y, z, w);
         Quaternion rotation(x, y, z, w);
-        component->SetCameraRotation(rotation);
+        ModelView::GetInstance()->SetCameraRotation(rotation);
     }
 
     // lookAt / target : {x : number, y : number, z : number }
@@ -186,7 +198,7 @@ void JSSceneView::JSCamera(const JSCallbackInfo& info)
         auto z = lookatArgs->GetDouble("z", 0.0);
         LOGD("lookAt: x: %f, y: %f, z: %f", x, y, z);
         Vec3 lookVec(x, y, z);
-        component->SetCameraLookAt(lookVec);
+        ModelView::GetInstance()->SetCameraLookAt(lookVec);
     }
 
     // up: {x : number, y : number, z : number } (Default: 0,1,0)
@@ -197,7 +209,7 @@ void JSSceneView::JSCamera(const JSCallbackInfo& info)
         auto z = upArgs->GetDouble("z", 0.0);
         LOGD("upArgs: x: %f, y: %f, z: %f", x, y, z);
         Vec3 upVec(x, y, z);
-        component->SetCameraUp(upVec);
+        ModelView::GetInstance()->SetCameraUp(upVec);
     }
 }
 
@@ -215,10 +227,7 @@ void JSSceneView::JSSetTransparent(const JSCallbackInfo& info)
 
     bool value = info[0]->ToBoolean();
     LOGD("JSSceneView::JSSetTransparentBackground(%s)", value ? "true" : "false");
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto svComponent = AceType::DynamicCast<SceneViewerComponent>(stack->GetMainComponent());
-    svComponent->SetTransparent(value);
+    ModelView::GetInstance()->SetTransparent(value);
 }
 
 void JSSceneView::JSSetBackground(const JSCallbackInfo& info)
@@ -237,20 +246,11 @@ void JSSceneView::JSSetBackground(const JSCallbackInfo& info)
     }
 
     LOGD("srcPath after ParseJsMedia(): %s", srcPath.c_str());
-    auto stack = ViewStackProcessor::GetInstance();
-    auto svComponent = AceType::DynamicCast<SceneViewerComponent>(stack->GetMainComponent());
-    svComponent->SetBackgroundSrc(srcPath);
+    ModelView::GetInstance()->SetBackground(srcPath);
 }
 
 void JSSceneView::JSLight(const JSCallbackInfo& info)
 {
-    auto top = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto component = AceType::DynamicCast<OHOS::Ace::SceneViewerComponent>(top);
-    if (!component) {
-        LOGE("Can not set camera. Component is not SceneViewComponent");
-        return;
-    }
-
     // Parse the info object.
     if (info.Length() <= 0 || !info[0]->IsObject()) {
         LOGE("JSSceneView: arg is invalid.");
@@ -265,7 +265,6 @@ void JSSceneView::JSLight(const JSCallbackInfo& info)
     }
 
     AnimationOption animOption = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-
     auto type = argsPtrItem->GetInt("type", 1);
     auto intensity = argsPtrItem->GetDouble("intensity", 10.0);
     auto shadow = argsPtrItem->GetBool("shadow", false);
@@ -325,19 +324,12 @@ void JSSceneView::JSLight(const JSCallbackInfo& info)
         rotation = Quaternion(x, y, z, w);
     }
 
-    component->AddLight(AceType::MakeRefPtr<OHOS::Render3D::SVLight>(
+    ModelView::GetInstance()->AddLight(AceType::MakeRefPtr<OHOS::Render3D::SVLight>(
         type, color, AnimatableFloat(intensity, animOption), shadow, position, rotation));
 }
 
 void JSSceneView::JSAddCube(const JSCallbackInfo& info)
 {
-    auto top = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto component = AceType::DynamicCast<OHOS::Ace::SceneViewerComponent>(top);
-    if (!component) {
-        LOGE("JSSceneView Can not invoke addEntity. Component is not SceneViewComponent");
-        return;
-    }
-
     // Parse the info object.
     if (info.Length() <= 0 || !info[0]->IsObject()) {
         LOGE("JSSceneView: arg is invalid.");
@@ -366,19 +358,12 @@ void JSSceneView::JSAddCube(const JSCallbackInfo& info)
     }
 
     LOGD("JSAddCube(%s, %.2f, %.2f, %.2f)", name.c_str(), width, height, depth);
-    component->AddGeometry(AceType::MakeRefPtr<OHOS::Render3D::SVCube>(
-        name.c_str(), width, height, depth, position));
+    ModelView::GetInstance()->AddGeometry(
+        AceType::MakeRefPtr<OHOS::Render3D::SVCube>(name.c_str(), width, height, depth, position));
 }
 
 void JSSceneView::JSAddSphere(const JSCallbackInfo& info)
 {
-    auto top = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto component = AceType::DynamicCast<OHOS::Ace::SceneViewerComponent>(top);
-    if (!component) {
-        LOGE("JSSceneView Can not invoke addEntity. Component is not SceneViewComponent");
-        return;
-    }
-
     // Parse the info object.
     if (info.Length() <= 0 || !info[0]->IsObject()) {
         LOGE("JSSceneView: arg is invalid.");
@@ -407,19 +392,12 @@ void JSSceneView::JSAddSphere(const JSCallbackInfo& info)
     }
 
     LOGD("JSAddSphere(%s, %.2f, %d, %d)", name.c_str(), radius, rings, sectors);
-    component->AddGeometry(AceType::MakeRefPtr<OHOS::Render3D::SVSphere>(
-        name.c_str(), radius, rings, sectors, position));
+    ModelView::GetInstance()->AddGeometry(
+        AceType::MakeRefPtr<OHOS::Render3D::SVSphere>(name.c_str(), radius, rings, sectors, position));
 }
 
 void JSSceneView::JSAddCone(const JSCallbackInfo& info)
 {
-    auto top = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto component = AceType::DynamicCast<OHOS::Ace::SceneViewerComponent>(top);
-    if (!component) {
-        LOGE("JSSceneView Can not invoke addEntity. Component is not SceneViewComponent");
-        return;
-    }
-
     // Parse the info object.
     if (info.Length() <= 0 || !info[0]->IsObject()) {
         LOGE("JSSceneView: arg is invalid.");
@@ -448,20 +426,12 @@ void JSSceneView::JSAddCone(const JSCallbackInfo& info)
     }
 
     LOGD("JSAddCone(%s, %.2f, %d, %d)", name.c_str(), radius, length, sectors);
-    component->AddGeometry(AceType::MakeRefPtr<OHOS::Render3D::SVCone>(
-        name.c_str(), radius, length, sectors, position));
+    ModelView::GetInstance()->AddGeometry(
+        AceType::MakeRefPtr<OHOS::Render3D::SVCone>(name.c_str(), radius, length, sectors, position));
 }
 
 void JSSceneView::JSGLTFAnimation(const JSCallbackInfo& info)
 {
-    LOGD("JSSceneView JSGLTFAnimation()");
-    auto top = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto component = AceType::DynamicCast<OHOS::Ace::SceneViewerComponent>(top);
-    if (!component) {
-        LOGE("Can not set GLTFAnimation. Component is not SceneViewComponent");
-        return;
-    }
-
     // Parse the info object.
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("JSSceneView JSGLTFAnimation: arg is invalid.");
@@ -482,7 +452,7 @@ void JSSceneView::JSGLTFAnimation(const JSCallbackInfo& info)
     auto duration = argsPtrItem->GetDouble("duration", -1.0); // Invalid.
     auto reverse = argsPtrItem->GetBool("reverse", false);
 
-    component->AddGLTFAnimation(AceType::MakeRefPtr<OHOS::Render3D::GLTFAnimation>(
+    ModelView::GetInstance()->AddGLTFAnimation(AceType::MakeRefPtr<OHOS::Render3D::GLTFAnimation>(
         name, static_cast<OHOS::Render3D::AnimationState>(state), repeatCount, speed, duration, reverse));
 }
 
@@ -511,14 +481,10 @@ void JSSceneView::JSAddCustomRender(const JSCallbackInfo& info)
     RefPtr<OHOS::Render3D::SVCustomRenderDescriptor> desc =
         AceType::MakeRefPtr<OHOS::Render3D::SVCustomRenderDescriptor>(
             info[0]->ToString(), info[1]->ToString(), info[2]->ToBoolean());
-    // add needs callback
+
     LOGD("JSSceneView::JSaddCustomRender(%s, %s, %s)", desc->GetUri().c_str(),
         desc->GetNativeTypeName().c_str(), (desc->NeedsFrameCallback() ? "true" : "false"));
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto svComponent = AceType::DynamicCast<SceneViewerComponent>(stack->GetMainComponent());
-
-    svComponent->AddCustomRender(desc);
+    ModelView::GetInstance()->AddCustomRender(desc);
 }
 
 void JSSceneView::JSBind(BindingTarget globalObj)

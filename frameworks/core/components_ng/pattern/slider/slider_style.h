@@ -27,6 +27,7 @@ struct SliderLayoutStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SliderMode, SliderModel::SliderMode)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Direction, Axis)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Thickness, Dimension)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ShowTips, bool)
 };
 struct SliderPaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Value, float)
@@ -38,7 +39,6 @@ struct SliderPaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TrackBackgroundColor, Color)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectColor, Color)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ShowSteps, bool)
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ShowTips, bool)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Direction, Axis)
 };
 

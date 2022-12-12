@@ -15,11 +15,13 @@
 
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 
+#include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -32,8 +34,10 @@ namespace OHOS::Ace::NG {
  *   |--column
  *      |--container_modal_title(row)
  *          |--icon(image), label(text), [leftSplit, maxRecover, minimize, close](button)
- *      |--container_modal_content(stage)
- *          |--page
+ *      |--stack
+ *          |--container_modal_content(stage)
+ *              |--page
+ *          |--dialog(when show)
  *   |--container_modal_floating_title(row)
  *          |--icon(image), label(text), [leftSplit, maxRecover, minimize, close](button)
  */
@@ -43,17 +47,22 @@ RefPtr<FrameNode> ContainerModalView::Create(RefPtr<FrameNode>& content)
     auto containerModalNode = FrameNode::CreateFrameNode(
         "ContainerModal", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ContainerModalPattern>());
     containerModalNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto stack = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<StackPattern>());
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
 
     column->AddChild(BuildTitle(containerModalNode));
-    column->AddChild(content);
+    stack->AddChild(content);
+    column->AddChild(stack);
     content->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     content->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT)));
     containerModalNode->AddChild(column);
     containerModalNode->AddChild(BuildTitle(containerModalNode, true));
 
+    CHECK_NULL_RETURN(stack->GetLayoutProperty(), nullptr);
+    stack->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     CHECK_NULL_RETURN(column->GetLayoutProperty(), nullptr);
     column->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
 
@@ -69,6 +78,7 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
 {
     auto containerTitleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    containerTitleRow->UpdateInspectorId("ContainerModalTitleRow");
     auto layoutProperty = containerTitleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     layoutProperty->UpdateUserDefinedIdealSize(
@@ -85,22 +95,38 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerPattern, nullptr);
     if (!isFloatingTitle) {
         // touch the title to move the floating window
-        auto touchEventHub = containerTitleRow->GetOrCreateGestureEventHub();
-        CHECK_NULL_RETURN(touchEventHub, nullptr);
-        touchEventHub->SetTouchEvent([windowManager](TouchEventInfo& info) {
+        auto eventHub = containerTitleRow->GetOrCreateGestureEventHub();
+        CHECK_NULL_RETURN(eventHub, nullptr);
+        PanDirection panDirection;
+        panDirection.type = PanDirection::ALL;
+        auto panActionStart = [windowManager](const GestureEvent&) {
             CHECK_NULL_VOID_NOLOG(windowManager);
+            LOGI("container window start move.");
             windowManager->WindowStartMove();
-        });
+        };
+        auto panEvent = AceType::MakeRefPtr<PanEvent>(std::move(panActionStart), nullptr, nullptr, nullptr);
+        eventHub->AddPanEvent(panEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 
         // click the title to move the floating window with the mouse
         auto mouseEventHub = containerTitleRow->GetOrCreateInputEventHub();
         CHECK_NULL_RETURN(mouseEventHub, nullptr);
-        mouseEventHub->SetMouseEvent([windowManager](MouseInfo& info) {
-            if (windowManager && info.GetButton() == MouseButton::LEFT_BUTTON &&
-                info.GetAction() == MouseAction::PRESS) {
+        mouseEventHub->SetMouseEvent([windowManager, containerPattern](MouseInfo& info) {
+            CHECK_NULL_VOID_NOLOG(windowManager && containerPattern);
+            if (info.GetButton() != MouseButton::LEFT_BUTTON) {
+                return;
+            }
+            if (info.GetAction() == MouseAction::MOVE) {
+                containerPattern->SetIsStartMove(true);
+            }
+            if (info.GetAction() == MouseAction::PRESS && containerPattern->GetIsStartMove()) {
                 windowManager->WindowStartMove();
+            }
+            if (info.GetAction() == MouseAction::RELEASE) {
+                containerPattern->SetIsStartMove(false);
             }
         });
     }
@@ -143,14 +169,20 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
 
     // add leftSplit / maxRecover / minimize / close button
     containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT,
-        [windowManager](GestureEvent& info) {
-            CHECK_NULL_VOID_NOLOG(windowManager);
+        [windowManager, containerPattern](GestureEvent& info) {
+            CHECK_NULL_VOID(windowManager && containerPattern);
+            if (containerPattern->GetIsStartMove()) {
+                return;
+            }
             LOGI("left split button clicked");
             windowManager->FireWindowSplitCallBack();
         }));
     containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
-        [windowManager](GestureEvent& info) {
+        [windowManager, containerPattern](GestureEvent& info) {
             CHECK_NULL_VOID_NOLOG(windowManager);
+            if (containerPattern->GetIsStartMove()) {
+                return;
+            }
             auto mode = windowManager->GetWindowMode();
             if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
                 LOGI("recover button clicked");
@@ -160,18 +192,26 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
                 windowManager->WindowMaximize();
             }
         }));
-    containerTitleRow->AddChild(BuildControlButton(
-        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, [windowManager](GestureEvent& info) {
-            CHECK_NULL_VOID_NOLOG(windowManager);
+    containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE,
+        [windowManager, containerPattern] (GestureEvent& info) {
+            CHECK_NULL_VOID(windowManager && containerPattern);
+            if (containerPattern->GetIsStartMove()) {
+                return;
+            }
             LOGI("minimize button clicked");
             windowManager->WindowMinimize();
         }));
     containerTitleRow->AddChild(BuildControlButton(
-        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE, [windowManager](GestureEvent& info) {
-            CHECK_NULL_VOID_NOLOG(windowManager);
+        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE,
+        [windowManager, containerPattern](GestureEvent& info) {
+            CHECK_NULL_VOID(windowManager && containerPattern);
+            if (containerPattern->GetIsStartMove()) {
+                return;
+            }
             LOGI("close button clicked");
             windowManager->WindowClose();
-        }, true));
+        },
+        true));
 
     return containerTitleRow;
 }

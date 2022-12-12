@@ -36,13 +36,16 @@ void SendMessage(const std::string& message);
 
 void StoreMessage(int32_t instanceId, const std::string& message);
 
+void SendLayoutMessage(const std::string& message);
+
 void StoreInspectorInfo(const std::string& jsonTreeStr,  const std::string& jsonSnapshotStr);
 
 void RemoveMessage(int32_t instanceId);
 
 bool WaitForDebugger();
 
-void SetSwitchCallBack(const std::function<void(bool)>& setSwitchStatus);
+void SetSwitchCallBack(const std::function<void(bool)>& setSwitchStatus,
+    const std::function<void(int32_t)>& createLayoutInfo, int32_t instanceId);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -67,6 +70,8 @@ public:
     std::atomic<bool> waitingForDebugger_ = true;
     std::queue<const std::string> ideMsgQueue_;
     std::function<void(bool)> setSwitchStatus_;
+    std::function<void(int32_t)> createLayoutInfo_;
+    int32_t instanceId_ = -1;
 };
 } // namespace OHOS::Ace
 

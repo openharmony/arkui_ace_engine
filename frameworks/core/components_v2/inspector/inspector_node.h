@@ -199,6 +199,8 @@ public:
     virtual void UpdateEventTarget(BaseEventInfo& info) const = 0;
 
     virtual std::pair<Rect, Offset> GetCurrentRectAndOrigin() const = 0;
+    virtual std::pair<Rect, Offset> GetLastRectAndOrigin() = 0;
+    virtual void UpdateLastRectAndOrigin(const std::pair<Rect, Offset>& curRectOrigin) = 0;
 
     // color gradient
     virtual std::unique_ptr<JsonValue> GetLinearGradient() const = 0;

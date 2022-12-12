@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -39,17 +40,32 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     CHECK_NULL_VOID(page);
     auto pagePattern = page->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
+    page->GetEventHub<EventHub>()->SetEnabled(false);
+    pagePattern->SetPageInTransition(true);
     if (transitionType == PageTransitionType::EXIT_PUSH || transitionType == PageTransitionType::EXIT_POP) {
-        pagePattern->TriggerPageTransition(transitionType, [page]() {
+        pagePattern->TriggerPageTransition(transitionType, [page, instanceId = Container::CurrentId()]() {
+            ContainerScope scope(instanceId);
             LOGI("pageTransition exit finish");
             CHECK_NULL_VOID(page);
+            page->GetEventHub<EventHub>()->SetEnabled(true);
             auto pattern = page->GetPattern<PagePattern>();
             CHECK_NULL_VOID(pattern);
-            pattern->OnHide();
+            pattern->SetPageInTransition(false);
         });
+        pagePattern->ProcessHideState();
         return;
     }
-    pagePattern->TriggerPageTransition(transitionType, nullptr);
+    pagePattern->TriggerPageTransition(
+        transitionType, [weak = WeakPtr<FrameNode>(page), instanceId = Container::CurrentId()]() {
+            ContainerScope scope(instanceId);
+            LOGI("pageTransition in finish");
+            auto page = weak.Upgrade();
+            CHECK_NULL_VOID(page);
+            page->GetEventHub<EventHub>()->SetEnabled(true);
+            auto pattern = page->GetPattern<PagePattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetPageInTransition(false);
+        });
 }
 
 void StartTransition(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage, RouteType type)
@@ -99,7 +115,9 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     CHECK_NULL_RETURN(pagePattern, false);
     stagePattern_->currentPageIndex_ = pagePattern->GetPageInfo()->GetPageId();
     if (needTransition) {
-        pagePattern->SetFirstBuildCallback([outPageNode, inPageNode = node]() {
+        pagePattern->SetFirstBuildCallback([outPageNode, weakIn = WeakPtr<FrameNode>(node)]() {
+            auto inPageNode = weakIn.Upgrade();
+            // outPageNode need to perform the onHide function so we keep its RefPtr
             StartTransition(outPageNode, inPageNode, RouteType::PUSH);
         });
     }
@@ -252,8 +270,11 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
+    pagePattern->OnHide();
     if (transitionType == PageTransitionType::NONE) {
-        pagePattern->OnHide();
+        // If there is a page transition, this function should execute after page transition,
+        // otherwise the page will not be visible
+        pagePattern->ProcessHideState();
     }
 
     auto pageFocusHub = pageNode->GetFocusHub();
@@ -265,14 +286,15 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
     context->SetIsNeedShowFocus(false);
 }
 
-void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType /* transitionType */)
+void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType)
 {
     auto pageNode = DynamicCast<FrameNode>(node);
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    pageNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     pagePattern->OnShow();
+    // With or without a page transition, we need to make the coming page visible first
+    pagePattern->ProcessShowState();
 
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);

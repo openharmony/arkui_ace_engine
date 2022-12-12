@@ -114,6 +114,8 @@ void RenderBox::Update(const RefPtr<Component>& component)
             onClick_ = tapGesture->CreateRecognizer(context_);
             onClick_->SetIsExternalGesture(true);
             SetAccessibilityClickImpl();
+        } else {
+            onClick_ = nullptr;
         }
         if (!box->GetRemoteMessageEvent().IsEmpty() && !tapGesture) {
             onClick_ = AceType::MakeRefPtr<ClickRecognizer>();
@@ -211,7 +213,12 @@ void RenderBox::Update(const RefPtr<Component>& component)
         auto inspector = inspector_.Upgrade();
         if (inspector) {
             auto area = inspector->GetCurrentRectAndOrigin();
-            eventExtensions_->GetOnAreaChangeExtension()->SetBase(area.first, area.second);
+            auto lastArea = inspector->GetLastRectAndOrigin();
+            if (area != lastArea) {
+                eventExtensions_->GetOnAreaChangeExtension()->UpdateArea(
+                    area.first, area.second, lastArea.first, lastArea.second);
+                inspector->UpdateLastRectAndOrigin(area);
+            }
         }
     }
 }
@@ -628,7 +635,12 @@ void RenderBox::OnPaintFinish()
         auto inspector = inspector_.Upgrade();
         if (inspector) {
             auto area = inspector->GetCurrentRectAndOrigin();
-            eventExtensions_->GetOnAreaChangeExtension()->UpdateArea(area.first, area.second);
+            auto lastArea = inspector->GetLastRectAndOrigin();
+            if (area != lastArea) {
+                eventExtensions_->GetOnAreaChangeExtension()->UpdateArea(
+                    area.first, area.second, lastArea.first, lastArea.second);
+                inspector->UpdateLastRectAndOrigin(area);
+            }
         }
     }
     auto node = GetAccessibilityNode().Upgrade();

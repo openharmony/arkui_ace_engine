@@ -153,6 +153,7 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     BorderRadiusProperty radius;
     radius.SetRadius(theme->GetRadius().GetX());
     contentRenderContext->UpdateBorderRadius(radius);
+    contentRenderContext->SetClipToBounds(true);
 }
 
 void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
@@ -196,7 +197,7 @@ void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
     if (deviceType == DeviceType::WATCH) {
         columnProp->UpdateMeasureType(MeasureType::MATCH_PARENT);
     } else {
-        columnProp->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        columnProp->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     }
 
     // build ActionSheet child

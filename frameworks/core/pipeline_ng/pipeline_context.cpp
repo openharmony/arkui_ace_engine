@@ -76,12 +76,16 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
     const RefPtr<Frontend>& frontend, int32_t instanceId)
     : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId)
-{}
+{
+    window_->OnHide();
+}
 
 PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
     : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId)
-{}
+{
+    window_->OnHide();
+}
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
@@ -334,7 +338,7 @@ void PipelineContext::SetupRootElement()
     }
 #endif
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
-    overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
+    overlayManager_ = MakeRefPtr<OverlayManager>(DynamicCast<FrameNode>(stageNode->GetParent()));
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
@@ -556,6 +560,12 @@ bool PipelineContext::OnBackPressed()
     // If the tag of the last child of the rootnode is video, exit full screen.
     if (fullScreenManager_->OnBackPressed()) {
         LOGI("Exit full screen: back press accepted");
+        return true;
+    }
+
+    // if has sharedTransition, back press will stop the sharedTransition
+    if (sharedTransitionManager_->OnBackPressed()) {
+        LOGI("sharedTransition stop: back press accepted");
         return true;
     }
 

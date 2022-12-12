@@ -55,6 +55,7 @@
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 #include "core/common/form_manager.h"
+#include "core/common/layout_inspector.h"
 #include "core/common/plugin_manager.h"
 
 namespace OHOS::Ace {
@@ -201,7 +202,7 @@ public:
         taskExecutor->PostTask(
             [] {
                 SubwindowManager::GetInstance()->ClearMenu();
-                SubwindowManager::GetInstance()->HideMenuNG();
+                SubwindowManager::GetInstance()->ClearMenuNG();
                 SubwindowManager::GetInstance()->HidePopupNG();
             },
             TaskExecutor::TaskType::UI);
@@ -660,6 +661,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                 nativeEngine->CreateReference(storage, 1), context->GetBindingObject()->Get<NativeReference>());
         }
     }
+    LayoutInspector::SetCallback(instanceId_);
 }
 
 void UIContentImpl::Foreground()

@@ -19,6 +19,8 @@
 #include <cstdint>
 #include <optional>
 
+#include "core/components/select/select_theme.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/option/option_paint_method.h"
@@ -26,6 +28,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
 #include "core/components_ng/pattern/select/select_view.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -115,6 +118,10 @@ private:
     void UpdateSelectedProps(int32_t index);
     // update text to selected option's text
     void UpdateText(int32_t index);
+
+    void InitTextProps(const RefPtr<TextLayoutProperty>& textProps, const RefPtr<SelectTheme>& theme);
+    void InitSpinner(
+        const RefPtr<FrameNode>& spinner, const RefPtr<IconTheme>& iconTheme, const RefPtr<SelectTheme>& selectTheme);
 
     std::vector<RefPtr<FrameNode>> options_;
     RefPtr<FrameNode> menu_ = nullptr;

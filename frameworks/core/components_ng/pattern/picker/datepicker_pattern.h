@@ -386,6 +386,19 @@ public:
         return ButtonTitleId_.value();
     }
 
+    bool HasDividerNode() const
+    {
+        return DividerId_.has_value();
+    }
+
+    int32_t GetDividerId()
+    {
+        if (!DividerId_.has_value()) {
+            DividerId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return DividerId_.value();
+    }
+
     static const std::string& GetYear(uint32_t year);
 
     static const std::string& GetSolarMonth(uint32_t month);
@@ -400,6 +413,8 @@ public:
     {
         return { FocusType::NODE, true };
     }
+
+    void ShowTitle(int32_t titleId);
 
 private:
     void OnModifyDone() override;
@@ -422,6 +437,7 @@ private:
     std::optional<int32_t> dateNodeId_;
     std::optional<int32_t> titleId_;
     std::optional<int32_t> ButtonTitleId_;
+    std::optional<int32_t> DividerId_;
 
     EventMarker OnDialogAccept_;
     EventMarker OnDialogCancel_;

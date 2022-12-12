@@ -19,7 +19,10 @@
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/syntax/if_else_model_ng.h"
+
+#define private public
 #include "core/components_ng/syntax/if_else_node.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -53,12 +56,12 @@ void IfElseSyntaxTestNg::TearDownTestSuite()
 
 void IfElseSyntaxTestNg::SetUp()
 {
-    GTEST_LOG_(INFO) << "IfElseSyntaxTestNg SetUp";
+    MockPipelineBase::SetUp();
 }
 
 void IfElseSyntaxTestNg::TearDown()
 {
-    GTEST_LOG_(INFO) << "IfElseSyntaxTestNg TearDown";
+    MockPipelineBase::TearDown();
 }
 
 /**
@@ -118,6 +121,14 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxBranchIDTest003, TestSize.Level1)
     ifElseNodeNode->SetBranchId(IF_ELSE_BRANCH_ID_2);
     ifElseNodeNode->FlushUpdateAndMarkDirty();
     EXPECT_EQ(ifElseNodeNode->GetChildren().size(), IF_ELSE_CHILDREN_COUNT_2);
+
+    /**
+     * @tc.steps: step1. Set branch id which is same as before.
+     * @tc.expected: OnDirtyLayoutWrapperSwap return the true only when the canvas images all have been initialized.
+     */
+    ifElseNodeNode->SetBranchId(IF_ELSE_BRANCH_ID);
+    ifElseNodeNode->FlushUpdateAndMarkDirty();
+    EXPECT_FALSE(ifElseNodeNode->branchIdChanged_);
 }
 
 /**

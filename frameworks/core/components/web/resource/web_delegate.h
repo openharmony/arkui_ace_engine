@@ -26,12 +26,16 @@
 #include <ui/rs_surface_node.h>
 #endif
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <GLES3/gl3.h>
 #include "base/image/pixel_map.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/web/resource/web_client_impl.h"
 #include "core/components/web/resource/web_resource.h"
 #include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
+#include "surface_delegate.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "nweb_handler.h"
 #include "nweb_helper.h"
@@ -43,6 +47,14 @@
 #endif
 
 namespace OHOS::Ace {
+
+typedef struct WindowsSurfaceInfoTag {
+    void* window;
+    EGLDisplay display;
+    EGLContext context;
+    EGLSurface surface;
+} WindowsSurfaceInfo;
+
 class WebMessagePortOhos : public WebMessagePort {
     DECLARE_ACE_TYPE(WebMessagePortOhos, WebMessagePort)
 
@@ -254,6 +266,57 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebControllerHandler> handler_;
 };
 
+class DataResubmittedOhos : public DataResubmitted {
+    DECLARE_ACE_TYPE(DataResubmittedOhos, DataResubmitted)
+
+public:
+    DataResubmittedOhos(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler) : handler_(handler) {}
+    void Resend() override;
+    void Cancel() override;
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler_;
+};
+
+class FaviconReceivedOhos : public WebFaviconReceived {
+    DECLARE_ACE_TYPE(FaviconReceivedOhos, WebFaviconReceived)
+
+public:
+    FaviconReceivedOhos(
+        const void* data,
+        size_t width,
+        size_t height,
+        OHOS::NWeb::ImageColorType colorType,
+        OHOS::NWeb::ImageAlphaType alphaType)
+        : data_(data), width_(width), height_(height), colorType_(colorType), alphaType_(alphaType)  {}
+    const void* GetData() override;
+    size_t GetWidth() override;
+    size_t GetHeight() override;
+    int GetColorType() override;
+    int GetAlphaType() override;
+
+private:
+    const void* data_ = nullptr;
+    size_t width_ = 0;
+    size_t height_ = 0;
+    OHOS::NWeb::ImageColorType colorType_ = OHOS::NWeb::ImageColorType::COLOR_TYPE_UNKNOWN;
+    OHOS::NWeb::ImageAlphaType alphaType_ = OHOS::NWeb::ImageAlphaType::ALPHA_TYPE_UNKNOWN;
+};
+
+class WebSurfaceCallback : public OHOS::SurfaceDelegate::ISurfaceCallback {
+
+public:
+    WebSurfaceCallback(const WeakPtr<WebDelegate>& delegate) : delegate_(delegate) {}
+    ~WebSurfaceCallback() = default;
+
+    void OnSurfaceCreated(const OHOS::sptr<OHOS::Surface>& surface) override;
+    void OnSurfaceChanged(const OHOS::sptr<OHOS::Surface>& surface, int32_t width, int32_t height) override;
+    void OnSurfaceDestroyed() override;
+private:
+    WeakPtr<WebDelegate> delegate_;
+
+};
+
 enum class DragAction {
     DRAG_START = 0,
     DRAG_ENTER,
@@ -331,6 +394,16 @@ public:
     void UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     void UpdateMediaPlayGestureAccess(bool isNeedGestureAccess);
     void UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled);
+    void UpdateWebCursiveFont(const std::string& cursiveFontFamily);
+    void UpdateWebFantasyFont(const std::string& fantasyFontFamily);
+    void UpdateWebFixedFont(const std::string& fixedFontFamily);
+    void UpdateWebSansSerifFont(const std::string& sansSerifFontFamily);
+    void UpdateWebSerifFont(const std::string& serifFontFamily);
+    void UpdateWebStandardFont(const std::string& standardFontFamily);
+    void UpdateDefaultFixedFontSize(int32_t size);
+    void UpdateDefaultFontSize(int32_t defaultFontSize);
+    void UpdateMinFontSize(int32_t minFontSize);
+    void UpdateBlockNetwork(bool isNetworkBlocked);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
@@ -401,11 +474,22 @@ public:
     void OnWindowNew(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
         const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler);
     void OnWindowExit();
+    void OnPageVisible(const std::string& url);
+    void OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler);
+    void OnFaviconReceived(const void* data, size_t width, size_t height, OHOS::NWeb::ImageColorType colorType,
+        OHOS::NWeb::ImageAlphaType alphaType);
+    void OnTouchIconUrl(const std::string& iconUrl, bool precomposed);
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();
     void SetDrawSize(const Size& drawSize);
     void SetEnhanceSurfaceFlag(const bool& isEnhanceSurface);
+    EGLConfig GLGetConfig(int version, EGLDisplay eglDisplay);
+    void GLContextInit(void* window);
+    sptr<OHOS::SurfaceDelegate> GetSurfaceDelegateClient();
+    void SetBoundsOrRezise(const Size& drawSize, const Offset& offset);
+    Offset GetWebRenderGlobalPos();
+    bool InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
@@ -524,6 +608,8 @@ private:
     EventCallbackV2 onPermissionRequestV2_;
     EventCallbackV2 onSearchResultReceiveV2_;
     EventCallbackV2 onWindowExitV2_;
+    EventCallbackV2 onPageVisibleV2_;
+    EventCallbackV2 onTouchIconUrlV2_;
 
     std::string bundlePath_;
     std::string bundleDataPath_;
@@ -533,7 +619,15 @@ private:
     Size drawSize_;
     Offset offset_;
     bool isEnhanceSurface_ = false;
-    void *enhanceSurfaceInfo_ = nullptr;
+    sptr<WebSurfaceCallback> surfaceCallback_;
+    sptr<OHOS::SurfaceDelegate> surfaceDelegate_;
+    EGLNativeWindowType mEglWindow;
+    EGLDisplay mEGLDisplay = EGL_NO_DISPLAY;
+    EGLConfig mEGLConfig = nullptr;
+    EGLContext mEGLContext = EGL_NO_CONTEXT;
+    EGLContext mSharedEGLContext = EGL_NO_CONTEXT;
+    EGLSurface mEGLSurface = nullptr;
+    WindowsSurfaceInfo surfaceInfo_;
 #endif
 };
 

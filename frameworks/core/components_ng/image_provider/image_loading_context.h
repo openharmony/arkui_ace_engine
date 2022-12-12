@@ -91,7 +91,7 @@ private:
     LoadFailCallback GenerateLoadFailCallback();
 
     // things to do when load callback is triggered during image loading
-    void OnDataReady(const ImageSourceInfo& sourceInfo, const RefPtr<ImageObject> imageObj);
+    void OnDataReady(const ImageSourceInfo& sourceInfo, const RefPtr<ImageObject>& imageObj);
     void OnLoadSuccess(const ImageSourceInfo& sourceInfo);
     void OnLoadFail(const ImageSourceInfo& sourceInfo, const std::string& errorMsg, const ImageLoadingCommand& command);
 

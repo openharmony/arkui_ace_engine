@@ -152,9 +152,6 @@ const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
 
 const RefPtr<DragDropManager>& PipelineContext::GetDragDropManager()
 {
-    if (dragDropManager_) {
-        return dragDropManager_;
-    }
     dragDropManager_ = AceType::MakeRefPtr<DragDropManager>();
     return dragDropManager_;
 }
@@ -211,4 +208,10 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
     fullScreenManager_ = AceType::MakeRefPtr<FullScreenManager>(root);
     return fullScreenManager_;
 }
+
+const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
+{
+    return overlayManager_;
+}
+void PipelineContext::AddPredictTask(PredictTask&& task) {}
 } // namespace OHOS::Ace::NG

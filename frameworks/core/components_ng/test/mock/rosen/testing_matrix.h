@@ -19,34 +19,36 @@
 #include <stdint.h>
 #include <vector>
 
-#include "utils/point.h"
-#include "utils/scalar.h"
+#include "testing_point.h"
 
 namespace OHOS::Ace::Testing {
-using scalar = Rosen::Drawing::scalar;
-using Point = Rosen::Drawing::PointF;
 class TestingMatrix {
 public:
     TestingMatrix() = default;
     ~TestingMatrix() = default;
-    void Rotate(scalar degree, scalar px, scalar py) {}
-    void Translate(scalar dx, scalar dy) {}
-    void Scale(scalar sx, scalar sy, scalar px, scalar py) {}
+    void Rotate(float degree, float px, float py) {}
+    void Translate(float dx, float dy) {}
+    void Scale(float sx, float sy, float px, float py) {}
+
     TestingMatrix operator*(const TestingMatrix& other)
     {
         return other;
     }
-    bool operator==(const TestingMatrix& other)
+
+    bool operator==(const TestingMatrix& /* other */)
     {
         return false;
     }
-    void SetMatrix(scalar scaleX, scalar skewX, scalar transX, scalar skewY, scalar scaleY, scalar transY,
-        scalar persp0, scalar persp1, scalar persp2)
+
+    void SetMatrix(
+        float scaleX, float skewX, float transX, float skewY, float scaleY, float transY, float p0, float p1, float p2)
     {}
-    void MapPoints(std::vector<Point>& dst, const std::vector<Point>& src, uint32_t count) const {}
-    scalar Get(int index) const
+
+    void MapPoints(std::vector<TestingPoint>& dst, const std::vector<TestingPoint>& src, uint32_t count) const {}
+
+    float Get(int /* index */) const
     {
-        return scalar();
+        return 1.0f;
     }
 };
 } // namespace OHOS::Ace::Testing

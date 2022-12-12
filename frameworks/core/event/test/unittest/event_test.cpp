@@ -15,21 +15,20 @@
 
 #include <gtest/gtest.h>
 
+#include "base/test/mock/mock_asset_manager.h"
+#include "base/test/mock/mock_task_executor.h"
 #include "core/common/platform_window.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #include "core/components/test/json/json_frontend.h"
 #include "core/event/ace_event_helper.h"
 #include "core/event/event_trigger.h"
 #include "core/event/key_event.h"
 #include "core/event/key_event_recognizer.h"
 #include "core/event/mouse_raw_recognizer.h"
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/fake_task_executor.h"
-#include "core/mock/mock_resource_register.h"
 
 using namespace testing::ext;
 namespace OHOS::Ace {
 namespace {
-
 const std::string EVENT_ID = "1";
 const std::string MOUSE_EVENT_TYPE = "onMouse";
 const double MOUSE_OFFSET = 10.0;
@@ -248,8 +247,8 @@ HWTEST_F(EventsTest, AsyncEventTrigger002, TestSize.Level0)
      */
     auto platformWindow = std::make_unique<TestWindow>(nullptr);
     auto window = std::make_unique<Window>(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     auto frontend = Frontend::CreateDefault();
     auto context =
@@ -329,8 +328,8 @@ HWTEST_F(EventsTest, SyncEventTrigger002, TestSize.Level0)
      */
     auto platformWindow = std::make_unique<TestWindow>(nullptr);
     auto window = std::make_unique<Window>(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     auto frontend = Frontend::CreateDefault();
     auto context =

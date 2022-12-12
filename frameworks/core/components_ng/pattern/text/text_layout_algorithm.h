@@ -43,6 +43,8 @@ public:
 
     void OnReset() override;
 
+    void Measure(LayoutWrapper* layoutWrapper) override;
+
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 

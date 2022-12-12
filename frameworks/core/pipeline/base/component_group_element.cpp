@@ -98,7 +98,9 @@ void ComponentGroupElement::UpdateChildrenForDeclarative(const std::list<RefPtr<
     if (children_.empty()) {
         for (const auto& component : newComponents) {
             auto newChild = UpdateChildWithSlot(nullptr, component, slot++, renderSlot);
-            renderSlot += newChild->CountRenderNode();
+            if (newChild) {
+                renderSlot += newChild->CountRenderNode();
+            }
         }
         return;
     }

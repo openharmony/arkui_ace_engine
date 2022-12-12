@@ -40,12 +40,12 @@ public:
     static void SetDate(const JSRef<JSObject>& obj, const RefPtr<CalendarComponentV2>& component);
     static void SetHolidays(const std::string& holidays);
     static void SetOffDays(int32_t offDays);
-    static void SetShowHoliday(bool showHoliday);
-    static void SetShowLunar(bool showLunar);
-    static void SetNeedSlide(bool needSlide);
-    static void SetStartOfWeek(int32_t startOfWeek);
+    static void SetShowHoliday(const JSCallbackInfo& info);
+    static void SetShowLunar(const JSCallbackInfo& info);
+    static void SetNeedSlide(const JSCallbackInfo& info);
+    static void SetStartOfWeek(const JSCallbackInfo& info);
     static void SetWorkDays(const std::string& workDays);
-    static void SetDirection(int32_t dir);
+    static void SetDirection(const JSCallbackInfo& info);
     static void SetCurrentDayStyle(const JSCallbackInfo& info);
     static void SetNonCurrentDayStyle(const JSCallbackInfo& info);
     static void SetTodayStyle(const JSCallbackInfo& info);

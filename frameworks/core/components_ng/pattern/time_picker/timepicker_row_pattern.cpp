@@ -43,9 +43,7 @@ void TimePickerRowPattern::OnAttachToFrameNode()
 
 bool TimePickerRowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (!config.frameSizeChange) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
     CHECK_NULL_RETURN(dirty, false);
     return true;
 }
@@ -144,10 +142,8 @@ PickerTime TimePickerRowPattern::GetCurrentTime()
     auto amPmColumn = allChildNode["amPm"];
     auto hourColumn = allChildNode["hour"];
     auto minuteColumn = allChildNode["minute"];
-    if (!hourColumn || !minuteColumn) {
-        LOGE("hour or minute column is null.");
-        return time;
-    }
+    CHECK_NULL_RETURN(hourColumn, time);
+    CHECK_NULL_RETURN(minuteColumn, time);
     auto hourPickerColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_RETURN(hourPickerColumnPattern, time);
     auto minutePickerColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
@@ -367,10 +363,9 @@ std::unordered_map<std::string, RefPtr<FrameNode>> TimePickerRowPattern::GetAllC
         auto amPmNode = DynamicCast<FrameNode>(amPm);
         auto hourNode = DynamicCast<FrameNode>(hour);
         auto minuteNode = DynamicCast<FrameNode>(minute);
-        if (!amPmNode || !hourNode || !minuteNode) {
-            LOGE("amPm or hour or day minute is null.");
-            return allChildNode;
-        }
+        CHECK_NULL_RETURN(amPmNode, allChildNode);
+        CHECK_NULL_RETURN(hourNode, allChildNode);
+        CHECK_NULL_RETURN(minuteNode, allChildNode);
         allChildNode["amPm"] = amPmNode;
         allChildNode["hour"] = hourNode;
         allChildNode["minute"] = minuteNode;
@@ -382,10 +377,8 @@ std::unordered_map<std::string, RefPtr<FrameNode>> TimePickerRowPattern::GetAllC
         CHECK_NULL_RETURN(minute, allChildNode);
         auto hourNode = DynamicCast<FrameNode>(hour);
         auto minuteNode = DynamicCast<FrameNode>(minute);
-        if (!hourNode || !minuteNode) {
-            LOGE("hour or day minute is null.");
-            return allChildNode;
-        }
+        CHECK_NULL_RETURN(hourNode, allChildNode);
+        CHECK_NULL_RETURN(minuteNode, allChildNode);
         allChildNode["hour"] = hourNode;
         allChildNode["minute"] = minuteNode;
     }

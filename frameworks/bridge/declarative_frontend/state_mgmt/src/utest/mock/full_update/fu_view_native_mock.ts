@@ -42,10 +42,10 @@ abstract class NativeViewFullUpdate {
     console.warn("NativeView(Mock).restoreInstanceId() -  unimplemented!");
   }
   setCardId(cardId: number): void {
-    console.warn("NativeViewPU(Mock).isLazyItemRender() -  unimplemented!");
+    console.warn("NativeView(Mock).setCardId() -  unimplemented!");
   }
   getCardId(): number {
-    console.warn("NativeViewPU(Mock).isLazyItemRender() -  unimplemented!");
+    console.warn("NativeView(Mock).getCardId() -  unimplemented!");
     return -1;
   }
 }

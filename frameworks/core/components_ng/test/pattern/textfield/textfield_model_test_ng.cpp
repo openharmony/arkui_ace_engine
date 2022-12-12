@@ -103,11 +103,42 @@ public:
     static void TearDownTestCase() {};
     void SetUp() override;
     void TearDown() override;
+    RefPtr<TextFieldLayoutProperty> CreateNodeAndGetLayoutProperty(TextFieldModelNG& textFieldModelInstance);
+    RefPtr<TextFieldPaintProperty> CreateNodeAndGetPaintProperty(TextFieldModelNG& textFieldModelInstance);
 };
 
 void TextFieldModelTestNG::SetUp() {}
 
-void TextFieldModelTestNG::TearDown() {}
+void TextFieldModelTestNG::TearDown()
+{
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
+RefPtr<TextFieldLayoutProperty> TextFieldModelTestNG::CreateNodeAndGetLayoutProperty(
+    TextFieldModelNG& textFieldModelInstance)
+{
+    textFieldModelInstance.CreateNode(PLACEHOLDER, EMPTY_TEXT_VALUE, false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (!frameNode) {
+        GTEST_LOG_(INFO) << "create textfield node failed!";
+        return nullptr;
+    }
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    return layoutProperty;
+}
+
+RefPtr<TextFieldPaintProperty> TextFieldModelTestNG::CreateNodeAndGetPaintProperty(
+    TextFieldModelNG& textFieldModelInstance)
+{
+    textFieldModelInstance.CreateNode(PLACEHOLDER, EMPTY_TEXT_VALUE, false);
+    auto frameNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (!frameNode_) {
+        GTEST_LOG_(INFO) << "create textfield node failed!";
+        return nullptr;
+    }
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    return paintProperty;
+}
 
 /**
  * @tc.name: CreateNode001
@@ -119,7 +150,6 @@ HWTEST_F(TextFieldModelTestNG, CreateNode001, TestSize.Level1)
     TextFieldModelNG textFieldModelInstance;
     textFieldModelInstance.CreateNode(PLACEHOLDER, EMPTY_TEXT_VALUE, false);
     EXPECT_TRUE(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    ViewStackProcessor::GetInstance()->Finish();
 }
 
 /**
@@ -132,7 +162,6 @@ HWTEST_F(TextFieldModelTestNG, CreateNode002, TestSize.Level1)
     TextFieldModelNG textFieldModelInstance;
     textFieldModelInstance.CreateNode(PLACEHOLDER, "value", false);
     EXPECT_TRUE(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    ViewStackProcessor::GetInstance()->Finish();
 }
 
 /**
@@ -145,7 +174,6 @@ HWTEST_F(TextFieldModelTestNG, CreateTextInput001, TestSize.Level1)
     TextFieldModelNG textFieldModelInstance;
     auto controller = textFieldModelInstance.CreateTextInput(PLACEHOLDER, EMPTY_TEXT_VALUE);
     EXPECT_TRUE(controller);
-    ViewStackProcessor::GetInstance()->Finish();
 }
 
 /**
@@ -158,7 +186,6 @@ HWTEST_F(TextFieldModelTestNG, CreateTextArea001, TestSize.Level1)
     TextFieldModelNG textFieldModelInstance;
     auto controller = textFieldModelInstance.CreateTextArea(PLACEHOLDER, EMPTY_TEXT_VALUE);
     EXPECT_TRUE(controller);
-    ViewStackProcessor::GetInstance()->Finish();
 }
 
 /**
@@ -169,15 +196,9 @@ HWTEST_F(TextFieldModelTestNG, CreateTextArea001, TestSize.Level1)
 HWTEST_F(TextFieldModelTestNG, SetType001, TestSize.Level1)
 {
     TextFieldModelNG textFieldModelInstance;
-    textFieldModelInstance.CreateNode(PLACEHOLDER, EMPTY_TEXT_VALUE, false);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    if (!frameNode) {
-        GTEST_LOG_(INFO) << "create textfield node failed!";
-        return;
-    }
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto layoutProperty = CreateNodeAndGetLayoutProperty(textFieldModelInstance);
     if (!layoutProperty) {
-        GTEST_LOG_(INFO) << "get layout property from text_field framenode failed";
+        EXPECT_TRUE(layoutProperty);
         return;
     }
     textFieldModelInstance.SetType(TextInputType::TEXT);
@@ -185,6 +206,93 @@ HWTEST_F(TextFieldModelTestNG, SetType001, TestSize.Level1)
     textFieldModelInstance.SetType(TextInputType::MULTILINE);
     EXPECT_EQ(layoutProperty->GetTextInputTypeValue(), TextInputType::MULTILINE);
     EXPECT_TRUE(layoutProperty->GetTypeChangedValue());
-    ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
+ * @tc.name: SetPlaceholderColor001
+ * @tc.desc: Create framenode and PlaceholderColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelTestNG, SetPlaceholderColor001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelInstance;
+    auto layoutProperty = CreateNodeAndGetLayoutProperty(textFieldModelInstance);
+    if (!layoutProperty) {
+        EXPECT_TRUE(layoutProperty);
+        return;
+    }
+    textFieldModelInstance.SetPlaceholderColor(Color::WHITE);
+    EXPECT_TRUE(layoutProperty->HasPlaceholderTextColor());
+}
+
+/**
+ * @tc.name: SetPlaceholderFont001
+ * @tc.desc: Create framenode and SetPlaceholderFont
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelTestNG, SetPlaceholderFont001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelInstance;
+    auto layoutProperty = CreateNodeAndGetLayoutProperty(textFieldModelInstance);
+    if (!layoutProperty) {
+        EXPECT_TRUE(layoutProperty);
+        return;
+    }
+    std::vector<std::string> fontFamilies;
+    fontFamilies.push_back("fontFamilies");
+    Font font { .fontWeight = Ace::FontWeight::W200,
+                .fontSize = Dimension(10.0),
+                .fontStyle = Ace::FontStyle::NORMAL,
+                .fontFamilies = fontFamilies };
+    textFieldModelInstance.SetPlaceholderFont(font);
+    EXPECT_EQ(layoutProperty->GetPlaceholderFontSize().value().Value(), 10.0);
+    EXPECT_EQ(layoutProperty->GetPlaceholderItalicFontStyle().value(), Ace::FontStyle::NORMAL);
+    EXPECT_EQ(layoutProperty->GetPlaceholderFontWeight().value(), Ace::FontWeight::W200);
+    EXPECT_EQ(layoutProperty->GetPlaceholderFontFamily().value().size(), fontFamilies.size());
+    EXPECT_TRUE(layoutProperty->GetPreferredLineHeightNeedToUpdate().value());
+}
+
+/**
+ * @tc.name: SetEnterKeyType001
+ * @tc.desc: Create framenode and SetEnterKeyType
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelTestNG, SetEnterKeyType001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelInstance;
+    auto layoutProperty = CreateNodeAndGetLayoutProperty(textFieldModelInstance);
+    if (!layoutProperty) {
+        EXPECT_TRUE(layoutProperty);
+        return;
+    }
+    textFieldModelInstance.SetEnterKeyType(TextInputAction::GO);
+    auto textFieldPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
+    EXPECT_TRUE(textFieldPattern);
+}
+
+/**
+ * @tc.name: SetOnEditChanged001
+ * @tc.desc: Create framenode and SetOnEditChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModelTestNG, SetOnEditChanged001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelInstance;
+    auto layoutProperty = CreateNodeAndGetLayoutProperty(textFieldModelInstance);
+    if (!layoutProperty) {
+        EXPECT_TRUE(layoutProperty);
+        return;
+    }
+    bool callback = false;
+    textFieldModelInstance.SetOnEditChanged([&callback] (bool info) {
+        callback = info;
+    });
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    if (!eventHub) {
+        EXPECT_TRUE(eventHub);
+        return;
+    }
+    eventHub->FireOnEditChanged(true);
+    EXPECT_TRUE(callback);
 }
 } // namespace OHOS::Ace::NG

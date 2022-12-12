@@ -187,14 +187,11 @@ void JSList::SetDivider(const JSCallbackInfo& args)
     }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-    Dimension strokeWidth;
-    if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), strokeWidth) && strokeWidth.IsValid()) {
-        LOGW("Invalid strokeWidth of divider");
-        return;
-    }
-
     V2::ItemDivider divider;
-    divider.strokeWidth = strokeWidth;
+    if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)) {
+        LOGW("Invalid strokeWidth of divider");
+        divider.strokeWidth.Reset();
+    }
     if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
         // Failed to get color from param, using default color defined in theme
         RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();

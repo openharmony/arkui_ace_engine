@@ -457,6 +457,14 @@ void RenderNode::PaintChild(const RefPtr<RenderNode>& child, RenderContext& cont
     }
 }
 
+void RenderNode::PaintChildList(
+    const std::list<RefPtr<RenderNode>>& childList, RenderContext& context, const Offset& offset)
+{
+    for (const auto& item : SortChildrenByZIndex(childList)) {
+        PaintChild(item, context, offset);
+    }
+}
+
 void RenderNode::MarkNeedLayout(bool selfOnly, bool forceParent)
 {
     bool addSelf = false;

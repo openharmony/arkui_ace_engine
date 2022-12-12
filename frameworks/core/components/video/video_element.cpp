@@ -1579,7 +1579,7 @@ void VideoElement::Start()
         return;
     }
     if (isStop_) {
-        if (mediaPlayer_->Prepare() != 0) {
+        if (mediaPlayer_->PrepareAsync() != 0) {
             LOGE("Player prepare failed");
             return;
         }

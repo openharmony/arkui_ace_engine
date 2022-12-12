@@ -72,6 +72,9 @@ void GestureScope::OnAcceptGesture(const RefPtr<NGGestureRecognizer>& recognizer
             gesture->OnRejected();
         }
     }
+    if (queryStateFunc_) {
+        queryStateFunc_(touchId_);
+    }
 }
 
 RefPtr<NGGestureRecognizer> GestureScope::UnBlockGesture()
@@ -124,6 +127,7 @@ void GestureReferee::AddGestureToScope(size_t touchId, const TouchTestResult& re
     for (const auto& item : result) {
         if (AceType::InstanceOf<NGGestureRecognizer>(item)) {
             scope->AddMember(DynamicCast<NGGestureRecognizer>(item));
+            scope->SetQueryStateFunc(queryStateFunc_);
         }
     }
 }

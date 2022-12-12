@@ -101,6 +101,7 @@ void SearchPattern::InitButtonAndImageClickEvent()
     CHECK_NULL_VOID(host);
     auto imageFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(IMAGE_INDEX));
     CHECK_NULL_VOID(imageFrameNode);
+    CHECK_NULL_VOID_NOLOG(!imageClickListener_);
     auto imageGesture = imageFrameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(imageGesture);
     auto imageClickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
@@ -116,6 +117,7 @@ void SearchPattern::InitButtonAndImageClickEvent()
     }
     auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(BUTTON_INDEX));
     CHECK_NULL_VOID(buttonFrameNode);
+    CHECK_NULL_VOID_NOLOG(!buttonClickListener_);
     auto buttonGesture = buttonFrameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(buttonGesture);
     auto buttonClickCallback = [weak = WeakClaim(this)](GestureEvent& info) {

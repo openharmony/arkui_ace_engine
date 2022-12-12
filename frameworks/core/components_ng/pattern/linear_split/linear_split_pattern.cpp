@@ -29,7 +29,8 @@ void LinearSplitPattern::OnAttachToFrameNode()
 
 bool LinearSplitPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
 {
-    if (skipMeasure || dirty->SkipMeasureContent()) {
+    CHECK_NULL_RETURN_NOLOG(!skipMeasure, false);
+    if (dirty->SkipMeasureContent()) {
         return false;
     }
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());

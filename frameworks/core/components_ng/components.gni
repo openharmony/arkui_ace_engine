@@ -116,8 +116,24 @@ template("build_component_ng") {
         "//third_party/bounds_checking_function/include",
       ]
 
+      if (defined(config.model_component_support) &&
+          config.model_component_support) {
+        include_dirs += [
+          "//foundation/graphic/graphic_3d/3d_widget_adapter/include",
+          "//foundation/graphic/graphic_3d/3d_widget_adapter/include/custom",
+          "//foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type",
+          "//foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/geometry",
+          "//foundation/graphic/graphic_3d/3d_widget_adapter/include/ohos",
+          "//foundation/graphic/graphic_2d/rosen/modules/",
+        ]
+      }
+
       if (platform == "ohos") {
-        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics" ]
+        deps += [
+          "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
+          "//third_party/EGL:libEGL",
+          "//third_party/openGLES:libGLES",
+        ]
       } else {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
       }

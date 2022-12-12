@@ -34,8 +34,20 @@ public:
 
     void OnReset() override {}
 
+    float GetHeight() const
+    {
+        return height_;
+    }
+
+    float GetWidth() const
+    {
+        return width_;
+    }
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SwitchLayoutAlgorithm);
+    float width_ = 0.0f;
+    float height_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

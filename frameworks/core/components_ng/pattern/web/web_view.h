@@ -88,6 +88,21 @@ public:
     static void SetWindowExitEventId(OnWebAsyncFunc&& windowExitEventId);
     static void SetMultiWindowAccessEnabled(bool isMultiWindowAccessEnabled);
     static void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback);
+    static void SetWebCursiveFont(const std::string& cursiveFontFamily);
+    static void SetWebFantasyFont(const std::string& fantasyFontFamily);
+    static void SetWebFixedFont(const std::string& fixedFontFamily);
+    static void SetWebSansSerifFont(const std::string& sansSerif);
+    static void SetWebSerifFont(const std::string& serifFontFamily);
+    static void SetWebStandardFont(const std::string& standardFontFamily);
+    static void SetDefaultFixedFontSize(int32_t defaultFixedFontSize);
+    static void SetDefaultFontSize(int32_t defaultFontSize);
+    static void SetMinFontSize(int32_t minFontSize);
+    static void SetBlockNetwork(bool isNetworkBlocked);
+    static void SetPageVisibleId(OnWebAsyncFunc&& pageVisibleId);
+    static void SetOnInterceptKeyEventCallback(std::function<bool(KeyEventInfo& keyEventInfo)>&& onPreKeyEventId);
+    static void SetDataResubmittedId(OnWebAsyncFunc&& DataResubmittedId);
+    static void SetFaviconReceivedId(OnWebAsyncFunc&& faviconReceivedId);
+    static void SetTouchIconUrlId(OnWebAsyncFunc&& touchIconUrlId);
 
 private:
     static void RegisterPipelineCallback(int32_t nodeId);

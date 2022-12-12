@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/list/list_paint_method.h"
 
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_painter.h"
+#include "core/components_ng/render/divider_painter.h"
+
 namespace OHOS::Ace::NG {
 void ListPaintMethod::PaintDivider(const DividerInfo& dividerInfo, const PositionMap& itemPosition, RSCanvas& canvas)
 {
@@ -31,8 +34,8 @@ void ListPaintMethod::PaintDivider(const DividerInfo& dividerInfo, const Positio
 
     for (const auto& child : itemPosition) {
         if (!isFirstItem) {
-            float mainPos = child.second.startPos - dividerInfo.halfSpaceWidth;
-            float crossPos = dividerInfo.startMargin;
+            float mainPos = child.second.startPos - dividerInfo.halfSpaceWidth + dividerInfo.mainPadding;
+            float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
             if (lanes > 1 && !lastIsItemGroup && !child.second.isGroup) {
                 crossPos += laneIdx * dividerInfo.crossSize / dividerInfo.lanes;
                 dividerPainter.SetDividerLength(laneLen);
@@ -53,8 +56,8 @@ void ListPaintMethod::PaintDivider(const DividerInfo& dividerInfo, const Positio
     if (!lastLineIndex.empty() && *lastLineIndex.rbegin() < dividerInfo.totalItemCount - 1) {
         int32_t laneIdx = 0;
         for (auto index : lastLineIndex) {
-            float mainPos = itemPosition.at(index).endPos + dividerInfo.halfSpaceWidth;
-            float crossPos = dividerInfo.startMargin;
+            float mainPos = itemPosition.at(index).endPos + dividerInfo.halfSpaceWidth + dividerInfo.mainPadding;
+            float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
             if (lanes > 1 && !itemPosition.at(index).isGroup) {
                 crossPos += laneIdx * dividerInfo.crossSize / dividerInfo.lanes;
                 dividerPainter.SetDividerLength(laneLen);
@@ -68,32 +71,56 @@ void ListPaintMethod::PaintDivider(const DividerInfo& dividerInfo, const Positio
     }
 }
 
-static void PaintScrollBar(const WeakPtr<ScrollBar>& weakScrollBar, RSCanvas& canvas)
+void ListPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas& canvas)
 {
-    auto scrollBar = weakScrollBar.Upgrade();
-    CHECK_NULL_VOID(scrollBar);
-    ScrollBarPainter::PaintRectBar(canvas, scrollBar, UINT8_MAX);
-}
-
-CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
-{
+    if (!divider_.strokeWidth.IsValid()) {
+        return;
+    }
     const auto& geometryNode = paintWrapper->GetGeometryNode();
-    auto frameSize = geometryNode->GetFrameSize();
+    auto frameSize = geometryNode->GetPaddingSize();
+    OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
+    Axis axis = vertical_ ? Axis::VERTICAL : Axis::HORIZONTAL;
     DividerInfo dividerInfo = {
         .constrainStrokeWidth = divider_.strokeWidth.ConvertToPx(),
         .crossSize = vertical_ ? frameSize.Height() : frameSize.Width(),
         .startMargin = divider_.startMargin.ConvertToPx(),
         .endMargin = divider_.endMargin.ConvertToPx(),
-        .halfSpaceWidth = space_ / 2.0f, /* 2.0f half */
+        .halfSpaceWidth = (space_ + divider_.strokeWidth.ConvertToPx()) / 2.0f, /* 2.0f half */
+        .mainPadding = paddingOffset.GetMainOffset(axis),
+        .crossPadding = paddingOffset.GetCrossOffset(axis),
         .isVertical = vertical_,
         .lanes = lanes_ > 1 ? lanes_ : 1,
         .totalItemCount = totalItemCount_,
         .color = divider_.color
     };
+    PaintDivider(dividerInfo, itemPosition_, canvas);
+}
 
-    return [dividerInfo, itemPosition = std::move(itemPosition_), scrollBar = scrollBar_](RSCanvas& canvas) {
-        PaintDivider(dividerInfo, itemPosition, canvas);
-        PaintScrollBar(scrollBar, canvas);
+void ListPaintMethod::PaintScrollBar(RSCanvas& canvas)
+{
+    auto scrollBar = scrollBar_.Upgrade();
+    CHECK_NULL_VOID(scrollBar);
+    ScrollBarPainter::PaintRectBar(canvas, scrollBar, UINT8_MAX);
+}
+
+void ListPaintMethod::PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas)
+{
+    CHECK_NULL_VOID(paintWrapper);
+    auto edgeEffect = edgeEffect_.Upgrade();
+    CHECK_NULL_VOID(edgeEffect);
+    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+    edgeEffect->Paint(canvas, frameSize, { 0.0f, 0.0f });
+}
+
+CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
+{
+    auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
+        auto painter = weak.Upgrade();
+        CHECK_NULL_VOID(painter);
+        painter->PaintDivider(paintWrapper, canvas);
+        painter->PaintScrollBar(canvas);
+        painter->PaintEdgeEffect(paintWrapper, canvas);
     };
+    return paintFunc;
 }
 } // namespace OHOS::Ace::NG

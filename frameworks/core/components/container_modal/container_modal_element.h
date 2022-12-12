@@ -20,6 +20,7 @@
 #include "core/components/flex/flex_component.h"
 #include "core/components/overlay/overlay_element.h"
 #include "core/components/stage/stage_element.h"
+#include "core/components/text/render_text.h"
 #include "core/pipeline/base/sole_child_element.h"
 
 namespace OHOS::Ace {
@@ -47,6 +48,8 @@ private:
     bool CanHideFloatingTitle();
     void ChangeFloatingTitleIcon(bool isFocus = true);
     void ChangeTitleIcon(bool isFocus = true);
+    RefPtr<RenderText> GetTitleRender(bool isFloatingTitle);
+    RefPtr<RenderImage> GetIconRender(bool isFloatingTitle);
     WindowMode windowMode_;
     RefPtr<Animator> controller_;
     RefPtr<RenderDisplay> floatingTitleDisplay_;

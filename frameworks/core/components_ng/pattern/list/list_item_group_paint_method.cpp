@@ -18,6 +18,9 @@
 namespace OHOS::Ace::NG {
 CanvasDrawFunction ListItemGroupPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
+    if (!divider_.strokeWidth.IsValid()) {
+        return nullptr;
+    }
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     auto frameSize = geometryNode->GetFrameSize();
     struct DividerInfo {
@@ -34,7 +37,7 @@ CanvasDrawFunction ListItemGroupPaintMethod::GetContentDrawFunction(PaintWrapper
         .crossSize = vertical_ ? frameSize.Height() : frameSize.Width(),
         .startMargin = divider_.startMargin.ConvertToPx(),
         .endMargin = divider_.endMargin.ConvertToPx(),
-        .halfSpaceWidth = spaceWidth_ / 2.0f, /* 2.0f half */
+        .halfSpaceWidth = (spaceWidth_ + divider_.strokeWidth.ConvertToPx()) / 2.0f, /* 2.0f half */
         .isVertical = vertical_,
         .lanes = lanes_ > 1 ? lanes_ : 1,
         .color = divider_.color

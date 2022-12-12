@@ -32,8 +32,8 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/rosen_modifier_property.h"
 #include "core/components_ng/render/adapter/graphics_modifier.h"
+#include "core/components_ng/render/adapter/rosen_modifier_property.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -192,7 +192,7 @@ public:
 
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
-    void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) override;
+    void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
     void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) override;
     void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) override;
@@ -200,10 +200,10 @@ private:
 
     void OnBorderImageUpdate(const RefPtr<BorderImage>& borderImage) override;
     void OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo) override;
-    void OnHasBorderImageSliceUpdate(bool tag) override;
-    void OnHasBorderImageWidthUpdate(bool tag) override;
-    void OnHasBorderImageOutsetUpdate(bool tag) override;
-    void OnHasBorderImageRepeatUpdate(bool tag) override;
+    void OnHasBorderImageSliceUpdate(bool tag) override {}
+    void OnHasBorderImageWidthUpdate(bool tag) override {}
+    void OnHasBorderImageOutsetUpdate(bool tag) override {}
+    void OnHasBorderImageRepeatUpdate(bool tag) override {}
     void OnBorderImageGradientUpdate(const Gradient& gradient) override;
 
     void OnBorderRadiusUpdate(const BorderRadiusProperty& value) override;
@@ -282,10 +282,13 @@ private:
     DataReadyNotifyTask CreateBorderImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBorderImageLoadSuccessCallback();
 
+    RefPtr<ImageLoadingContext> bgLoadingCtx_;
+    RefPtr<CanvasImage> bgImage_;
+    RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
+    RefPtr<CanvasImage> bdImage_;
+
     std::shared_ptr<Rosen::RSNode> rsNode_;
     SkPictureRecorder* recorder_ = nullptr;
-    RefPtr<ImageLoadingContext> bgLoadingCtx_;
-    RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
     RefPtr<Canvas> recordingCanvas_;
     RefPtr<Canvas> rosenCanvas_;
     bool isHoveredScale_ = false;

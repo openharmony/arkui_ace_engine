@@ -20,7 +20,6 @@
 
 #include "testing_color.h"
 #include "testing_mask_filter.h"
-#include "utils/scalar.h"
 
 namespace OHOS::Ace::Testing {
 class TestingFilter {

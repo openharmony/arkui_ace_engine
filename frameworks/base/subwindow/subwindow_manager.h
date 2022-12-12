@@ -73,6 +73,7 @@ public:
     bool CancelPopup(const std::string& id);
     void CloseMenu();
     void ClearMenu();
+    void ClearMenuNG();
 
     void SetHotAreas(const std::vector<Rect>& rects);
 

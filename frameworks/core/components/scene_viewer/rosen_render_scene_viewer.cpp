@@ -44,11 +44,23 @@ RosenRenderSceneViewer::RosenRenderSceneViewer(uint32_t key) : RenderSceneViewer
 
 void RosenRenderSceneViewer::PrepareTextureLayer(const OHOS::Render3D::TextureInfo& info)
 {
+    width_ = static_cast<uint32_t>(GetLayoutSize().Width());
+    height_ = static_cast<uint32_t>(GetLayoutSize().Height());
     textureLayer_ = std::make_shared<OHOS::Render3D::TextureLayer>(info);
+    textureLayer_->SetWH(width_, height_);
 }
 
 void RosenRenderSceneViewer::PaintTextureLayer(RenderContext& context, const Offset& offset)
 {
+    auto newWidth = static_cast<uint32_t>(GetLayoutSize().Width());
+    auto newHeight = static_cast<uint32_t>(GetLayoutSize().Height());
+    LOGD("PaintTextureLayer() newWidth: %d, newHeight: %d", newWidth, newHeight);
+    if (width_ != newWidth || height_ != newHeight) {
+        width_ = newWidth;
+        height_ = newHeight;
+        textureLayer_->SetWH(width_, height_);
+    }
+
     textureLayer_->UpdateRenderFinishFuture(renderFinished_);
     textureLayer_->SetOffset(offset.GetX(), offset.GetY());
     ACE_FUNCTION_TRACE();

@@ -31,7 +31,7 @@ void MakeNodeMapById(const std::list<RefPtr<UINode>>& nodes, const std::list<std
     ACE_DCHECK(ids.size() == nodes.size());
     auto idsIter = ids.begin();
     auto nodeIter = nodes.begin();
-    while (idsIter != ids.end()) {
+    while (idsIter != ids.end() && nodeIter != nodes.end()) {
         result.emplace(*idsIter, *nodeIter);
         ++idsIter;
         ++nodeIter;
@@ -96,7 +96,9 @@ void ForEachNode::CompareAndUpdateChildren()
         } else {
             auto iter = oldNodeByIdMap.find(newId);
             // the ID was used before, only need to update the child position.
-            AddChild(iter->second, DEFAULT_NODE_SLOT, true);
+            if (iter != oldNodeByIdMap.end() && iter->second) {
+                AddChild(iter->second, DEFAULT_NODE_SLOT, true);
+            }
             oldIdsSet.erase(oldIdIt);
         }
     }
@@ -108,7 +110,7 @@ void ForEachNode::CompareAndUpdateChildren()
             // node is a part the tree.
             // OnDetachFromMainTree to be called while node
             // still part of the tree, we need to find
-            // posiiton in the tab tab for the tab.
+            // position in the tab tab for the tab.
             AddChild(iter->second, DEFAULT_NODE_SLOT, true);
             // Remove and trigger all Detach callback.
             RemoveChild(iter->second);
@@ -116,13 +118,18 @@ void ForEachNode::CompareAndUpdateChildren()
     }
 
     if (IsOnMainTree()) {
-        for (auto newChild : additionalChildComps) {
+        for (const auto& newChild : additionalChildComps) {
             newChild->AttachToMainTree();
         }
     }
 
     tempChildren_.clear();
     tempIds_.clear();
+
+    auto parent = GetParent();
+    if (parent) {
+        parent->ChildrenUpdatedFrom(0);
+    }
 }
 
 void ForEachNode::FlushUpdateAndMarkDirty()

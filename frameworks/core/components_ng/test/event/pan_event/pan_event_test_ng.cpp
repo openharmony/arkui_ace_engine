@@ -41,7 +41,9 @@ bool OHOS::Ace::SystemProperties::GetDebugEnabled()
 } // namespace OHOS::Ace
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint32_t PAN_EVENT_TEST_RESULT_SIZE_1 = 1;
+constexpr double GESTURE_EVENT_PROPERTY_DEFAULT_VALUE = 0.0;
+constexpr double GESTURE_EVENT_PROPERTY_VALUE = 10.0;
+constexpr uint32_t PAN_EVENT_TEST_RESULT_SIZE_1 = 2;
 constexpr uint32_t PAN_EVENT_TEST_RESULT_SIZE = 0;
 const TouchRestrict PAN_EVENT_RESTRICT = { TouchRestrict::LONG_PRESS };
 constexpr float WIDTH = 400.0f;
@@ -49,7 +51,9 @@ constexpr float HEIGHT = 400.0f;
 const OffsetF COORDINATE_OFFSET(WIDTH, HEIGHT);
 const PanDirection PAN_EVENT_DIRECTION = { PanDirection::LEFT };
 constexpr int32_t FINGERS_NUMBER = 0;
+constexpr int32_t FINGERS_NUMBER_GREATER_THAN_DEFAULT = 2;
 constexpr float DISTANCE = 3.0f;
+constexpr float DISTANCE_GREATER_THAN_DEFAULT = 6.0f;
 constexpr int32_t DEFAULT_PAN_FINGER = 1;
 constexpr double DEFAULT_PAN_DISTANCE = 5.0;
 } // namespace
@@ -103,6 +107,16 @@ HWTEST_F(PanEventTestNg, PanEventOnCollectTouchTargetTest001, TestSize.Level1)
     EXPECT_NE(panEventActuator, nullptr);
     EXPECT_EQ(panEventActuator->fingers_, DEFAULT_PAN_FINGER);
     EXPECT_EQ(panEventActuator->distance_, DEFAULT_PAN_DISTANCE);
+
+    /**
+     * @tc.steps: step2. Create DragEventActuator when fingers number and distance are both greater than the default.
+     * @tc.expected: panEventActuator is initialized with the fingers_ and distance_ defined before.
+     */
+    auto panEventActuator2 = AceType::MakeRefPtr<PanEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)),
+        PAN_EVENT_DIRECTION, FINGERS_NUMBER_GREATER_THAN_DEFAULT, DISTANCE_GREATER_THAN_DEFAULT);
+    EXPECT_NE(panEventActuator2, nullptr);
+    EXPECT_EQ(panEventActuator2->fingers_, FINGERS_NUMBER_GREATER_THAN_DEFAULT);
+    EXPECT_EQ(panEventActuator2->distance_, DISTANCE_GREATER_THAN_DEFAULT);
 }
 
 /**
@@ -136,18 +150,28 @@ HWTEST_F(PanEventTestNg, PanEventOnCollectTouchTargetTest002, TestSize.Level1)
      * @tc.steps: step3. ReplacePanEvent to initialize userCallback_ and AddPanEvent to add panEvent into panEvents_.
      * @tc.expected: userCallback_ is not nullptr and panEvents_ is not empty.
      */
-    GestureEventFunc actionStart = [](GestureEvent& info) {};
-    GestureEventFunc actionUpdate = [](GestureEvent& info) {};
-    GestureEventFunc actionEnd = [](GestureEvent& info) {};
-    GestureEventNoParameter actionCancel = []() {};
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    GestureEventFunc actionStart = [&unknownPropertyValue](
+                                       GestureEvent& info) { unknownPropertyValue = info.GetScale(); };
+    GestureEventFunc actionUpdate = [&unknownPropertyValue](
+                                        GestureEvent& info) { unknownPropertyValue = info.GetScale(); };
+    GestureEventFunc actionEnd = [&unknownPropertyValue](
+                                     GestureEvent& info) { unknownPropertyValue = info.GetScale(); };
+    GestureEventNoParameter actionCancel = [&unknownPropertyValue]() {
+        unknownPropertyValue = GESTURE_EVENT_PROPERTY_VALUE;
+    };
 
     auto panEvent = AceType::MakeRefPtr<PanEvent>(
         std::move(actionStart), std::move(actionUpdate), std::move(actionEnd), std::move(actionCancel));
     EXPECT_NE(panEvent, nullptr);
+    panEventActuator->AddPanEvent(panEvent);
+    auto panEventNullptr = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
+    panEventActuator->AddPanEvent(panEventNullptr);
+    EXPECT_FALSE(panEventActuator->panEvents_.empty());
+    panEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, PAN_EVENT_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
     panEventActuator->ReplacePanEvent(panEvent);
     EXPECT_NE(panEventActuator->userCallback_, nullptr);
-    panEventActuator->AddPanEvent(panEvent);
-    EXPECT_FALSE(panEventActuator->panEvents_.empty());
 
     /**
      * @tc.steps: step4. Invoke OnCollectTouchTarget when panEvents_ and userCallback_ are not empty
@@ -162,5 +186,36 @@ HWTEST_F(PanEventTestNg, PanEventOnCollectTouchTargetTest002, TestSize.Level1)
     EXPECT_NE(panEventActuator->panRecognizer_->getEventTargetImpl_, nullptr);
     EXPECT_EQ(panEventActuator->panRecognizer_->GetCoordinateOffset(), Offset(WIDTH, HEIGHT));
     EXPECT_EQ(result.size(), PAN_EVENT_TEST_RESULT_SIZE_1);
+
+    /**
+     * @tc.steps: step5. Invoke onActionStart, onActionUpdate, onActionEnd, onActionCancel when the onActionStart
+     * function exists.
+     * @tc.expected: The functions have been executed and the unknownPropertyValue has been assigned the correct
+     * value.
+     */
+    GestureEvent info = GestureEvent();
+    info.SetScale(GESTURE_EVENT_PROPERTY_VALUE);
+    (*(panEventActuator->panRecognizer_->onActionStart_))(info);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    (*(panEventActuator->panRecognizer_->onActionUpdate_))(info);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    (*(panEventActuator->panRecognizer_->onActionEnd_))(info);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    (*(panEventActuator->panRecognizer_->onActionCancel_))();
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+
+    /**
+     * @tc.steps: step6. Invoke onActionStart, onActionUpdate, onActionEnd, onActionCancel when the onActionStart
+     * function not exist.
+     * @tc.expected: The functions have not been executed.
+     */
+    panEventActuator->ReplacePanEvent(panEventNullptr);
+    panEventActuator->RemovePanEvent(panEvent);
+    unknownPropertyValue = 0.0;
+    (*(panEventActuator->panRecognizer_->onActionStart_))(info);
+    (*(panEventActuator->panRecognizer_->onActionUpdate_))(info);
+    (*(panEventActuator->panRecognizer_->onActionEnd_))(info);
+    (*(panEventActuator->panRecognizer_->onActionCancel_))();
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
 }
 } // namespace OHOS::Ace::NG

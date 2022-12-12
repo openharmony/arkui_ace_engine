@@ -17,6 +17,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t LONG_PRESS_DURATION = 280;
+
 OffsetF GetMenuPosition(const RefPtr<FrameNode>& targetNode)
 {
     // show menu at bottom center point of targetNode
@@ -107,7 +109,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
         };
         auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
 
-        hub->SetLongPressEvent(longPress, false, true);
+        hub->SetLongPressEvent(longPress, false, true, LONG_PRESS_DURATION);
     } else {
         LOGE("The arg responseType is invalid.");
         return;

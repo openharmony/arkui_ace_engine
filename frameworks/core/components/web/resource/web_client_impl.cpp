@@ -683,13 +683,53 @@ void WebClientImpl::OnWindowExitByJS()
     delegate->OnWindowExit();
 }
 
+void WebClientImpl::OnPageVisible(const std::string& url)
+{
+    LOGI("OnPageVisible");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnPageVisible(url);
+}
+
+void WebClientImpl::OnDataResubmission(std::shared_ptr<NWeb::NWebDataResubmissionCallback> handler)
+{
+    LOGI("OnDataResubmission");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    CHECK_NULL_VOID(handler);
+    delegate->OnDataResubmitted(handler);
+}
+
+void WebClientImpl::OnPageIcon(const void* data,
+                               size_t width,
+                               size_t height,
+                               NWeb::ImageColorType colorType,
+                               NWeb::ImageAlphaType alphaType)
+{
+    LOGI("OnPageIcon");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnFaviconReceived(data, width, width, colorType, alphaType);
+}
+
+void WebClientImpl::OnDesktopIconUrl(const std::string& icon_url, bool precomposed)
+{
+    LOGI("OnDesktopIconUrl");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnTouchIconUrl(icon_url, precomposed);
+}
+
 void ReleaseSurfaceImpl::ReleaseSurface()
 {
     ContainerScope scope(instanceId_);
-    // if (!surfaceDelegate_) {
-    //     return;
-    // }
-    // SURFACE_DELEGATE
-    // surfaceDelegate_->ReleaseSurface();
+    if (!surfaceDelegate_) {
+        return;
+    }
+    surfaceDelegate_->ReleaseSurface();
 }
 } // namespace OHOS::Ace

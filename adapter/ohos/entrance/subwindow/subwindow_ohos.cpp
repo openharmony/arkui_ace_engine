@@ -226,6 +226,10 @@ void SubwindowOhos::ShowWindow()
     LOGI("Show the subwindow");
     CHECK_NULL_VOID(window_);
 
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    CHECK_NULL_VOID(defaultDisplay);
+    window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+
     OHOS::Rosen::WMError ret = window_->Show();
 
     if (ret != OHOS::Rosen::WMError::WM_OK) {
@@ -296,6 +300,10 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t tar
 
 void SubwindowOhos::HideMenuNG()
 {
+    if (!isShowed_) {
+        return;
+    }
+    isShowed_ = false;
     LOGI("SubwindowOhos::HideMenuNG");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
@@ -303,13 +311,15 @@ void SubwindowOhos::HideMenuNG()
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-    overlay->CleanMenuInSubWindow();
-    context->FlushPipelineImmediately();
-    HideWindow();
+    overlay->HideMenuInSubWindow();
 }
 
 void SubwindowOhos::HideMenuNG(int32_t targetId)
 {
+    if (!isShowed_) {
+        return;
+    }
+    isShowed_ = false;
     LOGI("SubwindowOhos::HideMenuNG for target id %{public}d", targetId);
     targetId_ = targetId;
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -318,7 +328,19 @@ void SubwindowOhos::HideMenuNG(int32_t targetId)
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-    overlay->HideMenu(targetId_);
+    overlay->HideMenuInSubWindow(targetId_);
+}
+
+void SubwindowOhos::ClearMenuNG()
+{
+    LOGI("SubwindowOhos::ClearMenuNG");
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->CleanMenuInSubWindow();
     context->FlushPipelineImmediately();
     HideWindow();
 }
@@ -400,7 +422,11 @@ void SubwindowOhos::GetToastDialogWindowProperty(
 bool SubwindowOhos::InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY, bool isToast)
 {
     OHOS::sptr<OHOS::Rosen::WindowOption> windowOption = new OHOS::Rosen::WindowOption();
-    windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    if (isToast) {
+        windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_TOAST);
+    } else {
+        windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    }
     windowOption->SetWindowRect({ posX, posY, width, height });
     windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
     windowOption->SetFocusable(!isToast);

@@ -79,7 +79,7 @@ public:
     bool HandleMouseEvent(const MouseEvent& event) override;
     void SendDoubleClickEvent(const MouseClickInfo& info);
     bool HandleDoubleClickEvent(const MouseEvent& event);
-    void HandleKeyEvent(const KeyEvent& keyEvent);
+    bool HandleKeyEvent(const KeyEvent& keyEvent);
 
 #ifdef OHOS_STANDARD_SYSTEM
     void OnAppShow() override;
@@ -121,7 +121,7 @@ public:
     void HandleAxisEvent(const AxisEvent& event) override;
     bool IsAxisScrollable(AxisDirection direction) override;
     WeakPtr<RenderNode> CheckAxisNode() override;
-    
+
     void SetWebIsFocus(bool isFocus)
     {
         isFocus_ = isFocus;
@@ -154,6 +154,7 @@ protected:
     Size drawSizeCache_;
     bool isUrlLoaded_ = false;
     Size preDrawSize_;
+    Offset position_;
     Offset prePosition_;
     bool isEnhanceSurface_ = false;
 
@@ -187,6 +188,7 @@ private:
     RefPtr<RawRecognizer> touchRecognizer_ = nullptr;
     OnMouseCallback onMouse_;
     OnKeyEventCallback onKeyEvent_;
+    std::function<bool(KeyEventInfo& keyEventInfo)> onPreKeyEvent_;
     RefPtr<TextOverlayComponent> textOverlay_;
     WeakPtr<StackElement> stackElement_;
     std::function<void(const OverlayShowOption&, float, float)> updateHandlePosition_ = nullptr;
@@ -204,7 +206,6 @@ private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
     void SetRootView(int32_t width, int32_t height, int32_t offset);
-    Offset position_;
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
     bool needOnFocus_ = false;

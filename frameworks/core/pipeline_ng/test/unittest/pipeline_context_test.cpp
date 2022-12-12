@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 #include <cstdint>
+
 #include "gtest/gtest.h"
+
 #include "core/components/common/layout/constants.h"
 
 // Add the following two macro definitions to test the private and protected method.
@@ -24,20 +26,22 @@
 #include "base/memory/referenced.h"
 #include "core/common/ace_engine.h"
 #include "core/common/event_manager.h"
-#include "core/components_ng/render/drawing_forward.h"
+#include "core/common/test/mock/mock_container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/test/mock/mock_container.h"
-#include "core/pipeline_ng/test/unittest/mock_schedule_task.h"
-#include "core/pipeline_ng/test/mock/mock_window.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_frontend.h"
 #include "core/pipeline_ng/test/mock/mock_task_executor.h"
-#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
+#include "core/pipeline_ng/test/mock/mock_window.h"
+#include "core/pipeline_ng/test/unittest/common_constants.h"
+#include "core/pipeline_ng/test/unittest/mock_schedule_task.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -55,6 +59,7 @@ constexpr uint32_t DEFAULT_SIZE2 = 2;
 constexpr uint32_t DEFAULT_SIZE3 = 3;
 constexpr uint32_t FRAME_COUNT = 10;
 constexpr uint64_t NANO_TIME_STAMP = 10;
+constexpr double DEFAULT_DOUBLE0 = 0.0;
 constexpr double DEFAULT_DOUBLE1 = 1.0;
 constexpr double DEFAULT_DOUBLE2 = 2.0;
 constexpr double DEFAULT_DOUBLE4 = 4.0;
@@ -63,10 +68,13 @@ const std::string TEST_TAG("test");
 
 class PipelineContextTest : public testing::Test {
 public:
+    static void ResetEventFlag(int32_t testFlag);
+    static bool GetEventFlag(int32_t testFlag);
     static void SetUpTestSuite();
-    static void TearDownTestSuite();
-    void SetUp() override;
-    void TearDown() override;
+    static void TearDownTestSuite() {}
+    void SetUp() override {}
+    void TearDown() override {}
+
 private:
     static ElementIdType frameNodeId_;
     static ElementIdType customNodeId_;
@@ -81,9 +89,20 @@ RefPtr<FrameNode> PipelineContextTest::frameNode_ = nullptr;
 RefPtr<CustomNode> PipelineContextTest::customNode_ = nullptr;
 RefPtr<PipelineContext> PipelineContextTest::context_ = nullptr;
 
+void PipelineContextTest::ResetEventFlag(int32_t testFlag)
+{
+    auto flag = context_->eventManager_->GetInstanceId();
+    context_->eventManager_->SetInstanceId(flag & (~testFlag));
+}
+
+bool PipelineContextTest::GetEventFlag(int32_t testFlag)
+{
+    auto flag = context_->eventManager_->GetInstanceId();
+    return flag & testFlag;
+}
+
 void PipelineContextTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "PipelineContextTest SetUpTestSuite";
     frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
     customNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
     frameNode_ = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
@@ -91,25 +110,11 @@ void PipelineContextTest::SetUpTestSuite()
     customNode_ = CustomNode::CreateCustomNode(customNodeId_, TEST_TAG);
     ElementRegister::GetInstance()->AddUINode(frameNode_);
     ContainerScope scope(DEFAULT_INSTANCE_ID);
-    context_ = AceType::MakeRefPtr<PipelineContext>(std::make_unique<MockWindow>(),
-        AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
+    context_ = AceType::MakeRefPtr<PipelineContext>(
+        std::make_unique<MockWindow>(), AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
+    context_->SetEventManager(AceType::MakeRefPtr<EventManager>());
     RefPtr<Container> container = AceType::MakeRefPtr<MockContainer>(context_);
     AceEngine::Get().AddContainer(DEFAULT_INSTANCE_ID, container);
-}
-
-void PipelineContextTest::TearDownTestSuite()
-{
-    GTEST_LOG_(INFO) << "PipelineContextTest TearDownTestSuite";
-}
-
-void PipelineContextTest::SetUp()
-{
-    GTEST_LOG_(INFO) << "PipelineContextTest SetUp";
-}
-
-void PipelineContextTest::TearDown()
-{
-    GTEST_LOG_(INFO) << "PipelineContextTest TearDown";
 }
 
 /**
@@ -125,7 +130,7 @@ HWTEST_F(PipelineContextTest, PipelineContextTest001, TestSize.Level1)
      */
     ASSERT_NE(context_, nullptr);
     bool flagUpdate = false;
-    customNode_->SetUpdateFunction([&flagUpdate] () { flagUpdate = true; });
+    customNode_->SetUpdateFunction([&flagUpdate]() { flagUpdate = true; });
     context_->AddDirtyCustomNode(customNode_);
 
     /**
@@ -404,7 +409,7 @@ HWTEST_F(PipelineContextTest, PipelineContextTest009, TestSize.Level1)
      * @tc.expected: The flagCbk is changed to true.
      */
     context_->SetForegroundCalled(true);
-    context_->SetNextFrameLayoutCallback([&flagCbk] () { flagCbk = !flagCbk; });
+    context_->SetNextFrameLayoutCallback([&flagCbk]() { flagCbk = !flagCbk; });
     context_->OnSurfaceChanged(DEFAULT_INT10, DEFAULT_INT10, WindowSizeChangeReason::CUSTOM_ANIMATION);
     EXPECT_TRUE(flagCbk);
 
@@ -598,7 +603,7 @@ HWTEST_F(PipelineContextTest, PipelineContextTest014, TestSize.Level1)
      * @tc.steps2: Call the function OnIdle.
      * @tc.expected: The value of flagCbk remains unchanged.
      */
-    context_->AddPredictTask([&flagCbk] (int64_t deadline) { flagCbk = true; });
+    context_->AddPredictTask([&flagCbk](int64_t deadline) { flagCbk = true; });
     context_->OnIdle(0);
     EXPECT_FALSE(flagCbk);
 
@@ -636,7 +641,7 @@ HWTEST_F(PipelineContextTest, PipelineContextTest015, TestSize.Level1)
      * @tc.steps3: Call the function Finish.
      * @tc.expected: The flagCbk is changed to true.
      */
-    context_->SetFinishEventHandler([&flagCbk] () { flagCbk = true; });
+    context_->SetFinishEventHandler([&flagCbk]() { flagCbk = true; });
     context_->Finish(false);
     EXPECT_TRUE(flagCbk);
 }
@@ -791,7 +796,6 @@ HWTEST_F(PipelineContextTest, PipelineContextTest019, TestSize.Level1)
     context_->SetAppTitle(TEST_TAG);
     EXPECT_DOUBLE_EQ(pattern->moveX_, DEFAULT_DOUBLE2);
 
-
     /**
      * @tc.steps3: Call the function ShowContainerTitle with windowModal_ = WindowModal::CONTAINER_MODAL.
      * @tc.expected: The moveX_ is unchanged.
@@ -832,7 +836,6 @@ HWTEST_F(PipelineContextTest, PipelineContextTest020, TestSize.Level1)
     context_->SetAppIcon(nullptr);
     EXPECT_DOUBLE_EQ(pattern->moveX_, DEFAULT_DOUBLE2);
 
-
     /**
      * @tc.steps3: Call the function SetAppIcon with windowModal_ = WindowModal::CONTAINER_MODAL.
      * @tc.expected: The moveX_ is unchanged.
@@ -864,29 +867,30 @@ HWTEST_F(PipelineContextTest, PipelineContextTest021, TestSize.Level1)
      * @tc.expected: The instanceId is changed to 4.
      */
     event.action = AxisAction::BEGIN;
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    context_->SetEventManager(eventManager);
-    eventManager->SetInstanceId(DEFAULT_INT0);
+    ResetEventFlag(TOUCH_TEST_FLAG | AXIS_TEST_FLAG);
     context_->OnAxisEvent(event);
-    EXPECT_EQ(context_->eventManager_->GetInstanceId(), DEFAULT_INT4);
+    EXPECT_TRUE(GetEventFlag(TOUCH_TEST_FLAG));
+    EXPECT_TRUE(GetEventFlag(AXIS_TEST_FLAG));
 
     /**
      * @tc.steps3: Call the function OnAxisEvent with action = AxisAction::UPDATE.
      * @tc.expected: The instanceId is changed to 3.
      */
     event.action = AxisAction::UPDATE;
-    eventManager->SetInstanceId(DEFAULT_INT0);
+    ResetEventFlag(TOUCH_TEST_FLAG | AXIS_TEST_FLAG);
     context_->OnAxisEvent(event);
-    EXPECT_EQ(eventManager->GetInstanceId(), DEFAULT_INT3);
+    EXPECT_FALSE(GetEventFlag(TOUCH_TEST_FLAG));
+    EXPECT_TRUE(GetEventFlag(AXIS_TEST_FLAG));
 
     /**
      * @tc.steps4: Call the function OnAxisEvent with action = AxisAction::END.
      * @tc.expected: The instanceId is changed to 1.
      */
     event.action = AxisAction::END;
-    eventManager->SetInstanceId(DEFAULT_INT0);
+    ResetEventFlag(TOUCH_TEST_FLAG | AXIS_TEST_FLAG);
     context_->OnAxisEvent(event);
-    EXPECT_EQ(eventManager->GetInstanceId(), DEFAULT_INT1);
+    EXPECT_FALSE(GetEventFlag(TOUCH_TEST_FLAG));
+    EXPECT_FALSE(GetEventFlag(AXIS_TEST_FLAG));
 }
 
 /**
@@ -968,21 +972,323 @@ HWTEST_F(PipelineContextTest, PipelineContextTest023, TestSize.Level1)
     ASSERT_NE(context_, nullptr);
     ContainerScope scope(DEFAULT_INSTANCE_ID);
     context_->SetupRootElement();
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    context_->SetEventManager(eventManager);
     MouseEvent event;
-    event.x = DEFAULT_INT1;
 
     /**
      * @tc.steps2: Call the function OnMouseEvent with action = MouseAction::HOVER
-     *             and button == MouseButton::BACK_BUTTON.
-     * @tc.expected: The instanceId is unequal to 4.
+     *             and button = MouseButton::BACK_BUTTON.
+     * @tc.expected: The function DispatchTouchEvent of eventManager_ is not called.
      */
     event.action = MouseAction::HOVER;
     event.button = MouseButton::BACK_BUTTON;
-    event.pressedButtons = DEFAULT_INT0;
-    eventManager->SetInstanceId(DEFAULT_INT0);
+    ResetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG);
     context_->OnMouseEvent(event);
-    EXPECT_EQ(eventManager->GetInstanceId(), DEFAULT_INT4);
+    EXPECT_FALSE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
+
+    /**
+     * @tc.steps3: Call the function OnMouseEvent with action = MouseAction::RELEASE
+     *             and button = MouseButton::LEFT_BUTTON.
+     * @tc.expected: The function DispatchTouchEvent of eventManager_ is called.
+     */
+    event.action = MouseAction::RELEASE;
+    event.button = MouseButton::LEFT_BUTTON;
+    ResetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG);
+    context_->OnMouseEvent(event);
+    EXPECT_TRUE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
+
+    /**
+     * @tc.steps4: Call the function OnMouseEvent with action = MouseAction::PRESS
+     *             and button = MouseButton::LEFT_BUTTON.
+     * @tc.expected: The function DispatchTouchEvent of eventManager_ is called.
+     */
+    event.action = MouseAction::PRESS;
+    event.button = MouseButton::LEFT_BUTTON;
+    ResetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG);
+    context_->OnMouseEvent(event);
+    EXPECT_TRUE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
+
+    /**
+     * @tc.steps5: Call the function OnMouseEvent with action = MouseAction::MOVE
+     *             and button = MouseButton::LEFT_BUTTON.
+     * @tc.expected: The function DispatchTouchEvent of eventManager_ is not called.
+     */
+    event.action = MouseAction::MOVE;
+    event.button = MouseButton::LEFT_BUTTON;
+    ResetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG);
+    context_->OnMouseEvent(event);
+    EXPECT_FALSE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
+
+    /**
+     * @tc.steps6: Call the function OnMouseEvent with action = MouseAction::RELEASE
+     *             and pressedButtons = MOUSE_PRESS_LEFT.
+     * @tc.expected: The function DispatchTouchEvent of eventManager_ is called.
+     */
+    event.button = MouseButton::BACK_BUTTON;
+    event.action = MouseAction::RELEASE;
+    event.pressedButtons = MOUSE_PRESS_LEFT;
+    ResetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG);
+    context_->OnMouseEvent(event);
+    EXPECT_TRUE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
+
+    /**
+     * @tc.steps7: Call the function OnMouseEvent with action = MouseAction::PRESS
+     *             and pressedButtons = MOUSE_PRESS_LEFT.
+     * @tc.expected: The function DispatchTouchEvent of eventManager_ is called.
+     */
+    event.action = MouseAction::PRESS;
+    event.pressedButtons = MOUSE_PRESS_LEFT;
+    ResetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG);
+    context_->OnMouseEvent(event);
+    EXPECT_TRUE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
+
+    /**
+     * @tc.steps8: Call the function OnMouseEvent with action = MouseAction::MOVE
+     *             and pressedButtons = MOUSE_PRESS_LEFT.
+     * @tc.expected: The function DispatchTouchEvent of eventManager_ is not called.
+     */
+    event.action = MouseAction::MOVE;
+    event.pressedButtons = MOUSE_PRESS_LEFT;
+    ResetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG);
+    context_->OnMouseEvent(event);
+    EXPECT_FALSE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
+}
+
+/**
+ * @tc.name: PipelineContextTest024
+ * @tc.desc: Test the function FlushTouchEvents.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTest, PipelineContextTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    context_->SetupRootElement();
+    TouchEvent event;
+    context_->touchEvents_.clear();
+
+    /**
+     * @tc.steps2: Call the function FlushTouchEvents with empty touchEvents_.
+     * @tc.expected: The function DispatchTouchEvent of eventManager_ is not called.
+     */
+    ResetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG);
+    context_->FlushTouchEvents();
+    EXPECT_FALSE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
+
+    /**
+     * @tc.steps3: Call the function FlushTouchEvents with unempty touchEvents_.
+     * @tc.expected: The function DispatchTouchEvent of eventManager_ is called.
+     */
+    context_->touchEvents_.push_back(event);
+    context_->touchEvents_.push_back(event);
+    ResetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG);
+    context_->FlushTouchEvents();
+    EXPECT_TRUE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
+}
+
+/**
+ * @tc.name: PipelineContextTest025
+ * @tc.desc: Test the function OnDumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTest, PipelineContextTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    context_->SetupRootElement();
+
+    /**
+     * @tc.steps2: Call the function OnDumpInfo and test the first branch.
+     * @tc.expected: The return value of function is true.
+     */
+    std::vector<std::string> params = { "-element", "-lastpage" };
+    EXPECT_TRUE(context_->OnDumpInfo(params));
+    params[1] = "non-lastpage";
+    EXPECT_TRUE(context_->OnDumpInfo(params));
+    params.pop_back();
+    EXPECT_TRUE(context_->OnDumpInfo(params));
+
+    /**
+     * @tc.steps3: Call the function OnDumpInfo and test the first branch.
+     * @tc.expected: The return value of function is true.
+     */
+    params = { "-element", "-lastpage" };
+    EXPECT_TRUE(context_->OnDumpInfo(params));
+    params[1] = "non-lastpage";
+    EXPECT_TRUE(context_->OnDumpInfo(params));
+    params.pop_back();
+    EXPECT_TRUE(context_->OnDumpInfo(params));
+
+    /**
+     * @tc.steps4: Call the function OnDumpInfo and test the second branch.
+     * @tc.expected: The return value of function is true.
+     */
+    params = { "-focus" };
+    EXPECT_TRUE(context_->OnDumpInfo(params));
+
+    /**
+     * @tc.steps5: Call the function OnDumpInfo and test the third branch.
+     * @tc.expected: The return value of function is true.
+     */
+    params = { "-accessibility" };
+    EXPECT_TRUE(context_->OnDumpInfo(params));
+    params = { "-inspector" };
+    EXPECT_TRUE(context_->OnDumpInfo(params));
+
+    /**
+     * @tc.steps6: Call the function OnDumpInfo and test the last branch.
+     * @tc.expected: The return value of function is false.
+     */
+    params = { "test" };
+    EXPECT_FALSE(context_->OnDumpInfo(params));
+}
+
+/**
+ * @tc.name: PipelineContextTest026
+ * @tc.desc: Test the function OnBackPressed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTest, PipelineContextTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    context_->SetupRootElement();
+
+    /**
+     * @tc.steps2: Call the function OnBackPressed with weakFrontend_ is null.
+     * @tc.expected: The return value of function is false.
+     */
+    context_->weakFrontend_.Reset();
+    EXPECT_FALSE(context_->OnBackPressed());
+
+    /**
+     * @tc.steps3: Call the function OnBackPressed with the return value of
+     *             fullScreenManager_->RequestFullScreen is true.
+     * @tc.expected: The return value of function is true.
+     */
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    EXPECT_CALL(*frontend, OnBackPressed()).WillRepeatedly(testing::Return(true));
+    context_->weakFrontend_ = frontend;
+    context_->fullScreenManager_->RequestFullScreen(nullptr); // Set the return value of OnBackPressed to true;
+    EXPECT_TRUE(context_->OnBackPressed());
+
+    /**
+     * @tc.steps4: Call the function OnBackPressed with the return value of
+     *             fullScreenManager_->RequestFullScreen is true.
+     * @tc.expected: The return value of function is true.
+     */
+    // Set the return value of OnBackPressed of fullScreenManager_ to true;
+    context_->fullScreenManager_->ExitFullScreen(nullptr);
+    EXPECT_TRUE(context_->OnBackPressed());
+
+    /**
+     * @tc.steps5: Call the function OnBackPressed with the return value of
+     *             overlayManager_->RemoveOverlay is true.
+     * @tc.expected: The return value of function is true.
+     */
+    // Set the return value of RemoveOverlay of overlayManager_ to true;
+    context_->overlayManager_->CloseDialog(frameNode_);
+    EXPECT_TRUE(context_->OnBackPressed());
+
+    /**
+     * @tc.steps6: Call the function OnBackPressed with the return value of
+     *             overlayManager_->RemoveOverlay is true.
+     * @tc.expected: The return value of function is true.
+     */
+    // Set the return value of RemoveOverlay of overlayManager_ to true;
+    context_->overlayManager_->CloseDialog(nullptr);
+    EXPECT_TRUE(context_->OnBackPressed());
+}
+
+/**
+ * @tc.name: PipelineContextTest027
+ * @tc.desc: Test functions StartWindowSizeChangeAnimate and SetRootRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTest, PipelineContextTest027, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    context_->SetupRootElement();
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    auto& windowConfig = frontend->GetWindowConfig();
+    windowConfig.designWidth = DEFAULT_INT1;
+    context_->weakFrontend_ = frontend;
+
+    /**
+     * @tc.steps2: Call the function StartWindowSizeChangeAnimate with WindowSizeChangeReason::RECOVER.
+     * @tc.expected: The designWidthScale_ is changed to DEFAULT_INT3.
+     */
+    context_->designWidthScale_ = DEFAULT_DOUBLE0;
+    context_->StartWindowSizeChangeAnimate(DEFAULT_INT3, DEFAULT_INT3, WindowSizeChangeReason::RECOVER);
+    EXPECT_DOUBLE_EQ(context_->designWidthScale_, DEFAULT_INT3);
+
+    /**
+     * @tc.steps3: Call the function StartWindowSizeChangeAnimate with WindowSizeChangeReason::MAXIMIZE.
+     * @tc.expected: The designWidthScale_ is changed to DEFAULT_INT3.
+     */
+    context_->designWidthScale_ = DEFAULT_DOUBLE0;
+    context_->StartWindowSizeChangeAnimate(DEFAULT_INT3, DEFAULT_INT3, WindowSizeChangeReason::MAXIMIZE);
+    EXPECT_DOUBLE_EQ(context_->designWidthScale_, DEFAULT_INT3);
+
+    /**
+     * @tc.steps4: Call the function StartWindowSizeChangeAnimate with WindowSizeChangeReason::ROTATION.
+     * @tc.expected: The designWidthScale_ is changed to DEFAULT_INT3.
+     */
+    context_->designWidthScale_ = DEFAULT_DOUBLE0;
+    context_->StartWindowSizeChangeAnimate(DEFAULT_INT3, DEFAULT_INT3, WindowSizeChangeReason::ROTATION);
+    EXPECT_DOUBLE_EQ(context_->designWidthScale_, DEFAULT_INT3);
+
+    /**
+     * @tc.steps5: Call the function StartWindowSizeChangeAnimate with WindowSizeChangeReason::UNDEFINED.
+     * @tc.expected: The designWidthScale_ is changed to DEFAULT_INT3.
+     */
+    context_->designWidthScale_ = DEFAULT_DOUBLE0;
+    context_->StartWindowSizeChangeAnimate(DEFAULT_INT3, DEFAULT_INT3, WindowSizeChangeReason::UNDEFINED);
+    EXPECT_DOUBLE_EQ(context_->designWidthScale_, DEFAULT_INT3);
+}
+
+/**
+ * @tc.name: PipelineContextTest028
+ * @tc.desc: Test functions OnVirtualKeyboardHeightChange and SetRootRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTest, PipelineContextTest028, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    context_->SetupRootElement();
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    auto& windowConfig = frontend->GetWindowConfig();
+    windowConfig.designWidth = DEFAULT_INT1;
+    context_->weakFrontend_ = frontend;
+    context_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
+
+    /**
+     * @tc.steps2: Call the function OnVirtualKeyboardHeightChange with DEFAULT_DOUBLE1.
+     * @tc.expected: The designWidthScale_ is changed to DEFAULT_INT0.
+     */
+    context_->designWidthScale_ = DEFAULT_DOUBLE1;
+    context_->OnVirtualKeyboardHeightChange(DEFAULT_DOUBLE1);
+    EXPECT_DOUBLE_EQ(context_->designWidthScale_, DEFAULT_INT0);
 }
 } // namespace OHOS::Ace::NG

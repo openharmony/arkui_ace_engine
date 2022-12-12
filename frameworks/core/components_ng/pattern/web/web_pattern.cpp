@@ -48,6 +48,14 @@ void WebPattern::OnAttachToFrameNode()
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
 }
 
+void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(delegate_);
+    isFocus_ = false;
+    delegate_->OnBlur();
+    OnQuickMenuDismissed();
+}
+
 void WebPattern::InitEvent()
 {
     auto host = GetHost();
@@ -437,7 +445,7 @@ void WebPattern::HandleBlurEvent()
 
 bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 {
-    bool ret = WebOnKeyEvent(keyEvent);
+    bool ret = false;
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ret);
@@ -445,10 +453,18 @@ bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
     CHECK_NULL_RETURN(eventHub, ret);
     auto keyEventCallback = eventHub->GetOnKeyEvent();
     CHECK_NULL_RETURN(keyEventCallback, ret);
-
     KeyEventInfo info(keyEvent);
     keyEventCallback(info);
 
+    auto preKeyEventCallback = eventHub->GetOnPreKeyEvent();
+    CHECK_NULL_RETURN(preKeyEventCallback, ret);
+    ret = preKeyEventCallback(info);
+    if (ret) {
+        LOGI("keyevent consumed in hap");
+        return ret;
+    }
+
+    ret = WebOnKeyEvent(keyEvent);
     return ret;
 }
 
@@ -515,122 +531,212 @@ void WebPattern::OnWebDataUpdate()
 
 void WebPattern::OnJsEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateJavaScriptEnabled(value);
+    if (delegate_) {
+        delegate_->UpdateJavaScriptEnabled(value);
+    }
 }
 
 void WebPattern::OnMediaPlayGestureAccessUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateMediaPlayGestureAccess(value);
+    if (delegate_) {
+        delegate_->UpdateMediaPlayGestureAccess(value);
+    }
 }
 
 void WebPattern::OnFileAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateAllowFileAccess(value);
+    if (delegate_) {
+        delegate_->UpdateAllowFileAccess(value);
+    }
 }
 
 void WebPattern::OnOnLineImageAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateBlockNetworkImage(!value);
+    if (delegate_) {
+        delegate_->UpdateBlockNetworkImage(!value);
+    }
 }
 
 void WebPattern::OnDomStorageAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateDomStorageEnabled(value);
+    if (delegate_) {
+        delegate_->UpdateDomStorageEnabled(value);
+    }
 }
 
 void WebPattern::OnImageAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateLoadsImagesAutomatically(value);
+    if (delegate_) {
+        delegate_->UpdateLoadsImagesAutomatically(value);
+    }
 }
 
 void WebPattern::OnMixedModeUpdate(MixedModeContent value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateMixedContentMode(value);
+    if (delegate_) {
+        delegate_->UpdateMixedContentMode(value);
+    }
 }
 
 void WebPattern::OnZoomAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateSupportZoom(value);
+    if (delegate_) {
+        delegate_->UpdateSupportZoom(value);
+    }
 }
 
 void WebPattern::OnGeolocationAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateGeolocationEnabled(value);
+    if (delegate_) {
+        delegate_->UpdateGeolocationEnabled(value);
+    }
 }
 
 void WebPattern::OnUserAgentUpdate(const std::string& value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateUserAgent(value);
+    if (delegate_) {
+        delegate_->UpdateUserAgent(value);
+    }
 }
 
 void WebPattern::OnCacheModeUpdate(WebCacheMode value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateCacheMode(value);
+    if (delegate_) {
+        delegate_->UpdateCacheMode(value);
+    }
 }
 
 void WebPattern::OnOverviewModeAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateOverviewModeEnabled(value);
+    if (delegate_) {
+        delegate_->UpdateOverviewModeEnabled(value);
+    }
 }
 
 void WebPattern::OnFileFromUrlAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateFileFromUrlEnabled(value);
+    if (delegate_) {
+        delegate_->UpdateFileFromUrlEnabled(value);
+    }
 }
 
 void WebPattern::OnDatabaseAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateDatabaseEnabled(value);
+    if (delegate_) {
+        delegate_->UpdateDatabaseEnabled(value);
+    }
 }
 
 void WebPattern::OnTextZoomRatioUpdate(int32_t value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateTextZoomRatio(value);
+    if (delegate_) {
+        delegate_->UpdateTextZoomRatio(value);
+    }
 }
 
 void WebPattern::OnWebDebuggingAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateWebDebuggingAccess(value);
+    if (delegate_) {
+        delegate_->UpdateWebDebuggingAccess(value);
+    }
 }
 
 void WebPattern::OnPinchSmoothModeEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdatePinchSmoothModeEnabled(value);
+    if (delegate_) {
+        delegate_->UpdatePinchSmoothModeEnabled(value);
+    }
 }
 
 void WebPattern::OnBackgroundColorUpdate(int32_t value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateBackgroundColor(value);
+    if (delegate_) {
+        delegate_->UpdateBackgroundColor(value);
+    }
 }
 
 void WebPattern::OnInitialScaleUpdate(float value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateInitialScale(value);
+    if (delegate_) {
+        delegate_->UpdateInitialScale(value);
+    }
 }
 
 void WebPattern::OnMultiWindowAccessEnabledUpdate(bool value)
 {
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    delegate_->UpdateMultiWindowAccess(value);
+    if (delegate_) {
+        delegate_->UpdateMultiWindowAccess(value);
+    }
+}
+
+void WebPattern::OnWebCursiveFontUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateWebCursiveFont(value);
+    }
+}
+
+void WebPattern::OnWebFantasyFontUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateWebFantasyFont(value);
+    }
+}
+
+void WebPattern::OnWebFixedFontUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateWebFixedFont(value);
+    }
+}
+
+void WebPattern::OnWebSansSerifFontUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateWebSansSerifFont(value);
+    }
+}
+
+void WebPattern::OnWebSerifFontUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateWebSerifFont(value);
+    }
+}
+
+void WebPattern::OnWebStandardFontUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateWebStandardFont(value);
+    }
+}
+
+void WebPattern::OnDefaultFixedFontSizeUpdate(int32_t value)
+{
+    if (delegate_) {
+        delegate_->UpdateDefaultFixedFontSize(value);
+    }
+}
+
+void WebPattern::OnDefaultFontSizeUpdate(int32_t value)
+{
+    if (delegate_) {
+        delegate_->UpdateDefaultFontSize(value);
+    }
+}
+
+void WebPattern::OnMinFontSizeUpdate(int32_t value)
+{
+    if (delegate_) {
+        delegate_->UpdateMinFontSize(value);
+    }
+}
+
+void WebPattern::OnBlockNetworkUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateBlockNetwork(value);
+    }
 }
 
 void WebPattern::RegistVirtualKeyBoardListener()
@@ -683,6 +789,18 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateMediaPlayGestureAccess(GetMediaPlayGestureAccessValue(true));
         delegate_->UpdatePinchSmoothModeEnabled(GetPinchSmoothModeEnabledValue(false));
         delegate_->UpdateMultiWindowAccess(GetMultiWindowAccessEnabledValue(false));
+        delegate_->UpdateWebCursiveFont(GetWebCursiveFontValue(DEFAULT_CURSIVE_FONT_FAMILY));
+        delegate_->UpdateWebFantasyFont(GetWebFantasyFontValue(DEFAULT_FANTASY_FONT_FAMILY));
+        delegate_->UpdateWebFixedFont(GetWebFixedFontValue(DEFAULT_FIXED_fONT_FAMILY));
+        delegate_->UpdateWebSansSerifFont(GetWebSansSerifFontValue(DEFAULT_SANS_SERIF_FONT_FAMILY));
+        delegate_->UpdateWebSerifFont(GetWebSerifFontValue(DEFAULT_SERIF_FONT_FAMILY));
+        delegate_->UpdateWebStandardFont(GetWebStandardFontValue(DEFAULT_STANDARD_FONT_FAMILY));
+        delegate_->UpdateDefaultFixedFontSize(GetDefaultFixedFontSizeValue(DEFAULT_FIXED_FONT_SIZE));
+        delegate_->UpdateDefaultFontSize(GetDefaultFontSizeValue(DEFAULT_FONT_SIZE));
+        delegate_->UpdateMinFontSize(GetMinFontSizeValue(DEFAULT_MINIMUM_FONT_SIZE));
+        if (GetBlockNetwork()) {
+            delegate_->UpdateBlockNetwork(GetBlockNetwork().value());
+        }
         if (GetUserAgent()) {
             delegate_->UpdateUserAgent(GetUserAgent().value());
         }
@@ -1138,5 +1256,13 @@ void WebPattern::OnActive()
     CHECK_NULL_VOID(delegate_);
     delegate_->OnActive();
     isActive_ = true;
+}
+
+void WebPattern::OnVisibleChange(bool isVisible)
+{
+    if (!isVisible) {
+        LOGI("web is not visible");
+        CloseSelectOverlay();
+    }
 }
 } // namespace OHOS::Ace::NG

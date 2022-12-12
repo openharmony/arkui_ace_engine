@@ -91,18 +91,18 @@ foreach(item, ace_platforms) {
       part_name = ace_engine_part
       testonly = true
       sources = [
-        "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
+        "$ace_root/frameworks/base/test/mock/mock_ace_container.cpp",
+        "$ace_root/frameworks/base/test/mock/mock_download_manager.cpp",
+        "$ace_root/frameworks/base/test/mock/mock_drag_window_old.cpp",
+        "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
+        "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
         "$ace_root/frameworks/core/components/test/unittest/mock/subwindow_mock.cpp",
-        "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
-        "$ace_root/frameworks/core/mock/mock_ace_container.cpp",
-        "$ace_root/frameworks/core/mock/mock_download_manager.cpp",
-        "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
       ]
 
       if (is_standard_system) {
         sources -= [
-          "$ace_root/frameworks/core/mock/mock_download_manager.cpp",
-          "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
+          "$ace_root/frameworks/base/test/mock/mock_download_manager.cpp",
+          "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
         ]
       }
 

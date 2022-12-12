@@ -41,59 +41,12 @@ void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("rowsTemplate", propRowsTemplate_.value_or("").c_str());
     json->Put("columnsGap", propColumnsGap_.value_or(0.0_vp).ToString().c_str());
     json->Put("rowsGap", propRowsGap_.value_or(0.0_vp).ToString().c_str());
-    json->Put("scrollBar", GetBarStateString().c_str());
-    json->Put("scrollBarColor", GetBarColor().ColorToString().c_str());
-    json->Put("scrollBarWidth", GetBarWidth().ToString().c_str());
     json->Put("cachedCount", propCachedCount_.value_or(1));
     json->Put("editMode ", propEditable_.value_or(false) ? "true" : "false");
     json->Put("layoutDirection ", GetLayoutDirectionStr().c_str());
     json->Put("maxCount ", propMaxCount_.value_or(Infinity<int32_t>()));
     json->Put("minCount ", propMinCount_.value_or(1));
     json->Put("cellLength ", propCellLength_.value_or(0));
-}
-
-Color GridLayoutProperty::GetBarColor() const
-{
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(context, Color::TRANSPARENT);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, Color::TRANSPARENT);
-    auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
-    CHECK_NULL_RETURN(scrollBarTheme, Color::TRANSPARENT);
-    auto defaultScrollBarColor = scrollBarTheme->GetForegroundColor();
-    return propScrollBarProperty_ ? propScrollBarProperty_->propScrollBarColor.value_or(defaultScrollBarColor)
-                                  : defaultScrollBarColor;
-}
-
-Dimension GridLayoutProperty::GetBarWidth() const
-{
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(context, Dimension());
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, Dimension());
-    auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
-    CHECK_NULL_RETURN(scrollBarTheme, Dimension());
-    auto defaultScrollBarWidth = scrollBarTheme->GetNormalWidth();
-    return propScrollBarProperty_ ? propScrollBarProperty_->propScrollBarWidth.value_or(defaultScrollBarWidth)
-                                  : defaultScrollBarWidth;
-}
-
-std::string GridLayoutProperty::GetBarStateString() const
-{
-    auto mode = propScrollBarProperty_ ? propScrollBarProperty_->propScrollBarMode.value_or(DisplayMode::OFF)
-                                       : DisplayMode::OFF;
-    switch (mode) {
-        case DisplayMode::AUTO:
-            return "BarState.Auto";
-        case DisplayMode::ON:
-            return "BarState.On";
-        case DisplayMode::OFF:
-            return "BarState.Off";
-        default:
-            LOGE("mode %{public}d is not valid", mode);
-            break;
-    }
-    return "BarState.Off";
 }
 
 std::string GridLayoutProperty::GetLayoutDirectionStr() const
