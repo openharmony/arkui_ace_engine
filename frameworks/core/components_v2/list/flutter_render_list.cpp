@@ -114,7 +114,6 @@ void FlutterRenderList::PaintDivider(RenderContext& context)
     const double startMargin = NormalizePercentToPx(divider->startMargin, !IsVertical());
     const double endMargin = NormalizePercentToPx(divider->endMargin, !IsVertical());
     const double topOffset = halfSpaceWidth + (strokeWidth / 2.0);
-    const double bottomOffset = topOffset - strokeWidth;
 
     SkPaint paint;
     paint.setAntiAlias(true);
@@ -127,14 +126,14 @@ void FlutterRenderList::PaintDivider(RenderContext& context)
 
     for (const auto& child : items_) {
         auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
-        double mainAxis = GetMainAxis(child->GetPosition());
+        double mainAxis = GetMainAxis(child->GetPosition()) - topOffset;
         if (itemGroup) {
-            mainAxis = GetMainAxis(itemGroup->GetRenderNode()->GetPosition());
+            mainAxis = GetMainAxis(itemGroup->GetRenderNode()->GetPosition()) - topOffset;
         }
-        if (GreatOrEqual(mainAxis - topOffset, GetMainSize(layoutSize))) {
+        if (GreatOrEqual(mainAxis, GetMainSize(layoutSize))) {
             break;
         }
-        if (!isFirstLine && child != selectedItem_ && GreatNotEqual(mainAxis - bottomOffset, 0.0)) {
+        if (!isFirstLine && child != selectedItem_ && GreatNotEqual(mainAxis - strokeWidth, 0.0)) {
             if (GetLanes() > 1 && !lastIsItemGroup && !itemGroup) {
                 double start = crossSize / GetLanes() * lane + startMargin;
                 double end = crossSize / GetLanes() * (lane + 1) - endMargin;
