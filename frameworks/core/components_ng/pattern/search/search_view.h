@@ -50,7 +50,9 @@ private:
     static RefPtr<FrameNode> CreateTextField(const RefPtr<SearchNode>& parentNode,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value);
     static RefPtr<FrameNode> CreateImage(const RefPtr<SearchNode>& parentNode, const std::string& src);
+    static RefPtr<FrameNode> CreateCancelImage(const RefPtr<SearchNode>& parentNode);
     static RefPtr<FrameNode> CreateButton(const RefPtr<SearchNode>& parentNode);
+    static RefPtr<FrameNode> CreateCancelButton(const RefPtr<SearchNode>& parentNode);
     static RefPtr<SearchNode> GetOrCreateSearchNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 };

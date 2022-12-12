@@ -211,10 +211,14 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 // return: true if text rect offset will NOT be further changed by caret position
 bool TextFieldPattern::UpdateCaretPosition()
 {
-    auto focusHub = GetHost()->GetOrCreateFocusHub();
-    if (focusHub && !focusHub->IsCurrentFocus()) {
-        CloseSelectOverlay();
-        return true;
+    // If the parent node is a Search, do not check whether it is a focus state.
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(GetHost()->GetParent());
+    if (!parentFrameNode || parentFrameNode->GetTag() != V2::SEARCH_ETS_TAG) {
+        auto focusHub = GetHost()->GetOrCreateFocusHub();
+        if (focusHub && !focusHub->IsCurrentFocus()) {
+            CloseSelectOverlay();
+            return true;
+        }
     }
     if (needCloseOverlay_ && SelectOverlayIsOn()) {
         CloseSelectOverlay();
@@ -2190,6 +2194,18 @@ std::string TextFieldPattern::GetInputFilter() const
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
     return layoutProperty->GetInputFilterValue("");
+}
+
+void TextFieldPattern::SearchRequestKeyboard()
+{
+    StartTwinkling();
+    caretUpdateType_ = CaretUpdateType::PRESSED;
+    selectionMode_ = SelectionMode::NONE;
+    if (RequestKeyboard(false, true, true)) {
+        auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireOnEditChanged(true);
+    }
 }
 
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const

@@ -322,6 +322,8 @@ public:
     {
         needCloseOverlay_ = needClose;
     }
+    
+    void SearchRequestKeyboard();
 
 private:
     bool IsTextArea();
