@@ -411,7 +411,7 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
         return;
     }
 
-    if (sideBarLine > maxSideBarWidthPx) {
+    if (sideBarLine >= maxSideBarWidthPx) {
         realSideBarWidth_ = maxSideBarWidthPx;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
