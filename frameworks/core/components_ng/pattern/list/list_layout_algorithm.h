@@ -176,7 +176,7 @@ protected:
         Axis axis, int32_t& currentIndex, float endPos, float& startPos);
     virtual float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     virtual void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
-        const LayoutConstraintF& layoutConstraint, Axis axis) {};
+        const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis) {};
     virtual int32_t GetLanesFloor(LayoutWrapper* layoutWrapper, int32_t index)
     {
         return index;

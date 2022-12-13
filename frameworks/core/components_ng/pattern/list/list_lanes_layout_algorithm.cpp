@@ -22,46 +22,23 @@ void ListLanesLayoutAlgorithm::UpdateListItemConstraint(
     Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint)
 {
     contentConstraint.parentIdealSize = selfIdealSize;
+    contentConstraint.maxSize.SetMainSize(Infinity<float>(), axis);
     groupLayoutConstraint_ = contentConstraint;
-    if (axis == Axis::VERTICAL) {
-        contentConstraint.maxSize.SetHeight(Infinity<float>());
-        groupLayoutConstraint_.maxSize.SetHeight(Infinity<float>());
-        auto width = selfIdealSize.Width();
-        if (width.has_value()) {
-            float crossSize = width.value();
-            groupLayoutConstraint_.maxSize.SetWidth(crossSize);
-            if (lanes_ > 1) {
-                crossSize /= lanes_;
-            }
-            if (maxLaneLength_.has_value() && maxLaneLength_.value() < crossSize) {
-                crossSize = maxLaneLength_.value();
-            }
-            contentConstraint.percentReference.SetWidth(crossSize);
-            contentConstraint.parentIdealSize.SetWidth(crossSize);
-            contentConstraint.maxSize.SetWidth(crossSize);
-            if (minLaneLength_.has_value()) {
-                contentConstraint.minSize.SetWidth(minLaneLength_.value());
-            }
-        }
-        return;
-    }
-    contentConstraint.maxSize.SetWidth(Infinity<float>());
-    groupLayoutConstraint_.maxSize.SetWidth(Infinity<float>());
-    auto height = selfIdealSize.Height();
-    if (height.has_value()) {
-        float crossSize = height.value();
-        groupLayoutConstraint_.maxSize.SetHeight(crossSize);
+    auto crossSizeOptional = selfIdealSize.CrossSize(axis);
+    if (crossSizeOptional.has_value()) {
+        float crossSize = crossSizeOptional.value();
+        groupLayoutConstraint_.maxSize.SetCrossSize(crossSize, axis);
         if (lanes_ > 1) {
             crossSize /= lanes_;
         }
         if (maxLaneLength_.has_value() && maxLaneLength_.value() < crossSize) {
             crossSize = maxLaneLength_.value();
         }
-        contentConstraint.percentReference.SetHeight(crossSize);
-        contentConstraint.parentIdealSize.SetHeight(crossSize);
-        contentConstraint.maxSize.SetHeight(crossSize);
+        contentConstraint.percentReference.SetCrossSize(crossSize, axis);
+        contentConstraint.parentIdealSize.SetCrossSize(crossSize, axis);
+        contentConstraint.maxSize.SetCrossSize(crossSize, axis);
         if (minLaneLength_.has_value()) {
-            contentConstraint.minSize.SetHeight(minLaneLength_.value());
+            contentConstraint.minSize.SetCrossSize(minLaneLength_.value(), axis);
         }
     }
 }
@@ -158,7 +135,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
 }
 
 void ListLanesLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
-    const LayoutConstraintF& layoutConstraint, Axis axis)
+    const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis)
 {
     auto contentConstraint = layoutProperty->GetContentLayoutConstraint().value();
     auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis);
@@ -173,14 +150,16 @@ void ListLanesLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutProperty>& 
             layoutProperty->GetLaneMaxLength().value(), layoutConstraint.scaleProperty, mainPercentRefer);
     }
     do {
-        SizeF layoutParamMaxSize = layoutConstraint.maxSize;
-        SizeF layoutParamMinSize = layoutConstraint.minSize;
+        if (!crossSizeOptional.has_value()) {
+            break;
+        }
+        auto crossSize = crossSizeOptional.value();
         // Case 1: lane length constrain is not set
         //      1.1: use [lanes] set by user if [lanes] is set
         //      1.2: set [lanes] to 1 if [lanes] is not set
         if (!minLaneLength_.has_value() || !maxLaneLength_.has_value()) {
-            maxLaneLength_ = GetCrossAxisSize(layoutParamMaxSize, axis) / lanes;
-            minLaneLength_ = GetCrossAxisSize(layoutParamMinSize, axis) / lanes;
+            maxLaneLength_ = crossSize / lanes;
+            minLaneLength_ = crossSize / lanes;
             break;
         }
         // Case 2: lane length constrain is set --> need to calculate [lanes_] according to contraint.
@@ -193,15 +172,14 @@ void ListLanesLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutProperty>& 
         //         if [minLaneLength_] is 40, [maxLaneLength_] is 60, list's width is 132, the [lanes_] is 3
         //         according to rule 1, then the width of lane will be 132 / 3 = 44 rather than 40,
         //         its [minLaneLength_].
-        ModifyLaneLength(layoutConstraint, axis);
+        ModifyLaneLength(crossSize);
 
         // if minLaneLength is 40, maxLaneLength is 60
         // when list's width is 120, lanes_ = 3
         // when list's width is 80, lanes_ = 2
         // when list's width is 70, lanes_ = 1
-        float maxCrossSize = GetCrossAxisSize(layoutParamMaxSize, axis);
-        float maxLanes = maxCrossSize / minLaneLength_.value();
-        float minLanes = maxCrossSize / maxLaneLength_.value();
+        float maxLanes = crossSize / minLaneLength_.value();
+        float minLanes = crossSize / maxLaneLength_.value();
         // let's considerate scenarios when maxCrossSize > 0
         // now it's guaranteed that [minLaneLength_] <= [maxLaneLength_], i.e., maxLanes >= minLanes > 0
         // there are 3 scenarios:
@@ -211,14 +189,14 @@ void ListLanesLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutProperty>& 
         // 1. 1 > maxLanes >= minLanes > 0 ---> maxCrossSize < minLaneLength_ =< maxLaneLength
         if (GreatNotEqual(1, maxLanes) && GreatOrEqual(maxLanes, minLanes)) {
             lanes = 1;
-            minLaneLength_ = maxCrossSize;
-            maxLaneLength_ = maxCrossSize;
+            minLaneLength_ = crossSize;
+            maxLaneLength_ = crossSize;
             break;
         }
         // 2. maxLanes >= 1 >= minLanes > 0 ---> minLaneLength_ = maxCrossSize < maxLaneLength
         if (GreatOrEqual(maxLanes, 1) && LessOrEqual(minLanes, 1)) {
             lanes = std::floor(maxLanes);
-            maxLaneLength_ = maxCrossSize;
+            maxLaneLength_ = crossSize;
             break;
         }
         // 3. maxLanes >= minLanes > 1 ---> minLaneLength_ <= maxLaneLength < maxCrossSize
@@ -237,13 +215,13 @@ void ListLanesLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutProperty>& 
     }
 }
 
-void ListLanesLayoutAlgorithm::ModifyLaneLength(const LayoutConstraintF& layoutConstraint, Axis axis)
+void ListLanesLayoutAlgorithm::ModifyLaneLength(float crossSize)
 {
     if (LessOrEqual(maxLaneLength_.value(), 0.0)) {
-        maxLaneLength_ = GetCrossAxisSize(layoutConstraint.maxSize, axis);
+        maxLaneLength_ = crossSize;
     }
     if (LessOrEqual(minLaneLength_.value(), 0.0)) {
-        minLaneLength_ = std::min(GetCrossAxisSize(layoutConstraint.maxSize, axis), maxLaneLength_.value());
+        minLaneLength_ = std::min(crossSize, maxLaneLength_.value());
     }
     if (GreatNotEqual(minLaneLength_.value(), maxLaneLength_.value())) {
         LOGI("minLaneLength: %{public}f is greater than maxLaneLength: %{public}f, assign minLaneLength to"

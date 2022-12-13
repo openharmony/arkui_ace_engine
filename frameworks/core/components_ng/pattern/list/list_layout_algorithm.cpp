@@ -111,7 +111,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
         }
 
-        CalculateLanes(listLayoutProperty, layoutConstraint, axis);
+        CalculateLanes(listLayoutProperty, layoutConstraint, contentIdealSize.CrossSize(axis), axis);
         listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
         // calculate child layout constraint.
         auto childLayoutConstraint = listLayoutProperty->CreateChildConstraint();

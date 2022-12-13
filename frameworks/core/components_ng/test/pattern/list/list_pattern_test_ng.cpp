@@ -1789,8 +1789,6 @@ HWTEST_F(ListPatternTestNg, ListLanesTest003, TestSize.Level1)
      * @tc.expected: step1. getLayoutAlgorithm.
      */
     ListLanesLayoutAlgorithm listLanesLayoutAlgorithm;
-    LayoutConstraintF contentConstraint;
-    Axis axis = Axis::VERTICAL;
 
     /**
      * @tc.steps: step2. call modifyLanLength function and compare.
@@ -1799,8 +1797,7 @@ HWTEST_F(ListPatternTestNg, ListLanesTest003, TestSize.Level1)
      */
     listLanesLayoutAlgorithm.maxLaneLength_ = 0;
     listLanesLayoutAlgorithm.minLaneLength_ = 0;
-    contentConstraint.maxSize = SizeF(LIST_ITEM_WIDTH, LIST_ITEM_HEIGHT);
-    listLanesLayoutAlgorithm.ModifyLaneLength(contentConstraint, axis);
+    listLanesLayoutAlgorithm.ModifyLaneLength(LIST_ITEM_WIDTH);
     EXPECT_EQ(listLanesLayoutAlgorithm.maxLaneLength_.value(), LIST_ITEM_WIDTH);
     EXPECT_EQ(listLanesLayoutAlgorithm.minLaneLength_.value(), LIST_ITEM_WIDTH);
 
@@ -1811,8 +1808,7 @@ HWTEST_F(ListPatternTestNg, ListLanesTest003, TestSize.Level1)
      */
     listLanesLayoutAlgorithm.maxLaneLength_ = 1;
     listLanesLayoutAlgorithm.minLaneLength_ = LIST_ITEM_WIDTH;
-    contentConstraint.maxSize = SizeF(LIST_ITEM_WIDTH, LIST_ITEM_HEIGHT);
-    listLanesLayoutAlgorithm.ModifyLaneLength(contentConstraint, axis);
+    listLanesLayoutAlgorithm.ModifyLaneLength(LIST_ITEM_WIDTH);
     EXPECT_EQ(listLanesLayoutAlgorithm.maxLaneLength_.value(), LIST_ITEM_WIDTH);
     EXPECT_EQ(listLanesLayoutAlgorithm.minLaneLength_.value(), LIST_ITEM_WIDTH);
 }
