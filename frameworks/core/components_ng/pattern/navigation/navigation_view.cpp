@@ -377,7 +377,6 @@ void NavigationView::SetTitle(const std::string& title, bool hasSubTitle)
         // update title content only without changing node
         titleProperty->UpdateContent(title);
         navBarNode->UpdateTitleNodeOperation(ChildNodeOperation::NONE);
-        navBarNode->MarkModifyDone();
         navBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     } while (false);
@@ -400,7 +399,6 @@ void NavigationView::SetTitle(const std::string& title, bool hasSubTitle)
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navBarNode->SetTitle(titleNode);
     navBarNode->UpdatePrevTitleIsCustom(false);
-    navBarNode->MarkModifyDone();
 }
 
 void NavigationView::SetCustomTitle(const RefPtr<UINode>& customTitle)
@@ -417,7 +415,6 @@ void NavigationView::SetCustomTitle(const RefPtr<UINode>& customTitle)
         } else {
             navBarNode->SetTitle(customTitle);
             navBarNode->UpdateTitleNodeOperation(ChildNodeOperation::REPLACE);
-            navBarNode->MarkModifyDone();
             navBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
         return;
@@ -425,7 +422,6 @@ void NavigationView::SetCustomTitle(const RefPtr<UINode>& customTitle)
     navBarNode->SetTitle(customTitle);
     navBarNode->UpdateTitleNodeOperation(ChildNodeOperation::ADD);
     navBarNode->UpdatePrevTitleIsCustom(true);
-    navBarNode->MarkModifyDone();
 }
 
 void NavigationView::SetSubtitle(const std::string& subtitle)
@@ -456,7 +452,6 @@ void NavigationView::SetSubtitle(const std::string& subtitle)
         }
         subtitleProperty->UpdateContent(subtitle);
         navBarNode->UpdateSubtitleNodeOperation(ChildNodeOperation::NONE);
-        navBarNode->MarkModifyDone();
         navBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     } while (false);
@@ -472,7 +467,6 @@ void NavigationView::SetSubtitle(const std::string& subtitle)
     textLayoutProperty->UpdateMaxLines(1);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navBarNode->SetSubtitle(subtitleNode);
-    navBarNode->MarkModifyDone();
 }
 
 void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
@@ -492,7 +486,6 @@ void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
             UpdateOldBarItems(titleBarNode->GetMenu(), menuItems);
             navBarNode->SetMenu(titleBarNode->GetMenu());
             navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
-            navBarNode->MarkModifyDone();
             return;
         }
         navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
@@ -539,7 +532,6 @@ void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
 
     navBarNode->SetMenu(menuNode);
     navBarNode->UpdatePrevMenuIsCustom(false);
-    navBarNode->MarkModifyDone();
 }
 
 void NavigationView::SetCustomMenu(const RefPtr<UINode>& customMenu)
@@ -560,13 +552,11 @@ void NavigationView::SetCustomMenu(const RefPtr<UINode>& customMenu)
         navBarNode->SetMenu(customMenu);
         navBarNode->UpdatePrevMenuIsCustom(true);
         navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
-        navBarNode->MarkModifyDone();
         return;
     }
     navBarNode->SetMenu(customMenu);
     navBarNode->UpdatePrevMenuIsCustom(true);
     navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
-    navBarNode->MarkModifyDone();
 }
 
 void NavigationView::SetTitleMode(NavigationTitleMode mode)
@@ -624,7 +614,6 @@ void NavigationView::SetTitleMode(NavigationTitleMode mode)
 
         navBarNode->SetBackButton(navigator);
         navBarNode->UpdateBackButtonNodeOperation(ChildNodeOperation::ADD);
-        navBarNode->MarkModifyDone();
         return;
     }
     if (needRemoveBackButton) {
@@ -717,7 +706,6 @@ void NavigationView::SetToolBarItems(std::vector<BarItem>&& toolBarItems)
             UpdateOldBarItems(navBarNode->GetPreToolBarNode(), toolBarItems);
             navBarNode->SetToolBarNode(navBarNode->GetPreToolBarNode());
             navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::NONE);
-            navBarNode->MarkModifyDone();
             return;
         }
         navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
@@ -737,7 +725,6 @@ void NavigationView::SetToolBarItems(std::vector<BarItem>&& toolBarItems)
     navBarNode->SetToolBarNode(toolBarNode);
     navBarNode->SetPreToolBarNode(toolBarNode);
     navBarNode->UpdatePrevToolBarIsCustom(false);
-    navBarNode->MarkModifyDone();
 }
 
 void NavigationView::SetCustomToolBar(const RefPtr<UINode>& customToolBar)
@@ -760,7 +747,6 @@ void NavigationView::SetCustomToolBar(const RefPtr<UINode>& customToolBar)
     navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
     navBarNode->SetToolBarNode(customToolBar);
     navBarNode->UpdatePrevToolBarIsCustom(true);
-    navBarNode->MarkModifyDone();
 }
 
 void NavigationView::SetOnTitleModeChange(std::function<void(NavigationTitleMode)>&& onTitleModeChange)
