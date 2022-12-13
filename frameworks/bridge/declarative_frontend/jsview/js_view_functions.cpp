@@ -183,6 +183,19 @@ void ViewFunctions::ExecuteReload(bool deep)
     }
 }
 
+void ViewFunctions::ExecuteForceNodeRerender(int32_t elemId)
+{
+    ACE_SCOPED_TRACE("ViewFunctions::ExecuteForceNodeRerender");
+    auto func = jsForceRerenderNodeFunc_.Lock();
+    if (!func.IsEmpty()) {
+        JSRef<JSVal> params[1];
+        params[0] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(elemId)));
+        func->Call(jsObject_.Lock(), 1, params);
+    } else {
+        LOGE("the force node rerender func is null");
+    }
+}
+
 #else
 
 void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper) {}
@@ -190,6 +203,8 @@ void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper) {}
 void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper) {}
 
 void ViewFunctions::ExecuteReload(bool deep) {}
+
+void ViewFunctions::ExecuteForceNodeRerender(int32_t elemId) {}
 
 #endif
 
@@ -222,6 +237,13 @@ void ViewFunctions::InitViewFunctions(
             jsReloadFunc_ = JSRef<JSFunc>::Cast(jsReloadFunc);
         } else {
             LOGE("View lacks mandatory 'forceCompleteRerender()' function, fatal internal error.");
+        }
+
+        JSRef<JSVal> jsForceRerenderNodeFunc = jsObject->GetProperty("forceRerenderNode");
+        if (jsReloadFunc->IsFunction()) {
+            jsForceRerenderNodeFunc_ = JSRef<JSFunc>::Cast(jsForceRerenderNodeFunc);
+        } else {
+            LOGE("View lacks mandatory 'forceRerenderNode()' function, fatal internal error.");
         }
     }
 

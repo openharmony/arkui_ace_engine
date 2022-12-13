@@ -725,6 +725,8 @@ private:
 
     void SetScopeFocusAlgorithm();
 
+    void CheckFocusStateStyle(bool onFocus);
+
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;

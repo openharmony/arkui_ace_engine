@@ -24,11 +24,13 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/gestures/gesture_processor.h"
 #include "core/pipeline/base/render_context.h"
+
 #define ACE_UPDATE_LAYOUT_PROPERTY(target, name, value)                         \
     do {                                                                        \
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
@@ -144,12 +146,15 @@ public:
     // Clear the key pushed to the stack
     void PopKey();
 
-    void SetVisualState(VisualState state)
-    {
-        visualState_ = state;
-    }
+    // Check whether the current node is in the corresponding polymorphic style state.
+    // When the polymorphic style is not set on the front end, it returns true regardless of the current node state;
+    // When the polymorphic style is set on the front end, true is returned only if the current node state is the same
+    // as the polymorphic style.
+    bool IsCurrentVisualStateProcess();
 
-    std::optional<VisualState> GetVisualState() const
+    void SetVisualState(VisualState state);
+
+    std::optional<UIState> GetVisualState() const
     {
         return visualState_;
     }
@@ -268,7 +273,7 @@ private:
 
     std::stack<int32_t> parentIdStack_;
 
-    std::optional<VisualState> visualState_ = std::nullopt;
+    std::optional<UIState> visualState_ = std::nullopt;
 
     // elmtId reserved for next component creation
     ElementIdType reservedNodeId_ = ElementRegister::UndefinedElementId;

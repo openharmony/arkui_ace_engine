@@ -53,4 +53,9 @@ RefPtr<UINode> ViewStackProcessor::Finish()
     return element;
 }
 
+bool ViewStackProcessor::IsCurrentVisualStateProcess()
+{
+    return true;
+}
+
 } // namespace OHOS::Ace::NG

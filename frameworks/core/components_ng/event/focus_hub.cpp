@@ -20,6 +20,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/dump_log.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -709,6 +710,8 @@ void FocusHub::OnFocusNode()
     if (onFocusCallback) {
         onFocusCallback();
     }
+    // check focus state style.
+    CheckFocusStateStyle(true);
     PaintFocusState();
 }
 
@@ -726,7 +729,20 @@ void FocusHub::OnBlurNode()
     if (onBlurCallback) {
         onBlurCallback();
     }
+    // check focus state style.
+    CheckFocusStateStyle(false);
     ClearFocusState();
+}
+
+void FocusHub::CheckFocusStateStyle(bool onFocus)
+{
+    auto eventHub = eventHub_.Upgrade();
+    CHECK_NULL_VOID(eventHub);
+    if (onFocus) {
+        eventHub->UpdateCurrentUIState(UI_STATE_FOCUSED);
+    } else {
+        eventHub->ResetCurrentUIState(UI_STATE_FOCUSED);
+    }
 }
 
 void FocusHub::OnFocusScope()

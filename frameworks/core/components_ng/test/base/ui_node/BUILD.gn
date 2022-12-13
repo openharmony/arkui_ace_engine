@@ -42,6 +42,8 @@ ohos_unittest("ui_node_test_ng") {
     "$ace_root/frameworks/core/components_ng/event/gesture_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/event/input_event.cpp",
     "$ace_root/frameworks/core/components_ng/event/input_event_hub.cpp",
+    "$ace_root/frameworks/core/components_ng/event/state_style_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/event/touch_event.cpp",
     "$ace_root/frameworks/core/components_ng/gestures/gesture_referee.cpp",
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/exclusive_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/gesture_recognizer.cpp",
