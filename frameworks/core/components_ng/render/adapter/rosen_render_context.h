@@ -189,6 +189,7 @@ public:
 
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;
     void OnZIndexUpdate(int32_t value) override;
+    void DumpInfo() const override;
 
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
