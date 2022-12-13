@@ -105,6 +105,7 @@ public:
         layoutAlgorithm->SetChildrenMainSize(childrenMainSize_);
         layoutAlgorithm->SetCurrentOffset(currentOffset_);
         layoutAlgorithm->SetIndicator(indicator_);
+        layoutAlgorithm->SetIsBuilder(IsContainsBuilder());
         return layoutAlgorithm;
     }
 
@@ -200,7 +201,7 @@ private:
     bool touching_ = false; // whether the item is in touching
     bool isHover_ = false;
     float hoverOpacity_ = 0.0;
-    int32_t touchingIndex_ = 0;
+    std::optional<int32_t> touchingIndex_;
     std::optional<int32_t> hoverIndex_;
 };
 } // namespace OHOS::Ace::NG
