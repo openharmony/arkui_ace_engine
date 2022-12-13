@@ -83,13 +83,13 @@ CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* pain
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     auto frameSize = geometryNode->GetPaddingSize();
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
-    Axis axis = vertical_ ? Axis::VERTICAL : Axis::HORIZONTAL;
+    Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;
     DividerInfo dividerInfo = {
         .constrainStrokeWidth = divider_.strokeWidth.ConvertToPx(),
         .crossSize = vertical_ ? frameSize.Height() : frameSize.Width(),
         .startMargin = divider_.startMargin.ConvertToPx(),
         .endMargin = divider_.endMargin.ConvertToPx(),
-        .halfSpaceWidth = space_ / 2.0f, /* 2.0f half */
+        .halfSpaceWidth = (space_ + divider_.strokeWidth.ConvertToPx()) / 2.0f, /* 2.0f half */
         .mainPadding = paddingOffset.GetMainOffset(axis),
         .crossPadding = paddingOffset.GetCrossOffset(axis),
         .isVertical = vertical_,
@@ -99,7 +99,9 @@ CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* pain
     };
 
     return [dividerInfo, itemPosition = std::move(itemPosition_), scrollBar = scrollBar_](RSCanvas& canvas) {
-        PaintDivider(dividerInfo, itemPosition, canvas);
+        if (Positive(dividerInfo.constrainStrokeWidth)) {
+            PaintDivider(dividerInfo, itemPosition, canvas);
+        }
         PaintScrollBar(scrollBar, canvas);
     };
 }
