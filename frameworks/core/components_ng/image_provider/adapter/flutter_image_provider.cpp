@@ -180,13 +180,13 @@ void ImageProvider::MakeCanvasImageHelper(const WeakPtr<ImageObject>& objWp, con
     const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder, bool forceResize, bool sync)
 {
     auto obj = objWp.Upgrade();
-    CHECK_NULL_VOID(obj && obj->GetData() && renderTaskHolder);
+    CHECK_NULL_VOID(obj && renderTaskHolder);
     auto flutterRenderTaskHolder = DynamicCast<FlutterRenderTaskHolder>(renderTaskHolder);
     CHECK_NULL_VOID(flutterRenderTaskHolder);
     CHECK_NULL_VOID_NOLOG(ImageProvider::PrepareImageData(obj));
     // resize image
     auto skiaImageData = DynamicCast<SkiaImageData>(obj->GetData());
-    CHECK_NULL_VOID(skiaImageData && skiaImageData->GetSkData().get());
+    CHECK_NULL_VOID(skiaImageData && skiaImageData->GetSkData());
     auto rawImage = SkImage::MakeFromEncoded(skiaImageData->GetSkData());
     if (!rawImage) {
         std::string errorMessage(
@@ -201,6 +201,7 @@ void ImageProvider::MakeCanvasImageHelper(const WeakPtr<ImageObject>& objWp, con
     if (!compressFileData) {
         image = ResizeSkImage(rawImage, obj->GetSourceInfo().GetSrc(), resizeTarget, forceResize);
     }
+    CHECK_NULL_VOID(image);
     // create gpu object
     flutter::SkiaGPUObject<SkImage> skiaGpuObjSkImage({ image, flutterRenderTaskHolder->unrefQueue });
 #ifdef NG_BUILD
@@ -212,7 +213,6 @@ void ImageProvider::MakeCanvasImageHelper(const WeakPtr<ImageObject>& objWp, con
 #else
     // make flutter image
     auto flutterCanvasImage = flutter::CanvasImage::Create();
-    CHECK_NULL_VOID(flutterCanvasImage);
     flutterCanvasImage->set_image(std::move(skiaGpuObjSkImage));
     auto canvasImage = CanvasImage::Create(&flutterCanvasImage);
     CHECK_NULL_VOID(canvasImage);
