@@ -75,7 +75,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
                                                              : contentConstraint.maxSize.Width();
         auto lineCount = paragraph_->GetLineCount();
         if (lineCount == 1) {
-            if (LessOrEqual(GetTextWidth(), width)) {
+            if (LessOrEqual(GetTextWidth(), width) && !paragraph_->DidExceedMaxLines()) {
                 skipMeasure = true;
             }
         } else {
