@@ -182,6 +182,10 @@
 #if defined(PREVIEW)
 #include "frameworks/bridge/declarative_frontend/jsview/js_previewer_mock.h"
 #endif
+#ifdef UICAST_COMPONENT_SUPPORTED
+#include "uicast_interface/js_uicast.h"
+#endif
+#include "uicast_interface/uicast_jsi_impl.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -484,6 +488,10 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
     arkRuntime->AddRootView(rootView);
 #endif
     UpdateRootComponent(obj);
+
+    {
+        UICastJsiImpl::UpdateRootView();
+    }
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1340,6 +1348,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextClock", JSTextClock::JSBind },
     { "SideBarContainer", JSSideBar::JSBind },
     { "QRCode", JSQRCode::JSBind },
+#ifdef UICAST_COMPONENT_SUPPORTED
+    { "UICast", JSUICast::JSBind },
+#endif
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
 #endif

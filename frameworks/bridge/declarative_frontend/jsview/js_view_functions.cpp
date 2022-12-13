@@ -318,6 +318,33 @@ void ViewFunctions::InitViewFunctions(
         } else {
             LOGD("updateWithValueParams is not a function");
         }
+
+#ifdef UICAST_COMPONENT_SUPPORTED
+        JSRef<JSVal> jsCreateChildViewFunc = jsObject->GetProperty("createChildView");
+        if (jsCreateChildViewFunc->IsFunction()) {
+            LOGI("UICast createChildView is a function");
+            jsCreateChildViewFunc_ = JSRef<JSFunc>::Cast(jsCreateChildViewFunc);
+        } else {
+            LOGI("UICast createChildView is not a function");
+        }
+
+        JSRef<JSVal> jsRouterHandleFunc = jsObject->GetProperty("routerHandle");
+        if (jsRouterHandleFunc->IsFunction()) {
+            LOGI("UICast routerHandle is a function");
+            jsRouterHandleFunc_ = JSRef<JSFunc>::Cast(jsRouterHandleFunc);
+        } else {
+            LOGI("UICast routerHandle is not a function");
+        }
+
+        JSRef<JSVal> jsReplayOnEventFunc = jsObject->GetProperty("replayOnEvent");
+        if (jsReplayOnEventFunc->IsFunction()) {
+            LOGI("UICast replayOnEvent is a function");
+            jsReplayOnEventFunc_ = JSRef<JSFunc>::Cast(jsReplayOnEventFunc);
+        } else {
+            LOGI("UICast replayOnEvent is not a function");
+        }
+#endif
+
         jsRenderFunc_ = jsRenderFunction;
     }
 }
@@ -406,6 +433,23 @@ void ViewFunctions::ExecuteUpdateWithValueParams(const std::string& jsonData)
 {
     ExecuteFunctionWithParams(jsUpdateWithValueParamsFunc_, "updateWithValueParams", jsonData);
 }
+
+#ifdef UICAST_COMPONENT_SUPPORTED
+void ViewFunctions::ExecuteCreateChildView(const std::string& jsonData)
+{
+    ExecuteFunctionWithParams(jsCreateChildViewFunc_, "createChildView", jsonData);
+}
+
+void ViewFunctions::ExecuteRouterHandle(const std::string& jsonData)
+{
+    ExecuteFunctionWithParams(jsRouterHandleFunc_, "routerHandle", jsonData);
+}
+
+void ViewFunctions::ExecuteReplayOnEvent(const std::string& jsonData)
+{
+    ExecuteFunctionWithParams(jsReplayOnEventFunc_, "replayOnEvent", jsonData);
+}
+#endif
 
 bool ViewFunctions::ExecuteOnBackPress()
 {

@@ -69,6 +69,8 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     packagePathStr_ = appResPath;
 }
 
+void ResourceAdapterImpl::Reload() {}
+
 void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
 {
     auto resConfig = ConvertConfigToGlobal(config);

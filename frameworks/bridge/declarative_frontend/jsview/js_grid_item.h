@@ -31,7 +31,6 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& args);
 
-protected:
 #define ACE_DEFINE_SET_GRID_ITEM_SIZE(name)                                                                       \
     static void SetGridItem##name(const JSCallbackInfo& info)                                                     \
     {                                                                                                             \
