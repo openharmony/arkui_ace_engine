@@ -85,7 +85,7 @@ public:
             CHECK_NULL_VOID(paragraph);
             paragraph->Layout(context.width);
             OffsetF offset = OverlayTextModifier::GetTextPosition(SizeF(context.width, context.height),
-                SizeF(paragraph->GetMinIntrinsicWidth(), paragraph->GetHeight()), overlayOptions);
+                SizeF(paragraph->GetLongestLine(), paragraph->GetHeight()), overlayOptions);
             std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
             RSCanvas canvas(&skCanvas);
             CHECK_NULL_VOID(&canvas);
