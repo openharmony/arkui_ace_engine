@@ -18,11 +18,11 @@
 #include "core/components/badge/badge_theme.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/badge/badge_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,7 +34,7 @@ void BadgeView::Create(BadgeParameters& badgeParameters)
         V2::BADGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BadgePattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
 
@@ -47,6 +47,8 @@ void BadgeView::Create(BadgeParameters& badgeParameters)
     }
     if (badgeParameters.badgeMaxCount.has_value()) {
         layoutProperty->UpdateBadgeMaxCount(badgeParameters.badgeMaxCount.value());
+    } else {
+        layoutProperty->UpdateBadgeMaxCount(badgeTheme->GetMaxCount());
     }
 
     if (badgeParameters.badgePosition.has_value()) {
