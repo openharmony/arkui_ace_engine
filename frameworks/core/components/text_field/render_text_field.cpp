@@ -481,12 +481,12 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
         }
     }
 
-    if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
+    if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::RELEASE) {
         Offset rightClickOffset = event.GetOffset();
         ShowTextOverlay(rightClickOffset, false, true);
     }
 
-    return false;
+    return true;
 }
 
 void RenderTextField::HandleMouseHoverEvent(MouseState mouseState)
@@ -680,7 +680,6 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
     if (clickInfo.GetSourceDevice() == SourceType::MOUSE) {
         StartTwinkling();
     } else {
-        StartTwinkling();
         ShowTextOverlay(globalPosition, true);
     }
 }
@@ -882,6 +881,10 @@ void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHan
     textOverlay_->SetSearchButtonMarker(onSearch_);
     textOverlay_->SetContext(context_);
     textOverlay_->SetIsUsingMouse(isUsingMouse);
+    if (isUsingMouse) {
+        textOverlay_->SetMouseOffset(showOffset);
+    }
+
     // Add the Animation
     InitAnimation();
 

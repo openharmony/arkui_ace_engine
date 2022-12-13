@@ -146,6 +146,7 @@ void RenderTextOverlay::Update(const RefPtr<Component>& component)
     onCopyAll_ = overlay->GetOnCopyAll();
     startHandleOffset_ = overlay->GetStartHandleOffset();
     endHandleOffset_ = overlay->GetEndHandleOffset();
+    mouseOffset_ = overlay->GetMouseOffset();
     onStartHandleMove_ = overlay->GetOnStartHandleMove();
     onEndHandleMove_ = overlay->GetOnEndHandleMove();
     isSingleHandle_ = overlay->GetIsSingleHandle() || (startHandleOffset_ == endHandleOffset_);
@@ -705,19 +706,36 @@ Offset RenderTextOverlay::ComputeChildPosition(const RefPtr<RenderNode>& child)
     double menuSpacingWithHandle = NormalizeToPx(menuSpacingWithHandle_);
     double menuSpacing = isSingleHandle_ ? menuSpacingWithText : menuSpacingWithHandle + menuSpacingWithText;
 
-    Offset childPosition =
-        Offset((startHandleOffset.GetX() + endHandleOffset.GetX() - child->GetLayoutSize().Width()) / 2.0,
-            startHandleOffset.GetY() - lineHeight_ - menuSpacing - NormalizeToPx(TOOL_BAR_HEIGHT));
-    // Adjust position of overlay.
-    if (LessOrEqual(childPosition.GetX(), 0.0)) {
-        childPosition.SetX(DEFAULT_SPACING);
-    } else if (GreatOrEqual(
-                   childPosition.GetX() + child->GetLayoutSize().Width(), GetLayoutParam().GetMaxSize().Width())) {
-        childPosition.SetX(GetLayoutParam().GetMaxSize().Width() - child->GetLayoutSize().Width() - DEFAULT_SPACING);
+    Offset childPosition;
+    if (isUsingMouse_) {
+        childPosition = mouseOffset_;
+        if (GreatOrEqual(
+                childPosition.GetX() + child->GetLayoutSize().Width(), GetLayoutParam().GetMaxSize().Width()) &&
+            GreatOrEqual(childPosition.GetX(), child->GetLayoutSize().Width())) {
+            childPosition.SetX(childPosition.GetX() - child->GetLayoutSize().Width());
+        }
+        if (GreatOrEqual(
+                childPosition.GetY() + child->GetLayoutSize().Height(), GetLayoutParam().GetMaxSize().Height()) &&
+            GreatOrEqual(childPosition.GetY(), child->GetLayoutSize().Height())) {
+            childPosition.SetY(childPosition.GetY() - child->GetLayoutSize().Height());
+        }
+    } else {
+        childPosition =
+            Offset((startHandleOffset.GetX() + endHandleOffset.GetX() - child->GetLayoutSize().Width()) / 2.0,
+                startHandleOffset.GetY() - lineHeight_ - menuSpacing - NormalizeToPx(TOOL_BAR_HEIGHT));
+        // Adjust position of overlay.
+        if (LessOrEqual(childPosition.GetX(), 0.0)) {
+            childPosition.SetX(DEFAULT_SPACING);
+        } else if (GreatOrEqual(
+                       childPosition.GetX() + child->GetLayoutSize().Width(), GetLayoutParam().GetMaxSize().Width())) {
+            childPosition.SetX(
+                GetLayoutParam().GetMaxSize().Width() - child->GetLayoutSize().Width() - DEFAULT_SPACING);
+        }
+        if (LessNotEqual(childPosition.GetY(), NormalizeToPx(TOOL_BAR_HEIGHT))) {
+            childPosition.SetY(endHandleOffset_.GetY() + menuSpacingWithHandle + menuSpacingWithText);
+        }
     }
-    if (LessNotEqual(childPosition.GetY(), NormalizeToPx(TOOL_BAR_HEIGHT))) {
-        childPosition.SetY(endHandleOffset_.GetY() + menuSpacingWithHandle + menuSpacingWithText);
-    }
+
     return childPosition;
 }
 
