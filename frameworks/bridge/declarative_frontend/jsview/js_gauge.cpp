@@ -122,6 +122,10 @@ void JSGauge::SetColors(const JSCallbackInfo& info)
     std::vector<float> weights;
     auto jsColor = JSRef<JSArray>::Cast(info[0]);
     for (size_t i = 0; i < jsColor->Length(); ++i) {
+        JSRef<JSVal> jsValue = jsColor->GetValueAt(i);
+        if (!jsValue->IsArray()) {
+            return;
+        }
         JSRef<JSArray> tempColors = jsColor->GetValueAt(i);
         double value = tempColors->GetValueAt(1)->ToNumber<double>();
         float weight = tempColors->GetValueAt(1)->ToNumber<float>();
