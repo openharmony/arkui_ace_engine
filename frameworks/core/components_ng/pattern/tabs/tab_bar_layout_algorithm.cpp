@@ -64,8 +64,10 @@ void TabBarLayoutAlgorithm::UpdateChildConstraint(LayoutConstraintF& childConstr
             childConstraint.maxSize.SetWidth(Infinity<float>());
             childConstraint.maxSize.SetHeight(
                 childConstraint.maxSize.Height() - tabTheme->GetSubTabIndicatorHeight().ConvertToPx());
+            childConstraint.selfIdealSize.SetHeight(ideaSize.Height());
         } else if (axis == Axis::VERTICAL) {
             childConstraint.maxSize.SetHeight(Infinity<float>());
+            childConstraint.selfIdealSize.SetWidth(ideaSize.Width());
         }
     }
 }
@@ -129,6 +131,14 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     int32_t indicator = layoutProperty->GetIndicatorValue(0);
+    if (layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
+        childrenMainSize_ <= frameSize.MainSize(axis) && !isBuilder_) {
+        indicator_ = indicator;
+        auto frontSpace = (frameSize.MainSize(axis) - childrenMainSize_) / 2;
+        OffsetF childOffset = (axis == Axis::HORIZONTAL ? OffsetF(frontSpace, 0.0f) : OffsetF(0.0f, frontSpace));
+        LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
+        return;
+    }
     if (indicator != indicator_ &&
         layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
         indicator_ = indicator;

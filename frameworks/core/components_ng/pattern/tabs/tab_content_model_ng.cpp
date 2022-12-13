@@ -41,6 +41,8 @@ constexpr Dimension DEFAULT_SINGLE_TEXT_FONT_SIZE = 16.0_fp;
 constexpr Dimension DEFAULT_SMALL_TEXT_FONT_SIZE = 10.0_fp;
 constexpr Dimension DEFAULT_IMAGE_SIZE = 24.0_vp;
 constexpr Dimension TAB_BAR_SPACE = 2.0_vp;
+constexpr Dimension TAB_BAR_ITEM_SMALL_PADDING(8, DimensionUnit::VP);
+constexpr Dimension TAB_BAR_ITEM_BIG_PADDING(12, DimensionUnit::VP);
 
 } // namespace
 
@@ -155,6 +157,12 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     // Create text node and image node.
     RefPtr<FrameNode> textNode;
     RefPtr<FrameNode> imageNode;
+    auto layoutProperty = columnNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto deviceType = SystemProperties::GetDeviceType();
+    auto tabBarItemPadding = deviceType == DeviceType::PHONE ? TAB_BAR_ITEM_SMALL_PADDING : TAB_BAR_ITEM_BIG_PADDING;
+    layoutProperty->UpdatePadding({ CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding),
+        CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding) });
     if (static_cast<int32_t>(columnNode->GetChildren().size()) == 0) {
         ImageSourceInfo imageSourceInfo(tabBarParam.GetIcon());
         imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
