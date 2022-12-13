@@ -16,6 +16,7 @@
 #include "core/components_ng/base/inspector.h"
 
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -72,6 +73,55 @@ TouchEvent GetUpPoint(const TouchEvent& downPoint)
         .x = downPoint.x, .y = downPoint.y, .type = TouchType::UP, .time = std::chrono::high_resolution_clock::now()
     };
 }
+
+void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<RefPtr<NG::UINode>>& children, int32_t pageId)
+{
+    if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
+        if (uiNode->GetTag() == "stage") {
+        } else if (uiNode->GetTag() == "page") {
+            if (uiNode->GetPageId() != pageId) {
+                return;
+            }
+        } else {
+            auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+            if (!frameNode->IsInternal()) {
+                children.emplace_back(uiNode);
+                return;
+            }
+        }
+    }
+
+    for (const auto& frameChild : uiNode->GetChildren()) {
+        GetFrameNodeChildren(frameChild, children, pageId);
+    }
+}
+
+void GetInspectorChildren(
+    const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray, int pageId)
+{
+    auto jsonNode = JsonUtil::Create(false);
+    jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
+    jsonNode->Put(INSPECTOR_ID, parent->GetId());
+    auto node = AceType::DynamicCast<FrameNode>(parent);
+    RectF rect(node->GetOffsetRelativeToWindow().GetX(), node->GetOffsetRelativeToWindow().GetY(),
+        node->GetGeometryNode()->GetFrameRect().Width(), node->GetGeometryNode()->GetFrameRect().Height());
+    jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
+    auto jsonObject = JsonUtil::Create(false);
+    parent->ToJsonValue(jsonObject);
+    jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
+    std::vector<RefPtr<NG::UINode>> children;
+    for (const auto& item : parent->GetChildren()) {
+        GetFrameNodeChildren(item, children, pageId);
+    }
+    auto jsonChildrenArray = JsonUtil::CreateArray(false);
+    for (auto uiNode : children) {
+        GetInspectorChildren(uiNode, jsonChildrenArray, pageId);
+    }
+    if (jsonChildrenArray->GetArraySize()) {
+        jsonNode->Put(INSPECTOR_CHILDREN, jsonChildrenArray);
+    }
+    jsonNodeArray->Put(jsonNode);
+}
 } // namespace
 
 std::string Inspector::GetInspectorNodeByKey(const std::string& key)
@@ -95,6 +145,46 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key)
     inspectorElement->ToJsonValue(jsonAttrs);
     jsonNode->Put(INSPECTOR_ATTRS, jsonAttrs);
     return jsonNode->ToString();
+}
+
+std::string Inspector::GetInspector(bool isLayoutInspector)
+{
+    LOGI("GetInspector start");
+    auto jsonRoot = JsonUtil::Create(true);
+    jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN_NOLOG(context, jsonRoot->ToString());
+    auto scale = context->GetViewScale();
+    auto rootHeight = context->GetRootHeight();
+    auto rootWidth = context->GetRootWidth();
+    jsonRoot->Put(INSPECTOR_WIDTH, std::to_string(rootWidth * scale).c_str());
+    jsonRoot->Put(INSPECTOR_HEIGHT, std::to_string(rootHeight * scale).c_str());
+    jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
+
+    auto pageRootNode = context->GetStageManager()->GetLastPage();
+    CHECK_NULL_RETURN_NOLOG(pageRootNode, jsonRoot->ToString());
+    auto pageId = context->GetStageManager()->GetLastPage()->GetPageId();
+    std::vector<RefPtr<NG::UINode>> children;
+    for (const auto& item : pageRootNode->GetChildren()) {
+        GetFrameNodeChildren(item, children, pageId);
+    }
+    auto jsonNodeArray = JsonUtil::CreateArray(false);
+    for (auto& uiNode : children) {
+        GetInspectorChildren(uiNode, jsonNodeArray, pageId);
+    }
+    if (jsonNodeArray->GetArraySize()) {
+        jsonRoot->Put(INSPECTOR_CHILDREN, jsonNodeArray);
+    }
+
+    if (isLayoutInspector) {
+        auto jsonTree = JsonUtil::Create(true);
+        jsonTree->Put("type", "root");
+        jsonTree->Put("content", jsonRoot);
+        return jsonTree->ToString();
+    }
+
+    return jsonRoot->ToString();
 }
 
 std::string Inspector::GetInspectorTree(bool isLayoutInspector)
