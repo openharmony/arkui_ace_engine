@@ -202,6 +202,26 @@ void SwiperModelImpl::SetOnChange(std::function<void(const BaseEventInfo* info)>
     }
 }
 
+void SwiperModelImpl::SetOnAnimationStart(std::function<void(const BaseEventInfo* info)>&& onAnimationStart)
+{
+    auto onAnimationStartEvent = EventMarker(std::move(onAnimationStart));
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        swiper->SetAnimationStartEventId(onAnimationStartEvent);
+    }
+}
+
+void SwiperModelImpl::SetOnAnimationEnd(std::function<void(const BaseEventInfo* info)>&& onAnimationEnd)
+{
+    auto onAnimationEndEvent = EventMarker(std::move(onAnimationEnd));
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        swiper->SetAnimationEndEventId(onAnimationEndEvent);
+    }
+}
+
 void SwiperModelImpl::SetRemoteMessageEventId(RemoteCallback&& remoteCallback)
 {
     EventMarker remoteMessageEventId(std::move(remoteCallback));
