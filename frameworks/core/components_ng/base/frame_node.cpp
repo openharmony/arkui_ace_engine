@@ -179,6 +179,9 @@ void FrameNode::DumpInfo()
     if (pattern_) {
         pattern_->DumpInfo();
     }
+    if (renderContext_) {
+        renderContext_->DumpInfo();
+    }
 }
 
 void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json) const

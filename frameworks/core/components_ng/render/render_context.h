@@ -172,6 +172,8 @@ public:
         const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn)
     {}
 
+    virtual void DumpInfo() const {}
+
     void SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option)
     {
         sharedTransitionOption_ = option;
