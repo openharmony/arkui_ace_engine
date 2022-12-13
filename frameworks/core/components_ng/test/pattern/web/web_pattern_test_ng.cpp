@@ -65,6 +65,16 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_001, TestSize.Level1)
     webpattern.OnGeolocationAccessEnabledUpdate(true);
     webpattern.OnUserAgentUpdate("chrome");
     webpattern.OnCacheModeUpdate(WebCacheMode::DEFAULT);
+    webpattern.OnWebCursiveFontUpdate("test");
+    webpattern.OnWebFantasyFontUpdate("test");
+    webpattern.OnWebSansSerifFontUpdate("test");
+    webpattern.OnWebSerifFontUpdate("test");
+    webpattern.OnWebStandardFontUpdate("test");
+    webpattern.OnDefaultFixedFontSizeUpdate(0);
+    webpattern.OnDefaultFontSizeUpdate(0);
+    webpattern.OnMinFontSizeUpdate(0);
+    webpattern.OnWebFixedFontUpdate("test");
+    webpattern.OnBlockNetworkUpdate(true);
 #endif
 }
 
@@ -102,6 +112,16 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_002, TestSize.Level1)
     webPattern->OnGeolocationAccessEnabledUpdate(true);
     webPattern->OnUserAgentUpdate("chrome");
     webPattern->OnCacheModeUpdate(WebCacheMode::DEFAULT);
+    webPattern->OnWebCursiveFontUpdate("test");
+    webPattern->OnWebFantasyFontUpdate("test");
+    webPattern->OnWebSansSerifFontUpdate("test");
+    webPattern->OnWebSerifFontUpdate("test");
+    webPattern->OnWebStandardFontUpdate("test");
+    webPattern->OnDefaultFixedFontSizeUpdate(0);
+    webPattern->OnDefaultFontSizeUpdate(0);
+    webPattern->OnMinFontSizeUpdate(0);
+    webPattern->OnWebFixedFontUpdate("test");
+    webPattern->OnBlockNetworkUpdate(true);
 #endif
 }
 } // namespace OHOS::Ace::NG

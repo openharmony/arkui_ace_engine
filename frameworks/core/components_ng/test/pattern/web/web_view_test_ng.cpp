@@ -174,4 +174,35 @@ HWTEST_F(WebViewTestNg, WebFrameNodeCreator003, TestSize.Level1)
     WebView::SetJsProxyCallback(std::move(jsProxyCallback));
 #endif
 }
+
+/**
+ * @tc.name: SetWindowNewEvent004
+ * @tc.desc: Test web_view.cpp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebViewTestNg, SetWindowNewEvent004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    OnWebAsyncFunc renderExitedId = [](const std::shared_ptr<BaseEventInfo>& info) {};
+    WebView::SetWindowNewEvent(std::move(renderExitedId));
+    WebView::SetWindowExitEventId(std::move(renderExitedId));
+    WebView::SetMultiWindowAccessEnabled(true);
+    WebView::SetWebCursiveFont("test");
+    WebView::SetWebFantasyFont("test");
+    WebView::SetWebSansSerifFont("test");
+    WebView::SetWebSerifFont("test");
+    WebView::SetWebStandardFont("test");
+    WebView::SetDefaultFixedFontSize(0);
+    WebView::SetDefaultFontSize(0);
+    WebView::SetMinFontSize(0);
+    WebView::SetWebFixedFont("test");
+    WebView::SetBlockNetwork(true);
+    WebView::SetPageVisibleId(std::move(renderExitedId));
+    std::function<bool(KeyEventInfo& keyEventInfo)> keyEvent = [](KeyEventInfo& keyEventInfo) {return true;};
+    WebView::SetOnInterceptKeyEventCallback(std::move(keyEvent));
+    WebView::SetDataResubmittedId(std::move(renderExitedId));
+    WebView::SetFaviconReceivedId(std::move(renderExitedId));
+    WebView::SetTouchIconUrlId(std::move(renderExitedId));
+#endif
+}
 } // namespace OHOS::Ace::NG
