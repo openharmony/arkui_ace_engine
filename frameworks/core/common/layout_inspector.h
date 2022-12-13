@@ -28,6 +28,7 @@ public:
     static void CreateLayoutInfo(int32_t instanceId);
     static void SetCallback(int32_t instanceId);
     static void SetStatus(bool layoutInspectorStatus);
+    static void GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message);
 
 private:
     static bool layoutInspectorStatus_;
