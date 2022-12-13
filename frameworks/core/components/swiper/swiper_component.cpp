@@ -145,6 +145,24 @@ const EventMarker& SwiperComponent::GetChangeEventId() const
     return declaration_->GetChangeEventId();
 }
 
+void SwiperComponent::SetAnimationStartEventId(const EventMarker& animationStartEventId)
+{
+    declaration_->SetAnimationStartEventId(animationStartEventId);
+}
+const EventMarker& SwiperComponent::GetAnimationStartEventId() const
+{
+    return declaration_->GetAnimationStartEventId();
+}
+
+void SwiperComponent::SetAnimationEndEventId(const EventMarker& animationEndEventId)
+{
+    declaration_->SetAnimationEndEventId(animationEndEventId);
+}
+const EventMarker& SwiperComponent::GetAnimationEndEventId() const
+{
+    return declaration_->GetAnimationEndEventId();
+}
+
 const EventMarker& SwiperComponent::GetRotationEventId() const
 {
     return declaration_->GetRotationEventId();

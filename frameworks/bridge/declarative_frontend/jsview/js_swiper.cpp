@@ -102,6 +102,8 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("cachedCount", &JSSwiper::SetCachedCount);
     JSClass<JSSwiper>::StaticMethod("curve", &JSSwiper::SetCurve);
     JSClass<JSSwiper>::StaticMethod("onChange", &JSSwiper::SetOnChange);
+    JSClass<JSSwiper>::StaticMethod("onAnimationStart", &JSSwiper::SetOnAnimationStart);
+    JSClass<JSSwiper>::StaticMethod("onAnimationEnd", &JSSwiper::SetOnAnimationEnd);
     JSClass<JSSwiper>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSwiper>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSSwiper>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -342,6 +344,52 @@ void JSSwiper::SetOnChange(const JSCallbackInfo& info)
     };
 
     SwiperModel::GetInstance()->SetOnChange(std::move(onChange));
+}
+
+void JSSwiper::SetOnAnimationStart(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto animationStartHandler = AceType::MakeRefPtr<JsEventFunction<SwiperChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), SwiperChangeEventToJSValue);
+    auto onAnimationStart = [executionContext = info.GetExecutionContext(), func = std::move(animationStartHandler)](
+                        const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (!swiperInfo) {
+            LOGE("onAnimationStart swiperInfo is nullptr");
+            return;
+        }
+        ACE_SCORING_EVENT("Swiper.onAnimationStart");
+        func->Execute(*swiperInfo);
+    };
+
+    SwiperModel::GetInstance()->SetOnAnimationStart(std::move(onAnimationStart));
+}
+
+void JSSwiper::SetOnAnimationEnd(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto animationEndHandler = AceType::MakeRefPtr<JsEventFunction<SwiperChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), SwiperChangeEventToJSValue);
+    auto onAnimationEnd = [executionContext = info.GetExecutionContext(), func = std::move(animationEndHandler)](
+                        const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (!swiperInfo) {
+            LOGE("onAnimationEnd swiperInfo is nullptr");
+            return;
+        }
+        ACE_SCORING_EVENT("Swiper.onAnimationEnd");
+        func->Execute(*swiperInfo);
+    };
+
+    SwiperModel::GetInstance()->SetOnAnimationEnd(std::move(onAnimationEnd));
 }
 
 void JSSwiper::SetOnClick(const JSCallbackInfo& info)

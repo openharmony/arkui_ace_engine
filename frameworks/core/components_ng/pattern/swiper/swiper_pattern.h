@@ -185,6 +185,8 @@ private:
     bool IsOutOfBoundary(float mainOffset) const;
     float MainSize() const;
     void FireChangeEvent() const;
+    void FireAnimationStartEvent() const;
+    void FireAnimationEndEvent() const;
     void CalculateCacheRange();
 
     float GetItemSpace() const;
