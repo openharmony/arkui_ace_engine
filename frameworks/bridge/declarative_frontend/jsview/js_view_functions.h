@@ -61,6 +61,11 @@ public:
     void ExecuteShow();
     void ExecuteHide();
     void ExecuteUpdateWithValueParams(const std::string& jsonData);
+#ifdef UICAST_COMPONENT_SUPPORTED
+    void ExecuteCreateChildView(const std::string& jsonData);
+    void ExecuteRouterHandle(const std::string& jsonData);
+    void ExecuteReplayOnEvent(const std::string& jsonData);
+#endif
 
     bool HasPageTransition() const;
     bool HasMeasure() const;
@@ -99,6 +104,11 @@ private:
     JSWeak<JSFunc> jsOnShowFunc_;
     JSWeak<JSFunc> jsBackPressFunc_;
     JSWeak<JSFunc> jsUpdateWithValueParamsFunc_;
+#ifdef UICAST_COMPONENT_SUPPORTED
+    JSWeak<JSFunc> jsCreateChildViewFunc_;
+    JSWeak<JSFunc> jsRouterHandleFunc_;
+    JSWeak<JSFunc> jsReplayOnEventFunc_;
+#endif
 
     JSExecutionContext context_;
 };

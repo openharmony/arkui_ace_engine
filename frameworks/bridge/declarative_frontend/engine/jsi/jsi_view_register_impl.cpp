@@ -164,6 +164,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_water_flow.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_water_flow_item.h"
+#ifdef UICAST_COMPONENT_SUPPORTED
+#include "uicast_interface/js_uicast.h"
+#endif
 
 #if defined(XCOMPONENT_SUPPORTED)
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
@@ -399,6 +402,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextClock", JSTextClock::JSBind },
     { "SideBarContainer", JSSideBar::JSBind },
     { "QRCode", JSQRCode::JSBind },
+#ifdef UICAST_COMPONENT_SUPPORTED
+    { "UICast", JSUICast::JSBind },
+#endif
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
 #endif
