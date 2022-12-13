@@ -46,6 +46,7 @@ public:
 
     void FireConnect()
     {
+        adapter_->UpdateRect(currentRect_);
         hasConnectionToAbility_ = true;
         if (component_) {
             component_->FireOnConnected();
@@ -66,6 +67,8 @@ public:
 
     void ConnectOrUpdateExtension();
 
+    void OnPaintFinish() override;
+
 private:
     Rect currentRect_;
     bool needLayout_ = false;
@@ -73,6 +76,7 @@ private:
     int32_t callbackId_ = 0;
     Dimension width_;
     Dimension height_;
+    Offset globalOffsetExternal_;
 
     RefPtr<WindowExtensionConnectionAdapter> adapter_;
     RefPtr<V2::AbilityComponent> component_;
