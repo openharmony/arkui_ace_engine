@@ -185,6 +185,9 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> mouseHoverEvent_;
     std::vector<XComponentTouchPoint> nativeXComponentTouchPoints_;
+#ifdef OHOS_PLATFORM
+    int64_t startIncreaseTime_ = 0;
+#endif
 };
 } // namespace OHOS::Ace::NG
 
