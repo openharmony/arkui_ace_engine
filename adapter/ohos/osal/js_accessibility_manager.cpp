@@ -658,6 +658,7 @@ void UpdateAccessibilityElementInfo(
     nodeInfo.SetWindowId(commonProperty.windowId);
     nodeInfo.SetPageId(node->GetPageId());
     nodeInfo.SetPagePath(commonProperty.pagePath);
+    nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
 
     UpdateSupportAction(node, nodeInfo);
 }

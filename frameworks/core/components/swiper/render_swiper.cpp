@@ -3455,17 +3455,19 @@ void RenderSwiper::ApplyRestoreInfo()
     SetRestoreInfo("");
 }
 
-void RenderSwiper::UpdateChildrenVisible()
+std::list<RefPtr<RenderNode>> RenderSwiper::GetPaintChildList()
 {
+    std::list<RefPtr<RenderNode>> childList;
     auto swiperGlobalRect = GetRectBasedWindowTopLeft();
     const auto& children = GetChildren();
     for (const auto& child : children) {
-        child->SetVisible(false);
         auto childGlobalRect = child->GetRectBasedWindowTopLeft();
         if (swiperGlobalRect.IsIntersectByCommonSideWith(childGlobalRect)) {
-            child->SetVisible(true);
+            childList.emplace_back(child);
         }
     }
+
+    return childList;
 }
 
 } // namespace OHOS::Ace

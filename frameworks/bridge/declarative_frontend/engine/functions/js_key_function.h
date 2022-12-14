@@ -31,6 +31,8 @@ public:
 
     void Execute(OHOS::Ace::KeyEventInfo& event);
 
+    JSRef<JSVal> ExecuteWithValue(OHOS::Ace::KeyEventInfo& event);
+
 private:
     JSRef<JSObject> createKeyEvent(OHOS::Ace::KeyEventInfo& keyEvent);
 };

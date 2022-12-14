@@ -326,6 +326,8 @@ public:
     {
         return showPasswordImageLoadingCtx_;
     }
+    
+    void SearchRequestKeyboard();
 
     const RefPtr<CanvasImage>& GetShowPasswordIconCanvasImage() const
     {

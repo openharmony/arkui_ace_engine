@@ -266,6 +266,43 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebControllerHandler> handler_;
 };
 
+class DataResubmittedOhos : public DataResubmitted {
+    DECLARE_ACE_TYPE(DataResubmittedOhos, DataResubmitted)
+
+public:
+    DataResubmittedOhos(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler) : handler_(handler) {}
+    void Resend() override;
+    void Cancel() override;
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler_;
+};
+
+class FaviconReceivedOhos : public WebFaviconReceived {
+    DECLARE_ACE_TYPE(FaviconReceivedOhos, WebFaviconReceived)
+
+public:
+    FaviconReceivedOhos(
+        const void* data,
+        size_t width,
+        size_t height,
+        OHOS::NWeb::ImageColorType colorType,
+        OHOS::NWeb::ImageAlphaType alphaType)
+        : data_(data), width_(width), height_(height), colorType_(colorType), alphaType_(alphaType)  {}
+    const void* GetData() override;
+    size_t GetWidth() override;
+    size_t GetHeight() override;
+    int GetColorType() override;
+    int GetAlphaType() override;
+
+private:
+    const void* data_ = nullptr;
+    size_t width_ = 0;
+    size_t height_ = 0;
+    OHOS::NWeb::ImageColorType colorType_ = OHOS::NWeb::ImageColorType::COLOR_TYPE_UNKNOWN;
+    OHOS::NWeb::ImageAlphaType alphaType_ = OHOS::NWeb::ImageAlphaType::ALPHA_TYPE_UNKNOWN;
+};
+
 class WebSurfaceCallback : public OHOS::SurfaceDelegate::ISurfaceCallback {
 
 public:
@@ -359,12 +396,14 @@ public:
     void UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled);
     void UpdateWebCursiveFont(const std::string& cursiveFontFamily);
     void UpdateWebFantasyFont(const std::string& fantasyFontFamily);
+    void UpdateWebFixedFont(const std::string& fixedFontFamily);
     void UpdateWebSansSerifFont(const std::string& sansSerifFontFamily);
     void UpdateWebSerifFont(const std::string& serifFontFamily);
     void UpdateWebStandardFont(const std::string& standardFontFamily);
     void UpdateDefaultFixedFontSize(int32_t size);
     void UpdateDefaultFontSize(int32_t defaultFontSize);
     void UpdateMinFontSize(int32_t minFontSize);
+    void UpdateBlockNetwork(bool isNetworkBlocked);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
@@ -435,6 +474,11 @@ public:
     void OnWindowNew(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
         const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler);
     void OnWindowExit();
+    void OnPageVisible(const std::string& url);
+    void OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler);
+    void OnFaviconReceived(const void* data, size_t width, size_t height, OHOS::NWeb::ImageColorType colorType,
+        OHOS::NWeb::ImageAlphaType alphaType);
+    void OnTouchIconUrl(const std::string& iconUrl, bool precomposed);
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();
@@ -564,6 +608,8 @@ private:
     EventCallbackV2 onPermissionRequestV2_;
     EventCallbackV2 onSearchResultReceiveV2_;
     EventCallbackV2 onWindowExitV2_;
+    EventCallbackV2 onPageVisibleV2_;
+    EventCallbackV2 onTouchIconUrlV2_;
 
     std::string bundlePath_;
     std::string bundleDataPath_;

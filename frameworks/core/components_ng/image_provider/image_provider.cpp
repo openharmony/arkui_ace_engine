@@ -54,8 +54,7 @@ WRAP_TASK_AND_POST_TO(UI, UI);
 WRAP_TASK_AND_POST_TO(BACKGROUND, Background);
 WRAP_TASK_AND_POST_TO(IO, IO);
 
-bool ImageProvider::PrepareImageData(
-    const RefPtr<ImageObject>& imageObj, const LoadFailCallback& failCallback, bool sync)
+bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
 {
     CHECK_NULL_RETURN(imageObj, false);
     // data already loaded
@@ -80,8 +79,6 @@ bool ImageProvider::PrepareImageData(
         imageObj->SetData(newLoadedData);
         return true;
     } while (false);
-    // fail to load data
-    FailCallback(failCallback, imageObj->GetSourceInfo(), errorMessage, sync);
     return false;
 }
 

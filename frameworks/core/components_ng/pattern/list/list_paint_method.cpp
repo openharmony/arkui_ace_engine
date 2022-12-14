@@ -79,7 +79,7 @@ void ListPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas& canvas)
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     auto frameSize = geometryNode->GetPaddingSize();
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
-    Axis axis = vertical_ ? Axis::VERTICAL : Axis::HORIZONTAL;
+    Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;
     DividerInfo dividerInfo = {
         .constrainStrokeWidth = divider_.strokeWidth.ConvertToPx(),
         .crossSize = vertical_ ? frameSize.Height() : frameSize.Width(),

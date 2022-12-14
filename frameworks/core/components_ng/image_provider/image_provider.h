@@ -138,6 +138,7 @@ public:
     // Query [CanvasImage] from cache, if hit, notify load success immediately and returns true
     static bool QueryCanvasImageFromCache(
         const WeakPtr<ImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget);
+
 protected:
     // helper function to post task to [TaskType] thread
     static void WrapTaskAndPostTo(
@@ -149,12 +150,9 @@ protected:
     /** Check if data is present in imageObj, if not, load image data.
      *
      *    @param imageObj         contains image source and image data
-     *    @param failCallback     State Manager's callback, called when load fails
-     *    @param sync             whether failCallback is called synchronously
      *    @return                 true if image data is prepared
      */
-    static bool PrepareImageData(
-        const RefPtr<ImageObject>& imageObj, const LoadFailCallback& failCallback, bool sync = false);
+    static bool PrepareImageData(const RefPtr<ImageObject>& imageObj);
 
     /** Generate imageObject with sourceInfo, encodedInfo, and data
      *

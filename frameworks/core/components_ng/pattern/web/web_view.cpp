@@ -468,6 +468,13 @@ void WebView::SetWebFantasyFont(const std::string& fantasyFontFamily)
     webPattern->UpdateWebFantasyFont(fantasyFontFamily);
 }
 
+void WebView::SetWebFixedFont(const std::string& fixedFontFamily)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebFixedFont(fixedFontFamily);
+}
+
 void WebView::SetWebSansSerifFont(const std::string& sansSerifFontFamily)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -508,5 +515,47 @@ void WebView::SetMinFontSize(int32_t minFontSize)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateMinFontSize(minFontSize);
+}
+
+void WebView::SetBlockNetwork(bool isNetworkBlocked)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateBlockNetwork(isNetworkBlocked);
+}
+
+void WebView::SetPageVisibleId(OnWebAsyncFunc&& pageVisibleId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnPageVisibleEvent(std::move(pageVisibleId));
+}
+
+void WebView::SetOnInterceptKeyEventCallback(std::function<bool(KeyEventInfo& keyEventInfo)>&& onPreKeyEventId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnPreKeyEvent(std::move(onPreKeyEventId));
+}
+
+void WebView::SetDataResubmittedId(OnWebAsyncFunc&& dataResubmittedId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnDataResubmittedEvent(std::move(dataResubmittedId));
+}
+
+void WebView::SetFaviconReceivedId(OnWebAsyncFunc&& faviconReceivedId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFaviconReceivedEvent(std::move(faviconReceivedId));
+}
+
+void WebView::SetTouchIconUrlId(OnWebAsyncFunc&& touchIconUrlId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnTouchIconUrlEvent(std::move(touchIconUrlId));
 }
 } // namespace OHOS::Ace::NG

@@ -58,6 +58,9 @@ FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Patter
 
 FrameNode::~FrameNode()
 {
+    for (const auto& destroyCallback : destroyCallbacks_) {
+        destroyCallback();
+    }
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
         OnDetachFromMainTree();
@@ -176,6 +179,9 @@ void FrameNode::DumpInfo()
         std::string("PaintRect: ").append(renderContext_->GetPaintRectWithTransform().ToString()));
     if (pattern_) {
         pattern_->DumpInfo();
+    }
+    if (renderContext_) {
+        renderContext_->DumpInfo();
     }
 }
 

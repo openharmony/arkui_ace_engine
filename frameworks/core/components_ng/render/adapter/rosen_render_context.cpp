@@ -29,6 +29,7 @@
 #include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
+#include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
@@ -273,17 +274,17 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
 
 void RosenRenderContext::PaintBackground()
 {
-    CHECK_NULL_VOID(GetBackground() && GetBackground()->GetBackgroundImage());
     auto image = DynamicCast<SkiaCanvasImage>(bgImage_);
     CHECK_NULL_VOID(bgLoadingCtx_ && image);
-    auto skImage = image->GetCanvasImage();
-    CHECK_NULL_VOID(skImage);
 
     auto rosenImage = std::make_shared<Rosen::RSImage>();
-    rosenImage->SetImage(skImage);
     auto compressData = image->GetCompressData();
-    rosenImage->SetCompressData(
-        compressData, image->GetUniqueID(), image->GetCompressWidth(), image->GetCompressHeight());
+    if (compressData) {
+        rosenImage->SetCompressData(
+            compressData, image->GetUniqueID(), image->GetCompressWidth(), image->GetCompressHeight());
+    } else {
+        rosenImage->SetImage(image->GetCanvasImage());
+    }
     rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
     rsNode_->SetBgImage(rosenImage);
 
@@ -1732,4 +1733,12 @@ void RosenRenderContext::PaintMouseSelectRect(const RectF& rect, const Color& fi
     mouseSelectModifier_->SetPaintTask(std::move(paintTask));
     rsNode_->AddModifier(mouseSelectModifier_);
 }
+
+void RosenRenderContext::DumpInfo() const
+{
+    if (rsNode_) {
+        DumpLog::GetInstance().AddDesc(rsNode_->DumpNode(0));
+    }
+}
+
 } // namespace OHOS::Ace::NG

@@ -927,7 +927,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest012, TestSize.Level1)
         for (int prepareReturn : prepareReturns) {
             pattern->isStop_ = isStop;
             if (isStop) {
-                EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Prepare())
+                EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), PrepareAsync())
                     .WillOnce(Return(prepareReturn));
             }
             if (isStop && prepareReturn != 0) {

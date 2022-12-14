@@ -53,6 +53,9 @@ void NavigationPattern::OnModifyDone()
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     MountNavBar(hostNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    navBarNode->MarkModifyDone();
 }
 
 bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)

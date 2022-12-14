@@ -885,7 +885,7 @@ void VideoPattern::Start()
         return;
     }
 
-    if (isStop_ && mediaPlayer_->Prepare() != 0) {
+    if (isStop_ && mediaPlayer_->PrepareAsync() != 0) {
         LOGE("Player has not prepared");
         return;
     }

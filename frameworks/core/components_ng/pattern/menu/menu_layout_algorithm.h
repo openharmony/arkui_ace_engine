@@ -40,6 +40,9 @@ protected:
 private:
     void Initialize(LayoutWrapper* layoutWrapper);
 
+    float GetChildrenMaxWidth(
+        const std::list<RefPtr<LayoutWrapper>>& children, const LayoutConstraintF& layoutConstraint);
+
     SizeF screenSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuLayoutAlgorithm);
