@@ -525,7 +525,7 @@ void RenderSideBarContainer::HandleDragUpdate(double xOffset)
         SetChildrenStatus();
         return;
     }
-    if (sideBarLine > maxValue) {
+    if (sideBarLine >= maxValue) {
         sidebarWidth_ = isSideBarWidthUnitPercent ? ConvertWidthToPercent(maxSidebarWidth_) : maxSidebarWidth_;
         SetChildrenStatus();
         return;
