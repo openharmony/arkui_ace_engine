@@ -166,10 +166,18 @@ void TabBarPattern::HandleMouseEvent(const MouseInfo& info)
     auto totalCount = host->TotalChildCount();
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
     if (index < 0 || index >= totalCount) {
+        if (hoverIndex_.has_value() && !touchingIndex_.has_value()) {
+            HandleMoveAway(hoverIndex_.value());
+        }
+        hoverIndex_.reset();
         return;
     }
     auto mouseAction = info.GetAction();
     if (mouseAction == MouseAction::MOVE || mouseAction == MouseAction::WINDOW_ENTER) {
+        if (touchingIndex_.has_value()) {
+            hoverIndex_ = index;
+            return;
+        }
         if (!hoverIndex_.has_value()) {
             HandleHoverOnEvent(index);
             hoverIndex_ = index;
@@ -195,9 +203,10 @@ void TabBarPattern::HandleHoverEvent(bool isHover)
         return;
     }
     isHover_ = isHover;
-    touching_ = false;
     if (!isHover_ && hoverIndex_.has_value()) {
-        HandleMoveAway(hoverIndex_.value());
+        if (!touchingIndex_.has_value()) {
+            HandleMoveAway(hoverIndex_.value());
+        }
         hoverIndex_.reset();
     }
 }
@@ -335,16 +344,16 @@ void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto totalCount = host->TotalChildCount();
-
+    auto touchType = info.GetTouchType();
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
-    if (index >= 0 && index < totalCount) {
-        auto touchType = info.GetTouchType();
-        if (touchType == TouchType::DOWN) {
-            HandleTouchDown(index);
-            touchingIndex_ = index;
-        } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-            HandleTouchUp(index);
-        }
+    if (touchType == TouchType::DOWN && index >= 0 && index < totalCount) {
+        HandleTouchDown(index);
+        touchingIndex_ = index;
+        return;
+    }
+    if ((touchType == TouchType::UP || touchType == TouchType::CANCEL) && touchingIndex_.has_value()) {
+        HandleTouchUp(index);
+        touchingIndex_.reset();
     }
 }
 
@@ -414,14 +423,14 @@ void TabBarPattern::HandleTouchUp(int32_t index)
     }
     if (IsTouching()) {
         SetTouching(false);
-        if (hoverIndex_.has_value()) {
-            if (touchingIndex_ == index) {
-                PlayPressAnimation(index, HOVER_OPACITY_RATIO);
-                return;
-            }
+        if (hoverIndex_.has_value() && touchingIndex_.value_or(-1) == index) {
+            PlayPressAnimation(index, HOVER_OPACITY_RATIO);
             return;
         }
-        PlayPressAnimation(touchingIndex_, 0.0f);
+        PlayPressAnimation(touchingIndex_.value_or(-1), 0.0f);
+        if (hoverIndex_.has_value()) {
+            PlayPressAnimation(hoverIndex_.value(), HOVER_OPACITY_RATIO);
+        }
     }
 }
 
