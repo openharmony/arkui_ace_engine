@@ -46,11 +46,11 @@ protected:
         Axis axis, int32_t& currentIndex, float endPos, float& startPos) override;
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize) override;
     void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
-        const LayoutConstraintF& layoutConstraint, Axis axis) override;
+        const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis) override;
     int32_t GetLanesFloor(LayoutWrapper* layoutWrapper, int32_t index) override;
 
 private:
-    void ModifyLaneLength(const LayoutConstraintF& layoutConstraint, Axis axis);
+    void ModifyLaneLength(float crossSize);
     int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t index);
     static int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t index);
     void SetListItemGroupProperty(const RefPtr<ListItemGroupLayoutProperty>& itemGroup, Axis axis, int32_t lanes);
