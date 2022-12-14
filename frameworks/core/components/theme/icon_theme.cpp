@@ -70,7 +70,8 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::UP_ARROW_SVG, "up_arrow" },
     { InternalResource::ResourceId::WATCH_DOWN_ARROW_SVG, "watch_down_arrow" },
     { InternalResource::ResourceId::WATCH_UP_ARROW_SVG, "watch_up_arrow" },
-    { InternalResource::ResourceId::WRONG_SVG, "wrong" }
+    { InternalResource::ResourceId::WRONG_SVG, "wrong" },
+    { InternalResource::ResourceId::INPUT_SEARCH_SVG, "ic_public_input_search" }
 };
 }
 

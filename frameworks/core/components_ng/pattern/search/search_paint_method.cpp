@@ -52,13 +52,15 @@ void SearchPaintMethod::PaintSearch(RSCanvas& canvas, PaintWrapper* paintWrapper
         auto searchSize = paintWrapper->GetGeometryNode()->GetFrameSize();
         // Paint divider.
         double dividerVerticalOffset = (searchSize.Height() - iconHeight.ConvertToPx()) / 2.0;
-        double dividerHorizontalOffset = searchSize.Width() - buttonSize_.Width() - dividerSpace - searchSpace;
+        double dividerHorizontalOffset =
+            searchSize.Width() - buttonSize_.Width() - dividerSpace - searchSpace - searchDividerWidth / 2;
         OffsetF dividerOffset = OffsetF(dividerHorizontalOffset, dividerVerticalOffset);
         float originX = dividerOffset.GetX();
         float originY = dividerOffset.GetY();
         RSRect rect(originX, originY, originX + searchDividerWidth, originY + iconHeight.ConvertToPx());
         canvas.Save();
         RSPen pen;
+        pen.SetWidth(searchDividerWidth);
         pen.SetColor(ToRSColor(searchDividerColor));
         canvas.AttachPen(pen);
         canvas.DrawRect(rect);
