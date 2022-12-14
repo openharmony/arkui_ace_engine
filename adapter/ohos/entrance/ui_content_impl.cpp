@@ -159,8 +159,13 @@ public:
     void OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
     {
         LOGI("DragWindowListener::OnDrag called.");
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        int32_t instanceId = instanceId_;
+        if (container->IsSubContainer()) {
+            instanceId = container->GetParentId();
+        }
         auto flutterAceView =
-            static_cast<Platform::FlutterAceView*>(Platform::AceContainer::GetContainer(instanceId_)->GetView());
+            static_cast<Platform::FlutterAceView*>(Platform::AceContainer::GetContainer(instanceId)->GetView());
         CHECK_NULL_VOID(flutterAceView);
         DragEventAction action;
         switch (event) {
@@ -937,6 +942,8 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     AceEngine::Get().AddContainer(instanceId_, container);
     touchOutsideListener_ = new TouchOutsideListener(instanceId_);
     window_->RegisterTouchOutsideListener(touchOutsideListener_);
+    dragWindowListener_ = new DragWindowListener(instanceId_);
+    window_->RegisterDragListener(dragWindowListener_);
 }
 
 void UIContentImpl::SetNextFrameLayoutCallback(std::function<void()>&& callback)
