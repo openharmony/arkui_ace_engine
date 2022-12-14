@@ -530,12 +530,12 @@ void ContainerModalElement::SetTitleButtonHide(bool hideSplit, bool hideMaximize
     containerModalComponent_->SetTitleButtonHide(hideSplit, hideMaximize, hideMinimize);
 
     auto titleChildrenRow = AceType::MakeRefPtr<RowComponent>(
-        FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(false));
+        FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(false, windowFocus_));
     titleChildrenRow->SetUpdateType(UpdateType::REBUILD);
     rowElement->SetUpdateComponent(titleChildrenRow);
 
     auto floatingTitleChildrenRow = AceType::MakeRefPtr<RowComponent>(
-        FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(true));
+        FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(true, windowFocus_));
     floatingTitleChildrenRow->SetUpdateType(UpdateType::REBUILD);
     floatingRowElement->SetUpdateComponent(floatingTitleChildrenRow);
 }
