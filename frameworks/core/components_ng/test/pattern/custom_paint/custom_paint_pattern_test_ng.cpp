@@ -52,6 +52,54 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    void OnDirtyLayoutWrapperSwapTest(const RefPtr<CustomPaintPattern>& customPattern,
+        const RefPtr<LayoutWrapper>& layoutWrapper, DirtySwapConfig& config)
+    {
+        /**
+        * @tc.steps1: Call the function OnDirtyLayoutWrapperSwap with config.skipMeasure = true.
+        * @tc.expected: The return value is equal to false.
+        */
+        config.skipMeasure = true;
+        layoutWrapper->skipMeasureContent_ = true;
+        EXPECT_FALSE(customPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+        layoutWrapper->skipMeasureContent_ = false;
+        EXPECT_FALSE(customPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+
+        /**
+        * @tc.steps2: Call the function OnDirtyLayoutWrapperSwap with config.skipMeasure = false.
+        * @tc.expected: The return value is equal to false.
+        */
+        config.skipMeasure = false;
+        layoutWrapper->skipMeasureContent_ = true;
+        EXPECT_FALSE(customPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+        layoutWrapper->skipMeasureContent_ = false;
+        customPattern->isCanvasInit_ = false;
+        EXPECT_TRUE(customPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+
+        /**
+        * @tc.steps3: Call the function OnDirtyLayoutWrapperSwap with customPattern->isCanvasInit_ = true,
+        *             config.skipMeasure = false and layoutWrapper->skipMeasureContent_ = false.
+        * @tc.expected: The return value is equal to true.
+        */
+        customPattern->isCanvasInit_ = true;
+        bool frameOffsetChanges[2] = { false, true };
+        bool contentOffsetChanges[2] = { false, true };
+        bool contentSizeChanges[2] = { false, true };
+        for (bool frameOffsetChange : frameOffsetChanges) {
+            for (bool contentOffsetChange : contentOffsetChanges) {
+                for (bool contentSizeChange: contentSizeChanges) {
+                    config.frameOffsetChange = frameOffsetChange;
+                    config.contentOffsetChange = contentOffsetChange;
+                    config.contentSizeChange = contentSizeChange;
+                    if (config.frameOffsetChange || config.contentOffsetChange || config.contentSizeChange) {
+                        EXPECT_TRUE(customPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+                    } else {
+                        EXPECT_FALSE(customPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+                    }
+                }
+            }
+        }
+    }
 };
 
 RefPtr<CustomPaintPattern> CustomPaintPatternTestNg::CreateCustomPaintPattern()
@@ -189,36 +237,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg003, TestSize.Level1)
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
     layoutWrapper->GetLayoutAlgorithm()->SetNeedLayout();
     DirtySwapConfig config;
-
     /**
-     * @tc.steps2: Call the function OnDirtyLayoutWrapperSwap with config.skipMeasure = false.
-     * @tc.expected: The return value is equal to true.
+     * @tc.steps2: Test OnDirtyLayoutWrapper.
+     * @tc.expected: return correct value.
      */
-    layoutWrapper->skipMeasureContent_ = true;
-    config.skipMeasure = false;
-    EXPECT_FALSE(customPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
-
-    /**
-     * @tc.steps3: Call the function OnDirtyLayoutWrapperSwap with config.skipMeasure = true.
-     * @tc.expected: The return value is equal to false.
-     */
-    config.skipMeasure = true;
-    EXPECT_FALSE(customPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
-
-    /**
-     * @tc.steps4: Call the function OnDirtyLayoutWrapperSwap with config.skipMeasure = false.
-     * @tc.expected: The return value is equal to true.
-     */
-    layoutWrapper->skipMeasureContent_ = false;
-    config.skipMeasure = false;
-    EXPECT_TRUE(customPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
-
-    /**
-     * @tc.steps5: Call the function OnDirtyLayoutWrapperSwap with config.skipMeasure = true.
-     * @tc.expected: The return value is equal to false.
-     */
-    config.skipMeasure = true;
-    EXPECT_FALSE(customPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    OnDirtyLayoutWrapperSwapTest(customPattern, layoutWrapper, config);
 }
 
 /**
