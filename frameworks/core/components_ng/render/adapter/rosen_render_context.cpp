@@ -438,7 +438,7 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
     // TODO: add rotation and center support
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto scale = rsNode_->GetStagingProperties().GetScale();
-    point = PointF((point.GetX() - translate[0]) / scale[0], (point.GetY() - translate[1]) / scale[1]);
+    point = PointF(point.GetX() / scale[0], point.GetY() / scale[1]);
 }
 
 RectF RosenRenderContext::GetPaintRectWithoutTransform()
