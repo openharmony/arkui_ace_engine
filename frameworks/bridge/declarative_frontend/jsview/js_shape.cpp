@@ -269,10 +269,9 @@ void JSShape::SetStrokeWidth(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    auto lineWidth = Dimension(1.0, DimensionUnit::VP);
-    ParseJsDimensionVp(info[0], lineWidth);
-    if (Negative(lineWidth.Value())) {
-        lineWidth = Dimension(1.0, DimensionUnit::VP);
+    Dimension lineWidth;
+    if (!ParseJsDimensionVp(info[0], lineWidth)) {
+        return;
     }
     ShapeModel::GetInstance()->SetStrokeWidth(lineWidth);
 }
