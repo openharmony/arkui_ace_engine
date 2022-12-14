@@ -238,40 +238,6 @@ inline Dimension StringToDimensionWithUnit(const std::string& value, DimensionUn
     }
     return Dimension(result, defaultUnit);
 }
-// string to dimension method with success check
-inline bool StringToDimensionWithUnit(
-    const std::string& value, Dimension& result, DimensionUnit defaultUnit = DimensionUnit::PX)
-{
-    errno = 0;
-    if (std::strcmp(value.c_str(), "auto") == 0) {
-        result = Dimension(1.0, DimensionUnit::AUTO);
-        return true;
-    }
-    char* pEnd = nullptr;
-    double res = std::strtod(value.c_str(), &pEnd);
-    if (pEnd == value.c_str() || errno == ERANGE) {
-        return false;
-    } else if (pEnd != nullptr) {
-        if (std::strcmp(pEnd, "") == 0) {
-            result = Dimension(res, defaultUnit);
-        } else if (std::strcmp(pEnd, "%") == 0) {
-            // Parse percent, transfer from [0, 100] to [0, 1]
-            result = Dimension(res / PERCENT_VALUE, DimensionUnit::PERCENT);
-        } else if (std::strcmp(pEnd, "px") == 0) {
-            result = Dimension(res, DimensionUnit::PX);
-        } else if (std::strcmp(pEnd, "vp") == 0) {
-            result = Dimension(res, DimensionUnit::VP);
-        } else if (std::strcmp(pEnd, "fp") == 0) {
-            result = Dimension(res, DimensionUnit::FP);
-        } else if ((pEnd) && (std::strcmp(pEnd, "lpx") == 0)) {
-            result = Dimension(res, DimensionUnit::LPX);
-        } else {
-            return false;
-        }
-        return true;
-    }
-    return false;
-}
 
 inline CalcDimension StringToCalcDimension(const std::string& value, bool useVp = false)
 {
