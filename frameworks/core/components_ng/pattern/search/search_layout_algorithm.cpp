@@ -224,7 +224,7 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         // Layout CancelButton
         float cancelButtonVerticalOffset = (searchSize.Height() - cancelButtonFrameSize.Height()) / 2.0;
         auto cancelButtonOffsetToSearchButton = cancelButtonFrameSize.Width() +
-                                                searchTheme->GetDividerSideSpace().ConvertToPx() +
+                                                2 * searchTheme->GetDividerSideSpace().ConvertToPx() +
                                                 searchTheme->GetSearchDividerWidth();
         OffsetF cancelButtonOffset = OffsetF(buttonOffset.GetX() - cancelButtonOffsetToSearchButton, 0.0);
         cancelButtonOffset += OffsetF(0.0, cancelButtonVerticalOffset);
@@ -233,7 +233,7 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         // Layout CancelImage
         float cancelImageVerticalOffset = (searchSize.Height() - iconHeight) / 2.0;
         auto cancelImageOffsetToSearchButton =
-            iconHeight + searchTheme->GetDividerSideSpace().ConvertToPx() + searchTheme->GetSearchDividerWidth();
+            iconHeight + 2 * searchTheme->GetDividerSideSpace().ConvertToPx() + searchTheme->GetSearchDividerWidth();
         auto cancelButtonImageCenterOffset = (cancelButtonFrameSize.Height() - iconHeight) / 2.0;
         OffsetF cancelImageOffset =
             OffsetF(buttonOffset.GetX() - cancelImageOffsetToSearchButton - cancelButtonImageCenterOffset, 0.0);

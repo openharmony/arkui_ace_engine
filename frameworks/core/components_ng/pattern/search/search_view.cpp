@@ -294,10 +294,10 @@ RefPtr<FrameNode> SearchView::CreateImage(const RefPtr<SearchNode>& parentNode, 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     if (src.empty()) {
-        imageSourceInfo.SetResourceId(InternalResource::ResourceId::SEARCH_SVG);
+        imageSourceInfo.SetResourceId(InternalResource::ResourceId::INPUT_SEARCH_SVG);
         auto iconTheme = pipeline->GetTheme<IconTheme>();
         CHECK_NULL_RETURN(iconTheme, nullptr);
-        auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SEARCH_SVG);
+        auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::INPUT_SEARCH_SVG);
         imageSourceInfo.SetSrc(iconPath);
     }
     auto frameNode = FrameNode::GetOrCreateFrameNode(
