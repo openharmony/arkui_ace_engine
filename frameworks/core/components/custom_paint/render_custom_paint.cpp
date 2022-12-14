@@ -69,8 +69,17 @@ void RenderCustomPaint::Update(const RefPtr<Component>& component)
 
 void RenderCustomPaint::PerformLayout()
 {
-    drawSize_ = GetLayoutParam().GetMaxSize();
-    SetLayoutSize(drawSize_);
+    LayoutParam innerLayout = GetLayoutParam();
+    auto maxSize = innerLayout.GetMaxSize();
+    // If max size is INFINITE, use viewport of parent.
+    if (maxSize == Size(std::numeric_limits<double>::max(), std::numeric_limits<double>::max())) {
+        auto parent = GetParent().Upgrade();
+        if (parent) {
+            maxSize = parent->GetChildViewPort();
+        }
+    }
+    innerLayout.SetMaxSize(maxSize);
+    SetLayoutSize(maxSize);
 }
 
 void RenderCustomPaint::OnPositionChanged()
