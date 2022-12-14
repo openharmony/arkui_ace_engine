@@ -363,7 +363,7 @@ protected:
     void IndicatorSwipePrev();
     void IndicatorSwipeNext();
     bool MouseHoverTest(const Point& parentLocalPoint) override;
-    void UpdateChildrenVisible();
+    std::list<RefPtr<RenderNode>> GetPaintChildList();
 
     // swiper item
     std::unordered_map<int32_t, RefPtr<RenderNode>> items_;
