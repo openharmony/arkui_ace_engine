@@ -37,6 +37,13 @@ public:
         Builder() = default;
         ~Builder() = default;
 
+        static constexpr Color BLOCK_COLOR_PRESSED = Color(0x19182431);
+        static constexpr Color BLOCK_OUTER_STROKE_EDGE_COLOR = Color(0x0A000000);
+        static constexpr Dimension BUBBLE_TO_CIRCLE_CENTER_DISTANCE = 20.0_vp;
+        static constexpr Dimension MEASURE_CONTENT_DEFAULT_WIDTH = 40.0_vp;
+        static constexpr Dimension OUTSET_HOT_BLOCK_SHADOW_WIDTH = 4.0_vp;
+        static constexpr Dimension INSET_HOT_BLOCK_SHADOW_WIDTH = 6.0_vp;
+
         RefPtr<SliderTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
             RefPtr<SliderTheme> theme = AceType::Claim(new SliderTheme());
@@ -80,6 +87,17 @@ public:
                 theme->tipTextColor_ = pattern->GetAttr<Color>("tip_text_color", Color::RED);
                 theme->tipColor_ = pattern->GetAttr<Color>("tip_color", Color::RED);
                 theme->blockHoverColor_ = pattern->GetAttr<Color>("block_color_hovered", Color::RED);
+                theme->blockPressedColor_ = pattern->GetAttr<Color>("block_color_pressed", BLOCK_COLOR_PRESSED);
+                theme->blockOuterStrokeEdgeColor_ =
+                    pattern->GetAttr<Color>("block_outer_stroke_edge", BLOCK_OUTER_STROKE_EDGE_COLOR);
+                theme->bubbleToCircleCenterDistance_ =
+                    pattern->GetAttr<Dimension>("bubble_to_circle_center_distance", BUBBLE_TO_CIRCLE_CENTER_DISTANCE);
+                theme->measureContentDefaultWidth_ =
+                    pattern->GetAttr<Dimension>("measure_content_default_width", MEASURE_CONTENT_DEFAULT_WIDTH);
+                theme->outsetHotBlockShadowWidth_ =
+                    pattern->GetAttr<Dimension>("outset_hot_block_shadow_width", OUTSET_HOT_BLOCK_SHADOW_WIDTH);
+                theme->insetHotBlockShadowWidth_ =
+                    pattern->GetAttr<Dimension>("inset_hot_block_shadow_width", INSET_HOT_BLOCK_SHADOW_WIDTH);
             } else {
                 LOGW("find pattern of slider fail");
             }
@@ -143,6 +161,36 @@ public:
         return tipTextPadding_;
     }
 
+    Dimension GetBubbleToCircleCenterDistance() const
+    {
+        return bubbleToCircleCenterDistance_;
+    }
+
+    Dimension GetMeasureContentDefaultWidth() const
+    {
+        return measureContentDefaultWidth_;
+    }
+
+    Dimension GetOutsetHotBlockShadowWidth() const
+    {
+        return outsetHotBlockShadowWidth_;
+    }
+
+    Dimension GetInsetHotBlockShadowWidth() const
+    {
+        return insetHotBlockShadowWidth_;
+    }
+
+    Color GetBlockPressedColor() const
+    {
+        return blockPressedColor_;
+    }
+
+    Color GetBlockOuterStrokeEdgeColor() const
+    {
+        return blockOuterStrokeEdgeColor_;
+    }
+
     Color GetTipColor() const
     {
         return tipColor_;
@@ -176,18 +224,24 @@ private:
     Dimension outsetBlockSize_;
     Dimension outsetBlockHotSize_;
     Dimension outsetTrackThickness_;
+    Dimension outsetHotBlockShadowWidth_;
 
     // inset slide mode
     Dimension insetBlockSize_;
     Dimension insetBlockHotSize_;
     Dimension insetTrackThickness_;
+    Dimension insetHotBlockShadowWidth_;
 
     // common
     Dimension markerSize_;
     Dimension tipFontSize_;
     Dimension tipTextPadding_;
+    Dimension bubbleToCircleCenterDistance_;
+    Dimension measureContentDefaultWidth_;
     Color blockColor_;
     Color blockHoverColor_;
+    Color blockPressedColor_;
+    Color blockOuterStrokeEdgeColor_;
     Color tipColor_;
     Color tipTextColor_;
     Color markerColor_;

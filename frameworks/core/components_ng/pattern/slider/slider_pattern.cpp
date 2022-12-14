@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 
+#include <valarray>
+
 #include "base/geometry/offset.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/slider/slider_accessibility_property.h"
@@ -26,7 +28,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float HALF = 0.5;
-constexpr Dimension HOT_CIRCLE_SHADOW_WIDTH = 6.0_vp;
+constexpr Dimension FOCUS_DISTANCE = 4.0_vp;
 } // namespace
 
 void SliderPattern::OnModifyDone()
@@ -37,6 +39,8 @@ void SliderPattern::OnModifyDone()
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    auto inputEventHub = hub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputEventHub);
     auto layoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateAlignment(Alignment::CENTER);
@@ -50,8 +54,8 @@ void SliderPattern::OnModifyDone()
     valueRatio_ = (value_ - min) / (max - min);
     stepRatio_ = step / (max - min);
     InitTouchEvent(gestureHub);
-    InitClickEvent(gestureHub);
     InitPanEvent(gestureHub);
+    InitMouseEvent(inputEventHub);
     auto focusHub = hub->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
@@ -69,6 +73,7 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(sliderLayoutAlgorithm, false);
     trackThickness_ = sliderLayoutAlgorithm->GetTrackThickness();
     blockDiameter_ = sliderLayoutAlgorithm->GetBlockDiameter();
+    blockHotSize_ = sliderLayoutAlgorithm->GetBlockHotSize();
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -79,11 +84,20 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     float length = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
                        ? contentSize.value().Width()
                        : contentSize.value().Height();
-    borderBlank_ = std::max(trackThickness_,
-                            blockDiameter_ + static_cast<float>(HOT_CIRCLE_SHADOW_WIDTH.ConvertToPx()) +
-                            static_cast<float>(HOT_CIRCLE_SHADOW_WIDTH.ConvertToPx()));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    Dimension hotBlockShadowWidth = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
+                                            SliderModel::SliderMode::OUTSET
+                                        ? theme->GetOutsetHotBlockShadowWidth()
+                                        : theme->GetInsetHotBlockShadowWidth();
+
+    hotBlockShadowWidth_ = static_cast<float>(hotBlockShadowWidth.ConvertToPx());
+    borderBlank_ = std::max(trackThickness_, blockDiameter_ + hotBlockShadowWidth_ / HALF);
     sliderLength_ = length >= borderBlank_ ? length - borderBlank_ : 1;
-    borderBlank_ = (length - sliderLength_) * static_cast<float>(HALF);
+    borderBlank_ = (length - sliderLength_) * HALF;
 
     return true;
 }
@@ -108,10 +122,11 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
         hotFlag_ = true;
+        UpdateValueByLocalLocation(info.GetChangedTouches().front().GetLocalLocation());
         if (showTips_) {
             bubbleFlag_ = true;
-            UpdateCircleCenterOffset();
             CreateAndSetBubbleNode();
+            FireChangeEvent(SliderChangeMode::Click);
         }
     } else if (touchType == TouchType::UP) {
         hotFlag_ = false;
@@ -151,7 +166,7 @@ void SliderPattern::CreateAndSetBubbleNode()
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontSize(sliderTheme->GetTipFontSize());
     textNode->MarkModifyDone();
     textNode->MountToParent(tipNode);
-    UpdateMarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    UpdateBubbleNode();
 }
 
 void SliderPattern::RemoveBubbleNode()
@@ -163,29 +178,13 @@ void SliderPattern::RemoveBubbleNode()
     bubbleId_ = std::nullopt;
 }
 
-void SliderPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
-{
-    if (clickEvent_) {
-        return;
-    }
-    auto clickEvent = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandlingGestureEvent(info);
-        pattern->FireChangeEvent(SliderChangeMode::Click);
-    };
-    gestureHub->RemoveClickEvent(clickEvent_);
-    clickEvent_ = MakeRefPtr<ClickEvent>(std::move(clickEvent));
-    gestureHub->AddClickEvent(clickEvent_);
-}
-
 void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
 {
     if (info.GetInputEventType() == InputEventType::AXIS) {
         info.GetMainDelta() > 0.0 ? MoveStep(-1) : MoveStep(1);
     } else {
         UpdateValueByLocalLocation(info.GetLocalLocation());
-        UpdateCircleCenterOffset();
+        UpdateBubbleNode();
     }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -219,7 +218,6 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     float oldValue = value_;
     value_ = valueRatio_ * (max - min) + min;
     valueChangeFlag_ = !NearEqual(oldValue, value_);
-    UpdateTipsValue();
 }
 
 void SliderPattern::UpdateTipsValue()
@@ -240,7 +238,6 @@ void SliderPattern::UpdateTipsValue()
 
 void SliderPattern::UpdateCircleCenterOffset()
 {
-    CHECK_NULL_VOID_NOLOG(showTips_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto frameSize = GetHostFrameSize();
@@ -257,6 +254,13 @@ void SliderPattern::UpdateCircleCenterOffset()
         circleCenter_.SetX(frameSize->Width() * HALF);
         circleCenter_.SetY(touchOffset);
     }
+}
+
+void SliderPattern::UpdateBubbleNode()
+{
+    CHECK_NULL_VOID_NOLOG(showTips_);
+    UpdateTipsValue();
+    UpdateCircleCenterOffset();
     UpdateMarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -304,12 +308,78 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void SliderPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
+    auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->GetInnerFocusPaintRect(paintRect);
+    };
+    focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
         return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+void SliderPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
+    auto sliderMode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
+    if (sliderMode == SliderModel::SliderMode::OUTSET) {
+        GetOutsetInnerFocusPaintRect(paintRect);
+    } else {
+        GetInsetInnerFocusPaintRect(paintRect);
+    }
+}
+
+void SliderPattern::GetOutsetInnerFocusPaintRect(RoundRect& paintRect)
+{
+    UpdateCircleCenterOffset();
+    auto focusRadius = blockDiameter_ * HALF + static_cast<float>(FOCUS_DISTANCE.ConvertToPx());
+    paintRect.SetRect(RectF(circleCenter_.GetX() - focusRadius, circleCenter_.GetY() - focusRadius, focusRadius / HALF,
+        focusRadius / HALF));
+    paintRect.SetCornerRadius(focusRadius);
+}
+void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
+{
+    auto frameSize = GetHostFrameSize();
+    CHECK_NULL_VOID(frameSize);
+    float offsetX = 0;
+    float offsetY = 0;
+    float width = frameSize->Width();
+    float height = frameSize->Height();
+    float focusRadius = trackThickness_ + static_cast<float>(FOCUS_DISTANCE.ConvertToPx()) / HALF;
+    if (direction_ == Axis::HORIZONTAL) {
+        offsetX = borderBlank_ - trackThickness_ * HALF - static_cast<float>(FOCUS_DISTANCE.ConvertToPx());
+        offsetY = (frameSize->Height() - trackThickness_) * HALF - static_cast<float>(FOCUS_DISTANCE.ConvertToPx());
+        width = sliderLength_ + trackThickness_ + static_cast<float>(FOCUS_DISTANCE.ConvertToPx()) / HALF;
+        height = trackThickness_ + static_cast<float>(FOCUS_DISTANCE.ConvertToPx()) / HALF;
+    } else {
+        offsetX = (frameSize->Width() - trackThickness_) * HALF - static_cast<float>(FOCUS_DISTANCE.ConvertToPx());
+        offsetY = borderBlank_ - trackThickness_ * HALF - static_cast<float>(FOCUS_DISTANCE.ConvertToPx());
+        width = trackThickness_ + static_cast<float>(FOCUS_DISTANCE.ConvertToPx()) / HALF;
+        height = sliderLength_ + trackThickness_ + static_cast<float>(FOCUS_DISTANCE.ConvertToPx()) / HALF;
+    }
+    paintRect.SetRect(RectF(offsetX, offsetY, width, height));
+    paintRect.SetCornerRadius(focusRadius);
+}
+
+void SliderPattern::PaintFocusState()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RoundRect focusRect;
+    GetInnerFocusPaintRect(focusRect);
+
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->PaintInnerFocusState(focusRect);
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool SliderPattern::OnKeyEvent(const KeyEvent& event)
@@ -320,10 +390,12 @@ bool SliderPattern::OnKeyEvent(const KeyEvent& event)
     if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
         (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
         MoveStep(-1);
+        PaintFocusState();
     }
     if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
         (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
         MoveStep(1);
+        PaintFocusState();
     }
     return false;
 }
@@ -356,6 +428,48 @@ bool SliderPattern::MoveStep(int32_t stepCount)
     FireChangeEvent(SliderChangeMode::Click);
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return true;
+}
+
+void SliderPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub)
+{
+    auto hoverEvent = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleHoverEvent(isHover);
+    };
+    if (hoverEvent_) {
+        inputEventHub->RemoveOnHoverEvent(hoverEvent_);
+    }
+    hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverEvent));
+    inputEventHub->AddOnHoverEvent(hoverEvent_);
+
+    auto mouseEvent = [weak = WeakClaim(this)](MouseInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleMouseEvent(info);
+    };
+    if (mouseEvent_) {
+        inputEventHub->RemoveOnMouseEvent(mouseEvent_);
+    }
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseEvent));
+    inputEventHub->AddOnMouseEvent(mouseEvent_);
+}
+
+void SliderPattern::HandleHoverEvent(bool isHover)
+{
+    mouseHoverFlag_ = mouseHoverFlag_ && isHover;
+    UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SliderPattern::HandleMouseEvent(const MouseInfo& info)
+{
+    UpdateCircleCenterOffset();
+    auto mouseToCenterDistanceX = static_cast<float>(std::abs(info.GetLocalLocation().GetX() - circleCenter_.GetX()));
+    auto mouseToCenterDistanceY = static_cast<float>(std::abs(info.GetLocalLocation().GetY() - circleCenter_.GetY()));
+    float mouseToCenterDistance = std::max(mouseToCenterDistanceX, mouseToCenterDistanceY);
+    mouseHoverFlag_ = LessOrEqual(mouseToCenterDistance, blockHotSize_ * HALF);
+    mousePressedFlag_ = info.GetButton() == MouseButton::LEFT_BUTTON;
+    UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SliderPattern::FireChangeEvent(int32_t mode)
