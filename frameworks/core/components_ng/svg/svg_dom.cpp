@@ -18,6 +18,8 @@
 #include "include/core/SkClipOp.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/svg/svg_context.h"
+#include "frameworks/core/components_ng/svg/parse/svg_animation.h"
 #include "frameworks/core/components_ng/svg/parse/svg_circle.h"
 #include "frameworks/core/components_ng/svg/parse/svg_clip_path.h"
 #include "frameworks/core/components_ng/svg/parse/svg_defs.h"
@@ -48,6 +50,9 @@ const char DOM_SVG_CLASS[] = "class";
 } // namespace
 
 static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
+    { "animate", []() -> RefPtr<SvgNode> { return SvgAnimation::Create(); } },
+    { "animateMotion", []() -> RefPtr<SvgNode> { return SvgAnimation::CreateAnimateMotion(); } },
+    { "animateTransform", []() -> RefPtr<SvgNode> { return SvgAnimation::CreateAnimateTransform(); } },
     { "circle", []() -> RefPtr<SvgNode> { return SvgCircle::Create(); } },
     { "clipPath", []() -> RefPtr<SvgNode> { return SvgClipPath::Create(); } },
     { "defs", []() -> RefPtr<SvgNode> { return SvgDefs::Create(); } },
@@ -236,11 +241,22 @@ void SvgDom::SetAttrValue(const std::string& name, const std::string& value, con
     svgNode->SetAttr(name, value);
 }
 
-void SvgDom::SetFunction(const FuncNormalizeToPx& funcNormalizeToPx, const FuncAnimateFlush& funcAnimateFlush)
+void SvgDom::SetFuncNormalizeToPx(FuncNormalizeToPx&& funcNormalizeToPx)
 {
     CHECK_NULL_VOID_NOLOG(svgContext_);
     svgContext_->SetFuncNormalizeToPx(funcNormalizeToPx);
-    svgContext_->SetFuncAnimateFlush(funcAnimateFlush);
+}
+
+void SvgDom::SetAnimationCallback(FuncAnimateFlush&& funcAnimateFlush)
+{
+    CHECK_NULL_VOID_NOLOG(svgContext_);
+    svgContext_->SetFuncAnimateFlush(std::move(funcAnimateFlush));
+}
+
+void SvgDom::ControlAnimation(bool play)
+{
+    CHECK_NULL_VOID_NOLOG(svgContext_);
+    svgContext_->ControlAnimators(play);
 }
 
 void SvgDom::DrawImage(

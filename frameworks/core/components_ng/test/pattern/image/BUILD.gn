@@ -68,6 +68,7 @@ ohos_unittest("image_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
 
     # components_ng_render
+    "$ace_root/frameworks/core/components_ng/render/adapter/svg_canvas_image.cpp",
     "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
 
     # components_ng_syntax

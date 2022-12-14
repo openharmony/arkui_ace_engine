@@ -13,23 +13,71 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/components_ng/svg/parse/svg_node.h"
+#include "core/components_ng/svg/parse/svg_node.h"
 
 #include "include/core/SkClipOp.h"
 #include "include/core/SkString.h"
 #include "include/utils/SkParsePath.h"
 
 #include "base/utils/utils.h"
-#include "frameworks/core/components/common/painter/flutter_svg_painter.h"
-#include "frameworks/core/components/transform/render_transform.h"
-#include "frameworks/core/components_ng/svg/parse/svg_gradient.h"
+#include "core/components/common/painter/flutter_svg_painter.h"
+#include "core/components/common/properties/decoration.h"
+#include "core/components/transform/render_transform.h"
+#include "core/components_ng/svg/parse/svg_animation.h"
+#include "core/components_ng/svg/parse/svg_gradient.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 
 constexpr size_t SVG_ATTR_ID_FLAG_NUMS = 6;
+const char ATTR_NAME_OPACITY[] = "opacity";
 
-}
+const std::unordered_map<std::string, std::function<Color(RefPtr<SvgBaseDeclaration>&)>> COLOR_GETTERS = {
+    { ATTR_NAME_FILL,
+        [](RefPtr<SvgBaseDeclaration>& declaration) -> Color { return declaration->GetFillState().GetColor(); } },
+    { ATTR_NAME_STROKE,
+        [](RefPtr<SvgBaseDeclaration>& declaration) -> Color { return declaration->GetStrokeState().GetColor(); } },
+};
+
+const std::unordered_map<std::string, std::function<Dimension(RefPtr<SvgBaseDeclaration>&)>> DIMENSION_GETTERS = {
+    { ATTR_NAME_STROKE_WIDTH,
+        [](RefPtr<SvgBaseDeclaration>& declaration) -> Dimension {
+            return declaration->GetStrokeState().GetLineWidth();
+        } },
+    { ATTR_NAME_FONT_SIZE,
+        [](RefPtr<SvgBaseDeclaration>& declaration) -> Dimension {
+            return declaration->GetSvgTextStyle().GetFontSize();
+        } },
+    { ATTR_NAME_LETTER_SPACING,
+        [](RefPtr<SvgBaseDeclaration>& declaration) -> Dimension {
+            return declaration->GetSvgTextStyle().GetLetterSpacing();
+        } },
+};
+
+const std::unordered_map<std::string, std::function<double(RefPtr<SvgBaseDeclaration>&)>> DOUBLE_GETTERS = {
+    { ATTR_NAME_FILL_OPACITY,
+        [](RefPtr<SvgBaseDeclaration>& declaration) -> double {
+            return declaration->GetFillState().GetOpacity().GetValue();
+        } },
+    { ATTR_NAME_STROKE_OPACITY,
+        [](RefPtr<SvgBaseDeclaration>& declaration) -> double {
+            return declaration->GetStrokeState().GetOpacity().GetValue();
+        } },
+    { ATTR_NAME_MITER_LIMIT,
+        [](RefPtr<SvgBaseDeclaration>& declaration) -> double {
+            return declaration->GetStrokeState().GetMiterLimit();
+        } },
+    { ATTR_NAME_STROKE_DASH_OFFSET,
+        [](RefPtr<SvgBaseDeclaration>& declaration) -> double {
+            return declaration->GetStrokeState().GetLineDash().dashOffset;
+        } },
+    { ATTR_NAME_OPACITY,
+        [](RefPtr<SvgBaseDeclaration>& declaration) -> double {
+            return declaration->GetOpacity() * (1.0 / UINT8_MAX);
+        } },
+};
+} // namespace
 
 uint8_t OpacityDoubleToUint8(double opacity)
 {
@@ -88,6 +136,13 @@ void SvgNode::InitStyle(const RefPtr<SvgBaseDeclaration>& parent)
             node->InitStyle((node->inheritStyle_) ? declaration_ : nullptr);
         }
     }
+    for (auto& child : children_) {
+        auto svgAnimate = DynamicCast<SvgAnimation>(child);
+        if (svgAnimate) {
+            svgAnimate->UpdateAttr();
+            PrepareAnimation(svgAnimate);
+        }
+    }
 }
 
 void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
@@ -129,7 +184,7 @@ bool SvgNode::OnCanvas(RSCanvas& canvas)
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
     CHECK_NULL_RETURN_NOLOG(rsCanvas, false);
     skCanvas_ = rsCanvas->ExportSkCanvas();
-    return skCanvas_ == nullptr ? false : true;
+    return skCanvas_ != nullptr;
 }
 
 void SvgNode::OnClipPath(RSCanvas& canvas, const Size& viewPort)
@@ -214,7 +269,7 @@ double SvgNode::ConvertDimensionToPx(const Dimension& value, double baseValue) c
     return 0.0;
 }
 
-std::optional<Gradient> SvgNode::GetGradient(const std::string& href)
+std::optional<Ace::Gradient> SvgNode::GetGradient(const std::string& href)
 {
     auto svgContext = svgContext_.Upgrade();
     CHECK_NULL_RETURN(svgContext, std::nullopt);
@@ -239,6 +294,77 @@ const Rect& SvgNode::GetRootViewBox() const
         return empty;
     }
     return svgContext->GetRootViewBox();
+}
+
+void SvgNode::PrepareAnimation(const RefPtr<SvgAnimation>& animate)
+{
+    auto attrName = animate->GetAttributeName();
+    if (COLOR_GETTERS.find(attrName) != COLOR_GETTERS.end()) {
+        Color originalValue = COLOR_GETTERS.find(attrName)->second(declaration_);
+        AnimateOnAttribute(animate, originalValue);
+    } else if (DIMENSION_GETTERS.find(attrName) != DIMENSION_GETTERS.end()) {
+        Dimension originalValue = DIMENSION_GETTERS.find(attrName)->second(declaration_);
+        AnimateOnAttribute(animate, originalValue);
+    } else if (DOUBLE_GETTERS.find(attrName) != DOUBLE_GETTERS.end()) {
+        double originalValue = DOUBLE_GETTERS.find(attrName)->second(declaration_);
+        AnimateOnAttribute(animate, originalValue);
+    } else {
+        LOGW("animation attrName not valid: %s", attrName.c_str());
+    }
+}
+
+// create animation callback
+template<typename T>
+void SvgNode::AnimateOnAttribute(const RefPtr<SvgAnimation>& animate, const T& originalValue)
+{
+    std::function<void(T)> callback;
+    callback = [weak = WeakClaim(this), attrName = animate->GetAttributeName()](T value) {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        self->UpdateAttr(attrName, value);
+        auto context = self->svgContext_.Upgrade();
+        CHECK_NULL_VOID(context);
+        context->AnimateFlush();
+    };
+    animate->CreatePropertyAnimation(originalValue, std::move(callback));
+}
+
+// update attribute for svgNode and its children
+void SvgNode::UpdateAttrHelper(const std::string& name, const std::string& val)
+{
+    SetAttr(name, val);
+    if (!passStyle_) {
+        return;
+    }
+    for (auto&& child : children_) {
+        if (child->inheritStyle_) {
+            child->UpdateAttrHelper(name, val);
+        }
+    }
+}
+
+template<typename T>
+void SvgNode::UpdateAttr(const std::string& /* name */, const T& /* val */)
+{
+    LOGW("data type not supported");
+}
+
+template<>
+void SvgNode::UpdateAttr(const std::string& name, const Color& val)
+{
+    UpdateAttrHelper(name, val.ColorToString());
+}
+
+template<>
+void SvgNode::UpdateAttr(const std::string& name, const Dimension& val)
+{
+    UpdateAttrHelper(name, val.ToString());
+}
+
+template<>
+void SvgNode::UpdateAttr(const std::string& name, const double& val)
+{
+    UpdateAttrHelper(name, std::to_string(val));
 }
 
 } // namespace OHOS::Ace::NG

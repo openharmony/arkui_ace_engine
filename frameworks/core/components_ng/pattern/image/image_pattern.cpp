@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
+#include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -167,6 +168,15 @@ void ImagePattern::SetImagePaintConfig(
         config.borderRadiusXY_ = std::make_shared<std::array<PointF, 4>>(std::move(radiusXY));
     }
     config.isSvg_ = isSvg;
+
+    if (isSvg) {
+        // set animation flush function for svg
+        DynamicCast<SvgCanvasImage>(canvasImage)->SetAnimationCallback([weak = WeakClaim(RawPtr(GetHost()))] {
+            auto image = weak.Upgrade();
+            CHECK_NULL_VOID(image);
+            image->MarkNeedRenderOnly();
+        });
+    }
 
     canvasImage->SetPaintConfig(config);
 }
@@ -367,6 +377,17 @@ void ImagePattern::OnWindowShow()
 {
     isShow_ = true;
     LoadImageDataIfNeed();
+}
+
+void ImagePattern::OnVisibleChange(bool visible)
+{
+    CHECK_NULL_VOID(image_);
+    // control svg animation
+    if (image_->GetPaintConfig().isSvg_) {
+        auto svg = DynamicCast<SvgCanvasImage>(image_);
+        CHECK_NULL_VOID(svg);
+        svg->ControlAnimation(visible);
+    }
 }
 
 void ImagePattern::OnAttachToFrameNode()
