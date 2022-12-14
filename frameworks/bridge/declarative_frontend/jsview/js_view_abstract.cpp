@@ -2283,7 +2283,8 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& re
         return true;
     }
     if (jsValue->IsString()) {
-        return StringUtils::StringToDimensionWithUnit(jsValue->ToString(), result, defaultUnit);
+        result = StringUtils::StringToDimensionWithUnit(jsValue->ToString(), defaultUnit);
+        return true;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
@@ -2845,7 +2846,7 @@ void JSViewAbstract::JsUseSizeType(const JSCallbackInfo& info)
         return;
     }
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
-    for (auto values : SCREEN_SIZE_VALUES) {
+    for (auto values: SCREEN_SIZE_VALUES) {
         JSRef<JSVal> val = sizeObj->GetProperty(values.second.c_str());
         if (val->IsNull() || val->IsEmpty()) {
             continue;
