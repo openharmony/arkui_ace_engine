@@ -62,6 +62,8 @@ struct SwiperEvent : Event {
     EventMarker rotationEventId;
     EventMarker clickEventId;
     EventMarker animationFinishEventId;
+    EventMarker animationStartEventId;
+    EventMarker animationEndEventId;
 };
 
 struct SwiperMethod : Method {};
@@ -279,6 +281,28 @@ public:
     {
         auto& event = MaybeResetEvent<SwiperEvent>(EventTag::SPECIALIZED_EVENT);
         event.changeEventId = changeEventId;
+    }
+
+    const EventMarker& GetAnimationStartEventId() const
+    {
+        auto& event = static_cast<SwiperEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.animationStartEventId;
+    }
+    void SetAnimationStartEventId(const EventMarker& animationStartEventId)
+    {
+        auto& event = MaybeResetEvent<SwiperEvent>(EventTag::SPECIALIZED_EVENT);
+        event.animationStartEventId = animationStartEventId;
+    }
+
+    const EventMarker& GetAnimationEndEventId() const
+    {
+        auto& event = static_cast<SwiperEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.animationEndEventId;
+    }
+    void SetAnimationEndEventId(const EventMarker& animationEndEventId)
+    {
+        auto& event = MaybeResetEvent<SwiperEvent>(EventTag::SPECIALIZED_EVENT);
+        event.animationEndEventId = animationEndEventId;
     }
 
     const EventMarker& GetRotationEventId() const

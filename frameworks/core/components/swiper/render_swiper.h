@@ -528,6 +528,8 @@ private:
     void ClearItems(const RefPtr<Component>& lazyForEachComponent, int32_t index);
     void ApplyRestoreInfo();
     void ResetScrollOffset();
+    void FireAnimationStart();
+    void FireAnimationEnd();
 
     RefPtr<SwiperComponent> swiper_;
 
@@ -548,6 +550,8 @@ private:
     bool isSwipeToAnimationAdded_ = false;
     std::function<void(const std::shared_ptr<BaseEventInfo>&)> changeEvent_;
     std::function<void()> animationFinishEvent_;
+    std::function<void(const std::shared_ptr<BaseEventInfo>&)> animationStartEvent_;
+    std::function<void(const std::shared_ptr<BaseEventInfo>&)> animationEndEvent_;
     std::function<void(const std::string&)> rotationEvent_;
     std::function<void(const std::shared_ptr<ClickInfo>&)> clickEvent_;
     std::function<void(const std::shared_ptr<ClickInfo>&)> remoteMessageEvent_;
