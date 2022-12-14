@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 #include "base/geometry/ng/size_t.h"
+#include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
@@ -26,6 +27,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+#ifdef OHOS_PLATFORM
+constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
+#endif
 OH_NativeXComponent_TouchEventType ConvertNativeXComponentTouchEvent(const TouchType& touchType)
 {
     switch (touchType) {
@@ -381,7 +385,21 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     touchEventPoint_.timeStamp = timeStamp;
     auto touchType = touchInfoList.front().GetTouchType();
     touchEventPoint_.type = ConvertNativeXComponentTouchEvent(touchType);
-
+#ifdef OHOS_PLATFORM
+    // increase cpu frequency
+    if (touchType == TouchType::MOVE) {
+        auto currentTime = GetSysTimestamp();
+        auto increaseCpuTime = currentTime - startIncreaseTime_;
+        if (increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
+            LOGD("HandleTouchEvent increase cpu frequency");
+            startIncreaseTime_ = currentTime;
+            ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+        }
+    } else if (touchType == TouchType::UP) {
+        startIncreaseTime_ = 0;
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+    }
+#endif
     SetTouchPoint(info.GetTouches(), timeStamp, touchType);
 
     NativeXComponentDispatchTouchEvent(touchEventPoint_, nativeXComponentTouchPoints_);

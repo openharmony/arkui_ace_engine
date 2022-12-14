@@ -111,6 +111,9 @@ private:
     OH_NativeXComponent_TouchEventType ConvertNativeXComponentTouchEvent(const TouchType& touchType);
     OH_NativeXComponent_TouchEvent touchEventPoint_;
     std::vector<XComponentTouchPoint> nativeXComponentTouchPoints_;
+#ifdef OHOS_PLATFORM
+    int64_t startIncreaseTime_ = 0;
+#endif
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_XCOMPONENT_RENDER_XCOMPONENT_H
