@@ -48,6 +48,8 @@ protected:
     static void SetDisableSwipe(bool disableSwipe);
     static void SetCurve(const std::string& curveStr);
     static void SetOnChange(const JSCallbackInfo& info);
+    static void SetOnAnimationStart(const JSCallbackInfo& info);
+    static void SetOnAnimationEnd(const JSCallbackInfo& info);
     static void SetOnClick(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);
 };
