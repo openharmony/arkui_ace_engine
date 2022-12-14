@@ -20,12 +20,12 @@ class SynchedPropertyObjectTwoWay<C extends Object>
   private linkedParentProperty_: ObservedPropertyObjectAbstract<C>;
   private contentStoragelinkedParentProperty_: ObservedPropertyObjectAbstract<C>;
 
-  constructor(linkSouce: ObservedPropertyObjectAbstract<C>,
+  constructor(linkSource: ObservedPropertyObjectAbstract<C>,
     owningChildView: IPropertySubscriber,
     thisPropertyName: PropertyInfo,
     contentStoragelinkedParentProperty?: ObservedPropertyObjectAbstract<C>) {
     super(owningChildView, thisPropertyName);
-    this.linkedParentProperty_ = linkSouce;
+    this.linkedParentProperty_ = linkSource;
     // register to the parent property
     this.linkedParentProperty_.subscribeMe(this);
     if (contentStoragelinkedParentProperty) {
