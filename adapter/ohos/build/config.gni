@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos/ace/ace_args.gni")
-import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import("//foundation/graphic/graphic_2d/graphic_config.gni")
 
 defines = [
@@ -28,8 +27,7 @@ ark_engine = {
 }
 js_engines += [ ark_engine ]
 
-if (ace_enable_gpu || (defined(vendor_configs.use_ext_surface) &&
-                       vendor_configs.use_ext_surface)) {
+if (ace_enable_gpu) {
   disable_gpu = false
 } else {
   disable_gpu = true
@@ -63,11 +61,7 @@ js_pa_support = true
 connect_server_support = true
 hdc_register_support = true
 pa_engine_path = "adapter/ohos/entrance/pa_engine"
-if (defined(vendor_configs.use_ext_surface) && vendor_configs.use_ext_surface) {
-  enable_rosen_backend = false
-} else {
-  enable_rosen_backend = true
-}
+enable_rosen_backend = true
 enable_standard_input = true
 build_container_scope_lib = true
 multiple_window_support = true
