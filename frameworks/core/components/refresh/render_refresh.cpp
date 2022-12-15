@@ -207,7 +207,6 @@ void RenderRefresh::Initialize()
             refresh->HandleDragCancel();
         }
     });
-
     animator_ = AceType::MakeRefPtr<Animator>(GetContext());
     refreshController_ = AceType::MakeRefPtr<RefreshController>();
     refreshController_->SetRefresh(AceType::WeakClaim(this));
@@ -465,7 +464,7 @@ double RenderRefresh::MaxScrollableHeight() const
 void RenderRefresh::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    if (!dragDetector_) {
+    if (!dragDetector_ || hasScrollableChild_) {
         return;
     }
     dragDetector_->SetCoordinateOffset(coordinateOffset);
