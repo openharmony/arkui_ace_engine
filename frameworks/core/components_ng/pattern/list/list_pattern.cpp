@@ -329,8 +329,9 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
     }
     auto startPos = useCurrentDelta ? startMainPos_ - currentDelta_ : startMainPos_;
     auto endPos = useCurrentDelta ? endMainPos_ - currentDelta_ : endMainPos_;
-    bool outOfStart = (startIndex_ == 0) && Positive(startPos);
-    bool outOfEnd = (endIndex_ == maxListItemIndex_) && LessNotEqual(endPos, GetMainContentSize());
+    auto mainSize = GetMainContentSize();
+    bool outOfStart = (startIndex_ == 0) && Positive(startPos) && GreatNotEqual(endPos, mainSize);
+    bool outOfEnd = (endIndex_ == maxListItemIndex_) && LessNotEqual(endPos, mainSize) && Negative(startPos);
     return outOfStart || outOfEnd;
 }
 
