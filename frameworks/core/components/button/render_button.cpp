@@ -322,6 +322,10 @@ void RenderButton::OnMouseHoverEnterTest()
         return;
     }
     if (hoverAnimationType_ == HoverAnimationType::NONE) {
+        if (buttonComponent_->IsPopupButton()) {
+            needHoverColor_ = true;
+            MarkNeedRender();
+        }
         LOGW("HoverAnimationType: %{public}d is not supported in this component.", hoverAnimationType_);
         return;
     }
@@ -349,7 +353,7 @@ void RenderButton::AnimateMouseHoverExit()
 }
 void RenderButton::OnMouseHoverExitTest()
 {
-    if (hoverAnimationType_ == HoverAnimationType::NONE) {
+    if (hoverAnimationType_ == HoverAnimationType::NONE && !buttonComponent_->IsPopupButton()) {
         LOGW("HoverAnimationType: %{public}d is not supported in this component.", hoverAnimationType_);
         return;
     }
