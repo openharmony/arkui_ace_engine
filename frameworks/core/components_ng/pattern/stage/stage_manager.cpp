@@ -51,6 +51,13 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             auto pattern = page->GetPattern<PagePattern>();
             CHECK_NULL_VOID(pattern);
             pattern->SetPageInTransition(false);
+
+            auto pageFocusHub = page->GetFocusHub();
+            CHECK_NULL_VOID(pageFocusHub);
+            pageFocusHub->SetParentFocusable(false);
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->SetIsNeedShowFocus(false);
         });
         pagePattern->ProcessHideState();
         return;
@@ -65,6 +72,14 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             auto pattern = page->GetPattern<PagePattern>();
             CHECK_NULL_VOID(pattern);
             pattern->SetPageInTransition(false);
+
+            auto pageFocusHub = page->GetFocusHub();
+            CHECK_NULL_VOID(pageFocusHub);
+            pageFocusHub->SetParentFocusable(true);
+            pageFocusHub->RequestFocus();
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->SetIsNeedShowFocus(false);
         });
 }
 
