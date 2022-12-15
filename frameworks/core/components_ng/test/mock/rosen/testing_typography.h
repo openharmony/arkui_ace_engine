@@ -13,13 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_PROP_CONVERTOR_MOCK_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_PROP_CONVERTOR_MOCK_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_H
 
-namespace OHOS::Ace {
-RSColor ToRSColor(const Color& color);
-RSPoint ToRSPoint(const NG::PointF& point);
-RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap);
-} // namespace OHOS::Ace
+namespace OHOS::Ace::Testing {
+enum class TextDirection {
+    RTL = 0,
+    LTR,
+};
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_PROP_CONVERTOR_MOCK_H
+enum class WordBreakType {
+    WordBreakTypeNormal = 0,
+    WordBreakTypeBreakAll,
+    WordBreakTypeBreakWord
+};
+
+enum class TextAlign {
+    LEFT = 0,
+    RIGHT,
+    CENTER,
+    JUSTIFY,
+    START,
+    END,
+};
+} // namespace OHOS::Ace::Testing
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_H

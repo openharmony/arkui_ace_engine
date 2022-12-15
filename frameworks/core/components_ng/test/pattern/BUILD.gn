@@ -72,7 +72,5 @@ group("pattern_unittest") {
     "video:video_pattern_test_ng",
     "web:web_pattern_unit_test",
     "xcomponent:xcomponent_pattern_test_ng",
-
-    # "stepper:stepper_pattern_test_ng",
   ]
 }

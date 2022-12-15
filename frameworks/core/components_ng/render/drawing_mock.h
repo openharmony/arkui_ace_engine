@@ -28,6 +28,8 @@
 #include "core/components_ng/test/mock/rosen/testing_pen.h"
 #include "core/components_ng/test/mock/rosen/testing_point.h"
 #include "core/components_ng/test/mock/rosen/testing_shader_effect.h"
+#include "core/components_ng/test/mock/rosen/testing_text_style.h"
+#include "core/components_ng/test/mock/rosen/testing_typography.h"
 
 namespace OHOS::Ace {
 using RSCanvas = Testing::TestingCanvas;
@@ -54,6 +56,10 @@ using RSClipOp = Testing::ClipOp;
 using RSPoint = Testing::TestingPoint;
 using RSRect = Testing::TestingRect;
 using RSRoundRect = Testing::TestingRoundRect;
+using RSTextDirection = Testing::TextDirection;
+using RSTextAlign = Testing::TextAlign;
+using RSWordBreakType = Testing::WordBreakType;
+using RSTextStyle = Testing::TestingTextStyle;
 using RSColorQuad = uint32_t;
 using RSScalar = float;
 } // namespace OHOS::Ace
