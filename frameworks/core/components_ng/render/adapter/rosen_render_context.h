@@ -258,6 +258,7 @@ private:
     void PaintBorderImage();
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
+    void GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop);
 
     // helper function to check if paint rect is valid
     bool RectIsNull();
