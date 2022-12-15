@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/adapter/txt_font_collection.h"
-#include "core/components_ng/render/font_collection.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
 
 namespace OHOS::Ace::NG {
-TxtFontCollection::TxtFontCollection(const std::shared_ptr<txt::FontCollection>& fontCollection)
-    : collection_(fontCollection)
-{}
-RefPtr<FontCollection> FontCollection::Current()
+bool SelectOverlayProxy::IsClosed() const
 {
-    std::shared_ptr<txt::FontCollection> fontCollection;
-    return AceType::MakeRefPtr<TxtFontCollection>(fontCollection);
+    return true;
 }
+
+void SelectOverlayProxy::Close() const {}
+
+void SelectOverlayProxy::UpdateFirstSelectHandleInfo(const SelectHandleInfo& info) const {}
+
+void SelectOverlayProxy::UpdateSecondSelectHandleInfo(const SelectHandleInfo& info) const {}
 } // namespace OHOS::Ace::NG

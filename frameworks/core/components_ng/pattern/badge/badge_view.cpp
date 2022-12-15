@@ -52,8 +52,7 @@ void BadgeView::Create(BadgeParameters& badgeParameters)
     }
 
     if (badgeParameters.badgePosition.has_value()) {
-        BadgeLayoutProperty::BadgePosition badgePosition =
-            static_cast<BadgeLayoutProperty::BadgePosition>(badgeParameters.badgePosition.value());
+        auto badgePosition = static_cast<BadgeLayoutProperty::BadgePosition>(badgeParameters.badgePosition.value());
         layoutProperty->SetBadgePosition(badgePosition);
     }
 
