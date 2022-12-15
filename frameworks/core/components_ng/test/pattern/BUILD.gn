@@ -15,7 +15,7 @@ group("pattern_unittest") {
   testonly = true
   deps = [
     "ability_component:ability_component_pattern_unit_test",
-    "badge:badge_pattern_unit_test",
+    "badge:badge_pattern_test_ng",
     "blank:blank_pattern_unit_test",
     "bubble:bubble_pattern_test_ng",
     "button:button_pattern_test_ng",

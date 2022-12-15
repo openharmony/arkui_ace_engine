@@ -47,11 +47,8 @@ void BadgePattern::OnModifyDone()
     auto badgeValue = layoutProperty->GetBadgeValue();
     if (badgeCount.has_value() && badgeCount.value() > 0) {
         const int32_t maxCountNum = 99;
-        auto maxCount = maxCountNum;
-        auto badgeMaxCount = layoutProperty->GetBadgeMaxCount();
-        if (badgeMaxCount.has_value()) {
-            maxCount = badgeMaxCount.value();
-        }
+        auto badgeMaxCount = layoutProperty->GetBadgeMaxCount().value_or(maxCountNum);
+        auto maxCount = badgeMaxCount;
         if (badgeCount.value() > maxCount) {
             badgeCount.value() = maxCount;
             textLayoutProperty->UpdateContent(std::to_string(badgeCount.value()) + "+");
@@ -72,13 +69,10 @@ void BadgePattern::OnModifyDone()
     }
 
     auto badgeTextColor = layoutProperty->GetBadgeTextColor();
-    if (badgeTextColor.has_value()) {
-        textLayoutProperty->UpdateTextColor(badgeTextColor.value());
-    }
+    textLayoutProperty->UpdateTextColor(badgeTextColor.value());
+
     auto badgeFontSize = layoutProperty->GetBadgeFontSize();
-    if (badgeFontSize.has_value()) {
-        textLayoutProperty->UpdateFontSize(badgeFontSize.value());
-    }
+    textLayoutProperty->UpdateFontSize(badgeFontSize.value());
 
     textLayoutProperty->UpdateMaxLines(1);
     auto badgeColor = layoutProperty->GetBadgeColorValue();
