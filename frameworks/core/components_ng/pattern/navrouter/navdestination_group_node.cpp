@@ -61,7 +61,6 @@ void NavDestinationGroupNode::OnAttachToMainTree()
     auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
     if (shallowBuilder && !shallowBuilder->IsExecuteDeepRenderDone()) {
         shallowBuilder->ExecuteDeepRender();
-        shallowBuilder.Reset();
     }
 }
 
