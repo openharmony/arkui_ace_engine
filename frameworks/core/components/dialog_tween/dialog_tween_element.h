@@ -30,6 +30,9 @@ public:
 
     void PerformBuild() override;
 
+    void OnFocus() override;
+    void OnBlur() override;
+
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent) override;
     bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
