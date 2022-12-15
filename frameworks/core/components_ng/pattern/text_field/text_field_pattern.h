@@ -383,6 +383,7 @@ private:
     void AddScrollEvent();
     void OnTextAreaScroll(float dy);
     void InitMouseEvent();
+    void OnHover(bool isHover);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
     void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle);
@@ -485,6 +486,7 @@ private:
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<InputEvent> mouseEvent_;
+    RefPtr<InputEvent> hoverEvent_;
     RefPtr<LongPressEvent> longPressEvent_;
     CursorPositionType cursorPositionType_ = CursorPositionType::NORMAL;
 

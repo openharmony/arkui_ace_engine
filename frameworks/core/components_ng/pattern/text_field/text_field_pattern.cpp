@@ -960,7 +960,6 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
-        UpdateTextFieldManager(info.GetTouches().front().GetGlobalLocation(), frameRect_.Height());
     } else if (touchType == TouchType::UP) {
         HandleTouchUp();
     }
@@ -968,33 +967,23 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void TextFieldPattern::HandleTouchDown(const Offset& offset)
 {
-    auto focusHub = GetHost()->GetOrCreateFocusHub();
-    CHECK_NULL_VOID_NOLOG(focusHub->IsFocusable());
-    StartTwinkling();
-    lastTouchOffset_ = offset;
-    caretUpdateType_ = CaretUpdateType::PRESSED;
-    selectionMode_ = SelectionMode::NONE;
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textfieldPaintProperty);
+    auto renderContext = GetHost()->GetRenderContext();
+    renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetPressBgColorValue(Color()));
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::HandleTouchUp()
 {
+    auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textfieldPaintProperty);
+    auto renderContext = GetHost()->GetRenderContext();
+    renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetBackgroundColorValue(Color()));
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     if (isMousePressed_) {
         LOGD("TextFieldPattern::HandleTouchUp of mouse");
         isMousePressed_ = false;
-        return;
-    }
-    LOGD("TextFieldPattern::HandleTouchUp");
-    auto focusHub = GetHost()->GetOrCreateFocusHub();
-    if (!focusHub->RequestFocusImmediately()) {
-        LOGE("Request focus failed, cannot open input method");
-        StopTwinkling();
-        return;
-    }
-    if (RequestKeyboard(false, true, true)) {
-        auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->FireOnEditChanged(true);
     }
 }
 
@@ -1144,6 +1133,7 @@ void TextFieldPattern::OnModifyDone()
     InitLongPressEvent();
     InitFocusEvent();
     InitMouseEvent();
+    InitTouchEvent();
     ProcessPasswordIcon();
     context->AddOnAreaChangeNode(host->GetId());
     if (!clipboard_ && context) {
@@ -1155,6 +1145,11 @@ void TextFieldPattern::OnModifyDone()
     caretRect_.SetHeight(GetTextOrPlaceHolderFontSize());
     if (textEditingValue_.caretPosition == 0) {
         caretRect_.SetLeft(GetPaddingLeft());
+    }
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    auto renderContext = GetHost()->GetRenderContext();
+    if (renderContext->HasBackgroundColor()) {
+        paintProperty->UpdateBackgroundColor(renderContext->GetBackgroundColorValue());
     }
     CloseSelectOverlay();
     if (layoutProperty->GetTypeChangedValue(false)) {
@@ -1424,7 +1419,7 @@ void TextFieldPattern::InitCaretPosition(std::string content)
 
 void TextFieldPattern::InitMouseEvent()
 {
-    CHECK_NULL_VOID_NOLOG(!mouseEvent_);
+    CHECK_NULL_VOID_NOLOG(!mouseEvent_ || !hoverEvent_);
     auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
 
@@ -1436,6 +1431,29 @@ void TextFieldPattern::InitMouseEvent()
     };
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent_);
+
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->OnHover(isHover);
+        }
+    };
+    hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
+    inputHub->AddOnHoverEvent(hoverEvent_);
+}
+
+void TextFieldPattern::OnHover(bool isHover)
+{
+    auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textfieldPaintProperty);
+    auto renderContext = GetHost()->GetRenderContext();
+    if (isHover) {
+        renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetHoverBgColorValue(Color()));
+        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        return;
+    }
+    renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetBackgroundColorValue(Color()));
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::HandleMouseEvent(const MouseInfo& info)
