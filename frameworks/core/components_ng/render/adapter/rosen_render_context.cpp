@@ -30,6 +30,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/dump_log.h"
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
@@ -757,9 +758,21 @@ RectF RosenRenderContext::AdjustPaintRect()
     auto anchorHeightReference = rect.Height();
     auto anchorX = ConvertToPx(anchor.GetX(), ScaleProperty::CreateScaleProperty(), anchorWidthReference);
     auto anchorY = ConvertToPx(anchor.GetY(), ScaleProperty::CreateScaleProperty(), anchorHeightReference);
+    Dimension parentPaddingLeft;
+    Dimension parentPaddingTop;
+    auto frameNodeParent = frameNode->GetAncestorNodeOfFrame();
+    if (frameNodeParent) {
+        auto layoutProperty = frameNodeParent->GetLayoutProperty();
+        if (layoutProperty && layoutProperty->GetPaddingProperty()) {
+            parentPaddingLeft =
+                layoutProperty->GetPaddingProperty()->left.value_or(CalcLength(Dimension(0))).GetDimension();
+            parentPaddingTop =
+                layoutProperty->GetPaddingProperty()->top.value_or(CalcLength(Dimension(0))).GetDimension();
+        }
+    }
     // Position properties take precedence over offset locations.
     if (HasPosition()) {
-        auto position = GetPositionValue({});
+        auto position = GetPositionValue({}) + OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
         auto posX = ConvertToPx(position.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
         auto posY = ConvertToPx(position.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
         rect.SetLeft(posX.value_or(0) - anchorX.value_or(0));
@@ -767,15 +780,15 @@ RectF RosenRenderContext::AdjustPaintRect()
         return rect;
     }
     if (HasOffset()) {
-        auto offset = GetOffsetValue({});
+        auto offset = GetOffsetValue({}) + OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
         auto offsetX = ConvertToPx(offset.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
         auto offsetY = ConvertToPx(offset.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
         rect.SetLeft(rect.GetX() + offsetX.value_or(0));
         rect.SetTop(rect.GetY() + offsetY.value_or(0));
         return rect;
     }
-    rect.SetLeft(rect.GetX() + anchorX.value_or(0));
-    rect.SetTop(rect.GetY() + anchorY.value_or(0));
+    rect.SetLeft(rect.GetX() - anchorX.value_or(0));
+    rect.SetTop(rect.GetY() - anchorY.value_or(0));
     return rect;
 }
 
