@@ -14,6 +14,7 @@
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
+import("../../../build/uicast.gni")
 
 # declarative frontend source
 template("declarative_frontend") {
@@ -316,6 +317,9 @@ template("declarative_js_engine") {
       "jsview/models/view_partial_update_model_impl.cpp",
     ]
 
+    defines += uicast_configs.uicast_defines
+    sources += uicast_configs.uicast_frontend_sources
+
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       sources += [ "jsview/models/model_view_impl.cpp" ]
@@ -409,7 +413,10 @@ template("declarative_js_engine") {
       ":gen_obj_src_js_proxyclass",
     ]
 
+    deps += uicast_configs.uicast_root_deps
+
     include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
+    include_dirs += uicast_configs.uicast_root_include
 
     if (platform == "windows" || platform == "mac" || platform == "linux") {
       deps += [ ":gen_obj_src_js_mock_system_plugin" ]

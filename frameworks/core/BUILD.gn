@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("../../build/uicast.gni")
 
 # build core sources
 template("ace_core_source_set") {
@@ -199,6 +200,9 @@ template("ace_core_source_set") {
       "common/flutter/flutter_task_executor.cpp",
       "common/flutter/flutter_window.cpp",
     ]
+
+    defines += uicast_configs.uicast_defines
+    sources += uicast_configs.uicast_core_sources
 
     if (platform == "ohos") {
       sources -= [ "common/anr_thread.cpp" ]
@@ -460,6 +464,7 @@ template("ace_core_source_set") {
       deps += [ "//commonlibrary/c_utils/base:utils" ]
     }
     include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
+    include_dirs += uicast_configs.uicast_root_include
 
     if (!is_wearable_product) {
       deps += [
@@ -473,6 +478,8 @@ template("ace_core_source_set") {
         "$ace_root/frameworks/core/components/video:ace_core_components_video_$platform",
       ]
     }
+
+    deps += uicast_configs.uicast_root_deps
 
     cflags_cc = []
     cflags_cc += invoker.cflags_cc

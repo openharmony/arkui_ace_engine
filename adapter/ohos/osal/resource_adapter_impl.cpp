@@ -136,6 +136,14 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     resConfig_ = resConfig;
 }
 
+void ResourceAdapterImpl::Reload()
+{
+    std::string resIndexPath = packagePathStr_ + "resources.index";
+    auto resRet = sysResourceManager_->AddResource(resIndexPath.c_str());
+    auto configRet = sysResourceManager_->UpdateResConfig(*resConfig_);
+    LOGI("UICast result=%{public}d, UpdateResConfig result=%{public}d", resRet, configRet);
+}
+
 void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
 {
     auto resConfig = ConvertConfigToGlobal(config);

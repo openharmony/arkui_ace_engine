@@ -15,6 +15,7 @@ import("//arkcompiler/ets_frontend/ts2panda/ts2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
+import("../../../../../build/uicast.gni")
 
 base_output_path = get_label_info(":gen_abc_proxyclass", "target_out_dir")
 abcproxyclass_obj_path = base_output_path + "/abc_proxy_class.o"
@@ -95,6 +96,8 @@ template("declarative_js_engine_ark") {
 
     configs = [ "$ace_root:ace_config" ]
 
+    configs += [ "${uicast_configs.ace_uicast}:uicast_jsi_config" ]
+
     public_configs = [ "//arkcompiler/ets_runtime:ark_jsruntime_public_config" ]
 
     sources = [
@@ -113,6 +116,9 @@ template("declarative_js_engine_ark") {
       "modules/jsi_syscap_module.cpp",
       "modules/jsi_timer_module.cpp",
     ]
+
+    defines += uicast_configs.uicast_defines
+    sources += uicast_configs.uicast_jsi_sources
 
     if (enable_ng_build) {
       sources += [
