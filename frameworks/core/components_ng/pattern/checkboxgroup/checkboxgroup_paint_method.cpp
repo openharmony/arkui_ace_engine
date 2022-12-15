@@ -43,7 +43,6 @@ constexpr float CHECK_MARK_END_Y_POSITION = 0.33f;
 constexpr float CHECK_MARK_PART_START_X_POSITION = 0.20f;
 constexpr float CHECK_MARK_PART_END_Y_POSITION = 0.80f;
 constexpr float CHECK_MARK_PART_Y_POSITION = 0.50f;
-const Color TRANSPARENT_COLOR = Color(0x00000000);
 constexpr float CHECK_MARK_LEFT_ANIMATION_PERCENT = 0.45;
 constexpr float CHECK_MARK_RIGHT_ANIMATION_PERCENT = 0.55;
 constexpr float DEFAULT_MAX_CHECKBOX_SHAPE_SCALE = 1.0;
@@ -71,6 +70,7 @@ void CheckBoxGroupPaintMethod::InitializeParam()
     borderWidth_ = checkBoxTheme->GetBorderWidth().ConvertToPx();
     borderRadius_ = checkBoxTheme->GetBorderRadius().ConvertToPx();
     checkStroke_ = checkBoxTheme->GetCheckStroke().ConvertToPx();
+    pointColor_ = checkBoxTheme->GetPointColor();
     activeColor_ = checkBoxTheme->GetActiveColor();
     inactiveColor_ = checkBoxTheme->GetInactiveColor();
     shadowColor_ = checkBoxTheme->GetShadowColor();
@@ -102,11 +102,9 @@ void CheckBoxGroupPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* pai
     paintOffset += OffsetF(strokeOffset, strokeOffset);
     contentSize.SetWidth(contentSize.Width() - borderWidth_);
     contentSize.SetHeight(contentSize.Height() - borderWidth_);
-    if (isTouch_ || isHover_) {
+    if (isTouch_) {
         paintOffset.SetX(paintOffset.GetX() + hotZoneHorizontalPadding_.ConvertToPx());
         paintOffset.SetY(paintOffset.GetY() + hotZoneVerticalPadding_.ConvertToPx());
-    }
-    if (isTouch_) {
         DrawTouchBoard(canvas, contentSize, paintOffset);
     }
     if (isHover_) {
@@ -115,7 +113,7 @@ void CheckBoxGroupPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* pai
     if (uiStatus_ == UIStatus::OFF_TO_ON) {
         brush.SetColor(ToRSColor(color));
         brush.SetAntiAlias(true);
-        pen.SetColor(ToRSColor(Color::WHITE));
+        pen.SetColor(ToRSColor(pointColor_));
         if (!enabled_) {
             brush.SetColor(ToRSColor(color.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
         }
@@ -124,7 +122,7 @@ void CheckBoxGroupPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* pai
     } else if (uiStatus_ == UIStatus::ON_TO_OFF) {
         brush.SetColor(ToRSColor(color));
         brush.SetAntiAlias(true);
-        pen.SetColor(ToRSColor(Color::WHITE));
+        pen.SetColor(ToRSColor(pointColor_));
         if (!enabled_) {
             brush.SetColor(ToRSColor(color.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
         }
@@ -132,7 +130,7 @@ void CheckBoxGroupPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* pai
         DrawAnimationOnToOff(canvas, paintOffset, pen, contentSize);
     } else if (uiStatus_ == UIStatus::UNSELECTED && status != CheckBoxGroupPaintProperty::SelectStatus::PART) {
         pen.SetColor(ToRSColor(inactiveColor_));
-        brush.SetColor(ToRSColor(TRANSPARENT_COLOR));
+        brush.SetColor(ToRSColor(Color::TRANSPARENT));
         if (!enabled_) {
             pen.SetColor(ToRSColor(inactiveColor_.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
         }
@@ -142,7 +140,7 @@ void CheckBoxGroupPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* pai
     if (status == CheckBoxGroupPaintProperty::SelectStatus::PART) {
         brush.SetColor(ToRSColor(color));
         brush.SetAntiAlias(true);
-        pen.SetColor(ToRSColor(Color::WHITE));
+        pen.SetColor(ToRSColor(pointColor_));
         if (!enabled_) {
             brush.SetColor(ToRSColor(color.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
         }

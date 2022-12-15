@@ -223,6 +223,7 @@ public:
             theme->clickEffectColor_ = checkboxPattern->GetAttr<Color>("click_effect_color", Color::RED);
             theme->inactivePointColor_ = checkboxPattern->GetAttr<Color>("bg_color_unchecked", Color::RED);
             theme->hoverRadius_ = checkboxPattern->GetAttr<Dimension>("hover_border_radius", 0.0_vp);
+            theme->focusPaintPadding_ = checkboxPattern->GetAttr<Dimension>("focus_paint_padding", 0.0_vp);
 
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
@@ -383,6 +384,7 @@ public:
             theme->focusColor_ = radioPattern->GetAttr<Color>("focus_border_color", Color::RED);
             theme->hoverColor_ = radioPattern->GetAttr<Color>("hover_border_color", Color::RED);
             theme->clickEffectColor_ = radioPattern->GetAttr<Color>("click_effect_color", Color::RED);
+            theme->focusPaintPadding_ = radioPattern->GetAttr<Dimension>("focus_paint_padding", 0.0_vp);
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
             }

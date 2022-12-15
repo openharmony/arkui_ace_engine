@@ -45,6 +45,7 @@ private:
     float borderWidth_ = 0.0f;
     float borderRadius_ = 0.0f;
     float checkStroke_ = 0.0f;
+    Color pointColor_ = Color::WHITE;
     Color activeColor_ = Color::BLUE;
     Color inactiveColor_ = Color::GRAY;
     Color shadowColor_ = Color::WHITE;
