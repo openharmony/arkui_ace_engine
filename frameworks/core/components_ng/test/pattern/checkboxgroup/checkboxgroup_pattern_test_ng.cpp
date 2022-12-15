@@ -349,7 +349,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest008, TestSize.Leve
     pattern->isHover_ = false;
     pattern->HandleMouseEvent(true);
     EXPECT_EQ(pattern->isHover_, true);
-    EXPECT_EQ(pattern->isTouch_, false);
+    EXPECT_EQ(pattern->isTouch_, true);
 }
 
 /**
