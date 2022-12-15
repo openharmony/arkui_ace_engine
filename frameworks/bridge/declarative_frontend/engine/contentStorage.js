@@ -601,9 +601,9 @@ class ObservedPropertySimple extends ObservedPropertySimpleAbstract {
     }
 }
 class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
-    constructor(linkSouce, owningChildView, thisPropertyName, contentStoragelinkedParentProperty) {
+    constructor(linkSource, owningChildView, thisPropertyName, contentStoragelinkedParentProperty) {
         super(owningChildView, thisPropertyName);
-        this.linkedParentProperty_ = linkSouce;
+        this.linkedParentProperty_ = linkSource;
         // register to the parent property
         this.linkedParentProperty_.subscribeMe(this);
         if (contentStoragelinkedParentProperty) {
@@ -1184,7 +1184,7 @@ class AppStorage {
         if (!p) {
             this.setOrCreate(propName, defaultValue);
         }
-        if (linkUser && linkUser.getContentStorage()) {
+        if (linkUser && (linkUser instanceof View) && linkUser.getContentStorage()) {
             var contentObserver = linkUser.getContentStorage().setAndLink(propName, defaultValue, linkUser);
             return this.link(propName, linkUser, contentObserver);
         }

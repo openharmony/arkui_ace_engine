@@ -262,6 +262,7 @@ class PersistentStorage {
         });
         this.links_.clear();
         SubscriberManager.Get().delete(this.id());
+        PersistentStorage.Storage_.clear();
     }
     id() {
         return this.id_;
