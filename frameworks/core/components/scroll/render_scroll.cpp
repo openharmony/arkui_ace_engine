@@ -683,9 +683,9 @@ bool RenderScroll::HandleMouseEvent(const MouseEvent& event)
     }
     auto globalOffset = GetGlobalOffset();
     auto localPoint = Point(event.x - globalOffset.GetX(), event.y - globalOffset.GetY());
-    bool isScrollBarHover = scrollBar_->InBarRegion(localPoint);
-    scrollBar_->SetIsHover(isScrollBarHover);
-    return isScrollBarHover;
+    bool isInBarRegion = scrollBar_->InBarRegion(localPoint);
+    scrollBar_->SetIsHover(isInBarRegion);
+    return isInBarRegion;
 }
 
 void RenderScroll::JumpToIndex(int32_t index, int32_t source)
