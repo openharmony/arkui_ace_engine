@@ -27,6 +27,7 @@ void RenderRefreshTarget::FindRefreshParent(const WeakPtr<RenderNode>& node)
     while (parent) {
         auto refresh = AceType::DynamicCast<RenderRefresh>(parent);
         if (refresh) {
+            refresh->SetHasScrollableChild(true);
             refreshParent_ = AceType::WeakClaim(AceType::RawPtr(refresh));
             break;
         }
