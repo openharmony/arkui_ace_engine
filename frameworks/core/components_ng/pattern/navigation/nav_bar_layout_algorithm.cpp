@@ -103,7 +103,7 @@ float MeasureToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hos
     auto constraint = navBarLayoutProperty->CreateChildConstraint();
 
     if (navBarLayoutProperty->GetHideToolBar().value_or(false) ||
-        static_cast<int32_t>(toolBarNode->GetChildren().size()) == 0) {
+        toolBarNode->GetChildren().empty()) {
         constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
         toolBarWrapper->Measure(constraint);
         return 0.0f;

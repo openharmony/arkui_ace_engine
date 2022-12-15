@@ -222,6 +222,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
                 auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
                 CHECK_NULL_VOID(navDestinationPattern);
                 auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
+                CHECK_NULL_VOID(shallowBuilder);
                 shallowBuilder->MarkIsExecuteDeepRenderDone(false);
                 destinationContent->Clean();
             }
