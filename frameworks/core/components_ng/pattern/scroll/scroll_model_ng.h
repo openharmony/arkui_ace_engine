@@ -40,6 +40,8 @@ public:
     void SetScrollBarWidth(const Dimension& dimension) override;
     void SetScrollBarColor(const Color& color) override;
     void SetEdgeEffect(EdgeEffect edgeEffect) override;
+    void SetHasWidth(bool hasWidth) override {}
+    void SetHasHeight(bool hasHeight) override {}
 };
 
 } // namespace OHOS::Ace::NG
