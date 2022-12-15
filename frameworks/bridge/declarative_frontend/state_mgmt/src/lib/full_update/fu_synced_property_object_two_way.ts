@@ -112,7 +112,7 @@ class SynchedPropertyObjectTwoWay<C extends Object>
   }
   public createProp(subscribeOwner?: IPropertySubscriber,
     linkPropName?: PropertyInfo): ObservedPropertyAbstract<C> {
-    throw new Error("Creating a 'Prop' proerty is unsuppoeted for Object type prperty value.");
+    throw new Error("Creating a 'Prop' property is unsupported for Object type property value.");
   }
 
 }
