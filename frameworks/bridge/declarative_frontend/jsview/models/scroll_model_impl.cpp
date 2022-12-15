@@ -152,4 +152,14 @@ void ScrollModelImpl::SetEdgeEffect(EdgeEffect edgeEffect)
     scrollComponent->SetScrollEffect(scrollEdgeEffect);
 }
 
+void ScrollModelImpl::SetHasWidth(bool hasWidth)
+{
+    JSViewSetProperty(&ScrollComponent::SetHasWidth, hasWidth);
+}
+
+void ScrollModelImpl::SetHasHeight(bool hasHeight)
+{
+    JSViewSetProperty(&ScrollComponent::SetHasHeight, hasHeight);
+}
+
 } // namespace OHOS::Ace::Framework

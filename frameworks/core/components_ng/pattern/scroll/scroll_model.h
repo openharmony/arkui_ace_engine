@@ -47,6 +47,8 @@ public:
     virtual void SetScrollBarWidth(const Dimension& dimension) = 0;
     virtual void SetScrollBarColor(const Color& color) = 0;
     virtual void SetEdgeEffect(EdgeEffect edgeEffect) = 0;
+    virtual void SetHasWidth(bool hasWidth) = 0;
+    virtual void SetHasHeight(bool hasHeight) = 0;
 
 private:
     static std::unique_ptr<ScrollModel> instance_;
