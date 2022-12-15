@@ -64,10 +64,13 @@ using RSTypographyProperties = rosen::TypographyProperties;
 using RSParagraphBuilder = rosen::TypographyCreate;
 using RSFontCollection = rosen::FontCollection;
 using RSParagraphStyle = rosen::TypographyStyle;
-using RSTextStyle = rosen::TextStyle;
 using RSColorQuad = rosen::ColorQuad;
 using RSShaderEffect = rosen::ShaderEffect;
 using RSTileMode = rosen::TileMode;
+using RSTextDirection = rosen::TextDirection;
+using RSTextAlign = rosen::TextAlign;
+using RSWordBreakType = rosen::WordBreakType;
+using RSTextStyle = rosen::TextStyle;
 } // namespace OHOS::Ace
 #else
 #include "core/components_ng/render/drawing_mock.h"
