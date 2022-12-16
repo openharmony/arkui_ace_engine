@@ -141,6 +141,8 @@ void SlidingPanelModelNG::SetBackgroundMask(const Color& backgroundMask)
     auto isShow = layoutProp->GetIsShow().value();
     if (isShow) {
         ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, backgroundMask);
+    } else {
+        ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, Color::TRANSPARENT);
     }
 }
 
