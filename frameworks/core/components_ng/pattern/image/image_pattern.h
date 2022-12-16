@@ -70,6 +70,7 @@ public:
     void OnNotifyMemoryLevel(int32_t level) override;
     void OnWindowHide() override;
     void OnWindowShow() override;
+    void OnVisibleChange(bool isVisible) override;
 
 private:
     void OnAttachToFrameNode() override;

@@ -16,14 +16,17 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_CONTEXT_H
 
+#include <cstdint>
+#include <string>
 #include <unordered_map>
 
+#include "base/geometry/dimension.h"
+#include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
-#include "frameworks/core/components_ng/svg/parse/svg_node.h"
+#include "core/animation/animator.h"
 
 namespace OHOS::Ace::NG {
-
 using AttrMap = std::unordered_map<std::string, std::string>;
 using ClassStyleMap = std::unordered_map<std::string, AttrMap>;
 using FuncNormalizeToPx = std::function<double(const Dimension&)>;
@@ -46,55 +49,23 @@ public:
         idMapper_.emplace(value, svgNode);
     }
 
-    RefPtr<SvgNode> GetSvgNodeById(const std::string& id) const
-    {
-        auto item = idMapper_.find(id);
-        if (item != idMapper_.end()) {
-            return item->second;
-        }
-        return nullptr;
-    }
+    RefPtr<SvgNode> GetSvgNodeById(const std::string& id) const;
 
-    void PushStyle(const std::string& styleName, const std::pair<std::string, std::string>& attrPair)
-    {
-        const auto& arrMapIter = styleMap_.find(styleName);
-        if (arrMapIter == styleMap_.end()) {
-            AttrMap attrMap;
-            attrMap.emplace(attrPair);
-            styleMap_.emplace(std::make_pair(styleName, attrMap));
-        } else {
-            if (arrMapIter->second.find(attrPair.first) != arrMapIter->second.end()) {
-                arrMapIter->second.erase(attrPair.first);
-            }
-            arrMapIter->second.emplace(attrPair);
-        }
-    }
+    void PushStyle(const std::string& styleName, const std::pair<std::string, std::string>& attrPair);
 
-    const AttrMap& GetAttrMap(const std::string& key) const
-    {
-        auto styleClassIter = styleMap_.find(key);
-        if (styleClassIter != styleMap_.end()) {
-            return styleClassIter->second;
-        } else {
-            static AttrMap emptyMap;
-            return emptyMap;
-        }
-    }
+    const AttrMap& GetAttrMap(const std::string& key) const;
 
-    void SetFuncNormalizeToPx(const FuncNormalizeToPx& funcNormalizeToPx)
-    {
-        funcNormalizeToPx_ = funcNormalizeToPx;
-    }
+    void AddAnimator(int32_t key, const RefPtr<Animator>& animator);
 
-    double NormalizeToPx(const Dimension& value)
-    {
-        if (funcNormalizeToPx_ == nullptr) {
-            return 0.0;
-        }
-        return funcNormalizeToPx_(value);
-    }
+    void RemoveAnimator(int32_t key);
 
-    void SetFuncAnimateFlush(const FuncAnimateFlush& funcAnimateFlush)
+    void ControlAnimators(bool play);
+
+    void SetFuncNormalizeToPx(const FuncNormalizeToPx& funcNormalizeToPx);
+
+    double NormalizeToPx(const Dimension& value);
+
+    void SetFuncAnimateFlush(FuncAnimateFlush&& funcAnimateFlush)
     {
         funcAnimateFlush_ = funcAnimateFlush;
     }
@@ -127,7 +98,9 @@ public:
     }
 
 private:
-    std::unordered_map<std::string, RefPtr<SvgNode>> idMapper_;
+    std::unordered_map<std::string, WeakPtr<SvgNode>> idMapper_;
+    // weak references to animators in svgDom
+    std::unordered_map<int32_t, WeakPtr<Animator>> animators_;
     ClassStyleMap styleMap_;
     FuncNormalizeToPx funcNormalizeToPx_ = nullptr;
     FuncAnimateFlush funcAnimateFlush_ = nullptr;
@@ -136,7 +109,6 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(SvgContext);
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_CONTEXT_H
