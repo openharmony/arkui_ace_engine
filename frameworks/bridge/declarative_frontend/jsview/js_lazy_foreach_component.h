@@ -123,7 +123,7 @@ public:
 
         {
             std::string para = R"({"viewId":")" + GetId() + R"(","parentViewId":")" +
-                std::to_string(parentView_->UICastGetUniqueId()) + R"(","index":")" + std::to_string(index) + R"("})";
+                std::to_string(parentView_->UICastGetUniqueId()) + R"(","index":)" + std::to_string(index) + R"(})";
             UICastImpl::CacheCmd("UICAST::LazyForEach::ItemCreate", para);
         }
 

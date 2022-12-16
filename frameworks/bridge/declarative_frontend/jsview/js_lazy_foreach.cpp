@@ -187,7 +187,7 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
         std::string pviewID = std::to_string(parentViewObj->Unwrap<JSView>()->UICastGetUniqueId());
         int totalCount = static_cast<int>(actuator->GetTotalIndexCount());
         std::string para = R"({"viewId":")" + viewId + R"(","parentViewId":")" +
-            pviewID + R"(","totalCount":")" + std::to_string(totalCount) + R"("})";
+            pviewID + R"(","totalCount":)" + std::to_string(totalCount) + R"(})";
         UICastImpl::CreateLazyForEach(pviewID, totalCount, para);
     }
 }

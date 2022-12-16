@@ -31,7 +31,7 @@ public:
         themeConstants_->InitResource(resourceInfo);
     }
 
-    void ReloadResource()
+    void ReloadResource() override
     {
         themeConstants_->ReloadResource();
     }
