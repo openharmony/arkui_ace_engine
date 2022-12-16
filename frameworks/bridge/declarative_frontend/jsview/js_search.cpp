@@ -412,9 +412,13 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
         if (!fontSize->IsNull()) {
             Dimension size;
             if (!ParseJsDimensionFp(fontSize, size)) {
+                font.fontSize = Dimension(-1);
                 LOGE("Parse to dimension FP failed.");
             } else {
                 font.fontSize = size;
+                if(size.Unit() == DimensionUnit::PERCENT){
+                    font.fontSize = Dimension(-1);
+                }
             }
         }
 
@@ -507,9 +511,13 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
         if (!fontSize->IsNull()) {
             Dimension size;
             if (!ParseJsDimensionFp(fontSize, size)) {
+                font.fontSize = Dimension(-1);
                 LOGE("Parse to dimension FP failed.");
             } else {
                 font.fontSize = size;
+                if(size.Unit() == DimensionUnit::PERCENT){
+                    font.fontSize = Dimension(-1);
+                }
             }
         }
 

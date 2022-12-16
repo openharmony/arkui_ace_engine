@@ -156,6 +156,10 @@ rosen::TextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextSt
     rsTextStyle.fontWeight_ = ToRSFontWeight(textStyle.GetFontWeight());
     rsTextStyle.fontStyle_ = static_cast<rosen::FontStyle>(textStyle.GetFontStyle());
     rsTextStyle.textBaseline_ = static_cast<rosen::TextBaseline>(textStyle.GetTextBaseline());
+    rsTextStyle.fontFamilies_ = textStyle.GetFontFamilies();
+    LOGI("zhangxiao: rsTextStyle.fontFamilies_: %d", rsTextStyle.fontFamilies_.size());
+    LOGI("zhangxiao: rsTextStyle.fontFamilies_: %s", rsTextStyle.fontFamilies_.front().data());
+    LOGI("zhangxiao: rsTextStyle.fontFamilies_: %s", rsTextStyle.fontFamilies_.back().data());
     if (context) {
         rsTextStyle.fontSize_ = context->NormalizeToPx(textStyle.GetFontSize());
         if (textStyle.IsAllowScale() || textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
