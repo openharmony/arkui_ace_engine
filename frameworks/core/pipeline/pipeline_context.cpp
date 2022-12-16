@@ -54,10 +54,10 @@
 #include "core/common/event_manager.h"
 #include "core/common/font_manager.h"
 #include "core/common/frontend.h"
+#include "core/common/layout_inspector.h"
 #include "core/common/manager_interface.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/thread_checker.h"
-#include "core/common/layout_inspector.h"
 #include "core/components/checkable/render_checkable.h"
 #include "core/components/common/layout/screen_system_manager.h"
 #include "core/components/container_modal/container_modal_component.h"
@@ -137,7 +137,7 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
     const RefPtr<Frontend>& frontend, int32_t instanceId)
     : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId,
-        (std::move(platformResRegister))),
+          (std::move(platformResRegister))),
       timeProvider_(g_defaultTimeProvider)
 {
     RegisterEventHandler(frontend->GetEventHandler());
@@ -1897,6 +1897,19 @@ void PipelineContext::CreateTouchEventOnZoom(const AxisEvent& event)
     }
 }
 
+MouseEvent ConvertAxisToMouse(const AxisEvent& event)
+{
+    MouseEvent result;
+    result.x = event.x;
+    result.y = event.y;
+    result.action = MouseAction::MOVE;
+    result.button = MouseButton::NONE_BUTTON;
+    result.time = event.time;
+    result.deviceId = event.deviceId;
+    result.sourceType = event.sourceType;
+    return result;
+}
+
 void PipelineContext::OnAxisEvent(const AxisEvent& event)
 {
     if (isKeyCtrlPressed_ && !NearZero(event.verticalAxis) &&
@@ -1920,6 +1933,9 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
         eventManager_->AxisTest(scaleEvent, rootElement_->GetRenderNode());
         eventManager_->DispatchAxisEvent(scaleEvent);
     }
+
+    auto mouseEvent = ConvertAxisToMouse(event);
+    OnMouseEvent(mouseEvent);
 }
 
 void PipelineContext::AddToHoverList(const RefPtr<RenderNode>& node)
@@ -2616,7 +2632,7 @@ bool PipelineContext::RequestFocus(const RefPtr<Element>& targetElement)
 bool PipelineContext::RequestFocus(const std::string& targetNodeId)
 {
     CHECK_NULL_RETURN(rootElement_, false);
-    auto currentFocusChecked =  rootElement_->RequestFocusImmediatelyById(targetNodeId);
+    auto currentFocusChecked = rootElement_->RequestFocusImmediatelyById(targetNodeId);
     if (!isSubPipeline_ || currentFocusChecked) {
         LOGI("Request focus finish currentFocus is %{public}d", currentFocusChecked);
         return currentFocusChecked;
