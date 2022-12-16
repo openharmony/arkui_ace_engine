@@ -21,6 +21,10 @@
 #include <dlfcn.h>
 #endif
 
+#include "napi/host/js_scene_session.h"
+#include <refbase.h>
+#include "scene_session.h"
+
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
 #include "base/want/want_wrap.h"
@@ -150,6 +154,51 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
     NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
 
     return WantWrap::CreateWantWrap(reinterpret_cast<void*>(nativeEngine), reinterpret_cast<void*>(nativeValue));
+}
+
+std::shared_ptr<Rosen::Session> CreateSceneSessionFromNapiValue(JSRef<JSVal> obj)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!obj->IsObject()) {
+        LOGE("CreateSceneSessionFromNapiValue: info[0] is not an object");
+        return nullptr;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        LOGE("CreateSceneSessionFromNapiValue: engine is null");
+        return nullptr;
+    }
+    auto nativeEngine = engine->GetNativeEngine();
+    if (nativeEngine == nullptr) {
+        LOGE("nativeEngine is nullptr");
+        return nullptr;
+    }
+#ifdef USE_V8_ENGINE
+    v8::Local<v8::Value> value = obj->operator v8::Local<v8::Value>();
+#elif USE_ARK_ENGINE
+    panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
+#endif
+    JSValueWrapper valueWrapper = value;
+    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
+    if (nativeValue == nullptr) {
+        LOGE("nativeValue is nullptr");
+        return nullptr;
+    }
+    NativeObject* object = static_cast<NativeObject*>(nativeValue->GetInterface(NativeObject::INTERFACE_ID));
+    if (object == nullptr) {
+        return nullptr;
+    }
+
+    auto jsSceneSession = static_cast<Rosen::JsSceneSession*>(object->GetNativePointer());
+    if (jsSceneSession == nullptr) {
+        LOGE("Failed to find scene session From JS Object");
+        return nullptr;
+    }
+    auto sceneSession = jsSceneSession->GetNativeSession().GetRefPtr();
+    return std::shared_ptr<Rosen::Session>(sceneSession);
+#else
+    return nullptr;
+#endif
 }
 
 #endif

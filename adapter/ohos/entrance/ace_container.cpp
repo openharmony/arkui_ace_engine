@@ -738,6 +738,23 @@ void AceContainer::SetViewNew(
 #endif
 }
 
+void AceContainer::SetViewNew(
+    AceView* view, double density, int32_t width, int32_t height, RefPtr<NG::WindowPattern> windowPattern)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    CHECK_NULL_VOID(view);
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    container->windowPattern_ = windowPattern;
+
+    std::unique_ptr<Window> window =
+        std::make_unique<NG::RosenWindow>(windowPattern, taskExecutor, view->GetInstanceId());
+    container->AttachView(std::move(window), view, density, width, height, windowPattern->GetWindowId(), nullptr);
+#endif
+}
+
 void AceContainer::SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow)
 {
     CHECK_NULL_VOID_NOLOG(uiWindow);
@@ -1309,7 +1326,10 @@ void AceContainer::InitWindowCallback()
             [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
     }
 
-    pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
+    pipelineContext_->SetGetWindowRectImpl([window = uiWindow_, windowPattern = windowPattern_]() -> Rect {
+        if (windowPattern) {
+            return windowPattern->GetRect();
+        }
         Rect rect;
         CHECK_NULL_RETURN_NOLOG(window, rect);
         auto windowRect = window->GetRect();

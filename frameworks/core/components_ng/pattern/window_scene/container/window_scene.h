@@ -13,18 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HOST_WINDOW_FLOAT_SCENE__PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HOST_WINDOW_FLOAT_SCENE__PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_H
 
-#include "host_window_scene_pattern.h"
+#include "scene_session_stage.h"
+
+#include "base/utils/macros.h"
+
+namespace OHOS::Rosen {
+class RSSurfaceNode;
+}
+
+namespace OHOS::AbilityRuntime {
+class Context;
+}
 
 namespace OHOS::Ace::NG {
-class HostWindowFloatScenePattern : public HostWindowScenePattern {
-    DECLARE_ACE_TYPE(HostWindowFloatScenePattern, HostWindowScenePattern);
+
+class ACE_EXPORT WindowScene {
 public:
-    HostWindowFloatScenePattern(/*SceneSession*/);
-    ~HostWindowFloatScenePattern() = default;
+    static sptr<Rosen::SceneSessionStage> Create(
+        const sptr<Rosen::ISceneSession>& iSceneSession,
+        const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
+        const std::shared_ptr<AbilityRuntime::Context>& runtimeContext);
 };
+
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HOST_WINDOW_FLOAT_SCENE__PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_H

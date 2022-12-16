@@ -32,6 +32,7 @@
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
 #include "core/common/js_message_dispatcher.h"
+#include "core/components_ng/pattern/window_scene/container/window_pattern.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace::Platform {
@@ -318,6 +319,8 @@ public:
     static void SetViewNew(
         AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window> rsWindow);
     static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow);
+    static void SetViewNew(
+        AceView* view, double density, int32_t width, int32_t height, RefPtr<NG::WindowPattern> windowPattern);
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
     static void SetFontScale(int32_t instanceId, float fontScale);
@@ -437,6 +440,7 @@ private:
     int32_t pageId_ = 0;
     bool useCurrentEventRunner_ = false;
     sptr<OHOS::Rosen::Window> uiWindow_ = nullptr;
+    RefPtr<NG::WindowPattern> windowPattern_;
     std::string windowName_;
     uint32_t windowId_ = OHOS::Rosen::INVALID_WINDOW_ID;
     sptr<IRemoteObject> token_;

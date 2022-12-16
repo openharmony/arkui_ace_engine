@@ -13,18 +13,36 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HOST_WINDOW_SCENE_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HOST_WINDOW_SCENE_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_SCENE_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_SCENE_PATTERN_H
 
-#include "host_window_pattern.h"
+#include "core/components_ng/pattern/window_scene/host/host_window_pattern.h"
+
+#include "session.h"
+
+#include "core/components_ng/event/event_hub.h"
 
 namespace OHOS::Ace::NG {
+
 class HostWindowScenePattern : public HostWindowPattern {
     DECLARE_ACE_TYPE(HostWindowScenePattern, HostWindowPattern);
+
 public:
-    HostWindowScenePattern(/*SceneSession*/);
-    ~HostWindowScenePattern() = default;
+    HostWindowScenePattern(const std::shared_ptr<Rosen::Session>& session) : HostWindowPattern(session) {}
+    ~HostWindowScenePattern() override = default;
+
+    void OnModifyDone() override;
+
+protected:
+    void OnAttachToFrameNode() override;
+
+private:
+    void OnClick();
+
+    RefPtr<ClickEvent> clickListener_;
+    ACE_DISALLOW_COPY_AND_MOVE(HostWindowScenePattern);
 };
+
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HOST_WINDOW_SCENE__PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_SCENE_PATTERN_H

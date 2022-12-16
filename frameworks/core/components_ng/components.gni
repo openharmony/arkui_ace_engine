@@ -144,6 +144,15 @@ template("build_component_ng") {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
         include_dirs +=
             [ "//foundation/window/window_manager/interfaces/innerkits" ]
+
+        deps += [
+          "//foundation/window/window_manager/window_scene:window_scene",
+        ]
+
+        include_dirs += [
+          "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
+          "//foundation/window/window_manager/window_scene/interfaces/innerkits",
+        ]
       }
 
       if (defined(config.enable_standard_input) &&

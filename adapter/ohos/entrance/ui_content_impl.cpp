@@ -325,6 +325,35 @@ void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& cont
     LOGI("Restore UIContentImpl done.");
 }
 
+void UIContentImpl::Initialize(NG::WindowPattern* windowPattern, const std::string& url, NativeValue* storage)
+{
+    if (windowPattern && StringUtils::StartWith(windowPattern->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
+        CommonInitialize(windowPattern, url, storage);
+        return;
+    }
+    if (windowPattern) {
+        CommonInitialize(windowPattern, url, storage);
+    }
+    LOGI("Initialize startUrl = %{public}s", startUrl_.c_str());
+    // run page.
+    Platform::AceContainer::RunPage(
+        instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
+    LOGD("Initialize UIContentImpl done.");
+}
+
+void UIContentImpl::Restore(NG::WindowPattern* windowPattern, const std::string& contentInfo, NativeValue* storage)
+{
+    CommonInitialize(windowPattern, contentInfo, storage);
+    startUrl_ = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo);
+    if (startUrl_.empty()) {
+        LOGW("UIContent Restore start url is empty");
+    }
+    LOGI("Restore startUrl = %{public}s", startUrl_.c_str());
+    Platform::AceContainer::RunPage(
+        instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
+    LOGI("Restore UIContentImpl done.");
+}
+
 std::string UIContentImpl::GetContentInfo() const
 {
     LOGI("UIContent GetContentInfo");
@@ -1488,6 +1517,45 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     window_->RegisterTouchOutsideListener(touchOutsideListener_);
     dragWindowListener_ = new DragWindowListener(instanceId_);
     window_->RegisterDragListener(dragWindowListener_);
+}
+
+void UIContentImpl::InitializeSubWindow(NG::WindowPattern* windowPattern, bool isDialog)
+{
+    windowPattern_ = windowPattern;
+    if (!windowPattern_) {
+        LOGE("Null window, can't initialize UI content");
+        return;
+    }
+    LOGI("The window name is %{public}s", windowPattern_->GetWindowName().c_str());
+
+    RefPtr<Container> container;
+    instanceId_ = gSubInstanceId.fetch_add(1, std::memory_order_relaxed);
+
+    std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo;
+    std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext;
+    if (isDialog) {
+        container = AceType::MakeRefPtr<Platform::DialogContainer>(instanceId_, FrontendType::DECLARATIVE_JS);
+    } else {
+        if (Container::IsCurrentUseNewPipeline()) {
+            container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
+                runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
+                    // Sub-window, just return.
+                    LOGI("Content event callback");
+                }),
+                false, true, true);
+        } else {
+            container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
+                runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
+                    // Sub-window, just return.
+                    LOGI("Content event callback");
+                }),
+                false, true);
+        }
+    }
+    SubwindowManager::GetInstance()->AddContainerId(windowPattern_->GetWindowId(), instanceId_);
+    AceEngine::Get().AddContainer(instanceId_, container);
+    // touchOutsideListener_ = new TouchOutsideListener(instanceId_);
+    // windowPattern_->RegisterTouchOutsideListener(touchOutsideListener_);
 }
 
 void UIContentImpl::SetNextFrameLayoutCallback(std::function<void()>&& callback)

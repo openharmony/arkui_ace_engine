@@ -13,34 +13,50 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HOST_WINDOW_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HOST_WINDOW_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_PATTERN_H
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
+#include "session.h"
+
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/window_scene/host/host_window_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
+
 class HostWindowPattern : public Pattern {
     DECLARE_ACE_TYPE(HostWindowPattern, Pattern);
-public:
-    HostWindowPattern(/*Session*/);
-    virtual ~HostWindowPattern() = default;
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+public:
+    HostWindowPattern(const std::shared_ptr<Rosen::Session>& session) : session_(session) {}
+    ~HostWindowPattern() override = default;
+
+    bool IsAtomicNode() const override
     {
-        return MakeRefPtr<HostWindowLayoutAlgorithm>();
+        return false;
     }
 
-protected:
-    // GetSession
-private:
-    // Session
+    std::shared_ptr<Rosen::Session> GetSession()
+    {
+        return session_;
+    }
 
-    RefPtr<FrameNode> startingView;
-    RefPtr<FrameNode> contentView;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+
+protected:
+    virtual void InitContent();
+
+    virtual void OnBackground();
+
+    RefPtr<FrameNode> startingNode_;
+    RefPtr<FrameNode> contentNode_;
+
+private:
+    std::shared_ptr<Rosen::Session> session_;
+
+    friend class HostWindowScene;
+
+    ACE_DISALLOW_COPY_AND_MOVE(HostWindowPattern);
 };
+
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HOST_WINDOW__PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_PATTERN_H

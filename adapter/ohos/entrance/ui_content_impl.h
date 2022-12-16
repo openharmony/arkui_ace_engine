@@ -23,9 +23,9 @@
 #include "key_event.h"
 #include "native_engine/native_value.h"
 #include "native_engine/native_engine.h"
+#include "wm/window.h"
 
 #include "base/utils/macros.h"
-#include "wm/window.h"
 
 namespace OHOS {
 
@@ -49,6 +49,7 @@ public:
 
     // UI content lifecycles
     void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
+    void Initialize(NG::WindowPattern* windowPattern, const std::string& url, NativeValue* storage) override;
     void Foreground() override;
     void Background() override;
     void Focus() override;
@@ -58,6 +59,7 @@ public:
 
     // distribute
     void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) override;
+    void Restore(NG::WindowPattern* windowPattern, const std::string& contentInfo, NativeValue* storage) override;
     std::string GetContentInfo() const override;
     void DestroyUIDirector() override;
 
@@ -121,10 +123,13 @@ private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
+    void CommonInitialize(NG::WindowPattern* windowPattern, const std::string& contentInfo, NativeValue* storage);
+    void InitializeSubWindow(NG::WindowPattern* windowPattern, bool isDialog = false);
     void DestroyCallback() const;
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
+    NG::WindowPattern* windowPattern_ = nullptr;
     std::string startUrl_;
     int32_t instanceId_ = -1;
     OHOS::sptr<OHOS::Rosen::IWindowDragListener> dragWindowListener_ = nullptr;

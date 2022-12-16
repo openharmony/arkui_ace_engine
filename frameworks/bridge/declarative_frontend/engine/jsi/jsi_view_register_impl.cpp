@@ -188,8 +188,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_previewer_mock.h"
 #endif
 
-#if defined(WINDW_SCENE_SUPPORT)
-
+#if defined(WINDOW_SCENE_SUPPORTED)
+#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_host_window_scene.h"
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -513,8 +513,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #if defined(MODEL_COMPONENT_SUPPORTED)
     { "Model", JSSceneView::JSBind },
 #endif
-#if defined(WINDW_SCENE_SUPPORT)
-
+#if defined(WINDOW_SCENE_SUPPORTED)
+    { "HostWindowScene", JSHostWindowScene::JSBind},
 #endif
 };
 

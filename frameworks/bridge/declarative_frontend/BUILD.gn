@@ -466,6 +466,19 @@ template("declarative_js_engine") {
           "multimedia_image_framework:image_native",
         ]
       }
+
+      if (defined(config.window_scene_support) && config.window_scene_support) {
+        deps += [
+          "//foundation/window/window_manager/window_scene:window_scene",
+          "//foundation/window/window_manager/window_scene/interfaces/kits/napi/host:window_scene_napi",
+        ]
+
+        include_dirs += [
+          "//foundation/window/window_manager/window_scene/interfaces/innerkits",
+          "//foundation/window/window_manager/window_scene/interfaces/kits",
+          "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
+        ]
+      }
     }
   }
 }

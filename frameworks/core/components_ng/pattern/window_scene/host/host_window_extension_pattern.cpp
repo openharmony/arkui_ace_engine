@@ -12,3 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "core/components_ng/pattern/window_scene/host/host_window_extension_pattern.h"
+
+namespace OHOS::Ace::NG {
+
+void HostWindowExtensionPattern::OnAttachToFrameNode()
+{
+    InitContent();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+} // namespace OHOS::Ace::NG

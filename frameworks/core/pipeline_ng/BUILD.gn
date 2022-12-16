@@ -51,6 +51,15 @@ template("ace_core_pipeline_ng_source_set") {
       deps += [ "$ace_root/frameworks/core/components_ng/render:ace_core_components_render_ng_$platform" ]
       include_dirs =
           [ "//foundation/window/window_manager/interfaces/innerkits" ]
+
+      deps += [
+        "//foundation/window/window_manager/window_scene:window_scene",
+      ]
+
+      include_dirs += [
+        "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
+        "//foundation/window/window_manager/window_scene/interfaces/innerkits",
+      ]
     }
 
     if (platform == "ohos" && defined(config.enable_native_view) &&

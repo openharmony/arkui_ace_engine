@@ -13,16 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HOST_WINDOW_SCENE_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HOST_WINDOW_SCENE_VIEW_H
+#include "core/components_ng/pattern/window_scene/container/window_scene.h"
 
-#include "base/utils/macros.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/window_scene/container/window_scene_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT HostWindowSceneView {
-public:
-    static void Create(/*SceneSession*/);
-};
+
+sptr<Rosen::SceneSessionStage> WindowScene::Create(
+    const sptr<Rosen::ISceneSession>& iSceneSession,
+    const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
+    const std::shared_ptr<AbilityRuntime::Context>& runtimeContext)
+{
+    return new Rosen::SceneSessionStage(iSceneSession);
 }
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HOST_WINDOW_SCENE_VIEW_H
+} // namespace OHOS::Ace::NG

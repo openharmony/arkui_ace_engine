@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WINDOW_EXTENSION_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WINDOW_EXTENSION_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_EXTENSION_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_EXTENSION_PATTERN_H
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -22,17 +22,21 @@
 #include "window_pattern.h"
 
 namespace OHOS::Ace::NG {
+
 class WindowExtensionPattern : public WindowPattern {
     DECLARE_ACE_TYPE(WindowExtensionPattern, WindowPattern);
-public:
-    WindowExtensionPattern(/*Session*/);
-    virtual ~WindowExtensionPattern() = default;
 
-protected:
-    // GetSession
+public:
+    WindowExtensionPattern(
+/*         const sptr<Rosen::IExtensionSession>& iExtensionSession,
+        const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
+        const std::shared_ptr<AbilityRuntime::Context>& runtimeContext */);
+    ~WindowExtensionPattern() override = default;
+
 private:
-    // Session
+    ACE_DISALLOW_COPY_AND_MOVE(WindowExtensionPattern);
 };
+
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WINDOW_EXTENSION_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_EXTENSION_PATTERN_H

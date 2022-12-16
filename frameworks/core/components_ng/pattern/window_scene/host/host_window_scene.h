@@ -12,3 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_SCENE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_SCENE_H
+
+#include "session.h"
+
+#include "base/utils/macros.h"
+
+namespace OHOS::Ace::NG {
+
+class ACE_EXPORT HostWindowScene {
+public:
+    static void Create(const std::shared_ptr<Rosen::Session>& session);
+};
+
+} // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_SCENE_H

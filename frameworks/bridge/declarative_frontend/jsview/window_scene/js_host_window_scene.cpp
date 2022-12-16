@@ -13,32 +13,40 @@
  * limitations under the License.
  */
 
-#include "js_host_window_scene.h"
+#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_host_window_scene.h"
 
-#include "frameworks/core/components_ng/pattern/window_scene/host/host_window_scene_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
+#include "frameworks/core/components_ng/pattern/window_scene/host/host_window_scene.h"
 
 namespace OHOS::Ace::Framework {
-void JSHostWindowSceneView::Create(const JSCallbackInfo &info)
+
+void JSHostWindowScene::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSHostWindowScene>::Declare("HostWindowScene");
+    JSClass<JSHostWindowScene>::StaticMethod("create", &JSHostWindowScene::Create, MethodOptions::NONE);
+    JSClass<JSHostWindowScene>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSHostWindowScene>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSHostWindowScene>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSHostWindowScene>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSHostWindowScene>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSHostWindowScene>::Inherit<JSViewAbstract>();
+    JSClass<JSHostWindowScene>::Bind(globalObj);
+}
+
+void JSHostWindowScene::Create(const JSCallbackInfo &info)
 {
     if (!Container::IsCurrentUseNewPipeline()) {
         LOGE("Window scene is only supported on new pipeline!");
         return;
     }
 
-    // auto sceneSession = CreateSceneSessionFromNapiValue(info[0]);
-    NG::HostWindowSceneView::Create(/*sceneSession*/);
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have 1 argument");
+        return;
+    }
+
+    auto sceneSession = CreateSceneSessionFromNapiValue(info[0]);
+    NG::HostWindowScene::Create(sceneSession);
 }
 
-void JSHostWindowSceneView::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSHostWindowSceneView>::Declare("WindowSceneView");
-    JSClass<JSHostWindowSceneView>::StaticMethod("create", &JSHostWindowSceneView::Create, MethodOptions::NONE);
-    JSClass<JSHostWindowSceneView>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSHostWindowSceneView>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
-    JSClass<JSHostWindowSceneView>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
-    JSClass<JSHostWindowSceneView>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
-    JSClass<JSHostWindowSceneView>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSHostWindowSceneView>::Inherit<JSViewAbstract>();
-    JSClass<JSHostWindowSceneView>::Bind<>(globalObj);
-}
 } // namespace OHOS::Ace::Framework

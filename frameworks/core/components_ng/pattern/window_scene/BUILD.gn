@@ -17,7 +17,9 @@ import(
 if (is_standard_system) {
   config("ohos_window_scene_config") {
     include_dirs = [
-
+      "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
+      "//foundation/window/window_manager/window_scene/interfaces/innerkits",
+      "//foundation/window/window_manager/wm",
     ]
   }
 }
@@ -26,20 +28,25 @@ build_component_ng("window_scene") {
   sources = [
     #container
     "container/window_extension_pattern.cpp",
-    "container/window_float_scene_pattern.cpp",
     "container/window_pattern.cpp",
+    "container/window_scene.cpp",
     "container/window_scene_pattern.cpp",
 
     #host
     "host/host_window_extension_pattern.cpp",
-    "host/host_window_float_scene_pattern.cpp",
     "host/host_window_pattern.cpp",
+    "host/host_window_scene.cpp",
     "host/host_window_scene_pattern.cpp",
   ]
 
   if (is_standard_system) {
     configs = [ ":ohos_window_scene_config" ]
 
-    deps = []
+    deps = [
+      "//foundation/arkui/napi:ace_napi",
+      "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+      "//foundation/window/window_manager/window_scene:window_scene",
+      "//foundation/window/window_manager/wm:libwm",
+    ]
   }
 }

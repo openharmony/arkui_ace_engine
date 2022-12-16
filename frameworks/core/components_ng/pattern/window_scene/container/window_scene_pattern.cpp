@@ -12,3 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "core/components_ng/pattern/window_scene/container/window_scene_pattern.h"
+
+namespace OHOS::Ace::NG {
+
+WindowScenePattern::WindowScenePattern(
+    const sptr<Rosen::ISceneSession>& iSceneSession,
+    const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
+    const std::shared_ptr<AbilityRuntime::Context>& runtimeContext)
+    : WindowPattern(surfaceNode, runtimeContext)
+{
+    sessionStage_ = std::shared_ptr<Rosen::SceneSessionStage>(new Rosen::SceneSessionStage(iSceneSession));
+}
+
+} // namespace OHOS::Ace::NG

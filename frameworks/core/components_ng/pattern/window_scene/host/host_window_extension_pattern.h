@@ -13,20 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HOST_WINDOW_EXTENSION_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HOST_WINDOW_EXTENSION_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_EXTENSION_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_EXTENSION_PATTERN_H
 
-#include "host_window_pattern.h"
+#include "core/components_ng/pattern/window_scene/host/host_window_pattern.h"
+
+#include "session.h"
 
 namespace OHOS::Ace::NG {
+
 class HostWindowExtensionPattern : public HostWindowPattern {
     DECLARE_ACE_TYPE(HostWindowExtensionPattern, HostWindowPattern);
+
 public:
-    HostWindowExtensionPattern(/*ExtensionSession*/);
-    ~HostWindowExtensionPattern() = default;
+    HostWindowExtensionPattern(const std::shared_ptr<Rosen::Session>& session) : HostWindowPattern(session) {}
+    ~HostWindowExtensionPattern() override = default;
+
+    void OnAttachToFrameNode() override;
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(HostWindowExtensionPattern);
 };
+
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HOST_WINDOW_EXTENSION_PATTERN_H
-
-
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_EXTENSION_PATTERN_H

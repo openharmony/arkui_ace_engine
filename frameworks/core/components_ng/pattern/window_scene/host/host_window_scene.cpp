@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-#include "host_window_scene_view.h"
+#include "core/components_ng/pattern/window_scene/host/host_window_scene.h"
 
-#include "base/memory/ace_type.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/window_scene/host/host_window_scene_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void HostWindowSceneView::Create(/*SceneSession*/)
+
+void HostWindowScene::Create(const std::shared_ptr<Rosen::Session>& session)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HOST_WINDOW_SCENE_ETS_TAG, nodeId,
-        [/*SceneSession*/]() { return AceType::MakeRefPtr<HostWindowScenePattern>(/*Scen eSession*/); });
+        [&session]() { return AceType::MakeRefPtr<HostWindowScenePattern>(session); });
     stack->Push(frameNode);
+    frameNode->GetPattern<HostWindowScenePattern>()->InitContent();
 }
 
 } // namespace OHOS::Ace::NG

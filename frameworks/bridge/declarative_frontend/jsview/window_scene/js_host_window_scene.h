@@ -13,18 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WINDOW_SCENE_VIEW_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WINDOW_SCENE_VIEW_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_HOST_WINDOW_SCENE_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_HOST_WINDOW_SCENE_H
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
-class JSHostWindowSceneView : public JSViewAbstract, public JSInteractableView {
+
+class JSHostWindowScene : public JSViewAbstract, public JSInteractableView {
 public:
-    static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
+    static void Create(const JSCallbackInfo& info);
 };
+
 } // namespace OHOS::Ace::Framework
 
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WINDOW_SCENE_VIEW_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_HOST_WINDOW_SCENE_H

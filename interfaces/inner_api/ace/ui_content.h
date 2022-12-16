@@ -43,6 +43,10 @@ class RSSurfaceNode;
 class RSTransaction;
 }
 
+namespace Ace::NG {
+class WindowPattern;
+}
+
 namespace AAFwk {
 class Want;
 }
@@ -76,6 +80,7 @@ public:
 
     // UI content life-cycles
     virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) = 0;
+    virtual void Initialize(NG::WindowPattern* windowPattern, const std::string& url, NativeValue* storage) = 0;
     virtual void Foreground() = 0;
     virtual void Background() = 0;
     virtual void Focus() = 0;
@@ -85,6 +90,7 @@ public:
 
     // distribute
     virtual void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) = 0;
+    virtual void Restore(NG::WindowPattern* windowPattern, const std::string& contentInfo, NativeValue* storage) = 0;
     virtual std::string GetContentInfo() const = 0;
     virtual void DestroyUIDirector() = 0;
 
