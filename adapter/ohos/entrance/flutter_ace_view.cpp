@@ -25,6 +25,7 @@
 #include "key_event.h"
 #include "pointer_event.h"
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "base/utils/utils.h"
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
@@ -418,6 +419,7 @@ void FlutterAceView::SurfaceChanged(
     FlutterAceView* view, int32_t width, int32_t height, int32_t orientation, WindowSizeChangeReason type)
 {
     CHECK_NULL_VOID(view);
+
     view->NotifySurfaceChanged(width, height, type);
     auto platformView = view->GetShellHolder()->GetPlatformView();
     LOGD("FlutterAceView::SurfaceChanged, GetPlatformView");
@@ -425,6 +427,15 @@ void FlutterAceView::SurfaceChanged(
         LOGD("FlutterAceView::SurfaceChanged, call NotifyChanged");
         platformView->NotifyChanged(SkISize::Make(width, height));
     }
+    
+    auto instanceId = view->GetInstanceId();
+    auto container = Platform::AceContainer::GetContainer(instanceId);
+    if (container) {
+        auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->CloseContextMenu();
+    }
+
     LOGD("<<< FlutterAceView::SurfaceChanged, end");
 }
 

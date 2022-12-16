@@ -15,6 +15,8 @@
 
 #include "adapter/ohos/entrance/subwindow/subwindow_ohos.h"
 
+#include "window.h"
+
 #include "adapter/ohos/entrance/ace_application_info.h"
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
@@ -236,6 +238,7 @@ void SubwindowOhos::ShowWindow()
         LOGE("Show window failed with errCode: %{public}d", static_cast<int32_t>(ret));
         return;
     }
+    window_->RequestFocus();
     LOGI("Show the subwindow successfully.");
     isShowed_ = true;
     SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
@@ -245,6 +248,13 @@ void SubwindowOhos::HideWindow()
 {
     LOGI("Hide the subwindow");
     CHECK_NULL_VOID(window_);
+
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentContainer);
+    auto parentWindowName = parentContainer->GetWindowName();
+    sptr<OHOS::Rosen::Window> parentWindow = OHOS::Rosen::Window::Find(parentWindowName);
+    CHECK_NULL_VOID(parentWindow);
+    parentWindow->RequestFocus();
 
     OHOS::Rosen::WMError ret = window_->Hide();
 
@@ -532,6 +542,20 @@ void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, cons
             subwindowOhos->SetIsToastWindow(true);
         }
         childContainerId = subwindowOhos->GetChildContainerId();
+
+        auto container = Platform::DialogContainer::GetContainer(childContainerId);
+        CHECK_NULL_VOID(container);
+        auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
+        CHECK_NULL_VOID(flutterAceView);
+        if (flutterAceView->GetWidth() != width || flutterAceView->GetHeight() != height) {
+            flutter::ViewportMetrics metrics;
+            metrics.physical_width = width;
+            metrics.physical_height = height;
+            metrics.device_pixel_ratio = density;
+            Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
+            Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
+        }
+
         Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height, true);
         Platform::DialogContainer::ShowToast(childContainerId, message, duration, bottom);
     };
