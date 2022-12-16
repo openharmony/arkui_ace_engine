@@ -805,6 +805,9 @@ void TextFieldPattern::HandleOnCopy()
         clipboard_->SetData(value, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
     }
 
+    textEditingValue_.caretPosition = textSelector_.GetEnd();
+    selectionMode_ = SelectionMode::NONE;
+    StartTwinkling();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // If the parent node is a Search, the Search callback is executed.
