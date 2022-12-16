@@ -458,7 +458,7 @@ bool ViewStackProcessor::ShouldPopImmediately()
 
 void ViewStackProcessor::Pop()
 {
-    if (componentsStack_.size() == 1) {
+    if (componentsStack_.empty() || componentsStack_.size() == 1) {
         return;
     }
 
