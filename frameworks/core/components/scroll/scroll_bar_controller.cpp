@@ -181,7 +181,8 @@ void ScrollBarController::HandleTouchUp()
 {
     LOGI("handle touch up");
     isPressed_ = false;
-    if (!isHover_) {
+    if (!isInBar_) {
+        isHover_ = false;
         PlayShrinkAnimation();
     }
     if (isActive_) {
@@ -326,19 +327,21 @@ bool ScrollBarController::CheckScroll()
     return scroll != nullptr;
 }
 
-void ScrollBarController::SetIsHover(bool isHover)
+void ScrollBarController::SetIsHover(bool isInBarRegion)
 {
-    LOGD("set scroll bar hover state: %{public}d", isHover);
+    LOGD("set isBarRegion state : %{public}d", isInBarRegion);
+    if (isInBar_ == isInBarRegion) {
+        LOGD("isInBar_ state is not changed");
+        return;
+    }
+    isInBar_  = isInBarRegion;
     if (isPressed_) {
         LOGD("scroll bar is pressed now.");
         return;
     }
-    if (isHover_ == isHover) {
-        LOGD("hover state is not changed");
-        return;
-    }
-    isHover_ = isHover;
-    if (isHover) {
+    isHover_ = isInBar_;
+    LOGD("set scroll bar hover state: %{public}d", isHover_);
+    if (isHover_) {
         isActive_ = true;
         PlayGrowAnimation();
     } else {
