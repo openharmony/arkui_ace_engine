@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "base/utils/utils.h"
 #include "core/components_ng/render/modifier_adapter.h"
 
 namespace OHOS::Ace::NG {

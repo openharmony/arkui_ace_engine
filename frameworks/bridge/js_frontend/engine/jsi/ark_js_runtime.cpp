@@ -127,11 +127,11 @@ shared_ptr<JsValue> ArkJSRuntime::EvaluateJsCode([[maybe_unused]] const std::str
     return NewUndefined();
 }
 
-bool ArkJSRuntime::EvaluateJsCode(const uint8_t* buffer, int32_t size, const std::string& filePath)
+bool ArkJSRuntime::EvaluateJsCode(const uint8_t* buffer, int32_t size, const std::string& filePath, bool needUpdate)
 {
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
-    bool ret = JSNApi::Execute(vm_, buffer, size, PANDA_MAIN_FUNCTION, filePath);
+    bool ret = JSNApi::Execute(vm_, buffer, size, PANDA_MAIN_FUNCTION, filePath, needUpdate);
     HandleUncaughtException();
     return ret;
 }

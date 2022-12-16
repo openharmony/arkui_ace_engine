@@ -3110,7 +3110,7 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
             this.source_ = new ObservedPropertyObjectPU(source, this, thisPropertyName);
         }
         // deep copy source Object and wrap it
-        this.wrappedValue_ = ObservedObject.createNew(Object.assign({}, ObservedObject.GetRawObject(this.source_.get())), this);
+        this.setWrapperValue(this.source_.get());
         
     }
     /*
@@ -3131,7 +3131,7 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
     hasChanged(newValue) {
         if (typeof newValue == "object") {
             
-            this.wrappedValue_ = ObservedObject.createNew(Object.assign({}, ObservedObject.GetRawObject(newValue)), this);
+            this.setWrapperValue(newValue);
             this.notifyHasChanged(ObservedObject.GetRawObject(this.wrappedValue_));
         }
     }
@@ -3162,13 +3162,22 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
             stateMgmtConsole.warn(`@Prop ${this.info()} Set: Provided new object's class 
          lacks @Observed class decorator. Object property changes will not be observed.`);
         }
-        this.wrappedValue_ = ObservedObject.createNew(Object.assign({}, ObservedObject.GetRawObject(newValue)), this);
+        this.setWrapperValue(newValue);
         this.notifyHasChanged(this.wrappedValue_);
     }
     reset(sourceChangedValue) {
         
         // if set causes an actual change, then, ObservedPropertyObject source_ will call hasChanged
         this.source_.set(sourceChangedValue);
+    }
+    setWrapperValue(value) {
+        let rawValue = ObservedObject.GetRawObject(value);
+        if (rawValue instanceof Array) {
+            this.wrappedValue_ = ObservedObject.createNew([...rawValue], this);
+        }
+        else {
+            this.wrappedValue_ = ObservedObject.createNew(Object.assign({}, rawValue), this);
+        }
     }
 }
 /*

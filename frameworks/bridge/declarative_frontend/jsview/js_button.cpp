@@ -167,8 +167,15 @@ RefPtr<TextComponent> JSButton::GetTextComponent()
     return textComponent;
 }
 
-void JSButton::SetType(int value)
+void JSButton::SetType(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
+    int32_t value = 1;
+    if (info[0]->IsNumber()) {
+        value = info[0]->ToNumber<int32_t>();
+    }
     if ((ButtonType)value == ButtonType::CAPSULE || (ButtonType)value == ButtonType::CIRCLE ||
         (ButtonType)value == ButtonType::ARC || (ButtonType)value == ButtonType::NORMAL) {
         if (Container::IsCurrentUseNewPipeline()) {

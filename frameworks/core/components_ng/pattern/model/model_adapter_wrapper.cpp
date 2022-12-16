@@ -157,6 +157,10 @@ void ModelAdapterWrapper::OnMeasureContent(const RefPtr<ModelLayoutProperty>& mo
     bool sizeChanged = size_.UpdateSizeWithCheck(size);
     bool needsUpdate = sizeChanged || modelLayoutProperty->NeedsSceneSetup();
 
+    if (sizeChanged && textureLayer_) {
+        textureLayer_->SetWH(size_.Width(), size_.Height());
+    }
+
     if (IsInitialized() && needsUpdate) {
         UnloadScene();
     }

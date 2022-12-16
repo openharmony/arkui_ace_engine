@@ -46,6 +46,10 @@ public:
     void DrawToRSCanvas(
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const std::array<PointF, 4>& radiusXY) override;
 
+    void SetAnimationCallback(std::function<void()>&& callback);
+
+    void ControlAnimation(bool play);
+
 private:
     RefPtr<SvgDomBase> svgDom_;
 };

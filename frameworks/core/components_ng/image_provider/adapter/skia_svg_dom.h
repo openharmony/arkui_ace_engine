@@ -46,6 +46,9 @@ public:
 
     SizeF GetContainerSize() const override;
     void SetContainerSize(const SizeF& containerSize) override;
+
+    // skia SVG doesn't support <animate> element
+
     const std::optional<Color>& GetSvgFillColor() override
     {
         return svgColor_;

@@ -13,15 +13,19 @@
  * limitations under the License.
  */
 
-#include "pipeline/rs_render_node.h"
+#include "uicast_interface/js_uicast.h"
+#include "uicast_interface/uicast_impl.h"
 
-namespace OHOS {
-namespace Rosen {
-RSRenderNode::RSRenderNode(NodeId id, std::weak_ptr<RSContext> context) : RSBaseRenderNode(id, context) {}
-
-bool RSRenderNode::ShouldPaint() const
+namespace OHOS::Ace::Framework {
+void JSUICast::Sandbox(const std::string& value)
 {
-    return false;
+    UICastImpl::Render(value);
 }
-} // namespace Rosen
-} // namespace OHOS
+
+void JSUICast::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSUICast>::Declare("UICast");
+    JSClass<JSUICast>::StaticMethod("sandbox", &JSUICast::Sandbox);
+    JSClass<JSUICast>::Bind<>(globalObj);
+}
+} // namespace OHOS::Ace::Framework

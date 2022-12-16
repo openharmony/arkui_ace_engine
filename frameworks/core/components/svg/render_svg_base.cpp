@@ -45,7 +45,7 @@ const std::unordered_map<std::string, std::function<double(RenderSvgBase&)>> DOU
     { ATTR_NAME_LETTER_SPACING,
         [](RenderSvgBase& base) -> double { return base.NormalizeToPx(base.GetTextStyle().GetLetterSpacing()); } },
     { ATTR_NAME_MITER_LIMIT, [](RenderSvgBase& base) -> double { return base.GetStrokeState().GetMiterLimit(); } },
-    { ATTR_NAME_STROKE_DASHOFFSET,
+    { ATTR_NAME_STROKE_DASH_OFFSET,
         [](RenderSvgBase& base) -> double { return base.GetStrokeState().GetLineDash().dashOffset; } },
     { ATTR_NAME_OPACITY, [](RenderSvgBase& base) -> double { return base.GetOpacity() * (1.0 / UINT8_MAX); } },
 };
@@ -604,7 +604,7 @@ bool RenderSvgBase::SetPresentationProperty(const std::string& attrName, const d
         textStyle_.SetLetterSpacing(Dimension(val), isSelf);
     } else if (attrName == ATTR_NAME_MITER_LIMIT) {
         strokeState_.SetMiterLimit(val, isSelf);
-    } else if (attrName == ATTR_NAME_STROKE_DASHOFFSET) {
+    } else if (attrName == ATTR_NAME_STROKE_DASH_OFFSET) {
         strokeState_.SetLineDashOffset(val, isSelf);
     } else if (attrName == ATTR_NAME_OPACITY) {
         opacity_ = static_cast<uint8_t>(round(val * UINT8_MAX));
@@ -630,7 +630,7 @@ bool RenderSvgBase::IsSelfValue(const std::string& attrName)
         return textStyle_.HasLetterSpacing();
     } else if (attrName == ATTR_NAME_MITER_LIMIT) {
         return strokeState_.HasMiterLimit();
-    } else if (attrName == ATTR_NAME_STROKE_DASHOFFSET) {
+    } else if (attrName == ATTR_NAME_STROKE_DASH_OFFSET) {
         return strokeState_.HasDashOffset();
     } else if (attrName == ATTR_NAME_STROKE_WIDTH) {
         return strokeState_.HasLineWidth();

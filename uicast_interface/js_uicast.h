@@ -13,20 +13,17 @@
  * limitations under the License.
  */
 
-#include "transaction/rs_render_service_client.h"
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_UICAST_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_UICAST_H
 
-namespace OHOS {
-namespace Rosen {
-std::shared_ptr<RSIRenderClient> RSIRenderClient::CreateRenderServiceClient()
-{
-    static std::shared_ptr<RSIRenderClient> client = std::make_shared<RSRenderServiceClient>();
-    return client;
-}
+#include "bridge/declarative_frontend/engine/bindings.h"
 
-int32_t RSRenderServiceClient::SetFocusAppInfo(
-    int32_t pid, int32_t uid, const std::string& bundleName, const std::string& abilityName)
-{
-    return SUCCESS;
-}
-} // namespace Rosen
-} // namespace OHOS
+namespace OHOS::Ace::Framework {
+class JSUICast {
+public:
+    static void JSBind(BindingTarget globalObj);
+    static void Sandbox(const std::string& value);
+};
+} // namespace OHOS::Ace::Framework
+
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_UICAST_H

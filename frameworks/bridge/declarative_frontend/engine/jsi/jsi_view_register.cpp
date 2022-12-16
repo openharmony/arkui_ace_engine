@@ -35,6 +35,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_v2/inspector/inspector.h"
+#include "uicast_interface/uicast_jsi_impl.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -200,6 +201,10 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
     arkRuntime->AddRootView(rootView);
 #endif
     UpdateRootComponent(obj);
+
+    {
+        UICastJsiImpl::UpdateRootView();
+    }
 
     return panda::JSValueRef::Undefined(vm);
 }

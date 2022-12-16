@@ -40,4 +40,14 @@ void SvgCanvasImage::DrawToRSCanvas(
     svgDom_->DrawImage(
         canvas, GetPaintConfig().imageFit_, Size(srcRect.GetWidth(), srcRect.GetHeight()), GetSvgFillColor());
 }
+
+void SvgCanvasImage::SetAnimationCallback(std::function<void()>&& callback)
+{
+    svgDom_->SetAnimationCallback(std::move(callback));
+}
+
+void SvgCanvasImage::ControlAnimation(bool play)
+{
+    svgDom_->ControlAnimation(play);
+}
 } // namespace OHOS::Ace::NG

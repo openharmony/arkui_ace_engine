@@ -326,7 +326,7 @@ public:
     {
         return showPasswordImageLoadingCtx_;
     }
-    
+
     void SearchRequestKeyboard();
 
     const RefPtr<CanvasImage>& GetShowPasswordIconCanvasImage() const
@@ -364,6 +364,11 @@ public:
     const ImagePaintConfig& GetPasswordIconPaintConfig()
     {
         return passwordIconPaintConfig_;
+    }
+
+    void SetEnableTouchAndHoverEffect(bool enable)
+    {
+        enableTouchAndHoverEffect_ = enable;
     }
 
 private:
@@ -510,6 +515,7 @@ private:
     bool isMousePressed_ = false;
     bool needCloseOverlay_ = true;
     bool textObscured_ = true;
+    bool enableTouchAndHoverEffect_ = true;
 
     SelectionMode selectionMode_ = SelectionMode::NONE;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
@@ -528,7 +534,6 @@ private:
     std::vector<RSTypographyProperties::TextBox> textBoxes_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPattern);
 
-    CopyOptions copyOption_ = CopyOptions::Distributed;
     RefPtr<Clipboard> clipboard_;
     std::vector<TextEditingValueNG> operationRecords_;
     std::vector<TextEditingValueNG> redoOperationRecords_;

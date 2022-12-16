@@ -48,6 +48,8 @@ public:
     SvgAnimateDeclaration() = default;
     ~SvgAnimateDeclaration() override = default;
 
+    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
+
     void SetAttributeName(const std::string& attributeName)
     {
         auto& attribute = MaybeResetAttribute<SvgAnimateAttribute>(AttributeTag::SPECIALIZED_ATTR);
@@ -218,10 +220,8 @@ public:
 
 protected:
     void InitSpecialized() override;
-    bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
     bool SetAnimateAttr(const std::pair<std::string, std::string>& attr);
 };
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_SVG_SVG_ANIMATE_DECLARATION_H

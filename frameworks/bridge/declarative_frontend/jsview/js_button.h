@@ -34,7 +34,7 @@ public:
     static void SetFontStyle(int32_t value);
     static void SetFontFamily(const JSCallbackInfo& info);
     static void SetTextColor(const JSCallbackInfo& info);
-    static void SetType(int value);
+    static void SetType(const JSCallbackInfo& info);
     static void SetStateEffect(bool stateEffect);
     static void JsBackgroundColor(const JSCallbackInfo& info);
     static void JsRadius(const JSCallbackInfo& info);

@@ -140,6 +140,7 @@ private:
 
     RefPtr<CanvasPaintMethod> paintMethod_;
     std::optional<SizeF> canvasSize_;
+    bool isCanvasInit_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(CustomPaintPattern);
 };

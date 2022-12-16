@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_PROP_CONVERTOR_MOCK_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_PROP_CONVERTOR_MOCK_H
+#include "uicast_interface/uicast_jsi_impl.h"
 
-namespace OHOS::Ace {
-RSColor ToRSColor(const Color& color);
-RSPoint ToRSPoint(const NG::PointF& point);
-RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap);
-} // namespace OHOS::Ace
+namespace OHOS::Ace::Framework {
+void UICastJsiImpl::CacheAceCmd(const std::string& cmd, bool isVoid, bool hasArguments, bool singleArg,
+    panda::JsiRuntimeCallInfo* runtimeCallInfo, panda::ecmascript::EcmaVM* vm)
+{}
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_PROP_CONVERTOR_MOCK_H
+void UICastJsiImpl::CacheAceCmd(const std::string& cmd, const JsiCallbackInfo& info) {}
+
+void UICastJsiImpl::UpdateRootView() {}
+
+void UICastJsiImpl::HandleRouterPageCall(const std::string& operation, const std::string& url) {}
+} // namespace OHOS::Ace::Framework
