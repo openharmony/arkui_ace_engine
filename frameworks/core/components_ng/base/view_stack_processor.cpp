@@ -94,7 +94,7 @@ void ViewStackProcessor::FlushRerenderTask()
 
 void ViewStackProcessor::Pop()
 {
-    if (elementsStack_.size() == 1) {
+    if (elementsStack_.empty() || elementsStack_.size() == 1) {
         return;
     }
 
