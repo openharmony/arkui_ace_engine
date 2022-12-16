@@ -961,7 +961,7 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
 #else
     const std::string& abcPath = fileName;
 #endif
-    if (!runtime->EvaluateJsCode(content.data(), content.size(), abcPath)) {
+    if (!runtime->EvaluateJsCode(content.data(), content.size(), abcPath, needUpdate_)) {
         LOGE("EvaluateJsCode \"%{public}s\" failed.", fileName.c_str());
         return false;
     }

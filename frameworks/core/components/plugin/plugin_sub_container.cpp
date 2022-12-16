@@ -101,6 +101,7 @@ void PluginSubContainer::Initialize()
 
     frontend_->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
     frontend_->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
+    jsEngine->SetForceUpdate(true);
     EngineHelper::AddEngine(instanceId_, jsEngine);
     frontend_->SetJsEngine(jsEngine);
     frontend_->Initialize(FrontendType::JS_PLUGIN, taskExecutor_);
