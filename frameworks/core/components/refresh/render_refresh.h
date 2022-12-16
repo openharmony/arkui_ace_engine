@@ -116,6 +116,7 @@ private:
     void FirePullDownEvent(const std::string& state) const;
     void StartAnimation(double start, double end, bool isFinished);
     void HandleStopListener(const bool isFinished);
+    void ResetStatus();
     RefreshStatus GetNextStatus();
 
     double MaxScrollableHeight() const;
