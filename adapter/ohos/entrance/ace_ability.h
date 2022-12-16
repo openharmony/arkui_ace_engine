@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CPP_ACE_ABILITY_H
 #define FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CPP_ACE_ABILITY_H
 
-#include <future>
 #include <string>
 #include <vector>
 
@@ -114,9 +113,6 @@ private:
     std::string remotePageUrl_;
     std::string remoteData_;
     std::string pageUrl_;
-
-    std::promise<void> promise_;
-    std::future<void> future_ = promise_.get_future();
 };
 
 } // namespace OHOS::Ace
