@@ -357,6 +357,9 @@ void JSButton::SetTypeAndStateEffect(const JSRef<JSObject>& obj)
     if (type->IsNumber()) {
         auto buttonType = static_cast<ButtonType>(type->ToNumber<int32_t>());
         NG::ButtonView::SetType(buttonType);
+    } else {
+        // undefined use capsule type.
+        NG::ButtonView::SetType(ButtonType::CAPSULE);
     }
     auto stateEffect = obj->GetProperty("stateEffect");
     if (stateEffect->IsBoolean()) {
@@ -370,6 +373,9 @@ void JSButton::SetTypeAndStateEffect(const JSRef<JSObject>& obj, const RefPtr<Bu
     if (type->IsNumber()) {
         auto buttonType = (ButtonType)type->ToNumber<int32_t>();
         buttonComponent->SetType(buttonType);
+    } else {
+        // undefined use capsule type.
+        buttonComponent->SetType(ButtonType::CAPSULE);
     }
     auto stateEffect = obj->GetProperty("stateEffect");
     if (stateEffect->IsBoolean()) {
