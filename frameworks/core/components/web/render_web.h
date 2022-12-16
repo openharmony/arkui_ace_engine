@@ -20,6 +20,7 @@
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_component.h"
+#include "core/gestures/pan_recognizer.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 
@@ -118,7 +119,6 @@ public:
         return delegate_;
     }
 
-    void HandleAxisEvent(const AxisEvent& event) override;
     bool IsAxisScrollable(AxisDirection direction) override;
     WeakPtr<RenderNode> CheckAxisNode() override;
     
@@ -157,6 +157,8 @@ protected:
 private:
 #ifdef OHOS_STANDARD_SYSTEM
     void Initialize();
+    void InitPanEvent();
+    void HandleDragMove(const GestureEvent& event);
     bool ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos, const TouchType& touchType);
     void OnTouchTestHit(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& result) override;
@@ -181,6 +183,7 @@ private:
     void OnDragWindowDropEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info);
 
     RefPtr<RawRecognizer> touchRecognizer_ = nullptr;
+    RefPtr<PanRecognizer> panRecognizer_ = nullptr;
     OnMouseCallback onMouse_;
     OnKeyEventCallback onKeyEvent_;
     RefPtr<TextOverlayComponent> textOverlay_;
