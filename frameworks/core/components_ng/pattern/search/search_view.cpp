@@ -284,6 +284,7 @@ RefPtr<FrameNode> SearchView::CreateTextField(const RefPtr<SearchNode>& parentNo
     padding.left = CalcLength(0.0);
     padding.right = CalcLength(0.0);
     textFieldLayoutProperty->UpdatePadding(padding);
+    pattern->SetEnableTouchAndHoverEffect(false);
     return frameNode;
 };
 

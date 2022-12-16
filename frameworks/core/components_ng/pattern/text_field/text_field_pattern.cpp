@@ -800,9 +800,9 @@ void TextFieldPattern::HandleOnCopy()
         LOGW("Copy value is empty");
         return;
     }
-    if (copyOption_ != CopyOptions::None) {
+    if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None) {
         LOGI("Copy value is %{private}s", value.c_str());
-        clipboard_->SetData(value, copyOption_);
+        clipboard_->SetData(value, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
     }
 
     auto host = GetHost();
@@ -898,9 +898,9 @@ void TextFieldPattern::HandleOnCut()
     }
     auto value = GetEditingValue();
     auto selectedText = value.GetSelectedText(textSelector_.GetStart(), textSelector_.GetEnd());
-    if (copyOption_ != CopyOptions::None) {
+    if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None) {
         LOGI("Cut value is %{private}s", selectedText.c_str());
-        clipboard_->SetData(selectedText, copyOption_);
+        clipboard_->SetData(selectedText, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
     }
     textEditingValue_.text = textEditingValue_.GetValueBeforePosition(textSelector_.GetStart()) +
                              textEditingValue_.GetValueAfterPosition(textSelector_.GetEnd());
@@ -971,23 +971,27 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void TextFieldPattern::HandleTouchDown(const Offset& offset)
 {
-    auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_VOID(textfieldPaintProperty);
-    auto renderContext = GetHost()->GetRenderContext();
-    renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetPressBgColorValue(Color()));
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (enableTouchAndHoverEffect_) {
+        auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
+        CHECK_NULL_VOID(textfieldPaintProperty);
+        auto renderContext = GetHost()->GetRenderContext();
+        renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetPressBgColorValue(Color()));
+        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void TextFieldPattern::HandleTouchUp()
 {
-    auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_VOID(textfieldPaintProperty);
-    auto renderContext = GetHost()->GetRenderContext();
-    renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetBackgroundColorValue(Color()));
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     if (isMousePressed_) {
         LOGD("TextFieldPattern::HandleTouchUp of mouse");
         isMousePressed_ = false;
+    }
+    if (enableTouchAndHoverEffect_) {
+        auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
+        CHECK_NULL_VOID(textfieldPaintProperty);
+        auto renderContext = GetHost()->GetRenderContext();
+        renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetBackgroundColorValue(Color()));
+        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 
@@ -1448,16 +1452,18 @@ void TextFieldPattern::InitMouseEvent()
 
 void TextFieldPattern::OnHover(bool isHover)
 {
-    auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_VOID(textfieldPaintProperty);
-    auto renderContext = GetHost()->GetRenderContext();
-    if (isHover) {
-        renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetHoverBgColorValue(Color()));
+    if (enableTouchAndHoverEffect_) {
+        auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
+        CHECK_NULL_VOID(textfieldPaintProperty);
+        auto renderContext = GetHost()->GetRenderContext();
+        if (isHover) {
+            renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetHoverBgColorValue(Color()));
+            GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            return;
+        }
+        renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetBackgroundColorValue(Color()));
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        return;
     }
-    renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetBackgroundColorValue(Color()));
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::HandleMouseEvent(const MouseInfo& info)

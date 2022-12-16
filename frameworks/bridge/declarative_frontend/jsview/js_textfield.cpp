@@ -264,10 +264,13 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
     Font font;
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto fontSize = paramObject->GetProperty("size");
-    if (!fontSize->IsNull()) {
+    if (fontSize->IsNull() || fontSize->IsUndefined()) {
+        font.fontSize = Dimension(-1);
+    } else {
         Dimension size;
-        if (!ParseJsDimensionFp(fontSize, size)) {
-            LOGE("Parse to dimension FP failed.");
+        if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
+            font.fontSize = Dimension(-1);
+            LOGW("Parse to dimension FP failed.");
         } else {
             font.fontSize = size;
         }
