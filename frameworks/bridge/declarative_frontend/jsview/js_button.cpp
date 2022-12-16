@@ -167,8 +167,15 @@ RefPtr<TextComponent> JSButton::GetTextComponent()
     return textComponent;
 }
 
-void JSButton::SetType(int value)
+void JSButton::SetType(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
+    int32_t value = 1;
+    if (info[0]->IsNumber()) {
+        value = info[0]->ToNumber<int32_t>();
+    }
     if ((ButtonType)value == ButtonType::CAPSULE || (ButtonType)value == ButtonType::CIRCLE ||
         (ButtonType)value == ButtonType::ARC || (ButtonType)value == ButtonType::NORMAL) {
         if (Container::IsCurrentUseNewPipeline()) {
@@ -357,6 +364,9 @@ void JSButton::SetTypeAndStateEffect(const JSRef<JSObject>& obj)
     if (type->IsNumber()) {
         auto buttonType = static_cast<ButtonType>(type->ToNumber<int32_t>());
         NG::ButtonView::SetType(buttonType);
+    } else {
+        // undefined use capsule type.
+        NG::ButtonView::SetType(ButtonType::CAPSULE);
     }
     auto stateEffect = obj->GetProperty("stateEffect");
     if (stateEffect->IsBoolean()) {
@@ -370,6 +380,9 @@ void JSButton::SetTypeAndStateEffect(const JSRef<JSObject>& obj, const RefPtr<Bu
     if (type->IsNumber()) {
         auto buttonType = (ButtonType)type->ToNumber<int32_t>();
         buttonComponent->SetType(buttonType);
+    } else {
+        // undefined use capsule type.
+        buttonComponent->SetType(ButtonType::CAPSULE);
     }
     auto stateEffect = obj->GetProperty("stateEffect");
     if (stateEffect->IsBoolean()) {
