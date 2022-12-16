@@ -41,7 +41,7 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
     }
 
     // deep copy source Object and wrap it
-    this.wrappedValue_ = ObservedObject.createNew({ ...ObservedObject.GetRawObject(this.source_.get()) }, this);
+    this.setWrapperValue(this.source_.get());
     stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor ready with wrappedValue '${JSON.stringify(this.wrappedValue_)}'.`);
   }
 
@@ -65,7 +65,7 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
   public hasChanged(newValue: C): void {
     if (typeof newValue == "object") {
       stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: hasChanged:  newValue '${JSON.stringify(newValue)}'.`);
-      this.wrappedValue_ = ObservedObject.createNew({ ...ObservedObject.GetRawObject(newValue) }, this);
+      this.setWrapperValue(newValue);
       this.notifyHasChanged(ObservedObject.GetRawObject(this.wrappedValue_));
     }
   }
@@ -102,7 +102,7 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
          lacks @Observed class decorator. Object property changes will not be observed.`);
     }
 
-    this.wrappedValue_ = ObservedObject.createNew({ ...ObservedObject.GetRawObject(newValue) }, this);
+    this.setWrapperValue(newValue);
     this.notifyHasChanged(this.wrappedValue_);
   }
 
@@ -110,5 +110,14 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
     stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: reset from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(sourceChangedValue)}'.`);
     // if set causes an actual change, then, ObservedPropertyObject source_ will call hasChanged
     this.source_.set(sourceChangedValue);
+  }
+
+  private setWrapperValue(value: C): void {
+    let rawValue = ObservedObject.GetRawObject(value);
+    if (rawValue instanceof Array) {
+      this.wrappedValue_ = ObservedObject.createNew([ ...rawValue ], this);
+    } else {
+      this.wrappedValue_ = ObservedObject.createNew({ ...rawValue }, this);
+    }
   }
 }
