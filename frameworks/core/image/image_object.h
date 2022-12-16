@@ -104,10 +104,10 @@ public:
     virtual void Resume() {}
     virtual void ClearData() {}
 
-    // this will be called on ui thread when renderImage do perform layout for deferent image objects.
+    // this will be called on ui thread when renderImage do perform layout for different image objects.
     virtual void PerformLayoutImageObject(RefPtr<RenderImage> image) {}
 
-    // this will be called on ui thread when renderImage do measure for deferent image objects.
+    // this will be called on ui thread when renderImage do measure for different image objects.
     virtual Size MeasureForImage(RefPtr<RenderImage> image);
 
     virtual bool CancelBackgroundTasks()

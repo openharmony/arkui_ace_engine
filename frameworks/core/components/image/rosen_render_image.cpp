@@ -401,6 +401,10 @@ void RosenRenderImage::FetchImageObject()
             break;
         }
         default: {
+            // prevent painting old pixMap while new image is loading
+            if (curSourceInfo_.GetSrcType() == SrcType::PIXMAP) {
+                imageObj_ = nullptr;
+            }
             bool syncMode = (context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD &&
                                 sourceInfo_.GetSrcType() != SrcType::NETWORK) ||
                             syncMode_;
