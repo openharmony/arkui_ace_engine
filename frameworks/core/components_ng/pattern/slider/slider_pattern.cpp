@@ -360,7 +360,9 @@ bool SliderPattern::MoveStep(int32_t stepCount)
 
 void SliderPattern::FireChangeEvent(int32_t mode)
 {
-    CHECK_NULL_VOID(valueChangeFlag_);
+    if (mode != SliderChangeMode::End) {
+        CHECK_NULL_VOID(valueChangeFlag_);
+    }
     auto sliderEventHub = GetEventHub<SliderEventHub>();
     CHECK_NULL_VOID(sliderEventHub);
     sliderEventHub->FireChangeEvent(static_cast<float>(value_), mode);
