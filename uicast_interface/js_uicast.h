@@ -22,7 +22,7 @@ namespace OHOS::Ace::Framework {
 class JSUICast {
 public:
     static void JSBind(BindingTarget globalObj);
-    static void Sandbox(const std::string& value);
+    static void SandBox(const std::string& value);
 };
 } // namespace OHOS::Ace::Framework
 

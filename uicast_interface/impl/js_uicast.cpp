@@ -17,7 +17,7 @@
 #include "uicast_interface/uicast_impl.h"
 
 namespace OHOS::Ace::Framework {
-void JSUICast::Sandbox(const std::string& value)
+void JSUICast::SandBox(const std::string& value)
 {
     UICastImpl::Render(value);
 }
@@ -25,7 +25,7 @@ void JSUICast::Sandbox(const std::string& value)
 void JSUICast::JSBind(BindingTarget globalObj)
 {
     JSClass<JSUICast>::Declare("UICast");
-    JSClass<JSUICast>::StaticMethod("sandbox", &JSUICast::Sandbox);
+    JSClass<JSUICast>::StaticMethod("sandbox", &JSUICast::SandBox);
     JSClass<JSUICast>::Bind<>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

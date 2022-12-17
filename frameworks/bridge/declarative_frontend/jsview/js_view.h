@@ -121,7 +121,7 @@ public:
 #ifdef UICAST_COMPONENT_SUPPORTED
     void ExecuteCreateChildView(const std::string &childViewId)
     {
-        std::string jsonData = R"({"viewId":")" + childViewId + R"("})";
+        std::string jsonData = R"({"viewID":")" + childViewId + R"("})";
         LOGI("UICast para: %{public}s", jsonData.c_str());
         jsViewFunction_->ExecuteCreateChildView(jsonData);
     }

@@ -18,7 +18,7 @@ check_file_script = "//build/ohos/file_exists.py"
 check_uicast_file_args = [
   "--filename",
   rebase_path(
-      "../../../../vender/huawei/foundation/HMconnect/CastEngine/Tongtu/uicast/config.gni"),
+      "../../../../vendor/huawei/foundation/HMconnect/CastEngine/Tongtu/uicast/config.gni"),
 ]
 
 uicast_configs = {
@@ -28,7 +28,7 @@ if (exec_script(check_file_script, check_uicast_file_args, "string") ==
     "True") {
   uicast_configs = {
     import(
-        "../../../../vender/huawei/foundation/HMconnect/CastEngine/Tongtu/uicast/config.gni")
+        "../../../../vendor/huawei/foundation/HMconnect/CastEngine/Tongtu/uicast/config.gni")
 
     uicast_enable = true
   }
