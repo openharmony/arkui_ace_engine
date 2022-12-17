@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_ITEM_LAYOUT_PROPERTY_H
 
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/list/list_item_model.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -29,6 +30,8 @@ public:
     ~ListItemLayoutProperty() override = default;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EdgeEffect, V2::SwipeEdgeEffect, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

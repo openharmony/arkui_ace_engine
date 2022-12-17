@@ -32,6 +32,22 @@ ohos_unittest("list_pattern_test_ng") {
   ]
 }
 
+ohos_unittest("list_test_ng") {
+  module_out_path = "$test_output_path/list"
+
+  sources = [ "list_test_ng.cpp" ]
+
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+  ]
+
+  configs = [
+    ":config_list_test",
+    "$ace_root:ace_config",
+  ]
+}
+
 config("config_list_test") {
   visibility = [ ":*" ]
   include_dirs = [

@@ -75,8 +75,8 @@ std::optional<SizeF> BoxLayoutAlgorithm::MeasureContent(
     return contentSize.ConvertToSizeT();
 }
 
-// Called to perform measure current render node.
-void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
+void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
+    LayoutWrapper* layoutWrapper, const std::list<RefPtr<LayoutWrapper>>& childList)
 {
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
     const auto& minSize = layoutConstraint->minSize;
@@ -110,7 +110,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
             auto childFrame = SizeF(-1, -1);
             float maxWidth = 0.0f;
             float maxHeight = 0.0f;
-            for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+            for (const auto& child : childList) {
                 auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
                 if (maxWidth < childSize.Width()) {
                     maxWidth = childSize.Width();
@@ -134,6 +134,12 @@ void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
     } while (false);
 
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
+}
+
+// Called to perform measure current render node.
+void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
+{
+    PerformMeasureSelfWithChildList(layoutWrapper, layoutWrapper->GetAllChildrenWithBuild());
 }
 
 // Called to perform layout render node and child.
