@@ -23,7 +23,6 @@
 #include "core/components_ng/syntax/shallow_builder.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT GridItemPattern : public Pattern {
     DECLARE_ACE_TYPE(GridItemPattern, Pattern);
 
@@ -48,7 +47,6 @@ public:
             shallowBuilder_.Reset();
         }
     }
-
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
     {
         auto layoutProperty = dirty->GetLayoutProperty();

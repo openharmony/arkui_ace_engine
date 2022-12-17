@@ -103,6 +103,11 @@ public:
         return MakeRefPtr<GridEventHub>();
     }
 
+    bool UsResRegion() override
+    {
+        return false;
+    }
+
     GridLayoutInfo GetGridLayoutInfo() const
     {
         return gridLayoutInfo_;

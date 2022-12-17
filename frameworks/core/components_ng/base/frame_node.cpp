@@ -879,6 +879,9 @@ bool FrameNode::GetTouchable() const
 
 bool FrameNode::IsResponseRegion() const
 {
+    if (!pattern_->UsResRegion()) {
+        return false;
+    }
     auto gestureHub = eventHub_->GetGestureEventHub();
     return gestureHub ? gestureHub->IsResponseRegion() : false;
 }
@@ -908,6 +911,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
                 parentLocalPoint.ToString().c_str());
         }
     }
+
     if ((!InResponseRegionList(parentLocalPoint, responseRegionList) || !GetTouchable()) && !IsResponseRegion()) {
         LOGD("TouchTest: point is out of region in %{public}s", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
