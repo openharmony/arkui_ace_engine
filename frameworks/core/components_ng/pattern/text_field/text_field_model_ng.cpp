@@ -59,6 +59,11 @@ void TextFieldModelNG::CreateNode(
     CHECK_NULL_VOID(themeManager);
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
+    auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textfieldPaintProperty);
+    textfieldPaintProperty->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+    textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
+    textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
     auto renderContext = frameNode->GetRenderContext();
     renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
     auto radius = textFieldTheme->GetBorderRadius();

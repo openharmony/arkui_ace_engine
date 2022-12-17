@@ -21,6 +21,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/property.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT TextFieldLayoutProperty : public LayoutProperty {
@@ -98,6 +99,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOptions, CopyOptions, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreferredLineHeightNeedToUpdate, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LastValue, std::string, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowPasswordSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HidePasswordSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override

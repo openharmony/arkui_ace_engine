@@ -37,6 +37,7 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -47,13 +48,25 @@ CanvasDrawFunction TextFieldPaintMethod::GetContentDrawFunction(PaintWrapper* pa
     CHECK_NULL_RETURN(textFieldPattern, nullptr);
     CHECK_NULL_RETURN(textFieldPattern->GetParagraph(), nullptr);
     auto offset = paintWrapper->GetContentOffset();
+    auto passwordIconCanvasImage = textFieldPattern->GetTextObscured()
+                                       ? textFieldPattern->GetHidePasswordIconCanvasImage()
+                                       : textFieldPattern->GetShowPasswordIconCanvasImage();
     auto drawFunction = [paragraph = textFieldPattern->GetParagraph(), offset, textFieldPattern,
                             contentSize = paintWrapper->GetContentSize(),
-                            contentOffset = paintWrapper->GetContentOffset()](RSCanvas& canvas) {
-        RSRect clipInnerRect(offset.GetX(), contentOffset.GetY(), offset.GetX() + contentSize.Width(),
+                            contentOffset = paintWrapper->GetContentOffset(),
+                            passwordIconCanvasImage](RSCanvas& canvas) {
+        CHECK_NULL_VOID_NOLOG(textFieldPattern);
+        RSRect clipInnerRect(offset.GetX(), contentOffset.GetY(), textFieldPattern->GetFrameRect().Width(),
             contentOffset.GetY() + contentSize.Height());
         canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
-        paragraph->Paint(&canvas, textFieldPattern->GetTextRect().GetX(), offset.GetY());
+        if (paragraph) {
+            paragraph->Paint(&canvas, textFieldPattern->GetTextRect().GetX(), offset.GetY());
+        }
+        CHECK_NULL_VOID_NOLOG(passwordIconCanvasImage);
+        const ImagePainter passwordIconImagePainter(passwordIconCanvasImage);
+        auto iconRect = textFieldPattern->GetImageRect();
+        passwordIconImagePainter.DrawImage(
+            canvas, iconRect.GetOffset(), iconRect.GetSize(), textFieldPattern->GetPasswordIconPaintConfig());
     };
     return drawFunction;
 }

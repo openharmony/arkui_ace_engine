@@ -58,7 +58,8 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentHeight = contentSize.Height();
     }
     if (!frameSize.Height().has_value()) {
-        frameSize.SetHeight(std::min(GetTextFieldDefaultHeight(), contentHeight));
+        frameSize.SetHeight(
+            std::min(layoutConstraint->maxSize.Height(), contentHeight + pattern->GetVerticalPaddingSum()));
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
     frameRect_ =
@@ -89,14 +90,10 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         textContent = textFieldLayoutProperty->GetPlaceholderValue("");
         showPlaceHolder = true;
     }
-    CreateParagraph(textStyle, textContent);
+    auto isPasswordType =
+        textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
+    CreateParagraph(textStyle, textContent, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder);
 
-    float imageSize = 0.0f;
-    auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(false);
-    imageSize = showPasswordIcon ? GetTextFieldDefaultImageHeight() : 0.0f;
-    if (contentConstraint.selfIdealSize.Height()) {
-        imageSize = std::min(imageSize, contentConstraint.selfIdealSize.Height().value());
-    }
     auto horizontalPaddingSum = pattern->GetHorizontalPaddingSum();
     if (textStyle.GetMaxLines() == 1 && !showPlaceHolder) {
         // for text input case, need to measure in one line without constraint.
@@ -113,32 +110,36 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (textContent.empty()) {
         preferredHeight = pattern->PreferredLineHeight();
     }
-
+    auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(false);
     // check password image size.
-    if (!showPasswordIcon) {
+    if (!showPasswordIcon || !isPasswordType) {
         textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
         imageRect_.SetSize(SizeF());
         return SizeF(contentConstraint.maxSize.Width() - horizontalPaddingSum, preferredHeight);
     }
-
-    float imageHeight = 0.0f;
-    imageHeight = GetTextFieldDefaultImageHeight();
+    float imageSize = 0.0f;
+    imageSize = showPasswordIcon ? preferredHeight : 0.0f;
     if (contentConstraint.selfIdealSize.Height()) {
-        imageHeight = std::min(imageHeight, contentConstraint.selfIdealSize.Height().value());
+        imageSize = std::min(imageSize, contentConstraint.selfIdealSize.Height().value());
     }
-    if (textStyle.GetMaxLines() > 1) {
+
+    if (textStyle.GetMaxLines() > 1 || pattern->IsTextArea()) {
         // for textArea, need to delete imageWidth and remeasure.
-        paragraph_->Layout(contentConstraint.maxSize.Width() - imageHeight);
-        textRect_.SetSize(SizeF(contentConstraint.maxSize.Width(), contentConstraint.maxSize.Height()));
+        paragraph_->Layout(contentConstraint.maxSize.Width() - imageSize);
+        textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
         imageRect_.SetSize(SizeF(0.0f, 0.0f));
-        return SizeF(contentConstraint.maxSize.Width(), imageHeight);
+        return SizeF(contentConstraint.maxSize.Width(), imageSize);
+    }
+    imageRect_.SetSize(SizeF(imageSize, imageSize));
+    if (pattern->GetTextObscured() && pattern->GetHidePasswordIconCtx()) {
+        pattern->GetHidePasswordIconCtx()->MakeCanvasImage(imageRect_.GetSize(), true, ImageFit::NONE);
+    } else if (!pattern->GetTextObscured() && pattern->GetShowPasswordIconCtx()) {
+        pattern->GetShowPasswordIconCtx()->MakeCanvasImage(imageRect_.GetSize(), true, ImageFit::NONE);
     }
     preferredHeight = std::min(static_cast<float>(paragraph_->GetHeight()), contentConstraint.maxSize.Height());
-    textRect_.SetSize(SizeF(std::min(static_cast<float>(paragraph_->GetLongestLine()),
-                                contentConstraint.maxSize.Width() - horizontalPaddingSum - imageSize),
-        static_cast<float>(preferredHeight)));
-    imageRect_.SetSize(SizeF(imageSize, imageSize));
-    return SizeF(contentConstraint.maxSize.Width(), std::max(imageSize, preferredHeight));
+    textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), static_cast<float>(preferredHeight)));
+    return SizeF(contentConstraint.maxSize.Width() - horizontalPaddingSum - imageSize,
+        std::min(contentConstraint.maxSize.Height() - pattern->GetVerticalPaddingSum(), preferredHeight));
 }
 
 void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -157,7 +158,6 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto context = layoutWrapper->GetHostNode()->GetContext();
     CHECK_NULL_VOID(context);
-    parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
         case TextAlign::START:
             break;
@@ -183,7 +183,8 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     textRect_.SetOffset(OffsetF(textRectOffsetX, textOffset.GetY()));
     // update image rect.
     if (!imageRect_.IsEmpty()) {
-        auto imageOffset = Alignment::GetAlignPosition(contentSize, imageRect_.GetSize(), Alignment::CENTER_RIGHT);
+        auto imageOffset = Alignment::GetAlignPosition(size, imageRect_.GetSize(), Alignment::CENTER_RIGHT);
+        imageOffset.AddX(-pattern->GetPaddingRight());
         imageRect_.SetOffset(imageOffset);
     }
 }
@@ -244,7 +245,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(
     }
 }
 
-void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content)
+void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText)
 {
     RSParagraphStyle paraStyle;
     paraStyle.textDirection_ = ToRSTextDirection(GetTextDirection(content));
@@ -255,11 +256,14 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
         paraStyle.ellipsis_ = RSParagraphStyle::ELLIPSIS;
     }
-
     auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), textStyle));
     StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
-    builder->AddText(StringUtils::Str8ToStr16(content));
+    if (!content.empty() && needObscureText) {
+        builder->AddText(TextFieldPattern::CreateObscuredText(static_cast<int32_t>(content.length())));
+    } else {
+        builder->AddText(StringUtils::Str8ToStr16(content));
+    }
     builder->Pop();
 
     auto paragraph = builder->Build();
