@@ -101,7 +101,9 @@ void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<
     if (touchPoint.type != TouchType::DOWN) {
         return;
     }
-    const Point point { touchPoint.x, touchPoint.y, touchPoint.sourceType };
+    auto coordinateOffset = textOverlayManager->GetCoordinateOffset();
+    const Point point { touchPoint.x - coordinateOffset.GetX(), touchPoint.y - coordinateOffset.GetY(),
+        touchPoint.sourceType };
     CHECK_NULL_VOID_NOLOG(textOverlayManager);
     auto textOverlayBase = textOverlayManager->GetTextOverlayBase();
     CHECK_NULL_VOID_NOLOG(textOverlayBase);
