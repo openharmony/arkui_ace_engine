@@ -75,12 +75,11 @@ void GridScrollLayoutAlgorithm::AdaptToChildMainSize(LayoutWrapper* layoutWrappe
     }
 
     if (!mainAxisIdealSize.has_value()) {
-        auto frameSize = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
-        auto crossGap = GridUtils::GetCrossGap(gridLayoutProperty, frameSize, axis_);
         float lengthOfItemsInViewport = 0;
         for (auto i = gridLayoutInfo_.startMainLineIndex_; i <= gridLayoutInfo_.endMainLineIndex_; i++) {
-            lengthOfItemsInViewport += (gridLayoutInfo_.lineHeightMap_[i] + crossGap);
+            lengthOfItemsInViewport += (gridLayoutInfo_.lineHeightMap_[i] + mainGap_);
         }
+        lengthOfItemsInViewport -= mainGap_;
         auto gridMainSize = std::min(lengthOfItemsInViewport, mainSize);
         // should use minCount * cellLength ?
         if (axis_ == Axis::HORIZONTAL) {
@@ -215,6 +214,13 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
             if (LessNotEqual(lineHeight, 0.0)) {
                 gridLayoutInfo_.reachEnd_ = true;
                 break;
+            }
+            // remove line out of viewport
+            auto iter = gridLayoutInfo_.gridMatrix_.find(currentMainLineIndex_ - 1);
+            if (iter != gridLayoutInfo_.gridMatrix_.end()) {
+                for (auto& item : iter->second) {
+                    layoutWrapper->RemoveChildInRenderTree(item.second);
+                }
             }
         }
         gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_;
@@ -373,12 +379,13 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
     gridLayoutInfo_.reachEnd_ = gridLayoutInfo_.endIndex_ == layoutWrapper->GetTotalChildCount() - 1;
 }
 
-bool GridScrollLayoutAlgorithm::IsIndexInMatrix(int32_t index)
+bool GridScrollLayoutAlgorithm::IsIndexInMatrix(int32_t index, int32_t& startLine)
 {
     auto iter = std::find_if(gridLayoutInfo_.gridMatrix_.begin(), gridLayoutInfo_.gridMatrix_.end(),
-        [index](const std::pair<int32_t, std::map<int32_t, int32_t>>& item) {
+        [index, &startLine](const std::pair<int32_t, std::map<int32_t, int32_t>>& item) {
             for (auto& subitem : item.second) {
                 if (subitem.second == index) {
+                    startLine = item.first;
                     return true;
                 }
             }
@@ -442,7 +449,15 @@ void GridScrollLayoutAlgorithm::UpdateGridLayoutInfo(LayoutWrapper* layoutWrappe
     }
 
     /* 2.2 targetIndex is already in the matrix */
-    if (IsIndexInMatrix(targetIndex)) {
+    int32_t startLine = 0;
+    if (IsIndexInMatrix(targetIndex, startLine)) {
+        gridLayoutInfo_.startMainLineIndex_ = startLine;
+        gridLayoutInfo_.startIndex_ = targetIndex;
+        gridLayoutInfo_.prevOffset_ = 0;
+        gridLayoutInfo_.currentOffset_ = 0;
+        gridLayoutInfo_.reachEnd_ = false;
+        gridLayoutInfo_.offsetEnd_ = false;
+        gridLayoutInfo_.reachStart_ = false;
         return;
     }
 
