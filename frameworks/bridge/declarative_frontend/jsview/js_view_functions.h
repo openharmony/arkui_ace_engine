@@ -49,6 +49,7 @@ public:
     void ExecuteRender();
     void ExecuteRerender();
     void ExecuteReload(bool deep);
+    void ExecuteForceNodeRerender(int32_t elemId);
     void ExecuteAppear();
     void ExecuteDisappear();
     void ExecuteMeasure(NG::LayoutWrapper* layoutWrapper);
@@ -97,6 +98,7 @@ private:
     JSWeak<JSFunc> jsRenderFunc_;
     JSWeak<JSFunc> jsRerenderFunc_;
     JSWeak<JSFunc> jsReloadFunc_;
+    JSWeak<JSFunc> jsForceRerenderNodeFunc_;
     JSWeak<JSFunc> jsTransitionFunc_;
     JSWeak<JSVal> jsRenderResult_;
 

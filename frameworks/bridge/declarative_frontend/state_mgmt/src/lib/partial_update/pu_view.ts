@@ -225,6 +225,22 @@ abstract class ViewPU extends NativeViewPartialUpdate
     this.initialRender();
   }
 
+  private UpdateElement(elmtId: number): void {
+    // do not process an Element that has been marked to be deleted
+    const updateFunc: UpdateFunc = this.updateFuncByElmtId.get(elmtId);
+    if (updateFunc == undefined) {
+      stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
+    } else {
+      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: updateDirtyElements: update function on elmtId ${elmtId} start ...`);
+      updateFunc(elmtId, /* isFirstRender */ false);
+      // continue in native JSView
+      // Finish the Update in JSView::JsFinishUpdateFunc
+      // this function appends no longer used elmtIds (as recrded by VSP) to the given allRmElmtIds array
+      this.finishUpdateFunc(elmtId);
+      stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}: ViewPU.updateDirtyElements: update function on ElementId ${elmtId} done`);
+    }
+  }
+
   /**
    * force a complete rerender / update by executing all update functions
    * exec a regular rerender first
@@ -244,15 +260,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     // and clean up all book keeping for them
     this.purgeDeletedElmtIds(deletedElmtIds);
 
-    Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => {
-      const updateFunc: UpdateFunc = this.updateFuncByElmtId.get(elmtId);
-      if (updateFunc == undefined) {
-        stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
-      } else {
-        updateFunc(elmtId, /* isFirstRender */ false);
-        this.finishUpdateFunc(elmtId);
-      }
-    });
+    Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
 
     if (deep) {
       this.childrenWeakrefMap_.forEach((weakRefChild: WeakRef<ViewPU>) => {
@@ -263,6 +271,27 @@ abstract class ViewPU extends NativeViewPartialUpdate
       });
     }
     stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).forceCompleteRerender - end`);
+  }
+
+  /**
+   * force a complete rerender / update on specific node by executing update function.
+   * 
+   * @param elmtId which node needs to update.
+   * 
+   * framework internal functions, apps must not call
+   */
+  public forceRerenderNode(elmtId: number): void {
+    // request list of all (gloabbly) deleted elmtIds;
+    let deletedElmtIds: number[] = [];
+    this.getDeletedElemtIds(deletedElmtIds);
+
+    // see which elmtIds are managed by this View
+    // and clean up all book keeping for them
+    this.purgeDeletedElmtIds(deletedElmtIds);
+    this.UpdateElement(elmtId);
+
+    // remove elemtId from dirtDescendantElementIds.
+    this.dirtDescendantElementIds_.delete(elmtId);
   }
 
   public updateStateVarsOfChildByElmtId(elmtId, params: Object) : void {
@@ -395,21 +424,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     // process all elmtIds marked as needing update in ascending order.
     // ascending order ensures parent nodes will be updated before their children
     // prior cleanup ensure no already deleted Elements have their update func executed
-    Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
-      // do not process an Element that has been marked to be deleted
-      const updateFunc: UpdateFunc = this.updateFuncByElmtId.get(elmtId);
-      if (updateFunc == undefined) {
-        stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
-      } else {
-        stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: updateDirtyElements: update function on elmtId ${elmtId} start ...`);
-        updateFunc(elmtId, /* isFirstRender */ false);
-        // continue in native JSView
-        // Finish the Update in JSView::JsFinishUpdateFunc
-        // this function appends no longer used elmtIds (as recrded by VSP) to the given allRmElmtIds array
-        this.finishUpdateFunc(elmtId);
-        stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}: ViewPU.updateDirtyElements: update function on ElementId ${elmtId} done`);
-      }
-    });
+    Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
     this.dirtDescendantElementIds_.clear();
   }
 
