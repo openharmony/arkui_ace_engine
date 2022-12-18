@@ -220,14 +220,14 @@ inline BoxSizing ConvertStrToBoxSizing(const std::string& value)
 inline ImageRepeat ConvertStrToImageRepeat(const std::string& repeat)
 {
     static const LinearMapNode<ImageRepeat> imageRepeatTable[] = {
-        { "no-repeat", ImageRepeat::NOREPEAT },
+        { "no-repeat", ImageRepeat::NO_REPEAT },
         { "repeat", ImageRepeat::REPEAT },
-        { "repeat-x", ImageRepeat::REPEATX },
-        { "repeat-y", ImageRepeat::REPEATY },
+        { "repeat-x", ImageRepeat::REPEAT_X },
+        { "repeat-y", ImageRepeat::REPEAT_Y },
     };
 
     auto index = BinarySearchFindIndex(imageRepeatTable, ArraySize(imageRepeatTable), repeat.c_str());
-    return index < 0 ? ImageRepeat::NOREPEAT : imageRepeatTable[index].value;
+    return index < 0 ? ImageRepeat::NO_REPEAT : imageRepeatTable[index].value;
 }
 
 inline FontWeight ConvertStrToFontWeight(const std::string& weight)
@@ -424,11 +424,11 @@ inline TabBarMode ConvertStrToTabBarMode(const std::string& value)
     return temp == "fixed" ? TabBarMode::FIXED : TabBarMode::SCROLLABLE;
 }
 
-RefPtr<Curve> CreateBuiltinCurve(const std::string& aniTimFunc);
+ACE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateBuiltinCurve(const std::string& aniTimFunc);
 
-RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc);
+ACE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc);
 
-ACE_EXPORT RefPtr<Curve> CreateCurve(const std::string& aniTimFunc, bool useDefault = true);
+ACE_EXPORT_WITH_PREVIEW RefPtr<Curve> CreateCurve(const std::string& aniTimFunc, bool useDefault = true);
 
 ACE_EXPORT TransitionType ParseTransitionType(const std::string& transitionType);
 

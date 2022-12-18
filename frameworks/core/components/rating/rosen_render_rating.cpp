@@ -37,7 +37,9 @@ void RosenRenderRating::Paint(RenderContext& context, const Offset& offset)
     offsetDelta_ = offset + Offset(offsetDeltaX, offsetDeltaY);
     double imageVerticalOffset = ratingSize_.Width() * paddingVertical_.Value() / defaultHeight_.Value() / starNum_;
     Offset starOffset = GetStarOffset(imageVerticalOffset);
-    if (!isIndicator_ && operationEvent_ == OperationEvent::RATING_KEY_EVENT && !NearZero(imageVerticalOffset)) {
+    auto pipeline = context_.Upgrade();
+    if (!isIndicator_ && operationEvent_ == OperationEvent::RATING_KEY_EVENT && !NearZero(imageVerticalOffset) &&
+        pipeline && pipeline->GetIsTabKeyPressed()) {
         Offset animationOffset = starOffset + Offset(offsetDeltaX, offsetDeltaY);
         PaintFocus(animationOffset + offset, singleWidth_ / 2 - imageVerticalOffset,
             Size(singleWidth_ - imageVerticalOffset * 2, singleWidth_ - imageVerticalOffset * 2), context);
@@ -45,10 +47,11 @@ void RosenRenderRating::Paint(RenderContext& context, const Offset& offset)
         RequestFocusAnimation(animationOffset + GetGlobalOffset(), Size(focusRadius, focusRadius), focusRadius);
     }
 
-    if ((IsTablet() || IsPhone()) && !isIndicator_ && operationEvent_ == OperationEvent::RATING_KEY_EVENT) {
+    if ((IsTablet() || IsPhone()) && !isIndicator_ && operationEvent_ == OperationEvent::RATING_KEY_EVENT &&
+        pipeline && pipeline->GetIsTabKeyPressed()) {
         Offset animationOffset = starOffset + Offset(offsetDeltaX, offsetDeltaY);
-        PaintFocusForTABLET(animationOffset, focusBorderRadius_.Value(),
-            Size(singleWidth_, ratingSize_.Height()), context);
+        PaintFocusForTABLET(
+            animationOffset, focusBorderRadius_.Value(), Size(singleWidth_, ratingSize_.Height()), context);
         double focusRadius = singleWidth_;
         RequestFocusAnimation(animationOffset + GetGlobalOffset(), Size(focusRadius, focusRadius), focusRadius);
     }

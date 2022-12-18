@@ -32,7 +32,7 @@
 namespace OHOS::Ace::NG {
 
 using LoadPageCallback = std::function<bool(const std::string&)>;
-using LoadCardCallback = std::function<bool(const std::string&, uint64_t cardId)>;
+using LoadCardCallback = std::function<bool(const std::string&, int64_t cardId)>;
 
 enum class RouterMode {
     STANDARD = 0,
@@ -60,13 +60,14 @@ struct RouterTask {
 };
 
 class PageRouterManager : public AceType {
+    DECLARE_ACE_TYPE(PageRouterManager, AceType)
 public:
     PageRouterManager() = default;
     ~PageRouterManager() override = default;
 
     void RunPage(const std::string& url, const std::string& params);
 
-    void RunCard(const std::string& url, const std::string& params, uint64_t cardId);
+    void RunCard(const std::string& url, const std::string& params, int64_t cardId);
 
     void SetManifestParser(const RefPtr<Framework::ManifestParser>& manifestParser)
     {
@@ -85,12 +86,20 @@ public:
 
     void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback);
 
+    void ClearAlertCallback(const RefPtr<PageInfo>& pageInfo);
+
     void DisableAlertBeforeBackPage();
 
     // router operation
     void Push(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD);
+    void PushWithCallback(const RouterPageInfo& target, const std::string& params,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr,
+        RouterMode mode = RouterMode::STANDARD);
     bool Pop();
     void Replace(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD);
+    void ReplaceWithCallback(const RouterPageInfo& target, const std::string& params,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr,
+        RouterMode mode = RouterMode::STANDARD);
     void BackWithTarget(const RouterPageInfo& target, const std::string& params);
     void Clear();
     int32_t GetStackSize() const;
@@ -115,8 +124,7 @@ public:
 
     void SetIsCard()
     {
-        isCardRouter = true;
-        return;
+        isCardRouter_ = true;
     }
 
 private:
@@ -140,10 +148,12 @@ private:
 
     std::pair<int32_t, RefPtr<FrameNode>> FindPageInStack(const std::string& url);
 
-    void StartPush(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD);
+    void StartPush(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
     void StartBack(const RouterPageInfo& target, const std::string& params);
     bool StartPop();
-    void StartReplace(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD);
+    void StartReplace(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
     void BackCheckAlert(const RouterPageInfo& target, const std::string& params);
     void StartClean();
 
@@ -156,22 +166,24 @@ private:
     void PopPageToIndex(int32_t index, const std::string& params, bool needShowNext, bool needTransition);
 
     static bool OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition,
-        bool isCardRouter = false, uint64_t cardId = 0);
+        bool isCardRouter = false, int64_t cardId = 0);
     static bool OnPopPage(bool needShowNext, bool needTransition);
     static bool OnPopPageToIndex(int32_t index, bool needShowNext, bool needTransition);
     static bool OnCleanPageStack();
 
-    void LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params, uint64_t cardId,
+    void LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params, int64_t cardId,
         bool isRestore = false, bool needHideLast = true);
-        
+
     RefPtr<Framework::ManifestParser> manifestParser_;
 
     bool inRouterOpt_ = false;
     LoadPageCallback loadJs_;
     LoadCardCallback loadCard_;
-    bool isCardRouter = false;
+    bool isCardRouter_ = false;
     int32_t pageId_ = 0;
     std::list<WeakPtr<FrameNode>> pageRouterStack_;
+    RouterPageInfo ngBackUri_ = { "" };
+    std::string backParam_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PageRouterManager);
 };

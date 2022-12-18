@@ -18,8 +18,6 @@
 
 #ifdef USE_V8_ENGINE
 #include "frameworks/bridge/declarative_frontend/engine/v8/v8_ref.h"
-#elif USE_QUICKJS_ENGINE
-#include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_ref.h"
 #elif USE_ARK_ENGINE
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_ref.h"
 #endif
@@ -83,17 +81,7 @@ private:
     ImplDetail object_;
 };
 
-#ifdef USE_QUICKJS_ENGINE
-template<typename T>
-using JSRef = QJSRef<T>;
-template<typename T>
-using JSWeak = QJSWeak<T>;
-template<typename T>
-using JSRefPtr = JSRefPtrImpl<T, QJSRef<QJSObject>>;
-template<typename T>
-using JSWeakPtr = JSRefPtrImpl<T, QJSWeak<QJSObject>>;
-
-#elif USE_V8_ENGINE
+#ifdef USE_V8_ENGINE
 template<typename T>
 using JSRef = V8Ref<T>;
 template<typename T>

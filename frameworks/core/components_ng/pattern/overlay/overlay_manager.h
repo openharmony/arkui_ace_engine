@@ -30,22 +30,14 @@
 
 namespace OHOS::Ace::NG {
 
-struct ToastInfo {
-    int32_t toastId = -1;
-    RefPtr<FrameNode> toastNode;
-
-    bool operator==(const ToastInfo& value) const
-    {
-        return toastId == value.toastId && toastNode == value.toastNode;
-    }
-};
-
 struct PopupInfo {
     int32_t popupId = -1;
     WeakPtr<FrameNode> target;
     RefPtr<FrameNode> popupNode;
     bool markNeedUpdate = false;
     bool isCurrentOnShow = false;
+    SizeF targetSize;
+    OffsetF targetOffset;
 };
 
 // StageManager is the base class for root render node to perform page switch.
@@ -60,32 +52,67 @@ public:
         popupMap_.clear();
     }
 
-    void UpdatePopupNode(int32_t targetId, const PopupInfo& popup);
+    void UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo);
+    void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
+    void ErasePopup(int32_t targetId);
 
     const PopupInfo& GetPopupInfo(int32_t targetId)
     {
         return popupMap_[targetId];
     }
 
-    void ShowMenu(int32_t targetId, RefPtr<FrameNode> menu = nullptr);
+    void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void HideMenu(int32_t targetId);
+    void DeleteMenu(int32_t targetId);
+    void ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
+    void HideMenuInSubWindow(int32_t targetId);
+    void HideMenuInSubWindow();
+    void CleanMenuInSubWindow();
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
-    void PopToast(int32_t toastId);
 
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
         const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft);
+
     void ShowDateDialog(const DialogProperties& dialogProps, std::map<std::string, PickerDate> datePickerProperty,
-        bool isLunar, std::map<std::string, NG::DailogChangeEvent> dialogEvent);
-    void ShowTimeDialog(const DialogProperties& dialogProps, std::map<std::string, PickerTime> datePickerProperty,
-        bool isUseMilitaryTime, std::map<std::string, NG::DailogChangeEvent> dialogEvent);
+        bool isLunar, std::map<std::string, NG::DialogEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+    void ShowTimeDialog(const DialogProperties& dialogProps, std::map<std::string, PickerTime> timePickerProperty,
+        bool isUseMilitaryTime, std::map<std::string, NG::DialogEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     void ShowTextDialog(const DialogProperties& dialogProps, uint32_t selected, const Dimension& height,
-        const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DailogTextChangeEvent> dialogEvent);
-    void CloseDialog(RefPtr<FrameNode> dialogNode);
+        const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DialogTextEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+
+    void CloseDialog(const RefPtr<FrameNode>& dialogNode);
+
+    /**  pop overlays (if any) on back press
+     *
+     *   @return    true if popup was removed, false if no overlay exists
+     */
+    bool RemoveOverlay();
 
 private:
-    NG::ToastInfo toastInfo_;
+    void PopToast(int32_t targetId);
+
+    // toast should contain id to avoid multiple delete.
+    std::unordered_map<int32_t, WeakPtr<FrameNode>> toastMap_;
+
+    /**  find/register menu node and update menu's display position
+     *
+     *   @return     true if process is successful
+     */
+    bool ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset);
+
+    void FocusDialog(const RefPtr<FrameNode>& dialogNode);
+    void BlurDialog();
+
+    // helper functions to show/hide popups with animation
+    void Show(const RefPtr<FrameNode>& node);
+    void Pop(const RefPtr<FrameNode>& node);
+    void PopInSubwindow(const RefPtr<FrameNode>& node);
+
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     // K: target frameNode ID, V: menuNode

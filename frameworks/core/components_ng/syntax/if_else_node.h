@@ -40,9 +40,8 @@ public:
 
     void SetBranchId(int32_t value);
 
-    int32_t GetBranchId()
+    int32_t GetBranchId() const
     {
-        getProcessed_ = true;
         return branchId_;
     }
 
@@ -57,7 +56,6 @@ private:
     // set by CompareBranchId
     // unset by FlushUpdateAndMarkDirty
     bool branchIdChanged_ = false;
-    bool getProcessed_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(IfElseNode);
 };

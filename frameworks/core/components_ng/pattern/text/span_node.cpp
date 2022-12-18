@@ -15,14 +15,43 @@
 
 #include "core/components_ng/pattern/text/span_node.h"
 
+#include <optional>
+
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/property/property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+std::string GetDeclaration(const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration)
+{
+    auto jsonSpanDeclaration = JsonUtil::Create(true);
+    jsonSpanDeclaration->Put(
+        "type", V2::ConvertWrapTextDecorationToStirng(textDecoration.value_or(TextDecoration::NONE)).c_str());
+    jsonSpanDeclaration->Put("color", (color.value_or(Color::BLACK).ColorToString()).c_str());
+    return jsonSpanDeclaration->ToString();
+}
+} // namespace
+
+void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("content", content.c_str());
+    if (fontStyle) {
+        json->Put("fontSize", fontStyle->GetFontSize().value_or(Dimension()).ToString().c_str());
+        json->Put(
+            "decoration", GetDeclaration(fontStyle->GetTextDecorationColor(), fontStyle->GetTextDecoration()).c_str());
+        json->Put("letterSpacing", fontStyle->GetLetterSpacing().value_or(Dimension()).ToString().c_str());
+        json->Put(
+            "textCase", V2::ConvertWrapTextCaseToStirng(fontStyle->GetTextCase().value_or(TextCase::NORMAL)).c_str());
+    }
+}
+
 RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(int32_t nodeId)
 {
     auto spanNode = ElementRegister::GetInstance()->GetSpecificItemById<SpanNode>(nodeId);
@@ -56,14 +85,32 @@ void SpanNode::MountToParagraph()
     LOGE("fail to find Text or Parent Span");
 }
 
-void SpanItem::UpdateParagraph(RSParagraphBuilder* builder)
+void SpanNode::RequestTextFlushDirty()
+{
+    auto parent = GetParent();
+    while (parent) {
+        auto textNode = DynamicCast<FrameNode>(parent);
+        if (textNode) {
+            textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            auto textPattern = textNode->GetPattern<TextPattern>();
+            if (textPattern) {
+                textPattern->OnModifyDone();
+                return;
+            }
+        }
+        parent = parent->GetParent();
+    }
+    LOGE("fail to find Text or Parent Span");
+}
+
+void SpanItem::UpdateParagraph(const RefPtr<Paragraph>& builder)
 {
     CHECK_NULL_VOID(builder);
     if (fontStyle) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         TextStyle textStyle = CreateTextStyleUsingTheme(fontStyle, nullptr, pipelineContext->GetTheme<TextTheme>());
-        builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), textStyle));
+        builder->PushStyle(textStyle);
     }
     auto displayText = content;
     auto textCase = fontStyle ? fontStyle->GetTextCase().value_or(TextCase::NORMAL) : TextCase::NORMAL;
@@ -75,7 +122,7 @@ void SpanItem::UpdateParagraph(RSParagraphBuilder* builder)
         }
     }
     if (fontStyle) {
-        builder->Pop();
+        builder->PopStyle();
     }
 }
 } // namespace OHOS::Ace::NG

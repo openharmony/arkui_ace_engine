@@ -17,11 +17,11 @@
 
 #include <cmath>
 
-#include "commonlibrary/c_utils/base/include/securec.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 #include "flutter/third_party/txt/src/txt/paragraph_style.h"
 #include "render_service_client/core/ui/rs_node.h"
+#include "third_party/bounds_checking_function/include/securec.h"
 #include "third_party/skia/include/core/SkBlendMode.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
@@ -38,11 +38,14 @@
 #include "third_party/skia/include/utils/SkParsePath.h"
 
 #include "base/i18n/localization.h"
+#include "base/image/pixel_map.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/linear_map.h"
+#include "base/utils/measure_util.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
 #include "core/components/calendar/rosen_render_calendar.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
@@ -262,6 +265,10 @@ void RosenRenderCustomPaint::Paint(RenderContext& context, const Offset& offset)
             CreateBitmap(viewScale);
         }
         lastLayoutSize_ = GetLayoutSize();
+    }
+    if (!skCanvas_) {
+        LOGE("skCanvas_ is null");
+        return;
     }
     skCanvas_->scale(viewScale, viewScale);
     TriggerOnReadyEvent();
@@ -491,10 +498,10 @@ void RosenRenderCustomPaint::ClearRect(const Offset& offset, const Rect& rect)
 
 void RosenRenderCustomPaint::FillText(const Offset& offset, const std::string& text, double x, double y)
 {
-    if (!UpdateParagraph(offset, text, false)) {
+    if (!UpdateParagraph(offset, text, false, HasShadow())) {
         return;
     }
-    PaintText(offset, x, y, false);
+    PaintText(offset, x, y, false, HasShadow());
 }
 
 void RosenRenderCustomPaint::StrokeText(const Offset& offset, const std::string& text, double x, double y)
@@ -503,13 +510,43 @@ void RosenRenderCustomPaint::StrokeText(const Offset& offset, const std::string&
         if (!UpdateParagraph(offset, text, true, true)) {
             return;
         }
-        PaintText(offset, x, y, true);
+        PaintText(offset, x, y, true, true);
     }
 
     if (!UpdateParagraph(offset, text, true)) {
         return;
     }
     PaintText(offset, x, y, true);
+}
+
+double RosenRenderCustomPaint::MeasureTextInner(const MeasureContext& context)
+{
+    using namespace Constants;
+    txt::ParagraphStyle style;
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+    if (!fontCollection) {
+        LOGW("fontCollection is null");
+        return 0.0;
+    }
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
+    std::vector<std::string> fontFamilies;
+    txtStyle.font_size = context.fontSize;
+    FontStyle fontStyleInt = OHOS::Ace::Framework::ConvertStrToFontStyle(std::to_string(context.fontStyle));
+    txtStyle.font_style = ConvertTxtFontStyle(fontStyleInt);
+    FontWeight fontWeightStr = StringUtils::StringToFontWeight(context.fontWeight);
+    txtStyle.font_weight = ConvertTxtFontWeight(fontWeightStr);
+    StringUtils::StringSplitter(context.fontFamily, ',', fontFamilies);
+    txtStyle.font_families = fontFamilies;
+    txtStyle.letter_spacing = context.letterSpacing;
+    builder->PushStyle(txtStyle);
+    builder->AddText(StringUtils::Str8ToStr16(context.textContent));
+    auto paragraph = builder->Build();
+    if (!paragraph) {
+        return 0.0;
+    }
+    paragraph->Layout(Size::INFINITE_SIZE);
+    return paragraph->GetMaxIntrinsicWidth();
 }
 
 double RosenRenderCustomPaint::MeasureText(const std::string& text, const PaintState& state)
@@ -712,6 +749,11 @@ void RosenRenderCustomPaint::Arc(const Offset& offset, const ArcParam& param)
         double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
         skPath_.arcTo(rect, SkDoubleToScalar(startAngle), SkDoubleToScalar(half), false);
         skPath_.arcTo(rect, SkDoubleToScalar(half + startAngle), SkDoubleToScalar(half), false);
+    } else if (!NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && abs(sweepAngle) > FULL_CIRCLE_ANGLE) {
+        double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
+        skPath_.arcTo(rect, SkDoubleToScalar(startAngle), SkDoubleToScalar(half), false);
+        skPath_.arcTo(rect, SkDoubleToScalar(half + startAngle), SkDoubleToScalar(half), false);
+        skPath_.arcTo(rect, SkDoubleToScalar(half + half + startAngle), SkDoubleToScalar(sweepAngle), false);
     } else {
         skPath_.arcTo(rect, SkDoubleToScalar(startAngle), SkDoubleToScalar(sweepAngle), false);
     }
@@ -982,6 +1024,10 @@ void RosenRenderCustomPaint::Path2DArc(const Offset& offset, const PathArgs& arg
     if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && !NearEqual(startAngle, endAngle)) {
         skPath2d_.arcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
         skPath2d_.arcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
+    } else if (!NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && abs(sweepAngle) > FULL_CIRCLE_ANGLE) {
+        skPath2d_.arcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
+        skPath2d_.arcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
+        skPath2d_.arcTo(rect, startAngle + HALF_CIRCLE_ANGLE + HALF_CIRCLE_ANGLE, sweepAngle, false);
     } else {
         skPath2d_.arcTo(rect, startAngle, sweepAngle, false);
     }
@@ -1157,6 +1203,11 @@ void RosenRenderCustomPaint::BeginPath()
     skPath_.reset();
 }
 
+void RosenRenderCustomPaint::ResetTransform()
+{
+    skCanvas_->resetMatrix();
+}
+
 void RosenRenderCustomPaint::ClosePath()
 {
     skPath_.close();
@@ -1290,7 +1341,9 @@ void RosenRenderCustomPaint::UpdatePaintShader(const Offset& offset, SkPaint& pa
     SkPoint endPoint = SkPoint::Make(SkDoubleToScalar(gradient.GetEndOffset().GetX() + offset.GetX()),
         SkDoubleToScalar(gradient.GetEndOffset().GetY() + offset.GetY()));
     SkPoint pts[2] = { beginPoint, endPoint };
-    auto gradientColors = gradient.GetColors();
+    std::vector<GradientColor> gradientColors = gradient.GetColors();
+    std::stable_sort(gradientColors.begin(), gradientColors.end(),
+        [](auto& colorA, auto& colorB) { return colorA.GetDimension() < colorB.GetDimension(); });
     uint32_t colorsSize = gradientColors.size();
     SkColor colors[gradientColors.size()];
     float pos[gradientColors.size()];
@@ -1531,13 +1584,13 @@ void RosenRenderCustomPaint::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Canva
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> image;
     if (!renderTaskHolder_->ioManager) {
-        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     } else {
 #ifndef GPU_DISABLED
         image = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
             imagePixmap, true, imagePixmap.colorSpace(), true);
 #else
-        image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
 #endif
     }
     if (!image) {

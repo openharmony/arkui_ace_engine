@@ -44,7 +44,6 @@ namespace {
 
 constexpr char16_t NEWLINE_CODE = u'\n';
 // pixel for how far the caret to the top of paint rect. Sometimes may leave some space for the floor.
-constexpr Dimension INLINE_STYLE_CORNER_RADIUS = 4.0_vp;
 constexpr Color INLINE_STYLE_SELECTED_COLOR = Color(0x1A0A59F7);
 constexpr double CARET_HEIGHT_OFFSET = 2.0;
 constexpr Dimension CURSOR_WIDTH = 1.5_vp;
@@ -313,9 +312,7 @@ void FlutterRenderTextField::DrawSelection(unsigned start, unsigned end, SkCanva
             rect = SkRect::MakeLTRB(selectionRect.Left(), selectionRect.Top(), selectionRect.Right(),
                 selectionRect.Bottom());
         }
-        SkRRect rRect = SkRRect::MakeRectXY(rect, NormalizeToPx(INLINE_STYLE_CORNER_RADIUS),
-            NormalizeToPx(INLINE_STYLE_CORNER_RADIUS));
-        canvas->drawRRect(rRect, paint);
+        canvas->drawRect(rect, paint);
     }
     canvas->restore();
 }
@@ -660,7 +657,7 @@ double FlutterRenderTextField::MeasureParagraph(
         placeholderBuilder->PushStyle(*txtStyle);
         placeholderBuilder->AddText(StringUtils::Str8ToStr16(placeholder_));
         placeholderParagraph_ = placeholderBuilder->Build();
-        placeholderParagraph_->Layout(textAreaWidth - errorTextWidth);
+        placeholderParagraph_->Layout(limitWidth - errorTextWidth);
         if (textDirection_ == TextDirection::RTL &&
             LessOrEqual(placeholderParagraph_->GetLongestLine(), innerRect_.Width())) {
             placeholderParagraph_->Layout(limitWidth);
@@ -1090,10 +1087,6 @@ bool FlutterRenderTextField::ComputeOffsetForCaretCloserToClick(int32_t extent, 
 
 Offset FlutterRenderTextField::MakeEmptyOffset() const
 {
-    if (realTextDirection_ == TextDirection::RTL) {
-        return Offset(innerRect_.Width(), 0.0);
-    }
-
     switch (textAlign_) {
         case TextAlign::LEFT: {
             return Offset::Zero();
@@ -1106,7 +1099,7 @@ Offset FlutterRenderTextField::MakeEmptyOffset() const
             return Offset(innerRect_.Width() / 2.0, 0.0);
         }
         case TextAlign::END: {
-            switch (textDirection_) {
+            switch (realTextDirection_) {
                 case TextDirection::RTL: {
                     return Offset::Zero();
                 }
@@ -1119,7 +1112,7 @@ Offset FlutterRenderTextField::MakeEmptyOffset() const
         case TextAlign::START:
         default: {
             // Default to start.
-            switch (textDirection_) {
+            switch (realTextDirection_) {
                 case TextDirection::RTL: {
                     return Offset(innerRect_.Width(), 0.0);
                 }

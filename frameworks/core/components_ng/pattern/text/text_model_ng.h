@@ -45,11 +45,11 @@ public:
     void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) override;
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;
-    void SetOnDragStartId(const OnDragFunc& onDragStartId) override;
-    void SetOnDragEnterId(const OnDropFunc& onDragEnterId) override;
-    void SetOnDragMoveId(const OnDropFunc& onDragMoveId) override;
-    void SetOnDragLeaveId(const OnDropFunc& onDragLeaveId) override;
-    void SetOnDropId(const OnDropFunc& onDropId) override;
+    void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
+    void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
+    void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
+    void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
+    void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
 };
 } // namespace OHOS::Ace::NG
 

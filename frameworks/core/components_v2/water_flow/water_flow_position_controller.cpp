@@ -25,25 +25,7 @@ void WaterFlowPositionController::JumpTo(int32_t index, int32_t source)
     if (!waterFlow) {
         return;
     }
-    return;
-}
-
-bool WaterFlowPositionController::AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve)
-{
-    auto waterFlow = AceType::DynamicCast<V2::RenderWaterFlow>(scroll_.Upgrade());
-    if (!waterFlow) {
-        return false;
-    }
-    return waterFlow->AnimateTo(position, duration, curve);
-}
-
-Offset WaterFlowPositionController::GetCurrentOffset() const
-{
-    auto waterFlow = AceType::DynamicCast<V2::RenderWaterFlow>(scroll_.Upgrade());
-    if (!waterFlow) {
-        return Offset::Zero();
-    }
-    return waterFlow->CurrentOffset();
+    waterFlow->ScrollToIndex(index, source);
 }
 
 Axis WaterFlowPositionController::GetScrollDirection() const
@@ -55,12 +37,4 @@ Axis WaterFlowPositionController::GetScrollDirection() const
     return waterFlow->GetAxis();
 }
 
-void WaterFlowPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
-{
-    auto waterFlow = AceType::DynamicCast<V2::RenderWaterFlow>(scroll_.Upgrade());
-    if (!waterFlow) {
-        return;
-    }
-    waterFlow->ScrollToEdge(scrollEdgeType, smooth);
-}
 } // namespace OHOS::Ace::V2

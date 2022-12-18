@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_QUATERNION_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_QUATERNION_H
 
+#include "base/utils/utils.h"
+
 namespace OHOS::Ace {
 
 class Quaternion {
@@ -73,6 +75,17 @@ public:
         auto z = w_ * q.z_ + x_ * q.y_ - y_ * q.x_ + z_ * q.w_;
         auto w = w_ * q.w_ - x_ * q.x_ - y_ * q.y_ - z_ * q.z_;
         return Quaternion(x, y, z, w);
+    }
+
+    bool operator==(const Quaternion& q) const
+    {
+        return NearEqual(x_, q.x_) && NearEqual(y_, q.y_)
+            && NearEqual(z_, q.z_) && NearEqual(w_, q.w_);
+    }
+
+    bool operator!=(const Quaternion& q) const
+    {
+        return !operator==(q);
     }
 
     Quaternion inverse() const

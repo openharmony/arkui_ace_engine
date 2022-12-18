@@ -35,8 +35,6 @@ public:
     NavBarPattern() = default;
     ~NavBarPattern() override = default;
 
-    void OnAttachToFrameNode() override;
-
     bool IsAtomicNode() const override
     {
         return false;
@@ -52,12 +50,7 @@ public:
         return MakeRefPtr<NavBarLayoutAlgorithm>();
     }
 
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
-
     void OnModifyDone() override;
-
-private:
-    float lastScrollDistance_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

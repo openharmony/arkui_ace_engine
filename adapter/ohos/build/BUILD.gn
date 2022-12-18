@@ -28,23 +28,13 @@ group("ace_packages") {
   ]
 
   # Engine and debugger
-  deps += [
-    "$ace_root/build:libace_engine_ark",
-    "$ace_root/build:libace_engine_qjs",
-    "$ace_root/build:libace_engine_qjs_debug",
-  ]
+  deps += [ "$ace_root/build:libace_engine_ark" ]
 
   # Declarative engine
-  deps += [
-    "$ace_root/build:libace_engine_declarative",
-    "$ace_root/build:libace_engine_declarative_ark",
-  ]
+  deps += [ "$ace_root/build:libace_engine_declarative_ark" ]
 
   # Pa engine
-  deps += [
-    "$ace_root/build:libace_engine_pa_ark",
-    "$ace_root/build:libace_engine_pa_qjs",
-  ]
+  deps += [ "$ace_root/build:libace_engine_pa_ark" ]
 
   # pid register
   deps += [ "$ace_root/frameworks/core/common/register:hdc_register" ]

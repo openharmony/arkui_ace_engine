@@ -15,10 +15,12 @@
 
 #include "base/resource/data_provider_manager.h"
 
+#include <shared_mutex>
 #include <sys/stat.h>
 #include <unistd.h>
 
 #include "base/log/log.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 
@@ -34,6 +36,7 @@ std::unique_ptr<DataProviderRes> DataProviderManager::GetDataProviderResFromUri(
 void* DataProviderManagerStandard::GetDataProviderThumbnailResFromUri(const std::string& uriStr)
 {
     InitHelper();
+    std::shared_lock lock(helperMutex_);
     if (!helper_) {
         LOGE("data ability helper is null when try query thumbnail resource, uri: %{private}s", uriStr.c_str());
         return nullptr;
@@ -45,6 +48,7 @@ std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderRes
 {
     LOGD("DataProviderManagerStandard::GetDataProviderResFromUri start uri: %{private}s", uriStr.c_str());
     InitHelper();
+    std::shared_lock lock(helperMutex_);
     if (!helper_) {
         LOGE("data ability helper is null");
         return nullptr;
@@ -80,9 +84,19 @@ std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderRes
 
 void DataProviderManagerStandard::InitHelper()
 {
+    // creating helper_, need exclusive access
+    std::unique_lock lock(helperMutex_);
     if (!helper_ && dataAbilityHelperImpl_) {
         helper_ = dataAbilityHelperImpl_();
     }
+}
+
+int32_t DataProviderManagerStandard::GetDataProviderFile(const std::string& uriStr, const std::string& mode)
+{
+    InitHelper();
+    std::shared_lock lock(helperMutex_);
+    CHECK_NULL_RETURN(helper_, -1);
+    return helper_->OpenFile(uriStr, mode);
 }
 
 } // namespace OHOS::Ace

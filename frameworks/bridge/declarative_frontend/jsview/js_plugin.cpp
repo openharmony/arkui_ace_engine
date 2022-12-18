@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/plugin/plugin_pattern.h"
 #include "core/components_ng/pattern/plugin/plugin_view.h"

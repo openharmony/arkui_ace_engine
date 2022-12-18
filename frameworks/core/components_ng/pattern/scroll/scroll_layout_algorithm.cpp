@@ -57,10 +57,7 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // Measure child.
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    if (!childWrapper) {
-        LOGI("There is no child.");
-        return;
-    }
+    CHECK_NULL_VOID(childWrapper);
     childWrapper->Measure(childLayoutConstraint);
 
     // Use child size when self idea size of scroll is not setted.
@@ -71,6 +68,7 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!idealSize.Height()) {
         idealSize.SetHeight(childSize.Height());
     }
+
     auto selfSize = idealSize.ConvertToSizeT();
     selfSize.Constrain(constraint->minSize, constraint->maxSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(selfSize);
@@ -88,16 +86,22 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(childWrapper);
     auto childGeometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_VOID(childGeometryNode);
-
     auto size = geometryNode->GetFrameSize();
+
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto childSize = childGeometryNode->GetMarginFrameSize();
     scrollableDistance_ = GetMainAxisSize(childSize, axis) - GetMainAxisSize(size, axis);
     auto scrollEffect = layoutProperty->GetScrollEdgeEffect();
     if (scrollEffect && scrollEffect->IsRestrictBoundary()) {
-        currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
+        if (scrollableDistance_ > 0.0f) {
+            currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
+        } else {
+            currentOffset_ = std::clamp(currentOffset_, 0.0f, -scrollableDistance_);
+        }
     }
+    viewPort_ = size;
+    viewPortExtent_ = childSize;
     viewPortLength_ = GetMainAxisSize(size, axis);
     auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, 0.0f);
     childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset);

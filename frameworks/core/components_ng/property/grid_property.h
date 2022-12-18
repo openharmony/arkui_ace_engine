@@ -20,6 +20,7 @@
 
 #include "property.h"
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/grid_column_info.h"
@@ -42,7 +43,7 @@ struct GridTypedProperty {
     }
 
     GridSizeType type_ = GridSizeType::UNDEFINED;
-    uint32_t span_ = DEFAULT_GRID_SPAN;
+    int32_t span_ = DEFAULT_GRID_SPAN;
     int32_t offset_ = DEFAULT_GRID_OFFSET;
 };
 
@@ -79,7 +80,7 @@ public:
 
     bool UpdateContainer(const RefPtr<Property>& container, const RefPtr<AceType>& host);
 
-    bool UpdateSpan(uint32_t span, GridSizeType type = GridSizeType::UNDEFINED);
+    bool UpdateSpan(int32_t span, GridSizeType type = GridSizeType::UNDEFINED);
 
     bool UpdateOffset(int32_t offset, GridSizeType type = GridSizeType::UNDEFINED);
 
@@ -93,8 +94,17 @@ public:
         return std::nullopt;
     }
 
+    bool HasContainer()
+    {
+        return container_;
+    }
+
+    OffsetF GetContainerPosition();
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
 private:
-    bool SetSpan(GridSizeType type, uint32_t span);
+    bool SetSpan(GridSizeType type, int32_t span);
 
     bool SetOffset(GridSizeType type, int32_t offset);
 

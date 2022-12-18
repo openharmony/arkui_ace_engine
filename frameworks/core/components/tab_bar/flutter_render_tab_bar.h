@@ -27,6 +27,7 @@ class FlutterRenderTabBar : public RenderTabBar {
 public:
     RenderLayer GetRenderLayer() override;
     void Paint(RenderContext& context, const Offset& offset) override;
+    RefPtr<RenderNode> FindTabsNode();
 
 private:
     RefPtr<Flutter::ClipLayer> layer_;

@@ -22,6 +22,7 @@
 #include "third_party/skia/include/core/SkShader.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
 
+#include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
 
 #include "core/common/frontend.h"
@@ -401,7 +402,7 @@ void FlutterRenderImage::ProcessPixmapForPaint()
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> skImage;
     if (!renderTaskHolder_->ioManager) {
-        skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        skImage = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixmap));
     } else {
 #ifndef GPU_DISABLED
         skImage = SkImage::MakeCrossContextFromPixmap(
@@ -576,7 +577,7 @@ void FlutterRenderImage::ApplyBorderRadius(
     // 1. when the image source is a SVG;
     // 2. when image loads fail;
     // 3. when there is a repeat to do;
-    bool clipLayoutSize = sourceInfo_.IsSvg() || (imageRepeat_ != ImageRepeat::NOREPEAT) ||
+    bool clipLayoutSize = sourceInfo_.IsSvg() || (imageRepeat_ != ImageRepeat::NO_REPEAT) ||
         (imageLoadingStatus_ == ImageLoadingStatus::LOAD_FAIL);
     Rect clipRect = clipLayoutSize ? Rect(offset, GetLayoutSize()) : paintRect + offset;
 
@@ -668,7 +669,7 @@ void FlutterRenderImage::CanvasDrawImageRect(
     }
     if (!image_ || !image_->image()) {
         imageDataNotReady_ = true;
-        LOGI("image data is not ready, rawImageSize_: %{public}s, image source: %{private}s",
+        LOGI("waiting for image data, rawImageSize_: %{public}s, image source: %{private}s",
             rawImageSize_.ToString().c_str(), sourceInfo_.ToString().c_str());
         return;
     }
@@ -693,7 +694,7 @@ void FlutterRenderImage::CanvasDrawImageRect(
         }
         return;
     }
-    if (imageRepeat_ != ImageRepeat::NOREPEAT) {
+    if (imageRepeat_ != ImageRepeat::NO_REPEAT) {
         DrawImageOnCanvas(scaledSrcRect, realDstRect, canvas, paint, imageRenderPosition_);
         return;
     }
@@ -767,10 +768,10 @@ void FlutterRenderImage::DrawImageOnCanvas(
             xTileMode = SkTileMode::kRepeat;
             yTileMode = SkTileMode::kRepeat;
             break;
-        case ImageRepeat::REPEATX:
+        case ImageRepeat::REPEAT_X:
             xTileMode = SkTileMode::kRepeat;
             break;
-        case ImageRepeat::REPEATY:
+        case ImageRepeat::REPEAT_Y:
             yTileMode = SkTileMode::kRepeat;
             break;
         default:
@@ -973,11 +974,11 @@ void FlutterRenderImage::OnHiddenChanged(bool hidden)
             CancelBackgroundTasks();
         }
     } else {
-        if (imageObj_ && imageObj_->GetFrameCount() > 1) {
+        if (imageObj_ && imageObj_->GetFrameCount() > 1 && GetVisible()) {
             LOGI("Animated image Resume");
             imageObj_->Resume();
-        } else if (backgroundTaskCancled_) {
-            backgroundTaskCancled_ = false;
+        } else if (backgroundTaskCanceled_) {
+            backgroundTaskCanceled_ = false;
             if (sourceInfo_.GetSrcType() == SrcType::MEMORY) {
                 LOGE("memory image: %{public}s should not be notified to resume loading.",
                     sourceInfo_.ToString().c_str());
@@ -991,10 +992,10 @@ void FlutterRenderImage::OnHiddenChanged(bool hidden)
 void FlutterRenderImage::CancelBackgroundTasks()
 {
     if (fetchImageObjTask_) {
-        backgroundTaskCancled_ = fetchImageObjTask_.Cancel(false);
+        backgroundTaskCanceled_ = fetchImageObjTask_.Cancel(false);
     }
     if (imageObj_) {
-        backgroundTaskCancled_ = imageObj_->CancelBackgroundTasks();
+        backgroundTaskCanceled_ = imageObj_->CancelBackgroundTasks();
     }
 }
 
@@ -1041,29 +1042,35 @@ void FlutterRenderImage::DrawSVGImage(const Offset& offset, ScopedCanvas& canvas
     if (!skiaDom_) {
         return;
     }
-    Size svgContainerSize = GetLayoutSize();
-    if (svgContainerSize.IsInfinite() || !svgContainerSize.IsValid()) {
-        // when layout size is invalid, try the container size of svg
-        svgContainerSize = Size(skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-        if (svgContainerSize.IsInfinite() || !svgContainerSize.IsValid()) {
+    Size layoutSize = GetLayoutSize();
+    Size imageSize(skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
+    if (layoutSize.IsInfinite() || !layoutSize.IsValid()) {
+        if (imageSize.IsInfinite() || !imageSize.IsValid()) {
             LOGE("Invalid layout size: %{private}s, invalid svgContainerSize: %{private}s, stop draw svg. The max size"
-                 " of layout param is %{private}s", GetLayoutSize().ToString().c_str(),
-                 svgContainerSize.ToString().c_str(), GetLayoutParam().GetMaxSize().ToString().c_str());
+                 " of layout param is %{private}s",
+                GetLayoutSize().ToString().c_str(), layoutSize.ToString().c_str(),
+                GetLayoutParam().GetMaxSize().ToString().c_str());
             return;
-        } else {
-            LOGE("Invalid layout size: %{private}s, valid svgContainerSize: %{private}s, use svg container size to draw"
-                 " svg. The max size of layout param is %{private}s", GetLayoutSize().ToString().c_str(),
-                 svgContainerSize.ToString().c_str(), GetLayoutParam().GetMaxSize().ToString().c_str());
         }
+        // when layout size is invalid, use svg's own size
+        layoutSize = imageSize;
     }
+
     canvas->translate(static_cast<float>(offset.GetX()), static_cast<float>(offset.GetY()));
-    double width = svgContainerSize.Width();
-    double height = svgContainerSize.Height();
+
+    auto width = static_cast<float>(layoutSize.Width());
+    auto height = static_cast<float>(layoutSize.Height());
     if (matchTextDirection_ && GetTextDirection() == TextDirection::RTL) {
         canvas.FlipHorizontal(0.0, width);
     }
-    skiaDom_->setContainerSize({ width, height });
     canvas->clipRect(0, 0, width, height, SkClipOp::kIntersect);
+    if (imageSize.IsValid() && !imageSize.IsInfinite()) {
+        // scale svg to layout size
+        float scale = std::min(width / imageSize.Width(), height / imageSize.Height());
+        canvas->scale(scale, scale);
+    } else {
+        skiaDom_->setContainerSize({ width, height });
+    }
     skiaDom_->render(canvas.GetSkCanvas());
 }
 
@@ -1289,12 +1296,18 @@ void FlutterRenderImage::OnAppShow()
     }
 }
 
+// pause image when not visible
 void FlutterRenderImage::OnVisibleChanged()
 {
-    if (imageObj_ && GetVisible()) {
-        imageObj_->Resume();
-    } else if (imageObj_ && !GetVisible()) {
-        imageObj_->Pause();
+    if (imageObj_) {
+        if (GetVisible()) {
+            imageObj_->Resume();
+        } else {
+            imageObj_->Pause();
+            LOGI("pause image when invisible");
+        }
+    } else {
+        LOGD("OnVisibleChanged: imageObj is null");
     }
 }
 

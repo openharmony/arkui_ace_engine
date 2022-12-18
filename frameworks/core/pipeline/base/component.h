@@ -209,8 +209,14 @@ public:
     static void MergeRSNode(const RefPtr<Component>& head, const RefPtr<Component>& tail);
     static void MergeRSNode(const RefPtr<Component>& standaloneNode);
     static void ExtendRSNode(const RefPtr<Component>& newHead, const RefPtr<Component>& prevHead);
-    void MarkUseExternalRSNode() { useExternalRSNode_ = true; }
-    bool UseExternalRSNode() const { return useExternalRSNode_; }
+    void MarkUseExternalRSNode(bool flag)
+    {
+        useExternalRSNode_ = flag;
+    }
+    bool UseExternalRSNode() const
+    {
+        return useExternalRSNode_;
+    }
 
     virtual uint32_t Compare(const RefPtr<Component>& component) const
     {

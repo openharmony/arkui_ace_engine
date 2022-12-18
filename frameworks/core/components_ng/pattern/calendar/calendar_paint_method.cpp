@@ -43,10 +43,7 @@ std::unique_ptr<RSParagraph> GetTextParagraph(const std::string& text, const ros
 {
     RSParagraphStyle style;
     auto fontCollection = RSFontCollection::GetInstance(false);
-    if (!fontCollection) {
-        LOGW("MeasureText: fontCollection is null");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(fontCollection, nullptr);
     std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::CreateRosenBuilder(style, fontCollection);
     builder->PushStyle(textStyle);
     builder->AddText(StringUtils::Str8ToStr16(text));
@@ -66,9 +63,7 @@ void DrawCalendarText(
     }
 
     auto paragraph = GetTextParagraph(newText, textStyle);
-    if (!paragraph) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(paragraph);
     const auto& offset = boxRect.GetOffset();
     paragraph->Layout(boxRect.Width());
     double textWidth = paragraph->GetMaxIntrinsicWidth();
@@ -346,25 +341,38 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
         paintProperty->GetOffDayMarkSize().value_or(theme->GetCalendarTheme().offDayMarkSize).ConvertToPx();
     focusedAreaRadius_ =
         paintProperty->GetFocusedAreaRadius().value_or(theme->GetCalendarTheme().focusedAreaRadius).ConvertToPx();
-    weekHeight_ = paintProperty->GetWeekHeight().value_or(theme->GetCalendarTheme().weekHeight).ConvertToPx();
-    dayHeight_ = paintProperty->GetDayHeight().value_or(theme->GetCalendarTheme().dayHeight).ConvertToPx();
-    weekWidth_ = paintProperty->GetWeekWidth().value_or(theme->GetCalendarTheme().weekWidth).ConvertToPx();
-    dayWidth_ = paintProperty->GetDayWidth().value_or(theme->GetCalendarTheme().dayWidth).ConvertToPx();
+    weekHeight_ = paintProperty->GetWeekHeightValue({}).ConvertToPx() <= 0
+                      ? theme->GetCalendarTheme().weekHeight.ConvertToPx()
+                      : paintProperty->GetWeekHeightValue({}).ConvertToPx();
+    dayHeight_ = paintProperty->GetDayHeightValue({}).ConvertToPx() <= 0
+                     ? theme->GetCalendarTheme().dayHeight.ConvertToPx()
+                     : paintProperty->GetDayHeightValue({}).ConvertToPx();
+    weekWidth_ = paintProperty->GetWeekWidthValue({}).ConvertToPx() <= 0
+                     ? theme->GetCalendarTheme().weekWidth.ConvertToPx()
+                     : paintProperty->GetWeekWidthValue({}).ConvertToPx();
+    dayWidth_ = paintProperty->GetDayWidthValue({}).ConvertToPx() <= 0
+                    ? theme->GetCalendarTheme().dayWidth.ConvertToPx()
+                    : paintProperty->GetDayWidthValue({}).ConvertToPx();
     weekAndDayRowSpace_ =
         paintProperty->GetWeekAndDayRowSpace().value_or(theme->GetCalendarTheme().weekAndDayRowSpace).ConvertToPx();
     lunarHeight_ = paintProperty->GetLunarHeight().value_or(theme->GetCalendarTheme().lunarHeight).ConvertToPx();
     touchCircleStrokeWidth_ = theme->GetCalendarTheme().touchCircleStrokeWidth.ConvertToPx();
 
-    const static int32_t daysOfWeek = 7;
-    colSpace_ = (frameSize_.Width() - daysOfWeek * dayWidth_) / (daysOfWeek - 1);
+    colSpace_ = paintProperty->GetColSpaceValue({}).ConvertToPx() <= 0
+                    ? theme->GetCalendarTheme().colSpace.ConvertToPx()
+                    : paintProperty->GetColSpaceValue({}).ConvertToPx();
 
-    dailyFiveRowSpace_ =
-        (frameSize_.Height() - topPadding_ - weekHeight_ - weekAndDayRowSpace_ - rowCount_ * dayHeight_) / 4;
-    gregorianCalendarHeight_ = paintProperty->GetGregorianCalendarHeight()
-                                   .value_or(theme->GetCalendarTheme().gregorianCalendarHeight)
-                                   .ConvertToPx();
-    workStateWidth_ =
-        paintProperty->GetWorkStateWidth().value_or(theme->GetCalendarTheme().workStateWidth).ConvertToPx();
+    dailyFiveRowSpace_ = paintProperty->GetDailyFiveRowSpaceValue({}).ConvertToPx() <= 0
+                             ? theme->GetCalendarTheme().dailyFiveRowSpace.ConvertToPx()
+                             : paintProperty->GetDailyFiveRowSpaceValue({}).ConvertToPx();
+
+    gregorianCalendarHeight_ = paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx() <= 0
+                                   ? theme->GetCalendarTheme().gregorianCalendarHeight.ConvertToPx()
+                                   : paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx();
+    workStateWidth_ = paintProperty->GetWorkStateWidthValue({}).ConvertToPx() <= 0
+                          ? theme->GetCalendarTheme().workStateWidth.ConvertToPx()
+                          : paintProperty->GetWorkStateWidthValue({}).ConvertToPx();
+
     workStateHorizontalMovingDistance_ = paintProperty->GetWorkStateHorizontalMovingDistance()
                                              .value_or(theme->GetCalendarTheme().workStateHorizontalMovingDistance)
                                              .ConvertToPx();
@@ -374,9 +382,7 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
     if (paintProperty->HasShowLunar()) {
         showLunar_ = paintProperty->GetShowLunarValue();
     }
-    if (paintProperty->HasShowHoliday()) {
-        showHoliday_ = paintProperty->GetShowHolidayValue();
-    }
+    showHoliday_ = paintProperty->GetShowHolidayValue(true);
     if (paintProperty->HasStartOfWeek()) {
         startOfWeek_ = static_cast<uint32_t>(paintProperty->GetStartOfWeekValue());
     }

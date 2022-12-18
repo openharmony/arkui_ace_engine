@@ -14,41 +14,129 @@
  */
 #include "core/components_ng/pattern/option/option_view.h"
 
+#include "base/geometry/dimension.h"
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components/select/select_theme.h"
+#include "core/components/text_field/textfield_theme.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/option/option_event_hub.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 
-RefPtr<FrameNode> OptionView::Create(
-    const std::string& value, const std::function<void()>& onClickFunc, int32_t targetId, int index)
+namespace {
+
+RefPtr<FrameNode> Create(int32_t index)
 {
     auto Id = ElementRegister::GetInstance()->MakeUniqueId();
-    auto node = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, Id, AceType::MakeRefPtr<OptionPattern>(targetId, index));
+    auto node = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, Id, AceType::MakeRefPtr<OptionPattern>(index));
 
-    auto eventHub = node->GetEventHub<OptionEventHub>();
-    CHECK_NULL_RETURN(eventHub, nullptr);
-    eventHub->SetOnClick(onClickFunc);
+    // set border radius
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    BorderRadiusProperty border;
+    border.SetRadius(ROUND_RADIUS_PHONE);
+    renderContext->UpdateBorderRadius(border);
 
-    auto paintProps = node->GetPaintProperty<OptionPaintProperty>();
-    // TODO: replace by theme
-    paintProps->UpdateBackgroundColor(Color(DEFAULT_BACKGROUND_COLOR));
-    paintProps->UpdateSelectedBackgroundColor(Color(DEFAULT_HOVER_BACKGROUND_COLOR));
+    auto props = node->GetPaintProperty<OptionPaintProperty>();
+    CHECK_NULL_RETURN(props, nullptr);
+    props->UpdateHover(false);
+    props->UpdatePress(false);
+    return node;
+}
 
+RefPtr<FrameNode> CreateText(const std::string& value, const RefPtr<FrameNode>& parent)
+{
     // create child text node
     auto textId = ElementRegister::GetInstance()->MakeUniqueId();
     auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textNode, nullptr);
+
     auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textProperty, nullptr);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto theme = AceType::DynamicCast<PipelineBase>(pipeline)->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+
+    textProperty->UpdateFontSize(theme->GetFontSize());
     textProperty->UpdateContent(value);
-    textNode->MountToParent(node);
+    textNode->MountToParent(parent);
     textNode->MarkModifyDone();
 
-    return node;
+    return textNode;
+}
+
+} // namespace
+
+RefPtr<FrameNode> OptionView::CreateMenuOption(
+    const std::string& value, std::function<void()>&& onClickFunc, int32_t index)
+{
+    auto option = Create(index);
+    CreateText(value, option);
+
+    auto eventHub = option->GetEventHub<OptionEventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    eventHub->SetMenuOnClick(std::move(onClickFunc));
+
+    return option;
+}
+
+RefPtr<FrameNode> OptionView::CreateSelectOption(const std::string& value, const std::string& icon, int32_t index)
+{
+    LOGI("create option value = %s", value.c_str());
+    auto option = Create(index);
+    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    auto minOptionHeight = theme->GetOptionMinHeight();
+
+    auto rowProps = row->GetLayoutProperty<LayoutProperty>();
+    CalcSize calcSize;
+    calcSize.SetHeight(CalcLength(minOptionHeight));
+    rowProps->UpdateCalcMinSize(calcSize);
+    row->MountToParent(option);
+
+    // create icon node
+    if (!icon.empty()) {
+        auto iconNode = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        CHECK_NULL_RETURN(iconNode, nullptr);
+        auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+        props->UpdateImageSourceInfo(ImageSourceInfo(icon));
+        props->UpdateImageFit(ImageFit::SCALE_DOWN);
+        props->UpdateCalcMaxSize(CalcSize(ICON_SIDE_LENGTH, ICON_SIDE_LENGTH));
+        props->UpdateAlignment(Alignment::CENTER_LEFT);
+
+        PaddingProperty padding;
+        padding.right = CalcLength(ICON_RIGHT_PADDING);
+        props->UpdatePadding(padding);
+
+        iconNode->MountToParent(row);
+        iconNode->MarkModifyDone();
+    }
+
+    auto text = CreateText(value, row);
+    auto pattern = option->GetPattern<OptionPattern>();
+    pattern->SetTextNode(text);
+    pattern->SetIcon(icon);
+
+    return option;
 }
 
 } // namespace OHOS::Ace::NG

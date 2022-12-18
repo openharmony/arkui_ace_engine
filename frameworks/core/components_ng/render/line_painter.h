@@ -27,7 +27,7 @@ class LinePainter {
 public:
     LinePainter() = default;
     ~LinePainter() = default;
-    static void DrawLine(RSCanvas& canvas, const LinePaintProperty& LinePaintProperty);
+    static void DrawLine(RSCanvas& canvas, const LinePaintProperty& linePaintProperty, OffsetF offset);
 };
 
 } // namespace OHOS::Ace::NG

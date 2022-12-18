@@ -22,6 +22,7 @@
 #include "base/log/event_report.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
 #include "core/common/frontend.h"
 #include "core/common/manager_interface.h"
@@ -43,6 +44,7 @@ PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> 
     CHECK_NULL_VOID(frontend);
     frontendType_ = frontend->GetType();
     eventManager_ = AceType::MakeRefPtr<EventManager>();
+    windowManager_ = AceType::MakeRefPtr<WindowManager>();
     eventManager_->SetInstanceId(instanceId);
     imageCache_ = ImageCache::Create();
     fontManager_ = FontManager::Create();
@@ -62,11 +64,12 @@ PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> 
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId,
     RefPtr<PlatformResRegister> platformResRegister)
     : window_(std::move(window)), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
-      weakFrontend_(frontend), instanceId_(instanceId),platformResRegister_(platformResRegister)
+      weakFrontend_(frontend), instanceId_(instanceId), platformResRegister_(std::move(platformResRegister))
 {
     CHECK_NULL_VOID(frontend);
     frontendType_ = frontend->GetType();
     eventManager_ = AceType::MakeRefPtr<EventManager>();
+    windowManager_ = AceType::MakeRefPtr<WindowManager>();
     eventManager_->SetInstanceId(instanceId);
     imageCache_ = ImageCache::Create();
     fontManager_ = FontManager::Create();
@@ -119,22 +122,30 @@ void PipelineBase::ClearImageCache()
     }
 }
 
+void PipelineBase::SetImageCache(const RefPtr<ImageCache>& imageChache)
+{
+    std::lock_guard<std::shared_mutex> lock(imageCacheMutex_);
+    if (imageChache) {
+        imageCache_ = imageChache;
+    }
+}
+
 RefPtr<ImageCache> PipelineBase::GetImageCache() const
 {
+    std::shared_lock<std::shared_mutex> lock(imageCacheMutex_);
     return imageCache_;
 }
 
 void PipelineBase::SetRootSize(double density, int32_t width, int32_t height)
 {
     ACE_SCOPED_TRACE("SetRootSize(%lf, %d, %d)", density, width, height);
-
+    density_ = density;
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), density, width, height]() {
             auto context = weak.Upgrade();
             if (!context) {
                 return;
             }
-            context->density_ = density;
             context->SetRootRect(width, height);
         },
         TaskExecutor::TaskType::UI);
@@ -394,6 +405,7 @@ bool PipelineBase::Dump(const std::vector<std::string>& params) const
         EventReport::SendEvent(eventInfo);
         return true;
     }
+    ContainerScope scope(instanceId_);
     return OnDumpInfo(params);
 }
 
@@ -492,6 +504,11 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
     if (onVsyncProfiler_) {
         AceTracker::Start();
     }
+
+    if (gsVsyncCallback_) {
+        gsVsyncCallback_();
+    }
+
     FlushVsync(nanoTimestamp, frameCount);
     if (onVsyncProfiler_) {
         onVsyncProfiler_(AceTracker::Stop());
@@ -536,6 +553,46 @@ Rect PipelineBase::GetCurrentWindowRect() const
         return window_->GetCurrentWindowRect();
     }
     return {};
+}
+
+RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
+{
+    auto frontend = weakFrontend_.Upgrade();
+    if (!frontend) {
+        LOGE("frontend is nullptr");
+        EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
+        return nullptr;
+    }
+    return frontend->GetAccessibilityManager();
+}
+
+void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent)
+{
+    auto accessibilityManager = GetAccessibilityManager();
+    if (!accessibilityManager) {
+        return;
+    }
+    accessibilityManager->SendAccessibilityAsyncEvent(accessibilityEvent);
+}
+
+void PipelineBase::Destroy()
+{
+    CHECK_RUN_ON(UI);
+    LOGI("PipelineBase::Destroy begin.");
+    ClearImageCache();
+    platformResRegister_.Reset();
+    drawDelegate_.reset();
+    eventManager_->ClearResults();
+    {
+        std::unique_lock<std::shared_mutex> lock(imageCacheMutex_);
+        imageCache_.Reset();
+    }
+    fontManager_.Reset();
+    themeManager_.Reset();
+    window_->Destroy();
+    touchPluginPipelineContext_.clear();
+    virtualKeyBoardCallback_.clear();
+    LOGI("PipelineBase::Destroy end.");
 }
 
 } // namespace OHOS::Ace

@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "base/log/event_report.h"
+#include "base/utils/utils.h"
 #include "core/common/thread_checker.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
@@ -67,9 +68,8 @@ void CardFrontendDeclarative::Destroy()
 void CardFrontendDeclarative::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
     auto pipelineContext = DynamicCast<NG::PipelineContext>(context);
-    if (!delegate_ || !pipelineContext) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
     eventHandler_ = AceType::MakeRefPtr<CardEventHandlerDeclarative>(delegate_);
 
     holder_.Attach(context);
@@ -126,9 +126,7 @@ void CardFrontendDeclarative::OnPageLoaded(const RefPtr<Framework::JsAcePage>& p
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), page, jsCommands] {
             auto frontend = weak.Upgrade();
-            if (!frontend) {
-                return;
-            }
+            CHECK_NULL_VOID_NOLOG(frontend);
             // Flush all JS commands.
             for (const auto& command : *jsCommands) {
                 command->Execute(page);
@@ -192,17 +190,18 @@ void CardFrontendDeclarative::UpdateData(const std::string& dataList)
                 frontend->UpdatePageData(dataList);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::UI); // eTSCard UI == Main JS/UI/PLATFORM
 }
 
 void CardFrontendDeclarative::UpdatePageData(const std::string& dataList)
 {
-    CHECK_RUN_ON(JS);
+    CHECK_RUN_ON(UI); // eTSCard UI == Main JS/UI/PLATFORM
     if (!delegate_) {
         LOGE("the delegate is null");
         EventReport::SendFormException(FormExcepType::UPDATE_PAGE_ERR);
         return;
     }
+    delegate_->UpdatePageData(dataList);
 }
 
 void CardFrontendDeclarative::SetColorMode(ColorMode colorMode)
@@ -226,7 +225,6 @@ void CardFrontendDeclarative::SetColorMode(ColorMode colorMode)
 
 void CardFrontendDeclarative::RebuildAllPages()
 {
-
 }
 
 void CardFrontendDeclarative::OnSurfaceChanged(int32_t width, int32_t height)

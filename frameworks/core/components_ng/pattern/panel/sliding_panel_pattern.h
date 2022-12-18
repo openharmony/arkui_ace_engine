@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PANEL_PANEL_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PANEL_PANEL_PATTERN_H
 
+#include <optional>
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
@@ -25,7 +26,6 @@
 #include "core/components_ng/pattern/panel/sliding_panel_event_hub.h"
 #include "core/components_ng/pattern/panel/sliding_panel_layout_algorithm.h"
 #include "core/components_ng/pattern/panel/sliding_panel_layout_property.h"
-#include "core/components_ng/pattern/panel/sliding_panel_node.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -37,8 +37,6 @@ public:
     SlidingPanelPattern() = default;
     ~SlidingPanelPattern() override = default;
 
-    void ResetContentHeight();
-    void OnAnimationStop();
     bool IsAtomicNode() const override
     {
         return false;
@@ -62,8 +60,11 @@ public:
         return MakeRefPtr<SlidingPanelEventHub>();
     }
 
+    void OnAnimationStop();
     void UpdateCurrentOffset(float offset);
     void UpdateCurrentOffsetOnAnimate(float currentOffset);
+    void MarkDirtyNode(PropertyChangeFlag extraFlag);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
 private:
     void OnModifyDone() override;
@@ -74,37 +75,39 @@ private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void Update();
     // Init LayoutProperties
-    bool InitializeLayoutProps();
-    // Init touch event, stop animation when touch down.
-    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitializeLayoutProps();
 
     void FireSizeChangeEvent();
     void FireHeightChangeEvent();
     void HandleDragStart(const Offset& startPoint);
     void HandleDragUpdate(const GestureEvent& info);
-    void HandleDragEnd(double dragVelocity);
-    void CalculateModeTypeMini(double dragLen, double dragVelocity);
-    void CalculateModeTypeFold(double dragLen, double dragVelocity);
-    void CalculateModeTypeTemp(double dragLen, double dragVelocity);
-    void AnimateTo(double blankHeight, PanelMode mode);
-    void AppendBlankHeightAnimation(double blankHeight, PanelMode mode);
-    int32_t GetAnimationDuration(double delta, double dragRange) const;
+    void HandleDragEnd(float dragVelocity);
+    void CalculateModeTypeMini(float dragLen, float dragVelocity);
+    void CalculateModeTypeFold(float dragLen, float dragVelocity);
+    void CalculateModeTypeTemp(float dragLen, float dragVelocity);
+    void AnimateTo(float targetLocation, PanelMode mode);
+    void AppendBlankHeightAnimation(float targetLocation, PanelMode mode);
+    int32_t GetAnimationDuration(float delta, float dragRange) const;
     void CheckHeightValidity();
+    void CheckPanelModeAndType();
+    void RemoveEvent();
+    void AddEvent();
+    void FirstLayout();
+    void IsShowChanged(bool isShow);
+    void HeightDynamicUpdate();
 
     PanelType GetPanelType() const;
     PanelMode GetPanelMode() const;
+    RefPtr<FrameNode> GetDragBarNode();
     void FireChangeEvent() const;
-    bool IsShow() const;
 
     RefPtr<PanEvent> panEvent_;
-    RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<Animator> animator_;
     std::unordered_map<PanelMode, double> defaultBlankHeights_;
-    std::optional<int32_t> dragBarId_;
-
+    
     bool isAnimating_ = false;
     bool isFirstLayout_ = true;
-    
+
     PanelMode mode_ = PanelMode::FULL;
     PanelMode previousMode_ = PanelMode::HALF;
     PanelType type_ = PanelType::FOLDABLE_BAR;
@@ -112,10 +115,18 @@ private:
     float halfMiniBoundary_ = 0.0f;
     float fullMiniBoundary_ = 0.0f;
 
-    SizeF previousSize_;
+    Dimension fullHeight_;
+    Dimension halfHeight_;
+    Dimension miniHeight_;
 
+    float minBlankHeight_ = 0.0;
     float currentOffset_ = 0.0f;
     float dragStartCurrentOffset_ = 0.0f;
+
+    std::optional<bool> isShow_;
+    PanDirection panDirection_;
+    float distance_ = 0.0f;
+    bool isDrag_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SlidingPanelPattern);
 };

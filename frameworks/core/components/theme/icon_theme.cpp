@@ -63,13 +63,15 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::SHARE_SVG, "share" },
     { InternalResource::ResourceId::SHOW_PASSWORD_SVG, "show_password" },
     { InternalResource::ResourceId::SIDE_BAR, "ic_public_drawer" },
+    { InternalResource::ResourceId::SPINNER, "ic_public_spinner" },
     { InternalResource::ResourceId::STEPPER_BACK_ARROW, "stepper_back_arrow" },
     { InternalResource::ResourceId::STEPPER_NEXT_ARROW, "stepper_next_arrow" },
     { InternalResource::ResourceId::TRANSLATE_C2E_SVG, "translate_c2e" },
     { InternalResource::ResourceId::UP_ARROW_SVG, "up_arrow" },
     { InternalResource::ResourceId::WATCH_DOWN_ARROW_SVG, "watch_down_arrow" },
     { InternalResource::ResourceId::WATCH_UP_ARROW_SVG, "watch_up_arrow" },
-    { InternalResource::ResourceId::WRONG_SVG, "wrong" }
+    { InternalResource::ResourceId::WRONG_SVG, "wrong" },
+    { InternalResource::ResourceId::INPUT_SEARCH_SVG, "ic_public_input_search" }
 };
 }
 

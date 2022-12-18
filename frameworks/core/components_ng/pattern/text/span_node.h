@@ -23,7 +23,6 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/gestures/gesture_info.h"
@@ -61,7 +60,7 @@ public:                                                                      \
             return;                                                          \
         }                                                                    \
         spanItem_->fontStyle->Update##name(value);                           \
-        MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);           \
+        RequestTextFlushDirty();                                             \
     }
 
 namespace OHOS::Ace::NG {
@@ -72,7 +71,9 @@ struct SpanItem : public Referenced {
     GestureEventFunc onClick;
     std::list<RefPtr<SpanItem>> children;
 
-    void UpdateParagraph(RSParagraphBuilder* builder);
+    void UpdateParagraph(const RefPtr<Paragraph>& builder);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 
 class ACE_EXPORT SpanNode : public UINode {
@@ -97,11 +98,11 @@ public:
     void UpdateContent(const std::string& content)
     {
         if (spanItem_->content == content) {
-            LOGD("the =content is same, just ignore");
+            LOGD("the content is same, just ignore");
             return;
         }
         spanItem_->content = content;
-        MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        RequestTextFlushDirty();
     }
 
     void UpdateOnClickEvent(GestureEventFunc&& onClick)
@@ -117,6 +118,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, TextDecoration);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
+    DEFINE_SPAN_FONT_STYLE_ITEM(LetterSpacing, Dimension);
 
     // Mount to the previous Span node or Text node.
     void MountToParagraph();
@@ -130,6 +132,13 @@ public:
     {
         spanItem_->children.clear();
     }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        spanItem_->ToJsonValue(json);
+    }
+
+    void RequestTextFlushDirty();
 
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;

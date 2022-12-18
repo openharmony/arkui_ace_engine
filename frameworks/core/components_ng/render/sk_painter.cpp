@@ -29,24 +29,23 @@ namespace OHOS::Ace::NG {
 void SkPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const ShapePaintProperty& shapePaintProperty)
 {
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
-    if (!rsCanvas) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(rsCanvas);
     auto skCanvas = rsCanvas->ExportSkCanvas();
-    if (!skCanvas) {
-        return;
-    }
-    SkPaint skPaint;
+    CHECK_NULL_VOID_NOLOG(skCanvas);
+    SkPaint skPen;
+    SkPaint skBrush;
     SkPath skPath;
     bool ret = SkParsePath::FromSVGString(commands.c_str(), &skPath);
     if (!ret) {
         return;
     }
-    SetPaint(skPaint, shapePaintProperty);
-    skCanvas->drawPath(skPath, skPaint);
+    SetPen(skPen, shapePaintProperty);
+    SetBrush(skBrush, shapePaintProperty);
+    skCanvas->drawPath(skPath, skPen);
+    skCanvas->drawPath(skPath, skBrush);
 }
 
-void SkPainter::SetPaint(SkPaint& skPaint, const ShapePaintProperty& shapePaintProperty)
+void SkPainter::SetPen(SkPaint& skPaint, const ShapePaintProperty& shapePaintProperty)
 {
     skPaint.setStyle(SkPaint::Style::kStroke_Style);
     if (shapePaintProperty.HasAntiAlias()) {
@@ -87,17 +86,15 @@ void SkPainter::SetPaint(SkPaint& skPaint, const ShapePaintProperty& shapePaintP
         skPaint.setStrokeWidth(static_cast<SkScalar>(shapePaintProperty.STOKE_WIDTH_DEFAULT.ConvertToPx()));
     }
 
+    Color strokeColor = Color::BLACK;
     if (shapePaintProperty.HasStroke()) {
-        skPaint.setStyle(SkPaint::Style::kStroke_Style);
-        Color strokeColor = shapePaintProperty.GetStrokeValue();
-        double curOpacity = shapePaintProperty.STOKE_OPACITY_DEFAULT;
-        if (shapePaintProperty.HasStrokeOpacity()) {
-            curOpacity = shapePaintProperty.GetStrokeOpacityValue();
-        }
-        skPaint.setColor(strokeColor.BlendOpacity(curOpacity).GetValue());
-    } else {
-        skPaint.setColor(Color::BLACK.GetValue());
+        strokeColor = shapePaintProperty.GetStrokeValue();
     }
+    double curOpacity = shapePaintProperty.STOKE_OPACITY_DEFAULT;
+    if (shapePaintProperty.HasStrokeOpacity()) {
+        curOpacity = shapePaintProperty.GetStrokeOpacityValue();
+    }
+    skPaint.setColor(strokeColor.BlendOpacity(curOpacity).GetValue());
 
     if (shapePaintProperty.HasStrokeDashArray()) {
         auto lineDashState = shapePaintProperty.GetStrokeDashArrayValue();
@@ -115,17 +112,20 @@ void SkPainter::SetPaint(SkPaint& skPaint, const ShapePaintProperty& shapePaintP
     if (shapePaintProperty.HasStrokeMiterLimit()) {
         skPaint.setStrokeMiter(static_cast<SkScalar>(shapePaintProperty.GetStrokeMiterLimitValue()));
     }
-
-    if (shapePaintProperty.HasFill()) {
-        skPaint.setStyle(SkPaint::Style::kFill_Style);
-        Color fillColor = shapePaintProperty.GetFillValue();
-        double curOpacity = shapePaintProperty.STOKE_OPACITY_DEFAULT;
-        if (shapePaintProperty.HasStrokeOpacity()) {
-            curOpacity = shapePaintProperty.GetStrokeOpacityValue();
-        }
-        skPaint.setColor(fillColor.BlendOpacity(curOpacity).GetValue());
-    } else {
-        skPaint.setColor(Color::BLACK.GetValue());
-    }
 }
+
+void SkPainter::SetBrush(SkPaint& skPaint, const ShapePaintProperty& shapePaintProperty)
+{
+    skPaint.setStyle(SkPaint::Style::kFill_Style);
+    Color fillColor = Color::BLACK;
+    if (shapePaintProperty.HasFill()) {
+        fillColor = shapePaintProperty.GetFillValue();
+    }
+    double curOpacity = shapePaintProperty.FILL_OPACITY_DEFAULT;
+    if (shapePaintProperty.HasFillOpacity()) {
+        curOpacity = shapePaintProperty.GetFillOpacityValue();
+    }
+    skPaint.setColor(fillColor.BlendOpacity(curOpacity).GetValue());
+}
+
 } // namespace OHOS::Ace::NG

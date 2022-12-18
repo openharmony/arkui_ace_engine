@@ -34,7 +34,9 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto loadingProgressModifier_ = AceType::MakeRefPtr<LoadingProgressModifier>();
+        if (!loadingProgressModifier_) {
+            loadingProgressModifier_ = AceType::MakeRefPtr<LoadingProgressModifier>();
+        }
         return MakeRefPtr<LoadingProgressPaintMethod>(loadingProgressModifier_);
     }
 
@@ -57,6 +59,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     void OnAttachToFrameNode() override;
 
+    RefPtr<LoadingProgressModifier> loadingProgressModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(LoadingProgressPattern);
 };
 } // namespace OHOS::Ace::NG

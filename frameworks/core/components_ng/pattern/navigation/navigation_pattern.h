@@ -53,6 +53,10 @@ public:
     {
         return MakeRefPtr<NavigationLayoutAlgorithm>();
     }
+
+    void OnModifyDone() override;
+
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 };
 
 } // namespace OHOS::Ace::NG

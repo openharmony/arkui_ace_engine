@@ -16,7 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_EVENT_HUB_H
 
+#include <algorithm>
+#include <memory>
+
 #include "base/memory/ace_type.h"
+#include "core/components/swiper/swiper_component.h"
 #include "core/components/tab_bar/tabs_event.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -27,9 +31,12 @@ enum class Direction {
     PRE = 0,
     NEXT,
 };
-
-using ChangeEvent = std::function<void(const BaseEventInfo*)>;
+using ChangeIndicatorEvent = std::function<void()>;
+using ChangeEvent = std::function<void(int32_t index)>;
+using ChangeEventPtr = std::shared_ptr<ChangeEvent>;
 using ChangeDoneEvent = std::function<void()>;
+using AnimationStartEvent = std::function<void(int32_t index)>;
+using AnimationEndEvent = std::function<void(int32_t index)>;
 
 class SwiperEventHub : public EventHub {
     DECLARE_ACE_TYPE(SwiperEventHub, EventHub)
@@ -38,9 +45,15 @@ public:
     SwiperEventHub() = default;
     ~SwiperEventHub() override = default;
 
-    void SetOnChange(ChangeEvent&& changeEvent)
+    /* Using shared_ptr to enable event modification without adding again */
+    void AddOnChangeEvent(const ChangeEventPtr& changeEvent)
     {
-        changeEvent_ = std::move(changeEvent);
+        changeEvents_.emplace_back(changeEvent);
+    }
+
+    void SetIndicatorOnChange(ChangeIndicatorEvent&& changeEvent)
+    {
+        changeIndicatorEvent_ = std::move(changeEvent);
     }
 
     void SetChangeDoneEvent(ChangeDoneEvent&& changeDoneEvent)
@@ -48,10 +61,20 @@ public:
         changeDoneEvent_ = std::move(changeDoneEvent);
     }
 
+    void SetAnimationStartEvent(AnimationStartEvent&& animationStartEvent)
+    {
+        animationStartEvent_ = std::move(animationStartEvent);
+    }
+
+    void SetAnimationEndEvent(AnimationEndEvent&& animationEndEvent)
+    {
+        animationEndEvent_ = std::move(animationEndEvent);
+    }
+
     void FireChangeDoneEvent(bool direction)
     {
         if (changeDoneEvent_) {
-            if (direction == true) {
+            if (direction) {
                 direction_ = Direction::NEXT;
             } else {
                 direction_ = Direction::PRE;
@@ -62,8 +85,16 @@ public:
 
     void FireChangeEvent(int32_t index) const
     {
-        if (changeEvent_) {
-            changeEvent_(std::make_shared<TabContentChangeEvent>(index).get());
+        if (!changeEvents_.empty()) {
+            std::for_each(
+                changeEvents_.begin(), changeEvents_.end(), [index](const ChangeEventPtr& event) { (*event)(index); });
+        }
+    }
+
+    void FireIndicatorChangeEvent(int32_t index) const
+    {
+        if (changeIndicatorEvent_) {
+            changeIndicatorEvent_();
         }
     }
 
@@ -72,10 +103,27 @@ public:
         return direction_;
     }
 
+    void FireAnimationStartEvent(int32_t index) const
+    {
+        if (animationStartEvent_) {
+            animationStartEvent_(index);
+        }
+    }
+
+    void FireAnimationEndEvent(int32_t index) const
+    {
+        if (animationEndEvent_) {
+            animationEndEvent_(index);
+        }
+    }
+
 private:
     Direction direction_;
-    ChangeEvent changeEvent_;
+    std::list<ChangeEventPtr> changeEvents_;
     ChangeDoneEvent changeDoneEvent_;
+    ChangeIndicatorEvent changeIndicatorEvent_;
+    AnimationStartEvent animationStartEvent_;
+    AnimationEndEvent animationEndEvent_;
 };
 
 } // namespace OHOS::Ace::NG

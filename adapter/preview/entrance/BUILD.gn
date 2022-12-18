@@ -13,8 +13,6 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-import(
-    "//foundation/arkui/ace_engine/adapter/preview/build/config_js_engine.gni")
 
 template("preview_entrance_source") {
   forward_variables_from(invoker, "*")
@@ -27,9 +25,7 @@ template("preview_entrance_source") {
     configs = [ "$ace_root:ace_config" ]
 
     # set icu_data_path for ark preview
-    if (enable_ark_preview) {
-      defines += [ "INIT_ICU_DATA_PATH" ]
-    }
+    defines += [ "INIT_ICU_DATA_PATH" ]
 
     sources = [
       "ace_ability.cpp",

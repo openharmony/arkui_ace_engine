@@ -27,17 +27,6 @@ void JsStopPropagation(const v8::FunctionCallbackInfo<v8::Value>& info)
     }
 }
 
-#elif USE_QUICKJS_ENGINE
-JSValue JsStopPropagation(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* arg)
-{
-    auto eventInfo = static_cast<BaseEventInfo*>(JS_GetOpaque3(new_target));
-    if (eventInfo) {
-        LOGD("JsStopPropagation is trigger");
-        eventInfo->SetStopPropagation(true);
-    }
-    return JS_UNDEFINED;
-}
-
 #elif USE_ARK_ENGINE
 Local<JSValueRef> JsStopPropagation(panda::JsiRuntimeCallInfo *info)
 {

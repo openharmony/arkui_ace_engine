@@ -17,7 +17,7 @@
 #include <cstdint>
 #include <string>
 
-#include "interfaces/napi/kits/napi_utils.h"
+#include "interfaces/napi/kits/utils/napi_utils.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 #include "napi/native_api.h"
@@ -164,11 +164,21 @@ bool ParseParamWithCallback(napi_env env, RouterAsyncContext* asyncContext, cons
     for (size_t i = 0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
-        if ((i == 0) && valueType == napi_object) {
+        if (i == 0) {
+            if (valueType != napi_object) {
+                delete asyncContext;
+                asyncContext = nullptr;
+                NapiThrow(env, "The type of parameters is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+                return false;
+            }
             napi_value uriNApi = nullptr;
             napi_value params = nullptr;
             napi_get_named_property(env, argv[i], "url", &uriNApi);
             napi_typeof(env, uriNApi, &valueType);
+            if (valueType == napi_undefined) {
+                NapiThrow(env, "The required url parameter is missing.", Framework::ERROR_CODE_PARAM_INVALID);
+                return false;
+            }
             if (valueType != napi_string) {
                 LOGE("url is invalid");
                 NapiThrow(env, "The type of the url parameter is not string.", Framework::ERROR_CODE_PARAM_INVALID);
@@ -208,6 +218,8 @@ static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info
 {
     napi_value result = nullptr;
     size_t requireArgc = 1;
+    size_t largestArgc = 3;
+    size_t largestArgcPromise = 2;
     size_t argc = ARGC_WITH_MODE_AND_CALLBACK;
     napi_value argv[ARGC_WITH_MODE_AND_CALLBACK] = { 0 };
     napi_value thisVar = nullptr;
@@ -218,6 +230,10 @@ static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info
         NapiThrow(env, "The number of parameters must be greater than or equal to 1.",
             Framework::ERROR_CODE_PARAM_INVALID);
         return result;
+    } else if (argc > largestArgc) {
+        LOGE("params number err");
+        NapiThrow(env, "The largest number of parameters is 3.", Framework::ERROR_CODE_PARAM_INVALID);
+        return result;
     }
     auto asyncContext = new RouterAsyncContext();
     if (!ParseParamWithCallback(env, asyncContext, argc, argv)) {
@@ -227,6 +243,10 @@ static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info
 
     if (asyncContext->callbackRef == nullptr) {
         napi_create_promise(env, &asyncContext->deferred, &result);
+        if (argc > largestArgcPromise) {
+            NapiThrow(env, "The largest number of parameters is 2 in Promise.", Framework::ERROR_CODE_PARAM_INVALID);
+            return result;
+        }
     } else {
         asyncContext->deferred = nullptr;
         napi_get_undefined(env, &result);
@@ -244,8 +264,7 @@ static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info
                 napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
 
                 napi_value msg = nullptr;
-                auto iter = ERROR_CODE_TO_MSG.find(errCode);
-                std::string strMsg = (iter != ERROR_CODE_TO_MSG.end() ? iter->second : "") + message;
+                std::string strMsg = ErrorToMessage(errCode) + message;
                 LOGE("napi throw errCode %d strMsg %s", errCode, strMsg.c_str());
                 napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
 
@@ -264,8 +283,8 @@ static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info
             auto delegate = EngineHelper::GetCurrentDelegate();
             if (delegate) {
                 if (asyncContext->isModeType) {
-                    delegate->PushWithModeAndCallback(
-                        asyncContext->uriString, asyncContext->paramsString, asyncContext->mode, errorCallback);
+                    delegate->PushWithCallback(
+                        asyncContext->uriString, asyncContext->paramsString, errorCallback, asyncContext->mode);
                 } else {
                     delegate->PushWithCallback(asyncContext->uriString, asyncContext->paramsString, errorCallback);
                 }
@@ -275,8 +294,8 @@ static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info
                 std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
                 napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
                 napi_value msg = nullptr;
-                auto iter = ERROR_CODE_TO_MSG.find(Framework::ERROR_CODE_INTERNAL_ERROR);
-                std::string strMsg = (iter != ERROR_CODE_TO_MSG.end() ? iter->second : "") + "Can not get delegate.";
+                std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR)
+                    + "UI execution context not found.";
                 napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
                 napi_value error = nullptr;
                 napi_create_error(env, code, msg, &error);
@@ -356,6 +375,8 @@ static napi_value JSRouterReplaceWithCallback(napi_env env, napi_callback_info i
 {
     napi_value result = nullptr;
     size_t requireArgc = 1;
+    size_t largestArgc = 3;
+    size_t largestArgcPromise = 2;
     size_t argc = ARGC_WITH_MODE_AND_CALLBACK;
     napi_value argv[ARGC_WITH_MODE_AND_CALLBACK] = { 0 };
     napi_value thisVar = nullptr;
@@ -366,6 +387,10 @@ static napi_value JSRouterReplaceWithCallback(napi_env env, napi_callback_info i
         NapiThrow(env, "The number of parameters must be greater than or equal to 1.",
             Framework::ERROR_CODE_PARAM_INVALID);
         return result;
+    } else if (argc > largestArgc) {
+        LOGE("params number err");
+        NapiThrow(env, "The largest number of parameters is 3.", Framework::ERROR_CODE_PARAM_INVALID);
+        return result;
     }
     auto asyncContext = new RouterAsyncContext();
     if (!ParseParamWithCallback(env, asyncContext, argc, argv)) {
@@ -375,6 +400,10 @@ static napi_value JSRouterReplaceWithCallback(napi_env env, napi_callback_info i
 
     if (asyncContext->callbackRef == nullptr) {
         napi_create_promise(env, &asyncContext->deferred, &result);
+        if (argc > largestArgcPromise) {
+            NapiThrow(env, "The largest number of parameters is 2 in Promise.", Framework::ERROR_CODE_PARAM_INVALID);
+            return result;
+        }
     } else {
         asyncContext->deferred = nullptr;
         napi_get_undefined(env, &result);
@@ -392,8 +421,7 @@ static napi_value JSRouterReplaceWithCallback(napi_env env, napi_callback_info i
                 napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
 
                 napi_value msg = nullptr;
-                auto iter = ERROR_CODE_TO_MSG.find(errCode);
-                std::string strMsg = (iter != ERROR_CODE_TO_MSG.end() ? iter->second : "") + message;
+                std::string strMsg = ErrorToMessage(errCode) + message;
                 LOGE("napi throw errCode %{public}d strMsg %{public}s", errCode, strMsg.c_str());
                 napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
 
@@ -412,8 +440,8 @@ static napi_value JSRouterReplaceWithCallback(napi_env env, napi_callback_info i
             auto delegate = EngineHelper::GetCurrentDelegate();
             if (delegate) {
                 if (asyncContext->isModeType) {
-                    delegate->ReplaceWithModeAndCallback(
-                        asyncContext->uriString, asyncContext->paramsString, asyncContext->mode, errorCallback);
+                    delegate->ReplaceWithCallback(
+                        asyncContext->uriString, asyncContext->paramsString, errorCallback, asyncContext->mode);
                 } else {
                     delegate->ReplaceWithCallback(asyncContext->uriString, asyncContext->paramsString, errorCallback);
                 }
@@ -423,8 +451,8 @@ static napi_value JSRouterReplaceWithCallback(napi_env env, napi_callback_info i
                 std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
                 napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
                 napi_value msg = nullptr;
-                auto iter = ERROR_CODE_TO_MSG.find(Framework::ERROR_CODE_INTERNAL_ERROR);
-                std::string strMsg = (iter != ERROR_CODE_TO_MSG.end() ? iter->second : "") + "Can not get delegate.";
+                std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR)
+                    + "UI execution context not found.";
                 napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
                 napi_value error = nullptr;
                 napi_create_error(env, code, msg, &error);
@@ -457,7 +485,7 @@ static napi_value JSRouterBack(napi_env env, napi_callback_info info)
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
         LOGE("can not get delegate.");
-        NapiThrow(env, "Can not get delegate.", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "UI execution context not found.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     std::string uriString = "";
@@ -496,7 +524,7 @@ static napi_value JSRouterClear(napi_env env, napi_callback_info info)
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
         LOGE("can not get delegate.");
-        NapiThrow(env, "Can not get delegate.", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "UI execution context not found.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     delegate->Clear();
@@ -508,7 +536,7 @@ static napi_value JSRouterGetLength(napi_env env, napi_callback_info info)
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
         LOGE("can not get delegate.");
-        NapiThrow(env, "Can not get delegate.", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "UI execution context not found.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     int32_t routeNumber = delegate->GetStackSize();
@@ -527,7 +555,7 @@ static napi_value JSRouterGetState(napi_env env, napi_callback_info info)
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
         LOGE("can not get delegate.");
-        NapiThrow(env, "Can not get delegate.", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "UI execution context not found.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     delegate->GetState(routeIndex, routeName, routePath);
@@ -635,7 +663,7 @@ static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
         LOGW("EnableAlertBeforeBackPage: delegate is null");
-        NapiThrow(env, "Can not get delegate.", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "UI execution context not found.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
 
@@ -684,7 +712,7 @@ static napi_value JSRouterDisableAlertBeforeBackPage(napi_env env, napi_callback
         delegate->DisableAlertBeforeBackPage();
     } else {
         LOGW("DisableAlertBeforeBackPage: delegate is null");
-        NapiThrow(env, "Can not get delegate.", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "UI execution context not found.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
 
@@ -723,7 +751,7 @@ static napi_value JSRouterGetParams(napi_env env, napi_callback_info info)
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
         LOGE("can not get delegate.");
-        NapiThrow(env, "Can not get delegate.", Framework::ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "UI execution context not found.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     std::string paramsStr = delegate->GetParams();

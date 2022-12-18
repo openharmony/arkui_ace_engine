@@ -17,23 +17,22 @@
 
 #define protected public
 #include "base/i18n/localization.h"
+#include "base/test/mock/mock_asset_manager.h"
+#include "base/test/mock/mock_task_executor.h"
 #include "base/utils/system_properties.h"
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/fake_task_executor.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #include "frameworks/core/components/clock/clock_component.h"
 #include "frameworks/core/components/clock/render_clock.h"
 #include "frameworks/core/components/test/json/json_frontend.h"
 #include "frameworks/core/components/test/unittest/mock/mock_render_depend.h"
 #include "frameworks/core/components/text/render_text.h"
 #include "frameworks/core/event/key_event.h"
-#include "frameworks/core/mock/mock_resource_register.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-
 constexpr char CLOCK_FACE_SRC[] = "clockFaceSrc";
 constexpr char CLOCK_FACE_NIGHT_SRC[] = "clockFaceNightSrc";
 constexpr char HOUR_HAND_SRC[] = "hourHandSrc";
@@ -55,9 +54,7 @@ constexpr double TEST_TEXT_SIZE = 14;
 constexpr int32_t FONT_FAMILY_SIZE = 1;
 const std::string DIGIT_COLOR_RED = "#ffff0000";
 const std::string DIGIT_COLOR_BLUE = "#ff0000ff";
-
 using UpdateClockCallback = std::function<void(const RefPtr<ClockComponent>&)>;
-
 } // namespace
 
 class MockImageCache : public ImageCache {
@@ -214,5 +211,4 @@ HWTEST_F(ClockComponentTest, UpdateClock003, TestSize.Level1)
     ASSERT_TRUE(NearEqual(renderClock->digitSizeRatio_, DEFAULT_DIGIT_SIZE_RATIO));
     ASSERT_TRUE(NearEqual(renderClock->digitRadiusRatio_, DEFAULT_DIGIT_RADIUS_RATIO));
 }
-
 } // namespace OHOS::Ace

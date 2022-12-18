@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 
 HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result)
+    const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
     const auto& rect = GetGeometryNode()->GetFrameRect();
     if (!rect.IsInRegion(parentLocalPoint)) {
@@ -37,7 +37,7 @@ HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& paren
 
     auto subContext = DynamicCast<OHOS::Ace::PipelineBase>(subContainer->GetPipelineContext());
     CHECK_NULL_RETURN(subContext, HitTestResult::BUBBLING);
-    auto selfGlobalOffset = GetGeometryNode()->GetParentGlobalOffset() + GetGeometryNode()->GetFrameOffset();
+    auto selfGlobalOffset = GetOffsetRelativeToWindow();
     subContext->SetPluginEventOffset(Offset(selfGlobalOffset.GetX(), selfGlobalOffset.GetY()));
 
     auto context = GetContext();
@@ -45,7 +45,7 @@ HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& paren
         context->SetTouchPipeline(WeakPtr<PipelineBase>(subContext));
     }
 
-    return HitTestResult::STOP_BUBBLING;
+    return HitTestResult::BUBBLING;
 }
 
 RefPtr<FormNode> FormNode::GetOrCreateFormNode(

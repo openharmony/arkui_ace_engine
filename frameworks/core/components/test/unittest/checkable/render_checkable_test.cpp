@@ -17,27 +17,27 @@
 #include "gtest/gtest.h"
 
 #include "base/log/log.h"
+#include "base/test/mock/mock_asset_manager.h"
+#include "base/test/mock/mock_task_executor.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #include "core/components/checkable/checkable_component.h"
 #include "core/components/checkable/radio_group_component.h"
 #include "core/components/checkable/render_checkable.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/test/json/json_frontend.h"
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/fake_task_executor.h"
-#include "core/mock/mock_resource_register.h"
 #include "core/pipeline/base/flutter_render_context.h"
 #include "core/pipeline/base/rosen_render_context.h"
 #define protected public
 #include "core/components/checkable/render_switch.h"
 #include "core/components/test/unittest/mock/mock_render_depend.h"
 #include "core/components/text/render_text.h"
+#include "core/components/theme/theme_manager_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-
 using CheckableEventCallback = std::function<void(const std::string&, const std::string&)>;
 using UpdateCheckboxCallback = std::function<void(const RefPtr<CheckboxComponent>&)>;
 using UpdateSwitchCallback = std::function<void(const RefPtr<SwitchComponent>&)>;
@@ -68,7 +68,7 @@ constexpr double TEST_TEXT_FONT_SIZE = 30.0;
 constexpr Dimension TEST_TEXT_LETTER_SPACING = 10.0_px;
 constexpr double TEST_TEXT_SIZE = 200.0;
 constexpr bool SHOW_TEXT = true;
-const RefPtr<ThemeManager> THEME_MANAGER = AceType::MakeRefPtr<ThemeManager>();
+const auto THEME_MANAGER = AceType::MakeRefPtr<ThemeManagerImpl>();
 
 const TouchEvent MOCK_DOWN_TOUCH_EVENT { 10, 10, 10, TouchType::DOWN };
 const TouchEvent MOCK_MOVE_TOUCH_EVENT { 10, 10, 10, TouchType::MOVE };
@@ -107,7 +107,6 @@ public:
 private:
     const CheckableEventCallback eventCallback_;
 };
-
 } // namespace
 
 flutter::Canvas* FlutterRenderContext::GetCanvas()
@@ -154,8 +153,8 @@ public:
     {
         auto platformWindow = PlatformWindow::Create(nullptr);
         auto window = std::make_unique<Window>(std::move(platformWindow));
-        auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
-        auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+        auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
+        auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
         auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
         frontend_ = Frontend::CreateDefault();
         context_ = AceType::MakeRefPtr<PipelineContext>(
@@ -773,5 +772,4 @@ HWTEST_F(CheckableComponentTest, UpdateTextSwitch002, TestSize.Level1)
     EXPECT_TRUE(!renderSwitch->renderTextOn_);
     EXPECT_TRUE(!renderSwitch->renderTextOff_);
 }
-
 } // namespace OHOS::Ace

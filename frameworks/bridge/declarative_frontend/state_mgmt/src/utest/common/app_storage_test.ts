@@ -42,8 +42,8 @@ const testAppStorage = tsuite("AppStorage", () => {
   });
 
 
-  var link1: ObservedPropertyAbstract<string> = AppStorage.Link<string>("say");
-  var link2: ObservedPropertyAbstract<string> = AppStorage.Link<string>("say");
+  var link1: SubscribedAbstractProperty<string> = AppStorage.Link<string>("say");
+  var link2: SubscribedAbstractProperty<string> = AppStorage.Link<string>("say");
 
   tcase("AppStorage and link1 update from link1.set",
     () => {
@@ -53,7 +53,7 @@ const testAppStorage = tsuite("AppStorage", () => {
     });
 
   tcase("AppStorage and link2 update from link1.set", () => {
-    link2.set("Hanna");
+    link1.set("Hanna");
     test("AppStorage: 'say' expected updated value is `Hanna`.", AppStorage.Get<string>("say") == "Hanna");
     test("SyncedPropertyTwoWay#2: 'say' expected updated value is `Hanna`.", link2.get() == "Hanna");
   });
@@ -63,24 +63,6 @@ const testAppStorage = tsuite("AppStorage", () => {
     test("SyncedPropertyTwoWay#1: 'say' expected updated value is `Paul`.", link1.get() == "Paul");
     test("SyncedPropertyTwoWay#2: 'say' expected updated value is `Paul`.", link2.get() == "Paul");
   });
-
-  let linkToLink2 = link2.createLink(undefined, "linkToLink2");
-
-  tcase("link2.set update AppStorage, link1, linkToLink2.", () => {
-    link2.set("Hanna");
-    test("AppStorage: 'say' expected updated value is `Hanna`.", AppStorage.Get<string>("say") == "Hanna");
-    test("SyncedPropertyTwoWay#1: 'say' expected updated value is `Hanna`.", link1.get() == "Hanna");
-    test("SyncedPropertyTwoWay#2: 'say' expected updated value is `Hanna`.", linkToLink2.get() == "Hanna");
-  });
-
-  tcase("linkToLink2.set update AppStorage, link1, link2.", () => {
-    linkToLink2.set("Guido");
-    test("linkToLink2: expected updated value is `Guido`.", linkToLink2.get() == "Guido");
-    test("SyncedPropertyTwoWay#1: 'say' expected updated value is `Guido`.", link1.get() == "Guido");
-    test("SyncedPropertyTwoWay#2: 'say' expected updated value is `Guido`.", link2.get() == "Guido");
-    test("AppStorage: 'say' expected updated value is `Gudio`.", AppStorage.Get<string>("say") == "Guido");
-  });
-
 
   AppStorage.Set("say", "Guido");
   let prop = AppStorage.Prop("say");
@@ -95,56 +77,14 @@ const testAppStorage = tsuite("AppStorage", () => {
     test("prop changed value expected `Hanna`.", prop.get() == "Hanna");
     test("link1 unchanged value expected `Guido`.", link1.get() == "Guido");
     test("app unchanged value expected `Guido`.", AppStorage.Get("say") == "Guido");
-    test("linkToLink2 unchanged value expected `Guido`.", linkToLink2.get() == "Guido");
   })
-
-
-  let proptoProp = prop.createProp();
-  tcase("proptoProp.get check value.", () => {
-    test("proptoProp value expected `Hanna`.", proptoProp.get() == "Hanna");
-    test("prop unchanged value expected `Hanna`.", prop.get() == "Hanna");
-  });
-
-
-  tcase("proptoProp.set change value only locally.", () => {
-    proptoProp.set("Paul");
-    test("proptoProp changed value expected `Paul`.", proptoProp.get() == "Paul");
-    test("prop unchanged value expected `Hanna`.", prop.get() == "Hanna");
-    test("link1 unchanged value expected `Guido`.", link1.get() == "Guido");
-    test("app unchanged value expected `Guido`.", AppStorage.Get("say") == "Guido");
-    test("linkToLink2 unchanged value expected `Guido`.", linkToLink2.get() == "Guido");
-  })
-
 
   tcase("appstorage set changes prop values", () => {
     AppStorage.Set("say", "Anton");
     test("prop changed value expected `Anton`.", prop.get() == "Anton");
-    test("proptoProp changed value expected `Anton`.", proptoProp.get() == "Anton");
   })
-
-  let proptoLink1 = link1.createProp(undefined, "proptoLink1");
-  tcase("proptoLink1 value", () => {
-    test("link1 unchanged value verification.", prop.get() == "Anton");
-    test("proptoLink1 initial value to be same as link1", proptoLink1.get() == "Anton");
-  })
-
-  tcase("propFromLink1 purely local value change", () => {
-    proptoLink1.set("Hanna");
-    test("link1 unchanged value verification.", prop.get() == "Anton");
-    test("proptoLink1 changed value", proptoLink1.get() == "Hanna");
-  })
-
-
-  tcase("link1 value change update proptoLink1", () => {
-    link1.set("Paul");
-    test("proptoLink1 changed value", proptoLink1.get() == "Paul");
-  })
-
 
   tcase("unsubscribe proptoLink1, linkToLink2", () => {
-    linkToLink2.aboutToBeDeleted();
-    test(`linkToLink2 subscriber has been unsubscribed from link2 (link2 Subscribers: ${link2.numberOfSubscrbers()}.`, link2.numberOfSubscrbers() == 0);
-
     const asSubscribers = AppStorage.NumberOfSubscribersTo("say");
     link2.aboutToBeDeleted();
     test("link2 subscriber has been unsubscribed from as", AppStorage.NumberOfSubscribersTo("say") == asSubscribers - 1);
@@ -174,8 +114,9 @@ const testAppStorage = tsuite("AppStorage", () => {
       AppStorage.Get<TestAClass>("objAClass").a == 102 && AppStorage.Get<TestAClass>("objAClass").b == 201);
   })
 
-  tcase("ObservedObject create, get, set", () => {
-    let linktoObsObj = AppStorage.Link<TestAClass>("objAClass");
+  let linktoObsObj = AppStorage.Link<TestAClass>("objAClass");
+
+  tcase("ObservedObject Link create, get, set", () => {
 
     test("link to ObservedObject, get value", linktoObsObj.get().b == 201);
 
@@ -183,14 +124,97 @@ const testAppStorage = tsuite("AppStorage", () => {
     test("link to ObservedObject, set value, read back link value", linktoObsObj.get().b == 203);
     test("link to ObservedObject, set value, read back value from AppStorage",
       AppStorage.Get<TestAClass>("objAClass").b == 203);
-    linktoObsObj.aboutToBeDeleted();
   })
 
+  tcase("ObservedObject Prop to Link create, get, set", () => {
+    let propToLinktoObsObj = linktoObsObj.createProp(undefined, "propToLinkObj");
+
+    test("prop to link to ObservedObject, get value", propToLinktoObsObj.get().b == 203);
+
+    propToLinktoObsObj.get().b = 204;
+    test("prop to link to ObservedObject, set value locally, read back prop value", propToLinktoObsObj.get().b == 204);
+    test("prop to link to ObservedObject, set value locally, read back link value", linktoObsObj.get().b == 203);
+    test("prop to link to ObservedObject, set value locally, read back value from AppStorage",
+      AppStorage.Get<TestAClass>("objAClass").b == 203);
+    linktoObsObj.aboutToBeDeleted();
+    propToLinktoObsObj.aboutToBeDeleted();
+  })
+
+  let proptoObsObj = AppStorage.Prop<TestAClass>("objAClass");
+
+  tcase("ObservedObject Prop create, get, set", () => {
+
+    test("prop to ObservedObject, get value", proptoObsObj.get().b == 203);
+
+    proptoObsObj.get().b = 201;
+    test("prop to ObservedObject, set value locally, read back prop value", proptoObsObj.get().b == 201);
+    test("prop to ObservedObject, set value locally, read back original prop value from AppStorage", 
+        AppStorage.Get<TestAClass>("objAClass").b == 203);
+
+    AppStorage.Set<TestAClass>("objAClass", { a: 42, b: 84 });
+    test("prop to ObservedObject, set value to AppStorage, read back from AppStorage", 
+        AppStorage.Get<TestAClass>("objAClass").b == 84);
+    test("prop to ObservedObject, set value to AppStorage, read back from prop", proptoObsObj.get().b == 84);
+  })
+
+  tcase("ObservedObject Prop to Prop create, get, set", () => {
+    let propToPropObsObj = proptoObsObj.createProp(undefined, "propToProp");
+
+    test("prop to prop to ObservedObject, get value", propToPropObsObj.get().a == 42);
+
+    propToPropObsObj.get().a = 201;
+    test("prop to prop to ObservedObject, set value locally, read back prop value", propToPropObsObj.get().a == 201);
+    test("prop to prop to ObservedObject, set value locally, read back value from parent prop", proptoObsObj.get().a == 42);
+    test("prop to prop to ObservedObject, set value locally, read back original prop value from AppStorage", 
+        AppStorage.Get<TestAClass>("objAClass").a == 42);
+
+    AppStorage.Set<TestAClass>("objAClass", { a: 421, b: 842 });
+    test("prop to prop to ObservedObject, set value to AppStorage, read back from AppStorage", 
+        AppStorage.Get<TestAClass>("objAClass").b == 842);
+    test("prop to prop toObservedObject, set value to AppStorage, read back from prop", propToPropObsObj.get().b == 842);
+    test("prop to prop toObservedObject, set value to AppStorage, read back from parent prop", proptoObsObj.get().b == 842);
+
+    propToPropObsObj.aboutToBeDeleted();
+    proptoObsObj.aboutToBeDeleted();
+  })
+
+  tcase("ObservedObject Prop create, get, set", () => {
+
+    test("prop to ObservedObject, get value", proptoObsObj.get().b == 203);
+
+    proptoObsObj.get().b = 201;
+    test("prop to ObservedObject, set value locally, read back prop value", proptoObsObj.get().b == 201);
+    test("prop to ObservedObject, set value locally, read back original prop value from AppStorage", 
+        AppStorage.Get<TestAClass>("objAClass").b == 203);
+
+    AppStorage.Set<TestAClass>("objAClass", { a: 42, b: 84 });
+    test("prop to ObservedObject, set value to AppStorage, read back from AppStorage", 
+        AppStorage.Get<TestAClass>("objAClass").b == 84);
+    test("prop to ObservedObject, set value to AppStorage, read back from prop", proptoObsObj.get().b == 84);
+  })
+
+  tcase("ObservedObject Prop to Prop create, get, set", () => {
+    let propToPropObsObj = proptoObsObj.createProp(undefined, "propToProp");
+
+    test("prop to prop to ObservedObject, get value", propToPropObsObj.get().a == 42);
+
+    propToPropObsObj.get().a = 201;
+    test("prop to prop to ObservedObject, set value locally, read back prop value", propToPropObsObj.get().a == 201);
+    test("prop to prop to ObservedObject, set value locally, read back value from parent prop", proptoObsObj.get().a == 42);
+    test("prop to prop to ObservedObject, set value locally, read back original prop value from AppStorage", 
+        AppStorage.Get<TestAClass>("objAClass").a == 42);
+
+    AppStorage.Set<TestAClass>("objAClass", { a: 421, b: 842 });
+    test("prop to prop to ObservedObject, set value to AppStorage, read back from AppStorage", 
+        AppStorage.Get<TestAClass>("objAClass").b == 842);
+    test("prop to prop toObservedObject, set value to AppStorage, read back from prop", propToPropObsObj.get().b == 842);
+    test("prop to prop toObservedObject, set value to AppStorage, read back from parent prop", proptoObsObj.get().b == 842);
+
+    propToPropObsObj.aboutToBeDeleted();
+    proptoObsObj.aboutToBeDeleted();
+  })
 
   tcase("cleanup ok", () => {
-    proptoProp.aboutToBeDeleted();
-    proptoLink1.aboutToBeDeleted();
-
     link1.aboutToBeDeleted();
     prop.aboutToBeDeleted();
     // note link2 and linktoLink2 have been deleted already earlier in this test suite!
@@ -203,7 +227,8 @@ const testAppStorage = tsuite("AppStorage", () => {
 
     AppStorage.AboutToBeDeleted();
 
-    test(`SubscriberManager num of subscribers is ${SubscriberManager.Get().numberOfSubscrbers()} should be 0 .`, SubscriberManager.Get().numberOfSubscrbers() == 0);
+    test(`SubscriberManager num of subscribers is ${SubscriberManager.NumberOfSubscribers()} should be 0 .`, 
+      SubscriberManager.NumberOfSubscribers() == 0);
 
 
   });

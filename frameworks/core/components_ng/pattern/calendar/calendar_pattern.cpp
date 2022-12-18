@@ -196,13 +196,15 @@ void CalendarPattern::FireRequestData(MonthState monthState)
     auto json = JsonUtil::Create(true);
     if (monthState == MonthState::PRE_MONTH) {
         json->Put("MonthState", 1);
+        json->Put("year", preMonth_.year);
+        json->Put("month", preMonth_.month);
     } else if (monthState == MonthState::NEXT_MONTH) {
         json->Put("MonthState", 2);
+        json->Put("year", nextMonth_.year);
+        json->Put("month", nextMonth_.month);
     }
     json->Put("currentYear", calendarDay_.month.year);
-    json->Put("currentMonth", calendarDay_.month.year);
-    json->Put("year", currentMonth_.year);
-    json->Put("month", currentMonth_.month);
+    json->Put("currentMonth", calendarDay_.month.month);
     onRequest(json->ToString());
 }
 
@@ -299,12 +301,36 @@ void CalendarPattern::JumpTo(const RefPtr<FrameNode>& preFrameNode, const RefPtr
 
 void CalendarPattern::FlushFocus(ObtainedMonth& obtainedMonth)
 {
-    if (!obtainedMonth.days.empty()) {
-        for (auto& day : obtainedMonth.days) {
-            day.focused = false;
+    if (obtainedMonth.days.empty()) {
+        LOGE("month data is empty");
+        return;
+    }
+    bool flag = false;
+    for (auto& day : obtainedMonth.days) {
+        day.focused = day.month.year == calendarDay_.month.year && day.month.month == calendarDay_.month.month &&
+                      day.day == calendarDay_.day;
+        if (!flag && day.focused == true) {
+            flag = true;
         }
+    }
+    if (!flag) {
         obtainedMonth.days[0].focused = true;
     }
+}
+
+void CalendarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_VOID(swiperPaintProperty);
+    json->Put("needSlide", !swiperPaintProperty->GetDisableSwipe().value_or(false) ? "true" : "false");
+    json->Put(
+        "direction", swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::VERTICAL ? "0" : "1");
 }
 
 } // namespace OHOS::Ace::NG

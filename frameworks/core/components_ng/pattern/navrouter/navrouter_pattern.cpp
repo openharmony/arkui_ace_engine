@@ -25,15 +25,14 @@ void NavRouterPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-    if (clickListener_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!clickListener_);
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& /*info*/) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto eventHub = pattern->GetEventHub<NavRouterEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireDestinationChangeEvent();
+        eventHub->FireChangeEvent(true);
     };
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gesture->AddClickEvent(clickListener_);

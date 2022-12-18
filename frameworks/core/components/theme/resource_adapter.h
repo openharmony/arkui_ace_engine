@@ -31,6 +31,7 @@ public:
     static RefPtr<ResourceAdapter> Create();
 
     virtual void Init(const ResourceInfo& resourceInfo) {}
+    virtual void Reload() {}
     virtual void UpdateConfig(const ResourceConfiguration& config) {}
 
     virtual RefPtr<ThemeStyle> GetTheme(int32_t themeId)

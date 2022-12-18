@@ -237,7 +237,6 @@ void ButtonComponent::SetProgressDiameter(const Dimension& diameter)
 void ButtonComponent::SetBackgroundColor(const Color& color)
 {
     declaration_->SetBackgroundColor(color);
-
 }
 
 void ButtonComponent::SetClickedColor(const Color& color)

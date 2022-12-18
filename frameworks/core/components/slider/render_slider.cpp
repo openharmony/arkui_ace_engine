@@ -51,6 +51,7 @@ void RenderSlider::Update(const RefPtr<Component>& component)
         onChange_ = *slider->GetOnChange();
     }
     sliderComponent_ = slider;
+    hoverAnimationType_ = slider->GetMouseAnimationType();
     if (!blockActive_) {
         Initialize(slider);
         if (!slider) {
@@ -344,6 +345,12 @@ void RenderSlider::Initialize(const RefPtr<SliderComponent>& sliderComponent)
     });
 }
 
+void RenderSlider::AnimateMouseHoverExit()
+{
+    isHover_ = false;
+    MarkNeedLayout();
+}
+
 bool RenderSlider::HandleMouseEvent(const MouseEvent& event)
 {
     auto localPosition = event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
@@ -488,7 +495,7 @@ void RenderSlider::HandleDragStart(const Offset& startPoint)
         }
         UpdateAnimation();
         controller_->Play();
-        isDraging_ = true;
+        isDragging_ = true;
         FireMovingEvent(SliderEvent::MOVE_START);
     }
 }
@@ -507,8 +514,8 @@ void RenderSlider::HandleDragUpdate(const Offset& updatePoint)
 
 void RenderSlider::HandleDragEnd()
 {
-    if (isDraging_) {
-        isDraging_ = false;
+    if (isDragging_) {
+        isDragging_ = false;
     }
     if (tip_) {
         tip_->SetVisible(false);

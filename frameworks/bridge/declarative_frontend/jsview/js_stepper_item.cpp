@@ -15,39 +15,38 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_stepper_item.h"
 
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/box/box_component.h"
-#include "core/components/focus_animation/focus_animation_theme.h"
-#include "core/components/navigator/navigator_component.h"
-#include "core/components/stepper/stepper_item_component_v2.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "frameworks/core/components/stepper/stepper_item_component.h"
-#include "frameworks/core/components/stepper/stepper_theme.h"
+#include <array>
+
+#include "bridge/declarative_frontend/jsview/models/stepper_item_model_impl.h"
+#include "core/components_ng/pattern/stepper/stepper_item_model_ng.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<StepperItemModel> StepperItemModel::instance_ = nullptr;
+
+StepperItemModel* StepperItemModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::ImageModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::StepperItemModelNG());
+        } else {
+            instance_.reset(new Framework::StepperItemModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
 void JSStepperItem::Create(const JSCallbackInfo& info)
 {
-    std::list<RefPtr<OHOS::Ace::Component>> componentChildren;
-    auto stepperItemComponentV2 = AceType::MakeRefPtr<StepperItemComponentV2>(
-            FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::FLEX_START, componentChildren);
-    ViewStackProcessor::GetInstance()->Push(stepperItemComponentV2);
-
-    RefPtr<StepperItemComponent> stepperItemComponent = ViewStackProcessor::GetInstance()->GetStepperItemComponent();
-    RefPtr<StepperTheme> stepperTheme = GetTheme<StepperTheme>();
-    if (stepperTheme) {
-        TextStyle textStyle_ = stepperTheme->GetTextStyle();
-        textStyle_.SetAdaptTextSize(stepperTheme->GetTextStyle().GetFontSize(), stepperTheme->GetMinFontSize());
-        textStyle_.SetMaxLines(stepperTheme->GetTextMaxLines());
-        textStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
-        stepperItemComponent->SetTextStyle(textStyle_);
-    }
-    auto focusAnimationTheme = GetTheme<FocusAnimationTheme>();
-    if (focusAnimationTheme) {
-        stepperItemComponent->SetFocusAnimationColor(focusAnimationTheme->GetColor());
-    }
-    ViewStackProcessor::GetInstance()->GetStepperDisplayComponent();
-    ViewStackProcessor::GetInstance()->GetStepperScrollComponent();
+    StepperItemModel::GetInstance()->Create();
 }
 
 void JSStepperItem::JSBind(BindingTarget globalObj)
@@ -76,18 +75,11 @@ void JSStepperItem::SetPrevLabel(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-    RefPtr<StepperItemComponent> stepperItem = ViewStackProcessor::GetInstance()->GetStepperItemComponent();
-    if (!stepperItem) {
-        LOGE("StepperItemComponent.");
-        return;
-    }
-    if (info[0]->IsString()) {
-        StepperLabels label = stepperItem->GetLabel();
-        label.leftLabel = info[0]->ToString();
-        stepperItem->SetLabel(label);
-    } else {
+    if (!info[0]->IsString()) {
         LOGE("Arg is not String.");
     }
+
+    StepperItemModel::GetInstance()->SetPrevLabel(info[0]->ToString());
 }
 
 void JSStepperItem::SetNextLabel(const JSCallbackInfo& info)
@@ -96,45 +88,34 @@ void JSStepperItem::SetNextLabel(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-    RefPtr<StepperItemComponent> stepperItem = ViewStackProcessor::GetInstance()->GetStepperItemComponent();
-    if (!stepperItem) {
-        LOGE("StepperItemComponent.");
-        return;
-    }
-    if (info[0]->IsString()) {
-        StepperLabels label = stepperItem->GetLabel();
-        label.rightLabel = info[0]->ToString();
-        stepperItem->SetLabel(label);
-    } else {
+    if (!info[0]->IsString()) {
         LOGE("Arg is not String.");
     }
+
+    StepperItemModel::GetInstance()->SetNextLabel(info[0]->ToString());
 }
 
 void JSStepperItem::SetStatus(const JSCallbackInfo& info)
 {
-    const std::string statusArray[] = {"normal", "disabled", "waiting", "skip"};
+    const std::array<std::string, 4> statusArray = { "normal", "disabled", "waiting", "skip" };
     std::string status = statusArray[0];
-    RefPtr<StepperItemComponent> stepperItem = ViewStackProcessor::GetInstance()->GetStepperItemComponent();
-    if (!stepperItem) {
-        LOGE("StepperItemComponent is NULL");
-        return;
-    }
-    StepperLabels label = stepperItem->GetLabel();
-    if (info.Length() < 1) {
-        label.initialStatus = status;
-    }
-
-    if (info[0]->IsNumber()) {
-        auto index = info[0]->ToNumber<uint32_t>();
-        if (index >= 0 && index < sizeof(statusArray) / sizeof(statusArray[0])) {
-            status = statusArray[index];
-            label.initialStatus = status;
-        } else {
-            status = statusArray[0];
-            label.initialStatus = status;
+    do {
+        if (info.Length() < 1) {
+            LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+            break;
         }
-    }
-    stepperItem->SetLabel(label);
+        if (!info[0]->IsNumber()) {
+            LOGE("Arg is not Number.");
+            break;
+        }
+        auto index = info[0]->ToNumber<uint32_t>();
+        if (index < 0 || index >= statusArray.size()) {
+            LOGE("The value of the index is not in the normal range.");
+            break;
+        }
+        status = statusArray.at(index);
+    } while (false);
+    StepperItemModel::GetInstance()->SetStatus(status);
 }
 
 } // namespace OHOS::Ace::Framework

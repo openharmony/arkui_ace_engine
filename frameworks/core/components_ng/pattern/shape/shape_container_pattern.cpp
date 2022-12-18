@@ -16,6 +16,7 @@
 #include <algorithm>
 
 #include "base/geometry/ng/rect_t.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/shape/shape_container_pattern.h"
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
 
@@ -35,9 +36,7 @@ void ShapeContainerPattern::ViewPortTansform()
     auto curFrameNode = GetHost();
     auto renderContext = curFrameNode->GetRenderContext();
     auto geoNode = curFrameNode->GetGeometryNode();
-    if (!geoNode) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(geoNode);
     SizeF sizeF = geoNode->GetContentSize();
     auto containerPaintProperty = curFrameNode->GetPaintProperty<ContainerPaintProperty>();
     if (containerPaintProperty->HasShapeViewBox() && containerPaintProperty->GetShapeViewBoxValue().IsValid()) {
@@ -54,6 +53,35 @@ void ShapeContainerPattern::ViewPortTansform()
         renderContext->OnTransformTranslateUpdate({ static_cast<float>(portLeft), static_cast<float>(portTop), 0 });
         renderContext->ClipWithRect(rectF);
     }
+}
+
+void ShapeContainerPattern::OnModifyDone()
+{
+    MarkChildrenDirty(GetHost());
+}
+
+void ShapeContainerPattern::MarkChildrenDirty(RefPtr<FrameNode> curentFrameNode)
+{
+    CHECK_NULL_VOID_NOLOG(curentFrameNode);
+    if (curentFrameNode->GetChildren().empty()) {
+        return;
+    }
+    auto children = curentFrameNode->GetChildren();
+    for (const auto& child : children) {
+        auto childNode = AceType::DynamicCast<FrameNode>(child);
+        if (childNode) {
+            childNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            MarkChildrenDirty(childNode);
+        }
+    }
+}
+
+void ShapeContainerPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+    host->GetRenderContext()->SetClipToFrame(true);
 }
 
 } // namespace OHOS::Ace::NG

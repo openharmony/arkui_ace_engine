@@ -27,12 +27,10 @@ namespace OHOS::Ace::NG {
 void ScrollPositionController::JumpTo(int32_t index, int32_t source)
 {
     auto pattern = scroll_.Upgrade();
-    if (pattern) {
-        auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-        if (scrollPattern) {
-            LOGW("jumpTo is not supported now");
-        }
-    }
+    CHECK_NULL_VOID_NOLOG(pattern);
+    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
+    CHECK_NULL_VOID_NOLOG(scrollPattern);
+    LOGW("jumpTo is not supported now");
 }
 
 bool ScrollPositionController::AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve)
@@ -64,26 +62,19 @@ void ScrollPositionController::ScrollBy(double pixelX, double pixelY, bool smoot
 double ScrollPositionController::GetCurrentPosition() const
 {
     auto pattern = scroll_.Upgrade();
-    if (!pattern) {
-        return 0.0;
-    }
+    CHECK_NULL_RETURN_NOLOG(pattern, 0.0);
     auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-    if (!scrollPattern) {
-        return 0.0;
-    }
+    CHECK_NULL_RETURN_NOLOG(scrollPattern, 0.0);
     return scrollPattern->GetCurrentPosition();
 }
 
 Axis ScrollPositionController::GetScrollDirection() const
 {
     auto pattern = scroll_.Upgrade();
-    if (pattern) {
-        auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-        if (scrollPattern) {
-            return scrollPattern->GetAxis();
-        }
-    }
-    return Axis::NONE;
+    CHECK_NULL_RETURN_NOLOG(pattern, Axis::NONE);
+    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
+    CHECK_NULL_RETURN_NOLOG(scrollPattern, Axis::NONE);
+    return scrollPattern->GetAxis();
 }
 
 void ScrollPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
@@ -110,9 +101,7 @@ Offset ScrollPositionController::GetCurrentOffset() const
 {
     auto pattern = scroll_.Upgrade();
     auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-    if (!scrollPattern) {
-        return Offset::Zero();
-    }
+    CHECK_NULL_RETURN_NOLOG(scrollPattern, Offset::Zero());
     auto pxOffset = scrollPattern->GetCurrentOffset();
     // need to reverse the coordinate
     auto x = Dimension(-pxOffset.GetX(), DimensionUnit::PX);

@@ -19,11 +19,13 @@
 #include <functional>
 
 #include "base/memory/ace_type.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_v2/grid/grid_event.h"
 
 namespace OHOS::Ace::NG {
 
-using ScrollToIndexFunc = std::function<void(int32_t)>;
+using ScrollToIndexFunc = std::function<void(const BaseEventInfo*)>;
 using ItemDragStartFunc = std::function<RefPtr<UINode>(const ItemDragInfo&, int32_t)>;
 using ItemDragEnterFunc = std::function<void(const ItemDragInfo&)>;
 using ItemDragMoveFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t)>;
@@ -70,18 +72,20 @@ public:
     void FireOnScrollToIndex(int32_t param) const
     {
         if (onScrollToIndex_) {
-            onScrollToIndex_(param);
+            V2::GridEventInfo info(param);
+            onScrollToIndex_(&info);
         }
     }
 
-    RefPtr<UINode> FireOnItemDragStart(const ItemDragInfo& dragInfo, int32_t itemIndex) const;
-
-    void FireOnItemDragEnter(const ItemDragInfo& dragInfo) const
+    RefPtr<UINode> FireOnItemDragStart(const ItemDragInfo& dragInfo, int32_t itemIndex) const
     {
-        if (onItemDragEnter_) {
-            onItemDragEnter_(dragInfo);
+        if (onItemDragStart_) {
+            return onItemDragStart_(dragInfo, itemIndex);
         }
+        return nullptr;
     }
+
+    void FireOnItemDragEnter(const ItemDragInfo& dragInfo);
 
     void FireOnItemDragMove(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) const
     {
@@ -90,27 +94,37 @@ public:
         }
     }
 
-    void FireOnItemDragLeave(const ItemDragInfo& dragInfo, int32_t itemIndex) const
+    void FireOnItemDragLeave(const ItemDragInfo& dragInfo, int32_t itemIndex);
+
+    void FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess);
+
+    bool HasOnItemDrop() const
     {
-        if (onItemDragLeave_) {
-            onItemDragLeave_(dragInfo, itemIndex);
-        }
+        return static_cast<bool>(onItemDrop_);
     }
 
-    void FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) const
-    {
-        if (onItemDrop_) {
-            onItemDrop_(dragInfo, itemIndex, insertIndex, isSuccess);
-        }
-    }
+    void InitItemDragEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleOnItemDragStart(const GestureEvent& info);
+    void HandleOnItemDragUpdate(const GestureEvent& info);
+    void HandleOnItemDragEnd(const GestureEvent& info);
+    void HandleOnItemDragCancel();
+    RefPtr<FrameNode> FindGridItemByPosition(float x, float y);
+    int32_t GetGridItemIndex(const RefPtr<FrameNode>& frameNode);
+    bool CheckPostionInGrid(float x, float y);
+    int GetFrameNodeChildSize();
 
 private:
+    bool GetEditable() const;
+
     ScrollToIndexFunc onScrollToIndex_;
     ItemDragStartFunc onItemDragStart_;
     ItemDragEnterFunc onItemDragEnter_;
     ItemDragMoveFunc onItemDragMove_;
     ItemDragLeaveFunc onItemDragLeave_;
     ItemDropFunc onItemDrop_;
+    RefPtr<DragDropProxy> dragDropProxy_;
+    int32_t draggedIndex_ = 0;
+    RefPtr<FrameNode> draggingItem_;
 };
 
 } // namespace OHOS::Ace::NG

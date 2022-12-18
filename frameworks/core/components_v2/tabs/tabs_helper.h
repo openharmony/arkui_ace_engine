@@ -186,7 +186,7 @@ public:
         if (tabContentItemComponent && tabContentItemComponent->HasBarBuilder()) {
             newBarItemComponent = AceType::MakeRefPtr<TabBarItemComponent>(
                 tabContentItemComponent->ExecuteBarBuilder());
-        } else {
+        } else if (tabContentItemComponent) {
             newBarItemComponent = AceType::MakeRefPtr<TabBarItemComponent>(
                 TabBarItemComponent::BuildWithTextIcon(
                     tabContentItemComponent->GetBarText(), tabContentItemComponent->GetBarIcon()));
@@ -197,7 +197,9 @@ public:
         newBarItemComponent->SetElementId(id);
 
         LOGD("setting id on tabContentItemComponent to %{public}d", id);
-        tabContentItemComponent->SetBarElementId(id);
+        if (tabContentItemComponent) {
+            tabContentItemComponent->SetBarElementId(id);
+        }
 
         // Add element to TabBar or store component to be added later
         if (tabBar) {
@@ -458,6 +460,7 @@ public:
     {
         if (!renderNode) {
             LOGE("Render node is nullptr");
+            return;
         }
         auto t1 = renderNode->GetChildren().front();
         auto t2 = t1 ? t1->GetChildren().front() : nullptr;

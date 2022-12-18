@@ -15,6 +15,8 @@
 
 #include "frameworks/core/components/svg/parse/svg_dom.h"
 
+#include <string>
+
 #include "base/utils/system_properties.h"
 #include "frameworks/core/components/box/render_box.h"
 #include "frameworks/core/components/svg/flutter_render_svg.h"
@@ -107,8 +109,8 @@ RefPtr<BoxComponent> CreateSvgClipBox(const Size& containerSize, const SvgRadius
 
 SvgDom::SvgDom(const WeakPtr<PipelineContext>& context) : context_(context)
 {
-    attrCallback_ = [weakSvgDom = AceType::WeakClaim(this)](const std::string& styleName,
-                    const std::pair<std::string, std::string>& attrPair) {
+    attrCallback_ = [weakSvgDom = AceType::WeakClaim(this)](
+                        const std::string& styleName, const std::pair<std::string, std::string>& attrPair) {
         auto svgDom = weakSvgDom.Upgrade();
         if (!svgDom) {
             LOGE("svg dom is null");
@@ -132,8 +134,8 @@ SvgDom::~SvgDom()
     renderNode_ = nullptr;
 }
 
-RefPtr<SvgDom> SvgDom::CreateSvgDom(SkStream& svgStream, const WeakPtr<PipelineContext>& context,
-    const std::optional<Color>& svgThemeColor)
+RefPtr<SvgDom> SvgDom::CreateSvgDom(
+    SkStream& svgStream, const WeakPtr<PipelineContext>& context, const std::optional<Color>& svgThemeColor)
 {
     RefPtr<SvgDom> svgDom = AceType::MakeRefPtr<SvgDom>(context);
     if (svgThemeColor) {
@@ -168,8 +170,7 @@ bool SvgDom::ParseSvg(SkStream& svgStream)
     return true;
 }
 
-RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xmlNode,
-    const RefPtr<SvgNode>& parent)
+RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xmlNode, const RefPtr<SvgNode>& parent)
 {
     const char* element = dom.getName(xmlNode);
     if (dom.getType(xmlNode) == SkDOM::kText_Type) {
@@ -207,8 +208,8 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
 
 void SvgDom::ParseAttrs(const SkDOM& xmlDom, const SkDOM::Node* xmlNode, const RefPtr<SvgNode>& svgNode)
 {
-    const char *name = nullptr;
-    const char *value = nullptr;
+    const char* name = nullptr;
+    const char* value = nullptr;
     SkDOM::AttrIter attrIter(xmlDom, xmlNode);
     while ((name = attrIter.next(&value))) {
         SetAttrValue(name, value, svgNode);
@@ -258,7 +259,7 @@ void SvgDom::ParseClassAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::stri
         if (attrMap.empty()) {
             continue;
         }
-        for (const auto& attr: attrMap) {
+        for (const auto& attr : attrMap) {
             svgNode->SetAttr(attr.first, attr.second);
         }
     }
@@ -285,22 +286,14 @@ void SvgDom::ParseStyleAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::stri
 void SvgDom::SetAttrValue(const std::string& name, const std::string& value, const RefPtr<SvgNode>& svgNode)
 {
     static const LinearMapNode<void (*)(const std::string&, const WeakPtr<SvgNode>&, SvgDom&)> attrs[] = {
-        { DOM_SVG_CLASS,
-            [](const std::string& val, const WeakPtr<SvgNode>& svgNode, SvgDom& svgDom) {
-                svgDom.ParseClassAttr(svgNode, val);
-            } },
-        { DOM_SVG_FILL,
-            [](const std::string& val, const WeakPtr<SvgNode>& svgNode, SvgDom& svgDom) {
-                svgDom.ParseFillAttr(svgNode, val);
-            } },
-        { DOM_ID,
-            [](const std::string& val, const WeakPtr<SvgNode>& svgNode, SvgDom& svgDom) {
-                svgDom.ParseIdAttr(svgNode, val);
-            } },
-        { DOM_SVG_STYLE,
-            [](const std::string& val, const WeakPtr<SvgNode>& svgNode, SvgDom& svgDom) {
-                svgDom.ParseStyleAttr(svgNode, val);
-            } },
+        { DOM_SVG_CLASS, [](const std::string& val, const WeakPtr<SvgNode>& svgNode,
+                             SvgDom& svgDom) { svgDom.ParseClassAttr(svgNode, val); } },
+        { DOM_SVG_FILL, [](const std::string& val, const WeakPtr<SvgNode>& svgNode,
+                            SvgDom& svgDom) { svgDom.ParseFillAttr(svgNode, val); } },
+        { DOM_ID, [](const std::string& val, const WeakPtr<SvgNode>& svgNode,
+                      SvgDom& svgDom) { svgDom.ParseIdAttr(svgNode, val); } },
+        { DOM_SVG_STYLE, [](const std::string& val, const WeakPtr<SvgNode>& svgNode,
+                             SvgDom& svgDom) { svgDom.ParseStyleAttr(svgNode, val); } },
     };
     if (value.empty()) {
         return;
@@ -311,6 +304,12 @@ void SvgDom::SetAttrValue(const std::string& name, const std::string& value, con
         return;
     }
     svgNode->SetAttr(name, value);
+    if (name == std::string("mask")) {
+        if (value.find("url(") == 0) {
+            auto src = std::regex_replace(value, std::regex(R"(^url\(\s*['"]?\s*#([^()]+?)\s*['"]?\s*\)$)"), "$1");
+            svgContext_->addMaskReferUrl(src);
+        }
+    }
 }
 
 void SvgDom::PaintDirectly(RenderContext& context, const Offset& offset)
@@ -446,8 +445,7 @@ void SvgDom::UpdateLayout(ImageFit imageFit, const SvgRadius& svgRadius, bool us
 
 SvgRenderTree SvgDom::GetSvgRenderTree() const
 {
-    return {
-        .root = renderNode_,
+    return { .root = renderNode_,
         .clipBox = clipBox_.Upgrade(),
         .transform = transform_.Upgrade(),
         .svgRoot = svgRoot_.Upgrade(),
@@ -488,7 +486,7 @@ void SvgDom::ApplyImageFit(ImageFit imageFit, double& scaleX, double& scaleY)
         case ImageFit::CONTAIN:
             ApplyContain(scaleX, scaleY);
             break;
-        case ImageFit::SCALEDOWN:
+        case ImageFit::SCALE_DOWN:
             if (svgSize_ > containerSize_ || svgSize_ == containerSize_) {
                 ApplyContain(scaleX, scaleY);
             }
@@ -544,8 +542,7 @@ void SvgDom::InitAnimatorGroup(const RefPtr<RenderNode>& node)
     AddToAnimatorGroup(node, animatorGroup_);
     auto finishEvent = AceAsyncEvent<void()>::Create(finishEvent_, context_);
     if (finishEvent) {
-        animatorGroup_->AddStopListener(
-            [asyncEvent = finishEvent] { asyncEvent(); });
+        animatorGroup_->AddStopListener([asyncEvent = finishEvent] { asyncEvent(); });
     }
     animatorGroup_->Play();
 }

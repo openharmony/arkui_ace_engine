@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/**
+ * NativeViewFullUpdate
+ * 
+ * all definitions in this file are framework internal
+ */
+
 declare class NativeViewFullUpdate {
   constructor(compilerAssignedUniqueChildId: string, parent: View);
   markNeedUpdate(): void;
@@ -20,4 +26,6 @@ declare class NativeViewFullUpdate {
   syncInstanceId(): void;
   restoreInstanceId(): void;
   static create(newView: NativeViewFullUpdate): void;
+  setCardId(cardId: number): void;
+  getCardId(): number;
 }

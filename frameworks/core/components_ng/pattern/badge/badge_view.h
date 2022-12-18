@@ -38,7 +38,6 @@ public:
     };
 
     static void Create(BadgeParameters& badgeParameters);
-    static void Pop();
 };
 
 } // namespace OHOS::Ace::NG

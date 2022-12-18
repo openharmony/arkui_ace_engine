@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("../../build/uicast.gni")
 
 # build core sources
 template("ace_core_source_set") {
@@ -60,6 +61,7 @@ template("ace_core_source_set") {
       # common
       "common/ace_application_info.cpp",
       "common/ace_engine.cpp",
+      "common/ace_engine_ext.cpp",
       "common/anr_thread.cpp",
       "common/card_scope.cpp",
       "common/clipboard/clipboard_proxy.cpp",
@@ -179,6 +181,8 @@ template("ace_core_source_set") {
       "image/image_compressor.cpp",
       "image/image_loader.cpp",
       "image/image_object.cpp",
+      "image/image_object_animated.cpp",
+      "image/image_object_svg.cpp",
       "image/image_provider.cpp",
       "image/image_source_info.cpp",
 
@@ -196,6 +200,9 @@ template("ace_core_source_set") {
       "common/flutter/flutter_task_executor.cpp",
       "common/flutter/flutter_window.cpp",
     ]
+
+    defines += uicast_configs.uicast_defines
+    sources += uicast_configs.uicast_core_sources
 
     if (platform == "ohos") {
       sources -= [ "common/anr_thread.cpp" ]
@@ -327,6 +334,14 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/wrap:ace_core_components_wrap_$platform",
     ]
 
+    if (defined(config.model_component_support) &&
+        config.model_component_support) {
+      deps += [
+        "$ace_root/frameworks/core/components/scene_viewer:ace_core_components_scene_viewer_$platform",
+        "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_model_component_ng_$platform",
+      ]
+    }
+
     deps += [
       "$ace_root/frameworks/core/components_v2/common:ace_core_components_common_v2_$platform",
       "$ace_root/frameworks/core/components_v2/foreach:ace_core_components_foreach_v2_$platform",
@@ -420,10 +435,23 @@ template("ace_core_source_set") {
       }
     }
 
+    if (defined(config.remote_window_support) && config.remote_window_support) {
+      if (!use_mingw_win && !use_mac && !use_linux) {
+        deps += [
+          "$ace_root/frameworks/core/components/remote_window:ace_core_components_remote_window_$platform",
+          "$ace_root/frameworks/core/components_ng/pattern/remote_window:ace_core_components_remote_window_pattern_ng_$platform",
+        ]
+      }
+    }
+
     if (defined(config.build_container_scope_lib) &&
         config.build_container_scope_lib) {
       sources -= [ "common/container_scope.cpp" ]
-      deps += [ "$ace_napi:ace_container_scope" ]
+      if (defined(config.build_for_ios) && config.build_for_ios) {
+        deps += [ "$ace_napi:ace_container_scope_static" ]
+      } else {
+        deps += [ "$ace_napi:ace_container_scope" ]
+      }
     }
 
     if (defined(config.plugin_components_support) &&
@@ -436,6 +464,7 @@ template("ace_core_source_set") {
       deps += [ "//commonlibrary/c_utils/base:utils" ]
     }
     include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
+    include_dirs += uicast_configs.uicast_root_include
 
     if (!is_wearable_product) {
       deps += [
@@ -444,12 +473,13 @@ template("ace_core_source_set") {
         "$ace_root/frameworks/core/components/piece:ace_core_components_piece_$platform",
         "$ace_root/frameworks/core/components/popup:ace_core_components_popup_$platform",
         "$ace_root/frameworks/core/components/rating:ace_core_components_rating_$platform",
-        "$ace_root/frameworks/core/components/remote_window:ace_core_components_remote_window_$platform",
         "$ace_root/frameworks/core/components/select:ace_core_components_select_$platform",
         "$ace_root/frameworks/core/components/tool_bar:ace_core_components_tool_bar_$platform",
         "$ace_root/frameworks/core/components/video:ace_core_components_video_$platform",
       ]
     }
+
+    deps += uicast_configs.uicast_root_deps
 
     cflags_cc = []
     cflags_cc += invoker.cflags_cc
@@ -569,6 +599,8 @@ template("ace_core_ng_source_set") {
       "image/image_compressor.cpp",
       "image/image_loader.cpp",
       "image/image_object.cpp",
+      "image/image_object_animated.cpp",
+      "image/image_object_svg.cpp",
       "image/image_provider.cpp",
       "image/image_source_info.cpp",
 
@@ -593,6 +625,7 @@ template("ace_core_ng_source_set") {
       "components/common/properties/color_factory.cpp",
       "components/common/properties/decoration.cpp",
       "components/common/properties/edge.cpp",
+      "components/common/properties/motion_path_evaluator.cpp",
       "components/common/properties/page_transition_option.cpp",
       "components/common/properties/scroll_bar.cpp",
       "components/common/properties/shadow.cpp",
@@ -604,6 +637,7 @@ template("ace_core_ng_source_set") {
       "components/common/layout/grid_column_info.cpp",
       "components/common/layout/grid_container_info.cpp",
       "components/common/layout/grid_system_manager.cpp",
+      "components/common/layout/screen_system_manager.cpp",
 
       # v1 deps
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
@@ -612,17 +646,22 @@ template("ace_core_ng_source_set") {
       "components/font/constants_converter.cpp",
       "components/font/font_loader_creator.cpp",
       "components/font/font_manager_creator.cpp",
+      "components/panel/sliding_events.cpp",
+      "components/picker/picker_animation.cpp",
       "components/picker/picker_data.cpp",
       "components/scroll/scrollable.cpp",
       "components/theme/app_theme.cpp",
       "components/theme/icon_theme.cpp",
       "components/theme/theme_attributes.cpp",
       "components/theme/theme_constants.cpp",
-      "components/theme/theme_manager.cpp",
+      "components/theme/theme_manager_impl.cpp",
       "components/theme/theme_utils.cpp",
 
       # v2 inspector
+      "components_v2/grid/grid_event.cpp",
+      "components_v2/grid_layout/grid_container_utils.cpp",
       "components_v2/inspector/inspector_constants.cpp",
+      "components_v2/inspector/utils.cpp",
 
       # flutter impl
       "common/flutter/flutter_asset_manager.cpp",
@@ -645,6 +684,16 @@ template("ace_core_ng_source_set") {
         "$ace_flutter_engine_root_new:third_party_flutter_engine_dev_$platform",
         "$ace_flutter_engine_root_new/third_party/skia:ace_skia_dev_$platform",
       ]
+    }
+
+    if (defined(config.build_container_scope_lib) &&
+        config.build_container_scope_lib) {
+      sources -= [ "common/container_scope.cpp" ]
+      if (defined(config.build_for_ios) && config.build_for_ios) {
+        deps += [ "$ace_napi:ace_container_scope_static" ]
+      } else {
+        deps += [ "$ace_napi:ace_container_scope" ]
+      }
     }
 
     deps += [

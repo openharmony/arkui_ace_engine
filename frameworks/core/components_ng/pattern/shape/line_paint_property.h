@@ -58,6 +58,23 @@ public:
         ResetEndPoint();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        ShapePaintProperty::ToJsonValue(json);
+        if (propStartPoint_.has_value()) {
+            auto startPointArray = JsonUtil::CreateArray(true);
+            startPointArray->Put("0", propStartPoint_.value().first.Value());
+            startPointArray->Put("1", propStartPoint_.value().second.Value());
+            json->Put("startPoint", startPointArray);
+        }
+        if (propEndPoint_.has_value()) {
+            auto endPointArray = JsonUtil::CreateArray(true);
+            endPointArray->Put("0", propEndPoint_.value().first.Value());
+            endPointArray->Put("1", propEndPoint_.value().second.Value());
+            json->Put("endPoint", endPointArray);
+        }
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StartPoint, ShapePoint, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EndPoint, ShapePoint, PROPERTY_UPDATE_RENDER);
 

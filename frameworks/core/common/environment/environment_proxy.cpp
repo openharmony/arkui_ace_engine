@@ -15,6 +15,9 @@
 
 #include "core/common/environment/environment_proxy.h"
 
+#include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
+
 namespace OHOS::Ace {
 
 EnvironmentProxy* EnvironmentProxy::inst_ = nullptr;
@@ -39,9 +42,7 @@ void EnvironmentProxy::SetDelegate(std::unique_ptr<EnvironmentInterface>&& deleg
 
 RefPtr<Environment> EnvironmentProxy::GetEnvironment(const RefPtr<TaskExecutor>& taskExecutor) const
 {
-    if (!delegate_) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN_NOLOG(delegate_, nullptr);
     return delegate_->GetEnvironment(taskExecutor);
 }
 

@@ -21,6 +21,7 @@
 #include "core/components/image/image_component.h"
 #include "core/components/side_bar/render_side_bar_container.h"
 #include "core/components/side_bar/side_bar_container_element.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/gestures/tap_gesture.h"
 #include "core/pipeline/base/component.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -107,10 +108,15 @@ void SideBarContainerComponent::Build()
     }
 
     ClearChildren();
-
     AppendChild(contentbox);
     AppendChild(barbox);
+#if !defined(PREVIEW)
+    auto btnComposed = AceType::MakeRefPtr<V2::InspectorComposedComponent>(
+        V2::InspectorComposedComponent::GenerateId(), V2::IMAGE_COMPONENT_TAG, displayBtn);
+    AppendChild(btnComposed);
+#else
     AppendChild(displayBtn);
+#endif
 }
 
 void SideBarContainerComponent::SetButtonWidth(double width)

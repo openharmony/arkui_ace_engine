@@ -30,9 +30,8 @@ class TxtParagraph : public Paragraph {
     DECLARE_ACE_TYPE(NG::TxtParagraph, NG::Paragraph)
 
 public:
-    TxtParagraph(const WeakPtr<PipelineContext>& context, const ParagraphStyle& paraStyle,
-        std::shared_ptr<txt::FontCollection> fontCollection)
-        : context_(context), paraStyle_(paraStyle), fontCollection_(std::move(fontCollection))
+    TxtParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<txt::FontCollection> fontCollection)
+        : paraStyle_(paraStyle), fontCollection_(std::move(fontCollection))
     {}
     ~TxtParagraph() override = default;
 
@@ -52,13 +51,17 @@ public:
     float GetHeight() override;
     float GetTextWidth() override;
     size_t GetLineCount() override;
+    float GetMaxIntrinsicWidth() override;
+    bool DidExceedMaxLines() override;
+    float GetLongestLine() override;
+    float GetMaxWidth() override;
+    float GetAlphabeticBaseline() override;
 
     // interfaces for painting
-    void Paint(const RefPtr<Canvas>& canvas, float x, float y) override;
+    void Paint(const RSCanvas& canvas, float x, float y) override;
 
 private:
     void CreateBuilder();
-    const WeakPtr<PipelineContext>& context_;
     ParagraphStyle paraStyle_;
     std::unique_ptr<txt::Paragraph> paragraph_;
     std::unique_ptr<txt::ParagraphBuilder> builder_;

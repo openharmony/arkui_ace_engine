@@ -28,13 +28,17 @@ class BlankPattern : public Pattern {
 public:
     BlankPattern() = default;
     ~BlankPattern() override = default;
+    std::string GetColorString() const;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
-    void OnMountToParentDone() override;
+    void OnModifyDone() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<BlankLayoutProperty>();
     }
+private:
+    RefPtr<FrameNode> GetParentFrameNode(RefPtr<FrameNode> node);
 };
 
 } // namespace OHOS::Ace::NG

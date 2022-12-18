@@ -21,6 +21,7 @@
 #include "core/components/scroll/scroll_component.h"
 #include "core/components/test/unittest/mock/mock_render_common.h"
 #include "core/components/test/unittest/scroll/scroll_test_utils.h"
+#include "core/components/scroll/render_multi_child_scroll.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -169,6 +170,214 @@ void RenderScrollTest::TearDown()
     renderScroll_ = nullptr;
     renderFocusScroll_ = nullptr;
     parentRenderScroll_ = nullptr;
+}
+
+class MockRenderScroller final : public RenderScroll {
+    DECLARE_ACE_TYPE(MockRenderScroller, RenderScroll);
+
+public:
+    MockRenderScroller() = default;
+    ~MockRenderScroller() override = default;
+
+    void InitScrollBarTest(const RefPtr<ScrollBar>& scrollBar)
+    {
+        InitScrollBar(scrollBar);
+    }
+
+    void SetAxis(Axis axisDirection)
+    {
+        axis_ = axisDirection;
+    }
+
+    void SetRtl(bool rightToLeft)
+    {
+        rightToLeft_ = rightToLeft;
+    }
+
+    void DoJumpTest(double position, int32_t source)
+    {
+        DoJump(position, source);
+    }
+
+    void PerformLayout() override;
+};
+
+void MockRenderScroller::PerformLayout()
+{
+    return;
+}
+
+class MockRenderMultiChildScroll final : public RenderMultiChildScroll {
+    DECLARE_ACE_TYPE(MockRenderMultiChildScroll, RenderMultiChildScroll);
+
+public:
+    MockRenderMultiChildScroll() = default;
+    ~MockRenderMultiChildScroll() override = default;
+
+    void UpdateTest(const RefPtr<Component>& component)
+    {
+        Update(component);
+    }
+};
+
+/**
+ * @tc.name: RenderScrollTestRTL001
+ * @tc.desc: Test Update and PerformLayout of RenderSingleChildScroll for RTL
+ * @tc.type: FUNC
+ * @tc.require: issueI5NC7M
+ */
+HWTEST_F(RenderScrollTest, RenderScrollTestRTL001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RenderScrollTest Rtl001 start";
+
+    /**
+     * @tc.steps: step1. construct the scroll component with a box child, set direction.
+     */
+    RefPtr<BoxComponent> boxComponent = AceType::MakeRefPtr<BoxComponent>();
+    boxComponent->SetWidth(SCROLL_CHILD_BOX_WIDTH);
+    boxComponent->SetHeight(SCROLL_CHILD_BOX_HEIGHT);
+    RefPtr<ScrollComponent> scrollComponent = AceType::MakeRefPtr<ScrollComponent>(boxComponent);
+    scrollComponent->SetTextDirection(TextDirection::RTL);
+    scrollComponent->SetAxisDirection(Axis::HORIZONTAL);
+
+    /**
+     * @tc.steps: step2. trigger layout for RenderSingleChildScroll.
+     * @tc.expected: step2. layout is horizontal.
+     */
+    renderScroll_->Update(scrollComponent);
+    renderScroll_->PerformLayout();
+
+    EXPECT_EQ(renderScroll_->GetAxisDirection(), Axis::HORIZONTAL);
+
+    GTEST_LOG_(INFO) << "RenderScrollTest Rtl001 stop";
+}
+
+/**
+ * @tc.name: RenderScrollTestRTL002
+ * @tc.desc: Test InitScrollBar of RenderScroll for RTL
+ * @tc.type: FUNC
+ * @tc.require: issueI5NC7M
+ */
+HWTEST_F(RenderScrollTest, RenderScrollTestRTL002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RenderScrollTest Rtl002 start";
+
+    /**
+     * @tc.steps: step1. construct the RenderScroll, set direction.
+     */
+    RefPtr<MockRenderScroller> renderScroll = AceType::MakeRefPtr<MockRenderScroller>();
+    RefPtr<ScrollBar> scrollBar = AceType::MakeRefPtr<ScrollBar>(DisplayMode::ON);
+    renderScroll->SetAxis(Axis::VERTICAL);
+    renderScroll->SetRtl(true);
+
+    /**
+     * @tc.steps: step2. trigger InitScrollBar for RenderScroll.
+     * @tc.expected: step2. position mode of scrollBar is left.
+     */
+    renderScroll->InitScrollBarTest(scrollBar);
+    EXPECT_EQ(scrollBar->GetPositionMode(), PositionMode::LEFT);
+
+    GTEST_LOG_(INFO) << "RenderScrollTest Rtl002 stop";
+}
+
+/**
+ * @tc.name: RenderScrollTestRTL003
+ * @tc.desc: Test ScrollToEdge of RenderScroll for RTL
+ * @tc.type: FUNC
+ * @tc.require: issueI5NC7M
+ */
+HWTEST_F(RenderScrollTest, RenderScrollTestRTL003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RenderScrollTest Rtl003 start";
+
+    /**
+     * @tc.steps: step1. construct the RenderScroll, set axis direction.
+     */
+    RefPtr<MockRenderScroller> renderScroll = AceType::MakeRefPtr<MockRenderScroller>();
+    renderScroll->SetAxis(Axis::HORIZONTAL);
+
+    /**
+     * @tc.steps: step2. trigger ScrollToEdge to bottom for RenderScroll with RTL.
+     * @tc.expected: step2. layout is horizontal.
+     */
+    renderScroll->SetRtl(true);
+    renderScroll->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_EQ(renderScroll->GetAxis(), Axis::HORIZONTAL);
+
+    /**
+     * @tc.steps: step3. trigger ScrollToEdge to top for RenderScroll with LTR.
+     * @tc.expected: step3. layout is horizontal.
+     */
+    renderScroll->SetRtl(false);
+    renderScroll->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    EXPECT_EQ(renderScroll->GetAxis(), Axis::HORIZONTAL);
+
+    GTEST_LOG_(INFO) << "RenderScrollTest Rtl003 stop";
+}
+
+/**
+ * @tc.name: RenderScrollTestRTL004
+ * @tc.desc: Test ScrollPage of RenderScroll for RTL
+ * @tc.type: FUNC
+ * @tc.require: issueI5NC7M
+ */
+HWTEST_F(RenderScrollTest, RenderScrollTestRTL004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RenderScrollTest Rtl004 start";
+
+    /**
+     * @tc.steps: step1. construct the RenderScroll, set direction.
+     */
+    RefPtr<MockRenderScroller> renderScroll = AceType::MakeRefPtr<MockRenderScroller>();
+    renderScroll->SetAxis(Axis::HORIZONTAL);
+
+    /**
+     * @tc.steps: step2. trigger ScrollPage to next page for RenderScroll with RTL.
+     * @tc.expected: step2. layout is horizontal.
+     */
+    renderScroll->SetRtl(true);
+    renderScroll->ScrollPage(false, false);
+    EXPECT_EQ(renderScroll->GetAxis(), Axis::HORIZONTAL);
+
+    /**
+     * @tc.steps: step3. trigger ScrollPage to previous page for RenderScroll with LTR.
+     * @tc.expected: step3. layout is horizontal.
+     */
+    renderScroll->SetRtl(false);
+    renderScroll->ScrollPage(true, false);
+    EXPECT_EQ(renderScroll->GetAxis(), Axis::HORIZONTAL);
+
+    GTEST_LOG_(INFO) << "RenderScrollTest Rtl004 stop";
+}
+
+/**
+ * @tc.name: RenderScrollTestRTL005
+ * @tc.desc: Test Update of RenderMultiChildScroll for RTL
+ * @tc.type: FUNC
+ * @tc.require: issueI5NC7M
+ */
+HWTEST_F(RenderScrollTest, RenderScrollTestRTL005, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RenderScrollTest Rtl005 start";
+
+    /**
+     * @tc.steps: step1. construct the RenderMultiChildScroll, set direction.
+     */
+    RefPtr<ListComponent> listComponent = AceType::MakeRefPtr<ListComponent>();
+    listComponent->SetRightToLeft(true);
+    listComponent->SetDirection(FlexDirection::ROW);
+    RefPtr<MockRenderMultiChildScroll> renderScroll = AceType::MakeRefPtr<MockRenderMultiChildScroll>();
+    RefPtr<PipelineContext> mockContext = MockRenderCommon::GetMockContext();
+    renderScroll->Attach(mockContext);
+
+    /**
+     * @tc.steps: step2. trigger Update for RenderMultiChildScroll with RTL.
+     * @tc.expected: step2. layout is horizontal.
+     */
+    renderScroll->UpdateTest(listComponent);
+    EXPECT_TRUE(renderScroll->IsRowReverse());
+
+    GTEST_LOG_(INFO) << "RenderScrollTest Rtl005 stop";
 }
 
 /**

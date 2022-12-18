@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_CLOCK_RENDER_TEXT_CLOCK_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_CLOCK_RENDER_TEXT_CLOCK_H
 
+#include <string>
 #include "base/i18n/localization.h"
 #include "base/utils/time_util.h"
 #include "core/components/image/render_image.h"
@@ -39,8 +40,8 @@ public:
     std::string GetFormatDateTime(const std::string& format) const;
     DateTime GetDateTime() const;
     void UpdateTimeText();
-    std::function<void(uint64_t)> onDateChange;
-    void SetOnDateChange(const std::function<void(uint64_t)>& value)
+    std::function<void(const std::string)> onDateChange;
+    void SetOnDateChange(const std::function<void(const std::string)>& value)
     {
         onDateChange = value;
     }
@@ -50,7 +51,7 @@ public:
     }
     void UpdateTimeTextCallBack();
 
-    double GetHoursWest() const
+    int32_t GetHoursWest() const
     {
         return hoursWest_;
     }
@@ -68,8 +69,8 @@ public:
 protected:
     RenderTextClock();
 
-    std::string format_;
-    double hoursWest_ = DBL_MAX;
+    std::string format_ = DEFAULT_FORMAT;
+    int32_t hoursWest_ = INT_MAX;
     TextStyle textStyle_;
     std::string currentTimeText_;
     bool isStart_ = true;

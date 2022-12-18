@@ -36,7 +36,7 @@ public:
         std::function<void()>&& startAction, std::function<void()>&& endAction, V2::SwipeEdgeEffect edgeEffect) override
     {}
     void SetSelectCallback(OnSelectFunc&& selectCallback) override {}
-    void SetOnDragStart(OnDragFunc&& onDragStart) override {}
+    void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override {}
 };
 } // namespace OHOS::Ace::NG
 

@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
+#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
 class TimePickerRowPattern : public LinearLayoutPattern {
@@ -42,6 +43,11 @@ public:
         return MakeRefPtr<TimePickerEventHub>();
     }
 
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        return MakeRefPtr<TimePickerPaintMethod>();
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<LinearLayoutAlgorithm>();
@@ -54,7 +60,7 @@ public:
 
     void OnColumnsBuilding();
 
-    std::unordered_map<std::string, RefPtr<FrameNode>> GetAllChildNode() const;
+    std::unordered_map<std::string, RefPtr<FrameNode>> GetAllChildNode();
 
     void HandleHourColumnBuilding();
 
@@ -71,13 +77,26 @@ public:
 
     void SetEventCallback(EventCallback&& value);
 
-    void FireChangeEvent(bool refresh) const;
+    void FireChangeEvent(bool refresh);
 
-    std::string GetSelectedObject(bool isColumnChange, int32_t status = -1) const;
+    std::string GetSelectedObject(bool isColumnChange, int32_t status = -1);
 
-    PickerTime GetCurrentTime() const;
+    PickerTime GetCurrentTime();
 
     uint32_t GetHourFromAmPm(bool isAm, uint32_t amPmhour) const;
+
+    bool HasTitleNode() const
+    {
+        return titleId_.has_value();
+    }
+
+    int32_t GetTitleId()
+    {
+        if (!titleId_.has_value()) {
+            titleId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return titleId_.value();
+    }
 
     uint32_t GetShowCount() const
     {
@@ -101,6 +120,19 @@ public:
             return nullptr;
         }
         return options_[frmeNode][index];
+    }
+
+    bool HasDividerNode() const
+    {
+        return DividerId_.has_value();
+    }
+
+    int32_t GetDividerId()
+    {
+        if (!DividerId_.has_value()) {
+            DividerId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return DividerId_.value();
     }
 
     const std::vector<std::string>& GetAllOptions(const RefPtr<FrameNode>& frmeNode)
@@ -212,9 +244,18 @@ public:
         return { FocusType::NODE, true };
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        json->Put("selectedTime", selectedTime_.ToString(false, false).c_str());
+        json->Put("isUseMilitaryTime", V2::ConvertBoolToString(hour24_).c_str());
+    }
+
+    void CreateAmPmNode();
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -228,6 +269,10 @@ private:
     std::optional<int32_t> amPmId_;
     std::optional<int32_t> hourId_;
     std::optional<int32_t> minuteId_;
+    std::optional<int32_t> titleId_;
+    std::optional<int32_t> ButtonTitleId_;
+    std::optional<int32_t> DividerId_;
+
     bool hasSecond_ = false;
     std::vector<RefPtr<FrameNode>> timePickerColumns_;
     std::vector<std::string> vecAmPm_ = Localization::GetInstance()->GetAmPmStrings();

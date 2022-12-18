@@ -16,7 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_POLYGON_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_POLYGON_PAINT_PROPERTY_H
 
+#include <array>
 #include <string>
+#include <vector>
 #include "core/components/shape/shape_component.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
@@ -54,6 +56,20 @@ public:
     {
         ShapePaintProperty::Reset();
         ResetPoints();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        ShapePaintProperty::ToJsonValue(json);
+        if (propPoints_.has_value()) {
+            const auto size = static_cast<int32_t>(propPoints_.value().size());
+            std::vector<std::array<float, 2>> point(size);
+            for (int i = 0; i < size; i++) {
+                point[i][0] = propPoints_.value()[i].first.ConvertToPx();
+                point[i][1] = propPoints_.value()[i].second.ConvertToPx();
+            }
+            json->Put("points", point.data());
+        }
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Points, ShapePoints, PROPERTY_UPDATE_RENDER);

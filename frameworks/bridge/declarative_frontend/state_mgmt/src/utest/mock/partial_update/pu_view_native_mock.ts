@@ -23,7 +23,7 @@ abstract class NativeViewPartialUpdate {
     console.error("NativeViewPU(Mock).createRerender - unimplemented");
   }
 
-  constructor( ) {
+  constructor() {
     console.log(`${this.constructor.name}: new instance`);
   }
 
@@ -48,16 +48,25 @@ abstract class NativeViewPartialUpdate {
   finishUpdateFunc(elmtId: number): void {
     console.warn("NativeViewPU(Mock).restoreInstanceId() -  unimplemented!");
   }
-  getDeletedElemtIds(elmtIds : number[]) : void {
+  getDeletedElemtIds(elmtIds: number[]): void {
     console.warn("NativeViewPU(Mock).finishUpdateFunc() -  unimplemented!");
   }
 
-  deletedElmtIdsHaveBeenPurged(elmtIds : number[]) : void {
+  deletedElmtIdsHaveBeenPurged(elmtIds: number[]): void {
     console.warn("NativeViewPU(Mock).deletedElmtIdsHaveBeenPurged() -  unimplemented!");
   }
 
-  isLazyItemRender(elmtId : number) : boolean {
+  isLazyItemRender(elmtId: number): boolean {
     console.warn("NativeViewPU(Mock).isLazyItemRender() -  unimplemented!");
     return false;
+  }
+
+  setCardId(cardId: number): void {
+    console.warn("NativeViewPU(Mock).setCardId() -  unimplemented!");
+  }
+
+  getCardId(): number {
+    console.warn("NativeViewPU(Mock).getCardId() -  unimplemented!");
+    return -1;
   }
 }

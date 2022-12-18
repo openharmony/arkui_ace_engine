@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_LAYOUTS_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_LAYOUTS_LAYOUT_PROPERTY_H
 
+#include <cstddef>
 #include <memory>
 #include <optional>
 
@@ -101,11 +102,6 @@ public:
     const std::unique_ptr<FlexItemProperty>& GetFlexItemProperty() const
     {
         return flexItemProperty_;
-    }
-
-    const std::unique_ptr<GridProperty>& GetGridProperty() const
-    {
-        return gridProperty_;
     }
 
     TextDirection GetLayoutDirection() const
@@ -302,20 +298,11 @@ public:
     }
 
     void UpdateGridProperty(
-        std::optional<uint32_t> span, std::optional<int32_t> offset, GridSizeType type = GridSizeType::UNDEFINED)
-    {
-        if (!gridProperty_) {
-            gridProperty_ = std::make_unique<GridProperty>();
-        }
+        std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type = GridSizeType::UNDEFINED);
 
-        bool isSpanUpdated = (span.has_value() && gridProperty_->UpdateSpan(span.value(), type));
-        bool isOffsetUpdated = (offset.has_value() && gridProperty_->UpdateOffset(offset.value(), type));
-        if (isSpanUpdated || isOffsetUpdated) {
-            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
-        }
-    }
+    bool UpdateGridOffset(const RefPtr<FrameNode>& host);
 
-    void UpdateGridConstraint(const RefPtr<FrameNode>& host);
+    void BuildGridProperty(const RefPtr<FrameNode>& host);
 
     void UpdateContentConstraint();
 
@@ -330,6 +317,8 @@ public:
 
     PaddingPropertyF CreatePaddingWithoutBorder();
     PaddingPropertyF CreatePaddingAndBorder();
+    PaddingPropertyF CreatePaddingAndBorderWithDefault(float paddingHorizontalDefault, float paddingVerticalDefault,
+        float borderHorizontalDefault, float borderVerticalDefault);
 
     MarginPropertyF CreateMargin();
 
@@ -343,6 +332,8 @@ public:
     {
         layoutConstraint_ = layoutProperty->layoutConstraint_;
         contentConstraint_ = layoutProperty->contentConstraint_;
+        gridProperty_ =
+            (layoutProperty->gridProperty_) ? std::make_unique<GridProperty>(*layoutProperty->gridProperty_) : nullptr;
     }
 
 protected:
@@ -355,6 +346,7 @@ private:
     void CheckSelfIdealSize();
 
     void CheckAspectRatio();
+    void CheckBorderAndPadding();
 
     // available in measure process.
     std::optional<LayoutConstraintF> layoutConstraint_;

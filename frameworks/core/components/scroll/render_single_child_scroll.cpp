@@ -32,6 +32,7 @@ void RenderSingleChildScroll::Update(const RefPtr<Component>& component)
         return;
     }
 
+    rightToLeft_ = scroll->GetTextDirection() == TextDirection::RTL;
     enable_ = scroll->GetEnable();
     onScrollBegin_ = scroll->GetOnScrollBegin();
 
@@ -40,6 +41,7 @@ void RenderSingleChildScroll::Update(const RefPtr<Component>& component)
         axis_ = axis;
         ResetScrollable();
         InitScrollBarProxy();
+        initial_ = true;
     }
     padding_ = scroll->GetPadding();
     scrollPage_ = scroll->GetScrollPage();
@@ -176,6 +178,16 @@ void RenderSingleChildScroll::MoveChildToViewPort(
     JumpToPosition(GetCurrentPosition() + moveDelta);
 }
 
+bool RenderSingleChildScroll::IsDeclarativePara()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return false;
+    }
+
+    return context->GetIsDeclarative();
+}
+
 void RenderSingleChildScroll::PerformLayout()
 {
     if (GetChildren().size() != MAX_CHILD_SIZE) {
@@ -209,6 +221,19 @@ void RenderSingleChildScroll::PerformLayout()
     }
     itemSize = child->GetLayoutSize();
     LOGD("child size after padding: %{public}lf, %{public}lf", itemSize.Width(), itemSize.Height());
+    auto left = child->GetLeft().ConvertToPx();
+    auto top = child->GetTop().ConvertToPx();
+
+    if (!IsDeclarativePara()) {
+        auto childPosition = child->GetChildren().front();
+        if (childPosition) {
+            left = childPosition->GetLeft().ConvertToPx();
+            top = childPosition->GetTop().ConvertToPx();
+        }
+    }
+    itemSize.SetWidth(itemSize.Width() + left);
+    itemSize.SetHeight(itemSize.Height() + top);
+
     auto currentChildMainSize = GetMainSize(child->GetLayoutSize());
     // Mark need force layout with parent if child size changed in semi and dialog window modal.
     if (!NearEqual(childLastMainSize_, -std::numeric_limits<double>::max()) &&
@@ -216,8 +241,11 @@ void RenderSingleChildScroll::PerformLayout()
         PostForceMakeNeedLayout();
     }
     childLastMainSize_ = currentChildMainSize;
-
-    SetLayoutSize(GetLayoutParam().Constrain(itemSize > viewPort_ ? viewPort_ : itemSize));
+    if (GetHasWidth() || GetHasHeight()) {
+        SetLayoutSize(GetLayoutParam().GetMaxSize());
+    } else {
+        SetLayoutSize(GetLayoutParam().Constrain(itemSize > viewPort_ ? viewPort_ : itemSize));
+    }
 
     auto textFieldManager = AceType::DynamicCast<TextFieldManager>(context->GetTextFieldManager());
     if (textFieldManager && moveStatus_.first && axis_ == Axis::VERTICAL) {
@@ -234,10 +262,21 @@ void RenderSingleChildScroll::PerformLayout()
     // Get main direction scrollable extent.
     bool isScrollable = CalculateMainScrollExtent(itemSize);
     scrollBarExtent_ = mainScrollExtent_;
+
+    if (initial_ && IsRowReverse()) {
+        currentOffset_.SetX(mainScrollExtent_ - viewPort_.Width());
+        lastOffset_ = currentOffset_;
+        initial_ = false;
+    }
+
     if (isScrollable) {
         ValidateOffset(SCROLL_FROM_NONE);
     } else {
         currentOffset_ = Offset::Zero();
+        if (IsRowReverse()) {
+            currentOffset_.SetX(mainScrollExtent_ - viewPort_.Width());
+            lastOffset_ = currentOffset_;
+        }
     }
     child->SetPosition(Offset::Zero() - currentOffset_ + paddingOffset);
     LOGD("child position:%{public}s", child->GetPosition().ToString().c_str());

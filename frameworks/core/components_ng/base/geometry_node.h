@@ -22,6 +22,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
@@ -34,10 +35,10 @@
 
 namespace OHOS::Ace::NG {
 // GeometryNode acts as a physical property of the size and position of the component
-class ACE_EXPORT GeometryNode : public Referenced {
+class ACE_EXPORT GeometryNode : public AceType {
+    DECLARE_ACE_TYPE(GeometryNode, AceType)
 public:
     GeometryNode() = default;
-
     ~GeometryNode() override = default;
 
     void Reset();
@@ -95,9 +96,46 @@ public:
         return frame_.rect_.GetOffset();
     }
 
+    void SetFrameOffset(const OffsetF& offset)
+    {
+        frame_.rect_.SetOffset(offset);
+    }
+
     void SetFrameSize(const SizeF& size)
     {
         frame_.rect_.SetSize(size);
+    }
+
+    SizeF GetPaddingSize() const
+    {
+        auto size = frame_.rect_.GetSize();
+        if (padding_) {
+            MinusPaddingToSize(*padding_, size);
+        }
+        return size;
+    }
+
+    OffsetF GetPaddingOffset() const
+    {
+        auto offset = frame_.rect_.GetOffset();
+        if (padding_) {
+            offset += OffsetF(padding_->left.value_or(0), padding_->top.value_or(0));
+        }
+        return offset;
+    }
+
+    RectF GetPaddingRect() const
+    {
+        auto rect = frame_.rect_;
+        if (padding_) {
+            auto size = rect.GetSize();
+            MinusPaddingToSize(*padding_, size);
+            rect.SetSize(size);
+            auto offset = rect.GetOffset();
+            offset += OffsetF(padding_->left.value_or(0), padding_->top.value_or(0));
+            rect.SetOffset(offset);
+        }
+        return rect;
     }
 
     void SetContentSize(const SizeF& size)
@@ -161,6 +199,26 @@ public:
         }
     }
 
+    void UpdatePaddingWithBorder(const PaddingPropertyF& padding)
+    {
+        if (!padding_) {
+            padding_ = std::make_unique<PaddingPropertyF>(padding);
+            return;
+        }
+        if (padding.left) {
+            padding_->left = padding.left;
+        }
+        if (padding.right) {
+            padding_->right = padding.right;
+        }
+        if (padding.top) {
+            padding_->top = padding.top;
+        }
+        if (padding.bottom) {
+            padding_->bottom = padding.bottom;
+        }
+    }
+
     const OffsetF& GetParentGlobalOffset() const
     {
         return parentGlobalOffset_;
@@ -181,20 +239,6 @@ public:
         return parentLayoutConstraint_;
     }
 
-    bool Measure(NG::LayoutWrapper* layoutWrapper);
-
-    bool Layout(NG::LayoutWrapper* layoutWrapper);
-
-    void SetLayoutFunction(std::function<void(NG::LayoutWrapper* layoutWrapper)>&& layoutFunc)
-    {
-        layoutFunc_ = std::move(layoutFunc);
-    }
-
-    void SetMeasureFunction(std::function<void(NG::LayoutWrapper* layoutWrapper)>&& measureFunc)
-    {
-        measureFunc_ = std::move(measureFunc);
-    }
-
     void SetBaselineDistance(float baselineDistance)
     {
         baselineDistance_ = baselineDistance;
@@ -213,15 +257,14 @@ private:
 
     // the frame size in parent local coordinate.
     GeometryProperty frame_;
-    // the size of margin rect in current node local coordinate.
+    // the size of margin property.
     std::unique_ptr<MarginPropertyF> margin_;
+    // the size of padding property.
+    std::unique_ptr<MarginPropertyF> padding_;
     // the size of content rect in current node local coordinate.
     std::unique_ptr<GeometryProperty> content_;
 
     OffsetF parentGlobalOffset_;
-
-    std::function<void(NG::LayoutWrapper* layoutWrapper)> layoutFunc_;
-    std::function<void(NG::LayoutWrapper* layoutWrapper)> measureFunc_;
 };
 } // namespace OHOS::Ace::NG
 

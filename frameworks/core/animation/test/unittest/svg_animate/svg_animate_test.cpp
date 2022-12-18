@@ -18,21 +18,20 @@
 #include "adapter/aosp/entrance/java/jni/jni_environment.h"
 #include "base/json/json_util.h"
 #include "base/log/log.h"
+#include "base/test/mock/mock_asset_manager.h"
+#include "base/test/mock/mock_task_executor.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/flush_event.h"
 #include "core/animation/svg_animate.h"
-#include "core/animation/test/unittest/mock/animation_test_utils.h"
+#include "core/animation/test/mock/mock_animation_util.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #include "core/components/test/json/json_frontend.h"
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/fake_task_executor.h"
-#include "core/mock/mock_resource_register.h"
 #include "core/pipeline/pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
-
 Platform::JniEnvironment::JniEnvironment() {}
 
 Platform::JniEnvironment::~JniEnvironment() = default;
@@ -143,8 +142,8 @@ public:
         std::unique_ptr<PlatformWindow> platformWindow = AnimationTestUtils::CreatePlatformWindow();
         platformWindowRaw_ = reinterpret_cast<MockPlatformWindow*>(platformWindow.get());
         auto window = AnimationTestUtils::CreateWindow(std::move(platformWindow));
-        auto taskExecutor = AceType::MakeRefPtr<FakeTaskExecutor>();
-        auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+        auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+        auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
         auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
         RefPtr<Frontend> frontend = Frontend::CreateDefault();
         context_ = AceType::MakeRefPtr<PipelineContext>(
@@ -514,5 +513,4 @@ HWTEST_F(SvgAnimateTest, SvgAnimateTest009, TestSize.Level1)
     platformWindowRaw_->TriggerFrames(70);
     EXPECT_NEAR(flushEventMock->motionValue_, 1.0, CUBIC_ERROR_BOUND);
 }
-
 } // namespace OHOS::Ace

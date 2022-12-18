@@ -21,11 +21,11 @@
 
 namespace OHOS::Ace::NG {
 
-class LongPressInfo : public BaseEventInfo, public TouchLocationInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(LongPressInfo, BaseEventInfo, TouchLocationInfo);
+class LongPressInfo : public TouchLocationInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LongPressInfo, TouchLocationInfo);
 
 public:
-    explicit LongPressInfo(int32_t fingerId) : BaseEventInfo("onLongPress"), TouchLocationInfo(fingerId) {}
+    explicit LongPressInfo(int32_t fingerId) : TouchLocationInfo("onLongPress", fingerId) {}
     ~LongPressInfo() override = default;
 };
 
@@ -40,8 +40,11 @@ public:
     explicit LongPressRecognizer() = default;
     LongPressRecognizer(
         int32_t duration, int32_t fingers, bool repeat, bool isForDrag = false, bool isDisableMouseLeft = false)
-        : duration_(duration), fingers_(fingers), repeat_(repeat), isForDrag_(isForDrag),
+        : MultiFingersRecognizer(fingers), duration_(duration), repeat_(repeat), isForDrag_(isForDrag),
           isDisableMouseLeft_(isDisableMouseLeft)
+    {}
+    LongPressRecognizer(bool isForDrag = false, bool isDisableMouseLeft = false)
+        : isForDrag_(isForDrag), isDisableMouseLeft_(isDisableMouseLeft)
     {}
     ~LongPressRecognizer() override = default;
 
@@ -58,31 +61,31 @@ public:
         useCatchMode_ = useCatchMode;
     }
 
+    void SetDuration(int32_t duration)
+    {
+        duration_ = duration;
+    }
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
     void HandleTouchMoveEvent(const TouchEvent& event) override;
     void HandleTouchCancelEvent(const TouchEvent& event) override;
-    bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
-    void HandleOverdueDeadline();
-    void DeadlineTimer(int32_t time, bool isAccept);
+    bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
+    void HandleOverdueDeadline(bool isCatchMode);
+    void DeadlineTimer(int32_t time, bool isCatchMode);
     void DoRepeat();
     void StartRepeatTimer();
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat);
-    void Reset();
+    void OnResetStatus() override;
     double ConvertPxToVp(double offset) const;
 
     OnLongPress onLongPress_;
     CancelableCallback<void()> deadlineTimer_;
     CancelableCallback<void()> timer_;
     int32_t duration_ = 500;
-    int32_t fingers_ = 1;
     bool repeat_ = false;
-    std::map<int32_t, TouchEvent> touchMap_;
-    int32_t pointsCount_ = 0;
     TimeStamp time_;
-    bool pendingEnd_ = false;
-    bool pendingCancel_ = false;
     bool useCatchMode_ = true;
     bool isForDrag_ = false;
     bool isDisableMouseLeft_ = false;

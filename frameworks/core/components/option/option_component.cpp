@@ -74,7 +74,7 @@ bool OptionComponent::Initialize(const RefPtr<AccessibilityManager>& manager)
     ClearChildren();
 
     if (icon_) {
-        icon_->SetImageFit(ImageFit::SCALEDOWN);
+        icon_->SetImageFit(ImageFit::SCALE_DOWN);
         icon_->SetAlignment((SystemProperties::GetDeviceType() == DeviceType::TV ?
             Alignment::CENTER : Alignment::CENTER_LEFT));
         icon_->SetWidth(24.0_vp); // icon is only for phone which is fixes size 24dp*24dp
@@ -99,6 +99,7 @@ bool OptionComponent::Initialize(const RefPtr<AccessibilityManager>& manager)
             textStyle = GetTextStyle();
             text_->SetTextStyle(textStyle);
         }
+        textStyle.SetFontSize(GetFontSize());
         textStyle.SetTextDecoration(GetTextDecoration());
         text_->SetData(value_);
     } else {

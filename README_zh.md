@@ -7,7 +7,7 @@
 
 ## 简介<a name="section15701932113019"></a>
 
-ArkUI框架是OpenHarmony UI开发框架，提供开发者进行应用UI开发时所必需的能力，包括UI组件、动画、绘制、交互事件、JS API扩展机制等。ArkUI框架提供了两种开发范式，分别是基于eTS的声明式开发范式（简称“声明式开发范式”）和兼容JS的类Web开发范式（简称“类Web开发范式”）。
+ArkUI框架是OpenHarmony UI开发框架，提供开发者进行应用UI开发时所必需的能力，包括UI组件、动画、绘制、交互事件、JS API扩展机制等。ArkUI框架提供了两种开发范式，分别是基于ArkTS的声明式开发范式（简称“声明式开发范式”）和兼容JS的类Web开发范式（简称“类Web开发范式”）。
 
 **图 1**  ArkUI框架结构<a name="fig2606133765017"></a>  
 ![](figures/ArkUI框架结构.png "ArkUI框架结构")

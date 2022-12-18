@@ -93,10 +93,10 @@ public:
         RefPtr<GridContainerInfo> containerInfo_;
     };
 
-    GridContainerInfo(const GridContainerInfo& info)
-    {
-        *this = info;
-    }
+    DEFINE_COPY_CONSTRUCTOR_AND_COPY_OPERATOR_AND_COMPARE_OPERATOR_WITH_PROPERTIES(GridContainerInfo,
+        (templateType_)(currentSizeType_)(sizeType_)(columns_)(gutterWidth_)(marginLeft_)(marginRight_)\
+        (paddingLeft_)(paddingRight_)(containerWidth_)(columnWidth_)(columnType_));
+
     ~GridContainerInfo() override = default;
 
     double GetColumnWidth() const
@@ -119,38 +119,6 @@ public:
      */
     void ACE_EXPORT BuildColumnWidth();
     void BuildColumnWidth(double width);
-    bool operator==(const GridContainerInfo& info) const
-    {
-        if (&info == this) {
-            return true;
-        }
-
-        return ((templateType_ == info.templateType_) && (currentSizeType_ == info.currentSizeType_) &&
-                (sizeType_ == info.sizeType_) && (columns_ == info.columns_) && (gutterWidth_ == info.gutterWidth_) &&
-                (marginLeft_ == info.marginLeft_) && (marginRight_ == info.marginRight_) &&
-                (paddingLeft_ == info.paddingLeft_) && (paddingRight_ == info.paddingRight_) &&
-                (containerWidth_ == info.containerWidth_) && (columnWidth_ == info.columnWidth_) &&
-                (columnType_ == info.columnType_));
-    }
-
-    GridContainerInfo& operator=(const GridContainerInfo& info)
-    {
-        if (&info != this) {
-            templateType_ = info.templateType_;
-            currentSizeType_ = info.currentSizeType_;
-            sizeType_ = info.sizeType_;
-            columns_ = info.columns_;
-            gutterWidth_ = info.gutterWidth_;
-            marginLeft_ = info.marginLeft_;
-            marginRight_ = info.marginRight_;
-            paddingLeft_ = info.paddingLeft_;
-            paddingRight_ = info.paddingRight_;
-            containerWidth_ = info.containerWidth_;
-            columnWidth_ = info.columnWidth_;
-            columnType_ = info.columnType_;
-        }
-        return *this;
-    }
 
 private:
     GridContainerInfo() = default;

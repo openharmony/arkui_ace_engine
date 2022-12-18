@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIALOG_DIALOG_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIALOG_DIALOG_PATTERN_H
 
+#include <cstdint>
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
@@ -25,7 +27,6 @@
 #include "core/components_ng/pattern/dialog//dialog_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
-#include "core/components_ng/pattern/dialog/dialog_render_property.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -53,11 +54,6 @@ public:
         return AceType::MakeRefPtr<DialogLayoutAlgorithm>();
     }
 
-    RefPtr<PaintProperty> CreatePaintProperty() override
-    {
-        return MakeRefPtr<DialogRenderProperty>();
-    }
-
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<DialogEventHub>();
@@ -70,29 +66,48 @@ public:
 
     void BuildChild(const DialogProperties& dialogProperties);
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
+    const std::string& GetTitle()
+    {
+        return title_;
+    }
+
+    const std::string& GetMessage()
+    {
+        return message_;
+    }
+
 private:
     void OnModifyDone() override;
-    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleTouchEvent(const TouchEventInfo& info);
-    void HandleTouchUp(const Offset& clickPosition);
-    void PopDialog();
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleClick(const GestureEvent& info);
+    void PopDialog(int32_t buttonIdx);
 
     // set render context properties of content frame
-    void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const RefPtr<DialogTheme>& theme);
+    static void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const RefPtr<DialogTheme>& theme);
 
-    RefPtr<FrameNode> BuildTitle(std::string& data, const DialogProperties& dialogProperties);
-    RefPtr<FrameNode> BuildContent(std::string& data, const DialogProperties& dialogProperties);
+    RefPtr<FrameNode> BuildTitle(const DialogProperties& dialogProperties);
+    RefPtr<FrameNode> BuildContent(const DialogProperties& dialogProperties);
 
     RefPtr<FrameNode> BuildButtons(const std::vector<ButtonInfo>& buttons);
-    RefPtr<UINode> CreateButton(const ButtonInfo& params);
+    RefPtr<FrameNode> CreateButton(const ButtonInfo& params, int32_t index);
+    RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& colorStr);
     // to close dialog when button is clicked
-    void BindCloseCallBack(const RefPtr<GestureEventHub>& hub);
+    void BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_t buttonIdx);
     // build ActionSheet items
     RefPtr<FrameNode> BuildSheet(const std::vector<ActionSheetInfo>& sheets);
     RefPtr<FrameNode> BuildSheetItem(const ActionSheetInfo& item);
+    // build actionMenu
+    RefPtr<FrameNode> BuildMenu(const std::vector<ButtonInfo>& buttons);
 
     RefPtr<DialogTheme> dialogTheme_;
     RefPtr<UINode> customNode_;
+    RefPtr<ClickEvent> onClick_;
+
+    // XTS inspector values
+    std::string message_;
+    std::string title_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
 };

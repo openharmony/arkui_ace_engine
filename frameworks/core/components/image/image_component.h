@@ -210,7 +210,7 @@ private:
     // set default value to [ImageInterpolation::LOW] to keep consistent for the old frontend
     ImageInterpolation imageInterpolation_ = ImageInterpolation::LOW;
     ImageRenderMode imageRenderMode_ = ImageRenderMode::ORIGINAL;
-    ImageRepeat imageRepeat_ = ImageRepeat::NOREPEAT;
+    ImageRepeat imageRepeat_ = ImageRepeat::NO_REPEAT;
     std::pair<Dimension, Dimension> imageSourceSize_ = std::pair<Dimension, Dimension>(Dimension(-1), Dimension(-1));
     RefPtr<PixelMap> pixmap_ = nullptr;
     bool syncMode_ = false;

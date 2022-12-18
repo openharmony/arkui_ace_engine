@@ -23,7 +23,6 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_base_component.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -31,22 +30,50 @@
 namespace OHOS::Ace::NG {
 namespace {
 // TODO timepicker style modification
-constexpr Dimension LAYOUT_WEIGHT = 30.0_vp;
 constexpr Dimension PADDING_WEIGHT = 10.0_vp;
+const Dimension FONT_SIZE = Dimension(2.0);
+const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
+const int32_t CHILD_SIZE = 3;
+const float TEXT_HEIGHT_NUMBER = 3.0f;
+const float TEXT_HOUR24_HEIGHT_NUMBER = 9.0f;
+const float TEXT_WEIGHT_NUMBER = 6.0f;
+const int32_t ANIMATION_ZERO_TO_OUTER = 200; // 200ms for animation that from zero to outer.
+const int32_t ANIMATION_OUTER_TO_ZERO = 150; // 150ms for animation that from outer to zero.
 } // namespace
 
 void TimePickerColumnPattern::OnAttachToFrameNode()
 {
-    ScrollTimeColumn();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    tossAnimationController_->SetPipelineContext(context);
+    tossAnimationController_->SetColumn(AceType::WeakClaim(this));
+    jumpInterval_ = pickerTheme->GetJumpInterval().ConvertToPx();
+    CreateAnimation();
+    InitPanEvent(gestureHub);
 }
 
 void TimePickerColumnPattern::OnModifyDone()
 {
     auto host = GetHost();
     auto focusHub = host->GetFocusHub();
-    if (focusHub) {
-        InitOnKeyEvent(focusHub);
-    }
+    CHECK_NULL_VOID_NOLOG(focusHub);
+    InitOnKeyEvent(focusHub);
+}
+
+bool TimePickerColumnPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
+    CHECK_NULL_RETURN(dirty, false);
+    return true;
 }
 
 void TimePickerColumnPattern::FlushCurrentOptions()
@@ -57,7 +84,6 @@ void TimePickerColumnPattern::FlushCurrentOptions()
     CHECK_NULL_VOID(parentNode);
     auto dataPickerLayoutProperty = host->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(dataPickerLayoutProperty);
-    dataPickerLayoutProperty->UpdateLayoutWeight(static_cast<float>(LAYOUT_WEIGHT.ConvertToPx()));
     dataPickerLayoutProperty->UpdatePadding(
         PaddingProperty { CalcLength(static_cast<float>(PADDING_WEIGHT.ConvertToPx()), DimensionUnit::PX) });
     dataPickerLayoutProperty->UpdateAlignSelf(FlexAlign::CENTER);
@@ -68,27 +94,278 @@ void TimePickerColumnPattern::FlushCurrentOptions()
     uint32_t currentIndex = host->GetPattern<TimePickerColumnPattern>()->GetCurrentIndex();
     currentIndex = currentIndex % totalOptionCount;
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
-
     auto child = host->GetChildren();
     auto iter = child.begin();
-
     if (child.size() != showOptionCount) {
         return;
     }
-
     for (uint32_t index = 0; index < showOptionCount; index++) {
         uint32_t optionIndex = (totalOptionCount + currentIndex + index - selectedIndex) % totalOptionCount;
-        auto optionValue = timePickerRowPattern->GetAllOptions(host)[optionIndex];
         auto textNode = DynamicCast<FrameNode>(*iter);
         CHECK_NULL_VOID(textNode);
         auto textPattern = textNode->GetPattern<TextPattern>();
         CHECK_NULL_VOID(textPattern);
         auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateContent(optionValue);
-        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        ChangeTextStyle(index, showOptionCount, textLayoutProperty);
+        ChangeAmPmTextStyle(index, showOptionCount, textLayoutProperty);
         iter++;
+        int32_t diffIndex = static_cast<int32_t>(index) - static_cast<int32_t>(selectedIndex);
+        int32_t virtualIndex = static_cast<int32_t>(currentIndex) + diffIndex;
+        bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
+        if (NotLoopOptions() && !virtualIndexValidate) {
+            textLayoutProperty->UpdateContent("");
+            textNode->MarkDirtyNode();
+            textNode->MarkModifyDone();
+            continue;
+        }
+        auto optionValue = timePickerRowPattern->GetAllOptions(host)[optionIndex];
+        textLayoutProperty->UpdateContent(optionValue);
+        textNode->MarkDirtyNode();
+        textNode->MarkModifyDone();
     }
+}
+
+void TimePickerColumnPattern::ChangeAmPmTextStyle(
+    uint32_t index, uint32_t showOptionCount, RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
+    auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
+    auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
+    if (index == selectedIndex && showOptionCount == CHILD_SIZE) {
+        textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+        textLayoutProperty->UpdateMaxLines(1);
+        textLayoutProperty->UpdateFontSize(selectedOptionSize);
+        textLayoutProperty->UpdateAlignment(Alignment::CENTER);
+    }
+    if (index == 0 && showOptionCount == CHILD_SIZE) {
+        textLayoutProperty->UpdateFontSize(normalOptionSize);
+        textLayoutProperty->UpdateMaxLines(1);
+        textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
+    }
+    if (index == showOptionCount - 1 && showOptionCount == CHILD_SIZE) {
+        textLayoutProperty->UpdateFontSize(normalOptionSize);
+        textLayoutProperty->UpdateMaxLines(1);
+        textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
+    }
+}
+
+void TimePickerColumnPattern::ChangeTextStyle(
+    uint32_t index, uint32_t showOptionCount, RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
+    auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
+    auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
+    auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
+    if (index < selectedIndex && showOptionCount != CHILD_SIZE) {
+        if (index == 0) {
+            textLayoutProperty->UpdateFontSize(normalOptionSize);
+        } else {
+            textLayoutProperty->UpdateFontSize(focusOptionSize);
+        }
+        textLayoutProperty->UpdateMaxLines(1);
+        textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
+    }
+    if (index == selectedIndex && showOptionCount != CHILD_SIZE) {
+        textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+        textLayoutProperty->UpdateMaxLines(1);
+        textLayoutProperty->UpdateFontSize(selectedOptionSize);
+        textLayoutProperty->UpdateAlignment(Alignment::CENTER);
+    }
+    if (index > selectedIndex && showOptionCount != CHILD_SIZE) {
+        if (index == showOptionCount - 1) {
+            textLayoutProperty->UpdateFontSize(normalOptionSize);
+        } else {
+            textLayoutProperty->UpdateFontSize(focusOptionSize);
+        }
+        textLayoutProperty->UpdateMaxLines(1);
+        textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
+    }
+}
+
+void TimePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    CHECK_NULL_VOID_NOLOG(!panEvent_);
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
+        LOGI("Pan event start");
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleDragStart(event);
+    };
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleDragMove(event);
+    };
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        if (info.GetInputEventType() == InputEventType::AXIS) {
+            return;
+        }
+        pattern->HandleDragEnd();
+    };
+    auto actionCancelTask = [weak = WeakClaim(this)]() {
+        LOGI("Pan event cancel");
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleDragEnd();
+    };
+    PanDirection panDirection;
+    panDirection.type = PanDirection::VERTICAL;
+    panEvent_ = MakeRefPtr<PanEvent>(
+        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
+    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+}
+
+void TimePickerColumnPattern::HandleDragStart(const GestureEvent& event)
+{
+    CHECK_NULL_VOID_NOLOG(GetHost());
+    CHECK_NULL_VOID_NOLOG(GetToss());
+    auto toss = GetToss();
+    yOffset_ = event.GetGlobalPoint().GetY();
+    toss->SetStart(yOffset_);
+    yLast_ = yOffset_;
+    pressed_ = true;
+}
+
+void TimePickerColumnPattern::HandleDragMove(const GestureEvent& event)
+{
+    if (event.GetInputEventType() == InputEventType::AXIS) {
+        InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0));
+        return;
+    }
+    CHECK_NULL_VOID_NOLOG(pressed_);
+    CHECK_NULL_VOID_NOLOG(GetHost());
+    CHECK_NULL_VOID_NOLOG(GetToss());
+    auto toss = GetToss();
+    double offsetY = event.GetGlobalPoint().GetY();
+    if (NearEqual(offsetY, yLast_, 1.0)) { // if changing less than 1.0, no need to handle
+        return;
+    }
+    toss->SetEnd(offsetY);
+    UpdateColumnChildPosition(offsetY);
+}
+
+void TimePickerColumnPattern::HandleDragEnd()
+{
+    pressed_ = false;
+    CHECK_NULL_VOID_NOLOG(GetHost());
+    CHECK_NULL_VOID_NOLOG(GetToss());
+    auto toss = GetToss();
+    if (!NotLoopOptions() && toss->Play()) {
+        return;
+    }
+    yOffset_ = 0.0;
+    yLast_ = 0.0;
+    if (!animationCreated_) {
+        ScrollOption(0.0);
+        return;
+    }
+    auto curve = CreateAnimation(scrollDelta_, 0.0);
+    fromController_->ClearInterpolators();
+    fromController_->AddInterpolator(curve);
+    fromController_->Play();
+}
+void TimePickerColumnPattern::CreateAnimation()
+{
+    CHECK_NULL_VOID_NOLOG(!animationCreated_);
+    toController_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    toController_->SetDuration(ANIMATION_ZERO_TO_OUTER);
+    auto weak = AceType::WeakClaim(this);
+    toController_->AddStopListener([weak]() {
+        auto column = weak.Upgrade();
+        CHECK_NULL_VOID(column);
+        column->HandleCurveStopped();
+    });
+    fromBottomCurve_ = CreateAnimation(jumpInterval_, 0.0);
+    fromTopCurve_ = CreateAnimation(0.0 - jumpInterval_, 0.0);
+    fromController_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    fromController_->SetDuration(ANIMATION_OUTER_TO_ZERO);
+    animationCreated_ = true;
+}
+
+RefPtr<CurveAnimation<double>> TimePickerColumnPattern::CreateAnimation(double from, double to)
+{
+    auto weak = AceType::WeakClaim(this);
+    auto curve = AceType::MakeRefPtr<CurveAnimation<double>>(from, to, Curves::FRICTION);
+    curve->AddListener(Animation<double>::ValueCallback([weak](double value) {
+        auto column = weak.Upgrade();
+        CHECK_NULL_VOID(column);
+        column->ScrollOption(value);
+    }));
+    return curve;
+}
+
+void TimePickerColumnPattern::HandleCurveStopped()
+{
+    CHECK_NULL_VOID_NOLOG(animationCreated_);
+    if (NearZero(scrollDelta_)) {
+        return;
+    }
+    ScrollOption(0.0 - scrollDelta_);
+    InnerHandleScroll(GreatNotEqual(scrollDelta_, 0.0));
+    fromController_->ClearInterpolators();
+    if (LessNotEqual(scrollDelta_, 0.0)) {
+        fromController_->AddInterpolator(fromTopCurve_);
+    } else {
+        fromController_->AddInterpolator(fromBottomCurve_);
+    }
+    fromController_->Play();
+}
+
+void TimePickerColumnPattern::ScrollOption(double delta)
+{
+    UpdateScrollDelta(delta);
+    scrollDelta_ = delta;
+}
+
+void TimePickerColumnPattern::UpdateScrollDelta(double delta)
+{
+    SetCurrentOffset(delta);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void TimePickerColumnPattern::UpdateToss(double offsetY)
+{
+    UpdateColumnChildPosition(offsetY);
+}
+
+void TimePickerColumnPattern::TossStoped()
+{
+    yOffset_ = 0.0;
+    yLast_ = 0.0;
+    ScrollOption(0.0);
+}
+
+void TimePickerColumnPattern::SetDividerHeight(uint32_t showOptionCount)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    auto childSize = host->GetChildren().size();
+    if (showOptionCount != OPTION_COUNT_PHONE_LANDSCAPE && childSize != CHILD_SIZE) {
+        gradientHeight_ = static_cast<float>(pickerTheme->GetGradientHeight().Value() * TEXT_HEIGHT_NUMBER);
+    } else if (showOptionCount != OPTION_COUNT_PHONE_LANDSCAPE && childSize == CHILD_SIZE) {
+        gradientHeight_ = static_cast<float>(pickerTheme->GetGradientHeight().Value() - TEXT_HOUR24_HEIGHT_NUMBER);
+    } else {
+        gradientHeight_ = static_cast<float>(pickerTheme->GetGradientHeight().Value());
+    }
+    dividerHeight_ = static_cast<float>(
+        gradientHeight_ + pickerTheme->GetDividerSpacing().Value() + pickerTheme->GetGradientHeight().Value());
+    dividerSpacingWidth_ = static_cast<float>(pickerTheme->GetDividerSpacing().Value() * TEXT_WEIGHT_NUMBER);
 }
 
 bool TimePickerColumnPattern::NotLoopOptions() const
@@ -108,10 +385,8 @@ bool TimePickerColumnPattern::InnerHandleScroll(bool isDown)
     auto options = GetOptions();
     auto totalOptionCount = options[host].size();
 
-    if (!host || !totalOptionCount) {
-        LOGE("options is empty.");
-        return false;
-    }
+    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_RETURN(totalOptionCount, false);
 
     uint32_t currentIndex = GetCurrentIndex();
     if (isDown) {
@@ -126,9 +401,9 @@ bool TimePickerColumnPattern::InnerHandleScroll(bool isDown)
     return true;
 }
 
-void TimePickerColumnPattern::UpdateColumnChildPosition(double y)
+void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
-    yLast_ = y;
+    yLast_ = offsetY;
     double dragDelta = yLast_ - yOffset_;
     if (!CanMove(LessNotEqual(dragDelta, 0))) {
         return;
@@ -138,22 +413,21 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double y)
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    jumpInterval_ = Dimension(pickerTheme->GetJumpInterval().ConvertToPx(), DimensionUnit::PX);
+    jumpInterval_ = pickerTheme->GetJumpInterval().ConvertToPx();
     // the abs of drag delta is less than jump interval.
-    if (LessNotEqual(0.0 - jumpInterval_.Value(), dragDelta) && LessNotEqual(dragDelta, jumpInterval_.Value())) {
-        LOGE("the abs of drag delta is less than jump interval");
+    if (LessNotEqual(0.0 - jumpInterval_, dragDelta) && LessNotEqual(dragDelta, jumpInterval_)) {
+        ScrollOption(dragDelta);
         return;
     }
     InnerHandleScroll(LessNotEqual(dragDelta, 0.0));
-    double jumpDelta = (LessNotEqual(dragDelta, 0.0) ? jumpInterval_.Value() : 0.0 - jumpInterval_.Value());
-    yOffset_ = y - jumpDelta;
+    double jumpDelta = (LessNotEqual(dragDelta, 0.0) ? jumpInterval_ : 0.0 - jumpInterval_);
+    ScrollOption(jumpDelta);
+    yOffset_ = offsetY - jumpDelta;
 }
 
 bool TimePickerColumnPattern::CanMove(bool isDown) const
 {
-    if (!NotLoopOptions()) {
-        return true;
-    }
+    CHECK_NULL_RETURN_NOLOG(NotLoopOptions(), true);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto options = GetOptions();
@@ -165,49 +439,12 @@ bool TimePickerColumnPattern::CanMove(bool isDown) const
     return nextVirtualIndex >= 0 && nextVirtualIndex < totalOptionCount;
 }
 
-void TimePickerColumnPattern::ScrollTimeColumn()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto task = [weak = WeakClaim(this)](double offset, int32_t source) {
-        if (source != SCROLL_FROM_START) {
-            auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->UpdateCurrentOffset(static_cast<float>(offset));
-            }
-        }
-        return true;
-    };
-
-    auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    if (scrollableEvent_) {
-        gestureHub->RemoveScrollableEvent(scrollableEvent_);
-    }
-    scrollableEvent_ = MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
-    scrollableEvent_->SetScrollPositionCallback(std::move(task));
-    gestureHub->AddScrollableEvent(scrollableEvent_);
-}
-
-void TimePickerColumnPattern::UpdateCurrentOffset(float offset)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    currentOffset_ = currentOffset_ + offset;
-    UpdateColumnChildPosition(GetCurrentOffset());
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-}
-
 void TimePickerColumnPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        if (pattern) {
-            return pattern->OnKeyEvent(event);
-        }
-        return false;
+        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 }

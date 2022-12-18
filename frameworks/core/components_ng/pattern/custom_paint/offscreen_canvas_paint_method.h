@@ -25,7 +25,7 @@ class OffscreenCanvasPaintMethod : public CustomPaintPaintMethod {
     DECLARE_ACE_TYPE(OffscreenCanvasPaintMethod, CustomPaintPaintMethod)
 public:
     OffscreenCanvasPaintMethod() = default;
-    OffscreenCanvasPaintMethod(const RefPtr<PipelineContext> context, int32_t width, int32_t height);
+    OffscreenCanvasPaintMethod(const RefPtr<PipelineBase> context, int32_t width, int32_t height);
     ~OffscreenCanvasPaintMethod() override = default;
 
     void DrawImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height);
@@ -38,6 +38,7 @@ public:
     double MeasureText(const std::string& text, const PaintState& state);
     double MeasureTextHeight(const std::string& text, const PaintState& state);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
+    void SetTransform(const TransformParam& param) override;
 
     int32_t GetWidth()
     {
@@ -66,7 +67,7 @@ private:
     double PxStrToDouble(const std::string& str);
     double BlurStrToDouble(const std::string& str);
 
-    void ImageObjReady(const RefPtr<ImageObject>& imageObj) override;
+    void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
 
     sk_sp<SkImage> GetImage(const std::string& src) override { return sk_sp<SkImage>(); }
@@ -79,12 +80,18 @@ private:
     bool UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow = false);
     void UpdateTextStyleForeground(bool isStroke, txt::TextStyle& txtStyle, bool hasShadow);
     TextDirection GetTextDirection(const std::string& content);
+    void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas) override;
+    void Path2DRect(const OffsetF& offset, const PathArgs& args) override;
+    SkCanvas* GetRawPtrOfSkCanvas() override
+    {
+        return globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
+    }
 
     int32_t width_;
     int32_t height_;
     std::map<std::string, setColorFunc> filterFunc_;
     Shadow imageShadow_;
-    std::string filterParam_ = "";
+    std::string filterParam_;
 };
 } // namespace OHOS::Ace::NG
 

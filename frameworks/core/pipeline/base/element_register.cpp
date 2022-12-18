@@ -16,10 +16,12 @@
 #include "frameworks/core/pipeline/base/element_register.h"
 
 #include "base/log/log.h"
+#include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_v2/common/element_proxy.h"
-#include "frameworks/base/memory/ace_type.h"
-#include "frameworks/core/pipeline/base/element.h"
+#include "core/pipeline/base/element.h"
 
 namespace OHOS::Ace {
 thread_local ElementRegister* ElementRegister::instance_ = nullptr;
@@ -123,15 +125,20 @@ bool ElementRegister::RemoveItem(ElementIdType elementId)
     if (elementId == ElementRegister::UndefinedElementId) {
         return false;
     }
-
     auto removed = itemMap_.erase(elementId);
     if (removed) {
+        auto iter = deletedCachedItems_.find(elementId);
+        if (iter != deletedCachedItems_.end()) {
+            LOGD("ElmtId %{public}d has already deleted by custom node", elementId);
+            deletedCachedItems_.erase(iter);
+            return true;
+        }
         LOGD("ElmtId %{public}d successfully removed from registry, added to list of removed Elements.", elementId);
+        removedItems_.insert(elementId);
+        LOGD("Size of removedItems_ removedItems_ %{public}d", static_cast<int32_t>(removedItems_.size()));
     } else {
         LOGD("ElmtId %{public}d not found. Cannot be removed.", elementId);
     }
-    removedItems_.insert(elementId);
-    LOGD("Size of removedItems_ removedItems_ %{public}d", static_cast<int32_t>(removedItems_.size()));
     return removed;
 }
 
@@ -157,10 +164,23 @@ std::unordered_set<ElementIdType>& ElementRegister::GetRemovedItems()
     return removedItems_;
 }
 
+void ElementRegister::ClearRemovedItems(ElementIdType elmtId)
+{
+    auto iter = removedItems_.find(elmtId);
+    if (iter != removedItems_.end()) {
+        removedItems_.erase(elmtId);
+        return;
+    }
+    // When the custom component is destroyed, the child component may be temporarily referenced by other objects, and
+    // removeItem will delay the call, which needs to be cached first here.
+    deletedCachedItems_.emplace(elmtId);
+}
+
 void ElementRegister::Clear()
 {
     LOGD("Empty the ElementRegister");
     itemMap_.clear();
     removedItems_.clear();
 }
+
 } // namespace OHOS::Ace

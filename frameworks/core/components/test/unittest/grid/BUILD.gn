@@ -51,6 +51,7 @@ ohos_unittest("RenderGridTest") {
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_common.cpp",
     "grid_test_utils.cpp",
     "render_grid_test.cpp",
+    "render_grid_test_v2.cpp",
   ]
 
   configs = [ "$ace_root:ace_test_config" ]

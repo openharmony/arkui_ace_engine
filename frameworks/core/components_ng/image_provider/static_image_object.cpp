@@ -17,11 +17,23 @@
 
 namespace OHOS::Ace::NG {
 
-void StaticImageObject::MakeCanvasImage(const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize)
+void StaticImageObject::MakeCanvasImage(
+    const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize, bool syncLoad)
 {
     auto renderTaskHolder = ImageProvider::CreateRenderTaskHolder();
     CHECK_NULL_VOID(renderTaskHolder);
-    ImageProvider::MakeCanvasImage(WeakClaim(this), loadCallbacks, resizeTarget, renderTaskHolder, forceResize);
+    if (syncLoad) {
+        SyncImageProvider::MakeCanvasImage(WeakClaim(this), loadCallbacks, resizeTarget, renderTaskHolder, forceResize);
+    } else {
+        ImageProvider::MakeCanvasImage(WeakClaim(this), loadCallbacks, resizeTarget, renderTaskHolder, forceResize);
+    }
+}
+
+RefPtr<StaticImageObject> StaticImageObject::Create(
+    const ImageSourceInfo& sourceInfo, const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data)
+{
+    return AceType::MakeRefPtr<NG::StaticImageObject>(
+        sourceInfo, encodedInfo->GetImageSize(), encodedInfo->GetFrameCount(), data);
 }
 
 } // namespace OHOS::Ace::NG

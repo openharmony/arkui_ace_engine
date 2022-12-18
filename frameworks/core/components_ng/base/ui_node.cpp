@@ -15,10 +15,6 @@
 
 #include "core/components_ng/base/ui_node.h"
 
-#include <algorithm>
-#include <cstdint>
-#include <iterator>
-
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
@@ -29,36 +25,34 @@
 
 namespace OHOS::Ace::NG {
 
+thread_local int32_t UINode::currentAccessibilityId_ = 0;
+
 UINode::~UINode()
 {
-    ElementRegister::GetInstance()->RemoveItem(nodeId_);
+    if (!removeSilently_) {
+        ElementRegister::GetInstance()->RemoveItem(nodeId_);
+    } else {
+        ElementRegister::GetInstance()->RemoveItemSilently(nodeId_);
+    }
     if (!onMainTree_) {
         return;
     }
-    DetachFromMainTree();
     onMainTree_ = false;
 }
 
-void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot)
+void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently)
 {
     CHECK_NULL_VOID(child);
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
-        LOGW("Child node already exists. Existing child nodeId %{public}d, add. child nodeId nodeId %{public}d", 
+        LOGW("Child node already exists. Existing child nodeId %{public}d, add. child nodeId nodeId %{public}d",
             (*it)->GetId(), child->GetId());
         return;
     }
 
     it = children_.begin();
     std::advance(it, slot);
-    children_.insert(it, child);
-
-    child->SetParent(Claim(this));
-    child->SetDepth(GetDepth() + 1);
-    if (onMainTree_) {
-        child->AttachToMainTree();
-    }
-    MarkNeedSyncRenderTree();
+    DoAddChild(it, child, silently);
 }
 
 std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child)
@@ -70,6 +64,7 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
         LOGE("child is not exist.");
         return children_.end();
     }
+    (*iter)->OnRemoveFromParent();
     auto result = children_.erase(iter);
     MarkNeedSyncRenderTree();
     return result;
@@ -88,11 +83,12 @@ void UINode::RemoveChildAtIndex(int32_t index)
     }
     auto iter = children_.begin();
     std::advance(iter, index);
+    (*iter)->OnRemoveFromParent();
     children_.erase(iter);
     MarkNeedSyncRenderTree();
 }
 
-RefPtr<UINode> UINode::GetChildAtIndex(int32_t index)
+RefPtr<UINode> UINode::GetChildAtIndex(int32_t index) const
 {
     if ((index < 0) || (index >= static_cast<int32_t>(children_.size()))) {
         return nullptr;
@@ -115,25 +111,44 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
     }
 
     auto iter = RemoveChild(oldNode);
-    children_.insert(iter, newNode);
-    newNode->SetParent(Claim(this));
-    newNode->SetDepth(GetDepth() + 1);
-    if (onMainTree_) {
-        newNode->AttachToMainTree();
-    }
-    MarkNeedSyncRenderTree();
+    DoAddChild(iter, newNode);
 }
 
 void UINode::Clean()
 {
+    for (const auto& child : children_) {
+        child->OnRemoveFromParent();
+    }
     children_.clear();
     MarkNeedSyncRenderTree();
 }
 
-void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot)
+void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool silently)
 {
     CHECK_NULL_VOID(parent);
-    parent->AddChild(AceType::Claim(this), slot);
+    parent->AddChild(AceType::Claim(this), slot, silently);
+    if (parent->GetPageId() != 0) {
+        SetHostPageId(parent->GetPageId());
+    }
+}
+
+void UINode::OnRemoveFromParent()
+{
+    DetachFromMainTree();
+    parent_.Reset();
+    depth_ = -1;
+}
+
+void UINode::DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently)
+{
+    children_.insert(it, child);
+
+    child->SetParent(Claim(this));
+    child->SetDepth(GetDepth() + 1);
+    if (!silently && onMainTree_) {
+        child->AttachToMainTree();
+    }
+    MarkNeedSyncRenderTree();
 }
 
 RefPtr<FrameNode> UINode::GetFocusParent() const
@@ -301,18 +316,25 @@ void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleL
     }
 }
 
+void UINode::GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList)
+{
+    for (const auto& child : children_) {
+        child->OnGenerateOneDepthAllFrame(visibleList);
+    }
+}
+
 RefPtr<PipelineContext> UINode::GetContext()
 {
     return PipelineContext::GetCurrentContext();
 }
 
 HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result)
+    const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
     HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
     for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
         auto& child = *iter;
-        auto hitResult = child->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
+        auto hitResult = child->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result, touchId);
         if (hitResult == HitTestResult::STOP_BUBBLING) {
             return HitTestResult::STOP_BUBBLING;
         }
@@ -404,4 +426,56 @@ RefPtr<LayoutWrapper> UINode::CreateLayoutWrapper(bool forceMeasure, bool forceL
     return frameChild ? frameChild->CreateLayoutWrapper(forceMeasure, forceLayout) : nullptr;
 }
 
+void UINode::Build()
+{
+    for (const auto& child : children_) {
+        child->Build();
+    }
+}
+
+void UINode::SetActive(bool active)
+{
+    for (const auto& child : children_) {
+        child->SetActive(active);
+    }
+}
+
+void UINode::OnVisibleChange(bool isVisible)
+{
+    for (const auto& child: GetChildren()) {
+        child->OnVisibleChange(isVisible);
+    }
+}
+
+std::pair<bool, int32_t> UINode::GetChildFlatIndex(int32_t id)
+{
+    if (GetId() == id) {
+        return std::pair<bool, int32_t>(true, 0);
+    }
+
+    const auto& node = ElementRegister::GetInstance()->GetUINodeById(id);
+    if (!node) {
+        return std::pair<bool, int32_t>(false, 0);
+    }
+
+    if (node && (node->GetTag() == GetTag())) {
+        return std::pair<bool, int32_t>(false, 1);
+    }
+
+    int32_t count = 0;
+    for (const auto& child : GetChildren()) {
+        auto res = child->GetChildFlatIndex(id);
+        if (res.first) {
+            return std::pair<bool, int32_t>(true, count + res.second);
+        }
+        count += res.second;
+    }
+    return std::pair<bool, int32_t>(false, count);
+}
+
+// for Grid refresh GridItems
+void UINode::ChildrenUpdatedFrom(int32_t index)
+{
+    childrenUpdatedFrom_ = index;
+}
 } // namespace OHOS::Ace::NG

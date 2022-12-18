@@ -266,7 +266,7 @@ void JSMatrix4::Scale(const v8::FunctionCallbackInfo<v8::Value>& info)
             if (obj->IsArray()) {
                 auto array = v8::Local<v8::Array>::Cast(obj);
                 auto matrix = ArrayToMatrix4(array, context);
-                auto scaleMatrix = Matrix4::CreateScale(dx, dy, dz) * matrix;
+                auto scaleMatrix = Matrix4::CreateScale(dx, dy, dz);
 
                 if (!NearZero(centerX) || !NearZero(centerY)) {
                     auto translate1 = Matrix4::CreateTranslate(centerX, centerY, 0.0);
@@ -312,7 +312,7 @@ void JSMatrix4::Rotate(const v8::FunctionCallbackInfo<v8::Value>& info)
             if (obj->IsArray()) {
                 auto array = v8::Local<v8::Array>::Cast(obj);
                 auto matrix = ArrayToMatrix4(array, context);
-                auto rotateMatrix = Matrix4::CreateRotate(angle, dx, dy, dz) * matrix;
+                auto rotateMatrix = Matrix4::CreateRotate(angle, dx, dy, dz);
 
                 if (!NearZero(centerX) || !NearZero(centerY)) {
                     auto translate1 = Matrix4::CreateTranslate(centerX, centerY, 0.0);

@@ -127,7 +127,6 @@ private:
     RefPtr<AssetManager> assetManager_;
 
     int32_t instanceId_ = 0;
-    bool isArkApp_ = false;
 
     bool allowUpdate_ = true;
 

@@ -373,6 +373,139 @@ private:
 };
 
 using RectF = RectT<float>;
+
+struct EdgeF {
+    EdgeF() = default;
+    EdgeF(float x, float y) : x(x), y(y) {}
+    void SetX(float setX)
+    {
+        x = setX;
+    }
+    void SetY(float setY)
+    {
+        y = setY;
+    }
+    EdgeF operator+(const EdgeF& add) const
+    {
+        return EdgeF(x + add.x, y + add.y);
+    }
+    float x = 0.0f;
+    float y = 0.0f;
+};
+
+struct RadiusF {
+    RadiusF(const EdgeF& radius) : topLeft(radius), topRight(radius), bottomLeft(radius), bottomRight(radius) {}
+    RadiusF(const EdgeF& topLeft, const EdgeF& topRight, const EdgeF& bottomLeft, const EdgeF& bottomRight)
+        : topLeft(topLeft), topRight(topRight), bottomLeft(bottomLeft), bottomRight(bottomRight)
+    {}
+
+    void SetCorner(int32_t pos, const EdgeF& edge)
+    {
+        if (LessNotEqual(pos, 0.0) || GreatOrEqual(pos, data_.size())) {
+            return;
+        }
+        data_[pos] = edge;
+    }
+
+    EdgeF GetCorner(int32_t pos) const
+    {
+        if (LessNotEqual(pos, 0.0) || GreatOrEqual(pos, data_.size())) {
+            return EdgeF();
+        }
+        return data_[pos];
+    }
+
+    union {
+        struct {
+            EdgeF topLeft;
+            EdgeF topRight;
+            EdgeF bottomLeft;
+            EdgeF bottomRight;
+        };
+        std::array<EdgeF, 4> data_;
+    };
+};
+
+class RoundRect {
+public:
+    enum CornerPos {
+        TOP_LEFT_POS,
+        TOP_RIGHT_POS,
+        BOTTOM_RIGHT_POS,
+        BOTTOM_LEFT_POS,
+    };
+
+    inline RoundRect() noexcept;
+    inline ~RoundRect() = default;
+
+    inline RoundRect(const RoundRect& roundRect) noexcept;
+    inline RoundRect(const RectF& rect, float xRad, float yRad) noexcept;
+    inline RoundRect(const RectF& rect, const RadiusF& radius) noexcept;
+
+    inline void SetCornerRadius(CornerPos pos, float radiusX, float radiusY);
+    inline void SetCornerRadius(float radius);
+    inline EdgeF GetCornerRadius(CornerPos pos) const;
+
+    inline void SetRect(const RectF& rect);
+    inline RectF GetRect() const;
+
+    inline void Offset(float dx, float dy);
+
+private:
+    RectF rect_;
+    // Four radii are stored: top-left/top-right/bottom-left/bottom-right corner radii.
+    RadiusF radius_;
+};
+
+inline RoundRect::RoundRect() noexcept : radius_(EdgeF(0, 0), EdgeF(0, 0), EdgeF(0, 0), EdgeF(0, 0)) {}
+
+inline RoundRect::RoundRect(const RoundRect& roundRect) noexcept : RoundRect()
+{
+    rect_ = roundRect.rect_;
+    radius_ = roundRect.radius_;
+}
+
+inline RoundRect::RoundRect(const RectF& r, float xRad, float yRad) noexcept : RoundRect()
+{
+    rect_ = r;
+    for (auto& i : radius_.data_) {
+        i = EdgeF(xRad, yRad);
+    }
+}
+
+inline RoundRect::RoundRect(const RectF& r, const RadiusF& rad) noexcept : RoundRect()
+{
+    rect_ = r;
+    radius_ = rad;
+}
+
+inline void RoundRect::SetCornerRadius(CornerPos pos, float radiusX, float radiusY)
+{
+    radius_.SetCorner(pos, EdgeF(radiusX, radiusY));
+}
+
+inline void RoundRect::SetCornerRadius(float radius)
+{
+    radius_.SetCorner(TOP_LEFT_POS, EdgeF(radius, radius));
+    radius_.SetCorner(TOP_RIGHT_POS, EdgeF(radius, radius));
+    radius_.SetCorner(BOTTOM_LEFT_POS, EdgeF(radius, radius));
+    radius_.SetCorner(BOTTOM_RIGHT_POS, EdgeF(radius, radius));
+}
+
+inline EdgeF RoundRect::GetCornerRadius(CornerPos pos) const
+{
+    return radius_.GetCorner(pos);
+}
+
+inline void RoundRect::SetRect(const RectF& rect)
+{
+    rect_ = rect;
+}
+
+inline RectF RoundRect::GetRect() const
+{
+    return rect_;
+}
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_NG_RECT_H

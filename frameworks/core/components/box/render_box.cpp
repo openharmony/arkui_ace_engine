@@ -95,7 +95,7 @@ void RenderBox::Update(const RefPtr<Component>& component)
     const RefPtr<BoxComponent> box = AceType::DynamicCast<BoxComponent>(component);
     if (box) {
         boxComponent_ = box;
-        needMaterial_ = box->GetNeedMaterial();
+        needMaterial_ |= box->GetNeedMaterial();
         inspectorDirection_ = box->GetInspectorDirection();
         RenderBoxBase::Update(component);
         UpdateBackDecoration(box->GetBackDecoration());
@@ -114,6 +114,8 @@ void RenderBox::Update(const RefPtr<Component>& component)
             onClick_ = tapGesture->CreateRecognizer(context_);
             onClick_->SetIsExternalGesture(true);
             SetAccessibilityClickImpl();
+        } else {
+            onClick_ = nullptr;
         }
         if (!box->GetRemoteMessageEvent().IsEmpty() && !tapGesture) {
             onClick_ = AceType::MakeRefPtr<ClickRecognizer>();
@@ -211,7 +213,12 @@ void RenderBox::Update(const RefPtr<Component>& component)
         auto inspector = inspector_.Upgrade();
         if (inspector) {
             auto area = inspector->GetCurrentRectAndOrigin();
-            eventExtensions_->GetOnAreaChangeExtension()->SetBase(area.first, area.second);
+            auto lastArea = inspector->GetLastRectAndOrigin();
+            if (area != lastArea) {
+                eventExtensions_->GetOnAreaChangeExtension()->UpdateArea(
+                    area.first, area.second, lastArea.first, lastArea.second);
+                inspector->UpdateLastRectAndOrigin(area);
+            }
         }
     }
 }
@@ -322,7 +329,7 @@ void RenderBox::PanOnActionStart(const GestureEvent& info)
     auto positionedComponent = AceType::MakeRefPtr<PositionedComponent>(dragItemInfo.customComponent);
     positionedComponent->SetTop(Dimension(GetGlobalOffset().GetY()));
     positionedComponent->SetLeft(Dimension(GetGlobalOffset().GetX()));
-    SetLocalPoint(info.GetGlobalPoint() - GetGlobalOffset());
+    SetLocalPoint(startPoint_ - GetGlobalOffset());
     auto updatePosition = [renderBox = AceType::Claim(this)](
                                 const std::function<void(const Dimension&, const Dimension&)>& func) {
         if (!renderBox) {
@@ -628,7 +635,12 @@ void RenderBox::OnPaintFinish()
         auto inspector = inspector_.Upgrade();
         if (inspector) {
             auto area = inspector->GetCurrentRectAndOrigin();
-            eventExtensions_->GetOnAreaChangeExtension()->UpdateArea(area.first, area.second);
+            auto lastArea = inspector->GetLastRectAndOrigin();
+            if (area != lastArea) {
+                eventExtensions_->GetOnAreaChangeExtension()->UpdateArea(
+                    area.first, area.second, lastArea.first, lastArea.second);
+                inspector->UpdateLastRectAndOrigin(area);
+            }
         }
     }
     auto node = GetAccessibilityNode().Upgrade();

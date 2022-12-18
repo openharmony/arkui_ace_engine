@@ -50,6 +50,7 @@ enum class AxisAction : int32_t {
 };
 
 struct AxisEvent final {
+    int32_t id = 0;
     float x = 0.0;
     float y = 0.0;
     double verticalAxis = 0.0;
@@ -63,7 +64,8 @@ struct AxisEvent final {
     AxisEvent CreateScaleEvent(float scale) const
     {
         if (NearZero(scale)) {
-            return { .x = x,
+            return { .id = id,
+                .x = x,
                 .y = y,
                 .verticalAxis = verticalAxis,
                 .horizontalAxis = horizontalAxis,
@@ -73,7 +75,8 @@ struct AxisEvent final {
                 .deviceId = deviceId,
                 .sourceType = sourceType };
         }
-        return { .x = x / scale,
+        return { .id = id,
+            .x = x / scale,
             .y = y / scale,
             .verticalAxis = verticalAxis,
             .horizontalAxis = horizontalAxis,

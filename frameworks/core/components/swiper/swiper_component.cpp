@@ -145,6 +145,24 @@ const EventMarker& SwiperComponent::GetChangeEventId() const
     return declaration_->GetChangeEventId();
 }
 
+void SwiperComponent::SetAnimationStartEventId(const EventMarker& animationStartEventId)
+{
+    declaration_->SetAnimationStartEventId(animationStartEventId);
+}
+const EventMarker& SwiperComponent::GetAnimationStartEventId() const
+{
+    return declaration_->GetAnimationStartEventId();
+}
+
+void SwiperComponent::SetAnimationEndEventId(const EventMarker& animationEndEventId)
+{
+    declaration_->SetAnimationEndEventId(animationEndEventId);
+}
+const EventMarker& SwiperComponent::GetAnimationEndEventId() const
+{
+    return declaration_->GetAnimationEndEventId();
+}
+
 const EventMarker& SwiperComponent::GetRotationEventId() const
 {
     return declaration_->GetRotationEventId();
@@ -302,6 +320,11 @@ int32_t SwiperComponent::GetCachedSize() const
 
 void SwiperComponent::SetCachedSize(int32_t cachedSize)
 {
+    // cachedCount is only useful in lazy loading scenario.
+    if (cachedSize <= 0) {
+        LOGE("cachedCount must be a positive integer");
+        return;
+    }
     declaration_->SetCachedSize(cachedSize);
 }
 

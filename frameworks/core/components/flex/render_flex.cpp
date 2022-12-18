@@ -363,7 +363,7 @@ void RenderFlex::LayoutMagicNodes(BaselineProperties& baselineProperties)
                 continue;
             }
             child.node->Layout(child.innerLayout);
-            child.node->SetVisible(true);
+            child.node->SetVisible(GetVisible());
             ResizeByItem(child.node, allocatedSize);
             CheckSizeValidity(child.node);
             CheckBaselineProperties(child.node, baselineProperties);
@@ -421,7 +421,7 @@ void RenderFlex::PerformLayoutInIndexMode()
         for (const auto& node : nodeList) {
             auto child = node.node;
             CheckSizeValidity(child);
-            child->SetVisible(true);
+            child->SetVisible(GetVisible());
             auto flexItem = AceType::DynamicCast<RenderFlexItem>(child);
             if (flexItem && GreatNotEqual(flexItem->GetFlexGrow(), 0.0)) {
                 flexItemProperties.totalGrow += flexItem->GetFlexGrow();
@@ -667,9 +667,6 @@ void RenderFlex::DetermineItemsPosition(const BaselineProperties& baselineProper
 
 void RenderFlex::CalculateSpace(double remainSpace, double& frontSpace, double& betweenSpace) const
 {
-    if (NearZero(remainSpace) && mainAxisAlign_ != FlexAlign::SPACE_CUSTOMIZATION) {
-        return;
-    }
     switch (mainAxisAlign_) {
         case FlexAlign::FLEX_START:
             frontSpace = 0.0;
@@ -932,7 +929,7 @@ void RenderFlex::InitFlexProperties()
 void RenderFlex::TravelChildrenFlexProps()
 {
     for (const auto& child : GetChildren()) {
-        child->SetVisible(true);
+        child->SetVisible(GetVisible());
         if (IsNonRelativePosition(child->GetPositionType())) {
             absoluteNodes_.insert(child);
             continue;

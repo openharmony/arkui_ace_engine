@@ -33,9 +33,13 @@ public:
     static void SetStateEffect(bool stateEffect);
     static void SetFontSize(const Dimension& fontSize);
     static void SetFontWeight(Ace::FontWeight fontWeight);
-    static void SetItalicFontStyle(Ace::FontStyle fontStyle);
+    static void SetFontStyle(Ace::FontStyle fontStyle);
     static void SetFontFamily(const std::vector<std::string>& fontFamilies);
-    static void SetTextColor(const Color& textColor);
+    static void SetFontColor(const Color& textColor);
+    static void SetBorderRadius(const Dimension& radius);
+
+private:
+    static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const std::string& label);
 };
 } // namespace OHOS::Ace::NG
 

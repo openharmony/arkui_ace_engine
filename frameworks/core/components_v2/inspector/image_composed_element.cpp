@@ -113,7 +113,7 @@ std::string ImageComposedElement::GetObjectFit() const
         case ImageFit::NONE:
             result = "ImageFit.None";
             break;
-        case ImageFit::SCALEDOWN:
+        case ImageFit::SCALE_DOWN:
             result = "ImageFit.ScaleDown";
             break;
         default:
@@ -128,19 +128,19 @@ std::string ImageComposedElement::GetObjectRepeat() const
     if (!renderImage) {
         return "NoRepeat";
     }
-    auto imageRepeat = renderImage ? renderImage->GetImageRepeat() : ImageRepeat::NOREPEAT;
+    auto imageRepeat = renderImage ? renderImage->GetImageRepeat() : ImageRepeat::NO_REPEAT;
     std::string result = "";
     switch (imageRepeat) {
-        case ImageRepeat::NOREPEAT:
+        case ImageRepeat::NO_REPEAT:
             result = "ImageRepeat.NoRepeat";
             break;
         case ImageRepeat::REPEAT:
             result = "ImageRepeat.XY";
             break;
-        case ImageRepeat::REPEATX:
+        case ImageRepeat::REPEAT_X:
             result = "ImageRepeat.X";
             break;
-        case ImageRepeat::REPEATY:
+        case ImageRepeat::REPEAT_Y:
             result = "ImageRepeat.Y";
             break;
         default:

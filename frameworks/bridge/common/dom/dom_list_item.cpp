@@ -404,6 +404,15 @@ void DOMListItem::PrepareSpecializedComponent()
 
     if (boxComponent_) {
         boxComponent_->SetMouseAnimationType(HoverAnimationType::OPACITY);
+        auto& sizeStyle = static_cast<CommonSizeStyle&>(declaration_->GetStyle(StyleTag::COMMON_SIZE_STYLE));
+        if (sizeStyle.IsValid()) {
+            boxComponent_->SetAspectRatio(sizeStyle.aspectRatio);
+            boxComponent_->SetMinWidth(sizeStyle.minWidth);
+            boxComponent_->SetMinHeight(sizeStyle.minHeight);
+            boxComponent_->SetMaxWidth(sizeStyle.maxWidth);
+            boxComponent_->SetMaxHeight(sizeStyle.maxHeight);
+            boxComponent_->SetBoxSizing(sizeStyle.boxSizing);
+        }
     }
 }
 

@@ -19,17 +19,8 @@
 #include "core/pipeline/base/sole_child_element.h"
 
 namespace OHOS::Ace::V2 {
-class WaterFlowItemElement : public SoleChildElement, public FocusGroup {
-    DECLARE_ACE_TYPE(WaterFlowItemElement, SoleChildElement, FocusGroup);
-
-public:
-    void HandleOnFocus();
-
-    bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override
-    {
-        // waterflow Item just one child, all focus move event make it blur.
-        return false;
-    }
+class WaterFlowItemElement : public SoleChildElement {
+    DECLARE_ACE_TYPE(WaterFlowItemElement, SoleChildElement);
 
 private:
     RefPtr<RenderNode> CreateRenderNode() override;

@@ -17,14 +17,14 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/pattern/video/video_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 void FullScreenManager::RequestFullScreen(const RefPtr<FrameNode>& frameNode)
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     auto parentNode = frameNode->GetParent();
@@ -39,23 +39,30 @@ void FullScreenManager::RequestFullScreen(const RefPtr<FrameNode>& frameNode)
     if (!resultForParent.second) {
         return;
     }
-
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    auto originGeometryNode = frameNode->GetGeometryNode()->Clone();
+    auto geometryNode = frameNode->GetGeometryNode();
+    auto originGeometryNode = geometryNode->Clone();
     auto resultForGeo = originGeometryNode_.try_emplace(nodeId, originGeometryNode);
     if (!resultForGeo.second) {
         return;
     }
     // TODO: remove the original property of padding&margin
-    auto rootWidth = CalcLength(context->GetRootWidth());
-    auto rootHeight = CalcLength(context->GetRootHeight());
-    CalcSize idealSize = { rootWidth, rootHeight };
+    auto rootWidth = PipelineContext::GetCurrentRootWidth();
+    auto rootHeight = PipelineContext::GetCurrentRootHeight();
+    auto calcRootWidth = CalcLength(rootWidth);
+    auto calcRootHeight = CalcLength(rootHeight);
+    CalcSize idealSize = { calcRootWidth, calcRootHeight };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     layoutConstraint.maxSize = idealSize;
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize.SetWidth(static_cast<float>(rootWidth));
+    parentLayoutConstraint.maxSize.SetHeight(static_cast<float>(rootHeight));
+    geometryNode->SetParentLayoutConstraint(parentLayoutConstraint);
     frameNode->UpdateLayoutConstraint(layoutConstraint);
+    frameNode->GetGeometryNode()->SetMarginFrameOffset(OffsetF { 0.0f, 0.0f });
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     rootNode->RebuildRenderContextTree();
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void FullScreenManager::ExitFullScreen(const RefPtr<FrameNode>& frameNode)
@@ -70,6 +77,7 @@ void FullScreenManager::ExitFullScreen(const RefPtr<FrameNode>& frameNode)
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     rootNode->RemoveChild(frameNode);
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     auto parent = iterOfParent->second.first.Upgrade();
     CHECK_NULL_VOID(parent);
@@ -95,6 +103,24 @@ void FullScreenManager::ExitFullScreen(const RefPtr<FrameNode>& frameNode)
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     parent->RebuildRenderContextTree();
+}
+
+bool FullScreenManager::OnBackPressed()
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, false);
+    auto child = rootNode->GetLastChild();
+    auto frameNode = AceType::DynamicCast<FrameNode>(child);
+    CHECK_NULL_RETURN(frameNode, false);
+    if (frameNode->GetTag() != V2::VIDEO_ETS_TAG) {
+        return false;
+    }
+
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_RETURN(pattern, false);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(pattern);
+    CHECK_NULL_RETURN(videoPattern, false);
+    return videoPattern->OnBackPressed();
 }
 
 } // namespace OHOS::Ace::NG

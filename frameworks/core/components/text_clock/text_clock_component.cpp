@@ -29,12 +29,12 @@ RefPtr<RenderNode> TextClockComponent::CreateRenderNode()
     return RenderTextClock::Create();
 }
 
-void TextClockComponent::SetHoursWest(double hoursWest)
+void TextClockComponent::SetHoursWest(int32_t hoursWest)
 {
     hoursWest_ = hoursWest;
 }
 
-double TextClockComponent::GetHoursWest() const
+int32_t TextClockComponent::GetHoursWest() const
 {
     return hoursWest_;
 }

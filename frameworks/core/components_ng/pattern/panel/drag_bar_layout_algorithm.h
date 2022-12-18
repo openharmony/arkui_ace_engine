@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PANEL_DRAG_BAR_LAYOUT_ALGORITHM_H
 
 #include "base/geometry/axis.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -35,30 +36,15 @@ public:
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
-    void SetCurrentOffset(float currentOffset)
+    OffsetF GetIconOffset() const
     {
-        currentOffset_ = currentOffset;
-    }
-
-    float GetCurrentOffset() const
-    {
-        return currentOffset_;
+        return iconOffset_;
     }
 
 protected:
-    NG::OffsetF iconOffset_;
-    PanelMode showMode_ = PanelMode::HALF;
-    bool hasDragBar_ = true;
-
-    float dragRangeX_ = 0.0f;
-    float dragRangeY_ = 0.0f;
-    float scaleX_ = 1.0f;
-    float scaleY_ = 1.0f;
-    float scaleWidth_ = 1.0f;
+    OffsetF iconOffset_;
 
 private:
-    float currentOffset_ = 0.0f;
-    bool fullScreenMode_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(DragBarLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

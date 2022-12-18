@@ -16,9 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_CONTAINER_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_CONTAINER_PATTERN_H
 
-#include "../linear_layout/linear_layout_pattern.h"
-#include "grid_container_layout_algorithm.h"
-#include "grid_container_layout_property.h"
+#include "core/components_ng/pattern/grid_container/grid_container_layout_algorithm.h"
+#include "core/components_ng/pattern/grid_container/grid_container_layout_property.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -37,6 +37,13 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<GridContainerLayoutAlgorithm>();
+    }
+
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig) override
+    {
+        auto layoutProperty = GetLayoutProperty<GridContainerLayoutProperty>();
+        layoutProperty->SetReserveObj(layoutProperty);
+        return LinearLayoutPattern::OnDirtyLayoutWrapperSwap(dirty, changeConfig);
     }
 };
 } // namespace OHOS::Ace::NG

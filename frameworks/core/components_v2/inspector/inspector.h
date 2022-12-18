@@ -33,7 +33,7 @@ class ACE_EXPORT Inspector {
 public:
     static std::string GetInspectorNodeByKey(const RefPtr<PipelineContext>& context, const std::string& key);
 
-    static std::string GetInspectorTree(const RefPtr<PipelineContext>& context);
+    static std::string GetInspectorTree(const RefPtr<PipelineContext>& context, bool isLayoutInspector = false);
 
     static bool SendEventByKey(
         const RefPtr<PipelineContext>& context, const std::string& key, int action, const std::string& params);

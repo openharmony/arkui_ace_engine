@@ -22,9 +22,9 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
-#include "base/geometry/ng/offset_t.h"
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace::NG {
@@ -79,8 +79,8 @@ struct LinearGradientInfo {
     float y2 = 0.0f;
     bool operator==(const LinearGradientInfo& other) const
     {
-        return (NearEqual(x1, other.x1) && NearEqual(x2, other.x2) &&
-                NearEqual(y1, other.y1) && NearEqual(y2, other.y2));
+        return (
+            NearEqual(x1, other.x1) && NearEqual(x2, other.x2) && NearEqual(y1, other.y1) && NearEqual(y2, other.y2));
     }
 };
 
@@ -92,9 +92,8 @@ struct RadialGradientInfo {
     float fy = 0.0f;
     bool operator==(const RadialGradientInfo& other) const
     {
-        return (NearEqual(r, other.r) && NearEqual(cx, other.cx) &&
-                NearEqual(cy, other.cy) && NearEqual(fx, other.fx) &&
-                NearEqual(fy, other.fy));
+        return (NearEqual(r, other.r) && NearEqual(cx, other.cx) && NearEqual(cy, other.cy) &&
+                NearEqual(fx, other.fx) && NearEqual(fy, other.fy));
     }
 };
 
@@ -167,9 +166,7 @@ public:
 
     bool operator==(const GradientColor& other) const
     {
-        return (hasValue_ == other.GetHasValue() &&
-                color_ == other.GetColor() &&
-                dimension_ == other.GetDimension() &&
+        return (hasValue_ == other.GetHasValue() && color_ == other.GetColor() && dimension_ == other.GetDimension() &&
                 opacity_ == other.GetOpacity());
     }
 
@@ -198,14 +195,10 @@ struct ACE_EXPORT RadialGradient {
 
     bool operator==(const RadialGradient& other) const
     {
-        return (radialSizeType == other.radialSizeType &&
-                radialShape == other.radialShape &&
-                radialHorizontalSize == other.radialHorizontalSize &&
-                radialVerticalSize == other.radialVerticalSize &&
-                radialCenterX == other.radialCenterX &&
-                radialCenterY == other.radialCenterY &&
-                fRadialCenterX == other.fRadialCenterX &&
-                fRadialCenterY == other.fRadialCenterY);
+        return (radialSizeType == other.radialSizeType && radialShape == other.radialShape &&
+                radialHorizontalSize == other.radialHorizontalSize && radialVerticalSize == other.radialVerticalSize &&
+                radialCenterX == other.radialCenterX && radialCenterY == other.radialCenterY &&
+                fRadialCenterX == other.fRadialCenterX && fRadialCenterY == other.fRadialCenterY);
     }
 };
 
@@ -231,13 +224,8 @@ struct ACE_EXPORT LinearGradient {
 
     bool operator==(const LinearGradient& other) const
     {
-        return (x1 == other.x1 &&
-                y1 == other.y1 &&
-                x2 == other.x2 &&
-                y2 == other.y2 &&
-                linearX == other.linearX &&
-                linearY == other.linearY &&
-                angle == other.angle);
+        return (x1 == other.x1 && y1 == other.y1 && x2 == other.x2 && y2 == other.y2 && linearX == other.linearX &&
+                linearY == other.linearY && angle == other.angle);
     }
 };
 
@@ -255,11 +243,8 @@ struct ACE_EXPORT SweepGradient {
 
     bool operator==(const OHOS::Ace::NG::SweepGradient& other) const
     {
-        return (centerX == other.centerX &&
-                centerY == other.centerY &&
-                startAngle == other.startAngle &&
-                endAngle == other.endAngle &&
-                rotation == other.rotation);
+        return (centerX == other.centerX && centerY == other.centerY && startAngle == other.startAngle &&
+                endAngle == other.endAngle && rotation == other.rotation);
     }
 };
 
@@ -272,8 +257,7 @@ public:
     bool IsSweepGradientValid() const
     {
         if (sweepGradient_->startAngle.has_value() && sweepGradient_->endAngle.has_value()) {
-            return LessOrEqual(sweepGradient_->startAngle.value().Value(),
-                sweepGradient_->endAngle.value().Value());
+            return LessOrEqual(sweepGradient_->startAngle.value().Value(), sweepGradient_->endAngle.value().Value());
         }
         if (sweepGradient_->startAngle.has_value() && !sweepGradient_->endAngle.has_value()) {
             return LessOrEqual(sweepGradient_->startAngle.value().Value(), 0.0);
@@ -479,20 +463,24 @@ public:
 
     bool operator==(const Gradient& other) const
     {
-        return (type_ == other.GetType() &&
-                repeat_ == other.GetRepeat() &&
-                colors_ == other.GetColors() &&
-                radialGradient_ == other.GetRadialGradient() &&
-                linearGradient_ == other.GetLinearGradient() &&
-                sweepGradient_ == other.GetSweepGradient() &&
-                beginOffset_ == other.GetBeginOffset() &&
-                endOffset_ == other.GetEndOffset() &&
-                spreadMethod_ == other.GetSpreadMethod() &&
+        return (type_ == other.GetType() && repeat_ == other.GetRepeat() && colors_ == other.GetColors() &&
+                radialGradient_ == other.GetRadialGradient() && linearGradient_ == other.GetLinearGradient() &&
+                sweepGradient_ == other.GetSweepGradient() && beginOffset_ == other.GetBeginOffset() &&
+                endOffset_ == other.GetEndOffset() && spreadMethod_ == other.GetSpreadMethod() &&
                 gradientTransform_ == other.GetGradientTransform() &&
                 linearGradientInfo_ == other.GetLinearGradientInfo() &&
                 radialGradientInfo_ == other.GetRadialGradientInfo());
     }
-    
+
+    bool operator!=(const Gradient& other) const
+    {
+        return !(*this == other);
+    }
+
+    std::unique_ptr<JsonValue> LinearGradientToJson() const;
+    std::unique_ptr<JsonValue> SweepGradientToJson() const;
+    std::unique_ptr<JsonValue> RadialGradientToJson() const;
+
 private:
     GradientType type_ = GradientType::LINEAR;
     bool repeat_ = false;

@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/components_ng/pattern/radio/radio_paint_method.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
@@ -28,7 +29,8 @@ class CheckBoxGroupPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(CheckBoxGroupPaintMethod, NodePaintMethod)
 
 public:
-    CheckBoxGroupPaintMethod() = default;
+    CheckBoxGroupPaintMethod(bool enabled, bool isTouch, bool isHover, float shapeScale, UIStatus uiStatus)
+        : enabled_(enabled), isTouch_(isTouch), isHover_(isHover), shapeScale_(shapeScale), uiStatus_(uiStatus) {};
 
     ~CheckBoxGroupPaintMethod() override = default;
 
@@ -39,14 +41,30 @@ private:
     void PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
     void DrawUnselected(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, RSBrush& brush, SizeF& paintSize) const;
     void DrawActiveBorder(RSCanvas& canvas, const OffsetF& paintOffset, RSBrush& brush, const SizeF& paintSize) const;
-    void DrawCheck(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
     void DrawPart(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
+    void DrawTouchBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
+    void DrawHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
+    void DrawAnimationOffToOn(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
+    void DrawAnimationOnToOff(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
 
     float borderWidth_ = 0.0f;
     float borderRadius_ = 0.0f;
     float checkStroke_ = 0.0f;
+    Color pointColor_ = Color::WHITE;
     Color activeColor_ = Color::BLUE;
+    Color inactiveColor_ = Color::GRAY;
     Color shadowColor_ = Color::WHITE;
+    Color clickEffectColor_ = Color::WHITE;
+    Color hoverColor_ = Color::WHITE;
+    Dimension hoverRadius_ = 8.0_vp;
+    Dimension hotZoneHorizontalPadding_ = 11.0_vp;
+    Dimension hotZoneVerticalPadding_ = 11.0_vp;
+
+    bool enabled_ = true;
+    bool isTouch_ = false;
+    bool isHover_ = false;
+    float shapeScale_ = 1.0f;
+    UIStatus uiStatus_ = UIStatus::UNSELECTED;
 };
 } // namespace OHOS::Ace::NG
 

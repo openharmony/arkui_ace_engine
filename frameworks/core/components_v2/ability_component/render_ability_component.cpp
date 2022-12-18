@@ -24,7 +24,9 @@ namespace OHOS::Ace::V2 {
 
 RenderAbilityComponent::~RenderAbilityComponent()
 {
-    adapter_->RemoveExtension();
+    if (adapter_) {
+        adapter_->RemoveExtension();
+    }
 
     auto context = context_.Upgrade();
     if (!context || callbackId_ <= 0) {
@@ -82,7 +84,7 @@ void RenderAbilityComponent::Paint(RenderContext& context, const Offset& offset)
 
 void RenderAbilityComponent::ConnectOrUpdateExtension()
 {
-    Offset globalOffset = GetGlobalOffset();
+    Offset globalOffset = GetGlobalOffsetExternal();
     if (currentRect_.GetOffset() == globalOffset && !needLayout_ && hasConnectionToAbility_) {
         return;
     }
@@ -95,19 +97,31 @@ void RenderAbilityComponent::ConnectOrUpdateExtension()
     auto parentWindowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
     Offset containerModalOffset;
     auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
-        pipelineContext->FireWindowGetModeCallBack() == WindowMode::WINDOW_MODE_FLOATING;
+        pipelineContext->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     if (isContainerModal) {
         containerModalOffset = Offset((NormalizeToPx(CONTAINER_BORDER_WIDTH) + NormalizeToPx(CONTENT_PADDING)),
             NormalizeToPx(CONTAINER_TITLE_HEIGHT));
     }
     currentRect_.SetOffset(globalOffset + parentWindowOffset + containerModalOffset);
-    if (hasConnectionToAbility_) {
-        adapter_->UpdateRect(currentRect_);
+
+    if (!adapter_) {
+        adapter_ = WindowExtensionConnectionProxy::CreateAdapter();
+        int32_t windowId = pipelineContext->GetWindowId();
+        adapter_->ConnectExtension(component_->GetWant(), currentRect_, AceType::Claim(this), windowId);
         return;
     }
-    adapter_ = WindowExtensionConnectionProxy::CreateAdapter();
-    int32_t windowId = pipelineContext->GetWindowId();
-    adapter_->ConnectExtension(component_->GetWant(), currentRect_, AceType::Claim(this), windowId);
+
+    if (hasConnectionToAbility_) {
+        adapter_->UpdateRect(currentRect_);
+    }
+}
+
+void RenderAbilityComponent::OnPaintFinish()
+{
+    if (globalOffsetExternal_ != GetGlobalOffsetExternal()) {
+        globalOffsetExternal_ = GetGlobalOffsetExternal();
+        ConnectOrUpdateExtension();
+    }
 }
 
 } // namespace OHOS::Ace::V2

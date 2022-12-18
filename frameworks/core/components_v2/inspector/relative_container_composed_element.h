@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_STACK_COMPOSED_ELEMENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_STACK_COMPOSED_ELEMENT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_RELATIVE_CONTAINER_COMPOSED_ELEMENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_RELATIVE_CONTAINER_COMPOSED_ELEMENT_H
 
-#include "core/components/relative_container/render_relative_container.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/relative_container/relative_container_element.h"
+#include "core/components/relative_container/render_relative_container.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -33,18 +34,23 @@ public:
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
 
+    std::string GetAlignRulesMap() const;
+    std::string GetAlignDirectionStr(AlignDirection alignDirection) const;
+    std::string GetAlignRuleStr(AlignRule alignRule) const;
+
     AceType::IdType GetTargetTypeId() const override
     {
-        return StackElement::TypeId();
+        return RelativeContainerComposedElement::TypeId();
     }
 
     void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
     void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
     void DeleteChildWithSlot(int32_t slot) override;
+
 private:
-    RefPtr<RenderStack> GetRenderRelativeContainer() const;
+    RefPtr<RenderRelativeContainer> GetRenderRelativeContainer() const;
 };
 
 } // namespace OHOS::Ace::V2
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_STACK_COMPOSED_ELEMENT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_RELATIVE_CONTAINER_COMPOSED_ELEMENT_H

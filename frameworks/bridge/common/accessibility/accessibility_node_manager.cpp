@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
+#include <cstddef>
 
 #include "base/geometry/dimension_offset.h"
 #include "base/log/dump_log.h"
@@ -188,6 +189,14 @@ int32_t ConvertToNodeId(int32_t cardAccessibilityId)
 }
 
 } // namespace
+
+const size_t AccessibilityNodeManager::EVENT_DUMP_PARAM_LENGTH_UPPER = 4;
+const size_t AccessibilityNodeManager::EVENT_DUMP_PARAM_LENGTH_LOWER = 3;
+const size_t AccessibilityNodeManager::PROPERTY_DUMP_PARAM_LENGTH = 2;
+const int32_t AccessibilityNodeManager::EVENT_DUMP_ORDER_INDEX = 0;
+const int32_t AccessibilityNodeManager::EVENT_DUMP_ID_INDEX = 1;
+const int32_t AccessibilityNodeManager::EVENT_DUMP_ACTION_INDEX = 2;
+const int32_t AccessibilityNodeManager::EVENT_DUMP_ACTION_PARAM_INDEX = 3;
 
 AccessibilityNodeManager::~AccessibilityNodeManager()
 {
@@ -384,9 +393,7 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateSpecializedNode(
     const std::string& tag, int32_t nodeId, int32_t parentNodeId)
 {
 #if defined(PREVIEW)
-    if (IsDeclarative()) {
-        return nullptr;
-    }
+    return nullptr;
 #endif
     if (nodeId < ROOT_STACK_BASE) {
         return nullptr;
@@ -659,6 +666,17 @@ void AccessibilityNodeManager::TrySaveTargetAndIdNode(
     }
 }
 
+void AccessibilityNodeManager::OnDumpInfo(const std::vector<std::string>& params)
+{
+    if (params.size() == 1) {
+        DumpTree(0, 0);
+    } else if (params.size() == PROPERTY_DUMP_PARAM_LENGTH) {
+        DumpProperty(params);
+    } else if (params.size() == EVENT_DUMP_PARAM_LENGTH_LOWER || params.size() == EVENT_DUMP_PARAM_LENGTH_UPPER) {
+        DumpHandleEvent(params);
+    }
+}
+
 void AccessibilityNodeManager::DumpHandleEvent(const std::vector<std::string>& params) {}
 
 void AccessibilityNodeManager::DumpProperty(const std::vector<std::string>& params) {}
@@ -791,8 +809,17 @@ void AccessibilityNodeManager::DumpTree(int32_t depth, NodeId nodeID)
     DumpLog::GetInstance().AddDesc("text: " + node->GetText());
     DumpLog::GetInstance().AddDesc("top: " + std::to_string(node->GetTop() + GetWindowTop(node->GetWindowId())));
     DumpLog::GetInstance().AddDesc("left: " + std::to_string(node->GetLeft() + GetWindowLeft(node->GetWindowId())));
-    DumpLog::GetInstance().AddDesc("width: " + std::to_string(node->GetWidth()));
-    DumpLog::GetInstance().AddDesc("height: " + std::to_string(node->GetHeight()));
+    if (node->GetTag() == "SideBarContainer") {
+        Rect sideBarRect = node->GetRect();
+        for (const auto& childNode : node->GetChildList()) {
+            sideBarRect = sideBarRect.CombineRect(childNode->GetRect());
+        }
+        DumpLog::GetInstance().AddDesc("width: " + std::to_string(sideBarRect.Width()));
+        DumpLog::GetInstance().AddDesc("height: " + std::to_string(sideBarRect.Height()));
+    } else {
+        DumpLog::GetInstance().AddDesc("width: " + std::to_string(node->GetWidth()));
+        DumpLog::GetInstance().AddDesc("height: " + std::to_string(node->GetHeight()));
+    }
     DumpLog::GetInstance().AddDesc("visible: " + std::to_string(node->GetShown() && node->GetVisible()));
     DumpLog::GetInstance().AddDesc("clickable: " + std::to_string(node->GetClickableState()));
     DumpLog::GetInstance().AddDesc("checkable: " + std::to_string(node->GetCheckableState()));

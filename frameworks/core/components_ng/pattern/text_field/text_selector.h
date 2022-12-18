@@ -19,6 +19,9 @@
 #include <cstdint>
 #include <string>
 
+#include "base/geometry/ng/offset_t.h"
+#include "frameworks/base/geometry/ng/rect_t.h"
+
 namespace OHOS::Ace::NG {
 
 /**
@@ -79,13 +82,31 @@ struct TextSelector {
         return destinationOffset == baseOffset;
     }
 
+    std::string ToString()
+    {
+        std::string result;
+        result.append("base offset: ");
+        result.append(std::to_string(baseOffset));
+        result.append(", base position: ");
+        result.append(selectionBaseOffset.ToString());
+        result.append(", destination offset: ");
+        result.append(std::to_string(destinationOffset));
+        result.append(", destination position: ");
+        result.append(selectionDestinationOffset.ToString());
+        return result;
+    }
+
     // May larger than, smaller than or equal to destinationOffset.
     int32_t baseOffset = -1;
+    OffsetF selectionBaseOffset;
 
     // When paints caret, this is where the caret position is.
     int32_t destinationOffset = -1;
+    OffsetF selectionDestinationOffset;
 
     int32_t charCount = 0;
+    RectF firstHandle;
+    RectF secondHandle;
 };
 
 } // namespace OHOS::Ace::NG

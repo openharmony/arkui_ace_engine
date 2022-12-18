@@ -17,29 +17,58 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FLEX_FLEX_MODEL_H
 
 #include <memory>
+#include <vector>
 
 #include "base/utils/macros.h"
+#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
+
+const std::vector<WrapAlignment> WRAP_TABLE = {
+    WrapAlignment::START,
+    WrapAlignment::START,
+    WrapAlignment::CENTER,
+    WrapAlignment::END,
+    WrapAlignment::STRETCH,
+    WrapAlignment::BASELINE,
+    WrapAlignment::SPACE_BETWEEN,
+    WrapAlignment::SPACE_AROUND,
+    WrapAlignment::SPACE_EVENLY,
+};
+
+constexpr int32_t MAIN_ALIGN_MAX_VALUE = 8;
+constexpr int32_t CROSS_ALIGN_MAX_VALUE = 5;
+constexpr int32_t DIRECTION_MAX_VALUE = 3;
 
 class ACE_EXPORT FlexModel {
 public:
     static FlexModel* GetInstance();
     virtual ~FlexModel() = default;
 
-    virtual void SetFillParent() = 0;
+    virtual void CreateFlexRow() = 0;
 
-    virtual void SetWrapContent() = 0;
+    virtual void CreateWrap() = 0;
+
+    virtual void SetDirection(FlexDirection direction) = 0;
+    virtual void SetWrapDirection(WrapDirection direction) = 0;
+
+    virtual void SetMainAxisAlign(FlexAlign flexAlign) = 0;
+    virtual void SetWrapMainAlignment(WrapAlignment value) = 0;
+
+    virtual void SetCrossAxisAlign(FlexAlign flexAlign) = 0;
+    virtual void SetWrapCrossAlignment(WrapAlignment value) = 0;
+
+    virtual void SetAlignItems(int32_t value) = 0;
+    virtual void SetWrapAlignment(WrapAlignment value) = 0;
+
+    virtual void SetHasHeight() = 0;
+    virtual void SetHasWidth() = 0;
+    virtual void SetFlexWidth() = 0;
+    virtual void SetFlexHeight() = 0;
 
     virtual void SetJustifyContent(int32_t value) = 0;
 
-    virtual void SetAlignItems(int32_t value) = 0;
-
     virtual void SetAlignContent(int32_t value) = 0;
-
-    virtual void SetHasHeight() = 0;
-
-    virtual void SetHasWidth() = 0;
 
 private:
     static std::unique_ptr<FlexModel> instance_;

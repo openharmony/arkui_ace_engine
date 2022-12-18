@@ -7,31 +7,36 @@
     "src/utest/mock/common/local_storage_native_mock.ts",
     "src/utest/mock/full_update/fu_view_native_mock.ts",
     "src/lib/common/lazy_foreach.d.ts",
-
     "src/utest/mock/partial_update/mock_viewstack_processor.ts",
     "src/utest/mock/partial_update/mock_foreach.ts",
     "src/utest/mock/partial_update/pu_view_native_mock.ts",
-
+    
     // common:
     // delcrations of C++ exposed classes
     "src/lib/common/environment_setting.d.ts",
     "src/lib/common/storage.d.ts",
     "src/lib/common/ifelse_native.d.ts",
-
+    
     // interfaces
     "src/lib/common/i_environment_backend.ts",
-    "src/lib/common/i_property_subscriber.ts",
-    "src/lib/common/i_property_subscriber_lookup.ts",
     "src/lib/common/i_storage.ts",
-    "src/lib/common/local_storage.ts",
-    "src/lib/common/app_storage.ts",
-    "src/lib/common/persistent_storage.ts",
+    
+    // sdk
+    "src/lib/sdk/i_data_source.d.ts",
+    "src/lib/sdk/i_property_subscriber.ts",
+    "src/lib/sdk/local_storage.ts",
+    "src/lib/sdk/app_storage.ts",
+    "src/lib/sdk/subscriber_lookup.ts",
+    "src/lib/sdk/subscribed_abstract_property.ts",
+    "src/lib/sdk/subscribable_abstract.ts",
+    "src/lib/sdk/persistent_storage.ts",
+    "src/lib/sdk/environment.ts",
+
+    // common, non-sdk
     "src/lib/common/distributed_storage.ts",
-    "src/lib/common/environment.ts",
-    "src/lib/common/subscriber_lookup.ts",
-    "src/lib/common/subscribable_abstract.ts",
     "src/lib/common/observed_object.ts",
     "src/lib/common/observed_property_abstract.ts",
+
     // full_update specific
     "src/lib/full_update/fu_observed_property_object_abstract.ts",
     "src/lib/full_update/fu_observed_property_simple_abstract.ts",
@@ -42,13 +47,14 @@
     "src/lib/full_update/fu_synced_property_simple_two_way.ts",
     "src/lib/full_update/fu_synced_property_object_nested.ts",
     "src/lib/full_update/fu_view.ts",
-   
+
     // partial update specific 
     "src/lib/partial_update/pu_observed_property_abstract.ts",
     "src/lib/partial_update/pu_observed_property_object_abstract.ts",
     "src/lib/partial_update/pu_observed_property_simple_abstract.ts",
     "src/lib/partial_update/pu_observed_property_object.ts",
     "src/lib/partial_update/pu_observed_property_simple.ts",
+    "src/lib/partial_update/pu_synced_property_object_one_way.ts",
     "src/lib/partial_update/pu_synced_property_object_two_way.ts",
     "src/lib/partial_update/pu_synced_property_simple_one_way.ts",
     "src/lib/partial_update/pu_synced_property_simple_two_way.ts",
@@ -65,7 +71,6 @@
     "src/utest/full_update/view_test.ts",
     "src/utest/full_update/observed_objects_properties_nested.ts",
     "src/utest/full_update/observed_objects_properties_array1.ts",
-    
     "src/utest/partial_update/observed_objects_properties_nested.ts",
     "src/utest/partial_update/observed_objects_properties_array1.ts",
     "src/utest/partial_update/viewpu_appstorage_test.ts",
@@ -80,6 +85,8 @@
     "outFile": "./distTest/stateMgmt_test.js",
     "rootDir": "./src/",
     "experimentalDecorators": true,
-    "lib" : ["ES6"],
+    "lib": [
+      "ES6"
+    ],
   }
 }

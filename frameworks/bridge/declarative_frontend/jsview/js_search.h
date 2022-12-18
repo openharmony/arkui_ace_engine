@@ -31,6 +31,7 @@ public:
     static void SetPlaceholderColor(const JSCallbackInfo& info);
     static void SetPlaceholderFont(const JSCallbackInfo& info);
     static void SetTextFont(const JSCallbackInfo& info);
+    static void SetTextAlign(int32_t value);
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderWidth(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);
@@ -54,13 +55,13 @@ public:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSSearchController* scroller);
     void CaretPosition(int32_t caretPosition);
-    void SetController(const RefPtr<TextFieldController>& controller)
+    void SetController(const RefPtr<TextFieldControllerBase>& controller)
     {
         controller_ = controller;
     }
 
 private:
-    WeakPtr<TextFieldController> controller_;
+    WeakPtr<TextFieldControllerBase> controller_;
     ACE_DISALLOW_COPY_AND_MOVE(JSSearchController);
 };
 

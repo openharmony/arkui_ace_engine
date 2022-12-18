@@ -28,21 +28,29 @@ class ACE_EXPORT LinePaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(LinePaintMethod, NodePaintMethod)
 public:
     LinePaintMethod() = default;
+    explicit LinePaintMethod(const RefPtr<ShapePaintProperty>& shapePaintProperty)
+        : propertiesFromAncestor_(shapePaintProperty)
+    {}
     ~LinePaintMethod() override = default;
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
-        auto linePaintProperty = DynamicCast<LinePaintProperty>(paintWrapper->GetPaintProperty());
+        auto linePaintProperty = DynamicCast<LinePaintProperty>(paintWrapper->GetPaintProperty()->Clone());
         if (!linePaintProperty) {
             return nullptr;
         }
-
+        if (propertiesFromAncestor_) {
+            linePaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
+        }
         if (!linePaintProperty->GetStartPoint() || !linePaintProperty->GetEndPoint()) {
             return nullptr;
         }
-        return [linePaintProperty](RSCanvas& canvas) { LinePainter::DrawLine(canvas, *linePaintProperty); };
+        auto offset = paintWrapper->GetContentOffset();
+        return [linePaintProperty, offset](RSCanvas& canvas) {
+            LinePainter::DrawLine(canvas, *linePaintProperty, offset); };
     }
 
 private:
+    RefPtr<ShapePaintProperty> propertiesFromAncestor_;
     ACE_DISALLOW_COPY_AND_MOVE(LinePaintMethod);
 };
 } // namespace OHOS::Ace::NG

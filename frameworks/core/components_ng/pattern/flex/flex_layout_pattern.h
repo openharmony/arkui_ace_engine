@@ -80,6 +80,49 @@ public:
         DumpLog::GetInstance().AddDesc(std::string("Type: ").append(isWrap_ ? "Wrap" : "NoWrap"));
     }
 
+    bool GetIsWrap() const
+    {
+        return isWrap_;
+    }
+    
+    void SetIsWrap(bool isWrap)
+    {
+        isWrap_ = isWrap;
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        auto property = GetLayoutProperty<FlexLayoutProperty>();
+        CHECK_NULL_VOID(property);
+        auto jsonConstructor = JsonUtil::Create(true);
+        auto direction = property->GetFlexDirection().value_or(FlexDirection::ROW);
+        jsonConstructor->Put("direction", V2::ConvertFlexDirectionToStirng(direction).c_str());
+        if (!isWrap_) {
+            jsonConstructor->Put("wrap", "FlexWrap.NoWrap");
+            jsonConstructor->Put("justifyContent",
+                V2::ConvertFlexAlignToStirng(property->GetMainAxisAlign().value_or(FlexAlign::FLEX_START)).c_str());
+            jsonConstructor->Put("alignItems",
+                V2::ConvertFlexAlignToStirng(property->GetCrossAxisAlign().value_or(FlexAlign::FLEX_START)).c_str());
+            jsonConstructor->Put("alignContent", "FlexAlign.Start");
+        } else {
+            auto wrapDirection = property->GetWrapDirection().value_or(WrapDirection::HORIZONTAL);
+            if (static_cast<int32_t>(direction) <= 1) {
+                auto wrap = (static_cast<int32_t>(wrapDirection) - static_cast<int32_t>(direction)) / 2 + 1;
+                jsonConstructor->Put("wrap", wrap == 1 ? "FlexWrap.Wrap" : "FlexWrap.WrapReverse");
+            } else {
+                auto wrap = (static_cast<int32_t>(wrapDirection) + static_cast<int32_t>(direction)) / 2 + 1;
+                jsonConstructor->Put("wrap", wrap == 1 ? "FlexWrap.Wrap" : "FlexWrap.WrapReverse");
+            }
+            jsonConstructor->Put("justifyContent",
+                V2::ConvertWrapAlignmentToStirng(property->GetMainAlignment().value_or(WrapAlignment::START)).c_str());
+            jsonConstructor->Put("alignItems",
+                V2::ConvertWrapAlignmentToStirng(property->GetCrossAlignment().value_or(WrapAlignment::START)).c_str());
+            jsonConstructor->Put("alignContent",
+                V2::ConvertWrapAlignmentToStirng(property->GetAlignment().value_or(WrapAlignment::START)).c_str());
+        }
+        json->Put("constructor", jsonConstructor);
+    }
+
 private:
     bool isWrap_ = false;
     bool isDialogStretch_ = false;

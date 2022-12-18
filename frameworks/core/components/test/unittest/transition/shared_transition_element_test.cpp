@@ -17,9 +17,12 @@
 
 #include "adapter/aosp/entrance/java/jni/jni_environment.h"
 #include "base/log/log.h"
+#include "base/test/mock/mock_asset_manager.h"
+#include "base/test/mock/mock_task_executor.h"
 #include "base/utils/system_properties.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/curve_animation.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #include "core/components/box/box_component.h"
 #include "core/components/drop_filter/drop_filter_component.h"
 #include "core/components/flex/flex_component.h"
@@ -33,16 +36,12 @@
 #include "core/components/test/unittest/mock/window_mock.h"
 #include "core/components/transition/transition_component.h"
 #include "core/components/tween/tween_element.h"
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/fake_task_executor.h"
-#include "core/mock/mock_resource_register.h"
 #include "core/pipeline/pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
-
 Platform::JniEnvironment::JniEnvironment() {}
 
 Platform::JniEnvironment::~JniEnvironment() = default;
@@ -133,8 +132,8 @@ public:
         std::unique_ptr<PlatformWindow> platformWindow = TweenTestUtils::CreatePlatformWindow();
         platformWindowRaw_ = reinterpret_cast<MockPlatformWindow*>(platformWindow.get());
         auto window = TweenTestUtils::CreateWindow(std::move(platformWindow));
-        auto taskExecutor = AceType::MakeRefPtr<FakeTaskExecutor>();
-        auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+        auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+        auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
         auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
         RefPtr<Frontend> frontend = Frontend::CreateDefault();
         context_ = AceType::MakeRefPtr<PipelineContext>(
@@ -613,5 +612,4 @@ HWTEST_F(SharedTransitionElementTest, SharedTransitionTest006, TestSize.Level1)
     platformWindowRaw_->TriggerOneFrame();
     EXPECT_EQ(0UL, children.size()); // Null.
 }
-
 } // namespace OHOS::Ace

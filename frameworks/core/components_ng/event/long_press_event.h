@@ -19,6 +19,7 @@
 #include <list>
 
 #include "base/memory/referenced.h"
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "core/gestures/gesture_info.h"
@@ -27,7 +28,8 @@ namespace OHOS::Ace::NG {
 
 class GestureEventHub;
 
-class LongPressEvent : public Referenced {
+class LongPressEvent : public virtual AceType {
+    DECLARE_ACE_TYPE(LongPressEvent, AceType)
 public:
     explicit LongPressEvent(GestureEventFunc&& callback) : callback_(std::move(callback)) {}
     ~LongPressEvent() override = default;
@@ -46,6 +48,8 @@ public:
 
 private:
     GestureEventFunc callback_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(LongPressEvent);
 };
 
 class ACE_EXPORT LongPressEventActuator : public GestureEventActuator {
@@ -54,29 +58,34 @@ public:
     explicit LongPressEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
     ~LongPressEventActuator() override = default;
 
-    void AddLongPressEvent(const RefPtr<LongPressEvent>& event)
+    void SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag = false, bool isDisableMouseLeft = false)
     {
-        if (longPressEvents_.empty()) {
-            longPressEvents_.emplace_back(event);
-            return;
-        }
-        if (std::find(longPressEvents_.begin(), longPressEvents_.end(), event) == longPressEvents_.end()) {
-            longPressEvents_.emplace_back(event);
-        }
+        longPressEvent_ = event;
+        isForDrag_ = isForDrag;
+        isDisableMouseLeft_ = isDisableMouseLeft;
     }
 
-    void RemoveLongPressEvent(const RefPtr<LongPressEvent>& event)
+    void SetDuration(int32_t duration)
     {
-        longPressEvents_.remove(event);
+        if (!longPressRecognizer_) {
+            longPressRecognizer_ = MakeRefPtr<LongPressRecognizer>(isForDrag_, isDisableMouseLeft_);
+        }
+        longPressRecognizer_->SetDuration(duration);
     }
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
 
+    GestureEventFunc GetGestureEventFunc();
+
 private:
+    bool isForDrag_ = false;
+    bool isDisableMouseLeft_ = false;
     WeakPtr<GestureEventHub> gestureEventHub_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
-    std::list<RefPtr<LongPressEvent>> longPressEvents_;
+    RefPtr<LongPressEvent> longPressEvent_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(LongPressEventActuator);
 };
 
 } // namespace OHOS::Ace::NG

@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_PAINT_PROPERTY_H
 
+#include <array>
+#include <string>
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/paint_state.h"
@@ -35,6 +37,7 @@ public:
     const Dimension STOKE_WIDTH_DEFAULT = Dimension(1.0f);
     const bool ANTIALIAS_DEFAULT = true;
     const int SQUARE_CAP = 2;
+    const int DEFAULT_LINE_JOIN=0;
 
     ShapePaintProperty() = default;
     ~ShapePaintProperty() override = default;
@@ -70,6 +73,33 @@ public:
         ResetStrokeLineJoin();
         ResetStrokeMiterLimit();
         ResetStrokeOpacity();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        PaintProperty::ToJsonValue(json);
+        json->Put("stroke", propStroke_.value_or(Color::BLACK).ColorToString().c_str());
+        json->Put("strokeWidth", propStrokeWidth_.value_or(Dimension()).ConvertToPx());
+        json->Put("strokeOpacity", std::to_string(propStrokeOpacity_.value_or(STOKE_OPACITY_DEFAULT)).c_str());
+        json->Put("strokeDashOffset", propStrokeDashOffset_.value_or(Dimension()).ToString().c_str());
+
+        auto jsonDashArray = JsonUtil::CreateArray(true);
+        std::vector<Dimension> array = propStrokeDashArray_.value_or(std::vector<Dimension>());
+        for (size_t i = 0; i < array.size(); i++) {
+            auto index = std::to_string(i);
+            auto value = array[i].ToString();
+            jsonDashArray->Put(index.c_str(), value.c_str());
+        }
+        json->Put("strokeDashArray", jsonDashArray);
+
+        std::array<std::string, 3> lineCap = { "LineCapStyle.Butt", "LineCapStyle.Round", "LineCapStyle.Square" };
+        json->Put("strokeLineCap", lineCap.at(propStrokeLineCap_.value_or(0) % 3).c_str());
+        std::array<std::string, 3> lineJoin = { "LineJoinStyle.Miter", "LineJoinStyle.Round", "LineJoinStyle.Bevel" };
+        json->Put("strokeLineJoin", lineJoin.at(propStrokeLineJoin_.value_or(0) % 3).c_str());
+        json->Put("strokeMiterLimit", std::to_string(propStrokeMiterLimit_.value_or(STOKE_MITERLIMIT_DEFAULT)).c_str());
+        json->Put("fill", propFill_.value_or(Color::BLACK).ColorToString().c_str());
+        json->Put("fillOpacity", std::to_string(propFillOpacity_.value_or(FILL_OPACITY_DEFAULT)).c_str());
+        json->Put("antiAlias", propAntiAlias_.value_or(ANTIALIAS_DEFAULT) ? "true" : "false");
     }
 
     void UpdateShapeProperty(const RefPtr<ShapePaintProperty>& target);

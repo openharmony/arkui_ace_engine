@@ -137,9 +137,9 @@ public:
     RefPtr<RenderNode> GetRenderNode();
     void SetItemGroupLayoutParam(const ListItemLayoutParam &param);
     void SetChainOffset(double offset);
-    void SetRenderBox(const WeakPtr<RenderNode>& renderBox)
+    void SetRenderNode(const WeakPtr<RenderNode>& renderNode)
     {
-        renderBox_ = renderBox;
+        renderNode_ = renderNode;
     }
 
 protected:
@@ -162,6 +162,7 @@ private:
     double LayoutALine(std::list<RefPtr<RenderListItem>>::iterator& it);
     void RequestNewItemsAtEnd(double& curMainPos);
     void RequestNewItemsAtStart();
+    void LayoutHeaderFooter(bool reachEnd);
     void SetItemsPostion();
     double CalculateCrossOffset(double crossSize, double childCrossSize);
 
@@ -176,7 +177,7 @@ private:
     Dimension listSpace_;
     bool stickyHeader_ = false;
     bool stickyFooter_ = false;
-    WeakPtr<RenderNode> renderBox_;
+    WeakPtr<RenderNode> renderNode_;
 
     // layout param
     bool forwardLayout_ = true;

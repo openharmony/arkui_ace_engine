@@ -74,7 +74,8 @@ public:
         return id_;
     }
 
-    void NativeXComponentDispatchTouchEvent(const OH_NativeXComponent_TouchEvent& touchEvent);
+    void NativeXComponentDispatchTouchEvent(const OH_NativeXComponent_TouchEvent& touchEvent,
+        const std::vector<XComponentTouchPoint>& xComponentTouchPoints);
     bool NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent);
 
 protected:
@@ -109,6 +110,10 @@ private:
         const std::list<TouchLocationInfo>& touchInfoList, const int64_t timeStamp, const TouchType& touchType);
     OH_NativeXComponent_TouchEventType ConvertNativeXComponentTouchEvent(const TouchType& touchType);
     OH_NativeXComponent_TouchEvent touchEventPoint_;
+    std::vector<XComponentTouchPoint> nativeXComponentTouchPoints_;
+#ifdef OHOS_PLATFORM
+    int64_t startIncreaseTime_ = 0;
+#endif
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_XCOMPONENT_RENDER_XCOMPONENT_H

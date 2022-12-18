@@ -18,46 +18,9 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 
-enum class JavascriptEngine { NONE, QUICKJS, V8, ARK };
+enum class JavascriptEngine { NONE, V8, ARK };
 
-#ifdef USE_QUICKJS_ENGINE
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include "third_party/quickjs/cutils.h"
-#include "third_party/quickjs/quickjs-libc.h"
-
-void* JS_GetOpaqueA(JSValueConst obj, JSClassID* classIds, size_t classIdLen);
-
-JSValueConst JS_NewGlobalCConstructor(
-    JSContext* ctx, const char* name, JSCFunction* func, int length, JSValueConst proto);
-
-#ifdef __cplusplus
-}
-#endif
-
-using BindingTarget = JSValue;
-using FunctionCallback = JSValue (*)(JSContext*, JSValueConst, int, JSValueConst*);
-using FunctionGetCallback = JSValue (*)(JSContext*, JSValueConst);
-using FunctionSetCallback = JSValue (*)(JSContext*, JSValueConst, JSValueConst);
-template<typename T>
-using MemberFunctionCallback = JSValue (T::*)(JSContext*, JSValueConst, int, JSValueConst*);
-template<typename T>
-using MemberFunctionGetCallback = JSValue (T::*)(JSContext*, JSValueConst);
-template<typename T>
-using MemberFunctionSetCallback = JSValue (T::*)(JSContext*, JSValueConst, JSValueConst);
-using ExoticGetterCallback = JSValue (*)(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);
-using ExoticSetterCallback = int (*)(
-    JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
-using ExoticHasPropertyCallback = int (*)(JSContext* ctx, JSValueConst obj, JSAtom atom);
-using ExoticIsArrayCallback = int (*)(JSContext* ctx, JSValueConst obj);
-
-/* return < 0 if exception or TRUE/FALSE */
-
-constexpr const JavascriptEngine cCurrentJSEngine = JavascriptEngine::QUICKJS;
-
-#elif USE_V8_ENGINE
+#ifdef USE_V8_ENGINE
 
 #include "third_party/v8/include/v8.h"
 

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 
 #include "base/utils/utils.h"
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/radio/radio_layout_algorithm.h"
@@ -26,6 +27,13 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+constexpr int DEFAULT_RADIO_ANIMATION_DURATION = 300;
+constexpr float DEFAULT_MID_TIME_SLOT = 0.5;
+constexpr float DEFAULT_END_TIME_SLOT = 1.0;
+constexpr float DEFAULT_SHRINK_TIME_SLOT = 0.9;
+} // namespace
 
 void RadioPattern::OnAttachToFrameNode()
 {
@@ -45,7 +53,6 @@ void RadioPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(pageNode);
     auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
     CHECK_NULL_VOID(pageEventHub);
-
     auto radioEventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(radioEventHub);
     pageEventHub->RemoveRadioFromGroup(radioEventHub->GetGroup(), frameNode->GetId());
@@ -54,12 +61,39 @@ void RadioPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 void RadioPattern::OnModifyDone()
 {
     UpdateState();
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    CHECK_NULL_VOID(radioTheme);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->GetMarginProperty()) {
+        MarginProperty margin;
+        margin.left = CalcLength(radioTheme->GetHotZoneHorizontalPadding());
+        margin.right = CalcLength(radioTheme->GetHotZoneHorizontalPadding());
+        margin.top = CalcLength(radioTheme->GetHotZoneVerticalPadding());
+        margin.bottom = CalcLength(radioTheme->GetHotZoneVerticalPadding());
+        layoutProperty->UpdateMargin(margin);
+    }
+    hotZoneHorizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding();
+    hotZoneVerticalPadding_ = radioTheme->GetHotZoneVerticalPadding();
+    InitClickEvent();
+    InitTouchEvent();
+    InitMouseEvent();
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
+}
+
+void RadioPattern::InitClickEvent()
+{
     if (clickListener_) {
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
@@ -67,9 +101,62 @@ void RadioPattern::OnModifyDone()
         CHECK_NULL_VOID(radioPattern);
         radioPattern->OnClick();
     };
-
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gesture->AddClickEvent(clickListener_);
+}
+
+void RadioPattern::InitTouchEvent()
+{
+    if (touchListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto radioPattern = weak.Upgrade();
+        CHECK_NULL_VOID(radioPattern);
+        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            radioPattern->OnTouchDown();
+        }
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
+            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
+            radioPattern->OnTouchUp();
+        }
+    };
+    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gesture->AddTouchEvent(touchListener_);
+}
+
+void RadioPattern::InitMouseEvent()
+{
+    if (mouseEvent_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto eventHub = host->GetEventHub<RadioEventHub>();
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+
+    auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleMouseEvent(isHover);
+        }
+    };
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnHoverEvent(mouseEvent_);
+}
+
+void RadioPattern::HandleMouseEvent(bool isHover)
+{
+    isHover_ = isHover;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkNeedRenderOnly();
 }
 
 void RadioPattern::OnClick()
@@ -78,13 +165,56 @@ void RadioPattern::OnClick()
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<RadioPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-
-    bool check = paintProperty->GetRadioCheckValue();
-
+    bool check = false;
+    if (paintProperty->HasRadioCheck()) {
+        check = paintProperty->GetRadioCheckValue();
+    } else {
+        paintProperty->UpdateRadioCheck(false);
+    }
+    if (preCheck_ && check) {
+        UpdateUIStatus(true);
+        PlayAnimation(true);
+    }
     if (!preCheck_ && !check) {
         paintProperty->UpdateRadioCheck(true);
         UpdateState();
     }
+}
+
+void RadioPattern::OnTouchDown()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    isTouch_ = true;
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
+    auto frameSize = geometryNode->GetFrameSize();
+    if (originalPaintRect.GetSize() == frameSize) {
+        originalPaintRect = GetHotZoneRect(true);
+    }
+    renderContext->SyncGeometryProperties(originalPaintRect);
+    host->MarkNeedRenderOnly();
+}
+
+void RadioPattern::OnTouchUp()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    isTouch_ = false;
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto paintRect = renderContext->GetPaintRectWithoutTransform();
+    auto frameSize = geometryNode->GetFrameSize();
+    if (paintRect.GetSize() != frameSize) {
+        paintRect = GetHotZoneRect(false);
+    }
+    renderContext->SyncGeometryProperties(paintRect);
+    host->MarkNeedRenderOnly();
 }
 
 void RadioPattern::UpdateState()
@@ -127,8 +257,29 @@ void RadioPattern::UpdateState()
 
     auto paintProperty = host->GetPaintProperty<RadioPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    bool check = paintProperty->GetRadioCheckValue();
 
+    bool check = false;
+    if (paintProperty->HasRadioCheck()) {
+        check = paintProperty->GetRadioCheckValue();
+        /*
+         * Do not set isFirstCreated_ to false if the radio is set to true at creation time. The isFirstCreated_ is set
+         * to false in UpdateGroupCheckStatus because isFirstCreated_ is also required to determine if an onChange event
+         * needs to be triggered.
+         */
+        if (check) {
+            UpdateUIStatus(true);
+            if (!isFirstCreated_) {
+                PlayAnimation(true);
+            }
+        } else {
+            // If the radio is set to false, set isFirstCreated_ to false.
+            isFirstCreated_ = false;
+        }
+    } else {
+        paintProperty->UpdateRadioCheck(false);
+        // If the radio check is not set, set isFirstCreated_ to false.
+        isFirstCreated_ = false;
+    }
     if (preCheck_ != check) {
         UpdateGroupCheckStatus(host, check);
     }
@@ -140,19 +291,20 @@ void RadioPattern::UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode)
     auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
     CHECK_NULL_VOID(radioPaintProperty);
     radioPaintProperty->UpdateRadioCheck(false);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    frameNode->MarkNeedRenderOnly();
 
     if (preCheck_) {
         auto radioEventHub = GetEventHub<RadioEventHub>();
         CHECK_NULL_VOID(radioEventHub);
         radioEventHub->UpdateChangeEvent(false);
+        PlayAnimation(false);
     }
     preCheck_ = false;
 }
 
 void RadioPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool check)
 {
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    frameNode->MarkNeedRenderOnly();
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -165,14 +317,186 @@ void RadioPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bo
 
     auto radioEventHub = GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(radioEventHub);
-    radioEventHub->UpdateChangeEvent(check);
+    if (!isFirstCreated_) {
+        radioEventHub->UpdateChangeEvent(check);
+    }
+    // If the radio is set to true at creation time, set isFirstCreated_ to false here.
+    isFirstCreated_ = false;
     if (check) {
         pageEventHub->UpdateRadioGroupValue(radioEventHub->GetGroup(), frameNode->GetId());
     } else {
         auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
         CHECK_NULL_VOID(radioPaintProperty);
         radioPaintProperty->UpdateRadioCheck(check);
+        PlayAnimation(false);
     }
+}
+
+void RadioPattern::PlayAnimation(bool isOn)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!onController_) {
+        onController_ = AceType::MakeRefPtr<Animator>(host->GetContext());
+        onController_->AddStopListener(Animator::StatusCallback([weak = AceType::WeakClaim(this)]() {
+            auto radio = weak.Upgrade();
+            if (radio) {
+                radio->UpdateUIStatus(true);
+            }
+        }));
+    }
+    if (!offController_) {
+        offController_ = AceType::MakeRefPtr<Animator>(host->GetContext());
+        offController_->AddStopListener(Animator::StatusCallback([weak = AceType::WeakClaim(this)]() {
+            auto radio = weak.Upgrade();
+            if (radio) {
+                radio->UpdateUIStatus(false);
+            }
+        }));
+    }
+    StopTranslateAnimation();
+    RefPtr<KeyframeAnimation<float>> shrinkEngine = AceType::MakeRefPtr<KeyframeAnimation<float>>();
+    RefPtr<KeyframeAnimation<float>> selectEngine = AceType::MakeRefPtr<KeyframeAnimation<float>>();
+    onController_->ClearInterpolators();
+    offController_->ClearInterpolators();
+    auto shrinkFrameStart = AceType::MakeRefPtr<Keyframe<float>>(0.0, 1.0);
+    auto shrinkFrameMid = AceType::MakeRefPtr<Keyframe<float>>(DEFAULT_MID_TIME_SLOT, DEFAULT_SHRINK_TIME_SLOT);
+    shrinkFrameMid->SetCurve(Curves::FRICTION);
+    auto shrinkFrameEnd = AceType::MakeRefPtr<Keyframe<float>>(DEFAULT_END_TIME_SLOT, 1.0);
+    shrinkFrameEnd->SetCurve(Curves::FRICTION);
+    shrinkEngine->AddKeyframe(shrinkFrameStart);
+    shrinkEngine->AddKeyframe(shrinkFrameMid);
+    shrinkEngine->AddKeyframe(shrinkFrameEnd);
+    shrinkEngine->AddListener(Animation<float>::ValueCallback([weak = AceType::WeakClaim(this)](float value) {
+        auto radio = weak.Upgrade();
+        if (radio) {
+            radio->UpdateTotalScale(value);
+        }
+    }));
+
+    auto selectFrameStart = AceType::MakeRefPtr<Keyframe<float>>(0.0, isOn ? 1.0 : 0.5);
+    auto selectFrameMid = AceType::MakeRefPtr<Keyframe<float>>(DEFAULT_MID_TIME_SLOT, 0.0);
+    selectFrameMid->SetCurve(Curves::FRICTION);
+    auto selectFrameEnd = AceType::MakeRefPtr<Keyframe<float>>(DEFAULT_END_TIME_SLOT, isOn ? 0.5 : 1.0);
+    selectFrameEnd->SetCurve(Curves::FRICTION);
+    selectEngine->AddKeyframe(selectFrameStart);
+    selectEngine->AddKeyframe(selectFrameMid);
+    selectEngine->AddKeyframe(selectFrameEnd);
+    selectEngine->AddListener(Animation<float>::ValueCallback([weak = AceType::WeakClaim(this)](float value) {
+        auto radio = weak.Upgrade();
+        if (radio) {
+            radio->UpdatePointScale(value);
+        }
+    }));
+    if (isOn) {
+        onController_->AddInterpolator(shrinkEngine);
+        onController_->AddInterpolator(selectEngine);
+        onController_->SetDuration(DEFAULT_RADIO_ANIMATION_DURATION);
+        onController_->Play();
+    } else {
+        offController_->AddInterpolator(shrinkEngine);
+        offController_->AddInterpolator(selectEngine);
+        offController_->SetDuration(DEFAULT_RADIO_ANIMATION_DURATION);
+        offController_->Play();
+    }
+}
+
+void RadioPattern::StopTranslateAnimation()
+{
+    if (onController_ && !onController_->IsStopped()) {
+        onController_->Stop();
+    }
+    if (offController_ && !offController_->IsStopped()) {
+        offController_->Stop();
+    }
+}
+
+void RadioPattern::UpdateUIStatus(bool check)
+{
+    uiStatus_ = check ? UIStatus::SELECTED : UIStatus::UNSELECTED;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkNeedRenderOnly();
+}
+
+void RadioPattern::UpdateTotalScale(float scale)
+{
+    totalScale_ = scale;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkNeedRenderOnly();
+}
+
+void RadioPattern::UpdatePointScale(float scale)
+{
+    pointScale_ = scale;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkNeedRenderOnly();
+}
+
+RectF RadioPattern::GetHotZoneRect(bool isOriginal) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, {});
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, {});
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, {});
+    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
+    auto offset = originalPaintRect.GetOffset();
+    double actualWidth = 0.0;
+    double actualHeight = 0.0;
+    if (isOriginal) {
+        actualWidth = geometryNode->GetFrameSize().Width() + hotZoneHorizontalPadding_.ConvertToPx() * 2;
+        actualHeight = geometryNode->GetFrameSize().Height() + hotZoneHorizontalPadding_.ConvertToPx() * 2;
+        offset.SetX(offset.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
+        offset.SetY(offset.GetY() - hotZoneHorizontalPadding_.ConvertToPx());
+    } else {
+        actualWidth = geometryNode->GetFrameSize().Width();
+        actualHeight = geometryNode->GetFrameSize().Height();
+        offset.SetX(offset.GetX() + hotZoneHorizontalPadding_.ConvertToPx());
+        offset.SetY(offset.GetY() + hotZoneHorizontalPadding_.ConvertToPx());
+    }
+    return RectF(offset, SizeF(actualWidth, actualHeight));
+}
+
+void RadioPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            pattern->GetInnerFocusPaintRect(paintRect);
+        }
+    };
+    focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+}
+
+void RadioPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
+{
+    float outCircleRadius = size_.Width() / 2;
+    auto paintOffset = offset_;
+    float originX = paintOffset.GetX();
+    float originY = paintOffset.GetY();
+    float endX = size_.Width() + originX;
+    float endY = size_.Height() + originY;
+    paintRect.SetRect({ originX, originY, endX - originX, endY - originY });
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, outCircleRadius, outCircleRadius);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, outCircleRadius, outCircleRadius);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, outCircleRadius, outCircleRadius);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, outCircleRadius, outCircleRadius);
+}
+
+FocusPattern RadioPattern::GetFocusPattern() const
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, FocusPattern());
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    CHECK_NULL_RETURN(radioTheme, FocusPattern());
+    auto activeColor = radioTheme->GetActiveColor();
+    FocusPaintParam focusPaintParam;
+    focusPaintParam.SetPaintColor(activeColor);
+    return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
 }
 
 } // namespace OHOS::Ace::NG

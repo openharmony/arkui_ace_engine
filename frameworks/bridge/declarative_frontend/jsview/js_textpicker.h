@@ -45,9 +45,11 @@ class JSTextPickerDialog {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Show(const JSCallbackInfo& info);
-    static void TextPickerDialogShow(
-        const JSRef<JSObject>& paramObj, std::map<std::string, NG::DailogTextChangeEvent> dailogEvent);
-    static std::map<std::string, NG::DailogTextChangeEvent> AddEvent(const JSCallbackInfo& info);
+    static void TextPickerDialogShow(const JSRef<JSObject>& paramObj,
+        const std::map<std::string, NG::DialogTextEvent>& dialogEvent,
+        const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
+    static std::map<std::string, NG::DialogTextEvent> DialogEvent(const JSCallbackInfo& info);
+    static std::map<std::string, NG::DialogGestureEvent> DialogCancelEvent(const JSCallbackInfo& info);
 
 private:
     static void ParseText(RefPtr<PickerTextComponent>& component, const JSRef<JSObject>& paramObj);

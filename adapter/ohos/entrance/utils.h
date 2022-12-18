@@ -25,7 +25,6 @@ namespace OHOS::Ace {
 
 std::string GetStringFromFile(const std::string& packagePathStr, const std::string& fileName);
 std::string GetStringFromHap(const std::string& hapPath, const std::string& fileName);
-bool GetIsArkFromConfig(const std::string& packagePathStr, bool isHap);
 
 RefPtr<FlutterAssetProvider> CreateAssetProvider(const std::string& packagePath,
     const std::vector<std::string>& assetBasePaths);

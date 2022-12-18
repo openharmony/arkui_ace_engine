@@ -103,16 +103,25 @@ RefPtr<RenderListItem> ListElement::RequestListItem(size_t index)
         return nullptr;
     }
     auto renderNode = element->GetRenderNode();
-    // for list item group
-    if (AceType::DynamicCast<RenderBox>(renderNode)) {
-        auto child = renderNode->GetFirstChild();
-        auto renderListItemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
-        if (renderListItemGroup) {
-            renderListItemGroup->SetRenderBox(AceType::WeakClaim(AceType::RawPtr(renderNode)));
-            renderNode = renderListItemGroup;
-        }
+    // for list item
+    auto renderListItem = AceType::DynamicCast<RenderListItem>(renderNode);
+    if (renderListItem) {
+        return renderListItem;
     }
-    return AceType::DynamicCast<RenderListItem>(renderNode);
+    // get target list item group
+    auto renderListItemGroup = AceType::DynamicCast<RenderListItemGroup>(renderNode);
+    auto currentNode = renderNode;
+    while (!renderListItemGroup) {
+        currentNode = currentNode->GetFirstChild();
+        if (!currentNode) {
+            break;
+        }
+        renderListItemGroup = AceType::DynamicCast<RenderListItemGroup>(currentNode);
+    }
+    if (renderListItemGroup) {
+        renderListItemGroup->SetRenderNode(renderNode);
+    }
+    return renderListItemGroup;
 }
 
 RefPtr<Element> ListElement::GetListItemBySlot(size_t index)
@@ -258,6 +267,7 @@ void ListElement::OnDataSourceUpdated(size_t startIndex)
         renderList_->RemoveAllItems();
         renderList_->MarkNeedLayout();
     }
+    ElementProxyHost::OnDataSourceUpdated(startIndex);
 }
 
 void ListElement::OnPostFlush()

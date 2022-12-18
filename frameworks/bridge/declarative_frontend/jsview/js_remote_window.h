@@ -16,16 +16,12 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WINDOW_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WINDOW_H
 
-#include "base/geometry/dimension.h"
-#include "core/components/common/properties/color.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
 class JSRemoteWindow : public JSViewAbstract, public JSInteractableView {
 public:
-    static void SetWindowColor(const JSCallbackInfo& info);
-
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
 };

@@ -19,6 +19,7 @@
 
 #include "core/components/common/properties/color.h"
 #include "core/components/search/search_theme.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -31,28 +32,28 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<TextFieldControllerBase> SearchView::Create(
-    std::optional<std::string>& value, std::optional<std::string>& placeholder, std::optional<std::string>& icon)
+RefPtr<TextFieldController> SearchView::Create(const std::optional<std::string>& value,
+    const std::optional<std::string>& placeholder, const std::optional<std::string>& icon)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
     auto frameNode =
         GetOrCreateSearchNode(V2::SEARCH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SearchPattern>(); });
 
-    const Color TRANSPARENT_COLOR = Color(0x00000000);
-    constexpr Dimension FONT_SIZE(20);
-
     bool hasTextFieldNode = frameNode->HasTextFieldNode();
     bool hasImageNode = frameNode->HasImageNode();
     bool hasButtonNode = frameNode->HasButtonNode();
+    bool hasCancelImageNode = frameNode->HasCancelImageNode();
+    bool hasCancelButtonNode = frameNode->HasCancelButtonNode();
 
     // TextField frameNode
+    auto searchTheme = frameNode->GetContext()->GetTheme<SearchTheme>();
     auto textFieldFrameNode = CreateTextField(frameNode, placeholder, value);
-    auto pattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
-    pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
-    pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    textFieldPattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
+    textFieldPattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     auto textInputRenderContext = textFieldFrameNode->GetRenderContext();
-    textInputRenderContext->UpdateBackgroundColor(TRANSPARENT_COLOR);
+    textInputRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     if (!hasTextFieldNode) {
         textFieldFrameNode->MountToParent(frameNode);
         textFieldFrameNode->MarkModifyDone();
@@ -69,36 +70,56 @@ RefPtr<TextFieldControllerBase> SearchView::Create(
         imageFrameNode->MarkModifyDone();
     }
 
+    // CancelImage frameNode
+    auto cancelImageFrameNode = CreateCancelImage(frameNode);
+    if (!hasCancelImageNode) {
+        cancelImageFrameNode->MountToParent(frameNode);
+        cancelImageFrameNode->MarkModifyDone();
+    }
+    // CancelButton frameNode
+    if (!hasCancelButtonNode) {
+        auto cancelButtonFrameNode = CreateCancelButton(frameNode);
+        auto cancelButtonRenderContext = cancelButtonFrameNode->GetRenderContext();
+        cancelButtonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        auto textFrameNode = AceType::DynamicCast<FrameNode>(cancelButtonFrameNode->GetChildren().front());
+        auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        textLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
+        auto cancelButtonlayoutProperty = cancelButtonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+        cancelButtonlayoutProperty->UpdateType(ButtonType::CIRCLE);
+        cancelButtonFrameNode->MountToParent(frameNode);
+        cancelButtonFrameNode->MarkModifyDone();
+    }
+
     // Button frameNode
-    auto buttonFrameNode = CreateButtonWithLabel(frameNode, "");
-    auto buttonRenderContext = buttonFrameNode->GetRenderContext();
-    buttonRenderContext->UpdateBackgroundColor(TRANSPARENT_COLOR);
-    auto textFrameNode = AceType::DynamicCast<FrameNode>(buttonFrameNode->GetChildren().front());
-    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateTextColor(Color::BLUE);
-    textLayoutProperty->UpdateFontSize(FONT_SIZE);
     if (!hasButtonNode) {
+        auto buttonFrameNode = CreateButton(frameNode);
+        auto buttonRenderContext = buttonFrameNode->GetRenderContext();
+        buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        auto textFrameNode = AceType::DynamicCast<FrameNode>(buttonFrameNode->GetChildren().front());
+        auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
+        textLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
         buttonFrameNode->MountToParent(frameNode);
         buttonFrameNode->MarkModifyDone();
     }
 
     // Set search background
     auto renderContext = frameNode->GetRenderContext();
-    auto textFieldTheme = textFieldFrameNode->GetContext()->GetThemeManager()->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = textFieldFrameNode->GetContext()->GetTheme<TextFieldTheme>();
     renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
     auto radius = textFieldTheme->GetBorderRadius();
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
 
     ViewStackProcessor::GetInstance()->Push(frameNode);
-
-    return pattern->GetTextFieldController();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    pattern->SetSearchController(AceType::MakeRefPtr<TextFieldController>());
+    return pattern->GetSearchController();
 }
 
 void SearchView::SetSearchButton(const std::string& text)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchButton, text);
-    ACE_UPDATE_PAINT_PROPERTY(SearchPaintProperty, SearchButton, text);
 }
 
 void SearchView::SetPlaceholderColor(const Color& color)
@@ -110,6 +131,7 @@ void SearchView::SetPlaceholderColor(const Color& color)
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdatePlaceholderTextColor(color);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SearchView::SetPlaceholderFont(const Font& font)
@@ -132,6 +154,7 @@ void SearchView::SetPlaceholderFont(const Font& font)
     if (!font.fontFamilies.empty()) {
         textFieldLayoutProperty->UpdatePlaceholderFontFamily(font.fontFamilies);
     }
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SearchView::SetTextFont(const Font& font)
@@ -154,15 +177,70 @@ void SearchView::SetTextFont(const Font& font)
     if (!font.fontFamilies.empty()) {
         textFieldLayoutProperty->UpdateFontFamily(font.fontFamilies);
     }
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void SearchView::SetOnChangeAndSubmit(ChangeAndSubmitEvent&& onChange)
+void SearchView::SetTextAlign(const TextAlign& textAlign)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateTextAlign(textAlign);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchView::SetCopyOption(const CopyOptions& copyOptions)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateCopyOptions(copyOptions);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchView::SetOnSubmit(ChangeAndSubmitEvent&& onSubmit)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<SearchEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnChangeAndSubmit(std::move(onChange));
+    eventHub->SetOnSubmit(std::move(onSubmit));
+}
+
+void SearchView::SetOnChange(ChangeAndSubmitEvent&& onChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SearchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
+}
+
+void SearchView::SetOnCopy(std::function<void(const std::string&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SearchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCopy(std::move(func));
+}
+
+void SearchView::SetOnCut(std::function<void(const std::string&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SearchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCut(std::move(func));
+}
+
+void SearchView::SetOnPaste(std::function<void(const std::string&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SearchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPaste(std::move(func));
 }
 
 RefPtr<FrameNode> SearchView::CreateTextField(const RefPtr<SearchNode>& parentNode,
@@ -172,9 +250,15 @@ RefPtr<FrameNode> SearchView::CreateTextField(const RefPtr<SearchNode>& parentNo
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXTINPUT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
     if (textFieldLayoutProperty) {
-        if (value && !value.value().empty()) {
-            textFieldLayoutProperty->UpdateValue(value.value());
+        if (value) {
+            if (!textFieldLayoutProperty->HasLastValue() || textFieldLayoutProperty->GetLastValue() != value.value()) {
+                pattern->InitEditingValueText(value.value());
+                pattern->InitCaretPosition(value.value());
+                textFieldLayoutProperty->UpdateLastValue(value.value());
+                textFieldLayoutProperty->UpdateValue(value.value());
+            }
         }
         if (placeholder) {
             textFieldLayoutProperty->UpdatePlaceholder(placeholder.value());
@@ -182,8 +266,8 @@ RefPtr<FrameNode> SearchView::CreateTextField(const RefPtr<SearchNode>& parentNo
         textFieldLayoutProperty->UpdateMaxLines(1);
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
     }
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
+    pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
@@ -196,9 +280,11 @@ RefPtr<FrameNode> SearchView::CreateTextField(const RefPtr<SearchNode>& parentNo
     auto radius = textFieldTheme->GetBorderRadius();
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     textFieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
-    BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
-    renderContext->UpdateBorderRadius(borderRadius);
-
+    PaddingProperty padding;
+    padding.left = CalcLength(0.0);
+    padding.right = CalcLength(0.0);
+    textFieldLayoutProperty->UpdatePadding(padding);
+    pattern->SetEnableTouchAndHoverEffect(false);
     return frameNode;
 };
 
@@ -206,18 +292,60 @@ RefPtr<FrameNode> SearchView::CreateImage(const RefPtr<SearchNode>& parentNode, 
 {
     auto nodeId = parentNode->GetImageId();
     ImageSourceInfo imageSourceInfo(src);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
     if (src.empty()) {
-        imageSourceInfo.SetResourceId(InternalResource::ResourceId::CLOSE_SVG);
+        imageSourceInfo.SetResourceId(InternalResource::ResourceId::INPUT_SEARCH_SVG);
+        auto iconTheme = pipeline->GetTheme<IconTheme>();
+        CHECK_NULL_RETURN(iconTheme, nullptr);
+        auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::INPUT_SEARCH_SVG);
+        imageSourceInfo.SetSrc(iconPath);
     }
-    // else{TODO: Display system picture}
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_RETURN(searchTheme, nullptr);
+    auto iconHeigth = searchTheme->GetIconHeight();
+    CalcSize idealSize = { CalcLength(iconHeigth), CalcLength(iconHeigth) };
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    layoutConstraint.maxSize = idealSize;
+    frameNode->UpdateLayoutConstraint(layoutConstraint);
     return frameNode;
 }
 
-RefPtr<FrameNode> SearchView::CreateButtonWithLabel(const RefPtr<SearchNode>& parentNode, const std::string& label)
+RefPtr<FrameNode> SearchView::CreateCancelImage(const RefPtr<SearchNode>& parentNode)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto nodeId = parentNode->GetCancelImageId();
+    ImageSourceInfo imageSourceInfo("");
+    imageSourceInfo.SetResourceId(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE);
+    auto iconTheme = pipeline->GetTheme<IconTheme>();
+    CHECK_NULL_RETURN(iconTheme, nullptr);
+    auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE);
+    imageSourceInfo.SetSrc(iconPath);
+
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_RETURN(searchTheme, nullptr);
+    auto iconHeigth = searchTheme->GetIconHeight();
+    CalcSize idealSize = { CalcLength(iconHeigth), CalcLength(iconHeigth) };
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    layoutConstraint.maxSize = idealSize;
+    frameNode->UpdateLayoutConstraint(layoutConstraint);
+    return frameNode;
+}
+
+RefPtr<FrameNode> SearchView::CreateButton(const RefPtr<SearchNode>& parentNode)
 {
     auto nodeId = parentNode->GetButtonId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -226,16 +354,21 @@ RefPtr<FrameNode> SearchView::CreateButtonWithLabel(const RefPtr<SearchNode>& pa
     if (frameNode->GetChildren().empty()) {
         auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
         CHECK_NULL_RETURN(textNode, nullptr);
-        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-        textLayoutProperty->UpdateContent(label);
         frameNode->AddChild(textNode);
-    } else {
-        auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-        CHECK_NULL_RETURN(textChild, nullptr);
-        auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-        textLayoutProperty->UpdateContent(label);
+    }
+    return frameNode;
+}
+
+RefPtr<FrameNode> SearchView::CreateCancelButton(const RefPtr<SearchNode>& parentNode)
+{
+    auto nodeId = parentNode->GetCancelButtonId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    if (frameNode->GetChildren().empty()) {
+        auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+        CHECK_NULL_RETURN(textNode, nullptr);
+        frameNode->AddChild(textNode);
     }
     return frameNode;
 }

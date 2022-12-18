@@ -34,16 +34,7 @@ class ACE_EXPORT ImagePattern : public Pattern {
 
 public:
     ImagePattern() = default;
-    ~ImagePattern() override
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto pipeline = NG::PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto id = host->GetId();
-        pipeline->RemoveWindowStateChangedCallback(id);
-        pipeline->RemoveNodesToNotifyMemoryLevel(id);
-    }
+    ~ImagePattern() override = default;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
@@ -79,27 +70,28 @@ public:
     void OnNotifyMemoryLevel(int32_t level) override;
     void OnWindowHide() override;
     void OnWindowShow() override;
+    void OnVisibleChange(bool isVisible) override;
 
 private:
-    void OnModifyDone() override;
-    void OnActive() override
+    void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override
     {
-        isActive_ = true;
+        auto id = frameNode->GetId();
+        auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+        CHECK_NULL_VOID(pipeline);
+        pipeline->RemoveWindowStateChangedCallback(id);
+        pipeline->RemoveNodesToNotifyMemoryLevel(id);
     }
 
-    void OnInActive() override
-    {
-        isActive_ = false;
-    }
+    void OnModifyDone() override;
 
     void PaintImage(RenderContext* renderContext, const OffsetF& offset);
 
     void OnImageDataReady();
     void OnImageLoadFail();
     void OnImageLoadSuccess();
-    void CacheImageObject();
     void SetImagePaintConfig(
-        const RefPtr<CanvasImage>& canvasImage, const RectF& lastSrcRect_, const RectF& lastDstRect_, bool isSvg);
+        const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect, bool isSvg);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
 
     DataReadyNotifyTask CreateDataReadyCallback();
@@ -111,18 +103,17 @@ private:
     LoadFailNotifyTask CreateLoadFailCallbackForAlt();
 
     RefPtr<ImageLoadingContext> loadingCtx_;
-    RefPtr<CanvasImage> lastCanvasImage_;
-    RectF lastDstRect_;
-    RectF lastSrcRect_;
+    RefPtr<CanvasImage> image_;
+    RectF dstRect_;
+    RectF srcRect_;
 
-    bool isActive_ = false;
     bool isShow_ = true; // TODO: remove it later when use [isActive_] to determine image data management
 
     // clear alt data after [OnImageLoadSuccess] being called
     RefPtr<ImageLoadingContext> altLoadingCtx_;
-    RefPtr<CanvasImage> lastAltCanvasImage_;
-    std::unique_ptr<RectF> lastAltDstRect_;
-    std::unique_ptr<RectF> lastAltSrcRect_;
+    RefPtr<CanvasImage> altImage_;
+    std::unique_ptr<RectF> altDstRect_;
+    std::unique_ptr<RectF> altSrcRect_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 };

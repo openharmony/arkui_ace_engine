@@ -277,6 +277,7 @@ protected:
     LayoutParam MakeInnerLayoutForLane();
     Size SetItemsPosition(double mainSize);
     Size SetItemsPositionForLaneList(double mainSize);
+    bool HandleOverScroll();
     bool UpdateScrollPosition(double offset, int32_t source);
 
     bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
@@ -470,6 +471,7 @@ private:
     bool hasHeight_ = false;
     bool hasWidth_ = false;
     bool isAxisResponse_ = true;
+    ScrollState scrollState_;
 
     void MultiSelectWithoutKeyboard(const Rect& selectedZone);
     void HandleMouseEventWithoutKeyboard(const MouseEvent& event);

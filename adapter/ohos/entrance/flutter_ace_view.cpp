@@ -25,6 +25,8 @@
 #include "key_event.h"
 #include "pointer_event.h"
 
+#include "base/utils/utils.h"
+
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
@@ -72,19 +74,47 @@ void GetEventDevice(int32_t sourceType, E& event)
     }
 }
 
+SourceTool GetSourceTool(int32_t orgToolType)
+{
+    switch (orgToolType) {
+        case OHOS::MMI::PointerEvent::TOOL_TYPE_FINGER:
+            return SourceTool::FINGER;
+        case OHOS::MMI::PointerEvent::TOOL_TYPE_PEN:
+            return SourceTool::PEN;
+        case OHOS::MMI::PointerEvent::TOOL_TYPE_RUBBER:
+            return SourceTool::RUBBER;
+        case OHOS::MMI::PointerEvent::TOOL_TYPE_BRUSH:
+            return SourceTool::BRUSH;
+        case OHOS::MMI::PointerEvent::TOOL_TYPE_PENCIL:
+            return SourceTool::PENCIL;
+        case OHOS::MMI::PointerEvent::TOOL_TYPE_AIRBRUSH:
+            return SourceTool::AIRBRUSH;
+        case OHOS::MMI::PointerEvent::TOOL_TYPE_MOUSE:
+            return SourceTool::MOUSE;
+        case OHOS::MMI::PointerEvent::TOOL_TYPE_LENS:
+            return SourceTool::LENS;
+        default:
+            LOGW("unknown tool type");
+            return SourceTool::UNKNOWN;
+    }
+}
+
 TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
 {
     TouchPoint touchPoint;
     // just get the max of width and height
     touchPoint.size = std::max(pointerItem.GetWidth(), pointerItem.GetHeight()) / 2.0;
     touchPoint.id = pointerItem.GetPointerId();
-    touchPoint.force = pointerItem.GetPressure();
     touchPoint.downTime = TimeStamp(std::chrono::microseconds(pointerItem.GetDownTime()));
     touchPoint.x = pointerItem.GetWindowX();
     touchPoint.y = pointerItem.GetWindowY();
     touchPoint.screenX = pointerItem.GetDisplayX();
     touchPoint.screenY = pointerItem.GetDisplayY();
     touchPoint.isPressed = pointerItem.IsPressed();
+    touchPoint.force = static_cast<float>(pointerItem.GetPressure());
+    touchPoint.tiltX = pointerItem.GetTiltX();
+    touchPoint.tiltY = pointerItem.GetTiltY();
+    touchPoint.sourceTool = GetSourceTool(pointerItem.GetToolType());
     return touchPoint;
 }
 
@@ -116,7 +146,8 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
     TouchEvent event { touchPoint.id, touchPoint.x, touchPoint.y, touchPoint.screenX, touchPoint.screenY,
-        TouchType::UNKNOWN, time, touchPoint.size, touchPoint.force, pointerEvent->GetDeviceId() };
+        TouchType::UNKNOWN, time, touchPoint.size, touchPoint.force, touchPoint.tiltX, touchPoint.tiltY,
+        pointerEvent->GetDeviceId(), SourceType::NONE, touchPoint.sourceTool };
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
     int32_t orgAction = pointerEvent->GetPointerAction();
@@ -260,8 +291,9 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
         return;
     }
 
-    event.x = item.GetWindowX();
-    event.y = item.GetWindowY();
+    event.id = item.GetPointerId();
+    event.x = static_cast<float>(item.GetWindowX());
+    event.y = static_cast<float>(item.GetWindowY());
     event.horizontalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL);
     event.verticalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL);
     event.pinchAxisScale = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH);
@@ -273,9 +305,10 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
     event.time = time;
-    LOGD("ConvertAxisEvent: (x,y): (%{public}f,%{public}f). HorizontalAxis: %{public}f. VerticalAxis: %{public}f. "
+    LOGD("ConvertAxisEvent: id: %{public}d, (x,y): (%{public}f,%{public}f). HorizontalAxis: %{public}f. VerticalAxis: "
+         "%{public}f. "
          "Action: %{public}d. DeviceType: %{public}d. Time: %{public}lld",
-        event.x, event.y, event.horizontalAxis, event.verticalAxis, event.action, event.sourceType,
+        event.id, event.x, event.y, event.horizontalAxis, event.verticalAxis, event.action, event.sourceType,
         (long long)pointerEvent->GetActionTime());
 }
 
@@ -310,15 +343,19 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     auto actionId = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem item;
     if (pointerEvent->GetPointerItem(actionId, item)) {
-        LOGD("action point info: id: %{public}d, x: %{public}d, y: %{public}d, action: %{public}d", actionId,
-            item.GetWindowX(), item.GetWindowY(), pointerEvent->GetPointerAction());
+        LOGD("action point info: id: %{public}d, x: %{public}d, y: %{public}d, action: %{public}d, pressure: "
+             "%{public}f, tiltX: %{public}f, tiltY: %{public}f",
+            actionId, item.GetWindowX(), item.GetWindowY(), pointerEvent->GetPointerAction(), item.GetPressure(),
+            item.GetTiltX(), item.GetTiltY());
     }
     auto ids = pointerEvent->GetPointerIds();
     for (auto&& id : ids) {
         MMI::PointerEvent::PointerItem item;
         if (pointerEvent->GetPointerItem(id, item)) {
-            LOGD("all point info: id: %{public}d, x: %{public}d, y: %{public}d, isPressed: %{public}d", actionId,
-                item.GetWindowX(), item.GetWindowY(), item.IsPressed());
+            LOGD("all point info: id: %{public}d, x: %{public}d, y: %{public}d, isPressed: %{public}d, pressure: "
+                 "%{public}f, tiltX: %{public}f, tiltY: %{public}f",
+                actionId, item.GetWindowX(), item.GetWindowY(), item.IsPressed(), item.GetPressure(), item.GetTiltX(),
+                item.GetTiltY());
         }
     }
 }
@@ -349,13 +386,9 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEv
     settings.idle_notification_callback = [instanceId](int64_t deadline) {
         ContainerScope scope(instanceId);
         auto container = Container::Current();
-        if (!container) {
-            return;
-        }
+        CHECK_NULL_VOID_NOLOG(container);
         auto context = container->GetPipelineContext();
-        if (!context) {
-            return;
-        }
+        CHECK_NULL_VOID_NOLOG(context);
         context->GetTaskExecutor()->PostTask(
             [context, deadline]() { context->OnIdle(deadline); }, TaskExecutor::TaskType::UI);
     };
@@ -368,14 +401,8 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEv
 
 void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen::Window> window)
 {
-    if (window == nullptr) {
-        LOGE("FlutterAceView::SurfaceCreated, window is nullptr");
-        return;
-    }
-    if (view == nullptr) {
-        LOGE("FlutterAceView::SurfaceCreated, view is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(window);
+    CHECK_NULL_VOID(view);
     LOGD(">>> FlutterAceView::SurfaceCreated, pWnd:%{public}p", &(*window));
     auto platformView = view->GetShellHolder()->GetPlatformView();
     LOGD("FlutterAceView::SurfaceCreated, GetPlatformView");
@@ -390,11 +417,7 @@ void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen
 void FlutterAceView::SurfaceChanged(
     FlutterAceView* view, int32_t width, int32_t height, int32_t orientation, WindowSizeChangeReason type)
 {
-    if (view == nullptr) {
-        LOGE("FlutterAceView::SurfaceChanged, view is nullptr");
-        return;
-    }
-
+    CHECK_NULL_VOID(view);
     view->NotifySurfaceChanged(width, height, type);
     auto platformView = view->GetShellHolder()->GetPlatformView();
     LOGD("FlutterAceView::SurfaceChanged, GetPlatformView");
@@ -407,21 +430,18 @@ void FlutterAceView::SurfaceChanged(
 
 void FlutterAceView::SurfacePositionChanged(FlutterAceView* view, int32_t posX, int32_t posY)
 {
-    if (view != nullptr) {
-        view->NotifySurfacePositionChanged(posX, posY);
-    }
+    CHECK_NULL_VOID_NOLOG(view);
+    view->NotifySurfacePositionChanged(posX, posY);
 }
 
 void FlutterAceView::SetViewportMetrics(FlutterAceView* view, const flutter::ViewportMetrics& metrics)
 {
-    if (view) {
-        view->NotifyDensityChanged(metrics.device_pixel_ratio);
-        view->NotifySystemBarHeightChanged(metrics.physical_padding_top, metrics.physical_view_inset_bottom);
-        auto platformView = view->GetShellHolder()->GetPlatformView();
-        if (platformView) {
-            platformView->SetViewportMetrics(metrics);
-        }
-    }
+    CHECK_NULL_VOID_NOLOG(view);
+    view->NotifyDensityChanged(metrics.device_pixel_ratio);
+    view->NotifySystemBarHeightChanged(metrics.physical_padding_top, metrics.physical_view_inset_bottom);
+    auto platformView = view->GetShellHolder()->GetPlatformView();
+    CHECK_NULL_VOID_NOLOG(platformView);
+    platformView->SetViewportMetrics(metrics);
 }
 
 void FlutterAceView::DispatchTouchEvent(FlutterAceView* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -446,20 +466,14 @@ void FlutterAceView::DispatchTouchEvent(FlutterAceView* view, const std::shared_
 
 bool FlutterAceView::DispatchKeyEvent(FlutterAceView* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    if (view != nullptr) {
-        return view->ProcessKeyEvent(keyEvent);
-    }
-    LOGE("view is null, return false!");
-    return false;
+    CHECK_NULL_RETURN(view, false);
+    return view->ProcessKeyEvent(keyEvent);
 }
 
 bool FlutterAceView::DispatchRotationEvent(FlutterAceView* view, float rotationValue)
 {
-    if (view) {
-        return view->ProcessRotationEvent(rotationValue);
-    }
-    LOGE("view is null, return false!");
-    return false;
+    CHECK_NULL_RETURN(view, false);
+    return view->ProcessRotationEvent(rotationValue);
 }
 
 void FlutterAceView::RegisterTouchEventCallback(TouchEventCallback&& callback)
@@ -515,12 +529,12 @@ void FlutterAceView::SetShellHolder(std::unique_ptr<flutter::OhosShellHolder> ho
 
 void FlutterAceView::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    CHECK_NULL_VOID_NOLOG(pointerEvent);
     TouchEvent touchPoint = ConvertTouchEvent(pointerEvent);
     auto markProcess = [pointerEvent]() {
-        if (pointerEvent) {
-            LOGI("Mark %{public}d id Touch Event Processed", pointerEvent->GetPointerId());
-            pointerEvent->MarkProcessed();
-        }
+        CHECK_NULL_VOID_NOLOG(pointerEvent);
+        LOGI("Mark %{public}d id Touch Event Processed", pointerEvent->GetPointerId());
+        pointerEvent->MarkProcessed();
     };
     if (touchPoint.type != TouchType::UNKNOWN) {
         if (touchEventCallback_) {
@@ -534,49 +548,45 @@ void FlutterAceView::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>&
 void FlutterAceView::ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& action)
 {
     LOGD("ProcessDragEvent");
-
-    if (dragEventCallback_) {
-        dragEventCallback_(x, y, action);
-    }
+    CHECK_NULL_VOID_NOLOG(dragEventCallback_);
+    dragEventCallback_(x, y, action);
 }
 
 void FlutterAceView::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     MouseEvent event;
-    ConvertMouseEvent(pointerEvent, event);
+    if (pointerEvent) {
+        ConvertMouseEvent(pointerEvent, event);
+    }
     auto markProcess = [pointerEvent]() {
-        if (pointerEvent) {
-            LOGI("Mark %{public}d id Mouse Event Processed", pointerEvent->GetPointerId());
-            pointerEvent->MarkProcessed();
-        }
+        CHECK_NULL_VOID_NOLOG(pointerEvent);
+        LOGI("Mark %{public}d id Mouse Event Processed", pointerEvent->GetPointerId());
+        pointerEvent->MarkProcessed();
     };
 
-    if (mouseEventCallback_) {
-        mouseEventCallback_(event, markProcess);
-    }
+    CHECK_NULL_VOID_NOLOG(mouseEventCallback_);
+    mouseEventCallback_(event, markProcess);
 }
 
 void FlutterAceView::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     AxisEvent event;
-    ConvertAxisEvent(pointerEvent, event);
+    if (pointerEvent) {
+        ConvertAxisEvent(pointerEvent, event);
+    }
     auto markProcess = [pointerEvent]() {
-        if (pointerEvent) {
-            LOGI("Mark %{public}d id Axis Event Processed", pointerEvent->GetPointerId());
-            pointerEvent->MarkProcessed();
-        }
+        CHECK_NULL_VOID_NOLOG(pointerEvent);
+        LOGI("Mark %{public}d id Axis Event Processed", pointerEvent->GetPointerId());
+        pointerEvent->MarkProcessed();
     };
 
-    if (axisEventCallback_) {
-        axisEventCallback_(event, markProcess);
-    }
+    CHECK_NULL_VOID_NOLOG(axisEventCallback_);
+    axisEventCallback_(event, markProcess);
 }
 
 bool FlutterAceView::ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    if (!keyEventCallback_) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(keyEventCallback_, false);
     KeyEvent event;
     ConvertKeyEvent(keyEvent, event);
     return keyEventCallback_(event);
@@ -589,12 +599,8 @@ const void* FlutterAceView::GetNativeWindowById(uint64_t textureId)
 
 bool FlutterAceView::ProcessRotationEvent(float rotationValue)
 {
-    if (!rotationEventCallBack_) {
-        return false;
-    }
-
+    CHECK_NULL_RETURN_NOLOG(rotationEventCallBack_, false);
     RotationEvent event { .value = rotationValue * ROTATION_DIVISOR };
-
     return rotationEventCallBack_(event);
 }
 
@@ -648,22 +654,16 @@ void FlutterAceView::InitCacheFilePath(const std::string& path)
 bool FlutterAceView::IsLastPage() const
 {
     auto container = AceEngine::Get().GetContainer(instanceId_);
-    if (!container) {
-        return false;
-    }
-
+    CHECK_NULL_RETURN_NOLOG(container, false);
     ContainerScope scope(instanceId_);
     auto context = container->GetPipelineContext();
-    if (!context) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(context, false);
     auto taskExecutor = context->GetTaskExecutor();
 
     bool isLastPage = false;
-    if (taskExecutor) {
-        taskExecutor->PostSyncTask(
-            [context, &isLastPage]() { isLastPage = context->IsLastPage(); }, TaskExecutor::TaskType::UI);
-    }
+    CHECK_NULL_RETURN_NOLOG(taskExecutor, isLastPage);
+    taskExecutor->PostSyncTask(
+        [context, &isLastPage]() { isLastPage = context->IsLastPage(); }, TaskExecutor::TaskType::UI);
     return isLastPage;
 }
 
@@ -721,17 +721,11 @@ std::unique_ptr<DrawDelegate> FlutterAceView::GetDrawDelegate()
     auto drawDelegate = std::make_unique<DrawDelegate>();
 
     drawDelegate->SetDrawFrameCallback([this](RefPtr<Flutter::Layer>& layer, const Rect& dirty) {
-        if (!layer) {
-            LOGE("layer is nullptr");
-            return;
-        }
+        CHECK_NULL_VOID(layer);
         RefPtr<Flutter::FlutterSceneBuilder> flutterSceneBuilder = AceType::MakeRefPtr<Flutter::FlutterSceneBuilder>();
         layer->AddToScene(*flutterSceneBuilder, 0.0, 0.0);
         auto scene = flutterSceneBuilder->Build();
-        if (!flutter::UIDartState::Current()) {
-            LOGE("uiDartState is nullptr");
-            return;
-        }
+        CHECK_NULL_VOID(flutter::UIDartState::Current());
         auto window = flutter::UIDartState::Current()->window();
         if (window != nullptr && window->client() != nullptr) {
             window->client()->Render(scene.get());
@@ -810,10 +804,7 @@ void FlutterAceView::InitIOManager(RefPtr<TaskExecutor> taskExecutor)
         return;
     }
     auto state = flutter::UIDartState::Current()->GetStateById(instanceId_);
-    if (state == nullptr) {
-        LOGE("state is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(state);
     fml::WeakPtr<flutter::ShellIOManager> ioManager = state->GetIOManager();
     taskExecutor->PostSyncTask(
         [surface, shareContext, ioManager]() {

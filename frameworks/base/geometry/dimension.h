@@ -99,12 +99,17 @@ public:
 
     bool IsValid() const
     {
-        return (value_ > 0.0) && (!NearZero(value_));
+        return GreatNotEqual(value_, 0.0);
     }
 
     bool IsNonNegative() const
     {
         return NonNegative(value_);
+    }
+
+    bool IsNegative() const
+    {
+        return !NonNegative(value_);
     }
 
     // Deprecated: don't use this to covert to px.
@@ -121,6 +126,9 @@ public:
 
     // Percentage unit conversion is not supported.
     double ConvertToPx() const;
+
+    // support percentage unit conversion
+    double ConvertToPxWithSize(double size) const;
 
     bool NormalizeToPx(double vpScale, double fpScale, double lpxScale, double parentLength, double& result) const;
 

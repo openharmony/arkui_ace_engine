@@ -18,6 +18,7 @@
 
 #include <tuple>
 
+#include "base/geometry/matrix4.h"
 #include "core/components/box/render_box.h"
 #include "core/components/display/display_component.h"
 #include "core/components/popup/popup_element_v2.h"
@@ -152,7 +153,6 @@ public:
     std::string GetBackgroundColor() const override;
     std::string GetBackgroundImageSize() const override;
     std::string GetBackgroundImagePosition() const override;
-    std::string GetAlignmentType(double width, double height) const override;
 
     // front decoration settings
     RefPtr<Decoration> GetFrontDecoration() const override;
@@ -243,6 +243,20 @@ public:
     void UpdateEventTarget(BaseEventInfo& info) const override;
 
     std::pair<Rect, Offset> GetCurrentRectAndOrigin() const override;
+    std::pair<Rect, Offset> GetLastRectAndOrigin() override
+    {
+        if (!lastRectOriginPtr_) {
+            lastRectOriginPtr_ = std::make_unique<std::pair<Rect, Offset>>();
+        }
+        return *lastRectOriginPtr_;
+    }
+    void UpdateLastRectAndOrigin(const std::pair<Rect, Offset>& curRectOrigin) override
+    {
+        if (!lastRectOriginPtr_) {
+            lastRectOriginPtr_ = std::make_unique<std::pair<Rect, Offset>>();
+        }
+        *lastRectOriginPtr_ = curRectOrigin;
+    }
 
     bool IsRectValid() const
     {
@@ -287,6 +301,7 @@ private:
     double CalculateCurrentVisibleRatio(const Rect& visibleRect, const Rect& renderRect);
     bool isRectValid_;
     std::string key_;
+    std::unique_ptr<std::pair<Rect, Offset>> lastRectOriginPtr_;
 };
 
 } // namespace OHOS::Ace::V2

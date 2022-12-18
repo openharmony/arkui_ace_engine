@@ -31,7 +31,7 @@ namespace OHOS::Ace::NG {
 
 void ProgressPaintMethod::GetThemeDate()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
@@ -93,7 +93,7 @@ void ProgressPaintMethod::PaintRing(RSCanvas& canvas, const OffsetF& offset, con
     pen.SetCapStyle(ToRSCapStyle(LineCap::ROUND));
     pen.SetColor(ToRSColor(bgColor_));
     canvas.AttachPen(pen);
-    canvas.DrawCircle(ToRSPonit(centerPt), radius);
+    canvas.DrawCircle(ToRSPoint(centerPt), radius);
     pen.SetColor(ToRSColor((color_)));
     canvas.AttachPen(pen);
     double angle = (value_ / maxValue_) * totalDegree;
@@ -153,7 +153,7 @@ void ProgressPaintMethod::PaintMoon(RSCanvas& canvas, const OffsetF& offset, con
     double angle = (value_ / maxValue_) * totalDegree;
     RSPath path;
     canvas.AttachBrush(brush);
-    canvas.DrawCircle(ToRSPonit(centerPt), radius);
+    canvas.DrawCircle(ToRSPoint(centerPt), radius);
     brush.SetColor(ToRSColor((color_)));
     canvas.AttachBrush(brush);
     path.AddArc(

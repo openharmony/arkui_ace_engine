@@ -30,8 +30,6 @@ namespace OHOS::Ace {
 
 constexpr int32_t SINGLE_CLICK_NUM = 1;
 constexpr int32_t DOUBLE_CLICK_NUM = 2;
-constexpr int32_t DEFAULT_POINT_X = 0;
-constexpr int32_t DEFAULT_POINT_Y = 50;
 constexpr int32_t DEFAULT_NUMS_ONE = 1;
 constexpr double DEFAULT_DBCLICK_INTERVAL = 0.5f;
 RenderWeb::RenderWeb() : RenderNode(true)
@@ -53,9 +51,9 @@ void RenderWeb::OnAttachContext()
         drawSize_ = Size(pipelineContext->GetRootWidth(), pipelineContext->GetRootHeight());
         drawSizeCache_ = drawSize_;
         position_ = Offset(0, 0);
-#ifdef OHOS_STANDARD_SYSTEM
-        delegate_->InitOHOSWeb(context_);
-#else
+        delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
+#ifndef OHOS_STANDARD_SYSTEM
+        delegate_->SetDrawSize(drawSize_);
         delegate_->CreatePlatformResource(drawSize_, position_, context_);
 #endif
     }
@@ -91,6 +89,7 @@ void RenderWeb::Update(const RefPtr<Component>& component)
 
     onMouse_ = web->GetOnMouseEventCallback();
     onKeyEvent_ = web->GetOnKeyEventCallback();
+    onPreKeyEvent_ = web->GetOnInterceptKeyEventCallback();
     RegistVirtualKeyBoardListener();
     web_ = web;
     if (delegate_) {
@@ -134,15 +133,10 @@ void RenderWeb::Update(const RefPtr<Component>& component)
 
 bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard)
 {
-    double offsetFix = (height - globlePointPosition_.GetY()) > 100.0 ?
-        keyboard - (height - globlePointPosition_.GetY()) / 2.0 : keyboard;
-    LOGI("Web ProcessVirtualKeyBoard width=%{public}d height=%{public}d keyboard=%{public}f offsetFix=%{public}f",
-        width, height, keyboard, offsetFix);
-    if (globlePointPosition_.GetY() <= (height - keyboard) || offsetFix <= 0.0) {
-        offsetFix = 0.0;
-    }
+    LOGI("Web ProcessVirtualKeyBoard width=%{public}d height=%{public}d keyboard=%{public}f",
+        width, height, keyboard);
     if (delegate_) {
-        offsetFix_ = offsetFix;
+        offsetFix_ = 0;
         if (!isFocus_) {
             if (isVirtualKeyBoardShow_ == VkState::VK_SHOW) {
                 drawSize_.SetSize(drawSizeCache_);
@@ -161,15 +155,15 @@ bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double key
             isVirtualKeyBoardShow_ = VkState::VK_HIDE;
         } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
             drawSizeCache_.SetSize(drawSize_);
-            if (drawSize_.Height() <= (height - keyboard - GetCoordinatePoint().GetY() + offsetFix)) {
-                SetRootView(width, height, -offsetFix);
+            if (drawSize_.Height() <= (height - keyboard - GetCoordinatePoint().GetY())) {
+                SetRootView(width, height, 0);
                 isVirtualKeyBoardShow_ = VkState::VK_SHOW;
                 return true;
             }
-            drawSize_.SetHeight(height - keyboard - GetCoordinatePoint().GetY() + offsetFix);
+            drawSize_.SetHeight(height - keyboard - GetCoordinatePoint().GetY());
             delegate_->Resize(drawSize_.Width(), drawSize_.Height());
             SyncGeometryProperties();
-            SetRootView(width, height, (NearZero(offsetFix)) ? DEFAULT_NUMS_ONE : -offsetFix);
+            SetRootView(width, height, DEFAULT_NUMS_ONE);
             isVirtualKeyBoardShow_ = VkState::VK_SHOW;
         }
     }
@@ -238,19 +232,14 @@ void RenderWeb::OnMouseEvent(const MouseEvent& event)
     }
 
     auto localLocation = event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
-    if (!HandleDoubleClickEvent(event)) { 
+    if (!HandleDoubleClickEvent(event)) {
         delegate_->OnMouseEvent(localLocation.GetX(), localLocation.GetY(), event.button, event.action, SINGLE_CLICK_NUM);
     }
 
     // clear the recording position, for not move content when virtual keyboard popup when web get focused.
-    if (GetCoordinatePoint().GetY() > 0) {
-        webPoint_ = Offset(DEFAULT_POINT_X, DEFAULT_POINT_Y) +
-            Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
-    }
     auto context = GetContext().Upgrade();
     if (context && context->GetTextFieldManager()) {
         context->GetTextFieldManager()->SetClickPosition(Offset());
-        globlePointPosition_ = localLocation + webPoint_;
     }
 }
 
@@ -282,14 +271,16 @@ bool RenderWeb::HandleMouseEvent(const MouseEvent& event)
     return info.IsStopPropagation();
 }
 
-void RenderWeb::HandleKeyEvent(const KeyEvent& keyEvent)
+bool RenderWeb::HandleKeyEvent(const KeyEvent& keyEvent)
 {
-    if (!onKeyEvent_) {
-        LOGW("RenderWeb::HandleKeyEvent, key event callback is null");
-        return;
-    }
     KeyEventInfo info(keyEvent);
-    onKeyEvent_(info);
+    if (onKeyEvent_) {
+        onKeyEvent_(info);
+    }
+    if (onPreKeyEvent_) {
+        return onPreKeyEvent_(info);
+    }
+    return false;
 }
 
 void RenderWeb::PerformLayout()
@@ -301,6 +292,7 @@ void RenderWeb::PerformLayout()
 
     // render web do not support child.
     drawSize_ = Size(GetLayoutParam().GetMaxSize().Width(), GetLayoutParam().GetMaxSize().Height());
+    drawSizeCache_ = drawSize_;
     SetLayoutSize(drawSize_);
     SetNeedLayout(false);
     MarkNeedRender();
@@ -318,6 +310,7 @@ void RenderWeb::OnAppShow()
 void RenderWeb::OnAppHide()
 {
     RenderNode::OnAppHide();
+    needOnFocus_ = false;
     if (delegate_) {
         delegate_->HideWebView();
     }
@@ -325,6 +318,7 @@ void RenderWeb::OnAppHide()
 
 void RenderWeb::OnGlobalPositionChanged()
 {
+    UpdateGlobalPos();
     if (!textOverlay_ || !updateHandlePosition_) {
         return;
     }
@@ -336,7 +330,23 @@ void RenderWeb::OnPositionChanged()
     PopTextOverlay();
 }
 
-void RenderWeb::OnSizeChanged() {}
+void RenderWeb::OnSizeChanged()
+{
+    if (drawSize_.IsWidthInfinite() || drawSize_.IsHeightInfinite() ||
+        drawSize_.Width() == 0 || drawSize_.Height() == 0) {
+        LOGE("size is invalid");
+        return;
+    }
+    UpdateGlobalPos();
+    if (!isUrlLoaded_) {
+        delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+        if (!delegate_->LoadDataWithRichText()) {
+            LOGI("RenderWeb::Paint start LoadUrl");
+            delegate_->LoadUrl();
+        }
+        isUrlLoaded_ = true;
+    }
+}
 
 void RenderWeb::Initialize()
 {
@@ -388,14 +398,9 @@ void RenderWeb::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y);
     }
     // clear the recording position, for not move content when virtual keyboard popup when web get focused.
-    if (GetCoordinatePoint().GetY() > 0) {
-        webPoint_ = Offset(DEFAULT_POINT_X, DEFAULT_POINT_Y) +
-            Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
-    }
     auto context = GetContext().Upgrade();
     if (context && context->GetTextFieldManager()) {
         context->GetTextFieldManager()->SetClickPosition(Offset());
-        globlePointPosition_ = touchOffset + webPoint_;
     }
 }
 
@@ -994,7 +999,6 @@ void RenderWeb::OnDragWindowMoveEvent(RefPtr<PipelineContext> pipelineContext, c
 {
     int32_t globalX = static_cast<int32_t>(info.GetGlobalPoint().GetX());
     int32_t globalY = static_cast<int32_t>(info.GetGlobalPoint().GetY());
-    LOGD("drag window position update, x = %{public}d, y = %{public}d", globalX, globalY);
     dragWindow_->MoveTo(globalX, globalY);
     if (isW3cDragEvent_ && delegate_) {
         LOGD("w3c drag update");
@@ -1155,6 +1159,14 @@ void RenderWeb::PanOnActionCancel()
         hasDragItem_ = false;
     }
     SetPreDragDropNode(nullptr);
+}
+
+void RenderWeb::UpdateGlobalPos()
+{
+    auto position = GetGlobalOffset();
+    if (delegate_) {
+        delegate_->SetWebRendeGlobalPos(position);
+    }
 }
 #endif
 } // namespace OHOS::Ace

@@ -22,9 +22,9 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/image_provider/svg_dom_base.h"
-#include "frameworks/core/components_ng/svg/parse/svg_context.h"
-#include "frameworks/core/components_ng/svg/parse/svg_node.h"
-#include "frameworks/core/components_ng/svg/parse/svg_style.h"
+#include "core/components_ng/svg/parse/svg_node.h"
+#include "core/components_ng/svg/parse/svg_style.h"
+#include "core/components_ng/svg/svg_context.h"
 
 namespace OHOS::Ace::NG {
 class SvgDom : public SvgDomBase {
@@ -32,26 +32,24 @@ class SvgDom : public SvgDomBase {
 
 public:
     SvgDom();
-    ~SvgDom();
+    ~SvgDom() override;
 
     static RefPtr<SvgDom> CreateSvgDom(SkStream& svgStream, const std::optional<Color>& color);
 
-    void SetFunction(const FuncNormalizeToPx& funcNormalizeToPx, const FuncAnimateFlush& funcAnimateFlush);
+    void SetFuncNormalizeToPx(FuncNormalizeToPx&& funcNormalizeToPx);
+    void SetAnimationCallback(std::function<void()>&& funcAnimateFlush) override;
+    void ControlAnimation(bool play) override;
 
     bool ParseSvg(SkStream& svgStream);
 
     void DrawImage(
         RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>& color) override;
 
-    SizeF GetContainerSize() const override
-    {
-        // TODO: return correct size
-        return {};
-    }
+    SizeF GetContainerSize() const override;
     void SetContainerSize(const SizeF& containerSize) override {}
-    void SetSvgFillColor(const std::optional<Color>& color) override
+    const std::optional<Color>& GetSvgFillColor() override
     {
-        fillColor_ = color;
+        return fillColor_;
     }
 
 protected:
@@ -66,7 +64,7 @@ private:
     void ParseFillAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string& value);
     void ParseClassAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string& value);
     void ParseStyleAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string& value);
-    void ApplyImageFit(ImageFit imageFit, double& scaleX, double& scaleY, bool skip = true);
+    void ApplyImageFit(ImageFit imageFit, double& scaleX, double& scaleY);
     void ApplyFill(double& scaleX, double& scaleY);
     void ApplyContain(double& scaleX, double& scaleY);
     void ApplyCover(double& scaleX, double& scaleY);
@@ -74,8 +72,8 @@ private:
 
     RefPtr<SvgContext> svgContext_;
     RefPtr<SvgNode> root_;
-    Size layout_; // svg外视口, 即image组件赋予的布局宽高
-    Size svgSize_; // svg内视口，即图源内置宽高
+    Size layout_;  // layout size set by Image Component
+    Size svgSize_; // self size specified in SVG file
     Rect viewBox_;
     std::optional<Color> fillColor_;
     PushAttr attrCallback_;

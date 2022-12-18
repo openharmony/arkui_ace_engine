@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/animation_utils.h"
+#include "render_service_client/core/ui/rs_node.h"
 
 #include "core/animation/native_curve_helper.h"
-#include "render_service_client/core/ui/rs_node.h"
+#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace {
 
@@ -50,9 +50,11 @@ bool AnimationUtils::CloseImplicitAnimation()
     return !animations.empty();
 }
 
-void AnimationUtils::Animate(const AnimationOption& option, const std::function<void()>& wrapFinishCallback)
+void AnimationUtils::Animate(
+    const AnimationOption& option, const PropertyCallback& callback, const FinishCallback& finishCallback)
 {
     const auto& timingProtocol = OptionToTimingProtocol(option);
-    Rosen::RSNode::Animate(timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), wrapFinishCallback);
+    Rosen::RSNode::Animate(
+        timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), callback, finishCallback);
 }
 } // namespace OHOS::Ace

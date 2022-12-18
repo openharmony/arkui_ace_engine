@@ -15,9 +15,13 @@
 
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 
+#include <cstdint>
 #include <iterator>
 #include <list>
+#include <map>
+#include <optional>
 #include <string>
+#include <unordered_map>
 
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
@@ -41,10 +45,15 @@ void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
     }
     auto host = host_.Upgrade();
     CHECK_NULL_VOID(host);
+
     // check front active flag.
     auto item = childWrappers_.front();
+    decltype(nodeIds_) frontNodeIds;
+    decltype(nodeIds_) backNodeIds;
+
     while (item && !item->IsActive()) {
         childWrappers_.pop_front();
+        frontNodeIds.push_front(nodeIds_.front());
         nodeIds_.pop_front();
         startIndex_ = startIndex_.value() + 1;
         item = childWrappers_.empty() ? nullptr : childWrappers_.front();
@@ -52,6 +61,7 @@ void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
     // check end active flag.
     item = childWrappers_.empty() ? nullptr : childWrappers_.back();
     while (item && !item->IsActive()) {
+        backNodeIds.push_front(nodeIds_.back());
         nodeIds_.pop_back();
         childWrappers_.pop_back();
         endIndex_ = endIndex_.value() - 1;
@@ -61,15 +71,63 @@ void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
     for (const auto& wrapper : childWrappers_) {
         wrapper->SwapDirtyLayoutWrapperOnMainThread();
     }
+    int32_t frontCount = 0;
+    int32_t backCount = 0;
+    auto totalCount = OnGetTotalCount();
 
-    host->UpdateCachedItems(startIndex_.value(), endIndex_.value(), std::move(nodeIds_));
+    std::list<int32_t> idleIndexes;
+    std::unordered_map<int32_t, std::optional<std::string>> cacheItems;
+    for (int32_t i = 0; i < cacheCount_; i++) {
+        if (frontNodeIds.empty()) {
+            if (startIndex_.value() - i > 0) {
+                auto idleIndex = startIndex_.value() - 1 - i;
+                auto cacheInfo = builder_->GetCacheItemInfo(idleIndex);
+                if (!cacheInfo) {
+                    cacheInfo = GetKeyByIndexFromPreNodes(idleIndex);
+                }
+                if (!cacheInfo) {
+                    idleIndexes.emplace_back(idleIndex);
+                }
+                cacheItems.try_emplace(idleIndex, std::move(cacheInfo));
+            }
+        } else {
+            cacheItems.try_emplace(startIndex_.value() - frontCount - 1, frontNodeIds.front());
+            frontNodeIds.pop_front();
+            frontCount++;
+        }
+
+        if (backNodeIds.empty()) {
+            if (endIndex_.value() + i < (totalCount - 1)) {
+                auto idleIndex = endIndex_.value() + 1 + i;
+                auto cacheInfo = builder_->GetCacheItemInfo(idleIndex);
+                if (!cacheInfo) {
+                    idleIndexes.emplace_back(idleIndex);
+                }
+                if (!cacheInfo) {
+                    cacheInfo = GetKeyByIndexFromPreNodes(idleIndex);
+                }
+                cacheItems.try_emplace(idleIndex, std::move(cacheInfo));
+            }
+        } else {
+            cacheItems.try_emplace(endIndex_.value() + 1 + i, backNodeIds.front());
+            backNodeIds.pop_front();
+            backCount++;
+        }
+    }
+    host->UpdateLazyForEachItems(startIndex_.value(), endIndex_.value(), std::move(nodeIds_), std::move(cacheItems));
+    host->PostIdleTask(std::move(idleIndexes));
+}
+
+void LazyLayoutWrapperBuilder::AdjustGridOffset()
+{
+    for (const auto& wrapper : childWrappers_) {
+        wrapper->GetHostNode()->AdjustGridOffset();
+    }
 }
 
 int32_t LazyLayoutWrapperBuilder::OnGetTotalCount()
 {
-    if (!builder_) {
-        return 0;
-    }
+    CHECK_NULL_RETURN_NOLOG(builder_, 0);
     return builder_->GetTotalCount();
 }
 
@@ -177,6 +235,18 @@ const std::list<RefPtr<LayoutWrapper>>& LazyLayoutWrapperBuilder::OnExpandChildL
     startIndex_ = 0;
     endIndex_ = total - 1;
     return childWrappers_;
+}
+
+std::optional<std::string> LazyLayoutWrapperBuilder::GetKeyByIndexFromPreNodes(int32_t index)
+{
+    if ((index >= preStartIndex_) && (index <= preEndIndex_)) {
+        auto iter = preNodeIds_.begin();
+        std::advance(iter, index - preStartIndex_);
+        if ((iter != preNodeIds_.end()) && (iter->has_value())) {
+            return iter->value();
+        }
+    }
+    return std::nullopt;
 }
 
 } // namespace OHOS::Ace::NG

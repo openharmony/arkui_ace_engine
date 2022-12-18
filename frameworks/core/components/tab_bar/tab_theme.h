@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TAB_BAR_TAB_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TAB_BAR_TAB_THEME_H
 
+#include "base/geometry/dimension.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
@@ -68,7 +69,9 @@ public:
                 theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::WHITE);
                 theme->activeIndicatorColor_ = pattern->GetAttr<Color>("active_indicator_color", Color::WHITE);
                 theme->focusIndicatorColor_ = pattern->GetAttr<Color>("focus_indicator_color", Color::WHITE);
-                theme->focusIndicatorRadius_  = pattern->GetAttr<Dimension>("focus_indicator_radius", 0.0_vp);
+                theme->focusIndicatorRadius_ = pattern->GetAttr<Dimension>("focus_indicator_radius", 0.0_vp);
+                theme->subTabIndicatorHeight_ = pattern->GetAttr<Dimension>("subtab_indicator_height", 0.0_vp);
+                theme->subTabTextOffColor_ = pattern->GetAttr<Color>("subtab_text_off_color", Color::WHITE);
             } else {
                 LOGW("find pattern of tab fail");
             }
@@ -153,6 +156,16 @@ public:
         return focusIndicatorVerticalPadding_;
     }
 
+    const Color& GetSubTabTextOffColor() const
+    {
+        return subTabTextOffColor_;
+    }
+
+    const Dimension& GetSubTabIndicatorHeight() const
+    {
+        return subTabIndicatorHeight_;
+    }
+
 protected:
     TabTheme() = default;
 
@@ -172,6 +185,8 @@ private:
     Dimension focusIndicatorRadius_;
     Dimension focusIndicatorHorizontalPadding_;
     Dimension focusIndicatorVerticalPadding_;
+    Color subTabTextOffColor_;
+    Dimension subTabIndicatorHeight_;
 };
 
 } // namespace OHOS::Ace

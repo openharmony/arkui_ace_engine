@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -48,26 +49,47 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
     }
 
     // MINI 模式
-    if (navBarLayoutProperty->GetTitleModeValue() == NavigationTitleMode::MINI) {
-        constraint.selfIdealSize = OptionalSizeF(
-            navigationSize.Width(), static_cast<float>(TITLEBAR_HEIGHT_MINI.ConvertToPx()));
+    if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
+        // 有subtitle
+        if (hostNode->GetSubtitle()) {
+            constraint.selfIdealSize =
+                OptionalSizeF(navigationSize.Width(), static_cast<float>(DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
+            titleBarWrapper->Measure(constraint);
+            return static_cast<float>(DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+        }
+
+        constraint.selfIdealSize =
+            OptionalSizeF(navigationSize.Width(), static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
         titleBarWrapper->Measure(constraint);
-        return static_cast<float>(TITLEBAR_HEIGHT_MINI.ConvertToPx());
+        return static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    }
+
+    float titleBarHeight = 0.0f;
+    if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
+        auto titleBar = AceType::DynamicCast<TitleBarNode>(titleBarNode);
+        CHECK_NULL_RETURN(titleBar, 0.0f);
+        auto titlePattern = titleBar->GetPattern<TitleBarPattern>();
+        CHECK_NULL_RETURN(titlePattern, 0.0f);
+        titleBarHeight = titlePattern->GetTempTitleBarHeight();
     }
 
     // FREE 和 FULL 模式，有subtitle
     if (hostNode->GetSubtitle()) {
-        constraint.selfIdealSize = OptionalSizeF(
-            navigationSize.Width(), static_cast<float>(TITLEBAR_HEIGHT_WITH_SUBTITLE.ConvertToPx()));
+        if (NearZero(titleBarHeight)) {
+            titleBarHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+        }
+        constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), titleBarHeight);
         titleBarWrapper->Measure(constraint);
-        return static_cast<float>(TITLEBAR_HEIGHT_WITH_SUBTITLE.ConvertToPx());
+        return titleBarHeight;
     }
 
     // no subtitle
-    constraint.selfIdealSize = OptionalSizeF(
-        navigationSize.Width(), static_cast<float>(TITLEBAR_HEIGHT_WITHOUT_SUBTITLE.ConvertToPx()));
+    if (NearZero(titleBarHeight)) {
+        titleBarHeight = static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    }
+    constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), titleBarHeight);
     titleBarWrapper->Measure(constraint);
-    return static_cast<float>(TITLEBAR_HEIGHT_WITHOUT_SUBTITLE.ConvertToPx());
+    return titleBarHeight;
 }
 
 float MeasureToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
@@ -79,20 +101,25 @@ float MeasureToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hos
     auto toolBarWrapper = layoutWrapper->GetOrCreateChildByIndex((index));
     CHECK_NULL_RETURN(toolBarWrapper, 0.0f);
     auto constraint = navBarLayoutProperty->CreateChildConstraint();
-    if (navBarLayoutProperty->GetHideToolBar().value_or(false)) {
+
+    if (navBarLayoutProperty->GetHideToolBar().value_or(false) ||
+        toolBarNode->GetChildren().empty()) {
         constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
         toolBarWrapper->Measure(constraint);
         return 0.0f;
     }
-    constraint.selfIdealSize = OptionalSizeF(
-        navigationSize.Width(), static_cast<float>(TOOLBAR_HEIGHT.ConvertToPx()));
+
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_RETURN(theme, 0.0f);
+    auto toolbarHeight = theme->GetHeight();
+    constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), static_cast<float>(toolbarHeight.ConvertToPx()));
     toolBarWrapper->Measure(constraint);
-    return static_cast<float>(TOOLBAR_HEIGHT.ConvertToPx());
+    return static_cast<float>(toolbarHeight.ConvertToPx());
 }
 
 void MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
-    const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty, const SizeF& navigationSize,
-    float titleBarHeight, float toolBarHeight)
+    const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty, const SizeF& navigationSize, float titleBarHeight,
+    float toolBarHeight)
 {
     auto contentNode = hostNode->GetNavBarContentNode();
     CHECK_NULL_VOID(contentNode);
@@ -100,8 +127,8 @@ void MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>&
     auto contentWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(contentWrapper);
     auto constraint = navBarLayoutProperty->CreateChildConstraint();
-    constraint.selfIdealSize = OptionalSizeF(
-        navigationSize.Width(), navigationSize.Height() - titleBarHeight - toolBarHeight);
+    constraint.selfIdealSize =
+        OptionalSizeF(navigationSize.Width(), navigationSize.Height() - titleBarHeight - toolBarHeight);
     contentWrapper->Measure(constraint);
 }
 
@@ -117,6 +144,8 @@ float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hos
     auto titleBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
     auto geometryNode = titleBarWrapper->GetGeometryNode();
+    auto titleBarOffset = OffsetF(0.0f, 0.0f);
+    geometryNode->SetMarginFrameOffset(titleBarOffset);
     titleBarWrapper->Layout();
     return geometryNode->GetFrameSize().Height();
 }
@@ -131,11 +160,13 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostN
     CHECK_NULL_VOID(contentWrapper);
     auto geometryNode = contentWrapper->GetGeometryNode();
     if (!navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
-        auto contentOffset = OffsetT<float>(geometryNode->GetFrameOffset().GetX(), titlebarHeight);
+        auto contentOffset = OffsetF(geometryNode->GetFrameOffset().GetX(), titlebarHeight);
         geometryNode->SetMarginFrameOffset(contentOffset);
         contentWrapper->Layout();
         return;
     }
+    auto contentOffset = OffsetF(0.0f, 0.0f);
+    geometryNode->SetMarginFrameOffset(contentOffset);
     contentWrapper->Layout();
 }
 
@@ -151,8 +182,11 @@ void LayoutToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostN
     auto toolBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(toolBarWrapper);
     auto geometryNode = toolBarWrapper->GetGeometryNode();
-    auto toolBarOffsetY = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - TOOLBAR_HEIGHT.ConvertToPx();
-    auto toolBarOffset = OffsetT<float>(geometryNode->GetFrameOffset().GetX(), static_cast<float>(toolBarOffsetY));
+
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    auto toolBarOffsetY = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - theme->GetHeight().ConvertToPx();
+    auto toolBarOffset = OffsetF(geometryNode->GetFrameOffset().GetX(), static_cast<float>(toolBarOffsetY));
     geometryNode->SetMarginFrameOffset(toolBarOffset);
     toolBarWrapper->Layout();
 }

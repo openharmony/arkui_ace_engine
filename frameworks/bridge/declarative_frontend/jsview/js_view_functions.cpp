@@ -19,6 +19,7 @@
 
 #include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/pipeline/base/composed_element.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
@@ -44,14 +45,24 @@ JSRef<JSObject> GenConstraint(const std::optional<NG::LayoutConstraintF>& parent
     return constraint;
 }
 
-JSRef<JSObject> GenPadding(const std::unique_ptr<NG::PaddingProperty>& padding_)
+JSRef<JSObject> GenPadding(const std::unique_ptr<NG::PaddingProperty>& paddingNative)
 {
     JSRef<JSObject> padding = JSRef<JSObject>::New();
-    padding->SetProperty("top", padding_->top->ToString());
-    padding->SetProperty("right", padding_->right->ToString());
-    padding->SetProperty("bottom", padding_->bottom->ToString());
-    padding->SetProperty("left", padding_->left->ToString());
+    padding->SetProperty("top", paddingNative->top->ToString());
+    padding->SetProperty("right", paddingNative->right->ToString());
+    padding->SetProperty("bottom", paddingNative->bottom->ToString());
+    padding->SetProperty("left", paddingNative->left->ToString());
     return padding;
+}
+
+JSRef<JSObject> GenEdgeWidths(const std::unique_ptr<NG::BorderWidthProperty>& edgeWidthsNative)
+{
+    JSRef<JSObject> edgeWidths = JSRef<JSObject>::New();
+    edgeWidths->SetProperty("top", edgeWidthsNative->topDimen->ToString());
+    edgeWidths->SetProperty("right", edgeWidthsNative->rightDimen->ToString());
+    edgeWidths->SetProperty("bottom", edgeWidthsNative->bottomDimen->ToString());
+    edgeWidths->SetProperty("left", edgeWidthsNative->leftDimen->ToString());
+    return edgeWidths;
 }
 
 JSRef<JSObject> GenBorderInfo(const RefPtr<NG::LayoutWrapper>& layoutWrapper)
@@ -63,11 +74,10 @@ JSRef<JSObject> GenBorderInfo(const RefPtr<NG::LayoutWrapper>& layoutWrapper)
     }
 
     const std::unique_ptr<NG::PaddingProperty> defaultPadding = std::make_unique<NG::PaddingProperty>();
-    if (layoutProperty->GetBorderWidthProperty()) {
-        borderInfo->SetProperty("borderWidth", layoutProperty->GetBorderWidthProperty()->leftDimen->ToString());
-    } else {
-        borderInfo->SetProperty("borderWidth", "0");
-    }
+    const std::unique_ptr<NG::BorderWidthProperty>& defaultEdgeWidth = std::make_unique<NG::BorderWidthProperty>();
+    borderInfo->SetPropertyObject("borderWidth",
+        GenEdgeWidths(
+            layoutProperty->GetBorderWidthProperty() ? layoutProperty->GetBorderWidthProperty() : defaultEdgeWidth));
 
     borderInfo->SetPropertyObject("margin",
         GenPadding(layoutProperty->GetMarginProperty() ? layoutProperty->GetMarginProperty() : defaultPadding));
@@ -90,7 +100,7 @@ void FillSubComponetProperty(JSRef<JSObject>& info, const RefPtr<NG::LayoutWrapp
 {
     info->SetProperty<std::string>("name", layoutWrapper->GetHostNode()->GetTag());
     info->SetProperty<std::string>("id", std::to_string(layoutWrapper->GetHostNode()->GetId()));
-    info->SetPropertyObject("constraint", GenConstraint(layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()));
+    info->SetPropertyObject("constraint", GenConstraint(layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()));
     info->SetPropertyObject("borderInfo", GenBorderInfo(layoutWrapper));
     info->SetPropertyObject("position", GenPositionInfo(layoutWrapper));
 }
@@ -160,17 +170,26 @@ void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
     jsMeasureFunc_.Lock()->Call(jsObject_.Lock(), 2, params);
 }
 
+void ViewFunctions::ExecuteReload(bool deep)
+{
+    ACE_SCOPED_TRACE("ViewFunctions::ExecuteReload");
+    auto func = jsReloadFunc_.Lock();
+    if (!func.IsEmpty()) {
+        JSRef<JSVal> params[1];
+        params[0] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(deep)));
+        func->Call(jsObject_.Lock(), 1, params);
+    } else {
+        LOGE("the reload func is null");
+    }
+}
+
 #else
 
-void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper)
-{
-    return;
-}
+void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper) {}
 
-void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
-{
-    return;
-}
+void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper) {}
+
+void ViewFunctions::ExecuteReload(bool deep) {}
 
 #endif
 
@@ -196,6 +215,13 @@ void ViewFunctions::InitViewFunctions(
             jsRerenderFunc_ = JSRef<JSFunc>::Cast(jsRerenderFunc);
         } else {
             LOGE("View lacks mandatory 'rerender()' function, fatal internal error.");
+        }
+
+        JSRef<JSVal> jsReloadFunc = jsObject->GetProperty("forceCompleteRerender");
+        if (jsReloadFunc->IsFunction()) {
+            jsReloadFunc_ = JSRef<JSFunc>::Cast(jsReloadFunc);
+        } else {
+            LOGE("View lacks mandatory 'forceCompleteRerender()' function, fatal internal error.");
         }
     }
 
@@ -292,6 +318,33 @@ void ViewFunctions::InitViewFunctions(
         } else {
             LOGD("updateWithValueParams is not a function");
         }
+
+#ifdef UICAST_COMPONENT_SUPPORTED
+        JSRef<JSVal> jsCreateChildViewFunc = jsObject->GetProperty("createChildView");
+        if (jsCreateChildViewFunc->IsFunction()) {
+            LOGI("UICast createChildView is a function");
+            jsCreateChildViewFunc_ = JSRef<JSFunc>::Cast(jsCreateChildViewFunc);
+        } else {
+            LOGI("UICast createChildView is not a function");
+        }
+
+        JSRef<JSVal> jsRouterHandleFunc = jsObject->GetProperty("routerHandle");
+        if (jsRouterHandleFunc->IsFunction()) {
+            LOGI("UICast routerHandle is a function");
+            jsRouterHandleFunc_ = JSRef<JSFunc>::Cast(jsRouterHandleFunc);
+        } else {
+            LOGI("UICast routerHandle is not a function");
+        }
+
+        JSRef<JSVal> jsReplayOnEventFunc = jsObject->GetProperty("replayOnEvent");
+        if (jsReplayOnEventFunc->IsFunction()) {
+            LOGI("UICast replayOnEvent is a function");
+            jsReplayOnEventFunc_ = JSRef<JSFunc>::Cast(jsReplayOnEventFunc);
+        } else {
+            LOGI("UICast replayOnEvent is not a function");
+        }
+#endif
+
         jsRenderFunc_ = jsRenderFunction;
     }
 }
@@ -380,6 +433,23 @@ void ViewFunctions::ExecuteUpdateWithValueParams(const std::string& jsonData)
 {
     ExecuteFunctionWithParams(jsUpdateWithValueParamsFunc_, "updateWithValueParams", jsonData);
 }
+
+#ifdef UICAST_COMPONENT_SUPPORTED
+void ViewFunctions::ExecuteCreateChildView(const std::string& jsonData)
+{
+    ExecuteFunctionWithParams(jsCreateChildViewFunc_, "createChildView", jsonData);
+}
+
+void ViewFunctions::ExecuteRouterHandle(const std::string& jsonData)
+{
+    ExecuteFunctionWithParams(jsRouterHandleFunc_, "routerHandle", jsonData);
+}
+
+void ViewFunctions::ExecuteReplayOnEvent(const std::string& jsonData)
+{
+    ExecuteFunctionWithParams(jsReplayOnEventFunc_, "replayOnEvent", jsonData);
+}
+#endif
 
 bool ViewFunctions::ExecuteOnBackPress()
 {

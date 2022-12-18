@@ -38,6 +38,20 @@
         }                                                               \
     } while (0)
 
+#define CHECK_NULL_VOID_NOLOG(ptr) \
+    do {                           \
+        if (!(ptr)) {              \
+            return;                \
+        }                          \
+    } while (0)                    \
+
+#define CHECK_NULL_RETURN_NOLOG(ptr, ret) \
+    do {                                  \
+        if (!(ptr)) {                     \
+            return ret;                   \
+        }                                 \
+    } while (0)                           \
+
 #define PRIMITIVE_CAT(x, y) x##y
 #define CAT(x, y) PRIMITIVE_CAT(x, y)
 
@@ -74,7 +88,7 @@
 #define DEFINE_COMPARE_OPERATOR_WITH_PROPERTIES(type, PROPS) \
     bool operator==(const type& other) const                 \
     {                                                        \
-        if (&other != this) {                                \
+        if (&other == this) {                                \
             return true;                                     \
         }                                                    \
         return LOOP_COMPARE(PROPS);                          \
@@ -207,6 +221,11 @@ inline bool InRegion(double lowerBound, double upperBound, double destNum)
     return LessOrEqual(lowerBound, destNum) && LessOrEqual(destNum, upperBound);
 }
 
+inline bool GreaterOrEqualToInfinity(float num)
+{
+    return GreatOrEqual(num, Infinity<float>() / 2.0f);
+}
+
 inline uint64_t GetMilliseconds()
 {
     auto now = std::chrono::system_clock::now();
@@ -219,6 +238,15 @@ inline uint64_t GetNanoseconds()
     auto now = std::chrono::system_clock::now();
     auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch());
     return nanoseconds.count();
+}
+
+inline float CalculateFriction(float gamma)
+{
+    constexpr float SCROLL_RATIO = 0.72f;
+    if (GreatOrEqual(gamma, 1.0)) {
+        gamma = 1.0;
+    }
+    return SCROLL_RATIO * static_cast<float>(std::pow(1.0 - gamma, 2));
 }
 
 } // namespace OHOS::Ace

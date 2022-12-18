@@ -19,15 +19,27 @@
 
 namespace OHOS::Ace::NG {
 
+RefPtr<SvgImageObject> SvgImageObject::Create(
+    const ImageSourceInfo& sourceInfo, const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data)
+{
+    auto obj = AceType::MakeRefPtr<NG::SvgImageObject>(
+        sourceInfo, encodedInfo->GetImageSize(), encodedInfo->GetFrameCount(), data);
+    if (!obj->MakeSvgDom(sourceInfo.GetFillColor())) {
+        return nullptr;
+    };
+    return obj;
+}
+
 const RefPtr<SvgDomBase>& SvgImageObject::GetSVGDom() const
 {
     return svgDomBase_;
 }
 
 void SvgImageObject::MakeCanvasImage(
-    const LoadCallbacks& loadCallbacks, const SizeF&  /*resizeTarget*/, bool  /*forceResize*/)
+    const LoadCallbacks& loadCallbacks, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool /*syncLoad*/)
 {
-    ImageProvider::MakeCanvasImageForSVG(WeakClaim(this), loadCallbacks);
+    // svg doesn't need to create canvasImage, always run synchronously
+    ImageProvider::MakeSvgCanvasImage(WeakClaim(this), loadCallbacks);
 }
 
 bool SvgImageObject::MakeSvgDom(const std::optional<Color>& svgFillColor)

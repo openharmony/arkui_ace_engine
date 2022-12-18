@@ -51,6 +51,10 @@ public:
     void HandleDragUpdate(double delta);
     void HandleDragEnd();
     void HandleDragCancel();
+    void SetHasScrollableChild(bool hasScrollableChild)
+    {
+        hasScrollableChild_ = hasScrollableChild;
+    }
 
     RefreshStatus GetStatus() const
     {
@@ -111,7 +115,7 @@ private:
     void FireRefreshEvent() const;
     void FirePullDownEvent(const std::string& state) const;
     void StartAnimation(double start, double end, bool isFinished);
-    void HandleStopListener(bool isFinished);
+    void HandleStopListener(const bool isFinished);
     RefreshStatus GetNextStatus();
 
     double MaxScrollableHeight() const;
@@ -183,6 +187,7 @@ private:
     double frictionRatio_ = 0.0;
     double timeDistance_ = 0.0;
     double timeOffset_ = 0.0;
+    bool hasScrollableChild_ = false;
     Dimension inspectorOffset_;
 
     // Use for update loading size when screen size changed.

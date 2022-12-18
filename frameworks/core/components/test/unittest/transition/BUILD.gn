@@ -28,7 +28,7 @@ common_mock_files = [
   "$ace_root/frameworks/core/components/test/unittest/mock/overlay_mock.cpp",
   "$ace_root/frameworks/core/components/test/unittest/mock/semi_modal_mock.cpp",
   "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
-  "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
+  "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",
   "transition_test_utils.cpp",
 ]
 
@@ -140,6 +140,7 @@ common_module_files = [
   "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",
   "$ace_root/frameworks/core/components/common/layout/grid_container_info.cpp",
   "$ace_root/frameworks/core/components/common/layout/grid_system_manager.cpp",
+  "$ace_root/frameworks/core/components/common/layout/screen_system_manager.cpp",
 
   # image
   "$ace_root/frameworks/core/image/image_cache.cpp",
@@ -176,7 +177,7 @@ common_module_files = [
   "$ace_root/frameworks/core/components/theme/theme_attributes.cpp",
   "$ace_root/frameworks/core/components/theme/theme_constants.cpp",
   "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
-  "$ace_root/frameworks/core/components/theme/theme_manager.cpp",
+  "$ace_root/frameworks/core/components/theme/theme_manager_impl.cpp",
   "$ace_root/frameworks/core/components/theme/theme_utils.cpp",
 
   # others
@@ -192,7 +193,7 @@ common_module_files = [
   "$ace_root/frameworks/core/components/common/properties/scroll_bar.cpp",
   "$ace_root/frameworks/core/components/common/properties/shadow.cpp",
   "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
-  "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
+  "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
 
   # add secure c API
   "//third_party/bounds_checking_function/src/strcpy_s.c",
@@ -253,7 +254,7 @@ ohos_unittest("TransitionElementTest") {
   sources += [
     "$ace_root/adapter/ohos/osal/ace_trace.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
-    "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
+    "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
   ]
   part_name = ace_engine_part
 }
@@ -310,7 +311,7 @@ ohos_unittest("SharedTransitionElementTest") {
   sources += [
     "$ace_root/adapter/ohos/osal/ace_trace.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
-    "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
+    "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
   ]
   subsystem_name = ace_engine_subsystem
   part_name = "ace_engine_full"
@@ -371,7 +372,7 @@ ohos_unittest("TransitionPropertyElementTest") {
   sources += [
     "$ace_root/adapter/ohos/osal/ace_trace.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
-    "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
+    "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
   ]
   subsystem_name = ace_engine_subsystem
   part_name = "ace_engine_full"

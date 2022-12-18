@@ -107,11 +107,14 @@ public:
     }
     void OnRemoteTerminated() override {}
     void OnNewRequest(const std::string& data) override {}
-    void OnDialogUpdated(const std::string& data) override {}
     void OnNewWant(const std::string& data) override {}
     void CallRouterBack() override {}
     void OnSurfaceChanged(int32_t width, int32_t height) override;
     void DumpFrontend() const override {}
+    std::string GetPagePath() const override
+    {
+        return "";
+    }
     WindowConfig& GetWindowConfig() override;
     void SetColorMode(ColorMode colorMode) override;
     void RebuildAllPages() override;
@@ -176,7 +179,7 @@ public:
         cardWindowConfig_ = cardWindowConfig;
     }
 
-    void SetRunningCardId(uint64_t cardId)
+    void SetRunningCardId(int64_t cardId)
     {
         cardId_ = cardId;
     }

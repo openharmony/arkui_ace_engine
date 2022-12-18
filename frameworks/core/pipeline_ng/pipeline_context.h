@@ -22,10 +22,12 @@
 #include <utility>
 
 #include "base/memory/referenced.h"
+#include "core/common/frontend.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
@@ -38,11 +40,13 @@ class ACE_EXPORT PipelineContext final : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
 public:
+    using PredictTask = std::function<void(int64_t)>;
     PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
     PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId);
+    PipelineContext() = default;
 
     ~PipelineContext() override = default;
 
@@ -53,6 +57,8 @@ public:
     static float GetCurrentRootHeight();
 
     void SetupRootElement() override;
+
+    void SetupSubRootElement();
 
     const RefPtr<FrameNode>& GetRootElement() const
     {
@@ -93,13 +99,12 @@ public:
     void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override;
 
     // Called by view when idle event.
-    void OnIdle(int64_t deadline) override {}
+    void OnIdle(int64_t deadline) override;
 
-    void OnActionEvent(const std::string& action) override {}
-
-    void SetBuildAfterCallback(const std::function<void()>& callback) override {}
-
-    void SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) override {}
+    void SetBuildAfterCallback(const std::function<void()>& callback) override
+    {
+        buildFinishCallbacks_.emplace_back(callback);
+    }
 
     void SaveExplicitAnimationOption(const AnimationOption& option) override {}
 
@@ -112,6 +117,16 @@ public:
         return {};
     }
 
+    void AddOnAreaChangeNode(int32_t nodeId);
+
+    void RemoveOnAreaChangeNode(int32_t nodeId);
+
+    void HandleOnAreaChangeEvent();
+
+    void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback);
+
+    void HandleVisibleAreaChangeEvent();
+
     void Destroy() override;
 
     void OnShow() override;
@@ -120,11 +135,16 @@ public:
 
     void WindowFocus(bool isFocus) override;
 
+    void ShowContainerTitle(bool isShow) override;
+
+    void SetAppBgColor(const Color& color) override;
+
+    void SetAppTitle(const std::string& title) override;
+
+    void SetAppIcon(const RefPtr<PixelMap>& icon) override;
+
     void OnSurfaceChanged(
-        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override
-    {
-        SetRootSize(density_, width, height);
-    }
+        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override;
 
     void OnSurfacePositionChanged(int32_t posX, int32_t posY) override {}
 
@@ -143,11 +163,15 @@ public:
 
     bool OnBackPressed();
 
+    RefPtr<FrameNode> GetNavDestinationBackButtonNode();
+
     void AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode);
 
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
 
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
+
+    void AddPredictTask(PredictTask&& task);
 
     void FlushDirtyNodeUpdate();
 
@@ -159,15 +183,14 @@ public:
 
     const RefPtr<OverlayManager>& GetOverlayManager();
 
-    const RefPtr<SelectOverlayManager>& GetSelectOverlayManager()
+    const RefPtr<SelectOverlayManager>& GetSelectOverlayManager();
+
+    const RefPtr<SharedOverlayManager>& GetSharedOverlayManager()
     {
-        return selectOverlayManager_;
+        return sharedTransitionManager_;
     }
 
-    const RefPtr<DragDropManager>& GetDragDropManager()
-    {
-        return dragDropManager_;
-    }
+    const RefPtr<DragDropManager>& GetDragDropManager();
 
     void FlushBuild() override;
 
@@ -182,7 +205,6 @@ public:
     void AddWindowFocusChangedCallback(int32_t nodeId);
 
     void RemoveWindowFocusChangedCallback(int32_t nodeId);
-
 
     bool GetIsFocusingByTab() const
     {
@@ -204,25 +226,39 @@ public:
         isNeedShowFocus_ = isNeedShowFocus;
     }
 
-    void SetIsDragged(bool isDragged)
+    bool GetOnShow() const
     {
-        isDragged_ = isDragged;
+        return onShow_;
     }
 
     bool RequestDefaultFocus();
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
+    void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
-    void SetDrawDelegate(std::unique_ptr<DrawDelegate> delegate)
-    {
-        drawDelegate_ = std::move(delegate);
-    }
+    void SetContainerWindow(bool isShow) override;
+
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);
     void NotifyMemoryLevel(int32_t level) override;
     void FlushMessages() override;
 
+    void FlushUITasks() override
+    {
+        taskScheduler_.FlushTask();
+    }
+    // end pipeline, exit app
+    void Finish(bool autoFinish) const override;
+    RectF GetRootRect()
+    {
+        return rootNode_->GetGeometryNode()->GetFrameRect();
+    }
+
+    void FlushReload() override;
+
 protected:
+    void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type);
+
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushFocus();
@@ -230,11 +266,6 @@ protected:
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
 
     void OnVirtualKeyboardHeightChange(float keyboardHeight) override;
-
-    void FlushUITasks() override
-    {
-        taskScheduler_.FlushTask();
-    }
 
 private:
     void FlushWindowStateChangedCallback(bool isShow);
@@ -249,6 +280,9 @@ private:
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const
         {
+            if (!nodeLeft || !nodeRight) {
+                return false;
+            }
             if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
                 return true;
             }
@@ -259,24 +293,10 @@ private:
         }
     };
 
-    template<typename T>
-    struct NodeCompareWeak {
-        bool operator()(const T& nodeLeftWeak, const T& nodeRightWeak) const
-        {
-            auto nodeLeft = nodeLeftWeak.Upgrade();
-            auto nodeRight = nodeRightWeak.Upgrade();
-            if (!nodeLeft || !nodeRight) {
-                return false;
-            }
-            auto compare = NodeCompare<decltype(nodeLeft)>();
-            return compare(nodeLeft, nodeRight);
-        }
-    };
-
     UITaskScheduler taskScheduler_;
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
-    std::set<WeakPtr<UINode>, NodeCompareWeak<WeakPtr<UINode>>> dirtyNodes_;
+    std::set<RefPtr<UINode>, NodeCompare<RefPtr<UINode>>> dirtyNodes_;
     std::list<std::function<void()>> buildFinishCallbacks_;
 
     // window on show or on hide
@@ -289,20 +309,25 @@ private:
     std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_;
-    std::unique_ptr<DrawDelegate> drawDelegate_;
+
+    std::unordered_set<int32_t> onAreaChangeNodeIds_;
+    std::unordered_map<int32_t, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
 
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
     RefPtr<FullScreenManager> fullScreenManager_;
     RefPtr<SelectOverlayManager> selectOverlayManager_;
     RefPtr<DragDropManager> dragDropManager_;
+    RefPtr<SharedOverlayManager> sharedTransitionManager_;
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     uint32_t nextScheduleTaskId_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isNeedShowFocus_ = false;
-    bool isDragged_ = false;
+    bool onShow_ = false;
+    bool onFocus_ = true;
+
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
 

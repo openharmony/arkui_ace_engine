@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONTAINER_H
 
 #include <functional>
+#include <mutex>
+#include <unordered_map>
 
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
@@ -29,8 +31,8 @@
 #include "core/common/platform_res_register.h"
 #include "core/common/settings.h"
 #include "core/common/window.h"
-#include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -104,16 +106,16 @@ public:
 
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}
 
-    virtual void SetCardFrontend(WeakPtr<Frontend> frontend, uint64_t cardId) {}
+    virtual void SetCardFrontend(WeakPtr<Frontend> frontend, int64_t cardId) {}
 
-    virtual WeakPtr<Frontend> GetCardFrontend(uint64_t cardId) const
+    virtual WeakPtr<Frontend> GetCardFrontend(int64_t cardId) const
     {
         return nullptr;
     }
 
-    virtual void SetCardPipeline(WeakPtr<PipelineBase>, uint64_t cardId) {}
+    virtual void SetCardPipeline(WeakPtr<PipelineBase>, int64_t cardId) {}
 
-    virtual WeakPtr<PipelineBase> GetCardPipeline(uint64_t cardId) const
+    virtual WeakPtr<PipelineBase> GetCardPipeline(int64_t cardId) const
     {
         return nullptr;
     }
@@ -127,6 +129,11 @@ public:
     virtual void ProcessScreenOnEvents() {}
 
     virtual void ProcessScreenOffEvents() {}
+
+    virtual std::string GetHapPath() const
+    {
+        return "";
+    }
 
     void SetCreateTime(std::chrono::time_point<std::chrono::high_resolution_clock> time)
     {
@@ -167,6 +174,8 @@ public:
     {
         return cardHapPath_;
     }
+
+    bool UpdateState(const Frontend::State& state);
 
     Settings& GetSettings()
     {
@@ -246,14 +255,12 @@ public:
         return false;
     }
 
-    void SetIdeDebuggerConnected(bool IdeDebuggerConnected)
-    {
-        IdeDebuggerConnected_ = IdeDebuggerConnected;
-    }
+    virtual void GetCardFrontendMap(std::unordered_map<int64_t, WeakPtr<Frontend>>& cardFrontendMap) const {}
 
-    bool GetIdeDebuggerConnected()
+    virtual void SetSharedRuntime(void* runtime) {}
+    virtual void* GetSharedRuntime()
     {
-        return IdeDebuggerConnected_;
+        return nullptr;
     }
 
 protected:
@@ -261,12 +268,13 @@ protected:
     bool firstUpdateData_ = true;
     std::string cardHapPath_;
     bool useNewPipeline_ = false;
+    std::mutex stateMutex_;
+    Frontend::State state_ = Frontend::State::UNDEFINE;
 
 private:
     std::string moduleName_;
     std::string bundlePath_;
     std::string filesDataPath_;
-    bool IdeDebuggerConnected_ = false;
     bool usePartialUpdate_ = false;
     Settings settings_;
     ACE_DISALLOW_COPY_AND_MOVE(Container);

@@ -22,7 +22,9 @@
 namespace OHOS::Ace::NG {
 
 using ChangeEvent = std::function<void(const BaseEventInfo* info)>;
-using DailogChangeEvent = std::function<void(const std::string&)>;
+using DialogEvent = std::function<void(const std::string&)>;
+using DialogCancelEvent = std::function<void()>;
+using DialogGestureEvent = std::function<void(const GestureEvent& info)>;
 
 class TimePickerEventHub : public EventHub {
     DECLARE_ACE_TYPE(TimePickerEventHub, EventHub)
@@ -43,21 +45,34 @@ public:
         }
     }
 
-    void SetDailogChange(DailogChangeEvent&& onChange)
+    void SetDialogChange(DialogEvent&& onChange)
     {
-        dailogChangeEvent_ = std::move(onChange);
+        DialogChangeEvent_ = std::move(onChange);
     }
 
-    void FireDailogChangeEvent(const std::string& info) const
+    void FireDialogChangeEvent(const std::string& info) const
     {
-        if (dailogChangeEvent_) {
-            dailogChangeEvent_(info);
+        if (DialogChangeEvent_) {
+            DialogChangeEvent_(info);
+        }
+    }
+
+    void SetDialogAcceptEvent(DialogEvent&& onChange)
+    {
+        DialogAcceptEvent_ = std::move(onChange);
+    }
+
+    void FireDialogAcceptEvent(const std::string& info) const
+    {
+        if (DialogAcceptEvent_) {
+            DialogAcceptEvent_(info);
         }
     }
 
 private:
     ChangeEvent changeEvent_;
-    DailogChangeEvent dailogChangeEvent_;
+    DialogEvent DialogChangeEvent_;
+    DialogEvent DialogAcceptEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerEventHub);
 };

@@ -15,6 +15,8 @@
 
 #include "core/components/texttimer/render_texttimer.h"
 
+#include <string>
+
 #include "base/i18n/localization.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/text/render_text.h"
@@ -138,7 +140,7 @@ void RenderTextTimer::Tick(uint64_t duration)
     elapsedTime_ += duration;
 
     if (onTimer_) {
-        onTimer_(GetMilliseconds(), elapsedTime_);
+        onTimer_(std::to_string(GetMilliseconds()), std::to_string(elapsedTime_));
     }
 
     double tmp_value = static_cast<double>(elapsedTime_);

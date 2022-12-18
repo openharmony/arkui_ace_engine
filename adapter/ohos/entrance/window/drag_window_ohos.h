@@ -37,14 +37,17 @@ public:
     void MoveTo(int32_t x, int32_t y) const override;
     void Destroy() const override;
     void DrawPixelMap(const RefPtr<PixelMap>& pixelMap) override;
+    void DrawFrameNode(const RefPtr<NG::FrameNode>& rootNode) override;
     void DrawImage(void* skImage) override;
     void DrawText(std::shared_ptr<txt::Paragraph> paragraph,
         const Offset& offset, const RefPtr<RenderText>& renderText) override;
 
 private:
     OHOS::sptr<Rosen::Window> dragWindow_;
+#ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<Rosen::RSNode> rootNode_;
     std::shared_ptr<Rosen::RSUIDirector> rsUiDirector_;
+#endif
 };
 } // namespace OHOS::Ace
 

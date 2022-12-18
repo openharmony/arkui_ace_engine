@@ -16,15 +16,21 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_PAGE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_PAGE_PATTERN_H
 
+#include <functional>
+
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/animation/animator_info.h"
 #include "core/animation/page_transition_common.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/stage/page_info.h"
+#include "core/components_ng/pattern/stage/page_transition_effect.h"
 
 namespace OHOS::Ace::NG {
 
+using SharedTransitionMap = std::unordered_map<ShareId, WeakPtr<FrameNode>>;
+using JSAnimatorMap = std::unordered_map<std::string, RefPtr<Framework::AnimatorInfo>>;
 // PagePattern is the base class for page root render node.
 class ACE_EXPORT PagePattern : public Pattern {
     DECLARE_ACE_TYPE(PagePattern, Pattern);
@@ -54,6 +60,9 @@ public:
 
     bool OnBackPressed() const
     {
+        if (isPageInTransition_) {
+            return true;
+        }
         if (OnBackPressed_) {
             return OnBackPressed_();
         }
@@ -75,17 +84,55 @@ public:
         OnBackPressed_ = std::move(OnBackPressed);
     }
 
+    void SetPageTransitionFunc(std::function<void()>&& pageTransitionFunc)
+    {
+        pageTransitionFunc_ = std::move(pageTransitionFunc);
+    }
+
+    // find pageTransition effect according to transition type, it will clear the transition effect stack
+    RefPtr<PageTransitionEffect> FindPageTransitionEffect(PageTransitionType type);
+
+    void ClearPageTransitionEffect();
+
+    RefPtr<PageTransitionEffect> GetTopTransition() const;
+
+    void AddPageTransition(const RefPtr<PageTransitionEffect>& effect);
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<PageEventHub>();
     }
 
-    bool TriggerPageTransition(PageTransitionType type) const;
+    bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish);
 
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
     }
+
+    const SharedTransitionMap& GetSharedTransitionMap() const
+    {
+        return sharedTransitionMap_;
+    }
+
+    void AddJsAnimator(const std::string& animatorId, const RefPtr<Framework::AnimatorInfo>& animatorInfo);
+    RefPtr<Framework::AnimatorInfo> GetJsAnimator(const std::string& animatorId);
+
+    void BuildSharedTransitionMap();
+
+    void ReloadPage();
+
+    void SetFirstBuildCallback(std::function<void()>&& buildCallback);
+
+    void SetPageInTransition(bool pageTransition)
+    {
+        isPageInTransition_ = pageTransition;
+    }
+
+    // Mark current page node invisible in render tree.
+    void ProcessHideState();
+    // Mark current page node visible in render tree.
+    void ProcessShowState();
 
 private:
     void OnAttachToFrameNode() override;
@@ -96,9 +143,16 @@ private:
     std::function<void()> onPageShow_;
     std::function<void()> onPageHide_;
     std::function<bool()> OnBackPressed_;
+    std::function<void()> pageTransitionFunc_;
+    std::function<void()> firstBuildCallback_;
+    std::stack<RefPtr<PageTransitionEffect>> pageTransitionEffects_;
 
     bool isOnShow_ = false;
-    bool isLoaded_ = false;
+    bool isFirstLoad_ = true;
+    bool isPageInTransition_ = false;
+
+    SharedTransitionMap sharedTransitionMap_;
+    JSAnimatorMap jsAnimatorMap_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PagePattern);
 };

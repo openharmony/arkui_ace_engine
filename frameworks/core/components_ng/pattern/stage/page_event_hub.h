@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_PAGE_EVENT_HUB_H
 
 #include <stdint.h>
+
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
@@ -34,6 +35,7 @@ public:
 
     void AddRadioToGroup(const std::string& group, int32_t radioId);
     void RemoveRadioFromGroup(const std::string& group, int32_t radioId);
+    bool HasRadioId(const std::string& group, int32_t radioId);
     void UpdateRadioGroupValue(const std::string& group, int32_t radioId);
 
     void AddCheckBoxToGroup(const std::string& group, int32_t checkBoxId);

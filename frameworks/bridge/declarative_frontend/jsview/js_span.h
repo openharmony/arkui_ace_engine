@@ -37,8 +37,6 @@ public:
     static void SetDecoration(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);
-
-    static RefPtr<TextSpanComponent> GetComponent();
 };
 
 } // namespace OHOS::Ace::Framework

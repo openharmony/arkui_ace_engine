@@ -23,7 +23,6 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
@@ -36,18 +35,20 @@ class ACE_EXPORT TextLayoutAlgorithm : public BoxLayoutAlgorithm {
 public:
     TextLayoutAlgorithm();
 
-    explicit TextLayoutAlgorithm(std::list<RefPtr<SpanItem>> spanItemChildren)
-        : spanItemChildren_(std::move(spanItemChildren))
+    TextLayoutAlgorithm(std::list<RefPtr<SpanItem>> spanItemChildren, const RefPtr<Paragraph>& paragraph)
+        : spanItemChildren_(std::move(spanItemChildren)), paragraph_(paragraph)
     {}
 
     ~TextLayoutAlgorithm() override = default;
 
     void OnReset() override;
 
+    void Measure(LayoutWrapper* layoutWrapper) override;
+
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
-    const std::shared_ptr<RSParagraph>& GetParagraph();
+    const RefPtr<Paragraph>& GetParagraph();
     float GetBaselineOffset() const;
 
 private:
@@ -56,12 +57,13 @@ private:
         const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
         const RefPtr<PipelineContext>& pipeline);
-    bool DidExceedMaxLines(const LayoutConstraintF& contentConstraint);
+    bool DidExceedMaxLines(const SizeF& maxSize);
     static TextDirection GetTextDirection(const std::string& content);
     float GetTextWidth() const;
+    SizeF GetMaxMeasureSize(const LayoutConstraintF& contentConstraint) const;
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
-    std::shared_ptr<RSParagraph> paragraph_;
+    RefPtr<Paragraph> paragraph_;
     float baselineOffset_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);

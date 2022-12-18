@@ -22,7 +22,6 @@
 #include <unistd.h>
 
 #include "native_engine/impl/v8/v8_native_engine.h"
-
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
@@ -48,6 +47,7 @@
 #include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
 #include "frameworks/core/common/ace_view.h"
 #include "frameworks/core/common/container.h"
+#include "frameworks/core/components/xcomponent/xcomponent_component_client.h"
 
 extern const char _binary_stateMgmt_js_start[];
 extern const char _binary_stateMgmt_js_end[];
@@ -1786,7 +1786,7 @@ void V8DeclarativeEngine::FireExternalEvent(const std::string& componentId, cons
 {
     CHECK_RUN_ON(JS);
     if (isDestroy) {
-        XComponentClient::GetInstance().DeleteFromXcomponentsMapById(componentId);
+        XComponentComponentClient::GetInstance().DeleteFromXcomponentsMapById(componentId);
         XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(componentId);
         XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(componentId);
         XComponentClient::GetInstance().DeleteFromJsValMapById(componentId);
@@ -1796,7 +1796,7 @@ void V8DeclarativeEngine::FireExternalEvent(const std::string& componentId, cons
     std::tie(nativeXComponentImpl_, nativeXComponent_) =
         XComponentClient::GetInstance().GetNativeXComponentFromXcomponentsMap(componentId);
     RefPtr<XComponentComponent> xcomponent =
-        XComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId);
+        XComponentComponentClient::GetInstance().GetXComponentFromXcomponentsMap(componentId);
     if (!xcomponent) {
         LOGE("FireExternalEvent xcomponent is null.");
         return;

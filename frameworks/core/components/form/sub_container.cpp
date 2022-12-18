@@ -22,6 +22,7 @@
 #include "adapter/ohos/entrance/utils.h"
 #include "base/utils/utils.h"
 #include "core/common/container_scope.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
 #include "frameworks/core/common/flutter/flutter_asset_manager.h"
 #include "frameworks/core/common/flutter/flutter_task_executor.h"
@@ -151,7 +152,7 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
 
     if (cardType_ == FrontendType::ETS_CARD) {
         frontend_ = AceType::MakeRefPtr<CardFrontendDeclarative>();
-    } else if (cardType_ == FrontendType::JS_CARD){
+    } else if (cardType_ == FrontendType::JS_CARD) {
         frontend_ = AceType::MakeRefPtr<CardFrontend>();
     } else {
         LOGE("Run Card failed, card type unknown");
@@ -185,7 +186,7 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
             flutterAssetManager->PushBack(std::move(assetProvider));
         }
     }
-    if (formSrc.compare(0, 2, "./") == 0) { // 2:length of "./"
+    if (formSrc.compare(0, 2, "./") == 0) {       // 2:length of "./"
         frontend_->SetFormSrc(formSrc.substr(2)); // 2:length of "./"
     } else {
         frontend_->SetFormSrc(formSrc);
@@ -200,7 +201,6 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
         pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
             std::move(window), taskExecutor_, assetManager_, nullptr, frontend_, instanceId_);
     }
-
     ContainerScope scope(instanceId_);
     density_ = outSidePipelineContext_.Upgrade()->GetDensity();
     auto eventManager = outSidePipelineContext_.Upgrade()->GetEventManager();
@@ -220,7 +220,7 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
     cardResourceInfo.SetResourceConfiguration(resConfig);
     auto cardThemeManager = pipelineContext_->GetThemeManager();
     if (!cardThemeManager) {
-        cardThemeManager = AceType::MakeRefPtr<ThemeManager>();
+        cardThemeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
         pipelineContext_->SetThemeManager(cardThemeManager);
     }
     if (cardThemeManager) {
@@ -282,7 +282,7 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
             auto pattern = formPattern_.Upgrade();
             CHECK_NULL_VOID(pattern);
             auto pipelineContext = DynamicCast<NG::PipelineContext>(pipelineContext_);
-            if(!pipelineContext) {
+            if (!pipelineContext) {
                 LOGE("RunCard failed, pipeline context is nullptr");
                 return;
             }
@@ -293,12 +293,13 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
             LOGE("ETS Card not support old pipeline");
             return;
         }
-    } else if (cardType_ == FrontendType::JS_CARD) { // JS Card : API9 only support Old Pipeline JSCard, Host can be NG or Old
+    } else if (cardType_ == FrontendType::JS_CARD) {
+        // JS Card : API9 only support Old Pipeline JSCard, Host can be NG or Old
         if (Container::IsCurrentUseNewPipeline()) {
             auto pattern = formPattern_.Upgrade();
             CHECK_NULL_VOID(pattern);
             auto pipelineContext = DynamicCast<PipelineContext>(pipelineContext_);
-            if(!pipelineContext) {
+            if (!pipelineContext) {
                 LOGE("RunCard failed, pipeline context is nullptr");
                 return;
             }

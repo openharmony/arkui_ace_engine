@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/video/video_pattern.h"
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
@@ -29,6 +30,7 @@
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -52,31 +54,129 @@ constexpr uint32_t CURRENT_POS = 1;
 constexpr uint32_t SLIDER_POS = 2;
 constexpr uint32_t DURATION_POS = 3;
 constexpr uint32_t FULL_SCREEN_POS = 4;
+constexpr int32_t AVERAGE_VALUE = 2;
 enum SliderChangeMode {
     BEGIN = 0,
     MOVING,
     END,
 };
+
 std::string IntTimeToText(uint32_t time)
 {
     bool needShowHour = time > SECONDS_PER_HOUR;
     return Localization::GetInstance()->FormatDuration(time, needShowHour);
 }
-float CalControlBarHeight()
+
+SizeF CalculateFitContain(const SizeF& videoSize, const SizeF& layoutSize)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, 0.0f);
-    auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
-    CHECK_NULL_RETURN(videoTheme, 0.0f);
-    auto controlsHeight =
-        pipelineContext->NormalizeToPx(Dimension(videoTheme->GetBtnSize().Height(), DimensionUnit::VP));
-    controlsHeight += pipelineContext->NormalizeToPx(videoTheme->GetBtnEdge().Top());
-    controlsHeight += pipelineContext->NormalizeToPx(videoTheme->GetBtnEdge().Bottom());
-    return static_cast<float>(controlsHeight);
+    double layoutRatio = NearZero(layoutSize.Height()) ? 0.0 : layoutSize.Width() / layoutSize.Height();
+    double sourceRatio = NearZero(videoSize.Height()) ? layoutRatio : videoSize.Width() / videoSize.Height();
+
+    if (NearZero(layoutRatio) || NearZero(sourceRatio)) {
+        return layoutSize;
+    }
+    if (sourceRatio < layoutRatio) {
+        return { static_cast<float>(sourceRatio) * layoutSize.Height(), layoutSize.Height() };
+    }
+    return { layoutSize.Width(), static_cast<float>(layoutSize.Width() / sourceRatio) };
+}
+
+SizeF CalculateFitFill(const SizeF& layoutSize)
+{
+    return layoutSize;
+}
+
+SizeF CalculateFitCover(const SizeF& videoSize, const SizeF& layoutSize)
+{
+    double layoutRatio = NearZero(layoutSize.Height()) ? 0.0 : layoutSize.Width() / layoutSize.Height();
+    double sourceRatio = NearZero(videoSize.Height()) ? layoutRatio : videoSize.Width() / videoSize.Height();
+
+    if (NearZero(layoutRatio) || NearZero(sourceRatio)) {
+        return layoutSize;
+    }
+    if (sourceRatio < layoutRatio) {
+        return { layoutSize.Width(), static_cast<float>(layoutSize.Width() / sourceRatio) };
+    }
+    return { static_cast<float>(layoutSize.Height() * sourceRatio), layoutSize.Height() };
+}
+
+SizeF CalculateFitNone(const SizeF& videoSize)
+{
+    return videoSize;
+}
+
+SizeF CalculateFitScaleDown(const SizeF& videoSize, const SizeF& layoutSize)
+{
+    if (layoutSize.Width() > videoSize.Width()) {
+        return CalculateFitNone(videoSize);
+    }
+    return CalculateFitContain(videoSize, layoutSize);
+}
+
+SizeF ConstraintSize(const SizeF& contentSize, const SizeF& layoutSize)
+{
+    if (contentSize.Width() <= layoutSize.Width() && contentSize.Height() <= layoutSize.Height()) {
+        return contentSize;
+    }
+
+    double widthRatio = contentSize.Width() / layoutSize.Width();
+    double heightRatio = contentSize.Height() / layoutSize.Height();
+    double rightRatio;
+    if (widthRatio <= 1) {
+        rightRatio = heightRatio;
+    } else if (heightRatio <= 1) {
+        rightRatio = widthRatio;
+    } else {
+        rightRatio = widthRatio > heightRatio ? heightRatio : heightRatio;
+    }
+
+    return { static_cast<float>(contentSize.Width() / rightRatio),
+        static_cast<float>(contentSize.Height() / rightRatio) };
+}
+
+SizeF MeasureVideoContentLayout(const SizeF& layoutSize, const RefPtr<VideoLayoutProperty>& layoutProperty)
+{
+    if (!layoutProperty || !layoutProperty->HasVideoSize()) {
+        LOGW("VideoSize has not set");
+        return layoutSize;
+    }
+
+    auto videoSize = layoutProperty->GetVideoSizeValue(SizeF(0, 0));
+    LOGD("VideoSize = %{public}s", videoSize.ToString().c_str());
+    auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
+    SizeF contentSize = { 0.0, 0.0 };
+    switch (imageFit) {
+        case ImageFit::CONTAIN:
+            contentSize = CalculateFitContain(videoSize, layoutSize);
+            break;
+        case ImageFit::FILL:
+            contentSize = CalculateFitFill(layoutSize);
+            break;
+        case ImageFit::COVER:
+            contentSize = CalculateFitCover(videoSize, layoutSize);
+            break;
+        case ImageFit::NONE:
+            contentSize = CalculateFitNone(videoSize);
+            break;
+        case ImageFit::SCALE_DOWN:
+            contentSize = CalculateFitScaleDown(videoSize, layoutSize);
+            break;
+        default:
+            contentSize = CalculateFitContain(videoSize, layoutSize);
+    }
+
+    // The video frame area should not be greater than the video component area.
+    return ConstraintSize(contentSize, layoutSize);
 }
 } // namespace
 
 VideoPattern::VideoPattern(const RefPtr<VideoControllerV2>& videoController) : videoControllerV2_(videoController) {}
+
+void VideoPattern::ResetStatus()
+{
+    isInitialState_ = true;
+    isPlaying_ = false;
+}
 
 void VideoPattern::UpdateMediaPlayer()
 {
@@ -97,15 +197,21 @@ void VideoPattern::PrepareMediaPlayer()
     if (!videoLayoutProperty->HasVideoSource() || videoLayoutProperty->GetVideoSource() == src_) {
         return;
     }
-    mediaPlayer_->ResetMediaPlayer();
-    if (mediaPlayer_->IsMediaPlayerValid()) {
-        float volume = muted_ ? 0.0f : 1.0f;
-        mediaPlayer_->SetVolume(volume, volume);
+
+    if (!mediaPlayer_->IsMediaPlayerValid()) {
+        LOGE("media player is invalid.");
+        return;
     }
+
+    ResetStatus();
+    mediaPlayer_->ResetMediaPlayer();
+    float volume = muted_ ? 0.0f : 1.0f;
+    mediaPlayer_->SetVolume(volume, volume);
     if (!SetSourceForMediaPlayer()) {
         LOGE("set source for mediaPlayer failed");
         return;
     }
+
     RegisterMediaPlayerEvent();
     PrepareSurface();
     if (mediaPlayer_->PrepareAsync() != 0) {
@@ -132,38 +238,34 @@ void VideoPattern::RegisterMediaPlayerEvent()
     auto&& positionUpdatedEvent = [videoPattern, uiTaskExecutor](uint32_t currentPos) {
         uiTaskExecutor.PostSyncTask([&videoPattern, currentPos] {
             auto video = videoPattern.Upgrade();
-            if (video != nullptr) {
-                video->OnCurrentTimeChange(currentPos);
-            }
+            CHECK_NULL_VOID_NOLOG(video);
+            video->OnCurrentTimeChange(currentPos);
         });
     };
 
     auto&& stateChangedEvent = [videoPattern, uiTaskExecutor](PlaybackStatus status) {
         uiTaskExecutor.PostSyncTask([&videoPattern, status] {
             auto video = videoPattern.Upgrade();
-            if (video) {
-                LOGD("OnPlayerStatus");
-                video->OnPlayerStatus(status);
-            }
+            CHECK_NULL_VOID_NOLOG(video);
+            LOGD("OnPlayerStatus");
+            video->OnPlayerStatus(status);
         });
     };
 
     auto&& errorEvent = [videoPattern, uiTaskExecutor]() {
         uiTaskExecutor.PostTask([&videoPattern] {
             auto video = videoPattern.Upgrade();
-            if (video) {
-                LOGD("OnError");
-                video->OnError("");
-            }
+            CHECK_NULL_VOID_NOLOG(video);
+            LOGD("OnError");
+            video->OnError("");
         });
     };
 
     auto&& resolutionChangeEvent = [videoPattern, uiTaskExecutor]() {
         uiTaskExecutor.PostSyncTask([&videoPattern] {
             auto video = videoPattern.Upgrade();
-            if (video) {
-                video->OnResolutionChange();
-            }
+            CHECK_NULL_VOID_NOLOG(video);
+            video->OnResolutionChange();
         });
     };
 
@@ -172,9 +274,11 @@ void VideoPattern::RegisterMediaPlayerEvent()
 
 void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)
 {
+    isInitialState_ = isInitialState_ ? currentPos == 0 : false;
     if (currentPos == currentPos_) {
         return;
     }
+
     if (duration_ == 0) {
         int32_t duration = 0;
         if (mediaPlayer_->GetDuration(duration) == 0) {
@@ -182,9 +286,9 @@ void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)
             OnUpdateTime(duration_, DURATION_POS);
         }
     }
+
     OnUpdateTime(currentPos, CURRENT_POS);
     currentPos_ = currentPos;
-
     auto eventHub = GetEventHub<VideoEventHub>();
     auto json = JsonUtil::Create(true);
     json->Put("time", static_cast<double>(currentPos));
@@ -195,6 +299,15 @@ void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)
 void VideoPattern::OnPlayerStatus(PlaybackStatus status)
 {
     bool isPlaying = (status == PlaybackStatus::STARTED);
+    if (isPlaying_ != isPlaying) {
+        isPlaying_ = isPlaying;
+        ChangePlayButtonTag();
+    }
+
+    if (isInitialState_) {
+        isInitialState_ = !isPlaying;
+    }
+
     if (isPlaying) {
         auto json = JsonUtil::Create(true);
         json->Put("start", "");
@@ -215,6 +328,7 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
         if (!mediaPlayer_->IsMediaPlayerValid()) {
             return;
         }
+
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         Size videoSize = Size(mediaPlayer_->GetVideoWidth(), mediaPlayer_->GetVideoHeight());
         int32_t milliSecondDuration = 0;
@@ -223,7 +337,10 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
             LOGI("Video OnPrepared video size: %{public}s", videoSize.ToString().c_str());
             this->OnPrepared(videoSize.Width(), videoSize.Height(), duration, 0, true);
         });
-    } else if (status == PlaybackStatus::PLAYBACK_COMPLETE) {
+        return;
+    }
+
+    if (status == PlaybackStatus::PLAYBACK_COMPLETE) {
         OnCompletion();
     }
 }
@@ -264,14 +381,16 @@ void VideoPattern::OnPrepared(double width, double height, uint32_t duration, ui
     auto videoLayoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
     videoLayoutProperty->UpdateVideoSize(SizeF(static_cast<float>(width), static_cast<float>(height)));
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    auto needControlBar = videoLayoutProperty->GetControlsValue(false);
 
     duration_ = duration;
     currentPos_ = currentPos;
+    isInitialState_ = currentPos != 0 ? false : isInitialState_;
+    isPlaying_ = mediaPlayer_->IsPlaying();
 
     OnUpdateTime(duration_, DURATION_POS);
     OnUpdateTime(currentPos_, CURRENT_POS);
 
+    auto needControlBar = videoLayoutProperty->GetControlsValue(true);
     if (needControlBar) {
         RefPtr<UINode> controlBar = nullptr;
         auto children = host->GetChildren();
@@ -289,7 +408,7 @@ void VideoPattern::OnPrepared(double width, double height, uint32_t duration, ui
         sliderPaintProperty->UpdateMax(static_cast<float>(duration_));
         sliderNode->MarkModifyDone();
         auto playBtn = DynamicCast<FrameNode>(controlBar->GetChildAtIndex(0));
-        ChangePlayButtonTag(false, playBtn);
+        ChangePlayButtonTag(playBtn);
     }
 
     if (needFireEvent) {
@@ -314,6 +433,7 @@ void VideoPattern::OnPrepared(double width, double height, uint32_t duration, ui
 
 void VideoPattern::OnCompletion()
 {
+    isPlaying_ = false;
     currentPos_ = duration_;
     OnUpdateTime(currentPos_, CURRENT_POS);
     auto json = JsonUtil::Create(true);
@@ -321,17 +441,31 @@ void VideoPattern::OnCompletion()
     auto param = json->ToString();
     auto eventHub = GetEventHub<VideoEventHub>();
     eventHub->FireFinishEvent(param);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    const auto& children = host->GetChildren();
-    for (const auto& child : children) {
-        if (child->GetTag() == V2::ROW_ETS_TAG) {
-            auto playBtn = DynamicCast<FrameNode>(child->GetChildAtIndex(0));
-            ChangePlayButtonTag(false, playBtn);
-            break;
-        }
+}
+
+bool VideoPattern::HasPlayer() const
+{
+    return mediaPlayer_ != nullptr;
+}
+
+void VideoPattern::HiddenChange(bool hidden)
+{
+    if (isPlaying_ && hidden && HasPlayer()) {
+        pastPlayingStatus_ = isPlaying_;
+        Pause();
+        return;
+    }
+
+    if (!hidden && pastPlayingStatus_) {
+        pastPlayingStatus_ = false;
+        Start();
+    }
+}
+
+void VideoPattern::OnVisibleChange(bool isVisible)
+{
+    if (hiddenChangeEvent_) {
+        hiddenChangeEvent_(!isVisible);
     }
 }
 
@@ -349,36 +483,48 @@ void VideoPattern::SetSpeed()
     }
 }
 
+void VideoPattern::UpdateMuted()
+{
+    if (mediaPlayer_->IsMediaPlayerValid()) {
+        float volume = muted_ ? 0.0f : 1.0f;
+        mediaPlayer_->SetVolume(volume, volume);
+    }
+}
+
 void VideoPattern::OnUpdateTime(uint32_t time, int pos) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    bool needControlBar = layoutProperty->GetControlsValue(false);
-    if (needControlBar) {
-        RefPtr<UINode> controlBar = nullptr;
-        auto children = host->GetChildren();
-        for (const auto& child : children) {
-            if (child->GetTag() == V2::ROW_ETS_TAG) {
-                controlBar = child;
-                break;
-            }
+    bool needControlBar = layoutProperty->GetControlsValue(true);
+    if (!needControlBar) {
+        return;
+    }
+
+    RefPtr<UINode> controlBar = nullptr;
+    auto children = host->GetChildren();
+    for (const auto& child : children) {
+        if (child->GetTag() == V2::ROW_ETS_TAG) {
+            controlBar = child;
+            break;
         }
-        CHECK_NULL_VOID(controlBar);
-        auto durationNode = DynamicCast<FrameNode>(controlBar->GetChildAtIndex(pos));
-        auto textLayoutProperty = durationNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProperty);
-        std::string timeText = IntTimeToText(time);
-        textLayoutProperty->UpdateContent(timeText);
-        durationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        if (pos == CURRENT_POS) {
-            auto sliderNode = DynamicCast<FrameNode>(controlBar->GetChildAtIndex(SLIDER_POS));
-            auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
-            CHECK_NULL_VOID(sliderPaintProperty);
-            sliderPaintProperty->UpdateValue(static_cast<float>(time));
-            sliderNode->MarkModifyDone();
-        }
+    }
+
+    CHECK_NULL_VOID(controlBar);
+    auto durationNode = DynamicCast<FrameNode>(controlBar->GetChildAtIndex(pos));
+    auto textLayoutProperty = durationNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    std::string timeText = IntTimeToText(time);
+    textLayoutProperty->UpdateContent(timeText);
+    durationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    durationNode->MarkModifyDone();
+    if (pos == CURRENT_POS) {
+        auto sliderNode = DynamicCast<FrameNode>(controlBar->GetChildAtIndex(SLIDER_POS));
+        auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
+        CHECK_NULL_VOID(sliderPaintProperty);
+        sliderPaintProperty->UpdateValue(static_cast<float>(time));
+        sliderNode->MarkModifyDone();
     }
 }
 
@@ -404,47 +550,53 @@ void VideoPattern::OnAttachToFrameNode()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContextForMediaPlayer_->InitContext(false, "MediaPlayerSurface");
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
 }
 
 void VideoPattern::OnModifyDone()
 {
+    if (!hiddenChangeEvent_) {
+        SetHiddenChangeEvent([weak = WeakClaim(this)](bool hidden) {
+            auto videoPattern = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(videoPattern);
+            videoPattern->HiddenChange(hidden);
+        });
+    }
     AddPreviewNodeIfNeeded();
     // Create the control bar
     AddControlBarNodeIfNeeded();
     UpdateMediaPlayer();
+    UpdateVideoProperty();
 }
 
 void VideoPattern::AddPreviewNodeIfNeeded()
 {
-    if (hasInit_) {
+    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+    if (!isInitialState_ || !layoutProperty->HasPosterImageInfo()) {
         return;
     }
-    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
-    if (layoutProperty->HasPosterImageInfo()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto children = host->GetChildren();
-        bool isExist = false;
-        for (const auto& child : children) {
-            if (child->GetTag() == V2::IMAGE_ETS_TAG) {
-                isExist = true;
-                break;
-            }
-        }
-        if (!isExist) {
-            auto posterSourceInfo = layoutProperty->GetPosterImageInfo().value();
-            auto posterNode =
-                FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
-            CHECK_NULL_VOID(posterNode);
-            auto posterLayoutProperty = posterNode->GetLayoutProperty<ImageLayoutProperty>();
-            posterLayoutProperty->UpdateImageSourceInfo(posterSourceInfo);
-            host->AddChild(posterNode);
-            posterNode->MarkModifyDone();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    bool isExist = false;
+    for (const auto& child : children) {
+        if (child->GetTag() == V2::IMAGE_ETS_TAG) {
+            isExist = true;
+            break;
         }
     }
-    hasInit_ = true;
+
+    if (!isExist) {
+        auto posterSourceInfo = layoutProperty->GetPosterImageInfo().value();
+        auto posterNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+        CHECK_NULL_VOID(posterNode);
+        auto posterLayoutProperty = posterNode->GetLayoutProperty<ImageLayoutProperty>();
+        posterLayoutProperty->UpdateImageSourceInfo(posterSourceInfo);
+        host->AddChild(posterNode);
+        posterNode->MarkModifyDone();
+    }
 }
 
 void VideoPattern::AddControlBarNodeIfNeeded()
@@ -453,7 +605,7 @@ void VideoPattern::AddControlBarNodeIfNeeded()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto children = host->GetChildren();
-    if (layoutProperty->GetControlsValue(false)) {
+    if (layoutProperty->GetControlsValue(true)) {
         bool isExist = false;
         for (const auto& child : children) {
             if (child->GetTag() == V2::ROW_ETS_TAG) {
@@ -481,6 +633,17 @@ void VideoPattern::AddControlBarNodeIfNeeded()
     }
 }
 
+void VideoPattern::UpdateVideoProperty()
+{
+    if (isInitialState_ && autoPlay_) {
+        Start();
+    }
+
+    SetSpeed();
+    UpdateLooping();
+    UpdateMuted();
+}
+
 void VideoPattern::OnRebuildFrame()
 {
     if (!renderSurface_->IsSurfaceValid()) {
@@ -499,17 +662,19 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
+
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
-    auto size = geometryNode->GetContentSize();
-    auto offset = geometryNode->GetContentOffset();
-    auto controlBarHeight = 0.0f;
+    auto videoNodeSize = geometryNode->GetContentSize();
+    auto videoNodeOffset = geometryNode->GetContentOffset();
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
-    if (layoutProperty->GetControlsValue(false)) {
-        controlBarHeight = CalControlBarHeight();
-    }
-    size.MinusHeight(controlBarHeight);
-    renderContextForMediaPlayer_->SetBounds(offset.GetX(), offset.GetY(), size.Width(), size.Height());
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
+    // Change the surface layout for drawing video frames
+    renderContextForMediaPlayer_->SetBounds(
+        videoNodeOffset.GetX() + (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+        videoNodeOffset.GetY() + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+        videoFrameSize.Width(), videoFrameSize.Height());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     host->MarkNeedSyncRenderTree();
@@ -518,17 +683,16 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 
 RefPtr<FrameNode> VideoPattern::CreateControlBar()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
     auto controlBar = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(controlBar, nullptr);
 
-    auto playButton = CreateButton();
+    auto playButton = CreateSVG();
     CHECK_NULL_RETURN(playButton, nullptr);
-    bool playing = mediaPlayer_->IsMediaPlayerValid() ? mediaPlayer_->IsPlaying() : false;
-    ChangePlayButtonTag(playing, playButton);
+    ChangePlayButtonTag(playButton);
     controlBar->AddChild(playButton);
 
     auto currentPosText = CreateText(currentPos_);
@@ -543,9 +707,10 @@ RefPtr<FrameNode> VideoPattern::CreateControlBar()
     CHECK_NULL_RETURN(durationText, nullptr);
     controlBar->AddChild(durationText);
 
-    auto fullScreenButton = CreateButton();
+    auto fullScreenButton = CreateSVG();
     CHECK_NULL_RETURN(fullScreenButton, nullptr);
-    ChangeFullScreenButtonTag(false, fullScreenButton);
+    SetFullScreenButtonCallBack(fullScreenButton);
+    ChangeFullScreenButtonTag(isFullScreen_, fullScreenButton);
     controlBar->AddChild(fullScreenButton);
 
     auto renderContext = controlBar->GetRenderContext();
@@ -556,15 +721,15 @@ RefPtr<FrameNode> VideoPattern::CreateControlBar()
 }
 RefPtr<FrameNode> VideoPattern::CreateSlider()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
-    auto sliderTheme = pipelineContext->GetTheme<SliderTheme>();
 
     auto sliderNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, AceType::MakeRefPtr<SliderPattern>());
     CHECK_NULL_RETURN(sliderNode, nullptr);
     auto sliderLayoutProperty = sliderNode->GetLayoutProperty<SliderLayoutProperty>();
+    CHECK_NULL_RETURN(sliderLayoutProperty, nullptr);
 
     auto sliderEdge = videoTheme->GetSliderEdge();
     PaddingProperty padding;
@@ -573,8 +738,6 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
     padding.top = CalcLength(sliderEdge.Top());
     padding.bottom = CalcLength(sliderEdge.Bottom());
     sliderLayoutProperty->UpdatePadding(padding);
-    sliderLayoutProperty->UpdateInsetBlockHotSize(sliderTheme->GetInsetBlockHotSize());
-    sliderLayoutProperty->UpdateInsetBlockSize(sliderTheme->GetInsetBlockSize());
     sliderLayoutProperty->UpdateLayoutWeight(1.0);
 
     SliderOnChangeEvent sliderOnChangeEvent = [weak = WeakClaim(this)](float value, int32_t mode) {
@@ -585,17 +748,19 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
     };
     auto sliderEventHub = sliderNode->GetEventHub<SliderEventHub>();
     sliderEventHub->SetOnChange(std::move(sliderOnChangeEvent));
-    if (duration_ > 0) {
-        auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
-        CHECK_NULL_RETURN(sliderPaintProperty, nullptr);
-        sliderPaintProperty->UpdateMax(static_cast<float>(duration_));
-    }
+
+    auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(sliderPaintProperty, nullptr);
+    sliderPaintProperty->UpdateMax(static_cast<float>(duration_));
+    sliderPaintProperty->UpdateSelectColor(Color::BLACK);
+    sliderPaintProperty->UpdateValue(static_cast<float>(currentPos_));
+    sliderNode->MarkModifyDone();
     return sliderNode;
 }
 
 RefPtr<FrameNode> VideoPattern::CreateText(uint32_t time)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
@@ -619,19 +784,16 @@ RefPtr<FrameNode> VideoPattern::CreateText(uint32_t time)
     return textNode;
 }
 
-RefPtr<FrameNode> VideoPattern::CreateButton()
+RefPtr<FrameNode> VideoPattern::CreateSVG()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
 
-    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
-    CHECK_NULL_RETURN(buttonNode, nullptr);
-    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
-    CHECK_NULL_RETURN(textNode, nullptr);
-    buttonNode->AddChild(textNode);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    auto svgNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_RETURN(svgNode, nullptr);
+    auto svgLayoutProperty = svgNode->GetLayoutProperty<ImageLayoutProperty>();
 
     auto btnEdge = videoTheme->GetBtnEdge();
     PaddingProperty padding;
@@ -639,14 +801,19 @@ RefPtr<FrameNode> VideoPattern::CreateButton()
     padding.right = CalcLength(btnEdge.Right());
     padding.top = CalcLength(btnEdge.Top());
     padding.bottom = CalcLength(btnEdge.Bottom());
-    buttonLayoutProperty->UpdatePadding(padding);
-    buttonLayoutProperty->UpdateType(ButtonType::CIRCLE);
-    buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::BLUE);
+    svgLayoutProperty->UpdatePadding(padding);
 
     auto btnSize = videoTheme->GetBtnSize();
     SizeF size { static_cast<float>(btnSize.Width()), static_cast<float>(btnSize.Height()) };
-    buttonLayoutProperty->UpdateMarginSelfIdealSize(size);
-    return buttonNode;
+    svgLayoutProperty->UpdateMarginSelfIdealSize(size);
+    auto width = Dimension(btnSize.Width(), DimensionUnit::VP).ConvertToPx();
+    auto height = Dimension(btnSize.Height(), DimensionUnit::VP).ConvertToPx();
+    CalcSize idealSize = { CalcLength(width), CalcLength(height) };
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    layoutConstraint.maxSize = idealSize;
+    svgNode->UpdateLayoutConstraint(layoutConstraint);
+    return svgNode;
 }
 
 void VideoPattern::SetMethodCall()
@@ -658,153 +825,152 @@ void VideoPattern::SetMethodCall()
     videoController->SetStartImpl([weak = WeakClaim(this), uiTaskExecutor]() {
         uiTaskExecutor.PostTask([weak]() {
             auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->Start();
-            }
+            CHECK_NULL_VOID(pattern);
+            pattern->Start();
         });
     });
     videoController->SetPausetImpl([weak = WeakClaim(this), uiTaskExecutor]() {
         uiTaskExecutor.PostTask([weak]() {
             auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->Pause();
-            }
+            CHECK_NULL_VOID(pattern);
+            pattern->Pause();
         });
     });
     videoController->SetStopImpl([weak = WeakClaim(this), uiTaskExecutor]() {
         uiTaskExecutor.PostTask([weak]() {
             auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->Stop();
-            }
+            CHECK_NULL_VOID(pattern);
+            pattern->Stop();
         });
     });
     videoController->SetSeekToImpl([weak = WeakClaim(this), uiTaskExecutor](float pos, SeekMode seekMode) {
         uiTaskExecutor.PostTask([weak, pos, seekMode]() {
             auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->SetCurrentTime(pos, seekMode);
-            }
+            CHECK_NULL_VOID(pattern);
+            pattern->SetCurrentTime(pos, seekMode);
         });
     });
     videoController->SetRequestFullscreenImpl([weak = WeakClaim(this), uiTaskExecutor](bool isFullScreen) {
         uiTaskExecutor.PostTask([weak, isFullScreen]() {
             auto pattern = weak.Upgrade();
-            if (pattern) {
-                if (isFullScreen) {
-                    pattern->FullScreen();
-                } else {
-                    pattern->ExitFullScreen();
-                }
+            CHECK_NULL_VOID(pattern);
+            if (isFullScreen) {
+                pattern->FullScreen();
+            } else {
+                pattern->ExitFullScreen();
             }
         });
     });
     videoController->SetExitFullscreenImpl([weak = WeakClaim(this), uiTaskExecutor](bool isSync) {
         if (isSync) {
             auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->ExitFullScreen();
-            }
+            CHECK_NULL_VOID(pattern);
+            pattern->ExitFullScreen();
             return;
         }
         uiTaskExecutor.PostTask([weak]() {
             auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->ExitFullScreen();
-            }
+            CHECK_NULL_VOID(pattern);
+            pattern->ExitFullScreen();
         });
     });
-    if (videoControllerV2_) {
-        videoControllerV2_->AddVideoController(videoController);
-    }
+    CHECK_NULL_VOID_NOLOG(videoControllerV2_);
+    videoControllerV2_->AddVideoController(videoController);
 }
 
 void VideoPattern::Start()
 {
     if (!mediaPlayer_->IsMediaPlayerValid()) {
+        LOGE("media player is invalid.");
         return;
     }
-    if (isStop_ && mediaPlayer_->Prepare() != 0) {
+
+    if (isStop_ && mediaPlayer_->PrepareAsync() != 0) {
         LOGE("Player has not prepared");
         return;
     }
-    if (!mediaPlayer_->IsPlaying()) {
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        const auto& children = host->GetChildren();
-        auto iter = children.begin();
-        while (iter != children.end()) {
-            if ((*iter)->GetTag() == V2::IMAGE_ETS_TAG) {
-                iter = host->RemoveChild(*iter);
-                host->RebuildRenderContextTree();
-                context->RequestFrame();
-                continue;
-            } else if ((*iter)->GetTag() == V2::ROW_ETS_TAG) {
-                auto playBtn = DynamicCast<FrameNode>((*iter)->GetChildAtIndex(0));
-                ChangePlayButtonTag(true, playBtn);
-            }
-            ++iter;
-        }
-        LOGD("Video Start");
-        auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-        platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_))] {
-            auto mediaPlayer = weak.Upgrade();
-            if (mediaPlayer) {
-                mediaPlayer->Play();
-            }
-        });
+
+    if (isPlaying_) {
+        LOGI("Already isPlaying");
+        return;
     }
+
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& children = host->GetChildren();
+    auto iter = children.begin();
+    while (iter != children.end()) {
+        if ((*iter)->GetTag() == V2::IMAGE_ETS_TAG) {
+            iter = host->RemoveChild(*iter);
+            host->RebuildRenderContextTree();
+            context->RequestFrame();
+            break;
+        }
+
+        ++iter;
+    }
+
+    LOGD("Video Start");
+    auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+    platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_))] {
+        auto mediaPlayer = weak.Upgrade();
+        CHECK_NULL_VOID(mediaPlayer);
+        mediaPlayer->Play();
+    });
 }
 
 void VideoPattern::Pause()
 {
     if (!mediaPlayer_->IsMediaPlayerValid()) {
+        LOGE("media player is invalid.");
         return;
     }
-    if (mediaPlayer_->IsPlaying()) {
-        LOGD("Video Pause");
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        const auto& children = host->GetChildren();
-        for (const auto& child : children) {
-            if (child->GetTag() == V2::ROW_ETS_TAG) {
-                auto playBtn = DynamicCast<FrameNode>(child->GetChildAtIndex(0));
-                ChangePlayButtonTag(false, playBtn);
-                break;
-            }
-        }
-        mediaPlayer_->Pause();
+
+    if (!isPlaying_) {
+        LOGI("Already pause");
+        return;
     }
+
+    LOGD("Video Pause");
+    mediaPlayer_->Pause();
 }
 
 void VideoPattern::Stop()
 {
-    OnCurrentTimeChange(0);
-    OnPlayerStatus(PlaybackStatus::STOPPED);
     if (!mediaPlayer_->IsMediaPlayerValid()) {
+        LOGE("media player is invalid.");
         return;
     }
+
+    OnCurrentTimeChange(0);
+    OnPlayerStatus(PlaybackStatus::STOPPED);
     LOGD("Video Stop");
     mediaPlayer_->Stop();
     isStop_ = true;
+}
+
+void VideoPattern::ChangePlayButtonTag()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = host->GetChildren();
     for (const auto& child : children) {
         if (child->GetTag() == V2::ROW_ETS_TAG) {
             auto playBtn = DynamicCast<FrameNode>(child->GetChildAtIndex(0));
-            ChangePlayButtonTag(false, playBtn);
+            ChangePlayButtonTag(playBtn);
             break;
         }
     }
 }
 
-void VideoPattern::ChangePlayButtonTag(bool playing, RefPtr<FrameNode>& playBtn)
+void VideoPattern::ChangePlayButtonTag(RefPtr<FrameNode>& playBtn)
 {
     CHECK_NULL_VOID(playBtn);
-    auto playClickCallback = [weak = WeakClaim(this), playing](GestureEvent& /*info*/) {
+    auto playClickCallback = [weak = WeakClaim(this), playing = isPlaying_](GestureEvent& /* info */) {
         auto videoPattern = weak.Upgrade();
         CHECK_NULL_VOID(videoPattern);
         if (playing) {
@@ -814,19 +980,20 @@ void VideoPattern::ChangePlayButtonTag(bool playing, RefPtr<FrameNode>& playBtn)
         }
     };
     auto playBtnEvent = playBtn->GetOrCreateGestureEventHub();
-    playBtnEvent->SetClickEvent(std::move(playClickCallback));
-    auto textNode = DynamicCast<FrameNode>(playBtn->GetChildAtIndex(0));
-    CHECK_NULL_VOID(textNode);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateContent(playing ? "P" : "S");
-    textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    playBtnEvent->SetUserOnClick(std::move(playClickCallback));
+    auto svgLayoutProperty = playBtn->GetLayoutProperty<ImageLayoutProperty>();
+    auto resourceId = isPlaying_ ? InternalResource::ResourceId::PAUSE_SVG : InternalResource::ResourceId::PLAY_SVG;
+    auto svgSourceInfo = ImageSourceInfo("");
+    svgSourceInfo.SetResourceId(resourceId);
+    svgLayoutProperty->UpdateImageSourceInfo(svgSourceInfo);
+    playBtn->MarkModifyDone();
+    playBtn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void VideoPattern::ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode>& fullScreenBtn)
+void VideoPattern::SetFullScreenButtonCallBack(RefPtr<FrameNode>& fullScreenBtn)
 {
     CHECK_NULL_VOID(fullScreenBtn);
-    auto fsClickCallback = [weak = WeakClaim(this), isFullScreen](GestureEvent& /*info*/) {
+    auto fsClickCallback = [weak = WeakClaim(this), &isFullScreen = isFullScreen_](GestureEvent& /* info */) {
         auto videoPattern = weak.Upgrade();
         CHECK_NULL_VOID(videoPattern);
         if (isFullScreen) {
@@ -836,12 +1003,20 @@ void VideoPattern::ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode
         }
     };
     auto fullScreenBtnEvent = fullScreenBtn->GetOrCreateGestureEventHub();
-    fullScreenBtnEvent->SetClickEvent(std::move(fsClickCallback));
-    auto textNode = DynamicCast<FrameNode>(fullScreenBtn->GetChildAtIndex(0));
-    CHECK_NULL_VOID(textNode);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateContent(isFullScreen ? "x" : "X");
+    fullScreenBtnEvent->SetUserOnClick(std::move(fsClickCallback));
+}
+
+void VideoPattern::ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode>& fullScreenBtn)
+{
+    CHECK_NULL_VOID(fullScreenBtn);
+    auto svgLayoutProperty = fullScreenBtn->GetLayoutProperty<ImageLayoutProperty>();
+    auto resourceId =
+        isFullScreen ? InternalResource::ResourceId::QUIT_FULLSCREEN_SVG : InternalResource::ResourceId::FULLSCREEN_SVG;
+    auto svgSourceInfo = ImageSourceInfo("");
+    svgSourceInfo.SetResourceId(resourceId);
+    svgLayoutProperty->UpdateImageSourceInfo(svgSourceInfo);
+    fullScreenBtn->MarkModifyDone();
+    fullScreenBtn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void VideoPattern::SetCurrentTime(float currentPos, OHOS::Ace::SeekMode seekMode)
@@ -859,6 +1034,7 @@ void VideoPattern::SetCurrentTime(float currentPos, OHOS::Ace::SeekMode seekMode
 void VideoPattern::OnSliderChange(float posTime, int32_t mode)
 {
     LOGD("posTime: %{public}lf, mode: %{public}d", posTime, mode);
+    SetCurrentTime(posTime);
     auto eventHub = GetEventHub<VideoEventHub>();
     auto json = JsonUtil::Create(true);
     json->Put("time", static_cast<double>(posTime));
@@ -868,7 +1044,6 @@ void VideoPattern::OnSliderChange(float posTime, int32_t mode)
         eventHub->FireSeekingEvent(param);
     } else if (mode == SliderChangeMode::END) {
         eventHub->FireSeekedEvent(param);
-        SetCurrentTime(posTime);
     }
 }
 
@@ -893,26 +1068,50 @@ void VideoPattern::OnFullScreenChange(bool isFullScreen)
 
 void VideoPattern::FullScreen()
 {
+    if (isFullScreen_) {
+        LOGE("The video is already full screen when FullScreen");
+        return;
+    }
+
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    OnFullScreenChange(true);
     auto fullScreenManager = context->GetFullScreenManager();
     CHECK_NULL_VOID(fullScreenManager);
     fullScreenManager->RequestFullScreen(host);
+    isFullScreen_ = true;
+    OnFullScreenChange(true);
 }
 
 void VideoPattern::ExitFullScreen()
 {
+    if (!isFullScreen_) {
+        LOGE("The video is not full screen when ExitFullScreen");
+        return;
+    }
+
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    OnFullScreenChange(false);
     auto fullScreenManager = context->GetFullScreenManager();
     CHECK_NULL_VOID(fullScreenManager);
     fullScreenManager->ExitFullScreen(host);
+    isFullScreen_ = false;
+    OnFullScreenChange(false);
+}
+
+bool VideoPattern::OnBackPressed()
+{
+    if (!isFullScreen_) {
+        LOGE("The video is not full screen when OnBackPressed");
+        return false;
+    }
+
+    LOGI("Exit full screen when OnBackPressed");
+    ExitFullScreen();
+    return true;
 }
 
 } // namespace OHOS::Ace::NG

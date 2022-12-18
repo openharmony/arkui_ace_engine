@@ -20,6 +20,7 @@
 
 #include "base/json/json_util.h"
 #include "base/log/log.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace {
@@ -50,26 +51,18 @@ HdcRegister& HdcRegister::Get()
 void HdcRegister::LoadRegisterSo()
 {
     registerHandler_ = dlopen("libhdc_register.z.so", RTLD_LAZY);
-    if (registerHandler_ == nullptr) {
-        LOGE("cannot find register so");
-    }
+    CHECK_NULL_VOID(registerHandler_);
 }
 
 void HdcRegister::StartHdcRegister(int32_t instanceId)
 {
     LOGI("Start Hdc Register");
-    if (registerHandler_ == nullptr) {
-        LOGE("registerHandler_ is null");
-        return;
-    }
+    CHECK_NULL_VOID(registerHandler_);
     if (instanceId != 0) {
         return; // Applications and abilities should only call this function once, especially in multi-instance.
     }
     StartRegister startRegister = (StartRegister)dlsym(registerHandler_, "StartConnect");
-    if (startRegister == nullptr) {
-        LOGE("startRegister = NULL, dlerror = %s", dlerror());
-        return;
-    }
+    CHECK_NULL_VOID(startRegister);
     startRegister(pkgName_);
 }
 
@@ -79,15 +72,9 @@ void HdcRegister::StopHdcRegister(int32_t instanceId)
         return;
     }
     LOGI("Stop Hdc Register");
-    if (registerHandler_ == nullptr) {
-        LOGE("registerHandler_ is null");
-        return;
-    }
+    CHECK_NULL_VOID(registerHandler_);
     StopRegister stopRegister = (StopRegister)dlsym(registerHandler_, "StopConnect");
-    if (stopRegister == nullptr) {
-        LOGE("stopRegister = NULL, dlerror = %s", dlerror());
-        return;
-    }
+    CHECK_NULL_VOID(stopRegister);
     stopRegister();
     dlclose(registerHandler_);
     registerHandler_ = nullptr;

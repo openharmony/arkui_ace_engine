@@ -16,6 +16,8 @@
 #include "core/components_ng/base/inspector.h"
 
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -32,20 +34,18 @@ const char INSPECTOR_CHILDREN[] = "$children";
 
 const uint32_t LONG_PRESS_DELAY = 1000;
 
-RefPtr<FrameNode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key)
+RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key)
 {
     std::queue<RefPtr<UINode>> elements;
     elements.push(root);
-    RefPtr<FrameNode> inspectorElement;
+    RefPtr<UINode> inspectorElement;
     while (!elements.empty()) {
         auto current = elements.front();
         elements.pop();
-        inspectorElement = AceType::DynamicCast<FrameNode>(current);
-        if (inspectorElement != nullptr && inspectorElement->HasInspectorId()) {
-            if (key == inspectorElement->GetInspectorIdValue()) {
-                return inspectorElement;
-            }
+        if (key == current->GetInspectorId().value_or("")) {
+            return current;
         }
+
         const auto& children = current->GetChildren();
         for (const auto& child : children) {
             elements.push(child);
@@ -73,6 +73,55 @@ TouchEvent GetUpPoint(const TouchEvent& downPoint)
         .x = downPoint.x, .y = downPoint.y, .type = TouchType::UP, .time = std::chrono::high_resolution_clock::now()
     };
 }
+
+void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<RefPtr<NG::UINode>>& children, int32_t pageId)
+{
+    if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
+        if (uiNode->GetTag() == "stage") {
+        } else if (uiNode->GetTag() == "page") {
+            if (uiNode->GetPageId() != pageId) {
+                return;
+            }
+        } else {
+            auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+            if (!frameNode->IsInternal()) {
+                children.emplace_back(uiNode);
+                return;
+            }
+        }
+    }
+
+    for (const auto& frameChild : uiNode->GetChildren()) {
+        GetFrameNodeChildren(frameChild, children, pageId);
+    }
+}
+
+void GetInspectorChildren(
+    const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray, int pageId)
+{
+    auto jsonNode = JsonUtil::Create(false);
+    jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
+    jsonNode->Put(INSPECTOR_ID, parent->GetId());
+    auto node = AceType::DynamicCast<FrameNode>(parent);
+    RectF rect(node->GetOffsetRelativeToWindow().GetX(), node->GetOffsetRelativeToWindow().GetY(),
+        node->GetGeometryNode()->GetFrameRect().Width(), node->GetGeometryNode()->GetFrameRect().Height());
+    jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
+    auto jsonObject = JsonUtil::Create(false);
+    parent->ToJsonValue(jsonObject);
+    jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
+    std::vector<RefPtr<NG::UINode>> children;
+    for (const auto& item : parent->GetChildren()) {
+        GetFrameNodeChildren(item, children, pageId);
+    }
+    auto jsonChildrenArray = JsonUtil::CreateArray(false);
+    for (auto uiNode : children) {
+        GetInspectorChildren(uiNode, jsonChildrenArray, pageId);
+    }
+    if (jsonChildrenArray->GetArraySize()) {
+        jsonNode->Put(INSPECTOR_CHILDREN, jsonChildrenArray);
+    }
+    jsonNodeArray->Put(jsonNode);
+}
 } // namespace
 
 std::string Inspector::GetInspectorNodeByKey(const std::string& key)
@@ -83,30 +132,68 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key)
     CHECK_NULL_RETURN(rootNode, "");
 
     auto inspectorElement = GetInspectorByKey(rootNode, key);
-    if (inspectorElement == nullptr) {
-        LOGE("no inspector with key:%{public}s is found", key.c_str());
-        return "";
-    }
+    CHECK_NULL_RETURN(inspectorElement, "");
 
     auto jsonNode = JsonUtil::Create(true);
     jsonNode->Put(INSPECTOR_TYPE, inspectorElement->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, inspectorElement->GetId());
-    jsonNode->Put(INSPECTOR_RECT, inspectorElement->GetGeometryNode()->GetFrameRect().ToBounds().c_str());
+    if (AceType::InstanceOf<FrameNode>(inspectorElement)) {
+        jsonNode->Put(INSPECTOR_RECT,
+            AceType::DynamicCast<FrameNode>(inspectorElement)->GetGeometryNode()->GetFrameRect().ToBounds().c_str());
+    }
     auto jsonAttrs = JsonUtil::Create(true);
     inspectorElement->ToJsonValue(jsonAttrs);
     jsonNode->Put(INSPECTOR_ATTRS, jsonAttrs);
     return jsonNode->ToString();
 }
 
-std::string Inspector::GetInspectorTree()
+std::string Inspector::GetInspector(bool isLayoutInspector)
+{
+    LOGI("GetInspector start");
+    auto jsonRoot = JsonUtil::Create(true);
+    jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN_NOLOG(context, jsonRoot->ToString());
+    auto scale = context->GetViewScale();
+    auto rootHeight = context->GetRootHeight();
+    auto rootWidth = context->GetRootWidth();
+    jsonRoot->Put(INSPECTOR_WIDTH, std::to_string(rootWidth * scale).c_str());
+    jsonRoot->Put(INSPECTOR_HEIGHT, std::to_string(rootHeight * scale).c_str());
+    jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
+
+    auto pageRootNode = context->GetStageManager()->GetLastPage();
+    CHECK_NULL_RETURN_NOLOG(pageRootNode, jsonRoot->ToString());
+    auto pageId = context->GetStageManager()->GetLastPage()->GetPageId();
+    std::vector<RefPtr<NG::UINode>> children;
+    for (const auto& item : pageRootNode->GetChildren()) {
+        GetFrameNodeChildren(item, children, pageId);
+    }
+    auto jsonNodeArray = JsonUtil::CreateArray(false);
+    for (auto& uiNode : children) {
+        GetInspectorChildren(uiNode, jsonNodeArray, pageId);
+    }
+    if (jsonNodeArray->GetArraySize()) {
+        jsonRoot->Put(INSPECTOR_CHILDREN, jsonNodeArray);
+    }
+
+    if (isLayoutInspector) {
+        auto jsonTree = JsonUtil::Create(true);
+        jsonTree->Put("type", "root");
+        jsonTree->Put("content", jsonRoot);
+        return jsonTree->ToString();
+    }
+
+    return jsonRoot->ToString();
+}
+
+std::string Inspector::GetInspectorTree(bool isLayoutInspector)
 {
     auto jsonRoot = JsonUtil::Create(true);
     jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
 
     auto context = NG::PipelineContext::GetCurrentContext();
-    if (!context) {
-        return jsonRoot->ToString();
-    }
+    CHECK_NULL_RETURN_NOLOG(context, jsonRoot->ToString());
     auto scale = context->GetViewScale();
     auto rootHeight = context->GetRootHeight();
     auto rootWidth = context->GetRootWidth();
@@ -115,9 +202,7 @@ std::string Inspector::GetInspectorTree()
     jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
 
     auto root = context->GetRootElement();
-    if (root == nullptr) {
-        return jsonRoot->ToString();
-    }
+    CHECK_NULL_RETURN_NOLOG(root, jsonRoot->ToString());
 
     std::map<int32_t, std::list<RefPtr<UINode>>> depthElementMap;
     depthElementMap[0].emplace_back(root);
@@ -170,6 +255,13 @@ std::string Inspector::GetInspectorTree()
         jsonChildren->Put(nodeJSONValue);
     }
     jsonRoot->Put(INSPECTOR_CHILDREN, jsonChildren);
+
+    if (isLayoutInspector) {
+        auto jsonTree = JsonUtil::Create(true);
+        jsonTree->Put("type", "root");
+        jsonTree->Put("content", jsonRoot);
+        return jsonTree->ToString();
+    }
     return jsonRoot->ToString();
 }
 
@@ -180,13 +272,12 @@ bool Inspector::SendEventByKey(const std::string& key, int action, const std::st
     auto rootNode = context->GetRootElement();
     CHECK_NULL_RETURN(rootNode, false);
 
-    auto inspectorElement = GetInspectorByKey(rootNode, key);
-    if (inspectorElement == nullptr) {
-        LOGE("no inspector with key:%{public}s is found", key.c_str());
-        return false;
-    }
+    auto inspectorElement = AceType::DynamicCast<FrameNode>(GetInspectorByKey(rootNode, key));
+    CHECK_NULL_RETURN(inspectorElement, false);
 
-    auto rect = inspectorElement->GetGeometryNode()->GetFrameRect();
+    auto size = inspectorElement->GetGeometryNode()->GetFrameSize();
+    auto offset = inspectorElement->GetOffsetRelativeToWindow();
+    Rect rect { offset.GetX(), offset.GetY(), size.Width(), size.Height() };
     context->GetTaskExecutor()->PostTask(
         [weak = AceType::WeakClaim(AceType::RawPtr(context)), rect, action, params]() {
             auto context = weak.Upgrade();
@@ -198,11 +289,11 @@ bool Inspector::SendEventByKey(const std::string& key, int action, const std::st
                 .y = (rect.Top() + rect.Height() / 2),
                 .type = TouchType::DOWN,
                 .time = std::chrono::high_resolution_clock::now() };
-            context->OnTouchEvent(point);
+            context->OnTouchEvent(point.UpdatePointers());
 
             switch (action) {
                 case static_cast<int>(AceAction::ACTION_CLICK): {
-                    context->OnTouchEvent(GetUpPoint(point));
+                    context->OnTouchEvent(GetUpPoint(point).UpdatePointers());
                     break;
                 }
                 case static_cast<int>(AceAction::ACTION_LONG_CLICK): {
@@ -210,7 +301,7 @@ bool Inspector::SendEventByKey(const std::string& key, int action, const std::st
                     auto&& callback = [weak, point]() {
                         auto refPtr = weak.Upgrade();
                         if (refPtr) {
-                            refPtr->OnTouchEvent(GetUpPoint(point));
+                            refPtr->OnTouchEvent(GetUpPoint(point).UpdatePointers());
                         }
                     };
                     inspectorTimer.Reset(callback);

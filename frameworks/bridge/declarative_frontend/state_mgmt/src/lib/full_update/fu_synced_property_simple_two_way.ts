@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/**
+ * SynchedPropertySimpleTwoWay
+ * 
+ * all definitions in this file are framework internal
+ */
 class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
   implements ISinglePropertyChangeSubscriber<T> {
 
@@ -30,8 +35,10 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
   the property.
 */
   aboutToBeDeleted() {
-    this.source_.unlinkSuscriber(this.id__());
-    this.source_ = undefined;
+    if (this.source_) {
+        this.source_.unlinkSuscriber(this.id__());
+        this.source_ = undefined;
+    }
     super.aboutToBeDeleted();
   }
 

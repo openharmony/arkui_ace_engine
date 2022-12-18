@@ -86,8 +86,8 @@ void GridLayoutAlgorithm::InitGridCeils(LayoutWrapper* layoutWrapper, const Size
 
 bool GridLayoutAlgorithm::CheckGridPlaced(int32_t index, int32_t row, int32_t col, int32_t& rowSpan, int32_t& colSpan)
 {
-    auto rowIter = gridMatrix_.find(row);
-    if (rowIter != gridMatrix_.end()) {
+    auto rowIter = gridLayoutInfo_.gridMatrix_.find(row);
+    if (rowIter != gridLayoutInfo_.gridMatrix_.end()) {
         auto colIter = rowIter->second.find(col);
         if (colIter != rowIter->second.end()) {
             return false;
@@ -99,8 +99,8 @@ bool GridLayoutAlgorithm::CheckGridPlaced(int32_t index, int32_t row, int32_t co
     int32_t cSpan = 0;
     int32_t retColSpan = 1;
     while (rSpan < rowSpan) {
-        rowIter = gridMatrix_.find(rSpan + row);
-        if (rowIter != gridMatrix_.end()) {
+        rowIter = gridLayoutInfo_.gridMatrix_.find(rSpan + row);
+        if (rowIter != gridLayoutInfo_.gridMatrix_.end()) {
             cSpan = 0;
             while (cSpan < colSpan) {
                 if (rowIter->second.find(cSpan + col) != rowIter->second.end()) {
@@ -123,14 +123,14 @@ bool GridLayoutAlgorithm::CheckGridPlaced(int32_t index, int32_t row, int32_t co
     colSpan = retColSpan;
     for (int32_t i = row; i < row + rowSpan; ++i) {
         std::map<int32_t, int32_t> rowMap;
-        auto iter = gridMatrix_.find(i);
-        if (iter != gridMatrix_.end()) {
+        auto iter = gridLayoutInfo_.gridMatrix_.find(i);
+        if (iter != gridLayoutInfo_.gridMatrix_.end()) {
             rowMap = iter->second;
         }
         for (int32_t j = col; j < col + colSpan; ++j) {
             rowMap.emplace(std::make_pair(j, index));
         }
-        gridMatrix_[i] = rowMap;
+        gridLayoutInfo_.gridMatrix_[i] = rowMap;
     }
     return true;
 }
@@ -214,19 +214,29 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     int32_t colIndex = 0;
     int32_t itemIndex = 0;
     itemsPosition_.clear();
+    gridLayoutInfo_.gridMatrix_.clear();
     for (int32_t index = 0; index < mainCount_ * crossCount_; ++index) {
         auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childLayoutWrapper) {
-            continue;
+            break;
         }
-        auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(childLayoutWrapper->GetLayoutProperty());
-        if (!childLayoutProperty) {
-            continue;
+        auto layoutProperty = childLayoutWrapper->GetLayoutProperty();
+        if (!layoutProperty) {
+            break;
         }
-        int32_t itemRowStart = childLayoutProperty->GetRowStart().value_or(-1);
-        int32_t itemColStart = childLayoutProperty->GetColumnStart().value_or(-1);
-        int32_t itemRowSpan = std::max(childLayoutProperty->GetRowEnd().value_or(-1) - itemRowStart + 1, 1);
-        int32_t itemColSpan = std::max(childLayoutProperty->GetColumnEnd().value_or(-1) - itemColStart + 1, 1);
+        auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(layoutProperty);
+        int32_t itemRowStart = -1;
+        int32_t itemColStart = -1;
+        int32_t itemRowSpan = 1;
+        int32_t itemColSpan = 1;
+
+        if (childLayoutProperty) {
+            itemRowStart = childLayoutProperty->GetRowStart().value_or(-1);
+            itemColStart = childLayoutProperty->GetColumnStart().value_or(-1);
+            itemRowSpan = std::max(childLayoutProperty->GetRowEnd().value_or(-1) - itemRowStart + 1, 1);
+            itemColSpan = std::max(childLayoutProperty->GetColumnEnd().value_or(-1) - itemColStart + 1, 1);
+        }
+
         if (itemRowStart >= 0 && itemRowStart < mainCount_ && itemColStart >= 0 && itemColStart < crossCount_ &&
             CheckGridPlaced(itemIndex, itemRowStart, itemColStart, itemRowSpan, itemColSpan)) {
             childLayoutWrapper->Measure(CreateChildConstraint(
@@ -264,30 +274,32 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     for (int32_t index = 0; index < mainCount_ * crossCount_; ++index) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childWrapper) {
-            continue;
+            break;
         }
         OffsetF childOffset;
         auto childPosition = itemsPosition_.find(index);
         if (childPosition != itemsPosition_.end()) {
             childOffset = itemsPosition_.at(index);
+            // TODO: add center position when grid item is less than ceil.
+            childWrapper->GetGeometryNode()->SetMarginFrameOffset(padding.Offset() + childOffset);
+            childWrapper->Layout();
+        } else {
+            LayoutWrapper::RemoveChildInRenderTree(childWrapper);
         }
-        // TODO: add center position when grid item is less than ceil.
-        childWrapper->GetGeometryNode()->SetMarginFrameOffset(padding.Offset() + childOffset);
-        childWrapper->Layout();
     }
 
     for (const auto& mainLine : gridLayoutInfo_.gridMatrix_) {
-        int32_t itemIdex = -1;
+        int32_t itemIndex = -1;
         for (const auto& crossLine : mainLine.second) {
-            // If item index is the same, must be the same GridItem, need't layout again.
-            if (itemIdex == crossLine.second) {
+            // If item index is the same, must be the same GridItem, needn't layout again.
+            if (itemIndex == crossLine.second) {
                 continue;
             }
-            itemIdex = crossLine.second;
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(itemIdex);
+            itemIndex = crossLine.second;
+            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex);
             if (!wrapper) {
-                LOGE("Layout item wrapper of index: %{public}d is null, please check.", itemIdex);
-                continue;
+                LOGE("Layout item wrapper of index: %{public}d is null, please check.", itemIndex);
+                break;
             }
             auto layoutProperty = wrapper->GetLayoutProperty();
             CHECK_NULL_VOID(layoutProperty);

@@ -247,6 +247,12 @@ void CanvasTaskPool::BeginPath()
     PushTask(task);
 }
 
+void CanvasTaskPool::ResetTransform()
+{
+    auto task = [](RenderCustomPaint& interface, const Offset& offset) { interface.ResetTransform(); };
+    PushTask(task);
+}
+
 void CanvasTaskPool::ClosePath()
 {
     auto task = [](RenderCustomPaint& interface, const Offset& offset) { interface.ClosePath(); };
@@ -343,11 +349,11 @@ std::string CanvasTaskPool::GetJsonData(const std::string& path)
     return paint->GetJsonData(path);
 }
 
-const std::vector<double>& CanvasTaskPool::GetLineDash() const
+LineDashParam CanvasTaskPool::GetLineDash() const
 {
     auto paint = renderNode_.Upgrade();
     if (!paint) {
-        return {};
+        return { {}, 0.0 };
     }
 
     return paint->GetLineDash();

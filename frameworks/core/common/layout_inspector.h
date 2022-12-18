@@ -16,11 +16,22 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_LAYOUT_INSPECTOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_LAYOUT_INSPECTOR_H
 
+#include "core/common/container.h"
+
 namespace OHOS::Ace {
 
 class LayoutInspector {
 public:
     static void SupportInspector();
+    static void SetlayoutInspectorStatus(int32_t containerId);
+    static void GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t containerId);
+    static void CreateLayoutInfo(int32_t containerId);
+    static void SetCallback(int32_t instanceId);
+    static void SetStatus(bool layoutInspectorStatus);
+    static void GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message);
+
+private:
+    static bool layoutInspectorStatus_;
 };
 
 } // namespace OHOS::Ace

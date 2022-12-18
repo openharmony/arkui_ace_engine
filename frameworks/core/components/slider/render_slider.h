@@ -223,6 +223,7 @@ protected:
     void OnMouseHoverEnterTest() override {}
     void OnMouseHoverExitTest() override {}
     bool HandleMouseEvent(const MouseEvent& event) override;
+    void AnimateMouseHoverExit() override;
 
     void SetOnChange(const std::function<void(double,int)>& value)
     {
@@ -280,7 +281,7 @@ protected:
 
     bool showSteps_ = false;
     bool showTips_ = false;
-    bool isDraging_ = false;
+    bool isDragging_ = false;
     bool isReverse_ = false;
     SliderMode mode_ = SliderMode::OUTSET;
     Dimension blockHotWidth_;

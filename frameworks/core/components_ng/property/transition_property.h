@@ -18,11 +18,11 @@
 
 #include <optional>
 #include <string>
+#include <sstream>
 
 #include "base/geometry/dimension.h"
 #include "core/animation/animation_pub.h"
 #include "core/components_ng/property/property.h"
-
 
 namespace OHOS::Ace::NG {
 

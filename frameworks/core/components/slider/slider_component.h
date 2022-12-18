@@ -162,6 +162,9 @@ public:
     void SetSliderMode(SliderMode mode)
     {
         mode_ = mode;
+        if (theme_) {
+            InitStyle(theme_);
+        }
     }
 
     void SetShowTips(bool showTips)
@@ -216,6 +219,15 @@ public:
         thickness_ = thickness;
     }
 
+    HoverAnimationType GetMouseAnimationType() const
+    {
+        return animationType_;
+    }
+    void SetMouseAnimationType(HoverAnimationType animationType)
+    {
+        animationType_ = animationType;
+    }
+
     ACE_DEFINE_COMPONENT_EVENT(OnChange, void(double, int));
 
 private:
@@ -232,6 +244,8 @@ private:
     RefPtr<RotationController> rotationController_;
     Axis axis_ = Axis::HORIZONTAL;
     Dimension thickness_;
+    RefPtr<SliderTheme> theme_;
+    HoverAnimationType animationType_ = HoverAnimationType::NONE;
 };
 
 } // namespace OHOS::Ace

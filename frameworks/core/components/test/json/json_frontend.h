@@ -88,8 +88,6 @@ public:
 
     void OnNewRequest(const std::string& data) override;
 
-    void OnDialogUpdated(const std::string& data) override {}
-
     void OnNewWant(const std::string& data) override {}
 
     void CallRouterBack() override;
@@ -102,6 +100,11 @@ public:
     {
         // maybe will implement later,
         LOGI("json not support dump now.");
+    }
+
+    std::string GetPagePath() const override
+    {
+        return "";
     }
 
     void SetEventHandler(const RefPtr<AceEventHandler>& handler)

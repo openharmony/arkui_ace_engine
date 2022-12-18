@@ -14,6 +14,7 @@
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
+import("../../../build/uicast.gni")
 
 # declarative frontend source
 template("declarative_frontend") {
@@ -108,6 +109,11 @@ template("declarative_js_engine") {
 
     deps = []
     configs = [ "$ace_root:ace_config" ]
+
+    if (defined(config.model_component_support) &&
+        config.model_component_support) {
+      configs += [ "//foundation/graphic/graphic_3d/3d_widget_adapter:widget_adapter_config" ]
+    }
 
     sources = [
       "engine/bindings_implementation.cpp",
@@ -251,23 +257,73 @@ template("declarative_js_engine") {
       "view_stack_processor.cpp",
 
       # Models implemenations for classic fw
+      "jsview/models/animator_model_impl.cpp",
+      "jsview/models/checkbox_model_impl.cpp",
+      "jsview/models/checkboxgroup_model_impl.cpp",
+      "jsview/models/circle_model_impl.cpp",
       "jsview/models/column_model_impl.cpp",
+      "jsview/models/counter_model_impl.cpp",
+      "jsview/models/data_panel_model_impl.cpp",
+      "jsview/models/divider_model_impl.cpp",
+      "jsview/models/ellipse_model_impl.cpp",
       "jsview/models/flex_model_impl.cpp",
       "jsview/models/for_each_model_impl.cpp",
+      "jsview/models/gauge_model_impl.cpp",
+      "jsview/models/grid_col_model_impl.cpp",
+      "jsview/models/grid_container_model_impl.cpp",
+      "jsview/models/grid_item_model_impl.cpp",
+      "jsview/models/grid_model_impl.cpp",
+      "jsview/models/grid_row_model_impl.cpp",
       "jsview/models/if_else_model_impl.cpp",
       "jsview/models/image_model_impl.cpp",
       "jsview/models/lazy_for_each_model_impl.cpp",
+      "jsview/models/line_model_impl.cpp",
+      "jsview/models/linear_split_model_impl.cpp",
+      "jsview/models/list_item_group_model_impl.cpp",
       "jsview/models/list_item_model_impl.cpp",
       "jsview/models/list_model_impl.cpp",
+      "jsview/models/loading_progress_model_impl.cpp",
+      "jsview/models/marquee_model_impl.cpp",
+      "jsview/models/navigator_model_impl.cpp",
+      "jsview/models/page_transition_model_impl.cpp",
+      "jsview/models/path_model_impl.cpp",
+      "jsview/models/patternlock_model_impl.cpp",
+      "jsview/models/polygon_model_impl.cpp",
+      "jsview/models/progress_model_impl.cpp",
+      "jsview/models/qrcode_model_impl.cpp",
+      "jsview/models/radio_model_impl.cpp",
+      "jsview/models/rect_model_impl.cpp",
       "jsview/models/refresh_model_impl.cpp",
       "jsview/models/row_model_impl.cpp",
+      "jsview/models/scroll_model_impl.cpp",
+      "jsview/models/shape_abstract_model_impl.cpp",
+      "jsview/models/shape_model_impl.cpp",
+      "jsview/models/slider_model_impl.cpp",
+      "jsview/models/sliding_panel_model_impl.cpp",
+      "jsview/models/span_model_impl.cpp",
       "jsview/models/stack_model_impl.cpp",
+      "jsview/models/stepper_item_model_impl.cpp",
+      "jsview/models/stepper_model_impl.cpp",
+      "jsview/models/swiper_model_impl.cpp",
       "jsview/models/tab_content_model_impl.cpp",
       "jsview/models/tabs_model_impl.cpp",
+      "jsview/models/text_clock_model_impl.cpp",
       "jsview/models/text_field_model_impl.cpp",
       "jsview/models/text_model_impl.cpp",
+      "jsview/models/text_timer_model_impl.cpp",
+      "jsview/models/toggle_model_impl.cpp",
       "jsview/models/view_abstract_model_impl.cpp",
+      "jsview/models/view_full_update_model_impl.cpp",
+      "jsview/models/view_partial_update_model_impl.cpp",
     ]
+
+    defines += uicast_configs.uicast_defines
+    sources += uicast_configs.uicast_frontend_sources
+
+    if (defined(config.model_component_support) &&
+        config.model_component_support) {
+      sources += [ "jsview/models/model_view_impl.cpp" ]
+    }
 
     # rich components needed by phone and TV. wearable like watch do not need them
     if (defined(config.rich_components_support) &&
@@ -276,9 +332,10 @@ template("declarative_js_engine") {
         "jsview/js_camera.cpp",
         "jsview/js_piece.cpp",
         "jsview/js_rating.cpp",
-        "jsview/js_remote_window.cpp",
         "jsview/js_video.cpp",
         "jsview/js_video_controller.cpp",
+        "jsview/models/rating_model_impl.cpp",
+        "jsview/models/video_model_impl.cpp",
       ]
     }
 
@@ -287,6 +344,7 @@ template("declarative_js_engine") {
       sources += [
         "jsview/js_xcomponent.cpp",
         "jsview/js_xcomponent_controller.cpp",
+        "jsview/models/xcomponent_model_impl.cpp",
       ]
     }
 
@@ -313,6 +371,10 @@ template("declarative_js_engine") {
       sources += [ "jsview/js_form.cpp" ]
     }
 
+    if (defined(config.remote_window_support) && config.remote_window_support) {
+      sources += [ "jsview/js_remote_window.cpp" ]
+    }
+
     if (defined(config.plugin_components_support) &&
         config.plugin_components_support) {
       deps +=
@@ -322,6 +384,11 @@ template("declarative_js_engine") {
 
     if (defined(config.preview_support) && config.preview_support) {
       sources += [ "jsview/js_previewer_mock.cpp" ]
+    }
+
+    if (defined(config.model_component_support) &&
+        config.model_component_support) {
+      sources += [ "jsview/js_sceneview.cpp" ]
     }
 
     if (defined(config.use_build_in_js_engine) &&
@@ -346,7 +413,10 @@ template("declarative_js_engine") {
       ":gen_obj_src_js_proxyclass",
     ]
 
+    deps += uicast_configs.uicast_root_deps
+
     include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
+    include_dirs += uicast_configs.uicast_root_include
 
     if (platform == "windows" || platform == "mac" || platform == "linux") {
       deps += [ ":gen_obj_src_js_mock_system_plugin" ]
@@ -411,28 +481,41 @@ template("declarative_js_engine_ng") {
       "jsview/js_persistent.cpp",
       "jsview/js_view_functions.cpp",
       "jsview/js_view_measure_layout.cpp",
+      "jsview/js_view_stack_processor.cpp",
       "sharedata/js_share_data.cpp",
 
       # jsviews
       "jsview/js_column.cpp",
       "jsview/js_container_base.cpp",
+      "jsview/js_counter.cpp",
+      "jsview/js_divider.cpp",
       "jsview/js_flex.cpp",
+      "jsview/js_flex_impl.cpp",
+      "jsview/js_foreach.cpp",
+      "jsview/js_grid.cpp",
+      "jsview/js_grid_container.cpp",
+      "jsview/js_grid_item.cpp",
+      "jsview/js_if_else.cpp",
       "jsview/js_image.cpp",
       "jsview/js_interactable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_list.cpp",
       "jsview/js_list_item.cpp",
+      "jsview/js_navigator.cpp",
+      "jsview/js_rating.cpp",
       "jsview/js_row.cpp",
+      "jsview/js_scroll.cpp",
+      "jsview/js_span.cpp",
       "jsview/js_stack.cpp",
+      "jsview/js_swiper.cpp",
+      "jsview/js_tab_content.cpp",
+      "jsview/js_tabs.cpp",
+      "jsview/js_tabs_controller.cpp",
       "jsview/js_text.cpp",
-
-      # jsview bindings
-      "jsview/bindings/js_view_abstract_binding.cpp",
-      "jsview/bindings/js_view_binding.cpp",
-
-      # ng jsviews
-      "ng/jsview/js_view.cpp",
-      "ng/jsview/js_view_abstract.cpp",
+      "jsview/js_toggle.cpp",
+      "jsview/js_video.cpp",
+      "jsview/js_view.cpp",
+      "jsview/js_view_abstract.cpp",
     ]
 
     sources += [

@@ -497,6 +497,10 @@ struct KeyEvent final {
     {
         return (KeyCode::KEY_A <= code && code <= KeyCode::KEY_Z);
     }
+    bool IsCombinationKey() const
+    {
+        return pressedCodes.size() > 1;
+    }
     std::string ConvertCodeToString() const
     {
         if (KeyCode::KEY_0 <= code && code <= KeyCode::KEY_9) {
@@ -573,10 +577,16 @@ private:
     SourceType keySource_ = SourceType::NONE;
 };
 
+enum class BlurReason : int32_t {
+    FOCUS_SWITCH = 0,
+    WINDOW_BLUR = 1,
+};
+
 using OnKeyEventFunc = std::function<bool(const KeyEvent&)>;
 using OnKeyCallbackFunc = std::function<void(KeyEventInfo&)>;
 using OnFocusFunc = std::function<void()>;
 using OnBlurFunc = std::function<void()>;
+using OnBlurReasonFunc = std::function<void(BlurReason reason)>;
 using OnPreFocusFunc = std::function<void()>;
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_KEY_EVENT_H

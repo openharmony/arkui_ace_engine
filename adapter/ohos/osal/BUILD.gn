@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 
 # build static
 template("ace_osal_ohos_source_set") {
@@ -22,6 +23,10 @@ template("ace_osal_ohos_source_set") {
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
+    if (defined(vendor_configs.use_ext_surface) &&
+        vendor_configs.use_ext_surface) {
+      defines += [ "EXT_SURFACE_ENABLE" ]
+    }
     if (is_standard_system) {
       external_deps = [
         "hitrace_native:hitrace_meter",
@@ -40,12 +45,15 @@ template("ace_osal_ohos_source_set") {
       configs = [ "$ace_root:ace_config" ]
     }
     include_dirs = [
+      "$ability_runtime_napi_path/inner/napi_common",
       "//base/hiviewdfx/hicollie/interfaces/native/innerkits/include",
       "//commonlibrary/c_utils/base/include",
+      "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf",
       "//foundation/window/window_manager/interfaces/innerkits",
     ]
 
     sources = [
+      "ace_engine_ext.cpp",
       "ace_trace.cpp",
       "anr_thread.cpp",
       "event_report.cpp",
@@ -56,12 +64,14 @@ template("ace_osal_ohos_source_set") {
       "ressched_report.cpp",
       "system_properties.cpp",
       "trace_id_impl.cpp",
+      "want_wrap_ohos.cpp",
     ]
 
     public_deps = [ "//base/startup/init/interfaces/innerkits:libbegetutil" ]
 
     if (is_standard_system) {
       sources += [
+        "frame_trace_adapter_impl.cpp",
         "resource_adapter_impl.cpp",
         "resource_convertor.cpp",
         "resource_theme_style.cpp",
@@ -69,6 +79,7 @@ template("ace_osal_ohos_source_set") {
       deps = [
         "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
         "$ace_flutter_engine_root/icu:ace_libicu_ohos",
+        "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf:frame_trace_intf",
       ]
       public_deps += [
         "//base/global/resource_management/frameworks/resmgr:global_resmgr",
@@ -98,6 +109,7 @@ template("ace_osal_ohos_source_set") {
       "pixel_map_ohos.cpp",
     ]
     external_deps += [
+      "ability_runtime:runtime",
       "hicollie_native:libhicollie",
       "hisysevent_native:libhisysevent",
       "hitrace_native:libhitracechain",

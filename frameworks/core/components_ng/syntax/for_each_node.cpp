@@ -31,7 +31,7 @@ void MakeNodeMapById(const std::list<RefPtr<UINode>>& nodes, const std::list<std
     ACE_DCHECK(ids.size() == nodes.size());
     auto idsIter = ids.begin();
     auto nodeIter = nodes.begin();
-    while (idsIter != ids.end()) {
+    while (idsIter != ids.end() && nodeIter != nodes.end()) {
         result.emplace(*idsIter, *nodeIter);
         ++idsIter;
         ++nodeIter;
@@ -50,12 +50,18 @@ RefPtr<ForEachNode> ForEachNode::GetOrCreateForEachNode(int32_t nodeId)
     return node;
 }
 
+void ForEachNode::CreateTempItems()
+{
+    std::swap(ids_, tempIds_);
+    std::swap(ModifyChildren(), tempChildren_);
+}
+
 // same as foundation/arkui/ace_engine/frameworks/core/components_part_upd/foreach/foreach_element.cpp.
 void ForEachNode::CompareAndUpdateChildren()
 {
     ACE_SCOPED_TRACE("ForEachNode::CompareAndUpdateChildren");
 
-    LOGD("Local update for ForEachNode nodeId: %{public}d ....", nodeId_);
+    LOGD("Local update for ForEachNode nodeId: %{public}d ....", GetId());
 
     // result of id gen function of most re-recent render
     // create a map for quicker find/search
@@ -69,7 +75,8 @@ void ForEachNode::CompareAndUpdateChildren()
     // it does not include children of array items that were rendered on a previous
     // render
     std::list<RefPtr<UINode>> additionalChildComps;
-    std::swap(additionalChildComps, children_);
+    auto& children = ModifyChildren();
+    std::swap(additionalChildComps, children);
 
     // create map id -> Node
     // old children
@@ -78,7 +85,8 @@ void ForEachNode::CompareAndUpdateChildren()
 
     int additionalChildIndex = 0;
     for (const auto& newId : ids_) {
-        if (oldIdsSet.find(newId) == oldIdsSet.end()) {
+        auto oldIdIt = oldIdsSet.find(newId);
+        if (oldIdIt == oldIdsSet.end()) {
             // found a newly added ID
             // insert new child item.
             auto newCompsIter = additionalChildComps.begin();
@@ -88,11 +96,40 @@ void ForEachNode::CompareAndUpdateChildren()
         } else {
             auto iter = oldNodeByIdMap.find(newId);
             // the ID was used before, only need to update the child position.
-            children_.emplace_back(iter->second);
+            if (iter != oldNodeByIdMap.end() && iter->second) {
+                AddChild(iter->second, DEFAULT_NODE_SLOT, true);
+            }
+            oldIdsSet.erase(oldIdIt);
         }
     }
+
+    for (const auto& oldId : oldIdsSet) {
+        auto iter = oldNodeByIdMap.find(oldId);
+        if (iter != oldNodeByIdMap.end()) {
+            // Adding silently, so that upon removal
+            // node is a part the tree.
+            // OnDetachFromMainTree to be called while node
+            // still part of the tree, we need to find
+            // position in the tab tab for the tab.
+            AddChild(iter->second, DEFAULT_NODE_SLOT, true);
+            // Remove and trigger all Detach callback.
+            RemoveChild(iter->second);
+        }
+    }
+
+    if (IsOnMainTree()) {
+        for (const auto& newChild : additionalChildComps) {
+            newChild->AttachToMainTree();
+        }
+    }
+
     tempChildren_.clear();
     tempIds_.clear();
+
+    auto parent = GetParent();
+    if (parent) {
+        parent->ChildrenUpdatedFrom(0);
+    }
 }
 
 void ForEachNode::FlushUpdateAndMarkDirty()

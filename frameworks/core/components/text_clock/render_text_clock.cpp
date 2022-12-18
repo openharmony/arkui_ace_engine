@@ -17,6 +17,7 @@
 #include "core/components/text_clock/text_clock_controller.h"
 
 #include <chrono>
+#include <string>
 #include <sys/time.h>
 
 #include "base/utils/string_utils.h"
@@ -95,7 +96,7 @@ void RenderTextClock::UpdateTimeTextCallBack()
         return;
     } else {
         currentMillisecond_ = GetMilliseconds();
-        onDateChange(currentMillisecond_);
+        onDateChange(std::to_string(currentMillisecond_));
     }
 }
 

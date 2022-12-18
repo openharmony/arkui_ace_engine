@@ -32,7 +32,8 @@ using ScrollEndCallback = std::function<void()>;
 
 class GestureEventHub;
 
-class ScrollableEvent : public Referenced {
+class ScrollableEvent : public AceType {
+    DECLARE_ACE_TYPE(ScrollableEvent, AceType)
 public:
     explicit ScrollableEvent(Axis axis) : axis_(axis) {};
     ~ScrollableEvent() override = default;
@@ -107,13 +108,52 @@ public:
         return axis_;
     }
 
+    void SetAxis(Axis axis)
+    {
+        axis_ = axis;
+        if (scrollable_) {
+            scrollable_->SetAxis(axis);
+        }
+    }
+
+    void SetScrollable(const RefPtr<Scrollable>& scrollable)
+    {
+        scrollable_ = scrollable;
+    }
+
+    const RefPtr<Scrollable>& GetScrollable() const
+    {
+        return scrollable_;
+    }
+
+    void SetEnabled(bool enable)
+    {
+        enable_ = enable;
+    }
+
+    bool GetEnable() const
+    {
+        return enable_;
+    }
+
+    bool Idle() const
+    {
+        if (scrollable_) {
+            return scrollable_->Idle();
+        }
+        return true;
+    }
+
 private:
     ScrollPositionCallback callback_;
     OnScrollCallback onScrollCallback_;
     ScrollBeginCallback scrollBeginCallback_;
     ScrollEndCallback scrollEndCallback_;
     OutBoundaryCallback outBoundaryCallback_;
+
     Axis axis_ = Axis::VERTICAL;
+    bool enable_ = true;
+    RefPtr<Scrollable> scrollable_;
 };
 
 class ScrollableActuator : public GestureEventActuator {
@@ -144,7 +184,6 @@ private:
     void InitializeScrollable();
 
     std::unordered_map<Axis, RefPtr<ScrollableEvent>> scrollableEvents_;
-    std::unordered_map<Axis, RefPtr<Scrollable>> scrollables_;
     std::unordered_map<Axis, RefPtr<ScrollEdgeEffect>> scrollEffects_;
     WeakPtr<GestureEventHub> gestureEventHub_;
     bool initialized_ = false;

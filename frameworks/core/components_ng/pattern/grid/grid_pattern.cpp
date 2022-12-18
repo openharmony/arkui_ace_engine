@@ -15,14 +15,32 @@
 
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
+#include <memory>
+
+#include "base/geometry/axis.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_paint_property.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_scroll_bar.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
+constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
+constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
+constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
+} // namespace
+
+GridPattern::~GridPattern()
+{
+    delete scrollBar_;
+}
 
 RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 {
@@ -37,6 +55,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     if (!gridLayoutProperty->IsVertical()) {
         std::swap(crossCount, mainCount);
     }
+    gridLayoutInfo_.crossCount_ = crossCount;
 
     // When rowsTemplate and columnsTemplate is both setting, use static layout algorithm.
     if (!rows.empty() && !cols.empty()) {
@@ -52,24 +71,209 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     return MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
 }
 
+RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
+{
+    if (scrollBar_ && scrollBar_->GetInnerScrollBar()) {
+        return MakeRefPtr<GridPaintMethod>(scrollBar_->GetInnerScrollBar());
+    }
+    return Pattern::CreateNodePaintMethod();
+}
+
 void GridPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
+    host->GetRenderContext()->SetClipToBounds(true);
 }
 
 void GridPattern::OnModifyDone()
 {
+    if (multiSelectable_ && !isMouseEventInit_) {
+        InitMouseEvent();
+    }
+
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(gridLayoutProperty);
     gridLayoutInfo_.axis_ = gridLayoutProperty->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
-
-    if (gridLayoutProperty->GetColumnsTemplate().has_value() && gridLayoutProperty->GetRowsTemplate().has_value()) {
+    isConfigScrollable_ = gridLayoutProperty->IsConfiguredScrollable();
+    if (!isConfigScrollable_) {
         LOGD("use fixed grid template");
         return;
     }
     AddScrollEvent();
+
+    auto gridPaintProperty = GetPaintProperty<GridPaintProperty>();
+    CHECK_NULL_VOID(gridPaintProperty);
+    if (gridPaintProperty->GetScrollBarProperty()) {
+        if (!scrollBar_) {
+            scrollBar_ = new GridScrollBar(Claim(this));
+        }
+        scrollBar_->CreateInnerBar();
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    if (focusHub) {
+        InitOnKeyEvent(focusHub);
+    }
+}
+
+void GridPattern::InitMouseEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto mouseEventHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(mouseEventHub);
+    mouseEventHub->SetMouseEvent([weak = WeakClaim(this)](MouseInfo& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleMouseEventWithoutKeyboard(info);
+        }
+    });
+    isMouseEventInit_ = true;
+}
+
+void GridPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
+{
+    auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
+
+    if (info.GetButton() == MouseButton::LEFT_BUTTON) {
+        if (info.GetAction() == MouseAction::PRESS) {
+            ClearMultiSelect();
+            mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+            mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+            MultiSelectWithoutKeyboard(selectedZone);
+        } else if (info.GetAction() == MouseAction::MOVE) {
+            mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+            MultiSelectWithoutKeyboard(selectedZone);
+        } else if (info.GetAction() == MouseAction::RELEASE) {
+            mouseStartOffset_.Reset();
+            mouseEndOffset_.Reset();
+            ClearSelectedZone();
+        }
+    }
+}
+
+void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    for (const auto& item : host->GetChildren()) {
+        if (!AceType::InstanceOf<FrameNode>(item)) {
+            continue;
+        }
+
+        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+        auto itemPattern = itemFrameNode->GetPattern<GridItemPattern>();
+        CHECK_NULL_VOID(itemPattern);
+
+        if (!itemPattern->Selectable()) {
+            continue;
+        }
+
+        auto itemGeometry = itemFrameNode->GetGeometryNode();
+        CHECK_NULL_VOID(itemGeometry);
+
+        auto itemRect = itemGeometry->GetFrameRect();
+        if (!selectedZone.IsIntersectWith(itemRect)) {
+            itemPattern->MarkIsSelected(false);
+        } else {
+            itemPattern->MarkIsSelected(true);
+        }
+        auto context = itemFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->OnMouseSelectUpdate(ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+    }
+
+    auto hostContext = host->GetRenderContext();
+    CHECK_NULL_VOID(hostContext);
+    hostContext->UpdateMouseSelectWithRect(selectedZone, SELECT_FILL_COLOR, SELECT_STROKE_COLOR);
+}
+
+void GridPattern::ClearMultiSelect()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    for (const auto& item : host->GetChildren()) {
+        if (!AceType::InstanceOf<FrameNode>(item)) {
+            continue;
+        }
+
+        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+        auto itemPattern = itemFrameNode->GetPattern<GridItemPattern>();
+        CHECK_NULL_VOID(itemPattern);
+        itemPattern->MarkIsSelected(false);
+        auto renderContext = itemFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->OnMouseSelectUpdate(ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+    }
+
+    ClearSelectedZone();
+}
+
+void GridPattern::ClearSelectedZone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostContext = host->GetRenderContext();
+    CHECK_NULL_VOID(hostContext);
+    hostContext->UpdateMouseSelectWithRect(RectF(), SELECT_FILL_COLOR, SELECT_STROKE_COLOR);
+}
+
+RectF GridPattern::ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset)
+{
+    RectF selectedZone;
+    if (startOffset.GetX() <= endOffset.GetX()) {
+        if (startOffset.GetY() <= endOffset.GetY()) {
+            // bottom right
+            selectedZone = RectF(startOffset.GetX(), startOffset.GetY(), endOffset.GetX() - startOffset.GetX(),
+                endOffset.GetY() - startOffset.GetY());
+        } else {
+            // top right
+            selectedZone = RectF(startOffset.GetX(), endOffset.GetY(), endOffset.GetX() - startOffset.GetX(),
+                startOffset.GetY() - endOffset.GetY());
+        }
+    } else {
+        if (startOffset.GetY() <= endOffset.GetY()) {
+            // bottom left
+            selectedZone = RectF(endOffset.GetX(), startOffset.GetY(), startOffset.GetX() - endOffset.GetX(),
+                endOffset.GetY() - startOffset.GetY());
+        } else {
+            // top left
+            selectedZone = RectF(endOffset.GetX(), endOffset.GetY(), startOffset.GetX() - endOffset.GetX(),
+                startOffset.GetY() - endOffset.GetY());
+        }
+    }
+
+    return selectedZone;
+}
+
+void GridPattern::OnMouseSelectAll()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
+    auto rect = geometryNode->GetFrameRect();
+    rect.SetOffset(OffsetF());
+
+    MultiSelectWithoutKeyboard(rect);
+}
+
+float GridPattern::GetMainContentSize() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0);
+    return geometryNode->GetPaddingSize().MainSize(gridLayoutInfo_.axis_);
 }
 
 void GridPattern::AddScrollEvent()
@@ -85,27 +289,44 @@ void GridPattern::AddScrollEvent()
     }
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(gridLayoutInfo_.axis_);
     auto scrollCallback = [weak = WeakClaim(this)](double offset, int32_t source) {
-        auto gridPattern = weak.Upgrade();
-        if (!gridPattern) {
-            LOGE("grid pattern upgrade fail when try handle scroll event.");
-            return false;
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        if (source == SCROLL_FROM_UPDATE && pattern->scrollBar_) {
+            if (pattern->scrollBar_->OnInnerBarScroll(offset)) {
+                return true;
+            }
         }
-        return gridPattern->UpdateScrollPosition(static_cast<float>(offset), source);
+        return pattern->OnScrollCallback(static_cast<float>(offset), source);
     };
     scrollableEvent_->SetScrollPositionCallback(std::move(scrollCallback));
     gestureHub->AddScrollableEvent(scrollableEvent_);
 }
 
-bool GridPattern::UpdateScrollPosition(float offset, int32_t source)
+bool GridPattern::OnScrollCallback(float offset, int32_t source)
 {
+    if (animator_) {
+        animator_->Stop();
+    }
+    if (source == SCROLL_FROM_START) {
+        return true;
+    }
+    return UpdateScrollPosition(offset);
+}
+
+bool GridPattern::UpdateScrollPosition(float offset)
+{
+    if (!isConfigScrollable_) {
+        return false;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
-    if (gridLayoutInfo_.reachEnd_) {
+    if (gridLayoutInfo_.offsetEnd_) {
         if (LessOrEqual(offset, 0)) {
             return false;
         }
+        gridLayoutInfo_.offsetEnd_ = false;
         gridLayoutInfo_.reachEnd_ = false;
     }
     if (gridLayoutInfo_.reachStart_) {
@@ -114,6 +335,7 @@ bool GridPattern::UpdateScrollPosition(float offset, int32_t source)
         }
         gridLayoutInfo_.reachStart_ = false;
     }
+    gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
     gridLayoutInfo_.currentOffset_ += offset;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
@@ -128,7 +350,18 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto gridLayoutAlgorithm = DynamicCast<GridLayoutBaseAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(gridLayoutAlgorithm, false);
-    gridLayoutInfo_ = gridLayoutAlgorithm->GetGridLayoutInfo();
+    const auto& gridLayoutInfo = gridLayoutAlgorithm->GetGridLayoutInfo();
+    auto eventhub = GetEventHub<GridEventHub>();
+    CHECK_NULL_RETURN(eventhub, false);
+    if (gridLayoutInfo_.startMainLineIndex_ != gridLayoutInfo.startMainLineIndex_) {
+        eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
+    }
+    gridLayoutInfo_ = gridLayoutInfo;
+    gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
+
+    if (scrollBar_) {
+        scrollBar_->UpdateBarOffset(dirty);
+    }
     return false;
 }
 
@@ -201,6 +434,139 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     }
 
     return nullptr;
+}
+
+void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    Pattern::ToJsonValue(json);
+    json->Put("multiSelectable", multiSelectable_ ? "true" : "false");
+    json->Put("supportAnimation", supportAnimation_ ? "true" : "false");
+}
+
+void GridPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool GridPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if ((event.code == KeyCode::KEY_PAGE_DOWN) || (event.code == KeyCode::KEY_PAGE_UP)) {
+        ScrollPage(event.code == KeyCode::KEY_PAGE_UP);
+    }
+    if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN) {
+        HandleDirectionKey(event.code);
+        return true;
+    }
+    return false;
+}
+
+bool GridPattern::HandleDirectionKey(KeyCode code)
+{
+    if (code == KeyCode::KEY_DPAD_UP) {
+        // Need to update: current selection
+        return true;
+    }
+    if (code == KeyCode::KEY_DPAD_DOWN) {
+        // Need to update: current selection
+        return true;
+    }
+    return false;
+}
+
+void GridPattern::SetPositionController(const RefPtr<ScrollController>& controller)
+{
+    positionController_ = DynamicCast<GridPositionController>(controller);
+    if (controller) {
+        controller->SetScrollPattern(AceType::WeakClaim<GridPattern>(this));
+    }
+}
+
+void GridPattern::ScrollPage(bool reverse)
+{
+    if (!isConfigScrollable_) {
+        return;
+    }
+    if (!reverse) {
+        LOGD("PgDn. Scroll offset is %{public}f", -GetMainContentSize());
+        UpdateScrollPosition(-GetMainContentSize());
+    } else {
+        LOGD("PgUp. Scroll offset is %{public}f", GetMainContentSize());
+        UpdateScrollPosition(GetMainContentSize());
+    }
+}
+
+bool GridPattern::UpdateStartIndex(uint32_t index)
+{
+    if (!isConfigScrollable_) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    gridLayoutInfo_.jumpIndex_ = index;
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    return true;
+}
+
+void GridPattern::UpdateScrollerAnimation(float offset)
+{
+    UpdateScrollPosition(offset - animatorOffset_);
+    animatorOffset_ = offset;
+}
+
+bool GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve)
+{
+    if (!isConfigScrollable_) {
+        return false;
+    }
+    if (!animator_) {
+        animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
+    }
+    if (!animator_->IsStopped()) {
+        animator_->Stop();
+    }
+    animatorOffset_ = 0;
+    animator_->ClearInterpolators();
+
+    auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(0, position, curve);
+    animation->AddListener(
+        [offset = gridLayoutInfo_.currentOffset_, weakScroll = AceType::WeakClaim(this)](float value) {
+            auto gridPattern = weakScroll.Upgrade();
+            if (gridPattern) {
+                gridPattern->UpdateScrollPosition(value);
+            }
+        });
+    animator_->AddInterpolator(animation);
+    animator_->SetDuration(std::min(duration, SCROLL_MAX_TIME));
+    animator_->Play();
+    return true;
+}
+
+void GridPattern::SetScrollBarProxy(const RefPtr<NG::ScrollBarProxy>& scrollBarProxy)
+{
+    if (!scrollBar_) {
+        scrollBar_ = new GridScrollBar(Claim(this));
+    }
+    scrollBar_->CreateBarProxy(scrollBarProxy);
+}
+
+float GridPattern::GetScrollableDistance() const
+{
+    return scrollBar_ ? scrollBar_->GetEstimatedHeight() : 0.0f;
+}
+
+float GridPattern::GetCurrentPosition() const
+{
+    return scrollBar_ ? -scrollBar_->GetOffset() : 0.0f;
 }
 
 } // namespace OHOS::Ace::NG

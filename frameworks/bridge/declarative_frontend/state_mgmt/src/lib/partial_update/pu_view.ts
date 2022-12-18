@@ -11,7 +11,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ *  * ViewPU - View for Partial Update
+ *  
+* all definitions in this file are framework internal
+*/
+
+/**
+ * WeakRef
+ * ref to an Object that does not prevent the Object from getting GC'ed
+ * current version of tsc does not know about WeakRef
+ * but Ark runtime supports it
+ *
  */
+declare class WeakRef<T extends Object> {
+  constructor(o: T);
+  deref(): T;
+}
 
 type ProvidedVarsMapPU = Map<string, ObservedPropertyAbstractPU<any>>;
 
@@ -27,7 +43,15 @@ type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
 abstract class ViewPU extends NativeViewPartialUpdate
   implements IViewPropertiesChangeSubscriber {
 
+  // Array.sort() converts array items to string to compare them, sigh!
+  static readonly compareNumber = (a: number, b: number): number => {
+    return (a < b) ? -1 : (a > b) ? 1 : 0;
+  };
+
   private id_: number;
+
+  private parent_: ViewPU = undefined;
+  private childrenWeakrefMap_ = new Map<number, WeakRef<ViewPU>>();
 
   private watchedProps: Map<string, (propName: string) => void>
     = new Map<string, (propName: string) => void>();
@@ -70,22 +94,25 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   /**
    * Create a View
-   * 
+   *
    * 1. option: top level View, specify
    *    - compilerAssignedUniqueChildId must specify
    *    - parent=undefined
    *    - localStorage  must provide if @LocalSTorageLink/Prop variables are used
    *      in this View or descendant Views.
-   * 
+   *
    * 2. option: not a top level View
    *    - compilerAssignedUniqueChildId must specify
    *    - parent must specify
    *    - localStorage do not specify, will inherit from parent View.
-   * 
+   *
   */
-  constructor(parent: ViewPU, localStorage?: LocalStorage) {
+  constructor(parent: ViewPU, localStorage: LocalStorage, elmtId : number = -1) {
     super();
-    this.id_ = SubscriberManager.Get().MakeId();
+    // if set use the elmtId also as the ViewPU object's subscribable id.
+    // these matching is requiremrnt for updateChildViewById(elmtId) being able to
+    // find the child ViewPU object by given elmtId
+    this.id_= elmtId == -1 ? SubscriberManager.MakeId() : elmtId;
     this.providedVars_ = parent ? new Map(parent.providedVars_)
       : new Map<string, ObservedPropertyAbstractPU<any>>();
 
@@ -93,13 +120,15 @@ abstract class ViewPU extends NativeViewPartialUpdate
     if (parent) {
       // this View is not a top-level View
       stateMgmtConsole.debug(`${this.constructor.name} constructor: Using LocalStorage instance of the parent View.`);
+      this.setCardId(parent.getCardId());
       this.localStorage_ = parent.localStorage_;
+      parent.addChild(this);
     } else if (localStorage) {
       this.localStorage_ = localStorage;
       stateMgmtConsole.debug(`${this.constructor.name} constructor: Using LocalStorage instance provided via @Entry.`);
     }
 
-    SubscriberManager.Get().add(this);
+    SubscriberManager.Add(this);
     stateMgmtConsole.debug(`${this.constructor.name}(${this.id__()}): constructor done`);
   }
 
@@ -113,20 +142,143 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // are about to be deleted
   abstract aboutToBeDeleted(): void;
 
-  // super class will call this function from 
+  // super class will call this function from
   // its aboutToBeDeleted implementation
   protected aboutToBeDeletedInternal(): void {
+    // When a custom component is deleted, need to notify the C++ side to clean the corresponding deletion cache Map,
+    // because after the deletion, can no longer clean the RemoveIds cache on the C++ side through the 
+    // updateDirtyElements function.
+    let removedElmtIds: number[] = [];
+    this.updateFuncByElmtId.forEach((value: UpdateFunc, key: number) => {
+      this.purgeVariableDependenciesOnElmtId(key);
+      removedElmtIds.push(key);
+    });
+    this.deletedElmtIdsHaveBeenPurged(removedElmtIds);
+
     this.updateFuncByElmtId.clear();
     this.watchedProps.clear();
     this.providedVars_.clear();
+    if (this.parent_) {
+      this.parent_.removeChild(this);
+    }
+  }
+
+  private setParent(parent: ViewPU) {
+    if (this.parent_ && parent) {
+      stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).setChild: changing parent to '${parent.constructor.name}', id ${parent.id__()} (unsafe operation)`);
+    }
+    this.parent_ = parent;
+  }
+
+  /**
+   * add given child and set 'this' as its parent
+   * @param child child to add
+   * @returns returns false if child with given child's id already exists
+   * 
+   * framework internal function
+   * Note: Use of WeakRef ensures child and parent do not generate a cycle dependency.
+   * The add. Set<ids> is required to reliably tell what children still exist.
+   */
+  public addChild(child: ViewPU): boolean {
+    if (this.childrenWeakrefMap_.has(child.id__())) {
+      stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).addChild '${child.constructor.name}' id already exists ${child.id__()} !`);
+      return false;
+    }
+    this.childrenWeakrefMap_.set(child.id__(), new WeakRef(child));
+    child.setParent(this);
+    return true;
+  }
+
+  /**
+   * remove given child and remove 'this' as its parent
+   * @param child child to add
+   * @returns returns false if child with given child's id does not exist
+   */
+  public removeChild(child: ViewPU): boolean {
+    const hasBeenDeleted = this.childrenWeakrefMap_.delete(child.id__());
+    if (!hasBeenDeleted) {
+      stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).removeChild '${child.constructor.name}', child id ${child.id__()} not known!`);
+    } else {
+      child.setParent(undefined);
+    }
+    return hasBeenDeleted;
+  }
+
+  /**
+   * Retrieve child by given id
+   * @param id 
+   * @returns child if in map and weak ref can still be downreferenced
+   */
+  public getChildById(id: number) {
+    const childWeakRef = this.childrenWeakrefMap_.get(id);
+    return childWeakRef ? childWeakRef.deref() : undefined;
   }
 
   protected abstract purgeVariableDependenciesOnElmtId(removedElmtId: number);
   protected abstract initialRender(): void;
   protected abstract rerender(): void;
+  protected updateStateVars(params: {}) : void {
+    stateMgmtConsole.warn("ViewPU.updateStateVars unimplemented. Pls upgrade to latest eDSL transpiler version.")
+  }
 
   protected initialRenderView(): void {
     this.initialRender();
+  }
+
+  /**
+   * force a complete rerender / update by executing all update functions
+   * exec a regular rerender first
+   * 
+   * @param deep recurse all children as well
+   * 
+   * framework internal functions, apps must not call
+   */
+  public forceCompleteRerender(deep: boolean = false): void {
+    stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).forceCompleteRerender - start.`);
+
+    // request list of all (gloabbly) deleted elmtIds;
+    let deletedElmtIds: number[] = [];
+    this.getDeletedElemtIds(deletedElmtIds);
+
+    // see which elmtIds are managed by this View
+    // and clean up all book keeping for them
+    this.purgeDeletedElmtIds(deletedElmtIds);
+
+    Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => {
+      const updateFunc: UpdateFunc = this.updateFuncByElmtId.get(elmtId);
+      if (updateFunc == undefined) {
+        stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
+      } else {
+        updateFunc(elmtId, /* isFirstRender */ false);
+        this.finishUpdateFunc(elmtId);
+      }
+    });
+
+    if (deep) {
+      this.childrenWeakrefMap_.forEach((weakRefChild: WeakRef<ViewPU>) => {
+        const child = weakRefChild.deref();
+        if (child) {
+          (child as ViewPU).forceCompleteRerender(true);
+        }
+      });
+    }
+    stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).forceCompleteRerender - end`);
+  }
+
+  public updateStateVarsOfChildByElmtId(elmtId, params: Object) : void {
+    stateMgmtConsole.debug(`ViewPU('${this.constructor.name}', ${this.id__()}).updateChildViewById(${elmtId}) - start`);
+
+    if (elmtId<0) {
+      stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).updateChildViewById(${elmtId}) - invalid elmtId - internal error!`);
+      return ;
+    }
+    let child : ViewPU = this.getChildById(elmtId);
+    if (!child) {
+      stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).updateChildViewById(${elmtId}) - no child with this elmtId - internal error!`);
+      return;
+    }
+    child.updateStateVars(params);
+    stateMgmtConsole.debug(`ViewPU('${this.constructor.name}', ${this.id__()}).updateChildViewById(${elmtId}) - end`);
   }
 
   // implements IMultiPropertiesChangeSubscriber
@@ -134,13 +286,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}'. View needs ${dependentElmtIds.size ? 'update' : 'no update'}.`);
     this.syncInstanceId();
 
-    let cb = this.watchedProps.get(varName)
-    if (cb) {
-      stateMgmtConsole.debug(`   .. calling @Watch function`);
-      cb.call(this, varName);
-    }
-
-    if (dependentElmtIds.size) {
+    if (dependentElmtIds.size && !this.isFirstRender()) {
       if (!this.dirtDescendantElementIds_.size) {
         // mark Composedelement dirty when first elmtIds are added
         // do not need to do this every time
@@ -151,6 +297,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.dirtDescendantElementIds_ = union;
       stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': all elmtIds need update [${Array.from(this.dirtDescendantElementIds_).toString()}].`)
     }
+
+    let cb = this.watchedProps.get(varName)
+    if (cb) {
+      stateMgmtConsole.debug(`   .. calling @Watch function`);
+      cb.call(this, varName);
+    }
+  
     this.restoreInstanceId();
   }
 
@@ -214,7 +367,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   public markElemenDirtyById(elmtId: number): void {
     // TODO ace-ets2bundle, framework, compilated apps need to update together
     // this function will be removed after a short transiition periode
-    stateMgmtConsole.error(`markElemenDirtyById no longer supported. 
+    stateMgmtConsole.error(`markElemenDirtyById no longer supported.
         Please update your ace-ets2bundle and recompile your application!`);
   }
 
@@ -229,12 +382,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       return;
     }
 
-    // Array.sort() converts array items to string to compare them, sigh!
-    var compareNumber = (a: number, b: number): number => {
-      return (a < b) ? -1 : (a > b) ? 1 : 0;
-    };
-
-    stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}:  updateDirtyElements: sorted dirty elmtIds: ${JSON.stringify(Array.from(this.dirtDescendantElementIds_).sort(compareNumber))}, starting ....`);
+    stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}:  updateDirtyElements: sorted dirty elmtIds: ${JSON.stringify(Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber))}, starting ....`);
 
     // request list of all (gloabbly) deleteelmtIds;
     let deletedElmtIds: number[] = [];
@@ -247,7 +395,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     // process all elmtIds marked as needing update in ascending order.
     // ascending order ensures parent nodes will be updated before their children
     // prior cleanup ensure no already deleted Elements have their update func executed
-    Array.from(this.dirtDescendantElementIds_).sort(compareNumber).forEach(elmtId => {
+    Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
       // do not process an Element that has been marked to be deleted
       const updateFunc: UpdateFunc = this.updateFuncByElmtId.get(elmtId);
       if (updateFunc == undefined) {
@@ -273,7 +421,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}.purgeDeletedElmtIds -  start.`);
 
-    // rmElmtIds is the array of ElemntIds that 
+    // rmElmtIds is the array of ElemntIds that
     let removedElmtIds: number[] = [];
     rmElmtIds.forEach((elmtId: number) => {
       // remove entry from Map elmtId -> update function
@@ -316,103 +464,77 @@ abstract class ViewPU extends NativeViewPartialUpdate
     branchfunc();
   }
 
-  /*
-    partual updates for ForEach
-    The processing steps in re-render case are
-    1. create ForEachComponent,
-    2. get the previousIdArray from the ForEachElement. This array of
-       trings stores the result of the id generation function for all
-       array items at previous render,
-    3. compute newIdArray in the same way, using the current array. By comparing
-       the two array it gets clear what array items a- still exist but may have
-       moved position, b- which ones are new, and c- which ones no longer exist.
-    4. the ForEachComponent to sync the new idArray to the ForEachElement when it updates.
-    5. create ForEach children for new item array (case 2 above).
+   /**
+    Partial updates for ForEach.
+    * @param elmtId ID of element.
+    * @param itemArray Array of items for use of itemGenFunc.
+    * @param itemGenFunc Item generation function to generate new elements. If index parameter is
+    *                    given set itemGenFuncUsesIndex to true.
+    * @param idGenFunc   ID generation function to generate unique ID for each element. If index parameter is
+    *                    given set idGenFuncUsesIndex to true.
+    * @param itemGenFuncUsesIndex itemGenFunc optional index parameter is given or not.
+    * @param idGenFuncUsesIndex idGenFunc optional index parameter is given or not.
+    */
+  public forEachUpdateFunction(elmtId : number,
+    itemArray: Array<any>,
+    itemGenFunc: (item: any, index?: number) => void,
+    idGenFunc?: (item: any, index?: number) => string,
+    itemGenFuncUsesIndex: boolean = false,
+    idGenFuncUsesIndex: boolean = false) : void {
 
-    In the initial render case oldIdArray is empty. Therefore a new child will be
-    created for each item in the array (see step 3).
-  */
-  forEachUpdateFunction(elmtId: number,
-    _arr: Array<any>,
-    itemGenFunc: (item: any) => void,
-    idGenFunc?: (item: any) => string) {
-    stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction elmtId ${elmtId} - start`);
+      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction `);
 
-    if (idGenFunc === undefined) {
-      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction: forEach does not specify id generation function. This will degrade performance`);
-      idGenFunc = function makeIdGenFunction() {
-        let index = 0;
-        // developers should always add an id gen function, because framework can not invent a good one
-        // for most cases:
-        // generate id that consist of the running index and the strinified item
-        return (item) => `${index++}_${JSON.stringify(item)}`;
-      }();
-    }
-    const arr = _arr;  // just to trigger a 'get' onto the array
-
-    // id array of previous render or empty
-    const prevIdArray: string[] = [];
-    const success: boolean = ForEach.getIdArray(elmtId, prevIdArray) || false;  // step 2
-
-    stateMgmtConsole.debug(`${JSON.stringify(prevIdArray)}`);
-
-    // create array of new ids
-    let newIdArray: string[] = [];
-    arr.forEach((item) => {
-      let value = idGenFunc(item);
-      stateMgmtConsole.debug(`ID generator for ${item} returned: ${value}`)
-      newIdArray.push(value);
-    });
-
-    // step 3
-    // replace the idArray
-    // ForEachComponent needs to sync this back to the ForEachElement
-    ForEach.setIdArray(elmtId, newIdArray);
-
-    // step 4
-    // now, we compare the old and the new array
-    // for each entry three cases
-    // 1. id is in newIdArray, but missing from oldIdArray -> new entry, execute itemGenFunction
-    // 2. id is not in newIdArray, but in oldIdArray -> do nothing,
-    //       ForEachComponent to ForEachElement update will take care of deletion
-    // 3. id is in newdIdEntry and in oldIdEntry -> do nothing
-    //         ForEachComponent to ForEachElement update will change the slot
-    //         based on info found in the new idArray
-    newIdArray.forEach((id, newIndex) => {     // step 5
-      stateMgmtConsole.debug(`Handle item with item-id ${id}:`);
-      if (prevIdArray.indexOf(id) < 0) {
-        // id not in oldIdArray: create new child
-
-        stateMgmtConsole.debug(`   ... render children for item with item-id ${id} - start !`);
-        // on native side:
-        //  viewStack->PushKey(id);
-        //  viewStack->Push(AceType::MakeRefPtr<MultiComposedComponent>(viewStack->GetKey(), "ForEachItem"));
-        ForEach.createNewChildStart(id, /* View/JSView */ this);
-
-        itemGenFunc(arr[newIndex]);
-
-        // on native side:
-        //   viewStack->PopContainer();  FIXME: put to the right position in children_
-        //   viewStack->PopKey();
-        //   sync Component to Element
-        ForEach.createNewChildFinish(id, /* View/JSView */ this);
-
-        stateMgmtConsole.debug(`   ... render children for item with item-id ${id} - done!`);
-      } else {
-        stateMgmtConsole.debug(`   ... item-id ${id} is no new item, will not render child - done!`);
+      if (idGenFunc === undefined) {
+        stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: providing default id gen function `);
+        idGenFunc = (item: any, index : number) => `${index}__${JSON.stringify(item)}`;
+        idGenFuncUsesIndex = true;
       }
-    }); // newIdArray.forEach
 
-    stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction elmtId ${elmtId} - done.`);
-  }
+      let diffIndexArray = []; // New indexes compared to old one.
+      let newIdArray = [];
+      const arr = itemArray; // just to trigger a 'get' onto the array
 
+      // ID gen is with index.
+      if (idGenFuncUsesIndex) {
+        stateMgmtConsole.debug(`ID Gen with index parameter or with default id gen func`);
+        // Create array of new ids.
+        arr.forEach((item, indx) => {
+          newIdArray.push(idGenFunc(item, indx));
+        });
+      }
+      else {
+        // Create array of new ids.
+        stateMgmtConsole.debug(`ID Gen without index parameter`);
+        arr.forEach((item, index) => {
+          newIdArray.push(`${itemGenFuncUsesIndex ? index + '_':''}` + idGenFunc(item));
+        });
+      }
 
+      // set new array on C++ side.
+      // C++ returns array of indexes of newly added array items.
+      // these are indexes in new child list.
+      ForEach.setIdArray(elmtId, newIdArray, diffIndexArray);
+      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: diff indexes ${JSON.stringify(diffIndexArray)} . `);
+
+      // Item gen is with index.
+      stateMgmtConsole.debug(`Item Gen ${itemGenFuncUsesIndex ? 'with' : "without"} index`);
+      // Create new elements if any.
+      diffIndexArray.forEach((indx) => {
+        ForEach.createNewChildStart(newIdArray[indx], this);
+        if (itemGenFuncUsesIndex) {
+          itemGenFunc(arr[indx], indx);
+        } else {
+          itemGenFunc(arr[indx]);
+        }
+        ForEach.createNewChildFinish(newIdArray[indx], this);
+      });
+    }
 
   /**
      * CreateStorageLink and CreateStorageLinkPU are used by the implementation of @StorageLink and
-     * @LocalStotrageLink in full update and partial update solution respectively. 
+     * @LocalStotrageLink in full update and partial update solution respectively.
      * These are not part of the public AppStorage API , apps should not use.
-     * @param storagePropName - key in LocalStorage 
+     * @param storagePropName - key in LocalStorage
      * @param defaultValue - value to use when creating a new prop in the LocalStotage
      * @param owningView - the View/ViewPU owning the @StorageLink/@LocalStorageLink variable
      * @param viewVariableName -  @StorageLink/@LocalStorageLink variable name
@@ -428,14 +550,14 @@ abstract class ViewPU extends NativeViewPartialUpdate
     ) as ObservedPropertyAbstractPU<T>;
   }
 
-
-  public createStorageProp<T>(storagePropName: string, defaultValue: T,
-    viewVariableName: string): SynchedPropertySimpleOneWayPU<T> {
+  public createStorageProp<T>(storagePropName: string, defaultValue: T, viewVariableName: string): ObservedPropertyAbstractPU<T> {
     return AppStorage.__CreateSync<T>(storagePropName, defaultValue,
-      <T>(source: ObservedPropertyAbstract<T>) => (source instanceof ObservedPropertySimple)
-        ? new SynchedPropertySimpleOneWayPU<T>(source, this, viewVariableName)
-        : undefined
-    ) as SynchedPropertySimpleOneWayPU<T>;
+      <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
+        ? undefined
+        : (source instanceof ObservedPropertySimple)
+          ? new SynchedPropertySimpleOneWayPU<T>(source, this, viewVariableName)
+          : new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
+    ) as ObservedPropertyAbstractPU<T>;
   }
 
   public createLocalStorageLink<T>(storagePropName: string, defaultValue: T,
@@ -449,13 +571,14 @@ abstract class ViewPU extends NativeViewPartialUpdate
     ) as ObservedPropertyAbstractPU<T>;
   }
 
-
   public createLocalStorageProp<T>(storagePropName: string, defaultValue: T,
-    viewVariableName: string): SynchedPropertySimpleOneWayPU<T> {
+    viewVariableName: string): ObservedPropertyAbstractPU<T> {
     return this.localStorage_.__createSync<T>(storagePropName, defaultValue,
-      <T>(source: ObservedPropertyAbstract<T>) => (source instanceof ObservedPropertySimple)
-        ? new SynchedPropertySimpleOneWayPU<T>(source, this, viewVariableName)
-        : undefined
-    ) as SynchedPropertySimpleOneWayPU<T>;
+      <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
+        ? undefined
+        : (source instanceof ObservedPropertySimple)
+          ? new SynchedPropertySimpleOneWayPU<T>(source, this, viewVariableName)
+          : new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
+    ) as ObservedPropertyAbstractPU<T>;
   }
 }

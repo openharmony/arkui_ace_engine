@@ -25,7 +25,7 @@ source_set("ace_resource") {
     "shared_image_manager.cpp",
   ]
   if (current_os == "mac" || current_os == "mingw" || current_os == "ios" ||
-      current_os == "linux") {
+      current_os == "linux" || current_os == "android") {
     deps = [ ":binary_resource_mac_and_windows" ]
     sources -= [ "internal_resource.cpp" ]
     sources += [ "internal_resource_previewer.cpp" ]
@@ -88,6 +88,8 @@ source_set("binary_resource_mac_and_windows") {
     "$ace_resource_dir/ic_more_dark.c",
     "$ace_resource_dir/ic_more_transparent.c",
     "$ace_resource_dir/ic_public_drawer.c",
+    "$ace_resource_dir/ic_public_input_search.c",
+    "$ace_resource_dir/ic_public_spinner.c",
     "$ace_resource_dir/indexer_arrow.c",
     "$ace_resource_dir/indexletter_bar.c",
     "$ace_resource_dir/left_arrow.c",
@@ -187,6 +189,8 @@ action_foreach("objcopy_resource_mac_and_windows") {
     "binary/ic_more_dark.svg",
     "binary/ic_more_transparent.svg",
     "binary/ic_public_drawer.svg",
+    "binary/ic_public_input_search.svg",
+    "binary/ic_public_spinner.svg",
     "binary/indexer_arrow.png",
     "binary/indexletter_bar.json",
     "binary/left_arrow.svg",

@@ -118,9 +118,9 @@ protected:
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
 
 private:
-    void HandleDragStart(const TouchEventInfo& info);
-    void HandleDragMove(const TouchEventInfo& info);
-    void HandleDragEnd(const TouchEventInfo& info);
+    void HandleDragStart(const GestureEvent& event);
+    void HandleDragMove(const GestureEvent& event);
+    void HandleDragEnd();
     void GetRenders(const RefPtr<RenderNode>& render);
     void GetRenders();
     void ClearRenders();
@@ -156,6 +156,7 @@ private:
 
     RefPtr<RawRecognizer> rawRecognizer_;
     RefPtr<VerticalDragRecognizer> dragRecognizer_;
+    RefPtr<PanRecognizer> panRecognizer_;
     double xOffset_ = 0.0;
     double yOffset_ = 0.0;
     double yLast_ = 0.0;

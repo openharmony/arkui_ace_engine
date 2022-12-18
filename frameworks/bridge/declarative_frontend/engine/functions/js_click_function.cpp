@@ -28,8 +28,6 @@ void JsClickFunction::Execute()
     // FlushBuild, FlushLayout and FlushRender on the dirty elements
 #ifdef USE_V8_ENGINE
     V8DeclarativeEngineInstance::TriggerPageUpdate();
-#elif USE_QUICKJS_ENGINE
-    QJSDeclarativeEngineInstance::TriggerPageUpdate(QJSDeclarativeEngineInstance::GetCurrentContext());
 #elif USE_ARK_ENGINE
     JsiDeclarativeEngineInstance::TriggerPageUpdate(JsiDeclarativeEngineInstance::GetCurrentRuntime());
 #endif
@@ -48,6 +46,14 @@ void JsClickFunction::Execute(const ClickInfo& info)
     obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
+    obj->SetProperty<double>("pressure", info.GetForce());
+    if (info.GetTiltX().has_value()) {
+        obj->SetProperty<double>("tiltX", info.GetTiltX().value());
+    }
+    if (info.GetTiltY().has_value()) {
+        obj->SetProperty<double>("tiltY", info.GetTiltY().value());
+    }
+    obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
 
     LOGD("globalOffset.GetX() = %lf, globalOffset.GetY() = %lf, localOffset.GetX() = %lf, localOffset.GetY() = %lf",
         globalOffset.GetX(), globalOffset.GetY(), localOffset.GetX(), localOffset.GetY());
@@ -67,6 +73,14 @@ void JsClickFunction::Execute(const GestureEvent& info)
     obj->SetProperty<double>("y", SystemProperties::Px2Vp(localOffset.GetY()));
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
+    obj->SetProperty<double>("pressure", info.GetForce());
+    if (info.GetTiltX().has_value()) {
+        obj->SetProperty<double>("tiltX", info.GetTiltX().value());
+    }
+    if (info.GetTiltY().has_value()) {
+        obj->SetProperty<double>("tiltY", info.GetTiltY().value());
+    }
+    obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
 
@@ -94,6 +108,14 @@ void JsClickFunction::Execute(MouseInfo& info)
     obj->SetPropertyObject(
         "stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
     obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
+    obj->SetProperty<double>("pressure", info.GetForce());
+    if (info.GetTiltX().has_value()) {
+        obj->SetProperty<double>("tiltX", info.GetTiltX().value());
+    }
+    if (info.GetTiltY().has_value()) {
+        obj->SetProperty<double>("tiltY", info.GetTiltY().value());
+    }
+    obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
     obj->Wrap<MouseInfo>(&info);

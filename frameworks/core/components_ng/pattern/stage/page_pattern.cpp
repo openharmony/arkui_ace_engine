@@ -21,6 +21,26 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+void IterativeAddToSharedMap(const RefPtr<UINode>& node, SharedTransitionMap& map)
+{
+    const auto& children = node->GetChildren();
+    for (const auto& child : children) {
+        auto frameChild = AceType::DynamicCast<FrameNode>(child);
+        if (!frameChild) {
+            IterativeAddToSharedMap(child, map);
+            continue;
+        }
+        auto id = frameChild->GetRenderContext()->GetShareId();
+        if (!id.empty()) {
+            LOGD("add id:%{public}s, child:%{public}p", id.c_str(), AceType::RawPtr(frameChild));
+            map[id] = frameChild;
+        }
+        IterativeAddToSharedMap(frameChild, map);
+    }
+}
+} // namespace
+
 void PagePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -32,32 +52,57 @@ void PagePattern::OnAttachToFrameNode()
 
 bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*wrapper*/, const DirtySwapConfig& /*config*/)
 {
-    if (!isLoaded_) {
-        isOnShow_ = true;
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(context, false);
-        if (onPageShow_) {
-            context->PostAsyncEvent([onPageShow = onPageShow_]() { onPageShow(); });
+    if (isFirstLoad_) {
+        isFirstLoad_ = false;
+        if (firstBuildCallback_) {
+            firstBuildCallback_();
+            firstBuildCallback_ = nullptr;
         }
-        isLoaded_ = true;
     }
     return false;
 }
 
-bool PagePattern::TriggerPageTransition(PageTransitionType type) const
+bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    return renderContext->TriggerPageTransition(type);
+    if (pageTransitionFunc_) {
+        pageTransitionFunc_();
+    }
+    return renderContext->TriggerPageTransition(type, onFinish);
+}
+
+void PagePattern::ProcessHideState()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetActive(false);
+    host->OnVisibleChange(false);
+    host->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+    auto parent = host->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(parent);
+    parent->MarkNeedSyncRenderTree();
+    parent->RebuildRenderContextTree();
+}
+
+void PagePattern::ProcessShowState()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetActive(true);
+    host->OnVisibleChange(true);
+    host->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+    auto parent = host->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(parent);
+    parent->MarkNeedSyncRenderTree();
+    parent->RebuildRenderContextTree();
 }
 
 void PagePattern::OnShow()
 {
-    if (isOnShow_ || !isLoaded_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!isOnShow_);
     isOnShow_ = true;
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -68,14 +113,88 @@ void PagePattern::OnShow()
 
 void PagePattern::OnHide()
 {
-    if (!isOnShow_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(isOnShow_);
     isOnShow_ = false;
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     if (onPageHide_) {
         context->PostAsyncEvent([onPageHide = onPageHide_]() { onPageHide(); });
+    }
+}
+
+void PagePattern::BuildSharedTransitionMap()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    sharedTransitionMap_.clear();
+    IterativeAddToSharedMap(host, sharedTransitionMap_);
+}
+
+void PagePattern::ReloadPage()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto customNode = DynamicCast<CustomNodeBase>(host->GetFirstChild());
+    CHECK_NULL_VOID(customNode);
+    customNode->FireReloadFunction(true);
+}
+
+RefPtr<PageTransitionEffect> PagePattern::FindPageTransitionEffect(PageTransitionType type)
+{
+    RefPtr<PageTransitionEffect> result;
+    while (!pageTransitionEffects_.empty()) {
+        auto effect = pageTransitionEffects_.top();
+        if (effect->CanFit(type)) {
+            result = effect;
+            break;
+        }
+        pageTransitionEffects_.pop();
+    }
+    ClearPageTransitionEffect();
+    return result;
+}
+
+void PagePattern::ClearPageTransitionEffect()
+{
+    while (!pageTransitionEffects_.empty()) {
+        pageTransitionEffects_.pop();
+    }
+}
+
+RefPtr<PageTransitionEffect> PagePattern::GetTopTransition() const
+{
+    return pageTransitionEffects_.empty() ? nullptr : pageTransitionEffects_.top();
+}
+
+void PagePattern::AddPageTransition(const RefPtr<PageTransitionEffect>& effect)
+{
+    pageTransitionEffects_.emplace(effect);
+}
+
+void PagePattern::AddJsAnimator(const std::string& animatorId, const RefPtr<Framework::AnimatorInfo>& animatorInfo)
+{
+    CHECK_NULL_VOID(animatorInfo);
+    auto animator = animatorInfo->GetAnimator();
+    CHECK_NULL_VOID(animator);
+    animator->AttachScheduler(PipelineContext::GetCurrentContext());
+    jsAnimatorMap_[animatorId] = animatorInfo;
+}
+
+RefPtr<Framework::AnimatorInfo> PagePattern::GetJsAnimator(const std::string& animatorId)
+{
+    auto iter = jsAnimatorMap_.find(animatorId);
+    if (iter != jsAnimatorMap_.end()) {
+        return iter->second;
+    }
+    return nullptr;
+}
+
+void PagePattern::SetFirstBuildCallback(std::function<void()>&& buildCallback)
+{
+    if (isFirstLoad_) {
+        firstBuildCallback_ = std::move(buildCallback);
+    } else if (buildCallback) {
+        buildCallback();
     }
 }
 

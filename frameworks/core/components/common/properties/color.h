@@ -57,6 +57,7 @@ public:
     static Color FromRGB(uint8_t red, uint8_t green, uint8_t blue);
     // Need to change the input parameters, it is more appropriate to use the passed value here.
     static Color FromString(std::string colorStr, uint32_t maskAlpha = COLOR_ALPHA_MASK);
+    static bool ParseColorString(std::string colorStr, Color& color, uint32_t maskAlpha = COLOR_ALPHA_MASK);
     // Return the linear transition color from startColor to endColor.
     static const Color LineColorTransition(const Color& startColor, const Color& endColor, double percent);
 
@@ -133,6 +134,14 @@ private:
         const Color& gammaColor, double& linearRed, double& linearGreen, double& linearBlue);
     static uint8_t ConvertLinearToGamma(double value);
     static Color ConvertLinearToGamma(double alpha, double linearRed, double linearGreen, double linearBlue);
+    static bool MatchColorWithMagic(std::string& colorStr, uint32_t maskAlpha, Color& color);
+    static bool MatchColorWithMagicMini(std::string& colorStr, uint32_t maskAlpha, Color& color);
+    static bool MatchColorWithRGB(const std::string& colorStr, Color& color);
+    static bool MatchColorWithRGBA(const std::string& colorStr, Color& color);
+    static bool MatchColorSpecialString(const std::string& colorStr, Color& color);
+    static bool ParseUintColorString(const std::string& colorStr, Color& color);
+    static bool IsRGBValid(int value);
+    static bool IsOpacityValid(double value);
 
     float CalculateBlend(float alphaLeft, float alphaRight, float valueLeft, float valueRight) const;
     ColorParam colorValue_ { .value = 0xff000000 };
@@ -148,6 +157,57 @@ inline void StringSplitter(const std::string& source, char delimiter, std::vecto
 }
 
 } // namespace StringUtils
+
+class ACE_EXPORT LinearColor : public Color {
+public:
+    LinearColor() = default;
+    explicit LinearColor(uint32_t value) : Color(value) {}
+    explicit LinearColor(const Color& color) : Color(color.GetValue()) {}
+    LinearColor(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue)
+    {
+        ColorParam colorValue {
+#if BIG_ENDIANNESS
+        .argb = { .alpha = alpha, .red = red, .green = green, .blue = blue }
+#else
+        .argb = { .blue = blue, .green = green, .red = red, .alpha = alpha }
+#endif
+        };
+        SetValue(colorValue.value);
+    }
+    ~LinearColor() = default;
+
+    static const LinearColor TRANSPARENT;
+    static const LinearColor WHITE;
+    static const LinearColor BLACK;
+    static const LinearColor RED;
+    static const LinearColor GREEN;
+    static const LinearColor BLUE;
+    static const LinearColor GRAY;
+
+    LinearColor operator+(const LinearColor& color) const
+    {
+        return LinearColor(GetAlpha() + color.GetAlpha(), GetRed() + color.GetRed(),
+            GetGreen() + color.GetGreen(), GetBlue() + color.GetBlue());
+    }
+
+    LinearColor operator-(const LinearColor& color) const
+    {
+        return LinearColor(GetAlpha() - color.GetAlpha(), GetRed() - color.GetRed(),
+            GetGreen() - color.GetGreen(), GetBlue() - color.GetBlue());
+    }
+
+    LinearColor operator*(double value) const
+    {
+        return LinearColor(GetAlpha() * value, GetRed() * value,
+            GetGreen() * value, GetBlue() * value);
+    }
+
+    bool operator==(const LinearColor& color) const
+    {
+        return GetValue() == color.GetValue();
+    }
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_COLOR_H

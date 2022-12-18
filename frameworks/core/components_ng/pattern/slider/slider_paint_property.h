@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SLIDER_SLIDER_RENDER_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SLIDER_SLIDER_RENDER_PROPERTY_H
 
+#include <string>
+
 #include "core/components_ng/pattern/slider/slider_style.h"
 #include "core/components_ng/render/paint_property.h"
 
@@ -40,6 +42,26 @@ public:
         PaintProperty::Reset();
         ResetSliderPaintStyle();
     }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        PaintProperty::ToJsonValue(json);
+        auto jsonConstructor = JsonUtil::Create(true);
+        jsonConstructor->Put("value", std::to_string(GetValue().value_or(0.0f)).c_str());
+        jsonConstructor->Put("min", std::to_string(GetMin().value_or(0.0f)).c_str());
+        jsonConstructor->Put("max", std::to_string(GetMax().value_or(100.0f)).c_str());
+        jsonConstructor->Put("step", std::to_string(GetStep().value_or(1.0f)).c_str());
+        jsonConstructor->Put("reverse", GetReverse().value_or(false) ? "true" : "false");
+        jsonConstructor->Put("direction",
+            (GetDirection().value_or(Axis::HORIZONTAL)) == Axis::VERTICAL ? "Axis.Vertical" : "Axis.Horizontal");
+        json->Put("constructor", jsonConstructor);
+        json->Put("blockColor", GetBlockColor().value_or(Color(0xffffffff)).ColorToString().c_str());
+        json->Put(
+            "trackBackgroundColor", GetTrackBackgroundColor().value_or(Color(0xafdbdbdb)).ColorToString().c_str());
+        json->Put("selectColor", GetSelectColor().value_or(Color(0xff007dff)).ColorToString().c_str());
+        json->Put("showSteps", GetShowSteps().value_or(false) ? "true" : "false");
+    }
+
     ACE_DEFINE_PROPERTY_GROUP(SliderPaintStyle, SliderPaintStyle)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Value, float, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Min, float, PROPERTY_UPDATE_RENDER)
@@ -47,18 +69,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Step, float, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Reverse, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Direction, Axis, PROPERTY_UPDATE_RENDER)
-    // Themes are shared with user settings
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, ShowSteps, bool, PROPERTY_UPDATE_RENDER)
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, ShowTips, bool, PROPERTY_UPDATE_RENDER)
-    ACE_DEFINE_PROPERTY_GROUP(SliderPaintThemeStyle, SliderPaintThemeStyle)
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintThemeStyle, MarkerSize, Dimension, PROPERTY_UPDATE_RENDER)
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintThemeStyle, BlockHoverColor, Color, PROPERTY_UPDATE_RENDER)
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintThemeStyle, TipColor, Color, PROPERTY_UPDATE_RENDER)
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintThemeStyle, TipTextColor, Color, PROPERTY_UPDATE_RENDER)
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintThemeStyle, MarkerColor, Color, PROPERTY_UPDATE_RENDER)
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SliderPaintProperty);
 };

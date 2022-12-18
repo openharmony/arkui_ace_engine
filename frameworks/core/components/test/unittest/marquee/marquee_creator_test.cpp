@@ -19,6 +19,7 @@
 #include "core/components/test/json/marquee_creator.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
+#include "core/components/theme/theme_manager_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -54,7 +55,7 @@ void CheckMarqueeDefaultValue(const RefPtr<MarqueeComponent>& marquee)
     EXPECT_TRUE(marquee->GetValue().empty());
 
     const auto& textStyle = marquee->GetTextStyle();
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     auto themeConstants = themeManager->GetThemeConstants();
     ASSERT_NE(themeConstants, nullptr);
     EXPECT_EQ(textStyle.GetTextColor().GetValue(), themeConstants->GetColor(THEME_OHOS_COLOR_TEXT_PRIMARY).GetValue());

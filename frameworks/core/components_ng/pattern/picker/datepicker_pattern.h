@@ -59,6 +59,11 @@ public:
         return MakeRefPtr<DataPickerRowLayoutProperty>();
     }
 
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        return MakeRefPtr<DatePickerPaintMethod>();
+    }
+
     void SetChangeCallback(ColumnChangeCallback&& value);
 
     void HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify);
@@ -355,6 +360,45 @@ public:
         return dayId_.value();
     }
 
+    bool HasTitleNode() const
+    {
+        return titleId_.has_value();
+    }
+
+    int32_t GetTitleId()
+    {
+        if (!titleId_.has_value()) {
+            titleId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return titleId_.value();
+    }
+
+    bool HasButtonTitleNode() const
+    {
+        return ButtonTitleId_.has_value();
+    }
+
+    int32_t GetButtonTitleId()
+    {
+        if (!ButtonTitleId_.has_value()) {
+            ButtonTitleId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return ButtonTitleId_.value();
+    }
+
+    bool HasDividerNode() const
+    {
+        return DividerId_.has_value();
+    }
+
+    int32_t GetDividerId()
+    {
+        if (!DividerId_.has_value()) {
+            DividerId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return DividerId_.value();
+    }
+
     static const std::string& GetYear(uint32_t year);
 
     static const std::string& GetSolarMonth(uint32_t month);
@@ -370,10 +414,14 @@ public:
         return { FocusType::NODE, true };
     }
 
+    void ShowTitle(int32_t titleId);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     static void Init();
+    RefPtr<ClickEvent> clickEventListener_;
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -387,6 +435,9 @@ private:
     std::optional<int32_t> monthId_;
     std::optional<int32_t> dayId_;
     std::optional<int32_t> dateNodeId_;
+    std::optional<int32_t> titleId_;
+    std::optional<int32_t> ButtonTitleId_;
+    std::optional<int32_t> DividerId_;
 
     EventMarker OnDialogAccept_;
     EventMarker OnDialogCancel_;

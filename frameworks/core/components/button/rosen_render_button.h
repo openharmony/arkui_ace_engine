@@ -36,7 +36,7 @@ public:
 
 private:
     Size Measure() override;
-
+    void SyncFocusGeometryProperties();
     void UpdateLayer();
     void PaintButtonAnimation();
     void MeasureButtonSize();
@@ -53,6 +53,7 @@ private:
     void DrawButton(SkCanvas* canvas, const Offset& offset);
     void ConvertToSkVector(const std::array<Radius, 4>& radii, SkVector* skRadii);
     void PaintFocus(RenderContext& context, const Offset& offset);
+    void PaintPopupFocus(RenderContext& context);
     uint32_t GetStateColor();
     bool NeedClickedColor(const Color& backgroundColor);
 

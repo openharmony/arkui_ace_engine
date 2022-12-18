@@ -49,6 +49,7 @@ public:
 
 private:
     static void CreateAndMountControlButton(const RefPtr<FrameNode>& parentNode);
+    static void MarkNeedInitRealSideBarWidth();
 };
 
 } // namespace OHOS::Ace::NG

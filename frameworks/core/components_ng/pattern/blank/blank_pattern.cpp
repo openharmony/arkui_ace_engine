@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/blank/blank_pattern.h"
 
+#include <string>
+
+#include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
@@ -25,7 +28,7 @@
 
 namespace OHOS::Ace::NG {
 
-void BlankPattern::OnMountToParentDone()
+void BlankPattern::OnModifyDone()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -34,19 +37,8 @@ void BlankPattern::OnMountToParentDone()
     if (!layoutProperty->HasMinSize()) {
         return;
     }
-    auto parent = frameNode->GetParent();
+    auto parent = GetParentFrameNode(frameNode);
     CHECK_NULL_VOID(parent);
-    while (parent) {
-        if (parent->GetTag() == V2::FLEX_ETS_TAG || parent->GetTag() == V2::ROW_ETS_TAG ||
-            parent->GetTag() == V2::COLUMN_ETS_TAG) {
-            break;
-        }
-        parent = parent->GetParent();
-    }
-    if (!parent) {
-        LOGW("Blank does not have a flex, row or column parent");
-        return;
-    }
     if (parent->GetTag() == V2::FLEX_ETS_TAG) {
         auto flexParent = DynamicCast<FrameNode>(parent);
         CHECK_NULL_VOID(flexParent);
@@ -54,20 +46,60 @@ void BlankPattern::OnMountToParentDone()
         CHECK_NULL_VOID(flexLayoutProperty);
         auto flexDirection = flexLayoutProperty->GetFlexDirectionValue(FlexDirection::ROW);
         if (flexDirection == FlexDirection::ROW || flexDirection == FlexDirection::ROW_REVERSE) {
+            if (layoutProperty->GetHeightValue() > layoutProperty->GetMinSizeValue()) {
+                layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(layoutProperty->GetHeightValue()), std::nullopt));
+            } else {
+                layoutProperty->UpdateCalcMinSize(
+                    CalcSize(CalcLength(layoutProperty->GetMinSizeValue()), std::nullopt));
+            }
+        } else {
+            if (layoutProperty->GetHeightValue() > layoutProperty->GetMinSizeValue()) {
+                layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(layoutProperty->GetHeightValue())));
+            } else {
+                layoutProperty->UpdateCalcMinSize(
+                    CalcSize(std::nullopt, CalcLength(layoutProperty->GetMinSizeValue())));
+            }
+        }
+    } else if (parent->GetTag() == V2::ROW_ETS_TAG) {
+        if (layoutProperty->GetHeightValue() > layoutProperty->GetMinSizeValue()) {
+            layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(layoutProperty->GetHeightValue()), std::nullopt));
+        } else {
             layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(layoutProperty->GetMinSizeValue()), std::nullopt));
+        }
+    } else if (parent->GetTag() == V2::COLUMN_ETS_TAG) {
+        if (layoutProperty->GetHeightValue() > layoutProperty->GetMinSizeValue()) {
+            layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(layoutProperty->GetHeightValue())));
         } else {
             layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(layoutProperty->GetMinSizeValue())));
         }
-        return;
     }
-    if (parent->GetTag() == V2::ROW_ETS_TAG) {
-        layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(layoutProperty->GetMinSizeValue()), std::nullopt));
-        return;
+}
+
+RefPtr<FrameNode> BlankPattern::GetParentFrameNode(RefPtr<FrameNode> frameNode)
+{
+    auto parent = frameNode->GetParent();
+    CHECK_NULL_RETURN(parent, nullptr);
+    while (parent) {
+        if (parent->GetTag() == V2::FLEX_ETS_TAG || parent->GetTag() == V2::ROW_ETS_TAG ||
+            parent->GetTag() == V2::COLUMN_ETS_TAG) {
+            break;
+        }
+        parent = parent->GetParent();
     }
-    if (parent->GetTag() == V2::COLUMN_ETS_TAG) {
-        layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(layoutProperty->GetMinSizeValue())));
-        return;
-    }
+    return DynamicCast<FrameNode>(parent);
+}
+
+std::string BlankPattern::GetColorString() const
+{
+    std::string color;
+    auto renderContext = GetHost()->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, "NA");
+    return renderContext->GetBackgroundColor().value_or(Color::WHITE).ColorToString();
+}
+
+void BlankPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("color", GetColorString().c_str());
 }
 
 } // namespace OHOS::Ace::NG

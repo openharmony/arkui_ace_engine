@@ -24,7 +24,8 @@ namespace OHOS::Ace {
 
 class OnTextChangedListenerImpl : public MiscServices::OnTextChangedListener {
 public:
-    explicit OnTextChangedListenerImpl(const WeakPtr<RenderTextField>& field) : field_(field) {}
+    OnTextChangedListenerImpl(const WeakPtr<RenderTextField>& field, const WeakPtr<PipelineContext>& context)
+        : field_(field), context_(context) {}
     ~OnTextChangedListenerImpl() override = default;
 
     void InsertText(const std::u16string& text) override;
@@ -41,6 +42,7 @@ private:
     void HandleFunctionKey(MiscServices::FunctionKey functionKey);
 
     WeakPtr<RenderTextField> field_;
+    WeakPtr<PipelineContext> context_;
 };
 
 } // namespace OHOS::Ace

@@ -15,16 +15,18 @@
 
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 
-#include "third_party/skia/include/effects/SkBlurImageFilter.h"
 #include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 #include "flutter/third_party/txt/src/txt/paragraph_style.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
+#include "third_party/skia/include/effects/SkBlurImageFilter.h"
 #include "third_party/skia/include/encode/SkJpegEncoder.h"
 #include "third_party/skia/include/encode/SkPngEncoder.h"
 #include "third_party/skia/include/encode/SkWebpEncoder.h"
 #include "third_party/skia/include/utils/SkBase64.h"
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/i18n/localization.h"
+#include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
 #include "core/components/common/painter/flutter_decoration_painter.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
@@ -69,9 +71,8 @@ double GetQuality(const std::string& args, const double quality)
 } // namespace
 
 OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(
-    const RefPtr<PipelineContext> context, int32_t width, int32_t height)
+    const RefPtr<PipelineBase> context, int32_t width, int32_t height)
 {
-    isOffscreen_ = true;
     antiAlias_ = true;
     context_ = context;
     width_ = width;
@@ -86,10 +87,8 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(
     skCanvas_ = std::make_unique<SkCanvas>(canvasCache_);
     cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
 
-    auto currentDartState = flutter::UIDartState::Current();
-    if (!currentDartState) {
-        return;
-    }
+    auto* currentDartState = flutter::UIDartState::Current();
+    CHECK_NULL_VOID(currentDartState);
 
     InitFilterFunc();
     InitImageCallbacks();
@@ -423,7 +422,7 @@ double OffscreenCanvasPaintMethod::BlurStrToDouble(const std::string& str)
     return ret;
 }
 
-void OffscreenCanvasPaintMethod::ImageObjReady(const RefPtr<ImageObject>& imageObj)
+void OffscreenCanvasPaintMethod::ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj)
 {
     if (imageObj->IsSvg()) {
         skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj)->GetSkiaDom();
@@ -443,9 +442,8 @@ void OffscreenCanvasPaintMethod::ImageObjFailed()
 void OffscreenCanvasPaintMethod::DrawImage(
     PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
+    auto* currentDartState = flutter::UIDartState::Current();
+    CHECK_NULL_VOID(currentDartState);
 
     std::string::size_type tmp = canvasImage.src.find(".svg");
     if (tmp != std::string::npos) {
@@ -454,12 +452,9 @@ void OffscreenCanvasPaintMethod::DrawImage(
     }
 
     auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
-                        ? ImageProvider::GetSkImage(canvasImage.src, context_, Size(width, height))
-                        : ImageProvider::GetSkImage(canvasImage.src, context_);
-    if (!image) {
-        LOGE("image is null");
-        return;
-    }
+                     ? Ace::ImageProvider::GetSkImage(canvasImage.src, context_, Size(width, height))
+                     : Ace::ImageProvider::GetSkImage(canvasImage.src, context_);
+    CHECK_NULL_VOID(image);
     InitPaintBlend(cachePaint_);
     const auto skCanvas =
         globalState_.GetType() == CompositeOperation::SOURCE_OVER ? skCanvas_.get() : cacheCanvas_.get();
@@ -498,22 +493,18 @@ void OffscreenCanvasPaintMethod::DrawImage(
 
 void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
+    auto* currentDartState = flutter::UIDartState::Current();
+    CHECK_NULL_VOID(currentDartState);
 
     // get skImage form pixelMap
-    auto imageInfo = ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
+    auto imageInfo = Ace::ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
     SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
 
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> image;
 
-    image = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
-    if (!image) {
-        LOGE("image is null");
-        return;
-    }
+    image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
+    CHECK_NULL_VOID(image);
 
     InitPaintBlend(cachePaint_);
     const auto skCanvas =
@@ -619,10 +610,10 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
 
 void OffscreenCanvasPaintMethod::FillText(const std::string& text, double x, double y, const PaintState& state)
 {
-    if (!UpdateOffParagraph(text, false, state)) {
+    if (!UpdateOffParagraph(text, false, state, HasShadow())) {
         return;
     }
-    PaintText(text, x, y, false);
+    PaintText(text, x, y, false, HasShadow());
 }
 
 void OffscreenCanvasPaintMethod::StrokeText(const std::string& text, double x, double y, const PaintState& state)
@@ -631,7 +622,7 @@ void OffscreenCanvasPaintMethod::StrokeText(const std::string& text, double x, d
         if (!UpdateOffParagraph(text, true, state, true)) {
             return;
         }
-        PaintText(text, x, y, true);
+        PaintText(text, x, y, true, true);
     }
 
     if (!UpdateOffParagraph(text, true, state)) {
@@ -647,10 +638,7 @@ double OffscreenCanvasPaintMethod::MeasureText(const std::string& text, const Pa
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
-    if (!fontCollection) {
-        LOGW("MeasureText: fontCollection is null");
-        return 0.0;
-    }
+    CHECK_NULL_RETURN(fontCollection, 0.0);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
@@ -669,10 +657,7 @@ double OffscreenCanvasPaintMethod::MeasureTextHeight(const std::string& text, co
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
-    if (!fontCollection) {
-        LOGW("MeasureText: fontCollection is null");
-        return 0.0;
-    }
+    CHECK_NULL_RETURN(fontCollection, 0.0);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
@@ -687,14 +672,12 @@ double OffscreenCanvasPaintMethod::MeasureTextHeight(const std::string& text, co
 TextMetrics OffscreenCanvasPaintMethod::MeasureTextMetrics(const std::string& text, const PaintState& state)
 {
     using namespace Constants;
+    TextMetrics textMetrics = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
-    if (!fontCollection) {
-        LOGW("MeasureText: fontCollection is null");
-        return { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-    }
+    CHECK_NULL_RETURN(fontCollection, textMetrics);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
@@ -706,17 +689,13 @@ TextMetrics OffscreenCanvasPaintMethod::MeasureTextMetrics(const std::string& te
 
     auto textAlign = state.GetTextAlign();
     auto textBaseLine = state.GetTextStyle().GetTextBaseline();
-
-    auto width = paragraph->GetMaxIntrinsicWidth();
-    auto height = paragraph->GetHeight();
-
-    auto actualBoundingBoxLeft = -GetAlignOffset(text, textAlign, paragraph);
-    auto actualBoundingBoxRight = width - actualBoundingBoxLeft;
-    auto actualBoundingBoxAscent = -GetBaselineOffset(textBaseLine, paragraph);
-    auto actualBoundingBoxDescent = height - actualBoundingBoxAscent;
-
-    return { width, height, actualBoundingBoxLeft, actualBoundingBoxRight, actualBoundingBoxAscent,
-        actualBoundingBoxDescent };
+    textMetrics.width = paragraph->GetMaxIntrinsicWidth();
+    textMetrics.height = paragraph->GetHeight();
+    textMetrics.actualBoundingBoxLeft = -GetAlignOffset(text, textAlign, paragraph);
+    textMetrics.actualBoundingBoxRight = textMetrics.width - textMetrics.actualBoundingBoxLeft;
+    textMetrics.actualBoundingBoxAscent = -GetBaselineOffset(textBaseLine, paragraph);
+    textMetrics.actualBoundingBoxDescent = textMetrics.height - textMetrics.actualBoundingBoxAscent;
+    return textMetrics;
 }
 
 void OffscreenCanvasPaintMethod::PaintText(
@@ -809,9 +788,7 @@ bool OffscreenCanvasPaintMethod::UpdateOffParagraph(const std::string& text, boo
     }
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
-    if (!fontCollection) {
-        return false;
-    }
+    CHECK_NULL_RETURN(fontCollection, false);
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
     if (!isStroke && hasShadow) {
@@ -890,6 +867,29 @@ TextDirection OffscreenCanvasPaintMethod::GetTextDirection(const std::string& co
     return textDirection;
 }
 
+void OffscreenCanvasPaintMethod::PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas)
+{
+    FlutterDecorationPainter::PaintShadow(path, shadow, canvas);
+}
+
+void OffscreenCanvasPaintMethod::Path2DRect(const OffsetF& offset, const PathArgs& args)
+{
+    double left = args.para1 + offset.GetX();
+    double top = args.para2 + offset.GetY();
+    double right = args.para3 + args.para1;
+    double bottom = args.para4 + args.para2;
+    skPath2d_.addRect(SkRect::MakeLTRB(left, top, right, bottom));
+}
+
+void OffscreenCanvasPaintMethod::SetTransform(const TransformParam& param)
+{
+    double viewScale = context_->GetViewScale();
+    SkMatrix skMatrix;
+    skMatrix.setAll(param.scaleX * viewScale, param.skewY * viewScale, param.translateX, param.skewX * viewScale,
+        param.scaleY * viewScale, param.translateY, 0, 0, 1);
+    skCanvas_->setMatrix(skMatrix);
+}
+
 std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const double quality)
 {
     CHECK_NULL_RETURN(context_, UNSUPPORTED);
@@ -910,9 +910,7 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
 #endif
     SkPixmap src;
     bool success = tempCache.peekPixels(&src);
-    if (!success) {
-        return UNSUPPORTED;
-    }
+    CHECK_NULL_RETURN(success, UNSUPPORTED);
     SkDynamicMemoryWStream dst;
     if (mimeType == IMAGE_JPEG) {
         SkJpegEncoder::Options options;
@@ -927,13 +925,9 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
         SkPngEncoder::Options options;
         success = SkPngEncoder::Encode(&dst, src, options);
     }
-    if (!success) {
-        return UNSUPPORTED;
-    }
+    CHECK_NULL_RETURN(success, UNSUPPORTED);
     auto result = dst.detachAsData();
-    if (result == nullptr) {
-        return UNSUPPORTED;
-    }
+    CHECK_NULL_RETURN(result, UNSUPPORTED);
     size_t len = SkBase64::Encode(result->data(), result->size(), nullptr);
     if (len > MAX_LENGTH) {
         return UNSUPPORTED;

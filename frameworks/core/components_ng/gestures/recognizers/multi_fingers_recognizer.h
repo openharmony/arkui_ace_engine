@@ -16,45 +16,53 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_MULTI_FINGERS_RECOGNIZER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_MULTI_FINGERS_RECOGNIZER_H
 
-#include <functional>
+#include <list>
 #include <map>
 
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 
 namespace OHOS::Ace::NG {
 
-// ClickRecognizer identifies only single click events.
-// For long press and double click, see: LongPressRecognizer and DoubleClickRecognizer.
-class MultiFingersRecognizer : public GestureRecognizer {
-    DECLARE_ACE_TYPE(MultiFingersRecognizer, GestureRecognizer);
+class MultiFingersRecognizer : public NGGestureRecognizer {
+    DECLARE_ACE_TYPE(MultiFingersRecognizer, NGGestureRecognizer);
 
 public:
     MultiFingersRecognizer() = default;
+    explicit MultiFingersRecognizer(int32_t fingers) : fingers_(fingers) {}
+
     ~MultiFingersRecognizer() override = default;
 
-    void OnAccepted(size_t touchId) override;
-    void OnRejected(size_t touchId) override;
-    void AddToReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer) override;
-    void DelFromReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer) override;
-    bool IsInReferee(size_t touchId);
+    void UpdateFingerListInfo(const Offset& coordinateOffset);
 
-    void Adjudicate(const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal);
-
-    virtual void OnAccepted() {}
-    virtual void OnRejected() {}
-
-    void SetRefereePointer(size_t touchId)
+    bool CheckTouchId(int32_t touchId) override
     {
-        refereePointers_.emplace(touchId);
+        return touchPoints_.find(touchId) != touchPoints_.end();
     }
 
-    std::set<size_t> refereePointers_;
+protected:
+    void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override
+    {
+        touchPoints_[touchId] = {};
+    }
 
-    void SetFingerList(const std::map<int32_t, TouchEvent> touchPoints, const Offset& coordinateOffset,
-        std::list<FingerInfo>& fingerList);
+    void OnFinishGestureReferee(int32_t touchId) override
+    {
+        touchPoints_.erase(touchId);
+        if (touchPoints_.empty()) {
+            ResetStatusOnFinish();
+        }
+    }
 
-private:
-    size_t acceptedCount_ = 0;
+    void OnResetStatus() override
+    {
+        touchPoints_.clear();
+        fingerList_.clear();
+    }
+
+    std::map<int32_t, TouchEvent> touchPoints_;
+    std::list<FingerInfo> fingerList_;
+
+    int32_t fingers_ = 1;
 };
 
 } // namespace OHOS::Ace::NG

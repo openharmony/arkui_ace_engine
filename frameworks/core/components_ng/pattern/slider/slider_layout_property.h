@@ -32,7 +32,6 @@ public:
         auto value = MakeRefPtr<SliderLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propSliderLayoutStyle_ = CloneSliderLayoutStyle();
-        value->propSliderLayoutThemeStyle_ = CloneSliderLayoutThemeStyle();
         return value;
     }
 
@@ -40,21 +39,29 @@ public:
     {
         LayoutProperty::Reset();
         ResetSliderLayoutStyle();
-        ResetSliderLayoutThemeStyle();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+        json->Put("thickness", GetThickness().value_or(Dimension(20.0, DimensionUnit::VP)).ToString().c_str());
+        static const std::array<std::string, 3> SLIDER_MODE_TO_STRING = {
+            "SliderMode.OUTSET",
+            "SliderMode.INSET",
+            "SliderMode.CAPSULE",
+        };
+        // should be in constructor
+        json->Put("style",
+            SLIDER_MODE_TO_STRING.at(static_cast<int32_t>(GetSliderMode().value_or(SliderModel::SliderMode::OUTSET)))
+                .c_str());
+        json->Put("showTips", GetShowTips().value_or(false) ? "true" : "false");
     }
 
     ACE_DEFINE_PROPERTY_GROUP(SliderLayoutStyle, SliderLayoutStyle)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutStyle, Direction, Axis, PROPERTY_UPDATE_MEASURE)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutStyle, Thickness, Dimension, PROPERTY_UPDATE_MEASURE)
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutStyle, SliderMode, SliderMode, PROPERTY_UPDATE_MEASURE)
-    ACE_DEFINE_PROPERTY_GROUP(SliderLayoutThemeStyle, SliderLayoutThemeStyle)
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutThemeStyle, OutsetBlockSize, Dimension, PROPERTY_UPDATE_MEASURE)
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutThemeStyle, OutsetBlockHotSize, Dimension, PROPERTY_UPDATE_MEASURE)
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
-        SliderLayoutThemeStyle, OutsetTrackThickness, Dimension, PROPERTY_UPDATE_MEASURE)
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutThemeStyle, InsetBlockSize, Dimension, PROPERTY_UPDATE_MEASURE)
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutThemeStyle, InsetBlockHotSize, Dimension, PROPERTY_UPDATE_MEASURE)
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutThemeStyle, InsetTrackThickness, Dimension, PROPERTY_UPDATE_MEASURE)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutStyle, SliderMode, SliderModel::SliderMode, PROPERTY_UPDATE_MEASURE)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderLayoutStyle, ShowTips, bool, PROPERTY_UPDATE_MEASURE)
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SliderLayoutProperty);
 };

@@ -17,6 +17,7 @@
 #include <shared_mutex>
 #include <unistd.h>
 
+#include "base/utils/utils.h"
 #include "base/utils/system_properties.h"
 
 #include "parameter.h"
@@ -31,14 +32,16 @@
 namespace OHOS::Ace {
 namespace {
 
-const char PROPERTY_DEVICE_TYPE[] = "const.build.characteristics";
+const char PROPERTY_DEVICE_TYPE[] = "const.product.devicetype";
 const char PROPERTY_DEVICE_TYPE_DEFAULT[] = "default";
 const char PROPERTY_DEVICE_TYPE_TV[] = "tv";
 const char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
 const char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 const char PROPERTY_DEVICE_TYPE_CAR[] = "car";
+#ifdef ENABLE_ROSEN_BACKEND
 const char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
+#endif
 const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 const char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
 
@@ -138,10 +141,7 @@ bool IsGpuUploadEnabled()
 
 void OnAnimationScaleChanged(const char *key, const char *value, void *context)
 {
-    if (key == nullptr) {
-        LOGE("AnimationScale changes failed. key is null.");
-        return;
-    }
+    CHECK_NULL_VOID(key);
     if (strcmp(key, ANIMATION_SCALE_KEY) != 0) {
         LOGE("AnimationScale key not matched. key: %{public}s", key);
         return;
@@ -237,6 +237,15 @@ int32_t GetAstcPsnrProp()
     return system::GetIntParameter<int>("persist.astc.psnr", 0);
 }
 
+bool IsExtSurfaceEnabled()
+{
+#ifdef EXT_SURFACE_ENABLE
+    return true;
+#else
+    return false;
+#endif
+}
+
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
@@ -269,6 +278,7 @@ bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
 bool SystemProperties::astcEnabled_ = GetAstcEnabled();
 int32_t SystemProperties::astcMax_ = GetAstcMaxErrorProp();
 int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
+bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 
 DeviceType SystemProperties::GetDeviceType()
 {
@@ -314,7 +324,7 @@ void SystemProperties::InitDeviceInfo(
     product_ = system::GetParameter("const.product.name", INVALID_PARAM);
     apiVersion_ = system::GetParameter("const.ohos.apiversion", INVALID_PARAM);
     releaseType_ = system::GetParameter("const.ohos.releasetype", INVALID_PARAM);
-    paramDeviceType_ = system::GetParameter("const.build.characteristics", INVALID_PARAM);
+    paramDeviceType_ = system::GetParameter("const.product.devicetype", INVALID_PARAM);
 
     debugEnabled_ = IsDebugEnabled();
     traceEnabled_ = IsTraceEnabled();
@@ -365,6 +375,11 @@ bool SystemProperties::GetDebugEnabled()
     return debugEnabled_;
 }
 
+bool SystemProperties::GetResourceUseHapPathEnable()
+{
+    return system::GetBoolParameter("compress", false);
+}
+
 std::string SystemProperties::GetLanguage()
 {
     return system::GetParameter("const.global.language", INVALID_PARAM);
@@ -393,7 +408,7 @@ std::string SystemProperties::GetPartialUpdatePkg()
 
 int32_t SystemProperties::GetSvgMode()
 {
-    return system::GetIntParameter<int>("persist.ace.svg.mode", 0);
+    return system::GetIntParameter<int>("persist.ace.svg.mode", 1);
 }
 
 } // namespace OHOS::Ace

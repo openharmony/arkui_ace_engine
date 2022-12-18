@@ -20,27 +20,12 @@
 #include <sstream>
 #include <string>
 
-#include "runtime_extractor.h"
+#include "extractor.h"
 
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"
 
 namespace OHOS::Ace {
-
-bool GetIsArkFromConfig(const std::string& packagePath, bool isHap)
-{
-    std::string jsonStr = isHap ? GetStringFromHap(packagePath, "config.json") :
-        GetStringFromFile(packagePath, "config.json");
-    if (jsonStr.empty()) {
-        LOGE("return not arkApp.");
-        return false;
-    }
-    auto rootJson = JsonUtil::ParseJsonString(jsonStr);
-    auto module = rootJson->GetValue("module");
-    auto distro = module->GetValue("distro");
-    std::string virtualMachine = distro->GetString("virtualMachine");
-    return virtualMachine.find("ark") != std::string::npos;
-}
 
 std::string GetStringFromFile(const std::string& packagePathStr, const std::string& fileName)
 {
@@ -80,15 +65,16 @@ std::string GetStringFromFile(const std::string& packagePathStr, const std::stri
 
 std::string GetStringFromHap(const std::string& hapPath, const std::string& fileName)
 {
-    std::shared_ptr<AbilityRuntime::RuntimeExtractor> runtimeExtractor =
-        AbilityRuntime::RuntimeExtractor::Create(hapPath);
-    if (!runtimeExtractor) {
+    bool newCreate = false;
+    std::string loadPath = AbilityBase::ExtractorUtil::GetLoadFilePath(hapPath);
+    std::shared_ptr<AbilityBase::Extractor> extractor = AbilityBase::ExtractorUtil::GetExtractor(loadPath, newCreate);
+    if (!extractor) {
         LOGE("read file %{public}s error\n", hapPath.c_str());
         return "";
     }
 
     std::ostringstream osstream;
-    bool hasFile = runtimeExtractor->GetFileBuffer(fileName, osstream);
+    bool hasFile = extractor->GetFileBuffer(fileName, osstream);
     if (!hasFile) {
         LOGE("read file %{public}s /config.json error\n", hapPath.c_str());
         return "";

@@ -108,54 +108,14 @@ public:
         return propOnMouseEvent_;
     }
 
-    void SetOnDragStartEvent(const OnDragFunc& propOnDragStartEvent)
+    void SetOnPreKeyEvent(std::function<bool(KeyEventInfo& keyEventInfo)>&& propOnPreKeyEvent)
     {
-        propOnDragStartEvent_ = propOnDragStartEvent;
+        propOnPreKeyEvent_ = propOnPreKeyEvent;
     }
 
-    const OnDragFunc& GetOnDragEvent() const
+    const std::function<bool(KeyEventInfo& keyEventInfo)>& GetOnPreKeyEvent() const
     {
-        return propOnDragStartEvent_;
-    }
-
-    void SetOnDragEnterEvent(const OnDropFunc& propOnDragEnterEvent)
-    {
-        propOnDragEnterEvent_ = propOnDragEnterEvent;
-    }
-
-    const OnDropFunc& GetOnDragEnterEvent() const
-    {
-        return propOnDragEnterEvent_;
-    }
-
-    void SetOnDragMoveEvent(const OnDropFunc& propOnDragMoveEvent)
-    {
-        propOnDragMoveEvent_ = propOnDragMoveEvent;
-    }
-
-    const OnDropFunc& GetOnDragMoveEvent() const
-    {
-        return propOnDragMoveEvent_;
-    }
-
-    void SetOnDragLeaveEvent(const OnDropFunc& propOnDragLeaveEvent)
-    {
-        propOnDragLeaveEvent_ = propOnDragLeaveEvent;
-    }
-
-    const OnDropFunc& GetOnDragLeaveEvent() const
-    {
-        return propOnDragLeaveEvent_;
-    }
-
-    void SetOnDropEvent(const OnDropFunc& propOnDropEvent)
-    {
-        propOnDropEvent_ = propOnDropEvent;
-    }
-
-    const OnDropFunc& GetOnDropEvent() const
-    {
-        return propOnDropEvent_;
+        return propOnPreKeyEvent_;
     }
 
     ACE_WEB_EVENT_PROPERTY(OnPageStarted, void);
@@ -187,6 +147,10 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnSearchResultReceive, void);
     ACE_WEB_EVENT_PROPERTY(OnWindowNew, void);
     ACE_WEB_EVENT_PROPERTY(OnWindowExit, void);
+    ACE_WEB_EVENT_PROPERTY(OnPageVisible, void);
+    ACE_WEB_EVENT_PROPERTY(OnDataResubmitted, void);
+    ACE_WEB_EVENT_PROPERTY(OnFaviconReceived, void);
+    ACE_WEB_EVENT_PROPERTY(OnTouchIconUrl, void);
 
 private:
     std::function<void(KeyEventInfo& keyEventInfo)> propOnKeyEvent_;
@@ -200,6 +164,7 @@ private:
     std::function<bool(const std::shared_ptr<BaseEventInfo>& info)> onConfirmImpl_;
     std::function<bool(const std::shared_ptr<BaseEventInfo>& info)> onPromptImpl_;
     std::function<bool(const std::shared_ptr<BaseEventInfo>& info)> onBeforeUnloadImpl_;
+    std::function<bool(KeyEventInfo& keyEventInfo)> propOnPreKeyEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(WebEventHub);
 };

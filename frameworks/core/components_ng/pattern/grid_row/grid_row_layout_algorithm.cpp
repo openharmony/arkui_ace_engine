@@ -38,38 +38,25 @@ namespace {
 std::string ConvertSizeTypeToString(GridSizeType sizeType)
 {
     auto index = static_cast<int32_t>(sizeType);
-    std::array<const char*, 7> refs { "xs", "sm", "lg", "md", "xl", "xxl", "undefined" }; // 7 types of size
+    std::array<const char*, 7> refs { "xs", "sm", "md", "lg", "xl", "xxl", "undefined" }; // 7 types of size
     return refs[index];
 }
 
-bool ParseNewLineForLargeOffset(
+void ParseNewLineForLargeOffset(
     int32_t childSpan, int32_t childOffset, int32_t restColumnNum, int32_t totalColumnNum, NewLineOffset& newLineOffset)
 {
-    if (childOffset <= totalColumnNum) {
-        return false;
-    }
-    auto totalOffsetStartFromNewLine = childOffset - restColumnNum;
-    auto lineCountForLargeChildOffset = static_cast<int32_t>(totalOffsetStartFromNewLine / totalColumnNum);
-    if (totalOffsetStartFromNewLine > totalColumnNum) {
-        // ex. totalColumn 12, restColumn is 4, child offset 26, span 6. Offsets of next 2 lines are 12 and 10
-        // then the child will be placed at the third new line with offset 0.
-        if ((totalOffsetStartFromNewLine % totalColumnNum) + childSpan > totalColumnNum) {
-            newLineOffset.offset = 0;
-            lineCountForLargeChildOffset++;
-        } else {
-            // ex. totalColumn 12, restColumn is 4, child offset 20, span 6. Offsets of next 2 lines are 12 and 4
-            // then the child will be placed at the second new line with offset 4.
-            newLineOffset.offset = totalOffsetStartFromNewLine % totalColumnNum;
-        }
-        newLineOffset.newLineCount = lineCountForLargeChildOffset;
-        return true;
-    }
-    if (totalOffsetStartFromNewLine + childSpan > totalColumnNum) {
-        newLineOffset.newLineCount += 1;
+    int32_t totalOffsetStartFromNewLine = childOffset - restColumnNum;
+    newLineOffset.newLineCount = totalOffsetStartFromNewLine / totalColumnNum + 1;
+    // ex. totalColumn 12, restColumn is 4, child offset 26, span 6. Offsets of next 2 lines are 12 and 10
+    // then the child will be placed at the third new line with offset 0.
+    if ((totalOffsetStartFromNewLine % totalColumnNum) + childSpan > totalColumnNum) {
         newLineOffset.offset = 0;
-        return true;
+        ++newLineOffset.newLineCount;
+    } else {
+        // ex. totalColumn 12, restColumn is 4, child offset 20, span 6. Offsets of next 2 lines are 12 and 4
+        // then the child will be placed at the second new line with offset 4.
+        newLineOffset.offset = totalOffsetStartFromNewLine % totalColumnNum;
     }
-    return false;
 }
 
 void CalculateOffsetOfNewline(const RefPtr<GridColLayoutProperty>& gridCol, int32_t currentChildSpan,
@@ -77,42 +64,31 @@ void CalculateOffsetOfNewline(const RefPtr<GridColLayoutProperty>& gridCol, int3
 {
     newLineOffset.span = currentChildSpan;
     int32_t offset = gridCol->GetOffset(sizeType);
-    if (restColumnNum < offset + currentChildSpan) {
-        newLineOffset.newLineCount = 1;
+    if (restColumnNum < (offset + currentChildSpan)) {
         // ex. if there are 7 columns left and chile span is 4 or 8(< or > than restColumnNum), offset is 5,
         // child will be set on a new row with offset 0
         if (restColumnNum >= offset) {
+            newLineOffset.newLineCount = 1;
             newLineOffset.offset = 0;
-            return;
+        } else {
+            ParseNewLineForLargeOffset(currentChildSpan, offset, restColumnNum, totalColumnNum, newLineOffset);
         }
-        // in this case, child will be set on a new row with offset (child offset - restColumnNum)
-        if (restColumnNum < offset && restColumnNum > currentChildSpan) {
-            if (ParseNewLineForLargeOffset(currentChildSpan, offset, restColumnNum, totalColumnNum, newLineOffset)) {
-                return;
-            }
-            newLineOffset.offset = offset - restColumnNum;
-            return;
-        }
-        // in this case, empty line(s) will be placed
-        if (restColumnNum < offset && restColumnNum < currentChildSpan) {
-            if (ParseNewLineForLargeOffset(currentChildSpan, offset, restColumnNum, totalColumnNum, newLineOffset)) {
-                return;
-            }
-            newLineOffset.offset = offset - restColumnNum;
-            return;
-        }
+    } else {
+        // in this case, child can be place at current row
+        newLineOffset.newLineCount = 0;
+        newLineOffset.offset = offset;
     }
-    // in this case, child can be place at current row
-    newLineOffset.offset = offset;
 }
 
 } // namespace
 
-void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, SizeF& frameSize)
+void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, float childHeight)
 {
     const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto layoutConstraint = layoutProperty->GetLayoutConstraint();
 
+    auto frameSize = CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
+    frameSize.SetHeight(childHeight);
     frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
 }
@@ -149,25 +125,32 @@ float GridRowLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, doub
 
         /* Measure child */
         auto span = std::min(gridCol->GetSpan(sizeType), columnNum);
-        OptionalSize<float> ideaSize;
-        ideaSize.SetWidth(columnUnitWidth * span + (span - 1) * gutter.first);
-        LayoutConstraintF parentConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-        parentConstraint.UpdateSelfMarginSizeWithCheck(ideaSize);
-        child->Measure(parentConstraint);
 
         /* Calculate line break */
         NewLineOffset newLineOffset;
         CalculateOffsetOfNewline(gridCol, span, columnNum - offset, columnNum, sizeType, newLineOffset);
 
-        /* accumulate total lines */
+        /* update total height */
         if (newLineOffset.newLineCount > 0) {
             totalHeight += (currentRowHeight * newLineOffset.newLineCount + gutter.second);
+        }
+
+        OptionalSize<float> ideaSize;
+        ideaSize.SetWidth(columnUnitWidth * span + (span - 1) * gutter.first);
+        LayoutConstraintF parentConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+        parentConstraint.UpdateSelfMarginSizeWithCheck(ideaSize);
+        // the max size need to minus the already allocated height.
+        parentConstraint.maxSize.MinusHeight(totalHeight);
+        child->Measure(parentConstraint);
+
+        if (newLineOffset.newLineCount > 0) {
             currentRowHeight = child->GetGeometryNode()->GetFrameSize().Height();
         } else {
             newLineOffset.offset += offset;
             auto childHeight = child->GetGeometryNode()->GetFrameSize().Height();
             currentRowHeight = std::max(currentRowHeight, childHeight);
         }
+
         offset = newLineOffset.offset + newLineOffset.span;
         newLineOffset.offsetY = totalHeight;
         LOGD("GridRowLayoutAlgorithm::MeasureChildren(), height=%f, span=%d, newline=%d, offsetY=%f, offset=%d",
@@ -184,8 +167,9 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
 
-    auto maxSize = CreateIdealSize(
-        layoutProperty->GetLayoutConstraint().value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
+    auto maxSize = CreateIdealSize(layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF()),
+        Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
+    CreateChildrenConstraint(maxSize, layoutProperty->GetMarginProperty(), layoutProperty->GetPaddingProperty());
     auto context = NG::PipelineContext::GetCurrentContext();
     auto sizeType = GridContainerUtils::ProcessGridSizeType(
         layoutProperty->GetBreakPointsValue(), Size(maxSize.Width(), maxSize.Height()));
@@ -203,8 +187,8 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureChildren(layoutWrapper, columnUnitWidth_, maxSize.Height(), gutterInDouble_, sizeType, columnNum);
     LOGI("GridRowLayoutAlgorithm::Measure() columnNum=%d, columnUnitWidth_=%f, childrenHeight=%f, sizetype=%d",
         columnNum, columnUnitWidth_, childrenHeight, static_cast<int>(sizeType));
-    maxSize.SetHeight(childrenHeight);
-    MeasureSelf(layoutWrapper, maxSize);
+
+    MeasureSelf(layoutWrapper, childrenHeight);
 }
 
 void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

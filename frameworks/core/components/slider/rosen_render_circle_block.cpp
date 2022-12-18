@@ -21,8 +21,10 @@
 
 #include "base/utils/system_properties.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/pipeline/base/rosen_render_context.h"
+#include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -42,6 +44,51 @@ void RosenRenderCircleBlock::Update(const RefPtr<Component>& component)
 {
     LOGD("Slider::Update");
     RenderBlock::Update(component);
+}
+
+void RosenRenderCircleBlock::SyncGeometryProperties()
+{
+    RenderBlock::SyncGeometryProperties();
+    auto rsNode = GetRSNode();
+    if (!rsNode) {
+        return;
+    }
+
+    double radius = NormalizeToPx(blockSize_) * HALF * radiusScale_;
+    double diameter = radius * 2.0;
+    auto frame = rsNode->GetStagingProperties().GetFrame();
+    SkRect rect = SkRect::MakeXYWH(frame.x_ - radius, frame.y_ - radius, diameter, diameter);
+
+    float elevationOfDefaultShadowXS = 4.0f;
+    float transRatio = elevationOfDefaultShadowXS / (LIGHT_HEIGHT - elevationOfDefaultShadowXS);
+    float spotRatio = LIGHT_HEIGHT / (LIGHT_HEIGHT - elevationOfDefaultShadowXS);
+
+    SkRect spotRect = SkRect::MakeLTRB(rect.left() * spotRatio, rect.top() * spotRatio,
+        rect.right() * spotRatio, rect.bottom() * spotRatio);
+    spotRect.offset(-transRatio * LIGHT_POSITION_X, -transRatio * LIGHT_POSITION_Y);
+    spotRect.outset(transRatio * LIGHT_RADIUS, transRatio * LIGHT_RADIUS);
+
+    SkRect shadowRect = rect;
+    float ambientBlur = 2.0f;
+    shadowRect.outset(ambientBlur, ambientBlur);
+    shadowRect.join(spotRect);
+    shadowRect.outset(1, 1);
+
+    float offsetX = 0.0f;
+    float offsetY = 0.0f;
+    if (isHover_) {
+        double hoverRadius = NormalizeToPx(HOVER_RADIUS);
+        offsetX = hoverRadius > shadowRect.width() * HALF ? hoverRadius : shadowRect.width() * HALF;
+        offsetY = hoverRadius > shadowRect.height() * HALF ? hoverRadius : shadowRect.height() * HALF;
+    } else if (isPress_) {
+        double pressRadius = NormalizeToPx(PRESS_RADIUS);
+        offsetX = pressRadius > shadowRect.width() * HALF ? pressRadius : shadowRect.width() * HALF;
+        offsetY = pressRadius > shadowRect.height() * HALF ? pressRadius : shadowRect.height() * HALF;
+    } else {
+        offsetX = shadowRect.width() * HALF;
+        offsetY = shadowRect.height() * HALF;
+    }
+    rsNode->SetFrame(frame.x_ - offsetX, frame.y_ - offsetY, frame.z_ + offsetX, frame.w_ + offsetY);
 }
 
 void RosenRenderCircleBlock::Paint(RenderContext& context, const Offset& offset)

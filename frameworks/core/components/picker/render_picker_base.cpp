@@ -335,9 +335,9 @@ void RenderPickerBase::LayoutBoxes()
         LOGE("inner param invalidate.");
         return;
     }
-
     auto theme = data_->GetTheme();
     outBox_->Layout(LayoutParam());
+    SetOutBoxBorderRadius();
     Size innerSize = box_->GetLayoutSize();
     if (innerSize.Width() < NormalizeToPx(theme->GetButtonWidth()) * 2.0) { // ok width + cancel width
         innerSize.SetWidth(NormalizeToPx(theme->GetButtonWidth()) * 2.0);   // ok width + cancel width
@@ -349,9 +349,10 @@ void RenderPickerBase::LayoutBoxes()
     LayoutParam layout;
     layout.SetFixedSize(GetLayoutParam().GetMaxSize());
     outBox_->Layout(layout);
-    double x = (stack_->GetLayoutSize().Width() - innerSize.Width()) / 2.0; // place center
+    double x = (outBox_->GetLayoutSize().Width() - innerSize.Width()) / 2.0; // place center
     double y = 0.0;
-    if (theme->GetShowButtons()) {
+    auto deviceType = SystemProperties::GetDeviceType();
+    if (theme->GetShowButtons() && deviceType == DeviceType::PHONE) {
         y = (outBox_->GetLayoutSize().Height() - innerSize.Height() -
              NormalizeToPx(theme->GetButtonTopPadding())); // place bottom
     } else {
@@ -410,6 +411,26 @@ void RenderPickerBase::LayoutColumns()
         layout.SetFixedSize(Size(columnWidth, totalHeight));
         columns_[realIndex]->Layout(layout);
         left += columnWidth;
+    }
+}
+
+void RenderPickerBase::SetOutBoxBorderRadius()
+{
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        auto decoration = outBox_->GetBackDecoration();
+        auto parent = outBox_->GetParent().Upgrade();
+        auto borderRadius = Radius();
+        while (parent) {
+            if (AceType::InstanceOf<RenderBox>(parent)) {
+                auto boxParent = DynamicCast<RenderBox>(parent);
+                borderRadius = boxParent->GetBackDecoration()->GetBorder().TopLeftRadius();
+                break;
+            }
+            parent = parent->GetParent().Upgrade();
+        }
+        decoration->SetBorderRadius(borderRadius);
+        outBox_->SetBackDecoration(decoration);
     }
 }
 
@@ -809,6 +830,9 @@ void RenderPickerBase::GetRenders(const RefPtr<RenderNode>& render)
 
     DealRenders(render);
     for (const auto& child : render->GetChildren()) {
+#if defined(PREVIEW)
+        child->SetAccessibilityNode(nullptr);
+#endif
         GetRenders(child);
     }
 }

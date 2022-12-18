@@ -71,7 +71,7 @@ public:
     Frontend() = default;
     ~Frontend() override = default;
 
-    enum class State { ON_CREATE, ON_DESTROY, ON_SHOW, ON_HIDE };
+    enum class State { ON_CREATE, ON_DESTROY, ON_SHOW, ON_HIDE, ON_ACTIVE, ON_INACTIVE, UNDEFINE };
 
     static RefPtr<Frontend> Create();
     static RefPtr<Frontend> CreateDefault();
@@ -125,6 +125,8 @@ public:
 
     // dump frontend info
     virtual void DumpFrontend() const = 0;
+
+    virtual std::string GetPagePath() const = 0;
 
     // send the message by js callback
     virtual void SendCallbackMessage(const std::string& callbackId, const std::string& data) const = 0;
@@ -201,8 +203,6 @@ public:
 
     virtual void OnNewWant(const std::string& data) = 0;
 
-    virtual void OnDialogUpdated(const std::string& data) = 0;
-
     // call router back
     virtual void CallRouterBack() = 0;
 
@@ -255,6 +255,7 @@ public:
 protected:
     bool disallowPopLastPage_ = false;
     FrontendDialogCallback dialogCallback_ = nullptr;
+    State state_ = State::UNDEFINE;
 };
 
 } // namespace OHOS::Ace

@@ -32,6 +32,9 @@ class TabsPattern : public Pattern {
     DECLARE_ACE_TYPE(TabsPattern, Pattern);
 
 public:
+    using ChangeEvent = std::function<void(int32_t)>;
+    using ChangeEventPtr = std::shared_ptr<ChangeEvent>;
+
     TabsPattern() = default;
     ~TabsPattern() override = default;
 
@@ -50,8 +53,32 @@ public:
         return MakeRefPtr<TabsLayoutAlgorithm>();
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
+    {
+        auto property = GetLayoutProperty<TabsLayoutProperty>();
+        if (!property) {
+            return {};
+        }
+        bool isVertical = true;
+        if (property->GetAxis().has_value()) {
+            isVertical = property->GetAxis().value() == Axis::HORIZONTAL;
+        }
+        return { isVertical, true, ScopeType::FLEX };
+    }
+
+    void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& event);
+
+    void OnModifyDone() override;
+
 private:
     void OnAttachToFrameNode() override;
+
+    ChangeEventPtr onChangeEvent_;
 };
 
 } // namespace OHOS::Ace::NG

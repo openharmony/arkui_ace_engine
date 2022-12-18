@@ -22,6 +22,7 @@
 
 #include "accessibility_config.h"
 #include "accessibility_element_operator.h"
+#include "accessibility_event_info.h"
 #include "accessibility_state_event.h"
 
 #include "core/accessibility/accessibility_manager.h"
@@ -35,13 +36,11 @@ class JsAccessibilityManager : public AccessibilityNodeManager {
 
 public:
     JsAccessibilityManager() = default;
-    virtual ~JsAccessibilityManager();
+    ~JsAccessibilityManager() override;
 
     // JsAccessibilityManager overrides functions.
     void InitializeCallback() override;
     void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) override;
-    void DumpHandleEvent(const std::vector<std::string>& params) override;
-    void DumpProperty(const std::vector<std::string>& params) override;
     void SetCardViewParams(const std::string& key, bool focus) override;
     void HandleComponentPostBinding() override;
 
@@ -75,7 +74,8 @@ public:
     virtual bool UnsubscribeStateObserver(const int eventType);
     virtual int RegisterInteractionOperation(const int windowId);
     virtual void DeregisterInteractionOperation();
-    virtual bool SendAccessibilitySyncEvent(const AccessibilityEvent& accessibilityEvent);
+    virtual bool SendAccessibilitySyncEvent(
+        const AccessibilityEvent& accessibilityEvent, Accessibility::AccessibilityEventInfo eventInfo);
 
     void SearchElementInfoByAccessibilityId(const int32_t elementId, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode);
@@ -91,6 +91,13 @@ public:
     bool ClearCurrentFocus();
     void UpdateNodeChildIds(const RefPtr<AccessibilityNode>& node);
     void SendActionEvent(const Accessibility::ActionType& action, NodeId nodeId);
+
+    std::string GetPagePath();
+
+protected:
+    void DumpHandleEvent(const std::vector<std::string>& params) override;
+    void DumpProperty(const std::vector<std::string>& params) override;
+    void DumpTree(int32_t depth, NodeId nodeID) override;
 
 private:
     class JsInteractionOperation : public Accessibility::AccessibilityElementOperator {
@@ -165,15 +172,18 @@ private:
         const std::list<RefPtr<AccessibilityNode>>& nodeList, RefPtr<AccessibilityNode>& node);
     RefPtr<AccessibilityNode> GetPreviousFocusableNode(
         const std::list<RefPtr<AccessibilityNode>>& nodeList, RefPtr<AccessibilityNode>& node);
-    bool CheckBetterRect(Rect nodeRect, const int direction, Rect itemRect, Rect tempBest);
-    bool IsCandidateRect(Rect nodeRect, Rect itemRect, const int direction);
-    bool OutrightBetter(Rect nodeRect, const int direction, Rect Rect1, Rect Rect2);
-    bool CheckRectBeam(Rect nodeRect, Rect itemRect, const int direction);
-    bool IsToDirectionOf(Rect nodeRect, Rect itemRect, const int direction);
-    double MajorAxisDistanceToFarEdge(Rect nodeRect, Rect itemRect, const int direction);
-    double MajorAxisDistance(Rect nodeRect, Rect itemRect, const int direction);
-    double MinorAxisDistance(Rect nodeRect, Rect itemRect, const int direction);
-    double GetWeightedDistanceFor(double majorAxisDistance, double minorAxisDistance);
+
+    void SearchElementInfoByAccessibilityIdNG(
+        int32_t elementId, int32_t mode, std::list<Accessibility::AccessibilityElementInfo>& infos);
+
+    void SearchElementInfosByTextNG(
+        int32_t elementId, const std::string& text, std::list<Accessibility::AccessibilityElementInfo>& infos);
+
+    void FindFocusedElementInfoNG(int32_t elementId, int32_t focusType, Accessibility::AccessibilityElementInfo& info);
+
+    void FocusMoveSearchNG(int32_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info);
+
+    bool ExecuteActionNG(int32_t elementId, Accessibility::ActionType action);
 
     void SetSearchElementInfoByAccessibilityIdResult(Accessibility::AccessibilityElementOperatorCallback& callback,
         const std::list<Accessibility::AccessibilityElementInfo>& infos, const int32_t requestId);

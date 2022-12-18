@@ -30,16 +30,17 @@ namespace OHOS::Ace::Framework {
 class JSButton : public JSContainerBase {
 public:
     static void SetFontSize(const JSCallbackInfo& info);
-    static void SetFontWeight(std::string value);
+    static void SetFontWeight(const std::string& value);
     static void SetFontStyle(int32_t value);
     static void SetFontFamily(const JSCallbackInfo& info);
     static void SetTextColor(const JSCallbackInfo& info);
-    static void SetType(int value);
+    static void SetType(const JSCallbackInfo& info);
     static void SetStateEffect(bool stateEffect);
     static void JsBackgroundColor(const JSCallbackInfo& info);
     static void JsRadius(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
+    static void JsAspectRatio(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsSize(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);

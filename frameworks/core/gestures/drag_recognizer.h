@@ -30,19 +30,19 @@
 
 namespace OHOS::Ace {
 
-class DragStartInfo : public TouchLocationInfo, public BaseEventInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(DragStartInfo, TouchLocationInfo, BaseEventInfo);
+class DragStartInfo : public TouchLocationInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(DragStartInfo, TouchLocationInfo);
 
 public:
-    explicit DragStartInfo(int32_t fingerId) : TouchLocationInfo(fingerId), BaseEventInfo("onDragStart") {}
+    explicit DragStartInfo(int32_t fingerId) : TouchLocationInfo("onDragStart", fingerId) {}
     ~DragStartInfo() override = default;
 };
 
-class DragUpdateInfo : public TouchLocationInfo, public BaseEventInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(DragUpdateInfo, TouchLocationInfo, BaseEventInfo);
+class DragUpdateInfo : public TouchLocationInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(DragUpdateInfo, TouchLocationInfo);
 
 public:
-    explicit DragUpdateInfo(int32_t fingerId) : TouchLocationInfo(fingerId), BaseEventInfo("onDragUpdate") {}
+    explicit DragUpdateInfo(int32_t fingerId) : TouchLocationInfo("onDragUpdate", fingerId) {}
     ~DragUpdateInfo() override = default;
 
     DragUpdateInfo& SetDelta(const Offset& delta)
@@ -73,11 +73,11 @@ private:
     double mainDelta_ = 0.0;
 };
 
-class DragEndInfo : public TouchLocationInfo, public BaseEventInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(DragEndInfo, TouchLocationInfo, BaseEventInfo);
+class DragEndInfo : public TouchLocationInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(DragEndInfo, TouchLocationInfo);
 
 public:
-    explicit DragEndInfo(int32_t fingerId) : TouchLocationInfo(fingerId), BaseEventInfo("onDragEnd") {}
+    explicit DragEndInfo(int32_t fingerId) : TouchLocationInfo("onDragEnd", fingerId) {}
     ~DragEndInfo() override = default;
 
     const Velocity& GetVelocity() const

@@ -20,7 +20,9 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
+#include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 
@@ -31,29 +33,13 @@ public:
     explicit ImagePaintMethod(const RefPtr<CanvasImage>& canvasImage) : canvasImage_(canvasImage) {}
     ~ImagePaintMethod() override = default;
 
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
-    {
-        CHECK_NULL_RETURN(canvasImage_, nullptr);
-        auto offset = paintWrapper->GetContentOffset();
-        auto contentSize = paintWrapper->GetContentSize();
-        ImagePainter imagePainter(canvasImage_);
-        return
-            [imagePainter, offset, ImagePaintConfig = *canvasImage_->imagePaintConfig_, contentSize](RSCanvas& canvas) {
-                if (ImagePaintConfig.isSvg) {
-                    imagePainter.DrawSVGImage(canvas, offset, contentSize, ImagePaintConfig);
-                    return;
-                }
-                if (ImagePaintConfig.imageRepeat_ == ImageRepeat::NOREPEAT) {
-                    imagePainter.DrawImage(canvas, offset, ImagePaintConfig);
-                    return;
-                }
-                imagePainter.DrawImageWithRepeat(canvas, ImagePaintConfig,
-                    RectF(offset.GetX(), offset.GetY(), contentSize.Width(), contentSize.Height()));
-            };
-    }
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
+    void UpdatePaintConfig(const RefPtr<ImageRenderProperty>& renderProps);
     RefPtr<CanvasImage> canvasImage_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(ImagePaintMethod);
 };
 
 } // namespace OHOS::Ace::NG

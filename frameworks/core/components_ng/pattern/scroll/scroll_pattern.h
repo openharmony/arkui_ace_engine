@@ -23,7 +23,10 @@
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
+#include "core/components_ng/pattern/scroll/scroll_paint_property.h"
+#include "core/components_ng/pattern/scroll/scroll_paint_method.h"
 #include "core/components_ng/pattern/scroll/scroll_position_controller.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 
 namespace OHOS::Ace::NG {
 
@@ -50,10 +53,20 @@ public:
         return MakeRefPtr<ScrollLayoutProperty>();
     }
 
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<ScrollPaintProperty>();
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         auto layoutAlgorithm = MakeRefPtr<ScrollLayoutAlgorithm>(currentOffset_);
         return layoutAlgorithm;
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        return MakeRefPtr<ScrollPaintMethod>();
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -70,6 +83,8 @@ public:
     {
         return currentOffset_;
     }
+
+    void ResetPosition();
 
     Offset GetCurrentOffset() const
     {
@@ -105,6 +120,11 @@ public:
         return  direction_ == FlexDirection::COLUMN_REVERSE;
     }
 
+    RefPtr<ScrollPositionController> GetScrollPositionController() const
+    {
+        return positionController_;
+    }
+
     void SetScrollPositionController(const RefPtr<ScrollPositionController>& positionController)
     {
         positionController_ = positionController;
@@ -114,6 +134,13 @@ public:
     {
         direction_ = direction;
     }
+
+    void SetScrollContent(bool isScrollContent = true)
+    {
+        isScrollContent_ = isScrollContent;
+    }
+
+    void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy);
 
     bool IsAtTop() const;
     bool IsAtBottom() const;
@@ -140,10 +167,12 @@ private:
 
     bool IsCrashTop() const;
     bool IsCrashBottom() const;
+    bool IsScrollOutOnEdge(float delta) const;
     void HandleCrashTop() const;
     void HandleCrashBottom() const;
 
     void RegisterScrollEventTask();
+    void RegisterScrollBarEventTask();
     void CreateOrStopAnimator();
     void HandleScrollEffect();
     void HandleScrollBarOutBoundary();
@@ -154,14 +183,19 @@ private:
 
     RefPtr<Animator> animator_;
     RefPtr<ScrollPositionController> positionController_;
+    RefPtr<ScrollBarProxy> scrollBarProxy_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
+    RefPtr<TouchEventImpl> touchEvent_;
     Axis axis_ = Axis::VERTICAL;
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;
     float viewPortLength_ = 0.0f;
+    SizeF viewPort_;
+    SizeF viewPortExtent_;
     FlexDirection direction_ { FlexDirection::COLUMN };
+    bool isScrollContent_ = true; // true: 操作内容区, false: 操作scrollBar
 };
 
 } // namespace OHOS::Ace::NG

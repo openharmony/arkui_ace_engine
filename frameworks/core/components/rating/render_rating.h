@@ -165,8 +165,8 @@ protected:
     {
         return operationEvent_;
     }
-    std::function<void(double)> onChangeRating;
-    void SetOnChange(const std::function<void(double)>& value)
+    std::function<void(std::string)> onChangeRating;
+    void SetOnChange(const std::function<void(std::string)>& value)
     {
         onChangeRating = value;
     }

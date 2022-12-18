@@ -378,7 +378,7 @@ protected:
     ImageFit imageFit_ = ImageFit::COVER;
     ImageInterpolation imageInterpolation_ = ImageInterpolation::NONE;
     ImageRenderMode imageRenderMode_ = ImageRenderMode::ORIGINAL;
-    ImageRepeat imageRepeat_ = ImageRepeat::NOREPEAT;
+    ImageRepeat imageRepeat_ = ImageRepeat::NO_REPEAT;
 
     // For RosenRenderImage which need to be painted several times on parent RenderNode.
     // For Example: RosenRenderRating::PaintImageArea
@@ -407,6 +407,7 @@ private:
     RefPtr<Clipboard> clipboard_;
     Offset popOverlayOffset_;
     CopyOptions copyOption_ = CopyOptions::None;
+    Offset lastDragMoveOffset_;
 };
 
 } // namespace OHOS::Ace

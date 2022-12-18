@@ -53,14 +53,14 @@ void RenderContainerModal::UpdateStyle(const RefPtr<Component>& component) const
         LOGE("get pipeline context failed");
         return;
     }
-    auto labelId = context->GetAppLabelId();
+    auto labelId = context->GetWindowManager()->GetAppLabelId();
     auto appLabelComponent = containerModal->GetTitleLabel();
     if (appLabelComponent && labelId != 0) {
         auto appLabel = themeConstants->GetString(labelId);
         appLabelComponent->SetData(appLabel);
     }
 
-    auto iconId = context->GetAppIconId();
+    auto iconId = context->GetWindowManager()->GetAppIconId();
     auto appIconComponent = containerModal->GetTitleIcon();
     if (appIconComponent && iconId != 0) {
         auto appIconSrc = themeConstants->GetMediaPath(iconId);

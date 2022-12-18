@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 
+#include <functional>
+
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
 #include "base/geometry/ng/rect_t.h"
@@ -24,23 +26,23 @@
 #include "base/utils/noncopyable.h"
 #include "core/animation/page_transition_common.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/canvas.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/render_property.h"
 #include "core/pipeline/base/constants.h"
 
-namespace OHOS::Rosen::Drawing {
-class Canvas;
-}
 namespace OHOS::Ace::NG {
 class GeometryNode;
 class RenderPropertyNode;
 class FrameNode;
 class Modifier;
 
-using RSCanvas = Rosen::Drawing::Canvas;
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
 
 // RenderContext is used for render node to paint.
@@ -80,7 +82,8 @@ public:
 
     virtual void OnModifyDone() {}
 
-    virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName) {}
+    virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode = false)
+    {}
 
     virtual void StartRecording() {}
     virtual void StopRecordingIfNeeded() {}
@@ -95,6 +98,18 @@ public:
 
     virtual void BlendBorderColor(const Color& color) {}
 
+    // Paint focus state by component's setting. It will paint along the paintRect
+    virtual void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth) {}
+    // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
+    virtual void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
+        const Dimension& paintWidth)
+    {}
+    // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
+    virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth)
+    {}
+
+    virtual void ClearFocusState() {}
+
     virtual void UpdateBorderWidthF(const BorderWidthPropertyF& value) {}
 
     // clip node without padding
@@ -103,26 +118,35 @@ public:
     // clip node with padding
     virtual void SetClipToBounds(bool useClip) {}
 
+    virtual void SetVisible(bool visible) {}
+
     virtual RefPtr<Canvas> GetCanvas() = 0;
 
     virtual void Restore() = 0;
 
     virtual void AnimateHoverEffectScale(bool isHovered) {}
     virtual void AnimateHoverEffectBoard(bool isHovered) {}
+
     virtual void UpdateTransition(const TransitionOptions& options) {}
-    virtual bool TriggerPageTransition(PageTransitionType type) const
+    virtual void OnNodeDisappear(FrameNode* host) {}
+    virtual void OnNodeAppear() {}
+
+    virtual bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
     {
         return false;
     }
+
+    virtual void SetSharedTranslate(float xTranslate, float yTranslate) {}
+    virtual void ResetSharedTranslate() {}
 
     virtual void AddChild(const RefPtr<RenderContext>& renderContext, int index) {}
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
-    virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
-    virtual void UpdateBackShadow(const Shadow& shadow) {}
 
     virtual void ClipWithRect(const RectF& rectF) {}
+
+    virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
 
     virtual void OnTransformTranslateUpdate(const Vector3F& value) {}
 
@@ -130,6 +154,8 @@ public:
     {
         return {};
     }
+
+    virtual void GetPointWithTransform(PointF& point) {}
 
     virtual RectF GetPaintRectWithoutTransform()
     {
@@ -139,6 +165,45 @@ public:
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     virtual void ClearDrawCommands() {}
+
+    virtual void NotifyTransition(
+        const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn)
+    {}
+
+    virtual void DumpInfo() const {}
+
+    void SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option)
+    {
+        sharedTransitionOption_ = option;
+    }
+    const std::shared_ptr<SharedTransitionOption>& GetSharedTransitionOption() const
+    {
+        return sharedTransitionOption_;
+    }
+    void SetShareId(const ShareId& shareId)
+    {
+        shareId_ = shareId;
+    }
+    const ShareId& GetShareId() const
+    {
+        return shareId_;
+    }
+    bool HasSharedTransition() const
+    {
+        return !shareId_.empty();
+    }
+    bool HasSharedTransitionOption() const
+    {
+        return sharedTransitionOption_ != nullptr;
+    }
+
+    virtual void PaintAccessibilityFocus() {};
+
+    virtual void OnMouseSelectUpdate(const Color& fillColor, const Color& strokeColor) {}
+    virtual void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) {}
+
+    virtual void OnPositionUpdate(const OffsetT<Dimension>& value) {}
+    virtual void OnZIndexUpdate(int32_t value) {}
 
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
@@ -171,11 +236,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
 
-    // Decoration
-    ACE_DEFINE_PROPERTY_GROUP(BackDecoration, DecorationProperty);
-    ACE_DEFINE_PROPERTY_GROUP(FrontDecoration, DecorationProperty);
-
-    // Border
     // Graphics
     ACE_DEFINE_PROPERTY_GROUP(Graphics, GraphicsProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontBrightness, Dimension);
@@ -186,6 +246,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontInvert, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontHueRotate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontColorBlend, Color);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontBlurRadius, Dimension);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackShadow, Shadow);
 
     // BorderRadius.
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
@@ -208,8 +270,9 @@ public:
 
     // Clip
     ACE_DEFINE_PROPERTY_GROUP(Clip, ClipProperty);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipShape, ClipPathNG);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipShape, RefPtr<BasicShape>);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipEdge, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipMask, RefPtr<BasicShape>);
 
     // Gradient
     ACE_DEFINE_PROPERTY_GROUP(Gradient, GradientProperty);
@@ -217,8 +280,21 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, SweepGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, RadialGradient, NG::Gradient);
 
+    // Overlay
+    ACE_DEFINE_PROPERTY_GROUP(Overlay, OverlayProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Overlay, OverlayText, OverlayOptions)
+
+    // MotionPath
+    ACE_DEFINE_PROPERTY_GROUP(Motion, MotionPathProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Motion, MotionPath, MotionPathOption)
+
+    // accessibility
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocus, bool);
+
 protected:
     RenderContext() = default;
+    std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
+    ShareId shareId_;
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
@@ -245,13 +321,12 @@ protected:
     virtual void OnTransformRotateUpdate(const Vector4F& value) {}
     virtual void OnTransformMatrixUpdate(const Matrix4& matrix) {}
 
-    virtual void OnPositionUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnAnchorUpdate(const OffsetT<Dimension>& value) {}
-    virtual void OnZIndexUpdate(int32_t value) {}
 
-    virtual void OnClipShapeUpdate(const ClipPathNG& clipPath) {}
+    virtual void OnClipShapeUpdate(const RefPtr<BasicShape>& basicShape) {}
     virtual void OnClipEdgeUpdate(bool isClip) {}
+    virtual void OnClipMaskUpdate(const RefPtr<BasicShape>& basicShape) {}
 
     virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
     virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}
@@ -265,6 +340,12 @@ protected:
     virtual void OnFrontInvertUpdate(const Dimension& value) {}
     virtual void OnFrontHueRotateUpdate(float value) {}
     virtual void OnFrontColorBlendUpdate(const Color& value) {}
+    virtual void OnFrontBlurRadiusUpdate(const Dimension& value) {}
+    virtual void OnBackShadowUpdate(const Shadow& shadow) {}
+
+    virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
+    virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
+    virtual void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) {}
 
 private:
     std::function<void()> requestFrame_;

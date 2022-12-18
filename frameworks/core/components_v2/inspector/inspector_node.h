@@ -141,7 +141,6 @@ public:
     virtual std::string GetBackgroundColor() const = 0;
     virtual std::string GetBackgroundImageSize() const = 0;
     virtual std::string GetBackgroundImagePosition() const = 0;
-    virtual std::string GetAlignmentType(double width, double height) const = 0;
 
     // front decoration settings
     virtual RefPtr<Decoration> GetFrontDecoration() const = 0;
@@ -200,6 +199,8 @@ public:
     virtual void UpdateEventTarget(BaseEventInfo& info) const = 0;
 
     virtual std::pair<Rect, Offset> GetCurrentRectAndOrigin() const = 0;
+    virtual std::pair<Rect, Offset> GetLastRectAndOrigin() = 0;
+    virtual void UpdateLastRectAndOrigin(const std::pair<Rect, Offset>& curRectOrigin) = 0;
 
     // color gradient
     virtual std::unique_ptr<JsonValue> GetLinearGradient() const = 0;

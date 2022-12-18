@@ -30,6 +30,7 @@ class TabBarElement : public ComponentGroupElement, public FocusGroup {
 
 public:
     void UpdateIndex(int32_t index);
+    void UpdateScrollIndicator(double percent, int32_t newIndex, bool needChange);
     void PerformBuild() override;
     void Update() override;
     bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;

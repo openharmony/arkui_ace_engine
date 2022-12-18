@@ -16,8 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_CARD_FRONTEND_CARD_FRONTEND_DELEGATE_DECLARATIVE_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_CARD_FRONTEND_CARD_FRONTEND_DELEGATE_DECLARATIVE_H
 
+#include <mutex>
+
 #include "frameworks/base/memory/ace_type.h"
 #include "frameworks/base/utils/noncopyable.h"
+#include "frameworks/base/utils/measure_util.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
 #include "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h"
@@ -25,9 +28,10 @@
 namespace OHOS::Ace::Framework {
 // This is the primary class by which the CardFrontend delegates
 
-using LoadCardCallback = std::function<bool(const std::string&, uint64_t cardId)>;
+using LoadCardCallback = std::function<bool(const std::string&, int64_t cardId)>;
+using UpdateCardDataCallback = std::function<void(const std::string&)>;
 
-class CardFrontendDelegateDeclarative : public FrontendDelegateDeclarativeNG {
+class ACE_EXPORT CardFrontendDelegateDeclarative : public FrontendDelegateDeclarativeNG {
     DECLARE_ACE_TYPE(CardFrontendDelegateDeclarative, FrontendDelegateDeclarativeNG);
 
 public:
@@ -36,9 +40,11 @@ public:
     {}
     ~CardFrontendDelegateDeclarative() override;
 
-    void RunCard(const std::string& url, const std::string& params, const std::string& profile, uint64_t cardId);
+    void RunCard(const std::string& url, const std::string& params, const std::string& profile, int64_t cardId);
 
     void FireCardEvent(const EventMarker& eventMarker, const std::string& params = "");
+
+    void FireCardAction(const std::string& action);
 
     void SetLoadCardCallBack(const LoadCardCallback& loadCallback)
     {
@@ -47,7 +53,38 @@ public:
         pageRouterManager->SetLoadCardCallback(loadCallback);
     }
 
+    void UpdatePageData(const std::string& dataList)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (updateCardData_) {
+            updateCardData_(dataList);
+        } else {
+            cardData_ = dataList;
+        }
+    }
+
+    void SetUpdateCardDataCallback(UpdateCardDataCallback&& callback)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        updateCardData_ = std::move(callback);
+    }
+
+    void UpdatePageDataImmediately()
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!cardData_.empty() && updateCardData_) {
+            updateCardData_(cardData_);
+        }
+    }
+	
+    double MeasureText(const MeasureContext& context) override;
+
     ACE_DISALLOW_COPY_AND_MOVE(CardFrontendDelegateDeclarative);
+
+private:
+    UpdateCardDataCallback updateCardData_;
+    std::string cardData_;
+    mutable std::mutex mutex_;
 };
 } // namespace OHOS::Ace::Framework
 

@@ -33,7 +33,6 @@ constexpr int32_t SCROLL_TOUCH_DOWN = 1;
 constexpr int32_t SCROLL_TOUCH_UP = 2;
 constexpr double SCROLL_RATIO = 0.52;
 constexpr float SCROLL_BY_SPEED = 250.0f; // move 250 pixels per second
-constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
 constexpr double UNIT_CONVERT = 1000.0;   // 1s convert to 1000ms
 constexpr double ROTATE_FACTOR = -1.0;    // pixels factor per angle
 
@@ -83,11 +82,7 @@ bool RenderScroll::ValidateOffset(int32_t source)
     if (!scrollEffect_ || scrollEffect_->IsRestrictBoundary() || source == SCROLL_FROM_JUMP ||
         source == SCROLL_FROM_BAR || source == SCROLL_FROM_ROTATE || refreshParent_.Upgrade()) {
         if (axis_ == Axis::HORIZONTAL) {
-            if (IsRowReverse()) {
-                currentOffset_.SetX(std::clamp(currentOffset_.GetX(), viewPort_.Width() - mainScrollExtent_, 0.0));
-            } else {
-                currentOffset_.SetX(std::clamp(currentOffset_.GetX(), 0.0, mainScrollExtent_ - viewPort_.Width()));
-            }
+            currentOffset_.SetX(std::clamp(currentOffset_.GetX(), 0.0, mainScrollExtent_ - viewPort_.Width()));
         } else {
             // Refresh support spring when pulling up.
 #ifdef WEARABLE_PRODUCT
@@ -103,21 +98,15 @@ bool RenderScroll::ValidateOffset(int32_t source)
 #endif
         }
     } else {
-        if (IsRowReverse()  || IsColReverse()) {
-            if (GetMainOffset(currentOffset_) > 0) {
-                outBoundaryExtent_ = GetMainOffset(currentOffset_);
-            }
-        } else {
-            if (GetMainOffset(currentOffset_) < 0) {
-                outBoundaryExtent_ = -GetMainOffset(currentOffset_);
-                scrollBarOutBoundaryExtent_ = -GetMainOffset(currentOffset_);
-            } else if (GetMainOffset(currentOffset_) >= (mainScrollExtent_ - GetMainSize(viewPort_)) &&
-                       ReachMaxCount()) {
-                scrollBarOutBoundaryExtent_ =
-                    GetMainOffset(currentOffset_) - (mainScrollExtent_ - GetMainSize(viewPort_));
-            }
-            HandleScrollBarOutBoundary();
+        if (GetMainOffset(currentOffset_) < 0) {
+            outBoundaryExtent_ = -GetMainOffset(currentOffset_);
+            scrollBarOutBoundaryExtent_ = -GetMainOffset(currentOffset_);
+        } else if (GetMainOffset(currentOffset_) >= (mainScrollExtent_ - GetMainSize(viewPort_)) &&
+            ReachMaxCount()) {
+            scrollBarOutBoundaryExtent_ =
+            GetMainOffset(currentOffset_) - (mainScrollExtent_ - GetMainSize(viewPort_));
         }
+        HandleScrollBarOutBoundary();
     }
 
     axis_ == Axis::HORIZONTAL ? currentOffset_.SetY(0.0) : currentOffset_.SetX(0.0);
@@ -376,22 +365,13 @@ bool RenderScroll::ScrollPageByChild(Offset& delta, int32_t source)
 
 bool RenderScroll::IsOutOfBottomBoundary()
 {
-    if (IsRowReverse() || IsColReverse()) {
-        return LessOrEqual(GetMainOffset(currentOffset_), (GetMainSize(viewPort_) - mainScrollExtent_)) &&
-               ReachMaxCount();
-    } else {
-        return GreatOrEqual(GetMainOffset(currentOffset_), (mainScrollExtent_ - GetMainSize(viewPort_))) &&
-               ReachMaxCount();
-    }
+    return GreatOrEqual(GetMainOffset(currentOffset_), (mainScrollExtent_ - GetMainSize(viewPort_))) &&
+                       ReachMaxCount();
 }
 
 bool RenderScroll::IsOutOfTopBoundary()
 {
-    if (IsRowReverse() || IsColReverse()) {
-        return GreatOrEqual(GetMainOffset(currentOffset_), 0.0);
-    } else {
-        return LessOrEqual(GetMainOffset(currentOffset_), 0.0);
-    }
+    return LessOrEqual(GetMainOffset(currentOffset_), 0.0);
 }
 
 bool RenderScroll::IsOutOfBoundary()
@@ -416,23 +396,13 @@ void RenderScroll::AdjustOffset(Offset& delta, int32_t source)
     double overscrollPastEnd = 0.0;
     double overscrollPast = 0.0;
     bool easing = false;
-    if (IsRowReverse()  || IsColReverse()) {
-        overscrollPastStart = std::max(GetCurrentPosition(), 0.0);
-        overscrollPastEnd = std::max(-GetCurrentPosition() - maxScrollExtent, 0.0);
-        // do not adjust offset if direction opposite from the overScroll direction when out of boundary
-        if ((overscrollPastStart > 0.0 && offset < 0.0) || (overscrollPastEnd > 0.0 && offset > 0.0)) {
-            return;
-        }
-        easing = (overscrollPastStart > 0.0 && offset > 0.0) || (overscrollPastEnd > 0.0 && offset < 0.0);
-    } else {
-        overscrollPastStart = std::max(-GetCurrentPosition(), 0.0);
-        overscrollPastEnd = std::max(GetCurrentPosition() - maxScrollExtent, 0.0);
-        // do not adjust offset if direction oppsite from the overScroll direction when out of boundary
-        if ((overscrollPastStart > 0.0 && offset > 0.0) || (overscrollPastEnd > 0.0 && offset < 0.0)) {
-            return;
-        }
-        easing = (overscrollPastStart > 0.0 && offset < 0.0) || (overscrollPastEnd > 0.0 && offset > 0.0);
+    overscrollPastStart = std::max(-GetCurrentPosition(), 0.0);
+    overscrollPastEnd = std::max(GetCurrentPosition() - maxScrollExtent, 0.0);
+    // do not adjust offset if direction oppsite from the overScroll direction when out of boundary
+    if ((overscrollPastStart > 0.0 && offset > 0.0) || (overscrollPastEnd > 0.0 && offset < 0.0)) {
+        return;
     }
+    easing = (overscrollPastStart > 0.0 && offset < 0.0) || (overscrollPastEnd > 0.0 && offset > 0.0);
     overscrollPast = std::max(overscrollPastStart, overscrollPastEnd);
     double friction = easing ? CalculateFriction((overscrollPast - std::abs(offset)) / viewPortSize)
                              : CalculateFriction(overscrollPast / viewPortSize);
@@ -525,7 +495,10 @@ void RenderScroll::ResetScrollEventCallBack()
                     std::make_shared<ScrollEventInfo>(ScrollEvent::SCROLL_END, 0.0, 0.0, -1));
             }
             // Send scroll none when scroll is end.
-            scroll->HandleScrollPosition(0.0, 0.0, SCROLL_NONE);
+            auto context = scroll->GetContext().Upgrade();
+            if (!(context && context->GetIsDeclarative())) {
+                scroll->HandleScrollPosition(0.0, 0.0, SCROLL_NONE);
+            }
             scroll->HandleScrollBarEnd();
 
             auto proxy = scroll->scrollBarProxy_;
@@ -553,21 +526,29 @@ void RenderScroll::ResetScrollEventCallBack()
 
 void RenderScroll::InitScrollBar(const RefPtr<ScrollBar>& scrollBar)
 {
-    if (scrollBar_ != scrollBar) {
-        if (scrollBar_) {
-            // Clear the old data.
-            scrollBar_->Reset();
-        }
-        scrollBar_ = scrollBar;
-        if (!scrollBar_) {
-            scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::OFF);
-        }
-        if (axis_ == Axis::HORIZONTAL) {
-            scrollBar_->SetPositionMode(PositionMode::BOTTOM);
-        }
-        scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
-        SetBarCallBack(axis_ == Axis::VERTICAL);
+    if (scrollBar_ == scrollBar) {
+        return;
     }
+
+    if (scrollBar_) {
+        // Clear the old data.
+        scrollBar_->Reset(scrollBar);
+        return;
+    }
+    scrollBar_ = scrollBar;
+    if (!scrollBar_) {
+        scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::OFF);
+    }
+    if (axis_ == Axis::HORIZONTAL) {
+        scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+    }
+    if (axis_ == Axis::VERTICAL) {
+        if (rightToLeft_) {
+            scrollBar_->SetPositionMode(PositionMode::LEFT);
+        }
+    }
+    scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
+    SetBarCallBack(axis_ == Axis::VERTICAL);
 }
 
 void RenderScroll::ResetScrollable()
@@ -670,10 +651,10 @@ void RenderScroll::OnTouchTestHit(
     if (!GetVisible() || axis_ == Axis::NONE) {
         return;
     }
-    if (!scrollable_ || !scrollable_->Available()) {
+    if (!scrollable_) {
         return;
     }
-    if (scrollBar_ && scrollBar_->InBarRegion(globalPoint_ - coordinateOffset)) {
+    if (scrollable_->Available() && scrollBar_ && scrollBar_->InBarRegion(globalPoint_ - coordinateOffset)) {
         scrollBar_->AddScrollBarController(coordinateOffset, result);
     } else {
         scrollable_->SetCoordinateOffset(coordinateOffset);
@@ -701,9 +682,9 @@ bool RenderScroll::HandleMouseEvent(const MouseEvent& event)
     }
     auto globalOffset = GetGlobalOffset();
     auto localPoint = Point(event.x - globalOffset.GetX(), event.y - globalOffset.GetY());
-    bool isScrollBarHover = scrollBar_->InBarRegion(localPoint);
-    scrollBar_->SetIsHover(isScrollBarHover);
-    return isScrollBarHover;
+    bool isInBarRegion = scrollBar_->InBarRegion(localPoint);
+    scrollBar_->SetIsHover(isInBarRegion);
+    return isInBarRegion;
 }
 
 void RenderScroll::JumpToIndex(int32_t index, int32_t source)
@@ -713,7 +694,8 @@ void RenderScroll::JumpToIndex(int32_t index, int32_t source)
 
 void RenderScroll::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
 {
-    if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
+    if ((IsRowReverse() && scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) ||
+        (!IsRowReverse() && scrollEdgeType == ScrollEdgeType::SCROLL_TOP)) {
         double distance = -GetMainOffset(currentOffset_);
         ScrollBy(distance, distance, smooth);
     } else {
@@ -724,7 +706,7 @@ void RenderScroll::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
 
 bool RenderScroll::ScrollPage(bool reverse, bool smooth, const std::function<void()>& onFinish)
 {
-    if (reverse) {
+    if ((IsRowReverse() && !reverse) || (!IsRowReverse() && reverse)) {
         double distance = -GetMainSize(viewPort_);
         ScrollBy(distance, distance, smooth, onFinish);
     } else {
@@ -753,11 +735,7 @@ void RenderScroll::DoJump(double position, int32_t source)
         if (axis_ == Axis::VERTICAL) {
             delta.SetY(position - GetMainOffset(currentOffset_));
         } else {
-            if (IsRowReverse()) {
-                delta.SetX(-position - GetMainOffset(currentOffset_));
-            } else {
-                delta.SetX(position - GetMainOffset(currentOffset_));
-            }
+            delta.SetX(position - GetMainOffset(currentOffset_));
         }
 
         UpdateOffset(delta, source);
@@ -790,7 +768,7 @@ void RenderScroll::AnimateTo(double position, float duration, const RefPtr<Curve
         }
     });
     animator_->AddInterpolator(animation);
-    animator_->SetDuration(limitDuration ? std::min(duration, SCROLL_MAX_TIME) : duration);
+    animator_->SetDuration(duration);
     animator_->ClearStopListeners();
     animator_->Play();
     auto weakScroll = AceType::WeakClaim(this);
@@ -871,6 +849,13 @@ double RenderScroll::GetCurrentPosition() const
 
 void RenderScroll::Update(const RefPtr<Component>& component)
 {
+    auto scroll = AceType::DynamicCast<ScrollComponent>(component);
+    if (scroll == nullptr) {
+        LOGI("scroll component is null, which it is multi scroll, not single scroll");
+        return;
+    }
+    hasHeight_ = scroll->GetHasHeight();
+    hasWidth_ = scroll->GetHasWidth();
     if (!animator_) {
         animator_ = AceType::MakeRefPtr<Animator>(GetContext());
     }
@@ -880,11 +865,6 @@ void RenderScroll::Update(const RefPtr<Component>& component)
     // Send scroll none when first build.
     HandleScrollPosition(0.0, 0.0, SCROLL_NONE);
     MarkNeedLayout();
-    auto scroll = AceType::DynamicCast<ScrollComponent>(component);
-    if (scroll == nullptr) {
-        LOGI("scroll component is null, which it is multi scroll, not single scroll");
-        return;
-    }
     onReachStart_ = AceAsyncEvent<void(const std::string&)>::Create(scroll->GetOnReachStart(), context_);
     onReachEnd_ = AceAsyncEvent<void(const std::string&)>::Create(scroll->GetOnReachEnd(), context_);
     onReachTop_ = AceAsyncEvent<void(const std::string&)>::Create(scroll->GetOnReachTop(), context_);
@@ -930,7 +910,7 @@ void RenderScroll::SetBarCallBack(bool isVertical)
                 return;
             }
             scroll->scrollBarOpacity_ = value;
-            scroll->MarkNeedLayout(true);
+            scroll->MarkNeedRender();
         };
         auto&& scrollEndCallback = [weakScroll = AceType::WeakClaim(this), isVertical]() {
             auto scroll = weakScroll.Upgrade();

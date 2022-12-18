@@ -15,7 +15,38 @@
 
 #include "core/components/xcomponent/render_xcomponent.h"
 
+#include "base/ressched/ressched_report.h"
+#include "base/utils/time_util.h"
+#include "core/event/touch_event.h"
 namespace OHOS::Ace {
+namespace {
+#ifdef OHOS_PLATFORM
+constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
+#endif
+OH_NativeXComponent_TouchPointToolType ConvertNativeXComponentTouchToolType(const SourceTool& toolType)
+{
+    switch (toolType) {
+        case SourceTool::FINGER:
+            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_FINGER;
+        case SourceTool::PEN:
+            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_PEN;
+        case SourceTool::RUBBER:
+            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_RUBBER;
+        case SourceTool::BRUSH:
+            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_BRUSH;
+        case SourceTool::PENCIL:
+            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_PENCIL;
+        case SourceTool::AIRBRUSH:
+            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_AIRBRUSH;
+        case SourceTool::MOUSE:
+            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_MOUSE;
+        case SourceTool::LENS:
+            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_LENS;
+        default:
+            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_UNKNOWN;
+    }
+}
+} // namespace
 RenderXComponent::RenderXComponent()
 {
     Initialize();
@@ -70,12 +101,27 @@ void RenderXComponent::HandleTouchEvent(const TouchEventInfo& info, const TouchT
 {
     std::list<TouchLocationInfo> touchInfoList;
 #ifdef OHOS_STANDARD_SYSTEM
-    touchInfoList = info.GetTouches();
+    touchInfoList = info.GetChangedTouches();
 #else
     if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
         touchInfoList = info.GetChangedTouches();
     } else {
         touchInfoList = info.GetTouches();
+    }
+#endif
+#ifdef OHOS_PLATFORM
+    // increase cpu frequency
+    if (touchType == TouchType::MOVE) {
+        auto currentTime = GetSysTimestamp();
+        auto increaseCpuTime = currentTime - startIncreaseTime_;
+        if (increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
+            LOGD("HandleTouchEvent increase cpu frequency");
+            startIncreaseTime_ = currentTime;
+            ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+        }
+    } else if (touchType == TouchType::UP) {
+        startIncreaseTime_ = 0;
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
     }
 #endif
     if (touchInfoList.empty()) {
@@ -96,9 +142,9 @@ void RenderXComponent::HandleTouchEvent(const TouchEventInfo& info, const TouchT
     touchEventPoint_.timeStamp = timeStamp;
     touchEventPoint_.type = ConvertNativeXComponentTouchEvent(touchType);
 #ifdef OHOS_STANDARD_SYSTEM
-    SetTouchPoint(touchInfoList, timeStamp, touchType);
+    SetTouchPoint(info.GetTouches(), timeStamp, touchType);
 #endif
-    NativeXComponentDispatchTouchEvent(touchEventPoint_);
+    NativeXComponentDispatchTouchEvent(touchEventPoint_, nativeXComponentTouchPoints_);
 }
 
 void RenderXComponent::SetTouchPoint(
@@ -106,6 +152,7 @@ void RenderXComponent::SetTouchPoint(
 {
     touchEventPoint_.numPoints =
         touchInfoList.size() <= OH_MAX_TOUCH_POINTS_NUMBER ? touchInfoList.size() : OH_MAX_TOUCH_POINTS_NUMBER;
+    nativeXComponentTouchPoints_.clear();
     uint32_t i = 0;
     for (auto iterator = touchInfoList.begin(); iterator != touchInfoList.end() && i < OH_MAX_TOUCH_POINTS_NUMBER;
          iterator++) {
@@ -124,6 +171,12 @@ void RenderXComponent::SetTouchPoint(
         ohTouchPoint.timeStamp = timeStamp;
         ohTouchPoint.isPressed = (touchType == TouchType::DOWN);
         touchEventPoint_.touchPoints[i++] = ohTouchPoint;
+        // set tiltX, tiltY and sourceToolType
+        XComponentTouchPoint xcomponentTouchPoint;
+        xcomponentTouchPoint.tiltX = pointTouchInfo.GetTiltX().value_or(0.0f);
+        xcomponentTouchPoint.tiltY = pointTouchInfo.GetTiltY().value_or(0.0f);
+        xcomponentTouchPoint.sourceToolType = ConvertNativeXComponentTouchToolType(pointTouchInfo.GetSourceTool());
+        nativeXComponentTouchPoints_.emplace_back(xcomponentTouchPoint);
     }
     while (i < OH_MAX_TOUCH_POINTS_NUMBER) {
         OH_NativeXComponent_TouchPoint ohTouchPoint;
@@ -197,9 +250,8 @@ void RenderXComponent::PerformLayout()
 
     // render xcomponent do not support child.
     drawSize_ = Size(GetLayoutParam().GetMaxSize().Width(),
-                     (GetLayoutParam().GetMaxSize().Height() == Size::INFINITE_SIZE) ?
-                     Size::INFINITE_SIZE :
-                     (GetLayoutParam().GetMaxSize().Height()));
+        (GetLayoutParam().GetMaxSize().Height() == Size::INFINITE_SIZE) ? Size::INFINITE_SIZE
+                                                                        : (GetLayoutParam().GetMaxSize().Height()));
     SetLayoutSize(drawSize_);
     SetNeedLayout(false);
     MarkNeedRender();
@@ -255,8 +307,7 @@ void RenderXComponent::Paint(RenderContext& context, const Offset& offset)
 }
 
 void RenderXComponent::NativeXComponentInit(
-    OH_NativeXComponent* nativeXComponent,
-    WeakPtr<NativeXComponentImpl> nativeXComponentImpl)
+    OH_NativeXComponent* nativeXComponent, WeakPtr<NativeXComponentImpl> nativeXComponentImpl)
 {
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
@@ -267,8 +318,8 @@ void RenderXComponent::NativeXComponentInit(
     nativeXComponentImpl_ = nativeXComponentImpl;
 
     pipelineContext->GetTaskExecutor()->PostTask(
-        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_,
-            w = drawSize_.Width(), h = drawSize_.Height()] {
+        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, w = drawSize_.Width(),
+            h = drawSize_.Height()] {
             auto nXCompImpl = weakNXCompImpl.Upgrade();
             if (nXComp && nXCompImpl) {
                 nXCompImpl->SetXComponentWidth((int)(w));
@@ -281,8 +332,8 @@ void RenderXComponent::NativeXComponentInit(
             } else {
                 LOGE("Native XComponent nullptr");
             }
-         },
-         TaskExecutor::TaskType::JS);
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void RenderXComponent::NativeXComponentChange()
@@ -294,22 +345,22 @@ void RenderXComponent::NativeXComponentChange()
     }
 
     pipelineContext->GetTaskExecutor()->PostTask(
-        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_,
-            w = drawSize_.Width(), h = drawSize_.Height()] {
+        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, w = drawSize_.Width(),
+            h = drawSize_.Height()] {
             auto nXCompImpl = weakNXCompImpl.Upgrade();
             if (nXComp && nXCompImpl) {
                 nXCompImpl->SetXComponentWidth((int)(w));
                 nXCompImpl->SetXComponentHeight((int)(h));
                 auto surface = const_cast<void*>(nXCompImpl->GetSurface());
                 auto callback = nXCompImpl->GetCallback();
-                if (callback && callback->OnSurfaceChanged!= nullptr) {
+                if (callback && callback->OnSurfaceChanged != nullptr) {
                     callback->OnSurfaceChanged(nXComp, surface);
                 }
             } else {
                 LOGE("Native XComponent nullptr");
             }
-         },
-         TaskExecutor::TaskType::JS);
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void RenderXComponent::NativeXComponentDestroy()
@@ -327,21 +378,22 @@ void RenderXComponent::NativeXComponentDestroy()
 
     pipelineContext->GetTaskExecutor()->PostTask(
         [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_] {
-        auto nXCompImpl = weakNXCompImpl.Upgrade();
-        if (nXComp != nullptr && nXCompImpl) {
-            auto surface = const_cast<void*>(nXCompImpl->GetSurface());
-            auto callback = nXCompImpl->GetCallback();
-            if (callback != nullptr && callback->OnSurfaceDestroyed != nullptr) {
-                callback->OnSurfaceDestroyed(nXComp, surface);
+            auto nXCompImpl = weakNXCompImpl.Upgrade();
+            if (nXComp != nullptr && nXCompImpl) {
+                auto surface = const_cast<void*>(nXCompImpl->GetSurface());
+                auto callback = nXCompImpl->GetCallback();
+                if (callback != nullptr && callback->OnSurfaceDestroyed != nullptr) {
+                    callback->OnSurfaceDestroyed(nXComp, surface);
+                }
+            } else {
+                LOGE("Native XComponent nullptr");
             }
-        } else {
-            LOGE("Native XComponent nullptr");
-        }
-    },
-    TaskExecutor::TaskType::JS);
+        },
+        TaskExecutor::TaskType::JS);
 }
 
-void RenderXComponent::NativeXComponentDispatchTouchEvent(const OH_NativeXComponent_TouchEvent& touchEvent)
+void RenderXComponent::NativeXComponentDispatchTouchEvent(
+    const OH_NativeXComponent_TouchEvent& touchEvent, const std::vector<XComponentTouchPoint>& xComponentTouchPoints)
 {
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
@@ -349,12 +401,13 @@ void RenderXComponent::NativeXComponentDispatchTouchEvent(const OH_NativeXCompon
         return;
     }
     pipelineContext->GetTaskExecutor()->PostTask(
-        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, touchEvent] {
+        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, touchEvent, xComponentTouchPoints] {
             auto nXCompImpl = weakNXCompImpl.Upgrade();
             if (nXComp != nullptr && nXCompImpl) {
                 nXCompImpl->SetTouchEvent(touchEvent);
-                auto surface = const_cast<void*>(nXCompImpl->GetSurface());
-                auto callback = nXCompImpl->GetCallback();
+                nXCompImpl->SetTouchPoint(xComponentTouchPoints);
+                auto* surface = const_cast<void*>(nXCompImpl->GetSurface());
+                const auto* callback = nXCompImpl->GetCallback();
                 if (callback != nullptr && callback->DispatchTouchEvent != nullptr) {
                     callback->DispatchTouchEvent(nXComp, surface);
                 }

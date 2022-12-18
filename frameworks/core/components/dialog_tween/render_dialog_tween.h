@@ -89,7 +89,7 @@ private:
     Edge margin_;
     bool isSetMargin_ = false;
     bool isDragable_ = false;
-    bool isDraging_ = false;
+    bool isDragging_ = false;
     bool init_ = true;
     bool popDialog_ = false;
     Offset topLeftPoint_;

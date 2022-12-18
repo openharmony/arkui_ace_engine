@@ -13,5 +13,11 @@
 
 group("base_unittest") {
   testonly = true
-  deps = []
+  deps = [
+    "frame_node:frame_node_test_ng",
+    "geometry_node:geometry_node_test_ng",
+    "inspector:inspector_test_ng",
+    "ui_node:ui_node_test_ng",
+    "view_stack_processor:view_stack_processor_test_ng",
+  ]
 }

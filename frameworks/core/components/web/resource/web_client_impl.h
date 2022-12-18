@@ -21,6 +21,10 @@
 
 #include "base/log/log.h"
 #include "core/common/container_scope.h"
+#include "surface_delegate.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "surface.h"
+#endif
 
 namespace OHOS::Ace {
 class WebDelegate;
@@ -44,6 +48,23 @@ private:
     int32_t instanceId_ = -1;
 };
 
+class ReleaseSurfaceImpl : public OHOS::NWeb::NWebReleaseSurfaceCallback {
+public:
+    ReleaseSurfaceImpl() = default;
+    explicit ReleaseSurfaceImpl(int32_t instanceId) : instanceId_(instanceId) {}
+    ~ReleaseSurfaceImpl() = default;
+
+    void ReleaseSurface() override;
+
+    void SetSurfaceDelegate(const sptr<OHOS::SurfaceDelegate> &surfaceDelegate)
+    {
+        surfaceDelegate_ = surfaceDelegate;
+    }
+
+private:
+    sptr<OHOS::SurfaceDelegate> surfaceDelegate_ = nullptr;
+    int32_t instanceId_ = -1;
+};
 class FindListenerImpl : public OHOS::NWeb::NWebFindCallback {
 public:
     FindListenerImpl() = default;
@@ -140,6 +161,15 @@ public:
         bool isUserTrigger,
         std::shared_ptr<NWeb::NWebControllerHandler> handler) override;
     void OnWindowExitByJS() override;
+    void OnPageVisible(const std::string& url) override;
+    void OnDataResubmission(std::shared_ptr<NWeb::NWebDataResubmissionCallback> handler) override;
+    void OnPageIcon(
+        const void* data,
+        size_t width,
+        size_t height,
+        NWeb::ImageColorType colorType,
+        NWeb::ImageAlphaType alphaType) override;
+    void OnDesktopIconUrl(const std::string& icon_url, bool precomposed) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {

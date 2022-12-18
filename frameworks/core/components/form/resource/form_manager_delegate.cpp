@@ -20,6 +20,7 @@
 #include <sstream>
 
 #include "base/log/log.h"
+#include "core/common/container.h"
 #include "frameworks/base/json/json_util.h"
 #include "frameworks/core/common/frontend.h"
 
@@ -28,6 +29,8 @@
 #include "form_host_client.h"
 #include "form_js_info.h"
 #include "form_mgr.h"
+#include "core/common/form_manager.h"
+#include "core/components/form/resource/form_utils.h"
 #endif
 
 namespace OHOS::Ace {
@@ -107,12 +110,8 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
     wantCache_.SetElementName(info.bundleName, info.abilityName);
 
-    if (!info.want.empty()) {
-        auto wantJson = JsonUtil::ParseJsonString(info.want);
-        auto params = wantJson->GetValue("parameters");
-        LOGI("AddForm: Host want params : %{public}s", params->ToString().c_str());
-        AAFwk::WantParams parameters = AAFwk::WantParamWrapper::ParseWantParams(params->ToString());
-        wantCache_.SetParams(parameters);
+    if (info.wantWrap) {
+        info.wantWrap->SetWantParamsFromWantWrap(reinterpret_cast<void*>(&wantCache_));
     }
 
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY, info.id);
@@ -124,7 +123,6 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     if (info.dimension != -1) {
         wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DIMENSION_KEY, info.dimension);
     }
-
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
     if (ret != 0) {
@@ -302,7 +300,7 @@ bool FormManagerDelegate::ParseAction(const std::string &action, AAFwk::Want &wa
     auto bundle = bundleName->GetString();
     auto ability = abilityName->GetString();
     LOGI("bundle:%{public}s ability:%{public}s, params:%{public}s", bundle.c_str(), ability.c_str(),
-        params->GetString().c_str());
+        params->ToString().c_str());
     if (bundle.empty()) {
         bundle = wantCache_.GetElement().GetBundleName();
     }
@@ -316,10 +314,14 @@ bool FormManagerDelegate::ParseAction(const std::string &action, AAFwk::Want &wa
         auto child = params->GetChild();
         while (child->IsValid()) {
             auto key = child->GetKey();
-            if (!child->GetString().empty()) {
+            if (child->IsNull()) {
+                want.SetParam(key, std::string());
+            } else if (child->IsString()) {
                 want.SetParam(key, child->GetString());
-            } else {
+            } else if (child->IsNumber()) {
                 want.SetParam(key, child->GetInt());
+            } else {
+                want.SetParam(key, std::string());
             }
             child = child->GetNext();
         }
@@ -352,7 +354,12 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
         if (!ParseAction(action, want)) {
             LOGE("Failed to parse want");
         } else {
-            AppExecFwk::FormMgr::GetInstance().RouterEvent(runningCardId_, want);
+            auto contianerId = Container::CurrentId();
+            if (!formUtils_) {
+                LOGE("Failed to get formUtils");
+                return;
+            }
+            formUtils_->RouterEvent(runningCardId_, action, contianerId, wantCache_.GetElement().GetBundleName());
         }
         return;
     }
@@ -462,6 +469,13 @@ void FormManagerDelegate::OnDeathReceived()
 
     if (ret != 0) {
         LOGE("relink to form manager fail!!!");
+    }
+}
+
+void FormManagerDelegate::SetFormUtils(const std::shared_ptr<FormUtils>& formUtils)
+{
+    if (formUtils) {
+        formUtils_ = formUtils;
     }
 }
 #endif

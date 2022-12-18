@@ -24,41 +24,37 @@
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/text/span_view.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
+namespace {
 // create menuWrapper and menu node, update menu props
-std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(const std::string& targetTag, int32_t targetId)
+std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, MenuType type = MenuType::MENU)
 {
-    auto wrapperId = ElementRegister::GetInstance()->MakeUniqueId();
     // use wrapper to detect click events outside menu
-    auto wrapperNode = FrameNode::CreateFrameNode(
-        V2::MENU_WRAPPER_ETS_TAG, wrapperId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId));
+    auto wrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(targetId));
 
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, nodeId, AceType::MakeRefPtr<MenuPattern>());
+    auto menuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, nodeId, AceType::MakeRefPtr<MenuPattern>(targetId, type));
 
-    // update menu props
-    auto layoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-    layoutProps->UpdateTargetId(targetId);
-    layoutProps->UpdateTargetTag(targetTag);
-
+    auto menuFrameNode = menuNode->GetPattern<MenuPattern>();
     menuNode->MountToParent(wrapperNode);
     menuNode->MarkModifyDone();
 
     return { wrapperNode, menuNode };
 }
+} // namespace
 
 // create menu with menuItems
-RefPtr<FrameNode> MenuView::Create(
-    const std::vector<OptionParam>& params, const std::string& targetTag, int32_t targetId)
+RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t targetId, MenuType type)
 {
-    auto [wrapperNode, menuNode] = CreateMenu(targetTag, targetId);
+    auto [wrapperNode, menuNode] = CreateMenu(targetId, type);
     // append options to menu
     for (size_t i = 0; i < params.size(); ++i) {
-        auto optionNode = OptionView::Create(params[i].first, params[i].second, targetId, i);
+        auto optionNode = OptionView::CreateMenuOption(params[i].first, std::move(params[i].second), i);
         // first node never paints divider
         if (i == 0) {
             auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
@@ -71,9 +67,9 @@ RefPtr<FrameNode> MenuView::Create(
 }
 
 // create menu with custom node from a builder
-RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, const std::string& targetTag, int32_t targetId)
+RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t targetId, MenuType type)
 {
-    auto [wrapperNode, menuNode] = CreateMenu(targetTag, targetId);
+    auto [wrapperNode, menuNode] = CreateMenu(targetId, type);
     // put custom node in a scroll to limit its height
     auto scroll = FrameNode::CreateFrameNode(
         V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
@@ -85,6 +81,21 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, const std::
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
 
+    return wrapperNode;
+}
+
+RefPtr<FrameNode> MenuView::Create(const std::vector<SelectParam>& params, int32_t targetId)
+{
+    auto [wrapperNode, menuNode] = CreateMenu(targetId);
+    for (size_t i = 0; i < params.size(); ++i) {
+        auto optionNode = OptionView::CreateSelectOption(params[i].first, params[i].second, i);
+        // first node never paints divider
+        if (i == 0) {
+            auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
+            props->UpdateNeedDivider(false);
+        }
+        optionNode->MountToParent(menuNode);
+    }
     return wrapperNode;
 }
 

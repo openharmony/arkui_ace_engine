@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_VIDEO_COMPONENT_V2_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_VIDEO_COMPONENT_V2_H
 
-#include "core/components/video/video_controller_v2.h"
+#include "core/components/video/video_component.h"
 
 namespace OHOS::Ace {
 // A component can show Video.

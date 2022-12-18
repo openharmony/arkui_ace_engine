@@ -35,9 +35,7 @@ void RenderTexture::Update(const RefPtr<Component>& component)
     if (sourceSize.IsValid()) {
         sourceSize_ = sourceSize;
     }
-#if (!defined OHOS_STANDARD_SYSTEM) || (defined ENABLE_ROSEN_BACKEND)
     imageFit_ = texture->GetFit();
-#endif
     imagePosition_ = texture->GetImagePosition();
     InitControlsHeight(component);
 
@@ -132,7 +130,7 @@ void RenderTexture::Measure()
         case ImageFit::NONE:
             CalculateFitNone();
             break;
-        case ImageFit::SCALEDOWN:
+        case ImageFit::SCALE_DOWN:
             CalculateFitScaleDown();
             break;
         default:

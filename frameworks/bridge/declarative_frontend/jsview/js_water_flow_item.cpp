@@ -32,29 +32,17 @@ void JSWaterFlowItem::JSBind(BindingTarget globalObj)
 
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSWaterFlowItem>::StaticMethod("create", &JSWaterFlowItem::Create, opt);
-    JSClass<JSWaterFlowItem>::StaticMethod("rowSpan", &JSWaterFlowItem::SetRowSpan, opt);
-    JSClass<JSWaterFlowItem>::StaticMethod("columnSpan", &JSWaterFlowItem::SetColumnSpan, opt);
+    JSClass<JSWaterFlowItem>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSWaterFlowItem>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSWaterFlowItem>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSWaterFlowItem>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSWaterFlowItem>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSWaterFlowItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSWaterFlowItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSWaterFlowItem>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
     JSClass<JSWaterFlowItem>::Inherit<JSContainerBase>();
     JSClass<JSWaterFlowItem>::Inherit<JSViewAbstract>();
     JSClass<JSWaterFlowItem>::Bind<>(globalObj);
-}
-
-void JSWaterFlowItem::SetRowSpan(int32_t rowSpan)
-{
-    auto flowItem =
-        AceType::DynamicCast<V2::WaterFlowItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (flowItem) {
-        flowItem->SetRowSpan(rowSpan);
-    }
-}
-
-void JSWaterFlowItem::SetColumnSpan(int32_t columnSpan)
-{
-    auto flowItem =
-        AceType::DynamicCast<V2::WaterFlowItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (flowItem) {
-        flowItem->SetColumnSpan(columnSpan);
-    }
 }
 } // namespace OHOS::Ace::Framework

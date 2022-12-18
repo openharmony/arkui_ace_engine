@@ -45,7 +45,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    isLimit_ = dialogProp->GetUseCustom().value_or(true);
+    auto customSize = dialogProp->GetUseCustomStyle().value_or(false);
     gridCount_ = dialogProp->GetGridCount().value_or(-1);
     const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
     const auto& parentIdealSize = layoutConstraint->parentIdealSize;
@@ -55,9 +55,12 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(realSize.ConvertToSizeT());
     layoutWrapper->GetGeometryNode()->SetContentSize(realSize.ConvertToSizeT());
     // update child layout constraint
-    LayoutConstraintF childLayoutConstraint;
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     childLayoutConstraint.UpdateMaxSizeWithCheck(layoutConstraint->maxSize);
-    ComputeInnerLayoutParam(childLayoutConstraint);
+    // constraint child size unless developer is using customStyle
+    if (!customSize) {
+        ComputeInnerLayoutParam(childLayoutConstraint);
+    }
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;
@@ -81,10 +84,7 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
     }
     columnInfo->GetParent()->BuildColumnWidth();
     auto width = GetMaxWidthBasedOnGridType(columnInfo, gridSizeType, SystemProperties::GetDeviceType());
-    if (!isLimit_) {
-        innerLayout.minSize = SizeF();
-        innerLayout.maxSize = SizeF(maxSize.Width(), maxSize.Height());
-    } else if (SystemProperties::GetDeviceType() == DeviceType::WATCH) {
+    if (SystemProperties::GetDeviceType() == DeviceType::WATCH) {
         innerLayout.minSize = SizeF(width, 0.0);
         innerLayout.maxSize = SizeF(width, maxSize.Height());
     } else if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
@@ -102,6 +102,8 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
         innerLayout.minSize = SizeF(width, 0.0);
         innerLayout.maxSize = SizeF(width, maxSize.Height() * DIALOG_HEIGHT_RATIO);
     }
+    // update percentRef
+    innerLayout.percentReference = innerLayout.maxSize;
 }
 
 double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(

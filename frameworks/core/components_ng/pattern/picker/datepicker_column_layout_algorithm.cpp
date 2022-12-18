@@ -15,11 +15,75 @@
 
 #include "core/components_ng/pattern/picker/datepicker_column_layout_algorithm.h"
 
+#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_utils.h"
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const int32_t DIVIDER_SIZE = 2;
+} // namespace
+void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    SizeF frameSize = { -1.0f, -1.0f };
+
+    auto height = static_cast<float>(
+        pickerTheme->GetGradientHeight().ConvertToPx() * 4 + pickerTheme->GetDividerSpacing().ConvertToPx());
+
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+
+    auto width = layoutConstraint->parentIdealSize.Width();
+    auto children = layoutWrapper->GetHostNode()->GetParent()->GetChildren();
+    float pickerWidth = 0.0f;
+    if (width.has_value()) {
+        pickerWidth = width.value() / static_cast<float>(children.size());
+    } else {
+        pickerWidth = static_cast<float>((pickerTheme->GetDividerSpacing() * DIVIDER_SIZE).ConvertToPx());
+    }
+
+    frameSize.SetWidth(pickerWidth);
+    frameSize.SetHeight(height);
+    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
+    auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->Measure(layoutChildConstraint);
+    }
+    MeasureText(layoutWrapper, frameSize);
+}
+
+void DatePickerColumnLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, const SizeF& size)
+{
+    auto totalChild = layoutWrapper->GetTotalChildCount();
+    for (int32_t index = 0; index < totalChild; index++) {
+        auto child = layoutWrapper->GetOrCreateChildByIndex(index);
+        ChangeTextStyle(index, totalChild, size, child);
+    }
+}
+
+void DatePickerColumnLayoutAlgorithm::ChangeTextStyle(
+    uint32_t index, uint32_t showOptionCount, const SizeF& size, const RefPtr<LayoutWrapper>& childLayoutWrapper)
+{
+    SizeF frameSize = { -1.0f, -1.0f };
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    frameSize.SetWidth(size.Width());
+    uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
+    if (index == selectedIndex) {
+        frameSize.SetHeight(static_cast<float>(pickerTheme->GetDividerSpacing().ConvertToPx()));
+        childLayoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
+    } else {
+        frameSize.SetHeight(static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()));
+        childLayoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
+    }
+}
 
 void DatePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
@@ -38,7 +102,8 @@ void DatePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     for (const auto& child : children) {
         auto childGeometryNode = child->GetGeometryNode();
         auto childSize = childGeometryNode->GetMarginFrameSize();
-        auto childOffset = padding.Offset() + OffsetF(0.0f, childStartCoordinate);
+        auto childOffset =
+            OffsetF(0.0f, childStartCoordinate + static_cast<float>(currentOffset_) + padding.Offset().GetY());
         childGeometryNode->SetMarginFrameOffset(childOffset);
         child->Layout();
         childStartCoordinate += childSize.Height();

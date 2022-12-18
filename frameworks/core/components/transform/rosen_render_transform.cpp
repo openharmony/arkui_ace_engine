@@ -45,9 +45,10 @@ void RosenRenderTransform::UpdateTransformLayer()
     SyncOriginToRsNode(rsNode);
 
     auto transform = UpdateWithEffectMatrix(transform_);
-    if (transform == previousTransformMatrix_) {
+    if (transform == previousTransformMatrix_ && !firstUpdateTransform_) {
         return;
     }
+    firstUpdateTransform_ = false;
     SyncTransformToRsNode(rsNode, transform);
     previousTransformMatrix_ = transform;
 }
@@ -67,7 +68,7 @@ void RosenRenderTransform::SyncTransformToRsNode(const std::shared_ptr<RSNode>& 
     }
 
     // translate
-    rsNode->SetTranslate(transform.translate[0], transform.translate[1], transform.translate[2]);
+    rsNode->SetTranslate(transform.translate[0], transform.translate[1], 0.0f);
 
     // scale
     rsNode->SetScale(transform.scale[0], transform.scale[1]);

@@ -15,6 +15,7 @@
 
 #include "adapter/ohos/capability/clipboard/clipboard_impl.h"
 #include "adapter/ohos/osal/pixel_map_ohos.h"
+#include "base/utils/utils.h"
 
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
 #include "pasteboard_client.h"
@@ -46,24 +47,33 @@ MiscServices::ShareOption TransitionCopyOption(CopyOptions copyOption)
     return shareOption;
 }
 
-void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption, bool isDragData)
+void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
 {
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
+    bool hasData = false;
+    taskExecutor_->PostSyncTask(
+        [&hasData]() {
+            hasData = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData();
+        },
+        TaskExecutor::TaskType::PLATFORM);
+    callback(hasData);
+#endif
+}
+
+void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption, bool isDragData)
+{
+CHECK_NULL_VOID_NOLOG(taskExecutor_);
+#ifdef SYSTEM_CLIPBOARD_SUPPORTED
     auto shareOption = TransitionCopyOption(copyOption);
-    if (taskExecutor_) {
-        taskExecutor_->PostTask(
-            [data, shareOption, isDragData]() {
-                auto pasteData = OHOS::MiscServices::PasteboardClient::GetInstance()->CreatePlainTextData(data);
-                if (!pasteData) {
-                    LOGE("create SystemKeyboardData fail from MiscServices");
-                    return;
-                }
-                pasteData->SetShareOption(shareOption);
-                pasteData->SetDraggedDataFlag(isDragData);
-                OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData);
-            },
-            TaskExecutor::TaskType::PLATFORM);
-    }
+    taskExecutor_->PostTask(
+        [data, shareOption, isDragData]() {
+            auto pasteData = OHOS::MiscServices::PasteboardClient::GetInstance()->CreatePlainTextData(data);
+            CHECK_NULL_VOID(pasteData);
+            pasteData->SetShareOption(shareOption);
+            pasteData->SetDraggedDataFlag(isDragData);
+            OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData);
+        },
+        TaskExecutor::TaskType::PLATFORM);
 #else
     LOGI("Current device doesn't support system clipboard");
     taskExecutor_->PostTask([data]() { g_clipboard = data; }, TaskExecutor::TaskType::UI);
@@ -72,31 +82,22 @@ void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption, boo
 
 void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption)
 {
+CHECK_NULL_VOID_NOLOG(taskExecutor_);
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
     auto shareOption = TransitionCopyOption(copyOption);
-    if (taskExecutor_) {
-        taskExecutor_->PostTask(
-            [pixmap, shareOption]() {
-                if (!pixmap) {
-                    LOGE("pixmap is nullptr");
-                    return;
-                }
-                auto pixmapOhos = AceType::DynamicCast<PixelMapOhos>(pixmap);
-                if (!pixmapOhos) {
-                    return;
-                }
-                auto pasteData = OHOS::MiscServices::PasteboardClient::GetInstance()->CreatePixelMapData(
-                    pixmapOhos->GetPixelMapSharedPtr());
-                if (!pasteData) {
-                    LOGE("create SystemKeyboardData fail from MiscServices");
-                    return;
-                }
-                pasteData->SetShareOption(shareOption);
-                LOGI("Set pixmap to system clipboard");
-                OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData);
-            },
-            TaskExecutor::TaskType::PLATFORM);
-    }
+    taskExecutor_->PostTask(
+        [pixmap, shareOption]() {
+            CHECK_NULL_VOID(pixmap);
+            auto pixmapOhos = AceType::DynamicCast<PixelMapOhos>(pixmap);
+            CHECK_NULL_VOID_NOLOG(pixmapOhos);
+            auto pasteData = OHOS::MiscServices::PasteboardClient::GetInstance()->CreatePixelMapData(
+                pixmapOhos->GetPixelMapSharedPtr());
+            CHECK_NULL_VOID(pasteData);
+            pasteData->SetShareOption(shareOption);
+            LOGI("Set pixmap to system clipboard");
+            OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData);
+        },
+        TaskExecutor::TaskType::PLATFORM);
 #else
     LOGI("Current device doesn't support system clipboard");
     taskExecutor_->PostTask([pixmap]() { g_pixmap = pixmap; }, TaskExecutor::TaskType::UI);
@@ -161,21 +162,12 @@ void ClipboardImpl::GetDataSync(const std::function<void(const std::string&)>& c
     taskExecutor_->PostSyncTask(
         [&result]() {
             auto has = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData();
-            if (!has) {
-                LOGE("GetDataSync: SystemKeyboardData is not exist from MiscServices");
-                return;
-            }
+            CHECK_NULL_VOID(has);
             OHOS::MiscServices::PasteData pasteData;
             auto ok = OHOS::MiscServices::PasteboardClient::GetInstance()->GetPasteData(pasteData);
-            if (!ok) {
-                LOGE("GetDataSync: Get SystemKeyboardData fail from MiscServices");
-                return;
-            }
+            CHECK_NULL_VOID(ok);
             auto textData = pasteData.GetPrimaryText();
-            if (!textData) {
-                LOGE("GetDataSync: Get SystemKeyboardTextData fail from MiscServices");
-                return;
-            }
+            CHECK_NULL_VOID(textData);
             result = *textData;
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -187,10 +179,7 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& 
     taskExecutor_->PostTask(
         [callback, weakExecutor = WeakClaim(RawPtr(taskExecutor_))]() {
             auto taskExecutor = weakExecutor.Upgrade();
-            if (!taskExecutor) {
-                LOGE("GetDataAsync: TaskExecutor is not exist");
-                return;
-            }
+            CHECK_NULL_VOID(taskExecutor);
             auto has = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData();
             if (!has) {
                 LOGE("GetDataAsync: SystemKeyboardData is not exist from MiscServices");
@@ -222,21 +211,12 @@ void ClipboardImpl::GetPixelMapDataSync(const std::function<void(const RefPtr<Pi
     taskExecutor_->PostSyncTask(
         [&pixmap]() {
             auto has = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData();
-            if (!has) {
-                LOGE("SystemKeyboardData is not exist from MiscServices");
-                return;
-            }
+            CHECK_NULL_VOID(has);
             OHOS::MiscServices::PasteData pasteData;
             auto ok = OHOS::MiscServices::PasteboardClient::GetInstance()->GetPasteData(pasteData);
-            if (!ok) {
-                LOGE("Get SystemKeyboardData fail from MiscServices");
-                return;
-            }
+            CHECK_NULL_VOID(ok);
             auto imageData = pasteData.GetPrimaryPixelMap();
-            if (!imageData) {
-                LOGE("Get SystemKeyboardImageData fail from MiscServices");
-                return;
-            }
+            CHECK_NULL_VOID(imageData);
             pixmap = AceType::MakeRefPtr<PixelMapOhos>(imageData);
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -248,10 +228,7 @@ void ClipboardImpl::GetPixelMapDataAsync(const std::function<void(const RefPtr<P
     taskExecutor_->PostTask(
         [callback, weakExecutor = WeakClaim(RawPtr(taskExecutor_))]() {
             auto taskExecutor = weakExecutor.Upgrade();
-            if (!taskExecutor) {
-                LOGE("TaskExecutor is not exist");
-                return;
-            }
+            CHECK_NULL_VOID(taskExecutor);
             auto has = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData();
             if (!has) {
                 LOGE("SystemKeyboardData is not exist from MiscServices");

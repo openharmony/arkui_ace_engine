@@ -83,7 +83,7 @@ public:
     // Load script in JS engine, and execute in corresponding context.
     virtual void LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) = 0;
     // Load ets card script in JS engine, and execute in corresponding context.
-    virtual bool LoadCard(const std::string& url, uint64_t cardId)
+    virtual bool LoadCard(const std::string& url, int64_t cardId)
     {
         return false;
     }
@@ -237,6 +237,11 @@ public:
         return extraNativeObject_;
     }
 
+    void SetForceUpdate(bool needUpdate)
+    {
+        needUpdate_ = needUpdate;
+    }
+
     virtual RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode)
     {
         return nullptr;
@@ -271,7 +276,7 @@ public:
 
     virtual void InitializeModuleSearcher(const std::string& bundleName, const std::string assetPath, bool isBundle)
     {
-        LOGE("V8 and QuickJs does not support InitializeModuleSearcher");
+        LOGE("V8 does not support InitializeModuleSearcher");
     }
 #endif
 
@@ -280,6 +285,7 @@ public:
 protected:
     NativeEngine* nativeEngine_ = nullptr;
     std::function<void(JsEngine*)> mediaUpdateCallback_;
+    bool needUpdate_ = false;
 
 private:
     // weather the app has debugger.so.

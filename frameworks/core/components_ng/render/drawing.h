@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_H
 
+#ifndef ACE_UNITTEST
 #include "draw/canvas.h"
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 #include "image/image.h"
@@ -26,7 +27,6 @@
 #include "utils/scalar.h"
 
 namespace OHOS::Ace {
-
 using RSCanvas = Rosen::Drawing::Canvas;
 using RSImage = Rosen::Drawing::Image;
 using RSBrush = Rosen::Drawing::Brush;
@@ -53,6 +53,8 @@ using RSClipOp = Rosen::Drawing::ClipOp;
 using RSSkCanvas = Rosen::Drawing::SkiaCanvas;
 using RSMatrix = Rosen::Drawing::Matrix;
 using RSCamera3D = Rosen::Drawing::Camera3D;
+using RSMaskFilter = Rosen::Drawing::MaskFilter;
+using RSBlurType = Rosen::Drawing::BlurType;
 
 using RSPathEffect = rosen::PathEffect;
 using RSPathDirection = rosen::PathDirection;
@@ -62,10 +64,15 @@ using RSTypographyProperties = rosen::TypographyProperties;
 using RSParagraphBuilder = rosen::TypographyCreate;
 using RSFontCollection = rosen::FontCollection;
 using RSParagraphStyle = rosen::TypographyStyle;
-using RSTextStyle = rosen::TextStyle;
 using RSColorQuad = rosen::ColorQuad;
 using RSShaderEffect = rosen::ShaderEffect;
 using RSTileMode = rosen::TileMode;
+using RSTextDirection = rosen::TextDirection;
+using RSTextAlign = rosen::TextAlign;
+using RSWordBreakType = rosen::WordBreakType;
+using RSTextStyle = rosen::TextStyle;
 } // namespace OHOS::Ace
-
+#else
+#include "core/components_ng/render/drawing_mock.h"
+#endif
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_H

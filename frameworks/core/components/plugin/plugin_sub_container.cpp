@@ -16,9 +16,11 @@
 #include "core/components/plugin/plugin_sub_container.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/common/plugin_manager.h"
 #include "core/components/plugin/file_asset_provider.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/pattern/plugin/plugin_layout_property.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
@@ -32,39 +34,31 @@
 namespace OHOS::Ace {
 namespace {
 const int32_t THEME_ID_DEFAULT = 117440515;
-constexpr char DECLARATIVE_JS_ENGINE_SHARED_LIB[] = "libace_engine_declarative.z.so";
 constexpr char DECLARATIVE_ARK_ENGINE_SHARED_LIB[] = "libace_engine_declarative_ark.z.so";
 } // namespace
 
-const char* GetDeclarativeSharedLibrary(bool isArkApp)
+const char* GetDeclarativeSharedLibrary()
 {
-    if (isArkApp) {
-        return DECLARATIVE_ARK_ENGINE_SHARED_LIB;
-    } else {
-        return DECLARATIVE_JS_ENGINE_SHARED_LIB;
-    }
+    return DECLARATIVE_ARK_ENGINE_SHARED_LIB;
 }
 
 void PluginSubContainer::Initialize()
 {
     ContainerScope scope(instanceId_);
 
-    if (!outSidePipelineContext_.Upgrade()) {
+    auto outSidePipelineContext = outSidePipelineContext_.Upgrade();
+    if (!outSidePipelineContext) {
         LOGE("no pipeline context for create plugin component container.");
         return;
     }
 
-    auto executor = outSidePipelineContext_.Upgrade()->GetTaskExecutor();
+    auto executor = outSidePipelineContext->GetTaskExecutor();
     if (!executor) {
         LOGE("could not got main pipeline executor");
         return;
     }
-    auto taskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(executor);
-    if (!taskExecutor) {
-        LOGE("main pipeline context executor is not flutter taskexecutor");
-        return;
-    }
-    taskExecutor_ = Referenced::MakeRefPtr<FlutterTaskExecutor>(taskExecutor);
+
+    taskExecutor_ = executor;
 
     frontend_ = AceType::MakeRefPtr<PluginFrontend>();
     if (!frontend_) {
@@ -72,13 +66,26 @@ void PluginSubContainer::Initialize()
         return;
     }
 
+    auto container = AceEngine::Get().GetContainer(outSidePipelineContext->GetInstanceId());
+    if (!container) {
+        LOGE("no container for create plugin component container.");
+        return;
+    }
+
     // set JS engine，init in JS thread
     auto loader = PluginManager::GetInstance().GetJsEngineLoader();
     if (!loader) {
-        loader = &Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary(isArkApp_));
+        loader = &Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary());
         PluginManager::GetInstance().SetJsEngineLoader(loader);
     }
-    auto jsEngine = loader->CreateJsEngine(instanceId_);
+
+    RefPtr<Framework::JsEngine> jsEngine;
+    if (container->GetSettings().usingSharedRuntime) {
+        jsEngine = loader->CreateJsEngineUsingSharedRuntime(instanceId_, container->GetSharedRuntime());
+        LOGI("Create engine using runtime, engine %{public}p", RawPtr(jsEngine));
+    } else {
+        jsEngine = loader->CreateJsEngine(instanceId_);
+    }
     if (!jsEngine) {
         LOGE("PluginSubContainer::Initialize:jsEngine is nullptr");
         return;
@@ -89,6 +96,7 @@ void PluginSubContainer::Initialize()
 
     frontend_->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
     frontend_->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
+    jsEngine->SetForceUpdate(true);
     EngineHelper::AddEngine(instanceId_, jsEngine);
     frontend_->SetJsEngine(jsEngine);
     frontend_->Initialize(FrontendType::JS_PLUGIN, taskExecutor_);
@@ -180,7 +188,7 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
     const std::string& moduleResPath, const std::string& data)
 {
     ContainerScope scope(instanceId_);
-
+    CHECK_NULL_VOID(frontend_);
     frontend_->ResetPageLoadState();
     auto flutterAssetManager = SetAssetManager(path, module);
 
@@ -210,7 +218,9 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
         },
         TaskExecutor::TaskType::UI);
 
-    frontend_->AttachPipelineContext(pipelineContext_);
+    if (frontend_) {
+        frontend_->AttachPipelineContext(pipelineContext_);
+    }
     if (frontend_) {
         frontend_->SetDensity(density_);
         UpdateSurfaceSize();
@@ -260,7 +270,7 @@ void PluginSubContainer::SetPluginComponentTheme(
         pluginResourceInfo.SetPackagePath(path.substr(0, position + 1));
     }
     pluginResourceInfo.SetResourceConfiguration(resConfig);
-    pipelineContext_->SetThemeManager(AceType::MakeRefPtr<ThemeManager>());
+    pipelineContext_->SetThemeManager(AceType::MakeRefPtr<ThemeManagerImpl>());
     auto pluginThemeManager = pipelineContext_->GetThemeManager();
     if (pluginThemeManager) {
         // Init resource, load theme map, do not parse yet.

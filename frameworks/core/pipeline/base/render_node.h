@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/rect.h"
+#include "base/geometry/matrix4.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/system_properties.h"
@@ -478,21 +479,7 @@ public:
         return nullptr;
     }
 
-    void SetVisible(bool visible, bool inRecursion = false)
-    {
-        if (visible_ != visible) {
-            visible_ = visible;
-            AddDirtyRenderBoundaryNode();
-            OnVisibleChanged();
-            CheckIfNeedUpdateTouchRect();
-            if (!inRecursion && SystemProperties::GetRosenBackendEnabled()) {
-                MarkParentNeedRender();
-            }
-        }
-        for (auto& child : children_) {
-            child->SetVisible(visible, true);
-        }
-    }
+    virtual void SetVisible(bool visible, bool inRecursion = false);
 
     virtual bool GetVisible() const
     {
@@ -555,6 +542,7 @@ public:
 
     virtual void RenderWithContext(RenderContext& context, const Offset& offset);
     virtual void Paint(RenderContext& context, const Offset& offset);
+    void PaintChildList(const std::list<RefPtr<RenderNode>>& childList, RenderContext& context, const Offset& offset);
     virtual void PaintChild(const RefPtr<RenderNode>& child, RenderContext& context, const Offset& offset);
 
     virtual void OnPaintFinish() {}
@@ -1084,7 +1072,7 @@ public:
 
     // mark JSview boundary, create/destroy RSNode if need
     void SyncRSNodeBoundary(bool isHead, bool isTail, const RefPtr<Component>& component = nullptr);
-    void ProcessExternalRSNode(const RefPtr<Component>& component);
+    bool ProcessExternalRSNode(const RefPtr<Component>& component);
     void SyncRSNode(const std::shared_ptr<RSNode>& rsNode);
     const std::shared_ptr<RSNode>& GetRSNode() const
     {
@@ -1206,6 +1194,7 @@ protected:
     double GetFirstChildBaseline(TextBaseline baseline);
     Size GetLargestChildContentSize();
     void UpdateAccessibilityPosition();
+    void UpdateAccessibilityEnable(bool isEnabled);
     void CheckIfNeedUpdateTouchRect();
 
     RefPtr<ThemeManager> GetThemeManager() const

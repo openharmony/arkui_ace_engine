@@ -33,7 +33,7 @@ public:
     void BitmapMesh(RenderContext& context, const Offset& offset);
     void DrawBitmapMesh(SkBitmap& bitmap, int column, int row,
         const float* vertices, const int* colors, const SkPaint* paint);
-    RefPtr<FlutterRenderShape> GetShapeChild(const RefPtr<RenderNode>& node);
+    RefPtr<FlutterRenderShape> GetShapeChild(const RefPtr<RenderNode>& node, Offset& offset);
     bool IsRepaintBoundary() const override
     {
         return true;

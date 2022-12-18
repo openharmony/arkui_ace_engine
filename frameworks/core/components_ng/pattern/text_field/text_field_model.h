@@ -62,6 +62,34 @@ public:
         setCaretPosition_ = std::move(setCaretPosition);
     }
 
+    static bool EscapeString(const std::string& value, std::string& result)
+    {
+        const std::unordered_map<std::string, std::string> escapeMap = { { "a", "\a" }, { "b", "\b" }, { "f", "\f" },
+            { "n", "\n" }, { "r", "\r" }, { "t", "\t" }, { "v", "\v" }, { "'", "\'" }, { "\"", "\"" }, { "\\", "\\" },
+            { "?", "\?" }, { "0", "\0" } };
+        size_t i = 0;
+        for (; i < value.size();) {
+            std::string ch = value.substr(i, 1);
+            if (ch == "\\") {
+                if (i + 1 >= value.size()) {
+                    return false;
+                }
+                i++;
+                // cannot escape this combo
+                auto nextChar = value.substr(i, 1);
+                auto mapTuple = escapeMap.find(nextChar);
+                if (mapTuple == escapeMap.end()) {
+                    LOGE("Find escape \\%{public}s failed", nextChar.c_str());
+                    return false;
+                }
+                ch = mapTuple->second;
+            }
+            result += ch;
+            i++;
+        }
+        return true;
+    }
+
 protected:
     std::function<void(const int32_t)> setCaretPosition_;
 };

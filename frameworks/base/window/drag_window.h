@@ -28,6 +28,10 @@ namespace OHOS::Ace {
 
 class RenderText;
 
+namespace NG {
+class FrameNode;
+}
+
 class ACE_EXPORT DragWindow : public AceType {
     DECLARE_ACE_TYPE(DragWindow, AceType);
 
@@ -37,6 +41,7 @@ public:
     virtual void MoveTo(int32_t x, int32_t y) const = 0;
     virtual void Destroy() const = 0;
     virtual void DrawPixelMap(const RefPtr<PixelMap>& pixelmap) = 0;
+    virtual void DrawFrameNode(const RefPtr<NG::FrameNode>& rootNode) = 0;
     virtual void DrawImage(void* skImage) = 0;
     virtual void DrawText(std::shared_ptr<txt::Paragraph> paragraph_,
         const Offset& offset, const RefPtr<RenderText>& renderText) = 0;

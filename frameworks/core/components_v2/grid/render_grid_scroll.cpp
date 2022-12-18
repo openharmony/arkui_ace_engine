@@ -22,6 +22,7 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/animation/curve_animation.h"
+#include "core/common/text_field_manager.h"
 #include "core/components/grid_layout/grid_layout_component.h"
 #include "core/components/grid_layout/render_grid_layout_item.h"
 #include "core/components_v2/grid/grid_scroll_controller.h"
@@ -34,13 +35,9 @@ namespace {
 const char UNIT_PERCENT[] = "%";
 const char UNIT_RATIO[] = "fr";
 constexpr int32_t TIME_THRESHOLD = 3 * 1000000; // 3 millisecond
+constexpr double JUMP_INDEX_THRESHOLD = 2.0;
 
 } // namespace
-
-std::string GridEventInfo::ToJSONString() const
-{
-    return std::string("\"grid\",{\"first\":").append(std::to_string(scrollIndex_)).append("},null");
-}
 
 RenderGridScroll::~RenderGridScroll()
 {
@@ -51,7 +48,10 @@ RenderGridScroll::~RenderGridScroll()
 
 void RenderGridScroll::Update(const RefPtr<Component>& component)
 {
+    component_ = AceType::DynamicCast<GridLayoutComponent>(component);
+    ACE_DCHECK(component_);
     if (!NeedUpdate(component)) {
+        InitScrollBar();
         return;
     }
     useScrollable_ = SCROLLABLE::NO_SCROLL;
@@ -67,7 +67,7 @@ void RenderGridScroll::Update(const RefPtr<Component>& component)
     ApplyRestoreInfo();
     RenderGridLayout::Update(component);
     FindRefreshParent(AceType::WeakClaim(this));
-    InitScrollBar(component);
+    InitScrollBar();
     TakeBoundary();
     const RefPtr<GridLayoutComponent> grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (!grid) {
@@ -104,7 +104,7 @@ bool RenderGridScroll::NeedUpdate(const RefPtr<Component>& component)
         rowsArgs_ != grid->GetRowsArgs() || userColGap_ != grid->GetColumnGap() || userRowGap_ != grid->GetRowGap() ||
         rightToLeft_ != grid->GetRightToLeft()) {
         return true;
-    };
+    }
     return false;
 }
 
@@ -150,10 +150,45 @@ void RenderGridScroll::CreateScrollable()
             if (proxy) {
                 proxy->StartScrollBarAnimator();
             }
+            auto scrollBar = grid->scrollBar_;
+            if (scrollBar) {
+                scrollBar->HandleScrollBarEnd();
+            }
         }
     });
     InitializeScrollable(scrollable_);
     scrollable_->Initialize(context_);
+}
+
+void RenderGridScroll::CheckJumpToIndex(double offset)
+{
+    int32_t index = startShowItemIndex_;
+    double dtIndex = -offset / estimateAverageHeight_;
+    double remainOffset = 0.0;
+    if (dtIndex >= 0) {
+        auto idx = static_cast<int32_t>(dtIndex);
+        index = endShowItemIndex_ + idx;
+        if (index >= GetItemTotalCount()) {
+            index = GetItemTotalCount() - 1;
+        } else {
+            remainOffset = -offset - idx * estimateAverageHeight_;
+        }
+    } else {
+        auto idx = static_cast<int32_t>(-dtIndex);
+        index = startShowItemIndex_ - idx;
+        if (index < 0) {
+            index = 0;
+        } else {
+            remainOffset = -offset + idx * estimateAverageHeight_;
+        }
+    }
+    int32_t rankIndex = GetStartingItem(index);
+    if (((index - rankIndex) * estimateAverageHeight_) > (colSize_* JUMP_INDEX_THRESHOLD)) {
+        currentOffset_ += offset;
+        return;
+    }
+    ScrollToIndex(rankIndex, SCROLL_FROM_BAR);
+    currentOffset_ = remainOffset + (index - rankIndex) * estimateAverageHeight_;
 }
 
 bool RenderGridScroll::UpdateScrollPosition(double offset, int32_t source)
@@ -175,6 +210,9 @@ bool RenderGridScroll::UpdateScrollPosition(double offset, int32_t source)
         return false;
     }
 
+    if (rightToLeft_ && useScrollable_ == SCROLLABLE::HORIZONTAL) {
+        offset = -offset;
+    }
     if (offset > 0.0) {
         if (reachHead_) {
             return false;
@@ -186,8 +224,12 @@ bool RenderGridScroll::UpdateScrollPosition(double offset, int32_t source)
         }
         reachHead_ = false;
     }
-
-    currentOffset_ += offset;
+    // If the offset is from the scroll bar and is large, use scroll to index to improve performance
+    if (source == SCROLL_FROM_BAR && std::abs(offset) > colSize_ * JUMP_INDEX_THRESHOLD) {
+        CheckJumpToIndex(offset);
+    } else {
+        currentOffset_ += offset;
+    }
     MarkNeedLayout(true);
     return true;
 }
@@ -198,10 +240,10 @@ void RenderGridScroll::OnTouchTestHit(
     if (!GetVisible()) {
         return;
     }
-    if (!scrollable_ || !scrollable_->Available()) {
+    if (!scrollable_) {
         return;
     }
-    if (scrollBar_ && scrollBar_->InBarRegion(globalPoint_ - coordinateOffset)) {
+    if (scrollable_->Available() && scrollBar_ && scrollBar_->InBarRegion(globalPoint_ - coordinateOffset)) {
         scrollBar_->AddScrollBarController(coordinateOffset, result);
     } else {
         scrollable_->SetCoordinateOffset(coordinateOffset);
@@ -253,6 +295,8 @@ void RenderGridScroll::SetChildPosition(
     if (rightToLeft_) {
         if (useScrollable_ != SCROLLABLE::HORIZONTAL) {
             positionCross = colSize_ - positionCross - crossLen;
+        } else {
+            positionMain = colSize_ - positionMain - mainLen;
         }
     }
 
@@ -263,7 +307,11 @@ void RenderGridScroll::SetChildPosition(
     if (useScrollable_ != SCROLLABLE::HORIZONTAL) {
         offset = Offset(positionCross + crossOffset, positionMain + mainOffset - firstItemOffset_);
     } else {
-        offset = Offset(positionMain + mainOffset - firstItemOffset_, positionCross + crossOffset);
+        if (rightToLeft_) {
+            offset = Offset(positionMain + mainOffset + firstItemOffset_, positionCross + crossOffset);
+        } else {
+            offset = Offset(positionMain + mainOffset - firstItemOffset_, positionCross + crossOffset);
+        }
     }
 
     child->SetPosition(offset);
@@ -304,6 +352,30 @@ double RenderGridScroll::GetSize(const Size& src, bool isMain) const
     return isMain ? src.Height() : src.Width();
 }
 
+void RenderGridScroll::SizeChangeOffset(double newWindowHeight)
+{
+    LOGD("list newWindowHeight = %{public}f", newWindowHeight);
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    auto textFieldManager = AceType::DynamicCast<TextFieldManager>(context->GetTextFieldManager());
+    // only need to offset vertical lists
+    if (textFieldManager && (useScrollable_ == SCROLLABLE::VERTICAL)) {
+        // only when textField is onFocus
+        if (!textFieldManager->GetOnFocusTextField().Upgrade()) {
+            return;
+        }
+        auto position = textFieldManager->GetClickPosition().GetY();
+        double offset = newWindowHeight + GetGlobalOffset().GetY() - position;
+        if (LessOrEqual(offset, 0.0)) {
+            // negative offset to scroll down
+            textFieldOffset_ = offset;
+            LOGD("size change offset applied, %{public}f", offset);
+        }
+    }
+}
+
 bool RenderGridScroll::GetGridSize()
 {
     double rowSize = ((gridHeight_ > 0.0) && (gridHeight_ < GetLayoutParam().GetMaxSize().Height()))
@@ -337,6 +409,7 @@ bool RenderGridScroll::GetGridSize()
         rowSize_ = rowSize;
         colSize_ = colSize;
         CreateScrollable();
+        SizeChangeOffset(rowSize);
         return true;
     }
     return false;
@@ -625,6 +698,10 @@ void RenderGridScroll::LoadForward()
 
 void RenderGridScroll::CalculateViewPort()
 {
+    if (textFieldOffset_) {
+        currentOffset_ += textFieldOffset_.value();
+        textFieldOffset_.reset();
+    }
     while (!NearZero(currentOffset_) || needCalculateViewPort_) {
         if (currentOffset_ > 0) {
             // [currentOffset_] > 0  means grid items are going to move down
@@ -685,7 +762,7 @@ void RenderGridScroll::CalculateViewPort()
             }
             // request new item until the blank is filled up
             blank -= BuildLazyGridLayout(*mainCount_, blank);
-            if (blank < 0) {
+            if (LessOrEqual(blank, 0)) {
                 return;
             }
             blank = blank - firstItemOffset_;
@@ -826,7 +903,6 @@ void RenderGridScroll::PerformLayout()
     if (RenderGridLayout::GetChildren().empty() && !buildChildByIndex_) {
         return;
     }
-    lastOffset_ = startMainPos_ + firstItemOffset_ - currentOffset_;
     InitialGridProp();
     CalculateViewPort();
     showItem_.clear();
@@ -873,6 +949,12 @@ void RenderGridScroll::PerformLayout()
     MarkNeedPredictLayout();
     CalculateWholeSize(drawLength);
 
+    if (rightToLeft_ && useScrollable_ == SCROLLABLE::HORIZONTAL) {
+        lastOffset_ = estimateHeight_ - viewPort_.Width() - (startMainPos_ + firstItemOffset_ + currentOffset_);
+    } else {
+        lastOffset_ = estimatePos_ + startMainPos_ + firstItemOffset_ + currentOffset_;
+    }
+
     int32_t firstIndex = GetIndexByPosition(0);
     if (lastFirstIndex_ != firstIndex) {
         if (!animatorJumpFlag_) {
@@ -887,6 +969,17 @@ void RenderGridScroll::DealCache(int32_t start, int32_t end)
 {
     if (loadingIndex_ != -1) {
         return;
+    }
+
+    if (!inRankCache_.empty()) {
+        std::set<int32_t> rankCache(std::move(inRankCache_));
+        if (deleteChildByIndex_) {
+            for (auto index : rankCache) {
+                if (items_.find(index) == items_.end()) {
+                    deleteChildByIndex_(index);
+                }
+            }
+        }
     }
 
     std::set<int32_t> deleteItem;
@@ -949,8 +1042,9 @@ void RenderGridScroll::ClearLayout(bool needReservedPlace)
     firstItemOffset_ = 0.0;
     startIndex_ = 0;
     endIndex_ = -1;
-    mainScrollExtent_ = 0.0;
     lastOffset_ = 0.0;
+    estimatePos_ = 0.0;
+    estimateAverageHeight_ = 0.0;
     estimateHeight_ = 0.0;
 
     colCount_ = 0;
@@ -979,22 +1073,12 @@ void RenderGridScroll::ClearItems()
     for (const auto& item : items) {
         if (item.first < startRankItemIndex_) {
             deleteChildByIndex_(item.first);
+        } else {
+            inRankCache_.emplace(item.first);
         }
         RemoveChildByIndex(item.first);
     }
     loadingIndex_ = -1;
-}
-
-void RenderGridScroll::GetMinAndMaxIndex(int32_t& min, int32_t& max)
-{
-    for (const auto& item : items_) {
-        if (item.first < min) {
-            min = item.first;
-        }
-        if (item.first > max) {
-            max = item.first;
-        }
-    }
 }
 
 int32_t RenderGridScroll::GetItemMainIndex(int32_t index)
@@ -1063,27 +1147,32 @@ void RenderGridScroll::CalculateWholeSize(double drawLength)
             currentItemCount = lastRow.rbegin()->second;
         }
         if (currentItemCount != 0) {
-            mainScrollExtent_ = 0.0;
-            // calculate the whole size
-            mainScrollExtent_ = static_cast<double>(totalCount_) / static_cast<double>(currentItemCount) * drawLength;
-            estimateHeight_ = mainScrollExtent_;
             totalCountFlag_ = false;
         }
     }
-    scrollBarExtent_ = 0.0;
+    double scrollBarExtent = 0.0;
+    double itemCount = 0;
     startMainPos_ = 0.0;
     for (int index = 0; index < *mainCount_; index++) {
         if (index == startIndex_) {
             // get the start position in grid
-            startMainPos_ = scrollBarExtent_;
+            startMainPos_ = scrollBarExtent;
         }
         if (gridCells_.find(index) == gridCells_.end()) {
             continue;
         }
-        scrollBarExtent_ += GetSize(gridCells_.at(index).at(0)) + *mainGap_;
+        itemCount += gridCells_.at(index).size();
+        scrollBarExtent += GetSize(gridCells_.at(index).at(0)) + *mainGap_;
     }
+    if (itemCount > 0 && !gridMatrix_.empty()) {
+        estimateAverageHeight_ = scrollBarExtent / itemCount;
+        estimateHeight_ = estimateAverageHeight_ * GetItemTotalCount();
+        int32_t startItem = gridMatrix_.begin()->second[0];
+        estimatePos_ = estimateAverageHeight_ * startItem;
+    }
+
     bool isScrollable = false;
-    if (estimateHeight_ > GetSize(GetLayoutSize()) || scrollBarExtent_ > GetSize(GetLayoutSize())) {
+    if (estimateHeight_ > GetSize(GetLayoutSize()) || scrollBarExtent > GetSize(GetLayoutSize())) {
         isScrollable = true;
     }
     if (scrollBar_) {
@@ -1105,40 +1194,45 @@ void RenderGridScroll::ScrollPage(bool reverse, bool smooth)
 
 double RenderGridScroll::GetEstimatedHeight()
 {
-    if (reachTail_) {
-        // reach the end of grid, update the total scroll bar length
-        estimateHeight_ = scrollBarExtent_;
-    } else {
-        estimateHeight_ = std::max(estimateHeight_, scrollBarExtent_);
-    }
     return estimateHeight_;
 }
 
-void RenderGridScroll::InitScrollBar(const RefPtr<Component>& component)
+void RenderGridScroll::InitScrollBar()
 {
+    if (!component_) {
+        LOGE("InitScrollBar failed, component_ is null.");
+        return;
+    }
     if (scrollBar_) {
+        scrollBar_->SetDisplayMode(component_->GetScrollBar());
+        if (!component_->GetScrollBarWidth().empty()) {
+            const auto& width = StringUtils::StringToDimension(component_->GetScrollBarWidth());
+            scrollBar_->SetInactiveWidth(width);
+            scrollBar_->SetNormalWidth(width);
+            scrollBar_->SetActiveWidth(width);
+            scrollBar_->SetTouchWidth(width);
+        }
+        if (!component_->GetScrollBarColor().empty()) {
+            scrollBarColor_ = Color::FromString(component_->GetScrollBarColor());
+            scrollBar_->SetForegroundColor(scrollBarColor_);
+        }
         scrollBar_->Reset();
         return;
     }
-    const RefPtr<GridLayoutComponent> grid = AceType::DynamicCast<GridLayoutComponent>(component);
-    if (!grid) {
-        LOGE("RenderGridLayout update failed.");
-        EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
-        return;
-    }
+
     const RefPtr<ScrollBarTheme> theme = GetTheme<ScrollBarTheme>();
     if (!theme) {
         return;
     }
     RefPtr<GridScrollController> controller = AceType::MakeRefPtr<GridScrollController>();
-    scrollBar_ = AceType::MakeRefPtr<ScrollBar>(grid->GetScrollBar(), theme->GetShapeMode());
+    scrollBar_ = AceType::MakeRefPtr<ScrollBar>(component_->GetScrollBar(), theme->GetShapeMode());
     scrollBar_->SetScrollBarController(controller);
 
     // set the scroll bar style
     scrollBar_->SetReservedHeight(theme->GetReservedHeight());
     scrollBar_->SetMinHeight(theme->GetMinHeight());
     scrollBar_->SetMinDynamicHeight(theme->GetMinDynamicHeight());
-    auto& scrollBarColor = grid->GetScrollBarColor();
+    auto& scrollBarColor = component_->GetScrollBarColor();
     if (!scrollBarColor.empty()) {
         scrollBarColor_ = Color::FromString(scrollBarColor);
     } else {
@@ -1148,8 +1242,8 @@ void RenderGridScroll::InitScrollBar(const RefPtr<Component>& component)
     scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
     scrollBar_->SetPadding(theme->GetPadding());
     scrollBar_->SetScrollable(true);
-    if (!grid->GetScrollBarWidth().empty()) {
-        const auto& width = StringUtils::StringToDimension(grid->GetScrollBarWidth());
+    if (!component_->GetScrollBarWidth().empty()) {
+        const auto& width = StringUtils::StringToDimension(component_->GetScrollBarWidth());
         scrollBar_->SetInactiveWidth(width);
         scrollBar_->SetNormalWidth(width);
         scrollBar_->SetActiveWidth(width);
@@ -1162,6 +1256,10 @@ void RenderGridScroll::InitScrollBar(const RefPtr<Component>& component)
     }
     if (!isVertical_) {
         scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+    } else {
+        if (rightToLeft_) {
+            scrollBar_->SetPositionMode(PositionMode::LEFT);
+        }
     }
     scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
     SetScrollBarCallback();

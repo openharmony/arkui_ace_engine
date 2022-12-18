@@ -17,6 +17,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
+#include "core/components/divider/divider_theme.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_ng/pattern/shape/rect_paint_property.h"
@@ -30,46 +31,10 @@ CanvasDrawFunction OptionPaintMethod::GetOverlayDrawFunction(PaintWrapper* paint
     return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto option = weak.Upgrade();
         if (option) {
-            option->PaintBackground(canvas, paintWrapper);
-            // don't paint divider when hovered
+            // don't paint divider when pressed or hovered
             option->PaintDivider(canvas, paintWrapper);
         }
     };
-}
-
-void OptionPaintMethod::PaintBackground(RSCanvas& canvas, PaintWrapper* paintWrapper)
-{
-    CHECK_NULL_VOID(paintWrapper);
-    auto props = DynamicCast<OptionPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(props);
-
-    // get background color
-    Color bgColor;
-    hover_ = props->GetHover().value_or(false);
-    if (hover_) {
-        bgColor = props->GetSelectedBackgroundColor().value_or(Color::WHITE);
-    } else {
-        bgColor = props->GetBackgroundColor().value_or(Color::WHITE);
-    }
-    RSBrush brush;
-    brush.SetARGB(bgColor.GetRed(), bgColor.GetGreen(), bgColor.GetBlue(), bgColor.GetAlpha());
-    canvas.AttachBrush(brush);
-
-    // initialize rRect radius
-    float radius = ROUND_RADIUS_PHONE.ConvertToPx();
-
-    // offset should be (0, 0)
-    auto size = paintWrapper->GetGeometryNode()->GetFrameSize();
-    auto offset = paintWrapper->GetContentOffset();
-    LOGD("paintWrapper offset = %{public}f, %{public}f, size = %{public}f, %{public}f", offset.GetX(), offset.GetY(),
-        size.Width(), size.Height());
-    // draw background rRect
-    RSRoundRect rSRoundRect(
-        RSRRect(offset.GetX(), offset.GetY(), size.Width() + offset.GetX(), size.Height() + offset.GetY()), radius,
-        radius);
-    canvas.DrawRoundRect(rSRoundRect);
-    // TODO: NEED: paint.setColor(GetEventEffectColor().GetValue());
-    // TODO: NEED: canvas->drawPath(path, paint);
 }
 
 void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper)
@@ -79,7 +44,9 @@ void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrappe
     CHECK_NULL_VOID(props);
 
     bool needDivider = props->GetNeedDivider().value_or(true);
-    if (!needDivider || hover_) {
+    bool press = props->GetPress().value_or(false);
+    bool hover = props->GetHover().value_or(false);
+    if (!needDivider || press || hover) {
         return;
     }
 
@@ -92,7 +59,12 @@ void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrappe
     LOGD("drawing option divider with length %{public}f", optionSize.Width() - 2 * horInterval);
 
     RSBrush brush;
-    brush.SetColor(DIVIDER_COLOR);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<DividerTheme>();
+    CHECK_NULL_VOID(theme);
+    auto dividerColor = theme->GetColor();
+    brush.SetColor(dividerColor.GetValue());
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
     canvas.DrawPath(path);

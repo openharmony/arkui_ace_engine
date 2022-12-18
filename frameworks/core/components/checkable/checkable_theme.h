@@ -100,6 +100,16 @@ public:
         return hoverColor_;
     }
 
+    void SetClickEffectColor(const Color& clickEffectColor)
+    {
+        clickEffectColor_ = clickEffectColor;
+    }
+
+    const Color& GetClickEffectColor() const
+    {
+        return clickEffectColor_;
+    }
+
     const Color& GetInactivePointColor() const
     {
         return inactivePointColor_;
@@ -120,6 +130,11 @@ public:
         return hoverRadius_;
     }
 
+    const Dimension& GetFocusPaintPadding() const
+    {
+        return focusPaintPadding_;
+    }
+
 protected:
     CheckableTheme() = default;
 
@@ -129,6 +144,7 @@ protected:
     Color inactivePointColor_;
     Color focusColor_;
     Color hoverColor_;
+    Color clickEffectColor_;
     Color shadowColor_;
     Dimension width_;
     Dimension height_;
@@ -139,6 +155,7 @@ protected:
     Dimension borderWidth_;
     Dimension shadowWidth_;
     Dimension hoverRadius_;
+    Dimension focusPaintPadding_;
     double aspectRatio_ = 1.0;
     double radioInnerSizeRatio_ = 0.5;
     bool needFocus_ = true;
@@ -203,8 +220,10 @@ public:
             theme->focusColor_ = checkboxPattern->GetAttr<Color>("focus_border_color", Color::RED);
             theme->borderRadius_ = checkboxPattern->GetAttr<Dimension>("bg_border_radius", 0.0_vp);
             theme->hoverColor_ = checkboxPattern->GetAttr<Color>("hover_border_color", Color::RED);
+            theme->clickEffectColor_ = checkboxPattern->GetAttr<Color>("click_effect_color", Color::RED);
             theme->inactivePointColor_ = checkboxPattern->GetAttr<Color>("bg_color_unchecked", Color::RED);
             theme->hoverRadius_ = checkboxPattern->GetAttr<Dimension>("hover_border_radius", 0.0_vp);
+            theme->focusPaintPadding_ = checkboxPattern->GetAttr<Dimension>("focus_paint_padding", 0.0_vp);
 
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
@@ -291,6 +310,8 @@ public:
             theme->hoverColor_ = switchPattern->GetAttr<Color>("hover_border_color", Color::RED);
             theme->hoverRadius_ = switchPattern->GetAttr<Dimension>("hover_border_radius", 0.0_vp);
             theme->inactivePointColor_ = switchPattern->GetAttr<Color>("fg_color_unchecked", Color::RED);
+            theme->clickEffectColor_ = switchPattern->GetAttr<Color>("click_effect_color", Color::RED);
+            theme->focusPaintPadding_ = switchPattern->GetAttr<Dimension>("focus_paint_padding", 0.0_vp);
 
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
@@ -362,6 +383,8 @@ public:
             theme->inactivePointColor_ = radioPattern->GetAttr<Color>("fg_color_unchecked", Color::RED);
             theme->focusColor_ = radioPattern->GetAttr<Color>("focus_border_color", Color::RED);
             theme->hoverColor_ = radioPattern->GetAttr<Color>("hover_border_color", Color::RED);
+            theme->clickEffectColor_ = radioPattern->GetAttr<Color>("click_effect_color", Color::RED);
+            theme->focusPaintPadding_ = radioPattern->GetAttr<Dimension>("focus_paint_padding", 0.0_vp);
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
             }

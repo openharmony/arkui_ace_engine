@@ -16,9 +16,105 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_VIDEO_CONTROLLER_V2_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_VIDEO_CONTROLLER_V2_H
 
-#include "core/components/video/video_component.h"
+#include <algorithm>
+#include <functional>
+#include <list>
+
+#include "core/components/video/video_utils.h"
+#include "frameworks/base/memory/ace_type.h"
 
 namespace OHOS::Ace {
+class VideoController : public virtual AceType {
+    DECLARE_ACE_TYPE(VideoController, AceType);
+
+public:
+    using StartImpl = std::function<void()>;
+    using PauseImpl = std::function<void()>;
+    using StopImpl = std::function<void()>;
+    using SeekToImpl = std::function<void(float, SeekMode)>;
+    using RequestFullscreenImpl = std::function<void(bool)>;
+    using ExitFullscreenImpl = std::function<void(bool)>;
+
+    void Start()
+    {
+        if (startImpl_) {
+            startImpl_();
+        }
+    }
+
+    void Pause()
+    {
+        if (pauseImpl_) {
+            pauseImpl_();
+        }
+    }
+
+    void Stop()
+    {
+        if (stopImpl_) {
+            stopImpl_();
+        }
+    }
+
+    void SeekTo(float pos, SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC)
+    {
+        if (seekToImpl_) {
+            seekToImpl_(pos, seekMode);
+        }
+    }
+
+    void RequestFullscreen(bool isPortrait)
+    {
+        if (requestFullscreenImpl_) {
+            requestFullscreenImpl_(isPortrait);
+        }
+    }
+
+    void ExitFullscreen(bool isSync)
+    {
+        if (exitFullscreenImpl_) {
+            exitFullscreenImpl_(isSync);
+        }
+    }
+
+    void SetStartImpl(StartImpl&& startImpl)
+    {
+        startImpl_ = std::move(startImpl);
+    }
+
+    void SetPausetImpl(PauseImpl&& pauseImpl)
+    {
+        pauseImpl_ = std::move(pauseImpl);
+    }
+
+    void SetStopImpl(StopImpl&& stopImpl)
+    {
+        stopImpl_ = std::move(stopImpl);
+    }
+
+    void SetSeekToImpl(SeekToImpl&& seekToImpl)
+    {
+        seekToImpl_ = std::move(seekToImpl);
+    }
+
+    void SetRequestFullscreenImpl(RequestFullscreenImpl&& requestFullscreenImpl)
+    {
+        requestFullscreenImpl_ = std::move(requestFullscreenImpl);
+    }
+
+    void SetExitFullscreenImpl(ExitFullscreenImpl&& exitFullscreenImpl)
+    {
+        exitFullscreenImpl_ = std::move(exitFullscreenImpl);
+    }
+
+private:
+    StartImpl startImpl_;
+    PauseImpl pauseImpl_;
+    StopImpl stopImpl_;
+    SeekToImpl seekToImpl_;
+    RequestFullscreenImpl requestFullscreenImpl_;
+    ExitFullscreenImpl exitFullscreenImpl_;
+};
 
 class VideoControllerV2 : public virtual AceType {
     DECLARE_ACE_TYPE(VideoControllerV2, AceType);

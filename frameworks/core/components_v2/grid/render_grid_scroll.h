@@ -29,28 +29,10 @@
 #include "core/components/refresh/render_refresh_target.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/scroll/scrollable.h"
+#include "core/components_v2/grid/grid_event.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace::V2 {
-
-class GridEventInfo : public BaseEventInfo, public EventToJSONStringAdapter {
-    DECLARE_RELATIONSHIP_OF_CLASSES(GridEventInfo, BaseEventInfo, EventToJSONStringAdapter);
-
-public:
-    explicit GridEventInfo(int32_t scrollIndex) : BaseEventInfo("grid"), scrollIndex_(scrollIndex) {}
-
-    ~GridEventInfo() = default;
-
-    std::string ToJSONString() const override;
-
-    int32_t GetScrollIndex() const
-    {
-        return scrollIndex_;
-    }
-
-private:
-    int32_t scrollIndex_ = 0;
-};
 
 class RenderGridScroll : public RenderGridLayout, public RenderRefreshTarget {
     DECLARE_ACE_TYPE(RenderGridScroll, RenderGridLayout, RenderRefreshTarget);
@@ -59,6 +41,7 @@ public:
     using BuildChildByIndex = std::function<bool(int32_t)>;
     using GetChildSpanByIndex = std::function<bool(int32_t, bool, int32_t&, int32_t&, int32_t&, int32_t&)>;
     using DeleteChildByIndex = std::function<void(int32_t)>;
+    using GetItemTotalCountFunc = std::function<int32_t(void)>;
     using OnScrolledFunc = std::function<void(std::shared_ptr<GridEventInfo>&)>;
 
     RenderGridScroll() = default;
@@ -90,6 +73,19 @@ public:
         getChildSpanByIndex_ = std::move(func);
     }
 
+    void SetGetItemTotalCount(GetItemTotalCountFunc func)
+    {
+        getItemTotalCount_ = std::move(func);
+    }
+
+    int32_t GetItemTotalCount()
+    {
+        if (getItemTotalCount_) {
+            return getItemTotalCount_();
+        }
+        return 0;
+    }
+
     void AddChildByIndex(int32_t index, const RefPtr<RenderNode>& renderNode);
     void RemoveChildByIndex(int32_t index)
     {
@@ -107,6 +103,9 @@ public:
     {
         if (totalCount_ == totalCount) {
             return;
+        }
+        if (totalCount_ < totalCount) {
+            reachTail_ = false;
         }
         totalCount_ = totalCount;
         totalCountFlag_ = true;
@@ -151,6 +150,7 @@ public:
 protected:
     int32_t GetItemMainIndex(const RefPtr<RenderNode>& child, bool isMain) const;
     void SetMainSize(Size& dst, const Size& src);
+    void SizeChangeOffset(double newWindowHeight);
     double GetSize(const Size& src, bool isMain = true) const;
     void GetNextGrid(int32_t& curMain, int32_t& curCross) const override;
     void GetPreviousGrid(int32_t& curMain, int32_t& curCross);
@@ -168,6 +168,7 @@ protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
     bool UpdateScrollPosition(double offset, int32_t source);
+    void CheckJumpToIndex(double offset);
     void RecordLocation();
 
     void InitialGridProp() override;
@@ -184,14 +185,13 @@ protected:
     void DealCache(int32_t start, int32_t end);
     void DeleteItems(int32_t index, bool isTail);
 
-    void GetMinAndMaxIndex(int32_t& min, int32_t& max);
     int32_t GetItemMainIndex(int32_t index);
 
     bool NeedUpdate(const RefPtr<Component>& component);
 
     void CalculateWholeSize(double drawLength);
 
-    void InitScrollBar(const RefPtr<Component>& component);
+    void InitScrollBar();
     void InitScrollBarProxy();
 
     void DoJump(double position, int32_t source);
@@ -201,7 +201,7 @@ protected:
 
     double GetCurrentOffset() const
     {
-        return startMainPos_ + currentOffset_ - firstItemOffset_;
+        return estimatePos_ + startMainPos_ + currentOffset_ + firstItemOffset_;
     }
 
     void SetScrollBarCallback();
@@ -225,6 +225,7 @@ protected:
     std::unordered_map<int32_t, RefPtr<RenderNode>> items_;
     std::set<int32_t> showItem_;
     std::set<int32_t> inCache_;
+    std::set<int32_t> inRankCache_;
     std::list<RefPtr<RenderNode>> childrenInRect_;
 
     RefPtr<Scrollable> scrollable_;
@@ -234,6 +235,7 @@ protected:
     bool needCalculateViewPort_ = false;
     double startMainPos_ = 0.0;
     double currentOffset_ = 0.0;
+    std::optional<double> textFieldOffset_;
     double animateDelta_ = 0.0;
     double lastOffset_ = 0.0;
     double firstItemOffset_ = 0.0;
@@ -255,10 +257,10 @@ protected:
     double* mainGap_ = &rowGap_;
 
     // used for scrollbar
-    double scrollBarExtent_ = 0.0;
-    double mainScrollExtent_ = 0.0;
     int32_t scrollBarOpacity_ = 0;
     double estimateHeight_ = 0.0;
+    double estimatePos_ = 0.0;
+    double estimateAverageHeight_ = 0.0;
     bool totalCountFlag_ = false;
     bool animatorJumpFlag_ = false;
     Color scrollBarColor_;
@@ -270,6 +272,7 @@ protected:
     BuildChildByIndex buildChildByIndex_;
     DeleteChildByIndex deleteChildByIndex_;
     GetChildSpanByIndex getChildSpanByIndex_;
+    GetItemTotalCountFunc getItemTotalCount_;
     OnScrolledFunc scrolledEventFun_;
 
     int32_t lastFirstIndex_ = -1;

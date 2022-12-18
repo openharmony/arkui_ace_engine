@@ -53,7 +53,22 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<CheckBoxGroupPaintMethod>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto eventHub = host->GetEventHub<EventHub>();
+        CHECK_NULL_RETURN(eventHub, nullptr);
+        auto enabled = eventHub->IsEnabled();
+        auto paintMethod = MakeRefPtr<CheckBoxGroupPaintMethod>(enabled, isTouch_, isHover_, shapeScale_, uiStatus_);
+        return paintMethod;
+    }
+
+    bool OnDirtyLayoutWrapperSwap(
+        const RefPtr<LayoutWrapper>& dirty, bool /*skipMeasure*/, bool /*skipLayout*/) override
+    {
+        auto geometryNode = dirty->GetGeometryNode();
+        offset_ = geometryNode->GetContentOffset();
+        size_ = geometryNode->GetContentSize();
+        return true;
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -81,23 +96,67 @@ public:
         isAddToMap_ = isAddToMap;
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        Pattern::ToJsonValue(json);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto checkBoxEventHub = host->GetEventHub<NG::CheckBoxGroupEventHub>();
+        auto group = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
+        json->Put("group", group.c_str());
+    }
+
+    void ResetUIStatus()
+    {
+        uiStatus_ = UIStatus::UNSELECTED;
+    }
+
+    FocusPattern GetFocusPattern() const override;
+    void UpdateAnimation(bool check);
+    void UpdateUIStatus(bool check);
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
+    void InitClickEvent();
+    void InitTouchEvent();
+    void InitMouseEvent();
     void OnClick();
-
+    void OnTouchDown();
+    void OnTouchUp();
+    void HandleMouseEvent(bool isHover);
+    void UpdateCheckBoxShape(float value);
+    void UpdateUnSelect();
     void UpdateState();
     void UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool select);
     void UpdateRepeatedGroupStatus(const RefPtr<FrameNode>& frameNode, bool select);
     void UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNode,
-        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap, std::string group,
+        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap, const std::string& group,
         bool select);
+    RectF GetHotZoneRect(bool isOriginal) const;
+    // Init key event
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
 
     std::optional<std::string> preGroup_;
     bool isAddToMap_ = true;
-
     RefPtr<ClickEvent> clickListener_;
+    RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<InputEvent> mouseEvent_;
+    bool isTouch_ = false;
+    bool isHover_ = false;
+    bool isClick_ = false;
+    bool isFirstCreated_ = true;
+    // animation control
+    RefPtr<Animator> controller_;
+    RefPtr<CurveAnimation<float>> translate_;
+    float shapeScale_ = 1.0f;
+    UIStatus uiStatus_ = UIStatus::UNSELECTED;
+    Dimension hotZoneHorizontalPadding_ = 11.0_vp;
+    Dimension hotZoneVerticalPadding_ = 11.0_vp;
+    OffsetF offset_;
+    SizeF size_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupPattern);
 };

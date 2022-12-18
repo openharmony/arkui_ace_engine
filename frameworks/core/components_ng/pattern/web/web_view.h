@@ -19,7 +19,6 @@
 #include <functional>
 #include <string>
 
-#include "core/components/box/drag_drop_event.h"
 #include "core/components/web/web_property.h"
 
 namespace OHOS::Ace::NG {
@@ -67,6 +66,7 @@ public:
     static void SetZoomAccessEnabled(bool isZoomAccessEnabled);
     static void SetGeolocationAccessEnabled(bool isGeolocationAccessEnabled);
     static void SetUserAgent(const std::string& userAgent);
+    static void SetCustomScheme(const std::string& customScheme);
     static void SetRenderExitedId(OnWebAsyncFunc&& renderExitedId);
     static void SetRefreshAccessedHistoryId(OnWebAsyncFunc&& refreshAccessedHistoryId);
     static void SetCacheMode(WebCacheMode mode);
@@ -83,16 +83,29 @@ public:
     static void SetBackgroundColor(int32_t backgroundColor);
     static void SetInitialScale(float scale);
     static void SetSearchResultReceiveEventId(OnWebAsyncFunc&& searchResultReceiveEventId);
-    static void SetOnDragStartId(const OnDragFunc& onDragStartId);
-    static void SetOnDragEnterId(const OnDropFunc& onDragEnterId);
-    static void SetOnDragMoveId(const OnDropFunc& onDragMoveId);
-    static void SetOnDragLeaveId(const OnDropFunc& onDragLeaveId);
-    static void SetOnDropId(const OnDropFunc& onDropId);
     static void SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     static void SetWindowNewEvent(OnWebAsyncFunc&& windowNewEventId);
     static void SetWindowExitEventId(OnWebAsyncFunc&& windowExitEventId);
     static void SetMultiWindowAccessEnabled(bool isMultiWindowAccessEnabled);
     static void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback);
+    static void SetWebCursiveFont(const std::string& cursiveFontFamily);
+    static void SetWebFantasyFont(const std::string& fantasyFontFamily);
+    static void SetWebFixedFont(const std::string& fixedFontFamily);
+    static void SetWebSansSerifFont(const std::string& sansSerif);
+    static void SetWebSerifFont(const std::string& serifFontFamily);
+    static void SetWebStandardFont(const std::string& standardFontFamily);
+    static void SetDefaultFixedFontSize(int32_t defaultFixedFontSize);
+    static void SetDefaultFontSize(int32_t defaultFontSize);
+    static void SetMinFontSize(int32_t minFontSize);
+    static void SetBlockNetwork(bool isNetworkBlocked);
+    static void SetPageVisibleId(OnWebAsyncFunc&& pageVisibleId);
+    static void SetOnInterceptKeyEventCallback(std::function<bool(KeyEventInfo& keyEventInfo)>&& onPreKeyEventId);
+    static void SetDataResubmittedId(OnWebAsyncFunc&& DataResubmittedId);
+    static void SetFaviconReceivedId(OnWebAsyncFunc&& faviconReceivedId);
+    static void SetTouchIconUrlId(OnWebAsyncFunc&& touchIconUrlId);
+
+private:
+    static void RegisterPipelineCallback(int32_t nodeId);
 };
 } // namespace OHOS::Ace::NG
 

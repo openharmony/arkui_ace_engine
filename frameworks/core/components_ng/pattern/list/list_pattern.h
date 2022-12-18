@@ -16,14 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 
-#include <optional>
-
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_paint_method.h"
+#include "core/components_ng/pattern/list/list_paint_property.h"
+#include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -43,7 +45,13 @@ public:
         auto divider = listLayoutProperty->GetDivider().value_or(itemDivider);
         auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
         auto drawVertical = (axis == Axis::HORIZONTAL);
-        return MakeRefPtr<ListPaintMethod>(divider, startIndex_, endIndex_, drawVertical, itemPosition_);
+        auto paint =  MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_, itemPosition_);
+        paint->SetScrollBar(AceType::WeakClaim(AceType::RawPtr(scrollBar_)));
+        paint->SetTotalItemCount(maxListItemIndex_ + 1);
+        if (scrollEffect_ && scrollEffect_->IsFadeEffect()) {
+            paint->SetEdgeEffect(scrollEffect_);
+        }
+        return paint;
     }
 
     bool IsAtomicNode() const override
@@ -56,23 +64,19 @@ public:
         return MakeRefPtr<ListLayoutProperty>();
     }
 
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<ListPaintProperty>();
+    }
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<ListEventHub>();
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        auto listLayoutAlgorithm = MakeRefPtr<ListLayoutAlgorithm>(startIndex_, endIndex_);
-        if (jumpIndex_) {
-            listLayoutAlgorithm->SetIndex(jumpIndex_.value());
-        }
-        listLayoutAlgorithm->SetCurrentOffset(currentDelta_);
-        listLayoutAlgorithm->SetIsInitialized(isInitialized_);
-        return listLayoutAlgorithm;
-    }
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
-    void UpdateCurrentOffset(float offset);
+    bool UpdateCurrentOffset(float offset);
 
     int32_t GetStartIndex() const
     {
@@ -87,21 +91,6 @@ public:
     int32_t GetMaxListItemIndex() const
     {
         return maxListItemIndex_;
-    }
-
-    void SetIsScroll(bool isScroll)
-    {
-        isScroll_ = isScroll;
-    }
-
-    bool GetIsScroll() const
-    {
-        return isScroll_;
-    }
-
-    void SetScrollStop(bool scrollStop)
-    {
-        scrollStop_ = scrollStop;
     }
 
     void SetScrollState(int32_t scrollState)
@@ -125,17 +114,53 @@ public:
     {
         auto property = GetLayoutProperty<ListLayoutProperty>();
         if (!property) {
-            return ScopeFocusAlgorithm();
+            return {};
         }
         auto isVertical = property->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL;
-        return ScopeFocusAlgorithm(isVertical, true, ScopeType::OTHERS);
+        return { isVertical, true, ScopeType::OTHERS };
     }
 
     const ListLayoutAlgorithm::PositionMap& GetItemPosition() const
     {
         return itemPosition_;
     }
+
+    void SetPositionController(RefPtr<ListPositionController> control)
+    {
+        positionController_ = control;
+        if (control) {
+            control->SetScrollPattern(AceType::WeakClaim<ListPattern>(this));
+        }
+    }
+
+    float GetTotalOffset() const
+    {
+        return estimateOffset_ - currentOffset_;
+    }
+
+    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve);
+    void ScrollTo(float position);
+    void ScrollToIndex(int32_t index, ScrollIndexAlignment align = ScrollIndexAlignment::ALIGN_TOP);
+    void ScrollToEdge(ScrollEdgeType scrollEdgeType);
+    bool ScrollPage(bool reverse);
+    Offset GetCurrentOffset() const;
+
+    void SetScrollBar();
+    void UpdateScrollBarOffset();
+    void RegisterScrollBarEventTask();
+    void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy);
+    float GetScrollableDistance() const
+    {
+        return scrollableDistance_;
+    }
+    float GetCurrentPosition() const
+    {
+        return currentPosition_;
+    }
+
 private:
+    void ProcessScrollEnd();
+
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -144,32 +169,53 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
 
-    float MainSize() const;
-    void ResetScrollableEvent(bool scrollable);
-    bool IsOutOfBoundary();
-    void SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect);
+    void MarkDirtyNodeSelf();
+    SizeF GetContentSize() const;
+    float GetMainContentSize() const;
+    void ProcessEvent(bool indexChanged, float finalOffset, bool isJump);
+    void CheckScrollable();
+    bool IsOutOfBoundary(bool useCurrentDelta = true);
+    void InitScrollableEvent();
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect);
-    void RemoveScrollEdgeEffect();
+    void SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub, EdgeEffect edgeEffect);
+    void HandleScrollEffect(float offset);
 
+    RefPtr<Animator> animator_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
-    RefPtr<Animator> springController_;
+    RefPtr<ListPositionController> positionController_;
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
+    float startMainPos_;
+    float endMainPos_;
     bool isInitialized_ = false;
-    float totalOffset_ = 0.0f;
+    float estimateOffset_ = 0.0f;
+    float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
+    float spaceWidth_ = 0.0f;
 
     float currentDelta_ = 0.0f;
 
     std::optional<int32_t> jumpIndex_;
+    ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
+    int32_t scrollIndex_ = 0;
+    bool scrollable_ = true;
+
+    RefPtr<ScrollBar> scrollBar_;
+    RefPtr<TouchEventImpl> touchEvent_;
+    bool isScrollContent_ = true;
+    RefPtr<ScrollBarProxy> scrollBarProxy_;
+    float scrollableDistance_ = 0.0f;
+    float currentPosition_ = 0.0f;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
-    bool isScroll_ = false;
     bool scrollStop_ = false;
     int32_t scrollState_ = SCROLL_FROM_NONE;
-    bool initScrollable_ = false;
+
+    std::list<WeakPtr<FrameNode>> itemGroupList_;
+    std::map<int32_t, int32_t> lanesItemRange_;
+    int32_t lanes_ = 1;
 };
 } // namespace OHOS::Ace::NG
 

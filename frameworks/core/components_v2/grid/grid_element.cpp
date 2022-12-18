@@ -25,16 +25,6 @@
 
 namespace OHOS::Ace::V2 {
 
-void GridElement::Update()
-{
-    RenderElement::Update();
-    RefPtr<RenderGridScroll> render = AceType::DynamicCast<RenderGridScroll>(renderNode_);
-    if (!render) {
-        return;
-    }
-    render->OnDataSourceUpdated(0);
-}
-
 RefPtr<RenderNode> GridElement::CreateRenderNode()
 {
     auto render = RenderElement::CreateRenderNode();
@@ -64,6 +54,14 @@ RefPtr<RenderNode> GridElement::CreateRenderNode()
             }
             return element->GetItemSpanByIndex(index, isHorizontal, itemMain, itemCross, itemMainSpan, itemCrossSpan);
         });
+
+        renderGrid->SetGetItemTotalCount([weak = WeakClaim(this)]() {
+            auto element = weak.Upgrade();
+            if (!element) {
+                return 0;
+            }
+            return static_cast<int32_t>(element->TotalCount());
+        });
     }
 
     return render;
@@ -74,6 +72,9 @@ void GridElement::PerformBuild()
     auto component = AceType::DynamicCast<GridLayoutComponent>(component_);
     ACE_DCHECK(component); // MUST be GridComponent
     V2::ElementProxyHost::UpdateChildren(component->GetChildren());
+    RefPtr<RenderGridScroll> render = AceType::DynamicCast<RenderGridScroll>(renderNode_);
+    CHECK_NULL_VOID_NOLOG(render);
+    render->OnDataSourceUpdated(0);
 }
 
 bool GridElement::BuildChildByIndex(int32_t index)
@@ -194,6 +195,7 @@ void GridElement::OnDataSourceUpdated(size_t startIndex)
     }
     render->OnDataSourceUpdated(static_cast<int32_t>(startIndex));
     render->SetTotalCount(ElementProxyHost::TotalCount());
+    ElementProxyHost::OnDataSourceUpdated(startIndex);
 }
 
 void GridElement::OnPostFlush()

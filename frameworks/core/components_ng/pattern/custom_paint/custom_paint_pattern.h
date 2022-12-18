@@ -56,6 +56,8 @@ public:
         canvasSize_ = canvasSize;
     }
 
+    void SetAntiAlias(bool isEnabled);
+
     void FillRect(const Rect& rect);
     void StrokeRect(const Rect& rect);
     void ClearRect(const Rect& rect);
@@ -106,6 +108,7 @@ public:
     void Transform(const TransformParam& param);
     void Translate(double x, double y);
     std::string ToDataURL(const std::string& args);
+    std::string GetJsonData(const std::string& path);
 
     void UpdateGlobalAlpha(double alpha);
     void UpdateCompositeOperation(CompositeOperation type);
@@ -137,6 +140,7 @@ private:
 
     RefPtr<CanvasPaintMethod> paintMethod_;
     std::optional<SizeF> canvasSize_;
+    bool isCanvasInit_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(CustomPaintPattern);
 };

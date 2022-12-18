@@ -108,10 +108,12 @@ public:
 
     static void RemoveChildInRenderTree(const RefPtr<LayoutWrapper>& wrapper);
     void RemoveChildInRenderTree(int32_t index);
+    void RemoveAllChildInRenderTree();
 
     void ResetHostNode();
 
     RefPtr<FrameNode> GetHostNode() const;
+    WeakPtr<FrameNode> GetWeakHostNode() const;
     std::string GetHostTag() const;
     int32_t GetHostDepth() const;
 
@@ -162,7 +164,7 @@ public:
 
     bool IsContraintNoChanged() const
     {
-        return isContraintNoChanged_;
+        return isConstraintNotChanged_;
     }
 
     // dirty layoutBox mount to host and switch layoutBox.
@@ -183,7 +185,6 @@ public:
         float distance = 0.0;
         for (const auto& child : children_) {
             float childBaseline = child->GetBaselineDistance();
-            childBaseline += child->GetGeometryNode()->GetFrameRect().GetY();
             distance = NearZero(distance) ? childBaseline : std::min(distance, childBaseline);
         }
         return distance;
@@ -199,8 +200,12 @@ public:
         outOfLayout_ = outOfLayout;
     }
 
-    // Gets the flag attribute with descendant node
-    PropertyChangeFlag GetFlagWithDescendant();
+    // Check the flag attribute with descendant node
+    bool CheckNeedForceMeasureAndLayout();
+
+    bool CheckChildNeedForceMeasureAndLayout();
+
+    void SetCacheCount(int32_t cacheCount = 0);
 
 private:
     // Used to save a persist wrapper created by child, ifElse, ForEach, the map stores [index, Wrapper].
@@ -219,12 +224,12 @@ private:
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithm_;
 
     int32_t currentChildCount_ = 0;
-    bool isContraintNoChanged_ = false;
+    bool isConstraintNotChanged_ = false;
     bool isActive_ = false;
     bool needForceSyncRenderTree_ = false;
     bool isRootNode_ = false;
     std::optional<bool> skipMeasureContent_;
-    std::optional<PropertyChangeFlag> descendantFlag_;
+    std::optional<bool> needForceMeasureAndLayout_;
 
     // When the location property is set, it departs from the layout flow.
     bool outOfLayout_ = false;

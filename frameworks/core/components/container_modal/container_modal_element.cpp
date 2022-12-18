@@ -28,6 +28,7 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr uint32_t COLUMN_CHILD_NUM = 2;
+constexpr uint32_t TITLE_POSITION = 1;
 constexpr uint32_t SPLIT_BUTTON_POSITION = 2;
 constexpr uint32_t BLUR_WINDOW_RADIUS = 100;
 constexpr uint32_t TITLE_POPUP_TIME = 200;        // 200ms
@@ -127,7 +128,10 @@ void ContainerModalElement::ShowTitle(bool isShow)
         LOGE("ContainerModalElement showTitle failed, context is null.");
         return;
     }
-    windowMode_ = context->FireWindowGetModeCallBack();
+    windowMode_ = context->GetWindowManager()->GetWindowMode();
+
+    // set container window show state to RS
+    context->SetContainerWindow(isShow);
 
     // full screen need to hide border and padding.
     auto containerRenderBox = AceType::DynamicCast<RenderBox>(containerBox->GetRenderNode());
@@ -250,11 +254,8 @@ void ContainerModalElement::PerformBuild()
     ChangeTitleIcon();
 
     // The first time it starts up, it needs to hide title if mode as follows.
-    windowMode_ = context_.Upgrade()->FireWindowGetModeCallBack();
-    if (windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN || windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-        windowMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        ShowTitle(false);
-    }
+    windowMode_ = context_.Upgrade()->GetWindowManager()->GetWindowMode();
+    ShowTitle(windowMode_ == WindowMode::WINDOW_MODE_FLOATING);
 }
 
 void ContainerModalElement::FlushReload()
@@ -301,27 +302,48 @@ void ContainerModalElement::Update()
         density_ = (float)context->GetDensity();
     }
 
-    containerBox->SetOnTouchDownId([week = WeakClaim(this)](const TouchEventInfo& info) {
-        auto containerElement = week.Upgrade();
-        if (containerElement && info.GetChangedTouches().begin()->GetGlobalLocation().GetY() <=
-                                    (TITLE_POPUP_DISTANCE * containerElement->density_)) {
-            containerElement->moveX_ = (float)info.GetChangedTouches().begin()->GetGlobalLocation().GetX();
-            containerElement->moveY_ = (float)info.GetChangedTouches().begin()->GetGlobalLocation().GetY();
+    containerBox->SetOnTouchDownId([weak = WeakClaim(this), context = context_](const TouchEventInfo& info) {
+        auto containerElement = weak.Upgrade();
+        auto pipeline = context.Upgrade();
+        if (!pipeline || !containerElement) {
+            return;
+        }
+        auto viewScale = pipeline->GetViewScale();
+        if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() * viewScale <=
+            (TITLE_POPUP_DISTANCE * containerElement->density_)) {
+            containerElement->moveX_ = info.GetChangedTouches().begin()->GetGlobalLocation().GetX() * viewScale;
+            containerElement->moveY_ = info.GetChangedTouches().begin()->GetGlobalLocation().GetY() * viewScale;
+            return;
+        }
+
+        // touch other area to hide floating title
+        if (containerElement->CanHideFloatingTitle()) {
+            containerElement->controller_->AddStopListener([weak] {
+                auto container = weak.Upgrade();
+                if (container && container->floatingTitleDisplay_) {
+                    container->floatingTitleDisplay_->UpdateVisibleType(VisibleType::GONE);
+                }
+            });
+            containerElement->controller_->Backward();
         }
     });
 
     // touch top to pop-up title bar.
-    containerBox->SetOnTouchMoveId([week = WeakClaim(this)](const TouchEventInfo& info) {
-        auto containerElement = week.Upgrade();
-        if (!containerElement || !containerElement->CanShowFloatingTitle()) {
+    containerBox->SetOnTouchMoveId([weak = WeakClaim(this), context = context_](const TouchEventInfo& info) {
+        auto containerElement = weak.Upgrade();
+        auto pipeline = context.Upgrade();
+        if (!pipeline || !containerElement || !containerElement->CanShowFloatingTitle()) {
             return;
         }
-        if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() >
+        auto viewScale = pipeline->GetViewScale();
+        if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() * viewScale >
             (TITLE_POPUP_DISTANCE * containerElement->density_)) {
             return;
         }
-        auto deltaMoveX = fabs(info.GetChangedTouches().begin()->GetGlobalLocation().GetX() - containerElement->moveX_);
-        auto deltaMoveY = info.GetChangedTouches().begin()->GetGlobalLocation().GetY() - containerElement->moveY_;
+        auto deltaMoveX =
+            fabs(info.GetChangedTouches().begin()->GetGlobalLocation().GetX() * viewScale - containerElement->moveX_);
+        auto deltaMoveY =
+            info.GetChangedTouches().begin()->GetGlobalLocation().GetY() * viewScale - containerElement->moveY_;
         if (deltaMoveX <= MOVE_POPUP_DISTANCE_X && deltaMoveY >= MOVE_POPUP_DISTANCE_Y) {
             containerElement->floatingTitleDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
             containerElement->controller_->ClearStopListeners();
@@ -330,40 +352,30 @@ void ContainerModalElement::Update()
     });
 
     // mouse move top to pop up title bar and move other area to hide title bar.
-    containerBox->SetOnMouseId([weak = WeakClaim(this)](MouseInfo& info) {
+    containerBox->SetOnMouseId([weak = WeakClaim(this), context = context_](MouseInfo& info) {
         auto containerElement = weak.Upgrade();
-        if (!containerElement || info.GetAction() != MouseAction::MOVE) {
+        auto pipeline = context.Upgrade();
+        if (!pipeline || !containerElement || info.GetAction() != MouseAction::MOVE) {
             return;
         }
-        if (info.GetLocalLocation().GetY() <= MOUSE_MOVE_POPUP_DISTANCE && containerElement->CanShowFloatingTitle()) {
+        auto viewScale = pipeline->GetViewScale();
+        if (info.GetLocalLocation().GetY() * viewScale <= MOUSE_MOVE_POPUP_DISTANCE &&
+            containerElement->CanShowFloatingTitle()) {
             containerElement->floatingTitleDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
             containerElement->controller_->ClearStopListeners();
             containerElement->controller_->Forward();
         }
-        if (info.GetLocalLocation().GetY() > (TITLE_POPUP_DISTANCE * containerElement->density_) &&
+        if (info.GetLocalLocation().GetY() * viewScale > (TITLE_POPUP_DISTANCE * containerElement->density_) &&
             containerElement->CanHideFloatingTitle()) {
             containerElement->controller_->AddStopListener([weak] {
                 auto container = weak.Upgrade();
-                container->floatingTitleDisplay_->UpdateVisibleType(VisibleType::GONE);
+                if (container && container->floatingTitleDisplay_) {
+                    container->floatingTitleDisplay_->UpdateVisibleType(VisibleType::GONE);
+                }
             });
             containerElement->controller_->Backward();
         }
     });
-
-    // touch other area of screen to hide title bar.
-    auto tapGesture = AceType::MakeRefPtr<TapGesture>();
-    tapGesture->SetOnActionId([weak = WeakClaim(this)](GestureEvent& info) {
-        auto containerElement = weak.Upgrade();
-        if (!containerElement || !containerElement->CanHideFloatingTitle()) {
-            return;
-        }
-        containerElement->controller_->AddStopListener([weak] {
-            auto container = weak.Upgrade();
-            container->floatingTitleDisplay_->UpdateVisibleType(VisibleType::GONE);
-        });
-        containerElement->controller_->Backward();
-    });
-    containerBox->SetOnClick(tapGesture);
 }
 
 bool ContainerModalElement::CanShowFloatingTitle()
@@ -429,17 +441,11 @@ void ContainerModalElement::ChangeFloatingTitleIcon(bool isFocus)
         splitButton = AceType::DynamicCast<RenderPadding>(*iterator);
     }
 
-    if (windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        auto floatingTitleChildrenRow = AceType::MakeRefPtr<RowComponent>(
-            FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(true, isFocus));
-        floatingTitleChildrenRow->SetUpdateType(UpdateType::REBUILD);
-        rowElement->SetUpdateComponent(floatingTitleChildrenRow);
-    } else {
-        auto titleChildrenRow = AceType::MakeRefPtr<RowComponent>(
-            FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(false, isFocus));
-        titleChildrenRow->SetUpdateType(UpdateType::REBUILD);
-        rowElement->SetUpdateComponent(titleChildrenRow);
-    }
+    auto floatingTitleChildrenRow = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER,
+        containerModalComponent_->BuildTitleChildren(true, isFocus, windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN));
+    floatingTitleChildrenRow->SetUpdateType(UpdateType::REBUILD);
+    rowElement->SetUpdateComponent(floatingTitleChildrenRow);
+
     if (splitButton) {
         splitButton->SetHidden(windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     }
@@ -524,12 +530,12 @@ void ContainerModalElement::SetTitleButtonHide(bool hideSplit, bool hideMaximize
     containerModalComponent_->SetTitleButtonHide(hideSplit, hideMaximize, hideMinimize);
 
     auto titleChildrenRow = AceType::MakeRefPtr<RowComponent>(
-        FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(false));
+        FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(false, windowFocus_));
     titleChildrenRow->SetUpdateType(UpdateType::REBUILD);
     rowElement->SetUpdateComponent(titleChildrenRow);
 
     auto floatingTitleChildrenRow = AceType::MakeRefPtr<RowComponent>(
-        FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(true));
+        FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(true, windowFocus_));
     floatingTitleChildrenRow->SetUpdateType(UpdateType::REBUILD);
     floatingRowElement->SetUpdateComponent(floatingTitleChildrenRow);
 }
@@ -539,8 +545,18 @@ void ContainerModalElement::SetAppTitle(const std::string& title)
     CHECK_NULL_VOID(containerModalComponent_);
     auto textComponent = containerModalComponent_->GetTitleLabel();
     CHECK_NULL_VOID(textComponent);
+    if (textComponent->GetData() == title) {
+        LOGI("set same title, skip, title is %{public}s", title.c_str());
+        return;
+    }
     textComponent->SetData(title);
-    FlushReload();
+    bool isFloatingTitle = windowMode_ != WindowMode::WINDOW_MODE_FLOATING;
+    auto renderTitle = GetTitleRender(isFloatingTitle);
+    CHECK_NULL_VOID(renderTitle);
+    renderTitle->Update(textComponent);
+    renderTitle->MarkNeedRender();
+    LOGI("set app title successfully, title:%{public}s, isFloatingTitle:%{public}d", title.c_str(),
+        static_cast<int>(isFloatingTitle));
 }
 
 void ContainerModalElement::SetAppIcon(const RefPtr<PixelMap>& icon)
@@ -550,7 +566,45 @@ void ContainerModalElement::SetAppIcon(const RefPtr<PixelMap>& icon)
     CHECK_NULL_VOID(imageComponent);
     imageComponent->SetSrc("");
     imageComponent->SetPixmap(icon);
-    FlushReload();
+    bool isFloatingTitle = windowMode_ != WindowMode::WINDOW_MODE_FLOATING;
+    auto renderIcon = GetIconRender(isFloatingTitle);
+    CHECK_NULL_VOID(renderIcon);
+    renderIcon->Update(imageComponent);
+    renderIcon->MarkNeedRender();
+    LOGI("set app icon successfully, isFloatingTitle:%{public}d", static_cast<int>(isFloatingTitle));
+}
+
+RefPtr<RenderText> ContainerModalElement::GetTitleRender(bool isFloatingTitle)
+{
+    auto titleBoxElement = isFloatingTitle ? floatingTitleBox_ : titleBox_;
+    CHECK_NULL_RETURN(titleBoxElement, nullptr);
+    auto rowElement = AceType::DynamicCast<RowElement>(titleBoxElement->GetFirstChild());
+    CHECK_NULL_RETURN(rowElement, nullptr);
+    auto renderRow = AceType::DynamicCast<RenderFlex>(rowElement->GetRenderNode());
+    CHECK_NULL_RETURN(renderRow, nullptr);
+    const auto& children = renderRow->GetChildren();
+    if (children.size() <= TITLE_POSITION) {
+        LOGW("row children size is wrong");
+        return nullptr;
+    }
+    auto iterator = renderRow->GetChildren().begin();
+    std::advance(iterator, TITLE_POSITION);
+    auto title = AceType::DynamicCast<RenderText>(*iterator);
+    return title;
+}
+
+RefPtr<RenderImage> ContainerModalElement::GetIconRender(bool isFloatingTitle)
+{
+    auto titleBoxElement = isFloatingTitle ? floatingTitleBox_ : titleBox_;
+    CHECK_NULL_RETURN(titleBoxElement, nullptr);
+    auto rowElement = AceType::DynamicCast<RowElement>(titleBoxElement->GetFirstChild());
+    CHECK_NULL_RETURN(rowElement, nullptr);
+    auto renderRow = AceType::DynamicCast<RenderFlex>(rowElement->GetRenderNode());
+    CHECK_NULL_RETURN(renderRow, nullptr);
+    auto renderPadding = AceType::DynamicCast<RenderPadding>(renderRow->GetFirstChild());
+    CHECK_NULL_RETURN(renderPadding, nullptr);
+    auto icon = AceType::DynamicCast<RenderImage>(renderPadding->GetFirstChild());
+    return icon;
 }
 
 } // namespace OHOS::Ace

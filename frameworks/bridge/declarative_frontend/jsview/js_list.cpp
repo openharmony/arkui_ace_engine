@@ -16,14 +16,16 @@
 #include "bridge/declarative_frontend/jsview/js_list.h"
 
 #include "base/geometry/axis.h"
+#include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/list_model_impl.h"
-#include "core/components_ng/pattern/container_model.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/list/list_model.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
+#include "core/components_ng/pattern/list/list_position_controller.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 
 namespace OHOS::Ace {
 
@@ -74,6 +76,26 @@ void JSList::SetCachedCount(int32_t cachedCount)
     ListModel::GetInstance()->SetCachedCount(cachedCount);
 }
 
+void JSList::SetScroller(RefPtr<JSScroller> scroller)
+{
+    if (scroller) {
+        RefPtr<ScrollControllerBase> listController = ListModel::GetInstance()->CreateScrollController();
+        scroller->SetController(listController);
+
+        // Init scroll bar proxy.
+        auto proxy = scroller->GetScrollBarProxy();
+        if (!proxy) {
+            if (Container::IsCurrentUseNewPipeline()) {
+                proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+            } else {
+                proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+            }
+            scroller->SetScrollBarProxy(proxy);
+        }
+        ListModel::GetInstance()->SetScroller(listController, proxy);
+    }
+}
+
 void JSList::Create(const JSCallbackInfo& args)
 {
     ListModel::GetInstance()->Create();
@@ -90,7 +112,8 @@ void JSList::Create(const JSCallbackInfo& args)
         JSRef<JSVal> scrollerValue = obj->GetProperty("scroller");
         if (scrollerValue->IsObject()) {
             void* scroller = JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>();
-            ListModel::GetInstance()->SetScroller(scroller);
+            RefPtr<JSScroller> jsScroller = Referenced::Claim(reinterpret_cast<JSScroller*>(scroller));
+            SetScroller(jsScroller);
         }
     }
 
@@ -132,20 +155,23 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         ListModel::GetInstance()->SetLanes(laneNum);
         return;
     }
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
-    auto minLengthParam = jsObj->GetProperty("minLength");
-    auto maxLengthParam = jsObj->GetProperty("maxLength");
-    if (minLengthParam->IsNull() || maxLengthParam->IsNull()) {
-        LOGW("minLength and maxLength are not both set");
-        return;
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        auto minLengthParam = jsObj->GetProperty("minLength");
+        auto maxLengthParam = jsObj->GetProperty("maxLength");
+        if (minLengthParam->IsNull() || maxLengthParam->IsNull()) {
+            LOGW("minLength and maxLength are not both set");
+            return;
+        }
+        Dimension minLengthValue;
+        Dimension maxLengthValue;
+        if (!ParseJsDimensionVp(minLengthParam, minLengthValue)
+            || !ParseJsDimensionVp(maxLengthParam, maxLengthValue)) {
+            LOGW("minLength param or maxLength param is invalid");
+            return;
+        }
+        ListModel::GetInstance()->SetLaneConstrain(minLengthValue, maxLengthValue);
     }
-    Dimension minLengthValue;
-    Dimension maxLengthValue;
-    if (!ParseJsDimensionVp(minLengthParam, minLengthValue) || !ParseJsDimensionVp(maxLengthParam, maxLengthValue)) {
-        LOGW("minLength param or maxLength param is invalid");
-        return;
-    }
-    ListModel::GetInstance()->SetLaneConstrain(minLengthValue, maxLengthValue);
 }
 
 void JSList::SetSticky(int32_t sticky)
@@ -161,14 +187,11 @@ void JSList::SetDivider(const JSCallbackInfo& args)
     }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-    Dimension strokeWidth;
-    if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), strokeWidth) && strokeWidth.IsValid()) {
-        LOGW("Invalid strokeWidth of divider");
-        return;
-    }
-
     V2::ItemDivider divider;
-    divider.strokeWidth = strokeWidth;
+    if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)) {
+        LOGW("Invalid strokeWidth of divider");
+        divider.strokeWidth.Reset();
+    }
     if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
         // Failed to get color from param, using default color defined in theme
         RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();
@@ -252,6 +275,7 @@ void JSList::ItemMoveCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onItemMove = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
                               int32_t start, int32_t end) -> bool {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
             auto params = ConvertToJSValues(start, end);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return true;
@@ -266,6 +290,7 @@ void JSList::ScrollIndexCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onScrollIndex = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
                                  const int32_t start, const int32_t end) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(start, end);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return;
@@ -304,12 +329,12 @@ void JSList::ItemDragStartCallback(const JSCallbackInfo& info)
             return nullptr;
         }
         // use another VSP instance while executing the builder function
-        ContainerModel::GetInstance()->NewScope();
+        ViewStackModel::GetInstance()->NewScope();
         {
             ACE_SCORING_EVENT("List.onItemDragStart.builder");
             builderFunc->Execute();
         }
-        return ContainerModel::GetInstance()->Finish();
+        return ViewStackModel::GetInstance()->Finish();
     };
     ListModel::GetInstance()->SetOnItemDragStart(std::move(onItemDragStart));
 }

@@ -24,9 +24,7 @@ void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption, boo
         return;
     }
     taskExecutor_->PostTask(
-        [callbackSetClipboardData = callbackSetClipboardData_, data] {
-            callbackSetClipboardData(data);
-        },
+        [callbackSetClipboardData = callbackSetClipboardData_, data] { callbackSetClipboardData(data); },
         TaskExecutor::TaskType::UI);
 }
 
@@ -37,11 +35,11 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callb
         return;
     }
     taskExecutor_->PostTask(
-        [callbackGetClipboardData = callbackGetClipboardData_, callback] {
-            callback(callbackGetClipboardData());
-        },
+        [callbackGetClipboardData = callbackGetClipboardData_, callback] { callback(callbackGetClipboardData()); },
         TaskExecutor::TaskType::UI);
 }
+
+void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback) {}
 
 void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption)
 {
@@ -49,10 +47,8 @@ void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions 
         LOGE("Failed to set the pixmap data to clipboard.");
         return;
     }
-    taskExecutor_->PostTask(
-        [callbackSetClipboardPixmapData = callbackSetClipboardPixmapData_, pixmap] {
-            callbackSetClipboardPixmapData(pixmap);
-        },
+    taskExecutor_->PostTask([callbackSetClipboardPixmapData = callbackSetClipboardPixmapData_,
+                                pixmap] { callbackSetClipboardPixmapData(pixmap); },
         TaskExecutor::TaskType::UI);
 }
 
@@ -62,10 +58,8 @@ void ClipboardImpl::GetPixelMapData(const std::function<void(const RefPtr<PixelM
         LOGE("Failed to get the pixmap data from clipboard.");
         return;
     }
-    taskExecutor_->PostTask(
-        [callbackGetClipboardPixmapData = callbackGetClipboardPixmapData_, callback] {
-            callback(callbackGetClipboardPixmapData());
-        },
+    taskExecutor_->PostTask([callbackGetClipboardPixmapData = callbackGetClipboardPixmapData_,
+                                callback] { callback(callbackGetClipboardPixmapData()); },
         TaskExecutor::TaskType::UI);
 }
 

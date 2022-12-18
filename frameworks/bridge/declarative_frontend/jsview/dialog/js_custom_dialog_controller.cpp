@@ -322,7 +322,13 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
     // NG
     if (Container::IsCurrentUseNewPipeline()) {
         auto container = Container::Current();
+        auto currentId = Container::CurrentId();
         CHECK_NULL_VOID(container);
+        if (container->IsSubContainer()) {
+            currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+            container = AceEngine::Get().GetContainer(currentId);
+        }
+        ContainerScope scope(currentId);
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_VOID(pipelineContext);
         auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
@@ -341,7 +347,7 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
                 this->isShown_ = isShown;
             }
         };
-        dialogNode_ = overlayManager->ShowDialog(dialogProperties_, customNode, false);
+        dialog_ = overlayManager->ShowDialog(dialogProperties_, customNode, false);
         return;
     }
 
@@ -377,15 +383,26 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
     LOGI("JSCustomDialogController(JsCloseDialog)");
 
     if (Container::IsCurrentUseNewPipeline()) {
+        auto dialog = dialog_.Upgrade();
+        if (!dialog) {
+            LOGW("dialog is null");
+            return;
+        }
         auto container = Container::Current();
+        auto currentId = Container::CurrentId();
         CHECK_NULL_VOID(container);
+        if (container->IsSubContainer()) {
+            currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+            container = AceEngine::Get().GetContainer(currentId);
+        }
+        ContainerScope scope(currentId);
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_VOID(pipelineContext);
         auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
         CHECK_NULL_VOID(context);
         auto overlayManager = context->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
-        overlayManager->CloseDialog(dialogNode_);
+        overlayManager->CloseDialog(dialog);
         return;
     }
 

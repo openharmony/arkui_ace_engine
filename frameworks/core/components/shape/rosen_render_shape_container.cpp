@@ -15,8 +15,8 @@
 
 #include "frameworks/core/components/shape/rosen_render_shape_container.h"
 
-#include "commonlibrary/c_utils/base/include/securec.h"
 #include "render_service_client/core/ui/rs_node.h"
+#include "third_party/bounds_checking_function/include/securec.h"
 
 #include "frameworks/core/components/transform/rosen_render_transform.h"
 
@@ -75,7 +75,40 @@ void RosenRenderShapeContainer::Paint(RenderContext& context, const Offset& offs
     if (!skCanvas_) {
         return;
     }
-    BitmapMesh(context, offset);
+    if (mesh_.size() == 0) {
+        auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width(), GetLayoutSize().Height(),
+            SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
+        skOffBitmap_.allocPixels(imageInfo);
+        skOffBitmap_.eraseColor(SK_ColorTRANSPARENT);
+        skOffCanvas_ = std::make_unique<SkCanvas>(skOffBitmap_);
+
+        double viewBoxWidth = NormalizePercentToPx(viewBox_.Width(), false);
+        double viewBoxHeight = NormalizePercentToPx(viewBox_.Height(), true);
+        double viewBoxLeft = NormalizePercentToPx(viewBox_.Left(), false);
+        double viewBoxTop = NormalizePercentToPx(viewBox_.Top(), true);
+        if (!GetLayoutSize().IsInfinite() && GreatNotEqual(viewBoxWidth, 0.0) && GreatNotEqual(viewBoxHeight, 0.0)) {
+            double scale = std::min(GetLayoutSize().Width() / viewBoxWidth, GetLayoutSize().Height() / viewBoxHeight);
+            double tx = GetLayoutSize().Width() * 0.5 - (viewBoxWidth * 0.5 + viewBoxLeft) * scale;
+            double ty = GetLayoutSize().Height() * 0.5 - (viewBoxHeight * 0.5 + viewBoxTop) * scale;
+            skOffCanvas_->scale(scale, scale);
+            skOffCanvas_->translate(tx, ty);
+        }
+        const auto& children = GetChildren();
+        for (const auto& item : SortChildrenByZIndex(children)) {
+            Offset childOffset = offset;
+            RefPtr<RosenRenderShape> renderShape = GetShapeChild(item, childOffset);
+            if (renderShape) {
+                renderShape->PaintOnCanvas(skOffCanvas_.get(), childOffset);
+                continue;
+            }
+            RenderNode::Paint(context, offset);
+        }
+        if (column_ == 0 && row_ == 0) {
+            skCanvas_->drawBitmap(skOffBitmap_, 0, 0);
+        }
+    } else {
+        BitmapMesh(context, offset);
+    }
 }
 
 RefPtr<RosenRenderShape> RosenRenderShapeContainer::GetShapeChild(const RefPtr<RenderNode>& node, Offset& offset)
@@ -96,8 +129,6 @@ RefPtr<RosenRenderShape> RosenRenderShapeContainer::GetShapeChild(const RefPtr<R
 
 void RosenRenderShapeContainer::BitmapMesh(RenderContext& context, const Offset& offset)
 {
-    auto pipelineContext = GetContext().Upgrade();
-
     auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width(), GetLayoutSize().Height(),
         SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
     skOffBitmap_.allocPixels(imageInfo);

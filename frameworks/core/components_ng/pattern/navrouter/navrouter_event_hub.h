@@ -28,9 +28,14 @@ using OnDestinationChangeEvent = std::function<void()>;
 class NavRouterEventHub : public EventHub {
     DECLARE_ACE_TYPE(NavRouterEventHub, EventHub)
 public:
-    void SetOnStateChangeChange(OnStateChangeEvent&& changeEvent)
+    void SetOnStateChange(OnStateChangeEvent&& changeEvent)
     {
         onStateChangeEvent_ = changeEvent;
+    }
+
+    const OnStateChangeEvent& GetOnStateChange()
+    {
+        return onStateChangeEvent_;
     }
 
     void FireChangeEvent(bool isActivated) const
@@ -40,7 +45,7 @@ public:
         }
     }
 
-    void SetOnDestinationChange(const OnDestinationChangeEvent& onDestinationChangeEvent)
+    void SetOnDestinationChange(OnDestinationChangeEvent&& onDestinationChangeEvent)
     {
         onDestinationChangeEvent_ = onDestinationChangeEvent;
     }

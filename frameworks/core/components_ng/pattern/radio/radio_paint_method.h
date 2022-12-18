@@ -24,25 +24,51 @@
 
 namespace OHOS::Ace::NG {
 
+enum class UIStatus {
+    SELECTED = 0,
+    UNSELECTED,
+    FOCUS,
+    ON_TO_OFF,
+    OFF_TO_ON,
+    PART,
+    PART_TO_OFF,
+    OFF_TO_PART,
+    PART_TO_ON,
+    ON_TO_PART,
+};
 class RadioPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(RadioPaintMethod, NodePaintMethod)
 
 public:
-    RadioPaintMethod() = default;
+    RadioPaintMethod(bool enabled, bool isTouch, bool isHover, float totalScale, float pointScale, UIStatus uiStatus)
+        : enabled_(enabled), isTouch_(isTouch), isHover_(isHover), totalScale_(totalScale), pointScale_(pointScale),
+          uiStatus_(uiStatus) {};
     ~RadioPaintMethod() override = default;
-
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
     void InitializeParam();
     void PaintRadio(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& offset) const;
     void DrawUnselected(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, SizeF& paintSize) const;
+    void DrawTouchBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
+    void DrawHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
 
     float shadowWidth_ = 1.5f;
     float borderWidth_ = 1.5f;
+    Color pointColor_ = Color::WHITE;
     Color activeColor_ = Color::BLUE;
     Color inactiveColor_ = Color::WHITE;
     Color shadowColor_ = Color::RED;
+    Color clickEffectColor_ = Color::WHITE;
+    Color hoverColor_ = Color::WHITE;
+    Dimension hotZoneHorizontalPadding_ = 11.0_vp;
+
+    bool enabled_ = true;
+    bool isTouch_ = false;
+    bool isHover_ = false;
+    float totalScale_ = 1.0f;
+    float pointScale_ = 0.5f;
+    UIStatus uiStatus_ = UIStatus::UNSELECTED;
 };
 } // namespace OHOS::Ace::NG
 

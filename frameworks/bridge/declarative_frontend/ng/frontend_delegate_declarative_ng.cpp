@@ -20,6 +20,7 @@
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
 #include "base/thread/background_task_executor.h"
+#include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
@@ -92,6 +93,14 @@ void FrontendDelegateDeclarativeNG::PushWithMode(const std::string& uri, const s
     pageRouterManager_->Push({ uri }, params);
 }
 
+void FrontendDelegateDeclarativeNG::PushWithCallback(const std::string& uri, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->PushWithCallback({ uri }, params, errorCallback);
+    OnMediaQueryUpdate();
+}
+
 void FrontendDelegateDeclarativeNG::Replace(const std::string& uri, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
@@ -104,6 +113,14 @@ void FrontendDelegateDeclarativeNG::ReplaceWithMode(
     CHECK_NULL_VOID(pageRouterManager_);
     // TODO: router mode support
     pageRouterManager_->Replace({ uri }, params);
+}
+
+void FrontendDelegateDeclarativeNG::ReplaceWithCallback(const std::string& uri, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->ReplaceWithCallback({ uri }, params, errorCallback);
+    OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::Back(const std::string& uri, const std::string& params)
@@ -203,6 +220,11 @@ void FrontendDelegateDeclarativeNG::ChangeLocale(const std::string& language, co
 void FrontendDelegateDeclarativeNG::RegisterFont(const std::string& familyName, const std::string& familySrc)
 {
     pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc);
+}
+
+double FrontendDelegateDeclarativeNG::MeasureText(const MeasureContext& context)
+{
+    return MeasureUtil::MeasureText(context);
 }
 
 SingleTaskExecutor FrontendDelegateDeclarativeNG::GetAnimationJsTask()

@@ -27,6 +27,9 @@ enum class WindowSizeChangeReason : uint32_t {
     DRAG_END,
     RESIZE,
     MOVE,
+    HIDE,
+    TRANSFORM,
+    CUSTOM_ANIMATION,
 };
 } // namespace OHOS::Ace
 

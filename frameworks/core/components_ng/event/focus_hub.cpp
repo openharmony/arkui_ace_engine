@@ -21,6 +21,8 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/dump_log.h"
 #include "core/common/ace_application_info.h"
+#include "core/components/theme/app_theme.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/event/ace_event_handler.h"
@@ -43,20 +45,20 @@ RefPtr<GeometryNode> FocusHub::GetGeometryNode() const
 std::optional<std::string> FocusHub::GetInspectorKey() const
 {
     auto frameNode = GetFrameNode();
-    if (frameNode) {
-        return frameNode->GetInspectorId();
-    }
-    return std::nullopt;
+    CHECK_NULL_RETURN_NOLOG(frameNode, std::nullopt);
+    return frameNode->GetInspectorId();
 }
 
-RefPtr<FocusHub> FocusHub::GetParentFocusHub() const
+RefPtr<FocusHub> FocusHub::GetParentFocusHub(FrameNode* node) const
 {
-    auto frameNode = GetFrameNode();
-    if (frameNode) {
-        auto parentNode = frameNode->GetFocusParent();
+    if (node) {
+        auto parentNode = node->GetFocusParent();
         return parentNode ? parentNode->GetFocusHub() : nullptr;
     }
-    return nullptr;
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN_NOLOG(frameNode, nullptr);
+    auto parentNode = frameNode->GetFocusParent();
+    return parentNode ? parentNode->GetFocusHub() : nullptr;
 }
 
 std::string FocusHub::GetFrameName() const
@@ -181,9 +183,10 @@ void FocusHub::UpdateAccessibilityFocusInfo()
     // Need update
 }
 
-void FocusHub::LostFocus()
+void FocusHub::LostFocus(BlurReason reason)
 {
     if (IsCurrentFocus()) {
+        blurReason_ = reason;
         currentFocus_ = false;
         UpdateAccessibilityFocusInfo();
         OnBlur();
@@ -198,15 +201,14 @@ void FocusHub::LostSelfFocus()
     }
 }
 
-void FocusHub::RemoveSelf()
+void FocusHub::RemoveSelf(FrameNode* node)
 {
-    auto parent = GetParentFocusHub();
-    if (parent) {
-        parent->RemoveChild(AceType::Claim(this));
-    }
+    auto parent = GetParentFocusHub(node);
+    CHECK_NULL_VOID_NOLOG(parent);
+    parent->RemoveChild(this);
 }
 
-void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode)
+void FocusHub::RemoveChild(FocusHub* focusNode)
 {
     // Not belong to this focus scope.
     if (!focusNode || focusNode->GetParentFocusHub() != this) {
@@ -252,6 +254,12 @@ bool FocusHub::IsFocusable()
     return false;
 }
 
+bool FocusHub::IsEnabled() const
+{
+    auto eventHub = eventHub_.Upgrade();
+    return eventHub ? eventHub->IsEnabled() : true;
+}
+
 bool FocusHub::IsFocusableScope()
 {
     if (!IsFocusableNode()) {
@@ -265,7 +273,9 @@ bool FocusHub::IsFocusableScope()
 
 bool FocusHub::IsFocusableNode()
 {
-    return enabled_ && show_ && focusable_ && parentFocusable_;
+    auto eventHub = eventHub_.Upgrade();
+    auto enabled = eventHub ? eventHub->IsEnabled() : true;
+    return enabled && show_ && focusable_ && parentFocusable_;
 }
 
 void FocusHub::SetFocusable(bool focusable)
@@ -289,7 +299,6 @@ void FocusHub::SetEnabled(bool enabled)
 
 void FocusHub::SetEnabledNode(bool enabled)
 {
-    enabled_ = enabled;
     if (!enabled) {
         RefreshFocus();
     }
@@ -335,6 +344,7 @@ void FocusHub::SetIsFocusOnTouch(bool isFocusOnTouch)
     focusCallbackEvents_->SetIsFocusOnTouch(isFocusOnTouch);
 
     auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto gesture = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
 
@@ -416,7 +426,7 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
     auto info = KeyEventInfo(keyEvent);
     auto onKeyEventCallback = GetOnKeyCallback();
     if (!onKeyEventCallback) {
-        return false;
+        return retInternal;
     }
     LOGD("FocusHub::OnKeyEvent: Do key callback on %{public}s with key event{ Code(%{public}d), "
          "Action(%{public}d), "
@@ -494,6 +504,7 @@ void FocusHub::RequestFocus() const
 
 bool FocusHub::RequestNextFocus(bool vertical, bool reverse, const RectF& rect)
 {
+    SetScopeFocusAlgorithm();
     if (!focusAlgorithm_.getNextFocusNode) {
         if (focusAlgorithm_.isVertical != vertical) {
             return false;
@@ -542,10 +553,8 @@ void FocusHub::OnClick(const KeyEvent& event)
         auto info = GestureEvent();
         info.SetTimeStamp(event.timeStamp);
         auto rect = GetGeometryNode()->GetFrameRect();
-        info.SetGlobalLocation(
-            Offset((rect.Left() + rect.Right()) / 2, (rect.Top() + rect.Bottom()) / 2));
-        info.SetLocalLocation(
-            Offset((rect.Right() - rect.Left()) / 2, (rect.Bottom() - rect.Top()) / 2));
+        info.SetGlobalLocation(Offset((rect.Left() + rect.Right()) / 2, (rect.Top() + rect.Bottom()) / 2));
+        info.SetLocalLocation(Offset((rect.Right() - rect.Left()) / 2, (rect.Bottom() - rect.Top()) / 2));
         info.SetSourceDevice(event.sourceType);
         info.SetDeviceId(event.deviceId);
         LOGD("FocusHub::OnClick: Do click callback on %{public}s with key event{ Global(%{public}f,%{public}f), "
@@ -659,6 +668,15 @@ bool FocusHub::CalculatePosition()
     return true;
 }
 
+void FocusHub::SetScopeFocusAlgorithm()
+{
+    auto frame = GetFrameNode();
+    CHECK_NULL_VOID(frame);
+    auto pattern = frame->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    focusAlgorithm_ = pattern->GetScopeFocusAlgorithm();
+}
+
 void FocusHub::OnFocus()
 {
     if (focusType_ == FocusType::NODE) {
@@ -691,32 +709,24 @@ void FocusHub::OnFocusNode()
     if (onFocusCallback) {
         onFocusCallback();
     }
-    auto context = PipelineContext::GetCurrentContext();
-    if (context && context->GetIsNeedShowFocus() && focusType_ == FocusType::NODE) {
-        auto frameNode = GetFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        auto renderContext = frameNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->BlendBorderColor(Color(0xFF254FF7));
-    }
+    PaintFocusState();
 }
+
 void FocusHub::OnBlurNode()
 {
     LOGI("FocusHub: Node(%{public}s) on blur", GetFrameName().c_str());
     if (onBlurInternal_) {
         onBlurInternal_();
     }
+    if (onBlurReasonInternal_) {
+        LOGI("FocusHub: Node(%{public}s) 's blur reason is %{public}d", GetFrameName().c_str(), blurReason_);
+        onBlurReasonInternal_(blurReason_);
+    }
     auto onBlurCallback = GetOnBlurCallback();
     if (onBlurCallback) {
         onBlurCallback();
     }
-    if (focusType_ == FocusType::NODE) {
-        auto frameNode = GetFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        auto renderContext = frameNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->ResetBlendBorderColor();
-    }
+    ClearFocusState();
 }
 
 void FocusHub::OnFocusScope()
@@ -752,7 +762,126 @@ void FocusHub::OnBlurScope()
     FlushChildrenFocusHub();
     OnBlurNode();
     if (itLastFocusNode_ != focusNodes_.end() && *itLastFocusNode_) {
-        (*itLastFocusNode_)->LostFocus();
+        (*itLastFocusNode_)->LostFocus(blurReason_);
+    }
+}
+
+void FocusHub::PaintFocusState()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (focusStyleType_ == FocusStyleType::NONE || !context->GetIsNeedShowFocus()) {
+        return;
+    }
+
+    if (focusStyleType_ == FocusStyleType::CUSTOM_REGION) {
+        CHECK_NULL_VOID(getInnerFocusRectFunc_);
+        RoundRect focusRectInner;
+        getInnerFocusRectFunc_(focusRectInner);
+        PaintInnerFocusState(focusRectInner);
+        return;
+    }
+
+    auto appTheme = context->GetTheme<AppTheme>();
+    CHECK_NULL_VOID(appTheme);
+    Color paintColor;
+    if (HasPaintColor()) {
+        paintColor = GetPaintColor();
+    } else {
+        paintColor = appTheme->GetFocusColor();
+    }
+    Dimension paintWidth;
+    if (HasPaintWidth()) {
+        paintWidth = GetPaintWidth();
+    } else {
+        paintWidth = appTheme->GetFocusWidthVp();
+    }
+
+    if (focusStyleType_ == FocusStyleType::CUSTOM_BORDER) {
+        if (!HasPaintRect()) {
+            LOGE("PaintFocusState: frame rect has no value while focus style is CUSTOMIZE");
+            return;
+        }
+        renderContext->PaintFocusState(GetPaintRect(), paintColor, paintWidth);
+        return;
+    }
+
+    Dimension focusPaddingVp = Dimension(0.0, DimensionUnit::VP);
+    if (HasFocusPadding()) {
+        focusPaddingVp = GetFocusPadding();
+    } else {
+        if (focusStyleType_ == FocusStyleType::INNER_BORDER) {
+            focusPaddingVp = -appTheme->GetFocusWidthVp();
+        } else if (focusStyleType_ == FocusStyleType::OUTER_BORDER) {
+            focusPaddingVp = appTheme->GetFocusOutPaddingVp();
+        }
+    }
+    if (HasPaintRect()) {
+        renderContext->PaintFocusState(GetPaintRect(), focusPaddingVp, paintColor, paintWidth);
+    } else {
+        renderContext->PaintFocusState(focusPaddingVp, paintColor, paintWidth);
+    }
+}
+
+void FocusHub::PaintAllFocusState()
+{
+    PaintFocusState();
+    FlushChildrenFocusHub();
+    if (itLastFocusNode_ != focusNodes_.end() && *itLastFocusNode_) {
+        (*itLastFocusNode_)->PaintAllFocusState();
+    }
+}
+
+void FocusHub::PaintInnerFocusState(const RoundRect& paintRect)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!context->GetIsNeedShowFocus()) {
+        return;
+    }
+    auto appTheme = context->GetTheme<AppTheme>();
+    CHECK_NULL_VOID(appTheme);
+    Color paintColor;
+    if (HasPaintColor()) {
+        paintColor = GetPaintColor();
+    } else {
+        paintColor = appTheme->GetFocusColor();
+    }
+    Dimension paintWidth;
+    if (HasPaintWidth()) {
+        paintWidth = GetPaintWidth();
+    } else {
+        paintWidth = appTheme->GetFocusWidthVp();
+    }
+    renderContext->ClearFocusState();
+    renderContext->PaintFocusState(paintRect, paintColor, paintWidth);
+}
+
+void FocusHub::ClearFocusState()
+{
+    if (!currentFocus_ && focusStyleType_ != FocusStyleType::NONE) {
+        auto frameNode = GetFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->ClearFocusState();
+    }
+}
+
+void FocusHub::ClearAllFocusState()
+{
+    ClearFocusState();
+    FlushChildrenFocusHub();
+    if (itLastFocusNode_ != focusNodes_.end() && *itLastFocusNode_) {
+        (*itLastFocusNode_)->ClearAllFocusState();
     }
 }
 
@@ -762,6 +891,7 @@ bool FocusHub::AcceptFocusByRectOfLastFocus(const RectF& rect)
         return AcceptFocusByRectOfLastFocusNode(rect);
     }
     if (focusType_ == FocusType::SCOPE) {
+        SetScopeFocusAlgorithm();
         if (focusAlgorithm_.scopeType == ScopeType::FLEX) {
             return AcceptFocusByRectOfLastFocusFlex(rect);
         }
@@ -770,7 +900,7 @@ bool FocusHub::AcceptFocusByRectOfLastFocus(const RectF& rect)
     return false;
 }
 
-bool FocusHub::AcceptFocusByRectOfLastFocusNode(const RectF &rect)
+bool FocusHub::AcceptFocusByRectOfLastFocusNode(const RectF& rect)
 {
     return IsFocusable();
 }
@@ -875,10 +1005,8 @@ bool FocusHub::IsFocusableByTab()
 bool FocusHub::IsFocusableNodeByTab()
 {
     auto parent = GetParentFocusHub();
-    if (parent) {
-        return (GetTabIndex() == 0) && (parent->GetTabIndex() == 0);
-    }
-    return GetTabIndex() == 0;
+    CHECK_NULL_RETURN_NOLOG(parent, GetTabIndex() == 0);
+    return (GetTabIndex() == 0) && (parent->GetTabIndex() == 0);
 }
 
 bool FocusHub::IsFocusableScopeByTab()
@@ -1001,10 +1129,7 @@ RefPtr<FocusHub> FocusHub::GetChildFocusNodeById(const std::string& id)
 bool FocusHub::RequestFocusImmediatelyById(const std::string& id)
 {
     auto focusNode = GetChildFocusNodeById(id);
-    if (!focusNode) {
-        LOGW("Can not find focus node by id: %{public}s", id.c_str());
-        return false;
-    }
+    CHECK_NULL_RETURN(focusNode, false);
     if (!focusNode->IsFocusableWholePath()) {
         return false;
     }
@@ -1039,10 +1164,7 @@ bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusHu
     if (event.code != KeyCode::KEY_TAB || event.action != KeyAction::DOWN) {
         return false;
     }
-    if (!curPage) {
-        LOGE("Current page node is not exit. Can't handle focus by tabIndex.");
-        return false;
-    }
+    CHECK_NULL_RETURN(curPage, false);
     TabIndexNodeList tabIndexNodes;
     tabIndexNodes.clear();
     curPage->CollectTabIndexNodes(tabIndexNodes);

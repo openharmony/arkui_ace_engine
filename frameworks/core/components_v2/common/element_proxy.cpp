@@ -50,7 +50,7 @@ public:
     ~RenderElementProxy() override
     {
         RemoveSelfFromElementRegistry();
-        ReleaseElementByIndex(startIndex_);
+        ReleaseElement(Container::IsCurrentUsePartialUpdate());
     }
 
     void Update(const RefPtr<Component>& component, size_t startIndex) override
@@ -234,9 +234,8 @@ public:
         host->AddActiveComposeId(composedId_);
     };
 
-    void ReleaseElementByIndex(size_t index) override
+    void ReleaseElement(bool partialUpdates)
     {
-        ACE_DCHECK(index == startIndex_);
         if (!element_) {
             return;
         }
@@ -245,10 +244,16 @@ public:
             return;
         }
         SetComposedId("");
-        if (element_) {
+        if (partialUpdates) {
             element_->UnregisterForPartialUpdates();
         }
         element_ = host->OnUpdateElement(element_, nullptr);
+    }
+
+    void ReleaseElementByIndex(size_t index) override
+    {
+        ACE_DCHECK(index == startIndex_);
+        ReleaseElement(true);
     }
 
     void ReleaseElementById(const ComposeId& id) override
@@ -700,7 +705,6 @@ public:
         auto component = lazyForEachComponent_->GetChildByIndex(index - startIndex_);
         ACE_DCHECK(AceType::InstanceOf<ComposedComponent>(component));
         auto child = AceType::MakeRefPtr<RenderElementProxy>(host_.Upgrade(), true);
-        children_.emplace(index - startIndex_, child);
         child->Update(component, index);
         return child->GetComponentByIndex(index);
     }

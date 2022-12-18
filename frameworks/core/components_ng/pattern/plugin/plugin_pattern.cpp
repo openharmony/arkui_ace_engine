@@ -52,6 +52,16 @@ ErrCode GetActiveAccountIds(std::vector<int32_t>& userIds)
 }
 } // namespace
 
+PluginPattern::~PluginPattern()
+{
+    auto currentId = pluginSubContainer_->GetInstanceId();
+    PluginManager::GetInstance().RemovePluginSubContainer(currentId);
+    PluginManager::GetInstance().RemovePluginParentContainer(currentId);
+    pluginManagerBridge_.Reset();
+    pluginSubContainer_->Destroy();
+    pluginSubContainer_.Reset();
+}
+
 void PluginPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -111,10 +121,7 @@ bool PluginPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 void PluginPattern::InitPluginManagerDelegate()
 {
-    if (pluginManagerBridge_) {
-        LOGD("PluginInfo manager bridge is already initialized.");
-        return;
-    }
+    CHECK_NULL_VOID(!pluginManagerBridge_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
@@ -147,9 +154,7 @@ void PluginPattern::InitPluginManagerDelegate()
         uiTaskExecutor.PostTask([id, data, weak] {
             auto plugin = weak.Upgrade();
             CHECK_NULL_VOID(plugin);
-            if (plugin) {
-                plugin->GetPluginSubContainer()->UpdatePlugin(data);
-            }
+            plugin->GetPluginSubContainer()->UpdatePlugin(data);
         });
     });
     pluginManagerBridge_->AddPluginErrorCallback(
@@ -179,7 +184,15 @@ void PluginPattern::CreatePluginSubContainer()
     auto layoutProperty = host->GetLayoutProperty<PluginLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
+    auto parentcontainerId = Container::CurrentId();
+    while (parentcontainerId >= MIN_PLUGIN_SUBCONTAINER_ID) {
+        parentcontainerId = PluginManager::GetInstance().GetPluginParentContainerId(parentcontainerId);
+    }
+
     if (pluginSubContainer_) {
+        auto currentId = pluginSubContainer_->GetInstanceId();
+        PluginManager::GetInstance().RemovePluginSubContainer(currentId);
+        PluginManager::GetInstance().RemovePluginParentContainer(currentId);
         pluginSubContainer_->Destroy();
         pluginSubContainer_.Reset();
     }
@@ -188,8 +201,8 @@ void PluginPattern::CreatePluginSubContainer()
     CHECK_NULL_VOID(pluginSubContainer_);
 
     PluginManager::GetInstance().AddPluginSubContainer(pluginSubContainerId_, pluginSubContainer_);
-    PluginManager::GetInstance().AddPluginParentContainer(pluginSubContainerId_, Container::CurrentId());
-    flutter::UIDartState::Current()->AddPluginParentContainer(pluginSubContainerId_, Container::CurrentId());
+    PluginManager::GetInstance().AddPluginParentContainer(pluginSubContainerId_, parentcontainerId);
+    flutter::UIDartState::Current()->AddPluginParentContainer(pluginSubContainerId_, parentcontainerId);
     pluginSubContainer_->Initialize();
     pluginSubContainer_->SetPluginPattern(WeakClaim(this));
     pluginSubContainer_->SetPluginNode(GetHost());
@@ -216,6 +229,7 @@ void PluginPattern::CreatePluginSubContainer()
 std::unique_ptr<DrawDelegate> PluginPattern::GetDrawDelegate()
 {
     auto drawDelegate = std::make_unique<DrawDelegate>();
+#ifdef ENABLE_ROSEN_BACKEND
     drawDelegate->SetDrawRSFrameCallback(
         [weak = WeakClaim(this)](std::shared_ptr<RSNode>& node, const Rect& /* dirty */) {
             auto plugin = weak.Upgrade();
@@ -232,6 +246,7 @@ std::unique_ptr<DrawDelegate> PluginPattern::GetDrawDelegate()
             rsNode->AddChild(node, -1);
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         });
+#endif
     return drawDelegate;
 }
 
@@ -279,9 +294,8 @@ void PluginPattern::OnActionEvent(const std::string& action) const
         return;
     }
 
-    if (pluginManagerBridge_) {
-        pluginManagerBridge_->OnActionEvent(action);
-    }
+    CHECK_NULL_VOID_NOLOG(pluginManagerBridge_);
+    pluginManagerBridge_->OnActionEvent(action);
 }
 
 bool PluginPattern::ISAllowUpdate() const
@@ -329,11 +343,7 @@ std::string PluginPattern::GetPackagePathByWant(const WeakPtr<PluginPattern>& we
 {
     std::string packagePathStr;
     auto pluginPattern = weak.Upgrade();
-    if (!pluginPattern) {
-        LOGE("pluginPattern is nullptr.");
-        return packagePathStr;
-    }
-
+    CHECK_NULL_RETURN(pluginPattern, packagePathStr);
     std::vector<std::string> strList;
     pluginPattern->SplitString(info.bundleName, '/', strList);
 
@@ -354,9 +364,7 @@ std::string PluginPattern::GetPackagePathByAbsolutePath(
 {
     std::string packagePathStr;
     auto pluginPattern = weak.Upgrade();
-    if (!pluginPattern) {
-        return packagePathStr;
-    }
+    CHECK_NULL_RETURN_NOLOG(pluginPattern, packagePathStr);
     std::string assets = "assets/js/";
     size_t posAssets = info.pluginName.rfind(assets);
     if (posAssets != std::string::npos) {
@@ -382,12 +390,7 @@ std::string PluginPattern::GetPackagePathByAbsolutePath(
 void PluginPattern::GetModuleNameByWant(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info) const
 {
     auto pluginPattern = weak.Upgrade();
-    if (!pluginPattern) {
-        LOGE("pluginPattern is nullptr.");
-        pluginPattern->FireOnErrorEvent("1", "pluginPattern is nullptr.");
-        return;
-    }
-
+    CHECK_NULL_VOID(pluginPattern);
     std::vector<std::string> strList;
     pluginPattern->SplitString(info.pluginName, '&', strList);
     if (strList.empty()) {
@@ -415,10 +418,7 @@ std::string PluginPattern::GerPackagePathByBms(const WeakPtr<PluginPattern>& wea
 {
     std::string packagePathStr;
     auto pluginPattern = weak.Upgrade();
-    if (!pluginPattern) {
-        LOGE("pluginPattern is nullptr.");
-        return packagePathStr;
-    }
+    CHECK_NULL_RETURN(pluginPattern, packagePathStr);
     auto bms = PluginComponentManager::GetInstance()->GetBundleManager();
     if (!bms) {
         LOGE("Bms bundleManager is nullptr.");

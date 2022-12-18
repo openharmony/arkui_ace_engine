@@ -49,6 +49,8 @@ public:
 
     RefPtr<FrameNode> GetLastPage();
 
+    void ReloadStage();
+
 private:
     RefPtr<FrameNode> stageNode_;
     RefPtr<StagePattern> stagePattern_;

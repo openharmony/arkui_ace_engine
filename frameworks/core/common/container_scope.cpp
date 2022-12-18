@@ -15,6 +15,8 @@
 
 #include "core/common/container_scope.h"
 
+#include "base/utils/utils.h"
+
 namespace OHOS::Ace {
 
 // preview not support multi-instance, always using default instance id 0.
@@ -35,9 +37,8 @@ void ContainerScope::UpdateCurrent(int32_t id)
 {
     currentId_ = id;
     std::shared_lock<std::shared_mutex> readLock(scopeLock_);
-    if (updateScopeNotify_) {
-        updateScopeNotify_(id);
-    }
+    CHECK_NULL_VOID_NOLOG(updateScopeNotify_);
+    updateScopeNotify_(id);
 }
 
 void ContainerScope::SetScopeNotify(std::function<void(int32_t)>&& notify)

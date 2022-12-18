@@ -532,6 +532,9 @@ protected:
         return stickyNextOffset_;
     }
 
+    int32_t GetItemIndex(const RefPtr<RenderNode>& node);
+    void PaintItems(RenderContext& context, const Offset& offset);
+
     double shiftHeight_ = 0.0;
     bool makeCardTransition_ = false;
 

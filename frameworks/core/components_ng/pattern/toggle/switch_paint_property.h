@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWITCH_SWITCH_PAINT_PROPERTY_H
 
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/toggle/toggle_view.h"
+#include "core/components_ng/pattern/toggle/toggle_model.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
 namespace OHOS::Ace::NG {
@@ -26,6 +26,12 @@ struct SwitchPaintParagraph {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectedColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SwitchPointColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CurrentOffset, float);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("selectedColor", propSelectedColor.value_or(Color()).ColorToString().c_str());
+        json->Put("switchPointColor", propSwitchPointColor.value_or(Color()).ColorToString().c_str());
+    }
 };
 
 struct SwitchAnimationStyle {
@@ -56,6 +62,14 @@ public:
         ResetIsOn();
         ResetSwitchAnimationStyle();
     }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        json->Put("type", "ToggleType.Switch");
+        json->Put("isOn", propIsOn_.value_or(false) ? "true" : "false");
+        ACE_PROPERTY_TO_JSON_VALUE(propSwitchPaintParagraph_, SwitchPaintParagraph);
+    }
+
     ACE_DEFINE_PROPERTY_GROUP(SwitchAnimationStyle, SwitchAnimationStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwitchAnimationStyle, Duration, int32_t, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwitchAnimationStyle, Curve, RefPtr<Curve>, PROPERTY_UPDATE_RENDER);

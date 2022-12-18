@@ -20,6 +20,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/render/canvas.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -31,6 +32,7 @@ struct ParagraphStyle {
     uint32_t maxLines = 1;
     std::string fontLocale;
     WordBreak wordBreak = WordBreak::NORMAL;
+    TextOverflow textOverflow = TextOverflow::CLIP;
 };
 
 // Paragraph is interface for drawing text and text paragraph.
@@ -38,8 +40,7 @@ class Paragraph : public virtual AceType {
     DECLARE_ACE_TYPE(NG::Paragraph, AceType)
 
 public:
-    static RefPtr<Paragraph> Create(const WeakPtr<PipelineContext>& context, const ParagraphStyle& paraStyle,
-        const RefPtr<FontCollection>& fontCollection);
+    static RefPtr<Paragraph> Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection);
 
     // whether the paragraph has been build
     virtual bool IsValid() = 0;
@@ -56,9 +57,14 @@ public:
     virtual float GetHeight() = 0;
     virtual float GetTextWidth() = 0;
     virtual size_t GetLineCount() = 0;
+    virtual float GetMaxIntrinsicWidth() = 0;
+    virtual bool DidExceedMaxLines() = 0;
+    virtual float GetLongestLine() = 0;
+    virtual float GetMaxWidth() = 0;
+    virtual float GetAlphabeticBaseline() = 0;
 
     // interfaces for painting
-    virtual void Paint(const RefPtr<Canvas>& canvas, float x, float y) = 0;
+    virtual void Paint(const RSCanvas& canvas, float x, float y) = 0;
 };
 
 } // namespace OHOS::Ace::NG

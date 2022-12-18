@@ -37,6 +37,7 @@ public:
         auto copy = MakeRefPtr<BlankLayoutProperty>();
         copy->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         copy->propMinSize_ = CloneMinSize();
+        copy->propHeight_ = CloneHeight();
         return copy;
     }
 
@@ -44,9 +45,18 @@ public:
     {
         LayoutProperty::Reset();
         ResetMinSize();
+        ResetHeight();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinSize, Dimension, PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Height, Dimension, PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+        json->Put("min", GetMinSizeValue(Dimension()).ToString().c_str());
+        json->Put("height", GetHeightValue(Dimension()).ToString().c_str());
+    }
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(BlankLayoutProperty);

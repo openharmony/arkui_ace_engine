@@ -35,9 +35,8 @@ RefPtr<ImageData> ImageData::MakeFromDataWithCopy(const void* data, size_t lengt
 RefPtr<ImageData> ImageData::MakeFromDataWrapper(void* dataWrapper)
 {
     sk_sp<SkData>* skDataPtr = reinterpret_cast<sk_sp<SkData>*>(dataWrapper);
-    if (skDataPtr == nullptr || *skDataPtr == nullptr) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN_NOLOG(skDataPtr, nullptr);
+    CHECK_NULL_RETURN_NOLOG(*skDataPtr, nullptr);
     return MakeRefPtr<SkiaImageData>(*skDataPtr);
 }
 
@@ -71,13 +70,12 @@ RefPtr<SvgDomBase> SkiaImageData::MakeSvgDom(const std::optional<Color>& svgFill
         return SkiaSvgDom::CreateSkiaSvgDom(*svgStream, svgFillColor);
     }
     auto svgDom_ = SvgDom::CreateSvgDom(*svgStream, svgFillColor);
-    svgDom_->SetFunction(
+    svgDom_->SetFuncNormalizeToPx(
         [pipeline = WeakClaim(RawPtr(PipelineContext::GetCurrentContext()))](const Dimension& value) -> double {
             auto context = pipeline.Upgrade();
             CHECK_NULL_RETURN(context, 0.0);
             return context->NormalizeToPx(value);
-        },
-        nullptr);
+        });
     return svgDom_;
 #endif
 }

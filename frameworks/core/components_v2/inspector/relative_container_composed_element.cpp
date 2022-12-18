@@ -22,15 +22,16 @@
 namespace OHOS::Ace::V2 {
 namespace {
 
-const std::unordered_map<std::string, std::function<std::string(const RelativeContainerComposedElement&)>> CREATE_JSON_MAP {
-    { "alignContent", [](const RelativeContainerComposedElement& inspector) { return inspector.GetAlignContent(); } }
-};
+const std::unordered_map<std::string, std::function<std::string(const RelativeContainerComposedElement&)>>
+    CREATE_JSON_MAP { { "alignRulesMap",
+        [](const RelativeContainerComposedElement& inspector) { return inspector.GetAlignRulesMap(); } } };
 
 } // namespace
 
 void RelativeContainerComposedElement::Dump()
 {
     InspectorComposedElement::Dump();
+    DumpLog::GetInstance().AddDesc(std::string("alignRulesMap: ").append(GetAlignRulesMap()));
 }
 
 std::unique_ptr<JsonValue> RelativeContainerComposedElement::ToJsonObject() const
@@ -40,6 +41,24 @@ std::unique_ptr<JsonValue> RelativeContainerComposedElement::ToJsonObject() cons
         resultJson->Put(value.first.c_str(), value.second(*this).c_str());
     }
     return resultJson;
+}
+
+std::string RelativeContainerComposedElement::GetAlignRulesMap() const
+{
+    std::string result;
+    auto renderRelativeContainer = GetRenderRelativeContainer();
+    auto alignRulesMap = renderRelativeContainer->GetAlignRulesMap();
+    for (auto& firstIter : alignRulesMap) {
+        result.append(firstIter.first + ": ");
+        auto curAlignRules = firstIter.second;
+        for (auto& curAlignRule : curAlignRules) {
+            auto alignDirection = curAlignRule.first;
+            auto alignRule = curAlignRule.second;
+            result.append(GetAlignDirectionStr(alignDirection) + ": {");
+            result.append(GetAlignRuleStr(alignRule));
+        }
+    }
+    return result;
 }
 
 RefPtr<RenderRelativeContainer> RelativeContainerComposedElement::GetRenderRelativeContainer() const
@@ -53,36 +72,80 @@ RefPtr<RenderRelativeContainer> RelativeContainerComposedElement::GetRenderRelat
 
 void RelativeContainerComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
 {
-    auto RelativeContainerElement = GetContentElement<RelativeContainerElement>(RelativeContainerElement::TypeId());
-    if (!RelativeContainerElement) {
-        LOGE("get GetRelativeContainerElement failed");
+    auto relativeContainerElement = GetContentElement<RelativeContainerElement>(RelativeContainerElement::TypeId());
+    if (!relativeContainerElement) {
+        LOGE("Get relativeContainerElement failed");
         return;
     }
-    RelativeContainerElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
-    RelativeContainerElement->MarkDirty();
+    relativeContainerElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    relativeContainerElement->MarkDirty();
 }
 
 void RelativeContainerComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
 {
-    auto RelativeContainerElement = GetContentElement<RelativeContainerElement>(RelativeContainerElement::TypeId());
-    if (!RelativeContainerElement) {
-        LOGE("get GetRelativeContainerElement failed");
+    auto relativeContainerElement = GetContentElement<RelativeContainerElement>(RelativeContainerElement::TypeId());
+    if (!relativeContainerElement) {
+        LOGE("Get relativeContainerElement failed");
         return;
     }
-    auto child = RelativeContainerElement->GetChildBySlot(slot);
-    RelativeContainerElement->UpdateChildWithSlot(child, newComponent, slot, slot);
-    RelativeContainerElement->MarkDirty();
+    auto child = relativeContainerElement->GetChildBySlot(slot);
+    relativeContainerElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    relativeContainerElement->MarkDirty();
 }
 
 void RelativeContainerComposedElement::DeleteChildWithSlot(int32_t slot)
 {
-    auto RelativeContainerElement = GetContentElement<RelativeContainerElement>(RelativeContainerElement::TypeId());
-    if (!RelativeContainerElement) {
-        LOGE("get GetRelativeContainerElement failed");
+    auto relativeContainerElement = GetContentElement<RelativeContainerElement>(RelativeContainerElement::TypeId());
+    if (!relativeContainerElement) {
+        LOGE("Get relativeContainerElement failed");
         return;
     }
-    auto child = RelativeContainerElement->GetChildBySlot(slot);
-    RelativeContainerElement->UpdateChildWithSlot(child, nullptr, slot, slot);
-    RelativeContainerElement->MarkDirty();
+    auto child = relativeContainerElement->GetChildBySlot(slot);
+    relativeContainerElement->UpdateChildWithSlot(child, nullptr, slot, slot);
+    relativeContainerElement->MarkDirty();
 }
+
+std::string RelativeContainerComposedElement::GetAlignDirectionStr(AlignDirection alignDirection) const
+{
+    switch (alignDirection) {
+        case AlignDirection::LEFT:
+            return "left";
+        case AlignDirection::MIDDLE:
+            return "middle";
+        case AlignDirection::RIGHT:
+            return "right";
+        case AlignDirection::TOP:
+            return "top";
+        case AlignDirection::CENTER:
+            return "center";
+        case AlignDirection::BOTTOM:
+            return "bottom";
+        default:
+            return "";
+    }
+}
+
+std::string RelativeContainerComposedElement::GetAlignRuleStr(AlignRule alignRule) const
+{
+    std::string result;
+    alignRule.anchor = alignRule.anchor == "__container__" ? "" : alignRule.anchor;
+    result = "anchor: " + alignRule.anchor + ", align: ";
+    if (alignRule.horizontal == HorizontalAlign::START) {
+        result += "HorizontalAlign::START }";
+    } else if (alignRule.horizontal == HorizontalAlign::CENTER) {
+        result += "HorizontalAlign::CENTER }";
+    } else if (alignRule.horizontal == HorizontalAlign::END) {
+        result += "HorizontalAlign::END }";
+    } else if (alignRule.vertical == VerticalAlign::TOP) {
+        result += "VerticalAlign::TOP }";
+    } else if (alignRule.vertical == VerticalAlign::CENTER) {
+        result += "VerticalAlign::CENTER }";
+    } else if (alignRule.vertical == VerticalAlign::BOTTOM) {
+        result += "VerticalAlign::BOTTOM }";
+    } else {
+        result = "";
+    }
+    return result;
+}
+
 } // namespace OHOS::Ace::V2

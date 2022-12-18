@@ -34,6 +34,7 @@ struct ButtonProperties {
     EventMarker actionId;
     //  touchFunc used in Declarative mode.
     TouchEventFunc touchFunc;
+    RefPtr<NG::ClickEvent> action; // button click action
 };
 
 using StateChangeFunc = std::function<void(const std::string&)>;

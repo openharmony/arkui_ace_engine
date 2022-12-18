@@ -24,7 +24,7 @@ void GridContainerLayoutProperty::RegistGridChild(const RefPtr<FrameNode>& child
     childrenFramenode_.emplace_back(child);
 }
 
-void GridContainerLayoutProperty::OnContainerInfoUpdate(const GridContainerInfo& info)
+void GridContainerLayoutProperty::OnContainerInfoUpdate(const GridContainerInfo& /* info */)
 {
     LOGD("GridContainer layout info update.");
     auto p = childrenFramenode_.begin();
@@ -40,11 +40,30 @@ void GridContainerLayoutProperty::OnContainerInfoUpdate(const GridContainerInfo&
 
 void GridContainerLayoutProperty::BuildWidth(float width)
 {
-    if (NearEqual(width, Infinity<float>())) {
+    if (GreaterOrEqualToInfinity(width)) {
         propContainerInfo_->BuildColumnWidth();
     } else {
         propContainerInfo_->BuildColumnWidth(width);
     }
+}
+
+void GridContainerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    LinearLayoutProperty::ToJsonValue(json);
+    if (!HasContainerInfo()) {
+        return;
+    }
+
+    auto info = GetContainerInfoValue();
+    const std::string sizeTypeStrs[] { "SizeType.Auto", "SizeType.XS", "SizeType.SM", "SizeType.MD", "SizeType.LG",
+        "SizeType.XL" };
+    auto constructor = JsonUtil::Create(false);
+    constructor->Put("columns", std::to_string(info.GetColumns()).c_str());
+    constructor->Put("sizeType", sizeTypeStrs[static_cast<int32_t>(info.GetSizeType())].c_str());
+    constructor->Put("gutter", info.GetGutterWidth().ToString().c_str());
+    constructor->Put("margin", info.GetMarginLeft().ToString().c_str());
+
+    json->Put("constructor", constructor);
 }
 
 } // namespace OHOS::Ace::NG

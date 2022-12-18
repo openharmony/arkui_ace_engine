@@ -69,6 +69,16 @@ public:
         height_ = height;
     }
 
+    void SetMainSize(T mainSize, Axis axis)
+    {
+        axis == Axis::HORIZONTAL ? width_ = mainSize : height_ = mainSize;
+    }
+
+    void SetCrossSize(T crossSize, Axis axis)
+    {
+        axis == Axis::HORIZONTAL ? height_ = crossSize : width_ = crossSize;
+    }
+
     void SetSizeT(const SizeT& SizeT)
     {
         width_ = SizeT.Width();
@@ -259,6 +269,15 @@ public:
         return *this;
     }
 
+    void DivideScale(float scale)
+    {
+        if (NearZero(scale)) {
+            return;
+        }
+        width_ /= scale;
+        height_ /= scale;
+    }
+
     void ApplyScale(double scale)
     {
         width_ *= scale;
@@ -357,6 +376,16 @@ public:
     void SetHeight(T height)
     {
         height_ = height;
+    }
+
+    void SetMainSize(T mainSize, Axis axis)
+    {
+        axis == Axis::HORIZONTAL ? width_ = mainSize : height_ = mainSize;
+    }
+
+    void SetCrossSize(T crossSize, Axis axis)
+    {
+        axis == Axis::HORIZONTAL ? height_ = crossSize : width_ = crossSize;
     }
 
     void SetWidth(const std::optional<T>& width)
@@ -563,16 +592,36 @@ public:
 
     void Constrain(const SizeT<T>& minSize, const SizeT<T>& maxSize)
     {
-        if (NonNegative(minSize.Width())) {
+        if (NonNegative(minSize.Width()) && width_) {
             width_ = width_.value_or(0) > minSize.Width() ? width_ : minSize.Width();
         }
-        if (NonNegative(minSize.Height())) {
+        if (NonNegative(minSize.Height()) && height_) {
             height_ = height_.value_or(0) > minSize.Height() ? height_ : minSize.Height();
         }
-        if (NonNegative(maxSize.Width())) {
+        if (NonNegative(maxSize.Width()) && width_) {
             width_ = width_.value_or(0) < maxSize.Width() ? width_ : maxSize.Width();
         }
-        if (NonNegative(maxSize.Height())) {
+        if (NonNegative(maxSize.Height()) && height_) {
+            height_ = height_.value_or(0) < maxSize.Height() ? Height() : maxSize.Height();
+        }
+    }
+
+    void ConstrainFloat(const SizeT<T>& minSize, const SizeT<T>& maxSize, bool isWidth)
+    {
+        if (isWidth) {
+            if (NonNegative(minSize.Width()) && width_) {
+                width_ = width_.value_or(0) > minSize.Width() ? width_ : minSize.Width();
+            }
+
+            if (NonNegative(maxSize.Width()) && width_) {
+                width_ = width_.value_or(0) < maxSize.Width() ? width_ : maxSize.Width();
+            }
+            return;
+        }
+        if (NonNegative(minSize.Height()) && height_) {
+            height_ = height_.value_or(0) > minSize.Height() ? height_ : minSize.Height();
+        }
+        if (NonNegative(maxSize.Height()) && height_) {
             height_ = height_.value_or(0) < maxSize.Height() ? Height() : maxSize.Height();
         }
     }

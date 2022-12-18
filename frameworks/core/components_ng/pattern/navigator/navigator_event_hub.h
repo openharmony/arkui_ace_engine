@@ -16,11 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATOR_NAVIGATOR_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATOR_NAVIGATOR_EVENT_HUB_H
 
+#include "core/components/navigator/navigator_component.h"
 #include "core/components_ng/event/event_hub.h"
 
 namespace OHOS::Ace::NG {
-
-enum class NavigatorType { DEFAULT = 0, PUSH, REPLACE, BACK };
 
 class NavigatorEventHub : public EventHub {
     DECLARE_ACE_TYPE(NavigatorEventHub, EventHub)
@@ -49,14 +48,7 @@ public:
         return params_;
     }
 
-    void SetActive(bool active)
-    {
-        if (active) {
-            NavigatePage();
-        }
-        active_ = active;
-    }
-
+    void SetActive(bool active);
     bool GetActive() const
     {
         return active_;
@@ -73,6 +65,9 @@ public:
     }
 
     void NavigatePage();
+
+    std::string GetNavigatorType() const;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
 private:
     std::string url_;

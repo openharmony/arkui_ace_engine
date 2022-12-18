@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <map>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -43,7 +44,7 @@ public:
     std::pair<std::string, RefPtr<UINode>> CreateChildByIndex(int32_t index)
     {
         {
-            ACE_SCOPED_TRACE("Builder:BuildLazyItem");
+            ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
             auto itemInfo = OnGetChildByIndex(index, generatedItem_);
             CHECK_NULL_RETURN(itemInfo.second, itemInfo);
             auto result = generatedItem_.try_emplace(itemInfo.first, itemInfo.second);
@@ -63,7 +64,8 @@ public:
         return nullptr;
     }
 
-    void UpdateCachedItems(const std::list<std::optional<std::string>>& nodeIds)
+    void UpdateCachedItems(const std::list<std::optional<std::string>>& nodeIds,
+        std::unordered_map<int32_t, std::optional<std::string>>&& cachedItems)
     {
         // use active ids to update cached items.
         std::unordered_map<std::string, RefPtr<UINode>> generatedItem;
@@ -77,7 +79,40 @@ public:
                 generatedItem_.try_emplace(iter->first, iter->second);
             }
         }
+        // store cached items.
+        for (auto& [index, id] : cachedItems) {
+            if (!id) {
+                // get id from old cachedItems which stores the idle task generate result.
+                auto iter = cachedItems_.find(index);
+                if (iter == cachedItems_.end()) {
+                    continue;
+                }
+                id = iter->second;
+            }
+            if (id) {
+                auto iter = generatedItem.find(*id);
+                if (iter != generatedItem.end()) {
+                    iter->second->SetActive(false);
+                    generatedItem_.try_emplace(iter->first, iter->second);
+                }
+            }
+        }
+        std::swap(cachedItems_, cachedItems);
         LOGD("LazyForEach cached size : %{public}d", static_cast<int32_t>(generatedItem_.size()));
+    }
+
+    void SetCacheItemInfo(int32_t index, const std::string& info)
+    {
+        cachedItems_[index] = info;
+    }
+
+    std::optional<std::string> GetCacheItemInfo(int32_t index) const
+    {
+        auto iter = cachedItems_.find(index);
+        if (iter != cachedItems_.end()) {
+            return iter->second;
+        }
+        return std::nullopt;
     }
 
     void Clean()
@@ -108,6 +143,8 @@ protected:
 private:
     // [key, UINode]
     std::unordered_map<std::string, RefPtr<UINode>> generatedItem_;
+    // [index, key]
+    std::unordered_map<int32_t, std::optional<std::string>> cachedItems_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LazyForEachBuilder);
 };

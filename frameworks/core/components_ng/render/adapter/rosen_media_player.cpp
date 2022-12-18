@@ -77,9 +77,8 @@ OHOS::Media::PlaybackRateMode ConvertToMediaPlaybackSpeed(float speed)
 } // namespace
 RosenMediaPlayer::~RosenMediaPlayer()
 {
-    if (mediaPlayer_) {
-        mediaPlayer_->Release();
-    }
+    CHECK_NULL_VOID_NOLOG(mediaPlayer_);
+    mediaPlayer_->Release();
 }
 
 void RosenMediaPlayer::CreateMediaPlayer()
@@ -122,10 +121,7 @@ bool RosenMediaPlayer::SetSource(const std::string& src)
         CHECK_NULL_RETURN(context, false);
         auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(context->GetDataProviderManager());
         CHECK_NULL_RETURN(dataProvider, false);
-        auto dataAbilityHelper = dataProvider->GetDataAbilityHelper();
-        if (dataAbilityHelper) {
-            fd = dataAbilityHelper->OpenFile(videoSrc, "r");
-        }
+        fd = dataProvider->GetDataProviderFile(videoSrc, "r");
     } else if (!StringUtils::StartWith(videoSrc, "http")) {
         videoSrc = GetAssetAbsolutePath(videoSrc);
         fd = open(videoSrc.c_str(), O_RDONLY);
@@ -208,11 +204,6 @@ int32_t RosenMediaPlayer::SetSurface()
 int32_t RosenMediaPlayer::PrepareAsync()
 {
     return mediaPlayer_->PrepareAsync();
-}
-
-int32_t RosenMediaPlayer::Prepare()
-{
-    return mediaPlayer_->Prepare();
 }
 
 bool RosenMediaPlayer::IsPlaying()

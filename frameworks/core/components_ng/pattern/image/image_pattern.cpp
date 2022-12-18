@@ -15,9 +15,12 @@
 
 #include "core/components_ng/pattern/image/image_pattern.h"
 
+#include <array>
+
 #include "base/utils/utils.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
+#include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -36,6 +39,7 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
+        LOGD("Image Data Ready %{private}s", sourceInfo.ToString().c_str());
         pattern->OnImageDataReady();
     };
     return task;
@@ -54,6 +58,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
+        LOGD("Image Load Success %{private}s", sourceInfo.ToString().c_str());
         pattern->OnImageLoadSuccess();
     };
     return task;
@@ -90,28 +95,18 @@ void ImagePattern::OnImageLoadSuccess()
         geometryNode->GetFrameSize().Height(), 1);
     imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
     // update src data
-    lastCanvasImage_ = loadingCtx_->GetCanvasImage();
-    lastSrcRect_ = loadingCtx_->GetSrcRect();
-    lastDstRect_ = loadingCtx_->GetDstRect();
-    SetImagePaintConfig(lastCanvasImage_, lastSrcRect_, lastDstRect_, loadingCtx_->GetSourceInfo().IsSvg());
-    CHECK_NULL_VOID(lastCanvasImage_->imagePaintConfig_);
+    image_ = loadingCtx_->MoveCanvasImage();
+    srcRect_ = loadingCtx_->GetSrcRect();
+    dstRect_ = loadingCtx_->GetDstRect();
+    SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
     // clear alt data
     altLoadingCtx_ = nullptr;
-    lastAltCanvasImage_ = nullptr;
-    lastAltDstRect_.reset();
-    lastAltSrcRect_.reset();
+    altImage_ = nullptr;
+    altDstRect_.reset();
+    altSrcRect_.reset();
     // TODO: only do paint task when the pattern is active
     // figure out why here is always inactive
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void ImagePattern::CacheImageObject()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    // TODO: do cache
+    host->MarkNeedRenderOnly();
 }
 
 void ImagePattern::OnImageDataReady()
@@ -125,7 +120,10 @@ void ImagePattern::OnImageDataReady()
     LoadImageSuccessEvent loadImageSuccessEvent_(loadingCtx_->GetImageSize().Width(),
         loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
         geometryNode->GetFrameSize().Height(), 0);
-    imageEventHub->FireCompleteEvent(std::move(loadImageSuccessEvent_));
+    imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
+    if (!host->IsActive()) {
+        return;
+    }
     if (!geometryNode->GetContent() || (geometryNode->GetContent() && altLoadingCtx_)) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
@@ -147,39 +145,49 @@ void ImagePattern::OnImageLoadFail()
 }
 
 void ImagePattern::SetImagePaintConfig(
-    const RefPtr<CanvasImage>& canvasImage, const RectF& lastSrcRect_, const RectF& lastDstRect_, bool isSvg)
+    const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect, bool isSvg)
 {
-    auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(imageRenderProperty);
-    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
+    auto renderProps = GetPaintProperty<ImageRenderProperty>();
+    auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(renderProps && layoutProps);
 
-    ImagePaintConfig imagePaintConfig(lastSrcRect_, lastDstRect_);
-    imagePaintConfig.imageFit_ = imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER);
-    imagePaintConfig.renderMode_ = imageRenderProperty->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
-    imagePaintConfig.imageInterpolation_ =
-        imageRenderProperty->GetImageInterpolation().value_or(ImageInterpolation::NONE);
-    imagePaintConfig.imageRepeat_ = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NOREPEAT);
-    auto pipelineCtx = PipelineContext::GetCurrentContext();
-    bool isRightToLeft = pipelineCtx && pipelineCtx->IsRightToLeft();
-    imagePaintConfig.needFlipCanvasHorizontally_ =
-        isRightToLeft && imageRenderProperty->GetMatchTextDirection().value_or(false);
-    auto colorFilterMatrix = imageRenderProperty->GetColorFilter();
-    if (colorFilterMatrix.has_value()) {
-        imagePaintConfig.colorFilter_ = std::make_shared<std::vector<float>>(colorFilterMatrix.value());
+    ImagePaintConfig config {
+        .srcRect_ = srcRect,
+        .dstRect_ = dstRect,
+    };
+    config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
+    if (renderProps->GetNeedBorderRadiusValue(false)) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto borderRadius = host->GetRenderContext()->GetBorderRadius();
+        std::array<PointF, 4> radiusXY = { PointF(borderRadius->radiusTopLeft->ConvertToPx(),
+                                               borderRadius->radiusTopLeft->ConvertToPx()),
+            PointF(borderRadius->radiusTopRight->ConvertToPx(), borderRadius->radiusTopRight->ConvertToPx()),
+            PointF(borderRadius->radiusBottomLeft->ConvertToPx(), borderRadius->radiusBottomLeft->ConvertToPx()),
+            PointF(borderRadius->radiusBottomRight->ConvertToPx(), borderRadius->radiusBottomRight->ConvertToPx()) };
+        config.borderRadiusXY_ = std::make_shared<std::array<PointF, 4>>(std::move(radiusXY));
     }
-    imagePaintConfig.isSvg = isSvg;
+    config.isSvg_ = isSvg;
 
-    canvasImage->SetImagePaintConfig(imagePaintConfig);
+    if (isSvg) {
+        // set animation flush function for svg
+        DynamicCast<SvgCanvasImage>(canvasImage)->SetAnimationCallback([weak = WeakClaim(RawPtr(GetHost()))] {
+            auto image = weak.Upgrade();
+            CHECK_NULL_VOID(image);
+            image->MarkNeedRenderOnly();
+        });
+    }
+
+    canvasImage->SetPaintConfig(config);
 }
 
 RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 {
-    if (lastCanvasImage_ && lastCanvasImage_->imagePaintConfig_) {
-        return MakeRefPtr<ImagePaintMethod>(lastCanvasImage_);
+    if (image_) {
+        return MakeRefPtr<ImagePaintMethod>(image_);
     }
-    if (lastAltCanvasImage_ && lastAltCanvasImage_->imagePaintConfig_ && lastAltDstRect_ && lastAltSrcRect_) {
-        return MakeRefPtr<ImagePaintMethod>(lastAltCanvasImage_);
+    if (altImage_ && altDstRect_ && altSrcRect_) {
+        return MakeRefPtr<ImagePaintMethod>(altImage_);
     }
     return nullptr;
 }
@@ -189,7 +197,7 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
-    return lastCanvasImage_;
+    return image_;
 }
 
 void ImagePattern::LoadImageDataIfNeed()
@@ -202,14 +210,16 @@ void ImagePattern::LoadImageDataIfNeed()
     UpdateInternalResource(currentSourceInfo);
     std::optional<Color> svgFillColorOpt = std::nullopt;
     if (currentSourceInfo.IsSvg()) {
-        svgFillColorOpt = imageRenderProperty->GetSvgFillColor() ? imageRenderProperty->GetSvgFillColor()
-                                                                 : currentSourceInfo.GetFillColor();
+        svgFillColorOpt = currentSourceInfo.GetFillColor();
     }
+
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != currentSourceInfo ||
-        (currentSourceInfo.IsSvg() && svgFillColorOpt.has_value() &&
-            loadingCtx_->GetSvgFillColor() != svgFillColorOpt)) {
+        (currentSourceInfo.IsSvg() && loadingCtx_->GetSvgFillColor() != svgFillColorOpt)) {
         LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
-        loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(currentSourceInfo, std::move(loadNotifier));
+
+        bool syncLoad = imageLayoutProperty->GetSyncModeValue(false);
+        loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(currentSourceInfo, std::move(loadNotifier), syncLoad);
+
         loadingCtx_->SetSvgFillColor(svgFillColorOpt);
         loadingCtx_->LoadImageData();
     }
@@ -252,6 +262,9 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
         }
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
+        if (!host->IsActive()) {
+            return;
+        }
         const auto& geometryNode = host->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         if (!geometryNode->GetContent()) {
@@ -271,6 +284,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
     auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern->altLoadingCtx_);
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         auto currentAltSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
         if (currentAltSourceInfo != sourceInfo) {
@@ -282,12 +296,11 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        pattern->lastAltCanvasImage_ = pattern->altLoadingCtx_->GetCanvasImage();
-        pattern->lastAltSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
-        pattern->lastAltDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
-        pattern->SetImagePaintConfig(pattern->lastAltCanvasImage_, *pattern->lastAltSrcRect_, *pattern->lastAltDstRect_,
+        pattern->altImage_ = pattern->altLoadingCtx_->MoveCanvasImage();
+        pattern->altSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
+        pattern->altDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
+        pattern->SetImagePaintConfig(pattern->altImage_, *pattern->altSrcRect_, *pattern->altDstRect_,
             pattern->altLoadingCtx_->GetSourceInfo().IsSvg());
-        CHECK_NULL_VOID(pattern->lastAltCanvasImage_->imagePaintConfig_);
     };
     return task;
 }
@@ -297,7 +310,8 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
     if (!sourceInfo.IsInternalResource()) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -333,14 +347,14 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 
     // Step2: clean data and reset params
     // clear src data
-    lastCanvasImage_ = nullptr;
-    lastSrcRect_ = RectF();
-    lastDstRect_ = RectF();
+    image_ = nullptr;
+    srcRect_ = RectF();
+    dstRect_ = RectF();
     // clear alt data
     altLoadingCtx_ = nullptr;
-    lastAltCanvasImage_ = nullptr;
-    lastAltDstRect_.reset();
-    lastAltSrcRect_.reset();
+    altImage_ = nullptr;
+    altDstRect_.reset();
+    altSrcRect_.reset();
 
     // Step3: clean rs node to release the sk_sp<SkImage> held by it
     // TODO: release PixelMap resource when use PixelMap resource to draw image
@@ -349,8 +363,7 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->ClearDrawCommands();
-
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->FlushMessages();
 }
@@ -364,6 +377,24 @@ void ImagePattern::OnWindowShow()
 {
     isShow_ = true;
     LoadImageDataIfNeed();
+}
+
+void ImagePattern::OnVisibleChange(bool visible)
+{
+    CHECK_NULL_VOID(image_);
+    // control svg animation
+    if (image_->GetPaintConfig().isSvg_) {
+        auto svg = DynamicCast<SvgCanvasImage>(image_);
+        CHECK_NULL_VOID(svg);
+        svg->ControlAnimation(visible);
+    }
+}
+
+void ImagePattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToBounds(true);
 }
 
 } // namespace OHOS::Ace::NG

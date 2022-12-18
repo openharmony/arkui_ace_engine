@@ -63,6 +63,7 @@ public:
     void SetPendingIndex(int32_t index);
     void SetIndexWithoutChangeContent(int32_t index);
     void SetIndexByController(int32_t index, bool blockEvent = true);
+    void SetIndicatorByScrollContent(double percent, int32_t newIndex, bool needChange);
     void SetIndexByScrollContent(int32_t index);
     void SetContentElement(const RefPtr<Element>& contentElement);
     void SetBarElement(const RefPtr<Element>& barElement);

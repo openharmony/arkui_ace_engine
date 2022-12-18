@@ -26,20 +26,42 @@ class ACE_EXPORT TextPickerLayoutAlgorithm : public LinearLayoutAlgorithm {
     DECLARE_ACE_TYPE(TextPickerLayoutAlgorithm, LinearLayoutAlgorithm);
 
 public:
-    explicit TextPickerLayoutAlgorithm(float currentOffset) : currentOffset_(currentOffset) {}
+    TextPickerLayoutAlgorithm() = default;
     ~TextPickerLayoutAlgorithm() override = default;
 
     void OnReset() override {}
 
+    void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
+    void MeasureText(LayoutWrapper* layoutWrapper, const SizeF& size);
+    void ChangeTextStyle(
+        uint32_t index, uint32_t showOptionCount, const SizeF& size, const RefPtr<LayoutWrapper>& childLayoutWrapper);
 
     float GetCurrentOffset() const
     {
         return currentOffset_;
     }
 
+    void SetCurrentOffset(float currentOffset)
+    {
+        currentOffset_ = currentOffset;
+    }
+
+    double GetDefaultPickerItemHeight() const
+    {
+        return defaultPickerItemHeight_;
+    }
+
+    void SetDefaultPickerItemHeight(double defaultPickerItemHeight)
+    {
+        defaultPickerItemHeight_ = defaultPickerItemHeight;
+    }
+
 private:
+    float pickerItemHeight_ = 0.0f;
     float currentOffset_ = 0.0f;
+    double defaultPickerItemHeight_ = 0.0;
+    bool isDefaultPickerItemHeight_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerLayoutAlgorithm);
 };

@@ -20,7 +20,6 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ConnectManagement> g_connectManagement = nullptr;
-static uv_loop_t loopMain;
 static HdcJdwpSimulator *clsHdcJdwpSimulator = nullptr;
 
 void ConnectManagement::SetPkgName(const std::string &pkgName)
@@ -33,72 +32,12 @@ std::string ConnectManagement::GetPkgName()
     return pkgName_;
 }
 
-void TryCloseHandle(const uv_handle_t* handle, bool alwaysCallback, uv_close_cb closeCallBack)
-{
-    bool hasCallClose = false;
-    if (handle->loop && !uv_is_closing(handle)) {
-        uv_close((uv_handle_t *)handle, closeCallBack);
-        hasCallClose = true;
-    }
-    if (!hasCallClose && alwaysCallback) {
-        closeCallBack((uv_handle_t *)handle);
-    }
-}
-
-void TryCloseHandle(const uv_handle_t *handle, uv_close_cb closeCallBack)
-{
-    TryCloseHandle(handle, false, closeCallBack);
-}
-
-void TryCloseHandle(const uv_handle_t *handle)
-{
-    TryCloseHandle(handle, nullptr);
-}
-
-bool TryCloseLoop(uv_loop_t *ptrLoop, const char *callerName)
-{
-    uint8_t closeRetry = 0;
-    bool ret = false;
-    constexpr int maxRetry = 3;
-    constexpr int maxHandle = 2;
-    for (closeRetry = 0; closeRetry < maxRetry; ++closeRetry) {
-        if (uv_loop_close(ptrLoop) == UV_EBUSY) {
-            if (closeRetry > maxRetry) {
-                LOGE("%{private}s close busy,try:%{private}d", callerName, closeRetry);
-            }
-
-            if (ptrLoop->active_handles >= maxHandle) {
-                LOGE("TryCloseLoop issue");
-            }
-            auto clearLoopTask = [](uv_handle_t *handle, void *arg) -> void {
-                TryCloseHandle(handle);
-            };
-            uv_walk(ptrLoop, clearLoopTask, nullptr);
-            // If all processing ends, Then return0,this call will block
-            if (!ptrLoop->active_handles) {
-                ret = true;
-                break;
-            }
-            if (!uv_run(ptrLoop, UV_RUN_ONCE)) {
-                ret = true;
-                break;
-            }
-        } else {
-            ret = true;
-            break;
-        }
-    }
-    return ret;
-}
-
 void FreeInstance()
 {
     if (clsHdcJdwpSimulator == nullptr) {
         return; // if clsHdcJdwpSimulator is nullptr, should return immediately.
     }
-    clsHdcJdwpSimulator->FreeContext();
-    uv_stop(&loopMain);
-    TryCloseLoop(&loopMain, "Hdcjdwp exit");
+    clsHdcJdwpSimulator->Disconnect();
     delete clsHdcJdwpSimulator;
     clsHdcJdwpSimulator = nullptr;
 }
@@ -118,7 +57,6 @@ void StopConnect()
 
 void* HdcConnectRun(void* pkgContent)
 {
-    uv_loop_init(&loopMain);
     if (signal(SIGINT, Stop) == SIG_ERR) {
         LOGE("jdwp_process signal fail.");
     }
@@ -128,7 +66,6 @@ void* HdcConnectRun(void* pkgContent)
         LOGE("Connect fail.");
         return nullptr;
     }
-    uv_run(&loopMain, UV_RUN_DEFAULT);
     return nullptr;
 }
 

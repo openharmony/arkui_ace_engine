@@ -15,24 +15,38 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
 
+#include "bridge/declarative_frontend/jsview/models/polygon_model_impl.h"
 #include "core/common/container.h"
-#include "core/components/box/box_component.h"
-#include "core/components/shape/shape_component.h"
-#include "core/components_ng/pattern/shape/polygon_view.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/shape/polygon_model.h"
+#include "core/components_ng/pattern/shape/polygon_model_ng.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<PolygonModel> PolygonModel::instance_ = nullptr;
+
+PolygonModel* PolygonModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::PolygonModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::PolygonModelNG());
+        } else {
+            instance_.reset(new Framework::PolygonModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
 void JSPolygon::Create(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::PolygonView::Create(true);
-        JSShapeAbstract::SetNgSize(info);
-        return;
-    }
-    RefPtr<Component> polygonComponent = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::POLYGON);
-    ViewStackProcessor::GetInstance()->ClaimElementId(polygonComponent);
-    ViewStackProcessor::GetInstance()->Push(polygonComponent);
+    PolygonModel::GetInstance()->Create(true);
     JSShapeAbstract::SetSize(info);
 }
 
@@ -83,16 +97,7 @@ void JSPolygon::JsPoints(const JSCallbackInfo& info)
             }
             shapePoints.push_back(shapePoint);
         }
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::PolygonView::SetPoints(shapePoints);
-            return;
-        }
-        auto polygon = AceType::DynamicCast<ShapeComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        if (!polygon) {
-            LOGE("ShapeComponent is null.");
-            return;
-        }
-        polygon->SetPoints(shapePoints);
+        PolygonModel::GetInstance()->SetPoints(shapePoints);
     }
 }
 

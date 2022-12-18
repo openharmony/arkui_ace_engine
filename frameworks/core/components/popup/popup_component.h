@@ -87,6 +87,11 @@ public:
         return popupController_;
     }
 
+    void SetPopupParam(const RefPtr<PopupParam>& popupParam)
+    {
+        popupParam_ = popupParam;
+    }
+
     const RefPtr<PopupParam>& GetPopupParam() const
     {
         return popupParam_;

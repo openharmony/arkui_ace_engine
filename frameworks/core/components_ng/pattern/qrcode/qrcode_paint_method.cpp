@@ -21,7 +21,6 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/qrcode/qrcode_paint_property.h"
-#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 

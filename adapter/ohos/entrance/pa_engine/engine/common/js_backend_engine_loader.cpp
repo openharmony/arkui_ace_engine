@@ -20,6 +20,7 @@
 #include "base/log/log.h"
 #include "base/utils/singleton.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace {
@@ -43,11 +44,7 @@ DummyJsBackendEngineLoader::~DummyJsBackendEngineLoader() = default;
 
 JsBackendEngineLoader& GetJsBackendEngineLoader(const char* sharedLibrary)
 {
-    if (sharedLibrary == nullptr) {
-        LOGE("Name of shared library MUST NOT be null pointer");
-        return DummyJsBackendEngineLoader::GetInstance();
-    }
-
+    CHECK_NULL_RETURN(sharedLibrary, DummyJsBackendEngineLoader::GetInstance());
     void* handle = dlopen(sharedLibrary, RTLD_LAZY);
     if (handle == nullptr) {
         LOGE("Failed to open shared library %{public}s, reason: %{public}sn", sharedLibrary, dlerror());

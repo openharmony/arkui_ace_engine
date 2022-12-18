@@ -22,6 +22,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/animation/friction_motion.h"
 #include "core/animation/spring_animation.h"
@@ -39,6 +40,7 @@ constexpr int32_t ANIMATION_BASE_DURATION = 256;
 constexpr Dimension BLANK_MIN_HEIGHT = 8.0_vp;
 constexpr Dimension DRAG_BAR_HEIGHT = 8.0_vp;
 constexpr Dimension DRAG_UP_THRESHOLD = 48.0_vp;
+constexpr double VELOCITY_THRESHOLD = 1000.0; // Move 1000px per second.
 
 } // namespace
 
@@ -73,8 +75,10 @@ bool SlidingPanelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& 
     auto layoutAlgorithm = DynamicCast<SlidingPanelLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     InitializeLayoutProps();
-    currentOffset_ = layoutAlgorithm->GetCurrentOffset();
     isFirstLayout_ = layoutAlgorithm->GetIsFirstLayout();
+    fullHeight_ = layoutAlgorithm->GetFullHeight();
+    halfHeight_ = layoutAlgorithm->GetHalfHeight();
+    miniHeight_ = layoutAlgorithm->GetMiniHeight();
     return true;
 }
 
@@ -87,17 +91,14 @@ void SlidingPanelPattern::Update()
     type_ = layoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR);
 }
 
-bool SlidingPanelPattern::InitializeLayoutProps()
+void SlidingPanelPattern::InitializeLayoutProps()
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, 0);
+    CHECK_NULL_VOID(host);
     auto child = host->GetChildren();
     if (child.empty() || child.size() != 1) {
         LOGE("Children size wrong in slide panel modal");
-        return false;
-    }
-    if (isFirstLayout_) {
-        isFirstLayout_ = false;
+        return;
     }
 
     auto maxSize = host->GetGeometryNode()->GetFrameSize();
@@ -107,19 +108,118 @@ bool SlidingPanelPattern::InitializeLayoutProps()
     auto halfHeight = layoutProperty->GetHalfHeight().value_or(Dimension(maxSize.Height() / 2)).ConvertToPx();
     auto miniHeight =
         layoutProperty->GetMiniHeight().value_or(Dimension(DRAG_UP_THRESHOLD.ConvertToPx())).ConvertToPx();
-    if (defaultBlankHeights_.empty()) {
-        defaultBlankHeights_[PanelMode::FULL] = maxSize.Height() - fullHeight;
-        defaultBlankHeights_[PanelMode::HALF] = maxSize.Height() - halfHeight;
-        defaultBlankHeights_[PanelMode::MINI] = maxSize.Height() - miniHeight;
-        CheckHeightValidity();
-        fullHalfBoundary_ = defaultBlankHeights_[PanelMode::FULL] +
-                            (defaultBlankHeights_[PanelMode::HALF] - defaultBlankHeights_[PanelMode::FULL]) / 2.0;
-        halfMiniBoundary_ = defaultBlankHeights_[PanelMode::HALF] +
-                            (defaultBlankHeights_[PanelMode::MINI] - defaultBlankHeights_[PanelMode::HALF]) / 2.0;
-        fullMiniBoundary_ = defaultBlankHeights_[PanelMode::FULL] +
-                            (defaultBlankHeights_[PanelMode::MINI] - defaultBlankHeights_[PanelMode::FULL]) / 2.0;
+    defaultBlankHeights_[PanelMode::FULL] = maxSize.Height() - fullHeight;
+    defaultBlankHeights_[PanelMode::HALF] = maxSize.Height() - halfHeight;
+    defaultBlankHeights_[PanelMode::MINI] = maxSize.Height() - miniHeight;
+    CheckHeightValidity();
+    fullHalfBoundary_ = defaultBlankHeights_[PanelMode::FULL] +
+                        (defaultBlankHeights_[PanelMode::HALF] - defaultBlankHeights_[PanelMode::FULL]) / 2.0;
+    halfMiniBoundary_ = defaultBlankHeights_[PanelMode::HALF] +
+                        (defaultBlankHeights_[PanelMode::MINI] - defaultBlankHeights_[PanelMode::HALF]) / 2.0;
+    fullMiniBoundary_ = defaultBlankHeights_[PanelMode::FULL] +
+                        (defaultBlankHeights_[PanelMode::MINI] - defaultBlankHeights_[PanelMode::FULL]) / 2.0;
+    minBlankHeight_ = BLANK_MIN_HEIGHT.ConvertToPx();
+
+    if (!isShow_.has_value()) {
+        FirstLayout();
+        return;
     }
-    return true;
+    auto isShow = layoutProperty->GetIsShowValue(false);
+    if (isShow_.value() != isShow) {
+        IsShowChanged(isShow);
+        return;
+    }
+    HeightDynamicUpdate();
+}
+
+void SlidingPanelPattern::FirstLayout()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    isFirstLayout_ = false;
+    auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto maxSize = host->GetGeometryNode()->GetFrameSize();
+    if (layoutProperty->GetIsShowValue(false) == true) {
+        CheckPanelModeAndType();
+        UpdateCurrentOffset(maxSize.Height());
+        AnimateTo(defaultBlankHeights_[mode_], mode_);
+        if (previousMode_ != mode_) {
+            FireSizeChangeEvent();
+        }
+        isShow_ = true;
+        auto dragBar = GetDragBarNode();
+        CHECK_NULL_VOID(dragBar);
+        auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
+        CHECK_NULL_VOID(dragBarPattern);
+        dragBarPattern->ShowInPanelMode(mode_);
+        return;
+    }
+    CheckPanelModeAndType();
+    UpdateCurrentOffset(maxSize.Height());
+    RemoveEvent();
+    isShow_ = false;
+}
+
+void SlidingPanelPattern::IsShowChanged(bool isShow)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto maxSize = host->GetGeometryNode()->GetFrameSize();
+    if (isShow) {
+        AddEvent();
+        CheckPanelModeAndType();
+        AnimateTo(defaultBlankHeights_[mode_], mode_);
+        if (previousMode_ != mode_) {
+            FireSizeChangeEvent();
+        }
+        isShow_ = true;
+        auto dragBar = GetDragBarNode();
+        CHECK_NULL_VOID(dragBar);
+        auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
+        CHECK_NULL_VOID(dragBarPattern);
+        dragBarPattern->ShowInPanelMode(mode_);
+        return;
+    }
+    UpdateCurrentOffset(defaultBlankHeights_[previousMode_]);
+    AnimateTo(maxSize.Height(), mode_);
+    if (previousMode_ != mode_) {
+        FireSizeChangeEvent();
+    }
+    isShow_ = false;
+    auto dragBar = GetDragBarNode();
+    CHECK_NULL_VOID(dragBar);
+    auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
+    CHECK_NULL_VOID(dragBarPattern);
+    dragBarPattern->ShowInPanelMode(mode_);
+    RemoveEvent();
+}
+
+void SlidingPanelPattern::HeightDynamicUpdate()
+{
+    if (isShow_.value_or(false) == true && !isDrag_ && !isAnimating_) {
+        switch (previousMode_) {
+            case PanelMode::FULL:
+                if (!NearEqual(currentOffset_, defaultBlankHeights_[PanelMode::FULL])) {
+                    AnimateTo(defaultBlankHeights_[PanelMode::FULL], PanelMode::FULL);
+                }
+                break;
+            case PanelMode::HALF:
+                if (!NearEqual(currentOffset_, defaultBlankHeights_[PanelMode::HALF])) {
+                    AnimateTo(defaultBlankHeights_[PanelMode::HALF], PanelMode::HALF);
+                }
+                break;
+            case PanelMode::MINI:
+                if (!NearEqual(currentOffset_, defaultBlankHeights_[PanelMode::MINI])) {
+                    AnimateTo(defaultBlankHeights_[PanelMode::MINI], PanelMode::MINI);
+                }
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 void SlidingPanelPattern::CheckHeightValidity()
@@ -133,6 +233,19 @@ void SlidingPanelPattern::CheckHeightValidity()
     defaultBlankHeights_[PanelMode::MINI] = std::clamp(defaultBlankHeights_[PanelMode::MINI], minBlank, maxBlank);
     defaultBlankHeights_[PanelMode::HALF] = std::clamp(defaultBlankHeights_[PanelMode::HALF], minBlank, maxBlank);
     defaultBlankHeights_[PanelMode::FULL] = std::clamp(defaultBlankHeights_[PanelMode::FULL], minBlank, maxBlank);
+}
+
+void SlidingPanelPattern::CheckPanelModeAndType()
+{
+    // This parameter does not take effect when PanelMode is set to Half and PanelType is set to minibar
+    if (mode_ == PanelMode::HALF && type_ == PanelType::MINI_BAR) {
+        mode_ = PanelMode::MINI;
+    }
+
+    // This parameter does not take effect when PanelMode is set to Mini and PanelType is set to temporary
+    if (mode_ == PanelMode::MINI && type_ == PanelType::TEMP_DISPLAY) {
+        mode_ = PanelMode::HALF;
+    }
 }
 
 void SlidingPanelPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -163,20 +276,19 @@ void SlidingPanelPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub
         }
     };
 
-    PanDirection panDirection;
-    panDirection.type = PanDirection::VERTICAL;
-    float distance = DEFAULT_PAN_DISTANCE;
+    panDirection_.type = PanDirection::VERTICAL;
+    distance_ = DEFAULT_PAN_DISTANCE;
     auto host = GetHost();
     if (host) {
         auto context = host->GetContext();
         if (context) {
-            distance = static_cast<float>(
+            distance_ = static_cast<float>(
                 context->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP))); // convert VP to Px
         }
     }
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), nullptr);
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
+    gestureHub->AddPanEvent(panEvent_, panDirection_, 1, distance_);
 }
 
 void SlidingPanelPattern::HandleDragStart(const Offset& startPoint) // const GestureEvent& info
@@ -184,6 +296,7 @@ void SlidingPanelPattern::HandleDragStart(const Offset& startPoint) // const Ges
     if (isAnimating_) {
         return;
     }
+    isDrag_ = true;
     dragStartCurrentOffset_ = currentOffset_;
 }
 
@@ -203,15 +316,15 @@ void SlidingPanelPattern::HandleDragUpdate(const GestureEvent& info)
         LOGI("Offset is not changed, needn't measure.");
         return;
     }
+    FireHeightChangeEvent();
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
-void SlidingPanelPattern::HandleDragEnd(double dragVelocity)
+void SlidingPanelPattern::HandleDragEnd(float dragVelocity)
 {
     if (isAnimating_) {
         return;
     }
-    previousMode_ = mode_;
     auto dragLen = currentOffset_ - dragStartCurrentOffset_;
     type_ = GetPanelType();
     switch (type_) {
@@ -233,41 +346,84 @@ void SlidingPanelPattern::HandleDragEnd(double dragVelocity)
         }
     }
     AnimateTo(defaultBlankHeights_[mode_], mode_);
+    if (previousMode_ != mode_) {
+        FireSizeChangeEvent();
+        previousMode_ = mode_;
+    }
+    isDrag_ = false;
 }
 
-void SlidingPanelPattern::CalculateModeTypeMini(double dragLen, double velocity) // FULL & MINI
+void SlidingPanelPattern::CalculateModeTypeMini(float dragLen, float velocity) // FULL & MINI
 {
     float currentPostion = currentOffset_;
-    if (currentPostion < fullMiniBoundary_) {
-        mode_ = PanelMode::FULL;
+    if (std::abs(velocity) < VELOCITY_THRESHOLD) {
+        // Drag velocity not reached to threshold, mode based on the location.
+        if (currentPostion < fullMiniBoundary_) {
+            mode_ = PanelMode::FULL;
+        } else {
+            mode_ = PanelMode::MINI;
+        }
     } else {
-        mode_ = PanelMode::MINI;
+        // Drag velocity reached to threshold, mode based on the drag direction.
+        if (velocity > 0.0) {
+            mode_ = PanelMode::MINI;
+        } else {
+            mode_ = PanelMode::FULL;
+        }
     }
 }
 
-void SlidingPanelPattern::CalculateModeTypeFold(double dragLen, double velocity) // // FULL & HALF & MINI
+void SlidingPanelPattern::CalculateModeTypeFold(float dragLen, float velocity) // // FULL & HALF & MINI
 {
     float currentPostion = currentOffset_;
-    if (currentPostion < fullHalfBoundary_) {
-        mode_ = PanelMode::FULL;
-    } else if (currentPostion < halfMiniBoundary_) {
-        mode_ = PanelMode::HALF;
+    if (std::abs(velocity) < VELOCITY_THRESHOLD) {
+        // Drag velocity not reached to threshold, mode based on the location.
+        if (currentPostion < fullHalfBoundary_) {
+            mode_ = PanelMode::FULL;
+        } else if (currentPostion < halfMiniBoundary_) {
+            mode_ = PanelMode::HALF;
+        } else {
+            mode_ = PanelMode::MINI;
+        }
     } else {
-        mode_ = PanelMode::MINI;
+        // Drag velocity reached to threshold, mode based on the drag direction.
+        if (velocity > 0.0) {
+            if (currentPostion < defaultBlankHeights_[PanelMode::HALF]) {
+                mode_ = PanelMode::HALF;
+            } else {
+                mode_ = PanelMode::MINI;
+            }
+        } else {
+            if (currentPostion > defaultBlankHeights_[PanelMode::HALF]) {
+                mode_ = PanelMode::HALF;
+            } else {
+                mode_ = PanelMode::FULL;
+            }
+        }
     }
 }
 
-void SlidingPanelPattern::CalculateModeTypeTemp(double dragLen, double velocity) // FULL & HALF
+void SlidingPanelPattern::CalculateModeTypeTemp(float dragLen, float velocity) // FULL & HALF
 {
     float currentPostion = currentOffset_;
-    if (currentPostion < fullHalfBoundary_) {
-        mode_ = PanelMode::FULL;
+    if (std::abs(velocity) < VELOCITY_THRESHOLD) {
+        // Drag velocity not reached to threshold, mode based on the location.
+        if (currentPostion < fullHalfBoundary_) {
+            mode_ = PanelMode::FULL;
+        } else {
+            mode_ = PanelMode::HALF;
+        }
     } else {
-        mode_ = PanelMode::HALF;
+        // Drag velocity reached to threshold, mode based on the drag direction.
+        if (velocity > 0.0) {
+            mode_ = PanelMode::HALF;
+        } else {
+            mode_ = PanelMode::FULL;
+        }
     }
 }
 
-void SlidingPanelPattern::AnimateTo(double targetLocation, PanelMode mode)
+void SlidingPanelPattern::AnimateTo(float targetLocation, PanelMode mode)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -281,9 +437,12 @@ void SlidingPanelPattern::AnimateTo(double targetLocation, PanelMode mode)
     animator_->AddStopListener([weak = WeakClaim(this), mode]() {
         auto panel = weak.Upgrade();
         CHECK_NULL_VOID(panel);
-        if (panel) {
-            panel->OnAnimationStop();
-        }
+        auto dragBar = panel->GetDragBarNode();
+        CHECK_NULL_VOID(dragBar);
+        panel->OnAnimationStop();
+        auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
+        CHECK_NULL_VOID(dragBarPattern);
+        dragBarPattern->ShowInPanelMode(mode);
     });
     AppendBlankHeightAnimation(targetLocation, mode);
     auto geometryNode = host->GetGeometryNode();
@@ -294,21 +453,42 @@ void SlidingPanelPattern::AnimateTo(double targetLocation, PanelMode mode)
     animator_->Forward();
 }
 
-void SlidingPanelPattern::AppendBlankHeightAnimation(double targetLocation, PanelMode mode)
+void SlidingPanelPattern::AppendBlankHeightAnimation(float targetLocation, PanelMode mode)
 {
     auto springProperty = AceType::MakeRefPtr<SpringProperty>(1.0f, 100.0f, 20.0f);
     auto heightAnimation = AceType::MakeRefPtr<SpringAnimation>(springProperty);
     heightAnimation->AddListener(
-        [weak = AceType::WeakClaim(this), start = currentOffset_, end = targetLocation, mode](double value) {
+        [weak = AceType::WeakClaim(this), start = currentOffset_, end = targetLocation, mode](float value) {
             auto panel = weak.Upgrade();
-            if (panel) {
-                panel->UpdateCurrentOffsetOnAnimate((end - start) * value + start);
+            if (!panel) {
+                LOGE("Panel is null.");
+                return;
             }
+            if (value > 1.0) {
+                auto dragBar = panel->GetDragBarNode();
+                CHECK_NULL_VOID(dragBar);
+                auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
+                CHECK_NULL_VOID(dragBarPattern);
+                dragBarPattern->ShowInPanelMode(mode);
+            }
+            panel->UpdateCurrentOffsetOnAnimate((end - start) * value + start);
+            panel->FireHeightChangeEvent();
+            panel->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         });
     animator_->AddInterpolator(heightAnimation);
 }
 
-int32_t SlidingPanelPattern::GetAnimationDuration(double delta, double dragRange) const
+RefPtr<FrameNode> SlidingPanelPattern::GetDragBarNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto column = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    CHECK_NULL_RETURN(column, nullptr);
+    auto dragBar = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(0));
+    return dragBar;
+}
+
+int32_t SlidingPanelPattern::GetAnimationDuration(float delta, float dragRange) const
 {
     if (NearZero(dragRange)) {
         return 0;
@@ -365,20 +545,72 @@ void SlidingPanelPattern::FireSizeChangeEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto frameSize = host->GetGeometryNode()->GetFrameSize();
-    float height = std::floor(frameSize.Height() - defaultBlankHeights_[mode_]);
+    auto dragBar = GetDragBarNode();
+    CHECK_NULL_VOID(dragBar);
+    auto dragBarFrameSize = dragBar->GetGeometryNode()->GetFrameSize();
+    float height = std::floor(frameSize.Height() - defaultBlankHeights_[mode_] - dragBarFrameSize.Height());
     float width = std::floor(frameSize.Width());
-    slidingPanelEventHub->FireSizeChangeEvent(width, height, mode_);
+    slidingPanelEventHub->FireSizeChangeEvent(mode_, width, height);
+    previousMode_ = mode_;
 }
 
 void SlidingPanelPattern::FireHeightChangeEvent()
 {
     auto slidingPanelEventHub = GetEventHub<SlidingPanelEventHub>();
     CHECK_NULL_VOID(slidingPanelEventHub);
-    auto slidingLayoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
-    auto layoutConstraint = slidingLayoutProperty->GetLayoutConstraint();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
 
-    auto currentHeight = static_cast<float>(layoutConstraint->maxSize.Height() - currentOffset_);
+    auto currentHeight = static_cast<float>(geometryNode->GetFrameSize().Height() - currentOffset_);
     slidingPanelEventHub->FireHeightChangeEvent(currentHeight);
+}
+
+void SlidingPanelPattern::MarkDirtyNode(PropertyChangeFlag extraFlag)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(extraFlag);
+}
+
+void SlidingPanelPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    Pattern::ToJsonValue(json);
+    auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    static const char* PANEL_TYPE[] = { "PanelType.Minibar", "PanelType.Foldable", "PanelType.Temporary" };
+    json->Put(
+        "type", PANEL_TYPE[static_cast<int32_t>(layoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR))]);
+    static const char* PANEL_MODE[] = { "PanelMode.Mini", "PanelMode.Half", "PanelMode.Full" };
+    json->Put("mode", PANEL_MODE[static_cast<int32_t>(layoutProperty->GetPanelMode().value_or(PanelMode::HALF))]);
+    json->Put("dragBar", layoutProperty->GetHasDragBar().value_or(true) ? "true" : "false");
+    json->Put("show", layoutProperty->GetIsShow().value_or(true) ? "true" : "false");
+    json->Put("miniHeight", layoutProperty->GetMiniHeight().value_or(miniHeight_).ToString().c_str());
+    json->Put("halfHeight", layoutProperty->GetHalfHeight().value_or(halfHeight_).ToString().c_str());
+    json->Put("fullHeight", layoutProperty->GetFullHeight().value_or(fullHeight_).ToString().c_str());
+}
+
+void SlidingPanelPattern::RemoveEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->RemovePanEvent(panEvent_);
+}
+
+void SlidingPanelPattern::AddEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->AddPanEvent(panEvent_, panDirection_, 1, distance_);
 }
 
 } // namespace OHOS::Ace::NG

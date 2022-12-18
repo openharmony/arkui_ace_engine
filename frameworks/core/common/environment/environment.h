@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/thread/task_executor.h"
+#include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace {
 
@@ -36,4 +37,4 @@ protected:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_STORAGE_STORAGE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ENVIRONMENT_ENVIRONMENT_H

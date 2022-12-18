@@ -15,22 +15,21 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_gesture.h"
 
-#include "core/components_ng/base/view_stack_processor.h"
+#include "frameworks/base/log/ace_scoring_log.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_gesture_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/core/components/gesture_listener/gesture_component.h"
-
-#include "frameworks/core/components_ng/gestures/recognizers/exclusive_recognizer.h"
+#include "frameworks/core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/components_ng/gestures/gesture_group.h"
 #include "frameworks/core/components_ng/gestures/long_press_gesture.h"
 #include "frameworks/core/components_ng/gestures/pan_gesture.h"
-#include "frameworks/core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "frameworks/core/components_ng/gestures/pinch_gesture.h"
+#include "frameworks/core/components_ng/gestures/recognizers/exclusive_recognizer.h"
+#include "frameworks/core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "frameworks/core/components_ng/gestures/rotation_gesture.h"
 #include "frameworks/core/components_ng/gestures/swipe_gesture.h"
 #include "frameworks/core/components_ng/gestures/tap_gesture.h"
-
 #include "frameworks/core/gestures/exclusive_recognizer.h"
 #include "frameworks/core/gestures/gesture_group.h"
 #include "frameworks/core/gestures/long_press_gesture.h"
@@ -421,7 +420,6 @@ void JSGestureGroup::Create(const JSCallbackInfo& args)
         auto gesture = AceType::MakeRefPtr<GestureGroup>(static_cast<GestureMode>(gestureMode));
         gestureProcessor->PushGesture(gesture);
     };
-
 }
 
 void JSGesture::JsHandlerOnGestureEvent(JSGestureEvent action, const JSCallbackInfo& args)
@@ -452,8 +450,7 @@ void JSGesture::JsHandlerOnGestureEvent(JSGestureEvent action, const JSCallbackI
             return;
         }
 
-        auto onActionFunc = [execCtx = args.GetExecutionContext(), func = std::move(handlerFunc)](
-                                GestureEvent& info) {
+        auto onActionFunc = [execCtx = args.GetExecutionContext(), func = std::move(handlerFunc)](GestureEvent& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Gesture.onActionCancel");
             func->Execute(info);

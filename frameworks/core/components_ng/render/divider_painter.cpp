@@ -27,24 +27,12 @@ void DividerPainter::DrawLine(RSCanvas& canvas, const OffsetF& offset) const
     pen.SetColor(ToRSColor(dividerColor_.value_or(Color::BLACK)));
     canvas.AttachPen(pen);
 
-    auto startPointX = offset.GetX();
-    auto startPointY = offset.GetY();
+    auto dividerWidth = constrainStrokeWidth_ / 2;
+    auto startPointX = offset.GetX() + dividerWidth;
+    auto startPointY = offset.GetY() + dividerWidth;
     PointF start = PointF(startPointX, startPointY);
-    PointF end = vertical_ ? PointF(startPointX, startPointY + dividerLength_)
-                           : PointF(startPointX + dividerLength_, startPointY);
-    canvas.DrawLine(ToRSPonit(start) , ToRSPonit(end));
-}
-
-void DividerPainter::DrawListLines(RSCanvas& canvas, const int32_t startIndex, const int32_t endIndex,
-    const ListLayoutAlgorithm::PositionMap& itemPosition, float startMargin) const
-{
-    float half = 0.5f;
-    for (int32_t lineIndex = startIndex; lineIndex < endIndex; lineIndex++) {
-        if (vertical_) {
-            DrawLine(canvas, OffsetF(itemPosition.at(lineIndex).second + constrainStrokeWidth_ * half, startMargin));
-        } else {
-            DrawLine(canvas, OffsetF(startMargin, itemPosition.at(lineIndex).second + constrainStrokeWidth_ * half));
-        }
-    }
+    PointF end = vertical_ ? PointF(startPointX, startPointY + dividerLength_ - constrainStrokeWidth_)
+                           : PointF(startPointX + dividerLength_ - constrainStrokeWidth_, startPointY);
+    canvas.DrawLine(ToRSPoint(start), ToRSPoint(end));
 }
 } // namespace OHOS::Ace::NG

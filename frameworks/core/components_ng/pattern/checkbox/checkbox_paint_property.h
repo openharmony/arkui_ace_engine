@@ -22,6 +22,7 @@
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
+
 class CheckBoxPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(CheckBoxPaintProperty, PaintProperty)
 
@@ -45,6 +46,8 @@ public:
         ResetCheckBoxSelect();
         ResetCheckBoxSelectedColor();
     }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxSelect, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxSelectedColor, Color, PROPERTY_UPDATE_RENDER);

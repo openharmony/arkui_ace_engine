@@ -17,62 +17,127 @@
 
 #include <string>
 
+#include "third_party/skia/include/core/SkString.h"
+#include "third_party/skia/include/utils/SkBase64.h"
 #include "wm/window.h"
 
 #include "base/thread/background_task_executor.h"
+#include "base/utils/utils.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
+#include "core/common/ace_engine.h"
+#include "core/components_ng/base/inspector.h"
 #include "core/components_v2/inspector/inspector.h"
+#include "foundation/ability/ability_runtime/frameworks/native/runtime/connect_server_manager.h"
 
 namespace OHOS::Ace {
+
+bool LayoutInspector::layoutInspectorStatus_ = false;
 
 void LayoutInspector::SupportInspector()
 {
     auto container = Container::Current();
-    if (!container) {
-        LOGE("container null");
+    CHECK_NULL_VOID_NOLOG(container);
+    if (!layoutInspectorStatus_) {
         return;
     }
-    if (!container->GetIdeDebuggerConnected()) {
-        LOGE("container:GetIdeDebuggerConnected:false");
+    std::string treeJsonStr;
+    GetInspectorTreeJsonStr(treeJsonStr, ContainerScope::CurrentId());
+    if (treeJsonStr.empty()) {
         return;
     }
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    if (!pipelineContext) {
-        LOGE("pipelineContext null");
-        return;
+    auto message = JsonUtil::Create(true);
+    GetSnapshotJson(ContainerScope::CurrentId(), message);
+    CHECK_NULL_VOID(message);
+
+    auto sendTask = [treeJsonStr, jsonSnapshotStr = message->ToString(), container]() {
+        if (container->IsUseStageModel()) {
+            OHOS::AbilityRuntime::ConnectServerManager::Get().SendInspector(treeJsonStr, jsonSnapshotStr);
+        } else {
+            OHOS::Ace::ConnectServerManager::Get().SendInspector(treeJsonStr, jsonSnapshotStr);
+        }
+    };
+    BackgroundTaskExecutor::GetInstance().PostTask(std::move(sendTask));
+}
+
+void LayoutInspector::SetStatus(bool layoutInspectorStatus)
+{
+    layoutInspectorStatus_ = layoutInspectorStatus;
+}
+
+void LayoutInspector::SetCallback(int32_t instanceId)
+{
+    LOGI("SetCallback start");
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID_NOLOG(container);
+    if (container->IsUseStageModel()) {
+        OHOS::AbilityRuntime::ConnectServerManager::Get().SetLayoutInspectorCallback(
+            [](int32_t containerId) { return CreateLayoutInfo(containerId); },
+            [](bool status) { return SetStatus(status); });
+    } else {
+        OHOS::Ace::ConnectServerManager::Get().SetLayoutInspectorCallback(
+            [](int32_t containerId) { return CreateLayoutInfo(containerId); },
+            [](bool status) { return SetStatus(status); });
     }
-    std::string jsonTreeStr = V2::Inspector::GetInspectorTree(pipelineContext);
+}
+
+void LayoutInspector::CreateLayoutInfo(int32_t containerId)
+{
+    LOGI("CreateLayoutInfo start");
+    auto container = AceEngine::Get().GetContainer(containerId);
+    CHECK_NULL_VOID_NOLOG(container);
+    std::string treeJsonStr;
+    GetInspectorTreeJsonStr(treeJsonStr, containerId);
+    auto message = JsonUtil::Create(true);
+    GetSnapshotJson(containerId, message);
+    CHECK_NULL_VOID(message);
+
+    auto sendTask = [treeJsonStr, jsonSnapshotStr = message->ToString(), container]() {
+        if (container->IsUseStageModel()) {
+            OHOS::AbilityRuntime::ConnectServerManager::Get().SendInspector(treeJsonStr, jsonSnapshotStr);
+        } else {
+            OHOS::Ace::ConnectServerManager::Get().SendInspector(treeJsonStr, jsonSnapshotStr);
+        }
+    };
+    BackgroundTaskExecutor::GetInstance().PostTask(std::move(sendTask));
+}
+
+void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t containerId)
+{
+    auto container = AceEngine::Get().GetContainer(containerId);
+    CHECK_NULL_VOID_NOLOG(container);
+    if (container->IsUseNewPipeline()) {
+        treeJsonStr = NG::Inspector::GetInspector(true);
+    } else {
+        auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+        CHECK_NULL_VOID(pipelineContext);
+        treeJsonStr = V2::Inspector::GetInspectorTree(pipelineContext, true);
+    }
+}
+
+void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message)
+{
+    LOGI("GetSnapshotJson start");
+    auto container = AceEngine::Get().GetContainer(containerId);
+    CHECK_NULL_VOID_NOLOG(container);
+
     OHOS::sptr<OHOS::Rosen::Window> window = OHOS::Rosen::Window::GetTopWindowWithId(container->GetWindowId());
-    if (!window) {
-        LOGE("GetWindow is null!");
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(window);
     auto pixelMap = window->Snapshot();
-    if (pixelMap == nullptr) {
-        LOGE("Pixel is null");
-        return;
-    }
-    std::string pixelStr = "";
+    CHECK_NULL_VOID(pixelMap);
+
     auto data = (*pixelMap).GetPixels();
     auto height = (*pixelMap).GetHeight();
     auto stride = (*pixelMap).GetRowBytes();
-    for (int32_t i = 0; i < height; i++) {
-        for (int32_t j = 0; j < stride; j++) {
-            pixelStr += std::to_string(*(data + i * stride + j));
-        }
-    }
-    auto message = JsonUtil::Create(true);
     message->Put("type", "snapShot");
     message->Put("width", (*pixelMap).GetWidth());
     message->Put("height", height);
     message->Put("posX", container->GetViewPosX());
     message->Put("posY", container->GetViewPosY());
-    message->Put("pixelMap", pixelStr.c_str());
-    auto sendTask = [jsonTreeStr, jsonSnapshotStr = message->ToString()]() {
-        ConnectServerManager::Get().SendInspector(jsonTreeStr, jsonSnapshotStr);
-    };
-    BackgroundTaskExecutor::GetInstance().PostTask(std::move(sendTask));
+    int32_t encodeLength = SkBase64::Encode(data, height * stride, nullptr);
+    SkString info(encodeLength);
+    SkBase64::Encode(data, height * stride, info.writable_str());
+    message->Put("pixelMapBase64", info.c_str());
 }
 
 } // namespace OHOS::Ace

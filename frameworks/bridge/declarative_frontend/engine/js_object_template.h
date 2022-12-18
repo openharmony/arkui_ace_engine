@@ -18,8 +18,6 @@
 
 #ifdef USE_V8_ENGINE
 #include "frameworks/bridge/declarative_frontend/engine/v8/v8_object_template.h"
-#elif USE_QUICKJS_ENGINE
-#include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_object_template.h"
 #elif USE_ARK_ENGINE
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
 #endif
@@ -41,8 +39,6 @@ public:
 
 #ifdef USE_V8_ENGINE
 using JSObjectTemplate = JSObjectTemplateImpl<V8ObjectTemplate>;
-#elif USE_QUICKJS_ENGINE
-using JSObjectTemplate = JSObjectTemplateImpl<QJSObjectTemplate>;
 #elif USE_ARK_ENGINE
 using JSObjectTemplate = JSObjectTemplateImpl<JsiObjectTemplate>;
 #endif

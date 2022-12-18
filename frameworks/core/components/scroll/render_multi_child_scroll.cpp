@@ -332,8 +332,8 @@ void RenderMultiChildScroll::Update(const RefPtr<Component>& component)
     }
 
     auto scrollBar = listComponent->GetScrollBar();
-    InitScrollBar(scrollBar);
     rightToLeft_ = listComponent->GetRightToLeft();
+    InitScrollBar(scrollBar);
 
     // This should be put after setting positionController_.
     RenderScroll::Update(component);
@@ -945,6 +945,10 @@ double RenderMultiChildScroll::GetFixPositionOnWatch(double destination, double 
         for (const auto &itemPair : listBase->GetItems()) {
             int32_t index = itemPair.first;
             auto item = RenderListItem::GetRenderListItem(itemPair.second);
+            if (!item) {
+                LOGW("get render list item is null");
+                continue;
+            }
             double start = listBase->GetItemPosition(index);
             double end = start + listBase->GetMainSize(item->GetLayoutSize());
 

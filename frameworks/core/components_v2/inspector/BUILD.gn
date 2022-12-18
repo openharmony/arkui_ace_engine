@@ -54,6 +54,8 @@ build_component("inspector_v2") {
     "marquee_composed_element.cpp",
     "menu_composed_element.cpp",
     "navigation_composed_element.cpp",
+    "navigation_menus_composed_element.cpp",
+    "navigation_title_composed_element.cpp",
     "navigator_composed_element.cpp",
     "panel_composed_element.cpp",
     "pattern_lock_composed_element.cpp",
@@ -63,6 +65,7 @@ build_component("inspector_v2") {
     "radio_composed_element.cpp",
     "rating_composed_element.cpp",
     "refresh_composed_element.cpp",
+    "relative_container_composed_element.cpp",
     "row_composed_element.cpp",
     "row_split_composed_element.cpp",
     "scroll_bar_composed_element.cpp",
@@ -91,6 +94,9 @@ build_component("inspector_v2") {
     "time_picker_composed_element.cpp",
     "time_picker_dialog_composed_element.cpp",
     "toggle_composed_element.cpp",
+    "utils.cpp",
+    "water_flow_composed_element.cpp",
+    "water_flow_item_composed_element.cpp",
     "wrap_composed_element.cpp",
   ]
 }

@@ -29,15 +29,19 @@ class ACE_EXPORT ConnectServerManager {
 public:
     ~ConnectServerManager();
     static ConnectServerManager& Get();
+    void SetDebugMode();
     void AddInstance(int32_t instanceId, const std::string& instanceName = "PandaDebugger");
     void SendInspector(const std::string& jsonTreeStr, const std::string& jsonSnapshotStr);
     void RemoveInstance(int32_t instanceId);
+    void SetLayoutInspectorCallback(
+        const std::function<void(int32_t)>& createLayoutInfo, const std::function<void(bool)>& setStatus);
+    std::function<void(int32_t)> GetLayoutInspectorCallback();
 
 private:
     ConnectServerManager();
-    void LoadConnectServerSo();
+    bool InitFunc();
+    void InitConnectServer();
     void CloseConnectServerSo();
-    void StartConnectServer();
     void StopConnectServer();
     std::string GetInstanceMapMessage(const char* messageType, int32_t instanceId);
 
@@ -46,7 +50,8 @@ private:
     void* handlerConnectServerSo_;
     std::string packageName_;
     std::unordered_map<int32_t, std::string> instanceMap_;
-
+    std::function<void(int32_t)> createLayoutInfo_;
+    std::function<void(int32_t)> setStatus_;
     ACE_DISALLOW_COPY_AND_MOVE(ConnectServerManager);
 };
 

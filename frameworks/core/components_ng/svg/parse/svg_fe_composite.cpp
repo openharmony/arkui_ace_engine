@@ -17,6 +17,7 @@
 
 #include "include/effects/SkArithmeticImageFilter.h"
 
+#include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_fe_composite_declaration.h"
 
 namespace OHOS::Ace::NG {
@@ -37,9 +38,7 @@ void SvgFeComposite::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
     const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
 {
     auto declaration = AceType::DynamicCast<SvgFeCompositeDeclaration>(declaration_);
-    if (!declaration) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(declaration);
     if (declaration->GetOperatorType() != FeOperatorType::FE_ARITHMETIC) {
         // this version skia not support SkBlendImageFilters
         return;
@@ -51,7 +50,7 @@ void SvgFeComposite::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
     ConverImageFilterColor(backImageFilter, srcColor, currentColor);
 
     imageFilter = SkArithmeticImageFilter::Make(
-        declaration->GetK1(), declaration->GetK2(),declaration->GetK3(), declaration->GetK4(),
+        declaration->GetK1(), declaration->GetK2(), declaration->GetK3(), declaration->GetK4(),
         true, backImageFilter, foreImageFilter, nullptr);
 
     ConverImageFilterColor(imageFilter, srcColor, currentColor);

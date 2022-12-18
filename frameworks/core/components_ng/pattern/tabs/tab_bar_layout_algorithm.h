@@ -50,14 +50,45 @@ public:
         return currentOffset_;
     }
 
+    void SetChildrenMainSize(float childrenMainSize)
+    {
+        childrenMainSize_ = childrenMainSize;
+    }
+
+    float GetChildrenMainSize() const
+    {
+        return childrenMainSize_;
+    }
+
+    void SetIndicator(int32_t indicator)
+    {
+        indicator_ = indicator;
+    }
+
+    int32_t GetIndicator() const
+    {
+        return indicator_;
+    }
+
+    void SetIsBuilder(bool isBuilder)
+    {
+        isBuilder_ = isBuilder;
+    }
+
 private:
     Axis GetAxis(LayoutWrapper* layoutWrapper) const;
     void UpdateChildConstraint(LayoutConstraintF& childConstraint, const RefPtr<TabBarLayoutProperty>& layoutProperty,
         const SizeF& ideaSize, int32_t childCount, Axis axis);
+    float GetSpace(LayoutWrapper* layoutWrapper, int32_t indicator, const SizeF& frameSize, Axis axis);
+    float CalculateFrontChildrenMainSize(LayoutWrapper* layoutWrapper, int32_t indicator, Axis axis);
+    void LayoutChildren(LayoutWrapper* layoutWrapper, const SizeF& frameSize, Axis axis, OffsetF& childOffset);
+    float CalculateBackChildrenMainSize(LayoutWrapper* layoutWrapper, int32_t indicator, Axis axis);
 
     std::vector<OffsetF> tabItemOffset_;
     float currentOffset_ = 0.0f;
     float childrenMainSize_ = 0.0f; // Children total size in main axis.
+    int32_t indicator_ = 0;
+    bool isBuilder_ = false;
 };
 } // namespace OHOS::Ace::NG
 

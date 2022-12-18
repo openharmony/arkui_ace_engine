@@ -93,11 +93,6 @@ public:
         return -1;
     }
 
-    virtual int32_t Prepare()
-    {
-        return -1;
-    }
-
     virtual bool IsPlaying()
     {
         return false;

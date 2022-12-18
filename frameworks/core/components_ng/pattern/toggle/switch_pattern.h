@@ -19,6 +19,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/size.h"
 #include "base/memory/referenced.h"
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -56,7 +57,28 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<SwitchPaintMethod>(currentOffset_);
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto eventHub = host->GetEventHub<EventHub>();
+        CHECK_NULL_RETURN(eventHub, nullptr);
+        auto enabled = eventHub->IsEnabled();
+        auto paintMethod = MakeRefPtr<SwitchPaintMethod>(currentOffset_, enabled, isTouch_, isHover_);
+        return paintMethod;
+    }
+
+    FocusPattern GetFocusPattern() const override
+    {
+        FocusPaintParam focusPaintParams;
+
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, FocusPattern());
+        auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
+        CHECK_NULL_RETURN(switchTheme, FocusPattern());
+        auto focusPaintcolor = switchTheme->GetActiveColor();
+        focusPaintParams.SetPaintColor(focusPaintcolor);
+        focusPaintParams.SetFocusPadding(Dimension(2.0_vp));
+
+        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
 private:
@@ -70,16 +92,46 @@ private:
     void StopTranslateAnimation();
     void UpdateChangeEvent() const;
     void OnChange();
+    void OnTouchDown();
+    void OnTouchUp();
+    void HandleMouseEvent(bool isHover);
     float GetSwitchWidth() const;
 
+    // Init pan recognizer to move items when drag update, play translate animation when drag end.
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitClickEvent();
+    void InitTouchEvent();
+    void InitMouseEvent();
+
+    // Init key event
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
+
+    void HandleDragUpdate(const GestureEvent& info);
+    void HandleDragEnd();
+
+    bool IsOutOfBoundary(double mainOffset) const;
+
+    RectF GetHotZoneRect(bool isOriginal) const;
+
     void OnClick();
+
+    RefPtr<PanEvent> panEvent_;
 
     RefPtr<Animator> controller_;
     RefPtr<ClickEvent> clickListener_;
     RefPtr<CurveAnimation<double>> translate_;
     std::optional<bool> isOn_;
+    bool changeFlag_ = false;
     float currentOffset_ = 0.0f;
 
+    RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<InputEvent> mouseEvent_;
+    bool isTouch_ = false;
+    bool isHover_ = false;
+
+    float width_ = 0.0f;
+    float height_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
 };
 } // namespace OHOS::Ace::NG

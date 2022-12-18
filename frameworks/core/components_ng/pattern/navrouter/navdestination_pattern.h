@@ -19,10 +19,12 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
+#include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/syntax/shallow_builder.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,6 +32,9 @@ class NavDestinationPattern : public Pattern {
     DECLARE_ACE_TYPE(NavDestinationPattern, Pattern);
 
 public:
+    explicit NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder)
+        : shallowBuilder_(shallowBuilder)
+    {}
     NavDestinationPattern() = default;
     ~NavDestinationPattern() override = default;
 
@@ -48,7 +53,20 @@ public:
         return MakeRefPtr<NavDestinationLayoutAlgorithm>();
     }
 
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<NavDestinationEventHub>();
+    }
+
     void OnModifyDone() override;
+
+    const RefPtr<ShallowBuilder>& GetShallowBuilder() const
+    {
+        return shallowBuilder_;
+    }
+
+private:
+    RefPtr<ShallowBuilder> shallowBuilder_;
 };
 
 } // namespace OHOS::Ace::NG

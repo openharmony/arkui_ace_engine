@@ -231,6 +231,25 @@ public:
     {
         return hasCustomChild_;
     }
+    void SetAspectRatio(double ratio)
+    {
+        aspectRatio_ = ratio;
+    }
+
+    double GetAspectRatio() const
+    {
+        return aspectRatio_;
+    }
+
+    void SetIsPopupButton(bool isPopupButton)
+    {
+        isPopupButton_ = isPopupButton;
+    }
+
+    bool IsPopupButton() const
+    {
+        return isPopupButton_;
+    }
 
 private:
     RefPtr<ButtonDeclaration> declaration_;
@@ -243,9 +262,11 @@ private:
     bool isCatchMode_ = true;
     bool isDeclareHeight_ = false;
     bool needResetHeight_ = true;
+    bool isPopupButton_ = false;
     uint32_t layoutFlag_ = 0;
     Dimension height_;
     bool hasCustomChild_  = false;
+    double aspectRatio_ = 0.0;
     // for custom button type
     std::array<Radius, 4> radii_ = { Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp) };
     RefPtr<StateAttributes<ButtonStateAttribute>> stateAttributeList_;

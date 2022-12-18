@@ -16,8 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_PIPELINE_BASE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_PIPELINE_BASE_H
 
+#include <atomic>
 #include <functional>
 #include <memory>
+#include <shared_mutex>
 #include <stack>
 #include <string>
 #include <utility>
@@ -44,6 +46,7 @@
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_cache.h"
+#include "core/pipeline/container_window_manager.h"
 
 namespace OHOS::Ace {
 
@@ -126,7 +129,7 @@ public:
 
     virtual void FlushAnimation(uint64_t nanoTimestamp) = 0;
 
-    virtual void SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) = 0;
+    virtual void SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent);
 
     virtual void SaveExplicitAnimationOption(const AnimationOption& option) = 0;
 
@@ -136,13 +139,15 @@ public:
 
     virtual AnimationOption GetExplicitAnimationOption() const = 0;
 
-    virtual void Destroy() = 0;
+    virtual void Destroy();
 
     virtual void OnShow() = 0;
 
     virtual void OnHide() = 0;
 
     virtual void WindowFocus(bool isFocus) = 0;
+
+    virtual void ShowContainerTitle(bool isShow) = 0;
 
     virtual void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) = 0;
@@ -198,6 +203,10 @@ public:
         return appBgColor_;
     }
 
+    virtual void SetAppTitle(const std::string& title) = 0;
+
+    virtual void SetAppIcon(const RefPtr<PixelMap>& icon) = 0;
+
     virtual void RefreshRootBgColor() const {}
 
     virtual void PostponePageTransition() {}
@@ -205,10 +214,7 @@ public:
 
     virtual void GetBoundingRectData(int32_t nodeId, Rect& rect) {}
 
-    virtual RefPtr<AccessibilityManager> GetAccessibilityManager() const
-    {
-        return nullptr;
-    }
+    virtual RefPtr<AccessibilityManager> GetAccessibilityManager() const;
 
     void SetRootSize(double density, int32_t width, int32_t height);
 
@@ -344,6 +350,8 @@ public:
     }
 
     void ClearImageCache();
+
+    void SetImageCache(const RefPtr<ImageCache>& imageChache);
 
     RefPtr<ImageCache> GetImageCache() const;
 
@@ -486,8 +494,6 @@ public:
         return rootHeight_;
     }
 
-
-    // TODO:: Set up window manager class to manage window related operations
     void SetWindowModal(WindowModal modal)
     {
         windowModal_ = modal;
@@ -496,116 +502,6 @@ public:
     WindowModal GetWindowModal() const
     {
         return windowModal_;
-    }
-
-    void SetAppIconId(int32_t id)
-    {
-        appIconId_ = id;
-    }
-
-    int32_t GetAppIconId() const
-    {
-        return appIconId_;
-    }
-
-    void SetAppLabelId(int32_t id)
-    {
-        appLabelId_ = id;
-    }
-
-    int32_t GetAppLabelId() const
-    {
-        return appLabelId_;
-    }
-
-    void SetWindowMinimizeCallBack(std::function<bool(void)>&& callback)
-    {
-        windowMinimizeCallback_ = std::move(callback);
-    }
-
-    void SetWindowMaximizeCallBack(std::function<bool(void)>&& callback)
-    {
-        windowMaximizeCallback_ = std::move(callback);
-    }
-
-    void SetWindowRecoverCallBack(std::function<bool(void)>&& callback)
-    {
-        windowRecoverCallback_ = std::move(callback);
-    }
-
-    void SetWindowCloseCallBack(std::function<bool(void)>&& callback)
-    {
-        windowCloseCallback_ = std::move(callback);
-    }
-
-    void SetWindowSplitCallBack(std::function<bool(void)>&& callback)
-    {
-        windowSplitCallback_ = std::move(callback);
-    }
-
-    void SetWindowGetModeCallBack(std::function<WindowMode(void)>&& callback)
-    {
-        windowGetModeCallback_ = std::move(callback);
-    }
-
-    void SetWindowStartMoveCallBack(std::function<void(void)>&& callback)
-    {
-        windowStartMoveCallback_ = std::move(callback);
-    }
-
-    bool FireWindowMinimizeCallBack() const
-    {
-        if (windowMinimizeCallback_) {
-            return windowMinimizeCallback_();
-        }
-        return false;
-    }
-
-    bool FireWindowMaximizeCallBack() const
-    {
-        if (windowMaximizeCallback_) {
-            return windowMaximizeCallback_();
-        }
-        return false;
-    }
-
-    bool FireWindowRecoverCallBack() const
-    {
-        if (windowRecoverCallback_) {
-            return windowRecoverCallback_();
-        }
-        return false;
-    }
-
-    bool FireWindowSplitCallBack() const
-    {
-        if (windowSplitCallback_) {
-            return windowSplitCallback_();
-        }
-        return false;
-    }
-
-    bool FireWindowCloseCallBack() const
-    {
-        if (windowCloseCallback_) {
-            return windowCloseCallback_();
-        }
-        return false;
-    }
-
-    void FireWindowStartMoveCallBack() const
-    {
-        if (windowStartMoveCallback_) {
-            windowStartMoveCallback_();
-        }
-    }
-
-    WindowMode FireWindowGetModeCallBack() const
-    {
-        if (windowGetModeCallback_) {
-            return windowGetModeCallback_();
-        }
-        return WindowMode::WINDOW_MODE_UNDEFINED;
     }
 
     bool IsFullScreenModal() const
@@ -632,6 +528,11 @@ public:
     RefPtr<EventManager> GetEventManager() const
     {
         return eventManager_;
+    }
+
+    const RefPtr<WindowManager>& GetWindowManager() const
+    {
+        return windowManager_;
     }
 
     bool IsRebuildFinished() const
@@ -750,6 +651,8 @@ public:
         displayWindowRectInfo_ = displayWindowRectInfo;
     }
 
+    virtual void SetContainerWindow(bool isShow) = 0;
+
     // This method can get the coordinates and size of the current window,
     // which can be added to the return value of the GetGlobalOffset method to get the window coordinates of the node.
     const Rect& GetDisplayWindowRectInfo() const
@@ -757,8 +660,44 @@ public:
         return displayWindowRectInfo_;
     }
     virtual void FlushMessages() = 0;
+    void SetGSVsyncCallback(std::function<void(void)>&& callback)
+    {
+        gsVsyncCallback_ = std::move(callback);
+    }
+
+    virtual void FlushUITasks() = 0;
+
+    // for sync animation only
+    AnimationOption GetSyncAnimationOption()
+    {
+        return animationOption_;
+    }
+
+    void SetSyncAnimationOption(const AnimationOption& option)
+    {
+        animationOption_ = option;
+    }
+
+    void SetNextFrameLayoutCallback(std::function<void()>&& callback)
+    {
+        nextFrameLayoutCallback_ = std::move(callback);
+    }
+
+    void SetForegroundCalled(bool isForegroundCalled)
+    {
+        isForegroundCalled_ = isForegroundCalled;
+    }
 
 protected:
+    void TryCallNextFrameLayoutCallback()
+    {
+        if (isForegroundCalled_ && nextFrameLayoutCallback_) {
+            isForegroundCalled_ = false;
+            nextFrameLayoutCallback_();
+            LOGI("nextFrameLayoutCallback called");
+        }
+    }
+
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const
     {
         return false;
@@ -766,7 +705,7 @@ protected:
     virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) = 0;
     virtual void SetRootRect(double width, double height, double offset = 0.0) = 0;
     virtual void FlushPipelineWithoutAnimation() = 0;
-    virtual void FlushUITasks() = 0;
+
     virtual void OnVirtualKeyboardHeightChange(float keyboardHeight) {}
 
     void UpdateRootSizeAndScale(int32_t width, int32_t height);
@@ -806,11 +745,13 @@ protected:
     int32_t instanceId_ = 0;
     RefPtr<EventManager> eventManager_;
     RefPtr<ImageCache> imageCache_;
+    mutable std::shared_mutex imageCacheMutex_;
     RefPtr<ThemeManager> themeManager_;
     RefPtr<DataProviderManagerInterface> dataProviderManager_;
     RefPtr<FontManager> fontManager_;
     RefPtr<ManagerInterface> textFieldManager_;
     RefPtr<PlatformBridge> messageBridge_;
+    RefPtr<WindowManager> windowManager_;
     OnPageShowCallBack onPageShowCallBack_;
     AnimationCallback animationCallback_;
     ProfilerCallback onVsyncProfiler_;
@@ -824,6 +765,10 @@ protected:
     RefPtr<Clipboard> clipboard_;
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;
     Rect displayWindowRectInfo_;
+    AnimationOption animationOption_;
+
+    std::function<void()> nextFrameLayoutCallback_ = nullptr;
+    std::atomic<bool> isForegroundCalled_ = false;
 
 private:
     StatusBarEventHandler statusBarBgColorEventHandler_;
@@ -837,17 +782,7 @@ private:
     // OnRouterChangeCallback is function point, need to be initialized.
     OnRouterChangeCallback onRouterChangeCallback_ = nullptr;
     PostRTTaskCallback postRTTaskCallback_;
-
-    // for container modal
-    int32_t appLabelId_ = 0;
-    int32_t appIconId_ = 0;
-    std::function<bool(void)> windowMinimizeCallback_ = nullptr;
-    std::function<bool(void)> windowMaximizeCallback_ = nullptr;
-    std::function<bool(void)> windowRecoverCallback_ = nullptr;
-    std::function<bool(void)> windowCloseCallback_ = nullptr;
-    std::function<bool(void)> windowSplitCallback_ = nullptr;
-    std::function<void(void)> windowStartMoveCallback_ = nullptr;
-    std::function<WindowMode(void)> windowGetModeCallback_ = nullptr;
+    std::function<void(void)> gsVsyncCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

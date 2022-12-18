@@ -1,0 +1,80 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+
+if (is_standard_system) {
+  module_output_path = "ace_engine/frameworkbasicability/geometry"
+} else {
+  module_output_path = "ace_engine_full/frameworkbasicability/geometry"
+}
+
+ohos_unittest("GeometryTest") {
+  module_out_path = module_output_path
+
+  sources = [
+    # deps
+    "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
+    "$ace_root/frameworks/base/utils/base_id.cpp",
+    "$ace_root/frameworks/core/animation/animator.cpp",
+    "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
+    "$ace_root/frameworks/core/animation/cubic_curve.cpp",
+    "$ace_root/frameworks/core/animation/curves.cpp",
+    "$ace_root/frameworks/core/animation/test/mock/mock_scheduler.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/common/test/mock/mock_container.cpp",
+    "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
+
+    # test target
+    "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
+    "$ace_root/frameworks/base/geometry/animatable_matrix4.cpp",
+    "$ace_root/frameworks/base/geometry/dimension.cpp",
+    "$ace_root/frameworks/base/geometry/least_square_impl.cpp",
+    "$ace_root/frameworks/base/geometry/matrix3.cpp",
+    "$ace_root/frameworks/base/geometry/matrix4.cpp",
+    "$ace_root/frameworks/base/geometry/quaternion.cpp",
+    "$ace_root/frameworks/base/geometry/transform_util.cpp",
+
+    # self
+    "animatable_dimension_test.cpp",
+    "animatable_matrix4_test.cpp",
+    "dimension_test.cpp",
+    "least_square_impl_test.cpp",
+    "matrix3_test.cpp",
+    "matrix4_test.cpp",
+    "quaternion_test.cpp",
+    "transform_util_test.cpp",
+  ]
+
+  include_dirs = [
+    "//commonlibrary/c_utils/base/include",
+    "$ace_root",
+    "//third_party/googletest/googlemock/include",
+  ]
+
+  configs = [ "$ace_root:ace_test_config" ]
+
+  deps = [
+    "$ace_root:ace_test_log",
+    "$cjson_root:cjson_static",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [ "c_utils:utils" ]
+
+  part_name = ace_engine_part
+}

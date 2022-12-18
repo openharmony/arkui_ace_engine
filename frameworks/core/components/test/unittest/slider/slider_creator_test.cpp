@@ -23,7 +23,7 @@
 #include "core/components/slider/block_component.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components/test/json/slider_creator.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/components/track/track_component.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/constants.h"
@@ -100,7 +100,7 @@ void SliderCreatorTest::CompareAllDefault(const RefPtr<SliderComponent>& slider)
 {
     CompareAllEssential(slider);
     RefPtr<TrackComponent> linearBar = slider->GetTrack();
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     auto theme = themeManager->GetTheme<SliderTheme>();
     ASSERT_TRUE(theme);
     Color barBackgroundColor = linearBar->GetBackgroundColor();

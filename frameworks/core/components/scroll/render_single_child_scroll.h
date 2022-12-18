@@ -39,9 +39,11 @@ private:
     bool CalculateMainScrollExtent(const Size& itemSize);
     void UpdateAccessibilityAttr();
     void PostForceMakeNeedLayout();
+    bool IsDeclarativePara();
 
     bool isEffectSetted_ = false;
     double childLastMainSize_ = -std::numeric_limits<double>::max();
+    bool initial_ = true;
 };
 
 } // namespace OHOS::Ace

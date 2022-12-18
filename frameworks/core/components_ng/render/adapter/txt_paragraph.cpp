@@ -17,18 +17,20 @@
 
 #include "base/utils/utils.h"
 #include "core/components/font/constants_converter.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 
 namespace OHOS::Ace::NG {
-
-RefPtr<Paragraph> Paragraph::Create(const WeakPtr<PipelineContext>& context, const ParagraphStyle& paraStyle,
-    const RefPtr<FontCollection>& fontCollection)
+namespace {
+const std::u16string ELLIPSIS = u"\u2026";
+}
+RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
 {
     auto txtFontCollection = DynamicCast<TxtFontCollection>(fontCollection);
     CHECK_NULL_RETURN(txtFontCollection, nullptr);
     auto sharedFontCollection = txtFontCollection->GetRawFontCollection();
-    return AceType::MakeRefPtr<TxtParagraph>(context, paraStyle, sharedFontCollection);
+    return AceType::MakeRefPtr<TxtParagraph>(paraStyle, sharedFontCollection);
 }
 
 bool TxtParagraph::IsValid()
@@ -43,6 +45,9 @@ void TxtParagraph::CreateBuilder()
     style.text_align = Constants::ConvertTxtTextAlign(paraStyle_.align);
     style.max_lines = paraStyle_.maxLines;
     style.locale = paraStyle_.fontLocale;
+    if (paraStyle_.textOverflow == TextOverflow::ELLIPSIS) {
+        style.ellipsis = ELLIPSIS;
+    }
 #ifndef NG_BUILD
     // keep WordBreak define same with WordBreakType in minikin
     style.word_break_type = static_cast<minikin::WordBreakType>(paraStyle_.wordBreak);
@@ -57,7 +62,7 @@ void TxtParagraph::PushStyle(const TextStyle& style)
     }
 
     txt::TextStyle txtStyle;
-    Constants::ConvertTxtStyle(style, context_, txtStyle);
+    Constants::ConvertTxtStyle(style, PipelineContext::GetCurrentContext(), txtStyle);
     builder_->PushStyle(txtStyle);
 }
 
@@ -77,9 +82,8 @@ void TxtParagraph::AddText(const std::u16string& text)
 
 void TxtParagraph::Build()
 {
-    if (builder_) {
-        paragraph_ = builder_->Build();
-    }
+    CHECK_NULL_VOID_NOLOG(builder_);
+    paragraph_ = builder_->Build();
 }
 
 void TxtParagraph::Reset()
@@ -110,6 +114,36 @@ float TxtParagraph::GetTextWidth()
     return paragraph_->GetLongestLine();
 }
 
+float TxtParagraph::GetMaxIntrinsicWidth()
+{
+    CHECK_NULL_RETURN(paragraph_, 0.0f);
+    return static_cast<float>(paragraph_->GetMaxIntrinsicWidth());
+}
+
+bool TxtParagraph::DidExceedMaxLines()
+{
+    CHECK_NULL_RETURN(paragraph_, false);
+    return paragraph_->DidExceedMaxLines();
+}
+
+float TxtParagraph::GetLongestLine()
+{
+    CHECK_NULL_RETURN(paragraph_, 0.0f);
+    return static_cast<float>(paragraph_->GetLongestLine());
+}
+
+float TxtParagraph::GetMaxWidth()
+{
+    CHECK_NULL_RETURN(paragraph_, 0.0f);
+    return static_cast<float>(paragraph_->GetMaxWidth());
+}
+
+float TxtParagraph::GetAlphabeticBaseline()
+{
+    CHECK_NULL_RETURN(paragraph_, 0.0f);
+    return static_cast<float>(paragraph_->GetAlphabeticBaseline());
+}
+
 size_t TxtParagraph::GetLineCount()
 {
     auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
@@ -117,12 +151,10 @@ size_t TxtParagraph::GetLineCount()
     return paragraphTxt->GetLineCount();
 }
 
-void TxtParagraph::Paint(const RefPtr<Canvas>& canvas, float x, float y)
+void TxtParagraph::Paint(const RSCanvas& canvas, float x, float y)
 {
     CHECK_NULL_VOID(paragraph_);
-    auto skiaCanvas = AceType::DynamicCast<SkiaCanvas>(canvas);
-    CHECK_NULL_VOID(skiaCanvas);
-    auto* skCanvas = skiaCanvas->RawCanvas();
+    SkCanvas* skCanvas = canvas.GetImpl<RSSkCanvas>()->ExportSkCanvas();
     CHECK_NULL_VOID(skCanvas);
     paragraph_->Paint(skCanvas, x, y);
 }

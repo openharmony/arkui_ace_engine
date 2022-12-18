@@ -26,6 +26,8 @@
 #include "core/pipeline/base/element.h"
 
 namespace OHOS::Ace {
+    
+const std::string DEFAULT_FORMAT = "hms";
 class ACE_EXPORT TextClockComponent : public TextComponentV2 {
     DECLARE_ACE_TYPE(TextClockComponent, TextComponentV2);
 
@@ -36,8 +38,8 @@ public:
     RefPtr<RenderNode> CreateRenderNode() override;
     RefPtr<Element> CreateElement() override;
 
-    void SetHoursWest(double hoursWest);
-    double GetHoursWest() const;
+    void SetHoursWest(int32_t hoursWest);
+    int32_t GetHoursWest() const;
 
     void SetFormat(const std::string& format);
     std::string GetFormat() const;
@@ -45,11 +47,11 @@ public:
     void SetTextClockController(RefPtr<TextClockController> textClockController);
 
     RefPtr<TextClockController> GetTextClockController() const;
-    ACE_DEFINE_COMPONENT_EVENT(OnDateChange, void(uint64_t));
+    ACE_DEFINE_COMPONENT_EVENT(OnDateChange, void(const std::string));
 
 private:
-    std::string format_;
-    double hoursWest_ = DBL_MAX;
+    std::string format_ = DEFAULT_FORMAT;
+    int32_t hoursWest_ = INT_MAX;
     RefPtr<TextClockController> textClockController_;
 };
 } // namespace OHOS::Ace

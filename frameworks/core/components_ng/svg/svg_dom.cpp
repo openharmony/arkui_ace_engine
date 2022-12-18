@@ -17,6 +17,9 @@
 
 #include "include/core/SkClipOp.h"
 
+#include "base/utils/utils.h"
+#include "core/components_ng/svg/svg_context.h"
+#include "frameworks/core/components_ng/svg/parse/svg_animation.h"
 #include "frameworks/core/components_ng/svg/parse/svg_circle.h"
 #include "frameworks/core/components_ng/svg/parse/svg_clip_path.h"
 #include "frameworks/core/components_ng/svg/parse/svg_defs.h"
@@ -47,6 +50,9 @@ const char DOM_SVG_CLASS[] = "class";
 } // namespace
 
 static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
+    { "animate", []() -> RefPtr<SvgNode> { return SvgAnimation::Create(); } },
+    { "animateMotion", []() -> RefPtr<SvgNode> { return SvgAnimation::CreateAnimateMotion(); } },
+    { "animateTransform", []() -> RefPtr<SvgNode> { return SvgAnimation::CreateAnimateTransform(); } },
     { "circle", []() -> RefPtr<SvgNode> { return SvgCircle::Create(); } },
     { "clipPath", []() -> RefPtr<SvgNode> { return SvgClipPath::Create(); } },
     { "defs", []() -> RefPtr<SvgNode> { return SvgDefs::Create(); } },
@@ -75,22 +81,17 @@ static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
 SvgDom::SvgDom()
 {
     svgContext_ = AceType::MakeRefPtr<SvgContext>();
-    attrCallback_ = [weakSvgDom = AceType::WeakClaim(this)](const std::string& styleName,
-                    const std::pair<std::string, std::string>& attrPair) {
+    attrCallback_ = [weakSvgDom = AceType::WeakClaim(this)](
+                        const std::string& styleName, const std::pair<std::string, std::string>& attrPair) {
         auto svgDom = weakSvgDom.Upgrade();
-        if (!svgDom) {
-            LOGE("svg dom is null");
-            return;
-        }
+        CHECK_NULL_VOID(svgDom);
         if (svgDom->svgContext_) {
             svgDom->svgContext_->PushStyle(styleName, attrPair);
         }
     };
 }
 
-SvgDom::~SvgDom()
-{
-}
+SvgDom::~SvgDom() {}
 
 RefPtr<SvgDom> SvgDom::CreateSvgDom(SkStream& svgStream, const std::optional<Color>& color)
 {
@@ -108,17 +109,14 @@ RefPtr<SvgDom> SvgDom::CreateSvgDom(SkStream& svgStream, const std::optional<Col
 bool SvgDom::ParseSvg(SkStream& svgStream)
 {
     SkDOM xmlDom;
-    if (svgContext_ == nullptr || !xmlDom.build(svgStream)) {
+    CHECK_NULL_RETURN_NOLOG(svgContext_, false);
+    if (!xmlDom.build(svgStream)) {
         return false;
     }
     root_ = TranslateSvgNode(xmlDom, xmlDom.getRootNode(), nullptr);
-    if (root_ == nullptr) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(root_, false);
     auto svg = AceType::DynamicCast<SvgSvg>(root_);
-    if (svg == nullptr) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(svg, false);
     svgSize_ = svg->GetSize();
     viewBox_ = svg->GetViewBox();
     svgContext_->SetRootViewBox(viewBox_);
@@ -126,14 +124,11 @@ bool SvgDom::ParseSvg(SkStream& svgStream)
     return true;
 }
 
-RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xmlNode,
-    const RefPtr<SvgNode>& parent)
+RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xmlNode, const RefPtr<SvgNode>& parent)
 {
     const char* element = dom.getName(xmlNode);
     if (dom.getType(xmlNode) == SkDOM::kText_Type) {
-        if (parent == nullptr) {
-            return nullptr;
-        }
+        CHECK_NULL_RETURN_NOLOG(parent, nullptr);
         if (AceType::InstanceOf<SvgStyle>(parent)) {
             SvgStyle::ParseCssStyle(element, attrCallback_);
         } else {
@@ -146,9 +141,7 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
         return nullptr;
     }
     RefPtr<SvgNode> node = TAG_FACTORIES[elementIter].value();
-    if (!node) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN_NOLOG(node, nullptr);
     node->SetContext(svgContext_);
     ParseAttrs(dom, xmlNode, node);
     for (auto* child = dom.getFirstChild(xmlNode, nullptr); child; child = dom.getNextSibling(child)) {
@@ -162,8 +155,8 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
 
 void SvgDom::ParseAttrs(const SkDOM& xmlDom, const SkDOM::Node* xmlNode, const RefPtr<SvgNode>& svgNode)
 {
-    const char *name = nullptr;
-    const char *value = nullptr;
+    const char* name = nullptr;
+    const char* value = nullptr;
     SkDOM::AttrIter attrIter(xmlDom, xmlNode);
     while ((name = attrIter.next(&value))) {
         SetAttrValue(name, value, svgNode);
@@ -173,10 +166,7 @@ void SvgDom::ParseAttrs(const SkDOM& xmlDom, const SkDOM::Node* xmlNode, const R
 void SvgDom::ParseIdAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string& value)
 {
     auto svgNode = weakSvgNode.Upgrade();
-    if (!svgNode) {
-        LOGE("ParseIdAttr failed, svgNode is null");
-        return;
-    }
+    CHECK_NULL_VOID(svgNode);
     svgNode->SetNodeId(value);
     svgNode->SetAttr(DOM_ID, value);
     svgContext_->Push(value, svgNode);
@@ -185,10 +175,7 @@ void SvgDom::ParseIdAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string&
 void SvgDom::ParseFillAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string& value)
 {
     auto svgNode = weakSvgNode.Upgrade();
-    if (!svgNode) {
-        LOGE("ParseFillAttr failed, svgNode is null");
-        return;
-    }
+    CHECK_NULL_VOID(svgNode);
     if (fillColor_) {
         std::stringstream stream;
         stream << std::hex << fillColor_.value().GetValue();
@@ -202,10 +189,7 @@ void SvgDom::ParseFillAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::strin
 void SvgDom::ParseClassAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string& value)
 {
     auto svgNode = weakSvgNode.Upgrade();
-    if (!svgNode) {
-        LOGE("ParseClassAttr failed, svgNode is null");
-        return;
-    }
+    CHECK_NULL_VOID(svgNode);
     std::vector<std::string> styleNameVector;
     StringUtils::SplitStr(value, " ", styleNameVector);
     for (const auto& styleName : styleNameVector) {
@@ -213,7 +197,7 @@ void SvgDom::ParseClassAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::stri
         if (attrMap.empty()) {
             continue;
         }
-        for (const auto& attr: attrMap) {
+        for (const auto& attr : attrMap) {
             svgNode->SetAttr(attr.first, attr.second);
         }
     }
@@ -222,10 +206,7 @@ void SvgDom::ParseClassAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::stri
 void SvgDom::ParseStyleAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string& value)
 {
     auto svgNode = weakSvgNode.Upgrade();
-    if (!svgNode) {
-        LOGE("ParseStyleAttr failed, svgNode is null");
-        return;
-    }
+    CHECK_NULL_VOID(svgNode);
     std::vector<std::string> attrPairVector;
     StringUtils::SplitStr(value, ";", attrPairVector);
     for (const auto& attrPair : attrPairVector) {
@@ -240,22 +221,14 @@ void SvgDom::ParseStyleAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::stri
 void SvgDom::SetAttrValue(const std::string& name, const std::string& value, const RefPtr<SvgNode>& svgNode)
 {
     static const LinearMapNode<void (*)(const std::string&, const WeakPtr<SvgNode>&, SvgDom&)> attrs[] = {
-        { DOM_SVG_CLASS,
-            [](const std::string& val, const WeakPtr<SvgNode>& svgNode, SvgDom& svgDom) {
-                svgDom.ParseClassAttr(svgNode, val);
-            } },
-        { DOM_SVG_FILL,
-            [](const std::string& val, const WeakPtr<SvgNode>& svgNode, SvgDom& svgDom) {
-                svgDom.ParseFillAttr(svgNode, val);
-            } },
-        { DOM_ID,
-            [](const std::string& val, const WeakPtr<SvgNode>& svgNode, SvgDom& svgDom) {
-                svgDom.ParseIdAttr(svgNode, val);
-            } },
-        { DOM_SVG_STYLE,
-            [](const std::string& val, const WeakPtr<SvgNode>& svgNode, SvgDom& svgDom) {
-                svgDom.ParseStyleAttr(svgNode, val);
-            } },
+        { DOM_SVG_CLASS, [](const std::string& val, const WeakPtr<SvgNode>& svgNode,
+                             SvgDom& svgDom) { svgDom.ParseClassAttr(svgNode, val); } },
+        { DOM_SVG_FILL, [](const std::string& val, const WeakPtr<SvgNode>& svgNode,
+                            SvgDom& svgDom) { svgDom.ParseFillAttr(svgNode, val); } },
+        { DOM_ID, [](const std::string& val, const WeakPtr<SvgNode>& svgNode,
+                      SvgDom& svgDom) { svgDom.ParseIdAttr(svgNode, val); } },
+        { DOM_SVG_STYLE, [](const std::string& val, const WeakPtr<SvgNode>& svgNode,
+                             SvgDom& svgDom) { svgDom.ParseStyleAttr(svgNode, val); } },
     };
     if (value.empty()) {
         return;
@@ -268,21 +241,28 @@ void SvgDom::SetAttrValue(const std::string& name, const std::string& value, con
     svgNode->SetAttr(name, value);
 }
 
-void SvgDom::SetFunction(const FuncNormalizeToPx& funcNormalizeToPx, const FuncAnimateFlush& funcAnimateFlush)
+void SvgDom::SetFuncNormalizeToPx(FuncNormalizeToPx&& funcNormalizeToPx)
 {
-    if (svgContext_ == nullptr) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(svgContext_);
     svgContext_->SetFuncNormalizeToPx(funcNormalizeToPx);
-    svgContext_->SetFuncAnimateFlush(funcAnimateFlush);
+}
+
+void SvgDom::SetAnimationCallback(FuncAnimateFlush&& funcAnimateFlush)
+{
+    CHECK_NULL_VOID_NOLOG(svgContext_);
+    svgContext_->SetFuncAnimateFlush(std::move(funcAnimateFlush));
+}
+
+void SvgDom::ControlAnimation(bool play)
+{
+    CHECK_NULL_VOID_NOLOG(svgContext_);
+    svgContext_->ControlAnimators(play);
 }
 
 void SvgDom::DrawImage(
     RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>& color)
 {
-    if (root_ == nullptr) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(root_);
     canvas.Save();
     // viewBox scale and imageFit scale
     FitImage(canvas, imageFit, layout);
@@ -314,17 +294,13 @@ void SvgDom::FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& la
             tx = svgSize_.Width() * half - (viewBox_.Width() * half + viewBox_.Left()) * scaleViewBox;
             ty = svgSize_.Height() * half - (viewBox_.Height() * half + viewBox_.Top()) * scaleViewBox;
         } else if (!layout_.IsEmpty()) {
-            scaleViewBox =
-                std::min(layout_.Width() / viewBox_.Width(), layout_.Height() / viewBox_.Height());
+            scaleViewBox = std::min(layout_.Width() / viewBox_.Width(), layout_.Height() / viewBox_.Height());
             tx = layout_.Width() * half - (viewBox_.Width() * half + viewBox_.Left()) * scaleViewBox;
             ty = layout_.Height() * half - (viewBox_.Height() * half + viewBox_.Top()) * scaleViewBox;
         } else {
             LOGW("FitImage containerSize and svgSize is null");
         }
     }
-
-    RSRect clipRect(0.0f, 0.0f, static_cast<float>(layout_.Width()), static_cast<float>(layout_.Height()));
-    canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
     canvas.Translate(static_cast<float>(tx), static_cast<float>(ty));
     canvas.Scale(static_cast<float>(scaleX * scaleViewBox), static_cast<float>(scaleY * scaleViewBox));
 }
@@ -338,11 +314,8 @@ void SvgDom::FitViewPort(const Size& layout)
     }
 }
 
-void SvgDom::ApplyImageFit(ImageFit imageFit, double& scaleX, double& scaleY, bool skip)
+void SvgDom::ApplyImageFit(ImageFit imageFit, double& scaleX, double& scaleY)
 {
-    if (skip) {
-        return;
-    }
     switch (imageFit) {
         case ImageFit::FILL:
             ApplyFill(scaleX, scaleY);
@@ -355,7 +328,7 @@ void SvgDom::ApplyImageFit(ImageFit imageFit, double& scaleX, double& scaleY, bo
         case ImageFit::CONTAIN:
             ApplyContain(scaleX, scaleY);
             break;
-        case ImageFit::SCALEDOWN:
+        case ImageFit::SCALE_DOWN:
             if (svgSize_ > layout_ || svgSize_ == layout_) {
                 ApplyContain(scaleX, scaleY);
             }
@@ -400,6 +373,11 @@ void SvgDom::ApplyCover(double& scaleX, double& scaleY)
         scaleX = layout_.Width() / svgSize_.Width();
         scaleY = scaleX;
     }
+}
+
+SizeF SvgDom::GetContainerSize() const
+{
+    return { static_cast<float>(svgSize_.Width()), static_cast<float>(svgSize_.Height()) };
 }
 
 } // namespace OHOS::Ace::NG

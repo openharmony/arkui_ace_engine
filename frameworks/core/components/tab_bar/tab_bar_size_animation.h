@@ -23,6 +23,7 @@
 namespace OHOS::Ace {
 
 class TabBarSizeAnimation : public virtual AceType {
+    DECLARE_ACE_TYPE(TabBarSizeAnimation, AceType)
 public:
     void Initialize(const WeakPtr<PipelineContext>& context);
     void Start(const WeakPtr<RenderNode>& tabBar, int32_t from, int32_t to);
@@ -33,15 +34,15 @@ private:
         constexpr ItemAnimationProp(Dimension fontSize, double opacity) : fontSize(fontSize), opacity(opacity) {}
         constexpr ItemAnimationProp operator+(const ItemAnimationProp& prop) const
         {
-            return ItemAnimationProp(fontSize + prop.fontSize, opacity + prop.opacity);
+            return { fontSize + prop.fontSize, opacity + prop.opacity };
         }
         constexpr ItemAnimationProp operator-(const ItemAnimationProp& prop) const
         {
-            return ItemAnimationProp(fontSize - prop.fontSize, opacity - prop.opacity);
+            return { fontSize - prop.fontSize, opacity - prop.opacity };
         }
         constexpr ItemAnimationProp operator*(double value) const
         {
-            return ItemAnimationProp(fontSize * value, opacity * value);
+            return { fontSize * value, opacity * value };
         }
 
         Dimension fontSize;

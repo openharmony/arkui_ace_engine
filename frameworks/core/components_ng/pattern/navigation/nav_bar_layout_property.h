@@ -39,8 +39,8 @@ public:
         copy->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         copy->propTitleMode_ = CloneTitleMode();
         copy->propHideTitleBar_ = CloneHideTitleBar();
-        copy->propHideBackButton_ = CloneHideBackButton();
         copy->propHideToolBar_ = CloneHideToolBar();
+        copy->propHideBackButton_ = CloneHideBackButton();
         return copy;
     }
 
@@ -49,14 +49,35 @@ public:
         LayoutProperty::Reset();
         ResetTitleMode();
         ResetHideTitleBar();
-        ResetHideBackButton();
         ResetHideToolBar();
+        ResetHideBackButton();
     }
 
+    std::string GetTitleModeString() const
+    {
+        switch (GetTitleModeValue(NavigationTitleMode::FREE)) {
+            case NavigationTitleMode::FREE:
+                return "NavigationTitleMode.Free";
+            case NavigationTitleMode::FULL:
+                return "NavigationTitleMode.Full";
+            case NavigationTitleMode::MINI:
+                return "NavigationTitleMode.Mini";
+            default:
+                return "NavigationTitleMode.Free";
+        }
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        json->Put("titleMode", GetTitleModeString().c_str());
+        json->Put("hideBackButton", GetHideBackButtonValue(false));
+        json->Put("hideTitleBar", GetHideTitleBarValue(false));
+        json->Put("hideToolBar", GetHideToolBarValue(false));
+    }
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleMode, NavigationTitleMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideTitleBar, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideBackButton, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideToolBar, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideBackButton, bool, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

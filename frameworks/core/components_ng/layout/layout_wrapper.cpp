@@ -15,6 +15,8 @@
 
 #include "core/components_ng/layout/layout_wrapper.h"
 
+#include <algorithm>
+
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -47,6 +49,12 @@ RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool
         wrapper->isActive_ = true;
     }
     return wrapper;
+}
+
+void LayoutWrapper::SetCacheCount(int32_t cacheCount)
+{
+    CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
+    layoutWrapperBuilder_->SetCacheCount(cacheCount);
 }
 
 const std::list<RefPtr<LayoutWrapper>>& LayoutWrapper::GetAllChildrenWithBuild(bool addToRenderTree)
@@ -85,6 +93,15 @@ void LayoutWrapper::RemoveChildInRenderTree(int32_t index)
     wrapper->isActive_ = false;
 }
 
+void LayoutWrapper::RemoveAllChildInRenderTree()
+{
+    for (auto& child : childrenMap_) {
+        child.second->isActive_ = false;
+    }
+    CHECK_NULL_VOID(layoutWrapperBuilder_);
+    layoutWrapperBuilder_->RemoveAllChildInRenderTree();
+}
+
 void LayoutWrapper::ResetHostNode()
 {
     hostNode_.Reset();
@@ -95,34 +112,34 @@ RefPtr<FrameNode> LayoutWrapper::GetHostNode() const
     return hostNode_.Upgrade();
 }
 
+WeakPtr<FrameNode> LayoutWrapper::GetWeakHostNode() const
+{
+    return hostNode_;
+}
+
 std::string LayoutWrapper::GetHostTag() const
 {
     auto host = GetHostNode();
-    if (host) {
-        return host->GetTag();
-    }
-    return "";
+    CHECK_NULL_RETURN_NOLOG(host, "");
+    return host->GetTag();
 }
 
 int32_t LayoutWrapper::GetHostDepth() const
 {
     auto host = GetHostNode();
-    if (host) {
-        return host->GetDepth();
-    }
-    return -1;
+    CHECK_NULL_RETURN_NOLOG(host, -1);
+    return host->GetDepth();
 }
 
 // This will call child and self measure process.
 void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
     auto host = GetHostNode();
-    if (!layoutProperty_ || !geometryNode_ || !host) {
-        LOGE("Measure failed: the layoutProperty_ or geometryNode_ or host is nullptr");
-        return;
-    }
-
-    if (!layoutAlgorithm_ || layoutAlgorithm_->SkipMeasure()) {
+    CHECK_NULL_VOID(layoutProperty_);
+    CHECK_NULL_VOID(geometryNode_);
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(layoutAlgorithm_);
+    if (layoutAlgorithm_->SkipMeasure()) {
         LOGD("%{public}s, depth: %{public}d: the layoutAlgorithm skip measure", host->GetTag().c_str(),
             host->GetDepth());
         return;
@@ -130,39 +147,32 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
 
     auto preConstraint = layoutProperty_->GetLayoutConstraint();
     auto contentConstraint = layoutProperty_->GetContentLayoutConstraint();
+    layoutProperty_->BuildGridProperty(host);
     if (parentConstraint) {
         geometryNode_->SetParentLayoutConstraint(parentConstraint.value());
-        layoutProperty_->UpdateGridConstraint(GetHostNode());
         layoutProperty_->UpdateLayoutConstraint(parentConstraint.value());
     } else {
         LayoutConstraintF layoutConstraint;
         layoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
         layoutConstraint.percentReference.SetHeight(PipelineContext::GetCurrentRootHeight());
-        layoutProperty_->UpdateGridConstraint(GetHostNode());
         layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
     }
     layoutProperty_->UpdateContentConstraint();
     geometryNode_->UpdateMargin(layoutProperty_->CreateMargin());
+    geometryNode_->UpdatePaddingWithBorder(layoutProperty_->CreatePaddingAndBorder());
 
-    isContraintNoChanged_ = preConstraint ? preConstraint == layoutProperty_->GetLayoutConstraint() : false;
-    if (!isContraintNoChanged_) {
-        isContraintNoChanged_ =
+    isConstraintNotChanged_ = preConstraint ? preConstraint == layoutProperty_->GetLayoutConstraint() : false;
+    if (!isConstraintNotChanged_) {
+        isConstraintNotChanged_ =
             contentConstraint ? contentConstraint == layoutProperty_->GetContentLayoutConstraint() : false;
     }
 
     LOGD("Measure: %{public}s, depth: %{public}d, Constraint: %{public}s", host->GetTag().c_str(), host->GetDepth(),
         layoutProperty_->GetLayoutConstraint()->ToString().c_str());
 
-    if (isContraintNoChanged_ && !skipMeasureContent_) {
-        // need check descendant flag.
-        descendantFlag_ = descendantFlag_ ? descendantFlag_ : GetFlagWithDescendant();
-        // Need to remove layout flag when measure and layout make independent in each pattern layoutAlgorithm like
-        // flex.
-        if (!(CheckNeedMeasure(descendantFlag_.value()) || CheckNeedLayout(descendantFlag_.value()))) {
-            LOGD("%{public}s (depth: %{public}d) skip measure content, constrain flag: %{public}d, measure flag: "
-                 "%{public}d",
-                host->GetTag().c_str(), host->GetDepth(), isContraintNoChanged_,
-                layoutProperty_->GetPropertyChangeFlag() | descendantFlag_.value());
+    if (isConstraintNotChanged_ && !skipMeasureContent_) {
+        if (!CheckNeedForceMeasureAndLayout()) {
+            LOGD("%{public}s (depth: %{public}d) skip measure content", host->GetTag().c_str(), host->GetDepth());
             skipMeasureContent_ = true;
         }
     }
@@ -199,12 +209,12 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
 void LayoutWrapper::Layout()
 {
     auto host = GetHostNode();
-    if (!layoutProperty_ || !geometryNode_ || !host) {
-        LOGE("Layout failed: the layoutProperty_ or geometryNode_ or host or frameNode is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(layoutProperty_);
+    CHECK_NULL_VOID(geometryNode_);
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(layoutAlgorithm_);
 
-    if (!layoutAlgorithm_ || layoutAlgorithm_->SkipLayout()) {
+    if (layoutAlgorithm_->SkipLayout()) {
         LOGD(
             "%{public}s, depth: %{public}d: the layoutAlgorithm skip layout", host->GetTag().c_str(), host->GetDepth());
         return;
@@ -213,10 +223,8 @@ void LayoutWrapper::Layout()
     LOGD("On Layout begin: type: %{public}s, depth: %{public}d", host->GetTag().c_str(), host->GetDepth());
 
     if ((skipMeasureContent_ == true)) {
-        LOGD("%{public}s (depth: %{public}d) skip measure content and layout flag is %{public}d, descendant flag "
-             "is %{public}d skip layout process",
-            host->GetTag().c_str(), host->GetDepth(), layoutProperty_->GetPropertyChangeFlag(),
-            descendantFlag_.value());
+        LOGD(
+            "%{public}s (depth: %{public}d) skip measure content and layout", host->GetTag().c_str(), host->GetDepth());
         LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", host->GetTag().c_str(),
             host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
         return;
@@ -234,9 +242,6 @@ void LayoutWrapper::Layout()
         }
         layoutProperty_->UpdateContentConstraint();
     }
-
-    // TODO: add grid container offset prop.
-
     layoutAlgorithm_->Layout(this);
     LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", host->GetTag().c_str(),
         host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
@@ -247,29 +252,29 @@ bool LayoutWrapper::SkipMeasureContent() const
     return (skipMeasureContent_ == true) || layoutAlgorithm_->SkipMeasure();
 }
 
-PropertyChangeFlag LayoutWrapper::GetFlagWithDescendant()
+bool LayoutWrapper::CheckNeedForceMeasureAndLayout()
 {
-    if (descendantFlag_) {
-        return descendantFlag_.value();
+    if (needForceMeasureAndLayout_) {
+        return needForceMeasureAndLayout_.value();
     }
     PropertyChangeFlag flag = layoutProperty_->GetPropertyChangeFlag();
-    for (const auto& child : children_) {
-        if (!child) {
-            continue;
-        }
-        flag = child->GetFlagWithDescendant() | flag;
+    // Need to remove layout flag when measure and layout make independent in each pattern layoutAlgorithm like
+    // flex.
+    bool needForceMeasureAndLayout = CheckNeedMeasure(flag) || CheckNeedLayout(flag);
+    if (needForceMeasureAndLayout) {
+        needForceMeasureAndLayout_ = true;
+        return true;
     }
-    if (layoutWrapperBuilder_) {
-        const auto& children = layoutWrapperBuilder_->GetCachedChildLayoutWrapper();
-        for (const auto& child : children) {
-            if (!child) {
-                continue;
-            }
-            flag = child->GetFlagWithDescendant() | flag;
-        }
-    }
-    descendantFlag_ = flag;
-    return descendantFlag_.value();
+    // check child flag.
+    needForceMeasureAndLayout_ = std::any_of(
+        children_.begin(), children_.end(), [](const auto& item) { return item->CheckNeedForceMeasureAndLayout(); });
+    return needForceMeasureAndLayout_.value();
+}
+
+bool LayoutWrapper::CheckChildNeedForceMeasureAndLayout()
+{
+    return std::any_of(
+        children_.begin(), children_.end(), [](const auto& item) { return item->CheckNeedForceMeasureAndLayout(); });
 }
 
 void LayoutWrapper::MountToHostOnMainThread()
@@ -290,10 +295,16 @@ void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
     }
 
     auto host = hostNode_.Upgrade();
-    if (!host) {
-        LOGE("the host is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(host);
     host->SwapDirtyLayoutWrapperOnMainThread(Claim(this));
+
+    /* Adjust components' position which have been set grid properties */
+    for (const auto& child : children_) {
+        if (child && child->GetHostNode()) {
+            child->GetHostNode()->AdjustGridOffset();
+        }
+    }
+    CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
+    layoutWrapperBuilder_->AdjustGridOffset();
 }
 } // namespace OHOS::Ace::NG

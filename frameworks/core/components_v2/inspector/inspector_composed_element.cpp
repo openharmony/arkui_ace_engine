@@ -123,31 +123,20 @@ const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
 
 const std::unordered_map<std::string, BoolJsonFunc> CREATE_JSON_BOOL_MAP {
     { "enabled", [](const InspectorNode& inspector) { return inspector.GetEnabled(); } },
-    { "clickable", [](const InspectorNode& inspector) { return inspector.GetClickable(); } },
-    { "checkable", [](const InspectorNode& inspector) { return inspector.GetCheckable(); } },
     { "focusable", [](const InspectorNode& inspector) { return inspector.GetFocusable(); } },
-    { "scrollable", [](const InspectorNode& inspector) { return inspector.GetScrollable(); } },
-    { "long-clickable", [](const InspectorNode& inspector) { return inspector.GetLongClickable(); } },
     { "touchable", [](const InspectorNode& inspector) { return inspector.GetTouchable(); } },
-    { "selected", [](const InspectorNode& inspector) { return inspector.IsSelected(); } },
-    { "password", [](const InspectorNode& inspector) { return inspector.IsPassword(); } },
-    { "checked", [](const InspectorNode& inspector) { return inspector.IsChecked(); } },
-    { "focused", [](const InspectorNode& inspector) { return inspector.IsFocused(); } },
 };
 
 const std::unordered_map<std::string, IntJsonFunc> CREATE_JSON_INT_MAP {
     { "zIndex", [](const InspectorNode& inspector) { return inspector.GetZIndex(); } },
     { "gridSpan", [](const InspectorNode& inspector) { return inspector.GetGridSpan(); } },
-    { "layoutPriority", [](const InspectorNode& inspector) { return inspector.GetLayoutPriority(); } },
     { "layoutWeight", [](const InspectorNode& inspector) { return inspector.GetLayoutWeight(); } },
     { "displayPriority", [](const InspectorNode& inspector) { return inspector.GetDisplayPriority(); } },
 };
 
 const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_JSON_JSON_VALUE_MAP {
-    { "windowBlur", [](const InspectorNode& inspector) { return inspector.GetWindowBlur(); } },
     { "shadow", [](const InspectorNode& inspector) { return inspector.GetShadow(); } },
     { "position", [](const InspectorNode& inspector) { return inspector.GetPosition(); } },
-
     { "offset", [](const InspectorNode& inspector) { return inspector.GetOffset(); } },
     { "size", [](const InspectorNode& inspector) { return inspector.GetSize(); } },
     { "useSizeType", [](const InspectorNode& inspector) { return inspector.GetUseSizeType(); } },
@@ -157,12 +146,31 @@ const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_JSON_JSON_VALUE_
     { "translate", [](const InspectorNode& inspector) { return inspector.GetTranslate(); } },
     { "markAnchor", [](const InspectorNode& inspector) { return inspector.GetMarkAnchor(); } },
     { "mask", [](const InspectorNode& inspector) { return inspector.GetMask(); } },
-    { "useAlign", [](const InspectorNode& inspector) { return inspector.GetUseAlign(); } },
     { "overlay", [](const InspectorNode& inspector) { return inspector.GetOverlay(); } },
     { "border", [](const InspectorNode& inspector) { return inspector.GetUnifyBorder(); } },
     { "linearGradient", [](const InspectorNode& inspector) { return inspector.GetLinearGradient(); } },
     { "sweepGradient", [](const InspectorNode& inspector) { return inspector.GetSweepGradient(); } },
     { "radialGradient", [](const InspectorNode& inspector) { return inspector.GetRadialGradient(); } },
+};
+
+const std::unordered_map<std::string, BoolJsonFunc> CREATE_XTS_BOOL_MAP {
+    { "clickable", [](const InspectorNode& inspector) { return inspector.GetClickable(); } },
+    { "checkable", [](const InspectorNode& inspector) { return inspector.GetCheckable(); } },
+    { "scrollable", [](const InspectorNode& inspector) { return inspector.GetScrollable(); } },
+    { "long-clickable", [](const InspectorNode& inspector) { return inspector.GetLongClickable(); } },
+    { "selected", [](const InspectorNode& inspector) { return inspector.IsSelected(); } },
+    { "password", [](const InspectorNode& inspector) { return inspector.IsPassword(); } },
+    { "checked", [](const InspectorNode& inspector) { return inspector.IsChecked(); } },
+    { "focused", [](const InspectorNode& inspector) { return inspector.IsFocused(); } },
+};
+
+const std::unordered_map<std::string, IntJsonFunc> CREATE_XTS_INT_MAP {
+    { "layoutPriority", [](const InspectorNode& inspector) { return inspector.GetLayoutPriority(); } },
+};
+
+const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_XTS_JSON_VALUE_MAP {
+    { "windowBlur", [](const InspectorNode& inspector) { return inspector.GetWindowBlur(); } },
+    { "useAlign", [](const InspectorNode& inspector) { return inspector.GetUseAlign(); } },
 };
 
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -266,6 +274,18 @@ std::unique_ptr<JsonValue> InspectorComposedElement::ToJsonObject() const
     for (const auto& value : CREATE_JSON_JSON_VALUE_MAP) {
         resultJson->Put(value.first.c_str(), value.second(*this));
     }
+#if !defined(PREVIEW)
+    for (const auto& value : CREATE_XTS_BOOL_MAP) {
+        resultJson->Put(value.first.c_str(), value.second(*this));
+    }
+    for (const auto& value : CREATE_XTS_INT_MAP) {
+        resultJson->Put(value.first.c_str(), value.second(*this));
+    }
+
+    for (const auto& value : CREATE_XTS_JSON_VALUE_MAP) {
+        resultJson->Put(value.first.c_str(), value.second(*this));
+    }
+#endif
     return resultJson;
 }
 
@@ -687,15 +707,22 @@ std::string InspectorComposedElement::GetRect()
     if (accessibilityNode_ && GetClipFlag()) {
         accessibilityNode_->SetClipFlagToChild(true);
     }
-    auto parent = GetElementParent().Upgrade();
-    while (parent && rect.IsValid()) {
-        rect = rect.IntersectRect(parent->GetRenderRect());
-        parent = parent->GetElementParent().Upgrade();
-    }
 
     isRectValid_ = rect.IsValid();
     if (!isRectValid_) {
         rect.SetRect(0, 0, 0, 0);
+    }
+
+    if (accessibilityNode_) {
+        auto render = AceType::DynamicCast<RenderTransform>(GetInspectorNode(TransformElement::TypeId()));
+        if (render || accessibilityNode_->GetMatrix4Flag()) {
+            if (render) {
+                auto transformNow = render->GetTransformMatrix(render->GetTransitionPaintRect().GetOffset());
+                accessibilityNode_->SetTransformToChild(transformNow);
+            }
+            Matrix4 transform = accessibilityNode_->GetMatrix4();
+            rect = accessibilityNode_->GetRectWithTransform(rect, transform);
+        }
     }
 
     strRec = std::to_string(rect.Left())
@@ -833,9 +860,9 @@ std::string InspectorComposedElement::GetBackgroundImage() const
         return "NONE";
     }
     auto imageRepeat = image->GetImageRepeat();
-    if (imageRepeat == ImageRepeat::REPEATX) {
+    if (imageRepeat == ImageRepeat::REPEAT_X) {
         return image->GetSrc() + ", ImageRepeat.X";
-    } else if (imageRepeat == ImageRepeat::REPEATY) {
+    } else if (imageRepeat == ImageRepeat::REPEAT_Y) {
         return image->GetSrc() + ", ImageRepeat.Y";
     } else if (imageRepeat == ImageRepeat::REPEAT) {
         return image->GetSrc() + ", ImageRepeat.XY";
@@ -864,20 +891,8 @@ std::string InspectorComposedElement::GetBackgroundImageSize() const
     if (!image) {
         return "ImageSize.Auto";
     }
-    auto widthType = image->GetImageSize().GetSizeTypeX();
-    if (widthType == BackgroundImageSizeType::CONTAIN) {
-        return "ImageSize.Contain";
-    } else if (widthType == BackgroundImageSizeType::COVER) {
-        return "ImageSize.Cover";
-    } else if (widthType == BackgroundImageSizeType::AUTO) {
-        return "ImageSize.Auto";
-    }
-    auto jsonValue = JsonUtil::Create(true);
-    Dimension width = Dimension((image->GetImageSize().GetSizeValueX()), DimensionUnit::VP);
-    Dimension height = Dimension((image->GetImageSize().GetSizeValueY()), DimensionUnit::VP);
-    jsonValue->Put("width", width.ToString().c_str());
-    jsonValue->Put("height", height.ToString().c_str());
-    return jsonValue->ToString();
+
+    return image->GetImageSize().ToString();
 }
 
 std::string InspectorComposedElement::GetBackgroundImagePosition() const
@@ -895,47 +910,8 @@ std::string InspectorComposedElement::GetBackgroundImagePosition() const
         jsonValue->Put("y", 0.0);
         return jsonValue->ToString();
     }
-    if (image->GetImagePosition().GetSizeTypeX() == BackgroundImagePositionType::PX) {
-        auto width = image->GetImagePosition().GetSizeValueX();
-        auto height = image->GetImagePosition().GetSizeValueY();
-        jsonValue->Put("x", width);
-        jsonValue->Put("y", height);
-        return jsonValue->ToString();
-    } else {
-        auto width = image->GetImagePosition().GetSizeValueX();
-        auto height = image->GetImagePosition().GetSizeValueY();
-        return GetAlignmentType(width, height);
-    }
-}
 
-std::string InspectorComposedElement::GetAlignmentType(double width, double height) const
-{
-    auto jsonValue = JsonUtil::Create(true);
-    if (NearZero(width)) {
-        if (NearZero(height)) {
-            return "Alignment.TopStart";
-        } else if (NearEqual(height, 50.0)) { // Determine whether the vertical element is centered
-            return "Alignment.Start";
-        } else {
-            return "Alignment.BottomStart";
-        }
-    } else if (NearEqual(width, 50.0)) { // Judge whether the horizontal element is centered
-        if (NearZero(height)) {
-            return "Alignment.Top";
-        } else if (NearEqual(height, 50)) {
-            return "Alignment.Center";
-        } else {
-            return "Alignment.Bottom";
-        }
-    } else {
-        if (NearZero(height)) {
-            return "Alignment.TopEnd";
-        } else if (NearEqual(height, 50.0)) {
-            return "Alignment.End";
-        } else {
-            return "Alignment.BottomEnd";
-        }
-    }
+    return image->GetImagePosition().ToString();
 }
 
 RefPtr<Decoration> InspectorComposedElement::GetFrontDecoration() const

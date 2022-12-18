@@ -537,6 +537,16 @@ void RenderBoxBase::SetChildLayoutParam()
     }
 }
 
+bool RenderBoxBase::IsDeclarativePara()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return false;
+    }
+
+    return context->GetIsDeclarative();
+}
+
 void RenderBoxBase::ConvertPaddingForLayoutInBox()
 {
     if (!layoutInBox_) {
@@ -614,6 +624,11 @@ void RenderBoxBase::CalculateSelfLayoutSize()
         }
     } else {
         height = childSize_.Height() + padding_.GetLayoutSize().Height() + borderSize.Height();
+        if (IsDeclarativePara()) {
+            if (height < selfMinHeight_) {
+                height = selfMinHeight_;
+            }
+        }
     }
 
     const static int32_t PLATFORM_VERSION_SIX = 6;
@@ -737,6 +752,14 @@ void RenderBoxBase::Update(const RefPtr<Component>& component)
         minHeight_ = box->GetMinHeight();
         maxWidth_ = box->GetMaxWidth();
         maxHeight_ = box->GetMaxHeight();
+        if (aspectRatio_.IsValid()) {
+            if (GreatNotEqual(minWidth_.Value(), 0.0) && NearZero(minHeight_.Value())) {
+                minHeight_ = minWidth_ / aspectRatio_.Value();
+            }
+            if (GreatNotEqual(minHeight_.Value(), 0.0) && NearZero(minWidth_.Value())) {
+                minWidth_ = minHeight_ * aspectRatio_.Value();
+            }
+        }
         useLiteStyle_ = box->UseLiteStyle();
         mask_ = box->GetMask();
         auto gridLayoutInfo = box->GetGridLayoutInfo();

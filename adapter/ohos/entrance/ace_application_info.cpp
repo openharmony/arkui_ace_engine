@@ -28,6 +28,7 @@
 #include "base/log/log.h"
 #include "base/resource/ace_res_config.h"
 #include "base/resource/ace_res_data_struct.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::Platform {
@@ -53,21 +54,17 @@ std::string AceApplicationInfoImpl::GetJsEngineParam(const std::string& key) con
 
 void AceApplicationInfoImpl::ChangeLocale(const std::string& language, const std::string& countryOrRegion)
 {
-    std::string languageLower;
+    std::string languageLower = language;
     std::transform(language.begin(), language.end(), languageLower.begin(), ::tolower);
 
-    std::string countryOrRegionUpper;
+    std::string countryOrRegionUpper = countryOrRegion;
     std::transform(countryOrRegion.begin(), countryOrRegion.end(), countryOrRegionUpper.begin(), ::tolower);
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     resourceManager_->GetResConfig(*resConfig);
 
     auto localeInfo = resConfig->GetLocaleInfo();
-    if (localeInfo == nullptr) {
-        LOGE("get local info failed");
-        return;
-    }
-
+    CHECK_NULL_VOID(localeInfo);
     auto script = Localization::ComputeScript(language, countryOrRegion);
     resConfig->SetLocaleInfo(languageLower.c_str(), script.c_str(), countryOrRegionUpper.c_str());
     resourceManager_->UpdateResConfig(*resConfig);

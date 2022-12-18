@@ -78,6 +78,7 @@ void SlideRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
 
     touchPoints_[event.id] = event;
+    lastTouchEvent_ = event;
     fingersDistance_[event.id] = Offset();
     touchDownTime_ = event.time;
 
@@ -129,6 +130,7 @@ void SlideRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     globalPoint_ = Point(event.x, event.y);
+    lastTouchEvent_ = event;
     touchPoints_.erase(itr);
     auto distanceData = fingersDistance_;
     fingersDistance_.erase(itf);
@@ -233,6 +235,7 @@ void SlideRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         return;
     }
     globalPoint_ = Point(event.x, event.y);
+    lastTouchEvent_ = event;
     if (state_ == DetectState::READY) {
         touchPoints_[event.id] = event;
         return;
@@ -414,6 +417,14 @@ void SlideRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         info.SetSourceDevice(deviceType_);
         info.SetDeviceId(deviceId_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        info.SetForce(lastTouchEvent_.force);
+        if (lastTouchEvent_.tiltX.has_value()) {
+            info.SetTiltX(lastTouchEvent_.tiltX.value());
+        }
+        if (lastTouchEvent_.tiltY.has_value()) {
+            info.SetTiltY(lastTouchEvent_.tiltY.value());
+        }
+        info.SetSourceTool(lastTouchEvent_.sourceTool);
         (*callback)(info);
     }
 }

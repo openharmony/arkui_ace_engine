@@ -19,12 +19,21 @@
 #include "core/components/common/properties/animation_option.h"
 
 namespace OHOS::Ace {
+
+namespace {
+
+using PropertyCallback = std::function<void()>;
+using FinishCallback = std::function<void()>;
+
+} // namespace
+
 class AnimationUtils {
 public:
     static void OpenImplicitAnimation(
         const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback);
     static bool CloseImplicitAnimation();
-    static void Animate(const AnimationOption& option, const std::function<void()>& wrapFinishCallback);
+    static void Animate(const AnimationOption& option, const PropertyCallback& callback,
+        const FinishCallback& finishCallback = nullptr);
 };
 } // namespace OHOS::Ace
 

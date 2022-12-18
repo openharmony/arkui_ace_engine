@@ -39,6 +39,8 @@ public:
 
     const std::list<RefPtr<LayoutWrapper>>& ExpandAllChildWrappers();
 
+    void RemoveAllChildInRenderTree();
+
     int32_t GetTotalCount()
     {
         return OnGetTotalCount();
@@ -54,7 +56,14 @@ public:
         return startIndex_;
     }
 
+    void SetCacheCount(int32_t cacheCount)
+    {
+        cacheCount_ = cacheCount;
+    }
+
     virtual void SwapDirtyAndUpdateBuildCache() {}
+
+    virtual void AdjustGridOffset() {}
 
 protected:
     virtual int32_t OnGetTotalCount() = 0;
@@ -64,6 +73,7 @@ protected:
     std::unordered_map<int32_t, RefPtr<LayoutWrapper>> wrapperMap_;
 
     int32_t startIndex_ = 0;
+    int32_t cacheCount_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapperBuilder);
 };

@@ -19,14 +19,14 @@
 #include <climits>
 #include <cmath>
 #include <codecvt>
+#include <cstring>
 #include <locale>
 #include <sstream>
 #include <string>
 #include <vector>
 
-
-#include "base/geometry/dimension.h"
 #include "base/geometry/calc_dimension.h"
+#include "base/geometry/dimension.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
 
@@ -37,6 +37,7 @@ ACE_EXPORT extern const std::wstring DEFAULT_WSTRING;
 ACE_EXPORT extern const std::u16string DEFAULT_USTRING;
 constexpr int32_t TEXT_CASE_LOWERCASE = 1;
 constexpr int32_t TEXT_CASE_UPPERCASE = 2;
+constexpr double PERCENT_VALUE = 100.0;
 
 inline std::u16string Str8ToStr16(const std::string& str)
 {
@@ -170,7 +171,7 @@ inline uint32_t StringToUint(const std::string& value, uint32_t defaultErr = 0)
         return result;
     }
 }
-
+// generic string to double value method without success check
 inline double StringToDouble(const std::string& value)
 {
     char* pEnd = nullptr;
@@ -180,6 +181,24 @@ inline double StringToDouble(const std::string& value)
     } else {
         return result;
     }
+}
+// string to double method with success check, and support for parsing number string with percentage case
+inline bool StringToDouble(const std::string& value, double& result)
+{
+    char* pEnd = nullptr;
+    double res = std::strtod(value.c_str(), &pEnd);
+    if (pEnd == value.c_str() || errno == ERANGE) {
+        return false;
+    } else if (pEnd != nullptr) {
+        if (std::strcmp(pEnd, "%") == 0) {
+            result = res / PERCENT_VALUE;
+            return true;
+        } else if (std::strcmp(pEnd, "") == 0) {
+            result = res;
+            return true;
+        }
+    }
+    return false;
 }
 
 inline float StringToFloat(const std::string& value)
@@ -229,9 +248,20 @@ inline CalcDimension StringToCalcDimension(const std::string& value, bool useVp 
     }
 }
 
-
 inline Dimension StringToDimension(const std::string& value, bool useVp = false)
 {
+    return StringToDimensionWithUnit(value, useVp ? DimensionUnit::VP : DimensionUnit::PX);
+}
+
+inline Dimension StringToDimensionWithThemeValue(const std::string& value, bool useVp, const Dimension& themeValue)
+{
+    errno = 0;
+    char* pEnd = nullptr;
+    std::strtod(value.c_str(), &pEnd);
+    if (pEnd == value.c_str() || errno == ERANGE) {
+        return themeValue;
+    }
+
     return StringToDimensionWithUnit(value, useVp ? DimensionUnit::VP : DimensionUnit::PX);
 }
 

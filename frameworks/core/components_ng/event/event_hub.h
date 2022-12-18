@@ -18,7 +18,6 @@
 
 #include <utility>
 
-#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -28,6 +27,8 @@
 namespace OHOS::Ace::NG {
 
 class FrameNode;
+using OnAreaChangedFunc =
+    std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>;
 
 // The event hub is mainly used to handle common collections of events, such as gesture events, mouse events, etc.
 class EventHub : public virtual AceType {
@@ -63,10 +64,18 @@ public:
         return inputEventHub_;
     }
 
-    const RefPtr<FocusHub>& GetOrCreateFocusHub(FocusType type = FocusType::DISABLE, bool focusable = false)
+    const RefPtr<FocusHub>& GetOrCreateFocusHub(
+        FocusType type = FocusType::DISABLE,
+        bool focusable = false,
+        FocusStyleType focusStyleType = FocusStyleType::NONE,
+        const std::unique_ptr<FocusPaintParam>& paintParamsPtr = nullptr)
     {
         if (!focusHub_) {
             focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this), type, focusable);
+            focusHub_->SetFocusStyleType(focusStyleType);
+            if (paintParamsPtr) {
+                focusHub_->SetFocusPaintParamsPtr(paintParamsPtr);
+            }
         }
         return focusHub_;
     }
@@ -111,8 +120,6 @@ public:
         }
     }
 
-    using OnAreaChangedFunc =
-        std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>;
     void SetOnAreaChanged(OnAreaChangedFunc&& onAreaChanged)
     {
         onAreaChanged_ = std::move(onAreaChanged);
@@ -200,6 +207,32 @@ public:
         return static_cast<bool>(onDrop_);
     }
 
+    virtual std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType isStart)
+    {
+        auto json = JsonUtil::Create(true);
+        if (!extraInfo.empty()) {
+            json->Put("extraInfo", extraInfo.c_str());
+        }
+        return json->ToString();
+    }
+
+    bool IsEnabled() const
+    {
+        return enabled_;
+    }
+
+    void SetEnabled(bool enabled)
+    {
+        enabled_ = enabled;
+    }
+    // get XTS inspector value
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+
+    void MarkModifyDone();
+
+protected:
+    virtual void OnModifyDone() {}
+
 private:
     WeakPtr<FrameNode> host_;
     RefPtr<GestureEventHub> gestureEventHub_;
@@ -215,6 +248,8 @@ private:
     OnDragFunc onDragLeave_;
     OnDragFunc onDragMove_;
     OnDragFunc onDrop_;
+
+    bool enabled_ { true };
 
     ACE_DISALLOW_COPY_AND_MOVE(EventHub);
 };

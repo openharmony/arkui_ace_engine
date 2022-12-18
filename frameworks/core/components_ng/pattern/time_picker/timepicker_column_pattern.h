@@ -23,7 +23,10 @@
 #include "core/components/picker/picker_date_component.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_layout_algorithm.h"
+#include "core/components_ng/pattern/time_picker/timepicker_paint_method.h"
+#include "core/components_ng/pattern/time_picker/toss_animation_controller.h"
 
 namespace OHOS::Ace::NG {
 
@@ -41,7 +44,9 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<TimePickerColumnLayoutAlgorithm>(currentOffset_);
+        auto layoutAlgorithm = MakeRefPtr<TimePickerColumnLayoutAlgorithm>();
+        layoutAlgorithm->SetCurrentOffset(GetCurrentOffset());
+        return layoutAlgorithm;
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -53,7 +58,7 @@ public:
 
     bool NotLoopOptions() const;
 
-    void UpdateColumnChildPosition(double y);
+    void UpdateColumnChildPosition(double offsetY);
 
     bool CanMove(bool isDown) const;
 
@@ -75,7 +80,12 @@ public:
 
     float GetCurrentOffset() const
     {
-        return currentOffset_;
+        return deltaSize_;
+    }
+
+    void SetCurrentOffset(float deltaSize)
+    {
+        deltaSize_ = deltaSize;
     }
 
     const std::map<RefPtr<FrameNode>, std::vector<std::string>>& GetOptions() const
@@ -141,25 +151,74 @@ public:
         return { FocusType::NODE, true };
     }
 
+    void SetHour24(bool value)
+    {
+        hour24_ = value;
+    }
+
+    bool GetHour24() const
+    {
+        return hour24_;
+    }
+
+    const RefPtr<TimePickerTossAnimationController>& GetToss() const
+    {
+        return tossAnimationController_;
+    }
+
+    void UpdateToss(double offsetY);
+
+    void TossStoped();
+
+    void UpdateScrollDelta(double delta);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void SetDividerHeight(uint32_t showOptionCount);
+    void ChangeTextStyle(uint32_t index, uint32_t showOptionCount, RefPtr<TextLayoutProperty>& textLayoutProperty);
+    void ChangeAmPmTextStyle(uint32_t index, uint32_t showOptionCount, RefPtr<TextLayoutProperty>& textLayoutProperty);
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
 
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleDragStart(const GestureEvent& event);
+    void HandleDragMove(const GestureEvent& event);
+    void HandleDragEnd();
+    void CreateAnimation();
+    RefPtr<CurveAnimation<double>> CreateAnimation(double from, double to);
+    void HandleCurveStopped();
+    void ScrollOption(double delta);
+
+    bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
     std::map<RefPtr<FrameNode>, std::vector<std::string>> options_;
     ColumnChangeCallback changeCallback_;
     EventCallback EventCallback_;
     uint32_t currentIndex_ = 0;
     RefPtr<ScrollableEvent> scrollableEvent_;
-    float currentOffset_ = 0.0f;
     double yLast_ = 0.0;
     double yOffset_ = 0.0;
-    Dimension jumpInterval_;
+    double jumpInterval_;
     uint32_t showCount_ = 0;
     bool isVertical_ = true;
+    float gradientHeight_;
+    float dividerHeight_;
+    float dividerSpacingWidth_;
+
+    float deltaSize_ = 0.0f;
+    RefPtr<PanEvent> panEvent_;
+    bool pressed_ = false;
+    double scrollDelta_ = 0.0;
+    bool animationCreated_ = false;
+    RefPtr<Animator> toController_;
+    RefPtr<Animator> fromController_;
+    RefPtr<CurveAnimation<double>> fromBottomCurve_;
+    RefPtr<CurveAnimation<double>> fromTopCurve_;
+    RefPtr<TimePickerTossAnimationController> tossAnimationController_ =
+        AceType::MakeRefPtr<TimePickerTossAnimationController>();
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnPattern);
 };

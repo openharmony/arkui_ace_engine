@@ -28,8 +28,6 @@
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
-class PipelineContext;
-
 // ProgressLayoutAlgorithm acts as the underlying progress layout.
 class ACE_EXPORT ProgressLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(ProgressLayoutAlgorithm, BoxLayoutAlgorithm);

@@ -114,6 +114,7 @@ ohos_unittest("ClockComponentTest") {
     "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_container_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_system_manager.cpp",
+    "$ace_root/frameworks/core/components/common/layout/screen_system_manager.cpp",
 
     # properties
     "$ace_root/frameworks/core/components/box/render_box.cpp",
@@ -156,14 +157,14 @@ ohos_unittest("ClockComponentTest") {
     "$ace_root/frameworks/core/components/theme/app_theme.cpp",
     "$ace_root/frameworks/core/components/theme/theme_attributes.cpp",
     "$ace_root/frameworks/core/components/theme/theme_constants.cpp",
-    "$ace_root/frameworks/core/components/theme/theme_manager.cpp",
+    "$ace_root/frameworks/core/components/theme/theme_manager_impl.cpp",
     "$ace_root/frameworks/core/components/theme/theme_utils.cpp",
     "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
     "render_clock_test.cpp",
 
     #mock
-    "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
-    "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
+    "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
+    "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",
   ]
 
   # add sources only needed by wearable like watch.

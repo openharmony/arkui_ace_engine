@@ -47,7 +47,7 @@ void TextTimerComposedElement::Dump()
     DumpLog::GetInstance().AddDesc(std::string("fontSize : ").append(GetFontSize()));
     DumpLog::GetInstance().AddDesc(std::string("fontWeight : ").append(GetFontWeight()));
     DumpLog::GetInstance().AddDesc(std::string("fontStyle : ").append(GetFontSize()));
-    DumpLog::GetInstance().AddDesc(std::string("fontfamily : ").append(GetFontSize()));
+    DumpLog::GetInstance().AddDesc(std::string("fontFamily : ").append(GetFontSize()));
 }
 
 std::unique_ptr<JsonValue> TextTimerComposedElement::ToJsonObject() const
@@ -83,7 +83,7 @@ std::string TextTimerComposedElement::GetFormat() const
     if (render) {
         return render->GetFormat();
     }
-    return "hh:mm:ss.ms";
+    return "HH:mm:ss.SS";
 }
 
 std::string TextTimerComposedElement::GetFontColor() const

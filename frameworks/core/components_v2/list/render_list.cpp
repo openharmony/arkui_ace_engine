@@ -27,6 +27,7 @@
 #include "core/components/scroll/render_scroll.h"
 #include "core/components/scroll/render_single_child_scroll.h"
 #include "core/components/scroll/scroll_spring_effect.h"
+#include "core/components/scroll/scrollable.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components_v2/list/list_component.h"
 #include "core/components_v2/list/list_scroll_bar_controller.h"
@@ -42,9 +43,6 @@ namespace {
 constexpr double VIEW_PORT_SCALE = 1.2;
 constexpr int32_t CHAIN_ANIMATION_NODE_COUNT = 30;
 constexpr int32_t DEFAULT_SOURCE = 3;
-constexpr int32_t SCROLL_STATE_IDLE = 0;
-constexpr int32_t SCROLL_STATE_SCROLL = 1;
-constexpr int32_t SCROLL_STATE_FLING = 2;
 constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
 constexpr int32_t SCROLL_FROM_JUMP = 3;
 constexpr int32_t DEFAULT_FINGERS = 1;
@@ -116,6 +114,11 @@ void RenderList::Update(const RefPtr<Component>& component)
     if (component_->GetEdgeEffect() == EdgeEffect::SPRING) {
         if (!scrollEffect_ || scrollEffect_->GetEdgeEffect() != EdgeEffect::SPRING) {
             scrollEffect_ = AceType::MakeRefPtr<ScrollSpringEffect>();
+            ResetEdgeEffect();
+        }
+    } else if (component_->GetEdgeEffect() == EdgeEffect::FADE) {
+        if (!scrollEffect_ || scrollEffect_->GetEdgeEffect() != EdgeEffect::FADE) {
+            scrollEffect_ = AceType::MakeRefPtr<ScrollFadeEffect>();
             ResetEdgeEffect();
         }
     } else {
@@ -232,6 +235,10 @@ void RenderList::InitScrollable(Axis axis)
         if (proxy) {
             proxy->StartScrollBarAnimator();
         }
+        auto scrollBar = list->scrollBar_;
+        if (scrollBar) {
+            scrollBar->HandleScrollBarEnd();
+        }
         list->listEventFlags_[ListEvents::SCROLL_STOP] = true;
         list->HandleListEvent();
     });
@@ -270,12 +277,13 @@ bool RenderList::IsReachStart()
 
 void RenderList::InitScrollBar()
 {
-    if (scrollBar_) {
-        scrollBar_->Reset();
-        scrollBar_->SetDisplayMode(component_->GetScrollBar());
+    if (!component_) {
+        LOGE("InitScrollBar failed, component_ is null.");
         return;
     }
-    if (!component_) {
+    if (scrollBar_) {
+        scrollBar_->SetDisplayMode(component_->GetScrollBar());
+        scrollBar_->Reset();
         return;
     }
     const RefPtr<ScrollBarTheme> theme = GetTheme<ScrollBarTheme>();
@@ -301,6 +309,10 @@ void RenderList::InitScrollBar()
     scrollBar_->SetTouchWidth(theme->GetTouchWidth());
     if (!vertical_) {
         scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+    } else {
+        if (isRightToLeft_) {
+            scrollBar_->SetPositionMode(PositionMode::LEFT);
+        }
     }
     scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
     SetScrollBarCallback();
@@ -427,9 +439,14 @@ void RenderList::CalculateLanes()
              "%{public}f, maxLaneLength_: %{public}f",
             maxLanes, minLanes, minLaneLength_, maxLaneLength_);
     } while (0);
-    lanes_ = lanes;
-    if (lanes > 1) { // if lanes changes, adjust startIndex_
-        startIndex_ -= GetItemRelativeIndex(startIndex_) % lanes;
+    if (lanes != lanes_) {  // if lanes changes, adjust startIndex_
+        lanes_ = lanes;
+        if (lanes > 1) {
+            size_t startIndex = startIndex_ - GetItemRelativeIndex(startIndex_) % lanes;
+            if (startIndex_ != startIndex) {
+                RemoveAllItems();
+            }
+        }
     }
 }
 
@@ -607,6 +624,7 @@ void RenderList::PerformLayout()
         CalculateLanes();
     }
 
+    double prevTotalOffset = startIndexOffset_ - prevOffset_;
     double curMainPos = 0.0;
     if (isLaneList_) {
         curMainPos = LayoutOrRecycleCurrentItemsForLaneList(mainSize);
@@ -631,8 +649,8 @@ void RenderList::PerformLayout()
 
     // Check if reach the end of list
     reachEnd_ = LessOrEqual(curMainPos, mainSize);
-    bool noEdgeEffect =
-        (scrollable_ && scrollable_->IsAnimationNotRunning()) || !scrollEffect_ || autoScrollingForItemMove_;
+    bool noEdgeEffect = (scrollable_ && scrollable_->IsAnimationNotRunning()) ||
+        !(scrollEffect_ && scrollEffect_->IsSpringEffect()) || autoScrollingForItemMove_;
     if (noEdgeEffect && reachEnd_) {
         // Adjust end of list to match the end of layout
         if (LessNotEqual(curMainPos, mainSize)) {
@@ -694,9 +712,14 @@ void RenderList::PerformLayout()
 
     // Clear auto scrolling flags
     autoScrollingForItemMove_ = false;
-    if (scrollable_ && scrollable_->Idle()) {
-        ResumeEventCallback(component_, &ListComponent::GetOnScroll, Dimension(offset_ / dipScale_, DimensionUnit::VP),
-            ScrollState(SCROLL_STATE_IDLE));
+    double currentTotalOffset = startIndexOffset_ - currentOffset_;
+    if (!NearEqual(currentTotalOffset, prevTotalOffset)) {
+        auto offset = Dimension((currentTotalOffset - prevTotalOffset) / dipScale_, DimensionUnit::VP);
+        if (scrollable_ && scrollable_->Idle()) {
+            ResumeEventCallback(component_, &ListComponent::GetOnScroll, offset, ScrollState::IDLE);
+        } else {
+            ResumeEventCallback(component_, &ListComponent::GetOnScroll, offset, scrollState_);
+        }
     }
 
     realMainSize_ = curMainPos - currentOffset_;
@@ -1150,6 +1173,19 @@ bool RenderList::GetCurMainPosAndMainSize(double& curMainPos, double& mainSize)
     return true;
 }
 
+bool RenderList::HandleOverScroll()
+{
+    if (scrollEffect_ && scrollEffect_->IsFadeEffect() && (reachStart_ || reachEnd_)) {
+        double overScroll = scrollEffect_->CalculateOverScroll(prevOffset_, reachEnd_);
+        if (!NearZero(overScroll)) {
+            Axis axis = IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
+            scrollEffect_->HandleOverScroll(axis, overScroll, viewPort_);
+        }
+        return false;
+    }
+    return true;
+}
+
 bool RenderList::UpdateScrollPosition(double offset, int32_t source)
 {
     if (source == SCROLL_FROM_START) {
@@ -1184,13 +1220,14 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
     }
     offset_ = offset;
     if (source == SCROLL_FROM_UPDATE) {
-        ResumeEventCallback(component_, &ListComponent::GetOnScroll, Dimension(offset_ / dipScale_, DimensionUnit::VP),
-            ScrollState(SCROLL_STATE_SCROLL));
+        scrollState_ = ScrollState::SCROLL;
     } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING) {
-        ResumeEventCallback(component_, &ListComponent::GetOnScroll, Dimension(offset_ / dipScale_, DimensionUnit::VP),
-            ScrollState(SCROLL_STATE_FLING));
+        scrollState_ = ScrollState::FLING;
+    } else {
+        scrollState_ = ScrollState::IDLE;
     }
     currentOffset_ += offset;
+    bool next = HandleOverScroll();
     if (source == SCROLL_FROM_AXIS) {
         double curMainPos = 0.0;
         double mainSize = 0.0;
@@ -1202,7 +1239,7 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
         }
     }
     MarkNeedLayout(true);
-    return true;
+    return next;
 }
 
 bool RenderList::TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
@@ -1233,10 +1270,10 @@ void RenderList::OnTouchTestHit(
     if (!fixedMainSize_) {
         return;
     }
-    if (!scrollable_ || !scrollable_->Available()) {
+    if (!scrollable_) {
         return;
     }
-    if (scrollBar_ && scrollBar_->InBarRegion(globalPoint_ - coordinateOffset)) {
+    if (scrollable_->Available() && scrollBar_ && scrollBar_->InBarRegion(globalPoint_ - coordinateOffset)) {
         scrollBar_->AddScrollBarController(coordinateOffset, result);
     } else {
         scrollable_->SetCoordinateOffset(coordinateOffset);

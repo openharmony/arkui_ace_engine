@@ -76,18 +76,18 @@ const std::string CONTAINER_ID = "__container__";
 
 } // namespace
 
-class RelativeContainerPropertyTestNg : public testing::Test {
+class RelativeContainerLayoutTestNg : public testing::Test {
 public:
     static void SetUpTestCase() {};
     static void TearDownTestCase() {};
 };
 
 /**
- * @tc.name: RelativeContainerPropertyTest001
+ * @tc.name: RelativeContainerLayoutTest001
  * @tc.desc: Set an item with alignrules with RelativeContainer and check it.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest001, TestSize.Level1)
+HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest001, TestSize.Level1)
 {
     auto relativeContainerFrameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -164,11 +164,11 @@ HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest001, TestSi
 }
 
 /**
- * @tc.name: RelativeContainerPropertyTest002
+ * @tc.name: RelativeContainerLayoutTest002
  * @tc.desc: Set two item with alignrules with RelativeContainer and check it.
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest002, TestSize.Level1)
+HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest002, TestSize.Level1)
 {
     auto relativeContainerFrameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
@@ -280,11 +280,11 @@ HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest002, TestSi
 }
 
 /**
- * @tc.name: RelativeContainerPropertyTest003
+ * @tc.name: RelativeContainerLayoutTest003
  * @tc.desc: Set five items with different alignrules value into RelativeContainer and check .
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest003, TestSize.Level1)
+HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest003, TestSize.Level1)
 {
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto relativeContainerFrameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, nodeId,
@@ -335,12 +335,12 @@ HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest003, TestSi
               .alignRules({
                 left: { anchor: "bt1", align: HorizontalAlign.End },
                 right:{ anchor: "__container__", align: HorizontalAlign.End },
-                top: { anchor: "tx2", align: VerticalAlign.Center },
+                top: { anchor: "bt2", align: VerticalAlign.Center },
                 bottom: { anchor: "__container__", align: VerticalAlign.Bottom }
               }).id("bt3").borderWidth(1).borderColor(Color.Black)
             Button("Button 4").fontSize(20).padding(10)
               .alignRules({
-                left: { anchor: "tx2", align: HorizontalAlign.End },
+                left: { anchor: "bt2", align: HorizontalAlign.End },
                 middle: {anchor: "__container__", align: HorizontalAlign.Center},
                 right:{ anchor: "__container__", align: HorizontalAlign.Center },
                 top: { anchor: "bt1", align: VerticalAlign.Bottom }
@@ -350,7 +350,7 @@ HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest003, TestSi
                 left: { anchor: "bt1", align: HorizontalAlign.End },
                 top: { anchor: "__container__", align: VerticalAlign.Top },
                 center: {anchor: "bt1", align: VerticalAlign.Center},
-                bottom: { anchor: "tx4", align: VerticalAlign.Bottom }
+                bottom: { anchor: "bt4", align: VerticalAlign.Bottom }
               }).id("bt5").borderWidth(1).borderColor(Color.Black)
         }.width(200).height(200)
     */
@@ -383,7 +383,7 @@ HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest003, TestSi
     // Add secondItem-Box2 with 4alignRules(2 HorizontalAlign and 2 VerticalAlign).
     int32_t secondNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto secondItem = FrameNode::GetOrCreateFrameNode(
-        V2::BLANK_ETS_TAG, secondNodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::ButtonPattern>(); });
+        V2::BLANK_ETS_TAG, secondNodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>(); });
     RefPtr<GeometryNode> secondItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> secondItemLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(secondItem, secondItemGeometryNode, secondItem->GetLayoutProperty());
@@ -409,7 +409,7 @@ HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest003, TestSi
     // Add thirdItem-Box3 with size and 4alignRules(2 HorizontalAlign and 2 VerticalAlign).
     int32_t thirdnodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto thirdItem = FrameNode::GetOrCreateFrameNode(
-        V2::BLANK_ETS_TAG, thirdnodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::ButtonPattern>(); });
+        V2::BLANK_ETS_TAG, thirdnodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>(); });
     RefPtr<GeometryNode> thirdItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> thirdItemLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(thirdItem, thirdItemGeometryNode, thirdItem->GetLayoutProperty());
@@ -437,7 +437,7 @@ HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest003, TestSi
     // Add fourthItem-Box4 with 4alignRules(3 HorizontalAlign and 1 VerticalAlign).
     int32_t fourthnodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto fourthItem = FrameNode::GetOrCreateFrameNode(
-        V2::BLANK_ETS_TAG, fourthnodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::ButtonPattern>(); });
+        V2::BLANK_ETS_TAG, fourthnodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>(); });
     RefPtr<GeometryNode> fourthItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> fourthItemLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(fourthItem, fourthItemGeometryNode, fourthItem->GetLayoutProperty());
@@ -463,7 +463,7 @@ HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest003, TestSi
     // Add fifthItem-Box5 with 4alignRules(1 HorizontalAlign and 3 VerticalAlign).
     int32_t fifthnodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto fifthItem = FrameNode::GetOrCreateFrameNode(
-        V2::BLANK_ETS_TAG, fifthnodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::ButtonPattern>(); });
+        V2::BLANK_ETS_TAG, fifthnodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>(); });
     RefPtr<GeometryNode> fifthItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> fifthItemLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(fifthItem, fifthItemGeometryNode, fifthItem->GetLayoutProperty());
@@ -510,6 +510,512 @@ HWTEST_F(RelativeContainerPropertyTestNg, RelativeContainerLayoutTest003, TestSi
     EXPECT_EQ(fourthItemLayoutWrapper->GetGeometryNode()->GetFrameOffset(),
         OffsetF(secondItemLayoutWrapper->GetGeometryNode()->GetFrameSize().Width(), FIRST_ITEM_HEIGHT));
     EXPECT_EQ(fifthItemLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF(FIRST_ITEM_WIDTH, 0.0f));
+}
+
+/**
+ * @tc.name: RelativeContainerLayoutTest004
+ * @tc.desc: Set no child in RelativeContainer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest004, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
+        []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
+    EXPECT_FALSE(frameNode == nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto relativeContainerPattern = frameNode->GetPattern<RelativeContainerPattern>();
+    EXPECT_FALSE(relativeContainerPattern == nullptr);
+    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    EXPECT_FALSE(relativeContainerLayoutProperty == nullptr);
+    frameNode->UpdateInspectorId(CONTAINER_ID);
+    auto relativeContainerLayoutAlgorithm = relativeContainerPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(relativeContainerLayoutAlgorithm == nullptr);
+    layoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(relativeContainerLayoutAlgorithm));
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(CONTAINER_WIDTH), CalcLength(CONTAINER_HEIGHT)));
+
+    LayoutConstraintF parentLayoutConstraint;
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    /**
+    corresponding ets code:
+       RelativeContainer() {
+            }.width(200).height(200).backgroundColor(Color.Orange)
+    */
+    relativeContainerLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    relativeContainerLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF());
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
+}
+
+/**
+ * @tc.name: RelativeContainerLayoutTest005
+ * @tc.desc: Set one child with no flexItemProperty another depend on itself in RelativeContainer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest005, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
+        []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
+    EXPECT_FALSE(frameNode == nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto relativeContainerPattern = frameNode->GetPattern<RelativeContainerPattern>();
+    EXPECT_FALSE(relativeContainerPattern == nullptr);
+    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    EXPECT_FALSE(relativeContainerLayoutProperty == nullptr);
+    frameNode->UpdateInspectorId(CONTAINER_ID);
+    relativeContainerLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(CONTAINER_WIDTH), CalcLength(CONTAINER_HEIGHT)));
+    auto relativeContainerLayoutAlgorithm = relativeContainerPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(relativeContainerLayoutAlgorithm == nullptr);
+    layoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(relativeContainerLayoutAlgorithm));
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = CONTAINER_SIZE;
+    childLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    /**
+    corresponding ets code:
+       RelativeContainer() {
+        Button("Button 1").width(120).height(50).id("bt1")
+        Button("Button 2").alignRules({
+            left: { anchor: "bt2", align: HorizontalAlign.End },
+            middle: { anchor: "bt2", align: HorizontalAlign.Center },
+          }).id("bt2")
+      }.width(200).height(200).backgroundColor(Color.Orange)
+    */
+    auto firstItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> firstItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    firstItemGeometryNode->Reset();
+    RefPtr<LayoutWrapper> firstItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        firstItemFrameNode, firstItemGeometryNode, firstItemFrameNode->GetLayoutProperty());
+    firstItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    firstItemLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
+    firstItemFrameNode->UpdateInspectorId(FIRST_ITEM_ID);
+    auto boxLayoutAlgorithm = firstItemFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
+    firstItemLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+    frameNode->AddChild(firstItemFrameNode);
+    layoutWrapper->AppendChild(firstItemLayoutWrapper);
+
+    auto secondItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> secondItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    secondItemGeometryNode->Reset();
+    RefPtr<LayoutWrapper> secondItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        secondItemFrameNode, secondItemGeometryNode, secondItemFrameNode->GetLayoutProperty());
+    secondItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    std::map<AlignDirection, AlignRule> secondItemAlignRules;
+    RelativeContainerTestUtilsNG::AddAlignRule(
+        SECOND_ITEM_ID, AlignDirection::LEFT, HorizontalAlign::END, secondItemAlignRules);
+    RelativeContainerTestUtilsNG::AddAlignRule(
+        SECOND_ITEM_ID, AlignDirection::MIDDLE, HorizontalAlign::CENTER, secondItemAlignRules);
+    secondItemFrameNode->UpdateInspectorId(SECOND_ITEM_ID);
+    secondItemFrameNode->GetLayoutProperty()->UpdateAlignRules(secondItemAlignRules);
+    secondItemLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+    frameNode->AddChild(secondItemFrameNode);
+    layoutWrapper->AppendChild(secondItemLayoutWrapper);
+
+    relativeContainerLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    relativeContainerLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
+    EXPECT_EQ(firstItemLayoutWrapper->GetGeometryNode()->GetFrameSize(), FIRST_IITEM_SIZE);
+    EXPECT_EQ(secondItemLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF());
+    EXPECT_EQ(firstItemLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
+    EXPECT_EQ(secondItemLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
+}
+
+/**
+ * @tc.name: RelativeContainerLayoutTest006
+ * @tc.desc: Set two child with no flexItemProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest006, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
+        []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
+    EXPECT_FALSE(frameNode == nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto relativeContainerPattern = frameNode->GetPattern<RelativeContainerPattern>();
+    EXPECT_FALSE(relativeContainerPattern == nullptr);
+    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    EXPECT_FALSE(relativeContainerLayoutProperty == nullptr);
+    frameNode->UpdateInspectorId(CONTAINER_ID);
+    relativeContainerLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(CONTAINER_WIDTH), CalcLength(CONTAINER_HEIGHT)));
+    auto relativeContainerLayoutAlgorithm = relativeContainerPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(relativeContainerLayoutAlgorithm == nullptr);
+    layoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(relativeContainerLayoutAlgorithm));
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = CONTAINER_SIZE;
+    childLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    /**
+    corresponding ets code:
+       RelativeContainer() {
+        Button("Button 1").width(120).height(50).id("bt1")
+        Button("Button 2").id("bt2")
+      }.width(200).height(200).backgroundColor(Color.Orange)
+    */
+    auto firstItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> firstItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    firstItemGeometryNode->Reset();
+    RefPtr<LayoutWrapper> firstItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        firstItemFrameNode, firstItemGeometryNode, firstItemFrameNode->GetLayoutProperty());
+    firstItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    firstItemLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
+    firstItemFrameNode->UpdateInspectorId(FIRST_ITEM_ID);
+    auto boxLayoutAlgorithm = firstItemFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
+    firstItemLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+    frameNode->AddChild(firstItemFrameNode);
+    layoutWrapper->AppendChild(firstItemLayoutWrapper);
+
+    auto secondItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> secondItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    secondItemGeometryNode->Reset();
+    RefPtr<LayoutWrapper> secondItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        secondItemFrameNode, secondItemGeometryNode, secondItemFrameNode->GetLayoutProperty());
+    secondItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    secondItemFrameNode->UpdateInspectorId(SECOND_ITEM_ID);
+    secondItemLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+    frameNode->AddChild(secondItemFrameNode);
+    layoutWrapper->AppendChild(secondItemLayoutWrapper);
+
+    relativeContainerLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    relativeContainerLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
+    EXPECT_EQ(firstItemLayoutWrapper->GetGeometryNode()->GetFrameSize(), FIRST_IITEM_SIZE);
+    EXPECT_EQ(firstItemLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
+    EXPECT_EQ(secondItemLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
+}
+
+/**
+ * @tc.name: RelativeContainerLayoutTest007
+ * @tc.desc: Set two children with wrong alignRules which makes calc length < 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest007, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
+        []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
+    EXPECT_FALSE(frameNode == nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto relativeContainerPattern = frameNode->GetPattern<RelativeContainerPattern>();
+    EXPECT_FALSE(relativeContainerPattern == nullptr);
+    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    EXPECT_FALSE(relativeContainerLayoutProperty == nullptr);
+    frameNode->UpdateInspectorId(CONTAINER_ID);
+    relativeContainerLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(CONTAINER_WIDTH), CalcLength(CONTAINER_HEIGHT)));
+    auto relativeContainerLayoutAlgorithm = relativeContainerPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(relativeContainerLayoutAlgorithm == nullptr);
+    layoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(relativeContainerLayoutAlgorithm));
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = CONTAINER_SIZE;
+    childLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    /**
+    corresponding ets code:
+       RelativeContainer() {
+        Button("Button 1").width(120).height(50).id("bt1")
+          .alignRules({
+            middle: { anchor: "__container__", align: HorizontalAlign.End },
+            right: { anchor: "__container__", align: HorizontalAlign.Center },
+          }).id("bt1")
+        Button("Button 2")
+        .alignRules({
+            center: { anchor: "__container__", align: VerticalAlign.Bottom },
+            bottom: { anchor: "__container__", align: VerticalAlign.Center },
+          }).id("bt2")
+      }.width(200).height(200).backgroundColor(Color.Orange)
+    */
+    auto firstItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> firstItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    firstItemGeometryNode->Reset();
+    RefPtr<LayoutWrapper> firstItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        firstItemFrameNode, firstItemGeometryNode, firstItemFrameNode->GetLayoutProperty());
+    firstItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    std::map<AlignDirection, AlignRule> firstItemAlignRules;
+    RelativeContainerTestUtilsNG::AddAlignRule(
+        CONTAINER_ID, AlignDirection::MIDDLE, HorizontalAlign::END, firstItemAlignRules);
+    RelativeContainerTestUtilsNG::AddAlignRule(
+        CONTAINER_ID, AlignDirection::RIGHT, HorizontalAlign::CENTER, firstItemAlignRules);
+    firstItemFrameNode->UpdateInspectorId(FIRST_ITEM_ID);
+    firstItemFrameNode->GetLayoutProperty()->UpdateAlignRules(firstItemAlignRules);
+    auto boxLayoutAlgorithm = firstItemFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
+    firstItemLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+    frameNode->AddChild(firstItemFrameNode);
+    layoutWrapper->AppendChild(firstItemLayoutWrapper);
+
+    auto secondItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> secondItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    secondItemGeometryNode->Reset();
+    RefPtr<LayoutWrapper> secondItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        secondItemFrameNode, secondItemGeometryNode, secondItemFrameNode->GetLayoutProperty());
+    secondItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    std::map<AlignDirection, AlignRule> secondItemAlignRules;
+    RelativeContainerTestUtilsNG::AddAlignRule(
+        CONTAINER_ID, AlignDirection::CENTER, VerticalAlign::BOTTOM, secondItemAlignRules);
+    RelativeContainerTestUtilsNG::AddAlignRule(
+        CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::CENTER, secondItemAlignRules);
+    secondItemFrameNode->UpdateInspectorId(SECOND_ITEM_ID);
+    secondItemFrameNode->GetLayoutProperty()->UpdateAlignRules(secondItemAlignRules);
+    secondItemLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+    frameNode->AddChild(secondItemFrameNode);
+    layoutWrapper->AppendChild(secondItemLayoutWrapper);
+
+    relativeContainerLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    relativeContainerLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
+    EXPECT_EQ(firstItemLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF());
+    EXPECT_EQ(secondItemLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF());
+}
+
+/**
+ * @tc.name: RelativeContainerLayoutTest008
+ * @tc.desc: Set two children with remain alignRules.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest008, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
+        []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
+    EXPECT_FALSE(frameNode == nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto relativeContainerPattern = frameNode->GetPattern<RelativeContainerPattern>();
+    EXPECT_FALSE(relativeContainerPattern == nullptr);
+    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    EXPECT_FALSE(relativeContainerLayoutProperty == nullptr);
+    frameNode->UpdateInspectorId(CONTAINER_ID);
+    relativeContainerLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(CONTAINER_WIDTH), CalcLength(CONTAINER_HEIGHT)));
+    auto relativeContainerLayoutAlgorithm = relativeContainerPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(relativeContainerLayoutAlgorithm == nullptr);
+    layoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(relativeContainerLayoutAlgorithm));
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = CONTAINER_SIZE;
+    childLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    /**
+    corresponding ets code:
+       RelativeContainer() {
+        Button("Button 1").alignRules({
+          middle: { anchor: "__container__", align: HorizontalAlign.Center },
+          right: { anchor: "__container__", align: HorizontalAlign.End },
+          center: { anchor: "__container__", align: VerticalAlign.Center },
+          bottom: { anchor: "__container__", align: VerticalAlign.Bottom },
+        }).id("bt1")
+        Button("Button 2").alignRules({
+          middle: { anchor: "__container__", align: HorizontalAlign.Start },
+          right: { anchor: "__container__", align: HorizontalAlign.Start },
+          center: { anchor: "__container__", align: VerticalAlign.Top },
+          bottom: { anchor: "__container__", align: VerticalAlign.Top },
+        }).id("bt2")
+      }.width(200).height(200).backgroundColor(Color.Orange)
+    */
+    auto firstItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> firstItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    firstItemGeometryNode->Reset();
+    RefPtr<LayoutWrapper> firstItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        firstItemFrameNode, firstItemGeometryNode, firstItemFrameNode->GetLayoutProperty());
+    firstItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    std::map<AlignDirection, AlignRule> firstItemAlignRules;
+    RelativeContainerTestUtilsNG::AddAlignRule(
+        CONTAINER_ID, AlignDirection::MIDDLE, HorizontalAlign::CENTER, firstItemAlignRules);
+    RelativeContainerTestUtilsNG::AddAlignRule(
+        CONTAINER_ID, AlignDirection::RIGHT, HorizontalAlign::END, firstItemAlignRules);
+    RelativeContainerTestUtilsNG::AddAlignRule(
+        CONTAINER_ID, AlignDirection::CENTER, VerticalAlign::CENTER, firstItemAlignRules);
+    RelativeContainerTestUtilsNG::AddAlignRule(
+        CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::BOTTOM, firstItemAlignRules);
+    firstItemFrameNode->UpdateInspectorId(FIRST_ITEM_ID);
+    firstItemFrameNode->GetLayoutProperty()->UpdateAlignRules(firstItemAlignRules);
+    auto boxLayoutAlgorithm = firstItemFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
+    firstItemLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+    frameNode->AddChild(firstItemFrameNode);
+    layoutWrapper->AppendChild(firstItemLayoutWrapper);
+
+    auto secondItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> secondItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    secondItemGeometryNode->Reset();
+    RefPtr<LayoutWrapper> secondItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        secondItemFrameNode, secondItemGeometryNode, secondItemFrameNode->GetLayoutProperty());
+    secondItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    std::map<AlignDirection, AlignRule> secondItemAlignRules;
+    RelativeContainerTestUtilsNG::AddAlignRule(
+        CONTAINER_ID, AlignDirection::MIDDLE, HorizontalAlign::START, secondItemAlignRules);
+    RelativeContainerTestUtilsNG::AddAlignRule(
+        CONTAINER_ID, AlignDirection::RIGHT, HorizontalAlign::START, secondItemAlignRules);
+    RelativeContainerTestUtilsNG::AddAlignRule(
+        CONTAINER_ID, AlignDirection::CENTER, VerticalAlign::TOP, secondItemAlignRules);
+    RelativeContainerTestUtilsNG::AddAlignRule(
+        CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::TOP, secondItemAlignRules);
+    secondItemFrameNode->UpdateInspectorId(SECOND_ITEM_ID);
+    secondItemFrameNode->GetLayoutProperty()->UpdateAlignRules(secondItemAlignRules);
+    secondItemLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+    frameNode->AddChild(secondItemFrameNode);
+    layoutWrapper->AppendChild(secondItemLayoutWrapper);
+
+    relativeContainerLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    relativeContainerLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
+    EXPECT_EQ(firstItemLayoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
+    EXPECT_EQ(secondItemLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF());
+    EXPECT_EQ(firstItemLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF());
+    EXPECT_EQ(secondItemLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF());
+}
+
+/**
+ * @tc.name: RelativeContainerLayoutTest009
+ * @tc.desc: Set two children with remain alignRules to check offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest009, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
+        []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
+    EXPECT_FALSE(frameNode == nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto relativeContainerPattern = frameNode->GetPattern<RelativeContainerPattern>();
+    EXPECT_FALSE(relativeContainerPattern == nullptr);
+    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    EXPECT_FALSE(relativeContainerLayoutProperty == nullptr);
+    frameNode->UpdateInspectorId(CONTAINER_ID);
+    relativeContainerLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(CONTAINER_WIDTH), CalcLength(CONTAINER_HEIGHT)));
+    auto relativeContainerLayoutAlgorithm = relativeContainerPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(relativeContainerLayoutAlgorithm == nullptr);
+    layoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(relativeContainerLayoutAlgorithm));
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = CONTAINER_SIZE;
+    childLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    /**
+    corresponding ets code:
+       RelativeContainer() {
+        Button("Button 1").alignRules({
+          right: { anchor: "__container__", align: HorizontalAlign.End },
+          bottom: { anchor: "__container__", align: VerticalAlign.Bottom },
+        }).id("bt1")
+        Button("Button 2").alignRules({
+          right: { anchor: "__container__", align: HorizontalAlign.Start },
+          bottom: { anchor: "__container__", align: VerticalAlign.Top },
+        }).id("bt2")
+      }.width(200).height(200).backgroundColor(Color.Orange)
+    */
+    auto firstItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> firstItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    firstItemGeometryNode->Reset();
+    RefPtr<LayoutWrapper> firstItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        firstItemFrameNode, firstItemGeometryNode, firstItemFrameNode->GetLayoutProperty());
+    firstItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    std::map<AlignDirection, AlignRule> firstItemAlignRules;
+    RelativeContainerTestUtilsNG::AddAlignRule(
+        CONTAINER_ID, AlignDirection::RIGHT, HorizontalAlign::END, firstItemAlignRules);
+    RelativeContainerTestUtilsNG::AddAlignRule(
+        CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::BOTTOM, firstItemAlignRules);
+    firstItemFrameNode->UpdateInspectorId(FIRST_ITEM_ID);
+    firstItemFrameNode->GetLayoutProperty()->UpdateAlignRules(firstItemAlignRules);
+    auto boxLayoutAlgorithm = firstItemFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
+    firstItemLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+    frameNode->AddChild(firstItemFrameNode);
+    layoutWrapper->AppendChild(firstItemLayoutWrapper);
+
+    auto secondItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> secondItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    secondItemGeometryNode->Reset();
+    RefPtr<LayoutWrapper> secondItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+        secondItemFrameNode, secondItemGeometryNode, secondItemFrameNode->GetLayoutProperty());
+    secondItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    std::map<AlignDirection, AlignRule> secondItemAlignRules;
+    RelativeContainerTestUtilsNG::AddAlignRule(
+        CONTAINER_ID, AlignDirection::RIGHT, HorizontalAlign::START, secondItemAlignRules);
+    RelativeContainerTestUtilsNG::AddAlignRule(
+        CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::TOP, secondItemAlignRules);
+    secondItemFrameNode->UpdateInspectorId(SECOND_ITEM_ID);
+    secondItemFrameNode->GetLayoutProperty()->UpdateAlignRules(secondItemAlignRules);
+    secondItemLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+    frameNode->AddChild(secondItemFrameNode);
+    layoutWrapper->AppendChild(secondItemLayoutWrapper);
+
+    relativeContainerLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    relativeContainerLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
+
+    EXPECT_EQ(firstItemLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF());
+    EXPECT_EQ(secondItemLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF());
+    EXPECT_EQ(firstItemLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
+    EXPECT_EQ(secondItemLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF());
 }
 
 } // namespace OHOS::Ace::NG

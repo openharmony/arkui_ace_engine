@@ -28,7 +28,6 @@ class ACE_EXPORT SliderPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SliderPaintMethod, NodePaintMethod)
 
 public:
-    static constexpr float HALF = 0.5f;
     struct Parameters {
         float trackThickness = 0.0f;
         float blockDiameter = 0.0f;
@@ -36,9 +35,12 @@ public:
         float borderBlank = 0.0f;
         float stepRatio = 0.0f;
         float valueRatio = 0.0f;
+        float hotCircleShadowWidth = 0.0f;
+        bool hotFlag = false;
+        bool mouseHoverFlag_ = false;
+        bool mousePressedFlag_ = false;
     };
-    explicit SliderPaintMethod(const Parameters& parameters)
-        : parameters_(parameters) {};
+    explicit SliderPaintMethod(const Parameters& parameters) : parameters_(parameters) {};
     ~SliderPaintMethod() override = default;
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
@@ -56,15 +58,20 @@ private:
 
     struct CirclePenAndSize {
         RSPen pen;
+        RSPen shadowPen;
         PointF center;
         float radius;
+        float shadowRadius;
     };
 
-    LinePenAndSize GetBackgroundPen(
-        const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset) const;
-    MarkerPenAndPath GetMarkerPen(const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset) const;
-    LinePenAndSize GetSelectPen(const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset) const;
-    CirclePenAndSize GetCirclePen(const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset) const;
+    LinePenAndSize GetBackgroundPen(const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset,
+        const RefPtr<SliderTheme>& theme) const;
+    MarkerPenAndPath GetMarkerPen(const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset,
+        const RefPtr<SliderTheme>& theme) const;
+    LinePenAndSize GetSelectPen(const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset,
+        const RefPtr<SliderTheme>& theme) const;
+    CirclePenAndSize GetCirclePen(const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset,
+        const RefPtr<SliderTheme>& theme) const;
 
     Parameters parameters_;
 

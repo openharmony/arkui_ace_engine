@@ -104,6 +104,7 @@ public:
     void BeginPath();
     void ClosePath();
     void Restore();
+    void ResetTransform();
     void Save();
     void Rotate(double angle);
     void Scale(double x, double y);
@@ -117,7 +118,7 @@ public:
     std::string GetJsonData(const std::string& path);
     double GetWidth() const;
     double GetHeight() const;
-    const std::vector<double>& GetLineDash() const;
+    LineDashParam GetLineDash() const;
 
     void UpdateFillRuleForPath(const CanvasFillRule rule);
     void UpdateFillRuleForPath2D(const CanvasFillRule rule);

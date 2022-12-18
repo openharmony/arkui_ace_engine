@@ -341,6 +341,7 @@ RefPtr<FocusableComponent> ViewStackProcessor::GetFocusableComponent(bool create
     if (createIfNotExist) {
         RefPtr<FocusableComponent> focusableComponent = AceType::MakeRefPtr<OHOS::Ace::FocusableComponent>();
         wrappingComponentsMap.emplace("focusable", focusableComponent);
+        Component::MergeRSNode(focusableComponent);
         return focusableComponent;
     }
     return nullptr;
@@ -446,13 +447,6 @@ void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomV
 
 bool ViewStackProcessor::ShouldPopImmediately()
 {
-// Pop the non-pop mock component immediately on the preview
-#if defined(PREVIEW)
-    auto inspectorTag = GetMainComponent()->GetInspectorTag();
-    if (inspectorTag == "XComponentComponent" || inspectorTag == "WebComponent") {
-        return true;
-    }
-#endif
     auto type = AceType::TypeName(GetMainComponent());
     auto componentGroup = AceType::DynamicCast<ComponentGroup>(GetMainComponent());
     auto multiComposedComponent = AceType::DynamicCast<MultiComposedComponent>(GetMainComponent());
@@ -464,7 +458,7 @@ bool ViewStackProcessor::ShouldPopImmediately()
 
 void ViewStackProcessor::Pop()
 {
-    if (componentsStack_.size() == 1) {
+    if (componentsStack_.empty() || componentsStack_.size() == 1) {
         return;
     }
 
@@ -673,7 +667,7 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
         // mark head component, it should use external RSNode stored in tail component.
         components.emplace_back(mainComponent);
         Component::MergeRSNode(components);
-        components.front()->MarkUseExternalRSNode();
+        components.front()->MarkUseExternalRSNode(true);
     } else {
         // by default, mainComponent is placed after other components, they should share the same RSNode.
         //  (head)      (tail)
@@ -871,6 +865,12 @@ RefPtr<Component> ViewStackProcessor::GetScoringComponent() const
         return iter->second;
     }
     return nullptr;
+}
+
+RefPtr<ComposedComponent> ViewStackProcessor::CreateInspectorWrapper(const std::string& inspectorTag)
+{
+    return AceType::MakeRefPtr<V2::InspectorComposedComponent>(
+        V2::InspectorComposedComponent::GenerateId(), inspectorTag);
 }
 
 void ViewStackProcessor::CreateInspectorComposedComponent(const std::string& inspectorTag)

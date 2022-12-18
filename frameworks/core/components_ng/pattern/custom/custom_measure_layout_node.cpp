@@ -39,32 +39,22 @@ CustomMeasureLayoutNode::CustomMeasureLayoutNode(int32_t nodeId, const std::stri
     : FrameNode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey)
 {}
 
-CustomMeasureLayoutNode::~CustomMeasureLayoutNode()
+bool CustomMeasureLayoutNode::FireOnMeasure(NG::LayoutWrapper* layoutWrapper)
 {
-    if (destroyFunc_) {
-        destroyFunc_();
+    if (measureFunc_) {
+        measureFunc_(layoutWrapper);
+        return true;
     }
+    return false;
 }
 
-void CustomMeasureLayoutNode::Update()
+bool CustomMeasureLayoutNode::FireOnLayout(NG::LayoutWrapper* layoutWrapper)
 {
-    if (updateFunc_) {
-        updateFunc_();
+    if (layoutFunc_) {
+        layoutFunc_(layoutWrapper);
+        return true;
     }
-    needRebuild_ = false;
+    return false;
 }
 
-void CustomMeasureLayoutNode::MarkNeedUpdate()
-{
-    auto context = GetContext();
-    if (!context) {
-        LOGE("context is nullptr, fail to push async task");
-        return;
-    }
-    if (needRebuild_) {
-        return;
-    }
-    needRebuild_ = true;
-    context->AddDirtyCustomNode(Claim(this));
-}
 } // namespace OHOS::Ace::NG

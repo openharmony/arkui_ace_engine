@@ -80,7 +80,7 @@ void IfElseNode::SetBranchId(int32_t value)
 {
     branchIdChanged_ = (branchId_ != value);
     if (branchIdChanged_) {
-        LOGD("%{public}s id %{public}d, branchId changed to %{public}d", AceType::TypeName(this), nodeId_, value);
+        LOGD("%{public}s id %{public}d, branchId changed to %{public}d", AceType::TypeName(this), GetId(), value);
         // TODO check if we need to do anything to properly unregister old children!
         // same issue to check for ForEach CompareAndUpdateChildren
         Clean();
@@ -90,20 +90,13 @@ void IfElseNode::SetBranchId(int32_t value)
 
 void IfElseNode::FlushUpdateAndMarkDirty()
 {
-    if (!getProcessed_) {
-        // case when if true -> false.
-        branchIdChanged_ = true;
-        branchId_ = -1;
-        Clean();
-    }
     if (branchIdChanged_) {
         LOGD("%{public}s id %{public}d, branchId changed, resetting with %{public}d new children",
-            AceType::TypeName(this), nodeId_, static_cast<int32_t>(children_.size()));
+            AceType::TypeName(this), GetId(), static_cast<int32_t>(GetChildren().size()));
         // mark parent dirty to flush measure.
-        MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+        MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
     branchIdChanged_ = false;
-    getProcessed_ = false;
 }
 
 } // namespace OHOS::Ace::NG

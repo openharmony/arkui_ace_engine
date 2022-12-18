@@ -18,6 +18,8 @@
 #include <string>
 
 #include "base/log/event_report.h"
+#include "base/utils/utils.h"
+#include "base/utils/measure_util.h"
 #include "core/common/thread_checker.h"
 
 namespace OHOS::Ace::Framework {
@@ -29,7 +31,7 @@ CardFrontendDelegateDeclarative::~CardFrontendDelegateDeclarative()
 }
 
 void CardFrontendDelegateDeclarative::RunCard(const std::string& url,
-    const std::string& params, const std::string& profile, uint64_t cardId)
+    const std::string& params, const std::string& profile, int64_t cardId)
 {
     ACE_SCOPED_TRACE("CardFrontendDelegateDeclarative::RunCard");
     auto pageRouterManager = GetPageRouterManager();
@@ -38,25 +40,41 @@ void CardFrontendDelegateDeclarative::RunCard(const std::string& url,
     pageRouterManager->SetIsCard();
     auto cardPipeline = GetPipelineContext();
     auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [weakPageRouterManager = WeakPtr<NG::PageRouterManager>(pageRouterManager), 
          weakCardPipeline = WeakPtr<PipelineBase>(cardPipeline), url, params, cardId]() {
             auto pageRouterManager = weakPageRouterManager.Upgrade();
             CHECK_NULL_VOID(pageRouterManager);
             auto container = Container::Current();
-            if (!container) {
-                LOGE("RunCard host container null");
-                return;
-            }
+            CHECK_NULL_VOID(container);
             container->SetCardPipeline(weakCardPipeline, cardId);
             pageRouterManager->RunCard(url, params, cardId);
         },
         TaskExecutor::TaskType::UI); // eTSCard UI == Main JS/UI/PLATFORM
 }
 
-void CardFrontendDelegateDeclarative::FireCardEvent(const EventMarker& eventMarker, const std::string& params)
-{
+void CardFrontendDelegateDeclarative::FireCardEvent(const EventMarker& eventMarker, const std::string& params) {}
 
+void CardFrontendDelegateDeclarative::FireCardAction(const std::string& action)
+{
+    auto context = GetPipelineContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [weakCardPipeline = WeakPtr<PipelineBase>(context), action]() {
+            auto context = weakCardPipeline.Upgrade();
+            if (context) {
+                context->OnActionEvent(action);
+            }
+        },
+        TaskExecutor::TaskType::UI); // eTSCard UI == Main JS/UI/PLATFORM
 }
+
+double CardFrontendDelegateDeclarative::MeasureText(const MeasureContext& context)
+    {
+        return 0.0;
+    }
 
 } // namespace OHOS::Ace::Framework

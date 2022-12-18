@@ -17,6 +17,7 @@
 
 #include "core/components/divider/divider_component.h"
 #include "core/components/divider/divider_theme.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "frameworks/bridge/test/unittest/jsfrontend/dom_node_factory.h"
 
 using namespace testing;
@@ -85,7 +86,7 @@ HWTEST_F(DomDividerTest, DomDividerCreatorTest001, TestSize.Level1)
      * @tc.steps: step2. Check styles and attributes of created divider node.
      * @tc.expected: step2. The styles and attributes are as expected.
      */
-    auto themeManager = AceType::MakeRefPtr<ThemeManager>();
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     auto theme = themeManager->GetTheme<DividerTheme>();
     ASSERT_TRUE(theme);
     EXPECT_EQ(divider->GetStrokeWidth(), DEFAULT_STROKE_WIDTH);

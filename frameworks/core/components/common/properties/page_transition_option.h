@@ -40,7 +40,8 @@ enum class TransitionDirection {
     TRANSITION_OUT,
 };
 
-class TransitionTweenOption : public AceType {
+class TransitionTweenOption : public virtual AceType {
+    DECLARE_ACE_TYPE(TransitionTweenOption, AceType)
 public:
     TransitionTweenOption(bool isRightToLeft, const WeakPtr<PipelineContext>& context);
     ~TransitionTweenOption() override = default;
@@ -55,9 +56,9 @@ public:
 
 protected:
     double deviceWidth_ = TRANSITION_DEFAULT_WIDTH;   // default device width
-    double deviceHeight_ = TRANSITION_DEFAULT_HEIGHT;   // default device height
-    double deviceViewScale_ = 1.0; // default device view scale
-    bool isRightToLeft_ = false; // default RTL config
+    double deviceHeight_ = TRANSITION_DEFAULT_HEIGHT; // default device height
+    double deviceViewScale_ = 1.0;                    // default device view scale
+    bool isRightToLeft_ = false;                      // default RTL config
     WindowModal windowModal_ = WindowModal::NORMAL;
     TweenOption contentInOption_;
     TweenOption contentOutOption_;
@@ -70,6 +71,7 @@ protected:
 };
 
 class TransitionTvTweenOption : public TransitionTweenOption {
+    DECLARE_ACE_TYPE(TransitionTvTweenOption, TransitionTweenOption)
 public:
     TransitionTvTweenOption(bool isRightToLeft, const WeakPtr<PipelineContext>& context);
     ~TransitionTvTweenOption() override = default;
@@ -85,10 +87,11 @@ private:
 };
 
 class TransitionPhoneTweenOption : public TransitionTweenOption {
+    DECLARE_ACE_TYPE(TransitionPhoneTweenOption, TransitionTweenOption)
 public:
     TransitionPhoneTweenOption(TransitionEvent event, bool isRightToLeft, const WeakPtr<PipelineContext>& context);
-    TransitionPhoneTweenOption(TransitionEvent event, bool isRightToLeft, const RRect& rrect,
-        const WeakPtr<PipelineContext>& context);
+    TransitionPhoneTweenOption(
+        TransitionEvent event, bool isRightToLeft, const RRect& rrect, const WeakPtr<PipelineContext>& context);
     ~TransitionPhoneTweenOption() override = default;
 
 private:
@@ -103,6 +106,7 @@ private:
 };
 
 class TransitionWatchTweenOption : public TransitionTweenOption {
+    DECLARE_ACE_TYPE(TransitionWatchTweenOption, TransitionTweenOption)
 public:
     TransitionWatchTweenOption(TransitionEvent event, bool isRightToLeft, const WeakPtr<PipelineContext>& context);
     ~TransitionWatchTweenOption() override = default;
@@ -113,6 +117,7 @@ private:
 };
 
 class TransitionDeclarativeTweenOption final : public TransitionTweenOption {
+    DECLARE_ACE_TYPE(TransitionDeclarativeTweenOption, TransitionTweenOption)
 public:
     TransitionDeclarativeTweenOption(bool isRightToLeft, const WeakPtr<PipelineContext>& context)
         : TransitionTweenOption(isRightToLeft, context)

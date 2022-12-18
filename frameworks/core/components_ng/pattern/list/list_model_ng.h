@@ -25,9 +25,10 @@ public:
     void Create() override;
     void SetSpace(const Dimension& space) override;
     void SetInitialIndex(int32_t initialIndex) override;
-    void SetScroller(void* scroller) override {}
+    RefPtr<ScrollControllerBase> CreateScrollController() override;
+    void SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy) override;
     void SetListDirection(Axis axis) override;
-    void SetScrollBar(DisplayMode scrollBar) override {}
+    void SetScrollBar(DisplayMode scrollBar) override;
     void SetEdgeEffect(EdgeEffect edgeEffect) override;
     void SetEditMode(bool editMode) override {}
     void SetDivider(const V2::ItemDivider& divider) override;
@@ -49,12 +50,14 @@ public:
     void SetOnReachStart(OnReachEvent&& onReachStart) override;
     void SetOnReachEnd(OnReachEvent&& onReachEnd) override;
     void SetOnItemDelete(OnItemDeleteEvent&& onItemDelete) override {}
-    void SetOnItemMove(OnItemMoveEvent&& onItemMove) override {}
-    void SetOnItemDragStart(OnItemDragStartFunc&& onItemDragStart) override {}
-    void SetOnItemDragEnter(OnItemDragEnterFunc&& onItemDragEnter) override {}
-    void SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave) override {}
-    void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) override {}
-    void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override {}
+    void SetOnItemMove(OnItemMoveEvent&& onItemMove) override;
+    void SetOnItemDragStart(OnItemDragStartFunc&& onItemDragStart) override;
+    void SetOnItemDragEnter(OnItemDragEnterFunc&& onItemDragEnter) override;
+    void SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave) override;
+    void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) override;
+    void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
+private:
+    void AddDragFrameNodeToManager() const;
 };
 
 } // namespace OHOS::Ace::NG

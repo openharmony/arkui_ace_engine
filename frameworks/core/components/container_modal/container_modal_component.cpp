@@ -28,6 +28,7 @@
 #include "core/components/tween/tween_component.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/gestures/pan_gesture.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -70,20 +71,36 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
         AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, BuildTitleChildren(false));
 
     // handle mouse move
-    titleBox->SetOnMouseId([contextWptr = context_](MouseInfo& info) {
+    titleBox->SetOnMouseId([contextWptr = context_, weak = WeakClaim(this)](MouseInfo& info) {
         auto context = contextWptr.Upgrade();
-        if (context && info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
-            context->FireWindowStartMoveCallBack();
+        CHECK_NULL_VOID_NOLOG(context);
+        auto container = weak.Upgrade();
+        if (info.GetButton() != MouseButton::LEFT_BUTTON) {
+            return;
+        }
+        if (info.GetAction() == MouseAction::MOVE) {
+            container->isStartMove_ = true;
+        }
+        if (info.GetAction() == MouseAction::PRESS && container->isStartMove_) {
+            context->GetWindowManager()->WindowStartMove();
+        }
+        if (info.GetAction() == MouseAction::RELEASE) {
+            container->isStartMove_ = false;
         }
     });
 
     // handle touch move
-    titleBox->SetOnTouchMoveId([contextWptr = context_](const TouchEventInfo&) {
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    auto panGesture = AceType::MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
+    panGesture->SetOnActionStartId([contextWptr = context_] (const GestureEvent&) {
         auto context = contextWptr.Upgrade();
         if (context) {
-            context->FireWindowStartMoveCallBack();
+            LOGI("container window start move.");
+            context->GetWindowManager()->WindowStartMove();
         }
     });
+    titleBox->AddGesture(GesturePriority::Low, panGesture);
     titleBox->SetChild(titleChildrenRow);
 
     if (isDeclarative_) {
@@ -154,7 +171,17 @@ RefPtr<Component> ContainerModalComponent::BuildControlButton(
     button->SetType(ButtonType::CIRCLE);
     button->SetBackgroundColor(isFocus ? TITLE_BUTTON_BACKGROUND_COLOR : TITLE_BUTTON_BACKGROUND_COLOR_LOST_FOCUS);
     button->SetClickedColor(TITLE_BUTTON_CLICKED_COLOR);
-    button->SetClickFunction(std::move(clickCallback));
+    if (isFloating) {
+        button->SetClickFunction(std::move(clickCallback));
+    } else {
+        button->SetClickFunction([weak = WeakClaim(this), clickCallback] () {
+            auto container = weak.Upgrade();
+            CHECK_NULL_VOID(container);
+            if (!container->isStartMove_) {
+                clickCallback();
+            }
+        });
+    }
     button->SetFocusable(false);
     
     ++controlButtonId;
@@ -212,7 +239,8 @@ void ContainerModalComponent::BuildInnerChild()
     SetChild(containerBox);
 }
 
-std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool isFloating, bool isFocus)
+std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool isFloating, bool isFocus,
+    bool isFullWindow)
 {
     // title icon
     if (!titleIcon_) {
@@ -228,6 +256,7 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
     }
     TextStyle style;
     style.SetFontSize(TITLE_TEXT_FONT_SIZE);
+    style.SetMaxLines(1);
     style.SetTextColor(isFocus ? TITLE_TEXT_COLOR : TITLE_TEXT_COLOR_LOST_FOCUS);
     style.SetFontWeight(FontWeight::W500);
     style.SetAllowScale(false);
@@ -239,51 +268,48 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
         isFloating ? FLOATING_TITLE_ROW : TITLE_ROW);
 
     // title control button
-    auto contextWptr = context_;
+    auto windowManager = context_.Upgrade()->GetWindowManager();
     auto leftSplitButton = isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT
                                    : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_SPLIT_LEFT;
-    auto titleLeftSplitButton = BuildControlButton(leftSplitButton, [contextWptr]() {
-            LOGI("left split button clicked");
-            auto context = contextWptr.Upgrade();
-            if (context) {
-                context->FireWindowSplitCallBack();
+    auto titleLeftSplitButton = BuildControlButton(leftSplitButton, [windowManager]() {
+            if (windowManager) {
+                LOGI("left split button clicked");
+                windowManager->FireWindowSplitCallBack();
             }
         }, isFocus, isFloating);
-    auto maxRecoverButton = isFloating ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER
-                                       : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE;
+    auto maxRecoverButton = isFloating && isFullWindow ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER
+                                                       : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE;
     if (!isFocus) {
-        maxRecoverButton = isFloating ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_RECOVER
-                                      : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MAXIMIZE;
+        maxRecoverButton = isFloating && isFullWindow ?
+            InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_RECOVER :
+            InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MAXIMIZE;
     }
-    auto titleMaximizeRecoverButton = BuildControlButton(maxRecoverButton, [contextWptr]() {
-            auto context = contextWptr.Upgrade();
-            if (context) {
-                auto mode = context->FireWindowGetModeCallBack();
+    auto titleMaximizeRecoverButton = BuildControlButton(maxRecoverButton, [windowManager]() {
+            if (windowManager) {
+                auto mode = windowManager->GetWindowMode();
                 if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
                     LOGI("recover button clicked");
-                    context->FireWindowRecoverCallBack();
+                    windowManager->WindowRecover();
                 } else {
                     LOGI("maximize button clicked");
-                    context->FireWindowMaximizeCallBack();
+                    windowManager->WindowMaximize();
                 }
             }
         }, isFocus, isFloating);
     auto minimizeButton = isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE
                                   : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MINIMIZE;
-    auto titleMinimizeButton = BuildControlButton(minimizeButton, [contextWptr]() {
-            auto context = contextWptr.Upgrade();
-            if (context) {
+    auto titleMinimizeButton = BuildControlButton(minimizeButton, [windowManager]() {
+            if (windowManager) {
                 LOGI("minimize button clicked");
-                context->FireWindowMinimizeCallBack();
+                windowManager->WindowMinimize();
             }
         }, isFocus, isFloating);
     auto closeButton = isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE
                                : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE;
-    auto titleCloseButton = BuildControlButton(closeButton, [contextWptr]() {
-            auto context = contextWptr.Upgrade();
-            if (context) {
+    auto titleCloseButton = BuildControlButton(closeButton, [windowManager]() {
+            if (windowManager) {
                 LOGI("close button clicked");
-                context->FireWindowCloseCallBack();
+                windowManager->WindowClose();
             }
         }, isFocus, isFloating);
     std::list<RefPtr<Component>> titleChildren;

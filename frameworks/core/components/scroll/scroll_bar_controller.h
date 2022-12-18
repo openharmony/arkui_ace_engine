@@ -24,6 +24,7 @@
 #include "core/common/vibrator/vibrator.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/drag_recognizer.h"
+#include "core/gestures/pan_recognizer.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 
@@ -45,8 +46,8 @@ public:
     void HandleScrollBarEnd();
     void HandleTouchDown();
     void HandleTouchUp();
-    void HandleDragUpdate(const DragUpdateInfo& info);
-    void HandleDragEnd(const DragEndInfo& info);
+    void HandleDragUpdate(const GestureEvent& info);
+    void HandleDragEnd(const GestureEvent& info);
     virtual void MarkScrollRender();
     void Reset();
 
@@ -56,13 +57,20 @@ public:
     }
     bool HandleEvent(const TouchEvent& event) override
     {
-        if (dragRecognizer_) {
-            dragRecognizer_->HandleEvent(event);
+        if (panRecognizer_) {
+            panRecognizer_->HandleEvent(event);
         }
         if (rawRecognizer_) {
             return rawRecognizer_->HandleEvent(event);
         }
         return true;
+    }
+    bool HandleEvent(const AxisEvent& event) override
+    {
+        if (panRecognizer_) {
+            return panRecognizer_->HandleEvent(event);
+        }
+        return false;
     }
 
     void SetCallback(const ScrollBarPositionCallback& callback)
@@ -77,8 +85,8 @@ public:
 
     void SetCoordinateOffset(const Offset& offset) const
     {
-        if (dragRecognizer_) {
-            dragRecognizer_->SetCoordinateOffset(offset);
+        if (panRecognizer_) {
+            panRecognizer_->SetCoordinateOffset(offset);
         }
         if (rawRecognizer_) {
             rawRecognizer_->SetCoordinateOffset(offset);
@@ -140,7 +148,10 @@ public:
         return isPressed_;
     }
 
-    void SetIsHover(bool isHover);
+    void SetIsHover(bool isInBarRegion);
+
+    void OnFlushTouchEventsBegin() override;
+    void OnFlushTouchEventsEnd() override;
 
 protected:
     virtual bool UpdateScrollPosition(double offset, int32_t source);
@@ -154,6 +165,8 @@ protected:
     // Play shrink animation when lost hover or pressed state, from active with to inactive width.
     void PlayShrinkAnimation();
 
+    void InitBarEndAnimation(const WeakPtr<PipelineContext>& context);
+
     WeakPtr<RenderNode> scroll_;
     ScrollBarPositionCallback callback_;
     ScrollBarEventCallback scrollEndCallback_;
@@ -161,7 +174,7 @@ protected:
     ScrollBarTouchEventCallback touchUpCallback_;
     ScrollBarTouchEventCallback touchDownCallback_;
 
-    RefPtr<DragRecognizer> dragRecognizer_;
+    RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<RawRecognizer> rawRecognizer_;
 
     RefPtr<Animator> scrollEndAnimator_;
@@ -177,6 +190,8 @@ protected:
     bool isPressed_ = false;
     // Whether scroll bar is hover.
     bool isHover_ = false;
+    // Whether event is in scroll bar region.
+    bool isInBar_ = false;
     double currentPos_ = 0.0;
     Dimension activeWidth_;
     Dimension inactiveWidth_;

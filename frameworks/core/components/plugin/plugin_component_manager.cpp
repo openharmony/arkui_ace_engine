@@ -18,7 +18,7 @@
 #include <map>
 #include <vector>
 
-#include "sa_mgr_client.h"
+#include "iservice_registry.h"
 #include "system_ability_definition.h"
 #include "ui_service_mgr_client.h"
 
@@ -93,12 +93,18 @@ void PluginComponentManager::UnregisterCallBack(const AAFwk::Want& want)
 
 sptr<AppExecFwk::IBundleMgr> PluginComponentManager::GetBundleManager()
 {
-    auto bundleObj =
-        OHOS::DelayedSingleton<AAFwk::SaMgrClient>::GetInstance()->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    if (bundleObj == nullptr) {
-        LOGE("failed to get bundle manager service");
+    auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityMgr == nullptr) {
+        LOGE("Failed to get SystemAbilityManager.");
         return nullptr;
     }
+
+    auto bundleObj = systemAbilityMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (bundleObj == nullptr) {
+        LOGE("Failed to get bundle manager service");
+        return nullptr;
+    }
+
     return iface_cast<AppExecFwk::IBundleMgr>(bundleObj);
 }
 
@@ -106,7 +112,7 @@ void PluginComponentManager::UIServiceListener::ResgisterListener(
     const std::shared_ptr<PluginComponentCallBack>& callback, CallBackType callBackType)
 {
     LOGD("PluginComponentManager::UIServiceListener::ResgisterListener");
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     callbackVec_.try_emplace(callback, callBackType);
 }
 
@@ -128,7 +134,7 @@ void PluginComponentManager::UIServiceListener::OnPushCallBack(const AAFwk::Want
     }
     pluginTemplate.SetAbility(want.GetElement().GetBundleName() + "/" + want.GetElement().GetAbilityName());
 
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (auto &callback : callbackVec_) {
         if (callback.second == CallBackType::PushEvent && callback.first != nullptr) {
             callback.first->OnPushEvent(want, pluginTemplate, data, extraData);
@@ -140,7 +146,7 @@ void PluginComponentManager::UIServiceListener::OnRequestCallBack(
     const AAFwk::Want& want, const std::string& name,  const std::string& data)
 {
     LOGD("PluginComponentManager::UIServiceListener::OnRequestCallBack");
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (auto &callback : callbackVec_) {
         if (callback.second == CallBackType::RequestEvent && callback.first != nullptr) {
             callback.first->OnRequestEvent(want, name, data);
@@ -152,27 +158,38 @@ void PluginComponentManager::UIServiceListener::OnReturnRequest(
     const AAFwk::Want& want, const std::string& source, const std::string& data, const std::string& extraData)
 {
     LOGD("PluginComponentManager::UIServiceListener::OnReturnRequest");
-    for (auto iter = callbackVec_.begin(); iter != callbackVec_.end();) {
-        if (iter->second == CallBackType::RequestCallBack && iter->first != nullptr) {
-            PluginComponentTemplate pluginTemplate;
-            if (source.empty()) {
-                pluginTemplate.SetSource("{}");
+
+    std::vector<std::shared_ptr<PluginComponentCallBack>> callbacks;
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        for (auto iter = callbackVec_.begin(); iter != callbackVec_.end();) {
+            if (iter->second == CallBackType::RequestCallBack && iter->first != nullptr) {
+                callbacks.emplace_back(iter->first);
+                callbackVec_.erase(iter++);
             } else {
-                pluginTemplate.SetSource(source);
+                iter++;
             }
-            pluginTemplate.SetAbility(want.GetElement().GetBundleName() + "/" + want.GetElement().GetAbilityName());
-            iter->first->OnRequestCallBack(pluginTemplate, data, extraData);
-            callbackVec_.erase(iter++);
-        } else {
-            iter++;
         }
+    }
+
+    PluginComponentTemplate pluginTemplate;
+    if (source.empty()) {
+        pluginTemplate.SetSource("{}");
+    } else {
+        pluginTemplate.SetSource(source);
+    }
+    pluginTemplate.SetAbility(want.GetElement().GetBundleName() + "/" + want.GetElement().GetAbilityName());
+
+    for (const auto& item : callbacks) {
+        item->OnRequestCallBack(pluginTemplate, data, extraData);
     }
 }
 
 void PluginComponentManager::UIServiceListener::RequestByJsonPath(
     const PluginComponentTemplate& pluginTemplate, const std::string& data)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (auto iter = callbackVec_.begin(); iter != callbackVec_.end();) {
         if (iter->second == CallBackType::RequestCallBack && iter->first != nullptr) {
             iter->first->OnRequestCallBack(pluginTemplate, data, "{}");

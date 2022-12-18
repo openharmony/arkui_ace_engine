@@ -401,6 +401,10 @@ void RosenRenderImage::FetchImageObject()
             break;
         }
         default: {
+            // prevent painting old pixMap while new image is loading
+            if (curSourceInfo_.GetSrcType() == SrcType::PIXMAP) {
+                imageObj_ = nullptr;
+            }
             bool syncMode = (context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD &&
                                 sourceInfo_.GetSrcType() != SrcType::NETWORK) ||
                             syncMode_;
@@ -454,13 +458,13 @@ void RosenRenderImage::ProcessPixmapForPaint()
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> skImage;
     if (!renderTaskHolder_->ioManager) {
-        skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        skImage = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixmap));
     } else {
 #ifndef GPU_DISABLED
         skImage = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
             imagePixmap, true, imagePixmap.colorSpace(), true);
 #else
-        skImage = SkImage::MakeFromRaster(imagePixmap, nullptr, nullptr);
+        skImage = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixmap));
 #endif
     }
     auto canvasImage = flutter::CanvasImage::Create();
@@ -551,15 +555,6 @@ void RosenRenderImage::RebuildSvgRenderTree(const SvgRenderTree& svgRenderTree, 
     MarkNeedRender();
 }
 
-std::string RosenRenderImage::GetSvgImageKey()
-{
-    auto key = sourceInfo_.GetCacheKey();
-    if (sourceInfo_.GetFillColor().has_value()) {
-        key += sourceInfo_.GetFillColor().value().ColorToString();
-    }
-    return key;
-}
-
 void RosenRenderImage::CacheSvgImageObject()
 {
     auto context = GetContext().Upgrade();
@@ -569,7 +564,7 @@ void RosenRenderImage::CacheSvgImageObject()
     }
     auto imageCache = context->GetImageCache();
     if (imageCache) {
-        imageCache->CacheImgObj(GetSvgImageKey(), imageObj_);
+        imageCache->CacheImgObj(sourceInfo_.GetCacheKey(), imageObj_);
     }
 }
 
@@ -585,7 +580,7 @@ RefPtr<ImageObject> RosenRenderImage::QueryCacheSvgImageObject()
         LOGE("image cached is null!");
         return nullptr;
     }
-    return imageCache->GetCacheImgObj(GetSvgImageKey());
+    return imageCache->GetCacheImgObj(sourceInfo_.GetCacheKey());
 }
 
 void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
@@ -693,7 +688,7 @@ void RosenRenderImage::ApplyBorderRadius(
     // 1. when the image source is a SVG;
     // 2. when image loads fail;
     // 3. when there is a repeat to do;
-    bool clipLayoutSize = sourceInfo_.IsSvg() || (imageRepeat_ != ImageRepeat::NOREPEAT) ||
+    bool clipLayoutSize = sourceInfo_.IsSvg() || (imageRepeat_ != ImageRepeat::NO_REPEAT) ||
         (imageLoadingStatus_ == ImageLoadingStatus::LOAD_FAIL);
     Rect clipRect = clipLayoutSize ? Rect(offset, GetLayoutSize()) : paintRect + offset;
 
@@ -784,7 +779,8 @@ void RosenRenderImage::CanvasDrawImageRect(
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
     if (GetAdaptiveFrameRectFlag()) {
         recordingCanvas->translate(imageRenderPosition_.GetX() * -1, imageRenderPosition_.GetY() * -1);
-        Rosen::RsImageInfo rsImageInfo(fitNum, repeatNum, radii_, scale_);
+        Rosen::RsImageInfo rsImageInfo(fitNum, repeatNum, radii_, scale_,
+            0, image_->compressWidth(), image_->compressHeight());
         recordingCanvas->DrawImageWithParm(image_->image(), image_->compressData(), rsImageInfo, paint);
         image_->setCompress(nullptr, 0, 0);
         return;
@@ -803,7 +799,7 @@ void RosenRenderImage::CanvasDrawImageRect(
 
     Rect realDstRect = paintRect + offset;
 
-    if (imageRepeat_ != ImageRepeat::NOREPEAT) {
+    if (imageRepeat_ != ImageRepeat::NO_REPEAT) {
         DrawImageOnCanvas(scaledSrcRect, realDstRect, paint, canvas);
         return;
     }
@@ -1050,11 +1046,11 @@ void RosenRenderImage::OnHiddenChanged(bool hidden)
             CancelBackgroundTasks();
         }
     } else {
-        if (imageObj_ && imageObj_->GetFrameCount() > 1) {
+        if (imageObj_ && imageObj_->GetFrameCount() > 1 && GetVisible()) {
             LOGI("Animated image Resume");
             imageObj_->Resume();
-        } else if (backgroundTaskCancled_) {
-            backgroundTaskCancled_ = false;
+        } else if (backgroundTaskCanceled_) {
+            backgroundTaskCanceled_ = false;
             if (sourceInfo_.GetSrcType() == SrcType::MEMORY) {
                 LOGE("memory image: %{public}s should not be notified to resume loading.",
                     sourceInfo_.ToString().c_str());
@@ -1068,10 +1064,10 @@ void RosenRenderImage::OnHiddenChanged(bool hidden)
 void RosenRenderImage::CancelBackgroundTasks()
 {
     if (fetchImageObjTask_) {
-        backgroundTaskCancled_ = fetchImageObjTask_.Cancel(false);
+        backgroundTaskCanceled_ = fetchImageObjTask_.Cancel(false);
     }
     if (imageObj_) {
-        backgroundTaskCancled_ = imageObj_->CancelBackgroundTasks();
+        backgroundTaskCanceled_ = imageObj_->CancelBackgroundTasks();
     }
 }
 
@@ -1118,32 +1114,36 @@ void RosenRenderImage::DrawSVGImage(const Offset& offset, SkCanvas* canvas)
     if (!skiaDom_) {
         return;
     }
-    Size svgContainerSize = GetLayoutSize();
-    if (svgContainerSize.IsInfinite() || !svgContainerSize.IsValid()) {
-        // when layout size is invalid, try the container size of svg
-        svgContainerSize = Size(skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-        if (svgContainerSize.IsInfinite() || !svgContainerSize.IsValid()) {
+    Size layoutSize = GetLayoutSize();
+    Size imageSize(skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
+    if (layoutSize.IsInfinite() || !layoutSize.IsValid()) {
+        if (imageSize.IsInfinite() || !imageSize.IsValid()) {
             LOGE("Invalid layout size: %{private}s, invalid svgContainerSize: %{private}s, stop draw svg. The max size"
                  " of layout param is %{private}s",
-                GetLayoutSize().ToString().c_str(), svgContainerSize.ToString().c_str(),
+                GetLayoutSize().ToString().c_str(), layoutSize.ToString().c_str(),
                 GetLayoutParam().GetMaxSize().ToString().c_str());
             return;
-        } else {
-            LOGE("Invalid layout size: %{private}s, valid svgContainerSize: %{private}s, use svg container size to draw"
-                 " svg. The max size of layout param is %{private}s",
-                GetLayoutSize().ToString().c_str(), svgContainerSize.ToString().c_str(),
-                GetLayoutParam().GetMaxSize().ToString().c_str());
         }
+        // when layout size is invalid, use svg's own size
+        layoutSize = imageSize;
     }
+
     canvas->translate(static_cast<float>(offset.GetX()), static_cast<float>(offset.GetY()));
-    double width = svgContainerSize.Width();
-    double height = svgContainerSize.Height();
+
+    auto width = static_cast<float>(layoutSize.Width());
+    auto height = static_cast<float>(layoutSize.Height());
     if (matchTextDirection_ && GetTextDirection() == TextDirection::RTL) {
         canvas->translate(width, 0);
         canvas->scale(-1, 1);
     }
-    skiaDom_->setContainerSize({ width, height });
     canvas->clipRect({ 0, 0, width, height }, SkClipOp::kIntersect, true);
+    if (imageSize.IsValid() && !imageSize.IsInfinite()) {
+        // scale svg to layout size
+        float scale = std::min(width / imageSize.Width(), height / imageSize.Height());
+        canvas->scale(scale, scale);
+    } else {
+        skiaDom_->setContainerSize({ width, height });
+    }
     skiaDom_->render(canvas);
 }
 
@@ -1364,12 +1364,18 @@ void RosenRenderImage::OnAppShow()
     }
 }
 
+// pause image when not visible
 void RosenRenderImage::OnVisibleChanged()
 {
-    if (imageObj_ && GetVisible()) {
-        imageObj_->Resume();
-    } else if (imageObj_ && !GetVisible()) {
-        imageObj_->Pause();
+    if (imageObj_) {
+        if (GetVisible()) {
+            imageObj_->Resume();
+        } else {
+            imageObj_->Pause();
+            LOGD("pause image when invisible");
+        }
+    } else {
+        LOGD("OnVisibleChanged: imageObj is null");
     }
 }
 

@@ -52,11 +52,21 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<RadioPaintMethod>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto eventHub = host->GetEventHub<EventHub>();
+        CHECK_NULL_RETURN(eventHub, nullptr);
+        auto enabled = eventHub->IsEnabled();
+        auto paintMethod =
+            MakeRefPtr<RadioPaintMethod>(enabled, isTouch_, isHover_, totalScale_, pointScale_, uiStatus_);
+        return paintMethod;
     }
 
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*dirty*/, const DirtySwapConfig& /*config*/) override
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& /*config*/) override
     {
+        auto geometryNode = dirty->GetGeometryNode();
+        offset_ = geometryNode->GetContentOffset();
+        size_ = geometryNode->GetContentSize();
         return true;
     }
 
@@ -85,26 +95,67 @@ public:
         preGroup_ = group;
     }
 
+    FocusPattern GetFocusPattern() const override;
+
     void UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode);
 
-    FocusPattern GetFocusPattern() const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
-        return { FocusType::NODE, true };
+        Pattern::ToJsonValue(json);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto radioEventHub = host->GetEventHub<NG::RadioEventHub>();
+        auto value = radioEventHub ? radioEventHub->GetValue() : "";
+        auto group = radioEventHub ? radioEventHub->GetGroup() : "";
+        auto resultJson = JsonUtil::Create(true);
+        resultJson->Put("value", value.c_str());
+        resultJson->Put("group", group.c_str());
+        json->Put("value", resultJson->ToString().c_str());
     }
 
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
+    void InitClickEvent();
+    void InitTouchEvent();
+    void InitMouseEvent();
     void OnClick();
     void UpdateState();
     void UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool check);
+    void OnTouchDown();
+    void OnTouchUp();
+    void HandleMouseEvent(bool isHover);
+    void PlayAnimation(bool isOn);
+    void StopTranslateAnimation();
+    void StopAnimation();
+    void UpdateTotalScale(float scale);
+    void UpdatePointScale(float scale);
+    void UpdateUIStatus(bool check);
+    RectF GetHotZoneRect(bool isOriginal) const;
+    // Init key event
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
 
     RefPtr<ClickEvent> clickListener_;
+    RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<InputEvent> mouseEvent_;
+    RefPtr<Animator> onController_;
+    RefPtr<Animator> offController_;
 
+    bool isFirstCreated_ = true;
     bool preCheck_ = false;
     std::optional<std::string> preValue_;
     std::optional<std::string> preGroup_;
+    bool isTouch_ = false;
+    bool isHover_ = false;
+    float totalScale_ = 1.0f;
+    float pointScale_ = 0.5f;
+    UIStatus uiStatus_ = UIStatus::UNSELECTED;
+    Dimension hotZoneHorizontalPadding_ = 11.0_vp;
+    Dimension hotZoneVerticalPadding_ = 11.0_vp;
+    OffsetF offset_;
+    SizeF size_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };

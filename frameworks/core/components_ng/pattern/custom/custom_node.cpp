@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
@@ -35,14 +36,7 @@ CustomNode::CustomNode(int32_t nodeId, const std::string& viewKey)
     : UINode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey)
 {}
 
-CustomNode::~CustomNode()
-{
-    if (destroyFunc_) {
-        destroyFunc_();
-    }
-}
-
-void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
+void CustomNode::Build()
 {
     if (renderFunction_) {
         {
@@ -52,36 +46,21 @@ void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bo
         {
             ACE_SCOPED_TRACE("CustomNode:BuildItem");
             // first create child node and wrapper.
+            ScopedViewStackProcessor scopedViewStackProcessor;
             auto child = renderFunction_();
-            CHECK_NULL_VOID(child);
-            child->MountToParent(Claim(this));
-            child->AdjustLayoutWrapperTree(parent, true, true);
+            if (child) {
+                child->MountToParent(Claim(this));
+            }
         }
         renderFunction_ = nullptr;
-    } else {
-        UINode::AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
     }
+    UINode::Build();
 }
 
-void CustomNode::Update()
+void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
 {
-    if (updateFunc_) {
-        updateFunc_();
-    }
-    needRebuild_ = false;
+    Build();
+    UINode::AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
 }
 
-void CustomNode::MarkNeedUpdate()
-{
-    auto context = GetContext();
-    if (!context) {
-        LOGE("context is nullptr, fail to push async task");
-        return;
-    }
-    if (needRebuild_) {
-        return;
-    }
-    needRebuild_ = true;
-    context->AddDirtyCustomNode(Claim(this));
-}
 } // namespace OHOS::Ace::NG

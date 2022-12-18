@@ -29,8 +29,6 @@
 
 #ifdef USE_V8_ENGINE
 #include "bridge/declarative_frontend/engine/v8/v8_declarative_engine.h"
-#elif USE_QUICKJS_ENGINE
-#include "bridge/declarative_frontend/engine/quickjs/qjs_declarative_engine_instance.h"
 #elif USE_ARK_ENGINE
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #endif
@@ -66,6 +64,9 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         context->PrepareOpenImplicitAnimation();
     });
     pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
+    if (!Container::IsCurrentUseNewPipeline()) {
+        pipelineContext->SetSyncAnimationOption(option);
+    }
     // Execute the function.
     JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
     jsAnimateToFunc->Call(info[1]);
@@ -90,6 +91,9 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         }
         context->PrepareCloseImplicitAnimation();
     });
+    if (!Container::IsCurrentUseNewPipeline()) {
+        pipelineContext->SetSyncAnimationOption(AnimationOption());
+    }
     pipelineContext->CloseImplicitAnimation();
 }
 
@@ -98,9 +102,15 @@ void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOp
 {
     pipelineContext->FlushBuild();
     pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
+    if (!Container::IsCurrentUseNewPipeline()) {
+        pipelineContext->SetSyncAnimationOption(option);
+    }
     JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
     jsAnimateToFunc->Call(info[1]);
     pipelineContext->FlushBuild();
+    if (!Container::IsCurrentUseNewPipeline()) {
+        pipelineContext->SetSyncAnimationOption(AnimationOption());
+    }
     pipelineContext->CloseImplicitAnimation();
 }
 

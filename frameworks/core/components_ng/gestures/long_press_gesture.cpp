@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<GestureRecognizer> LongPressGesture::CreateRecognizer()
+RefPtr<NGGestureRecognizer> LongPressGesture::CreateRecognizer()
 {
     LOGD("create long press gesture, fingers %{public}d, duration %{public}d, isRepeat %{public}d", fingers_, duration_,
         repeat_);

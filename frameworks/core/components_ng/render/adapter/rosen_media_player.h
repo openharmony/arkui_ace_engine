@@ -48,7 +48,6 @@ public:
     int32_t SetPlaybackSpeed(float speed) override;
     int32_t SetSurface() override;
     int32_t PrepareAsync() override;
-    int32_t Prepare() override;
     bool IsPlaying() override;
     int32_t Play() override;
     int32_t Pause() override;

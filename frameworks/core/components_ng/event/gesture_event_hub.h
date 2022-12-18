@@ -28,6 +28,7 @@
 #include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/event/touch_event.h"
+#include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
 #include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
@@ -78,7 +79,17 @@ enum class HitTestResult {
     SELF_TRANSPARENT,
 };
 
+struct DragDropBaseInfo {
+    RefPtr<AceType> node;
+    RefPtr<PixelMap> pixelMap;
+    std::string extraInfo;
+};
+
+using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
+using OnDragDropFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
+
 struct DragDropInfo {
+    RefPtr<UINode> customNode;
     RefPtr<PixelMap> pixelMap;
     std::string extraInfo;
 };
@@ -159,26 +170,18 @@ public:
 
     void SetFocusClickEvent(GestureEventFunc&& clickEvent);
 
+    bool IsClickable() const
+    {
+        return clickEventActuator_ != nullptr;
+    }
+
+    bool ActClick();
+
+    void CheckClickActuator();
     // Set by user define, which will replace old one.
-    void SetClickEvent(GestureEventFunc&& clickEvent)
-    {
-        if (!clickEventActuator_) {
-            clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
-        }
-        clickEventActuator_->ReplaceClickEvent(std::move(clickEvent));
+    void SetUserOnClick(GestureEventFunc&& clickEvent);
 
-        SetFocusClickEvent(clickEventActuator_->GetClickEvent());
-    }
-
-    void AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
-    {
-        if (!clickEventActuator_) {
-            clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
-        }
-        clickEventActuator_->AddClickEvent(clickEvent);
-
-        SetFocusClickEvent(clickEventActuator_->GetClickEvent());
-    }
+    void AddClickEvent(const RefPtr<ClickEvent>& clickEvent);
 
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)
     {
@@ -188,20 +191,24 @@ public:
         clickEventActuator_->RemoveClickEvent(clickEvent);
     }
 
-    void AddLongPressEvent(const RefPtr<LongPressEvent>& event)
+    void BindMenu(GestureEventFunc&& showMenu);
+
+    bool IsLongClickable() const
+    {
+        return longPressEventActuator_ != nullptr;
+    }
+
+    bool ActLongClick();
+
+    void SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag = false,
+                           bool isDisableMouseLeft = false, int32_t duration = 500)
     {
         if (!longPressEventActuator_) {
             longPressEventActuator_ = MakeRefPtr<LongPressEventActuator>(WeakClaim(this));
+            longPressEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
         }
-        longPressEventActuator_->AddLongPressEvent(event);
-    }
-
-    void RemoveLongPressEvent(const RefPtr<LongPressEvent>& event)
-    {
-        if (!longPressEventActuator_) {
-            return;
-        }
-        longPressEventActuator_->RemoveLongPressEvent(event);
+        longPressEventActuator_->SetLongPressEvent(event, isForDrag, isDisableMouseLeft);
+        longPressEventActuator_->SetDuration(duration);
     }
 
     // Set by user define, which will replace old one.
@@ -238,25 +245,17 @@ public:
         dragEventActuator_->ReplaceDragEvent(dragEvent);
     }
 
-    void AddDragEvent(const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, float distance)
-    {
-        if (!dragEventActuator_ || direction.type != dragEventActuator_->GetDirection().type) {
-            dragEventActuator_ = MakeRefPtr<DragEventActuator>(WeakClaim(this), direction, fingers, distance);
-        }
-        dragEventActuator_->AddDragEvent(dragEvent);
-    }
-
-    void RemoveDragEvent(const RefPtr<DragEvent>& dragEvent)
+    void SetCustomDragEvent(const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, float distance)
     {
         if (!dragEventActuator_) {
-            return;
+            dragEventActuator_ = MakeRefPtr<DragEventActuator>(WeakClaim(this), direction, fingers, distance);
         }
-        dragEventActuator_->RemoveDragEvent(dragEvent);
+        dragEventActuator_->SetCustomDragEvent(dragEvent);
     }
 
     // the return value means prevents event bubbling.
     bool ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        TouchTestResult& innerTargets, TouchTestResult& finalResult);
+        TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId);
 
     RefPtr<FrameNode> GetFrameNode() const;
 
@@ -272,7 +271,8 @@ public:
         hitTestMode_ = hitTestMode;
     }
 
-    void CombineIntoExclusiveRecognizer(const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result);
+    void CombineIntoExclusiveRecognizer(
+        const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result, int32_t touchId);
 
     bool IsResponseRegion() const
     {
@@ -312,14 +312,18 @@ public:
     void HandleOnDragEnd(const GestureEvent& info);
     void HandleOnDragCancel();
 
+    void OnModifyDone();
+
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        std::list<RefPtr<GestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult);
+        std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId);
 
     void UpdateGestureHierarchy();
 
     // old path.
-    void UpdateExternalGestureRecognizer();
+    void UpdateExternalNGGestureRecognizer();
+
+    OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;
@@ -330,13 +334,17 @@ private:
     RefPtr<DragEventActuator> dragEventActuator_;
     RefPtr<ExclusiveRecognizer> innerExclusiveRecognizer_;
     RefPtr<ExclusiveRecognizer> nodeExclusiveRecognizer_;
+    RefPtr<ParallelRecognizer> nodeParallelRecognizer_;
     std::vector<RefPtr<ExclusiveRecognizer>> externalExclusiveRecognizer_;
     std::vector<RefPtr<ParallelRecognizer>> externalParallelRecognizer_;
     RefPtr<DragDropProxy> dragDropProxy_;
 
     // Set by use gesture, priorityGesture and parallelGesture attribute function.
     std::list<RefPtr<NG::Gesture>> gestures_;
-    std::list<RefPtr<GestureRecognizer>> gestureHierarchy_;
+    std::list<RefPtr<NGGestureRecognizer>> gestureHierarchy_;
+
+    // used in bindMenu, need to delete the old callback when bindMenu runs again
+    RefPtr<ClickEvent> showMenu_;
 
     HitTestMode hitTestMode_ = HitTestMode::HTMDEFAULT;
     bool recreateGesture_ = true;

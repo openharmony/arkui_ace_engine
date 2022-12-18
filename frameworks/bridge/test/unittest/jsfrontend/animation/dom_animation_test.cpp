@@ -16,7 +16,7 @@
 #include "gtest/gtest.h"
 
 #include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/js_frontend/engine/quickjs/animation_bridge.h"
+#include "frameworks/bridge/js_frontend/engine/common/base_animation_bridge.h"
 #include "frameworks/core/animation/curve.h"
 
 using namespace testing;

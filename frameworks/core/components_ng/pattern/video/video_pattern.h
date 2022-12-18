@@ -36,6 +36,8 @@ class VideoPattern : public Pattern {
     DECLARE_ACE_TYPE(VideoPattern, Pattern);
 
 public:
+    using HiddenChangeEvent = std::function<void(bool)>;
+
     VideoPattern() = default;
     explicit VideoPattern(const RefPtr<VideoControllerV2>& videoController);
     ~VideoPattern() override = default;
@@ -60,9 +62,19 @@ public:
         muted_ = muted;
     }
 
+    bool GetMuted() const
+    {
+        return muted_;
+    }
+
     void UpdateAutoPlay(bool autoPlay)
     {
         autoPlay_ = autoPlay;
+    }
+
+    bool GetAutoPlay() const
+    {
+        return autoPlay_;
     }
 
     void UpdateLoop(bool loop)
@@ -70,15 +82,34 @@ public:
         loop_ = loop;
     }
 
+    bool GetLoop() const
+    {
+        return loop_;
+    }
+
     void UpdateProgressRate(double progressRate)
     {
         progressRate_ = progressRate;
+    }
+
+    double GetProgressRate() const
+    {
+        return progressRate_;
     }
 
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::NODE, true };
     }
+
+    void SetHiddenChangeEvent(HiddenChangeEvent&& hiddenChangeEvent)
+    {
+        hiddenChangeEvent_ = std::move(hiddenChangeEvent);
+    }
+
+    bool OnBackPressed();
+
+    void OnVisibleChange(bool isVisible) override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -92,6 +123,7 @@ private:
     void RegisterMediaPlayerEvent();
     void SetMethodCall();
     bool SetSourceForMediaPlayer();
+    bool HasPlayer() const;
 
     void Start();
     void Pause();
@@ -102,6 +134,7 @@ private:
     void ExitFullScreen();
     void UpdateLooping();
     void SetSpeed();
+    void UpdateMuted();
 
     void OnCurrentTimeChange(uint32_t currentPos);
     void OnPlayerStatus(PlaybackStatus status);
@@ -115,12 +148,17 @@ private:
 
     void AddPreviewNodeIfNeeded();
     void AddControlBarNodeIfNeeded();
+    void UpdateVideoProperty();
     RefPtr<FrameNode> CreateControlBar();
-    static RefPtr<FrameNode> CreateButton();
+    static RefPtr<FrameNode> CreateSVG();
     static RefPtr<FrameNode> CreateText(uint32_t time);
     RefPtr<FrameNode> CreateSlider();
-    void ChangePlayButtonTag(bool playing, RefPtr<FrameNode>& playBtn);
+    void ChangePlayButtonTag();
+    void ChangePlayButtonTag(RefPtr<FrameNode>& playBtn);
+    void SetFullScreenButtonCallBack(RefPtr<FrameNode>& fullScreenBtn);
     void ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode>& fullScreenBtn);
+    void ResetStatus();
+    void HiddenChange(bool hidden);
 
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
@@ -129,9 +167,9 @@ private:
 
     GestureEventFunc playBtnCallBack_;
     GestureEventFunc pauseBtnCallBack_;
+    HiddenChangeEvent hiddenChangeEvent_;
 
     bool isStop_ = false;
-    bool hasInit_ = false;
     std::string src_;
 
     uint32_t duration_ = 0;
@@ -140,6 +178,10 @@ private:
     bool muted_ = false;
     bool autoPlay_ = false;
     bool loop_ = false;
+    bool isFullScreen_ = false;
+    bool isInitialState_ = true; // Initial state is true. Play or seek will set it to false.
+    bool isPlaying_ = false;
+    bool pastPlayingStatus_ = false;
     double progressRate_ = 1.0;
 
     ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);

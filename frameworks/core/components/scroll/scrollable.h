@@ -22,6 +22,7 @@
 #include "core/animation/animator.h"
 #include "core/animation/friction_motion.h"
 #include "core/animation/scroll_motion.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/event/axis_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/pan_recognizer.h"
@@ -97,6 +98,18 @@ public:
     void SetAxis(Axis axis)
     {
         axis_ = axis;
+        PanDirection panDirection;
+        if (axis_ == Axis::VERTICAL) {
+            panDirection.type = PanDirection::VERTICAL;
+        } else {
+            panDirection.type = PanDirection::HORIZONTAL;
+        }
+        if (panRecognizer_) {
+            panRecognizer_->SetDirection(panDirection);
+        }
+        if (panRecognizerNG_) {
+            panRecognizerNG_->SetDirection(panDirection);
+        }
     }
 
     void SetScrollableNode(const WeakPtr<RenderNode>& node)
@@ -125,8 +138,23 @@ public:
             panRecognizer_->SetCoordinateOffset(offset);
         }
 
+        if (panRecognizerNG_) {
+            panRecognizerNG_->SetCoordinateOffset(offset);
+        }
+
         if (rawRecognizer_) {
             rawRecognizer_->SetCoordinateOffset(offset);
+        }
+    }
+
+    void OnCollectTouchTarget(TouchTestResult& result)
+    {
+        if (panRecognizerNG_) {
+            result.emplace_back(panRecognizerNG_);
+        }
+
+        if (rawRecognizer_) {
+            result.emplace_back(rawRecognizer_);
         }
     }
 
@@ -134,6 +162,9 @@ public:
     {
         if (panRecognizer_) {
             panRecognizer_->SetTouchRestrict(touchRestrict);
+        }
+        if (panRecognizerNG_) {
+            panRecognizerNG_->SetTouchRestrict(touchRestrict);
         }
     }
 
@@ -149,6 +180,7 @@ public:
 
     void HandleTouchDown();
     void HandleTouchUp();
+    void HandleTouchCancel();
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(const GestureEvent& info);
@@ -311,12 +343,17 @@ private:
     ScrollOverCallback scrollOverCallback_;       // scroll motion controller when edge set to spring
     ScrollOverCallback notifyScrollOverCallback_; // scroll motion controller when edge set to spring
     OutBoundaryCallback outBoundaryCallback_;     // whether out of boundary check when edge set to spring
+
     WatchFixCallback watchFixCallback_;
     ScrollBeginCallback scrollBeginCallback_;
     DragEndForRefreshCallback dragEndCallback_;
     DragCancelRefreshCallback dragCancelCallback_;
     Axis axis_;
     RefPtr<PanRecognizer> panRecognizer_;
+
+    // used for ng structure.
+    RefPtr<NG::PanRecognizer> panRecognizerNG_;
+
     RefPtr<RawRecognizer> rawRecognizer_;
     RefPtr<Animator> controller_;
     RefPtr<Animator> springController_;

@@ -47,15 +47,84 @@ public:
 #endif
         return nullptr;
     }
+    virtual sk_sp<SkData> GetCompressData() const
+    {
+#ifndef NG_BUILD
+        if (image_) {
+            return image_->compressData();
+        }
+#endif
+        return nullptr;
+    }
+    void SetCompressData(sk_sp<SkData> data, int32_t w, int32_t h)
+    {
+#ifndef NG_BUILD
+        if (image_) {
+            image_->setCompress(data, w, h);
+            auto skimage = image_->image();
+            uniqueId_ = skimage ? skimage->uniqueID() : 0;
+        }
+#endif
+    }
+    virtual int32_t GetCompressWidth() const
+    {
+#ifndef NG_BUILD
+        if (image_) {
+            return image_->compressWidth();
+        }
+#endif
+        return 0;
+    }
+    virtual int32_t GetCompressHeight() const
+    {
+#ifndef NG_BUILD
+        if (image_) {
+            return image_->compressHeight();
+        }
+#endif
+        return 0;
+    }
+    virtual uint32_t GetUniqueID() const
+    {
+#ifndef NG_BUILD
+        if (image_ && image_->image()) {
+            return image_->image()->uniqueID();
+        }
+        return uniqueId_;
+#endif
+        return 0;
+    }
+    virtual void SetUniqueID(uint32_t id)
+    {
+#ifndef NG_BUILD
+        uniqueId_ = id;
+#endif
+    }
+#ifndef NG_BUILD
+    virtual fml::RefPtr<flutter::CanvasImage> GetFlutterCanvasImage() const
+    {
+        if (image_) {
+            return image_;
+        }
+        return nullptr;
+    }
+#endif
     void ReplaceSkImage(flutter::SkiaGPUObject<SkImage> newSkGpuObjSkImage);
     int32_t GetWidth() const override;
     int32_t GetHeight() const override;
 
-    void DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) override;
+    void DrawToRSCanvas(
+        RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const std::array<PointF, 4>& radiusXY) override;
+
+    static SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap);
+    static sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap);
+    static SkAlphaType AlphaTypeToSkAlphaType(const RefPtr<PixelMap>& pixmap);
+    static SkColorType PixelFormatToSkColorType(const RefPtr<PixelMap>& pixmap);
 
 private:
     // TODO: should not deps on flutter.
 #ifndef NG_BUILD
+    uint32_t uniqueId_;
     fml::RefPtr<flutter::CanvasImage> image_;
 #endif
 };

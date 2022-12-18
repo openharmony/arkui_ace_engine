@@ -182,6 +182,9 @@ private:
     shared_ptr<JsValue> CallFunc(const shared_ptr<JsValue>& func, const std::vector<shared_ptr<JsValue>>& argv);
     shared_ptr<JsValue> CallFunc(
         const shared_ptr<JsValue>& func, const std::vector<shared_ptr<JsValue>>& argv, const CallingInfo& callingInfo);
+    shared_ptr<JsValue> CallFuncWithDefaultThis(
+        const shared_ptr<JsValue>& func, const std::vector<shared_ptr<JsValue>>& argv);
+
     shared_ptr<JsValue> CallAsyncFunc(
         const shared_ptr<JsValue>& func, std::vector<shared_ptr<JsValue>>& argv, const CallingInfo& callingInfo);
     shared_ptr<JsValue> NativeValueToJsValue(NativeValue* nativeValue);

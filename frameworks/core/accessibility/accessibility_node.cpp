@@ -287,10 +287,7 @@ void AccessibilityNode::AddEvent(int32_t pageId, const std::vector<std::string>&
 
 void AccessibilityNode::AddNode(const RefPtr<AccessibilityNode>& node, int32_t slot)
 {
-    if (!node) {
-        LOGE("the node is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(node);
     auto isExist = std::find_if(children_.begin(), children_.end(),
         [node](const RefPtr<AccessibilityNode>& child) { return child->GetNodeId() == node->GetNodeId(); });
     if (isExist != children_.end()) {
@@ -304,10 +301,7 @@ void AccessibilityNode::AddNode(const RefPtr<AccessibilityNode>& node, int32_t s
 
 void AccessibilityNode::RemoveNode(const RefPtr<AccessibilityNode>& node)
 {
-    if (!node) {
-        LOGE("the node is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(node);
     children_.remove_if(
         [node](const RefPtr<AccessibilityNode>& child) { return node->GetNodeId() == child->GetNodeId(); });
 }
@@ -315,10 +309,7 @@ void AccessibilityNode::RemoveNode(const RefPtr<AccessibilityNode>& node)
 void AccessibilityNode::Mount(int32_t slot)
 {
     auto parentNode = parentNode_.Upgrade();
-    if (!parentNode) {
-        LOGE("the parent node is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(parentNode);
     parentNode->AddNode(AceType::Claim(this), slot);
 }
 
@@ -453,16 +444,10 @@ void AccessibilityNode::SetFocusChangeEventMarker(const EventMarker& eventId)
     }
 
     auto container = Container::Current();
-    if (!container) {
-        LOGE("Container is null.");
-        return;
-    }
+    CHECK_NULL_VOID(container);
 #ifndef NG_BUILD
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    if (!pipelineContext) {
-        LOGE("PipelineContext is null.");
-        return;
-    }
+    CHECK_NULL_VOID(pipelineContext);
     focusChangeEventId_ =
         AceAsyncEvent<void(const std::string&)>::Create(eventId, pipelineContext);
 #endif
@@ -470,11 +455,10 @@ void AccessibilityNode::SetFocusChangeEventMarker(const EventMarker& eventId)
 
 void AccessibilityNode::OnFocusChange(bool isFocus)
 {
-    if (focusChangeEventId_) {
-        auto json = JsonUtil::Create(true);
-        json->Put("eventType", isFocused_ ? "1" : "2");
-        focusChangeEventId_(json->ToString());
-    }
+    CHECK_NULL_VOID_NOLOG(focusChangeEventId_);
+    auto json = JsonUtil::Create(true);
+    json->Put("eventType", isFocused_ ? "1" : "2");
+    focusChangeEventId_(json->ToString());
 }
 
 } // namespace OHOS::Ace

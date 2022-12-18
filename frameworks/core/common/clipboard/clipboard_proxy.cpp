@@ -15,6 +15,8 @@
 
 #include "core/common/clipboard/clipboard_proxy.h"
 
+#include "base/utils/utils.h"
+
 namespace OHOS::Ace {
 
 ClipboardProxy* ClipboardProxy::inst_ = nullptr;
@@ -38,9 +40,7 @@ void ClipboardProxy::SetDelegate(std::unique_ptr<ClipboardInterface>&& delegate)
 
 RefPtr<Clipboard> ClipboardProxy::GetClipboard(const RefPtr<TaskExecutor>& taskExecutor) const
 {
-    if (!delegate_) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN_NOLOG(delegate_, nullptr);
     return delegate_->GetClipboard(taskExecutor);
 }
 

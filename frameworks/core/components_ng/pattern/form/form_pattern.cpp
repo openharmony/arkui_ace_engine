@@ -97,6 +97,10 @@ void FormPattern::InitFormManagerDelegate()
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     formManagerBridge_ = AceType::MakeRefPtr<FormManagerDelegate>(context);
+    auto formUtils = FormManager::GetInstance().GetFormUtils();
+    if (formUtils) {
+        formManagerBridge_->SetFormUtils(formUtils);
+    }
     int32_t instanceID = context->GetInstanceId();
     formManagerBridge_->AddFormAcquireCallback([weak = WeakClaim(this), instanceID](int64_t id, const std::string& path,
                                                    const std::string& module, const std::string& data,
@@ -209,10 +213,9 @@ void FormPattern::CreateCardContainer()
             SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([id, weak] {
             auto pattern = weak.Upgrade();
-            if (pattern) {
-                LOGI("card id:%{public}zu", id);
-                pattern->FireOnAcquiredEvent(id);
-            }
+            CHECK_NULL_VOID_NOLOG(pattern);
+            LOGI("card id:%{public}zu", id);
+            pattern->FireOnAcquiredEvent(id);
         });
     });
 }
@@ -220,6 +223,7 @@ void FormPattern::CreateCardContainer()
 std::unique_ptr<DrawDelegate> FormPattern::GetDrawDelegate()
 {
     auto drawDelegate = std::make_unique<DrawDelegate>();
+#ifdef ENABLE_ROSEN_BACKEND
     drawDelegate->SetDrawRSFrameCallback(
         [weak = WeakClaim(this)](std::shared_ptr<RSNode>& node, const Rect& /* dirty */) {
             CHECK_NULL_VOID(node);
@@ -252,6 +256,7 @@ std::unique_ptr<DrawDelegate> FormPattern::GetDrawDelegate()
             rsNode->AddChild(node, -1);
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         });
+#endif
     return drawDelegate;
 }
 
@@ -306,7 +311,6 @@ void FormPattern::FireOnRouterEvent(const std::unique_ptr<JsonValue>& action) co
 
 void FormPattern::OnActionEvent(const std::string& action) const
 {
-    LOGI("OnActionEvent action: %{public}s", action.c_str());
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
         LOGE("get event action failed");
@@ -328,9 +332,8 @@ void FormPattern::OnActionEvent(const std::string& action) const
         FireOnRouterEvent(eventAction);
     }
 
-    if (formManagerBridge_) {
-        formManagerBridge_->OnActionEvent(action);
-    }
+    CHECK_NULL_VOID_NOLOG(formManagerBridge_);
+    formManagerBridge_->OnActionEvent(action);
 }
 
 bool FormPattern::ISAllowUpdate() const

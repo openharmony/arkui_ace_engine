@@ -47,6 +47,7 @@ public:
     using Method = std::string;
     using SetWebIdCallback = std::function<void(int32_t)>;
     using JsProxyCallback = std::function<void()>;
+    using PreKeyEventCallback = std::function<bool(KeyEventInfo& keyEventInfo)>;
 
     WebComponent() = default;
     explicit WebComponent(const std::string& type);
@@ -341,6 +342,16 @@ public:
     void SetUserAgent(std::string userAgent)
     {
         userAgent_ = std::move(userAgent);
+    }
+
+    std::string GetCustomScheme() const
+    {
+        return customScheme_;
+    }
+
+    void SetCustomScheme(std::string cmdLine)
+    {
+        customScheme_ = std::move(cmdLine);
     }
 
     bool GetContentAccessEnabled() const
@@ -830,6 +841,16 @@ public:
         }
     }
 
+    void SetOnInterceptKeyEventCallback(const PreKeyEventCallback& onPreKeyEventId)
+    {
+        onPreKeyEvent_ = onPreKeyEventId;
+    }
+
+    PreKeyEventCallback GetOnInterceptKeyEventCallback() const
+    {
+        return onPreKeyEvent_;
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
@@ -860,6 +881,7 @@ private:
     bool isContentAccessEnabled_ = true;
     bool isFileAccessEnabled_ = true;
     std::string userAgent_;
+    std::string customScheme_;
     WeakPtr<FocusNode> focusElement_;
     bool isOnLineImageAccessEnabled_ = false;
     bool isDomStorageAccessEnabled_ = false;
@@ -887,6 +909,7 @@ private:
     OnDropFunc onDragLeaveId_;
     OnDropFunc onDropId_;
     bool isPinchSmoothModeEnabled_ = false;
+    PreKeyEventCallback onPreKeyEvent_;
 };
 
 } // namespace OHOS::Ace

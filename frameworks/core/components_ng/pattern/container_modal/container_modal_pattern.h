@@ -39,6 +39,16 @@ public:
         return false;
     }
 
+    bool GetIsStartMove() const
+    {
+        return isStartMove_;
+    }
+
+    void SetIsStartMove(bool isStartMove)
+    {
+        isStartMove_ = isStartMove;
+    }
+
     void OnAttachToFrameNode() override
     {
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -48,18 +58,36 @@ public:
         pipeline->AddWindowFocusChangedCallback(host->GetId());
     }
 
-    void OnActive() override {}
+    void OnWindowFocused() override;
 
-    void OnInActive() override {}
+    void OnWindowUnfocused() override;
 
-    void OnWindowShow() override {}
-    void OnWindowHide() override {}
+    void InitContainerEvent();
 
-    void OnWindowFocused() override {}
-    void OnWindowUnfocused() override {}
+    void ShowTitle(bool isShow);
+
+    void SetAppTitle(const std::string& title);
+
+    void SetAppIcon(const RefPtr<PixelMap>& icon);
 
 private:
     void OnModifyDone() override;
+
+    void WindowFocus(bool isFocus);
+
+    void ChangeFloatingTitle(const RefPtr<FrameNode>& floatingNode, bool isFocus = true);
+
+    static void ChangeTitle(const RefPtr<FrameNode>& titleNode, bool isFocus = true);
+
+    static void ChangeTitleButtonIcon(
+        const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus = true);
+
+    bool CanShowFloatingTitle();
+
+    WindowMode windowMode_;
+    float moveX_ = 0.0f;
+    float moveY_ = 0.0f;
+    bool isStartMove_ = false;
 };
 
 } // namespace OHOS::Ace::NG

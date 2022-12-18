@@ -22,6 +22,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT DataPickerRowLayoutProperty : public LinearLayoutProperty {
@@ -49,6 +50,57 @@ public:
         ResetStartDate();
         ResetEndDate();
         ResetLunar();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+        json->Put("lunar", V2::ConvertBoolToString(GetLunar().value_or(false)).c_str());
+        json->Put("selectedDate", GetDateSelected().c_str());
+        json->Put("startDate", GetDateStart().c_str());
+        json->Put("endDate", GetDateEnd().c_str());
+    }
+
+    std::string GetDateStart() const
+    {
+        if (HasStartDate()) {
+            std::string startDate;
+            startDate += std::to_string(GetStartDate()->year);
+            startDate += "-";
+            startDate += std::to_string(GetStartDate()->month);
+            startDate += "-";
+            startDate += std::to_string(GetStartDate()->day);
+            return startDate;
+        }
+        return "1970-1-1";
+    }
+
+    std::string GetDateEnd() const
+    {
+        if (HasEndDate()) {
+            std::string endDate;
+            endDate += std::to_string(GetEndDate()->year);
+            endDate += "-";
+            endDate += std::to_string(GetEndDate()->month);
+            endDate += "-";
+            endDate += std::to_string(GetEndDate()->day);
+            return endDate;
+        }
+        return "2100-12-31";
+    }
+
+    std::string GetDateSelected() const
+    {
+        if (HasSelectedDate()) {
+            std::string selectedDate;
+            selectedDate += std::to_string(GetSelectedDate()->year);
+            selectedDate += "-";
+            selectedDate += std::to_string(GetSelectedDate()->month);
+            selectedDate += "-";
+            selectedDate += std::to_string(GetSelectedDate()->day);
+            return selectedDate;
+        }
+        return "";
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedDate, LunarDate, PROPERTY_UPDATE_RENDER);

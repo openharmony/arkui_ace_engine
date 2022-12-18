@@ -19,7 +19,7 @@
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline/base/constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
@@ -27,7 +27,7 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, std::nullopt);
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
@@ -38,8 +38,8 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     if (contentConstraint.selfIdealSize.Width().has_value()) {
         frameWidth = contentConstraint.selfIdealSize.Width().value();
     } else {
-        frameWidth =
-            static_cast<float>((switchTheme->GetWidth() - switchTheme->GetHotZoneHorizontalPadding() * 2).Value());
+        auto width = (switchTheme->GetWidth() - switchTheme->GetHotZoneHorizontalPadding() * 2).ConvertToPx();
+        frameWidth = static_cast<float>(width);
         if (frameWidth > contentConstraint.maxSize.Width()) {
             frameWidth = contentConstraint.maxSize.Width();
         }
@@ -47,8 +47,8 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     if (contentConstraint.selfIdealSize.Height().has_value()) {
         frameHeight = contentConstraint.selfIdealSize.Height().value();
     } else {
-        frameHeight =
-            static_cast<float>((switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).Value());
+        auto height = (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
+        frameHeight = static_cast<float>(height);
         if (frameHeight > contentConstraint.maxSize.Height()) {
             frameHeight = contentConstraint.maxSize.Height();
         }
@@ -66,6 +66,9 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
         height = frameHeight;
         width = frameWidth;
     }
+
+    width_ = width;
+    height_ = height;
 
     return SizeF(width, height);
 }

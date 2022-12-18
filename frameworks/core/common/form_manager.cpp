@@ -18,9 +18,9 @@
 #include "unistd.h"
 
 #include "base/log/log.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
-
 FormManager::FormManager() {}
 
 FormManager::~FormManager() {}
@@ -91,6 +91,20 @@ void FormManager::Dump(const std::vector<std::string>& params)
             [params, container = container.second]() { container->Dump(params); }, TaskExecutor::TaskType::UI);
     }
 #endif
+}
+
+void FormManager::SetFormUtils(const std::shared_ptr<FormUtils>& formUtils)
+{
+    std::lock_guard<std::mutex> lock(formUtilsMutex_);
+    CHECK_NULL_VOID_NOLOG(formUtils);
+    formUtils_ = formUtils;
+}
+
+std::shared_ptr<FormUtils> FormManager::GetFormUtils()
+{
+    std::lock_guard<std::mutex> lock(formUtilsMutex_);
+    CHECK_NULL_RETURN_NOLOG(formUtils_, nullptr);
+    return formUtils_;
 }
 
 } // namespace OHOS::Ace

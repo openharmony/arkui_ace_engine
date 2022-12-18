@@ -46,7 +46,7 @@ void RosenRenderWaterFlow::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     bool needPaint = false;
-    if (scrollBar_->GetFirstLoad() || scrollBar_->IsActive() || scrollBar_->GetDisplayMode() == DisplayMode::ON) {
+    if (scrollBar_->IsActive() || scrollBar_->GetDisplayMode() == DisplayMode::ON) {
         scrollBarOpacity_ = UINT8_MAX;
         needPaint = true;
     } else {
@@ -57,21 +57,17 @@ void RosenRenderWaterFlow::Paint(RenderContext& context, const Offset& offset)
     if (!needPaint) {
         return;
     }
-    const auto renderContext = static_cast<RosenRenderContext*>(&context);
-    auto canvas = renderContext->GetCanvas();
+    const auto& renderContext = AceType::DynamicCast<RosenRenderContext>(&context);
+    auto *canvas = renderContext->GetCanvas();
     auto rsNode = renderContext->GetRSNode();
     if (!canvas || !rsNode) {
         LOGE("canvas is null");
         return;
     }
     rsNode->SetPaintOrder(true);
-    Offset lastOffset = isVertical_ ? Offset(0, lastOffset_) : Offset(lastOffset_, 0);
+    Offset lastOffset = (useScrollable_ == SCROLLABLE::VERTICAL) ? Offset(0, lastOffset_) : Offset(lastOffset_, 0);
     scrollBar_->UpdateScrollBarRegion(offset, GetLayoutSize(), lastOffset, GetEstimatedHeight());
     RefPtr<RosenScrollBarPainter> scrollPainter = AceType::MakeRefPtr<RosenScrollBarPainter>();
     scrollPainter->PaintBar(canvas, offset, GetPaintRect(), scrollBar_, GetGlobalOffset(), scrollBarOpacity_);
-    if (scrollBar_->GetFirstLoad()) {
-        scrollBar_->SetFirstLoad(false);
-        scrollBar_->HandleScrollBarEnd();
-    }
 }
 } // namespace OHOS::Ace::V2

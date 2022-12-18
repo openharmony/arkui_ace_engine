@@ -24,17 +24,15 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
-
-RSColor ToRSColor(const Color& color);
-RSRect ToRSRect(const NG::RectF& rect);
-RSPoint ToRSPonit(const NG::PointF& point);
+RSPoint ToRSPoint(const NG::PointF& point);
 RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap);
-
-rosen::TextDirection ToRSTextDirection(const TextDirection& txtDir);
-rosen::TextAlign ToRSTextAlign(const TextAlign& align);
-rosen::WordBreakType ToRSWordBreakType(const WordBreak& wordBreak);
-rosen::TextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextStyle& textStyle);
-
+RSColor ToRSColor(const Color& color);
+RSColor ToRSColor(const LinearColor& color);
+RSRect ToRSRect(const NG::RectF& rect);
+RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap);
+RSTextDirection ToRSTextDirection(const TextDirection& txtDir);
+RSTextAlign ToRSTextAlign(const TextAlign& align);
+RSWordBreakType ToRSWordBreakType(const WordBreak& wordBreak);
+RSTextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextStyle& textStyle);
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_PROP_CONVERTOR_H

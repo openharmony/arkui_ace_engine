@@ -16,11 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DIVIDER_PAINTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DIVIDER_PAINTER_H
 
+#include <optional>
+
 #include "base/geometry/ng/point_t.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/render/drawing.h"
-#include "core/components_ng/pattern/list/list_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 class DividerPainter {
@@ -41,8 +42,11 @@ public:
     ~DividerPainter() = default;
 
     void DrawLine(RSCanvas& canvas, const OffsetF& offset) const;
-    void DrawListLines(RSCanvas& canvas, int32_t startIndex, int32_t endIndex,
-        const ListLayoutAlgorithm::PositionMap& itemPosition, float startMargin) const;
+
+    void SetDividerLength(float length)
+    {
+        dividerLength_ = length;
+    }
 
 private:
     float constrainStrokeWidth_ = 0.0f;

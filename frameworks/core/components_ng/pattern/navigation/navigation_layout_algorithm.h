@@ -21,6 +21,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,18 +31,21 @@ class ACE_EXPORT NavigationLayoutAlgorithm : public LayoutAlgorithm {
 public:
     NavigationLayoutAlgorithm() = default;
     ~NavigationLayoutAlgorithm() override = default;
-
     void Measure(LayoutWrapper* layoutWrapper) override;
-
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    float GetLastScrollDistance() const
+    NavigationMode GetNavigationMode() const
     {
-        return lastScrollDistance_;
+        return navigationMode_;
     }
-private:
-    float lastScrollDistance_ = 0.0f;
 
+    void SetNavigationMode(NavigationMode navigationMode)
+    {
+        navigationMode_ = navigationMode;
+    }
+
+private:
+    NavigationMode navigationMode_ = NavigationMode::AUTO;
     ACE_DISALLOW_COPY_AND_MOVE(NavigationLayoutAlgorithm);
 };
 

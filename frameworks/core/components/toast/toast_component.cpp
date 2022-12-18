@@ -179,7 +179,7 @@ void ToastComponent::Show(const RefPtr<PipelineContext>& context, const std::str
     duration = duration > barrierfreeDuration ? duration : barrierfreeDuration;
     // get toast animation playing time
     toastDurationTime_ = duration;
-    Dimension bottomPosition = StringUtils::StringToDimension(bottom);
+    Dimension bottomPosition = StringUtils::StringToDimensionWithThemeValue(bottom, true, toastTheme->GetBottom());
     RefPtr<TweenComponent> tween =
         AceType::MakeRefPtr<TweenComponent>(TweenComponent::AllocTweenComponentId(), TOAST_TWEEN_NAME, box);
     InitToastAnimation();
@@ -199,7 +199,7 @@ void ToastComponent::Show(const RefPtr<PipelineContext>& context, const std::str
         stackElement->PushToastComponent(align, toastId);
     } else {
         RefPtr<PositionedComponent> positioned = AceType::MakeRefPtr<PositionedComponent>(tween);
-        positioned->SetBottom(bottomPosition.IsValid() ? bottomPosition : toastTheme->GetBottom());
+        positioned->SetBottom(GreatOrEqual(bottomPosition.Value(), 0.0) ? bottomPosition : toastTheme->GetBottom());
         stackElement->PushToastComponent(positioned, toastId);
     }
 

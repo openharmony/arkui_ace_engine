@@ -115,6 +115,7 @@ public:
 
     void FireFirstRequestData();
     void FireGoToRequestData(int32_t year, int32_t month, int32_t day);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -123,7 +124,7 @@ private:
     void FireRequestData(MonthState monthState);
     void JumpTo(const RefPtr<FrameNode>& preFrameNode, const RefPtr<FrameNode>& curFrameNode,
         const RefPtr<FrameNode>& nextFrameNode, const RefPtr<FrameNode>& swiperFrameNode);
-    static void FlushFocus(ObtainedMonth& obtainedMonth);
+    void FlushFocus(ObtainedMonth& obtainedMonth);
 
     RefPtr<CalendarControllerNg> calendarControllerNg_;
     CalendarDay calendarDay_;

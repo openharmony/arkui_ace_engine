@@ -17,6 +17,7 @@
 
 #include "base/geometry/size.h"
 #include "base/log/dump_log.h"
+#include "core/common/ace_engine_ext.h"
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/font_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
@@ -173,8 +174,29 @@ void RenderText::UpdateAccessibilityText()
     accessibilityNode->SetIsMultiLine(GetTextLines() > 1);
 }
 
+bool RenderText::IsDeclarativePara()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return false;
+    }
+
+    return context->GetIsDeclarative();
+}
+
 void RenderText::PerformLayout()
 {
+    // When the constraint is set, minHeight is reset to 0.0,
+    // and the occupied height is controlled by the parent node box
+    if (IsDeclarativePara()) {
+        LayoutParam layoutParam = GetLayoutParam();
+        auto minWidth = layoutParam.GetMinSize().Width();
+        auto minHeight = layoutParam.GetMinSize().Height();
+        if (GreatNotEqual(minHeight, 0.0f)) {
+            layoutParam.SetMinSize(Size(minWidth, 0.0f));
+            SetLayoutParam(layoutParam);
+        }
+    }
     auto pipelineContext = GetContext().Upgrade();
     if ((textStyle_.IsAllowScale() || textStyle_.GetFontSize().Unit() == DimensionUnit::FP) && pipelineContext &&
         !NearEqual(fontScale_, pipelineContext->GetFontScale())) {
@@ -532,6 +554,9 @@ void RenderText::ShowTextOverlay(const Offset& showOffset, bool isUsingMouse)
     textOverlay_->SetEndHandleOffset(endHandleOffset);
     textOverlay_->SetContext(context_);
     textOverlay_->SetIsUsingMouse(isUsingMouse);
+    if (isUsingMouse) {
+        textOverlay_->SetMouseOffset(showOffset);
+    }
     // Add the Animation
     InitAnimation(context_);
     RegisterCallbacksToOverlay();
@@ -972,11 +997,15 @@ void RenderText::PanOnActionStart(const GestureEvent& info)
         if (!dragWindow_) {
             auto rect = pipelineContext->GetCurrentWindowRect();
             dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
-                static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Left(),
-                static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Top(), GetPaintRect().Width(),
-                GetPaintRect().Height());
-            dragWindow_->SetOffset(rect.Left(), rect.Top());
+                static_cast<int32_t>(info.GetGlobalPoint().GetX() + rect.Left()),
+                static_cast<int32_t>(info.GetGlobalPoint().GetY() + rect.Top()),
+                static_cast<int32_t>(GetPaintRect().Width()),
+                static_cast<int32_t>(GetPaintRect().Height()));
+            dragWindow_->SetOffset(static_cast<int32_t>(rect.Left()), static_cast<int32_t>(rect.Top()));
             dragWindow_->DrawText(paragraph_, GetPaintRect().GetOffset(), initRenderNode);
+        }
+        if (dragWindow_) {
+            AceEngineExt::GetInstance().DragStartExt();
         }
         return;
     }
@@ -996,6 +1025,9 @@ void RenderText::PanOnActionStart(const GestureEvent& info)
             dragWindow_->SetOffset(rect.Left(), rect.Top());
             dragWindow_->DrawPixelMap(dragItemInfo.pixelMap);
         }
+        if (dragWindow_) {
+            AceEngineExt::GetInstance().DragStartExt();
+        }
         return;
     }
 #endif
@@ -1008,7 +1040,7 @@ void RenderText::PanOnActionStart(const GestureEvent& info)
     auto positionedComponent = AceType::MakeRefPtr<PositionedComponent>(dragItemInfo.customComponent);
     positionedComponent->SetTop(Dimension(GetGlobalOffset().GetY()));
     positionedComponent->SetLeft(Dimension(GetGlobalOffset().GetX()));
-    SetLocalPoint(info.GetGlobalPoint() - GetGlobalOffset());
+    SetLocalPoint(startPoint_ - GetGlobalOffset());
     auto updatePosition = [renderBox = AceType::Claim(this)](
                               const std::function<void(const Dimension&, const Dimension&)>& func) {
         if (!renderBox) {
@@ -1027,6 +1059,10 @@ void RenderText::PanOnActionUpdate(const GestureEvent& info)
     if (isDragDropNode_ && dragWindow_) {
         int32_t x = static_cast<int32_t>(info.GetGlobalPoint().GetX());
         int32_t y = static_cast<int32_t>(info.GetGlobalPoint().GetY());
+        if (lastDragMoveOffset_ == Offset(x, y)) {
+            return;
+        }
+        lastDragMoveOffset_ = Offset(x, y);
         if (dragWindow_) {
             dragWindow_->MoveTo(x, y);
         }

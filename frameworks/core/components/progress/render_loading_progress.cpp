@@ -78,7 +78,9 @@ void RenderLoadingProgress::UpdateRingAnimation()
         auto loading = weak.Upgrade();
         if (loading) {
             loading->ringOffset_.SetY(value * loading->scale_);
-            loading->MarkNeedRender();
+            if (loading->GetVisible() && !loading->GetHidden()) {
+                loading->MarkNeedRender();
+            }
         }
     });
     double moveRange = ringRadius_ * moveRatio_ * 2.0;
@@ -97,7 +99,9 @@ void RenderLoadingProgress::UpdateRingAnimation()
     ringController_->AddInterpolator(ringMove);
     ringController_->SetIteration(ANIMATION_REPEAT_INFINITE);
     ringController_->SetDuration(LOOP_DURATION);
-    ringController_->Play();
+    if (GetVisible() && !GetHidden()) {
+        ringController_->Play();
+    }
 }
 
 void RenderLoadingProgress::UpdateCometAnimation()
@@ -126,7 +130,9 @@ void RenderLoadingProgress::UpdateCometAnimation()
             loading->DoCometTailAnimation();
         }
     });
-    cometController_->Play();
+    if (GetVisible() && !GetHidden()) {
+        cometController_->Play();
+    }
 }
 
 void RenderLoadingProgress::DoCometTailAnimation()
@@ -177,7 +183,9 @@ void RenderLoadingProgress::DoCometTailAnimation()
             loading->DoCometLoopAnimation();
         }
     });
-    cometController_->Play();
+    if (GetVisible() && !GetHidden()) {
+        cometController_->Play();
+    }
 }
 
 void RenderLoadingProgress::DoCometLoopAnimation()
@@ -203,7 +211,9 @@ void RenderLoadingProgress::DoCometLoopAnimation()
     cometController_->AddInterpolator(cometLoopDegree);
     cometController_->SetIteration(ANIMATION_REPEAT_INFINITE);
     cometController_->SetDuration(LOOP_DURATION);
-    cometController_->Play();
+    if (GetVisible() && !GetHidden()) {
+        cometController_->Play();
+    }
 }
 
 void RenderLoadingProgress::UpdateCometParams()
@@ -273,6 +283,8 @@ void RenderLoadingProgress::SetLoadingMode(int32_t mode)
         return;
     }
     if (ringController_ && cometController_) {
+        ringController_->Stop();
+        cometController_->Stop();
         ringController_->ClearStopListeners();
         cometController_->ClearStopListeners();
         ringController_->Finish();
@@ -331,7 +343,9 @@ void RenderLoadingProgress::SetDragDistance(double distance)
             break;
         }
     }
-    MarkNeedRender();
+    if (GetVisible() && !GetHidden()) {
+        MarkNeedRender();
+    }
 }
 
 void RenderLoadingProgress::PerformLayout()

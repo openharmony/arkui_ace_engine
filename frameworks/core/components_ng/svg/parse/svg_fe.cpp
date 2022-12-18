@@ -18,13 +18,13 @@
 #include "third_party/skia/include/effects/SkColorFilterImageFilter.h"
 #include "third_party/skia/include/effects/SkColorMatrix.h"
 
+#include "base/utils/utils.h"
+
 namespace OHOS::Ace::NG {
 
 void InitFilterColor(const RefPtr<SvgFeDeclaration>& fe, ColorInterpolationType& currentColor)
 {
-    if (!fe) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(fe);
 
     if (fe->GetIn() == FeInType::SOURCE_GRAPHIC) {
         currentColor = ColorInterpolationType::SRGB;
@@ -68,7 +68,7 @@ sk_sp<SkImageFilter> SvgFe::MakeImageFilter(const FeInType& in, sk_sp<SkImageFil
 {
     switch (in) {
         case FeInType::SOURCE_GRAPHIC:
-        return nullptr;
+            return nullptr;
         case FeInType::SOURCE_ALPHA:
             SkColorMatrix m;
             m.setScale(0, 0, 0, 1.0f);

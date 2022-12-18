@@ -79,4 +79,47 @@ RefPtr<RenderToggle> ToggleComposedElement::GetRenderToggle() const
     return nullptr;
 }
 
+void ToggleComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto toggleElement = GetContentElement<ToggleElement>(ToggleElement::TypeId());
+    if (!toggleElement) {
+        LOGE("get GetToggleElement failed");
+        return;
+    }
+    toggleElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    toggleElement->MarkDirty();
+}
+
+void ToggleComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto toggleElement = GetContentElement<ToggleElement>(ToggleElement::TypeId());
+    if (!toggleElement) {
+        LOGE("get GetToggleElement failed");
+        return;
+    }
+    auto child = GetElementChildBySlot(toggleElement, slot);
+    if (!child) {
+        LOGE("toggleElement get GetChildBySlot failed");
+        return;
+    }
+    toggleElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    toggleElement->MarkDirty();
+}
+
+void ToggleComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto toggleElement = GetContentElement<ToggleElement>(ToggleElement::TypeId());
+    if (!toggleElement) {
+        LOGE("get GetToggleElement failed");
+        return;
+    }
+    auto child = GetElementChildBySlot(toggleElement, slot);
+    if (!child) {
+        LOGE("toggleElement get GetChildBySlot failed");
+        return;
+    }
+    toggleElement->UpdateChildWithSlot(child, nullptr, slot, slot);
+    toggleElement->MarkDirty();
+}
+
 } // namespace OHOS::Ace::V2

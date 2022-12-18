@@ -29,6 +29,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/text_field_model_impl.h"
+#include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/common/ime/text_input_action.h"
@@ -48,7 +49,7 @@ TextFieldModel* TextFieldModel::GetInstance()
 {
     if (!instance_) {
 #ifdef NG_BUILD
-        instance.reset(new NG::TextFieldModelNG());
+        instance_.reset(new NG::TextFieldModelNG());
 #else
         if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::TextFieldModelNG());
@@ -188,8 +189,10 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        // TODO: add textfield impl.
-        TextFieldModel::GetInstance()->CreateTextInput(placeholderSrc, value);
+        auto controller = TextFieldModel::GetInstance()->CreateTextArea(placeholderSrc, value);
+        if (jsController) {
+            jsController->SetController(controller);
+        }
         return;
     }
 
@@ -261,10 +264,13 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
     Font font;
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto fontSize = paramObject->GetProperty("size");
-    if (!fontSize->IsNull()) {
+    if (fontSize->IsNull() || fontSize->IsUndefined()) {
+        font.fontSize = Dimension(-1);
+    } else {
         Dimension size;
-        if (!ParseJsDimensionFp(fontSize, size)) {
-            LOGE("Parse to dimension FP failed.");
+        if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
+            font.fontSize = Dimension(-1);
+            LOGW("Parse to dimension FP failed.");
         } else {
             font.fontSize = size;
         }
@@ -552,20 +558,21 @@ void JSTextField::JsBorder(const JSCallbackInfo& info)
     JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
     auto valueWidth = object->GetProperty("width");
     if (!valueWidth->IsUndefined()) {
-        ParseBorderWidth(valueWidth, decoration);
+        ParseBorderWidth(valueWidth);
     }
     auto valueColor = object->GetProperty("color");
     if (!valueColor->IsUndefined()) {
-        ParseBorderColor(valueColor, decoration);
+        ParseBorderColor(valueColor);
     }
     auto valueRadius = object->GetProperty("radius");
     if (!valueRadius->IsUndefined()) {
-        ParseBorderRadius(valueRadius, decoration);
+        ParseBorderRadius(valueRadius);
     }
     auto valueStyle = object->GetProperty("style");
     if (!valueStyle->IsUndefined()) {
-        ParseBorderStyle(valueStyle, decoration);
+        ParseBorderStyle(valueStyle);
     }
+    ViewAbstractModelImpl::SwapBackBorder(decoration);
     if (component) {
         component->SetOriginBorder(decoration->GetBorder());
     }
@@ -587,7 +594,8 @@ void JSTextField::JsBorderWidth(const JSCallbackInfo& info)
     if (component) {
         decoration = component->GetDecoration();
     }
-    JSViewAbstract::ParseBorderWidth(info[0], decoration);
+    JSViewAbstract::ParseBorderWidth(info[0]);
+    ViewAbstractModelImpl::SwapBackBorder(decoration);
     if (component) {
         component->SetOriginBorder(decoration->GetBorder());
     }
@@ -608,7 +616,8 @@ void JSTextField::JsBorderColor(const JSCallbackInfo& info)
     if (component) {
         decoration = component->GetDecoration();
     }
-    JSViewAbstract::ParseBorderColor(info[0], decoration);
+    JSViewAbstract::ParseBorderColor(info[0]);
+    ViewAbstractModelImpl::SwapBackBorder(decoration);
     if (component) {
         component->SetOriginBorder(decoration->GetBorder());
     }
@@ -629,7 +638,8 @@ void JSTextField::JsBorderStyle(const JSCallbackInfo& info)
     if (component) {
         decoration = component->GetDecoration();
     }
-    JSViewAbstract::ParseBorderStyle(info[0], decoration);
+    JSViewAbstract::ParseBorderStyle(info[0]);
+    ViewAbstractModelImpl::SwapBackBorder(decoration);
     if (component) {
         component->SetOriginBorder(decoration->GetBorder());
     }
@@ -650,7 +660,8 @@ void JSTextField::JsBorderRadius(const JSCallbackInfo& info)
     if (component) {
         decoration = component->GetDecoration();
     }
-    JSViewAbstract::ParseBorderRadius(info[0], decoration);
+    JSViewAbstract::ParseBorderRadius(info[0]);
+    ViewAbstractModelImpl::SwapBackBorder(decoration);
     if (component) {
         component->SetOriginBorder(decoration->GetBorder());
     }

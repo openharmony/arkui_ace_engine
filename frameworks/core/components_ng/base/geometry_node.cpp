@@ -25,6 +25,7 @@ void GeometryNode::Reset()
 {
     frame_.Reset();
     margin_.reset();
+    padding_.reset();
     content_.reset();
     parentGlobalOffset_.Reset();
     parentLayoutConstraint_.reset();
@@ -37,32 +38,15 @@ RefPtr<GeometryNode> GeometryNode::Clone() const
     if (margin_) {
         node->margin_ = std::make_unique<MarginPropertyF>(*margin_);
     }
+    if (padding_) {
+        node->padding_ = std::make_unique<MarginPropertyF>(*padding_);
+    }
     if (content_) {
         node->content_ = std::make_unique<GeometryProperty>(*content_);
     }
     node->parentGlobalOffset_ = parentGlobalOffset_;
     node->parentLayoutConstraint_ = parentLayoutConstraint_;
-    node->layoutFunc_ = layoutFunc_;
-    node->measureFunc_ = measureFunc_;
     return node;
-}
-
-bool GeometryNode::Measure(NG::LayoutWrapper* layoutWrapper)
-{
-    if (measureFunc_) {
-        measureFunc_(layoutWrapper);
-        return true;
-    }
-    return false;
-}
-
-bool GeometryNode::Layout(NG::LayoutWrapper* layoutWrapper)
-{
-    if (layoutFunc_) {
-        layoutFunc_(layoutWrapper);
-        return true;
-    }
-    return false;
 }
 
 } // namespace OHOS::Ace::NG

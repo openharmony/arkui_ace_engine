@@ -26,9 +26,9 @@ public:
     static RefPtr<FrameNode> Create(RefPtr<FrameNode>& content);
 
 private:
-    static RefPtr<FrameNode> BuildTitle(bool isFloatingTitle = false);
-    static void BuildContent(RefPtr<FrameNode>& content);
-    static RefPtr<FrameNode> BuildControlButton(InternalResource::ResourceId icon, GestureEventFunc&& clickCallback);
+    static RefPtr<FrameNode> BuildTitle(RefPtr<FrameNode>& containerNode, bool isFloatingTitle = false);
+    static RefPtr<FrameNode> BuildControlButton(
+        InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isCloseButton = false);
 };
 
 } // namespace OHOS::Ace::NG

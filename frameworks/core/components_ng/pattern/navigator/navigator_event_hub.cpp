@@ -15,6 +15,7 @@
 
 #include "navigator_event_hub.h"
 
+#include "base/utils/utils.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
@@ -22,10 +23,7 @@ namespace OHOS::Ace::NG {
 void NavigatorEventHub::NavigatePage()
 {
     auto delegate = EngineHelper::GetCurrentDelegate();
-    if (!delegate) {
-        LOGE("get jsi delegate failed");
-        return;
-    }
+    CHECK_NULL_VOID(delegate);
     switch (type_) {
         case NavigatorType::PUSH:
             delegate->Push(url_, params_);
@@ -39,6 +37,47 @@ void NavigatorEventHub::NavigatePage()
         default:
             LOGE("Navigator type is invalid!");
     }
+    LOGD("navigate success");
+}
+
+void NavigatorEventHub::SetActive(bool active)
+{
+    if (active) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this)] {
+                auto eventHub = weak.Upgrade();
+                CHECK_NULL_VOID(eventHub);
+                eventHub->NavigatePage();
+            },
+            TaskExecutor::TaskType::JS);
+    }
+    active_ = active;
+}
+
+std::string NavigatorEventHub::GetNavigatorType() const
+{
+    switch (type_) {
+        case NavigatorType::PUSH:
+            return "NavigationType.Push";
+        case NavigatorType::BACK:
+            return "NavigationType.Back";
+        case NavigatorType::DEFAULT:
+            return "NavigationType.Default";
+        case NavigatorType::REPLACE:
+            return "NavigationType.Replace";
+        default:
+            return "NavigationType.Push";
+    }
+}
+
+void NavigatorEventHub::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("active", active_ ? "true" : "false");
+    json->Put("target", url_.c_str());
+    json->Put("type", GetNavigatorType().c_str());
+    json->Put("params", params_.c_str());
 }
 
 } // namespace OHOS::Ace::NG

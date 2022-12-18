@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<GestureRecognizer> SwipeGesture::CreateRecognizer()
+RefPtr<NGGestureRecognizer> SwipeGesture::CreateRecognizer()
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);

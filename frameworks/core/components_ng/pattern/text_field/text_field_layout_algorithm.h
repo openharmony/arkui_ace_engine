@@ -19,14 +19,13 @@
 #include <string>
 #include <utility>
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/rect.h"
 #include "base/memory/referenced.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
@@ -63,6 +62,11 @@ public:
         return imageRect_;
     }
 
+    const RectF& GetFrameRect() const
+    {
+        return frameRect_;
+    }
+
     float GetCaretOffsetX() const
     {
         return caretOffsetX_;
@@ -73,6 +77,11 @@ public:
         caretOffsetX_ = offsetX;
     }
 
+    const OffsetF& GetParentGlobalOffset() const
+    {
+        return parentGlobalOffset_;
+    }
+
     static TextDirection GetTextDirection(const std::string& content);
 
     static void UpdateTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
@@ -81,7 +90,7 @@ public:
         const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle);
 
 private:
-    void CreateParagraph(const TextStyle& textStyle, std::string content);
+    void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText);
     bool CreateParagraphAndLayout(
         const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
@@ -94,8 +103,10 @@ private:
     int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
 
     std::shared_ptr<RSParagraph> paragraph_;
+    RectF frameRect_;
     RectF textRect_;
     RectF imageRect_;
+    OffsetF parentGlobalOffset_;
 
     float caretOffsetX_ = 0.0f;
 

@@ -31,37 +31,39 @@ Dimension GridProperty::GetWidth()
 Dimension GridProperty::GetOffset()
 {
     // gridInfo_ must exist, because layout algorithm invoke UpdateContainer() first
+    auto offset = gridInfo_->GetOffset();
+    if (offset == UNDEFINED_DIMENSION) {
+        return UNDEFINED_DIMENSION;
+    }
     auto marginOffset = Dimension(gridInfo_->GetParent()->GetMarginLeft().ConvertToPx());
-    return gridInfo_->GetOffset() + marginOffset;
+    return offset + marginOffset;
 }
 
 bool GridProperty::UpdateContainer(const RefPtr<Property>& container, const RefPtr<AceType>& host)
 {
-    auto gridContainer = DynamicCast<GridContainerLayoutProperty>(container);
-    auto mGridContainer = DynamicCast<GridContainerLayoutProperty>(container_);
-
-    if ((container_) && (*mGridContainer == *gridContainer)) {
-        return false;
-    }
-    container_ = container;
-
+    auto currentContainer = DynamicCast<GridContainerLayoutProperty>(container);
+    auto gridContainer = currentContainer->GetReserveObj();
     GridColumnInfo::Builder builder;
-    auto containerInfo = MakeRefPtr<GridContainerInfo>(gridContainer->GetContainerInfoValue());
+    auto containerInfo = AceType::MakeRefPtr<GridContainerInfo>(gridContainer->GetContainerInfoValue());
     builder.SetParent(containerInfo);
-
     for (const auto& item : typedPropertySet_) {
         builder.SetSizeColumn(item.type_, item.span_);
         builder.SetOffset(item.offset_, item.type_);
     }
-
     gridInfo_ = builder.Build();
-    gridContainer->RegistGridChild(DynamicCast<FrameNode>(host));
+    container_ = container;
+
+    currentContainer->RegistGridChild(DynamicCast<FrameNode>(host));
     return true;
 }
 
-bool GridProperty::UpdateSpan(uint32_t span, GridSizeType type)
+bool GridProperty::UpdateSpan(int32_t span, GridSizeType type)
 {
-    LOGD("Update grid span. (span=%u, type=%i)", span, type);
+    LOGD("Update grid span. (span=%i, type=%i)", span, type);
+    if (span < 0) {
+        LOGE("Span value is illegal.");
+        return false;
+    }
     if (!container_) {
         SetSpan(type, span);
         return true;
@@ -88,7 +90,7 @@ bool GridProperty::UpdateOffset(int32_t offset, GridSizeType type)
     return (currentProp->type_ == type || currentType == type) && SetOffset(type, offset);
 }
 
-bool GridProperty::SetSpan(GridSizeType type, uint32_t span)
+bool GridProperty::SetSpan(GridSizeType type, int32_t span)
 {
     auto item = std::find_if(typedPropertySet_.begin(), typedPropertySet_.end(),
         [type](const GridTypedProperty& p) { return p.type_ == type; });
@@ -116,6 +118,57 @@ bool GridProperty::SetOffset(GridSizeType type, int32_t offset)
     }
     item->offset_ = offset;
     return true;
+}
+
+OffsetF GridProperty::GetContainerPosition()
+{
+    if (container_) {
+        auto container = DynamicCast<GridContainerLayoutProperty>(container_);
+        auto framenode = container->GetHost();
+        return framenode->GetOffsetRelativeToWindow();
+    }
+    return OffsetF();
+}
+
+void GridProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    const char* GRID_SIZE_TYPE[] = { "default", "sx", "sm", "md", "lg" };
+    if (!gridInfo_) {
+        auto item = std::find_if(typedPropertySet_.begin(), typedPropertySet_.end(),
+            [](const GridTypedProperty& p) { return p.type_ == GridSizeType::UNDEFINED; });
+        if (item == typedPropertySet_.end()) {
+            json->Put("gridSpan", 1);
+            json->Put("gridOffset", 0);
+        } else {
+            json->Put("gridSpan", item->span_);
+            json->Put("gridOffset", item->offset_);
+        }
+
+        auto useSizeType = JsonUtil::Create(false);
+        for (const auto& item : typedPropertySet_) {
+            auto jsonValue = JsonUtil::Create(true);
+            jsonValue->Put("span", item.span_);
+            jsonValue->Put("offset", item.offset_);
+            useSizeType->Put(GRID_SIZE_TYPE[static_cast<int32_t>(item.type_)], jsonValue);
+        }
+        json->Put("useSizeType", useSizeType);
+        return;
+    }
+
+    auto gridOffset = gridInfo_->GetOffset(GridSizeType::UNDEFINED);
+    json->Put("gridSpan", static_cast<int32_t>(gridInfo_->GetColumns()));
+    json->Put("gridOffset", gridOffset == -1 ? 0 : gridOffset);
+
+    auto useSizeType = JsonUtil::Create(false);
+    auto index = static_cast<int32_t>(GridSizeType::XS);
+    for (; index < static_cast<int32_t>(GridSizeType::XL); index++) {
+        auto jsonValue = JsonUtil::Create(true);
+        auto type = static_cast<GridSizeType>(index);
+        jsonValue->Put("span", static_cast<int32_t>(gridInfo_->GetColumns(type)));
+        jsonValue->Put("offset", gridInfo_->GetOffset(type));
+        useSizeType->Put(GRID_SIZE_TYPE[index], jsonValue);
+    }
+    json->Put("useSizeType", useSizeType);
 }
 
 } // namespace OHOS::Ace::NG

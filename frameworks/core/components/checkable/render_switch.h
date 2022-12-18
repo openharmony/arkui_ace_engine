@@ -105,7 +105,7 @@ protected:
     bool isSwitchDuringAnimation_ = false;
     RefPtr<SwitchComponent> component_;
 
-    bool isDraging = false;
+    bool isDragging = false;
 private:
     void SetAccessibilityClickImpl();
     void ApplyRestoreInfo();

@@ -47,15 +47,23 @@ RefPtr<Container> Container::GetActive()
 RefPtr<TaskExecutor> Container::CurrentTaskExecutor()
 {
     auto curContainer = Current();
-    if (curContainer) {
-        return curContainer->GetTaskExecutor();
-    }
-    return nullptr;
+    CHECK_NULL_RETURN_NOLOG(curContainer, nullptr);
+    return curContainer->GetTaskExecutor();
 }
 
 void Container::UpdateCurrent(int32_t id)
 {
     ContainerScope::UpdateCurrent(id);
+}
+
+bool Container::UpdateState(const Frontend::State& state)
+{
+    std::lock_guard<std::mutex> lock(stateMutex_);
+    if (state_ == state) {
+        return false;
+    }
+    state_ = state;
+    return true;
 }
 
 } // namespace OHOS::Ace

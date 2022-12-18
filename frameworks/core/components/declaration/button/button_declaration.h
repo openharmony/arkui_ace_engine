@@ -45,6 +45,7 @@ struct ButtonStyle : Style {
     Dimension iconHeight;
     Dimension innerLeftPadding;
     Color focusColor;
+    Color focusBorderColor;
     Color backgroundColor;
     Color clickedColor;
     Color disabledColor;
@@ -213,6 +214,12 @@ public:
     {
         auto& style = static_cast<ButtonStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
         return style.focusColor;
+    }
+
+    const Color& GetFocusBorderColor() const
+    {
+        auto& style = static_cast<ButtonStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
+        return style.focusBorderColor;
     }
 
     const Color& GetHoverColor() const
@@ -440,6 +447,12 @@ public:
     {
         auto& style = MaybeResetStyle<ButtonStyle>(StyleTag::SPECIALIZED_STYLE);
         style.focusColor = color;
+    }
+
+    void SetFocusBorderColor(const Color& color)
+    {
+        auto& style = MaybeResetStyle<ButtonStyle>(StyleTag::SPECIALIZED_STYLE);
+        style.focusBorderColor = color;
     }
 
     void SetHoverColor(const Color& color)

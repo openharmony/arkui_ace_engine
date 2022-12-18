@@ -26,6 +26,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
 #include "base/resource/internal_resource.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/container_scope.h"
 #include "core/components/align/align_component.h"
@@ -138,6 +139,10 @@ VideoElement::~VideoElement()
         BackEndEventManager<void()>::GetInstance().RemoveBackEndEvent(startBtnClickId_);
     }
 
+    if (isMediaPlayerFullStatus_) {
+        ExitFullScreen();
+    }
+
     if (!isExternalResource_) {
         if (isFullScreen_) {
             ExitFullScreen();
@@ -152,6 +157,9 @@ VideoElement::~VideoElement()
 #ifdef OHOS_STANDARD_SYSTEM
     if (mediaPlayer_ != nullptr) {
         mediaPlayer_->Release();
+    }
+    if (SystemProperties::GetExtSurfaceEnabled() && surfaceDelegate_) {
+        surfaceDelegate_->ReleaseSurface();
     }
 #endif
 }
@@ -180,6 +188,14 @@ void VideoElement::InitStatus(const RefPtr<VideoComponent>& videoComponent)
     isFullScreen_ = videoComponent->IsFullscreen();
     direction_ = videoComponent->GetDirection();
     startTime_ = videoComponent->GetStartTime();
+    isMediaPlayerFullStatus_ = videoComponent->GetMediaPlayerFullStatus();
+    if (isMediaPlayerFullStatus_) {
+        pastPlayingStatus_ = videoComponent->GetPastPlayingStatus();
+        if (startTime_ != 0) {
+            currentPos_ = startTime_;
+            IntTimeToText(currentPos_, currentPosText_);
+        }
+    }
     if (isLoop_ != videoComponent->IsLoop()) {
         isLoop_ = videoComponent->IsLoop();
         EnableLooping(isLoop_);
@@ -192,6 +208,9 @@ void VideoElement::InitStatus(const RefPtr<VideoComponent>& videoComponent)
 
 #ifdef OHOS_STANDARD_SYSTEM
     PreparePlayer();
+    if (isMediaPlayerFullStatus_) {
+        isExternalResource_ = true;
+    }
 #endif
 
     if (!videoComponent->GetPlayer().Invalid() && !videoComponent->GetTexture().Invalid()) {
@@ -303,8 +322,7 @@ void VideoElement::PreparePlayer()
 
     int32_t fd = -1;
     // SetSource by fd.
-    if (StringUtils::StartWith(filePath, "dataability://") ||
-        StringUtils::StartWith(filePath, "datashare://")) {
+    if (StringUtils::StartWith(filePath, "dataability://") || StringUtils::StartWith(filePath, "datashare://")) {
         auto context = context_.Upgrade();
         if (!context) {
             LOGE("get context fail");
@@ -315,10 +333,7 @@ void VideoElement::PreparePlayer()
             LOGE("get data provider fail");
             return;
         }
-        auto dataAbilityHelper = dataProvider->GetDataAbilityHelper();
-        if (dataAbilityHelper) {
-            fd = dataAbilityHelper->OpenFile(filePath, "r");
-        }
+        fd = dataProvider->GetDataProviderFile(filePath, "r");
     } else if (!StringUtils::StartWith(filePath, "http")) {
         filePath = GetAssetAbsolutePath(filePath);
         fd = open(filePath.c_str(), O_RDONLY);
@@ -346,18 +361,29 @@ void VideoElement::PreparePlayer()
             return;
         }
     }
-    
+
     RegisterMediaPlayerEvent();
 
     sptr<Surface> producerSurface;
-#ifdef ENABLE_ROSEN_BACKEND
-    if (renderNode_) {
-        auto rosenTexture = AceType::DynamicCast<RosenRenderTexture>(renderNode_);
-        if (rosenTexture) {
-            producerSurface = rosenTexture->GetSurface();
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        auto context = context_.Upgrade();
+        int32_t windowId = 0;
+        if (context && !surfaceDelegate_) {
+            windowId = context->GetWindowId();
+            surfaceDelegate_ = new OHOS::SurfaceDelegate(windowId);
+            surfaceDelegate_->CreateSurface();
+            producerSurface = surfaceDelegate_->GetSurface();
         }
-    }
+    } else {
+#ifdef ENABLE_ROSEN_BACKEND
+        if (renderNode_) {
+            auto rosenTexture = AceType::DynamicCast<RosenRenderTexture>(renderNode_);
+            if (rosenTexture) {
+                producerSurface = rosenTexture->GetSurface();
+            }
+        }
 #endif
+    }
 
     if (producerSurface == nullptr) {
         LOGE("producerSurface is nullptr");
@@ -370,7 +396,7 @@ void VideoElement::PreparePlayer()
         LOGE("Player SetVideoSurface failed");
         return;
     }
-    if (mediaPlayer_->PrepareAsync() != 0) {
+    if (!SystemProperties::GetExtSurfaceEnabled() && mediaPlayer_->PrepareAsync() != 0) {
         LOGE("Player prepare failed");
         return;
     }
@@ -392,6 +418,23 @@ std::string VideoElement::GetAssetAbsolutePath(const std::string& fileName)
     std::string filePath = assetManager->GetAssetPath(fileName);
     std::string absolutePath = filePath + fileName;
     return absolutePath;
+}
+
+void VideoElement::OnTextureOffset(int64_t textureId, int32_t x, int32_t y)
+{
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        const auto pipelineContext = GetContext().Upgrade();
+        if (!pipelineContext) {
+            LOGW("pipelineContext is null!");
+            return;
+        }
+        float viewScale = pipelineContext->GetViewScale();
+        textureOffsetX_ = x * viewScale;
+        textureOffsetY_ = y * viewScale;
+        surfaceDelegate_->SetBounds(textureOffsetX_, textureOffsetY_, textureWidth_, textureHeight_);
+        LOGI("OnTextureSize x = %{public}d y = %{public}d textureWidth_ = %{public}d textureHeight_ = %{public}d",
+            textureOffsetX_, textureOffsetY_, textureWidth_, textureHeight_);
+    }
 }
 #endif
 
@@ -438,13 +481,16 @@ void VideoElement::Prepare(const WeakPtr<Element>& parent)
         }
         videoComponent->SetChild(CreateChild());
         fullscreenEvent_ = videoComponent->GetFullscreenEvent();
+        if (!mediaFullscreenEvent_) {
+            mediaFullscreenEvent_ = videoComponent->GetMediaFullscreenEvent();
+        }
+        if (!mediaExitFullscreenEvent_ && isMediaPlayerFullStatus_) {
+            mediaExitFullscreenEvent_ = videoComponent->GetMediaExitFullscreenEvent();
+        }
     }
 
     RenderElement::Prepare(parent);
     if (renderNode_) {
-#ifdef OHOS_STANDARD_SYSTEM
-        CreateMediaPlayer();
-#endif
         auto renderTexture = AceType::DynamicCast<RenderTexture>(renderNode_);
         if (renderTexture) {
             renderTexture->SetHiddenChangeEvent([weak = WeakClaim(this)](bool hidden) {
@@ -461,6 +507,18 @@ void VideoElement::Prepare(const WeakPtr<Element>& parent)
                     }
                 });
         }
+#ifdef OHOS_STANDARD_SYSTEM
+        if (renderTexture && SystemProperties::GetExtSurfaceEnabled()) {
+            renderTexture->SetTextureOffsetChange(
+                [weak = WeakClaim(this)](int64_t textureId, int32_t x, int32_t y) {
+                    auto videoElement = weak.Upgrade();
+                    if (videoElement) {
+                        videoElement->OnTextureOffset(textureId, x, y);
+                    }
+                });
+        }
+        CreateMediaPlayer();
+#endif
     }
     isElementPrepared_ = true;
 }
@@ -470,6 +528,28 @@ void VideoElement::OnTextureSize(int64_t textureId, int32_t textureWidth, int32_
 #ifndef OHOS_STANDARD_SYSTEM
     if (texture_) {
         texture_->OnSize(textureId, textureWidth, textureHeight);
+    }
+#else
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        const auto pipelineContext = GetContext().Upgrade();
+        if (!pipelineContext) {
+            LOGW("pipelineContext is null!");
+            return;
+        }
+        float viewScale = pipelineContext->GetViewScale();
+        textureWidth_ = textureWidth * viewScale + 1;
+        textureHeight_ = textureHeight * viewScale + 1;
+        surfaceDelegate_->SetBounds(textureOffsetX_, textureOffsetY_, textureWidth_, textureHeight_);
+        LOGI("OnTextureSize x = %{public}d y = %{public}d textureWidth_ = %{public}d textureHeight_ = %{public}d",
+            textureOffsetX_, textureOffsetY_, textureWidth_, textureHeight_);
+        if (hasMediaPrepared_) {
+            return;
+        }
+        if (mediaPlayer_->PrepareAsync() != 0) {
+            LOGE("Player prepare failed");
+        } else {
+            hasMediaPrepared_ = true;
+        }
     }
 #endif
 }
@@ -1035,7 +1115,7 @@ void VideoElement::OnPrepared(
     videoWidth_ = width;
     videoHeight_ = height;
     duration_ = duration;
-    currentPos_ = currentPos;
+    currentPos_ = std::max(startTime_, static_cast<int32_t>(currentPos));
 
     IntTimeToText(duration_, durationText_);
     IntTimeToText(currentPos_, currentPosText_);
@@ -1072,8 +1152,8 @@ void VideoElement::OnPrepared(
         onPrepared_(param);
     }
 
-    if (!isExternalResource_) {
-        SetCurrentTime(startTime_);
+    if (!isExternalResource_ || isMediaPlayerFullStatus_) {
+        SetCurrentTime(startTime_, SeekMode::SEEK_CLOSEST);
         EnableLooping(isLoop_);
         SetSpeed(speed_);
     }
@@ -1086,6 +1166,9 @@ void VideoElement::OnPrepared(
 #ifdef OHOS_STANDARD_SYSTEM
     if (isAutoPlay_) {
         Start();
+    } else if (isMediaPlayerFullStatus_ && pastPlayingStatus_) {
+        Start();
+        pastPlayingStatus_ = false;
     }
 #endif
 }
@@ -1145,14 +1228,14 @@ void VideoElement::OnPlayerStatus(PlaybackStatus status)
         Size videoSize = Size(mediaPlayer_->GetVideoWidth(), mediaPlayer_->GetVideoHeight());
         int32_t milliSecondDuration = 0;
         mediaPlayer_->GetDuration(milliSecondDuration);
-        uiTaskExecutor.PostSyncTask(
-            [&videoElement, videoSize, duration = milliSecondDuration / MILLISECONDS_TO_SECONDS] {
-                auto video = videoElement.Upgrade();
-                if (video) {
-                    LOGI("Video OnPrepared video size: %{public}s", videoSize.ToString().c_str());
-                    video->OnPrepared(videoSize.Width(), videoSize.Height(), false, duration, 0, true);
-                }
-            });
+        uiTaskExecutor.PostSyncTask([&videoElement, videoSize, duration = milliSecondDuration / MILLISECONDS_TO_SECONDS,
+                                        startTime = startTime_] {
+            auto video = videoElement.Upgrade();
+            if (video) {
+                LOGI("Video OnPrepared video size: %{public}s", videoSize.ToString().c_str());
+                video->OnPrepared(videoSize.Width(), videoSize.Height(), false, duration, startTime, true);
+            }
+        });
     } else if (status == PlaybackStatus::PLAYBACK_COMPLETE) {
         OnCompletion();
     }
@@ -1162,7 +1245,12 @@ void VideoElement::OnPlayerStatus(PlaybackStatus status)
 void VideoElement::OnCurrentTimeChange(uint32_t currentPos)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    if (currentPos == currentPos_) {
+    if (isMediaPlayerFullStatus_ && startTime_ != 0) {
+        if (GreatNotEqual(startTime_, currentPos)) {
+            currentPos = startTime_;
+        }
+    }
+    if (currentPos == currentPos_ || isStop_) {
         return;
     }
     if (duration_ == 0) {
@@ -1399,10 +1487,10 @@ const RefPtr<Component> VideoElement::CreateChild()
         columnChildren.emplace_back(AceType::MakeRefPtr<FlexItemComponent>(VIDEO_CHILD_COMMON_FLEX_GROW,
             VIDEO_CHILD_COMMON_FLEX_SHRINK, VIDEO_CHILD_COMMON_FLEX_BASIS, CreatePoster()));
 #else
-#ifdef ENABLE_ROSEN_BACKEND
-        columnChildren.emplace_back(AceType::MakeRefPtr<FlexItemComponent>(VIDEO_CHILD_COMMON_FLEX_GROW,
-            VIDEO_CHILD_COMMON_FLEX_SHRINK, VIDEO_CHILD_COMMON_FLEX_BASIS, CreatePoster()));
-#endif
+        if (startTime_ == 0) {
+            columnChildren.emplace_back(AceType::MakeRefPtr<FlexItemComponent>(VIDEO_CHILD_COMMON_FLEX_GROW,
+                VIDEO_CHILD_COMMON_FLEX_SHRINK, VIDEO_CHILD_COMMON_FLEX_BASIS, CreatePoster()));
+        }
 #endif
         if (needControls_) {
             columnChildren.emplace_back(CreateControl());
@@ -1551,7 +1639,7 @@ void VideoElement::Start()
         return;
     }
     if (isStop_) {
-        if (mediaPlayer_->Prepare() != 0) {
+        if (mediaPlayer_->PrepareAsync() != 0) {
             LOGE("Player prepare failed");
             return;
         }
@@ -1593,6 +1681,7 @@ void VideoElement::Pause()
 
 void VideoElement::Stop()
 {
+    startTime_ = 0;
     OnCurrentTimeChange(0);
     OnPlayerStatus(PlaybackStatus::STOPPED);
 #ifndef OHOS_STANDARD_SYSTEM
@@ -1612,6 +1701,7 @@ void VideoElement::SetCurrentTime(float currentPos, SeekMode seekMode)
 #ifdef OHOS_STANDARD_SYSTEM
     if (mediaPlayer_ != nullptr && GreatOrEqual(currentPos, 0.0) && LessOrEqual(currentPos, duration_)) {
         LOGI("Video Seek");
+        startTime_ = currentPos;
         mediaPlayer_->Seek(currentPos * MILLISECONDS_TO_SECONDS, ConvertToMediaSeekMode(seekMode));
     }
 #else
@@ -1624,56 +1714,64 @@ void VideoElement::SetCurrentTime(float currentPos, SeekMode seekMode)
 void VideoElement::FullScreen()
 {
     if (!isFullScreen_ && !isError_) {
+        RefPtr<Component> component;
+#ifdef OHOS_STANDARD_SYSTEM
+        if (mediaFullscreenEvent_) {
+            component = mediaFullscreenEvent_(true, isPlaying_, texture_);
+        }
+#else
         if (fullscreenEvent_) {
-            RefPtr<Component> component = fullscreenEvent_(true, player_, texture_);
-            if (component) {
-                auto context = context_.Upgrade();
-                if (!context) {
-                    return;
-                }
-
-                auto stackElement = context->GetLastStack();
-                if (!stackElement) {
-                    return;
-                }
-
-                // add fullscreen component cover component
-                if (IsDeclarativePara()) {
-                    stackElement->PushComponent(AceType::MakeRefPtr<ComposedComponent>("0", "fullscreen", component));
-                } else {
-                    auto composedComponent = AceType::DynamicCast<ComposedComponent>(component);
-                    if (!composedComponent) {
-                        LOGE("VideoElement::FullScreen: is not ComposedComponent");
-                        return;
-                    }
-                    if (composedComponent->IsInspector()) {
-                        LOGE("VideoElement::FullScreen: is InspectorComposedComponent");
-                        return;
-                    }
-                    stackElement->PushComponent(AceType::MakeRefPtr<ComposedComponent>(
-                        composedComponent->GetId() + "fullscreen", composedComponent->GetName() + "fullscreen",
-                        composedComponent->GetChild()));
-                }
-                isFullScreen_ = true;
-                currentPlatformVersion_ = context->GetMinPlatformVersion();
-                if (player_ && currentPlatformVersion_ > COMPATIBLE_VERSION) {
-#ifndef OHOS_STANDARD_SYSTEM
-                    player_->SetDirection(direction_);
+            component = fullscreenEvent_(true, player_, texture_);
+        }
 #endif
+        if (component) {
+            auto context = context_.Upgrade();
+            CHECK_NULL_VOID(context);
+
+            auto stackElement = context->GetLastStack();
+            CHECK_NULL_VOID(stackElement);
+
+            // add fullscreen component cover component
+            if (IsDeclarativePara()) {
+#ifdef OHOS_STANDARD_SYSTEM
+                if (mediaPlayer_ != nullptr && mediaPlayer_->IsPlaying()) {
+                    mediaPlayer_->Pause();
                 }
-                if (onFullScreenChange_) {
-                    std::string param;
-                    if (IsDeclarativePara()) {
-                        auto json = JsonUtil::Create(true);
-                        json->Put("fullscreen", isFullScreen_);
-                        param = json->ToString();
-                    } else {
-                        param = std::string("\"fullscreenchange\",{\"fullscreen\":")
-                                    .append(std::to_string(isFullScreen_))
-                                    .append("}");
-                    }
-                    onFullScreenChange_(param);
+#endif
+                stackElement->PushComponent(AceType::MakeRefPtr<ComposedComponent>("0", "fullscreen", component));
+            } else {
+                auto composedComponent = AceType::DynamicCast<ComposedComponent>(component);
+                if (!composedComponent) {
+                    LOGE("VideoElement::FullScreen: is not ComposedComponent");
+                    return;
                 }
+                if (composedComponent->IsInspector()) {
+                    LOGE("VideoElement::FullScreen: is InspectorComposedComponent");
+                    return;
+                }
+                stackElement->PushComponent(
+                    AceType::MakeRefPtr<ComposedComponent>(composedComponent->GetId() + "fullscreen",
+                        composedComponent->GetName() + "fullscreen", composedComponent->GetChild()));
+            }
+            isFullScreen_ = true;
+            currentPlatformVersion_ = context->GetMinPlatformVersion();
+            if (player_ && currentPlatformVersion_ > COMPATIBLE_VERSION) {
+#ifndef OHOS_STANDARD_SYSTEM
+                player_->SetDirection(direction_);
+#endif
+            }
+            if (onFullScreenChange_) {
+                std::string param;
+                if (IsDeclarativePara()) {
+                    auto json = JsonUtil::Create(true);
+                    json->Put("fullscreen", isFullScreen_);
+                    param = json->ToString();
+                } else {
+                    param = std::string("\"fullscreenchange\",{\"fullscreen\":")
+                                .append(std::to_string(isFullScreen_))
+                                .append("}");
+                }
+                onFullScreenChange_(param);
             }
         }
     }
@@ -1681,11 +1779,17 @@ void VideoElement::FullScreen()
 
 void VideoElement::ExitFullScreen()
 {
+#ifdef OHOS_STANDARD_SYSTEM
+    if (mediaExitFullscreenEvent_ && isFullScreen_) {
+        mediaExitFullscreenEvent_(false, isPlaying_, currentPos_);
+    }
+#else
     if (fullscreenEvent_) {
         fullscreenEvent_(false, nullptr, nullptr);
     }
+#endif
 
-    if (!isExternalResource_ && isFullScreen_) {
+    if ((!isExternalResource_ && isFullScreen_) || isMediaPlayerFullStatus_) {
         auto context = context_.Upgrade();
         if (!context) {
             return;

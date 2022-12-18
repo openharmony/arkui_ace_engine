@@ -15,9 +15,17 @@
 
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style.h"
+
 namespace OHOS::Ace {
 
 RSColor ToRSColor(const Color& color)
+{
+    return RSColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
+}
+
+RSColor ToRSColor(const LinearColor& color)
 {
     return RSColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
 }
@@ -27,7 +35,7 @@ RSRect ToRSRect(const NG::RectF& rect)
     return RSRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom());
 }
 
-RSPoint ToRSPonit(const NG::PointF& point)
+RSPoint ToRSPoint(const NG::PointF& point)
 {
     return RSPoint(point.GetX(), point.GetY());
 }
@@ -116,16 +124,39 @@ rosen::WordBreakType ToRSWordBreakType(const WordBreak& wordBreak)
     return static_cast<rosen::WordBreakType>(wordBreak);
 }
 
+rosen::TextDecoration ToRSTextDecoration(TextDecoration textDecoration)
+{
+    rosen::TextDecoration rsTextDecoration = rosen::TextDecoration::NONE;
+    switch (textDecoration) {
+        case TextDecoration::OVERLINE:
+            rsTextDecoration = rosen::TextDecoration::OVERLINE;
+            break;
+        case TextDecoration::LINE_THROUGH:
+            rsTextDecoration = rosen::TextDecoration::LINETHROUGH;
+            break;
+        case TextDecoration::UNDERLINE:
+            rsTextDecoration = rosen::TextDecoration::UNDERLINE;
+            break;
+        default:
+            rsTextDecoration = rosen::TextDecoration::NONE;
+            break;
+    }
+    return rsTextDecoration;
+}
+
 rosen::TextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextStyle& textStyle)
 {
     rosen::TextStyle rsTextStyle;
     rsTextStyle.color_ = ToRSColor(textStyle.GetTextColor());
-    // TODO: convert decoration,fontFamily and other styles.
+    rsTextStyle.decoration_ = ToRSTextDecoration(textStyle.GetTextDecoration());
+    rsTextStyle.decorationColor_ = ToRSColor(textStyle.GetTextDecorationColor());
+    // TODO: convert fontFamily and other styles.
 
     // TODO: convert missing textBaseline
     rsTextStyle.fontWeight_ = ToRSFontWeight(textStyle.GetFontWeight());
     rsTextStyle.fontStyle_ = static_cast<rosen::FontStyle>(textStyle.GetFontStyle());
     rsTextStyle.textBaseline_ = static_cast<rosen::TextBaseline>(textStyle.GetTextBaseline());
+    rsTextStyle.fontFamilies_ = textStyle.GetFontFamilies();
     if (context) {
         rsTextStyle.fontSize_ = context->NormalizeToPx(textStyle.GetFontSize());
         if (textStyle.IsAllowScale() || textStyle.GetFontSize().Unit() == DimensionUnit::FP) {

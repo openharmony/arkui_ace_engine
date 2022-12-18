@@ -38,6 +38,7 @@
 #include "base/log/log.h"
 #include "base/log/trace_id.h"
 #include "base/thread/background_task_executor.h"
+#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 
@@ -76,9 +77,8 @@ TaskExecutor::Task WrapTaskWithContainer(
 
 bool PostTaskToTaskRunner(const fml::RefPtr<fml::TaskRunner>& taskRunner, TaskExecutor::Task&& task, uint32_t delayTime)
 {
-    if (!taskRunner || !task) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(taskRunner, false);
+    CHECK_NULL_RETURN_NOLOG(task, false);
 
     if (delayTime > 0) {
         taskRunner->PostDelayedTask(std::move(task), fml::TimeDelta::FromMilliseconds(delayTime));

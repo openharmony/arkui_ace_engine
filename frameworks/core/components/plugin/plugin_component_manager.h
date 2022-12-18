@@ -64,14 +64,9 @@ public:
         UIServiceListener() = default;
         ~UIServiceListener()
         {
-            std::lock_guard<std::mutex> lock(mutex_);
+            std::lock_guard<std::recursive_mutex> lock(mutex_);
             callbackVec_.clear();
         };
-
-        std::map<std::shared_ptr<PluginComponentCallBack>, CallBackType>& GetPluginComponentCallBack()
-        {
-            return callbackVec_;
-        }
 
         void ResgisterListener(const std::shared_ptr<PluginComponentCallBack>& callback, CallBackType callBackType);
         void OnPushCallBack(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
@@ -82,7 +77,7 @@ public:
         void RequestByJsonPath(const PluginComponentTemplate& pluginTemplate, const std::string& data);
     
     private:
-        std::mutex mutex_;
+        std::recursive_mutex mutex_;
         std::map<std::shared_ptr<PluginComponentCallBack>, CallBackType> callbackVec_;
     };
 

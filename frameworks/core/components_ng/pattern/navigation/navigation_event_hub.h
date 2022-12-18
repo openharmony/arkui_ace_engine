@@ -24,24 +24,38 @@
 namespace OHOS::Ace::NG {
 
 using OnTitleModeChangeEvent = std::function<void(const NavigationTitleMode)>;
+using OnNavBarStateChangeEvent = std::function<void(bool)>;
 
 class NavigationEventHub : public EventHub {
     DECLARE_ACE_TYPE(NavigationEventHub, EventHub)
 public:
     void SetOnTitleModeChange(OnTitleModeChangeEvent&& changeEvent)
     {
-        OnTitleModeChangeEvent_ = changeEvent;
+        onTitleModeChangeEvent_ = changeEvent;
     }
 
     void FireChangeEvent(NavigationTitleMode mode) const
     {
-        if (OnTitleModeChangeEvent_) {
-            OnTitleModeChangeEvent_(mode);
+        if (onTitleModeChangeEvent_) {
+            onTitleModeChangeEvent_(mode);
+        }
+    }
+
+    void SetOnNavBarStateChange(OnNavBarStateChangeEvent&& changeEvent)
+    {
+        onNavBarStateChangeEvent_ = changeEvent;
+    }
+
+    void FireNavBarStateChangeEvent(bool isVisible) const
+    {
+        if (onNavBarStateChangeEvent_) {
+            onNavBarStateChangeEvent_(isVisible);
         }
     }
 
 private:
-    OnTitleModeChangeEvent OnTitleModeChangeEvent_;
+    OnTitleModeChangeEvent onTitleModeChangeEvent_;
+    OnNavBarStateChangeEvent onNavBarStateChangeEvent_;
 };
 
 } // namespace OHOS::Ace::NG

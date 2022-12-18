@@ -173,6 +173,7 @@ protected:
     double percentChange_ = 0.0;
     float scale_ = 1.0f;
     bool stateEffect_ = true;
+    double aspectRatio_ = 0.0;
 
     bool needUpdateAnimation_ = false;
     bool isInnerBorder_ = false;

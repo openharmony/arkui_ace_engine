@@ -20,6 +20,9 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#ifndef ACE_UNITTEST
+#include "core/components_ng/base/view_abstract.h"
+#endif
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -30,15 +33,20 @@ void ImageModelNG::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ImageSourceInfo imageSourceInfo(src);
+    auto createSourceInfoFunc = [&src, noPixMap, &pixMap]() -> ImageSourceInfo {
+#if defined(PIXEL_MAP_SUPPORTED)
+        return noPixMap ? ImageSourceInfo(src) : ImageSourceInfo(pixMap);
+#else
+        return ImageSourceInfo(src);
+#endif
+    };
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     stack->Push(frameNode);
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageSourceInfo);
-
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, createSourceInfoFunc());
     // register image frame node to pipeline context to receive memory level notification and window state change
     // notification
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddNodesToNotifyMemoryLevel(nodeId);
     pipeline->AddWindowStateChangedCallback(nodeId);
@@ -49,13 +57,14 @@ void ImageModelNG::SetAlt(const std::string& src)
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, ImageSourceInfo(src));
 }
 
-void ImageModelNG::SetBorder(const Border& border)
+void ImageModelNG::SetBorder(const Border& border) {}
+
+void ImageModelNG::SetBackBorder()
 {
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, NeedBorderRadius, true);
 }
 
-void ImageModelNG::SetBlur(double blur)
-{
-}
+void ImageModelNG::SetBlur(double blur) {}
 
 void ImageModelNG::SetImageFit(int32_t value)
 {
@@ -67,7 +76,7 @@ void ImageModelNG::SetMatchTextDirection(bool value)
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, MatchTextDirection, value);
 }
 
-void ImageModelNG::SetFitMaxSize(bool value)
+void ImageModelNG::SetFitOriginSize(bool value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, FitOriginalSize, value);
 }
@@ -90,17 +99,25 @@ void ImageModelNG::SetOnError(std::function<void(const LoadImageFailEvent& info)
     eventHub->SetOnError(std::move(callback));
 }
 
-void ImageModelNG::SetSvgAnimatorFinishEvent(std::function<void()>&& callback)
-{
-}
+void ImageModelNG::SetSvgAnimatorFinishEvent(std::function<void()>&& callback) {}
 
 void ImageModelNG::SetImageSourceSize(const std::pair<Dimension, Dimension>& size)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, SourceSize, size);
+    SizeF sourceSize =
+        SizeF(static_cast<float>(size.first.ConvertToPx()), static_cast<float>(size.second.ConvertToPx()));
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, SourceSize, sourceSize);
 }
 
 void ImageModelNG::SetImageFill(const Color& color)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
+    if (imageSourceInfo.IsSvg()) {
+        imageSourceInfo.SetFillColor(color);
+        ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageSourceInfo);
+    }
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color);
 }
 
@@ -131,6 +148,7 @@ void ImageModelNG::SetAutoResize(bool autoResize)
 
 void ImageModelNG::SetSyncMode(bool syncMode)
 {
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, SyncMode, syncMode);
 }
 
 void ImageModelNG::SetColorFilterMatrix(const std::vector<float>& matrix)
@@ -138,28 +156,33 @@ void ImageModelNG::SetColorFilterMatrix(const std::vector<float>& matrix)
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, matrix);
 }
 
-void ImageModelNG::SetOnDragStartId(const OnDragFunc& onDragStartId)
+void ImageModelNG::SetOnDragStart(OnDragStartFunc&& onDragStart)
 {
+#ifndef ACE_UNITTEST
+    auto dragStart = [dragStartFunc = std::move(onDragStart)](
+                         const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
+        auto dragInfo = dragStartFunc(event, extraParams);
+        DragDropInfo info;
+        info.extraInfo = dragInfo.extraInfo;
+        info.pixelMap = dragInfo.pixelMap;
+        info.customNode = AceType::DynamicCast<UINode>(dragInfo.node);
+        return info;
+    };
+    ViewAbstract::SetOnDragStart(std::move(dragStart));
+#endif
 }
 
-void ImageModelNG::SetOnDragEnterId(const OnDropFunc&  onDragStartId)
-{
-}
+void ImageModelNG::SetOnDragEnter(OnDragDropFunc&& onDragEnter) {}
 
-void ImageModelNG::SetOnDragLeaveId(const OnDropFunc& onDragStartId)
-{
-}
+void ImageModelNG::SetOnDragLeave(OnDragDropFunc&& onDragLeave) {}
 
-void ImageModelNG::SetOnDragMoveId(const OnDropFunc& onDragMoveId)
-{
-}
+void ImageModelNG::SetOnDragMove(OnDragDropFunc&& onDragMove) {}
 
-void ImageModelNG::SetOnDropId(const OnDropFunc& onDropId)
-{
-}
+void ImageModelNG::SetOnDrop(OnDragDropFunc&& onDrop) {}
 
 void ImageModelNG::SetCopyOption(const CopyOptions& copyOption)
 {
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, CopyOptions, copyOption);
 }
 
 bool ImageModelNG::UpdateDragItemInfo(DragItemInfo& itemInfo)

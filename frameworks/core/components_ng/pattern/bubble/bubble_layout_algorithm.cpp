@@ -15,7 +15,11 @@
 
 #include "core/components_ng/pattern/bubble/bubble_layout_algorithm.h"
 
+#include <algorithm>
+
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
@@ -48,18 +52,21 @@ constexpr Dimension BEZIER_WIDTH_HALF = 16.0_vp;
 void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto bubbleProp = AceType::DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(bubbleProp);
-    bool useCustom = bubbleProp->GetUseCustom().value_or(false);
-    const auto& layoutConstraint = bubbleProp->GetLayoutConstraint();
-    const auto& parentIdealSize = layoutConstraint->parentIdealSize;
-    OptionalSizeF realSize;
+    auto bubbleLayoutProperty = AceType::DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(bubbleLayoutProperty);
+
+    const auto& layoutConstraint = bubbleLayoutProperty->GetLayoutConstraint();
+    if (!layoutConstraint) {
+        LOGE("fail to measure bubble due to layoutConstraint is nullptr");
+        return;
+    }
+    bool useCustom = bubbleLayoutProperty->GetUseCustom().value_or(false);
     // bubble size fit screen.
-    realSize.UpdateIllegalSizeWithCheck(parentIdealSize);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(realSize.ConvertToSizeT());
-    layoutWrapper->GetGeometryNode()->SetContentSize(realSize.ConvertToSizeT());
+    layoutWrapper->GetGeometryNode()->SetFrameSize(layoutConstraint->maxSize);
+    layoutWrapper->GetGeometryNode()->SetContentSize(layoutConstraint->maxSize);
+
     // update child layout constraint
-    LayoutConstraintF childLayoutConstraint;
+    LayoutConstraintF childLayoutConstraint = bubbleLayoutProperty->CreateChildConstraint();
     if (!useCustom) {
         if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
             childLayoutConstraint.UpdateMaxSizeWithCheck(
@@ -81,42 +88,86 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto child = children.front();
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
+    bool showInSubWindow = bubbleLayoutProperty->GetShowInSubWindowValue(false);
+    if (useCustom && !showInSubWindow) {
+        auto context = layoutWrapper->GetHostNode()->GetContext();
+        float rootH = context->GetRootHeight();
+        float rootW = context->GetRootWidth();
+        auto childHeight = child->GetGeometryNode()->GetMarginFrameSize().Height();
+        auto childWidth = child->GetGeometryNode()->GetMarginFrameSize().Width();
+        float scaledBubbleSpacing = BUBBLE_SPACING.ConvertToPx() * 2.0;
+        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
+        CHECK_NULL_VOID(targetNode);
+        auto geometryNode = targetNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto targetSize = geometryNode->GetFrameSize();
+        auto targetOffset = targetNode->GetPaintRectOffset();
+        auto constrainHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
+        auto constrainWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+        auto placement = bubbleLayoutProperty->GetPlacement().value_or(Placement::BOTTOM);
+        std::unordered_set<Placement> setHorizontal = { Placement::LEFT, Placement::LEFT_BOTTOM, Placement::LEFT_TOP,
+            Placement::RIGHT, Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP };
+        std::unordered_set<Placement> setVertical = { Placement::TOP, Placement::TOP_LEFT, Placement::TOP_RIGHT,
+            Placement::BOTTOM, Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT };
+        if (setHorizontal.find(placement) != setHorizontal.end()) {
+            if (childWidth + targetOffset.GetX() + targetSize.Width() + scaledBubbleSpacing <= rootW &&
+                targetOffset.GetX() - childWidth - scaledBubbleSpacing >= 0) {
+                return;
+            }
+            constrainWidth = rootW - scaledBubbleSpacing;
+        }
+        if (setVertical.find(placement) != setVertical.end()) {
+            if (childHeight + targetOffset.GetY() + targetSize.Height() + scaledBubbleSpacing <= rootH &&
+                targetOffset.GetY() - childHeight - scaledBubbleSpacing >= 0) {
+                return;
+            }
+            constrainHeight = std::max(rootH - targetOffset.GetY() - targetSize.Height() - scaledBubbleSpacing,
+                targetOffset.GetY() - scaledBubbleSpacing);
+        }
+        SizeF size = SizeF(constrainWidth, constrainHeight);
+        childLayoutConstraint.UpdateMaxSizeWithCheck(size);
+        child->Measure(childLayoutConstraint);
+    }
 }
 
 void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    InitTargetSizeAndPosition();
     CHECK_NULL_VOID(layoutWrapper);
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
     auto bubbleProp = DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(bubbleProp);
+    InitProps(bubbleProp);
+    InitTargetSizeAndPosition(bubbleProp);
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;
     }
-    selfSize_ = frameNode->GetGeometryNode()->GetFrameSize();
+    selfSize_ = layoutWrapper->GetGeometryNode()->GetFrameSize(); // bubble's size
     auto child = children.front();
-    childSize_ = child->GetGeometryNode()->GetMarginFrameSize();
-    childOffset_ = GetChildPosition(childSize_, bubbleProp);
+    childSize_ = child->GetGeometryNode()->GetMarginFrameSize(); // bubble's child's size
+    childOffset_ = GetChildPosition(childSize_, bubbleProp); // bubble's child's offset
     bool useCustom = bubbleProp->GetUseCustom().value_or(false);
-    if (useCustom) {
+    if (useCustom) { // use custom popupOption
         UpdateCustomChildPosition(bubbleProp);
         UpdateTouchRegion();
     }
     child->GetGeometryNode()->SetMarginFrameOffset(childOffset_);
+    child->Layout();
 }
 
-OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp)
+void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, OffsetF());
+    CHECK_NULL_VOID(pipelineContext);
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
-    CHECK_NULL_RETURN(popupTheme, OffsetF());
+    CHECK_NULL_VOID(popupTheme);
     padding_ = popupTheme->GetPadding();
     border_.SetBorderRadius(popupTheme->GetRadius());
     targetSpace_ = popupTheme->GetTargetSpace();
     placement_ = layoutProp->GetPlacement().value_or(Placement::BOTTOM);
+}
+
+OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp)
+{
     InitArrowState(layoutProp);
     float scaledBubbleSpacing = BUBBLE_SPACING.ConvertToPx();
     OffsetF bottomPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
@@ -161,6 +212,7 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const Re
     // If childPosition is error, adjust bubble to origin position.
     arrowPlacement_ = placement_;
     arrowPosition_ = arrowPlacement_ == Placement::TOP ? topArrowPosition : bottomArrowPosition;
+
     return originOffset;
 }
 
@@ -172,9 +224,16 @@ void BubbleLayoutAlgorithm::InitArrowState(const RefPtr<BubbleLayoutProperty>& l
         showBottomArrow_ = false;
         return;
     }
-    float arrowWidth = ARROW_WIDTH.ConvertToPx();
-    showTopArrow_ = GreatOrEqual(childSize_.Width(), arrowWidth);
+    float arrowWidth = static_cast<float>(ARROW_WIDTH.ConvertToPx());
+    showTopArrow_ = GreatOrEqual(
+        childSize_.Width() - std::max(padding_.Left().ConvertToPx(), border_.TopLeftRadius().GetX().ConvertToPx()) -
+            std::max(padding_.Right().ConvertToPx(), border_.TopRightRadius().GetX().ConvertToPx()),
+        arrowWidth);
     showBottomArrow_ = GreatOrEqual(childSize_.Width(), arrowWidth);
+    showBottomArrow_ = GreatOrEqual(
+        childSize_.Width() - std::max(padding_.Left().ConvertToPx(), border_.BottomLeftRadius().GetX().ConvertToPx()) -
+            std::max(padding_.Right().ConvertToPx(), border_.BottomRightRadius().GetX().ConvertToPx()),
+        arrowWidth);
 }
 
 void BubbleLayoutAlgorithm::InitArrowTopAndBottomPosition(OffsetF& topArrowPosition, OffsetF& bottomArrowPosition,
@@ -276,7 +335,7 @@ OffsetF BubbleLayoutAlgorithm::GetPositionWithPlacement(const SizeF& childSize, 
 BubbleLayoutAlgorithm::ErrorPositionType BubbleLayoutAlgorithm::GetErrorPositionType(
     const OffsetF& childOffset, const SizeF& childSize)
 {
-    float horizonSpacing = HORIZON_SPACING_WITH_SCREEN.ConvertToPx();
+    auto horizonSpacing = static_cast<float>(HORIZON_SPACING_WITH_SCREEN.ConvertToPx());
     RectF validRegion =
         RectF(OffsetF(horizonSpacing, 0.0), OffsetF(selfSize_.Width() - horizonSpacing, selfSize_.Height()));
     PointF childPoint(childOffset.GetX(), childOffset.GetY());
@@ -297,7 +356,7 @@ OffsetF BubbleLayoutAlgorithm::FitToScreen(const OffsetF& fitPosition, const Siz
         return fitPosition;
     }
     OffsetF childPosition = fitPosition;
-    float horizonSpacing = HORIZON_SPACING_WITH_SCREEN.ConvertToPx();
+    auto horizonSpacing = static_cast<float>(HORIZON_SPACING_WITH_SCREEN.ConvertToPx());
     if (validation == ErrorPositionType::TOP_LEFT_ERROR) {
         childPosition.SetX(horizonSpacing);
     } else {
@@ -402,12 +461,27 @@ void BubbleLayoutAlgorithm::UpdateTouchRegion()
     touchRegion_ = RectF(topLeft, topLeft + bottomRight);
 }
 
-void BubbleLayoutAlgorithm::InitTargetSizeAndPosition()
+void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(const RefPtr<BubbleLayoutProperty>& layoutProp)
 {
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
-    targetSize_ = targetNode->GetGeometryNode()->GetFrameSize();
-    targetOffset_ = targetNode->GetGeometryNode()->GetFrameOffset();
+    auto geometryNode = targetNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    targetSize_ = geometryNode->GetFrameSize();
+    auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+    auto context = targetNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    targetOffset_ = targetNode->GetPaintRectOffset();
+    // Show in SubWindow
+    if (showInSubWindow) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto overlayManager = pipelineContext->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        auto displayWindowOffset = layoutProp->GetDisplayWindowOffset().value_or(OffsetF());
+        targetOffset_ += displayWindowOffset;
+        auto popupInfo = overlayManager->GetPopupInfo(targetNodeId_);
+    }
 }
 
 } // namespace OHOS::Ace::NG

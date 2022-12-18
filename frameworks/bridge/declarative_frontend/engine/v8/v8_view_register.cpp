@@ -107,6 +107,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_relative_container.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row_split.h"
+#if defined(MODEL_COMPONENT_SUPPORTED)
+#include "frameworks/bridge/declarative_frontend/jsview/js_sceneview.h"
+#endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_search.h"
@@ -607,6 +610,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"ColumnSplit", JSColumnSplit::JSBind},
     {"If", JSIfElse::JSBind},
     {"Scroll", JSScroll::JSBind},
+#if defined(MODEL_COMPONENT_SUPPORTED)
+    {"Model", JSSceneView::JSBind},
+#endif
     {"ScrollBar", JSScrollBar::JSBind},
     {"Toggle", JSToggle::JSBind},
     {"Blank", JSBlank::JSBind},
@@ -658,11 +664,13 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"Web", JSWeb::JSBind},
     {"WebController", JSWebController::JSBind},
 #endif
+#ifdef REMOTE_WINDOW_SUPPORTED
+    {"RemoteWindow", JSRemoteWindow::JSBind },
+#endif
 #ifndef WEARABLE_PRODUCT
     {"Camera", JSCamera::JSBind},
     {"Piece", JSPiece::JSBind},
     {"Rating", JSRating::JSBind},
-    {"RemoteWindow", JSRemoteWindow::JSBind },
     {"Video", JSVideo::JSBind},
 #endif
 #if defined(XCOMPONENT_SUPPORTED)
@@ -708,8 +716,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"TextClockController", JSTextClockController::JSBind},
     {"Checkbox", JSCheckbox::JSBind},
     {"CheckboxGroup", JSCheckboxGroup::JSBind},
-    {"WaterFlow", JSWaterFLow::JSBind},
-    {"FlowItem", JSFLowItem::JSBind},
+    {"WaterFlow", JSWaterFlow::JSBind},
+    {"FlowItem", JSWaterFlowItem::JSBind},
     {"RelativeContainer", JSRelativeContainer::JSBind},
     {"__Common__", JSCommonView::JSBind},
 };

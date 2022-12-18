@@ -48,7 +48,7 @@ ohos_unittest("RenderTabContentTest") {
   if (is_standard_system) {
     sources += []
   } else {
-    sources += [ "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp" ]
+    sources += [ "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp" ]
   }
 
   # add sources only needed by wearable like watch.

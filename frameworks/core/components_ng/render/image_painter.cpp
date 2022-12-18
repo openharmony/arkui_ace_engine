@@ -92,13 +92,28 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0,    0,  // red
                                       0,     0,     0,     1.0f, 0}; // alpha transparency
 } // namespace
 
+void ImagePainter::DrawImage(
+    RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize, const ImagePaintConfig& imagePaintConfig) const
+{
+    if (!imagePaintConfig.dstRect_.IsValid()) {
+        LOGW("image dstRect isn't valid");
+        return;
+    }
+
+    if (imagePaintConfig.isSvg_) {
+        DrawSVGImage(canvas, offset, contentSize, imagePaintConfig);
+    } else if (imagePaintConfig.imageRepeat_ == ImageRepeat::NO_REPEAT) {
+        DrawStaticImage(canvas, offset, imagePaintConfig);
+    } else {
+        RectF rect(offset.GetX(), offset.GetY(), contentSize.Width(), contentSize.Height());
+        DrawImageWithRepeat(canvas, imagePaintConfig, rect);
+    }
+}
+
 void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& svgContainerSize,
     const ImagePaintConfig& imagePaintConfig) const
 {
     CHECK_NULL_VOID(canvasImage_);
-    auto svgCanvasImage = AceType::DynamicCast<SvgCanvasImage>(canvasImage_);
-    CHECK_NULL_VOID(svgCanvasImage);
-    svgCanvasImage->SetSvgImageFit(imagePaintConfig.imageFit_);
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
 
@@ -108,11 +123,13 @@ void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const S
 
     RectF srcRect;
     srcRect.SetSize(svgContainerSize);
-    canvasImage_->DrawToRSCanvas(canvas, ToRSRect(srcRect), ToRSRect(imagePaintConfig.dstRect_));
+    canvasImage_->DrawToRSCanvas(
+        canvas, ToRSRect(srcRect), ToRSRect(imagePaintConfig.dstRect_), std::array<PointF, 4>());
     canvas.Restore();
 }
 
-void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const ImagePaintConfig& imagePaintConfig) const
+void ImagePainter::DrawStaticImage(
+    RSCanvas& canvas, const OffsetF& offset, const ImagePaintConfig& imagePaintConfig) const
 {
     CHECK_NULL_VOID(canvasImage_);
     RSBrush brush;
@@ -138,8 +155,9 @@ void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const Imag
 
     brush.SetFilter(filter);
     canvas.AttachBrush(brush);
-    // need add recordingCanvas's ClipAdaptiveRRect operation.
-    canvasImage_->DrawToRSCanvas(canvas, ToRSRect(imagePaintConfig.srcRect_), ToRSRect(imagePaintConfig.dstRect_));
+    // include recordingCanvas's ClipAdaptiveRRect operation.
+    canvasImage_->DrawToRSCanvas(canvas, ToRSRect(imagePaintConfig.srcRect_), ToRSRect(imagePaintConfig.dstRect_),
+        imagePaintConfig.borderRadiusXY_ ? *imagePaintConfig.borderRadiusXY_ : std::array<PointF, 4>());
     canvas.Restore();
 }
 
@@ -154,7 +172,7 @@ void ImagePainter::FlipHorizontal(RSCanvas& canvas, double horizontalOffset, dou
 void ImagePainter::DrawImageWithRepeat(
     RSCanvas& canvas, const ImagePaintConfig& imagePaintConfig, const RectF& contentRect) const
 {
-    if (imagePaintConfig.imageRepeat_ == ImageRepeat::NOREPEAT) {
+    if (imagePaintConfig.imageRepeat_ == ImageRepeat::NO_REPEAT) {
         return;
     }
     auto offset = contentRect.GetOffset();
@@ -163,19 +181,18 @@ void ImagePainter::DrawImageWithRepeat(
     float singleImageWidth = imagePaintConfig.dstRect_.Width();
     float singleImageHeight = imagePaintConfig.dstRect_.Height();
     bool imageRepeatX =
-        imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT || imagePaintConfig.imageRepeat_ == ImageRepeat::REPEATX;
+        imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT || imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT_X;
     bool imageRepeatY =
-        imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT || imagePaintConfig.imageRepeat_ == ImageRepeat::REPEATY;
-    std::vector<uint32_t> dirRepeatNum = {
-        static_cast<uint32_t>(ceil(imagePaintConfig.dstRect_.GetY() / singleImageHeight)),
+        imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT || imagePaintConfig.imageRepeat_ == ImageRepeat::REPEAT_Y;
+    std::vector<uint32_t> dirRepeatNum = { static_cast<uint32_t>(
+                                               ceil(imagePaintConfig.dstRect_.GetY() / singleImageHeight)),
         static_cast<uint32_t>((ceil((contentHeight - imagePaintConfig.dstRect_.GetY()) / singleImageHeight))) - 1,
         static_cast<uint32_t>(ceil(imagePaintConfig.dstRect_.GetX() / singleImageWidth)),
         imageRepeatX ? static_cast<uint32_t>(ceil((contentWidth - imagePaintConfig.dstRect_.GetX()) / singleImageWidth))
                      : 1 };
 
     canvas.Save();
-    auto clipRect = RSRect(offset.GetX(), offset.GetY(),
-        static_cast<float>(offset.GetX() + contentWidth),
+    auto clipRect = RSRect(offset.GetX(), offset.GetY(), static_cast<float>(offset.GetX() + contentWidth),
         static_cast<float>(offset.GetY() + contentHeight));
     canvas.ClipRect(clipRect, OHOS::Rosen::Drawing::ClipOp::INTERSECT);
     uint32_t up = 0;
@@ -187,13 +204,13 @@ void ImagePainter::DrawImageWithRepeat(
         float downNum = (dir == 0) ? -1 : 1;
         for (size_t j = 0; j < dirRepeatNum[dir] && imageRepeatY; j++) {
             offsetTempY.SetY(static_cast<float>(offsetTempY.GetY() + singleImageHeight * downNum));
-            DrawImage(canvas, offsetTempY, imagePaintConfig);
+            DrawStaticImage(canvas, offsetTempY, imagePaintConfig);
         }
     };
     auto offsetTempX = offset;
     // right
     for (size_t i = 0; i < dirRepeatNum[right]; i++) {
-        DrawImage(canvas, offsetTempX, imagePaintConfig);
+        DrawStaticImage(canvas, offsetTempX, imagePaintConfig);
         DrawRepeatYTask(offsetTempX, up);
         DrawRepeatYTask(offsetTempX, down);
         offsetTempX.SetX(static_cast<float>(offsetTempX.GetX() + singleImageWidth));
@@ -202,7 +219,7 @@ void ImagePainter::DrawImageWithRepeat(
     offsetTempX = offset;
     for (size_t i = 0; i < dirRepeatNum[left] && imageRepeatX; i++) {
         offsetTempX.SetX(static_cast<float>(offsetTempX.GetX() - singleImageWidth));
-        DrawImage(canvas, offsetTempX, imagePaintConfig);
+        DrawStaticImage(canvas, offsetTempX, imagePaintConfig);
         DrawRepeatYTask(offsetTempX, up);
         DrawRepeatYTask(offsetTempX, down);
     }
@@ -235,7 +252,7 @@ void ImagePainter::ApplyImageFit(
         case ImageFit::FITHEIGHT:
             ApplyFitHeight(rawPicSize, dstSize, srcRect, dstRect);
             break;
-        case ImageFit::SCALEDOWN:
+        case ImageFit::SCALE_DOWN:
             if (srcRect.GetSize() < dstRect.GetSize()) {
                 ApplyNone(rawPicSize, dstSize, srcRect, dstRect);
             } else {

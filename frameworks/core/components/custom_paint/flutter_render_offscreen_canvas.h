@@ -27,7 +27,6 @@
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
 #include "core/pipeline/layers/clip_layer.h"
-#include "frameworks/bridge/js_frontend/engine/quickjs/offscreen_canvas_bridge.h"
 
 namespace OHOS::Ace {
 using setColorFunc = std::function<void (const std::string&)>;
@@ -143,6 +142,7 @@ private:
     double BlurStrToDouble(const std::string& str);
     bool IsPercentStr(std::string& percentStr);
     void SetColorFilter(float matrix[20]);
+    void SetRenderTaskHolder(const RefPtr<FlutterRenderTaskHolder> renderTaskHolder);
 };
 } // namespace OHOS::Ace
 

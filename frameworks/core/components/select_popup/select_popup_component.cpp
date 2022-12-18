@@ -129,6 +129,7 @@ void SelectPopupComponent::HideDialog(uint32_t index)
     if (refreshAnimationCallback_ && animationController_) {
         hideOption_.ClearListeners();
         refreshAnimationCallback_(hideOption_, false);
+        animationController_->ClearStopListeners();
         animationController_->AddStopListener([weak = WeakClaim(this), index]() {
             auto refPtr = weak.Upgrade();
             if (!refPtr) {
@@ -187,6 +188,7 @@ void SelectPopupComponent::CloseContextMenu()
     if (refreshAnimationCallback_ && animationController_) {
         hideOption_.ClearListeners();
         refreshAnimationCallback_(hideOption_, false);
+        animationController_->ClearStopListeners();
         animationController_->AddStopListener([]() {
             SubwindowManager::GetInstance()->ClearMenu();
         });
@@ -335,7 +337,7 @@ bool SelectPopupComponent::Initialize(const RefPtr<AccessibilityManager>& manage
     tween->SetAnimationOperation(AnimationOperation::PLAY);
 
 #if defined(PREVIEW)
-    auto popupNode = manager->CreateSpecializedNode("select-popup", id, GetSelectPopupId());
+    auto popupNode = manager->CreateAccessibilityNode("select-popup", id, GetSelectPopupId(), -1);
     SetNode(popupNode);
 #else
     SetNode(manager->CreateSpecializedNode("select-popup", id, -1));

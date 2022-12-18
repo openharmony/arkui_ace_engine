@@ -33,20 +33,19 @@ class ImageLoadingContext : public AceType {
 
 public:
     // Create an empty ImageObject and initialize state machine when the constructor is called
-    ImageLoadingContext(const ImageSourceInfo& sourceInfo, const LoadNotifier& loadNotifier);
+    ImageLoadingContext(const ImageSourceInfo& sourceInfo, const LoadNotifier& loadNotifier, bool syncLoad = false);
     ~ImageLoadingContext() override = default;
 
     static SizeF CalculateResizeTarget(const SizeF& srcSize, const SizeF& dstSize, const SizeF& rawImageSize);
     static void MakeCanvasImageIfNeed(const RefPtr<ImageLoadingContext>& loadingCtx, const SizeF& dstSize,
-        bool incomingNeedResize, ImageFit incommingImageFit,
-        const std::optional<std::pair<Dimension, Dimension>>& sourceSize = std::nullopt);
+        bool incomingNeedResize, ImageFit incomingImageFit, const std::optional<SizeF>& sourceSize = std::nullopt);
 
     void RegisterStateChangeCallbacks();
 
     /* interfaces to drive image loading */
     void LoadImageData();
     void MakeCanvasImage(const SizeF& dstSize, bool needResize, ImageFit imageFit = ImageFit::COVER,
-        const std::optional<std::pair<Dimension, Dimension>>& sourceSize = std::nullopt);
+        const std::optional<SizeF>& sourceSize = std::nullopt);
     void ResetLoading();
     void ResumeLoading();
 
@@ -55,7 +54,10 @@ public:
     const RectF& GetDstRect() const;
     const RectF& GetSrcRect() const;
     ImageFit GetImageFit() const;
-    RefPtr<CanvasImage> GetCanvasImage() const;
+
+    bool HasCanvasImage() const;
+    RefPtr<CanvasImage> MoveCanvasImage();
+
     const ImageSourceInfo& GetSourceInfo() const;
     const SizeF& GetDstSize() const;
     bool GetNeedResize() const;
@@ -66,8 +68,10 @@ public:
     /* interfaces to set properties */
     void SetImageFit(ImageFit imageFit);
     void SetNeedResize(bool needResize);
-    void SetSourceSize(const std::optional<std::pair<Dimension, Dimension>>& sourceSize = std::nullopt);
+    void SetSourceSize(const std::optional<SizeF>& sourceSize = std::nullopt);
     void SetSvgFillColor(const std::optional<Color>& svgFillColorOpt);
+
+    void CacheImageObject();
 
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult, loadResultNotifierName)                                         \
@@ -87,7 +91,7 @@ private:
     LoadFailCallback GenerateLoadFailCallback();
 
     // things to do when load callback is triggered during image loading
-    void OnDataReady(const ImageSourceInfo& sourceInfo, const RefPtr<ImageObject> imageObj);
+    void OnDataReady(const ImageSourceInfo& sourceInfo, const RefPtr<ImageObject>& imageObj);
     void OnLoadSuccess(const ImageSourceInfo& sourceInfo);
     void OnLoadFail(const ImageSourceInfo& sourceInfo, const std::string& errorMsg, const ImageLoadingCommand& command);
 
@@ -115,11 +119,14 @@ private:
     RectF dstRect_;
     SizeF dstSize_;
     bool needResize_ = true;
+    bool syncLoad_ = false;
     ImageFit imageFit_ = ImageFit::COVER;
     std::optional<Color> svgFillColorOpt_;
-    std::unique_ptr<std::pair<Dimension, Dimension>> sourceSizePtr_ = nullptr;
+    std::unique_ptr<SizeF> sourceSizePtr_ = nullptr;
     bool needAlt_ = true;
     std::function<void()> updateParamsCallback_ = nullptr;
+
+    ACE_DISALLOW_COPY_AND_MOVE(ImageLoadingContext);
 };
 
 } // namespace OHOS::Ace::NG

@@ -47,10 +47,6 @@ private:
         const JSRef<JSVal>& jsVal);
     template<class T>
     static void SetRadiusWithJsVal(const RefPtr<T>& component, const JSRef<JSVal>& jsVal);
-    static void SetNgCreatePropertyWithJsVal(const JSCallbackInfo& info);
-    static void SetNgRadiusWithArrayValue(const JSRef<JSVal>& jsVal);
-    static void SetNgRadiusWithJsVal(const JSRef<JSVal>& jsVal);
-    
 };
 
 } // namespace OHOS::Ace::Framework

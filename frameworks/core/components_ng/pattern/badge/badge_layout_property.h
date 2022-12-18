@@ -65,7 +65,7 @@ public:
         LEFT,
     };
 
-    BadgePosition& GetBadgePosition()
+    const BadgePosition& GetBadgePosition() const
     {
         return propBadgePosition_;
     }
@@ -85,14 +85,31 @@ public:
         badgeCircleRadius_ = badgeCircleRadius;
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeValue, std::string, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeCount, int, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeMaxCount, int, PROPERTY_UPDATE_RENDER);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeColor, Color, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeTextColor, Color, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeFontSize, Dimension, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeCircleSize, Dimension, PROPERTY_UPDATE_RENDER);
+    static std::string GetBadgePositionString(BadgePosition& position)
+    {
+        switch (position) {
+            case BadgePosition::RIGHT_TOP:
+                return "BadgePosition.RightTop";
+            case BadgePosition::RIGHT:
+                return "BadgePosition.Right";
+            case BadgePosition::LEFT:
+                return "BadgePosition.Left";
+            default:
+                break;
+        }
+        return "-";
+    }
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeValue, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeCount, int, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeMaxCount, int, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeTextColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BadgeCircleSize, Dimension, PROPERTY_UPDATE_MEASURE);
 
 private:
     BadgePosition propBadgePosition_ = BadgePosition::RIGHT_TOP;

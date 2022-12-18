@@ -17,6 +17,7 @@
 
 #include "third_party/skia/include/effects/SkBlurImageFilter.h"
 
+#include "base/utils/utils.h"
 #include "frameworks/core/components/declaration/svg/svg_fe_gaussianblur_declaration.h"
 
 namespace OHOS::Ace::NG {
@@ -37,9 +38,7 @@ void SvgFeGaussianBlur::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
     const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
 {
     auto declaration = AceType::DynamicCast<SvgFeGaussianBlurDeclaration>(declaration_);
-    if (!declaration) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(declaration);
     imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
     imageFilter = SkBlurImageFilter::Make(
         declaration->GetStdDeviation(), declaration->GetStdDeviation(), imageFilter, nullptr);

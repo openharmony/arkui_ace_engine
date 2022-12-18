@@ -18,7 +18,9 @@
 
 #include <list>
 
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/gestures/gesture_info.h"
@@ -27,7 +29,8 @@ namespace OHOS::Ace::NG {
 
 class GestureEventHub;
 
-class ClickEvent : public Referenced {
+class ClickEvent : public AceType {
+    DECLARE_ACE_TYPE(ClickEvent, AceType)
 public:
     explicit ClickEvent(GestureEventFunc&& callback) : callback_(std::move(callback)) {}
     ~ClickEvent() override = default;
@@ -46,6 +49,8 @@ public:
 
 private:
     GestureEventFunc callback_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(ClickEvent);
 };
 
 class ACE_EXPORT ClickEventActuator : public GestureEventActuator {
@@ -54,7 +59,7 @@ public:
     explicit ClickEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
     ~ClickEventActuator() override = default;
 
-    void ReplaceClickEvent(GestureEventFunc&& callback)
+    void SetUserCallback(GestureEventFunc&& callback)
     {
         if (userCallback_) {
             userCallback_.Reset();
@@ -88,6 +93,8 @@ private:
     std::list<RefPtr<ClickEvent>> clickEvents_;
     RefPtr<ClickEvent> userCallback_;
     RefPtr<ClickRecognizer> clickRecognizer_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(ClickEventActuator);
 };
 
 } // namespace OHOS::Ace::NG

@@ -21,8 +21,6 @@
 #include "core/components/common/properties/border_edge.h"
 #include "core/components/common/properties/border_image_edge.h"
 
-
-
 namespace OHOS::Ace {
 
 BorderImagePainter::BorderImagePainter(const Size& paintSize, const RefPtr<Decoration>& decoration,
@@ -32,7 +30,7 @@ BorderImagePainter::BorderImagePainter(const Size& paintSize, const RefPtr<Decor
 
 namespace {
     constexpr double EXTRA_OFFSET = 1.0;
-}
+} // namespace
 
 void BorderImagePainter::InitPainter()
 {

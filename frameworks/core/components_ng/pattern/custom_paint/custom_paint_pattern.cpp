@@ -17,6 +17,7 @@
 
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
@@ -27,7 +28,7 @@ void CustomPaintPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
 
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     paintMethod_ = MakeRefPtr<CanvasPaintMethod>(context);
 }
@@ -43,9 +44,29 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
         return false;
     }
     auto customPaintEventHub = GetEventHub<CustomPaintEventHub>();
-    CHECK_NULL_RETURN(customPaintEventHub, true);
-    customPaintEventHub->FireReadyEvent();
-    return true;
+    CHECK_NULL_RETURN(customPaintEventHub, false);
+
+    if (config.frameOffsetChange || config.contentOffsetChange || config.contentSizeChange) {
+        isCanvasInit_ = false;
+    }
+
+    if (!isCanvasInit_) {
+        customPaintEventHub->FireReadyEvent();
+        isCanvasInit_ = true;
+        return true;
+    }
+    return false;
+}
+
+void CustomPaintPattern::SetAntiAlias(bool isEnabled)
+{
+    auto task = [isEnabled](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetAntiAlias(isEnabled);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::FillRect(const Rect& rect)
@@ -55,6 +76,7 @@ void CustomPaintPattern::FillRect(const Rect& rect)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -65,6 +87,7 @@ void CustomPaintPattern::StrokeRect(const Rect& rect)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -75,6 +98,7 @@ void CustomPaintPattern::ClearRect(const Rect& rect)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -85,6 +109,7 @@ void CustomPaintPattern::Fill()
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -95,6 +120,7 @@ void CustomPaintPattern::Fill(const RefPtr<CanvasPath2D>& path)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -105,6 +131,7 @@ void CustomPaintPattern::Stroke()
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -115,6 +142,7 @@ void CustomPaintPattern::Stroke(const RefPtr<CanvasPath2D>& path)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -125,6 +153,7 @@ void CustomPaintPattern::Clip()
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -135,6 +164,7 @@ void CustomPaintPattern::Clip(const RefPtr<CanvasPath2D>& path)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -145,6 +175,7 @@ void CustomPaintPattern::BeginPath()
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -155,6 +186,7 @@ void CustomPaintPattern::ClosePath()
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -165,6 +197,7 @@ void CustomPaintPattern::MoveTo(double x, double y)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -175,6 +208,7 @@ void CustomPaintPattern::LineTo(double x, double y)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -185,6 +219,7 @@ void CustomPaintPattern::Arc(const ArcParam& param)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -195,6 +230,7 @@ void CustomPaintPattern::ArcTo(const ArcToParam& param)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -205,6 +241,7 @@ void CustomPaintPattern::AddRect(const Rect& rect)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -215,6 +252,7 @@ void CustomPaintPattern::Ellipse(const EllipseParam& param)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -225,6 +263,7 @@ void CustomPaintPattern::BezierCurveTo(const BezierCurveParam& param)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -235,6 +274,7 @@ void CustomPaintPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -245,6 +285,7 @@ void CustomPaintPattern::FillText(const std::string& text, double x, double y)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -255,6 +296,7 @@ void CustomPaintPattern::StrokeText(const std::string& text, double x, double y)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -280,6 +322,7 @@ void CustomPaintPattern::DrawImage(const Ace::CanvasImage& image, double width, 
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -290,6 +333,7 @@ void CustomPaintPattern::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canv
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -314,26 +358,29 @@ void CustomPaintPattern::PutImageData(const Ace::ImageData& imageData)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::TransferFromImageBitmap(const RefPtr<OffscreenCanvasPattern>& offscreenCanvasPattern)
 {
     auto task = [offscreenCanvasPattern](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
-        paintMethod.TransferFromImageBitmap(offscreenCanvasPattern);
+        paintMethod.TransferFromImageBitmap(paintWrapper, offscreenCanvasPattern);
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::UpdateGlobalAlpha(double alpha)
 {
     auto task = [alpha](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
-        paintMethod.SetAlpha(alpha); ;
+        paintMethod.SetAlpha(alpha);
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -344,6 +391,7 @@ void CustomPaintPattern::UpdateCompositeOperation(CompositeOperation type)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -354,6 +402,7 @@ void CustomPaintPattern::UpdateSmoothingEnabled(bool enabled)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -364,6 +413,7 @@ void CustomPaintPattern::UpdateLineCap(LineCapStyle cap)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -374,6 +424,7 @@ void CustomPaintPattern::UpdateLineDashOffset(double dash)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -384,6 +435,7 @@ void CustomPaintPattern::UpdateLineJoin(LineJoinStyle join)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -394,6 +446,7 @@ void CustomPaintPattern::UpdateLineWidth(double width)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -404,6 +457,7 @@ void CustomPaintPattern::UpdateMiterLimit(double limit)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -414,6 +468,7 @@ void CustomPaintPattern::UpdateShadowBlur(double blur)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -424,6 +479,7 @@ void CustomPaintPattern::UpdateShadowColor(const Color& color)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -434,6 +490,7 @@ void CustomPaintPattern::UpdateShadowOffsetX(double offsetX)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -444,6 +501,7 @@ void CustomPaintPattern::UpdateShadowOffsetY(double offsetY)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -454,6 +512,7 @@ void CustomPaintPattern::UpdateTextAlign(TextAlign align)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -464,6 +523,7 @@ void CustomPaintPattern::UpdateTextBaseline(TextBaseline baseline)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -476,6 +536,7 @@ void CustomPaintPattern::UpdateStrokePattern(const Ace::Pattern& pattern)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -488,6 +549,7 @@ void CustomPaintPattern::UpdateStrokeColor(const Color& color)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -500,6 +562,7 @@ void CustomPaintPattern::UpdateStrokeGradient(const Ace::Gradient& grad)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -510,6 +573,7 @@ void CustomPaintPattern::UpdateFontWeight(FontWeight weight)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -520,6 +584,7 @@ void CustomPaintPattern::UpdateFontStyle(FontStyle style)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -530,6 +595,7 @@ void CustomPaintPattern::UpdateFontFamilies(const std::vector<std::string>& fami
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -540,6 +606,7 @@ void CustomPaintPattern::UpdateFontSize(const Dimension& size)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -552,6 +619,7 @@ void CustomPaintPattern::UpdateFillColor(const Color& color)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -564,6 +632,7 @@ void CustomPaintPattern::UpdateFillGradient(const Ace::Gradient& gradient)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -576,6 +645,7 @@ void CustomPaintPattern::UpdateFillPattern(const Ace::Pattern& pattern)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -586,6 +656,7 @@ void CustomPaintPattern::UpdateFillRuleForPath(const CanvasFillRule rule)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -596,6 +667,7 @@ void CustomPaintPattern::UpdateFillRuleForPath2D(const CanvasFillRule rule)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -611,6 +683,7 @@ void CustomPaintPattern::UpdateLineDash(const std::vector<double>& segments)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -621,6 +694,7 @@ void CustomPaintPattern::Save()
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -631,6 +705,7 @@ void CustomPaintPattern::Restore()
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -641,6 +716,7 @@ void CustomPaintPattern::Scale(double x, double y)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -651,6 +727,7 @@ void CustomPaintPattern::Rotate(double angle)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -661,6 +738,7 @@ void CustomPaintPattern::SetTransform(const TransformParam& param)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -671,6 +749,7 @@ void CustomPaintPattern::ResetTransform()
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -681,6 +760,7 @@ void CustomPaintPattern::Transform(const TransformParam& param)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -691,6 +771,7 @@ void CustomPaintPattern::Translate(double x, double y)
     };
     paintMethod_->PushTask(task);
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -700,6 +781,11 @@ std::string CustomPaintPattern::ToDataURL(const std::string& args)
         paintMethod_->FlushPipelineImmediately();
     }
     return paintMethod_->ToDataURL(args);
+}
+
+std::string CustomPaintPattern::GetJsonData(const std::string& path)
+{
+    return paintMethod_->GetJsonData(path);
 }
 
 double CustomPaintPattern::GetWidth()
