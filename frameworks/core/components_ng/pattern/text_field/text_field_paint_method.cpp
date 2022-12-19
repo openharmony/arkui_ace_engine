@@ -14,9 +14,6 @@
  */
 #include "core/components_ng/pattern/text_field/text_field_paint_method.h"
 
-#include <cmath>
-#include <vector>
-
 #include "foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include/draw/path.h"
 
 #include "base/geometry/ng/offset_t.h"
@@ -56,8 +53,10 @@ CanvasDrawFunction TextFieldPaintMethod::GetContentDrawFunction(PaintWrapper* pa
                             contentOffset = paintWrapper->GetContentOffset(),
                             passwordIconCanvasImage](RSCanvas& canvas) {
         CHECK_NULL_VOID_NOLOG(textFieldPattern);
-        RSRect clipInnerRect(offset.GetX(), contentOffset.GetY(), textFieldPattern->GetFrameRect().Width(),
-            contentOffset.GetY() + contentSize.Height());
+        auto frameRect = textFieldPattern->GetFrameRect();
+        RSRect clipInnerRect(offset.GetX(), 0.0f,
+            textFieldPattern->NeedShowPasswordIcon() ? frameRect.Width() : contentSize.Width() + contentOffset.GetX(),
+            frameRect.Height());
         canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         if (paragraph) {
             paragraph->Paint(&canvas, textFieldPattern->GetTextRect().GetX(), offset.GetY());
