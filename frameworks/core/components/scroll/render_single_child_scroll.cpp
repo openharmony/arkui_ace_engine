@@ -241,11 +241,15 @@ void RenderSingleChildScroll::PerformLayout()
         PostForceMakeNeedLayout();
     }
     childLastMainSize_ = currentChildMainSize;
-    if (GetHasWidth() || GetHasHeight()) {
-        SetLayoutSize(GetLayoutParam().GetMaxSize());
-    } else {
-        SetLayoutSize(GetLayoutParam().Constrain(itemSize > viewPort_ ? viewPort_ : itemSize));
+
+    auto constrainSize = GetLayoutParam().Constrain(itemSize > viewPort_ ? viewPort_ : itemSize);
+    if (GetHasWidth()) {
+        constrainSize.SetWidth(GetLayoutParam().GetMaxSize().Width());
     }
+    if (GetHasHeight()) {
+        constrainSize.SetHeight(GetLayoutParam().GetMaxSize().Height());
+    }
+    SetLayoutSize(constrainSize);
 
     auto textFieldManager = AceType::DynamicCast<TextFieldManager>(context->GetTextFieldManager());
     if (textFieldManager && moveStatus_.first && axis_ == Axis::VERTICAL) {
