@@ -56,8 +56,8 @@ void SwitchPaintMethod::PaintContent(
     auto width = contentSize.Width();
     auto height = contentSize.Height();
     auto radius = height / 2;
-    auto actualGap =
-        radiusGap_ * height / (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
+    auto actualGap = radiusGap_.ConvertToPx() * height /
+                     (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
 
     auto xOffset = contentOffset.GetX();
     auto yOffset = contentOffset.GetY();

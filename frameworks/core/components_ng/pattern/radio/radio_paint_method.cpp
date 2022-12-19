@@ -95,8 +95,8 @@ void RadioPaintMethod::PaintRadio(
         pen.SetAntiAlias(true);
         pen.SetColor(ToRSColor(activeColor_));
         if (!enabled_) {
-            brush.SetColor(ToRSColor(activeColor_.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
-            pen.SetColor(ToRSColor(activeColor_.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
+            brush.SetColor(ToRSColor(activeColor_.BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
+            pen.SetColor(ToRSColor(activeColor_.BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
         }
         canvas.AttachBrush(brush);
         canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale_);
@@ -126,8 +126,8 @@ void RadioPaintMethod::PaintRadio(
         pen.SetAntiAlias(true);
         pen.SetColor(ToRSColor(inactiveColor_));
         if (!enabled_) {
-            brush.SetColor(ToRSColor(inactiveColor_.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
-            pen.SetColor(ToRSColor(inactiveColor_.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
+            brush.SetColor(ToRSColor(inactiveColor_.BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
+            pen.SetColor(ToRSColor(inactiveColor_.BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
         }
         pen.SetWidth(borderWidth_);
         canvas.AttachPen(pen);
