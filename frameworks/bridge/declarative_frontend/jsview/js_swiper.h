@@ -25,7 +25,6 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
 
-protected:
     static void SetAutoPlay(bool autoPlay);
     static void SetDuration(int32_t duration);
     static void SetIndex(int32_t index);

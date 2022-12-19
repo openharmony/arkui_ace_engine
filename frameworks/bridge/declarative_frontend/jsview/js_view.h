@@ -73,20 +73,14 @@ public:
 
     virtual void MarkNeedUpdate() = 0;
 
-    bool NeedsUpdate()
-    {
-        return needsUpdate_;
-    }
+    bool NeedsUpdate();
 
     static void JSBind(BindingTarget globalObj);
     /**
      * Views which do not have a state can mark static.
      * The element will be reused and re-render will be skipped.
      */
-    void MarkStatic()
-    {
-        isStatic_ = true;
-    }
+    void MarkStatic();
 
     bool IsStatic()
     {
@@ -124,6 +118,45 @@ public:
         return true;
     }
 
+#ifdef UICAST_COMPONENT_SUPPORTED
+    void ExecuteCreateChildView(const std::string &childViewId)
+    {
+        std::string jsonData = R"({"viewID":")" + childViewId + R"("})";
+        LOGI("UICast para: %{public}s", jsonData.c_str());
+        jsViewFunction_->ExecuteCreateChildView(jsonData);
+    }
+
+    void ExecuteRouterHandle(const std::string &type, const std::string &uri)
+    {
+        std::string jsonData = R"({"uri":")" + uri + R"(","type":")" + type + R"("})";
+        LOGI("UICast para: %{public}s", jsonData.c_str());
+        ContainerScope scope(instanceId_);
+        jsViewFunction_->ExecuteRouterHandle(jsonData);
+    }
+
+    void ExecuteReplayOnEvent(const std::string &event)
+    {
+        std::string jsonData = R"({"event":")" + event + R"("})";
+        LOGI("UICast para: %{public}s", jsonData.c_str());
+        jsViewFunction_->ExecuteReplayOnEvent(jsonData);
+    }
+#endif
+
+    std::string UICastGetViewId() const
+    {
+        return viewId_;
+    }
+
+    int UICastGetUniqueId() const
+    {
+        return uniqueId_;
+    }
+
+    int32_t GetInstanceId() const
+    {
+        return instanceId_;
+    }
+
 protected:
     RefPtr<ViewFunctions> jsViewFunction_;
     bool needsUpdate_ = false;
@@ -131,6 +164,7 @@ protected:
     WeakPtr<AceType> viewNode_;
     // view id for custom view itself
     std::string viewId_;
+    int uniqueId_;
 
     // card id for eTS Card
     // set on the root JSView of the card and inherited by all child JSViews

@@ -13,6 +13,7 @@
 
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("../../../../../build/uicast.gni")
 
 if (is_standard_system) {
   module_output_path = "ace_engine/graphicalbasicability/pipeline"
@@ -217,6 +218,8 @@ ohos_unittest("PipelineContextTest") {
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
   ]
 
+  sources += uicast_configs.uicast_core_sources
+
   # add sources only needed by wearable like watch.
   if (is_wearable_product) {
     sources += [ "$root_out_dir/arkui/framework/core/components/theme/theme_constants_watch.cpp" ]
@@ -243,8 +246,10 @@ ohos_unittest("PipelineContextTest") {
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
+  deps += uicast_configs.uicast_root_deps
 
   include_dirs = [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf" ]
+  include_dirs += uicast_configs.uicast_root_include
 
   if (!is_standard_system) {
     aosp_deps = [ "shared_library:libcurl" ]
