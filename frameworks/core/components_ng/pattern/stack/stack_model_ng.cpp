@@ -39,4 +39,8 @@ void StackModelNG::Create(Alignment alignment)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
 }
 
+void StackModelNG::SetAlignment(Alignment alignment)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
+}
 } // namespace OHOS::Ace::NG
