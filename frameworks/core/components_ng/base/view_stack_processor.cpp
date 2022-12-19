@@ -16,6 +16,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 
 #include "base/utils/utils.h"
+#include "core/components/common/properties/state_attributes.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -150,6 +151,41 @@ RefPtr<UINode> ViewStackProcessor::Finish()
         forEachNode->CompareAndUpdateChildren();
     }
     return element;
+}
+
+void ViewStackProcessor::SetVisualState(VisualState state)
+{
+    switch (state) {
+        case VisualState::DISABLED:
+            visualState_ = UI_STATE_DISABLED;
+            break;
+        case VisualState::FOCUSED:
+            visualState_ = UI_STATE_FOCUSED;
+            break;
+        case VisualState::PRESSED:
+            visualState_ = UI_STATE_PRESSED;
+            break;
+        case VisualState::NORMAL:
+        default:
+            visualState_ = UI_STATE_NORMAL;
+    }
+    LOGD("set visual state: %{public}d", static_cast<int32_t>(visualState_.value()));
+    auto eventHub = GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->AddSupportedState(visualState_.value());
+}
+
+bool ViewStackProcessor::IsCurrentVisualStateProcess()
+{
+    if (!visualState_.has_value()) {
+        return true;
+    }
+    auto eventHub = GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    auto result = eventHub->IsCurrentStateOn(visualState_.value());
+    LOGD("get current visual state: %{public}d, node state: %{public}d, result is: %{public}d",
+        static_cast<int32_t>(visualState_.value()), static_cast<int32_t>(eventHub->GetCurrentUIState()), result);
+    return result;
 }
 
 void ViewStackProcessor::PushKey(const std::string& key)

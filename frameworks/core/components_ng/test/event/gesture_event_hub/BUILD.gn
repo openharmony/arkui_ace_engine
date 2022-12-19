@@ -33,6 +33,7 @@ ohos_unittest("gesture_event_hub_test_ng") {
     "$ace_root/frameworks/core/components_ng/event/gesture_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/event/input_event.cpp",
     "$ace_root/frameworks/core/components_ng/event/input_event_hub.cpp",
+    "$ace_root/frameworks/core/components_ng/event/state_style_manager.cpp",
     "$ace_root/frameworks/core/components_ng/gestures/long_press_gesture.cpp",
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_proxy.cpp",

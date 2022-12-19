@@ -231,6 +231,7 @@ ohos_unittest("pipeline_ng_test") {
     "$ace_root/frameworks/core/components_ng/event/long_press_event.cpp",
     "$ace_root/frameworks/core/components_ng/event/pan_event.cpp",
     "$ace_root/frameworks/core/components_ng/event/scrollable_event.cpp",
+    "$ace_root/frameworks/core/components_ng/event/state_style_manager.cpp",
     "$ace_root/frameworks/core/components_ng/event/touch_event.cpp",
 
     # layout
