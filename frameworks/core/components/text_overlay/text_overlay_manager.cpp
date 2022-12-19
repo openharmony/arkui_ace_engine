@@ -449,6 +449,7 @@ const RefPtr<RenderNode> TextOverlayManager::GetTargetNode() const
 
 void TextOverlayManager::PopTextOverlay()
 {
+    coordinateOffset_ = Offset();
     const auto& stackElement = stackElement_.Upgrade();
     if (stackElement) {
         stackElement->PopTextOverlay();
