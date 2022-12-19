@@ -44,9 +44,18 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
         return false;
     }
     auto customPaintEventHub = GetEventHub<CustomPaintEventHub>();
-    CHECK_NULL_RETURN(customPaintEventHub, true);
-    customPaintEventHub->FireReadyEvent();
-    return true;
+    CHECK_NULL_RETURN(customPaintEventHub, false);
+
+    if (config.frameOffsetChange || config.contentOffsetChange || config.contentSizeChange) {
+        isCanvasInit_ = false;
+    }
+
+    if (!isCanvasInit_) {
+        customPaintEventHub->FireReadyEvent();
+        isCanvasInit_ = true;
+        return true;
+    }
+    return false;
 }
 
 void CustomPaintPattern::SetAntiAlias(bool isEnabled)
