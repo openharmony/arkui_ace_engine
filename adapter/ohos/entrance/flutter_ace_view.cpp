@@ -29,6 +29,7 @@
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
@@ -437,6 +438,15 @@ void FlutterAceView::SurfaceChanged(
         LOGD("FlutterAceView::SurfaceChanged, call NotifyChanged");
         platformView->NotifyChanged(SkISize::Make(width, height));
     }
+
+    auto instanceId = view->GetInstanceId();
+    auto container = Platform::AceContainer::GetContainer(instanceId);
+    if (container) {
+        auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->CloseContextMenu();
+    }
+
     LOGD("<<< FlutterAceView::SurfaceChanged, end");
 }
 
