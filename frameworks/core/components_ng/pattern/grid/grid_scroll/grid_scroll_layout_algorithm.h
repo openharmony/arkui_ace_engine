@@ -44,6 +44,8 @@ private:
     void FillGridViewportAndMeasureChildren(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     float MeasureRecordedItems(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     bool UseCurrentLines(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
+    void SkipForwardLines(float mainSize, LayoutWrapper* layoutWrapper);
+    void SkipBackwardLines(float mainSize, LayoutWrapper* layoutWrapper);
 
     // fill start of viewport
     bool FillBlankAtStart(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
