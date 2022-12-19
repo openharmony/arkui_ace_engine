@@ -35,6 +35,8 @@ ohos_unittest("shared_overlay_manager_test_ng") {
     "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/ui_node.cpp",
     "$ace_root/frameworks/core/components_ng/event/event_hub.cpp",
+    "$ace_root/frameworks/core/components_ng/event/state_style_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/event/touch_event.cpp",
     "$ace_root/frameworks/core/components_ng/manager/shared_overlay/shared_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/shared_overlay/shared_transition_effect.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",

@@ -23,6 +23,7 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 
@@ -81,6 +82,20 @@ public:
         }
     }
 
+    void SetForceUpdateNodeFunc(std::function<void(int32_t)>&& forceNodeUpdateFunc)
+    {
+        forceNodeUpdateFunc_ = std::move(forceNodeUpdateFunc);
+    }
+
+    void FireNodeUpdateFunc(ElementIdType id)
+    {
+        if (forceNodeUpdateFunc_) {
+            forceNodeUpdateFunc_(id);
+        } else {
+            LOGE("fail to find node update func to execute %{public}d node update", id);
+        }
+    }
+
     void Reset()
     {
         updateFunc_ = nullptr;
@@ -100,6 +115,7 @@ private:
     std::function<void()> destroyFunc_;
     std::function<void()> pageTransitionFunc_;
     std::function<void(bool)> reloadFunc_;
+    std::function<void(int32_t)> forceNodeUpdateFunc_;
     bool needRebuild_ = false;
 };
 } // namespace OHOS::Ace::NG

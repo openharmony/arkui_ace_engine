@@ -617,6 +617,13 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         }
     };
 
+    auto nodeUpdateFunc = [weak = AceType::WeakClaim(this)](int32_t nodeId) {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
+        jsView->jsViewFunction_->ExecuteForceNodeRerender(nodeId);
+    };
+
     NodeInfoPU info = { .appearFunc = std::move(appearFunc),
         .renderFunc = std::move(renderFunction),
         .updateFunc = std::move(updateFunction),
@@ -624,6 +631,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         .updateNodeFunc = std::move(updateViewNodeFunction),
         .pageTransitionFunc = std::move(pageTransitionFunction),
         .reloadFunc = std::move(reloadFunction),
+        .nodeUpdateFunc = std::move(nodeUpdateFunc),
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout(),
         .isStatic = IsStatic() };
 
