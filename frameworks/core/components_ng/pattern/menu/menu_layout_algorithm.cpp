@@ -19,7 +19,9 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace {
@@ -39,6 +41,11 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     screenSize_ = SizeF(pipeline->GetRootWidth(), pipeline->GetRootHeight());
+    auto stageManager = pipeline->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto page = stageManager->GetLastPage();
+    CHECK_NULL_VOID(page);
+    pageOffset_ = page->GetOffsetRelativeToWindow();
 
     // currently using click point as menu position
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -104,11 +111,23 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     float x = HorizontalLayout(size, position_.GetX());
     float y = VerticalLayout(size, position_.GetY());
-
-    layoutWrapper->GetGeometryNode()->SetMarginFrameOffset(NG::OffsetF(x, y));
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    if (!menuPattern->IsContextMenu()) {
+        x -= pageOffset_.GetX();
+        y -= pageOffset_.GetY();
+    }
+    auto outPadding = OUT_PADDING.ConvertToPx();
+    MarginPropertyF margin;
+    margin.left = margin.top = margin.right = margin.bottom = outPadding;
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->UpdateMargin(margin);
+    geometryNode->SetMarginFrameOffset(NG::OffsetF(x, y));
 
     // translate each option by the height of previous options
-    auto outPadding = OUT_PADDING.ConvertToPx();
     OffsetF translate(outPadding, outPadding);
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         LOGD("layout child at offset: %{public}f, %{public}f", translate.GetX(), translate.GetY());
@@ -123,7 +142,7 @@ float MenuLayoutAlgorithm::VerticalLayout(const SizeF& size, float clickPosition
 {
     double screenHeight = screenSize_.Height();
     double bottomSpace = screenHeight - clickPosition;
-    double topSpace = clickPosition;
+    double topSpace = clickPosition - pageOffset_.GetY();
     // can put menu below click point
     if (bottomSpace >= size.Height()) {
         return clickPosition;
@@ -147,7 +166,7 @@ float MenuLayoutAlgorithm::HorizontalLayout(const SizeF& size, float clickPositi
 {
     double screenWidth = screenSize_.Width();
     double rightSpace = screenWidth - clickPosition;
-    double leftSpace = clickPosition;
+    double leftSpace = clickPosition - pageOffset_.GetX();
     // can fit menu on the right side of clickPosition
     if (rightSpace >= size.Width()) {
         return clickPosition;

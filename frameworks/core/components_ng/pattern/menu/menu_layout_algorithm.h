@@ -45,6 +45,9 @@ private:
 
     SizeF screenSize_;
 
+    // current page offset relative to window.
+    OffsetF pageOffset_;
+
     ACE_DISALLOW_COPY_AND_MOVE(MenuLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
