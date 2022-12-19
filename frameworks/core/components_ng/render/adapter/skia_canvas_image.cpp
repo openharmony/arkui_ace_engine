@@ -28,7 +28,11 @@
 #endif
 
 namespace OHOS::Ace::NG {
-
+namespace {
+#ifdef ENABLE_ROSEN_BACKEND
+constexpr uint8_t RADIUS_POINTS_SIZE = 4;
+#endif
+} // namespace
 RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
 {
 #ifdef NG_BUILD
@@ -119,8 +123,8 @@ int32_t SkiaCanvasImage::GetHeight() const
 #endif
 }
 
-void SkiaCanvasImage::DrawToRSCanvas(
-    RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const std::array<PointF, 4>& radiusXY)
+void SkiaCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect,
+    const BorderRadiusArray& radiusXY)
 {
     auto image = GetCanvasImage();
     RSImage rsImage(&image);
@@ -143,8 +147,8 @@ void SkiaCanvasImage::DrawToRSCanvas(
         return;
     }
     SkPaint paint;
-    SkVector radii[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
-    if (radiusXY.size() == 4) {
+    SkVector radii[RADIUS_POINTS_SIZE] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
+    if (radiusXY.size() == RADIUS_POINTS_SIZE) {
         radii[SkRRect::kUpperLeft_Corner].set(
             SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperLeft_Corner].GetX(), 0.0f)),
             SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperLeft_Corner].GetY(), 0.0f)));

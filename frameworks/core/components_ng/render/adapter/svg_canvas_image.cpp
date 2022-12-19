@@ -33,8 +33,8 @@ std::optional<Color> SvgCanvasImage::GetSvgFillColor()
     return svgDom_ ? std::nullopt : svgDom_->GetSvgFillColor();
 }
 
-void SvgCanvasImage::DrawToRSCanvas(
-    RSCanvas& canvas, const RSRect& srcRect, const RSRect& /* dstRect */, const std::array<PointF, 4>& /* radiusXY */)
+void SvgCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& /* dstRect */,
+    const BorderRadiusArray& /* radiusXY */)
 {
     CHECK_NULL_VOID(svgDom_);
     svgDom_->DrawImage(

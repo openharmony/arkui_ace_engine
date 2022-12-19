@@ -30,6 +30,16 @@ const float ROTATEX = 100.f;
 const float ROTATEZ = 30.f;
 const float DECAY_FACTOR = 2.f;
 const float HALF_COUNT = 25.0f;
+const Dimension RING_WIDTH = 2.8_vp;
+const Dimension COMET_WIDTH = 6.0_vp;
+constexpr int32_t START_POINT = 0;
+constexpr int32_t MIDDLE_POINT = 1;
+constexpr int32_t END_POINT = 2;
+const Dimension MODE_SMALL = 16.0_vp;
+const Dimension MODE_MIDDLE = 40.0_vp;
+const Dimension MODE_LARGE = 76.0_vp;
+const Dimension MODE_RING_WIDTH[] = { 2.8_vp, 1.9_vp, 1.2_vp };
+const Dimension MODE_COMET_RADIUS[] = { 3.0_vp, 3.0_vp, 2.2_vp };
 } // namespace
 
 LoadingProgressModifier::LoadingProgressModifier()
@@ -49,7 +59,7 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, float date, floa
     canvas.Save();
     RSPen pen;
     pen.SetColor(ToRSColor(color_->Get()));
-    pen.SetWidth(RING_WIDTH.ConvertToPx() * scale_);
+    pen.SetWidth(ringWidth_ * scale_);
     date = abs(COUNT - date);
     canvas.AttachPen(pen);
     canvas.DrawCircle(
@@ -103,9 +113,45 @@ void LoadingProgressModifier::DrawOrbit(DrawingContext& context, float date, flo
         cometColor.SetAlphaF(setAlpha);
         brush.SetColor(cometColor);
         canvas.AttachBrush(brush);
-        canvas.DrawCircle(pointCenter, COMET_WIDTH.ConvertToPx() * HALF * scale_);
+        canvas.DrawCircle(pointCenter, cometRadius_ * scale_);
     }
     canvas.DetachBrush();
     canvas.Restore();
+}
+
+void LoadingProgressModifier::UpdateLoadingSize(float diameter)
+{
+    ringWidth_ = RING_WIDTH.ConvertToPx();
+    cometRadius_ = COMET_WIDTH.ConvertToPx() * HALF;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (LessOrEqual(diameter, pipeline->NormalizeToPx(MODE_SMALL))) {
+        CalculateValue(START_POINT, START_POINT);
+    } else if (LessOrEqual(diameter, pipeline->NormalizeToPx(MODE_MIDDLE))) {
+        CalculateValue(START_POINT, MIDDLE_POINT,
+            (diameter - pipeline->NormalizeToPx(MODE_SMALL)) /
+                (pipeline->NormalizeToPx(MODE_MIDDLE) - pipeline->NormalizeToPx(MODE_SMALL)));
+    } else if (LessOrEqual(diameter, pipeline->NormalizeToPx(MODE_LARGE))) {
+        CalculateValue(MIDDLE_POINT, END_POINT,
+            (diameter - pipeline->NormalizeToPx(MODE_MIDDLE)) /
+                (pipeline->NormalizeToPx(MODE_LARGE) - pipeline->NormalizeToPx(MODE_MIDDLE)));
+    } else {
+        CalculateValue(END_POINT, END_POINT);
+    }
+}
+
+void LoadingProgressModifier::CalculateValue(int32_t start, int32_t end, double percent)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (start == end) {
+        ringWidth_ = pipeline->NormalizeToPx(MODE_RING_WIDTH[start]);
+        cometRadius_ = pipeline->NormalizeToPx(MODE_COMET_RADIUS[start]);
+    } else {
+        ringWidth_ = pipeline->NormalizeToPx(MODE_RING_WIDTH[start] +
+            (MODE_RING_WIDTH[end] - MODE_RING_WIDTH[start]) * percent);
+        cometRadius_ = pipeline->NormalizeToPx(MODE_COMET_RADIUS[start] +
+            (MODE_COMET_RADIUS[end] - MODE_COMET_RADIUS[start]) * percent);
+    }
 }
 } // namespace OHOS::Ace::NG
