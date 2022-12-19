@@ -124,7 +124,7 @@ void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const S
     RectF srcRect;
     srcRect.SetSize(svgContainerSize);
     canvasImage_->DrawToRSCanvas(
-        canvas, ToRSRect(srcRect), ToRSRect(imagePaintConfig.dstRect_), std::array<PointF, 4>());
+        canvas, ToRSRect(srcRect), ToRSRect(imagePaintConfig.dstRect_), BorderRadiusArray());
     canvas.Restore();
 }
 
@@ -157,7 +157,7 @@ void ImagePainter::DrawStaticImage(
     canvas.AttachBrush(brush);
     // include recordingCanvas's ClipAdaptiveRRect operation.
     canvasImage_->DrawToRSCanvas(canvas, ToRSRect(imagePaintConfig.srcRect_), ToRSRect(imagePaintConfig.dstRect_),
-        imagePaintConfig.borderRadiusXY_ ? *imagePaintConfig.borderRadiusXY_ : std::array<PointF, 4>());
+        imagePaintConfig.borderRadiusXY_ ? *imagePaintConfig.borderRadiusXY_ : BorderRadiusArray());
     canvas.Restore();
 }
 

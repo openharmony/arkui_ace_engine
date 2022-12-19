@@ -160,12 +160,12 @@ void ImagePattern::SetImagePaintConfig(
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto borderRadius = host->GetRenderContext()->GetBorderRadius();
-        std::array<PointF, 4> radiusXY = { PointF(borderRadius->radiusTopLeft->ConvertToPx(),
-                                               borderRadius->radiusTopLeft->ConvertToPx()),
+        BorderRadiusArray radiusXY = { PointF(borderRadius->radiusTopLeft->ConvertToPx(),
+                                                                borderRadius->radiusTopLeft->ConvertToPx()),
             PointF(borderRadius->radiusTopRight->ConvertToPx(), borderRadius->radiusTopRight->ConvertToPx()),
             PointF(borderRadius->radiusBottomLeft->ConvertToPx(), borderRadius->radiusBottomLeft->ConvertToPx()),
             PointF(borderRadius->radiusBottomRight->ConvertToPx(), borderRadius->radiusBottomRight->ConvertToPx()) };
-        config.borderRadiusXY_ = std::make_shared<std::array<PointF, 4>>(std::move(radiusXY));
+        config.borderRadiusXY_ = std::make_shared<BorderRadiusArray>(std::move(radiusXY));
     }
     config.isSvg_ = isSvg;
 

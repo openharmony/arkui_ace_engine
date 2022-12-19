@@ -113,8 +113,8 @@ public:
     int32_t GetWidth() const override;
     int32_t GetHeight() const override;
 
-    void DrawToRSCanvas(
-        RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const std::array<PointF, 4>& radiusXY) override;
+    void DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect,
+        const BorderRadiusArray& radiusXY) override;
 
     static SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap);
     static sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap);
