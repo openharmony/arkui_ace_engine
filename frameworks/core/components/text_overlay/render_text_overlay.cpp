@@ -17,6 +17,7 @@
 
 #include "base/geometry/rect.h"
 #include "core/animation/scheduler.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/focus_collaboration/render_focus_collaboration.h"
 #include "core/components/stack/stack_element.h"
 #ifdef WEB_SUPPORTED
@@ -673,6 +674,13 @@ void RenderTextOverlay::PerformLayout()
         auto textOverlayManager = context->GetTextOverlayManager();
         if (textOverlayManager) {
             textOverlayManager->ClearTextOverlayRect();
+            auto isContainerModal = context->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+                                    context->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+            if (isContainerModal) {
+                textOverlayManager->SetCoordinateOffset(
+                    Offset((CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
+                        CONTAINER_TITLE_HEIGHT.ConvertToPx()));
+            }
             textOverlayManager->AddTextOverlayRect(textOverlayRect);
             textOverlayManager->AddTextOverlayRect(startHandleRect);
             textOverlayManager->AddTextOverlayRect(endHandleRect);
