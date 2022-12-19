@@ -300,8 +300,8 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
             if (refereeNG_) {
                 refereeNG_->CleanGestureScope(event.id);
             }
-            axisTouchTestResult_.clear();
         }
+        axisTouchTestResult_.clear();
     }
     return true;
 }

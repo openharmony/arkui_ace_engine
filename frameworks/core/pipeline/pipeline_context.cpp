@@ -1869,6 +1869,19 @@ void PipelineContext::CreateTouchEventOnZoom(const AxisEvent& event)
     }
 }
 
+MouseEvent ConvertAxisToMouse(const AxisEvent& event)
+{
+    MouseEvent result;
+    result.x = event.x;
+    result.y = event.y;
+    result.action = MouseAction::MOVE;
+    result.button = MouseButton::NONE_BUTTON;
+    result.time = event.time;
+    result.deviceId = event.deviceId;
+    result.sourceType = event.sourceType;
+    return result;
+}
+
 void PipelineContext::OnAxisEvent(const AxisEvent& event)
 {
     if (isKeyCtrlPressed_ && !NearZero(event.verticalAxis) &&
@@ -1892,6 +1905,9 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
         eventManager_->AxisTest(scaleEvent, rootElement_->GetRenderNode());
         eventManager_->DispatchAxisEvent(scaleEvent);
     }
+
+    auto mouseEvent = ConvertAxisToMouse(event);
+    OnMouseEvent(mouseEvent);
 }
 
 void PipelineContext::AddToHoverList(const RefPtr<RenderNode>& node)

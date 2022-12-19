@@ -920,6 +920,19 @@ void PipelineContext::RootLostFocus(BlurReason reason) const
     focusHub->LostFocus(reason);
 }
 
+MouseEvent ConvertAxisToMouse(const AxisEvent& event)
+{
+    MouseEvent result;
+    result.x = event.x;
+    result.y = event.y;
+    result.action = MouseAction::MOVE;
+    result.button = MouseButton::NONE_BUTTON;
+    result.time = event.time;
+    result.deviceId = event.deviceId;
+    result.sourceType = event.sourceType;
+    return result;
+}
+
 void PipelineContext::OnAxisEvent(const AxisEvent& event)
 {
     // Need develop here: CTRL+AXIS = Pinch event
@@ -941,6 +954,9 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
         eventManager_->AxisTest(scaleEvent, rootNode_);
         eventManager_->DispatchAxisEvent(scaleEvent);
     }
+
+    auto mouseEvent = ConvertAxisToMouse(event);
+    OnMouseEvent(mouseEvent);
 }
 
 void PipelineContext::AddVisibleAreaChangeNode(
