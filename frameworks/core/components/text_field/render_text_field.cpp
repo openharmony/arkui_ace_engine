@@ -132,6 +132,8 @@ void GetKeyboardFilter(TextInputType keyboard, std::string& keyboardFilterValue)
 void RenderTextField::UpdateConfiguration()
 {
     MiscServices::Configuration configuration;
+    LOGI("UpdateConfiguration: Enter key type %{public}d", static_cast<int32_t>(action_));
+    LOGI("UpdateConfiguration: Enter keyboard type %{public}d", static_cast<int32_t>(keyboard_));
     configuration.SetEnterKeyType(static_cast<MiscServices::EnterKeyType>((int32_t)action_));
     configuration.SetTextInputType(static_cast<MiscServices::TextInputType>((int32_t)keyboard_));
     MiscServices::InputMethodController::GetInstance()->OnConfigurationChange(configuration);
@@ -353,9 +355,6 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     if (textField->IsSetFocusOnTouch()) {
         isFocusOnTouch_ = textField->IsFocusOnTouch();
     }
-#if defined(ENABLE_STANDARD_INPUT)
-    UpdateConfiguration();
-#endif
     SetCallback(textField);
     UpdateFocusStyles();
     UpdateIcon(textField);
@@ -1077,6 +1076,7 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
     if (softKeyboardEnabled_) {
         LOGI("Request open soft keyboard");
 #if defined(ENABLE_STANDARD_INPUT)
+        UpdateConfiguration();
         if (textChangeListener_ == nullptr) {
             textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this), context_);
         }

@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
 
-#include <algorithm>
-#include <optional>
 #include <unicode/uchar.h>
 
 #include "base/geometry/axis.h"
@@ -110,7 +108,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (textContent.empty()) {
         preferredHeight = pattern->PreferredLineHeight();
     }
-    auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(false);
+    auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(true);
     // check password image size.
     if (!showPasswordIcon || !isPasswordType) {
         textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
@@ -153,23 +151,11 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
     auto contentSize = content->GetRect().GetSize();
-    auto textRectOffsetX = pattern->GetPaddingLeft();
     auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto context = layoutWrapper->GetHostNode()->GetContext();
     CHECK_NULL_VOID(context);
-    switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
-        case TextAlign::START:
-            break;
-        case TextAlign::CENTER:
-            textRectOffsetX += contentSize.Width() / 2.0f - textRect_.Width() / 2.0f;
-            break;
-        case TextAlign::END:
-            textRectOffsetX += contentSize.Width() - textRect_.Width();
-            break;
-        default:
-            break;
-    }
+    parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     auto align = Alignment::CENTER;
     if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
@@ -177,10 +163,28 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     // Update content position.
     auto contentOffset = Alignment::GetAlignPosition(size, contentSize, align);
     content->SetOffset(OffsetF(pattern->GetPaddingLeft(), contentOffset.GetY()));
-    // update text rect.
-    auto textOffset = Alignment::GetAlignPosition(contentSize, textRect_.GetSize(), Alignment::CENTER_LEFT);
-    // adjust text rect to the basic padding first
-    textRect_.SetOffset(OffsetF(textRectOffsetX, textOffset.GetY()));
+    // if handler is moving, no need to adjust text rect in pattern
+    if (pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE ||
+        pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE_DONE) {
+        textRect_ = pattern->GetTextRect();
+    } else {
+        auto textOffset = Alignment::GetAlignPosition(contentSize, textRect_.GetSize(), Alignment::CENTER_LEFT);
+        // adjust text rect to the basic padding
+        auto textRectOffsetX = pattern->GetPaddingLeft();
+        switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
+            case TextAlign::START:
+                break;
+            case TextAlign::CENTER:
+                textRectOffsetX += (contentSize.Width() - textRect_.Width()) * 0.5f;
+                break;
+            case TextAlign::END:
+                textRectOffsetX += contentSize.Width() - textRect_.Width();
+                break;
+            default:
+                break;
+        }
+        textRect_.SetOffset(OffsetF(textRectOffsetX, textOffset.GetY()));
+    }
     // update image rect.
     if (!imageRect_.IsEmpty()) {
         auto imageOffset = Alignment::GetAlignPosition(size, imageRect_.GetSize(), Alignment::CENTER_RIGHT);
