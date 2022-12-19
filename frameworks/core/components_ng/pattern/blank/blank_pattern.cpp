@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/blank/blank_pattern.h"
 
-#include <string>
-
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -27,8 +25,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-
-void BlankPattern::OnModifyDone()
+void BlankPattern::OnMountToParentDone()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -101,5 +98,4 @@ void BlankPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("color", GetColorString().c_str());
 }
-
 } // namespace OHOS::Ace::NG
