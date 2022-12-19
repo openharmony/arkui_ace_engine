@@ -716,7 +716,16 @@ Offset RenderTextOverlay::ComputeChildPosition(const RefPtr<RenderNode>& child)
 
     Offset childPosition;
     if (isUsingMouse_) {
-        childPosition = mouseOffset_;
+        auto context = GetContext().Upgrade();
+        auto isContainerModal = context->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+                                context->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+        if (isContainerModal) {
+            childPosition =
+                mouseOffset_ - Offset((CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
+                                   CONTAINER_TITLE_HEIGHT.ConvertToPx());
+        } else {
+            childPosition = mouseOffset_;
+        }
         if (GreatOrEqual(
                 childPosition.GetX() + child->GetLayoutSize().Width(), GetLayoutParam().GetMaxSize().Width()) &&
             GreatOrEqual(childPosition.GetX(), child->GetLayoutSize().Width())) {
