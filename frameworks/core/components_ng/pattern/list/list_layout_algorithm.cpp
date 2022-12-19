@@ -43,6 +43,7 @@ void ListLayoutAlgorithm::UpdateListItemConstraint(
         auto width = selfIdealSize.Width();
         if (width.has_value()) {
             contentConstraint.maxSize.SetWidth(width.value());
+            contentConstraint.percentReference.SetWidth(width.value());
         }
         return;
     }
@@ -50,6 +51,7 @@ void ListLayoutAlgorithm::UpdateListItemConstraint(
     auto height = selfIdealSize.Height();
     if (height.has_value()) {
         contentConstraint.maxSize.SetHeight(height.value());
+        contentConstraint.percentReference.SetHeight(height.value());
     }
 }
 
