@@ -542,7 +542,7 @@ private:
     void DeleteEntirelyCookie();
     void RegisterOHOSWebEventAndMethord();
     void SetWebCallBack();
-    void RunSetWebIdCallback();
+    void RunSetWebIdAndHapPathCallback();
     void RunJsProxyCallback();
 
     // Backward and forward

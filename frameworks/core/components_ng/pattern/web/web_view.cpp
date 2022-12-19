@@ -54,7 +54,8 @@ void WebView::Create(const std::string& src, const RefPtr<WebController>& webCon
     RegisterPipelineCallback(nodeId);
 }
 
-void WebView::Create(const std::string& src, SetWebIdCallback&& setWebIdCallback)
+void WebView::Create(const std::string& src, SetWebIdCallback&& setWebIdCallback,
+    SetHapPathCallback&& setHapPathCallback)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -65,6 +66,7 @@ void WebView::Create(const std::string& src, SetWebIdCallback&& setWebIdCallback
     CHECK_NULL_VOID(webPattern);
     webPattern->SetWebSrc(src);
     webPattern->SetSetWebIdCallback(std::move(setWebIdCallback));
+    webPattern->SetSetHapPathCallback(std::move(setHapPathCallback));
     RegisterPipelineCallback(nodeId);
 }
 
