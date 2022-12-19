@@ -463,9 +463,6 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
         rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
         if (rsUiDirector != nullptr) {
             rsUiDirector->SetRSSurfaceNode(dialogWindow_->GetSurfaceNode());
-            rsUiDirector->SetUITaskRunner(
-                [taskExecutor = container->GetTaskExecutor()](
-                    const std::function<void()>& task) { taskExecutor->PostTask(task, TaskExecutor::TaskType::UI); });
             auto context = DynamicCast<PipelineContext>(container->GetPipelineContext());
             if (context != nullptr) {
                 LOGI("Init RSUIDirector");
