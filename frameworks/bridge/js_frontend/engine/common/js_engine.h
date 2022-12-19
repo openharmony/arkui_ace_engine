@@ -237,6 +237,11 @@ public:
         return extraNativeObject_;
     }
 
+    void SetForceUpdate(bool needUpdate)
+    {
+        needUpdate_ = needUpdate;
+    }
+
     virtual RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode)
     {
         return nullptr;
@@ -280,6 +285,7 @@ public:
 protected:
     NativeEngine* nativeEngine_ = nullptr;
     std::function<void(JsEngine*)> mediaUpdateCallback_;
+    bool needUpdate_ = false;
 
 private:
     // weather the app has debugger.so.
