@@ -126,8 +126,8 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
         if (showTips_) {
             bubbleFlag_ = true;
             CreateAndSetBubbleNode();
-            FireChangeEvent(SliderChangeMode::Click);
         }
+        FireChangeEvent(SliderChangeMode::Click);
     } else if (touchType == TouchType::UP) {
         hotFlag_ = false;
         if (bubbleFlag_) {
