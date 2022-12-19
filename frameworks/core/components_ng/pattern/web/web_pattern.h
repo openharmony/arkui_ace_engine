@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/web/web_property.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -268,6 +269,8 @@ private:
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleDragMove(const GestureEvent& event);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
@@ -275,7 +278,6 @@ private:
     void HandleDragCancel();
     bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
-    void HandleAxisEvent(AxisInfo& info);
     void WebOnMouseEvent(const MouseInfo& info);
     bool HandleDoubleClickEvent(const MouseInfo& info);
     void SendDoubleClickEvent(const MouseClickInfo& info);
@@ -326,7 +328,7 @@ private:
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
-    RefPtr<InputEvent> axisEvent_;
+    RefPtr<PanEvent> panEvent_ = nullptr;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_ = nullptr;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle_ = nullptr;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle_ = nullptr;

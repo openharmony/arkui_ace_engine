@@ -32,6 +32,8 @@ constexpr int32_t SINGLE_CLICK_NUM = 1;
 constexpr int32_t DOUBLE_CLICK_NUM = 2;
 constexpr int32_t DEFAULT_NUMS_ONE = 1;
 constexpr double DEFAULT_DBCLICK_INTERVAL = 0.5f;
+constexpr double DEFAULT_AXIS_RATIO = -0.06f;
+
 RenderWeb::RenderWeb() : RenderNode(true)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -91,6 +93,9 @@ void RenderWeb::Update(const RefPtr<Component>& component)
     onKeyEvent_ = web->GetOnKeyEventCallback();
     onPreKeyEvent_ = web->GetOnInterceptKeyEventCallback();
     RegistVirtualKeyBoardListener();
+#ifdef OHOS_STANDARD_SYSTEM
+    InitPanEvent();
+#endif
     web_ = web;
     if (delegate_) {
         delegate_->SetComponent(web);
@@ -377,6 +382,39 @@ void RenderWeb::Initialize()
     });
 }
 
+void RenderWeb::InitPanEvent()
+{
+    auto context = context_.Upgrade();
+    if (panRecognizer_ || !context) {
+        return;
+    }
+    PanDirection panDirection;
+    panDirection.type = PanDirection::VERTICAL;
+    panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(
+        context, DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
+    panRecognizer_->SetOnActionUpdate([weakItem = AceType::WeakClaim(this)](const GestureEvent& event) {
+        auto item = weakItem.Upgrade();
+        if (item) {
+            item->HandleDragMove(event);
+        }
+    });
+}
+
+void RenderWeb::HandleDragMove(const GestureEvent& event)
+{
+    if (event.GetInputEventType() == InputEventType::AXIS) {
+        if (!delegate_) {
+            LOGE("HandleDragMove delegate_ is nullptr");
+            return;
+        }
+        auto localLocation = event.GetLocalLocation();
+        delegate_->HandleAxisEvent(
+            localLocation.GetX(), localLocation.GetY(),
+            event.GetDelta().GetX() * DEFAULT_AXIS_RATIO,
+            event.GetDelta().GetY() * DEFAULT_AXIS_RATIO);
+    }
+}
+
 void RenderWeb::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 {
     if (!delegate_) {
@@ -525,6 +563,11 @@ void RenderWeb::OnTouchTestHit(const Offset& coordinateOffset, const TouchRestri
         MarkIsNotSiblingAddRecognizerToResult(true);
     }
 
+    if (panRecognizer_) {
+        panRecognizer_->SetCoordinateOffset(coordinateOffset);
+        result.emplace_back(panRecognizer_);
+    }
+
     if (!touchRecognizer_) {
         LOGE("TouchTestHit touchRecognizer_ is nullptr");
         return;
@@ -541,16 +584,6 @@ void RenderWeb::OnTouchTestHit(const Offset& coordinateOffset, const TouchRestri
 bool RenderWeb::IsAxisScrollable(AxisDirection direction)
 {
     return true;
-}
-
-void RenderWeb::HandleAxisEvent(const AxisEvent& event)
-{
-    if (!delegate_) {
-        LOGE("Delegate_ is nullptr");
-        return;
-    }
-    auto localLocation = Offset(event.x, event.y) - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
-    delegate_->HandleAxisEvent(localLocation.GetX(), localLocation.GetY(), event.horizontalAxis, event.verticalAxis);
 }
 
 WeakPtr<RenderNode> RenderWeb::CheckAxisNode()
