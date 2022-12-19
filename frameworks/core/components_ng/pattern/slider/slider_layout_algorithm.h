@@ -44,9 +44,15 @@ public:
         return blockDiameter_;
     }
 
+    float GetBlockHotSize() const
+    {
+        return blockHotSize_;
+    }
+
 private:
     float trackThickness_ = 0.0f;
     float blockDiameter_ = 0.0f;
+    float blockHotSize_ = 0.0f;
 
     OffsetF circleCenter_ = { 0, 0 };
     bool bubbleFlag_ = false;

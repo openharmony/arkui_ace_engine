@@ -28,9 +28,6 @@ class ACE_EXPORT SliderPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SliderPaintMethod, NodePaintMethod)
 
 public:
-    static constexpr float HALF = 0.5f;
-    static constexpr Dimension CIRCLE_SHADOW_WIDTH = 1.0_vp;
-    static constexpr Dimension HOT_CIRCLE_SHADOW_WIDTH = 6.0_vp;
     struct Parameters {
         float trackThickness = 0.0f;
         float blockDiameter = 0.0f;
@@ -38,7 +35,10 @@ public:
         float borderBlank = 0.0f;
         float stepRatio = 0.0f;
         float valueRatio = 0.0f;
+        float hotCircleShadowWidth = 0.0f;
         bool hotFlag = false;
+        bool mouseHoverFlag_ = false;
+        bool mousePressedFlag_ = false;
     };
     explicit SliderPaintMethod(const Parameters& parameters) : parameters_(parameters) {};
     ~SliderPaintMethod() override = default;
