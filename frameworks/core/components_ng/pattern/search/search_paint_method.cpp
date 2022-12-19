@@ -47,7 +47,7 @@ void SearchPaintMethod::PaintSearch(RSCanvas& canvas, PaintWrapper* paintWrapper
         auto iconHeight = searchTheme->GetIconHeight();
         auto dividerSpace = searchTheme->GetDividerSideSpace().ConvertToPx();
         auto searchSpace = searchTheme->GetSearchButtonSpacing().ConvertToPx();
-        auto searchDividerWidth = searchTheme->GetSearchDividerWidth();
+        auto searchDividerWidth = searchTheme->GetSearchDividerWidth().ConvertToPx();
         auto searchDividerColor = searchTheme->GetSearchDividerColor();
         auto searchSize = paintWrapper->GetGeometryNode()->GetFrameSize();
         // Paint divider.

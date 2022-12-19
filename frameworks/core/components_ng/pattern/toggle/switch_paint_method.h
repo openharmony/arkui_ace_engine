@@ -44,7 +44,7 @@ private:
     float actualWidth_ = 0.0f;
     float actualHeight_ = 0.0f;
     float pointRadius_ = 0.0f;
-    const float radiusGap_ = 2.0f;
+    const Dimension radiusGap_ = 2.0_vp;
     bool enabled_ = true;
     Color clickEffectColor_ = Color::WHITE;
     Color hoverColor_ = Color::WHITE;

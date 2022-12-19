@@ -403,11 +403,11 @@ void RadioPattern::PlayAnimation(bool isOn)
 
 void RadioPattern::StopTranslateAnimation()
 {
-    if (onController_ && !onController_->IsStopped()) {
-        onController_->Stop();
-    }
     if (offController_ && !offController_->IsStopped()) {
         offController_->Stop();
+    }
+    if (onController_ && !onController_->IsStopped()) {
+        onController_->Stop();
     }
 }
 
