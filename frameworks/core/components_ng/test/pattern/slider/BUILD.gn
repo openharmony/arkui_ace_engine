@@ -28,6 +28,7 @@ ohos_unittest("slider_pattern_test_ng") {
     "//third_party/flutter/engine/flutter/third_party/txt/src/txt",
     "//third_party/flutter/engine/flutter/third_party/txt/src",
     "//third_party/flutter/skia/third_party/externals/harfbuzz/src",
+    "//third_party/flutter/skia/third_party/externals/icu/source/common",
   ]
 
   sources = [
@@ -145,31 +146,17 @@ ohos_unittest("slider_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/slider/slider_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/slider/tip_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/slider/tip_paint_method.cpp",
-    "slider_paint_method_test_ng.cpp",
     "slider_pattern_test_ng.cpp",
   ]
 
   deps = [
     "$ace_root:ace_test_log",
     "$cjson_root:cjson_static",
-    "//foundation/window/window_manager/wm:libwm",
     "//third_party/googletest:gmock_main",
-  ]
-
-  external_deps = [
-    "hiviewdfx_hilog_native:libhilog",
-    "window_manager:libwindow_extension_client",
-
-    # "ability_base:want",
-    # "ability_runtime:ability_manager",
   ]
 
   configs = [
     "$ace_root:ace_unittest_config",
     "$ace_root:ace_test_coverage_config",
-    "//commonlibrary/c_utils/base:utils_config",
-    "//foundation/window/window_manager/extension/extension_connection:libwindow_extension_client_private_config",
-    "//foundation/window/window_manager/extension/extension_connection:libextension_connection_public_config",
-    "//foundation/window/window_manager/resources/config/build:coverage_flags",
   ]
 }
