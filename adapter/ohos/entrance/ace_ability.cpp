@@ -359,9 +359,7 @@ void AceAbility::OnStart(const Want& want)
         false, useNewPipe);
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     CHECK_NULL_VOID(container);
-    promise_.set_value();
     container->SetToken(token_);
-
     auto aceResCfg = container->GetResourceConfiguration();
     aceResCfg.SetOrientation(SystemProperties::GetDeviceOrientation());
     aceResCfg.SetDensity(SystemProperties::GetResolution());
@@ -672,7 +670,6 @@ void AceAbility::OnRemoteTerminated()
 
 void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::WindowSizeChangeReason reason)
 {
-    future_.wait();
     LOGI("width: %{public}u, height: %{public}u, left: %{public}d, top: %{public}d", rect.width_, rect.height_,
         rect.posX_, rect.posY_);
     SystemProperties::SetDeviceOrientation(rect.height_ >= rect.width_ ? 0 : 1);
