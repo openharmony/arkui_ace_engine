@@ -2440,6 +2440,18 @@ std::string TextFieldPattern::GetInputFilter() const
     return layoutProperty->GetInputFilterValue("");
 }
 
+void TextFieldPattern::SearchRequestKeyboard()
+{
+    StartTwinkling();
+    caretUpdateType_ = CaretUpdateType::PRESSED;
+    selectionMode_ = SelectionMode::NONE;
+    if (RequestKeyboard(false, true, true)) {
+        auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireOnEditChanged(true);
+    }
+}
+
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("placeholder", GetPlaceHolder().c_str());
