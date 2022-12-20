@@ -76,8 +76,6 @@ public:
 
     bool ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
-    void ProcessIdleEvent(int64_t deadline);
-
     bool ProcessRotationEvent(float rotationValue);
 
     int32_t GetInstanceId() const override
@@ -105,10 +103,7 @@ public:
         surfaceDestroyCallback_ = std::move(callback);
     }
 
-    void RegisterIdleCallback(IdleCallback&& callback) override
-    {
-        idleCallback_ = std::move(callback);
-    }
+    void RegisterIdleCallback(IdleCallback&& callback) override {}
 
     void SetPlatformResRegister(const RefPtr<PlatformResRegister>& resRegister)
     {
@@ -174,7 +169,6 @@ private:
     DensityChangeCallback densityChangeCallback_;
     SystemBarHeightChangeCallbak systemBarHeightChangeCallback_;
     SurfaceDestroyCallback surfaceDestroyCallback_;
-    IdleCallback idleCallback_;
     DragEventCallBack dragEventCallback_;
     int32_t instanceId_ = 0;
     bool viewLaunched_ = false;

@@ -34,12 +34,8 @@ class AceAbility final : public OHOS::AppExecFwk::Ability,
                          public OHOS::Rosen::IOccupiedAreaChangeListener,
                          public OHOS::Rosen::IAceAbilityHandler {
 public:
-    AceAbility()
-    {
-        abilityId_ = instanceId_;
-        instanceId_++;
-    }
-    virtual ~AceAbility() = default;
+    AceAbility();
+    ~AceAbility() override = default;
 
     void OnStart(const OHOS::AAFwk::Want& want) override;
     void OnStop() override;
@@ -80,12 +76,11 @@ public:
     void Dump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
 private:
-    static int32_t instanceId_;
     static const std::string START_PARAMS_KEY;
     static const std::string PAGE_URI;
     static const std::string CONTINUE_PARAMS_KEY;
 
-    int32_t abilityId_ = 0;
+    int32_t abilityId_ = -1;
     float density_ = 1.0f;
     std::string remotePageUrl_;
     std::string remoteData_;

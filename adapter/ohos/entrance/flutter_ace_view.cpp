@@ -297,10 +297,18 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEv
     settings.use_current_event_runner = useCurrentEventRunner;
     LOGI("software render: %{public}s", settings.enable_software_rendering ? "true" : "false");
     LOGI("use platform as ui thread: %{public}s", settings.platform_as_ui_thread ? "true" : "false");
-    settings.idle_notification_callback = [aceSurface](int64_t deadline) {
-        if (aceSurface != nullptr) {
-            aceSurface->ProcessIdleEvent(deadline);
+    settings.idle_notification_callback = [instanceId](int64_t deadline) {
+        ContainerScope scope(instanceId);
+        auto container = Container::Current();
+        if (!container) {
+            return;
         }
+        auto context = container->GetPipelineContext();
+        if (!context) {
+            return;
+        }
+        context->GetTaskExecutor()->PostTask(
+            [context, deadline]() { context->OnIdle(deadline); }, TaskExecutor::TaskType::UI);
     };
     auto shell_holder = std::make_unique<flutter::OhosShellHolder>(settings, false);
     if (aceSurface != nullptr) {
@@ -500,13 +508,6 @@ bool FlutterAceView::ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEv
     KeyEvent event;
     ConvertKeyEvent(keyEvent, event);
     return keyEventCallback_(event);
-}
-
-void FlutterAceView::ProcessIdleEvent(int64_t deadline)
-{
-    if (idleCallback_) {
-        idleCallback_(deadline);
-    }
 }
 
 const void* FlutterAceView::GetNativeWindowById(uint64_t textureId)
