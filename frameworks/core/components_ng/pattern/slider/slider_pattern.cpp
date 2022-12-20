@@ -85,7 +85,7 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                        ? contentSize.value().Width()
                        : contentSize.value().Height();
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_RETURN(theme, false);

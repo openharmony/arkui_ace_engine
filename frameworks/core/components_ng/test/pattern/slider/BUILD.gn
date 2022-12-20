@@ -147,6 +147,7 @@ ohos_unittest("slider_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/slider/tip_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/slider/tip_paint_method.cpp",
     "slider_pattern_test_ng.cpp",
+    "slider_tip_test_ng.cpp",
   ]
 
   deps = [

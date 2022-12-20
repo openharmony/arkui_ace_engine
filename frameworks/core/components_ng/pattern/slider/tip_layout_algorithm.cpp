@@ -37,7 +37,7 @@ void TipLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childWrapper->Measure(childLayoutConstraint);
         childSize = childWrapper->GetGeometryNode()->GetFrameSize();
     }
-    auto padding = static_cast<float>(layoutProperty->GetPadding().value_or(0.0_vp).ConvertToVp());
+    auto padding = static_cast<float>(layoutProperty->GetPadding().value_or(0.0_vp).ConvertToPx());
     float frameSizeHeight = childSize.Height() + padding + padding;
     float frameSizeWidth = childSize.Width();
     if (layoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
@@ -58,7 +58,7 @@ void TipLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
-    auto padding = static_cast<float>(layoutProperty->GetPadding().value_or(0.0_vp).ConvertToVp());
+    auto padding = static_cast<float>(layoutProperty->GetPadding().value_or(0.0_vp).ConvertToPx());
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(childWrapper);
     auto childSize = childWrapper->GetGeometryNode()->GetFrameSize();
