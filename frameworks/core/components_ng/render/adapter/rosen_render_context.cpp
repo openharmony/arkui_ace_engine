@@ -919,13 +919,14 @@ void RosenRenderContext::PaintFocusState(
         paintRect.GetRect().Height(), focusPaddingVp.ToString().c_str(), paintColor.ColorToString().c_str(),
         paintWidth.ToString().c_str());
 
+    auto paintWidthPx = static_cast<float>(paintWidth.ConvertToPx());
     auto borderPaddingPx = static_cast<float>(focusPaddingVp.ConvertToPx());
-    auto focusPaintRectLeft = paintRect.GetRect().Left() - borderPaddingPx;
-    auto focusPaintRectTop = paintRect.GetRect().Top() - borderPaddingPx;
-    auto focusPaintRectWidth = paintRect.GetRect().Width() + 2 * borderPaddingPx;
-    auto focusPaintRectHeight = paintRect.GetRect().Height() + 2 * borderPaddingPx;
+    auto focusPaintRectLeft = paintRect.GetRect().Left() - borderPaddingPx - paintWidthPx / 2;
+    auto focusPaintRectTop = paintRect.GetRect().Top() - borderPaddingPx - paintWidthPx / 2;
+    auto focusPaintRectWidth = paintRect.GetRect().Width() + 2 * borderPaddingPx + paintWidthPx;
+    auto focusPaintRectHeight = paintRect.GetRect().Height() + 2 * borderPaddingPx + paintWidthPx;
 
-    EdgeF diffRadius = { borderPaddingPx, borderPaddingPx };
+    EdgeF diffRadius = { borderPaddingPx + paintWidthPx, borderPaddingPx + paintWidthPx };
     auto focusPaintCornerTopLeft = paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS) + diffRadius;
     auto focusPaintCornerTopRight = paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS) + diffRadius;
     auto focusPaintCornerBottomLeft = paintRect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS) + diffRadius;

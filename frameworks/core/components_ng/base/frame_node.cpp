@@ -65,10 +65,6 @@ FrameNode::~FrameNode()
     if (IsOnMainTree()) {
         OnDetachFromMainTree();
     }
-    auto focusHub = GetFocusHub();
-    if (focusHub) {
-        focusHub->RemoveSelf(this);
-    }
     auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {
         pipeline->RemoveOnAreaChangeNode(GetId());
