@@ -182,6 +182,48 @@ void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
     PostTaskToUI(task);
 }
 
+void OnTextChangedListenerImpl::HandleSetSelection(int32_t start, int32_t end)
+{
+    auto task = [textField = field_, start, end] {
+        auto client = textField.Upgrade();
+        if (!client) {
+            LOGE("text field is null");
+            return;
+        }
+        ContainerScope scope(client->instanceId_);
+        client->HandleSetSelection(start, end);
+    };
+    PostTaskToUI(task);
+}
+
+void OnTextChangedListenerImpl::HandleExtendAction(int32_t action)
+{
+    auto task = [textField = field_, action] {
+        auto client = textField.Upgrade();
+        if (!client) {
+            LOGE("text field is null");
+            return;
+        }
+        ContainerScope scope(client->instanceId_);
+        client->HandleExtendAction(action);
+    };
+    PostTaskToUI(task);
+}
+
+void OnTextChangedListenerImpl::HandleSelect(int32_t keyCode, int32_t cursorMoveSkip)
+{
+    auto task = [textField = field_, keyCode, cursorMoveSkip] {
+        auto client = textField.Upgrade();
+        if (!client) {
+            LOGE("text field is null");
+            return;
+        }
+        ContainerScope scope(client->instanceId_);
+        client->HandleSelect(keyCode, cursorMoveSkip);
+    };
+    PostTaskToUI(task);
+}
+
 void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)
 {
     if (!task) {

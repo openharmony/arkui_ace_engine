@@ -62,6 +62,20 @@ enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
 enum class CaretUpdateType { PRESSED, LONG_PRESSED, DEL, EVENT, HANDLE_MOVE, HANDLE_MOVE_DONE, INPUT, NONE };
 
+enum {
+    ACTION_SELECT_ALL, // Smallest code unit.
+    ACTION_UNDO,
+    ACTION_REDO,
+    ACTION_CUT,
+    ACTION_COPY,
+    ACTION_PASTE,
+    ACTION_SHARE,
+    ACTION_PASTE_AS_PLAIN_TEXT,
+    ACTION_REPLACE,
+    ACTION_ASSIST,
+    ACTION_AUTOFILL,
+};
+
 class TextFieldPattern : public Pattern, public ValueChangeObserver {
     DECLARE_ACE_TYPE(TextFieldPattern, Pattern, ValueChangeObserver);
 
@@ -287,6 +301,9 @@ public:
     void CursorMoveUp();
     void CursorMoveDown();
     void SetCaretPosition(int32_t position);
+    void HandleSetSelection(int32_t start, int32_t end);
+    void HandleExtendAction(int32_t action);
+    void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
 
     const std::vector<RSTypographyProperties::TextBox>& GetTextBoxes()
     {
