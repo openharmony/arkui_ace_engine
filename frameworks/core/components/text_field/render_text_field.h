@@ -353,6 +353,18 @@ public:
         return inputStyle_;
     }
 
+    void HandleOnBlur();
+
+    void SetCanPaintSelection(bool flag)
+    {
+        canPaintSelection_ = flag;
+    }
+
+    bool GetCanPaintSelection() const
+    {
+        return canPaintSelection_;
+    }
+
 protected:
     // Describe where caret is and how tall visually.
     struct CaretMetrics {
@@ -538,6 +550,7 @@ protected:
     double widthReservedForSearch_ = 0.0;  // Width reserved for delete icon of search.
     double paddingHorizonForSearch_ = 0.0; // Width reserved for search button of search.
     double selectHeight_ = 0.0;
+    bool canPaintSelection_ = false;
     Dimension height_;
     Dimension iconSizeInDimension_;
     Dimension iconHotZoneSizeInDimension_;

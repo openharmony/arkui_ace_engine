@@ -1948,11 +1948,23 @@ void RenderTextField::CursorMoveDown()
     MarkNeedLayout();
 }
 
+void RenderTextField::HandleOnBlur()
+{
+    SetCanPaintSelection(false);
+    auto lastPosition = static_cast<int32_t>(GetEditingValue().GetWideText().length());
+    UpdateSelection(lastPosition, lastPosition);
+    StopTwinkling();
+    PopTextOverlay();
+    OnEditChange(false);
+    ResetOnFocusForTextFieldManager();
+}
+
 void RenderTextField::CursorMoveOnClick(const Offset& offset)
 {
     auto value = GetEditingValue();
     auto position = GetCursorPositionForClick(offset);
     value.MoveToPosition(position);
+    UpdateSelection(position, position);
     SetEditingValue(std::move(value));
 
     if (!GetEditingValue().text.empty() && position == GetEditingValue().selection.GetEnd()) {
