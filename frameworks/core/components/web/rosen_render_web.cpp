@@ -63,7 +63,8 @@ void RosenRenderWeb::OnAttachContext()
     if (delegate_) {
         CreateDragDropRecognizer(context_);
         auto surface = GetSurface();
-        delegate_->InitOHOSWeb(context_, surface);
+        delegate_->SetSurface(surface);
+        drawSize_ = Size(pipelineContext->GetRootWidth(), pipelineContext->GetRootHeight());
     }
 }
 
@@ -87,7 +88,9 @@ void RosenRenderWeb::Paint(RenderContext& context, const Offset& offset)
     }
     if (delegate_) {
         LOGI("Web paint drawSize width = %{public}f, height = %{public}f", drawSize_.Width(), drawSize_.Height());
-        delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+        Offset paintOffset = GetPaintOffset();
+        delegate_->SetWebRendeGlobalPos(paintOffset);
+        delegate_->SetBoundsOrRezise(drawSize_);
         if (!isUrlLoaded_) {
             if (!delegate_->LoadDataWithRichText()) {
                 delegate_->LoadUrl();

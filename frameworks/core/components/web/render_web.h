@@ -146,6 +146,7 @@ public:
     void PanOnActionEnd(const GestureEvent& info) override;
     void PanOnActionCancel() override;
     DragItemInfo GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info) override;
+    void InitEnhanceSurfaceFlag();
 
 protected:
     RefPtr<WebDelegate> delegate_;
@@ -153,6 +154,11 @@ protected:
     Size drawSize_;
     Size drawSizeCache_;
     bool isUrlLoaded_ = false;
+    Size preDrawSize_;
+    Offset position_;
+    Offset prePosition_;
+    bool isEnhanceSurface_ = false;
+    bool isCreateWebView_ = false;
 
 private:
 #ifdef OHOS_STANDARD_SYSTEM
@@ -181,6 +187,7 @@ private:
         const DragItemInfo& dragItemInfo);
     void OnDragWindowMoveEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info);
     void OnDragWindowDropEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info);
+    void UpdateGlobalPos();
 
     RefPtr<RawRecognizer> touchRecognizer_ = nullptr;
     RefPtr<PanRecognizer> panRecognizer_ = nullptr;
@@ -203,7 +210,6 @@ private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
     void SetRootView(int32_t width, int32_t height, int32_t offset);
-    Offset position_;
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
     bool needOnFocus_ = false;
