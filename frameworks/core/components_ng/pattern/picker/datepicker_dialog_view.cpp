@@ -32,7 +32,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
-const int32_t DIVIDER_MARGIN = 2;
+const int32_t MARGIN_HALF = 2;
 } // namespace
 
 RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogProperties,
@@ -199,10 +199,10 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     CHECK_NULL_RETURN(buttonTitleRenderContext, nullptr);
     buttonTitleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     MarginProperty margin;
-    margin.left = CalcLength(dialogTheme->GetDividerHeight());
-    margin.right = CalcLength(dialogTheme->GetDividerHeight());
-    margin.top = CalcLength(dialogTheme->GetDividerHeight());
-    margin.bottom = CalcLength(dialogTheme->GetDividerHeight());
+    margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
+    margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
+    margin.top = CalcLength(dialogTheme->GetDividerHeight() / MARGIN_HALF);
+    margin.bottom = CalcLength(dialogTheme->GetDividerHeight() / MARGIN_HALF);
     buttonTitleNode->GetLayoutProperty()->UpdateMargin(margin);
     textTitleNode->MountToParent(buttonTitleNode);
     return buttonTitleNode;
@@ -222,7 +222,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateDividerNode(const RefPtr<FrameNode
     dividerRenderContext->UpdateBackgroundColor(dialogTheme->GetDividerColor());
 
     MarginProperty margin;
-    margin.top = CalcLength(dialogTheme->GetDividerPadding().Top());
+    margin.top = CalcLength(dialogTheme->GetDividerHeight());
     margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
     dividerNode->GetLayoutProperty()->UpdateMargin(margin);
     dividerNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
@@ -269,6 +269,8 @@ RefPtr<FrameNode> DatePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
     textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    textLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
+    textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
     auto buttonConfirmEventHub = buttonConfirmNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonConfirmEventHub, nullptr);
     buttonConfirmEventHub->SetStateEffect(true);
@@ -282,9 +284,9 @@ RefPtr<FrameNode> DatePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
 
     MarginProperty margin;
-    margin.right = CalcLength(dialogTheme->GetDividerHeight() * DIVIDER_MARGIN);
+    margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
     margin.top = CalcLength(dialogTheme->GetDividerHeight());
-    margin.bottom = CalcLength(dialogTheme->GetDividerHeight());
+    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
     buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
 
     textConfirmNode->MountToParent(buttonConfirmNode);
@@ -321,6 +323,8 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     CHECK_NULL_RETURN(textCancelLayoutProperty, nullptr);
     textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
     textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    textCancelLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
+    textCancelLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
     textCancelNode->MountToParent(buttonCancelNode);
     auto eventCancelHub = buttonCancelNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventCancelHub, nullptr);
@@ -331,9 +335,9 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     buttonCancelEventHub->SetStateEffect(true);
 
     MarginProperty margin;
-    margin.left = CalcLength(dialogTheme->GetDividerHeight() * DIVIDER_MARGIN);
+    margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
     margin.top = CalcLength(dialogTheme->GetDividerHeight());
-    margin.bottom = CalcLength(dialogTheme->GetDividerHeight());
+    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
     buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
 
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();

@@ -195,7 +195,7 @@ void JSDatePicker::Create(const JSCallbackInfo& info)
         paramObject = JSRef<JSObject>::Cast(info[0]);
         auto type = paramObject->GetProperty("type");
         if (type->IsNumber()) {
-        pickerType = static_cast<DatePickerType>(type->ToNumber<int32_t>());
+            pickerType = static_cast<DatePickerType>(type->ToNumber<int32_t>());
         }
     }
     switch (pickerType) {
@@ -516,10 +516,21 @@ void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
         LOGE("date error");
     }
 
+    auto theme = GetTheme<DialogTheme>();
+    if (!theme) {
+        LOGE("DialogTheme is null");
+        return;
+    }
+
     ButtonInfo buttonInfo;
     DialogProperties properties;
-    properties.alignment = DialogAlignment::CENTER;
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+        properties.alignment = DialogAlignment::BOTTOM;
+    } else {
+        properties.alignment = DialogAlignment::CENTER;
+    }
     properties.customStyle = false;
+    properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
 
     std::map<std::string, PickerDate> datePickerProperty;
     if (startDate->IsObject()) {
@@ -794,10 +805,21 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
     auto useMilitaryTime = paramObj->GetProperty("useMilitaryTime");
     bool isUseMilitaryTime = useMilitaryTime->ToBoolean();
 
+    auto theme = JSAlertDialog::GetTheme<DialogTheme>();
+    if (!theme) {
+        LOGE("DialogTheme is null");
+        return;
+    }
+
     ButtonInfo buttonInfo;
     DialogProperties properties;
-    properties.alignment = DialogAlignment::CENTER;
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+        properties.alignment = DialogAlignment::BOTTOM;
+    } else {
+        properties.alignment = DialogAlignment::CENTER;
+    }
     properties.customStyle = false;
+    properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
 
     std::map<std::string, PickerTime> timePickerProperty;
     if (selectedTime->IsObject()) {
