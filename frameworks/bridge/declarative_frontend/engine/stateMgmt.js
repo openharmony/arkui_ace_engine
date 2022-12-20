@@ -2247,8 +2247,10 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
         super(owningChildView, thisPropertyName);
         this.changeNotificationIsOngoing_ = false;
         this.linkedParentProperty_ = linkSource;
-        // register to the parent property
-        this.linkedParentProperty_.subscribeMe(this);
+        if (this.linkedParentProperty_) {
+            // register to the parent property
+            this.linkedParentProperty_.subscribeMe(this);
+        }
         // register to the ObservedObject
         ObservedObject.addOwningProperty(this.getObject(), this);
     }
@@ -3204,8 +3206,10 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
         super(owningChildView, thisPropertyName);
         this.changeNotificationIsOngoing_ = false;
         this.linkedParentProperty_ = linkSource;
-        // register to the parent property
-        this.linkedParentProperty_.subscribeMe(this);
+        if (this.linkedParentProperty_) {
+            // register to the parent property
+            this.linkedParentProperty_.subscribeMe(this);
+        }
         // register to the ObservedObject
         ObservedObject.addOwningProperty(this.linkedParentProperty_.get(), this);
     }

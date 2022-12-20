@@ -30,8 +30,10 @@ class SynchedPropertyObjectTwoWay<C extends Object>
     thisPropertyName: PropertyInfo) {
     super(owningChildView, thisPropertyName);
     this.linkedParentProperty_ = linkSource;
-    // register to the parent property
-    this.linkedParentProperty_.subscribeMe(this);
+    if (this.linkedParentProperty_) {
+      // register to the parent property
+      this.linkedParentProperty_.subscribeMe(this);
+    }
 
     // register to the ObservedObject
     ObservedObject.addOwningProperty(this.getObject(), this);
