@@ -1695,7 +1695,8 @@ function Observed(target) {
     // the new constructor behaviour
     var f = function (...args) {
         
-        return new ObservedObject(new original(...args), undefined);
+        return ObservedObject.createNew(new original(...args), undefined);
+        //    return new ObservedObject<C>(new original(...args), undefined);
     };
     Object.setPrototypeOf(f, Object.getPrototypeOf(original));
     // return new constructor (will override original)
@@ -3919,15 +3920,15 @@ class ViewPU extends NativeViewPartialUpdate {
         });
     }
     /**
-     * CreateStorageLink and CreateStorageLinkPU are used by the implementation of @StorageLink and
-     * @LocalStotrageLink in full update and partial update solution respectively.
-     * These are not part of the public AppStorage API , apps should not use.
-     * @param storagePropName - key in LocalStorage
-     * @param defaultValue - value to use when creating a new prop in the LocalStotage
-     * @param owningView - the View/ViewPU owning the @StorageLink/@LocalStorageLink variable
-     * @param viewVariableName -  @StorageLink/@LocalStorageLink variable name
-     * @returns SynchedPropertySimple/ObjectTwoWay/PU
-     */
+       * CreateStorageLink and CreateStorageLinkPU are used by the implementation of @StorageLink and
+       * @LocalStotrageLink in full update and partial update solution respectively.
+       * These are not part of the public AppStorage API , apps should not use.
+       * @param storagePropName - key in LocalStorage
+       * @param defaultValue - value to use when creating a new prop in the LocalStotage
+       * @param owningView - the View/ViewPU owning the @StorageLink/@LocalStorageLink variable
+       * @param viewVariableName -  @StorageLink/@LocalStorageLink variable name
+       * @returns SynchedPropertySimple/ObjectTwoWay/PU
+       */
     createStorageLink(storagePropName, defaultValue, viewVariableName) {
         return AppStorage.__CreateSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined

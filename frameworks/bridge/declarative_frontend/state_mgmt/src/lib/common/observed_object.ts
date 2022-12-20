@@ -43,13 +43,14 @@ interface Type<T> extends Function {
 * In that case use factory function
 *   obsObj = ObservedObject.createNew<ClassA[]>([])
 */
-
+p
 function Observed<C extends Object>(target: Type<C>): any {
   var original = target;
   // the new constructor behaviour
   var f: any = function (...args: any[]) {
     stateMgmtConsole.debug(`New ${original.name}, gets wrapped inside ObservableObject proxy.`);
-    return new ObservedObject<C>(new original(...args), undefined);
+    return ObservedObject.createNew(new original(...args), undefined);
+//    return new ObservedObject<C>(new original(...args), undefined);
   };
 
   Object.setPrototypeOf(f, Object.getPrototypeOf(original));
