@@ -263,8 +263,7 @@ void FlutterRenderTextField::PaintSelection(SkCanvas* canvas) const
     if (!IsSelectiveDevice()) {
         return;
     }
-
-    if (!paragraph_ || (canvas == nullptr)) {
+    if (!paragraph_ || (canvas == nullptr) || !canPaintSelection_) {
         return;
     }
 
