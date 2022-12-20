@@ -245,5 +245,4 @@ void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)
 
     taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
 }
-
 } // namespace OHOS::Ace
