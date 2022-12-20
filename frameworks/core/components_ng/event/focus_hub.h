@@ -443,8 +443,9 @@ public:
 
     RefPtr<FrameNode> GetFrameNode() const;
     RefPtr<GeometryNode> GetGeometryNode() const;
-    RefPtr<FocusHub> GetParentFocusHub(FrameNode* node = nullptr) const;
+    RefPtr<FocusHub> GetParentFocusHub() const;
     std::string GetFrameName() const;
+    int32_t GetFrameId() const;
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     bool RequestFocusImmediately();
@@ -454,11 +455,12 @@ public:
 
     void LostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH);
     void LostSelfFocus();
-    void RemoveSelf(FrameNode* frameNode);
-    void RemoveChild(FocusHub* focusNode);
+    void RemoveSelf();
+    void RemoveChild(const RefPtr<FocusHub>& focusNode);
     bool GoToNextFocusLinear(bool reverse, const RectF& rect = RectF());
     bool TryRequestFocus(const RefPtr<FocusHub>& focusNode, const RectF& rect);
 
+    bool AcceptFocusOfLastFocus();
     bool AcceptFocusByRectOfLastFocus(const RectF& rect);
     bool AcceptFocusByRectOfLastFocusNode(const RectF& rect);
     bool AcceptFocusByRectOfLastFocusScope(const RectF& rect);
@@ -583,12 +585,13 @@ public:
         onKeyEventInternal_ = std::move(onKeyEventInternal);
     }
 
-    void FlushChildrenFocusHub();
+    std::list<RefPtr<FocusHub>>::iterator FlushChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
 
-    std::list<RefPtr<FocusHub>>& GetChildren()
+    std::list<RefPtr<FocusHub>> GetChildren()
     {
-        FlushChildrenFocusHub();
-        return focusNodes_;
+        std::list<RefPtr<FocusHub>> focusNodes;
+        FlushChildrenFocusHub(focusNodes);
+        return focusNodes;
     }
 
     bool IsChild() const
@@ -739,8 +742,6 @@ private:
 
     WeakPtr<EventHub> eventHub_;
 
-    std::list<RefPtr<FocusHub>> focusNodes_;
-    std::list<RefPtr<FocusHub>>::iterator itLastFocusNode_ { focusNodes_.end() };
     WeakPtr<FocusHub> lastWeakFocusNode_ { nullptr };
 
     bool focusable_ { true };
