@@ -60,7 +60,7 @@ constexpr Dimension CURSOR_PADDING = 2.0_vp;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
-enum class CaretUpdateType { PRESSED, LONG_PRESSED, DEL, EVENT, HANDLER_MOVE, INPUT, NONE };
+enum class CaretUpdateType { PRESSED, LONG_PRESSED, DEL, EVENT, HANDLE_MOVE, HANDLE_MOVE_DONE, INPUT, NONE };
 
 class TextFieldPattern : public Pattern, public ValueChangeObserver {
     DECLARE_ACE_TYPE(TextFieldPattern, Pattern, ValueChangeObserver);
@@ -361,6 +361,19 @@ public:
         return imageRect_;
     }
 
+    const RefPtr<TouchEventImpl>& GetTouchListener()
+    {
+        return touchListener_;
+    }
+
+    bool NeedShowPasswordIcon()
+    {
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_RETURN_NOLOG(layoutProperty, false);
+        return layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD &&
+               layoutProperty->GetShowPasswordIconValue(true);
+    }
+
     const ImagePaintConfig& GetPasswordIconPaintConfig()
     {
         return passwordIconPaintConfig_;
@@ -386,6 +399,8 @@ private:
     void InitTouchEvent();
     void InitLongPressEvent();
     void InitClickEvent();
+    bool CaretPositionCloseToTouchPosition();
+    void CreateSingleHandle();
 
     void AddScrollEvent();
     void OnTextAreaScroll(float dy);
@@ -400,7 +415,9 @@ private:
     void ProcessOverlay();
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
+    void SetHandlerOnMoveDone();
     void OnDetachFromFrameNode(FrameNode* node) override;
+    bool UpdateCaretByPressOrLongPress();
     void UpdateTextSelectorByHandleMove(bool isMovingBase, int32_t position, OffsetF& offsetToParagraphBeginning);
 
     void HandleSelectionUp();
@@ -507,6 +524,8 @@ private:
     Offset lastTouchOffset_;
     PaddingPropertyF utilPadding_;
 
+    bool isSingleHandle_ = false;
+    bool isFirstHandle_ = false;
     float baselineOffset_ = 0.0f;
     RectF caretRect_;
     bool cursorVisible_ = false;
