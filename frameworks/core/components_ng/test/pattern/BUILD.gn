@@ -43,7 +43,7 @@ group("pattern_unittest") {
     "list:list_pattern_test_ng",
     "loading_progress:loading_progress_pattern_test_ng",
     "marquee:marquee_pattern_unit_test",
-    "menu:menu_layout_algorithm_unit_test",
+    "menu:menu_layout_algorithm_test_ng",
     "navigation:navigation_pattern_test_ng",
     "navigator:navigator_event_hub_test_ng",
     "option:panel_option_test_ng",

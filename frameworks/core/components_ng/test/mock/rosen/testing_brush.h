@@ -68,6 +68,7 @@ public:
     virtual void SetFilter(const TestingFilter filter) {}
     virtual void SetBlendMode(BlendMode mode) {}
     virtual void SetAlpha(uint32_t alpha) {}
+    virtual void SetARGB(int r, int g, int b, int a) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_BRUSH_H

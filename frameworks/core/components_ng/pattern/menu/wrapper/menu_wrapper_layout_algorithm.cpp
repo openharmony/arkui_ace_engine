@@ -18,15 +18,13 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 // set wrapper to full screen size
 void MenuWrapperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto screenSize = SizeF(pipeline->GetRootWidth(), pipeline->GetRootHeight());
 
@@ -37,7 +35,7 @@ void MenuWrapperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     menu->Measure(layoutConstraint);
 }
 
-void MenuWrapperLayoutAlgorithm::Layout(LayoutWrapper *layoutWrapper)
+void MenuWrapperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     menu->Layout();
