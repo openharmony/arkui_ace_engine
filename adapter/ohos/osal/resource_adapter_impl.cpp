@@ -341,14 +341,11 @@ std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
 bool ResourceAdapterImpl::GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest)
 {
     CHECK_NULL_RETURN_NOLOG(resourceManager_, false);
-    auto rawFileObj = std::make_unique<OHOS::Global::Resource::ResourceManager::RawFile>();
-    auto state = resourceManager_->GetRawFileFromHap(rawFile, rawFileObj);
-    if (state != Global::Resource::SUCCESS || !rawFileObj || !rawFileObj->buffer) {
+    auto state = resourceManager_->GetRawFileFromHap(rawFile, len, dest);
+    if (state != Global::Resource::SUCCESS || !dest) {
         LOGE("GetRawFileFromHap error, raw filename:%{public}s, error:%{public}u", rawFile.c_str(), state);
         return false;
     }
-    len = rawFileObj->length;
-    dest.swap(rawFileObj->buffer);
     return true;
 }
 
