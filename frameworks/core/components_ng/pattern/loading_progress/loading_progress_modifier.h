@@ -26,8 +26,6 @@
 namespace OHOS::Ace::NG {
 const Dimension RING_RADIUS = 10.5_vp;
 const Dimension ORBIT_RADIUS = 17.0_vp;
-const Dimension RING_WIDTH = 2.8_vp;
-const Dimension COMET_WIDTH = 6.0_vp;
 const float RING_MOVEMENT = 0.06f;
 const float FULL_COUNT = 100.0f;
 const float COUNT = 50.0f;
@@ -45,10 +43,9 @@ public:
     {
         float scale_ = 1.0;
         float date = date_->Get();
-        scale_ = std::min((context.width / (ORBIT_RADIUS.ConvertToPx() + COMET_WIDTH.ConvertToPx())),
-                     (context.height /
-                         (RING_RADIUS.ConvertToPx() * (1 + RING_MOVEMENT) + RING_WIDTH.ConvertToPx() * HALF))) *
-                 HALF;
+        UpdateLoadingSize(std::min(context.width, context.height));
+        scale_ = std::min((context.width / (ORBIT_RADIUS.ConvertToPx() + cometRadius_ / HALF)),
+            (context.height / (RING_RADIUS.ConvertToPx() * (1 + RING_MOVEMENT) + ringWidth_ * HALF))) * HALF;
         if (date > COUNT) {
             DrawRing(context, date, scale_);
             DrawOrbit(context, date, scale_);
@@ -60,6 +57,8 @@ public:
 
     void DrawRing(DrawingContext& canvas, float date, float scale_) const;
     void DrawOrbit(DrawingContext& canvas, float date, float scale_) const;
+    void UpdateLoadingSize(float diameter);
+    void CalculateValue(int32_t start, int32_t end, double percent = 1.0);
 
     void SetDate(float date)
     {
@@ -85,7 +84,8 @@ public:
 private:
     RefPtr<AnimatablePropertyFloat> date_;
     RefPtr<AnimatablePropertyColor> color_;
-
+    float ringWidth_ = 0.0f;
+    float cometRadius_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(LoadingProgressModifier);
 };
 } // namespace OHOS::Ace::NG
