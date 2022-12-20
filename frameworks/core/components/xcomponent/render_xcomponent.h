@@ -30,6 +30,7 @@ class RenderXComponent : public RenderNode {
 public:
     using XComponentSizeInitEvent = std::function<void(int64_t, int32_t, int32_t)>;
     using XComponentSizeChangeEvent = std::function<void(int64_t, int32_t, int32_t)>;
+    using XComponentPositionChangeEvent = std::function<void(int32_t, int32_t)>;
 
     static RefPtr<RenderNode> Create();
 
@@ -53,6 +54,7 @@ public:
         WeakPtr<NativeXComponentImpl> nativeXComponentImpl);
     void NativeXComponentChange();
     void NativeXComponentDestroy();
+    void NativeXComponentOffset(double x, double y);
 
     void SetXComponentSizeInit(XComponentSizeInitEvent &&xcomponentSizeInitEvent)
     {
@@ -63,6 +65,13 @@ public:
     {
         xcomponentSizeChangeEvent_ = std::move(xcomponentSizeChangeEvent);
     }
+
+    void SetXComponentPositionChange(XComponentPositionChangeEvent &&xcomponentPositionChangeEvent)
+    {
+        xcomponentPositionChangeEvent_ = std::move(xcomponentPositionChangeEvent);
+    }
+
+    void OnGlobalPositionChanged() override;
 
     void SetXComponentId(const std::string& id)
     {
@@ -83,7 +92,6 @@ protected:
     void HandleTouchEvent(const TouchEventInfo& info, const TouchType& touchType = TouchType::UNKNOWN);
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
-    void NativeXComponentOffset(double x, double y);
 
     RefPtr<XComponentDelegate> delegate_;
     RefPtr<XComponentTaskPool> pool_;
@@ -92,6 +100,7 @@ protected:
     WeakPtr<NativeXComponentImpl> nativeXComponentImpl_;
     XComponentSizeInitEvent xcomponentSizeInitEvent_;
     XComponentSizeChangeEvent xcomponentSizeChangeEvent_;
+    XComponentPositionChangeEvent xcomponentPositionChangeEvent_;
 
     Offset position_;
     Size drawSize_;
