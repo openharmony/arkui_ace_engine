@@ -460,7 +460,9 @@ void PipelineBase::PrepareCloseImplicitAnimation()
     if (pendingImplicitLayout_.top()) {
         FlushUITasks();
     }
-    pendingImplicitLayout_.pop();
+    if (!pendingImplicitLayout_.empty()) {
+        pendingImplicitLayout_.pop();
+    }
 #endif
 }
 
