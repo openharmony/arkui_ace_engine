@@ -1695,7 +1695,8 @@ function Observed(target) {
     // the new constructor behaviour
     var f = function (...args) {
         
-        return new ObservedObject(new original(...args), undefined);
+        return ObservedObject.createNew(new original(...args), undefined);
+        //    return new ObservedObject<C>(new original(...args), undefined);
     };
     Object.setPrototypeOf(f, Object.getPrototypeOf(original));
     // return new constructor (will override original)
