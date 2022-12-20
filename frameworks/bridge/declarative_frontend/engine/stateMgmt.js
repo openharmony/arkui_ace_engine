@@ -3919,15 +3919,15 @@ class ViewPU extends NativeViewPartialUpdate {
         });
     }
     /**
-       * CreateStorageLink and CreateStorageLinkPU are used by the implementation of @StorageLink and
-       * @LocalStotrageLink in full update and partial update solution respectively.
-       * These are not part of the public AppStorage API , apps should not use.
-       * @param storagePropName - key in LocalStorage
-       * @param defaultValue - value to use when creating a new prop in the LocalStotage
-       * @param owningView - the View/ViewPU owning the @StorageLink/@LocalStorageLink variable
-       * @param viewVariableName -  @StorageLink/@LocalStorageLink variable name
-       * @returns SynchedPropertySimple/ObjectTwoWay/PU
-       */
+     * CreateStorageLink and CreateStorageLinkPU are used by the implementation of @StorageLink and
+     * @LocalStotrageLink in full update and partial update solution respectively.
+     * These are not part of the public AppStorage API , apps should not use.
+     * @param storagePropName - key in LocalStorage
+     * @param defaultValue - value to use when creating a new prop in the LocalStotage
+     * @param owningView - the View/ViewPU owning the @StorageLink/@LocalStorageLink variable
+     * @param viewVariableName -  @StorageLink/@LocalStorageLink variable name
+     * @returns SynchedPropertySimple/ObjectTwoWay/PU
+     */
     createStorageLink(storagePropName, defaultValue, viewVariableName) {
         return AppStorage.__CreateSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
@@ -3961,6 +3961,64 @@ class ViewPU extends NativeViewPartialUpdate {
 ViewPU.compareNumber = (a, b) => {
     return (a < b) ? -1 : (a > b) ? 1 : 0;
 };
+/**
+    given parameters for calling a @Builder function
+    this function wraps the Object of type T inside a ES6 Proxy.
+    Each param, i.e. Object property is either a function or a value.
+    If it is a function the function can either return a value of expected
+    parameter type or an ObservedPropertyabstract<T> where T is the exected
+    parameter type. The latter is the case when passing a state variable by
+    reference.
+
+    Two purposes:
+    1 - @Builder function boxy accesses params a '$$.paramA'
+        However paramA can be a function, so to obtain the value the
+        access would need to be '$$.param()' The proxy executes
+        the function and return s the result
+    2 - said function returns to ObservedPropertyAbstract backing store of
+        a calling @Component state variable (whenever the state var is
+        provided to the @Builder function). For this case the proxy can provide
+        - the value by executing paramA() to return the ObservedPropertyAbstract
+          and further (monitored!) get() to read its value
+        - when requested to return '__param1' it returns the ObservedPropertyAbstract
+          object. The scenario is to use to init a @Link source.
+  */
+function makeBuilderParameterProxy(builderName, source) {
+    return new Proxy(source, {
+        set(target, prop, val) {
+            throw Error(`@Builder '${builderName}': Invalid attempt to set(write to) parameter '${prop.toString()}' error!`);
+        },
+        get(target, prop) {
+            const prop1 = prop.toString().trim().startsWith("__")
+                ? prop.toString().trim().substring(2)
+                : prop.toString().trim();
+            
+            if (!(typeof target === "object") && (prop1 in target)) {
+                throw Error(`@Builder '${builderName}': '${prop1}' used but not a function parameter error!`);
+            }
+            const value = target[prop1];
+            if (typeof value !== "function") {
+                
+                return value;
+            }
+            const funcRet = value();
+            if ((typeof funcRet === "object") && ('get' in funcRet)) {
+                if (prop1 !== prop) {
+                    
+                    return funcRet;
+                }
+                else {
+                    
+                    const result = funcRet.get();
+                    
+                    return result;
+                }
+            }
+            
+            return funcRet;
+        } // get
+    }); // new Proxy
+}
 /*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
