@@ -140,6 +140,7 @@ void TimePickerColumnPattern::ChangeAmPmTextStyle(
         textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
         textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateFontSize(selectedOptionSize);
+        textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
     }
     if (index == 0 && showOptionCount == CHILD_SIZE) {
@@ -176,6 +177,7 @@ void TimePickerColumnPattern::ChangeTextStyle(
     }
     if (index == selectedIndex && showOptionCount != CHILD_SIZE) {
         textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+        textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
         textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateFontSize(selectedOptionSize);
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);

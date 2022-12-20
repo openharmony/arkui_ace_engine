@@ -159,6 +159,7 @@ void TextPickerPattern::FlushCurrentOptions()
         }
         if (index == middleIndex) {
             textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+            textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
             textLayoutProperty->UpdateMaxLines(1);
             textLayoutProperty->UpdateAlignment(Alignment::CENTER);
             textLayoutProperty->UpdateFontSize(selectedOptionSize);
