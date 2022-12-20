@@ -129,6 +129,7 @@ void DatePickerColumnPattern::FlushCurrentOptions()
             textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
             textLayoutProperty->UpdateMaxLines(1);
             textLayoutProperty->UpdateFontSize(selectedOptionSize);
+            textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
             textLayoutProperty->UpdateAlignment(Alignment::CENTER);
         }
         if (index > middleIndex) {
