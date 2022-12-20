@@ -187,29 +187,35 @@ void RenderRefresh::CalcLoadingParams(const RefPtr<Component>& component)
 void RenderRefresh::Initialize()
 {
     LOGI("RenderRefresh Initialize state:%{public}d", refreshing_);
-    dragDetector_ = AceType::MakeRefPtr<VerticalDragRecognizer>();
-    dragDetector_->SetOnDragUpdate([weakFresh = AceType::WeakClaim(this)](const DragUpdateInfo& info) {
-        auto refresh = weakFresh.Upgrade();
-        if (refresh) {
-            refresh->HandleDragUpdate(info.GetMainDelta());
-        }
-    });
-    dragDetector_->SetOnDragEnd([weakFresh = AceType::WeakClaim(this)](const DragEndInfo& info) {
-        auto refresh = weakFresh.Upgrade();
-        if (refresh) {
-            refresh->HandleDragEnd();
-        }
-    });
+    if (!dragDetector_) {
+        dragDetector_ = AceType::MakeRefPtr<VerticalDragRecognizer>();
+        dragDetector_->SetOnDragUpdate([weakFresh = AceType::WeakClaim(this)](const DragUpdateInfo& info) {
+            auto refresh = weakFresh.Upgrade();
+            if (refresh) {
+                refresh->HandleDragUpdate(info.GetMainDelta());
+            }
+        });
+        dragDetector_->SetOnDragEnd([weakFresh = AceType::WeakClaim(this)](const DragEndInfo& info) {
+            auto refresh = weakFresh.Upgrade();
+            if (refresh) {
+                refresh->HandleDragEnd();
+            }
+        });
 
-    dragDetector_->SetOnDragCancel([weakFresh = AceType::WeakClaim(this)]() {
-        auto refresh = weakFresh.Upgrade();
-        if (refresh) {
-            refresh->HandleDragCancel();
-        }
-    });
-    animator_ = AceType::MakeRefPtr<Animator>(GetContext());
-    refreshController_ = AceType::MakeRefPtr<RefreshController>();
-    refreshController_->SetRefresh(AceType::WeakClaim(this));
+        dragDetector_->SetOnDragCancel([weakFresh = AceType::WeakClaim(this)]() {
+            auto refresh = weakFresh.Upgrade();
+            if (refresh) {
+                refresh->HandleDragCancel();
+            }
+        });
+    }
+    if (!animator_) {
+        animator_ = AceType::MakeRefPtr<Animator>(GetContext());
+    }
+    if (!refreshController_) {
+        refreshController_ = AceType::MakeRefPtr<RefreshController>();
+        refreshController_->SetRefresh(AceType::WeakClaim(this));
+    }
     InitAccessibilityEventListener();
 }
 
@@ -339,7 +345,6 @@ void RenderRefresh::StartAnimation(double start, double end, bool isFinished)
     }));
     animator_->SetDuration(ANIMATION_DURATION);
     animator_->AddInterpolator(translate_);
-
     animator_->AddStopListener([weak, isFinished]() {
         auto refresh = weak.Upgrade();
         if (refresh) {
@@ -350,12 +355,13 @@ void RenderRefresh::StartAnimation(double start, double end, bool isFinished)
     animator_->Play();
 }
 
-void RenderRefresh::HandleStopListener(bool isFinished)
+void RenderRefresh::HandleStopListener(const bool isFinished)
 {
     // Update the last loading time
     if (isFinished) {
         timeComponent_->SetData(timeText_);
         time_->Update(timeComponent_);
+        return;
     }
     if (NearEqual(scrollableOffset_.GetY(), triggerRefreshDistance_)) {
         if (refreshing_) {
@@ -623,7 +629,6 @@ void RenderRefresh::PerformLayout()
 
     display_->UpdateOpacity(GetOpacity() * MAX_ALPHA);
     display_->SetPosition(GetShowTimeOffset());
-
     loadingBox_->SetHidden(scrollableOffset_.GetY() < triggerLoadingDistance_);
     loadingBox_->SetVisible(scrollableOffset_.GetY() > triggerLoadingDistance_);
 
