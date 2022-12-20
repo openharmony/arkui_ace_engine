@@ -306,6 +306,14 @@ void RenderXComponent::Paint(RenderContext& context, const Offset& offset)
     RenderNode::Paint(context, offset);
 }
 
+void RenderXComponent::OnGlobalPositionChanged()
+{
+    if (SystemProperties::GetExtSurfaceEnabled() && xcomponentPositionChangeEvent_) {
+        position_ = GetGlobalOffset();
+        xcomponentPositionChangeEvent_(position_.GetX(), position_.GetY());
+    }
+}
+
 void RenderXComponent::NativeXComponentInit(
     OH_NativeXComponent* nativeXComponent, WeakPtr<NativeXComponentImpl> nativeXComponentImpl)
 {
