@@ -201,6 +201,12 @@ public:
     std::string GetUnfilteredLinkUrl() const override;
     std::string GetSourceUrl() const override;
     bool HasImageContents() const override;
+    bool IsEditable() const override;
+    int GetEditStateFlags() const override;
+    int GetSourceType() const override;
+    int GetMediaType() const override;
+    int GetInputFieldType() const override;
+    std::string GetSelectionText() const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param_;
@@ -214,6 +220,10 @@ public:
 
     void Cancel() const override;
     void CopyImage() const override;
+    void Copy() const override;
+    void Paste() const override;
+    void Cut() const override;
+    void SelectAll() const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback_;

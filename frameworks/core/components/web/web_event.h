@@ -1021,6 +1021,12 @@ public:
     virtual std::string GetUnfilteredLinkUrl() const = 0;
     virtual std::string GetSourceUrl() const = 0;
     virtual bool HasImageContents() const = 0;
+    virtual bool IsEditable() const = 0;
+    virtual int GetEditStateFlags() const = 0;
+    virtual int GetSourceType() const = 0;
+    virtual int GetMediaType() const = 0;
+    virtual int GetInputFieldType() const = 0;
+    virtual std::string GetSelectionText() const = 0;
 };
 
 class ACE_EXPORT ContextMenuResult : public AceType {
@@ -1032,6 +1038,10 @@ public:
 
     virtual void Cancel() const = 0;
     virtual void CopyImage() const = 0;
+    virtual void Copy() const = 0;
+    virtual void Paste() const = 0;
+    virtual void Cut() const = 0;
+    virtual void SelectAll() const = 0;
 };
 
 class ACE_EXPORT ContextMenuEvent : public BaseEventInfo {
