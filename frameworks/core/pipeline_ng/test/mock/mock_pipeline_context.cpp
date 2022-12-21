@@ -214,4 +214,6 @@ const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
     return overlayManager_;
 }
 void PipelineContext::AddPredictTask(PredictTask&& task) {}
+
+void PipelineContext::FlushPipelineImmediately() {}
 } // namespace OHOS::Ace::NG
