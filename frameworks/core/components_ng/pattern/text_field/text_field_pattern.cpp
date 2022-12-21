@@ -655,6 +655,66 @@ void TextFieldPattern::HandleFocusEvent()
                                                                                       : PROPERTY_UPDATE_MEASURE);
 }
 
+void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end)
+{
+    LOGI("HandleSetSelection %{public}d, %{public}d", start, end);
+    UpdateSelection(start, end);
+}
+
+void TextFieldPattern::HandleExtendAction(int32_t action)
+{
+    LOGI("HandleExtendAction %{public}d", action);
+    switch (action) {
+        case ACTION_SELECT_ALL: {
+            auto end = GetEditingValue().GetWideText().length();
+            UpdateSelection(0, static_cast<int32_t>(end));
+            break;
+        }
+        case ACTION_CUT: {
+            HandleOnCut();
+            break;
+        }
+        case ACTION_COPY: {
+            HandleOnCopy();
+            break;
+        }
+        case ACTION_PASTE: {
+            HandleOnPaste();
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void TextFieldPattern::HandleSelect(int32_t keyCode, int32_t cursorMoveSkip)
+{
+    KeyCode code = static_cast<KeyCode>(keyCode);
+    switch (code) {
+        case KeyCode::KEY_DPAD_LEFT: {
+            HandleSelectionLeft();
+            break;
+        }
+        case KeyCode::KEY_DPAD_RIGHT: {
+            HandleSelectionRight();
+            break;
+        }
+        case KeyCode::KEY_DPAD_UP: {
+            HandleSelectionUp();
+            break;
+        }
+        case KeyCode::KEY_DPAD_DOWN: {
+            HandleSelectionDown();
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+
 void TextFieldPattern::InitFocusEvent()
 {
     CHECK_NULL_VOID_NOLOG(!focusEventInitialized_);
@@ -1599,7 +1659,10 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             LOGI("RequestKeyboard set calling window id is : %{public}d", context->GetWindowId());
             inputMethod->SetCallingWindow(context->GetWindowId());
         }
-        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard);
+        MiscServices::InputAttribute inputAttribute;
+        inputAttribute.inputPattern = (int32_t)keyboard_;
+        inputAttribute.enterKeyType = (int32_t)GetTextInputActionValue(TextInputAction::DONE);
+        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, inputAttribute);
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         imeAttached_ = true;
 #endif

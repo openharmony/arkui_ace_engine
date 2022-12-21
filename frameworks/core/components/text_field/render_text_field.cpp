@@ -1090,7 +1090,10 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
             LOGI("RequestKeyboard set calling window id is : %{public}d", context->GetWindowId());
             inputMethod->SetCallingWindow(context->GetWindowId());
         }
-        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard);
+        MiscServices::InputAttribute inputAttribute;
+        inputAttribute.inputPattern = (int32_t)keyboard_;
+        inputAttribute.enterKeyType = (int32_t)action_;
+        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, inputAttribute);
 #else
         if (!HasConnection()) {
             AttachIme();
@@ -1203,6 +1206,54 @@ void RenderTextField::StopTwinkling()
         cursorVisibility_ = false;
         MarkNeedRender();
     }
+}
+
+void RenderTextField::HandleSetSelection(int32_t start, int32_t end)
+{
+    LOGI("HandleSetSelection %{public}d, %{public}d", start, end);
+    UpdateSelection(start, end);
+}
+
+void RenderTextField::HandleExtendAction(int32_t action)
+{
+    LOGI("HandleExtendAction %{public}d", action);
+    switch (action) {
+        case ACTION_SELECT_ALL: {
+            auto end = GetEditingValue().GetWideText().length();
+            UpdateSelection(0, end);
+            break;
+        }
+        case ACTION_UNDO: {
+            HandleOnRevoke();
+            break;
+        }
+        case ACTION_REDO: {
+            HandleOnInverseRevoke();
+            break;
+        }
+        case ACTION_CUT: {
+            HandleOnCut();
+            break;
+        }
+        case ACTION_COPY: {
+            HandleOnCopy();
+            break;
+        }
+        case ACTION_PASTE: {
+            HandleOnPaste();
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void RenderTextField::HandleSelect(int32_t keyCode, int32_t cursorMoveSkip)
+{
+    KeyCode code = static_cast<KeyCode>(keyCode);
+    CursorMoveSkip skip = static_cast<CursorMoveSkip>(cursorMoveSkip);
+    HandleOnSelect(code, skip);
 }
 
 const TextEditingValue& RenderTextField::GetEditingValue() const
