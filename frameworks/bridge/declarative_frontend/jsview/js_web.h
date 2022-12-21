@@ -113,6 +113,7 @@ public:
     static void DefaultFixedFontSize(int32_t defaultFixedFontSize);
     static void DefaultFontSize(int32_t defaultFontSize);
     static void MinFontSize(int32_t minFontSize);
+    static void MinLogicalFontSize(int32_t minLogicalFontSize);
     static void BlockNetwork(bool isNetworkBlocked);
     static void OnPageVisible(const JSCallbackInfo& args);
     static void OnInterceptKeyEvent(const JSCallbackInfo& args);

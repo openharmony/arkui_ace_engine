@@ -403,6 +403,7 @@ public:
     void UpdateDefaultFixedFontSize(int32_t size);
     void UpdateDefaultFontSize(int32_t defaultFontSize);
     void UpdateMinFontSize(int32_t minFontSize);
+    void UpdateMinLogicalFontSize(int32_t minLogicalFontSize);
     void UpdateBlockNetwork(bool isNetworkBlocked);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);

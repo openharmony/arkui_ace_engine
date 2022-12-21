@@ -2782,6 +2782,25 @@ void WebDelegate::UpdateMinFontSize(int32_t minFontSize)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdateMinLogicalFontSize(int32_t minLogicalFontSize)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), minLogicalFontSize]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutLogicalFontSizeLowerLimit(minLogicalFontSize);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::UpdateBlockNetwork(bool isNetworkBlocked)
 {
     auto context = context_.Upgrade();
