@@ -272,6 +272,10 @@ void RenderRefresh::HandleDragUpdate(double delta)
 void RenderRefresh::HandleDragEnd()
 {
     LOGD("RenderRefresh HandleDragEnd");
+    if (NearEqual(scrollableOffset_.GetY(), 0.0f)) {
+        ResetStatus();
+        return;
+    }
     if (refreshStatus_ == RefreshStatus::INACTIVE) {
         return;
     }
@@ -292,6 +296,11 @@ void RenderRefresh::HandleDragEnd()
 void RenderRefresh::HandleDragCancel()
 {
     LOGD("RenderRefresh HandleDragCancel");
+    ResetStatus();
+}
+
+void RenderRefresh::ResetStatus()
+{
     refreshing_ = false;
     if (changeEvent_) {
         changeEvent_("false");
@@ -363,6 +372,7 @@ void RenderRefresh::HandleStopListener(const bool isFinished)
         time_->Update(timeComponent_);
         return;
     }
+
     if (NearEqual(scrollableOffset_.GetY(), triggerRefreshDistance_)) {
         if (refreshing_) {
             loading_->SetLoadingMode(MODE_LOOP);
@@ -372,6 +382,8 @@ void RenderRefresh::HandleStopListener(const bool isFinished)
             changeEvent_("true");
         }
         FireRefreshEvent();
+    } else if (NearEqual(scrollableOffset_.GetY(), 0.0f)) {
+        ResetStatus();
     } else {
         loading_->SetLoadingMode(MODE_DRAG);
     }
@@ -587,15 +599,7 @@ void RenderRefresh::OnHiddenChanged(bool hidden)
     if (hidden) {
         return;
     }
-    refreshing_ = false;
-    if (changeEvent_) {
-        changeEvent_("false");
-    }
-    refreshStatus_ = RefreshStatus::INACTIVE;
-    scrollableOffset_.Reset();
-    loading_->SetLoadingMode(MODE_DRAG);
-    loading_->SetDragDistance(scrollableOffset_.GetY());
-    MarkNeedLayout();
+    ResetStatus();
 }
 
 void RenderRefresh::PerformLayout()
