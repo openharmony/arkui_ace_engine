@@ -759,6 +759,13 @@ void WebPattern::OnMinFontSizeUpdate(int32_t value)
     }
 }
 
+void WebPattern::OnMinLogicalFontSizeUpdate(int32_t value)
+{
+    if (delegate_) {
+        delegate_->UpdateMinLogicalFontSize(value);
+    }
+}
+
 void WebPattern::OnBlockNetworkUpdate(bool value)
 {
     if (delegate_) {
@@ -825,6 +832,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateDefaultFixedFontSize(GetDefaultFixedFontSizeValue(DEFAULT_FIXED_FONT_SIZE));
         delegate_->UpdateDefaultFontSize(GetDefaultFontSizeValue(DEFAULT_FONT_SIZE));
         delegate_->UpdateMinFontSize(GetMinFontSizeValue(DEFAULT_MINIMUM_FONT_SIZE));
+        delegate_->UpdateMinLogicalFontSize(GetMinLogicalFontSizeValue(DEFAULT_MINIMUM_LOGICAL_FONT_SIZE));
         if (GetBlockNetwork()) {
             delegate_->UpdateBlockNetwork(GetBlockNetwork().value());
         }

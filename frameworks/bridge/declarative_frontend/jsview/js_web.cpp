@@ -1355,6 +1355,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("defaultFixedFontSize", &JSWeb::DefaultFixedFontSize);
     JSClass<JSWeb>::StaticMethod("defaultFontSize", &JSWeb::DefaultFontSize);
     JSClass<JSWeb>::StaticMethod("minFontSize", &JSWeb::MinFontSize);
+    JSClass<JSWeb>::StaticMethod("minLogicalFontSize", &JSWeb::MinLogicalFontSize);
     JSClass<JSWeb>::StaticMethod("blockNetwork", &JSWeb::BlockNetwork);
     JSClass<JSWeb>::StaticMethod("onPageVisible", &JSWeb::OnPageVisible);
     JSClass<JSWeb>::StaticMethod("onInterceptKeyEvent", &JSWeb::OnInterceptKeyEvent);
@@ -3639,6 +3640,14 @@ void JSWeb::MinFontSize(int32_t minFontSize)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         NG::WebView::SetMinFontSize(minFontSize);
+        return;
+    }
+}
+
+void JSWeb::MinLogicalFontSize(int32_t minLogicalFontSize)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetMinLogicalFontSize(minLogicalFontSize);
         return;
     }
 }

@@ -51,6 +51,7 @@ constexpr int32_t DEFAULT_TEXT_ZOOM_RATIO = 100;
 constexpr int32_t DEFAULT_FIXED_FONT_SIZE = 13;
 constexpr int32_t DEFAULT_FONT_SIZE = 16;
 constexpr int32_t DEFAULT_MINIMUM_FONT_SIZE = 8;
+constexpr int32_t DEFAULT_MINIMUM_LOGICAL_FONT_SIZE = 8;
 const std::string DEFAULT_CURSIVE_FONT_FAMILY = "cursive";
 const std::string DEFAULT_FANTASY_FONT_FAMILY = "fantasy";
 const std::string DEFAULT_FIXED_fONT_FAMILY = "monospace";

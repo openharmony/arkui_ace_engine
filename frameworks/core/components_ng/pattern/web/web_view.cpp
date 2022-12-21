@@ -517,6 +517,13 @@ void WebView::SetMinFontSize(int32_t minFontSize)
     webPattern->UpdateMinFontSize(minFontSize);
 }
 
+void WebView::SetMinLogicalFontSize(int32_t minLogicalFontSize)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateMinLogicalFontSize(minLogicalFontSize);
+}
+
 void WebView::SetBlockNetwork(bool isNetworkBlocked)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();

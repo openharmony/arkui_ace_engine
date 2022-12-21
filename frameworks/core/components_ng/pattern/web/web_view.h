@@ -97,6 +97,7 @@ public:
     static void SetDefaultFixedFontSize(int32_t defaultFixedFontSize);
     static void SetDefaultFontSize(int32_t defaultFontSize);
     static void SetMinFontSize(int32_t minFontSize);
+    static void SetMinLogicalFontSize(int32_t minLogicalFontSize);
     static void SetBlockNetwork(bool isNetworkBlocked);
     static void SetPageVisibleId(OnWebAsyncFunc&& pageVisibleId);
     static void SetOnInterceptKeyEventCallback(std::function<bool(KeyEventInfo& keyEventInfo)>&& onPreKeyEventId);
