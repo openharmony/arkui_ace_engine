@@ -201,7 +201,6 @@ void DragWindowOhos::DrawPixelMap(const RefPtr<PixelMap>& pixelmap)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(pixelmap);
-    auto rect = dragWindow_->GetRequestRect();
     auto surfaceNode = dragWindow_->GetSurfaceNode();
     rsUiDirector_ = Rosen::RSUIDirector::Create();
     rsUiDirector_->Init();
@@ -211,12 +210,12 @@ void DragWindowOhos::DrawPixelMap(const RefPtr<PixelMap>& pixelmap)
     }
     rsUiDirector_->SetRSSurfaceNode(surfaceNode);
     rootNode_ = Rosen::RSRootNode::Create();
-    rootNode_->SetBounds(0, 0, rect.width_, rect.height_);
-    rootNode_->SetFrame(0, 0, rect.width_, rect.height_);
+    rootNode_->SetBounds(0, 0, static_cast<float>(width_), static_cast<float>(height_));
+    rootNode_->SetFrame(0, 0, static_cast<float>(width_), static_cast<float>(height_));
     rsUiDirector_->SetRoot(rootNode_->GetId());
     auto canvasNode = std::static_pointer_cast<Rosen::RSCanvasNode>(rootNode_);
-    auto skia = canvasNode->BeginRecording(rect.width_, rect.height_);
-    DrawSkImage(skia, pixelmap, rect.width_, rect.height_);
+    auto skia = canvasNode->BeginRecording(width_, height_);
+    DrawSkImage(skia, pixelmap, width_, height_);
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
 #endif
@@ -231,7 +230,6 @@ void DragWindowOhos::DrawImage(void* skImage)
     CHECK_NULL_VOID(canvasImagePtr);
     fml::RefPtr<flutter::CanvasImage> canvasImage = *canvasImagePtr;
     CHECK_NULL_VOID(canvasImage);
-    auto rect = dragWindow_->GetRect();
     auto surfaceNode = dragWindow_->GetSurfaceNode();
     rsUiDirector_ = Rosen::RSUIDirector::Create();
     rsUiDirector_->Init();
@@ -241,12 +239,12 @@ void DragWindowOhos::DrawImage(void* skImage)
     }
     rsUiDirector_->SetRSSurfaceNode(surfaceNode);
     rootNode_ = Rosen::RSRootNode::Create();
-    rootNode_->SetBounds(0, 0, rect.width_, rect.height_);
-    rootNode_->SetFrame(0, 0, rect.width_, rect.height_);
+    rootNode_->SetBounds(0, 0, static_cast<float>(width_), static_cast<float>(height_));
+    rootNode_->SetFrame(0, 0, static_cast<float>(width_), static_cast<float>(height_));
     rsUiDirector_->SetRoot(rootNode_->GetId());
     auto canvasNode = std::static_pointer_cast<Rosen::RSCanvasNode>(rootNode_);
-    auto skia = canvasNode->BeginRecording(rect.width_, rect.height_);
-    DrawSkImage(skia, canvasImage->image(), rect.width_, rect.height_);
+    auto skia = canvasNode->BeginRecording(width_, height_);
+    DrawSkImage(skia, canvasImage->image(), width_, height_);
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
 #endif
@@ -257,7 +255,6 @@ void DragWindowOhos::DrawText(std::shared_ptr<txt::Paragraph> paragraph,
 {
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(paragraph);
-    auto rect = dragWindow_->GetRect();
     auto surfaceNode = dragWindow_->GetSurfaceNode();
     rsUiDirector_ = Rosen::RSUIDirector::Create();
     rsUiDirector_->Init();
@@ -267,8 +264,8 @@ void DragWindowOhos::DrawText(std::shared_ptr<txt::Paragraph> paragraph,
     }
     rsUiDirector_->SetRSSurfaceNode(surfaceNode);
     rootNode_ = Rosen::RSRootNode::Create();
-    rootNode_->SetBounds(0, 0, rect.width_, rect.height_);
-    rootNode_->SetFrame(0, 0, rect.width_, rect.height_);
+    rootNode_->SetBounds(0, 0, static_cast<float>(width_), static_cast<float>(height_));
+    rootNode_->SetFrame(0, 0, static_cast<float>(width_), static_cast<float>(height_));
     rsUiDirector_->SetRoot(rootNode_->GetId());
     auto canvasNode = std::static_pointer_cast<Rosen::RSCanvasNode>(rootNode_);
     SkPath path;
@@ -305,7 +302,7 @@ void DragWindowOhos::DrawText(std::shared_ptr<txt::Paragraph> paragraph,
     }
     rootNode_->SetClipToBounds(true);
     rootNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(path));
-    auto skia = canvasNode->BeginRecording(rect.width_, rect.height_);
+    auto skia = canvasNode->BeginRecording(width_, height_);
     paragraph->Paint(skia, 0, 0);
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
