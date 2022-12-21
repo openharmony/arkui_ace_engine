@@ -745,13 +745,15 @@ void TextFieldPattern::InitFocusEvent()
 
 void TextFieldPattern::HandleBlurEvent()
 {
-    LOGI("TextField %{public}d OnBlur", GetHost()->GetId());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    LOGI("TextField %{public}d OnBlur", host->GetId());
     StopTwinkling();
     CloseKeyboard(true);
     auto pos = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     UpdateSelection(pos, pos);
     selectionMode_ = SelectionMode::NONE;
-    auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnEditChanged(false);
     CloseSelectOverlay();
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

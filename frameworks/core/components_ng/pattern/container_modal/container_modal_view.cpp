@@ -140,6 +140,10 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
     ImageSourceInfo imageSourceInfo;
     auto titleIcon = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto titleFocus = titleIcon->GetFocusHub();
+    if (titleFocus) {
+        titleFocus->SetFocusable(false);
+    }
     imageSourceInfo.SetSrc(themeConstants->GetMediaPath(pipeline->GetWindowManager()->GetAppIconId()));
     auto imageLayoutProperty = titleIcon->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
@@ -223,6 +227,10 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     ImageSourceInfo imageSourceInfo;
     auto imageIcon = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto imageFocus = imageIcon->GetFocusHub();
+    if (imageFocus) {
+        imageFocus->SetFocusable(false);
+    }
     imageSourceInfo.SetResourceId(icon);
     auto imageLayoutProperty = imageIcon->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
@@ -232,6 +240,10 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
 
     auto buttonNode = FrameNode::CreateFrameNode(
         V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    auto buttonFocus = buttonNode->GetFocusHub();
+    if (buttonFocus) {
+        buttonFocus->SetFocusable(false);
+    }
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(TITLE_BUTTON_BACKGROUND_COLOR);

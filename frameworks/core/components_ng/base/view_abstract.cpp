@@ -433,67 +433,69 @@ void ViewAbstract::SetHoverEffect(HoverEffectType hoverEffect)
 void ViewAbstract::SetEnabled(bool enabled)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetEnabled(enabled);
+    if (eventHub) {
+        eventHub->SetEnabled(enabled);
+    }
 
     // The SetEnabled of focusHub must be after at eventHub
     auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->SetEnabled(enabled);
+    if (focusHub) {
+        focusHub->SetEnabled(enabled);
+    }
 }
 
 void ViewAbstract::SetFocusable(bool focusable)
 {
-    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusable(focusable);
 }
 
 void ViewAbstract::SetOnFocus(OnFocusFunc&& onFocusCallback)
 {
-    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetOnFocusCallback(std::move(onFocusCallback));
 }
 
 void ViewAbstract::SetOnBlur(OnBlurFunc&& onBlurCallback)
 {
-    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetOnBlurCallback(std::move(onBlurCallback));
 }
 
 void ViewAbstract::SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback)
 {
-    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetOnKeyCallback(std::move(onKeyCallback));
 }
 
 void ViewAbstract::SetTabIndex(int32_t index)
 {
-    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetTabIndex(index);
 }
 
 void ViewAbstract::SetFocusOnTouch(bool isSet)
 {
-    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetIsFocusOnTouch(isSet);
 }
 
 void ViewAbstract::SetDefaultFocus(bool isSet)
 {
-    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetIsDefaultFocus(isSet);
 }
 
 void ViewAbstract::SetGroupDefaultFocus(bool isSet)
 {
-    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetIsDefaultGroupFocus(isSet);
 }

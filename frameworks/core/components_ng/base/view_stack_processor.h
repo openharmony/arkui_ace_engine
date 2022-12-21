@@ -106,13 +106,22 @@ public:
         return frameNode->GetOrCreateInputEventHub();
     }
 
-    RefPtr<FocusHub> GetMainFrameNodeFocusHub() const
+    RefPtr<FocusHub> GetOrCreateMainFrameNodeFocusHub() const
     {
         auto frameNode = GetMainFrameNode();
         if (!frameNode) {
             return nullptr;
         }
         return frameNode->GetOrCreateFocusHub();
+    }
+
+    RefPtr<FocusHub> GetMainFrameNodeFocusHub() const
+    {
+        auto frameNode = GetMainFrameNode();
+        if (!frameNode) {
+            return nullptr;
+        }
+        return frameNode->GetFocusHub();
     }
 
     RefPtr<FrameNode> GetMainFrameNode() const;
