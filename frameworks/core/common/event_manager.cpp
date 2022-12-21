@@ -309,13 +309,13 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
 }
 
 bool EventManager::DispatchTabIndexEvent(
-    const KeyEvent& event, const RefPtr<FocusNode>& focusNode, const RefPtr<FocusGroup>& curPage)
+    const KeyEvent& event, const RefPtr<FocusNode>& focusNode, const RefPtr<FocusGroup>& mainNode)
 {
-    CHECK_NULL_RETURN(focusNode, false);
-    CHECK_NULL_RETURN(curPage, false);
     LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
         event.action, event.repeatTime);
-    if (focusNode->HandleFocusByTabIndex(event, curPage)) {
+    CHECK_NULL_RETURN(focusNode, false);
+    CHECK_NULL_RETURN(mainNode, false);
+    if (focusNode->HandleFocusByTabIndex(event, mainNode)) {
         LOGI("Tab index focus system handled this event");
         return true;
     }
@@ -336,17 +336,17 @@ bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNod
 }
 
 bool EventManager::DispatchTabIndexEventNG(
-    const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode, const RefPtr<NG::FrameNode>& curPage)
+    const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode, const RefPtr<NG::FrameNode>& mainNode)
 {
-    CHECK_NULL_RETURN(focusNode, false);
-    CHECK_NULL_RETURN(curPage, false);
     LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
         event.action, event.repeatTime);
+    CHECK_NULL_RETURN(focusNode, false);
+    CHECK_NULL_RETURN(mainNode, false);
     auto focusNodeHub = focusNode->GetFocusHub();
     CHECK_NULL_RETURN(focusNodeHub, false);
-    auto curPageFocusHub = curPage->GetFocusHub();
-    CHECK_NULL_RETURN(curPageFocusHub, false);
-    if (focusNodeHub->HandleFocusByTabIndex(event, curPageFocusHub)) {
+    auto mainNodeHub = mainNode->GetFocusHub();
+    CHECK_NULL_RETURN(mainNodeHub, false);
+    if (focusNodeHub->HandleFocusByTabIndex(event, mainNodeHub)) {
         LOGI("Tab index focus system handled this event");
         return true;
     }

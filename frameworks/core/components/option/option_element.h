@@ -22,8 +22,8 @@
 
 namespace OHOS::Ace {
 
-class OptionElement : public ComponentGroupElement, public FocusNode {
-    DECLARE_ACE_TYPE(OptionElement, ComponentGroupElement, FocusNode);
+class OptionElement : public ComponentGroupElement, public FocusGroup {
+    DECLARE_ACE_TYPE(OptionElement, ComponentGroupElement, FocusGroup);
 
 public:
     void PerformBuild() override;
@@ -33,6 +33,7 @@ protected:
     void OnFocus() override;
     void OnClick() override;
     void OnBlur() override;
+    bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
 };
 
 } // namespace OHOS::Ace

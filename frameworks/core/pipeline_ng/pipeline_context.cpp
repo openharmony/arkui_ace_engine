@@ -864,8 +864,9 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         return true;
     }
     auto lastPage = stageManager_->GetLastPage();
-    CHECK_NULL_RETURN(lastPage, false);
-    if (!eventManager_->DispatchTabIndexEventNG(event, rootNode_, lastPage)) {
+    auto mainNode = lastPage ? lastPage : rootNode_;
+    CHECK_NULL_RETURN(mainNode, false);
+    if (!eventManager_->DispatchTabIndexEventNG(event, rootNode_, mainNode)) {
         return eventManager_->DispatchKeyEventNG(event, rootNode_);
     }
     return true;
@@ -874,20 +875,27 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 bool PipelineContext::RequestDefaultFocus()
 {
     auto lastPage = stageManager_->GetLastPage();
-    CHECK_NULL_RETURN(lastPage, false);
-    auto lastPageFocusHub = lastPage->GetFocusHub();
-    CHECK_NULL_RETURN(lastPageFocusHub, false);
-    if (lastPageFocusHub->IsDefaultHasFocused()) {
+    auto mainNode = lastPage ? lastPage : rootNode_;
+    CHECK_NULL_RETURN(mainNode, false);
+    auto mainFocusHub = mainNode->GetFocusHub();
+    CHECK_NULL_RETURN(mainFocusHub, false);
+    if (mainFocusHub->IsDefaultHasFocused()) {
+        LOGD("RequestDefaultFocus: %{public}s/%{public}d 's default focus node has be focused.",
+            mainNode->GetTag().c_str(), mainNode->GetId());
         return false;
     }
-    auto defaultFocusNode = lastPageFocusHub->GetChildFocusNodeByType();
+    auto defaultFocusNode = mainFocusHub->GetChildFocusNodeByType();
     if (!defaultFocusNode) {
+        LOGD("RequestDefaultFocus: %{public}s/%{public}d do not has default focus node.",
+            mainNode->GetTag().c_str(), mainNode->GetId());
         return false;
     }
     if (!defaultFocusNode->IsFocusableWholePath()) {
+        LOGD("RequestDefaultFocus: %{public}s/%{public}d 's default focus node is not focusable.",
+            mainNode->GetTag().c_str(), mainNode->GetId());
         return false;
     }
-    lastPageFocusHub->SetIsDefaultHasFocused(true);
+    mainFocusHub->SetIsDefaultHasFocused(true);
     LOGD("Focus: request default focus node %{public}s", defaultFocusNode->GetFrameName().c_str());
     return defaultFocusNode->RequestFocusImmediately();
 }
