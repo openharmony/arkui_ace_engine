@@ -120,43 +120,58 @@ void JSForEach::GetIdArray(const JSCallbackInfo& info)
 }
 
 // Partial update / NG only
-// Gets idList as a input and stores it. Fill diffIndexArray with new indexes as an output.
+// Gets idList as a input and stores it.
+// Fill diffIds with new indexes as an output.
+// Fill duplicateIds with duplica IDs detected.
 // nodeId/elmtId : number
 // idList : string[]
-// diffIndexArray : number[]
+// diffIds : number[]
+// duplicateIds : number[]
 // no return value
 void JSForEach::SetIdArray(const JSCallbackInfo& info)
 {
-
     ACE_SCOPED_TRACE("JSForEach::SetIdArray");
-
-    if (info.Length() != 3 || !info[1]->IsArray() || !info[2]->IsArray() || !info[0]->IsNumber()) {
+    if (info.Length() != 4 ||
+        !info[0]->IsNumber() || !info[1]->IsArray() ||
+        !info[2]->IsArray()  || !info[3]->IsArray()) {
         LOGE("Invalid arguments for ForEach.SetIdArray");
         return;
     }
 
+    const auto elmtId = info[0]->ToNumber<int32_t>();
     JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[1]);
+    JSRef<JSArray> diffIds = JSRef<JSArray>::Cast(info[2]);
+    JSRef<JSArray> duplicateIds = JSRef<JSArray>::Cast(info[3]);
     std::list<std::string> newIdArr;
 
-    for (size_t i = 0; i < jsArr->Length(); i++) {
-        JSRef<JSVal> strId = jsArr->GetValueAt(i);
-        newIdArr.emplace_back(strId->ToString());
+    if (diffIds->Length() > 0 || duplicateIds->Length() > 0) {
+        LOGE("Invalid arguments for ForEach.SetIdArray output arrays must be empty!");
+        return;
     }
 
-    const auto elmtId = info[0]->ToNumber<int32_t>();
-    // Get old IDs. New ID are set in the end of this function.
-    std::list<std::string> previousIDList =  ForEachModel::GetInstance()->GetCurrentIdList(elmtId);
+    const std::list<std::string>& previousIDList = ForEachModel::GetInstance()->GetCurrentIdList(elmtId);
     std::unordered_set<std::string> oldIdsSet(previousIDList.begin(), previousIDList.end());
-    // Get reference to output diff index array.
-    JSRef<JSArray> diffIndexArray = JSRef<JSArray>::Cast(info[2]);
-    size_t index = 0;
+    std::unordered_set<std::string> newIds;
 
-    for (const auto& newId : newIdArr) {
-        if (oldIdsSet.find(newId) == oldIdsSet.end()) {
-            // Populate output diff array with this index that was not in old array.
-            diffIndexArray->SetValueAt(index, JSRef<JSVal>::Make(ToJSValue(index)));
+    size_t diffIndx = 0;
+    size_t duplicateIndx = 0;
+    for (size_t i = 0; i < jsArr->Length(); i++) {
+        JSRef<JSVal> strId = jsArr->GetValueAt(i);
+        // Save return value of insert to know was it duplicate...
+        std::pair<std::unordered_set<std::string>::iterator, bool> ret = newIds.insert(strId->ToString());
+
+        // Duplicate Id detected. Will return index of those to caller.
+        if (!ret.second) {
+            duplicateIds->SetValueAt(duplicateIndx++, JSRef<JSVal>::Make(ToJSValue(i)));
+        } else {
+            // ID was not duplicate. Accept it.
+            newIdArr.emplace_back(*ret.first);
+            // Check was ID previously available or totally new one.
+            if (oldIdsSet.find(*ret.first) == oldIdsSet.end()) {
+                // Populate output diff array with this index that was not in old array.
+                diffIds->SetValueAt(diffIndx++, JSRef<JSVal>::Make(ToJSValue(i)));
+            }
         }
-        index++;
     }
 
     ForEachModel::GetInstance()->SetNewIds(std::move(newIdArr));

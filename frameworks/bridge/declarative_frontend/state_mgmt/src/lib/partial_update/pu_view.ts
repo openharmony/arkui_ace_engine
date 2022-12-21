@@ -11,9 +11,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  *  * ViewPU - View for Partial Update
- *  
+ *
 * all definitions in this file are framework internal
 */
 
@@ -146,7 +146,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // its aboutToBeDeleted implementation
   protected aboutToBeDeletedInternal(): void {
     // When a custom component is deleted, need to notify the C++ side to clean the corresponding deletion cache Map,
-    // because after the deletion, can no longer clean the RemoveIds cache on the C++ side through the 
+    // because after the deletion, can no longer clean the RemoveIds cache on the C++ side through the
     // updateDirtyElements function.
     let removedElmtIds: number[] = [];
     this.updateFuncByElmtId.forEach((value: UpdateFunc, key: number) => {
@@ -174,7 +174,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
    * add given child and set 'this' as its parent
    * @param child child to add
    * @returns returns false if child with given child's id already exists
-   * 
+   *
    * framework internal function
    * Note: Use of WeakRef ensures child and parent do not generate a cycle dependency.
    * The add. Set<ids> is required to reliably tell what children still exist.
@@ -206,7 +206,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   /**
    * Retrieve child by given id
-   * @param id 
+   * @param id
    * @returns child if in map and weak ref can still be downreferenced
    */
   public getChildById(id: number) {
@@ -244,9 +244,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
   /**
    * force a complete rerender / update by executing all update functions
    * exec a regular rerender first
-   * 
+   *
    * @param deep recurse all children as well
-   * 
+   *
    * framework internal functions, apps must not call
    */
   public forceCompleteRerender(deep: boolean = false): void {
@@ -275,9 +275,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   /**
    * force a complete rerender / update on specific node by executing update function.
-   * 
+   *
    * @param elmtId which node needs to update.
-   * 
+   *
    * framework internal functions, apps must not call
    */
   public forceRerenderNode(elmtId: number): void {
@@ -332,7 +332,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       stateMgmtConsole.debug(`   .. calling @Watch function`);
       cb.call(this, varName);
     }
-  
+
     this.restoreInstanceId();
   }
 
@@ -507,6 +507,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
       let diffIndexArray = []; // New indexes compared to old one.
       let newIdArray = [];
+      let idDuplicates = [];
       const arr = itemArray; // just to trigger a 'get' onto the array
 
       // ID gen is with index.
@@ -525,10 +526,19 @@ abstract class ViewPU extends NativeViewPartialUpdate
         });
       }
 
-      // set new array on C++ side.
+      // Set new array on C++ side.
       // C++ returns array of indexes of newly added array items.
       // these are indexes in new child list.
-      ForEach.setIdArray(elmtId, newIdArray, diffIndexArray);
+      ForEach.setIdArray(elmtId, newIdArray, diffIndexArray, idDuplicates);
+
+      // Its error if there are duplicate IDs.
+      if (idDuplicates.length > 0) {
+        idDuplicates.forEach((indx) => {
+          stateMgmtConsole.error(`Error: Duplicate ID! Index: ${indx} Value: ${newIdArray[indx]} is already in use.`);
+        });
+        stateMgmtConsole.error(`Please make ID generation function of forEach return a unique ID for every array item.`);
+      }
+
       stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: diff indexes ${JSON.stringify(diffIndexArray)} . `);
 
       // Item gen is with index.
