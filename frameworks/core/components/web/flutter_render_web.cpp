@@ -84,7 +84,7 @@ void FlutterRenderWeb::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     if (delegate_) {
-        delegate_->SetBoundsOrRezise(drawSize_, delegate_->GetWebRenderGlobalPos());
+        delegate_->SetBoundsOrRezise(drawSize_, GetGlobalOffset());
     }
     RenderNode::Paint(context, offset);
 }
