@@ -27,7 +27,8 @@ constexpr double ANGLE_UNIT = 0.017453f; // PI / 180
 
 inline bool IsEqual(const double& left, const double& right)
 {
-    return NearEqual(left, right);
+    constexpr double epsilon = 0.0001;
+    return NearEqual(left, right, epsilon);
 }
 
 } // namespace
