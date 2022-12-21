@@ -291,8 +291,8 @@ bool TextFieldPattern::CaretPositionCloseToTouchPosition()
     auto fontSize = GetTextOrPlaceHolderFontSize();
     auto xInRange = GreatOrEqual(lastTouchOffset_.GetX(), caretRect_.GetX() - fontSize) &&
                     LessOrEqual(lastTouchOffset_.GetX(), caretRect_.GetX() + fontSize);
-    auto yInRange = GreatOrEqual(lastTouchOffset_.GetY(), caretRect_.GetY() + contentRect_.GetY()) &&
-                    LessOrEqual(lastTouchOffset_.GetY(), caretRect_.GetY() + contentRect_.GetY() + fontSize);
+    auto yInRange = GreatOrEqual(lastTouchOffset_.GetY(), caretRect_.GetY() - fontSize) &&
+                    LessOrEqual(lastTouchOffset_.GetY(), caretRect_.GetY() + fontSize * 2.0f);
     return xInRange && yInRange;
 }
 
@@ -418,6 +418,9 @@ void TextFieldPattern::UpdateSelectionOffset()
             isSingleHandle_ = false;
             ShowSelectOverlay(firstHandleOption, secondHandleOption);
         }
+        return;
+    }
+    if (caretUpdateType_ == CaretUpdateType::HANDLE_MOVE || caretUpdateType_ == CaretUpdateType::HANDLE_MOVE_DONE) {
         return;
     }
     textSelector_.selectionDestinationOffset.SetX(caretRect_.GetX());
