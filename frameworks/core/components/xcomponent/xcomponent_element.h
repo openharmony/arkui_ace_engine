@@ -27,6 +27,7 @@
 #include "foundation/window/window_manager/interfaces/innerkits/wm/window.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
+#include "surface_delegate.h"
 #include "surface_utils.h"
 #endif
 
@@ -54,6 +55,7 @@ private:
     void OnSurfaceInit(const std::string& componentId, const uint32_t nodeId);
     void OnXComponentSizeInit(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
     void OnXComponentSizeChange(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
+    void OnXComponentPositionChange(int32_t offsetX, int32_t offsetY);
 
     void CreatePlatformResource();
     void ReleasePlatformResource();
@@ -78,6 +80,9 @@ private:
 
     sptr<OHOS::Surface> producerSurface_ = nullptr;
     struct NativeWindow *nativeWindow_ = nullptr;
+    sptr<OHOS::SurfaceDelegate> surfaceDelegate_;
+    int32_t surfaceWidth_ = 0;
+    int32_t surfaceHeight_ = 0;
 #else
     void OnTextureRefresh();
 #endif
