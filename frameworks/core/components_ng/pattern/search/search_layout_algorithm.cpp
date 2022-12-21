@@ -146,7 +146,8 @@ void SearchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (searchButton.has_value() && !searchButton.value()->empty()) {
         textFieldWidth = idealSize.Width() - searchTheme->GetIconWidthOffset().ConvertToPx() - iconHeight -
                          searchTheme->GetIconTextFieldOffset().ConvertToPx() - cancelButtonWidth - buttonWidth -
-                         searchTheme->GetSearchDividerWidth() - 2 * searchTheme->GetDividerSideSpace().ConvertToPx();
+                         searchTheme->GetSearchDividerWidth().ConvertToPx() -
+                         2 * searchTheme->GetDividerSideSpace().ConvertToPx();
     } else {
         textFieldWidth = idealSize.Width() - searchTheme->GetIconWidthOffset().ConvertToPx() - iconHeight -
                          searchTheme->GetIconTextFieldOffset().ConvertToPx() - cancelButtonWidth - buttonWidth;
@@ -224,16 +225,16 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         // Layout CancelButton
         float cancelButtonVerticalOffset = (searchSize.Height() - cancelButtonFrameSize.Height()) / 2.0;
         auto cancelButtonOffsetToSearchButton = cancelButtonFrameSize.Width() +
-                                                searchTheme->GetDividerSideSpace().ConvertToPx() +
-                                                searchTheme->GetSearchDividerWidth();
+                                                2 * searchTheme->GetDividerSideSpace().ConvertToPx() +
+                                                searchTheme->GetSearchDividerWidth().ConvertToPx();
         OffsetF cancelButtonOffset = OffsetF(buttonOffset.GetX() - cancelButtonOffsetToSearchButton, 0.0);
         cancelButtonOffset += OffsetF(0.0, cancelButtonVerticalOffset);
         cancelButtonGeometryNode->SetMarginFrameOffset(cancelButtonOffset);
         cancelButtonWrapper->Layout();
         // Layout CancelImage
         float cancelImageVerticalOffset = (searchSize.Height() - iconHeight) / 2.0;
-        auto cancelImageOffsetToSearchButton =
-            iconHeight + searchTheme->GetDividerSideSpace().ConvertToPx() + searchTheme->GetSearchDividerWidth();
+        auto cancelImageOffsetToSearchButton = iconHeight + 2 * searchTheme->GetDividerSideSpace().ConvertToPx() +
+                                               searchTheme->GetSearchDividerWidth().ConvertToPx();
         auto cancelButtonImageCenterOffset = (cancelButtonFrameSize.Height() - iconHeight) / 2.0;
         OffsetF cancelImageOffset =
             OffsetF(buttonOffset.GetX() - cancelImageOffsetToSearchButton - cancelButtonImageCenterOffset, 0.0);
