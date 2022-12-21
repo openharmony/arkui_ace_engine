@@ -46,11 +46,6 @@ public:
         return MakeRefPtr<CustomPaintEventHub>();
     }
 
-    bool IsAtomicNode() const override
-    {
-        return false;
-    }
-
     void SetCanvasSize(std::optional<SizeF> canvasSize)
     {
         canvasSize_ = canvasSize;
