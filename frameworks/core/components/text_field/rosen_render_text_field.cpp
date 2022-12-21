@@ -258,8 +258,7 @@ void RosenRenderTextField::PaintSelection(SkCanvas* canvas) const
         return;
     }
     using namespace Constants;
-
-    if (!paragraph_ || (canvas == nullptr)) {
+    if (!paragraph_ || (canvas == nullptr) || !canPaintSelection_) {
         return;
     }
     const auto& selection = GetEditingValue().selection;
