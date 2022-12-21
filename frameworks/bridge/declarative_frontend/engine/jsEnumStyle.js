@@ -934,3 +934,26 @@ var SelectStatus;
   SelectStatus[SelectStatus["Part"] = 1] = "Part";
   SelectStatus[SelectStatus["None"] = 2] = "None";
 })(SelectStatus || (SelectStatus = {}));
+
+var ContextMenuSourceType;
+(function (ContextMenuSourceType) {
+  ContextMenuSourceType[ContextMenuSourceType["None"] = 0] = "None";
+  ContextMenuSourceType[ContextMenuSourceType["Mouse"] = 1] = "Mouse";
+  ContextMenuSourceType[ContextMenuSourceType["LongPress"] = 2] = "LongPress";
+})(ContextMenuSourceType || (ContextMenuSourceType = {}));
+
+var ContextMenuMediaType;
+(function (ContextMenuMediaType) {
+  ContextMenuMediaType[ContextMenuMediaType["None"] = 0] = "None";
+  ContextMenuMediaType[ContextMenuMediaType["Image"] = 1] = "Image";
+})(ContextMenuMediaType || (ContextMenuMediaType = {}));
+
+var ContextMenuInputFieldType;
+(function (ContextMenuInputFieldType) {
+  ContextMenuInputFieldType[ContextMenuInputFieldType["None"] = 0] = "None";
+  ContextMenuInputFieldType[ContextMenuInputFieldType["PlainText"] = 1] = "PlainText";
+  ContextMenuInputFieldType[ContextMenuInputFieldType["Password"] = 2] = "Password";
+  ContextMenuInputFieldType[ContextMenuInputFieldType["Number"] = 3] = "Number";
+  ContextMenuInputFieldType[ContextMenuInputFieldType["Telephone"] = 4] = "Telephone";
+  ContextMenuInputFieldType[ContextMenuInputFieldType["Other"] = 5] = "Other";
+})(ContextMenuInputFieldType || (ContextMenuInputFieldType = {}));
