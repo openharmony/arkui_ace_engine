@@ -137,7 +137,7 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
     const RefPtr<Frontend>& frontend, int32_t instanceId)
     : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId,
-        (std::move(platformResRegister))),
+          (std::move(platformResRegister))),
       timeProvider_(g_defaultTimeProvider)
 {
     RegisterEventHandler(frontend->GetEventHandler());
@@ -1755,25 +1755,48 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN && !isTabKeyPressed_) {
         isTabKeyPressed_ = true;
     }
-    if (!eventManager_->DispatchTabIndexEvent(event, rootElement_, GetLastPage())) {
-        return eventManager_->DispatchKeyEvent(event, rootElement_);
+    auto lastPage = GetLastPage();
+    if (lastPage) {
+        if (!eventManager_->DispatchTabIndexEvent(event, rootElement_, lastPage)) {
+            return eventManager_->DispatchKeyEvent(event, rootElement_);
+        }
+    } else {
+        if (!eventManager_->DispatchTabIndexEvent(event, rootElement_, rootElement_)) {
+            return eventManager_->DispatchKeyEvent(event, rootElement_);
+        }
     }
     return true;
 }
 
 bool PipelineContext::RequestDefaultFocus()
 {
+    RefPtr<FocusNode> defaultFocusNode;
+    std::string mainNodeName;
     auto curPageElement = GetLastPage();
-    CHECK_NULL_RETURN_NOLOG(curPageElement, false);
-    if (curPageElement->IsFocused()) {
+    if (curPageElement) {
+        if (curPageElement->IsDefaultHasFocused()) {
+            return false;
+        }
+        curPageElement->SetIsDefaultHasFocused(true);
+        defaultFocusNode = curPageElement->GetChildDefaultFocusNode();
+        mainNodeName = std::string(AceType::TypeName(curPageElement));
+    } else {
+        if (rootElement_->IsDefaultHasFocused()) {
+            return false;
+        }
+        rootElement_->SetIsDefaultHasFocused(true);
+        defaultFocusNode = rootElement_->GetChildDefaultFocusNode();
+        mainNodeName = std::string(AceType::TypeName(rootElement_));
+    }
+    if (!defaultFocusNode) {
+        LOGD("RequestDefaultFocus: %{public}s do not has default focus node.", mainNodeName.c_str());
         return false;
     }
-    curPageElement->SetIsFocused(true);
-    auto defaultFocusNode = curPageElement->GetChildDefaultFocusNode();
-    CHECK_NULL_RETURN_NOLOG(defaultFocusNode, false);
     if (!defaultFocusNode->IsFocusableWholePath()) {
+        LOGD("RequestDefaultFocus: %{public}s 's default focus node is not focusable.", mainNodeName.c_str());
         return false;
     }
+    LOGD("Focus: request default focus node %{public}s", AceType::TypeName(defaultFocusNode));
     return defaultFocusNode->RequestFocusImmediately();
 }
 
@@ -2616,7 +2639,7 @@ bool PipelineContext::RequestFocus(const RefPtr<Element>& targetElement)
 bool PipelineContext::RequestFocus(const std::string& targetNodeId)
 {
     CHECK_NULL_RETURN(rootElement_, false);
-    auto currentFocusChecked =  rootElement_->RequestFocusImmediatelyById(targetNodeId);
+    auto currentFocusChecked = rootElement_->RequestFocusImmediatelyById(targetNodeId);
     if (!isSubPipeline_ || currentFocusChecked) {
         LOGI("Request focus finish currentFocus is %{public}d", currentFocusChecked);
         return currentFocusChecked;

@@ -82,13 +82,13 @@ public:
     // platform will handle it.
     bool DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNode>& focusNode);
     bool DispatchTabIndexEvent(
-        const KeyEvent& event, const RefPtr<FocusNode>& focusNode, const RefPtr<FocusGroup>& curPage);
+        const KeyEvent& event, const RefPtr<FocusNode>& focusNode, const RefPtr<FocusGroup>& mainNode);
 
     // Distribute the key event to the corresponding root node. If the root node is not processed, return false and the
     // platform will handle it.
     bool DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode);
     bool DispatchTabIndexEventNG(
-        const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode, const RefPtr<NG::FrameNode>& curPage);
+        const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode, const RefPtr<NG::FrameNode>& mainNode);
 
     // Distribute the rotation event to the corresponding render tree or requested render node. If the render is not
     // processed, return false and the platform will handle it.

@@ -466,7 +466,7 @@ public:
 
     void CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes);
     bool GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t tabNodeIdx);
-    bool HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusHub>& curPage);
+    bool HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusHub>& mainFocusHub);
     RefPtr<FocusHub> GetChildFocusNodeByType(FocusNodeType nodeType = FocusNodeType::DEFAULT);
     RefPtr<FocusHub> GetChildFocusNodeById(const std::string& id);
     int32_t GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes);
