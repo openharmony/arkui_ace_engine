@@ -53,6 +53,7 @@ void RenderWeb::InitEnhanceSurfaceFlag()
 
 void RenderWeb::OnAttachContext()
 {
+    LOGI("OnAttachContext");
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         LOGE("OnAttachContext context null");
@@ -65,7 +66,7 @@ void RenderWeb::OnAttachContext()
         position_ = Offset(0, 0);
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
         delegate_->SetDrawSize(drawSize_);
-#ifndef OHOS_STANDARD_SYSTEM
+#ifdef OHOS_STANDARD_SYSTEM
         delegate_->InitOHOSWeb(context_);
 #else
         delegate_->CreatePlatformResource(drawSize_, position_, context_);
@@ -156,7 +157,7 @@ bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double key
         if (!isFocus_) {
             if (isVirtualKeyBoardShow_ == VkState::VK_SHOW) {
                 drawSize_.SetSize(drawSizeCache_);
-                delegate_->SetBoundsOrRezise(drawSize_);
+                delegate_->SetBoundsOrRezise(drawSize_, GetGlobalOffset());
                 SyncGeometryProperties();
                 SetRootView(width, height, 0);
                 isVirtualKeyBoardShow_ = VkState::VK_HIDE;
@@ -165,7 +166,7 @@ bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double key
         }
         if (NearZero(keyboard)) {
             drawSize_.SetSize(drawSizeCache_);
-            delegate_->SetBoundsOrRezise(drawSize_);
+            delegate_->SetBoundsOrRezise(drawSize_, GetGlobalOffset());
             SyncGeometryProperties();
             SetRootView(width, height, 0);
             isVirtualKeyBoardShow_ = VkState::VK_HIDE;
@@ -177,7 +178,7 @@ bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double key
                 return true;
             }
             drawSize_.SetHeight(height - keyboard - GetCoordinatePoint().GetY());
-            delegate_->SetBoundsOrRezise(drawSize_);
+            delegate_->SetBoundsOrRezise(drawSize_, GetGlobalOffset());
             SyncGeometryProperties();
             SetRootView(width, height, DEFAULT_NUMS_ONE);
             isVirtualKeyBoardShow_ = VkState::VK_SHOW;
@@ -248,7 +249,7 @@ void RenderWeb::OnMouseEvent(const MouseEvent& event)
     }
 
     auto localLocation = event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
-    if (!HandleDoubleClickEvent(event)) { 
+    if (!HandleDoubleClickEvent(event)) {
         delegate_->OnMouseEvent(localLocation.GetX(), localLocation.GetY(), event.button, event.action, SINGLE_CLICK_NUM);
     }
 
@@ -351,7 +352,6 @@ void RenderWeb::OnSizeChanged()
         LOGE("size is invalid");
         return;
     }
-
     auto context = context_.Upgrade();
     if (!context) {
         LOGE("context is nullptr");
@@ -365,14 +365,15 @@ void RenderWeb::OnSizeChanged()
             delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
             delegate_->InitOHOSWeb(context_);
         }
-    }
-    if (!isUrlLoaded_) {
-        delegate_->SetBoundsOrRezise(drawSize_);
-        if (!delegate_->LoadDataWithRichText()) {
-            LOGI("RenderWeb::Paint start LoadUrl");
-            delegate_->LoadUrl();
+
+        if (!isUrlLoaded_) {
+            delegate_->SetBoundsOrRezise(drawSize_, GetGlobalOffset());
+            if (!delegate_->LoadDataWithRichText()) {
+                LOGI("RenderWeb::Paint start LoadUrl");
+                delegate_->LoadUrl();
+            }
+            isUrlLoaded_ = true;
         }
-        isUrlLoaded_ = true;
     }
 }
 
