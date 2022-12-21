@@ -81,7 +81,7 @@ void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto bubbleSize = bubbleWrapper->GetGeometryNode()->GetFrameSize();
     auto sliderLayoutProperty = DynamicCast<SliderLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(sliderLayoutProperty);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);

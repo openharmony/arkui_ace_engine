@@ -48,6 +48,7 @@ public:
     MOCK_METHOD3(DrawBitmap, void(const TestingBitmap& bitmap, const float px, const float py));
     MOCK_METHOD1(DrawBackground, void(const TestingBrush& brush));
     MOCK_METHOD2(ClipRect, void(const TestingRect& rect, ClipOp op));
+    MOCK_METHOD2(ClipPath, void(const TestingPath& rect, ClipOp op));
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_ROSEN_MOCK_CANVAS_H

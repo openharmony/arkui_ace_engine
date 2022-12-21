@@ -13,12 +13,7 @@
  * limitations under the License.
  */
 
-#include <iostream>
-
-#include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "gtest/internal/gtest-port.h"
-
 #define private public
 #define protected public
 #include "core/components_ng/base/view_stack_processor.h"
@@ -65,12 +60,6 @@ constexpr Dimension SLIDER_OUTSET_BLOCK_SIZE = Dimension(30.0);
 constexpr Dimension SLIDER_INSET_BLOCK_SIZE = Dimension(40.0);
 constexpr Dimension SLIDER_OUTSET_BLOCK_HOTSIZE = Dimension(50.0);
 constexpr Dimension SLIDER_INSET_BLOCK_HOTSIZE = Dimension(60.0);
-constexpr Dimension MARKER_SIZE = Dimension(100.0);
-const Color SLIDER_TRACK_BG_COLOR = Color::BLACK;
-const Color SLIDER_MARKER_COLOR = Color::GRAY;
-const Color SLIDER_TRACK_SELECTED_COLOR = Color::GREEN;
-const Color SLIDER_BLOCK_COLOR = Color::RED;
-const Color SLIDER_BLOCK_HOVER_COLOR = Color::BLUE;
 } // namespace
 class SliderPatternTestNg : public testing::Test {
 public:
@@ -195,7 +184,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg003, TestSize.Level1)
     RefPtr<LayoutWrapper> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, sliderLayoutProperty);
     EXPECT_NE(layoutWrapper, nullptr);
-
+    layoutWrapper->skipMeasureContent_ = false;
     /**
      * @tc.steps: step3. call sliderPattern OnDirtyLayoutWrapperSwap function, compare result.
      * @tc.expected: step3. OnDirtyLayoutWrapperSwap success and result correct.
@@ -204,42 +193,47 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg003, TestSize.Level1)
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(sliderLayoutAlgorithm, true);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
-
     /**
      * @tc.steps: step4. call sliderPattern OnDirtyLayoutWrapperSwap function, compare result.
      * @tc.expected: step4. OnDirtyLayoutWrapperSwap success and result correct.
      */
-
     /**
-    //     case 1: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
-    */
+     *     case 1: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
+     */
     bool firstCase = sliderPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
     EXPECT_FALSE(firstCase);
-
     /**
-    //     case 2: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
-    */
+     *     case 2: LayoutWrapper::SkipMeasureContent = true , skipMeasure = false;
+     */
     bool secondCase = sliderPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_FALSE(secondCase);
-
+    /**
+     *    case 3: LayoutWrapper::SkipMeasureContent = false , skipMeasure = true;
+     */
     layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(sliderLayoutAlgorithm, false);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
-
-    /**
-    //     case 3: LayoutWrapper::SkipMeasureContent = false , skipMeasure = true;
-    */
     bool thirdCase = sliderPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
     EXPECT_FALSE(thirdCase);
-
     /**
-    //     case 4: LayoutWrapper::SkipMeasureContent = false , skipMeasure = false;
-    */
+     *    case 4: LayoutWrapper::SkipMeasureContent = false , skipMeasure = false, and directions is HORIZONTAL,
+     *            sliderMode is OUTSET.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    sliderTheme->outsetHotBlockShadowWidth_ = Dimension(20.0f);
+    sliderTheme->insetHotBlockShadowWidth_ = Dimension(30.0f);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    sliderLayoutAlgorithm->trackThickness_ = 40.0f;
     bool forthCase = sliderPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_TRUE(forthCase);
-    EXPECT_EQ(sliderPattern->sliderLength_, 38.0);
-    EXPECT_EQ(sliderPattern->borderBlank_, 6.0);
+    EXPECT_EQ(sliderPattern->sliderLength_, 10.f);
+    EXPECT_EQ(sliderPattern->borderBlank_, 20.f);
+    /**
+     *    case 5: directions is VERTICAL, sliderMode is INSET.
+     */
     sliderLayoutProperty->UpdateDirection(Axis::VERTICAL);
-    sliderLayoutAlgorithm->trackThickness_ = 60.0f;
+    sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::INSET);
     bool fifthCase = sliderPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_TRUE(fifthCase);
     EXPECT_EQ(sliderPattern->sliderLength_, 1.0);
@@ -303,8 +297,9 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg005, TestSize.Level1)
      */
     TouchLocationInfo LInfo(0);
     LInfo.touchType_ = TouchType::DOWN;
+    LInfo.localLocation_ = Offset(MIN_LABEL, MAX_LABEL);
     TouchEventInfo info("");
-    info.touches_.emplace_back(LInfo);
+    info.changedTouches_.emplace_back(LInfo);
     sliderPattern->HandleTouchEvent(info);
     EXPECT_EQ(sliderPattern->hotFlag_, true);
     sliderPattern->showTips_ = true;
@@ -364,6 +359,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg006, TestSize.Level1)
      * @tc.cases: case3. direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT, MoveStep(1).
      */
     event.code = KeyCode::KEY_DPAD_RIGHT;
+    sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::INSET);
     EXPECT_EQ(sliderPattern->OnKeyEvent(event), false);
     EXPECT_EQ(sliderPattern->valueRatio_, 0.5f);
     /**
@@ -377,6 +373,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg006, TestSize.Level1)
      * @tc.cases: case5. direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN, MoveStep(1).
      */
     event.code = KeyCode::KEY_DPAD_DOWN;
+    sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::OUTSET);
     EXPECT_EQ(sliderPattern->OnKeyEvent(event), false);
     EXPECT_EQ(sliderPattern->valueRatio_, 0.5f);
 }
@@ -526,6 +523,12 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithm002, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapper>(nullptr, bubbleGeometryNode, nullptr);
     EXPECT_NE(bubbleLayoutWrapper, nullptr);
     layoutWrapper.AppendChild(std::move(bubbleLayoutWrapper));
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    sliderTheme->bubbleToCircleCenterDistance_ = 20.0_vp;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
     /**
      * @tc.steps: step2. start SliderLayoutAlgorithm Layout func.
      * @tc.cases: case1. when sliderPaintProperty's direction is HORIZONTAL.
@@ -560,14 +563,7 @@ HWTEST_F(SliderPatternTestNg, SliderPaintMethodTest001, TestSize.Level1)
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
-    sliderTheme->trackBgColor_ = SLIDER_TRACK_BG_COLOR;
-    sliderTheme->markerColor_ = SLIDER_MARKER_COLOR;
-    sliderTheme->trackSelectedColor_ = SLIDER_TRACK_SELECTED_COLOR;
-    sliderTheme->blockColor_ = SLIDER_BLOCK_COLOR;
-    sliderTheme->blockHoverColor_ = SLIDER_BLOCK_HOVER_COLOR;
-    sliderTheme->markerSize_ = MARKER_SIZE;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
@@ -604,6 +600,8 @@ HWTEST_F(SliderPatternTestNg, SliderPaintMethodTest001, TestSize.Level1)
     sliderPaintProperty->UpdateReverse(false);
     sliderPaintProperty->UpdateShowSteps(false);
     sliderPaintMethod.parameters_.hotFlag = true;
+    sliderPaintMethod.parameters_.mouseHoverFlag_ = true;
+    sliderPaintMethod.parameters_.mousePressedFlag_ = true;
     auto drawfunc4 = sliderPaintMethod.GetContentDrawFunction(&paintwrapper);
     EXPECT_CALL(canvas, DrawLine(_, _)).Times(2);
     EXPECT_CALL(canvas, DrawCircle(_, _)).Times(2);
