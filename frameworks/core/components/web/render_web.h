@@ -146,7 +146,7 @@ public:
     void PanOnActionEnd(const GestureEvent& info) override;
     void PanOnActionCancel() override;
     DragItemInfo GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info) override;
-    InitEnhanceSurfaceFlag();
+    void InitEnhanceSurfaceFlag();
 
 protected:
     RefPtr<WebDelegate> delegate_;
