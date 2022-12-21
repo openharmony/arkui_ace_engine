@@ -1212,7 +1212,7 @@ public:
         args.SetReturnValue(descriptionRef);
     }
 
-void GetSelectionText(const JSCallbackInfo& args)
+    void GetSelectionText(const JSCallbackInfo& args)
     {
         std::string text;
         if (param_) {
@@ -1277,6 +1277,7 @@ void GetSelectionText(const JSCallbackInfo& args)
         auto descriptionRef = JSRef<JSVal>::Make(jsType);
         args.SetReturnValue(descriptionRef);
     }
+
 private:
     static void Constructor(const JSCallbackInfo& args)
     {
