@@ -957,3 +957,12 @@ var ContextMenuInputFieldType;
   ContextMenuInputFieldType[ContextMenuInputFieldType["Telephone"] = 4] = "Telephone";
   ContextMenuInputFieldType[ContextMenuInputFieldType["Other"] = 5] = "Other";
 })(ContextMenuInputFieldType || (ContextMenuInputFieldType = {}));
+
+var ContextMenuEditStateFlags;
+(function (ContextMenuEditStateFlags) {
+  ContextMenuEditStateFlags[ContextMenuEditStateFlags["NONE"] = 0] = "None";
+  ContextMenuEditStateFlags[ContextMenuEditStateFlags["CAN_CUT"] = 1] = "CAN_CUT";
+  ContextMenuEditStateFlags[ContextMenuEditStateFlags["CAN_COPY"] = 2] = "CAN_COPY";
+  ContextMenuEditStateFlags[ContextMenuEditStateFlags["CAN_PASTE"] = 4] = "CAN_PASTE";
+  ContextMenuEditStateFlags[ContextMenuEditStateFlags["CAN_SELECT_ALL"] = 8] = "CAN_SELECT_ALL";
+})(ContextMenuEditStateFlags || (ContextMenuEditStateFlags = {}));

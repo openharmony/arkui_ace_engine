@@ -411,7 +411,7 @@ int ContextMenuParamOhos::GetEditStateFlags() const
     if (param_) {
         return param_->GetEditStateFlags();
     }
-    return 0;
+    return OHOS::NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_NONE;
 }
 
 int ContextMenuParamOhos::GetSourceType() const
@@ -419,7 +419,7 @@ int ContextMenuParamOhos::GetSourceType() const
     if (param_) {
         return param_->GetSourceType();
     }
-    return 0;
+    return OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_NONE;
 }
 
 int ContextMenuParamOhos::GetMediaType() const
@@ -427,7 +427,7 @@ int ContextMenuParamOhos::GetMediaType() const
     if (param_) {
         return param_->GetMediaType();
     }
-    return 0;
+    return OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_NONE;
 }
 
 int ContextMenuParamOhos::GetInputFieldType() const
@@ -435,7 +435,7 @@ int ContextMenuParamOhos::GetInputFieldType() const
     if (param_) {
         return param_->GetInputFieldType();
     }
-    return 0;
+    return OHOS::NWeb::NWebContextMenuParams::ContextMenuInputFieldType::CM_IT_NONE;
 }
 
 std::string ContextMenuParamOhos::GetSelectionText() const
