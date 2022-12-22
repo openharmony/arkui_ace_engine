@@ -498,6 +498,9 @@ void ViewStackProcessor::Pop()
 
 RefPtr<Component> ViewStackProcessor::GetNewComponent()
 {
+    if (componentsStack_.empty()) {
+        return nullptr;
+    }
     auto component = WrapComponents().first;
     if (AceType::DynamicCast<ComposedComponent>(component)) {
         auto childComponent = AceType::DynamicCast<ComposedComponent>(component)->GetChild();
