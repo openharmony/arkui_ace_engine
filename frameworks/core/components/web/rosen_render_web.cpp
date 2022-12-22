@@ -66,8 +66,6 @@ void RosenRenderWeb::OnAttachContext()
         if (!isEnhanceSurface_) {
             auto surface = GetSurface();
             delegate_->SetSurface(surface);
-            drawSize_ = Size(pipelineContext->GetRootWidth(), pipelineContext->GetRootHeight());
-            delegate_->SetDrawSize(drawSize_);
             delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
             delegate_->InitOHOSWeb(context_);
         }
