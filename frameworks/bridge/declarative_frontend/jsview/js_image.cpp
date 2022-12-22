@@ -322,9 +322,23 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have 1 arguments");
         return;
     }
-    JSColorFilter* colorfilter = JSRef<JSObject>::Cast(info[0])->Unwrap<JSColorFilter>();
-    CHECK_NULL_VOID(colorfilter);
-    ImageModel::GetInstance()->SetColorFilterMatrix(colorfilter->GetColorFilterMatrix());
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(info[0]);
+    if (array->Length() != COLOR_FILTER_MATRIX_SIZE) {
+        LOGE("arg length illegal");
+        return;
+    }
+    std::vector<float> colorfilter;
+    for (size_t i = 0; i < array->Length(); i++) {
+        JSRef<JSVal> value = array->GetValueAt(i);
+        if (value->IsNumber()) {
+            colorfilter.emplace_back(value->ToNumber<float>());
+        }
+    }
+    if (colorfilter.size() != COLOR_FILTER_MATRIX_SIZE) {
+        LOGE("colorfilter length illegal");
+        return;
+    }
+    ImageModel::GetInstance()->SetColorFilterMatrix(colorfilter);
 }
 
 void JSImage::JSBind(BindingTarget globalObj)
