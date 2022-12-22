@@ -1688,7 +1688,7 @@ void WebDelegate::RegisterOHOSWebEventAndMethord()
     }
 }
 
-void WebDelegate::RunSetWebIdAndHapPathCallback()
+void WebDelegate::RunSetWebIdCallback()
 {
     CHECK_NULL_VOID(nweb_);
     auto webId = nweb_->GetWebId();
@@ -1699,11 +1699,6 @@ void WebDelegate::RunSetWebIdAndHapPathCallback()
         auto setWebIdCallback = pattern->GetSetWebIdCallback();
         CHECK_NULL_VOID(setWebIdCallback);
         setWebIdCallback(webId);
-        if (!hapPath_.empty()) {
-            auto setHapPathCallback = pattern->GetSetHapPathCallback();
-            CHECK_NULL_VOID(setHapPathCallback);
-            setHapPathCallback(hapPath_);
-        }
         return;
     }
     auto webCom = webComponent_.Upgrade();
@@ -1711,11 +1706,6 @@ void WebDelegate::RunSetWebIdAndHapPathCallback()
     auto setWebIdCallback = webCom->GetSetWebIdCallback();
     CHECK_NULL_VOID(setWebIdCallback);
     setWebIdCallback(webId);
-    if (!hapPath_.empty()) {
-        auto setHapPathCallback = webCom->GetSetHapPathCallback();
-        CHECK_NULL_VOID(setHapPathCallback);
-        setHapPathCallback(hapPath_);
-    }
 }
 
 void WebDelegate::RunJsProxyCallback()
@@ -2255,7 +2245,7 @@ void WebDelegate::InitWebViewWithSurface()
             findListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->PutFindCallback(findListenerImpl);
             delegate->UpdateSettting(Container::IsCurrentUseNewPipeline());
-            delegate->RunSetWebIdAndHapPathCallback();
+            delegate->RunSetWebIdCallback();
             delegate->RunJsProxyCallback();
             auto releaseSurfaceListenerImpl = std::make_shared<ReleaseSurfaceImpl>(Container::CurrentId());
             releaseSurfaceListenerImpl->SetSurfaceDelegate(delegate->GetSurfaceDelegateClient());

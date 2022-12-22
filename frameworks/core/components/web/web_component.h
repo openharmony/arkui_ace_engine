@@ -46,7 +46,6 @@ public:
     using MethodCall = std::function<void(const std::string&)>;
     using Method = std::string;
     using SetWebIdCallback = std::function<void(int32_t)>;
-    using SetHapPathCallback = std::function<void(const std::string&)>;
     using JsProxyCallback = std::function<void()>;
     using PreKeyEventCallback = std::function<bool(KeyEventInfo& keyEventInfo)>;
 
@@ -323,16 +322,6 @@ public:
     SetWebIdCallback GetSetWebIdCallback() const
     {
         return setWebIdCallback_;
-    }
-
-    void SetSetHapPathCallback(SetHapPathCallback&& callback)
-    {
-        setHapPathCallback_ = std::move(callback);
-    }
-
-    SetHapPathCallback GetSetHapPathCallback() const
-    {
-        return setHapPathCallback_;
     }
 
     bool GetJsEnabled() const
@@ -868,7 +857,6 @@ private:
     ReleasedCallback releasedCallback_ = nullptr;
     ErrorCallback errorCallback_ = nullptr;
     SetWebIdCallback setWebIdCallback_ = nullptr;
-    SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebController> webController_;
