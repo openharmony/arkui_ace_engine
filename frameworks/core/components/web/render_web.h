@@ -146,6 +146,7 @@ public:
     void PanOnActionEnd(const GestureEvent& info) override;
     void PanOnActionCancel() override;
     DragItemInfo GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info) override;
+    void InitEnhanceSurfaceFlag();
 
 protected:
     RefPtr<WebDelegate> delegate_;
@@ -157,6 +158,7 @@ protected:
     Offset position_;
     Offset prePosition_;
     bool isEnhanceSurface_ = false;
+    bool isCreateWebView_ = false;
 
 private:
 #ifdef OHOS_STANDARD_SYSTEM

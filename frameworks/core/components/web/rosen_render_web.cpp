@@ -55,6 +55,7 @@ void RosenRenderWeb::DumpTree(int32_t depth) {}
 #ifdef OHOS_STANDARD_SYSTEM
 void RosenRenderWeb::OnAttachContext()
 {
+    LOGI("OnAttachContext");
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         LOGE("OnAttachContext context null");
@@ -62,9 +63,12 @@ void RosenRenderWeb::OnAttachContext()
     }
     if (delegate_) {
         CreateDragDropRecognizer(context_);
-        auto surface = GetSurface();
-        delegate_->SetSurface(surface);
-        delegate_->InitOHOSWeb(context_);
+        if (!isEnhanceSurface_) {
+            auto surface = GetSurface();
+            delegate_->SetSurface(surface);
+            delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
+            delegate_->InitOHOSWeb(context_);
+        }
     }
 }
 
@@ -72,7 +76,7 @@ void RosenRenderWeb::Paint(RenderContext& context, const Offset& offset)
 {
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
-        LOGE("OnAttachContext context null");
+        LOGE("context null");
         return;
     }
     if (pipelineContext->GetIsDragStart()) {
@@ -88,7 +92,7 @@ void RosenRenderWeb::Paint(RenderContext& context, const Offset& offset)
     }
     if (delegate_) {
         LOGI("Web paint drawSize width = %{public}f, height = %{public}f", drawSize_.Width(), drawSize_.Height());
-        delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+        delegate_->SetBoundsOrRezise(drawSize_, GetGlobalOffset());
         if (!isUrlLoaded_) {
             if (!delegate_->LoadDataWithRichText()) {
                 delegate_->LoadUrl();

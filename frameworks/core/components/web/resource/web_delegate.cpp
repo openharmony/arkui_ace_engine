@@ -1518,7 +1518,7 @@ void WebSurfaceCallback::OnSurfaceChanged(const sptr<OHOS::Surface>& surface, in
         LOGE("WebSurfaceCallback::OnSurfaceChanged get delegate fail");
         return;
     }
-    LOGD("OnSurfaceChanged w:%{public}d, h:%{public}d", width, height);
+    LOGI("OnSurfaceChanged w:%{public}d, h:%{public}d", width, height);
     delegate->Resize((double)width, (double)height);
 }
 
@@ -1603,7 +1603,11 @@ void WebDelegate::GLContextInit(void* window)
     glFlush();
     glFinish();
     eglSwapBuffers(mEGLDisplay, mEGLSurface);
+
+    eglDestroySurface(mEGLDisplay, mEGLSurface);
+    eglDestroyContext(mEGLDisplay, mEGLContext);
 }
+
 bool WebDelegate::InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context)
 {
     auto pipelineContext = context.Upgrade();
@@ -1632,9 +1636,6 @@ bool WebDelegate::InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context)
     }
     GLContextInit(aNativeSurface);
     surfaceInfo_.window = aNativeSurface;
-    surfaceInfo_.display = mEGLDisplay;
-    surfaceInfo_.context = mEGLContext;
-    surfaceInfo_.surface = mEGLSurface;
     return true;
 }
 
@@ -2176,7 +2177,6 @@ void WebDelegate::UpdateSettting(bool useNewPipe)
     setting->PutMediaPlayGestureAccess(component->IsMediaPlayGestureAccess());
 }
 
-#if defined(ENABLE_ROSEN_BACKEND)
 std::string WebDelegate::GetCustomScheme()
 {
     std::string customScheme;
@@ -2203,6 +2203,7 @@ void WebDelegate::InitWebViewWithSurface()
     if (!context) {
         return;
     }
+    LOGI("Init WebView With Surface");
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
@@ -2231,7 +2232,8 @@ void WebDelegate::InitWebViewWithSurface()
                 LOGI("Create webview with isEnhanceSurface");
                 delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
                     (void *)(&delegate->surfaceInfo_),
-                    initArgs);
+                    initArgs,
+                    delegate->drawSize_.Width(), delegate->drawSize_.Height());
             } else {
 #ifdef ENABLE_ROSEN_BACKEND
                 LOGI("Create webview with surface in");
@@ -2262,7 +2264,6 @@ void WebDelegate::InitWebViewWithSurface()
         },
         TaskExecutor::TaskType::PLATFORM);
 }
-#endif
 
 void WebDelegate::UpdateUserAgent(const std::string& userAgent)
 {
@@ -4147,6 +4148,7 @@ void WebDelegate::SetDrawSize(const Size& drawSize)
 
 void WebDelegate::SetEnhanceSurfaceFlag(const bool& isEnhanceSurface)
 {
+    LOGI("enhance flag %{public}d", isEnhanceSurface);
     isEnhanceSurface_ = isEnhanceSurface;
 }
 
@@ -4163,7 +4165,7 @@ void WebDelegate::SetBoundsOrRezise(const Size& drawSize, const Offset& offset)
     }
     if (isEnhanceSurface_) {
         if (surfaceDelegate_) {
-            LOGD("WebDelegate::SetBounds: x:%{public}d, y:%{public}d, w::%{public}d, h:%{public}d",
+            LOGI("WebDelegate::SetBounds: x:%{public}d, y:%{public}d, w::%{public}d, h:%{public}d",
                 (int32_t)offset.GetX(), (int32_t)offset.GetY(),
                 (int32_t)drawSize.Width(), (int32_t)drawSize.Height());
             surfaceDelegate_->SetBounds(offset.GetX(), (int32_t)offset.GetY(), drawSize.Width(), drawSize.Height());
