@@ -108,12 +108,11 @@ template("ace_osal_ohos_source_set") {
       }
 
       deps += [
-        "//foundation/window/window_manager/window_scene:window_scene",
+        "//foundation/window/window_manager/window_scene:window_session",
       ]
 
       include_dirs += [
         "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
-        "//foundation/window/window_manager/window_scene/interfaces/innerkits",
       ]
     } else {
       external_deps += [ "multimedia_image:image" ]

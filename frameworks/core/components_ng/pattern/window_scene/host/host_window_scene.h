@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_SCENE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_SCENE_H
 
-#include "session.h"
+#include "foundation/window/window_manager/window_scene/session/host/include/session.h"
 
 #include "base/utils/macros.h"
 

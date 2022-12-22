@@ -18,7 +18,6 @@ if (is_standard_system) {
   config("ohos_window_scene_config") {
     include_dirs = [
       "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
-      "//foundation/window/window_manager/window_scene/interfaces/innerkits",
       "//foundation/window/window_manager/wm",
     ]
   }
@@ -45,7 +44,7 @@ build_component_ng("window_scene") {
     deps = [
       "//foundation/arkui/napi:ace_napi",
       "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-      "//foundation/window/window_manager/window_scene:window_scene",
+      "//foundation/window/window_manager/window_scene:window_session",
       "//foundation/window/window_manager/wm:libwm",
     ]
   }

@@ -53,12 +53,11 @@ template("ace_core_pipeline_ng_source_set") {
           [ "//foundation/window/window_manager/interfaces/innerkits" ]
 
       deps += [
-        "//foundation/window/window_manager/window_scene:window_scene",
+        "//foundation/window/window_manager/window_scene:window_session",
       ]
 
       include_dirs += [
         "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
-        "//foundation/window/window_manager/window_scene/interfaces/innerkits",
       ]
     }
 
