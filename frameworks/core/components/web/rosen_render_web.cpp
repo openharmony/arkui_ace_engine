@@ -71,7 +71,6 @@ void RosenRenderWeb::OnAttachContext()
             delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
             delegate_->InitOHOSWeb(context_);
         }
-        
     }
 }
 
