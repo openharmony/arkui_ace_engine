@@ -193,7 +193,8 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     } else {
         if (badgePosition == BadgeLayoutProperty::BadgePosition::RIGHT_TOP) {
-            textOffset = OffsetF(width - badgeCircleDiameter + 3, 0 - 3);
+            textOffset = OffsetF(
+                width - badgeCircleDiameter + Dimension(2.0_vp).ConvertToPx(), 0 - Dimension(2.0_vp).ConvertToPx());
             textOffset = OffsetF(offset.GetX() + textOffset.GetX(), offset.GetY() + textOffset.GetY());
         } else if (badgePosition == BadgeLayoutProperty::BadgePosition::RIGHT) {
             textOffset = OffsetF(width - badgeCircleDiameter, height / 2 - badgeCircleRadius);
