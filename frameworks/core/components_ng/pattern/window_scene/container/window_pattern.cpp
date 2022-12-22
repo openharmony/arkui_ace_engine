@@ -31,28 +31,28 @@ WindowPattern::WindowPattern(
 Rosen::WSError WindowPattern::SetUIContent(const std::string& contentInfo,
     NativeEngine* engine, NativeValue* storage, bool isDistributed, AppExecFwk::Ability* ability)
 {
-    LOGI("SetUIContent contentInfo: %{public}s", contentInfo.c_str());
-    std::unique_ptr<UIContent> uiContent;
-    if (ability != nullptr) {
-        uiContent = UIContent::Create(ability);
-    } else {
-        uiContent = UIContent::Create(runtimeContext_.get(), engine);
-    }
-    if (uiContent == nullptr) {
-        LOGE("fail to SetUIContent id: %{public}u", GetWindowId());
-        return Rosen::WSError::WS_ERROR_NULLPTR;
-    }
-    // if (!isAppDecorEnable_ || !windowSystemConfig_.isSystemDecorEnable_) {
-    //     WLOGFI("app set decor enable false");
-    //     property_->SetDecorEnable(false);
+    // LOGI("SetUIContent contentInfo: %{public}s", contentInfo.c_str());
+    // std::unique_ptr<UIContent> uiContent;
+    // if (ability != nullptr) {
+    //     uiContent = UIContent::Create(ability);
+    // } else {
+    //     uiContent = UIContent::Create(runtimeContext_.get(), engine);
     // }
-    if (isDistributed) {
-        uiContent->Restore(this, contentInfo, storage);
-    } else {
-        uiContent->Initialize(this, contentInfo, storage);
-    }
-    // make uiContent available after Initialize/Restore
-    uiContent_ = std::move(uiContent);
+    // if (uiContent == nullptr) {
+    //     LOGE("fail to SetUIContent id: %{public}u", GetWindowId());
+    //     return Rosen::WSError::WS_ERROR_NULLPTR;
+    // }
+    // // if (!isAppDecorEnable_ || !windowSystemConfig_.isSystemDecorEnable_) {
+    // //     WLOGFI("app set decor enable false");
+    // //     property_->SetDecorEnable(false);
+    // // }
+    // if (isDistributed) {
+    //     uiContent->Restore(this, contentInfo, storage);
+    // } else {
+    //     uiContent->Initialize(this, contentInfo, storage);
+    // }
+    // // make uiContent available after Initialize/Restore
+    // uiContent_ = std::move(uiContent);
 
     // if (state_ == WindowState::STATE_SHOWN) {
     //     UpdateTitleButtonVisibility();

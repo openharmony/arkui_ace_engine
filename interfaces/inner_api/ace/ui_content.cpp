@@ -108,6 +108,13 @@ std::unique_ptr<UIContent> UIContent::Create(OHOS::AbilityRuntime::Context* cont
     return content;
 }
 
+std::shared_ptr<UIContent> UIContent::CreateUI(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime)
+{
+    std::shared_ptr<UIContent> content;
+    content.reset(CreateUIContent(reinterpret_cast<void*>(context), reinterpret_cast<void*>(runtime)));
+    return content;
+}
+
 std::unique_ptr<UIContent> UIContent::Create(OHOS::AppExecFwk::Ability* ability)
 {
     std::unique_ptr<UIContent> content;

@@ -37,6 +37,9 @@ class FormAshmem;
 
 namespace Rosen {
 class Window;
+class ISceneSession;
+class ISessionStateListener;
+class RSSurfaceNode;
 enum class WindowSizeChangeReason : uint32_t;
 enum class WindowMode : uint32_t;
 class RSSurfaceNode;
@@ -45,6 +48,7 @@ class RSTransaction;
 
 namespace Ace::NG {
 class WindowPattern;
+class WindowScenePattern;
 }
 
 namespace AAFwk {
@@ -74,13 +78,14 @@ public:
                                              bool isFormRender);
     static std::unique_ptr<UIContent> Create(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime);
     static std::unique_ptr<UIContent> Create(OHOS::AppExecFwk::Ability* ability);
+    static std::shared_ptr<UIContent> CreateUI(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime);
     static void ShowDumpHelp(std::vector<std::string>& info);
 
     virtual ~UIContent() = default;
 
     // UI content life-cycles
     virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) = 0;
-    virtual void Initialize(NG::WindowPattern* windowPattern, const std::string& url, NativeValue* storage) = 0;
+    virtual void Initialize(const std::string& url, NativeValue* storage) = 0;
     virtual void Foreground() = 0;
     virtual void Background() = 0;
     virtual void Focus() = 0;
@@ -138,6 +143,18 @@ public:
         std::function<void(const std::string&)>&& actionCallback) = 0;
     virtual void SetErrorEventHandler(
         std::function<void(const std::string&, const std::string&)>&& errorCallback) = 0;
+
+    // window scene
+    virtual void ScenePatternInit(
+        const sptr<Rosen::ISceneSession>& iSceneSession,
+        const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
+        const std::shared_ptr<AbilityRuntime::Context>& runtimeContext,
+        const std::shared_ptr<Rosen::ISessionStateListener>& listener
+    ) = 0;
+
+    virtual void DoForeground() = 0;
+    virtual void DoBackground() = 0;
+    virtual void DoDisconnect() = 0;
 };
 
 } // namespace OHOS::Ace

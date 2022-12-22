@@ -24,7 +24,6 @@
 #include "native_engine/native_value.h"
 #include "native_engine/native_engine.h"
 #include "wm/window.h"
-
 #include "base/utils/macros.h"
 
 namespace OHOS {
@@ -49,7 +48,7 @@ public:
 
     // UI content lifecycles
     void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
-    void Initialize(NG::WindowPattern* windowPattern, const std::string& url, NativeValue* storage) override;
+    void Initialize(const std::string& url, NativeValue* storage) override;
     void Foreground() override;
     void Background() override;
     void Focus() override;
@@ -119,6 +118,17 @@ public:
     void SetErrorEventHandler(
         std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
 
+
+    // window scene
+    void ScenePatternInit(
+        const sptr<Rosen::ISceneSession>& iSceneSession,
+        const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
+        const std::shared_ptr<AbilityRuntime::Context>& runtimeContext,
+        const std::shared_ptr<Rosen::ISessionStateListener>& listener) override;
+
+    virtual void DoForeground() override;
+    virtual void DoBackground() override;
+    virtual void DoDisconnect() override;
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);

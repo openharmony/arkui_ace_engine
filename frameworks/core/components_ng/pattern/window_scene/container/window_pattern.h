@@ -96,6 +96,9 @@ public:
         return true;
     }
 
+    virtual void Foreground() = 0;
+    virtual void Background() = 0;
+    virtual void Disconnect() = 0;
 protected:
     // for lifecycle
     std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode_;

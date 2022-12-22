@@ -60,6 +60,7 @@
 #include "core/common/form_manager.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/plugin_manager.h"
+#include "core/components_ng/pattern/window_scene/container/window_scene_pattern.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -325,8 +326,9 @@ void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& cont
     LOGI("Restore UIContentImpl done.");
 }
 
-void UIContentImpl::Initialize(NG::WindowPattern* windowPattern, const std::string& url, NativeValue* storage)
+void UIContentImpl::Initialize(const std::string& url, NativeValue* storage)
 {
+    auto windowPattern = windowScenePattern_ ? windowScenePattern_ : nullptr; // window pattern
     if (windowPattern && StringUtils::StartWith(windowPattern->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
         CommonInitialize(windowPattern, url, storage);
         return;
@@ -1639,5 +1641,29 @@ void UIContentImpl::SetErrorEventHandler(std::function<void(const std::string&, 
     auto front = container->GetFrontend();
     CHECK_NULL_VOID(front);
     return front->SetErrorEventHandler(std::move(errorCallback));
+}
+
+void UIContentImpl::ScenePatternInit(
+    const sptr<Rosen::ISceneSession>& iSceneSession,
+    const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
+    const std::shared_ptr<AbilityRuntime::Context>& runtimeContext,
+    const std::shared_ptr<Rosen::ISessionStateListener>& listener)
+{
+    windowScenePattern_ = new NG::WindowScenePattern(iSceneSession, surfaceNode, runtimeContext, listener);
+}
+
+void UIContentImpl::DoForeground()
+{
+    windowScenePattern_->Foreground();
+}
+
+void UIContentImpl::DoBackground()
+{
+    windowScenePattern_->Background();
+}
+
+void UIContentImpl::DoDisconnect()
+{
+    windowScenePattern_->Disconnect();
 }
 } // namespace OHOS::Ace
