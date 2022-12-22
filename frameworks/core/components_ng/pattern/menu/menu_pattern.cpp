@@ -21,6 +21,7 @@
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/event/touch_event.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -36,7 +37,7 @@ void MenuPattern::OnModifyDone()
     CHECK_NULL_VOID(renderContext);
 
     // get theme from SelectThemeManager
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
 

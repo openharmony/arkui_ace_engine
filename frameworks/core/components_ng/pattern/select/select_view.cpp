@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/select/select_view.h"
 
 #include "base/utils/utils.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/select/select_pattern.h"

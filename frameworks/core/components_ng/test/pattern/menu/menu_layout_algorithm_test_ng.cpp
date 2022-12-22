@@ -19,13 +19,15 @@
 
 #include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/marquee/marquee_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_ng/test/mock/syntax/mock_lazy_for_each_builder.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/components/select/select_theme.h"
+#include "core/components/text_field/textfield_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -40,8 +42,14 @@ public:
     void TearDown() override;
 };
 
-void MenuLayoutAlgorithmTestNg::SetUpTestCase() {}
-void MenuLayoutAlgorithmTestNg::TearDownTestCase() {}
+void MenuLayoutAlgorithmTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+void MenuLayoutAlgorithmTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 void MenuLayoutAlgorithmTestNg::SetUp() {}
 void MenuLayoutAlgorithmTestNg::TearDown() {}
 
@@ -180,6 +188,14 @@ HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg008, TestSize.Level
  */
 HWTEST_F(MenuLayoutAlgorithmTestNg, MenuLayoutAlgorithmTestNg009, TestSize.Level1)
 {
+    // set buttonTheme to themeManager before using themeManager to get buttonTheme
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<TextFieldTheme>()));
+
     RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     const std::string tag = "tag";
     RefPtr<Pattern> pattern = AceType::MakeRefPtr<Pattern>();

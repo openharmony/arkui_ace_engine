@@ -39,7 +39,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/gestures/gesture_info.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -206,9 +206,9 @@ void SelectPattern::AddOptionNode(const RefPtr<FrameNode>& option)
 void SelectPattern::BuildChild()
 {
     // get theme from SelectThemeManager
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = DynamicCast<PipelineBase>(pipeline)->GetTheme<SelectTheme>();
+    auto theme = pipeline->GetTheme<SelectTheme>();
 
     auto row = FrameNode::CreateFrameNode(
         V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(false));
@@ -228,7 +228,7 @@ void SelectPattern::BuildChild()
     auto spinner = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ImagePattern>());
     CHECK_NULL_VOID(spinner);
-    auto iconTheme = DynamicCast<PipelineBase>(pipeline)->GetTheme<IconTheme>();
+    auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
     InitSpinner(spinner, iconTheme, theme);
 
@@ -528,9 +528,9 @@ void SelectPattern::UpdateText(int32_t index)
 
 void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps, const RefPtr<SelectTheme>& theme)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto textTheme = DynamicCast<PipelineBase>(pipeline)->GetTheme<TextFieldTheme>();
+    auto textTheme = pipeline->GetTheme<TextFieldTheme>();
     textProps->UpdateFontSize(textTheme->GetFontSize());
     textProps->UpdateTextDecoration(theme->GetTextDecoration());
     textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -540,7 +540,7 @@ void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps, c
 void SelectPattern::InitSpinner(
     const RefPtr<FrameNode>& spinner, const RefPtr<IconTheme>& iconTheme, const RefPtr<SelectTheme>& selectTheme)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     ImageSourceInfo imageSourceInfo;
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);

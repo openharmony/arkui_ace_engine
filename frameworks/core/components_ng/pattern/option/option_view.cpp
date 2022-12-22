@@ -65,9 +65,9 @@ RefPtr<FrameNode> CreateText(const std::string& value, const RefPtr<FrameNode>& 
     auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProperty, nullptr);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = AceType::DynamicCast<PipelineBase>(pipeline)->GetTheme<TextFieldTheme>();
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
 
     textProperty->UpdateFontSize(theme->GetFontSize());
@@ -100,7 +100,7 @@ RefPtr<FrameNode> OptionView::CreateSelectOption(const std::string& value, const
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
