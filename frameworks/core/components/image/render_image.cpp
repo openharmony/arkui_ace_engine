@@ -132,7 +132,7 @@ void RenderImage::Update(const RefPtr<Component>& component)
     LOGD("inComingSource %{public}s", inComingSource.ToString().c_str());
     LOGD("imageLoadingStatus_: %{public}d", static_cast<int32_t>(imageLoadingStatus_));
     proceedPreviousLoading_ = sourceInfo_.IsValid() && sourceInfo_ == inComingSource;
-    // if loading new image, postpone performLayout
+    // perform layout only if loading new image
     if (!proceedPreviousLoading_) {
         sourceInfo_ = inComingSource;
         MarkNeedLayout(sourceInfo_.IsSvg());
