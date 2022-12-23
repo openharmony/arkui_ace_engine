@@ -129,7 +129,7 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
     CHECK_NULL_VOID(listEventHub);
 
     auto onScroll = listEventHub->GetOnScroll();
-    if (onScroll && !NearZero(finalOffset)) {
+    if (onScroll && !NearZero(finalOffset) && !isJump) {
         auto source = GetScrollState();
         auto offsetPX = Dimension(finalOffset);
         auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
