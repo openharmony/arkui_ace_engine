@@ -173,12 +173,15 @@ ImageSourceInfo RatingPattern::GetImageSourceInfoFromTheme(int32_t imageFlag)
     switch (imageFlag) {
         case 0b001:
             imageSourceInfo.SetResourceId(ratingTheme->GetForegroundResourceId());
+            imageSourceInfo.SetFillColor(ratingTheme->GetStarColorActive());
             break;
         case 0b010:
             imageSourceInfo.SetResourceId(ratingTheme->GetSecondaryResourceId());
+            imageSourceInfo.SetFillColor(ratingTheme->GetStarColorInactive());
             break;
         case 0b100:
             imageSourceInfo.SetResourceId(ratingTheme->GetBackgroundResourceId());
+            imageSourceInfo.SetFillColor(ratingTheme->GetStarColorInactive());
             break;
         default:
             break;
@@ -405,7 +408,7 @@ void RatingPattern::UpdateInternalResource(ImageSourceInfo& sourceInfo, int32_t 
     CHECK_NULL_VOID(iconTheme);
     auto iconPath = iconTheme->GetIconPath(sourceInfo.GetResourceId());
     if (!iconPath.empty()) {
-        sourceInfo.SetSrc(iconPath);
+        sourceInfo.SetSrc(iconPath, sourceInfo.GetFillColor());
         auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
         CHECK_NULL_VOID(ratingLayoutProperty);
         switch (imageFlag) {
@@ -592,6 +595,7 @@ void RatingPattern::OnModifyDone()
             CreateDataReadyCallback(0b001), CreateLoadSuccessCallback(0b001), CreateLoadFailCallback(0b001));
         foregroundImageLoadingCtx_ =
             AceType::MakeRefPtr<ImageLoadingContext>(foregroundImageSourceInfo, std::move(loadNotifierForegroundImage));
+        foregroundImageLoadingCtx_->SetSvgFillColor(foregroundImageSourceInfo.GetFillColor());
         foregroundImageLoadingCtx_->LoadImageData();
     }
     if (!ratingLayoutProperty->HasSecondaryImageSourceInfo()) {
@@ -606,6 +610,7 @@ void RatingPattern::OnModifyDone()
             CreateDataReadyCallback(0b010), CreateLoadSuccessCallback(0b010), CreateLoadFailCallback(0b010));
         secondaryImageLoadingCtx_ =
             AceType::MakeRefPtr<ImageLoadingContext>(secondaryImageSourceInfo, std::move(loadNotifierSecondaryImage));
+        secondaryImageLoadingCtx_->SetSvgFillColor(secondaryImageSourceInfo.GetFillColor());
         secondaryImageLoadingCtx_->LoadImageData();
     }
 
@@ -621,6 +626,7 @@ void RatingPattern::OnModifyDone()
             CreateDataReadyCallback(0b100), CreateLoadSuccessCallback(0b100), CreateLoadFailCallback(0b100));
         backgroundImageLoadingCtx_ =
             AceType::MakeRefPtr<ImageLoadingContext>(backgroundImageSourceInfo, std::move(loadNotifierBackgroundImage));
+        backgroundImageLoadingCtx_->SetSvgFillColor(backgroundImageSourceInfo.GetFillColor());
         backgroundImageLoadingCtx_->LoadImageData();
     }
 
