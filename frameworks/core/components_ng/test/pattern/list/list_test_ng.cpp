@@ -53,14 +53,27 @@ constexpr Dimension DEFAULT_ITEM_CROSS_SIZE = Dimension(1.0, DimensionUnit::PERC
 } // namespace
 class ListTestNg : public testing::Test {
 public:
+    static void SetWidth(const Dimension& width)
+    {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), std::nullopt));
+    }
+
+    static void SetHeight(const Dimension& height)
+    {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(height)));
+    }
+
     static void CreateListItem(int32_t number)
     {
         for (int32_t i = 0; i < number; i++) {
             ListItemModelNG listItemModel;
             listItemModel.Create();
-            std::unique_ptr<ViewAbstractModel> instance = std::make_unique<ViewAbstractModelNG>();
-            instance->SetHeight(Dimension(DEFAULT_ITEM_MAIN_SIZE));
-            instance->SetWidth(DEFAULT_ITEM_CROSS_SIZE);
+            SetHeight(Dimension(DEFAULT_ITEM_MAIN_SIZE));
+            SetWidth(DEFAULT_ITEM_CROSS_SIZE);
             ViewStackProcessor::GetInstance()->Pop();
         }
     }
@@ -70,8 +83,7 @@ public:
         for (int32_t i = 0; i < number; i++) {
             ListItemModelNG listItemModel;
             listItemModel.Create();
-            std::unique_ptr<ViewAbstractModel> instance = std::make_unique<ViewAbstractModelNG>();
-            instance->SetHeight(Dimension(DEFAULT_ITEM_MAIN_SIZE));
+            SetHeight(Dimension(DEFAULT_ITEM_MAIN_SIZE));
             ViewStackProcessor::GetInstance()->Pop();
         }
     }
@@ -81,16 +93,14 @@ public:
     {
         ListItemModelNG listItemModel;
         listItemModel.Create();
-        std::unique_ptr<ViewAbstractModel> instance = std::make_unique<ViewAbstractModelNG>();
-        instance->SetHeight(Dimension(DEFAULT_ITEM_MAIN_SIZE));
-        instance->SetWidth(DEFAULT_ITEM_CROSS_SIZE);
+        SetHeight(Dimension(DEFAULT_ITEM_MAIN_SIZE));
+        SetWidth(DEFAULT_ITEM_CROSS_SIZE);
         listItemModel.SetSwiperAction(std::move(startAction), std::move(endAction), effect);
         {
             RowModelNG rowModel;
             rowModel.Create(std::nullopt, nullptr, "");
-            std::unique_ptr<ViewAbstractModel> instance = std::make_unique<ViewAbstractModelNG>();
-            instance->SetHeight(Dimension(DEFAULT_ITEM_MAIN_SIZE));
-            instance->SetWidth(DEFAULT_ITEM_CROSS_SIZE);
+            SetHeight(Dimension(DEFAULT_ITEM_MAIN_SIZE));
+            SetWidth(DEFAULT_ITEM_CROSS_SIZE);
             ViewStackProcessor::GetInstance()->Pop();
         }
         ViewStackProcessor::GetInstance()->Pop();
@@ -156,17 +166,15 @@ public:
         return [crossSize, spring]() {
             RowModelNG rowModel;
             rowModel.Create(std::nullopt, nullptr, "");
-            std::unique_ptr<ViewAbstractModel> instance = std::make_unique<ViewAbstractModelNG>();
-            instance->SetHeight(Dimension(DEFAULT_ITEM_MAIN_SIZE));
+            SetHeight(Dimension(DEFAULT_ITEM_MAIN_SIZE));
             if (spring) {
                 RowModelNG rowModel;
                 rowModel.Create(std::nullopt, nullptr, "");
-                std::unique_ptr<ViewAbstractModel> instance = std::make_unique<ViewAbstractModelNG>();
-                instance->SetHeight(Dimension(DEFAULT_ITEM_MAIN_SIZE));
-                instance->SetWidth(Dimension(crossSize));
+                SetHeight(Dimension(DEFAULT_ITEM_MAIN_SIZE));
+                SetWidth(Dimension(crossSize));
                 ViewStackProcessor::GetInstance()->Pop();
             } else {
-                instance->SetWidth(Dimension(crossSize));
+                SetWidth(Dimension(crossSize));
             }
         };
     }
