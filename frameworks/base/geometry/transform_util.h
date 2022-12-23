@@ -44,7 +44,9 @@ struct ACE_EXPORT ScaleOperation {
     ScaleOperation(float x, float y, float z) : scaleX(x), scaleY(y), scaleZ(z) {}
     bool operator==(const ScaleOperation& other) const
     {
-        return NearEqual(scaleX, other.scaleX) && NearEqual(scaleY, other.scaleY) && NearEqual(scaleZ, other.scaleZ);
+        constexpr double epsilon = 0.0001;
+        return NearEqual(scaleX, other.scaleX, epsilon) && NearEqual(scaleY, other.scaleY, epsilon) &&
+               NearEqual(scaleZ, other.scaleZ, epsilon);
     }
     float scaleX = 1.0f;
     float scaleY = 1.0f;
