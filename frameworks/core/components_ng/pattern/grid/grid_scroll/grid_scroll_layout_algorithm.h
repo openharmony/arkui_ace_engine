@@ -73,7 +73,7 @@ private:
     void ModifyCurrentOffsetWhenReachEnd(float mainSize);
     void InitialItemsCrossSize(const RefPtr<GridLayoutProperty>& layoutProperty, const SizeF& frameSize);
     bool IsIndexInMatrix(int32_t index, int32_t& startLine);
-    void UpdateGridLayoutInfo(LayoutWrapper* layoutWrapper);
+    void UpdateGridLayoutInfo(LayoutWrapper* layoutWrapper, float mainSize);
     void GetTargetIndexInfoWithBenchMark(
         LayoutWrapper* layoutWrapper, int32_t benchmarkIndex, int32_t mainStartIndex, int32_t targetIndex);
 

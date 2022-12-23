@@ -25,6 +25,15 @@ namespace OHOS::Ace::NG {
 // Try not to add more variables in [GridLayoutInfo] because the more state variables, the more problematic and the
 // harder it is to maintain
 struct GridLayoutInfo {
+    float GetTotalHeightOfItemsInView(float mainGap)
+    {
+        float lengthOfItemsInViewport = 0.0;
+        for (auto i = startMainLineIndex_; i <= endMainLineIndex_; i++) {
+            lengthOfItemsInViewport += (lineHeightMap_[i] + mainGap);
+        }
+        return lengthOfItemsInViewport - mainGap;
+    }
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f;
