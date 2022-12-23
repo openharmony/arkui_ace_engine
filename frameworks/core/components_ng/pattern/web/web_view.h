@@ -104,6 +104,8 @@ public:
     static void SetDataResubmittedId(OnWebAsyncFunc&& DataResubmittedId);
     static void SetFaviconReceivedId(OnWebAsyncFunc&& faviconReceivedId);
     static void SetTouchIconUrlId(OnWebAsyncFunc&& touchIconUrlId);
+    static void SetDarkMode(WebDarkMode mode);
+    static void SetForceDarkAccess(bool access);
 
 private:
     static void RegisterPipelineCallback(int32_t nodeId);

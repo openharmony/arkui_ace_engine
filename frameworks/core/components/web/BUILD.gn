@@ -33,6 +33,7 @@ build_component("web") {
     "render_web.cpp",
     "render_web_creator.cpp",
     "resource/web_client_impl.cpp",
+    "resource/web_configuration_observer.cpp",
     "resource/web_delegate.cpp",
     "resource/web_resource.cpp",
     "web_component.cpp",
@@ -55,6 +56,13 @@ build_component("web") {
       "//third_party/EGL:libEGL",
       "//third_party/openGLES:libGLES",
     ]
-    external_deps = [ "webview:libnweb" ]
+    external_deps = [
+      "ability_base:base",
+      "ability_base:configuration",
+      "ability_runtime:app_manager",
+      "c_utils:utils",
+      "ipc:ipc_core",
+      "webview:libnweb",
+    ]
   }
 }

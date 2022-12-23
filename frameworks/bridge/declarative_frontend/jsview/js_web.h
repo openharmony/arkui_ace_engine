@@ -120,6 +120,8 @@ public:
     static void OnDataResubmitted(const JSCallbackInfo& args);
     static void OnFaviconReceived(const JSCallbackInfo& args);
     static void OnTouchIconUrlReceived(const JSCallbackInfo& args);
+    static void DarkMode(int32_t darkMode);
+    static void ForceDarkAccess(bool access);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
