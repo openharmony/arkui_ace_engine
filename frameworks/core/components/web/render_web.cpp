@@ -37,12 +37,23 @@ constexpr double DEFAULT_AXIS_RATIO = -0.06f;
 RenderWeb::RenderWeb() : RenderNode(true)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    InitEnhanceSurfaceFlag();
     Initialize();
 #endif
 }
 
+void RenderWeb::InitEnhanceSurfaceFlag()
+{
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        isEnhanceSurface_ = true;
+    } else {
+        isEnhanceSurface_ = false;
+    }
+}
+
 void RenderWeb::OnAttachContext()
 {
+    LOGI("OnAttachContext");
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         LOGE("OnAttachContext context null");
@@ -53,6 +64,8 @@ void RenderWeb::OnAttachContext()
         drawSize_ = Size(pipelineContext->GetRootWidth(), pipelineContext->GetRootHeight());
         drawSizeCache_ = drawSize_;
         position_ = Offset(0, 0);
+        delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
+        delegate_->SetDrawSize(drawSize_);
 #ifdef OHOS_STANDARD_SYSTEM
         delegate_->InitOHOSWeb(context_);
 #else
@@ -144,7 +157,7 @@ bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double key
         if (!isFocus_) {
             if (isVirtualKeyBoardShow_ == VkState::VK_SHOW) {
                 drawSize_.SetSize(drawSizeCache_);
-                delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+                delegate_->SetBoundsOrRezise(drawSize_, GetGlobalOffset());
                 SyncGeometryProperties();
                 SetRootView(width, height, 0);
                 isVirtualKeyBoardShow_ = VkState::VK_HIDE;
@@ -153,7 +166,7 @@ bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double key
         }
         if (NearZero(keyboard)) {
             drawSize_.SetSize(drawSizeCache_);
-            delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+            delegate_->SetBoundsOrRezise(drawSize_, GetGlobalOffset());
             SyncGeometryProperties();
             SetRootView(width, height, 0);
             isVirtualKeyBoardShow_ = VkState::VK_HIDE;
@@ -165,7 +178,7 @@ bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double key
                 return true;
             }
             drawSize_.SetHeight(height - keyboard - GetCoordinatePoint().GetY());
-            delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+            delegate_->SetBoundsOrRezise(drawSize_, GetGlobalOffset());
             SyncGeometryProperties();
             SetRootView(width, height, DEFAULT_NUMS_ONE);
             isVirtualKeyBoardShow_ = VkState::VK_SHOW;
@@ -236,7 +249,7 @@ void RenderWeb::OnMouseEvent(const MouseEvent& event)
     }
 
     auto localLocation = event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
-    if (!HandleDoubleClickEvent(event)) { 
+    if (!HandleDoubleClickEvent(event)) {
         delegate_->OnMouseEvent(localLocation.GetX(), localLocation.GetY(), event.button, event.action, SINGLE_CLICK_NUM);
     }
 
@@ -320,6 +333,7 @@ void RenderWeb::OnAppHide()
 
 void RenderWeb::OnGlobalPositionChanged()
 {
+    UpdateGlobalPos();
     if (!textOverlay_ || !updateHandlePosition_) {
         return;
     }
@@ -331,7 +345,37 @@ void RenderWeb::OnPositionChanged()
     PopTextOverlay();
 }
 
-void RenderWeb::OnSizeChanged() {}
+void RenderWeb::OnSizeChanged()
+{
+    if (drawSize_.IsWidthInfinite() || drawSize_.IsHeightInfinite() ||
+        drawSize_.Width() == 0 || drawSize_.Height() == 0) {
+        LOGE("size is invalid");
+        return;
+    }
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("context is nullptr");
+        return;
+    }
+    UpdateGlobalPos();
+    if (delegate_) {
+        if (isEnhanceSurface_ && !isCreateWebView_) {
+            isCreateWebView_ = true;
+            delegate_->SetDrawSize(drawSize_);
+            delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
+            delegate_->InitOHOSWeb(context_);
+        }
+
+        if (!isUrlLoaded_) {
+            delegate_->SetBoundsOrRezise(drawSize_, GetGlobalOffset());
+            if (!delegate_->LoadDataWithRichText()) {
+                LOGI("RenderWeb::Paint start LoadUrl");
+                delegate_->LoadUrl();
+            }
+            isUrlLoaded_ = true;
+        }
+    }
+}
 
 void RenderWeb::Initialize()
 {
@@ -1173,6 +1217,14 @@ void RenderWeb::PanOnActionCancel()
         hasDragItem_ = false;
     }
     SetPreDragDropNode(nullptr);
+}
+
+void RenderWeb::UpdateGlobalPos()
+{
+    auto position = GetGlobalOffset();
+    if (delegate_) {
+        delegate_->SetWebRendeGlobalPos(position);
+    }
 }
 #endif
 } // namespace OHOS::Ace
