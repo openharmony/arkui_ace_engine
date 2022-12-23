@@ -1224,19 +1224,19 @@ int32_t FocusHub::GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes)
     return res;
 }
 
-bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusHub>& curPage)
+bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusHub>& mainFocusHub)
 {
     if (event.code != KeyCode::KEY_TAB || event.action != KeyAction::DOWN) {
         return false;
     }
-    CHECK_NULL_RETURN(curPage, false);
+    CHECK_NULL_RETURN(mainFocusHub, false);
     TabIndexNodeList tabIndexNodes;
     tabIndexNodes.clear();
-    curPage->CollectTabIndexNodes(tabIndexNodes);
+    mainFocusHub->CollectTabIndexNodes(tabIndexNodes);
     tabIndexNodes.sort([](std::pair<int32_t, WeakPtr<FocusHub>>& a, std::pair<int32_t, WeakPtr<FocusHub>>& b) {
         return a.first < b.first;
     });
-    int32_t curTabFocusIndex = curPage->GetFocusingTabNodeIdx(tabIndexNodes);
+    int32_t curTabFocusIndex = mainFocusHub->GetFocusingTabNodeIdx(tabIndexNodes);
     if ((curTabFocusIndex < 0 || curTabFocusIndex >= static_cast<int32_t>(tabIndexNodes.size())) &&
         curTabFocusIndex != DEFAULT_TAB_FOCUSED_INDEX) {
         LOGI("Current focused tabIndex node: %{public}d. Use default focus system.", curTabFocusIndex);

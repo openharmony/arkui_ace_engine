@@ -46,7 +46,7 @@ public:
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     void CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes);
     bool GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t tabNodeIdx);
-    bool HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusGroup>& curPage);
+    bool HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusGroup>& mainNode);
     bool RequestFocusImmediately();
     void UpdateAccessibilityFocusInfo();
     // Use pipeline to request focus. In this case that node gets focus when the layout needs to be completed.
@@ -364,6 +364,15 @@ public:
         return isGroupDefaultFocused_;
     }
 
+    void SetIsDefaultHasFocused(bool isDefaultHasFocused)
+    {
+        isDefaultHasFocused_ = isDefaultHasFocused;
+    }
+    bool IsDefaultHasFocused() const
+    {
+        return isDefaultHasFocused_;
+    }
+
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent) override;
     void OnFocus() override;
@@ -380,6 +389,7 @@ protected:
 
 private:
     bool CalculatePosition();
+    bool isDefaultHasFocused_ { false };
     bool isGroupDefaultFocused_ { false };
     bool isFirstFocusInPage_ { true };
 };
