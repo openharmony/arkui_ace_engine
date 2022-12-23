@@ -238,7 +238,9 @@ bool TextFieldPattern::UpdateCaretPosition()
         UpdateCaretByPressOrLongPress();
     } else if (caretUpdateType_ == CaretUpdateType::EVENT || caretUpdateType_ == CaretUpdateType::DEL) {
         UpdateCaretOffsetByEvent();
-        StartTwinkling();
+        if (!NeedShowPasswordIcon()) {
+            StartTwinkling();
+        }
     } else if (caretUpdateType_ == CaretUpdateType::NONE) {
         if (GetEditingValue().text.empty()) {
             SetCaretOffsetXForEmptyText();
@@ -267,7 +269,8 @@ void TextFieldPattern::CreateSingleHandle()
 
 bool TextFieldPattern::UpdateCaretByPressOrLongPress()
 {
-    if (!SelectOverlayIsOn() && caretUpdateType_ != CaretUpdateType::LONG_PRESSED) {
+    if (CaretPositionCloseToTouchPosition() && !SelectOverlayIsOn() &&
+        caretUpdateType_ != CaretUpdateType::LONG_PRESSED) {
         isSingleHandle_ = true;
         CreateSingleHandle();
         return true;
@@ -291,8 +294,8 @@ bool TextFieldPattern::CaretPositionCloseToTouchPosition()
     auto fontSize = GetTextOrPlaceHolderFontSize();
     auto xInRange = GreatOrEqual(lastTouchOffset_.GetX(), caretRect_.GetX() - fontSize) &&
                     LessOrEqual(lastTouchOffset_.GetX(), caretRect_.GetX() + fontSize);
-    auto yInRange = GreatOrEqual(lastTouchOffset_.GetY(), caretRect_.GetY() + contentRect_.GetY()) &&
-                    LessOrEqual(lastTouchOffset_.GetY(), caretRect_.GetY() + contentRect_.GetY() + fontSize);
+    auto yInRange = GreatOrEqual(lastTouchOffset_.GetY(), caretRect_.GetY() - fontSize) &&
+                    LessOrEqual(lastTouchOffset_.GetY(), caretRect_.GetY() + fontSize * 2.0f);
     return xInRange && yInRange;
 }
 
@@ -415,8 +418,12 @@ void TextFieldPattern::UpdateSelectionOffset()
                 secondHandle.SetSize(handlePaintSize);
                 secondHandleOption = secondHandle;
             }
+            isSingleHandle_ = false;
             ShowSelectOverlay(firstHandleOption, secondHandleOption);
         }
+        return;
+    }
+    if (caretUpdateType_ == CaretUpdateType::HANDLE_MOVE || caretUpdateType_ == CaretUpdateType::HANDLE_MOVE_DONE) {
         return;
     }
     textSelector_.selectionDestinationOffset.SetX(caretRect_.GetX());
@@ -1139,8 +1146,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     CloseSelectOverlay();
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     if (lastTouchOffset_.GetX() > frameRect_.Width() - imageRect_.Width() - GetPaddingRight() &&
-        layoutProperty->GetShowPasswordIcon().value_or(true) &&
-        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD) {
+        NeedShowPasswordIcon()) {
         textObscured_ = !textObscured_;
         ProcessPasswordIcon();
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
