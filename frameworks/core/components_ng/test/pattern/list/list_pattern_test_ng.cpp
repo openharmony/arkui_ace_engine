@@ -1785,32 +1785,26 @@ HWTEST_F(ListPatternTestNg, ListLanesTest002, TestSize.Level1)
 HWTEST_F(ListPatternTestNg, ListLanesTest003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create layoutAlgorithm.
-     * @tc.expected: step1. getLayoutAlgorithm.
-     */
-    ListLanesLayoutAlgorithm listLanesLayoutAlgorithm;
-
-    /**
-     * @tc.steps: step2. call modifyLanLength function and compare.
+     * @tc.steps: step1. call modifyLanLength function and compare.
      * @tc.steps: case1: max = min = 0
-     * @tc.expected: step2. result equals expected result.
+     * @tc.expected: step1. result equals expected result.
      */
-    listLanesLayoutAlgorithm.maxLaneLength_ = 0;
-    listLanesLayoutAlgorithm.minLaneLength_ = 0;
-    listLanesLayoutAlgorithm.ModifyLaneLength(LIST_ITEM_WIDTH);
-    EXPECT_EQ(listLanesLayoutAlgorithm.maxLaneLength_.value(), LIST_ITEM_WIDTH);
-    EXPECT_EQ(listLanesLayoutAlgorithm.minLaneLength_.value(), LIST_ITEM_WIDTH);
+    std::optional<float> minLaneLength = 0;
+    std::optional<float> maxLaneLength = 0;
+    ListLanesLayoutAlgorithm::ModifyLaneLength(minLaneLength, maxLaneLength, LIST_ITEM_WIDTH);
+    EXPECT_EQ(minLaneLength.value(), LIST_ITEM_WIDTH);
+    EXPECT_EQ(maxLaneLength.value(), LIST_ITEM_WIDTH);
 
     /**
      * @tc.steps: step2. call modifyLanLength function and compare.
      * @tc.steps: case2: max = 1, min = 0
      * @tc.expected: step2. result equals expected result.
      */
-    listLanesLayoutAlgorithm.maxLaneLength_ = 1;
-    listLanesLayoutAlgorithm.minLaneLength_ = LIST_ITEM_WIDTH;
-    listLanesLayoutAlgorithm.ModifyLaneLength(LIST_ITEM_WIDTH);
-    EXPECT_EQ(listLanesLayoutAlgorithm.maxLaneLength_.value(), LIST_ITEM_WIDTH);
-    EXPECT_EQ(listLanesLayoutAlgorithm.minLaneLength_.value(), LIST_ITEM_WIDTH);
+    maxLaneLength = 1;
+    minLaneLength = LIST_ITEM_WIDTH;
+    ListLanesLayoutAlgorithm::ModifyLaneLength(minLaneLength, maxLaneLength, LIST_ITEM_WIDTH);
+    EXPECT_EQ(maxLaneLength.value(), LIST_ITEM_WIDTH);
+    EXPECT_EQ(minLaneLength.value(), LIST_ITEM_WIDTH);
 }
 
 /**

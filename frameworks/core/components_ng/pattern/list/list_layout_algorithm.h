@@ -23,7 +23,6 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_v2/list/list_component.h"
 #include "core/components_v2/list/list_properties.h"
@@ -182,8 +181,7 @@ protected:
         return index;
     }
 
-    static RefPtr<ListItemGroupLayoutProperty> GetListItemGroup(const RefPtr<LayoutWrapper>&  layoutWrapper);
-    void SetListItemGroupProperty(const RefPtr<ListItemGroupLayoutProperty>& itemGroup, Axis axis, int32_t lanes);
+    void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper);
     void SetItemInfo(int32_t index, ListItemInfo&& info)
     {
         itemPosition_[index] = info;

@@ -20,6 +20,7 @@
 #include "base/geometry/axis.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
@@ -47,6 +48,26 @@ public:
         return spaceWidth_;
     }
 
+    Axis GetAxis() const
+    {
+        return axis_;
+    }
+
+    int32_t GetLanes() const
+    {
+        return lanes_;
+    }
+
+    void SetListMainSize(float contentMainSize)
+    {
+        listMainSize_ = contentMainSize;
+    }
+
+    void SetListLayoutProperty(RefPtr<ListLayoutProperty> layoutProperty)
+    {
+        listLayoutProperty_ = std::move(layoutProperty);
+    }
+
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -61,10 +82,14 @@ private:
     {
         return layoutWrapper->GetOrCreateChildByIndex(index + itemStartIndex_);
     }
+    void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
+        const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis);
 
     int32_t headerIndex_;
     int32_t footerIndex_;
     int32_t itemStartIndex_;
+    RefPtr<ListLayoutProperty> listLayoutProperty_;
+    float listMainSize_ = 0.0f;
 
     PositionMap itemPosition_;
     Axis axis_ = Axis::VERTICAL;
