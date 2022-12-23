@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 
+#include <numeric>
+
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -431,7 +433,7 @@ void GridScrollLayoutAlgorithm::GetTargetIndexInfoWithBenchMark(
     gridLayoutInfo_.endIndex_ = headOfMainStartLine - 1;
 }
 
-void GridScrollLayoutAlgorithm::UpdateGridLayoutInfo(LayoutWrapper* layoutWrapper)
+void GridScrollLayoutAlgorithm::UpdateGridLayoutInfo(LayoutWrapper* layoutWrapper, float mainSize)
 {
     /* 1. Have gotten gridLayoutInfo_.startMainLineIndex_ and directly jump to it */
     if (gridLayoutInfo_.jumpIndex_ < 0) {
@@ -448,13 +450,29 @@ void GridScrollLayoutAlgorithm::UpdateGridLayoutInfo(LayoutWrapper* layoutWrappe
     /* 2.2 targetIndex is already in the matrix */
     int32_t startLine = 0;
     if (IsIndexInMatrix(targetIndex, startLine)) {
-        gridLayoutInfo_.startMainLineIndex_ = startLine;
-        gridLayoutInfo_.startIndex_ = targetIndex;
-        gridLayoutInfo_.prevOffset_ = 0;
-        gridLayoutInfo_.currentOffset_ = 0;
+        if (startLine < gridLayoutInfo_.endMainLineIndex_ && startLine > gridLayoutInfo_.startMainLineIndex_) {
+            return;
+        }
+        if (startLine == gridLayoutInfo_.startMainLineIndex_) {
+            gridLayoutInfo_.startMainLineIndex_ = startLine;
+            gridLayoutInfo_.startIndex_ = targetIndex;
+            gridLayoutInfo_.prevOffset_ = 0;
+            gridLayoutInfo_.currentOffset_ = 0;
+            gridLayoutInfo_.reachEnd_ = false;
+            gridLayoutInfo_.offsetEnd_ = false;
+            gridLayoutInfo_.reachStart_ = false;
+            return;
+        }
+        // startLine == gridLayoutInfo_.endMainLineIndex_
+        auto totalViewHeight = std::accumulate(gridLayoutInfo_.lineHeightMap_.find(gridLayoutInfo_.startMainLineIndex_),
+            gridLayoutInfo_.lineHeightMap_.find(gridLayoutInfo_.endMainLineIndex_ + 1), 0,
+            [](auto prevHeight, auto& line) { return prevHeight + line.second; });
+        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+        gridLayoutInfo_.currentOffset_ -= (totalViewHeight - mainSize + gridLayoutInfo_.currentOffset_);
         gridLayoutInfo_.reachEnd_ = false;
         gridLayoutInfo_.offsetEnd_ = false;
         gridLayoutInfo_.reachStart_ = false;
+
         return;
     }
 
@@ -478,7 +496,7 @@ void GridScrollLayoutAlgorithm::UpdateGridLayoutInfo(LayoutWrapper* layoutWrappe
 
 float GridScrollLayoutAlgorithm::MeasureRecordedItems(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
 {
-    UpdateGridLayoutInfo(layoutWrapper);
+    UpdateGridLayoutInfo(layoutWrapper, mainSize);
     currentMainLineIndex_ = gridLayoutInfo_.startMainLineIndex_ - 1;
     float mainLength = gridLayoutInfo_.currentOffset_;
     // already at start line, do not use offset for mainLength
