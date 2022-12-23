@@ -73,6 +73,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_001, TestSize.Level1)
     webpattern.OnDefaultFixedFontSizeUpdate(0);
     webpattern.OnDefaultFontSizeUpdate(0);
     webpattern.OnMinFontSizeUpdate(0);
+    webpattern.OnMinLogicalFontSizeUpdate(0);
     webpattern.OnWebFixedFontUpdate("test");
     webpattern.OnBlockNetworkUpdate(true);
 #endif
@@ -120,6 +121,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_002, TestSize.Level1)
     webPattern->OnDefaultFixedFontSizeUpdate(0);
     webPattern->OnDefaultFontSizeUpdate(0);
     webPattern->OnMinFontSizeUpdate(0);
+    webPattern->OnMinLogicalFontSizeUpdate(0);
     webPattern->OnWebFixedFontUpdate("test");
     webPattern->OnBlockNetworkUpdate(true);
 #endif

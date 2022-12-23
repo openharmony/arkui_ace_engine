@@ -195,6 +195,7 @@ HWTEST_F(WebViewTestNg, SetWindowNewEvent004, TestSize.Level1)
     WebView::SetDefaultFixedFontSize(0);
     WebView::SetDefaultFontSize(0);
     WebView::SetMinFontSize(0);
+    WebView::SetMinLogicalFontSize(0);
     WebView::SetWebFixedFont("test");
     WebView::SetBlockNetwork(true);
     WebView::SetPageVisibleId(std::move(renderExitedId));
