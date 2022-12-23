@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
+#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 
@@ -88,6 +89,8 @@ public:
         renderContext->UpdateZIndex(1);
     }
 
+    RefPtr<ListLayoutProperty> GetListLayoutProperty();
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     RefPtr<ShallowBuilder> shallowBuilder_;
@@ -97,7 +100,9 @@ private:
     int32_t itemStartIndex_ = 0;
 
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
-    float spaceWidth_;
+    float spaceWidth_ = 0.0f;
+    Axis axis_ = Axis::VERTICAL;
+    int32_t lanes_ = 1;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListItemGroupPattern);
 };

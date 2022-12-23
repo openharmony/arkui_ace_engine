@@ -37,6 +37,9 @@ public:
         return lanes_;
     }
 
+    static int32_t CalculateLanesParam(std::optional<float>& minLaneLength, std::optional<float>& maxLaneLength,
+        int32_t lanes, std::optional<float> crossSizeOptional);
+
 protected:
     void UpdateListItemConstraint(Axis axis, const OptionalSizeF& selfIdealSize,
         LayoutConstraintF& contentConstraint) override;
@@ -50,10 +53,10 @@ protected:
     int32_t GetLanesFloor(LayoutWrapper* layoutWrapper, int32_t index) override;
 
 private:
-    void ModifyLaneLength(float crossSize);
+    static void ModifyLaneLength(
+        std::optional<float>& minLaneLength, std::optional<float>& maxLaneLength, float crossSize);
     int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t index);
     static int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t index);
-    void SetListItemGroupProperty(const RefPtr<ListItemGroupLayoutProperty>& itemGroup, Axis axis, int32_t lanes);
 
     int32_t lanes_ = 1;
     bool lanesChanged_ = false;
