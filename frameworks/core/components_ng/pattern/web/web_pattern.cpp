@@ -634,6 +634,20 @@ void WebPattern::OnCacheModeUpdate(WebCacheMode value)
     }
 }
 
+void WebPattern::OnDarkModeUpdate(WebDarkMode mode)
+{
+    if (delegate_) {
+        delegate_->UpdateDarkMode(mode);
+    }
+}
+
+void WebPattern::OnForceDarkAccessUpdate(bool access)
+{
+    if (delegate_) {
+        delegate_->UpdateForceDarkAccess(access);
+    }
+}
+
 void WebPattern::OnOverviewModeAccessEnabledUpdate(bool value)
 {
     if (delegate_) {
@@ -838,6 +852,8 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateDomStorageEnabled(GetDomStorageAccessEnabledValue(false));
         delegate_->UpdateGeolocationEnabled(GetGeolocationAccessEnabledValue(true));
         delegate_->UpdateCacheMode(GetCacheModeValue(WebCacheMode::DEFAULT));
+        delegate_->UpdateDarkMode(GetDarkModeValue(WebDarkMode::OFF));
+        delegate_->UpdateForceDarkAccess(GetForceDarkAccessValue(false));
         delegate_->UpdateOverviewModeEnabled(GetOverviewModeAccessEnabledValue(true));
         delegate_->UpdateFileFromUrlEnabled(GetFileFromUrlAccessEnabledValue(false));
         delegate_->UpdateDatabaseEnabled(GetDatabaseAccessEnabledValue(false));

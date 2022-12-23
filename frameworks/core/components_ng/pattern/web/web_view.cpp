@@ -565,4 +565,18 @@ void WebView::SetTouchIconUrlId(OnWebAsyncFunc&& touchIconUrlId)
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnTouchIconUrlEvent(std::move(touchIconUrlId));
 }
+
+void WebView::SetDarkMode(WebDarkMode mode)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateDarkMode(mode);
+}
+
+void WebView::SetForceDarkAccess(bool access)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateForceDarkAccess(access);
+}
 } // namespace OHOS::Ace::NG

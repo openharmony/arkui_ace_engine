@@ -60,4 +60,5 @@ build_component("text_overlay_for_web") {
 
   standard_web_configs = [ ":ohos_text_overlay_web_config" ]
   standard_web_deps = [ "webview:libnweb" ]
+  external_deps = [ "ability_runtime:app_manager" ]
 }

@@ -829,6 +829,13 @@ var CacheMode;
   CacheMode[CacheMode["Only"] = 3] = "Only";
 })(CacheMode || (CacheMode = {}));
 
+var WebDarkMode;
+(function (WebDarkMode) {
+  WebDarkMode[WebDarkMode["OFF"] = 0] = "OFF";
+  WebDarkMode[WebDarkMode["ON"] = 1] = "ON";
+  WebDarkMode[WebDarkMode["AUTO"] = 2] = "AUTO";
+})(WebDarkMode || (WebDarkMode = {}));
+
 var RenderExitReason;
 (function (RenderExitReason) {
   RenderExitReason[RenderExitReason["ProcessAbnormalTermination"] = 0] = "ProcessAbnormalTermination";

@@ -43,6 +43,13 @@ build_component_ng("web_pattern_ng") {
       "//foundation/window/window_manager/utils:libwmutil",
       "//foundation/window/window_manager/wm:libwm",
     ]
-    external_deps = [ "webview:libnweb" ]
+    external_deps = [
+      "ability_base:base",
+      "ability_base:configuration",
+      "ability_runtime:app_manager",
+      "c_utils:utils",
+      "ipc:ipc_core",
+      "webview:libnweb",
+    ]
   }
 }

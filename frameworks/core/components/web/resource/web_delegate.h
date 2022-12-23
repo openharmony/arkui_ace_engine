@@ -40,6 +40,7 @@
 #include "nweb_handler.h"
 #include "nweb_helper.h"
 #include "nweb_hit_testresult.h"
+#include "app_mgr_client.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "surface.h"
 #endif
@@ -396,6 +397,11 @@ public:
     void UpdateDomStorageEnabled(const bool& isDomStorageAccessEnabled);
     void UpdateGeolocationEnabled(const bool& isGeolocationAccessEnabled);
     void UpdateCacheMode(const WebCacheMode& mode);
+    std::shared_ptr<OHOS::NWeb::NWeb> GetNweb();
+    bool GetForceDarkMode();
+    void UpdateDarkMode(const WebDarkMode& mode);
+    void UpdateDarkModeAuto(RefPtr<WebDelegate> delegate, std::shared_ptr<OHOS::NWeb::NWebPreference> setting);
+    void UpdateForceDarkAccess(const bool& access);
     void UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled);
     void UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnabled);
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
@@ -431,8 +437,8 @@ public:
     void OnFocus();
     void OnBlur();
     void OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request);
-    bool RunQuickMenu(
-        std::shared_ptr<NWeb::NWebQuickMenuParams> params, std::shared_ptr<NWeb::NWebQuickMenuCallback> callback);
+    bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
+        std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void OnQuickMenuDismissed();
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
@@ -553,6 +559,8 @@ private:
     void SetWebCallBack();
     void RunSetWebIdCallback();
     void RunJsProxyCallback();
+    void RegisterConfigObserver();
+    void UnRegisterConfigObserver();
 
     // Backward and forward
     void Backward();
@@ -636,6 +644,8 @@ private:
     EGLContext mSharedEGLContext = EGL_NO_CONTEXT;
     EGLSurface mEGLSurface = nullptr;
     WindowsSurfaceInfo surfaceInfo_;
+    bool forceDarkMode_ = false;
+    sptr<AppExecFwk::IConfigurationObserver> configChangeObserver_ = nullptr;
 #endif
 };
 
