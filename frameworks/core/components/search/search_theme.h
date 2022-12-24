@@ -185,12 +185,12 @@ public:
         return dividerSideSpace_;
     }
 
-    float GetSearchDividerWidth() const
+    const Dimension& GetSearchDividerWidth() const
     {
         return searchDividerWidth_;
     }
 
-    float GetTextPadding() const
+    const Dimension& GetTextPadding() const
     {
         return textPadding_;
     }
@@ -247,8 +247,8 @@ private:
     Radius borderRadius_;
     bool blockRightShade_ = false;
     Dimension dividerSideSpace_ = 2.0_vp;
-    float searchDividerWidth_ = 1.0f;
-    float textPadding_ = 18.0f;
+    Dimension searchDividerWidth_ = 1.0_px;
+    Dimension textPadding_ = 10.0_vp;
     Dimension searchButtonSpacing_ = 2.0_vp;
     Dimension iconHeight_ = 16.0_vp;
     Dimension iconWidthOffset_ = 12.0_vp;

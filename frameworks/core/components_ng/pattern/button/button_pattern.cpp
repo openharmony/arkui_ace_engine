@@ -117,6 +117,8 @@ void ButtonPattern::OnModifyDone()
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gesture->AddTouchEvent(touchListener_);
+
+    HandleEnabled();
 }
 
 void ButtonPattern::OnTouchDown()
@@ -191,6 +193,28 @@ void ButtonPattern::HandleMouseEvent(bool isHover)
     auto hoverColor = theme->GetHoverColor();
     if (isHover) {
         renderContext->BlendBgColor(hoverColor);
+    } else {
+        renderContext->ResetBlendBgColor();
+    }
+}
+
+void ButtonPattern::HandleEnabled()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(theme);
+    if (!enabled) {
+        auto alpha = theme->GetBgDisabledAlpha();
+        auto color = renderContext->GetBackgroundColor();
+        renderContext->UpdateBackgroundColor(color->BlendOpacity(alpha));
     } else {
         renderContext->ResetBlendBgColor();
     }
