@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 
-#include <numeric>
-
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -292,14 +290,7 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize)
     }
     // Step1. Calculate total length of all items with cross gap in viewport.
     // [lengthOfItemsInViewport] must be greater than or equal to viewport height
-    float lengthOfItemsInViewport = 0.0;
-    for (auto i = gridLayoutInfo_.startMainLineIndex_; i <= gridLayoutInfo_.endMainLineIndex_; i++) {
-        if (i != gridLayoutInfo_.endMainLineIndex_) {
-            lengthOfItemsInViewport += (gridLayoutInfo_.lineHeightMap_[i] + mainGap_);
-        } else {
-            lengthOfItemsInViewport += gridLayoutInfo_.lineHeightMap_[i];
-        }
-    }
+    float lengthOfItemsInViewport = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_);
 
     // Step2. Calculate real offset that items can only be moved up by.
     // Hint: [prevOffset_] is a non-positive value
@@ -464,15 +455,12 @@ void GridScrollLayoutAlgorithm::UpdateGridLayoutInfo(LayoutWrapper* layoutWrappe
             return;
         }
         // startLine == gridLayoutInfo_.endMainLineIndex_
-        auto totalViewHeight = std::accumulate(gridLayoutInfo_.lineHeightMap_.find(gridLayoutInfo_.startMainLineIndex_),
-            gridLayoutInfo_.lineHeightMap_.find(gridLayoutInfo_.endMainLineIndex_ + 1), 0,
-            [](auto prevHeight, auto& line) { return prevHeight + line.second; });
+        auto totalViewHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_);
         gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
         gridLayoutInfo_.currentOffset_ -= (totalViewHeight - mainSize + gridLayoutInfo_.currentOffset_);
         gridLayoutInfo_.reachEnd_ = false;
         gridLayoutInfo_.offsetEnd_ = false;
         gridLayoutInfo_.reachStart_ = false;
-
         return;
     }
 
