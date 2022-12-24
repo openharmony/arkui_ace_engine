@@ -25,11 +25,13 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/layout_param.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
@@ -199,14 +201,12 @@ void ListLayoutAlgorithm::MeasureList(
 int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
     const LayoutConstraintF& layoutConstraint, Axis axis, int32_t& currentIndex, float startPos, float& endPos)
 {
-    bool isGroup = false;
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
     CHECK_NULL_RETURN(wrapper, 0);
     ++currentIndex;
-    auto itemGroup = GetListItemGroup(wrapper);
-    if (itemGroup) {
-        isGroup = true;
-        SetListItemGroupProperty(itemGroup, axis, 1);
+    bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+    if (isGroup) {
+        SetListItemGroupParam(wrapper);
     }
     {
         ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
@@ -221,14 +221,12 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
 int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
     const LayoutConstraintF& layoutConstraint, Axis axis, int32_t& currentIndex, float endPos, float& startPos)
 {
-    bool isGroup = false;
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex - 1);
     CHECK_NULL_RETURN(wrapper, 0);
     --currentIndex;
-    auto itemGroup = GetListItemGroup(wrapper);
-    if (itemGroup) {
-        isGroup = true;
-        SetListItemGroupProperty(itemGroup, axis, 1);
+    bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+    if (isGroup) {
+        SetListItemGroupParam(wrapper);
     }
     {
         ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
@@ -420,20 +418,13 @@ float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float child
     }
 }
 
-RefPtr<ListItemGroupLayoutProperty> ListLayoutAlgorithm::GetListItemGroup(const RefPtr<LayoutWrapper>& layoutWrapper)
+void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
-    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
-    return AceType::DynamicCast<ListItemGroupLayoutProperty>(layoutProperty);
-}
-
-void ListLayoutAlgorithm::SetListItemGroupProperty(const RefPtr<ListItemGroupLayoutProperty>& itemGroup,
-    Axis axis, int32_t lanes)
-{
-    itemGroup->UpdateListDirection(axis);
-    itemGroup->UpdateLanes(lanes);
-    itemGroup->UpdateListItemAlign(listItemAlign_);
-    itemGroup->UpdateStickyStyle(stickyStyle_);
-    itemGroup->UpdateListMainSize(contentMainSize_);
+    auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm();
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(itemGroup);
+    itemGroup->SetListMainSize(contentMainSize_);
 }
 
 void ListLayoutAlgorithm::CreateItemGroupList(LayoutWrapper* layoutWrapper)

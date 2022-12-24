@@ -136,7 +136,7 @@ RefPtr<FrameNode> ListItemPattern::GetListFrameNode() const
     auto parent = host->GetParent();
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
     while (parent && !frameNode) {
-        parent = frameNode->GetParent();
+        parent = parent->GetParent();
         frameNode = AceType::DynamicCast<FrameNode>(parent);
     }
     return frameNode;
