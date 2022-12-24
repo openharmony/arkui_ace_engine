@@ -22,6 +22,7 @@ ohos_unittest("ability_component_pattern_test_ng") {
     "//third_party/flutter/skia/src",
     "//third_party/jsoncpp/include",
     "//third_party/bounds_checking_function/include",
+    "//base/account/os_account/interfaces/innerkits/domain_account/native/include",
     "//base/account/os_account/interfaces/innerkits/osaccount/native/include",
     "//foundation/window/window_manager/interfaces/innerkits/extension",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
