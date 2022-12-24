@@ -18,6 +18,7 @@
 #include "window.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
+#include "core/components/root/root_element.h"
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
@@ -248,6 +249,25 @@ void SubwindowOhos::HideWindow()
 {
     LOGI("Hide the subwindow");
     CHECK_NULL_VOID(window_);
+
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+        CHECK_NULL_VOID(context);
+        auto rootNode = context->GetRootElement();
+        CHECK_NULL_VOID(rootNode);
+        auto focusHub = rootNode->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetIsDefaultHasFocused(false);
+    } else {
+        auto context = DynamicCast<PipelineContext>(aceContainer->GetPipelineContext());
+        CHECK_NULL_VOID(context);
+        auto rootNode = context->GetRootElement();
+        CHECK_NULL_VOID(rootNode);
+        rootNode->SetIsDefaultHasFocused(false);
+    }
 
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     CHECK_NULL_VOID(parentContainer);

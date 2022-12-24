@@ -53,6 +53,7 @@ void OptionElement::PerformBuild()
 
 bool OptionElement::OnKeyEvent(const KeyEvent& keyEvent)
 {
+    FocusGroup::OnKeyEvent(keyEvent);
     if (!((keyEvent.code == KeyCode::KEY_BACK || keyEvent.code == KeyCode::KEY_ESCAPE) &&
         keyEvent.action == KeyAction::UP)) {
         return false;
@@ -68,6 +69,7 @@ bool OptionElement::OnKeyEvent(const KeyEvent& keyEvent)
 
 void OptionElement::OnFocus()
 {
+    FocusGroup::OnFocus();
     RefPtr<RenderOption> render = AceType::DynamicCast<RenderOption>(renderNode_);
     if (!render) {
         LOGE("select: can not dynamic from render node to render select option.");
@@ -78,6 +80,7 @@ void OptionElement::OnFocus()
 
 void OptionElement::OnClick()
 {
+    FocusGroup::OnClick();
     RefPtr<RenderOption> render = AceType::DynamicCast<RenderOption>(renderNode_);
     if (!render) {
         LOGE("select: can not dynamic from render node to render select option.");
@@ -88,12 +91,18 @@ void OptionElement::OnClick()
 
 void OptionElement::OnBlur()
 {
+    FocusGroup::OnBlur();
     RefPtr<RenderOption> render = AceType::DynamicCast<RenderOption>(renderNode_);
     if (!render) {
         LOGE("select: can not dynamic from render node to render select option.");
         return;
     }
     render->OnFocus(false);
+}
+
+bool OptionElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect)
+{
+    return false;
 }
 
 } // namespace OHOS::Ace
