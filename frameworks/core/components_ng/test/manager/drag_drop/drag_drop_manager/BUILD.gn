@@ -76,7 +76,7 @@ ohos_unittest("drag_drop_manager_test_ng") {
 
   deps = [
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
-    "$cjson_root:cjson_static",
+    "$cjson_root:cjson",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_src",
     "//third_party/googletest:gmock_main",

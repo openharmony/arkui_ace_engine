@@ -96,7 +96,7 @@ ohos_unittest("lazy_for_each_syntax_test_ng") {
 
   deps = [
     "$ace_root:ace_test_log",
-    "$cjson_root:cjson_static",
+    "$cjson_root:cjson",
     "//third_party/googletest:gmock_main",
   ]
 

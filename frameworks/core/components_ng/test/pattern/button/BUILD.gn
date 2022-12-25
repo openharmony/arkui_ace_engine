@@ -114,7 +114,7 @@ ohos_unittest("button_pattern_test_ng") {
 
   deps = [
     "$ace_root:ace_test_log",
-    "$cjson_root:cjson_static",
+    "$cjson_root:cjson",
     "//third_party/googletest:gmock_main",
   ]
 
