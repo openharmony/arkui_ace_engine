@@ -57,6 +57,7 @@ public:
 private:
     void UpdateAttr(const RefPtr<CalendarComponent>& calendar);
     void SetArrowImage(const RefPtr<Element>& element, bool isLeft);
+    void RegisterChangeEndListener(const RefPtr<CalendarComponent>& calendar, const RefPtr<Element>& element);
     RefPtr<TextElement> GetTextElement(const RefPtr<Element>& flex);
 
     RefPtr<CalendarController> calendarController_;
