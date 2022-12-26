@@ -13,26 +13,8 @@
  * limitations under the License.
  */
 
-#include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/scroll/effect/scroll_fade_painter.h"
 
-namespace OHOS::Ace {
-Scrollable::~Scrollable() = default;
-
-void Scrollable::OnFlushTouchEventsBegin() {}
-
-void Scrollable::OnFlushTouchEventsEnd() {}
-
-void Scrollable::Initialize(const WeakPtr<PipelineBase>& context) {}
-
-bool Scrollable::Idle() const
-{
-    return false;
-}
-
-void Scrollable::StartSpringMotion(
-    double mainPosition, double mainVelocity, const ExtentPair& extent, const ExtentPair& initExtent)
-{}
-
-void Scrollable::SetAxis(Axis axis)
-{}
-} // namespace OHOS::Ace
+namespace OHOS::Ace::NG {
+void ScrollFadePainter::PaintSide(RSCanvas& canvas, const SizeF& size, const OffsetF& offset) {}
+} // namespace OHOS::Ace::NG

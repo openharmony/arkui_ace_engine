@@ -22,18 +22,18 @@ namespace OHOS::Ace::NG {
 
 RefPtr<LayoutAlgorithm> ListItemGroupPattern::CreateLayoutAlgorithm()
 {
-    return MakeRefPtr<ListItemGroupLayoutAlgorithm>(headerIndex_, footerIndex_, itemStartIndex_);
+    auto layoutAlgorithm = MakeRefPtr<ListItemGroupLayoutAlgorithm>(headerIndex_, footerIndex_, itemStartIndex_);
+    layoutAlgorithm->SetListLayoutProperty(GetListLayoutProperty());
+    return layoutAlgorithm;
 }
 
 RefPtr<NodePaintMethod> ListItemGroupPattern::CreateNodePaintMethod()
 {
-    auto listLayoutProperty = GetHost()->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    auto layoutProperty = GetLayoutProperty<ListItemGroupLayoutProperty>();
     V2::ItemDivider itemDivider;
-    auto divider = listLayoutProperty->GetDivider().value_or(itemDivider);
-    auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
-    auto lanes = listLayoutProperty->GetLanes().value_or(1);
-    auto drawVertical = (axis == Axis::HORIZONTAL);
-    return MakeRefPtr<ListItemGroupPaintMethod>(divider, drawVertical, lanes, spaceWidth_, itemPosition_);
+    auto divider = layoutProperty->GetDivider().value_or(itemDivider);
+    auto drawVertical = (axis_ == Axis::HORIZONTAL);
+    return MakeRefPtr<ListItemGroupPaintMethod>(divider, drawVertical, lanes_, spaceWidth_, itemPosition_);
 }
 
 bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -47,9 +47,25 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     itemPosition_ = layoutAlgorithm->GetItemPosition();
     spaceWidth_ = layoutAlgorithm->GetSpaceWidth();
+    lanes_ = layoutAlgorithm->GetLanes();
+    axis_ = layoutAlgorithm->GetAxis();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto listLayoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();
     return listLayoutProperty && listLayoutProperty->GetDivider().has_value() && !itemPosition_.empty();
+}
+
+RefPtr<ListLayoutProperty> ListItemGroupPattern::GetListLayoutProperty()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto parent = host->GetParent();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+    while (parent && !frameNode) {
+        parent = parent->GetParent();
+        frameNode = AceType::DynamicCast<FrameNode>(parent);
+    }
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode->GetLayoutProperty<ListLayoutProperty>();
 }
 } // namespace OHOS::Ace::NG

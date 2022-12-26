@@ -23,7 +23,6 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_v2/list/list_component.h"
 #include "core/components_v2/list/list_properties.h"
@@ -148,14 +147,9 @@ public:
         return itemPosition_.rbegin()->second.endPos + spaceWidth_;
     }
 
-    WeakPtr<FrameNode> GetHeaderGroupNode() const
+    std::list<WeakPtr<FrameNode>>& GetItemGroupList()
     {
-        return headerGroupNode_;
-    }
-
-    WeakPtr<FrameNode> GetFooterGroupNode() const
-    {
-        return footerGroupNode_;
+        return itemGroupList_;
     }
 
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -181,14 +175,13 @@ protected:
         Axis axis, int32_t& currentIndex, float endPos, float& startPos);
     virtual float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     virtual void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
-        const LayoutConstraintF& layoutConstraint, Axis axis) {};
+        const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis) {};
     virtual int32_t GetLanesFloor(LayoutWrapper* layoutWrapper, int32_t index)
     {
         return index;
     }
 
-    static RefPtr<ListItemGroupLayoutProperty> GetListItemGroup(const RefPtr<LayoutWrapper>&  layoutWrapper);
-    void SetListItemGroupProperty(const RefPtr<ListItemGroupLayoutProperty>& itemGroup, Axis axis, int32_t lanes);
+    void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper);
     void SetItemInfo(int32_t index, ListItemInfo&& info)
     {
         itemPosition_[index] = info;
@@ -208,7 +201,8 @@ private:
     std::pair<int32_t, float> RequestNewItemsBackward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
 
-    void GetHeaderFooterGroupNode(LayoutWrapper* layoutWrapper);
+    void CreateItemGroupList(LayoutWrapper* layoutWrapper);
+    bool HasItemGroup();
 
     std::optional<int32_t> jumpIndex_;
     ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
@@ -235,8 +229,7 @@ private:
     float paddingAfterContent_ = 0.0f;
 
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
-    WeakPtr<FrameNode> headerGroupNode_;
-    WeakPtr<FrameNode> footerGroupNode_;
+    std::list<WeakPtr<FrameNode>> itemGroupList_;
 };
 } // namespace OHOS::Ace::NG
 

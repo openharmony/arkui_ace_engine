@@ -25,11 +25,13 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/layout_param.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
@@ -57,7 +59,7 @@ void ListLayoutAlgorithm::UpdateListItemConstraint(
 
 void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    if (overScrollFeature_ && !layoutWrapper->CheckChildNeedForceMeasureAndLayout()) {
+    if (overScrollFeature_ && !layoutWrapper->CheckChildNeedForceMeasureAndLayout() && !HasItemGroup()) {
         LOGD("in over scroll case");
         return;
     }
@@ -72,8 +74,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // calculate main size.
     auto contentConstraint = listLayoutProperty->GetContentLayoutConstraint().value();
     auto contentIdealSize = CreateIdealSize(
-        contentConstraint, axis, listLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS),
-        listLayoutProperty->CreateMargin());
+        contentConstraint, axis, listLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS));
 
     const auto& padding = listLayoutProperty->CreatePaddingAndBorder();
     paddingBeforeContent_ = axis == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
@@ -111,7 +112,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
         }
 
-        CalculateLanes(listLayoutProperty, layoutConstraint, axis);
+        CalculateLanes(listLayoutProperty, layoutConstraint, contentIdealSize.CrossSize(axis), axis);
         listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
         // calculate child layout constraint.
         auto childLayoutConstraint = listLayoutProperty->CreateChildConstraint();
@@ -194,20 +195,18 @@ void ListLayoutAlgorithm::MeasureList(
             LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
         }
     }
-    GetHeaderFooterGroupNode(layoutWrapper);
+    CreateItemGroupList(layoutWrapper);
 }
 
 int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
     const LayoutConstraintF& layoutConstraint, Axis axis, int32_t& currentIndex, float startPos, float& endPos)
 {
-    bool isGroup = false;
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
     CHECK_NULL_RETURN(wrapper, 0);
     ++currentIndex;
-    auto itemGroup = GetListItemGroup(wrapper);
-    if (itemGroup) {
-        isGroup = true;
-        SetListItemGroupProperty(itemGroup, axis, 1);
+    bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+    if (isGroup) {
+        SetListItemGroupParam(wrapper);
     }
     {
         ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
@@ -222,14 +221,12 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
 int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
     const LayoutConstraintF& layoutConstraint, Axis axis, int32_t& currentIndex, float endPos, float& startPos)
 {
-    bool isGroup = false;
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex - 1);
     CHECK_NULL_RETURN(wrapper, 0);
     --currentIndex;
-    auto itemGroup = GetListItemGroup(wrapper);
-    if (itemGroup) {
-        isGroup = true;
-        SetListItemGroupProperty(itemGroup, axis, 1);
+    bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+    if (isGroup) {
+        SetListItemGroupParam(wrapper);
     }
     {
         ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
@@ -359,9 +356,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
-    auto left = padding.left.value_or(0.0f);
-    auto top = padding.top.value_or(0.0f);
-    auto paddingOffset = OffsetF(left, top);
+    auto paddingOffset = padding.Offset();
     float crossSize = GetCrossAxisSize(size, axis);
     totalItemCount_ = layoutWrapper->GetTotalChildCount();
     listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
@@ -423,37 +418,31 @@ float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float child
     }
 }
 
-RefPtr<ListItemGroupLayoutProperty> ListLayoutAlgorithm::GetListItemGroup(const RefPtr<LayoutWrapper>& layoutWrapper)
+void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
-    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
-    return AceType::DynamicCast<ListItemGroupLayoutProperty>(layoutProperty);
+    auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm();
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(itemGroup);
+    itemGroup->SetListMainSize(contentMainSize_);
 }
 
-void ListLayoutAlgorithm::SetListItemGroupProperty(const RefPtr<ListItemGroupLayoutProperty>& itemGroup,
-    Axis axis, int32_t lanes)
+void ListLayoutAlgorithm::CreateItemGroupList(LayoutWrapper* layoutWrapper)
 {
-    itemGroup->UpdateListDirection(axis);
-    itemGroup->UpdateLanes(lanes);
-    itemGroup->UpdateListItemAlign(listItemAlign_);
-    itemGroup->UpdateStickyStyle(stickyStyle_);
-    itemGroup->UpdateListMainSize(contentMainSize_);
-}
-
-void ListLayoutAlgorithm::GetHeaderFooterGroupNode(LayoutWrapper* layoutWrapper)
-{
-    if (!itemPosition_.empty() && stickyStyle_ != V2::StickyStyle::NONE) {
-        if (itemPosition_.begin()->second.isGroup) {
-            auto headerWrapper = layoutWrapper->GetOrCreateChildByIndex(itemPosition_.begin()->first);
-            if (headerWrapper) {
-                headerGroupNode_ = headerWrapper->GetWeakHostNode();
-            }
-        }
-        if (itemPosition_.size() > 1 && itemPosition_.rbegin()->second.isGroup) {
-            auto footerWrapper = layoutWrapper->GetOrCreateChildByIndex(itemPosition_.rbegin()->first);
-            if (footerWrapper) {
-                footerGroupNode_ = footerWrapper->GetWeakHostNode();
+    itemGroupList_.clear();
+    if (stickyStyle_ != V2::StickyStyle::NONE) {
+        for (const auto& item : itemPosition_) {
+            if (item.second.isGroup) {
+                auto wrapper = layoutWrapper->GetOrCreateChildByIndex(item.first);
+                itemGroupList_.push_back(wrapper->GetWeakHostNode());
             }
         }
     }
+}
+
+bool ListLayoutAlgorithm::HasItemGroup()
+{
+    return std::any_of(itemPosition_.begin(), itemPosition_.end(),
+        [](const auto& item) { return item.second.isGroup; });
 }
 } // namespace OHOS::Ace::NG

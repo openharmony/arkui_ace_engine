@@ -264,8 +264,7 @@ SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, Meas
     return optional.ConvertToSizeT();
 }
 
-OptionalSizeF CreateIdealSize(
-    const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, const MarginPropertyF& margin)
+OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType)
 {
     OptionalSizeF idealSize;
     do {
@@ -286,9 +285,7 @@ OptionalSizeF CreateIdealSize(
             if (!selfSize) {
                 auto parentCrossSize = GetCrossAxisSize(layoutConstraint.parentIdealSize, axis);
                 if (parentCrossSize) {
-                    float marginValue = (axis == Axis::VERTICAL ? margin.left.value_or(0) + margin.right.value_or(0)
-                                                                : margin.top.value_or(0) + margin.bottom.value_or(0));
-                    SetCrossAxisSize(parentCrossSize.value() - marginValue, axis, idealSize);
+                    SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
                 } else {
                     parentCrossSize = GetCrossAxisSize(layoutConstraint.maxSize, axis);
                     SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
@@ -302,9 +299,7 @@ OptionalSizeF CreateIdealSize(
             auto parentMainSize = GetMainAxisSize(layoutConstraint.parentIdealSize, axis);
             if (!selfSize) {
                 if (parentMainSize) {
-                    float marginValue = (axis == Axis::VERTICAL ? margin.top.value_or(0) + margin.bottom.value_or(0)
-                                                                : margin.left.value_or(0) + margin.right.value_or(0));
-                    SetMainAxisSize(parentMainSize.value() - marginValue, axis, idealSize);
+                    SetMainAxisSize(parentMainSize.value(), axis, idealSize);
                 } else {
                     parentMainSize = GetMainAxisSize(layoutConstraint.maxSize, axis);
                     SetMainAxisSize(parentMainSize.value(), axis, idealSize);
