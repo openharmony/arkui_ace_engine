@@ -196,7 +196,7 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const Re
     // If childPosition is error, adjust bubble to bottom.
     if (placement_ != Placement::TOP || errorType == ErrorPositionType::TOP_LEFT_ERROR) {
         childPosition = FitToScreen(bottomPosition, childSize);
-        arrowPosition_ = bottomArrowPosition + (childPosition - bottomPosition);
+        arrowPosition_ = bottomArrowPosition;
         arrowPlacement_ = Placement::BOTTOM;
         if (GetErrorPositionType(childPosition, childSize) == ErrorPositionType::NORMAL) {
             return childPosition;
@@ -204,7 +204,7 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const Re
     }
     // If childPosition is error, adjust bubble to top.
     childPosition = FitToScreen(topPosition, childSize);
-    arrowPosition_ = topArrowPosition + (childPosition - topPosition);
+    arrowPosition_ = topArrowPosition;
     arrowPlacement_ = Placement::TOP;
     if (GetErrorPositionType(childPosition, childSize) == ErrorPositionType::NORMAL) {
         return childPosition;
@@ -229,7 +229,6 @@ void BubbleLayoutAlgorithm::InitArrowState(const RefPtr<BubbleLayoutProperty>& l
         childSize_.Width() - std::max(padding_.Left().ConvertToPx(), border_.TopLeftRadius().GetX().ConvertToPx()) -
             std::max(padding_.Right().ConvertToPx(), border_.TopRightRadius().GetX().ConvertToPx()),
         arrowWidth);
-    showBottomArrow_ = GreatOrEqual(childSize_.Width(), arrowWidth);
     showBottomArrow_ = GreatOrEqual(
         childSize_.Width() - std::max(padding_.Left().ConvertToPx(), border_.BottomLeftRadius().GetX().ConvertToPx()) -
             std::max(padding_.Right().ConvertToPx(), border_.BottomRightRadius().GetX().ConvertToPx()),
