@@ -18,6 +18,7 @@
 #include <utility>
 
 #include "base/utils/utils.h"
+#include "core/animation/animation_pub.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -49,8 +50,16 @@ void OverlayManager::Show(const RefPtr<FrameNode>& node)
     root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
 
     AnimationOption option;
-    option.SetCurve(Curves::SMOOTH);
+    option.SetCurve(Curves::LINEAR);
     option.SetDuration(ANIMATION_DUR);
+    option.SetFillMode(FillMode::FORWARDS);
+    option.SetOnFinishEvent([weak = WeakClaim(this), nodeWK = WeakClaim(RawPtr(node)), id = Container::CurrentId()] {
+        auto node = nodeWK.Upgrade();
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID(node && overlayManager);
+        ContainerScope scope(id);
+        overlayManager->FocusDialog(node);
+    });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
     ctx->OpacityAnimation(option, 0.0, 1.0);
@@ -59,8 +68,9 @@ void OverlayManager::Show(const RefPtr<FrameNode>& node)
 void OverlayManager::Pop(const RefPtr<FrameNode>& node)
 {
     AnimationOption option;
-    option.SetCurve(Curves::SMOOTH);
+    option.SetCurve(Curves::LINEAR);
     option.SetDuration(ANIMATION_DUR);
+    option.SetFillMode(FillMode::FORWARDS);
     option.SetOnFinishEvent([rootWk = rootNodeWeak_, nodeWk = WeakClaim(RawPtr(node)), id = Container::CurrentId()] {
         auto root = rootWk.Upgrade();
         auto node = nodeWk.Upgrade();
@@ -320,7 +330,6 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     LOGI("OverlayManager::ShowDialog");
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
     Show(dialog);
-    FocusDialog(dialog);
     return dialog;
 }
 
@@ -332,7 +341,6 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps,
         dialogProps, std::move(datePickerProperty), isLunar, std::move(dialogEvent), std::move(dialogCancelEvent));
     CHECK_NULL_VOID(dialogNode);
     Show(dialogNode);
-    FocusDialog(dialogNode);
 }
 
 void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps,
@@ -342,7 +350,6 @@ void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps,
     auto dialogNode = TimePickerDialogView::Show(dialogProps, std::move(timePickerProperty), isUseMilitaryTime,
         std::move(dialogEvent), std::move(dialogCancelEvent));
     Show(dialogNode);
-    FocusDialog(dialogNode);
 }
 
 void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, uint32_t selected, const Dimension& height,
@@ -352,7 +359,6 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, uint32_
     auto dialogNode = TextPickerDialogView::Show(
         dialogProps, selected, height, getRangeVector, std::move(dialogEvent), std::move(dialogCancelEvent));
     Show(dialogNode);
-    FocusDialog(dialogNode);
 }
 
 void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
@@ -391,7 +397,6 @@ void OverlayManager::FocusDialog(const RefPtr<FrameNode>& dialogNode)
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);
     focusHub->RequestFocusImmediately();
-    pageFocusHub->LostFocus();
 }
 
 void OverlayManager::BlurDialog()
