@@ -224,14 +224,17 @@ if (is_standard_system) {
     uv_path = get_label_info("//third_party/libuv:uv", "root_out_dir")
     icu_path =
         get_label_info("//third_party/icu/icu4c:shared_icuuc", "root_out_dir")
+    cjson_path = get_label_info("//third_party/cJSON:cjson", "root_out_dir")
     deps += [
       "$ace_napi:ace_napi",
+      "//third_party/cJSON:cjson",
       "//third_party/icu/icu4c:shared_icui18n",
       "//third_party/icu/icu4c:shared_icuuc",
       "//third_party/libuv:uv",
     ]
     sources += [
       "$ace_napi_path/arkui/napi/libace_napi${dylib_suffix}",
+      "$cjson_path/thirdparty/cjson/libcjson${dylib_suffix}",
       "$icu_path/thirdparty/icu/libhmicui18n${dylib_suffix}",
       "$icu_path/thirdparty/icu/libhmicuuc${dylib_suffix}",
       "$uv_path/thirdparty/libuv/libuv${dylib_suffix}",
