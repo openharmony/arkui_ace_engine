@@ -95,11 +95,6 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0,    0,  // red
 void ImagePainter::DrawImage(
     RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize, const ImagePaintConfig& imagePaintConfig) const
 {
-    if (!imagePaintConfig.dstRect_.IsValid()) {
-        LOGW("image dstRect isn't valid");
-        return;
-    }
-
     if (imagePaintConfig.isSvg_) {
         DrawSVGImage(canvas, offset, contentSize, imagePaintConfig);
     } else if (imagePaintConfig.imageRepeat_ == ImageRepeat::NO_REPEAT) {
