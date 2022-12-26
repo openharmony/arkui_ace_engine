@@ -16,20 +16,21 @@
 #include "core/components/plugin/plugin_sub_container.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
+#include "bridge/common/utils/engine_helper.h"
+#include "bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
+#include "core/common/flutter/flutter_asset_manager.h"
+#include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/plugin_manager.h"
 #include "core/components/plugin/file_asset_provider.h"
+#include "core/components/plugin/hap_asset_provider.h"
+#include "core/components/plugin/plugin_element.h"
+#include "core/components/plugin/plugin_window.h"
+#include "core/components/plugin/render_plugin.h"
 #include "core/components/theme/theme_manager_impl.h"
+#include "core/components/transform/transform_element.h"
 #include "core/components_ng/pattern/plugin/plugin_layout_property.h"
-#include "frameworks/bridge/common/utils/engine_helper.h"
-#include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
-#include "frameworks/core/common/flutter/flutter_asset_manager.h"
-#include "frameworks/core/common/flutter/flutter_task_executor.h"
-#include "frameworks/core/components/plugin/plugin_element.h"
-#include "frameworks/core/components/plugin/plugin_window.h"
-#include "frameworks/core/components/plugin/render_plugin.h"
-#include "frameworks/core/components/transform/transform_element.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -184,6 +185,70 @@ void PluginSubContainer::UpdateSurfaceSize()
         TaskExecutor::TaskType::UI);
 }
 
+void PluginSubContainer::RunDecompressedPlugin(const std::string& hapPath, const std::string& module,
+    const std::string& source, const std::string& moduleResPath, const std::string& data)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_VOID(frontend_);
+    frontend_->ResetPageLoadState();
+    auto flutterAssetManager = GetDecompressedAssetManager(hapPath, module);
+
+    auto&& window = std::make_unique<PluginWindow>(outSidePipelineContext_);
+    pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(std::move(window), taskExecutor_, assetManager_,
+        outSidePipelineContext_.Upgrade()->GetPlatformResRegister(), frontend_, instanceId_);
+
+    density_ = outSidePipelineContext_.Upgrade()->GetDensity();
+    auto eventManager = outSidePipelineContext_.Upgrade()->GetEventManager();
+    pipelineContext_->SetEventManager(eventManager);
+    UpdateRootElementSize();
+    pipelineContext_->SetIsJsPlugin(true);
+
+    SetPluginComponentTheme(moduleResPath, flutterAssetManager);
+    SetActionEventHandler();
+
+    auto weakContext = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
+    auto& instance = instanceId_;
+    taskExecutor_->PostTask(
+        [weakContext, &instance]() {
+            ContainerScope scope(instance);
+            auto context = weakContext.Upgrade();
+            if (context == nullptr) {
+                LOGE("context or root box is nullptr");
+                return;
+            }
+            context->SetupRootElement();
+        },
+        TaskExecutor::TaskType::UI);
+
+    if (frontend_) {
+        frontend_->AttachPipelineContext(pipelineContext_);
+    }
+    if (frontend_) {
+        frontend_->SetDensity(density_);
+        UpdateSurfaceSize();
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto pluginPattern = pluginPattern_.Upgrade();
+        CHECK_NULL_VOID(pluginPattern);
+        pipelineContext_->SetDrawDelegate(pluginPattern->GetDrawDelegate());
+        frontend_->SetInstanceName(module);
+        frontend_->RunPage(0, source, data);
+        return;
+    }
+
+    auto plugin = AceType::DynamicCast<PluginElement>(GetPluginElement().Upgrade());
+    CHECK_NULL_VOID(plugin);
+    auto renderNode = plugin->GetRenderNode();
+    CHECK_NULL_VOID(renderNode);
+    auto pluginRender = AceType::DynamicCast<RenderPlugin>(renderNode);
+    CHECK_NULL_VOID(pluginRender);
+    pipelineContext_->SetDrawDelegate(pluginRender->GetDrawDelegate());
+
+    frontend_->SetInstanceName(module);
+    frontend_->RunPage(0, source, data);
+}
+
 void PluginSubContainer::RunPlugin(const std::string& path, const std::string& module, const std::string& source,
     const std::string& moduleResPath, const std::string& data)
 {
@@ -309,6 +374,31 @@ void PluginSubContainer::SetActionEventHandler()
         }
     };
     pipelineContext_->SetActionEventHandler(actionEventHandler);
+}
+
+RefPtr<AssetManager> PluginSubContainer::GetDecompressedAssetManager(
+    const std::string& hapPath, const std::string& module)
+{
+    RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
+    if (flutterAssetManager) {
+        frontend_->SetAssetManager(flutterAssetManager);
+        assetManager_ = flutterAssetManager;
+
+        auto assetProvider = AceType::MakeRefPtr<Plugin::HapAssetProvider>();
+
+        std::vector<std::string> basePaths;
+        std::string path1 = "assets/js/" + module + "/";
+        std::string path2 = "assets/js/share";
+        basePaths.push_back(path1);
+        basePaths.push_back(path2);
+        basePaths.push_back("");
+
+        if (assetProvider->Initialize(hapPath, basePaths)) {
+            LOGD("push plugin asset provider to queue");
+            flutterAssetManager->PushBack(std::move(assetProvider));
+        }
+    }
+    return flutterAssetManager;
 }
 
 RefPtr<AssetManager> PluginSubContainer::SetAssetManager(const std::string& path, const std::string& module)

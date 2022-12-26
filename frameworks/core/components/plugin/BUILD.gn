@@ -18,6 +18,7 @@ build_component("plugin") {
   sources = [
     "file_asset_provider.cpp",
     "flutter_render_plugin.cpp",
+    "hap_asset_provider.cpp",
     "plugin_component.cpp",
     "plugin_component_manager.cpp",
     "plugin_element.cpp",
@@ -48,6 +49,7 @@ build_component("plugin") {
     ]
 
     external_deps = [
+      "ability_base:extractortool",
       "ability_base:want",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
