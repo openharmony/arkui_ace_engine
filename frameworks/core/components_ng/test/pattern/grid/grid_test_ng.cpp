@@ -900,7 +900,7 @@ RefPtr<FrameNode> TestScrollGrid(OptionalSizeF gridSize, double gridItemHeight, 
 
         // save current grid info to grid pattern for next operation
         DirtySwapConfig config { false, false, false, false };
-        auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(layoutWrapper->GetLayoutAlgorithm());
+        auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm();
         CHECK_NULL_RETURN(layoutAlgorithmWrapper, frameNode);
         config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure() || layoutWrapper->SkipMeasureContent();
         config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
@@ -1078,5 +1078,48 @@ HWTEST_F(GridTestNg, GridTest017, TestSize.Level1)
     layoutWrapper->Measure(constraint);
     layoutWrapper->Layout();
     EXPECT_FALSE(layoutWrapper->GetOrCreateChildByIndex(9, false)->IsActive());
+}
+
+/**
+ * @tc.name: GridTest018
+ * @tc.desc: grid with fixed column, scroll to index out of view
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridTest018, TestSize.Level1)
+{
+    OptionalSizeF gridSize(900.0f, 600.0f);
+    const int32_t ITEM_COUNT = 9;
+    constexpr double GRID_ITEM_HEIGHT = 300.0f;
+    // scroll to show index 0-8
+    auto frameNode = TestScrollGrid(gridSize, GRID_ITEM_HEIGHT, 0, ITEM_COUNT, -100.0f, 10);
+
+    // scroll to index 9
+    EXPECT_FALSE(frameNode == nullptr);
+    auto gridPattern = frameNode->GetPattern<GridPattern>();
+    EXPECT_FALSE(gridPattern == nullptr);
+    gridPattern->UpdateStartIndex(9);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    LayoutConstraintF constraint;
+    constraint.UpdateIllegalSelfIdealSizeWithCheck(gridSize);
+    layoutWrapper->Measure(constraint);
+    layoutWrapper->Layout();
+    EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(9, false)->IsActive());
+    EXPECT_FALSE(layoutWrapper->GetOrCreateChildByIndex(0, false)->IsActive());
+
+    // save current grid info to grid pattern for next operation
+    DirtySwapConfig config { false, false, false, false };
+    auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm();
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure() || layoutWrapper->SkipMeasureContent();
+    config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
+    gridPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+
+    // scroll to index 0
+    gridPattern->UpdateStartIndex(0);
+    layoutWrapper = frameNode->CreateLayoutWrapper();
+    layoutWrapper->Measure(constraint);
+    layoutWrapper->Layout();
+    EXPECT_FALSE(layoutWrapper->GetOrCreateChildByIndex(9, false)->IsActive());
+    EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(0, false)->IsActive());
 }
 } // namespace OHOS::Ace::NG

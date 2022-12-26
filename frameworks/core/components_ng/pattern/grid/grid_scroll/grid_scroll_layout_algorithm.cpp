@@ -444,20 +444,22 @@ void GridScrollLayoutAlgorithm::UpdateGridLayoutInfo(LayoutWrapper* layoutWrappe
         if (startLine < gridLayoutInfo_.endMainLineIndex_ && startLine > gridLayoutInfo_.startMainLineIndex_) {
             return;
         }
-        if (startLine == gridLayoutInfo_.startMainLineIndex_) {
-            gridLayoutInfo_.startMainLineIndex_ = startLine;
-            gridLayoutInfo_.startIndex_ = targetIndex;
-            gridLayoutInfo_.prevOffset_ = 0;
-            gridLayoutInfo_.currentOffset_ = 0;
+
+        if (startLine == gridLayoutInfo_.endMainLineIndex_) {
+            auto totalViewHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_);
+            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+            gridLayoutInfo_.currentOffset_ -= (totalViewHeight - mainSize + gridLayoutInfo_.currentOffset_);
             gridLayoutInfo_.reachEnd_ = false;
             gridLayoutInfo_.offsetEnd_ = false;
             gridLayoutInfo_.reachStart_ = false;
             return;
         }
-        // startLine == gridLayoutInfo_.endMainLineIndex_
-        auto totalViewHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_);
-        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-        gridLayoutInfo_.currentOffset_ -= (totalViewHeight - mainSize + gridLayoutInfo_.currentOffset_);
+
+        // startLine == gridLayoutInfo_.startMainLineIndex_ and scroll out of view
+        gridLayoutInfo_.startMainLineIndex_ = startLine;
+        gridLayoutInfo_.startIndex_ = targetIndex;
+        gridLayoutInfo_.prevOffset_ = 0;
+        gridLayoutInfo_.currentOffset_ = 0;
         gridLayoutInfo_.reachEnd_ = false;
         gridLayoutInfo_.offsetEnd_ = false;
         gridLayoutInfo_.reachStart_ = false;
