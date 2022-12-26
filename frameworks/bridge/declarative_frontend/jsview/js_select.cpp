@@ -178,6 +178,10 @@ void JSSelect::Selected(int value)
 
     auto tipText = selectComponent->GetTipText();
     auto optionComponent = selectComponent->GetSelectOption(value);
+    if (!optionComponent) {
+        LOGE("optionComponent is null");
+        return;
+    }
     optionComponent->SetSelected(true);
 
     auto optionText = optionComponent->GetText();
