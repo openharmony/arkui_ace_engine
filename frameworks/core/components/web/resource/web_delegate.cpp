@@ -2308,6 +2308,10 @@ void WebDelegate::UpdateInitialScale(float scale)
 
 void WebDelegate::Resize(const double& width, const double& height)
 {
+    if (width <= 0 || height <= 0) {
+        return;
+    }
+
     auto context = context_.Upgrade();
     if (!context) {
         return;
