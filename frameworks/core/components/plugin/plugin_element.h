@@ -16,11 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PLUGIN_PLUGIN_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PLUGIN_PLUGIN_ELEMENT_H
 
-#include "core/pipeline/base/render_element.h"
 #include "core/components/plugin/plugin_component.h"
 #include "core/components/plugin/plugin_sub_container.h"
 #include "core/components/plugin/resource/plugin_manager_delegate.h"
 #include "core/pipeline/base/composed_element.h"
+#include "core/pipeline/base/render_element.h"
 
 namespace OHOS::Ace {
 class PluginElement : public RenderElement {
@@ -33,7 +33,7 @@ public:
     ~PluginElement() override;
 
     void Prepare(const WeakPtr<Element>& parent) override;
-    void Update()  override;
+    void Update() override;
     void PerformBuild() override;
 
     RefPtr<RenderNode> CreateRenderNode() override;
@@ -51,16 +51,15 @@ private:
     void RunPluginContainer();
     void InitEvent(const RefPtr<PluginComponent>& component);
     void SplitString(const std::string& str, char tag, std::vector<std::string>& strList);
+    void ReplaceAll(std::string& str, const std::string& pattern, const std::string& newPattern);
     std::string GetPackagePath(const WeakPtr<PluginElement>& weak, RequestPluginInfo& info) const;
     std::string GetPackagePathByWant(const WeakPtr<PluginElement>& weak, RequestPluginInfo& info) const;
     std::string GetPackagePathByAbsolutePath(const WeakPtr<PluginElement>& weak, RequestPluginInfo& info) const;
     void GetModuleNameByWant(const WeakPtr<PluginElement>& weak, RequestPluginInfo& info) const;
     void RunPluginTask(const WeakPtr<PluginElement>& weak, const RefPtr<PluginComponent>& component);
-    std::string GerPackagePathByBms(
-        const WeakPtr<PluginElement>& weak, RequestPluginInfo& info,
+    std::string GetPackagePathByBms(const WeakPtr<PluginElement>& weak, RequestPluginInfo& info,
         const std::vector<std::string>& strList, const std::vector<int32_t>& userIds) const;
 
-private:
     RefPtr<PluginSubContainer> pluginSubContainer_;
     RefPtr<PluginManagerDelegate> pluginManagerBridge_;
 

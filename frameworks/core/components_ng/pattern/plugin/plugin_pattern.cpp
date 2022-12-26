@@ -447,7 +447,7 @@ std::string PluginPattern::GerPackagePathByBms(const WeakPtr<PluginPattern>& wea
             pluginPattern->FireOnErrorEvent("1", "Bms moduleResPaths is empty.");
             return packagePathStr;
         }
-        packagePathStr = bundleInfo.applicationInfo.entryDir + "/";
+        packagePathStr =  bundleInfo.moduleDirs[0] + "/";
     } else {
         AAFwk::Want want;
         AppExecFwk::AbilityInfo abilityInfo;

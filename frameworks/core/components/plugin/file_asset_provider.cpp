@@ -121,4 +121,4 @@ void FileAssetProvider::GetAssetList(const std::string& path, std::vector<std::s
         closedir(dp);
     }
 }
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::Plugin
