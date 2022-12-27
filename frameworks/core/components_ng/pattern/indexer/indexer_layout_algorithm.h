@@ -28,29 +28,7 @@ class ACE_EXPORT IndexerLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(IndexerLayoutAlgorithm, LayoutAlgorithm);
 
 public:
-    IndexerLayoutAlgorithm(uint32_t popupSize) : popupSize_(popupSize) {}
-
-    ~IndexerLayoutAlgorithm() override = default;
-
-    bool GetIsInitialized() const
-    {
-        return isInitialized_;
-    }
-
-    void SetIsInitialized(bool isInitialized)
-    {
-        isInitialized_ = isInitialized;
-    }
-
-    int32_t GetSelected() const
-    {
-        return selected_;
-    }
-
-    void SetSelected(int32_t selected)
-    {
-        selected_ = selected;
-    }
+    IndexerLayoutAlgorithm(int32_t itemCount_) : itemCount_(itemCount_) {}
 
     float GetItemSizeRender() const
     {
@@ -65,14 +43,10 @@ private:
     void InitializeIndexer(LayoutWrapper* layoutWrapper);
 
     std::vector<std::string> arrayValue_;
-    bool isInitialized_ = false;
     uint32_t popupSize_ = 0;
     int32_t itemCount_ = 0;
-    int32_t selected_ = 0;
-    bool usingPopup_ = false;
     float itemSize_ = 0.0f;
     float itemSizeRender_ = 0.0f;
-    NG::AlignStyle alignStyle_ = NG::AlignStyle::RIGHT;
 };
 } // namespace OHOS::Ace::NG
 
