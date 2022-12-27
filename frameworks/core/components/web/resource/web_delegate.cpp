@@ -22,6 +22,7 @@
 
 #include "base/json/json_util.h"
 #include "base/log/log.h"
+#include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
@@ -1395,6 +1396,9 @@ void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<
 
 bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
 {
+    ACE_SCOPED_TRACE("PrepareInitOHOSWeb");
+    LOGI("PrepareInitOHOSWeb");
+
     state_ = State::CREATING;
     // obtain hap data path
     auto container = Container::Current();
