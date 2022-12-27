@@ -97,9 +97,18 @@ public:
     virtual uint32_t GetUniqueID() const
     {
 #ifndef NG_BUILD
+        if (image_ && image_->image()) {
+            return image_->image()->uniqueID();
+        }
         return uniqueId_;
 #endif
         return 0;
+    }
+    virtual void SetUniqueID(uint32_t id)
+    {
+#ifndef NG_BUILD
+        uniqueId_ = id;
+#endif
     }
     void ReplaceSkImage(flutter::SkiaGPUObject<SkImage> newSkGpuObjSkImage);
     int32_t GetWidth() const override;

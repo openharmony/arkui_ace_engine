@@ -282,7 +282,6 @@ void RosenRenderContext::PaintBackground()
     auto image = DynamicCast<SkiaCanvasImage>(bgImage_);
     CHECK_NULL_VOID(rsNode_ && bgLoadingCtx_ && image);
     auto skImage = image->GetCanvasImage();
-    CHECK_NULL_VOID(skImage);
 
     auto rosenImage = std::make_shared<Rosen::RSImage>();
     rosenImage->SetImage(skImage);
