@@ -42,6 +42,26 @@ public:
     std::function<void(std::string)> callback_;
     int32_t instanceId_;
 };
+
+class WebMessageValueCallBackImpl : public OHOS::NWeb::NWebValueCallback<std::shared_ptr<NWebMessage>> {
+public:
+    WebMessageValueCallBackImpl() = delete;
+    explicit WebMessageValueCallBackImpl(int32_t instanceId) : instanceId_(instanceId) {}
+
+    void OnReceiveValue(std::shared_ptr<NWebMessage> result) override
+    {
+        ContainerScope scope(instanceId_);
+        if (callback_ && result && result->GetType() == NWebValue::Type::STRING) {
+            callback_(result->GetString());
+        }
+    }
+    void SetCallBack(const std::function<void(std::string)>&& callback)
+    {
+        callback_ = callback;
+    }
+    std::function<void(std::string)> callback_;
+    int32_t instanceId_;
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_RESOURCE_WEB_JAVASCRIPT_EXECUTE_CALLBACK_H
