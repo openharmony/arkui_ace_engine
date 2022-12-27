@@ -26,6 +26,7 @@
 namespace OHOS::Ace::V2 {
 namespace {
 const std::unordered_map<std::string, std::function<std::string(const IndexerComposedElement&)>> CREATE_JSON_MAP {
+    { "color", [](const IndexerComposedElement& inspector) { return inspector.GetColor(); } },
     { "selectedColor", [](const IndexerComposedElement& inspector) { return inspector.GetSelectedColor(); } },
     { "popupColor", [](const IndexerComposedElement& inspector) { return inspector.GetPopupColor(); } },
     { "selectedBackgroundColor",
@@ -69,6 +70,20 @@ std::unique_ptr<JsonValue> IndexerComposedElement::ToJsonObject() const
         resultJson->Put(value.first.c_str(), value.second(*this));
     }
     return resultJson;
+}
+
+std::string IndexerComposedElement::GetColor() const
+{
+    auto node = GetInspectorNode(IndexerElement::TypeId());
+    if (!node) {
+        return "";
+    }
+    auto render = AceType::DynamicCast<RenderIndexer>(node)->GetSpecificItem(0);
+    if (!render) {
+        return "";
+    }
+    auto Color = render ? render->GetNormalTextStyle().GetTextColor() : Color::BLACK;
+    return Color.ColorToString();
 }
 
 std::string IndexerComposedElement::GetSelectedColor() const

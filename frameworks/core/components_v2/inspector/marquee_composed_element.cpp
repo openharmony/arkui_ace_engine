@@ -29,6 +29,7 @@ const std::unordered_map<std::string, std::function<std::string(const MarqueeCom
     { "start", [](const MarqueeComposedElement& inspector) { return inspector.GetStart(); } },
     { "fromStart", [](const MarqueeComposedElement& inspector) { return inspector.GetFromStart(); } },
     { "fontSize", [](const MarqueeComposedElement& inspector) { return inspector.GetFontSize(); } },
+    { "fontColor", [](const MarqueeComposedElement& inspector) { return inspector.GetFontColor(); } },
 };
 } // namespace
 
@@ -100,6 +101,13 @@ std::string MarqueeComposedElement::GetFontSize() const
     auto render = GetRenderMarquee();
     auto fontSize = render ? render->GetTextStyle().GetFontSize() : Dimension();
     return fontSize.ToString();
+}
+
+std::string MarqueeComposedElement::GetFontColor() const
+{
+    auto render = GetRenderMarquee();
+    auto fontColor = render ? render->GetTextStyle().GetTextColor() : Color::BLACK;
+    return fontColor.ColorToString();
 }
 
 RefPtr<RenderMarquee> MarqueeComposedElement::GetRenderMarquee() const
