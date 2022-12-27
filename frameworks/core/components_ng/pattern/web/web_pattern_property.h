@@ -58,6 +58,8 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MinFontSize, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MinLogicalFontSize, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockNetwork, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(HorizontalScrollBarAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(VerticalScrollBarAccessEnabled, bool);
 };
 
 } // namespace OHOS::Ace::NG

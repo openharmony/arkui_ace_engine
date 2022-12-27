@@ -121,6 +121,8 @@ public:
     static void OnTouchIconUrlReceived(const JSCallbackInfo& args);
     static void DarkMode(int32_t darkMode);
     static void ForceDarkAccess(bool access);
+    static void HorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled);
+    static void VerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

@@ -209,6 +209,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BlockNetwork, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DarkMode, WebDarkMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ForceDarkAccess, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, HorizontalScrollBarAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, VerticalScrollBarAccessEnabled, bool);
 
     void RequestFullScreen();
     void ExitFullScreen();
@@ -270,6 +272,8 @@ private:
     void OnBlockNetworkUpdate(bool value);
     void OnDarkModeUpdate(WebDarkMode mode);
     void OnForceDarkAccessUpdate(bool access);
+    void OnHorizontalScrollBarAccessEnabledUpdate(bool value);
+    void OnVerticalScrollBarAccessEnabledUpdate(bool value);
 
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);

@@ -1460,6 +1460,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onTouchIconUrlReceived", &JSWeb::OnTouchIconUrlReceived);
     JSClass<JSWeb>::StaticMethod("darkMode", &JSWeb::DarkMode);
     JSClass<JSWeb>::StaticMethod("forceDarkAccess", &JSWeb::ForceDarkAccess);
+    JSClass<JSWeb>::StaticMethod("horizontalScrollBarAccess", &JSWeb::HorizontalScrollBarAccess);
+    JSClass<JSWeb>::StaticMethod("verticalScrollBarAccess", &JSWeb::VerticalScrollBarAccess);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -3989,6 +3991,20 @@ void JSWeb::ForceDarkAccess(bool access)
     if (Container::IsCurrentUseNewPipeline()) {
         NG::WebView::SetForceDarkAccess(access);
         return;
+    }
+}
+
+void JSWeb::HorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetHorizontalScrollBarAccessEnabled(isHorizontalScrollBarAccessEnabled);
+    }
+}
+
+void JSWeb::VerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetVerticalScrollBarAccessEnabled(isVerticalScrollBarAccessEnabled);
     }
 }
 } // namespace OHOS::Ace::Framework
