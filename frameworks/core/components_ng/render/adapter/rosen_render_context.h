@@ -150,7 +150,7 @@ public:
         return propTransitionDisappearing_ != nullptr;
     }
     void OnNodeAppear() override;
-    void OnNodeDisappear(FrameNode* host) override;
+    void OnNodeDisappear() override;
     void ClipWithRect(const RectF& rectF) override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
@@ -161,7 +161,9 @@ public:
     static std::list<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
         const std::list<RefPtr<FrameNode>>& frameChildren);
 
-    static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(const TransitionOptions& options);
+    // if translate params use percent dimension, frameSize should be given correctly
+    static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(
+        const TransitionOptions& options, const SizeF& frameSize = SizeF());
 
     void FlushModifier(const RefPtr<Modifier>& modifier) override;
 
