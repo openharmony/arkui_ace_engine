@@ -249,7 +249,7 @@ void FrameNode::OnVisibleChange(bool isVisible)
 void FrameNode::OnDetachFromMainTree()
 {
     eventHub_->FireOnDisappear();
-    renderContext_->OnNodeDisappear(this);
+    renderContext_->OnNodeDisappear();
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
