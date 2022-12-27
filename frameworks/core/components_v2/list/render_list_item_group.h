@@ -34,6 +34,7 @@ struct ListItemLayoutParam {
     double endMainPos;
     double listMainSize;
     double referencePos;
+    double maxLaneLength;
     bool forwardLayout;
     bool isVertical;
     StickyStyle sticky;
@@ -141,6 +142,7 @@ public:
     {
         renderNode_ = renderNode;
     }
+    void SetNeedLayoutDeep();
 
 protected:
     virtual void PaintDivider(RenderContext& context) {}
@@ -186,6 +188,7 @@ private:
     double startMainPos_ = 0.0;
     double endMainPos_ = 0.0;
     double listMainSize_ = 0.0;
+    double maxLaneLength_ = 0.0;
     size_t startCacheCount_ = 0;
     size_t endCacheCount_ = 0;
     size_t lanes_ = 1;

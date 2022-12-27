@@ -1829,6 +1829,16 @@ void RenderList::ScrollPage(bool reverse, bool smooth)
     }
 }
 
+void RenderList::ScrollBy(double pixelX, double pixelY)
+{
+    if (IsVertical()) {
+        currentOffset_ -= pixelY;
+    } else {
+        currentOffset_ -= pixelX;
+    }
+    MarkNeedLayout();
+}
+
 void RenderList::AdjustOffset(Offset& delta, int32_t source)
 {
     // when scrollEffect equal to none, no need to adjust offset
@@ -3088,6 +3098,7 @@ void RenderList::LayoutChild(RefPtr<RenderNode> child, double referencePos, bool
             .endMainPos = (cachedCount_ == 0 || isLaneList_) ? endMainPos_ : mainSize_,
             .listMainSize = mainSize_,
             .referencePos = referencePos,
+            .maxLaneLength = isLaneList_ ? maxLaneLength_ : 0.0,
             .forwardLayout = forward,
             .isVertical = vertical_,
             .sticky = sticky_,
@@ -3095,10 +3106,7 @@ void RenderList::LayoutChild(RefPtr<RenderNode> child, double referencePos, bool
             .align = component_->GetAlignListItemAlign(),
         };
         listItemGroup->SetItemGroupLayoutParam(param);
-        listItemGroup->SetNeedLayout(true);
-        if (renderNode) {
-            renderNode->SetNeedLayout(true);
-        }
+        listItemGroup->SetNeedLayoutDeep();
     } else if (isLaneList_) {
         innerLayout = MakeInnerLayoutForLane();
     }

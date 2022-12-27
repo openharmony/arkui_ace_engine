@@ -33,10 +33,20 @@ LayoutParam RenderListItemGroup::MakeInnerLayout()
     Size maxSize;
     Size minSize;
     if (vertical_) {
-        maxSize = Size(GetLayoutParam().GetMaxSize().Width() / lanes_, Size::INFINITE_SIZE);
+        auto maxCrossSize = GetLayoutParam().GetMaxSize().Width();
+        if (Positive(maxLaneLength_)) {
+            maxSize = Size(std::min(maxCrossSize / lanes_, maxLaneLength_), Size::INFINITE_SIZE);
+        } else {
+            maxSize = Size(maxCrossSize / lanes_, Size::INFINITE_SIZE);
+        }
         minSize = Size(GetLayoutParam().GetMinSize().Width(), 0.0);
     } else {
-        maxSize = Size(Size::INFINITE_SIZE, GetLayoutParam().GetMaxSize().Height() / lanes_);
+        auto maxCrossSize = GetLayoutParam().GetMaxSize().Height();
+        if (Positive(maxLaneLength_)) {
+            maxSize = Size(Size::INFINITE_SIZE, std::min(maxCrossSize / lanes_, maxLaneLength_));
+        } else {
+            maxSize = Size(Size::INFINITE_SIZE, maxCrossSize / lanes_);
+        }
         minSize = Size(0.0, GetLayoutParam().GetMinSize().Height());
     }
     return { maxSize, minSize };
@@ -408,6 +418,20 @@ RefPtr<RenderNode> RenderListItemGroup::GetRenderNode()
     return Claim(this);
 }
 
+void RenderListItemGroup::SetNeedLayoutDeep()
+{
+    SetNeedLayout(true);
+    auto topRenderNode = renderNode_.Upgrade();
+    if (topRenderNode) {
+        auto parent = GetParent().Upgrade();
+        while (parent != nullptr && topRenderNode != parent) {
+            parent->SetNeedLayout(true);
+            parent = parent->GetParent().Upgrade();
+        }
+        topRenderNode->SetNeedLayout(true);
+    }
+}
+
 void RenderListItemGroup::SetItemGroupLayoutParam(const ListItemLayoutParam &param)
 {
     startMainPos_ = param.startMainPos;
@@ -415,6 +439,7 @@ void RenderListItemGroup::SetItemGroupLayoutParam(const ListItemLayoutParam &par
     startCacheCount_ = param.startCacheCount;
     endCacheCount_ = param.endCacheCount;
     listMainSize_ = param.listMainSize;
+    maxLaneLength_ = param.maxLaneLength;
     vertical_ = param.isVertical;
     align_ = param.align;
     stickyHeader_ = (param.sticky == StickyStyle::HEADER) || (param.sticky == StickyStyle::BOTH);
