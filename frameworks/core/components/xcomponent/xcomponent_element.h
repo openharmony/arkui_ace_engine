@@ -33,9 +33,25 @@
 
 namespace OHOS::Ace {
 class XComponentComponent;
+class XComponentElement;
+
+class XComponentSurfaceCallback : public OHOS::SurfaceDelegate::ISurfaceCallback {
+public:
+    explicit XComponentSurfaceCallback(const WeakPtr<XComponentElement>& xcomponentElement)
+        : weakXComponentElement_(xcomponentElement) {}
+    ~XComponentSurfaceCallback() override = default;
+
+    // override OHOS::SurfaceDelegate::ISurfaceCallback virtual callback function
+    void OnSurfaceCreated(const OHOS::sptr<OHOS::Surface>& surface) override;
+    void OnSurfaceChanged(const OHOS::sptr<OHOS::Surface>& surface, int32_t width, int32_t height) override;
+    void OnSurfaceDestroyed() override {};
+private:
+    WeakPtr<XComponentElement>weakXComponentElement_;
+};
 
 class XComponentElement : public RenderElement {
     DECLARE_ACE_TYPE(XComponentElement, RenderElement);
+    friend class XComponentSurfaceCallback;
 
 public:
     using InitEventCallback = std::function<void(const std::string&)>;
@@ -56,6 +72,9 @@ private:
     void OnXComponentSizeInit(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
     void OnXComponentSizeChange(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
     void OnXComponentPositionChange(int32_t offsetX, int32_t offsetY);
+
+    void OnSurfaceCreated(const OHOS::sptr<OHOS::Surface>& surface);
+    void OnSurfaceChanged(const OHOS::sptr<OHOS::Surface>& surface, int32_t width, int32_t height);
 
     void CreatePlatformResource();
     void ReleasePlatformResource();
@@ -83,6 +102,7 @@ private:
     sptr<OHOS::SurfaceDelegate> surfaceDelegate_;
     int32_t surfaceWidth_ = 0;
     int32_t surfaceHeight_ = 0;
+    int32_t scopeId_ = 0;
 #else
     void OnTextureRefresh();
 #endif

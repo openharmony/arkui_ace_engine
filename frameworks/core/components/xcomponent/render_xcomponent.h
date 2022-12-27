@@ -71,6 +71,14 @@ public:
         xcomponentPositionChangeEvent_ = std::move(xcomponentPositionChangeEvent);
     }
 
+    void OnPaintFinish() override
+    {
+        if (xcomponentPositionChangeEvent_ && SystemProperties::GetExtSurfaceEnabled()) {
+            position_ = GetGlobalOffset();
+            xcomponentPositionChangeEvent_(position_.GetX(), position_.GetY());
+        }
+    }
+
     void OnGlobalPositionChanged() override;
 
     void SetXComponentId(const std::string& id)
