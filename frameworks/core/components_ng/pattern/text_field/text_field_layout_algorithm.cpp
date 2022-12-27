@@ -101,12 +101,19 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         paragraph_->Layout(contentConstraint.maxSize.Width() - horizontalPaddingSum);
     }
     auto paragraphNewWidth = static_cast<float>(paragraph_->GetMaxIntrinsicWidth());
-    if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
+    if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth()) && !pattern->IsTextArea()) {
         paragraph_->Layout(std::ceil(paragraphNewWidth));
     }
     auto preferredHeight = static_cast<float>(paragraph_->GetHeight());
     if (textContent.empty()) {
         preferredHeight = pattern->PreferredLineHeight();
+    }
+    if (pattern->IsTextArea()) {
+        textRect_.SetSize(SizeF(
+            contentConstraint.maxSize.Width() - horizontalPaddingSum, static_cast<float>(paragraph_->GetHeight())));
+        return SizeF(contentConstraint.maxSize.Width() - horizontalPaddingSum,
+            std::min(contentConstraint.maxSize.Height() - pattern->GetVerticalPaddingSum(),
+                GetTextFieldDefaultHeight() * 2.0f));
     }
     auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(true);
     // check password image size.
@@ -161,7 +168,16 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
     // Update content position.
-    auto contentOffset = Alignment::GetAlignPosition(size, contentSize, align);
+    OffsetF contentOffset;
+    if (pattern->IsTextArea()) {
+        contentOffset = OffsetF(pattern->GetUtilPadding().Offset());
+        content->SetOffset(contentOffset);
+        textRect_.SetOffset(contentOffset);
+        return;
+    }
+
+    contentOffset = Alignment::GetAlignPosition(size, contentSize, align);
+
     content->SetOffset(OffsetF(pattern->GetPaddingLeft(), contentOffset.GetY()));
     // if handler is moving, no need to adjust text rect in pattern
     if (pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE ||
