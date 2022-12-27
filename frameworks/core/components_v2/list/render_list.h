@@ -162,6 +162,8 @@ public:
 
     void ScrollPage(bool reverse, bool smooth);
 
+    void ScrollBy(double pixelX, double pixelY);
+
     RefPtr<Component> GetComponent() override
     {
         return component_;

@@ -71,8 +71,11 @@ void JSList::SetEditMode(bool editMode)
     ListModel::GetInstance()->SetEditMode(editMode);
 }
 
-void JSList::SetCachedCount(int32_t cachedCount)
+void JSList::SetCachedCount(const JSCallbackInfo& info)
 {
+    int32_t cachedCount = 1;
+    ParseJsInteger<int32_t>(info[0], cachedCount);
+    cachedCount = cachedCount < 0 ? 1 : cachedCount;
     ListModel::GetInstance()->SetCachedCount(cachedCount);
 }
 
