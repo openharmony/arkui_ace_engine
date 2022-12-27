@@ -82,6 +82,18 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
     return task;
 }
 
+void ImagePattern::SetSvgAnimationCallback()
+{
+    // set animation flush function for svg
+    auto svg = DynamicCast<SvgCanvasImage>(image_);
+    CHECK_NULL_VOID_NOLOG(svg);
+    svg->SetAnimationCallback([weak = WeakClaim(RawPtr(GetHost()))] {
+        auto image = weak.Upgrade();
+        CHECK_NULL_VOID(image);
+        image->MarkNeedRenderOnly();
+    });
+}
+
 void ImagePattern::OnImageLoadSuccess()
 {
     auto host = GetHost();
@@ -98,7 +110,13 @@ void ImagePattern::OnImageLoadSuccess()
     image_ = loadingCtx_->MoveCanvasImage();
     srcRect_ = loadingCtx_->GetSrcRect();
     dstRect_ = loadingCtx_->GetDstRect();
-    SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
+
+    bool isSvg = loadingCtx_->GetSourceInfo().IsSvg();
+    SetImagePaintConfig(image_, srcRect_, dstRect_, isSvg);
+    if (isSvg) {
+        SetSvgAnimationCallback();
+    }
+
     // clear alt data
     altLoadingCtx_ = nullptr;
     altImage_ = nullptr;
@@ -161,22 +179,13 @@ void ImagePattern::SetImagePaintConfig(
         CHECK_NULL_VOID(host);
         auto borderRadius = host->GetRenderContext()->GetBorderRadius();
         BorderRadiusArray radiusXY = { PointF(borderRadius->radiusTopLeft->ConvertToPx(),
-                                                                borderRadius->radiusTopLeft->ConvertToPx()),
+                                           borderRadius->radiusTopLeft->ConvertToPx()),
             PointF(borderRadius->radiusTopRight->ConvertToPx(), borderRadius->radiusTopRight->ConvertToPx()),
             PointF(borderRadius->radiusBottomLeft->ConvertToPx(), borderRadius->radiusBottomLeft->ConvertToPx()),
             PointF(borderRadius->radiusBottomRight->ConvertToPx(), borderRadius->radiusBottomRight->ConvertToPx()) };
         config.borderRadiusXY_ = std::make_shared<BorderRadiusArray>(std::move(radiusXY));
     }
     config.isSvg_ = isSvg;
-
-    if (isSvg) {
-        // set animation flush function for svg
-        DynamicCast<SvgCanvasImage>(canvasImage)->SetAnimationCallback([weak = WeakClaim(RawPtr(GetHost()))] {
-            auto image = weak.Upgrade();
-            CHECK_NULL_VOID(image);
-            image->MarkNeedRenderOnly();
-        });
-    }
 
     canvasImage->SetPaintConfig(config);
 }
