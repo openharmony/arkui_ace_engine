@@ -35,6 +35,11 @@ ModelAdapterWrapper::ModelAdapterWrapper(uint32_t key) : key_(key)
 
 void ModelAdapterWrapper::OnPaint(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
+    if (!setupDone_) {
+        LOGE("MODEL_NG: ModelAdapterWrapper::OnPaint() setup not done!");
+        return;
+    }
+
     auto properties = ExtractPaintProperties(modelPaintProperty);
     if (modelPaintProperty->NeedsCameraSetup()) {
         UpdateCamera(properties);
@@ -157,6 +162,12 @@ void ModelAdapterWrapper::OnMeasureContent(const RefPtr<ModelLayoutProperty>& mo
     bool sizeChanged = size_.UpdateSizeWithCheck(size);
     bool needsUpdate = sizeChanged || modelLayoutProperty->NeedsSceneSetup();
 
+    // Do not create Texture layer with zero size.
+    if (!textureLayer_ && NearEqual(size_.Width(), 0) && NearEqual(size_.Height(), 0)) {
+        LOGE("MODEL_NG: ModelAdapterWrapper::OnMeasureContent() size is zero!");
+        return;
+    }
+
     if (sizeChanged && textureLayer_) {
         textureLayer_->SetWH(size_.Width(), size_.Height());
     }
@@ -217,6 +228,7 @@ void ModelAdapterWrapper::UpdateSceneViewerAdapter(const SceneViewerAdapterPrope
             obj, properties.gltfSrc_, properties.backgroundSrc_, properties.bgType_);
         LOGD("MODEL_NG: ModelAdapterWrapper::UpdateSceneViewerAdapter() glTFSrc_ %s GetKey() %d",
             properties.gltfSrc_.c_str(), adapter->GetKey());
+        adapter->setupDone_ = true;
     });
 }
 
