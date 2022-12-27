@@ -275,7 +275,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
 void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)
 {
     isInitialState_ = isInitialState_ ? currentPos == 0 : false;
-    if (currentPos == currentPos_) {
+    if (currentPos == currentPos_ || isStop_) {
         return;
     }
 
