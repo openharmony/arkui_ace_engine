@@ -531,6 +531,20 @@ void WebView::SetBlockNetwork(bool isNetworkBlocked)
     webPattern->UpdateBlockNetwork(isNetworkBlocked);
 }
 
+void WebView::SetHorizontalScrollBarAccessEnabled(bool isHorizontalScrollBarAccessEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateHorizontalScrollBarAccessEnabled(isHorizontalScrollBarAccessEnabled);
+}
+
+void WebView::SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAccessEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateVerticalScrollBarAccessEnabled(isVerticalScrollBarAccessEnabled);
+}
+
 void WebView::SetPageVisibleId(OnWebAsyncFunc&& pageVisibleId)
 {
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();

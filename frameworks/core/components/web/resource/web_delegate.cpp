@@ -3045,6 +3045,44 @@ void WebDelegate::UpdateBlockNetwork(bool isNetworkBlocked)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdateHorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isHorizontalScrollBarAccessEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutHorizontalScrollBarAccess(isHorizontalScrollBarAccessEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isVerticalScrollBarAccessEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutVerticalScrollBarAccess(isVerticalScrollBarAccessEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::LoadUrl()
 {
     auto context = context_.Upgrade();
