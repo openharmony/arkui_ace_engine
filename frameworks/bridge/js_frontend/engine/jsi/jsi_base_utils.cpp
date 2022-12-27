@@ -496,6 +496,12 @@ std::string ParseLogContent(const std::vector<std::string>& params)
     if (pos < len) {
         ret += formatStr.substr(pos, len - pos);
     }
+    std::string::size_type idx = formatStr.find('%');
+    if(idx == std::string::npos) {
+        for(int32_t i = 1; i < size; ++i) {
+            ret += params[i];
+        }
+    }
     return ret;
 }
 
