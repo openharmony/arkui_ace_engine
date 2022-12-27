@@ -54,12 +54,24 @@ CanvasDrawFunction TextFieldPaintMethod::GetContentDrawFunction(PaintWrapper* pa
                             passwordIconCanvasImage](RSCanvas& canvas) {
         CHECK_NULL_VOID_NOLOG(textFieldPattern);
         auto frameRect = textFieldPattern->GetFrameRect();
-        RSRect clipInnerRect(offset.GetX(), 0.0f,
-            textFieldPattern->NeedShowPasswordIcon() ? frameRect.Width() : contentSize.Width() + contentOffset.GetX(),
-            frameRect.Height());
+        RSRect clipInnerRect;
+        if (textFieldPattern->IsTextArea()) {
+            clipInnerRect = RSRect(offset.GetX(), contentOffset.GetY(), contentSize.Width() + contentOffset.GetX(),
+                contentOffset.GetY() + contentSize.Height());
+        } else {
+            clipInnerRect = RSRect(offset.GetX(), 0.0f,
+                textFieldPattern->NeedShowPasswordIcon() ? frameRect.Width()
+                                                         : contentSize.Width() + contentOffset.GetX(),
+                frameRect.Height());
+        }
         canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         if (paragraph) {
-            paragraph->Paint(&canvas, textFieldPattern->GetTextRect().GetX(), offset.GetY());
+            if (textFieldPattern->IsTextArea()) {
+                paragraph->Paint(
+                    &canvas, textFieldPattern->GetTextRect().GetX(), textFieldPattern->GetTextRect().GetY());
+            } else {
+                paragraph->Paint(&canvas, textFieldPattern->GetTextRect().GetX(), contentOffset.GetY());
+            }
         }
         CHECK_NULL_VOID_NOLOG(passwordIconCanvasImage);
         const ImagePainter passwordIconImagePainter(passwordIconCanvasImage);
@@ -146,11 +158,18 @@ void TextFieldPaintMethod::PaintCursor(RSCanvas& canvas, PaintWrapper* paintWrap
     brush.SetColor(cursorColor.GetValue());
     canvas.AttachBrush(brush);
     float caretHeight = textFieldPattern->GetTextOrPlaceHolderFontSize();
-    auto top = static_cast<float>(
-        paintWrapper->GetContentOffset().GetY() + (paintWrapper->GetContentSize().Height() - caretHeight) / 2);
-    auto cursorOffsetX = textFieldPattern->GetCaretOffsetX();
-    canvas.DrawRect(
-        RSRect(cursorOffsetX, top, cursorOffsetX + static_cast<float>(CURSOR_WIDTH.ConvertToPx()), top + caretHeight));
+    if (!textFieldPattern->IsTextArea()) {
+        auto top = static_cast<float>(
+            paintWrapper->GetContentOffset().GetY() + (paintWrapper->GetContentSize().Height() - caretHeight) / 2);
+        auto cursorOffsetX = textFieldPattern->GetCaretOffsetX();
+        canvas.DrawRect(RSRect(
+            cursorOffsetX, top, cursorOffsetX + static_cast<float>(CURSOR_WIDTH.ConvertToPx()), top + caretHeight));
+        canvas.Restore();
+        return;
+    }
+    auto cursorOffset = textFieldPattern->GetCaretRect().GetOffset();
+    canvas.DrawRect(RSRect(cursorOffset.GetX(), cursorOffset.GetY(),
+        cursorOffset.GetX() + static_cast<float>(CURSOR_WIDTH.ConvertToPx()), cursorOffset.GetY() + caretHeight));
     canvas.Restore();
 }
 
