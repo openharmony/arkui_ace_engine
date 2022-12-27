@@ -444,23 +444,15 @@ void RenderSelectPopup::ProcessTouchUp(const TouchEventInfo& info)
     }
 
     auto clickPosition = touches.front().GetLocalLocation();
-    if (!touchRegion_.ContainsInRegion(clickPosition.GetX(), clickPosition.GetY())) {
-        LOGI("Do not contains the touch region.");
-        return;
-    }
 
     if (selectPopup_->GetSelectOptions().empty()) {
         return;
     }
 
-    auto firstOption = selectPopup_->GetSelectOptions().front();
-    if (!firstOption->GetCustomComponent()) {
-        return;
-    }
-
     auto offset = touches.front().GetGlobalLocation();
     firstFingerUpOffset_ = offset;
-    if ((offset - firstFingerDownOffset_).GetDistance() <= DEFAULT_DISTANCE) {
+    if ((offset - firstFingerDownOffset_).GetDistance() <= DEFAULT_DISTANCE ||
+        !touchRegion_.ContainsInRegion(clickPosition.GetX(), clickPosition.GetY())) {
         if (isContextMenu_) {
             selectPopup_->CloseContextMenu();
         } else {
