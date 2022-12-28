@@ -20,8 +20,14 @@
 #include "base/utils/macros.h"
 #include "core/components/dialog/dialog_properties.h"
 
-#define RETURN_VOID_IF_NOT_ENABLE if (!OHOS::Ace::UICastContextImpl::IsEnable()) { return; }
-#define RETURN_DEFAULT_IF_NOT_ENABLE if (!OHOS::Ace::UICastContextImpl::IsEnable()) { return 0; }
+#define RETURN_VOID_IF_NOT_ENABLE                    \
+    if (!OHOS::Ace::UICastContextImpl::IsEnable()) { \
+        return;                                      \
+    }
+#define RETURN_DEFAULT_IF_NOT_ENABLE                 \
+    if (!OHOS::Ace::UICastContextImpl::IsEnable()) { \
+        return 0;                                    \
+    }
 
 namespace OHOS::Ace {
 class RenderNode;
@@ -31,15 +37,15 @@ class ACE_EXPORT UICastContextImpl {
 public:
     UICastContextImpl() = delete;
     static bool IsEnable();
-    static void Init(const WeakPtr<PipelineContext> &context);
+    static void Init(const WeakPtr<PipelineContext>& context);
     static bool NeedsRebuild();
     static void OnFlushBuildStart();
     static void OnFlushBuildFinish();
     static bool CallRouterBackToPopPage();
     static void CheckEvent();
-    static void HandleRouterPageCall(const std::string &cmd, const std::string &url);
-    static void ShowToast(const std::string &message, int32_t duration, const std::string& bottom);
-    static void ShowDialog(const DialogProperties &dialogProperties);
+    static void HandleRouterPageCall(const std::string& cmd, const std::string& url);
+    static void ShowToast(const std::string& message, int32_t duration, const std::string& bottom);
+    static void ShowDialog(const DialogProperties& dialogProperties);
 
 private:
     static int enable_;

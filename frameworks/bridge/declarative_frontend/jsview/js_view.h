@@ -119,14 +119,14 @@ public:
     }
 
 #ifdef UICAST_COMPONENT_SUPPORTED
-    void ExecuteCreateChildView(const std::string &childViewId)
+    void ExecuteCreateChildView(const std::string& childViewId)
     {
         std::string jsonData = R"({"viewID":")" + childViewId + R"("})";
         LOGI("UICast para: %{public}s", jsonData.c_str());
         jsViewFunction_->ExecuteCreateChildView(jsonData);
     }
 
-    void ExecuteRouterHandle(const std::string &type, const std::string &uri)
+    void ExecuteRouterHandle(const std::string& type, const std::string& uri)
     {
         std::string jsonData = R"({"uri":")" + uri + R"(","type":")" + type + R"("})";
         LOGI("UICast para: %{public}s", jsonData.c_str());
@@ -134,7 +134,7 @@ public:
         jsViewFunction_->ExecuteRouterHandle(jsonData);
     }
 
-    void ExecuteReplayOnEvent(const std::string &event)
+    void ExecuteReplayOnEvent(const std::string& event)
     {
         std::string jsonData = R"({"event":")" + event + R"("})";
         LOGI("UICast para: %{public}s", jsonData.c_str());
@@ -164,7 +164,7 @@ protected:
     WeakPtr<AceType> viewNode_;
     // view id for custom view itself
     std::string viewId_;
-    int uniqueId_;
+    int uniqueId_ = -1;
 
     // card id for eTS Card
     // set on the root JSView of the card and inherited by all child JSViews
