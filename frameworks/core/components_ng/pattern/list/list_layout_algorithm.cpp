@@ -111,6 +111,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 spaceWidth_ = std::max(spaceWidth_, dividerSpace.value());
             }
         }
+        spaceWidth_ += chainInterval_;
 
         CalculateLanes(listLayoutProperty, layoutConstraint, contentIdealSize.CrossSize(axis), axis);
         listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
@@ -257,6 +258,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
     float currentStartPos = 0.0f;
     float endMainPos = overScrollFeature_ ? std::max(startPos + contentMainSize_, endMainPos_) : endMainPos_;
     auto currentIndex = startIndex - 1;
+    auto chainOffset = 0.0f;
     do {
         currentStartPos = currentEndPos;
         int32_t count = LayoutALineForward(layoutWrapper, layoutConstraint, axis, currentIndex,
@@ -269,7 +271,8 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
         }
         LOGD("LayoutForward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
-    } while (LessNotEqual(currentEndPos, endMainPos + paddingAfterContent_));
+        chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
+    } while (LessNotEqual(currentEndPos - chainOffset, endMainPos + paddingAfterContent_));
 
     if (overScrollFeature_) {
         LOGD("during over scroll, just return in LayoutForward");
@@ -302,7 +305,8 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
 
     // Mark inactive in wrapper.
     for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {
-        if (GreatOrEqual(pos->second.endPos, startMainPos_ - paddingBeforeContent_)) {
+        chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
+        if (GreatOrEqual(pos->second.endPos - chainOffset, startMainPos_ - paddingBeforeContent_)) {
             break;
         }
         LOGI("recycle item:%{public}d", pos->first);
@@ -318,6 +322,7 @@ void ListLayoutAlgorithm::LayoutBackward(
     float currentEndPos = 0.0f;
     float startMainPos = overScrollFeature_ ? std::min(endPos - contentMainSize_, startMainPos_) : startMainPos_;
     auto currentIndex = endIndex + 1;
+    auto chainOffset = 0.0f;
     do {
         currentEndPos = currentStartPos;
         int32_t count = LayoutALineBackward(layoutWrapper, layoutConstraint, axis, currentIndex,
@@ -330,7 +335,8 @@ void ListLayoutAlgorithm::LayoutBackward(
         }
         LOGD("LayoutBackward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
-    } while (GreatNotEqual(currentStartPos, startMainPos - paddingBeforeContent_));
+        chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
+    } while (GreatNotEqual(currentStartPos - chainOffset, startMainPos - paddingBeforeContent_));
 
     if (overScrollFeature_) {
         LOGD("during over scroll, just return in LayoutBackward");
@@ -349,7 +355,8 @@ void ListLayoutAlgorithm::LayoutBackward(
     // Mark inactive in wrapper.
     std::list<int32_t> removeIndexes;
     for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
-        if (LessOrEqual(pos->second.startPos, endMainPos_ + paddingAfterContent_)) {
+        chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
+        if (LessOrEqual(pos->second.startPos - chainOffset, endMainPos_ + paddingAfterContent_)) {
             break;
         }
         layoutWrapper->RemoveChildInRenderTree(pos->first);
@@ -399,10 +406,11 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         } else {
             crossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
         }
+        auto chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(index) : 0.0f;
         if (axis == Axis::VERTICAL) {
-            offset = offset + OffsetF(crossOffset, pos.second.startPos);
+            offset = offset + OffsetF(crossOffset, pos.second.startPos - chainOffset);
         } else {
-            offset = offset + OffsetF(pos.second.startPos, crossOffset);
+            offset = offset + OffsetF(pos.second.startPos - chainOffset, crossOffset);
         }
         wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
         if (!overScrollFeature_ || wrapper->CheckNeedForceMeasureAndLayout()) {

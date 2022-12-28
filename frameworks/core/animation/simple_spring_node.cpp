@@ -23,7 +23,7 @@ constexpr int64_t NANOS_TO_MILLS = 1000000;
 
 } // namespace
 
-SimpleSpringNode::SimpleSpringNode(const WeakPtr<PipelineContext>& context, int32_t index, double value)
+SimpleSpringNode::SimpleSpringNode(const WeakPtr<PipelineBase>& context, int32_t index, double value)
     : SpringNode(index), context_(context), value_(value)
 {
     springProperty_ = AceType::MakeRefPtr<SpringProperty>();
