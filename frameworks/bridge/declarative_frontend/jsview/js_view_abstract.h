@@ -152,6 +152,7 @@ public:
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result);
     static bool ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
+    static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
 
     static std::pair<Dimension, Dimension> ParseSize(const JSCallbackInfo& info);
     static void JsUseAlign(const JSCallbackInfo& info);
