@@ -1132,6 +1132,12 @@ public:
         JSClass<JSContextMenuParam>::CustomMethod("getUnfilteredLinkUrl", &JSContextMenuParam::GetUnfilteredLinkUrl);
         JSClass<JSContextMenuParam>::CustomMethod("getSourceUrl", &JSContextMenuParam::GetSourceUrl);
         JSClass<JSContextMenuParam>::CustomMethod("existsImageContents", &JSContextMenuParam::HasImageContents);
+        JSClass<JSContextMenuParam>::CustomMethod("getSelectionText", &JSContextMenuParam::GetSelectionText);
+        JSClass<JSContextMenuParam>::CustomMethod("isEditable", &JSContextMenuParam::IsEditable);
+        JSClass<JSContextMenuParam>::CustomMethod("getEditStateFlags", &JSContextMenuParam::GetEditStateFlags);
+        JSClass<JSContextMenuParam>::CustomMethod("getSourceType", &JSContextMenuParam::GetSourceType);
+        JSClass<JSContextMenuParam>::CustomMethod("getInputFieldType", &JSContextMenuParam::GetInputFieldType);
+        JSClass<JSContextMenuParam>::CustomMethod("getMediaType", &JSContextMenuParam::GetMediaType);
         JSClass<JSContextMenuParam>::Bind(globalObj, &JSContextMenuParam::Constructor, &JSContextMenuParam::Destructor);
     }
 
@@ -1206,6 +1212,72 @@ public:
         args.SetReturnValue(descriptionRef);
     }
 
+    void GetSelectionText(const JSCallbackInfo& args)
+    {
+        std::string text;
+        if (param_) {
+            text = param_->GetSelectionText();
+        }
+        auto jsText = JSVal(ToJSValue(text));
+        auto descriptionRef = JSRef<JSVal>::Make(jsText);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void IsEditable(const JSCallbackInfo& args)
+    {
+        bool flag = false;
+        if (param_) {
+            flag = param_->IsEditable();
+        }
+        auto jsFlag = JSVal(ToJSValue(flag));
+        auto descriptionRef = JSRef<JSVal>::Make(jsFlag);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetEditStateFlags(const JSCallbackInfo& args)
+    {
+        int32_t flags = 0;
+        if (param_) {
+            flags = param_->GetEditStateFlags();
+        }
+        auto jsFlags = JSVal(ToJSValue(flags));
+        auto descriptionRef = JSRef<JSVal>::Make(jsFlags);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetSourceType(const JSCallbackInfo& args)
+    {
+        int32_t type = 0;
+        if (param_) {
+            type = param_->GetSourceType();
+        }
+        auto jsType = JSVal(ToJSValue(type));
+        auto descriptionRef = JSRef<JSVal>::Make(jsType);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetInputFieldType(const JSCallbackInfo& args)
+    {
+        int32_t type = 0;
+        if (param_) {
+            type = param_->GetInputFieldType();
+        }
+        auto jsType = JSVal(ToJSValue(type));
+        auto descriptionRef = JSRef<JSVal>::Make(jsType);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetMediaType(const JSCallbackInfo& args)
+    {
+        int32_t type = 0;
+        if (param_) {
+            type = param_->GetMediaType();
+        }
+        auto jsType = JSVal(ToJSValue(type));
+        auto descriptionRef = JSRef<JSVal>::Make(jsType);
+        args.SetReturnValue(descriptionRef);
+    }
+
 private:
     static void Constructor(const JSCallbackInfo& args)
     {
@@ -1231,6 +1303,10 @@ public:
         JSClass<JSContextMenuResult>::Declare("WebContextMenuResult");
         JSClass<JSContextMenuResult>::CustomMethod("closeContextMenu", &JSContextMenuResult::Cancel);
         JSClass<JSContextMenuResult>::CustomMethod("copyImage", &JSContextMenuResult::CopyImage);
+        JSClass<JSContextMenuResult>::CustomMethod("copy", &JSContextMenuResult::Copy);
+        JSClass<JSContextMenuResult>::CustomMethod("paste", &JSContextMenuResult::Paste);
+        JSClass<JSContextMenuResult>::CustomMethod("cut", &JSContextMenuResult::Cut);
+        JSClass<JSContextMenuResult>::CustomMethod("selectAll", &JSContextMenuResult::SelectAll);
         JSClass<JSContextMenuResult>::Bind(
             globalObj, &JSContextMenuResult::Constructor, &JSContextMenuResult::Destructor);
     }
@@ -1251,6 +1327,34 @@ public:
     {
         if (result_) {
             result_->CopyImage();
+        }
+    }
+
+    void Copy(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Copy();
+        }
+    }
+
+    void Paste(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Paste();
+        }
+    }
+
+    void Cut(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Cut();
+        }
+    }
+
+    void SelectAll(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->SelectAll();
         }
     }
 
