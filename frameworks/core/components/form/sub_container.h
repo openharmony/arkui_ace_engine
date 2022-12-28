@@ -41,7 +41,7 @@ public:
     ~SubContainer() = default;
 
     void Initialize();
-    void RunCard(int64_t id, const std::string& path, const std::string& module, const std::string& data,
+    void RunCard(int64_t formId, const std::string& path, const std::string& module, const std::string& data,
         const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap, const std::string& formSrc,
         const FrontendType& cardType);
     void UpdateCard(
@@ -120,6 +120,11 @@ public:
         return formPattern_.Upgrade();
     }
 
+    void SetNodeId(int32_t nodeId)
+    {
+        nodeId_ = static_cast<int64_t>(nodeId);
+    }
+
 private:
     RefPtr<CardFrontend> frontend_;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -146,6 +151,7 @@ private:
 
     // Use for NG.
     WeakPtr<NG::FormPattern> formPattern_;
+    int64_t nodeId_ = 0;
 };
 
 } // namespace OHOS::Ace
