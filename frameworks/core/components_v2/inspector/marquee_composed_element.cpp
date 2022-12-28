@@ -106,7 +106,10 @@ std::string MarqueeComposedElement::GetFontSize() const
 std::string MarqueeComposedElement::GetFontColor() const
 {
     auto render = GetRenderMarquee();
-    auto fontColor = render ? render->GetTextStyle().GetTextColor() : Color::BLACK;
+    if (!render) {
+        return "";
+    }
+    auto fontColor = render->GetTextStyle().GetTextColor();
     return fontColor.ColorToString();
 }
 
