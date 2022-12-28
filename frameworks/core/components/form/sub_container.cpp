@@ -139,15 +139,15 @@ void SubContainer::UpdateSurfaceSize()
         TaskExecutor::TaskType::UI);
 }
 
-void SubContainer::RunCard(int64_t id, const std::string& path, const std::string& module, const std::string& data,
+void SubContainer::RunCard(int64_t formId, const std::string& path, const std::string& module, const std::string& data,
     const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap, const std::string& formSrc,
     const FrontendType& cardType)
 {
-    if (id == runningCardId_) {
+    if (formId == runningCardId_) {
         LOGE("the card is showing, no need run again");
         return;
     }
-    runningCardId_ = id;
+    runningCardId_ = formId;
     cardType_ = cardType;
 
     if (cardType_ == FrontendType::ETS_CARD) {
@@ -162,7 +162,7 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
     frontend_->Initialize(cardType_, taskExecutor_);
 
     if (onFormAcquiredCallback_) {
-        onFormAcquiredCallback_(id);
+        onFormAcquiredCallback_(formId);
     }
 
     frontend_->ResetPageLoadState();
@@ -273,7 +273,7 @@ void SubContainer::RunCard(int64_t id, const std::string& path, const std::strin
 
     frontend_->AttachPipelineContext(pipelineContext_);
     frontend_->SetLoadCardCallBack(outSidePipelineContext_);
-    frontend_->SetRunningCardId(runningCardId_);
+    frontend_->SetRunningCardId(nodeId_);
     frontend_->SetDensity(density_);
     UpdateSurfaceSize();
 
