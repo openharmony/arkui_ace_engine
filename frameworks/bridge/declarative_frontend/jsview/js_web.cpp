@@ -1466,6 +1466,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onDataResubmitted", &JSWeb::OnDataResubmitted);
     JSClass<JSWeb>::StaticMethod("onFaviconReceived", &JSWeb::OnFaviconReceived);
     JSClass<JSWeb>::StaticMethod("onTouchIconUrlReceived", &JSWeb::OnTouchIconUrlReceived);
+    JSClass<JSWeb>::StaticMethod("darkMode", &JSWeb::DarkMode);
+    JSClass<JSWeb>::StaticMethod("forceDarkAccess", &JSWeb::ForceDarkAccess);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -4019,6 +4021,37 @@ void JSWeb::OnTouchIconUrlReceived(const JSCallbackInfo& args)
             });
         };
         NG::WebView::SetTouchIconUrlId(std::move(uiCallback));
+        return;
+    }
+}
+
+void JSWeb::DarkMode(int32_t darkMode)
+{
+    auto mode = WebDarkMode::OFF;
+    switch (darkMode) {
+        case 0:
+            mode = WebDarkMode::OFF;
+            break;
+        case 1:
+            mode = WebDarkMode::ON;
+            break;
+        case 2:
+            mode = WebDarkMode::AUTO;
+            break;
+        default:
+            mode = WebDarkMode::OFF;
+            break;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetDarkMode(mode);
+        return;
+    }
+}
+
+void JSWeb::ForceDarkAccess(bool access)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetForceDarkAccess(access);
         return;
     }
 }

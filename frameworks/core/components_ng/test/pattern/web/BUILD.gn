@@ -45,6 +45,7 @@ ohos_unittest("web_pattern_test_ng") {
     ":config_web_test",
     "$ace_root:ace_config",
   ]
+  external_deps = [ "ability_runtime:app_manager" ]
 }
 
 ohos_unittest("web_view_test_ng") {
@@ -63,6 +64,7 @@ ohos_unittest("web_view_test_ng") {
     ":config_web_test",
     "$ace_root:ace_config",
   ]
+  external_deps = [ "ability_runtime:app_manager" ]
 }
 config("config_web_test") {
   visibility = [ ":*" ]

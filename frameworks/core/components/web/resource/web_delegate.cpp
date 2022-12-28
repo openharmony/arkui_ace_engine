@@ -43,6 +43,7 @@
 #include "application_env.h"
 #include "nweb_adapter_helper.h"
 #include "nweb_handler.h"
+#include "web_configuration_observer.h"
 #include "web_javascript_execute_callback.h"
 #include "web_javascript_result_callback.h"
 #endif
@@ -1802,6 +1803,55 @@ void WebDelegate::RunJsProxyCallback()
     webCom->CallJsProxyCallback();
 }
 
+void WebDelegate::RegisterConfigObserver()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
+            if (appMgrClient->ConnectAppMgrService()) {
+                LOGE("connect to app mgr service failed");
+                return;
+            }
+            delegate->configChangeObserver_ = sptr<AppExecFwk::IConfigurationObserver>(
+                new (std::nothrow) WebConfigurationObserver(delegate));
+            if (appMgrClient->RegisterConfigurationObserver(delegate->configChangeObserver_)) {
+                return;
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UnRegisterConfigObserver()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            if (delegate->configChangeObserver_) {
+                auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
+                if (appMgrClient->ConnectAppMgrService()) {
+                    LOGE("connect to app mgr service failed");
+                    return;
+                }
+                appMgrClient->UnregisterConfigurationObserver(delegate->configChangeObserver_);
+                delegate->configChangeObserver_ = nullptr;
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::SetWebCallBack()
 {
     RefPtr<WebController> webController;
@@ -2553,6 +2603,96 @@ void WebDelegate::UpdateCacheMode(const WebCacheMode& mode)
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
                 setting->PutCacheMode(static_cast<OHOS::NWeb::NWebPreference::CacheModeFlag>(mode));
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+std::shared_ptr<OHOS::NWeb::NWeb> WebDelegate::GetNweb()
+{
+    return nweb_;
+}
+
+bool WebDelegate::GetForceDarkMode()
+{
+    return forceDarkMode_;
+}
+
+void WebDelegate::UpdateDarkMode(const WebDarkMode& mode)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), mode]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+            if (mode == WebDarkMode::ON) {
+                delegate->UnRegisterConfigObserver();
+                setting->PutDarkSchemeEnabled(true);
+                if (delegate->forceDarkMode_) {
+                    setting->PutForceDarkModeEnabled(true);
+                }
+                return;
+            }
+            if (mode == WebDarkMode::OFF) {
+                delegate->UnRegisterConfigObserver();
+                setting->PutDarkSchemeEnabled(false);
+                setting->PutForceDarkModeEnabled(false);
+                return;
+            }
+            if (mode == WebDarkMode::AUTO) {
+                delegate->UpdateDarkModeAuto(delegate, setting);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateDarkModeAuto(RefPtr<WebDelegate> delegate,
+    std::shared_ptr<OHOS::NWeb::NWebPreference> setting)
+{
+    auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
+    if (appMgrClient->ConnectAppMgrService()) {
+        return;
+    }
+    auto systemConfig = OHOS::AppExecFwk::Configuration();
+    appMgrClient->GetConfiguration(systemConfig);
+    std::string colorMode =
+        systemConfig.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    if (colorMode == "dark") {
+        setting->PutDarkSchemeEnabled(true);
+        if (delegate->GetForceDarkMode()) {
+            setting->PutForceDarkModeEnabled(true);
+        }
+        return;
+    }
+    if (colorMode == "light") {
+        setting->PutDarkSchemeEnabled(false);
+        setting->PutForceDarkModeEnabled(false);
+    }
+    delegate->RegisterConfigObserver();
+}
+
+void WebDelegate::UpdateForceDarkAccess(const bool& access)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), access]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+            delegate->forceDarkMode_ = access;
+            if (setting->DarkSchemeEnabled()) {
+                setting->PutForceDarkModeEnabled(access);
+            } else {
+                setting->PutForceDarkModeEnabled(false);
             }
         },
         TaskExecutor::TaskType::PLATFORM);
