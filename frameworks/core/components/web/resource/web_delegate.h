@@ -559,7 +559,7 @@ private:
     void DeleteEntirelyCookie();
     void RegisterOHOSWebEventAndMethord();
     void SetWebCallBack();
-    void RunSetWebIdCallback();
+    void RunSetWebIdAndHapPathCallback();
     void RunJsProxyCallback();
     void RegisterConfigObserver();
     void UnRegisterConfigObserver();

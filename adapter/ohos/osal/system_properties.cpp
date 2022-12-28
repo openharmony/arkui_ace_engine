@@ -375,11 +375,6 @@ bool SystemProperties::GetDebugEnabled()
     return debugEnabled_;
 }
 
-bool SystemProperties::GetResourceUseHapPathEnable()
-{
-    return system::GetBoolParameter("compress", false);
-}
-
 std::string SystemProperties::GetLanguage()
 {
     return system::GetParameter("const.global.language", INVALID_PARAM);
