@@ -86,7 +86,7 @@ template("ace_base_source_set") {
       }
     }
 
-    if (is_cross_platform_build) {
+    if (is_cross_platform_build || platform != "ohos") {
       deps += [ "//third_party/cJSON:cjson_static" ]
     } else {
       deps += [ "//third_party/cJSON:cjson" ]
