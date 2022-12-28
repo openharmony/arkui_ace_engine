@@ -134,4 +134,39 @@ std::string WrapComposedElement::GetAlignContent() const
     return "FlexAlign.Start";
 }
 
+void WrapComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto wrapElement = GetContentElement<WrapElement>(WrapElement::TypeId());
+    if (!wrapElement) {
+        LOGE("get wrapElement failed");
+        return;
+    }
+    wrapElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    wrapElement->MarkDirty();
+}
+
+void WrapComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+{
+    auto wrapElement = GetContentElement<WrapElement>(WrapElement::TypeId());
+    if (!wrapElement) {
+        LOGE("get wrapElement failed");
+        return;
+    }
+    auto child = wrapElement->GetChildBySlot(slot);
+    wrapElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    wrapElement->MarkDirty();
+}
+
+void WrapComposedElement::DeleteChildWithSlot(int32_t slot)
+{
+    auto wrapElement = GetContentElement<WrapElement>(WrapElement::TypeId());
+    if (!wrapElement) {
+        LOGE("get wrapElement failed");
+        return;
+    }
+    auto child = wrapElement->GetChildBySlot(slot);
+    wrapElement->UpdateChildWithSlot(child, nullptr, slot, slot);
+    wrapElement->MarkDirty();
+}
+
 } // namespace OHOS::Ace::V2
