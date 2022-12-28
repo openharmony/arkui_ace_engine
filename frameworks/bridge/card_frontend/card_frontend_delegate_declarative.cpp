@@ -41,6 +41,7 @@ void CardFrontendDelegateDeclarative::RunCard(const std::string& url,
     auto cardPipeline = GetPipelineContext();
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    cardData_ = params;
     taskExecutor->PostTask(
         [weakPageRouterManager = WeakPtr<NG::PageRouterManager>(pageRouterManager), 
          weakCardPipeline = WeakPtr<PipelineBase>(cardPipeline), url, params, cardId]() {
