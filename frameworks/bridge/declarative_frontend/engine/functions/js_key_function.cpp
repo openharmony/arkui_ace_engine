@@ -43,4 +43,10 @@ void JsKeyFunction::Execute(OHOS::Ace::KeyEventInfo& event)
     JsFunction::ExecuteJS(1, &param);
 }
 
+JSRef<JSVal> JsKeyFunction::ExecuteWithValue(OHOS::Ace::KeyEventInfo& event)
+{
+    JSRef<JSVal> param = JSRef<JSObject>::Cast(createKeyEvent(event));
+    return JsFunction::ExecuteJS(1, &param);
+}
+
 } // namespace OHOS::Ace::Framework

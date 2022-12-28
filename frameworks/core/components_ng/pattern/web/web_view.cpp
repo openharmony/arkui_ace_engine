@@ -453,4 +453,116 @@ void WebView::SetJsProxyCallback(JsProxyCallback&& jsProxyCallback)
     CHECK_NULL_VOID(webPattern);
     webPattern->SetJsProxyCallback(std::move(jsProxyCallback));
 }
+
+void WebView::SetWebCursiveFont(const std::string& cursiveFontFamily)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebCursiveFont(cursiveFontFamily);
+}
+
+void WebView::SetWebFantasyFont(const std::string& fantasyFontFamily)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebFantasyFont(fantasyFontFamily);
+}
+
+void WebView::SetWebFixedFont(const std::string& fixedFontFamily)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebFixedFont(fixedFontFamily);
+}
+
+void WebView::SetWebSansSerifFont(const std::string& sansSerifFontFamily)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebSansSerifFont(sansSerifFontFamily);
+}
+
+void WebView::SetWebSerifFont(const std::string& serifFontFamily)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebSerifFont(serifFontFamily);
+}
+
+void WebView::SetWebStandardFont(const std::string& standardFontFamily)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebStandardFont(standardFontFamily);
+}
+
+void WebView::SetDefaultFixedFontSize(int32_t defaultFixedFontSize)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateDefaultFixedFontSize(defaultFixedFontSize);
+}
+
+void WebView::SetDefaultFontSize(int32_t defaultFontSize)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateDefaultFontSize(defaultFontSize);
+}
+
+void WebView::SetMinFontSize(int32_t minFontSize)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateMinFontSize(minFontSize);
+}
+
+void WebView::SetMinLogicalFontSize(int32_t minLogicalFontSize)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateMinLogicalFontSize(minLogicalFontSize);
+}
+
+void WebView::SetBlockNetwork(bool isNetworkBlocked)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateBlockNetwork(isNetworkBlocked);
+}
+
+void WebView::SetPageVisibleId(OnWebAsyncFunc&& pageVisibleId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnPageVisibleEvent(std::move(pageVisibleId));
+}
+
+void WebView::SetOnInterceptKeyEventCallback(std::function<bool(KeyEventInfo& keyEventInfo)>&& onPreKeyEventId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnPreKeyEvent(std::move(onPreKeyEventId));
+}
+
+void WebView::SetDataResubmittedId(OnWebAsyncFunc&& dataResubmittedId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnDataResubmittedEvent(std::move(dataResubmittedId));
+}
+
+void WebView::SetFaviconReceivedId(OnWebAsyncFunc&& faviconReceivedId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFaviconReceivedEvent(std::move(faviconReceivedId));
+}
+
+void WebView::SetTouchIconUrlId(OnWebAsyncFunc&& touchIconUrlId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnTouchIconUrlEvent(std::move(touchIconUrlId));
+}
 } // namespace OHOS::Ace::NG

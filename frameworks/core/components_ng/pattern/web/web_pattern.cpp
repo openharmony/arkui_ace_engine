@@ -469,18 +469,29 @@ void WebPattern::HandleBlurEvent()
 
 bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 {
-    bool ret = WebOnKeyEvent(keyEvent);
+    bool ret = false;
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ret);
     auto eventHub = host->GetEventHub<WebEventHub>();
     CHECK_NULL_RETURN(eventHub, ret);
-    auto keyEventCallback = eventHub->GetOnKeyEvent();
-    CHECK_NULL_RETURN(keyEventCallback, ret);
 
     KeyEventInfo info(keyEvent);
-    keyEventCallback(info);
+    auto keyEventCallback = eventHub->GetOnKeyEvent();
+    if (keyEventCallback) {
+        keyEventCallback(info);
+    }
 
+    auto preKeyEventCallback = eventHub->GetOnPreKeyEvent();
+    if (preKeyEventCallback) {
+        ret = preKeyEventCallback(info);
+        if (ret) {
+            LOGI("keyevent consumed in hap");
+            return ret;
+        }
+    }
+
+    ret = WebOnKeyEvent(keyEvent);
     return ret;
 }
 
@@ -685,6 +696,83 @@ void WebPattern::OnMultiWindowAccessEnabledUpdate(bool value)
     }
 }
 
+void WebPattern::OnWebCursiveFontUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateWebCursiveFont(value);
+    }
+}
+
+void WebPattern::OnWebFantasyFontUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateWebFantasyFont(value);
+    }
+}
+
+void WebPattern::OnWebFixedFontUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateWebFixedFont(value);
+    }
+}
+
+void WebPattern::OnWebSansSerifFontUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateWebSansSerifFont(value);
+    }
+}
+
+void WebPattern::OnWebSerifFontUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateWebSerifFont(value);
+    }
+}
+
+void WebPattern::OnWebStandardFontUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateWebStandardFont(value);
+    }
+}
+
+void WebPattern::OnDefaultFixedFontSizeUpdate(int32_t value)
+{
+    if (delegate_) {
+        delegate_->UpdateDefaultFixedFontSize(value);
+    }
+}
+
+void WebPattern::OnDefaultFontSizeUpdate(int32_t value)
+{
+    if (delegate_) {
+        delegate_->UpdateDefaultFontSize(value);
+    }
+}
+
+void WebPattern::OnMinFontSizeUpdate(int32_t value)
+{
+    if (delegate_) {
+        delegate_->UpdateMinFontSize(value);
+    }
+}
+
+void WebPattern::OnMinLogicalFontSizeUpdate(int32_t value)
+{
+    if (delegate_) {
+        delegate_->UpdateMinLogicalFontSize(value);
+    }
+}
+
+void WebPattern::OnBlockNetworkUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateBlockNetwork(value);
+    }
+}
+
 void WebPattern::RegistVirtualKeyBoardListener()
 {
     if (!needUpdateWeb_) {
@@ -739,6 +827,19 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateMediaPlayGestureAccess(GetMediaPlayGestureAccessValue(true));
         delegate_->UpdatePinchSmoothModeEnabled(GetPinchSmoothModeEnabledValue(false));
         delegate_->UpdateMultiWindowAccess(GetMultiWindowAccessEnabledValue(false));
+        delegate_->UpdateWebCursiveFont(GetWebCursiveFontValue(DEFAULT_CURSIVE_FONT_FAMILY));
+        delegate_->UpdateWebFantasyFont(GetWebFantasyFontValue(DEFAULT_FANTASY_FONT_FAMILY));
+        delegate_->UpdateWebFixedFont(GetWebFixedFontValue(DEFAULT_FIXED_fONT_FAMILY));
+        delegate_->UpdateWebSansSerifFont(GetWebSansSerifFontValue(DEFAULT_SANS_SERIF_FONT_FAMILY));
+        delegate_->UpdateWebSerifFont(GetWebSerifFontValue(DEFAULT_SERIF_FONT_FAMILY));
+        delegate_->UpdateWebStandardFont(GetWebStandardFontValue(DEFAULT_STANDARD_FONT_FAMILY));
+        delegate_->UpdateDefaultFixedFontSize(GetDefaultFixedFontSizeValue(DEFAULT_FIXED_FONT_SIZE));
+        delegate_->UpdateDefaultFontSize(GetDefaultFontSizeValue(DEFAULT_FONT_SIZE));
+        delegate_->UpdateMinFontSize(GetMinFontSizeValue(DEFAULT_MINIMUM_FONT_SIZE));
+        delegate_->UpdateMinLogicalFontSize(GetMinLogicalFontSizeValue(DEFAULT_MINIMUM_LOGICAL_FONT_SIZE));
+        if (GetBlockNetwork()) {
+            delegate_->UpdateBlockNetwork(GetBlockNetwork().value());
+        }
         if (GetUserAgent()) {
             delegate_->UpdateUserAgent(GetUserAgent().value());
         }

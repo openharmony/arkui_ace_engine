@@ -108,6 +108,16 @@ public:
         return propOnMouseEvent_;
     }
 
+    void SetOnPreKeyEvent(std::function<bool(KeyEventInfo& keyEventInfo)>&& propOnPreKeyEvent)
+    {
+        propOnPreKeyEvent_ = propOnPreKeyEvent;
+    }
+
+    const std::function<bool(KeyEventInfo& keyEventInfo)>& GetOnPreKeyEvent() const
+    {
+        return propOnPreKeyEvent_;
+    }
+
     ACE_WEB_EVENT_PROPERTY(OnPageStarted, void);
     ACE_WEB_EVENT_PROPERTY(OnPageFinished, void);
     ACE_WEB_EVENT_PROPERTY(OnHttpErrorReceive, void);
@@ -137,6 +147,10 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnSearchResultReceive, void);
     ACE_WEB_EVENT_PROPERTY(OnWindowNew, void);
     ACE_WEB_EVENT_PROPERTY(OnWindowExit, void);
+    ACE_WEB_EVENT_PROPERTY(OnPageVisible, void);
+    ACE_WEB_EVENT_PROPERTY(OnDataResubmitted, void);
+    ACE_WEB_EVENT_PROPERTY(OnFaviconReceived, void);
+    ACE_WEB_EVENT_PROPERTY(OnTouchIconUrl, void);
 
 private:
     std::function<void(KeyEventInfo& keyEventInfo)> propOnKeyEvent_;
@@ -150,6 +164,7 @@ private:
     std::function<bool(const std::shared_ptr<BaseEventInfo>& info)> onConfirmImpl_;
     std::function<bool(const std::shared_ptr<BaseEventInfo>& info)> onPromptImpl_;
     std::function<bool(const std::shared_ptr<BaseEventInfo>& info)> onBeforeUnloadImpl_;
+    std::function<bool(KeyEventInfo& keyEventInfo)> propOnPreKeyEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(WebEventHub);
 };
