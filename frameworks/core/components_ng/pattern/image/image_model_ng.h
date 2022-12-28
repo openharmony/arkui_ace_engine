@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 // ImageModel is essentially the same class as ImageView
 // there should be only one left in the final implementation
 
-class  ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
+class ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
 public:
     void Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap) override;
     void SetAlt(const std::string& src) override;
@@ -45,8 +45,9 @@ public:
     void SetAutoResize(bool autoResize) override;
     void SetSyncMode(bool syncMode) override;
     void SetColorFilterMatrix(const std::vector<float>& matrix) override;
+    void SetDraggable(bool draggable) override;
     void SetOnDragStart(OnDragStartFunc&& onDragStart) override;
-    void SetOnDragEnter(OnDragDropFunc&&  onDragEnter) override;
+    void SetOnDragEnter(OnDragDropFunc&& onDragEnter) override;
     void SetOnDragLeave(OnDragDropFunc&& onDragLeave) override;
     void SetOnDragMove(OnDragDropFunc&& onDragMove) override;
     void SetOnDrop(OnDragDropFunc&& onDrop) override;

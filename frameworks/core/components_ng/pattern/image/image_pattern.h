@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,12 @@ public:
     void OnWindowShow() override;
     void OnVisibleChange(bool isVisible) override;
 
+    void EnableDrag();
+    void SetDraggable(bool draggable)
+    {
+        draggable_ = draggable;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override
@@ -109,6 +115,7 @@ private:
     RectF dstRect_;
     RectF srcRect_;
 
+    bool draggable_ = false;
     bool isShow_ = true; // TODO: remove it later when use [isActive_] to determine image data management
 
     // clear alt data after [OnImageLoadSuccess] being called

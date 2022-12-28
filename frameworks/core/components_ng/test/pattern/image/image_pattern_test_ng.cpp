@@ -1276,4 +1276,45 @@ HWTEST_F(ImagePatternTestNg, ImageLayoutFunction001, TestSize.Level1)
     EXPECT_EQ(loadingCtx->autoResize_, true);
     EXPECT_EQ(loadingCtx->dstSize_, SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
 }
+
+/**
+ * @tc.name: Drag001
+ * @tc.desc: Test image drag with src change.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, Drag001, TestSize.Level1)
+{
+    auto frameNode = ImagePatternTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    pattern->loadingCtx_->SuccessCallback(nullptr);
+
+    // emulate drag event
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    EXPECT_TRUE(eventHub->GetOnDragStart() != nullptr);
+    auto extraParams =
+        eventHub->GetDragExtraParams(std::string(), Point(RADIUS_DEFAULT, RADIUS_DEFAULT), DragEventType::START);
+    auto dragDropInfo = (eventHub->GetOnDragStart())(nullptr, extraParams);
+
+    // check dragInfo customNode
+    EXPECT_TRUE(dragDropInfo.customNode != nullptr);
+    EXPECT_TRUE(dragDropInfo.customNode->tag_ == V2::IMAGE_ETS_TAG);
+
+    auto dragNode = AceType::DynamicCast<FrameNode>(dragDropInfo.customNode);
+    EXPECT_TRUE(dragNode != nullptr);
+    auto dragPattern = dragNode->GetPattern<ImagePattern>();
+    EXPECT_TRUE(dragPattern->image_ != nullptr);
+    EXPECT_TRUE(dragPattern->loadingCtx_->src_.GetSrc() == IMAGE_SRC_URL);
+
+    // change src
+    frameNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(ImageSourceInfo(ALT_SRC_URL));
+    pattern->loadingCtx_->SuccessCallback(nullptr);
+
+    auto newDragDropInfo = (eventHub->GetOnDragStart())(nullptr, extraParams);
+    dragNode = AceType::DynamicCast<FrameNode>(newDragDropInfo.customNode);
+    dragPattern = dragNode->GetPattern<ImagePattern>();
+    EXPECT_TRUE(dragPattern->image_ != nullptr);
+    EXPECT_TRUE(dragPattern->loadingCtx_->src_.GetSrc() == ALT_SRC_URL);
+}
 } // namespace OHOS::Ace::NG
