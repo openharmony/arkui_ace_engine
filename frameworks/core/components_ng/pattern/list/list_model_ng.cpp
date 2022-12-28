@@ -80,7 +80,10 @@ void ListModelNG::SetDivider(const V2::ItemDivider& divider)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider);
 }
 
-void ListModelNG::SetChainAnimation(bool enableChainAnimation) {}
+void ListModelNG::SetChainAnimation(bool enableChainAnimation)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ChainAnimation, enableChainAnimation);
+}
 
 void ListModelNG::SetLanes(int32_t lanes)
 {

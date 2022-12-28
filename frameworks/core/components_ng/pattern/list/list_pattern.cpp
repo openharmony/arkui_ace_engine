@@ -18,6 +18,7 @@
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/animation/bilateral_spring_node.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/scroll/scrollable.h"
@@ -30,6 +31,10 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t CHAIN_ANIMATION_NODE_COUNT = 30;
+} // namespace
+
 void ListPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -68,6 +73,7 @@ void ListPattern::OnModifyDone()
 
     SetEdgeEffect(gestureHub, listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING));
     SetScrollBar();
+    SetChainAnimation(listLayoutProperty->GetChainAnimation().value_or(false));
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID_NOLOG(focusHub);
     InitOnKeyEvent(focusHub);
@@ -232,6 +238,14 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     auto effect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
     bool canOverScroll = (effect == EdgeEffect::SPRING) && (scrollableEvent_ && !scrollableEvent_->Idle());
     listLayoutAlgorithm->SetCanOverScroll(canOverScroll);
+    if (chainAdapter_) {
+        listLayoutAlgorithm->SetChainOffsetCallback([weak = AceType::WeakClaim(this)](int32_t index) {
+            auto list = weak.Upgrade();
+            CHECK_NULL_RETURN(list, 0.0f);
+            return list->GetChainDelta(index);
+        });
+        listLayoutAlgorithm->SetChainInterval(chainProperty_.Interval().ConvertToPx());
+    }
     return listLayoutAlgorithm;
 }
 
@@ -335,6 +349,25 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
     return outOfStart || outOfEnd;
 }
 
+bool ListPattern::ScrollPositionCallback(float offset, int32_t source)
+{
+    SetScrollState(source);
+    if (source == SCROLL_FROM_START) {
+        ProcessDragStart(offset);
+        return true;
+    }
+    if (!isScrollContent_ && scrollBar_) {
+        if (source == SCROLL_FROM_UPDATE) {
+            offset = scrollBar_->CalcPatternOffset(-offset);
+        } else {
+            return false;
+        }
+    } else {
+        ProcessDragUpdate(offset);
+    }
+    return UpdateCurrentOffset(offset);
+}
+
 void ListPattern::InitScrollableEvent()
 {
     auto host = GetHost();
@@ -343,18 +376,7 @@ void ListPattern::InitScrollableEvent()
     auto task = [weak = WeakClaim(this)](double offset, int32_t source) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        pattern->SetScrollState(source);
-        if (source != SCROLL_FROM_START) {
-            if (!pattern->isScrollContent_ && pattern->scrollBar_) {
-                if (source == SCROLL_FROM_UPDATE) {
-                    offset = pattern->scrollBar_->CalcPatternOffset(-offset);
-                } else {
-                    return false;
-                }
-            }
-            return pattern->UpdateCurrentOffset(static_cast<float>(offset));
-        }
-        return true;
+        return pattern->ScrollPositionCallback(offset, source);
     };
     scrollableEvent_->SetScrollPositionCallback(std::move(task));
 
@@ -706,4 +728,135 @@ void ListPattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy
     scrollBarProxy_ = scrollBarProxy;
 }
 
+void ListPattern::SetChainAnimation(bool enable)
+{
+    if (!enable) {
+        overSpringProperty_.Reset();
+        chain_.Reset();
+        chainAdapter_.Reset();
+        return;
+    }
+    if (!chainAdapter_) {
+        InitChainAnimation(CHAIN_ANIMATION_NODE_COUNT);
+        overSpringProperty_ = SpringChainProperty::GetDefaultOverSpringProperty();
+    }
+}
+
+void ListPattern::InitChainAnimation(int32_t nodeCount)
+{
+    chainAdapter_ = AceType::MakeRefPtr<BilateralSpringAdapter>();
+    chain_ = AceType::MakeRefPtr<SimpleSpringChain>(chainAdapter_);
+    chain_->SetFrameDelta(chainProperty_.FrameDelay());
+    if (chainProperty_.StiffnessTransfer()) {
+        chain_->SetStiffnessTransfer(AceType::MakeRefPtr<ExpParamTransfer>(chainProperty_.StiffnessCoefficient()));
+    } else {
+        chain_->SetStiffnessTransfer(AceType::MakeRefPtr<LinearParamTransfer>(chainProperty_.StiffnessCoefficient()));
+    }
+    if (chainProperty_.DampingTransfer()) {
+        chain_->SetDampingTransfer(AceType::MakeRefPtr<ExpParamTransfer>(chainProperty_.DampingCoefficient()));
+    } else {
+        chain_->SetDampingTransfer(AceType::MakeRefPtr<LinearParamTransfer>(chainProperty_.DampingCoefficient()));
+    }
+    chain_->SetControlDamping(chainProperty_.ControlDamping());
+    chain_->SetControlStiffness(chainProperty_.ControlStiffness());
+    chain_->SetDecoration(chainProperty_.Interval().ConvertToPx());
+    chain_->SetMinDecoration(chainProperty_.MinInterval().ConvertToPx());
+    chain_->SetMaxDecoration(chainProperty_.MaxInterval().ConvertToPx());
+    for (int32_t index = 0; index < nodeCount; index++) {
+        auto node = AceType::MakeRefPtr<BilateralSpringNode>(PipelineBase::GetCurrentContext(), index, 0.0);
+        node->AddUpdateListener(
+            [weak = AceType::WeakClaim(this)](double value, double velocity) {
+                auto list = weak.Upgrade();
+                CHECK_NULL_VOID(list);
+                list->MarkDirtyNodeSelf();
+            });
+        chainAdapter_->AddNode(node);
+    }
+    chainAdapter_->NotifyControlIndexChange();
+}
+
+float ListPattern::FlushChainAnimation(float dragOffset)
+{
+    if (!chain_ || !chainAdapter_) {
+        return 0.0;
+    }
+    float deltaDistance = 0.0;
+    bool needSetValue = false;
+    bool overScroll = scrollableEvent_ && scrollableEvent_->GetScrollable() &&
+        scrollableEvent_->GetScrollable()->IsSpringMotionRunning();
+    if (chainOverScroll_ != overScroll) {
+        if (overScroll) {
+            if (overSpringProperty_ && overSpringProperty_->IsValid()) {
+                chain_->SetControlStiffness(overSpringProperty_->Stiffness());
+                chain_->SetControlDamping(overSpringProperty_->Damping());
+            }
+        } else {
+            chain_->SetControlStiffness(chainProperty_.ControlStiffness());
+            chain_->SetControlDamping(chainProperty_.ControlDamping());
+        }
+        chain_->OnControlNodeChange();
+        chainOverScroll_ = overScroll;
+    }
+    chain_->FlushAnimation();
+    if (dragStartIndexPending_ != dragStartIndex_) {
+        deltaDistance = chainAdapter_->ResetControl(dragStartIndexPending_ - dragStartIndex_);
+        dragStartIndex_ = dragStartIndexPending_;
+        chainAdapter_->SetDeltaValue(-deltaDistance);
+        needSetValue = true;
+    }
+    if (!NearZero(dragOffset)) {
+        chainAdapter_->SetDeltaValue(dragOffset);
+        needSetValue = true;
+    }
+    if (needSetValue) {
+        chain_->SetValue(0.0);
+    }
+    return deltaDistance;
+}
+
+void ListPattern::ProcessDragStart(float startPosition)
+{
+    int32_t index = -1;
+    for (auto & pos : itemPosition_) {
+        if (startPosition <= pos.second.endPos) {
+            index = pos.first;
+            break;
+        }
+    }
+    if (index == -1 && !itemPosition_.empty()) {
+        index = itemPosition_.rbegin()->first + 1;
+    }
+    dragStartIndexPending_ = index;
+}
+
+void ListPattern::ProcessDragUpdate(float dragOffset)
+{
+    if (!chainAdapter_) {
+        return;
+    }
+
+    if (NearZero(dragOffset)) {
+        return;
+    }
+
+    float delta = FlushChainAnimation(dragOffset);
+    currentDelta_ += delta;
+}
+
+float ListPattern::GetChainDelta(int32_t index) const
+{
+    if (!chainAdapter_) {
+        return 0.0;
+    }
+    float value = 0.0;
+    RefPtr<BilateralSpringNode> node;
+    int32_t controlIndex = dragStartIndex_;
+    int32_t baseIndex = controlIndex - chainAdapter_->GetControlIndex();
+    auto targetIndex = std::clamp(index - baseIndex, 0, CHAIN_ANIMATION_NODE_COUNT - 1);
+    node = AceType::DynamicCast<BilateralSpringNode>(chainAdapter_->GetNode(targetIndex));
+    if (node) {
+        value = node->GetValue();
+    }
+    return value;
+}
 } // namespace OHOS::Ace::NG
