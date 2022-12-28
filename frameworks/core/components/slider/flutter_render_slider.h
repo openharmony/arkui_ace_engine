@@ -43,7 +43,7 @@ public:
 
     bool IsRepaintBoundary() const override
     {
-        return true;
+        return false;
     }
 
     RefPtr<RenderBlock> GetRenderBlock()
@@ -73,7 +73,6 @@ private:
     RefPtr<Animator> controllerExit_;
     RefPtr<KeyframeAnimation<Color>> colorAnimationEnter_;
     RefPtr<KeyframeAnimation<Color>> colorAnimationExit_;
-    RefPtr<Flutter::TransformLayer> layer_;
     bool initialUpdate_ = true;
 };
 

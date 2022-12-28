@@ -102,10 +102,7 @@ void FlutterRenderSlider::PerformLayout()
 
 RenderLayer FlutterRenderSlider::GetRenderLayer()
 {
-    if (!layer_) {
-        layer_ = AceType::MakeRefPtr<Flutter::TransformLayer>(Matrix4::CreateIdentity(), 0.0, 0.0);
-    }
-    return AceType::RawPtr(layer_);
+    return nullptr;
 }
 
 void FlutterRenderSlider::AddTipChild()
