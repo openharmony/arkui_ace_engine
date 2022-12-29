@@ -26,7 +26,7 @@ class BilateralSpringNode : public SimpleSpringNode {
     DECLARE_ACE_TYPE(BilateralSpringNode, SimpleSpringNode);
 
 public:
-    BilateralSpringNode(const WeakPtr<PipelineContext>& context, int32_t index, double value)
+    BilateralSpringNode(const WeakPtr<PipelineBase>& context, int32_t index, double value)
         : SimpleSpringNode(context, index, value) {}
     ~BilateralSpringNode() override = default;
 

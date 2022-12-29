@@ -152,6 +152,16 @@ public:
         return itemGroupList_;
     }
 
+    void SetChainOffsetCallback(std::function<float(int32_t)> func)
+    {
+        chainOffsetFunc_ = std::move(func);
+    }
+
+    void SetChainInterval(float interval)
+    {
+        chainInterval_ = interval;
+    }
+
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
@@ -230,6 +240,9 @@ private:
 
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
     std::list<WeakPtr<FrameNode>> itemGroupList_;
+
+    std::function<float(int32_t)> chainOffsetFunc_;
+    float chainInterval_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 
