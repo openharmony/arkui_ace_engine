@@ -184,7 +184,7 @@ public:
 
     void PaintAccessibilityFocus() override;
 
-    void OnMouseSelectUpdate(const Color& fillColor, const Color& strokeColor) override;
+    void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) override;
     void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) override;
 
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;

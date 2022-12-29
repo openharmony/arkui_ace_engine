@@ -31,10 +31,10 @@ public:
     void SetIsLazyCreating(bool isLazy) override {}
     void SetSticky(V2::StickyMode stickyMode) override {}
     void SetEditMode(uint32_t editMode) override {}
-    void SetSelectable(bool selectable) override {}
+    void SetSelectable(bool selectable) override;
     void SetSwiperAction(std::function<void()>&& startAction, std::function<void()>&& endAction,
         V2::SwipeEdgeEffect edgeEffect) override;
-    void SetSelectCallback(OnSelectFunc&& selectCallback) override {}
+    void SetSelectCallback(OnSelectFunc&& selectCallback) override;
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override {}
 };
 } // namespace OHOS::Ace::NG

@@ -201,7 +201,7 @@ public:
 
     virtual void PaintAccessibilityFocus() {};
 
-    virtual void OnMouseSelectUpdate(const Color& fillColor, const Color& strokeColor) {}
+    virtual void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) {}
     virtual void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) {}
 
     virtual void OnPositionUpdate(const OffsetT<Dimension>& value) {}

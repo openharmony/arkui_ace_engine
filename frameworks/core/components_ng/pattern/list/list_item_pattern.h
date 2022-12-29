@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/list/list_item_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -66,6 +67,11 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<ListItemEventHub>();
+    }
+
     void SetStartNode(const RefPtr<NG::UINode>& startNode);
 
     void SetEndNode(const RefPtr<NG::UINode>& endNode);
@@ -101,6 +107,23 @@ public:
 
     static float CalculateFriction(float gamma);
 
+    void MarkIsSelected(bool isSelected);
+
+    bool IsSelected() const
+    {
+        return isSelected_;
+    }
+
+    bool Selectable() const
+    {
+        return selectable_;
+    }
+
+    void SetSelectable(bool selectable)
+    {
+        selectable_ = selectable;
+    }
+
 protected:
     void OnModifyDone() override;
 
@@ -111,6 +134,7 @@ private:
 
     RefPtr<ShallowBuilder> shallowBuilder_;
 
+    // swiperAction
     int32_t startNodeIndex_ = -1;
     int32_t endNodeIndex_ = -1;
     int32_t childNodeIndex_ = 0;
@@ -124,6 +148,10 @@ private:
     RefPtr<PanEvent> panEvent_;
     RefPtr<Animator> springController_;
     RefPtr<SpringMotion> springMotion_;
+
+    // selectable
+    bool selectable_ = true;
+    bool isSelected_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListItemPattern);
 };

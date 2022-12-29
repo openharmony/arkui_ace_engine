@@ -19,6 +19,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/list/list_item_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -79,5 +80,23 @@ void ListItemModelNG::SetSwiperAction(
     }
 
     ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, edgeEffect);
+}
+
+void ListItemModelNG::SetSelectable(bool selectable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectable(selectable);
+}
+
+void ListItemModelNG::SetSelectCallback(OnSelectFunc&& selectCallback)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelect(std::move(selectCallback));
 }
 } // namespace OHOS::Ace::NG
