@@ -16,6 +16,7 @@
 #include "core/components/xcomponent/xcomponent_element.h"
 
 #include "base/json/json_util.h"
+#include "core/common/container.h"
 #include "core/components/xcomponent/render_xcomponent.h"
 #include "core/components/xcomponent/rosen_render_xcomponent.h"
 #include "core/components/xcomponent/xcomponent_component.h"
@@ -28,6 +29,21 @@ constexpr int32_t SURFACE_QUEUE_SIZE = 5;
 } // namespace
 
 #endif
+
+void XComponentSurfaceCallback::OnSurfaceCreated(const OHOS::sptr<OHOS::Surface>& surface)
+{
+    auto xcomponentElement = weakXComponentElement_.Upgrade();
+    CHECK_NULL_VOID(xcomponentElement);
+    xcomponentElement->OnSurfaceCreated(surface);
+}
+
+void XComponentSurfaceCallback::OnSurfaceChanged(
+    const OHOS::sptr<OHOS::Surface>& surface, int32_t width, int32_t height)
+{
+    auto xcomponentElement = weakXComponentElement_.Upgrade();
+    CHECK_NULL_VOID(xcomponentElement);
+    xcomponentElement->OnSurfaceChanged(surface, width, height);
+}
 
 XComponentElement::~XComponentElement()
 {
@@ -240,6 +256,8 @@ void XComponentElement::CreateSurface()
         }
         surfaceDelegate_ = new OHOS::SurfaceDelegate(windowId);
         surfaceDelegate_->CreateSurface();
+        scopeId_ = Container::CurrentId();
+        surfaceDelegate_->AddSurfaceCallback(new XComponentSurfaceCallback(WeakClaim(this)));
         producerSurface_ = surfaceDelegate_->GetSurface();
     } else {
 #ifdef ENABLE_ROSEN_BACKEND
@@ -264,6 +282,39 @@ void XComponentElement::CreateSurface()
     producerSurface_->SetQueueSize(SURFACE_QUEUE_SIZE);
     producerSurface_->SetUserData("SURFACE_STRIDE_ALIGNMENT", SURFACE_STRIDE_ALIGNMENT);
     producerSurface_->SetUserData("SURFACE_FORMAT", std::to_string(PIXEL_FMT_RGBA_8888));
+}
+
+void XComponentElement::OnSurfaceCreated(const OHOS::sptr<OHOS::Surface>& surface)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    nativeWindow_ = CreateNativeWindowFromSurface(&producerSurface_);
+    CHECK_NULL_VOID(nativeWindow_);
+    xcomponent_->SetNativeWindow(nativeWindow_);
+    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
+    platformTaskExecutor.PostTask([weak = WeakClaim(this), scopeId = scopeId_] {
+        ContainerScope scope(scopeId);
+        auto xcomponentElement = weak.Upgrade();
+        if (xcomponentElement && xcomponentElement->xcomponent_) {
+            xcomponentElement->OnSurfaceInit(
+                xcomponentElement->xcomponent_->GetId(),
+                xcomponentElement->xcomponent_->GetNodeId());
+            xcomponentElement->OnXComponentInit("");
+        }
+    });
+}
+
+void XComponentElement::OnSurfaceChanged(const OHOS::sptr<OHOS::Surface>& surface, int32_t width, int32_t height)
+{
+    auto renderNode = AceType::DynamicCast<RenderXComponent>(renderNode_);
+    CHECK_NULL_VOID(renderNode);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    float viewScale = context->GetViewScale();
+    CHECK_NULL_VOID(nativeWindow_);
+    NativeWindowHandleOpt(nativeWindow_, SET_BUFFER_GEOMETRY,
+        (int)(width * viewScale), (int)(height * viewScale));
+    renderNode->NativeXComponentChange();
 }
 #else
 void XComponentElement::OnTextureRefresh()
@@ -384,6 +435,7 @@ void XComponentElement::OnXComponentSizeInit(int64_t textureId, int32_t textureW
             surfaceWidth_ = textureWidth * viewScale;
             surfaceHeight_ = textureHeight * viewScale;
             surfaceDelegate_->SetBounds(offsetX, offsetY, surfaceWidth_, surfaceHeight_);
+            return;
         }
         nativeWindow_ = CreateNativeWindowFromSurface(&producerSurface_);
         if (nativeWindow_) {
@@ -444,13 +496,12 @@ void XComponentElement::OnXComponentSizeChange(int64_t textureId, int32_t textur
             surfaceWidth_ = textureWidth * viewScale;
             surfaceHeight_ = textureHeight * viewScale;
             surfaceDelegate_->SetBounds(offsetX, offsetY, surfaceWidth_, surfaceHeight_);
+            return;
         }
         if (nativeWindow_) {
+            NativeWindowHandleOpt(nativeWindow_, SET_BUFFER_GEOMETRY,
+                (int)(textureWidth * viewScale), (int)(textureHeight * viewScale));
             renderNode->NativeXComponentChange();
-            if (!SystemProperties::GetExtSurfaceEnabled()) {
-                NativeWindowHandleOpt(nativeWindow_, SET_BUFFER_GEOMETRY,
-                    (int)(textureWidth * viewScale), (int)(textureHeight * viewScale));
-            }
         } else {
             LOGE("change nativewindow size failed, nativewindow NULL");
         }
