@@ -392,11 +392,11 @@ void VideoElement::PreparePlayer()
     producerSurface->SetQueueSize(SURFACE_QUEUE_SIZE);
     producerSurface->SetUserData("SURFACE_STRIDE_ALIGNMENT", SURFACE_STRIDE_ALIGNMENT);
     producerSurface->SetUserData("SURFACE_FORMAT", std::to_string(PIXEL_FMT_RGBA_8888));
-    if (!SystemProperties::GetExtSurfaceEnabled() && mediaPlayer_->PrepareAsync() != 0) {
+    if (mediaPlayer_->SetVideoSurface(producerSurface) != 0) {
         LOGE("Player SetVideoSurface failed");
         return;
     }
-    if (mediaPlayer_->PrepareAsync() != 0) {
+    if (!SystemProperties::GetExtSurfaceEnabled() && mediaPlayer_->PrepareAsync() != 0) {
         LOGE("Player prepare failed");
         return;
     }
