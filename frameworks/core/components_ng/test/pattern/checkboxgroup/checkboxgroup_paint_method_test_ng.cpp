@@ -19,9 +19,9 @@
 #define private public
 #define protected public
 #include "core/components/checkable/checkable_theme.h"
-#include "core/components_ng/pattern/checkbox/checkbox_layout_algorithm.h"
-#include "core/components_ng/pattern/checkbox/checkbox_paint_method.h"
-#include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_layout_algorithm.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_method.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -55,7 +55,7 @@ constexpr Dimension HORIZONTAL_PADDING = Dimension(5.0);
 constexpr Dimension VERTICAL_PADDING = Dimension(4.0);
 } // namespace
 
-class CheckBoxPaintMethodTestNg : public testing::Test {
+class CheckBoxGroupPaintMethodTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -63,28 +63,28 @@ public:
     void TearDown() override {}
 };
 
-void CheckBoxPaintMethodTestNg::SetUpTestCase()
+void CheckBoxGroupPaintMethodTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
 }
 
-void CheckBoxPaintMethodTestNg::TearDownTestCase()
+void CheckBoxGroupPaintMethodTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
 }
 
 /**
- * @tc.name: CheckBoxPaintMethodTest001
- * @tc.desc: Test CheckBox PaintMethod, verify that PaintMethod can generate correct function.
+ * @tc.name: CheckBoxGroupPaintMethodTest001
+ * @tc.desc: Test CheckBoxGroup PaintMethod, verify that PaintMethod can generate correct function.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest001, TestSize.Level1)
+HWTEST_F(CheckBoxGroupPaintMethodTestNg, CheckBoxGroupPaintMethodTest001, TestSize.Level1)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_TRUE(geometryNode != nullptr);
     geometryNode->SetContentSize(CONTENT_SIZE);
     geometryNode->SetContentOffset(CONTENT_OFFSET);
-    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
     EXPECT_TRUE(checkBoxPaintProperty != nullptr);
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -104,10 +104,10 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest001, TestSize.Level1)
      * @tc.case: case1. uiStatus_ == UIStatus::OFF_TO_ON.
      */
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
-    CheckBoxPaintMethod checkBoxPaintMethod(false, false, false, 0.0, UIStatus::OFF_TO_ON);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(false, false, false, 0.0, UIStatus::OFF_TO_ON);
     auto paintMethod = checkBoxPaintMethod.GetContentDrawFunction(&paintWrapper);
-    auto paintProperty = AccessibilityManager::DynamicCast<CheckBoxPaintProperty>(paintWrapper.GetPaintProperty());
-    paintProperty->UpdateCheckBoxSelectedColor(ACTIVE_COLOR);
+    auto paintProperty = AccessibilityManager::DynamicCast<CheckBoxGroupPaintProperty>(paintWrapper.GetPaintProperty());
+    paintProperty->UpdateCheckBoxGroupSelectedColor(ACTIVE_COLOR);
     EXPECT_TRUE(paintMethod != nullptr);
     EXPECT_EQ(checkBoxPaintMethod.borderWidth_, BORDER_WIDTH);
     EXPECT_EQ(checkBoxPaintMethod.activeColor_, ACTIVE_COLOR);
@@ -121,7 +121,7 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest001, TestSize.Level1)
      * @tc.case: case2. uiStatus_ == UIStatus::ON_TO_OFF.
      */
     PaintWrapper paintWrapper2(nullptr, geometryNode, checkBoxPaintProperty);
-    CheckBoxPaintMethod checkBoxPaintMethod2(false, false, false, 0.0, UIStatus::ON_TO_OFF);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod2(false, false, false, 0.0, UIStatus::ON_TO_OFF);
     auto paintMethod2 = checkBoxPaintMethod.GetContentDrawFunction(&paintWrapper);
     EXPECT_TRUE(paintMethod2 != nullptr);
 
@@ -129,29 +129,29 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest001, TestSize.Level1)
      * @tc.case: case3. uiStatus_ == UIStatus::UNSELECTED.
      */
     PaintWrapper paintWrapper3(nullptr, geometryNode, checkBoxPaintProperty);
-    CheckBoxPaintMethod checkBoxPaintMethod3(false, false, false, 0.0, UIStatus::UNSELECTED);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod3(false, false, false, 0.0, UIStatus::UNSELECTED);
     auto paintMethod3 = checkBoxPaintMethod.GetContentDrawFunction(&paintWrapper);
     EXPECT_TRUE(paintMethod3 != nullptr);
 }
 
 /**
- * @tc.name: CheckBoxPaintMethodTest002
- * @tc.desc: Test CheckBox PaintMethod DrawTouchBoard.
+ * @tc.name: CheckBoxGroupPaintMethodTest002
+ * @tc.desc: Test CheckBoxGroup PaintMethod DrawTouchBoard.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest002, TestSize.Level1)
+HWTEST_F(CheckBoxGroupPaintMethodTestNg, CheckBoxGroupPaintMethodTest002, TestSize.Level1)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_TRUE(geometryNode != nullptr);
     geometryNode->SetContentSize(CONTENT_SIZE);
     geometryNode->SetContentOffset(CONTENT_OFFSET);
-    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
     EXPECT_TRUE(checkBoxPaintProperty != nullptr);
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
     /**
      * @tc.case: case. When isTouch is true, CheckBoxPaintMethod's PaintCheckBox will call DrawTouchBoard.
      */
-    CheckBoxPaintMethod checkBoxPaintMethod(false, true, false, 0.0, UIStatus::FOCUS);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(false, true, false, 0.0, UIStatus::FOCUS);
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillOnce(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(1);
@@ -159,23 +159,23 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckBoxPaintMethodTest003
- * @tc.desc: Test CheckBox PaintMethod DrawHoverBoard.
+ * @tc.name: CheckBoxGroupPaintMethodTest003
+ * @tc.desc: Test CheckBoxGroup PaintMethod DrawHoverBoard.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest003, TestSize.Level1)
+HWTEST_F(CheckBoxGroupPaintMethodTestNg, CheckBoxGroupPaintMethodTest003, TestSize.Level1)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_TRUE(geometryNode != nullptr);
     geometryNode->SetContentSize(CONTENT_SIZE);
     geometryNode->SetContentOffset(CONTENT_OFFSET);
-    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
     EXPECT_TRUE(checkBoxPaintProperty != nullptr);
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
     /**
      * @tc.case: case. When isHover is true, CheckBoxPaintMethod's PaintCheckBox will call DrawHoverBoard.
      */
-    CheckBoxPaintMethod checkBoxPaintMethod(false, false, true, 0.0, UIStatus::FOCUS);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(false, false, true, 0.0, UIStatus::FOCUS);
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillOnce(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(1);
@@ -183,24 +183,24 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckBoxPaintMethodTest004
- * @tc.desc: Test CheckBox PaintMethod DrawAnimationOffToOn.
+ * @tc.name: CheckBoxGroupPaintMethodTest004
+ * @tc.desc: Test CheckBoxGroup PaintMethod DrawAnimationOffToOn.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest004, TestSize.Level1)
+HWTEST_F(CheckBoxGroupPaintMethodTestNg, CheckBoxGroupPaintMethodTest004, TestSize.Level1)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_TRUE(geometryNode != nullptr);
     geometryNode->SetContentSize(CONTENT_SIZE);
     geometryNode->SetContentOffset(CONTENT_OFFSET);
-    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
     EXPECT_TRUE(checkBoxPaintProperty != nullptr);
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
     /**
      * @tc.case: case. When uiStatus_ == UIStatus::OFF_TO_ON, CheckBoxPaintMethod's PaintCheckBox will call
      * DrawAnimationOffToOn.
      */
-    CheckBoxPaintMethod checkBoxPaintMethod(false, false, false, 0.0, UIStatus::FOCUS);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(false, false, false, 0.0, UIStatus::FOCUS);
     Testing::MockCanvas canvas;
     OffsetF offset;
     RSPen pen;
@@ -230,11 +230,11 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckBoxPaintMethodTest005
- * @tc.desc: Test CheckBox PaintMethod will paintCheckBox when UIStatus is OFF_TO_ON.
+ * @tc.name: CheckBoxGroupPaintMethodTest005
+ * @tc.desc: Test CheckBoxGroup PaintMethod will paintCheckBox when UIStatus is OFF_TO_ON.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest005, TestSize.Level1)
+HWTEST_F(CheckBoxGroupPaintMethodTestNg, CheckBoxGroupPaintMethodTest005, TestSize.Level1)
 {
     /**
      * @tc.case: case1. When uiStatus_ == UIStatus::OFF_TO_ON and enabled_ == true.
@@ -243,10 +243,10 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest005, TestSize.Level1)
     EXPECT_TRUE(geometryNode != nullptr);
     geometryNode->SetContentSize(CONTENT_SIZE);
     geometryNode->SetContentOffset(CONTENT_OFFSET);
-    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
     EXPECT_TRUE(checkBoxPaintProperty != nullptr);
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
-    CheckBoxPaintMethod checkBoxPaintMethod(false, false, false, 0.0, UIStatus::OFF_TO_ON);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(false, false, false, 0.0, UIStatus::OFF_TO_ON);
     auto paintMethod = checkBoxPaintMethod.GetContentDrawFunction(&paintWrapper);
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillOnce(ReturnRef(canvas));
@@ -266,11 +266,11 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckBoxPaintMethodTest006
- * @tc.desc: Test CheckBox PaintMethod will paintCheckBox when UIStatus is ON_TO_OFF.
+ * @tc.name: CheckBoxGroupPaintMethodTest006
+ * @tc.desc: Test CheckBoxGroup PaintMethod will paintCheckBox when UIStatus is ON_TO_OFF.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest006, TestSize.Level1)
+HWTEST_F(CheckBoxGroupPaintMethodTestNg, CheckBoxGroupPaintMethodTest006, TestSize.Level1)
 {
     /**
      * @tc.case: case1. When uiStatus_ == UIStatus::ON_TO_OFF and enabled_ == true.
@@ -279,10 +279,10 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest006, TestSize.Level1)
     EXPECT_TRUE(geometryNode != nullptr);
     geometryNode->SetContentSize(CONTENT_SIZE);
     geometryNode->SetContentOffset(CONTENT_OFFSET);
-    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
     EXPECT_TRUE(checkBoxPaintProperty != nullptr);
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
-    CheckBoxPaintMethod checkBoxPaintMethod(false, false, false, 0.0, UIStatus::ON_TO_OFF);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(false, false, false, 0.0, UIStatus::ON_TO_OFF);
     auto paintMethod2 = checkBoxPaintMethod.GetContentDrawFunction(&paintWrapper);
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillOnce(ReturnRef(canvas));
@@ -302,11 +302,11 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckBoxPaintMethodTest007
- * @tc.desc: Test CheckBox PaintMethod will paintCheckBox when UIStatus is ON_TO_OFF.
+ * @tc.name: CheckBoxGroupPaintMethodTest007
+ * @tc.desc: Test CheckBoxGroup PaintMethod will paintCheckBox when UIStatus is ON_TO_OFF.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest007, TestSize.Level1)
+HWTEST_F(CheckBoxGroupPaintMethodTestNg, CheckBoxGroupPaintMethodTest007, TestSize.Level1)
 {
     /**
      * @tc.case: case1. When uiStatus_ == UIStatus::UNSELECTED and enabled_ == true.
@@ -315,10 +315,10 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest007, TestSize.Level1)
     EXPECT_TRUE(geometryNode != nullptr);
     geometryNode->SetContentSize(CONTENT_SIZE);
     geometryNode->SetContentOffset(CONTENT_OFFSET);
-    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
     EXPECT_TRUE(checkBoxPaintProperty != nullptr);
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
-    CheckBoxPaintMethod checkBoxPaintMethod(false, false, false, 0.0, UIStatus::UNSELECTED);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(false, false, false, 0.0, UIStatus::UNSELECTED);
     auto paintMethod3 = checkBoxPaintMethod.GetContentDrawFunction(&paintWrapper);
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachPen(_)).WillOnce(ReturnRef(canvas));
@@ -334,11 +334,48 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckBoxLayoutAlgorithmTest001
- * @tc.desc: Verify that CheckBoxLayoutAlgorithm can correctly InitializeParam.
+ * @tc.name: CheckBoxGroupPaintMethodTest011
+ * @tc.desc: Test CheckBoxGroup PaintMethod DrawPart.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest001, TestSize.Level1)
+HWTEST_F(CheckBoxGroupPaintMethodTestNg, CheckBoxGroupPaintMethodTest011, TestSize.Level1)
+{
+    /**
+     * @tc.case: case1. When status == CheckBoxGroupPaintProperty::SelectStatus::PART and enabled_ == true.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
+    EXPECT_NE(checkBoxPaintProperty, nullptr);
+    checkBoxPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::PART);
+    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(false, false, false, 0.0, UIStatus::UNSELECTED);
+    auto paintMethod4 = checkBoxPaintMethod.GetContentDrawFunction(&paintWrapper);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillOnce(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(1);
+    EXPECT_CALL(canvas, DrawPath(_)).Times(2);
+    checkBoxPaintMethod.PaintCheckBox(canvas, &paintWrapper);
+    /**
+     * @tc.case: case1. When status == CheckBoxGroupPaintProperty::SelectStatus::PART and enabled_ == false.
+     */
+    checkBoxPaintMethod.enabled_ = false;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillOnce(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(1);
+    EXPECT_CALL(canvas, DrawPath(_)).Times(2);
+    checkBoxPaintMethod.PaintCheckBox(canvas, &paintWrapper);
+}
+
+/**
+ * @tc.name: CheckBoxGroupLayoutAlgorithmTest001
+ * @tc.desc: Verify that CheckBoxGroupLayoutAlgorithm can correctly InitializeParam.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPaintMethodTestNg, CheckBoxGroupLayoutAlgorithmTest001, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -349,7 +386,7 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest001, TestSize.Lev
     checkBoxTheme->defaultWidth_ = DEFAULT_WIDTH_DIMENSION;
     checkBoxTheme->defaultHeight_ = DEFAULT_HEIGHT_DIMENSION;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(checkBoxTheme));
-    CheckBoxLayoutAlgorithm checkBoxLayoutAlgorithm;
+    CheckBoxGroupLayoutAlgorithm checkBoxLayoutAlgorithm;
     checkBoxLayoutAlgorithm.InitializeParam();
     EXPECT_EQ(checkBoxLayoutAlgorithm.defaultWidth_, DEFAULT_WIDTH);
     EXPECT_EQ(checkBoxLayoutAlgorithm.defaultHeight_, DEFAULT_HEIGHT);
@@ -358,12 +395,12 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest001, TestSize.Lev
 }
 
 /**
- * @tc.name: CheckBoxLayoutAlgorithmTest002
- * @tc.desc: Verify that CheckBoxLayoutAlgorithm's MeasureContent can get contentSize
+ * @tc.name: CheckBoxGroupLayoutAlgorithmTest002
+ * @tc.desc: Verify that CheckBoxGroupLayoutAlgorithm's MeasureContent can get contentSize
              when Width and height are set in the front end.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest002, TestSize.Level1)
+HWTEST_F(CheckBoxGroupPaintMethodTestNg, CheckBoxGroupLayoutAlgorithmTest002, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -371,11 +408,11 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest002, TestSize.Lev
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<CheckboxTheme>()));
     /**
     //     corresponding ets code:
-    //         CheckBox().width(200).height(210)
+    //         CheckBoxGroup().width(200).height(210)
     //     size = (200, 200)
     */
     LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
-    CheckBoxLayoutAlgorithm checkBoxLayoutAlgorithm;
+    CheckBoxGroupLayoutAlgorithm checkBoxLayoutAlgorithm;
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH);
     layoutConstraintSize.selfIdealSize.SetHeight(COMPONENT_HEIGHT);
@@ -385,12 +422,12 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest002, TestSize.Lev
 }
 
 /**
- * @tc.name: CheckBoxLayoutAlgorithmTest003
- * @tc.desc: Verify that CheckBoxLayoutAlgorithm's MeasureContent can get contentSize
+ * @tc.name: CheckBoxGroupLayoutAlgorithmTest003
+ * @tc.desc: Verify that CheckBoxGroupLayoutAlgorithm's MeasureContent can get contentSize
              when The front end only sets width.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest003, TestSize.Level1)
+HWTEST_F(CheckBoxGroupPaintMethodTestNg, CheckBoxLayoutAlgorithmTest003, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -398,11 +435,11 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest003, TestSize.Lev
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<CheckboxTheme>()));
     /**
     //     corresponding ets code:
-    //         CheckBox().width(200)
+    //         CheckBoxGroup().width(200)
     //     size = (200, 200)
     */
     LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
-    CheckBoxLayoutAlgorithm checkBoxLayoutAlgorithm;
+    CheckBoxGroupLayoutAlgorithm checkBoxLayoutAlgorithm;
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH);
     auto size = checkBoxLayoutAlgorithm.MeasureContent(layoutConstraintSize, &layoutWrapper);
@@ -411,12 +448,12 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest003, TestSize.Lev
 }
 
 /**
- * @tc.name: CheckBoxLayoutAlgorithmTest004
- * @tc.desc: Verify that CheckBoxLayoutAlgorithm's MeasureContent can get contentSize
+ * @tc.name: CheckBoxGroupLayoutAlgorithmTest004
+ * @tc.desc: Verify that CheckBoxGroupLayoutAlgorithm's MeasureContent can get contentSize
              when The front end only sets height.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest004, TestSize.Level1)
+HWTEST_F(CheckBoxGroupPaintMethodTestNg, CheckBoxLayoutAlgorithmTest004, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -424,11 +461,11 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest004, TestSize.Lev
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<CheckboxTheme>()));
     /**
     //     corresponding ets code:
-    //         CheckBox().height(210)
+    //         CheckBoxGroup().height(210)
     //     size = (210, 210)
     */
     LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
-    CheckBoxLayoutAlgorithm checkBoxLayoutAlgorithm;
+    CheckBoxGroupLayoutAlgorithm checkBoxLayoutAlgorithm;
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetHeight(COMPONENT_HEIGHT);
     auto size = checkBoxLayoutAlgorithm.MeasureContent(layoutConstraintSize, &layoutWrapper);
@@ -437,12 +474,12 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest004, TestSize.Lev
 }
 
 /**
- * @tc.name: CheckBoxLayoutAlgorithmTest005
- * @tc.desc: Verify that CheckBoxLayoutAlgorithm's MeasureContent can get contentSize from the theme,
+ * @tc.name: CheckBoxGroupLayoutAlgorithmTest005
+ * @tc.desc: Verify that CheckBoxGroupLayoutAlgorithm's MeasureContent can get contentSize from the theme,
              when Width and height are not set in the front end.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest005, TestSize.Level1)
+HWTEST_F(CheckBoxGroupPaintMethodTestNg, CheckBoxGroupLayoutAlgorithmTest005, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -455,11 +492,11 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest005, TestSize.Lev
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(checkBoxTheme));
     /**
     //     corresponding ets code:
-    //         CheckBox()
+    //         CheckBoxGroup()
     //     length = min(theme.Width(), theme.Height()), size = (length, length)
     */
     LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
-    CheckBoxLayoutAlgorithm checkBoxLayoutAlgorithm;
+    CheckBoxGroupLayoutAlgorithm checkBoxLayoutAlgorithm;
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.maxSize = SizeF(1000.0, 1000.0);
     layoutConstraintSize.minSize = SizeF(0, 0);
@@ -475,12 +512,12 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest005, TestSize.Lev
 }
 
 /**
- * @tc.name: CheckBoxLayoutAlgorithmTest006
- * @tc.desc: Verify that CheckBoxLayoutAlgorithm's MeasureContent can get contentSize
+ * @tc.name: CheckBoxGroupLayoutAlgorithmTest006
+ * @tc.desc: Verify that CheckBoxGroupLayoutAlgorithm's MeasureContent can get contentSize
              when Width and height are set in the front end.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest006, TestSize.Level1)
+HWTEST_F(CheckBoxGroupPaintMethodTestNg, CheckBoxGroupLayoutAlgorithmTest006, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -488,7 +525,7 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest006, TestSize.Lev
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<CheckboxTheme>()));
 
     LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
-    CheckBoxLayoutAlgorithm checkBoxLayoutAlgorithm;
+    CheckBoxGroupLayoutAlgorithm checkBoxLayoutAlgorithm;
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH_INVALID);
     layoutConstraintSize.selfIdealSize.SetHeight(COMPONENT_HEIGHT_INVALID);
@@ -498,12 +535,12 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest006, TestSize.Lev
 }
 
 /**
- * @tc.name: CheckBoxLayoutAlgorithmTest007
- * @tc.desc: Verify that CheckBoxLayoutAlgorithm's MeasureContent can get contentSize
+ * @tc.name: CheckBoxGroupLayoutAlgorithmTest007
+ * @tc.desc: Verify that CheckBoxGroupLayoutAlgorithm's MeasureContent can get contentSize
              when Width and height are set in the front end.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest007, TestSize.Level1)
+HWTEST_F(CheckBoxGroupPaintMethodTestNg, CheckBoxGroupLayoutAlgorithmTest007, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -511,7 +548,7 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest007, TestSize.Lev
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<CheckboxTheme>()));
 
     LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
-    CheckBoxLayoutAlgorithm checkBoxLayoutAlgorithm;
+    CheckBoxGroupLayoutAlgorithm checkBoxLayoutAlgorithm;
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH_INVALID);
     auto size = checkBoxLayoutAlgorithm.MeasureContent(layoutConstraintSize, &layoutWrapper);
@@ -520,12 +557,12 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest007, TestSize.Lev
 }
 
 /**
- * @tc.name: CheckBoxLayoutAlgorithmTest008
- * @tc.desc: Verify that CheckBoxLayoutAlgorithm's MeasureContent can get contentSize
+ * @tc.name: CheckBoxGroupLayoutAlgorithmTest008
+ * @tc.desc: Verify that CheckBoxGroupLayoutAlgorithm's MeasureContent can get contentSize
              when Width and height are set in the front end.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest008, TestSize.Level1)
+HWTEST_F(CheckBoxGroupPaintMethodTestNg, CheckBoxGroupLayoutAlgorithmTest008, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -533,7 +570,7 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest008, TestSize.Lev
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<CheckboxTheme>()));
 
     LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
-    CheckBoxLayoutAlgorithm checkBoxLayoutAlgorithm;
+    CheckBoxGroupLayoutAlgorithm checkBoxLayoutAlgorithm;
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetHeight(COMPONENT_HEIGHT_INVALID);
     auto size = checkBoxLayoutAlgorithm.MeasureContent(layoutConstraintSize, &layoutWrapper);
@@ -542,22 +579,22 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxLayoutAlgorithmTest008, TestSize.Lev
 }
 
 /**
- * @tc.name: CheckBoxPaintMethodTest009
- * @tc.desc: Test CheckBox PaintMethod DrawTouchBoard.
+ * @tc.name: CheckBoxGroupPaintMethodTest009
+ * @tc.desc: Test CheckBoxGroup PaintMethod DrawTouchBoard.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest009, TestSize.Level1)
+HWTEST_F(CheckBoxGroupPaintMethodTestNg, CheckBoxGroupPaintMethodTest009, TestSize.Level1)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_TRUE(geometryNode != nullptr);
     geometryNode->SetContentSize(CONTENT_SIZE);
     geometryNode->SetContentOffset(CONTENT_OFFSET);
-    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
     EXPECT_TRUE(checkBoxPaintProperty != nullptr);
-    checkBoxPaintProperty->UpdateCheckBoxSelectedColor(ACTIVE_COLOR);
+    checkBoxPaintProperty->UpdateCheckBoxGroupSelectedColor(ACTIVE_COLOR);
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
 
-    CheckBoxPaintMethod checkBoxPaintMethod(false, true, false, 0.0, UIStatus::FOCUS);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(false, true, false, 0.0, UIStatus::FOCUS);
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillOnce(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(1);
@@ -565,22 +602,22 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest009, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckBoxPaintMethodTest010
- * @tc.desc: Test CheckBox PaintMethod DrawTouchBoard.
+ * @tc.name: CheckBoxGroupPaintMethodTest010
+ * @tc.desc: Test CheckBoxGroup PaintMethod DrawTouchBoard.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest010, TestSize.Level1)
+HWTEST_F(CheckBoxGroupPaintMethodTestNg, CheckBoxPaintMethodTest010, TestSize.Level1)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_TRUE(geometryNode != nullptr);
     geometryNode->SetContentSize(CONTENT_SIZE);
     geometryNode->SetContentOffset(CONTENT_OFFSET);
-    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
     EXPECT_TRUE(checkBoxPaintProperty != nullptr);
-    checkBoxPaintProperty->UpdateCheckBoxSelectedColor(ACTIVE_COLOR);
+    checkBoxPaintProperty->UpdateCheckBoxGroupSelectedColor(ACTIVE_COLOR);
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
 
-    CheckBoxPaintMethod checkBoxPaintMethod(true, true, false, 0.0, UIStatus::FOCUS);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(true, true, false, 0.0, UIStatus::FOCUS);
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillOnce(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(1);

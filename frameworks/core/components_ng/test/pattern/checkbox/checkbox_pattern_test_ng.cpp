@@ -18,6 +18,8 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -212,26 +214,6 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxMeasureTest005, TestSize.Level1)
      * @tc.steps: step3. Test CheckBox Measure method
      * @tc.expected: step3. Check the CheckBox frame size and frame offset value
      */
-    // CheckBox without setting height and width.
-    const LayoutConstraintF layoutConstraint;
-    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
-    // Calculate the size and offset.
-    checkBoxLayoutAlgorithm->Measure(&layoutWrapper);
-    checkBoxLayoutAlgorithm->Layout(&layoutWrapper);
-    // Test the default size set in theme and the offset.
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
-    CHECK_NULL_VOID(checkBoxTheme);
-    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize(),
-        SizeF(checkBoxTheme->GetHeight().ConvertToPx(), checkBoxTheme->GetWidth().ConvertToPx()));
-    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameOffset(), OffsetF(0.0, 0.0));
-
-    /**
-    //     corresponding ets code:
-    //         Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).width(50).height(50)
-    */
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetSize(SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize);
@@ -571,5 +553,92 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest016, TestSize.Level1)
     pattern->UpdateAnimation(false);
     EXPECT_FALSE(pattern->controller_ == nullptr);
     pattern->UpdateAnimation(false);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest017
+ * @tc.desc: Test UpdateCheckBoxGroupStatus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest017, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG1;
+    checkBoxModelNG1.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode1 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode1, nullptr);
+    auto pattern1 = frameNode1->GetPattern<CheckBoxPattern>();
+    EXPECT_NE(pattern1, nullptr);
+    CheckBoxModelNG checkBoxModelNG2;
+    checkBoxModelNG2.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode2, nullptr);
+    CheckBoxModelNG checkBoxModelNG3;
+    checkBoxModelNG3.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode3 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode3, nullptr);
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(GROUP_NAME);
+    auto groupFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(groupFrameNode, nullptr);
+
+    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap;
+    checkBoxGroupMap[GROUP_NAME].push_back(frameNode1);
+    checkBoxGroupMap[GROUP_NAME].push_back(frameNode2);
+    checkBoxGroupMap[GROUP_NAME].push_back(frameNode3);
+    checkBoxGroupMap[GROUP_NAME].push_back(groupFrameNode);
+    bool isSelected = true;
+    pattern1->UpdateCheckBoxGroupStatus(frameNode1, checkBoxGroupMap, isSelected);
+    auto checkBoxPaintProperty1 = frameNode1->GetPaintProperty<CheckBoxPaintProperty>();
+    EXPECT_NE(checkBoxPaintProperty1, nullptr);
+    checkBoxPaintProperty1->UpdateCheckBoxSelect(true);
+    auto checkBoxPaintProperty2 = frameNode2->GetPaintProperty<CheckBoxPaintProperty>();
+    EXPECT_NE(checkBoxPaintProperty2, nullptr);
+    checkBoxPaintProperty2->UpdateCheckBoxSelect(false);
+    pattern1->UpdateCheckBoxGroupStatus(frameNode1, checkBoxGroupMap, isSelected);
+    isSelected = false;
+    pattern1->UpdateCheckBoxGroupStatus(frameNode1, checkBoxGroupMap, isSelected);
+    checkBoxPaintProperty2->UpdateCheckBoxSelect(true);
+    auto checkBoxPaintProperty3 = frameNode3->GetPaintProperty<CheckBoxPaintProperty>();
+    EXPECT_NE(checkBoxPaintProperty3, nullptr);
+    checkBoxPaintProperty3->UpdateCheckBoxSelect(true);
+    isSelected = true;
+    pattern1->UpdateCheckBoxGroupStatus(frameNode1, checkBoxGroupMap, isSelected);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest018
+ * @tc.desc: Test CheckBoxGroupIsTrue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest018, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG1;
+    checkBoxModelNG1.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode1 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    EXPECT_NE(frameNode1, nullptr);
+    auto pattern1 = frameNode1->GetPattern<CheckBoxPattern>();
+    EXPECT_NE(pattern1, nullptr);
+    pattern1->CheckBoxGroupIsTrue();
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest019
+ * @tc.desc: Test GetInnerFocusPaintRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest019, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    EXPECT_NE(pattern, nullptr);
+    RefPtr<EventHub> eventHub = AccessibilityManager::MakeRefPtr<EventHub>();
+    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
+    pattern->InitOnKeyEvent(focusHub);
+    RoundRect paintRect;
+    pattern->GetInnerFocusPaintRect(paintRect);
+    pattern->GetHotZoneRect(false);
 }
 } // namespace OHOS::Ace::NG
