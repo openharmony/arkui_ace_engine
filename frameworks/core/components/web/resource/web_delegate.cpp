@@ -3849,9 +3849,9 @@ void WebDelegate::SetBoundsOrRezise(const Size& drawSize, const Offset& offset)
     if (isEnhanceSurface_) {
         if (surfaceDelegate_) {
             LOGI("WebDelegate::SetBounds: x:%{public}d, y:%{public}d, w::%{public}d, h:%{public}d",
-                (int32_t)offset_.GetX(), (int32_t)offset_.GetY(),
+                (int32_t)offset.GetX(), (int32_t)offset.GetY(),
                 (int32_t)drawSize.Width(), (int32_t)drawSize.Height());
-            surfaceDelegate_->SetBounds(offset_.GetX(), (int32_t)offset_.GetY(), drawSize.Width(), drawSize.Height());
+            surfaceDelegate_->SetBounds(offset.GetX(), (int32_t)offset.GetY(), drawSize.Width(), drawSize.Height());
         }
     } else {
         Resize(drawSize.Width(), drawSize.Height());
