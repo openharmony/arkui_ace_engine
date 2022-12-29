@@ -241,6 +241,16 @@ public:
     float AdjustTextRectOffsetX();
     float AdjustTextAreaOffsetY();
 
+    float GetPaddingTop() const
+    {
+        return utilPadding_.top.value_or(0.0f);
+    }
+
+    float GetPaddingBottom() const
+    {
+        return utilPadding_.bottom.value_or(0.0f);
+    }
+
     float GetPaddingLeft() const
     {
         return utilPadding_.left.value_or(0.0f);
@@ -401,6 +411,13 @@ public:
         enableTouchAndHoverEffect_ = enable;
     }
 
+    const RectF& GetCaretRect()
+    {
+        return caretRect_;
+    }
+
+    void UpdateCaretRectByPosition(int32_t position);
+
 private:
     void HandleBlurEvent();
     void HandleFocusEvent();
@@ -457,6 +474,7 @@ private:
     void UpdateCaretOffsetByLastTouchOffset();
     bool UpdateCaretPositionByMouseMovement();
     bool UpdateCaretPosition();
+    int32_t GetLineNumber(float offsetY);
 
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
