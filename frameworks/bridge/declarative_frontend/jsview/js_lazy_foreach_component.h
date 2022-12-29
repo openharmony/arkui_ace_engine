@@ -122,8 +122,9 @@ public:
         viewStack->PushKey(key);
 
         {
+            std::string pviewID = parentView_ ? std::to_string(parentView_->UICastGetUniqueId()) : "-1";
             std::string para = R"({"viewId":")" + GetId() + R"(","parentViewId":")" +
-                std::to_string(parentView_->UICastGetUniqueId()) + R"(","index":)" + std::to_string(index) + R"(})";
+                pviewID + R"(","index":)" + std::to_string(index) + R"(})";
             UICastImpl::CacheCmd("UICAST::LazyForEach::ItemCreate", para);
         }
 
