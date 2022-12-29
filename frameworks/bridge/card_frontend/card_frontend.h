@@ -204,7 +204,7 @@ protected:
     Framework::PageIdPool pageIdPool_;
     std::string formSrc_;
     WindowConfig cardWindowConfig_;
-    uint64_t cardId_ = 0;
+    uint64_t cardId_ = 0; // cardId != formId, cardId is the nodeId of component.
 
 private:
     RefPtr<Framework::CardFrontendDelegate> delegate_;
