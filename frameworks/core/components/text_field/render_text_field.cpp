@@ -70,6 +70,7 @@ const std::string DIGIT_WHITE_LIST = "^[0-9]*$";
 const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
 const std::string EMAIL_WHITE_LIST = "\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
+const std::string NEW_LINE = "\n";
 // Whether the system is Mac or not determines which key code is selected.
 #if defined(MAC_PLATFORM)
 #define KEY_META_OR_CTRL_LEFT KeyCode::KEY_META_LEFT
@@ -279,14 +280,18 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         }
         keyboard_ = textField->GetTextInputType();
     }
-    if (action_ != TextInputAction::UNSPECIFIED && action_ != textField->GetAction()) {
-        auto context = context_.Upgrade();
-        if (context && context->GetIsDeclarative()) {
-            CloseKeyboard();
+    if (keyboard_ == TextInputType::MULTILINE) {
+        action_ = TextInputAction::DONE;
+    } else {
+        if (action_ != TextInputAction::UNSPECIFIED && action_ != textField->GetAction()) {
+            auto context = context_.Upgrade();
+            if (context && context->GetIsDeclarative()) {
+                CloseKeyboard();
+            }
         }
-    }
-    if (action_ != textField->GetAction()) {
-        action_ = textField->GetAction();
+        if (action_ != textField->GetAction()) {
+            action_ = textField->GetAction();
+        }
     }
 
     actionLabel_ = textField->GetActionLabel();
@@ -1584,6 +1589,14 @@ void RenderTextField::PerformAction(TextInputAction action, bool forceCloseKeybo
 {
     LOGD("PerformAction  %{public}d", static_cast<int32_t>(action));
     ContainerScope scope(instanceId_);
+    if (keyboard_ == TextInputType::MULTILINE) {
+        auto value = GetEditingValue();
+        auto textEditingValue = std::make_shared<TextEditingValue>();
+        textEditingValue->text = value.GetBeforeSelection() + NEW_LINE + value.GetAfterSelection();
+        textEditingValue->UpdateSelection(std::max(value.selection.GetStart(), 0) + 1);
+        UpdateEditingValue(textEditingValue, true);
+        return;
+    }
     if (action == TextInputAction::NEXT && moveNextFocusEvent_) {
         moveNextFocusEvent_();
     } else {
