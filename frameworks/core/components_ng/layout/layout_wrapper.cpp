@@ -98,7 +98,7 @@ void LayoutWrapper::RemoveAllChildInRenderTree()
     for (auto& child : childrenMap_) {
         child.second->isActive_ = false;
     }
-    CHECK_NULL_VOID(layoutWrapperBuilder_);
+    CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
     layoutWrapperBuilder_->RemoveAllChildInRenderTree();
 }
 

@@ -99,15 +99,15 @@ void ListPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas& canvas)
 void ListPaintMethod::PaintScrollBar(RSCanvas& canvas)
 {
     auto scrollBar = scrollBar_.Upgrade();
-    CHECK_NULL_VOID(scrollBar);
+    CHECK_NULL_VOID_NOLOG(scrollBar);
     ScrollBarPainter::PaintRectBar(canvas, scrollBar, UINT8_MAX);
 }
 
 void ListPaintMethod::PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas)
 {
-    CHECK_NULL_VOID(paintWrapper);
     auto edgeEffect = edgeEffect_.Upgrade();
-    CHECK_NULL_VOID(edgeEffect);
+    CHECK_NULL_VOID_NOLOG(edgeEffect);
+    CHECK_NULL_VOID(paintWrapper);
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     edgeEffect->Paint(canvas, frameSize, { 0.0f, 0.0f });
 }
