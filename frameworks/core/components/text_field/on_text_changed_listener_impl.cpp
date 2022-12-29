@@ -15,6 +15,8 @@
 
 #include "core/components/text_field/on_text_changed_listener_impl.h"
 
+#include "base/utils/utils.h"
+
 namespace OHOS::Ace {
 
 void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
@@ -33,11 +35,23 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
         }
         ContainerScope scope(client->instanceId_);
         auto value = client->GetEditingValue();
+        auto prevLength = value.GetWideText().length();
+        if (GreatOrEqual(client->GetMaxLength(), 0) && GreatOrEqual(prevLength, client->GetMaxLength())) {
+            LOGW("Cannot insert this text since reaching maximum length already");
+            return;
+        }
+        auto leavingStrLength = static_cast<int32_t>(text.length());
+        if (GreatOrEqual(client->GetMaxLength(), 0) &&
+            GreatOrEqual(prevLength + static_cast<int32_t>(text.length()), client->GetMaxLength())) {
+            leavingStrLength = client->GetMaxLength() - prevLength;
+            LOGW("%{public}d characters of this text will be truncated for exceeding maximum length", leavingStrLength);
+        }
+        auto insertText = text.substr(0, leavingStrLength);
         auto textEditingValue = std::make_shared<TextEditingValue>();
         textEditingValue->text =
-            value.GetBeforeSelection() + StringUtils::Str16ToStr8(text) + value.GetAfterSelection();
+            value.GetBeforeSelection() + StringUtils::Str16ToStr8(insertText) + value.GetAfterSelection();
         textEditingValue->UpdateSelection(std::max(value.selection.GetStart(), 0) + text.length());
-        client->UpdateInsertText(StringUtils::Str16ToStr8(text));
+        client->UpdateInsertText(StringUtils::Str16ToStr8(insertText));
         client->UpdateEditingValue(textEditingValue, true);
     };
     PostTaskToUI(task);
