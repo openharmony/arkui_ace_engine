@@ -2122,6 +2122,7 @@ std::string JsAccessibilityManager::GetPagePath()
     CHECK_NULL_RETURN(context, "");
     auto frontend = context->GetFrontend();
     CHECK_NULL_RETURN(frontend, "");
+    ContainerScope scope(context->GetInstanceId());
     return frontend->GetPagePath();
 }
 
