@@ -3855,10 +3855,11 @@ JSRef<JSObject> FaviconReceivedEventToJSValue(const FaviconReceivedEvent& eventI
     napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMapToJs);
     NativeValue* nativeValue = reinterpret_cast<NativeValue*>(napiValue);
     (void)nativeValue;
-    // auto jsPixelMap = JsConverter::ConvertNativeValueToJsVal(nativeValue);
-    // obj->SetPropertyObject("favicon", jsPixelMap);
-    // return JSRef<JSObject>::Cast(obj);
-    return JSRef<JSObject>::New();
+#ifdef USE_ARK_ENGINE
+    auto jsPixelMap = JsConverter::ConvertNativeValueToJsVal(nativeValue);
+    obj->SetPropertyObject("favicon", jsPixelMap);
+#endif
+    return JSRef<JSObject>::Cast(obj);
 }
 
 void JSWeb::OnFaviconReceived(const JSCallbackInfo& args)
