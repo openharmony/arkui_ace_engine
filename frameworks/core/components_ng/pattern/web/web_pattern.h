@@ -323,6 +323,7 @@ private:
         int32_t id = -1;
     };
     static bool ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos);
+    void InitEnhanceSurfaceFlag();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -353,7 +354,7 @@ private:
     bool isW3cDragEvent_ = false;
     bool isWindowShow_ = true;
     bool isActive_ = true;
-
+    bool isEnhanceSurface_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG

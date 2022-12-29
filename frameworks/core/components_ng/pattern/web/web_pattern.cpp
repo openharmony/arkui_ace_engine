@@ -529,7 +529,8 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
 
     drawSize_ = drawSize;
     drawSizeCache_ = drawSize_;
-    delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+    auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
+    delegate_->SetBoundsOrRezise(drawSize_, offset);
     // first update size to load url.
     if (!isUrlLoaded_) {
         isUrlLoaded_ = true;
@@ -803,6 +804,15 @@ void WebPattern::RegistVirtualKeyBoardListener()
     needUpdateWeb_ = false;
 }
 
+void WebPattern::InitEnhanceSurfaceFlag()
+{
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        isEnhanceSurface_ = true;
+    } else {
+        isEnhanceSurface_ = false;
+    }
+}
+
 void WebPattern::OnModifyDone()
 {
     // called in each update function.
@@ -814,10 +824,19 @@ void WebPattern::OnModifyDone()
     if (!delegate_) {
         // first create case,
         delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "");
+        InitEnhanceSurfaceFlag();
         delegate_->SetNGWebPattern(Claim(this));
-        renderSurface_->SetRenderContext(host->GetRenderContext());
-        renderSurface_->InitSurface();
-        delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
+        delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
+        if (isEnhanceSurface_) {
+            auto drawSize = Size(1, 1);
+            delegate_->SetDrawSize(drawSize);
+            delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext());
+        } else {
+            renderSurface_->SetRenderContext(host->GetRenderContext());
+            renderSurface_->InitSurface();
+            delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
+        }
+
         delegate_->UpdateBackgroundColor(
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue()));
         delegate_->UpdateJavaScriptEnabled(GetJsEnabledValue(true));
@@ -899,7 +918,8 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height)
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto rect = frameNode->GetGeometryNode()->GetFrameRect();
-    delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+    auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
+    delegate_->SetBoundsOrRezise(drawSize_, offset);
     rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
     frameNode->GetRenderContext()->SyncGeometryProperties(rect);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
