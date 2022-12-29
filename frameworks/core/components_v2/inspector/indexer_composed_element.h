@@ -33,6 +33,7 @@ public:
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
 
+    std::string GetColor() const;
     std::string GetSelectedColor() const;
     std::string GetPopupColor() const;
     std::string GetSelectedBackgroundColor() const;
