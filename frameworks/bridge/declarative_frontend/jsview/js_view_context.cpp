@@ -18,6 +18,7 @@
 #include <functional>
 
 #include "base/utils/system_properties.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -79,6 +80,12 @@ const AnimationOption JSViewContext::CreateAnimation(const std::unique_ptr<JsonV
 void JSViewContext::JSAnimation(const JSCallbackInfo& info)
 {
     LOGD("JSAnimation");
+    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+    if (!scopedDelegate) {
+        // this case usually means there is no foreground container, need to figure out the reason.
+        LOGE("scopedDelegate is null, please check");
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have 1 object argument.");
         return;
@@ -122,6 +129,12 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
 
 void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
 {
+    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+    if (!scopedDelegate) {
+        // this case usually means there is no foreground container, need to figure out the reason.
+        LOGE("scopedDelegate is null, please check");
+        return;
+    }
     if (info.Length() < 2) {
         LOGE("The arg is wrong, it is supposed to have two arguments.");
         return;
