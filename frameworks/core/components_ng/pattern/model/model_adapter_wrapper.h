@@ -97,6 +97,7 @@ private:
     SizeF size_ { 0.0f, 0.0f };
     PaintFinishCallback callback_ = nullptr;
     bool needsRepaint_ = false;
+    bool setupDone_ = false;
 
     std::shared_ptr<OHOS::Render3D::SceneViewerAdapter> sceneViewerAdapter_;
     std::shared_ptr<OHOS::Render3D::TextureInfo> textureInfo_;
