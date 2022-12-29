@@ -184,7 +184,8 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
     LazyForEachModel::GetInstance()->Create(actuator);
 
     {
-        std::string pviewID = std::to_string(parentViewObj->Unwrap<JSView>()->UICastGetUniqueId());
+        auto parentView = parentViewObj->Unwrap<JSView>();
+        std::string pviewID = parentView ? std::to_string(parentView->UICastGetUniqueId()) : "-1";
         int totalCount = static_cast<int>(actuator->GetTotalIndexCount());
         std::string para = R"({"viewId":")" + viewId + R"(","parentViewId":")" +
             pviewID + R"(","totalCount":)" + std::to_string(totalCount) + R"(})";
