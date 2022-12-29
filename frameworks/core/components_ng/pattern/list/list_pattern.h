@@ -170,6 +170,12 @@ public:
     void ProcessDragUpdate(float dragOffset);
     float GetChainDelta(int32_t index) const;
 
+    // multiSelectable
+    void SetMultiSelectable(bool multiSelectable)
+    {
+        multiSelectable_ = multiSelectable;
+    }
+
 private:
     void ProcessScrollEnd();
 
@@ -192,6 +198,13 @@ private:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect);
     void SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub, EdgeEffect edgeEffect);
     void HandleScrollEffect(float offset);
+
+    // multiSelectable
+    void InitMouseEvent();
+    void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
+    void ClearSelectedZone();
+    RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
+    void MultiSelectWithoutKeyboard(const RectF& selectedZone);
 
     RefPtr<Animator> animator_;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -238,6 +251,12 @@ private:
     bool chainOverScroll_ = false;
     int32_t dragStartIndexPending_ = 0;
     int32_t dragStartIndex_ = 0;
+
+    // multiSelectable
+    bool multiSelectable_ = false;
+    bool isMouseEventInit_ = false;
+    OffsetF mouseStartOffset_;
+    OffsetF mouseEndOffset_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -22,6 +22,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
@@ -33,6 +34,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t CHAIN_ANIMATION_NODE_COUNT = 30;
+constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
+constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
+constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
 } // namespace
 
 void ListPattern::OnAttachToFrameNode()
@@ -74,6 +78,9 @@ void ListPattern::OnModifyDone()
     SetEdgeEffect(gestureHub, listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING));
     SetScrollBar();
     SetChainAnimation(listLayoutProperty->GetChainAnimation().value_or(false));
+    if (multiSelectable_ && !isMouseEventInit_) {
+        InitMouseEvent();
+    }
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID_NOLOG(focusHub);
     InitOnKeyEvent(focusHub);
@@ -858,5 +865,112 @@ float ListPattern::GetChainDelta(int32_t index) const
         value = node->GetValue();
     }
     return value;
+}
+
+void ListPattern::InitMouseEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto mouseEventHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(mouseEventHub);
+    mouseEventHub->SetMouseEvent([weak = WeakClaim(this)](MouseInfo& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleMouseEventWithoutKeyboard(info);
+        }
+    });
+    isMouseEventInit_ = true;
+}
+
+void ListPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
+{
+    auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
+    if (info.GetButton() == MouseButton::LEFT_BUTTON) {
+        if (info.GetAction() == MouseAction::PRESS) {
+            mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+            mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+            MultiSelectWithoutKeyboard(selectedZone);
+        } else if (info.GetAction() == MouseAction::MOVE) {
+            mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+            MultiSelectWithoutKeyboard(selectedZone);
+        } else if (info.GetAction() == MouseAction::RELEASE) {
+            mouseStartOffset_.Reset();
+            mouseEndOffset_.Reset();
+            ClearSelectedZone();
+        }
+    }
+}
+
+void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::list<RefPtr<FrameNode>> childrens;
+    host->GenerateOneDepthVisibleFrame(childrens);
+    for (const auto& item : childrens) {
+        auto itemPattern = item->GetPattern<ListItemPattern>();
+        CHECK_NULL_VOID(itemPattern);
+        if (!itemPattern->Selectable()) {
+            continue;
+        }
+
+        auto itemGeometry = item->GetGeometryNode();
+        CHECK_NULL_VOID(itemGeometry);
+        auto context = item->GetRenderContext();
+        CHECK_NULL_VOID(context);
+
+        auto itemRect = itemGeometry->GetFrameRect();
+        if (!selectedZone.IsIntersectWith(itemRect)) {
+            itemPattern->MarkIsSelected(false);
+            context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+        } else {
+            itemPattern->MarkIsSelected(true);
+            context->OnMouseSelectUpdate(true, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+        }
+    }
+
+    auto hostContext = host->GetRenderContext();
+    CHECK_NULL_VOID(hostContext);
+    hostContext->UpdateMouseSelectWithRect(selectedZone, SELECT_FILL_COLOR, SELECT_STROKE_COLOR);
+}
+
+void ListPattern::ClearSelectedZone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostContext = host->GetRenderContext();
+    CHECK_NULL_VOID(hostContext);
+    hostContext->UpdateMouseSelectWithRect(RectF(), SELECT_FILL_COLOR, SELECT_STROKE_COLOR);
+}
+
+RectF ListPattern::ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset)
+{
+    RectF selectedZone;
+    if (startOffset.GetX() <= endOffset.GetX()) {
+        if (startOffset.GetY() <= endOffset.GetY()) {
+            // bottom right
+            selectedZone = RectF(startOffset.GetX(), startOffset.GetY(), endOffset.GetX() - startOffset.GetX(),
+                endOffset.GetY() - startOffset.GetY());
+        } else {
+            // top right
+            selectedZone = RectF(startOffset.GetX(), endOffset.GetY(), endOffset.GetX() - startOffset.GetX(),
+                startOffset.GetY() - endOffset.GetY());
+        }
+    } else {
+        if (startOffset.GetY() <= endOffset.GetY()) {
+            // bottom left
+            selectedZone = RectF(endOffset.GetX(), startOffset.GetY(), startOffset.GetX() - endOffset.GetX(),
+                endOffset.GetY() - startOffset.GetY());
+        } else {
+            // top left
+            selectedZone = RectF(endOffset.GetX(), endOffset.GetY(), startOffset.GetX() - endOffset.GetX(),
+                startOffset.GetY() - endOffset.GetY());
+        }
+    }
+
+    return selectedZone;
 }
 } // namespace OHOS::Ace::NG

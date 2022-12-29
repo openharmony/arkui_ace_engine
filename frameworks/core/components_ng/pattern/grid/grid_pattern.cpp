@@ -178,16 +178,17 @@ void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
 
         auto itemGeometry = itemFrameNode->GetGeometryNode();
         CHECK_NULL_VOID(itemGeometry);
+        auto context = itemFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
 
         auto itemRect = itemGeometry->GetFrameRect();
         if (!selectedZone.IsIntersectWith(itemRect)) {
             itemPattern->MarkIsSelected(false);
+            context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
         } else {
             itemPattern->MarkIsSelected(true);
+            context->OnMouseSelectUpdate(true, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
         }
-        auto context = itemFrameNode->GetRenderContext();
-        CHECK_NULL_VOID(context);
-        context->OnMouseSelectUpdate(ITEM_FILL_COLOR, ITEM_FILL_COLOR);
     }
 
     auto hostContext = host->GetRenderContext();
@@ -211,7 +212,7 @@ void GridPattern::ClearMultiSelect()
         itemPattern->MarkIsSelected(false);
         auto renderContext = itemFrameNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        renderContext->OnMouseSelectUpdate(ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+        renderContext->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
     }
 
     ClearSelectedZone();
