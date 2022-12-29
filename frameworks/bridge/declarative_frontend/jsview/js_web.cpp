@@ -40,13 +40,6 @@
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
 
-namespace {
-
-constexpr int32_t MAX_NAME_SIZE = 32;
-constexpr int32_t MAX_CUSTOM_SCHEME_SIZE = 10;
-
-}
-
 namespace OHOS::Ace::Framework {
 
 class JSWebDialog : public Referenced {
@@ -1395,7 +1388,6 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onGeolocationShow", &JSWeb::OnGeolocationShow);
     JSClass<JSWeb>::StaticMethod("onRequestSelected", &JSWeb::OnRequestFocus);
     JSClass<JSWeb>::StaticMethod("onShowFileSelector", &JSWeb::OnFileSelectorShow);
-    JSClass<JSWeb>::StaticMethod("customSchemes", &JSWeb::CustomSchemes);
     JSClass<JSWeb>::StaticMethod("javaScriptAccess", &JSWeb::JsEnabled);
     JSClass<JSWeb>::StaticMethod("fileExtendAccess", &JSWeb::ContentAccessEnabled);
     JSClass<JSWeb>::StaticMethod("fileAccess", &JSWeb::FileAccessEnabled);
@@ -1728,6 +1720,12 @@ void JSWeb::CreateInNewPipeline(
             func->Call(webviewController, 1, argv);
         };
         NG::WebView::Create(dstSrc.value(), std::move(setIdCallback));
+
+        auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
+        std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
+        if (!cmdLine.empty()) {
+            NG::WebView::SetCustomScheme(cmdLine);
+        }
         return;
     }
     auto* jsWebController = controller->Unwrap<JSWebController>();
@@ -1758,6 +1756,12 @@ void JSWeb::CreateWithWebviewController(
         func->Call(webviewController, 1, argv);
     };
     webComponent->SetSetWebIdCallback(std::move(setIdCallback));
+
+    auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
+    std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
+    if (!cmdLine.empty()) {
+        webComponent->SetCustomScheme(cmdLine);
+    }
 }
 
 void JSWeb::CreateWithWebController(JSRef<JSObject> controller, RefPtr<WebComponent>& webComponent)
@@ -2627,77 +2631,6 @@ void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
     };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetOnFileSelectorShow(std::move(jsCallback));
-}
-
-bool WebcustomSchemeCheckName(const std::string scheme)
-{
-    if (scheme.empty() || scheme.size() > MAX_NAME_SIZE) {
-        LOGE("invalid size");
-        return false;
-    }
-
-    for (auto it = scheme.begin(); it != scheme.end(); it++) {
-        char chr = *it;
-        if ((chr >= 'a' && chr <= 'z') || (chr >= '0' && chr <= '9') || (chr == '.') || (chr == '+') || (chr == '-')) {
-            continue;
-        } else {
-            LOGE("invalid character %{public}c", chr);
-            return false;
-        }
-    }
-    return true;
-}
-
-void JSWeb::CustomSchemes(const JSCallbackInfo& args)
-{
-    if ((args.Length() <= 0) || !(args[0]->IsArray())) {
-        LOGE("arg is invalid");
-        return;
-    }
-    JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
-    if (array->Length() > MAX_CUSTOM_SCHEME_SIZE) {
-        LOGE("arg len invalid");
-        return;
-    }
-    std::string cmdLine;
-    for (size_t i = 0; i < array->Length(); i++) {
-        auto obj = JSRef<JSObject>::Cast(array->GetValueAt(i));
-        auto schemeName = obj->GetProperty("schemeName");
-        auto isCors = obj->GetProperty("isSupportCors");
-        auto isFetch = obj->GetProperty("isSupportFetch");
-        if (!schemeName->IsString() || !isCors->IsBoolean() || !isFetch->IsBoolean()) {
-            LOGE("scheme value is undefined");
-            return;
-        }
-        auto schemeNamestr = schemeName->ToString();
-        if (!WebcustomSchemeCheckName(schemeNamestr)) {
-            LOGE("scheme name is invalid");
-            return;
-        }
-        auto isCorsBool = isCors->ToBoolean();
-        auto isFetchBool = isFetch->ToBoolean();
-        LOGI("reg scheme info %{public}s:%{public}d:%{public}d", schemeNamestr.c_str(), isCorsBool, isFetchBool);
-        cmdLine.append(schemeNamestr + ",");
-        if (isCorsBool) {
-            cmdLine.append("1,");
-        } else {
-            cmdLine.append("0,");
-        }
-
-        if (isFetchBool) {
-            cmdLine.append("1;");
-        } else {
-            cmdLine.append("0;");
-        }
-    }
-    cmdLine.pop_back();
-    LOGI("reg scheme cmdline %{public}s", cmdLine.c_str());
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::WebView::SetCustomScheme(cmdLine);
-        return;
-    }
-    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    webComponent->SetCustomScheme(cmdLine);
 }
 
 JSRef<JSVal> ContextMenuEventToJSValue(const ContextMenuEvent& eventInfo)
