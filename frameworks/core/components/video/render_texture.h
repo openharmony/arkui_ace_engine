@@ -108,7 +108,7 @@ public:
         return isAddGaussianFuzzy_;
     }
 
-    void OnGlobalPositionChanged() override
+    void OnPaintFinish() override
     {
         if (textureOffsetChangeEvent_) {
             textureOffsetChangeEvent_(textureId_,
