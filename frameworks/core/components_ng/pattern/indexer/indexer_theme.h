@@ -38,24 +38,26 @@ inline constexpr double DEFAULT_OPACITY_IN_PERCENT = 1.0;
 inline constexpr double NINETY_OPACITY_IN_PERCENT = 0.9;
 inline constexpr double ZERO_OPACITY_IN_PERCENT = 0.0;
 inline constexpr int32_t INDEXER_BUBBLE_ANIMATION_DURATION = 3000;
-inline constexpr uint32_t INDEXER_BUBBLE_MAXSIZE = 6;
+inline constexpr uint32_t INDEXER_BUBBLE_MAXSIZE = 5;
 // data for list mode
 inline constexpr double INDEXER_LIST_ITEM_TEXT_SIZE = 12.0; // list mode, font size (FP)
 inline constexpr uint32_t INDEXER_LIST_COLOR = 0x99000000;
 inline constexpr uint32_t INDEXER_LIST_ACTIVE_COLOR = 0xFF254FF7;
 inline constexpr double INDEXER_DEFAULT_PADDING_X = 10.0;
 inline constexpr double INDEXER_DEFAULT_PADDING_Y = 16.0;
+inline constexpr uint32_t POPUP_LISTITEM_CLICKED_BG = 0x1A000000;
 inline constexpr double BUBBLE_BOX_SIZE = 56.0;
 inline constexpr double BUBBLE_BOX_RADIUS = 12.0;
 inline constexpr double BOX_RADIUS = 6.0;
 inline constexpr double ZERO_RADIUS = 0.0;
 inline constexpr double BUBBLE_FONT_SIZE = 24.0;
-inline constexpr double BUBBLE_POSITION_X = -96.0;
+inline constexpr double BUBBLE_POSITION_X = 96.0;
 inline constexpr double BUBBLE_POSITION_Y = 48.0;
 inline constexpr uint32_t BUBBLE_FONT_COLOR = 0xFF254FF7;
 inline constexpr uint32_t BUBBLE_BG_COLOR = 0xFFF1F3F5;
-inline constexpr double INDEXER_ITEM_SIZE = 24.0;      // circle mode, item size (VP)
+inline constexpr double INDEXER_ITEM_SIZE = 16.0;      // circle mode, item size (VP)
 inline constexpr double INDEXER_ITEM_TEXT_SIZE = 12.0; // circle, mode font size (VP)
+inline constexpr float INDEXER_LIST_DIVIDER = 1.0;
 // data for circle mode
 inline constexpr int32_t INDEXER_COLLAPSE_ITEM_COUNT = 4;
 inline constexpr double INDEXER_CIRCLE_ITEM_SIZE = 24.0;          // circle mode, item size (VP)
@@ -65,6 +67,8 @@ inline constexpr double BUBBLE_BOX_SIZE_CIRCLE = 46.0;
 inline constexpr double BUBBLE_FONT_SIZE_CIRCLE = 19.0;
 inline constexpr uint32_t INDEXER_ACTIVE_BG_COLOR = 0x1F0A59F7;
 inline constexpr float TEXTVIEW_MIN_SIZE = 42.0f;
+inline constexpr float INDEXER_PADDING_TOP = 2.0f;
+inline constexpr float INDEXER_PADDING_LEFT = 4.0f;
 
 enum class AlignStyle {
     LEFT = 0,

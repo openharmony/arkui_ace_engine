@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 #include <utility>
-
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/components/common/properties/color.h"
@@ -169,6 +169,46 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
     }
     popupMap_[targetId].isCurrentOnShow = !popupInfo.isCurrentOnShow;
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode)
+{
+    CHECK_NULL_VOID(customNode);
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto it = customPopupMap_.find(targetId);
+    if (it != customPopupMap_.end()) {
+        rootNode->RemoveChild(customPopupMap_[targetId]);
+        customPopupMap_.erase(it);
+    }
+    customPopupMap_[targetId] = customNode;
+    auto popupNode = customPopupMap_[targetId];
+    customNode->MountToParent(rootNode);
+    customNode->MarkModifyDone();
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void OverlayManager::EraseIndexerPopup(int32_t targetId)
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto it = customPopupMap_.find(targetId);
+    if (it != customPopupMap_.end()) {
+        rootNode->RemoveChild(customPopupMap_[targetId]);
+        customPopupMap_.erase(it);
+    }
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+RefPtr<FrameNode> OverlayManager::GetIndexerPopup(int32_t targetId)
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    auto it = customPopupMap_.find(targetId);
+    if (it != customPopupMap_.end()) {
+        return customPopupMap_[targetId];
+    }
+    return nullptr;
 }
 
 void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
