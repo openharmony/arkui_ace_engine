@@ -21,23 +21,10 @@
 #include "session_stage.h"
 
 #include "core/components_ng/pattern/pattern.h"
-#include "interfaces/inner_api/ace/ui_content.h"
-
-class NativeEngine;
-class NativeValue;
 
 namespace OHOS::Rosen {
 struct VsyncCallback;
 class RSSurfaceNode;
-enum class WSError;
-}
-
-namespace OHOS::AppExecFwk {
-class Ability;
-}
-
-namespace OHOS::AbilityRuntime {
-class Context;
 }
 
 namespace OHOS::Ace::NG {
@@ -46,13 +33,8 @@ class WindowPattern : public Pattern {
     DECLARE_ACE_TYPE(WindowPattern, Pattern);
 
 public:
-    WindowPattern(
-        const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
-        const std::shared_ptr<AbilityRuntime::Context>& runtimeContext);
+    WindowPattern(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
     ~WindowPattern() override = default;
-
-    Rosen::WSError SetUIContent(const std::string& contentInfo,
-        NativeEngine* engine, NativeValue* storage, bool isDistributed = false, AppExecFwk::Ability* ability = nullptr);
 
     void RequestVsync(const std::shared_ptr<Rosen::VsyncCallback>& vsyncCallback);
 
@@ -99,6 +81,7 @@ public:
     virtual void Foreground() = 0;
     virtual void Background() = 0;
     virtual void Disconnect() = 0;
+
 protected:
     // for lifecycle
     std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode_;
@@ -108,9 +91,6 @@ protected:
     std::string windowName_ = "example";
     uint32_t windowId_ = 100;
     uint32_t windowFlags_;
-
-    std::unique_ptr<UIContent> uiContent_;
-    std::shared_ptr<AbilityRuntime::Context> runtimeContext_;
 
     std::recursive_mutex mutex_;
 

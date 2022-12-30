@@ -19,7 +19,6 @@ namespace OHOS::Ace::NG {
 
 void HostWindowExtensionPattern::OnAttachToFrameNode()
 {
-    InitContent();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

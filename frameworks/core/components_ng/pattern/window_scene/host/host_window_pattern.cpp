@@ -54,6 +54,7 @@ void HostWindowPattern::InitContent()
     context->SetRSNode(surfaceNode);
 
     surfaceNode->SetBufferAvailableCallback([weak = WeakClaim(this)]() {
+        LOGI("RSSurfaceNode buffer available callback");
         auto hostWindowPattern = weak.Upgrade();
         CHECK_NULL_VOID(hostWindowPattern);
         auto host = hostWindowPattern->GetHost();
@@ -78,7 +79,7 @@ bool HostWindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(dirty, false);
     // auto geometryNode = dirty->GetGeometryNode();
     // auto windowSize = geometryNode->GetFrameSize();
-    // session_->NotifyWindowSizeChanged(windowSize);
+    // session_->OnWindowSizeChanged(windowSize);
     return false;
 }
 

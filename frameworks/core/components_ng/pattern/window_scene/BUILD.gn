@@ -28,7 +28,6 @@ build_component_ng("window_scene") {
     #container
     "container/window_extension_pattern.cpp",
     "container/window_pattern.cpp",
-    "container/window_scene.cpp",
     "container/window_scene_pattern.cpp",
 
     #host
@@ -42,7 +41,6 @@ build_component_ng("window_scene") {
     configs = [ ":ohos_window_scene_config" ]
 
     deps = [
-      "//foundation/arkui/napi:ace_napi",
       "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
       "//foundation/window/window_manager/window_scene:window_session",
       "//foundation/window/window_manager/wm:libwm",

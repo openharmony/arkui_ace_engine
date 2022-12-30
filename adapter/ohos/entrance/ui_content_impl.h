@@ -35,6 +35,10 @@ class RSTransaction;
 
 namespace OHOS::Ace {
 
+namespace NG {
+class WindowPattern;
+}
+
 class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime);
@@ -58,7 +62,7 @@ public:
 
     // distribute
     void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) override;
-    void Restore(NG::WindowPattern* windowPattern, const std::string& contentInfo, NativeValue* storage) override;
+    void Restore(const std::string& contentInfo, NativeValue* storage) override;
     std::string GetContentInfo() const override;
     void DestroyUIDirector() override;
 
@@ -120,21 +124,20 @@ public:
 
 
     // window scene
-    void ScenePatternInit(
+    void InitWindowScene(
         const sptr<Rosen::ISceneSession>& iSceneSession,
         const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
-        const std::shared_ptr<AbilityRuntime::Context>& runtimeContext,
         const std::shared_ptr<Rosen::ISessionStateListener>& listener) override;
 
     virtual void DoForeground() override;
     virtual void DoBackground() override;
     virtual void DoDisconnect() override;
+
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
-    void CommonInitialize(NG::WindowPattern* windowPattern, const std::string& contentInfo, NativeValue* storage);
-    void InitializeSubWindow(NG::WindowPattern* windowPattern, bool isDialog = false);
+    void InitializeSubWindow(bool isDialog = false);
     void DestroyCallback() const;
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;

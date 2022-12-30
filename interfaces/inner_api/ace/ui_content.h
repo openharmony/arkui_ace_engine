@@ -46,11 +46,6 @@ class RSSurfaceNode;
 class RSTransaction;
 }
 
-namespace Ace::NG {
-class WindowPattern;
-class WindowScenePattern;
-}
-
 namespace AAFwk {
 class Want;
 }
@@ -95,7 +90,7 @@ public:
 
     // distribute
     virtual void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) = 0;
-    virtual void Restore(NG::WindowPattern* windowPattern, const std::string& contentInfo, NativeValue* storage) = 0;
+    virtual void Restore(const std::string& contentInfo, NativeValue* storage) = 0;
     virtual std::string GetContentInfo() const = 0;
     virtual void DestroyUIDirector() = 0;
 
@@ -145,12 +140,10 @@ public:
         std::function<void(const std::string&, const std::string&)>&& errorCallback) = 0;
 
     // window scene
-    virtual void ScenePatternInit(
+    virtual void InitWindowScene(
         const sptr<Rosen::ISceneSession>& iSceneSession,
         const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
-        const std::shared_ptr<AbilityRuntime::Context>& runtimeContext,
-        const std::shared_ptr<Rosen::ISessionStateListener>& listener
-    ) = 0;
+        const std::shared_ptr<Rosen::ISessionStateListener>& listener) = 0;
 
     virtual void DoForeground() = 0;
     virtual void DoBackground() = 0;

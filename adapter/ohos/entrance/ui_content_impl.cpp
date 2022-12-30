@@ -328,32 +328,30 @@ void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& cont
 
 void UIContentImpl::Initialize(const std::string& url, NativeValue* storage)
 {
-    auto windowPattern = windowScenePattern_ ? windowScenePattern_ : nullptr; // window pattern
-    if (windowPattern && StringUtils::StartWith(windowPattern->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
-        CommonInitialize(windowPattern, url, storage);
+    if (windowPattern_ && StringUtils::StartWith(windowPattern_->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
+        CommonInitialize(nullptr, url, storage);
         return;
     }
-    if (windowPattern) {
-        CommonInitialize(windowPattern, url, storage);
+    if (windowPattern_) {
+        CommonInitialize(nullptr, url, storage);
     }
     LOGI("Initialize startUrl = %{public}s", startUrl_.c_str());
-    // run page.
     Platform::AceContainer::RunPage(
         instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
-    LOGD("Initialize UIContentImpl done.");
+    LOGI("Initialize UIContentImpl done");
 }
 
-void UIContentImpl::Restore(NG::WindowPattern* windowPattern, const std::string& contentInfo, NativeValue* storage)
+void UIContentImpl::Restore(const std::string& url, NativeValue* storage)
 {
-    CommonInitialize(windowPattern, contentInfo, storage);
-    startUrl_ = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo);
+    CommonInitialize(nullptr, url, storage);
+    startUrl_ = Platform::AceContainer::RestoreRouterStack(instanceId_, url);
     if (startUrl_.empty()) {
         LOGW("UIContent Restore start url is empty");
     }
     LOGI("Restore startUrl = %{public}s", startUrl_.c_str());
     Platform::AceContainer::RunPage(
         instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
-    LOGI("Restore UIContentImpl done.");
+    LOGI("Restore UIContentImpl done");
 }
 
 std::string UIContentImpl::GetContentInfo() const
@@ -1112,13 +1110,22 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                 }),
             false, false, useNewPipe);
     CHECK_NULL_VOID(container);
-    container->SetWindowName(window_->GetWindowName());
-    container->SetWindowId(window_->GetWindowId());
+    if (windowPattern_) {
+        container->SetWindowName(windowPattern_->GetWindowName());
+        container->SetWindowId(windowPattern_->GetWindowId());
+    } else {
+        container->SetWindowName(window_->GetWindowName());
+        container->SetWindowId(window_->GetWindowId());
+    }
     auto token = context->GetToken();
     container->SetToken(token);
     container->SetPageUrlChecker(AceType::MakeRefPtr<PageUrlCheckerOhos>(context));
     // Mark the relationship between windowId and containerId, it is 1:1
-    SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
+    if (windowPattern_) {
+        SubwindowManager::GetInstance()->AddContainerId(windowPattern_->GetWindowId(), instanceId_);
+    } else {
+        SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
+    }
     AceEngine::Get().AddContainer(instanceId_, container);
     if (runtime_) {
         container->GetSettings().SetUsingSharedRuntime(true);
@@ -1168,20 +1175,40 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             });
     }
 
-    if (window_->IsDecorEnable()) {
-        LOGI("Container modal is enabled.");
-        container->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    if (windowPattern_) {
+        if (windowPattern_->IsDecorEnable()) {
+            LOGI("Container modal is enabled.");
+            container->SetWindowModal(WindowModal::CONTAINER_MODAL);
+        }
+        if (windowPattern_->IsFocused()) {
+            LOGI("UIContentImpl: focus again");
+            Focus();
+        }
+        // dragWindowListener_ = new DragWindowListener(instanceId_);
+        // windowPattern_->RegisterDragListener(dragWindowListener_);
+        // occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
+        // windowPattern_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
+    } else {
+        if (window_->IsDecorEnable()) {
+            LOGI("Container modal is enabled.");
+            container->SetWindowModal(WindowModal::CONTAINER_MODAL);
+        }
+        if (window_->IsFocused()) {
+            LOGI("UIContentImpl: focus again");
+            Focus();
+        }
+        dragWindowListener_ = new DragWindowListener(instanceId_);
+        window_->RegisterDragListener(dragWindowListener_);
+        occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
+        window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
     }
-
-    dragWindowListener_ = new DragWindowListener(instanceId_);
-    window_->RegisterDragListener(dragWindowListener_);
-    occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
-    window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
 
     // create ace_view
     auto aceView =
         Platform::AceViewOhos::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
-    Platform::AceViewOhos::SurfaceCreated(aceView, window_);
+    if (!windowPattern_) {
+        Platform::AceViewOhos::SurfaceCreated(aceView, window_);
+    }
     if (!useNewPipe) {
         Ace::Platform::UIEnvCallback callback = nullptr;
 #ifdef ENABLE_ROSEN_BACKEND
@@ -1205,7 +1232,11 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         // set view
         Platform::AceContainer::SetView(aceView, density, 0, 0, window_, callback);
     } else {
-        Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
+        if (windowPattern_) {
+            Platform::AceContainer::SetViewNew(aceView, density, 0, 0, AceType::Claim(windowPattern_));
+        } else {
+            Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
+        }
     }
 
     // after frontend initialize
@@ -1521,9 +1552,8 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     window_->RegisterDragListener(dragWindowListener_);
 }
 
-void UIContentImpl::InitializeSubWindow(NG::WindowPattern* windowPattern, bool isDialog)
+void UIContentImpl::InitializeSubWindow(bool isDialog)
 {
-    windowPattern_ = windowPattern;
     if (!windowPattern_) {
         LOGE("Null window, can't initialize UI content");
         return;
@@ -1643,27 +1673,29 @@ void UIContentImpl::SetErrorEventHandler(std::function<void(const std::string&, 
     return front->SetErrorEventHandler(std::move(errorCallback));
 }
 
-void UIContentImpl::ScenePatternInit(
+void UIContentImpl::InitWindowScene(
     const sptr<Rosen::ISceneSession>& iSceneSession,
     const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
-    const std::shared_ptr<AbilityRuntime::Context>& runtimeContext,
     const std::shared_ptr<Rosen::ISessionStateListener>& listener)
 {
-    windowScenePattern_ = new NG::WindowScenePattern(iSceneSession, surfaceNode, runtimeContext, listener);
+    windowPattern_ = new NG::WindowScenePattern(iSceneSession, surfaceNode, listener);
 }
 
 void UIContentImpl::DoForeground()
 {
-    windowScenePattern_->Foreground();
+    CHECK_NULL_VOID(windowPattern_);
+    windowPattern_->Foreground();
 }
 
 void UIContentImpl::DoBackground()
 {
-    windowScenePattern_->Background();
+    CHECK_NULL_VOID(windowPattern_);
+    windowPattern_->Background();
 }
 
 void UIContentImpl::DoDisconnect()
 {
-    windowScenePattern_->Disconnect();
+    CHECK_NULL_VOID(windowPattern_);
+    windowPattern_->Disconnect();
 }
 } // namespace OHOS::Ace

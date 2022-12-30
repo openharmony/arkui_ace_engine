@@ -22,7 +22,7 @@ WindowExtensionPattern::WindowExtensionPattern(
     const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
     const std::shared_ptr<AbilityRuntime::Context>& runtimeContext */)
     // : WindowPattern(surfaceNode, runtimeContext)
-    : WindowPattern(nullptr, nullptr)
+    : WindowPattern(nullptr)
 {
     // sessionStage_ = std::shared_ptr<Rosen::ExtensionSessionStage>(new Rosen::ExtensionSessionStage(iExtensionSession));
 }

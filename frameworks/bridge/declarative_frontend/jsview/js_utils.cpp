@@ -21,8 +21,7 @@
 #include <dlfcn.h>
 #endif
 
-#include "napi/host/js_scene_session.h"
-#include <refbase.h>
+#include "js_scene_session.h"
 #include "scene_session.h"
 
 #include "base/image/pixel_map.h"

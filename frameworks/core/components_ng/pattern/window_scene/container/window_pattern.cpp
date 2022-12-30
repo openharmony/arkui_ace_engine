@@ -14,65 +14,14 @@
  */
 
 #include "include/vsync_station.h"
-#include "native_engine/native_engine.h"
-#include "native_engine/native_value.h"
-#include "window_scene_common.h"
 
 #include "core/components_ng/pattern/window_scene/container/window_pattern.h"
 
 namespace OHOS::Ace::NG {
 
-WindowPattern::WindowPattern(
-    const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
-    const std::shared_ptr<AbilityRuntime::Context>& runtimeContext)
-    : surfaceNode_(surfaceNode), runtimeContext_(runtimeContext)
+WindowPattern::WindowPattern(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
+    : surfaceNode_(surfaceNode)
 {}
-
-Rosen::WSError WindowPattern::SetUIContent(const std::string& contentInfo,
-    NativeEngine* engine, NativeValue* storage, bool isDistributed, AppExecFwk::Ability* ability)
-{
-    // LOGI("SetUIContent contentInfo: %{public}s", contentInfo.c_str());
-    // std::unique_ptr<UIContent> uiContent;
-    // if (ability != nullptr) {
-    //     uiContent = UIContent::Create(ability);
-    // } else {
-    //     uiContent = UIContent::Create(runtimeContext_.get(), engine);
-    // }
-    // if (uiContent == nullptr) {
-    //     LOGE("fail to SetUIContent id: %{public}u", GetWindowId());
-    //     return Rosen::WSError::WS_ERROR_NULLPTR;
-    // }
-    // // if (!isAppDecorEnable_ || !windowSystemConfig_.isSystemDecorEnable_) {
-    // //     WLOGFI("app set decor enable false");
-    // //     property_->SetDecorEnable(false);
-    // // }
-    // if (isDistributed) {
-    //     uiContent->Restore(this, contentInfo, storage);
-    // } else {
-    //     uiContent->Initialize(this, contentInfo, storage);
-    // }
-    // // make uiContent available after Initialize/Restore
-    // uiContent_ = std::move(uiContent);
-
-    // if (state_ == WindowState::STATE_SHOWN) {
-    //     UpdateTitleButtonVisibility();
-    //     ViewportConfig config;
-    //     Rect rect = GetRect();
-    //     config.SetSize(rect.Width(), rect.Height());
-    //     config.SetPosition(rect.Left(), rect.Top());
-    //     // auto display = DisplayManager::GetInstance().GetDisplayById(property_->GetDisplayId());
-    //     // if (display == nullptr) {
-    //     //     WLOGFE("get display failed displayId:%{public}" PRIu64", window id:%{public}u", property_->GetDisplayId(),
-    //     //         property_->GetWindowId());
-    //     //     return Rosen::WSError::WS_ERROR_NULLPTR;
-    //     // }
-    //     // float virtualPixelRatio = display->GetVirtualPixelRatio();
-    //     // config.SetDensity(virtualPixelRatio);
-    //     uiContent_->UpdateViewportConfig(config, WindowSizeChangeReason::UNDEFINED);
-    //     LOGI("notify uiContent window size change end");
-    // }
-    return Rosen::WSError::WS_OK;
-}
 
 void WindowPattern::RequestVsync(const std::shared_ptr<Rosen::VsyncCallback>& vsyncCallback)
 {

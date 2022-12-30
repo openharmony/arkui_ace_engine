@@ -16,10 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_EXTENSION_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_EXTENSION_PATTERN_H
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "window_pattern.h"
+#include "core/components_ng/pattern/window_scene/container/window_pattern.h"
 
 namespace OHOS::Ace::NG {
 
