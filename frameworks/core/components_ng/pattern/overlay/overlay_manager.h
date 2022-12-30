@@ -51,7 +51,9 @@ public:
         LOGI("OverlayManager Destructor.");
         popupMap_.clear();
     }
-
+    void ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode);
+    void EraseIndexerPopup(int32_t targetId);
+    RefPtr<FrameNode> GetIndexerPopup(int32_t targetId);
     void UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo);
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
     void ErasePopup(int32_t targetId);
@@ -117,6 +119,7 @@ private:
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     // K: target frameNode ID, V: menuNode
     std::unordered_map<int32_t, RefPtr<FrameNode>> menuMap_;
+    std::unordered_map<int32_t, RefPtr<FrameNode>> customPopupMap_;
     WeakPtr<UINode> rootNodeWeak_;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
