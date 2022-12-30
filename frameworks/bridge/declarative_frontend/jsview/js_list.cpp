@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/list/list_model.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 
 namespace OHOS::Ace {
 
@@ -70,8 +71,11 @@ void JSList::SetEditMode(bool editMode)
     ListModel::GetInstance()->SetEditMode(editMode);
 }
 
-void JSList::SetCachedCount(int32_t cachedCount)
+void JSList::SetCachedCount(const JSCallbackInfo& info)
 {
+    int32_t cachedCount = 1;
+    ParseJsInteger<int32_t>(info[0], cachedCount);
+    cachedCount = cachedCount < 0 ? 1 : cachedCount;
     ListModel::GetInstance()->SetCachedCount(cachedCount);
 }
 
@@ -82,9 +86,13 @@ void JSList::SetScroller(RefPtr<JSScroller> scroller)
         scroller->SetController(listController);
 
         // Init scroll bar proxy.
-        auto proxy = AceType::DynamicCast<ScrollBarProxy>(scroller->GetScrollBarProxy());
+        auto proxy = scroller->GetScrollBarProxy();
         if (!proxy) {
-            proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+            if (Container::IsCurrentUseNewPipeline()) {
+                proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+            } else {
+                proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+            }
             scroller->SetScrollBarProxy(proxy);
         }
         ListModel::GetInstance()->SetScroller(listController, proxy);
@@ -182,14 +190,11 @@ void JSList::SetDivider(const JSCallbackInfo& args)
     }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-    Dimension strokeWidth;
-    if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), strokeWidth) && strokeWidth.IsValid()) {
-        LOGW("Invalid strokeWidth of divider");
-        return;
-    }
-
     V2::ItemDivider divider;
-    divider.strokeWidth = strokeWidth;
+    if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)) {
+        LOGW("Invalid strokeWidth of divider");
+        divider.strokeWidth.Reset();
+    }
     if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
         // Failed to get color from param, using default color defined in theme
         RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();

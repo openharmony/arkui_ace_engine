@@ -280,6 +280,8 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
         configuration.fontRatio_, configuration.colorMode_);
 }
 
+void ResourceAdapterImpl::Reload() {}
+
 void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
 {
     auto configuration = ConvertConfig(config);

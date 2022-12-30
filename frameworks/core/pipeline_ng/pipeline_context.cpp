@@ -58,6 +58,7 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
@@ -75,12 +76,16 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
     const RefPtr<Frontend>& frontend, int32_t instanceId)
     : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId)
-{}
+{
+    window_->OnHide();
+}
 
 PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
     : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId)
-{}
+{
+    window_->OnHide();
+}
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
@@ -285,7 +290,9 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 
 void PipelineContext::FlushBuild()
 {
+    isRebuildFinished_ = false;
     FlushDirtyNodeUpdate();
+    isRebuildFinished_ = true;
     FlushBuildFinishCallbacks();
 }
 
@@ -336,7 +343,7 @@ void PipelineContext::SetupRootElement()
     }
 #endif
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
-    overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
+    overlayManager_ = MakeRefPtr<OverlayManager>(DynamicCast<FrameNode>(stageNode->GetParent()));
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
@@ -539,7 +546,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
 {
     CHECK_RUN_ON(UI);
     float positionY = 0;
-    auto manager = DynamicCast<TextFieldManager>(PipelineBase::GetTextFieldManager());
+    auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
     float height = 0.0f;
     if (manager) {
         height = manager->GetHeight();
@@ -573,6 +580,12 @@ bool PipelineContext::OnBackPressed()
     // If the tag of the last child of the rootnode is video, exit full screen.
     if (fullScreenManager_->OnBackPressed()) {
         LOGI("Exit full screen: back press accepted");
+        return true;
+    }
+
+    // if has sharedTransition, back press will stop the sharedTransition
+    if (sharedTransitionManager_->OnBackPressed()) {
+        LOGI("sharedTransition stop: back press accepted");
         return true;
     }
 
@@ -669,6 +682,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         scalePoint.type);
     eventManager_->SetInstanceId(GetInstanceId());
     if (scalePoint.type == TouchType::DOWN) {
+        isNeedShowFocus_ = false;
+        auto rootFocusHub = rootNode_->GetFocusHub();
+        if (rootFocusHub) {
+            rootFocusHub->ClearAllFocusState();
+        }
+
         LOGD("receive touch down event, first use touch test to collect touch event target");
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
@@ -824,7 +843,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     LOGD(
         "MouseEvent (x,y): (%{public}f,%{public}f), button: %{public}d, action: %{public}d, pressedButtons: %{public}d",
-        scaleEvent.x, scaleEvent.y, scaleEvent.action, scaleEvent.button, scaleEvent.pressedButtons);
+        scaleEvent.x, scaleEvent.y, scaleEvent.button, scaleEvent.action, scaleEvent.pressedButtons);
     eventManager_->MouseTest(scaleEvent, rootNode_);
     eventManager_->DispatchMouseEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverEventNG(scaleEvent);
@@ -836,15 +855,18 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 {
     // Need update while key tab pressed
     if (!isNeedShowFocus_ && event.action == KeyAction::DOWN &&
-        (event.code == KeyCode::KEY_TAB || event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_LEFT ||
-            event.code == KeyCode::KEY_DPAD_DOWN || event.code == KeyCode::KEY_DPAD_RIGHT)) {
+        (event.IsKey({ KeyCode::KEY_TAB }) || event.IsDirectionalKey())) {
         isNeedShowFocus_ = true;
-        FlushFocus();
+        auto rootFocusHub = rootNode_->GetFocusHub();
+        if (rootFocusHub) {
+            rootFocusHub->PaintAllFocusState();
+        }
         return true;
     }
     auto lastPage = stageManager_->GetLastPage();
-    CHECK_NULL_RETURN(lastPage, false);
-    if (!eventManager_->DispatchTabIndexEventNG(event, rootNode_, lastPage)) {
+    auto mainNode = lastPage ? lastPage : rootNode_;
+    CHECK_NULL_RETURN(mainNode, false);
+    if (!eventManager_->DispatchTabIndexEventNG(event, rootNode_, mainNode)) {
         return eventManager_->DispatchKeyEventNG(event, rootNode_);
     }
     return true;
@@ -853,20 +875,27 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 bool PipelineContext::RequestDefaultFocus()
 {
     auto lastPage = stageManager_->GetLastPage();
-    CHECK_NULL_RETURN(lastPage, false);
-    auto lastPageFocusHub = lastPage->GetFocusHub();
-    CHECK_NULL_RETURN(lastPageFocusHub, false);
-    if (lastPageFocusHub->IsDefaultHasFocused()) {
+    auto mainNode = lastPage ? lastPage : rootNode_;
+    CHECK_NULL_RETURN(mainNode, false);
+    auto mainFocusHub = mainNode->GetFocusHub();
+    CHECK_NULL_RETURN(mainFocusHub, false);
+    if (mainFocusHub->IsDefaultHasFocused()) {
+        LOGD("RequestDefaultFocus: %{public}s/%{public}d 's default focus node has be focused.",
+            mainNode->GetTag().c_str(), mainNode->GetId());
         return false;
     }
-    auto defaultFocusNode = lastPageFocusHub->GetChildFocusNodeByType();
+    auto defaultFocusNode = mainFocusHub->GetChildFocusNodeByType();
     if (!defaultFocusNode) {
+        LOGD("RequestDefaultFocus: %{public}s/%{public}d do not has default focus node.",
+            mainNode->GetTag().c_str(), mainNode->GetId());
         return false;
     }
     if (!defaultFocusNode->IsFocusableWholePath()) {
+        LOGD("RequestDefaultFocus: %{public}s/%{public}d 's default focus node is not focusable.",
+            mainNode->GetTag().c_str(), mainNode->GetId());
         return false;
     }
-    lastPageFocusHub->SetIsDefaultHasFocused(true);
+    mainFocusHub->SetIsDefaultHasFocused(true);
     LOGD("Focus: request default focus node %{public}s", defaultFocusNode->GetFrameName().c_str());
     return defaultFocusNode->RequestFocusImmediately();
 }
@@ -891,6 +920,27 @@ void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node)
     window_->RequestFrame();
 }
 
+void PipelineContext::RootLostFocus(BlurReason reason) const
+{
+    CHECK_NULL_VOID(rootNode_);
+    auto focusHub = rootNode_->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->LostFocus(reason);
+}
+
+MouseEvent ConvertAxisToMouse(const AxisEvent& event)
+{
+    MouseEvent result;
+    result.x = event.x;
+    result.y = event.y;
+    result.action = MouseAction::MOVE;
+    result.button = MouseButton::NONE_BUTTON;
+    result.time = event.time;
+    result.deviceId = event.deviceId;
+    result.sourceType = event.sourceType;
+    return result;
+}
+
 void PipelineContext::OnAxisEvent(const AxisEvent& event)
 {
     // Need develop here: CTRL+AXIS = Pinch event
@@ -912,6 +962,9 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
         eventManager_->AxisTest(scaleEvent, rootNode_);
         eventManager_->DispatchAxisEvent(scaleEvent);
     }
+
+    auto mouseEvent = ConvertAxisToMouse(event);
+    OnMouseEvent(mouseEvent);
 }
 
 void PipelineContext::AddVisibleAreaChangeNode(
@@ -1003,11 +1056,16 @@ void PipelineContext::WindowFocus(bool isFocus)
     CHECK_RUN_ON(UI);
     onFocus_ = isFocus;
     if (!isFocus) {
+        LOGD("WindowFocus: isFocus_ is %{public}d. Lost all focus.", onFocus_);
+        RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
     }
     if (onFocus_ && onShow_) {
+        LOGD("WindowFocus: onFocus_ and onShow_ are both true. Do FlushFocus().");
         FlushFocus();
+    } else {
+        LOGD("WindowFocus: onFocus_ is %{public}d, onShow_ is %{public}d.", onFocus_, onShow_);
     }
     FlushWindowFocusChangedCallback(isFocus);
 }

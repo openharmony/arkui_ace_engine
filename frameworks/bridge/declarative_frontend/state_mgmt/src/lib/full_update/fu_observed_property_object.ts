@@ -116,6 +116,6 @@ class ObservedPropertyObject<T extends Object> extends ObservedPropertyObjectAbs
 
   public createProp(subscribeOwner?: IPropertySubscriber,
     linkPropName?: PropertyInfo): ObservedPropertyAbstract<T> {
-    throw new Error("Creating a 'Prop' proerty is unsuppoeted for Object type prperty value.");
+    throw new Error("Creating a 'Prop' property is unsupported for Object type property value.");
   }
 }

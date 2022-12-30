@@ -285,6 +285,7 @@ public:
 protected:
     NativeEngine* nativeEngine_ = nullptr;
     std::function<void(JsEngine*)> mediaUpdateCallback_;
+    bool needUpdate_ = false;
 
 private:
     // weather the app has debugger.so.

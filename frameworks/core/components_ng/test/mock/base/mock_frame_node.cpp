@@ -35,6 +35,7 @@ void FrameNode::SetActive(bool active)
 {
     isActive_ = active;
 }
+void FrameNode::OnVisibleChange(bool isVisible) {}
 void FrameNode::PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType) {}
 void FrameNode::RebuildRenderContextTree() {}
 void FrameNode::MarkModifyDone()
@@ -48,6 +49,7 @@ void FrameNode::MarkNeedRenderOnly() {}
 void FrameNode::MarkNeedRender(bool isRenderBoundary) {}
 void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag) {}
 void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) {}
+void FrameNode::OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) {}
 void FrameNode::UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapper>& self, bool forceMeasure, bool forceLayout) {}
 void FrameNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) {}
 void FrameNode::UpdateLayoutPropertyFlag() {}

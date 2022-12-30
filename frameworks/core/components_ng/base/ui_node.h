@@ -97,6 +97,7 @@ public:
     }
 
     void GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList);
+    void GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList);
 
     int32_t GetChildIndexById(int32_t id);
 
@@ -235,6 +236,8 @@ public:
 
     virtual void SetActive(bool active);
 
+    virtual void OnVisibleChange(bool isVisible);
+
     bool IsOnMainTree() const
     {
         return onMainTree_;
@@ -265,6 +268,12 @@ public:
         return nullptr;
     }
 
+    void ChildrenUpdatedFrom(int32_t index);
+    int32_t GetChildrenUpdated() const
+    {
+        return childrenUpdatedFrom_;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -275,6 +284,13 @@ protected:
     {
         for (const auto& child : children_) {
             child->OnGenerateOneDepthVisibleFrame(visibleList);
+        }
+    }
+
+    virtual void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList)
+    {
+        for (const auto& child : children_) {
+            child->OnGenerateOneDepthAllFrame(allList);
         }
     }
 
@@ -302,6 +318,7 @@ private:
     bool onMainTree_ = false;
     bool removeSilently_ = true;
 
+    int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UINode);

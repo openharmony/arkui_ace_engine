@@ -145,22 +145,22 @@ bool FocusNode::GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t t
     return nodeNeedToFocus->RequestFocusImmediately();
 }
 
-bool FocusNode::HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusGroup>& curPage)
+bool FocusNode::HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusGroup>& mainNode)
 {
     if (event.code != KeyCode::KEY_TAB || event.action != KeyAction::DOWN) {
         return false;
     }
-    if (!curPage) {
+    if (!mainNode) {
         LOGE("Current page node is not exit. Can't handle focus by tabIndex.");
         return false;
     }
     TabIndexNodeList tabIndexNodes;
     tabIndexNodes.clear();
-    curPage->CollectTabIndexNodes(tabIndexNodes);
+    mainNode->CollectTabIndexNodes(tabIndexNodes);
     tabIndexNodes.sort([](std::pair<int32_t, WeakPtr<FocusNode>>& a, std::pair<int32_t, WeakPtr<FocusNode>>& b) {
         return a.first < b.first;
     });
-    int32_t curTabFocusIndex = curPage->GetFocusingTabNodeIdx(tabIndexNodes);
+    int32_t curTabFocusIndex = mainNode->GetFocusingTabNodeIdx(tabIndexNodes);
     if ((curTabFocusIndex < 0 || curTabFocusIndex >= static_cast<int32_t>(tabIndexNodes.size())) &&
         curTabFocusIndex != DEFAULT_TAB_FOCUSED_INDEX) {
         LOGI("Current focused tabIndex node: %{public}d. Use default focus system.", curTabFocusIndex);
@@ -328,9 +328,10 @@ void FocusNode::UpdateAccessibilityFocusInfo()
     accessibilityNode->SetFocusedState(currentFocus_);
 }
 
-void FocusNode::LostFocus()
+void FocusNode::LostFocus(BlurReason reason)
 {
     if (IsCurrentFocus()) {
+        blurReason_ = reason;
         currentFocus_ = false;
         UpdateAccessibilityFocusInfo();
         OnBlur();
@@ -779,7 +780,7 @@ void FocusGroup::OnBlur()
     FocusNode::OnBlur();
 
     if (itLastFocusNode_ != focusNodes_.end() && *itLastFocusNode_) {
-        (*itLastFocusNode_)->LostFocus();
+        (*itLastFocusNode_)->LostFocus(blurReason_);
     }
 }
 

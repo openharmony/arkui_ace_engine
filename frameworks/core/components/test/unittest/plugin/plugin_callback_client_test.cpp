@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-
 #include "gtest/gtest.h"
 
+#include "base/test/mock/mock_asset_manager.h"
 #include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/frontend.h"
-#include "core/mock/fake_asset_manager.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #include "core/components/plugin/plugin_sub_container.h"
-#include "core/mock/mock_resource_register.h"
 #include "core/components/plugin/resource/plugin_manager_delegate.h"
 #define private public
 #define protected public
@@ -32,8 +31,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
-class PluginCallBackClientTest
- : public testing::Test {
+class PluginCallBackClientTest : public testing::Test {
 public:
     static void SetUpTestCase() {}
     static void TearDownTestCase() {}
@@ -47,7 +45,7 @@ RefPtr<PipelineContext> PluginCallBackClientTest::GetPipelineContext(const RefPt
     auto platformWindow = PlatformWindow::Create(nullptr);
     auto window = std::make_unique<Window>(std::move(platformWindow));
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     return AceType::MakeRefPtr<PipelineContext>(
         std::move(window), taskExecutor, assetManager, resRegister, frontend, 0);
@@ -70,8 +68,8 @@ HWTEST_F(PluginCallBackClientTest, PluginCallBackClientOnDeathReceivedTest001, T
      * @tc.expected: step2.On Death Received success.
      */
     auto fakeFrontend = Frontend::CreateDefault();
-    RefPtr<PluginManagerDelegate> delegate = AceType::MakeRefPtr<PluginManagerDelegate>
-                                                (PluginCallBackClientTest::GetPipelineContext(fakeFrontend));
+    RefPtr<PluginManagerDelegate> delegate =
+        AceType::MakeRefPtr<PluginManagerDelegate>(PluginCallBackClientTest::GetPipelineContext(fakeFrontend));
     pluginCallbackClient.SetPluginManagerDelegate(delegate);
     pluginCallbackClient.OnDeathReceived();
     EXPECT_TRUE(pluginCallbackClient.delegate_.Upgrade());

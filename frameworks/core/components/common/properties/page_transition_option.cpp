@@ -395,6 +395,8 @@ void TransitionPhoneTweenOption::CreateTransitionInOption(TransitionEvent event)
             DimensionOffset(Dimension(), Dimension()), Curves::FRICTION);
         auto offsetXAnimation =
             AceType::MakeRefPtr<CurveAnimation<float>>(deviceWidth_ * TRANSITION_FACTOR_IN, 0.0f, Curves::FRICTION);
+        auto widthAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(deviceWidth_, deviceWidth_, Curves::LINEAR);
+        contentInOption_.SetPropertyAnimationFloat(PropertyAnimatableType::PROPERTY_WIDTH, widthAnimation);
         contentInOption_.SetPropertyAnimationFloat(PropertyAnimatableType::PROPERTY_OFFSET_X, offsetXAnimation);
         contentInOption_.SetTranslateAnimations(AnimationType::TRANSLATE_X, translateAnimation);
     }

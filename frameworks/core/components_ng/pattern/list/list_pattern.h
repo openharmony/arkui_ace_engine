@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -47,6 +48,9 @@ public:
         auto paint =  MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_, itemPosition_);
         paint->SetScrollBar(AceType::WeakClaim(AceType::RawPtr(scrollBar_)));
         paint->SetTotalItemCount(maxListItemIndex_ + 1);
+        if (scrollEffect_ && scrollEffect_->IsFadeEffect()) {
+            paint->SetEdgeEffect(scrollEffect_);
+        }
         return paint;
     }
 
@@ -144,6 +148,15 @@ public:
     void SetScrollBar();
     void UpdateScrollBarOffset();
     void RegisterScrollBarEventTask();
+    void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy);
+    float GetScrollableDistance() const
+    {
+        return scrollableDistance_;
+    }
+    float GetCurrentPosition() const
+    {
+        return currentPosition_;
+    }
 
 private:
     void ProcessScrollEnd();
@@ -156,19 +169,20 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
 
+    void MarkDirtyNodeSelf();
     SizeF GetContentSize() const;
     float GetMainContentSize() const;
     void ProcessEvent(bool indexChanged, float finalOffset, bool isJump);
     void CheckScrollable();
     bool IsOutOfBoundary(bool useCurrentDelta = true);
     void InitScrollableEvent();
-    void SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect);
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect);
+    void SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub, EdgeEffect edgeEffect);
+    void HandleScrollEffect(float offset);
 
     RefPtr<Animator> animator_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
-    RefPtr<Animator> springController_;
     RefPtr<ListPositionController> positionController_;
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;
@@ -191,13 +205,15 @@ private:
     RefPtr<ScrollBar> scrollBar_;
     RefPtr<TouchEventImpl> touchEvent_;
     bool isScrollContent_ = true;
+    RefPtr<ScrollBarProxy> scrollBarProxy_;
+    float scrollableDistance_ = 0.0f;
+    float currentPosition_ = 0.0f;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
     bool scrollStop_ = false;
     int32_t scrollState_ = SCROLL_FROM_NONE;
 
-    WeakPtr<FrameNode> headerGroupNode_;
-    WeakPtr<FrameNode> footerGroupNode_;
+    std::list<WeakPtr<FrameNode>> itemGroupList_;
     std::map<int32_t, int32_t> lanesItemRange_;
     int32_t lanes_ = 1;
 };

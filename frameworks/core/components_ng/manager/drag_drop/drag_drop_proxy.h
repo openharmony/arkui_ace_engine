@@ -29,6 +29,7 @@ enum class DragEventType {
     LEAVE,
     MOVE,
     DROP,
+    START,
 };
 
 enum class DragType {

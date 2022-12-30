@@ -112,6 +112,22 @@ void BuildTitleBar(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNo
     BuildMenu(navBarNode, titleBarNode);
 }
 
+void UpdateTitleFontSize(const RefPtr<NavBarNode>& hostNode)
+{
+    auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    auto titleNode = AceType::DynamicCast<FrameNode>(hostNode->GetTitle());
+    CHECK_NULL_VOID(titleNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<NavigationBarTheme>();
+    CHECK_NULL_VOID(theme);
+    auto titleLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID_NOLOG(titleLayoutProperty);
+    titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
+    titleNode->MarkModifyDone();
+}
+
 void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
 {
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
@@ -124,6 +140,10 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
     if ((!hostNode->GetTitle() && !hostNode->GetSubtitle() && !hostNode->GetMenu() &&
         navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI)) {
         return;
+    }
+    if (hostNode->GetTitle() &&
+        navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
+        UpdateTitleFontSize(hostNode);
     }
     titleBarLayoutProperty->UpdateTitleMode(navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE));
     titleBarLayoutProperty->UpdateHideBackButton(navBarLayoutProperty->GetHideBackButtonValue(false));

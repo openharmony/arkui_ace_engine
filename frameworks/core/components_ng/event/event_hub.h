@@ -16,14 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_EVENT_HUB_H
 
+#include <list>
 #include <utility>
 
-#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/input_event_hub.h"
+#include "core/components_ng/event/state_style_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -65,10 +67,16 @@ public:
         return inputEventHub_;
     }
 
-    const RefPtr<FocusHub>& GetOrCreateFocusHub(FocusType type = FocusType::DISABLE, bool focusable = false)
+    const RefPtr<FocusHub>& GetOrCreateFocusHub(FocusType type = FocusType::DISABLE, bool focusable = false,
+        FocusStyleType focusStyleType = FocusStyleType::NONE,
+        const std::unique_ptr<FocusPaintParam>& paintParamsPtr = nullptr)
     {
         if (!focusHub_) {
             focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this), type, focusable);
+            focusHub_->SetFocusStyleType(focusStyleType);
+            if (paintParamsPtr) {
+                focusHub_->SetFocusPaintParamsPtr(paintParamsPtr);
+            }
         }
         return focusHub_;
     }
@@ -200,6 +208,15 @@ public:
         return static_cast<bool>(onDrop_);
     }
 
+    virtual std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType isStart)
+    {
+        auto json = JsonUtil::Create(true);
+        if (!extraInfo.empty()) {
+            json->Put("extraInfo", extraInfo.c_str());
+        }
+        return json->ToString();
+    }
+
     bool IsEnabled() const
     {
         return enabled_;
@@ -214,6 +231,31 @@ public:
 
     void MarkModifyDone();
 
+    void UpdateCurrentUIState(UIState state)
+    {
+        if (stateStyleMgr_) {
+            stateStyleMgr_->UpdateCurrentUIState(state);
+        }
+    }
+
+    void ResetCurrentUIState(UIState state)
+    {
+        if (stateStyleMgr_) {
+            stateStyleMgr_->ResetCurrentUIState(state);
+        }
+    }
+
+    UIState GetCurrentUIState() const
+    {
+        return stateStyleMgr_ ? stateStyleMgr_->GetCurrentUIState() : UI_STATE_NORMAL;
+    }
+
+    void AddSupportedState(UIState state);
+
+    void SetSupportedStates(UIState state);
+
+    bool IsCurrentStateOn(UIState state);
+
 protected:
     virtual void OnModifyDone() {}
 
@@ -222,6 +264,7 @@ private:
     RefPtr<GestureEventHub> gestureEventHub_;
     RefPtr<InputEventHub> inputEventHub_;
     RefPtr<FocusHub> focusHub_;
+    RefPtr<StateStyleManager> stateStyleMgr_;
 
     std::function<void()> onAppear_;
     std::function<void()> onDisappear_;

@@ -351,6 +351,8 @@ public:
 
     void ClearImageCache();
 
+    void SetImageCache(const RefPtr<ImageCache>& imageChache);
+
     RefPtr<ImageCache> GetImageCache() const;
 
     Window* GetWindow()
@@ -663,6 +665,8 @@ public:
     virtual void FlushMessages() = 0;
 
     virtual void FlushUITasks() = 0;
+
+    virtual void FlushPipelineImmediately() = 0;
 
     // for sync animation only
     AnimationOption GetSyncAnimationOption()

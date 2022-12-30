@@ -49,7 +49,7 @@ RenderLayer FlutterRenderSwiper::GetRenderLayer()
 void FlutterRenderSwiper::Paint(RenderContext& context, const Offset& offset)
 {
     layer_->SetClip(0.0, GetLayoutSize().Width(), 0.0, GetLayoutSize().Height(), Clip::HARD_EDGE);
-    RenderNode::Paint(context, offset);
+    RenderNode::PaintChildList(GetPaintChildList(), context, offset);
 
     if (!indicator_) {
         LOGD("swiper has not default indicator");

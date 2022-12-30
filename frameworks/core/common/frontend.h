@@ -71,7 +71,7 @@ public:
     Frontend() = default;
     ~Frontend() override = default;
 
-    enum class State { ON_CREATE, ON_DESTROY, ON_SHOW, ON_HIDE, ON_ACTIVE, ON_INACTIVE };
+    enum class State { ON_CREATE, ON_DESTROY, ON_SHOW, ON_HIDE, ON_ACTIVE, ON_INACTIVE, UNDEFINED };
 
     static RefPtr<Frontend> Create();
     static RefPtr<Frontend> CreateDefault();

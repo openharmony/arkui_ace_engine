@@ -83,6 +83,9 @@ void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
                 auto idleIndex = startIndex_.value() - 1 - i;
                 auto cacheInfo = builder_->GetCacheItemInfo(idleIndex);
                 if (!cacheInfo) {
+                    cacheInfo = GetKeyByIndexFromPreNodes(idleIndex);
+                }
+                if (!cacheInfo) {
                     idleIndexes.emplace_back(idleIndex);
                 }
                 cacheItems.try_emplace(idleIndex, std::move(cacheInfo));
@@ -100,6 +103,9 @@ void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
                 if (!cacheInfo) {
                     idleIndexes.emplace_back(idleIndex);
                 }
+                if (!cacheInfo) {
+                    cacheInfo = GetKeyByIndexFromPreNodes(idleIndex);
+                }
                 cacheItems.try_emplace(idleIndex, std::move(cacheInfo));
             }
         } else {
@@ -110,6 +116,13 @@ void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
     }
     host->UpdateLazyForEachItems(startIndex_.value(), endIndex_.value(), std::move(nodeIds_), std::move(cacheItems));
     host->PostIdleTask(std::move(idleIndexes));
+}
+
+void LazyLayoutWrapperBuilder::AdjustGridOffset()
+{
+    for (const auto& wrapper : childWrappers_) {
+        wrapper->GetHostNode()->AdjustGridOffset();
+    }
 }
 
 int32_t LazyLayoutWrapperBuilder::OnGetTotalCount()
@@ -222,6 +235,18 @@ const std::list<RefPtr<LayoutWrapper>>& LazyLayoutWrapperBuilder::OnExpandChildL
     startIndex_ = 0;
     endIndex_ = total - 1;
     return childWrappers_;
+}
+
+std::optional<std::string> LazyLayoutWrapperBuilder::GetKeyByIndexFromPreNodes(int32_t index)
+{
+    if ((index >= preStartIndex_) && (index <= preEndIndex_)) {
+        auto iter = preNodeIds_.begin();
+        std::advance(iter, index - preStartIndex_);
+        if ((iter != preNodeIds_.end()) && (iter->has_value())) {
+            return iter->value();
+        }
+    }
+    return std::nullopt;
 }
 
 } // namespace OHOS::Ace::NG

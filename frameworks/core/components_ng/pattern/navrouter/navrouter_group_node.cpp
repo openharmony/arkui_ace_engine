@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navrouter/navrouter_event_hub.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -39,9 +40,7 @@ RefPtr<NavRouterGroupNode> NavRouterGroupNode::GetOrCreateGroupNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto frameNode = GetFrameNode(tag, nodeId);
-    if (frameNode) {
-        return AceType::DynamicCast<NavRouterGroupNode>(frameNode);
-    }
+    CHECK_NULL_RETURN_NOLOG(!frameNode, AceType::DynamicCast<NavRouterGroupNode>(frameNode));
     auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
     auto navRouterGroupNode = AceType::MakeRefPtr<NavRouterGroupNode>(tag, nodeId, pattern);
     navRouterGroupNode->InitializePatternAndContext();
@@ -218,6 +217,15 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
         const auto& childNode = *iter;
         auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(childNode);
         if (navDestinationNode && navDestinationNode != navDestination) {
+            auto destinationContent = navDestinationNode->GetContentNode();
+            if (destinationContent) {
+                auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+                CHECK_NULL_VOID(navDestinationPattern);
+                auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
+                CHECK_NULL_VOID(shallowBuilder);
+                shallowBuilder->MarkIsExecuteDeepRenderDone(false);
+                destinationContent->Clean();
+            }
             navDestination->SetPreNode(navDestinationNode);
             SetOnStateChangeFalse(navDestinationNode, parent);
             break;

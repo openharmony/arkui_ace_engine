@@ -64,6 +64,8 @@ public:
         layoutAlgorithm->SetTotalCount(TotalCount());
         layoutAlgorithm->SetPreItemRange(preItemRange_);
         layoutAlgorithm->SetIsLoop(IsLoop());
+        layoutAlgorithm->SetMaxChildSize(maxChildSize_);
+        layoutAlgorithm->SetDisplayCount(GetDisplayCount());
         return layoutAlgorithm;
     }
 
@@ -131,6 +133,8 @@ public:
     void ShowNext();
     void ShowPrevious();
 
+    void OnVisibleChange(bool isVisible) override;
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -181,6 +185,8 @@ private:
     bool IsOutOfBoundary(float mainOffset) const;
     float MainSize() const;
     void FireChangeEvent() const;
+    void FireAnimationStartEvent() const;
+    void FireAnimationEndEvent() const;
     void CalculateCacheRange();
 
     float GetItemSpace() const;

@@ -34,6 +34,8 @@ public:
 
     void SwapDirtyAndUpdateBuildCache() override;
 
+    void AdjustGridOffset() override;
+
     void UpdateIndexRange(int32_t startIndex, int32_t endIndex, const std::list<std::optional<std::string>>& ids)
     {
         auto size = static_cast<int32_t>(ids.size());
@@ -72,6 +74,8 @@ private:
     std::optional<int32_t> startIndex_;
     std::optional<int32_t> endIndex_;
     std::list<std::optional<std::string>> nodeIds_;
+
+    std::optional<std::string> GetKeyByIndexFromPreNodes(int32_t index);
 
     std::list<RefPtr<LayoutWrapper>> childWrappers_;
 

@@ -107,9 +107,6 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_001, TestSize.Level1)
     g_webPattern->HandleDoubleClickEvent(info);
     EXPECT_NE(g_webPattern->doubleClickQueue_.size(), 1);
     g_webPattern->HandleDoubleClickEvent(info);
-
-    AxisInfo axisInfo;
-    g_webPattern->HandleAxisEvent(axisInfo);
 #endif
 }
 
@@ -125,7 +122,6 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_002, TestSize.Level1)
     g_webPattern->WebOnMouseEvent(info);
     g_webPattern->HandleDoubleClickEvent(info);
     AxisInfo axisInfo;
-    g_webPattern->HandleAxisEvent(axisInfo);
     g_webPattern->HandleFocusEvent();
     g_webPattern->HandleBlurEvent();
     KeyEvent keyEvent;

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SLIDER_SLIDER_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SLIDER_SLIDER_LAYOUT_ALGORITHM_H
 
+#include "base/geometry/ng/offset_t.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
@@ -25,15 +26,14 @@ class ACE_EXPORT SliderLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(SliderLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    // TODO: Put it on theme later
-    static constexpr Dimension BORDER_BLANK = 14.0_vp;
-    static constexpr float EXTREMELY_SMALL_SLIDER_LENGTH = 1.0f;
-
-    SliderLayoutAlgorithm() = default;
+    explicit SliderLayoutAlgorithm(bool bubbleFlag = false, const OffsetF& circleCenter = { 0, 0 })
+        : circleCenter_(circleCenter), bubbleFlag_(bubbleFlag) {};
     ~SliderLayoutAlgorithm() override = default;
 
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+
+    void Layout(LayoutWrapper* layoutWrapper) override;
 
     float GetTrackThickness() const
     {
@@ -44,9 +44,18 @@ public:
         return blockDiameter_;
     }
 
+    float GetBlockHotSize() const
+    {
+        return blockHotSize_;
+    }
+
 private:
     float trackThickness_ = 0.0f;
     float blockDiameter_ = 0.0f;
+    float blockHotSize_ = 0.0f;
+
+    OffsetF circleCenter_ = { 0, 0 };
+    bool bubbleFlag_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SliderLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

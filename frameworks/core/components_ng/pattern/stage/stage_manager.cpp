@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -32,6 +33,72 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transitionType)
+{
+    CHECK_NULL_VOID(page);
+    auto pagePattern = page->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    page->GetEventHub<EventHub>()->SetEnabled(false);
+    pagePattern->SetPageInTransition(true);
+    if (transitionType == PageTransitionType::EXIT_PUSH || transitionType == PageTransitionType::EXIT_POP) {
+        pagePattern->TriggerPageTransition(transitionType, [page, instanceId = Container::CurrentId()]() {
+            ContainerScope scope(instanceId);
+            LOGI("pageTransition exit finish");
+            CHECK_NULL_VOID(page);
+            page->GetEventHub<EventHub>()->SetEnabled(true);
+            auto pattern = page->GetPattern<PagePattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetPageInTransition(false);
+
+            auto pageFocusHub = page->GetFocusHub();
+            CHECK_NULL_VOID(pageFocusHub);
+            pageFocusHub->SetParentFocusable(false);
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->SetIsNeedShowFocus(false);
+        });
+        pagePattern->ProcessHideState();
+        return;
+    }
+    pagePattern->TriggerPageTransition(
+        transitionType, [weak = WeakPtr<FrameNode>(page), instanceId = Container::CurrentId()]() {
+            ContainerScope scope(instanceId);
+            LOGI("pageTransition in finish");
+            auto page = weak.Upgrade();
+            CHECK_NULL_VOID(page);
+            page->GetEventHub<EventHub>()->SetEnabled(true);
+            auto pattern = page->GetPattern<PagePattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetPageInTransition(false);
+
+            auto pageFocusHub = page->GetFocusHub();
+            CHECK_NULL_VOID(pageFocusHub);
+            pageFocusHub->SetParentFocusable(true);
+            pageFocusHub->RequestFocus();
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->SetIsNeedShowFocus(false);
+        });
+}
+
+void StartTransition(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage, RouteType type)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sharedManager = pipeline->GetSharedOverlayManager();
+    CHECK_NULL_VOID(sharedManager);
+    sharedManager->StartSharedTransition(srcPage, destPage);
+    if (type == RouteType::PUSH) {
+        FirePageTransition(srcPage, PageTransitionType::EXIT_PUSH);
+        FirePageTransition(destPage, PageTransitionType::ENTER_PUSH);
+    } else if (type == RouteType::POP) {
+        FirePageTransition(srcPage, PageTransitionType::EXIT_POP);
+        FirePageTransition(destPage, PageTransitionType::ENTER_POP);
+    }
+}
+} // namespace
 StageManager::StageManager(const RefPtr<FrameNode>& stage) : stageNode_(stage)
 {
     stagePattern_ = DynamicCast<StagePattern>(stageNode_->GetPattern());
@@ -41,10 +108,15 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
 {
     CHECK_NULL_RETURN(stageNode_, false);
     CHECK_NULL_RETURN(node, false);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
 
     const auto& children = stageNode_->GetChildren();
     RefPtr<FrameNode> outPageNode;
     needTransition &= !children.empty();
+    if (needTransition) {
+        pipeline->FlushPipelineImmediately();
+    }
     if (!children.empty() && needHideLast) {
         FirePageHide(children.back(), needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);
         outPageNode = AceType::DynamicCast<FrameNode>(children.back());
@@ -62,6 +134,13 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     auto pagePattern = node->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
     stagePattern_->currentPageIndex_ = pagePattern->GetPageInfo()->GetPageId();
+    if (needTransition) {
+        pagePattern->SetFirstBuildCallback([outPageNode, weakIn = WeakPtr<FrameNode>(node)]() {
+            auto inPageNode = weakIn.Upgrade();
+            // outPageNode need to perform the onHide function so we keep its RefPtr
+            StartTransition(outPageNode, inPageNode, RouteType::PUSH);
+        });
+    }
 
     // flush layout task.
     if (!stageNode_->GetGeometryNode()->GetMarginFrameSize().IsPositive()) {
@@ -70,7 +149,6 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         return true;
     }
     stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    StartSharedTransition(outPageNode, node, true);
     return true;
 }
 
@@ -87,19 +165,24 @@ bool StageManager::PopPage(bool needShowNext, bool needTransition)
     auto pageNode = children.back();
     const size_t transitionPageSize = 2;
     needTransition &= (children.size() >= transitionPageSize);
+    if (needTransition) {
+        pipeline->FlushPipelineImmediately();
+    }
     FirePageHide(pageNode, needTransition ? PageTransitionType::EXIT_POP : PageTransitionType::NONE);
-    stageNode_->RemoveChild(pageNode);
 
     RefPtr<FrameNode> inPageNode;
-    if (needShowNext) {
-        const auto& newPageNode = children.back();
+    if (needShowNext && children.size() >= transitionPageSize) {
+        auto newPageNode = *(++children.rbegin());
         FirePageShow(newPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
-        inPageNode = AceType::DynamicCast<FrameNode>(children.back());
+        inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
     }
 
-    stageNode_->RebuildRenderContextTree();
     auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
-    StartSharedTransition(outPageNode, inPageNode, false);
+    if (needTransition) {
+        StartTransition(outPageNode, inPageNode, RouteType::POP);
+    }
+    stageNode_->RemoveChild(pageNode);
+    stageNode_->RebuildRenderContextTree();
     pipeline->RequestFrame();
     return true;
 }
@@ -124,24 +207,34 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         return true;
     }
 
+    if (needTransition) {
+        pipeline->FlushPipelineImmediately();
+    }
     bool firstPageTransition = true;
     auto outPageNode = AceType::DynamicCast<FrameNode>(children.back());
+    auto iter = children.rbegin();
     for (int32_t current = 0; current < popSize; ++current) {
-        auto pageNode = children.back();
+        auto pageNode = *iter;
         FirePageHide(
             pageNode, firstPageTransition && needTransition ? PageTransitionType::EXIT_POP : PageTransitionType::NONE);
         firstPageTransition = false;
-        stageNode_->RemoveChild(pageNode);
+        ++iter;
     }
 
     RefPtr<FrameNode> inPageNode;
     if (needShowNext) {
-        const auto& newPageNode = children.back();
+        const auto& newPageNode = *iter;
         FirePageShow(newPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
         inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
     }
-    StartSharedTransition(outPageNode, inPageNode, false);
 
+    if (needTransition) {
+        StartTransition(outPageNode, inPageNode, RouteType::POP);
+    }
+    for (int32_t current = 0; current < popSize; ++current) {
+        auto pageNode = children.back();
+        stageNode_->RemoveChild(pageNode);
+    }
     stageNode_->RebuildRenderContextTree();
     pipeline->RequestFrame();
     return true;
@@ -182,6 +275,9 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
         LOGD("page already on the top");
         return true;
     }
+    if (needTransition) {
+        pipeline->FlushPipelineImmediately();
+    }
     if (needHideLast) {
         FirePageHide(lastPage, needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);
     }
@@ -189,6 +285,10 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
     FirePageShow(node, needTransition ? PageTransitionType::ENTER_PUSH : PageTransitionType::NONE);
 
     stageNode_->RebuildRenderContextTree();
+    if (needTransition) {
+        auto outPageNode = AceType::DynamicCast<FrameNode>(lastPage);
+        StartTransition(outPageNode, node, RouteType::PUSH);
+    }
     pipeline->RequestFrame();
     return true;
 }
@@ -199,16 +299,11 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    if (transitionType != PageTransitionType::NONE) {
-        pagePattern->TriggerPageTransition(transitionType, [pageNode]() {
-            LOGI("pageTransition exit finish");
-            CHECK_NULL_VOID(pageNode);
-            auto pattern = pageNode->GetPattern<PagePattern>();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnHide();
-        });
-    } else {
-        pagePattern->OnHide();
+    pagePattern->OnHide();
+    if (transitionType == PageTransitionType::NONE) {
+        // If there is a page transition, this function should execute after page transition,
+        // otherwise the page will not be visible
+        pagePattern->ProcessHideState();
     }
 
     auto pageFocusHub = pageNode->GetFocusHub();
@@ -226,11 +321,9 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    pageNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     pagePattern->OnShow();
-    if (transitionType != PageTransitionType::NONE) {
-        pagePattern->TriggerPageTransition(transitionType, nullptr);
-    }
+    // With or without a page transition, we need to make the coming page visible first
+    pagePattern->ProcessShowState();
 
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);
@@ -251,31 +344,6 @@ RefPtr<FrameNode> StageManager::GetLastPage()
         return nullptr;
     }
     return DynamicCast<FrameNode>(children.back());
-}
-
-void StageManager::StartSharedTransition(
-    const RefPtr<FrameNode>& outNode, const RefPtr<FrameNode>& inNode, bool needFlush) const
-{
-    if (!inNode || !outNode) {
-        return;
-    }
-    auto inPattern = inNode->GetPattern<PagePattern>();
-    CHECK_NULL_VOID(inPattern);
-    auto outPattern = outNode->GetPattern<PagePattern>();
-    CHECK_NULL_VOID(outPattern);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (needFlush) {
-        pipeline->FlushPipelineImmediately();
-    }
-    inPattern->BuildSharedTransitionMap();
-    outPattern->BuildSharedTransitionMap();
-    if (inPattern->GetSharedTransitionMap().empty() || outPattern->GetSharedTransitionMap().empty()) {
-        return;
-    }
-    auto sharedTransitionManager = pipeline->GetSharedOverlayManager();
-    CHECK_NULL_VOID(sharedTransitionManager);
-    sharedTransitionManager->StartSharedTransition(outNode, inNode);
 }
 
 void StageManager::ReloadStage()

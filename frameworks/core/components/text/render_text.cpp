@@ -449,6 +449,17 @@ void RenderText::OnLongPress(const LongPressInfo& longPressInfo)
     }
 
     Offset longPressPosition = longPressInfo.GetGlobalLocation();
+    auto context = context_.Upgrade();
+    if (context) {
+        auto isContainerModal = context->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+                                context->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+        if (isContainerModal) {
+            longPressPosition =
+                longPressPosition + Offset(-(CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
+                                        -CONTAINER_TITLE_HEIGHT.ConvertToPx());
+        }
+    }
+
     InitSelection(longPressPosition, GetGlobalOffset());
     ShowTextOverlay(longPressPosition, false);
 }
@@ -533,6 +544,9 @@ void RenderText::ShowTextOverlay(const Offset& showOffset, bool isUsingMouse)
     textOverlay_->SetEndHandleOffset(endHandleOffset);
     textOverlay_->SetContext(context_);
     textOverlay_->SetIsUsingMouse(isUsingMouse);
+    if (isUsingMouse) {
+        textOverlay_->SetMouseOffset(showOffset);
+    }
     // Add the Animation
     InitAnimation(context_);
     RegisterCallbacksToOverlay();

@@ -41,6 +41,7 @@ constexpr Dimension INDICATOR_PADDING_DEFAULT = 13.0_vp;
 
 CanvasDrawFunction SwiperIndicatorPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
+    CHECK_NULL_RETURN(paintWrapper, nullptr);
     auto paintProperty = DynamicCast<SwiperIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_RETURN(paintProperty, nullptr);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -69,7 +70,7 @@ void SwiperIndicatorPaintMethod::PaintMask(
     paint.setAntiAlias(true);
     canvas.Save();
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     std::vector<GradientColor> gradientColors = std::vector<GradientColor>(GRADIENT_COLOR_SIZE);
     gradientColors[0].SetColor(Color(0x00000000));

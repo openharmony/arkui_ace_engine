@@ -47,7 +47,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<PathLayoutAlgorithm>();
+        return MakeRefPtr<PathLayoutAlgorithm>(GetAncestorPaintProperty());
     }
 
 private:

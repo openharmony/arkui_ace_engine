@@ -17,29 +17,28 @@
 #include <optional>
 
 #include "gtest/gtest.h"
-
-#include "core/common/ace_engine.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/test/unittest/geometry/mock_pipeline_base.h"
-#include "base/test/unittest/geometry/mock_container.h"
 #include "include/core/SkColorFilter.h"
 
-
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
+#include "core/common/ace_engine.h"
+#include "core/common/test/mock/mock_container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/test/pattern/custom_paint/common_constants.h"
 #include "core/components_ng/test/pattern/custom_paint/mock/mock_paragraph.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_interface.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
 
-#include "core/image/image_object.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
+#include "core/image/image_object.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -640,7 +639,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg013, 
     paintMethod->ImageObjFailed();
     EXPECT_EQ(paintMethod->loadingSource_.GetSrc(), nullSrc);
     EXPECT_EQ(paintMethod->currentSource_.GetSrc(), nullSrc);
-    
+
     /**
      * @tc.steps3: Call the function ImageObjReady with imageObj->isSvg_ = false.
      * @tc.expected: The srcs of currentSource_ is not equal to loadingSrc.
@@ -683,10 +682,10 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg014, 
      * @tc.steps2: Call the function HasImageShadow with imageShadowAttr1.
      * @tc.expected: The return value is false.
      */
-    
+
     paintMethod->SetDropShadowFilter(imageShadowAttr1);
     EXPECT_FALSE(paintMethod->HasImageShadow());
-    
+
     /**
      * @tc.steps3: Call the function HasImageShadow with imageShadowAttr2.
      * @tc.expected: The return value is true.
@@ -770,7 +769,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg016, 
      */
     EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::LEFT, paragraph), DEFAULT_DOUBLE0);
     EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::RIGHT, paragraph), -DEFAULT_DOUBLE10);
-    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::CENTER, paragraph), -DEFAULT_DOUBLE10/2);
+    EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::CENTER, paragraph), -DEFAULT_DOUBLE10 / 2);
     EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::JUSTIFY, paragraph), DEFAULT_DOUBLE0);
     EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::START, paragraph), DEFAULT_DOUBLE0);
     EXPECT_DOUBLE_EQ(paintMethod->GetAlignOffset(DEFAULT_STR, TextAlign::END, paragraph), -DEFAULT_DOUBLE10);

@@ -108,6 +108,14 @@ public:
         return isAddGaussianFuzzy_;
     }
 
+    void OnPaintFinish() override
+    {
+        if (textureOffsetChangeEvent_) {
+            textureOffsetChangeEvent_(textureId_,
+                (int32_t)(alignmentX_ + GetGlobalOffset().GetX()), (int32_t)(alignmentY_ + GetGlobalOffset().GetY()));
+        }
+    }
+
 protected:
     RenderTexture();
     void Measure();

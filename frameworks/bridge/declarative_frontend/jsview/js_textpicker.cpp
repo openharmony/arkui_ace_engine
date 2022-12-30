@@ -78,6 +78,7 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
 
     if (selected < 0 || selected >= getRangeVector.size()) {
         LOGE("selected is out of range");
+        selected = 0;
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
@@ -264,10 +265,21 @@ void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
         return;
     }
 
+    auto theme = JSDatePicker::GetTheme<DialogTheme>();
+    if (!theme) {
+        LOGE("DialogTheme is null");
+        return;
+    }
+
     DialogProperties properties;
     ButtonInfo buttonInfo;
-    properties.alignment = DialogAlignment::CENTER;
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+        properties.alignment = DialogAlignment::BOTTOM;
+    } else {
+        properties.alignment = DialogAlignment::CENTER;
+    }
     properties.customStyle = false;
+    properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
 
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;

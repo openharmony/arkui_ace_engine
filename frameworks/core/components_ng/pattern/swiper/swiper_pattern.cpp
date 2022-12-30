@@ -183,8 +183,8 @@ void SwiperPattern::CalculateCacheRange()
         startIndex_ = std::max(currentIndex_ - cacheCount, 0);
         endIndex_ = std::min(currentIndex_ + displayCount + cacheCount - 1, totalCount - 1);
     } else {
-        startIndex_ = (totalCount + currentIndex_ - cacheCount) % totalCount;
-        endIndex_ = (currentIndex_ + cacheCount) % totalCount;
+        startIndex_ = (currentIndex_ - cacheCount + totalCount) % totalCount;
+        endIndex_ = (currentIndex_ + displayCount + cacheCount - 1 + totalCount) % totalCount;
     }
 
     LOGD("Cache range [%{public}d - %{public}d], totalCount: %{public}d", startIndex_, endIndex_, totalCount);
@@ -197,6 +197,20 @@ void SwiperPattern::FireChangeEvent() const
     swiperEventHub->FireChangeEvent(currentIndex_);
     swiperEventHub->FireIndicatorChangeEvent(currentIndex_);
     swiperEventHub->FireChangeDoneEvent(moveDirection_);
+}
+
+void SwiperPattern::FireAnimationStartEvent() const
+{
+    auto swiperEventHub = GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(swiperEventHub);
+    swiperEventHub->FireAnimationStartEvent(currentIndex_);
+}
+
+void SwiperPattern::FireAnimationEndEvent() const
+{
+    auto swiperEventHub = GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(swiperEventHub);
+    swiperEventHub->FireAnimationEndEvent(currentIndex_);
 }
 
 void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
@@ -595,6 +609,15 @@ void SwiperPattern::StartAutoPlay()
     }
 }
 
+void SwiperPattern::OnVisibleChange(bool isVisible)
+{
+    if (isVisible) {
+        StartAutoPlay();
+    } else {
+        StopAutoPlay();
+    }
+}
+
 void SwiperPattern::UpdateCurrentOffset(float offset)
 {
     currentOffset_ = currentOffset_ + offset;
@@ -792,8 +815,16 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
     if (!controller_) {
         controller_ = AceType::MakeRefPtr<Animator>(host->GetContext());
     }
+    controller_->ClearStartListeners();
     controller_->ClearStopListeners();
     controller_->ClearInterpolators();
+
+    controller_->AddStartListener([weak]() {
+        auto swiper = weak.Upgrade();
+        CHECK_NULL_VOID(swiper);
+        swiper->FireAnimationStartEvent();
+    });
+
     controller_->AddStopListener([weak, nextIndex, restartAutoPlay]() {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
@@ -807,6 +838,7 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
         if (restartAutoPlay) {
             swiper->StartAutoPlay();
         }
+        swiper->FireAnimationEndEvent();
         auto host = swiper->GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -824,6 +856,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     if (!springController_) {
         springController_ = AceType::MakeRefPtr<Animator>(host->GetContext());
     }
+    springController_->ClearStartListeners();
     springController_->ClearStopListeners();
     springController_->ClearInterpolators();
 
@@ -849,7 +882,18 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
             swiper->UpdateCurrentOffset(static_cast<float>(position) - swiper->currentOffset_);
         }
     });
-    springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {});
+    springController_->AddStartListener([weak = AceType::WeakClaim(this)]() {
+        auto swiperPattern = weak.Upgrade();
+        if (swiperPattern) {
+            swiperPattern->FireAnimationStartEvent();
+        }
+    });
+    springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
+        auto swiperPattern = weak.Upgrade();
+        if (swiperPattern) {
+            swiperPattern->FireAnimationEndEvent();
+        }
+    });
     springController_->PlayMotion(scrollMotion);
 }
 
@@ -878,7 +922,18 @@ void SwiperPattern::PlayFadeAnimation()
         }
     }));
 
-    fadeController_->AddStopListener([weak]() {});
+    fadeController_->AddStartListener([weak]() {
+        auto swiperPattern = weak.Upgrade();
+        if (swiperPattern) {
+            swiperPattern->FireAnimationStartEvent();
+        }
+    });
+    fadeController_->AddStopListener([weak]() {
+        auto swiperPattern = weak.Upgrade();
+        if (swiperPattern) {
+            swiperPattern->FireAnimationEndEvent();
+        }
+    });
     constexpr float FADE_DURATION = 500.0f;
     fadeController_->SetDuration(FADE_DURATION);
     fadeController_->AddInterpolator(translate);

@@ -40,25 +40,16 @@ void TextFieldModelNG::CreateNode(
     stack->Push(frameNode);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    if (textFieldLayoutProperty) {
-        if (value) {
-            if (value->empty()) {
-                if (textFieldLayoutProperty->HasValue()) {
-                    textFieldLayoutProperty->UpdateValue(value.value());
-                }
-            } else {
-                textFieldLayoutProperty->UpdateValue(value.value());
-            }
-        }
-        if (placeholder) {
-            textFieldLayoutProperty->UpdatePlaceholder(placeholder.value());
-        }
-        if (!isTextArea) {
-            textFieldLayoutProperty->UpdateMaxLines(1);
-            textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
-        }
-    }
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto textEditingValue = pattern->GetTextEditingValue();
+    if (value.has_value() && value.value() != textEditingValue.text) {
+        pattern->InitEditingValueText(value.value());
+    }
+    textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
+    if (!isTextArea) {
+        textFieldLayoutProperty->UpdateMaxLines(1);
+        textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
+    }
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
@@ -68,12 +59,16 @@ void TextFieldModelNG::CreateNode(
     CHECK_NULL_VOID(themeManager);
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
+    auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textfieldPaintProperty);
+    textfieldPaintProperty->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+    textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
+    textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
     auto renderContext = frameNode->GetRenderContext();
     renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
     auto radius = textFieldTheme->GetBorderRadius();
     SetCaretColor(textFieldTheme->GetCursorColor());
     // TODO: basic padding check ux
-    pattern->InitEditingValueText(textFieldLayoutProperty->GetValueValue(""));
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
     textFieldLayoutProperty->UpdateCopyOptions(CopyOptions::Distributed);

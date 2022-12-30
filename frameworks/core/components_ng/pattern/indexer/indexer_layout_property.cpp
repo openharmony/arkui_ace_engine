@@ -26,10 +26,9 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("PopupColor", propPopupColor_.value_or(Color::WHITE).ColorToString().c_str());
     json->Put("UsingPopup", propUsingPopup_.value_or(false) ? "true" : "false");
     json->Put("ItemSize", propItemSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-    json->Put("AlignStyle", propAlignStyle_.value_or(AlignStyle::LEFT) == AlignStyle::LEFT
-                                ? "AlignStyle::LEFT"
-                                : "AlignStyle::RIGHT");
+    json->Put("AlignStyle",
+        propAlignStyle_.value_or(AlignStyle::LEFT) == AlignStyle::LEFT ? "AlignStyle::LEFT" : "AlignStyle::RIGHT");
     json->Put("PopupPositionX", std::to_string(propPopupPositionX_.value_or(0)).c_str());
     json->Put("PopupPositionY", std::to_string(propPopupPositionY_.value_or(0)).c_str());
 }
-}
+} // namespace OHOS::Ace::NG

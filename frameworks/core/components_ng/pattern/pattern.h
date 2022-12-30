@@ -154,6 +154,11 @@ public:
         return false;
     }
 
+    virtual bool UsResRegion()
+    {
+        return true;
+    }
+
     std::optional<SizeF> GetHostFrameSize() const
     {
         auto frameNode = frameNode_.Upgrade();
@@ -234,7 +239,7 @@ public:
 
     virtual FocusPattern GetFocusPattern() const
     {
-        return { FocusType::DISABLE, false };
+        return { FocusType::DISABLE, false, FocusStyleType::NONE };
     }
 
     virtual ScopeFocusAlgorithm GetScopeFocusAlgorithm()
@@ -255,6 +260,9 @@ public:
 
     // get XTS inspector value
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+
+    virtual void OnAreaChangedInner() {}
+    virtual void OnVisibleChange(bool isVisible) {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

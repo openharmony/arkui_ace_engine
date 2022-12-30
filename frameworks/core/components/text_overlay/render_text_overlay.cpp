@@ -17,6 +17,7 @@
 
 #include "base/geometry/rect.h"
 #include "core/animation/scheduler.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/focus_collaboration/render_focus_collaboration.h"
 #include "core/components/stack/stack_element.h"
 #ifdef WEB_SUPPORTED
@@ -146,6 +147,7 @@ void RenderTextOverlay::Update(const RefPtr<Component>& component)
     onCopyAll_ = overlay->GetOnCopyAll();
     startHandleOffset_ = overlay->GetStartHandleOffset();
     endHandleOffset_ = overlay->GetEndHandleOffset();
+    mouseOffset_ = overlay->GetMouseOffset();
     onStartHandleMove_ = overlay->GetOnStartHandleMove();
     onEndHandleMove_ = overlay->GetOnEndHandleMove();
     isSingleHandle_ = overlay->GetIsSingleHandle() || (startHandleOffset_ == endHandleOffset_);
@@ -672,6 +674,13 @@ void RenderTextOverlay::PerformLayout()
         auto textOverlayManager = context->GetTextOverlayManager();
         if (textOverlayManager) {
             textOverlayManager->ClearTextOverlayRect();
+            auto isContainerModal = context->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+                                    context->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+            if (isContainerModal) {
+                textOverlayManager->SetCoordinateOffset(
+                    Offset((CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
+                        CONTAINER_TITLE_HEIGHT.ConvertToPx()));
+            }
             textOverlayManager->AddTextOverlayRect(textOverlayRect);
             textOverlayManager->AddTextOverlayRect(startHandleRect);
             textOverlayManager->AddTextOverlayRect(endHandleRect);
@@ -705,19 +714,45 @@ Offset RenderTextOverlay::ComputeChildPosition(const RefPtr<RenderNode>& child)
     double menuSpacingWithHandle = NormalizeToPx(menuSpacingWithHandle_);
     double menuSpacing = isSingleHandle_ ? menuSpacingWithText : menuSpacingWithHandle + menuSpacingWithText;
 
-    Offset childPosition =
-        Offset((startHandleOffset.GetX() + endHandleOffset.GetX() - child->GetLayoutSize().Width()) / 2.0,
-            startHandleOffset.GetY() - lineHeight_ - menuSpacing - NormalizeToPx(TOOL_BAR_HEIGHT));
-    // Adjust position of overlay.
-    if (LessOrEqual(childPosition.GetX(), 0.0)) {
-        childPosition.SetX(DEFAULT_SPACING);
-    } else if (GreatOrEqual(
-                   childPosition.GetX() + child->GetLayoutSize().Width(), GetLayoutParam().GetMaxSize().Width())) {
-        childPosition.SetX(GetLayoutParam().GetMaxSize().Width() - child->GetLayoutSize().Width() - DEFAULT_SPACING);
+    Offset childPosition;
+    if (isUsingMouse_) {
+        auto context = GetContext().Upgrade();
+        auto isContainerModal = context->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+                                context->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+        if (isContainerModal) {
+            childPosition =
+                mouseOffset_ - Offset((CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
+                                   CONTAINER_TITLE_HEIGHT.ConvertToPx());
+        } else {
+            childPosition = mouseOffset_;
+        }
+        if (GreatOrEqual(
+                childPosition.GetX() + child->GetLayoutSize().Width(), GetLayoutParam().GetMaxSize().Width()) &&
+            GreatOrEqual(childPosition.GetX(), child->GetLayoutSize().Width())) {
+            childPosition.SetX(childPosition.GetX() - child->GetLayoutSize().Width());
+        }
+        if (GreatOrEqual(
+                childPosition.GetY() + child->GetLayoutSize().Height(), GetLayoutParam().GetMaxSize().Height()) &&
+            GreatOrEqual(childPosition.GetY(), child->GetLayoutSize().Height())) {
+            childPosition.SetY(childPosition.GetY() - child->GetLayoutSize().Height());
+        }
+    } else {
+        childPosition =
+            Offset((startHandleOffset.GetX() + endHandleOffset.GetX() - child->GetLayoutSize().Width()) / 2.0,
+                startHandleOffset.GetY() - lineHeight_ - menuSpacing - NormalizeToPx(TOOL_BAR_HEIGHT));
+        // Adjust position of overlay.
+        if (LessOrEqual(childPosition.GetX(), 0.0)) {
+            childPosition.SetX(DEFAULT_SPACING);
+        } else if (GreatOrEqual(
+                       childPosition.GetX() + child->GetLayoutSize().Width(), GetLayoutParam().GetMaxSize().Width())) {
+            childPosition.SetX(
+                GetLayoutParam().GetMaxSize().Width() - child->GetLayoutSize().Width() - DEFAULT_SPACING);
+        }
+        if (LessNotEqual(childPosition.GetY(), NormalizeToPx(TOOL_BAR_HEIGHT))) {
+            childPosition.SetY(endHandleOffset_.GetY() + menuSpacingWithHandle + menuSpacingWithText);
+        }
     }
-    if (LessNotEqual(childPosition.GetY(), NormalizeToPx(TOOL_BAR_HEIGHT))) {
-        childPosition.SetY(endHandleOffset_.GetY() + menuSpacingWithHandle + menuSpacingWithText);
-    }
+
     return childPosition;
 }
 

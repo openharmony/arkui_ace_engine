@@ -61,9 +61,10 @@ public:
     }
     void StopPlayingEffect() const
     {
-        controller_->Finish();
-        controller_->ClearAllListeners();
-        controller_->ClearInterpolators();
+        if (controller_->IsRunning()) {
+            LOGI("stop playing effect, shareId:%{public}s", shareId_.c_str());
+            controller_->Finish();
+        }
     }
     const std::shared_ptr<SharedTransitionOption>& GetOption() const
     {
@@ -84,6 +85,10 @@ public:
     const std::optional<int32_t>& GetPassengerInitZIndex() const
     {
         return initialZIndex_;
+    }
+    bool GetPassengerInitEventEnabled() const
+    {
+        return initialEventEnabled_;
     }
     void SetSharedNode(const WeakPtr<FrameNode>& src, const WeakPtr<FrameNode>& dest)
     {
@@ -106,6 +111,10 @@ public:
     {
         initialZIndex_ = zIndex;
     }
+    void SetPassengerInitEventEnabled(bool enabled)
+    {
+        initialEventEnabled_ = enabled;
+    }
     void PerformFinishCallback();
     bool ApplyAnimation();
     static RefPtr<SharedTransitionEffect> GetSharedTransitionEffect(
@@ -125,6 +134,7 @@ protected:
     OffsetF initialFrameOffset_;
     std::optional<int32_t> initialZIndex_;
     std::list<std::function<void()>> finishCallbacks_;
+    bool initialEventEnabled_ = true;
 };
 
 class SharedTransitionExchange : public SharedTransitionEffect {
@@ -158,8 +168,6 @@ private:
     bool CreateTranslateAnimation(const RefPtr<FrameNode>& src, const RefPtr<FrameNode>& dest);
     bool CreateSizeAnimation(const RefPtr<FrameNode>& src, const RefPtr<FrameNode>& dest);
     bool CreateOpacityAnimation(const RefPtr<FrameNode>& src, const RefPtr<FrameNode>& dest);
-    void CreateWidthAnimation(const RefPtr<FrameNode>& src, float start, float end);
-    void CreateHeightAnimation(const RefPtr<FrameNode>& src, float start, float end);
     VisibleType destVisible_ = VisibleType::VISIBLE;
 };
 

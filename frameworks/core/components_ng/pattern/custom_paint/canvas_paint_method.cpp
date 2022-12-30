@@ -103,6 +103,11 @@ void CanvasPaintMethod::PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWr
         CreateBitmap(frameSize);
         lastLayoutSize_.SetSizeT(frameSize);
     }
+    if (!skCanvas_) {
+        LOGW("skCanvas_ is null");
+        return;
+    }
+
     auto viewScale = context_->GetViewScale();
     skCanvas_->scale(viewScale, viewScale);
 
@@ -274,15 +279,11 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
     double dirtyHeight = height >= 0 ? height : 0;
     tempCache.allocPixels(imageInfo);
     int32_t size = dirtyWidth * dirtyHeight;
-    bool isGpuEnable = false;
     const uint8_t* pixels = nullptr;
     SkCanvas tempCanvas(tempCache);
     auto srcRect = SkRect::MakeXYWH(scaledLeft, scaledTop, width * viewScale, height * viewScale);
     auto dstRect = SkRect::MakeXYWH(0.0, 0.0, dirtyWidth, dirtyHeight);
-
-    if (!isGpuEnable) {
-        tempCanvas.drawBitmapRect(canvasCache_, srcRect, dstRect, nullptr);
-    }
+    tempCanvas.drawBitmapRect(canvasCache_, srcRect, dstRect, nullptr);
     pixels = tempCache.pixmap().addr8();
     CHECK_NULL_RETURN(pixels, nullptr);
     std::unique_ptr<Ace::ImageData> imageData = std::make_unique<Ace::ImageData>();
@@ -592,18 +593,14 @@ std::string CanvasPaintMethod::ToDataURL(const std::string& args)
     SkBitmap tempCache;
     tempCache.allocPixels(SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType,
         (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType));
-    bool isGpuEnable = false;
     bool success = false;
-
-    if (!isGpuEnable) {
-        if (canvasCache_.empty()) {
-            LOGE("Bitmap is empty");
-            return UNSUPPORTED;
-        }
-
-        success = canvasCache_.pixmap().scalePixels(tempCache.pixmap(), SkFilterQuality::kHigh_SkFilterQuality);
-        CHECK_NULL_RETURN(success, UNSUPPORTED);
+    if (canvasCache_.empty()) {
+        LOGE("Bitmap is empty");
+        return UNSUPPORTED;
     }
+
+    success = canvasCache_.pixmap().scalePixels(tempCache.pixmap(), SkFilterQuality::kHigh_SkFilterQuality);
+    CHECK_NULL_RETURN(success, UNSUPPORTED);
     SkPixmap src = tempCache.pixmap();
     SkDynamicMemoryWStream dst;
     if (mimeType == IMAGE_JPEG) {

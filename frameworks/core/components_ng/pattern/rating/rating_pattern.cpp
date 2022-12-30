@@ -18,11 +18,13 @@
 #include <iomanip>
 #include <sstream>
 
+#include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/rating/rating_paint_method.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/canvas_image.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
@@ -38,36 +40,21 @@ void RatingPattern::CheckImageInfoHasChangedOrNot(
     switch (imageFlag) {
         case 0b001:
             currentSourceInfo = ratingLayoutProperty->GetForegroundImageSourceInfo().value_or(ImageSourceInfo(""));
-            if (currentSourceInfo != sourceInfo) {
-                LOGW("Foreground image sourceInfo does not match, ignore current %{private}s callback. "
-                     "current: %{private}s vs callback's: %{private}s",
-                    lifeCycleTag.c_str(), currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
-                return;
-            }
+            CHECK_NULL_VOID(currentSourceInfo == sourceInfo);
             if (lifeCycleTag == "ImageDataFailed") {
                 LOGE("Rating load foreground image failed");
             }
             break;
         case 0b010:
             currentSourceInfo = ratingLayoutProperty->GetSecondaryImageSourceInfo().value_or(ImageSourceInfo(""));
-            if (currentSourceInfo != sourceInfo) {
-                LOGW("Secondary image sourceInfo does not match, ignore current %{private}s callback. "
-                     "current: %{private}s vs callback's: %{private}s",
-                    lifeCycleTag.c_str(), currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
-                return;
-            }
+            CHECK_NULL_VOID(currentSourceInfo == sourceInfo);
             if (lifeCycleTag == "ImageDataFailed") {
                 LOGE("Rating load secondary image failed");
             }
             break;
         case 0b100:
             currentSourceInfo = ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo(""));
-            if (currentSourceInfo != sourceInfo) {
-                LOGW("Background image sourceInfo does not match, ignore current %{private}s callback. "
-                     "current: %{private}s vs callback's: %{private}s",
-                    lifeCycleTag.c_str(), currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
-                return;
-            }
+            CHECK_NULL_VOID(currentSourceInfo == sourceInfo);
             if (lifeCycleTag == "ImageDataFailed") {
                 LOGE("Rating load background image failed");
             }
@@ -117,18 +104,18 @@ void RatingPattern::OnImageLoadSuccess(int32_t imageFlag)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (imageFlag == 0b001) {
-        foregroundImageCanvas_ = foregroundImageLoadingCtx_->GetCanvasImage();
+        foregroundImageCanvas_ = foregroundImageLoadingCtx_->MoveCanvasImage();
         singleStarRect_ = foregroundImageLoadingCtx_->GetSrcRect();
         singleStarDstRect_ = foregroundImageLoadingCtx_->GetDstRect();
         imageSuccessStateCode_ = imageFlag | imageSuccessStateCode_;
     }
     if (imageFlag == 0b010) {
-        secondaryImageCanvas_ = secondaryImageLoadingCtx_->GetCanvasImage();
+        secondaryImageCanvas_ = secondaryImageLoadingCtx_->MoveCanvasImage();
         imageSuccessStateCode_ = imageFlag | imageSuccessStateCode_;
     }
 
     if (imageFlag == 0b100) {
-        backgroundImageCanvas_ = backgroundImageLoadingCtx_->GetCanvasImage();
+        backgroundImageCanvas_ = backgroundImageLoadingCtx_->MoveCanvasImage();
         imageSuccessStateCode_ = imageFlag | imageSuccessStateCode_;
     }
     // only when foreground, secondary and background image are all loaded successfully, mark dirty to update rendering.
@@ -177,10 +164,10 @@ bool RatingPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 ImageSourceInfo RatingPattern::GetImageSourceInfoFromTheme(int32_t imageFlag)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     ImageSourceInfo imageSourceInfo;
-    CHECK_NULL_RETURN(pipelineContext, imageSourceInfo);
-    auto ratingTheme = pipelineContext->GetTheme<RatingTheme>();
+    CHECK_NULL_RETURN(pipeline, imageSourceInfo);
+    auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_RETURN(ratingTheme, imageSourceInfo);
 
     switch (imageFlag) {
@@ -263,9 +250,9 @@ void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(double eventPointX,
     // step3.2: Determine whether the old and new ratingScores are same or not.
     const double oldRatingScore = ratingRenderProperty->GetRatingScoreValue();
     const double oldDrawScore = fmin(Round(oldRatingScore / stepSize) * stepSize, static_cast<double>(starNum));
-    if (NearEqual(newDrawScore, oldDrawScore)) {
-        return;
-    }
+
+    CHECK_NULL_VOID_NOLOG(!NearEqual(newDrawScore, oldDrawScore));
+
     // step4: Update the ratingScore saved in renderProperty and update render.
     ratingRenderProperty->UpdateRatingScore(newDrawScore);
     if (isDrag) {
@@ -286,9 +273,7 @@ bool RatingPattern::IsIndicator()
 
 void RatingPattern::HandleDragUpdate(const GestureEvent& info)
 {
-    if (IsIndicator()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!IsIndicator());
     RecalculatedRatingScoreBasedOnEventPoint(info.GetLocalLocation().GetX(), true);
 }
 
@@ -305,45 +290,35 @@ void RatingPattern::FireChangeEvent() const
 
 void RatingPattern::HandleDragEnd()
 {
-    if (IsIndicator()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!IsIndicator());
     FireChangeEvent();
 }
 
 void RatingPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    if (IsIndicator() || panEvent_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!(IsIndicator() || panEvent_));
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) { LOGD("Pan event start"); };
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleDragUpdate(info);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragUpdate(info);
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            // invoke onChange callback
-            pattern->HandleDragEnd();
-        }
+        CHECK_NULL_VOID(pattern);
+        // invoke onChange callback
+        pattern->HandleDragEnd();
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() { LOGD("Pan event cancel"); };
 
     float distance = DEFAULT_PAN_DISTANCE;
-    auto host = GetHost();
-    if (host) {
-        auto context = host->GetContext();
-        if (context) {
-            distance = static_cast<float>(context->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP)));
-        }
-    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    distance = static_cast<float>(pipeline->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP)));
     PanDirection panDirection;
     panDirection.type = PanDirection::HORIZONTAL;
 
@@ -354,9 +329,7 @@ void RatingPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void RatingPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    if (IsIndicator() || touchEvent_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!(IsIndicator() || touchEvent_));
 
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
@@ -377,9 +350,8 @@ void RatingPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void RatingPattern::HandleTouchUp()
 {
-    if (IsIndicator()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!IsIndicator());
+
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
     // Update touch star to 0 to indicate there is no star to be touched.
@@ -391,9 +363,8 @@ void RatingPattern::HandleTouchUp()
 
 void RatingPattern::HandleTouchDown(const Offset& localPosition)
 {
-    if (IsIndicator()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!IsIndicator());
+
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
     // calculate the number of star the touch point falls on and trigger render update.
@@ -406,18 +377,15 @@ void RatingPattern::HandleTouchDown(const Offset& localPosition)
 
 void RatingPattern::HandleClick(const GestureEvent& info)
 {
-    if (IsIndicator()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!IsIndicator());
+
     RecalculatedRatingScoreBasedOnEventPoint(info.GetLocalLocation().GetX(), false);
     FireChangeEvent();
 }
 
 void RatingPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    if (IsIndicator() || clickEvent_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!(IsIndicator() || clickEvent_));
 
     auto touchTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -430,10 +398,8 @@ void RatingPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void RatingPattern::UpdateInternalResource(ImageSourceInfo& sourceInfo, int32_t imageFlag)
 {
-    if (!sourceInfo.IsInternalResource()) {
-        return;
-    }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(sourceInfo.IsInternalResource());
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -458,6 +424,49 @@ void RatingPattern::UpdateInternalResource(ImageSourceInfo& sourceInfo, int32_t 
     }
 }
 
+void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto property = GetPaintProperty<RatingRenderProperty>();
+    CHECK_NULL_VOID(property);
+    auto ratingScore = property->GetRatingScoreValue();
+    auto singleStarWith = singleStarDstRect_.Width();
+    auto wholeStarNum = fmax(ceil(ratingScore) - 1, 0.0);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto ratingTheme = pipeline->GetTheme<RatingTheme>();
+    CHECK_NULL_VOID(ratingTheme);
+    auto radius = ratingTheme->GetFocusBorderRadius();
+
+    paintRect.SetRect(
+        RectF(static_cast<float>(wholeStarNum) * singleStarWith, 0.0f, singleStarWith, singleStarDstRect_.Height()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
+        static_cast<RSScalar>(radius.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
+        static_cast<RSScalar>(radius.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
+        static_cast<RSScalar>(radius.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
+        static_cast<RSScalar>(radius.ConvertToPx()));
+}
+
+void RatingPattern::PaintFocusState(double ratingScore)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    RoundRect focusRect;
+    GetInnerFocusPaintRect(focusRect);
+
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->PaintInnerFocusState(focusRect);
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 bool RatingPattern::OnKeyEvent(const KeyEvent& event)
 {
     if (event.action != KeyAction::DOWN) {
@@ -470,8 +479,7 @@ bool RatingPattern::OnKeyEvent(const KeyEvent& event)
     if (event.code == KeyCode::KEY_DPAD_LEFT) {
         ratingScore = fmax(ratingScore - stepSize, 0.0);
         ratingRenderProperty->UpdateRatingScore(ratingScore);
-        auto host = GetHost();
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        PaintFocusState(ratingScore);
         return true;
     }
     if (event.code == KeyCode::KEY_DPAD_RIGHT) {
@@ -479,8 +487,7 @@ bool RatingPattern::OnKeyEvent(const KeyEvent& event)
             fmin(ratingScore + stepSize, GetLayoutProperty<RatingLayoutProperty>()->GetStars().value_or(
                                              GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM)));
         ratingRenderProperty->UpdateRatingScore(ratingScore);
-        auto host = GetHost();
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        PaintFocusState(ratingScore);
         return true;
     }
     return false;
@@ -490,19 +497,22 @@ void RatingPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        if (pattern) {
-            return pattern->OnKeyEvent(event);
-        }
-        return false;
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+
+    auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->GetInnerFocusPaintRect(paintRect);
+    };
+    focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
 }
 
 void RatingPattern::InitMouseEvent()
 {
-    if (mouseEvent_ && hoverEvent_) {
-        return;
-    }
+    CHECK_NULL_VOID(!(mouseEvent_ && hoverEvent_));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
@@ -512,16 +522,14 @@ void RatingPattern::InitMouseEvent()
 
     auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleHoverEvent(isHover);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleHoverEvent(isHover);
     };
 
     auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleMouseEvent(info);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleMouseEvent(info);
     };
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
     hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
@@ -533,21 +541,19 @@ void RatingPattern::HandleHoverEvent(bool isHover)
 {
     isHover_ = isHover;
     // Remove hover state when rating is not hovered.
-    if (!isHover) {
-        auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
-        CHECK_NULL_VOID(ratingRenderProperty);
-        ratingRenderProperty->UpdateTouchStar(DEFAULT_RATING_TOUCH_STAR_NUMBER);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    }
+    CHECK_NULL_VOID_NOLOG(!isHover);
+    auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
+    CHECK_NULL_VOID(ratingRenderProperty);
+    ratingRenderProperty->UpdateTouchStar(DEFAULT_RATING_TOUCH_STAR_NUMBER);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RatingPattern::HandleMouseEvent(MouseInfo& info)
 {
-    if (IsIndicator() && !isHover_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!IsIndicator() && isHover_);
+
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
     // calculate the number of star the mouse moved on and trigger render update.
@@ -628,9 +634,8 @@ void RatingPattern::OnModifyDone()
     InitClickEvent(gestureHub);
     InitMouseEvent();
     auto focusHub = host->GetFocusHub();
-    if (focusHub) {
-        InitOnKeyEvent(focusHub);
-    }
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
 }
 
 // XTS inspector code
@@ -640,20 +645,23 @@ void RatingPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     if (isForegroundImageInfoFromTheme_) {
         json->Put("foregroundImageSourceInfo", ImageSourceInfo("").ToString().c_str());
     } else {
-        auto foregroundImageSourceInfo = ratingLayoutProperty->GetForegroundImageSourceInfo();
-        json->Put("foregroundImageSourceInfo", foregroundImageSourceInfo->ToString().c_str());
+        auto foregroundImageSourceInfo =
+            ratingLayoutProperty->GetForegroundImageSourceInfo().value_or(ImageSourceInfo(""));
+        json->Put("foregroundImageSourceInfo", foregroundImageSourceInfo.ToString().c_str());
     }
     if (isSecondaryImageInfoFromTheme_) {
-        json->Put("foregroundImageSourceInfo", ImageSourceInfo("").ToString().c_str());
+        json->Put("secondaryImageSourceInfo", ImageSourceInfo("").ToString().c_str());
     } else {
-        auto secondaryImageSourceInfo = ratingLayoutProperty->GetSecondaryImageSourceInfo();
-        json->Put("foregroundImageSourceInfo", secondaryImageSourceInfo->ToString().c_str());
+        auto secondaryImageSourceInfo =
+            ratingLayoutProperty->GetSecondaryImageSourceInfo().value_or(ImageSourceInfo(""));
+        json->Put("secondaryImageSourceInfo", secondaryImageSourceInfo.ToString().c_str());
     }
     if (isBackgroundImageInfoFromTheme_) {
-        json->Put("foregroundImageSourceInfo", ImageSourceInfo("").ToString().c_str());
+        json->Put("backgroundImageSourceInfo", ImageSourceInfo("").ToString().c_str());
     } else {
-        auto backgroundImageSourceInfo = ratingLayoutProperty->GetBackgroundImageSourceInfo();
-        json->Put("foregroundImageSourceInfo", backgroundImageSourceInfo->ToString().c_str());
+        auto backgroundImageSourceInfo =
+            ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo(""));
+        json->Put("backgroundImageSourceInfo", backgroundImageSourceInfo.ToString().c_str());
     }
 }
 } // namespace OHOS::Ace::NG

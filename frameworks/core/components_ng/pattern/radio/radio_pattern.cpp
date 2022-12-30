@@ -77,8 +77,14 @@ void RadioPattern::OnModifyDone()
         margin.bottom = CalcLength(radioTheme->GetHotZoneVerticalPadding().Value());
         layoutProperty->UpdateMargin(margin);
     }
+    hotZoneHorizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding();
+    hotZoneVerticalPadding_ = radioTheme->GetHotZoneVerticalPadding();
     InitClickEvent();
+    InitTouchEvent();
     InitMouseEvent();
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
 }
 
 void RadioPattern::InitClickEvent()
@@ -114,7 +120,8 @@ void RadioPattern::InitTouchEvent()
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             radioPattern->OnTouchDown();
         }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
+            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
             radioPattern->OnTouchUp();
         }
     };
@@ -131,7 +138,7 @@ void RadioPattern::InitMouseEvent()
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-    auto eventHub = GetHost()->GetEventHub<RadioEventHub>();
+    auto eventHub = host->GetEventHub<RadioEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
 
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
@@ -149,7 +156,6 @@ void RadioPattern::HandleMouseEvent(bool isHover)
     isHover_ = isHover;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    isTouch_ = false;
     host->MarkNeedRenderOnly();
 }
 
@@ -180,6 +186,16 @@ void RadioPattern::OnTouchDown()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = true;
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
+    auto frameSize = geometryNode->GetFrameSize();
+    if (originalPaintRect.GetSize() == frameSize) {
+        originalPaintRect = GetHotZoneRect(true);
+    }
+    renderContext->SyncGeometryProperties(originalPaintRect);
     host->MarkNeedRenderOnly();
 }
 
@@ -188,6 +204,16 @@ void RadioPattern::OnTouchUp()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = false;
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto paintRect = renderContext->GetPaintRectWithoutTransform();
+    auto frameSize = geometryNode->GetFrameSize();
+    if (paintRect.GetSize() != frameSize) {
+        paintRect = GetHotZoneRect(false);
+    }
+    renderContext->SyncGeometryProperties(paintRect);
     host->MarkNeedRenderOnly();
 }
 
@@ -242,7 +268,9 @@ void RadioPattern::UpdateState()
          */
         if (check) {
             UpdateUIStatus(true);
-            PlayAnimation(true);
+            if (!isFirstCreated_) {
+                PlayAnimation(true);
+            }
         } else {
             // If the radio is set to false, set isFirstCreated_ to false.
             isFirstCreated_ = false;
@@ -375,11 +403,11 @@ void RadioPattern::PlayAnimation(bool isOn)
 
 void RadioPattern::StopTranslateAnimation()
 {
-    if (onController_ && !onController_->IsStopped()) {
-        onController_->Stop();
-    }
     if (offController_ && !offController_->IsStopped()) {
         offController_->Stop();
+    }
+    if (onController_ && !onController_->IsStopped()) {
+        onController_->Stop();
     }
 }
 
@@ -405,6 +433,70 @@ void RadioPattern::UpdatePointScale(float scale)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkNeedRenderOnly();
+}
+
+RectF RadioPattern::GetHotZoneRect(bool isOriginal) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, {});
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, {});
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, {});
+    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
+    auto offset = originalPaintRect.GetOffset();
+    double actualWidth = 0.0;
+    double actualHeight = 0.0;
+    if (isOriginal) {
+        actualWidth = geometryNode->GetFrameSize().Width() + hotZoneHorizontalPadding_.ConvertToPx() * 2;
+        actualHeight = geometryNode->GetFrameSize().Height() + hotZoneHorizontalPadding_.ConvertToPx() * 2;
+        offset.SetX(offset.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
+        offset.SetY(offset.GetY() - hotZoneHorizontalPadding_.ConvertToPx());
+    } else {
+        actualWidth = geometryNode->GetFrameSize().Width();
+        actualHeight = geometryNode->GetFrameSize().Height();
+        offset.SetX(offset.GetX() + hotZoneHorizontalPadding_.ConvertToPx());
+        offset.SetY(offset.GetY() + hotZoneHorizontalPadding_.ConvertToPx());
+    }
+    return RectF(offset, SizeF(actualWidth, actualHeight));
+}
+
+void RadioPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            pattern->GetInnerFocusPaintRect(paintRect);
+        }
+    };
+    focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+}
+
+void RadioPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
+{
+    float outCircleRadius = size_.Width() / 2;
+    auto paintOffset = offset_;
+    float originX = paintOffset.GetX();
+    float originY = paintOffset.GetY();
+    float endX = size_.Width() + originX;
+    float endY = size_.Height() + originY;
+    paintRect.SetRect({ originX, originY, endX - originX, endY - originY });
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, outCircleRadius, outCircleRadius);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, outCircleRadius, outCircleRadius);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, outCircleRadius, outCircleRadius);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, outCircleRadius, outCircleRadius);
+}
+
+FocusPattern RadioPattern::GetFocusPattern() const
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, FocusPattern());
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    CHECK_NULL_RETURN(radioTheme, FocusPattern());
+    auto activeColor = radioTheme->GetActiveColor();
+    FocusPaintParam focusPaintParam;
+    focusPaintParam.SetPaintColor(activeColor);
+    return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
 }
 
 } // namespace OHOS::Ace::NG

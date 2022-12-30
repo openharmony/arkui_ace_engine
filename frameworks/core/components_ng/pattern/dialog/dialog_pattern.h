@@ -92,6 +92,7 @@ private:
 
     RefPtr<FrameNode> BuildButtons(const std::vector<ButtonInfo>& buttons);
     RefPtr<FrameNode> CreateButton(const ButtonInfo& params, int32_t index);
+    RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& colorStr);
     // to close dialog when button is clicked
     void BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_t buttonIdx);
     // build ActionSheet items
@@ -102,6 +103,7 @@ private:
 
     RefPtr<DialogTheme> dialogTheme_;
     RefPtr<UINode> customNode_;
+    RefPtr<ClickEvent> onClick_;
 
     // XTS inspector values
     std::string message_;

@@ -46,9 +46,7 @@ namespace OHOS::Ace::NG {
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
 {
-    if (renderContext_) {
-        renderContext_->InitContext(IsRootNode(), pattern_->GetSurfaceNodeName(), pattern_->UseExternalRSNode());
-    }
+    renderContext_->InitContext(IsRootNode(), pattern_->GetSurfaceNodeName(), pattern_->UseExternalRSNode());
     paintProperty_ = pattern->CreatePaintProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
     eventHub_ = pattern->CreateEventHub();
@@ -60,13 +58,12 @@ FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Patter
 
 FrameNode::~FrameNode()
 {
+    for (const auto& destroyCallback : destroyCallbacks_) {
+        destroyCallback();
+    }
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
         OnDetachFromMainTree();
-    }
-    auto focusHub = GetFocusHub();
-    if (focusHub) {
-        focusHub->RemoveSelf(this);
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {
@@ -136,7 +133,7 @@ void FrameNode::InitializePatternAndContext()
     });
     renderContext_->SetHostNode(WeakClaim(this));
     // Initialize FocusHub
-    if (pattern_->GetFocusPattern().focusType != FocusType::DISABLE) {
+    if (pattern_->GetFocusPattern().GetFocusType() != FocusType::DISABLE) {
         GetOrCreateFocusHub();
     }
 }
@@ -177,6 +174,9 @@ void FrameNode::DumpInfo()
         std::string("PaintRect: ").append(renderContext_->GetPaintRectWithTransform().ToString()));
     if (pattern_) {
         pattern_->DumpInfo();
+    }
+    if (renderContext_) {
+        renderContext_->DumpInfo();
     }
 }
 
@@ -235,6 +235,14 @@ void FrameNode::OnAttachToMainTree()
     CHECK_NULL_VOID(context);
     context->RequestFrame();
     hasPendingRequest_ = false;
+}
+
+void FrameNode::OnVisibleChange(bool isVisible)
+{
+    pattern_->OnVisibleChange(isVisible);
+    for (const auto& child: GetChildren()) {
+        child->OnVisibleChange(isVisible);
+    }
 }
 
 void FrameNode::OnDetachFromMainTree()
@@ -315,6 +323,18 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     RebuildRenderContextTree();
 }
 
+void FrameNode::AdjustGridOffset()
+{
+    if (!isActive_) {
+        return;
+    }
+    if (layoutProperty_->UpdateGridOffset(Claim(this))) {
+        renderContext_->UpdateOffset(OffsetT<Dimension>());
+        renderContext_->UpdateAnchor(OffsetT<Dimension>());
+        renderContext_->SyncGeometryProperties(RawPtr(GetGeometryNode()));
+    }
+}
+
 void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
 {
     if (!lastFrameRect_) {
@@ -338,6 +358,7 @@ void FrameNode::TriggerOnAreaChangeCallback()
             *lastParentOffsetToWindow_ = currParentOffsetToWindow;
         }
     }
+    pattern_->OnAreaChangedInner();
 }
 
 void FrameNode::TriggerVisibleAreaChangeCallback(std::list<VisibleCallbackInfo>& callbackInfoList)
@@ -774,20 +795,18 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
     CHECK_NULL_VOID(context);
 
     if (CheckNeedRequestMeasureAndLayout(layoutFlag)) {
+        if (!isMeasureBoundary && IsNeedRequestParentMeasure()) {
+            auto parent = GetAncestorNodeOfFrame();
+            if (parent) {
+                parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+                return;
+            }
+        }
         if (isLayoutDirtyMarked_) {
             LOGD("MarkDirtyNode: isLayoutDirtyMarked is true");
             return;
         }
         isLayoutDirtyMarked_ = true;
-        if (!isMeasureBoundary && IsNeedRequestParentMeasure()) {
-            auto parent = GetAncestorNodeOfFrame();
-            if (parent) {
-                parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-            } else {
-                context->AddDirtyLayoutNode(Claim(this));
-            }
-            return;
-        }
         context->AddDirtyLayoutNode(Claim(this));
         return;
     }
@@ -814,6 +833,11 @@ void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& vis
     if (isActive_ && IsVisible()) {
         visibleList.emplace_back(Claim(this));
     }
+}
+
+void FrameNode::OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList)
+{
+    allList.emplace_back(Claim(this));
 }
 
 bool FrameNode::IsMeasureBoundary()
@@ -850,6 +874,9 @@ bool FrameNode::GetTouchable() const
 
 bool FrameNode::IsResponseRegion() const
 {
+    if (!pattern_->UsResRegion()) {
+        return false;
+    }
     auto gestureHub = eventHub_->GetGestureEventHub();
     return gestureHub ? gestureHub->IsResponseRegion() : false;
 }
@@ -879,6 +906,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
                 parentLocalPoint.ToString().c_str());
         }
     }
+
     if ((!InResponseRegionList(parentLocalPoint, responseRegionList) || !GetTouchable()) && !IsResponseRegion()) {
         LOGD("TouchTest: point is out of region in %{public}s", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
@@ -891,7 +919,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     // newComingTargets is the template object to collect child nodes gesture and used by gestureHub to pack gesture
     // group.
     TouchTestResult newComingTargets;
-    auto tmp  = parentLocalPoint - paintRect.GetOffset();
+    auto tmp = parentLocalPoint - paintRect.GetOffset();
     renderContext_->GetPointWithTransform(tmp);
     const auto localPoint = tmp;
     bool consumed = false;
@@ -1105,7 +1133,9 @@ RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub() const
     if (!pattern_) {
         return eventHub_->GetOrCreateFocusHub();
     }
-    return eventHub_->GetOrCreateFocusHub(pattern_->GetFocusPattern().focusType, pattern_->GetFocusPattern().focusable);
+    return eventHub_->GetOrCreateFocusHub(pattern_->GetFocusPattern().GetFocusType(),
+        pattern_->GetFocusPattern().GetFocusable(), pattern_->GetFocusPattern().GetStyleType(),
+        pattern_->GetFocusPattern().GetFocusPaintParams());
 }
 
 void FrameNode::OnWindowShow()

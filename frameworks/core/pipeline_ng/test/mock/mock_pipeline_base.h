@@ -86,6 +86,7 @@ public:
     MOCK_METHOD2(FlushVsync, void(uint64_t nanoTimestamp, uint32_t frameCount));
     MOCK_METHOD3(SetRootRect, void(double width, double height, double offset));
     MOCK_METHOD0(FlushPipelineWithoutAnimation, void());
+    MOCK_METHOD0(FlushPipelineImmediately, void());
     MOCK_METHOD1(OnVirtualKeyboardHeightChange, void(float keyboardHeight));
     MOCK_METHOD6(MeasureText, double(const std::string& text, double fontSize, int32_t fontStyle,
         const std::string& fontWeight, const std::string& fontFamily, double letterSpacing));

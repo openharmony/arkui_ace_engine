@@ -662,7 +662,18 @@ void DeclarativeFrontend::UpdateState(Frontend::State state)
     if (!delegate_ || state == Frontend::State::ON_CREATE) {
         return;
     }
-    delegate_->UpdateApplicationState(delegate_->GetAppID(), state);
+    bool needPostJsTask = true;
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    const auto& setting = container->GetSettings();
+    needPostJsTask = !(setting.usePlatformAsUIThread && setting.useUIAsJSThread);
+    if (needPostJsTask) {
+        delegate_->UpdateApplicationState(delegate_->GetAppID(), state);
+        return;
+    }
+    if (jsEngine_) {
+        jsEngine_->UpdateApplicationState(delegate_->GetAppID(), state);
+    }
 }
 
 void DeclarativeFrontend::OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data)

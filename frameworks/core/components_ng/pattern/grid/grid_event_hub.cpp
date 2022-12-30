@@ -17,8 +17,10 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 
@@ -57,6 +59,23 @@ void GridEventHub::InitItemDragEvent(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->SetDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
+bool GridEventHub::CheckPostionInGrid(float x, float y)
+{
+    auto host = GetFrameNode();
+    CHECK_NULL_RETURN(host, false);
+    auto size = host->GetGeometryNode()->GetFrameRect();
+    return size.IsInRegion(PointF(x, y));
+}
+
+int GridEventHub::GetFrameNodeChildSize()
+{
+    auto host = GetFrameNode();
+    CHECK_NULL_RETURN(host, 0);
+    auto pattern = AceType::DynamicCast<GridPattern>(host->GetPattern());
+    CHECK_NULL_RETURN(pattern, 0);
+    return pattern->GetGridLayoutInfo().childrenCount_;
+}
+
 RefPtr<FrameNode> GridEventHub::FindGridItemByPosition(float x, float y)
 {
     auto host = GetFrameNode();
@@ -64,7 +83,7 @@ RefPtr<FrameNode> GridEventHub::FindGridItemByPosition(float x, float y)
 
     std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes;
     std::list<RefPtr<FrameNode>> children;
-    host->GenerateOneDepthVisibleFrame(children);
+    host->GenerateOneDepthAllFrame(children);
     for (const auto& child : children) {
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
@@ -148,7 +167,7 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
     dragDropProxy_ = manager->CreateAndShowDragWindow(customNode, info);
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->OnItemDragStart(info, GetFrameNode());
-    itemFrameNode->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+    itemFrameNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
     draggingItem_ = itemFrameNode;
 }
 
@@ -174,11 +193,7 @@ void GridEventHub::HandleOnItemDragEnd(const GestureEvent& info)
     dragDropProxy_ = nullptr;
     draggedIndex_ = 0;
     if (draggingItem_) {
-        if (itemRemoved_) {
-            itemRemoved_ = false;
-        } else {
-            draggingItem_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-        }
+        draggingItem_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
         draggingItem_ = nullptr;
     }
 }
@@ -202,9 +217,6 @@ void GridEventHub::HandleOnItemDragCancel()
 
 void GridEventHub::FireOnItemDragEnter(const ItemDragInfo& dragInfo)
 {
-    if (draggingItem_) {
-        itemRemoved_ = false;
-    }
     if (onItemDragEnter_) {
         onItemDragEnter_(dragInfo);
     }
@@ -212,9 +224,6 @@ void GridEventHub::FireOnItemDragEnter(const ItemDragInfo& dragInfo)
 
 void GridEventHub::FireOnItemDragLeave(const ItemDragInfo& dragInfo, int32_t itemIndex)
 {
-    if (draggingItem_) {
-        itemRemoved_ = true;
-    }
     if (onItemDragLeave_) {
         onItemDragLeave_(dragInfo, itemIndex);
     }
@@ -222,8 +231,7 @@ void GridEventHub::FireOnItemDragLeave(const ItemDragInfo& dragInfo, int32_t ite
 
 void GridEventHub::FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess)
 {
-    if (draggingItem_ && !isSuccess) {
-        itemRemoved_ = false;
+    if (draggingItem_) {
         draggingItem_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     }
     if (onItemDrop_) {

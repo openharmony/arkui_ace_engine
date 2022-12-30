@@ -26,12 +26,10 @@ void GridItemLayoutProperty::ResetGridLayoutInfoAndMeasure() const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
     auto uiNode = DynamicCast<UINode>(host);
     while (uiNode->GetTag() != V2::GRID_ETS_TAG) {
         uiNode = uiNode->GetParent();
-        CHECK_NULL_VOID(uiNode);
+        CHECK_NULL_VOID_NOLOG(uiNode);
     }
     auto grid = DynamicCast<FrameNode>(uiNode);
     CHECK_NULL_VOID(grid);
@@ -50,4 +48,11 @@ void GridItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("columnEnd", std::to_string(propColumnEnd_.value_or(0)).c_str());
 }
 
+int32_t GridItemLayoutProperty::GetCustomCrossIndex(Axis axis) const
+{
+    if (axis == Axis::VERTICAL) {
+        return propColumnStart_.value_or(-1);
+    }
+    return propRowStart_.value_or(-1);
+}
 } // namespace OHOS::Ace::NG

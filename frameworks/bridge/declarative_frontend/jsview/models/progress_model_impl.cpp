@@ -18,10 +18,8 @@
 
 #include "base/geometry/dimension.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/progress/progress_component.h"
 #include "core/components/progress/progress_theme.h"
-#include "core/components_ng/pattern/progress/progress_model.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
 namespace {

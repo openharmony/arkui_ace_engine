@@ -20,9 +20,12 @@
 #include "adapter/aosp/entrance/java/jni/ace_application_info.h"
 #include "adapter/aosp/entrance/java/jni/jni_environment.h"
 #endif
+#include "base/test/mock/mock_asset_manager.h"
+#include "base/test/mock/mock_task_executor.h"
 #include "core/animation/animator.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/shared_transition_controller.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #include "core/common/window.h"
 #include "core/components/box/box_component.h"
 #include "core/components/box/render_box.h"
@@ -42,9 +45,6 @@
 #include "core/components/text/render_text.h"
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components/transform/render_transform.h"
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/fake_task_executor.h"
-#include "core/mock/mock_resource_register.h"
 #include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace {
@@ -223,8 +223,8 @@ RefPtr<PipelineContext> RenderTestUtils::GetMockPipelineContext(const RefPtr<Fro
 {
     auto platformWindow = PlatformWindow::Create(nullptr);
     auto window = std::make_unique<Window>(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     return AceType::MakeRefPtr<PipelineContext>(
         std::move(window), taskExecutor, assetManager, resRegister, frontend, 0);

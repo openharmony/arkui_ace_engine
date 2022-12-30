@@ -99,9 +99,7 @@ void SideBarContainerPattern::OnModifyDone()
 
 void SideBarContainerPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    if (dragEvent_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!dragEvent_);
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -180,9 +178,8 @@ void SideBarContainerPattern::CreateAnimation()
 
 void SideBarContainerPattern::InitControlButtonTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    if (controlButtonClickEvent_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!controlButtonClickEvent_);
+
     auto clickTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -197,10 +194,9 @@ void SideBarContainerPattern::DoSideBarAnimation()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    if (!controller_ || !leftToRightAnimation_ || !rightToLeftAnimation_) {
-        LOGE("DoSideBarAnimation: Animator or animation is null.");
-        return;
-    }
+    CHECK_NULL_VOID(controller_);
+    CHECK_NULL_VOID(leftToRightAnimation_);
+    CHECK_NULL_VOID(rightToLeftAnimation_);
 
     if (!controller_->IsStopped()) {
         controller_->Stop();
@@ -415,7 +411,7 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
         return;
     }
 
-    if (sideBarLine > maxSideBarWidthPx) {
+    if (sideBarLine >= maxSideBarWidthPx) {
         realSideBarWidth_ = maxSideBarWidthPx;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;

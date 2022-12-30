@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <cinttypes>
+#include <cstddef>
 #include <cstdint>
 
 #include "base/geometry/offset.h"
@@ -114,6 +115,8 @@ void RenderBox::Update(const RefPtr<Component>& component)
             onClick_ = tapGesture->CreateRecognizer(context_);
             onClick_->SetIsExternalGesture(true);
             SetAccessibilityClickImpl();
+        } else {
+            onClick_ = nullptr;
         }
         if (!box->GetRemoteMessageEvent().IsEmpty() && !tapGesture) {
             onClick_ = AceType::MakeRefPtr<ClickRecognizer>();
@@ -211,7 +214,12 @@ void RenderBox::Update(const RefPtr<Component>& component)
         auto inspector = inspector_.Upgrade();
         if (inspector) {
             auto area = inspector->GetCurrentRectAndOrigin();
-            eventExtensions_->GetOnAreaChangeExtension()->SetBase(area.first, area.second);
+            auto lastArea = inspector->GetLastRectAndOrigin();
+            if (area != lastArea) {
+                eventExtensions_->GetOnAreaChangeExtension()->UpdateArea(
+                    area.first, area.second, lastArea.first, lastArea.second);
+                inspector->UpdateLastRectAndOrigin(area);
+            }
         }
     }
 }
@@ -352,11 +360,19 @@ void RenderBox::PanOnActionUpdate(const GestureEvent& info)
         LOGE("Context is null.");
         return;
     }
-
     RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
-    event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
-    event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
-
+    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+        pipelineContext->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    if (isContainerModal) {
+        auto floatOffset =
+            info.GetGlobalPoint() + Offset(-(CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
+            -CONTAINER_TITLE_HEIGHT.ConvertToPx());
+        event->SetX(pipelineContext->ConvertPxToVp(Dimension(floatOffset.GetX(), DimensionUnit::PX)));
+        event->SetY(pipelineContext->ConvertPxToVp(Dimension(floatOffset.GetY(), DimensionUnit::PX)));
+    } else {
+        event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+        event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+    }
     Offset offset = info.GetGlobalPoint() - GetLocalPoint();
     if (GetUpdateBuilderFuncId()) {
         GetUpdateBuilderFuncId()(Dimension(offset.GetX()), Dimension(offset.GetY()));
@@ -628,7 +644,12 @@ void RenderBox::OnPaintFinish()
         auto inspector = inspector_.Upgrade();
         if (inspector) {
             auto area = inspector->GetCurrentRectAndOrigin();
-            eventExtensions_->GetOnAreaChangeExtension()->UpdateArea(area.first, area.second);
+            auto lastArea = inspector->GetLastRectAndOrigin();
+            if (area != lastArea) {
+                eventExtensions_->GetOnAreaChangeExtension()->UpdateArea(
+                    area.first, area.second, lastArea.first, lastArea.second);
+                inspector->UpdateLastRectAndOrigin(area);
+            }
         }
     }
     auto node = GetAccessibilityNode().Upgrade();

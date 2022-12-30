@@ -457,6 +457,14 @@ void RenderNode::PaintChild(const RefPtr<RenderNode>& child, RenderContext& cont
     }
 }
 
+void RenderNode::PaintChildList(
+    const std::list<RefPtr<RenderNode>>& childList, RenderContext& context, const Offset& offset)
+{
+    for (const auto& item : SortChildrenByZIndex(childList)) {
+        PaintChild(item, context, offset);
+    }
+}
+
 void RenderNode::MarkNeedLayout(bool selfOnly, bool forceParent)
 {
     bool addSelf = false;
@@ -726,7 +734,12 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
     const auto localPoint = transformPoint - GetPaintRect().GetOffset();
     bool dispatchSuccess = DispatchTouchTestToChildren(localPoint, globalPoint, touchRestrict, result);
     auto beforeSize = result.size();
-    for (const auto& rect : GetTouchRectList()) {
+    std::vector<Rect> vrect;
+    if (IsResponseRegion()) {
+        vrect = responseRegionList_;
+    }
+    vrect.emplace_back(paintRect_);
+    for (const auto& rect : vrect) {
         if (touchable_ && rect.IsInRegion(transformPoint)) {
             // Calculates the coordinate offset in this node.
             globalPoint_ = globalPoint;

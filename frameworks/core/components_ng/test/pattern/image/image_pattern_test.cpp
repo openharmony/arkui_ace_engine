@@ -220,30 +220,30 @@ HWTEST_F(ImagePatternTest, SetImagePaintConfig001, TestSize.Level1)
         ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT), nullptr);
     imagePattern->altLoadingCtx_->OnLoadSuccess(
         ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT));
-    EXPECT_TRUE(imagePattern->lastAltCanvasImage_ != nullptr);
-    EXPECT_EQ(*imagePattern->lastAltSrcRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
-    EXPECT_EQ(*imagePattern->lastAltDstRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
-    EXPECT_TRUE(imagePattern->lastAltCanvasImage_->paintConfig_ != nullptr);
-    auto altImagePaintConfig = *imagePattern->lastAltCanvasImage_->paintConfig_;
+    EXPECT_TRUE(imagePattern->altImage_ != nullptr);
+    EXPECT_EQ(*imagePattern->altSrcRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(*imagePattern->altDstRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
+    EXPECT_TRUE(imagePattern->altImage_->paintConfig_ != nullptr);
+    auto altImagePaintConfig = imagePattern->altImage_->GetPaintConfig();
     EXPECT_EQ(altImagePaintConfig.imageFit_, IMAGE_FIT_DEFAULT);
     /**
      * @tc.steps: step4. Image loads successfully, and trigger Pattern->OnImageLoadSuccess.
      */
     imagePattern->loadingCtx_->OnLoadSuccess(
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
-    EXPECT_TRUE(imagePattern->lastCanvasImage_ != nullptr);
-    EXPECT_EQ(imagePattern->lastSrcRect_, RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
-    EXPECT_EQ(imagePattern->lastDstRect_, RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
-    EXPECT_TRUE(imagePattern->lastCanvasImage_->paintConfig_ != nullptr);
-    auto imagePaintConfig = *imagePattern->lastCanvasImage_->paintConfig_;
+    EXPECT_TRUE(imagePattern->image_ != nullptr);
+    EXPECT_EQ(imagePattern->srcRect_, RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(imagePattern->dstRect_, RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
+    EXPECT_TRUE(imagePattern->image_->paintConfig_ != nullptr);
+    auto imagePaintConfig = imagePattern->image_->GetPaintConfig();
     EXPECT_EQ(imagePaintConfig.imageFit_, IMAGE_FIT_DEFAULT);
     /**
      * @tc.steps: step5. Image loads successfully, and clear alt data.
      */
     EXPECT_EQ(imagePattern->altLoadingCtx_, nullptr);
-    EXPECT_EQ(imagePattern->lastAltCanvasImage_, nullptr);
-    EXPECT_EQ(imagePattern->lastAltSrcRect_, nullptr);
-    EXPECT_EQ(imagePattern->lastAltDstRect_, nullptr);
+    EXPECT_EQ(imagePattern->altImage_, nullptr);
+    EXPECT_EQ(imagePattern->altSrcRect_, nullptr);
+    EXPECT_EQ(imagePattern->altDstRect_, nullptr);
 }
 
 /**
@@ -317,15 +317,15 @@ HWTEST_F(ImagePatternTest, ImagePatternCallback001, TestSize.Level1)
     imagePattern->altLoadingCtx_->OnLoadFail(
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT), "",
         ImageLoadingCommand::LOAD_DATA_FAIL);
-    EXPECT_EQ(imagePattern->lastAltCanvasImage_, nullptr);
-    EXPECT_EQ(imagePattern->lastAltSrcRect_, nullptr);
-    EXPECT_EQ(imagePattern->lastAltDstRect_, nullptr);
+    EXPECT_EQ(imagePattern->altImage_, nullptr);
+    EXPECT_EQ(imagePattern->altSrcRect_, nullptr);
+    EXPECT_EQ(imagePattern->altDstRect_, nullptr);
     imagePattern->loadingCtx_->OnLoadSuccess(
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
     imagePattern->loadingCtx_->OnLoadFail(
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT), "",
         ImageLoadingCommand::LOAD_DATA_FAIL);
-    EXPECT_TRUE(imagePattern->lastCanvasImage_ == nullptr);
+    EXPECT_TRUE(imagePattern->image_ == nullptr);
 }
 
 /**
@@ -359,7 +359,7 @@ HWTEST_F(ImagePatternTest, ImagePatternCallback002, TestSize.Level1)
     imagePattern->loadingCtx_->OnLoadFail(
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT), "",
         ImageLoadingCommand::LOAD_DATA_FAIL);
-    EXPECT_TRUE(imagePattern->lastCanvasImage_ == nullptr);
+    EXPECT_TRUE(imagePattern->image_ == nullptr);
 }
 
 /**
@@ -382,9 +382,9 @@ HWTEST_F(ImagePatternTest, ImagePatternOnNotifyMemoryLevelFunction001, TestSize.
     imagePattern->OnNotifyMemoryLevel(0);
     EXPECT_TRUE(imagePattern->isShow_ == false);
     EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
-    EXPECT_EQ(imagePattern->lastCanvasImage_, nullptr);
+    EXPECT_EQ(imagePattern->image_, nullptr);
     EXPECT_EQ(imagePattern->altLoadingCtx_, nullptr);
-    EXPECT_EQ(imagePattern->lastAltCanvasImage_, nullptr);
+    EXPECT_EQ(imagePattern->altImage_, nullptr);
     /**
      * @tc.cases: case2. ImagePattern windowShow and OnNotifyMemoryLevel function will return.
      */
@@ -397,13 +397,13 @@ HWTEST_F(ImagePatternTest, ImagePatternOnNotifyMemoryLevelFunction001, TestSize.
     imagePattern->OnWindowHide();
     imagePattern->OnNotifyMemoryLevel(0);
     EXPECT_TRUE(imagePattern->isShow_ == false);
-    EXPECT_EQ(imagePattern->lastCanvasImage_, nullptr);
-    EXPECT_EQ(imagePattern->lastSrcRect_, RectF());
-    EXPECT_EQ(imagePattern->lastDstRect_, RectF());
+    EXPECT_EQ(imagePattern->image_, nullptr);
+    EXPECT_EQ(imagePattern->srcRect_, RectF());
+    EXPECT_EQ(imagePattern->dstRect_, RectF());
     EXPECT_EQ(imagePattern->altLoadingCtx_, nullptr);
-    EXPECT_EQ(imagePattern->lastAltCanvasImage_, nullptr);
-    EXPECT_EQ(imagePattern->lastAltSrcRect_, nullptr);
-    EXPECT_EQ(imagePattern->lastAltDstRect_, nullptr);
+    EXPECT_EQ(imagePattern->altImage_, nullptr);
+    EXPECT_EQ(imagePattern->altSrcRect_, nullptr);
+    EXPECT_EQ(imagePattern->altDstRect_, nullptr);
 }
 
 /**
@@ -427,18 +427,21 @@ HWTEST_F(ImagePatternTest, ImagePatternCreateNodePaintMethod001, TestSize.Level1
     /**
      * @tc.cases: case2. When SrcImage load successfully, it will Create SrcImage's NodePaintMethod.
      */
-    imagePattern->lastCanvasImage_ = imagePattern->loadingCtx_->GetCanvasImage();
+    imagePattern->image_ = imagePattern->loadingCtx_->MoveCanvasImage();
     EXPECT_TRUE(imagePattern->CreateNodePaintMethod() != nullptr);
     /**
      * @tc.cases: case3. When AltImage load successfully and altImage Rect is valid, it will Create AltImage's
      *                   NodePaintMethod.
      */
-    imagePattern->lastCanvasImage_ = nullptr;
-    imagePattern->lastAltCanvasImage_ = imagePattern->altLoadingCtx_->GetCanvasImage();
+    imagePattern->image_ = nullptr;
+    imagePattern->altImage_ = imagePattern->altLoadingCtx_->MoveCanvasImage();
     EXPECT_TRUE(imagePattern->CreateNodePaintMethod() == nullptr);
-    imagePattern->lastAltSrcRect_ = std::make_unique<RectF>(RectF());
+    imagePattern->altDstRect_ = std::make_unique<RectF>(RectF());
     EXPECT_TRUE(imagePattern->CreateNodePaintMethod() == nullptr);
-    imagePattern->lastAltDstRect_ = std::make_unique<RectF>(RectF());
+    imagePattern->altSrcRect_ = std::make_unique<RectF>(RectF());
+    imagePattern->altDstRect_.reset();
+    EXPECT_TRUE(imagePattern->CreateNodePaintMethod() == nullptr);
+    imagePattern->altDstRect_ = std::make_unique<RectF>(RectF());
     EXPECT_TRUE(imagePattern->CreateNodePaintMethod() != nullptr);
 }
 
@@ -461,9 +464,9 @@ HWTEST_F(ImagePatternTest, ImagePaintMethod001, TestSize.Level1)
      */
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     EXPECT_TRUE(imagePattern != nullptr);
-    imagePattern->lastCanvasImage_ = AceType::MakeRefPtr<MockCanvasImage>();
-    imagePattern->lastCanvasImage_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->lastCanvasImage_);
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->image_->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethod imagePaintMethod(imagePattern->image_);
     /**
      * @tc.steps: step3. ImagePaintMethod GetContentDrawFunction.
      */
@@ -487,7 +490,7 @@ HWTEST_F(ImagePatternTest, ImagePaintMethod001, TestSize.Level1)
 
 /**
  * @tc.name: OnDirtyLayoutWrapperSwap001
- * @tc.desc: Test OnDirtyLayoutWrapperSwap funciton.
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap function.
  * @tc.type: FUNC
  */
 HWTEST_F(ImagePatternTest, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
@@ -507,6 +510,6 @@ HWTEST_F(ImagePatternTest, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     config.skipMeasure = true;
     EXPECT_FALSE(imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
     config.skipMeasure = false;
-    EXPECT_EQ(imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config), imagePattern->lastCanvasImage_);
+    EXPECT_EQ(imagePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config), imagePattern->image_);
 }
 } // namespace OHOS::Ace::NG

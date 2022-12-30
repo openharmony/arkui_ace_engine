@@ -22,6 +22,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/event/mouse_event.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
@@ -35,7 +36,8 @@ bool OHOS::Ace::SystemProperties::GetDebugEnabled()
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t INPUT_EVENTS_SIZE = 1;
-constexpr uint32_t INPUT_EVENTS_SIZE_2 = 0;
+constexpr uint32_t INPUT_EVENTS_SIZE_2 = 2;
+constexpr uint32_t INPUT_EVENTS_SIZE_0 = 0;
 constexpr uint32_t MOUSE_RESULT_SIZE = 1;
 constexpr uint32_t HOVER_RESULT_SIZE = 1;
 constexpr uint32_t AXIS_RESULT_SIZE = 1;
@@ -43,6 +45,7 @@ const HoverEffectType HOVER_EFFECT_TYPE = HoverEffectType::BOARD;
 constexpr float WIDTH = 400.0f;
 constexpr float HEIGHT = 400.0f;
 const OffsetF COORDINATE_OFFSET(WIDTH, HEIGHT);
+constexpr bool HOVER_VALUE = true;
 } // namespace
 
 class InputEventHubTestNg : public testing::Test {
@@ -130,7 +133,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubMouseEventTest002, TestSize.Level1)
      * mouseEventActuator_ is nullptr, the function will return directly.
      */
     inputEventHub->RemoveOnMouseEvent(inputEvent);
-    EXPECT_EQ(inputEventHub->mouseEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE_2);
+    EXPECT_EQ(inputEventHub->mouseEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE_0);
     inputEventHub->mouseEventActuator_ = nullptr;
     inputEventHub->RemoveOnMouseEvent(inputEvent);
 }
@@ -185,7 +188,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubHoverEventTest003, TestSize.Level1)
      * hoverEventActuator_ is nullptr, the function will return directly.
      */
     inputEventHub->RemoveOnHoverEvent(onHoverEvent);
-    EXPECT_EQ(inputEventHub->hoverEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE_2);
+    EXPECT_EQ(inputEventHub->hoverEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE_0);
     inputEventHub->hoverEventActuator_ = nullptr;
     inputEventHub->RemoveOnHoverEvent(onHoverEvent);
 }
@@ -222,7 +225,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubAxisEventTest004, TestSize.Level1)
      * axisEventActuator_ is nullptr, the function will return directly.
      */
     inputEventHub->RemoveOnAxisEvent(onAxisEvent);
-    EXPECT_EQ(inputEventHub->axisEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE_2);
+    EXPECT_EQ(inputEventHub->axisEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE_0);
     inputEventHub->axisEventActuator_ = nullptr;
     inputEventHub->RemoveOnAxisEvent(onAxisEvent);
 }
@@ -265,7 +268,17 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
     EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, onMouseResult, onHoverResult, hoverNode));
 
     /**
-     * @tc.steps: step4. Set MouseEvent and mouseEventActuator_ and userCallback_ will be initialized.
+     * @tc.steps: step4. Invoke ProcessMouseTestHit when hoverNode is nullptr and the hover effect is UNKNOWN or not.
+     * @tc.expected: OnCollectMouseEvent will return directly, and ProcessMouseTestHit return false.
+     */
+    auto hoverNode2 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    hoverNode2.Reset();
+    EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, onMouseResult, onHoverResult, hoverNode2));
+    inputEventHub->SetHoverAnimation(HOVER_EFFECT_TYPE);
+    EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, onMouseResult, onHoverResult, hoverNode2));
+
+    /**
+     * @tc.steps: step5. Set MouseEvent and mouseEventActuator_ and userCallback_ will be initialized.
      */
     const OnMouseEventFunc onMouse = [](MouseInfo& info) {};
     OnMouseEventFunc onMouse1 = onMouse;
@@ -273,7 +286,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
     EXPECT_NE(inputEventHub->mouseEventActuator_->userCallback_, nullptr);
 
     /**
-     * @tc.steps: step5. Set HoverEvent and hoverEventActuator_ and userCallback_ will be initialized.
+     * @tc.steps: step6. Set HoverEvent and hoverEventActuator_ and userCallback_ will be initialized.
      */
     const OnHoverEventFunc onHover = [](bool) {};
     OnHoverEventFunc onHover1 = onHover;
@@ -281,23 +294,25 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
     EXPECT_NE(inputEventHub->hoverEventActuator_->userCallback_, nullptr);
 
     /**
-     * @tc.steps: step6. Add OnMouseEvent and inputEvents_ will not be empty.
+     * @tc.steps: step7. Add OnMouseEvent and inputEvents_ will not be empty.
      */
     OnMouseEventFunc onMouse2 = onMouse;
     auto inputEvent = AceType::MakeRefPtr<InputEvent>(std::move(onMouse2));
     inputEventHub->AddOnMouseEvent(inputEvent);
-    EXPECT_EQ(inputEventHub->mouseEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE);
+    inputEventHub->AddOnMouseEvent(nullptr);
+    EXPECT_EQ(inputEventHub->mouseEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE_2);
 
     /**
-     * @tc.steps: step7. Set HoverEvent and inputEvents_ will not be empty.
+     * @tc.steps: step8. Set HoverEvent and inputEvents_ will not be empty.
      */
     OnHoverEventFunc onHover2 = onHover;
     auto onHoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(onHover2));
     inputEventHub->AddOnHoverEvent(onHoverEvent);
-    EXPECT_EQ(inputEventHub->hoverEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE);
+    inputEventHub->AddOnHoverEvent(nullptr);
+    EXPECT_EQ(inputEventHub->hoverEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE_2);
 
     /**
-     * @tc.steps: step8. Invoke ProcessMouseTestHit when inputEvents_ is not empty and userCallback_ has already been
+     * @tc.steps: step9. Invoke ProcessMouseTestHit when inputEvents_ is not empty and userCallback_ has already been
      * initialized.
      * @tc.expected: ProcessMouseTestHit return false, mouse and hover result size has been increased one.
      */
@@ -306,6 +321,17 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
     EXPECT_EQ(inputEventHub->hoverEventActuator_->eventTarget_->coordinateOffset_, COORDINATE_OFFSET);
     EXPECT_EQ(onMouseResult.size(), MOUSE_RESULT_SIZE);
     EXPECT_EQ(onHoverResult.size(), HOVER_RESULT_SIZE);
+
+    /**
+     * @tc.steps: step10. Handle mouse and hover event when the events and userCallback is nullptr or not.
+     */
+    const MouseEvent mouseEvent = { .action = MouseAction::MOVE };
+    EXPECT_TRUE(inputEventHub->hoverEventActuator_->eventTarget_->HandleHoverEvent(HOVER_VALUE));
+    inputEventHub->hoverEventActuator_->eventTarget_->HandleMouseEvent(mouseEvent);
+    inputEventHub->mouseEventActuator_->userCallback_ = nullptr;
+    inputEventHub->hoverEventActuator_->userCallback_ = nullptr;
+    EXPECT_TRUE(inputEventHub->hoverEventActuator_->eventTarget_->HandleHoverEvent(HOVER_VALUE));
+    inputEventHub->hoverEventActuator_->eventTarget_->HandleMouseEvent(mouseEvent);
 }
 
 /**
@@ -362,5 +388,33 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessAxisTestHitTest006, TestSize.L
     EXPECT_FALSE(inputEventHub->ProcessAxisTestHit(COORDINATE_OFFSET, onAxisResult));
     EXPECT_EQ(inputEventHub->axisEventActuator_->axisEventTarget_->coordinateOffset_, COORDINATE_OFFSET);
     EXPECT_EQ(onAxisResult.size(), AXIS_RESULT_SIZE);
+}
+
+/**
+ * @tc.name: InputEventHubBindContextMenuTest007
+ * @tc.desc: Create InputEventHub and invoke BindContextMenu functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, InputEventHubBindContextMenuTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create InputEventHub.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_NE(inputEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke BindContextMenu when showMenu_ is nullptr or not.
+     * @tc.expected: mouseEventActuator_ is not nullptr.
+     */
+    const OnMouseEventFunc onMouse = [](MouseInfo& info) {};
+    OnMouseEventFunc onMouse1 = onMouse;
+    OnMouseEventFunc onMouse2 = onMouse;
+    inputEventHub->BindContextMenu(std::move(onMouse1));
+    inputEventHub->BindContextMenu(std::move(onMouse2));
+    EXPECT_NE(inputEventHub->mouseEventActuator_, nullptr);
 }
 } // namespace OHOS::Ace::NG

@@ -185,7 +185,6 @@ public:
         float distance = 0.0;
         for (const auto& child : children_) {
             float childBaseline = child->GetBaselineDistance();
-            childBaseline += child->GetGeometryNode()->GetFrameRect().GetY();
             distance = NearZero(distance) ? childBaseline : std::min(distance, childBaseline);
         }
         return distance;

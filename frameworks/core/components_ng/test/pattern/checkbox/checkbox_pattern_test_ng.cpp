@@ -15,15 +15,16 @@
 
 #include "gtest/gtest.h"
 
-#include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
-
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 
 using namespace testing;
@@ -39,6 +40,8 @@ const Dimension HEIGHT = 50.0_vp;
 const NG::PaddingPropertyF PADDING = NG::PaddingPropertyF();
 const bool SELECTED = true;
 const Color SELECTED_COLOR = Color::BLUE;
+constexpr Dimension HORIZONTAL_PADDING = Dimension(5.0);
+constexpr Dimension VERTICAL_PADDING = Dimension(4.0);
 } // namespace
 
 class CheckBoxPropertyTestNg : public testing::Test {
@@ -49,8 +52,14 @@ public:
     void TearDown() override;
 };
 
-void CheckBoxPropertyTestNg::SetUpTestCase() {}
-void CheckBoxPropertyTestNg::TearDownTestCase() {}
+void CheckBoxPropertyTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+void CheckBoxPropertyTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 void CheckBoxPropertyTestNg::SetUp() {}
 void CheckBoxPropertyTestNg::TearDown() {}
 
@@ -356,7 +365,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest009, TestSize.Level1)
     pattern->isHover_ = false;
     pattern->HandleMouseEvent(true);
     EXPECT_EQ(pattern->isHover_, true);
-    EXPECT_EQ(pattern->isTouch_, false);
+    EXPECT_EQ(pattern->isTouch_, true);
 }
 
 /**
@@ -443,4 +452,124 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest011, TestSize.Level1)
     EXPECT_EQ(pattern->uiStatus_, UIStatus::UNSELECTED);
 }
 
+/**
+ * @tc.name: CheckBoxEventHubPropertyTest012
+ * @tc.desc: Set CheckBox value into CheckBoxEventHub and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPropertyTestNg, CheckBoxEventHubPropertyTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, std::nullopt, TAG);
+
+    /**
+     * @tc.steps: step2. Get CheckBox event hub and get property
+     * @tc.expected: step2. Check the CheckBox property value
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    EXPECT_FALSE(eventHub == nullptr);
+    EXPECT_EQ(eventHub->GetName(), NAME);
+    EXPECT_EQ(eventHub->GetGroupName(), "");
+}
+
+/**
+ * @tc.name: CheckBoxEventHubPropertyTest013
+ * @tc.desc: Set CheckBox value into CheckBoxEventHub and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPropertyTestNg, CheckBoxEventHubPropertyTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(std::nullopt, GROUP_NAME, TAG);
+
+    /**
+     * @tc.steps: step2. Get CheckBox event hub and get property
+     * @tc.expected: step2. Check the CheckBox property value
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    EXPECT_FALSE(eventHub == nullptr);
+    EXPECT_EQ(eventHub->GetName(), "");
+    EXPECT_EQ(eventHub->GetGroupName(), GROUP_NAME);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest014
+ * @tc.desc: Test CheckBox onModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest014, TestSize.Level1)
+{
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto checkboxTheme = AceType::MakeRefPtr<CheckboxTheme>();
+    checkboxTheme->hotZoneHorizontalPadding_ = HORIZONTAL_PADDING;
+    checkboxTheme->hotZoneVerticalPadding_ = VERTICAL_PADDING;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkboxTheme));
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    pattern->SetPreGroup(GROUP_NAME);
+    frameNode->MarkModifyDone();
+    pattern->SetPreGroup(GROUP_NAME_CHANGE);
+    frameNode->MarkModifyDone();
+    EXPECT_FALSE(pattern == nullptr);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest015
+ * @tc.desc: Test UpdateAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest015, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    checkBoxModelNG.SetSelect(false);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    checkBoxModelNG.SetSelect(true);
+    pattern->UpdateAnimation(true);
+    EXPECT_FALSE(pattern->controller_ == nullptr);
+    pattern->UpdateAnimation(true);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest016
+ * @tc.desc: Test UpdateAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest016, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    checkBoxModelNG.SetSelect(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    checkBoxModelNG.SetSelect(false);
+    pattern->UpdateAnimation(false);
+    EXPECT_FALSE(pattern->controller_ == nullptr);
+    pattern->UpdateAnimation(false);
+}
 } // namespace OHOS::Ace::NG

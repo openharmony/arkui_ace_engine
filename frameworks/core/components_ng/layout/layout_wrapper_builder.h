@@ -58,10 +58,12 @@ public:
 
     void SetCacheCount(int32_t cacheCount)
     {
-        cacheCount_ = cacheCount;
+        cacheCount_ = cacheCount < 0 ? 1 : cacheCount;
     }
 
     virtual void SwapDirtyAndUpdateBuildCache() {}
+
+    virtual void AdjustGridOffset() {}
 
 protected:
     virtual int32_t OnGetTotalCount() = 0;

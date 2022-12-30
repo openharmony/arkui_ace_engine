@@ -53,7 +53,9 @@ void ContainerModalPattern::ShowTitle(bool isShow)
     CHECK_NULL_VOID(columnNode);
     auto titleNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
     CHECK_NULL_VOID(titleNode);
-    auto contentNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
+    auto stackNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
+    CHECK_NULL_VOID(stackNode);
+    auto contentNode = AceType::DynamicCast<FrameNode>(stackNode->GetChildren().front());
     CHECK_NULL_VOID(contentNode);
     auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
     CHECK_NULL_VOID(floatingTitleNode);
@@ -86,17 +88,17 @@ void ContainerModalPattern::ShowTitle(bool isShow)
     borderColor.SetColor(isShow ? CONTAINER_BORDER_COLOR : Color::TRANSPARENT);
     renderContext->UpdateBorderColor(borderColor);
 
-    // update stage content border
-    auto contentLayoutProperty = contentNode->GetLayoutProperty();
-    CHECK_NULL_VOID(contentLayoutProperty);
-    contentLayoutProperty->UpdateLayoutWeight(1.0f);
+    // update stack content border
+    auto stackLayoutProperty = stackNode->GetLayoutProperty();
+    CHECK_NULL_VOID(stackLayoutProperty);
+    stackLayoutProperty->UpdateLayoutWeight(1.0f);
 
-    auto contentRenderContext = contentNode->GetRenderContext();
-    CHECK_NULL_VOID(contentRenderContext);
+    auto stackRenderContext = stackNode->GetRenderContext();
+    CHECK_NULL_VOID(stackRenderContext);
     BorderRadiusProperty stageBorderRadius;
     stageBorderRadius.SetRadius(isShow ? CONTAINER_INNER_RADIUS : 0.0_vp);
-    contentRenderContext->UpdateBorderRadius(stageBorderRadius);
-    contentRenderContext->SetClipToBounds(true);
+    stackRenderContext->UpdateBorderRadius(stageBorderRadius);
+    stackRenderContext->SetClipToBounds(true);
 
     auto titleLayoutProperty = titleNode->GetLayoutProperty();
     CHECK_NULL_VOID(titleLayoutProperty);

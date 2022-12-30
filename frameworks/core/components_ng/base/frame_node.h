@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_FRAME_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_FRAME_NODE_H
 
+#include <functional>
 #include <list>
 #include <utility>
 
@@ -260,6 +261,8 @@ public:
 
     OffsetF GetPaintRectOffset() const;
 
+    void AdjustGridOffset();
+
     void SetActive(bool active) override;
 
     bool IsActive() const
@@ -283,6 +286,13 @@ public:
     void OnDetachFromMainTree() override;
     void OnAttachToMainTree() override;
 
+    void OnVisibleChange(bool isVisible) override;
+
+    void PushDestroyCallback(std::function<void()>&& callback)
+    {
+        destroyCallbacks_.emplace_back(callback);
+    }
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
@@ -298,6 +308,7 @@ private:
     RefPtr<PaintWrapper> CreatePaintWrapper();
 
     void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) override;
+    void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) override;
 
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
@@ -329,6 +340,8 @@ private:
     // sort in ZIndex.
     std::multiset<RefPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
+
+    std::list<std::function<void()>> destroyCallbacks_;
 
     RefPtr<AccessibilityProperty> accessibilityProperty_;
     RefPtr<LayoutProperty> layoutProperty_;

@@ -18,10 +18,12 @@
 #include <climits>
 #include <cstdint>
 
+#include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -55,28 +57,8 @@ namespace {
 constexpr Dimension SHEET_IMAGE_PADDING = 16.0_vp;
 constexpr Dimension SHEET_DIVIDER_WIDTH = 1.0_px;
 constexpr Dimension SHEET_LIST_PADDING = 24.0_vp;
+constexpr Dimension DIALOG_BUTTON_TEXT_SIZE = 16.0_fp;
 const CalcLength SHEET_IMAGE_SIZE(40.0_vp);
-
-RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& colorStr)
-{
-    auto textNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    CHECK_NULL_RETURN(textNode, nullptr);
-    textNode->SetInternal();
-    CHECK_NULL_RETURN(textNode, nullptr);
-    auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textProps, nullptr);
-    textProps->UpdateContent(text);
-    // update text color
-    Color color;
-    if (Color::ParseColorString(colorStr, color)) {
-        textProps->UpdateTextColor(color);
-    } else {
-        textProps->UpdateTextColor(Color::BLUE);
-    }
-    textNode->SetInternal();
-    return textNode;
-}
 
 } // namespace
 
@@ -87,7 +69,9 @@ void DialogPattern::OnModifyDone()
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
-    InitClickEvent(gestureHub);
+    if (!onClick_) {
+        InitClickEvent(gestureHub);
+    }
 }
 
 void DialogPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -97,8 +81,8 @@ void DialogPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
         CHECK_NULL_VOID(pattern);
         pattern->HandleClick(info);
     };
-    auto clickEvent = MakeRefPtr<ClickEvent>(std::move(task));
-    gestureHub->AddClickEvent(clickEvent);
+    onClick_ = MakeRefPtr<ClickEvent>(std::move(task));
+    gestureHub->AddClickEvent(onClick_);
 }
 
 void DialogPattern::HandleClick(const GestureEvent& info)
@@ -151,6 +135,7 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     BorderRadiusProperty radius;
     radius.SetRadius(theme->GetRadius().GetX());
     contentRenderContext->UpdateBorderRadius(radius);
+    contentRenderContext->SetClipToBounds(true);
 }
 
 void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
@@ -194,7 +179,7 @@ void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
     if (deviceType == DeviceType::WATCH) {
         columnProp->UpdateMeasureType(MeasureType::MATCH_PARENT);
     } else {
-        columnProp->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        columnProp->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     }
 
     // build ActionSheet child
@@ -235,6 +220,9 @@ RefPtr<FrameNode> DialogPattern::BuildTitle(const DialogProperties& dialogProper
     titleProp->UpdateAdaptMaxFontSize(dialogTheme_->GetTitleTextStyle().GetFontSize());
     titleProp->UpdateAdaptMinFontSize(dialogTheme_->GetTitleMinFontSize());
     titleProp->UpdateContent(dialogProperties.title);
+    auto titleStyle = dialogTheme_->GetTitleTextStyle();
+    titleProp->UpdateFontSize(titleStyle.GetFontSize());
+    titleProp->UpdateTextColor(titleStyle.GetTextColor());
     PaddingProperty titlePadding;
     auto paddingInTheme = (dialogProperties.content.empty() && dialogProperties.buttons.empty())
                               ? dialogTheme_->GetTitleDefaultPadding()
@@ -249,7 +237,7 @@ RefPtr<FrameNode> DialogPattern::BuildTitle(const DialogProperties& dialogProper
     title_ = dialogProperties.title;
 
     // actionSheet title needs to align flex start
-    if (dialogProperties.type == DialogType::ACTION_SHEET) {
+    if (dialogProperties.type == DialogType::ACTION_SHEET || dialogProperties.type == DialogType::ALERT_DIALOG) {
         auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(false));
         CHECK_NULL_RETURN(row, nullptr);
@@ -277,6 +265,9 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& dialogProp
         contentProp->UpdateTextAlign(TextAlign::CENTER);
     }
     contentProp->UpdateContent(dialogProperties.content);
+    auto contentStyle = dialogTheme_->GetContentTextStyle();
+    contentProp->UpdateFontSize(contentStyle.GetFontSize());
+    contentProp->UpdateTextColor(contentStyle.GetTextColor());
     LOGD("content = %s", dialogProperties.content.c_str());
     // update padding
     Edge contentPaddingInTheme;
@@ -384,6 +375,30 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(const std::vector<ButtonInfo>& but
         buttonNode->MarkModifyDone();
     }
     return container;
+}
+
+RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const std::string& colorStr)
+{
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    textNode->SetInternal();
+    CHECK_NULL_RETURN(textNode, nullptr);
+    auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textProps, nullptr);
+    textProps->UpdateContent(text);
+    Dimension buttonTextSize =
+        dialogTheme_->GetButtonTextSize().IsValid() ? dialogTheme_->GetButtonTextSize() : DIALOG_BUTTON_TEXT_SIZE;
+    textProps->UpdateFontSize(buttonTextSize);
+    // update text color
+    Color color;
+    if (Color::ParseColorString(colorStr, color)) {
+        textProps->UpdateTextColor(color);
+    } else {
+        textProps->UpdateTextColor(Color::BLUE);
+    }
+    textNode->SetInternal();
+    return textNode;
 }
 
 RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)

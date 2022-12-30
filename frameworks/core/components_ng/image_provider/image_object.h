@@ -40,11 +40,14 @@ public:
     int32_t GetFrameCount() const;
     const SizeF& GetImageSize() const;
     const ImageSourceInfo& GetSourceInfo() const;
-    const RefPtr<CanvasImage>& GetCanvasImage() const;
     const RefPtr<ImageData>& GetData() const;
     bool IsSingleFrame() const;
 
+    // clear canvasImage when load succeeds
+    RefPtr<CanvasImage> MoveCanvasImage();
+    bool HasCanvasImage() const;
     void SetCanvasImage(const RefPtr<CanvasImage>& canvasImage);
+
     void SetData(const RefPtr<ImageData>& data);
     void SetImageSize(const SizeF& imageSize);
     void ClearData();

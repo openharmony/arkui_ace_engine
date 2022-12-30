@@ -15,6 +15,8 @@
 
 #include "core/components/text_field/on_text_changed_listener_impl.h"
 
+#include "base/utils/utils.h"
+
 namespace OHOS::Ace {
 
 void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
@@ -33,11 +35,23 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
         }
         ContainerScope scope(client->instanceId_);
         auto value = client->GetEditingValue();
+        auto prevLength = value.GetWideText().length();
+        if (GreatOrEqual(client->GetMaxLength(), 0) && GreatOrEqual(prevLength, client->GetMaxLength())) {
+            LOGW("Cannot insert this text since reaching maximum length already");
+            return;
+        }
+        auto leavingStrLength = static_cast<int32_t>(text.length());
+        if (GreatOrEqual(client->GetMaxLength(), 0) &&
+            GreatOrEqual(prevLength + static_cast<int32_t>(text.length()), client->GetMaxLength())) {
+            leavingStrLength = client->GetMaxLength() - prevLength;
+            LOGW("%{public}d characters of this text will be truncated for exceeding maximum length", leavingStrLength);
+        }
+        auto insertText = text.substr(0, leavingStrLength);
         auto textEditingValue = std::make_shared<TextEditingValue>();
         textEditingValue->text =
-            value.GetBeforeSelection() + StringUtils::Str16ToStr8(text) + value.GetAfterSelection();
+            value.GetBeforeSelection() + StringUtils::Str16ToStr8(insertText) + value.GetAfterSelection();
         textEditingValue->UpdateSelection(std::max(value.selection.GetStart(), 0) + text.length());
-        client->UpdateInsertText(StringUtils::Str16ToStr8(text));
+        client->UpdateInsertText(StringUtils::Str16ToStr8(insertText));
         client->UpdateEditingValue(textEditingValue, true);
     };
     PostTaskToUI(task);
@@ -182,6 +196,48 @@ void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
     PostTaskToUI(task);
 }
 
+void OnTextChangedListenerImpl::HandleSetSelection(int32_t start, int32_t end)
+{
+    auto task = [textField = field_, start, end] {
+        auto client = textField.Upgrade();
+        if (!client) {
+            LOGE("text field is null");
+            return;
+        }
+        ContainerScope scope(client->instanceId_);
+        client->HandleSetSelection(start, end);
+    };
+    PostTaskToUI(task);
+}
+
+void OnTextChangedListenerImpl::HandleExtendAction(int32_t action)
+{
+    auto task = [textField = field_, action] {
+        auto client = textField.Upgrade();
+        if (!client) {
+            LOGE("text field is null");
+            return;
+        }
+        ContainerScope scope(client->instanceId_);
+        client->HandleExtendAction(action);
+    };
+    PostTaskToUI(task);
+}
+
+void OnTextChangedListenerImpl::HandleSelect(int32_t keyCode, int32_t cursorMoveSkip)
+{
+    auto task = [textField = field_, keyCode, cursorMoveSkip] {
+        auto client = textField.Upgrade();
+        if (!client) {
+            LOGE("text field is null");
+            return;
+        }
+        ContainerScope scope(client->instanceId_);
+        client->HandleSelect(keyCode, cursorMoveSkip);
+    };
+    PostTaskToUI(task);
+}
+
 void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)
 {
     if (!task) {
@@ -203,5 +259,4 @@ void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)
 
     taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
 }
-
 } // namespace OHOS::Ace

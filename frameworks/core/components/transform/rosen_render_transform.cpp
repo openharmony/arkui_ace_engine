@@ -68,7 +68,7 @@ void RosenRenderTransform::SyncTransformToRsNode(const std::shared_ptr<RSNode>& 
     }
 
     // translate
-    rsNode->SetTranslate(transform.translate[0], transform.translate[1], transform.translate[2]);
+    rsNode->SetTranslate(transform.translate[0], transform.translate[1], 0.0f);
 
     // scale
     rsNode->SetScale(transform.scale[0], transform.scale[1]);

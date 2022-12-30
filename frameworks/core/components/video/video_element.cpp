@@ -26,6 +26,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
 #include "base/resource/internal_resource.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/container_scope.h"
 #include "core/components/align/align_component.h"
@@ -156,6 +157,9 @@ VideoElement::~VideoElement()
 #ifdef OHOS_STANDARD_SYSTEM
     if (mediaPlayer_ != nullptr) {
         mediaPlayer_->Release();
+    }
+    if (SystemProperties::GetExtSurfaceEnabled() && surfaceDelegate_) {
+        surfaceDelegate_->ReleaseSurface();
     }
 #endif
 }
@@ -361,14 +365,25 @@ void VideoElement::PreparePlayer()
     RegisterMediaPlayerEvent();
 
     sptr<Surface> producerSurface;
-#ifdef ENABLE_ROSEN_BACKEND
-    if (renderNode_) {
-        auto rosenTexture = AceType::DynamicCast<RosenRenderTexture>(renderNode_);
-        if (rosenTexture) {
-            producerSurface = rosenTexture->GetSurface();
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        auto context = context_.Upgrade();
+        int32_t windowId = 0;
+        if (context && !surfaceDelegate_) {
+            windowId = context->GetWindowId();
+            surfaceDelegate_ = new OHOS::SurfaceDelegate(windowId);
+            surfaceDelegate_->CreateSurface();
+            producerSurface = surfaceDelegate_->GetSurface();
         }
-    }
+    } else {
+#ifdef ENABLE_ROSEN_BACKEND
+        if (renderNode_) {
+            auto rosenTexture = AceType::DynamicCast<RosenRenderTexture>(renderNode_);
+            if (rosenTexture) {
+                producerSurface = rosenTexture->GetSurface();
+            }
+        }
 #endif
+    }
 
     if (producerSurface == nullptr) {
         LOGE("producerSurface is nullptr");
@@ -381,7 +396,7 @@ void VideoElement::PreparePlayer()
         LOGE("Player SetVideoSurface failed");
         return;
     }
-    if (mediaPlayer_->PrepareAsync() != 0) {
+    if (!SystemProperties::GetExtSurfaceEnabled() && mediaPlayer_->PrepareAsync() != 0) {
         LOGE("Player prepare failed");
         return;
     }
@@ -403,6 +418,23 @@ std::string VideoElement::GetAssetAbsolutePath(const std::string& fileName)
     std::string filePath = assetManager->GetAssetPath(fileName);
     std::string absolutePath = filePath + fileName;
     return absolutePath;
+}
+
+void VideoElement::OnTextureOffset(int64_t textureId, int32_t x, int32_t y)
+{
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        const auto pipelineContext = GetContext().Upgrade();
+        if (!pipelineContext) {
+            LOGW("pipelineContext is null!");
+            return;
+        }
+        float viewScale = pipelineContext->GetViewScale();
+        textureOffsetX_ = x * viewScale;
+        textureOffsetY_ = y * viewScale;
+        surfaceDelegate_->SetBounds(textureOffsetX_, textureOffsetY_, textureWidth_, textureHeight_);
+        LOGI("OnTextureSize x = %{public}d y = %{public}d textureWidth_ = %{public}d textureHeight_ = %{public}d",
+            textureOffsetX_, textureOffsetY_, textureWidth_, textureHeight_);
+    }
 }
 #endif
 
@@ -459,9 +491,6 @@ void VideoElement::Prepare(const WeakPtr<Element>& parent)
 
     RenderElement::Prepare(parent);
     if (renderNode_) {
-#ifdef OHOS_STANDARD_SYSTEM
-        CreateMediaPlayer();
-#endif
         auto renderTexture = AceType::DynamicCast<RenderTexture>(renderNode_);
         if (renderTexture) {
             renderTexture->SetHiddenChangeEvent([weak = WeakClaim(this)](bool hidden) {
@@ -478,6 +507,18 @@ void VideoElement::Prepare(const WeakPtr<Element>& parent)
                     }
                 });
         }
+#ifdef OHOS_STANDARD_SYSTEM
+        if (renderTexture && SystemProperties::GetExtSurfaceEnabled()) {
+            renderTexture->SetTextureOffsetChange(
+                [weak = WeakClaim(this)](int64_t textureId, int32_t x, int32_t y) {
+                    auto videoElement = weak.Upgrade();
+                    if (videoElement) {
+                        videoElement->OnTextureOffset(textureId, x, y);
+                    }
+                });
+        }
+        CreateMediaPlayer();
+#endif
     }
     isElementPrepared_ = true;
 }
@@ -487,6 +528,28 @@ void VideoElement::OnTextureSize(int64_t textureId, int32_t textureWidth, int32_
 #ifndef OHOS_STANDARD_SYSTEM
     if (texture_) {
         texture_->OnSize(textureId, textureWidth, textureHeight);
+    }
+#else
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        const auto pipelineContext = GetContext().Upgrade();
+        if (!pipelineContext) {
+            LOGW("pipelineContext is null!");
+            return;
+        }
+        float viewScale = pipelineContext->GetViewScale();
+        textureWidth_ = textureWidth * viewScale + 1;
+        textureHeight_ = textureHeight * viewScale + 1;
+        surfaceDelegate_->SetBounds(textureOffsetX_, textureOffsetY_, textureWidth_, textureHeight_);
+        LOGI("OnTextureSize x = %{public}d y = %{public}d textureWidth_ = %{public}d textureHeight_ = %{public}d",
+            textureOffsetX_, textureOffsetY_, textureWidth_, textureHeight_);
+        if (hasMediaPrepared_) {
+            return;
+        }
+        if (mediaPlayer_->PrepareAsync() != 0) {
+            LOGE("Player prepare failed");
+        } else {
+            hasMediaPrepared_ = true;
+        }
     }
 #endif
 }
@@ -1424,13 +1487,10 @@ const RefPtr<Component> VideoElement::CreateChild()
         columnChildren.emplace_back(AceType::MakeRefPtr<FlexItemComponent>(VIDEO_CHILD_COMMON_FLEX_GROW,
             VIDEO_CHILD_COMMON_FLEX_SHRINK, VIDEO_CHILD_COMMON_FLEX_BASIS, CreatePoster()));
 #else
-#ifdef ENABLE_ROSEN_BACKEND
         if (startTime_ == 0) {
             columnChildren.emplace_back(AceType::MakeRefPtr<FlexItemComponent>(VIDEO_CHILD_COMMON_FLEX_GROW,
                 VIDEO_CHILD_COMMON_FLEX_SHRINK, VIDEO_CHILD_COMMON_FLEX_BASIS, CreatePoster()));
         }
-
-#endif
 #endif
         if (needControls_) {
             columnChildren.emplace_back(CreateControl());
@@ -1579,7 +1639,7 @@ void VideoElement::Start()
         return;
     }
     if (isStop_) {
-        if (mediaPlayer_->Prepare() != 0) {
+        if (mediaPlayer_->PrepareAsync() != 0) {
             LOGE("Player prepare failed");
             return;
         }

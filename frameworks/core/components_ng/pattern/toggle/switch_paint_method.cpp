@@ -22,9 +22,10 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/paint_property.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 CanvasDrawFunction SwitchPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
@@ -47,7 +48,7 @@ void SwitchPaintMethod::PaintContent(
 {
     constexpr uint8_t ENABLED_ALPHA = 255;
     constexpr uint8_t DISABLED_ALPHA = 102;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
@@ -55,8 +56,8 @@ void SwitchPaintMethod::PaintContent(
     auto width = contentSize.Width();
     auto height = contentSize.Height();
     auto radius = height / 2;
-    auto actualGap =
-        radiusGap_ * height / (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
+    auto actualGap = radiusGap_.ConvertToPx() * height /
+                     (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
 
     auto xOffset = contentOffset.GetX();
     auto yOffset = contentOffset.GetY();
@@ -77,16 +78,20 @@ void SwitchPaintMethod::PaintContent(
     hoverRadius_ =
         hoverRadius_ * height / (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
 
+    if (isTouch_ || isHover_) {
+        xOffset += defaultWidthGap / 2;
+        yOffset += defaultHeightGap / 2;
+    }
     if (isTouch_) {
         OffsetF touchBoardOffset;
-        touchBoardOffset.SetX(contentOffset.GetX() - (actualWidth_ - width) / 2.0);
-        touchBoardOffset.SetY(contentOffset.GetY() - (actualHeight_ - height) / 2.0);
+        touchBoardOffset.SetX(xOffset - (actualWidth_ - width) / 2.0);
+        touchBoardOffset.SetY(yOffset - (actualHeight_ - height) / 2.0);
         DrawTouchBoard(canvas, touchBoardOffset);
     }
     if (isHover_) {
         OffsetF hoverBoardOffset;
-        hoverBoardOffset.SetX(contentOffset.GetX() - (actualWidth_ - width) / 2.0);
-        hoverBoardOffset.SetY(contentOffset.GetY() - (actualHeight_ - height) / 2.0);
+        hoverBoardOffset.SetX(xOffset - (actualWidth_ - width) / 2.0);
+        hoverBoardOffset.SetY(yOffset - (actualHeight_ - height) / 2.0);
         DrawHoverBoard(canvas, hoverBoardOffset);
     }
 
@@ -101,12 +106,12 @@ void SwitchPaintMethod::PaintContent(
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
 
-    rosen::Rect rect;
+    RSRect rect;
     rect.SetLeft(xOffset);
     rect.SetTop(yOffset);
     rect.SetRight(xOffset + width);
     rect.SetBottom(yOffset + height);
-    rosen::RoundRect roundRect(rect, radius, radius);
+    RSRoundRect roundRect(rect, radius, radius);
     canvas.DrawRoundRect(roundRect);
 
     auto innerRadius = pointRadius_ + actualGap * mainDelta_ / GetSwitchWidth(contentSize);
@@ -119,20 +124,20 @@ void SwitchPaintMethod::PaintContent(
         }
         brush.SetAntiAlias(true);
         canvas.AttachBrush(brush);
-        rosen::Rect rectCover;
+        RSRect rectCover;
         float moveRitio = mainDelta_ / GetSwitchWidth(contentSize);
         rectCover.SetLeft(xOffset + actualGap * (1 - moveRitio));
         rectCover.SetTop(yOffset + actualGap * (1 - moveRitio));
         rectCover.SetRight(xOffset + mainDelta_ + 2 * pointRadius_ + actualGap * (1 + moveRitio));
         rectCover.SetBottom(yOffset + height - actualGap * (1 - moveRitio));
-        rosen::RoundRect roundRectCover(rectCover, innerRadius, innerRadius);
+        RSRoundRect roundRectCover(rectCover, innerRadius, innerRadius);
         canvas.DrawRoundRect(roundRectCover);
     }
     brush.SetColor(ToRSColor(paintProperty->GetSwitchPointColor().value_or(switchTheme->GetPointColor())));
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
 
-    rosen::Point point;
+    RSPoint point;
     point.SetX(xOffset + actualGap + pointRadius_ + mainDelta_);
     point.SetY(yOffset + radius);
     canvas.DrawCircle(point, pointRadius_);
@@ -167,7 +172,7 @@ void SwitchPaintMethod::DrawHoverBoard(RSCanvas& canvas, const OffsetF& offset) 
 float SwitchPaintMethod::GetSwitchWidth(const SizeF& contentSize) const
 {
     const float switchGap = 2.0f;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
     auto actualGap = switchGap * contentSize.Height() /

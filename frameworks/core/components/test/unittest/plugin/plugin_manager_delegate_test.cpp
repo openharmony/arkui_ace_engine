@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "gtest/gtest.h"
 
 #include "core/common/flutter/flutter_task_executor.h"
@@ -22,9 +21,9 @@
 #include "core/components/plugin/resource/plugin_manager_delegate.h"
 #undef private
 #undef protected
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/mock_resource_register.h"
-#include "frameworks/bridge/plugin_frontend/plugin_frontend.h"
+#include "base/test/mock/mock_asset_manager.h"
+#include "bridge/plugin_frontend/plugin_frontend.h"
+#include "core/common/test/mock/mock_resource_register.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -45,7 +44,7 @@ RefPtr<PipelineContext> PluginManagerDelegateTest::GetPipelineContext(const RefP
     auto window = std::make_unique<Window>(std::move(platformWindow));
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     taskExecutor->InitJsThread(false);
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     return AceType::MakeRefPtr<PipelineContext>(
         std::move(window), taskExecutor, assetManager, resRegister, frontend, 0);
@@ -71,8 +70,7 @@ HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateAddPluginCompleteCallba
      */
     EXPECT_TRUE(pluginManagerDelegate.onPluginCompleteCallback_ == nullptr);
     pluginManagerDelegate.state_ = PluginManagerDelegate::State::CREATED;
-    pluginManagerDelegate.AddPluginCompleteCallback(
-        []() {});
+    pluginManagerDelegate.AddPluginCompleteCallback([]() {});
     EXPECT_TRUE(pluginManagerDelegate.onPluginCompleteCallback_ != nullptr);
 }
 
@@ -96,8 +94,7 @@ HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateCreatePlatformResource0
      */
     EXPECT_TRUE(pluginManagerDelegate.onPluginCompleteCallback_ == nullptr);
     pluginManagerDelegate.state_ = PluginManagerDelegate::State::RELEASED;
-    pluginManagerDelegate.AddPluginCompleteCallback(
-        []() {});
+    pluginManagerDelegate.AddPluginCompleteCallback([]() {});
     EXPECT_TRUE(pluginManagerDelegate.onPluginCompleteCallback_ == nullptr);
 }
 
@@ -121,8 +118,7 @@ HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateAddPluginUpdateCallback
      */
     EXPECT_TRUE(pluginManagerDelegate.onPluginUpdateCallback_ == nullptr);
     pluginManagerDelegate.state_ = PluginManagerDelegate::State::CREATED;
-    pluginManagerDelegate.AddPluginUpdateCallback(
-        [](int64_t id, std::string data) {});
+    pluginManagerDelegate.AddPluginUpdateCallback([](int64_t id, std::string data) {});
     EXPECT_TRUE(pluginManagerDelegate.onPluginUpdateCallback_ != nullptr);
 }
 
@@ -146,8 +142,7 @@ HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateAddPluginUpdateCallback
      */
     EXPECT_TRUE(pluginManagerDelegate.onPluginCompleteCallback_ == nullptr);
     pluginManagerDelegate.state_ = PluginManagerDelegate::State::RELEASED;
-    pluginManagerDelegate.AddPluginUpdateCallback(
-        [](int64_t id, std::string data) {});
+    pluginManagerDelegate.AddPluginUpdateCallback([](int64_t id, std::string data) {});
     EXPECT_TRUE(pluginManagerDelegate.onPluginUpdateCallback_ == nullptr);
 }
 
@@ -171,8 +166,7 @@ HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateAddPluginErrorCallback0
      */
     EXPECT_TRUE(pluginManagerDelegate.onPluginErrorCallback_ == nullptr);
     pluginManagerDelegate.state_ = PluginManagerDelegate::State::CREATED;
-    pluginManagerDelegate.AddPluginErrorCallback(
-        [](std::string code, std::string msg) {});
+    pluginManagerDelegate.AddPluginErrorCallback([](std::string code, std::string msg) {});
     EXPECT_TRUE(pluginManagerDelegate.onPluginErrorCallback_ != nullptr);
 }
 
@@ -196,8 +190,7 @@ HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateAddPluginErrorCallback0
      */
     EXPECT_TRUE(pluginManagerDelegate.onPluginCompleteCallback_ == nullptr);
     pluginManagerDelegate.state_ = PluginManagerDelegate::State::RELEASED;
-    pluginManagerDelegate.AddPluginErrorCallback(
-        [](std::string code, std::string msg) {});
+    pluginManagerDelegate.AddPluginErrorCallback([](std::string code, std::string msg) {});
     EXPECT_TRUE(pluginManagerDelegate.onPluginErrorCallback_ == nullptr);
 }
 
@@ -219,8 +212,7 @@ HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateOnPluginAcquired001, Te
      * @tc.steps: step2. On Plugin Acquired.
      * @tc.expected: step2.  On Plugin Acquired success. no expect because Plugin Complete Call Back has no param
      */
-    pluginManagerDelegate.onPluginCompleteCallback_ = []() {
-    };
+    pluginManagerDelegate.onPluginCompleteCallback_ = []() {};
     pluginManagerDelegate.OnPluginComplete("1#HWJS-=-#");
 }
 
@@ -274,7 +266,6 @@ HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateOnPluginError001, TestS
     pluginManagerDelegate.OnPluginError("1#HWJS-=-#");
 }
 
-
 /**
  * @tc.name: PluginManagerDelegateRegisterEvent001
  * @tc.desc: Verify the RegisterEvent Interface of PluginManagerDelegate work success.
@@ -293,8 +284,7 @@ HWTEST_F(PluginManagerDelegateTest, PluginManagerDelegateRegisterEvent001, TestS
      * @tc.steps: step2. Register Event.
      * @tc.expected: step2.  Register Event Success.
      */
-    pluginManagerDelegate.onPluginCompleteCallback_ = []() {
-    };
+    pluginManagerDelegate.onPluginCompleteCallback_ = []() {};
     pluginManagerDelegate.onPluginUpdateCallback_ = [](int64_t id, std::string data) {
         EXPECT_EQ(id, 0);
         EXPECT_EQ(data, "");

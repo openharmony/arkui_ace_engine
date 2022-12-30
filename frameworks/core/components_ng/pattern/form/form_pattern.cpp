@@ -200,6 +200,7 @@ void FormPattern::CreateCardContainer()
     CHECK_NULL_VOID(subContainer_);
     subContainer_->Initialize();
     subContainer_->SetFormPattern(WeakClaim(this));
+    subContainer_->SetNodeId(host->GetId());
     auto info = layoutProperty->GetRequestFormInfo().value_or(RequestFormInfo());
     auto key = info.ToString();
     FormManager::GetInstance().AddNonmatchedContainer(key, subContainer_);

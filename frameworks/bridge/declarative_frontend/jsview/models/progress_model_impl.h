@@ -17,7 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_PROGRESS_MODEL_IMPL_H
 
 #include "core/components_ng/pattern/progress/progress_model.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 
 namespace OHOS::Ace::Framework {
 

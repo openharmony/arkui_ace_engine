@@ -28,6 +28,7 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr uint32_t COLUMN_CHILD_NUM = 2;
+constexpr uint32_t TITLE_POSITION = 1;
 constexpr uint32_t SPLIT_BUTTON_POSITION = 2;
 constexpr uint32_t BLUR_WINDOW_RADIUS = 100;
 constexpr uint32_t TITLE_POPUP_TIME = 200;        // 200ms
@@ -440,17 +441,11 @@ void ContainerModalElement::ChangeFloatingTitleIcon(bool isFocus)
         splitButton = AceType::DynamicCast<RenderPadding>(*iterator);
     }
 
-    if (windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        auto floatingTitleChildrenRow = AceType::MakeRefPtr<RowComponent>(
-            FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(true, isFocus));
-        floatingTitleChildrenRow->SetUpdateType(UpdateType::REBUILD);
-        rowElement->SetUpdateComponent(floatingTitleChildrenRow);
-    } else {
-        auto titleChildrenRow = AceType::MakeRefPtr<RowComponent>(
-            FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(false, isFocus));
-        titleChildrenRow->SetUpdateType(UpdateType::REBUILD);
-        rowElement->SetUpdateComponent(titleChildrenRow);
-    }
+    auto floatingTitleChildrenRow = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER,
+        containerModalComponent_->BuildTitleChildren(true, isFocus, windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN));
+    floatingTitleChildrenRow->SetUpdateType(UpdateType::REBUILD);
+    rowElement->SetUpdateComponent(floatingTitleChildrenRow);
+
     if (splitButton) {
         splitButton->SetHidden(windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     }
@@ -535,12 +530,12 @@ void ContainerModalElement::SetTitleButtonHide(bool hideSplit, bool hideMaximize
     containerModalComponent_->SetTitleButtonHide(hideSplit, hideMaximize, hideMinimize);
 
     auto titleChildrenRow = AceType::MakeRefPtr<RowComponent>(
-        FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(false));
+        FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(false, windowFocus_));
     titleChildrenRow->SetUpdateType(UpdateType::REBUILD);
     rowElement->SetUpdateComponent(titleChildrenRow);
 
     auto floatingTitleChildrenRow = AceType::MakeRefPtr<RowComponent>(
-        FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(true));
+        FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(true, windowFocus_));
     floatingTitleChildrenRow->SetUpdateType(UpdateType::REBUILD);
     floatingRowElement->SetUpdateComponent(floatingTitleChildrenRow);
 }
@@ -550,8 +545,18 @@ void ContainerModalElement::SetAppTitle(const std::string& title)
     CHECK_NULL_VOID(containerModalComponent_);
     auto textComponent = containerModalComponent_->GetTitleLabel();
     CHECK_NULL_VOID(textComponent);
+    if (textComponent->GetData() == title) {
+        LOGI("set same title, skip, title is %{public}s", title.c_str());
+        return;
+    }
     textComponent->SetData(title);
-    FlushReload();
+    bool isFloatingTitle = windowMode_ != WindowMode::WINDOW_MODE_FLOATING;
+    auto renderTitle = GetTitleRender(isFloatingTitle);
+    CHECK_NULL_VOID(renderTitle);
+    renderTitle->Update(textComponent);
+    renderTitle->MarkNeedRender();
+    LOGI("set app title successfully, title:%{public}s, isFloatingTitle:%{public}d", title.c_str(),
+        static_cast<int>(isFloatingTitle));
 }
 
 void ContainerModalElement::SetAppIcon(const RefPtr<PixelMap>& icon)
@@ -561,7 +566,45 @@ void ContainerModalElement::SetAppIcon(const RefPtr<PixelMap>& icon)
     CHECK_NULL_VOID(imageComponent);
     imageComponent->SetSrc("");
     imageComponent->SetPixmap(icon);
-    FlushReload();
+    bool isFloatingTitle = windowMode_ != WindowMode::WINDOW_MODE_FLOATING;
+    auto renderIcon = GetIconRender(isFloatingTitle);
+    CHECK_NULL_VOID(renderIcon);
+    renderIcon->Update(imageComponent);
+    renderIcon->MarkNeedRender();
+    LOGI("set app icon successfully, isFloatingTitle:%{public}d", static_cast<int>(isFloatingTitle));
+}
+
+RefPtr<RenderText> ContainerModalElement::GetTitleRender(bool isFloatingTitle)
+{
+    auto titleBoxElement = isFloatingTitle ? floatingTitleBox_ : titleBox_;
+    CHECK_NULL_RETURN(titleBoxElement, nullptr);
+    auto rowElement = AceType::DynamicCast<RowElement>(titleBoxElement->GetFirstChild());
+    CHECK_NULL_RETURN(rowElement, nullptr);
+    auto renderRow = AceType::DynamicCast<RenderFlex>(rowElement->GetRenderNode());
+    CHECK_NULL_RETURN(renderRow, nullptr);
+    const auto& children = renderRow->GetChildren();
+    if (children.size() <= TITLE_POSITION) {
+        LOGW("row children size is wrong");
+        return nullptr;
+    }
+    auto iterator = renderRow->GetChildren().begin();
+    std::advance(iterator, TITLE_POSITION);
+    auto title = AceType::DynamicCast<RenderText>(*iterator);
+    return title;
+}
+
+RefPtr<RenderImage> ContainerModalElement::GetIconRender(bool isFloatingTitle)
+{
+    auto titleBoxElement = isFloatingTitle ? floatingTitleBox_ : titleBox_;
+    CHECK_NULL_RETURN(titleBoxElement, nullptr);
+    auto rowElement = AceType::DynamicCast<RowElement>(titleBoxElement->GetFirstChild());
+    CHECK_NULL_RETURN(rowElement, nullptr);
+    auto renderRow = AceType::DynamicCast<RenderFlex>(rowElement->GetRenderNode());
+    CHECK_NULL_RETURN(renderRow, nullptr);
+    auto renderPadding = AceType::DynamicCast<RenderPadding>(renderRow->GetFirstChild());
+    CHECK_NULL_RETURN(renderPadding, nullptr);
+    auto icon = AceType::DynamicCast<RenderImage>(renderPadding->GetFirstChild());
+    return icon;
 }
 
 } // namespace OHOS::Ace

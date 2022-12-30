@@ -54,6 +54,7 @@ public:
 
     void UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo);
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
+    void ErasePopup(int32_t targetId);
 
     const PopupInfo& GetPopupInfo(int32_t targetId)
     {
@@ -64,6 +65,8 @@ public:
     void HideMenu(int32_t targetId);
     void DeleteMenu(int32_t targetId);
     void ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
+    void HideMenuInSubWindow(int32_t targetId);
+    void HideMenuInSubWindow();
     void CleanMenuInSubWindow();
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
@@ -81,6 +84,7 @@ public:
     void ShowTextDialog(const DialogProperties& dialogProps, uint32_t selected, const Dimension& height,
         const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DialogTextEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);
 
     /**  pop overlays (if any) on back press
@@ -99,6 +103,14 @@ private:
      *   @return     true if process is successful
      */
     bool ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset);
+
+    void FocusDialog(const RefPtr<FrameNode>& dialogNode);
+    void BlurDialog();
+
+    // helper functions to show/hide popups with animation
+    void Show(const RefPtr<FrameNode>& node);
+    void Pop(const RefPtr<FrameNode>& node);
+    void PopInSubwindow(const RefPtr<FrameNode>& node);
 
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;

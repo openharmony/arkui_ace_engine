@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 
@@ -25,26 +27,45 @@ constexpr int32_t SCROLL_FROM_BAR = 6; // Source type of scroll.
 
 bool CheckScrollable(const RefPtr<Pattern>& pattern)
 {
-    return AceType::InstanceOf<ScrollPattern>(pattern);
-    // TO DO for grid/list
+    return AceType::InstanceOf<ScrollPattern>(pattern) || AceType::InstanceOf<ListPattern>(pattern) ||
+           AceType::InstanceOf<GridPattern>(pattern);
 }
 
 float GetScrollableDistance(RefPtr<Pattern> pattern)
 {
     auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-    // TO DO for grid/list
-    CHECK_NULL_RETURN(scrollPattern, 0.0f);
-    return scrollPattern->GetScrollableDistance();
+    if (scrollPattern) {
+        return scrollPattern->GetScrollableDistance();
+    }
+    auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
+    if (listPattern) {
+        return listPattern->GetScrollableDistance();
+    }
+    auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
+    if (gridPattern) {
+        return gridPattern->GetScrollableDistance();
+    }
+    return 0.0f;
 }
 
 float GetScrollOffset(RefPtr<Pattern> pattern)
 {
     auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-    // TO DO for grid/list
-    CHECK_NULL_RETURN(scrollPattern, 0.0f);
-    return scrollPattern->GetCurrentPosition();
+    if (scrollPattern) {
+        CHECK_NULL_RETURN(scrollPattern, 0.0f);
+        return scrollPattern->GetCurrentPosition();
+    }
+    auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
+    if (listPattern) {
+        return listPattern->GetCurrentPosition();
+    }
+    auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
+    if (gridPattern) {
+        return gridPattern->GetCurrentPosition();
+    }
+    return 0.0f;
 }
-}
+} // namespace
 
 void ScrollBarProxy::RegisterScrollableNode(const ScrollableNodeInfo& scrollableNode)
 {
@@ -98,7 +119,7 @@ void ScrollBarProxy::NotifyScrollableNode(float distance, const WeakPtr<ScrollBa
         }
 
         float value = 0.0f;
-        float scrollableDistance = GetScrollableDistance(scrollable);;
+        float scrollableDistance = GetScrollableDistance(scrollable);
         if (!NearZero(controlDistance)) {
             value = distance * scrollableDistance / controlDistance;
         } else {

@@ -170,7 +170,7 @@ void JSForEach::CreateNewChildStart(const JSCallbackInfo& info)
     }
 
     const auto id = info[0]->ToString();
-        ForEachModel::GetInstance()->CreateNewChildStart(id);
+    ForEachModel::GetInstance()->CreateNewChildStart(id);
 }
 
 // signature is

@@ -28,6 +28,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr int32_t DEFAULT_DISTANCE = 5;
+constexpr Dimension MENU_ARROW_PADDING = 4.0_vp;
 } // namespace
 
 RenderSelectPopup::RenderSelectPopup()
@@ -175,17 +176,18 @@ void RenderSelectPopup::AdjustChildVerticalLayout(const Size& size, double& y, d
         return;
     }
 
+    double globalOffsetExternalY = GetGlobalOffsetExternal().GetY();
     double bottomSpace = globalRightBottom_.GetY() - selectRightBottom_.GetY();
     double topSpace = selectLeftTop_.GetY();
     // think about top padding and bottom padding
     if (bottomSpace >= size.Height() + 2.0 * normalPadding_) {
-        y = selectRightBottom_.GetY() + normalPadding_;
+        y = selectRightBottom_.GetY() + normalPadding_ - globalOffsetExternalY;
         height = size.Height();
         return;
     }
 
     if (bottomSpace >= topSpace) {
-        y = selectRightBottom_.GetY() + normalPadding_;
+        y = selectRightBottom_.GetY() + normalPadding_ - globalOffsetExternalY;
         // think about top padding and bottom padding
         height = bottomSpace - 2.0 * normalPadding_;
         return;
@@ -194,7 +196,7 @@ void RenderSelectPopup::AdjustChildVerticalLayout(const Size& size, double& y, d
     // think about top padding and bottom padding
     if (topSpace >= size.Height() + 2.0 * normalPadding_) {
         height = size.Height();
-        y = selectLeftTop_.GetY() - normalPadding_ - height;
+        y = selectLeftTop_.GetY() - normalPadding_ - height + globalOffsetExternalY;
         return;
     }
 
@@ -315,7 +317,11 @@ void RenderSelectPopup::PerformLayout()
     verticalSpacing_ = Dimension(NormalizeToPx(verticalSpacing_), DimensionUnit::PX);
     horizontalSpacing_ = Dimension(NormalizeToPx(horizontalSpacing_), DimensionUnit::PX);
     contentSpacing_ = Dimension(NormalizeToPx(contentSpacing_), DimensionUnit::PX);
-    normalPadding_ = NormalizeToPx(rrectSize_);
+    if (selectPopup_ && (selectPopup_->IsMenu() || selectPopup_->IsContextMenu())) {
+        normalPadding_ = NormalizeToPx(MENU_ARROW_PADDING);
+    } else {
+        normalPadding_ = NormalizeToPx(rrectSize_);
+    }
     globalRightBottom_ = Offset() + renderRoot_->GetLayoutSize();
     double outPadding = NormalizeToPx(4.0_vp); // the out padding is 4dp from doc.
     Size totalSize;
@@ -347,7 +353,8 @@ void RenderSelectPopup::PerformLayout()
         }
         totalSize.AddHeight(option->GetLayoutSize().Height());
     }
-    if (totalSize.Width() < NormalizeToPx(minWidth_)) {
+    if (selectPopup_ && !selectPopup_->IsMenu() && !selectPopup_->IsContextMenu() &&
+        totalSize.Width() < NormalizeToPx(minWidth_)) {
         totalSize.SetWidth(NormalizeToPx(minWidth_));
     }
     totalSize.AddHeight(2.0 * outPadding);
@@ -437,23 +444,15 @@ void RenderSelectPopup::ProcessTouchUp(const TouchEventInfo& info)
     }
 
     auto clickPosition = touches.front().GetLocalLocation();
-    if (!touchRegion_.ContainsInRegion(clickPosition.GetX(), clickPosition.GetY())) {
-        LOGI("Do not contains the touch region.");
-        return;
-    }
 
     if (selectPopup_->GetSelectOptions().empty()) {
         return;
     }
 
-    auto firstOption = selectPopup_->GetSelectOptions().front();
-    if (!firstOption->GetCustomComponent()) {
-        return;
-    }
-
     auto offset = touches.front().GetGlobalLocation();
     firstFingerUpOffset_ = offset;
-    if ((offset - firstFingerDownOffset_).GetDistance() <= DEFAULT_DISTANCE) {
+    if ((offset - firstFingerDownOffset_).GetDistance() <= DEFAULT_DISTANCE ||
+        !touchRegion_.ContainsInRegion(clickPosition.GetX(), clickPosition.GetY())) {
         if (isContextMenu_) {
             selectPopup_->CloseContextMenu();
         } else {

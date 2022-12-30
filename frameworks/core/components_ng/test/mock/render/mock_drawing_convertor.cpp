@@ -21,7 +21,7 @@ RSColor ToRSColor(const Color& color)
     return RSColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
 }
 
-RSPoint ToRSPonit(const NG::PointF& point)
+RSPoint ToRSPoint(const NG::PointF& point)
 {
     return RSPoint(point.GetX(), point.GetY());
 }
@@ -41,5 +41,10 @@ RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap)
             break;
     }
     return capStyle;
+}
+
+RSRect ToRSRect(const NG::RectF& rect)
+{
+    return RSRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom());
 }
 } // namespace OHOS::Ace

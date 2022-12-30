@@ -269,8 +269,16 @@ void JSCalendar::SetOffDays(int32_t offDays)
     component->SetOffDays(result);
 }
 
-void JSCalendar::SetShowHoliday(bool showHoliday)
+void JSCalendar::SetShowHoliday(const JSCallbackInfo& info)
 {
+    bool showHoliday = true;
+    if (info.Length() < 1) {
+        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    if (info[0]->IsBoolean()) {
+        showHoliday = info[0]->ToBoolean();
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         NG::CalendarView::SetShowHoliday(showHoliday);
         return;
@@ -280,8 +288,16 @@ void JSCalendar::SetShowHoliday(bool showHoliday)
     component->SetShowHoliday(showHoliday);
 }
 
-void JSCalendar::SetShowLunar(bool showLunar)
+void JSCalendar::SetShowLunar(const JSCallbackInfo& info)
 {
+    bool showLunar = false;
+    if (info.Length() < 1) {
+        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    if (info[0]->IsBoolean()) {
+        showLunar = info[0]->ToBoolean();
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         NG::CalendarView::SetShowLunar(showLunar);
         return;
@@ -292,22 +308,37 @@ void JSCalendar::SetShowLunar(bool showLunar)
     component->SetShowLunar(showLunar);
 }
 
-void JSCalendar::SetStartOfWeek(int32_t startOfWeek)
+void JSCalendar::SetStartOfWeek(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::CalendarView::SetStartOfWeek(NG::Week(startOfWeek));
+    if (info.Length() < 1) {
+        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    auto component = GetComponent();
-    CHECK_NULL_VOID(component);
+    if (info[0]->IsNumber()) {
+        auto startOfWeek = info[0]->ToNumber<int32_t>();
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::CalendarView::SetStartOfWeek(NG::Week(startOfWeek));
+            return;
+        }
+        auto component = GetComponent();
+        CHECK_NULL_VOID(component);
 
-    if (0 <= startOfWeek && startOfWeek < 7) {
-        component->SetStartDayOfWeek(startOfWeek);
+        if (0 <= startOfWeek && startOfWeek < 7) {
+            component->SetStartDayOfWeek(startOfWeek);
+        }
     }
 }
 
-void JSCalendar::SetNeedSlide(bool needSlide)
+void JSCalendar::SetNeedSlide(const JSCallbackInfo& info)
 {
+    bool needSlide = false;
+    if (info.Length() < 1) {
+        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    if (info[0]->IsBoolean()) {
+        needSlide = info[0]->ToBoolean();
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         NG::CalendarView::SetNeedSlide(needSlide);
         return;
@@ -424,18 +455,25 @@ ObtainedMonth JSCalendar::GetNextData(const JSRef<JSObject>& obj)
     return GetCalendarData(obj, MonthState::NEXT_MONTH);
 }
 
-void JSCalendar::SetDirection(int32_t dir)
+void JSCalendar::SetDirection(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::CalendarView::SetDirection(Axis(dir));
+    if (info.Length() < 1) {
+        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    auto component = GetComponent();
-    CHECK_NULL_VOID(component);
-    if (dir == 0) {
-        component->SetAxis(Axis::VERTICAL);
-    } else if (dir == 1) {
-        component->SetAxis(Axis::HORIZONTAL);
+    if (info[0]->IsNumber()) {
+        auto dir = info[0]->ToNumber<int32_t>();
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::CalendarView::SetDirection(Axis(dir));
+            return;
+        }
+        auto component = GetComponent();
+        CHECK_NULL_VOID(component);
+        if (dir == 0) {
+            component->SetAxis(Axis::VERTICAL);
+        } else if (dir == 1) {
+            component->SetAxis(Axis::HORIZONTAL);
+        }
     }
 }
 

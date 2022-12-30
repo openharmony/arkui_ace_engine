@@ -91,7 +91,7 @@ private:
     void OnImageLoadSuccess();
     void CacheImageObject();
     void SetImagePaintConfig(
-        const RefPtr<CanvasImage>& canvasImage, const RectF& lastSrcRect_, const RectF& lastDstRect_, bool isSvg);
+        const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect, bool isSvg);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
 
     DataReadyNotifyTask CreateDataReadyCallback();
@@ -103,17 +103,17 @@ private:
     LoadFailNotifyTask CreateLoadFailCallbackForAlt();
 
     RefPtr<ImageLoadingContext> loadingCtx_;
-    RefPtr<CanvasImage> lastCanvasImage_;
-    RectF lastDstRect_;
-    RectF lastSrcRect_;
+    RefPtr<CanvasImage> image_;
+    RectF dstRect_;
+    RectF srcRect_;
 
     bool isShow_ = true; // TODO: remove it later when use [isActive_] to determine image data management
 
     // clear alt data after [OnImageLoadSuccess] being called
     RefPtr<ImageLoadingContext> altLoadingCtx_;
-    RefPtr<CanvasImage> lastAltCanvasImage_;
-    std::unique_ptr<RectF> lastAltDstRect_;
-    std::unique_ptr<RectF> lastAltSrcRect_;
+    RefPtr<CanvasImage> altImage_;
+    std::unique_ptr<RectF> altDstRect_;
+    std::unique_ptr<RectF> altSrcRect_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 };

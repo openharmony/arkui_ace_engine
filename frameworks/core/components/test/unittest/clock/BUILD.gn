@@ -162,8 +162,8 @@ ohos_unittest("ClockComponentTest") {
     "render_clock_test.cpp",
 
     #mock
-    "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
-    "$ace_root/frameworks/core/mock/mock_watch_dog.cpp",
+    "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
+    "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",
   ]
 
   # add sources only needed by wearable like watch.

@@ -16,20 +16,19 @@
 #include "gtest/gtest.h"
 
 #include "base/log/log.h"
+#include "base/test/mock/mock_asset_manager.h"
+#include "base/test/mock/mock_task_executor.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #include "core/components/test/json/json_frontend.h"
 #include "core/components/test/unittest/mock/mock_render_depend.h"
 #include "core/components/theme/theme_manager_impl.h"
 #include "core/components_v2/swiper/swiper_element.h"
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/fake_task_executor.h"
-#include "core/mock/mock_resource_register.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-
 using SwiperEventCallback = std::function<void(const std::string&, const std::string&)>;
 using UpdateSwiperCallback = std::function<void(const RefPtr<SwiperComponent>&)>;
 const UpdateSwiperCallback EMPTY_CALLBAK;
@@ -87,7 +86,6 @@ public:
 private:
     SwiperEventCallback eventCallback_;
 };
-
 } // namespace
 
 // mock
@@ -154,8 +152,8 @@ public:
     {
         auto platformWindow = PlatformWindow::Create(nullptr);
         auto window = std::make_unique<Window>(std::move(platformWindow));
-        auto taskExecutor = Referenced::MakeRefPtr<FakeTaskExecutor>();
-        auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+        auto taskExecutor = Referenced::MakeRefPtr<MockTaskExecutor>();
+        auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
         auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
         frontend_ = Frontend::CreateDefault();
         context_ = AceType::MakeRefPtr<PipelineContext>(
@@ -1230,5 +1228,4 @@ HWTEST_F(SwiperComponentTest, Indicator013, TestSize.Level0)
     swiperIndicator->PerformLayout();
     EXPECT_FALSE(swiperIndicator->GetQuickTrunItem());
 }
-
 } // namespace OHOS::Ace

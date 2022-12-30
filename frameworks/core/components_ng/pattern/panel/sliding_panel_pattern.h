@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PANEL_PANEL_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PANEL_PANEL_PATTERN_H
 
+#include <optional>
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
@@ -75,8 +76,6 @@ private:
     void Update();
     // Init LayoutProperties
     void InitializeLayoutProps();
-    // Init touch event, stop animation when touch down.
-    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
 
     void FireSizeChangeEvent();
     void FireHeightChangeEvent();
@@ -90,19 +89,21 @@ private:
     void AppendBlankHeightAnimation(float targetLocation, PanelMode mode);
     int32_t GetAnimationDuration(float delta, float dragRange) const;
     void CheckHeightValidity();
-    void CheckPanelModeandType();
+    void CheckPanelModeAndType();
+    void RemoveEvent();
+    void AddEvent();
+    void FirstLayout();
+    void IsShowChanged(bool isShow);
+    void HeightDynamicUpdate();
 
     PanelType GetPanelType() const;
     PanelMode GetPanelMode() const;
     RefPtr<FrameNode> GetDragBarNode();
     void FireChangeEvent() const;
-    bool IsShow() const;
 
     RefPtr<PanEvent> panEvent_;
-    RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<Animator> animator_;
     std::unordered_map<PanelMode, double> defaultBlankHeights_;
-    std::optional<int32_t> dragBarId_;
     
     bool isAnimating_ = false;
     bool isFirstLayout_ = true;
@@ -118,11 +119,14 @@ private:
     Dimension halfHeight_;
     Dimension miniHeight_;
 
-    SizeF previousSize_;
-
     float minBlankHeight_ = 0.0;
     float currentOffset_ = 0.0f;
     float dragStartCurrentOffset_ = 0.0f;
+
+    std::optional<bool> isShow_;
+    PanDirection panDirection_;
+    float distance_ = 0.0f;
+    bool isDrag_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SlidingPanelPattern);
 };

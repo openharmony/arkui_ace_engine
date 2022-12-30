@@ -28,21 +28,16 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 
-
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 
-using std::cout;
-using std::endl;
-
 namespace {
 
 constexpr float DEFAULT_WIDTH = 800.0f;
 constexpr int32_t DEFAULT_COLUMN_NUM = 8;
-constexpr float DEFAULT_SPAN_WIDTH = 71.0f; // To modify
-constexpr float DEFAULT_OFFSET = 95.0f;     // To modify
+constexpr float DEFAULT_COLUMN_WIDTH = 100.0f;
 
 void MeasureLayout(RefPtr<LayoutWrapper>& container, RefPtr<LayoutWrapper>& text)
 {
@@ -55,7 +50,9 @@ void MeasureLayout(RefPtr<LayoutWrapper>& container, RefPtr<LayoutWrapper>& text
     auto textAlgorithm = text->GetLayoutAlgorithm();
     textAlgorithm->Measure(AceType::RawPtr(text));
     textAlgorithm->Layout(AceType::RawPtr(text));
-    textLayoutProperty->UpdateGridOffset(AceType::RawPtr(text));
+    textLayoutProperty->UpdateGridOffset(text->GetHostNode());
+
+    container->SwapDirtyLayoutWrapperOnMainThread();
 }
 
 } // namespace
@@ -75,7 +72,7 @@ public:
         ViewStackProcessor::GetInstance()->Pop();
 
         containerNode_ = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-        ViewStackProcessor::GetInstance()->PopContainer();
+        ViewStackProcessor::GetInstance()->Pop();
 
         auto layoutWrapper = containerNode_->CreateLayoutWrapper();
         LayoutConstraintF constraint;
@@ -130,23 +127,22 @@ HWTEST_F(GridContainerPatternTestNg, BuildContainer001, TestSize.Level1)
     auto layoutWrapper = CreateGridContainerWithChild();
     auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
 
-    /* first time layout to build size */
-    MeasureLayout(layoutWrapper, textWrapper);
-    auto rect = textWrapper->GetGeometryNode()->GetFrameRect();
-    EXPECT_NE(rect.Width(), DEFAULT_WIDTH / DEFAULT_COLUMN_NUM);
-    EXPECT_EQ(rect.GetX(), DEFAULT_OFFSET);
-
     /* update property to mark-dirty children */
     GridContainerInfo::Builder builder;
     builder.SetColumns(DEFAULT_COLUMN_NUM);
+    builder.SetGutterWidth(Dimension());
+    builder.SetMarginLeft(Dimension());
+    builder.SetMarginRight(Dimension());
+    builder.SetPaddingLeft(Dimension());
+    builder.SetPaddingRight(Dimension());
     auto layoutProperty = AceType::DynamicCast<GridContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     layoutProperty->UpdateContainerInfo(*builder.Build());
 
-    /* second time layout */
+    /* layout */
     MeasureLayout(layoutWrapper, textWrapper);
-    rect = textWrapper->GetGeometryNode()->GetFrameRect();
-    EXPECT_EQ(rect.Width(), DEFAULT_SPAN_WIDTH);
-    EXPECT_EQ(rect.GetX(), DEFAULT_OFFSET);
+    auto rect = textWrapper->GetHostNode()->GetGeometryNode()->GetFrameRect();
+    EXPECT_EQ(rect.Width(), DEFAULT_COLUMN_WIDTH);
+    EXPECT_EQ(rect.GetX(), DEFAULT_COLUMN_WIDTH);
 }
 
 } // namespace OHOS::Ace::NG

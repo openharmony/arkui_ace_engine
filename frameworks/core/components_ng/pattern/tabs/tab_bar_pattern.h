@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_controller.h"
+#include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
@@ -30,6 +31,8 @@
 #include "core/components_ng/pattern/tabs/tab_bar_paint_method.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/event/mouse_event.h"
+#include "frameworks/core/components/focus_animation/focus_animation_theme.h"
+#include "frameworks/core/components_ng/event/focus_hub.h"
 
 namespace OHOS::Ace::NG {
 
@@ -105,6 +108,7 @@ public:
         layoutAlgorithm->SetChildrenMainSize(childrenMainSize_);
         layoutAlgorithm->SetCurrentOffset(currentOffset_);
         layoutAlgorithm->SetIndicator(indicator_);
+        layoutAlgorithm->SetIsBuilder(IsContainsBuilder());
         return layoutAlgorithm;
     }
 
@@ -116,6 +120,20 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         return MakeRefPtr<TabBarPaintMethod>();
+    }
+
+    FocusPattern GetFocusPattern() const override
+    {
+        FocusPaintParam focusPaintParams;
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, FocusPattern());
+        auto focusTheme = pipeline->GetTheme<FocusAnimationTheme>();
+        CHECK_NULL_RETURN(focusTheme, FocusPattern());
+        auto tabTheme = pipeline->GetTheme<TabTheme>();
+        CHECK_NULL_RETURN(tabTheme, FocusPattern());
+        focusPaintParams.SetPaintWidth(tabTheme->GetActiveIndicatorWidth());
+        focusPaintParams.SetPaintColor(focusTheme->GetColor());
+        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
     void SetChildrenMainSize(float childrenMainSize)
@@ -171,6 +189,8 @@ private:
     void HandleHoverEvent(bool isHover);
     void HandleHoverOnEvent(int32_t index);
     void HandleMoveAway(int32_t index);
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
     void HandleClick(const GestureEvent& info);
     void HandleTouchEvent(const TouchLocationInfo& info);
 
@@ -179,6 +199,10 @@ private:
     int32_t CalculateSelectedIndex(const Offset& info);
 
     void PlayPressAnimation(int32_t index, float endOpacityRatio);
+
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void PaintFocusState();
+    void FocusIndexChange(int32_t index);
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -200,7 +224,7 @@ private:
     bool touching_ = false; // whether the item is in touching
     bool isHover_ = false;
     float hoverOpacity_ = 0.0;
-    int32_t touchingIndex_ = 0;
+    std::optional<int32_t> touchingIndex_;
     std::optional<int32_t> hoverIndex_;
 };
 } // namespace OHOS::Ace::NG

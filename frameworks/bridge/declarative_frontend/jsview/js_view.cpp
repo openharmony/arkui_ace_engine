@@ -30,6 +30,8 @@
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/view_full_update_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/view_partial_update_model_impl.h"
+#include "uicast_interface/uicast_impl.h"
+#include "uicast_interface/uicast_context_impl.h"
 
 namespace OHOS::Ace {
 
@@ -72,6 +74,26 @@ ViewPartialUpdateModel* ViewPartialUpdateModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
+void JSView::MarkStatic()
+{
+    isStatic_ = true;
+    {
+        UICastImpl::CacheCmd("UICast::View::markStatic", std::to_string(uniqueId_));
+    }
+}
+
+bool JSView::NeedsUpdate()
+{
+    {
+        if (UICastContextImpl::NeedsRebuild()) {
+            isStatic_ = false;
+            return true;
+        }
+    }
+
+    return needsUpdate_;
+}
+
 void JSView::JSBind(BindingTarget object)
 {
     JSViewPartialUpdate::JSBind(object);
@@ -86,6 +108,9 @@ void JSView::RenderJSExecution()
         return;
     }
     {
+        {
+            UICastImpl::CacheCmd("UICast::View::locate", std::to_string(uniqueId_));
+        }
         ACE_SCORING_EVENT("Component.AboutToRender");
         jsViewFunction_->ExecuteAboutToRender();
     }
@@ -98,6 +123,9 @@ void JSView::RenderJSExecution()
     {
         ACE_SCORING_EVENT("Component.OnRenderDone");
         jsViewFunction_->ExecuteOnRenderDone();
+        {
+            UICastImpl::SendCmd();
+        }
     }
 }
 
@@ -126,6 +154,7 @@ JSViewFullUpdate::JSViewFullUpdate(const std::string& viewId, JSRef<JSObject> js
 {
     viewId_ = viewId;
     jsViewFunction_ = AceType::MakeRefPtr<ViewFunctions>(jsObject, jsRenderFunction);
+    jsViewObject_ = jsObject;
     LOGD("JSViewFullUpdate constructor");
 }
 
@@ -141,11 +170,8 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
-        if (jsView->viewNode_.Invalid()) {
-            if (jsView->jsViewFunction_) {
-                jsView->jsViewFunction_->ExecuteAppear();
-            }
-            jsView->isAboutToAppearProcessed_ = true;
+        if (jsView->viewNode_.Invalid() && jsView->jsViewFunction_) {
+            jsView->jsViewFunction_->ExecuteAppear();
         }
     };
 
@@ -174,9 +200,8 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
 
     auto removeFunction = [weak = AceType::WeakClaim(this)]() -> void {
         auto jsView = weak.Upgrade();
-        if (jsView) {
-            jsView->Destroy(nullptr);
-            jsView->viewNode_.Reset();
+        if (jsView && jsView->jsViewFunction_) {
+            jsView->jsViewFunction_->ExecuteDisappear();
         }
     };
 
@@ -196,6 +221,7 @@ RefPtr<AceType> JSViewFullUpdate::CreateViewNode()
 
 RefPtr<AceType> JSViewFullUpdate::InternalRender()
 {
+    JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     needsUpdate_ = false;
     RenderJSExecution();
     CleanUpAbandonedChild();
@@ -216,15 +242,15 @@ void JSViewFullUpdate::Destroy(JSView* parentCustomView)
 {
     LOGD("JSViewFullUpdate::Destroy start");
     DestroyChild(parentCustomView);
-    if (isAboutToAppearProcessed_) {
+    {
         ACE_SCORING_EVENT("Component[" + viewId_ + "].Disappear");
         jsViewFunction_->ExecuteDisappear();
-        isAboutToAppearProcessed_ = false;
     }
     {
         ACE_SCORING_EVENT("Component[" + viewId_ + "].AboutToBeDeleted");
         jsViewFunction_->ExecuteAboutToBeDeleted();
     }
+    jsViewObject_.Reset();
     LOGD("JSViewFullUpdate::Destroy end");
 }
 
@@ -241,6 +267,9 @@ void JSViewFullUpdate::Create(const JSCallbackInfo& info)
             return;
         }
         ViewStackModel::GetInstance()->Push(view->CreateViewNode(), true);
+        {
+            UICastImpl::ViewCreate(view->UICastGetViewId(), view->uniqueId_, view);
+        }
     } else {
         LOGE("JSView Object is expected.");
     }
@@ -280,7 +309,7 @@ void JSViewFullUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
 {
     std::string viewId = info[0]->ToString();
     if (viewId_ == viewId) {
-        info.SetReturnValue(this);
+        info.SetReturnValue(jsViewObject_);
         return;
     }
     JSRef<JSObject> targetView = JSRef<JSObject>::New();
@@ -331,15 +360,24 @@ void JSViewFullUpdate::ConstructorCallback(const JSCallbackInfo& info)
         instance->SetContext(context);
         instance->IncRefCount();
         info.SetReturnValue(AceType::RawPtr(instance));
+        std::string parentViewId = "";
+        int parentUniqueId = -1;
         if (!info[1]->IsUndefined() && info[1]->IsObject()) {
             JSRef<JSObject> parentObj = JSRef<JSObject>::Cast(info[1]);
             auto* parentView = parentObj->Unwrap<JSViewFullUpdate>();
             if (parentView != nullptr) {
                 auto id = parentView->AddChildById(viewId, info.This());
                 instance->id_ = id;
+                parentViewId = parentView->viewId_;
+                parentUniqueId = parentView->uniqueId_;
             }
         }
         LOGD("JSView ConstructorCallback: %{public}s", instance->id_.c_str());
+        {
+            instance->uniqueId_ = UICastImpl::GetViewUniqueID(parentUniqueId);
+            UICastImpl::ViewConstructor(
+                instance->viewId_, instance->uniqueId_, parentViewId, parentUniqueId, AceType::RawPtr(instance));
+        }
     } else {
         LOGE("JSView creation with invalid arguments.");
         JSException::Throw("%s", "JSView creation with invalid arguments.");
@@ -579,6 +617,13 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         }
     };
 
+    auto nodeUpdateFunc = [weak = AceType::WeakClaim(this)](int32_t nodeId) {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
+        jsView->jsViewFunction_->ExecuteForceNodeRerender(nodeId);
+    };
+
     NodeInfoPU info = { .appearFunc = std::move(appearFunc),
         .renderFunc = std::move(renderFunction),
         .updateFunc = std::move(updateFunction),
@@ -586,6 +631,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         .updateNodeFunc = std::move(updateViewNodeFunction),
         .pageTransitionFunc = std::move(pageTransitionFunction),
         .reloadFunc = std::move(reloadFunction),
+        .nodeUpdateFunc = std::move(nodeUpdateFunc),
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout(),
         .isStatic = IsStatic() };
 

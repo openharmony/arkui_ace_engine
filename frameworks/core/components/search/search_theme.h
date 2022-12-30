@@ -81,6 +81,15 @@ public:
             theme->textColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color());
             theme->focusTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR_FOCUSED, Color());
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp);
+            theme->touchColor_ = pattern->GetAttr<Color>("search_touch_color", Color());
+            theme->hoverColor_ = pattern->GetAttr<Color>("search_hover_color", Color());
+            theme->searchDividerColor_ = pattern->GetAttr<Color>("search_divider_color", Color());
+            theme->searchButtonTextColor_ = pattern->GetAttr<Color>("search_button_text_color", Color());
+            theme->searchButtonSpacing_ = pattern->GetAttr<Dimension>("search_divider_side_space", Dimension());
+            theme->dividerSideSpace_ = pattern->GetAttr<Dimension>("search_divider_side_space", Dimension());
+            theme->iconHeight_ = pattern->GetAttr<Dimension>("search_icon_height", Dimension());
+            theme->iconWidthOffset_ = pattern->GetAttr<Dimension>("search_icon_width_offset", Dimension());
+            theme->iconTextFieldOffset_ = pattern->GetAttr<Dimension>("search_icon_text_field_offset", Dimension());
         }
     };
 
@@ -104,6 +113,16 @@ public:
     const Color& GetFocusTextColor() const
     {
         return focusTextColor_;
+    }
+
+    const Color& GetTouchColor() const
+    {
+        return touchColor_;
+    }
+
+    const Color& GetHoverColor() const
+    {
+        return hoverColor_;
     }
 
     const Dimension& GetHeight() const
@@ -161,24 +180,24 @@ public:
         return blockRightShade_;
     }
 
-    float GetDividerSpace() const
+    const Dimension& GetDividerSideSpace() const
     {
-        return dividerSpace_;
+        return dividerSideSpace_;
     }
 
-    float GetSearchDividerWidth() const
+    const Dimension& GetSearchDividerWidth() const
     {
         return searchDividerWidth_;
     }
 
-    float GetTextPadding() const
+    const Dimension& GetTextPadding() const
     {
         return textPadding_;
     }
 
-    const Dimension& GetSearchSpacing() const
+    const Dimension& GetSearchButtonSpacing() const
     {
-        return searchSpacing_;
+        return searchButtonSpacing_;
     }
 
     const Dimension& GetIconHeight() const
@@ -189,6 +208,11 @@ public:
     const Dimension& GetIconWidthOffset() const
     {
         return iconWidthOffset_;
+    }
+
+    const Dimension& GetIconTextFieldOffset() const
+    {
+        return iconTextFieldOffset_;
     }
 
     const Color& GetSearchDividerColor() const
@@ -209,6 +233,8 @@ private:
     Color focusPlaceholderColor_;
     Color textColor_;
     Color focusTextColor_;
+    Color touchColor_;
+    Color hoverColor_;
     Dimension height_;
     Dimension fontSize_;
     Dimension iconSize_;
@@ -220,12 +246,13 @@ private:
     FontWeight fontWeight_ = FontWeight::NORMAL;
     Radius borderRadius_;
     bool blockRightShade_ = false;
-    float dividerSpace_ = 7.0f;
-    float searchDividerWidth_ = 1.0f;
-    float textPadding_ = 18.0f;
-    Dimension searchSpacing_ = 2.0_vp;
+    Dimension dividerSideSpace_ = 2.0_vp;
+    Dimension searchDividerWidth_ = 1.0_px;
+    Dimension textPadding_ = 10.0_vp;
+    Dimension searchButtonSpacing_ = 2.0_vp;
     Dimension iconHeight_ = 16.0_vp;
-    Dimension iconWidthOffset_ = 14.0_vp;
+    Dimension iconWidthOffset_ = 12.0_vp;
+    Dimension iconTextFieldOffset_ = 8.0_vp;
     Color searchDividerColor_ = Color(0x33000000);
     Color searchButtonTextColor_ = Color(0xFF254FF7);
 };

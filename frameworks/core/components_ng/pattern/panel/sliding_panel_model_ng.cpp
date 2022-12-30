@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"
 
+#include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -28,7 +29,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+
 namespace {
+const Dimension PANEL_RADIUS = 24.0_vp;
 const Color BG_COLOR = Color(0xfff1f3f5);
 } // namespace
 
@@ -49,13 +52,15 @@ void SlidingPanelModelNG::Create(bool isShow)
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelType, PanelType::FOLDABLE_BAR); // default value
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HasDragBar, true);                   // default value
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelMode, PanelMode::HALF);         // default value
-    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, IsShow, true);
+    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, IsShow, isShow);
 
-    auto type = isShow ? VisibleType::VISIBLE : VisibleType::GONE;
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, type);
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext) {
         renderContext->UpdateBackgroundColor(BG_COLOR);
+        BorderRadiusProperty radius;
+        radius.radiusTopLeft = PANEL_RADIUS;
+        radius.radiusTopRight = PANEL_RADIUS;
+        renderContext->UpdateBorderRadius(radius);
     }
 }
 
@@ -124,13 +129,21 @@ void SlidingPanelModelNG::SetFullHeight(const Dimension& fullHeight)
 
 void SlidingPanelModelNG::SetIsShow(bool isShow)
 {
-    NG::ViewAbstract::SetVisibility(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, IsShow, isShow);
 }
 
 void SlidingPanelModelNG::SetBackgroundMask(const Color& backgroundMask)
 {
-    NG::ViewAbstract::SetBackgroundColor(backgroundMask);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProp = frameNode->GetLayoutProperty<SlidingPanelLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    auto isShow = layoutProp->GetIsShow().value();
+    if (isShow) {
+        ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, backgroundMask);
+    } else {
+        ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, Color::TRANSPARENT);
+    }
 }
 
 // Set the color of the panel content area

@@ -101,7 +101,10 @@ public:
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
 
-    void SetBuildAfterCallback(const std::function<void()>& callback) override {}
+    void SetBuildAfterCallback(const std::function<void()>& callback) override
+    {
+        buildFinishCallbacks_.emplace_back(callback);
+    }
 
     void SaveExplicitAnimationOption(const AnimationOption& option) override {}
 
@@ -194,7 +197,7 @@ public:
 
     void FlushBuild() override;
 
-    void FlushPipelineImmediately();
+    void FlushPipelineImmediately() override;
 
     void AddBuildFinishCallBack(std::function<void()>&& callback);
 
@@ -234,6 +237,7 @@ public:
     bool RequestDefaultFocus();
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
+    void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);
@@ -324,7 +328,7 @@ private:
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isNeedShowFocus_ = false;
-    bool onShow_ = true;
+    bool onShow_ = false;
     bool onFocus_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);

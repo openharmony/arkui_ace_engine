@@ -42,6 +42,7 @@ void GridItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc, bool
     auto nodeId = stack->ClaimNodeId();
     auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
         CHECK_NULL_RETURN(deepRenderFunc, nullptr);
+        ScopedViewStackProcessor scopedViewStackProcessor;
         deepRenderFunc(nodeId);
         return ViewStackProcessor::GetInstance()->Finish();
     };

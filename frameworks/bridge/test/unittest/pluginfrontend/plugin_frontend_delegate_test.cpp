@@ -15,17 +15,17 @@
 
 #include "gtest/gtest.h"
 
+#include "base/test/mock/mock_asset_manager.h"
 #include "core/common/flutter/flutter_task_executor.h"
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/mock_resource_register.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #define private public
 #define protected public
-#include "frameworks/bridge/plugin_frontend/plugin_frontend_delegate.h"
+#include "bridge/plugin_frontend/plugin_frontend_delegate.h"
 #undef private
 #undef protected
-#include "frameworks/bridge/plugin_frontend/plugin_frontend.h"
-#include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
-#include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
+#include "bridge/js_frontend/engine/common/js_engine_loader.h"
+#include "bridge/js_frontend/frontend_delegate_impl.h"
+#include "bridge/plugin_frontend/plugin_frontend.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -40,8 +40,8 @@ public:
     static void TearDownTestCase() {}
     void SetUp() {}
     void TearDown() {}
-    static RefPtr<Framework::PluginFrontendDelegate> GetPluginFrontendDelegate
-                                                    (const RefPtr<TaskExecutor>& taskExecutor);
+    static RefPtr<Framework::PluginFrontendDelegate> GetPluginFrontendDelegate(
+        const RefPtr<TaskExecutor>& taskExecutor);
     static RefPtr<PipelineContext> GetPipelineContext(const RefPtr<PluginFrontend>& frontend);
 };
 
@@ -51,14 +51,14 @@ RefPtr<PipelineContext> PluginFrontendDelegateTest::GetPipelineContext(const Ref
     auto window = std::make_unique<Window>(std::move(platformWindow));
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     taskExecutor->InitJsThread(false);
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     return AceType::MakeRefPtr<PipelineContext>(
         std::move(window), taskExecutor, assetManager, resRegister, frontend, 0);
 }
 
-RefPtr<Framework::PluginFrontendDelegate> PluginFrontendDelegateTest::GetPluginFrontendDelegate
-                                                                        (const RefPtr<TaskExecutor>& taskExecutor)
+RefPtr<Framework::PluginFrontendDelegate> PluginFrontendDelegateTest::GetPluginFrontendDelegate(
+    const RefPtr<TaskExecutor>& taskExecutor)
 {
     auto& loader = Framework::JsEngineLoader::Get("libace_engine_qjs.z.so");
     auto jsEngine = loader.CreateJsEngine(0);
@@ -151,8 +151,7 @@ RefPtr<Framework::PluginFrontendDelegate> PluginFrontendDelegateTest::GetPluginF
         jsEngine->OnWindowDisplayModeChanged(isShownInMultiWindow, data);
     };
 
-    const auto& onSaveAbilityStateCallBack  = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine)](
-                                                    std::string& data) {
+    const auto& onSaveAbilityStateCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine)](std::string& data) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             LOGE("the js engine is nullptr");
@@ -160,7 +159,7 @@ RefPtr<Framework::PluginFrontendDelegate> PluginFrontendDelegateTest::GetPluginF
         }
         jsEngine->OnSaveAbilityState(data);
     };
-    const auto& onRestoreAbilityStateCallBack  = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine)](
+    const auto& onRestoreAbilityStateCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine)](
                                                     const std::string& data) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
@@ -170,8 +169,7 @@ RefPtr<Framework::PluginFrontendDelegate> PluginFrontendDelegateTest::GetPluginF
         jsEngine->OnRestoreAbilityState(data);
     };
 
-    const auto& onNewWantCallBack  = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine)](
-                                                    const std::string& data) {
+    const auto& onNewWantCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine)](const std::string& data) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             LOGE("the js engine is nullptr");
@@ -240,8 +238,7 @@ RefPtr<Framework::PluginFrontendDelegate> PluginFrontendDelegateTest::GetPluginF
         jsEngine->JsCallback(callbackId, args);
     };
 
-    const auto& onMemoryLevelCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine)](
-                                                     const int32_t level) {
+    const auto& onMemoryLevelCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine)](const int32_t level) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
@@ -256,8 +253,7 @@ RefPtr<Framework::PluginFrontendDelegate> PluginFrontendDelegateTest::GetPluginF
         }
         return jsEngine->OnStartContinuation();
     };
-    const auto& onCompleteContinuationCallBack =
-        [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine)](int32_t code) {
+    const auto& onCompleteContinuationCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine)](int32_t code) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
@@ -271,30 +267,29 @@ RefPtr<Framework::PluginFrontendDelegate> PluginFrontendDelegateTest::GetPluginF
         }
         jsEngine->OnRemoteTerminated();
     };
-    const auto& onSaveDataCallBack =
-        [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine)](std::string& savedData) {
+    const auto& onSaveDataCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine)](std::string& savedData) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
         }
         jsEngine->OnSaveData(savedData);
     };
-    const auto& onRestoreDataCallBack =
-        [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine)](const std::string& data) -> bool {
+    const auto& onRestoreDataCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine)](
+                                            const std::string& data) -> bool {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return false;
         }
         return jsEngine->OnRestoreData(data);
     };
-    RefPtr<Framework::PluginFrontendDelegate> delegate = AceType::MakeRefPtr<Framework::PluginFrontendDelegate>(
-        taskExecutor, loadCallback,
-        setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
-        resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
-        timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback, onWindowDisplayModeChangedCallBack,
-        onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack, onRestoreAbilityStateCallBack,
-        onNewWantCallBack, onActiveCallBack, onInactiveCallBack, onMemoryLevelCallBack, onStartContinuationCallBack,
-        onCompleteContinuationCallBack, onRemoteTerminatedCallBack, onSaveDataCallBack, onRestoreDataCallBack);
+    RefPtr<Framework::PluginFrontendDelegate> delegate =
+        AceType::MakeRefPtr<Framework::PluginFrontendDelegate>(taskExecutor, loadCallback,
+            setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
+            resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
+            timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback, onWindowDisplayModeChangedCallBack,
+            onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack, onRestoreAbilityStateCallBack,
+            onNewWantCallBack, onActiveCallBack, onInactiveCallBack, onMemoryLevelCallBack, onStartContinuationCallBack,
+            onCompleteContinuationCallBack, onRemoteTerminatedCallBack, onSaveDataCallBack, onRestoreDataCallBack);
     return delegate;
 }
 
@@ -309,8 +304,8 @@ HWTEST_F(PluginFrontendDelegateTest, GetMinPlatformVersionTest001, TestSize.Leve
      * @tc.steps: step1. Build a PluginFrontendDelegate.
      */
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
-    RefPtr<Framework::PluginFrontendDelegate> delegate = PluginFrontendDelegateTest::GetPluginFrontendDelegate
-                                                                                    (taskExecutor);
+    RefPtr<Framework::PluginFrontendDelegate> delegate =
+        PluginFrontendDelegateTest::GetPluginFrontendDelegate(taskExecutor);
     EXPECT_TRUE(delegate != nullptr);
     /**
      * @tc.steps: step2. GetMinPlatformVersion.
@@ -330,8 +325,8 @@ HWTEST_F(PluginFrontendDelegateTest, AttachPipelineContextTest001, TestSize.Leve
      * @tc.steps: step1. Build a PluginFrontendDelegate.
      */
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
-    RefPtr<Framework::PluginFrontendDelegate> delegate = PluginFrontendDelegateTest::GetPluginFrontendDelegate
-                                                                                    (taskExecutor);
+    RefPtr<Framework::PluginFrontendDelegate> delegate =
+        PluginFrontendDelegateTest::GetPluginFrontendDelegate(taskExecutor);
     EXPECT_TRUE(delegate != nullptr);
     /**
      * @tc.steps: step2. GetMinPlatformVersion.
@@ -354,8 +349,8 @@ HWTEST_F(PluginFrontendDelegateTest, GetUiTask001, TestSize.Level1)
      * @tc.steps: step1. Build a PluginFrontendDelegate.
      */
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
-    RefPtr<Framework::PluginFrontendDelegate> delegate = PluginFrontendDelegateTest::GetPluginFrontendDelegate
-                                                                                    (taskExecutor);
+    RefPtr<Framework::PluginFrontendDelegate> delegate =
+        PluginFrontendDelegateTest::GetPluginFrontendDelegate(taskExecutor);
     EXPECT_TRUE(delegate != nullptr);
     /**
      * @tc.steps: step2. Get Ui Task.
@@ -378,8 +373,8 @@ HWTEST_F(PluginFrontendDelegateTest, GetAnimationJsTask001, TestSize.Level1)
      * @tc.steps: step1. Build a PluginFrontendDelegate.
      */
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
-    RefPtr<Framework::PluginFrontendDelegate> delegate = PluginFrontendDelegateTest::GetPluginFrontendDelegate
-                                                                                    (taskExecutor);
+    RefPtr<Framework::PluginFrontendDelegate> delegate =
+        PluginFrontendDelegateTest::GetPluginFrontendDelegate(taskExecutor);
     EXPECT_TRUE(delegate != nullptr);
     /**
      * @tc.steps: step2. Get Animation Js Task.
@@ -399,14 +394,14 @@ HWTEST_F(PluginFrontendDelegateTest, Initialize001, TestSize.Level1)
      * @tc.steps: step1. Build a PluginFrontendDelegate.
      */
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
-    RefPtr<Framework::PluginFrontendDelegate> delegate = PluginFrontendDelegateTest::GetPluginFrontendDelegate
-                                                                                    (taskExecutor);
+    RefPtr<Framework::PluginFrontendDelegate> delegate =
+        PluginFrontendDelegateTest::GetPluginFrontendDelegate(taskExecutor);
     EXPECT_TRUE(delegate != nullptr);
     /**
      * @tc.steps: step2. Get Running Page Id.
      * @tc.expected: step2. Get Running PageId success.
      */
-    delegate->pageRouteStack_.emplace_back(Ace::Framework::PageInfo { 0, "url"});
+    delegate->pageRouteStack_.emplace_back(Ace::Framework::PageInfo { 0, "url" });
     EXPECT_EQ(delegate->GetRunningPageId(), 0);
 }
 
@@ -422,8 +417,8 @@ HWTEST_F(PluginFrontendDelegateTest, GetRunningPageId002, TestSize.Level1)
      * @tc.steps: step1. Build a PluginFrontendDelegate.
      */
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
-    RefPtr<Framework::PluginFrontendDelegate> delegate = PluginFrontendDelegateTest::GetPluginFrontendDelegate
-                                                                                    (taskExecutor);
+    RefPtr<Framework::PluginFrontendDelegate> delegate =
+        PluginFrontendDelegateTest::GetPluginFrontendDelegate(taskExecutor);
     EXPECT_TRUE(delegate != nullptr);
     /**
      * @tc.steps: step2. Get Running Page Id.

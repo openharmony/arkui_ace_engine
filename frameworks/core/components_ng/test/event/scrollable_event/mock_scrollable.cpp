@@ -23,4 +23,16 @@ void Scrollable::OnFlushTouchEventsBegin() {}
 void Scrollable::OnFlushTouchEventsEnd() {}
 
 void Scrollable::Initialize(const WeakPtr<PipelineBase>& context) {}
+
+bool Scrollable::Idle() const
+{
+    return false;
+}
+
+void Scrollable::StartSpringMotion(
+    double mainPosition, double mainVelocity, const ExtentPair& extent, const ExtentPair& initExtent)
+{}
+
+void Scrollable::SetAxis(Axis axis)
+{}
 } // namespace OHOS::Ace

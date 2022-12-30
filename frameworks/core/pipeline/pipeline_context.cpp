@@ -54,10 +54,10 @@
 #include "core/common/event_manager.h"
 #include "core/common/font_manager.h"
 #include "core/common/frontend.h"
+#include "core/common/layout_inspector.h"
 #include "core/common/manager_interface.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/thread_checker.h"
-#include "core/common/layout_inspector.h"
 #include "core/components/checkable/render_checkable.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/container_modal/container_modal_component.h"
@@ -93,6 +93,7 @@
 #include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/base/factories/flutter_render_factory.h"
 #include "core/pipeline/base/render_context.h"
+#include "uicast_interface/uicast_context_impl.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -136,7 +137,7 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
     const RefPtr<Frontend>& frontend, int32_t instanceId)
     : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId,
-        (std::move(platformResRegister))),
+          (std::move(platformResRegister))),
       timeProvider_(g_defaultTimeProvider)
 {
     RegisterEventHandler(frontend->GetEventHandler());
@@ -149,6 +150,9 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     renderFactory_ = AceType::MakeRefPtr<FlutterRenderFactory>();
     eventManager_ = AceType::MakeRefPtr<EventManager>();
     UpdateFontWeightScale();
+    {
+        UICastContextImpl::Init(AceType::WeakClaim(this));
+    }
     eventManager_->SetInstanceId(instanceId);
     textOverlayManager_ = AceType::MakeRefPtr<TextOverlayManager>(WeakClaim(this));
 }
@@ -165,6 +169,9 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     cardTransitionController_ = AceType::MakeRefPtr<CardTransitionController>(AceType::WeakClaim(this));
     renderFactory_ = AceType::MakeRefPtr<FlutterRenderFactory>();
     UpdateFontWeightScale();
+    {
+        UICastContextImpl::Init(AceType::WeakClaim(this));
+    }
     textOverlayManager_ = AceType::MakeRefPtr<TextOverlayManager>(WeakClaim(this));
 }
 
@@ -206,6 +213,10 @@ void PipelineContext::FlushBuild()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+    {
+        UICastContextImpl::OnFlushBuildStart();
+    }
+
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushBuild();
     }
@@ -246,6 +257,10 @@ void PipelineContext::FlushBuild()
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushBuild();
     }
+
+    {
+        UICastContextImpl::OnFlushBuildFinish();
+    }
 #if !defined(PREVIEW)
     LayoutInspector::SupportInspector();
 #endif
@@ -267,8 +282,7 @@ void PipelineContext::FlushPredictLayout(int64_t deadline)
 double PipelineContext::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
     const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
 {
-    return OHOS::Ace::RenderCustomPaint::PaintMeasureText(text, fontSize, fontStyle,
-        fontWeight, fontFamily, letterSpacing);
+    return RenderCustomPaint::PaintMeasureText(text, fontSize, fontStyle, fontWeight, fontFamily, letterSpacing);
 }
 
 void PipelineContext::FlushFocus()
@@ -1363,6 +1377,12 @@ bool PipelineContext::CallRouterBackToPopPage()
         return false;
     }
 
+    {
+        if (UICastContextImpl::CallRouterBackToPopPage()) {
+            return true;
+        }
+    }
+
     if (frontend->OnBackPressed()) {
         // if user accept
         LOGI("CallRouterBackToPopPage(): user consume the back key event");
@@ -1738,25 +1758,48 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN && !isTabKeyPressed_) {
         isTabKeyPressed_ = true;
     }
-    if (!eventManager_->DispatchTabIndexEvent(event, rootElement_, GetLastPage())) {
-        return eventManager_->DispatchKeyEvent(event, rootElement_);
+    auto lastPage = GetLastPage();
+    if (lastPage) {
+        if (!eventManager_->DispatchTabIndexEvent(event, rootElement_, lastPage)) {
+            return eventManager_->DispatchKeyEvent(event, rootElement_);
+        }
+    } else {
+        if (!eventManager_->DispatchTabIndexEvent(event, rootElement_, rootElement_)) {
+            return eventManager_->DispatchKeyEvent(event, rootElement_);
+        }
     }
     return true;
 }
 
 bool PipelineContext::RequestDefaultFocus()
 {
+    RefPtr<FocusNode> defaultFocusNode;
+    std::string mainNodeName;
     auto curPageElement = GetLastPage();
-    CHECK_NULL_RETURN(curPageElement, false);
-    if (curPageElement->IsFocused()) {
+    if (curPageElement) {
+        if (curPageElement->IsDefaultHasFocused()) {
+            return false;
+        }
+        curPageElement->SetIsDefaultHasFocused(true);
+        defaultFocusNode = curPageElement->GetChildDefaultFocusNode();
+        mainNodeName = std::string(AceType::TypeName(curPageElement));
+    } else {
+        if (rootElement_->IsDefaultHasFocused()) {
+            return false;
+        }
+        rootElement_->SetIsDefaultHasFocused(true);
+        defaultFocusNode = rootElement_->GetChildDefaultFocusNode();
+        mainNodeName = std::string(AceType::TypeName(rootElement_));
+    }
+    if (!defaultFocusNode) {
+        LOGD("RequestDefaultFocus: %{public}s do not has default focus node.", mainNodeName.c_str());
         return false;
     }
-    curPageElement->SetIsFocused(true);
-    auto defaultFocusNode = curPageElement->GetChildDefaultFocusNode();
-    CHECK_NULL_RETURN(defaultFocusNode, false);
     if (!defaultFocusNode->IsFocusableWholePath()) {
+        LOGD("RequestDefaultFocus: %{public}s 's default focus node is not focusable.", mainNodeName.c_str());
         return false;
     }
+    LOGD("Focus: request default focus node %{public}s", AceType::TypeName(defaultFocusNode));
     return defaultFocusNode->RequestFocusImmediately();
 }
 
@@ -1810,7 +1853,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     LOGD(
         "MouseEvent (x,y): (%{public}f,%{public}f), button: %{public}d, action: %{public}d, pressedButtons: %{public}d",
-        scaleEvent.x, scaleEvent.y, scaleEvent.action, scaleEvent.button, scaleEvent.pressedButtons);
+        scaleEvent.x, scaleEvent.y, scaleEvent.button, scaleEvent.action, scaleEvent.pressedButtons);
     if (event.action == MouseAction::PRESS && event.button != MouseButton::LEFT_BUTTON) {
         eventManager_->HandleOutOfRectCallback(
             { scaleEvent.x, scaleEvent.y, scaleEvent.sourceType }, rectCallbackList_);
@@ -1870,6 +1913,19 @@ void PipelineContext::CreateTouchEventOnZoom(const AxisEvent& event)
     }
 }
 
+MouseEvent ConvertAxisToMouse(const AxisEvent& event)
+{
+    MouseEvent result;
+    result.x = event.x;
+    result.y = event.y;
+    result.action = MouseAction::MOVE;
+    result.button = MouseButton::NONE_BUTTON;
+    result.time = event.time;
+    result.deviceId = event.deviceId;
+    result.sourceType = event.sourceType;
+    return result;
+}
+
 void PipelineContext::OnAxisEvent(const AxisEvent& event)
 {
     if (isKeyCtrlPressed_ && !NearZero(event.verticalAxis) &&
@@ -1893,6 +1949,9 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
         eventManager_->AxisTest(scaleEvent, rootElement_->GetRenderNode());
         eventManager_->DispatchAxisEvent(scaleEvent);
     }
+
+    auto mouseEvent = ConvertAxisToMouse(event);
+    OnMouseEvent(mouseEvent);
 }
 
 void PipelineContext::AddToHoverList(const RefPtr<RenderNode>& node)
@@ -1958,6 +2017,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
+    {
+        UICastContextImpl::CheckEvent();
+    }
 #if defined(ENABLE_NATIVE_VIEW)
     if (frameCount_ < 2) {
         frameCount_++;
@@ -2113,26 +2175,30 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
             option.SetDuration(duration);
             auto curve = MakeRefPtr<CubicCurve>(0.2, 0.0, 0.2, 1.0); // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
             option.SetCurve(curve);
-            Animate(option, curve, [width, height, this]() {
-                SetRootSizeWithWidthHeight(width, height);
-                FlushLayout();
-            }, [weak = AceType::WeakClaim(this)]() {
-                auto pipeline = weak.Upgrade();
-                if (pipeline == nullptr) {
-                    return;
-                }
-                pipeline->rotationAnimationCount_--;
-                if (pipeline->rotationAnimationCount_ < 0) {
-                    LOGE("PipelineContext::Root node ROTATION animation callback"
-                        "rotationAnimationCount Invalid %{public}d", pipeline->rotationAnimationCount_);
-                }
-                if (pipeline->rotationAnimationCount_ == 0) {
+            Animate(
+                option, curve,
+                [width, height, this]() {
+                    SetRootSizeWithWidthHeight(width, height);
+                    FlushLayout();
+                },
+                [weak = AceType::WeakClaim(this)]() {
+                    auto pipeline = weak.Upgrade();
+                    if (pipeline == nullptr) {
+                        return;
+                    }
+                    pipeline->rotationAnimationCount_--;
+                    if (pipeline->rotationAnimationCount_ < 0) {
+                        LOGE("PipelineContext::Root node ROTATION animation callback"
+                             "rotationAnimationCount Invalid %{public}d",
+                            pipeline->rotationAnimationCount_);
+                    }
+                    if (pipeline->rotationAnimationCount_ == 0) {
 #ifdef ENABLE_ROSEN_BACKEND
-                    // to improve performance, duration rotation animation, draw text as bitmap
-                    Rosen::RSSystemProperties::SetDrawTextAsBitmap(false);
+                        // to improve performance, duration rotation animation, draw text as bitmap
+                        Rosen::RSSystemProperties::SetDrawTextAsBitmap(false);
 #endif
-                }
-            });
+                    }
+                });
 #ifdef ENABLE_ROSEN_BACKEND
             // to improve performance, duration rotation animation, draw text as bitmap
             Rosen::RSSystemProperties::SetDrawTextAsBitmap(true);
@@ -2199,14 +2265,14 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
         }
     }
 
-    taskExecutor_->PostTask([weakFrontend = weakFrontend_, width, height](){
-        auto frontend = weakFrontend.Upgrade();
-        if (frontend) {
-            frontend->OnSurfaceChanged(width, height);
-        }
-    },
-    TaskExecutor::TaskType::JS);
-
+    taskExecutor_->PostTask(
+        [weakFrontend = weakFrontend_, width, height]() {
+            auto frontend = weakFrontend.Upgrade();
+            if (frontend) {
+                frontend->OnSurfaceChanged(width, height);
+            }
+        },
+        TaskExecutor::TaskType::JS);
 
     // init transition clip size when surface changed.
     const auto& pageElement = GetLastPage();
@@ -2602,7 +2668,7 @@ bool PipelineContext::RequestFocus(const RefPtr<Element>& targetElement)
 bool PipelineContext::RequestFocus(const std::string& targetNodeId)
 {
     CHECK_NULL_RETURN(rootElement_, false);
-    auto currentFocusChecked =  rootElement_->RequestFocusImmediatelyById(targetNodeId);
+    auto currentFocusChecked = rootElement_->RequestFocusImmediatelyById(targetNodeId);
     if (!isSubPipeline_ || currentFocusChecked) {
         LOGI("Request focus finish currentFocus is %{public}d", currentFocusChecked);
         return currentFocusChecked;
@@ -2869,10 +2935,10 @@ void PipelineContext::FlushBuildAndLayoutBeforeSurfaceReady()
         TaskExecutor::TaskType::UI);
 }
 
-void PipelineContext::RootLostFocus() const
+void PipelineContext::RootLostFocus(BlurReason reason) const
 {
     if (rootElement_) {
-        rootElement_->LostFocus();
+        rootElement_->LostFocus(reason);
     }
 }
 
@@ -2880,7 +2946,7 @@ void PipelineContext::WindowFocus(bool isFocus)
 {
     onFocus_ = isFocus;
     if (!isFocus) {
-        RootLostFocus();
+        RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
     }

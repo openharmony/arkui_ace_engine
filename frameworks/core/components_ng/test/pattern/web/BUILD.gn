@@ -27,9 +27,13 @@ ohos_unittest("web_pattern_test_ng") {
     "web_pattern_test_ng.cpp",
   ]
   deps = [
+    "$ability_runtime_path/frameworks/native/appkit:appkit_native",
     "$ace_root/build:ace_ohos_unittest_base",
     "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
     "//base/web/webview/ohos_nweb:libnweb",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "//foundation/window/window_manager/utils:libwmutil",
+    "//foundation/window/window_manager/wm:libwm",
   ]
   configs = [
     ":config_web_test",
@@ -47,6 +51,9 @@ ohos_unittest("web_view_test_ng") {
     "$ace_root/build:ace_ohos_unittest_base",
     "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
     "//base/web/webview/ohos_nweb:libnweb",
+    "//foundation/graphic/graphic_2d:libsurface",
+    "//third_party/EGL:libEGL",
+    "//third_party/openGLES:libGLES",
   ]
 
   configs = [
@@ -60,6 +67,11 @@ config("config_web_test") {
     "//commonlibrary/c_utils/base/include",
     "$ace_root",
     "$ace_root/frameworks",
+    "//foundation/window/window_manager/interfaces/innerkits/wm",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+    "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
+    "//foundation/multimedia/image_framework/interfaces/innerkits/include",
+    "//foundation/window/window_manager/interfaces/innerkits",
   ]
 }
 

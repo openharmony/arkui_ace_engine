@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_RENDER_CONTEXT_H
 
 #include <cstdint>
+#include <memory>
 #include <optional>
 
 #include "render_service_client/core/ui/rs_node.h"
@@ -31,12 +32,14 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/rosen_modifier_property.h"
+#include "core/components_ng/render/adapter/graphics_modifier.h"
+#include "core/components_ng/render/adapter/rosen_modifier_property.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
 class BorderImageModifier;
 class MouseSelectModifier;
+class FocusStateModifier;
 class PageTransitionEffect;
 class OverlayTextModifier;
 class RosenRenderContext : public RenderContext {
@@ -68,6 +71,17 @@ public:
     void ResetBlendBorderColor() override;
 
     void BlendBorderColor(const Color& color) override;
+
+    // Paint focus state by component's setting. It will paint along the paintRect
+    void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth) override;
+    // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
+    void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
+        const Dimension& paintWidth) override;
+    // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
+    void PaintFocusState(
+        const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth) override;
+
+    void ClearFocusState() override;
 
     RefPtr<Canvas> GetCanvas() override;
     void Restore() override;
@@ -174,6 +188,8 @@ public:
     void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) override;
 
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;
+    void OnZIndexUpdate(int32_t value) override;
+    void DumpInfo() const override;
 
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
@@ -202,7 +218,6 @@ private:
 
     void OnOffsetUpdate(const OffsetT<Dimension>& value) override;
     void OnAnchorUpdate(const OffsetT<Dimension>& value) override;
-    void OnZIndexUpdate(int32_t value) override;
 
     void OnClipShapeUpdate(const RefPtr<BasicShape>& basicShape) override;
     void OnClipEdgeUpdate(bool isClip) override;
@@ -240,11 +255,27 @@ private:
     void PaintClip(const SizeF& frameSize);
     void PaintGradient(const SizeF& frameSize);
     void PaintGraphics();
-    void OnPaintGraphics();
     void PaintOverlayText();
     void PaintBorderImage();
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
+    void GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop);
+
+    // helper function to check if paint rect is valid
+    bool RectIsNull();
+
+    /** Set data to the modifier and bind it to rsNode_
+     *   If [modifier] not initialized, initialize it and add it to rsNode
+     *
+     *   @param modifier     shared_ptr to a member modifier
+     *   @param data         passed to SetCustomData, set to the modifier
+     */
+    template<typename T, typename D>
+    void SetModifier(std::shared_ptr<T>& modifier, D data);
+
+    // helper function to update one of the graphic effects
+    template<typename T, typename D>
+    void UpdateGraphic(std::shared_ptr<T>& modifier, D data);
 
     RectF AdjustPaintRect();
 
@@ -253,12 +284,17 @@ private:
     DataReadyNotifyTask CreateBorderImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBorderImageLoadSuccessCallback();
 
+    RefPtr<ImageLoadingContext> bgLoadingCtx_;
+    RefPtr<CanvasImage> bgImage_;
+
+    RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
+    RefPtr<CanvasImage> bdImage_;
+
     std::shared_ptr<Rosen::RSNode> rsNode_;
     SkPictureRecorder* recorder_ = nullptr;
-    RefPtr<ImageLoadingContext> bgLoadingCtx_;
-    RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
     RefPtr<Canvas> recordingCanvas_;
     RefPtr<Canvas> rosenCanvas_;
+
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;
     bool isPositionChanged_ = false;
@@ -268,10 +304,21 @@ private:
 
     std::shared_ptr<BorderImageModifier> borderImageModifier_ = nullptr;
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_ = nullptr;
+    std::shared_ptr<FocusStateModifier> focusStateModifier_;
     std::optional<TransformMatrixModifier> transformMatrixModifier_;
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
     std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
+
+    // graphics modifiers
+    std::shared_ptr<GrayScaleModifier> grayScaleModifier_;
+    std::shared_ptr<BrightnessModifier> brightnessModifier_;
+    std::shared_ptr<ContrastModifier> contrastModifier_;
+    std::shared_ptr<SaturateModifier> saturateModifier_;
+    std::shared_ptr<SepiaModifier> sepiaModifier_;
+    std::shared_ptr<InvertModifier> invertModifier_;
+    std::shared_ptr<HueRotateModifier> hueRotateModifier_;
+    std::shared_ptr<ColorBlendModifier> colorBlendModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };

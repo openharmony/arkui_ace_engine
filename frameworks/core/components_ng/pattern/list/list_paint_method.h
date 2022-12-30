@@ -16,20 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_PAINT_METHOD_H
 
-#include <stdint.h>
-
-#include "base/geometry/ng/size_t.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/macros.h"
-#include "base/utils/utils.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar_painter.h"
-#include "core/components_ng/render/divider_painter.h"
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_v2/list/list_properties.h"
-
 
 namespace OHOS::Ace::NG {
 struct DividerInfo {
@@ -38,6 +29,8 @@ struct DividerInfo {
     float startMargin;
     float endMargin;
     float halfSpaceWidth;
+    float mainPadding;
+    float crossPadding;
     bool isVertical;
     int32_t lanes;
     int32_t totalItemCount;
@@ -58,9 +51,18 @@ public:
 
     static void PaintDivider(const DividerInfo& dividerInfo, const PositionMap& itemPosition, RSCanvas& canvas);
 
+    void PaintDivider(PaintWrapper* paintWrapper, RSCanvas& canvas);
+    void PaintScrollBar(RSCanvas& canvas);
+    void PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas);
+
     void SetScrollBar(WeakPtr<ScrollBar>&& scrollBar)
     {
         scrollBar_ = scrollBar;
+    }
+
+    void SetEdgeEffect(WeakPtr<ScrollEdgeEffect>&& edgeEffect)
+    {
+        edgeEffect_ = edgeEffect;
     }
 
     void SetTotalItemCount(int32_t totalItemCount)
@@ -77,6 +79,7 @@ private:
     PositionMap itemPosition_;
 
     WeakPtr<ScrollBar> scrollBar_;
+    WeakPtr<ScrollEdgeEffect> edgeEffect_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_PAINT_METHOD_H

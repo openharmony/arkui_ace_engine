@@ -151,7 +151,19 @@ Size FlutterRenderShape::CreatePath()
         return Size();
     }
     auto skRect =  path_.getBounds();
-    return Size(skRect.right(), skRect.bottom());
+    auto right = skRect.right();
+    auto bottom = skRect.bottom();
+    if (NearZero(right) && NearZero(bottom)) {
+        return Size();
+    }
+    auto lineWidth = strokeState_.GetLineWidth();
+    if (NearZero(right)) {
+        right = lineWidth.ConvertToPx();
+    }
+    if (NearZero(bottom)) {
+        bottom = lineWidth.ConvertToPx();
+    }
+    return Size(right, bottom);
 }
 
 void FlutterRenderShape::Paint(RenderContext& context, const Offset& offset)

@@ -33,7 +33,9 @@ void ButtonPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     SetDefaultAttributes(host, pipeline);
     host->GetRenderContext()->SetClipToFrame(true);
-    clickedColor_ = pipeline->GetTheme<ButtonTheme>()->GetClickedColor();
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    clickedColor_ = buttonTheme->GetClickedColor();
 }
 
 void ButtonPattern::SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, const RefPtr<PipelineBase>& pipeline)
@@ -61,7 +63,7 @@ void ButtonPattern::InitButtonLabel()
         LOGI("No label, no need to initialize label.");
         return;
     }
-    
+
     auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -94,6 +96,7 @@ void ButtonPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
 
     InitButtonLabel();
+    InitMouseEvent();
 
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
@@ -107,12 +110,15 @@ void ButtonPattern::OnModifyDone()
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             buttonPattern->OnTouchDown();
         }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
+            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
             buttonPattern->OnTouchUp();
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gesture->AddTouchEvent(touchListener_);
+
+    HandleEnabled();
 }
 
 void ButtonPattern::OnTouchDown()
@@ -148,6 +154,68 @@ void ButtonPattern::OnTouchUp()
             renderContext->UpdateBackgroundColor(backgroundColor_);
             return;
         }
+        renderContext->ResetBlendBgColor();
+    }
+}
+
+void ButtonPattern::InitMouseEvent()
+{
+    if (mouseEvent_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto eventHub = host->GetEventHub<ButtonEventHub>();
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+
+    auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleMouseEvent(isHover);
+        }
+    };
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnHoverEvent(mouseEvent_);
+}
+
+void ButtonPattern::HandleMouseEvent(bool isHover)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(theme);
+    auto hoverColor = theme->GetHoverColor();
+    if (isHover) {
+        renderContext->BlendBgColor(hoverColor);
+    } else {
+        renderContext->ResetBlendBgColor();
+    }
+}
+
+void ButtonPattern::HandleEnabled()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(theme);
+    if (!enabled) {
+        auto alpha = theme->GetBgDisabledAlpha();
+        auto color = renderContext->GetBackgroundColor();
+        renderContext->UpdateBackgroundColor(color->BlendOpacity(alpha));
+    } else {
         renderContext->ResetBlendBgColor();
     }
 }

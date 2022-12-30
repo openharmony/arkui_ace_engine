@@ -49,28 +49,15 @@ public:
         callbacks_.emplace_back(std::move(event));
     }
 
-    void SetBase(const Rect& rect, const Offset& origin)
+    void UpdateArea(const Rect& rect, const Offset& origin, const Rect& lastRect, const Offset& lastOrigin)
     {
-        rect_ = rect;
-        origin_ = origin;
-    }
-
-    void UpdateArea(const Rect& rect, const Offset& origin)
-    {
-        if ((rect_ == rect) && (origin_ == origin)) {
-            return;
-        }
         for (const auto& callback : callbacks_) {
-            callback(rect_, origin_, rect, origin);
+            callback(lastRect, lastOrigin, rect, origin);
         }
-        rect_ = rect;
-        origin_ = origin;
     }
 
 private:
     std::list<OnAreaChangeEvent> callbacks_;
-    Rect rect_;
-    Offset origin_;
 };
 
 } // namespace OHOS::Ace::V2

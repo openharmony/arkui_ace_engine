@@ -198,8 +198,9 @@ void JSCheckboxGroup::SelectedColor(const JSCallbackInfo& info)
         return;
     }
     Color selectedColor;
+    auto theme = GetTheme<CheckboxTheme>();
     if (!ParseJsColor(info[0], selectedColor)) {
-        return;
+        selectedColor = theme->GetActiveColor();
     }
 
     CheckBoxGroupModel::GetInstance()->SetSelectedColor(selectedColor);

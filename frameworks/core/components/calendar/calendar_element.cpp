@@ -25,6 +25,11 @@
 #include "core/components/text/text_element.h"
 
 namespace OHOS::Ace {
+namespace {
+
+constexpr int REGISTER_CHANGE_LISTENER_ID = 1003;
+
+}
 
 void CalendarElement::PerformBuild()
 {
@@ -62,10 +67,11 @@ void CalendarElement::PerformBuild()
 
     const auto& child = children_.empty() ? nullptr : children_.front();
     auto newComponent = calendar->Build(GetContext(), calendarController_);
-    auto element = UpdateChild(child, newComponent);
+    auto childElement = UpdateChild(child, newComponent);
+    auto element = childElement;
     if (calendar->IsCardCalendar()) {
-        BuildCardCalendar(calendar, element);
-        element = element->GetChildren().back();
+        BuildCardCalendar(calendar, childElement);
+        element = childElement->GetChildren().back();
     }
 
     auto swiperElement = AceType::DynamicCast<SwiperElement>(element);
@@ -83,8 +89,55 @@ void CalendarElement::PerformBuild()
             calendarController_->SetRenderSwiper(renderSwiper_);
         }
     }
-
+    RegisterChangeEndListener(calendar, childElement);
     RequestFocusImmediately();
+}
+
+void CalendarElement::RegisterChangeEndListener(
+    const RefPtr<CalendarComponent>& calendar, const RefPtr<Element>& element)
+{
+    if (!calendar->IsCardCalendar()) {
+        return;
+    }
+    auto children = element->GetChildren().front()->GetChildren();
+    int32_t index = 0;
+    RefPtr<Element> flex;
+    for (const auto& item : children) {
+        if (index == 1) {
+            flex = item;
+            break;
+        }
+        ++index;
+    }
+
+    auto text = GetTextElement(flex);
+    CHECK_NULL_VOID(text);
+    auto renderText = AceType::DynamicCast<RenderText>(text->GetRenderNode());
+    CHECK_NULL_VOID(renderSwiper_);
+    auto onChanged = [text = WeakClaim(RawPtr(renderText)), weakController = WeakClaim(RawPtr(calendarController_))](
+                         bool index) {
+        auto controller = weakController.Upgrade();
+        CHECK_NULL_VOID(controller);
+        auto renderText = text.Upgrade();
+        CHECK_NULL_VOID(renderText);
+        auto currentDate = controller->GetCurrentMonth();
+        DateTime dateTime;
+        dateTime.year = currentDate.year;
+        dateTime.month = currentDate.month;
+        auto date = Localization::GetInstance()->FormatDateTime(dateTime, "yyyyMMM");
+        auto textComponent = AceType::MakeRefPtr<TextComponent>(date);
+        auto cardTheme = renderText->GetTheme<CalendarTheme>();
+        CHECK_NULL_VOID(cardTheme);
+        TextStyle style;
+        style.SetFontSize(cardTheme->GetCardCalendarTheme().titleFontSize);
+        style.SetTextColor(cardTheme->GetCardCalendarTheme().titleTextColor);
+        style.SetFontWeight(FontWeight::W500);
+        style.SetAllowScale(false);
+        textComponent->SetTextStyle(style);
+        renderText->Update(textComponent);
+        renderText->MarkNeedLayout();
+    };
+    renderSwiper_->RegisterChangeEndListener(REGISTER_CHANGE_LISTENER_ID, onChanged);
 }
 
 void CalendarElement::BuildCardCalendar(const RefPtr<CalendarComponent>& calendar, const RefPtr<Element>& element)
@@ -133,27 +186,6 @@ void CalendarElement::BuildCardCalendar(const RefPtr<CalendarComponent>& calenda
             return;
         }
         pre ? controller->GoToPrevMonth(1) : controller->GoToNextMonth(1);
-        auto renderText = text.Upgrade();
-        auto currentDate = controller->GetCurrentMonth();
-        if (renderText) {
-            DateTime dateTime;
-            dateTime.year = currentDate.year;
-            dateTime.month = currentDate.month;
-            auto date = Localization::GetInstance()->FormatDateTime(dateTime, "yyyyMMM");
-            auto textComponent = AceType::MakeRefPtr<TextComponent>(date);
-            auto cardTheme = renderText->GetTheme<CalendarTheme>();
-            if (!cardTheme) {
-                return;
-            }
-            TextStyle style;
-            style.SetFontSize(cardTheme->GetCardCalendarTheme().titleFontSize);
-            style.SetTextColor(cardTheme->GetCardCalendarTheme().titleTextColor);
-            style.SetFontWeight(FontWeight::W500);
-            style.SetAllowScale(false);
-            textComponent->SetTextStyle(style);
-            renderText->Update(textComponent);
-            renderText->MarkNeedLayout();
-        }
     };
     BackEndEventManager<void()>::GetInstance().BindBackendEvent(calendar->GetPreClickId(), [buttonCallback]() {
         AceApplicationInfo::GetInstance().IsRightToLeft() ? buttonCallback(false) : buttonCallback(true);

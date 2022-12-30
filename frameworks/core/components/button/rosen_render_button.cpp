@@ -54,6 +54,7 @@ constexpr uint8_t DEFAULT_OPACITY = 255;
 constexpr Dimension FOCUS_PADDING = 2.0_vp;
 constexpr Dimension FOCUS_BORDER_WIDTH = 2.0_vp;
 constexpr uint32_t FOCUS_BORDER_COLOR = 0xFF0A59F7;
+constexpr uint32_t FOCUS_POPUP_BORDER_COLOR = 0xFFFFFFFF;
 
 } // namespace
 
@@ -114,7 +115,12 @@ void RosenRenderButton::Paint(RenderContext& context, const Offset& offset)
     auto pipeline = context_.Upgrade();
     if (isFocus_ && (isTablet_ || isPhone_) && pipeline && pipeline->GetIsTabKeyPressed()) {
         // Need to use PipelineContext::ShowFocusAnimation
-        PaintFocus(context, offset);
+        if (buttonComponent_->IsPopupButton()) {
+            PaintPopupFocus(context);
+        } else {
+            PaintFocus(context, offset);
+        }
+        SyncFocusGeometryProperties();
     }
     RenderNode::Paint(context, offset);
 }
@@ -492,9 +498,57 @@ void RosenRenderButton::PaintFocus(RenderContext& context, const Offset& offset)
     paint.setAntiAlias(true);
     SkRRect rRect;
     rRect.setRectXY(SkRect::MakeIWH(focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
-    rRect.offset(- NormalizeToPx(FOCUS_PADDING  + FOCUS_BORDER_WIDTH * HALF),
-        - NormalizeToPx(FOCUS_PADDING  + FOCUS_BORDER_WIDTH * HALF));
+    rRect.offset(-NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF),
+        -NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF));
     canvas->drawRRect(rRect, paint);
+}
+
+void RosenRenderButton::PaintPopupFocus(RenderContext& context)
+{
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
+    if (!canvas) {
+        LOGE("paint canvas is null");
+        return;
+    }
+    Size canvasSize = GetLayoutSize();
+    double focusBorderHeight = canvasSize.Height() - NormalizeToPx(FOCUS_BORDER_WIDTH) / HALF;
+    double focusBorderWidth = canvasSize.Width() - NormalizeToPx(FOCUS_BORDER_WIDTH) / HALF;
+    double focusRadius = focusBorderHeight * HALF;
+    if (!buttonComponent_) {
+        return;
+    }
+
+    SkPaint paint;
+    paint.setColor(FOCUS_POPUP_BORDER_COLOR);
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    paint.setStrokeWidth(NormalizeToPx(FOCUS_BORDER_WIDTH));
+    paint.setAntiAlias(true);
+    SkRRect rRect;
+    rRect.setRectXY(SkRect::MakeIWH(focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
+    rRect.offset(NormalizeToPx(FOCUS_BORDER_WIDTH), NormalizeToPx(FOCUS_BORDER_WIDTH));
+    canvas->drawRRect(rRect, paint);
+}
+
+void RosenRenderButton::SyncFocusGeometryProperties()
+{
+    auto rsNode = GetRSNode();
+    if (!rsNode) {
+        return;
+    }
+    Size boundsSize = GetLayoutSize();
+    double focusBorderHeight = boundsSize.Height() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
+    double focusBorderWidth = boundsSize.Width() + NormalizeToPx(FOCUS_PADDING * 2 + FOCUS_BORDER_WIDTH);
+    Offset boundsOffset = GetPaintOffset() + Offset(-NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF),
+                                                 -NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF));
+    boundsOffset += Offset(-NormalizeToPx(FOCUS_PADDING), -NormalizeToPx(FOCUS_PADDING));
+    focusBorderWidth += 2 * NormalizeToPx(FOCUS_PADDING);
+    focusBorderHeight += 2 *NormalizeToPx(FOCUS_PADDING);
+    rsNode->SetBounds(boundsOffset.GetX(), boundsOffset.GetY(), focusBorderWidth, focusBorderHeight);
+    if (IsTailRenderNode()) {
+        Offset frameOffset = GetPaintOffset();
+        Size frameSize = GetLayoutSize();
+        rsNode->SetFrame(frameOffset.GetX(), frameOffset.GetY(), frameSize.Width(), frameSize.Height());
+    }
 }
 
 } // namespace OHOS::Ace

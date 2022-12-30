@@ -18,24 +18,24 @@
 
 #include "gtest/gtest.h"
 
-#include "core/common/ace_engine.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "base/test/unittest/geometry/mock_pipeline_base.h"
-#include "base/test/unittest/geometry/mock_container.h"
-
+#include "core/common/ace_engine.h"
+#include "core/common/test/mock/mock_container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/test/pattern/custom_paint/common_constants.h"
 #include "core/components_ng/test/pattern/custom_paint/mock/mock_paragraph.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_interface.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
 
-#include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
+#include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
@@ -43,7 +43,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
 class OffscreenCanvasPaintPatternTestNg : public testing::Test {
 public:
     // Create the pointer of the class OffscreenCanvasPattern
@@ -158,7 +157,7 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg002
     EXPECT_DOUBLE_EQ(paintMethod->fillState_.GetPattern().GetImageHeight(), IDEAL_HEIGHT);
     EXPECT_EQ(paintMethod->fillState_.GetPattern().GetImgSrc(), IMAGE_SRC);
     EXPECT_EQ(paintMethod->fillState_.GetPattern().GetRepetition(), REPETITION_STR);
-    
+
     Ace::Gradient gradient;
     offscreenCanvasPattern->SetFillGradient(gradient);
     EXPECT_FALSE(paintMethod->fillState_.GetGradient().GetRepeat());
@@ -423,8 +422,8 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg006
      * @tc.steps4: Test the function GetImageData.
      * @tc.expected: The attributes dirtyWidth and dirtyHeight of return value are equal to DEFAULT_DOUBLE1.
      */
-    auto imageData1 = offscreenCanvasPattern->GetImageData(
-        DEFAULT_DOUBLE1, DEFAULT_DOUBLE1, DEFAULT_DOUBLE1, DEFAULT_DOUBLE1);
+    auto imageData1 =
+        offscreenCanvasPattern->GetImageData(DEFAULT_DOUBLE1, DEFAULT_DOUBLE1, DEFAULT_DOUBLE1, DEFAULT_DOUBLE1);
     EXPECT_DOUBLE_EQ(imageData1->dirtyWidth, DEFAULT_DOUBLE1);
     EXPECT_DOUBLE_EQ(imageData1->dirtyHeight, DEFAULT_DOUBLE1);
 
@@ -448,5 +447,4 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg006
     EXPECT_DOUBLE_EQ(offscreenCanvasPattern->MeasureText(DEFAULT_STR, paintState), DEFAULT_DOUBLE0);
     EXPECT_DOUBLE_EQ(offscreenCanvasPattern->MeasureTextHeight(DEFAULT_STR, paintState), DEFAULT_DOUBLE0);
 }
-
 } // namespace OHOS::Ace::NG

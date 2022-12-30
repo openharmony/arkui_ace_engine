@@ -102,7 +102,7 @@ void EventManager::TouchTest(
     // collect
     const NG::PointF point { event.x, event.y };
     // For root node, the parent local point is the same as global point.
-    frameNode->TouchTest(point, point, touchRestrict, axisTouchTestResult_, -1);
+    frameNode->TouchTest(point, point, touchRestrict, axisTouchTestResult_, event.id);
 }
 
 void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<TextOverlayManager>& textOverlayManager)
@@ -110,7 +110,9 @@ void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<
     if (touchPoint.type != TouchType::DOWN) {
         return;
     }
-    const Point point { touchPoint.x, touchPoint.y, touchPoint.sourceType };
+    auto coordinateOffset = textOverlayManager->GetCoordinateOffset();
+    const Point point { touchPoint.x - coordinateOffset.GetX(), touchPoint.y - coordinateOffset.GetY(),
+        touchPoint.sourceType };
     if (!textOverlayManager) {
         return;
     }
@@ -280,6 +282,15 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
 {
     ContainerScope scope(instanceId_);
 
+    if (event.action == AxisAction::BEGIN) {
+        // first collect gesture into gesture referee.
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (refereeNG_) {
+                refereeNG_->AddGestureToScope(event.id, axisTouchTestResult_);
+            }
+        }
+    }
+
     ACE_FUNCTION_TRACE();
     for (const auto& entry : axisTouchTestResult_) {
         if (!entry->HandleEvent(event)) {
@@ -287,19 +298,24 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
         }
     }
     if (event.action == AxisAction::END || event.action == AxisAction::NONE) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (refereeNG_) {
+                refereeNG_->CleanGestureScope(event.id);
+            }
+        }
         axisTouchTestResult_.clear();
     }
     return true;
 }
 
 bool EventManager::DispatchTabIndexEvent(
-    const KeyEvent& event, const RefPtr<FocusNode>& focusNode, const RefPtr<FocusGroup>& curPage)
+    const KeyEvent& event, const RefPtr<FocusNode>& focusNode, const RefPtr<FocusGroup>& mainNode)
 {
-    CHECK_NULL_RETURN(focusNode, false);
-    CHECK_NULL_RETURN(curPage, false);
     LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
         event.action, event.repeatTime);
-    if (focusNode->HandleFocusByTabIndex(event, curPage)) {
+    CHECK_NULL_RETURN(focusNode, false);
+    CHECK_NULL_RETURN(mainNode, false);
+    if (focusNode->HandleFocusByTabIndex(event, mainNode)) {
         LOGI("Tab index focus system handled this event");
         return true;
     }
@@ -320,17 +336,17 @@ bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNod
 }
 
 bool EventManager::DispatchTabIndexEventNG(
-    const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode, const RefPtr<NG::FrameNode>& curPage)
+    const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode, const RefPtr<NG::FrameNode>& mainNode)
 {
-    CHECK_NULL_RETURN(focusNode, false);
-    CHECK_NULL_RETURN(curPage, false);
     LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
         event.action, event.repeatTime);
+    CHECK_NULL_RETURN(focusNode, false);
+    CHECK_NULL_RETURN(mainNode, false);
     auto focusNodeHub = focusNode->GetFocusHub();
     CHECK_NULL_RETURN(focusNodeHub, false);
-    auto curPageFocusHub = curPage->GetFocusHub();
-    CHECK_NULL_RETURN(curPageFocusHub, false);
-    if (focusNodeHub->HandleFocusByTabIndex(event, curPageFocusHub)) {
+    auto mainNodeHub = mainNode->GetFocusHub();
+    CHECK_NULL_RETURN(mainNodeHub, false);
+    if (focusNodeHub->HandleFocusByTabIndex(event, mainNodeHub)) {
         LOGI("Tab index focus system handled this event");
         return true;
     }
@@ -639,6 +655,45 @@ EventManager::EventManager()
         return refereeNG->HasGestureAccepted(touchId);
     };
     referee_->SetQueryStateFunc(std::move(callback));
+
+    auto cleanReferee = [weak = WeakClaim(this)](size_t touchId) -> void {
+        auto eventManager = weak.Upgrade();
+        CHECK_NULL_VOID(eventManager);
+        auto referee = eventManager->referee_;
+        CHECK_NULL_VOID(referee);
+        auto gestureScope = referee->GetGestureScope();
+        const auto iter = gestureScope.find(touchId);
+        if (iter == gestureScope.end()) {
+            return;
+        }
+
+        auto highRecognizers = iter->second.GetHighRecognizers();
+        auto lowRecognizers = iter->second.GetLowRecognizers();
+        auto parallelRecognizers = iter->second.GetParallelRecognizers();
+
+        for (const auto& weak : highRecognizers) {
+            auto gesture = weak.Upgrade();
+            if (gesture) {
+                gesture->OnRejected(touchId);
+            }
+        }
+
+        for (const auto& weak : lowRecognizers) {
+            auto gesture = weak.Upgrade();
+            if (gesture) {
+                gesture->OnRejected(touchId);
+            }
+        }
+
+        for (const auto& weak : parallelRecognizers) {
+            auto gesture = weak.Upgrade();
+            if (gesture) {
+                gesture->OnRejected(touchId);
+            }
+        }
+        
+    };
+    refereeNG_->SetQueryStateFunc(std::move(cleanReferee));
 }
 
 } // namespace OHOS::Ace

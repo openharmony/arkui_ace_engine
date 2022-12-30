@@ -187,12 +187,35 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
             scroll->HandleTouchUp();
         }
     });
+    rawRecognizer_->SetOnTouchCancel([weakScroll = AceType::WeakClaim(this)](const TouchEventInfo&) {
+        auto scroll = weakScroll.Upgrade();
+        if (scroll) {
+            scroll->HandleTouchCancel();
+        }
+    });
 
     controller_ = AceType::MakeRefPtr<Animator>(context);
     springController_ = AceType::MakeRefPtr<Animator>(context);
 
     spring_ = GetDefaultOverSpringProperty();
     available_ = true;
+}
+
+void Scrollable::SetAxis(Axis axis)
+{
+    axis_ = axis;
+    PanDirection panDirection;
+    if (axis_ == Axis::VERTICAL) {
+        panDirection.type = PanDirection::VERTICAL;
+    } else {
+        panDirection.type = PanDirection::HORIZONTAL;
+    }
+    if (panRecognizer_) {
+        panRecognizer_->SetDirection(panDirection);
+    }
+    if (panRecognizerNG_) {
+        panRecognizerNG_->SetDirection(panDirection);
+    }
 }
 
 void Scrollable::HandleTouchDown()
@@ -219,6 +242,15 @@ void Scrollable::HandleTouchUp()
     }
     if (springController_->IsStopped() && scrollOverCallback_) {
         LOGD("need scroll to boundary");
+        ProcessScrollOverCallback(0.0);
+    }
+}
+
+void Scrollable::HandleTouchCancel()
+{
+    LOGD("handle touch cancel");
+    isTouching_ = false;
+    if (springController_->IsStopped() && scrollOverCallback_) {
         ProcessScrollOverCallback(0.0);
     }
 }
@@ -330,6 +362,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         if (scrollEndCallback_) {
             scrollEndCallback_();
         }
+        currentVelocity_ = 0.0;
         return;
     }
     if (outBoundaryCallback_ && outBoundaryCallback_() && scrollOverCallback_) {

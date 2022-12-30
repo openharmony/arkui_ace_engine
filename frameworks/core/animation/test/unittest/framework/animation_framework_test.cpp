@@ -17,23 +17,22 @@
 
 #include "adapter/aosp/entrance/java/jni/jni_environment.h"
 #include "base/log/log.h"
+#include "base/test/mock/mock_asset_manager.h"
+#include "base/test/mock/mock_task_executor.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/friction_motion.h"
 #include "core/animation/scroll_motion.h"
 #include "core/animation/spring_motion.h"
-#include "core/animation/test/unittest/mock/animation_mock.h"
-#include "core/animation/test/unittest/mock/animation_test_utils.h"
+#include "core/animation/test/mock/mock_animation.h"
+#include "core/animation/test/mock/mock_animation_util.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #include "core/components/test/json/json_frontend.h"
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/fake_task_executor.h"
-#include "core/mock/mock_resource_register.h"
 #include "core/pipeline/pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
-
 CardTransitionController::CardTransitionController(const WeakPtr<PipelineContext>& context) {}
 
 void CardTransitionController::RegisterTransitionListener() {}
@@ -89,15 +88,15 @@ public:
         std::unique_ptr<PlatformWindow> platformWindow = AnimationTestUtils::CreatePlatformWindow();
         platformWindowRaw_ = reinterpret_cast<MockPlatformWindow*>(platformWindow.get());
         auto window = AnimationTestUtils::CreateWindow(std::move(platformWindow));
-        auto taskExecutor = AceType::MakeRefPtr<FakeTaskExecutor>();
-        auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+        auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+        auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
         auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
         RefPtr<Frontend> frontend = Frontend::CreateDefault();
         context_ = AceType::MakeRefPtr<PipelineContext>(
             std::move(window), taskExecutor, assetManager, resRegister, frontend, 0);
         context_->SetTimeProvider(
             [this] { return this->platformWindowRaw_->GetCurrentTimestampNano() + NANOSECOND_TO_MILLISECOND * 10; });
-        flushEventMock_ = AceType::MakeRefPtr<AnimationMock>();
+        flushEventMock_ = AceType::MakeRefPtr<MockAnimation>();
 
         context_->SetupRootElement();
         context_->OnSurfaceChanged(100, 200);
@@ -374,7 +373,7 @@ public:
 
 protected:
     RefPtr<PipelineContext> context_;
-    RefPtr<AnimationMock> flushEventMock_;
+    RefPtr<MockAnimation> flushEventMock_;
     MockPlatformWindow* platformWindowRaw_ = nullptr;
 };
 
@@ -3746,5 +3745,4 @@ HWTEST_F(AnimationFrameworkTest, AnimationDirectionTest028, TestSize.Level1)
     EXPECT_NEAR(5.0f, flushEventMock_->keyframeAnimationValue_, FLT_EPSILON);
     EXPECT_FALSE(flushEventMock_->animationStopStatus_);
 }
-
 } // namespace OHOS::Ace

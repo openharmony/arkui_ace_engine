@@ -15,8 +15,14 @@
 
 #include "core/components/xcomponent/render_xcomponent.h"
 
+#include "base/ressched/ressched_report.h"
+#include "base/utils/time_util.h"
+#include "core/event/touch_event.h"
 namespace OHOS::Ace {
 namespace {
+#ifdef OHOS_PLATFORM
+constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
+#endif
 OH_NativeXComponent_TouchPointToolType ConvertNativeXComponentTouchToolType(const SourceTool& toolType)
 {
     switch (toolType) {
@@ -101,6 +107,21 @@ void RenderXComponent::HandleTouchEvent(const TouchEventInfo& info, const TouchT
         touchInfoList = info.GetChangedTouches();
     } else {
         touchInfoList = info.GetTouches();
+    }
+#endif
+#ifdef OHOS_PLATFORM
+    // increase cpu frequency
+    if (touchType == TouchType::MOVE) {
+        auto currentTime = GetSysTimestamp();
+        auto increaseCpuTime = currentTime - startIncreaseTime_;
+        if (increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
+            LOGD("HandleTouchEvent increase cpu frequency");
+            startIncreaseTime_ = currentTime;
+            ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+        }
+    } else if (touchType == TouchType::UP) {
+        startIncreaseTime_ = 0;
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
     }
 #endif
     if (touchInfoList.empty()) {
@@ -283,6 +304,14 @@ void RenderXComponent::Paint(RenderContext& context, const Offset& offset)
     }
 
     RenderNode::Paint(context, offset);
+}
+
+void RenderXComponent::OnGlobalPositionChanged()
+{
+    if (SystemProperties::GetExtSurfaceEnabled() && xcomponentPositionChangeEvent_) {
+        position_ = GetGlobalOffset();
+        xcomponentPositionChangeEvent_(position_.GetX(), position_.GetY());
+    }
 }
 
 void RenderXComponent::NativeXComponentInit(

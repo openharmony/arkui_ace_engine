@@ -200,13 +200,15 @@ public:
 
     bool ActLongClick();
 
-    void SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag = false, bool isDisableMouseLeft = false)
+    void SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag = false,
+                           bool isDisableMouseLeft = false, int32_t duration = 500)
     {
         if (!longPressEventActuator_) {
             longPressEventActuator_ = MakeRefPtr<LongPressEventActuator>(WeakClaim(this));
             longPressEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
         }
         longPressEventActuator_->SetLongPressEvent(event, isForDrag, isDisableMouseLeft);
+        longPressEventActuator_->SetDuration(duration);
     }
 
     // Set by user define, which will replace old one.
@@ -340,7 +342,7 @@ private:
     // Set by use gesture, priorityGesture and parallelGesture attribute function.
     std::list<RefPtr<NG::Gesture>> gestures_;
     std::list<RefPtr<NGGestureRecognizer>> gestureHierarchy_;
-    
+
     // used in bindMenu, need to delete the old callback when bindMenu runs again
     RefPtr<ClickEvent> showMenu_;
 

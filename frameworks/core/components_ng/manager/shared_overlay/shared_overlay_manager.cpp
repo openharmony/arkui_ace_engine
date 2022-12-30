@@ -89,6 +89,12 @@ void SharedOverlayManager::StartSharedTransition(const RefPtr<FrameNode>& pageSr
         AceType::RawPtr(pageDest));
     CHECK_NULL_VOID(pageSrc);
     CHECK_NULL_VOID(pageDest);
+    auto patternSrc = pageSrc->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(patternSrc);
+    auto patternDest = pageDest->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(patternDest);
+    patternSrc->BuildSharedTransitionMap();
+    patternDest->BuildSharedTransitionMap();
     PrepareSharedTransition(pageSrc, pageDest);
     auto pipeline = PipelineBase::GetCurrentContext();
     for (const auto& effect : effects_) {
@@ -97,7 +103,7 @@ void SharedOverlayManager::StartSharedTransition(const RefPtr<FrameNode>& pageSr
             LOGI("effect start, shareId = %{public}s, id = %{public}d", effect->GetShareId().c_str(),
                 effect->GetController()->GetId());
             controller->SetFillMode(FillMode::FORWARDS);
-            controller->SetAllowRunningAsynchronously(false);
+            controller->SetAllowRunningAsynchronously(true);
             controller->AttachScheduler(pipeline);
             controller->Forward();
         }
@@ -201,11 +207,11 @@ bool SharedOverlayManager::PrepareEachTransition(const RefPtr<SharedTransitionEf
 
 void SharedOverlayManager::ClearAllEffects()
 {
-    for (auto& effect : effects_) {
+    while (!effects_.empty()) {
+        auto& effect = effects_.front();
         effect->StopPlayingEffect();
-        effect->PerformFinishCallback();
+        effects_.pop_front();
     }
-    effects_.clear();
 }
 
 bool SharedOverlayManager::CheckIn(const RefPtr<SharedTransitionEffect>& effect)
@@ -233,10 +239,12 @@ void SharedOverlayManager::PassengerAboard(
     auto ticket = passenger->GetOffsetRelativeToWindow();
     auto initialPosition = passenger->GetRenderContext()->GetPosition();
     auto initialFrameOffset = passenger->GetGeometryNode()->GetFrameOffset();
+    auto initialEventEnabled = passenger->GetEventHub<EventHub>()->IsEnabled();
     auto zIndex = passenger->GetRenderContext()->GetZIndex();
     effect->SetPassengerInitZIndex(zIndex);
     effect->SetPassengerInitPos(initialPosition);
     effect->SetPassengerInitFrameOffset(initialFrameOffset);
+    effect->SetPassengerInitEventEnabled(initialEventEnabled);
     auto passengerHolder = CreateBlankFrameNode(passenger);
     passengerHolder->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
     ReplaceFrameNode(passenger, passengerHolder);
@@ -248,6 +256,7 @@ void SharedOverlayManager::PassengerAboard(
     passenger->GetRenderContext()->UpdateZIndex(effect->GetZIndex());
     passenger->GetRenderContext()->UpdatePosition(offset);
     passenger->GetRenderContext()->OnModifyDone();
+    passenger->GetEventHub<EventHub>()->SetEnabled(false);
 }
 
 bool SharedOverlayManager::AboardShuttle(const RefPtr<SharedTransitionEffect>& effect)
@@ -298,9 +307,13 @@ void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& e
             passenger->GetRenderContext()->UpdateZIndex(effect->GetPassengerInitZIndex().value());
         } else {
             passenger->GetRenderContext()->ResetZIndex();
+            passenger->GetRenderContext()->OnZIndexUpdate(0);
         }
         passenger->GetGeometryNode()->SetFrameOffset(effect->GetPassengerInitFrameOffset());
+        passenger->GetEventHub<EventHub>()->SetEnabled(effect->GetPassengerInitEventEnabled());
         ReplaceFrameNode(passengerHolder, passenger);
+        // The callback is to restore the parameters used by passenger in the animation
+        effect->PerformFinishCallback();
         passenger->GetRenderContext()->OnModifyDone();
     }
     if (effect->GetType() == SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE) {
@@ -309,11 +322,18 @@ void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& e
         auto destVisible = exchangeEffect->GetInitialDestVisible();
         exchangeEffect->SetVisibleToDest(destVisible);
     }
-    effect->PerformFinishCallback();
-    auto iter = std::find(effects_.begin(), effects_.end(), effect);
-    if (iter != effects_.end()) {
-        effects_.erase(iter);
+}
+
+bool SharedOverlayManager::OnBackPressed()
+{
+    bool inSharedTransition = false;
+    for (const auto& effect : effects_) {
+        if (effect->GetController()->IsRunning()) {
+            inSharedTransition = true;
+            break;
+        }
     }
+    return inSharedTransition;
 }
 
 } // namespace OHOS::Ace::NG

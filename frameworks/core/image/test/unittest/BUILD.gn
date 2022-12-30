@@ -54,7 +54,7 @@ ohos_unittest("ImageCacheTest") {
     "$ace_root/frameworks/core/image/image_cache.cpp",
     "$ace_root/frameworks/core/image/image_loader.cpp",
     "$ace_root/frameworks/core/image/image_provider.cpp",
-    "$ace_root/frameworks/core/mock/mock_image_loader.cpp",
+    "$ace_root/frameworks/core/image/test/mock/mock_image_loader.cpp",
     "$ace_root/frameworks/core/pipeline/base/component_group_element.cpp",
     "$ace_root/frameworks/core/pipeline/base/composed_component.cpp",
     "$ace_root/frameworks/core/pipeline/base/composed_element.cpp",
@@ -95,6 +95,7 @@ ohos_unittest("ImageProviderTest") {
     "$ace_root/frameworks/core/common/ace_application_info.cpp",
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/focus_animation_manager.cpp",
+    "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
     "$ace_root/frameworks/core/components/bubble/bubble_element.cpp",
@@ -126,7 +127,6 @@ ohos_unittest("ImageProviderTest") {
     "$ace_root/frameworks/core/image/image_loader.cpp",
     "$ace_root/frameworks/core/image/image_provider.cpp",
     "$ace_root/frameworks/core/image/image_source_info.cpp",
-    "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/pipeline/base/component_group_element.cpp",
     "$ace_root/frameworks/core/pipeline/base/composed_component.cpp",
     "$ace_root/frameworks/core/pipeline/base/composed_element.cpp",
@@ -137,7 +137,7 @@ ohos_unittest("ImageProviderTest") {
     "$ace_root/frameworks/core/pipeline/pipeline_context.cpp",
 
     # test source
-    "$ace_root/frameworks/core/mock/mock_download_manager.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_download_manager.cpp",
     "image_provider_test.cpp",
   ]
 
@@ -168,10 +168,12 @@ config("config_image_provider_test") {
 ohos_unittest("ImageCompressorTest") {
   module_out_path = module_output_path
   sources = [
+    "$ace_root/frameworks/base/test/mock/mock_ace_container.cpp",
     "$ace_root/frameworks/core/common/ace_application_info.cpp",
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
     "$ace_root/frameworks/core/components/display/display_component.cpp",
     "$ace_root/frameworks/core/components/display/render_display.cpp",
@@ -181,8 +183,6 @@ ohos_unittest("ImageCompressorTest") {
     "$ace_root/frameworks/core/image/image_loader.cpp",
     "$ace_root/frameworks/core/image/image_provider.cpp",
     "$ace_root/frameworks/core/image/image_source_info.cpp",
-    "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
-    "$ace_root/frameworks/core/mock/mock_ace_container.cpp",
     "image_compressor_test.cpp",
   ]
 

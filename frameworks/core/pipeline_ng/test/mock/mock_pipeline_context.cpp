@@ -16,6 +16,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -56,11 +57,14 @@ float PipelineContext::GetCurrentRootHeight()
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
-    return AceType::MakeRefPtr<PipelineContext>();
+    static RefPtr<PipelineContext> pipeline = AceType::MakeRefPtr<PipelineContext>();
+    return pipeline;
 }
 
 // non-static method
-void PipelineContext::PipelineContext::SetupRootElement() {}
+void PipelineContext::AddWindowFocusChangedCallback(int32_t nodeId) {}
+
+void PipelineContext::SetupRootElement() {}
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
 
@@ -148,9 +152,6 @@ const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
 
 const RefPtr<DragDropManager>& PipelineContext::GetDragDropManager()
 {
-    if (dragDropManager_) {
-        return dragDropManager_;
-    }
     dragDropManager_ = AceType::MakeRefPtr<DragDropManager>();
     return dragDropManager_;
 }
@@ -197,8 +198,7 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty) {}
 
 const RefPtr<StageManager>& PipelineContext::GetStageManager()
 {
-    auto stageNode = MakeRefPtr<FrameNode>(
-        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
+    auto stageNode = MakeRefPtr<FrameNode>(V2::PAGE_ETS_TAG, -1, MakeRefPtr<PagePattern>(nullptr), true);
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
     return stageManager_;
 }
@@ -207,6 +207,19 @@ void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback) {
 
 const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 {
-    return nullptr;
+    if (fullScreenManager_) {
+        return fullScreenManager_;
+    }
+    auto root = AceType::MakeRefPtr<FrameNode>("ROOT", -1, AceType::MakeRefPtr<Pattern>(), true);
+    fullScreenManager_ = AceType::MakeRefPtr<FullScreenManager>(root);
+    return fullScreenManager_;
 }
+
+const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
+{
+    return overlayManager_;
+}
+void PipelineContext::AddPredictTask(PredictTask&& task) {}
+
+void PipelineContext::FlushPipelineImmediately() {}
 } // namespace OHOS::Ace::NG

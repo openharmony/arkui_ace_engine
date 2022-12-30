@@ -29,6 +29,7 @@ void BubbleElement::PerformBuild()
         const auto& child = children_.empty() ? nullptr : children_.front();
         UpdateChild(child, bubble->GetChild());
     }
+    RequestFocusImmediately();
 }
 
 bool BubbleElement::OnKeyEvent(const KeyEvent& keyEvent)

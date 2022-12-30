@@ -52,6 +52,13 @@ void PagePattern::OnAttachToFrameNode()
 
 bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*wrapper*/, const DirtySwapConfig& /*config*/)
 {
+    if (isFirstLoad_) {
+        isFirstLoad_ = false;
+        if (firstBuildCallback_) {
+            firstBuildCallback_();
+            firstBuildCallback_ = nullptr;
+        }
+    }
     return false;
 }
 
@@ -72,6 +79,8 @@ void PagePattern::ProcessHideState()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetActive(false);
+    host->OnVisibleChange(false);
+    host->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
@@ -83,6 +92,8 @@ void PagePattern::ProcessShowState()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetActive(true);
+    host->OnVisibleChange(true);
+    host->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
@@ -91,11 +102,8 @@ void PagePattern::ProcessShowState()
 
 void PagePattern::OnShow()
 {
-    if (isOnShow_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!isOnShow_);
     isOnShow_ = true;
-    ProcessShowState();
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     if (onPageShow_) {
@@ -105,11 +113,8 @@ void PagePattern::OnShow()
 
 void PagePattern::OnHide()
 {
-    if (!isOnShow_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(isOnShow_);
     isOnShow_ = false;
-    ProcessHideState();
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     if (onPageHide_) {
@@ -182,6 +187,15 @@ RefPtr<Framework::AnimatorInfo> PagePattern::GetJsAnimator(const std::string& an
         return iter->second;
     }
     return nullptr;
+}
+
+void PagePattern::SetFirstBuildCallback(std::function<void()>&& buildCallback)
+{
+    if (isFirstLoad_) {
+        firstBuildCallback_ = std::move(buildCallback);
+    } else if (buildCallback) {
+        buildCallback();
+    }
 }
 
 } // namespace OHOS::Ace::NG

@@ -28,7 +28,11 @@
 #endif
 
 namespace OHOS::Ace::NG {
-
+namespace {
+#ifdef ENABLE_ROSEN_BACKEND
+constexpr uint8_t RADIUS_POINTS_SIZE = 4;
+#endif
+} // namespace
 RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
 {
 #ifdef NG_BUILD
@@ -38,44 +42,6 @@ RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
     CHECK_NULL_RETURN(imageRef, nullptr);
 
     return AceType::MakeRefPtr<SkiaCanvasImage>(*imageRef);
-#endif
-}
-
-RefPtr<CanvasImage> CanvasImage::Create(
-    const RefPtr<PixelMap>& pixelMap, const RefPtr<RenderTaskHolder>& renderTaskHolder)
-{
-#ifndef NG_BUILD
-    // TODO: use [PixelMap] as data source when rs provides interface like
-    // DrawBitmapRect(Media::PixelMap* pixelMap, const Rect& dstRect, const Rect& srcRect, ...)
-    // now we make [SkImage] from [PixelMap] and use [drawImageRect] to draw image
-
-    auto flutterRenderTaskHolder = DynamicCast<FlutterRenderTaskHolder>(renderTaskHolder);
-    CHECK_NULL_RETURN(flutterRenderTaskHolder, nullptr);
-
-    // Step1: Create SkPixmap
-    auto imageInfo = SkiaCanvasImage::MakeSkImageInfoFromPixelMap(pixelMap);
-    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
-
-    // Step2: Create SkImage and draw it, using gpu or cpu
-    sk_sp<SkImage> skImage;
-    if (!flutterRenderTaskHolder->ioManager) {
-        skImage =
-            SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
-    } else {
-#ifndef GPU_DISABLED
-        skImage = SkImage::MakeCrossContextFromPixmap(flutterRenderTaskHolder->ioManager->GetResourceContext().get(),
-            imagePixmap, true, imagePixmap.colorSpace(), true);
-#else
-        // SkImage needs to hold PixelMap shared_ptr
-        skImage =
-            SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
-#endif
-    }
-    auto canvasImage = flutter::CanvasImage::Create();
-    canvasImage->set_image(flutter::SkiaGPUObject<SkImage>(skImage, flutterRenderTaskHolder->unrefQueue));
-    return CanvasImage::Create(&canvasImage);
-#else
-    return AceType::MakeRefPtr<SkiaCanvasImage>();
 #endif
 }
 
@@ -157,8 +123,8 @@ int32_t SkiaCanvasImage::GetHeight() const
 #endif
 }
 
-void SkiaCanvasImage::DrawToRSCanvas(
-    RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const std::array<PointF, 4>& radiusXY)
+void SkiaCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect,
+    const BorderRadiusArray& radiusXY)
 {
     auto image = GetCanvasImage();
     RSImage rsImage(&image);
@@ -181,8 +147,8 @@ void SkiaCanvasImage::DrawToRSCanvas(
         return;
     }
     SkPaint paint;
-    SkVector radii[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
-    if (radiusXY.size() == 4) {
+    SkVector radii[RADIUS_POINTS_SIZE] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
+    if (radiusXY.size() == RADIUS_POINTS_SIZE) {
         radii[SkRRect::kUpperLeft_Corner].set(
             SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperLeft_Corner].GetX(), 0.0f)),
             SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperLeft_Corner].GetY(), 0.0f)));

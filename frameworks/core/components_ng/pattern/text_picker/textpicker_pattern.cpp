@@ -31,7 +31,6 @@ namespace OHOS::Ace::NG {
 namespace {
 // TODO datepicker style modification
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
-const int32_t DIVIDER_SIZE = 2;
 const Dimension FONT_SIZE = Dimension(2.0);
 const int32_t ANIMATION_ZERO_TO_OUTER = 200; // 200ms for animation that from zero to outer.
 const int32_t ANIMATION_OUTER_TO_ZERO = 150; // 150ms for animation that from outer to zero.
@@ -64,9 +63,7 @@ void TextPickerPattern::OnAttachToFrameNode()
 
 bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (!config.frameSizeChange) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
     CHECK_NULL_RETURN(dirty, false);
     return true;
 }
@@ -137,11 +134,9 @@ void TextPickerPattern::FlushCurrentOptions()
     if (child.size() != showCount) {
         return;
     }
-
     auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
     auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-    auto height = CalculateHeight();
     for (uint32_t index = 0; index < showCount; index++) {
         uint32_t optionIndex = (totalOptionCount + currentIndex + index - selectedIndex) % totalOptionCount;
         auto optionValue = textPickerPattern->GetOption(optionIndex);
@@ -159,18 +154,15 @@ void TextPickerPattern::FlushCurrentOptions()
             } else {
                 textLayoutProperty->UpdateFontSize(focusOptionSize);
             }
-            textLayoutProperty->UpdateMaxLines(1);
-            textLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE), CalcLength(height)));
             textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
+            textLayoutProperty->UpdateMaxLines(1);
         }
         if (index == middleIndex) {
             textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+            textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
             textLayoutProperty->UpdateMaxLines(1);
-            textLayoutProperty->UpdateFontSize(selectedOptionSize);
-            textLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE), CalcLength(height)));
             textLayoutProperty->UpdateAlignment(Alignment::CENTER);
+            textLayoutProperty->UpdateFontSize(selectedOptionSize);
         }
         if (index > middleIndex) {
             if (index == showCount - 1) {
@@ -178,11 +170,10 @@ void TextPickerPattern::FlushCurrentOptions()
             } else {
                 textLayoutProperty->UpdateFontSize(focusOptionSize);
             }
-            textLayoutProperty->UpdateMaxLines(1);
-            textLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE), CalcLength(height)));
             textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
+            textLayoutProperty->UpdateMaxLines(1);
         }
+        
         iter++;
         int32_t diffIndex = static_cast<int32_t>(index) - static_cast<int32_t>(selectedIndex);
         int32_t virtualIndex = static_cast<int32_t>(currentIndex) + diffIndex;
@@ -210,9 +201,7 @@ void TextPickerPattern::FlushCurrentOptions()
 
 void TextPickerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    if (panEvent_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!panEvent_);
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         LOGI("Pan event start");
         auto pattern = weak.Upgrade();
@@ -248,9 +237,8 @@ void TextPickerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void TextPickerPattern::HandleDragStart(const GestureEvent& event)
 {
-    if (!GetHost() || !GetToss()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(GetHost());
+    CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
     yOffset_ = event.GetGlobalPoint().GetY();
     toss->SetStart(yOffset_);
@@ -264,13 +252,10 @@ void TextPickerPattern::HandleDragMove(const GestureEvent& event)
         InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0));
         return;
     }
-    if (!pressed_) {
-        LOGE("not pressed.");
-        return;
-    }
-    if (!GetHost() || !GetToss()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(pressed_);
+
+    CHECK_NULL_VOID_NOLOG(GetHost());
+    CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
     double offsetY = event.GetGlobalPoint().GetY();
     if (NearEqual(offsetY, yLast_, 1.0)) { // if changing less than 1.0, no need to handle
@@ -283,9 +268,8 @@ void TextPickerPattern::HandleDragMove(const GestureEvent& event)
 void TextPickerPattern::HandleDragEnd()
 {
     pressed_ = false;
-    if (!GetHost() || !GetToss()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(GetHost());
+    CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
     if (!NotLoopOptions() && toss->Play()) {
         return;
@@ -303,9 +287,7 @@ void TextPickerPattern::HandleDragEnd()
 }
 void TextPickerPattern::CreateAnimation()
 {
-    if (animationCreated_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!animationCreated_);
     toController_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
     toController_->SetDuration(ANIMATION_ZERO_TO_OUTER); // 200ms for animation that from zero to outer.
     auto weak = AceType::WeakClaim(this);
@@ -338,10 +320,7 @@ RefPtr<CurveAnimation<double>> TextPickerPattern::CreateAnimation(double from, d
 
 void TextPickerPattern::HandleCurveStopped()
 {
-    if (!animationCreated_) {
-        LOGE("animation not created.");
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(animationCreated_);
     if (NearZero(scrollDelta_)) {
         return;
     }
@@ -401,14 +380,14 @@ double TextPickerPattern::CalculateHeight()
             return height;
         }
         if (defaultPickerItemHeightValue.Unit() == DimensionUnit::PERCENT) {
-            height = pickerTheme->GetGradientHeight().Value() * defaultPickerItemHeightValue.Value();
+            height = pickerTheme->GetGradientHeight().ConvertToPx() * defaultPickerItemHeightValue.ConvertToPx();
         } else {
             height = context->NormalizeToPx(defaultPickerItemHeightValue);
         }
     } else {
-        height = pickerTheme->GetGradientHeight().Value();
+        height = pickerTheme->GetDividerSpacing().ConvertToPx();
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return height;
 }
 
@@ -439,9 +418,7 @@ void TextPickerPattern::UpdateColumnChildPosition(double offsetY)
 {
     yLast_ = offsetY;
     double dragDelta = yLast_ - yOffset_;
-    if (!CanMove(LessNotEqual(dragDelta, 0))) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(CanMove(LessNotEqual(dragDelta, 0)));
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -461,9 +438,7 @@ void TextPickerPattern::UpdateColumnChildPosition(double offsetY)
 
 bool TextPickerPattern::CanMove(bool isDown) const
 {
-    if (!NotLoopOptions()) {
-        return true;
-    }
+    CHECK_NULL_RETURN_NOLOG(NotLoopOptions(), true);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     int totalOptionCount = static_cast<int>(GetOptionCount());
@@ -487,10 +462,8 @@ bool TextPickerPattern::InnerHandleScroll(bool isDown)
     CHECK_NULL_RETURN(host, false);
     auto totalOptionCount = GetOptionCount();
 
-    if (!host || !totalOptionCount) {
-        LOGE("options is empty.");
-        return false;
-    }
+    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_RETURN(totalOptionCount, false);
 
     uint32_t currentIndex = GetCurrentIndex();
     if (isDown) {

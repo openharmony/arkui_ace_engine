@@ -62,6 +62,7 @@ public:
     bool CancelPopup(const std::string& id) override;
     void CloseMenu() override;
     void ClearMenu() override;
+    void ClearMenuNG() override;
 
     void SetHotAreas(const std::vector<Rect>& rects) override;
 
@@ -79,6 +80,14 @@ public:
     {
         return dialogWindow_;
     }
+    bool IsToastWindow() const
+    {
+        return isToastWindow_;
+    }
+    void SetIsToastWindow(bool isToastWindow)
+    {
+        isToastWindow_ = isToastWindow;
+    }
 
 private:
     RefPtr<StackElement> GetStack();
@@ -92,7 +101,7 @@ private:
     bool CreateEventRunner();
     void GetToastDialogWindowProperty(
         int32_t& width, int32_t& height, int32_t& posX, int32_t& posY, float& density) const;
-    bool InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY);
+    bool InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY, bool isToast = false);
     bool InitToastDialogView(int32_t width, int32_t height, float density);
 
     static int32_t id_;
@@ -107,6 +116,7 @@ private:
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
     int32_t targetId_ = -1;
+    bool isToastWindow_ = false;
     int32_t popupTargetId_ = -1;
     bool isShowed_ = false;
 };

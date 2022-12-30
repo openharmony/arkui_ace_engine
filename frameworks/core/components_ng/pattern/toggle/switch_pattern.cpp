@@ -27,7 +27,7 @@
 #include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 void SwitchPattern::OnAttachToFrameNode()
@@ -44,6 +44,17 @@ bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (isOn_.value()) {
         currentOffset_ = GetSwitchWidth();
     }
+
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
+    auto switchLayoutAlgorithm = DynamicCast<SwitchLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(switchLayoutAlgorithm, false);
+
+    auto height = switchLayoutAlgorithm->GetHeight();
+    auto width = switchLayoutAlgorithm->GetWidth();
+
+    width_ = width;
+    height_ = height;
     return true;
 }
 
@@ -55,19 +66,18 @@ void SwitchPattern::OnModifyDone()
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-
     if (!layoutProperty->GetMarginProperty()) {
         MarginProperty margin;
-        margin.left = CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value());
-        margin.right = CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value());
-        margin.top = CalcLength(switchTheme->GetHotZoneVerticalPadding().Value());
-        margin.bottom = CalcLength(switchTheme->GetHotZoneVerticalPadding().Value());
+        margin.left = CalcLength(switchTheme->GetHotZoneHorizontalPadding());
+        margin.right = CalcLength(switchTheme->GetHotZoneHorizontalPadding());
+        margin.top = CalcLength(switchTheme->GetHotZoneVerticalPadding());
+        margin.bottom = CalcLength(switchTheme->GetHotZoneVerticalPadding());
         layoutProperty->UpdateMargin(margin);
     }
     if (layoutProperty->GetPositionProperty()) {
@@ -78,7 +88,10 @@ void SwitchPattern::OnModifyDone()
     }
     auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_VOID(switchPaintProperty);
-    if (!isOn_.has_value()) {
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    if (!isOn_.has_value() || (isOn_.has_value() && NearZero(geometryNode->GetContentSize().Width()) &&
+                                  NearZero(geometryNode->GetContentSize().Height()))) {
         isOn_ = switchPaintProperty->GetIsOnValue();
     }
     auto isOn = switchPaintProperty->GetIsOnValue();
@@ -89,6 +102,9 @@ void SwitchPattern::OnModifyDone()
     InitPanEvent(gestureHub);
     InitTouchEvent();
     InitMouseEvent();
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
 }
 
 void SwitchPattern::UpdateCurrentOffset(float offset)
@@ -126,7 +142,9 @@ void SwitchPattern::PlayTranslateAnimation(float startPos, float endPos)
     }));
 
     if (!controller_) {
-        controller_ = AceType::MakeRefPtr<Animator>(host->GetContext());
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        controller_ = AceType::MakeRefPtr<Animator>(pipeline);
     }
     controller_->ClearStopListeners();
     controller_->ClearInterpolators();
@@ -223,6 +241,16 @@ void SwitchPattern::OnTouchDown()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = true;
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
+    auto frameSize = geometryNode->GetFrameSize();
+    if (originalPaintRect.GetSize() == frameSize) {
+        originalPaintRect = GetHotZoneRect(true);
+    }
+    renderContext->SyncGeometryProperties(originalPaintRect);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -231,6 +259,16 @@ void SwitchPattern::OnTouchUp()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = false;
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto paintRect = renderContext->GetPaintRectWithoutTransform();
+    auto frameSize = geometryNode->GetFrameSize();
+    if (paintRect.GetSize() != frameSize && !isHover_) {
+        paintRect = GetHotZoneRect(false);
+    }
+    renderContext->SyncGeometryProperties(paintRect);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -315,7 +353,8 @@ void SwitchPattern::InitTouchEvent()
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             switchPattern->OnTouchDown();
         }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
+            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
             switchPattern->OnTouchUp();
         }
     };
@@ -344,12 +383,55 @@ void SwitchPattern::InitMouseEvent()
     inputHub->AddOnHoverEvent(mouseEvent_);
 }
 
+void SwitchPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            pattern->GetInnerFocusPaintRect(paintRect);
+        }
+    };
+    focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+}
+
+void SwitchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
+{
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
+    CHECK_NULL_VOID(switchTheme);
+    auto focusPaintPadding = switchTheme->GetFocusPaintPadding().ConvertToPx();
+
+    auto height = height_ + focusPaintPadding * 2;
+    auto width = width_ + focusPaintPadding * 2;
+    auto radio = height / 2.0;
+    auto Rect = RectF(-focusPaintPadding, -focusPaintPadding, width, height);
+
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, radio, radio);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, radio, radio);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, radio, radio);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, radio, radio);
+    paintRect.SetRect(Rect);
+}
+
 void SwitchPattern::HandleMouseEvent(bool isHover)
 {
     isHover_ = isHover;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = false;
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
+    auto frameSize = geometryNode->GetFrameSize();
+    if (isHover_ && originalPaintRect.GetSize() == frameSize) {
+        originalPaintRect = GetHotZoneRect(true);
+    } else if (!isHover_ && originalPaintRect.GetSize() != frameSize) {
+        originalPaintRect = GetHotZoneRect(false);
+    }
+    renderContext->SyncGeometryProperties(originalPaintRect);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -391,6 +473,42 @@ void SwitchPattern::HandleDragEnd()
 bool SwitchPattern::IsOutOfBoundary(double mainOffset) const
 {
     return mainOffset < 0 || mainOffset > GetSwitchWidth();
+}
+
+RectF SwitchPattern::GetHotZoneRect(bool isOriginal) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, {});
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, {});
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    CHECK_NULL_RETURN(switchTheme, {});
+    auto defaultWidth = switchTheme->GetDefaultWidth().ConvertToPx();
+    auto defaultHeight = switchTheme->GetDefaultHeight().ConvertToPx();
+    auto defaultWidthGap =
+        defaultWidth - (switchTheme->GetWidth() - switchTheme->GetHotZoneHorizontalPadding() * 2).ConvertToPx();
+    auto defaultHeightGap =
+        defaultHeight - (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, {});
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, {});
+    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
+    auto offset = originalPaintRect.GetOffset();
+    double actualWidth = 0.0;
+    double actualHeight = 0.0;
+    if (isOriginal) {
+        actualWidth = geometryNode->GetFrameSize().Width() + defaultWidthGap;
+        actualHeight = geometryNode->GetFrameSize().Height() + defaultHeightGap;
+        offset.SetX(offset.GetX() - defaultWidthGap / 2);
+        offset.SetY(offset.GetY() - defaultHeightGap / 2);
+    } else {
+        actualWidth = geometryNode->GetFrameSize().Width();
+        actualHeight = geometryNode->GetFrameSize().Height();
+        offset.SetX(offset.GetX() + defaultWidthGap / 2);
+        offset.SetY(offset.GetY() + defaultHeightGap / 2);
+    }
+    return RectF(offset, SizeF(actualWidth, actualHeight));
 }
 
 } // namespace OHOS::Ace::NG

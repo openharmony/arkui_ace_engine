@@ -46,12 +46,12 @@ public:
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     void CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes);
     bool GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t tabNodeIdx);
-    bool HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusGroup>& curPage);
+    bool HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusGroup>& mainNode);
     bool RequestFocusImmediately();
     void UpdateAccessibilityFocusInfo();
     // Use pipeline to request focus. In this case that node gets focus when the layout needs to be completed.
     void RequestFocus();
-    void LostFocus();
+    void LostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH);
     void LostSelfFocus();
 
     virtual bool IsFocusable() const
@@ -237,13 +237,18 @@ protected:
     }
     virtual void OnBlur()
     {
-        LOGD("FocusNode::OnFocus: Node(%{public}s) on blur", AceType::TypeName(this));
+        LOGD("FocusNode::OnBlur: Node(%{public}s) on blur", AceType::TypeName(this));
+        OnBlur(blurReason_);
         if (onBlurCallback_) {
             onBlurCallback_();
         }
         if (onBlur_) {
             onBlur_();
         }
+    }
+    virtual void OnBlur(BlurReason reason)
+    {
+        LOGI("FocusNode: (%{public}s) 's blur reason is %{public}d", AceType::TypeName(this), reason);
     }
     virtual void OnFocusMove(KeyCode keyCode)
     {
@@ -283,6 +288,7 @@ protected:
     bool isFocusOnTouch_ = false;
     bool isDefaultFocus_ = false;
     bool isDefaultGroupFocus_ = false;
+    BlurReason blurReason_ = BlurReason::FOCUS_SWITCH;
 
 private:
     static int32_t GenerateFocusIndex();
@@ -358,6 +364,15 @@ public:
         return isGroupDefaultFocused_;
     }
 
+    void SetIsDefaultHasFocused(bool isDefaultHasFocused)
+    {
+        isDefaultHasFocused_ = isDefaultHasFocused;
+    }
+    bool IsDefaultHasFocused() const
+    {
+        return isDefaultHasFocused_;
+    }
+
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent) override;
     void OnFocus() override;
@@ -374,6 +389,7 @@ protected:
 
 private:
     bool CalculatePosition();
+    bool isDefaultHasFocused_ { false };
     bool isGroupDefaultFocused_ { false };
     bool isFirstFocusInPage_ { true };
 };

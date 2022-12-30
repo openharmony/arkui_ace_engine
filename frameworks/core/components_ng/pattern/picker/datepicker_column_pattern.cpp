@@ -39,7 +39,6 @@ namespace {
 constexpr float PADDING_WEIGHT = 10.0f;
 const Dimension FONT_SIZE = Dimension(2.0);
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
-const int32_t DIVIDER_SIZE = 2;
 const float TEXT_HEIGHT_NUMBER = 3.0f;
 const float TEXT_WEIGHT_NUMBER = 6.0f;
 const int32_t ANIMATION_ZERO_TO_OUTER = 200;
@@ -69,9 +68,7 @@ void DatePickerColumnPattern::OnAttachToFrameNode()
 bool DatePickerColumnPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (!config.frameSizeChange) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
     CHECK_NULL_RETURN(dirty, false);
     return true;
 }
@@ -114,10 +111,6 @@ void DatePickerColumnPattern::FlushCurrentOptions()
     for (uint32_t index = 0; index < showOptionCount; index++) {
         currentChildIndex_ = index;
         uint32_t optionIndex = (totalOptionCount + currentIndex + index - selectedIndex) % totalOptionCount;
-        int diffIndex = static_cast<int>(index) - static_cast<int>(selectedIndex);
-        int virtualIndex = static_cast<int>(currentIndex) + diffIndex;
-        bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int>(totalOptionCount);
-        auto optionValue = datePickerPattern->GetAllOptions(host)[optionIndex];
 
         auto textNode = DynamicCast<FrameNode>(*iter);
         CHECK_NULL_VOID(textNode);
@@ -130,18 +123,13 @@ void DatePickerColumnPattern::FlushCurrentOptions()
                 textLayoutProperty->UpdateFontSize(focusOptionSize);
             }
             textLayoutProperty->UpdateMaxLines(1);
-            textLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE),
-                    CalcLength(pickerTheme->GetGradientHeight())));
             textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
         }
         if (index == middleIndex) {
             textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
             textLayoutProperty->UpdateMaxLines(1);
             textLayoutProperty->UpdateFontSize(selectedOptionSize);
-            textLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE),
-                    CalcLength(pickerTheme->GetDividerSpacing())));
+            textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
             textLayoutProperty->UpdateAlignment(Alignment::CENTER);
         }
         if (index > middleIndex) {
@@ -151,19 +139,22 @@ void DatePickerColumnPattern::FlushCurrentOptions()
                 textLayoutProperty->UpdateFontSize(focusOptionSize);
             }
             textLayoutProperty->UpdateMaxLines(1);
-            textLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE),
-                    CalcLength(pickerTheme->GetGradientHeight())));
             textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
         }
+        iter++;
+        int32_t diffIndex = static_cast<int32_t>(index) - static_cast<int32_t>(selectedIndex);
+        int32_t virtualIndex = static_cast<int32_t>(currentIndex) + diffIndex;
+        bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
         if (NotLoopOptions() && !virtualIndexValidate) {
             textLayoutProperty->UpdateContent("");
+            textNode->MarkDirtyNode();
+            textNode->MarkModifyDone();
             continue;
         }
+        auto optionValue = datePickerPattern->GetAllOptions(host)[optionIndex];
         textLayoutProperty->UpdateContent(optionValue);
         textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         textNode->MarkModifyDone();
-        iter++;
     }
 }
 
@@ -198,10 +189,8 @@ bool DatePickerColumnPattern::InnerHandleScroll(bool isDown)
     auto options = GetOptions();
     auto totalOptionCount = options[host].size();
 
-    if (!host || !totalOptionCount) {
-        LOGE("options is empty.");
-        return false;
-    }
+    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_RETURN(totalOptionCount, false);
 
     uint32_t currentIndex = GetCurrentIndex();
     if (isDown) {
@@ -218,9 +207,7 @@ bool DatePickerColumnPattern::InnerHandleScroll(bool isDown)
 
 void DatePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    if (panEvent_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!panEvent_);
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         LOGI("Pan event start");
         auto pattern = weak.Upgrade();
@@ -256,9 +243,8 @@ void DatePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
 
 void DatePickerColumnPattern::HandleDragStart(const GestureEvent& event)
 {
-    if (!GetHost() || !GetToss()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(GetHost());
+    CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
     yOffset_ = event.GetGlobalPoint().GetY();
     toss->SetStart(yOffset_);
@@ -272,13 +258,9 @@ void DatePickerColumnPattern::HandleDragMove(const GestureEvent& event)
         InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0));
         return;
     }
-    if (!pressed_) {
-        LOGE("not pressed.");
-        return;
-    }
-    if (!GetHost() || !GetToss()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(pressed_);
+    CHECK_NULL_VOID_NOLOG(GetHost());
+    CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
     double offsetY = event.GetGlobalPoint().GetY();
     if (NearEqual(offsetY, yLast_, 1.0)) { // if changing less than 1.0, no need to handle
@@ -291,9 +273,8 @@ void DatePickerColumnPattern::HandleDragMove(const GestureEvent& event)
 void DatePickerColumnPattern::HandleDragEnd()
 {
     pressed_ = false;
-    if (!GetHost() || !GetToss()) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(GetHost());
+    CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
     if (!NotLoopOptions() && toss->Play()) {
         return;
@@ -311,9 +292,7 @@ void DatePickerColumnPattern::HandleDragEnd()
 }
 void DatePickerColumnPattern::CreateAnimation()
 {
-    if (animationCreated_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!animationCreated_);
     toController_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
     toController_->SetDuration(ANIMATION_ZERO_TO_OUTER); // 200ms for animation that from zero to outer.
     auto weak = AceType::WeakClaim(this);
@@ -343,10 +322,7 @@ RefPtr<CurveAnimation<double>> DatePickerColumnPattern::CreateAnimation(double f
 
 void DatePickerColumnPattern::HandleCurveStopped()
 {
-    if (!animationCreated_) {
-        LOGE("animation not created.");
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(animationCreated_);
     if (NearZero(scrollDelta_)) {
         return;
     }
@@ -407,9 +383,7 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 
 bool DatePickerColumnPattern::CanMove(bool isDown) const
 {
-    if (!NotLoopOptions()) {
-        return true;
-    }
+    CHECK_NULL_RETURN_NOLOG(NotLoopOptions(), true);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto options = GetOptions();

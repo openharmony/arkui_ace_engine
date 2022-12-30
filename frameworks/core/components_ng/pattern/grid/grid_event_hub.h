@@ -110,6 +110,8 @@ public:
     void HandleOnItemDragCancel();
     RefPtr<FrameNode> FindGridItemByPosition(float x, float y);
     int32_t GetGridItemIndex(const RefPtr<FrameNode>& frameNode);
+    bool CheckPostionInGrid(float x, float y);
+    int GetFrameNodeChildSize();
 
 private:
     bool GetEditable() const;
@@ -123,7 +125,6 @@ private:
     RefPtr<DragDropProxy> dragDropProxy_;
     int32_t draggedIndex_ = 0;
     RefPtr<FrameNode> draggingItem_;
-    bool itemRemoved_ = false;
 };
 
 } // namespace OHOS::Ace::NG

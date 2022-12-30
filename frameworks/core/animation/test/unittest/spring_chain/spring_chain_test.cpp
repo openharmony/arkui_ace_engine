@@ -23,12 +23,12 @@
 #include "core/animation/simple_spring_chain.h"
 #include "core/animation/simple_spring_node.h"
 #include "core/animation/spring_motion.h"
-#include "core/animation/test/unittest/mock/animation_test_utils.h"
-#include "core/animation/test/unittest/mock/spring_chain_item.h"
+#include "core/animation/test/mock/mock_animation_util.h"
+#include "core/animation/test/mock/mock_spring_chain.h"
 #include "core/components/test/json/json_frontend.h"
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/fake_task_executor.h"
-#include "core/mock/mock_resource_register.h"
+#include "base/test/mock/mock_asset_manager.h"
+#include "base/test/mock/mock_task_executor.h"
+#include "core/common/test/mock/mock_resource_register.h"
 #include "core/pipeline/pipeline_context.h"
 
 using namespace testing;
@@ -88,8 +88,8 @@ public:
         std::unique_ptr<PlatformWindow> platformWindow = AnimationTestUtils::CreatePlatformWindow();
         platformWindowRaw_ = reinterpret_cast<MockPlatformWindow*>(platformWindow.get());
         auto window = AnimationTestUtils::CreateWindow(std::move(platformWindow));
-        auto taskExecutor = AceType::MakeRefPtr<FakeTaskExecutor>();
-        auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+        auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+        auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
         auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
         RefPtr<Frontend> frontend = Frontend::CreateDefault();
         context_ = AceType::MakeRefPtr<PipelineContext>(

@@ -55,6 +55,7 @@
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 #include "core/common/form_manager.h"
+#include "core/common/layout_inspector.h"
 #include "core/common/plugin_manager.h"
 
 namespace OHOS::Ace {
@@ -168,8 +169,13 @@ public:
     void OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
     {
         LOGI("DragWindowListener::OnDrag called.");
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        int32_t instanceId = instanceId_;
+        if (container->IsSubContainer()) {
+            instanceId = container->GetParentId();
+        }
         auto flutterAceView =
-            static_cast<Platform::FlutterAceView*>(Platform::AceContainer::GetContainer(instanceId_)->GetView());
+            static_cast<Platform::FlutterAceView*>(Platform::AceContainer::GetContainer(instanceId)->GetView());
         if (!flutterAceView) {
             LOGE("DragWindowListener::OnDrag flutterAceView is null");
             return;
@@ -222,7 +228,7 @@ public:
         taskExecutor->PostTask(
             [] {
                 SubwindowManager::GetInstance()->ClearMenu();
-                SubwindowManager::GetInstance()->HideMenuNG();
+                SubwindowManager::GetInstance()->ClearMenuNG();
                 SubwindowManager::GetInstance()->HidePopupNG();
             },
             TaskExecutor::TaskType::UI);
@@ -644,10 +650,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
 
-    if (window_->IsFocused()) {
-        LOGI("UIContentImpl: focus again");
-        Focus();
-    }
     dragWindowListener_ = new DragWindowListener(instanceId_);
     window_->RegisterDragListener(dragWindowListener_);
     occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
@@ -683,6 +685,13 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     } else {
         Platform::AceContainer::SetViewNew(flutterAceView, density, 0, 0, window_);
     }
+
+    // after frontend initialize
+    if (window_->IsFocused()) {
+        LOGI("UIContentImpl: focus again");
+        Focus();
+    }
+
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
     // Set sdk version in module json mode
     if (isModelJson) {
@@ -702,6 +711,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                 nativeEngine->CreateReference(storage, 1), context->GetBindingObject()->Get<NativeReference>());
         }
     }
+    LayoutInspector::SetCallback(instanceId_);
 }
 
 void UIContentImpl::Foreground()
@@ -1041,6 +1051,8 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     AceEngine::Get().AddContainer(instanceId_, container);
     touchOutsideListener_ = new TouchOutsideListener(instanceId_);
     window_->RegisterTouchOutsideListener(touchOutsideListener_);
+    dragWindowListener_ = new DragWindowListener(instanceId_);
+    window_->RegisterDragListener(dragWindowListener_);
 }
 
 void UIContentImpl::SetNextFrameLayoutCallback(std::function<void()>&& callback)

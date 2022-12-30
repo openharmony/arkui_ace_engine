@@ -98,6 +98,18 @@ public:
 
     virtual void BlendBorderColor(const Color& color) {}
 
+    // Paint focus state by component's setting. It will paint along the paintRect
+    virtual void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth) {}
+    // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
+    virtual void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
+        const Dimension& paintWidth)
+    {}
+    // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
+    virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth)
+    {}
+
+    virtual void ClearFocusState() {}
+
     virtual void UpdateBorderWidthF(const BorderWidthPropertyF& value) {}
 
     // clip node without padding
@@ -160,6 +172,8 @@ public:
         const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn)
     {}
 
+    virtual void DumpInfo() const {}
+
     void SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option)
     {
         sharedTransitionOption_ = option;
@@ -191,6 +205,7 @@ public:
     virtual void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) {}
 
     virtual void OnPositionUpdate(const OffsetT<Dimension>& value) {}
+    virtual void OnZIndexUpdate(int32_t value) {}
 
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
@@ -310,7 +325,6 @@ protected:
 
     virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnAnchorUpdate(const OffsetT<Dimension>& value) {}
-    virtual void OnZIndexUpdate(int32_t value) {}
 
     virtual void OnClipShapeUpdate(const RefPtr<BasicShape>& basicShape) {}
     virtual void OnClipEdgeUpdate(bool isClip) {}

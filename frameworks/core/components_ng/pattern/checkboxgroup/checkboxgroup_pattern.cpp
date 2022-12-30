@@ -89,9 +89,14 @@ void CheckBoxGroupPattern::OnModifyDone()
         margin.bottom = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
         layoutProperty->UpdateMargin(margin);
     }
+    hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
+    hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
     InitClickEvent();
     InitTouchEvent();
     InitMouseEvent();
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
 }
 
 void CheckBoxGroupPattern::InitClickEvent()
@@ -104,9 +109,9 @@ void CheckBoxGroupPattern::InitClickEvent()
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto radioPattern = weak.Upgrade();
-        CHECK_NULL_VOID(radioPattern);
-        radioPattern->OnClick();
+        auto checkboxPattern = weak.Upgrade();
+        CHECK_NULL_VOID(checkboxPattern);
+        checkboxPattern->OnClick();
     };
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gesture->AddClickEvent(clickListener_);
@@ -122,13 +127,14 @@ void CheckBoxGroupPattern::InitTouchEvent()
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
-        auto radioPattern = weak.Upgrade();
-        CHECK_NULL_VOID(radioPattern);
+        auto checkboxPattern = weak.Upgrade();
+        CHECK_NULL_VOID(checkboxPattern);
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
-            radioPattern->OnTouchDown();
+            checkboxPattern->OnTouchDown();
         }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
-            radioPattern->OnTouchUp();
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
+            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
+            checkboxPattern->OnTouchUp();
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
@@ -144,7 +150,7 @@ void CheckBoxGroupPattern::InitMouseEvent()
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-    auto eventHub = GetHost()->GetEventHub<CheckBoxGroupEventHub>();
+    auto eventHub = host->GetEventHub<CheckBoxGroupEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
 
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
@@ -162,7 +168,6 @@ void CheckBoxGroupPattern::HandleMouseEvent(bool isHover)
     isHover_ = isHover;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    isTouch_ = false;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -174,12 +179,9 @@ void CheckBoxGroupPattern::OnClick()
     CHECK_NULL_VOID(paintProperty);
     bool isSelected = false;
     auto status = paintProperty->GetSelectStatus();
-    if (status == CheckBoxGroupPaintProperty::SelectStatus::ALL) {
-        isSelected = false;
-    } else {
-        isSelected = true;
-    }
+    isSelected = status != CheckBoxGroupPaintProperty::SelectStatus::ALL;
     paintProperty->UpdateCheckBoxGroupSelect(isSelected);
+    isClick_ = true;
     UpdateState();
 }
 
@@ -188,6 +190,16 @@ void CheckBoxGroupPattern::OnTouchDown()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = true;
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
+    auto frameSize = geometryNode->GetFrameSize();
+    if (originalPaintRect.GetSize() == frameSize) {
+        originalPaintRect = GetHotZoneRect(true);
+    }
+    renderContext->SyncGeometryProperties(originalPaintRect);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -196,6 +208,16 @@ void CheckBoxGroupPattern::OnTouchUp()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = false;
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto paintRect = renderContext->GetPaintRectWithoutTransform();
+    auto frameSize = geometryNode->GetFrameSize();
+    if (paintRect.GetSize() != frameSize) {
+        paintRect = GetHotZoneRect(false);
+    }
+    renderContext->SyncGeometryProperties(paintRect);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -304,28 +326,34 @@ void CheckBoxGroupPattern::UpdateState()
                 UpdateUIStatus(selectAll);
             }
         }
-    } else {
-        if (preGroup.value() != group) {
-            pageEventHub->RemoveCheckBoxFromGroup(preGroup.value(), host->GetId());
-            pageEventHub->AddCheckBoxGroupToGroup(group, host->GetId());
+        isFirstCreated_ = false;
+        pattern->SetPreGroup(group);
+        return;
+    }
+    if (preGroup.value() != group) {
+        pageEventHub->RemoveCheckBoxFromGroup(preGroup.value(), host->GetId());
+        pageEventHub->AddCheckBoxGroupToGroup(group, host->GetId());
+        pattern->SetPreGroup(group);
+        return;
+    }
+    auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!paintProperty->HasCheckBoxGroupSelect()) {
+        return;
+    }
+    bool isSelected = paintProperty->GetCheckBoxGroupSelectValue();
+    paintProperty->ResetCheckBoxGroupSelect();
+
+    // Setting selectAll to false when clicked requires processing, changing selectAll to false dynamically does
+    // not require processing
+    if (isClick_ || isSelected) {
+        if (pattern->GetIsAddToMap()) {
+            UpdateGroupCheckStatus(host, isSelected);
         } else {
-            auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
-            CHECK_NULL_VOID(paintProperty);
-            if (!paintProperty->HasCheckBoxGroupSelect()) {
-                pattern->SetPreGroup(group);
-                return;
-            }
-            bool isSelected = paintProperty->GetCheckBoxGroupSelectValue();
-            paintProperty->ResetCheckBoxGroupSelect();
-            if (pattern->GetIsAddToMap()) {
-                UpdateGroupCheckStatus(host, isSelected);
-            } else {
-                UpdateRepeatedGroupStatus(host, isSelected);
-            }
+            UpdateRepeatedGroupStatus(host, isSelected);
         }
     }
-    isFirstCreated_ = false;
-    pattern->SetPreGroup(group);
+    isClick_ = false;
 }
 
 void CheckBoxGroupPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool select)
@@ -409,6 +437,7 @@ void CheckBoxGroupPattern::UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNo
                     auto pattern = node->GetPattern<CheckBoxPattern>();
                     pattern->UpdateUIStatus(select);
                     pattern->UpdateAnimation(select);
+                    pattern->SetLastSelect(select);
                     eventHub->UpdateChangeEvent(select);
                 }
             }
@@ -417,6 +446,7 @@ void CheckBoxGroupPattern::UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNo
                 auto pattern = node->GetPattern<CheckBoxPattern>();
                 pattern->UpdateUIStatus(select);
                 pattern->UpdateAnimation(select);
+                pattern->SetLastSelect(select);
                 eventHub->UpdateChangeEvent(select);
             }
         }
@@ -442,6 +472,76 @@ void CheckBoxGroupPattern::UpdateRepeatedGroupStatus(const RefPtr<FrameNode>& fr
     CheckboxGroupResult groupResult(vec, int(status));
     auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
     eventHub->UpdateChangeEvent(&groupResult);
+}
+
+RectF CheckBoxGroupPattern::GetHotZoneRect(bool isOriginal) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, {});
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, {});
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, {});
+    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
+    auto offset = originalPaintRect.GetOffset();
+    double actualWidth = 0.0;
+    double actualHeight = 0.0;
+    if (isOriginal) {
+        actualWidth = geometryNode->GetFrameSize().Width() + hotZoneHorizontalPadding_.ConvertToPx() * 2;
+        actualHeight = geometryNode->GetFrameSize().Height() + hotZoneVerticalPadding_.ConvertToPx() * 2;
+        offset.SetX(offset.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
+        offset.SetY(offset.GetY() - hotZoneVerticalPadding_.ConvertToPx());
+    } else {
+        actualWidth = geometryNode->GetFrameSize().Width();
+        actualHeight = geometryNode->GetFrameSize().Height();
+        offset.SetX(offset.GetX() + hotZoneHorizontalPadding_.ConvertToPx());
+        offset.SetY(offset.GetY() + hotZoneVerticalPadding_.ConvertToPx());
+    }
+    return RectF(offset, SizeF(actualWidth, actualHeight));
+}
+
+void CheckBoxGroupPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            pattern->GetInnerFocusPaintRect(paintRect);
+        }
+    };
+    focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+}
+
+void CheckBoxGroupPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
+{
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto checkBoxTheme = pipelineContext->GetTheme<CheckboxTheme>();
+    CHECK_NULL_VOID(checkBoxTheme);
+    auto borderRadius = checkBoxTheme->GetBorderRadius().ConvertToPx();
+    auto paintSize = size_;
+    auto paintOffset = offset_;
+    auto focusPaintPadding = checkBoxTheme->GetFocusPaintPadding().ConvertToPx();
+    float originX = paintOffset.GetX() - focusPaintPadding;
+    float originY = paintOffset.GetY() - focusPaintPadding;
+    float endX = paintSize.Width() + originX + 2 * focusPaintPadding;
+    float endY = paintSize.Height() + originY + 2 * focusPaintPadding;
+    paintRect.SetRect({ originX, originY, endX - originX, endY - originY });
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, borderRadius, borderRadius);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, borderRadius, borderRadius);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, borderRadius, borderRadius);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, borderRadius, borderRadius);
+}
+
+FocusPattern CheckBoxGroupPattern::GetFocusPattern() const
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, FocusPattern());
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_RETURN(checkBoxTheme, FocusPattern());
+    auto activeColor = checkBoxTheme->GetActiveColor();
+    FocusPaintParam focusPaintParam;
+    focusPaintParam.SetPaintColor(activeColor);
+    return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
 }
 
 } // namespace OHOS::Ace::NG

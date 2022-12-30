@@ -17,8 +17,8 @@
 
 #include "base/geometry/offset.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/common/ace_application_info.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -41,29 +41,27 @@ void CalendarMonthPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (clickListener_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!clickListener_);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     auto obtainedMonth = obtainedMonth_;
     auto clickCallback = [weak = WeakClaim(this), obtainedMonth](GestureEvent& info) {
         auto calendarPattern = weak.Upgrade();
         CHECK_NULL_VOID(calendarPattern);
-        auto globalLocation = info.GetFingerList().begin()->globalLocation_;
-        calendarPattern->OnClick(globalLocation, calendarPattern->obtainedMonth_);
+        auto localLocation = info.GetFingerList().begin()->localLocation_;
+        calendarPattern->OnClick(localLocation, calendarPattern->obtainedMonth_);
     };
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gesture->AddClickEvent(clickListener_);
 }
 
-void CalendarMonthPattern::OnClick(Offset& globalLocation, const ObtainedMonth& obtainedMonth)
+void CalendarMonthPattern::OnClick(Offset& localLocation, const ObtainedMonth& obtainedMonth)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<CalendarMonthPattern>();
     CHECK_NULL_VOID(pattern);
-    auto index = JudgeArea(globalLocation);
+    auto index = JudgeArea(localLocation);
     pattern->obtainedMonth_ = obtainedMonth;
     if (!obtainedMonth_.days.empty()) {
         for (auto& day : pattern->obtainedMonth_.days) {
@@ -99,12 +97,14 @@ int32_t CalendarMonthPattern::JudgeArea(const Offset& offset)
         paintProperty->GetWeekAndDayRowSpace().value_or(theme->GetCalendarTheme().weekAndDayRowSpace).ConvertToPx();
     auto dayHeight = paintProperty->GetDayHeight().value_or(theme->GetCalendarTheme().dayHeight).ConvertToPx();
     auto dayWidth = paintProperty->GetDayWidth().value_or(theme->GetCalendarTheme().dayWidth).ConvertToPx();
-    const static int32_t rowsOfData = 5;
     const static int32_t columnsOfData = 7;
-    auto rowSpace = (host->GetGeometryNode()->GetFrameSize().Height() - topPadding - weekHeight - weekAndDayRowSpace -
-                        dayHeight * rowsOfData) /
-                    (rowsOfData - 1);
-    auto colSpace = (host->GetGeometryNode()->GetFrameSize().Width() - columnsOfData * dayWidth) / (columnsOfData - 1);
+    auto colSpace = paintProperty->GetColSpaceValue({}).ConvertToPx() <= 0
+                        ? theme->GetCalendarTheme().colSpace.ConvertToPx()
+                        : paintProperty->GetColSpaceValue({}).ConvertToPx();
+
+    auto dailyFiveRowSpace = paintProperty->GetDailyFiveRowSpaceValue({}).ConvertToPx() <= 0
+                                 ? theme->GetCalendarTheme().dailyFiveRowSpace.ConvertToPx()
+                                 : paintProperty->GetDailyFiveRowSpaceValue({}).ConvertToPx();
     auto browHeight = weekHeight + topPadding + weekAndDayRowSpace;
     auto maxHeight = host->GetGeometryNode()->GetFrameSize().Height();
     auto maxWidth = host->GetGeometryNode()->GetFrameSize().Width();
@@ -113,8 +113,9 @@ int32_t CalendarMonthPattern::JudgeArea(const Offset& offset)
         return -1;
     }
     auto height = offset.GetY() - browHeight;
-    int32_t y =
-        height < (dayHeight + rowSpace / 2) ? 0 : (height - dayHeight - rowSpace / 2) / (dayHeight + rowSpace) + 1;
+    int32_t y = height < (dayHeight + dailyFiveRowSpace / 2)
+                    ? 0
+                    : (height - dayHeight - dailyFiveRowSpace / 2) / (dayHeight + dailyFiveRowSpace) + 1;
     int32_t x = offset.GetX() < (dayWidth + colSpace / 2)
                     ? 0
                     : (offset.GetX() - dayWidth - colSpace / 2) / (dayWidth + colSpace) + 1;

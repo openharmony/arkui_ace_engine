@@ -19,6 +19,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -31,6 +32,7 @@ void ListItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc)
     auto nodeId = stack->ClaimNodeId();
     auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
         CHECK_NULL_RETURN(deepRenderFunc, nullptr);
+        ScopedViewStackProcessor scopedViewStackProcessor;
         deepRenderFunc(nodeId);
         return ViewStackProcessor::GetInstance()->Finish();
     };
@@ -50,4 +52,32 @@ void ListItemModelNG::Create()
     stack->Push(frameNode);
 }
 
+void ListItemModelNG::SetSwiperAction(
+    std::function<void()>&& startAction, std::function<void()>&& endAction, V2::SwipeEdgeEffect edgeEffect)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<NG::UINode> startNode;
+    if (startAction) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        startAction();
+        startNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    if (startNode) {
+        pattern->SetStartNode(startNode);
+    }
+    RefPtr<NG::UINode> endNode;
+    if (endAction) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        endAction();
+        endNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    if (endNode) {
+        pattern->SetEndNode(endNode);
+    }
+
+    ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, edgeEffect);
+}
 } // namespace OHOS::Ace::NG

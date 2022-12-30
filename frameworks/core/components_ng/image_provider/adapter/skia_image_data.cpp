@@ -35,9 +35,8 @@ RefPtr<ImageData> ImageData::MakeFromDataWithCopy(const void* data, size_t lengt
 RefPtr<ImageData> ImageData::MakeFromDataWrapper(void* dataWrapper)
 {
     sk_sp<SkData>* skDataPtr = reinterpret_cast<sk_sp<SkData>*>(dataWrapper);
-    if (skDataPtr == nullptr || *skDataPtr == nullptr) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN_NOLOG(skDataPtr, nullptr);
+    CHECK_NULL_RETURN_NOLOG(*skDataPtr, nullptr);
     return MakeRefPtr<SkiaImageData>(*skDataPtr);
 }
 

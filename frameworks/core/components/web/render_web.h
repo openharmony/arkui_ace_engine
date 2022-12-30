@@ -20,6 +20,7 @@
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_component.h"
+#include "core/gestures/pan_recognizer.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 
@@ -118,7 +119,6 @@ public:
         return delegate_;
     }
 
-    void HandleAxisEvent(const AxisEvent& event) override;
     bool IsAxisScrollable(AxisDirection direction) override;
     WeakPtr<RenderNode> CheckAxisNode() override;
     
@@ -146,6 +146,7 @@ public:
     void PanOnActionEnd(const GestureEvent& info) override;
     void PanOnActionCancel() override;
     DragItemInfo GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info) override;
+    void InitEnhanceSurfaceFlag();
 
 protected:
     RefPtr<WebDelegate> delegate_;
@@ -153,10 +154,17 @@ protected:
     Size drawSize_;
     Size drawSizeCache_;
     bool isUrlLoaded_ = false;
+    Size preDrawSize_;
+    Offset position_;
+    Offset prePosition_;
+    bool isEnhanceSurface_ = false;
+    bool isCreateWebView_ = false;
 
 private:
 #ifdef OHOS_STANDARD_SYSTEM
     void Initialize();
+    void InitPanEvent();
+    void HandleDragMove(const GestureEvent& event);
     bool ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos, const TouchType& touchType);
     void OnTouchTestHit(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& result) override;
@@ -179,8 +187,10 @@ private:
         const DragItemInfo& dragItemInfo);
     void OnDragWindowMoveEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info);
     void OnDragWindowDropEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info);
+    void UpdateGlobalPos();
 
     RefPtr<RawRecognizer> touchRecognizer_ = nullptr;
+    RefPtr<PanRecognizer> panRecognizer_ = nullptr;
     OnMouseCallback onMouse_;
     OnKeyEventCallback onKeyEvent_;
     RefPtr<TextOverlayComponent> textOverlay_;
@@ -200,7 +210,6 @@ private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
     void SetRootView(int32_t width, int32_t height, int32_t offset);
-    Offset position_;
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
     bool needOnFocus_ = false;

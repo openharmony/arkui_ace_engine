@@ -77,6 +77,7 @@ void FullScreenManager::ExitFullScreen(const RefPtr<FrameNode>& frameNode)
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     rootNode->RemoveChild(frameNode);
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     auto parent = iterOfParent->second.first.Upgrade();
     CHECK_NULL_VOID(parent);

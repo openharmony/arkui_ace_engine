@@ -35,7 +35,7 @@ RSRect ToRSRect(const NG::RectF& rect)
     return RSRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom());
 }
 
-RSPoint ToRSPonit(const NG::PointF& point)
+RSPoint ToRSPoint(const NG::PointF& point)
 {
     return RSPoint(point.GetX(), point.GetY());
 }
@@ -156,6 +156,7 @@ rosen::TextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextSt
     rsTextStyle.fontWeight_ = ToRSFontWeight(textStyle.GetFontWeight());
     rsTextStyle.fontStyle_ = static_cast<rosen::FontStyle>(textStyle.GetFontStyle());
     rsTextStyle.textBaseline_ = static_cast<rosen::TextBaseline>(textStyle.GetTextBaseline());
+    rsTextStyle.fontFamilies_ = textStyle.GetFontFamilies();
     if (context) {
         rsTextStyle.fontSize_ = context->NormalizeToPx(textStyle.GetFontSize());
         if (textStyle.IsAllowScale() || textStyle.GetFontSize().Unit() == DimensionUnit::FP) {

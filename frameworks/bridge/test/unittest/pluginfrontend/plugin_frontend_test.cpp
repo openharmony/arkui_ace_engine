@@ -18,11 +18,11 @@
 #include "core/common/flutter/flutter_task_executor.h"
 #define private public
 #define protected public
-#include "frameworks/bridge/plugin_frontend/plugin_frontend.h"
+#include "bridge/plugin_frontend/plugin_frontend.h"
 #undef private
 #undef protected
-#include "core/mock/fake_asset_manager.h"
-#include "core/mock/mock_resource_register.h"
+#include "base/test/mock/mock_asset_manager.h"
+#include "core/common/test/mock/mock_resource_register.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -56,7 +56,7 @@ RefPtr<PipelineContext> PluginFrontendTest::GetPipelineContext(const RefPtr<Plug
 
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
 
-    auto assetManager = Referenced::MakeRefPtr<FakeAssetManager>();
+    auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     return AceType::MakeRefPtr<PipelineContext>(
         std::move(window), taskExecutor, assetManager, resRegister, frontend, 0);
@@ -97,7 +97,7 @@ HWTEST_F(PluginFrontendTest, OnShowTest001, TestSize.Level1)
      * @tc.steps: step2. On Show.
      * @tc.expected: step2. On Show success.
      */
-    auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
     std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
@@ -151,7 +151,7 @@ HWTEST_F(PluginFrontendTest, OnHideTest001, TestSize.Level1)
      * @tc.steps: step2. On Hide.
      * @tc.expected: step2. On Hide success.
      */
-    auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
     std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
@@ -247,7 +247,7 @@ HWTEST_F(PluginFrontendTest, OnActiveTest001, TestSize.Level1)
      * @tc.steps: step2. On Active.
      * @tc.expected: step2. On Configuration Updated success.
      */
-    auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
     std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
@@ -303,7 +303,7 @@ HWTEST_F(PluginFrontendTest, OnInactiveTest001, TestSize.Level1)
      * @tc.steps: step2. On Inactive.
      * @tc.expected: step2. On Inactive success.
      */
-    auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
     std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
@@ -420,7 +420,7 @@ HWTEST_F(PluginFrontendTest, OnMemoryLevelTest001, TestSize.Level1)
      * @tc.steps: step2. On Memory Level.
      * @tc.expected: step2. On Memory Level success.
      */
-    auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
     std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
@@ -881,7 +881,7 @@ HWTEST_F(PluginFrontendTest, NotifyAppStorageTest001, TestSize.Level1)
      * @tc.steps: step2. Notify App Storage.
      * @tc.expected: step2. Notify App Storage success.
      */
-    auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
     std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
@@ -1108,7 +1108,7 @@ HWTEST_F(PluginFrontendTest, NavigatePageTest003, TestSize.Level1)
     RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
-    pluginFrontend. NavigatePage(BACK, PageTarget("uri"), "params");
+    pluginFrontend.NavigatePage(BACK, PageTarget("uri"), "params");
 }
 
 /**
@@ -1130,7 +1130,7 @@ HWTEST_F(PluginFrontendTest, NavigatePageTest004, TestSize.Level1)
     RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
-    pluginFrontend. NavigatePage(DEFAULT, PageTarget("uri"), "params");
+    pluginFrontend.NavigatePage(DEFAULT, PageTarget("uri"), "params");
 }
 
 /**
@@ -1169,7 +1169,7 @@ HWTEST_F(PluginFrontendTest, SendCallbackMessageTest001, TestSize.Level1)
      * @tc.steps: step2. Send Callback Message.
      * @tc.expected: step2. Send Callback Message success.
      */
-    auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
     std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
@@ -1223,7 +1223,7 @@ HWTEST_F(PluginFrontendTest, TransferComponentResponseDataTest001, TestSize.Leve
      * @tc.steps: step2. Transfer Component Response Data.
      * @tc.expected: step2. Transfer Component Response Data success.
      */
-    auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
     std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
@@ -1351,7 +1351,7 @@ HWTEST_F(PluginFrontendTest, TransferJsPluginGetErrorTest001, TestSize.Level1)
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
-    std::string errorMessage {"errorMessage"};
+    std::string errorMessage { "errorMessage" };
     pluginFrontend.TransferJsPluginGetError(0, 0, std::move(errorMessage));
 }
 
@@ -1372,7 +1372,7 @@ HWTEST_F(PluginFrontendTest, TransferJsPluginGetErrorTest002, TestSize.Level1)
      * @tc.expected: step2. Transfer Js Response Data fail.
      */
     EXPECT_TRUE(pluginFrontend.delegate_ == nullptr);
-    std::string errorMessage {"errorMessage"};
+    std::string errorMessage { "errorMessage" };
     pluginFrontend.TransferJsPluginGetError(0, 0, std::move(errorMessage));
 }
 
@@ -1484,7 +1484,7 @@ HWTEST_F(PluginFrontendTest, LoadPluginJsCodeTest002, TestSize.Level1)
      * @tc.expected: step2. Load Plugin Js Code fail.
      */
     EXPECT_TRUE(pluginFrontend.delegate_ == nullptr);
-    std::string vecJsCode {"JsCode"};
+    std::string vecJsCode { "JsCode" };
     pluginFrontend.LoadPluginJsCode(std::move(vecJsCode));
 }
 
@@ -1682,7 +1682,7 @@ HWTEST_F(PluginFrontendTest, LoadPluginJsByteCodeTest001, TestSize.Level1)
      * @tc.steps: step2. Load Plugin Js Byte Code.
      * @tc.expected: step2. Load Plugin Js Byte Code success.
      */
-    auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
     std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
@@ -1697,8 +1697,8 @@ HWTEST_F(PluginFrontendTest, LoadPluginJsByteCodeTest001, TestSize.Level1)
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
-    std::vector<uint8_t> vecJsCode {0, 0};
-    std::vector<int32_t> vecJsCodeLen {0, 0};
+    std::vector<uint8_t> vecJsCode { 0, 0 };
+    std::vector<int32_t> vecJsCodeLen { 0, 0 };
     pluginFrontend.LoadPluginJsByteCode(std::move(vecJsCode), std::move(vecJsCodeLen));
 }
 
@@ -1719,8 +1719,8 @@ HWTEST_F(PluginFrontendTest, LoadPluginJsByteCodeTest002, TestSize.Level1)
      * @tc.expected: step2. Load Plugin Js Code fail.
      */
     EXPECT_TRUE(pluginFrontend.delegate_ == nullptr);
-    std::vector<uint8_t> vecJsCode {0, 0};
-    std::vector<int32_t> vecJsCodeLen {0, 0};
+    std::vector<uint8_t> vecJsCode { 0, 0 };
+    std::vector<int32_t> vecJsCodeLen { 0, 0 };
     pluginFrontend.LoadPluginJsByteCode(std::move(vecJsCode), std::move(vecJsCodeLen));
 }
 
@@ -1740,7 +1740,7 @@ HWTEST_F(PluginFrontendTest, OnWindowDisplayModeChangedTest001, TestSize.Level1)
      * @tc.steps: step2. On Window Display ModeChanged.
      * @tc.expected: step2. On Window Display Mode Changed success.
      */
-    auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
     std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
@@ -1838,7 +1838,7 @@ HWTEST_F(PluginFrontendTest, OnRestoreAbilityStateTest001, TestSize.Level1)
      * @tc.steps: step2. On Restore Ability State.
      * @tc.expected: step2. On Restore Ability State success.
      */
-    auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
     std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
@@ -1892,7 +1892,7 @@ HWTEST_F(PluginFrontendTest, OnNewWantTest001, TestSize.Level1)
      * @tc.steps: step2. On New Want Message.
      * @tc.expected: step2. On New Want success.
      */
-    auto taskExecutor =  Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
     std::string label = LABEL;
     std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
     std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);

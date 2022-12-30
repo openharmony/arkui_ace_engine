@@ -21,6 +21,7 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/offset.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -35,15 +36,15 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float RK3568_WIDTH = 720.0f;
-constexpr float RK3568_HEIGHT = 1136.0f;
+constexpr float DEVICE_WIDTH = 720.0f;
+constexpr float DEVICE_HEIGHT = 1136.0f;
 constexpr float GRID_POSITION = 100.0f;
 constexpr float GRID_DURATION = 200.0f;
 constexpr int32_t GRID_MAX_COUNT = 10;
 constexpr int32_t GRID_MIN_COUNT = 1;
 constexpr int32_t GRID_CELL_LENGTH = 200;
 constexpr float GRID_SCROLL_OFFSET = 1.0f;
-const SizeF CONTAINER_SIZE(RK3568_WIDTH, RK3568_HEIGHT);
+const SizeF CONTAINER_SIZE(DEVICE_WIDTH, DEVICE_HEIGHT);
 const Dimension GRID_COLUMNS_GAP = Dimension(10, DimensionUnit::PX);
 const Dimension GRID_ROWS_GAP = Dimension(5, DimensionUnit::PX);
 const std::string GRID_DIRECTION_ROW = "GridDirection.Row";
@@ -434,8 +435,8 @@ HWTEST_F(GridTestNg, GridTest004, TestSize.Level1)
     auto layoutProperty = frameNode->GetLayoutProperty<GridLayoutProperty>();
     auto layoutDirectionStr = layoutProperty->GetLayoutDirectionStr();
     EXPECT_EQ(layoutDirectionStr, GRID_DIRECTION_ROW);
-    auto barStateStr = layoutProperty->GetBarStateString();
-    EXPECT_EQ(barStateStr, GRID_SCROLL_BAR_OFF);
+    // auto barStateStr = layoutProperty->GetBarStateString();
+    // EXPECT_EQ(barStateStr, GRID_SCROLL_BAR_OFF);
 
     /**
      * @tc.steps: step7. Get the pattern to call the related functions in the positionController.
@@ -507,7 +508,7 @@ HWTEST_F(GridTestNg, GridTest005, TestSize.Level1)
     grid.SetMaxCount(GRID_MAX_COUNT);
     grid.SetMinCount(GRID_MIN_COUNT);
     grid.SetCellLength(GRID_CELL_LENGTH);
-    grid.SetScrollBarMode(DisplayMode::AUTO);
+    grid.SetScrollBarMode(static_cast<int32_t>(NG::DisplayMode::AUTO));
 
     /**
      * @tc.steps: step3. Create the child nodes gridItem and text of the grid, and set the width and height of text.
@@ -552,8 +553,8 @@ HWTEST_F(GridTestNg, GridTest005, TestSize.Level1)
     EXPECT_NE(layoutProperty, nullptr);
     auto layoutDirectionStr = layoutProperty->GetLayoutDirectionStr();
     EXPECT_EQ(layoutDirectionStr, GRID_DIRECTION_ROW_REVERSE);
-    auto barStateStr = layoutProperty->GetBarStateString();
-    EXPECT_EQ(barStateStr, GRID_SCROLL_BAR_AUTO);
+    // auto barStateStr = layoutProperty->GetBarStateString();
+    // EXPECT_EQ(barStateStr, GRID_SCROLL_BAR_AUTO);
 }
 
 /**
@@ -587,7 +588,7 @@ HWTEST_F(GridTestNg, GridTest006, TestSize.Level1)
     grid.SetMaxCount(GRID_MAX_COUNT);
     grid.SetMinCount(GRID_MIN_COUNT);
     grid.SetCellLength(GRID_CELL_LENGTH);
-    grid.SetScrollBarMode(DisplayMode::ON);
+    grid.SetScrollBarMode(static_cast<int32_t>(NG::DisplayMode::ON));
 
     /**
      * @tc.steps: step3. Create the child nodes gridItem and text of the grid, and set the width and height of text.
@@ -632,8 +633,8 @@ HWTEST_F(GridTestNg, GridTest006, TestSize.Level1)
     EXPECT_NE(layoutProperty, nullptr);
     auto layoutDirectionStr = layoutProperty->GetLayoutDirectionStr();
     EXPECT_EQ(layoutDirectionStr, GRID_DIRECTION_COLUMN);
-    auto barStateStr = layoutProperty->GetBarStateString();
-    EXPECT_EQ(barStateStr, GRID_SCROLL_BAR_ON);
+    // auto barStateStr = layoutProperty->GetBarStateString();
+    // EXPECT_EQ(barStateStr, GRID_SCROLL_BAR_ON);
 }
 
 /**
@@ -667,7 +668,7 @@ HWTEST_F(GridTestNg, GridTest007, TestSize.Level1)
     grid.SetMaxCount(GRID_MAX_COUNT);
     grid.SetMinCount(GRID_MIN_COUNT);
     grid.SetCellLength(GRID_CELL_LENGTH);
-    grid.SetScrollBarMode(DisplayMode::OFF);
+    grid.SetScrollBarMode(static_cast<int32_t>(NG::DisplayMode::OFF));
 
     /**
      * @tc.steps: step3. Create the child nodes gridItem and text of the grid, and set the width and height of text.
@@ -712,8 +713,8 @@ HWTEST_F(GridTestNg, GridTest007, TestSize.Level1)
     EXPECT_NE(layoutProperty, nullptr);
     auto layoutDirectionStr = layoutProperty->GetLayoutDirectionStr();
     EXPECT_EQ(layoutDirectionStr, GRID_DIRECTION_COLUMN_REVERSE);
-    auto barStateStr = layoutProperty->GetBarStateString();
-    EXPECT_EQ(barStateStr, GRID_SCROLL_BAR_OFF);
+    // auto barStateStr = layoutProperty->GetBarStateString();
+    // EXPECT_EQ(barStateStr, GRID_SCROLL_BAR_OFF);
 
     /**
      * @tc.steps: step7. Get grid EventHub to call related function.
@@ -834,5 +835,291 @@ HWTEST_F(GridTestNg, GridTest008, TestSize.Level1)
     auto selectedZone4 = pattern->ComputeSelectedZone(startOffset4, endOffset4);
     EXPECT_EQ(selectedZone4, RectF(endOffset4.GetX(), endOffset4.GetY(), startOffset4.GetX() - endOffset4.GetX(),
                                  startOffset4.GetY() - endOffset4.GetY()));
+}
+
+RefPtr<FrameNode> TestScrollGrid(OptionalSizeF gridSize, double gridItemHeight, int32_t gridItemFrom,
+    int32_t gridItemTo, float scrollOffset = 0.0f, int32_t totalItemCount = 9)
+{
+    /**
+     * @tc.steps: step1. Create grid node and initialize width, height, properties.
+     */
+    RefPtr<V2::GridPositionController> positionController;
+    RefPtr<ScrollBarProxy> scrollBarProxy;
+    GridModelNG grid;
+    grid.Create(positionController, scrollBarProxy);
+    std::unique_ptr<ViewAbstractModel> instance = std::make_unique<ViewAbstractModelNG>();
+    auto height = StringUtils::StringToDimensionWithUnit("70%");
+    instance->SetHeight(height);
+    auto width = StringUtils::StringToDimensionWithUnit("90%");
+    instance->SetWidth(width);
+    grid.SetColumnsTemplate("1fr 1fr 1fr");
+
+    /**
+     * @tc.steps: step2. Create the child nodes gridItem and text of the grid, and set the width and height of text.
+     */
+    GridItemModelNG gridItem;
+    TextModelNG text;
+    for (int32_t i = 0; i < totalItemCount; ++i) {
+        gridItem.Create();
+        text.Create("test");
+        auto textHeight = StringUtils::StringToDimensionWithUnit("50%");
+        instance->SetHeight(textHeight);
+        auto textWidth = StringUtils::StringToDimensionWithUnit("100%");
+        instance->SetWidth(textWidth);
+        ViewStackProcessor::GetInstance()->Pop();
+        instance->SetHeight(Dimension(gridItemHeight));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+
+    /**
+     * @tc.steps: step3. Get grid frameNode and set layoutConstraint.
+     * @tc.expected: step3. related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    LayoutConstraintF constraint;
+    constraint.UpdateIllegalSelfIdealSizeWithCheck(gridSize);
+
+    /**
+     * @tc.steps: step4. Call the measure and layout function of grid to calculate the size and layout.
+     */
+    layoutWrapper->Measure(constraint);
+    layoutWrapper->Layout();
+
+    // scroll
+    if (!NearZero(scrollOffset)) {
+        auto gridPattern = frameNode->GetPattern<GridPattern>();
+        EXPECT_FALSE(gridPattern == nullptr);
+        gridPattern->UpdateScrollPosition(scrollOffset);
+        layoutWrapper = frameNode->CreateLayoutWrapper();
+        LayoutConstraintF constraint;
+        constraint.UpdateIllegalSelfIdealSizeWithCheck(gridSize);
+        layoutWrapper->Measure(constraint);
+        layoutWrapper->Layout();
+
+        // save current grid info to grid pattern for next operation
+        DirtySwapConfig config { false, false, false, false };
+        auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm();
+        CHECK_NULL_RETURN(layoutAlgorithmWrapper, frameNode);
+        config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure() || layoutWrapper->SkipMeasureContent();
+        config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
+        gridPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    }
+    /**
+     * @tc.steps: step5. When setting fixed rows and columns, check the status of child nodes in the grid.
+     * @tc.expected: step3. All child nodes are active.
+     */
+    for (int32_t i = gridItemFrom; i < gridItemTo; ++i) {
+        EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(i, false)->IsActive());
+    }
+
+    return frameNode;
+}
+
+/**
+ * @tc.name: GridTest009
+ * @tc.desc: grid with fixed column
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridTest009, TestSize.Level1)
+{
+    OptionalSizeF gridSize(900.0f, 900.0f);
+    const int32_t ITEM_COUNT = 9;
+    constexpr double GRID_ITEM_HEIGHT = 300.0f;
+    TestScrollGrid(gridSize, GRID_ITEM_HEIGHT, 0, ITEM_COUNT);
+}
+
+/**
+ * @tc.name: GridTest010
+ * @tc.desc: grid with fixed column, some griditem not show
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridTest010, TestSize.Level1)
+{
+    OptionalSizeF gridSize(900.0f, 600.0f);
+    const int32_t ITEM_COUNT = 6;
+    constexpr double GRID_ITEM_HEIGHT = 300.0f;
+    TestScrollGrid(gridSize, GRID_ITEM_HEIGHT, 0, ITEM_COUNT);
+}
+
+/**
+ * @tc.name: GridTest011
+ * @tc.desc: grid with fixed column, some griditem not fully show
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridTest011, TestSize.Level1)
+{
+    OptionalSizeF gridSize(900.0f, 800.0f);
+    const int32_t ITEM_COUNT = 9;
+    constexpr double GRID_ITEM_HEIGHT = 300.0f;
+    TestScrollGrid(gridSize, GRID_ITEM_HEIGHT, 0, ITEM_COUNT);
+}
+
+/**
+ * @tc.name: GridTest012
+ * @tc.desc: grid with fixed column, scroll to show one more line
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridTest012, TestSize.Level1)
+{
+    OptionalSizeF gridSize(900.0f, 600.0f);
+    const int32_t ITEM_COUNT = 9;
+    constexpr double GRID_ITEM_HEIGHT = 300.0f;
+    TestScrollGrid(gridSize, GRID_ITEM_HEIGHT, 0, ITEM_COUNT, -100.0f);
+}
+
+/**
+ * @tc.name: GridTest013
+ * @tc.desc: grid with fixed column, scroll to end
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridTest013, TestSize.Level1)
+{
+    OptionalSizeF gridSize(900.0f, 600.0f);
+    const int32_t ITEM_COUNT = 9;
+    constexpr double GRID_ITEM_HEIGHT = 300.0f;
+    TestScrollGrid(gridSize, GRID_ITEM_HEIGHT, 3, ITEM_COUNT, -300.0f);
+}
+
+/**
+ * @tc.name: GridTest014
+ * @tc.desc: grid with fixed column, scroll to index not fully showed at last line
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridTest014, TestSize.Level1)
+{
+    OptionalSizeF gridSize(900.0f, 600.0f);
+    const int32_t ITEM_COUNT = 9;
+    constexpr double GRID_ITEM_HEIGHT = 300.0f;
+    auto frameNode = TestScrollGrid(gridSize, GRID_ITEM_HEIGHT, 0, ITEM_COUNT, -100.0f);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto gridPattern = frameNode->GetPattern<GridPattern>();
+    EXPECT_FALSE(gridPattern == nullptr);
+    gridPattern->UpdateStartIndex(8);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    LayoutConstraintF constraint;
+    constraint.UpdateIllegalSelfIdealSizeWithCheck(gridSize);
+    layoutWrapper->Measure(constraint);
+    layoutWrapper->Layout();
+    for (int32_t i = 0; i < 3; ++i) {
+        EXPECT_FALSE(layoutWrapper->GetOrCreateChildByIndex(i, false)->IsActive());
+    }
+}
+
+/**
+ * @tc.name: GridTest015
+ * @tc.desc: grid with fixed column, scroll to index not fully showed at first line
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridTest015, TestSize.Level1)
+{
+    OptionalSizeF gridSize(900.0f, 600.0f);
+    const int32_t ITEM_COUNT = 9;
+    constexpr double GRID_ITEM_HEIGHT = 300.0f;
+    auto frameNode = TestScrollGrid(gridSize, GRID_ITEM_HEIGHT, 0, ITEM_COUNT, -100.0f);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto gridPattern = frameNode->GetPattern<GridPattern>();
+    EXPECT_FALSE(gridPattern == nullptr);
+    gridPattern->UpdateStartIndex(1);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    LayoutConstraintF constraint;
+    constraint.UpdateIllegalSelfIdealSizeWithCheck(gridSize);
+    layoutWrapper->Measure(constraint);
+    layoutWrapper->Layout();
+    for (int32_t i = 6; i < ITEM_COUNT; ++i) {
+        EXPECT_FALSE(layoutWrapper->GetOrCreateChildByIndex(i, false)->IsActive());
+    }
+}
+
+/**
+ * @tc.name: GridTest016
+ * @tc.desc: grid with fixed column, scroll to index fully showed
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridTest016, TestSize.Level1)
+{
+    OptionalSizeF gridSize(900.0f, 600.0f);
+    const int32_t ITEM_COUNT = 9;
+    constexpr double GRID_ITEM_HEIGHT = 300.0f;
+    auto frameNode = TestScrollGrid(gridSize, GRID_ITEM_HEIGHT, 0, ITEM_COUNT, -100.0f);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto gridPattern = frameNode->GetPattern<GridPattern>();
+    EXPECT_FALSE(gridPattern == nullptr);
+    gridPattern->UpdateStartIndex(3);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    LayoutConstraintF constraint;
+    constraint.UpdateIllegalSelfIdealSizeWithCheck(gridSize);
+    layoutWrapper->Measure(constraint);
+    layoutWrapper->Layout();
+    for (int32_t i = 0; i < ITEM_COUNT; ++i) {
+        EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(i, false)->IsActive());
+    }
+}
+
+/**
+ * @tc.name: GridTest017
+ * @tc.desc: grid with fixed column, scroll to index not fully showed at last line
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridTest017, TestSize.Level1)
+{
+    OptionalSizeF gridSize(900.0f, 600.0f);
+    const int32_t ITEM_COUNT = 9;
+    constexpr double GRID_ITEM_HEIGHT = 300.0f;
+    auto frameNode = TestScrollGrid(gridSize, GRID_ITEM_HEIGHT, 0, ITEM_COUNT, -100.0f, 10);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto gridPattern = frameNode->GetPattern<GridPattern>();
+    EXPECT_FALSE(gridPattern == nullptr);
+    gridPattern->UpdateStartIndex(8);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    LayoutConstraintF constraint;
+    constraint.UpdateIllegalSelfIdealSizeWithCheck(gridSize);
+    layoutWrapper->Measure(constraint);
+    layoutWrapper->Layout();
+    EXPECT_FALSE(layoutWrapper->GetOrCreateChildByIndex(9, false)->IsActive());
+}
+
+/**
+ * @tc.name: GridTest018
+ * @tc.desc: grid with fixed column, scroll to index out of view
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridTest018, TestSize.Level1)
+{
+    OptionalSizeF gridSize(900.0f, 600.0f);
+    const int32_t ITEM_COUNT = 9;
+    constexpr double GRID_ITEM_HEIGHT = 300.0f;
+    // scroll to show index 0-8
+    auto frameNode = TestScrollGrid(gridSize, GRID_ITEM_HEIGHT, 0, ITEM_COUNT, -100.0f, 10);
+
+    // scroll to index 9
+    EXPECT_FALSE(frameNode == nullptr);
+    auto gridPattern = frameNode->GetPattern<GridPattern>();
+    EXPECT_FALSE(gridPattern == nullptr);
+    gridPattern->UpdateStartIndex(9);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    LayoutConstraintF constraint;
+    constraint.UpdateIllegalSelfIdealSizeWithCheck(gridSize);
+    layoutWrapper->Measure(constraint);
+    layoutWrapper->Layout();
+    EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(9, false)->IsActive());
+    EXPECT_FALSE(layoutWrapper->GetOrCreateChildByIndex(0, false)->IsActive());
+
+    // save current grid info to grid pattern for next operation
+    DirtySwapConfig config { false, false, false, false };
+    auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm();
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure() || layoutWrapper->SkipMeasureContent();
+    config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
+    gridPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+
+    // scroll to index 0
+    gridPattern->UpdateStartIndex(0);
+    layoutWrapper = frameNode->CreateLayoutWrapper();
+    layoutWrapper->Measure(constraint);
+    layoutWrapper->Layout();
+    EXPECT_FALSE(layoutWrapper->GetOrCreateChildByIndex(9, false)->IsActive());
+    EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(0, false)->IsActive());
 }
 } // namespace OHOS::Ace::NG

@@ -122,6 +122,14 @@ void PipelineBase::ClearImageCache()
     }
 }
 
+void PipelineBase::SetImageCache(const RefPtr<ImageCache>& imageChache)
+{
+    std::lock_guard<std::shared_mutex> lock(imageCacheMutex_);
+    if (imageChache) {
+        imageCache_ = imageChache;
+    }
+}
+
 RefPtr<ImageCache> PipelineBase::GetImageCache() const
 {
     std::shared_lock<std::shared_mutex> lock(imageCacheMutex_);
@@ -452,7 +460,9 @@ void PipelineBase::PrepareCloseImplicitAnimation()
     if (pendingImplicitLayout_.top()) {
         FlushUITasks();
     }
-    pendingImplicitLayout_.pop();
+    if (!pendingImplicitLayout_.empty()) {
+        pendingImplicitLayout_.pop();
+    }
 #endif
 }
 

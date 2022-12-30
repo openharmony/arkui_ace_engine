@@ -12,9 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/pattern/patternlock/patternlock_paint_method.h"
 
-#include <optional>
+#include "core/components_ng/pattern/patternlock/patternlock_paint_method.h"
 
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
@@ -24,14 +23,11 @@
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
-
 constexpr int32_t RADIUS_TO_DIAMETER = 2;
 constexpr float SCALE_ACTIVE_CIRCLE_RADIUS = 16.00 / 14.00;
 constexpr float GRADUAL_CHANGE_POINT = 0.5;
 constexpr float SCALE_SELECTED_CIRCLE_RADIUS = 26.00 / 14.00;
-
 } // namespace
 
 CanvasDrawFunction PatternLockPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
@@ -55,7 +51,7 @@ CanvasDrawFunction PatternLockPaintMethod::GetContentDrawFunction(PaintWrapper* 
 
 void PatternLockPaintMethod::InitializeParam(const RefPtr<PatternLockPaintProperty>& patternLockPaintProperty)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto patternLockTheme = pipeline->GetTheme<V2::PatternLockTheme>();
     CHECK_NULL_VOID(patternLockTheme);
@@ -151,11 +147,11 @@ void PatternLockPaintMethod::PaintLockLine(RSCanvas& canvas, const OffsetF& offs
         y2 = y2 > offset.GetY() + sideLength_.ConvertToPx() ? offset.GetY() + sideLength_.ConvertToPx() : y2;
         y2 = y2 < offset.GetY() ? offset.GetY() : y2;
 
-        std::vector<rosen::ColorQuad> colors = { pathColorAlpha255.GetValue(), pathColorAlpha255.GetValue(),
+        std::vector<RSColorQuad> colors = { pathColorAlpha255.GetValue(), pathColorAlpha255.GetValue(),
             pathColorAlpha255.ChangeOpacity(0.0).GetValue() };
-        std::vector<rosen::scalar> pos = { 0.0, GRADUAL_CHANGE_POINT, 1.0 };
+        std::vector<RSScalar> pos = { 0.0, GRADUAL_CHANGE_POINT, 1.0 };
         auto shader = pen.GetShaderEffect();
-        shader->CreateLinearGradient(RSPoint(x1, y1), RSPoint(x2, y2), colors, pos, rosen::TileMode::CLAMP);
+        shader->CreateLinearGradient(RSPoint(x1, y1), RSPoint(x2, y2), colors, pos, RSTileMode::CLAMP);
         pen.SetShaderEffect(shader);
         canvas.DrawLine(RSPoint(x1, y1), RSPoint(x2, y2));
     }
