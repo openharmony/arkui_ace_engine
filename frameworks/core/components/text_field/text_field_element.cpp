@@ -178,6 +178,7 @@ void TextFieldElement::OnFocus()
     if (!enabled_) {
         return;
     }
+    LOGI("Textfield on focus");
     auto textField = DynamicCast<RenderTextField>(renderNode_);
     if (textField) {
         textField->StartTwinkling();

@@ -55,6 +55,15 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto contentSize = content->GetRect().GetSize();
         contentHeight = contentSize.Height();
     }
+    if (pattern->IsTextArea()) {
+        if (!frameSize.Height().has_value()) {
+            frameSize.SetHeight(contentHeight + pattern->GetVerticalPaddingSum());
+        }
+        layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
+        frameRect_ =
+            RectF(layoutWrapper->GetGeometryNode()->GetFrameOffset(), layoutWrapper->GetGeometryNode()->GetFrameSize());
+        return;
+    }
     if (!frameSize.Height().has_value()) {
         frameSize.SetHeight(
             std::min(layoutConstraint->maxSize.Height(), contentHeight + pattern->GetVerticalPaddingSum()));
@@ -111,9 +120,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (pattern->IsTextArea()) {
         textRect_.SetSize(SizeF(
             contentConstraint.maxSize.Width() - horizontalPaddingSum, static_cast<float>(paragraph_->GetHeight())));
-        return SizeF(contentConstraint.maxSize.Width() - horizontalPaddingSum,
-            std::min(contentConstraint.maxSize.Height() - pattern->GetVerticalPaddingSum(),
-                GetTextFieldDefaultHeight() * 2.0f));
+        return SizeF(contentConstraint.maxSize.Width() - horizontalPaddingSum, preferredHeight);
     }
     auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(true);
     // check password image size.

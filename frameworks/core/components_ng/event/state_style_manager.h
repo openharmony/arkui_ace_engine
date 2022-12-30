@@ -34,7 +34,7 @@ inline constexpr UIState UI_STATE_CHECKED = 1 << 3;
 
 // StateStyleManager is mainly used to manage the setting and refresh of state styles.
 class StateStyleManager : public virtual AceType {
-    DECLARE_ACE_TYPE(StateStyles, AceType)
+    DECLARE_ACE_TYPE(StateStyleManager, AceType)
 
 public:
     explicit StateStyleManager(WeakPtr<FrameNode> frameNode);

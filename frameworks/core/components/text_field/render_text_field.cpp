@@ -68,7 +68,7 @@ constexpr Dimension DEFLATE_RADIUS_FOCUS = 3.0_vp;
 
 const std::string DIGIT_WHITE_LIST = "^[0-9]*$";
 const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
-const std::string EMAIL_WHITE_LIST = "\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";
+const std::string EMAIL_WHITE_LIST = "^[a-zA-Z0-9_-.]+@[a-zA-Z0-9_-.]+([a-zA-Z0-9])";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
 const std::string NEW_LINE = "\n";
 // Whether the system is Mac or not determines which key code is selected.
@@ -267,6 +267,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         resetToStart_ = textField->GetResetToStart();
     }
     if (keyboard_ != TextInputType::UNSPECIFIED && keyboard_ != textField->GetTextInputType()) {
+        LOGI("TextInput changed, close keyboard");
         CloseKeyboard();
     }
     if (keyboard_ != textField->GetTextInputType()) {
@@ -286,6 +287,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         if (action_ != TextInputAction::UNSPECIFIED && action_ != textField->GetAction()) {
             auto context = context_.Upgrade();
             if (context && context->GetIsDeclarative()) {
+                LOGI("Action changed, close keyboard");
                 CloseKeyboard();
             }
         }
@@ -722,6 +724,7 @@ void RenderTextField::AddOutOfRectCallbackToContext()
                 render->PopTextOverlay();
             }
             render->StopTwinkling();
+            LOGI("Out of rect, close keyboard");
             render->CloseKeyboard();
             render->OnEditChange(false);
         }
@@ -1131,6 +1134,11 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
 
 bool RenderTextField::CloseKeyboard(bool forceClose)
 {
+#if defined(OHOS_STANDARD_SYSTEM)
+    if (!imeAttached_) {
+        return false;
+    }
+#endif
     if (!isOverlayShowed_ || !isOverlayFocus_ || forceClose) {
         if (!textFieldController_) {
             StopTwinkling();
@@ -1600,6 +1608,7 @@ void RenderTextField::PerformAction(TextInputAction action, bool forceCloseKeybo
     if (action == TextInputAction::NEXT && moveNextFocusEvent_) {
         moveNextFocusEvent_();
     } else {
+        LOGI("Perform action received from input frame, close keyboard");
         CloseKeyboard(forceCloseKeyboard);
     }
     if (onFinishInputEvent_) {
@@ -2014,6 +2023,7 @@ void RenderTextField::CursorMoveDown()
 
 void RenderTextField::HandleOnBlur()
 {
+    LOGI("Textfield on blur");
     SetCanPaintSelection(false);
     auto lastPosition = static_cast<int32_t>(GetEditingValue().GetWideText().length());
     UpdateSelection(lastPosition, lastPosition);
@@ -2590,6 +2600,7 @@ void RenderTextField::HandleDeviceOrientationChange()
 void RenderTextField::OnHiddenChanged(bool hidden)
 {
     if (hidden) {
+        LOGI("On hidden change, close keyboard");
         CloseKeyboard();
         PopTextOverlay();
     }
