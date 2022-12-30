@@ -32,8 +32,6 @@ RefPtr<MouseStyle> MouseStyle::CreateMouseStyle()
 bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle) const
 {
     auto inputManager = MMI::InputManager::GetInstance();
-    MMI::PointerStyle style;
-
     CHECK_NULL_RETURN(inputManager, false);
     int32_t MMIPointStyle = 0;
     switch (pointerStyle) {
@@ -52,6 +50,7 @@ bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle)
         default:
             MMIPointStyle = MMI::DEFAULT;
     }
+    MMI::PointerStyle style;
     style.id = MMIPointStyle;
     int32_t setResult = inputManager->SetPointerStyle(windowId, style);
     if (setResult == -1) {
