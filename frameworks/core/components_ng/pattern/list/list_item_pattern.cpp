@@ -356,4 +356,16 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
     }
     StartSpringMotion(curOffset_, end, info.GetMainVelocity() * friction);
 }
+
+void ListItemPattern::MarkIsSelected(bool isSelected)
+{
+    if (isSelected_ != isSelected) {
+        isSelected_ = isSelected;
+        auto eventHub = GetEventHub<ListItemEventHub>();
+        auto onSelect = eventHub->GetOnSelect();
+        if (onSelect) {
+            onSelect(isSelected);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG
