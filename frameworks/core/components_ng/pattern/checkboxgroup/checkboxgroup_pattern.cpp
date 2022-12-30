@@ -15,15 +15,7 @@
 
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 
-#include <algorithm>
-#include <cmath>
-#include <cstdint>
-
-#include "base/geometry/axis.h"
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
-#include "core/animation/curve.h"
-#include "core/animation/curves.h"
+#include "core/components/checkable/checkable_component.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components/test/unittest/image/image_test_utils.h"
@@ -75,7 +67,7 @@ void CheckBoxGroupPattern::OnModifyDone()
     UpdateState();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkBoxTheme);

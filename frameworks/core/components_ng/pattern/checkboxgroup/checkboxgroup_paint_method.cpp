@@ -63,7 +63,7 @@ CanvasDrawFunction CheckBoxGroupPaintMethod::GetContentDrawFunction(PaintWrapper
 
 void CheckBoxGroupPaintMethod::InitializeParam()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkBoxTheme);
