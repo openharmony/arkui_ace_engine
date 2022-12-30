@@ -16,6 +16,7 @@
 #include "mouse_style_ohos.h"
 
 #include "input_manager.h"
+#include "pointer_style.h"
 #include "struct_multimodal.h"
 
 #include "base/log/log_wrapper.h"
@@ -49,7 +50,9 @@ bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle)
         default:
             MMIPointStyle = MMI::DEFAULT;
     }
-    int32_t setResult = inputManager->SetPointerStyle(windowId, MMIPointStyle);
+    MMI::PointerStyle style;
+    style.id = MMIPointStyle;
+    int32_t setResult = inputManager->SetPointerStyle(windowId, style);
     if (setResult == -1) {
         LOGE("SetPointerStyle result is false");
         return false;
@@ -61,11 +64,13 @@ int32_t MouseStyleOhos::GetPointerStyle(int32_t windowId, int32_t& pointerStyle)
 {
     auto inputManager = MMI::InputManager::GetInstance();
     CHECK_NULL_RETURN(inputManager, -1);
-    int32_t getResult = inputManager->GetPointerStyle(windowId, pointerStyle);
+    MMI::PointerStyle style;
+    int32_t getResult = inputManager->GetPointerStyle(windowId, style);
     if (getResult == -1) {
         LOGE("GetPointerStyle result is false");
         return -1;
     }
+    pointerStyle = style.id;
     return getResult;
 }
 
