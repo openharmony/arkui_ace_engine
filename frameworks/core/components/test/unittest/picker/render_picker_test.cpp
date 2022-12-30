@@ -27,7 +27,10 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-
+constexpr uint32_t HEIGHT_VALUE = 20;
+constexpr Dimension COLUMN_HEIGHT = Dimension(HEIGHT_VALUE, DimensionUnit::PX);
+constexpr uint32_t FONT_VALUE = 20;
+constexpr Dimension FONT_SIZE = Dimension(FONT_VALUE, DimensionUnit::PX);
 constexpr uint32_t TEST_LEAP_YEAR = 2020;
 constexpr uint32_t TEST_LEAP_HUNDREDS = 2000;
 constexpr uint32_t TEST_OTHER_YEAR = 2019;
@@ -341,6 +344,111 @@ HWTEST_F(RenderPickerTest, RenderPicker012, TestSize.Level1)
      */
     auto nullColumn = picker->GetColumn(TEST_COLUMN_TAG);
     EXPECT_EQ(nullColumn, nullptr);
+}
+
+/**
+ * @tc.name: RenderPicker013
+ * @tc.desc: Verify the focusFontSize .
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPickerTest, RenderPicker013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the picker component and set FontSize.
+     */
+    auto picker = AceType::MakeRefPtr<PickerBaseComponent>();
+    picker->SetFocusFontSize(FONT_SIZE);
+    
+    /**
+     * @tc.steps: step2. get the FontSize, and check it's value.
+     * @tc.expected: step2. fontValue is equal FONT_VALUE.
+     */
+    uint32_t fontValue = picker->GetFocusFontSize().Value();
+    ASSERT_TRUE(fontValue == FONT_VALUE);
+}
+
+/**
+ * @tc.name: RenderPicker014
+ * @tc.desc: Verify the NormalFontSize .
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPickerTest, RenderPicker014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the picker component and set FontSize.
+     */
+    auto picker = AceType::MakeRefPtr<PickerBaseComponent>();
+    picker->SetNormalFontSize(FONT_SIZE);
+    
+    /**
+     * @tc.steps: step2. get the FontSize, and check it's value.
+     * @tc.expected: step2. fontValue is equal FONT_VALUE.
+     */
+    uint32_t fontValue = picker->GetNormalFontSize().Value();
+    ASSERT_TRUE(fontValue == FONT_VALUE);
+}
+
+/**
+ * @tc.name: RenderPicker015
+ * @tc.desc: Verify the focusFontSize .
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPickerTest, RenderPicker015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the picker component and set FontSize.
+     */
+    auto picker = AceType::MakeRefPtr<PickerBaseComponent>();
+    picker->SetSelectedFontSize(FONT_SIZE);
+    
+    /**
+     * @tc.steps: step2. get the FontSize, and check it's value.
+     * @tc.expected: step2. fontValue is equal FONT_VALUE.
+     */
+    uint32_t fontValue = picker->GetSelectedFontSize().Value();
+    ASSERT_TRUE(fontValue == FONT_VALUE);
+}
+
+/**
+ * @tc.name: RenderPicker016
+ * @tc.desc: Verify the focusFontSize .
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPickerTest, RenderPicker016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the picker component and set FontSize.
+     */
+    auto picker = AceType::MakeRefPtr<PickerBaseComponent>();
+    picker->SetDisappearFontSize(FONT_SIZE);
+    
+    /**
+     * @tc.steps: step2. get the FontSize, and check it's value.
+     * @tc.expected: step2. fontValue is equal FONT_VALUE.
+     */
+    uint32_t fontValue = picker->GetDisappearFontSize().Value();
+    ASSERT_TRUE(fontValue == FONT_VALUE);
+}
+
+/**
+ * @tc.name: RenderPicker017
+ * @tc.desc: Verify the columnHeight .
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPickerTest, RenderPicker017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the picker component and set columnHeight.
+     */
+    auto picker = AceType::MakeRefPtr<PickerBaseComponent>();
+    picker->SetColumnHeight(COLUMN_HEIGHT);
+    
+    /**
+     * @tc.steps: step2. get the COLUMN_HEIGHT, and check it's value.
+     * @tc.expected: step2. heightValue is equal columnHeight.
+     */
+    uint32_t heightValue = picker->GetColumnHeight().Value();
+    ASSERT_TRUE(heightValue == HEIGHT_VALUE);
 }
 
 } // namespace OHOS::Ace
