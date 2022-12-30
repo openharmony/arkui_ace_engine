@@ -24,6 +24,7 @@ RefPtr<LayoutAlgorithm> ListItemGroupPattern::CreateLayoutAlgorithm()
 {
     auto layoutAlgorithm = MakeRefPtr<ListItemGroupLayoutAlgorithm>(headerIndex_, footerIndex_, itemStartIndex_);
     layoutAlgorithm->SetListLayoutProperty(GetListLayoutProperty());
+    layoutAlgorithm->SetItemsPosition(itemPosition_);
     return layoutAlgorithm;
 }
 

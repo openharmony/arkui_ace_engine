@@ -71,7 +71,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
         ++currentIndex;
         if (isGroup) {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", currentIndex);
-            SetListItemGroupParam(wrapper);
+            SetListItemGroupParam(wrapper, startPos, true);
             wrapper->Measure(groupLayoutConstraint_);
         } else {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
@@ -114,7 +114,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
         cnt++;
         if (isGroup) {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", currentIndex);
-            SetListItemGroupParam(wrapper);
+            SetListItemGroupParam(wrapper, endPos, false);
             wrapper->Measure(groupLayoutConstraint_);
         } else {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
