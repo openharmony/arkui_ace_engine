@@ -312,13 +312,15 @@ void QJSDeclarativeEngine::ReplaceJSContent(const std::string& url, const std::s
     instance->GetDelegate()->Replace(url, "");
 }
 #endif
-RefPtr<Component> QJSDeclarativeEngine::GetNewComponentWithJsCode(const std::string& jsCode)
+RefPtr<Component> QJSDeclarativeEngine::GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID)
 {
 #ifdef NG_BUILD
     return nullptr;
 #else
     ViewStackProcessor::GetInstance()->ClearStack();
+    ViewStackProcessor::GetInstance()->PushKey(viewID);
     bool result = engineInstance_->InitAceModules(jsCode.c_str(), jsCode.length(), "AddComponent");
+    ViewStackProcessor::GetInstance()->PopKey();
     if (!result) {
         LOGE("execute addComponent failed,script=[%{public}s]", jsCode.c_str());
         return nullptr;

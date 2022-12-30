@@ -143,7 +143,7 @@ public:
     void SetColorMode(ColorMode colorMode) override;
     void RebuildAllPages() override;
     void NotifyAppStorage(const std::string& key, const std::string& value) override;
-    RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode);
+    RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID);
     RefPtr<AceEventHandler> GetEventHandler() override
     {
         return handler_;
