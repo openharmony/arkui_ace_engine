@@ -91,6 +91,11 @@ public:
 
     RefPtr<ListLayoutProperty> GetListLayoutProperty();
 
+    const ListItemGroupLayoutAlgorithm::PositionMap& GetItemPosition()
+    {
+        return itemPosition_;
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     RefPtr<ShallowBuilder> shallowBuilder_;

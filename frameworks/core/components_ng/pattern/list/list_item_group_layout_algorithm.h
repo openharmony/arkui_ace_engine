@@ -43,6 +43,11 @@ public:
         return itemPosition_;
     }
 
+    void SetItemsPosition(const PositionMap& itemPosition)
+    {
+        itemPosition_ = itemPosition;
+    }
+
     float GetSpaceWidth() const
     {
         return spaceWidth_;
@@ -58,9 +63,20 @@ public:
         return lanes_;
     }
 
-    void SetListMainSize(float contentMainSize)
+    int32_t GetLanesFloor(int32_t index) const
     {
-        listMainSize_ = contentMainSize;
+        if (lanes_ <= 1) {
+            return index;
+        }
+        return index - index % lanes_;
+    }
+
+    void SetListMainSize(float startPos, float endPos, float referencePos, bool forwardLayout)
+    {
+        startPos_ = startPos;
+        endPos_ = endPos;
+        referencePos_ = referencePos;
+        forwardLayout_ = forwardLayout;
     }
 
     void SetListLayoutProperty(RefPtr<ListLayoutProperty> layoutProperty)
@@ -68,12 +84,41 @@ public:
         listLayoutProperty_ = std::move(layoutProperty);
     }
 
+    int32_t GetStartIndex() const
+    {
+        return itemPosition_.empty() ? 0 : itemPosition_.begin()->first;
+    }
+
+    int32_t GetEndIndex() const
+    {
+        return itemPosition_.empty() ? 0 : itemPosition_.rbegin()->first;
+    }
+
+    float GetStartPosition() const
+    {
+        if (itemPosition_.empty()) {
+            return 0.0f;
+        }
+        if (GetStartIndex() == 0) {
+            return itemPosition_.begin()->second.first;
+        }
+        return itemPosition_.begin()->second.first - spaceWidth_;
+    }
+
+    float GetEndPosition() const
+    {
+        if (itemPosition_.empty()) {
+            return 0.0f;
+        }
+        if (GetEndIndex() == totalItemCount_ - 1) {
+            return itemPosition_.rbegin()->second.second;
+        }
+        return itemPosition_.rbegin()->second.second + spaceWidth_;
+    }
+
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
-    int32_t MeasureALine(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
-        int32_t currentIndex, float& mainLen);
-    float MeasureListItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, float startPos);
     void LayoutListItem(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
     void LayoutHeaderFooter(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
     void LayoutIndex(const RefPtr<LayoutWrapper>& wrapper, const OffsetF& paddingOffset,
@@ -85,11 +130,21 @@ private:
     void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
         const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis);
 
+    void MeasureListItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
+    int32_t MeasureALineForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        int32_t& currentIndex, float startPos, float& endPos);
+    int32_t MeasureALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        int32_t& currentIndex, float endPos, float& startPos);
+    void MeasureForward(
+        LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos);
+    void MeasureBackward(
+        LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t endIndex, float endPos);
+    void UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty);
+
     int32_t headerIndex_;
     int32_t footerIndex_;
     int32_t itemStartIndex_;
     RefPtr<ListLayoutProperty> listLayoutProperty_;
-    float listMainSize_ = 0.0f;
 
     PositionMap itemPosition_;
     Axis axis_ = Axis::VERTICAL;
@@ -98,6 +153,16 @@ private:
     std::optional<float> maxLaneLength_;
     V2::ListItemAlign itemAlign_ = V2::ListItemAlign::START;
     float spaceWidth_ = 0.0f;
+
+    int32_t totalItemCount_ = 0;
+    float totalMainSize_ = 0.0f;
+    float headerMainSize_ = 0.0f;
+    float footerMainSize_ = 0.0f;
+    float startPos_ = 0.0f;
+    float endPos_ = 0.0f;
+    float referencePos_ = 0.0f;
+    bool forwardLayout_ = true;
+    bool lanesChanged_ = false;
 };
 } // namespace OHOS::Ace::NG
 
