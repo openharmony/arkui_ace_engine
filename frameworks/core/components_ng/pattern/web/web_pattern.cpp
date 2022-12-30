@@ -788,6 +788,20 @@ void WebPattern::OnBlockNetworkUpdate(bool value)
     }
 }
 
+void WebPattern::OnHorizontalScrollBarAccessEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateHorizontalScrollBarAccess(value);
+    }
+}
+
+void WebPattern::OnVerticalScrollBarAccessEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateVerticalScrollBarAccess(value);
+    }
+}
+
 void WebPattern::RegistVirtualKeyBoardListener()
 {
     if (!needUpdateWeb_) {
@@ -868,6 +882,8 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateDefaultFontSize(GetDefaultFontSizeValue(DEFAULT_FONT_SIZE));
         delegate_->UpdateMinFontSize(GetMinFontSizeValue(DEFAULT_MINIMUM_FONT_SIZE));
         delegate_->UpdateMinLogicalFontSize(GetMinLogicalFontSizeValue(DEFAULT_MINIMUM_LOGICAL_FONT_SIZE));
+        delegate_->UpdateHorizontalScrollBarAccess(GetHorizontalScrollBarAccessEnabledValue(true));
+        delegate_->UpdateVerticalScrollBarAccess(GetVerticalScrollBarAccessEnabledValue(true));
         if (GetBlockNetwork()) {
             delegate_->UpdateBlockNetwork(GetBlockNetwork().value());
         }

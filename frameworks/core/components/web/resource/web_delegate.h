@@ -421,6 +421,8 @@ public:
     void UpdateMinFontSize(int32_t minFontSize);
     void UpdateMinLogicalFontSize(int32_t minLogicalFontSize);
     void UpdateBlockNetwork(bool isNetworkBlocked);
+    void UpdateHorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled);
+    void UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
