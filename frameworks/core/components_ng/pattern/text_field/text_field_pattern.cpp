@@ -67,7 +67,7 @@ constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
 const std::string DIGIT_WHITE_LIST = "^[0-9]*$";
 const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
-const std::string EMAIL_WHITE_LIST = "\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";
+const std::string EMAIL_WHITE_LIST = "^[a-zA-Z0-9_-.]+@[a-zA-Z0-9_-.]+([a-zA-Z0-9])";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
 
 void RemoveErrorTextFromValue(const std::string& value, const std::string& errorText, std::string& result)
@@ -1265,6 +1265,7 @@ void TextFieldPattern::OnModifyDone()
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (keyboard_ != layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED)) {
+        LOGI("Keyboard type changed to %{public}d", layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED));
         CloseKeyboard(true);
         keyboard_ = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
     }
