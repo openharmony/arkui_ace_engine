@@ -65,6 +65,7 @@ class WebPattern : public Pattern {
 
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
+    using SetHapPathCallback = std::function<void(const std::string&)>;
     using JsProxyCallback = std::function<void()>;
 
     WebPattern();
@@ -151,6 +152,16 @@ public:
     SetWebIdCallback GetSetWebIdCallback() const
     {
         return setWebIdCallback_;
+    }
+
+    void SetSetHapPathCallback(SetHapPathCallback&& callback)
+    {
+        setHapPathCallback_ = std::move(callback);
+    }
+
+    SetHapPathCallback GetSetHapPathCallback() const
+    {
+        return setHapPathCallback_;
     }
 
     void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback)
@@ -330,6 +341,7 @@ private:
     std::optional<std::string> customScheme_;
     RefPtr<WebController> webController_;
     SetWebIdCallback setWebIdCallback_ = nullptr;
+    SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
     RefPtr<WebDelegate> delegate_;
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();

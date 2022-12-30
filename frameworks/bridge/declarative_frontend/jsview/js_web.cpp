@@ -1719,13 +1719,16 @@ void JSWeb::CreateInNewPipeline(
             JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
             func->Call(webviewController, 1, argv);
         };
-        NG::WebView::Create(dstSrc.value(), std::move(setIdCallback));
-
-        auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
-        std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
-        if (!cmdLine.empty()) {
-            NG::WebView::SetCustomScheme(cmdLine);
+        auto setHapPathFunction = controller->GetProperty("innerSetHapPath");
+        NG::SetHapPathCallback setHapPathCallback = nullptr;
+        if (setHapPathFunction->IsFunction()) {
+            setHapPathCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(setHapPathFunction)](
+                                     const std::string& hapPath) {
+                JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(hapPath)) };
+                func->Call(webviewController, 1, argv);
+            };
         }
+        NG::WebView::Create(dstSrc.value(), std::move(setIdCallback), std::move(setHapPathCallback));
         return;
     }
     auto* jsWebController = controller->Unwrap<JSWebController>();
@@ -1756,11 +1759,14 @@ void JSWeb::CreateWithWebviewController(
         func->Call(webviewController, 1, argv);
     };
     webComponent->SetSetWebIdCallback(std::move(setIdCallback));
-
-    auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
-    std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
-    if (!cmdLine.empty()) {
-        webComponent->SetCustomScheme(cmdLine);
+    auto setHapPathFunction = controller->GetProperty("innerSetHapPath");
+    if (setHapPathFunction->IsFunction()) {
+        auto setHapPathCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(setHapPathFunction)](
+                                    const std::string& hapPath) {
+            JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(hapPath)) };
+            func->Call(webviewController, 1, argv);
+        };
+        webComponent->SetSetHapPathCallback(std::move(setHapPathCallback));
     }
 }
 

@@ -218,8 +218,6 @@ public:
         return gpuUploadEnabled_;
     }
 
-    static bool GetResourceUseHapPathEnable();
-
     /*
      * Set device orientation.
      */
