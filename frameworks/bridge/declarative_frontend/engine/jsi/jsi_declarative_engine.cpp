@@ -1175,7 +1175,7 @@ void JsiDeclarativeEngine::ReplaceJSContent(const std::string& url, const std::s
     engineInstance_->GetDelegate()->Replace(url, "");
 }
 
-RefPtr<Component> JsiDeclarativeEngine::GetNewComponentWithJsCode(const std::string& jsCode)
+RefPtr<Component> JsiDeclarativeEngine::GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID)
 {
     std::string dest;
     if (!Base64Util::Decode(jsCode, dest)) {
@@ -1183,7 +1183,9 @@ RefPtr<Component> JsiDeclarativeEngine::GetNewComponentWithJsCode(const std::str
     }
 
     ViewStackProcessor::GetInstance()->ClearStack();
+    ViewStackProcessor::GetInstance()->PushKey(viewID);
     bool result = engineInstance_->InitAceModule((uint8_t*)dest.data(), dest.size());
+    ViewStackProcessor::GetInstance()->PopKey();
     if (!result) {
         return nullptr;
     }
