@@ -896,10 +896,10 @@ void DeclarativeFrontend::NotifyAppStorage(const std::string& key, const std::st
     delegate_->NotifyAppStorage(jsEngine_, key, value);
 }
 
-RefPtr<Component> DeclarativeFrontend::GetNewComponentWithJsCode(const std::string& jsCode)
+RefPtr<Component> DeclarativeFrontend::GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID)
 {
     if (jsEngine_) {
-        return jsEngine_->GetNewComponentWithJsCode(jsCode);
+        return jsEngine_->GetNewComponentWithJsCode(jsCode, viewID);
     }
     return nullptr;
 }

@@ -237,7 +237,12 @@ public:
         return extraNativeObject_;
     }
 
-    virtual RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode)
+    void SetForceUpdate(bool needUpdate)
+    {
+        needUpdate_ = needUpdate;
+    }
+
+    virtual RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID)
     {
         return nullptr;
     }
