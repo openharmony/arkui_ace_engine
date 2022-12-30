@@ -381,6 +381,10 @@ void AceAbility::SurfaceChanged(
         TaskExecutor::TaskType::PLATFORM);
     SystemProperties::InitDeviceInfo(
         width, height, orientation == DeviceOrientation::PORTRAIT ? 0 : 1, resolution, runArgs_.isRound);
+    DeviceConfig deviceConfig = runArgs_.deviceConfig;
+    deviceConfig.orientation = orientation;
+    deviceConfig.density = resolution;
+    container->UpdateDeviceConfig(deviceConfig);
     viewPtr->NotifyDensityChanged(resolution);
     viewPtr->NotifySurfaceChanged(width, height);
 }
