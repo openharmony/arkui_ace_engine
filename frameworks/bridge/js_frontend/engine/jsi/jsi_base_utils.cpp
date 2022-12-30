@@ -138,11 +138,12 @@ std::string JsiBaseUtils::GenerateSummaryBody(
 
 ErrorPos JsiBaseUtils::GetErrorPos(const std::string& rawStack)
 {
-    uint32_t lineEnd = rawStack.find("\n") - 1;
-    if (lineEnd < 1) {
+    size_t findLineEnd = rawStack.find("\n");
+    if (findLineEnd == std::string::npos) {
         return std::make_pair(0, 0);
     }
-    if (rawStack[lineEnd - 1] == '?') {
+    uint32_t lineEnd = findLineEnd - 1;
+    if (lineEnd < 1 || rawStack[lineEnd - 1] == '?') {
         return std::make_pair(0, 0);
     }
 
