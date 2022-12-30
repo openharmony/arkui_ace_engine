@@ -130,7 +130,9 @@ ohos_unittest("ThemeConstantsTest") {
 
   sources = [
     # base
+    "$ace_root/adapter/ohos/osal/ace_trace.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",
+    "$ace_root/frameworks/base/log/ace_trace.cpp",
     "$ace_root/frameworks/base/log/dump_log.cpp",
     "$ace_root/frameworks/base/utils/base_id.cpp",
 
@@ -140,6 +142,7 @@ ohos_unittest("ThemeConstantsTest") {
     "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
+    "$ace_root/frameworks/core/components/theme/icon_theme.cpp",
 
     # theme
     "$ace_root/frameworks/core/components/theme/app_theme.cpp",
@@ -202,6 +205,7 @@ ohos_unittest("ThemeConstantsTest") {
 
   if (is_standard_system) {
     external_deps = [
+      "hitrace_native:hitrace_meter",
       "hiviewdfx_hilog_native:libhilog",
       "init:libbegetutil",
     ]
@@ -232,7 +236,7 @@ group("unittest") {
   testonly = true
   if (!is_asan) {
     deps = [
-      #":ThemeConstantsTest",
+      ":ThemeConstantsTest",
       ":ThemeManagerTest",
     ]
   }
