@@ -401,6 +401,17 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest008, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(), CalcLength(PADDING.ConvertToPx()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(), CalcLength(PADDING.ConvertToPx()));
     EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(), CalcLength(PADDING.ConvertToPx()));
+
+    auto geometryNode = switchFrameNode->GetGeometryNode();
+    geometryNode->SetContentSize(SizeF(SWITCH_WIDTH, SWITCH_HEIGHT));
+    auto paintProperty = switchFrameNode->GetPaintProperty<SwitchPaintProperty>();
+    switchPattern->isOn_ = false;
+    paintProperty->UpdateIsOn(true);
+    switchPattern->OnModifyDone();
+    EXPECT_EQ(switchPattern->isOn_, false);
+    EXPECT_EQ(paintProperty->GetIsOnValue(), true);
+    paintProperty->UpdateCurve(Curves::LINEAR);
+    switchPattern->PlayTranslateAnimation(0.0f, 1.0f);
 }
 
 /**
@@ -472,6 +483,13 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest009, TestSize.Level1)
     */
     bool forth_case = switchPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, true);
     EXPECT_TRUE(forth_case);
+
+    /**
+    //     case 5: LayoutWrapper::SkipMeasure = false , skipLayout = true, isOn_ is false;
+    */
+    switchPattern->isOn_ = false;
+    bool fifth_case = switchPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, true);
+    EXPECT_TRUE(fifth_case);
 }
 
 /**
@@ -503,22 +521,42 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0010, TestSize.Level1)
     EXPECT_NE(hub, nullptr);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     EXPECT_NE(gestureHub, nullptr);
-    RefPtr<PanEvent> panEvent = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
-    switchPattern->panEvent_ = panEvent;
+    // InitPanEvent()
     switchPattern->InitPanEvent(gestureHub);
-
-    RefPtr<ClickEvent> clickEvent = AceType::MakeRefPtr<ClickEvent>(nullptr);
-    switchPattern->clickListener_ = clickEvent;
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+    switchPattern->panEvent_->actionStart_(info);
+    switchPattern->panEvent_->actionUpdate_(info);
+    switchPattern->panEvent_->actionEnd_(info);
+    switchPattern->panEvent_->actionCancel_();
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    switchPattern->panEvent_->actionStart_(info);
+    switchPattern->panEvent_->actionUpdate_(info);
+    switchPattern->panEvent_->actionEnd_(info);
+    switchPattern->InitPanEvent(gestureHub);
+    // InitClickEvent()
     switchPattern->InitClickEvent();
-
-    RefPtr<TouchEventImpl> touchEvent = AceType::MakeRefPtr<TouchEventImpl>(nullptr);
-    switchPattern->touchListener_ = touchEvent;
+    switchPattern->InitClickEvent();
+    // InitTouchEvent()
     switchPattern->InitTouchEvent();
+    switchPattern->InitTouchEvent();
+    TouchEventInfo touchInfo("onTouch");
+    TouchLocationInfo touchInfo1(1);
+    touchInfo1.SetTouchType(TouchType::DOWN);
+    touchInfo.AddTouchLocationInfo(std::move(touchInfo1));
+    switchPattern->touchListener_->GetTouchEventCallback()(touchInfo);
+    TouchLocationInfo touchInfo2(2);
+    touchInfo2.SetTouchType(TouchType::UP);
+    touchInfo.AddTouchLocationInfo(std::move(touchInfo2));
+    switchPattern->touchListener_->GetTouchEventCallback()(touchInfo);
+    TouchLocationInfo touchInfo3(3);
+    touchInfo2.SetTouchType(TouchType::CANCEL);
+    touchInfo.AddTouchLocationInfo(std::move(touchInfo3));
+    switchPattern->touchListener_->GetTouchEventCallback()(touchInfo);
 
-    // std::move(mouseTask)
-    auto mouseTask = [](bool isHover) {};
-    RefPtr<InputEvent> inputEvent = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
-    switchPattern->mouseEvent_ = inputEvent;
+    // InitMouseEvent()
+    switchPattern->InitMouseEvent();
+    EXPECT_NE(switchPattern->mouseEvent_, nullptr);
     switchPattern->InitMouseEvent();
 
     switchPattern->isOn_ = true;
@@ -529,7 +567,6 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0010, TestSize.Level1)
 
     // execute Handle function
     switchPattern->HandleMouseEvent(true);
-    GestureEvent info;
     info.SetMainDelta(10.0f);
     switchPattern->HandleDragUpdate(info);
     info.SetMainDelta(0.0f);
@@ -555,6 +592,9 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0010, TestSize.Level1)
     switchPattern->HandleDragEnd();
     switchPattern->isOn_ = true;
     switchPattern->HandleDragEnd();
+    switchPattern->controller_ = AccessibilityManager::MakeRefPtr<Animator>();
+    switchPattern->controller_->status_ = Animator::Status::RUNNING;
+    switchPattern->OnClick();
 }
 
 /**
@@ -659,11 +699,13 @@ HWTEST_F(TogglePatternTestNg, TogglePaintTest001, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, switchPaintProperty);
     EXPECT_NE(paintWrapper, nullptr);
-    switchPaintMethod.GetContentDrawFunction(paintWrapper);
+    auto paintMethod = switchPaintMethod.GetContentDrawFunction(paintWrapper);
+    RSCanvas canvas;
+    paintMethod(canvas);
 }
 
 /**
- * @tc.name: TogglePaintTest001
+ * @tc.name: TogglePaintTest002
  * @tc.desc: Test toggle GetContentDrawFunction.
  * @tc.type: FUNC
  */

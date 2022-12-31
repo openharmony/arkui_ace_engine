@@ -370,10 +370,24 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest009, TestSize.Leve
     pattern->InitMouseEvent();
     EXPECT_FALSE(pattern->mouseEvent_ == nullptr);
     pattern->InitMouseEvent();
+    pattern->mouseEvent_->GetOnHoverEventFunc()(true);
     // InitTouchEvent()
     pattern->InitTouchEvent();
     EXPECT_FALSE(pattern->touchListener_ == nullptr);
     pattern->InitTouchEvent();
+    TouchEventInfo info("onTouch");
+    TouchLocationInfo touchInfo1(1);
+    touchInfo1.SetTouchType(TouchType::DOWN);
+    info.AddTouchLocationInfo(std::move(touchInfo1));
+    pattern->touchListener_->GetTouchEventCallback()(info);
+    TouchLocationInfo touchInfo2(2);
+    touchInfo2.SetTouchType(TouchType::UP);
+    info.AddTouchLocationInfo(std::move(touchInfo2));
+    pattern->touchListener_->GetTouchEventCallback()(info);
+    TouchLocationInfo touchInfo3(3);
+    touchInfo2.SetTouchType(TouchType::CANCEL);
+    info.AddTouchLocationInfo(std::move(touchInfo3));
+    pattern->touchListener_->GetTouchEventCallback()(info);
     // InitClickEvent()
     pattern->InitClickEvent();
     EXPECT_FALSE(pattern->clickListener_ == nullptr);
@@ -548,5 +562,49 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxPatternTest014, TestSize.Level1)
     RoundRect paintRect;
     pattern->GetInnerFocusPaintRect(paintRect);
     pattern->GetHotZoneRect(false);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPatternTest015
+ * @tc.desc: Test UpdateAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest015, TestSize.Level1)
+{
+    CheckBoxGroupModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(GROUP_NAME);
+    checkBoxModelNG.SetSelectAll(false);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    checkBoxModelNG.SetSelectAll(true);
+    pattern->UpdateAnimation(true);
+    EXPECT_FALSE(pattern->controller_ == nullptr);
+    pattern->UpdateAnimation(true);
+    pattern->controller_->NotifyStopListener();
+    pattern->translate_->NotifyListener(1);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPatternTest016
+ * @tc.desc: Test UpdateAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest016, TestSize.Level1)
+{
+    CheckBoxGroupModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(GROUP_NAME);
+    checkBoxModelNG.SetSelectAll(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    checkBoxModelNG.SetSelectAll(false);
+    pattern->UpdateAnimation(false);
+    EXPECT_FALSE(pattern->controller_ == nullptr);
+    pattern->UpdateAnimation(false);
 }
 } // namespace OHOS::Ace::NG
