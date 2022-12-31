@@ -197,7 +197,7 @@ public:
 
     void FlushBuild() override;
 
-    void FlushPipelineImmediately();
+    void FlushPipelineImmediately() override;
 
     void AddBuildFinishCallBack(std::function<void()>&& callback);
 

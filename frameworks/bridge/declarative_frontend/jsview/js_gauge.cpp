@@ -120,14 +120,19 @@ void JSGauge::SetColors(const JSCallbackInfo& info)
     std::vector<Color> colors;
     std::vector<double> values;
     std::vector<float> weights;
+    auto theme = GetTheme<ProgressTheme>();
     auto jsColor = JSRef<JSArray>::Cast(info[0]);
     for (size_t i = 0; i < jsColor->Length(); ++i) {
+        JSRef<JSVal> jsValue = jsColor->GetValueAt(i);
+        if (!jsValue->IsArray()) {
+            return;
+        }
         JSRef<JSArray> tempColors = jsColor->GetValueAt(i);
         double value = tempColors->GetValueAt(1)->ToNumber<double>();
         float weight = tempColors->GetValueAt(1)->ToNumber<float>();
         Color selectedColor;
         if (!ParseJsColor(tempColors->GetValueAt(0), selectedColor)) {
-            return;
+            selectedColor = theme->GetProgressColor();
         }
         colors.push_back(selectedColor);
         values.push_back(value);
@@ -148,7 +153,7 @@ void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
     }
     Dimension strokeWidth;
     if (!ParseJsDimensionVp(info[0], strokeWidth)) {
-        return;
+        strokeWidth = Dimension(0);
     }
     GaugeModel::GetInstance()->SetStrokeWidth(strokeWidth);
 }

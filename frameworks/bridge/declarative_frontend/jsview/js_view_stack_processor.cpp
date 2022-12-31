@@ -28,7 +28,7 @@ void JSViewStackProcessor::JSVisualState(const JSCallbackInfo& info)
 {
     LOGD("JSVisualState");
     if ((info.Length() < 1) || (!info[0]->IsString())) {
-        LOGE("JSVisualState: is not a string.");
+        LOGD("JSVisualState: is not a string.");
         if (Container::IsCurrentUseNewPipeline()) {
             NG::ViewStackProcessor::GetInstance()->ClearVisualState();
         } else {

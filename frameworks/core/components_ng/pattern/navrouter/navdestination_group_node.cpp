@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -50,6 +51,17 @@ void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
         AddChild(contentNode);
     }
     contentNode->AddChild(child);
+}
+
+void NavDestinationGroupNode::OnAttachToMainTree()
+{
+    FrameNode::OnAttachToMainTree();
+    auto navDestinationPattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
+    if (shallowBuilder && !shallowBuilder->IsExecuteDeepRenderDone()) {
+        shallowBuilder->ExecuteDeepRender();
+    }
 }
 
 } // namespace OHOS::Ace::NG

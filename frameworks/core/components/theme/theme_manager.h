@@ -31,6 +31,8 @@ public:
 
     virtual void InitResource(const ResourceInfo& resourceInfo) {}
 
+    virtual void ReloadResource() {}
+
     virtual void UpdateConfig(const ResourceConfiguration& config) {}
 
     virtual void LoadSystemTheme(int32_t themeId) {}

@@ -39,7 +39,6 @@ namespace {
 constexpr float PADDING_WEIGHT = 10.0f;
 const Dimension FONT_SIZE = Dimension(2.0);
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
-const int32_t DIVIDER_SIZE = 2;
 const float TEXT_HEIGHT_NUMBER = 3.0f;
 const float TEXT_WEIGHT_NUMBER = 6.0f;
 const int32_t ANIMATION_ZERO_TO_OUTER = 200;
@@ -112,10 +111,6 @@ void DatePickerColumnPattern::FlushCurrentOptions()
     for (uint32_t index = 0; index < showOptionCount; index++) {
         currentChildIndex_ = index;
         uint32_t optionIndex = (totalOptionCount + currentIndex + index - selectedIndex) % totalOptionCount;
-        int diffIndex = static_cast<int>(index) - static_cast<int>(selectedIndex);
-        int virtualIndex = static_cast<int>(currentIndex) + diffIndex;
-        bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int>(totalOptionCount);
-        auto optionValue = datePickerPattern->GetAllOptions(host)[optionIndex];
 
         auto textNode = DynamicCast<FrameNode>(*iter);
         CHECK_NULL_VOID(textNode);
@@ -128,18 +123,13 @@ void DatePickerColumnPattern::FlushCurrentOptions()
                 textLayoutProperty->UpdateFontSize(focusOptionSize);
             }
             textLayoutProperty->UpdateMaxLines(1);
-            textLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE),
-                    CalcLength(pickerTheme->GetGradientHeight())));
             textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
         }
         if (index == middleIndex) {
             textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
             textLayoutProperty->UpdateMaxLines(1);
             textLayoutProperty->UpdateFontSize(selectedOptionSize);
-            textLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE),
-                    CalcLength(pickerTheme->GetDividerSpacing())));
+            textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
             textLayoutProperty->UpdateAlignment(Alignment::CENTER);
         }
         if (index > middleIndex) {
@@ -149,19 +139,22 @@ void DatePickerColumnPattern::FlushCurrentOptions()
                 textLayoutProperty->UpdateFontSize(focusOptionSize);
             }
             textLayoutProperty->UpdateMaxLines(1);
-            textLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(pickerTheme->GetDividerSpacing() * DIVIDER_SIZE),
-                    CalcLength(pickerTheme->GetGradientHeight())));
             textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
         }
+        iter++;
+        int32_t diffIndex = static_cast<int32_t>(index) - static_cast<int32_t>(selectedIndex);
+        int32_t virtualIndex = static_cast<int32_t>(currentIndex) + diffIndex;
+        bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
         if (NotLoopOptions() && !virtualIndexValidate) {
             textLayoutProperty->UpdateContent("");
+            textNode->MarkDirtyNode();
+            textNode->MarkModifyDone();
             continue;
         }
+        auto optionValue = datePickerPattern->GetAllOptions(host)[optionIndex];
         textLayoutProperty->UpdateContent(optionValue);
         textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         textNode->MarkModifyDone();
-        iter++;
     }
 }
 

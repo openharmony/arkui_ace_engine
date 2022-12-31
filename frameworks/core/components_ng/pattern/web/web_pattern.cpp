@@ -28,6 +28,7 @@ namespace OHOS::Ace::NG {
 constexpr int32_t SINGLE_CLICK_NUM = 1;
 constexpr int32_t DOUBLE_CLICK_NUM = 2;
 constexpr double DEFAULT_DBCLICK_INTERVAL = 0.5f;
+constexpr double DEFAULT_AXIS_RATIO = -0.06f;
 
 WebPattern::WebPattern() = default;
 
@@ -68,6 +69,7 @@ void WebPattern::InitEvent()
 
     InitTouchEvent(gestureHub);
     InitDragEvent(gestureHub);
+    InitPanEvent(gestureHub);
 
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -85,6 +87,44 @@ void WebPattern::InitEvent()
         WebPattern->UpdateLocale();
     };
     context->SetConfigChangedCallback(std::move(langTask));
+}
+
+void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (panEvent_) {
+        return;
+    }
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
+        return;
+    };
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleDragMove(event);
+    };
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        return;
+    };
+    auto actionCancelTask = [weak = WeakClaim(this)]() {
+        return;
+    };
+    PanDirection panDirection;
+    panDirection.type = PanDirection::VERTICAL;
+    panEvent_ = MakeRefPtr<PanEvent>(
+        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
+    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+}
+
+void WebPattern::HandleDragMove(const GestureEvent& event)
+{
+    if (event.GetInputEventType() == InputEventType::AXIS) {
+        CHECK_NULL_VOID(delegate_);
+        auto localLocation = event.GetLocalLocation();
+        delegate_->HandleAxisEvent(
+            localLocation.GetX(), localLocation.GetY(),
+            event.GetDelta().GetX() * DEFAULT_AXIS_RATIO,
+            event.GetDelta().GetY() * DEFAULT_AXIS_RATIO);
+    }
 }
 
 void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -142,14 +182,6 @@ void WebPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
 
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent_);
-
-    auto axisTask = [weak = WeakClaim(this)](AxisInfo& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleAxisEvent(info);
-    };
-    axisEvent_ = MakeRefPtr<InputEvent>(std::move(axisTask));
-    inputHub->AddOnAxisEvent(axisEvent_);
 }
 
 void WebPattern::HandleMouseEvent(MouseInfo& info)
@@ -163,14 +195,6 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
     auto mouseEventCallback = eventHub->GetOnMouseEvent();
     CHECK_NULL_VOID(mouseEventCallback);
     mouseEventCallback(info);
-}
-
-void WebPattern::HandleAxisEvent(AxisInfo& info)
-{
-    CHECK_NULL_VOID(delegate_);
-    auto localLocation = info.GetLocalLocation();
-    delegate_->HandleAxisEvent(
-        localLocation.GetX(), localLocation.GetY(), info.GetHorizontalAxis(), info.GetVerticalAxis());
 }
 
 void WebPattern::WebOnMouseEvent(const MouseInfo& info)
@@ -494,7 +518,8 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
 
     drawSize_ = Size(drawSize.Width(), drawSize.Height());
     drawSizeCache_ = drawSize_;
-    delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+    auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
+    delegate_->SetBoundsOrRezise(drawSize_, offset);
     // first update size to load url.
     if (!isUrlLoaded_) {
         isUrlLoaded_ = true;
@@ -681,6 +706,15 @@ void WebPattern::RegistVirtualKeyBoardListener()
     needUpdateWeb_ = false;
 }
 
+void WebPattern::InitEnhanceSurfaceFlag()
+{
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        isEnhanceSurface_ = true;
+    } else {
+        isEnhanceSurface_ = false;
+    }
+}
+
 void WebPattern::OnModifyDone()
 {
     // called in each update function.
@@ -692,10 +726,19 @@ void WebPattern::OnModifyDone()
     if (!delegate_) {
         // first create case,
         delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "");
+        InitEnhanceSurfaceFlag();
         delegate_->SetNGWebPattern(Claim(this));
-        renderSurface_->SetRenderContext(host->GetRenderContext());
-        renderSurface_->InitSurface();
-        delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
+        delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
+        if (isEnhanceSurface_) {
+            auto drawSize = Size(1, 1);
+            delegate_->SetDrawSize(drawSize);
+            delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext());
+        } else {
+            renderSurface_->SetRenderContext(host->GetRenderContext());
+            renderSurface_->InitSurface();
+            delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
+        }
+
         delegate_->UpdateBackgroundColor(
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue()));
         delegate_->UpdateJavaScriptEnabled(GetJsEnabledValue(true));
@@ -762,7 +805,8 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height)
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto rect = frameNode->GetGeometryNode()->GetFrameRect();
-    delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+    auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
+    delegate_->SetBoundsOrRezise(drawSize_, offset);
     rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
     frameNode->GetRenderContext()->SyncGeometryProperties(rect);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

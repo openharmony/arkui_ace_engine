@@ -71,25 +71,21 @@ void ListPaintMethod::PaintDivider(const DividerInfo& dividerInfo, const Positio
     }
 }
 
-static void PaintScrollBar(const WeakPtr<ScrollBar>& weakScrollBar, RSCanvas& canvas)
+void ListPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas& canvas)
 {
-    auto scrollBar = weakScrollBar.Upgrade();
-    CHECK_NULL_VOID(scrollBar);
-    ScrollBarPainter::PaintRectBar(canvas, scrollBar, UINT8_MAX);
-}
-
-CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
-{
+    if (!divider_.strokeWidth.IsValid()) {
+        return;
+    }
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     auto frameSize = geometryNode->GetPaddingSize();
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
-    Axis axis = vertical_ ? Axis::VERTICAL : Axis::HORIZONTAL;
+    Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;
     DividerInfo dividerInfo = {
         .constrainStrokeWidth = divider_.strokeWidth.ConvertToPx(),
         .crossSize = vertical_ ? frameSize.Height() : frameSize.Width(),
         .startMargin = divider_.startMargin.ConvertToPx(),
         .endMargin = divider_.endMargin.ConvertToPx(),
-        .halfSpaceWidth = space_ / 2.0f, /* 2.0f half */
+        .halfSpaceWidth = (space_ + divider_.strokeWidth.ConvertToPx()) / 2.0f, /* 2.0f half */
         .mainPadding = paddingOffset.GetMainOffset(axis),
         .crossPadding = paddingOffset.GetCrossOffset(axis),
         .isVertical = vertical_,
@@ -97,10 +93,34 @@ CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* pain
         .totalItemCount = totalItemCount_,
         .color = divider_.color
     };
+    PaintDivider(dividerInfo, itemPosition_, canvas);
+}
 
-    return [dividerInfo, itemPosition = std::move(itemPosition_), scrollBar = scrollBar_](RSCanvas& canvas) {
-        PaintDivider(dividerInfo, itemPosition, canvas);
-        PaintScrollBar(scrollBar, canvas);
+void ListPaintMethod::PaintScrollBar(RSCanvas& canvas)
+{
+    auto scrollBar = scrollBar_.Upgrade();
+    CHECK_NULL_VOID(scrollBar);
+    ScrollBarPainter::PaintRectBar(canvas, scrollBar, UINT8_MAX);
+}
+
+void ListPaintMethod::PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas)
+{
+    CHECK_NULL_VOID(paintWrapper);
+    auto edgeEffect = edgeEffect_.Upgrade();
+    CHECK_NULL_VOID(edgeEffect);
+    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+    edgeEffect->Paint(canvas, frameSize, { 0.0f, 0.0f });
+}
+
+CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
+{
+    auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
+        auto painter = weak.Upgrade();
+        CHECK_NULL_VOID(painter);
+        painter->PaintDivider(paintWrapper, canvas);
+        painter->PaintScrollBar(canvas);
+        painter->PaintEdgeEffect(paintWrapper, canvas);
     };
+    return paintFunc;
 }
 } // namespace OHOS::Ace::NG

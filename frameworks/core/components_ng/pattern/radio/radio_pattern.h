@@ -62,8 +62,11 @@ public:
         return paintMethod;
     }
 
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*dirty*/, const DirtySwapConfig& /*config*/) override
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& /*config*/) override
     {
+        auto geometryNode = dirty->GetGeometryNode();
+        offset_ = geometryNode->GetContentOffset();
+        size_ = geometryNode->GetContentSize();
         return true;
     }
 
@@ -92,12 +95,9 @@ public:
         preGroup_ = group;
     }
 
-    void UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode);
+    FocusPattern GetFocusPattern() const override;
 
-    FocusPattern GetFocusPattern() const override
-    {
-        return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
-    }
+    void UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
@@ -133,6 +133,9 @@ private:
     void UpdatePointScale(float scale);
     void UpdateUIStatus(bool check);
     RectF GetHotZoneRect(bool isOriginal) const;
+    // Init key event
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -150,6 +153,9 @@ private:
     float pointScale_ = 0.5f;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_ = 11.0_vp;
+    Dimension hotZoneVerticalPadding_ = 11.0_vp;
+    OffsetF offset_;
+    SizeF size_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };

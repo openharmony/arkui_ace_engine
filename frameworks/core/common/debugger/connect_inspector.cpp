@@ -140,8 +140,8 @@ void RemoveMessage(int32_t instanceId)
 
 void SendLayoutMessage(const std::string& message)
 {
+    LOGI("SendLayoutMessage start to send message");
     if (g_inspector != nullptr && g_inspector->connectServer_ != nullptr) {
-        LOGI("SendLayoutMessage message:%{public}s", message.c_str());
         g_inspector->connectServer_->SendMessage(message);
     }
 }

@@ -53,7 +53,7 @@ const testAppStorage = tsuite("AppStorage", () => {
     });
 
   tcase("AppStorage and link2 update from link1.set", () => {
-    link2.set("Hanna");
+    link1.set("Hanna");
     test("AppStorage: 'say' expected updated value is `Hanna`.", AppStorage.Get<string>("say") == "Hanna");
     test("SyncedPropertyTwoWay#2: 'say' expected updated value is `Hanna`.", link2.get() == "Hanna");
   });
@@ -114,8 +114,9 @@ const testAppStorage = tsuite("AppStorage", () => {
       AppStorage.Get<TestAClass>("objAClass").a == 102 && AppStorage.Get<TestAClass>("objAClass").b == 201);
   })
 
-  tcase("ObservedObject create, get, set", () => {
-    let linktoObsObj = AppStorage.Link<TestAClass>("objAClass");
+  let linktoObsObj = AppStorage.Link<TestAClass>("objAClass");
+
+  tcase("ObservedObject Link create, get, set", () => {
 
     test("link to ObservedObject, get value", linktoObsObj.get().b == 201);
 
@@ -123,9 +124,95 @@ const testAppStorage = tsuite("AppStorage", () => {
     test("link to ObservedObject, set value, read back link value", linktoObsObj.get().b == 203);
     test("link to ObservedObject, set value, read back value from AppStorage",
       AppStorage.Get<TestAClass>("objAClass").b == 203);
-    linktoObsObj.aboutToBeDeleted();
   })
 
+  tcase("ObservedObject Prop to Link create, get, set", () => {
+    let propToLinktoObsObj = linktoObsObj.createProp(undefined, "propToLinkObj");
+
+    test("prop to link to ObservedObject, get value", propToLinktoObsObj.get().b == 203);
+
+    propToLinktoObsObj.get().b = 204;
+    test("prop to link to ObservedObject, set value locally, read back prop value", propToLinktoObsObj.get().b == 204);
+    test("prop to link to ObservedObject, set value locally, read back link value", linktoObsObj.get().b == 203);
+    test("prop to link to ObservedObject, set value locally, read back value from AppStorage",
+      AppStorage.Get<TestAClass>("objAClass").b == 203);
+    linktoObsObj.aboutToBeDeleted();
+    propToLinktoObsObj.aboutToBeDeleted();
+  })
+
+  let proptoObsObj = AppStorage.Prop<TestAClass>("objAClass");
+
+  tcase("ObservedObject Prop create, get, set", () => {
+
+    test("prop to ObservedObject, get value", proptoObsObj.get().b == 203);
+
+    proptoObsObj.get().b = 201;
+    test("prop to ObservedObject, set value locally, read back prop value", proptoObsObj.get().b == 201);
+    test("prop to ObservedObject, set value locally, read back original prop value from AppStorage", 
+        AppStorage.Get<TestAClass>("objAClass").b == 203);
+
+    AppStorage.Set<TestAClass>("objAClass", { a: 42, b: 84 });
+    test("prop to ObservedObject, set value to AppStorage, read back from AppStorage", 
+        AppStorage.Get<TestAClass>("objAClass").b == 84);
+    test("prop to ObservedObject, set value to AppStorage, read back from prop", proptoObsObj.get().b == 84);
+  })
+
+  tcase("ObservedObject Prop to Prop create, get, set", () => {
+    let propToPropObsObj = proptoObsObj.createProp(undefined, "propToProp");
+
+    test("prop to prop to ObservedObject, get value", propToPropObsObj.get().a == 42);
+
+    propToPropObsObj.get().a = 201;
+    test("prop to prop to ObservedObject, set value locally, read back prop value", propToPropObsObj.get().a == 201);
+    test("prop to prop to ObservedObject, set value locally, read back value from parent prop", proptoObsObj.get().a == 42);
+    test("prop to prop to ObservedObject, set value locally, read back original prop value from AppStorage", 
+        AppStorage.Get<TestAClass>("objAClass").a == 42);
+
+    AppStorage.Set<TestAClass>("objAClass", { a: 421, b: 842 });
+    test("prop to prop to ObservedObject, set value to AppStorage, read back from AppStorage", 
+        AppStorage.Get<TestAClass>("objAClass").b == 842);
+    test("prop to prop toObservedObject, set value to AppStorage, read back from prop", propToPropObsObj.get().b == 842);
+    test("prop to prop toObservedObject, set value to AppStorage, read back from parent prop", proptoObsObj.get().b == 842);
+
+    propToPropObsObj.aboutToBeDeleted();
+    proptoObsObj.aboutToBeDeleted();
+  })
+
+  tcase("ObservedObject Prop create, get, set", () => {
+
+    test("prop to ObservedObject, get value", proptoObsObj.get().b == 203);
+
+    proptoObsObj.get().b = 201;
+    test("prop to ObservedObject, set value locally, read back prop value", proptoObsObj.get().b == 201);
+    test("prop to ObservedObject, set value locally, read back original prop value from AppStorage", 
+        AppStorage.Get<TestAClass>("objAClass").b == 203);
+
+    AppStorage.Set<TestAClass>("objAClass", { a: 42, b: 84 });
+    test("prop to ObservedObject, set value to AppStorage, read back from AppStorage", 
+        AppStorage.Get<TestAClass>("objAClass").b == 84);
+    test("prop to ObservedObject, set value to AppStorage, read back from prop", proptoObsObj.get().b == 84);
+  })
+
+  tcase("ObservedObject Prop to Prop create, get, set", () => {
+    let propToPropObsObj = proptoObsObj.createProp(undefined, "propToProp");
+
+    test("prop to prop to ObservedObject, get value", propToPropObsObj.get().a == 42);
+
+    propToPropObsObj.get().a = 201;
+    test("prop to prop to ObservedObject, set value locally, read back prop value", propToPropObsObj.get().a == 201);
+    test("prop to prop to ObservedObject, set value locally, read back value from parent prop", proptoObsObj.get().a == 42);
+    test("prop to prop to ObservedObject, set value locally, read back original prop value from AppStorage", 
+        AppStorage.Get<TestAClass>("objAClass").a == 42);
+
+    AppStorage.Set<TestAClass>("objAClass", { a: 421, b: 842 });
+    test("prop to prop to ObservedObject, set value to AppStorage, read back from AppStorage", 
+        AppStorage.Get<TestAClass>("objAClass").b == 842);
+    test("prop to prop toObservedObject, set value to AppStorage, read back from prop", propToPropObsObj.get().b == 842);
+    test("prop to prop toObservedObject, set value to AppStorage, read back from parent prop", proptoObsObj.get().b == 842);
+
+    propToPropObsObj.aboutToBeDeleted();
+    proptoObsObj.aboutToBeDeleted();
+  })
 
   tcase("cleanup ok", () => {
     link1.aboutToBeDeleted();

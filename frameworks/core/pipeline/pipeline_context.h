@@ -237,7 +237,7 @@ public:
 
     void SetCardViewAccessibilityParams(const std::string& key, bool focus);
 
-    void FlushPipelineImmediately();
+    void FlushPipelineImmediately() override;
 
     void RegisterEventHandler(const RefPtr<AceEventHandler>& handler)
     {

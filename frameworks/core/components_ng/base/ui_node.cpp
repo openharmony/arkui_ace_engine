@@ -135,6 +135,13 @@ void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool sile
 void UINode::OnRemoveFromParent()
 {
     DetachFromMainTree();
+    auto* frame = AceType::DynamicCast<FrameNode>(this);
+    if (frame) {
+        auto focusHub = frame->GetFocusHub();
+        if (focusHub) {
+            focusHub->RemoveSelf();
+        }
+    }
     parent_.Reset();
     depth_ = -1;
 }

@@ -31,7 +31,7 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-const Dimension PANEL_RADIUS = 32.0_vp;
+const Dimension PANEL_RADIUS = 24.0_vp;
 const Color BG_COLOR = Color(0xfff1f3f5);
 } // namespace
 
@@ -141,6 +141,8 @@ void SlidingPanelModelNG::SetBackgroundMask(const Color& backgroundMask)
     auto isShow = layoutProp->GetIsShow().value();
     if (isShow) {
         ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, backgroundMask);
+    } else {
+        ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, Color::TRANSPARENT);
     }
 }
 

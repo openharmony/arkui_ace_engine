@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/grid/grid_scroll_bar.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/grid/grid_utils.h"
 
 namespace OHOS::Ace::NG {
 GridScrollBar::~GridScrollBar()
@@ -155,17 +156,25 @@ void GridScrollBar::UpdateBarOffset(const RefPtr<LayoutWrapper>& layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
 
     float heightSum = 0;
+    size_t itemCount = 0;
+    auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
     for (const auto& item : info.lineHeightMap_) {
-        heightSum += item.second;
+        auto line = info.gridMatrix_.find(item.first);
+        if (line != info.gridMatrix_.end()) {
+            itemCount += line->second.size();
+        } else {
+            itemCount += info.crossCount_;
+        }
+        heightSum += item.second + mainGap;
     }
 
-    auto averageHeight_ = heightSum / (info.endIndex_ - info.startIndex_ + 1);
-    int32_t estimateLineCount = (info.childrenCount_ + info.crossCount_ - 1) / info.crossCount_;
-    estimatedHeight_ = info.childrenCount_ * averageHeight_;
-    auto gap = (info.axis_ == Axis::HORIZONTAL) ? layoutProperty->GetRowsGap() : layoutProperty->GetColumnsGap();
-    if (gap) {
-        estimatedHeight_ += gap.value().ConvertToPx() * (estimateLineCount - 1);
+    auto averageHeight_ = heightSum / itemCount;
+    if (itemCount >= (info.childrenCount_ - 1)) {
+        estimatedHeight_ = heightSum - mainGap;
+    } else {
+        estimatedHeight_ = heightSum + (info.childrenCount_ - itemCount) * averageHeight_;
     }
+
     offset_ = info.startIndex_ * averageHeight_ - info.currentOffset_;
     Offset scrollOffset { offset_, offset_ };
     Size mainSize = { viewScopeSize.Width(), viewScopeSize.Height() };
@@ -177,7 +186,7 @@ void GridScrollBar::UpdateBarOffset(const RefPtr<LayoutWrapper>& layoutWrapper)
     if (scrollBarProxy_) {
         float mainHeight = (info.axis_ == Axis::HORIZONTAL) ? mainSize.Width() : mainSize.Height();
         estimatedHeight_ -= mainHeight;
-        // will stop grid layout when delete item, scrollBarProxy_->NotifyScrollBar(pattern_);
+        scrollBarProxy_->NotifyScrollBar(pattern_);
     }
 }
 } // namespace OHOS::Ace::NG

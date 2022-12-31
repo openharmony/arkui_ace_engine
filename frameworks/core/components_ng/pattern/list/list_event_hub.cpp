@@ -119,26 +119,19 @@ int32_t ListEventHub::GetListItemIndexByPosition(float x, float y)
     auto listNodeFrameOffset = geometryNode->GetMarginFrameOffset();
     float offsetX = x - listNodeFrameOffset.GetX();
     float offsetY = y - listNodeFrameOffset.GetY();
+    float mainOffset = GetDirection() == Axis::VERTICAL ? offsetY : offsetX;
     
     auto listPattern = listNode->GetPattern<ListPattern>();
     CHECK_NULL_RETURN(listPattern, 0);
     auto itemPosition = listPattern->GetItemPosition();
-    int32_t result = 0;
-    if (GetDirection() == Axis::VERTICAL) {
-        for (auto pos = itemPosition.begin(); pos != itemPosition.end(); pos++) {
-            if (pos->second.startPos <= offsetY && pos->second.endPos >= offsetY) {
-                result = pos->first;
-                break;
-            }
-        }
-    } else {
-        for (auto pos = itemPosition.begin(); pos != itemPosition.end(); pos++) {
-            if (pos->second.startPos <= offsetX && pos->second.endPos >= offsetX) {
-                result = pos->first;
-                break;
-            }
+    for (auto & pos : itemPosition) {
+        if (mainOffset <= pos.second.endPos) {
+            return pos.first;
         }
     }
-    return result;
+    if (!itemPosition.empty()) {
+        return itemPosition.rbegin()->first + 1;
+    }
+    return 0;
 }
 } // namespace OHOS::Ace::NG

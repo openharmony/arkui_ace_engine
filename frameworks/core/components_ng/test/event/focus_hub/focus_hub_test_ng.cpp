@@ -111,7 +111,7 @@ HWTEST_F(FocusHubTestNg, FocusHubCreateTest001, TestSize.Level1)
      * @tc.expected: FocusHub will return node' parent focusHub which does not exist.
      */
     auto node = FrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    EXPECT_TRUE(focusHub2->GetParentFocusHub(&node) == nullptr);
+    EXPECT_TRUE(focusHub2->GetParentFocusHub() == nullptr);
 
     /**
      * @tc.steps: step5. Invoke GetParentFocusHub passing node as parameter which does not have parent.
@@ -120,7 +120,7 @@ HWTEST_F(FocusHubTestNg, FocusHubCreateTest001, TestSize.Level1)
     auto nodeParent = AceType::MakeRefPtr<FrameNode>(V2::BLANK_ETS_TAG, -1, AceType::MakeRefPtr<FlexLayoutPattern>());
     nodeParent->GetOrCreateFocusHub();
     node.SetParent(nodeParent);
-    EXPECT_TRUE(focusHub2->GetParentFocusHub(&node) != nullptr);
+    EXPECT_TRUE(focusHub2->GetParentFocusHub() != nullptr);
 }
 
 /**
@@ -190,17 +190,17 @@ HWTEST_F(FocusHubTestNg, FocusHubFlushChildrenFocusHubTest003, TestSize.Level1)
      * @tc.steps: step3. Invoke FlushChildrenFocusHub to get the focusable children.
      * @tc.expected: Button is the focusable child which will be emplace_back in focusNodes_.
      */
-    focusHub->FlushChildrenFocusHub();
-    EXPECT_EQ(focusHub->focusNodes_.size(), FOCUS_NODE_SIZE);
-    EXPECT_EQ(focusHub->itLastFocusNode_, focusHub->focusNodes_.end());
+    std::list<RefPtr<FocusHub>> focusNodes;
+    focusHub->FlushChildrenFocusHub(focusNodes);
+    EXPECT_EQ(focusNodes.size(), FOCUS_NODE_SIZE);
+    EXPECT_EQ(focusHub->lastWeakFocusNode_.Upgrade(), nullptr);
 
     /**
      * @tc.steps: step4. lastWeakFocusNode_ is not nullptr.
      * @tc.expected: itLastFocusNode_ will be assigned the iter corresponding lastWeakFocusNode_ found in focusNodes_.
      */
-    focusHub->lastWeakFocusNode_ = *(focusHub->focusNodes_.begin());
-    focusHub->FlushChildrenFocusHub();
-    EXPECT_EQ(focusHub->itLastFocusNode_, focusHub->focusNodes_.begin());
+    focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(*(focusNodes.begin())));
+    EXPECT_EQ(focusHub->lastWeakFocusNode_.Upgrade(), *(focusNodes.begin()));
 }
 
 /**
@@ -229,7 +229,7 @@ HWTEST_F(FocusHubTestNg, FocusHubRemoveSelfTest004, TestSize.Level1)
      * @tc.steps: step3. Remove self.
      * @tc.expected: The nodeParent children size is 0.
      */
-    focusHub->RemoveSelf(AceType::RawPtr(frameNode));
+    focusHub->RemoveSelf();
     EXPECT_EQ(nodeParent->GetChildren().size(), NODE_SIZE);
 }
 
@@ -575,7 +575,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0014, TestSize.Level1)
      */
     focusHub->SetFocusType(FocusType::SCOPE);
     focusHub->OnFocus();
-    EXPECT_TRUE(focusHub->focusNodes_.empty());
+    std::list<RefPtr<FocusHub>> focusNodes;
+    focusHub->FlushChildrenFocusHub(focusNodes);
+    EXPECT_TRUE(focusNodes.empty());
 
     /**
      * @tc.steps3: call the function OnFocus with FocusType::NODE.

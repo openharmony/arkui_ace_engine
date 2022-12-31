@@ -42,6 +42,16 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep /* step */, const Weak
     return nullptr;
 }
 
+float GridPattern::GetCurrentPosition() const
+{
+    return 0.0f;
+}
+
+float GridPattern::GetScrollableDistance() const
+{
+    return 0.0f;
+}
+
 CanvasDrawFunction GridPaintMethod::GetForegroundDrawFunction(PaintWrapper* /* paintWrapper */)
 {
     return [](RSCanvas& canvas) {};

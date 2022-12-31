@@ -17,6 +17,8 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
@@ -166,10 +168,18 @@ void TabBarPattern::HandleMouseEvent(const MouseInfo& info)
     auto totalCount = host->TotalChildCount();
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
     if (index < 0 || index >= totalCount) {
+        if (hoverIndex_.has_value() && !touchingIndex_.has_value()) {
+            HandleMoveAway(hoverIndex_.value());
+        }
+        hoverIndex_.reset();
         return;
     }
     auto mouseAction = info.GetAction();
     if (mouseAction == MouseAction::MOVE || mouseAction == MouseAction::WINDOW_ENTER) {
+        if (touchingIndex_.has_value()) {
+            hoverIndex_ = index;
+            return;
+        }
         if (!hoverIndex_.has_value()) {
             HandleHoverOnEvent(index);
             hoverIndex_ = index;
@@ -195,9 +205,10 @@ void TabBarPattern::HandleHoverEvent(bool isHover)
         return;
     }
     isHover_ = isHover;
-    touching_ = false;
     if (!isHover_ && hoverIndex_.has_value()) {
-        HandleMoveAway(hoverIndex_.value());
+        if (!touchingIndex_.has_value()) {
+            HandleMoveAway(hoverIndex_.value());
+        }
         hoverIndex_.reset();
     }
 }
@@ -210,6 +221,122 @@ void TabBarPattern::HandleHoverOnEvent(int32_t index)
 void TabBarPattern::HandleMoveAway(int32_t index)
 {
     PlayPressAnimation(index, 0.0f);
+}
+
+void TabBarPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+
+    auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            pattern->GetInnerFocusPaintRect(paintRect);
+        }
+    };
+    focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+}
+
+bool TabBarPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    auto indicator = tabBarLayoutProperty->GetIndicatorValue(0);
+
+    if (event.code == (tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL
+                              ? KeyCode::KEY_DPAD_LEFT
+                              : KeyCode::KEY_DPAD_UP) ||
+        event.IsShiftWith(KeyCode::KEY_TAB)) {
+        if (indicator <= 0) {
+            return false;
+        }
+        indicator -= 1;
+        FocusIndexChange(indicator);
+        return true;
+    }
+    if (event.code == (tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL
+                              ? KeyCode::KEY_DPAD_RIGHT
+                              : KeyCode::KEY_DPAD_DOWN) ||
+        event.code == KeyCode::KEY_TAB) {
+        if (indicator >= host->TotalChildCount() - 1) {
+            return false;
+        }
+        indicator += 1;
+        FocusIndexChange(indicator);
+        return true;
+    }
+    return false;
+}
+
+void TabBarPattern::FocusIndexChange(int32_t index)
+{
+    auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    if (animationDuration_.has_value()) {
+        swiperController_->SwipeTo(index);
+    } else {
+        swiperController_->SwipeToWithoutAnimation(index);
+    }
+    tabBarLayoutProperty->UpdateIndicator(index);
+    PaintFocusState();
+}
+
+void TabBarPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    auto indicator = tabBarLayoutProperty->GetIndicatorValue(0);
+    auto childNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(indicator));
+    CHECK_NULL_VOID(childNode);
+    auto renderContext = childNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto columnPaintRect = renderContext->GetPaintRectWithoutTransform();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    auto radius = tabTheme->GetFocusIndicatorRadius();
+    auto outLineWidth = tabTheme->GetActiveIndicatorWidth();
+    columnPaintRect.SetOffset(OffsetF((columnPaintRect.GetOffset().GetX() + outLineWidth.ConvertToPx() / 2),
+        (columnPaintRect.GetOffset().GetY() + outLineWidth.ConvertToPx() / 2)));
+    columnPaintRect.SetSize(SizeF((columnPaintRect.GetSize().Width() - outLineWidth.ConvertToPx()),
+        (columnPaintRect.GetSize().Height() - outLineWidth.ConvertToPx())));
+
+    paintRect.SetRect(columnPaintRect);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
+        static_cast<RSScalar>(radius.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
+        static_cast<RSScalar>(radius.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
+        static_cast<RSScalar>(radius.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
+        static_cast<RSScalar>(radius.ConvertToPx()));
+}
+
+void TabBarPattern::PaintFocusState()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    RoundRect focusRect;
+    GetInnerFocusPaintRect(focusRect);
+
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->PaintInnerFocusState(focusRect);
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TabBarPattern::OnModifyDone()
@@ -230,6 +357,9 @@ void TabBarPattern::OnModifyDone()
     InitTouch(gestureHub);
     InitHoverEvent();
     InitMouseEvent();
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
 
     auto removeEventCallback = [weak = WeakClaim(this)]() {
         auto tabBarPattern = weak.Upgrade();
@@ -335,16 +465,16 @@ void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto totalCount = host->TotalChildCount();
-
+    auto touchType = info.GetTouchType();
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
-    if (index >= 0 && index < totalCount) {
-        auto touchType = info.GetTouchType();
-        if (touchType == TouchType::DOWN) {
-            HandleTouchDown(index);
-            touchingIndex_ = index;
-        } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-            HandleTouchUp(index);
-        }
+    if (touchType == TouchType::DOWN && index >= 0 && index < totalCount) {
+        HandleTouchDown(index);
+        touchingIndex_ = index;
+        return;
+    }
+    if ((touchType == TouchType::UP || touchType == TouchType::CANCEL) && touchingIndex_.has_value()) {
+        HandleTouchUp(index);
+        touchingIndex_.reset();
     }
 }
 
@@ -414,14 +544,14 @@ void TabBarPattern::HandleTouchUp(int32_t index)
     }
     if (IsTouching()) {
         SetTouching(false);
-        if (hoverIndex_.has_value()) {
-            if (touchingIndex_ == index) {
-                PlayPressAnimation(index, HOVER_OPACITY_RATIO);
-                return;
-            }
+        if (hoverIndex_.has_value() && touchingIndex_.value_or(-1) == index) {
+            PlayPressAnimation(index, HOVER_OPACITY_RATIO);
             return;
         }
-        PlayPressAnimation(touchingIndex_, 0.0f);
+        PlayPressAnimation(touchingIndex_.value_or(-1), 0.0f);
+        if (hoverIndex_.has_value()) {
+            PlayPressAnimation(hoverIndex_.value(), HOVER_OPACITY_RATIO);
+        }
     }
 }
 

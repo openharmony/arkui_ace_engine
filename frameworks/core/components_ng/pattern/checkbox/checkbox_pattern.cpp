@@ -56,10 +56,10 @@ void CheckBoxPattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
     if (!layoutProperty->GetMarginProperty()) {
         MarginProperty margin;
-        margin.left = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding());
-        margin.right = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding());
-        margin.top = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding());
-        margin.bottom = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding());
+        margin.left = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
+        margin.right = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
+        margin.top = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
+        margin.bottom = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
         layoutProperty->UpdateMargin(margin);
     }
     hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
@@ -67,6 +67,9 @@ void CheckBoxPattern::OnModifyDone()
     InitClickEvent();
     InitTouchEvent();
     InitMouseEvent();
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
 }
 
 void CheckBoxPattern::InitClickEvent()
@@ -138,20 +141,6 @@ void CheckBoxPattern::HandleMouseEvent(bool isHover)
     isHover_ = isHover;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    isTouch_ = false;
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
-    auto frameSize = geometryNode->GetFrameSize();
-    if (isHover_ && originalPaintRect.GetSize() == frameSize) {
-        originalPaintRect = GetHotZoneRect(true);
-        renderContext->SyncGeometryProperties(originalPaintRect);
-    } else if (!isHover_ && originalPaintRect.GetSize() != frameSize) {
-        originalPaintRect = GetHotZoneRect(false);
-    }
-    renderContext->SyncGeometryProperties(originalPaintRect);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -203,7 +192,7 @@ void CheckBoxPattern::OnTouchUp()
     CHECK_NULL_VOID(geometryNode);
     auto paintRect = renderContext->GetPaintRectWithoutTransform();
     auto frameSize = geometryNode->GetFrameSize();
-    if (paintRect.GetSize() != frameSize && !isHover_) {
+    if (paintRect.GetSize() != frameSize) {
         paintRect = GetHotZoneRect(false);
     }
     renderContext->SyncGeometryProperties(paintRect);
@@ -562,6 +551,50 @@ RectF CheckBoxPattern::GetHotZoneRect(bool isOriginal) const
         offset.SetY(offset.GetY() + hotZoneVerticalPadding_.ConvertToPx());
     }
     return RectF(offset, SizeF(actualWidth, actualHeight));
+}
+
+void CheckBoxPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            pattern->GetInnerFocusPaintRect(paintRect);
+        }
+    };
+    focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+}
+
+void CheckBoxPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
+{
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto checkBoxTheme = pipelineContext->GetTheme<CheckboxTheme>();
+    CHECK_NULL_VOID(checkBoxTheme);
+    auto borderRadius = checkBoxTheme->GetBorderRadius().ConvertToPx();
+    auto paintSize = size_;
+    auto paintOffset = offset_;
+    auto focusPaintPadding = checkBoxTheme->GetFocusPaintPadding().ConvertToPx();
+    float originX = paintOffset.GetX() - focusPaintPadding;
+    float originY = paintOffset.GetY() - focusPaintPadding;
+    float endX = paintSize.Width() + originX + 2 * focusPaintPadding;
+    float endY = paintSize.Height() + originY + 2 * focusPaintPadding;
+    paintRect.SetRect({ originX, originY, endX - originX, endY - originY });
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, borderRadius, borderRadius);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, borderRadius, borderRadius);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, borderRadius, borderRadius);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, borderRadius, borderRadius);
+}
+
+FocusPattern CheckBoxPattern::GetFocusPattern() const
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, FocusPattern());
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_RETURN(checkBoxTheme, FocusPattern());
+    auto activeColor = checkBoxTheme->GetActiveColor();
+    FocusPaintParam focusPaintParam;
+    focusPaintParam.SetPaintColor(activeColor);
+    return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
 }
 
 } // namespace OHOS::Ace::NG

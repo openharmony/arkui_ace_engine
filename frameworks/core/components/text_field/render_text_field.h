@@ -67,6 +67,20 @@ enum class CursorMoveSkip {
     PARAGRAPH,
 };
 
+enum {
+    ACTION_SELECT_ALL, // Smallest code unit.
+    ACTION_UNDO,
+    ACTION_REDO,
+    ACTION_CUT,
+    ACTION_COPY,
+    ACTION_PASTE,
+    ACTION_SHARE,
+    ACTION_PASTE_AS_PLAIN_TEXT,
+    ACTION_REPLACE,
+    ACTION_ASSIST,
+    ACTION_AUTOFILL,
+};
+
 class RenderTextField : public RenderNode, public TextInputClient, public ValueChangeObserver {
     DECLARE_ACE_TYPE(RenderTextField, RenderNode, TextInputClient, ValueChangeObserver);
 
@@ -121,6 +135,9 @@ public:
     RefPtr<RenderSlidingPanel> GetSlidingPanelAncest();
     void ResetOnFocusForTextFieldManager();
     void ResetSlidingPanelParentHeight();
+    void HandleSetSelection(int32_t start, int32_t end);
+    void HandleExtendAction(int32_t action);
+    void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
 
     void SetInputFilter(const std::string& inputFilter)
     {
@@ -353,6 +370,18 @@ public:
         return inputStyle_;
     }
 
+    void HandleOnBlur();
+
+    void SetCanPaintSelection(bool flag)
+    {
+        canPaintSelection_ = flag;
+    }
+
+    bool GetCanPaintSelection() const
+    {
+        return canPaintSelection_;
+    }
+
 protected:
     // Describe where caret is and how tall visually.
     struct CaretMetrics {
@@ -538,6 +567,7 @@ protected:
     double widthReservedForSearch_ = 0.0;  // Width reserved for delete icon of search.
     double paddingHorizonForSearch_ = 0.0; // Width reserved for search button of search.
     double selectHeight_ = 0.0;
+    bool canPaintSelection_ = false;
     Dimension height_;
     Dimension iconSizeInDimension_;
     Dimension iconHotZoneSizeInDimension_;

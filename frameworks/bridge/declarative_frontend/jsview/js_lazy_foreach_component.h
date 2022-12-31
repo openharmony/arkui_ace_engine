@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach_actuator.h"
 #include "bridge/declarative_frontend/jsview/js_view.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
+#include "uicast_interface/uicast_impl.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -119,7 +120,20 @@ public:
             parentView_->MarkLazyForEachProcess(key);
         }
         viewStack->PushKey(key);
+
+        {
+            std::string pviewID = parentView_ ? std::to_string(parentView_->UICastGetUniqueId()) : "-1";
+            std::string para = R"({"viewId":")" + GetId() + R"(","parentViewId":")" +
+                pviewID + R"(","index":)" + std::to_string(index) + R"(})";
+            UICastImpl::CacheCmd("UICAST::LazyForEach::ItemCreate", para);
+        }
+
         itemGenFunc_->Call(JSRef<JSObject>(), 2, params);
+
+        {
+            UICastImpl::SendCmd();
+        }
+
         viewStack->PopContainer();
         viewStack->PopKey();
         if (parentView_) {

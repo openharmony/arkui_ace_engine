@@ -202,6 +202,10 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
     changeEvent_ =
         AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(swiper->GetChangeEventId(), context_);
     animationFinishEvent_ = AceAsyncEvent<void()>::Create(swiper->GetAnimationFinishEventId(), context_);
+    animationStartEvent_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        swiper->GetAnimationStartEventId(), context_);
+    animationEndEvent_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        swiper->GetAnimationEndEventId(), context_);
     rotationEvent_ = AceAsyncEvent<void(const std::string&)>::Create(swiper->GetRotationEventId(), context_);
     auto clickId = swiper->GetClickEventId();
     catchMode_ = true;
@@ -1033,6 +1037,13 @@ void RenderSwiper::StartSpringMotion(double mainPosition, double mainVelocity,
             swiper->UpdateChildPosition(position, swiper->currentIndex_);
         }
     });
+    springController_->ClearStartListeners();
+    springController_->AddStartListener([weak = AceType::WeakClaim(this)]() {
+        auto swiper = weak.Upgrade();
+        if (swiper) {
+            swiper->FireAnimationStart();
+        }
+    });
     springController_->ClearStopListeners();
     springController_->PlayMotion(scrollMotion_);
     springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
@@ -1043,6 +1054,7 @@ void RenderSwiper::StartSpringMotion(double mainPosition, double mainVelocity,
             swiper->UpdateOneItemOpacity(MAX_OPACITY, swiper->currentIndex_);
             swiper->UpdateOneItemOpacity(MAX_OPACITY, swiper->currentIndex_);
             swiper->ExecuteMoveCallback(swiper->currentIndex_);
+            swiper->FireAnimationEnd();
             swiper->MarkNeedLayout(true);
         }
     });
@@ -1133,6 +1145,7 @@ void RenderSwiper::MoveItems(double dragVelocity)
 
     if (controller_) {
         controller_->ClearStopListeners();
+        controller_->ClearStartListeners();
         // trigger the event after the animation ends.
         controller_->AddStopListener([weak, fromIndex, toIndex, needRestore]() {
             LOGI("slide animation stop");
@@ -1156,7 +1169,15 @@ void RenderSwiper::MoveItems(double dragVelocity)
             swiper->UpdateOneItemOpacity(MAX_OPACITY, fromIndex);
             swiper->UpdateOneItemOpacity(MAX_OPACITY, toIndex);
             swiper->ExecuteMoveCallback(swiper->currentIndex_);
+            swiper->FireAnimationEnd();
             swiper->MarkNeedLayout(true);
+        });
+
+        controller_->AddStartListener([weak]() {
+            auto swiper = weak.Upgrade();
+            if (swiper) {
+                swiper->FireAnimationStart();
+            }
         });
 
         controller_->SetDuration(duration_);
@@ -1183,6 +1204,22 @@ void RenderSwiper::FireItemChangedEvent(bool changed) const
         if (second) {
             second(currentIndex_);
         }
+    }
+}
+
+void RenderSwiper::FireAnimationStart()
+{
+    if (animationStartEvent_) {
+        LOGI("call animationStartEvent_");
+        animationStartEvent_(std::make_shared<SwiperChangeEvent>(currentIndex_));
+    }
+}
+
+void RenderSwiper::FireAnimationEnd()
+{
+    if (animationEndEvent_) {
+        LOGI("call animationEndEvent_");
+        animationEndEvent_(std::make_shared<SwiperChangeEvent>(currentIndex_));
     }
 }
 
@@ -3455,17 +3492,19 @@ void RenderSwiper::ApplyRestoreInfo()
     SetRestoreInfo("");
 }
 
-void RenderSwiper::UpdateChildrenVisible()
+std::list<RefPtr<RenderNode>> RenderSwiper::GetPaintChildList()
 {
+    std::list<RefPtr<RenderNode>> childList;
     auto swiperGlobalRect = GetRectBasedWindowTopLeft();
     const auto& children = GetChildren();
     for (const auto& child : children) {
-        child->SetVisible(false);
         auto childGlobalRect = child->GetRectBasedWindowTopLeft();
         if (swiperGlobalRect.IsIntersectByCommonSideWith(childGlobalRect)) {
-            child->SetVisible(true);
+            childList.emplace_back(child);
         }
     }
+
+    return childList;
 }
 
 } // namespace OHOS::Ace

@@ -70,6 +70,7 @@ const std::string DIGIT_WHITE_LIST = "^[0-9]*$";
 const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
 const std::string EMAIL_WHITE_LIST = "\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
+const std::string NEW_LINE = "\n";
 // Whether the system is Mac or not determines which key code is selected.
 #if defined(MAC_PLATFORM)
 #define KEY_META_OR_CTRL_LEFT KeyCode::KEY_META_LEFT
@@ -132,6 +133,8 @@ void GetKeyboardFilter(TextInputType keyboard, std::string& keyboardFilterValue)
 void RenderTextField::UpdateConfiguration()
 {
     MiscServices::Configuration configuration;
+    LOGI("UpdateConfiguration: Enter key type %{public}d", static_cast<int32_t>(action_));
+    LOGI("UpdateConfiguration: Enter keyboard type %{public}d", static_cast<int32_t>(keyboard_));
     configuration.SetEnterKeyType(static_cast<MiscServices::EnterKeyType>((int32_t)action_));
     configuration.SetTextInputType(static_cast<MiscServices::TextInputType>((int32_t)keyboard_));
     MiscServices::InputMethodController::GetInstance()->OnConfigurationChange(configuration);
@@ -277,14 +280,18 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         }
         keyboard_ = textField->GetTextInputType();
     }
-    if (action_ != TextInputAction::UNSPECIFIED && action_ != textField->GetAction()) {
-        auto context = context_.Upgrade();
-        if (context && context->GetIsDeclarative()) {
-            CloseKeyboard();
+    if (keyboard_ == TextInputType::MULTILINE) {
+        action_ = TextInputAction::DONE;
+    } else {
+        if (action_ != TextInputAction::UNSPECIFIED && action_ != textField->GetAction()) {
+            auto context = context_.Upgrade();
+            if (context && context->GetIsDeclarative()) {
+                CloseKeyboard();
+            }
         }
-    }
-    if (action_ != textField->GetAction()) {
-        action_ = textField->GetAction();
+        if (action_ != textField->GetAction()) {
+            action_ = textField->GetAction();
+        }
     }
 
     actionLabel_ = textField->GetActionLabel();
@@ -353,9 +360,6 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     if (textField->IsSetFocusOnTouch()) {
         isFocusOnTouch_ = textField->IsFocusOnTouch();
     }
-#if defined(ENABLE_STANDARD_INPUT)
-    UpdateConfiguration();
-#endif
     SetCallback(textField);
     UpdateFocusStyles();
     UpdateIcon(textField);
@@ -481,12 +485,12 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
         }
     }
 
-    if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
+    if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::RELEASE) {
         Offset rightClickOffset = event.GetOffset();
         ShowTextOverlay(rightClickOffset, false, true);
     }
 
-    return false;
+    return true;
 }
 
 void RenderTextField::HandleMouseHoverEvent(MouseState mouseState)
@@ -680,7 +684,6 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
     if (clickInfo.GetSourceDevice() == SourceType::MOUSE) {
         StartTwinkling();
     } else {
-        StartTwinkling();
         ShowTextOverlay(globalPosition, true);
     }
 }
@@ -882,6 +885,10 @@ void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHan
     textOverlay_->SetSearchButtonMarker(onSearch_);
     textOverlay_->SetContext(context_);
     textOverlay_->SetIsUsingMouse(isUsingMouse);
+    if (isUsingMouse) {
+        textOverlay_->SetMouseOffset(showOffset);
+    }
+
     // Add the Animation
     InitAnimation();
 
@@ -1074,6 +1081,7 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
     if (softKeyboardEnabled_) {
         LOGI("Request open soft keyboard");
 #if defined(ENABLE_STANDARD_INPUT)
+        UpdateConfiguration();
         if (textChangeListener_ == nullptr) {
             textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this), context_);
         }
@@ -1087,7 +1095,10 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
             LOGI("RequestKeyboard set calling window id is : %{public}d", context->GetWindowId());
             inputMethod->SetCallingWindow(context->GetWindowId());
         }
-        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard);
+        MiscServices::InputAttribute inputAttribute;
+        inputAttribute.inputPattern = (int32_t)keyboard_;
+        inputAttribute.enterKeyType = (int32_t)action_;
+        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, inputAttribute);
 #else
         if (!HasConnection()) {
             AttachIme();
@@ -1200,6 +1211,54 @@ void RenderTextField::StopTwinkling()
         cursorVisibility_ = false;
         MarkNeedRender();
     }
+}
+
+void RenderTextField::HandleSetSelection(int32_t start, int32_t end)
+{
+    LOGI("HandleSetSelection %{public}d, %{public}d", start, end);
+    UpdateSelection(start, end);
+}
+
+void RenderTextField::HandleExtendAction(int32_t action)
+{
+    LOGI("HandleExtendAction %{public}d", action);
+    switch (action) {
+        case ACTION_SELECT_ALL: {
+            auto end = GetEditingValue().GetWideText().length();
+            UpdateSelection(0, end);
+            break;
+        }
+        case ACTION_UNDO: {
+            HandleOnRevoke();
+            break;
+        }
+        case ACTION_REDO: {
+            HandleOnInverseRevoke();
+            break;
+        }
+        case ACTION_CUT: {
+            HandleOnCut();
+            break;
+        }
+        case ACTION_COPY: {
+            HandleOnCopy();
+            break;
+        }
+        case ACTION_PASTE: {
+            HandleOnPaste();
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void RenderTextField::HandleSelect(int32_t keyCode, int32_t cursorMoveSkip)
+{
+    KeyCode code = static_cast<KeyCode>(keyCode);
+    CursorMoveSkip skip = static_cast<CursorMoveSkip>(cursorMoveSkip);
+    HandleOnSelect(code, skip);
 }
 
 const TextEditingValue& RenderTextField::GetEditingValue() const
@@ -1530,6 +1589,14 @@ void RenderTextField::PerformAction(TextInputAction action, bool forceCloseKeybo
 {
     LOGD("PerformAction  %{public}d", static_cast<int32_t>(action));
     ContainerScope scope(instanceId_);
+    if (keyboard_ == TextInputType::MULTILINE) {
+        auto value = GetEditingValue();
+        auto textEditingValue = std::make_shared<TextEditingValue>();
+        textEditingValue->text = value.GetBeforeSelection() + NEW_LINE + value.GetAfterSelection();
+        textEditingValue->UpdateSelection(std::max(value.selection.GetStart(), 0) + 1);
+        UpdateEditingValue(textEditingValue, true);
+        return;
+    }
     if (action == TextInputAction::NEXT && moveNextFocusEvent_) {
         moveNextFocusEvent_();
     } else {
@@ -1945,11 +2012,23 @@ void RenderTextField::CursorMoveDown()
     MarkNeedLayout();
 }
 
+void RenderTextField::HandleOnBlur()
+{
+    SetCanPaintSelection(false);
+    auto lastPosition = static_cast<int32_t>(GetEditingValue().GetWideText().length());
+    UpdateSelection(lastPosition, lastPosition);
+    StopTwinkling();
+    PopTextOverlay();
+    OnEditChange(false);
+    ResetOnFocusForTextFieldManager();
+}
+
 void RenderTextField::CursorMoveOnClick(const Offset& offset)
 {
     auto value = GetEditingValue();
     auto position = GetCursorPositionForClick(offset);
     value.MoveToPosition(position);
+    UpdateSelection(position, position);
     SetEditingValue(std::move(value));
 
     if (!GetEditingValue().text.empty() && position == GetEditingValue().selection.GetEnd()) {

@@ -60,7 +60,21 @@ constexpr Dimension CURSOR_PADDING = 2.0_vp;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
-enum class CaretUpdateType { PRESSED, LONG_PRESSED, DEL, EVENT, HANDLER_MOVE, INPUT, NONE };
+enum class CaretUpdateType { PRESSED, LONG_PRESSED, DEL, EVENT, HANDLE_MOVE, HANDLE_MOVE_DONE, INPUT, NONE };
+
+enum {
+    ACTION_SELECT_ALL, // Smallest code unit.
+    ACTION_UNDO,
+    ACTION_REDO,
+    ACTION_CUT,
+    ACTION_COPY,
+    ACTION_PASTE,
+    ACTION_SHARE,
+    ACTION_PASTE_AS_PLAIN_TEXT,
+    ACTION_REPLACE,
+    ACTION_ASSIST,
+    ACTION_AUTOFILL,
+};
 
 class TextFieldPattern : public Pattern, public ValueChangeObserver {
     DECLARE_ACE_TYPE(TextFieldPattern, Pattern, ValueChangeObserver);
@@ -227,6 +241,16 @@ public:
     float AdjustTextRectOffsetX();
     float AdjustTextAreaOffsetY();
 
+    float GetPaddingTop() const
+    {
+        return utilPadding_.top.value_or(0.0f);
+    }
+
+    float GetPaddingBottom() const
+    {
+        return utilPadding_.bottom.value_or(0.0f);
+    }
+
     float GetPaddingLeft() const
     {
         return utilPadding_.left.value_or(0.0f);
@@ -287,6 +311,9 @@ public:
     void CursorMoveUp();
     void CursorMoveDown();
     void SetCaretPosition(int32_t position);
+    void HandleSetSelection(int32_t start, int32_t end);
+    void HandleExtendAction(int32_t action);
+    void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
 
     const std::vector<RSTypographyProperties::TextBox>& GetTextBoxes()
     {
@@ -322,9 +349,76 @@ public:
     {
         needCloseOverlay_ = needClose;
     }
+    const RefPtr<ImageLoadingContext>& GetShowPasswordIconCtx() const
+    {
+        return showPasswordImageLoadingCtx_;
+    }
+
+    void SearchRequestKeyboard();
+
+    const RefPtr<CanvasImage>& GetShowPasswordIconCanvasImage() const
+    {
+        return showPasswordCanvasImage_;
+    }
+
+    const RefPtr<ImageLoadingContext>& GetHidePasswordIconCtx() const
+    {
+        return hidePasswordImageLoadingCtx_;
+    }
+
+    const RefPtr<CanvasImage>& GetHidePasswordIconCanvasImage() const
+    {
+        return hidePasswordCanvasImage_;
+    }
+
+    bool GetTextObscured() const
+    {
+        return textObscured_;
+    }
+
+    void SetTextObscured(bool obscured)
+    {
+        textObscured_ = obscured;
+    }
+
+    static std::u16string CreateObscuredText(int32_t len);
+    bool IsTextArea();
+    const RectF& GetImageRect()
+    {
+        return imageRect_;
+    }
+
+    const RefPtr<TouchEventImpl>& GetTouchListener()
+    {
+        return touchListener_;
+    }
+
+    bool NeedShowPasswordIcon()
+    {
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_RETURN_NOLOG(layoutProperty, false);
+        return layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD &&
+               layoutProperty->GetShowPasswordIconValue(true);
+    }
+
+    const ImagePaintConfig& GetPasswordIconPaintConfig()
+    {
+        return passwordIconPaintConfig_;
+    }
+
+    void SetEnableTouchAndHoverEffect(bool enable)
+    {
+        enableTouchAndHoverEffect_ = enable;
+    }
+
+    const RectF& GetCaretRect()
+    {
+        return caretRect_;
+    }
+
+    void UpdateCaretRectByPosition(int32_t position);
 
 private:
-    bool IsTextArea();
     void HandleBlurEvent();
     void HandleFocusEvent();
     bool OnKeyEvent(const KeyEvent& event);
@@ -339,10 +433,13 @@ private:
     void InitTouchEvent();
     void InitLongPressEvent();
     void InitClickEvent();
+    bool CaretPositionCloseToTouchPosition();
+    void CreateSingleHandle();
 
     void AddScrollEvent();
     void OnTextAreaScroll(float dy);
     void InitMouseEvent();
+    void OnHover(bool isHover);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
     void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle);
@@ -352,7 +449,9 @@ private:
     void ProcessOverlay();
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
+    void SetHandlerOnMoveDone();
     void OnDetachFromFrameNode(FrameNode* node) override;
+    bool UpdateCaretByPressOrLongPress();
     void UpdateTextSelectorByHandleMove(bool isMovingBase, int32_t position, OffsetF& offsetToParagraphBeginning);
 
     void HandleSelectionUp();
@@ -375,6 +474,7 @@ private:
     void UpdateCaretOffsetByLastTouchOffset();
     bool UpdateCaretPositionByMouseMovement();
     bool UpdateCaretPosition();
+    int32_t GetLineNumber(float offsetY);
 
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
@@ -414,6 +514,16 @@ private:
     bool OffsetInContentRegion(const Offset& offset);
     void ProcessPadding();
 
+    void ProcessPasswordIcon();
+    void UpdateInternalResource(ImageSourceInfo& sourceInfo);
+    ImageSourceInfo GetImageSourceInfoFromTheme(bool checkHidePasswordIcon);
+    LoadSuccessNotifyTask CreateLoadSuccessCallback(bool checkHidePasswordIcon);
+    DataReadyNotifyTask CreateDataReadyCallback(bool checkHidePasswordIcon);
+    LoadFailNotifyTask CreateLoadFailCallback(bool checkHidePasswordIcon);
+    void OnImageDataReady(bool checkHidePasswordIcon);
+    void OnImageLoadSuccess(bool checkHidePasswordIcon);
+    void OnImageLoadFail(bool checkHidePasswordIcon);
+
     RectF frameRect_;
     RectF contentRect_;
     RectF textRect_;
@@ -426,13 +536,16 @@ private:
     RefPtr<ImageLoadingContext> hidePasswordImageLoadingCtx_;
 
     // password icon image related
-    RefPtr<CanvasImage> showPasswordImageCanvas_;
-    RefPtr<CanvasImage> hidePasswordImageCanvas_;
+    RefPtr<CanvasImage> showPasswordCanvasImage_;
+    RefPtr<CanvasImage> hidePasswordCanvasImage_;
+
+    ImagePaintConfig passwordIconPaintConfig_;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<InputEvent> mouseEvent_;
+    RefPtr<InputEvent> hoverEvent_;
     RefPtr<LongPressEvent> longPressEvent_;
     CursorPositionType cursorPositionType_ = CursorPositionType::NORMAL;
 
@@ -446,6 +559,8 @@ private:
     Offset lastTouchOffset_;
     PaddingPropertyF utilPadding_;
 
+    bool isSingleHandle_ = false;
+    bool isFirstHandle_ = false;
     float baselineOffset_ = 0.0f;
     RectF caretRect_;
     bool cursorVisible_ = false;
@@ -453,6 +568,8 @@ private:
     bool preferredLineHeightNeedToUpdate = true;
     bool isMousePressed_ = false;
     bool needCloseOverlay_ = true;
+    bool textObscured_ = true;
+    bool enableTouchAndHoverEffect_ = true;
 
     SelectionMode selectionMode_ = SelectionMode::NONE;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
@@ -471,7 +588,6 @@ private:
     std::vector<RSTypographyProperties::TextBox> textBoxes_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPattern);
 
-    CopyOptions copyOption_ = CopyOptions::Distributed;
     RefPtr<Clipboard> clipboard_;
     std::vector<TextEditingValueNG> operationRecords_;
     std::vector<TextEditingValueNG> redoOperationRecords_;

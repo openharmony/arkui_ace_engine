@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import extension from '@ohos.application.ServiceExtensionAbility'
+import extension from '@ohos.app.ability.ServiceExtensionAbility'
 import window from '@ohos.window';
 import display from '@ohos.display';
 import bundle from '@ohos.bundle';

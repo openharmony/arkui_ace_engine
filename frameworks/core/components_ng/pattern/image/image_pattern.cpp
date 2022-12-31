@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/image/image_pattern.h"
+
 #include <array>
 
 #include "base/utils/utils.h"
@@ -94,14 +95,14 @@ void ImagePattern::OnImageLoadSuccess()
     imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
     // update src data
     image_ = loadingCtx_->MoveCanvasImage();
-    lastSrcRect_ = loadingCtx_->GetSrcRect();
-    lastDstRect_ = loadingCtx_->GetDstRect();
-    SetImagePaintConfig(image_, lastSrcRect_, lastDstRect_, loadingCtx_->GetSourceInfo().IsSvg());
+    srcRect_ = loadingCtx_->GetSrcRect();
+    dstRect_ = loadingCtx_->GetDstRect();
+    SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
     // clear alt data
     altLoadingCtx_ = nullptr;
     altImage_ = nullptr;
-    lastAltDstRect_.reset();
-    lastAltSrcRect_.reset();
+    altDstRect_.reset();
+    altSrcRect_.reset();
     // TODO: only do paint task when the pattern is active
     // figure out why here is always inactive
     host->MarkNeedRenderOnly();
@@ -143,27 +144,27 @@ void ImagePattern::OnImageLoadFail()
 }
 
 void ImagePattern::SetImagePaintConfig(
-    const RefPtr<CanvasImage>& canvasImage, const RectF& lastSrcRect_, const RectF& lastDstRect_, bool isSvg)
+    const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect, bool isSvg)
 {
     auto renderProps = GetPaintProperty<ImageRenderProperty>();
     auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(renderProps && layoutProps);
 
     ImagePaintConfig config {
-        .srcRect_ = lastSrcRect_,
-        .dstRect_ = lastDstRect_,
+        .srcRect_ = srcRect,
+        .dstRect_ = dstRect,
     };
     config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
     if (renderProps->GetNeedBorderRadiusValue(false)) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto borderRadius = host->GetRenderContext()->GetBorderRadius();
-        std::array<PointF, 4> radiusXY = { PointF(borderRadius->radiusTopLeft->ConvertToPx(),
-                                               borderRadius->radiusTopLeft->ConvertToPx()),
+        BorderRadiusArray radiusXY = { PointF(borderRadius->radiusTopLeft->ConvertToPx(),
+                                                                borderRadius->radiusTopLeft->ConvertToPx()),
             PointF(borderRadius->radiusTopRight->ConvertToPx(), borderRadius->radiusTopRight->ConvertToPx()),
             PointF(borderRadius->radiusBottomLeft->ConvertToPx(), borderRadius->radiusBottomLeft->ConvertToPx()),
             PointF(borderRadius->radiusBottomRight->ConvertToPx(), borderRadius->radiusBottomRight->ConvertToPx()) };
-        config.borderRadiusXY_ = std::make_shared<std::array<PointF, 4>>(std::move(radiusXY));
+        config.borderRadiusXY_ = std::make_shared<BorderRadiusArray>(std::move(radiusXY));
     }
     config.isSvg_ = isSvg;
 
@@ -175,7 +176,7 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
     if (image_) {
         return MakeRefPtr<ImagePaintMethod>(image_);
     }
-    if (altImage_ && lastAltDstRect_ && lastAltSrcRect_) {
+    if (altImage_ && altDstRect_ && altSrcRect_) {
         return MakeRefPtr<ImagePaintMethod>(altImage_);
     }
     return nullptr;
@@ -286,9 +287,9 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         pattern->altImage_ = pattern->altLoadingCtx_->MoveCanvasImage();
-        pattern->lastAltSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
-        pattern->lastAltDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
-        pattern->SetImagePaintConfig(pattern->altImage_, *pattern->lastAltSrcRect_, *pattern->lastAltDstRect_,
+        pattern->altSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
+        pattern->altDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
+        pattern->SetImagePaintConfig(pattern->altImage_, *pattern->altSrcRect_, *pattern->altDstRect_,
             pattern->altLoadingCtx_->GetSourceInfo().IsSvg());
     };
     return task;
@@ -336,13 +337,13 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     // Step2: clean data and reset params
     // clear src data
     image_ = nullptr;
-    lastSrcRect_ = RectF();
-    lastDstRect_ = RectF();
+    srcRect_ = RectF();
+    dstRect_ = RectF();
     // clear alt data
     altLoadingCtx_ = nullptr;
     altImage_ = nullptr;
-    lastAltDstRect_.reset();
-    lastAltSrcRect_.reset();
+    altDstRect_.reset();
+    altSrcRect_.reset();
 
     // Step3: clean rs node to release the sk_sp<SkImage> held by it
     // TODO: release PixelMap resource when use PixelMap resource to draw image

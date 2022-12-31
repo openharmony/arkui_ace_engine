@@ -39,7 +39,7 @@ public:
 private:
     void InitializeParam();
     void PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
-    void DrawUnselected(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, RSBrush& brush, SizeF& paintSize) const;
+    void DrawUnselected(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, SizeF& paintSize) const;
     void DrawActiveBorder(RSCanvas& canvas, const OffsetF& paintOffset, RSBrush& brush, const SizeF& paintSize) const;
     void DrawPart(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
     void DrawTouchBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
@@ -50,6 +50,7 @@ private:
     float borderWidth_ = 0.0f;
     float borderRadius_ = 0.0f;
     float checkStroke_ = 0.0f;
+    Color pointColor_ = Color::WHITE;
     Color activeColor_ = Color::BLUE;
     Color inactiveColor_ = Color::GRAY;
     Color shadowColor_ = Color::WHITE;
@@ -58,6 +59,7 @@ private:
     Dimension hoverRadius_ = 8.0_vp;
     Dimension hotZoneHorizontalPadding_ = 11.0_vp;
     Dimension hotZoneVerticalPadding_ = 11.0_vp;
+    Dimension shadowWidth_;
 
     bool enabled_ = true;
     bool isTouch_ = false;

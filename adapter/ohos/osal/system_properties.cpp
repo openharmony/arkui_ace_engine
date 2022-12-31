@@ -32,7 +32,7 @@
 namespace OHOS::Ace {
 namespace {
 
-const char PROPERTY_DEVICE_TYPE[] = "const.build.characteristics";
+const char PROPERTY_DEVICE_TYPE[] = "const.product.devicetype";
 const char PROPERTY_DEVICE_TYPE_DEFAULT[] = "default";
 const char PROPERTY_DEVICE_TYPE_TV[] = "tv";
 const char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
@@ -237,6 +237,15 @@ int32_t GetAstcPsnrProp()
     return system::GetIntParameter<int>("persist.astc.psnr", 0);
 }
 
+bool IsExtSurfaceEnabled()
+{
+#ifdef EXT_SURFACE_ENABLE
+    return true;
+#else
+    return false;
+#endif
+}
+
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
@@ -269,6 +278,7 @@ bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
 bool SystemProperties::astcEnabled_ = GetAstcEnabled();
 int32_t SystemProperties::astcMax_ = GetAstcMaxErrorProp();
 int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
+bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 
 DeviceType SystemProperties::GetDeviceType()
 {
@@ -314,7 +324,7 @@ void SystemProperties::InitDeviceInfo(
     product_ = system::GetParameter("const.product.name", INVALID_PARAM);
     apiVersion_ = system::GetParameter("const.ohos.apiversion", INVALID_PARAM);
     releaseType_ = system::GetParameter("const.ohos.releasetype", INVALID_PARAM);
-    paramDeviceType_ = system::GetParameter("const.build.characteristics", INVALID_PARAM);
+    paramDeviceType_ = system::GetParameter("const.product.devicetype", INVALID_PARAM);
 
     debugEnabled_ = IsDebugEnabled();
     traceEnabled_ = IsTraceEnabled();

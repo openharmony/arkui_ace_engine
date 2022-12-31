@@ -864,8 +864,9 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         return true;
     }
     auto lastPage = stageManager_->GetLastPage();
-    CHECK_NULL_RETURN(lastPage, false);
-    if (!eventManager_->DispatchTabIndexEventNG(event, rootNode_, lastPage)) {
+    auto mainNode = lastPage ? lastPage : rootNode_;
+    CHECK_NULL_RETURN(mainNode, false);
+    if (!eventManager_->DispatchTabIndexEventNG(event, rootNode_, mainNode)) {
         return eventManager_->DispatchKeyEventNG(event, rootNode_);
     }
     return true;
@@ -874,20 +875,27 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 bool PipelineContext::RequestDefaultFocus()
 {
     auto lastPage = stageManager_->GetLastPage();
-    CHECK_NULL_RETURN(lastPage, false);
-    auto lastPageFocusHub = lastPage->GetFocusHub();
-    CHECK_NULL_RETURN(lastPageFocusHub, false);
-    if (lastPageFocusHub->IsDefaultHasFocused()) {
+    auto mainNode = lastPage ? lastPage : rootNode_;
+    CHECK_NULL_RETURN(mainNode, false);
+    auto mainFocusHub = mainNode->GetFocusHub();
+    CHECK_NULL_RETURN(mainFocusHub, false);
+    if (mainFocusHub->IsDefaultHasFocused()) {
+        LOGD("RequestDefaultFocus: %{public}s/%{public}d 's default focus node has be focused.",
+            mainNode->GetTag().c_str(), mainNode->GetId());
         return false;
     }
-    auto defaultFocusNode = lastPageFocusHub->GetChildFocusNodeByType();
+    auto defaultFocusNode = mainFocusHub->GetChildFocusNodeByType();
     if (!defaultFocusNode) {
+        LOGD("RequestDefaultFocus: %{public}s/%{public}d do not has default focus node.",
+            mainNode->GetTag().c_str(), mainNode->GetId());
         return false;
     }
     if (!defaultFocusNode->IsFocusableWholePath()) {
+        LOGD("RequestDefaultFocus: %{public}s/%{public}d 's default focus node is not focusable.",
+            mainNode->GetTag().c_str(), mainNode->GetId());
         return false;
     }
-    lastPageFocusHub->SetIsDefaultHasFocused(true);
+    mainFocusHub->SetIsDefaultHasFocused(true);
     LOGD("Focus: request default focus node %{public}s", defaultFocusNode->GetFrameName().c_str());
     return defaultFocusNode->RequestFocusImmediately();
 }
@@ -920,6 +928,19 @@ void PipelineContext::RootLostFocus(BlurReason reason) const
     focusHub->LostFocus(reason);
 }
 
+MouseEvent ConvertAxisToMouse(const AxisEvent& event)
+{
+    MouseEvent result;
+    result.x = event.x;
+    result.y = event.y;
+    result.action = MouseAction::MOVE;
+    result.button = MouseButton::NONE_BUTTON;
+    result.time = event.time;
+    result.deviceId = event.deviceId;
+    result.sourceType = event.sourceType;
+    return result;
+}
+
 void PipelineContext::OnAxisEvent(const AxisEvent& event)
 {
     // Need develop here: CTRL+AXIS = Pinch event
@@ -941,6 +962,9 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
         eventManager_->AxisTest(scaleEvent, rootNode_);
         eventManager_->DispatchAxisEvent(scaleEvent);
     }
+
+    auto mouseEvent = ConvertAxisToMouse(event);
+    OnMouseEvent(mouseEvent);
 }
 
 void PipelineContext::AddVisibleAreaChangeNode(
@@ -1032,12 +1056,16 @@ void PipelineContext::WindowFocus(bool isFocus)
     CHECK_RUN_ON(UI);
     onFocus_ = isFocus;
     if (!isFocus) {
+        LOGD("WindowFocus: isFocus_ is %{public}d. Lost all focus.", onFocus_);
         RootLostFocus(BlurReason::WINDOW_BLUR);
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
     }
     if (onFocus_ && onShow_) {
+        LOGD("WindowFocus: onFocus_ and onShow_ are both true. Do FlushFocus().");
         FlushFocus();
+    } else {
+        LOGD("WindowFocus: onFocus_ is %{public}d, onShow_ is %{public}d.", onFocus_, onShow_);
     }
     FlushWindowFocusChangedCallback(isFocus);
 }

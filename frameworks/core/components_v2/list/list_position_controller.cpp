@@ -74,4 +74,13 @@ void ListPositionController::ScrollPage(bool reverse, bool smooth)
     return list->ScrollPage(reverse, smooth);
 }
 
+void ListPositionController::ScrollBy(double pixelX, double pixelY, bool smooth)
+{
+    auto list = AceType::DynamicCast<V2::RenderList>(scroll_.Upgrade());
+    if (!list) {
+        return;
+    }
+    list->ScrollBy(pixelX, pixelY);
+}
+
 } // namespace OHOS::Ace::V2

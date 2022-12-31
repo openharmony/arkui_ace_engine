@@ -25,7 +25,6 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
 
-protected:
     static void SetAutoPlay(bool autoPlay);
     static void SetDuration(int32_t duration);
     static void SetIndex(int32_t index);
@@ -48,6 +47,8 @@ protected:
     static void SetDisableSwipe(bool disableSwipe);
     static void SetCurve(const std::string& curveStr);
     static void SetOnChange(const JSCallbackInfo& info);
+    static void SetOnAnimationStart(const JSCallbackInfo& info);
+    static void SetOnAnimationEnd(const JSCallbackInfo& info);
     static void SetOnClick(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);
 };

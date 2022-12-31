@@ -460,8 +460,7 @@ RefPtr<NG::FrameNode> FindInputFocus(const RefPtr<NG::UINode>& node)
     }
 
     auto focusHub = frameNode->GetFocusHub();
-    focusHub->FlushChildrenFocusHub();
-    auto& focusChildren = focusHub->GetChildren();
+    auto focusChildren = focusHub->GetChildren();
     for (const auto& focusChild : focusChildren) {
         auto childNode = FindInputFocus(focusChild->GetFrameNode());
         if (childNode) {

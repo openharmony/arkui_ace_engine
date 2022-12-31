@@ -283,14 +283,8 @@ class LocalStorage extends NativeLocalStorage {
    */
   public setAndProp<S>(propName: string, defaultValue: S, propUser?: IPropertySubscriber, subscribersName?: string): SubscribedAbstractProperty<S> {
     var p: ObservedPropertyAbstract<S> | undefined = this.storage_.get(propName);
-
     if (!p) {
-      if (typeof defaultValue === "boolean" ||
-        typeof defaultValue === "number" || typeof defaultValue === "string") {
         this.setOrCreate(propName, defaultValue);
-      } else {
-        return undefined;
-      }
     }
     return this.prop(propName, propUser, subscribersName);
   }

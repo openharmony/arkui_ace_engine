@@ -22,14 +22,17 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_view.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
+const int32_t MARGIN_HALF = 2;
 } // namespace
 
 RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogProperties,
@@ -145,17 +148,35 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     auto buttonTitleNode = CreateTitleButtonNode(dateNode);
     CHECK_NULL_RETURN(buttonTitleNode, nullptr);
     ViewStackProcessor::GetInstance()->Finish();
+
     buttonTitleNode->MountToParent(contentColumn);
     dateNode->MountToParent(contentColumn);
-    contentRow->MountToParent(contentColumn);
+
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
+    auto event = [dialogNode](const GestureEvent& /* info */) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        auto overlayManager = pipeline->GetOverlayManager();
+        overlayManager->CloseDialog(dialogNode);
+    };
+    for (const auto& child : contentRow->GetChildren()) {
+        auto firstChild = AceType::DynamicCast<FrameNode>(child);
+        auto gesturHub = firstChild->GetOrCreateGestureEventHub();
+        auto onClick = AceType::MakeRefPtr<NG::ClickEvent>(event);
+        gesturHub->AddClickEvent(onClick);
+    }
+    contentRow->AddChild(CreateDividerNode(dateNode), 1);
+    contentRow->MountToParent(contentColumn);
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return dialogNode;
 }
 
 RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<FrameNode>& dateNode)
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_RETURN(pickerPattern, nullptr);
     auto buttonTitleNode = FrameNode::GetOrCreateFrameNode(
@@ -167,9 +188,47 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent("");
-    textTitleNode->MountToParent(buttonTitleNode);
+    textLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
 
+    textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
+    textLayoutProperty->UpdateFontSize(pickerTheme->GetTitleStyle().GetFontSize());
+    textLayoutProperty->UpdateFontWeight(pickerTheme->GetTitleStyle().GetFontWeight());
+    textLayoutProperty->UpdateTextOverflow(pickerTheme->GetTitleStyle().GetTextOverflow());
+    textLayoutProperty->UpdateMaxLines(pickerTheme->GetTitleStyle().GetMaxLines());
+    auto buttonTitleRenderContext = buttonTitleNode->GetRenderContext();
+    CHECK_NULL_RETURN(buttonTitleRenderContext, nullptr);
+    buttonTitleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    MarginProperty margin;
+    margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
+    margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
+    margin.top = CalcLength(dialogTheme->GetDividerHeight() / MARGIN_HALF);
+    margin.bottom = CalcLength(dialogTheme->GetDividerHeight() / MARGIN_HALF);
+    buttonTitleNode->GetLayoutProperty()->UpdateMargin(margin);
+    textTitleNode->MountToParent(buttonTitleNode);
     return buttonTitleNode;
+}
+
+RefPtr<FrameNode> DatePickerDialogView::CreateDividerNode(const RefPtr<FrameNode>& dateNode)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_RETURN(pickerPattern, nullptr);
+    auto dividerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DIVIDER_ETS_TAG, pickerPattern->GetDividerId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    auto dividerRenderContext = dividerNode->GetRenderContext();
+    CHECK_NULL_RETURN(dividerRenderContext, nullptr);
+    dividerRenderContext->UpdateBackgroundColor(dialogTheme->GetDividerColor());
+
+    MarginProperty margin;
+    margin.top = CalcLength(dialogTheme->GetDividerHeight());
+    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+    dividerNode->GetLayoutProperty()->UpdateMargin(margin);
+    dividerNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(dialogTheme->GetDividerHeight())));
+
+    return dividerNode;
 }
 
 RefPtr<FrameNode> DatePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>& dateNode,
@@ -179,6 +238,27 @@ RefPtr<FrameNode> DatePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
     auto cancelEvent = dialogCancelEvent["cancelId"];
     auto contentRow = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    CHECK_NULL_RETURN(contentRow, nullptr);
+    auto layoutProps = contentRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProps, nullptr);
+    layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
+    layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+
+    auto buttonCancelNode = CreateCancelNode(cancelEvent);
+    auto buttonConfirmNode = CreateConfirmNode(dateNode, acceptEvent);
+
+    buttonCancelNode->MountToParent(contentRow);
+    buttonConfirmNode->MountToParent(contentRow);
+    return contentRow;
+}
+
+RefPtr<FrameNode> DatePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode>& dateNode, DialogEvent& acceptEvent)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+
     auto buttonConfirmNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textConfirmNode = FrameNode::CreateFrameNode(
@@ -188,12 +268,33 @@ RefPtr<FrameNode> DatePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    textLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
+    textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
+    auto buttonConfirmEventHub = buttonConfirmNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_RETURN(buttonConfirmEventHub, nullptr);
+    buttonConfirmEventHub->SetStateEffect(true);
+
+    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
+    buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
+    auto buttonConfirmRenderContext = buttonConfirmNode->GetRenderContext();
+    buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+
+    MarginProperty margin;
+    margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
+    margin.top = CalcLength(dialogTheme->GetDividerHeight());
+    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+    buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
+
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto eventConfirmHub = buttonConfirmNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventConfirmHub, nullptr);
     CHECK_NULL_RETURN(dateNode, nullptr);
     SetDialogAcceptEvent(dateNode, std::move(acceptEvent));
-    auto clickCallback = [dateNode](const GestureEvent& /*info*/) {
+    auto clickCallback = [dateNode](const GestureEvent& /* info */) {
         auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
         CHECK_NULL_VOID(pickerPattern);
         auto str = pickerPattern->GetSelectedObject(true);
@@ -202,7 +303,16 @@ RefPtr<FrameNode> DatePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
         datePickerEventHub->FireDialogAcceptEvent(str);
     };
     eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(clickCallback));
+    buttonConfirmNode->MarkModifyDone();
+    return buttonConfirmNode;
+}
 
+RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent& cancelEvent)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_RETURN(buttonCancelNode, nullptr);
@@ -212,14 +322,34 @@ RefPtr<FrameNode> DatePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textCancelLayoutProperty, nullptr);
     textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    textCancelLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
+    textCancelLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
     textCancelNode->MountToParent(buttonCancelNode);
     auto eventCancelHub = buttonCancelNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventCancelHub, nullptr);
     eventCancelHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(cancelEvent)));
 
-    buttonCancelNode->MountToParent(contentRow);
-    buttonConfirmNode->MountToParent(contentRow);
-    return contentRow;
+    auto buttonCancelEventHub = buttonCancelNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_RETURN(buttonCancelEventHub, nullptr);
+    buttonCancelEventHub->SetStateEffect(true);
+
+    MarginProperty margin;
+    margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
+    margin.top = CalcLength(dialogTheme->GetDividerHeight());
+    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+    buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
+
+    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
+    buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    buttonCancelLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
+
+    auto buttonCancelRenderContext = buttonCancelNode->GetRenderContext();
+    buttonCancelRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonCancelNode->MarkModifyDone();
+    return buttonCancelNode;
 }
 
 void DatePickerDialogView::SetStartDate(const RefPtr<DatePickerPattern>& datePickerPattern, const PickerDate& value)

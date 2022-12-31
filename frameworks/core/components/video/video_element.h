@@ -30,6 +30,8 @@
 #include "foundation/multimedia/player_framework/interfaces/inner_api/native/player.h"
 
 #include "core/components/video/media_player_callback.h"
+
+#include "surface_delegate.h"
 #endif
 
 namespace OHOS::Ace {
@@ -193,9 +195,16 @@ private:
     void CreateMediaPlayer();
     void PreparePlayer();
     std::string GetAssetAbsolutePath(const std::string& fileName);
+    void OnTextureOffset(int64_t textureId, int32_t x, int32_t y);
 
     std::shared_ptr<OHOS::Media::Player> mediaPlayer_ = nullptr;
     std::shared_ptr<MediaPlayerCallback> mediaPlayerCallback_ = nullptr;
+    sptr<OHOS::SurfaceDelegate> surfaceDelegate_;
+    bool hasMediaPrepared_ = false;
+    int32_t textureWidth_ = 0;
+    int32_t textureHeight_ = 0;
+    int32_t textureOffsetX_ = 0;
+    int32_t textureOffsetY_ = 0;
 #endif
 };
 

@@ -22,6 +22,9 @@ template("ace_osal_ohos_source_set") {
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
+    if ("${product_name}" == "ohcore") {
+      defines += [ "EXT_SURFACE_ENABLE" ]
+    }
     if (is_standard_system) {
       external_deps = [
         "hitrace_native:hitrace_meter",

@@ -183,6 +183,19 @@ void ViewFunctions::ExecuteReload(bool deep)
     }
 }
 
+void ViewFunctions::ExecuteForceNodeRerender(int32_t elemId)
+{
+    ACE_SCOPED_TRACE("ViewFunctions::ExecuteForceNodeRerender");
+    auto func = jsForceRerenderNodeFunc_.Lock();
+    if (!func.IsEmpty()) {
+        JSRef<JSVal> params[1];
+        params[0] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(elemId)));
+        func->Call(jsObject_.Lock(), 1, params);
+    } else {
+        LOGE("the force node rerender func is null");
+    }
+}
+
 #else
 
 void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper) {}
@@ -190,6 +203,8 @@ void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper) {}
 void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper) {}
 
 void ViewFunctions::ExecuteReload(bool deep) {}
+
+void ViewFunctions::ExecuteForceNodeRerender(int32_t elemId) {}
 
 #endif
 
@@ -222,6 +237,13 @@ void ViewFunctions::InitViewFunctions(
             jsReloadFunc_ = JSRef<JSFunc>::Cast(jsReloadFunc);
         } else {
             LOGE("View lacks mandatory 'forceCompleteRerender()' function, fatal internal error.");
+        }
+
+        JSRef<JSVal> jsForceRerenderNodeFunc = jsObject->GetProperty("forceRerenderNode");
+        if (jsReloadFunc->IsFunction()) {
+            jsForceRerenderNodeFunc_ = JSRef<JSFunc>::Cast(jsForceRerenderNodeFunc);
+        } else {
+            LOGE("View lacks mandatory 'forceRerenderNode()' function, fatal internal error.");
         }
     }
 
@@ -318,6 +340,33 @@ void ViewFunctions::InitViewFunctions(
         } else {
             LOGD("updateWithValueParams is not a function");
         }
+
+#ifdef UICAST_COMPONENT_SUPPORTED
+        JSRef<JSVal> jsCreateChildViewFunc = jsObject->GetProperty("createChildView");
+        if (jsCreateChildViewFunc->IsFunction()) {
+            LOGI("UICast createChildView is a function");
+            jsCreateChildViewFunc_ = JSRef<JSFunc>::Cast(jsCreateChildViewFunc);
+        } else {
+            LOGI("UICast createChildView is not a function");
+        }
+
+        JSRef<JSVal> jsRouterHandleFunc = jsObject->GetProperty("routerHandle");
+        if (jsRouterHandleFunc->IsFunction()) {
+            LOGI("UICast routerHandle is a function");
+            jsRouterHandleFunc_ = JSRef<JSFunc>::Cast(jsRouterHandleFunc);
+        } else {
+            LOGI("UICast routerHandle is not a function");
+        }
+
+        JSRef<JSVal> jsReplayOnEventFunc = jsObject->GetProperty("replayOnEvent");
+        if (jsReplayOnEventFunc->IsFunction()) {
+            LOGI("UICast replayOnEvent is a function");
+            jsReplayOnEventFunc_ = JSRef<JSFunc>::Cast(jsReplayOnEventFunc);
+        } else {
+            LOGI("UICast replayOnEvent is not a function");
+        }
+#endif
+
         jsRenderFunc_ = jsRenderFunction;
     }
 }
@@ -406,6 +455,23 @@ void ViewFunctions::ExecuteUpdateWithValueParams(const std::string& jsonData)
 {
     ExecuteFunctionWithParams(jsUpdateWithValueParamsFunc_, "updateWithValueParams", jsonData);
 }
+
+#ifdef UICAST_COMPONENT_SUPPORTED
+void ViewFunctions::ExecuteCreateChildView(const std::string& jsonData)
+{
+    ExecuteFunctionWithParams(jsCreateChildViewFunc_, "createChildView", jsonData);
+}
+
+void ViewFunctions::ExecuteRouterHandle(const std::string& jsonData)
+{
+    ExecuteFunctionWithParams(jsRouterHandleFunc_, "routerHandle", jsonData);
+}
+
+void ViewFunctions::ExecuteReplayOnEvent(const std::string& jsonData)
+{
+    ExecuteFunctionWithParams(jsReplayOnEventFunc_, "replayOnEvent", jsonData);
+}
+#endif
 
 bool ViewFunctions::ExecuteOnBackPress()
 {

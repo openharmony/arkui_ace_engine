@@ -30,6 +30,8 @@
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/view_full_update_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/view_partial_update_model_impl.h"
+#include "uicast_interface/uicast_impl.h"
+#include "uicast_interface/uicast_context_impl.h"
 
 namespace OHOS::Ace {
 
@@ -72,6 +74,26 @@ ViewPartialUpdateModel* ViewPartialUpdateModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
+void JSView::MarkStatic()
+{
+    isStatic_ = true;
+    {
+        UICastImpl::CacheCmd("UICast::View::markStatic", std::to_string(uniqueId_));
+    }
+}
+
+bool JSView::NeedsUpdate()
+{
+    {
+        if (UICastContextImpl::NeedsRebuild()) {
+            isStatic_ = false;
+            return true;
+        }
+    }
+
+    return needsUpdate_;
+}
+
 void JSView::JSBind(BindingTarget object)
 {
     JSViewPartialUpdate::JSBind(object);
@@ -86,6 +108,9 @@ void JSView::RenderJSExecution()
         return;
     }
     {
+        {
+            UICastImpl::CacheCmd("UICast::View::locate", std::to_string(uniqueId_));
+        }
         ACE_SCORING_EVENT("Component.AboutToRender");
         jsViewFunction_->ExecuteAboutToRender();
     }
@@ -98,6 +123,9 @@ void JSView::RenderJSExecution()
     {
         ACE_SCORING_EVENT("Component.OnRenderDone");
         jsViewFunction_->ExecuteOnRenderDone();
+        {
+            UICastImpl::SendCmd();
+        }
     }
 }
 
@@ -239,6 +267,9 @@ void JSViewFullUpdate::Create(const JSCallbackInfo& info)
             return;
         }
         ViewStackModel::GetInstance()->Push(view->CreateViewNode(), true);
+        {
+            UICastImpl::ViewCreate(view->UICastGetViewId(), view->uniqueId_, view);
+        }
     } else {
         LOGE("JSView Object is expected.");
     }
@@ -329,15 +360,24 @@ void JSViewFullUpdate::ConstructorCallback(const JSCallbackInfo& info)
         instance->SetContext(context);
         instance->IncRefCount();
         info.SetReturnValue(AceType::RawPtr(instance));
+        std::string parentViewId = "";
+        int parentUniqueId = -1;
         if (!info[1]->IsUndefined() && info[1]->IsObject()) {
             JSRef<JSObject> parentObj = JSRef<JSObject>::Cast(info[1]);
             auto* parentView = parentObj->Unwrap<JSViewFullUpdate>();
             if (parentView != nullptr) {
                 auto id = parentView->AddChildById(viewId, info.This());
                 instance->id_ = id;
+                parentViewId = parentView->viewId_;
+                parentUniqueId = parentView->uniqueId_;
             }
         }
         LOGD("JSView ConstructorCallback: %{public}s", instance->id_.c_str());
+        {
+            instance->uniqueId_ = UICastImpl::GetViewUniqueID(parentUniqueId);
+            UICastImpl::ViewConstructor(
+                instance->viewId_, instance->uniqueId_, parentViewId, parentUniqueId, AceType::RawPtr(instance));
+        }
     } else {
         LOGE("JSView creation with invalid arguments.");
         JSException::Throw("%s", "JSView creation with invalid arguments.");
@@ -577,6 +617,13 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         }
     };
 
+    auto nodeUpdateFunc = [weak = AceType::WeakClaim(this)](int32_t nodeId) {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
+        jsView->jsViewFunction_->ExecuteForceNodeRerender(nodeId);
+    };
+
     NodeInfoPU info = { .appearFunc = std::move(appearFunc),
         .renderFunc = std::move(renderFunction),
         .updateFunc = std::move(updateFunction),
@@ -584,6 +631,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         .updateNodeFunc = std::move(updateViewNodeFunction),
         .pageTransitionFunc = std::move(pageTransitionFunction),
         .reloadFunc = std::move(reloadFunction),
+        .nodeUpdateFunc = std::move(nodeUpdateFunc),
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout(),
         .isStatic = IsStatic() };
 

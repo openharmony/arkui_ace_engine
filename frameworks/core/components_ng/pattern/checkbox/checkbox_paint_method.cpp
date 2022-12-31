@@ -68,6 +68,7 @@ void CheckBoxPaintMethod::InitializeParam()
     borderWidth_ = checkBoxTheme->GetBorderWidth().ConvertToPx();
     borderRadius_ = checkBoxTheme->GetBorderRadius().ConvertToPx();
     checkStroke_ = checkBoxTheme->GetCheckStroke().ConvertToPx();
+    pointColor_ = checkBoxTheme->GetPointColor();
     activeColor_ = checkBoxTheme->GetActiveColor();
     inactiveColor_ = checkBoxTheme->GetInactiveColor();
     inactivePointColor_ = checkBoxTheme->GetInactivePointColor();
@@ -77,6 +78,7 @@ void CheckBoxPaintMethod::InitializeParam()
     hoverRadius_ = checkBoxTheme->GetHoverRadius();
     hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
+    shadowWidth_ = checkBoxTheme->GetShadowWidth();
 }
 
 void CheckBoxPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWrapper) const
@@ -99,11 +101,9 @@ void CheckBoxPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWra
     paintOffset += OffsetF(strokeOffset, strokeOffset);
     contentSize.SetWidth(contentSize.Width() - borderWidth_);
     contentSize.SetHeight(contentSize.Height() - borderWidth_);
-    if (isTouch_ || isHover_) {
+    if (isTouch_) {
         paintOffset.SetX(paintOffset.GetX() + hotZoneHorizontalPadding_.ConvertToPx());
         paintOffset.SetY(paintOffset.GetY() + hotZoneVerticalPadding_.ConvertToPx());
-    }
-    if (isTouch_) {
         DrawTouchBoard(canvas, contentSize, paintOffset);
     }
     if (isHover_) {
@@ -112,41 +112,38 @@ void CheckBoxPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWra
     if (uiStatus_ == UIStatus::OFF_TO_ON) {
         brush.SetColor(ToRSColor(color));
         brush.SetAntiAlias(true);
-        pen.SetColor(ToRSColor(Color::WHITE));
+        pen.SetColor(ToRSColor(pointColor_));
         if (!enabled_) {
-            brush.SetColor(ToRSColor(color.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
+            brush.SetColor(ToRSColor(color.BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
         }
         DrawActiveBorder(canvas, paintOffset, brush, contentSize);
         DrawAnimationOffToOn(canvas, paintOffset, pen, contentSize);
     } else if (uiStatus_ == UIStatus::ON_TO_OFF) {
         brush.SetColor(ToRSColor(color));
         brush.SetAntiAlias(true);
-        pen.SetColor(ToRSColor(Color::WHITE));
+        pen.SetColor(ToRSColor(pointColor_));
         if (!enabled_) {
-            brush.SetColor(ToRSColor(color.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
+            brush.SetColor(ToRSColor(color.BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
         }
         DrawActiveBorder(canvas, paintOffset, brush, contentSize);
         DrawAnimationOnToOff(canvas, paintOffset, pen, contentSize);
     } else if (uiStatus_ == UIStatus::UNSELECTED) {
         pen.SetColor(ToRSColor(inactiveColor_));
-        brush.SetColor(ToRSColor(inactivePointColor_));
         if (!enabled_) {
-            pen.SetColor(ToRSColor(inactiveColor_.BlendOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA)));
+            pen.SetColor(ToRSColor(inactiveColor_.BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
         }
-        DrawUnselected(canvas, paintOffset, pen, brush, contentSize);
+        DrawUnselected(canvas, paintOffset, pen, contentSize);
     }
 }
 
 void CheckBoxPaintMethod::DrawUnselected(
-    RSCanvas& canvas, const OffsetF& origin, RSPen& pen, RSBrush& brush, SizeF& paintSize) const
+    RSCanvas& canvas, const OffsetF& origin, RSPen& pen, SizeF& paintSize) const
 {
     float originX = origin.GetX();
     float originY = origin.GetY();
     auto rrect = RSRoundRect(
         { originX, originY, paintSize.Width() + originX, paintSize.Height() + originY }, borderRadius_, borderRadius_);
     canvas.AttachPen(pen);
-    canvas.DrawRoundRect(rrect);
-    canvas.AttachBrush(brush);
     canvas.DrawRoundRect(rrect);
 }
 
@@ -169,19 +166,20 @@ void CheckBoxPaintMethod::DrawAnimationOffToOn(
     float originX = origin.GetX();
     float originY = origin.GetY();
     const Offset start =
-        Offset(paintSize.Width() * CHECK_MARK_START_X_POSITION, paintSize.Width() * CHECK_MARK_START_Y_POSITION);
+        Offset(paintSize.Width() * CHECK_MARK_START_X_POSITION, paintSize.Height() * CHECK_MARK_START_Y_POSITION);
     const Offset middle =
-        Offset(paintSize.Width() * CHECK_MARK_MIDDLE_X_POSITION, paintSize.Width() * CHECK_MARK_MIDDLE_Y_POSITION);
+        Offset(paintSize.Width() * CHECK_MARK_MIDDLE_X_POSITION, paintSize.Height() * CHECK_MARK_MIDDLE_Y_POSITION);
     const Offset end =
-        Offset(paintSize.Width() * CHECK_MARK_END_X_POSITION, paintSize.Width() * CHECK_MARK_END_Y_POSITION);
+        Offset(paintSize.Width() * CHECK_MARK_END_X_POSITION, paintSize.Height() * CHECK_MARK_END_Y_POSITION);
 
     float deltaX = middle.GetX() - start.GetX();
     float deltaY = middle.GetY() - start.GetY();
     path.MoveTo(originX + start.GetX(), originY + start.GetY());
     shadowPen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
-    shadowPen.SetWidth(checkStroke_);
+    shadowPen.SetWidth(checkStroke_ + shadowWidth_.ConvertToPx() * 2);
     shadowPen.SetColor(ToRSColor(shadowColor_));
-    pen.SetWidth(borderWidth_);
+    pen.SetWidth(checkStroke_);
+    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     float ratio = DEFAULT_MIN_CHECKBOX_SHAPE_SCALE;
     if (shapeScale_ < CHECK_MARK_LEFT_ANIMATION_PERCENT) {
         ratio = shapeScale_ / CHECK_MARK_LEFT_ANIMATION_PERCENT;
@@ -221,19 +219,20 @@ void CheckBoxPaintMethod::DrawAnimationOnToOff(
     float originX = origin.GetX();
     float originY = origin.GetY();
     const Offset start =
-        Offset(paintSize.Width() * CHECK_MARK_START_X_POSITION, paintSize.Width() * CHECK_MARK_START_Y_POSITION);
+        Offset(paintSize.Width() * CHECK_MARK_START_X_POSITION, paintSize.Height() * CHECK_MARK_START_Y_POSITION);
     const Offset middle =
-        Offset(paintSize.Width() * CHECK_MARK_MIDDLE_X_POSITION, paintSize.Width() * CHECK_MARK_MIDDLE_Y_POSITION);
+        Offset(paintSize.Width() * CHECK_MARK_MIDDLE_X_POSITION, paintSize.Height() * CHECK_MARK_MIDDLE_Y_POSITION);
     const Offset end =
-        Offset(paintSize.Width() * CHECK_MARK_END_X_POSITION, paintSize.Width() * CHECK_MARK_END_Y_POSITION);
+        Offset(paintSize.Width() * CHECK_MARK_END_X_POSITION, paintSize.Height() * CHECK_MARK_END_Y_POSITION);
     const Offset middlePoint = Offset(paintSize.Width() / 2, paintSize.Height() / 2);
     float deltaX = middlePoint.GetX() - start.GetX();
     float deltaY = middlePoint.GetY() - start.GetY();
     float ratio = DEFAULT_MAX_CHECKBOX_SHAPE_SCALE - shapeScale_;
     shadowPen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
-    shadowPen.SetWidth(checkStroke_);
+    shadowPen.SetWidth(checkStroke_ + shadowWidth_.ConvertToPx() * 2);
     shadowPen.SetColor(ToRSColor(shadowColor_));
-    pen.SetWidth(borderWidth_);
+    pen.SetWidth(checkStroke_);
+    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     path.MoveTo(originX + start.GetX() + deltaX * ratio, originY + start.GetY() + deltaY * ratio);
     deltaX = middlePoint.GetX() - middle.GetX();
     deltaY = middle.GetY() - middlePoint.GetY();

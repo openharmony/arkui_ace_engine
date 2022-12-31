@@ -93,6 +93,7 @@
 #include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/base/factories/flutter_render_factory.h"
 #include "core/pipeline/base/render_context.h"
+#include "uicast_interface/uicast_context_impl.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -149,6 +150,9 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     renderFactory_ = AceType::MakeRefPtr<FlutterRenderFactory>();
     eventManager_ = AceType::MakeRefPtr<EventManager>();
     UpdateFontWeightScale();
+    {
+        UICastContextImpl::Init(AceType::WeakClaim(this));
+    }
     eventManager_->SetInstanceId(instanceId);
     textOverlayManager_ = AceType::MakeRefPtr<TextOverlayManager>(WeakClaim(this));
 }
@@ -165,6 +169,9 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     cardTransitionController_ = AceType::MakeRefPtr<CardTransitionController>(AceType::WeakClaim(this));
     renderFactory_ = AceType::MakeRefPtr<FlutterRenderFactory>();
     UpdateFontWeightScale();
+    {
+        UICastContextImpl::Init(AceType::WeakClaim(this));
+    }
     textOverlayManager_ = AceType::MakeRefPtr<TextOverlayManager>(WeakClaim(this));
 }
 
@@ -206,6 +213,10 @@ void PipelineContext::FlushBuild()
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
 
+    {
+        UICastContextImpl::OnFlushBuildStart();
+    }
+
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushBuild();
     }
@@ -245,6 +256,10 @@ void PipelineContext::FlushBuild()
 
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushBuild();
+    }
+
+    {
+        UICastContextImpl::OnFlushBuildFinish();
     }
 #if !defined(PREVIEW)
     LayoutInspector::SupportInspector();
@@ -1362,6 +1377,12 @@ bool PipelineContext::CallRouterBackToPopPage()
         return false;
     }
 
+    {
+        if (UICastContextImpl::CallRouterBackToPopPage()) {
+            return true;
+        }
+    }
+
     if (frontend->OnBackPressed()) {
         // if user accept
         LOGI("CallRouterBackToPopPage(): user consume the back key event");
@@ -1737,25 +1758,48 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN && !isTabKeyPressed_) {
         isTabKeyPressed_ = true;
     }
-    if (!eventManager_->DispatchTabIndexEvent(event, rootElement_, GetLastPage())) {
-        return eventManager_->DispatchKeyEvent(event, rootElement_);
+    auto lastPage = GetLastPage();
+    if (lastPage) {
+        if (!eventManager_->DispatchTabIndexEvent(event, rootElement_, lastPage)) {
+            return eventManager_->DispatchKeyEvent(event, rootElement_);
+        }
+    } else {
+        if (!eventManager_->DispatchTabIndexEvent(event, rootElement_, rootElement_)) {
+            return eventManager_->DispatchKeyEvent(event, rootElement_);
+        }
     }
     return true;
 }
 
 bool PipelineContext::RequestDefaultFocus()
 {
+    RefPtr<FocusNode> defaultFocusNode;
+    std::string mainNodeName;
     auto curPageElement = GetLastPage();
-    CHECK_NULL_RETURN_NOLOG(curPageElement, false);
-    if (curPageElement->IsFocused()) {
+    if (curPageElement) {
+        if (curPageElement->IsDefaultHasFocused()) {
+            return false;
+        }
+        curPageElement->SetIsDefaultHasFocused(true);
+        defaultFocusNode = curPageElement->GetChildDefaultFocusNode();
+        mainNodeName = std::string(AceType::TypeName(curPageElement));
+    } else {
+        if (rootElement_->IsDefaultHasFocused()) {
+            return false;
+        }
+        rootElement_->SetIsDefaultHasFocused(true);
+        defaultFocusNode = rootElement_->GetChildDefaultFocusNode();
+        mainNodeName = std::string(AceType::TypeName(rootElement_));
+    }
+    if (!defaultFocusNode) {
+        LOGD("RequestDefaultFocus: %{public}s do not has default focus node.", mainNodeName.c_str());
         return false;
     }
-    curPageElement->SetIsFocused(true);
-    auto defaultFocusNode = curPageElement->GetChildDefaultFocusNode();
-    CHECK_NULL_RETURN_NOLOG(defaultFocusNode, false);
     if (!defaultFocusNode->IsFocusableWholePath()) {
+        LOGD("RequestDefaultFocus: %{public}s 's default focus node is not focusable.", mainNodeName.c_str());
         return false;
     }
+    LOGD("Focus: request default focus node %{public}s", AceType::TypeName(defaultFocusNode));
     return defaultFocusNode->RequestFocusImmediately();
 }
 
@@ -1869,6 +1913,19 @@ void PipelineContext::CreateTouchEventOnZoom(const AxisEvent& event)
     }
 }
 
+MouseEvent ConvertAxisToMouse(const AxisEvent& event)
+{
+    MouseEvent result;
+    result.x = event.x;
+    result.y = event.y;
+    result.action = MouseAction::MOVE;
+    result.button = MouseButton::NONE_BUTTON;
+    result.time = event.time;
+    result.deviceId = event.deviceId;
+    result.sourceType = event.sourceType;
+    return result;
+}
+
 void PipelineContext::OnAxisEvent(const AxisEvent& event)
 {
     if (isKeyCtrlPressed_ && !NearZero(event.verticalAxis) &&
@@ -1892,6 +1949,9 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
         eventManager_->AxisTest(scaleEvent, rootElement_->GetRenderNode());
         eventManager_->DispatchAxisEvent(scaleEvent);
     }
+
+    auto mouseEvent = ConvertAxisToMouse(event);
+    OnMouseEvent(mouseEvent);
 }
 
 void PipelineContext::AddToHoverList(const RefPtr<RenderNode>& node)
@@ -1957,6 +2017,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
+    {
+        UICastContextImpl::CheckEvent();
+    }
 #if defined(ENABLE_NATIVE_VIEW)
     if (frameCount_ < 2) {
         frameCount_++;

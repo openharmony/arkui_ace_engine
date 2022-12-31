@@ -29,6 +29,7 @@
 #include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
+#include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
@@ -281,7 +282,6 @@ void RosenRenderContext::PaintBackground()
     auto image = DynamicCast<SkiaCanvasImage>(bgImage_);
     CHECK_NULL_VOID(rsNode_ && bgLoadingCtx_ && image);
     auto skImage = image->GetCanvasImage();
-    CHECK_NULL_VOID(skImage);
 
     auto rosenImage = std::make_shared<Rosen::RSImage>();
     rosenImage->SetImage(skImage);
@@ -442,7 +442,7 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
     // TODO: add rotation and center support
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto scale = rsNode_->GetStagingProperties().GetScale();
-    point = PointF((point.GetX() - translate[0]) / scale[0], (point.GetY() - translate[1]) / scale[1]);
+    point = PointF(point.GetX() / scale[0], point.GetY() / scale[1]);
 }
 
 RectF RosenRenderContext::GetPaintRectWithoutTransform()
@@ -765,9 +765,12 @@ RectF RosenRenderContext::AdjustPaintRect()
     auto anchorHeightReference = rect.Height();
     auto anchorX = ConvertToPx(anchor.GetX(), ScaleProperty::CreateScaleProperty(), anchorWidthReference);
     auto anchorY = ConvertToPx(anchor.GetY(), ScaleProperty::CreateScaleProperty(), anchorHeightReference);
+    Dimension parentPaddingLeft;
+    Dimension parentPaddingTop;
     // Position properties take precedence over offset locations.
     if (HasPosition()) {
-        auto position = GetPositionValue({});
+        GetPaddingOfFirstFrameNodeParent(parentPaddingLeft, parentPaddingTop);
+        auto position = GetPositionValue({}) + OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
         auto posX = ConvertToPx(position.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
         auto posY = ConvertToPx(position.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
         rect.SetLeft(posX.value_or(0) - anchorX.value_or(0));
@@ -775,16 +778,31 @@ RectF RosenRenderContext::AdjustPaintRect()
         return rect;
     }
     if (HasOffset()) {
-        auto offset = GetOffsetValue({});
+        GetPaddingOfFirstFrameNodeParent(parentPaddingLeft, parentPaddingTop);
+        auto offset = GetOffsetValue({}) + OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
         auto offsetX = ConvertToPx(offset.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
         auto offsetY = ConvertToPx(offset.GetY(), ScaleProperty::CreateScaleProperty(), heightPercentReference);
-        rect.SetLeft(rect.GetX() + offsetX.value_or(0));
-        rect.SetTop(rect.GetY() + offsetY.value_or(0));
+        rect.SetLeft(rect.GetX() + offsetX.value_or(0) - anchorX.value_or(0));
+        rect.SetTop(rect.GetY() + offsetY.value_or(0) - anchorY.value_or(0));
         return rect;
     }
-    rect.SetLeft(rect.GetX() + anchorX.value_or(0));
-    rect.SetTop(rect.GetY() + anchorY.value_or(0));
+    rect.SetLeft(rect.GetX() - anchorX.value_or(0));
+    rect.SetTop(rect.GetY() - anchorY.value_or(0));
     return rect;
+}
+
+void RosenRenderContext::GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto frameNodeParent = frameNode->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(frameNodeParent);
+    auto layoutProperty = frameNodeParent->GetLayoutProperty();
+    if (layoutProperty && layoutProperty->GetPaddingProperty()) {
+        parentPaddingLeft =
+            layoutProperty->GetPaddingProperty()->left.value_or(CalcLength(Dimension(0))).GetDimension();
+        parentPaddingTop = layoutProperty->GetPaddingProperty()->top.value_or(CalcLength(Dimension(0))).GetDimension();
+    }
 }
 
 void RosenRenderContext::OnPositionUpdate(const OffsetT<Dimension>& /*value*/)
@@ -900,13 +918,14 @@ void RosenRenderContext::PaintFocusState(
         paintRect.GetRect().Height(), focusPaddingVp.ToString().c_str(), paintColor.ColorToString().c_str(),
         paintWidth.ToString().c_str());
 
+    auto paintWidthPx = static_cast<float>(paintWidth.ConvertToPx());
     auto borderPaddingPx = static_cast<float>(focusPaddingVp.ConvertToPx());
-    auto focusPaintRectLeft = paintRect.GetRect().Left() - borderPaddingPx;
-    auto focusPaintRectTop = paintRect.GetRect().Top() - borderPaddingPx;
-    auto focusPaintRectWidth = paintRect.GetRect().Width() + 2 * borderPaddingPx;
-    auto focusPaintRectHeight = paintRect.GetRect().Height() + 2 * borderPaddingPx;
+    auto focusPaintRectLeft = paintRect.GetRect().Left() - borderPaddingPx - paintWidthPx / 2;
+    auto focusPaintRectTop = paintRect.GetRect().Top() - borderPaddingPx - paintWidthPx / 2;
+    auto focusPaintRectWidth = paintRect.GetRect().Width() + 2 * borderPaddingPx + paintWidthPx;
+    auto focusPaintRectHeight = paintRect.GetRect().Height() + 2 * borderPaddingPx + paintWidthPx;
 
-    EdgeF diffRadius = { borderPaddingPx, borderPaddingPx };
+    EdgeF diffRadius = { borderPaddingPx + paintWidthPx, borderPaddingPx + paintWidthPx };
     auto focusPaintCornerTopLeft = paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS) + diffRadius;
     auto focusPaintCornerTopRight = paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS) + diffRadius;
     auto focusPaintCornerBottomLeft = paintRect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS) + diffRadius;
@@ -1744,4 +1763,12 @@ void RosenRenderContext::PaintMouseSelectRect(const RectF& rect, const Color& fi
     mouseSelectModifier_->SetPaintTask(std::move(paintTask));
     rsNode_->AddModifier(mouseSelectModifier_);
 }
+
+void RosenRenderContext::DumpInfo() const
+{
+    if (rsNode_) {
+        DumpLog::GetInstance().AddDesc(rsNode_->DumpNode(0));
+    }
+}
+
 } // namespace OHOS::Ace::NG

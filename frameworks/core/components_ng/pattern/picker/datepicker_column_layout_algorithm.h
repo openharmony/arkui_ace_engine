@@ -31,7 +31,11 @@ public:
 
     void OnReset() override {}
 
+    void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
+    void MeasureText(LayoutWrapper* layoutWrapper, const SizeF& size);
+    void ChangeTextStyle(
+        uint32_t index, uint32_t showOptionCount, const SizeF& size, const RefPtr<LayoutWrapper>& childLayoutWrapper);
 
     double GetCurrentOffset() const
     {
@@ -42,6 +46,7 @@ public:
     {
         currentOffset_ = currentOffset;
     }
+
 private:
     double currentOffset_ = 0.0;
 

@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Dimension BUBBLE_TO_CIRCLE_CENTER_DISTANCE = 20.0_vp;
+constexpr float HALF = 0.5f;
 } // namespace
 
 std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
@@ -57,11 +57,15 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
                                           SliderModel::SliderMode::OUTSET
                                       ? theme->GetOutsetBlockHotSize()
                                       : theme->GetInsetBlockHotSize();
-    float blockHotDiameter = scaleValue * static_cast<float>(themeBlockHotSize.ConvertToPx());
-
-    float sliderWidth = trackThickness_;
-    sliderWidth = std::max(sliderWidth, blockHotDiameter);
-    sliderWidth = std::max(sliderWidth, blockDiameter_);
+    Dimension hotBlockShadowWidth = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
+                                            SliderModel::SliderMode::OUTSET
+                                        ? theme->GetOutsetHotBlockShadowWidth()
+                                        : theme->GetInsetHotBlockShadowWidth();
+    blockHotSize_ = scaleValue * static_cast<float>(themeBlockHotSize.ConvertToPx());
+    auto sliderWidth = static_cast<float>(theme->GetMeasureContentDefaultWidth().ConvertToPx());
+    sliderWidth = std::max(sliderWidth, trackThickness_);
+    sliderWidth = std::max(sliderWidth, blockHotSize_);
+    sliderWidth = std::max(sliderWidth, blockDiameter_ + static_cast<float>(hotBlockShadowWidth.ConvertToPx()) / HALF);
     Axis direction = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     sliderWidth = std::clamp(sliderWidth, 0.0f, direction == Axis::HORIZONTAL ? height : width);
     float sliderLength = direction == Axis::HORIZONTAL ? width : height;
@@ -77,16 +81,21 @@ void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto bubbleSize = bubbleWrapper->GetGeometryNode()->GetFrameSize();
     auto sliderLayoutProperty = DynamicCast<SliderLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(sliderLayoutProperty);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(theme);
 
     if (sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
         float offsetX = circleCenter_.GetX() - bubbleSize.Width() / 2;
-        float offsetY = circleCenter_.GetY() - static_cast<float>(BUBBLE_TO_CIRCLE_CENTER_DISTANCE.ConvertToPx()) -
+        float offsetY = circleCenter_.GetY() -
+                        static_cast<float>(theme->GetBubbleToCircleCenterDistance().ConvertToPx()) -
                         bubbleSize.Height();
         bubbleWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(offsetX, offsetY));
     } else {
         float offsetY = circleCenter_.GetY() - bubbleSize.Height() / 2;
-        float offsetX = circleCenter_.GetX() - static_cast<float>(BUBBLE_TO_CIRCLE_CENTER_DISTANCE.ConvertToPx()) -
-                        bubbleSize.Width();
+        float offsetX = circleCenter_.GetX() -
+                        static_cast<float>(theme->GetBubbleToCircleCenterDistance().ConvertToPx()) - bubbleSize.Width();
         bubbleWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(offsetX, offsetY));
     }
 }

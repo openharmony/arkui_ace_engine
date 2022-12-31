@@ -185,6 +185,7 @@ void TextFieldElement::OnFocus()
     }
     RequestKeyboard(true, false);
     FocusNode::OnFocus();
+    textField->SetCanPaintSelection(true);
     auto context = context_.Upgrade();
     if (context && context->GetIsTabKeyPressed() && renderNode_) {
         renderNode_->ChangeStatus(RenderStatus::FOCUS);
@@ -198,10 +199,7 @@ void TextFieldElement::OnBlur()
     }
     auto textField = DynamicCast<RenderTextField>(renderNode_);
     if (textField) {
-        textField->StopTwinkling();
-        textField->PopTextOverlay();
-        textField->OnEditChange(false);
-        textField->ResetOnFocusForTextFieldManager();
+        textField->HandleOnBlur();
     }
     CloseKeyboard();
     FocusNode::OnBlur();

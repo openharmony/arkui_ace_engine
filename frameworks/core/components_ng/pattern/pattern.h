@@ -154,6 +154,11 @@ public:
         return false;
     }
 
+    virtual bool UsResRegion()
+    {
+        return true;
+    }
+
     std::optional<SizeF> GetHostFrameSize() const
     {
         auto frameNode = frameNode_.Upgrade();

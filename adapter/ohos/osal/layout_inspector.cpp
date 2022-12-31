@@ -46,23 +46,10 @@ void LayoutInspector::SupportInspector()
     if (treeJsonStr.empty()) {
         return;
     }
-    OHOS::sptr<OHOS::Rosen::Window> window = OHOS::Rosen::Window::GetTopWindowWithId(container->GetWindowId());
-    CHECK_NULL_VOID_NOLOG(window);
-    auto pixelMap = window->Snapshot();
-    CHECK_NULL_VOID(pixelMap);
-    auto data = (*pixelMap).GetPixels();
-    auto height = (*pixelMap).GetHeight();
-    auto stride = (*pixelMap).GetRowBytes();
     auto message = JsonUtil::Create(true);
-    message->Put("type", "snapShot");
-    message->Put("width", (*pixelMap).GetWidth());
-    message->Put("height", height);
-    message->Put("posX", container->GetViewPosX());
-    message->Put("posY", container->GetViewPosY());
-    int32_t encodeLength = SkBase64::Encode(data, height * stride, nullptr);
-    SkString info(encodeLength);
-    SkBase64::Encode(data, height * stride, info.writable_str());
-    message->Put("pixelMapBase64", info.c_str());
+    GetSnapshotJson(ContainerScope::CurrentId(), message);
+    CHECK_NULL_VOID(message);
+
     auto sendTask = [treeJsonStr, jsonSnapshotStr = message->ToString(), container]() {
         if (container->IsUseStageModel()) {
             OHOS::AbilityRuntime::ConnectServerManager::Get().SendInspector(treeJsonStr, jsonSnapshotStr);
@@ -78,22 +65,9 @@ void LayoutInspector::SetStatus(bool layoutInspectorStatus)
     layoutInspectorStatus_ = layoutInspectorStatus;
 }
 
-void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t containerId)
-{
-    auto container = AceEngine::Get().GetContainer(containerId);
-    CHECK_NULL_VOID_NOLOG(container);
-    if (container->IsCurrentUseNewPipeline()) {
-        treeJsonStr = NG::Inspector::GetInspectorTree(true);
-    } else {
-        auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-        CHECK_NULL_VOID(pipelineContext);
-        treeJsonStr = V2::Inspector::GetInspectorTree(pipelineContext, true);
-    }
-}
-
 void LayoutInspector::SetCallback(int32_t instanceId)
 {
-    LOGI("start SetCallback");
+    LOGI("SetCallback start");
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID_NOLOG(container);
     if (container->IsUseStageModel()) {
@@ -107,21 +81,54 @@ void LayoutInspector::SetCallback(int32_t instanceId)
     }
 }
 
-void LayoutInspector::CreateLayoutInfo(int32_t instanceId)
+void LayoutInspector::CreateLayoutInfo(int32_t containerId)
 {
-    LOGI("start CreateLayoutInfo");
-    auto container = AceEngine::Get().GetContainer(instanceId);
+    LOGI("CreateLayoutInfo start");
+    auto container = AceEngine::Get().GetContainer(containerId);
     CHECK_NULL_VOID_NOLOG(container);
     std::string treeJsonStr;
-    GetInspectorTreeJsonStr(treeJsonStr, instanceId);
+    GetInspectorTreeJsonStr(treeJsonStr, containerId);
+    auto message = JsonUtil::Create(true);
+    GetSnapshotJson(containerId, message);
+    CHECK_NULL_VOID(message);
+
+    auto sendTask = [treeJsonStr, jsonSnapshotStr = message->ToString(), container]() {
+        if (container->IsUseStageModel()) {
+            OHOS::AbilityRuntime::ConnectServerManager::Get().SendInspector(treeJsonStr, jsonSnapshotStr);
+        } else {
+            OHOS::Ace::ConnectServerManager::Get().SendInspector(treeJsonStr, jsonSnapshotStr);
+        }
+    };
+    BackgroundTaskExecutor::GetInstance().PostTask(std::move(sendTask));
+}
+
+void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t containerId)
+{
+    auto container = AceEngine::Get().GetContainer(containerId);
+    CHECK_NULL_VOID_NOLOG(container);
+    if (container->IsUseNewPipeline()) {
+        treeJsonStr = NG::Inspector::GetInspector(true);
+    } else {
+        auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+        CHECK_NULL_VOID(pipelineContext);
+        treeJsonStr = V2::Inspector::GetInspectorTree(pipelineContext, true);
+    }
+}
+
+void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message)
+{
+    LOGI("GetSnapshotJson start");
+    auto container = AceEngine::Get().GetContainer(containerId);
+    CHECK_NULL_VOID_NOLOG(container);
+
     OHOS::sptr<OHOS::Rosen::Window> window = OHOS::Rosen::Window::GetTopWindowWithId(container->GetWindowId());
     CHECK_NULL_VOID_NOLOG(window);
     auto pixelMap = window->Snapshot();
     CHECK_NULL_VOID(pixelMap);
+
     auto data = (*pixelMap).GetPixels();
     auto height = (*pixelMap).GetHeight();
     auto stride = (*pixelMap).GetRowBytes();
-    auto message = JsonUtil::Create(true);
     message->Put("type", "snapShot");
     message->Put("width", (*pixelMap).GetWidth());
     message->Put("height", height);
@@ -131,14 +138,6 @@ void LayoutInspector::CreateLayoutInfo(int32_t instanceId)
     SkString info(encodeLength);
     SkBase64::Encode(data, height * stride, info.writable_str());
     message->Put("pixelMapBase64", info.c_str());
-    auto sendTask = [treeJsonStr, jsonSnapshotStr = message->ToString(), container]() {
-        if (container->IsUseStageModel()) {
-            OHOS::AbilityRuntime::ConnectServerManager::Get().SendInspector(treeJsonStr, jsonSnapshotStr);
-        } else {
-            OHOS::Ace::ConnectServerManager::Get().SendInspector(treeJsonStr, jsonSnapshotStr);
-        }
-    };
-    BackgroundTaskExecutor::GetInstance().PostTask(std::move(sendTask));
 }
 
 } // namespace OHOS::Ace

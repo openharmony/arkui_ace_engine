@@ -26,7 +26,7 @@ public:
     void Create(Alignment align) override;
     void SetStackFit(StackFit fit) override {}
     void SetOverflow(Overflow overflow) override {}
-    void SetAlignment(Alignment align) override {}
+    void SetAlignment(Alignment align) override;
     void SetHasHeight() override {}
     void SetHasWidth() override {}
 

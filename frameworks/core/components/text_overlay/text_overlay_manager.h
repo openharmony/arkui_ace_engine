@@ -213,6 +213,18 @@ public:
         textOverlayRect_.clear();
     }
 
+    // Coordinate offset is used to calculate the local location of the touch point in the event manager.
+    void SetCoordinateOffset(const Offset& coordinateOffset)
+    {
+        coordinateOffset_ = coordinateOffset;
+    }
+
+    // Gets the coordinate offset to calculate the local location of the touch point by manually.
+    const Offset& GetCoordinateOffset() const
+    {
+        return coordinateOffset_;
+    }
+
     const RefPtr<RenderNode> GetTargetNode() const;
     void PopTextOverlay();
     void PushTextOverlayToStack(const RefPtr<TextOverlayComponent>& textOverlay,
@@ -225,6 +237,7 @@ private:
     WeakPtr<StackElement> stackElement_;
     WeakPtr<PipelineContext> context_;
     std::vector<Rect> textOverlayRect_;
+    Offset coordinateOffset_;
 };
 
 } // namespace OHOS::Ace

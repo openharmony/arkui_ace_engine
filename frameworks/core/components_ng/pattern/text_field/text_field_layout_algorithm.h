@@ -90,7 +90,7 @@ public:
         const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle);
 
 private:
-    void CreateParagraph(const TextStyle& textStyle, std::string content);
+    void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText);
     bool CreateParagraphAndLayout(
         const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,

@@ -189,6 +189,7 @@ public:
 
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;
     void OnZIndexUpdate(int32_t value) override;
+    void DumpInfo() const override;
 
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
@@ -258,6 +259,7 @@ private:
     void PaintBorderImage();
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
+    void GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop);
 
     // helper function to check if paint rect is valid
     bool RectIsNull();

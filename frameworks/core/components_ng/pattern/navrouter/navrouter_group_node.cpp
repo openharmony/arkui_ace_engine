@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navrouter/navrouter_event_hub.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -216,6 +217,15 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
         const auto& childNode = *iter;
         auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(childNode);
         if (navDestinationNode && navDestinationNode != navDestination) {
+            auto destinationContent = navDestinationNode->GetContentNode();
+            if (destinationContent) {
+                auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+                CHECK_NULL_VOID(navDestinationPattern);
+                auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
+                CHECK_NULL_VOID(shallowBuilder);
+                shallowBuilder->MarkIsExecuteDeepRenderDone(false);
+                destinationContent->Clean();
+            }
             navDestination->SetPreNode(navDestinationNode);
             SetOnStateChangeFalse(navDestinationNode, parent);
             break;

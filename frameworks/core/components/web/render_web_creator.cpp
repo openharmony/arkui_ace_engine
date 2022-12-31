@@ -14,7 +14,9 @@
  */
 
 #include "flutter_render_web.h"
+#ifdef ENABLE_ROSEN_BACKEND
 #include "rosen_render_web.h"
+#endif
 
 namespace OHOS::Ace {
 RefPtr<RenderNode> RenderWeb::Create()

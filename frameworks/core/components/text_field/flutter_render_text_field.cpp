@@ -44,7 +44,6 @@ namespace {
 
 constexpr char16_t NEWLINE_CODE = u'\n';
 // pixel for how far the caret to the top of paint rect. Sometimes may leave some space for the floor.
-constexpr Dimension INLINE_STYLE_CORNER_RADIUS = 4.0_vp;
 constexpr Color INLINE_STYLE_SELECTED_COLOR = Color(0x1A0A59F7);
 constexpr double CARET_HEIGHT_OFFSET = 2.0;
 constexpr Dimension CURSOR_WIDTH = 1.5_vp;
@@ -264,8 +263,7 @@ void FlutterRenderTextField::PaintSelection(SkCanvas* canvas) const
     if (!IsSelectiveDevice()) {
         return;
     }
-
-    if (!paragraph_ || (canvas == nullptr)) {
+    if (!paragraph_ || (canvas == nullptr) || !canPaintSelection_) {
         return;
     }
 
@@ -313,9 +311,7 @@ void FlutterRenderTextField::DrawSelection(unsigned start, unsigned end, SkCanva
             rect = SkRect::MakeLTRB(selectionRect.Left(), selectionRect.Top(), selectionRect.Right(),
                 selectionRect.Bottom());
         }
-        SkRRect rRect = SkRRect::MakeRectXY(rect, NormalizeToPx(INLINE_STYLE_CORNER_RADIUS),
-            NormalizeToPx(INLINE_STYLE_CORNER_RADIUS));
-        canvas->drawRRect(rRect, paint);
+        canvas->drawRect(rect, paint);
     }
     canvas->restore();
 }

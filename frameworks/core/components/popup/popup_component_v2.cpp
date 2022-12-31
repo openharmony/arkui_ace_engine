@@ -30,8 +30,14 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr Dimension DEFAULT_FONT_SIZE = 14.0_fp;
-constexpr Dimension BUTTON_PADDING = 8.0_fp;
-constexpr Dimension BUTTON_ZERO_PADDING = 0.0_fp;
+constexpr Dimension BUTTON_ZERO_PADDING = 0.0_vp;
+constexpr Dimension BUTTON_ROW_PADDING = 4.0_vp;
+constexpr Dimension MESSAGE_HORIZONTAL_PADDING = 16.0_vp;
+constexpr Dimension MESSAGE_TOP_PADDING = 12.0_vp;
+constexpr Dimension MESSAGE_ZERO_PADDING = 0.0_vp;
+
+constexpr Color POPUP_BUTTON_HOVER_COLOR = Color(0x19FFFFFF);
+constexpr Color POPUP_BUTTON_CLICKED_COLOR = Color(0x26FFFFFF);
 
 } // namespace
 
@@ -79,8 +85,10 @@ const RefPtr<Component> PopupComponentV2::CreateChild()
 {
     RefPtr<ColumnComponent> child;
     std::list<RefPtr<Component>> columnChildren;
-    columnChildren.emplace_back(CreateMessage());
-    columnChildren.emplace_back(CreateButtons());
+    columnChildren.emplace_back(SetPadding(CreateMessage(),
+        Edge(MESSAGE_HORIZONTAL_PADDING, MESSAGE_TOP_PADDING, MESSAGE_HORIZONTAL_PADDING, MESSAGE_ZERO_PADDING)));
+    columnChildren.emplace_back(SetPadding(
+        CreateButtons(), Edge(BUTTON_ROW_PADDING, BUTTON_ZERO_PADDING, BUTTON_ROW_PADDING, BUTTON_ROW_PADDING)));
     child = AceType::MakeRefPtr<ColumnComponent>(FlexAlign::FLEX_START, FlexAlign::FLEX_END, columnChildren);
     child->SetMainAxisSize(MainAxisSize::MIN);
     child->SetCrossAxisSize(CrossAxisSize::MIN);
@@ -102,9 +110,9 @@ const RefPtr<Component> PopupComponentV2::CreateButtons()
 {
     std::list<RefPtr<Component>> rowChildren;
     rowChildren.emplace_back(SetPadding(CreateButton(primaryButtonProperties_),
-        Edge(BUTTON_PADDING, BUTTON_ZERO_PADDING, BUTTON_PADDING, BUTTON_ZERO_PADDING)));
+        Edge(BUTTON_ZERO_PADDING)));
     rowChildren.emplace_back(SetPadding(CreateButton(secondaryButtonProperties_),
-        Edge(BUTTON_PADDING, BUTTON_ZERO_PADDING, BUTTON_PADDING, BUTTON_ZERO_PADDING)));
+        Edge(BUTTON_ROW_PADDING, BUTTON_ZERO_PADDING, BUTTON_ZERO_PADDING, BUTTON_ZERO_PADDING)));
     auto row = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_END, FlexAlign::CENTER, rowChildren);
     row->SetMainAxisSize(MainAxisSize::MIN);
     auto box = AceType::MakeRefPtr<BoxComponent>();
@@ -136,12 +144,16 @@ const RefPtr<Component> PopupComponentV2::CreateButton(const ButtonProperties& b
     textStyle.SetTextColor(Color::WHITE);
     text->SetTextStyle(std::move(textStyle));
     std::list<RefPtr<Component>> buttonChildren;
-    buttonChildren.emplace_back(text);
+    buttonChildren.emplace_back(SetPadding(text, buttonTheme->GetPadding()));
     auto buttonComponent = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);
     buttonComponent->SetType(ButtonType::CAPSULE);
     buttonComponent->SetDeclarativeFlag(true);
     buttonComponent->SetHeight(buttonTheme->GetHeight());
     buttonComponent->SetBackgroundColor(Color::TRANSPARENT);
+    buttonComponent->SetIsPopupButton(true);
+    buttonComponent->SetClickedColor(POPUP_BUTTON_CLICKED_COLOR);
+    buttonComponent->SetHoverColor(POPUP_BUTTON_HOVER_COLOR);
+    buttonComponent->SetMouseAnimationType(HoverAnimationType::NONE);
     buttonComponent->SetClickFunction([action = buttonProperties.actionId, context = context_]() {
         auto func = AceAsyncEvent<void()>::Create(action, context);
         if (func) {
@@ -169,7 +181,7 @@ const RefPtr<BoxComponent> PopupComponentV2::CreateBox(const RefPtr<PopupTheme>&
     }
     decoration->SetBorderRadius(popupTheme->GetRadius());
 
-    if (!customComponent_) {
+    if (!customComponent_ && !primaryButtonProperties_.showButton && !secondaryButtonProperties_.showButton) {
         auto padding = popupTheme->GetPadding();
         box->SetPadding(padding);
         GetPopupParam()->SetPadding(padding);

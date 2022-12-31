@@ -666,6 +666,8 @@ public:
 
     virtual void FlushUITasks() = 0;
 
+    virtual void FlushPipelineImmediately() = 0;
+
     // for sync animation only
     AnimationOption GetSyncAnimationOption()
     {

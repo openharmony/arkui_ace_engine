@@ -143,6 +143,32 @@ void SwiperModelNG::SetOnChange(std::function<void(const BaseEventInfo* info)>&&
     });
 }
 
+void SwiperModelNG::SetOnAnimationStart(std::function<void(const BaseEventInfo* info)>&& onAnimationStart)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetAnimationStartEvent([event = std::move(onAnimationStart)](int32_t index) {
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
+void SwiperModelNG::SetOnAnimationEnd(std::function<void(const BaseEventInfo* info)>&& onAnimationEnd)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetAnimationEndEvent([event = std::move(onAnimationEnd)](int32_t index) {
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
 void SwiperModelNG::SetRemoteMessageEventId(RemoteCallback&& remoteCallback) {}
 
 void SwiperModelNG::SetIndicatorStyle(const SwiperParameters& swiperParameters)

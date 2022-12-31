@@ -22,6 +22,7 @@
 
 #include "base/json/json_util.h"
 #include "base/log/log.h"
+#include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
@@ -30,7 +31,9 @@
 #include "core/components/web/web_event.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+#ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_surface.h"
+#endif
 #include "core/event/ace_event_helper.h"
 #include "core/event/ace_events.h"
 #include "core/event/back_end_event_manager.h"
@@ -79,6 +82,8 @@ const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
 const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
 const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 } // namespace
+
+#define EGLCONFIG_VERSION 3
 
 void WebMessagePortOhos::SetPortHandle(std::string& handle)
 {
@@ -1330,25 +1335,37 @@ void WebDelegate::HideWebView()
 
 void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<NG::RenderSurface>& surface)
 {
+#ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(context);
     auto rosenRenderSurface = DynamicCast<NG::RosenRenderSurface>(surface);
     if (!rosenRenderSurface) {
         LOGI("source is nullptr, initialize with window");
-        InitOHOSWeb(context, sptr<Surface>(nullptr));
+        if (PrepareInitOHOSWeb(context)) {
+            if (!isCreateWebView_) {
+                InitWebViewWithWindow();
+                isCreateWebView_ = true;
+            }
+        } else {
+            LOGE("prepare init web failed");
+        }
         return;
     }
-    auto rosenSurface = rosenRenderSurface->GetSurface();
-    InitOHOSWeb(context, rosenSurface);
+    SetSurface(rosenRenderSurface->GetSurface());
+    InitOHOSWeb(context);
+#endif
 }
 
-void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface> surface)
+bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
 {
+    ACE_SCOPED_TRACE("PrepareInitOHOSWeb");
+    LOGI("PrepareInitOHOSWeb");
+
     state_ = State::CREATING;
     // obtain hap data path
     auto container = Container::Current();
     if (container == nullptr) {
         LOGE("Fail to get container");
-        return;
+        return false;
     }
     const std::string& bundlePath = container->GetBundlePath();
     const std::string& filesDataPath = container->GetFilesDataPath();
@@ -1356,7 +1373,7 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface
     std::size_t baseIndex = filesDataPath.find(baseDir);
     if (baseIndex == std::string::npos) {
         LOGE("Fail to parse hap data base path");
-        return;
+        return false;
     }
     std::string dataPath = filesDataPath.substr(0, baseIndex + baseDir.length());
     bundlePath_ = bundlePath;
@@ -1365,103 +1382,249 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface
     OHOS::NWeb::NWebHelper::Instance().SetBundlePath(bundlePath_);
     if (!OHOS::NWeb::NWebHelper::Instance().Init()) {
         LOGE("Fail to init NWebHelper");
-        return;
+        return false;
     }
     auto webCom = webComponent_.Upgrade();
     auto webPattern = webPattern_.Upgrade();
     auto eventHub = webPattern ? webPattern->GetWebEventHub() : nullptr;
     auto useNewPipe = Container::IsCurrentUseNewPipeline();
     if (useNewPipe && !webPattern && !eventHub) {
-        state_ = State::CREATEFAILED;
-        OnError(NTC_ERROR, "fail to call WebDelegate::Create due to webComponent is null");
-        return;
+        LOGE("fail to call WebDelegate::Create due to webComponent is null");
+        return false;
     }
     if (!useNewPipe && !webCom) {
-        state_ = State::CREATEFAILED;
-        OnError(NTC_ERROR, "fail to call WebDelegate::Create due to webComponent is null");
-        return;
+        LOGE("fail to call WebDelegate::Create due to webComponent is null");
+        return false;
     }
     context_ = context;
     auto pipelineContext = context.Upgrade();
     if (!pipelineContext) {
-        state_ = State::CREATEFAILED;
-        OnError(NTC_ERROR, "fail to call WebDelegate::Create due to context is null");
-        return;
+        LOGE("fail to call WebDelegate::Create due to context is null");
+        return false;
     }
     state_ = State::CREATED;
-
-    if (!isCreateWebView_) {
-        isCreateWebView_ = true;
-        if (surface != nullptr) {
-            InitWebViewWithSurface(surface);
-        } else {
-            InitWebViewWithWindow();
-        }
-    }
 
     SetWebCallBack();
     if (!pipelineContext->GetIsDeclarative()) {
         RegisterOHOSWebEventAndMethord();
-        return;
-    }
-    auto oldContext = DynamicCast<PipelineContext>(pipelineContext);
+    } else {
+        auto oldContext = DynamicCast<PipelineContext>(pipelineContext);
 
-    onPageFinishedV2_ = useNewPipe ? eventHub->GetOnPageFinishedEvent()
-                                   : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                         webCom->GetPageFinishedEventId(), oldContext);
-    onPageStartedV2_ = useNewPipe ? eventHub->GetOnPageStartedEvent()
-                                  : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                        webCom->GetPageStartedEventId(), oldContext);
-    onTitleReceiveV2_ = useNewPipe ? eventHub->GetOnTitleReceiveEvent()
-                                   : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                         webCom->GetTitleReceiveEventId(), oldContext);
-    onFullScreenExitV2_ = useNewPipe ? eventHub->GetOnFullScreenExitEvent()
-                                     : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                           webCom->GetOnFullScreenExitEventId(), oldContext);
-    onGeolocationHideV2_ = useNewPipe ? eventHub->GetOnGeolocationHideEvent()
-                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                            webCom->GetGeolocationHideEventId(), oldContext);
-    onGeolocationShowV2_ = useNewPipe ? eventHub->GetOnGeolocationShowEvent()
-                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                            webCom->GetGeolocationShowEventId(), oldContext);
-    onErrorReceiveV2_ = useNewPipe ? eventHub->GetOnErrorReceiveEvent()
-                                   : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                         webCom->GetPageErrorEventId(), oldContext);
-    onHttpErrorReceiveV2_ = useNewPipe ? eventHub->GetOnHttpErrorReceiveEvent()
-                                       : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                             webCom->GetHttpErrorEventId(), oldContext);
-    onRequestFocusV2_ = useNewPipe ? eventHub->GetOnRequestFocusEvent()
-                                   : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                         webCom->GetRequestFocusEventId(), oldContext);
-    onDownloadStartV2_ = useNewPipe ? eventHub->GetOnDownloadStartEvent()
+        onPageFinishedV2_ = useNewPipe ? eventHub->GetOnPageFinishedEvent()
                                     : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                          webCom->GetDownloadStartEventId(), oldContext);
-    onRenderExitedV2_ = useNewPipe ? eventHub->GetOnRenderExitedEvent()
-                                   : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                         webCom->GetRenderExitedId(), oldContext);
-    onRefreshAccessedHistoryV2_ = useNewPipe ? eventHub->GetOnRefreshAccessedHistoryEvent()
-                                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                                   webCom->GetRefreshAccessedHistoryId(), oldContext);
-    onResourceLoadV2_ = useNewPipe ? eventHub->GetOnResourceLoadEvent()
-                                   : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                         webCom->GetResourceLoadId(), oldContext);
-    onScaleChangeV2_ = useNewPipe ? eventHub->GetOnScaleChangeEvent()
-                                  : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                        webCom->GetPageFinishedEventId(), oldContext);
+        onPageStartedV2_ = useNewPipe ? eventHub->GetOnPageStartedEvent()
+                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                        webCom->GetPageStartedEventId(), oldContext);
+        onTitleReceiveV2_ = useNewPipe ? eventHub->GetOnTitleReceiveEvent()
+                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                        webCom->GetTitleReceiveEventId(), oldContext);
+        onFullScreenExitV2_ = useNewPipe ? eventHub->GetOnFullScreenExitEvent()
+                                        : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                            webCom->GetOnFullScreenExitEventId(), oldContext);
+        onGeolocationHideV2_ = useNewPipe ? eventHub->GetOnGeolocationHideEvent()
+                                        : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                            webCom->GetGeolocationHideEventId(), oldContext);
+        onGeolocationShowV2_ = useNewPipe ? eventHub->GetOnGeolocationShowEvent()
+                                        : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                            webCom->GetGeolocationShowEventId(), oldContext);
+        onErrorReceiveV2_ = useNewPipe ? eventHub->GetOnErrorReceiveEvent()
+                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                        webCom->GetPageErrorEventId(), oldContext);
+        onHttpErrorReceiveV2_ = useNewPipe ? eventHub->GetOnHttpErrorReceiveEvent()
+                                        : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                            webCom->GetHttpErrorEventId(), oldContext);
+        onRequestFocusV2_ = useNewPipe ? eventHub->GetOnRequestFocusEvent()
+                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                        webCom->GetRequestFocusEventId(), oldContext);
+        onDownloadStartV2_ = useNewPipe ? eventHub->GetOnDownloadStartEvent()
+                                        : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                            webCom->GetDownloadStartEventId(), oldContext);
+        onRenderExitedV2_ = useNewPipe ? eventHub->GetOnRenderExitedEvent()
+                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                        webCom->GetRenderExitedId(), oldContext);
+        onRefreshAccessedHistoryV2_ = useNewPipe ? eventHub->GetOnRefreshAccessedHistoryEvent()
+                                                : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                                    webCom->GetRefreshAccessedHistoryId(), oldContext);
+        onResourceLoadV2_ = useNewPipe ? eventHub->GetOnResourceLoadEvent()
+                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                        webCom->GetResourceLoadId(), oldContext);
+        onScaleChangeV2_ = useNewPipe ? eventHub->GetOnScaleChangeEvent()
+                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                         webCom->GetScaleChangeId(), oldContext);
-    onPermissionRequestV2_ = useNewPipe ? eventHub->GetOnPermissionRequestEvent()
-                                        : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                              webCom->GetPermissionRequestEventId(), oldContext);
-    onSearchResultReceiveV2_ = useNewPipe ? eventHub->GetOnSearchResultReceiveEvent()
-                                          : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+        onPermissionRequestV2_ = useNewPipe ? eventHub->GetOnPermissionRequestEvent()
+                                            : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                                webCom->GetPermissionRequestEventId(), oldContext);
+        onSearchResultReceiveV2_ = useNewPipe ? eventHub->GetOnSearchResultReceiveEvent()
+                                            : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                                 webCom->GetSearchResultReceiveEventId(), oldContext);
-    onScrollV2_ = useNewPipe ? eventHub->GetOnScrollEvent()
-                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                   webCom->GetScrollId(), oldContext);
-    onWindowExitV2_ = useNewPipe ? eventHub->GetOnWindowExitEvent()
-                                        : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                            webCom->GetWindowExitEventId(), oldContext);
+        onScrollV2_ = useNewPipe ? eventHub->GetOnScrollEvent()
+                                : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                    webCom->GetScrollId(), oldContext);
+        onWindowExitV2_ = useNewPipe ? eventHub->GetOnWindowExitEvent()
+                                            : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                                webCom->GetWindowExitEventId(), oldContext);
+    }
+    return true;
 }
 
+void WebSurfaceCallback::OnSurfaceCreated(const sptr<OHOS::Surface>& surface)
+{
+    LOGI("WebSurfaceCallback::OnSurfaceCreated");
+}
+
+void WebSurfaceCallback::OnSurfaceChanged(const sptr<OHOS::Surface>& surface, int32_t width, int32_t height)
+{
+    LOGD("WebSurfaceCallback::OnSurfaceChanged");
+    auto delegate = delegate_.Upgrade();
+    if (!delegate) {
+        LOGE("WebSurfaceCallback::OnSurfaceChanged get delegate fail");
+        return;
+    }
+    LOGI("OnSurfaceChanged w:%{public}d, h:%{public}d", width, height);
+    delegate->Resize((double)width, (double)height);
+}
+
+void WebSurfaceCallback::OnSurfaceDestroyed()
+{
+    LOGI("WebSurfaceCallback::OnSurfaceDestroyed");
+}
+
+EGLConfig WebDelegate::GLGetConfig(int version, EGLDisplay eglDisplay)
+{
+    int attribList[] = {
+        EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+        EGL_RED_SIZE, 8,
+        EGL_GREEN_SIZE, 8,
+        EGL_BLUE_SIZE, 8,
+        EGL_ALPHA_SIZE, 8,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+        EGL_NONE
+    };
+    EGLConfig configs = NULL;
+    int configsNum;
+    if (!eglChooseConfig(eglDisplay, attribList, &configs, 1, &configsNum)) {
+        LOGE("eglChooseConfig ERROR");
+        return NULL;
+    }
+    return configs;
+}
+
+void WebDelegate::GLContextInit(void* window)
+{
+    if (!window) {
+        LOGE("unable to get EGL window.");
+        return;
+    }
+    LOGD("GLContextInit window = %{public}p", window);
+    mEglWindow = static_cast<EGLNativeWindowType>(window);
+
+    // 1. create sharedcontext
+    mEGLDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    if (mEGLDisplay == EGL_NO_DISPLAY) {
+        LOGE("unable to get EGL display.");
+        return;
+    }
+
+    EGLint eglMajVers, eglMinVers;
+    if (!eglInitialize(mEGLDisplay, &eglMajVers, &eglMinVers)) {
+        mEGLDisplay = EGL_NO_DISPLAY;
+        LOGE("unable to initialize display");
+        return;
+    }
+
+    mEGLConfig = GLGetConfig(EGLCONFIG_VERSION, mEGLDisplay);
+    if (mEGLConfig == nullptr) {
+        LOGE("GLContextInit config ERROR");
+        return;
+    }
+
+    // 2. Create EGL Surface from Native Window
+    mEGLSurface = eglCreateWindowSurface(mEGLDisplay, mEGLConfig, mEglWindow, nullptr);
+    if (mEGLSurface == nullptr) {
+        LOGE("eglCreateContext eglSurface is null");
+        return;
+    }
+
+    // 3. Create EGLContext from
+    int attrib3_list[] = {
+        EGL_CONTEXT_CLIENT_VERSION, 2,
+        EGL_NONE
+    };
+
+    mEGLContext = eglCreateContext(mEGLDisplay, mEGLConfig, mSharedEGLContext, attrib3_list);
+
+    if (!eglMakeCurrent(mEGLDisplay, mEGLSurface, mEGLSurface, mEGLContext)) {
+        LOGE("eglMakeCurrent error = %{public}d", eglGetError());
+        return;
+    }
+
+    glViewport(offset_.GetX(), offset_.GetY(), drawSize_.Width(), drawSize_.Height());
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glFlush();
+    glFinish();
+    eglSwapBuffers(mEGLDisplay, mEGLSurface);
+
+    eglDestroySurface(mEGLDisplay, mEGLSurface);
+    eglDestroyContext(mEGLDisplay, mEGLContext);
+}
+
+bool WebDelegate::InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context)
+{
+    auto pipelineContext = context.Upgrade();
+    if (!pipelineContext) {
+        LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create due to context is null");
+        return false;
+    }
+    int32_t windowId = pipelineContext->GetWindowId();
+    surfaceDelegate_ = new OHOS::SurfaceDelegate(windowId);
+    if (surfaceDelegate_ == nullptr) {
+        LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create surfaceDelegate is null");
+        return false;
+    }
+    surfaceCallback_ = new WebSurfaceCallback(AceType::WeakClaim(this));
+    if (surfaceCallback_ == nullptr) {
+        LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create surfaceCallback is null");
+        return false;
+    }
+    surfaceDelegate_->AddSurfaceCallback(surfaceCallback_);
+    surfaceDelegate_->CreateSurface();
+    SetBoundsOrRezise(drawSize_, offset_);
+    auto aNativeSurface = surfaceDelegate_->GetNativeWindow();
+    if (aNativeSurface == nullptr) {
+        LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create get NativeWindow is null");
+        return false;
+    }
+    GLContextInit(aNativeSurface);
+    surfaceInfo_.window = aNativeSurface;
+    return true;
+}
+
+void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context)
+{
+    if (!PrepareInitOHOSWeb(context)) {
+        LOGE("prepare init web failed");
+        return;
+    }
+    if (!isCreateWebView_) {
+        isCreateWebView_ = true;
+        if (isEnhanceSurface_) {
+            if (!InitWebSurfaceDelegate(context)) {
+                LOGE("init web surfacedelegate failed");
+                return;
+            }
+            InitWebViewWithSurface();
+        } else {
+#ifdef ENABLE_ROSEN_BACKEND
+            InitWebViewWithSurface();
+#else
+            InitWebViewWithWindow();
+#endif
+        }
+    }
+}
 void WebDelegate::RegisterOHOSWebEventAndMethord()
 {
     auto reloadCallback = [weak = WeakClaim(this)]() {
@@ -1967,7 +2130,6 @@ void WebDelegate::UpdateSettting(bool useNewPipe)
     setting->PutMediaPlayGestureAccess(component->IsMediaPlayGestureAccess());
 }
 
-#if defined(ENABLE_ROSEN_BACKEND)
 std::string WebDelegate::GetCustomScheme()
 {
     std::string customScheme;
@@ -1988,16 +2150,16 @@ std::string WebDelegate::GetCustomScheme()
     return customScheme;
 }
 
-void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
+void WebDelegate::InitWebViewWithSurface()
 {
     LOGI("Create webview with surface");
     auto context = context_.Upgrade();
-    if (!context || !surface) {
+    if (!context) {
         return;
     }
+    LOGI("Init WebView With Surface");
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), surface]() {
-            wptr<Surface> surfaceWeak(surface);
+        [weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             OHOS::NWeb::NWebInitArgs initArgs;
@@ -2008,19 +2170,27 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             initArgs.web_engine_args_to_add.push_back(
                 std::string("--lang=").append(AceApplicationInfo::GetInstance().GetLanguage() +
                     "-" + AceApplicationInfo::GetInstance().GetCountryOrRegion()));
+            bool isEnhanceSurface = delegate->isEnhanceSurface_;
+            initArgs.is_enhance_surface = isEnhanceSurface;
             std::string customScheme = delegate->GetCustomScheme();
             if (!customScheme.empty()) {
                 LOGI("custome scheme %{public}s", customScheme.c_str());
                 initArgs.web_engine_args_to_add.push_back(
                     std::string("--ohos-custom-scheme=").append(customScheme));
             }
-            sptr<Surface> surface = surfaceWeak.promote();
-            CHECK_NULL_VOID(surface);
-            delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(surface, initArgs);
-            if (delegate->nweb_ == nullptr) {
-                LOGE("fail to get webview instance");
-                return;
-            }
+            if (isEnhanceSurface) {
+                LOGI("Create webview with isEnhanceSurface");
+                delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
+                    (void *)(&delegate->surfaceInfo_),
+                    initArgs,
+                    delegate->drawSize_.Width(), delegate->drawSize_.Height());
+            } else {
+                LOGI("init webview with surface");
+                wptr<Surface> surfaceWeak(delegate->surface_);
+                sptr<Surface> surface = surfaceWeak.promote();
+                CHECK_NULL_VOID(surface);
+                delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(surface, initArgs);
+             }
             delegate->cookieManager_ = OHOS::NWeb::NWebHelper::Instance().GetCookieManager();
             if (delegate->cookieManager_ == nullptr) {
                 LOGE("fail to get webview instance");
@@ -2039,10 +2209,11 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             delegate->UpdateSettting(Container::IsCurrentUseNewPipeline());
             delegate->RunSetWebIdCallback();
             delegate->RunJsProxyCallback();
+            auto releaseSurfaceListenerImpl = std::make_shared<ReleaseSurfaceImpl>(Container::CurrentId());
+            releaseSurfaceListenerImpl->SetSurfaceDelegate(delegate->GetSurfaceDelegateClient());
         },
         TaskExecutor::TaskType::PLATFORM);
 }
-#endif
 
 void WebDelegate::UpdateUserAgent(const std::string& userAgent)
 {
@@ -2687,53 +2858,90 @@ void WebDelegate::CallIsPagePathInvalid(const bool& isPageInvalid)
 
 void WebDelegate::OnPageStarted(const std::string& param)
 {
-    if (onPageStarted_) {
-        std::string paramStart = std::string(R"(")").append(param).append(std::string(R"(")"));
-        std::string urlParam = std::string(R"("pagestart",{"url":)").append(paramStart.append("},null"));
-        onPageStarted_(urlParam);
-    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), param]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onPageStarted = delegate->onPageStarted_;
+            if (onPageStarted) {
+                std::string paramStart = std::string(R"(")").append(param).append(std::string(R"(")"));
+                std::string urlParam = std::string(R"("pagestart",{"url":)").append(paramStart.append("},null"));
+                onPageStarted(urlParam);
+            }
 
-    // ace 2.0
-    if (onPageStartedV2_) {
-        onPageStartedV2_(std::make_shared<LoadWebPageStartEvent>(param));
-    }
+            // ace 2.0
+            auto onPageStartedV2 = delegate->onPageStartedV2_;
+            if (onPageStartedV2) {
+                onPageStartedV2(std::make_shared<LoadWebPageStartEvent>(param));
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void WebDelegate::OnPageFinished(const std::string& param)
 {
-    if (onPageFinished_) {
-        std::string paramFinish = std::string(R"(")").append(param).append(std::string(R"(")"));
-        std::string urlParam = std::string(R"("pagefinish",{"url":)").append(paramFinish.append("},null"));
-        onPageFinished_(urlParam);
-    }
-    // ace 2.0
-    if (onPageFinishedV2_) {
-        onPageFinishedV2_(std::make_shared<LoadWebPageFinishEvent>(param));
-    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), param]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onPageFinished = delegate->onPageFinished_;
+            if (onPageFinished) {
+                std::string paramFinish = std::string(R"(")").append(param).append(std::string(R"(")"));
+                std::string urlParam = std::string(R"("pagefinish",{"url":)").append(paramFinish.append("},null"));
+                onPageFinished(urlParam);
+            }
+            // ace 2.0
+            auto onPageFinishedV2 = delegate->onPageFinishedV2_;
+            if (onPageFinishedV2) {
+                onPageFinishedV2(std::make_shared<LoadWebPageFinishEvent>(param));
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void WebDelegate::OnProgressChanged(int param)
 {
-    auto eventParam = std::make_shared<LoadWebProgressChangeEvent>(param);
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto webPattern = webPattern_.Upgrade();
-        CHECK_NULL_VOID(webPattern);
-        auto webEventHub = webPattern->GetWebEventHub();
-        CHECK_NULL_VOID(webEventHub);
-        webEventHub->FireOnProgressChangeEvent(eventParam);
-        return;
-    }
-    auto webCom = webComponent_.Upgrade();
-    CHECK_NULL_VOID(webCom);
-    webCom->OnProgressChange(eventParam.get());
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), param]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto eventParam = std::make_shared<LoadWebProgressChangeEvent>(param);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                webEventHub->FireOnProgressChangeEvent(eventParam);
+                return;
+            }
+            auto webCom = delegate->webComponent_.Upgrade();
+            CHECK_NULL_VOID(webCom);
+            webCom->OnProgressChange(eventParam.get());
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void WebDelegate::OnReceivedTitle(const std::string& param)
 {
-    // ace 2.0
-    if (onTitleReceiveV2_) {
-        onTitleReceiveV2_(std::make_shared<LoadWebTitleReceiveEvent>(param));
-    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), param]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            // ace 2.0
+            auto onTitleReceiveV2 = delegate->onTitleReceiveV2_;
+            if (onTitleReceiveV2) {
+                onTitleReceiveV2(std::make_shared<LoadWebTitleReceiveEvent>(param));
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void WebDelegate::ExitFullScreen()
@@ -2747,204 +2955,329 @@ void WebDelegate::ExitFullScreen()
 
 void WebDelegate::OnFullScreenExit()
 {
-    auto param = std::make_shared<FullScreenExitEvent>(false);
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto webPattern = webPattern_.Upgrade();
-        CHECK_NULL_VOID(webPattern);
-        auto webEventHub = webPattern->GetWebEventHub();
-        CHECK_NULL_VOID(webEventHub);
-        auto propOnFullScreenExitEvent = webEventHub->GetOnFullScreenExitEvent();
-        CHECK_NULL_VOID(propOnFullScreenExitEvent);
-        propOnFullScreenExitEvent(param);
-        return;
-    }
-    // ace 2.0
-    if (onFullScreenExitV2_) {
-        onFullScreenExitV2_(param);
-    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto param = std::make_shared<FullScreenExitEvent>(false);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnFullScreenExitEvent = webEventHub->GetOnFullScreenExitEvent();
+                CHECK_NULL_VOID(propOnFullScreenExitEvent);
+                propOnFullScreenExitEvent(param);
+                return;
+            }
+            // ace 2.0
+            auto onFullScreenExitV2 = delegate->onFullScreenExitV2_;
+            if (onFullScreenExitV2) {
+                onFullScreenExitV2(param);
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void WebDelegate::OnGeolocationPermissionsHidePrompt()
 {
-    // ace 2.0
-    if (onGeolocationHideV2_) {
-        onGeolocationHideV2_(std::make_shared<LoadWebGeolocationHideEvent>(""));
-    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            // ace 2.0
+            auto onGeolocationHideV2 = delegate->onGeolocationHideV2_;
+            if (onGeolocationHideV2) {
+                onGeolocationHideV2(std::make_shared<LoadWebGeolocationHideEvent>(""));
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void WebDelegate::OnGeolocationPermissionsShowPrompt(
     const std::string& origin, OHOS::NWeb::NWebGeolocationCallbackInterface* callback)
 {
-    // ace 2.0
-    if (onGeolocationShowV2_) {
-        auto geolocation = AceType::MakeRefPtr<WebGeolocationOhos>(callback);
-        onGeolocationShowV2_(std::make_shared<LoadWebGeolocationShowEvent>(origin, geolocation));
-    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), origin, callback]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            // ace 2.0
+            auto onGeolocationShowV2 = delegate->onGeolocationShowV2_;
+            if (onGeolocationShowV2) {
+                auto geolocation = AceType::MakeRefPtr<WebGeolocationOhos>(callback);
+                onGeolocationShowV2(std::make_shared<LoadWebGeolocationShowEvent>(origin, geolocation));
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void WebDelegate::OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request)
 {
-    // ace 2.0
-    if (onPermissionRequestV2_) {
-        onPermissionRequestV2_(
-            std::make_shared<WebPermissionRequestEvent>(AceType::MakeRefPtr<WebPermissionRequestOhos>(request)));
-    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), request]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            // ace 2.0
+            auto onPermissionRequestV2 = delegate->onPermissionRequestV2_;
+            if (onPermissionRequestV2) {
+                onPermissionRequestV2(
+                    std::make_shared<WebPermissionRequestEvent>(
+                    AceType::MakeRefPtr<WebPermissionRequestOhos>(request)));
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 bool WebDelegate::OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message)
 {
-    auto param = std::make_shared<LoadWebConsoleLogEvent>(AceType::MakeRefPtr<ConsoleLogOhos>(message));
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto webPattern = webPattern_.Upgrade();
-        CHECK_NULL_RETURN(webPattern, false);
-        auto webEventHub = webPattern->GetWebEventHub();
-        CHECK_NULL_RETURN(webEventHub, false);
-        auto propOnConsoleEvent = webEventHub->GetOnConsoleEvent();
-        CHECK_NULL_RETURN(propOnConsoleEvent, false);
-        return propOnConsoleEvent(param);
-    }
-    auto webCom = webComponent_.Upgrade();
-    CHECK_NULL_RETURN(webCom, false);
-    return webCom->OnConsole(param.get());
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), message, &result]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        auto param = std::make_shared<LoadWebConsoleLogEvent>(AceType::MakeRefPtr<ConsoleLogOhos>(message));
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            auto propOnConsoleEvent = webEventHub->GetOnConsoleEvent();
+            CHECK_NULL_VOID(propOnConsoleEvent);
+            result = propOnConsoleEvent(param);
+        }
+        auto webCom = delegate->webComponent_.Upgrade();
+        CHECK_NULL_VOID(webCom);
+        result = webCom->OnConsole(param.get());
+        return;
+    });
+    return result;
 }
+
 
 bool WebDelegate::OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, DialogEventType dialogEventType)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto webPattern = webPattern_.Upgrade();
-        CHECK_NULL_RETURN(webPattern, false);
-        auto webEventHub = webPattern->GetWebEventHub();
-        CHECK_NULL_RETURN(webEventHub, false);
-        return webEventHub->FireOnCommonDialogEvent(info, dialogEventType);
-    }
-    auto webCom = webComponent_.Upgrade();
-    CHECK_NULL_RETURN(webCom, false);
-    return webCom->OnCommonDialog(info.get(), dialogEventType);
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, dialogEventType, &result]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            result = webEventHub->FireOnCommonDialogEvent(info, dialogEventType);
+            return;
+        }
+        auto webCom = delegate->webComponent_.Upgrade();
+        CHECK_NULL_VOID(webCom);
+        result = webCom->OnCommonDialog(info.get(), dialogEventType);
+        return;
+    });
+    return result;
 }
 
 void WebDelegate::OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler)
 {
-    auto param = std::make_shared<FullScreenEnterEvent>(
-        AceType::MakeRefPtr<FullScreenExitHandlerOhos>(handler, WeakClaim(this)));
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto webPattern = webPattern_.Upgrade();
-        CHECK_NULL_VOID(webPattern);
-        webPattern->RequestFullScreen();
-        auto webEventHub = webPattern->GetWebEventHub();
-        CHECK_NULL_VOID(webEventHub);
-        auto propOnFullScreenEnterEvent = webEventHub->GetOnFullScreenEnterEvent();
-        CHECK_NULL_VOID(propOnFullScreenEnterEvent);
-        propOnFullScreenEnterEvent(param);
-        return;
-    }
-    auto webCom = webComponent_.Upgrade();
-    CHECK_NULL_VOID(webCom);
-    webCom->OnFullScreenEnter(param.get());
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), handler]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto param = std::make_shared<FullScreenEnterEvent>(
+                AceType::MakeRefPtr<FullScreenExitHandlerOhos>(handler, weak));
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                webPattern->RequestFullScreen();
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnFullScreenEnterEvent = webEventHub->GetOnFullScreenEnterEvent();
+                CHECK_NULL_VOID(propOnFullScreenEnterEvent);
+                propOnFullScreenEnterEvent(param);
+                return;
+            }
+            auto webCom = delegate->webComponent_.Upgrade();
+            CHECK_NULL_VOID(webCom);
+            webCom->OnFullScreenEnter(param.get());
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 bool WebDelegate::OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto webPattern = webPattern_.Upgrade();
-        CHECK_NULL_RETURN(webPattern, false);
-        auto webEventHub = webPattern->GetWebEventHub();
-        CHECK_NULL_RETURN(webEventHub, false);
-        auto propOnHttpAuthRequestEvent = webEventHub->GetOnHttpAuthRequestEvent();
-        CHECK_NULL_RETURN(propOnHttpAuthRequestEvent, false);
-        return propOnHttpAuthRequestEvent(info);
-    }
-    auto webCom = webComponent_.Upgrade();
-    CHECK_NULL_RETURN(webCom, false);
-    return webCom->OnHttpAuthRequest(info.get());
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, &result]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            auto propOnHttpAuthRequestEvent = webEventHub->GetOnHttpAuthRequestEvent();
+            CHECK_NULL_VOID(propOnHttpAuthRequestEvent);
+            result = propOnHttpAuthRequestEvent(info);
+            return;
+        }
+        auto webCom = delegate->webComponent_.Upgrade();
+        CHECK_NULL_VOID(webCom);
+        result = webCom->OnHttpAuthRequest(info.get());
+    });
+    return result;
 }
 
 bool WebDelegate::OnSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto webPattern = webPattern_.Upgrade();
-        CHECK_NULL_RETURN(webPattern, false);
-        auto webEventHub = webPattern->GetWebEventHub();
-        CHECK_NULL_RETURN(webEventHub, false);
-        auto propOnSslErrorEvent = webEventHub->GetOnSslErrorRequestEvent();
-        CHECK_NULL_RETURN(propOnSslErrorEvent, false);
-        return propOnSslErrorEvent(info);
-    }
-    auto webCom = webComponent_.Upgrade();
-    CHECK_NULL_RETURN(webCom, false);
-    return webCom->OnSslErrorRequest(info.get());
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, &result]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            auto propOnSslErrorEvent = webEventHub->GetOnSslErrorRequestEvent();
+            CHECK_NULL_VOID(propOnSslErrorEvent);
+            result = propOnSslErrorEvent(info);
+            return;
+        }
+        auto webCom = delegate->webComponent_.Upgrade();
+        CHECK_NULL_VOID(webCom);
+        result = webCom->OnSslErrorRequest(info.get());
+    });
+    return result;
 }
 
 bool WebDelegate::OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto webPattern = webPattern_.Upgrade();
-        CHECK_NULL_RETURN(webPattern, false);
-        auto webEventHub = webPattern->GetWebEventHub();
-        CHECK_NULL_RETURN(webEventHub, false);
-        auto propOnSslSelectCertRequestEvent = webEventHub->GetOnSslSelectCertRequestEvent();
-        CHECK_NULL_RETURN(propOnSslSelectCertRequestEvent, false);
-        return propOnSslSelectCertRequestEvent(info);
-    }
-    auto webCom = webComponent_.Upgrade();
-    if (!webCom) {
-        return false;
-    }
-    return webCom->OnSslSelectCertRequest(info.get());
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, &result]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            auto propOnSslSelectCertRequestEvent = webEventHub->GetOnSslSelectCertRequestEvent();
+            CHECK_NULL_VOID(propOnSslSelectCertRequestEvent);
+            result = propOnSslSelectCertRequestEvent(info);
+            return;
+        }
+        auto webCom = delegate->webComponent_.Upgrade();
+        CHECK_NULL_VOID(webCom);
+        result = webCom->OnSslSelectCertRequest(info.get());
+    });
+    return result;
 }
 
 void WebDelegate::OnDownloadStart(const std::string& url, const std::string& userAgent,
     const std::string& contentDisposition, const std::string& mimetype, long contentLength)
 {
-    if (onDownloadStartV2_) {
-        onDownloadStartV2_(
-            std::make_shared<DownloadStartEvent>(url, userAgent, contentDisposition, mimetype, contentLength));
-    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), url, userAgent, contentDisposition,
+            mimetype, contentLength]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onDownloadStartV2 = delegate->onDownloadStartV2_;
+            if (onDownloadStartV2) {
+                onDownloadStartV2(
+                    std::make_shared<DownloadStartEvent>(url, userAgent, contentDisposition, mimetype, contentLength));
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error)
 {
-    if (onPageError_) {
-        std::string url = request->Url();
-        int errorCode = error->ErrorCode();
-        std::string description = error->ErrorInfo();
-        std::string paramUrl = std::string(R"(")").append(url).append(std::string(R"(")")).append(",");
-        std::string paramErrorCode = std::string(R"(")")
-                                         .append(NTC_PARAM_ERROR_CODE)
-                                         .append(std::string(R"(")"))
-                                         .append(":")
-                                         .append(std::to_string(errorCode))
-                                         .append(",");
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), request, error]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onPageError = delegate->onPageError_;
+            if (onPageError) {
+                std::string url = request->Url();
+                int errorCode = error->ErrorCode();
+                std::string description = error->ErrorInfo();
+                std::string paramUrl = std::string(R"(")").append(url).append(std::string(R"(")")).append(",");
+                std::string paramErrorCode = std::string(R"(")")
+                                                .append(NTC_PARAM_ERROR_CODE)
+                                                .append(std::string(R"(")"))
+                                                .append(":")
+                                                .append(std::to_string(errorCode))
+                                                .append(",");
 
-        std::string paramDesc = std::string(R"(")")
-                                    .append(NTC_PARAM_DESCRIPTION)
-                                    .append(std::string(R"(")"))
-                                    .append(":")
-                                    .append(std::string(R"(")").append(description).append(std::string(R"(")")));
-        std::string errorParam =
-            std::string(R"("error",{"url":)").append((paramUrl + paramErrorCode + paramDesc).append("},null"));
-        onPageError_(errorParam);
-    }
-
-    if (onErrorReceiveV2_) {
-        onErrorReceiveV2_(std::make_shared<ReceivedErrorEvent>(
-            AceType::MakeRefPtr<WebRequest>(request->RequestHeaders(), request->Method(), request->Url(),
-                request->FromGesture(), request->IsAboutMainFrame(), request->IsRequestRedirect()),
-            AceType::MakeRefPtr<WebError>(error->ErrorInfo(), error->ErrorCode())));
-    }
+                std::string paramDesc = std::string(R"(")")
+                                            .append(NTC_PARAM_DESCRIPTION)
+                                            .append(std::string(R"(")"))
+                                            .append(":")
+                                            .append(std::string(R"(")")
+                                            .append(description)
+                                            .append(std::string(R"(")")));
+                std::string errorParam =
+                    std::string(R"("error",{"url":)").append((paramUrl + paramErrorCode + paramDesc).append("},null"));
+                onPageError(errorParam);
+            }
+            auto onErrorReceiveV2 = delegate->onErrorReceiveV2_;
+            if (onErrorReceiveV2) {
+                onErrorReceiveV2(std::make_shared<ReceivedErrorEvent>(
+                    AceType::MakeRefPtr<WebRequest>(request->RequestHeaders(), request->Method(), request->Url(),
+                        request->FromGesture(), request->IsAboutMainFrame(), request->IsRequestRedirect()),
+                    AceType::MakeRefPtr<WebError>(error->ErrorInfo(), error->ErrorCode())));
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void WebDelegate::OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response)
 {
-    if (onHttpErrorReceiveV2_) {
-        onHttpErrorReceiveV2_(std::make_shared<ReceivedHttpErrorEvent>(
-            AceType::MakeRefPtr<WebRequest>(request->RequestHeaders(), request->Method(), request->Url(),
-                request->FromGesture(), request->IsAboutMainFrame(), request->IsRequestRedirect()),
-            AceType::MakeRefPtr<WebResponse>(response->ResponseHeaders(), response->ResponseData(),
-                response->ResponseEncoding(), response->ResponseMimeType(), response->ResponseStatus(),
-                response->ResponseStatusCode())));
-    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), request, response]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onHttpErrorReceiveV2 = delegate->onHttpErrorReceiveV2_;
+            if (onHttpErrorReceiveV2) {
+                onHttpErrorReceiveV2(std::make_shared<ReceivedHttpErrorEvent>(
+                    AceType::MakeRefPtr<WebRequest>(request->RequestHeaders(), request->Method(), request->Url(),
+                        request->FromGesture(), request->IsAboutMainFrame(), request->IsRequestRedirect()),
+                    AceType::MakeRefPtr<WebResponse>(response->ResponseHeaders(), response->ResponseData(),
+                        response->ResponseEncoding(), response->ResponseMimeType(), response->ResponseStatus(),
+                        response->ResponseStatusCode())));
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 bool WebDelegate::IsEmptyOnInterceptRequest()
@@ -2963,18 +3296,27 @@ bool WebDelegate::IsEmptyOnInterceptRequest()
 
 RefPtr<WebResponse> WebDelegate::OnInterceptRequest(const std::shared_ptr<BaseEventInfo>& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto webPattern = webPattern_.Upgrade();
-        CHECK_NULL_RETURN(webPattern, nullptr);
-        auto webEventHub = webPattern->GetWebEventHub();
-        CHECK_NULL_RETURN(webEventHub, nullptr);
-        auto propOnInterceptRequestEvent = webEventHub->GetOnInterceptRequestEvent();
-        CHECK_NULL_RETURN(propOnInterceptRequestEvent, nullptr);
-        return propOnInterceptRequestEvent(info);
-    }
-    auto webCom = webComponent_.Upgrade();
-    CHECK_NULL_RETURN(webCom, nullptr);
-    return webCom->OnInterceptRequest(info.get());
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, nullptr);
+    RefPtr<WebResponse> result = nullptr;
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, &result]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            auto propOnInterceptRequestEvent = webEventHub->GetOnInterceptRequestEvent();
+            CHECK_NULL_VOID(propOnInterceptRequestEvent);
+            result = propOnInterceptRequestEvent(info);
+        }
+        auto webCom = delegate->webComponent_.Upgrade();
+        CHECK_NULL_VOID(webCom);
+        result = webCom->OnInterceptRequest(info.get());
+    });
+    return result;
 }
 
 void WebDelegate::OnRequestFocus()
@@ -2986,16 +3328,34 @@ void WebDelegate::OnRequestFocus()
 
 void WebDelegate::OnRenderExited(OHOS::NWeb::RenderExitReason reason)
 {
-    if (onRenderExitedV2_) {
-        onRenderExitedV2_(std::make_shared<RenderExitedEvent>(static_cast<int32_t>(reason)));
-    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), reason]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onRenderExitedV2 = delegate->onRenderExitedV2_;
+            if (onRenderExitedV2) {
+                onRenderExitedV2(std::make_shared<RenderExitedEvent>(static_cast<int32_t>(reason)));
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void WebDelegate::OnRefreshAccessedHistory(const std::string& url, bool isRefreshed)
 {
-    if (onRefreshAccessedHistoryV2_) {
-        onRefreshAccessedHistoryV2_(std::make_shared<RefreshAccessedHistoryEvent>(url, isRefreshed));
-    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), url, isRefreshed]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onRefreshAccessedHistoryV2 = delegate->onRefreshAccessedHistoryV2_;
+            if (onRefreshAccessedHistoryV2) {
+                onRefreshAccessedHistoryV2(std::make_shared<RefreshAccessedHistoryEvent>(url, isRefreshed));
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void WebDelegate::OnPageError(const std::string& param)
@@ -3044,80 +3404,145 @@ void WebDelegate::OnRouterPush(const std::string& param)
 
 bool WebDelegate::OnFileSelectorShow(const std::shared_ptr<BaseEventInfo>& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto webPattern = webPattern_.Upgrade();
-        CHECK_NULL_RETURN(webPattern, false);
-        auto webEventHub = webPattern->GetWebEventHub();
-        CHECK_NULL_RETURN(webEventHub, false);
-        auto propOnFileSelectorShowEvent = webEventHub->GetOnFileSelectorShowEvent();
-        CHECK_NULL_RETURN(propOnFileSelectorShowEvent, false);
-        return propOnFileSelectorShowEvent(info);
-    }
-    auto webCom = webComponent_.Upgrade();
-    CHECK_NULL_RETURN(webCom, false);
-    return webCom->OnFileSelectorShow(info.get());
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, &result]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            auto propOnFileSelectorShowEvent = webEventHub->GetOnFileSelectorShowEvent();
+            CHECK_NULL_VOID(propOnFileSelectorShowEvent);
+            result = propOnFileSelectorShowEvent(info);
+        }
+        auto webCom = delegate->webComponent_.Upgrade();
+        CHECK_NULL_VOID(webCom);
+        result = webCom->OnFileSelectorShow(info.get());
+    });
+    return result;
 }
 
 bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto webPattern = webPattern_.Upgrade();
-        CHECK_NULL_RETURN(webPattern, false);
-        auto webEventHub = webPattern->GetWebEventHub();
-        CHECK_NULL_RETURN(webEventHub, false);
-        auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
-        CHECK_NULL_RETURN(propOnContextMenuShowEvent, false);
-        return propOnContextMenuShowEvent(info);
-    }
-    auto webCom = webComponent_.Upgrade();
-    CHECK_NULL_RETURN(webCom, false);
-    return webCom->OnContextMenuShow(info.get());
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, &result]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
+            CHECK_NULL_VOID(propOnContextMenuShowEvent);
+            result = propOnContextMenuShowEvent(info);
+            return;
+        }
+        auto webCom = delegate->webComponent_.Upgrade();
+        CHECK_NULL_VOID(webCom);
+        result = webCom->OnContextMenuShow(info.get());
+    });
+    return result;
 }
 
 bool WebDelegate::OnHandleInterceptUrlLoading(const std::string& data)
 {
-    auto param = std::make_shared<UrlLoadInterceptEvent>(data);
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto webPattern = webPattern_.Upgrade();
-        CHECK_NULL_RETURN(webPattern, false);
-        auto webEventHub = webPattern->GetWebEventHub();
-        CHECK_NULL_RETURN(webEventHub, false);
-        auto propOnUrlLoadInterceptEvent = webEventHub->GetOnUrlLoadInterceptEvent();
-        CHECK_NULL_RETURN(propOnUrlLoadInterceptEvent, false);
-        return propOnUrlLoadInterceptEvent(param);
-    }
-    auto webCom = webComponent_.Upgrade();
-    CHECK_NULL_RETURN(webCom, false);
-    return webCom->OnUrlLoadIntercept(param.get());
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), data, &result]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        auto param = std::make_shared<UrlLoadInterceptEvent>(data);
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            auto propOnUrlLoadInterceptEvent = webEventHub->GetOnUrlLoadInterceptEvent();
+            CHECK_NULL_VOID(propOnUrlLoadInterceptEvent);
+            result = propOnUrlLoadInterceptEvent(param);
+        }
+        auto webCom = delegate->webComponent_.Upgrade();
+        CHECK_NULL_VOID(webCom);
+        result = webCom->OnUrlLoadIntercept(param.get());
+    });
+    return result;
 }
 
 void WebDelegate::OnResourceLoad(const std::string& url)
 {
-    if (onResourceLoadV2_) {
-        onResourceLoadV2_(std::make_shared<ResourceLoadEvent>(url));
-    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), url]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onResourceLoadV2 = delegate->onResourceLoadV2_;
+            if (onResourceLoadV2) {
+                onResourceLoadV2(std::make_shared<ResourceLoadEvent>(url));
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void WebDelegate::OnScaleChange(float oldScaleFactor, float newScaleFactor)
 {
-    if (onScaleChangeV2_) {
-        onScaleChangeV2_(std::make_shared<ScaleChangeEvent>(oldScaleFactor, newScaleFactor));
-    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), oldScaleFactor, newScaleFactor]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onScaleChangeV2 = delegate->onScaleChangeV2_;
+            if (onScaleChangeV2) {
+                onScaleChangeV2(std::make_shared<ScaleChangeEvent>(oldScaleFactor, newScaleFactor));
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void WebDelegate::OnScroll(double xOffset, double yOffset)
 {
-    if (onScrollV2_) {
-        onScrollV2_(std::make_shared<WebOnScrollEvent>(xOffset, yOffset));
-    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), xOffset, yOffset]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onScrollV2 = delegate->onScrollV2_;
+            if (onScrollV2) {
+                onScrollV2(std::make_shared<WebOnScrollEvent>(xOffset, yOffset));
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void WebDelegate::OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting)
 {
-    if (onSearchResultReceiveV2_) {
-        onSearchResultReceiveV2_(
-            std::make_shared<SearchResultReceiveEvent>(activeMatchOrdinal, numberOfMatches, isDoneCounting));
-    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), activeMatchOrdinal,
+            numberOfMatches, isDoneCounting]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onSearchResultReceiveV2 = delegate->onSearchResultReceiveV2_;
+            if (onSearchResultReceiveV2) {
+                onSearchResultReceiveV2(
+                    std::make_shared<SearchResultReceiveEvent>(activeMatchOrdinal, numberOfMatches, isDoneCounting));
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 bool WebDelegate::OnDragAndDropData(const void* data, size_t len, int width, int height)
@@ -3135,28 +3560,45 @@ bool WebDelegate::OnDragAndDropData(const void* data, size_t len, int width, int
 void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
     const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler)
 {
-    auto param = std::make_shared<WebWindowNewEvent>(targetUrl, isAlert, isUserTrigger,
-        AceType::MakeRefPtr<WebWindowNewHandlerOhos>(handler));
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto webPattern = webPattern_.Upgrade();
-        CHECK_NULL_VOID(webPattern);
-        auto webEventHub = webPattern->GetWebEventHub();
-        CHECK_NULL_VOID(webEventHub);
-        auto propOnWindowNewEvent = webEventHub->GetOnWindowNewEvent();
-        CHECK_NULL_VOID(propOnWindowNewEvent);
-        propOnWindowNewEvent(param);
-        return;
-    }
-    auto webCom = webComponent_.Upgrade();
-    CHECK_NULL_VOID(webCom);
-    webCom->OnWindowNewEvent(param);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), targetUrl, isAlert, isUserTrigger, handler]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto param = std::make_shared<WebWindowNewEvent>(targetUrl, isAlert, isUserTrigger,
+                AceType::MakeRefPtr<WebWindowNewHandlerOhos>(handler));
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnWindowNewEvent = webEventHub->GetOnWindowNewEvent();
+                CHECK_NULL_VOID(propOnWindowNewEvent);
+                propOnWindowNewEvent(param);
+                return;
+            }
+            auto webCom = delegate->webComponent_.Upgrade();
+            CHECK_NULL_VOID(webCom);
+            webCom->OnWindowNewEvent(param);
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void WebDelegate::OnWindowExit()
 {
-    if (onWindowExitV2_) {
-        onWindowExitV2_(std::make_shared<WebWindowExitEvent>());
-    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onWindowExitV2 = delegate->onWindowExitV2_;
+            if (onWindowExitV2) {
+                onWindowExitV2(std::make_shared<WebWindowExitEvent>());
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 RefPtr<PixelMap> WebDelegate::GetDragPixelMap()
@@ -3386,4 +3828,48 @@ void WebDelegate::SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern)
     webPattern_ = webPattern;
 }
 
+void WebDelegate::SetDrawSize(const Size& drawSize)
+{
+    drawSize_ = drawSize;
+}
+
+void WebDelegate::SetEnhanceSurfaceFlag(const bool& isEnhanceSurface)
+{
+    LOGI("enhance flag %{public}d", isEnhanceSurface);
+    isEnhanceSurface_ = isEnhanceSurface;
+}
+
+sptr<OHOS::SurfaceDelegate> WebDelegate::GetSurfaceDelegateClient()
+{
+    return surfaceDelegate_;
+}
+
+void WebDelegate::SetBoundsOrRezise(const Size& drawSize, const Offset& offset)
+{
+    if ((drawSize.Width() == 0) && (drawSize.Height() == 0)) {
+        LOGE("WebDelegate::SetBoundsOrRezise width and height error");
+        return;
+    }
+    if (isEnhanceSurface_) {
+        if (surfaceDelegate_) {
+            LOGI("WebDelegate::SetBounds: x:%{public}d, y:%{public}d, w::%{public}d, h:%{public}d",
+                (int32_t)offset.GetX(), (int32_t)offset.GetY(),
+                (int32_t)drawSize.Width(), (int32_t)drawSize.Height());
+            surfaceDelegate_->SetBounds(offset.GetX(), (int32_t)offset.GetY(), drawSize.Width(), drawSize.Height());
+        }
+    } else {
+        Resize(drawSize.Width(), drawSize.Height());
+    }
+}
+
+Offset WebDelegate::GetWebRenderGlobalPos()
+{
+    return offset_;
+}
+#ifdef ENABLE_ROSEN_BACKEND
+void WebDelegate::SetSurface(const sptr<Surface>& surface)
+{
+    surface_ = surface;
+}
+#endif
 } // namespace OHOS::Ace

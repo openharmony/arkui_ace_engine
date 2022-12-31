@@ -241,6 +241,16 @@ public:
         return aspectRatio_;
     }
 
+    void SetIsPopupButton(bool isPopupButton)
+    {
+        isPopupButton_ = isPopupButton;
+    }
+
+    bool IsPopupButton() const
+    {
+        return isPopupButton_;
+    }
+
 private:
     RefPtr<ButtonDeclaration> declaration_;
     ButtonType type_ { ButtonType::NORMAL };
@@ -252,6 +262,7 @@ private:
     bool isCatchMode_ = true;
     bool isDeclareHeight_ = false;
     bool needResetHeight_ = true;
+    bool isPopupButton_ = false;
     uint32_t layoutFlag_ = 0;
     Dimension height_;
     bool hasCustomChild_  = false;

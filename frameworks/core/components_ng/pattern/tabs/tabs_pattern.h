@@ -53,6 +53,24 @@ public:
         return MakeRefPtr<TabsLayoutAlgorithm>();
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
+    {
+        auto property = GetLayoutProperty<TabsLayoutProperty>();
+        if (!property) {
+            return {};
+        }
+        bool isVertical = true;
+        if (property->GetAxis().has_value()) {
+            isVertical = property->GetAxis().value() == Axis::HORIZONTAL;
+        }
+        return { isVertical, true, ScopeType::FLEX };
+    }
+
     void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& event);
 
     void OnModifyDone() override;

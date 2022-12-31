@@ -140,18 +140,17 @@ void TimePickerColumnPattern::ChangeAmPmTextStyle(
         textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
         textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateFontSize(selectedOptionSize);
+        textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
     }
     if (index == 0 && showOptionCount == CHILD_SIZE) {
         textLayoutProperty->UpdateFontSize(normalOptionSize);
         textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateAlignment(Alignment::CENTER);
         textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
     }
     if (index == showOptionCount - 1 && showOptionCount == CHILD_SIZE) {
         textLayoutProperty->UpdateFontSize(normalOptionSize);
         textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateAlignment(Alignment::CENTER);
         textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
     }
 }
@@ -178,6 +177,7 @@ void TimePickerColumnPattern::ChangeTextStyle(
     }
     if (index == selectedIndex && showOptionCount != CHILD_SIZE) {
         textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+        textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
         textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateFontSize(selectedOptionSize);
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);

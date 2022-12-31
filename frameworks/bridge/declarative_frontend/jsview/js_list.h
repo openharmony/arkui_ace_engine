@@ -44,7 +44,7 @@ public:
     static void SetScrollBar(int32_t scrollBar);
     static void SetEdgeEffect(int32_t edgeEffect);
     static void SetEditMode(bool editMode);
-    static void SetCachedCount(int32_t cachedCount);
+    static void SetCachedCount(const JSCallbackInfo& info);
     static void SetChainAnimation(bool enableChainAnimation);
     static void SetMultiSelectable(bool multiSelectable);
     static void SetListItemAlign(int32_t itemAlignment);

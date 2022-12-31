@@ -15,6 +15,7 @@
 
 #include "core/components/option/render_option.h"
 
+#include "base/geometry/offset.h"
 #include "base/log/log.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
@@ -518,12 +519,13 @@ void RenderOption::InitTouchEvent()
         }
         ref->OnTouch(true);
     });
-    touch_->SetOnTouchUp([weak](const TouchEventInfo&) {
+    touch_->SetOnTouchUp([weak](const TouchEventInfo& info) {
         auto ref = weak.Upgrade();
         if (!ref) {
             return;
         }
         ref->OnTouch(false);
+        ref->ProcessTouchUp(info);
     });
     touch_->SetOnTouchCancel([weak](const TouchEventInfo&) {
         auto ref = weak.Upgrade();
@@ -544,6 +546,25 @@ void RenderOption::OnTouchTestHit(
     touch_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(click_);
     result.emplace_back(touch_);
+}
+
+void RenderOption::ProcessTouchUp(const TouchEventInfo& info)
+{
+    LOGI("RenderOption ProcessTouchUp");
+    auto touches = info.GetTouches();
+    if (touches.empty()) {
+        LOGW("touch event info is empty.");
+        return;
+    }
+
+    if (data_->GetCustomComponent()) {
+        return;
+    }
+
+    auto touchPosition = touches.front().GetLocalLocation();
+    if (optionRegion_.ContainsInRegion(touchPosition.GetX(), touchPosition.GetY())) {
+        OnClick(false);
+    }
 }
 
 void RenderOption::Update(const RefPtr<Component>& component)
@@ -739,6 +760,8 @@ void RenderOption::PerformLayout()
     } else {
         LayoutText(text);
     }
+
+    optionRegion_ = TouchRegion(Offset(), Offset(GetLayoutSize().Width(), GetLayoutSize().Height()));
 }
 
 void RenderOption::PlayEventEffectAnimation(const Color& endColor, int32_t duration, bool isHoverExists)

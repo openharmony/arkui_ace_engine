@@ -220,8 +220,8 @@ HWTEST_F(ImagePatternTest, SetImagePaintConfig001, TestSize.Level1)
     imagePattern->altLoadingCtx_->OnLoadSuccess(
         ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT));
     EXPECT_TRUE(imagePattern->altImage_ != nullptr);
-    EXPECT_EQ(*imagePattern->lastAltSrcRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
-    EXPECT_EQ(*imagePattern->lastAltDstRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(*imagePattern->altSrcRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(*imagePattern->altDstRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
     EXPECT_TRUE(imagePattern->altImage_->paintConfig_ != nullptr);
     auto altImagePaintConfig = imagePattern->altImage_->GetPaintConfig();
     EXPECT_EQ(altImagePaintConfig.imageFit_, IMAGE_FIT_DEFAULT);
@@ -231,8 +231,8 @@ HWTEST_F(ImagePatternTest, SetImagePaintConfig001, TestSize.Level1)
     imagePattern->loadingCtx_->OnLoadSuccess(
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
     EXPECT_TRUE(imagePattern->image_ != nullptr);
-    EXPECT_EQ(imagePattern->lastSrcRect_, RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
-    EXPECT_EQ(imagePattern->lastDstRect_, RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(imagePattern->srcRect_, RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(imagePattern->dstRect_, RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
     EXPECT_TRUE(imagePattern->image_->paintConfig_ != nullptr);
     auto imagePaintConfig = imagePattern->image_->GetPaintConfig();
     EXPECT_EQ(imagePaintConfig.imageFit_, IMAGE_FIT_DEFAULT);
@@ -241,8 +241,8 @@ HWTEST_F(ImagePatternTest, SetImagePaintConfig001, TestSize.Level1)
      */
     EXPECT_EQ(imagePattern->altLoadingCtx_, nullptr);
     EXPECT_EQ(imagePattern->altImage_, nullptr);
-    EXPECT_EQ(imagePattern->lastAltSrcRect_, nullptr);
-    EXPECT_EQ(imagePattern->lastAltDstRect_, nullptr);
+    EXPECT_EQ(imagePattern->altSrcRect_, nullptr);
+    EXPECT_EQ(imagePattern->altDstRect_, nullptr);
 }
 
 /**
@@ -317,8 +317,8 @@ HWTEST_F(ImagePatternTest, ImagePatternCallback001, TestSize.Level1)
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT), "",
         ImageLoadingCommand::LOAD_DATA_FAIL);
     EXPECT_EQ(imagePattern->altImage_, nullptr);
-    EXPECT_EQ(imagePattern->lastAltSrcRect_, nullptr);
-    EXPECT_EQ(imagePattern->lastAltDstRect_, nullptr);
+    EXPECT_EQ(imagePattern->altSrcRect_, nullptr);
+    EXPECT_EQ(imagePattern->altDstRect_, nullptr);
     imagePattern->loadingCtx_->OnLoadSuccess(
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
     imagePattern->loadingCtx_->OnLoadFail(
@@ -397,12 +397,12 @@ HWTEST_F(ImagePatternTest, ImagePatternOnNotifyMemoryLevelFunction001, TestSize.
     imagePattern->OnNotifyMemoryLevel(0);
     EXPECT_TRUE(imagePattern->isShow_ == false);
     EXPECT_EQ(imagePattern->image_, nullptr);
-    EXPECT_EQ(imagePattern->lastSrcRect_, RectF());
-    EXPECT_EQ(imagePattern->lastDstRect_, RectF());
+    EXPECT_EQ(imagePattern->srcRect_, RectF());
+    EXPECT_EQ(imagePattern->dstRect_, RectF());
     EXPECT_EQ(imagePattern->altLoadingCtx_, nullptr);
     EXPECT_EQ(imagePattern->altImage_, nullptr);
-    EXPECT_EQ(imagePattern->lastAltSrcRect_, nullptr);
-    EXPECT_EQ(imagePattern->lastAltDstRect_, nullptr);
+    EXPECT_EQ(imagePattern->altSrcRect_, nullptr);
+    EXPECT_EQ(imagePattern->altDstRect_, nullptr);
 }
 
 /**
@@ -435,9 +435,12 @@ HWTEST_F(ImagePatternTest, ImagePatternCreateNodePaintMethod001, TestSize.Level1
     imagePattern->image_ = nullptr;
     imagePattern->altImage_ = imagePattern->altLoadingCtx_->MoveCanvasImage();
     EXPECT_TRUE(imagePattern->CreateNodePaintMethod() == nullptr);
-    imagePattern->lastAltSrcRect_ = std::make_unique<RectF>(RectF());
+    imagePattern->altDstRect_ = std::make_unique<RectF>(RectF());
     EXPECT_TRUE(imagePattern->CreateNodePaintMethod() == nullptr);
-    imagePattern->lastAltDstRect_ = std::make_unique<RectF>(RectF());
+    imagePattern->altSrcRect_ = std::make_unique<RectF>(RectF());
+    imagePattern->altDstRect_.reset();
+    EXPECT_TRUE(imagePattern->CreateNodePaintMethod() == nullptr);
+    imagePattern->altDstRect_ = std::make_unique<RectF>(RectF());
     EXPECT_TRUE(imagePattern->CreateNodePaintMethod() != nullptr);
 }
 

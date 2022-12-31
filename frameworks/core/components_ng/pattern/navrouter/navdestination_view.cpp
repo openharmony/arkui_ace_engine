@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -42,7 +43,7 @@ void NavDestinationView::Create()
     int32_t nodeId = stack->ClaimNodeId();
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    
+
     // titleBar node
     if (!navDestinationNode->GetTitleBarNode()) {
         int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -71,9 +72,78 @@ void NavDestinationView::Create()
         CHECK_NULL_VOID(titleBarLayoutProperty);
         titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
     }
-    
+
     // content node
     if (!navDestinationNode->GetTitleBarNode()) {
+        int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG,
+            contentNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        navDestinationNode->AddChild(contentNode);
+        navDestinationNode->SetContentNode(contentNode);
+    }
+
+    stack->Push(navDestinationNode);
+    auto navDestinationLayoutProperty = navDestinationNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navDestinationLayoutProperty);
+    navDestinationLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+}
+
+void NavDestinationView::Create(std::function<void()>&& deepRenderFunc)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    // navDestination node
+    auto nodeId = stack->ClaimNodeId();
+    auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
+        CHECK_NULL_RETURN(deepRenderFunc, nullptr);
+        auto parent = AceType::DynamicCast<UINode>(FrameNode::GetFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId));
+        auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(parent);
+        if (navDestinationNode && navDestinationNode->GetContentNode()) {
+            parent = navDestinationNode->GetContentNode();
+        }
+        ScopedViewStackProcessor scopedViewStackProcessor;
+        ViewStackProcessor::GetInstance()->Push(parent);
+        deepRenderFunc();
+        ViewStackProcessor::GetInstance()->PopContainer();
+        ViewStackProcessor::GetInstance()->Finish();
+        return parent;
+    };
+
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId,
+        [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
+            return AceType::MakeRefPtr<NavDestinationPattern>(shallowBuilder);
+        });
+
+    // titleBar node
+    if (!navDestinationNode->GetTitleBarNode()) {
+        int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+            V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+        navDestinationNode->AddChild(titleBarNode);
+        navDestinationNode->SetTitleBarNode(titleBarNode);
+
+        int32_t backButtonNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto backButtonNode = FrameNode::CreateFrameNode(
+            V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::MakeRefPtr<ImagePattern>());
+        titleBarNode->AddChild(backButtonNode);
+        titleBarNode->SetBackButton(backButtonNode);
+
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_VOID(theme);
+        ImageSourceInfo imageSourceInfo;
+        imageSourceInfo.SetResourceId(theme->GetBackResourceId());
+        auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(backButtonLayoutProperty);
+        backButtonLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+        backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        backButtonNode->MarkModifyDone();
+
+        auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+        CHECK_NULL_VOID(titleBarLayoutProperty);
+        titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
+    }
+
+    // content node
+    if (!navDestinationNode->GetContentNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG,
             contentNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
