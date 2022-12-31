@@ -121,9 +121,9 @@ void ImageModelNG::SetImageFill(const Color& color)
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color);
 }
 
-void ImageModelNG::SetImageInterpolation(ImageInterpolation iterpolation)
+void ImageModelNG::SetImageInterpolation(ImageInterpolation interpolation)
 {
-    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, iterpolation);
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, interpolation);
 }
 
 void ImageModelNG::SetImageRepeat(ImageRepeat imageRepeat)

@@ -113,6 +113,7 @@ public:
     int32_t GetWidth() const override;
     int32_t GetHeight() const override;
 
+    void AddFilter(SkPaint& paint);
     void DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect,
         const BorderRadiusArray& radiusXY) override;
 
