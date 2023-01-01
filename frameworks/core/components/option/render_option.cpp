@@ -512,12 +512,13 @@ void RenderOption::InitTouchEvent()
     }
     touch_ = AceType::MakeRefPtr<RawRecognizer>();
     auto weak = AceType::WeakClaim(this);
-    touch_->SetOnTouchDown([weak](const TouchEventInfo&) {
+    touch_->SetOnTouchDown([weak](const TouchEventInfo& info) {
         auto ref = weak.Upgrade();
         if (!ref) {
             return;
         }
         ref->OnTouch(true);
+        ref->ProcessTouchDown(info);
     });
     touch_->SetOnTouchUp([weak](const TouchEventInfo& info) {
         auto ref = weak.Upgrade();
@@ -548,6 +549,27 @@ void RenderOption::OnTouchTestHit(
     result.emplace_back(touch_);
 }
 
+void RenderOption::ProcessTouchDown(const TouchEventInfo& info)
+{
+    LOGI("RenderOption ProcessTouchDown");
+    auto touches = info.GetTouches();
+    if (touches.empty()) {
+        LOGW("touch event info is empty.");
+        return;
+    }
+
+    if (data_->GetCustomComponent()) {
+        return;
+    }
+
+    auto touchPosition = touches.front().GetLocalLocation();
+    if (!optionRegion_.ContainsInRegion(touchPosition.GetX(), touchPosition.GetY())) {
+        LOGI("Do not contains the touch region.");
+        return;
+    }
+    firstTouchDownOffset_ = touchPosition;
+}
+
 void RenderOption::ProcessTouchUp(const TouchEventInfo& info)
 {
     LOGI("RenderOption ProcessTouchUp");
@@ -562,9 +584,12 @@ void RenderOption::ProcessTouchUp(const TouchEventInfo& info)
     }
 
     auto touchPosition = touches.front().GetLocalLocation();
-    if (optionRegion_.ContainsInRegion(touchPosition.GetX(), touchPosition.GetY())) {
+    firstTouchUpOffset_ = touchPosition;
+    if (optionRegion_.ContainsInRegion(touchPosition.GetX(), touchPosition.GetY()) &&
+        (firstTouchDownOffset_ != firstTouchUpOffset_)) {
         OnClick(false);
     }
+    firstTouchDownOffset_ = Offset();
 }
 
 void RenderOption::Update(const RefPtr<Component>& component)

@@ -449,9 +449,12 @@ void RenderSelectPopup::ProcessTouchUp(const TouchEventInfo& info)
         return;
     }
 
+    auto firstOption = selectPopup_->GetSelectOptions().front();
+    bool isCustomOption = (firstOption->GetCustomComponent() != nullptr);
+
     auto offset = touches.front().GetGlobalLocation();
     firstFingerUpOffset_ = offset;
-    if ((offset - firstFingerDownOffset_).GetDistance() <= DEFAULT_DISTANCE ||
+    if ((((offset - firstFingerDownOffset_).GetDistance() <= DEFAULT_DISTANCE) && isCustomOption) ||
         !touchRegion_.ContainsInRegion(clickPosition.GetX(), clickPosition.GetY())) {
         if (isContextMenu_) {
             selectPopup_->CloseContextMenu();
