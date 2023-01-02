@@ -41,10 +41,6 @@ void IndexerView::Create(const std::vector<std::string>& arrayValue, int32_t sel
         textLayoutProperty->UpdateContent(arrayValue[index]);
         frameNode->AddChild(indexerChildNode);
     }
-    auto indexerPopupNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<ListPattern>());
-    CHECK_NULL_VOID(indexerPopupNode);
-    frameNode->AddChild(indexerPopupNode);
-
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, ArrayValue, arrayValue);
     if (selected >= 0 && selected < indexerSize) {
