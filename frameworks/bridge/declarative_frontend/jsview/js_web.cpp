@@ -1731,6 +1731,12 @@ void JSWeb::CreateInNewPipeline(
             };
         }
         NG::WebView::Create(dstSrc.value(), std::move(setIdCallback), std::move(setHapPathCallback));
+
+        auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
+        std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
+        if (!cmdLine.empty()) {
+            NG::WebView::SetCustomScheme(cmdLine);
+        }
         return;
     }
     auto* jsWebController = controller->Unwrap<JSWebController>();
@@ -1769,6 +1775,12 @@ void JSWeb::CreateWithWebviewController(
             func->Call(webviewController, 1, argv);
         };
         webComponent->SetSetHapPathCallback(std::move(setHapPathCallback));
+    }
+
+    auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
+    std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
+    if (!cmdLine.empty()) {
+        webComponent->SetCustomScheme(cmdLine);
     }
 }
 
