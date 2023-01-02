@@ -77,7 +77,6 @@ DOMInput::~DOMInput()
 {
     if (!checkableChangeMarker_.IsEmpty()) {
         BackEndEventManager<void(const std::string&)>::GetInstance().RemoveBackEndEvent(checkableChangeMarker_);
-        checkableChangeMarker_.Reset();
     }
 }
 
@@ -201,7 +200,6 @@ void DOMInput::PrepareCheckedListener()
     if (isCheckbox || isRadio) {
         if (!checkableChangeMarker_.IsEmpty()) {
             BackEndEventManager<void(const std::string&)>::GetInstance().RemoveBackEndEvent(checkableChangeMarker_);
-            checkableChangeMarker_.Reset();
         }
         auto checkableChangeCallback = [weak = AceType::WeakClaim(this)](const std::string& checked) {
             auto domNode = weak.Upgrade();
