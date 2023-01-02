@@ -114,6 +114,9 @@ void RosenRenderList::Paint(RenderContext& context, const Offset& offset)
                 canvas, offset, GetPaintRect(), scrollBar_, GetGlobalOffset(), scrollBarOpacity_);
         }
     }
+    if (scrollBarProxy_) {
+        scrollBarProxy_->NotifyScrollBar(AceType::WeakClaim(this));
+    }
 
     PaintSelectedZone(context);
 }
