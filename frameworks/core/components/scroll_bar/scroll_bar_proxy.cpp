@@ -252,8 +252,8 @@ Size ScrollBarProxy::GetScrollableChildSize(
     }
     auto renderList = AceType::DynamicCast<V2::RenderList>(scrollable);
     if (renderList) {
-        scrollBarAxis == Axis::VERTICAL ? result.SetHeight(renderList->GetRealMainSize())
-                                        : result.SetWidth(renderList->GetRealMainSize());
+        scrollBarAxis == Axis::VERTICAL ? result.SetHeight(renderList->GetEstimatedHeight())
+                                        : result.SetWidth(renderList->GetEstimatedHeight());
         return result;
     }
     auto renderWaterFlow = AceType::DynamicCast<V2::RenderWaterFlow>(scrollable);
@@ -288,10 +288,10 @@ void ScrollBarProxy::AdjustParam(const RefPtr<RenderNode>& scrollable, Axis scro
 
     auto renderList = AceType::DynamicCast<V2::RenderList>(scrollable);
     if (renderList) {
-        scrollBarAxis == Axis::VERTICAL ? scrollableChildSize.SetHeight(renderList->GetRealMainSize())
-                                        : scrollableChildSize.SetWidth(renderList->GetRealMainSize());
+        scrollBarAxis == Axis::VERTICAL ? scrollableChildSize.SetHeight(renderList->GetEstimatedHeight())
+                                        : scrollableChildSize.SetWidth(renderList->GetEstimatedHeight());
         scrollableAxis = renderList->GetAxis();
-        scrollableChildPosition = renderList->GetCurrentOffset();
+        scrollableChildPosition = renderList->GetLastOffset();
     }
 
     auto renderWaterFlow = AceType::DynamicCast<V2::RenderWaterFlow>(scrollable);
