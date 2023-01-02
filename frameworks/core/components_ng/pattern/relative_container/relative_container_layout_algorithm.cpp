@@ -45,8 +45,8 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         LOGD("RelativeContainerLayoutAlgorithm: No child in Relative container");
         return;
     }
-    auto relativeContainerlayoutProperty = layoutWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID(relativeContainerlayoutProperty);
+    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(relativeContainerLayoutProperty);
     idNodeMap_.clear();
     reliedOnMap_.clear();
     incomingDegreeMap_.clear();
@@ -56,10 +56,9 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     GetDependencyRelationship();
     if (!PreTopologicalLoopDetection()) {
         const auto& childrenWrappers = layoutWrapper->GetAllChildrenWithBuild();
-        auto constraint = relativeContainerlayoutProperty->CreateChildConstraint();
+        auto constraint = relativeContainerLayoutProperty->CreateChildConstraint();
         for (const auto& childrenWrapper : childrenWrappers) {
-            constraint.maxSize = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
-            constraint.minSize = SizeF(0.0f, 0.0f);
+            constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
             childrenWrapper->Measure(constraint);
             constraint.Reset();
         }
@@ -78,8 +77,8 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void RelativeContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    auto relativeContainerlayoutProperty = layoutWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID(relativeContainerlayoutProperty);
+    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(relativeContainerLayoutProperty);
     const auto& childrenWrapper = layoutWrapper->GetAllChildrenWithBuild();
     for (const auto& childWrapper : childrenWrapper) {
         auto curOffset = recordOffsetMap_[childWrapper->GetHostNode()->GetInspectorIdValue()];
@@ -91,15 +90,15 @@ void RelativeContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 void RelativeContainerLayoutAlgorithm::CollectNodesById(LayoutWrapper* layoutWrapper)
 {
     idNodeMap_.clear();
-    auto relativeContainerlayoutProperty = layoutWrapper->GetLayoutProperty();
-    auto constraint = relativeContainerlayoutProperty->GetLayoutConstraint();
+    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    auto constraint = relativeContainerLayoutProperty->GetLayoutConstraint();
     const auto& childrenWrappers = layoutWrapper->GetAllChildrenWithBuild();
     for (const auto& childWrapper : childrenWrappers) {
         auto childLayoutProperty = childWrapper->GetLayoutProperty();
         auto childHostNode = childWrapper->GetHostNode();
         if (childHostNode) {
             auto geometryNode = childWrapper->GetGeometryNode();
-            auto childConstraint = relativeContainerlayoutProperty->CreateChildConstraint();
+            auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
             if (childHostNode->GetInspectorId()->empty()) {
                 // Component who does not have align Rules will have default offset and layout param
                 childConstraint.maxSize = SizeF(constraint->maxSize);
@@ -242,8 +241,8 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
     float itemMaxHeight = 0.0f;
     float itemMinWidth = 0.0f;
     float itemMinHeight = 0.0f;
-    auto relativeContainerlayoutProperty = layoutWrapper->GetLayoutProperty();
-    auto childConstraint = relativeContainerlayoutProperty->CreateChildConstraint();
+    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
     childConstraint.maxSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     childConstraint.minSize = SizeF(0.0f, 0.0f);
     // set first two boudnaries of each direction
