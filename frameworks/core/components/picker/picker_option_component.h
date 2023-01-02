@@ -126,6 +126,15 @@ public:
         fixHeight_ = value;
     }
 
+    bool GetDefaultHeight() const
+    {
+        return defaultHeight_;
+    }
+
+    void SetDefaultHeight(bool value)
+    {
+        defaultHeight_ = value;
+    }
 private:
     bool selected_ = false;
     bool autoLayout_ = false;
@@ -136,6 +145,7 @@ private:
     uint32_t index_ = 0;
     RefPtr<PickerTheme> theme_;
     Dimension fixHeight_;
+    bool defaultHeight_ = false;
 
     RefPtr<BoxComponent> boxComponent_;
     RefPtr<TextComponent> textComponent_;

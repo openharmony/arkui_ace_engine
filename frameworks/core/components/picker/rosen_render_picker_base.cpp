@@ -88,13 +88,18 @@ void RosenRenderPickerBase::Paint(RenderContext& context, const Offset& offset)
     paint.setColor(theme->GetDividerColor().GetValue());
     auto rect = GetOptionsRect(offset, anchorColumn);
     auto dividerSpacing = NormalizeToPx(theme->GetDividerSpacing());
-    if (!NearZero(NormalizeToPx(data_->GetColumnHeight()))) {
-        if (data_->GetColumnHeight().Unit() == DimensionUnit::PERCENT) {
-            dividerSpacing = data_->GetColumnHeight().Value() * dividerSpacing;
+    if (data_->GetDefaultHeight()) {
+        if (NormalizeToPx(data_->GetColumnHeight()) > 0) {
+            if (data_->GetColumnHeight().Unit() == DimensionUnit::PERCENT) {
+                dividerSpacing = data_->GetColumnHeight().Value() * dividerSpacing;
+            } else {
+                dividerSpacing = NormalizeToPx(data_->GetColumnHeight());
+            }
         } else {
-            dividerSpacing = NormalizeToPx(data_->GetColumnHeight());
+            dividerSpacing = 0;
         }
     }
+
     double upperLine = rect.Top() + rect.Height() / 2.0 - dividerSpacing / 2.0;
     double downLine = rect.Top() + rect.Height() / 2.0 + dividerSpacing / 2.0;
     double leftLine = rect.Left();
