@@ -77,6 +77,7 @@ public:
     void UpdateSelfStatus();
 
     void ProcessTouchUp(const TouchEventInfo& info);
+    void ProcessTouchDown(const TouchEventInfo& info);
 
 protected:
     void OnTouchTestHit(
@@ -140,6 +141,8 @@ protected:
     RefPtr<Animator> eventEffectController_;
     bool hovered_ = false;
     TouchRegion optionRegion_;
+    Offset firstTouchDownOffset_;
+    Offset firstTouchUpOffset_;
 };
 
 } // namespace OHOS::Ace
