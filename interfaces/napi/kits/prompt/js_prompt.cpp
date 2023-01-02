@@ -22,6 +22,7 @@
 #include "napi/native_node_api.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/system_properties.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/js_frontend/engine/common/js_engine.h"
 
@@ -150,7 +151,7 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         }
     }
 #ifdef OHOS_STANDARD_SYSTEM
-    if (Container::IsCurrentUseNewPipeline()) {
+    if (SystemProperties::GetExtSurfaceEnabled() || Container::IsCurrentUseNewPipeline()) {
         auto delegate = EngineHelper::GetCurrentDelegate();
         if (!delegate) {
             LOGE("can not get delegate.");
@@ -391,7 +392,7 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
-    if (Container::IsCurrentUseNewPipeline()) {
+    if (SystemProperties::GetExtSurfaceEnabled() || Container::IsCurrentUseNewPipeline()) {
         auto delegate = EngineHelper::GetCurrentDelegate();
         if (delegate) {
             delegate->ShowDialog(asyncContext->titleString, asyncContext->messageString, asyncContext->buttons,
@@ -687,7 +688,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
     };
 
 #ifdef OHOS_STANDARD_SYSTEM
-    if (Container::IsCurrentUseNewPipeline()) {
+    if (SystemProperties::GetExtSurfaceEnabled() || Container::IsCurrentUseNewPipeline()) {
         auto delegate = EngineHelper::GetCurrentDelegate();
         if (delegate) {
             delegate->ShowActionMenu(asyncContext->titleString, asyncContext->buttons, std::move(callBack));
