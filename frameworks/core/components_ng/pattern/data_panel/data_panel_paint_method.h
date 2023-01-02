@@ -46,7 +46,7 @@ public:
         auto dataPanelType_ = paintProperty->GetDataPanelType().value_or(0);
         auto effect_ = paintProperty->GetEffect().value_or(false);
         auto offset_ = paintWrapper->GetContentOffset();
-        dataPanelModifier_->SetDate(1);
+        dataPanelModifier_->UpdateDate();
         dataPanelModifier_->SetValues(values_);
         dataPanelModifier_->SetMax(max_);
         dataPanelModifier_->SetDataPanelType(dataPanelType_);
