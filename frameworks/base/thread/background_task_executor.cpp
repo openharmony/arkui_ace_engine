@@ -52,13 +52,19 @@ BackgroundTaskExecutor& BackgroundTaskExecutor::GetInstance()
 
 BackgroundTaskExecutor::BackgroundTaskExecutor() : maxThreadNum_(MAX_BACKGROUND_THREADS)
 {
-    if (maxThreadNum_ > 1) {
-        // Start other threads in the first created thread.
-        PostTask([this, num = maxThreadNum_ - 1]() { StartNewThreads(num); });
-    }
+    FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
+    if (ft != nullptr && ft->EnableFrameTrace(BG_THREAD_NAME)) {
+        LOGI("Use frame trace as bg threads pool.");
+    } else {
+        LOGI("Create ace bg threads pool.");
+        if (maxThreadNum_ > 1) {
+            // Start other threads in the first created thread.
+            PostTask([this, num = maxThreadNum_ - 1]() { StartNewThreads(num); });
+        }
 
-    // Make sure there is at least 1 thread in background thread pool.
-    StartNewThreads(1);
+        // Make sure there is at least 1 thread in background thread pool.
+        StartNewThreads(1);
+    }
 }
 
 BackgroundTaskExecutor::~BackgroundTaskExecutor()
