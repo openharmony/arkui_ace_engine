@@ -450,7 +450,7 @@ void ListPattern::SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub, EdgeE
         springEffect->SetOutBoundaryCallback([weak = AceType::WeakClaim(this)]() {
             auto list = weak.Upgrade();
             CHECK_NULL_RETURN_NOLOG(list, false);
-            return list->IsOutOfBoundary();
+            return list->IsOutOfBoundary(false);
         });
         // add callback to springEdgeEffect
         SetEdgeEffectCallback(springEffect);

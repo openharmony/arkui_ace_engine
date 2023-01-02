@@ -195,7 +195,7 @@ void ListLayoutAlgorithm::MeasureList(
     } else {
         LOGD("StartIndex index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
             startIndex, currentOffset_, startMainPos_, endMainPos_);
-        bool overScrollTop = GetStartIndex() == 0 && GreatNotEqual(GetStartPosition(), startMainPos_);
+        bool overScrollTop = startIndex == 0 && GreatNotEqual(startPos, startMainPos_);
         if ((!overScrollFeature_ && NonNegative(currentOffset_)) || (overScrollFeature_ && overScrollTop)) {
             LayoutForward(layoutWrapper, layoutConstraint, axis, startIndex, startPos);
             if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
@@ -222,7 +222,7 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
     ++currentIndex;
     bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (isGroup) {
-        SetListItemGroupParam(wrapper);
+        SetListItemGroupParam(wrapper, startPos, true);
     }
     {
         ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
@@ -245,7 +245,7 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
     --currentIndex;
     bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (isGroup) {
-        SetListItemGroupParam(wrapper);
+        SetListItemGroupParam(wrapper, endPos, false);
     }
     {
         ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
@@ -444,24 +444,24 @@ float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float child
     }
 }
 
-void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper)
+void ListLayoutAlgorithm::SetListItemGroupParam(
+    const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos, bool forwardLayout) const
 {
     auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm();
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_VOID(itemGroup);
-    itemGroup->SetListMainSize(contentMainSize_);
+    itemGroup->SetListMainSize(
+        startMainPos_ - paddingBeforeContent_, endMainPos_ + paddingAfterContent_, referencePos, forwardLayout);
 }
 
 void ListLayoutAlgorithm::CreateItemGroupList(LayoutWrapper* layoutWrapper)
 {
     itemGroupList_.clear();
-    if (stickyStyle_ != V2::StickyStyle::NONE) {
-        for (const auto& item : itemPosition_) {
-            if (item.second.isGroup) {
-                auto wrapper = layoutWrapper->GetOrCreateChildByIndex(item.first);
-                itemGroupList_.push_back(wrapper->GetWeakHostNode());
-            }
+    for (const auto& item : itemPosition_) {
+        if (item.second.isGroup) {
+            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(item.first);
+            itemGroupList_.push_back(wrapper->GetWeakHostNode());
         }
     }
 }
