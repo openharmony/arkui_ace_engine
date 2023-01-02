@@ -114,11 +114,6 @@ public:
         return *this;
     }
 
-    void Reset()
-    {
-        data_.release();
-    }
-
     bool operator!=(const std::string& markerEventId) const
     {
         return GetData().eventId != markerEventId;
