@@ -16,7 +16,11 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_SUBWINDOW_OHOS_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_SUBWINDOW_OHOS_H
 
+#include "event_handler.h"
+#include "event_runner.h"
+#include "resource_manager.h"
 #include "wm/window.h"
+
 #include "adapter/ohos/entrance/platform_event_callback.h"
 #include "base/resource/asset_manager.h"
 #include "base/subwindow/subwindow.h"
@@ -29,11 +33,8 @@
 #include "core/components/stack/stack_element.h"
 #include "core/components/tween/tween_component.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "event_handler.h"
-#include "event_runner.h"
-#include "resource_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Rosen {
 class Window;
@@ -67,11 +68,17 @@ public:
     void SetHotAreas(const std::vector<Rect>& rects) override;
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
-    void ShowDialog(const std::string& title, const std::string& message,
-        const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
+    void ShowToastNG(const std::string& message, int32_t duration, const std::string& bottom) override;
+    void ClearToastNG() override;
+    void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
+        bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) override;
-    void ShowActionMenu(const std::string& title,
-        const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback) override;
+    void ShowDialogNG(const DialogProperties& dialogProps, const std::set<std::string>& callbacks) override;
+    void ClearDialogNG() override;
+    void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
+        std::function<void(int32_t, int32_t)>&& callback) override;
+    void ShowActionMenuNG(const std::string& title, const std::vector<ButtonInfo>& button,
+        std::function<void(int32_t, int32_t)>&& callback) override;
     int32_t GetChildContainerId() const
     {
         return childContainerId_;

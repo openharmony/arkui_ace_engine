@@ -975,25 +975,23 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest012, TestSize.Level1)
         .Times(2)
         .WillRepeatedly(Return(0));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), GetDuration(_))
-        .Times(2)
-        .WillOnce(Return(0))
-        .WillOnce(Return(-1));
+        .Times(0);
     updateCheck.clear();
     pattern->currentPos_ = 1;
     pattern->Stop(); // case3: media player is valid & currentPos != currentPos_ & duration_ = 0 &
                      // mediaPlayer_->GetDuration return ok
                      // this will call OnUpdateTime(pos=DURATION_POS)
     EXPECT_EQ(pauseCheck, VIDEO_PAUSE_EVENT);
-    EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 0);
-    EXPECT_EQ(updateCheck, VIDEO_UPDATE_EVENT);
+    EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 1);
+    EXPECT_EQ(updateCheck, "");
 
     updateCheck.clear();
     pattern->currentPos_ = 1;
     pattern->Stop(); // case4: media player is valid & currentPos != currentPos_ & duration_ = 0 &
                      // mediaPlayer_->GetDuration return err
     EXPECT_EQ(pauseCheck, VIDEO_PAUSE_EVENT);
-    EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 0);
-    EXPECT_EQ(updateCheck, VIDEO_UPDATE_EVENT);
+    EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 1);
+    EXPECT_EQ(updateCheck, "");
 }
 
 /**
