@@ -19,6 +19,7 @@
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/render/canvas_image.h"
+#include "core/components_ng/render/divider_painter.h"
 
 namespace OHOS::Ace::NG {
 

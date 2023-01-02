@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OPTION_OPTION_PAINT_METHOD_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OPTION_OPTION_PAINT_METHOD_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_GROUP_MENU_ITEM_GROUP_PAINT_METHOD_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_GROUP_MENU_ITEM_GROUP_PAINT_METHOD_H
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -27,20 +27,18 @@
 #include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
-
-class ACE_EXPORT OptionPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(OptionPaintMethod, NodePaintMethod)
+class ACE_EXPORT MenuItemGroupPaintMethod : public NodePaintMethod {
+    DECLARE_ACE_TYPE(MenuItemGroupPaintMethod, NodePaintMethod)
 public:
-    OptionPaintMethod() = default;
-    ~OptionPaintMethod() override = default;
+    MenuItemGroupPaintMethod() = default;
+    ~MenuItemGroupPaintMethod() override = default;
 
     CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
-    void PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper);
+    void PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper, bool isHeader);
 
-    ACE_DISALLOW_COPY_AND_MOVE(OptionPaintMethod);
+    ACE_DISALLOW_COPY_AND_MOVE(MenuItemGroupPaintMethod);
 };
 } // namespace OHOS::Ace::NG
-
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OPTION_OPTION_PAINT_METHOD_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_GROUP_MENU_ITEM_GROUP_PAINT_METHOD_H

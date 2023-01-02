@@ -26,8 +26,16 @@ constexpr Dimension OUT_PADDING = 4.0_vp;
 constexpr float OPTION_MIN_WIDTH = 204.0f;
 
 constexpr Dimension GRADIENT_HEIGHT = Dimension(50, DimensionUnit::VP);
+constexpr Dimension DIVIDER_STROKE_WIDTH = 1.0_vp;
+constexpr Dimension DIVIDER_PADDING = 4.0_vp;
+constexpr Dimension GROUP_DIVIDER_PADDING = 9.0_vp;
+constexpr Dimension SUBMENU_PADDING = 4.0_vp;
+constexpr Dimension MENU_ITEM_GROUP_PADDING = 16.0_vp;
+
 constexpr uint8_t GRADIENT_END_GRADIENT = 255;
 constexpr uint32_t DEFAULT_BACKGROUND_COLOR = 0xFFFFFFF;
+constexpr uint32_t MENU_MIN_GRID_COUNTS = 2;
+constexpr uint32_t MENU_MAX_GRID_COUNTS = 6;
 
 } // namespace OHOS::Ace::NG
 

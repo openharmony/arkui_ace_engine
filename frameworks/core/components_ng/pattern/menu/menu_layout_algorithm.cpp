@@ -18,6 +18,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
@@ -65,6 +66,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     LOGD("menu padding width = %{public}f", padding.Width());
     double outPadding = OUT_PADDING.ConvertToPx();
 
+    // calculate menu main size
     auto childConstraint = props->CreateChildConstraint();
     RefPtr<GridColumnInfo> columnInfo;
     columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
@@ -85,7 +87,9 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float maxChildrenWidth = GetChildrenMaxWidth(layoutWrapper->GetAllChildrenWithBuild(), childConstraint);
     SizeF menuSize;
     menuSize.SetWidth(maxChildrenWidth);
+    childConstraint.selfIdealSize.SetWidth(maxChildrenWidth);
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->Measure(childConstraint);
         auto childSize = child->GetGeometryNode()->GetFrameSize();
         LOGD("menu childSize = %{public}f, %{public}f", childSize.Width(), childSize.Height());
         // set minimum size
@@ -95,8 +99,15 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         menuSize.AddHeight(childSize.Height());
     }
     // set menu size
-    menuSize.AddHeight(2.0 * outPadding);
-    menuSize.AddWidth(2.0 * outPadding);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto menuPattern = frameNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    if (!menuPattern->IsMultiMenu()) {
+        menuSize.AddHeight(2.0 * outPadding);
+        menuSize.AddWidth(2.0 * outPadding);
+    }
+
     LOGD("finish measure, menu size = %{public}f x %{public}f", menuSize.Width(), menuSize.Height());
     layoutWrapper->GetGeometryNode()->SetFrameSize(menuSize);
 }
@@ -121,14 +132,27 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     auto outPadding = OUT_PADDING.ConvertToPx();
     MarginPropertyF margin;
-    margin.left = margin.top = margin.right = margin.bottom = outPadding;
+    if (!menuPattern->IsMultiMenu()) {
+        margin.left = margin.top = margin.right = margin.bottom = outPadding;
+    }
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->UpdateMargin(margin);
     geometryNode->SetMarginFrameOffset(NG::OffsetF(x, y));
 
+    auto parentMenuItem = menuPattern->GetParentMenuItem();
+    if (parentMenuItem) {
+        auto parentPattern = parentMenuItem->GetPattern<MenuItemPattern>();
+        auto topLeftPoint = OffsetF(x, y);
+        auto bottomRightPoint = OffsetF(x + size.Width(), y + size.Height());
+        parentPattern->AddHoverRegions(topLeftPoint, bottomRightPoint);
+    }
+
     // translate each option by the height of previous options
-    OffsetF translate(outPadding, outPadding);
+    OffsetF translate;
+    if (!menuPattern->IsMultiMenu()) {
+        translate = OffsetF(outPadding, outPadding);
+    }
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         LOGD("layout child at offset: %{public}f, %{public}f", translate.GetX(), translate.GetY());
         child->GetGeometryNode()->SetMarginFrameOffset(translate);

@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_view.h"
 #include "core/components_ng/pattern/toast/toast_view.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -272,9 +273,13 @@ bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, c
         LOGI("menuNode %{public}d added to map", targetId);
     }
     CHECK_NULL_RETURN(menu, false);
-    auto menuChild = menu->GetChildAtIndex(0);
-    CHECK_NULL_RETURN(menuChild, false);
-    auto menuFrameNode = DynamicCast<FrameNode>(menuChild);
+
+    RefPtr<FrameNode> menuFrameNode = menu;
+    if (menu->GetTag() != V2::MENU_ETS_TAG) {
+        auto menuChild = menu->GetChildAtIndex(0);
+        CHECK_NULL_RETURN(menuChild, false);
+        menuFrameNode = DynamicCast<FrameNode>(menuChild);
+    }
 
     auto props = menuFrameNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(props, false);

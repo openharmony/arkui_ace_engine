@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
@@ -68,6 +69,12 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
 // create menu with custom node from a builder
 RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t targetId, MenuType type)
 {
+    if (type == MenuType::SUB_MENU) {
+        auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuPattern>(targetId, type));
+        customNode->MountToParent(menuNode);
+        return menuNode;
+    }
     auto [wrapperNode, menuNode] = CreateMenu(targetId, type);
     // put custom node in a scroll to limit its height
     auto scroll = FrameNode::CreateFrameNode(
@@ -96,6 +103,25 @@ RefPtr<FrameNode> MenuView::Create(const std::vector<SelectParam>& params, int32
         optionNode->MountToParent(menuNode);
     }
     return wrapperNode;
+}
+
+// create menu with menuItem and menuItemGroup
+void MenuView::Create()
+{
+    LOGI("MenuView::Create");
+    auto* stack = ViewStackProcessor::GetInstance();
+    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    auto menuNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MenuPattern>(-1, MenuType::MULTI_MENU); });
+    CHECK_NULL_VOID(menuNode);
+    ViewStackProcessor::GetInstance()->Push(menuNode);
+}
+
+void MenuView::SetFontSize(const Dimension& fontSize)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<MenuPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFontSize(fontSize);
 }
 
 } // namespace OHOS::Ace::NG

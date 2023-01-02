@@ -31,6 +31,10 @@ void MenuPattern::OnModifyDone()
         RegisterOnClick();
     }
 
+    if (IsMultiMenu()) {
+        return;
+    }
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();

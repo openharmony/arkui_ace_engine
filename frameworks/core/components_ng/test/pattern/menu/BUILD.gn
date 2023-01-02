@@ -77,6 +77,7 @@ ohos_unittest("menu_layout_algorithm_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/menu/menu_item/menu_item_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/option/option_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/option/option_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/option/option_pattern.cpp",
