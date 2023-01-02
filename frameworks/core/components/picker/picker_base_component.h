@@ -266,6 +266,16 @@ public:
         columnHeight_ = value;
     }
 
+    bool GetDefaultHeight() const
+    {
+        return defaultHeight_;
+    }
+
+    void SetDefaultHeight(bool value)
+    {
+        defaultHeight_ = value;
+    }
+
     const RefPtr<StackElement>& GetStack()
     {
         return stack_;
@@ -464,6 +474,7 @@ private:
     EventMarker OnDialogChange_;
 
     Dimension columnHeight_;
+    bool defaultHeight_ = false;
 
     RefPtr<RotationController> rotationController_;
 

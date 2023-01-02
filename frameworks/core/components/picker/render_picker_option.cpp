@@ -71,11 +71,16 @@ void RenderPickerOption::Update(const RefPtr<Component>& component)
         hoverDecoration_->SetBackgroundColor(HOVER_COLOR);
     }
     optionSize_ = theme->GetOptionSize(option->GetSelected());
-    if (!NearZero(NormalizeToPx(option->GetFixHeight()))) {
-        if (option->GetFixHeight().Unit() == DimensionUnit::PERCENT) {
-            optionSize_.SetHeight(optionSize_.Height() * option->GetFixHeight().Value());
+    if (option->GetDefaultHeight()) {
+        optionDefaultHeight_ = option->GetDefaultHeight();
+        if (NormalizeToPx(option->GetFixHeight()) > 0) {
+            if (option->GetFixHeight().Unit() == DimensionUnit::PERCENT) {
+                optionSize_.SetHeight(optionSize_.Height() * option->GetFixHeight().Value());
+            } else {
+                optionSize_.SetHeight(NormalizeToPx(option->GetFixHeight()));
+            }
         } else {
-            optionSize_.SetHeight(NormalizeToPx(option->GetFixHeight()));
+            optionSize_.SetHeight(0);
         }
     }
     optionSizeUnit_ = theme->GetOptionSizeUnit();
@@ -443,7 +448,7 @@ void RenderPickerOption::PerformLayout()
     if (realSize_.Width() - textSize.Width() < realPadding_) {
         realSize_.SetWidth(textSize.Width() + realPadding_);
     }
-    if (realSize_.Height() - textSize.Height() < realPadding_) {
+    if (realSize_.Height() - textSize.Height() < realPadding_ && !optionDefaultHeight_) {
         realSize_.SetHeight(textSize.Height() + realPadding_);
     }
 
