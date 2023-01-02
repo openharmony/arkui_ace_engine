@@ -305,6 +305,7 @@ void PickerBaseComponent::InitializeColumns(
         column->SetTextDirection(GetTextDirection());
         column->SetInDialog(isDialog_);
         column->SetFixHeight(GetColumnHeight());
+        column->SetDefaultHeight(GetDefaultHeight());
         auto id = column->GetNodeId();
         if (id < 0) {
             id = accessibilityManager->GenerateNextAccessibilityId();

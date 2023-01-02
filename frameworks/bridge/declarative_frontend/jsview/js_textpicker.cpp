@@ -131,8 +131,8 @@ void JSTextPicker::SetDefaultPickerItemHeight(const JSCallbackInfo& info)
         LOGE("PickerTextComponent is null");
         return;
     }
-
     TextPicker->SetColumnHeight(height);
+    TextPicker->SetDefaultHeight(true);
 }
 
 void JSTextPicker::OnAccept(const JSCallbackInfo& info)
@@ -423,7 +423,10 @@ void JSTextPickerDialog::ParseText(RefPtr<PickerTextComponent>& component, const
 
     component->SetIsDialog(true);
     component->SetIsCreateDialogComponent(true);
-    component->SetColumnHeight(height);
+    if (!defaultHeight->IsEmpty()) {
+        component->SetColumnHeight(height);
+        component->SetDefaultHeight(true);
+    }
     component->SetSelected(selected);
     component->SetRange(getRangeVector);
 }
