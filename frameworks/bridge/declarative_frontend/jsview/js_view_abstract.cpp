@@ -2583,7 +2583,7 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
             }
             count = countJsVal->ToNumber<int>();
             auto pluralStr = themeConstants->GetPluralStringByName(param->ToString(), count);
-            ReplaceHolder(pluralStr, params, 1);
+            ReplaceHolder(pluralStr, params, 2);
             result = pluralStr;
         } else {
             return false;
