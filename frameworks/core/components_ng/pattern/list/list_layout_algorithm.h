@@ -152,6 +152,16 @@ public:
         return itemGroupList_;
     }
 
+    void SetChainOffsetCallback(std::function<float(int32_t)> func)
+    {
+        chainOffsetFunc_ = std::move(func);
+    }
+
+    void SetChainInterval(float interval)
+    {
+        chainInterval_ = interval;
+    }
+
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
@@ -181,7 +191,8 @@ protected:
         return index;
     }
 
-    void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper);
+    void SetListItemGroupParam(
+        const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos, bool forwardLayout) const;
     void SetItemInfo(int32_t index, ListItemInfo&& info)
     {
         itemPosition_[index] = info;
@@ -230,6 +241,9 @@ private:
 
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
     std::list<WeakPtr<FrameNode>> itemGroupList_;
+
+    std::function<float(int32_t)> chainOffsetFunc_;
+    float chainInterval_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

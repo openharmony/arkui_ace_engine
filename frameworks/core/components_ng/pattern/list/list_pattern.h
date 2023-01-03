@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 
+#include "core/animation/bilateral_spring_adapter.h"
+#include "core/animation/simple_spring_chain.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
@@ -138,6 +140,7 @@ public:
         return estimateOffset_ - currentOffset_;
     }
 
+    // scroller
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve);
     void ScrollTo(float position);
     void ScrollToIndex(int32_t index, ScrollIndexAlignment align = ScrollIndexAlignment::ALIGN_TOP);
@@ -145,6 +148,7 @@ public:
     bool ScrollPage(bool reverse);
     Offset GetCurrentOffset() const;
 
+    // scrollBar
     void SetScrollBar();
     void UpdateScrollBarOffset();
     void RegisterScrollBarEventTask();
@@ -156,6 +160,20 @@ public:
     float GetCurrentPosition() const
     {
         return currentPosition_;
+    }
+
+    // chain animation
+    void SetChainAnimation(bool enable);
+    void InitChainAnimation(int32_t nodeCount);
+    float FlushChainAnimation(float dragOffset);
+    void ProcessDragStart(float startPosition);
+    void ProcessDragUpdate(float dragOffset);
+    float GetChainDelta(int32_t index) const;
+
+    // multiSelectable
+    void SetMultiSelectable(bool multiSelectable)
+    {
+        multiSelectable_ = multiSelectable;
     }
 
 private:
@@ -175,10 +193,18 @@ private:
     void ProcessEvent(bool indexChanged, float finalOffset, bool isJump);
     void CheckScrollable();
     bool IsOutOfBoundary(bool useCurrentDelta = true);
+    bool ScrollPositionCallback(float offset, int32_t source);
     void InitScrollableEvent();
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect);
     void SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub, EdgeEffect edgeEffect);
     void HandleScrollEffect(float offset);
+
+    // multiSelectable
+    void InitMouseEvent();
+    void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
+    void ClearSelectedZone();
+    RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
+    void MultiSelectWithoutKeyboard(const RectF& selectedZone);
 
     RefPtr<Animator> animator_;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -216,6 +242,21 @@ private:
     std::list<WeakPtr<FrameNode>> itemGroupList_;
     std::map<int32_t, int32_t> lanesItemRange_;
     int32_t lanes_ = 1;
+
+    // chain animation
+    SpringChainProperty chainProperty_;
+    RefPtr<SpringProperty> overSpringProperty_;
+    RefPtr<BilateralSpringAdapter> chainAdapter_;
+    RefPtr<SimpleSpringChain> chain_;
+    bool chainOverScroll_ = false;
+    int32_t dragStartIndexPending_ = 0;
+    int32_t dragStartIndex_ = 0;
+
+    // multiSelectable
+    bool multiSelectable_ = false;
+    bool isMouseEventInit_ = false;
+    OffsetF mouseStartOffset_;
+    OffsetF mouseEndOffset_;
 };
 } // namespace OHOS::Ace::NG
 

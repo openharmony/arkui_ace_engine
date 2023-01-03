@@ -37,7 +37,6 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
-#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -1710,17 +1709,13 @@ void RosenRenderContext::SetRSNode(const std::shared_ptr<RSNode>& externalNode)
     parentUINode->RebuildRenderContextTree();
 }
 
-void RosenRenderContext::OnMouseSelectUpdate(const Color& fillColor, const Color& strokeColor)
+void RosenRenderContext::OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pattern = host->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    auto itemPattern = AceType::DynamicCast<GridItemPattern>(pattern);
-    CHECK_NULL_VOID(itemPattern);
 
     RectF rect = RectF();
-    if (itemPattern->IsSelected()) {
+    if (isSelected) {
         auto geometryNode = host->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         rect = geometryNode->GetFrameRect();

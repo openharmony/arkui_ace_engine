@@ -56,10 +56,9 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
         lanesChanged_ = false;
         currentIndex = GetLanesFloor(layoutWrapper, currentIndex + 1) - 1;
     }
-    for (int32_t i = 0; i < lanes; i++) {
+    for (int32_t i = 0; i < lanes && currentIndex + 1 <= GetMaxListItemIndex(); i++) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
         if (!wrapper) {
-            LOGI("the start %{public}d index wrapper is null", currentIndex + 1);
             break;
         }
         isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
@@ -72,7 +71,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
         ++currentIndex;
         if (isGroup) {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", currentIndex);
-            SetListItemGroupParam(wrapper);
+            SetListItemGroupParam(wrapper, startPos, true);
             wrapper->Measure(groupLayoutConstraint_);
         } else {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
@@ -99,10 +98,9 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
     bool isGroup = false;
     int32_t cnt = 0;
     int32_t lanes = lanes_ > 1 ? lanes_ : 1;
-    for (int32_t i = 0; i < lanes; i++) {
+    for (int32_t i = 0; i < lanes && currentIndex - 1 >= 0; i++) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex - 1);
         if (!wrapper) {
-            LOGI("the %{public}d wrapper is null", currentIndex - 1);
             break;
         }
         isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
@@ -116,7 +114,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
         cnt++;
         if (isGroup) {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", currentIndex);
-            SetListItemGroupParam(wrapper);
+            SetListItemGroupParam(wrapper, endPos, false);
             wrapper->Measure(groupLayoutConstraint_);
         } else {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);

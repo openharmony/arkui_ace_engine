@@ -39,7 +39,7 @@ public:
     void SetLaneMaxLength(const Dimension& laneMaxLength) override;
     void SetListItemAlign(V2::ListItemAlign listItemAlign) override;
     void SetCachedCount(int32_t cachedCount) override;
-    void SetMultiSelectable(bool selectable) override {}
+    void SetMultiSelectable(bool selectable) override;
     void SetHasWidth(bool hasWidth) override {}
     void SetHasHeight(bool hasHeight) override {}
     void SetSticky(V2::StickyStyle stickyStyle) override;

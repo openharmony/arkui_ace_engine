@@ -80,7 +80,10 @@ void ListModelNG::SetDivider(const V2::ItemDivider& divider)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider);
 }
 
-void ListModelNG::SetChainAnimation(bool enableChainAnimation) {}
+void ListModelNG::SetChainAnimation(bool enableChainAnimation)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ChainAnimation, enableChainAnimation);
+}
 
 void ListModelNG::SetLanes(int32_t lanes)
 {
@@ -116,6 +119,15 @@ void ListModelNG::SetCachedCount(int32_t cachedCount)
 void ListModelNG::SetSticky(V2::StickyStyle stickyStyle)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, StickyStyle, stickyStyle);
+}
+
+void ListModelNG::SetMultiSelectable(bool selectable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMultiSelectable(selectable);
 }
 
 void ListModelNG::SetOnScroll(OnScrollEvent&& onScroll)
