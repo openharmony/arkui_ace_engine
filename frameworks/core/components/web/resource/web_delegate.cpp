@@ -2630,7 +2630,7 @@ void WebDelegate::UpdateDarkMode(const WebDarkMode& mode)
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
             std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
-            if (mode == WebDarkMode::ON) {
+            if (mode == WebDarkMode::On) {
                 delegate->UnRegisterConfigObserver();
                 setting->PutDarkSchemeEnabled(true);
                 if (delegate->forceDarkMode_) {
@@ -2638,13 +2638,13 @@ void WebDelegate::UpdateDarkMode(const WebDarkMode& mode)
                 }
                 return;
             }
-            if (mode == WebDarkMode::OFF) {
+            if (mode == WebDarkMode::Off) {
                 delegate->UnRegisterConfigObserver();
                 setting->PutDarkSchemeEnabled(false);
                 setting->PutForceDarkModeEnabled(false);
                 return;
             }
-            if (mode == WebDarkMode::AUTO) {
+            if (mode == WebDarkMode::Auto) {
                 delegate->UpdateDarkModeAuto(delegate, setting);
             }
         },

@@ -3965,19 +3965,19 @@ void JSWeb::OnTouchIconUrlReceived(const JSCallbackInfo& args)
 
 void JSWeb::DarkMode(int32_t darkMode)
 {
-    auto mode = WebDarkMode::OFF;
+    auto mode = WebDarkMode::Off;
     switch (darkMode) {
         case 0:
-            mode = WebDarkMode::OFF;
+            mode = WebDarkMode::Off;
             break;
         case 1:
-            mode = WebDarkMode::ON;
+            mode = WebDarkMode::On;
             break;
         case 2:
-            mode = WebDarkMode::AUTO;
+            mode = WebDarkMode::Auto;
             break;
         default:
-            mode = WebDarkMode::OFF;
+            mode = WebDarkMode::Off;
             break;
     }
     if (Container::IsCurrentUseNewPipeline()) {
