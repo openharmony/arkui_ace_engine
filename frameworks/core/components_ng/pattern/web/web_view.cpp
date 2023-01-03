@@ -449,6 +449,13 @@ void WebView::SetMultiWindowAccessEnabled(bool isMultiWindowAccessEnabled)
     webPattern->UpdateMultiWindowAccessEnabled(isMultiWindowAccessEnabled);
 }
 
+void WebView::SetAllowWindowOpenMethod(bool isAllowWindowOpenMethod)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateAllowWindowOpenMethod(isAllowWindowOpenMethod);
+}
+
 void WebView::SetJsProxyCallback(JsProxyCallback&& jsProxyCallback)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();

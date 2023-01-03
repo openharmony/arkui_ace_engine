@@ -406,4 +406,9 @@ int32_t SystemProperties::GetSvgMode()
     return system::GetIntParameter<int>("persist.ace.svg.mode", 1);
 }
 
+bool SystemProperties::GetAllowWindowOpenMethodEnabled()
+{
+    return system::GetBoolParameter("persist.web.allowWindowOpenMethod.enabled", false);
+}
+
 } // namespace OHOS::Ace

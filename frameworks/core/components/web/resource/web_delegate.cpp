@@ -2268,7 +2268,6 @@ void WebDelegate::UpdateSettting(bool useNewPipe)
         auto webPattern = webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
         setting->PutDomStorageEnabled(webPattern->GetDomStorageAccessEnabledValue(false));
-        setting->PutIsCreateWindowsByJavaScriptAllowed(true);
         setting->PutJavaScriptEnabled(webPattern->GetJsEnabledValue(true));
         setting->PutEnableRawFileAccess(webPattern->GetFileAccessEnabledValue(true));
         setting->PutEnableContentAccess(true);
@@ -2291,7 +2290,6 @@ void WebDelegate::UpdateSettting(bool useNewPipe)
     auto component = webComponent_.Upgrade();
     CHECK_NULL_VOID(component);
     setting->PutDomStorageEnabled(component->GetDomStorageAccessEnabled());
-    setting->PutIsCreateWindowsByJavaScriptAllowed(true);
     setting->PutJavaScriptEnabled(component->GetJsEnabled());
     setting->PutEnableRawFileAccess(component->GetFileAccessEnabled());
     setting->PutEnableContentAccess(component->GetContentAccessEnabled());
@@ -2844,6 +2842,23 @@ void WebDelegate::UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled)
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
                 setting->PutMultiWindowAccess(isMultiWindowAccessEnabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateAllowWindowOpenMethod(bool isAllowWindowOpenMethod)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isAllowWindowOpenMethod]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                setting->PutIsCreateWindowsByJavaScriptAllowed(isAllowWindowOpenMethod);
             }
         },
         TaskExecutor::TaskType::PLATFORM);

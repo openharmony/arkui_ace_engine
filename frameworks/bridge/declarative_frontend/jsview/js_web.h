@@ -103,6 +103,7 @@ public:
     static void OnWindowNew(const JSCallbackInfo& args);
     static void OnWindowExit(const JSCallbackInfo& args);
     static void MultiWindowAccessEnabled(bool isMultiWindowAccessEnable);
+    static void AllowWindowOpenMethod(bool isAllowWindowOpenMethod);
     static void WebCursiveFont(const std::string& cursiveFontFamily);
     static void WebFantasyFont(const std::string& fantasyFontFamily);
     static void WebFixedFont(const std::string& fixedFontFamily);
