@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,6 @@
 namespace OHOS::Ace::Framework {
 void JSMenuItem::Create(const JSCallbackInfo& info)
 {
-    LOGI("JSMenuItem::Create");
     if (info.Length() < 1 || (!info[0]->IsObject() && !info[0]->IsFunction())) {
         LOGW("JSMenuItem The arg is wrong");
         return;
@@ -37,8 +36,6 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
             builderFunc->Execute();
             auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
             CHECK_NULL_VOID(customNode);
-
-            // NG::OptionView::CreateMenuItem(customNode);
         } else {
             auto menuItemObj = JSRef<JSObject>::Cast(info[0]);
 
@@ -110,7 +107,6 @@ void JSMenuItem::SelectIcon(bool isShow)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         NG::MenuItemView::SetSelectIcon(isShow);
-        return;
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,6 @@
 namespace OHOS::Ace::Framework {
 void JSMenu::Create(const JSCallbackInfo& /* info */)
 {
-    LOGI("JSMenu::Create");
     if (Container::IsCurrentUseNewPipeline()) {
         NG::MenuView::Create();
         return;
@@ -29,7 +28,6 @@ void JSMenu::Create(const JSCallbackInfo& /* info */)
 
 void JSMenu::FontSize(const JSCallbackInfo& info)
 {
-    LOGI("JSMenu::FontSize");
     if (info.Length() < 1) {
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;

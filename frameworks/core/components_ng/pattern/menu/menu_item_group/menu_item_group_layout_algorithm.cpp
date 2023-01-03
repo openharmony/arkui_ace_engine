@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,7 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto paintProperty = host->GetPaintProperty<MenuItemGroupPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateNeedHeaderPadding(needHeaderPadding_);
-    float headerPadding = needHeaderPadding_ ? GROUP_DIVIDER_PADDING.ConvertToPx() : 0.0;
+    float headerPadding = needHeaderPadding_ ? GROUP_DIVIDER_PADDING.ConvertToPx() : 0.0f;
     float headerHeight = 0.0f;
     if (headerIndex_ >= 0) {
         auto headerWrapper = layoutWrapper->GetOrCreateChildByIndex(headerIndex_);
@@ -80,7 +80,7 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // set menu size
     needFooterPadding_ = NeedFooterPadding(host);
     paintProperty->UpdateNeedFooterPadding(needHeaderPadding_);
-    float footerPadding = needFooterPadding_ ? GROUP_DIVIDER_PADDING.ConvertToPx() : 0.0;
+    float footerPadding = needFooterPadding_ ? GROUP_DIVIDER_PADDING.ConvertToPx() : 0.0f;
     totalHeight += (headerPadding + footerPadding);
     menuItemGroupSize.SetHeight(totalHeight);
 
@@ -121,7 +121,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(wrapper);
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
-    float headerPadding = needHeaderPadding_ ? GROUP_DIVIDER_PADDING.ConvertToPx() : 0.0;
+    float headerPadding = needHeaderPadding_ ? GROUP_DIVIDER_PADDING.ConvertToPx() : 0.0f;
     LayoutIndex(wrapper, OffsetF(MENU_ITEM_GROUP_PADDING.ConvertToPx(), headerPadding));
 }
 
@@ -136,7 +136,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper)
     auto groupHeight = size.Height();
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
-    float footerPadding = needFooterPadding_ ? GROUP_DIVIDER_PADDING.ConvertToPx() : 0.0;
+    float footerPadding = needFooterPadding_ ? GROUP_DIVIDER_PADDING.ConvertToPx() : 0.0f;
     LayoutIndex(wrapper, OffsetF(MENU_ITEM_GROUP_PADDING.ConvertToPx(), (groupHeight - footerHeight - footerPadding)));
 }
 
