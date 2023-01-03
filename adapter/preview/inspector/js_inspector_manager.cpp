@@ -245,6 +245,7 @@ bool JsInspectorManager::OperateGeneralComponent(
 RefPtr<Component> JsInspectorManager::GetNewComponentWithJsCode(const std::unique_ptr<JsonValue>& root)
 {
     std::string jsCode = root->GetString("jsCode", "");
+    std::string viewID = root->GetString("viewID", "");
     if (jsCode.length() == 0) {
         LOGE("Get jsCode Failed");
         return nullptr;
@@ -264,7 +265,7 @@ RefPtr<Component> JsInspectorManager::GetNewComponentWithJsCode(const std::uniqu
         LOGE("Get declarativeFrontend Failed");
         return nullptr;
     }
-    auto component = declarativeFrontend->GetNewComponentWithJsCode(jsCode);
+    auto component = declarativeFrontend->GetNewComponentWithJsCode(jsCode, viewID);
     return component;
 }
 

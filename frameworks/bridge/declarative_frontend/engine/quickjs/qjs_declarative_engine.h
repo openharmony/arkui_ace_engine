@@ -36,7 +36,7 @@ public:
 
     void LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
 
-    RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode) override;
+    RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID) override;
 
     // Load the je file of the page in NG structure..
     bool LoadPageSource(const std::string& url) override;
