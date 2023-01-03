@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/property/property.h"
@@ -69,9 +70,10 @@ public:
     void PaintProgress(RSCanvas& canvas, ArcData arcData, bool useEffect = false, bool useAnimator = false,
         float percent = 0.0f) const;
 
-    void SetDate(float date)
+    void UpdateDate()
     {
         if (date_) {
+            float data = NearZero(date_->Get()) ? 1.0f : 0;
             AnimationOption option = AnimationOption();
             RefPtr<Curve> curve = AceType::MakeRefPtr<LinearCurve>();
             option.SetDuration(200);
@@ -79,9 +81,7 @@ public:
             option.SetCurve(curve);
             option.SetIteration(1);
             option.SetTempo(0.2f);
-            AnimationUtils::Animate(option, [&]() {
-                date_->Set(date);
-            });
+            AnimationUtils::Animate(option, [&]() { date_->Set(data); });
         }
     }
 
