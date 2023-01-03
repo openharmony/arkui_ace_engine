@@ -68,7 +68,7 @@ constexpr Dimension DEFLATE_RADIUS_FOCUS = 3.0_vp;
 
 const std::string DIGIT_WHITE_LIST = "^[0-9]*$";
 const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
-const std::string EMAIL_WHITE_LIST = "^[a-zA-Z0-9_-.]+@[a-zA-Z0-9_-.]+([a-zA-Z0-9])";
+const std::string EMAIL_WHITE_LIST = "[\\w.]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
 const std::string NEW_LINE = "\n";
 // Whether the system is Mac or not determines which key code is selected.
@@ -1476,6 +1476,14 @@ void RenderTextField::KeyboardEditingValueFilter(TextEditingValue& valueToUpdate
     if (keyboardFilterValue.empty()) {
         return;
     }
+    if (keyboard_ == TextInputType::EMAIL_ADDRESS && valueToUpdate.text == "@") {
+        if (GetEditingValue().text.find('@') != std::string::npos) {
+            valueToUpdate.text = "";
+            valueToUpdate.selection.baseOffset = 0;
+            valueToUpdate.selection.extentOffset = 0;
+        }
+        return;
+    }
     bool textChanged = false;
     auto start = valueToUpdate.selection.GetStart();
     auto end = valueToUpdate.selection.GetEnd();
@@ -1561,7 +1569,9 @@ void RenderTextField::UpdateEditingValue(const std::shared_ptr<TextEditingValue>
 
     ChangeCounterStyle(valueNeedToUpdate);
 
-    HandleValueFilter(valueBeforeUpdate, valueNeedToUpdate);
+    if (lastInputAction_ != InputAction::DELETE_BACKWARD && lastInputAction_ != InputAction::DELETE_FORWARD) {
+        HandleValueFilter(valueBeforeUpdate, valueNeedToUpdate);
+    }
 
     if (obscure_ && (valueNeedToUpdate.text.length() == valueBeforeUpdate.text.length() + 1)) {
         // Reset pending.
