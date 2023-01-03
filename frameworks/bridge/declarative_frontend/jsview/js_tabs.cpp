@@ -87,6 +87,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
                 tabController = JSTabsController::CreateController();
             }
             tabController->SetInitialIndex(index->ToNumber<int32_t>());
+            tabController->SetIndexWithoutChangeContent(index->ToNumber<int32_t>());
         }
     }
     std::list<RefPtr<Component>> children;
