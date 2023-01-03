@@ -27,6 +27,8 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr float DIVIDER_LINE_WIDTH = 1.0f;
+constexpr uint8_t ENABLED_ALPHA = 255;
+constexpr uint8_t DISABLED_ALPHA = 102;
 } // namespace
 
 CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
@@ -40,8 +42,8 @@ CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     auto geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
     auto frameRect = geometryNode->GetFrameRect();
-    return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, frameRect, dividerSpacing, dividerColor](
-               RSCanvas& canvas) {
+    return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, frameRect, dividerSpacing, dividerColor,
+               enabled = enabled_](RSCanvas& canvas) {
         DividerPainter dividerPainter(dividerLineWidth, frameRect.Width(), false, dividerColor, LineCap::SQUARE);
         double upperLine = (frameRect.Height() - dividerSpacing) / 2.0;
         double downLine = (frameRect.Height() + dividerSpacing) / 2.0;
@@ -52,7 +54,11 @@ CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
         dividerPainter.DrawLine(canvas, offsetY);
         auto picker = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(picker);
-        picker->PaintGradient(canvas, frameRect);
+        if (enabled) {
+            picker->PaintGradient(canvas, frameRect);
+        } else {
+            picker->PaintDisable(canvas, frameRect.Width(), frameRect.Height());
+        }
     };
 }
 
@@ -87,5 +93,21 @@ void DatePickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRe
     paint.setShader(SkGradientShader::MakeLinear(points, colors, stopPositions, std::size(colors), SkTileMode::kClamp));
 #endif
     skCanvas->drawRect({ 0.0f, 0.0f, frameRect.Right(), frameRect.Bottom() }, paint);
+}
+
+void DatePickerPaintMethod::PaintDisable(RSCanvas& canvas, double X, double Y)
+{
+    double centerY = Y;
+    double centerX = X;
+    RSRect rRect(0, 0, centerX, centerY);
+    RSPath path;
+    path.AddRoundRect(rRect, 0, 0, RSPathDirection::CW_DIRECTION);
+    RSPen pen;
+    RSBrush brush;
+    brush.SetColor(float(DISABLED_ALPHA) / ENABLED_ALPHA);
+    pen.SetColor(float(DISABLED_ALPHA) / ENABLED_ALPHA);
+    canvas.AttachBrush(brush);
+    canvas.AttachPen(pen);
+    canvas.DrawPath(path);
 }
 } // namespace OHOS::Ace::NG
