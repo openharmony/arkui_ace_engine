@@ -15,6 +15,8 @@
 
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
 
+#include "third_party/skia/include/core/SkColorFilter.h"
+
 #include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/image_provider/adapter/flutter_image_provider.h"
@@ -32,6 +34,11 @@ namespace {
 #ifdef ENABLE_ROSEN_BACKEND
 constexpr uint8_t RADIUS_POINTS_SIZE = 4;
 #endif
+
+const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
+    0.30f, 0.59f, 0.11f, 0, 0,                                   // green
+    0.30f, 0.59f, 0.11f, 0, 0,                                   // blue
+    0, 0, 0, 1.0f, 0 };                                          // alpha transparency
 } // namespace
 RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
 {
@@ -123,8 +130,21 @@ int32_t SkiaCanvasImage::GetHeight() const
 #endif
 }
 
-void SkiaCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect,
-    const BorderRadiusArray& radiusXY)
+void SkiaCanvasImage::AddFilter(SkPaint& paint)
+{
+    auto config = GetPaintConfig();
+    if (ImageRenderMode::TEMPLATE == config.renderMode_ || config.colorFilter_) {
+        RSColorMatrix colorFilterMatrix;
+        if (config.colorFilter_) {
+            paint.setColorFilter(SkColorFilters::Matrix(config.colorFilter_->data()));
+        } else if (ImageRenderMode::TEMPLATE == config.renderMode_) {
+            paint.setColorFilter(SkColorFilters::Matrix(GRAY_COLOR_MATRIX));
+        }
+    }
+}
+
+void SkiaCanvasImage::DrawToRSCanvas(
+    RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {
     auto image = GetCanvasImage();
     RSImage rsImage(&image);
@@ -147,6 +167,7 @@ void SkiaCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, co
         return;
     }
     SkPaint paint;
+    AddFilter(paint);
     SkVector radii[RADIUS_POINTS_SIZE] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
     if (radiusXY.size() == RADIUS_POINTS_SIZE) {
         radii[SkRRect::kUpperLeft_Corner].set(
@@ -163,15 +184,8 @@ void SkiaCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, co
             SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerLeft_Corner].GetY(), 0.0f)));
     }
     recordingCanvas->ClipAdaptiveRRect(radii);
-    Rosen::RsImageInfo rsImageInfo(
-        (int)(GetPaintConfig().imageFit_),
-        (int)(GetPaintConfig().imageRepeat_),
-        radii,
-        1.0,
-        GetUniqueID(),
-        GetCompressWidth(),
-        GetCompressHeight()
-    );
+    Rosen::RsImageInfo rsImageInfo((int)(GetPaintConfig().imageFit_), (int)(GetPaintConfig().imageRepeat_), radii, 1.0,
+        GetUniqueID(), GetCompressWidth(), GetCompressHeight());
     auto data = GetCompressData();
     recordingCanvas->DrawImageWithParm(image, std::move(data), rsImageInfo, paint);
 #else

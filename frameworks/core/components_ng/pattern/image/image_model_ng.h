@@ -38,7 +38,7 @@ public:
     void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) override;
     void SetImageSourceSize(const std::pair<Dimension, Dimension>& size) override;
     void SetImageFill(const Color& color) override;
-    void SetImageInterpolation(ImageInterpolation iterpolation) override;
+    void SetImageInterpolation(ImageInterpolation interpolation) override;
     void SetImageRepeat(ImageRepeat imageRepeat) override;
     void SetImageRenderMode(ImageRenderMode imageRenderMode) override;
     bool IsSrcSvgImage() override;
