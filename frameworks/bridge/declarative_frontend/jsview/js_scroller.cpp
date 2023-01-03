@@ -117,13 +117,14 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     } else {
         LOGD("ScrollTo(%lf, %lf)", xOffset.Value(), yOffset.Value());
     }
-    if (!controller_) {
+    auto scrollController = controllerWeak_.Upgrade();
+    if (!scrollController) {
         LOGE("controller_ is nullptr");
         return;
     }
-    auto direction = controller_->GetScrollDirection();
+    auto direction = scrollController->GetScrollDirection();
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
-    controller_->AnimateTo(position, static_cast<float>(duration), curve);
+    scrollController->AnimateTo(position, static_cast<float>(duration), curve);
 }
 
 void JSScroller::ScrollEdge(const JSCallbackInfo& args)
@@ -133,13 +134,14 @@ void JSScroller::ScrollEdge(const JSCallbackInfo& args)
         LOGW("Invalid params");
         return;
     }
-    if (!controller_) {
+    auto scrollController = controllerWeak_.Upgrade();
+    if (!scrollController) {
         LOGE("controller_ is nullptr");
         return;
     }
     LOGD("ScrollEdge(%{public}d)", static_cast<int32_t>(edge));
     ScrollEdgeType edgeType = EDGE_TYPE_TABLE[static_cast<int32_t>(edge)];
-    controller_->ScrollToEdge(edgeType, true);
+    scrollController->ScrollToEdge(edgeType, true);
 }
 
 void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
@@ -149,11 +151,12 @@ void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
         LOGW("Invalid params");
         return;
     }
-    if (!controller_) {
+    auto scrollController = controllerWeak_.Upgrade();
+    if (!scrollController) {
         LOGE("controller_ is nullptr");
         return;
     }
-    controller_->JumpTo(index, SCROLL_FROM_JUMP);
+    scrollController->JumpTo(index, SCROLL_FROM_JUMP);
 }
 
 void JSScroller::ScrollPage(const JSCallbackInfo& args)
@@ -172,23 +175,25 @@ void JSScroller::ScrollPage(const JSCallbackInfo& args)
 
     Axis direction = Axis::NONE;
     ConvertFromJSValue(obj->GetProperty("direction"), DIRECTION_TABLE, direction);
-    if (!controller_) {
+    auto scrollController = controllerWeak_.Upgrade();
+    if (!scrollController) {
         LOGE("controller_ is nullptr");
         return;
     }
     LOGD("ScrollPage(%{public}s, %{public}d)", next ? "true" : "false", static_cast<int32_t>(direction));
-    controller_->ScrollPage(!next, true);
+    scrollController->ScrollPage(!next, true);
 }
 
 void JSScroller::CurrentOffset(const JSCallbackInfo& args)
 {
     LOGD("CurrentOffset()");
-    if (!controller_) {
+    auto scrollController = controllerWeak_.Upgrade();
+    if (!scrollController) {
         LOGE("controller_ is nullptr");
         return;
     }
     auto retObj = JSRef<JSObject>::New();
-    auto offset = controller_->GetCurrentOffset();
+    auto offset = scrollController->GetCurrentOffset();
     retObj->SetProperty("xOffset", offset.GetX());
     retObj->SetProperty("yOffset", offset.GetY());
     args.SetReturnValue(retObj);
@@ -219,7 +224,10 @@ void JSScroller::ScrollBy(const JSCallbackInfo& args)
             deltaY = context->NormalizeToPx(yOffset);
         }
     }
-    controller_->ScrollBy(deltaX, deltaY, false);
+    auto scrollController = controllerWeak_.Upgrade();
+    if (scrollController) {
+        scrollController->ScrollBy(deltaX, deltaY, false);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

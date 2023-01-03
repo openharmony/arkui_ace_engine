@@ -111,8 +111,9 @@ void JSTextInputController::Destructor(JSTextInputController* scroller)
 
 void JSTextInputController::CaretPosition(int32_t caretPosition)
 {
-    if (controller_) {
-        controller_->CaretPosition(caretPosition);
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->CaretPosition(caretPosition);
     }
 }
 
