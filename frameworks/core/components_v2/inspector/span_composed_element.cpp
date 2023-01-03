@@ -29,7 +29,7 @@ const char NULL_STRING[] = "";
 
 const std::unordered_map<std::string, std::function<std::string(const SpanComposedElement&)>> CREATE_JSON_MAP {
     { "content", [](const SpanComposedElement& inspector) { return inspector.GetSpanData(); } },
-    { "fontsize", [](const SpanComposedElement& inspector) { return inspector.GetSpanTextFontSize(); } },
+    { "fontSize", [](const SpanComposedElement& inspector) { return inspector.GetSpanTextFontSize(); } },
     { "decoration", [](const SpanComposedElement& inspector) { return inspector.GetDeclaration(); } },
     { "textCase", [](const SpanComposedElement& inspector) { return inspector.GetTextCase(); } }
 };

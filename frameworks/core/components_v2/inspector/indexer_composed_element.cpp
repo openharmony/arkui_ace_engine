@@ -26,6 +26,7 @@
 namespace OHOS::Ace::V2 {
 namespace {
 const std::unordered_map<std::string, std::function<std::string(const IndexerComposedElement&)>> CREATE_JSON_MAP {
+    { "color", [](const IndexerComposedElement& inspector) { return inspector.GetColor(); } },
     { "selectedColor", [](const IndexerComposedElement& inspector) { return inspector.GetSelectedColor(); } },
     { "popupColor", [](const IndexerComposedElement& inspector) { return inspector.GetPopupColor(); } },
     { "selectedBackgroundColor",
@@ -71,6 +72,20 @@ std::unique_ptr<JsonValue> IndexerComposedElement::ToJsonObject() const
     return resultJson;
 }
 
+std::string IndexerComposedElement::GetColor() const
+{
+    auto node = GetInspectorNode(IndexerElement::TypeId());
+    if (!node) {
+        return "";
+    }
+    auto render = AceType::DynamicCast<RenderIndexer>(node)->GetSpecificItem(0);
+    if (!render) {
+        return "#99000000";
+    }
+    auto Color = render->GetNormalTextStyle().GetTextColor();
+    return Color.ColorToString();
+}
+
 std::string IndexerComposedElement::GetSelectedColor() const
 {
     auto node = GetInspectorNode(IndexerElement::TypeId());
@@ -81,7 +96,7 @@ std::string IndexerComposedElement::GetSelectedColor() const
     if (!render) {
         return "";
     }
-    auto selectedColor = render ? render->GetActiveTextStyle().GetTextColor() : Color::BLACK;
+    auto selectedColor = render->GetActiveTextStyle().GetTextColor();
     return selectedColor.ColorToString();
 }
 
@@ -92,6 +107,9 @@ std::string IndexerComposedElement::GetPopupColor() const
         return "";
     }
     auto render = AceType::DynamicCast<RenderIndexer>(node);
+    if (!render->GetBubbleText()) {
+        return "#FF254FF7";
+    }
     auto popupColor = render ? render->GetBubbleText()->GetTextStyle().GetTextColor() : Color::BLACK;
     return popupColor.ColorToString();
 }
@@ -167,6 +185,9 @@ std::string IndexerComposedElement::GetPopupFont() const
     }
     auto render = AceType::DynamicCast<RenderIndexer>(node);
     auto popupFontJson = JsonUtil::Create(true);
+    if (!render->GetBubbleText()) {
+        return "";
+    }
     auto fontSize = render ? render->GetBubbleText()->GetTextStyle().GetFontSize() : Dimension();
     auto fontStyle = render ? render->GetBubbleText()->GetTextStyle().GetFontStyle() : FontStyle::NORMAL;
     auto fontWeight = render ? render->GetBubbleText()->GetTextStyle().GetFontWeight() : FontWeight::NORMAL;
@@ -243,8 +264,7 @@ bool IndexerComposedElement::GetUsingPopup() const
         return false;
     }
     auto render = AceType::DynamicCast<RenderIndexer>(node);
-    auto usingPopup = render ? render->GetBubbleEnabled() : false;
-    return usingPopup;
+    return render ? render->GetBubbleEnabled() : false;
 }
 
 std::string IndexerComposedElement::ConvertAlignStyleToString(AlignStyle alignStyle) const
