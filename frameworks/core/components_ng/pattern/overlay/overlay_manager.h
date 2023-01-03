@@ -72,11 +72,17 @@ public:
     void CleanMenuInSubWindow();
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
+    void ShowToastInSubWindow(
+        const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
+    void PopToastInSubwindow(int32_t toastId);
+    void CleanUpInSubWindow();
 
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
         const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft);
-
+    void ShowDialogInSubWindow(
+        const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft);
+    void PopDialogInSubwindow(const RefPtr<FrameNode>& dialogNode);
     void ShowDateDialog(const DialogProperties& dialogProps, std::map<std::string, PickerDate> datePickerProperty,
         bool isLunar, std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);

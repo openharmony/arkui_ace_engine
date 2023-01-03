@@ -84,14 +84,21 @@ public:
     const RefPtr<Subwindow>& GetCurrentDialogWindow();
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom);
+    void ShowToastNG(const std::string& message, int32_t duration, const std::string& bottom);
+    void ClearToastNG();
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
         const std::set<std::string>& dialogCallbacks);
+    void ShowDialogNG(const DialogProperties& dialogProps, const std::set<std::string>& dialogCallbacks);
+    void ClearDialogNG();
     void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
+        std::function<void(int32_t, int32_t)>&& callback);
+    void ShowActionMenuNG(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();
+    RefPtr<Subwindow> GetOrCreateSubWindowNG();
 
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;

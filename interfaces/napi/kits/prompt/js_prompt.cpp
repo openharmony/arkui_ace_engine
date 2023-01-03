@@ -151,7 +151,7 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         }
     }
 #ifdef OHOS_STANDARD_SYSTEM
-    if (SystemProperties::GetExtSurfaceEnabled() || Container::IsCurrentUseNewPipeline()) {
+    if (SystemProperties::GetExtSurfaceEnabled()) {
         auto delegate = EngineHelper::GetCurrentDelegate();
         if (!delegate) {
             LOGE("can not get delegate.");
@@ -160,7 +160,11 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         }
         delegate->ShowToast(messageString, duration, bottomString);
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        SubwindowManager::GetInstance()->ShowToast(messageString, duration, bottomString);
+        if (Container::IsCurrentUseNewPipeline()) {
+            SubwindowManager::GetInstance()->ShowToastNG(messageString, duration, bottomString);
+        } else {
+            SubwindowManager::GetInstance()->ShowToast(messageString, duration, bottomString);
+        }
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegate();
@@ -208,8 +212,8 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
     if (argc < requireArgc) {
-        NapiThrow(env, "The number of parameters must be greater than or equal to 1.",
-            Framework::ERROR_CODE_PARAM_INVALID);
+        NapiThrow(
+            env, "The number of parameters must be greater than or equal to 1.", Framework::ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
     auto asyncContext = new PromptAsyncContext();
@@ -392,7 +396,7 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
-    if (SystemProperties::GetExtSurfaceEnabled() || Container::IsCurrentUseNewPipeline()) {
+    if (SystemProperties::GetExtSurfaceEnabled()) {
         auto delegate = EngineHelper::GetCurrentDelegate();
         if (delegate) {
             delegate->ShowDialog(asyncContext->titleString, asyncContext->messageString, asyncContext->buttons,
@@ -420,14 +424,25 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             }
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        SubwindowManager::GetInstance()->ShowDialog(asyncContext->titleString, asyncContext->messageString,
-            asyncContext->buttons, asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
+        DialogProperties dialogProperties = {
+            .title = asyncContext->titleString,
+            .content = asyncContext->messageString,
+            .autoCancel = asyncContext->autoCancelBool,
+            .buttons = asyncContext->buttons,
+            .onSuccess = std::move(callBack),
+        };
+        if (Container::IsCurrentUseNewPipeline()) {
+            SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, asyncContext->callbacks);
+        } else {
+            SubwindowManager::GetInstance()->ShowDialog(asyncContext->titleString, asyncContext->messageString,
+                asyncContext->buttons, asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
+        }
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate) {
-        delegate->ShowDialog(asyncContext->titleString, asyncContext->messageString,
-            asyncContext->buttons, asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
+        delegate->ShowDialog(asyncContext->titleString, asyncContext->messageString, asyncContext->buttons,
+            asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
     } else {
         LOGE("delegate is null");
         // throw internal error
@@ -435,8 +450,7 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
         napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
         napi_value msg = nullptr;
-        std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR)
-            + "UI execution context not found.";
+        std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found.";
         napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
         napi_value error = nullptr;
         napi_create_error(env, code, msg, &error);
@@ -483,8 +497,8 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
     if (argc < requireArgc) {
-        NapiThrow(env, "The number of parameters must be greater than or equal to 1.",
-            Framework::ERROR_CODE_PARAM_INVALID);
+        NapiThrow(
+            env, "The number of parameters must be greater than or equal to 1.", Framework::ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
     auto asyncContext = new ShowActionMenuAsyncContext();
@@ -688,7 +702,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
     };
 
 #ifdef OHOS_STANDARD_SYSTEM
-    if (SystemProperties::GetExtSurfaceEnabled() || Container::IsCurrentUseNewPipeline()) {
+    if (SystemProperties::GetExtSurfaceEnabled()) {
         auto delegate = EngineHelper::GetCurrentDelegate();
         if (delegate) {
             delegate->ShowActionMenu(asyncContext->titleString, asyncContext->buttons, std::move(callBack));
@@ -714,8 +728,13 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             }
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        SubwindowManager::GetInstance()->ShowActionMenu(
-            asyncContext->titleString, asyncContext->buttons, std::move(callBack));
+        if (Container::IsCurrentUseNewPipeline()) {
+            SubwindowManager::GetInstance()->ShowActionMenuNG(
+                asyncContext->titleString, asyncContext->buttons, std::move(callBack));
+        } else {
+            SubwindowManager::GetInstance()->ShowActionMenu(
+                asyncContext->titleString, asyncContext->buttons, std::move(callBack));
+        }
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegate();
@@ -727,8 +746,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         std::string strCode = std::to_string(Framework::ERROR_CODE_INTERNAL_ERROR);
         napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
         napi_value msg = nullptr;
-        std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR)
-            + "UI execution context not found.";
+        std::string strMsg = ErrorToMessage(Framework::ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found.";
         napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
         napi_value error = nullptr;
         napi_create_error(env, code, msg, &error);

@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/animation_pub.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -152,6 +153,73 @@ void OverlayManager::PopToast(int32_t toastId)
     LOGI("begin to pop toast, id is %{public}d", toastUnderPop->GetId());
     rootNode->RemoveChild(toastUnderPop);
     toastMap_.erase(toastId);
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void OverlayManager::ShowToastInSubWindow(
+    const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+
+    // only one toast
+    for (auto [id, toastNodeWeak] : toastMap_) {
+        rootNode->RemoveChild(toastNodeWeak.Upgrade());
+    }
+    toastMap_.clear();
+
+    auto toastNode = ToastView::CreateToastNode(message, bottom, isRightToLeft);
+    CHECK_NULL_VOID(toastNode);
+    auto toastId = toastNode->GetId();
+
+    // mount to parent
+    toastNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    toastMap_[toastId] = toastNode;
+    context->FlushPipelineImmediately();
+
+    context->GetTaskExecutor()->PostDelayedTask(
+        [weak = WeakClaim(this), toastId] {
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->PopToastInSubwindow(toastId);
+        },
+        TaskExecutor::TaskType::UI, duration);
+}
+
+void OverlayManager::PopToastInSubwindow(int32_t toastId)
+{
+    LOGI("OverlayManager:::PopToastInSubwindow, toastId= %{public}d", toastId);
+    auto toastIter = toastMap_.find(toastId);
+    if (toastIter == toastMap_.end()) {
+        LOGI("No toast under pop");
+        return;
+    }
+    auto toastFrameNode = toastIter->second.Upgrade();
+    CHECK_NULL_VOID(toastFrameNode);
+
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    LOGI("begin to pop toast, id is %{public}d", toastFrameNode->GetId());
+    rootNode->RemoveChild(toastFrameNode);
+    toastMap_.erase(toastId);
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+
+    auto id = Container::CurrentId();
+    ContainerScope scope(id);
+    SubwindowManager::GetInstance()->ClearToastNG();
+}
+
+void OverlayManager::CleanUpInSubWindow()
+{
+    LOGI("OverlayManager::CleanToastInSubWindow");
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    rootNode->Clean();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -379,6 +447,31 @@ void OverlayManager::CleanMenuInSubWindow()
     rootNode->Clean();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
+void OverlayManager::ShowDialogInSubWindow(
+    const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft)
+{
+    LOGI("OverlayManager::ShowDialogInSubWindow");
+    auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
+    auto root = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(root && dialog);
+    dialog->MountToParent(root);
+    root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+
+    AnimationOption option;
+    option.SetCurve(Curves::LINEAR);
+    option.SetDuration(ANIMATION_DUR);
+    option.SetFillMode(FillMode::FORWARDS);
+    option.SetOnFinishEvent([weak = WeakClaim(this), nodeWK = WeakClaim(RawPtr(dialog)), id = Container::CurrentId()] {
+        auto node = nodeWK.Upgrade();
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID(node && overlayManager);
+        ContainerScope scope(id);
+        overlayManager->FocusDialog(node);
+    });
+    auto ctx = dialog->GetRenderContext();
+    CHECK_NULL_VOID(ctx);
+    ctx->OpacityAnimation(option, 0.0, 1.0);
+}
 
 RefPtr<FrameNode> OverlayManager::ShowDialog(
     const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft)
@@ -421,6 +514,12 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     LOGI("OverlayManager::CloseDialog");
     Pop(dialogNode);
     BlurDialog();
+
+    auto id = Container::CurrentId();
+    ContainerScope scope(id);
+    if (SubwindowManager::GetInstance() != nullptr) {
+        SubwindowManager::GetInstance()->ClearDialogNG();
+    }
 }
 
 bool OverlayManager::RemoveOverlay()
