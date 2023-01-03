@@ -379,10 +379,24 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest010, TestSize.Level1)
     pattern->InitMouseEvent();
     EXPECT_FALSE(pattern->mouseEvent_ == nullptr);
     pattern->InitMouseEvent();
+    pattern->mouseEvent_->GetOnHoverEventFunc()(true);
     // InitTouchEvent()
     pattern->InitTouchEvent();
     EXPECT_FALSE(pattern->touchListener_ == nullptr);
     pattern->InitTouchEvent();
+    TouchEventInfo info("onTouch");
+    TouchLocationInfo touchInfo1(1);
+    touchInfo1.SetTouchType(TouchType::DOWN);
+    info.AddTouchLocationInfo(std::move(touchInfo1));
+    pattern->touchListener_->GetTouchEventCallback()(info);
+    TouchLocationInfo touchInfo2(2);
+    touchInfo2.SetTouchType(TouchType::UP);
+    info.AddTouchLocationInfo(std::move(touchInfo2));
+    pattern->touchListener_->GetTouchEventCallback()(info);
+    TouchLocationInfo touchInfo3(3);
+    touchInfo2.SetTouchType(TouchType::CANCEL);
+    info.AddTouchLocationInfo(std::move(touchInfo3));
+    pattern->touchListener_->GetTouchEventCallback()(info);
     // InitClickEvent()
     pattern->InitClickEvent();
     EXPECT_FALSE(pattern->clickListener_ == nullptr);
@@ -532,6 +546,8 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest015, TestSize.Level1)
     pattern->UpdateAnimation(true);
     EXPECT_FALSE(pattern->controller_ == nullptr);
     pattern->UpdateAnimation(true);
+    pattern->controller_->NotifyStopListener();
+    pattern->translate_->NotifyListener(1);
 }
 
 /**

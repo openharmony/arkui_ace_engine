@@ -36,7 +36,7 @@ namespace OHOS::Ace::NG {
 void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    int nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    int nodeId = stack->ClaimNodeId();
     auto childFrameNode = FrameNode::GetFrameNode(V2::TOGGLE_ETS_TAG, nodeId);
     if (!childFrameNode) {
         switch (toggleType) {

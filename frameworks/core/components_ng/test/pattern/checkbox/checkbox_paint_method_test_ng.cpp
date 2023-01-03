@@ -106,6 +106,8 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest001, TestSize.Level1)
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
     CheckBoxPaintMethod checkBoxPaintMethod(false, false, false, 0.0, UIStatus::OFF_TO_ON);
     auto paintMethod = checkBoxPaintMethod.GetContentDrawFunction(&paintWrapper);
+    RSCanvas canvas;
+    paintMethod(canvas);
     auto paintProperty = AccessibilityManager::DynamicCast<CheckBoxPaintProperty>(paintWrapper.GetPaintProperty());
     paintProperty->UpdateCheckBoxSelectedColor(ACTIVE_COLOR);
     EXPECT_TRUE(paintMethod != nullptr);
@@ -246,7 +248,7 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest005, TestSize.Level1)
     auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
     EXPECT_TRUE(checkBoxPaintProperty != nullptr);
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
-    CheckBoxPaintMethod checkBoxPaintMethod(false, false, false, 0.0, UIStatus::OFF_TO_ON);
+    CheckBoxPaintMethod checkBoxPaintMethod(true, false, false, 0.0, UIStatus::OFF_TO_ON);
     auto paintMethod = checkBoxPaintMethod.GetContentDrawFunction(&paintWrapper);
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillOnce(ReturnRef(canvas));
@@ -282,7 +284,7 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest006, TestSize.Level1)
     auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
     EXPECT_TRUE(checkBoxPaintProperty != nullptr);
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
-    CheckBoxPaintMethod checkBoxPaintMethod(false, false, false, 0.0, UIStatus::ON_TO_OFF);
+    CheckBoxPaintMethod checkBoxPaintMethod(true, false, false, 0.0, UIStatus::ON_TO_OFF);
     auto paintMethod2 = checkBoxPaintMethod.GetContentDrawFunction(&paintWrapper);
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillOnce(ReturnRef(canvas));
@@ -318,7 +320,7 @@ HWTEST_F(CheckBoxPaintMethodTestNg, CheckBoxPaintMethodTest007, TestSize.Level1)
     auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
     EXPECT_TRUE(checkBoxPaintProperty != nullptr);
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
-    CheckBoxPaintMethod checkBoxPaintMethod(false, false, false, 0.0, UIStatus::UNSELECTED);
+    CheckBoxPaintMethod checkBoxPaintMethod(true, false, false, 0.0, UIStatus::UNSELECTED);
     auto paintMethod3 = checkBoxPaintMethod.GetContentDrawFunction(&paintWrapper);
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachPen(_)).WillOnce(ReturnRef(canvas));
