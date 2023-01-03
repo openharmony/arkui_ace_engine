@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTAREA_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTAREA_H
 
+#include "base/memory/referenced.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/core/components/text_field/text_field_component.h"
@@ -41,11 +42,11 @@ public:
     void CaretPosition(int32_t caretPosition);
     void SetController(const RefPtr<TextFieldControllerBase>& controller)
     {
-        controller_ = controller;
+        controllerWeak_ = controller;
     }
 
 private:
-    RefPtr<TextFieldControllerBase> controller_;
+    WeakPtr<TextFieldControllerBase> controllerWeak_;
     ACE_DISALLOW_COPY_AND_MOVE(JSTextAreaController);
 };
 
