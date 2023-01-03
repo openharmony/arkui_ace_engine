@@ -67,6 +67,8 @@ enum class CursorMoveSkip {
     PARAGRAPH,
 };
 
+enum class InputAction { UNKNOWN, INSERT, DELETE_FORWARD, DELETE_BACKWARD };
+
 enum {
     ACTION_SELECT_ALL, // Smallest code unit.
     ACTION_UNDO,
@@ -382,6 +384,16 @@ public:
         return canPaintSelection_;
     }
 
+    void SetLastInputAction(InputAction action)
+    {
+        lastInputAction_ = action;
+    }
+
+    InputAction GetLastInputAction()
+    {
+        return lastInputAction_;
+    }
+
 protected:
     // Describe where caret is and how tall visually.
     struct CaretMetrics {
@@ -653,6 +665,7 @@ private:
     bool isInEditStatus_ = false;
     bool isFocusOnTouch_ = true;
     bool onTapCallbackResult_ = false;
+    InputAction lastInputAction_ = InputAction::UNKNOWN;
     Color pressColor_;
     Color hoverColor_;
     TextSelection selection_; // Selection from custom.

@@ -67,7 +67,7 @@ constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
 const std::string DIGIT_WHITE_LIST = "^[0-9]*$";
 const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
-const std::string EMAIL_WHITE_LIST = "^[a-zA-Z0-9_-.]+@[a-zA-Z0-9_-.]+([a-zA-Z0-9])";
+const std::string EMAIL_WHITE_LIST = "[\\w.]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
 
 void RemoveErrorTextFromValue(const std::string& value, const std::string& errorText, std::string& result)
@@ -1888,36 +1888,21 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     std::string result;
     auto textFieldLayoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto inputType = textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
     if (InSelectMode()) {
-        if (inputType == TextInputType::EMAIL_ADDRESS) {
-            valueToUpdate = textEditingValue_.GetValueBeforePosition(textSelector_.GetStart()) + insertValue +
-                            textEditingValue_.GetValueAfterPosition(textSelector_.GetEnd());
-        }
         caretStart = textSelector_.GetStart();
     } else {
-        if (inputType == TextInputType::EMAIL_ADDRESS) {
-            valueToUpdate =
-                textEditingValue_.GetValueBeforeCursor() + insertValue + textEditingValue_.GetValueAfterCursor();
-        }
         caretStart = textEditingValue_.caretPosition;
     }
     EditingValueFilter(valueToUpdate, result);
-    if ((inputType == TextInputType::EMAIL_ADDRESS && result == oldText) ||
-        (inputType != TextInputType::EMAIL_ADDRESS && result.empty())) {
-        return;
-    }
-    if (inputType != TextInputType::EMAIL_ADDRESS) {
-        if (InSelectMode()) {
-            textEditingValue_.text = textEditingValue_.GetValueBeforePosition(textSelector_.GetStart()) + result +
-                                     textEditingValue_.GetValueAfterPosition(textSelector_.GetEnd());
-        } else {
-            textEditingValue_.text =
-                textEditingValue_.GetValueBeforeCursor() + result + textEditingValue_.GetValueAfterCursor();
-        }
+
+    if (InSelectMode()) {
+        textEditingValue_.text = textEditingValue_.GetValueBeforePosition(textSelector_.GetStart()) + result +
+                                 textEditingValue_.GetValueAfterPosition(textSelector_.GetEnd());
     } else {
-        textEditingValue_.text = result;
+        textEditingValue_.text =
+            textEditingValue_.GetValueBeforeCursor() + result + textEditingValue_.GetValueAfterCursor();
     }
+
     textEditingValue_.CursorMoveToPosition(caretStart + static_cast<int32_t>(insertValue.length()));
     SetEditingValueToProperty(textEditingValue_.text);
     operationRecords_.emplace_back(textEditingValue_);
@@ -1996,7 +1981,13 @@ void TextFieldPattern::EditingValueFilter(std::string& valueToUpdate, std::strin
             break;
         }
         case TextInputType::EMAIL_ADDRESS: {
-            textChanged |= FilterWithRegex(EMAIL_WHITE_LIST, valueToUpdate, result);
+            if (valueToUpdate == "@") {
+                auto charExists = valueToUpdate.find('@') != std::string::npos;
+                textChanged = !charExists;
+                result = charExists ? "" : valueToUpdate;
+            } else {
+                textChanged |= FilterWithRegex(EMAIL_WHITE_LIST, valueToUpdate, result);
+            }
             break;
         }
         case TextInputType::URL: {
