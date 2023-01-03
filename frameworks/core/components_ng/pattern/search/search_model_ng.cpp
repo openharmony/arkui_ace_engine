@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/search/search_view.h"
-
-#include <string>
+#include "core/components_ng/pattern/search/search_model_ng.h"
 
 #include "core/components/common/properties/color.h"
 #include "core/components/search/search_theme.h"
@@ -32,7 +30,7 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<TextFieldController> SearchView::Create(const std::optional<std::string>& value,
+RefPtr<TextFieldControllerBase> SearchModelNG::Create(const std::optional<std::string>& value,
     const std::optional<std::string>& placeholder, const std::optional<std::string>& icon)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -47,7 +45,7 @@ RefPtr<TextFieldController> SearchView::Create(const std::optional<std::string>&
     bool hasCancelButtonNode = frameNode->HasCancelButtonNode();
 
     // TextField frameNode
-    auto searchTheme = frameNode->GetContext()->GetTheme<SearchTheme>();
+    auto searchTheme = PipelineBase::GetCurrentContext()->GetTheme<SearchTheme>();
     auto textFieldFrameNode = CreateTextField(frameNode, placeholder, value);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     textFieldPattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
@@ -105,7 +103,7 @@ RefPtr<TextFieldController> SearchView::Create(const std::optional<std::string>&
 
     // Set search background
     auto renderContext = frameNode->GetRenderContext();
-    auto textFieldTheme = textFieldFrameNode->GetContext()->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = PipelineBase::GetCurrentContext()->GetTheme<TextFieldTheme>();
     renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
     auto radius = textFieldTheme->GetBorderRadius();
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
@@ -117,12 +115,12 @@ RefPtr<TextFieldController> SearchView::Create(const std::optional<std::string>&
     return pattern->GetSearchController();
 }
 
-void SearchView::SetSearchButton(const std::string& text)
+void SearchModelNG::SetSearchButton(const std::string& text)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchButton, text);
 }
 
-void SearchView::SetPlaceholderColor(const Color& color)
+void SearchModelNG::SetPlaceholderColor(const Color& color)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -134,7 +132,7 @@ void SearchView::SetPlaceholderColor(const Color& color)
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void SearchView::SetPlaceholderFont(const Font& font)
+void SearchModelNG::SetPlaceholderFont(const Font& font)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -157,7 +155,7 @@ void SearchView::SetPlaceholderFont(const Font& font)
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void SearchView::SetTextFont(const Font& font)
+void SearchModelNG::SetTextFont(const Font& font)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -180,7 +178,7 @@ void SearchView::SetTextFont(const Font& font)
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void SearchView::SetTextAlign(const TextAlign& textAlign)
+void SearchModelNG::SetTextAlign(const TextAlign& textAlign)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -192,7 +190,7 @@ void SearchView::SetTextAlign(const TextAlign& textAlign)
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void SearchView::SetCopyOption(const CopyOptions& copyOptions)
+void SearchModelNG::SetCopyOption(const CopyOptions& copyOptions)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -204,7 +202,7 @@ void SearchView::SetCopyOption(const CopyOptions& copyOptions)
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void SearchView::SetOnSubmit(ChangeAndSubmitEvent&& onSubmit)
+void SearchModelNG::SetOnSubmit(std::function<void(const std::string&)>&& onSubmit)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -213,7 +211,7 @@ void SearchView::SetOnSubmit(ChangeAndSubmitEvent&& onSubmit)
     eventHub->SetOnSubmit(std::move(onSubmit));
 }
 
-void SearchView::SetOnChange(ChangeAndSubmitEvent&& onChange)
+void SearchModelNG::SetOnChange(std::function<void(const std::string&)>&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -222,28 +220,28 @@ void SearchView::SetOnChange(ChangeAndSubmitEvent&& onChange)
     eventHub->SetOnChange(std::move(onChange));
 }
 
-void SearchView::SetOnCopy(std::function<void(const std::string&)>&& func)
+void SearchModelNG::SetOnCopy(std::function<void(const std::string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SearchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnCopy(std::move(func));
 }
 
-void SearchView::SetOnCut(std::function<void(const std::string&)>&& func)
+void SearchModelNG::SetOnCut(std::function<void(const std::string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SearchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnCut(std::move(func));
 }
 
-void SearchView::SetOnPaste(std::function<void(const std::string&)>&& func)
+void SearchModelNG::SetOnPaste(std::function<void(const std::string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SearchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPaste(std::move(func));
 }
 
-RefPtr<FrameNode> SearchView::CreateTextField(const RefPtr<SearchNode>& parentNode,
+RefPtr<FrameNode> SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
     const std::optional<std::string>& placeholder, const std::optional<std::string>& value)
 {
     auto nodeId = parentNode->GetTextFieldId();
@@ -269,11 +267,9 @@ RefPtr<FrameNode> SearchView::CreateTextField(const RefPtr<SearchNode>& parentNo
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, nullptr);
     auto renderContext = frameNode->GetRenderContext();
     renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
@@ -288,7 +284,7 @@ RefPtr<FrameNode> SearchView::CreateTextField(const RefPtr<SearchNode>& parentNo
     return frameNode;
 };
 
-RefPtr<FrameNode> SearchView::CreateImage(const RefPtr<SearchNode>& parentNode, const std::string& src)
+RefPtr<FrameNode> SearchModelNG::CreateImage(const RefPtr<SearchNode>& parentNode, const std::string& src)
 {
     auto nodeId = parentNode->GetImageId();
     ImageSourceInfo imageSourceInfo(src);
@@ -317,7 +313,7 @@ RefPtr<FrameNode> SearchView::CreateImage(const RefPtr<SearchNode>& parentNode, 
     return frameNode;
 }
 
-RefPtr<FrameNode> SearchView::CreateCancelImage(const RefPtr<SearchNode>& parentNode)
+RefPtr<FrameNode> SearchModelNG::CreateCancelImage(const RefPtr<SearchNode>& parentNode)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
@@ -345,7 +341,7 @@ RefPtr<FrameNode> SearchView::CreateCancelImage(const RefPtr<SearchNode>& parent
     return frameNode;
 }
 
-RefPtr<FrameNode> SearchView::CreateButton(const RefPtr<SearchNode>& parentNode)
+RefPtr<FrameNode> SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode)
 {
     auto nodeId = parentNode->GetButtonId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -359,7 +355,7 @@ RefPtr<FrameNode> SearchView::CreateButton(const RefPtr<SearchNode>& parentNode)
     return frameNode;
 }
 
-RefPtr<FrameNode> SearchView::CreateCancelButton(const RefPtr<SearchNode>& parentNode)
+RefPtr<FrameNode> SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode)
 {
     auto nodeId = parentNode->GetCancelButtonId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -373,7 +369,7 @@ RefPtr<FrameNode> SearchView::CreateCancelButton(const RefPtr<SearchNode>& paren
     return frameNode;
 }
 
-RefPtr<SearchNode> SearchView::GetOrCreateSearchNode(
+RefPtr<SearchNode> SearchModelNG::GetOrCreateSearchNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto searchNode = ElementRegister::GetInstance()->GetSpecificItemById<SearchNode>(nodeId);

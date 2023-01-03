@@ -51,9 +51,9 @@ void SearchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(geometryNode);
     auto constraint = layoutProperty->GetLayoutConstraint();
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetThemeManager()->GetTheme<SearchTheme>();
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
     auto iconHeight = searchTheme->GetIconHeight().ConvertToPx();
 
     if (!constraint->selfIdealSize.Height().has_value()) {
@@ -170,9 +170,9 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(geometryNode);
     auto layoutProperty = DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetThemeManager()->GetTheme<SearchTheme>();
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
     auto iconHeight = searchTheme->GetIconHeight().ConvertToPx();
     // Layout TextField
     auto textFieldWrapper = layoutWrapper->GetOrCreateChildByIndex(TEXTFIELD_INDEX);
