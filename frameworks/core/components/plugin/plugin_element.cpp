@@ -386,33 +386,29 @@ std::string PluginElement::GetPackagePathByBms(const WeakPtr<PluginElement>& wea
         return packagePathStr;
     }
 
-    if (bundleInfo.hapModuleInfos[0].hapPath.empty()) {
-        if (strList.size() == 1) {
-            if (bundleInfo.moduleResPaths.size() == 1) {
-                info.moduleResPath = bundleInfo.moduleResPaths[0];
-            } else {
-                LOGE("Bms moduleResPaths is empty.");
-                pluginElement->HandleOnErrorEvent("1", "Bms moduleResPaths is empty.");
-                return packagePathStr;
-            }
-            packagePathStr = bundleInfo.moduleDirs[0] + "/";
+    if (strList.size() == 1) {
+        if (bundleInfo.moduleResPaths.size() == 1) {
+            info.moduleResPath = bundleInfo.moduleResPaths[0];
         } else {
-            AAFwk::Want want;
-            AppExecFwk::AbilityInfo abilityInfo;
-            AppExecFwk::ElementName element("", strList[0], strList[1]);
-            want.SetElement(element);
-            bool ret = bms->QueryAbilityInfo(want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT,
-                userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID, abilityInfo);
-            if (!ret) {
-                LOGE("Bms get abilityInfo failed!");
-                pluginElement->HandleOnErrorEvent("1", "Bms get bundleName failed!");
-                return packagePathStr;
-            }
-            packagePathStr = abilityInfo.applicationInfo.codePath + "/" + abilityInfo.package + "/";
-            info.moduleResPath = abilityInfo.resourcePath;
+            LOGE("Bms moduleResPaths is empty.");
+            pluginElement->HandleOnErrorEvent("1", "Bms moduleResPaths is empty.");
+            return packagePathStr;
         }
+        packagePathStr = bundleInfo.applicationInfo.entryDir + "/";
     } else {
-        packagePathStr = bundleInfo.hapModuleInfos[0].hapPath;
+        AAFwk::Want want;
+        AppExecFwk::AbilityInfo abilityInfo;
+        AppExecFwk::ElementName element("", strList[0], strList[1]);
+        want.SetElement(element);
+        bool ret = bms->QueryAbilityInfo(want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT,
+            userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID, abilityInfo);
+        if (!ret) {
+            LOGE("Bms get abilityInfo failed!");
+            pluginElement->HandleOnErrorEvent("1", "Bms get bundleName failed!");
+            return packagePathStr;
+        }
+        packagePathStr = abilityInfo.applicationInfo.codePath + "/" + abilityInfo.package + "/";
+        info.moduleResPath = abilityInfo.resourcePath;
     }
 
     return packagePathStr;
@@ -458,7 +454,7 @@ void PluginElement::RunPluginTask(const WeakPtr<PluginElement>& weak, const RefP
         pluginElement->HandleOnErrorEvent("1", "package path is empty.");
         return;
     }
-
+    
     if (packagePathStr.rfind(".hap")) {
         std::string sub = packagePathStr.substr(1, packagePathStr.size() - 5) + "/";
         ReplaceAll(info.source, sub, "");

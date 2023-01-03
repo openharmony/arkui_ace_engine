@@ -357,11 +357,6 @@ public:
     void SetToken(sptr<IRemoteObject>& token);
     sptr<IRemoteObject> GetToken();
 
-    std::string GetWebHapPath() const override
-    {
-        return webHapPath_;
-    }
-
 private:
     void InitializeFrontend();
     void InitializeCallback();
@@ -407,8 +402,6 @@ private:
     mutable std::mutex cardFrontMutex_;
     mutable std::mutex cardPipelineMutex_;
     mutable std::mutex cardTokensMutex_;
-
-    std::string webHapPath_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };

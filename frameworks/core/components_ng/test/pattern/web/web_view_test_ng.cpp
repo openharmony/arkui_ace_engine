@@ -54,8 +54,7 @@ HWTEST_F(WebViewTestNg, WebFrameNodeCreator001, TestSize.Level1)
     RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
     WebView::Create("page/index", controller);
     SetWebIdCallback setWebIdCallback = [](int32_t) {};
-    SetHapPathCallback setHapPathCallback = [](const std::string&) {};
-    WebView::Create("page/index", std::move(setWebIdCallback), std::move(setHapPathCallback));
+    WebView::Create("page/index", std::move(setWebIdCallback));
     OnWebSyncFunc onCommonDialogImpl = [](const std::shared_ptr<BaseEventInfo>& info) ->bool {return true;};
     DialogEventType dialogEventType = DialogEventType::DIALOG_EVENT_ALERT;
     WebView::SetOnCommonDialogImpl(std::move(onCommonDialogImpl), dialogEventType);

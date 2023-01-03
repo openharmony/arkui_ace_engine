@@ -26,15 +26,13 @@ namespace OHOS::Ace::NG {
 using OnWebSyncFunc = std::function<bool(const std::shared_ptr<BaseEventInfo>& info)>;
 using OnWebAsyncFunc = std::function<void(const std::shared_ptr<BaseEventInfo>& info)>;
 using SetWebIdCallback = std::function<void(int32_t)>;
-using SetHapPathCallback = std::function<void(const std::string&)>;
 using JsProxyCallback = std::function<void()>;
 
 class ACE_EXPORT WebView {
 public:
     static void Create(const std::string& webData);
     static void Create(const std::string& src, const RefPtr<WebController>& webController);
-    static void Create(const std::string& src, SetWebIdCallback&& setWebIdCallback,
-        SetHapPathCallback&& setHapPathCallback);
+    static void Create(const std::string& src, SetWebIdCallback&& setWebIdCallback);
     static void SetOnCommonDialogImpl(OnWebSyncFunc&& onCommonDialogImpl, DialogEventType dialogEventType);
     static void SetOnPageStart(OnWebAsyncFunc&& onPageStart);
     static void SetOnPageFinish(OnWebAsyncFunc&& onPageEnd);
