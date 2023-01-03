@@ -436,6 +436,45 @@ int32_t WebWindowNewHandlerOhos::GetId() const
     return -1;
 }
 
+void DataResubmittedOhos::Resend()
+{
+    if (handler_) {
+        handler_->Resend();
+    }
+}
+
+void DataResubmittedOhos::Cancel()
+{
+    if (handler_) {
+        handler_->Cancel();
+    }
+}
+
+const void* FaviconReceivedOhos::GetData()
+{
+    return data_;
+}
+
+size_t FaviconReceivedOhos::GetWidth()
+{
+    return width_;
+}
+
+size_t FaviconReceivedOhos::GetHeight()
+{
+    return height_;
+}
+
+int FaviconReceivedOhos::GetColorType()
+{
+    return static_cast<int>(colorType_);
+}
+
+int FaviconReceivedOhos::GetAlphaType()
+{
+    return static_cast<int>(alphaType_);
+}
+
 WebDelegate::~WebDelegate()
 {
     ReleasePlatformResource();
@@ -1464,6 +1503,8 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onWindowExitV2_ = useNewPipe ? eventHub->GetOnWindowExitEvent()
                                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                                 webCom->GetWindowExitEventId(), oldContext);
+        onPageVisibleV2_ = useNewPipe ? eventHub->GetOnPageVisibleEvent() : nullptr;
+        onTouchIconUrlV2_ = useNewPipe ? eventHub->GetOnTouchIconUrlEvent() : nullptr;
     }
     return true;
 }
@@ -2268,6 +2309,10 @@ void WebDelegate::UpdateInitialScale(float scale)
 
 void WebDelegate::Resize(const double& width, const double& height)
 {
+    if (width <= 0 || height <= 0) {
+        return;
+    }
+
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -2567,6 +2612,215 @@ void WebDelegate::UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled)
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
                 setting->PutMultiWindowAccess(isMultiWindowAccessEnabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateWebCursiveFont(const std::string& cursiveFontFamily)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), cursiveFontFamily]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutCursiveFontFamilyName(cursiveFontFamily);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateWebFantasyFont(const std::string& fantasyFontFamily)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), fantasyFontFamily]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutFantasyFontFamilyName(fantasyFontFamily);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateWebFixedFont(const std::string& fixedFontFamily)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), fixedFontFamily]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutFixedFontFamilyName(fixedFontFamily);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateWebSansSerifFont(const std::string& sansSerifFontFamily)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), sansSerifFontFamily]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutSansSerifFontFamilyName(sansSerifFontFamily);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateWebSerifFont(const std::string& serifFontFamily)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), serifFontFamily]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutSerifFontFamilyName(serifFontFamily);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateWebStandardFont(const std::string& standardFontFamily)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), standardFontFamily]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutStandardFontFamilyName(standardFontFamily);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateDefaultFixedFontSize(int32_t defaultFixedFontSize)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), defaultFixedFontSize]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutDefaultFixedFontSize(defaultFixedFontSize);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateDefaultFontSize(int32_t defaultFontSize)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), defaultFontSize]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutDefaultFontSize(defaultFontSize);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateMinFontSize(int32_t minFontSize)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), minFontSize]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutFontSizeLowerLimit(minFontSize);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateMinLogicalFontSize(int32_t minLogicalFontSize)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), minLogicalFontSize]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutLogicalFontSizeLowerLimit(minLogicalFontSize);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateBlockNetwork(bool isNetworkBlocked)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isNetworkBlocked]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutBlockNetwork(isNetworkBlocked);
+                }
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -3599,6 +3853,60 @@ void WebDelegate::OnWindowExit()
             }
         },
         TaskExecutor::TaskType::JS);
+}
+
+void WebDelegate::OnPageVisible(const std::string& url)
+{
+    if (onPageVisibleV2_) {
+        onPageVisibleV2_(std::make_shared<PageVisibleEvent>(url));
+    }
+}
+
+void WebDelegate::OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler)
+{
+    auto param = std::make_shared<DataResubmittedEvent>(AceType::MakeRefPtr<DataResubmittedOhos>(handler));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnDataResubmittedEvent = webEventHub->GetOnDataResubmittedEvent();
+        CHECK_NULL_VOID(propOnDataResubmittedEvent);
+        propOnDataResubmittedEvent(param);
+        return;
+    }
+}
+
+void WebDelegate::OnFaviconReceived(
+    const void* data,
+    size_t width,
+    size_t height,
+    OHOS::NWeb::ImageColorType colorType,
+    OHOS::NWeb::ImageAlphaType alphaType)
+{
+    auto param = std::make_shared<FaviconReceivedEvent>(AceType::MakeRefPtr<FaviconReceivedOhos>(
+                     data,
+                     width,
+                     height,
+                     colorType,
+                     alphaType));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnFaviconReceivedEvent = webEventHub->GetOnFaviconReceivedEvent();
+        CHECK_NULL_VOID(propOnFaviconReceivedEvent);
+        propOnFaviconReceivedEvent(param);
+        return;
+    }
+}
+
+void WebDelegate::OnTouchIconUrl(const std::string& iconUrl, bool precomposed)
+{
+    if (onTouchIconUrlV2_) {
+        onTouchIconUrlV2_(std::make_shared<TouchIconUrlEvent>(iconUrl, precomposed));
+    }
 }
 
 RefPtr<PixelMap> WebDelegate::GetDragPixelMap()

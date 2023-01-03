@@ -161,6 +161,15 @@ public:
         bool isUserTrigger,
         std::shared_ptr<NWeb::NWebControllerHandler> handler) override;
     void OnWindowExitByJS() override;
+    void OnPageVisible(const std::string& url) override;
+    void OnDataResubmission(std::shared_ptr<NWeb::NWebDataResubmissionCallback> handler) override;
+    void OnPageIcon(
+        const void* data,
+        size_t width,
+        size_t height,
+        NWeb::ImageColorType colorType,
+        NWeb::ImageAlphaType alphaType) override;
+    void OnDesktopIconUrl(const std::string& icon_url, bool precomposed) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {

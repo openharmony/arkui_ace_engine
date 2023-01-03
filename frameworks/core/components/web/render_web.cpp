@@ -104,6 +104,7 @@ void RenderWeb::Update(const RefPtr<Component>& component)
 
     onMouse_ = web->GetOnMouseEventCallback();
     onKeyEvent_ = web->GetOnKeyEventCallback();
+    onPreKeyEvent_ = web->GetOnInterceptKeyEventCallback();
     RegistVirtualKeyBoardListener();
 #ifdef OHOS_STANDARD_SYSTEM
     InitPanEvent();
@@ -288,14 +289,16 @@ bool RenderWeb::HandleMouseEvent(const MouseEvent& event)
     return info.IsStopPropagation();
 }
 
-void RenderWeb::HandleKeyEvent(const KeyEvent& keyEvent)
+bool RenderWeb::HandleKeyEvent(const KeyEvent& keyEvent)
 {
-    if (!onKeyEvent_) {
-        LOGW("RenderWeb::HandleKeyEvent, key event callback is null");
-        return;
-    }
     KeyEventInfo info(keyEvent);
-    onKeyEvent_(info);
+    if (onKeyEvent_) {
+        onKeyEvent_(info);
+    }
+    if (onPreKeyEvent_) {
+        return onPreKeyEvent_(info);
+    }
+    return false;
 }
 
 void RenderWeb::PerformLayout()

@@ -22,9 +22,12 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "base/web/webview/ohos_nweb/include/nweb.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_web_controller.h"
@@ -34,6 +37,8 @@
 #include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/web/web_view.h"
 #include "core/pipeline/pipeline_base.h"
+#include "pixel_map.h"
+#include "pixel_map_napi.h"
 
 namespace {
 
@@ -551,12 +556,13 @@ public:
         handler_ = eventInfo.GetWebWindowNewHandler();
     }
 
-    static RefPtr<WebController> PopController(int32_t id)
+    static JSRef<JSObject> PopController(int32_t id)
     {
+        LOGI("PopController");
         auto iter = controller_map_.find(id);
         if (iter == controller_map_.end()) {
             LOGI("JSWebWindowNewHandler not find web controller");
-            return nullptr;
+            return JSRef<JSVal>::Make();
         }
         auto controller = iter->second;
         controller_map_.erase(iter);
@@ -571,12 +577,8 @@ public:
             return;
         }
         if (handler_) {
-            auto paramObject = JSRef<JSObject>::Cast(args[0]);
-            auto controller = paramObject->Unwrap<JSWebController>();
-            if (controller) {
-                controller_map_.insert(
-                    std::pair<int32_t, RefPtr<WebController>>(handler_->GetId(), controller->GetController()));
-            }
+            auto controller = JSRef<JSObject>::Cast(args[0]);
+            controller_map_.insert(std::pair<int32_t, JSRef<JSObject>>(handler_->GetId(), controller));
         }
     }
 
@@ -596,9 +598,55 @@ private:
     }
 
     RefPtr<WebWindowNewHandler> handler_;
-    static std::unordered_map<int32_t, RefPtr<WebController>> controller_map_;
+    static std::unordered_map<int32_t, JSRef<JSObject>> controller_map_;
 };
-std::unordered_map<int32_t, RefPtr<WebController>> JSWebWindowNewHandler::controller_map_;
+std::unordered_map<int32_t, JSRef<JSObject>> JSWebWindowNewHandler::controller_map_;
+
+class JSDataResubmitted : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSDataResubmitted>::Declare("DataResubmissionHandler");
+        JSClass<JSDataResubmitted>::CustomMethod("resend", &JSDataResubmitted::Resend);
+        JSClass<JSDataResubmitted>::CustomMethod("cancel", &JSDataResubmitted::Cancel);
+        JSClass<JSDataResubmitted>::Bind(globalObj, &JSDataResubmitted::Constructor, &JSDataResubmitted::Destructor);
+    }
+
+    void SetHandler(const RefPtr<DataResubmitted>& handler)
+    {
+        dataResubmitted_ = handler;
+    }
+
+    void Resend(const JSCallbackInfo& args)
+    {
+        if (dataResubmitted_) {
+            dataResubmitted_->Resend();
+        }
+    }
+
+    void Cancel(const JSCallbackInfo& args)
+    {
+        if (dataResubmitted_) {
+            dataResubmitted_->Cancel();
+        }
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsDataResubmitted = Referenced::MakeRefPtr<JSDataResubmitted>();
+        jsDataResubmitted->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsDataResubmitted));
+    }
+
+    static void Destructor(JSDataResubmitted* jsDataResubmitted)
+    {
+        if (jsDataResubmitted != nullptr) {
+            jsDataResubmitted->DecRefCount();
+        }
+    }
+    RefPtr<DataResubmitted> dataResubmitted_;
+};
 
 class JSWebResourceError : public Referenced {
 public:
@@ -853,6 +901,7 @@ public:
         JSClass<JSWebResourceRequest>::Declare("WebResourceRequest");
         JSClass<JSWebResourceRequest>::CustomMethod("getRequestUrl", &JSWebResourceRequest::GetRequestUrl);
         JSClass<JSWebResourceRequest>::CustomMethod("getRequestHeader", &JSWebResourceRequest::GetRequestHeader);
+        JSClass<JSWebResourceRequest>::CustomMethod("getRequestMethod", &JSWebResourceRequest::GetRequestMethod);
         JSClass<JSWebResourceRequest>::CustomMethod("isRequestGesture", &JSWebResourceRequest::IsRequestGesture);
         JSClass<JSWebResourceRequest>::CustomMethod("isMainFrame", &JSWebResourceRequest::IsMainFrame);
         JSClass<JSWebResourceRequest>::CustomMethod("isRedirect", &JSWebResourceRequest::IsRedirect);
@@ -886,6 +935,13 @@ public:
     {
         auto url = JSVal(ToJSValue(request_->GetUrl()));
         auto descriptionRef = JSRef<JSVal>::Make(url);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetRequestMethod(const JSCallbackInfo& args)
+    {
+        auto method = JSVal(ToJSValue(request_->GetMethod()));
+        auto descriptionRef = JSRef<JSVal>::Make(method);
         args.SetReturnValue(descriptionRef);
     }
 
@@ -1290,6 +1346,22 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onWindowNew", &JSWeb::OnWindowNew);
     JSClass<JSWeb>::StaticMethod("onWindowExit", &JSWeb::OnWindowExit);
     JSClass<JSWeb>::StaticMethod("multiWindowAccess", &JSWeb::MultiWindowAccessEnabled);
+    JSClass<JSWeb>::StaticMethod("webCursiveFont", &JSWeb::WebCursiveFont);
+    JSClass<JSWeb>::StaticMethod("webFantasyFont", &JSWeb::WebFantasyFont);
+    JSClass<JSWeb>::StaticMethod("webFixedFont", &JSWeb::WebFixedFont);
+    JSClass<JSWeb>::StaticMethod("webSansSerifFont", &JSWeb::WebSansSerifFont);
+    JSClass<JSWeb>::StaticMethod("webSerifFont", &JSWeb::WebSerifFont);
+    JSClass<JSWeb>::StaticMethod("webStandardFont", &JSWeb::WebStandardFont);
+    JSClass<JSWeb>::StaticMethod("defaultFixedFontSize", &JSWeb::DefaultFixedFontSize);
+    JSClass<JSWeb>::StaticMethod("defaultFontSize", &JSWeb::DefaultFontSize);
+    JSClass<JSWeb>::StaticMethod("minFontSize", &JSWeb::MinFontSize);
+    JSClass<JSWeb>::StaticMethod("minLogicalFontSize", &JSWeb::MinLogicalFontSize);
+    JSClass<JSWeb>::StaticMethod("blockNetwork", &JSWeb::BlockNetwork);
+    JSClass<JSWeb>::StaticMethod("onPageVisible", &JSWeb::OnPageVisible);
+    JSClass<JSWeb>::StaticMethod("onInterceptKeyEvent", &JSWeb::OnInterceptKeyEvent);
+    JSClass<JSWeb>::StaticMethod("onDataResubmitted", &JSWeb::OnDataResubmitted);
+    JSClass<JSWeb>::StaticMethod("onFaviconReceived", &JSWeb::OnFaviconReceived);
+    JSClass<JSWeb>::StaticMethod("onTouchIconUrlReceived", &JSWeb::OnTouchIconUrlReceived);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -1308,6 +1380,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSContextMenuParam::JSBind(globalObj);
     JSContextMenuResult::JSBind(globalObj);
     JSWebWindowNewHandler::JSBind(globalObj);
+    JSDataResubmitted::JSBind(globalObj);
 }
 
 JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& eventInfo)
@@ -2483,7 +2556,7 @@ void JSWeb::CustomSchemes(const JSCallbackInfo& args)
     std::string cmdLine;
     for (size_t i = 0; i < array->Length(); i++) {
         auto obj = JSRef<JSObject>::Cast(array->GetValueAt(i));
-        auto schemeName  = obj->GetProperty("schemeName");
+        auto schemeName = obj->GetProperty("schemeName");
         auto isCors = obj->GetProperty("isSupportCors");
         auto isFetch = obj->GetProperty("isSupportFetch");
         if (!schemeName->IsString() || !isCors->IsBoolean() || !isFetch->IsBoolean()) {
@@ -3394,14 +3467,21 @@ JSRef<JSVal> WindowNewEventToJSValue(const WebWindowNewEvent& eventInfo)
 
 bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo)
 {
+    LOGI("HandleWindowNewEvent");
     if (eventInfo == nullptr) {
+        LOGE("EventInfo is nullptr");
         return false;
     }
     auto handler = eventInfo->GetWebWindowNewHandler();
     if (handler && !handler->IsFrist()) {
         auto controller = JSWebWindowNewHandler::PopController(handler->GetId());
-        if (controller) {
-            handler->SetWebController(controller->GetWebId());
+        if (!controller.IsEmpty()) {
+            auto getWebIdFunction = controller->GetProperty("innerGetWebId");
+            if (getWebIdFunction->IsFunction()) {
+                auto func = JSRef<JSFunc>::Cast(getWebIdFunction);
+                auto webId = func->Call(controller, 0, {});
+                handler->SetWebController(webId->ToNumber<int32_t>());
+            }
         }
         return false;
     }
@@ -3490,5 +3570,355 @@ void JSWeb::MultiWindowAccessEnabled(bool isMultiWindowAccessEnable)
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     CHECK_NULL_VOID(webComponent);
     webComponent->SetMultiWindowAccessEnabled(isMultiWindowAccessEnable);
+}
+
+void JSWeb::WebCursiveFont(const std::string& cursiveFontFamily)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetWebCursiveFont(cursiveFontFamily);
+        return;
+    }
+}
+
+void JSWeb::WebFantasyFont(const std::string& fantasyFontFamily)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetWebFantasyFont(fantasyFontFamily);
+        return;
+    }
+}
+
+void JSWeb::WebFixedFont(const std::string& fixedFontFamily)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetWebFixedFont(fixedFontFamily);
+        return;
+    }
+}
+
+void JSWeb::WebSansSerifFont(const std::string& sansSerifFontFamily)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetWebSansSerifFont(sansSerifFontFamily);
+        return;
+    }
+}
+
+void JSWeb::WebSerifFont(const std::string& serifFontFamily)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetWebSerifFont(serifFontFamily);
+        return;
+    }
+}
+
+void JSWeb::WebStandardFont(const std::string& standardFontFamily)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetWebStandardFont(standardFontFamily);
+        return;
+    }
+}
+
+void JSWeb::DefaultFixedFontSize(int32_t defaultFixedFontSize)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetDefaultFixedFontSize(defaultFixedFontSize);
+        return;
+    }
+}
+
+void JSWeb::DefaultFontSize(int32_t defaultFontSize)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetDefaultFontSize(defaultFontSize);
+        return;
+    }
+}
+
+void JSWeb::MinFontSize(int32_t minFontSize)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetMinFontSize(minFontSize);
+        return;
+    }
+}
+
+void JSWeb::MinLogicalFontSize(int32_t minLogicalFontSize)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetMinLogicalFontSize(minLogicalFontSize);
+        return;
+    }
+}
+
+void JSWeb::BlockNetwork(bool isNetworkBlocked)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetBlockNetwork(isNetworkBlocked);
+        return;
+    }
+}
+
+JSRef<JSVal> PageVisibleEventToJSValue(const PageVisibleEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("url", eventInfo.GetUrl());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnPageVisible(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<PageVisibleEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), PageVisibleEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<PageVisibleEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetPageVisibleId(std::move(uiCallback));
+        return;
+    }
+}
+
+void JSWeb::OnInterceptKeyEvent(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb OnInterceptKeyEvent");
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+
+    RefPtr<JsKeyFunction> jsOnPreKeyEventFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnPreKeyEventFunc), instanceId](
+                              KeyEventInfo& keyEventInfo) -> bool {
+            ContainerScope scope(instanceId);
+            bool result = false;
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_RETURN(context, result);
+            context->PostSyncEvent([execCtx, func = func, &keyEventInfo, &result]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                JSRef<JSVal> obj = func->ExecuteWithValue(keyEventInfo);
+                if (obj->IsBoolean()) {
+                    result = obj->ToBoolean();
+                }
+            });
+            return result;
+        };
+        NG::WebView::SetOnInterceptKeyEventCallback(std::move(uiCallback));
+        return;
+    }
+    auto onKeyEventId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnPreKeyEventFunc)](
+                            KeyEventInfo& keyEventInfo) -> bool {
+        bool result = false;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, result);
+        ACE_SCORING_EVENT("onPreKeyEvent");
+        JSRef<JSVal> obj = func->ExecuteWithValue(keyEventInfo);
+        if (obj->IsBoolean()) {
+            result = obj->ToBoolean();
+        }
+        return result;
+    };
+
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetOnInterceptKeyEventCallback(onKeyEventId);
+}
+
+JSRef<JSVal> DataResubmittedEventToJSValue(const DataResubmittedEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObject> resultObj = JSClass<JSDataResubmitted>::NewInstance();
+    auto jsDataResubmitted = Referenced::Claim(resultObj->Unwrap<JSDataResubmitted>());
+    if (!jsDataResubmitted) {
+        LOGE("jsDataResubmitted is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
+    jsDataResubmitted->SetHandler(eventInfo.GetHandler());
+    obj->SetPropertyObject("handler", resultObj);
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnDataResubmitted(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DataResubmittedEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), DataResubmittedEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostSyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<DataResubmittedEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetDataResubmittedId(std::move(uiCallback));
+        return;
+    }
+}
+
+Media::PixelFormat GetPixelFormat(NWeb::ImageColorType colorType)
+{
+    Media::PixelFormat pixelFormat;
+    switch (colorType) {
+        case NWeb::ImageColorType::COLOR_TYPE_UNKNOWN:
+            pixelFormat = Media::PixelFormat::UNKNOWN;
+            break;
+        case NWeb::ImageColorType::COLOR_TYPE_RGBA_8888:
+            pixelFormat = Media::PixelFormat::RGBA_8888;
+            break;
+        case NWeb::ImageColorType::COLOR_TYPE_BGRA_8888:
+            pixelFormat = Media::PixelFormat::BGRA_8888;
+            break;
+        default:
+            pixelFormat = Media::PixelFormat::UNKNOWN;
+            break;
+    }
+    return pixelFormat;
+}
+
+Media::AlphaType GetAlphaType(NWeb::ImageAlphaType alphaType)
+{
+    Media::AlphaType imageAlphaType;
+    switch (alphaType) {
+        case NWeb::ImageAlphaType::ALPHA_TYPE_UNKNOWN:
+            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+            break;
+        case NWeb::ImageAlphaType::ALPHA_TYPE_OPAQUE:
+            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+            break;
+        case NWeb::ImageAlphaType::ALPHA_TYPE_PREMULTIPLIED:
+            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
+            break;
+        case NWeb::ImageAlphaType::ALPHA_TYPE_POSTMULTIPLIED:
+            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL;
+            break;
+        default:
+            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+            break;
+    }
+    return imageAlphaType;
+}
+
+JSRef<JSObject> FaviconReceivedEventToJSValue(const FaviconReceivedEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    auto data = eventInfo.GetHandler()->GetData();
+    size_t width = eventInfo.GetHandler()->GetWidth();
+    size_t height = eventInfo.GetHandler()->GetHeight();
+    int colorType = eventInfo.GetHandler()->GetColorType();
+    int alphaType = eventInfo.GetHandler()->GetAlphaType();
+
+    Media::InitializationOptions opt;
+    opt.size.width = static_cast<int32_t>(width);
+    opt.size.height = static_cast<int32_t>(height);
+    opt.pixelFormat = GetPixelFormat(NWeb::ImageColorType(colorType));
+    opt.alphaType = GetAlphaType(NWeb::ImageAlphaType(alphaType));
+    opt.editable = true;
+    auto pixelMap = Media::PixelMap::Create(opt);
+    if (pixelMap == nullptr) {
+        LOGE("pixelMap is null");
+        return JSRef<JSVal>::Cast(obj);
+    }
+    uint32_t stride = width << 2;
+    uint64_t bufferSize = stride * height;
+    pixelMap->WritePixels(static_cast<const uint8_t *>(data), bufferSize);
+    std::shared_ptr<Media::PixelMap> pixelMapToJs(pixelMap.release());
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        LOGE("engine is null");
+        return JSRef<JSVal>::Cast(obj);
+    }
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMapToJs);
+    NativeValue* nativeValue = reinterpret_cast<NativeValue*>(napiValue);
+    (void)nativeValue;
+#ifdef USE_ARK_ENGINE
+    auto jsPixelMap = JsConverter::ConvertNativeValueToJsVal(nativeValue);
+    obj->SetPropertyObject("favicon", jsPixelMap);
+#endif
+    return JSRef<JSObject>::Cast(obj);
+}
+
+void JSWeb::OnFaviconReceived(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FaviconReceivedEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), FaviconReceivedEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<FaviconReceivedEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetFaviconReceivedId(std::move(uiCallback));
+        return;
+    }
+}
+
+JSRef<JSVal> TouchIconUrlEventToJSValue(const TouchIconUrlEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("url", eventInfo.GetUrl());
+    obj->SetProperty("precomposed", eventInfo.GetPreComposed());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnTouchIconUrlReceived(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<TouchIconUrlEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), TouchIconUrlEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<TouchIconUrlEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetTouchIconUrlId(std::move(uiCallback));
+        return;
+    }
 }
 } // namespace OHOS::Ace::Framework
