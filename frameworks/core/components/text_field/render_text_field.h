@@ -394,6 +394,8 @@ public:
         return lastInputAction_;
     }
 
+    bool NeedToFilter();
+
 protected:
     // Describe where caret is and how tall visually.
     struct CaretMetrics {
