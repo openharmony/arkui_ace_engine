@@ -862,7 +862,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateDomStorageEnabled(GetDomStorageAccessEnabledValue(false));
         delegate_->UpdateGeolocationEnabled(GetGeolocationAccessEnabledValue(true));
         delegate_->UpdateCacheMode(GetCacheModeValue(WebCacheMode::DEFAULT));
-        delegate_->UpdateDarkMode(GetDarkModeValue(WebDarkMode::OFF));
+        delegate_->UpdateDarkMode(GetDarkModeValue(WebDarkMode::Off));
         delegate_->UpdateForceDarkAccess(GetForceDarkAccessValue(false));
         delegate_->UpdateOverviewModeEnabled(GetOverviewModeAccessEnabledValue(true));
         delegate_->UpdateFileFromUrlEnabled(GetFileFromUrlAccessEnabledValue(false));

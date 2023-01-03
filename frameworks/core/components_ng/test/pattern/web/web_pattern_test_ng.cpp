@@ -76,7 +76,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_001, TestSize.Level1)
     webpattern.OnMinLogicalFontSizeUpdate(0);
     webpattern.OnWebFixedFontUpdate("test");
     webpattern.OnBlockNetworkUpdate(true);
-    webpattern.OnDarkModeUpdate(WebDarkMode::ON);
+    webpattern.OnDarkModeUpdate(WebDarkMode::On);
     webpattern.OnForceDarkAccessUpdate(true);
 #endif
 }
@@ -151,7 +151,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_003, TestSize.Level1)
     webPattern->HandleDragMove(event);
     event.SetInputEventType(InputEventType::AXIS);
     webPattern->HandleDragMove(event);
-    webPattern->OnDarkModeUpdate(WebDarkMode::ON);
+    webPattern->OnDarkModeUpdate(WebDarkMode::On);
     webPattern->OnForceDarkAccessUpdate(true);
 #endif
 }
