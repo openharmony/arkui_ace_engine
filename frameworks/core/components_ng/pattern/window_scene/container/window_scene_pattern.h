@@ -29,7 +29,7 @@ public:
     WindowScenePattern(
         const sptr<Rosen::ISceneSession>& iSceneSession,
         const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
-        const std::shared_ptr<Rosen::ISessionStateListener>& listener);
+        const std::shared_ptr<Rosen::ISessionStageStateListener>& listener);
     ~WindowScenePattern() override = default;
 
     void Foreground() override;

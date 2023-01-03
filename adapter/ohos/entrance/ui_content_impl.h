@@ -127,7 +127,7 @@ public:
     void InitWindowScene(
         const sptr<Rosen::ISceneSession>& iSceneSession,
         const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
-        const std::shared_ptr<Rosen::ISessionStateListener>& listener) override;
+        const std::shared_ptr<Rosen::ISessionStageStateListener>& listener) override;
 
     virtual void DoForeground() override;
     virtual void DoBackground() override;

@@ -38,7 +38,7 @@ class FormAshmem;
 namespace Rosen {
 class Window;
 class ISceneSession;
-class ISessionStateListener;
+class ISessionStageStateListener;
 class RSSurfaceNode;
 enum class WindowSizeChangeReason : uint32_t;
 enum class WindowMode : uint32_t;
@@ -143,7 +143,7 @@ public:
     virtual void InitWindowScene(
         const sptr<Rosen::ISceneSession>& iSceneSession,
         const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
-        const std::shared_ptr<Rosen::ISessionStateListener>& listener) = 0;
+        const std::shared_ptr<Rosen::ISessionStageStateListener>& listener) = 0;
 
     virtual void DoForeground() = 0;
     virtual void DoBackground() = 0;

@@ -20,14 +20,14 @@ namespace OHOS::Ace::NG {
 WindowScenePattern::WindowScenePattern(
     const sptr<Rosen::ISceneSession>& iSceneSession,
     const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
-    const std::shared_ptr<Rosen::ISessionStateListener>& listener)
+    const std::shared_ptr<Rosen::ISessionStageStateListener>& listener)
     : WindowPattern(surfaceNode)
 {
     sessionStage_ = std::make_shared<Rosen::SceneSessionStage>(iSceneSession);
     if (sessionStage_) {
         sessionStage_->Connect();
     }
-    sessionStage_->RegisterSessionStateListener(listener);
+    sessionStage_->RegisterSessionStageStateListener(listener);
 }
 
 void WindowScenePattern::Foreground()
