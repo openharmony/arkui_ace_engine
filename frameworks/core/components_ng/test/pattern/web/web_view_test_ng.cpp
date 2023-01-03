@@ -205,7 +205,7 @@ HWTEST_F(WebViewTestNg, SetWindowNewEvent004, TestSize.Level1)
     WebView::SetDataResubmittedId(std::move(renderExitedId));
     WebView::SetFaviconReceivedId(std::move(renderExitedId));
     WebView::SetTouchIconUrlId(std::move(renderExitedId));
-    WebView::SetDarkMode(WebDarkMode::ON);
+    WebView::SetDarkMode(WebDarkMode::On);
     WebView::SetForceDarkAccess(true);
 #endif
 }

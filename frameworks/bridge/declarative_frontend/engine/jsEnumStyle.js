@@ -831,9 +831,9 @@ var CacheMode;
 
 var WebDarkMode;
 (function (WebDarkMode) {
-  WebDarkMode[WebDarkMode["OFF"] = 0] = "OFF";
-  WebDarkMode[WebDarkMode["ON"] = 1] = "ON";
-  WebDarkMode[WebDarkMode["AUTO"] = 2] = "AUTO";
+  WebDarkMode[WebDarkMode["Off"] = 0] = "Off";
+  WebDarkMode[WebDarkMode["On"] = 1] = "On";
+  WebDarkMode[WebDarkMode["Auto"] = 2] = "Auto";
 })(WebDarkMode || (WebDarkMode = {}));
 
 var RenderExitReason;
