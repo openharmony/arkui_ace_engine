@@ -299,6 +299,7 @@ template("declarative_js_engine") {
       "jsview/models/refresh_model_impl.cpp",
       "jsview/models/row_model_impl.cpp",
       "jsview/models/scroll_model_impl.cpp",
+      "jsview/models/search_model_impl.cpp",
       "jsview/models/shape_abstract_model_impl.cpp",
       "jsview/models/shape_model_impl.cpp",
       "jsview/models/slider_model_impl.cpp",
