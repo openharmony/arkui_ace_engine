@@ -97,10 +97,11 @@ void JSSelect::Create(const JSCallbackInfo& info)
 
             auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
             auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(value);
-            auto iconComponent = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(icon);
+            if (!icon.empty()) {
+                optionComponent->SetIcon(AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(icon));
+            }
             optionComponent->SetTheme(optionTheme);
             optionComponent->SetText(textComponent);
-            optionComponent->SetIcon(iconComponent);
             optionComponent->SetTextStyle(optionTheme->GetTitleStyle());
             optionComponent->SetSelectedTextStyle(optionTheme->GetTitleStyle());
             optionComponent->SetSelectedBackgroundColor(optionTheme->GetSelectedColor());
