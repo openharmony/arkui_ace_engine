@@ -220,6 +220,36 @@ void RenderOption::OnTouch(bool down)
     PlayEventEffectAnimation(endColor, PRESS_DURATION);
 }
 
+void RenderOption::HandleMouseHoverEvent(const MouseState mouseState)
+{
+    if (!data_ || data_->IsDisabledStatus()) {
+        return;
+    }
+    Color color;
+    if (mouseState == MouseState::HOVER) {
+        color = hoveredColor_;
+    } else {
+        color = Color::TRANSPARENT;
+    }
+    PlayEventEffectAnimation(color, PRESS_DURATION);
+}
+
+bool RenderOption::HandleMouseEvent(const MouseEvent& event)
+{
+    if (!data_ || data_->IsDisabledStatus()) {
+        return false;
+    }
+    if (event.button == MouseButton::LEFT_BUTTON) {
+        if (event.action == MouseAction::PRESS || event.action == MouseAction::MOVE) {
+            PlayEventEffectAnimation(clickedColor_, PRESS_DURATION);
+        } else if (event.action == MouseAction::RELEASE) {
+            PlayEventEffectAnimation(data_->GetSelectedBackgroundColor(), PRESS_DURATION);
+        }
+        return true;
+    }
+    return false;
+}
+
 void RenderOption::OnMouseHoverEnterTest()
 {
     if (!data_ || data_->GetDisabled()) {

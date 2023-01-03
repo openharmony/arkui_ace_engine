@@ -84,6 +84,8 @@ protected:
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
     void OnMouseHoverEnterTest() override;
     void OnMouseHoverExitTest() override;
+    void HandleMouseHoverEvent(const MouseState mouseState) override;
+    bool HandleMouseEvent(const MouseEvent& event) override;
 
     void UpdateAccessibilityInfo(Size size, Offset offset, bool isSelected);
 
