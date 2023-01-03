@@ -1076,7 +1076,7 @@ void FlutterRenderOffscreenCanvas::Path2DFill()
 
 void FlutterRenderOffscreenCanvas::Path2DClip()
 {
-    skCanvas_->clipPath(skPath_);
+    skCanvas_->clipPath(skPath2d_);
 }
 
 void FlutterRenderOffscreenCanvas::UpdateLineDash(SkPaint& paint)
