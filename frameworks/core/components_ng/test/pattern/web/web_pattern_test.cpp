@@ -509,11 +509,11 @@ HWTEST_F(WebPatternTest, HandleDragUpdateTest010, TestSize.Level1)
     EXPECT_NE(webPattern, nullptr);
     webPattern->isW3cDragEvent_ = true;
     webPattern->HandleDragUpdate(info);
-    g_webPattern->HandleDragEnd(info);
+    webPattern->HandleDragEnd(info);
     g_webPattern->HandleDragCancel();
     webPattern->isW3cDragEvent_ = false;
     webPattern->HandleDragUpdate(info);
-    g_webPattern->HandleDragEnd(info);
+    webPattern->HandleDragEnd(info);
     g_webPattern->HandleDragCancel();
 #endif
 }
