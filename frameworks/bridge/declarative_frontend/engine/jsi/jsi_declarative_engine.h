@@ -324,7 +324,7 @@ public:
 
 #if defined(PREVIEW)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
-    RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode) override;
+    RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID) override;
 
     void InitializeModuleSearcher(const std::string& bundleName, const std::string assetPath, bool isBundle) override
     {
@@ -349,8 +349,8 @@ private:
     void RegisterInitWorkerFunc();
     void RegisterOffWorkerFunc();
     void RegisterAssetFunc();
-    bool ExecuteAbc(const std::string &fileName);
-    bool ExecuteCardAbc(const std::string &fileName, int64_t cardId);
+    bool ExecuteAbc(const std::string& fileName);
+    bool ExecuteCardAbc(const std::string& fileName, int64_t cardId);
 
     RefPtr<JsiDeclarativeEngineInstance> engineInstance_;
 

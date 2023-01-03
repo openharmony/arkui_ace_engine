@@ -242,7 +242,7 @@ public:
         needUpdate_ = needUpdate;
     }
 
-    virtual RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode)
+    virtual RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID)
     {
         return nullptr;
     }
