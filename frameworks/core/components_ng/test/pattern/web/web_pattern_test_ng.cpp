@@ -76,6 +76,8 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_001, TestSize.Level1)
     webpattern.OnMinLogicalFontSizeUpdate(0);
     webpattern.OnWebFixedFontUpdate("test");
     webpattern.OnBlockNetworkUpdate(true);
+    webpattern.OnDarkModeUpdate(WebDarkMode::On);
+    webpattern.OnForceDarkAccessUpdate(true);
 #endif
 }
 
@@ -124,6 +126,33 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_002, TestSize.Level1)
     webPattern->OnMinLogicalFontSizeUpdate(0);
     webPattern->OnWebFixedFontUpdate("test");
     webPattern->OnBlockNetworkUpdate(true);
+#endif
+}
+
+/**
+ * @tc.name: WebPatternTestNg_003
+ * @tc.desc: Test webPattern.cpp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, WebPatternTestNg_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    GestureEvent event;
+    event.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    webPattern->HandleDragMove(event);
+    event.SetInputEventType(InputEventType::AXIS);
+    webPattern->HandleDragMove(event);
+    webPattern->OnDarkModeUpdate(WebDarkMode::On);
+    webPattern->OnForceDarkAccessUpdate(true);
 #endif
 }
 } // namespace OHOS::Ace::NG

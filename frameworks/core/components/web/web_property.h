@@ -48,9 +48,9 @@ enum WebCacheMode {
 };
 
 enum class WebDarkMode {
-    OFF,
-    ON,
-    AUTO,
+    Off,
+    On,
+    Auto,
 };
 
 constexpr int32_t DEFAULT_TEXT_ZOOM_RATIO = 100;
