@@ -67,6 +67,8 @@ void RenderCheckable::Update(const RefPtr<Component>& component)
     needFocus_ = checkable->GetNeedFocus();
     if (checkable->GetOnChange()) {
         onChange_ = *checkable->GetOnChange();
+    } else {
+        onChange_ = nullptr;
     }
     if (checkable->GetOnClick()) {
         onClick_ = *checkable->GetOnClick();
