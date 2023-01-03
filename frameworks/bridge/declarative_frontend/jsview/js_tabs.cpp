@@ -106,6 +106,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
                 tabController = JSTabsController::CreateController();
             }
             tabController->SetInitialIndex(index);
+            tabController->SetIndexWithoutChangeContent(index);
         }
     }
 
