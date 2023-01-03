@@ -69,6 +69,7 @@ ohos_unittest("select_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/menu/menu_item/menu_item_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_pattern.cpp",

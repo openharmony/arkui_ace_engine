@@ -79,4 +79,24 @@ void MenuWrapperPattern::OnModifyDone()
     onTouch_ = MakeRefPtr<TouchEventImpl>(std::move(callback));
     gestureHub->AddTouchEvent(onTouch_);
 }
+
+// close subMenu when mouse move outside
+void MenuWrapperPattern::HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItemPattern>& menuItemPattern)
+{
+    auto menuItem = menuItemPattern->GetHost();
+    CHECK_NULL_VOID(menuItem);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    const auto& mousePosition = info.GetGlobalLocation();
+    if (!menuItemPattern->IsInHoverRegions(mousePosition.GetX(), mousePosition.GetY()) &&
+        menuItemPattern->IsSubMenuShowed()) {
+        LOGI("MenuWrapperPattern Hide SubMenu");
+        overlayManager->HideMenu(menuItem->GetId());
+        menuItemPattern->SetIsSubMenuShowed(false);
+        menuItemPattern->ClearHoverRegions();
+        menuItemPattern->ResetWrapperMouseEvent();
+    }
+}
 } // namespace OHOS::Ace::NG

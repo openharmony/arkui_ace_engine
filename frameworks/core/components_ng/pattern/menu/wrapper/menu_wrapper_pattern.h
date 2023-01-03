@@ -19,6 +19,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/string_utils.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_paint_method.h"
@@ -48,6 +49,8 @@ public:
     {
         return MakeRefPtr<MenuWrapperLayoutAlgorithm>();
     }
+
+    void HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItemPattern>& menuItem);
 
 private:
     void OnModifyDone() override;

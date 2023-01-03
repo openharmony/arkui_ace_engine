@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/option/option_paint_method.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_paint_method.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
 #include "core/components/divider/divider_theme.h"
-#include "core/components_ng/pattern/option/option_paint_property.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_paint_property.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_ng/pattern/shape/rect_paint_property.h"
 #include "core/components_ng/render/divider_painter.h"
@@ -26,38 +27,37 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
-CanvasDrawFunction OptionPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
+CanvasDrawFunction MenuItemGroupPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
 {
     return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
-        auto option = weak.Upgrade();
-        if (option) {
-            // don't paint divider when pressed or hovered
-            option->PaintDivider(canvas, paintWrapper);
+        auto group = weak.Upgrade();
+        if (group) {
+            CHECK_NULL_VOID(paintWrapper);
+            auto props = DynamicCast<MenuItemGroupPaintProperty>(paintWrapper->GetPaintProperty());
+            CHECK_NULL_VOID(props);
+            bool needHeaderPadding = props->GetNeedHeaderPadding().value_or(false);
+            if (needHeaderPadding) {
+                group->PaintDivider(canvas, paintWrapper, true);
+            }
+            bool needFooterPadding = props->GetNeedFooterPadding().value_or(false);
+            if (needFooterPadding) {
+                group->PaintDivider(canvas, paintWrapper, false);
+            }
         }
     };
 }
 
-void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper)
+void MenuItemGroupPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper, bool isHeader)
 {
-    CHECK_NULL_VOID(paintWrapper);
-    auto props = DynamicCast<OptionPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(props);
-
-    bool needDivider = props->GetNeedDivider().value_or(true);
-    bool press = props->GetPress().value_or(false);
-    bool hover = props->GetHover().value_or(false);
-    if (!needDivider || press || hover) {
-        return;
+    auto groupSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+    float horInterval = DIVIDER_PADDING.ConvertToPx();
+    float verInterval = VERTICAL_INTERVAL_PHONE.ConvertToPx();
+    if (!isHeader) {
+        verInterval = groupSize.Height() - verInterval;
     }
-
-    auto optionSize = paintWrapper->GetGeometryNode()->GetFrameSize();
-    auto horInterval = HORIZONTAL_INTERVAL_PHONE.ConvertToPx();
-
     RSPath path;
     // draw divider above content, length = content width
-    path.AddRect(horInterval, 0, optionSize.Width() - horInterval, DEFAULT_STROKE_WIDTH);
-    LOGD("drawing option divider with length %{public}f", optionSize.Width() - 2 * horInterval);
+    path.AddRect(horInterval, verInterval, groupSize.Width() - horInterval, verInterval + DEFAULT_STROKE_WIDTH);
 
     RSBrush brush;
     auto pipeline = PipelineContext::GetCurrentContext();

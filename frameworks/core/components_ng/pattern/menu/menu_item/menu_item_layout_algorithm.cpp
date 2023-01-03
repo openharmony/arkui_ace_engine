@@ -13,18 +13,15 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/option/option_layout_algorithm.h"
-
-#include <string>
+#include "core/components_ng/pattern/menu/menu_item/menu_item_layout_algorithm.h"
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/option/option_theme.h"
+#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
-
-void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     verInterval_ = VERTICAL_INTERVAL_PHONE.ConvertToPx();
@@ -34,29 +31,33 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutConstraint = props->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint);
 
-    float maxTextWidth = layoutConstraint->maxSize.Width() - horInterval_ * 2.0;
-
-    // measure text
+    float maxRowWidth = layoutConstraint->maxSize.Width() - horInterval_ * 2.0;
+    // measure row
     auto childConstraint = props->CreateChildConstraint();
-    childConstraint.maxSize.SetWidth(maxTextWidth);
-    childConstraint.percentReference.SetWidth(maxTextWidth);
-    auto text = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(text);
-    text->Measure(childConstraint);
+    childConstraint.maxSize.SetWidth(maxRowWidth);
+    childConstraint.percentReference.SetWidth(maxRowWidth);
 
-    // set self size based on TextNode size;
-    auto textSize = text->GetGeometryNode()->GetFrameSize();
-    SizeF size(textSize.Width() + horInterval_ * 2.0, textSize.Height() + verInterval_ * 2.0);
-    LOGD("option frame size set to %{public}f x %{public}f", size.Width(), size.Height());
+    if (layoutConstraint->selfIdealSize.Width().has_value()) {
+        childConstraint.selfIdealSize.SetWidth(layoutConstraint->selfIdealSize.Width().value() - horInterval_ * 2.0);
+    }
+
+    auto row = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(row);
+
+    row->Measure(childConstraint);
+
+    // set self size based on row size;
+    auto rowSize = row->GetGeometryNode()->GetFrameSize();
+    SizeF size(rowSize.Width() + horInterval_ * 2.0, rowSize.Height() + verInterval_ * 2.0);
+    LOGD("menuItem frame size set to %{public}f x %{public}f", size.Width(), size.Height());
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 }
 
-void OptionLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto text = layoutWrapper->GetOrCreateChildByIndex(0);
-    text->GetGeometryNode()->SetMarginFrameOffset(OffsetF(horInterval_, verInterval_));
-    text->Layout();
+    auto row = layoutWrapper->GetOrCreateChildByIndex(0);
+    row->GetGeometryNode()->SetMarginFrameOffset(OffsetF(horInterval_, verInterval_));
+    row->Layout();
 }
-
 } // namespace OHOS::Ace::NG

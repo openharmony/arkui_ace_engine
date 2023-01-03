@@ -89,6 +89,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_menu.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_menu_item.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_menu_item_group.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navdestination.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
@@ -433,6 +436,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Badge", JSBadge::JSBind },
     { "Gauge", JSGauge::JSBind },
     { "Marquee", JSMarquee::JSBind },
+    { "Menu", JSMenu::JSBind },
+    { "MenuItem", JSMenuItem::JSBind },
+    { "MenuItemGroup", JSMenuItemGroup::JSBind },
     { "Gesture", JSGesture::JSBind },
     { "TapGesture", JSGesture::JSBind },
     { "LongPressGesture", JSGesture::JSBind },
@@ -487,7 +493,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "WebController", JSWebController::JSBind },
 #endif
 #if defined(MODEL_COMPONENT_SUPPORTED)
-    { "Model", JSSceneView::JSBind},
+    { "Model", JSSceneView::JSBind },
 #endif
 };
 
