@@ -520,7 +520,7 @@ void ViewStackProcessor::PopContainer()
 
     while ((!componentGroup && !multiComposedComponent && !soleChildComponent) ||
            strcmp(type, AceType::TypeName<TextSpanComponent>()) == 0) {
-        if (componentsStack_.size() == 1) {
+        if (componentsStack_.size() <= 1) {
             break;
         }
         Pop();
