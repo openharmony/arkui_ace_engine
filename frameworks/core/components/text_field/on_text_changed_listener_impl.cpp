@@ -46,6 +46,7 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
             leavingStrLength = client->GetMaxLength() - prevLength;
             LOGW("%{public}d characters of this text will be truncated for exceeding maximum length", leavingStrLength);
         }
+        client->SetLastInputAction(InputAction::INSERT);
         auto insertText = text.substr(0, leavingStrLength);
         auto textEditingValue = std::make_shared<TextEditingValue>();
         textEditingValue->text =
@@ -75,6 +76,7 @@ void OnTextChangedListenerImpl::DeleteBackward(int32_t length)
         auto value = client->GetEditingValue();
         auto start = value.selection.GetStart();
         auto end = value.selection.GetEnd();
+        client->SetLastInputAction(InputAction::DELETE_BACKWARD);
         auto textEditingValue = std::make_shared<TextEditingValue>();
         textEditingValue->text = value.text;
         textEditingValue->UpdateSelection(start, end);
@@ -102,6 +104,7 @@ void OnTextChangedListenerImpl::DeleteForward(int32_t length)
         auto value = client->GetEditingValue();
         auto start = value.selection.GetStart();
         auto end = value.selection.GetEnd();
+        client->SetLastInputAction(InputAction::DELETE_FORWARD);
         auto textEditingValue = std::make_shared<TextEditingValue>();
         textEditingValue->text = value.text;
         textEditingValue->UpdateSelection(start, end);
