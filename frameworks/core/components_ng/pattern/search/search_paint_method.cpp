@@ -40,9 +40,9 @@ CanvasDrawFunction SearchPaintMethod::GetContentDrawFunction(PaintWrapper* paint
 void SearchPaintMethod::PaintSearch(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
     if (!searchButton_.empty()) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto searchTheme = pipelineContext->GetTheme<SearchTheme>();
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto searchTheme = pipeline->GetTheme<SearchTheme>();
         CHECK_NULL_VOID(searchTheme);
         auto iconHeight = searchTheme->GetIconHeight();
         auto dividerSpace = searchTheme->GetDividerSideSpace().ConvertToPx();

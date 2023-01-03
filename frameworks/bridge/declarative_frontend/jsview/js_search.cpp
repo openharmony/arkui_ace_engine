@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/jsview/models/search_model_impl.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/common/layout/constants.h"
@@ -30,199 +31,34 @@
 #include "core/components/text_field/text_field_component.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/search/search_view.h"
+#include "core/components_ng/pattern/search/search_model_ng.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<SearchModel> SearchModel::instance_ = nullptr;
+
+SearchModel* SearchModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::SearchModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::SearchModelNG());
+        } else {
+            instance_.reset(new Framework::SearchModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
 namespace {
-
-const TextInputAction INPUT_TEXTINPUTACTION_VALUE_DEFAULT = TextInputAction::UNSPECIFIED;
-const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = {
-    "sans-serif",
-};
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
-
-Radius defaultRadius;
-constexpr Dimension BOX_HOVER_RADIUS = 18.0_vp;
-bool isPaddingChanged;
-
-void InitializeDefaultValue(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,
-    const RefPtr<TextFieldTheme>& theme)
-{
-    component->SetAction(INPUT_TEXTINPUTACTION_VALUE_DEFAULT);
-    component->SetCursorColor(theme->GetCursorColor());
-    component->SetCursorRadius(theme->GetCursorRadius());
-    component->SetPlaceholderColor(theme->GetPlaceholderColor());
-
-    component->SetFocusBgColor(theme->GetFocusBgColor());
-    component->SetFocusPlaceholderColor(theme->GetFocusPlaceholderColor());
-    component->SetFocusTextColor(theme->GetFocusTextColor());
-    component->SetBgColor(theme->GetBgColor());
-    component->SetTextColor(theme->GetTextColor());
-    component->SetSelectedColor(theme->GetSelectedColor());
-    component->SetHoverColor(theme->GetHoverColor());
-    component->SetPressColor(theme->GetPressColor());
-    component->SetNeedFade(theme->NeedFade());
-    component->SetShowEllipsis(theme->ShowEllipsis());
-
-    TextStyle textStyle = component->GetTextStyle();
-    textStyle.SetTextColor(theme->GetTextColor());
-    textStyle.SetFontSize(theme->GetFontSize());
-    textStyle.SetFontWeight(theme->GetFontWeight());
-    textStyle.SetFontFamilies(INPUT_FONT_FAMILY_VALUE);
-    component->SetTextStyle(textStyle);
-
-    component->SetCountTextStyle(theme->GetCountTextStyle());
-    component->SetOverCountStyle(theme->GetOverCountStyle());
-    component->SetCountTextStyleOuter(theme->GetCountTextStyleOuter());
-    component->SetOverCountStyleOuter(theme->GetOverCountStyleOuter());
-
-    component->SetErrorTextStyle(theme->GetErrorTextStyle());
-    component->SetErrorSpacing(theme->GetErrorSpacing());
-    component->SetErrorIsInner(theme->GetErrorIsInner());
-    component->SetErrorBorderWidth(theme->GetErrorBorderWidth());
-    component->SetErrorBorderColor(theme->GetErrorBorderColor());
-
-    RefPtr<Decoration> decoration = AceType::MakeRefPtr<Decoration>();
-    decoration->SetPadding(theme->GetPadding());
-    decoration->SetBackgroundColor(theme->GetBgColor());
-    decoration->SetBorderRadius(theme->GetBorderRadius());
-    defaultRadius = theme->GetBorderRadius();
-    const auto& boxDecoration = boxComponent->GetBackDecoration();
-    if (boxDecoration) {
-        decoration->SetImage(boxDecoration->GetImage());
-        decoration->SetGradient(boxDecoration->GetGradient());
-    }
-    component->SetDecoration(decoration);
-
-    component->SetIconSize(theme->GetIconSize());
-    component->SetIconHotZoneSize(theme->GetIconHotZoneSize());
-
-    boxComponent->SetPadding(theme->GetPadding());
-    component->SetHeight(theme->GetHeight());
-}
-
-void UpdateDecorationStyle(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,
-    const Border& boxBorder, bool hasBoxRadius)
-{
-    RefPtr<Decoration> decoration = component->GetDecoration();
-    if (!decoration) {
-        decoration = AceType::MakeRefPtr<Decoration>();
-    }
-    if (hasBoxRadius) {
-        decoration->SetBorder(boxBorder);
-    } else {
-        Border border = decoration->GetBorder();
-        border.SetLeftEdge(boxBorder.Left());
-        border.SetRightEdge(boxBorder.Right());
-        border.SetTopEdge(boxBorder.Top());
-        border.SetBottomEdge(boxBorder.Bottom());
-        border.SetBorderRadius(defaultRadius);
-        decoration->SetBorder(border);
-    }
-    component->SetOriginBorder(decoration->GetBorder());
-
-    if (!boxComponent) {
-        return;
-    }
-    RefPtr<Decoration> boxDecoration = boxComponent->GetBackDecoration();
-    if (boxDecoration && (boxDecoration->GetImage() || boxDecoration->GetGradient().IsValid())) {
-        // clear box properties except background image and radius.
-        boxDecoration->SetBackgroundColor(Color::TRANSPARENT);
-        Border border;
-        if (!hasBoxRadius) {
-            border.SetBorderRadius(defaultRadius);
-        } else {
-            border.SetTopLeftRadius(boxBorder.TopLeftRadius());
-            border.SetTopRightRadius(boxBorder.TopRightRadius());
-            border.SetBottomLeftRadius(boxBorder.BottomLeftRadius());
-            border.SetBottomRightRadius(boxBorder.BottomRightRadius());
-        }
-        boxDecoration->SetBorder(border);
-    } else {
-        RefPtr<Decoration> backDecoration = AceType::MakeRefPtr<Decoration>();
-        backDecoration->SetBorderRadius(Radius(BOX_HOVER_RADIUS));
-        boxComponent->SetBackDecoration(backDecoration);
-    }
-    boxComponent->SetPadding(Edge());
-}
-
-void InitializeComponent(OHOS::Ace::RefPtr<OHOS::Ace::SearchComponent>& searchComponent,
-    OHOS::Ace::RefPtr<OHOS::Ace::TextFieldComponent>& textFieldComponent,
-    const OHOS::Ace::RefPtr<OHOS::Ace::SearchTheme>& searchTheme,
-    const OHOS::Ace::RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme)
-{
-    textFieldComponent->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
-
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-
-    InitializeDefaultValue(boxComponent, textFieldComponent, textFieldTheme);
-
-    boxComponent->SetBackDecoration(nullptr);
-    boxComponent->SetPadding(Edge());
-    textFieldComponent->SetIconSize(searchTheme->GetIconSize());
-    textFieldComponent->SetIconHotZoneSize(searchTheme->GetCloseIconHotZoneSize());
-    Edge decorationPadding;
-    Dimension leftPadding = searchTheme->GetLeftPadding();
-    Dimension rightPadding = searchTheme->GetRightPadding();
-    decorationPadding = Edge(rightPadding.Value(), 0.0, leftPadding.Value(), 0.0, leftPadding.Unit());
-    auto textFieldDecoration = textFieldComponent->GetDecoration();
-    if (textFieldDecoration) {
-        textFieldDecoration->SetPadding(decorationPadding);
-        textFieldDecoration->SetBorderRadius(searchTheme->GetBorderRadius());
-        textFieldComponent->SetOriginBorder(textFieldDecoration->GetBorder());
-    }
-    textFieldComponent->SetAction(TextInputAction::SEARCH);
-    textFieldComponent->SetWidthReserved(searchTheme->GetTextFieldWidthReserved());
-    textFieldComponent->SetTextColor(searchTheme->GetTextColor());
-    textFieldComponent->SetFocusTextColor(searchTheme->GetFocusTextColor());
-    textFieldComponent->SetPlaceholderColor(searchTheme->GetPlaceholderColor());
-    textFieldComponent->SetFocusPlaceholderColor(searchTheme->GetFocusPlaceholderColor());
-    textFieldComponent->SetBlockRightShade(searchTheme->GetBlockRightShade());
-
-    auto textStyle = textFieldComponent->GetTextStyle();
-    searchComponent->SetPlaceHoldStyle(textStyle);
-    searchComponent->SetEditingStyle(textStyle);
-
-    std::function<void(const std::string&)> submitEvent;
-    searchComponent->SetSubmitEvent(submitEvent);
-    searchComponent->SetChild(textFieldComponent);
-    searchComponent->SetTextEditController(textFieldComponent->GetTextEditController());
-    searchComponent->SetCloseIconSize(searchTheme->GetCloseIconSize());
-    searchComponent->SetCloseIconHotZoneHorizontal(searchTheme->GetCloseIconHotZoneSize());
-    searchComponent->SetHoverColor(textFieldTheme->GetHoverColor());
-    searchComponent->SetPressColor(textFieldTheme->GetPressColor());
-    isPaddingChanged = false;
-}
-
-void PrepareSpecializedComponent(OHOS::Ace::RefPtr<OHOS::Ace::SearchComponent>& searchComponent,
-    OHOS::Ace::RefPtr<OHOS::Ace::TextFieldComponent>& textFieldComponent)
-{
-    Border boxBorder;
-
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-
-    boxComponent->SetMouseAnimationType(HoverAnimationType::BOARD);
-    if (boxComponent->GetBackDecoration()) {
-        boxBorder = boxComponent->GetBackDecoration()->GetBorder();
-    }
-    UpdateDecorationStyle(boxComponent, textFieldComponent, boxBorder, false);
-    if (GreatOrEqual(boxComponent->GetHeightDimension().Value(), 0.0)) {
-        textFieldComponent->SetHeight(boxComponent->GetHeightDimension());
-    }
-    if (isPaddingChanged) {
-        auto padding = textFieldComponent->GetDecoration()->GetPadding();
-        if (searchComponent->GetTextDirection() == TextDirection::RTL) {
-            padding.SetLeft(padding.Left() + searchComponent->GetCloseIconHotZoneHorizontal());
-        } else {
-            padding.SetRight(padding.Right() + searchComponent->GetCloseIconHotZoneHorizontal());
-        }
-        textFieldComponent->GetDecoration()->SetPadding(padding);
-        searchComponent->SetDecoration(textFieldComponent->GetDecoration());
-        isPaddingChanged = false;
-    }
-}
-
 } // namespace
 
 void JSSearch::JSBind(BindingTarget globalObj)
@@ -261,15 +97,11 @@ void JSSearch::JSBind(BindingTarget globalObj)
 
 void JSSearch::Create(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        std::optional<std::string> key;
-        std::optional<std::string> tip;
-        std::optional<std::string> src;
-        if (info.Length() < 1 || !info[0]->IsObject()) {
-            LOGI("Search create without argument");
-            auto controller = NG::SearchView::Create(key, tip, src);
-            return;
-        }
+    std::optional<std::string> key;
+    std::optional<std::string> tip;
+    std::optional<std::string> src;
+    JSSearchController* jsController = nullptr;
+    if (info[0]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[0]);
         std::string placeholder;
         if (param->GetProperty("placeholder")->IsUndefined()) {
@@ -289,190 +121,49 @@ void JSSearch::Create(const JSCallbackInfo& info)
         if (ParseJsString(param->GetProperty("icon"), icon)) {
             src = icon;
         }
-
-        auto controller = NG::SearchView::Create(key, tip, src);
         auto controllerObj = param->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
-            auto* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSSearchController>();
-            if (jsController) {
-                jsController->SetController(controller);
-            }
-        }
-        return;
-    }
-
-    auto searchComponent = AceType::MakeRefPtr<OHOS::Ace::SearchComponent>();
-    ViewStackProcessor::GetInstance()->ClaimElementId(searchComponent);
-    ViewStackProcessor::GetInstance()->Push(searchComponent);
-
-    auto textFieldComponent = AceType::MakeRefPtr<OHOS::Ace::TextFieldComponent>();
-    auto textFieldTheme = GetTheme<TextFieldTheme>();
-    auto searchTheme = GetTheme<SearchTheme>();
-
-    InitializeComponent(searchComponent, textFieldComponent, searchTheme, textFieldTheme);
-    PrepareSpecializedComponent(searchComponent, textFieldComponent);
-
-    JSInteractableView::SetFocusable(true);
-    JSInteractableView::SetFocusNode(true);
-
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGI("Search create without argument");
-        return;
-    }
-
-    auto param = JSRef<JSObject>::Cast(info[0]);
-    auto value = param->GetProperty("value");
-    if (!value->IsUndefined() && value->IsString()) {
-        auto key = value->ToString();
-        textFieldComponent->SetValue(key);
-    }
-
-    auto placeholder = param->GetProperty("placeholder");
-    if (!placeholder->IsUndefined() && placeholder->IsString()) {
-        auto tip = placeholder->ToString();
-        textFieldComponent->SetPlaceholder(tip);
-    }
-
-    auto controllerObj = param->GetProperty("controller");
-    if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
-        auto* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSSearchController>();
-        if (jsController) {
-            jsController->SetController(textFieldComponent->GetTextFieldController());
+            jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSSearchController>();
         }
     }
-
-    auto icon = param->GetProperty("icon");
-    if (!icon->IsUndefined() && icon->IsString()) {
-        auto src = icon->ToString();
-        textFieldComponent->SetIconImage(src);
+    auto controller = SearchModel::GetInstance()->Create(key, tip, src);
+    if (jsController) {
+        jsController->SetController(controller);
+    }
+    if (!Container::IsCurrentUseNewPipeline()) {
+        JSInteractableView::SetFocusable(true);
+        JSInteractableView::SetFocusNode(true);
     }
 }
 
 void JSSearch::SetSearchButton(const std::string& text)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::SearchView::SetSearchButton(text);
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto searchComponent = AceType::DynamicCast<SearchComponent>(component);
-    if (!searchComponent) {
-        LOGE("component error");
-        return;
-    }
-
-    searchComponent->SetSearchText(text);
+    SearchModel::GetInstance()->SetSearchButton(text);
 }
 
 void JSSearch::SetPlaceholderColor(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto value = JSRef<JSVal>::Cast(info[0]);
-        Color colorVal;
-        if (ParseJsColor(value, colorVal)) {
-            NG::SearchView::SetPlaceholderColor(colorVal);
-        }
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto searchComponent = AceType::DynamicCast<SearchComponent>(component);
-    if (!searchComponent) {
-        LOGE("search component error");
-        return;
-    }
-
-    auto childComponent = searchComponent->GetChild();
-    if (!childComponent) {
-        LOGE("component error");
-        return;
-    }
-
-    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
-    if (!textFieldComponent) {
-        LOGE("text component error");
-        return;
-    }
-
     auto value = JSRef<JSVal>::Cast(info[0]);
-
     Color colorVal;
     if (ParseJsColor(value, colorVal)) {
-        textFieldComponent->SetPlaceholderColor(colorVal);
-        textFieldComponent->SetFocusPlaceholderColor(colorVal);
+        SearchModel::GetInstance()->SetPlaceholderColor(colorVal);
     }
 }
 
 void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto param = JSRef<JSObject>::Cast(info[0]);
-        Font font;
-        auto fontSize = param->GetProperty("size");
-        if (fontSize->IsNull() || fontSize->IsUndefined()) {
-            font.fontSize = Dimension(-1);
-        } else {
-            Dimension size;
-            if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
-                font.fontSize = Dimension(-1);
-                LOGW("Parse to dimension FP failed.");
-            } else {
-                font.fontSize = size;
-            }
-        }
-
-        auto weight = param->GetProperty("weight");
-        if (!weight->IsNull()) {
-            std::string weightVal;
-            if (weight->IsNumber()) {
-                weightVal = std::to_string(weight->ToNumber<int32_t>());
-            } else {
-                ParseJsString(weight, weightVal);
-            }
-            font.fontWeight = ConvertStrToFontWeight(weightVal);
-        }
-
-        auto family = param->GetProperty("family");
-        if (!family->IsNull() && family->IsString()) {
-            auto familyVal = family->ToString();
-            font.fontFamilies = ConvertStrToFontFamilies(familyVal);
-        }
-
-        auto style = param->GetProperty("style");
-        if (!style->IsNull() && style->IsNumber()) {
-            FontStyle styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
-            font.fontStyle = styleVal;
-        }
-        NG::SearchView::SetPlaceholderFont(font);
-
-        return;
-    }
-
     auto param = JSRef<JSObject>::Cast(info[0]);
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto searchComponent = AceType::DynamicCast<SearchComponent>(component);
-    if (!searchComponent) {
-        LOGE("search component error");
-        return;
-    }
-    auto childComponent = searchComponent->GetChild();
-    if (!childComponent) {
-        LOGE("component error");
-        return;
-    }
-    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
-    if (!textFieldComponent) {
-        LOGE("text component error");
-        return;
-    }
-
-    TextStyle textStyle = searchComponent->GetPlaceHoldStyle();
-
-    auto size = param->GetProperty("size");
-    if (!size->IsNull() && size->IsNumber()) {
-        Dimension fontSize;
-        if (ParseJsDimensionFp(size, fontSize)) {
-            textStyle.SetFontSize(fontSize);
+    Font font;
+    auto fontSize = param->GetProperty("size");
+    if (fontSize->IsNull() || fontSize->IsUndefined()) {
+        font.fontSize = Dimension(-1);
+    } else {
+        Dimension size;
+        if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
+            font.fontSize = Dimension(-1);
+            LOGW("Parse to dimension FP failed.");
+        } else {
+            font.fontSize = size;
         }
     }
 
@@ -484,93 +175,37 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
         } else {
             ParseJsString(weight, weightVal);
         }
-        textStyle.SetFontWeight(ConvertStrToFontWeight(weightVal));
+        font.fontWeight = ConvertStrToFontWeight(weightVal);
     }
 
     auto family = param->GetProperty("family");
     if (!family->IsNull() && family->IsString()) {
         auto familyVal = family->ToString();
-        textStyle.SetFontFamilies(ConvertStrToFontFamilies(familyVal));
+        font.fontFamilies = ConvertStrToFontFamilies(familyVal);
     }
 
     auto style = param->GetProperty("style");
     if (!style->IsNull() && style->IsNumber()) {
         FontStyle styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
-        textStyle.SetFontStyle(styleVal);
+        font.fontStyle = styleVal;
     }
-    textFieldComponent->SetPlaceHoldStyle(textStyle);
+    SearchModel::GetInstance()->SetPlaceholderFont(font);
 }
 
 void JSSearch::SetTextFont(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto param = JSRef<JSObject>::Cast(info[0]);
-        Font font;
-        auto fontSize = param->GetProperty("size");
-        if (fontSize->IsNull() || fontSize->IsUndefined()) {
-            font.fontSize = Dimension(-1);
-        } else {
-            Dimension size;
-            if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
-                font.fontSize = Dimension(-1);
-                LOGW("Parse to dimension FP failed.");
-            } else {
-                font.fontSize = size;
-            }
-        }
-
-        auto weight = param->GetProperty("weight");
-        if (!weight->IsNull()) {
-            std::string weightVal;
-            if (weight->IsNumber()) {
-                weightVal = std::to_string(weight->ToNumber<int32_t>());
-            } else {
-                ParseJsString(weight, weightVal);
-            }
-            font.fontWeight = ConvertStrToFontWeight(weightVal);
-        }
-
-        auto family = param->GetProperty("family");
-        if (!family->IsNull() && family->IsString()) {
-            auto familyVal = family->ToString();
-            font.fontFamilies = ConvertStrToFontFamilies(familyVal);
-        }
-
-        auto style = param->GetProperty("style");
-        if (!style->IsNull() && style->IsNumber()) {
-            FontStyle styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
-            font.fontStyle = styleVal;
-        }
-        NG::SearchView::SetTextFont(font);
-
-        return;
-    }
-
     auto param = JSRef<JSObject>::Cast(info[0]);
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto searchComponent = AceType::DynamicCast<SearchComponent>(component);
-    if (!searchComponent) {
-        LOGE("search component error");
-        return;
-    }
-    auto childComponent = searchComponent->GetChild();
-    if (!childComponent) {
-        LOGE("component error");
-        return;
-    }
-    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
-    if (!textFieldComponent) {
-        LOGE("text component error");
-        return;
-    }
-
-    TextStyle textStyle = searchComponent->GetEditingStyle();
-
-    auto size = param->GetProperty("size");
-    if (!size->IsNull() && size->IsNumber()) {
-        Dimension fontSize;
-        if (ParseJsDimensionFp(size, fontSize)) {
-            textStyle.SetFontSize(fontSize);
+    Font font;
+    auto fontSize = param->GetProperty("size");
+    if (fontSize->IsNull() || fontSize->IsUndefined()) {
+        font.fontSize = Dimension(-1);
+    } else {
+        Dimension size;
+        if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
+            font.fontSize = Dimension(-1);
+            LOGW("Parse to dimension FP failed.");
+        } else {
+            font.fontSize = size;
         }
     }
 
@@ -582,43 +217,27 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
         } else {
             ParseJsString(weight, weightVal);
         }
-        textStyle.SetFontWeight(ConvertStrToFontWeight(weightVal));
+        font.fontWeight = ConvertStrToFontWeight(weightVal);
     }
 
     auto family = param->GetProperty("family");
     if (!family->IsNull() && family->IsString()) {
         auto familyVal = family->ToString();
-        textStyle.SetFontFamilies(ConvertStrToFontFamilies(familyVal));
+        font.fontFamilies = ConvertStrToFontFamilies(familyVal);
     }
 
     auto style = param->GetProperty("style");
     if (!style->IsNull() && style->IsNumber()) {
         FontStyle styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
-        textStyle.SetFontStyle(styleVal);
+        font.fontStyle = styleVal;
     }
-    textFieldComponent->SetEditingStyle(textStyle);
+    SearchModel::GetInstance()->SetTextFont(font);
 }
 
 void JSSearch::SetTextAlign(int32_t value)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
-            NG::SearchView::SetTextAlign(TEXT_ALIGNS[value]);
-        } else {
-            LOGE("the value is error");
-        }
-        return;
-    }
-
     if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
-        auto* stack = ViewStackProcessor::GetInstance();
-        auto component = AceType::DynamicCast<SearchComponent>(stack->GetMainComponent());
-        CHECK_NULL_VOID(component);
-        auto childComponent = component->GetChild();
-        CHECK_NULL_VOID(childComponent);
-        auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
-        CHECK_NULL_VOID(textFieldComponent);
-        textFieldComponent->SetTextAlign(TEXT_ALIGNS[value]);
+        SearchModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
     } else {
         LOGE("the value is error");
     }
@@ -808,41 +427,16 @@ void JSSearch::JsBorderRadius(const JSCallbackInfo& info)
 
 void JSSearch::OnSubmit(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onSubmit = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](std::string value) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Search.onSubmit");
-            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
-            func->ExecuteJS(1, &newJSVal);
-        };
-        NG::SearchView::SetOnSubmit(std::move(onSubmit));
-        return;
-    }
-    if (!JSViewBindEvent(&SearchComponent::SetOnSubmit, info)) {
-        LOGE("Failed to bind event");
-    }
-    info.ReturnSelf();
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    SearchModel::GetInstance()->SetOnSubmit(std::move(callback));
 }
 
 void JSSearch::OnChange(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](std::string value) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Search.onChange");
-            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
-            func->ExecuteJS(1, &newJSVal);
-        };
-        NG::SearchView::SetOnChange(std::move(onChange));
-        return;
-    }
-
-    if (!JSViewBindEvent(&SearchComponent::SetOnChange, info)) {
-        LOGE("Failed to bind event");
-    }
-    info.ReturnSelf();
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    SearchModel::GetInstance()->SetOnChange(std::move(callback));
 }
 
 void JSSearch::SetHeight(const JSCallbackInfo& info)
@@ -887,62 +481,23 @@ void JSSearch::SetHeight(const JSCallbackInfo& info)
 
 void JSSearch::SetOnCopy(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onCopy = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](std::string value) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Search.onCopy");
-            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
-            func->ExecuteJS(1, &newJSVal);
-        };
-        NG::SearchView::SetOnCopy(std::move(onCopy));
-        return;
-    }
-
-    if (!JSViewBindEvent(&TextFieldComponent::SetOnCopy, info)) {
-        LOGW("Failed(OnCopy) to bind event");
-    }
-    info.ReturnSelf();
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    SearchModel::GetInstance()->SetOnCopy(std::move(callback));
 }
 
 void JSSearch::SetOnCut(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onCut = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](std::string value) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Search.onCut");
-            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
-            func->ExecuteJS(1, &newJSVal);
-        };
-        NG::SearchView::SetOnCut(std::move(onCut));
-        return;
-    }
-
-    if (!JSViewBindEvent(&TextFieldComponent::SetOnCut, info)) {
-        LOGW("Failed(OnCut) to bind event");
-    }
-    info.ReturnSelf();
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    SearchModel::GetInstance()->SetOnCut(std::move(callback));
 }
 
 void JSSearch::SetOnPaste(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onPaste = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](std::string value) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Search.onPaste");
-            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
-            func->ExecuteJS(1, &newJSVal);
-        };
-        NG::SearchView::SetOnPaste(std::move(onPaste));
-        return;
-    }
-
-    if (!JSViewBindEvent(&TextFieldComponent::SetOnPaste, info)) {
-        LOGW("Failed(OnPaste) to bind event");
-    }
-    info.ReturnSelf();
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    SearchModel::GetInstance()->SetOnPaste(std::move(callback));
 }
 
 void JSSearch::SetCopyOption(const JSCallbackInfo& info)
@@ -950,22 +505,12 @@ void JSSearch::SetCopyOption(const JSCallbackInfo& info)
     if (info.Length() == 0) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto copyOptions = CopyOptions::None;
-        if (info[0]->IsNumber()) {
-            auto emunNumber = info[0]->ToNumber<int>();
-            copyOptions = static_cast<CopyOptions>(emunNumber);
-        }
-        NG::SearchView::SetCopyOption(copyOptions);
-        return;
-    }
     auto copyOptions = CopyOptions::None;
     if (info[0]->IsNumber()) {
         auto emunNumber = info[0]->ToNumber<int>();
         copyOptions = static_cast<CopyOptions>(emunNumber);
     }
-    LOGI("copy option: %{public}d", copyOptions);
-    JSViewSetProperty(&TextFieldComponent::SetCopyOption, copyOptions);
+    SearchModel::GetInstance()->SetCopyOption(copyOptions);
 }
 
 void JSSearchController::JSBind(BindingTarget globalObj)
