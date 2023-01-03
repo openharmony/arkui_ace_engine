@@ -111,6 +111,7 @@ bool SvgDom::ParseSvg(SkStream& svgStream)
     SkDOM xmlDom;
     CHECK_NULL_RETURN_NOLOG(svgContext_, false);
     if (!xmlDom.build(svgStream)) {
+        LOGE("Failed to parse xml file.");
         return false;
     }
     root_ = TranslateSvgNode(xmlDom, xmlDom.getRootNode(), nullptr);
