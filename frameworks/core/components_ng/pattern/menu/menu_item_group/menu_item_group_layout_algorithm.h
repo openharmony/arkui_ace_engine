@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,9 +49,9 @@ private:
     float GetChildrenMaxWidth(
         const std::list<RefPtr<LayoutWrapper>>& children, const LayoutConstraintF& layoutConstraint);
 
-    int32_t headerIndex_;
-    int32_t footerIndex_;
-    int32_t itemStartIndex_;
+    int32_t headerIndex_ = -1;
+    int32_t footerIndex_ = -1;
+    int32_t itemStartIndex_ = 0;
 
     bool needHeaderPadding_ = false;
     bool needFooterPadding_ = false;

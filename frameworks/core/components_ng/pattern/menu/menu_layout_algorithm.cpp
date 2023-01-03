@@ -36,22 +36,23 @@ namespace OHOS::Ace::NG {
 
 void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
 {
+    // currently using click point as menu position
+    auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(props);
+    position_ = props->GetMenuOffset().value_or(OffsetF());
+
     CHECK_NULL_VOID(layoutWrapper);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     screenSize_ = SizeF(pipeline->GetRootWidth(), pipeline->GetRootHeight());
+
     auto stageManager = pipeline->GetStageManager();
     CHECK_NULL_VOID(stageManager);
     auto page = stageManager->GetLastPage();
     CHECK_NULL_VOID(page);
     pageOffset_ = page->GetOffsetRelativeToWindow();
-
-    // currently using click point as menu position
-    auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(props);
-    position_ = props->GetMenuOffset().value_or(OffsetF());
 }
 
 // Called to perform layout render node and child.
