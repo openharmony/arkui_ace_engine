@@ -16,10 +16,10 @@
 
 /**
  * ObservedObject, i.e. wrapper for class Object type state variable
- * 
- * This class and all other definitoons in this file are framework 
+ *
+ * This class and all other definitoons in this file are framework
  * internal / non-SDK
- * 
+ *
  */
 
 
@@ -166,6 +166,11 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
    */
   public static createNew<T extends Object>(rawObject: T,
     owningProperty: IPropertySubscriber): any {
+
+    if (rawObject === null || rawObject === undefined) {
+      stateMgmtConsole.error(`ObservedObject.CreateNew, input object must not be null or undefined.`);
+      return null;
+    }
 
     if (ObservedObject.IsObservedObject(rawObject)) {
       ObservedObject.addOwningProperty(rawObject, owningProperty);

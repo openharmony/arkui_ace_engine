@@ -11,9 +11,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  *  * ViewPU - View for Partial Update
- *  
+ *
 * all definitions in this file are framework internal
 */
 
@@ -146,7 +146,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // its aboutToBeDeleted implementation
   protected aboutToBeDeletedInternal(): void {
     // When a custom component is deleted, need to notify the C++ side to clean the corresponding deletion cache Map,
-    // because after the deletion, can no longer clean the RemoveIds cache on the C++ side through the 
+    // because after the deletion, can no longer clean the RemoveIds cache on the C++ side through the
     // updateDirtyElements function.
     let removedElmtIds: number[] = [];
     this.updateFuncByElmtId.forEach((value: UpdateFunc, key: number) => {
@@ -174,7 +174,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
    * add given child and set 'this' as its parent
    * @param child child to add
    * @returns returns false if child with given child's id already exists
-   * 
+   *
    * framework internal function
    * Note: Use of WeakRef ensures child and parent do not generate a cycle dependency.
    * The add. Set<ids> is required to reliably tell what children still exist.
@@ -206,7 +206,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   /**
    * Retrieve child by given id
-   * @param id 
+   * @param id
    * @returns child if in map and weak ref can still be downreferenced
    */
   public getChildById(id: number) {
@@ -244,9 +244,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
   /**
    * force a complete rerender / update by executing all update functions
    * exec a regular rerender first
-   * 
+   *
    * @param deep recurse all children as well
-   * 
+   *
    * framework internal functions, apps must not call
    */
   public forceCompleteRerender(deep: boolean = false): void {
@@ -275,9 +275,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   /**
    * force a complete rerender / update on specific node by executing update function.
-   * 
+   *
    * @param elmtId which node needs to update.
-   * 
+   *
    * framework internal functions, apps must not call
    */
   public forceRerenderNode(elmtId: number): void {
@@ -332,7 +332,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       stateMgmtConsole.debug(`   .. calling @Watch function`);
       cb.call(this, varName);
     }
-  
+
     this.restoreInstanceId();
   }
 
@@ -497,53 +497,75 @@ abstract class ViewPU extends NativeViewPartialUpdate
     itemGenFuncUsesIndex: boolean = false,
     idGenFuncUsesIndex: boolean = false) : void {
 
-      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction `);
+    stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction `);
 
-      if (idGenFunc === undefined) {
-        stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: providing default id gen function `);
-        idGenFunc = (item: any, index : number) => `${index}__${JSON.stringify(item)}`;
-        idGenFuncUsesIndex = true;
-      }
+    if (itemArray === null || itemArray === undefined) {
+      stateMgmtConsole.error(`ForEach input array is null or undefined error.`);
+      return;
+    }
 
-      let diffIndexArray = []; // New indexes compared to old one.
-      let newIdArray = [];
-      const arr = itemArray; // just to trigger a 'get' onto the array
+    if (itemGenFunc === null || itemGenFunc === undefined) {
+      stateMgmtConsole.error(`Error: Item generation function not defined in forEach function.`);
+      return;
+    }
 
-      // ID gen is with index.
-      if (idGenFuncUsesIndex) {
-        stateMgmtConsole.debug(`ID Gen with index parameter or with default id gen func`);
-        // Create array of new ids.
-        arr.forEach((item, indx) => {
-          newIdArray.push(idGenFunc(item, indx));
-        });
-      }
-      else {
-        // Create array of new ids.
-        stateMgmtConsole.debug(`ID Gen without index parameter`);
-        arr.forEach((item, index) => {
-          newIdArray.push(`${itemGenFuncUsesIndex ? index + '_':''}` + idGenFunc(item));
-        });
-      }
+    if (idGenFunc === undefined) {
+      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: providing default id gen function `);
+      idGenFunc = (item: any, index : number) => `${index}__${JSON.stringify(item)}`;
+      idGenFuncUsesIndex = true;
+    }
 
-      // set new array on C++ side.
-      // C++ returns array of indexes of newly added array items.
-      // these are indexes in new child list.
-      ForEach.setIdArray(elmtId, newIdArray, diffIndexArray);
-      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: diff indexes ${JSON.stringify(diffIndexArray)} . `);
+    let diffIndexArray = []; // New indexes compared to old one.
+    let newIdArray = [];
+    let idDuplicates = [];
+    const arr = itemArray; // just to trigger a 'get' onto the array
 
-      // Item gen is with index.
-      stateMgmtConsole.debug(`Item Gen ${itemGenFuncUsesIndex ? 'with' : "without"} index`);
-      // Create new elements if any.
-      diffIndexArray.forEach((indx) => {
-        ForEach.createNewChildStart(newIdArray[indx], this);
-        if (itemGenFuncUsesIndex) {
-          itemGenFunc(arr[indx], indx);
-        } else {
-          itemGenFunc(arr[indx]);
-        }
-        ForEach.createNewChildFinish(newIdArray[indx], this);
+    // ID gen is with index.
+    if (idGenFuncUsesIndex) {
+      stateMgmtConsole.debug(`ID Gen with index parameter or with default id gen func`);
+      // Create array of new ids.
+      arr.forEach((item, indx) => {
+        newIdArray.push(idGenFunc(item, indx));
       });
     }
+    else {
+      // Create array of new ids.
+      stateMgmtConsole.debug(`ID Gen without index parameter`);
+      arr.forEach((item, index) => {
+        newIdArray.push(`${itemGenFuncUsesIndex ? index + '_':''}` + idGenFunc(item));
+      });
+    }
+
+    // Set new array on C++ side.
+    // C++ returns array of indexes of newly added array items.
+    // these are indexes in new child list.
+    ForEach.setIdArray(elmtId, newIdArray, diffIndexArray, idDuplicates);
+
+    // Its error if there are duplicate IDs.
+    if (idDuplicates.length > 0) {
+      idDuplicates.forEach((indx) => {
+        stateMgmtConsole.error(
+          `Error: ${newIdArray[indx]} generated for ${indx}${indx < 4 ? indx == 2 ? "nd" : "rd" : "th"} array item ${arr[indx]}.`);
+      });
+      stateMgmtConsole.error(`Ids generated by the ForEach id gen function must be unique, error.`);
+    }
+
+    stateMgmtConsole.debug(
+      `${this.constructor.name}[${this.id__()}]: diff indexes ${JSON.stringify(diffIndexArray)} . `);
+
+    // Item gen is with index.
+    stateMgmtConsole.debug(`Item Gen ${itemGenFuncUsesIndex ? 'with' : "without"} index`);
+    // Create new elements if any.
+    diffIndexArray.forEach((indx) => {
+      ForEach.createNewChildStart(newIdArray[indx], this);
+      if (itemGenFuncUsesIndex) {
+        itemGenFunc(arr[indx], indx);
+      } else {
+        itemGenFunc(arr[indx]);
+      }
+      ForEach.createNewChildFinish(newIdArray[indx], this);
+    });
+  }
 
   /**
      * CreateStorageLink and CreateStorageLinkPU are used by the implementation of @StorageLink and
