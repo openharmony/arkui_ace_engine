@@ -773,14 +773,15 @@ bool AceContainer::UpdatePage(int32_t instanceId, int32_t pageId, const std::str
 
 void AceContainer::SetHapPath(const std::string& hapPath)
 {
-    if (hapPath.empty()) {
+    if (!SystemProperties::GetResourceUseHapPathEnable()) {
         LOGI("SetHapPath, Use .index to load resource");
         return;
     }
     LOGI("SetHapPath, Use hap path to load resource");
-    webHapPath_ = hapPath;
     resourceInfo_.SetHapPath(hapPath);
-    SystemProperties::SetUnZipHap(false);
+    if (!hapPath.empty()) {
+        SystemProperties::SetUnZipHap(false);
+    }
 }
 
 void AceContainer::Dispatch(
