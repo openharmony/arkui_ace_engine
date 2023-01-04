@@ -85,10 +85,10 @@ RefPtr<RenderNode> TextFieldElement::CreateRenderNode()
 
     auto renderNode = AceType::DynamicCast<RenderTextField>(node);
     if (renderNode) {
-        renderNode->RegisterTapCallback([wp = AceType::WeakClaim(this)]() {
+        renderNode->RegisterTapCallback([wp = AceType::WeakClaim(this)](bool isRequestKeyboard) {
             auto sp = wp.Upgrade();
             if (sp) {
-                return sp->RequestKeyboard();
+                return sp->RequestKeyboard(false, isRequestKeyboard);
             }
             return false;
         });

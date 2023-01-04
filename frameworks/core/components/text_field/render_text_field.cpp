@@ -697,7 +697,12 @@ void RenderTextField::OnTapCallback()
         context->SetClickPosition(GetGlobalOffset() + Size(0, GetLayoutSize().Height()));
     }
     if (isFocusOnTouch_ && tapCallback_) {
-        onTapCallbackResult_ = tapCallback_();
+        if (isLongPressStatus_) {
+            onTapCallbackResult_ = tapCallback_(false);
+            isLongPressStatus_ = false;
+        } else {
+            onTapCallbackResult_ = tapCallback_(true);
+        }
     }
 }
 
@@ -795,7 +800,7 @@ void RenderTextField::OnDoubleClick(const ClickInfo& clickInfo)
 void RenderTextField::OnLongPress(const LongPressInfo& longPressInfo)
 {
     if (isFocusOnTouch_ && tapCallback_ && !isOverlayShowed_) {
-        if (!tapCallback_()) {
+        if (!tapCallback_(false)) {
             return;
         }
     }
@@ -810,6 +815,7 @@ void RenderTextField::OnLongPress(const LongPressInfo& longPressInfo)
         return;
     }
 
+    isLongPressStatus_ = true;
     Offset longPressPosition = longPressInfo.GetGlobalLocation();
     bool isTextEnd =
         (static_cast<size_t>(GetCursorPositionForClick(longPressPosition)) == GetEditingValue().GetWideText().length());
@@ -1010,24 +1016,30 @@ void RenderTextField::PushTextOverlayToStack()
         return;
     }
 
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto textOverlayManager = context->GetTextOverlayManager();
+    CHECK_NULL_VOID(textOverlayManager);
+    textOverlayManager->PushTextOverlayToStack(textOverlay_, context);
+
     hasTextOverlayPushed_ = true;
+    isOverlayShowed_ = true;
     auto lastStack = GetLastStack();
     if (!lastStack) {
         LOGE("LastStack is null");
         return;
     }
-    isOverlayShowed_ = true;
-    lastStack->PushComponent(textOverlay_, false);
     stackElement_ = WeakClaim(RawPtr(lastStack));
     MarkNeedRender();
 }
 
 void RenderTextField::PopTextOverlay()
 {
-    const auto& stackElement = stackElement_.Upgrade();
-    if (stackElement) {
-        stackElement->PopTextOverlay();
-    }
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto textOverlayManager = context->GetTextOverlayManager();
+    CHECK_NULL_VOID(textOverlayManager);
+    textOverlayManager->PopTextOverlay();
     isOverlayShowed_ = false;
 }
 
