@@ -22,10 +22,12 @@
 
 namespace OHOS::Ace::Framework {
 
-void RatingModelImpl::Create()
+void RatingModelImpl::Create(double rating, bool indicator)
 {
     auto component = AceType::MakeRefPtr<RatingComponent>();
     component->SetMouseAnimationType(HoverAnimationType::NONE);
+    component->SetRatingScore(rating);
+    component->SetIndicator(indicator);
     ViewStackProcessor::GetInstance()->ClaimElementId(component);
     ViewStackProcessor::GetInstance()->Push(component);
 

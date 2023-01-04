@@ -29,7 +29,7 @@ public:
     static RatingModel* GetInstance();
     virtual ~RatingModel() = default;
 
-    virtual void Create() = 0;
+    virtual void Create(double rating, bool indicator) = 0;
     virtual void SetRatingScore(double value) = 0;
     virtual void SetIndicator(bool value) = 0;
     virtual void SetStars(int32_t value) = 0;
