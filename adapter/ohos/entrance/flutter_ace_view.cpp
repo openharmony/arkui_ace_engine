@@ -445,6 +445,9 @@ void FlutterAceView::SurfaceChanged(
         auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->CloseContextMenu();
+        auto textOverlayManager = pipelineContext->GetTextOverlayManager();
+        CHECK_NULL_VOID(textOverlayManager);
+        textOverlayManager->PopTextOverlay();
     }
 
     LOGD("<<< FlutterAceView::SurfaceChanged, end");
