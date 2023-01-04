@@ -39,29 +39,29 @@ public:
     void ScrollToIndex(const JSCallbackInfo& args);
     void ScrollBy(const JSCallbackInfo& args);
 
-    const RefPtr<ScrollControllerBase>& GetController() const
+    const WeakPtr<ScrollControllerBase>& GetController() const
     {
-        return controller_;
+        return controllerWeak_;
     }
 
     void SetController(const RefPtr<ScrollControllerBase>& controller)
     {
-        controller_ = controller;
+        controllerWeak_ = controller;
     }
 
     void SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy)
     {
-        scrollBarProxy_ = proxy;
+        scrollBarProxyWeak_ = proxy;
     }
 
-    const RefPtr<ScrollProxy>& GetScrollBarProxy()
+    RefPtr<ScrollProxy> GetScrollBarProxy()
     {
-        return scrollBarProxy_;
+        return scrollBarProxyWeak_.Upgrade();
     }
 
 private:
-    RefPtr<ScrollControllerBase> controller_;
-    RefPtr<ScrollProxy> scrollBarProxy_;
+    WeakPtr<ScrollControllerBase> controllerWeak_;
+    WeakPtr<ScrollProxy> scrollBarProxyWeak_;
 
     ACE_DISALLOW_COPY_AND_MOVE(JSScroller);
 };
