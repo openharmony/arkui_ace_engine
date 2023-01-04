@@ -896,7 +896,7 @@ private:
             auto nodeLeft = nodeLeftWeak.Upgrade();
             auto nodeRight = nodeRightWeak.Upgrade();
             if (!nodeLeft || !nodeRight) {
-                return false;
+                return true;
             }
             auto compare = NodeCompare<decltype(nodeLeft)>();
             return compare(nodeLeft, nodeRight);
