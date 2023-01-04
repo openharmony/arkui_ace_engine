@@ -215,4 +215,9 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
 {
     return { 1.0f, 1.0f };
 }
+
+OffsetF FrameNode::GetTransformRelativeOffset() const
+{
+    return { 1.0f, 1.0f };
+}
 } // namespace OHOS::Ace::NG

@@ -102,14 +102,17 @@ private:
         const RefPtr<NG::FrameNode>& node, const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode)
     {
         rsSurfaceNode->CreateNodeInRenderThread();
-        auto size = node->GetGeometryNode()->GetFrameSize();
+        auto context = node->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        auto geometryNode = node->GetGeometryNode();
+        auto size = geometryNode->GetFrameSize();
+        geometryNode->SetFrameOffset(geometryNode->GetFrameOffset() + context->GetPaintRectWithTransform().GetOffset());
+        node->SetGeometryNode(geometryNode);
         auto offset = node->GetGeometryNode()->GetFrameOffset();
         LOGI("OnWindowReady surface size:%{public}f %{public}f %{public}f %{public}f", offset.GetX(), offset.GetY(),
             size.Width(), size.Height());
         rsSurfaceNode->SetBounds(offset.GetX(), offset.GetY(), size.Width(), size.Height());
         rsSurfaceNode->SetBackgroundColor(Color::WHITE.GetValue());
-        auto context = node->GetRenderContext();
-        CHECK_NULL_VOID(context);
         AceType::DynamicCast<NG::RosenRenderContext>(context)->SetRSNode(rsSurfaceNode);
         auto parent = node->GetParent();
         CHECK_NULL_VOID(parent);
@@ -141,7 +144,6 @@ void WantConverterNG(const std::string& want, AppExecFwk::ElementName& element)
 
 void WindowExtensionConnectionAdapterOhosNG::ConnectExtension(const RefPtr<NG::FrameNode>& node, int32_t windowId)
 {
-    LOGI("connect to windows extension begin1111");
 #if defined(ENABLE_ROSEN_BACKEND) && defined(OS_ACCOUNT_EXISTS)
     LOGI("connect to windows extension begin");
     if (!windowExtension_) {
