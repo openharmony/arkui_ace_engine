@@ -417,6 +417,9 @@ public:
     }
 
     void UpdateCaretRectByPosition(int32_t position);
+    float GetIconRightOffset();
+    float GetIconHotZoneSize();
+    float GetIconSize();
 
 private:
     void HandleBlurEvent();

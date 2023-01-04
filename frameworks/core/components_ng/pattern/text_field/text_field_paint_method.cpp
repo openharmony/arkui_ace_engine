@@ -73,6 +73,9 @@ CanvasDrawFunction TextFieldPaintMethod::GetContentDrawFunction(PaintWrapper* pa
                 paragraph->Paint(&canvas, textFieldPattern->GetTextRect().GetX(), contentOffset.GetY());
             }
         }
+        if (!textFieldPattern->NeedShowPasswordIcon()) {
+            return;
+        }
         CHECK_NULL_VOID_NOLOG(passwordIconCanvasImage);
         const ImagePainter passwordIconImagePainter(passwordIconCanvasImage);
         auto iconRect = textFieldPattern->GetImageRect();
