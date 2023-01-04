@@ -38,6 +38,7 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
+        LOGD("Image Data Ready %{private}s", sourceInfo.ToString().c_str());
         pattern->OnImageDataReady();
     };
     return task;
@@ -56,6 +57,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
+        LOGD("Image Load Success %{private}s", sourceInfo.ToString().c_str());
         pattern->OnImageLoadSuccess();
     };
     return task;
@@ -104,15 +106,6 @@ void ImagePattern::OnImageLoadSuccess()
     // TODO: only do paint task when the pattern is active
     // figure out why here is always inactive
     host->MarkNeedRenderOnly();
-}
-
-void ImagePattern::CacheImageObject()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    // TODO: do cache
 }
 
 void ImagePattern::OnImageDataReady()

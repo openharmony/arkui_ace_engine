@@ -119,41 +119,41 @@ EnterStateTask ImageLoadingContext::CreateOnDataReadyTask()
 EnterStateTask ImageLoadingContext::CreateOnMakeCanvasImageTask()
 {
     auto task = [weakCtx = WeakClaim(this)]() {
-        auto imageLoadingContext = weakCtx.Upgrade();
-        CHECK_NULL_VOID(imageLoadingContext);
-        if (!imageLoadingContext->imageObj_) {
+        auto ctx = weakCtx.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        if (!ctx->imageObj_) {
             // there must be something wrong with state manager if [imageObj_] is null here.
             LOGE("image object is null during canvas image making task, sourceInfo: %{public}s",
-                imageLoadingContext->GetSourceInfo().ToString().c_str());
+                ctx->GetSourceInfo().ToString().c_str());
             return;
         }
 
         // only update params when it actually do [MakeCanvasImage]
-        if (imageLoadingContext->updateParamsCallback_) {
-            imageLoadingContext->updateParamsCallback_();
-            imageLoadingContext->updateParamsCallback_ = nullptr;
+        if (ctx->updateParamsCallback_) {
+            ctx->updateParamsCallback_();
+            ctx->updateParamsCallback_ = nullptr;
         }
 
         // step1: do first [ApplyImageFit] to calculate the srcRect based on original image size
-        ImagePainter::ApplyImageFit(imageLoadingContext->imageFit_, imageLoadingContext->GetImageSize(),
-            imageLoadingContext->dstSize_, imageLoadingContext->srcRect_, imageLoadingContext->dstRect_);
+        ImagePainter::ApplyImageFit(ctx->imageFit_, ctx->GetImageSize(),
+            ctx->dstSize_, ctx->srcRect_, ctx->dstRect_);
 
         // step2: calculate resize target
-        auto resizeTarget = imageLoadingContext->GetImageSize();
-        bool isPixelMapResource = (SrcType::DATA_ABILITY_DECODED == imageLoadingContext->GetSourceInfo().GetSrcType());
-        if (imageLoadingContext->needResize_ && !isPixelMapResource) {
-            resizeTarget = ImageLoadingContext::CalculateResizeTarget(imageLoadingContext->srcRect_.GetSize(),
-                imageLoadingContext->dstRect_.GetSize(),
-                imageLoadingContext->GetSourceSize().value_or(imageLoadingContext->GetImageSize()));
+        auto resizeTarget = ctx->GetImageSize();
+        bool isPixelMapResource = (SrcType::DATA_ABILITY_DECODED == ctx->GetSourceInfo().GetSrcType());
+        if (ctx->needResize_ && !isPixelMapResource) {
+            resizeTarget = ImageLoadingContext::CalculateResizeTarget(ctx->srcRect_.GetSize(),
+                ctx->dstRect_.GetSize(),
+                ctx->GetSourceSize().value_or(ctx->GetImageSize()));
         }
 
         // step3: do second [ApplyImageFit] to calculate real srcRect used for paint based on resized image size
-        ImagePainter::ApplyImageFit(imageLoadingContext->imageFit_, resizeTarget, imageLoadingContext->dstSize_,
-            imageLoadingContext->srcRect_, imageLoadingContext->dstRect_);
+        ImagePainter::ApplyImageFit(ctx->imageFit_, resizeTarget, ctx->dstSize_,
+            ctx->srcRect_, ctx->dstRect_);
 
         // step4: [MakeCanvasImage] according to [resizeTarget]
-        imageLoadingContext->imageObj_->MakeCanvasImage(imageLoadingContext->loadCallbacks_, resizeTarget,
-            imageLoadingContext->GetSourceSize().has_value(), imageLoadingContext->syncLoad_);
+        ctx->imageObj_->MakeCanvasImage(ctx->loadCallbacks_, resizeTarget,
+            ctx->GetSourceSize().has_value(), ctx->syncLoad_);
     };
     return task;
 }
@@ -161,13 +161,13 @@ EnterStateTask ImageLoadingContext::CreateOnMakeCanvasImageTask()
 EnterStateTask ImageLoadingContext::CreateOnLoadSuccessTask()
 {
     auto task = [weakCtx = WeakClaim(this)]() {
-        auto imageLoadingContext = weakCtx.Upgrade();
-        CHECK_NULL_VOID(imageLoadingContext);
-        if (imageLoadingContext->loadNotifier_.loadSuccessNotifyTask_) {
-            imageLoadingContext->loadNotifier_.loadSuccessNotifyTask_(imageLoadingContext->GetSourceInfo());
-            imageLoadingContext->CacheImageObject();
+        auto ctx = weakCtx.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        if (ctx->loadNotifier_.loadSuccessNotifyTask_) {
+            ctx->loadNotifier_.loadSuccessNotifyTask_(ctx->GetSourceInfo());
+            ctx->CacheImageObject();
         }
-        imageLoadingContext->needAlt_ = false;
+        ctx->needAlt_ = false;
     };
     return task;
 }
@@ -175,10 +175,10 @@ EnterStateTask ImageLoadingContext::CreateOnLoadSuccessTask()
 EnterStateTask ImageLoadingContext::CreateOnLoadFailTask()
 {
     auto task = [weakCtx = WeakClaim(this)]() {
-        auto imageLoadingContext = weakCtx.Upgrade();
-        CHECK_NULL_VOID(imageLoadingContext);
-        if (imageLoadingContext->loadNotifier_.loadFailNotifyTask_) {
-            imageLoadingContext->loadNotifier_.loadFailNotifyTask_(imageLoadingContext->GetSourceInfo());
+        auto ctx = weakCtx.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        if (ctx->loadNotifier_.loadFailNotifyTask_) {
+            ctx->loadNotifier_.loadFailNotifyTask_(ctx->GetSourceInfo());
         }
     };
     return task;
@@ -187,14 +187,14 @@ EnterStateTask ImageLoadingContext::CreateOnLoadFailTask()
 DataReadyCallback ImageLoadingContext::GenerateDataReadyCallback()
 {
     auto task = [weakCtx = WeakClaim(this)](const ImageSourceInfo& sourceInfo, const RefPtr<ImageObject>& imageObj) {
-        auto loadingCtx = weakCtx.Upgrade();
-        CHECK_NULL_VOID(loadingCtx);
-        loadingCtx->OnDataReady(sourceInfo, imageObj);
+        auto ctx = weakCtx.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        ctx->OnDataReady(sourceInfo, imageObj);
     };
     return task;
 }
 
-void ImageLoadingContext::OnDataReady(const ImageSourceInfo& sourceInfo, const RefPtr<ImageObject> imageObj)
+void ImageLoadingContext::OnDataReady(const ImageSourceInfo& sourceInfo, const RefPtr<ImageObject>& imageObj)
 {
     if (sourceInfo_ != sourceInfo) {
         LOGI("DataReady callback with sourceInfo: %{private}s does not match current: %{private}s",
@@ -208,9 +208,9 @@ void ImageLoadingContext::OnDataReady(const ImageSourceInfo& sourceInfo, const R
 LoadSuccessCallback ImageLoadingContext::GenerateLoadSuccessCallback()
 {
     auto task = [weakCtx = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
-        auto loadingCtx = weakCtx.Upgrade();
-        CHECK_NULL_VOID(loadingCtx);
-        loadingCtx->OnLoadSuccess(sourceInfo);
+        auto ctx = weakCtx.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        ctx->OnLoadSuccess(sourceInfo);
     };
     return task;
 }
@@ -297,12 +297,12 @@ void ImageLoadingContext::MakeCanvasImage(
     // updating params before they are not actually used, capture the params in a function. This function will only run
     // when it actually do [MakeCanvasImage], i.e. doing the update in [OnMakeCanvasImageTask]
     updateParamsCallback_ = [wp = WeakClaim(this), dstSize, needResize, imageFit, sourceSize]() {
-        auto loadingCtx = wp.Upgrade();
-        CHECK_NULL_VOID(loadingCtx);
-        loadingCtx->dstSize_ = dstSize;
-        loadingCtx->imageFit_ = imageFit;
-        loadingCtx->needResize_ = needResize;
-        loadingCtx->SetSourceSize(sourceSize);
+        auto ctx = wp.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        ctx->dstSize_ = dstSize;
+        ctx->imageFit_ = imageFit;
+        ctx->needResize_ = needResize;
+        ctx->SetSourceSize(sourceSize);
     };
     // send command to [StateManager] and waiting the callback from it to determine next step
     stateManager_->HandleCommand(ImageLoadingCommand::MAKE_CANVAS_IMAGE);
@@ -393,10 +393,10 @@ void ImageLoadingContext::CacheImageObject()
 {
     auto pipelineCtx = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineCtx);
-    auto imageCache = pipelineCtx->GetImageCache();
-    CHECK_NULL_VOID(imageCache);
-    if (imageCache && imageObj_->GetFrameCount() == 1 && imageObj_->IsSupportCache()) {
-        imageCache->CacheImgObjNG(imageObj_->GetSourceInfo().ToString(), imageObj_);
+    auto cache = pipelineCtx->GetImageCache();
+    CHECK_NULL_VOID(cache);
+    if (cache && imageObj_->GetFrameCount() == 1 && imageObj_->IsSupportCache()) {
+        cache->CacheImgObjNG(imageObj_->GetSourceInfo().ToString(), imageObj_);
     }
 }
 

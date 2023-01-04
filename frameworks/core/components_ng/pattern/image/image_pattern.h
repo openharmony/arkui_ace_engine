@@ -89,7 +89,6 @@ private:
     void OnImageDataReady();
     void OnImageLoadFail();
     void OnImageLoadSuccess();
-    void CacheImageObject();
     void SetImagePaintConfig(
         const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect, bool isSvg);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);

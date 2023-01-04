@@ -36,6 +36,8 @@ public:
 
     void MakeCanvasImage(
         const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
+
+    // return true if process is successful
     bool MakeSvgDom(const std::optional<Color>& svgFillColor);
 
 private:

@@ -128,7 +128,6 @@ HWTEST_F(ImagePatternTest, ImagePatternCreator001, TestSize.Level1)
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     EXPECT_TRUE(imagePattern != nullptr);
-    imagePattern->CacheImageObject();
 }
 
 /**

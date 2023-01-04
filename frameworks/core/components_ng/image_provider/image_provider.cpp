@@ -136,6 +136,7 @@ bool ImageProvider::QueryImageObjectFromCache(const LoadCallbacks& loadCallbacks
     CHECK_NULL_RETURN(imageCache, false);
     RefPtr<ImageObject> imageObj = imageCache->GetCacheImgObjNG(sourceInfo.ToString());
     if (imageObj && imageObj->GetSourceInfo() == sourceInfo) {
+        LOGD("imageObject cache found %{private}s", sourceInfo.ToString().c_str());
         // if [imageObj] of [sourceInfo] is already in cache, notify data ready immediately
         loadCallbacks.dataReadyCallback_(sourceInfo, imageObj);
         return true;
@@ -178,7 +179,6 @@ void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, cons
 void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& sourceInfo, const LoadCallbacks& loadCallbacks,
     const std::optional<Color>& svgFillColor, bool sync)
 {
-    // TODO: use PrepareImageData function instead
     // step1: load image data
     auto imageLoader = ImageLoader::CreateImageLoader(sourceInfo);
     if (!imageLoader) {
@@ -199,8 +199,7 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& sourceInfo, cons
     }
 
     // step3: build ImageObject according to encoded info
-    RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(
-        sourceInfo, encodedInfo, data, svgFillColor, loadCallbacks.loadFailCallback_, imageObjectType, sync);
+    RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(sourceInfo, encodedInfo, data, imageObjectType);
     if (!imageObj) {
         FailCallback(loadCallbacks.loadFailCallback_, sourceInfo, "Fail to build image object", sync);
     }
@@ -236,9 +235,7 @@ void SyncImageProvider::CreateImageObject(
 }
 
 RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& sourceInfo,
-    const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data,
-    const std::optional<Color>& svgFillColor, const LoadFailCallback& failCallback, ImageObjectType imageObjectType,
-    bool sync)
+    const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data, ImageObjectType imageObjectType)
 {
     switch (imageObjectType) {
         case ImageObjectType::STATIC_IMAGE_OBJECT:
@@ -248,10 +245,7 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& sourc
             return PixelMapImageObject::Create(sourceInfo, encodedInfo, data);
         case ImageObjectType::SVG_IMAGE_OBJECT: {
             // SVG object needs to make SVG dom during creation
-            auto svgImageObj = SvgImageObject::Create(sourceInfo, encodedInfo, data);
-            ImageProvider::MakeSvgDom(svgImageObj, failCallback, svgFillColor, sync);
-            CHECK_NULL_RETURN(svgImageObj->GetSVGDom(), nullptr);
-            return svgImageObj;
+            return SvgImageObject::Create(sourceInfo, encodedInfo, data);
         }
         case ImageObjectType::UNKNOWN:
             LOGE("Unknown ImageObject type, sourceInfo: %{public}s", sourceInfo.ToString().c_str());
@@ -261,35 +255,11 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& sourc
     }
 }
 
-void ImageProvider::MakeSvgDom(const RefPtr<SvgImageObject>& imageObj, const LoadFailCallback& failCallback,
-    const std::optional<Color>& svgFillColor, bool sync)
-{
-    CHECK_NULL_VOID(imageObj);
-    // if image object has no skData, reload data.
-    ImageProvider::PrepareImageData(imageObj, failCallback, sync);
-    // get SVGImageDOM
-    if (!imageObj->MakeSvgDom(svgFillColor)) {
-        std::string errorMessage("svg image MakeFromStream fail!");
-        FailCallback(failCallback, imageObj->GetSourceInfo(), errorMessage, sync);
-        return;
-    }
-}
-
 void ImageProvider::MakeSvgCanvasImage(const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks)
-{
-    auto notifyLoadSuccessTask = [imageObjWp, loadCallbacks] {
-        SyncImageProvider::MakeSvgCanvasImage(imageObjWp, loadCallbacks);
-    };
-    ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadSuccessTask));
-}
-
-// update SVGSkiaDom to ImageObject and trigger loadSuccessCallback_
-void SyncImageProvider::MakeSvgCanvasImage(
-    const WeakPtr<SvgImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks)
 {
     auto obj = imageObjWp.Upgrade();
     CHECK_NULL_VOID(obj && obj->GetSVGDom());
-    // upload canvasImage, in order to set svgDom
+    // just set svgDom to canvasImage
     obj->SetCanvasImage(MakeRefPtr<NG::SvgCanvasImage>(obj->GetSVGDom()));
     loadCallbacks.loadSuccessCallback_(obj->GetSourceInfo());
 }

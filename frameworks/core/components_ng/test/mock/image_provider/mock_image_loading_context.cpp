@@ -69,7 +69,7 @@ DataReadyCallback ImageLoadingContext::GenerateDataReadyCallback()
     return nullptr;
 }
 
-void ImageLoadingContext::OnDataReady(const ImageSourceInfo& sourceInfo, const RefPtr<ImageObject> imageObj) {}
+void ImageLoadingContext::OnDataReady(const ImageSourceInfo& sourceInfo, const RefPtr<ImageObject>& imageObj) {}
 
 LoadSuccessCallback ImageLoadingContext::GenerateLoadSuccessCallback()
 {
