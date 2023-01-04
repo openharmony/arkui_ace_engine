@@ -27,6 +27,10 @@ public:
     static void SetSelectedTime(const PickerTime& value);
     static void SetOnChange(ChangeEvent&& onChange);
     static void SetHour24(bool isUseMilitaryTime);
+
+private:
+    static RefPtr<FrameNode> CreateStackNode();
+    static RefPtr<FrameNode> CreateButtonNode();
 };
 } // namespace OHOS::Ace::NG
 

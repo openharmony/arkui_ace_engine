@@ -28,6 +28,10 @@ public:
     static void SetRange(const std::vector<std::string>& value);
     static void SetOnChange(TextChangeEvent&& onChange);
     static void SetDefaultPickerItemHeight(const Dimension& value);
+
+private:
+    static RefPtr<FrameNode> CreateStackNode();
+    static RefPtr<FrameNode> CreateButtonNode();
 };
 } // namespace OHOS::Ace::NG
 

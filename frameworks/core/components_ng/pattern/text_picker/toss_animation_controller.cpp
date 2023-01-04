@@ -19,7 +19,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
+#include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -78,7 +78,7 @@ bool TextPickerTossAnimationController::Play()
     toss_ = AceType::MakeRefPtr<PickerAnimation>(pipeline_, 0.0, time, 0, nTime, Curves::LINEAR, [weak](double value) {
         auto ref = weak.Upgrade();
         CHECK_NULL_VOID(ref);
-        auto column = AceType::DynamicCast<TextPickerPattern>(ref->column_.Upgrade());
+        auto column = AceType::DynamicCast<TextPickerColumnPattern>(ref->column_.Upgrade());
         CHECK_NULL_VOID(column);
         double distance = std::pow(DRAG, value);
         distance = (distance - 1.0) * ref->speed_ / std::log(DRAG);
@@ -87,7 +87,7 @@ bool TextPickerTossAnimationController::Play()
     toss_->AddStopCallback([weak] {
         auto ref = weak.Upgrade();
         CHECK_NULL_VOID(ref);
-        auto column = AceType::DynamicCast<TextPickerPattern>(ref->column_.Upgrade());
+        auto column = AceType::DynamicCast<TextPickerColumnPattern>(ref->column_.Upgrade());
         CHECK_NULL_VOID(column);
         column->TossStoped();
     });
