@@ -126,7 +126,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     // check password image size.
     if (!showPasswordIcon || !isPasswordType) {
         textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
-        imageRect_.SetSize(SizeF());
+        imageRect_.Reset();
         return SizeF(contentConstraint.maxSize.Width() - horizontalPaddingSum, preferredHeight);
     }
     float imageSize = 0.0f;
@@ -211,7 +211,7 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     // update image rect.
     if (!imageRect_.IsEmpty()) {
         auto imageOffset = Alignment::GetAlignPosition(size, imageRect_.GetSize(), Alignment::CENTER_RIGHT);
-        imageOffset.AddX(-pattern->GetPaddingRight());
+        imageOffset.AddX(-pattern->GetIconRightOffset());
         imageRect_.SetOffset(imageOffset);
     }
 }
