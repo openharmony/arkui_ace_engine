@@ -1780,13 +1780,16 @@ bool PipelineContext::RequestDefaultFocus()
         curPageElement->SetIsDefaultHasFocused(true);
         defaultFocusNode = curPageElement->GetChildDefaultFocusNode();
         mainNodeName = std::string(AceType::TypeName(curPageElement));
-    } else {
+    } else if (rootElement_) {
         if (rootElement_->IsDefaultHasFocused()) {
             return false;
         }
         rootElement_->SetIsDefaultHasFocused(true);
         defaultFocusNode = rootElement_->GetChildDefaultFocusNode();
         mainNodeName = std::string(AceType::TypeName(rootElement_));
+    } else {
+        LOGE("RequestDefaultFocus: rootElement or pageElement is nullptr!");
+        return false;
     }
     if (!defaultFocusNode) {
         LOGD("RequestDefaultFocus: %{public}s do not has default focus node.", mainNodeName.c_str());
