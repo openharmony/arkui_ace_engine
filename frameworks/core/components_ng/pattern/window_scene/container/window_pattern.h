@@ -36,16 +36,9 @@ public:
     WindowPattern(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
     ~WindowPattern() override = default;
 
-    void RequestVsync(const std::shared_ptr<Rosen::VsyncCallback>& vsyncCallback);
-
     std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode()
     {
         return surfaceNode_;
-    }
-
-    std::shared_ptr<Rosen::SessionStage> GetSessionStage()
-    {
-        return sessionStage_;
     }
 
     uint32_t GetWindowId() const
@@ -63,9 +56,14 @@ public:
         return windowFlags_;
     }
 
-    Rect GetRect() const
+    void SetWindowRect(Rect rect)
     {
-        return Rect(0, 0, 720, 1280);
+        windowRect_ = rect;
+    }
+
+    Rect GetWindowRect() const
+    {
+        return windowRect_;
     }
 
     bool IsDecorEnable() const
@@ -78,19 +76,36 @@ public:
         return true;
     }
 
-    virtual void Foreground() = 0;
-    virtual void Background() = 0;
-    virtual void Disconnect() = 0;
+    void RegisterSessionStageStateListener(const std::shared_ptr<Rosen::ISessionStageStateListener>& listener)
+    {
+        CHECK_NULL_VOID(sessionStage_);
+        sessionStage_->RegisterSessionStageStateListener(listener);
+    }
+
+    void RegisterSessionChangeListener(const std::shared_ptr<Rosen::ISessionChangeListener>& listener)
+    {
+        CHECK_NULL_VOID(sessionStage_);
+        sessionStage_->RegisterSessionChangeListener(listener);
+    }
+
+    void RequestVsync(const std::shared_ptr<Rosen::VsyncCallback>& vsyncCallback);
+
+    // for lifecycle
+    virtual void Foreground();
+    virtual void Background();
+    virtual void Disconnect();
 
 protected:
-    // for lifecycle
     std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode_;
+
+    // for lifecycle
     std::shared_ptr<Rosen::SessionStage> sessionStage_;
 
     // window properties
     std::string windowName_ = "example";
     uint32_t windowId_ = 100;
     uint32_t windowFlags_;
+    Rect windowRect_;
 
     std::recursive_mutex mutex_;
 

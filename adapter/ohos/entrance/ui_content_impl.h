@@ -24,7 +24,8 @@
 #include "native_engine/native_value.h"
 #include "native_engine/native_engine.h"
 #include "wm/window.h"
-#include "base/utils/macros.h"
+
+#include "core/components_ng/pattern/window_scene/container/window_scene_pattern.h"
 
 namespace OHOS {
 
@@ -34,10 +35,6 @@ class RSTransaction;
 } // namespace OHOS
 
 namespace OHOS::Ace {
-
-namespace NG {
-class WindowPattern;
-}
 
 class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
@@ -128,6 +125,8 @@ public:
         const sptr<Rosen::ISceneSession>& iSceneSession,
         const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
         const std::shared_ptr<Rosen::ISessionStageStateListener>& listener) override;
+
+    void SetWindowRect(Rect rect);
 
     virtual void DoForeground() override;
     virtual void DoBackground() override;

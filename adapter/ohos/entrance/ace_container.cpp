@@ -1328,7 +1328,7 @@ void AceContainer::InitWindowCallback()
 
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_, windowPattern = windowPattern_]() -> Rect {
         if (windowPattern) {
-            return windowPattern->GetRect();
+            return windowPattern->GetWindowRect();
         }
         Rect rect;
         CHECK_NULL_RETURN_NOLOG(window, rect);

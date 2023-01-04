@@ -26,11 +26,25 @@ WindowPattern::WindowPattern(const std::shared_ptr<Rosen::RSSurfaceNode>& surfac
 void WindowPattern::RequestVsync(const std::shared_ptr<Rosen::VsyncCallback>& vsyncCallback)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    // if (state_ == WindowState::STATE_DESTROYED) {
-    //    LOGE("[WM] Receive Vsync Request failed, window is destroyed");
-    //     return;
-    // }
     Rosen::VsyncStation::GetInstance().RequestVsync(vsyncCallback);
+}
+
+void WindowPattern::Foreground()
+{
+    CHECK_NULL_VOID(sessionStage_);
+    sessionStage_->Foreground();
+}
+
+void WindowPattern::Background()
+{
+    CHECK_NULL_VOID(sessionStage_);
+    sessionStage_->Background();
+}
+
+void WindowPattern::Disconnect()
+{
+    CHECK_NULL_VOID(sessionStage_);
+    sessionStage_->Disconnect();
 }
 
 } // namespace OHOS::Ace::NG

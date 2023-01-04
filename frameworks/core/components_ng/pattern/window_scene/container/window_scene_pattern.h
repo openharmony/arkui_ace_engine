@@ -28,13 +28,8 @@ class WindowScenePattern : public WindowPattern {
 public:
     WindowScenePattern(
         const sptr<Rosen::ISceneSession>& iSceneSession,
-        const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
-        const std::shared_ptr<Rosen::ISessionStageStateListener>& listener);
+        const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
     ~WindowScenePattern() override = default;
-
-    void Foreground() override;
-    void Background() override;
-    void Disconnect() override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(WindowScenePattern);

@@ -73,13 +73,22 @@ void HostWindowPattern::InitContent()
 
 bool HostWindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (!config.contentSizeChange) {
+    if (!config.frameSizeChange) {
+        LOGI("frame size not changed, just return");
         return false;
     }
     CHECK_NULL_RETURN(dirty, false);
-    // auto geometryNode = dirty->GetGeometryNode();
-    // auto windowSize = geometryNode->GetFrameSize();
-    // session_->OnWindowSizeChanged(windowSize);
+    auto geometryNode = dirty->GetGeometryNode();
+    auto windowRect = geometryNode->GetFrameRect();
+    Rosen::WSRect rect = {
+        .posX_ = windowRect.GetX(),
+        .posY_ = windowRect.GetY(),
+        .width_ = windowRect.Width(),
+        .height_ = windowRect.Height()
+    };
+    LOGI("update session rect: [%{public}d, %{public}d, %{public}d, %{public}d]",
+        rect.posX_, rect.posY_, rect.width_, rect.height_);
+    session_->UpdateSessionRect(rect, Rosen::SessionSizeChangeReason::SHOW);
     return false;
 }
 
