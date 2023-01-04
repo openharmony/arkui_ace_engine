@@ -1528,6 +1528,14 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
         return;
     }
     ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(static_cast<BlurStyle>(info[0]->ToNumber<int32_t>()));
+    CloseBackdropBlur();
+}
+
+void JSViewAbstract::CloseBackdropBlur()
+{
+    double radius = 0.0;
+    Dimension dimensionRadius(radius, DimensionUnit::PX);
+    ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius);
 }
 
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
@@ -4199,6 +4207,7 @@ void JSViewAbstract::SetBackdropBlur(float radius)
 {
     Dimension dimensionRadius(radius, DimensionUnit::PX);
     ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius);
+    ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(BlurStyle::NoMaterial);
 }
 
 void JSViewAbstract::SetWindowBlur(float progress, WindowBlurStyle blurStyle)
