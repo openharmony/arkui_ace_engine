@@ -34,7 +34,7 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
-    auto layoutDirection = gridLayoutProperty->GetGridDirection().value_or(FlexDirection::ROW);
+    auto layoutDirection = gridLayoutProperty->GetLayoutDirection().value_or(FlexDirection::ROW);
     auto axis = (layoutDirection == FlexDirection::ROW || layoutDirection == FlexDirection::ROW_REVERSE)
                     ? Axis::HORIZONTAL
                     : Axis::VERTICAL;
@@ -156,7 +156,7 @@ OffsetF GridAdaptiveLayoutAlgorithm::CalculateChildOffset(int32_t index, LayoutW
     auto layoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, OffsetF());
     auto padding = layoutProperty->CreatePaddingAndBorder();
-    auto layoutDirection = layoutProperty->GetGridDirection().value_or(FlexDirection::ROW);
+    auto layoutDirection = layoutProperty->GetLayoutDirection().value_or(FlexDirection::ROW);
     auto scale = layoutProperty->GetLayoutConstraint()->scaleProperty;
     auto rowsGap = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
     auto columnsGap =

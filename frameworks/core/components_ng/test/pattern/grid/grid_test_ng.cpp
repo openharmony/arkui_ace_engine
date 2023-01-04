@@ -22,10 +22,13 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/offset.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/pipeline/base/constants.h"
 
 using namespace testing;
@@ -69,16 +72,28 @@ HWTEST_F(GridTestNg, GridTest001, TestSize.Level1)
     RefPtr<ScrollBarProxy> scrollBarProxy;
     GridModelNG grid;
     grid.Create(positionController, scrollBarProxy);
+    std::unique_ptr<ViewAbstractModel> instance = std::make_unique<ViewAbstractModelNG>();
+    auto height = StringUtils::StringToDimensionWithUnit("70%");
+    instance->SetHeight(height);
+    auto width = StringUtils::StringToDimensionWithUnit("90%");
+    instance->SetWidth(width);
     grid.SetColumnsTemplate("1fr 1fr 1fr");
     grid.SetRowsTemplate("1fr 1fr 1fr");
 
     /**
-     * @tc.steps: step2. Create the child nodes gridItem of the grid.
+     * @tc.steps: step2. Create the child nodes gridItem and text of the grid, and set the width and height of text.
      */
     GridItemModelNG gridItem;
+    TextModelNG text;
     const int32_t ITEM_COUNT = 9;
     for (int32_t i = 0; i < ITEM_COUNT; ++i) {
         gridItem.Create();
+        text.Create("test");
+        auto textHeight = StringUtils::StringToDimensionWithUnit("50%");
+        instance->SetHeight(textHeight);
+        auto textWidth = StringUtils::StringToDimensionWithUnit("100%");
+        instance->SetWidth(textWidth);
+        ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->Pop();
     }
 
@@ -93,7 +108,6 @@ HWTEST_F(GridTestNg, GridTest001, TestSize.Level1)
     OptionalSizeF size;
     constexpr float DEFAULT_WIDTH = 800.0f;
     size.SetWidth(DEFAULT_WIDTH);
-    size.SetHeight(DEFAULT_WIDTH);
     constraint.UpdateIllegalSelfIdealSizeWithCheck(size);
 
     /**
@@ -125,6 +139,11 @@ HWTEST_F(GridTestNg, GridTest002, TestSize.Level1)
     RefPtr<V2::GridPositionController> positionController;
     RefPtr<ScrollBarProxy> scrollBarProxy;
     grid.Create(positionController, scrollBarProxy);
+    std::unique_ptr<ViewAbstractModel> instance = std::make_unique<ViewAbstractModelNG>();
+    auto height = StringUtils::StringToDimensionWithUnit("70%");
+    instance->SetHeight(height);
+    auto width = StringUtils::StringToDimensionWithUnit("90%");
+    instance->SetWidth(width);
 
     /**
      * @tc.steps: step2. initialize ColumnsTemplate, ColumnsGap and MultiSelectable properties.
@@ -134,12 +153,19 @@ HWTEST_F(GridTestNg, GridTest002, TestSize.Level1)
     grid.SetMultiSelectable(true);
 
     /**
-     * @tc.steps: step2. Create the child nodes gridItem of the grid.
+     * @tc.steps: step2. Create the child nodes gridItem and text of the grid, and set the width and height of text.
      */
+    TextModelNG text;
     GridItemModelNG gridItem;
     const int32_t ITEM_COUNT = 10;
     for (int32_t i = 0; i < ITEM_COUNT; ++i) {
         gridItem.Create();
+        text.Create("test");
+        auto textHeight = StringUtils::StringToDimensionWithUnit("50%");
+        instance->SetHeight(textHeight);
+        auto textWidth = StringUtils::StringToDimensionWithUnit("100%");
+        instance->SetWidth(textWidth);
+        ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->Pop();
     }
 
@@ -228,6 +254,11 @@ HWTEST_F(GridTestNg, GridTest003, TestSize.Level1)
     RefPtr<ScrollBarProxy> scrollBarProxy;
     RefPtr<V2::GridPositionController> positionController;
     grid.Create(positionController, scrollBarProxy);
+    std::unique_ptr<ViewAbstractModel> instance = std::make_unique<ViewAbstractModelNG>();
+    auto height = StringUtils::StringToDimensionWithUnit("70%");
+    instance->SetHeight(height);
+    auto width = StringUtils::StringToDimensionWithUnit("90%");
+    instance->SetWidth(width);
 
     /**
      * @tc.steps: step2. initialize RowsTemplate, RowsGap and MultiSelectable properties.
@@ -237,12 +268,19 @@ HWTEST_F(GridTestNg, GridTest003, TestSize.Level1)
     grid.SetMultiSelectable(true);
 
     /**
-     * @tc.steps: step3. Create the child nodes gridItem of the grid.
+     * @tc.steps: step3. Create the child nodes gridItem and text of the grid, and set the width and height of text.
      */
+    TextModelNG text;
     GridItemModelNG gridItem;
     const int32_t ITEM_COUNT = 10;
     for (int32_t i = 0; i < ITEM_COUNT; ++i) {
         gridItem.Create();
+        text.Create("test");
+        auto textHeight = StringUtils::StringToDimensionWithUnit("50%");
+        instance->SetHeight(textHeight);
+        auto textWidth = StringUtils::StringToDimensionWithUnit("100%");
+        instance->SetWidth(textWidth);
+        ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->Pop();
     }
 
@@ -337,6 +375,11 @@ HWTEST_F(GridTestNg, GridTest004, TestSize.Level1)
     RefPtr<ScrollBarProxy> scrollBarProxy;
     auto positionController = grid.CreatePositionController();
     grid.Create(positionController, scrollBarProxy);
+    std::unique_ptr<ViewAbstractModel> instance = std::make_unique<ViewAbstractModelNG>();
+    auto height = StringUtils::StringToDimensionWithUnit("70%");
+    instance->SetHeight(height);
+    auto width = StringUtils::StringToDimensionWithUnit("90%");
+    instance->SetWidth(width);
 
     /**
      * @tc.steps: step2. initialize properties such as ColumnsGap, RowsGap, LayoutDirection, MaxCount, MinCount,
@@ -351,12 +394,19 @@ HWTEST_F(GridTestNg, GridTest004, TestSize.Level1)
     grid.SetCellLength(GRID_CELL_LENGTH);
 
     /**
-     * @tc.steps: step3. Create the child nodes gridItem of the grid.
+     * @tc.steps: step3. Create the child nodes gridItem and text of the grid, and set the width and height of text.
      */
+    TextModelNG text;
     GridItemModelNG gridItem;
     const int32_t ITEM_COUNT = 10;
     for (int32_t i = 0; i < ITEM_COUNT; ++i) {
         gridItem.Create();
+        text.Create("test");
+        auto textHeight = StringUtils::StringToDimensionWithUnit("50%");
+        instance->SetHeight(textHeight);
+        auto textWidth = StringUtils::StringToDimensionWithUnit("100%");
+        instance->SetWidth(textWidth);
+        ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->Pop();
     }
 
@@ -383,8 +433,10 @@ HWTEST_F(GridTestNg, GridTest004, TestSize.Level1)
      * @tc.expected: step6. Check whether the updated properties is correct.
      */
     auto layoutProperty = frameNode->GetLayoutProperty<GridLayoutProperty>();
-    auto layoutDirectionStr = layoutProperty->GetGridDirectionStr();
+    auto layoutDirectionStr = layoutProperty->GetLayoutDirectionStr();
     EXPECT_EQ(layoutDirectionStr, GRID_DIRECTION_ROW);
+    // auto barStateStr = layoutProperty->GetBarStateString();
+    // EXPECT_EQ(barStateStr, GRID_SCROLL_BAR_OFF);
 
     /**
      * @tc.steps: step7. Get the pattern to call the related functions in the positionController.
@@ -439,6 +491,11 @@ HWTEST_F(GridTestNg, GridTest005, TestSize.Level1)
     RefPtr<ScrollBarProxy> scrollBarProxy;
     auto positionController = grid.CreatePositionController();
     grid.Create(positionController, scrollBarProxy);
+    std::unique_ptr<ViewAbstractModel> instance = std::make_unique<ViewAbstractModelNG>();
+    auto height = StringUtils::StringToDimensionWithUnit("70%");
+    instance->SetHeight(height);
+    auto width = StringUtils::StringToDimensionWithUnit("90%");
+    instance->SetWidth(width);
 
     /**
      * @tc.steps: step2. initialize properties such as ColumnsGap, RowsGap, LayoutDirection, MaxCount, MinCount,
@@ -454,12 +511,19 @@ HWTEST_F(GridTestNg, GridTest005, TestSize.Level1)
     grid.SetScrollBarMode(static_cast<int32_t>(NG::DisplayMode::AUTO));
 
     /**
-     * @tc.steps: step3. Create the child nodes gridItem of the grid.
+     * @tc.steps: step3. Create the child nodes gridItem and text of the grid, and set the width and height of text.
      */
+    TextModelNG text;
     GridItemModelNG gridItem;
     const int32_t ITEM_COUNT = 10;
     for (int32_t i = 0; i < ITEM_COUNT; ++i) {
         gridItem.Create();
+        text.Create("test");
+        auto textHeight = StringUtils::StringToDimensionWithUnit("50%");
+        instance->SetHeight(textHeight);
+        auto textWidth = StringUtils::StringToDimensionWithUnit("100%");
+        instance->SetWidth(textWidth);
+        ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->Pop();
     }
 
@@ -487,8 +551,10 @@ HWTEST_F(GridTestNg, GridTest005, TestSize.Level1)
      */
     auto layoutProperty = frameNode->GetLayoutProperty<GridLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
-    auto layoutDirectionStr = layoutProperty->GetGridDirectionStr();
+    auto layoutDirectionStr = layoutProperty->GetLayoutDirectionStr();
     EXPECT_EQ(layoutDirectionStr, GRID_DIRECTION_ROW_REVERSE);
+    // auto barStateStr = layoutProperty->GetBarStateString();
+    // EXPECT_EQ(barStateStr, GRID_SCROLL_BAR_AUTO);
 }
 
 /**
@@ -505,6 +571,11 @@ HWTEST_F(GridTestNg, GridTest006, TestSize.Level1)
     RefPtr<ScrollBarProxy> scrollBarProxy;
     auto positionController = grid.CreatePositionController();
     grid.Create(positionController, scrollBarProxy);
+    std::unique_ptr<ViewAbstractModel> instance = std::make_unique<ViewAbstractModelNG>();
+    auto height = StringUtils::StringToDimensionWithUnit("70%");
+    instance->SetHeight(height);
+    auto width = StringUtils::StringToDimensionWithUnit("90%");
+    instance->SetWidth(width);
 
     /**
      * @tc.steps: step2. initialize properties such as ColumnsGap, RowsGap, LayoutDirection, MaxCount, MinCount,
@@ -520,12 +591,19 @@ HWTEST_F(GridTestNg, GridTest006, TestSize.Level1)
     grid.SetScrollBarMode(static_cast<int32_t>(NG::DisplayMode::ON));
 
     /**
-     * @tc.steps: step3. Create the child nodes gridItem of the grid.
+     * @tc.steps: step3. Create the child nodes gridItem and text of the grid, and set the width and height of text.
      */
+    TextModelNG text;
     GridItemModelNG gridItem;
     const int32_t ITEM_COUNT = 10;
     for (int32_t i = 0; i < ITEM_COUNT; ++i) {
         gridItem.Create();
+        text.Create("test");
+        auto textHeight = StringUtils::StringToDimensionWithUnit("50%");
+        instance->SetHeight(textHeight);
+        auto textWidth = StringUtils::StringToDimensionWithUnit("100%");
+        instance->SetWidth(textWidth);
+        ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->Pop();
     }
 
@@ -553,8 +631,10 @@ HWTEST_F(GridTestNg, GridTest006, TestSize.Level1)
      */
     auto layoutProperty = frameNode->GetLayoutProperty<GridLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
-    auto layoutDirectionStr = layoutProperty->GetGridDirectionStr();
+    auto layoutDirectionStr = layoutProperty->GetLayoutDirectionStr();
     EXPECT_EQ(layoutDirectionStr, GRID_DIRECTION_COLUMN);
+    // auto barStateStr = layoutProperty->GetBarStateString();
+    // EXPECT_EQ(barStateStr, GRID_SCROLL_BAR_ON);
 }
 
 /**
@@ -571,6 +651,11 @@ HWTEST_F(GridTestNg, GridTest007, TestSize.Level1)
     RefPtr<ScrollBarProxy> scrollBarProxy;
     auto positionController = grid.CreatePositionController();
     grid.Create(positionController, scrollBarProxy);
+    std::unique_ptr<ViewAbstractModel> instance = std::make_unique<ViewAbstractModelNG>();
+    auto height = StringUtils::StringToDimensionWithUnit("70%");
+    instance->SetHeight(height);
+    auto width = StringUtils::StringToDimensionWithUnit("90%");
+    instance->SetWidth(width);
 
     /**
      * @tc.steps: step2. initialize properties such as ColumnsGap, RowsGap, LayoutDirection, MaxCount, MinCount,
@@ -586,12 +671,19 @@ HWTEST_F(GridTestNg, GridTest007, TestSize.Level1)
     grid.SetScrollBarMode(static_cast<int32_t>(NG::DisplayMode::OFF));
 
     /**
-     * @tc.steps: step3. Create the child nodes gridItem of the grid.
+     * @tc.steps: step3. Create the child nodes gridItem and text of the grid, and set the width and height of text.
      */
+    TextModelNG text;
     GridItemModelNG gridItem;
     const int32_t ITEM_COUNT = 10;
     for (int32_t i = 0; i < ITEM_COUNT; ++i) {
         gridItem.Create();
+        text.Create("test");
+        auto textHeight = StringUtils::StringToDimensionWithUnit("50%");
+        instance->SetHeight(textHeight);
+        auto textWidth = StringUtils::StringToDimensionWithUnit("100%");
+        instance->SetWidth(textWidth);
+        ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->Pop();
     }
 
@@ -619,8 +711,10 @@ HWTEST_F(GridTestNg, GridTest007, TestSize.Level1)
      */
     auto layoutProperty = frameNode->GetLayoutProperty<GridLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
-    auto layoutDirectionStr = layoutProperty->GetGridDirectionStr();
+    auto layoutDirectionStr = layoutProperty->GetLayoutDirectionStr();
     EXPECT_EQ(layoutDirectionStr, GRID_DIRECTION_COLUMN_REVERSE);
+    // auto barStateStr = layoutProperty->GetBarStateString();
+    // EXPECT_EQ(barStateStr, GRID_SCROLL_BAR_OFF);
 
     /**
      * @tc.steps: step7. Get grid EventHub to call related function.
@@ -659,6 +753,11 @@ HWTEST_F(GridTestNg, GridTest008, TestSize.Level1)
     RefPtr<ScrollBarProxy> scrollBarProxy;
     auto positionController = grid.CreatePositionController();
     grid.Create(positionController, scrollBarProxy);
+    std::unique_ptr<ViewAbstractModel> instance = std::make_unique<ViewAbstractModelNG>();
+    auto height = StringUtils::StringToDimensionWithUnit("100%");
+    instance->SetHeight(height);
+    auto width = StringUtils::StringToDimensionWithUnit("90%");
+    instance->SetWidth(width);
 
     /**
      * @tc.steps: step2. initialize properties such as RowsTemplate, RowsGap, Editable and MultiSelectable.
@@ -669,12 +768,19 @@ HWTEST_F(GridTestNg, GridTest008, TestSize.Level1)
     grid.SetEditable(true);
 
     /**
-     * @tc.steps: step3. Create the child nodes gridItem of the grid.
+     * @tc.steps: step3. Create the child nodes gridItem and text of the grid, and set the width and height of text.
      */
+    TextModelNG text;
     GridItemModelNG gridItem;
     const int32_t ITEM_COUNT = 10;
     for (int32_t i = 0; i < ITEM_COUNT; ++i) {
         gridItem.Create();
+        text.Create("test");
+        auto textHeight = StringUtils::StringToDimensionWithUnit("80%");
+        instance->SetHeight(textHeight);
+        auto textWidth = StringUtils::StringToDimensionWithUnit("100%");
+        instance->SetWidth(textWidth);
+        ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->Pop();
     }
 
@@ -741,19 +847,27 @@ RefPtr<FrameNode> TestScrollGrid(OptionalSizeF gridSize, double gridItemHeight, 
     RefPtr<ScrollBarProxy> scrollBarProxy;
     GridModelNG grid;
     grid.Create(positionController, scrollBarProxy);
+    std::unique_ptr<ViewAbstractModel> instance = std::make_unique<ViewAbstractModelNG>();
+    auto height = StringUtils::StringToDimensionWithUnit("70%");
+    instance->SetHeight(height);
+    auto width = StringUtils::StringToDimensionWithUnit("90%");
+    instance->SetWidth(width);
     grid.SetColumnsTemplate("1fr 1fr 1fr");
 
     /**
-     * @tc.steps: step2. Create the child nodes gridItem of the grid.
+     * @tc.steps: step2. Create the child nodes gridItem and text of the grid, and set the width and height of text.
      */
     GridItemModelNG gridItem;
+    TextModelNG text;
     for (int32_t i = 0; i < totalItemCount; ++i) {
         gridItem.Create();
-        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        CHECK_NULL_RETURN(frameNode, nullptr);
-        auto layoutProperty = frameNode->GetLayoutProperty();
-        CHECK_NULL_RETURN(layoutProperty, frameNode);
-        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, NG::CalcLength(Dimension(gridItemHeight))));
+        text.Create("test");
+        auto textHeight = StringUtils::StringToDimensionWithUnit("50%");
+        instance->SetHeight(textHeight);
+        auto textWidth = StringUtils::StringToDimensionWithUnit("100%");
+        instance->SetWidth(textWidth);
+        ViewStackProcessor::GetInstance()->Pop();
+        instance->SetHeight(Dimension(gridItemHeight));
         ViewStackProcessor::GetInstance()->Pop();
     }
 
@@ -786,7 +900,7 @@ RefPtr<FrameNode> TestScrollGrid(OptionalSizeF gridSize, double gridItemHeight, 
 
         // save current grid info to grid pattern for next operation
         DirtySwapConfig config { false, false, false, false };
-        auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(layoutWrapper->GetLayoutAlgorithm());
+        auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm();
         CHECK_NULL_RETURN(layoutAlgorithmWrapper, frameNode);
         config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure() || layoutWrapper->SkipMeasureContent();
         config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
