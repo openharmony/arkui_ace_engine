@@ -21,7 +21,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT RatingModelNG : public OHOS::Ace::RatingModel {
 public:
-    void Create() override;
+    void Create(double rating = .0, bool indicator = false) override;
     void SetRatingScore(double value) override;
     void SetIndicator(bool value) override;
     void SetStars(int32_t value) override;
