@@ -423,10 +423,7 @@ void RenderSideBarContainer::SetChildrenStatus()
             curPosition_ = isSideBarStart ? 0.0_vp : -sideBarWidthVP;
             status_ = SideStatus::SHOW;
         }
-    } else if (status_ == SideStatus::SHOW && autoHide) {
-        status_ = SideStatus::HIDDEN;
     }
-
     if (status_ == SideStatus::HIDDEN) {
         curPosition_ = isSideBarStart ? -sideBarWidthVP : 0.0_vp;
     }
