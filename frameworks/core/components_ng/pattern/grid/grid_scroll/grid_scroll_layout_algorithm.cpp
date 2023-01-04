@@ -288,9 +288,10 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize)
         gridLayoutInfo_.reachEnd_ = false;
         return;
     }
-    // Step1. Calculate total length of all items with main gap in viewport.
+    // Step1. Calculate total length of all items with cross gap in viewport.
     // [lengthOfItemsInViewport] must be greater than or equal to viewport height
     float lengthOfItemsInViewport = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_);
+
     // Step2. Calculate real offset that items can only be moved up by.
     // Hint: [prevOffset_] is a non-positive value
     if (LessNotEqual(lengthOfItemsInViewport, mainSize) && gridLayoutInfo_.startIndex_ == 0) {

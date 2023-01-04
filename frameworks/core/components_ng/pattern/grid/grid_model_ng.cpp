@@ -124,7 +124,7 @@ void GridModelNG::SetIsRTL(bool rightToLeft) {}
 
 void GridModelNG::SetLayoutDirection(FlexDirection value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, GridDirection, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, LayoutDirection, value);
 }
 
 void GridModelNG::SetMaxCount(int32_t value)
