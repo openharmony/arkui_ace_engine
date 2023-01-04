@@ -40,6 +40,16 @@ public:
             }
             theme->barColor_ = themeConstants->GetColor(THEME_DRAG_BAR_COLOR);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
+            auto themeStyle = themeConstants->GetThemeStyle();
+            if (!themeStyle) {
+                return theme;
+            }
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_DRAG_BAR, nullptr);
+            if (pattern) {
+                theme->dragBarColor_ = pattern->GetAttr<Color>("drag_bar_bg_color", Color::WHITE);
+            } else {
+                LOGW("find pattern of tab fail");
+            }
             return theme;
         }
     private:
@@ -63,11 +73,17 @@ public:
         return barColor_;
     }
 
+    const Color& GetDragBarColor() const
+    {
+        return dragBarColor_;
+    }
+
 protected:
     DragBarTheme() = default;
 
 private:
     Color barColor_;
+    Color dragBarColor_;
 };
 
 } // namespace OHOS::Ace

@@ -124,8 +124,6 @@ private:
     float dragStartCurrentOffset_ = 0.0f;
 
     std::optional<bool> isShow_;
-    PanDirection panDirection_;
-    float distance_ = 0.0f;
     bool isDrag_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SlidingPanelPattern);

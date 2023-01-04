@@ -33,7 +33,6 @@ constexpr Dimension DRAG_ICON_WIDTH = 64.0_vp;
 constexpr Dimension DRAG_ICON_HEIGHT = 24.0_vp;
 constexpr Dimension HOT_REGION_WIDTH = 64.0_vp;
 constexpr Dimension HOT_REGION_HEIGHT = 24.0_vp;
-const Size DRAG_BAR_SIZE = Size(64.0, 24.0);
 
 } // namespace
 
