@@ -259,6 +259,8 @@ public:
 
     OffsetF GetOffsetRelativeToWindow() const;
 
+    OffsetF GetTransformRelativeOffset() const;
+
     OffsetF GetPaintRectOffset() const;
 
     void AdjustGridOffset();

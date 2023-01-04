@@ -24,13 +24,20 @@ namespace OHOS::Ace::NG {
 
 void AbilityComponentPattern::OnModifyDone()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    int32_t windowId = pipelineContext->GetWindowId();
-    adapter_ = WindowExtensionConnectionProxyNG::CreateAdapter();
-    CHECK_NULL_VOID_NOLOG(adapter_);
-    adapter_->ConnectExtension(GetHost(), windowId);
-    LOGI("connect to windows extension begin %{public}s", GetHost()->GetTag().c_str());
+    if (adapter_) {
+        UpdateWindowRect();
+    } else {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        int32_t windowId = pipelineContext->GetWindowId();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        adapter_ = WindowExtensionConnectionProxyNG::CreateAdapter();
+        CHECK_NULL_VOID(adapter_);
+        adapter_->ConnectExtension(GetHost(), windowId);
+        pipelineContext->AddOnAreaChangeNode(host->GetId());
+        LOGI("connect to windows extension begin %{public}s", GetHost()->GetTag().c_str());
+    }
 }
 
 void AbilityComponentPattern::FireConnect()
@@ -65,7 +72,7 @@ void AbilityComponentPattern::UpdateWindowRect()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto size = host->GetGeometryNode()->GetFrameSize();
-    auto offset = host->GetGeometryNode()->GetFrameOffset() + host->GetOffsetRelativeToWindow();
+    auto offset = host->GetGeometryNode()->GetFrameOffset() + host->GetTransformRelativeOffset();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto rect = pipeline->GetDisplayWindowRectInfo();
@@ -75,6 +82,11 @@ void AbilityComponentPattern::UpdateWindowRect()
     rect.SetRect(offset.GetX() + rect.Left(), offset.GetY() + rect.Top(), size.Width(), size.Height());
     CHECK_NULL_VOID_NOLOG(adapter_);
     adapter_->UpdateRect(rect);
+}
+
+void AbilityComponentPattern::OnAreaChangedInner()
+{
+    UpdateWindowRect();
 }
 
 } // namespace OHOS::Ace::NG
