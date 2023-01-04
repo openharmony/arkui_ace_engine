@@ -14,9 +14,3 @@
 group("services_target") {
   deps = [ "uiservice:uiservice" ]
 }
-
-group("unittest") {
-  testonly = true
-
-  deps = []
-}
