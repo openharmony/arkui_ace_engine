@@ -222,7 +222,7 @@ void RenderOption::OnTouch(bool down)
 
 void RenderOption::HandleMouseHoverEvent(const MouseState mouseState)
 {
-    if (!data_ || data_->IsDisabledStatus()) {
+    if (!data_ || data_->IsDisabledStatus() || data_->GetCustomComponent()) {
         return;
     }
     Color color;
@@ -236,7 +236,7 @@ void RenderOption::HandleMouseHoverEvent(const MouseState mouseState)
 
 bool RenderOption::HandleMouseEvent(const MouseEvent& event)
 {
-    if (!data_ || data_->IsDisabledStatus()) {
+    if (!data_ || data_->IsDisabledStatus() || data_->GetCustomComponent()) {
         return false;
     }
     if (event.button == MouseButton::LEFT_BUTTON) {
