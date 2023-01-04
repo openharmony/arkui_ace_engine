@@ -18,7 +18,6 @@
 #include "window.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
-#include "base/memory/ace_type.h"
 #include "core/components/root/root_element.h"
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
@@ -526,80 +525,6 @@ bool SubwindowOhos::CreateEventRunner()
     return true;
 }
 
-void SubwindowOhos::ShowToastNG(const std::string& message, int32_t duration, const std::string& bottom)
-{
-    LOGI("SubwindowOhos::ShowToastNG");
-    ShowWindow();
-    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
-    CHECK_NULL_VOID(aceContainer);
-    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
-    CHECK_NULL_VOID(context);
-    auto overlay = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlay);
-    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-    overlay->ShowToastInSubWindow(message, duration, bottom, isRightToLeft);
-}
-
-void SubwindowOhos::ClearToastNG()
-{
-    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
-    CHECK_NULL_VOID(aceContainer);
-    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
-    CHECK_NULL_VOID(context);
-    auto overlay = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlay);
-    overlay->CleanUpInSubWindow();
-    context->FlushPipelineImmediately();
-    HideWindow();
-}
-
-void SubwindowOhos::ShowDialogNG(const DialogProperties& dialogProps, const std::set<std::string>& callbacks)
-{
-    ShowWindow();
-    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
-    CHECK_NULL_VOID(aceContainer);
-    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-    overlayManager->ShowDialogInSubWindow(dialogProps, nullptr, isRightToLeft);
-}
-
-void SubwindowOhos::ClearDialogNG()
-{
-    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
-    CHECK_NULL_VOID(aceContainer);
-    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
-    CHECK_NULL_VOID(context);
-    auto overlay = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlay);
-    overlay->CleanUpInSubWindow();
-    context->FlushPipelineImmediately();
-    HideWindow();
-}
-
-void SubwindowOhos::ShowActionMenuNG(
-    const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
-{
-    DialogProperties dialogProperties = {
-        .title = title,
-        .autoCancel = true,
-        .isMenu = true,
-        .buttons = button,
-        .onSuccess = std::move(callback),
-    };
-    ShowWindow();
-    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
-    CHECK_NULL_VOID(aceContainer);
-    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
-    CHECK_NULL_VOID(context);
-    LOGI("context = %{public}p", AceType::RawPtr(context));
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-    overlayManager->ShowDialogInSubWindow(dialogProperties, nullptr, isRightToLeft);
-}
 void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
 {
     LOGI("SubwindowOhos::ShowToast begin");

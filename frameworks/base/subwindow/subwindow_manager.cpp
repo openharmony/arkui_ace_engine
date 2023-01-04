@@ -333,41 +333,11 @@ RefPtr<Subwindow> SubwindowManager::GetOrCreateSubWindow()
     return subwindow;
 }
 
-RefPtr<Subwindow> SubwindowManager::GetOrCreateSubWindowNG()
-{
-    auto containerId = Container::CurrentId();
-    auto subwindow = GetSubwindow(containerId);
-    if (!subwindow) {
-        LOGI("Subwindow is null, add a new one.");
-        subwindow = Subwindow::CreateSubwindow(containerId);
-        subwindow->InitContainer();
-        AddSubwindow(containerId, subwindow);
-    }
-    return subwindow;
-}
-
 void SubwindowManager::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
 {
     auto subwindow = GetOrCreateSubWindow();
     CHECK_NULL_VOID(subwindow);
     subwindow->ShowToast(message, duration, bottom);
-}
-
-void SubwindowManager::ClearToastNG()
-{
-    LOGI("OverlayManager:::ClearToastNG");
-    auto subwindow = GetCurrentWindow();
-    if (subwindow) {
-        subwindow->ClearToastNG();
-    }
-}
-
-void SubwindowManager::ShowToastNG(const std::string& message, int32_t duration, const std::string& bottom)
-{
-    auto subwindow = GetOrCreateSubWindowNG();
-    CHECK_NULL_VOID(subwindow);
-    LOGI("SubwindowManager::ShowToast;bottom = %{public}s", bottom.c_str());
-    subwindow->ShowToastNG(message, duration, bottom);
 }
 
 void SubwindowManager::ShowDialog(const std::string& title, const std::string& message,
@@ -377,31 +347,6 @@ void SubwindowManager::ShowDialog(const std::string& title, const std::string& m
     auto subwindow = GetOrCreateSubWindow();
     CHECK_NULL_VOID(subwindow);
     subwindow->ShowDialog(title, message, buttons, autoCancel, std::move(napiCallback), dialogCallbacks);
-}
-
-void SubwindowManager::ShowDialogNG(const DialogProperties& dialogProps, const std::set<std::string>& dialogCallbacks)
-{
-    auto subwindow = GetOrCreateSubWindowNG();
-    CHECK_NULL_VOID(subwindow);
-    LOGI("SubwindowManager::ShowDialogNG");
-    subwindow->ShowDialogNG(dialogProps, dialogCallbacks);
-}
-
-void SubwindowManager::ClearDialogNG()
-{
-    LOGI("OverlayManager:::ClearToastNG");
-    auto subwindow = GetCurrentWindow();
-    if (subwindow) {
-        subwindow->ClearDialogNG();
-    }
-}
-
-void SubwindowManager::ShowActionMenuNG(
-    const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
-{
-    auto subwindow = GetOrCreateSubWindowNG();
-    CHECK_NULL_VOID(subwindow);
-    subwindow->ShowActionMenu(title, button, std::move(callback));
 }
 
 void SubwindowManager::ShowActionMenu(

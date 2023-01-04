@@ -68,16 +68,10 @@ public:
     void SetHotAreas(const std::vector<Rect>& rects) override;
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
-    void ShowToastNG(const std::string& message, int32_t duration, const std::string& bottom) override;
-    void ClearToastNG() override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) override;
-    void ShowDialogNG(const DialogProperties& dialogProps, const std::set<std::string>& callbacks) override;
-    void ClearDialogNG() override;
     void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
-        std::function<void(int32_t, int32_t)>&& callback) override;
-    void ShowActionMenuNG(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback) override;
     int32_t GetChildContainerId() const
     {

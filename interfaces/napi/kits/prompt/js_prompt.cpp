@@ -151,7 +151,7 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         }
     }
 #ifdef OHOS_STANDARD_SYSTEM
-    if (SystemProperties::GetExtSurfaceEnabled()) {
+    if (SystemProperties::GetExtSurfaceEnabled() || Container::IsCurrentUseNewPipeline()) {
         auto delegate = EngineHelper::GetCurrentDelegate();
         if (!delegate) {
             LOGE("can not get delegate.");
@@ -160,11 +160,7 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         }
         delegate->ShowToast(messageString, duration, bottomString);
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            SubwindowManager::GetInstance()->ShowToastNG(messageString, duration, bottomString);
-        } else {
-            SubwindowManager::GetInstance()->ShowToast(messageString, duration, bottomString);
-        }
+        SubwindowManager::GetInstance()->ShowToast(messageString, duration, bottomString);
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegate();
@@ -396,7 +392,7 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
-    if (SystemProperties::GetExtSurfaceEnabled()) {
+    if (SystemProperties::GetExtSurfaceEnabled() || Container::IsCurrentUseNewPipeline()) {
         auto delegate = EngineHelper::GetCurrentDelegate();
         if (delegate) {
             delegate->ShowDialog(asyncContext->titleString, asyncContext->messageString, asyncContext->buttons,
@@ -424,19 +420,8 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             }
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        DialogProperties dialogProperties = {
-            .title = asyncContext->titleString,
-            .content = asyncContext->messageString,
-            .autoCancel = asyncContext->autoCancelBool,
-            .buttons = asyncContext->buttons,
-            .onSuccess = std::move(callBack),
-        };
-        if (Container::IsCurrentUseNewPipeline()) {
-            SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, asyncContext->callbacks);
-        } else {
-            SubwindowManager::GetInstance()->ShowDialog(asyncContext->titleString, asyncContext->messageString,
-                asyncContext->buttons, asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
-        }
+        SubwindowManager::GetInstance()->ShowDialog(asyncContext->titleString, asyncContext->messageString,
+            asyncContext->buttons, asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegate();
@@ -702,7 +687,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
     };
 
 #ifdef OHOS_STANDARD_SYSTEM
-    if (SystemProperties::GetExtSurfaceEnabled()) {
+    if (SystemProperties::GetExtSurfaceEnabled() || Container::IsCurrentUseNewPipeline()) {
         auto delegate = EngineHelper::GetCurrentDelegate();
         if (delegate) {
             delegate->ShowActionMenu(asyncContext->titleString, asyncContext->buttons, std::move(callBack));
@@ -728,13 +713,8 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             }
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            SubwindowManager::GetInstance()->ShowActionMenuNG(
-                asyncContext->titleString, asyncContext->buttons, std::move(callBack));
-        } else {
-            SubwindowManager::GetInstance()->ShowActionMenu(
-                asyncContext->titleString, asyncContext->buttons, std::move(callBack));
-        }
+        SubwindowManager::GetInstance()->ShowActionMenu(
+            asyncContext->titleString, asyncContext->buttons, std::move(callBack));
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegate();
