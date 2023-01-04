@@ -30,7 +30,7 @@ void CounterModelNG::Create()
         V2::COUNTER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CounterPattern>(); });
     auto counterPattern = counterNode->GetPattern<CounterPattern>();
     CHECK_NULL_VOID(counterPattern);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto counterTheme = pipeline->GetTheme<CounterTheme>();
     CHECK_NULL_VOID(counterTheme);
@@ -62,7 +62,6 @@ void CounterModelNG::Create()
         auto addNode = CreateButtonChild(addId, "+", counterTheme);
         addNode->MountToParent(counterNode);
     }
-
     stack->Push(counterNode);
 }
 
@@ -121,6 +120,7 @@ void CounterModelNG::SetOnInc(CounterEventFunc&& onInc)
     GestureEventFunc gestureEventFunc = [clickEvent = std::move(onInc)](GestureEvent& /*unused*/) { clickEvent(); };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }
+
 void CounterModelNG::SetOnDec(CounterEventFunc&& onDec)
 {
     CHECK_NULL_VOID(onDec);
@@ -136,7 +136,7 @@ void CounterModelNG::SetOnDec(CounterEventFunc&& onDec)
 
 void CounterModelNG::SetHeight(const Dimension& value)
 {
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -161,6 +161,7 @@ void CounterModelNG::SetHeight(const Dimension& value)
     auto addLayoutProperty = addNode->GetLayoutProperty();
     addLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(value), CalcLength(value)));
 }
+
 void CounterModelNG::SetWidth(const Dimension& value)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
@@ -169,14 +170,17 @@ void CounterModelNG::SetWidth(const Dimension& value)
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(value), std::nullopt));
 }
+
 void CounterModelNG::SetControlWidth(const Dimension& value)
 {
     LOGE("no support SetControlWidth");
 }
+
 void CounterModelNG::SetStateChange(bool value)
 {
     LOGE("no support SetStateChange");
 }
+
 void CounterModelNG::SetBackgroundColor(const Color& value)
 {
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, value);
