@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,96 +57,96 @@ RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap)
     return capStyle;
 }
 
-rosen::TextDirection ToRSTextDirection(const TextDirection& txtDir)
+RSTextDirection ToRSTextDirection(const TextDirection& txtDir)
 {
-    rosen::TextDirection rsTxtDir = rosen::TextDirection::LTR;
+    RSTextDirection rsTxtDir = RSTextDirection::LTR;
     if (txtDir == TextDirection::LTR) {
-        rsTxtDir = rosen::TextDirection::LTR;
+        rsTxtDir = RSTextDirection::LTR;
     } else if (txtDir == TextDirection::RTL) {
-        rsTxtDir = rosen::TextDirection::RTL;
+        rsTxtDir = RSTextDirection::RTL;
     }
     return rsTxtDir;
 }
 
-rosen::TextAlign ToRSTextAlign(const TextAlign& align)
+RSTextAlign ToRSTextAlign(const TextAlign& align)
 {
     // should keep enum same with rosen.
-    return static_cast<rosen::TextAlign>(align);
+    return static_cast<RSTextAlign>(align);
 }
 
-rosen::FontWeight ToRSFontWeight(FontWeight fontWeight)
+RSFontWeight ToRSFontWeight(FontWeight fontWeight)
 {
-    rosen::FontWeight rsFontWeight = rosen::FontWeight::W400;
+    RSFontWeight rsFontWeight = RSFontWeight::W400;
     switch (fontWeight) {
         case FontWeight::W100:
         case FontWeight::LIGHTER:
-            rsFontWeight = rosen::FontWeight::W100;
+            rsFontWeight = RSFontWeight::W100;
             break;
         case FontWeight::W200:
-            rsFontWeight = rosen::FontWeight::W200;
+            rsFontWeight = RSFontWeight::W200;
             break;
         case FontWeight::W300:
-            rsFontWeight = rosen::FontWeight::W300;
+            rsFontWeight = RSFontWeight::W300;
             break;
         case FontWeight::W400:
         case FontWeight::NORMAL:
         case FontWeight::REGULAR:
-            rsFontWeight = rosen::FontWeight::W400;
+            rsFontWeight = RSFontWeight::W400;
             break;
         case FontWeight::W500:
         case FontWeight::MEDIUM:
-            rsFontWeight = rosen::FontWeight::W500;
+            rsFontWeight = RSFontWeight::W500;
             break;
         case FontWeight::W600:
-            rsFontWeight = rosen::FontWeight::W600;
+            rsFontWeight = RSFontWeight::W600;
             break;
         case FontWeight::W700:
         case FontWeight::BOLD:
-            rsFontWeight = rosen::FontWeight::W700;
+            rsFontWeight = RSFontWeight::W700;
             break;
         case FontWeight::W800:
-            rsFontWeight = rosen::FontWeight::W800;
+            rsFontWeight = RSFontWeight::W800;
             break;
         case FontWeight::W900:
         case FontWeight::BOLDER:
-            rsFontWeight = rosen::FontWeight::W900;
+            rsFontWeight = RSFontWeight::W900;
             break;
         default:
-            rsFontWeight = rosen::FontWeight::W400;
+            rsFontWeight = RSFontWeight::W400;
             break;
     }
     return rsFontWeight;
 }
 
-rosen::WordBreakType ToRSWordBreakType(const WordBreak& wordBreak)
+RSWordBreakType ToRSWordBreakType(const WordBreak& wordBreak)
 {
     // should keep enum same with rosen.
     return static_cast<rosen::WordBreakType>(wordBreak);
 }
 
-rosen::TextDecoration ToRSTextDecoration(TextDecoration textDecoration)
+RSTextDecoration ToRSTextDecoration(TextDecoration textDecoration)
 {
-    rosen::TextDecoration rsTextDecoration = rosen::TextDecoration::NONE;
+    RSTextDecoration rsTextDecoration = RSTextDecoration::NONE;
     switch (textDecoration) {
         case TextDecoration::OVERLINE:
-            rsTextDecoration = rosen::TextDecoration::OVERLINE;
+            rsTextDecoration = RSTextDecoration::OVERLINE;
             break;
         case TextDecoration::LINE_THROUGH:
-            rsTextDecoration = rosen::TextDecoration::LINETHROUGH;
+            rsTextDecoration = RSTextDecoration::LINETHROUGH;
             break;
         case TextDecoration::UNDERLINE:
-            rsTextDecoration = rosen::TextDecoration::UNDERLINE;
+            rsTextDecoration = RSTextDecoration::UNDERLINE;
             break;
         default:
-            rsTextDecoration = rosen::TextDecoration::NONE;
+            rsTextDecoration = RSTextDecoration::NONE;
             break;
     }
     return rsTextDecoration;
 }
 
-rosen::TextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextStyle& textStyle)
+RSTextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextStyle& textStyle)
 {
-    rosen::TextStyle rsTextStyle;
+    RSTextStyle rsTextStyle;
     rsTextStyle.color_ = ToRSColor(textStyle.GetTextColor());
     rsTextStyle.decoration_ = ToRSTextDecoration(textStyle.GetTextDecoration());
     rsTextStyle.decorationColor_ = ToRSColor(textStyle.GetTextDecorationColor());
@@ -202,5 +202,4 @@ rosen::TextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextSt
     }
     return rsTextStyle;
 }
-
 } // namespace OHOS::Ace

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "draw/canvas.h"
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 #include "image/image.h"
+#include "rosen_text/properties/text_style.h"
 #include "rosen_text/ui/font_collection.h"
 #include "rosen_text/ui/typography.h"
 #include "rosen_text/ui/typography_create.h"
@@ -71,6 +72,8 @@ using RSTextDirection = rosen::TextDirection;
 using RSTextAlign = rosen::TextAlign;
 using RSWordBreakType = rosen::WordBreakType;
 using RSTextStyle = rosen::TextStyle;
+using RSTextDecoration = rosen::TextDecoration;
+using RSFontWeight = rosen::FontWeight;
 } // namespace OHOS::Ace
 #else
 #include "core/components_ng/render/drawing_mock.h"
