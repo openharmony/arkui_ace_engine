@@ -91,7 +91,7 @@ public:
 
     static RefPtr<RenderNode> Create();
 
-    using TapCallback = std::function<bool()>;
+    using TapCallback = std::function<bool(bool)>;
 
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
@@ -573,6 +573,7 @@ protected:
     bool extend_ = false;           // Whether input support extend, this attribute is worked in textarea.
     bool isCallbackCalled_ = false; // Whether custom font is loaded.
     bool isOverlayShowed_ = false;  // Whether overlay has showed.
+    bool isLongPressStatus_ = false;
     double textHeight_ = 0.0;       // Height of text.
     double textHeightLast_ = 0.0;
     double iconSize_ = 0.0;
