@@ -22,9 +22,11 @@
 #include "core/components/picker/picker_date_component.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -106,15 +108,49 @@ void DatePickerView::CreateDatePicker()
     }
 
     if (!hasYearNode) {
-        yearColumnNode->MountToParent(dateNode);
+        auto stackYearNode = CreateStackNode();
+        auto buttonYearNode = CreateButtonNode();
+        buttonYearNode->MountToParent(stackYearNode);
+        yearColumnNode->MountToParent(stackYearNode);
+        auto layoutProperty = stackYearNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        stackYearNode->MountToParent(dateNode);
     }
     if (!hasMonthNode) {
-        monthColumnNode->MountToParent(dateNode);
+        auto stackMonthNode = CreateStackNode();
+        auto buttonMonthNode = CreateButtonNode();
+        buttonMonthNode->GetRenderContext()->UpdateBackgroundColor(Color::BLUE);
+        buttonMonthNode->MountToParent(stackMonthNode);
+        monthColumnNode->MountToParent(stackMonthNode);
+        auto layoutProperty = stackMonthNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        stackMonthNode->MountToParent(dateNode);
     }
     if (!hasDayNode) {
-        dayColumnNode->MountToParent(dateNode);
+        auto stackDayNode = CreateStackNode();
+        auto buttonDayNode = CreateButtonNode();
+        buttonDayNode->GetRenderContext()->UpdateBackgroundColor(Color::GRAY);
+        buttonDayNode->MountToParent(stackDayNode);
+        dayColumnNode->MountToParent(stackDayNode);
+        auto layoutProperty = stackDayNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        stackDayNode->MountToParent(dateNode);
     }
     stack->Push(dateNode);
+}
+
+RefPtr<FrameNode> DatePickerView::CreateStackNode()
+{
+    auto stackId = ElementRegister::GetInstance()->MakeUniqueId();
+    return FrameNode::GetOrCreateFrameNode(
+        V2::STACK_ETS_TAG, stackId, []() { return AceType::MakeRefPtr<StackPattern>(); });
+}
+
+RefPtr<FrameNode> DatePickerView::CreateButtonNode()
+{
+    auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
+    return FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
 }
 
 void DatePickerView::SetShowLunar(bool lunar)
