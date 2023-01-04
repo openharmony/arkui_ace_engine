@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/modifier_adapter.h"
+#include "core/components_ng/pattern/grid_container/grid_container_layout_property.h"
 
 namespace OHOS::Ace::NG {
-void ModifierAdapter::RemoveModifier(int32_t modifierId) {}
+void GridContainerLayoutProperty::RegistGridChild(const RefPtr<FrameNode>& child)
+{
+    childrenFramenode_.emplace_back(child);
+}
 } // namespace OHOS::Ace::NG
