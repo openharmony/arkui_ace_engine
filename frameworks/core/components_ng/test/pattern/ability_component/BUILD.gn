@@ -127,7 +127,3 @@ ohos_unittest("ability_component_pattern_test_ng") {
     "OS_ACCOUNT_EXISTS",
   ]
 }
-group("ability_component_pattern_unit_test") {
-  testonly = true
-  deps = [ ":ability_component_pattern_test_ng" ]
-}

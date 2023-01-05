@@ -36,6 +36,7 @@ public:
     ~TestingPen() = default;
 
     virtual void SetAntiAlias(bool aa) {}
+    virtual void SetBlendMode(BlendMode mode) {}
     virtual void SetWidth(float width) {}
     virtual void SetCapStyle(CapStyle cap) {}
     virtual void SetColor(const TestingColor& color) {}

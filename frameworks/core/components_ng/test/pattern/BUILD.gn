@@ -14,7 +14,7 @@
 group("pattern_unittest") {
   testonly = true
   deps = [
-    "ability_component:ability_component_pattern_unit_test",
+    "ability_component:ability_component_pattern_test_ng",
     "badge:badge_pattern_test_ng",
     "blank:blank_pattern_test_ng",
     "bubble:bubble_pattern_test_ng",
@@ -34,7 +34,7 @@ group("pattern_unittest") {
     "focusHub:focusHub_pattern_test_ng",
     "gauge:gauge_pattern_test_ng",
     "gesture:gesture_pattern_test_ng",
-    "grid:grid_test_ng",
+    "grid:grid_pattern_test_ng",
     "grid_container:grid_container_pattern_test_ng",
     "grid_row:grid_row_pattern_test_ng",
     "image:image_pattern_test_ng",
