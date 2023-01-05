@@ -66,6 +66,7 @@ test_pattern_sources = [
   # mock
   "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
   "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
+  "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/base/mock_dump_log.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/pattern/grid_container/mock_grid_container_layout_property.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animation_utils.cpp",

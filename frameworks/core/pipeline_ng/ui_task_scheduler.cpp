@@ -94,6 +94,12 @@ void UITaskScheduler::FlushTask()
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("UITaskScheduler::FlushTask");
     FlushLayoutTask();
+    // after first layout done if dirtynodes still exist due to new dirty nodes are added during fist layout,
+    // we need to initiate the second layout, otherwise the second will not be excuted.
+    if (!dirtyLayoutNodes_.empty()) {
+        FlushLayoutTask();
+    }
+    ElementRegister::GetInstance()->ClearPendingRemoveNodes();
     FlushRenderTask();
 }
 

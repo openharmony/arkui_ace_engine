@@ -221,4 +221,9 @@ OffsetF FrameNode::GetTransformRelativeOffset() const
 {
     return { 1.0f, 1.0f };
 }
+
+bool FrameNode::MarkRemoving()
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG

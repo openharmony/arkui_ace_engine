@@ -365,7 +365,10 @@ public:
         ViewAbstract::SetSharedTransition(shareId, option);
     }
 
-    void SetGeometryTransition(const std::string& id) override {}
+    void SetGeometryTransition(const std::string& id) override
+    {
+        ViewAbstract::SetGeometryTransition(id);
+    }
 
     void SetMotionPath(const MotionPathOption& option) override
     {

@@ -18,9 +18,11 @@
 
 #include <unordered_map>
 #include <unordered_set>
+#include <list>
 
 #include "base/memory/referenced.h"
 #include "frameworks/base/memory/ace_type.h"
+#include "frameworks/core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::V2 {
 class ElementProxy;
@@ -28,6 +30,7 @@ class ElementProxy;
 
 namespace OHOS::Ace::NG {
 class UINode;
+class FrameNode;
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
@@ -95,6 +98,12 @@ public:
         return nextUniqueElementId_++;
     }
 
+    RefPtr<NG::GeometryTransition> GetOrCreateGeometryTransition(const std::string& id,
+                                                                 const WeakPtr<NG::FrameNode>& frameNode);
+
+    void AddPendingRemoveNode(const RefPtr<NG::UINode>& node);
+    void ClearPendingRemoveNodes();
+
 private:
     // private constructor
     ElementRegister() = default;
@@ -117,6 +126,10 @@ private:
     // Cache IDs that are referenced by other object
     // which causes delayed destruction  when custom node is destoryed.
     std::unordered_set<ElementIdType> deletedCachedItems_;
+
+    std::unordered_map<std::string, RefPtr<NG::GeometryTransition>> geometryTransitionMap_;
+
+    std::list<RefPtr<NG::UINode>> pendingRemoveNodes_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ElementRegister);
 };
