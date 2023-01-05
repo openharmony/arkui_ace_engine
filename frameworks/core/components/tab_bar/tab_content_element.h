@@ -57,6 +57,7 @@ protected:
 
     std::list<RefPtr<Component>> contents_;
     std::unordered_map<int32_t, RefPtr<Element>> childMap_;
+    std::unordered_map<int32_t, RefPtr<FocusNode>> focusChildMap_;
     std::unordered_set<int32_t> focusIndexMap_;
     RefPtr<TabController> controller_;
 
