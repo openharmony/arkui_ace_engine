@@ -165,6 +165,7 @@ float GridRowLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, doub
 
 void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    gridColChildren_.clear();
     const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
 
     auto maxSize = CreateIdealSize(layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF()),
