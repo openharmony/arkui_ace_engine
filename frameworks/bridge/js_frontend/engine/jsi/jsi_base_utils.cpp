@@ -454,6 +454,7 @@ void JsiBaseUtils::ReportJsErrorEvent(std::shared_ptr<JsValue> error, std::share
 std::string ParseLogContent(const std::vector<std::string>& params)
 {
     std::string ret;
+    int32_t flag = 0;
     if (params.empty()) {
         return ret;
     }
@@ -467,6 +468,7 @@ std::string ParseLogContent(const std::vector<std::string>& params)
             break;
         }
         if (formatStr[pos] == '%') {
+            flag = 1;
             if (pos + 1 >= len) {
                 break;
             }
@@ -496,6 +498,18 @@ std::string ParseLogContent(const std::vector<std::string>& params)
     }
     if (pos < len) {
         ret += formatStr.substr(pos, len - pos);
+    }
+    switch (flag) {
+        case 0:
+            for (int32_t i = 1; i < size; ++i) {
+                ret += params[i];
+                break;
+            }
+        case 1:
+            for (int32_t i = 2; i < size; ++i) {
+                ret += params[i];
+                break;
+            }
     }
     return ret;
 }
