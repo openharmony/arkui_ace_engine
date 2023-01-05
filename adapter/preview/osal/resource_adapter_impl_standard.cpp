@@ -61,7 +61,7 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
 
     auto configRet = newResMgr->UpdateResConfig(*resConfig);
     LOGI("AddAppRes result=%{public}d, AddSysRes result=%{public}d,  UpdateResConfig result=%{public}d, "
-         "ori=%{public}d, dpi=%{public}d, device=%{public}d",
+         "ori=%{public}d, dpi=%{public}f, device=%{public}d",
         appResRet, sysResRet, configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(),
         resConfig->GetDeviceType());
     Platform::AceApplicationInfoImpl::GetInstance().SetResourceManager(newResMgr);
@@ -72,7 +72,7 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
 void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
 {
     auto resConfig = ConvertConfigToGlobal(config);
-    LOGI("UpdateConfig ori=%{public}d, dpi=%{public}d, device=%{public}d", resConfig->GetDirection(),
+    LOGI("UpdateConfig ori=%{public}d, dpi=%{public}f, device=%{public}d", resConfig->GetDirection(),
         resConfig->GetScreenDensity(), resConfig->GetDeviceType());
     resourceManager_->UpdateResConfig(*resConfig);
 }

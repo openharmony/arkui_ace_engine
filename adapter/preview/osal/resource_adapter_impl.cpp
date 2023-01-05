@@ -274,7 +274,7 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
         initRet = resourceManger_.Init(hapFiles, handlers);
         resourceManger_.UpdateConfig(configuration);
     }
-    LOGI("Init result=%{public}d, handle=%{public}zu, ori=%{public}d, dpi=%{public}d, device=%{public}d, "
+    LOGI("Init result=%{public}d, handle=%{public}zu, ori=%{public}d, dpi=%{public}f, device=%{public}d, "
          "font=%{public}f, color=%{public}d",
         initRet, handlers.size(), configuration.orientation_, configuration.resolution_, configuration.deviceType_,
         configuration.fontRatio_, configuration.colorMode_);
@@ -283,7 +283,7 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
 void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
 {
     auto configuration = ConvertConfig(config);
-    LOGI("UpdateConfig ori=%{public}d, dpi=%{public}d, device=%{public}d, font=%{public}f, color=%{public}d",
+    LOGI("UpdateConfig ori=%{public}d, dpi=%{public}f, device=%{public}d, font=%{public}f, color=%{public}d",
         configuration.orientation_, configuration.resolution_, configuration.deviceType_, configuration.fontRatio_,
         configuration.colorMode_);
     resourceManger_.UpdateConfig(configuration);
