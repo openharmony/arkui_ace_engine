@@ -22,13 +22,15 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void RatingModelNG::Create()
+void RatingModelNG::Create(double rating, bool indicator)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::RATING_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RatingPattern>(); });
     stack->Push(frameNode);
+    RatingModelNG::SetRatingScore(rating);
+    RatingModelNG::SetIndicator(indicator);
 }
 
 void RatingModelNG::SetRatingScore(double value)

@@ -25,7 +25,7 @@ public:
     RatingModelImpl() = default;
     ~RatingModelImpl() override = default;
 
-    void Create() override;
+    void Create(double rating = .0, bool indicator = false) override;
     void SetRatingScore(double value) override;
     void SetIndicator(bool value) override;
     void SetStars(int32_t value) override;

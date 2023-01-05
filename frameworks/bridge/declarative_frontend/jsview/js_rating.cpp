@@ -62,9 +62,7 @@ void JSRating::Create(const JSCallbackInfo& info)
             LOGE("create rating fail because the indicator is not value");
         }
     }
-    RatingModel::GetInstance()->Create();
-    RatingModel::GetInstance()->SetRatingScore(rating);
-    RatingModel::GetInstance()->SetIndicator(indicator);
+    RatingModel::GetInstance()->Create(rating, indicator);
 }
 
 void JSRating::SetStars(const JSCallbackInfo& info)
