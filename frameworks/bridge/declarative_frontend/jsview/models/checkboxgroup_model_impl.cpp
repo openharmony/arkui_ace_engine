@@ -34,11 +34,19 @@ void CheckBoxGroupModelImpl::Create(const std::optional<std::string>& groupName)
         const auto& checkboxGroupName = groupName.value();
         checkboxComponent->SetGroupName(checkboxGroupName);
         auto checkboxGroupmap = ViewStackProcessor::GetInstance()->GetCheckboxGroupComponent();
-        auto item = checkboxGroupmap->find(checkboxGroupName);
-        if (item != checkboxGroupmap->end()) {
-            checkboxGroupmap->erase(checkboxGroupName);
-        }
         checkboxGroupmap->emplace(checkboxGroupName, checkboxComponent);
+        auto& ungroupedCheckboxs = CheckboxComponent::GetUngroupedCheckboxs();
+        auto item = ungroupedCheckboxs.find(checkboxGroupName);
+        if (item != ungroupedCheckboxs.end()) {
+            for (auto component : item->second) {
+                auto chkComponent = component.Upgrade();
+                if (chkComponent) {
+                    checkboxComponent->AddCheckbox(chkComponent);
+                    chkComponent->SetGroup(checkboxComponent);
+                }
+            }
+            ungroupedCheckboxs.erase(item);
+        }
     }
 
     checkboxComponent->SetInspectorTag("CheckboxGroupComponent");
