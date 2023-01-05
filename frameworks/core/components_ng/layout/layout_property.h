@@ -40,6 +40,7 @@
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 
@@ -109,6 +110,11 @@ public:
         return layoutDirection_.value_or(TextDirection::AUTO);
     }
 
+    RefPtr<GeometryTransition> GetGeometryTransition() const
+    {
+        return geometryTransition_;
+    }
+
     MeasureType GetMeasureType(MeasureType defaultType = MeasureType::MATCH_CONTENT) const
     {
         return measureType_.value_or(defaultType);
@@ -171,6 +177,23 @@ public:
         }
         layoutDirection_ = value;
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+
+    void UpdateGeometryTransition(const std::string& id)
+    {
+        if (geometryTransition_ != nullptr) {
+            // unregister node from old geometry transition
+            geometryTransition_->Update(host_, nullptr);
+            // register node into new geometry transition
+            auto geometryTransition = ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, host_);
+            if (geometryTransition != nullptr && geometryTransition->Update(nullptr, host_)) {
+                geometryTransition_ = geometryTransition;
+            }
+        } else {
+            geometryTransition_ = ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, host_);
+            CHECK_NULL_VOID(geometryTransition_);
+            geometryTransition_->Build(host_, true);
+        }
     }
 
     void UpdateAspectRatio(float ratio)
@@ -362,6 +385,8 @@ private:
     std::unique_ptr<GridProperty> gridProperty_;
     std::optional<MeasureType> measureType_;
     std::optional<TextDirection> layoutDirection_;
+
+    RefPtr<GeometryTransition> geometryTransition_;
 
     WeakPtr<FrameNode> host_;
 
