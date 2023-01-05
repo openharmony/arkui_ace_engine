@@ -91,6 +91,7 @@ void ToastComponent::BuildToastContent(const RefPtr<TextComponent>& text, const 
         toastTextStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
         toastTextStyle.SetTextAlign(TextAlign::CENTER);
     }
+    toastTextStyle.SetTextAlign(TextAlign::START);
     text->SetTextStyle(toastTextStyle);
 }
 

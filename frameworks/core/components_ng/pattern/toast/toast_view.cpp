@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/toast/toast_theme.h"
@@ -81,7 +82,6 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     textColor = toastTheme->GetTextStyle().GetTextColor();
     fontSize = toastTheme->GetTextStyle().GetFontSize();
     minWidth = Dimension(toastTheme->GetMinWidth().ConvertToPx());
-    maxWidth = Dimension(toastTheme->GetMaxWidth().ConvertToPx());
     minHeight = Dimension(toastTheme->GetMinHeight().ConvertToPx());
     toastbottom = Dimension(
         GreatOrEqual(bottomPosition.Value(), 0.0) ? bottomPosition.Value() : toastTheme->GetBottom().ConvertToPx());
@@ -93,9 +93,16 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     paddings.left = NG::CalcLength(Dimension(padding.Left().Value()));
     paddings.right = NG::CalcLength(Dimension(padding.Right().Value()));
 
+    auto gridColumnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::TOAST);
+    auto parent = gridColumnInfo->GetParent();
+    if (parent) {
+        parent->BuildColumnWidth();
+    }
+    maxWidth = Dimension(gridColumnInfo->GetMaxWidth());
+
     textlayoutProperty->UpdateContent(message);
     textlayoutProperty->UpdateTextColor(textColor);
-    textlayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    textlayoutProperty->UpdateTextAlign(TextAlign::START);
     textlayoutProperty->UpdateFontWeight(fontWeight);
     textlayoutProperty->UpdateFontSize(fontSize);
     textlayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(maxWidth), std::nullopt));
