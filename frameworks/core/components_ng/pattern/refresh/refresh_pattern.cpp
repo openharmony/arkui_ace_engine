@@ -69,6 +69,33 @@ bool RefreshPattern::OnDirtyLayoutWrapperSwap(
 {
     auto refreshLayoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_RETURN(refreshLayoutProperty, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto refreshRenderProperty = host->GetPaintProperty<RefreshRenderProperty>();
+    CHECK_NULL_RETURN(refreshRenderProperty, false);
+    if (!progressChild_) {
+        progressChild_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->TotalChildCount() - 1));
+        auto diameter = refreshLayoutProperty->GetProgressDiameterValue(Dimension(0, DimensionUnit::VP)).ConvertToPx();
+        auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
+        CHECK_NULL_RETURN(progressLayoutProperty, false);
+        progressLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(diameter), CalcLength(diameter)));
+        progressChild_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    if (!textChild_) {
+        textChild_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->TotalChildCount() - 2));
+    }
+    if (refreshRenderProperty->GetIsRefreshingValue()) {
+        auto textChildLayoutProperty = textChild_->GetLayoutProperty<TextLayoutProperty>();
+        if (textChildLayoutProperty->GetVisibilityValue() == VisibleType::INVISIBLE &&
+            refreshLayoutProperty->GetIsShowLastTimeValue()) {
+            textChildLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        }
+        auto progressChildLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
+        if (progressChildLayoutProperty->GetVisibilityValue() == VisibleType::INVISIBLE) {
+            progressChildLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
+    }
 
     refreshStatus = GetNextStatus();
     return false;
@@ -121,12 +148,6 @@ void RefreshPattern::HandleDragStart()
     if (host->TotalChildCount() < CHILD_COUNT) {
         LOGI("%{public}s have %{public}d child", host->GetTag().c_str(), host->TotalChildCount());
         return;
-    }
-    if (!progressChild_) {
-        progressChild_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->TotalChildCount() - 1));
-    }
-    if (!textChild_) {
-        textChild_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->TotalChildCount() - 2));
     }
     refreshLayoutProperty->UpdateScrollableOffset(OffsetF(0, 0));
     refreshLayoutProperty->UpdateLoadingProcessOffset(OffsetF(0, 0));
@@ -201,6 +222,7 @@ void RefreshPattern::HandleDragEnd()
         if (scrollableOffset.GetY() > triggerRefreshDistance.ConvertToPx()) {
             FireChangeEvent("true");
             FireRefreshing();
+            refreshRenderProperty->UpdateIsRefreshing(true);
             refreshStatus = RefreshStatus::REFRESH;
         } else {
             refreshStatus = RefreshStatus::INACTIVE;
@@ -218,8 +240,6 @@ void RefreshPattern::HandleDragEnd()
     refreshLayoutProperty->UpdateLoadingProcessOffset(OffsetF(0, static_cast<float>(indicatorOffset)));
     refreshLayoutProperty->UpdateShowTimeOffset(OffsetF(0, static_cast<float>(triggerShowTimeDistance)));
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    host->MarkNeedSyncRenderTree();
-    host->RebuildRenderContextTree();
 }
 
 void RefreshPattern::HandleDragCancel()
@@ -276,8 +296,6 @@ RefreshStatus RefreshPattern::GetNextStatus()
                 if (progressChildLayoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
                     progressChildLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
                     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-                    host->MarkNeedSyncRenderTree();
-                    host->RebuildRenderContextTree();
                 }
             }
             break;
