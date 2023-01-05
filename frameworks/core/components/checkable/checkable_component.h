@@ -500,6 +500,11 @@ public:
         }
     }
 
+    static std::unordered_map<std::string, std::list<WeakPtr<CheckboxComponent>>>& GetUngroupedCheckboxs()
+    {
+        return ungroupedCheckboxs_;
+    }
+
 private:
     CheckableStatus groupValue_ = CheckableStatus::NONE;
     std::list<RefPtr<CheckboxComponent>> checkboxList_;
@@ -510,6 +515,7 @@ private:
     std::function<void(bool)> itemValueUpdateHandler_;
     std::function<void(CheckableStatus)> groupValueUpdateHandler_;
     EventMarker OnGroupChange_;
+    static std::unordered_map<std::string, std::list<WeakPtr<CheckboxComponent>>> ungroupedCheckboxs_;
 };
 
 class ACE_EXPORT SwitchComponent : public CheckableComponent, public CheckableValue<bool> {
