@@ -100,10 +100,11 @@ public:
 
     void TransferJsResponseDataPreview(int32_t callbackId, int32_t code, ResponseData responseData) const;
 
-    void InitializeModuleSearcher(const std::string& bundleName, const std::string& assetPath, bool isBundle)
+    void InitializeModuleSearcher(const std::string& bundleName, const std::string& moduleName,
+                                  const std::string& assetPath, bool isBundle)
     {
         if (jsEngine_) {
-            jsEngine_->InitializeModuleSearcher(bundleName, assetPath, isBundle);
+            jsEngine_->InitializeModuleSearcher(bundleName, moduleName, assetPath, isBundle);
         }
     }
 #endif

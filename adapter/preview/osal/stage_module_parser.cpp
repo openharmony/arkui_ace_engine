@@ -115,11 +115,17 @@ void StageModuleInfo::ModuleInfoParse(const std::unique_ptr<JsonValue>& root)
         return;
     }
     compileMode_ = root->GetString("compileMode");
+    moduleName_ = root->GetString("name");
 }
 
 const std::string& StageModuleInfo::GetCompileMode() const
 {
     return compileMode_;
+}
+
+const std::string& StageModuleInfo::GetModuleName() const
+{
+    return moduleName_;
 }
 
 void StageModuleParser::Parse(const std::string& contents)

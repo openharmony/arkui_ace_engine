@@ -188,11 +188,12 @@ void AceContainer::ParseStageAppConfig(const std::string& assetPath, bool formsE
     std::string bundleName = appInfo->GetBundleName();
     auto& moduleInfo = stageModuleParser->GetModuleInfo();
     const std::string& compileMode = moduleInfo->GetCompileMode();
+    const std::string& moduleName = moduleInfo->GetModuleName();
     bool isBundle = (compileMode != "esmodule");
     if (frontend_) {
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
         if (declarativeFrontend){
-            declarativeFrontend->InitializeModuleSearcher(bundleName, assetPath, isBundle);
+            declarativeFrontend->InitializeModuleSearcher(bundleName, moduleName, assetPath, isBundle);
         }
     } else {
         LOGE("frontend_ is nullptr");
