@@ -165,6 +165,21 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         case OHOS::MMI::PointerEvent::POINTER_ACTION_UP:
             event.type = TouchType::UP;
             break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN:
+            event.type = TouchType::PULL_DOWN;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
+            event.type = TouchType::PULL_MOVE;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
+            event.type = TouchType::PULL_UP;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW:
+            event.type = TouchType::PULL_IN_WINDOW;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW:
+            event.type = TouchType::PULL_OUT_WINDOW;
+            break;
         default:
             LOGW("unknown type");
             break;
