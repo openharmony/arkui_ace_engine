@@ -243,8 +243,12 @@ public:
     void NotifyMemoryLevel(int32_t level) override;
     void FlushMessages() override;
 
-    void FlushUITasks() override
+    void FlushUITasks(bool onlyLayout = false) override
     {
+        if (onlyLayout) {
+            taskScheduler_.FlushLayoutTask();
+            return;
+        }
         taskScheduler_.FlushTask();
     }
     // end pipeline, exit app

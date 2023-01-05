@@ -57,7 +57,6 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
                 container->GetInstanceId());
         }
         ContainerScope scope(container->GetInstanceId());
-        context->FlushBuild();
         if (context->GetInstanceId() == triggerId) {
             return;
         }
@@ -85,7 +84,6 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
                 container->GetInstanceId());
         }
         ContainerScope scope(container->GetInstanceId());
-        context->FlushBuild();
         if (context->GetInstanceId() == triggerId) {
             return;
         }
@@ -100,14 +98,12 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
 void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
     const JSCallbackInfo& info, std::function<void()>& onFinishEvent)
 {
-    pipelineContext->FlushBuild();
     pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
     if (!Container::IsCurrentUseNewPipeline()) {
         pipelineContext->SetSyncAnimationOption(option);
     }
     JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
     jsAnimateToFunc->Call(info[1]);
-    pipelineContext->FlushBuild();
     if (!Container::IsCurrentUseNewPipeline()) {
         pipelineContext->SetSyncAnimationOption(AnimationOption());
     }
@@ -155,7 +151,7 @@ const AnimationOption JSViewContext::CreateAnimation(const std::unique_ptr<JsonV
 
 void JSViewContext::JSAnimation(const JSCallbackInfo& info)
 {
-    LOGD("JSAnimation");
+    ACE_FUNCTION_TRACE();
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
@@ -217,6 +213,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
 
 void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
 {
+    ACE_FUNCTION_TRACE();
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.

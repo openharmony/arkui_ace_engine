@@ -439,7 +439,8 @@ void PipelineBase::PrepareOpenImplicitAnimation()
 
     // initialize false for implicit animation layout pending flag
     pendingImplicitLayout_.push(false);
-    FlushUITasks();
+    FlushBuild();
+    FlushUITasks(true);
 #endif
 }
 
@@ -455,10 +456,11 @@ void PipelineBase::PrepareCloseImplicitAnimation()
         LOGE("close implicit animation failed, need to open implicit animation first!");
         return;
     }
+    FlushBuild();
 
     // layout the views immediately to animate all related views, if layout updates are pending in the animation closure
     if (pendingImplicitLayout_.top()) {
-        FlushUITasks();
+        FlushUITasks(true);
     }
     if (!pendingImplicitLayout_.empty()) {
         pendingImplicitLayout_.pop();
@@ -470,6 +472,7 @@ void PipelineBase::OpenImplicitAnimation(
     const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
 {
 #ifdef ENABLE_ROSEN_BACKEND
+    ACE_FUNCTION_TRACE();
     PrepareOpenImplicitAnimation();
 
     auto wrapFinishCallback = [weak = AceType::WeakClaim(this), finishCallback]() {
@@ -492,6 +495,7 @@ void PipelineBase::OpenImplicitAnimation(
 bool PipelineBase::CloseImplicitAnimation()
 {
 #ifdef ENABLE_ROSEN_BACKEND
+    ACE_FUNCTION_TRACE();
     PrepareCloseImplicitAnimation();
     return AnimationUtils::CloseImplicitAnimation();
 #else

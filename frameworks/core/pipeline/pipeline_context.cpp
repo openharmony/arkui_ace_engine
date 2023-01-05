@@ -2140,7 +2140,6 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
             option.SetCurve(curve);
             Animate(option, curve, [width, height, this]() {
                 SetRootSizeWithWidthHeight(width, height);
-                FlushLayout();
             });
             break;
         }
@@ -2184,7 +2183,6 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
             option.SetCurve(curve);
             Animate(option, curve, [width, height, this]() {
                 SetRootSizeWithWidthHeight(width, height);
-                FlushLayout();
             }, [weak = AceType::WeakClaim(this)]() {
                 auto pipeline = weak.Upgrade();
                 if (pipeline == nullptr) {
