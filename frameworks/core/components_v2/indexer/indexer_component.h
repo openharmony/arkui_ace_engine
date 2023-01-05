@@ -75,7 +75,7 @@ class ACE_EXPORT IndexerComponent : public ComponentGroup {
 public:
     using OnRequestPopupDataFunc = std::function<std::vector<std::string>(std::shared_ptr<IndexerEventInfo>)>;
 
-    IndexerComponent(const std::vector<std::string>& label, int32_t selectedIndex, bool bubble = true)
+    IndexerComponent(const std::vector<std::string>& label, int32_t selectedIndex, bool bubble = false)
         : selectedIndex_(selectedIndex), bubbleEnabled_(bubble)
     {
         indexerLabel_ = GetU16StrVector(label);
@@ -168,7 +168,9 @@ public:
     void SetBubbleTextStyle(const TextStyle& textStyle)
     {
         bubbleStyle_ = textStyle;
-        bubbleText_->SetTextStyle(bubbleStyle_);
+        if (bubbleText_) {
+            bubbleText_->SetTextStyle(bubbleStyle_);
+        }
     }
 
     std::vector<std::u16string> GetU16StrVector(const std::vector<std::string>& str)
@@ -226,6 +228,10 @@ public:
 
     const Color& GetBubbleBackgroundColor()
     {
+        if (!bubbleBack_) {
+            bubbleBack_ = AceType::MakeRefPtr<Decoration>();
+            bubbleBack_->SetBackgroundColor(Color(BUBBLE_BG_COLOR).BlendOpacity(NINETY_OPACITY_IN_PERCENT));
+        }
         return bubbleBack_->GetBackgroundColor();
     }
 

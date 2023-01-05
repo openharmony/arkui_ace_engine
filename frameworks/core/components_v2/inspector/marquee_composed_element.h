@@ -38,7 +38,8 @@ public:
     std::string GetStart() const;
     std::string GetFromStart() const;
     std::string GetFontSize() const;
-
+    std::string GetFontColor() const;
+    
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
 
