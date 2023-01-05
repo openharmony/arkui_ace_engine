@@ -18,6 +18,9 @@
 
 #include "core/pipeline/base/render_element.h"
 
+#include <list>
+#include <unordered_map>
+
 namespace OHOS::Ace {
 
 class CheckableElement : public RenderElement, public FocusNode {
@@ -32,6 +35,7 @@ public:
     void OnFocus() override;
     void OnBlur() override;
     bool OnKeyEvent(const KeyEvent& keyEvent) override;
+    void SetNewComponent(const RefPtr<Component>& newComponent) override;
 
     bool CanUpdate(const RefPtr<Component>& newComponent) override
     {
