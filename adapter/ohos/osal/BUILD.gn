@@ -93,6 +93,7 @@ template("ace_osal_ohos_source_set") {
       if (defined(config.accessibility_support) &&
           config.accessibility_support) {
         sources += [ "js_accessibility_manager.cpp" ]
+        deps += [ "$ace_root/frameworks/bridge/common/accessibility:bridge_accessibility_ohos" ]
         external_deps += [
           "ability_runtime:ability_manager",
           "accessibility:accessibilityclient",
