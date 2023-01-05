@@ -74,7 +74,7 @@ RefPtr<FrameNode> CreateBlankFrameNode(const RefPtr<FrameNode>& node)
 
 bool ReplaceFrameNode(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& newNode)
 {
-    auto parent = node->GetAncestorNodeOfFrame();
+    auto parent = node->GetParent();
     CHECK_NULL_RETURN(parent, false);
     parent->ReplaceChild(node, newNode);
     parent->RebuildRenderContextTree();

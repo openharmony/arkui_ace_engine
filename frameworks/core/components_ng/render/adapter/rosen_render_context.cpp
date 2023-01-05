@@ -115,15 +115,15 @@ void RosenRenderContext::OnNodeAppear()
     }
 }
 
-void RosenRenderContext::OnNodeDisappear(FrameNode* host)
+void RosenRenderContext::OnNodeDisappear()
 {
     if (!propTransitionDisappearing_) {
         return;
     }
     CHECK_NULL_VOID(rsNode_);
     LOGD("rsNode disappear transition, rsNode:%{public}p", rsNode_.get());
-    CHECK_NULL_VOID(host);
-    NotifyTransitionInner(host->GetGeometryNode()->GetFrameSize(), false);
+    auto rect = GetPaintRectWithoutTransform();
+    NotifyTransitionInner(rect.GetSize(), false);
 }
 
 void RosenRenderContext::SetPivot(float xPivot, float yPivot)
@@ -476,7 +476,7 @@ void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTr
     }
     CHECK_NULL_VOID(rsNode_);
     SetTransitionPivot(frameSize, isTransitionIn);
-    auto effect = GetRSTransitionWithoutType(*transOptions);
+    auto effect = GetRSTransitionWithoutType(*transOptions, frameSize);
     // notice that we have been in animateTo, so do not need to use Animation closure to notify transition.
     rsNode_->NotifyTransition(effect, isTransitionIn);
 }
@@ -1384,7 +1384,7 @@ void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
 }
 
 std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWithoutType(
-    const TransitionOptions& options)
+    const TransitionOptions& options, const SizeF& frameSize)
 {
     std::shared_ptr<Rosen::RSTransitionEffect> effect = Rosen::RSTransitionEffect::Create();
     if (options.HasOpacity()) {
@@ -1392,7 +1392,9 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWi
     }
     if (options.HasTranslate()) {
         const auto& translate = options.GetTranslateValue();
-        effect = effect->Translate({ translate.x.ConvertToPx(), translate.y.ConvertToPx(), translate.z.ConvertToPx() });
+        effect = effect->Translate({ static_cast<float>(translate.x.ConvertToPxWithSize(frameSize.Width())),
+            static_cast<float>(translate.y.ConvertToPxWithSize(frameSize.Height())),
+            static_cast<float>(translate.z.ConvertToPx()) });
     }
     if (options.HasScale()) {
         const auto& scale = options.GetScaleValue();
