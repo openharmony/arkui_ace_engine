@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,8 +43,6 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
     UpdatePaintConfig(props);
     ImagePainter imagePainter(canvasImage_);
     return
-        [imagePainter, offset, config = canvasImage_->GetPaintConfig(), contentSize](RSCanvas& canvas) {
-            imagePainter.DrawImage(canvas, offset, contentSize, config);
-        };
+        [imagePainter, offset, contentSize](RSCanvas& canvas) { imagePainter.DrawImage(canvas, offset, contentSize); };
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,9 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
     CHECK_NULL_RETURN(foregroundImageCanvas_, nullptr);
     CHECK_NULL_RETURN(secondaryImageCanvas_, nullptr);
     CHECK_NULL_RETURN(backgroundImageCanvas_, nullptr);
+    foregroundImageCanvas_->SetPaintConfig(singleStarImagePaintConfig_);
+    secondaryImageCanvas_->SetPaintConfig(singleStarImagePaintConfig_);
+    backgroundImageCanvas_->SetPaintConfig(singleStarImagePaintConfig_);
     auto offset = paintWrapper->GetContentOffset();
 
     const ImagePainter foregroundImagePainter(foregroundImageCanvas_);
@@ -46,10 +49,10 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
     const double stepSize = ratingRenderProperty->GetStepSize().value_or(ratingTheme->GetStepSize());
     const int32_t touchStar = ratingRenderProperty->GetTouchStar().value_or(DEFAULT_RATING_TOUCH_STAR_NUMBER);
     return [foregroundImagePainter, secondaryImagePainter, backgroundPainter, drawScore, stepSize, touchStar,
-               starNum = starNum_, offset, ImagePaintConfig = singleStarImagePaintConfig_](RSCanvas& canvas) {
+               starNum = starNum_, offset, config = singleStarImagePaintConfig_](RSCanvas& canvas) {
         // step1: check if touch down any stars.
-        const float singleStarWidth = ImagePaintConfig.dstRect_.Width();
-        const float singleStarHeight = ImagePaintConfig.dstRect_.Height();
+        const float singleStarWidth = config.dstRect_.Width();
+        const float singleStarHeight = config.dstRect_.Height();
         if (touchStar >= 0 && touchStar <= starNum) {
             RSBrush rsBrush(PRESS_COLOR);
             rsBrush.SetAntiAlias(true);
@@ -77,7 +80,7 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
             static_cast<float>(offset.GetX() + singleStarWidth * drawScore), offset.GetY() + singleStarHeight);
         canvas.ClipRect(clipRect1, RSClipOp::INTERSECT);
         for (int32_t i = 0; i < foregroundImageRepeatNum; i++) {
-            foregroundImagePainter.DrawImage(canvas, offsetTemp, contentSize, ImagePaintConfig);
+            foregroundImagePainter.DrawImage(canvas, offsetTemp, contentSize);
             offsetTemp.SetX(static_cast<float>(offsetTemp.GetX() + singleStarWidth));
         }
         canvas.Restore();
@@ -91,16 +94,16 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
             // step3.1: calculate the clip area which already occupied by the foreground image.
             canvas.ClipRect(clipRect2, RSClipOp::INTERSECT);
             offsetTemp.SetX(static_cast<float>(offsetTemp.GetX() - singleStarWidth));
-            secondaryImagePainter.DrawImage(canvas, offsetTemp, contentSize, ImagePaintConfig);
-            offsetTemp.SetX(offsetTemp.GetX() + ImagePaintConfig.dstRect_.Width());
+            secondaryImagePainter.DrawImage(canvas, offsetTemp, contentSize);
+            offsetTemp.SetX(offsetTemp.GetX() + config.dstRect_.Width());
             canvas.Restore();
         }
 
         // step4: draw background image.
         for (int32_t i = 0; i < backgroundImageRepeatNum; i++) {
-            backgroundPainter.DrawImage(canvas, offsetTemp, contentSize, ImagePaintConfig);
+            backgroundPainter.DrawImage(canvas, offsetTemp, contentSize);
             if (i < backgroundImageRepeatNum - 1) {
-                offsetTemp.SetX(offsetTemp.GetX() + ImagePaintConfig.dstRect_.Width());
+                offsetTemp.SetX(offsetTemp.GetX() + config.dstRect_.Width());
             }
         }
     };
