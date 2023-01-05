@@ -388,7 +388,7 @@ std::string JsInspectorManager::UpdateNodeRectStrInfoV2(const RefPtr<Accessibili
     auto inspectorElement = AceType::DynamicCast<V2::InspectorComposedElement>(composedElement);
     if (inspectorElement) {
         auto rect = inspectorElement->GetRenderRect();
-        if (!rect.IsIntersectWith(deviceRect_)) {
+        if (!rect.IsIntersectByCommonSideWith(deviceRect_)) {
             return "0,0,0,0";
         }
         strRec = inspectorElement->GetRect();
