@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <utility>
 
 #include "core/image/image_source_info.h"
 #include "core/pipeline/base/constants.h"
@@ -49,9 +51,9 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
     return SrcType::FILE;
 }
 
-ImageSourceInfo::ImageSourceInfo(const std::string& imageSrc, Dimension width, Dimension height,
+ImageSourceInfo::ImageSourceInfo(std::string imageSrc, Dimension width, Dimension height,
     InternalResource::ResourceId resourceId, const RefPtr<PixelMap>& pixmap)
-    : src_(imageSrc), sourceWidth_(width), sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap),
+    : src_(std::move(imageSrc)), sourceWidth_(width), sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap),
       isSvg_(IsSVGSource(src_, resourceId_)), isPng_(IsPngSource(src_, resourceId_)), srcType_(ResolveSrcType())
 {}
 
@@ -168,7 +170,7 @@ Size ImageSourceInfo::GetSourceSize() const
 
 void ImageSourceInfo::Reset() {}
 
-std::optional<Color> ImageSourceInfo::GetFillColor() const
+const std::optional<Color>& ImageSourceInfo::GetFillColor() const
 {
     return fillColor_;
 }
@@ -178,7 +180,7 @@ const RefPtr<PixelMap>& ImageSourceInfo::GetPixmap() const
     return pixmap_;
 }
 
-std::string ImageSourceInfo::GetCacheKey() const
+std::string ImageSourceInfo::GetKey() const
 {
     return std::string("");
 }

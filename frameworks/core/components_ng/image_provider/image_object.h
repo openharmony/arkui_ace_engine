@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,11 +31,9 @@ public:
     ImageObject() = delete;
     ImageObject(
         const ImageSourceInfo& sourceInfo, const SizeF& imageSize, int32_t frameCount, const RefPtr<ImageData>& data)
-        : sourceInfo_(sourceInfo), imageSize_(imageSize), frameCount_(frameCount), data_(data)
+        : src_(sourceInfo), imageSize_(imageSize), frameCount_(frameCount), data_(data)
     {}
     ~ImageObject() override = default;
-
-    static std::string GenerateCacheKey(const ImageSourceInfo& srcInfo, const SizeF& targetImageSize);
 
     int32_t GetFrameCount() const;
     const SizeF& GetImageSize() const;
@@ -43,30 +41,24 @@ public:
     const RefPtr<ImageData>& GetData() const;
     bool IsSingleFrame() const;
 
-    // clear canvasImage when load succeeds
-    RefPtr<CanvasImage> MoveCanvasImage();
-    bool HasCanvasImage() const;
-    void SetCanvasImage(const RefPtr<CanvasImage>& canvasImage);
-
     void SetData(const RefPtr<ImageData>& data);
     void SetImageSize(const SizeF& imageSize);
     void ClearData();
-    void ClearCanvasImage();
 
     bool IsSupportCache() const
     {
-        return sourceInfo_.IsSupportCache();
+        return src_.IsSupportCache();
     }
 
     virtual void MakeCanvasImage(
-        const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize, bool syncLoad) = 0;
+        const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) = 0;
 
 protected:
-    ImageSourceInfo sourceInfo_;
+    ImageSourceInfo src_;
     SizeF imageSize_ { -1.0, -1.0 };
     int32_t frameCount_ = 1;
-    RefPtr<ImageData> data_; // TODO: clear data timely
-    RefPtr<CanvasImage> canvasImage_;
+    // no longer needed after making canvas image
+    RefPtr<ImageData> data_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImageObject);
 };

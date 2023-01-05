@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,13 +34,13 @@ public:
         const ImageSourceInfo& sourceInfo, const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data);
     const RefPtr<SvgDomBase>& GetSVGDom() const;
 
+private:
     void MakeCanvasImage(
-        const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
+        const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
 
     // return true if process is successful
     bool MakeSvgDom(const std::optional<Color>& svgFillColor);
 
-private:
     RefPtr<SvgDomBase> svgDomBase_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SvgImageObject);

@@ -275,10 +275,8 @@ HWTEST_F(ImagePatternTestNg, SetImagePaintConfig001, TestSize.Level1)
     /**
      * @tc.steps: step3. AltImage loads successfully, and trigger alt callback.
      */
-    imagePattern->altLoadingCtx_->OnDataReady(
-        ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT), nullptr);
-    imagePattern->altLoadingCtx_->OnLoadSuccess(
-        ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT));
+    imagePattern->altLoadingCtx_->DataReadyCallback(nullptr);
+    imagePattern->altLoadingCtx_->SuccessCallback(nullptr);
     EXPECT_TRUE(imagePattern->altImage_ != nullptr);
     EXPECT_EQ(*imagePattern->altSrcRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
     EXPECT_EQ(*imagePattern->altDstRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
@@ -288,8 +286,7 @@ HWTEST_F(ImagePatternTestNg, SetImagePaintConfig001, TestSize.Level1)
     /**
      * @tc.steps: step4. Image loads successfully, and trigger Pattern->OnImageLoadSuccess.
      */
-    imagePattern->loadingCtx_->OnLoadSuccess(
-        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
     EXPECT_TRUE(imagePattern->image_ != nullptr);
     EXPECT_EQ(imagePattern->srcRect_, RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
     EXPECT_EQ(imagePattern->dstRect_, RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
@@ -371,19 +368,13 @@ HWTEST_F(ImagePatternTestNg, ImagePatternCallback001, TestSize.Level1)
     /**
      * @tc.steps: step3. ImageLoadingContext trigger callback, but ImageSourceInfo is not match.
      */
-    imagePattern->altLoadingCtx_->OnLoadSuccess(
-        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
-    imagePattern->altLoadingCtx_->OnLoadFail(
-        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT), "",
-        ImageLoadingCommand::LOAD_DATA_FAIL);
+    imagePattern->altLoadingCtx_->SuccessCallback(nullptr);
+    imagePattern->altLoadingCtx_->FailCallback("");
     EXPECT_EQ(imagePattern->altImage_, nullptr);
     EXPECT_EQ(imagePattern->altSrcRect_, nullptr);
     EXPECT_EQ(imagePattern->altDstRect_, nullptr);
-    imagePattern->loadingCtx_->OnLoadSuccess(
-        ImageSourceInfo(ALT_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
-    imagePattern->loadingCtx_->OnLoadFail(
-        ImageSourceInfo(ALT_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT), "",
-        ImageLoadingCommand::LOAD_DATA_FAIL);
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    imagePattern->loadingCtx_->FailCallback("");
     EXPECT_TRUE(imagePattern->image_ == nullptr);
 }
 
@@ -415,9 +406,7 @@ HWTEST_F(ImagePatternTestNg, ImagePatternCallback002, TestSize.Level1)
     /**
      * @tc.steps: step3. Image loads failed, and trigger Pattern->OnImageLoadFail.
      */
-    imagePattern->loadingCtx_->OnLoadFail(
-        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT), "",
-        ImageLoadingCommand::LOAD_DATA_FAIL);
+    imagePattern->loadingCtx_->FailCallback("");
     EXPECT_TRUE(imagePattern->image_ == nullptr);
 }
 
@@ -1284,7 +1273,7 @@ HWTEST_F(ImagePatternTestNg, ImageLayoutFunction001, TestSize.Level1)
     geometryNode->SetContentSize(SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
     imageLayoutAlgorithm->Layout(&layoutWrapper);
     EXPECT_EQ(loadingCtx->imageFit_, ImageFit::COVER);
-    EXPECT_EQ(loadingCtx->needResize_, true);
+    EXPECT_EQ(loadingCtx->autoResize_, true);
     EXPECT_EQ(loadingCtx->dstSize_, SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
 }
 } // namespace OHOS::Ace::NG

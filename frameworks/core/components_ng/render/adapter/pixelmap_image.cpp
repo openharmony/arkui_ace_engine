@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,8 +32,7 @@ namespace {
 constexpr uint8_t RADIUS_POINTS_SIZE = 4;
 #endif
 } // namespace
-RefPtr<CanvasImage> CanvasImage::Create(
-    const RefPtr<PixelMap>& pixelMap, const RefPtr<RenderTaskHolder>& renderTaskHolder)
+RefPtr<CanvasImage> CanvasImage::Create(const RefPtr<PixelMap>& pixelMap)
 {
 #ifndef NG_BUILD
     return AceType::MakeRefPtr<PixelMapImage>(pixelMap);
@@ -60,8 +59,8 @@ int32_t PixelMapImage::GetHeight() const
     return 0;
 }
 
-void PixelMapImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect,
-    const BorderRadiusArray& radiusXY)
+void PixelMapImage::DrawToRSCanvas(
+    RSCanvas& canvas, const RSRect& /* srcRect */, const RSRect& /* dstRect */, const BorderRadiusArray& radiusXY)
 {
     if (!pixelMap_) {
         return;
@@ -101,14 +100,7 @@ void PixelMapImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, cons
     }
     recordingCanvas->ClipAdaptiveRRect(radii);
     Rosen::RsImageInfo rsImageInfo(
-        (int)(GetPaintConfig().imageFit_),
-        (int)(GetPaintConfig().imageRepeat_),
-        radii,
-        1.0,
-        0,
-        0,
-        0
-    );
+        (int)(GetPaintConfig().imageFit_), (int)(GetPaintConfig().imageRepeat_), radii, 1.0, 0, 0, 0);
     recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, paint);
 #endif
 }

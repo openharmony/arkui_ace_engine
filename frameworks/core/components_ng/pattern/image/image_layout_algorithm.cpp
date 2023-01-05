@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -114,9 +114,11 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     bool incomingNeedResize = imageLayoutProperty->GetAutoResize().value_or(true);
     ImageFit incomingImageFit = imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER);
     const std::optional<SizeF>& sourceSize = imageLayoutProperty->GetSourceSize();
-    ImageLoadingContext::MakeCanvasImageIfNeed(loadingCtx_, dstSize, incomingNeedResize, incomingImageFit, sourceSize);
+    if (loadingCtx_) {
+        loadingCtx_->MakeCanvasImageIfNeed(dstSize, incomingNeedResize, incomingImageFit, sourceSize);
+    }
     if (altLoadingCtx_) {
-        ImageLoadingContext::MakeCanvasImageIfNeed(altLoadingCtx_, dstSize, true, incomingImageFit, sourceSize);
+        altLoadingCtx_->MakeCanvasImageIfNeed(dstSize, true, incomingImageFit, sourceSize);
     }
 }
 

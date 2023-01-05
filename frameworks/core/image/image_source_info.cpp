@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,9 +109,9 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
     }
 }
 
-ImageSourceInfo::ImageSourceInfo(const std::string& imageSrc, Dimension width, Dimension height,
+ImageSourceInfo::ImageSourceInfo(std::string imageSrc, Dimension width, Dimension height,
     InternalResource::ResourceId resourceId, const RefPtr<PixelMap>& pixmap)
-    : src_(imageSrc), sourceWidth_(width), sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap),
+    : src_(std::move(imageSrc)), sourceWidth_(width), sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap),
       isSvg_(IsSVGSource(src_, resourceId_)), isPng_(IsPngSource(src_, resourceId_)), srcType_(ResolveSrcType())
 {
     // count how many source set.
@@ -147,7 +147,7 @@ SrcType ImageSourceInfo::ResolveSrcType() const
 
 void ImageSourceInfo::GenerateCacheKey()
 {
-    auto name = src_ + AceApplicationInfo::GetInstance().GetAbilityName();
+    auto name = ToString() + AceApplicationInfo::GetInstance().GetAbilityName();
     cacheKey_ = std::to_string(std::hash<std::string> {}(name)) + std::to_string(static_cast<int32_t>(resourceId_));
 }
 
@@ -249,13 +249,14 @@ std::string ImageSourceInfo::ToString() const
 {
     if (!src_.empty()) {
         return src_;
-    } else if (resourceId_ != InternalResource::ResourceId::NO_ID) {
-        return std::string("internal resource id: ") + std::to_string(static_cast<int32_t>(resourceId_));
-    } else if (pixmap_) {
-        return std::string("pixmapID: ") + pixmap_->GetId() + std::string(" -> modifyID: ") + pixmap_->GetModifyId();
-    } else {
-        return std::string("empty source");
     }
+    if (resourceId_ != InternalResource::ResourceId::NO_ID) {
+        return std::string("internal resource id: ") + std::to_string(static_cast<int32_t>(resourceId_));
+    }
+    if (pixmap_) {
+        return std::string("pixmapID: ") + pixmap_->GetId() + std::string(" -> modifyID: ") + pixmap_->GetModifyId();
+    }
+    return std::string("empty source");
 }
 
 void ImageSourceInfo::SetDimension(Dimension width, Dimension Height)
@@ -286,7 +287,7 @@ void ImageSourceInfo::Reset()
     cacheKey_.clear();
 }
 
-std::optional<Color> ImageSourceInfo::GetFillColor() const
+const std::optional<Color>& ImageSourceInfo::GetFillColor() const
 {
     return fillColor_;
 }
@@ -296,7 +297,7 @@ const RefPtr<PixelMap>& ImageSourceInfo::GetPixmap() const
     return pixmap_;
 }
 
-std::string ImageSourceInfo::GetCacheKey() const
+std::string ImageSourceInfo::GetKey() const
 {
     // only svg sets fillColor
     if (isSvg_ && fillColor_.has_value()) {

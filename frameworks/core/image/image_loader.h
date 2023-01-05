@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,9 +37,9 @@ class ImageLoader : public virtual AceType {
 
 public:
     virtual sk_sp<SkData> LoadImageData(
-        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) = 0;
+        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context) = 0;
     virtual RefPtr<NG::ImageData> LoadDecodedImageData(
-        const ImageSourceInfo& /*imageSourceInfo*/, const WeakPtr<PipelineBase>& /*context*/ = nullptr)
+        const ImageSourceInfo& /*imageSourceInfo*/, const WeakPtr<PipelineBase>& /*context*/)
     {
         return nullptr;
     }
@@ -52,7 +52,7 @@ public:
     // implementation in adapter layer
     static sk_sp<SkData> QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo);
     static void CacheImageDataToImageCache(const std::string& key, const RefPtr<CachedImageData>& imageData);
-    static RefPtr<NG::ImageData> LoadImageDataFromFileCache(const std::string key, const std::string suffix);
+    static RefPtr<NG::ImageData> LoadImageDataFromFileCache(const std::string& key, const std::string& suffix);
 };
 
 // File image provider: read image from file.

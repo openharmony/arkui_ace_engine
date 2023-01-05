@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,14 +17,13 @@
 #include "core/components_ng/test/mock/render/mock_canvas_image.h"
 
 namespace OHOS::Ace::NG {
-ImageLoadingContext::ImageLoadingContext(
-    const ImageSourceInfo& sourceInfo, const LoadNotifier& loadNotifier, bool syncLoad)
-    : sourceInfo_(sourceInfo), loadNotifier_(loadNotifier),
-      loadCallbacks_(GenerateDataReadyCallback(), GenerateLoadSuccessCallback(), GenerateLoadFailCallback()),
-      syncLoad_(syncLoad)
+ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad)
+    : src_(src), notifiers_(loadNotifier), syncLoad_(syncLoad)
 {}
 
-SizeF ImageLoadingContext::CalculateResizeTarget(const SizeF& srcSize, const SizeF& dstSize, const SizeF& rawImageSize)
+ImageLoadingContext::~ImageLoadingContext() = default;
+
+SizeF ImageLoadingContext::CalculateTargetSize(const SizeF& srcSize, const SizeF& dstSize, const SizeF& rawImageSize)
 {
     SizeF resizeTarget = rawImageSize;
     return resizeTarget;
@@ -32,74 +31,42 @@ SizeF ImageLoadingContext::CalculateResizeTarget(const SizeF& srcSize, const Siz
 
 void ImageLoadingContext::RegisterStateChangeCallbacks() {}
 
-EnterStateTask ImageLoadingContext::CreateOnUnloadedTask()
+void ImageLoadingContext::OnUnloaded() {}
+
+void ImageLoadingContext::OnDataLoading() {}
+
+void ImageLoadingContext::OnDataReady() {}
+
+void ImageLoadingContext::OnMakeCanvasImage() {}
+
+void ImageLoadingContext::OnLoadSuccess()
 {
-    return nullptr;
-}
-
-void ImageLoadingContext::RestoreLoadingParams() {}
-
-EnterStateTask ImageLoadingContext::CreateOnDataLoadingTask()
-{
-    return nullptr;
-}
-
-EnterStateTask ImageLoadingContext::CreateOnDataReadyTask()
-{
-    return nullptr;
-}
-
-EnterStateTask ImageLoadingContext::CreateOnMakeCanvasImageTask()
-{
-    return nullptr;
-}
-
-EnterStateTask ImageLoadingContext::CreateOnLoadSuccessTask()
-{
-    return nullptr;
-}
-
-EnterStateTask ImageLoadingContext::CreateOnLoadFailTask()
-{
-    return nullptr;
-}
-
-DataReadyCallback ImageLoadingContext::GenerateDataReadyCallback()
-{
-    return nullptr;
-}
-
-void ImageLoadingContext::OnDataReady(const ImageSourceInfo& sourceInfo, const RefPtr<ImageObject>& imageObj) {}
-
-LoadSuccessCallback ImageLoadingContext::GenerateLoadSuccessCallback()
-{
-    return nullptr;
-}
-
-void ImageLoadingContext::OnLoadSuccess(const ImageSourceInfo& sourceInfo)
-{
-    sourceInfo_ = sourceInfo;
-    RectF rect { 0, 0, sourceInfo_.GetSourceSize().Width(), sourceInfo_.GetSourceSize().Height() };
+    RectF rect { 0, 0, src_.GetSourceSize().Width(), src_.GetSourceSize().Height() };
     dstRect_ = rect;
     srcRect_ = rect;
-    if (loadNotifier_.dataReadyNotifyTask_) {
-        loadNotifier_.dataReadyNotifyTask_(sourceInfo);
+}
+
+void ImageLoadingContext::OnLoadFail() {}
+
+void ImageLoadingContext::DataReadyCallback(const RefPtr<ImageObject>& imageObj) {}
+
+void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& image)
+{
+    canvasImage_ = image;
+    OnLoadSuccess();
+
+    if (notifiers_.dataReadyNotifyTask_) {
+        notifiers_.dataReadyNotifyTask_(src_);
     }
-    if (loadNotifier_.loadSuccessNotifyTask_) {
-        loadNotifier_.loadSuccessNotifyTask_(sourceInfo);
+    if (notifiers_.loadSuccessNotifyTask_) {
+        notifiers_.loadSuccessNotifyTask_(src_);
     }
 }
 
-LoadFailCallback ImageLoadingContext::GenerateLoadFailCallback()
+void ImageLoadingContext::FailCallback(const std::string& /* errorMsg */)
 {
-    return nullptr;
-}
-
-void ImageLoadingContext::OnLoadFail(
-    const ImageSourceInfo& sourceInfo, const std::string& /* errorMsg */, const ImageLoadingCommand& /* command */)
-{
-    if (loadNotifier_.loadFailNotifyTask_) {
-        loadNotifier_.loadFailNotifyTask_(sourceInfo);
+    if (notifiers_.loadFailNotifyTask_) {
+        notifiers_.loadFailNotifyTask_(src_);
     }
 }
 
@@ -120,12 +87,12 @@ RefPtr<CanvasImage> ImageLoadingContext::MoveCanvasImage()
 
 void ImageLoadingContext::LoadImageData() {}
 
-void ImageLoadingContext::MakeCanvasImageIfNeed(const RefPtr<ImageLoadingContext>& loadingCtx, const SizeF& dstSize,
-    bool incomingNeedResize, ImageFit incommingImageFit, const std::optional<SizeF>& sourceSize)
+void ImageLoadingContext::MakeCanvasImageIfNeed(
+    const SizeF& dstSize, bool incomingNeedResize, ImageFit incomingImageFit, const std::optional<SizeF>& sourceSize)
 {
-    loadingCtx->dstSize_ = dstSize;
-    loadingCtx->imageFit_ = incommingImageFit;
-    loadingCtx->needResize_ = incomingNeedResize;
+    dstSize_ = dstSize;
+    imageFit_ = incomingImageFit;
+    autoResize_ = incomingNeedResize;
 }
 
 void ImageLoadingContext::MakeCanvasImage(
@@ -149,12 +116,12 @@ void ImageLoadingContext::SetImageFit(ImageFit imageFit)
 
 const ImageSourceInfo& ImageLoadingContext::GetSourceInfo() const
 {
-    return sourceInfo_;
+    return src_;
 }
 
-void ImageLoadingContext::SetNeedResize(bool needResize)
+void ImageLoadingContext::SetAutoResize(bool needResize)
 {
-    needResize_ = needResize;
+    autoResize_ = needResize;
 }
 
 const SizeF& ImageLoadingContext::GetDstSize() const
@@ -162,9 +129,9 @@ const SizeF& ImageLoadingContext::GetDstSize() const
     return dstSize_;
 }
 
-bool ImageLoadingContext::GetNeedResize() const
+bool ImageLoadingContext::GetAutoResize() const
 {
-    return needResize_;
+    return autoResize_;
 }
 
 void ImageLoadingContext::SetSourceSize(const std::optional<SizeF>& sourceSize) {}
@@ -176,15 +143,15 @@ std::optional<SizeF> ImageLoadingContext::GetSourceSize() const
 
 bool ImageLoadingContext::NeedAlt() const
 {
-    return needAlt_;
+    return false;
 }
 
 const std::optional<Color>& ImageLoadingContext::GetSvgFillColor() const
 {
-    return svgFillColorOpt_;
+    return src_.GetFillColor();
 }
 
-void ImageLoadingContext::SetSvgFillColor(const std::optional<Color>& svgFillColorOpt) {}
+void ImageLoadingContext::CacheImageObject() {}
 void ImageLoadingContext::ResetLoading() {}
 void ImageLoadingContext::ResumeLoading() {}
 } // namespace OHOS::Ace::NG

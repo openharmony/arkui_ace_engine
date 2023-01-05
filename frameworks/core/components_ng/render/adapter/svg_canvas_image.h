@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,14 +23,12 @@ namespace OHOS::Ace::NG {
 class SvgCanvasImage : public CanvasImage {
     DECLARE_ACE_TYPE(SvgCanvasImage, CanvasImage)
 public:
-    SvgCanvasImage() = default;
     explicit SvgCanvasImage(const RefPtr<SvgDomBase>& svgDom) : svgDom_(svgDom) {}
     ~SvgCanvasImage() override = default;
 
     void SetSvgFillColor(const std::optional<Color>& color) {}
     std::optional<Color> GetSvgFillColor();
 
-    void SetSVGDom(const RefPtr<SvgDomBase>& svgDom);
     const RefPtr<SvgDomBase>& GetSVGDom() const;
 
     int32_t GetWidth() const override
@@ -51,7 +49,7 @@ public:
     void ControlAnimation(bool play);
 
 private:
-    RefPtr<SvgDomBase> svgDom_;
+    const RefPtr<SvgDomBase> svgDom_;
 };
 } // namespace OHOS::Ace::NG
 
