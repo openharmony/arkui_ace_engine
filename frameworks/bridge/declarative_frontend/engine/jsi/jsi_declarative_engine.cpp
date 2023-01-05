@@ -1082,7 +1082,8 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
 #else
         if (!assetPath_.empty() && !isBundle_) {
             auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
-            arkRuntime->SetPathResolveCallback(bundleName_, assetPath_);
+            arkRuntime->SetBundleName(bundleName_);
+            arkRuntime->SetAssetPath(assetPath_);
             arkRuntime->SetBundle(isBundle_);
             arkRuntime->SetModuleName(moduleName_);
             std::vector<uint8_t> content;
