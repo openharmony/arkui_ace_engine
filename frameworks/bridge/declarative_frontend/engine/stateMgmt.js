@@ -3677,7 +3677,7 @@ class ViewPU extends NativeViewPartialUpdate {
     UpdateElement(elmtId) {
         // do not process an Element that has been marked to be deleted
         const updateFunc = this.updateFuncByElmtId.get(elmtId);
-        if (updateFunc == undefined) {
+        if ((updateFunc == undefined) || (typeof updateFunc !== "function")) {
             stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
         }
         else {
@@ -3962,15 +3962,15 @@ class ViewPU extends NativeViewPartialUpdate {
         });
     }
     /**
-     * CreateStorageLink and CreateStorageLinkPU are used by the implementation of @StorageLink and
-     * @LocalStotrageLink in full update and partial update solution respectively.
-     * These are not part of the public AppStorage API , apps should not use.
-     * @param storagePropName - key in LocalStorage
-     * @param defaultValue - value to use when creating a new prop in the LocalStotage
-     * @param owningView - the View/ViewPU owning the @StorageLink/@LocalStorageLink variable
-     * @param viewVariableName -  @StorageLink/@LocalStorageLink variable name
-     * @returns SynchedPropertySimple/ObjectTwoWay/PU
-     */
+       * CreateStorageLink and CreateStorageLinkPU are used by the implementation of @StorageLink and
+       * @LocalStotrageLink in full update and partial update solution respectively.
+       * These are not part of the public AppStorage API , apps should not use.
+       * @param storagePropName - key in LocalStorage
+       * @param defaultValue - value to use when creating a new prop in the LocalStotage
+       * @param owningView - the View/ViewPU owning the @StorageLink/@LocalStorageLink variable
+       * @param viewVariableName -  @StorageLink/@LocalStorageLink variable name
+       * @returns SynchedPropertySimple/ObjectTwoWay/PU
+       */
     createStorageLink(storagePropName, defaultValue, viewVariableName) {
         return AppStorage.__CreateSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
