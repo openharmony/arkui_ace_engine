@@ -30,4 +30,5 @@ void GestureEventHub::CombineIntoExclusiveRecognizer(
 
 void GestureEventHub::OnModifyDone() {}
 void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent) {}
+void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent) {}
 } // namespace OHOS::Ace::NG
