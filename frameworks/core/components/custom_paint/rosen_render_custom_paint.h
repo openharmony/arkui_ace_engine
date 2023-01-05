@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,11 +31,6 @@
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
-
-#ifdef CANVAS_USE_GPU
-class EnvironmentGL;
-#endif
-
 class RosenRenderCustomPaint : public RenderCustomPaint {
     DECLARE_ACE_TYPE(RosenRenderCustomPaint, RenderCustomPaint);
 
@@ -151,13 +146,6 @@ private:
     SkBitmap webglBitmap_;
     std::unique_ptr<SkCanvas> skCanvas_;
     std::unique_ptr<SkCanvas> cacheCanvas_;
-#ifdef CANVAS_USE_GPU
-    void InitializeEglContext();
-
-    RefPtr<EnvironmentGL> environment_;
-    sk_sp<SkSurface> surface_;
-#endif
-
     ImageSourceInfo loadingSource_;
     ImageSourceInfo currentSource_;
     ImageObjSuccessCallback imageObjSuccessCallback_;
@@ -171,7 +159,5 @@ private:
     Size lastLayoutSize_;
     RefPtr<ImageCache> imageCache_;
 };
-
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_CUSTOM_PAINT_H

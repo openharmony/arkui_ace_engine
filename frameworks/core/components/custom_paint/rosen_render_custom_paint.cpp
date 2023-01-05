@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,21 +55,12 @@
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
-#ifdef CANVAS_USE_GPU
-#include "core/common/graphic/environment_gl.h"
-#endif
-
 namespace OHOS::Ace {
 namespace {
-
 constexpr double HANGING_PERCENT = 0.8;
 constexpr double HALF_CIRCLE_ANGLE = 180.0;
 constexpr double FULL_CIRCLE_ANGLE = 360.0;
 constexpr int32_t IMAGE_CACHE_COUNT = 50;
-#ifdef CANVAS_USE_GPU
-constexpr int32_t UNREF_OBJECT_DELAY = 100;
-#endif
-
 constexpr double DEFAULT_QUALITY = 0.92;
 constexpr int32_t MAX_LENGTH = 2048 * 2048;
 const std::string UNSUPPORTED = "data:image/png";
@@ -153,79 +144,7 @@ RosenRenderCustomPaint::RosenRenderCustomPaint()
     InitImageCallbacks();
 }
 
-RosenRenderCustomPaint::~RosenRenderCustomPaint()
-{
-#ifdef CANVAS_USE_GPU
-    auto pipeline = context_.Upgrade();
-    if (!pipeline) {
-        return;
-    }
-    pipeline->PostTaskToRT([this]() { environment_ = nullptr; });
-#endif
-}
-
-#ifdef CANVAS_USE_GPU
-void RosenRenderCustomPaint::InitializeEglContext()
-{
-    ACE_SCOPED_TRACE("InitializeEglContext");
-    if (environment_) {
-        return;
-    }
-    environment_ = EnvironmentGL::GetCurrent();
-    if (environment_) {
-        return;
-    }
-    auto pipeline = context_.Upgrade();
-    if (!pipeline) {
-        return;
-    }
-    pipeline->PostTaskToRT([this]() { environment_ = EnvironmentGL::MakeSharedGLContext(); });
-    if (!environment_) {
-        LOGE("Make shared GLContext failed.");
-        return;
-    }
-    environment_->MakeCurrent();
-    environment_->MakeGrContext();
-}
-#endif
-
-bool RosenRenderCustomPaint::CreateSurface(double viewScale)
-{
-#ifdef CANVAS_USE_GPU
-    InitializeEglContext();
-    if (!environment_) {
-        return false;
-    }
-    auto grContext = environment_->GetGrContext();
-    if (!grContext) {
-        LOGE("grContext_ is nullptr.");
-        return false;
-    }
-    auto imageInfo = SkImageInfo::MakeN32(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale,
-        kOpaque_SkAlphaType, SkColorSpace::MakeSRGB());
-
-    const SkSurfaceProps surfaceProps(SkSurfaceProps::InitType::kLegacyFontHost_InitType);
-    surface_ = SkSurface::MakeRenderTarget(
-        grContext.get(), SkBudgeted::kNo, imageInfo, 0, kBottomLeft_GrSurfaceOrigin, &surfaceProps);
-    if (!surface_) {
-        LOGE("surface_ is nullptr");
-        return false;
-    }
-    skCanvas_ = std::unique_ptr<SkCanvas>(surface_->getCanvas());
-    lastLayoutSize_ = GetLayoutSize();
-    skCanvas_->drawColor(0x0);
-
-    auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale,
-        SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
-    cacheBitmap_.reset();
-    cacheBitmap_.allocPixels(imageInfo);
-    cacheBitmap_.eraseColor(SK_ColorTRANSPARENT);
-    cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
-    return true;
-#else
-    return false;
-#endif
-}
+RosenRenderCustomPaint::~RosenRenderCustomPaint() {}
 
 void RosenRenderCustomPaint::CreateBitmap(double viewScale)
 {
@@ -261,9 +180,7 @@ void RosenRenderCustomPaint::Paint(RenderContext& context, const Offset& offset)
         if (GetLayoutSize().IsInfinite()) {
             return;
         }
-        if (!CreateSurface(viewScale)) {
-            CreateBitmap(viewScale);
-        }
+        CreateBitmap(viewScale);
         lastLayoutSize_ = GetLayoutSize();
     }
     if (!skCanvas_) {
@@ -281,22 +198,7 @@ void RosenRenderCustomPaint::Paint(RenderContext& context, const Offset& offset)
 
     canvas->save();
     canvas->scale(1.0 / viewScale, 1.0 / viewScale);
-#ifdef CANVAS_USE_GPU
-    if (surface_) {
-        ACE_SCOPED_TRACE("surface draw");
-        surface_->flush(SkSurface::BackendSurfaceAccess::kNoAccess, { .fFlags = kSyncCpu_GrFlushFlag });
-        auto image = surface_->makeImageSnapshot();
-        if (!image) {
-            return;
-        }
-        canvas->drawImage(image, 0, 0, nullptr);
-        pipeline->GetTaskExecutor()->PostDelayedTask([image] {}, TaskExecutor::TaskType::UI, UNREF_OBJECT_DELAY);
-    } else {
-        canvas->drawBitmap(canvasCache_, 0.0f, 0.0f);
-    }
-#else
     canvas->drawBitmap(canvasCache_, 0.0f, 0.0f);
-#endif
     canvas->restore();
 }
 
@@ -343,29 +245,6 @@ std::string RosenRenderCustomPaint::ToDataURL(const std::string& args)
         (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType));
     bool isGpuEnable = false;
     bool success = false;
-#ifdef CANVAS_USE_GPU
-    if (surface_) {
-        isGpuEnable = true;
-        auto pipeline = context_.Upgrade();
-        if (!pipeline) {
-            return UNSUPPORTED;
-        }
-        double viewScale = pipeline->GetViewScale();
-        SkBitmap bitmap;
-        auto imageInfo = SkImageInfo::Make(lastLayoutSize_.Width() * viewScale, lastLayoutSize_.Height() * viewScale,
-            SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
-        bitmap.allocPixels(imageInfo);
-        if (!surface_->readPixels(bitmap, 0, 0)) {
-            LOGE("surface readPixels failed when ToDataURL.");
-            return UNSUPPORTED;
-        }
-        success = bitmap.pixmap().scalePixels(tempCache.pixmap(), SkFilterQuality::kHigh_SkFilterQuality);
-        if (!success) {
-            LOGE("scalePixels failed when ToDataURL.");
-            return UNSUPPORTED;
-        }
-    }
-#endif
     if (!isGpuEnable) {
         if (canvasCache_.empty()) {
             LOGE("Bitmap is empty");
@@ -476,7 +355,7 @@ void RosenRenderCustomPaint::StrokeRect(const Offset& offset, const Rect& rect)
     if (strokeState_.GetPattern().IsValid()) {
         UpdatePaintShader(strokeState_.GetPattern(), paint);
     }
-        if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         skCanvas_->drawRect(skRect, paint);
     } else {
         InitPaintBlend(cachePaint_);
@@ -1432,8 +1311,8 @@ void RosenRenderCustomPaint::InitImageCallbacks()
             render->ImageObjReady(imageObj);
             return;
         } else {
-            LOGE("image sourceInfo_ check error, : %{public}s vs %{public}s",
-                render->loadingSource_.ToString().c_str(), info.ToString().c_str());
+            LOGE("image sourceInfo_ check error, : %{public}s vs %{public}s", render->loadingSource_.ToString().c_str(),
+                info.ToString().c_str());
         }
     };
 
@@ -1494,8 +1373,8 @@ void RosenRenderCustomPaint::DrawSvgImage(const Offset& offset, const CanvasImag
         switch (canvasImage.flag) {
             case 0:
                 srcRect = SkRect::MakeXYWH(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-                dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy,
-                    skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
+                dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, skiaDom_->containerSize().width(),
+                    skiaDom_->containerSize().height());
                 break;
             case 1: {
                 srcRect = SkRect::MakeXYWH(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
@@ -1512,8 +1391,8 @@ void RosenRenderCustomPaint::DrawSvgImage(const Offset& offset, const CanvasImag
         }
         scaleX = dstRect.width() / srcRect.width();
         scaleY = dstRect.height() / srcRect.height();
-        startPoint = offset  + Offset(dstRect.left(), dstRect.top())
-	    - Offset(srcRect.left() * scaleX, srcRect.top() * scaleY);
+        startPoint =
+            offset + Offset(dstRect.left(), dstRect.top()) - Offset(srcRect.left() * scaleX, srcRect.top() * scaleY);
 
         skCanvas->save();
         skCanvas->clipRect(dstRect);
@@ -1725,19 +1604,6 @@ std::unique_ptr<ImageData> RosenRenderCustomPaint::GetImageData(double left, dou
     SkCanvas tempCanvas(tempCache);
     auto srcRect = SkRect::MakeXYWH(scaledLeft, scaledTop, width * viewScale, height * viewScale);
     auto dstRect = SkRect::MakeXYWH(0.0, 0.0, dirtyWidth, dirtyHeight);
-#ifdef CANVAS_USE_GPU
-    if (surface_) {
-        isGpuEnable = true;
-        SkBitmap bitmap;
-        auto imageInfo = SkImageInfo::Make(lastLayoutSize_.Width() * viewScale, lastLayoutSize_.Height() * viewScale,
-            SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
-        bitmap.allocPixels(imageInfo);
-        if (!surface_->readPixels(bitmap, 0, 0)) {
-            LOGE("surface readPixels failed when GetImageData.");
-        }
-        tempCanvas.drawBitmapRect(bitmap, srcRect, dstRect, nullptr);
-    }
-#endif
     if (!isGpuEnable) {
         tempCanvas.drawBitmapRect(canvasCache_, srcRect, dstRect, nullptr);
     }
@@ -1783,8 +1649,8 @@ void RosenRenderCustomPaint::WebGLInit(CanvasRenderContextBase* context)
             webglBitmap_.eraseColor(SK_ColorTRANSPARENT);
 #endif
         }
-        webGLContext_->SetBitMapPtr(reinterpret_cast<char*>(webglBitmap_.getPixels()),
-            webglBitmap_.width(), webglBitmap_.height());
+        webGLContext_->SetBitMapPtr(
+            reinterpret_cast<char*>(webglBitmap_.getPixels()), webglBitmap_.width(), webglBitmap_.height());
     }
 }
 
@@ -1800,11 +1666,11 @@ void RosenRenderCustomPaint::WebGLUpdate()
     }
 }
 
-void RosenRenderCustomPaint::DrawBitmapMesh(const RefPtr<OffscreenCanvas>& offscreenCanvas,
-    const std::vector<double>& mesh, int32_t column, int32_t row)
+void RosenRenderCustomPaint::DrawBitmapMesh(
+    const RefPtr<OffscreenCanvas>& offscreenCanvas, const std::vector<double>& mesh, int32_t column, int32_t row)
 {
-    std::unique_ptr<ImageData> imageData = offscreenCanvas->GetImageData(0, 0,
-        offscreenCanvas->GetWidth(), offscreenCanvas->GetHeight());
+    std::unique_ptr<ImageData> imageData =
+        offscreenCanvas->GetImageData(0, 0, offscreenCanvas->GetWidth(), offscreenCanvas->GetHeight());
     if (imageData != nullptr) {
         if (imageData->data.empty()) {
             LOGE("PutImageData failed, image data is empty.");
@@ -1835,8 +1701,8 @@ void RosenRenderCustomPaint::DrawBitmapMesh(const RefPtr<OffscreenCanvas>& offsc
     LOGD("RosenRenderCustomPaint::DrawBitmapMesh");
 }
 
-void RosenRenderCustomPaint::Mesh(SkBitmap& bitmap, int column, int row,
-    const float* vertices, const int* colors, const SkPaint* paint)
+void RosenRenderCustomPaint::Mesh(
+    SkBitmap& bitmap, int column, int row, const float* vertices, const int* colors, const SkPaint* paint)
 {
     const int vertCounts = (column + 1) * (row + 1);
     int32_t size = 6;
@@ -1949,5 +1815,4 @@ sk_sp<SkImage> RosenRenderCustomPaint::GetImage(const std::string& src)
 
     return image;
 }
-
 } // namespace OHOS::Ace
