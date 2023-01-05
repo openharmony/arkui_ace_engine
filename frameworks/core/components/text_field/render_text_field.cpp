@@ -1543,7 +1543,7 @@ bool RenderTextField::NeedToFilter()
 {
     std::string keyboardFilterValue;
     GetKeyboardFilter(keyboard_, keyboardFilterValue);
-    return !keyboardFilterValue.empty() && !inputFilter_.empty();
+    return !keyboardFilterValue.empty() || !inputFilter_.empty();
 }
 
 void RenderTextField::HandleValueFilter(TextEditingValue& valueBeforeUpdate, TextEditingValue& valueNeedToUpdate)
