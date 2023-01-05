@@ -43,16 +43,16 @@ void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("rowsGap", propRowsGap_.value_or(0.0_vp).ToString().c_str());
     json->Put("cachedCount", propCachedCount_.value_or(1));
     json->Put("editMode ", propEditable_.value_or(false) ? "true" : "false");
-    json->Put("layoutDirection ", GetLayoutDirectionStr().c_str());
+    json->Put("layoutDirection ", GetGridDirectionStr().c_str());
     json->Put("maxCount ", propMaxCount_.value_or(Infinity<int32_t>()));
     json->Put("minCount ", propMinCount_.value_or(1));
     json->Put("cellLength ", propCellLength_.value_or(0));
 }
 
-std::string GridLayoutProperty::GetLayoutDirectionStr() const
+std::string GridLayoutProperty::GetGridDirectionStr() const
 {
-    auto layoutDirection = propLayoutDirection_.value_or(FlexDirection::ROW);
-    switch (layoutDirection) {
+    auto gridDirection = propGridDirection_.value_or(FlexDirection::ROW);
+    switch (gridDirection) {
         case FlexDirection::ROW:
             return "GridDirection.Row";
         case FlexDirection::ROW_REVERSE:
@@ -62,7 +62,7 @@ std::string GridLayoutProperty::GetLayoutDirectionStr() const
         case FlexDirection::COLUMN_REVERSE:
             return "GridDirection.ColumnReverse";
         default:
-            LOGE("layout direction %{public}d is not valid", layoutDirection);
+            LOGE("grid direction %{public}d is not valid", gridDirection);
             break;
     }
     return "GridDirection.Row";

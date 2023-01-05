@@ -44,7 +44,7 @@ public:
         value->propRowsGap_ = CloneRowsGap();
         value->propColumnsGap_ = CloneColumnsGap();
         value->propCachedCount_ = CloneCachedCount();
-        value->propLayoutDirection_ = CloneLayoutDirection();
+        value->propGridDirection_ = CloneGridDirection();
         value->propMaxCount_ = CloneMaxCount();
         value->propMinCount_ = CloneMinCount();
         value->propCellLength_ = CloneCellLength();
@@ -59,7 +59,7 @@ public:
         ResetColumnsGap();
         ResetRowsGap();
         ResetCachedCount();
-        ResetLayoutDirection();
+        ResetGridDirection();
         ResetMaxCount();
         ResetMinCount();
         ResetCellLength();
@@ -105,8 +105,8 @@ public:
         ResetGridLayoutInfoAndMeasure();
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LayoutDirection, FlexDirection);
-    void OnLayoutDirectionUpdate(FlexDirection /*layoutDirection*/) const
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(GridDirection, FlexDirection);
+    void OnGridDirectionUpdate(FlexDirection /*gridDirection*/) const
     {
         ResetGridLayoutInfoAndMeasure();
     }
@@ -136,7 +136,7 @@ private:
 
     void ResetGridLayoutInfoAndMeasure() const;
     std::string GetBarStateString() const;
-    std::string GetLayoutDirectionStr() const;
+    std::string GetGridDirectionStr() const;
     Color GetBarColor() const;
     Dimension GetBarWidth() const;
 };
