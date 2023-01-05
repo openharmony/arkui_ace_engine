@@ -140,8 +140,8 @@ void PluginSubContainer::UpdateRootElementSize()
             rootWidth = pluginInfo->width;
             rootHeight = pluginInfo->height;
         }
-        LOGI("PluginSubContainer::UpdateRootElementSize: ploginInfo->widt:%{public}lf,"
-             "ploginInfo->height:%{public}lf",
+        LOGI("PluginSubContainer::UpdateRootElementSize: pluginInfo->widt:%{public}lf,"
+             "pluginInfo->height:%{public}lf",
             pluginInfo->width.Value(), pluginInfo->height.Value());
     } else {
         auto pluginComponent = AceType::DynamicCast<PluginComponent>(pluginComponent_);

@@ -383,7 +383,10 @@ template("declarative_js_engine") {
         config.plugin_components_support) {
       deps +=
           [ "$ace_flutter_engine_root:third_party_flutter_engine_$platform" ]
-      sources += [ "jsview/js_plugin.cpp" ]
+      sources += [
+        "jsview/js_plugin.cpp",
+        "jsview/models/plugin_model_impl.cpp",
+      ]
     }
 
     if (defined(config.preview_support) && config.preview_support) {
