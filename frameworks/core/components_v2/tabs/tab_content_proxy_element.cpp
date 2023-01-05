@@ -52,6 +52,21 @@ void TabContentProxyElement::Update()
     SetElementId(component_->GetElementId());
 }
 
+RefPtr<FocusNode> TabContentProxyElement::GetChildFocusNode(const RefPtr<Element>& node)
+{
+    auto focusNode = AceType::DynamicCast<FocusNode>(node);
+    if (focusNode) {
+        return focusNode;
+    }
+    for (const auto& child : node->GetChildren()) {
+        auto node = GetChildFocusNode(child);
+        if (node) {
+            return node;
+        }
+    }
+    return nullptr;
+}
+
 void TabContentProxyElement::PerformBuild()
 {
     if (component_) {
@@ -95,6 +110,7 @@ void TabContentProxyElement::PerformBuild()
     }
     tabContent->AddChildContent(target, renderNode);
     focusIndexMap_.emplace(target);
+    focusChildMap_[target] = GetChildFocusNode(element);
     renderNode_->MarkNeedLayout();
 
     // process for new content requested by drag
