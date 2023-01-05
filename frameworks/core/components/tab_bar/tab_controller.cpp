@@ -77,8 +77,8 @@ void TabController::SetInitialIndex(int32_t index)
 
 void TabController::SetIndexWithoutChangeContent(int32_t index)
 {
-    if (index_ == index || index < 0) {
-        LOGI("SetIndexWithoutChangeContent: Input index is not valid, %{public}d, %{public}d", index_, index);
+    if (index < 0) {
+        LOGI("SetIndexWithoutChangeContent: Input index is not valid: index = %{public}d", index);
         return;
     }
     indexDefined_ = true;

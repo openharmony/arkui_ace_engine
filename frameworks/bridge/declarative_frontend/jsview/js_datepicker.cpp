@@ -153,6 +153,10 @@ void JSDatePicker::OnChange(const JSCallbackInfo& info)
     }
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto datePicker = AceType::DynamicCast<PickerBaseComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!datePicker) {
+        LOGE("datePicker is null");
+        return;
+    }
     auto onChangeId =
         EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -438,12 +442,11 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
 
 void JSTimePicker::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("DatePicker create error, info is non-valid");
-        return;
+    JSRef<JSObject> paramObject = JSRef<JSObject>::New();
+    if (info.Length() >= 1 && info[0]->IsObject()) {
+        paramObject = JSRef<JSObject>::Cast(info[0]);
     }
-
-    CreateTimePicker(JSRef<JSObject>::Cast(info[0]));
+    CreateTimePicker(paramObject);
 }
 
 void JSTimePicker::UseMilitaryTime(bool isUseMilitaryTime)
