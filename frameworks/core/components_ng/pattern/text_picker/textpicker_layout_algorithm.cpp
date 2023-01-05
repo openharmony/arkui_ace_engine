@@ -28,6 +28,7 @@ const int32_t TEXT_PICKER_CHILD_SIZE = 5;
 const float PICKER_HEIGHT_HALF = 2.5f;
 const float ITEM_HEIGHT_HALF = 2.0f;
 const int32_t TEXT_PICKER_GRADIENT_CHILD_SIZE = 4;
+const Dimension TEXT_BOUNDARY = 4.0_vp;
 } // namespace
 void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -38,8 +39,13 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     SizeF frameSize = { -1.0f, -1.0f };
 
     float pickerHeight = 0.0f;
-    auto hostNode = layoutWrapper->GetHostNode();
-    auto layoutProperty = hostNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    auto columnNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(columnNode);
+    auto stackNode = DynamicCast<FrameNode>(columnNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto pickerNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(pickerNode);
+    auto layoutProperty = pickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
     isDefaultPickerItemHeight_ = layoutProperty->HasDefaultPickerItemHeight();
 
     if (isDefaultPickerItemHeight_) {
@@ -50,11 +56,9 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                                pickerTheme->GetDividerSpacing().ConvertToPx());
     }
 
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
-
+    auto layoutConstraint = pickerNode->GetLayoutProperty()->GetLayoutConstraint();
     auto width = layoutConstraint->selfIdealSize.Width();
     auto height = layoutConstraint->selfIdealSize.Height();
-    auto children = layoutWrapper->GetHostNode()->GetParent()->GetChildren();
     float pickerWidth = 0.0f;
     if (width.has_value()) {
         pickerWidth = width.value();
@@ -81,12 +85,12 @@ void TextPickerLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, const 
     auto totalChild = layoutWrapper->GetTotalChildCount();
     for (int32_t index = 0; index < totalChild; index++) {
         auto child = layoutWrapper->GetOrCreateChildByIndex(index);
-        ChangeTextStyle(index, totalChild, size, child);
+        ChangeTextStyle(index, totalChild, size, child, layoutWrapper);
     }
 }
 
-void TextPickerLayoutAlgorithm::ChangeTextStyle(
-    uint32_t index, uint32_t showOptionCount, const SizeF& size, const RefPtr<LayoutWrapper>& childLayoutWrapper)
+void TextPickerLayoutAlgorithm::ChangeTextStyle(uint32_t index, uint32_t showOptionCount, const SizeF& size,
+    const RefPtr<LayoutWrapper>& childLayoutWrapper, LayoutWrapper* layoutWrapper)
 {
     SizeF frameSize = { -1.0f, -1.0f };
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -95,15 +99,22 @@ void TextPickerLayoutAlgorithm::ChangeTextStyle(
     CHECK_NULL_VOID(pickerTheme);
     frameSize.SetWidth(size.Width());
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
+    auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     if (isDefaultPickerItemHeight_) {
         frameSize.SetHeight(static_cast<float>(defaultPickerItemHeight_));
         childLayoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
     } else {
         if (index == selectedIndex) {
             frameSize.SetHeight(static_cast<float>(pickerTheme->GetDividerSpacing().ConvertToPx()));
+            layoutChildConstraint.selfIdealSize = { frameSize.Width() - TEXT_BOUNDARY.ConvertToPx(),
+                frameSize.Height() - TEXT_BOUNDARY.ConvertToPx() };
+            childLayoutWrapper->Measure(layoutChildConstraint);
             childLayoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
         } else {
             frameSize.SetHeight(static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()));
+            layoutChildConstraint.selfIdealSize = { frameSize.Width() - TEXT_BOUNDARY.ConvertToPx(),
+                frameSize.Height() - TEXT_BOUNDARY.ConvertToPx() };
+            childLayoutWrapper->Measure(layoutChildConstraint);
             childLayoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
         }
     }
@@ -116,7 +127,7 @@ void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    auto layoutProperty = AceType::DynamicCast<TextPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<LinearLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);

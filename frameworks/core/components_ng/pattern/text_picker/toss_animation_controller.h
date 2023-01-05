@@ -22,7 +22,7 @@
 #include "frameworks/base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {
-class TextPickerPattern;
+class TextPickerColumnPattern;
 
 class TextPickerTossAnimationController : public virtual AceType {
     DECLARE_ACE_TYPE(TextPickerTossAnimationController, AceType);
@@ -31,7 +31,7 @@ public:
     TextPickerTossAnimationController() = default;
     ~TextPickerTossAnimationController() = default;
 
-    void SetColumn(const WeakPtr<TextPickerPattern>& value)
+    void SetColumn(const WeakPtr<TextPickerColumnPattern>& value)
     {
         column_ = value;
     }
@@ -57,7 +57,7 @@ private:
     double speed_ = 0.0;
 
     RefPtr<PickerAnimation> toss_;
-    WeakPtr<TextPickerPattern> column_;
+    WeakPtr<TextPickerColumnPattern> column_;
     WeakPtr<PipelineContext> pipeline_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerTossAnimationController);

@@ -20,6 +20,8 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
@@ -55,15 +57,13 @@ void TimePickerView::CreateTimePicker()
     
     auto hasHourNode = timePickerRowPattern->HasHourNode();
     auto hasMinuteNode = timePickerRowPattern->HasMinuteNode();
-
-    
     auto hourId = timePickerRowPattern->GetHourId();
     auto minuteId = timePickerRowPattern->GetMinuteId();
 
+    auto hourColumnNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, hourId, []() { return AceType::MakeRefPtr<TimePickerColumnPattern>(); });
+    CHECK_NULL_VOID(hourColumnNode);
     if (!hasHourNode) {
-        auto hourColumnNode = FrameNode::GetOrCreateFrameNode(
-            V2::COLUMN_ETS_TAG, hourId, []() { return AceType::MakeRefPtr<TimePickerColumnPattern>(); });
-        CHECK_NULL_VOID(hourColumnNode);
         for (uint32_t index = 0; index < showCount; index++) {
             auto textNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
@@ -72,13 +72,12 @@ void TimePickerView::CreateTimePicker()
         }
         hourColumnNode->MarkModifyDone();
         timePickerRowPattern->SetColumn(hourColumnNode);
-        hourColumnNode->MountToParent(timePickerNode);
     }
 
+    auto minuteColumnNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, minuteId, []() { return AceType::MakeRefPtr<TimePickerColumnPattern>(); });
+    CHECK_NULL_VOID(minuteColumnNode);
     if (!hasMinuteNode) {
-        auto minuteColumnNode = FrameNode::GetOrCreateFrameNode(
-            V2::COLUMN_ETS_TAG, minuteId, []() { return AceType::MakeRefPtr<TimePickerColumnPattern>(); });
-        CHECK_NULL_VOID(minuteColumnNode);
         for (uint32_t index = 0; index < showCount; index++) {
             auto textNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
@@ -87,9 +86,40 @@ void TimePickerView::CreateTimePicker()
         }
         minuteColumnNode->MarkModifyDone();
         timePickerRowPattern->SetColumn(minuteColumnNode);
-        minuteColumnNode->MountToParent(timePickerNode);
+    }
+    if (!hasHourNode) {
+        auto stackHourNode = CreateStackNode();
+        auto buttonYearNode = CreateButtonNode();
+        buttonYearNode->MountToParent(stackHourNode);
+        hourColumnNode->MountToParent(stackHourNode);
+        auto layoutProperty = stackHourNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        stackHourNode->MountToParent(timePickerNode);
+    }
+    if (!hasMinuteNode) {
+        auto stackMinuteNode = CreateStackNode();
+        auto buttonYearNode = CreateButtonNode();
+        buttonYearNode->MountToParent(stackMinuteNode);
+        minuteColumnNode->MountToParent(stackMinuteNode);
+        auto layoutProperty = stackMinuteNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        stackMinuteNode->MountToParent(timePickerNode);
     }
     stack->Push(timePickerNode);
+}
+
+RefPtr<FrameNode> TimePickerView::CreateStackNode()
+{
+    auto stackId = ElementRegister::GetInstance()->MakeUniqueId();
+    return FrameNode::GetOrCreateFrameNode(
+        V2::STACK_ETS_TAG, stackId, []() { return AceType::MakeRefPtr<StackPattern>(); });
+}
+
+RefPtr<FrameNode> TimePickerView::CreateButtonNode()
+{
+    auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
+    return FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
 }
 
 void TimePickerView::SetSelectedTime(const PickerTime& value)
