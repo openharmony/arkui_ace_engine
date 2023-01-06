@@ -83,7 +83,7 @@ void ForEachNode::CompareAndUpdateChildren()
     std::map<std::string, RefPtr<UINode>> oldNodeByIdMap;
     MakeNodeMapById(tempChildren_, tempIds_, oldNodeByIdMap);
 
-    int additionalChildIndex = 0;
+    int32_t additionalChildIndex = 0;
     for (const auto& newId : ids_) {
         auto oldIdIt = oldIdsSet.find(newId);
         if (oldIdIt == oldIdsSet.end()) {
@@ -91,8 +91,10 @@ void ForEachNode::CompareAndUpdateChildren()
             // insert new child item.
             auto newCompsIter = additionalChildComps.begin();
             std::advance(newCompsIter, additionalChildIndex++);
-            // Call AddChild to execute AttachToMainTree of new child.
-            AddChild(*newCompsIter);
+            if (newCompsIter != additionalChildComps.end()) {
+                // Call AddChild to execute AttachToMainTree of new child.
+                AddChild(*newCompsIter);
+            }
         } else {
             auto iter = oldNodeByIdMap.find(newId);
             // the ID was used before, only need to update the child position.
