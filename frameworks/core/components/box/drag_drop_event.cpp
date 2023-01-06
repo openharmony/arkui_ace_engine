@@ -29,7 +29,7 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr int32_t DEFAULT_FINGERS = 1;
-constexpr int32_t DEFAULT_DURATION = 500;
+constexpr int32_t DEFAULT_DURATION = 450;
 constexpr int32_t DEFAULT_DISTANCE = 5;
 
 }; // namespace
