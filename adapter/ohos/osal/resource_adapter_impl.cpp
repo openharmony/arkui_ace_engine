@@ -449,7 +449,7 @@ std::string ResourceAdapterImpl::GetMediaPathByName(const std::string& resName)
     auto actualResName = GetActualResourceName(resName);
     auto state = resourceManager_->GetMediaByName(actualResName.c_str(), mediaPath);
     if (state != Global::Resource::SUCCESS) {
-        LOGE("GetMediaById error, resName=%{public}s, errorCode=%{public}u", resName.c_str(), state);
+        LOGE("GetMediaPathByName error, resName=%{public}s, errorCode=%{public}u", resName.c_str(), state);
         return "";
     }
     if (SystemProperties::GetUnZipHap()) {
@@ -460,7 +460,7 @@ std::string ResourceAdapterImpl::GetMediaPathByName(const std::string& resName)
         LOGE("GetMediaById error, return mediaPath[%{private}s] format error", mediaPath.c_str());
         return "";
     }
-    return "resource:///" + resName + mediaPath.substr(pos);
+    return "resource:///" + actualResName + mediaPath.substr(pos);
 }
 
 std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)

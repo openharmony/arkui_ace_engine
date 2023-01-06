@@ -2631,26 +2631,7 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
             LOGW("themeConstants is nullptr");
             return false;
         }
-        auto resIdNum = resId->ToNumber<int32_t>();
-        if (resIdNum == -1) {
-            if (!IsGetResourceByName(jsObj)) {
-                return false;
-            }
-            JSRef<JSVal> args = jsObj->GetProperty("params");
-            JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
-            auto param = params->GetValueAt(0);
-            if (type->ToNumber<int32_t>() == static_cast<int>(ResourceType::MEDIA)) {
-                result = themeConstants->GetMediaPathByName(param->ToString());
-                return true;
-            }
-            LOGE("JSImage::Create ParseJsMedia type is wrong");
-            return false;
-        }
-        if (type->ToNumber<int32_t>() == static_cast<int>(ResourceType::MEDIA)) {
-            result = themeConstants->GetMediaPath(resId->ToNumber<uint32_t>());
-            return true;
-        }
-        if (type->ToNumber<int32_t>() == static_cast<int>(ResourceType::RAWFILE)) {
+        if (type->ToNumber<int32_t>() == static_cast<int32_t>(ResourceType::RAWFILE)) {
             JSRef<JSVal> args = jsObj->GetProperty("params");
             if (!args->IsArray()) {
                 LOGW("args is not Array");
@@ -2663,6 +2644,25 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
                 return false;
             }
             result = themeConstants->GetRawfile(fileName->ToString());
+            return true;
+        }
+        auto resIdNum = resId->ToNumber<int32_t>();
+        if (resIdNum == -1) {
+            if (!IsGetResourceByName(jsObj)) {
+                return false;
+            }
+            JSRef<JSVal> args = jsObj->GetProperty("params");
+            JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
+            auto param = params->GetValueAt(0);
+            if (type->ToNumber<int32_t>() == static_cast<int32_t>(ResourceType::MEDIA)) {
+                result = themeConstants->GetMediaPathByName(param->ToString());
+                return true;
+            }
+            LOGE("JSImage::Create ParseJsMedia type is wrong");
+            return false;
+        }
+        if (type->ToNumber<int32_t>() == static_cast<int32_t>(ResourceType::MEDIA)) {
+            result = themeConstants->GetMediaPath(resId->ToNumber<uint32_t>());
             return true;
         }
         LOGE("JSImage::Create ParseJsMedia type is wrong");
