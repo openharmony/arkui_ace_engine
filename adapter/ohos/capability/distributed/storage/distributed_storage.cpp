@@ -34,7 +34,7 @@ public:
 
     void OnChanged(const std::string& sessionid, const std::vector<std::string>& changedData) override
     {
-        CHECK_NULL_VOID(onChange_);
+        CHECK_NULL_VOID_NOLOG(onChange_);
         onChange_(sessionid, changedData);
     }
 
@@ -51,7 +51,7 @@ public:
     void OnChanged(const std::string& sessionId, const std::string& networkId, const std::string& onlineStatus) override
     {
         LOGI("DistributedObjectStatusNotifier [%{public}s-%{public}s]", sessionId.c_str(), onlineStatus.c_str());
-        CHECK_NULL_VOID(onNotify_);
+        CHECK_NULL_VOID_NOLOG(onNotify_);
         onNotify_(sessionId, onlineStatus);
     }
 
@@ -279,7 +279,7 @@ Storage::DataType DistributedStorage::GetDataType(const std::string& key)
 
 void DistributedStorage::NotifyStatus(const std::string& status)
 {
-    CHECK_NULL_VOID(taskExecutor_);
+    CHECK_NULL_VOID_NOLOG(taskExecutor_);
     LOGI("DistributedStorage::NotifyStatus [%{public}s-%{public}s]", sessionId_.c_str(), status.c_str());
     taskExecutor_->PostTask(
         [weak = WeakClaim(this), status] {

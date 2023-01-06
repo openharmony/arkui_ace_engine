@@ -41,7 +41,7 @@ CanvasDrawFunction TimePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, frameRect, dividerSpacing, dividerColor](
                RSCanvas& canvas) {
         auto picker = weak.Upgrade();
-        CHECK_NULL_VOID(picker);
+        CHECK_NULL_VOID_NOLOG(picker);
         DividerPainter dividerPainter(dividerLineWidth, frameRect.Width(), false, dividerColor, LineCap::SQUARE);
         double upperLine = (frameRect.Height() - dividerSpacing) / 2.0;
         double downLine = (frameRect.Height() + dividerSpacing) / 2.0;

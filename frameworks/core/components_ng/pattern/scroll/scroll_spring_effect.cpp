@@ -21,11 +21,11 @@ namespace OHOS::Ace::NG {
 
 void ScrollSpringEffect::RegisterSpringCallback()
 {
-    CHECK_NULL_VOID(scrollable_);
+    CHECK_NULL_VOID_NOLOG(scrollable_);
     scrollable_->SetOutBoundaryCallback(outBoundaryCallback_);
     scrollable_->SetScrollOverCallBack([weakEffect = AceType::WeakClaim(this)](double velocity) {
         auto effect = weakEffect.Upgrade();
-        CHECK_NULL_VOID(effect);
+        CHECK_NULL_VOID_NOLOG(effect);
         effect->ProcessScrollOver(velocity);
     });
 }

@@ -82,7 +82,7 @@ void ListPattern::OnModifyDone()
         InitMouseEvent();
     }
     auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID_NOLOG(focusHub);
     InitOnKeyEvent(focusHub);
 }
 
@@ -212,7 +212,7 @@ void ListPattern::CheckScrollable()
         }
     }
 
-    CHECK_NULL_VOID(scrollableEvent_);
+    CHECK_NULL_VOID_NOLOG(scrollableEvent_);
     scrollableEvent_->SetEnabled(scrollable_);
 }
 
@@ -422,7 +422,7 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
 {
     scrollEffect->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
-        CHECK_NULL_RETURN(list, 0.0);
+        CHECK_NULL_RETURN_NOLOG(list, 0.0);
         return list->startMainPos_ - list->currentDelta_;
     });
     scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
@@ -488,7 +488,7 @@ void ListPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_RETURN(pattern, false);
+        CHECK_NULL_RETURN_NOLOG(pattern, false);
         return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
@@ -559,7 +559,7 @@ void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
     auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(GetTotalOffset(), position, curve);
     animation->AddListener([weakScroll = AceType::WeakClaim(this)](float value) {
         auto list = weakScroll.Upgrade();
-        CHECK_NULL_VOID(list);
+        CHECK_NULL_VOID_NOLOG(list);
         list->SetScrollState(SCROLL_FROM_JUMP);
         list->UpdateCurrentOffset(list->GetTotalOffset() - value);
     });

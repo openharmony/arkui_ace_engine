@@ -39,7 +39,7 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     auto frameRect = geometryNode->GetFrameRect();
     return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, frameRect, dividerColor](RSCanvas& canvas) {
         auto picker = weak.Upgrade();
-        CHECK_NULL_VOID(picker);
+        CHECK_NULL_VOID_NOLOG(picker);
         DividerPainter dividerPainter(dividerLineWidth, frameRect.Width(), false, dividerColor, LineCap::SQUARE);
         double upperLine = (frameRect.Height() - picker->defaultPickerItemHeight_) / 2.0;
         double downLine = (frameRect.Height() + picker->defaultPickerItemHeight_) / 2.0;

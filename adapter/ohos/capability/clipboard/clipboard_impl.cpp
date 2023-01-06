@@ -62,7 +62,7 @@ void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
 
 void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption, bool isDragData)
 {
-CHECK_NULL_VOID(taskExecutor_);
+CHECK_NULL_VOID_NOLOG(taskExecutor_);
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
     auto shareOption = TransitionCopyOption(copyOption);
     taskExecutor_->PostTask(
@@ -82,14 +82,14 @@ CHECK_NULL_VOID(taskExecutor_);
 
 void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption)
 {
-CHECK_NULL_VOID(taskExecutor_);
+CHECK_NULL_VOID_NOLOG(taskExecutor_);
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
     auto shareOption = TransitionCopyOption(copyOption);
     taskExecutor_->PostTask(
         [pixmap, shareOption]() {
             CHECK_NULL_VOID(pixmap);
             auto pixmapOhos = AceType::DynamicCast<PixelMapOhos>(pixmap);
-            CHECK_NULL_VOID(pixmapOhos);
+            CHECK_NULL_VOID_NOLOG(pixmapOhos);
             auto pasteData = OHOS::MiscServices::PasteboardClient::GetInstance()->CreatePixelMapData(
                 pixmapOhos->GetPixelMapSharedPtr());
             CHECK_NULL_VOID(pasteData);

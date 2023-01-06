@@ -103,25 +103,25 @@ void SideBarContainerPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestu
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleDragStart();
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleDragUpdate(static_cast<float>(info.GetOffsetX()));
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleDragEnd();
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleDragEnd();
     };
 
@@ -182,7 +182,7 @@ void SideBarContainerPattern::InitControlButtonTouchEvent(const RefPtr<GestureEv
 
     auto clickTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->DoSideBarAnimation();
     };
     controlButtonClickEvent_ = MakeRefPtr<ClickEvent>(std::move(clickTask));
@@ -216,7 +216,7 @@ void SideBarContainerPattern::DoSideBarAnimation()
         controller_->AddInterpolator(isSideBarStart ? leftToRightAnimation_ : rightToLeftAnimation_);
         controller_->AddStopListener([weak]() {
             auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
+            CHECK_NULL_VOID_NOLOG(pattern);
             pattern->SetSideBarStatus(SideBarStatus::SHOW);
             pattern->FireChangeEvent(true);
             pattern->UpdateControlButtonIcon();
@@ -225,7 +225,7 @@ void SideBarContainerPattern::DoSideBarAnimation()
         controller_->AddInterpolator(isSideBarStart ? rightToLeftAnimation_ : leftToRightAnimation_);
         controller_->AddStopListener([weak]() {
             auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
+            CHECK_NULL_VOID_NOLOG(pattern);
             pattern->SetSideBarStatus(SideBarStatus::HIDDEN);
             pattern->FireChangeEvent(false);
             pattern->UpdateControlButtonIcon();

@@ -292,7 +292,7 @@ void PluginPattern::OnActionEvent(const std::string& action) const
         return;
     }
 
-    CHECK_NULL_VOID(pluginManagerBridge_);
+    CHECK_NULL_VOID_NOLOG(pluginManagerBridge_);
     pluginManagerBridge_->OnActionEvent(action);
 }
 
@@ -362,7 +362,7 @@ std::string PluginPattern::GetPackagePathByAbsolutePath(
 {
     std::string packagePathStr;
     auto pluginPattern = weak.Upgrade();
-    CHECK_NULL_RETURN(pluginPattern, packagePathStr);
+    CHECK_NULL_RETURN_NOLOG(pluginPattern, packagePathStr);
     std::string assets = "assets/js/";
     size_t posAssets = info.pluginName.rfind(assets);
     if (posAssets != std::string::npos) {
