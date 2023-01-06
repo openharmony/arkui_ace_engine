@@ -15,13 +15,12 @@
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 
-#include "foundation/communication/dsoftbus/tests/sdk/transmission/trans_channel/udp/distributed_stream/distributed_stream_test.h"
-
 #include "base/geometry/ng/offset_t.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -50,17 +49,110 @@ RefPtr<FrameNode> MenuItemPattern::GetMenuWrapper()
     return nullptr;
 }
 
+RefPtr<FrameNode> MenuItemPattern::GetMenu()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto parent = host->GetParent();
+    while (parent) {
+        if (parent->GetTag() == V2::MENU_ETS_TAG) {
+            return AceType::DynamicCast<FrameNode>(parent);
+        }
+        parent = parent->GetParent();
+    }
+    return nullptr;
+}
+
+void MenuItemPattern::ShowSubMenu()
+{
+    auto buildFunc = GetSubBuilder();
+    if (buildFunc && !isSubMenuShowed_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        buildFunc();
+        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        auto menuNode = MenuView::Create(customNode, host->GetId(), MenuType::SUB_MENU);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        menuPattern->SetParentMenuItem(host);
+        subMenuId_ = menuNode->GetId();
+        AddSelfHoverRegion(host);
+        LOGI("MenuItemPattern Show SubMenu");
+        isSubMenuShowed_ = true;
+        OffsetF offset = GetSubMenuPostion(host);
+        overlayManager->ShowMenu(host->GetId(), offset, menuNode);
+
+        RegisterWrapperMouseEvent();
+    }
+}
+
+void MenuItemPattern::CloseMenu()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    if (GetSubBuilder() != nullptr && isSubMenuShowed_) {
+        int32_t itemId = GetHost()->GetId();
+        overlayManager->HideMenu(itemId);
+    }
+
+    int32_t menuTargetId = 0;
+    bool isInContextMenu = false;
+
+    auto menuWrapper = GetMenuWrapper();
+    if (menuWrapper) {
+        auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        menuTargetId = menuWrapperPattern->GetTargetId();
+
+        auto menu = AceType::DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
+        CHECK_NULL_VOID(menu);
+        auto menuPattern = menu->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        isInContextMenu = menuPattern->IsContextMenu();
+    } else {
+        auto subMenu = GetMenu();
+        CHECK_NULL_VOID(subMenu);
+        auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(subMenuPattern);
+        menuTargetId = subMenuPattern->IsSubMenu() ? subMenuPattern->GetTargetId() : -1;
+    }
+
+    if (isInContextMenu) {
+        SubwindowManager::GetInstance()->HideMenuNG(menuTargetId);
+        return;
+    }
+    overlayManager->HideMenu(menuTargetId);
+}
+
 void MenuItemPattern::RegisterOnClick()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<MenuItemEventHub>();
 
-    auto event = [onChange = hub->GetOnChange()](GestureEvent& /* info */) {
+    auto event = [onChange = hub->GetOnChange(), weak = WeakClaim(this)](GestureEvent& /* info */) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetChange();
         if (onChange) {
             LOGI("trigger onChange");
-            onChange(true);
+            onChange(pattern->IsChange());
         }
+
+        if (pattern->GetSubBuilder() != nullptr) {
+            pattern->ShowSubMenu();
+            return;
+        }
+
+        // hide menu when menu item is clicked
+        pattern->CloseMenu();
     };
     auto clickEvent = MakeRefPtr<ClickEvent>(std::move(event));
 
@@ -106,8 +198,6 @@ void MenuItemPattern::OnPress(const TouchEventInfo& info)
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto props = GetPaintProperty<MenuItemPaintProperty>();
-    CHECK_NULL_VOID(props);
     auto touchType = info.GetTouches().front().GetTouchType();
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -118,12 +208,10 @@ void MenuItemPattern::OnPress(const TouchEventInfo& info)
         // change background color, update press status
         auto clickedColor = theme->GetClickedColor();
         renderContext->UpdateBackgroundColor(clickedColor);
-        props->UpdatePress(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     } else if (touchType == TouchType::UP) {
         auto bgColor = theme->GetBackgroundColor();
         renderContext->UpdateBackgroundColor(bgColor);
-        props->UpdatePress(false);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
@@ -134,44 +222,20 @@ void MenuItemPattern::OnHover(bool isHover)
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto props = GetPaintProperty<MenuItemPaintProperty>();
-    CHECK_NULL_VOID(props);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
 
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipeline);
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-
-    if (isHover) {
+    if (isHover || isSubMenuShowed_) {
         auto hoverColor = theme->GetHoverColor();
         renderContext->UpdateBackgroundColor(hoverColor);
-        props->UpdateHover(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 
-        auto buildFunc = GetSubBuilder();
-        if (buildFunc && !isSubMenuShowed_) {
-            NG::ScopedViewStackProcessor builderViewStackProcessor;
-            buildFunc();
-            auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-            auto menuNode = MenuView::Create(customNode, host->GetId(), MenuType::SUB_MENU);
-            auto menuPattern = menuNode->GetPattern<MenuPattern>();
-            menuPattern->SetParentMenuItem(host);
-            subMenuId_ = menuNode->GetId();
-            AddSelfHoverRegion(host);
-            LOGI("MenuItemPattern Show SubMenu");
-            OffsetF offset = GetSubMenuPostion(host);
-            overlayManager->ShowMenu(host->GetId(), offset, menuNode);
-            isSubMenuShowed_ = true;
-            RegisterWrapperMouseEvent();
-        }
+        ShowSubMenu();
     } else {
         auto bgColor = theme->GetBackgroundColor();
         renderContext->UpdateBackgroundColor(bgColor);
-        props->UpdateHover(false);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
@@ -212,7 +276,7 @@ OffsetF MenuItemPattern::GetSubMenuPostion(const RefPtr<FrameNode>& targetNode)
     // show menu at left top point of targetNode
     OffsetF position;
     auto frameSize = targetNode->GetGeometryNode()->GetMarginFrameSize();
-    position = targetNode->GetPaintRectOffset() + OffsetF(frameSize.Width() - SUBMENU_PADDING.ConvertToPx(), 0.0);
+    position = targetNode->GetPaintRectOffset() + OffsetF(frameSize.Width(), 0.0);
     return position;
 }
 

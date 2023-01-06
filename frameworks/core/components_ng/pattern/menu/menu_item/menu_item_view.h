@@ -42,11 +42,9 @@ public:
     static void SetOnChange(std::function<void(bool)>&& onChange);
 
 private:
-    static RefPtr<FrameNode> CreateItemRow(const RefPtr<FrameNode>& menuItem);
-
     static void AddIcon(const std::optional<std::string>& startIcon, const RefPtr<FrameNode>& row);
     static void AddContent(const std::string& content, const RefPtr<FrameNode>& row);
-    static void AddLabelInfo(std::optional<std::string> labelInfo, const RefPtr<FrameNode>& row);
+    static void AddLabelInfo(const std::optional<std::string>& labelInfo, const RefPtr<FrameNode>& row);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_VIEW_H

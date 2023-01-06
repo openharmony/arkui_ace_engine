@@ -74,6 +74,11 @@ public:
         return type_ == MenuType::MULTI_MENU;
     }
 
+    bool IsSubMenu() const
+    {
+        return type_ == MenuType::SUB_MENU;
+    }
+
     void SetFontSize(const Dimension& value)
     {
         fontSize_ = value;
@@ -92,6 +97,11 @@ public:
     RefPtr<FrameNode> GetParentMenuItem()
     {
         return parentMenuItem_;
+    }
+
+    int32_t GetTargetId() const
+    {
+        return targetId_;
     }
 
 private:

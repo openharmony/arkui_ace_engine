@@ -22,7 +22,6 @@
 #include "core/components/slider/render_slider.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_algorithm.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -42,11 +41,6 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::NODE, true };
-    }
-
-    RefPtr<PaintProperty> CreatePaintProperty() override
-    {
-        return MakeRefPtr<MenuItemPaintProperty>();
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -113,6 +107,18 @@ public:
         wrapperMouseEvent_.Reset();
     }
 
+    void SetChange()
+    {
+        isChanged_ = !isChanged_;
+    }
+
+    bool IsChange() const
+    {
+        return isChanged_;
+    }
+
+    void CloseMenu();
+
 protected:
     void OnModifyDone() override;
 
@@ -128,6 +134,9 @@ private:
     void RegisterWrapperMouseEvent();
 
     RefPtr<FrameNode> GetMenuWrapper();
+    RefPtr<FrameNode> GetMenu();
+
+    void ShowSubMenu();
 
     OffsetF GetSubMenuPostion(const RefPtr<FrameNode>& targetNode);
 
@@ -141,6 +150,8 @@ private:
 
     bool isSubMenuShowed_ = false;
     bool isSubMenuHovered_ = false;
+
+    bool isChanged_ = false;
 
     std::function<void()> subBuilderFunc_ = nullptr;
 

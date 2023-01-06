@@ -19,7 +19,9 @@
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/event/click_event.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -59,11 +61,38 @@ void MenuPattern::OnModifyDone()
 // close menu on touch up
 void MenuPattern::RegisterOnClick()
 {
-    auto event = [targetId = targetId_, isContextMenu = IsContextMenu()](const TouchEventInfo& info) {
+    auto event = [targetId = targetId_, isContextMenu = IsContextMenu(), weak = WeakClaim(this)](
+                     const TouchEventInfo& info) {
+        auto menuPattern = weak.Upgrade();
+        CHECK_NULL_VOID(menuPattern);
+        auto menuNode = menuPattern->GetHost();
+        CHECK_NULL_VOID(menuNode);
+        bool isCustomOption = false;
+        auto firstChild = menuNode->GetChildAtIndex(0);
+        if (firstChild && firstChild->GetTag() == V2::SCROLL_ETS_TAG) {
+            isCustomOption = true;
+            auto scrollChild = firstChild->GetChildAtIndex(0);
+            if ((scrollChild && scrollChild->GetTag() == V2::MENU_ETS_TAG)) {
+                isCustomOption = false;
+            }
+        }
+        if (!menuPattern->IsSubMenu() && !isCustomOption) {
+            // menu with options or menu items is closed by option or menuItem click event.
+            return;
+        }
+
         auto touches = info.GetTouches();
         if (touches.empty() || touches.front().GetTouchType() != TouchType::UP) {
             return;
         }
+
+        if (menuPattern->IsSubMenu()) {
+            auto menuItemParent = menuPattern->GetParentMenuItem();
+            auto menuItemPattern = menuItemParent->GetPattern<MenuItemPattern>();
+            menuItemPattern->CloseMenu();
+            return;
+        }
+
         if (isContextMenu) {
             SubwindowManager::GetInstance()->HideMenuNG(targetId);
             return;
