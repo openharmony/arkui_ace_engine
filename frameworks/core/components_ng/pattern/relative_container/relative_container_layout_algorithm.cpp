@@ -245,7 +245,7 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
     auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
     childConstraint.maxSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     childConstraint.minSize = SizeF(0.0f, 0.0f);
-    // set first two boudnaries of each direction
+    // set first two boundaries of each direction
     for (const auto& alignRule : alignRules) {
         if (idNodeMap_.find(alignRule.second.anchor) == idNodeMap_.end() &&
             !IsAnchorContainer(alignRule.second.anchor)) {
@@ -278,30 +278,30 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
             checkAlign = AlignDirection::LEFT;
             if (childFlexItemProperty->GetAligned(checkAlign)) {
                 widthValue = middleValue - childFlexItemProperty->GetAlignValue(checkAlign);
-                itemMaxWidth = 2 * (widthValue > 0.0f ? widthValue : 0.0f);
-                itemMinWidth = 2 * (widthValue > 0.0f ? widthValue : 0.0f);
+                itemMaxWidth = 2.0f * std::max(widthValue, 0.0f);
+                itemMinWidth = 2.0f * std::max(widthValue, 0.0f);
             } else {
                 checkAlign = AlignDirection::RIGHT;
                 widthValue = childFlexItemProperty->GetAlignValue(checkAlign) - middleValue;
-                itemMaxWidth = 2 * (widthValue > 0.0f ? widthValue : 0.0f);
-                itemMinWidth = 2 * (widthValue > 0.0f ? widthValue : 0.0f);
+                itemMaxWidth = 2.0f * std::max(widthValue, 0.0f);
+                itemMinWidth = 2.0f * std::max(widthValue, 0.0f);
             }
         } else {
             auto checkAlign = AlignDirection::LEFT;
             auto leftValue = childFlexItemProperty->GetAlignValue(checkAlign);
             checkAlign = AlignDirection::RIGHT;
             widthValue = childFlexItemProperty->GetAlignValue(checkAlign) - leftValue;
-            itemMaxWidth = widthValue > 0.0f ? widthValue : 0.0f;
-            itemMinWidth = widthValue > 0.0f ? widthValue : 0.0f;
+            itemMaxWidth = std::max(widthValue, 0.0f);
+            itemMinWidth = std::max(widthValue, 0.0f);
         }
-        if (widthValue <= 0.0f) {
+        if (LessNotEqual(widthValue, 0.0f)) {
             childConstraint.maxSize = SizeF(0.0f, 0.0f);
             childConstraint.minSize = SizeF(0.0f, 0.0f);
             LOGE("Component %{public}s horizontal alignment illegal, will layout with size (0, 0)", nodeName.c_str());
             return;
         }
+        childConstraint.selfIdealSize.SetWidth(itemMaxWidth);
     }
-
     if (!childFlexItemProperty->GetTwoVerticalDirectionAligned()) {
         itemMaxHeight = childConstraint.maxSize.Height();
         itemMinHeight = childConstraint.minSize.Height();
@@ -313,28 +313,29 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
             checkAlign = AlignDirection::TOP;
             if (childFlexItemProperty->GetAligned(checkAlign)) {
                 heightValue = centerValue - childFlexItemProperty->GetAlignValue(checkAlign);
-                itemMaxHeight = 2 * (heightValue > 0.0f ? heightValue : 0.0f);
-                itemMinHeight = 2 * (heightValue > 0.0f ? heightValue : 0.0f);
+                itemMaxHeight = 2.0f * std::max(heightValue, 0.0f);
+                itemMinHeight = 2.0f * std::max(heightValue, 0.0f);
             } else {
                 checkAlign = AlignDirection::BOTTOM;
                 heightValue = childFlexItemProperty->GetAlignValue(checkAlign) - centerValue;
-                itemMaxHeight = 2 * (heightValue > 0.0f ? heightValue : 0.0f);
-                itemMinHeight = 2 * (heightValue > 0.0f ? heightValue : 0.0f);
+                itemMaxHeight = 2.0f * std::max(heightValue, 0.0f);
+                itemMinHeight = 2.0f * std::max(heightValue, 0.0f);
             }
         } else {
             auto checkAlign = AlignDirection::TOP;
             auto topValue = childFlexItemProperty->GetAlignValue(checkAlign);
             checkAlign = AlignDirection::BOTTOM;
             heightValue = childFlexItemProperty->GetAlignValue(checkAlign) - topValue;
-            itemMaxHeight = heightValue > 0.0f ? heightValue : 0.0f;
-            itemMinHeight = heightValue > 0.0f ? heightValue : 0.0f;
+            itemMaxHeight = std::max(heightValue, 0.0f);
+            itemMinHeight = std::max(heightValue, 0.0f);
         }
-        if (heightValue <= 0.0f) {
+        if (LessNotEqual(heightValue, 0.0f)) {
             childConstraint.maxSize = SizeF(0.0f, 0.0f);
             childConstraint.minSize = SizeF(0.0f, 0.0f);
             LOGE("Component %{public}s vertical alignment illegal, will layout with size (0, 0)", nodeName.c_str());
             return;
         }
+        childConstraint.selfIdealSize.SetHeight(itemMaxHeight);
     }
 
     childConstraint.maxSize = SizeF(itemMaxWidth, itemMaxHeight);
@@ -389,8 +390,8 @@ void RelativeContainerLayoutAlgorithm::CalcHorizontalLayoutParam(AlignDirection 
         case HorizontalAlign::CENTER:
             childFlexItemProperty->SetAlignValue(alignDirection,
                 IsAnchorContainer(alignRule.anchor)
-                    ? parentSize.Width() / 2
-                    : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetMarginFrameSize().Width() / 2 +
+                    ? parentSize.Width() / 2.0f
+                    : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetMarginFrameSize().Width() / 2.0f +
                           recordOffsetMap_[alignRule.anchor].GetX());
             break;
         case HorizontalAlign::END:
@@ -422,8 +423,8 @@ void RelativeContainerLayoutAlgorithm::CalcVerticalLayoutParam(AlignDirection al
         case VerticalAlign::CENTER:
             childFlexItemProperty->SetAlignValue(alignDirection,
                 IsAnchorContainer(alignRule.anchor)
-                    ? parentSize.Height() / 2
-                    : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetMarginFrameSize().Height() / 2 +
+                    ? parentSize.Height() / 2.0f
+                    : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetMarginFrameSize().Height() / 2.0f +
                           recordOffsetMap_[alignRule.anchor].GetY());
             break;
         case VerticalAlign::BOTTOM:
@@ -456,7 +457,7 @@ float RelativeContainerLayoutAlgorithm::CalcHorizontalOffset(
                     offsetX = 0.0f;
                     break;
                 case HorizontalAlign::CENTER:
-                    offsetX = anchorWidth / 2;
+                    offsetX = anchorWidth / 2.0f;
                     break;
                 case HorizontalAlign::END:
                     offsetX = anchorWidth;
@@ -468,13 +469,13 @@ float RelativeContainerLayoutAlgorithm::CalcHorizontalOffset(
         case AlignDirection::MIDDLE:
             switch (alignRule.horizontal) {
                 case HorizontalAlign::START:
-                    offsetX = (-1) * flexItemWidth / 2;
+                    offsetX = (-1) * flexItemWidth / 2.0f;
                     break;
                 case HorizontalAlign::CENTER:
-                    offsetX = anchorWidth / 2 - flexItemWidth / 2;
+                    offsetX = (anchorWidth - flexItemWidth) / 2.0f;
                     break;
                 case HorizontalAlign::END:
-                    offsetX = anchorWidth - flexItemWidth / 2;
+                    offsetX = anchorWidth - flexItemWidth / 2.0f;
                     break;
                 default:
                     LOGE("Unsupported align direction");
@@ -486,7 +487,7 @@ float RelativeContainerLayoutAlgorithm::CalcHorizontalOffset(
                     offsetX = (-1) * flexItemWidth;
                     break;
                 case HorizontalAlign::CENTER:
-                    offsetX = anchorWidth / 2 - flexItemWidth;
+                    offsetX = anchorWidth / 2.0f - flexItemWidth;
                     break;
                 case HorizontalAlign::END:
                     offsetX = anchorWidth - flexItemWidth;
@@ -519,7 +520,7 @@ float RelativeContainerLayoutAlgorithm::CalcVerticalOffset(
                     offsetY = 0.0f;
                     break;
                 case VerticalAlign::CENTER:
-                    offsetY = anchorHeight / 2;
+                    offsetY = anchorHeight / 2.0f;
                     break;
                 case VerticalAlign::BOTTOM:
                     offsetY = anchorHeight;
@@ -531,13 +532,13 @@ float RelativeContainerLayoutAlgorithm::CalcVerticalOffset(
         case AlignDirection::CENTER:
             switch (alignRule.vertical) {
                 case VerticalAlign::TOP:
-                    offsetY = (-1) * flexItemHeight / 2;
+                    offsetY = (-1) * flexItemHeight / 2.0f;
                     break;
                 case VerticalAlign::CENTER:
-                    offsetY = anchorHeight / 2 - flexItemHeight / 2;
+                    offsetY = (anchorHeight - flexItemHeight) / 2.0f;
                     break;
                 case VerticalAlign::BOTTOM:
-                    offsetY = anchorHeight - flexItemHeight / 2;
+                    offsetY = anchorHeight - flexItemHeight / 2.0f;
                     break;
                 default:
                     LOGE("Unsupported align direction");
@@ -549,7 +550,7 @@ float RelativeContainerLayoutAlgorithm::CalcVerticalOffset(
                     offsetY = (-1) * flexItemHeight;
                     break;
                 case VerticalAlign::CENTER:
-                    offsetY = anchorHeight / 2 - flexItemHeight;
+                    offsetY = anchorHeight / 2.0f - flexItemHeight;
                     break;
                 case VerticalAlign::BOTTOM:
                     offsetY = anchorHeight - flexItemHeight;
