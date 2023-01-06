@@ -1347,7 +1347,12 @@ void JSViewAbstract::JsFlexGrow(const JSCallbackInfo& info)
     }
     double value = 0.0;
     if (!ParseJsDouble(info[0], value)) {
-        return;
+        if (info[0]->IsNull() || info[0]->IsUndefined()) {
+            // undefined use default value.
+            value = 0.0;
+        } else {
+            return;
+        }
     }
     ViewAbstractModel::GetInstance()->SetFlexGrow(static_cast<float>(value));
 }
@@ -1360,7 +1365,12 @@ void JSViewAbstract::JsFlexShrink(const JSCallbackInfo& info)
     }
     double value = 0.0;
     if (!ParseJsDouble(info[0], value)) {
-        return;
+        if (info[0]->IsNull() || info[0]->IsUndefined()) {
+            // undefined use default value.
+            value = 1.0;
+        } else {
+            return;
+        }
     }
     ViewAbstractModel::GetInstance()->SetFlexShrink(static_cast<float>(value));
 }
