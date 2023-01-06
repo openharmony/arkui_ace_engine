@@ -75,6 +75,10 @@ template("ace_core_pipeline_source_set") {
       deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
     }
 
+    if (defined(config.window_scene_support) && config.window_scene_support) {
+      deps += [ "//foundation/window/window_manager/window_scene:window_session" ]
+    }
+
     if (platform == "ohos" && defined(config.enable_native_view) &&
         config.enable_native_view) {
       sources += [ "layers/ace_scene_builder.cpp" ]

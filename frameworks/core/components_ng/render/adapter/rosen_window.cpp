@@ -79,45 +79,6 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     });
 }
 
-RosenWindow::RosenWindow(const RefPtr<WindowPattern>& windowPattern, RefPtr<TaskExecutor> taskExecutor, int32_t id)
-    : windowPattern_(windowPattern), taskExecutor_(taskExecutor), id_(id)
-{
-    int64_t refreshPeriod = static_cast<int64_t>(ONE_SECOND_IN_NANO / GetDisplayRefreshRate());
-    vsyncCallback_ = std::make_shared<OHOS::Rosen::VsyncCallback>();
-    vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_, refreshPeriod](int64_t timeStampNanos) {
-        auto taskExecutor = weakTask.Upgrade();
-        auto onVsync = [id, timeStampNanos, refreshPeriod] {
-            ContainerScope scope(id);
-            // use container to get window can make sure the window is valid
-            auto container = Container::Current();
-            CHECK_NULL_VOID(container);
-            auto window = container->GetWindow();
-            CHECK_NULL_VOID(window);
-            window->OnVsync(static_cast<uint64_t>(timeStampNanos), 0);
-            auto pipeline = container->GetPipelineContext();
-            if (pipeline) {
-                pipeline->OnIdle(timeStampNanos + refreshPeriod);
-            }
-        };
-        auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
-        if (uiTaskRunner.IsRunOnCurrentThread()) {
-            onVsync();
-            return;
-        }
-        uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); });
-    };
-    rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
-    rsUIDirector_->SetRSSurfaceNode(windowPattern_->GetSurfaceNode());
-    rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
-    rsUIDirector_->Init();
-    rsUIDirector_->SetUITaskRunner([taskExecutor, id](const std::function<void()>& task) {
-        ContainerScope scope(id);
-        if (taskExecutor) {
-            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-        }
-    });
-}
-
 void RosenWindow::RequestFrame()
 {
     CHECK_NULL_VOID_NOLOG(onShow_);
@@ -127,9 +88,6 @@ void RosenWindow::RequestFrame()
     if (rsWindow_) {
         rsWindow_->RequestVsync(vsyncCallback_);
         lastRequestVsyncTime_ = GetSysTimestamp();
-    }
-    if (windowPattern_) {
-        windowPattern_->RequestVsync(vsyncCallback_);
     }
     isRequestVsync_ = true;
     auto taskExecutor = taskExecutor_.Upgrade();
@@ -164,7 +122,6 @@ void RosenWindow::Destroy()
 {
     LOG_DESTROY();
     rsWindow_ = nullptr;
-    windowPattern_.Reset();
     vsyncCallback_.reset();
     rsUIDirector_->Destroy();
     rsUIDirector_.reset();

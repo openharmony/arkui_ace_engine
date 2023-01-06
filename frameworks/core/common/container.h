@@ -256,6 +256,8 @@ public:
         return context ? context->GetWindow() : nullptr;
     }
 
+    RefPtr<NG::WindowPattern> GetWindowPattern();
+
     virtual bool IsUseStageModel() const
     {
         return false;

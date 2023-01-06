@@ -20,11 +20,13 @@
 
 #include "session_stage.h"
 
+#include "base/thread/task_executor.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Rosen {
 struct VsyncCallback;
 class RSSurfaceNode;
+class RSUIDirector;
 }
 
 namespace OHOS::Ace::NG {
@@ -33,8 +35,11 @@ class WindowPattern : public Pattern {
     DECLARE_ACE_TYPE(WindowPattern, Pattern);
 
 public:
-    WindowPattern(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
+    WindowPattern(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode) : surfaceNode_(surfaceNode) {}
     ~WindowPattern() override = default;
+
+    void Init();
+    void Destroy();
 
     std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode()
     {
@@ -76,6 +81,46 @@ public:
         return true;
     }
 
+    void SetTaskExecutor(const RefPtr<TaskExecutor>& taskExecutor)
+    {
+        taskExecutor_ = taskExecutor;
+    }
+
+    void SetInstanceId(int32_t instanceId)
+    {
+        instanceId_ = instanceId;
+    }
+
+    using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
+
+    void SetVsyncCallback(AceVsyncCallback&& callback)
+    {
+        callbacks_.push_back(std::move(callback));
+    }
+
+    void SetRootFrameNode(const RefPtr<NG::FrameNode>& root);
+
+    std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector() const
+    {
+        return rsUIDirector_;
+    }
+
+    void RecordFrameTime(uint64_t timeStamp, const std::string& name);
+
+    void FlushTasks();
+
+    bool FlushCustomAnimation(uint64_t timeStamp);
+
+    void OnShow();
+    void OnHide();
+
+    void RequestFrame();
+
+    void RequestVsync(const std::shared_ptr<Rosen::VsyncCallback>& vsyncCallback);
+
+    void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount);
+
+    // for lifecycle
     void RegisterSessionStageStateListener(const std::shared_ptr<Rosen::ISessionStageStateListener>& listener)
     {
         CHECK_NULL_VOID(sessionStage_);
@@ -88,9 +133,6 @@ public:
         sessionStage_->RegisterSessionChangeListener(listener);
     }
 
-    void RequestVsync(const std::shared_ptr<Rosen::VsyncCallback>& vsyncCallback);
-
-    // for lifecycle
     virtual void Foreground();
     virtual void Background();
     virtual void Disconnect();
@@ -108,6 +150,16 @@ protected:
     Rect windowRect_;
 
     std::recursive_mutex mutex_;
+
+private:
+    bool isRequestVsync_ = false;
+    bool onShow_ = true;
+    std::list<AceVsyncCallback> callbacks_;
+
+    WeakPtr<TaskExecutor> taskExecutor_;
+    int32_t instanceId_ = 0;
+    std::shared_ptr<Rosen::RSUIDirector> rsUIDirector_;
+    std::shared_ptr<Rosen::VsyncCallback> vsyncCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(WindowPattern);
 };

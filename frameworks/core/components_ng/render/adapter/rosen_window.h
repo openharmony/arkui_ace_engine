@@ -27,14 +27,12 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/window.h"
-#include "core/components_ng/pattern/window_scene/container/window_pattern.h"
 
 namespace OHOS::Ace::NG {
 
 class RosenWindow : public Window {
 public:
     RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<TaskExecutor> taskExecutor, int32_t id);
-    RosenWindow(const RefPtr<WindowPattern>& windowPattern, RefPtr<TaskExecutor> taskExecutor, int32_t id);
     ~RosenWindow() override = default;
 
     void RequestFrame() override;
@@ -70,7 +68,6 @@ public:
 
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
-    RefPtr<WindowPattern> windowPattern_;
     WeakPtr<TaskExecutor> taskExecutor_;
     int32_t id_ = 0;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;

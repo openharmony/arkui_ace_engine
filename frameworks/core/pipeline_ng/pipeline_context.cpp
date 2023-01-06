@@ -63,6 +63,7 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/window_scene/container/window_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
@@ -82,6 +83,11 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
 {
     window_->OnHide();
 }
+
+PipelineContext::PipelineContext(RefPtr<NG::WindowPattern> windowPattern, RefPtr<TaskExecutor> taskExecutor,
+    RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
+    : PipelineBase(windowPattern, std::move(taskExecutor), std::move(assetManager), frontend, instanceId)
+{}
 
 PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
@@ -117,7 +123,7 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
     CHECK_NULL_VOID(dirtyNode);
     dirtyNodes_.emplace(dirtyNode);
     hasIdleTasks_ = true;
-    window_->RequestFrame();
+    RequestFrame();
 }
 
 void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
@@ -127,7 +133,7 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     taskScheduler_.AddDirtyLayoutNode(dirty);
     ForceLayoutForImplicitAnimation();
     hasIdleTasks_ = true;
-    window_->RequestFrame();
+    RequestFrame();
 }
 
 void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
@@ -136,7 +142,7 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     CHECK_NULL_VOID(dirty);
     taskScheduler_.AddDirtyRenderNode(dirty);
     hasIdleTasks_ = true;
-    window_->RequestFrame();
+    RequestFrame();
 }
 
 void PipelineContext::FlushDirtyNodeUpdate()
@@ -164,7 +170,7 @@ uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
 {
     CHECK_RUN_ON(UI);
     scheduleTasks_.try_emplace(++nextScheduleTaskId_, task);
-    window_->RequestFrame();
+    RequestFrame();
     return nextScheduleTaskId_;
 }
 
@@ -176,7 +182,11 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     static const std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
                                                : AceApplicationInfo::GetInstance().GetProcessName();
-    window_->RecordFrameTime(nanoTimestamp, abilityName);
+    if (windowPattern_) {
+        windowPattern_->RecordFrameTime(nanoTimestamp, abilityName);
+    } else {
+        window_->RecordFrameTime(nanoTimestamp, abilityName);
+    }
     FlushAnimation(GetTimeFromExternalTimer());
     FlushBuild();
     if (isFormRender_ && drawDelegate_) {
@@ -195,8 +205,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     taskScheduler_.FlushTask();
     taskScheduler_.FinishRecordFrameInfo();
     TryCallNextFrameLayoutCallback();
-    auto hasAninmation = window_->FlushCustomAnimation(nanoTimestamp);
-    if (hasAninmation) {
+    bool hasAnimation = windowPattern_ ? windowPattern_->FlushCustomAnimation(nanoTimestamp)
+        : window_->FlushCustomAnimation(nanoTimestamp);
+    if (hasAnimation) {
         RequestFrame();
     }
     FlushMessages();
@@ -235,7 +246,11 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
 void PipelineContext::FlushMessages()
 {
     ACE_FUNCTION_TRACE();
-    window_->FlushTasks();
+    if (windowPattern_) {
+        windowPattern_->FlushTasks();
+    } else {
+        window_->FlushTasks();
+    }
 }
 
 void PipelineContext::FlushFocus()
@@ -323,7 +338,11 @@ void PipelineContext::SetupRootElement()
     auto rootFocusHub = rootNode_->GetOrCreateFocusHub();
     rootFocusHub->SetFocusType(FocusType::SCOPE);
     rootFocusHub->SetFocusable(true);
-    window_->SetRootFrameNode(rootNode_);
+    if (windowPattern_) {
+        windowPattern_->SetRootFrameNode(rootNode_);
+    } else {
+        window_->SetRootFrameNode(rootNode_);
+    }
     rootNode_->AttachToMainTree();
 
     auto stageNode = FrameNode::CreateFrameNode(
@@ -336,11 +355,18 @@ void PipelineContext::SetupRootElement()
     }
 #ifdef ENABLE_ROSEN_BACKEND
     if (!IsJsCard() && !isFormRender_) {
-        auto rsWindow = static_cast<RosenWindow*>(GetWindow());
-        if (rsWindow) {
-            auto rsUIDirector = rsWindow->GetRsUIDirector();
+        if (windowPattern_) {
+            auto rsUIDirector = windowPattern_->GetRSUIDirector();
             if (rsUIDirector) {
                 rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+            }
+        } else {
+            auto rsWindow = static_cast<RosenWindow*>(GetWindow());
+            if (rsWindow) {
+                auto rsUIDirector = rsWindow->GetRsUIDirector();
+                if (rsUIDirector) {
+                    rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+                }
             }
         }
     }
@@ -383,7 +409,11 @@ void PipelineContext::SetupSubRootElement()
     auto rootFocusHub = rootNode_->GetOrCreateFocusHub();
     rootFocusHub->SetFocusType(FocusType::SCOPE);
     rootFocusHub->SetFocusable(true);
-    window_->SetRootFrameNode(rootNode_);
+    if (windowPattern_) {
+        windowPattern_->SetRootFrameNode(rootNode_);
+    } else {
+        window_->SetRootFrameNode(rootNode_);
+    }
     rootNode_->AttachToMainTree();
 
     auto stageNode = FrameNode::CreateFrameNode(
@@ -391,11 +421,18 @@ void PipelineContext::SetupSubRootElement()
     rootNode_->AddChild(stageNode);
 #ifdef ENABLE_ROSEN_BACKEND
     if (!IsJsCard()) {
-        auto rsWindow = static_cast<RosenWindow*>(GetWindow());
-        if (rsWindow) {
-            auto rsUIDirector = rsWindow->GetRsUIDirector();
+        if (windowPattern_) {
+            auto rsUIDirector = windowPattern_->GetRSUIDirector();
             if (rsUIDirector) {
                 rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+            }
+        } else {
+            auto rsWindow = static_cast<RosenWindow*>(GetWindow());
+            if (rsWindow) {
+                auto rsUIDirector = rsWindow->GetRsUIDirector();
+                if (rsUIDirector) {
+                    rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+                }
             }
         }
     }
@@ -780,7 +817,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     if (scalePoint.type == TouchType::MOVE) {
         touchEvents_.emplace_back(point);
         hasIdleTasks_ = true;
-        window_->RequestFrame();
+        RequestFrame();
         return;
     }
 
@@ -807,7 +844,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     }
 
     hasIdleTasks_ = true;
-    window_->RequestFrame();
+    RequestFrame();
 }
 
 void PipelineContext::OnSurfaceDensityChanged(double density)
@@ -955,7 +992,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     eventManager_->DispatchMouseEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
-    window_->RequestFrame();
+    RequestFrame();
 }
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
@@ -1043,7 +1080,7 @@ void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node)
     } else {
         dirtyFocusScope_ = WeakClaim(RawPtr(node));
     }
-    window_->RequestFrame();
+    RequestFrame();
 }
 
 void PipelineContext::RootLostFocus(BlurReason reason) const
@@ -1172,8 +1209,13 @@ void PipelineContext::OnShow()
 {
     CHECK_RUN_ON(UI);
     onShow_ = true;
-    window_->OnShow();
-    window_->RequestFrame();
+    if (windowPattern_) {
+        windowPattern_->OnShow();
+        RequestFrame();
+    } else {
+        window_->OnShow();
+        RequestFrame();
+    }
     FlushWindowStateChangedCallback(true);
 }
 
@@ -1181,8 +1223,13 @@ void PipelineContext::OnHide()
 {
     CHECK_RUN_ON(UI);
     onShow_ = false;
-    window_->RequestFrame();
-    window_->OnHide();
+    if (windowPattern_) {
+        RequestFrame();
+        windowPattern_->OnHide();
+    } else {
+        RequestFrame();
+        window_->OnHide();
+    }
     OnVirtualKeyboardAreaChange(Rect());
     FlushWindowStateChangedCallback(false);
 }
@@ -1221,11 +1268,18 @@ void PipelineContext::SetContainerWindow(bool isShow)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!IsJsCard()) {
-        auto rsWindow = static_cast<RosenWindow*>(GetWindow());
-        if (rsWindow) {
-            auto rsUIDirector = rsWindow->GetRsUIDirector();
+        if (windowPattern_) {
+            auto rsUIDirector = windowPattern_->GetRSUIDirector();
             if (rsUIDirector) {
-                rsUIDirector->SetContainerWindow(isShow, density_); // set container window show state to render service
+                rsUIDirector->SetContainerWindow(isShow); // set container window show state to render service
+            }
+        } else {
+            auto rsWindow = static_cast<RosenWindow*>(GetWindow());
+            if (rsWindow) {
+                auto rsUIDirector = rsWindow->GetRsUIDirector();
+                if (rsUIDirector) {
+                    rsUIDirector->SetContainerWindow(isShow, density_); // set container window show state to render service
+                }
             }
         }
     }
@@ -1237,11 +1291,18 @@ void PipelineContext::SetAppBgColor(const Color& color)
     appBgColor_ = color;
 #ifdef ENABLE_ROSEN_BACKEND
     if (!IsJsCard()) {
-        auto rsWindow = static_cast<RosenWindow*>(GetWindow());
-        if (rsWindow) {
-            auto rsUIDirector = rsWindow->GetRsUIDirector();
+        if (windowPattern_) {
+            auto rsUIDirector = windowPattern_->GetRSUIDirector();
             if (rsUIDirector) {
                 rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+            }
+        } else {
+            auto rsWindow = static_cast<RosenWindow*>(GetWindow());
+            if (rsWindow) {
+                auto rsUIDirector = rsWindow->GetRsUIDirector();
+                if (rsUIDirector) {
+                    rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+                }
             }
         }
     }
@@ -1447,7 +1508,7 @@ void PipelineContext::NotifyMemoryLevel(int32_t level)
 void PipelineContext::AddPredictTask(PredictTask&& task)
 {
     taskScheduler_.AddPredictTask(std::move(task));
-    window_->RequestFrame();
+    RequestFrame();
 }
 
 void PipelineContext::OnIdle(int64_t deadline)

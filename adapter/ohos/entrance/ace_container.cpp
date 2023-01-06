@@ -59,6 +59,7 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
+#include "core/components_ng/pattern/window_scene/container/window_pattern.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -738,7 +739,7 @@ void AceContainer::SetViewNew(
 #endif
 }
 
-void AceContainer::SetViewNew(
+void AceContainer::SetView(
     AceView* view, double density, int32_t width, int32_t height, RefPtr<NG::WindowPattern> windowPattern)
 {
 #ifdef ENABLE_ROSEN_BACKEND
@@ -747,11 +748,11 @@ void AceContainer::SetViewNew(
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    container->windowPattern_ = windowPattern;
+    windowPattern->SetTaskExecutor(taskExecutor);
+    windowPattern->SetInstanceId(view->GetInstanceId());
+    windowPattern->Init();
 
-    std::unique_ptr<Window> window =
-        std::make_unique<NG::RosenWindow>(windowPattern, taskExecutor, view->GetInstanceId());
-    container->AttachView(std::move(window), view, density, width, height, windowPattern->GetWindowId(), nullptr);
+    container->AttachView(nullptr, view, density, width, height, windowPattern->GetWindowId(), nullptr, windowPattern);
 #endif
 }
 
@@ -1040,7 +1041,7 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
 }
 
 void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width,
-    int32_t height, int32_t windowId, UIEnvCallback callback)
+    int32_t height, int32_t windowId, UIEnvCallback callback, RefPtr<NG::WindowPattern> windowPattern)
 {
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
@@ -1066,9 +1067,15 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
     }
     resRegister_ = aceView_->GetPlatformResRegister();
     if (useNewPipeline_) {
-        LOGI("New pipeline version creating...");
-        pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
-            std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+        if (windowPattern) {
+            LOGI("New pipeline using window scene creating...");
+            pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
+                windowPattern, taskExecutor_, assetManager_, frontend_, instanceId);
+        } else {
+            LOGI("New pipeline version creating...");
+            pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
+                std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+        }
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
     } else {
         pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
@@ -1326,10 +1333,7 @@ void AceContainer::InitWindowCallback()
             [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
     }
 
-    pipelineContext_->SetGetWindowRectImpl([window = uiWindow_, windowPattern = windowPattern_]() -> Rect {
-        if (windowPattern) {
-            return windowPattern->GetWindowRect();
-        }
+    pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
         CHECK_NULL_RETURN_NOLOG(window, rect);
         auto windowRect = window->GetRect();
