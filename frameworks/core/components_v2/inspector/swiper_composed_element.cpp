@@ -317,9 +317,17 @@ void SwiperComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Compo
         LOGE("get GetSwiperElement failed");
         return;
     }
-    auto child = swiperElement->GetChildBySlot(slot);
-    swiperElement->UpdateChildWithSlot(child, newComponent, slot, slot);
-    swiperElement->MarkDirty();
+    auto composedElement = swiperElement->GetChildBySlot(slot);
+    auto displayElement = GetInspectorComposedElementParent(composedElement);
+    if (!displayElement) {
+        return;
+    }
+    auto child = GetElementChildBySlot(displayElement, slot);
+    if (!child) {
+        return;
+    }
+    displayElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    displayElement->MarkDirty();
 }
 
 void SwiperComposedElement::DeleteChildWithSlot(int32_t slot)
@@ -329,9 +337,17 @@ void SwiperComposedElement::DeleteChildWithSlot(int32_t slot)
         LOGE("get GetSwiperElement failed");
         return;
     }
-    auto child = swiperElement->GetChildBySlot(slot);
-    swiperElement->UpdateChildWithSlot(child, nullptr, slot, slot);
-    swiperElement->MarkDirty();
+    auto composedElement = swiperElement->GetChildBySlot(slot);
+    auto displayElement = GetInspectorComposedElementParent(composedElement);
+    if (!displayElement) {
+        return;
+    }
+    auto child = GetElementChildBySlot(displayElement, slot);
+    if (!child) {
+        return;
+    }
+    displayElement->UpdateChildWithSlot(child, nullptr, slot, slot);
+    displayElement->MarkDirty();
 }
 
 } // namespace OHOS::Ace::V2
