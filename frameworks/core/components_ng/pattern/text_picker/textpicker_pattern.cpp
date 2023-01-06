@@ -35,6 +35,9 @@ namespace {
 // TODO datepicker style modification
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
+const uint8_t ENABLED_ALPHA = 255;
+const uint8_t DISABLED_ALPHA = 102;
+const double AVAILABLE_ALPHA = 1.0;
 } // namespace
 
 void TextPickerPattern::OnAttachToFrameNode()
@@ -139,6 +142,11 @@ void TextPickerPattern::InitDisabled()
     CHECK_NULL_VOID(eventHub);
     auto renderContext = host->GetRenderContext();
     enabled_ = eventHub->IsEnabled();
+    if (!enabled_) {
+        renderContext->UpdateOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA);
+    } else {
+        renderContext->UpdateOpacity(AVAILABLE_ALPHA);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
