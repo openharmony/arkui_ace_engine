@@ -247,6 +247,12 @@ void RenderNode::UpdateTouchRect()
         touchRect_ = GetTransformRect(touchRect_);
         touchRectList_.emplace_back(touchRect_);
         SetTouchRectList(touchRectList_);
+        std::vector<Rect> tmplist;
+        for (auto& rect : touchRectList_) {
+            auto trasrect = GetTransformRect(rect);
+            tmplist.push_back(trasrect);
+        }
+        touchRectList_ = tmplist;
         return;
     }
 
@@ -282,8 +288,8 @@ void RenderNode::SetTouchRectList(std::vector<Rect>& touchRectList)
     }
 }
 
-void RenderNode::CompareTouchRectList(std::vector<Rect>& touchRectList,
-    const std::vector<Rect>& childTouchRectList, const std::vector<Rect>& parentTouchRectList)
+void RenderNode::CompareTouchRectList(std::vector<Rect>& touchRectList, const std::vector<Rect>& childTouchRectList,
+    const std::vector<Rect>& parentTouchRectList)
 {
     for (auto& childRect : childTouchRectList) {
         bool isInRegion = false;
@@ -726,12 +732,14 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
         return false;
     }
 
-    Point transformPoint = GetTransformPoint(parentLocalPoint);
+    Point transformPoint = parentLocalPoint;
     if (!InTouchRectList(transformPoint, GetTouchRectList())) {
         return false;
     }
 
+    transformPoint = GetTransformPoint(transformPoint);
     const auto localPoint = transformPoint - GetPaintRect().GetOffset();
+
     bool dispatchSuccess = DispatchTouchTestToChildren(localPoint, globalPoint, touchRestrict, result);
     auto beforeSize = result.size();
     std::vector<Rect> vrect;
@@ -753,8 +761,8 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
     return dispatchSuccess || (beforeSize != endSize && IsNotSiblingAddRecognizerToResult());
 }
 
-bool RenderNode::DispatchTouchTestToChildren(const Point& localPoint, const Point& globalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result)
+bool RenderNode::DispatchTouchTestToChildren(
+    const Point& localPoint, const Point& globalPoint, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
     bool dispatchSuccess = false;
     if (!IsChildrenTouchEnable() || GetHitTestMode() == HitTestMode::HTMBLOCK) {
@@ -773,9 +781,9 @@ bool RenderNode::DispatchTouchTestToChildren(const Point& localPoint, const Poin
                 break;
             }
         }
-        auto interceptTouchEvent = (child->IsTouchable() &&
-            (child->InterceptTouchEvent() || IsExclusiveEventForChild()) &&
-            child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT);
+        auto interceptTouchEvent =
+            (child->IsTouchable() && (child->InterceptTouchEvent() || IsExclusiveEventForChild()) &&
+                child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT);
         if (child->GetHitTestMode() == HitTestMode::HTMBLOCK || interceptTouchEvent) {
             auto localTransformPoint = child->GetTransformPoint(localPoint);
             bool isInRegion = false;
@@ -1258,10 +1266,10 @@ Offset RenderNode::GetGlobalOffset() const
         return globalOffset;
     }
     auto isContainerModal = context->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
-        context->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+                            context->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     if (isContainerModal) {
         globalOffset = globalOffset + Offset(-(CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
-            -CONTAINER_TITLE_HEIGHT.ConvertToPx());
+                                          -CONTAINER_TITLE_HEIGHT.ConvertToPx());
     }
     return globalOffset;
 }
@@ -2239,25 +2247,25 @@ Rect RenderNode::ComputeSelectedZone(const Offset& startOffset, const Offset& en
     if (startOffset.GetX() <= endOffset.GetX()) {
         if (startOffset.GetY() <= endOffset.GetY()) {
             // bottom right
-            selectedZone = Rect(startOffset.GetX(), startOffset.GetY(),
-                endOffset.GetX() - startOffset.GetX(), endOffset.GetY() - startOffset.GetY());
+            selectedZone = Rect(startOffset.GetX(), startOffset.GetY(), endOffset.GetX() - startOffset.GetX(),
+                endOffset.GetY() - startOffset.GetY());
             return selectedZone;
         } else {
             // top right
-            selectedZone = Rect(startOffset.GetX(), endOffset.GetY(),
-                endOffset.GetX() - startOffset.GetX(), startOffset.GetY() - endOffset.GetY());
+            selectedZone = Rect(startOffset.GetX(), endOffset.GetY(), endOffset.GetX() - startOffset.GetX(),
+                startOffset.GetY() - endOffset.GetY());
             return selectedZone;
         }
     } else {
         if (startOffset.GetY() <= endOffset.GetY()) {
             // bottom left
-            selectedZone = Rect(endOffset.GetX(), startOffset.GetY(),
-                startOffset.GetX() - endOffset.GetX(), endOffset.GetY() - startOffset.GetY());
+            selectedZone = Rect(endOffset.GetX(), startOffset.GetY(), startOffset.GetX() - endOffset.GetX(),
+                endOffset.GetY() - startOffset.GetY());
             return selectedZone;
         } else {
             // top left
-            selectedZone = Rect(endOffset.GetX(), endOffset.GetY(),
-                startOffset.GetX() - endOffset.GetX(), startOffset.GetY() - endOffset.GetY());
+            selectedZone = Rect(endOffset.GetX(), endOffset.GetY(), startOffset.GetX() - endOffset.GetX(),
+                startOffset.GetY() - endOffset.GetY());
             return selectedZone;
         }
     }
