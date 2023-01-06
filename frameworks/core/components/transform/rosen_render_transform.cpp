@@ -140,7 +140,7 @@ Rect RosenRenderTransform::GetTransformRect(const Rect& rect)
     auto right = std::max(std::max(ltPoint.GetX(), rtPoint.GetX()), std::max(lbPoint.GetX(), rbPoint.GetX()));
     auto top = std::min(std::min(ltPoint.GetY(), rtPoint.GetY()), std::min(lbPoint.GetY(), rbPoint.GetY()));
     auto bottom = std::max(std::max(ltPoint.GetY(), rtPoint.GetY()), std::max(lbPoint.GetY(), rbPoint.GetY()));
-    return Rect(left, top, right - left, bottom - top).CombineRect(rect);
+    return Rect(left, top, right - left, bottom - top);
 }
 
 Matrix4 RosenRenderTransform::GetEffectiveTransform(const Offset& offset)
