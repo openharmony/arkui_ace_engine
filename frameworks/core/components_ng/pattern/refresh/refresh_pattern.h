@@ -86,7 +86,7 @@ private:
     OffsetF GetShowTimeOffset() const;
     float GetOpacity() const;
     RefreshStatus GetNextStatus();
-    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     static std::string GetFormatDateTime();
     RefPtr<PanEvent> panEvent_;
     OffsetF timeOffset_;

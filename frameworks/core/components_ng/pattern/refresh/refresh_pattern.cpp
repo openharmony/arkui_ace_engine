@@ -67,7 +67,6 @@ void RefreshPattern::OnModifyDone()
 bool RefreshPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/)
 {
-    refreshStatus = GetNextStatus();
     auto refreshLayoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_RETURN(refreshLayoutProperty, false);
     auto host = GetHost();
@@ -94,9 +93,13 @@ bool RefreshPattern::OnDirtyLayoutWrapperSwap(
         auto progressChildLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
         if (progressChildLayoutProperty->GetVisibilityValue() == VisibleType::INVISIBLE) {
             progressChildLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
+        FireRefreshing();
+        refreshRenderProperty->UpdateIsRefreshing(true);
+        refreshStatus_ = RefreshStatus::REFRESH;
     }
+    refreshStatus_ = GetNextStatus();
     return false;
 }
 
@@ -136,12 +139,13 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void RefreshPattern::HandleDragStart()
 {
+    CHECK_NULL_VOID_NOLOG(refreshStatus_ != RefreshStatus::REFRESH);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto refreshLayoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(refreshLayoutProperty);
-    if (refreshStatus != RefreshStatus::DRAG) {
-        refreshStatus = RefreshStatus::DRAG;
+    if (refreshStatus_ != RefreshStatus::DRAG) {
+        refreshStatus_ = RefreshStatus::DRAG;
         FireStateChange(static_cast<int>(RefreshStatus::DRAG));
     }
     if (host->TotalChildCount() < CHILD_COUNT) {
@@ -159,6 +163,7 @@ void RefreshPattern::HandleDragUpdate(float delta)
         LOGI("Delta is near zero!");
         return;
     }
+    CHECK_NULL_VOID_NOLOG(refreshStatus_ != RefreshStatus::REFRESH);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto refreshLayoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
@@ -208,6 +213,7 @@ void RefreshPattern::HandleDragUpdate(float delta)
 
 void RefreshPattern::HandleDragEnd()
 {
+    CHECK_NULL_VOID_NOLOG(refreshStatus_ != RefreshStatus::REFRESH);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
@@ -215,19 +221,19 @@ void RefreshPattern::HandleDragEnd()
     CHECK_NULL_VOID(refreshLayoutProperty);
     auto refreshRenderProperty = host->GetPaintProperty<RefreshRenderProperty>();
     CHECK_NULL_VOID(refreshRenderProperty);
-    if (refreshStatus != RefreshStatus::DONE && refreshStatus != RefreshStatus::INACTIVE) {
+    if (refreshStatus_ != RefreshStatus::DONE && refreshStatus_ != RefreshStatus::INACTIVE) {
         auto scrollableOffset = refreshLayoutProperty->GetScrollableOffsetValue();
         auto triggerRefreshDistance = refreshLayoutProperty->GetTriggerRefreshDistanceValue();
         if (scrollableOffset.GetY() > triggerRefreshDistance.ConvertToPx()) {
             FireChangeEvent("true");
             FireRefreshing();
             refreshRenderProperty->UpdateIsRefreshing(true);
-            refreshStatus = RefreshStatus::REFRESH;
+            refreshStatus_ = RefreshStatus::REFRESH;
         } else {
-            refreshStatus = RefreshStatus::INACTIVE;
+            refreshStatus_ = RefreshStatus::INACTIVE;
         }
     }
-    FireStateChange(static_cast<int>(refreshStatus));
+    FireStateChange(static_cast<int>(refreshStatus_));
     if (host->TotalChildCount() < CHILD_COUNT) {
         LOGI("%{public}s have %{public}d child", host->GetTag().c_str(), host->TotalChildCount());
         return;
@@ -282,7 +288,7 @@ RefreshStatus RefreshPattern::GetNextStatus()
     CHECK_NULL_RETURN(layoutProperty, RefreshStatus::INACTIVE);
     auto triggerRefreshDistance = layoutProperty->GetTriggerRefreshDistanceValue().ConvertToPx();
     auto scrollableOffset = layoutProperty->GetScrollableOffsetValue();
-    switch (refreshStatus) {
+    switch (refreshStatus_) {
         case RefreshStatus::INACTIVE:
             nextStatus = RefreshStatus::INACTIVE;
             FireStateChange(static_cast<int>(nextStatus));
@@ -328,7 +334,7 @@ RefreshStatus RefreshPattern::GetNextStatus()
             nextStatus = RefreshStatus::INACTIVE;
             break;
     }
-    if (refreshStatus != nextStatus) {
+    if (refreshStatus_ != nextStatus) {
         FireStateChange(static_cast<int>(nextStatus));
         host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     }
@@ -391,13 +397,13 @@ double RefreshPattern::GetLoadingDiameter() const
 void RefreshPattern::UpdateScrollableOffset(float delta)
 {
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    if (refreshStatus == RefreshStatus::REFRESH && delta > 0.0) {
+    if (refreshStatus_ == RefreshStatus::REFRESH && delta > 0.0) {
         LOGI("The refresh status is refreshing!");
         return;
     }
     OffsetF deltaOffset(0, delta);
-    if (refreshStatus == RefreshStatus::DRAG || refreshStatus == RefreshStatus::OVER_DRAG ||
-        refreshStatus == RefreshStatus::DONE) {
+    if (refreshStatus_ == RefreshStatus::DRAG || refreshStatus_ == RefreshStatus::OVER_DRAG ||
+        refreshStatus_ == RefreshStatus::DONE) {
         deltaOffset.SetY(GetOffset(delta));
     }
     auto scrollableOffset = layoutProperty->GetScrollableOffsetValue();
@@ -481,7 +487,7 @@ void RefreshPattern::OnInActive()
     auto renderProperty = GetPaintProperty<RefreshRenderProperty>();
     renderProperty->UpdateIsRefreshing(false);
     FireChangeEvent("false");
-    refreshStatus = RefreshStatus::INACTIVE;
+    refreshStatus_ = RefreshStatus::INACTIVE;
     auto scrollableOffset = layoutProperty->GetScrollableOffsetValue();
     scrollableOffset.Reset();
     layoutProperty->UpdateScrollableOffset(scrollableOffset);
