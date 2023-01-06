@@ -80,14 +80,6 @@ void ScrollModelNG::SetAxis(Axis axis)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, Axis, axis);
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollPaintProperty, Axis, axis);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto paintProperty = frameNode->GetPaintProperty<ScrollPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    paintProperty->SetScrollBarPositionMode(axis);
-    auto pattern = frameNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->ResetPosition();
 }
 
 void ScrollModelNG::SetOnScrollBegin(NG::ScrollBeginEvent&& event)
@@ -141,33 +133,20 @@ void ScrollModelNG::InitScrollBar(const RefPtr<ScrollBarTheme>& theme, const std
     const std::pair<bool, Dimension>& width, EdgeEffect effect)
 {}
 
-void ScrollModelNG::SetDisplayMode(int displayMode)
+void ScrollModelNG::SetDisplayMode(int value)
 {
-    if (displayMode < 0 || displayMode >= static_cast<int32_t>(DISPLAY_MODE.size())) {
-        return;
-    }
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto paintProperty = frameNode->GetPaintProperty<ScrollPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    paintProperty->SetDisplayMode(DISPLAY_MODE[displayMode]);
+    auto displayMode = static_cast<NG::DisplayMode>(value);
+    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, displayMode);
 }
 
 void ScrollModelNG::SetScrollBarWidth(const Dimension& dimension)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto paintProperty = frameNode->GetPaintProperty<ScrollPaintProperty>();
-    paintProperty->SetScrollBarWidth(dimension);
+    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, dimension);
 }
 
 void ScrollModelNG::SetScrollBarColor(const Color& color)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto paintProperty = frameNode->GetPaintProperty<ScrollPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    paintProperty->SetScrollBarColor(color);
+    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color);
 }
 
 void ScrollModelNG::SetEdgeEffect(EdgeEffect edgeEffect)

@@ -21,6 +21,7 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components/scroll/scrollable.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
@@ -445,7 +446,7 @@ HWTEST_F(ListTestNg, ListAttrLanesTest001, TestSize.Level1)
      * @tc.steps: step3. Scroll bottom, RunMeasureAndLayout and check ListItem position.
      */
     constexpr float SCROLL_OFFSET = -300.f;
-    pattern->UpdateCurrentOffset(SCROLL_OFFSET);
+    pattern->UpdateCurrentOffset(SCROLL_OFFSET, SCROLL_FROM_UPDATE);
     RunMeasureAndLayout(frameNode);
 
     constexpr int32_t START_INDEX = 4;
@@ -1117,7 +1118,7 @@ HWTEST_F(ListTestNg, ListItemGroupHeaderFooterTest002, TestSize.Level1)
      * @tc.expected: header is sticky at bottom of List
      */
     constexpr float SCROLL_OFFSET = -250.f;
-    pattern->UpdateCurrentOffset(SCROLL_OFFSET);
+    pattern->UpdateCurrentOffset(SCROLL_OFFSET, SCROLL_FROM_UPDATE);
     RunMeasureAndLayout(frameNode);
     EXPECT_NE(itemGroupFrameNode, nullptr);
     groupNode = itemGroupFrameNode->GetGeometryNode();
@@ -1132,7 +1133,7 @@ HWTEST_F(ListTestNg, ListItemGroupHeaderFooterTest002, TestSize.Level1)
      * @tc.expected: header is sticky at to of List
      */
     constexpr float SCROLL_OFFSET2 = -700.f;
-    pattern->UpdateCurrentOffset(SCROLL_OFFSET2);
+    pattern->UpdateCurrentOffset(SCROLL_OFFSET2, SCROLL_FROM_UPDATE);
     RunMeasureAndLayout(frameNode);
     EXPECT_NE(itemGroupFrameNode, nullptr);
     groupNode = itemGroupFrameNode->GetGeometryNode();
@@ -1147,7 +1148,7 @@ HWTEST_F(ListTestNg, ListItemGroupHeaderFooterTest002, TestSize.Level1)
      * @tc.expected: header is sticky upper footer
      */
     constexpr float SCROLL_OFFSET3 = -250.f;
-    pattern->UpdateCurrentOffset(SCROLL_OFFSET3);
+    pattern->UpdateCurrentOffset(SCROLL_OFFSET3, SCROLL_FROM_UPDATE);
     RunMeasureAndLayout(frameNode);
     EXPECT_NE(itemGroupFrameNode, nullptr);
     groupNode = itemGroupFrameNode->GetGeometryNode();

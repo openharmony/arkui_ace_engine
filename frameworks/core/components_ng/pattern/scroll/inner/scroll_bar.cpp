@@ -173,12 +173,12 @@ double ScrollBar::GetNormalWidthToPx() const
     return NormalizeToPx(normalWidth_);
 }
 
-double ScrollBar::CalcPatternOffset(double scrollBarOffset)
+float ScrollBar::CalcPatternOffset(float scrollBarOffset) const
 {
     if (!isDriving_ || NearZero(offsetScale_)) {
         return scrollBarOffset;
     }
-    return scrollBarOffset / offsetScale_;
+    return -scrollBarOffset / offsetScale_;
 }
 
 double ScrollBar::NormalizeToPx(const Dimension& dimension) const
@@ -188,4 +188,28 @@ double ScrollBar::NormalizeToPx(const Dimension& dimension) const
     return pipelineContext->NormalizeToPx(dimension);
 }
 
+void ScrollBar::SetGestureEvent()
+{
+    if (!touchEvent_) {
+        touchEvent_ = MakeRefPtr<TouchEventImpl>([weak = WeakClaim(this)](const TouchEventInfo& info) {
+            auto scrollBar = weak.Upgrade();
+            CHECK_NULL_VOID(scrollBar);
+            if (info.GetTouches().empty()) {
+                return;
+            }
+            auto touch = info.GetTouches().front();
+            if (touch.GetTouchType() == TouchType::DOWN) {
+                Point point(touch.GetLocalLocation().GetX(), touch.GetLocalLocation().GetY());
+                bool inRegion = scrollBar->InBarRegion(point);
+                scrollBar->SetPressed(inRegion);
+                scrollBar->SetDriving(inRegion);
+                scrollBar->MarkNeedRender();
+            }
+            if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+                scrollBar->SetPressed(false);
+                scrollBar->MarkNeedRender();
+            }
+        });
+    }
+}
 } // namespace OHOS::Ace::NG

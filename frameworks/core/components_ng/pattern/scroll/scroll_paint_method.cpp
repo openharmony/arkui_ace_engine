@@ -37,11 +37,7 @@ CanvasDrawFunction ScrollPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
 
 void ScrollPaintMethod::PaintScrollBar(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
-    CHECK_NULL_VOID(paintWrapper);
-    auto paintProperty = DynamicCast<ScrollPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(paintProperty);
-
-    auto scrollBar = paintProperty->GetScrollBar();
+    auto scrollBar = scrollBar_.Upgrade();
     CHECK_NULL_VOID(scrollBar);
     if (!scrollBar->NeedPaint()) {
         LOGD("no need paint scroll bar.");

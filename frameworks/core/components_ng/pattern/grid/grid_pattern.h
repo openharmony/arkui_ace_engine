@@ -24,19 +24,18 @@
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
-#include "core/components_ng/pattern/grid/grid_paint_property.h"
 #include "core/components_ng/pattern/grid/grid_position_controller.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
 class GridScrollBar;
-class ACE_EXPORT GridPattern : public Pattern {
-    DECLARE_ACE_TYPE(GridPattern, Pattern);
+class ACE_EXPORT GridPattern : public ScrollablePattern {
+    DECLARE_ACE_TYPE(GridPattern, ScrollablePattern);
 
 public:
     GridPattern() = default;
-    ~GridPattern() override;
 
     bool IsAtomicNode() const override
     {
@@ -52,10 +51,15 @@ public:
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
-        return MakeRefPtr<GridPaintProperty>();
+        return MakeRefPtr<ScrollablePaintProperty>();
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
+
+    bool IsScrollable() const override
+    {
+        return isConfigScrollable_;
+    }
 
     void SetMultiSelectable(bool multiSelectable)
     {
@@ -122,13 +126,9 @@ public:
 
     void OnMouseSelectAll();
 
-    bool UpdateScrollPosition(float offset);
+    bool UpdateCurrentOffset(float offset, int32_t source) override;
 
     void SetPositionController(const RefPtr<ScrollController>& controller);
-
-    void SetScrollBarProxy(const RefPtr<NG::ScrollBarProxy>& scrollBarProxy);
-    float GetScrollableDistance() const;
-    float GetCurrentPosition() const;
 
     void ScrollPage(bool reverse);
 
@@ -136,13 +136,12 @@ public:
 
     bool AnimateTo(float position, float duration, const RefPtr<Curve>& curve);
 
-    bool OnScrollCallback(float offset, int32_t source);
+    bool OnScrollCallback(float offset, int32_t source) override;
 
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     float GetMainContentSize() const;
-    void AddScrollEvent();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -154,10 +153,9 @@ private:
     void ClearSelectedZone();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
-    void UpdateScrollerAnimation(float offset);
+    void UpdateScrollBarOffset() override;
 
     GridLayoutInfo gridLayoutInfo_;
-    RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<GridPositionController> positionController_;
     RefPtr<Animator> animator_;
     float animatorOffset_ = 0.0f;
@@ -169,9 +167,6 @@ private:
 
     OffsetF mouseStartOffset_;
     OffsetF mouseEndOffset_;
-
-    friend GridScrollBar;
-    GridScrollBar* scrollBar_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };

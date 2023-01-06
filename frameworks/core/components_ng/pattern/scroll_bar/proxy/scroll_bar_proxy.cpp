@@ -27,43 +27,21 @@ constexpr int32_t SCROLL_FROM_BAR = 6; // Source type of scroll.
 
 bool CheckScrollable(const RefPtr<Pattern>& pattern)
 {
-    return AceType::InstanceOf<ScrollPattern>(pattern) || AceType::InstanceOf<ListPattern>(pattern) ||
-           AceType::InstanceOf<GridPattern>(pattern);
+    return AceType::InstanceOf<ScrollablePattern>(pattern);
 }
 
 float GetScrollableDistance(RefPtr<Pattern> pattern)
 {
-    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-    if (scrollPattern) {
-        return scrollPattern->GetScrollableDistance();
-    }
-    auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
-    if (listPattern) {
-        return listPattern->GetScrollableDistance();
-    }
-    auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
-    if (gridPattern) {
-        return gridPattern->GetScrollableDistance();
-    }
-    return 0.0f;
+    auto scrollPattern = AceType::DynamicCast<ScrollablePattern>(pattern);
+    CHECK_NULL_RETURN(scrollPattern, 0.0f);
+    return scrollPattern->GetScrollableDistance();
 }
 
 float GetScrollOffset(RefPtr<Pattern> pattern)
 {
-    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-    if (scrollPattern) {
-        CHECK_NULL_RETURN(scrollPattern, 0.0f);
-        return scrollPattern->GetCurrentPosition();
-    }
-    auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
-    if (listPattern) {
-        return listPattern->GetCurrentPosition();
-    }
-    auto gridPattern = AceType::DynamicCast<GridPattern>(pattern);
-    if (gridPattern) {
-        return gridPattern->GetCurrentPosition();
-    }
-    return 0.0f;
+    auto scrollPattern = AceType::DynamicCast<ScrollablePattern>(pattern);
+    CHECK_NULL_RETURN(scrollPattern, 0.0f);
+    return scrollPattern->GetCurrentPosition();
 }
 } // namespace
 

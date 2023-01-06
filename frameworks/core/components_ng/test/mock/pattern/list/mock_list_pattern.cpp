@@ -30,4 +30,11 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(
 {
     return false;
 }
+
+bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
+{
+    return true;
+}
+
+void ListPattern::UpdateScrollBarOffset() {}
 } // namespace OHOS::Ace::NG

@@ -1714,6 +1714,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest001, TestSize.Level1)
      * @tc.expected: step2. equal.
      */
     listPattern->scrollableEvent_->axis_ = Axis::NONE;
+    listPattern->axis_ = Axis::NONE;
     listPattern->OnModifyDone();
     EXPECT_EQ(listPattern->scrollableEvent_->axis_, Axis::VERTICAL);
     
@@ -2126,8 +2127,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest007, TestSize.Level1)
      * @tc.steps: case1: no scrollEffect, !isScrollContent
      * @tc.expected: step2. equal.
      */
-    listPattern->isScrollContent_ = false;
-    result = listPattern->UpdateCurrentOffset(0);
+    result = listPattern->UpdateCurrentOffset(0, SCROLL_FROM_UPDATE);
     EXPECT_NE(result, false);
 
     /**
@@ -2135,8 +2135,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest007, TestSize.Level1)
      * @tc.steps: case2: no scrollEffect, isScrollContent
      * @tc.expected: step2. equal.
      */
-    listPattern->isScrollContent_ = true;
-    result = listPattern->UpdateCurrentOffset(0);
+    result = listPattern->UpdateCurrentOffset(0, SCROLL_FROM_BAR);
     EXPECT_NE(result, false);
 
     /**
@@ -2144,9 +2143,8 @@ HWTEST_F(ListPatternTestNg, ListPatternTest007, TestSize.Level1)
      * @tc.steps: case3: scrollEffect not Spring, !isScrollContent
      * @tc.expected: step2. equal.
      */
-    listPattern->isScrollContent_ = false;
     listPattern->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::FADE);
-    result = listPattern->UpdateCurrentOffset(0);
+    result = listPattern->UpdateCurrentOffset(0, SCROLL_FROM_UPDATE);
     EXPECT_NE(result, false);
 
     /**
@@ -2154,9 +2152,8 @@ HWTEST_F(ListPatternTestNg, ListPatternTest007, TestSize.Level1)
      * @tc.steps: case4: scrollEffect Spring, !isScrollContent
      * @tc.expected: step2. equal.
      */
-    listPattern->isScrollContent_ = false;
     listPattern->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
-    result = listPattern->UpdateCurrentOffset(0);
+    result = listPattern->UpdateCurrentOffset(0, SCROLL_FROM_UPDATE);
     EXPECT_NE(result, false);
 
     /**
@@ -2164,9 +2161,8 @@ HWTEST_F(ListPatternTestNg, ListPatternTest007, TestSize.Level1)
      * @tc.steps: case4: scrollEffect Spring, isScrollContent
      * @tc.expected: step2. equal.
      */
-    listPattern->isScrollContent_ = true;
     listPattern->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
-    result = listPattern->UpdateCurrentOffset(0);
+    result = listPattern->UpdateCurrentOffset(0, SCROLL_FROM_BAR);
     EXPECT_NE(result, false);
 }
 
@@ -2200,10 +2196,9 @@ HWTEST_F(ListPatternTestNg, ListPatternTest008, TestSize.Level1)
      * @tc.steps: case4: scrollEffect Spring, isScrollContent, no header, no footer, UPDATE
      * @tc.expected: step2. equal.
      */
-    listPattern->isScrollContent_ = true;
     listPattern->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::SPRING);
     listPattern->scrollState_ = SCROLL_FROM_UPDATE;
-    result = listPattern->UpdateCurrentOffset(0);
+    result = listPattern->UpdateCurrentOffset(0, SCROLL_FROM_UPDATE);
     EXPECT_NE(result, false);
 
     /**
@@ -2214,7 +2209,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest008, TestSize.Level1)
     WeakPtr<FrameNode> weak = AceType::WeakClaim(AceType::RawPtr(frameNode));
     listPattern->itemGroupList_.push_back(weak);
     listPattern->scrollState_ = SCROLL_FROM_BAR;
-    result = listPattern->UpdateCurrentOffset(0);
+    result = listPattern->UpdateCurrentOffset(0, SCROLL_FROM_BAR);
     EXPECT_NE(result, false);
 
     /**
@@ -2226,7 +2221,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest008, TestSize.Level1)
     listPattern->itemPosition_.clear();
     listPattern->itemPosition_[0] = listItemInfo;
     listPattern->startMainPos_ = 1;
-    result = listPattern->UpdateCurrentOffset(0);
+    result = listPattern->UpdateCurrentOffset(0, SCROLL_FROM_UPDATE);
     EXPECT_NE(result, false);
 
     /**
@@ -2237,7 +2232,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest008, TestSize.Level1)
     listPattern->itemPosition_.clear();
     listPattern->itemPosition_[1] = listItemInfo;
     listPattern->startMainPos_ = 1;
-    result = listPattern->UpdateCurrentOffset(0);
+    result = listPattern->UpdateCurrentOffset(0, SCROLL_FROM_UPDATE);
     EXPECT_NE(result, false);
 
     /**
@@ -2248,7 +2243,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest008, TestSize.Level1)
     listPattern->itemPosition_.clear();
     listPattern->itemPosition_[0] = listItemInfo;
     listPattern->startMainPos_ = 0;
-    result = listPattern->UpdateCurrentOffset(0);
+    result = listPattern->UpdateCurrentOffset(0, SCROLL_FROM_UPDATE);
     EXPECT_NE(result, false);
 
     /**
@@ -2259,7 +2254,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest008, TestSize.Level1)
     listPattern->itemPosition_.clear();
     listPattern->itemPosition_[1] = listItemInfo;
     listPattern->startMainPos_ = 0;
-    result = listPattern->UpdateCurrentOffset(0);
+    result = listPattern->UpdateCurrentOffset(0, SCROLL_FROM_UPDATE);
     EXPECT_NE(result, false);
 }
 
@@ -2493,6 +2488,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest012, TestSize.Level1)
     EXPECT_NE(frameNode1, nullptr);
     RefPtr<ListPattern> listPattern1 = AceType::DynamicCast<ListPattern>(frameNode1->GetPattern());
     EXPECT_NE(listPattern1, nullptr);
+    listPattern1->axis_ = LIST_DIRECTION_CASE2_VALUE;
     
     /**
      * @tc.steps: step2. call function
@@ -2691,6 +2687,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest016, TestSize.Level1)
     EXPECT_NE(frameNode1, nullptr);
     RefPtr<ListPattern> listPattern1 = AceType::DynamicCast<ListPattern>(frameNode1->GetPattern());
     EXPECT_NE(listPattern1, nullptr);
+    listPattern1->axis_ = LIST_DIRECTION_CASE2_VALUE;
     
     /**
      * @tc.steps: step2. call function
@@ -2727,9 +2724,8 @@ HWTEST_F(ListPatternTestNg, ListPatternTest017, TestSize.Level1)
      * @tc.expected: step2. equal.
      */
     listPattern->scrollBar_ = nullptr;
-    listPattern->touchEvent_ = nullptr;
     listPattern->isInitialized_ = false;
-    listPattern->SetScrollBar();
+    listPattern->SetScrollBar(DisplayMode::OFF);
     EXPECT_EQ(listPattern->scrollBar_, nullptr);
 
     /**
@@ -2738,9 +2734,8 @@ HWTEST_F(ListPatternTestNg, ListPatternTest017, TestSize.Level1)
      * @tc.expected: step2. equal.
      */
     listPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
-    listPattern->touchEvent_ = AceType::MakeRefPtr<TouchEventImpl>([](TouchEventInfo) {});
     listPattern->isInitialized_ = true;
-    listPattern->SetScrollBar();
+    listPattern->SetScrollBar(DisplayMode::OFF);
     EXPECT_EQ(listPattern->scrollBar_, nullptr);
 
     /**
@@ -2752,7 +2747,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest017, TestSize.Level1)
     EXPECT_NE(listPaintProperty, nullptr);
     listPaintProperty->UpdateBarDisplayMode(DisplayMode::ON);
     listPattern->scrollBar_ = nullptr;
-    listPattern->SetScrollBar();
+    listPattern->SetScrollBar(DisplayMode::ON);
     EXPECT_NE(listPattern->scrollBar_, nullptr);
 
     /**
@@ -2762,7 +2757,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest017, TestSize.Level1)
      */
     listPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
     listPattern->scrollBar_->displayMode_ = DisplayMode::OFF;
-    listPattern->SetScrollBar();
+    listPattern->SetScrollBar(DisplayMode::ON);
     EXPECT_NE(listPattern->scrollBar_, nullptr);
 
     /**
@@ -2772,7 +2767,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest017, TestSize.Level1)
      */
     listPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
     listPattern->scrollBar_->displayMode_ = DisplayMode::ON;
-    listPattern->SetScrollBar();
+    listPattern->SetScrollBar(DisplayMode::ON);
     EXPECT_NE(listPattern->scrollBar_, nullptr);
 }
 
@@ -2823,7 +2818,6 @@ HWTEST_F(ListPatternTestNg, ListPatternTest018, TestSize.Level1)
     listPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
     listPattern->scrollBarProxy_ = nullptr;
     EXPECT_EQ(listPattern->itemPosition_.size(), 1);
-    EXPECT_EQ(listPattern->scrollBar_->isDriving_, !listPattern->isScrollContent_);
 
     /**
      * @tc.steps: step2. call function
@@ -2833,7 +2827,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest018, TestSize.Level1)
     listPattern->scrollBar_ = nullptr;
     listPattern->scrollBarProxy_ = AceType::MakeRefPtr<ScrollBarProxy>();
     EXPECT_EQ(listPattern->itemPosition_.size(), 1);
-    EXPECT_EQ(listPattern->currentPosition_, 0);
+    EXPECT_EQ(listPattern->barOffset_, 0);
 
     /**
      * @tc.steps: step2. call function
@@ -2843,8 +2837,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest018, TestSize.Level1)
     listPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
     listPattern->scrollBarProxy_ = AceType::MakeRefPtr<ScrollBarProxy>();
     EXPECT_EQ(listPattern->itemPosition_.size(), 1);
-    EXPECT_EQ(listPattern->scrollBar_->isDriving_, !listPattern->isScrollContent_);
-    EXPECT_EQ(listPattern->currentPosition_, 0);
+    EXPECT_EQ(listPattern->barOffset_, 0);
 }
 
 /**
@@ -2865,6 +2858,7 @@ HWTEST_F(ListPatternTestNg, ListPositionControllerTest001, TestSize.Level1)
     RefPtr<ListPattern> listPattern =
         AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     EXPECT_NE(listPattern, nullptr);
+    listPattern->axis_ = Axis::NONE;
     RefPtr<ListPositionController> positionController =
         AceType::MakeRefPtr<ListPositionController>();
     EXPECT_NE(positionController, nullptr);
@@ -2980,7 +2974,7 @@ HWTEST_F(ListPatternTestNg, ListPositionControllerTest003, TestSize.Level1)
      * @tc.expected: step2. equal.
      */
     positionController->ScrollBy(0, 0, true);
-    EXPECT_EQ(listPattern->currentPosition_, 0);
+    EXPECT_EQ(listPattern->barOffset_, 0);
 
     /**
      * @tc.steps: step1. create listTestProperty and set properties of it.
@@ -3004,7 +2998,7 @@ HWTEST_F(ListPatternTestNg, ListPositionControllerTest003, TestSize.Level1)
      * @tc.expected: step2. equal.
      */
     positionController1->ScrollBy(0, 0, true);
-    EXPECT_EQ(listPattern1->currentPosition_, 0);
+    EXPECT_EQ(listPattern1->barOffset_, 0);
 }
 
 /**

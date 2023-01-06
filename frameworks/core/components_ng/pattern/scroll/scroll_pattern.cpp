@@ -60,25 +60,6 @@ float CalculateOffsetByFriction(float extentOffset, float delta, float friction)
 
 } // namespace
 
-void ScrollPattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy)
-{
-    CHECK_NULL_VOID_NOLOG(scrollBarProxy);
-    auto scrollFunction = [weak = WeakClaim(this)](double offset, int32_t source) {
-        if (source != SCROLL_FROM_START) {
-            auto pattern = weak.Upgrade();
-            if (!pattern || pattern->GetAxis() == Axis::NONE) {
-                return false;
-            }
-            float adjustOffset = static_cast<float>(offset);
-            pattern->AdjustOffset(adjustOffset, source);
-            return pattern->UpdateCurrentOffset(adjustOffset, source);
-        }
-        return true;
-        };
-    scrollBarProxy->RegisterScrollableNode({ AceType::WeakClaim(this), std::move(scrollFunction) });
-    scrollBarProxy_ = scrollBarProxy;
-}
-
 void ScrollPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -94,100 +75,35 @@ void ScrollPattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = host->GetPaintProperty<ScrollPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    paintProperty->UpdateScrollBarOffset(currentOffset_, viewPort_, viewPortExtent_, !isScrollContent_);
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
-    if (axis_ == axis && scrollableEvent_) {
-        LOGD("Direction not changed, need's resister scroll event again.");
-        return;
-    }
-
-    axis_ = axis;
-    // scrollPosition callback
-    auto offsetTask = [weak = WeakClaim(this)](double offset, int32_t source) {
-        if (source != SCROLL_FROM_START) {
-            auto pattern = weak.Upgrade();
-            if (!pattern || pattern->GetAxis() == Axis::NONE) {
-                return false;
-            }
-            float adjustOffset = static_cast<float>(offset);
-            pattern->AdjustOffset(adjustOffset, source);
-            return pattern->UpdateCurrentOffset(adjustOffset, source);
+    if (axis != GetAxis()) {
+        SetAxis(axis);
+        ResetPosition();
+        if (scrollEffect_) {
+            AddScrollEdgeEffect(scrollEffect_);
         }
-        return true;
-    };
-
-    auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    if (scrollableEvent_) {
-        gestureHub->RemoveScrollableEvent(scrollableEvent_);
     }
-    scrollableEvent_ = MakeRefPtr<ScrollableEvent>(axis);
-    scrollableEvent_->SetScrollPositionCallback(std::move(offsetTask));
-
-    RegisterScrollEventTask();
-    RegisterScrollBarEventTask();
-    gestureHub->AddScrollEdgeEffect(axis_, scrollEffect_);
-    gestureHub->AddScrollableEvent(scrollableEvent_);
+    if (!GetScrollableEvent()) {
+        AddScrollEvent();
+        RegisterScrollEventTask();
+    }
+    SetScrollBar(paintProperty->GetScrollBarProperty());
 }
 
 void ScrollPattern::RegisterScrollEventTask()
 {
+    auto scrollableEvent = GetScrollableEvent();
+    CHECK_NULL_VOID(scrollableEvent);
     auto eventHub = GetHost()->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onScrollEvent = eventHub->GetOnScrollEvent();
     if (onScrollEvent) {
-        scrollableEvent_->SetOnScrollCallback(std::move(onScrollEvent));
+        scrollableEvent->SetOnScrollCallback(std::move(onScrollEvent));
     }
     auto scrollBeginEvent = eventHub->GetScrollBeginEvent();
     if (scrollBeginEvent) {
-        scrollableEvent_->SetScrollBeginCallback(std::move(scrollBeginEvent));
+        scrollableEvent->SetScrollBeginCallback(std::move(scrollBeginEvent));
     }
-    auto scrollEndEvent = eventHub->GetScrollEndEvent();
-    if (scrollEndEvent) {
-        scrollableEvent_->SetScrollEndCallback(std::move(scrollEndEvent));
-    }
-}
-
-void ScrollPattern::RegisterScrollBarEventTask()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    if (touchEvent_) {
-        gestureHub->RemoveTouchEvent(touchEvent_);
-    }
-    touchEvent_ = MakeRefPtr<TouchEventImpl>([weak = WeakClaim(this)](const TouchEventInfo& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto paintProperty = host->GetPaintProperty<ScrollPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
-        auto scrollBar = paintProperty->GetScrollBar();
-        CHECK_NULL_VOID(scrollBar);
-        CHECK_NULL_VOID(info.GetTouches().size());
-        auto touch = info.GetTouches().front();
-        if (touch.GetTouchType() == TouchType::DOWN) {
-            if (scrollBar->InBarRegion({ touch.GetLocalLocation().GetX(), touch.GetLocalLocation().GetY()})) {
-                scrollBar->SetPressed(true);
-                pattern->SetScrollContent(false);
-            } else {
-                scrollBar->SetPressed(false);
-                pattern->SetScrollContent(true);
-            }
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
-            scrollBar->SetPressed(false);
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        }
-        });
-    gestureHub->AddTouchEvent(touchEvent_);
 }
 
 bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -204,25 +120,46 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     viewPortLength_ = layoutAlgorithm->GetViewPort();
     viewPort_ = layoutAlgorithm->GetViewPortSize();
     viewPortExtent_ = layoutAlgorithm->GetViewPortExtent();
-
-    auto paintProperty = GetPaintProperty<ScrollPaintProperty>();
-    if (paintProperty && paintProperty->NeedPaintScrollBar()) {
-        return true;
-    }
+    UpdateScrollBarOffset();
     return false;
+}
+
+bool ScrollPattern::OnScrollCallback(float offset, int32_t source)
+{
+    if (source != SCROLL_FROM_START) {
+        if (GetAxis() == Axis::NONE) {
+            return false;
+        }
+        auto adjustOffset = static_cast<float>(offset);
+        auto scrollBar = GetScrollBar();
+        if (scrollBar && scrollBar->IsDriving()) {
+            adjustOffset = scrollBar->CalcPatternOffset(adjustOffset);
+            source = SCROLL_FROM_BAR;
+        }
+        AdjustOffset(adjustOffset, source);
+        return UpdateCurrentOffset(adjustOffset, source);
+    }
+    return true;
+}
+
+void ScrollPattern::OnScrollEndCallback()
+{
+    ScrollablePattern::OnScrollEndCallback();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto scrollEndEvent = eventHub->GetScrollEndEvent();
+    if (scrollEndEvent) {
+        scrollEndEvent();
+    }
 }
 
 void ScrollPattern::ResetPosition()
 {
     currentOffset_ = 0.0f;
     lastOffset_ = 0.0f;
-    auto paintProperty = GetPaintProperty<ScrollPaintProperty>();
-    if (paintProperty) {
-        paintProperty->UpdateScrollBarOffset(currentOffset_, viewPort_, viewPortExtent_, !isScrollContent_);
-    }
-    if (scrollBarProxy_) {
-        scrollBarProxy_->NotifyScrollBar(AceType::WeakClaim(this));
-    }
+    UpdateScrollBarOffset();
 }
 
 bool ScrollPattern::IsAtTop() const
@@ -248,7 +185,7 @@ void ScrollPattern::HandleScrollEffect()
     CHECK_NULL_VOID_NOLOG(scrollEffect_);
     auto overScroll = scrollEffect_->CalculateOverScroll(lastOffset_, ReachMaxCount());
     if (!NearZero(overScroll)) {
-        scrollEffect_->HandleOverScroll(axis_, overScroll, viewPort_);
+        scrollEffect_->HandleOverScroll(GetAxis(), overScroll, viewPort_);
     }
 }
 
@@ -256,32 +193,29 @@ void ScrollPattern::HandleScrollBarOutBoundary() {}
 
 void ScrollPattern::AdjustOffset(float& delta, int32_t source)
 {
-    if (!isScrollContent_) {
-        delta *= -1.0f; // revert if operate scroll bar
-    }
     if (NearZero(delta) || NearZero(viewPortLength_) || source == SCROLL_FROM_ANIMATION ||
         source == SCROLL_FROM_ANIMATION_SPRING) {
         return;
     }
     // the distance above the top, if lower than top, it is zero
-    float overscrollPastStart = 0.0f;
+    float overScrollPastStart = 0.0f;
     // the distance below the bottom, if higher than bottom, it is zero
-    float overscrollPastEnd = 0.0f;
-    float overscrollPast = 0.0f;
+    float overScrollPastEnd = 0.0f;
+    float overScrollPast = 0.0f;
     // TODO: not consider rowReverse or colReverse
-    overscrollPastStart = std::max(currentOffset_, 0.0f);
-    overscrollPastEnd = std::max(-scrollableDistance_ - currentOffset_, 0.0f);
+    overScrollPastStart = std::max(currentOffset_, 0.0f);
+    overScrollPastEnd = std::max(-scrollableDistance_ - currentOffset_, 0.0f);
     // do not adjust offset if direction opposite from the overScroll direction when out of boundary
-    if ((overscrollPastStart > 0.0f && delta < 0.0f) || (overscrollPastEnd > 0.0f && delta > 0.0f)) {
+    if ((overScrollPastStart > 0.0f && delta < 0.0f) || (overScrollPastEnd > 0.0f && delta > 0.0f)) {
         return;
     }
-    overscrollPast = std::max(overscrollPastStart, overscrollPastEnd);
-    if (overscrollPast == 0.0f) {
+    overScrollPast = std::max(overScrollPastStart, overScrollPastEnd);
+    if (overScrollPast == 0.0f) {
         return;
     }
-    float friction = CalculateFriction((overscrollPast - std::abs(delta)) / viewPortLength_);
+    float friction = CalculateFriction((overScrollPast - std::abs(delta)) / viewPortLength_);
     float direction = delta > 0.0f ? 1.0f : -1.0f;
-    delta = direction * CalculateOffsetByFriction(overscrollPast, std::abs(delta), friction);
+    delta = direction * CalculateOffsetByFriction(overScrollPast, std::abs(delta), friction);
 }
 
 void ScrollPattern::ValidateOffset(int32_t source)
@@ -293,7 +227,7 @@ void ScrollPattern::ValidateOffset(int32_t source)
     // restrict position between top and bottom
     if (!scrollEffect_ || scrollEffect_->IsRestrictBoundary() || source == SCROLL_FROM_JUMP ||
         source == SCROLL_FROM_BAR || source == SCROLL_FROM_ROTATE) {
-        if (axis_ == Axis::HORIZONTAL) {
+        if (GetAxis() == Axis::HORIZONTAL) {
             if (IsRowReverse()) {
                 currentOffset_ = std::clamp(currentOffset_, 0.0f, scrollableDistance_);
             } else {
@@ -307,15 +241,16 @@ void ScrollPattern::ValidateOffset(int32_t source)
 
 void ScrollPattern::HandleScrollPosition(float scroll, int32_t scrollState)
 {
-    CHECK_NULL_VOID_NOLOG(scrollableEvent_);
-    const auto& onScroll = scrollableEvent_->GetOnScrollCallback();
+    auto scrollableEvent = GetScrollableEvent();
+    CHECK_NULL_VOID_NOLOG(scrollableEvent);
+    const auto& onScroll = scrollableEvent->GetOnScrollCallback();
     CHECK_NULL_VOID_NOLOG(onScroll);
     // not consider async call
     Dimension scrollX(0, DimensionUnit::VP);
     Dimension scrollY(0, DimensionUnit::VP);
     Dimension scrollPx(scroll, DimensionUnit::PX);
     auto scrollVpValue = scrollPx.ConvertToVp();
-    if (axis_ == Axis::HORIZONTAL) {
+    if (GetAxis() == Axis::HORIZONTAL) {
         scrollX.SetValue(scrollVpValue);
     } else {
         scrollY.SetValue(scrollVpValue);
@@ -357,7 +292,7 @@ void ScrollPattern::HandleCrashTop() const
     const auto& onScrollEdge = eventHub->GetScrollEdgeEvent();
     CHECK_NULL_VOID_NOLOG(onScrollEdge);
     // not consider async call
-    if (axis_ == Axis::HORIZONTAL) {
+    if (GetAxis() == Axis::HORIZONTAL) {
         onScrollEdge(ScrollEdge::LEFT);
         return;
     }
@@ -372,7 +307,7 @@ void ScrollPattern::HandleCrashBottom() const
     CHECK_NULL_VOID(eventHub);
     const auto& onScrollEdge = eventHub->GetScrollEdgeEvent();
     CHECK_NULL_VOID_NOLOG(onScrollEdge);
-    if (axis_ == Axis::HORIZONTAL) {
+    if (GetAxis() == Axis::HORIZONTAL) {
         onScrollEdge(ScrollEdge::RIGHT);
         return;
     }
@@ -390,9 +325,6 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
     if (IsScrollOutOnEdge(delta)) {
         return false;
     }
-    auto paintProperty = GetPaintProperty<ScrollPaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, false);
-    delta = paintProperty->CalculatePatternOffset(delta);
     // TODO: scrollBar effect!!
     lastOffset_ = currentOffset_;
     currentOffset_ += delta;
@@ -415,14 +347,6 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
     }
     if (scrollEffect_ && !scrollEffect_->IsRestrictBoundary()) {
         next = true;
-    }
-    // inner scroll bar
-    if (lastOffset_ != currentOffset_) {
-        paintProperty->UpdateScrollBarOffset(currentOffset_, viewPort_, viewPortExtent_, !isScrollContent_);
-    }
-    // outer scrollbar
-    if (source != SCROLL_FROM_BAR && scrollBarProxy_ && lastOffset_ != currentOffset_) {
-        scrollBarProxy_->NotifyScrollBar(AceType::WeakClaim(this));
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     return next;
@@ -475,7 +399,7 @@ void ScrollPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
 
 void ScrollPattern::ScrollBy(float pixelX, float pixelY, bool smooth, const std::function<void()>& onFinish)
 {
-    float distance = (axis_ == Axis::VERTICAL) ? pixelY : pixelX;
+    float distance = (GetAxis() == Axis::VERTICAL) ? pixelY : pixelX;
     if (NearZero(distance)) {
         return;
     }
@@ -508,7 +432,7 @@ void ScrollPattern::JumpToPosition(float position, int32_t source)
 
 void ScrollPattern::DoJump(float position, int32_t source)
 {
-    float setPosition = (axis_ == Axis::HORIZONTAL && IsRowReverse()) ? -position : position;
+    float setPosition = (GetAxis() == Axis::HORIZONTAL && IsRowReverse()) ? -position : position;
     if (!NearEqual(currentOffset_, setPosition)) {
         UpdateCurrentOffset(setPosition - currentOffset_, source);
     }
@@ -551,16 +475,19 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
     });
 }
 
-void ScrollPattern::RemoveScrollEdgeEffect()
+void ScrollPattern::AddScrollEdgeEffect(RefPtr<ScrollEdgeEffect> scrollEffect)
 {
-    CHECK_NULL_VOID_NOLOG(scrollEffect_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    gestureHub->RemoveScrollEdgeEffect(scrollEffect_);
+    if (scrollEffect_) {
+        gestureHub->RemoveScrollEdgeEffect(scrollEffect_);
+    }
+    scrollEffect_ = std::move(scrollEffect);
+    gestureHub->AddScrollEdgeEffect(GetAxis(), scrollEffect_);
 }
 
 void ScrollPattern::SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect)
@@ -589,13 +516,22 @@ void ScrollPattern::SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEf
             scrollEffect->InitialEdgeEffect();
         }
     }
-    RemoveScrollEdgeEffect();
-    scrollEffect_ = scrollEffect;
+    AddScrollEdgeEffect(scrollEffect);
 }
 
 bool ScrollPattern::IsOutOfBoundary() const
 {
     return (IsAtTop() || IsAtBottom());
+}
+
+void ScrollPattern::UpdateScrollBarOffset()
+{
+    if (!GetScrollBar() && !GetScrollBarProxy()) {
+        return;
+    }
+    Size size(viewPort_.Width(), viewPort_.Height());
+    auto estimatedHeight = (GetAxis() == Axis::HORIZONTAL) ? viewPortExtent_.Width() : viewPortExtent_.Height();
+    UpdateScrollBarRegion(-currentOffset_, estimatedHeight, size);
 }
 
 } // namespace OHOS::Ace::NG

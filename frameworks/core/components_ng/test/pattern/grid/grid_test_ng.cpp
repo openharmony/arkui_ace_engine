@@ -330,7 +330,7 @@ HWTEST_F(GridTestNg, GridTest003, TestSize.Level1)
     pattern->isConfigScrollable_ = false;
     ret = pattern->AnimateTo(GRID_POSITION, GRID_DURATION, Curves::LINEAR);
     EXPECT_EQ(ret, false);
-    ret = pattern->UpdateScrollPosition(GRID_SCROLL_OFFSET);
+    ret = pattern->UpdateCurrentOffset(GRID_SCROLL_OFFSET, SCROLL_FROM_UPDATE);
     EXPECT_EQ(ret, false);
     ret = pattern->UpdateStartIndex(1.0);
     EXPECT_EQ(ret, false);
@@ -891,7 +891,7 @@ RefPtr<FrameNode> TestScrollGrid(OptionalSizeF gridSize, double gridItemHeight, 
     if (!NearZero(scrollOffset)) {
         auto gridPattern = frameNode->GetPattern<GridPattern>();
         EXPECT_FALSE(gridPattern == nullptr);
-        gridPattern->UpdateScrollPosition(scrollOffset);
+        gridPattern->UpdateCurrentOffset(scrollOffset, SCROLL_FROM_UPDATE);
         layoutWrapper = frameNode->CreateLayoutWrapper();
         LayoutConstraintF constraint;
         constraint.UpdateIllegalSelfIdealSizeWithCheck(gridSize);

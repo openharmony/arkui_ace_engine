@@ -292,7 +292,7 @@ HWTEST_F(ScrollTestNg, ScrollTest003, TestSize.Level1)
     config.skipMeasure = true;
     config.skipLayout = false;
     auto dirty = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_EQ(dirty, true);
+    EXPECT_EQ(dirty, false);
     config.skipMeasure = true;
     config.skipLayout = true;
     dirty = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
@@ -360,6 +360,7 @@ HWTEST_F(ScrollTestNg, ScrollTest004, TestSize.Level1)
     EXPECT_NE(layoutProperty, nullptr);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     EXPECT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
     auto scrollLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
     EXPECT_NE(scrollLayoutAlgorithm, nullptr);
     LayoutConstraintF layoutConstraint;
@@ -441,9 +442,8 @@ HWTEST_F(ScrollTestNg, ScrollTest004, TestSize.Level1)
     pattern->currentOffset_ = SCROLL_FLOAT_100;
     pattern->scrollableDistance_ = SCROLL_FLOAT_NEGATIVE_100;
     pattern->viewPortLength_ = SCROLL_FLOAT_100;
-    pattern->isScrollContent_ = false;
     ret = callback(SCROLL_DOUBLE_200, SCROLL_FROM_UPDATE);
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, true);
 
     pattern->currentOffset_ = 0.0f;
     pattern->scrollableDistance_ = 0.0f;
@@ -455,7 +455,7 @@ HWTEST_F(ScrollTestNg, ScrollTest004, TestSize.Level1)
     pattern->scrollableDistance_ = SCROLL_FLOAT_NEGATIVE_100;
     pattern->viewPortLength_ = SCROLL_FLOAT_100;
     ret = callback(SCROLL_DOUBLE_NEGATIVE_100, SCROLL_FROM_UPDATE);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
 }
 
 /**
@@ -843,19 +843,6 @@ HWTEST_F(ScrollTestNg, ScrollTest008, TestSize.Level1)
     pattern->HandleScrollPosition(1.0f, SCROLL_FROM_BAR);
     auto scrollVp = Dimension(1.0, DimensionUnit::PX).ConvertToVp();
     EXPECT_EQ(dim1, Dimension(scrollVp, DimensionUnit::VP));
-
-    /**
-     * @tc.steps: step6. When TouchType is UP, verify the touchEvent callback function.
-     * @tc.expected: step6. Check whether relevant parameters are correct.
-     */
-    TouchEventInfo eventInfo("");
-    TouchLocationInfo locationInfo(1);
-    locationInfo.SetTouchType(TouchType::UP);
-    locationInfo.SetLocalLocation(SCROLL_OFFSET_ONE);
-    eventInfo.AddTouchLocationInfo(std::move(locationInfo));
-    EXPECT_NE(pattern->touchEvent_, nullptr);
-    pattern->touchEvent_->callback_(eventInfo);
-    EXPECT_EQ(pattern->isScrollContent_, true);
 }
 
 /**
@@ -946,19 +933,6 @@ HWTEST_F(ScrollTestNg, ScrollTest009, TestSize.Level1)
     pattern->HandleScrollPosition(1.0f, SCROLL_FROM_BAR);
     auto scrollVp = Dimension(1.0, DimensionUnit::PX).ConvertToVp();
     EXPECT_EQ(dim2, Dimension(scrollVp, DimensionUnit::VP));
-
-    /**
-     * @tc.steps: step6. When TouchType is DOWN, verify the touchEvent callback function.
-     * @tc.expected: step6. Check whether relevant parameters are correct.
-     */
-    TouchEventInfo eventInfo("");
-    TouchLocationInfo locationInfo(1);
-    locationInfo.SetTouchType(TouchType::DOWN);
-    locationInfo.SetLocalLocation(SCROLL_OFFSET_ONE);
-    eventInfo.AddTouchLocationInfo(std::move(locationInfo));
-    EXPECT_NE(pattern->touchEvent_, nullptr);
-    pattern->touchEvent_->callback_(eventInfo);
-    EXPECT_EQ(pattern->isScrollContent_, true);
 }
 
 /**
