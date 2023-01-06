@@ -259,7 +259,7 @@ void DragBarPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (touchType == TouchType::MOVE) {
         HandleTouchMove(frontInfo);
     }
-    if (touchType == TouchType::UP) {
+    if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
         HandleTouchUp();
     }
 }
