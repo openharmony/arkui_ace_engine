@@ -67,6 +67,7 @@ void RefreshPattern::OnModifyDone()
 bool RefreshPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/)
 {
+    refreshStatus = GetNextStatus();
     auto refreshLayoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_RETURN(refreshLayoutProperty, false);
     auto host = GetHost();
@@ -96,8 +97,6 @@ bool RefreshPattern::OnDirtyLayoutWrapperSwap(
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         }
     }
-
-    refreshStatus = GetNextStatus();
     return false;
 }
 
