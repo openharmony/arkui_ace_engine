@@ -64,6 +64,7 @@ group("pattern_unittest") {
     "scroll_bar:scroll_bar_unit_test",
     "select:select_pattern_test_ng",
     "shape:shape_pattern_unit_test",
+    "side_bar:side_bar_pattern_test_ng",
     "slider:slider_pattern_test_ng",
     "stack:stack_pattern_test_ng",
     "swiper_indicator:swiper_indicator_pattern_test_ng",
