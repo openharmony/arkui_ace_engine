@@ -189,7 +189,7 @@ void SearchModelImpl::SetOnChange(std::function<void(const std::string&)>&& onCh
     auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<SearchComponent>(stack->GetMainComponent());
     CHECK_NULL_VOID(component);
-    component->SetOnSubmit(std::move(onChange));
+    component->SetOnChange(std::move(onChange));
 }
 
 void SearchModelImpl::SetOnCopy(std::function<void(const std::string&)>&& func)
@@ -197,7 +197,11 @@ void SearchModelImpl::SetOnCopy(std::function<void(const std::string&)>&& func)
     auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<SearchComponent>(stack->GetMainComponent());
     CHECK_NULL_VOID(component);
-    component->SetOnSubmit(std::move(func));
+    auto childComponent = component->GetChild();
+    CHECK_NULL_VOID(childComponent);
+    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
+    CHECK_NULL_VOID(textFieldComponent);
+    textFieldComponent->SetOnCopy(std::move(func));
 }
 
 void SearchModelImpl::SetOnCut(std::function<void(const std::string&)>&& func)
@@ -205,7 +209,11 @@ void SearchModelImpl::SetOnCut(std::function<void(const std::string&)>&& func)
     auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<SearchComponent>(stack->GetMainComponent());
     CHECK_NULL_VOID(component);
-    component->SetOnSubmit(std::move(func));
+    auto childComponent = component->GetChild();
+    CHECK_NULL_VOID(childComponent);
+    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
+    CHECK_NULL_VOID(textFieldComponent);
+    textFieldComponent->SetOnCut(std::move(func));
 }
 
 void SearchModelImpl::SetOnPaste(std::function<void(const std::string&)>&& func)
@@ -213,7 +221,11 @@ void SearchModelImpl::SetOnPaste(std::function<void(const std::string&)>&& func)
     auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<SearchComponent>(stack->GetMainComponent());
     CHECK_NULL_VOID(component);
-    component->SetOnSubmit(std::move(func));
+    auto childComponent = component->GetChild();
+    CHECK_NULL_VOID(childComponent);
+    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
+    CHECK_NULL_VOID(textFieldComponent);
+    textFieldComponent->SetOnPaste(std::move(func));
 }
 
 void SearchModelImpl::InitializeDefaultValue(const RefPtr<BoxComponent>& boxComponent,

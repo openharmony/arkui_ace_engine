@@ -291,10 +291,10 @@ RefPtr<FrameNode> SearchModelNG::CreateImage(const RefPtr<SearchNode>& parentNod
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     if (src.empty()) {
-        imageSourceInfo.SetResourceId(InternalResource::ResourceId::INPUT_SEARCH_SVG);
+        imageSourceInfo.SetResourceId(InternalResource::ResourceId::SEARCH_SVG);
         auto iconTheme = pipeline->GetTheme<IconTheme>();
         CHECK_NULL_RETURN(iconTheme, nullptr);
-        auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::INPUT_SEARCH_SVG);
+        auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SEARCH_SVG);
         imageSourceInfo.SetSrc(iconPath);
     }
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -319,10 +319,10 @@ RefPtr<FrameNode> SearchModelNG::CreateCancelImage(const RefPtr<SearchNode>& par
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto nodeId = parentNode->GetCancelImageId();
     ImageSourceInfo imageSourceInfo("");
-    imageSourceInfo.SetResourceId(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE);
+    imageSourceInfo.SetResourceId(InternalResource::ResourceId::CLOSE_SVG);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_RETURN(iconTheme, nullptr);
-    auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE);
+    auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::CLOSE_SVG);
     imageSourceInfo.SetSrc(iconPath);
 
     auto frameNode = FrameNode::GetOrCreateFrameNode(
