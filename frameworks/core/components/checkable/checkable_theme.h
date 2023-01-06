@@ -130,6 +130,11 @@ public:
         return hoverRadius_;
     }
 
+    const Dimension& GetFocusRadius() const
+    {
+        return focusRadius_;
+    }
+
     const Dimension& GetFocusPaintPadding() const
     {
         return focusPaintPadding_;
@@ -155,6 +160,7 @@ protected:
     Dimension borderWidth_;
     Dimension shadowWidth_;
     Dimension hoverRadius_;
+    Dimension focusRadius_;
     Dimension focusPaintPadding_;
     double aspectRatio_ = 1.0;
     double radioInnerSizeRatio_ = 0.5;
@@ -223,6 +229,7 @@ public:
             theme->clickEffectColor_ = checkboxPattern->GetAttr<Color>("click_effect_color", Color::RED);
             theme->inactivePointColor_ = checkboxPattern->GetAttr<Color>("bg_color_unchecked", Color::RED);
             theme->hoverRadius_ = checkboxPattern->GetAttr<Dimension>("hover_border_radius", 0.0_vp);
+            theme->focusRadius_ = checkboxPattern->GetAttr<Dimension>("focus_border_radius", 0.0_vp);
             theme->focusPaintPadding_ = checkboxPattern->GetAttr<Dimension>("focus_paint_padding", 0.0_vp);
 
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
