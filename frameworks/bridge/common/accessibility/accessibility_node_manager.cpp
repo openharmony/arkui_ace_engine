@@ -825,7 +825,7 @@ void AccessibilityNodeManager::DumpTree(int32_t depth, NodeId nodeID)
     DumpLog::GetInstance().AddDesc("checkable: " + std::to_string(node->GetCheckableState()));
     DumpLog::GetInstance().Print(depth, node->GetTag(), node->GetChildList().size());
     for (const auto& item : node->GetChildList()) {
-        DumpTree(depth + 1, item->GetNodeId());
+        AccessibilityNodeManager::DumpTree(depth + 1, item->GetNodeId());
     }
 }
 

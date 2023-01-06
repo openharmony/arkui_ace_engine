@@ -361,6 +361,7 @@ void PipelineBase::DumpInfo(const std::vector<std::string>& params, std::vector<
     auto result = false;
     if (!SystemProperties::GetDebugEnabled()) {
         std::unique_ptr<std::ostream> ss = std::make_unique<std::ostringstream>();
+        CHECK_NULL_VOID(ss);
         DumpLog::GetInstance().SetDumpFile(std::move(ss));
         result = Dump(params);
         const auto& infoFile = DumpLog::GetInstance().GetDumpFile();
@@ -370,6 +371,7 @@ void PipelineBase::DumpInfo(const std::vector<std::string>& params, std::vector<
     } else {
         auto dumpFilePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui.dump";
         std::unique_ptr<std::ostream> ss = std::make_unique<std::ofstream>(dumpFilePath);
+        CHECK_NULL_VOID(ss);
         DumpLog::GetInstance().SetDumpFile(std::move(ss));
         result = Dump(params);
         info.emplace_back("dumpFilePath: " + dumpFilePath);
