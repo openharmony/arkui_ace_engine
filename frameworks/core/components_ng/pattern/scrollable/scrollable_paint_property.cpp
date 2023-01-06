@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/grid/grid_paint_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-void GridPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ScrollablePaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     PaintProperty::ToJsonValue(json);
     json->Put("scrollBar", GetBarStateString().c_str());
@@ -27,7 +27,7 @@ void GridPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("scrollBarWidth", GetBarWidth().ToString().c_str());
 }
 
-Color GridPaintProperty::GetBarColor() const
+Color ScrollablePaintProperty::GetBarColor() const
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, Color::TRANSPARENT);
@@ -40,7 +40,7 @@ Color GridPaintProperty::GetBarColor() const
                                   : defaultScrollBarColor;
 }
 
-Dimension GridPaintProperty::GetBarWidth() const
+Dimension ScrollablePaintProperty::GetBarWidth() const
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, Dimension());
@@ -53,16 +53,16 @@ Dimension GridPaintProperty::GetBarWidth() const
                                   : defaultScrollBarWidth;
 }
 
-std::string GridPaintProperty::GetBarStateString() const
+std::string ScrollablePaintProperty::GetBarStateString() const
 {
-    auto mode = propScrollBarProperty_ ? propScrollBarProperty_->propScrollBarMode.value_or(DisplayMode::OFF)
-                                       : DisplayMode::OFF;
+    auto mode = propScrollBarProperty_ ? propScrollBarProperty_->propScrollBarMode.value_or(NG::DisplayMode::OFF)
+                                       : NG::DisplayMode::OFF;
     switch (mode) {
-        case DisplayMode::AUTO:
+        case NG::DisplayMode::AUTO:
             return "BarState.Auto";
-        case DisplayMode::ON:
+        case NG::DisplayMode::ON:
             return "BarState.On";
-        case DisplayMode::OFF:
+        case NG::DisplayMode::OFF:
             return "BarState.Off";
         default:
             LOGE("mode %{public}d is not valid", mode);

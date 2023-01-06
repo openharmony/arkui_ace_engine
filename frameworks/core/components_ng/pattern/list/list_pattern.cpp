@@ -61,22 +61,20 @@ void ListPattern::OnModifyDone()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
-    if (!scrollableEvent_) {
-        InitScrollableEvent();
-    } else {
-        if (scrollableEvent_->GetAxis() != axis) {
-            gestureHub->RemoveScrollableEvent(scrollableEvent_);
-            scrollableEvent_->SetAxis(axis);
-            gestureHub->AddScrollableEvent(scrollableEvent_);
-            if (scrollEffect_) {
-                gestureHub->RemoveScrollEdgeEffect(scrollEffect_);
-                gestureHub->AddScrollEdgeEffect(GetDirection(), scrollEffect_);
-            }
+    if (axis != GetAxis()) {
+        SetAxis(axis);
+        if (scrollEffect_) {
+            gestureHub->RemoveScrollEdgeEffect(scrollEffect_);
+            gestureHub->AddScrollEdgeEffect(GetAxis(), scrollEffect_);
         }
+    }
+    if (!GetScrollableEvent()) {
+        InitScrollableEvent();
     }
 
     SetEdgeEffect(gestureHub, listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING));
-    SetScrollBar();
+    auto listPaintProperty = host->GetPaintProperty<ListPaintProperty>();
+    SetScrollBar(listPaintProperty->GetBarDisplayMode().value_or(DisplayMode::OFF));
     SetChainAnimation(listLayoutProperty->GetChainAnimation().value_or(false));
     if (multiSelectable_ && !isMouseEventInit_) {
         InitMouseEvent();
@@ -131,7 +129,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
-    return (listLayoutProperty && listLayoutProperty->GetDivider().has_value()) || scrollBar_;
+    return (listLayoutProperty && listLayoutProperty->GetDivider().has_value());
 }
 
 void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump)
@@ -212,8 +210,7 @@ void ListPattern::CheckScrollable()
         }
     }
 
-    CHECK_NULL_VOID_NOLOG(scrollableEvent_);
-    scrollableEvent_->SetEnabled(scrollable_);
+    SetScrollEnable(scrollable_);
 }
 
 RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
@@ -243,7 +240,7 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
         listLayoutAlgorithm->SetOverScrollFeature();
     }
     auto effect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
-    bool canOverScroll = (effect == EdgeEffect::SPRING) && (scrollableEvent_ && !scrollableEvent_->Idle());
+    bool canOverScroll = (effect == EdgeEffect::SPRING) && !ScrollableIdle() && scrollState_ != SCROLL_FROM_BAR;
     listLayoutAlgorithm->SetCanOverScroll(canOverScroll);
     if (chainAdapter_) {
         listLayoutAlgorithm->SetChainOffsetCallback([weak = AceType::WeakClaim(this)](int32_t index) {
@@ -256,13 +253,15 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     return listLayoutAlgorithm;
 }
 
-bool ListPattern::UpdateCurrentOffset(float offset)
+bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 {
+    SetScrollState(source);
     // check edgeEffect is not springEffect
     if (scrollEffect_ && scrollEffect_->IsFadeEffect()) {
         HandleScrollEffect(offset);
     }
-    if (!(scrollEffect_ && scrollEffect_->IsSpringEffect()) || !isScrollContent_) {
+    if (!(scrollEffect_ && scrollEffect_->IsSpringEffect()) ||
+        source == SCROLL_FROM_BAR || source == SCROLL_FROM_JUMP) {
         if ((startIndex_ == 0) && NonNegative(startMainPos_) && Positive(offset)) {
             return false;
         }
@@ -313,7 +312,7 @@ void ListPattern::MarkDirtyNodeSelf()
 
 void ListPattern::ProcessScrollEnd()
 {
-    isScrollContent_ = true;
+    SetScrollBarDriving(false);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
 }
@@ -324,7 +323,7 @@ float ListPattern::GetMainContentSize() const
     CHECK_NULL_RETURN(host, 0.0);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0);
-    return geometryNode->GetPaddingSize().MainSize(GetDirection());
+    return geometryNode->GetPaddingSize().MainSize(GetAxis());
 }
 
 SizeF ListPattern::GetContentSize() const
@@ -334,13 +333,6 @@ SizeF ListPattern::GetContentSize() const
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, SizeF());
     return geometryNode->GetPaddingSize();
-}
-
-Axis ListPattern::GetDirection() const
-{
-    auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
-    CHECK_NULL_RETURN(listLayoutProperty, Axis::VERTICAL);
-    return listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
 }
 
 bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
@@ -358,64 +350,31 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
 
 bool ListPattern::ScrollPositionCallback(float offset, int32_t source)
 {
-    SetScrollState(source);
     if (source == SCROLL_FROM_START) {
         ProcessDragStart(offset);
         return true;
     }
-    if (!isScrollContent_ && scrollBar_) {
-        if (source == SCROLL_FROM_UPDATE) {
-            offset = scrollBar_->CalcPatternOffset(-offset);
-        } else {
-            return false;
-        }
+    auto scrollBar = GetScrollBar();
+    if (scrollBar && scrollBar->IsDriving()) {
+        offset = scrollBar->CalcPatternOffset(offset);
+        source = SCROLL_FROM_BAR;
     } else {
         ProcessDragUpdate(offset);
     }
-    return UpdateCurrentOffset(offset);
+    return UpdateCurrentOffset(offset, source);
 }
 
 void ListPattern::InitScrollableEvent()
 {
+    AddScrollEvent();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    scrollableEvent_ = MakeRefPtr<ScrollableEvent>(GetDirection());
-    auto task = [weak = WeakClaim(this)](double offset, int32_t source) -> bool {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_RETURN(pattern, false);
-        return pattern->ScrollPositionCallback(offset, source);
-    };
-    scrollableEvent_->SetScrollPositionCallback(std::move(task));
-
-    auto scrollEnd = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->ProcessScrollEnd();
-    };
-    scrollableEvent_->SetScrollEndCallback(std::move(scrollEnd));
-
     auto listEventHub = host->GetEventHub<ListEventHub>();
     auto onScrollBegin = listEventHub->GetOnScrollBegin();
-    if (onScrollBegin) {
-        auto scrollBeginTask = [weak = WeakClaim(this)](Dimension dx, Dimension dy) {
-            ScrollInfo scrollInfo = { dx, dy };
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_RETURN(pattern, scrollInfo);
-            auto host = pattern->GetHost();
-            CHECK_NULL_RETURN(host, scrollInfo);
-            auto listEventHub = host->GetEventHub<ListEventHub>();
-            CHECK_NULL_RETURN(listEventHub, scrollInfo);
-            auto onScrollBegin = listEventHub->GetOnScrollBegin();
-            if (onScrollBegin) {
-                scrollInfo = onScrollBegin(dx, dy);
-            }
-            return scrollInfo;
-        };
-        scrollableEvent_->SetScrollBeginCallback(std::move(scrollBeginTask));
+    auto scrollableEvent = GetScrollableEvent();
+    if (onScrollBegin && scrollableEvent) {
+        scrollableEvent->SetScrollBeginCallback(std::move(onScrollBegin));
     }
-    auto gestureHub = listEventHub->GetGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    gestureHub->AddScrollableEvent(scrollableEvent_);
 }
 
 void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect)
@@ -455,7 +414,7 @@ void ListPattern::SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub, EdgeE
         // add callback to springEdgeEffect
         SetEdgeEffectCallback(springEffect);
         scrollEffect_ = springEffect;
-        gestureHub->AddScrollEdgeEffect(GetDirection(), scrollEffect_);
+        gestureHub->AddScrollEdgeEffect(GetAxis(), scrollEffect_);
     }
     if (edgeEffect == EdgeEffect::FADE && !scrollEffect_) {
         auto fadeEdgeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::GRAY);
@@ -470,7 +429,7 @@ void ListPattern::SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub, EdgeE
         SetEdgeEffectCallback(fadeEdgeEffect);
         fadeEdgeEffect->InitialEdgeEffect();
         scrollEffect_ = fadeEdgeEffect;
-        gestureHub->AddScrollEdgeEffect(GetDirection(), scrollEffect_);
+        gestureHub->AddScrollEdgeEffect(GetAxis(), scrollEffect_);
     }
 }
 
@@ -480,7 +439,7 @@ void ListPattern::HandleScrollEffect(float offset)
     bool reachEnd = (endIndex_ == maxListItemIndex_) && NearEqual(endMainPos_, GetMainContentSize());
     // handle edge effect
     if ((reachStart && Positive(offset)) || (reachEnd && Negative(offset))) {
-        scrollEffect_->HandleOverScroll(GetDirection(), -offset, GetContentSize());
+        scrollEffect_->HandleOverScroll(GetAxis(), -offset, GetContentSize());
     }
 }
 
@@ -518,8 +477,8 @@ bool ListPattern::OnKeyEvent(const KeyEvent& event)
 
 bool ListPattern::HandleDirectionKey(KeyCode code)
 {
-    if ((GetDirection() == Axis::VERTICAL && code == KeyCode::KEY_DPAD_UP) ||
-        (GetDirection() == Axis::HORIZONTAL && code == KeyCode::KEY_DPAD_LEFT)) {
+    if ((GetAxis() == Axis::VERTICAL && code == KeyCode::KEY_DPAD_UP) ||
+        (GetAxis() == Axis::HORIZONTAL && code == KeyCode::KEY_DPAD_LEFT)) {
         auto nextIndex = std::clamp(scrollIndex_ - 1, 0, maxListItemIndex_);
         if (nextIndex == scrollIndex_) {
             return false;
@@ -530,8 +489,8 @@ bool ListPattern::HandleDirectionKey(KeyCode code)
         ScrollToIndex(scrollIndex_, ScrollIndexAlignment::ALIGN_TOP);
         return true;
     }
-    if ((GetDirection() == Axis::VERTICAL && code == KeyCode::KEY_DPAD_DOWN) ||
-        (GetDirection() == Axis::HORIZONTAL && code == KeyCode::KEY_DPAD_RIGHT)) {
+    if ((GetAxis() == Axis::VERTICAL && code == KeyCode::KEY_DPAD_DOWN) ||
+        (GetAxis() == Axis::HORIZONTAL && code == KeyCode::KEY_DPAD_RIGHT)) {
         auto nextIndex = std::clamp(scrollIndex_ + 1, 0, maxListItemIndex_);
         if (nextIndex == scrollIndex_) {
             return false;
@@ -561,7 +520,7 @@ void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
         auto list = weakScroll.Upgrade();
         CHECK_NULL_VOID_NOLOG(list);
         list->SetScrollState(SCROLL_FROM_JUMP);
-        list->UpdateCurrentOffset(list->GetTotalOffset() - value);
+        list->UpdateCurrentOffset(list->GetTotalOffset() - value, SCROLL_FROM_JUMP);
     });
     animator_->AddInterpolator(animation);
     animator_->SetDuration(static_cast<int32_t>(duration));
@@ -572,7 +531,7 @@ void ListPattern::ScrollTo(float position)
 {
     LOGI("ScrollTo:%{public}f", position);
     SetScrollState(SCROLL_FROM_JUMP);
-    UpdateCurrentOffset(GetTotalOffset() - position);
+    UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
 }
 
 void ListPattern::ScrollToIndex(int32_t index, ScrollIndexAlignment align)
@@ -600,52 +559,16 @@ bool ListPattern::ScrollPage(bool reverse)
     LOGI("ScrollPage:%{public}d", reverse);
     float distance = reverse ? GetMainContentSize() : -GetMainContentSize();
     SetScrollState(SCROLL_FROM_JUMP);
-    UpdateCurrentOffset(distance);
+    UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
     return true;
 }
 
 Offset ListPattern::GetCurrentOffset() const
 {
-    if (GetDirection() == Axis::HORIZONTAL) {
+    if (GetAxis() == Axis::HORIZONTAL) {
         return {GetTotalOffset(), 0.0};
     }
     return {0.0, GetTotalOffset()};
-}
-
-void ListPattern::SetScrollBar()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto listPaintProperty = host->GetPaintProperty<ListPaintProperty>();
-    auto displayMode = listPaintProperty->GetBarDisplayMode().value_or(DisplayMode::OFF);
-    if (displayMode == DisplayMode::OFF) {
-        if (scrollBar_) {
-            scrollBar_.Reset();
-        }
-        if (touchEvent_) {
-            auto hub = host->GetEventHub<EventHub>();
-            CHECK_NULL_VOID(hub);
-            auto gestureHub = hub->GetOrCreateGestureEventHub();
-            CHECK_NULL_VOID(gestureHub);
-            gestureHub->RemoveTouchEvent(touchEvent_);
-            touchEvent_.Reset();
-        }
-    } else if (!scrollBar_) {
-        scrollBar_ = AceType::MakeRefPtr<ScrollBar>(displayMode);
-        // set the scroll bar style
-        if (GetDirection() == Axis::HORIZONTAL) {
-            scrollBar_->SetPositionMode(PositionMode::BOTTOM);
-        }
-        RegisterScrollBarEventTask();
-    } else if (scrollBar_->GetDisplayMode() != displayMode) {
-        scrollBar_->SetDisplayMode(displayMode);
-    } else {
-        return;
-    }
-
-    if (isInitialized_) {
-        UpdateScrollBarOffset();
-    }
 }
 
 void ListPattern::UpdateScrollBarOffset()
@@ -653,7 +576,7 @@ void ListPattern::UpdateScrollBarOffset()
     if (itemPosition_.empty()) {
         return;
     }
-    if (!scrollBar_ && !scrollBarProxy_) {
+    if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
     SizeF ContentSize = GetContentSize();
@@ -663,76 +586,7 @@ void ListPattern::UpdateScrollBarOffset()
     Offset scrollOffset = { currentOffset, currentOffset }; // fit for w/h switched.
     auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1);
 
-    // inner scrollbar
-    if (scrollBar_) {
-        scrollBar_->SetDriving(!isScrollContent_);
-        scrollBar_->UpdateScrollBarRegion(Offset(), size, scrollOffset, estimatedHeight);
-    }
-
-    // outer scrollbar
-    if (scrollBarProxy_) {
-        scrollableDistance_ = estimatedHeight - GetMainContentSize();
-        currentPosition_ = -currentOffset;
-        scrollBarProxy_->NotifyScrollBar(AceType::WeakClaim(this));
-    }
-}
-
-void ListPattern::RegisterScrollBarEventTask()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    if (touchEvent_) {
-        gestureHub->RemoveTouchEvent(touchEvent_);
-    }
-    touchEvent_ = MakeRefPtr<TouchEventImpl>([weak = WeakClaim(this)](const TouchEventInfo& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto scrollBar = pattern->scrollBar_;
-        CHECK_NULL_VOID(scrollBar);
-        if (info.GetTouches().empty()) {
-            return;
-        }
-        auto touch = info.GetTouches().front();
-        if (touch.GetTouchType() == TouchType::DOWN) {
-            Point point(touch.GetLocalLocation().GetX(), touch.GetLocalLocation().GetY());
-            if (scrollBar->InBarRegion(point)) {
-                scrollBar->SetPressed(true);
-                pattern->isScrollContent_ = false;
-            } else {
-                scrollBar->SetPressed(false);
-                pattern->isScrollContent_ = true;
-            }
-            pattern->MarkDirtyNodeSelf();
-        }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
-            scrollBar->SetPressed(false);
-            pattern->MarkDirtyNodeSelf();
-        }
-    });
-    gestureHub->AddTouchEvent(touchEvent_);
-}
-
-void ListPattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy)
-{
-    CHECK_NULL_VOID(scrollBarProxy);
-    auto scrollFunction = [weak = WeakClaim(this)](double offset, int32_t source) {
-        if (source != SCROLL_FROM_START) {
-            auto pattern = weak.Upgrade();
-            if (!pattern || pattern->GetDirection() == Axis::NONE) {
-                return false;
-            }
-            pattern->SetScrollState(source);
-            return pattern->UpdateCurrentOffset(offset);
-        }
-        return true;
-    };
-    ScrollableNodeInfo nodeInfo = { AceType::WeakClaim(this), std::move(scrollFunction) };
-    scrollBarProxy->RegisterScrollableNode(nodeInfo);
-    scrollBarProxy_ = scrollBarProxy;
+    UpdateScrollBarRegion(currentOffset, estimatedHeight, size);
 }
 
 void ListPattern::SetChainAnimation(bool enable)
@@ -789,8 +643,9 @@ float ListPattern::FlushChainAnimation(float dragOffset)
     }
     float deltaDistance = 0.0;
     bool needSetValue = false;
-    bool overScroll = scrollableEvent_ && scrollableEvent_->GetScrollable() &&
-        scrollableEvent_->GetScrollable()->IsSpringMotionRunning();
+    auto scrollableEvent = GetScrollableEvent();
+    bool overScroll = scrollableEvent && scrollableEvent->GetScrollable() &&
+        scrollableEvent->GetScrollable()->IsSpringMotionRunning();
     if (chainOverScroll_ != overScroll) {
         if (overScroll) {
             if (overSpringProperty_ && overSpringProperty_->IsValid()) {

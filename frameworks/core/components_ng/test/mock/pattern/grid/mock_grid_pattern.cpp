@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
 namespace OHOS::Ace::NG {
-GridPattern::~GridPattern() {}
 void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void GridPattern::OnAttachToFrameNode() {}
 void GridPattern::OnModifyDone() {}
@@ -42,18 +41,20 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep /* step */, const Weak
     return nullptr;
 }
 
-float GridPattern::GetCurrentPosition() const
-{
-    return 0.0f;
-}
-
-float GridPattern::GetScrollableDistance() const
-{
-    return 0.0f;
-}
-
 CanvasDrawFunction GridPaintMethod::GetForegroundDrawFunction(PaintWrapper* /* paintWrapper */)
 {
     return [](RSCanvas& canvas) {};
+}
+
+bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
+{
+    return true;
+}
+
+void GridPattern::UpdateScrollBarOffset() {}
+
+bool GridPattern::OnScrollCallback(float offset, int32_t source)
+{
+    return true;
 }
 } // namespace OHOS::Ace::NG

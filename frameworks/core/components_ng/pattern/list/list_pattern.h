@@ -28,13 +28,14 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
-class ListPattern : public Pattern {
-    DECLARE_ACE_TYPE(ListPattern, Pattern);
+class ListPattern : public ScrollablePattern {
+    DECLARE_ACE_TYPE(ListPattern, ScrollablePattern);
 
 public:
     ListPattern() = default;
@@ -48,7 +49,7 @@ public:
         auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
         auto drawVertical = (axis == Axis::HORIZONTAL);
         auto paint =  MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_, itemPosition_);
-        paint->SetScrollBar(AceType::WeakClaim(AceType::RawPtr(scrollBar_)));
+        paint->SetScrollBar(AceType::WeakClaim(AceType::RawPtr(GetScrollBar())));
         paint->SetTotalItemCount(maxListItemIndex_ + 1);
         if (scrollEffect_ && scrollEffect_->IsFadeEffect()) {
             paint->SetEdgeEffect(scrollEffect_);
@@ -83,7 +84,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
-    bool UpdateCurrentOffset(float offset);
+    bool UpdateCurrentOffset(float offset, int32_t source) override;
 
     int32_t GetStartIndex() const
     {
@@ -110,7 +111,10 @@ public:
         return scrollState_;
     }
 
-    Axis GetDirection() const;
+    bool IsScrollable() const override
+    {
+        return scrollable_;
+    }
 
     FocusPattern GetFocusPattern() const override
     {
@@ -153,20 +157,7 @@ public:
     bool ScrollPage(bool reverse);
     Offset GetCurrentOffset() const;
 
-    // scrollBar
-    void SetScrollBar();
-    void UpdateScrollBarOffset();
-    void RegisterScrollBarEventTask();
-    void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy);
-    float GetScrollableDistance() const
-    {
-        return scrollableDistance_;
-    }
-    float GetCurrentPosition() const
-    {
-        return currentPosition_;
-    }
-
+    void UpdateScrollBarOffset() override;
     // chain animation
     void SetChainAnimation(bool enable);
     void InitChainAnimation(int32_t nodeCount);
@@ -212,7 +203,6 @@ private:
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
 
     RefPtr<Animator> animator_;
-    RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
     RefPtr<ListPositionController> positionController_;
     int32_t maxListItemIndex_ = 0;
@@ -232,13 +222,6 @@ private:
     ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
     int32_t scrollIndex_ = 0;
     bool scrollable_ = true;
-
-    RefPtr<ScrollBar> scrollBar_;
-    RefPtr<TouchEventImpl> touchEvent_;
-    bool isScrollContent_ = true;
-    RefPtr<ScrollBarProxy> scrollBarProxy_;
-    float scrollableDistance_ = 0.0f;
-    float currentPosition_ = 0.0f;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
     bool scrollStop_ = false;
