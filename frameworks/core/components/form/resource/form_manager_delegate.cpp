@@ -120,10 +120,21 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TEMPORARY_KEY, info.temporary);
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::ACQUIRE_TYPE,
         OHOS::AppExecFwk::Constants::ACQUIRE_TYPE_CREATE_FORM);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, info.width.Value());
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, info.height.Value());
+    auto pipelineContext = context_.Upgrade();
+    if (pipelineContext) {
+        auto density = pipelineContext->GetDensity();
+        // 在OHOS::AppExecFwk::Constants中加类似参数
+        wantCache_.SetParam("ohos.extra.param.key.form_density", density);
+    }
+    
     if (info.dimension != -1) {
         wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DIMENSION_KEY, info.dimension);
     }
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
+    // 不是clientInstance
+    wantCache_.SetParam("SurfaceCallback", clientInstance->AsObject());
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
     if (ret != 0) {
         auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
@@ -155,6 +166,17 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
         CreatePlatformResource(context, info);
     }
 #endif
+}
+
+void FormManagerDelegate::ProcessAddFormSurface(
+    const AppExecFwk::FormJsInfo& formInfo, const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode)
+{
+    if (!rsSurfaceNode) {
+        LOGI("---- etsCardTest ProcessAddFormSurface rsSurfaceNode is null");
+        return;
+    }
+    LOGI("---- etsCardTest ProcessAddFormSurface formId=%{public}lld, surfaceNodeId=%{public}llu ----", formInfo.formId,
+        rsSurfaceNode->GetId());
 }
 
 std::string FormManagerDelegate::ConvertRequestInfo(const RequestFormInfo& info) const
