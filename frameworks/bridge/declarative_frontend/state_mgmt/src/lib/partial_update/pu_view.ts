@@ -228,7 +228,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   private UpdateElement(elmtId: number): void {
     // do not process an Element that has been marked to be deleted
     const updateFunc: UpdateFunc = this.updateFuncByElmtId.get(elmtId);
-    if (updateFunc == undefined) {
+    if ((updateFunc == undefined) || (typeof updateFunc !== "function")) {
       stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
     } else {
       stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: updateDirtyElements: update function on elmtId ${elmtId} start ...`);
