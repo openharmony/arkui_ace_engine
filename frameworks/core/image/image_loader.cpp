@@ -483,20 +483,11 @@ sk_sp<SkData> ResourceImageLoader::LoadImageData(
 {
     auto uri = imageSourceInfo.GetSrc();
     auto pipelineContext = context.Upgrade();
-    if (!pipelineContext) {
-        LOGE("invalid pipeline context");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto themeManager = pipelineContext->GetThemeManager();
-    if (!themeManager) {
-        LOGE("get theme manager failed");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(themeManager, nullptr);
     auto themeConstants = themeManager->GetThemeConstants();
-    if (!themeConstants) {
-        LOGE("get theme constants failed");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(themeConstants, nullptr);
 
     std::unique_ptr<uint8_t[]> data;
     size_t dataLen = 0;

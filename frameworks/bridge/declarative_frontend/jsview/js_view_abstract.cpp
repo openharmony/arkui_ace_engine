@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -4435,16 +4435,11 @@ RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants(const JSRef<JSObject>& 
         auto container = Container::Current();
         auto weak = container->GetCardPipeline(cardId);
         auto cardPipelineContext = weak.Upgrade();
-        if (!cardPipelineContext) {
-            LOGE("card pipelineContext is null!");
-            return nullptr;
-        }
+        CHECK_NULL_RETURN(cardPipelineContext, nullptr);
         auto cardThemeManager = cardPipelineContext->GetThemeManager();
-        if (!cardThemeManager) {
-            LOGE("card themeManager is null!");
-            return nullptr;
-        }
-        return cardThemeManager->GetThemeConstants(bundleName, moduleName);
+        CHECK_NULL_RETURN(cardThemeManager, nullptr);
+        cardThemeManager->UpdateThemeConstants(bundleName, moduleName);
+        return cardThemeManager->GetThemeConstants();
     }
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
@@ -4464,25 +4459,18 @@ RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants(const JSRef<JSObject>& 
             LOGE("pluginThemeManager is null!");
             return nullptr;
         }
-        return pluginThemeManager->GetThemeConstants(bundleName, moduleName);
+        pluginThemeManager->UpdateThemeConstants(bundleName, moduleName);
+        return pluginThemeManager->GetThemeConstants();
     }
 #endif
     auto container = Container::Current();
-    if (!container) {
-        LOGW("container is null");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(container, nullptr);
     auto pipelineContext = container->GetPipelineContext();
-    if (!pipelineContext) {
-        LOGE("pipelineContext is null!");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto themeManager = pipelineContext->GetThemeManager();
-    if (!themeManager) {
-        LOGE("themeManager is null!");
-        return nullptr;
-    }
-    return themeManager->GetThemeConstants(bundleName, moduleName);
+    CHECK_NULL_RETURN(themeManager, nullptr);
+    themeManager->UpdateThemeConstants(bundleName, moduleName);
+    return themeManager->GetThemeConstants();
 }
 
 void JSViewAbstract::JsHoverEffect(const JSCallbackInfo& info)
