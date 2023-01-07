@@ -34,6 +34,18 @@ struct GridLayoutInfo {
         return lengthOfItemsInViewport - mainGap;
     }
 
+    void UpdateStartIndexByStartLine()
+    {
+        auto startLine = gridMatrix_.find(startMainLineIndex_);
+        if (startLine == gridMatrix_.end()) {
+            return;
+        }
+        if (startLine->second.empty()) {
+            return;
+        }
+        startIndex_ = startLine->second.begin()->second;
+    }
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f;
