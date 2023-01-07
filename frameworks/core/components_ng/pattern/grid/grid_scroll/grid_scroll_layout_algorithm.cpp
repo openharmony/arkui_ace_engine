@@ -221,6 +221,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
             }
         }
         gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_;
+        gridLayoutInfo_.UpdateStartIndexByStartLine();
     }
 
     // Step1: Measure [GridItem] that has been recorded to [gridMatrix_]
@@ -658,10 +659,9 @@ float GridScrollLayoutAlgorithm::FillNewLineForward(float crossSize, float mainS
             LOGI("startMainLineIndex: %{public}d is already the first line, no forward line to make",
                 gridLayoutInfo_.startMainLineIndex_);
             return lineHeight;
-        } else {
-            // add more than one line
-            UpdateMatrixForAddedItems();
         }
+        // add more than one line
+        UpdateMatrixForAddedItems();
     }
     gridLayoutInfo_.startMainLineIndex_--;
     bool doneCreateNewLine = false;
@@ -791,6 +791,7 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
             // try next item
             LOGI("skip item too big to be placed");
             --i;
+            layoutWrapper->RemoveChildInRenderTree(currentIndex);
             ++currentIndex;
             continue;
         }

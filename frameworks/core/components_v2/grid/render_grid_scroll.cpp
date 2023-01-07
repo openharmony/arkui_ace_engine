@@ -739,6 +739,16 @@ void RenderGridScroll::CalculateViewPort()
                 }
             }
             currentOffset_ = 0.0;
+
+            auto blank = CalculateBlankOfEnd();
+            if (GreatOrEqual(0.0, blank)) {
+                return;
+            }
+            // request new item until the blank is filled up
+            blank -= BuildLazyGridLayout(*mainCount_, blank);
+            if (LessOrEqual(blank, 0)) {
+                return;
+            }
         } else {
             // [currentOffset_] <= 0  means grid items are going to move up.
             if (!NearZero(firstItemOffset_)) {
