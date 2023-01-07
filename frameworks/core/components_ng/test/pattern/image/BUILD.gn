@@ -30,9 +30,7 @@ ohos_unittest("image_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/image/mock_icon_theme.cpp",
     "$ace_root/frameworks/core/image/image_source_info.cpp",
-    "image_layout_algorithm_test.cpp",
-    "image_model_ng_test.cpp",
-    "image_pattern_test.cpp",
+    "image_pattern_test_ng.cpp",
   ]
 
   sources += test_pattern_sources
