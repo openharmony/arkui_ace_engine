@@ -578,19 +578,19 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest011, TestSize.Level1)
      * @tc.steps: step2. Judge whether there is progressChild and textChild.
      */
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
     auto textChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
     EXPECT_FALSE(textChild == nullptr);
     pattern->textChild_ = textChild;
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
     auto loadingProgressChild =
         FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG, -1, AceType::MakeRefPtr<LoadingProgressPattern>());
     EXPECT_FALSE(loadingProgressChild == nullptr);
     pattern->progressChild_ = loadingProgressChild;
     pattern->textChild_ = nullptr;
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
     /**
      * @tc.steps: step3. when there is both progressChild and textChild, and their valid property.
      */
@@ -600,7 +600,7 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest011, TestSize.Level1)
     auto progressChildLayoutProperty = pattern->progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     progressChildLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
     EXPECT_EQ(textChildLayoutProperty->GetVisibilityValue(), VisibleType::INVISIBLE);
     EXPECT_EQ(progressChildLayoutProperty->GetVisibilityValue(), VisibleType::INVISIBLE);
 }
@@ -627,31 +627,31 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest012, TestSize.Level1)
     EXPECT_NE(layoutProperty, nullptr);
     auto refreshRenderProperty = frameNode->GetPaintProperty<RefreshRenderProperty>();
     EXPECT_FALSE(refreshRenderProperty == nullptr);
-    pattern->refreshStatus = RefreshStatus::REFRESH;
+    pattern->refreshStatus_ = RefreshStatus::REFRESH;
     /**
      * @tc.steps: step2. when renderProperty has invalid IsRefreshing.
      */
     refreshRenderProperty->UpdateIsRefreshing(true);
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::REFRESH);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::REFRESH);
     /**
      * @tc.steps: step3. when renderProperty has valid IsRefreshing property, but has no IsShowLastTimeValue.
      */
     refreshRenderProperty->UpdateIsRefreshing(false);
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::DONE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::DONE);
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
     /**
      * @tc.steps: step4. when renderProperty has valid IsRefreshing property and IsShowLastTimeValue.
      */
-    pattern->refreshStatus = RefreshStatus::REFRESH;
+    pattern->refreshStatus_ = RefreshStatus::REFRESH;
     refreshRenderProperty->UpdateLastTimeText("LastTimeText");
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
     EXPECT_FALSE(refreshLayoutProperty == nullptr);
     refreshLayoutProperty->UpdateIsShowLastTime(true);
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::DONE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::DONE);
     EXPECT_FALSE(refreshRenderProperty->GetTimeText() == std::nullopt);
 }
 
@@ -774,7 +774,7 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest016, TestSize.Level1)
     /**
      * @tc.steps: step2. initialize refreshStatus and create two child Node.
      */
-    pattern->refreshStatus = RefreshStatus::DRAG;
+    pattern->refreshStatus_ = RefreshStatus::DRAG;
     auto textChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
     EXPECT_FALSE(textChild == nullptr);
     frameNode->AddChild(textChild);
@@ -844,7 +844,7 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest017, TestSize.Level1)
     /**
      * @tc.cases: case1. RefreshPattern need UpdateScrollableOffset when RefreshStatus is DONE and frameSize is invalid.
      */
-    pattern->refreshStatus = RefreshStatus::DONE;
+    pattern->refreshStatus_ = RefreshStatus::DONE;
     refreshLayoutProperty->UpdateMaxDistance(Dimension(200.f));
     pattern->UpdateScrollableOffset(100.0f);
     EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 100.0f));
@@ -857,7 +857,7 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest017, TestSize.Level1)
     /**
      * @tc.cases: case3. RefreshPattern need not UpdateScrollableOffset.
      */
-    pattern->refreshStatus = RefreshStatus::REFRESH;
+    pattern->refreshStatus_ = RefreshStatus::REFRESH;
     pattern->UpdateScrollableOffset(100.0f);
     EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 100.0f));
 }
@@ -901,12 +901,12 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest019, TestSize.Level1)
     /**
      * @tc.cases: case1. refreshStatus is invalid, HandleDragEnd func is also invalid.
      */
-    pattern->refreshStatus = RefreshStatus::INACTIVE;
+    pattern->refreshStatus_ = RefreshStatus::INACTIVE;
     pattern->HandleDragEnd();
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::INACTIVE);
-    pattern->refreshStatus = RefreshStatus::DONE;
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
+    pattern->refreshStatus_ = RefreshStatus::DONE;
     pattern->HandleDragEnd();
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::DONE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::DONE);
     /**
      * @tc.steps: step2. initialize refreshStatus and create two child Node.
      */
@@ -920,13 +920,13 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest019, TestSize.Level1)
     /**
      * @tc.cases: case2. HandleDragEnd func is valid to run.
      */
-    pattern->refreshStatus = RefreshStatus::DRAG;
+    pattern->refreshStatus_ = RefreshStatus::DRAG;
     auto refreshLayoutProperty = pattern->GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(refreshLayoutProperty);
     refreshLayoutProperty->UpdateScrollableOffset(OffsetF(0, 100.0f));
     refreshLayoutProperty->UpdateIndicatorOffset(Dimension(50.0));
     pattern->HandleDragEnd();
-    EXPECT_EQ(pattern->refreshStatus, RefreshStatus::REFRESH);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::REFRESH);
     EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 0));
     EXPECT_EQ(refreshLayoutProperty->GetLoadingProcessOffsetValue(), OffsetF(0, 50.0));
     EXPECT_EQ(refreshLayoutProperty->GetShowTimeOffsetValue(), OffsetF(0, 0));
