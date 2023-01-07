@@ -44,9 +44,9 @@ public:
     void DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect,
         const BorderRadiusArray& radiusXY) override;
 
-    void SetAnimationCallback(std::function<void()>&& callback);
+    void SetAnimationCallback(std::function<void()>&& callback) override;
 
-    void ControlAnimation(bool play);
+    void ControlAnimation(bool play) override;
 
 private:
     const RefPtr<SvgDomBase> svgDom_;
