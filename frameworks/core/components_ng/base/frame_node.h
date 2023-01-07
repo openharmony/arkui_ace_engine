@@ -261,8 +261,8 @@ public:
 
     OffsetF GetTransformRelativeOffset() const;
 
-    OffsetF GetPaintRectOffset() const;
-
+    OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
+    
     void AdjustGridOffset();
 
     void SetActive(bool active) override;
@@ -294,6 +294,8 @@ public:
     {
         destroyCallbacks_.emplace_back(callback);
     }
+
+    bool MarkRemoving() override;
 
 private:
     void MarkNeedRender(bool isRenderBoundary);

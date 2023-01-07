@@ -77,11 +77,19 @@ public:
         return layoutAlgorithm_;
     }
 
+    // Called before layout, perform additional layout constraints or other layout parameters modifications to adjust
+    // the layout as needed.
+    void WillLayout();
+
     // This will call child and self measure process.
     void Measure(const std::optional<LayoutConstraintF>& parentConstraint);
 
     // Called to perform layout children.
     void Layout();
+
+    // Called after layout, perform final portion of additional layout-related tasks, such as final adjustments of
+    // geometry position, clean up temporary changes.
+    void DidLayout();
 
     const RefPtr<GeometryNode>& GetGeometryNode() const
     {

@@ -642,6 +642,11 @@ void ViewAbstract::SetVisibility(VisibleType visible)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, visible);
 }
 
+void ViewAbstract::SetGeometryTransition(const std::string& id)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, GeometryTransition, id);
+}
+
 void ViewAbstract::SetOpacity(double opacity)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

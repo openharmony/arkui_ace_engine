@@ -98,6 +98,9 @@ private:
             if (!nodeLeft || !nodeRight) {
                 return false;
             }
+            if (nodeLeft->IsRemoving() != nodeRight->IsRemoving()) {
+                return nodeRight->IsRemoving();
+            }
             if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
                 return true;
             }
