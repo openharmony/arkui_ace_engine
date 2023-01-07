@@ -221,6 +221,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
             }
         }
         gridLayoutInfo_.startMainLineIndex_ = currentMainLineIndex_;
+        gridLayoutInfo_.UpdateStartIndexByStartLine();
     }
 
     // Step1: Measure [GridItem] that has been recorded to [gridMatrix_]
@@ -657,10 +658,9 @@ float GridScrollLayoutAlgorithm::FillNewLineForward(float crossSize, float mainS
             LOGI("startMainLineIndex: %{public}d is already the first line, no forward line to make",
                 gridLayoutInfo_.startMainLineIndex_);
             return lineHeight;
-        } else {
-            // add more than one line
-            UpdateMatrixForAddedItems();
         }
+        // add more than one line
+        UpdateMatrixForAddedItems();
     }
     gridLayoutInfo_.startMainLineIndex_--;
     bool doneCreateNewLine = false;
@@ -790,6 +790,7 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
             // try next item
             LOGI("skip item too big to be placed");
             --i;
+            layoutWrapper->RemoveChildInRenderTree(currentIndex);
             ++currentIndex;
             continue;
         }
@@ -799,15 +800,11 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
         if (i >= crossCount_) {
             moreThanOneLine = true;
             secondLineHeight = std::max(GetMainAxisSize(itemSize, gridLayoutInfo_.axis_), secondLineHeight);
-            LOGE("currentMainLineIndex_:%{public}d,currentIndex:%{public}d,i:%{public}d", currentMainLineIndex_,
-                currentIndex, i);
         } else {
             lineHeight = std::max(GetMainAxisSize(itemSize, gridLayoutInfo_.axis_), lineHeight);
         }
 
         gridLayoutInfo_.endIndex_ = currentIndex;
-        LOGE("gridLayoutInfo_.endIndex_:%{public}d, lineHeight%{public}f, %{public}p", gridLayoutInfo_.endIndex_,
-            lineHeight, this);
         currentIndex++;
         doneFillLine = true;
     }
