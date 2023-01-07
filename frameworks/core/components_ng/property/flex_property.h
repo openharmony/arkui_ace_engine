@@ -66,16 +66,16 @@ struct FlexItemProperty {
     {
         static const std::unordered_map<AlignDirection, void (*)(float, FlexItemProperty&)> operators = {
             { AlignDirection::LEFT,
-                [](float inMapvalue, FlexItemProperty& item) { item.UpdateAlignLeft(inMapvalue); } },
+                [](float inMapValue, FlexItemProperty& item) { item.UpdateAlignLeft(inMapValue); } },
             { AlignDirection::RIGHT,
-                [](float inMapvalue, FlexItemProperty& item) { item.UpdateAlignRight(inMapvalue); } },
+                [](float inMapValue, FlexItemProperty& item) { item.UpdateAlignRight(inMapValue); } },
             { AlignDirection::MIDDLE,
-                [](float inMapvalue, FlexItemProperty& item) { item.UpdateAlignMiddle(inMapvalue); } },
-            { AlignDirection::TOP, [](float inMapvalue, FlexItemProperty& item) { item.UpdateAlignTop(inMapvalue); } },
+                [](float inMapValue, FlexItemProperty& item) { item.UpdateAlignMiddle(inMapValue); } },
+            { AlignDirection::TOP, [](float inMapValue, FlexItemProperty& item) { item.UpdateAlignTop(inMapValue); } },
             { AlignDirection::BOTTOM,
-                [](float inMapvalue, FlexItemProperty& item) { item.UpdateAlignBottom(inMapvalue); } },
+                [](float inMapValue, FlexItemProperty& item) { item.UpdateAlignBottom(inMapValue); } },
             { AlignDirection::CENTER,
-                [](float inMapvalue, FlexItemProperty& item) { item.UpdateAlignCenter(inMapvalue); } },
+                [](float inMapValue, FlexItemProperty& item) { item.UpdateAlignCenter(inMapValue); } },
         };
         auto operatorIter = operators.find(alignDirection);
         if (operatorIter != operators.end()) {
