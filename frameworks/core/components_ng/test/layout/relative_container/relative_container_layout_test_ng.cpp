@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -51,8 +52,8 @@ const float THIRD_ITEM_WIDTH = 225.0f;
 const float THIRD_ITEM_HEIGHT = 75.0f;
 
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
-const SizeF FIRST_IITEM_SIZE(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
-const SizeF THIRD_IITEM_SIZE(THIRD_ITEM_WIDTH, THIRD_ITEM_HEIGHT);
+const SizeF FIRST_ITEM_SIZE(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
+const SizeF THIRD_ITEM_SIZE(THIRD_ITEM_WIDTH, THIRD_ITEM_HEIGHT);
 
 const OffsetF OFFSET_TOP_LEFT = OffsetF(ZERO, ZERO);
 const OffsetF OFFSET_TOP_MIDDLE = OffsetF(CONTAINER_WIDTH / 2.0f, ZERO);
@@ -69,7 +70,7 @@ const OffsetF OFFSET_BOTTOM_RIGHT = OffsetF(CONTAINER_WIDTH, CONTAINER_HEIGHT);
 const std::string FIRST_ITEM_ID = "bt1";
 const std::string SECOND_ITEM_ID = "bt2";
 const std::string THIRD_ITEM_ID = "bt3";
-const std::string FOUTRH_ITEM_ID = "bt4";
+const std::string FOURTH_ITEM_ID = "bt4";
 const std::string FIFTH_ITEM_ID = "bt5";
 
 const std::string CONTAINER_ID = "__container__";
@@ -84,7 +85,7 @@ public:
 
 /**
  * @tc.name: RelativeContainerLayoutTest001
- * @tc.desc: Set an item with alignrules with RelativeContainer and check it.
+ * @tc.desc: Set an item with align rules with RelativeContainer and check it.
  * @tc.type: FUNC
  */
 HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest001, TestSize.Level1)
@@ -100,7 +101,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest001, TestSize
     EXPECT_FALSE(relativeContainerPattern == nullptr);
     auto relativeContainerLayoutProperty = layoutWrapper.GetLayoutProperty();
     EXPECT_FALSE(relativeContainerLayoutProperty == nullptr);
-    relativeContainerFrameNode->UpdateInspectorId("__container__");
+    relativeContainerFrameNode->UpdateInspectorId(CONTAINER_ID);
     auto relativeContainerLayoutAlgorithm = relativeContainerPattern->CreateLayoutAlgorithm();
     EXPECT_FALSE(relativeContainerLayoutAlgorithm == nullptr);
     layoutWrapper.SetLayoutAlgorithm(
@@ -149,7 +150,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest001, TestSize
         CONTAINER_ID, AlignDirection::TOP, VerticalAlign::CENTER, firstAlignRules);
     RelativeContainerTestUtilsNG::AddAlignRule(
         CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::BOTTOM, firstAlignRules);
-    firstFrameNode->UpdateInspectorId("bt1");
+    firstFrameNode->UpdateInspectorId(FIRST_ITEM_ID);
     firstFrameNode->GetLayoutProperty()->UpdateAlignRules(firstAlignRules);
     relativeContainerFrameNode->AddChild(firstFrameNode);
     layoutWrapper.AppendChild(firstLayoutWrapper);
@@ -165,7 +166,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest001, TestSize
 
 /**
  * @tc.name: RelativeContainerLayoutTest002
- * @tc.desc: Set two item with alignrules with RelativeContainer and check it.
+ * @tc.desc: Set two item with align rules with RelativeContainer and check it.
  * @tc.type: FUNC
  */
 HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest002, TestSize.Level1)
@@ -181,7 +182,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest002, TestSize
     EXPECT_FALSE(relativeContainerPattern == nullptr);
     auto relativeContainerLayoutProperty = layoutWrapper.GetLayoutProperty();
     EXPECT_FALSE(relativeContainerLayoutProperty == nullptr);
-    relativeContainerFrameNode->UpdateInspectorId("__container__");
+    relativeContainerFrameNode->UpdateInspectorId(CONTAINER_ID);
     auto relativeContainerLayoutAlgorithm = relativeContainerPattern->CreateLayoutAlgorithm();
     EXPECT_FALSE(relativeContainerLayoutAlgorithm == nullptr);
     layoutWrapper.SetLayoutAlgorithm(
@@ -235,7 +236,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest002, TestSize
     RelativeContainerTestUtilsNG::AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::TOP, firstAlignRules);
     RelativeContainerTestUtilsNG::AddAlignRule(
         CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::CENTER, firstAlignRules);
-    firstFrameNode->UpdateInspectorId("bt1");
+    firstFrameNode->UpdateInspectorId(FIRST_ITEM_ID);
     firstFrameNode->GetLayoutProperty()->UpdateAlignRules(firstAlignRules);
     relativeContainerFrameNode->AddChild(firstFrameNode);
     layoutWrapper.AppendChild(firstLayoutWrapper);
@@ -261,7 +262,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest002, TestSize
         FIRST_ITEM_ID, AlignDirection::TOP, VerticalAlign::BOTTOM, secondAlignRules);
     RelativeContainerTestUtilsNG::AddAlignRule(
         CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::BOTTOM, secondAlignRules);
-    secondFrameNode->UpdateInspectorId("bt2");
+    secondFrameNode->UpdateInspectorId(SECOND_ITEM_ID);
     secondFrameNode->GetLayoutProperty()->UpdateAlignRules(secondAlignRules);
     relativeContainerFrameNode->AddChild(secondFrameNode);
     layoutWrapper.AppendChild(secondLayoutWrapper);
@@ -275,13 +276,14 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest002, TestSize
     EXPECT_EQ(
         firstLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(CONTAINER_WIDTH / 2.0f, CONTAINER_HEIGHT / 2.0f));
     EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
-    EXPECT_EQ(secondLayoutWrapper->GetGeometryNode()->GetFrameSize(), FIRST_IITEM_SIZE);
+    EXPECT_EQ(
+        secondLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(CONTAINER_WIDTH / 2.0f, CONTAINER_HEIGHT / 2.0f));
     EXPECT_EQ(secondLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_CENTER_MIDDLE);
 }
 
 /**
  * @tc.name: RelativeContainerLayoutTest003
- * @tc.desc: Set five items with different alignrules value into RelativeContainer and check .
+ * @tc.desc: Set five items with different align rules value into RelativeContainer and check .
  * @tc.type: FUNC
  */
 HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest003, TestSize.Level1)
@@ -301,7 +303,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest003, TestSize
     EXPECT_FALSE(relativeContainerPattern == nullptr);
     auto relativeContainerLayoutProperty = relativeContainerPattern->CreateLayoutProperty();
     EXPECT_FALSE(relativeContainerLayoutProperty == nullptr);
-    relativeContainerFrameNode->UpdateInspectorId("__container__");
+    relativeContainerFrameNode->UpdateInspectorId(CONTAINER_ID);
 
     auto relativeContainerLayoutAlgorithm = relativeContainerPattern->CreateLayoutAlgorithm();
     EXPECT_FALSE(relativeContainerLayoutAlgorithm == nullptr);
@@ -365,7 +367,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest003, TestSize
     firstItemLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
     LayoutConstraintF firstItemLayoutConstraint = childLayoutConstraint;
-    firstItemLayoutConstraint.selfIdealSize.SetSize(FIRST_IITEM_SIZE);
+    firstItemLayoutConstraint.selfIdealSize.SetSize(FIRST_ITEM_SIZE);
     firstItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(firstItemLayoutConstraint);
     auto boxLayoutAlgorithm = firstItem->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     firstItemLayoutWrapper->SetLayoutAlgorithm(
@@ -375,7 +377,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest003, TestSize
     std::map<AlignDirection, AlignRule> firstItemAlignRules;
     RelativeContainerTestUtilsNG::AddAlignRule(
         CONTAINER_ID, AlignDirection::LEFT, HorizontalAlign::START, firstItemAlignRules);
-    firstItem->UpdateInspectorId("bt1");
+    firstItem->UpdateInspectorId(FIRST_ITEM_ID);
     firstItem->GetLayoutProperty()->UpdateAlignRules(firstItemAlignRules);
     relativeContainerFrameNode->AddChild(firstItem);
     layoutWrapper.AppendChild(firstItemLayoutWrapper);
@@ -401,15 +403,15 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest003, TestSize
         CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::BOTTOM, secondItemAlignRules);
     RelativeContainerTestUtilsNG::AddAlignRule(
         FIRST_ITEM_ID, AlignDirection::TOP, VerticalAlign::BOTTOM, secondItemAlignRules);
-    secondItem->UpdateInspectorId("bt2");
+    secondItem->UpdateInspectorId(SECOND_ITEM_ID);
     secondItem->GetLayoutProperty()->UpdateAlignRules(secondItemAlignRules);
     relativeContainerFrameNode->AddChild(secondItem);
     layoutWrapper.AppendChild(secondItemLayoutWrapper);
 
     // Add thirdItem-Box3 with size and 4alignRules(2 HorizontalAlign and 2 VerticalAlign).
-    int32_t thirdnodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    int32_t thirdNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto thirdItem = FrameNode::GetOrCreateFrameNode(
-        V2::BLANK_ETS_TAG, thirdnodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>(); });
+        V2::BLANK_ETS_TAG, thirdNodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>(); });
     RefPtr<GeometryNode> thirdItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> thirdItemLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(thirdItem, thirdItemGeometryNode, thirdItem->GetLayoutProperty());
@@ -429,15 +431,15 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest003, TestSize
         SECOND_ITEM_ID, AlignDirection::TOP, VerticalAlign::CENTER, thirdItemAlignRules);
     RelativeContainerTestUtilsNG::AddAlignRule(
         CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::BOTTOM, thirdItemAlignRules);
-    thirdItem->UpdateInspectorId("bt3");
+    thirdItem->UpdateInspectorId(THIRD_ITEM_ID);
     thirdItem->GetLayoutProperty()->UpdateAlignRules(thirdItemAlignRules);
     relativeContainerFrameNode->AddChild(thirdItem);
     layoutWrapper.AppendChild(thirdItemLayoutWrapper);
 
     // Add fourthItem-Box4 with 4alignRules(3 HorizontalAlign and 1 VerticalAlign).
-    int32_t fourthnodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    int32_t fourthNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto fourthItem = FrameNode::GetOrCreateFrameNode(
-        V2::BLANK_ETS_TAG, fourthnodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>(); });
+        V2::BLANK_ETS_TAG, fourthNodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>(); });
     RefPtr<GeometryNode> fourthItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> fourthItemLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(fourthItem, fourthItemGeometryNode, fourthItem->GetLayoutProperty());
@@ -455,15 +457,15 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest003, TestSize
         CONTAINER_ID, AlignDirection::RIGHT, HorizontalAlign::CENTER, fourthItemAlignRules);
     RelativeContainerTestUtilsNG::AddAlignRule(
         FIRST_ITEM_ID, AlignDirection::TOP, VerticalAlign::BOTTOM, fourthItemAlignRules);
-    fourthItem->UpdateInspectorId("bt4");
+    fourthItem->UpdateInspectorId(FOURTH_ITEM_ID);
     fourthItem->GetLayoutProperty()->UpdateAlignRules(fourthItemAlignRules);
     relativeContainerFrameNode->AddChild(fourthItem);
     layoutWrapper.AppendChild(fourthItemLayoutWrapper);
 
     // Add fifthItem-Box5 with 4alignRules(1 HorizontalAlign and 3 VerticalAlign).
-    int32_t fifthnodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    int32_t fifthNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto fifthItem = FrameNode::GetOrCreateFrameNode(
-        V2::BLANK_ETS_TAG, fifthnodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>(); });
+        V2::BLANK_ETS_TAG, fifthNodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::Pattern>(); });
     RefPtr<GeometryNode> fifthItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapper> fifthItemLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(fifthItem, fifthItemGeometryNode, fifthItem->GetLayoutProperty());
@@ -480,8 +482,8 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest003, TestSize
     RelativeContainerTestUtilsNG::AddAlignRule(
         FIRST_ITEM_ID, AlignDirection::CENTER, VerticalAlign::CENTER, fifthItemAlignRules);
     RelativeContainerTestUtilsNG::AddAlignRule(
-        FOUTRH_ITEM_ID, AlignDirection::BOTTOM, VerticalAlign::BOTTOM, fifthItemAlignRules);
-    fifthItem->UpdateInspectorId("bt5");
+        FOURTH_ITEM_ID, AlignDirection::BOTTOM, VerticalAlign::BOTTOM, fifthItemAlignRules);
+    fifthItem->UpdateInspectorId(FIFTH_ITEM_ID);
     fifthItem->GetLayoutProperty()->UpdateAlignRules(fifthItemAlignRules);
     relativeContainerFrameNode->AddChild(fifthItem);
     layoutWrapper.AppendChild(fifthItemLayoutWrapper);
@@ -495,10 +497,12 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest003, TestSize
 
     // check some size in some items.
     relativeContainerLayoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(firstItemLayoutWrapper->GetGeometryNode()->GetFrameSize(), FIRST_IITEM_SIZE);
+    EXPECT_EQ(firstItemLayoutWrapper->GetGeometryNode()->GetFrameSize(), FIRST_ITEM_SIZE);
     EXPECT_EQ(secondItemLayoutWrapper->GetGeometryNode()->GetFrameSize(),
         SizeF(FIRST_ITEM_WIDTH / 2.0f, CONTAINER_HEIGHT - FIRST_ITEM_HEIGHT));
-    EXPECT_EQ(thirdItemLayoutWrapper->GetGeometryNode()->GetFrameSize(), THIRD_IITEM_SIZE);
+    auto thirdItemWidth = CONTAINER_SIZE.Width() - FIRST_ITEM_WIDTH;
+    auto thirdItemHeight = (CONTAINER_SIZE.Height() - FIRST_ITEM_HEIGHT) / 2.0f;
+    EXPECT_EQ(thirdItemLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(thirdItemWidth, thirdItemHeight));
 
     // check offset in all items.
     relativeContainerLayoutAlgorithm->Layout(&layoutWrapper);
@@ -635,7 +639,7 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest005, TestSize
     relativeContainerLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
-    EXPECT_EQ(firstItemLayoutWrapper->GetGeometryNode()->GetFrameSize(), FIRST_IITEM_SIZE);
+    EXPECT_EQ(firstItemLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF());
     EXPECT_EQ(secondItemLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF());
     EXPECT_EQ(firstItemLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
     EXPECT_EQ(secondItemLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
@@ -710,12 +714,11 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest006, TestSize
         AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
     frameNode->AddChild(secondItemFrameNode);
     layoutWrapper->AppendChild(secondItemLayoutWrapper);
-
     relativeContainerLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     relativeContainerLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
-    EXPECT_EQ(firstItemLayoutWrapper->GetGeometryNode()->GetFrameSize(), FIRST_IITEM_SIZE);
+    EXPECT_EQ(firstItemLayoutWrapper->GetGeometryNode()->GetFrameSize(), FIRST_ITEM_SIZE);
     EXPECT_EQ(firstItemLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
     EXPECT_EQ(secondItemLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
 }

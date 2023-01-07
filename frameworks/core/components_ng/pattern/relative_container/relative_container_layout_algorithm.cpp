@@ -58,6 +58,7 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         const auto& childrenWrappers = layoutWrapper->GetAllChildrenWithBuild();
         auto constraint = relativeContainerLayoutProperty->CreateChildConstraint();
         for (const auto& childrenWrapper : childrenWrappers) {
+            childrenWrapper->SetActive(false);
             constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
             childrenWrapper->Measure(constraint);
             constraint.Reset();
@@ -66,8 +67,13 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     TopologicalSort(renderList_);
     for (const auto& nodeName : renderList_) {
+        if (idNodeMap_.find(nodeName) == idNodeMap_.end()) {
+            continue;
+        }
         auto childWrapper = idNodeMap_[nodeName];
-        if (!childWrapper) {
+        if (!childWrapper->GetLayoutProperty()->GetFlexItemProperty()) {
+            auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
+            childWrapper->Measure(childConstraint);
             continue;
         }
         CalcSizeParam(layoutWrapper, nodeName);
@@ -81,6 +87,10 @@ void RelativeContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(relativeContainerLayoutProperty);
     const auto& childrenWrapper = layoutWrapper->GetAllChildrenWithBuild();
     for (const auto& childWrapper : childrenWrapper) {
+        if (!childWrapper->GetLayoutProperty()->GetFlexItemProperty()) {
+            childWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0.0f, 0.0f));
+            continue;
+        }
         auto curOffset = recordOffsetMap_[childWrapper->GetHostNode()->GetInspectorIdValue()];
         childWrapper->GetGeometryNode()->SetMarginFrameOffset(curOffset);
         childWrapper->Layout();
@@ -96,6 +106,7 @@ void RelativeContainerLayoutAlgorithm::CollectNodesById(LayoutWrapper* layoutWra
     for (const auto& childWrapper : childrenWrappers) {
         auto childLayoutProperty = childWrapper->GetLayoutProperty();
         auto childHostNode = childWrapper->GetHostNode();
+        childWrapper->SetActive();
         if (childHostNode) {
             auto geometryNode = childWrapper->GetGeometryNode();
             auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
@@ -119,7 +130,7 @@ void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()
 {
     for (const auto& node : idNodeMap_) {
         auto childWrapper = node.second;
-        auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
         auto childHostNode = childWrapper->GetHostNode();
         if (!flexItem) {
             continue;
@@ -148,8 +159,9 @@ bool RelativeContainerLayoutAlgorithm::PreTopologicalLoopDetection()
     for (const auto& node : idNodeMap_) {
         auto childWrapper = node.second;
         auto childHostNode = childWrapper->GetHostNode();
-        auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
         if (!flexItem) {
+            visitedNode.push(node.first);
             continue;
         }
         std::set<std::string> anchorSet;
@@ -186,8 +198,8 @@ bool RelativeContainerLayoutAlgorithm::PreTopologicalLoopDetection()
         incomingDegreeMapCopy.erase(currentNodeName);
         visitedNode.push(currentNodeName);
     }
-    if (visitedNode.size() != idNodeMap_.size()) {
-        std::string loopDependentNodes = "";
+    if (!incomingDegreeMapCopy.empty()) {
+        std::string loopDependentNodes;
         for (const auto& node : incomingDegreeMapCopy) {
             loopDependentNodes += node.first + ",";
         }
@@ -204,15 +216,16 @@ void RelativeContainerLayoutAlgorithm::TopologicalSort(std::list<std::string>& r
     for (const auto& node : idNodeMap_) {
         auto childWrapper = node.second;
         auto childHostNode = childWrapper->GetHostNode();
-        auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
         if (!flexItem) {
+            renderList.emplace_back(node.first);
             continue;
         }
         if (incomingDegreeMap_[childHostNode->GetInspectorIdValue()] == 0) {
             layoutQueue.push(childHostNode->GetInspectorIdValue());
         }
     }
-    while (layoutQueue.size() > 0) {
+    while (!layoutQueue.empty()) {
         auto currentNodeName = layoutQueue.front();
         layoutQueue.pop();
         // reduce incoming degree of nodes relied on currentNode
@@ -233,6 +246,8 @@ void RelativeContainerLayoutAlgorithm::TopologicalSort(std::list<std::string>& r
 void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrapper, const std::string& nodeName)
 {
     auto childWrapper = idNodeMap_[nodeName];
+    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
     auto alignRules = childWrapper->GetLayoutProperty()->GetFlexItemProperty()->GetAlignRulesValue();
     auto geometryNode = childWrapper->GetGeometryNode();
     auto childLayoutProperty = childWrapper->GetLayoutProperty();
@@ -241,8 +256,6 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
     float itemMaxHeight = 0.0f;
     float itemMinWidth = 0.0f;
     float itemMinHeight = 0.0f;
-    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
-    auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
     childConstraint.maxSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     childConstraint.minSize = SizeF(0.0f, 0.0f);
     // set first two boundaries of each direction
