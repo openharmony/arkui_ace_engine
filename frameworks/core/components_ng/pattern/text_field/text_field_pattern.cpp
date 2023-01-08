@@ -254,6 +254,38 @@ bool TextFieldPattern::UpdateCaretPosition()
     return false;
 }
 
+float TextFieldPattern::GetIconSize()
+{
+    auto pipeline = GetHost()->GetContext();
+    CHECK_NULL_RETURN(pipeline, 0.0f);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, 0.0f);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(textFieldTheme, 0.0f);
+    return static_cast<float>(textFieldTheme->GetIconSize().ConvertToPx());
+}
+
+float TextFieldPattern::GetIconHotZoneSize()
+{
+    auto pipeline = GetHost()->GetContext();
+    CHECK_NULL_RETURN(pipeline, 0.0f);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, 0.0f);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(textFieldTheme, 0.0f);
+    return static_cast<float>(textFieldTheme->GetIconHotZoneSize().ConvertToPx());
+}
+
+float TextFieldPattern::GetIconRightOffset()
+{
+    auto iconSize = GetIconSize();
+    auto iconHotZoneSize = GetIconHotZoneSize();
+    if (NearZero(iconSize) || NearZero(iconHotZoneSize)) {
+        return 0.0f;
+    }
+    return (iconHotZoneSize - iconSize) / 2.0f;
+}
+
 void TextFieldPattern::CreateSingleHandle()
 {
     RectF firstHandle;
@@ -1174,7 +1206,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     selectionMode_ = SelectionMode::NONE;
     CloseSelectOverlay();
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    if (lastTouchOffset_.GetX() > frameRect_.Width() - imageRect_.Width() - GetPaddingRight() &&
+    if (lastTouchOffset_.GetX() > frameRect_.Width() - imageRect_.Width() - GetIconRightOffset() &&
         NeedShowPasswordIcon()) {
         textObscured_ = !textObscured_;
         ProcessPasswordIcon();
