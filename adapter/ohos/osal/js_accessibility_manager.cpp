@@ -1189,7 +1189,9 @@ void JsAccessibilityManager::DumpTree(int32_t depth, NodeId nodeID)
         CHECK_NULL_VOID(rootNode);
         auto windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
         auto windowTop = GetWindowTop(ngPipeline->GetWindowId());
-        auto pageId = ngPipeline->GetStageManager()->GetLastPage()->GetPageId();
+        auto page = ngPipeline->GetStageManager()->GetLastPage();
+        CHECK_NULL_VOID(page);
+        auto pageId = page->GetPageId();
         auto pagePath = GetPagePath();
         CommonProperty commonProperty { ngPipeline->GetWindowId(), windowLeft, windowTop, pageId, pagePath };
         DumpTreeNG(rootNode, depth, nodeID, commonProperty);
@@ -1331,7 +1333,9 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityIdNG(
 
     auto node = GetInspectorById(rootNode, nodeId);
     CHECK_NULL_VOID(node);
-    auto pageId = ngPipeline->GetStageManager()->GetLastPage()->GetPageId();
+    auto page = ngPipeline->GetStageManager()->GetLastPage();
+    CHECK_NULL_VOID(page);
+    auto pageId = page->GetPageId();
     auto pagePath = GetPagePath();
     CommonProperty commonProperty { ngPipeline->GetWindowId(), GetWindowLeft(ngPipeline->GetWindowId()),
         GetWindowTop(ngPipeline->GetWindowId()), pageId, pagePath };
@@ -1357,7 +1361,9 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(
     if (results.empty()) {
         return;
     }
-    auto pageId = ngPipeline->GetStageManager()->GetLastPage()->GetPageId();
+    auto page = ngPipeline->GetStageManager()->GetLastPage();
+    CHECK_NULL_VOID(page);
+    auto pageId = page->GetPageId();
     auto pagePath = GetPagePath();
     CommonProperty commonProperty { ngPipeline->GetWindowId(), GetWindowLeft(ngPipeline->GetWindowId()),
         GetWindowTop(ngPipeline->GetWindowId()), pageId, pagePath };
@@ -1527,7 +1533,9 @@ void JsAccessibilityManager::FindFocusedElementInfoNG(
         resultNode = FindInputFocus(node);
     }
     CHECK_NULL_VOID(resultNode);
-    auto pageId = ngPipeline->GetStageManager()->GetLastPage()->GetPageId();
+    auto page = ngPipeline->GetStageManager()->GetLastPage();
+    CHECK_NULL_VOID(page);
+    auto pageId = page->GetPageId();
     auto pagePath = GetPagePath();
     CommonProperty commonProperty { ngPipeline->GetWindowId(), GetWindowLeft(ngPipeline->GetWindowId()),
         GetWindowTop(ngPipeline->GetWindowId()), pageId, pagePath };
@@ -2069,7 +2077,9 @@ void JsAccessibilityManager::FocusMoveSearchNG(
     }
 
     CHECK_NULL_VOID(resultNode);
-    auto pageId = ngPipeline->GetStageManager()->GetLastPage()->GetPageId();
+    auto page = ngPipeline->GetStageManager()->GetLastPage();
+    CHECK_NULL_VOID(page);
+    auto pageId = page->GetPageId();
     auto pagePath = GetPagePath();
     CommonProperty commonProperty { ngPipeline->GetWindowId(), GetWindowLeft(ngPipeline->GetWindowId()),
         GetWindowTop(ngPipeline->GetWindowId()), pageId, pagePath };
@@ -2123,6 +2133,7 @@ std::string JsAccessibilityManager::GetPagePath()
     CHECK_NULL_RETURN(context, "");
     auto frontend = context->GetFrontend();
     CHECK_NULL_RETURN(frontend, "");
+    ContainerScope scope(context->GetInstanceId());
     return frontend->GetPagePath();
 }
 
