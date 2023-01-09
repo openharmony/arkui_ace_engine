@@ -24,6 +24,7 @@
 #include "core/components/web/render_web.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_element.h"
+#include "frameworks/base/utils/system_properties.h"
 
 namespace OHOS::Ace {
 
@@ -35,6 +36,9 @@ WebComponent::WebComponent(const std::string& type) : type_(type)
         declaration_->Init();
     }
     webController_ = AceType::MakeRefPtr<WebController>();
+    if (SystemProperties::GetAllowWindowOpenMethodEnabled()) {
+        isAllowWindowOpenMethod_ = true;
+    }
 }
 
 RefPtr<RenderNode> WebComponent::CreateRenderNode()

@@ -89,6 +89,7 @@ public:
     static void SetWindowNewEvent(OnWebAsyncFunc&& windowNewEventId);
     static void SetWindowExitEventId(OnWebAsyncFunc&& windowExitEventId);
     static void SetMultiWindowAccessEnabled(bool isMultiWindowAccessEnabled);
+    static void SetAllowWindowOpenMethod(bool isAllowWindowOpenMethod);
     static void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback);
     static void SetWebCursiveFont(const std::string& cursiveFontFamily);
     static void SetWebFantasyFont(const std::string& fantasyFontFamily);

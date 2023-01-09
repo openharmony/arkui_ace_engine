@@ -207,6 +207,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, InitialScale, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, PinchSmoothModeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MultiWindowAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, AllowWindowOpenMethod, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebCursiveFont, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebFantasyFont, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebFixedFont, std::string);
@@ -270,6 +271,7 @@ private:
     void OnBackgroundColorUpdate(int32_t value);
     void OnInitialScaleUpdate(float value);
     void OnMultiWindowAccessEnabledUpdate(bool value);
+    void OnAllowWindowOpenMethodUpdate(bool value);
     void OnWebCursiveFontUpdate(const std::string& value);
     void OnWebFantasyFontUpdate(const std::string& value);
     void OnWebFixedFontUpdate(const std::string& value);
@@ -371,6 +373,7 @@ private:
     bool isWindowShow_ = true;
     bool isActive_ = true;
     bool isEnhanceSurface_ = false;
+    bool isAllowWindowOpenMethod_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -1442,6 +1442,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onWindowNew", &JSWeb::OnWindowNew);
     JSClass<JSWeb>::StaticMethod("onWindowExit", &JSWeb::OnWindowExit);
     JSClass<JSWeb>::StaticMethod("multiWindowAccess", &JSWeb::MultiWindowAccessEnabled);
+    JSClass<JSWeb>::StaticMethod("allowWindowOpenMethod", &JSWeb::AllowWindowOpenMethod);
     JSClass<JSWeb>::StaticMethod("webCursiveFont", &JSWeb::WebCursiveFont);
     JSClass<JSWeb>::StaticMethod("webFantasyFont", &JSWeb::WebFantasyFont);
     JSClass<JSWeb>::StaticMethod("webFixedFont", &JSWeb::WebFixedFont);
@@ -3629,6 +3630,18 @@ void JSWeb::MultiWindowAccessEnabled(bool isMultiWindowAccessEnable)
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     CHECK_NULL_VOID(webComponent);
     webComponent->SetMultiWindowAccessEnabled(isMultiWindowAccessEnable);
+}
+
+void JSWeb::AllowWindowOpenMethod(bool isAllowWindowOpenMethod)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetAllowWindowOpenMethod(isAllowWindowOpenMethod);
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetAllowWindowOpenMethod(isAllowWindowOpenMethod);
 }
 
 void JSWeb::WebCursiveFont(const std::string& cursiveFontFamily)

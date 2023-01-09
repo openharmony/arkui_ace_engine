@@ -47,6 +47,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(InitialScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(PinchSmoothModeEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MultiWindowAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AllowWindowOpenMethod, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WebCursiveFont, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WebFantasyFont, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WebFixedFont, std::string);

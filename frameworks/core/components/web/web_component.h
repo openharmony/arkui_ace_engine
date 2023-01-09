@@ -514,6 +514,16 @@ public:
         isMultiWindowAccessEnabled_ = isEnabled;
     }
 
+    bool GetAllowWindowOpenMethod() const
+    {
+        return isAllowWindowOpenMethod_;
+    }
+
+    void SetAllowWindowOpenMethod(bool isEnabled)
+    {
+        isAllowWindowOpenMethod_ = isEnabled;
+    }
+
     bool GetIsInitialScaleSet() const
     {
         return isInitialScaleSet_;
@@ -908,6 +918,7 @@ private:
     WebCacheMode cacheMode_ = WebCacheMode::DEFAULT;
     bool isWebDebuggingAccessEnabled_ = false;
     bool isMultiWindowAccessEnabled_ = false;
+    bool isAllowWindowOpenMethod_ = false;
     OnMouseCallback onMouseEvent_;
     OnKeyEventCallback onKeyEvent_;
     float initialScale_;

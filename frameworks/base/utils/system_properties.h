@@ -324,6 +324,8 @@ public:
         return extSurfaceEnabled_;
     }
 
+    static bool GetAllowWindowOpenMethodEnabled();
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;

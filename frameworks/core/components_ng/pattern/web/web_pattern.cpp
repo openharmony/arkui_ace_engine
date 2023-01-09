@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/base/utils/system_properties.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t SINGLE_CLICK_NUM = 1;
@@ -711,6 +712,13 @@ void WebPattern::OnMultiWindowAccessEnabledUpdate(bool value)
     }
 }
 
+void WebPattern::OnAllowWindowOpenMethodUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateAllowWindowOpenMethod(value);
+    }
+}
+
 void WebPattern::OnWebCursiveFontUpdate(const std::string& value)
 {
     if (delegate_) {
@@ -893,6 +901,8 @@ void WebPattern::OnModifyDone()
         if (GetInitialScale()) {
             delegate_->UpdateInitialScale(GetInitialScale().value());
         }
+        isAllowWindowOpenMethod_ = SystemProperties::GetAllowWindowOpenMethodEnabled();
+        delegate_->UpdateAllowWindowOpenMethod(GetAllowWindowOpenMethodValue(isAllowWindowOpenMethod_));
     }
 
     // Initialize events such as keyboard, focus, etc.

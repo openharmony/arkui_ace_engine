@@ -410,6 +410,7 @@ public:
     void UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     void UpdateMediaPlayGestureAccess(bool isNeedGestureAccess);
     void UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled);
+    void UpdateAllowWindowOpenMethod(bool isAllowWindowOpenMethod);
     void UpdateWebCursiveFont(const std::string& cursiveFontFamily);
     void UpdateWebFantasyFont(const std::string& fantasyFontFamily);
     void UpdateWebFixedFont(const std::string& fixedFontFamily);
