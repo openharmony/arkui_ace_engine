@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FORM_RESOURCE_FORM_MANAGER_DELEGATE_H
 
 #include <list>
-#include "ui/rs_surface_node.h"
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/form/resource/form_manager_resource.h"
@@ -77,8 +76,6 @@ public:
     void ProcessFormUninstall(const int64_t formId);
     void OnDeathReceived();
     void SetFormUtils(const std::shared_ptr<FormUtils>& formUtils);
-    void ProcessAddFormSurface(const AppExecFwk::FormJsInfo &formInfo,
-        const std::shared_ptr<Rosen::RSSurfaceNode> &rsSurfaceNode);
 #endif
 
 private:

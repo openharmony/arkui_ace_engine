@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FORM_RESOURCE_FORM_CALLBACK_CLIENT_H
 
 #include "form_callback_interface.h"
-#include "ui/rs_surface_node.h"
 
 namespace OHOS::Ace {
 
@@ -48,15 +47,6 @@ public:
         auto delegate = delegate_.Upgrade();
         if (delegate) {
             delegate->OnDeathReceived();
-        }
-    }
-
-    void ProcessAddFormSurface(
-        const AppExecFwk::FormJsInfo& formInfo, const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode) override
-    {
-        auto delegate = delegate_.Upgrade();
-        if (delegate) {
-            delegate->ProcessAddFormSurface(formInfo, rsSurfaceNode);
         }
     }
 
