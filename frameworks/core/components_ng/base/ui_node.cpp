@@ -118,14 +118,6 @@ void UINode::Clean()
 {
     for (const auto& child : children_) {
         child->OnRemoveFromParent();
-        if (child->MarkRemoving()) {
-            // pending remove child is removed from tree but not cleaned completely, we'll keep reference of it
-            // and hold its tree integrity temporarily for transition use, of course the pending remove tree is
-            // unavailable for ui operations but some nodes in the tree may also be marked dirty as needed to
-            // perform transition's layout.
-            ElementRegister::GetInstance()->AddPendingRemoveNode(child);
-            LOGD("GeometryTransition: pending remove child: %{public}d, parent: %{public}d", child->GetId(), GetId());
-        }
     }
     children_.clear();
     MarkNeedSyncRenderTree();
@@ -493,16 +485,4 @@ void UINode::ChildrenUpdatedFrom(int32_t index)
 {
     childrenUpdatedFrom_ = index;
 }
-
-bool UINode::MarkRemoving()
-{
-    bool pendingRemove = false;
-    isRemoving_ = true;
-    const auto& children = GetChildren();
-    for (const auto& child : children) {
-        pendingRemove = child->MarkRemoving() || pendingRemove;
-    }
-    return pendingRemove;
-}
-
 } // namespace OHOS::Ace::NG

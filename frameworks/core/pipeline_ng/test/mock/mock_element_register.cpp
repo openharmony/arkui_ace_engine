@@ -109,9 +109,4 @@ void ElementRegister::Clear()
     itemMap_.clear();
     removedItems_.clear();
 }
-
-void ElementRegister::AddPendingRemoveNode(const RefPtr<NG::UINode>& node) {}
-
-void ElementRegister::ClearPendingRemoveNodes() {}
-
 } // namespace OHOS::Ace

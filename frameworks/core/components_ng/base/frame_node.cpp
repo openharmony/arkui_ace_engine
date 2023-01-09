@@ -275,12 +275,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     bool contentOffsetChange = geometryNode_->GetContentOffset() != dirty->GetGeometryNode()->GetContentOffset();
 
     SetGeometryNode(dirty->GetGeometryNode());
-
-    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    bool skipSync = geometryTransition != nullptr && geometryTransition->IsNodeActive(WeakClaim(this));
-    bool forceSync = geometryTransition != nullptr && geometryTransition->IsNodeInAndIdentity(WeakClaim(this));
-    if (!skipSync && (forceSync || frameSizeChange || frameOffsetChange ||
-        (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange))) {
+    if (frameSizeChange || frameOffsetChange || (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
         if (pattern_->NeedOverridePaintRect()) {
             renderContext_->SyncGeometryProperties(pattern_->GetOverridePaintRect().value_or(RectF()));
         } else {
@@ -507,7 +502,6 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
     auto task = [layoutWrapper, layoutConstraint = GetLayoutConstraint(), forceUseMainThread]() {
         layoutWrapper->SetActive();
         layoutWrapper->SetRootMeasureNode();
-        layoutWrapper->WillLayout();
         {
             ACE_SCOPED_TRACE("LayoutWrapper::Measure");
             layoutWrapper->Measure(layoutConstraint);
@@ -520,15 +514,11 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
             ACE_SCOPED_TRACE("LayoutWrapper::MountToHostOnMainThread");
             if (forceUseMainThread || layoutWrapper->CheckShouldRunOnMain()) {
                 layoutWrapper->MountToHostOnMainThread();
-                layoutWrapper->DidLayout();
                 return;
             }
             auto host = layoutWrapper->GetHostNode();
             CHECK_NULL_VOID(host);
-            host->PostTask([layoutWrapper]() {
-                layoutWrapper->MountToHostOnMainThread();
-                layoutWrapper->DidLayout();
-            });
+            host->PostTask([layoutWrapper]() { layoutWrapper->MountToHostOnMainThread(); });
         }
     };
     if (forceUseMainThread || layoutWrapper->CheckShouldRunOnMain()) {
@@ -1215,11 +1205,11 @@ OffsetF FrameNode::GetTransformRelativeOffset() const
     return offset;
 }
 
-OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
+OffsetF FrameNode::GetPaintRectOffset() const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
-    OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithTransform().GetOffset();
+    auto offset = context->GetPaintRectWithTransform().GetOffset();
     auto parent = GetAncestorNodeOfFrame();
     while (parent) {
         auto renderContext = parent->GetRenderContext();
@@ -1243,28 +1233,6 @@ void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType) const
         event.nodeId = GetAccessibilityId();
         PipelineContext::GetCurrentContext()->SendEventToAccessibility(event);
     }
-}
-
-bool FrameNode::MarkRemoving()
-{
-    bool pendingRemove = false;
-    if (!layoutProperty_ || !geometryNode_) {
-        return pendingRemove;
-    }
-
-    isRemoving_ = true;
-
-    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    if (geometryTransition != nullptr) {
-        geometryTransition->Build(WeakClaim(this), false);
-        pendingRemove = true;
-    }
-
-    const auto& children = GetChildren();
-    for (const auto& child : children) {
-        pendingRemove = child->MarkRemoving() || pendingRemove;
-    }
-    return pendingRemove;
 }
 
 } // namespace OHOS::Ace::NG

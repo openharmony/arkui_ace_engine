@@ -159,7 +159,6 @@ ohos_unittest("navigation_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/navigation/title_bar_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/title_bar_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/title_bar_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_localization.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_view_stack_processor.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/drag_drop/mock_drag_drop_manager.cpp",

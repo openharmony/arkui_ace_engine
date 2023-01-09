@@ -359,7 +359,6 @@ template("ace_core_source_set") {
     deps += [ "$ace_root/frameworks/core/components_part_upd/foreach:ace_core_components_foreach_part_upd_$platform" ]
 
     deps += [
-      "$ace_root/frameworks/core/components_ng/animation:ace_core_components_animation_ng_$platform",
       "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_$platform",
       "$ace_root/frameworks/core/components_ng/event:ace_core_components_event_ng_$platform",
       "$ace_root/frameworks/core/components_ng/gestures:ace_core_components_gestures_ng_$platform",
@@ -698,7 +697,6 @@ template("ace_core_ng_source_set") {
     }
 
     deps += [
-      "$ace_root/frameworks/core/components_ng/animation:ace_core_components_animation_ng_$platform",
       "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_$platform",
       "$ace_root/frameworks/core/components_ng/event:ace_core_components_event_ng_$platform",
       "$ace_root/frameworks/core/components_ng/gestures:ace_core_components_gestures_ng_$platform",

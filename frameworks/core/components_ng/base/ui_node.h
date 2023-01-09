@@ -189,11 +189,6 @@ public:
         nodeId_ = -1;
     }
 
-    bool IsRemoving() const
-    {
-        return isRemoving_;
-    }
-
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId);
     virtual HitTestMode GetHitTestMode() const
@@ -242,8 +237,6 @@ public:
     virtual void SetActive(bool active);
 
     virtual void OnVisibleChange(bool isVisible);
-
-    virtual bool MarkRemoving();
 
     bool IsOnMainTree() const
     {
@@ -308,8 +301,6 @@ protected:
     // Mount to the main tree to display.
     virtual void OnAttachToMainTree();
     virtual void OnDetachFromMainTree();
-
-    bool isRemoving_ = false;
 
 private:
     void OnRemoveFromParent();

@@ -44,7 +44,6 @@ ohos_unittest("input_event_hub_test_ng") {
 
     # mock
     "$ace_root/frameworks/core/common/test/mock/mock_container.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/gesture/recognizers/mock_exclusive_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/gesture/recognizers/mock_gesture_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/gesture/recognizers/mock_parallel_recognizer.cpp",
