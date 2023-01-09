@@ -58,6 +58,7 @@ constexpr Dimension SHEET_IMAGE_PADDING = 16.0_vp;
 constexpr Dimension SHEET_DIVIDER_WIDTH = 1.0_px;
 constexpr Dimension SHEET_LIST_PADDING = 24.0_vp;
 constexpr Dimension DIALOG_BUTTON_TEXT_SIZE = 16.0_fp;
+constexpr Color DEFAULT_BUTTON_COLOR = Color(0xff007dff);
 const CalcLength SHEET_IMAGE_SIZE(40.0_vp);
 
 } // namespace
@@ -395,7 +396,7 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     if (Color::ParseColorString(colorStr, color)) {
         textProps->UpdateTextColor(color);
     } else {
-        textProps->UpdateTextColor(Color::BLUE);
+        textProps->UpdateTextColor(DEFAULT_BUTTON_COLOR);
     }
     textNode->SetInternal();
     return textNode;

@@ -31,6 +31,7 @@ namespace {
 
 const int SHOW_DIALOG_BUTTON_NUM_MAX = 3;
 const int SHOW_ACTION_MENU_BUTTON_NUM_MAX = 6;
+constexpr char DEFAULT_FONT_COLOR_STRING_VALUE[] = "#ff007dff";
 
 } // namespace
 
@@ -576,16 +577,13 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                         if (ParseResourceParam(env, colorNApi, id, type, params)) {
                             ParseString(id, type, params, colorString);
                         }
+                    } else if (valueType == napi_undefined) {
+                        colorString = DEFAULT_FONT_COLOR_STRING_VALUE;
                     } else {
                         delete asyncContext;
                         asyncContext = nullptr;
-                        if (valueType == napi_undefined) {
-                            NapiThrow(
-                                env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
-                        } else {
-                            NapiThrow(env, "The type of the button color parameter is incorrect.",
-                                Framework::ERROR_CODE_PARAM_INVALID);
-                        }
+                        NapiThrow(env, "The type of the button color parameter is incorrect.",
+                            Framework::ERROR_CODE_PARAM_INVALID);
                         return nullptr;
                     }
                     ButtonInfo buttonInfo = { .text = textString, .textColor = colorString };
