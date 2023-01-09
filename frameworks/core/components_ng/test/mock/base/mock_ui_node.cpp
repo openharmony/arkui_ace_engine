@@ -128,9 +128,4 @@ RefPtr<LayoutWrapper> UINode::CreateLayoutWrapper(bool forceMeasure, bool forceL
 {
     return nullptr;
 }
-
-bool UINode::MarkRemoving()
-{
-    return false;
-}
 } // namespace OHOS::Ace::NG

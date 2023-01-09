@@ -27,7 +27,6 @@ build_component_ng("base_ng") {
     "view_stack_processor.cpp",
   ]
   component_ng_deps = [
-    "animation_ng",
     "event_ng",
     "layout_ng",
     "manager_ng",

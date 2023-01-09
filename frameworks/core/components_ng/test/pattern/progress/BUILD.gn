@@ -84,7 +84,6 @@ ohos_unittest("progress_pattern_test_ng") {
     # mock
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_container.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_drawing_convertor.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",

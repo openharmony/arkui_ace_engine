@@ -131,44 +131,6 @@ int32_t LayoutWrapper::GetHostDepth() const
     return host->GetDepth();
 }
 
-void LayoutWrapper::WillLayout()
-{
-    auto host = GetHostNode();
-    if (!layoutProperty_ || !geometryNode_ || !host) {
-        return;
-    }
-
-    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    if (geometryTransition != nullptr) {
-        LOGD("GeometryTransition: node%{public}d will layout", host->GetId());
-        geometryTransition->WillLayout(Claim(this));
-    }
-
-    auto children = GetAllChildrenWithBuild();
-    for (auto&& child : children) {
-        child->WillLayout();
-    }
-}
-
-void LayoutWrapper::DidLayout()
-{
-    auto host = GetHostNode();
-    if (!layoutProperty_ || !geometryNode_ || !host) {
-        return;
-    }
-
-    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    if (geometryTransition != nullptr) {
-        geometryTransition->DidLayout(hostNode_);
-        LOGD("GeometryTransition: node%{public}d did layout", host->GetId());
-    }
-
-    auto children = GetAllChildrenWithBuild();
-    for (auto&& child : children) {
-        child->DidLayout();
-    }
-}
-
 // This will call child and self measure process.
 void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
