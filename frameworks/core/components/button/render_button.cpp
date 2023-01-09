@@ -831,7 +831,7 @@ void RenderButton::PlayClickScaleAnimation(float keyTime, int32_t duration)
 
 void RenderButton::PlayClickAnimation()
 {
-    if (isPhone_ || isWatch_) {
+    if (isPhone_ || isWatch_ || isTablet_) {
         return;
     }
     if (!isFocus_) {
