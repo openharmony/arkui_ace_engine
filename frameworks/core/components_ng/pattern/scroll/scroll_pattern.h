@@ -41,7 +41,6 @@ public:
     {
         animator_ = nullptr;
         positionController_ = nullptr;
-        scrollEffect_ = nullptr;
     }
 
     bool IsAtomicNode() const override
@@ -69,6 +68,10 @@ public:
     {
         auto paint = MakeRefPtr<ScrollPaintMethod>();
         paint->SetScrollBar(GetScrollBar());
+        auto scrollEffect = GetScrollEdgeEffect();
+        if (scrollEffect && scrollEffect->IsFadeEffect()) {
+            paint->SetEdgeEffect(scrollEffect);
+        }
         return paint;
     }
 
@@ -105,11 +108,6 @@ public:
         return Offset{0, currentOffset_};
     }
 
-    const RefPtr<ScrollEdgeEffect>& GetScrollEdgeEffect() const
-    {
-        return scrollEffect_;
-    }
-
     float GetScrollableDistance() const
     {
         return scrollableDistance_;
@@ -141,11 +139,9 @@ public:
         direction_ = direction;
     }
 
-    bool IsAtTop() const;
-    bool IsAtBottom() const;
-    bool IsOutOfBoundary() const;
+    bool IsAtTop() const override;
+    bool IsAtBottom() const override;
 
-    void SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect);
     bool UpdateCurrentOffset(float offset, int32_t source) override;
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool limitDuration = true,
         const std::function<void()>& onFinish = nullptr);
@@ -177,13 +173,12 @@ private:
     void HandleScrollBarOutBoundary();
     void ValidateOffset(int32_t source);
     void HandleScrollPosition(float scroll, int32_t scrollState);
-    void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect);
+    void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void AddScrollEdgeEffect(RefPtr<ScrollEdgeEffect> scrollEffect);
     void UpdateScrollBarOffset() override;
 
     RefPtr<Animator> animator_;
     RefPtr<ScrollPositionController> positionController_;
-    RefPtr<ScrollEdgeEffect> scrollEffect_;
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;

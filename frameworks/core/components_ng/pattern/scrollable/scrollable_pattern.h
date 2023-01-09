@@ -43,6 +43,8 @@ public:
     {
         return false;
     }
+    virtual bool IsAtTop() const = 0;
+    virtual bool IsAtBottom() const = 0;
     void AddScrollEvent();
     RefPtr<ScrollableEvent> GetScrollableEvent()
     {
@@ -61,6 +63,20 @@ public:
     }
     void SetScrollableAxis(Axis axis);
     const RefPtr<GestureEventHub>& GetGestureHub();
+
+    // edgeEffect
+    const RefPtr<ScrollEdgeEffect>& GetScrollEdgeEffect() const
+    {
+        return scrollEffect_;
+    }
+    void SetEdgeEffect(EdgeEffect edgeEffect);
+    void AddScrollEdgeEffect(RefPtr<ScrollEdgeEffect> edgeEffect);
+    bool HandleEdgeEffect(float offset, int32_t source, const SizeF& size);
+    virtual void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) {}
+    bool IsRestrictBoundary()
+    {
+        return !scrollEffect_ || scrollEffect_->IsRestrictBoundary();
+    }
 
     // scrollBar
     virtual void UpdateScrollBarOffset() = 0;
@@ -100,6 +116,7 @@ private:
 
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
+    RefPtr<ScrollEdgeEffect> scrollEffect_;
     // scrollBar
     RefPtr<ScrollBar> scrollBar_;
     RefPtr<NG::ScrollBarProxy> scrollBarProxy_;

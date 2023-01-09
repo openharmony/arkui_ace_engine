@@ -51,8 +51,9 @@ public:
         auto paint =  MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_, itemPosition_);
         paint->SetScrollBar(AceType::WeakClaim(AceType::RawPtr(GetScrollBar())));
         paint->SetTotalItemCount(maxListItemIndex_ + 1);
-        if (scrollEffect_ && scrollEffect_->IsFadeEffect()) {
-            paint->SetEdgeEffect(scrollEffect_);
+        auto scrollEffect = GetScrollEdgeEffect();
+        if (scrollEffect && scrollEffect->IsFadeEffect()) {
+            paint->SetEdgeEffect(scrollEffect);
         }
         return paint;
     }
@@ -115,6 +116,9 @@ public:
     {
         return scrollable_;
     }
+
+    bool IsAtTop() const override;
+    bool IsAtBottom() const override;
 
     FocusPattern GetFocusPattern() const override
     {
@@ -191,8 +195,7 @@ private:
     bool IsOutOfBoundary(bool useCurrentDelta = true);
     bool ScrollPositionCallback(float offset, int32_t source);
     void InitScrollableEvent();
-    void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect);
-    void SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub, EdgeEffect edgeEffect);
+    void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void HandleScrollEffect(float offset);
 
     // multiSelectable
@@ -203,7 +206,6 @@ private:
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
 
     RefPtr<Animator> animator_;
-    RefPtr<ScrollEdgeEffect> scrollEffect_;
     RefPtr<ListPositionController> positionController_;
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;

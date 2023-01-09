@@ -19,6 +19,8 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
+#include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 
 namespace OHOS::Ace::NG {
 void ScrollablePattern::SetAxis(Axis axis)
@@ -27,15 +29,19 @@ void ScrollablePattern::SetAxis(Axis axis)
         return;
     }
     axis_ = axis;
+    if (scrollBar_) {
+        scrollBar_->SetPositionMode(axis_ == Axis::HORIZONTAL ? PositionMode::BOTTOM : PositionMode::RIGHT);
+    }
+    auto gestureHub = GetGestureHub();
+    CHECK_NULL_VOID(gestureHub);
     if (scrollableEvent_) {
-        auto gestureHub = GetGestureHub();
-        CHECK_NULL_VOID(gestureHub);
         gestureHub->RemoveScrollableEvent(scrollableEvent_);
         scrollableEvent_->SetAxis(axis);
         gestureHub->AddScrollableEvent(scrollableEvent_);
     }
-    if (scrollBar_) {
-        scrollBar_->SetPositionMode(axis_ == Axis::HORIZONTAL ? PositionMode::BOTTOM : PositionMode::RIGHT);
+    if (scrollEffect_) {
+        gestureHub->RemoveScrollEdgeEffect(scrollEffect_);
+        gestureHub->AddScrollEdgeEffect(GetAxis(), scrollEffect_);
     }
 }
 
@@ -86,6 +92,64 @@ void ScrollablePattern::AddScrollEvent()
     scrollableEvent_->SetScrollEndCallback(std::move(scrollEnd));
     scrollableEvent_->SetScrollPositionCallback(std::move(scrollCallback));
     gestureHub->AddScrollableEvent(scrollableEvent_);
+}
+
+void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
+{
+    auto gestureHub = GetGestureHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (scrollEffect_ && (edgeEffect != scrollEffect_->GetEdgeEffect())) {
+        gestureHub->RemoveScrollEdgeEffect(scrollEffect_);
+        scrollEffect_.Reset();
+    }
+    if (edgeEffect == EdgeEffect::SPRING && !scrollEffect_) {
+        auto springEffect = AceType::MakeRefPtr<ScrollSpringEffect>();
+        CHECK_NULL_VOID(springEffect);
+        springEffect->SetOutBoundaryCallback([weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN_NOLOG(pattern, false);
+            return pattern->IsAtTop() || pattern->IsAtBottom();
+        });
+        // add callback to springEdgeEffect
+        SetEdgeEffectCallback(springEffect);
+        scrollEffect_ = springEffect;
+        gestureHub->AddScrollEdgeEffect(GetAxis(), scrollEffect_);
+    }
+    if (edgeEffect == EdgeEffect::FADE && !scrollEffect_) {
+        auto fadeEdgeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::GRAY);
+        CHECK_NULL_VOID(fadeEdgeEffect);
+        fadeEdgeEffect->SetHandleOverScrollCallback([weakScroll = AceType::WeakClaim(this)]() -> void {
+            auto list = weakScroll.Upgrade();
+            CHECK_NULL_VOID_NOLOG(list);
+            auto host = list->GetHost();
+            CHECK_NULL_VOID_NOLOG(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        });
+        SetEdgeEffectCallback(fadeEdgeEffect);
+        fadeEdgeEffect->InitialEdgeEffect();
+        scrollEffect_ = fadeEdgeEffect;
+        gestureHub->AddScrollEdgeEffect(GetAxis(), scrollEffect_);
+    }
+}
+
+bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const SizeF& size)
+{
+    // check edgeEffect is not springEffect
+    if (scrollEffect_ && scrollEffect_->IsFadeEffect()) {    // handle edge effect
+        if ((IsAtTop() && Positive(offset)) || (IsAtBottom() && Negative(offset))) {
+            scrollEffect_->HandleOverScroll(GetAxis(), -offset, size);
+        }
+    }
+    if (!(scrollEffect_ && scrollEffect_->IsSpringEffect()) ||
+        source == SCROLL_FROM_BAR || source == SCROLL_FROM_JUMP) {
+        if (IsAtTop() && Positive(offset)) {
+            return false;
+        }
+        if (IsAtBottom() && Negative(offset)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 void ScrollablePattern::RegisterScrollBarEventTask()

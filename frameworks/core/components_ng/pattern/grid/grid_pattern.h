@@ -128,6 +128,16 @@ public:
 
     bool UpdateCurrentOffset(float offset, int32_t source) override;
 
+    bool IsAtTop() const override
+    {
+        return gridLayoutInfo_.reachStart_;
+    }
+
+    bool IsAtBottom() const override
+    {
+        return gridLayoutInfo_.reachEnd_;
+    }
+
     void SetPositionController(const RefPtr<ScrollController>& controller);
 
     void ScrollPage(bool reverse);

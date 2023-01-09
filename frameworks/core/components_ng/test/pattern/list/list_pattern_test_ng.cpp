@@ -2326,18 +2326,12 @@ HWTEST_F(ListPatternTestNg, ListPatternTest010, TestSize.Level1)
     RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     EXPECT_NE(listPattern, nullptr);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    EXPECT_NE(eventHub, nullptr);
-    auto listEventHub = AceType::DynamicCast<ListEventHub>(eventHub);
-    EXPECT_NE(listEventHub, nullptr);
-    auto gestureHub = listEventHub->GetOrCreateGestureEventHub();
-    EXPECT_NE(gestureHub, nullptr);
     /**
      * @tc.steps: step2. call function
      * @tc.steps: case1: EdgeEffect is NONE
      * @tc.expected: step2. scrollEffect_ is nullptr.
      */
-    listPattern->SetEdgeEffect(gestureHub, EdgeEffect::NONE);
+    listPattern->SetEdgeEffect(EdgeEffect::NONE);
     EXPECT_EQ(listPattern->scrollEffect_, nullptr);
 
     /**
@@ -2345,7 +2339,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest010, TestSize.Level1)
      * @tc.steps: case2: have scrollEffect, FADE
      * @tc.expected: step2. EdgeEffect is Fade.
      */
-    listPattern->SetEdgeEffect(gestureHub, EdgeEffect::FADE);
+    listPattern->SetEdgeEffect(EdgeEffect::FADE);
     EXPECT_NE(listPattern->scrollEffect_, nullptr);
     EXPECT_EQ(listPattern->scrollEffect_->IsFadeEffect(), true);
 
@@ -2354,7 +2348,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest010, TestSize.Level1)
      * @tc.steps: case3: have scrollEffect, SPRING
      * @tc.expected: step3. EdgeEffect is Spring.
      */
-    listPattern->SetEdgeEffect(gestureHub, EdgeEffect::SPRING);
+    listPattern->SetEdgeEffect(EdgeEffect::SPRING);
     EXPECT_NE(listPattern->scrollEffect_, nullptr);
     EXPECT_EQ(listPattern->scrollEffect_->IsSpringEffect(), true);
 
@@ -2363,7 +2357,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest010, TestSize.Level1)
      * @tc.steps: case4: have scrollEffect, FADE
      * @tc.expected: step4. IsFadeEffect is nullptr.
      */
-    listPattern->SetEdgeEffect(gestureHub, EdgeEffect::NONE);
+    listPattern->SetEdgeEffect(EdgeEffect::NONE);
     EXPECT_EQ(listPattern->scrollEffect_, nullptr);
 }
 

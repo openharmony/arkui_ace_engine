@@ -79,14 +79,12 @@ void ScrollPattern::OnModifyDone()
     if (axis != GetAxis()) {
         SetAxis(axis);
         ResetPosition();
-        if (scrollEffect_) {
-            AddScrollEdgeEffect(scrollEffect_);
-        }
     }
     if (!GetScrollableEvent()) {
         AddScrollEvent();
         RegisterScrollEventTask();
     }
+    SetEdgeEffect(layoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE));
     SetScrollBar(paintProperty->GetScrollBarProperty());
 }
 
@@ -179,16 +177,6 @@ bool ScrollPattern::ScrollPageCheck(float delta, int32_t source)
     return true;
 }
 
-void ScrollPattern::HandleScrollEffect()
-{
-    // handle edge effect
-    CHECK_NULL_VOID_NOLOG(scrollEffect_);
-    auto overScroll = scrollEffect_->CalculateOverScroll(lastOffset_, ReachMaxCount());
-    if (!NearZero(overScroll)) {
-        scrollEffect_->HandleOverScroll(GetAxis(), overScroll, viewPort_);
-    }
-}
-
 void ScrollPattern::HandleScrollBarOutBoundary() {}
 
 void ScrollPattern::AdjustOffset(float& delta, int32_t source)
@@ -225,7 +213,7 @@ void ScrollPattern::ValidateOffset(int32_t source)
     }
 
     // restrict position between top and bottom
-    if (!scrollEffect_ || scrollEffect_->IsRestrictBoundary() || source == SCROLL_FROM_JUMP ||
+    if (IsRestrictBoundary() || source == SCROLL_FROM_JUMP ||
         source == SCROLL_FROM_BAR || source == SCROLL_FROM_ROTATE) {
         if (GetAxis() == Axis::HORIZONTAL) {
             if (IsRowReverse()) {
@@ -273,16 +261,6 @@ bool ScrollPattern::IsCrashBottom() const
     return (scrollUpToReachEnd || scrollDownToReachEnd) && ReachMaxCount();
 }
 
-bool ScrollPattern::IsScrollOutOnEdge(float delta) const
-{
-    if ((IsAtBottom() && delta < 0.0f) || (IsAtTop() && delta > 0.0f)) {
-        if (!scrollEffect_ || scrollEffect_->IsNoneEffect()) {
-            return true;
-        }
-    }
-    return false;
-}
-
 void ScrollPattern::HandleCrashTop() const
 {
     auto frameNode = GetHost();
@@ -322,15 +300,13 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
         return false;
     }
     // TODO: ignore handle refresh
-    if (IsScrollOutOnEdge(delta)) {
+    if (!HandleEdgeEffect(delta, source, viewPort_)) {
         return false;
     }
     // TODO: scrollBar effect!!
     lastOffset_ = currentOffset_;
     currentOffset_ += delta;
-    HandleScrollEffect();
     ValidateOffset(source);
-    bool next = true;
     int32_t touchState = SCROLL_NONE;
     if (source == SCROLL_FROM_UPDATE) {
         touchState = SCROLL_TOUCH_DOWN;
@@ -340,16 +316,11 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
     HandleScrollPosition(-delta, touchState);
     if (IsCrashTop()) {
         HandleCrashTop();
-        next = false;
     } else if (IsCrashBottom()) {
         HandleCrashBottom();
-        next = false;
-    }
-    if (scrollEffect_ && !scrollEffect_->IsRestrictBoundary()) {
-        next = true;
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    return next;
+    return true;
 }
 
 void ScrollPattern::CreateOrStopAnimator()
@@ -473,55 +444,6 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
         }
         return 0.0;
     });
-}
-
-void ScrollPattern::AddScrollEdgeEffect(RefPtr<ScrollEdgeEffect> scrollEffect)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    if (scrollEffect_) {
-        gestureHub->RemoveScrollEdgeEffect(scrollEffect_);
-    }
-    scrollEffect_ = std::move(scrollEffect);
-    gestureHub->AddScrollEdgeEffect(GetAxis(), scrollEffect_);
-}
-
-void ScrollPattern::SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect)
-{
-    if (scrollEffect) {
-        if (scrollEffect->IsSpringEffect()) {
-            auto springEffect = AceType::DynamicCast<ScrollSpringEffect>(scrollEffect);
-            CHECK_NULL_VOID(springEffect);
-            springEffect->SetOutBoundaryCallback([weakScroll = AceType::WeakClaim(this)]() {
-                auto scroll = weakScroll.Upgrade();
-                CHECK_NULL_RETURN_NOLOG(scroll, false);
-                return scroll->IsOutOfBoundary();
-            });
-            // add callback to springEdgeEffect
-            SetEdgeEffectCallback(scrollEffect);
-        }
-        if (scrollEffect->IsFadeEffect()) {
-            scrollEffect->SetHandleOverScrollCallback([weakScroll = AceType::WeakClaim(this)]() -> void {
-                auto scroll = weakScroll.Upgrade();
-                CHECK_NULL_VOID_NOLOG(scroll);
-                auto host = scroll->GetHost();
-                CHECK_NULL_VOID_NOLOG(host);
-                host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-            });
-            SetEdgeEffectCallback(scrollEffect);
-            scrollEffect->InitialEdgeEffect();
-        }
-    }
-    AddScrollEdgeEffect(scrollEffect);
-}
-
-bool ScrollPattern::IsOutOfBoundary() const
-{
-    return (IsAtTop() || IsAtBottom());
 }
 
 void ScrollPattern::UpdateScrollBarOffset()
