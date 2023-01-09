@@ -18,9 +18,11 @@
 #include <string>
 
 #include "base/utils/utils.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/option/option_theme.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -45,8 +47,15 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     text->Measure(childConstraint);
 
     // set self size based on TextNode size;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto minOptionHeight = theme->GetOptionMinHeight().ConvertToPx();
+
     auto textSize = text->GetGeometryNode()->GetFrameSize();
-    SizeF size(textSize.Width() + horInterval_ * 2.0, textSize.Height() + verInterval_ * 2.0);
+    SizeF size(
+        textSize.Width() + horInterval_ * 2.0, std::max((textSize.Height() + verInterval_ * 2.0), minOptionHeight));
     LOGD("option frame size set to %{public}f x %{public}f", size.Width(), size.Height());
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 }
