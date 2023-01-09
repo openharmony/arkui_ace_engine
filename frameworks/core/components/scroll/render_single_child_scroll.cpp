@@ -282,7 +282,19 @@ void RenderSingleChildScroll::PerformLayout()
             lastOffset_ = currentOffset_;
         }
     }
-    child->SetPosition(Offset::Zero() - currentOffset_ + paddingOffset);
+    auto childOffset = Offset::Zero() - currentOffset_ + paddingOffset;
+    auto parentNode = AceType::DynamicCast<RenderBoxBase>(GetParent().Upgrade());
+    if (parentNode) {
+        auto alignmentPosition =
+            Alignment::GetAlignPosition(GetLayoutSize(), child->GetLayoutSize(), parentNode->GetAlign());
+        if (GetHasWidth()) {
+            childOffset.SetX(childOffset.GetX() + alignmentPosition.GetX());
+        }
+        if (GetHasHeight()) {
+            childOffset.SetY(childOffset.GetY() + alignmentPosition.GetY());
+        }
+    }
+    child->SetPosition(childOffset);
     LOGD("child position:%{public}s", child->GetPosition().ToString().c_str());
 
     currentBottomOffset_ = axis_ == Axis::VERTICAL ? currentOffset_ + Offset(0.0, viewPort_.Height())
