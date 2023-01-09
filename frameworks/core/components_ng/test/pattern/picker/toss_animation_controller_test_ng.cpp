@@ -27,7 +27,6 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
-#include "core/components_ng/pattern/picker/datepicker_view.h"
 #include "core/components_ng/pattern/picker/toss_animation_controller.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"

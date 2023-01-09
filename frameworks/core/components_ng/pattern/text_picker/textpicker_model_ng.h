@@ -13,20 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TIME_PICKER_TIME_PICKER_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TIME_PICKER_TIME_PICKER_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_PICKER_TEXT_PICKER_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_PICKER_TEXT_PICKER_MODEL_NG_H
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/picker/picker_base_component.h"
-#include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
+#include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
+#include "core/components_ng/pattern/text_picker/textpicker_model.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT TimePickerView {
+class ACE_EXPORT TextPickerModelNG : public TextPickerModel {
 public:
-    static void CreateTimePicker();
-    static void SetSelectedTime(const PickerTime& value);
-    static void SetOnChange(ChangeEvent&& onChange);
-    static void SetHour24(bool isUseMilitaryTime);
+    void Create(RefPtr<PickerTheme> pickerTheme) override;
+    void SetSelected(uint32_t value) override;
+    void SetRange(const std::vector<std::string>& value) override;
+    void SetOnChange(TextChangeEvent&& onChange) override;
+    void SetDefaultPickerItemHeight(const Dimension& value) override;
 
 private:
     static RefPtr<FrameNode> CreateStackNode();
@@ -34,4 +36,4 @@ private:
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TIME_PICKER_TIME_PICKER_VIEW_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_PICKER_TEXT_PICKER_MODEL_NG_H

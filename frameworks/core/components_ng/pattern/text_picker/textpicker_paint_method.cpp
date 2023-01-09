@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
 
-#include "third_party/skia/include/effects/SkGradientShader.h"
-
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -55,7 +53,6 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
 
 void TextPickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRect)
 {
-    SkCanvas* skCanvas = canvas.GetImpl<Rosen::Drawing::SkiaCanvas>()->ExportSkCanvas();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PickerTheme>();
@@ -66,23 +63,26 @@ void TextPickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRe
 
     auto height = static_cast<float>((frameRect.Height() - theme->GetDividerSpacing().ConvertToPx()) / 2);
     // Paint gradient rect over the picker content.
-    SkPaint paint;
-    SkPoint beginPoint = SkPoint::Make(SkDoubleToScalar(0.0f), SkDoubleToScalar(0.0f));
-    SkPoint endPoint = SkPoint::Make(SkDoubleToScalar(0.0f), SkDoubleToScalar(frameRect.Height()));
-    SkPoint points[2] = { beginPoint, endPoint };
+    RSBrush topBrush;
+    RSRect rect(0.0f, 0.0f, frameRect.Right(), frameRect.Bottom());
+    RSPoint topStartPoint;
+    topStartPoint.SetX(0.0f);
+    topStartPoint.SetY(0.0f);
+    RSPoint topEndPoint;
+    topEndPoint.SetX(0.0f);
+    topEndPoint.SetY(frameRect.Height());
     auto backDecoration = theme->GetPopupDecoration(false);
     Color endColor = backDecoration ? backDecoration->GetBackgroundColor() : Color::WHITE;
-
     Color middleColor = endColor.ChangeAlpha(0);
-    SkColor colors[] = { endColor.GetValue(), middleColor.GetValue(), middleColor.GetValue(), endColor.GetValue() };
-    const float stopPositions[] = { 0.0f, height / frameRect.Bottom(),
-        (frameRect.Bottom() - height) / frameRect.Bottom(), 1.0f };
-#ifdef USE_SYSTEM_SKIA
-    paint.setShader(
-        SkGradientShader::MakeLinear(points, colors, stopPositions, std::size(colors), SkShader::kClamp_TileMode));
-#else
-    paint.setShader(SkGradientShader::MakeLinear(points, colors, stopPositions, std::size(colors), SkTileMode::kClamp));
-#endif
-    skCanvas->drawRect({ 0.0f, 0.0f, frameRect.Right(), frameRect.Bottom() }, paint);
+    std::vector<float> topPos { 0.0f, height / frameRect.Bottom(), (frameRect.Bottom() - height) / frameRect.Bottom(),
+        1.0f };
+    std::vector<RSColorQuad> topColors { endColor.GetValue(), middleColor.GetValue(), middleColor.GetValue(),
+        endColor.GetValue() };
+    topBrush.SetShaderEffect(
+        RSShaderEffect::CreateLinearGradient(topStartPoint, topEndPoint, topColors, topPos, RSTileMode::CLAMP));
+    canvas.DetachPen().AttachBrush(topBrush);
+    canvas.DrawRect(rect);
+    canvas.DetachBrush();
+    canvas.Restore();
 }
 } // namespace OHOS::Ace::NG

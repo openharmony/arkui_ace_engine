@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/time_picker/timepicker_view.h"
+#include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 
 #include <cstdint>
 
@@ -34,18 +34,14 @@ namespace {
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 } // namespace
 
-void TimePickerView::CreateTimePicker()
+void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto timePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::TIME_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TimePickerRowPattern>(); });
 
-    auto context = timePickerNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-
     uint32_t showCount = pickerTheme->GetShowOptionCount();
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
         SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
@@ -108,21 +104,21 @@ void TimePickerView::CreateTimePicker()
     stack->Push(timePickerNode);
 }
 
-RefPtr<FrameNode> TimePickerView::CreateStackNode()
+RefPtr<FrameNode> TimePickerModelNG::CreateStackNode()
 {
     auto stackId = ElementRegister::GetInstance()->MakeUniqueId();
     return FrameNode::GetOrCreateFrameNode(
         V2::STACK_ETS_TAG, stackId, []() { return AceType::MakeRefPtr<StackPattern>(); });
 }
 
-RefPtr<FrameNode> TimePickerView::CreateButtonNode()
+RefPtr<FrameNode> TimePickerModelNG::CreateButtonNode()
 {
     auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
     return FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
 }
 
-void TimePickerView::SetSelectedTime(const PickerTime& value)
+void TimePickerModelNG::SetSelectedTime(const PickerTime& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -130,7 +126,7 @@ void TimePickerView::SetSelectedTime(const PickerTime& value)
     timePickerRowPattern->SetSelectedTime(value);
 }
 
-void TimePickerView::SetHour24(bool isUseMilitaryTime)
+void TimePickerModelNG::SetHour24(bool isUseMilitaryTime)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -140,7 +136,7 @@ void TimePickerView::SetHour24(bool isUseMilitaryTime)
     frameNode->MarkDirtyNode();
 }
 
-void TimePickerView::SetOnChange(ChangeEvent&& onChange)
+void TimePickerModelNG::SetOnChange(ChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -148,5 +144,4 @@ void TimePickerView::SetOnChange(ChangeEvent&& onChange)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
-
 } // namespace OHOS::Ace::NG
