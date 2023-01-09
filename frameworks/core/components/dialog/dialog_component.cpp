@@ -750,7 +750,7 @@ void DialogBuilder::BuildButtons(const RefPtr<ThemeManager>& themeManager, const
 
         RefPtr<ButtonComponent> buttonComponent;
         if (!button.textColor.empty()) {
-            buttonTextStyle.SetTextColor(Color::FromString(button.textColor));
+            buttonTextStyle.SetTextColor(Color::FromString(button.textColor, 0xff000000, Color(0xff0a59f4)));
             buttonComponent = ButtonBuilder::Build(
                 themeManager, button.text, buttonTextStyle, Color::FromString(button.textColor), true);
         } else {
