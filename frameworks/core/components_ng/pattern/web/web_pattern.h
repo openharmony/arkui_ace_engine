@@ -237,6 +237,7 @@ private:
     void OnInActive() override;
     void OnActive() override;
     void OnVisibleChange(bool isVisible) override;
+    void OnAreaChangedInner() override;
 
     void OnWebSrcUpdate();
     void OnWebDataUpdate();
@@ -360,6 +361,8 @@ private:
     bool isWindowShow_ = true;
     bool isActive_ = true;
     bool isEnhanceSurface_ = false;
+    OffsetF webOffset_;
+    SelectMenuInfo selectMenuInfo_;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -572,7 +572,18 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
             delegate_->LoadDataWithRichText();
         }
     }
+
     return false;
+}
+
+void WebPattern::OnAreaChangedInner()
+{
+    auto offset = OffsetF(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
+    if (webOffset_ == offset) {
+        return;
+    }
+    webOffset_ = offset;
+    UpdateTouchHandleForOverlay();
 }
 
 void WebPattern::OnWebSrcUpdate()
@@ -933,6 +944,10 @@ void WebPattern::OnModifyDone()
 
     // Initialize events such as keyboard, focus, etc.
     InitEvent();
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddOnAreaChangeNode(host->GetId());
 }
 
 bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard)
@@ -1243,6 +1258,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     selectInfo.menuInfo.menuIsShow = true;
     RegisterSelectOverlayCallback(selectInfo, params, callback);
     selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo);
+    selectMenuInfo_ = selectInfo.menuInfo;
     insertHandle_ = insertTouchHandle;
     startSelectionHandle_ = beginTouchHandle;
     endSelectionHandle_ = endTouchHandle;
@@ -1345,6 +1361,7 @@ void WebPattern::UpdateTouchHandleForOverlay()
         secondHandleInfo.paintRect = ComputeTouchHandleRect(endSelectionHandle_);
         selectOverlayProxy_->UpdateFirstSelectHandleInfo(firstHandleInfo);
         selectOverlayProxy_->UpdateSecondSelectHandleInfo(secondHandleInfo);
+        selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
     }
 }
 
