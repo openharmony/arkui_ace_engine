@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_checkbox.h"
 
+#include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/checkable/checkable_component.h"
@@ -42,6 +43,10 @@ void JSCheckbox::Create(const JSCallbackInfo& info)
             if (item != checkboxGroupmap->end()) {
                 item->second->AddCheckbox(checkboxComponent);
                 checkboxComponent->SetGroup(item->second);
+            } else {
+                auto& ungroupedCheckboxs = CheckboxComponent::GetUngroupedCheckboxs();
+                auto retPair = ungroupedCheckboxs.try_emplace(checkboxGroup, std::list<WeakPtr<CheckboxComponent>>());
+                retPair.first->second.push_back(checkboxComponent);
             }
         }
     }
