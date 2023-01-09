@@ -29,14 +29,8 @@ constexpr float DEFAULT_STROKE_WIDTH = 1.0f;
 constexpr Dimension VERTICAL_INTERVAL_PHONE = 14.4_vp;
 constexpr Dimension HORIZONTAL_INTERVAL_PHONE = 12.0_vp;
 
-constexpr Dimension MENU_FONT_SIZE = 16.0_fp;
-constexpr Dimension MENU_ITEM_ICON_PADDING = 8.0_vp;
-
 const CalcLength ICON_SIDE_LENGTH(24.0_vp);
 const CalcLength ICON_RIGHT_PADDING(5.0_vp);
-
-const CalcLength START_ICON_PADDING(8.0_vp);
-const CalcLength END_ICON_LEFT_PADDING(8.0_vp);
 
 } // namespace OHOS::Ace::NG
 

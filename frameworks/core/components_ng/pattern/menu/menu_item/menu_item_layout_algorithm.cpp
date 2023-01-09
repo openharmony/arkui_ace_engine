@@ -16,7 +16,9 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_algorithm.h"
 
 #include "base/utils/utils.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_ng/property/measure_property.h"
 
@@ -25,30 +27,44 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     verInterval_ = VERTICAL_INTERVAL_PHONE.ConvertToPx();
-    horInterval_ = HORIZONTAL_INTERVAL_PHONE.ConvertToPx();
+    horInterval_ = MENU_ITEM_GROUP_PADDING.ConvertToPx();
     auto props = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(props);
     auto layoutConstraint = props->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint);
 
     float maxRowWidth = layoutConstraint->maxSize.Width() - horInterval_ * 2.0;
-    // measure row
+
     auto childConstraint = props->CreateChildConstraint();
     childConstraint.maxSize.SetWidth(maxRowWidth);
     childConstraint.percentReference.SetWidth(maxRowWidth);
 
-    if (layoutConstraint->selfIdealSize.Width().has_value()) {
-        childConstraint.selfIdealSize.SetWidth(layoutConstraint->selfIdealSize.Width().value() - horInterval_ * 2.0);
+    auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(leftRow);
+    auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
+    CHECK_NULL_VOID(rightRow);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto minItemHeight = theme->GetOptionMinHeight().ConvertToPx();
+
+    SizeF size;
+    if (!layoutConstraint->selfIdealSize.Width().has_value()) {
+        // measure left row
+        leftRow->Measure(childConstraint);
+        // measure right row
+        rightRow->Measure(childConstraint);
+
+        auto leftRowSize = leftRow->GetGeometryNode()->GetFrameSize();
+        auto rightRowSize = rightRow->GetGeometryNode()->GetFrameSize();
+        size = SizeF(leftRowSize.Width() + rightRowSize.Width() + horInterval_ * 2.0 + MENU_ITEM_PADDING.ConvertToPx(),
+            minItemHeight);
+    } else {
+        size = SizeF(layoutConstraint->selfIdealSize.Width().value(), minItemHeight);
     }
 
-    auto row = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(row);
-
-    row->Measure(childConstraint);
-
-    // set self size based on row size;
-    auto rowSize = row->GetGeometryNode()->GetFrameSize();
-    SizeF size(rowSize.Width() + horInterval_ * 2.0, rowSize.Height() + verInterval_ * 2.0);
     LOGD("menuItem frame size set to %{public}f x %{public}f", size.Width(), size.Height());
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 }
@@ -56,8 +72,17 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto row = layoutWrapper->GetOrCreateChildByIndex(0);
-    row->GetGeometryNode()->SetMarginFrameOffset(OffsetF(horInterval_, verInterval_));
-    row->Layout();
+    auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(leftRow);
+    leftRow->GetGeometryNode()->SetMarginFrameOffset(OffsetF(horInterval_, verInterval_));
+    leftRow->Layout();
+
+    auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
+    CHECK_NULL_VOID(rightRow);
+    rightRow->GetGeometryNode()->SetMarginFrameOffset(
+        OffsetF(layoutWrapper->GetGeometryNode()->GetFrameSize().Width() - horInterval_ -
+                    rightRow->GetGeometryNode()->GetFrameSize().Width(),
+            verInterval_));
+    rightRow->Layout();
 }
 } // namespace OHOS::Ace::NG

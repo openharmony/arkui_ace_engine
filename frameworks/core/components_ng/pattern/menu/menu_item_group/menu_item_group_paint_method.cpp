@@ -50,8 +50,8 @@ CanvasDrawFunction MenuItemGroupPaintMethod::GetOverlayDrawFunction(PaintWrapper
 void MenuItemGroupPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper, bool isHeader)
 {
     auto groupSize = paintWrapper->GetGeometryNode()->GetFrameSize();
-    float horInterval = DIVIDER_PADDING.ConvertToPx();
-    float verInterval = VERTICAL_INTERVAL_PHONE.ConvertToPx();
+    float horInterval = HORIZONTAL_INTERVAL_PHONE.ConvertToPx();
+    float verInterval = DIVIDER_PADDING.ConvertToPx();
     if (!isHeader) {
         verInterval = groupSize.Height() - verInterval;
     }

@@ -20,6 +20,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -27,6 +28,7 @@ namespace OHOS::Ace::NG {
 void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto host = layoutWrapper->GetHostNode();
+    auto verInterval = VERTICAL_INTERVAL_PHONE.ConvertToPx();
 
     const auto& props = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(props);
@@ -43,6 +45,7 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float maxChildrenWidth = GetChildrenMaxWidth(layoutWrapper->GetAllChildrenWithBuild(), childConstraint);
     SizeF menuItemGroupSize;
     menuItemGroupSize.SetWidth(maxChildrenWidth);
+    float totalHeight = 0.0f;
 
     // measure header
     needHeaderPadding_ = NeedHeaderPadding(host);
@@ -50,13 +53,12 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateNeedHeaderPadding(needHeaderPadding_);
     float headerPadding = needHeaderPadding_ ? GROUP_DIVIDER_PADDING.ConvertToPx() : 0.0f;
-    float headerHeight = 0.0f;
+    totalHeight += headerPadding;
     if (headerIndex_ >= 0) {
         auto headerWrapper = layoutWrapper->GetOrCreateChildByIndex(headerIndex_);
-        headerHeight = headerWrapper->GetGeometryNode()->GetMarginFrameSize().Height();
+        totalHeight += headerWrapper->GetGeometryNode()->GetMarginFrameSize().Height() + verInterval * 2.0;
     }
     // measure menu item
-    float totalHeight = headerHeight + headerPadding;
     auto totalItemCount = layoutWrapper->GetTotalChildCount();
     int32_t currentIndex = itemStartIndex_;
     while (currentIndex < totalItemCount) {
@@ -75,13 +77,13 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     if (footerIndex_ >= 0) {
         auto footerWrapper = layoutWrapper->GetOrCreateChildByIndex(footerIndex_);
-        totalHeight += footerWrapper->GetGeometryNode()->GetMarginFrameSize().Height();
+        totalHeight += footerWrapper->GetGeometryNode()->GetMarginFrameSize().Height() + verInterval * 2.0;
     }
     // set menu size
     needFooterPadding_ = NeedFooterPadding(host);
-    paintProperty->UpdateNeedFooterPadding(needHeaderPadding_);
+    paintProperty->UpdateNeedFooterPadding(needFooterPadding_);
     float footerPadding = needFooterPadding_ ? GROUP_DIVIDER_PADDING.ConvertToPx() : 0.0f;
-    totalHeight += (headerPadding + footerPadding);
+    totalHeight += footerPadding;
     menuItemGroupSize.SetHeight(totalHeight);
 
     LOGD("finish measure, menuItemGroup size = %{public}f x %{public}f", menuItemGroupSize.Width(),
@@ -121,7 +123,8 @@ void MenuItemGroupLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(wrapper);
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
-    float headerPadding = needHeaderPadding_ ? GROUP_DIVIDER_PADDING.ConvertToPx() : 0.0f;
+    float headerPadding =
+        (needHeaderPadding_ ? GROUP_DIVIDER_PADDING.ConvertToPx() : 0.0f) + VERTICAL_INTERVAL_PHONE.ConvertToPx();
     LayoutIndex(wrapper, OffsetF(MENU_ITEM_GROUP_PADDING.ConvertToPx(), headerPadding));
 }
 
@@ -136,7 +139,8 @@ void MenuItemGroupLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper)
     auto groupHeight = size.Height();
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
-    float footerPadding = needFooterPadding_ ? GROUP_DIVIDER_PADDING.ConvertToPx() : 0.0f;
+    float footerPadding =
+        (needFooterPadding_ ? GROUP_DIVIDER_PADDING.ConvertToPx() : 0.0f) + VERTICAL_INTERVAL_PHONE.ConvertToPx();
     LayoutIndex(wrapper, OffsetF(MENU_ITEM_GROUP_PADDING.ConvertToPx(), (groupHeight - footerHeight - footerPadding)));
 }
 
@@ -168,7 +172,7 @@ bool MenuItemGroupLayoutAlgorithm::NeedFooterPadding(const RefPtr<FrameNode>& ho
     CHECK_NULL_RETURN(menu, false);
     int32_t index = menu->GetChildIndexById(hostId);
     int32_t menuCount = menu->TotalChildCount();
-    return index != menuCount - 1;
+    return index != (menuCount - 1);
 }
 
 float MenuItemGroupLayoutAlgorithm::GetChildrenMaxWidth(

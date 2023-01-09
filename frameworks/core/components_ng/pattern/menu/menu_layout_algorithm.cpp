@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace {
@@ -116,6 +117,16 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
+
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    if (menuPattern->IsSubMenu()) {
+        LayoutSubMenu(layoutWrapper);
+        return;
+    }
+
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     LOGD("MenuLayout: clickPosition = %{public}f, %{public}f", position_.GetX(), position_.GetY());
@@ -123,10 +134,6 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     float x = HorizontalLayout(size, position_.GetX());
     float y = VerticalLayout(size, position_.GetY());
-    auto menuNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
     if (!menuPattern->IsContextMenu()) {
         x -= pageOffset_.GetX();
         y -= pageOffset_.GetY();
@@ -141,17 +148,11 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     geometryNode->UpdateMargin(margin);
     geometryNode->SetMarginFrameOffset(NG::OffsetF(x, y));
 
-    auto parentMenuItem = menuPattern->GetParentMenuItem();
-    if (parentMenuItem) {
-        auto parentPattern = parentMenuItem->GetPattern<MenuItemPattern>();
-        auto topLeftPoint = OffsetF(x, y);
-        auto bottomRightPoint = OffsetF(x + size.Width(), y + size.Height());
-        parentPattern->AddHoverRegions(topLeftPoint, bottomRightPoint);
-    }
-
     // translate each option by the height of previous options
     OffsetF translate;
-    if (!menuPattern->IsMultiMenu()) {
+    auto menuParent = menuNode->GetParent();
+    CHECK_NULL_VOID(menuParent);
+    if (!menuPattern->IsMultiMenu() || menuParent->GetTag() == V2::MENU_ETS_TAG) {
         translate = OffsetF(outPadding, outPadding);
     }
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -160,6 +161,40 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         child->Layout();
         translate += OffsetF(0, child->GetGeometryNode()->GetFrameSize().Height());
     }
+}
+
+void MenuLayoutAlgorithm::LayoutSubMenu(LayoutWrapper* layoutWrapper)
+{
+    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(props);
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto parentMenuItem = menuPattern->GetParentMenuItem();
+    CHECK_NULL_VOID(parentMenuItem);
+    auto menuItemSize = parentMenuItem->GetGeometryNode()->GetFrameSize();
+
+    float x = HorizontalLayoutSubMenu(size, position_.GetX(), menuItemSize) - pageOffset_.GetX();
+    float y = VerticalLayoutSubMenu(size, position_.GetY(), menuItemSize) - pageOffset_.GetY();
+
+    const auto& geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetMarginFrameOffset(NG::OffsetF(x, y));
+
+    if (parentMenuItem) {
+        auto parentPattern = parentMenuItem->GetPattern<MenuItemPattern>();
+        auto topLeftPoint = OffsetF(x, y);
+        auto bottomRightPoint = OffsetF(x + size.Width(), y + size.Height());
+        parentPattern->AddHoverRegions(topLeftPoint, bottomRightPoint);
+    }
+
+    auto outPadding = OUT_PADDING.ConvertToPx();
+    OffsetF translate(outPadding, outPadding);
+    auto child = layoutWrapper->GetOrCreateChildByIndex(0);
+    child->GetGeometryNode()->SetMarginFrameOffset(translate);
+    child->Layout();
 }
 
 // return vertical offset
@@ -207,6 +242,45 @@ float MenuLayoutAlgorithm::HorizontalLayout(const SizeF& size, float clickPositi
         return screenWidth - size.Width();
     }
 
+    // can't fit in screen, line up with left side of the screen
+    return 0.0;
+}
+
+// return vertical offset
+float MenuLayoutAlgorithm::VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize)
+{
+    float screenHeight = screenSize_.Height();
+    float bottomSpace = screenHeight - position;
+    // line up top of subMenu with top of the menuItem
+    if (bottomSpace >= size.Height()) {
+        return position;
+    }
+    // line up bottom of menu with bottom of the screen
+    if (size.Height() < screenHeight) {
+        return screenHeight - size.Height();
+    }
+    // can't fit in screen, line up with top of the screen
+    return 0.0;
+}
+
+// returns submenu horizontal offset
+float MenuLayoutAlgorithm::HorizontalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize)
+{
+    float screenWidth = screenSize_.Width();
+    float rightSpace = screenWidth - position;
+    float leftSpace = position - pageOffset_.GetX() - menuItemSize.Width();
+    // can fit subMenu on the right side of menuItem
+    if (rightSpace >= size.Width()) {
+        return position;
+    }
+    // fit subMenu on the left side of menuItem
+    if (leftSpace >= size.Width()) {
+        return position - size.Width() - menuItemSize.Width();
+    }
+    // line up right side of menu with right boundary of the screen
+    if (size.Width() < screenWidth) {
+        return screenWidth - size.Width();
+    }
     // can't fit in screen, line up with left side of the screen
     return 0.0;
 }

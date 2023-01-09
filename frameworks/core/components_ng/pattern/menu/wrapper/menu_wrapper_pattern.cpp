@@ -57,7 +57,7 @@ void MenuWrapperPattern::OnModifyDone()
         }
         auto touch = info.GetTouches().front();
         // filter out other touch types
-        if (touch.GetTouchType() != TouchType::DOWN) {
+        if (touch.GetTouchType() != TouchType::DOWN && touch.GetTouchType() != TouchType::UP) {
             return;
         }
         auto host = weak.Upgrade();

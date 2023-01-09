@@ -31,6 +31,9 @@ constexpr Dimension DIVIDER_PADDING = 4.0_vp;
 constexpr Dimension GROUP_DIVIDER_PADDING = 9.0_vp;
 constexpr Dimension SUBMENU_PADDING = 4.0_vp;
 constexpr Dimension MENU_ITEM_GROUP_PADDING = 16.0_vp;
+constexpr Dimension MENU_FONT_SIZE = 16.0_fp;
+constexpr Dimension MENU_ITEM_PADDING = 8.0_vp;
+constexpr Dimension MENU_ITEM_HEIGHT = 48.0_vp;
 
 constexpr uint8_t GRADIENT_END_GRADIENT = 255;
 constexpr uint32_t DEFAULT_BACKGROUND_COLOR = 0xFFFFFFF;

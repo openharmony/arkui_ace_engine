@@ -17,33 +17,20 @@
 
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<FrameNode> MenuItemView::CreateItemRow(const RefPtr<FrameNode>& menuItem)
-{
-    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    CHECK_NULL_RETURN(row, nullptr);
-    auto rowLayoutProps = row->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_RETURN(rowLayoutProps, nullptr);
-    rowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    rowLayoutProps->UpdateFlexGrow(1);
-    rowLayoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
-    rowLayoutProps->UpdateSpace(MENU_ITEM_ICON_PADDING);
-    row->MountToParent(menuItem);
-    return row;
-}
-
 void MenuItemView::AddIcon(const std::optional<std::string>& icon, const RefPtr<FrameNode>& row)
 {
     auto iconPath = icon.value_or("");
@@ -70,12 +57,12 @@ void MenuItemView::AddContent(const std::string& content, const RefPtr<FrameNode
     CHECK_NULL_VOID(contentProperty);
     contentProperty->UpdateFontSize(MENU_FONT_SIZE);
     contentProperty->UpdateContent(content);
-    contentProperty->UpdateFlexGrow(1);
+
     contentNode->MountToParent(row);
     contentNode->MarkModifyDone();
 }
 
-void MenuItemView::AddLabelInfo(std::optional<std::string> labelInfo, const RefPtr<FrameNode>& row)
+void MenuItemView::AddLabelInfo(const std::optional<std::string>& labelInfo, const RefPtr<FrameNode>& row)
 {
     auto labelStr = labelInfo.value_or("");
     if (!labelStr.empty()) {
@@ -86,6 +73,13 @@ void MenuItemView::AddLabelInfo(std::optional<std::string> labelInfo, const RefP
         CHECK_NULL_VOID(labelProperty);
         labelProperty->UpdateFontSize(MENU_FONT_SIZE);
         labelProperty->UpdateContent(labelStr);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
+        auto textColor = theme->GetNormalTextDisableColor();
+        labelProperty->UpdateTextColor(textColor);
+
         labelNode->MountToParent(row);
         labelNode->MarkModifyDone();
     }
@@ -110,31 +104,28 @@ void MenuItemView::Create(const MenuItemProperties& menuItemProps)
     border.SetRadius(ROUND_RADIUS_PHONE);
     renderContext->UpdateBorderRadius(border);
 
-    auto paintProps = menuItem->GetPaintProperty<MenuItemPaintProperty>();
-    CHECK_NULL_VOID(paintProps);
-    paintProps->UpdateHover(false);
-    paintProps->UpdatePress(false);
-
-    auto row = CreateItemRow(menuItem);
-
     auto leftRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_VOID(leftRow);
-    auto leftRowLayoutProps = row->GetLayoutProperty<LinearLayoutProperty>();
+    auto leftRowLayoutProps = leftRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(leftRowLayoutProps);
-    leftRowLayoutProps->UpdateSpace(MENU_ITEM_ICON_PADDING);
-    leftRow->MountToParent(row);
+    leftRowLayoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+    leftRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    leftRowLayoutProps->UpdateSpace(MENU_ITEM_PADDING);
 
+    leftRow->MountToParent(menuItem);
     AddIcon(menuItemProps.startIcon, leftRow);
     AddContent(menuItemProps.content, leftRow);
     auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_VOID(rightRow);
-    auto rightRowLayoutProps = row->GetLayoutProperty<LinearLayoutProperty>();
+    auto rightRowLayoutProps = rightRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(rightRowLayoutProps);
-    rightRowLayoutProps->UpdateSpace(MENU_ITEM_ICON_PADDING);
-    rightRow->MountToParent(row);
+    rightRowLayoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+    rightRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    rightRowLayoutProps->UpdateSpace(MENU_ITEM_PADDING);
 
+    rightRow->MountToParent(menuItem);
     AddLabelInfo(menuItemProps.labelInfo, rightRow);
     AddIcon(menuItemProps.endIcon, rightRow);
 
@@ -142,7 +133,7 @@ void MenuItemView::Create(const MenuItemProperties& menuItemProps)
     if (buildFunc.has_value()) {
         auto pattern = menuItem->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->SetSubBuilder(std::move(buildFunc.value_or(nullptr)));
+        pattern->SetSubBuilder(buildFunc.value_or(nullptr));
     }
 }
 
@@ -157,6 +148,6 @@ void MenuItemView::SetOnChange(std::function<void(bool)>&& onChange)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnChange(std::move(onChange));
+    eventHub->SetOnChange(onChange);
 }
 } // namespace OHOS::Ace::NG

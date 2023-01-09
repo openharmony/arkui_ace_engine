@@ -29,7 +29,7 @@ public:
     // override measureSelf and measureChildren.
     void Measure(LayoutWrapper* layoutWrapper) override;
 
-    virtual void Layout(LayoutWrapper* layoutWrapper) override;
+    void Layout(LayoutWrapper* layoutWrapper) override;
 
 protected:
     float VerticalLayout(const SizeF& size, float clickPosition);
@@ -39,6 +39,10 @@ protected:
 
 private:
     void Initialize(LayoutWrapper* layoutWrapper);
+
+    void LayoutSubMenu(LayoutWrapper* layoutWrapper);
+    float VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);
+    float HorizontalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);
 
     float GetChildrenMaxWidth(
         const std::list<RefPtr<LayoutWrapper>>& children, const LayoutConstraintF& layoutConstraint);

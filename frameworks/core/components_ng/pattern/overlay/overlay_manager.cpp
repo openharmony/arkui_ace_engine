@@ -17,17 +17,20 @@
 
 #include <utility>
 
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/select/select_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
@@ -81,6 +84,24 @@ void OverlayManager::Pop(const RefPtr<FrameNode>& node)
         ContainerScope scope(id);
         root->RemoveChild(node);
         root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        auto menuPattern = node->GetPattern<MenuPattern>();
+        if (menuPattern && menuPattern->IsSubMenu()) {
+            auto menuItemParent = menuPattern->GetParentMenuItem();
+            CHECK_NULL_VOID(menuItemParent);
+            auto menuItemPattern = menuItemParent->GetPattern<MenuItemPattern>();
+            CHECK_NULL_VOID(menuItemPattern);
+            menuItemPattern->SetIsSubMenuShowed(false);
+
+            auto renderContext = menuItemParent->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto theme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_VOID(theme);
+            auto bgColor = theme->GetBackgroundColor();
+            renderContext->UpdateBackgroundColor(bgColor);
+            menuItemParent->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
     });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
