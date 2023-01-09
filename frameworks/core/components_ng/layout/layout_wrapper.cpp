@@ -143,9 +143,8 @@ void LayoutWrapper::WillLayout()
         LOGD("GeometryTransition: node%{public}d will layout", host->GetId());
         geometryTransition->WillLayout(Claim(this));
     }
-
-    auto children = GetAllChildrenWithBuild();
-    for (auto&& child : children) {
+    
+    for (const auto& child : children_) {
         child->WillLayout();
     }
 }
@@ -163,8 +162,7 @@ void LayoutWrapper::DidLayout()
         LOGD("GeometryTransition: node%{public}d did layout", host->GetId());
     }
 
-    auto children = GetAllChildrenWithBuild();
-    for (auto&& child : children) {
+    for (const auto& child : children_) {
         child->DidLayout();
     }
 }
