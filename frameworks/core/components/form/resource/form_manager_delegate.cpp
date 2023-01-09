@@ -26,11 +26,13 @@
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "form_callback_client.h"
+#include "form_surface_callback_client.h"
 #include "form_host_client.h"
 #include "form_js_info.h"
 #include "form_mgr.h"
 #include "core/common/form_manager.h"
 #include "core/components/form/resource/form_utils.h"
+#include "form_surface_client.h"
 #endif
 
 namespace OHOS::Ace {
@@ -132,6 +134,9 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
         wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DIMENSION_KEY, info.dimension);
     }
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
+    auto surfaceServiceClient = FormSurfaceServiceClient::GetInstance();
+    // 在OHOS::AppExecFwk::Constants中加类似参数
+    wantCache_.SetParam("ohos.extra.param.key.process_on_add_surface", surfaceServiceClient->AsObject());
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
     if (ret != 0) {
         auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
@@ -147,6 +152,11 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     }
     formCallbackClient_->SetFormManagerDelegate(AceType::WeakClaim(this));
     clientInstance->AddForm(formCallbackClient_, formJsInfo.formId);
+    if (formSurfaceCallbackClient_ == nullptr) {
+        formSurfaceCallbackClient_ = std::make_shared<FormSurfaceCallbackClient>();
+    }
+    formSurfaceCallbackClient_->SetFormManagerDelegate(AceType::WeakClaim(this));
+    surfaceServiceClient->AddForm(formSurfaceCallbackClient_, formJsInfo.formId);
     runningCardId_ = formJsInfo.formId;
     if (info.id == formJsInfo.formId) {
         LOGI("Added form already exist, trigger FormUpdate immediately.");
@@ -163,6 +173,17 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
         CreatePlatformResource(context, info);
     }
 #endif
+}
+
+void FormManagerDelegate::ProcessAddFormSurface(
+    const AppExecFwk::FormJsInfo& formInfo, const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode)
+{
+    if (!rsSurfaceNode) {
+        LOGI("---- etsCardTest ProcessAddFormSurface rsSurfaceNode is null");
+        return;
+    }
+    LOGI("---- etsCardTest ProcessAddFormSurface formId=%{public}lld, surfaceNodeId=%{public}llu ----", formInfo.formId,
+        rsSurfaceNode->GetId());
 }
 
 std::string FormManagerDelegate::ConvertRequestInfo(const RequestFormInfo& info) const

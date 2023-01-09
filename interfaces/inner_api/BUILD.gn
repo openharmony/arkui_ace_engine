@@ -12,5 +12,8 @@
 # limitations under the License.
 
 group("innerkits_target") {
-  deps = [ "ui_service_manager:ui_service_mgr" ]
+  deps = [ 
+    "form_surface_service:form_surface_service",
+    "ui_service_manager:ui_service_mgr",
+  ]
 }

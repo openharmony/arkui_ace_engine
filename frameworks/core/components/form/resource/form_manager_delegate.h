@@ -25,6 +25,7 @@
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "form_js_info.h"
+#include "ui/rs_surface_node.h"
 #include "want.h"
 #include "want_params_wrapper.h"
 
@@ -33,6 +34,7 @@
 
 namespace OHOS::Ace {
 class FormCallbackClient;
+class FormSurfaceCallbackClient;
 class FormManagerDelegate : public FormManagerResource {
     DECLARE_ACE_TYPE(FormManagerDelegate, FormManagerResource);
 
@@ -76,6 +78,8 @@ public:
     void ProcessFormUninstall(const int64_t formId);
     void OnDeathReceived();
     void SetFormUtils(const std::shared_ptr<FormUtils>& formUtils);
+    void ProcessAddFormSurface(const AppExecFwk::FormJsInfo &formInfo,
+        const std::shared_ptr<Rosen::RSSurfaceNode> &rsSurfaceNode);
 #endif
 
 private:
@@ -104,6 +108,7 @@ private:
     bool hasCreated_ = false;
     std::shared_ptr<FormCallbackClient> formCallbackClient_;
     std::shared_ptr<FormUtils> formUtils_;
+    std::shared_ptr<FormSurfaceCallbackClient> formSurfaceCallbackClient_;
 #endif
 };
 
