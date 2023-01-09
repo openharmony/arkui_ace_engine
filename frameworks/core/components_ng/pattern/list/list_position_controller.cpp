@@ -39,7 +39,7 @@ bool ListPositionController::AnimateTo(const Dimension& position, float duration
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
     auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
-    if (listPattern && listPattern->GetDirection() != Axis::NONE) {
+    if (listPattern && listPattern->GetAxis() != Axis::NONE) {
         if (position.Unit() == DimensionUnit::PERCENT) {
             LOGW("not support percent dimension now");
             return false;
@@ -61,10 +61,10 @@ void ListPositionController::ScrollBy(double pixelX, double pixelY, bool smooth)
     auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
     CHECK_NULL_VOID(listPattern);
     listPattern->SetScrollState(SCROLL_FROM_JUMP);
-    if (listPattern->GetDirection() == Axis::VERTICAL) {
-        listPattern->UpdateCurrentOffset(static_cast<float>(-pixelY));
+    if (listPattern->GetAxis() == Axis::VERTICAL) {
+        listPattern->UpdateCurrentOffset(static_cast<float>(-pixelY), SCROLL_FROM_JUMP);
     } else {
-        listPattern->UpdateCurrentOffset(static_cast<float>(-pixelX));
+        listPattern->UpdateCurrentOffset(static_cast<float>(-pixelX), SCROLL_FROM_JUMP);
     }
 }
 
@@ -74,7 +74,7 @@ Axis ListPositionController::GetScrollDirection() const
     CHECK_NULL_RETURN_NOLOG(pattern, Axis::NONE);
     auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
     CHECK_NULL_RETURN_NOLOG(listPattern, Axis::NONE);
-    return listPattern->GetDirection();
+    return listPattern->GetAxis();
 }
 
 void ListPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
@@ -82,7 +82,7 @@ void ListPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool sm
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
-    if (listPattern && listPattern->GetDirection() != Axis::NONE) {
+    if (listPattern && listPattern->GetAxis() != Axis::NONE) {
         listPattern->ScrollToEdge(scrollEdgeType);
     }
 }
@@ -92,7 +92,7 @@ void ListPositionController::ScrollPage(bool reverse, bool smooth)
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
-    if (listPattern && listPattern->GetDirection() != Axis::NONE) {
+    if (listPattern && listPattern->GetAxis() != Axis::NONE) {
         listPattern->ScrollPage(reverse);
     }
 }

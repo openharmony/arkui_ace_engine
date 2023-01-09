@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
+#include "core/components_ng/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -94,7 +95,7 @@ public:
     void UpdateScrollBarRegion(
         const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight);
     double GetNormalWidthToPx() const;
-    double CalcPatternOffset(double scrollBarOffset);
+    float CalcPatternOffset(float scrollBarOffset) const;
 
     ShapeMode GetShapeMode() const
     {
@@ -286,6 +287,30 @@ public:
         isDriving_ = isDriving;
     }
 
+    bool IsDriving() const
+    {
+        return isDriving_;
+    }
+
+    void MarkNeedRender()
+    {
+        if (markNeedRenderFunc_) {
+            markNeedRenderFunc_();
+        }
+    }
+
+    void SetMarkNeedRenderFunc(std::function<void()>&& func)
+    {
+        markNeedRenderFunc_ = func;
+    }
+
+    RefPtr<TouchEventImpl> GetTouchEvent()
+    {
+        return touchEvent_;
+    }
+
+    void SetGestureEvent();
+
 protected:
     void InitTheme();
 
@@ -326,6 +351,9 @@ private:
 
     bool isPressed_ = false;
     bool isDriving_ = false; // false: scroll driving; true: bar driving
+
+    RefPtr<TouchEventImpl> touchEvent_;
+    std::function<void()> markNeedRenderFunc_;
 };
 
 } // namespace OHOS::Ace::NG

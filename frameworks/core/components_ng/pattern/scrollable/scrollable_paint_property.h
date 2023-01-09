@@ -13,32 +13,33 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_PAINT_PROPERTY_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_PAINT_PROPERTY_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_PAINT_PROPERTY_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_PAINT_PROPERTY_H
 
 #include "core/animation/curve.h"
 #include "core/animation/curves.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
 struct ScrollBarProperty {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarMode, DisplayMode);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarMode, NG::DisplayMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarWidth, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarColor, Color);
 };
 
-class GridPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(GridPaintProperty, PaintProperty)
+class ScrollablePaintProperty : public PaintProperty {
+    DECLARE_ACE_TYPE(ScrollablePaintProperty, PaintProperty)
 
 public:
-    GridPaintProperty() = default;
-    ~GridPaintProperty() override = default;
+    ScrollablePaintProperty() = default;
+    ~ScrollablePaintProperty() override = default;
 
     RefPtr<PaintProperty> Clone() const override
     {
-        auto paintProperty = MakeRefPtr<GridPaintProperty>();
+        auto paintProperty = MakeRefPtr<ScrollablePaintProperty>();
         paintProperty->UpdatePaintProperty(this);
         paintProperty->propScrollBarProperty_ = CloneScrollBarProperty();
         return paintProperty;
@@ -53,7 +54,7 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     ACE_DEFINE_PROPERTY_GROUP(ScrollBarProperty, ScrollBarProperty);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarMode, DisplayMode, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarMode, NG::DisplayMode, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarWidth, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarColor, Color, PROPERTY_UPDATE_RENDER);
 

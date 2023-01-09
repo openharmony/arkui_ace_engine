@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_PATTERN_H
 
+#include "base/geometry/axis.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -27,11 +28,12 @@
 #include "core/components_ng/pattern/scroll/scroll_paint_method.h"
 #include "core/components_ng/pattern/scroll/scroll_position_controller.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
 
-class ScrollPattern : public Pattern {
-    DECLARE_ACE_TYPE(ScrollPattern, Pattern);
+class ScrollPattern : public ScrollablePattern {
+    DECLARE_ACE_TYPE(ScrollPattern, ScrollablePattern);
 
 public:
     ScrollPattern() = default;
@@ -39,7 +41,6 @@ public:
     {
         animator_ = nullptr;
         positionController_ = nullptr;
-        scrollableEvent_ = nullptr;
         scrollEffect_ = nullptr;
     }
 
@@ -66,7 +67,9 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<ScrollPaintMethod>();
+        auto paint = MakeRefPtr<ScrollPaintMethod>();
+        paint->SetScrollBar(GetScrollBar());
+        return paint;
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -79,6 +82,14 @@ public:
         return true;
     }
 
+    bool IsScrollable() const override
+    {
+        return GetAxis() != Axis::NONE;
+    }
+
+    bool OnScrollCallback(float offset, int32_t source) override;
+    void OnScrollEndCallback() override;
+
     double GetCurrentPosition() const
     {
         return currentOffset_;
@@ -88,7 +99,7 @@ public:
 
     Offset GetCurrentOffset() const
     {
-        if (axis_ == Axis::HORIZONTAL) {
+        if (GetAxis() == Axis::HORIZONTAL) {
             return Offset{currentOffset_, 0};
         }
         return Offset{0, currentOffset_};
@@ -97,11 +108,6 @@ public:
     const RefPtr<ScrollEdgeEffect>& GetScrollEdgeEffect() const
     {
         return scrollEffect_;
-    }
-
-    Axis GetAxis() const
-    {
-        return axis_;
     }
 
     float GetScrollableDistance() const
@@ -135,19 +141,12 @@ public:
         direction_ = direction;
     }
 
-    void SetScrollContent(bool isScrollContent = true)
-    {
-        isScrollContent_ = isScrollContent;
-    }
-
-    void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy);
-
     bool IsAtTop() const;
     bool IsAtBottom() const;
     bool IsOutOfBoundary() const;
 
     void SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect);
-    bool UpdateCurrentOffset(float offset, int32_t source);
+    bool UpdateCurrentOffset(float offset, int32_t source) override;
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool limitDuration = true,
         const std::function<void()>& onFinish = nullptr);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth);
@@ -179,15 +178,12 @@ private:
     void ValidateOffset(int32_t source);
     void HandleScrollPosition(float scroll, int32_t scrollState);
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect);
-    void RemoveScrollEdgeEffect();
+    void AddScrollEdgeEffect(RefPtr<ScrollEdgeEffect> scrollEffect);
+    void UpdateScrollBarOffset() override;
 
     RefPtr<Animator> animator_;
     RefPtr<ScrollPositionController> positionController_;
-    RefPtr<ScrollBarProxy> scrollBarProxy_;
-    RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
-    RefPtr<TouchEventImpl> touchEvent_;
-    Axis axis_ = Axis::VERTICAL;
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;
@@ -195,7 +191,6 @@ private:
     SizeF viewPort_;
     SizeF viewPortExtent_;
     FlexDirection direction_ { FlexDirection::COLUMN };
-    bool isScrollContent_ = true; // true: 操作内容区, false: 操作scrollBar
 };
 
 } // namespace OHOS::Ace::NG
