@@ -418,13 +418,19 @@ void RenderWaterFlow::InitialFlowProp()
     updateFlag_ = false;
 }
 
-LayoutParam RenderWaterFlow::MakeInnerLayoutParam(size_t itemIndex) const
+LayoutParam RenderWaterFlow::MakeInnerLayoutParam(size_t itemIndex)
 {
     LayoutParam innerLayout;
     double crossSize = 0.0;
+    size_t crossIndex = 0;
     auto iter = flowMatrix_.find(itemIndex);
     if (iter != flowMatrix_.end()) {
         crossSize = iter->second.crossSize;
+    } else {
+        crossIndex = GetLastMainBlankCross();
+        if (crossIndex < crossSideSize_.size()) {
+            crossSize = crossSideSize_[crossIndex];
+        }
     }
     if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::COLUMN_REVERSE) {
         innerLayout.SetMinSize(Size(crossSize, 0));
@@ -453,7 +459,7 @@ void RenderWaterFlow::SupplyItems(size_t startIndex, double targetPos)
             continue;
         }
         flowItem->SetNeedRender(false);
-        flowItem->Layout(GetLayoutParam());
+        flowItem->Layout(MakeInnerLayoutParam(startIndex));
         flowItem->SetVisible(false);
         itemCrossIndex = GetLastMainBlankCross();
         itemFlowStyle.mainPos = GetLastMainBlankPos().GetY();
