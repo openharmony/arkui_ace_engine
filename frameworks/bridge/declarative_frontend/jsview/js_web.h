@@ -74,6 +74,7 @@ public:
     static void OnRefreshAccessedHistory(const JSCallbackInfo& args);
     static void CacheMode(int32_t cacheMode);
     static void OverviewModeAccess(bool isOverviewModeAccessEnabled);
+    static void WideViewModeAccess(const JSCallbackInfo& args);
     static void FileFromUrlAccess(bool isFileFromUrlAccessEnabled);
     static void DatabaseAccess(bool isDatabaseAccessEnabled);
     static void TextZoomRatio(int32_t textZoomRatioNum);
