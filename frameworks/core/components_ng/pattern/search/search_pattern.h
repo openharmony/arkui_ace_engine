@@ -78,11 +78,7 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
-    enum class FocusChoice {
-        SEARCH = 0,
-        CANCEL_BUTTON,
-        SEARCH_BUTTON
-    };
+    enum class FocusChoice { SEARCH = 0, CANCEL_BUTTON, SEARCH_BUTTON };
 
 private:
     void OnModifyDone() override;
@@ -101,9 +97,11 @@ private:
     // Init touch and hover event
     void InitTouchEvent();
     void InitMouseEvent();
+    void InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId);
     void OnTouchDown();
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
+    void HandleButtonMouseEvent(bool isHover, int32_t childId);
     std::string searchButton_;
     SizeF searchSize_;
     OffsetF searchOffset_;
@@ -119,6 +117,8 @@ private:
 
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
+    RefPtr<InputEvent> searchButtonMouseEvent_;
+    RefPtr<InputEvent> cancelButtonMouseEvent_;
 };
 
 } // namespace OHOS::Ace::NG

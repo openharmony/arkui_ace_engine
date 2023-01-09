@@ -78,8 +78,6 @@ protected:
 private:
     void OnTouchDown();
     void OnTouchUp();
-    void InitMouseEvent();
-    void HandleMouseEvent(bool isHover);
     void HandleEnabled();
     void InitButtonLabel();
     static void SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, const RefPtr<PipelineBase>& pipeline);
