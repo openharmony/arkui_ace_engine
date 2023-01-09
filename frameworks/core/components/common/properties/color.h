@@ -56,7 +56,8 @@ public:
     static Color FromRGBO(uint8_t red, uint8_t green, uint8_t blue, double opacity);
     static Color FromRGB(uint8_t red, uint8_t green, uint8_t blue);
     // Need to change the input parameters, it is more appropriate to use the passed value here.
-    static Color FromString(std::string colorStr, uint32_t maskAlpha = COLOR_ALPHA_MASK);
+    static Color FromString(std::string colorStr, uint32_t maskAlpha = COLOR_ALPHA_MASK,
+        Color defaultColor = Color::BLACK);
     static bool ParseColorString(std::string colorStr, Color& color, uint32_t maskAlpha = COLOR_ALPHA_MASK);
     // Return the linear transition color from startColor to endColor.
     static const Color LineColorTransition(const Color& startColor, const Color& endColor, double percent);
