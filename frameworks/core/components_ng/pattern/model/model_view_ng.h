@@ -36,6 +36,8 @@ public:
     void AddGeometry(const RefPtr<OHOS::Render3D::SVGeometry>& shape) override;
     void AddGLTFAnimation(const RefPtr<OHOS::Render3D::GLTFAnimation>& animation) override;
     void AddCustomRender(const RefPtr<OHOS::Render3D::SVCustomRenderDescriptor>& customRender) override;
+    void SetWidth(Dimension& width) override;
+    void SetHeight(Dimension& height) override;
 };
 
 } // namespace OHOS::Ace::NG
