@@ -56,23 +56,13 @@ void ListPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
-    auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
-    if (axis != GetAxis()) {
-        SetAxis(axis);
-        if (scrollEffect_) {
-            gestureHub->RemoveScrollEdgeEffect(scrollEffect_);
-            gestureHub->AddScrollEdgeEffect(GetAxis(), scrollEffect_);
-        }
-    }
+    SetAxis(axis);
     if (!GetScrollableEvent()) {
         InitScrollableEvent();
     }
 
-    SetEdgeEffect(gestureHub, listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING));
+    SetEdgeEffect(listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING));
     auto listPaintProperty = host->GetPaintProperty<ListPaintProperty>();
     SetScrollBar(listPaintProperty->GetBarDisplayMode().value_or(DisplayMode::OFF));
     SetChainAnimation(listLayoutProperty->GetChainAnimation().value_or(false));
@@ -253,21 +243,22 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     return listLayoutAlgorithm;
 }
 
+bool ListPattern::IsAtTop() const
+{
+    return (startIndex_ == 0) && NonNegative(startMainPos_);
+}
+
+bool ListPattern::IsAtBottom() const
+{
+    return endIndex_ == maxListItemIndex_ && LessOrEqual(endMainPos_, GetMainContentSize());
+}
+
 bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 {
     SetScrollState(source);
     // check edgeEffect is not springEffect
-    if (scrollEffect_ && scrollEffect_->IsFadeEffect()) {
-        HandleScrollEffect(offset);
-    }
-    if (!(scrollEffect_ && scrollEffect_->IsSpringEffect()) ||
-        source == SCROLL_FROM_BAR || source == SCROLL_FROM_JUMP) {
-        if ((startIndex_ == 0) && NonNegative(startMainPos_) && Positive(offset)) {
-            return false;
-        }
-        if (endIndex_ == maxListItemIndex_ && LessOrEqual(endMainPos_, GetMainContentSize()) && Negative(offset)) {
-            return false;
-        }
+    if (!HandleEdgeEffect(offset, source, GetContentSize())) {
+        return false;
     }
     currentDelta_ = currentDelta_ - offset;
     MarkDirtyNodeSelf();
@@ -394,53 +385,6 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
         return list->GetMainContentSize() - (list->endMainPos_ - list->startMainPos_);
     });
     scrollEffect->SetInitTrailingCallback([]() -> double { return 0.0; });
-}
-
-void ListPattern::SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub, EdgeEffect edgeEffect)
-{
-    CHECK_NULL_VOID(gestureHub);
-    if (scrollEffect_ && (edgeEffect != scrollEffect_->GetEdgeEffect())) {
-        gestureHub->RemoveScrollEdgeEffect(scrollEffect_);
-        scrollEffect_.Reset();
-    }
-    if (edgeEffect == EdgeEffect::SPRING && !scrollEffect_) {
-        auto springEffect = AceType::MakeRefPtr<ScrollSpringEffect>();
-        CHECK_NULL_VOID(springEffect);
-        springEffect->SetOutBoundaryCallback([weak = AceType::WeakClaim(this)]() {
-            auto list = weak.Upgrade();
-            CHECK_NULL_RETURN_NOLOG(list, false);
-            return list->IsOutOfBoundary(false);
-        });
-        // add callback to springEdgeEffect
-        SetEdgeEffectCallback(springEffect);
-        scrollEffect_ = springEffect;
-        gestureHub->AddScrollEdgeEffect(GetAxis(), scrollEffect_);
-    }
-    if (edgeEffect == EdgeEffect::FADE && !scrollEffect_) {
-        auto fadeEdgeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::GRAY);
-        CHECK_NULL_VOID(fadeEdgeEffect);
-        fadeEdgeEffect->SetHandleOverScrollCallback([weakScroll = AceType::WeakClaim(this)]() -> void {
-            auto list = weakScroll.Upgrade();
-            CHECK_NULL_VOID_NOLOG(list);
-            auto host = list->GetHost();
-            CHECK_NULL_VOID_NOLOG(host);
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        });
-        SetEdgeEffectCallback(fadeEdgeEffect);
-        fadeEdgeEffect->InitialEdgeEffect();
-        scrollEffect_ = fadeEdgeEffect;
-        gestureHub->AddScrollEdgeEffect(GetAxis(), scrollEffect_);
-    }
-}
-
-void ListPattern::HandleScrollEffect(float offset)
-{
-    bool reachStart = (startIndex_ == 0) && NearZero(startMainPos_);
-    bool reachEnd = (endIndex_ == maxListItemIndex_) && NearEqual(endMainPos_, GetMainContentSize());
-    // handle edge effect
-    if ((reachStart && Positive(offset)) || (reachEnd && Negative(offset))) {
-        scrollEffect_->HandleOverScroll(GetAxis(), -offset, GetContentSize());
-    }
 }
 
 void ListPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)

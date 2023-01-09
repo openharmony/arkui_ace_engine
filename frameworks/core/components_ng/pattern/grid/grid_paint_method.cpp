@@ -23,6 +23,9 @@ CanvasDrawFunction GridPaintMethod::GetForegroundDrawFunction(PaintWrapper* /* p
     return [weak = scrollBar_](RSCanvas& canvas) {
         auto scrollBar = weak.Upgrade();
         CHECK_NULL_VOID(scrollBar);
+        if (!scrollBar->NeedPaint()) {
+            return;
+        }
         ScrollBarPainter::PaintRectBar(canvas, scrollBar, UINT8_MAX);
     };
 }

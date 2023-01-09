@@ -32,10 +32,6 @@ class ACE_EXPORT ScrollLayoutProperty : public LayoutProperty {
 
 public:
     ScrollLayoutProperty() = default;
-    ~ScrollLayoutProperty() override
-    {
-        scrollEffect_ = nullptr;
-    }
 
     RefPtr<LayoutProperty> Clone() const override
     {
@@ -43,7 +39,7 @@ public:
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propAxis_ = CloneAxis();
         value->propBarWidth_ = CloneBarWidth();
-        value->scrollEffect_ = scrollEffect_;
+        value->propEdgeEffect_ = CloneEdgeEffect();
         return value;
     }
 
@@ -51,6 +47,7 @@ public:
     {
         LayoutProperty::Reset();
         ResetAxis();
+        ResetEdgeEffect();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -63,25 +60,13 @@ public:
         json->Put("scrollable", scrollableMap[axis].c_str());
         std::unordered_map<EdgeEffect, std::string> edgeEffectMap { { EdgeEffect::SPRING, "EdgeEffect.Spring" },
             { EdgeEffect::FADE, "EdgeEffect.Fade" }, { EdgeEffect::NONE, "EdgeEffect.None" } };
-        EdgeEffect edgeEffect = scrollEffect_ ? scrollEffect_->GetEdgeEffect() : EdgeEffect::NONE;
+        EdgeEffect edgeEffect = propEdgeEffect_.value_or(EdgeEffect::NONE);
         json->Put("edgeEffect", edgeEffectMap[edgeEffect].c_str());
-    }
-
-    void SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEffect)
-    {
-        scrollEffect_ = scrollEffect;
-    }
-
-    const RefPtr<ScrollEdgeEffect>& GetScrollEdgeEffect() const
-    {
-        return scrollEffect_;
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
-
-private:
-    RefPtr<ScrollEdgeEffect> scrollEffect_;
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EdgeEffect, EdgeEffect, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

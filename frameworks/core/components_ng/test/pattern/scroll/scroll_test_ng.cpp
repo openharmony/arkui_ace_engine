@@ -49,7 +49,7 @@ constexpr float DEVICE_WIDTH = 720.0f;
 constexpr float DEVICE_HEIGHT = 1136.0f;
 constexpr float SCROLL_FLOAT_10 = 10.0f;
 constexpr float SCROLL_FLOAT_50 = 50.0f;
-constexpr float SCROLL_FLOAT_99 = 99.0f;
+constexpr float SCROLL_FLOAT_98 = 98.0f;
 constexpr float SCROLL_FLOAT_100 = 100.0f;
 constexpr float SCROLL_FLOAT_NEGATIVE_10 = -10.0f;
 constexpr float SCROLL_FLOAT_NEGATIVE_100 = -100.0f;
@@ -419,12 +419,12 @@ HWTEST_F(ScrollTestNg, ScrollTest004, TestSize.Level1)
     auto ret = callback(0.0, SCROLL_FROM_UPDATE);
     EXPECT_EQ(ret, false);
     ret = callback(1.0, SCROLL_FROM_ANIMATION);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
     ret = callback(-1.0, SCROLL_FROM_ANIMATION_SPRING);
     EXPECT_EQ(ret, false);
     pattern->viewPortLength_ = 0.0f;
     ret = callback(1.0, SCROLL_FROM_BAR);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
 
     pattern->currentOffset_ = SCROLL_FLOAT_100;
     pattern->scrollableDistance_ = SCROLL_FLOAT_100;
@@ -443,13 +443,13 @@ HWTEST_F(ScrollTestNg, ScrollTest004, TestSize.Level1)
     pattern->scrollableDistance_ = SCROLL_FLOAT_NEGATIVE_100;
     pattern->viewPortLength_ = SCROLL_FLOAT_100;
     ret = callback(SCROLL_DOUBLE_200, SCROLL_FROM_UPDATE);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
 
     pattern->currentOffset_ = 0.0f;
     pattern->scrollableDistance_ = 0.0f;
     pattern->viewPortLength_ = SCROLL_FLOAT_100;
     ret = callback(SCROLL_DOUBLE_NEGATIVE_100, SCROLL_FROM_ANIMATION_SPRING);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
 
     pattern->currentOffset_ = SCROLL_FLOAT_100;
     pattern->scrollableDistance_ = SCROLL_FLOAT_NEGATIVE_100;
@@ -639,7 +639,7 @@ HWTEST_F(ScrollTestNg, ScrollTest006, TestSize.Level1)
     pattern->scrollableDistance_ = SCROLL_FLOAT_100;
     pattern->viewPortLength_ = SCROLL_FLOAT_100;
     ret = callback(SCROLL_DOUBLE_10, SCROLL_FROM_BAR);
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, true);
 
     /**
      * @tc.steps: step6. Call the ResetPosition function.
@@ -1024,7 +1024,7 @@ HWTEST_F(ScrollTestNg, ScrollTest0010, TestSize.Level1)
     auto axis = positionController->GetScrollDirection();
     EXPECT_EQ(axis, Axis::VERTICAL);
     auto position = positionController->GetCurrentPosition();
-    EXPECT_EQ(position, SCROLL_FLOAT_99);
+    EXPECT_EQ(position, SCROLL_FLOAT_98);
     auto offset = positionController->GetCurrentOffset();
     EXPECT_EQ(offset, Offset::Zero());
     Dimension dimension(0, DimensionUnit::VP);
@@ -1097,9 +1097,9 @@ HWTEST_F(ScrollTestNg, ScrollTest0011, TestSize.Level1)
      * @tc.steps: step5. Set ScrollSpringEffect and call relevant callback functions.
      * @tc.expected: step5. Check whether the return value is correct.
      */
-    RefPtr<ScrollEdgeEffect> scrollEdgeEffect = AceType::MakeRefPtr<ScrollSpringEffect>();
+    pattern->SetEdgeEffect(EdgeEffect::SPRING);
+    RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern->GetScrollEdgeEffect();
     EXPECT_NE(scrollEdgeEffect, nullptr);
-    pattern->SetScrollEdgeEffect(scrollEdgeEffect);
     auto springEffect = AceType::DynamicCast<ScrollSpringEffect>(scrollEdgeEffect);
     EXPECT_NE(springEffect, nullptr);
     pattern->currentOffset_ = SCROLL_FLOAT_100;
@@ -1232,16 +1232,16 @@ HWTEST_F(ScrollTestNg, ScrollTest0012, TestSize.Level1)
      * @tc.steps: step6. Set ScrollFadeEffect and call relevant callback functions.
      * @tc.expected: step6. Check whether the return value is correct.
      */
-    RefPtr<ScrollEdgeEffect> scrollEdgeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::GRAY);
+    pattern->SetEdgeEffect(EdgeEffect::FADE);
+    RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern->GetScrollEdgeEffect();
     EXPECT_NE(scrollEdgeEffect, nullptr);
-    pattern->SetScrollEdgeEffect(scrollEdgeEffect);
     pattern->currentOffset_ = SCROLL_FLOAT_100;
     pattern->scrollableDistance_ = SCROLL_FLOAT_100;
     auto scrollFade = AceType::DynamicCast<ScrollFadeEffect>(scrollEdgeEffect);
     EXPECT_NE(scrollFade, nullptr);
     scrollFade->handleOverScrollCallback_();
     EXPECT_NE(scrollFade->fadeController_, nullptr);
-    pattern->SetScrollEdgeEffect(nullptr);
+    pattern->SetEdgeEffect(EdgeEffect::NONE);
     EXPECT_EQ(pattern->scrollEffect_, nullptr);
 }
 
@@ -1327,9 +1327,9 @@ HWTEST_F(ScrollTestNg, ScrollTest0013, TestSize.Level1)
      * @tc.steps: step6. Verify related functions in ScrollSpringEffect.
      * @tc.expected: step6. Check whether relevant parameters are correct.
      */
-    RefPtr<ScrollEdgeEffect> scrollEdgeEffect = AceType::MakeRefPtr<ScrollSpringEffect>();
+    pattern->SetEdgeEffect(EdgeEffect::SPRING);
+    RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern->GetScrollEdgeEffect();
     EXPECT_NE(scrollEdgeEffect, nullptr);
-    pattern->SetScrollEdgeEffect(scrollEdgeEffect);
     scrollEdgeEffect->ProcessScrollOver(0.0);
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
     EXPECT_NE(scrollable, nullptr);
@@ -1488,9 +1488,9 @@ HWTEST_F(ScrollTestNg, ScrollTest0015, TestSize.Level1)
      * @tc.steps: step5. Create ScrollFadeEffect and  verify related callback functions.
      * @tc.expected: step5. Check whether relevant parameters are correct.
      */
-    RefPtr<ScrollEdgeEffect> scrollEdgeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::GRAY);
+    pattern->SetEdgeEffect(EdgeEffect::FADE);
+    RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern->GetScrollEdgeEffect();
     EXPECT_NE(scrollEdgeEffect, nullptr);
-    pattern->SetScrollEdgeEffect(scrollEdgeEffect);
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
     EXPECT_NE(scrollable, nullptr);
     scrollable->controller_ = AceType::MakeRefPtr<Animator>();

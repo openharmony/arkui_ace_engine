@@ -40,7 +40,6 @@ public:
         auto paintProperty = MakeRefPtr<ScrollPaintProperty>();
         paintProperty->UpdatePaintProperty(this);
         paintProperty->currentOffset_ = currentOffset_;
-        paintProperty->scrollEdgeEffect_ = scrollEdgeEffect_;
         paintProperty->viewPortExtent_ = viewPortExtent_;
         paintProperty->propAxis_ = CloneAxis();
         return paintProperty;
@@ -51,29 +50,17 @@ public:
         ScrollablePaintProperty::ToJsonValue(json);
     }
 
-    void SetScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& scrollEdgeEffect)
-    {
-        scrollEdgeEffect_ = scrollEdgeEffect;
-    }
-
-    RefPtr<ScrollEdgeEffect> GetScrollEdgeEffect() const
-    {
-        return scrollEdgeEffect_;
-    }
-
     void Reset() override
     {
         ScrollablePaintProperty::Reset();
         ResetAxis();
     }
 
-
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_MEASURE);
 
 private:
     float currentOffset_ = 0.0f;
     SizeF viewPortExtent_;
-    RefPtr<ScrollEdgeEffect> scrollEdgeEffect_;
 };
 
 } // namespace OHOS::Ace::NG
