@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/model/model_adapter_wrapper.h"
 
+#include <EGL/egl.h>
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/graphics_task.h"
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/ohos/graphics_manager.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -35,11 +36,6 @@ ModelAdapterWrapper::ModelAdapterWrapper(uint32_t key) : key_(key)
 
 void ModelAdapterWrapper::OnPaint(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
-    if (!setupDone_) {
-        LOGE("MODEL_NG: ModelAdapterWrapper::OnPaint() setup not done!");
-        return;
-    }
-
     auto properties = ExtractPaintProperties(modelPaintProperty);
     if (modelPaintProperty->NeedsCameraSetup()) {
         UpdateCamera(properties);
@@ -159,20 +155,12 @@ SkDrawable* ModelAdapterWrapper::GetDrawable(OffsetF offset)
 
 void ModelAdapterWrapper::OnMeasureContent(const RefPtr<ModelLayoutProperty>& modelLayoutProperty, SizeF size)
 {
+    LOGD("MODEL_NG: OnMeasureContent");
     bool sizeChanged = size_.UpdateSizeWithCheck(size);
-    bool needsUpdate = sizeChanged || modelLayoutProperty->NeedsSceneSetup();
+    bool sceneChanged = modelLayoutProperty->NeedsSceneSetup();
+    bool needsSetup = !sceneIsSetUp_ || sceneChanged || sizeChanged;
 
-    // Do not create Texture layer with zero size.
-    if (!textureLayer_ && NearEqual(size_.Width(), 0) && NearEqual(size_.Height(), 0)) {
-        LOGE("MODEL_NG: ModelAdapterWrapper::OnMeasureContent() size is zero!");
-        return;
-    }
-
-    if (sizeChanged && textureLayer_) {
-        textureLayer_->SetWH(size_.Width(), size_.Height());
-    }
-
-    if (IsInitialized() && needsUpdate) {
+    if (IsInitialized() && sceneChanged) {
         UnloadScene();
     }
 
@@ -180,7 +168,17 @@ void ModelAdapterWrapper::OnMeasureContent(const RefPtr<ModelLayoutProperty>& mo
         Initialize();
     }
 
-    if (needsUpdate) {
+    if (!IsInitialized()) {
+        // Failed to create TextureLayer or Engine, or Cannot obtain EGL context
+        LOGW("MODEL_NG: OnMeasureContent() - Failed to initialize");
+        return;
+    }
+
+    if (sizeChanged) {
+        UpdateTextureLayer();
+    }
+
+    if (needsSetup) {
         modelLayoutProperty->UpdateNeedsSceneSetup(false);
         auto properties = ExtractLayoutProperties(modelLayoutProperty);
         UpdateSceneViewerAdapter(properties);
@@ -191,6 +189,11 @@ void ModelAdapterWrapper::Initialize()
 {
     // Obtain EGLContext
     EGLContext eglContext = GetRenderContext();
+
+    if (eglContext == EGL_NO_CONTEXT) {
+        LOGW("MODEL_NG: Initialize() - No render context.");
+        return;
+    }
 
     CreateTextureLayer(eglContext);
     CreateSceneViewerAdapter(eglContext);
@@ -228,7 +231,7 @@ void ModelAdapterWrapper::UpdateSceneViewerAdapter(const SceneViewerAdapterPrope
             obj, properties.gltfSrc_, properties.backgroundSrc_, properties.bgType_);
         LOGD("MODEL_NG: ModelAdapterWrapper::UpdateSceneViewerAdapter() glTFSrc_ %s GetKey() %d",
             properties.gltfSrc_.c_str(), adapter->GetKey());
-        adapter->setupDone_ = true;
+        adapter->sceneIsSetUp_ = true;
     });
 }
 
@@ -253,6 +256,12 @@ void ModelAdapterWrapper::CreateTextureLayer(const EGLContext& eglContext)
     });
 }
 
+void ModelAdapterWrapper::UpdateTextureLayer()
+{
+    CHECK_NULL_VOID(textureLayer_);
+    textureLayer_->SetWH(size_.Width(), size_.Height());
+}
+
 void ModelAdapterWrapper::UnloadScene()
 {
 #if MULTI_ECS_UPDATE_AT_ONCE
@@ -263,7 +272,7 @@ void ModelAdapterWrapper::UnloadScene()
         auto adapter = weak.Upgrade();
         CHECK_NULL_VOID(adapter);
         adapter->sceneViewerAdapter_->UnLoadModel();
-        LOGD("MODEL_NG: SetupSceneViewer -> Unload model GetKey() %d", adapter->GetKey());
+        LOGD("MODEL_NG: UnloadScene -> Unload model GetKey() %d", adapter->GetKey());
     });
 }
 
@@ -314,6 +323,11 @@ EGLContext ModelAdapterWrapper::GetRenderContext()
 bool ModelAdapterWrapper::IsInitialized()
 {
     return sceneViewerAdapter_ ? true : false;
+}
+
+bool ModelAdapterWrapper::IsReady()
+{
+    return IsInitialized() && sceneIsSetUp_;
 }
 
 bool ModelAdapterWrapper::NeedsRepaint()

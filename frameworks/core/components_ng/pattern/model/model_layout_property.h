@@ -19,6 +19,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/pattern/model/model_property.h"
 
 namespace OHOS::Ace::NG {
 class ModelPattern;
@@ -39,8 +40,14 @@ public:
         value->propModelBackground_ = CloneModelBackground();
         value->propModelCameraMove_ = CloneModelCameraMove();
         value->propModelTransparent_ = CloneModelTransparent();
+        value->needsSceneSetup_ = CloneNeedsSceneSetup();
 
         return value;
+    }
+
+    void ResetFlagProperties()
+    {
+        UpdateNeedsSceneSetup(false);
     }
 
     void Reset() override
@@ -50,6 +57,7 @@ public:
         ResetModelBackground();
         ResetModelCameraMove();
         ResetModelTransparent();
+        ResetFlagProperties();
     }
 
     void OnModelSourceUpdate(const std::string& value)
@@ -62,29 +70,14 @@ public:
         UpdateNeedsSceneSetup(true);
     }
 
-    bool NeedsSceneSetup()
-    {
-        return needsSceneSetup_;
-    }
-
-    void UpdateNeedsSceneSetup(const bool value)
-    {
-        needsSceneSetup_ = value;
-        if (value) {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        }
-    }
-
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(ModelSource, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(ModelBackground, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ModelCameraMove, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ModelTransparent, bool, PROPERTY_UPDATE_MEASURE);
 
-private:
-    bool needsSceneSetup_ = false;
+    DEFINE_NEEDS_SETUP_FLAG_PROPERTY(Scene, false, PROPERTY_UPDATE_MEASURE);
 
+private:
     ACE_DISALLOW_COPY_AND_MOVE(ModelLayoutProperty);
 };
 } // namespace OHOS::Ace::NG
