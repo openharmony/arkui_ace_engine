@@ -1748,7 +1748,7 @@ void UIContentImpl::InitWindowScene(
     const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
     const std::shared_ptr<Rosen::ISessionStageStateListener>& listener)
 {
-    windowPattern_ = new NG::WindowScenePattern(iSceneSession, surfaceNode);
+    windowPattern_ = new NG::WindowScene(iSceneSession, surfaceNode);
     windowPattern_->RegisterSessionStageStateListener(listener);
 }
 

@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/window_scene/host/host_window_extension_pattern.h"
+#include "core/components_ng/pattern/window_scene/container/window_extension.h"
 
 namespace OHOS::Ace::NG {
 
-void HostWindowExtensionPattern::OnAttachToFrameNode()
+WindowExtension::WindowExtension(
+    /* const sptr<Rosen::IExtensionSession>& iExtensionSession,
+    const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode */)
+    : WindowPattern(nullptr)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    // sessionStage_ = std::make_shared<Rosen::ExtensionSessionStage>(iExtensionSession);
+    // sessionStage_->Connect();
 }
 
 } // namespace OHOS::Ace::NG

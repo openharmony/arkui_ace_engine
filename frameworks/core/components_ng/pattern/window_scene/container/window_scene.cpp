@@ -13,18 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/window_scene/container/window_extension_pattern.h"
+#include "core/components_ng/pattern/window_scene/container/window_scene.h"
 
 namespace OHOS::Ace::NG {
 
-WindowExtensionPattern::WindowExtensionPattern(
-/*     const sptr<Rosen::IExtensionSession>& iExtensionSession,
-    const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
-    const std::shared_ptr<AbilityRuntime::Context>& runtimeContext */)
-    // : WindowPattern(surfaceNode, runtimeContext)
-    : WindowPattern(nullptr)
+WindowScene::WindowScene(
+    const sptr<Rosen::ISceneSession>& iSceneSession,
+    const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
+    : WindowPattern(surfaceNode)
 {
-    // sessionStage_ = std::shared_ptr<Rosen::ExtensionSessionStage>(new Rosen::ExtensionSessionStage(iExtensionSession));
+    sessionStage_ = std::make_shared<Rosen::SceneSessionStage>(iSceneSession);
+    sessionStage_->Connect();
 }
 
 } // namespace OHOS::Ace::NG

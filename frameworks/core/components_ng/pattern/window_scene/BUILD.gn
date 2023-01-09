@@ -17,7 +17,6 @@ import(
 if (is_standard_system) {
   config("ohos_window_scene_config") {
     include_dirs = [
-      "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
       "//foundation/window/window_manager/wm",
     ]
   }
@@ -25,16 +24,16 @@ if (is_standard_system) {
 
 build_component_ng("window_scene") {
   sources = [
-    #container
-    "container/window_extension_pattern.cpp",
+    # container
+    "container/window_extension.cpp",
     "container/window_pattern.cpp",
-    "container/window_scene_pattern.cpp",
+    "container/window_scene.cpp",
 
-    #host
-    "host/host_window_extension_pattern.cpp",
+    # host
+    "host/host_window_extension.cpp",
     "host/host_window_pattern.cpp",
+    "host/host_window_scene_model.cpp",
     "host/host_window_scene.cpp",
-    "host/host_window_scene_pattern.cpp",
   ]
 
   if (is_standard_system) {

@@ -52,7 +52,7 @@ protected:
 private:
     std::shared_ptr<Rosen::Session> session_;
 
-    friend class HostWindowScene;
+    friend class HostWindowSceneModel;
 
     ACE_DISALLOW_COPY_AND_MOVE(HostWindowPattern);
 };

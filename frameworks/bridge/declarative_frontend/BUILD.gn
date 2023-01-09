@@ -474,7 +474,6 @@ template("declarative_js_engine") {
         ]
 
         include_dirs += [
-          "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
           "//foundation/window/window_manager/window_scene/interfaces/kits/napi/host",
         ]
       }

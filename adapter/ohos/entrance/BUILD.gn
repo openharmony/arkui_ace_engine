@@ -95,10 +95,6 @@ template("ace_ohos_standard_source_set") {
       "//foundation/window/window_manager/window_scene:window_session",
     ]
 
-    include_dirs += [
-      "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
-    ]
-
     public_deps =
         [ "//base/global/resource_management/frameworks/resmgr:global_resmgr" ]
 

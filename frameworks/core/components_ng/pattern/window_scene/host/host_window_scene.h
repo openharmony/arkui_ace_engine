@@ -16,15 +16,28 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_SCENE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_SCENE_H
 
-#include "foundation/window/window_manager/window_scene/session/host/include/session.h"
-
-#include "base/utils/macros.h"
+#include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/window_scene/host/host_window_pattern.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT HostWindowScene {
+class HostWindowScene : public HostWindowPattern {
+    DECLARE_ACE_TYPE(HostWindowScene, HostWindowPattern);
+
 public:
-    static void Create(const std::shared_ptr<Rosen::Session>& session);
+    HostWindowScene(const std::shared_ptr<Rosen::Session>& session) : HostWindowPattern(session) {}
+    ~HostWindowScene() override = default;
+
+    void OnModifyDone() override;
+
+protected:
+    void OnAttachToFrameNode() override;
+
+private:
+    void OnClick();
+
+    RefPtr<ClickEvent> clickListener_;
+    ACE_DISALLOW_COPY_AND_MOVE(HostWindowScene);
 };
 
 } // namespace OHOS::Ace::NG

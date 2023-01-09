@@ -13,28 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_EXTENSION_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_EXTENSION_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_EXTENSION_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_EXTENSION_H
 
 #include "core/components_ng/pattern/window_scene/host/host_window_pattern.h"
 
-#include "session.h"
-
 namespace OHOS::Ace::NG {
 
-class HostWindowExtensionPattern : public HostWindowPattern {
-    DECLARE_ACE_TYPE(HostWindowExtensionPattern, HostWindowPattern);
+class HostWindowExtension : public HostWindowPattern {
+    DECLARE_ACE_TYPE(HostWindowExtension, HostWindowPattern);
 
 public:
-    HostWindowExtensionPattern(const std::shared_ptr<Rosen::Session>& session) : HostWindowPattern(session) {}
-    ~HostWindowExtensionPattern() override = default;
+    HostWindowExtension(const std::shared_ptr<Rosen::Session>& session) : HostWindowPattern(session) {}
+    ~HostWindowExtension() override = default;
 
+protected:
     void OnAttachToFrameNode() override;
 
 private:
-    ACE_DISALLOW_COPY_AND_MOVE(HostWindowExtensionPattern);
+    ACE_DISALLOW_COPY_AND_MOVE(HostWindowExtension);
 };
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_EXTENSION_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_EXTENSION_H

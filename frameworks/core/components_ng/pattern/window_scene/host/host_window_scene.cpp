@@ -15,20 +15,38 @@
 
 #include "core/components_ng/pattern/window_scene/host/host_window_scene.h"
 
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/window_scene/host/host_window_scene_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-
 namespace OHOS::Ace::NG {
 
-void HostWindowScene::Create(const std::shared_ptr<Rosen::Session>& session)
+void HostWindowScene::OnAttachToFrameNode()
 {
-    auto stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HOST_WINDOW_SCENE_ETS_TAG, nodeId,
-        [&session]() { return AceType::MakeRefPtr<HostWindowScenePattern>(session); });
-    stack->Push(frameNode);
-    frameNode->GetPattern<HostWindowScenePattern>()->InitContent();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void HostWindowScene::OnModifyDone()
+{
+    if (clickListener_) {
+        return;
+    }
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto hostWindowScene = weak.Upgrade();
+        CHECK_NULL_VOID(hostWindowScene);
+        hostWindowScene->OnClick();
+    };
+    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    gesture->AddClickEvent(clickListener_);
+}
+
+void HostWindowScene::OnClick()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 } // namespace OHOS::Ace::NG

@@ -13,27 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_EXTENSION_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_EXTENSION_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_H
+
+#include "scene_session_stage.h"
 
 #include "core/components_ng/pattern/window_scene/container/window_pattern.h"
 
 namespace OHOS::Ace::NG {
 
-class WindowExtensionPattern : public WindowPattern {
-    DECLARE_ACE_TYPE(WindowExtensionPattern, WindowPattern);
+class WindowScene : public WindowPattern {
+    DECLARE_ACE_TYPE(WindowScene, WindowPattern);
 
 public:
-    WindowExtensionPattern(
-/*         const sptr<Rosen::IExtensionSession>& iExtensionSession,
-        const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
-        const std::shared_ptr<AbilityRuntime::Context>& runtimeContext */);
-    ~WindowExtensionPattern() override = default;
+    WindowScene(
+        const sptr<Rosen::ISceneSession>& iSceneSession,
+        const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
+    ~WindowScene() override = default;
 
 private:
-    ACE_DISALLOW_COPY_AND_MOVE(WindowExtensionPattern);
+    ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
 };
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_EXTENSION_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_H

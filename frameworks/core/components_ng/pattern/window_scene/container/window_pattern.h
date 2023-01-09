@@ -24,9 +24,9 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Rosen {
-struct VsyncCallback;
 class RSSurfaceNode;
 class RSUIDirector;
+struct VsyncCallback;
 }
 
 namespace OHOS::Ace::NG {

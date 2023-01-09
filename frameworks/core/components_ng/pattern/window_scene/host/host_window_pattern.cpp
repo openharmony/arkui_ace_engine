@@ -66,6 +66,10 @@ void HostWindowPattern::InitContent()
         host->RemoveChild(hostWindowPattern->startingNode_);
         hostWindowPattern->startingNode_.Reset();
         host->AddChild(hostWindowPattern->contentNode_);
+
+        auto pipelineContext = FrameNode::GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->RequestFrame();
     });
     // session_->RegisterOnBackgroundCallback(&HostWindowPattern::OnBackground);
 }
