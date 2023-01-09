@@ -1302,24 +1302,18 @@ void JsiDeclarativeEngine::FireExternalEvent(
 
         std::string arguments;
         auto soPath = xcPattern->GetSoPath().value_or("");
-        auto arkObjectRef = arkNativeEngine->LoadModuleByName(xcPattern->GetLibraryName(), true, arguments,
-            OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent), soPath);
-
         auto runtime = engineInstance_->GetJsRuntime();
         shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
-        if (arkObjectRef.IsEmpty() || pandaRuntime->HasPendingException()) {
+        LocalScope scope(pandaRuntime->GetEcmaVm());
+        auto objXComp = arkNativeEngine->LoadModuleByName(xcPattern->GetLibraryName(), true, arguments,
+            OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent), soPath);
+        if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
             LOGE("LoadModuleByName failed.");
             return;
         }
 
         renderContext_ = runtime->NewObject();
         auto renderContext = std::static_pointer_cast<ArkJSValue>(renderContext_);
-        LocalScope scope(pandaRuntime->GetEcmaVm());
-        Local<ObjectRef> objXComp = arkObjectRef->ToObject(pandaRuntime->GetEcmaVm());
-        if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
-            LOGE("Get local object failed.");
-            return;
-        }
         renderContext->SetValue(pandaRuntime, objXComp);
 
         auto objContext = JsiObject(objXComp);
@@ -1396,24 +1390,18 @@ void JsiDeclarativeEngine::FireExternalEvent(
 
     std::string arguments;
     auto soPath = xcomponent->GetSoPath().value_or("");
-    auto arkObjectRef = arkNativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true, arguments,
-        OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent_), soPath);
-
     auto runtime = engineInstance_->GetJsRuntime();
     shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
-    if (arkObjectRef.IsEmpty() || pandaRuntime->HasPendingException()) {
+    LocalScope scope(pandaRuntime->GetEcmaVm());
+    auto objXComp = arkNativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true, arguments,
+        OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent_), soPath);
+    if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
         LOGE("LoadModuleByName failed.");
         return;
     }
 
     renderContext_ = runtime->NewObject();
     auto renderContext = std::static_pointer_cast<ArkJSValue>(renderContext_);
-    LocalScope scope(pandaRuntime->GetEcmaVm());
-    Local<ObjectRef> objXComp = arkObjectRef->ToObject(pandaRuntime->GetEcmaVm());
-    if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
-        LOGE("Get local object failed.");
-        return;
-    }
     renderContext->SetValue(pandaRuntime, objXComp);
 
     auto objContext = JsiObject(objXComp);

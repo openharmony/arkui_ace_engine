@@ -392,22 +392,21 @@ void JsiCanvasBridge::HandleWebglContext(const shared_ptr<JsRuntime>& runtime,
 
     std::string moduleName(CANVAS_WEBGL_SO);
     std::string pluginId(std::to_string(id));
-    auto arkObjectRef = nativeEngine->GetModuleFromName(
+    shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    LocalScope scope(pandaRuntime->GetEcmaVm());
+    auto obj = nativeEngine->GetModuleFromName(
         moduleName, false, pluginId, args, WEBGL_RENDER_CONTEXT_NAME, reinterpret_cast<void**>(&canvasRenderContext));
     if (!canvasRenderContext) {
         LOGE("CanvasBridge invalid canvasRenderContext");
         return;
     }
-
-    renderContext_ = runtime->NewObject();
-    auto renderContext = std::static_pointer_cast<ArkJSValue>(renderContext_);
-    shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
-    LocalScope scope(pandaRuntime->GetEcmaVm());
-    Local<ObjectRef> obj = arkObjectRef->ToObject(pandaRuntime->GetEcmaVm());
     if (obj.IsEmpty() || pandaRuntime->HasPendingException()) {
         LOGE("Get local object failed.");
         return;
     }
+
+    renderContext_ = runtime->NewObject();
+    auto renderContext = std::static_pointer_cast<ArkJSValue>(renderContext_);
     renderContext->SetValue(pandaRuntime, obj);
 
     auto page = engine->GetRunningPage();
