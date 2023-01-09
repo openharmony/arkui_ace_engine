@@ -15,6 +15,8 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 
+#include "scope_manager/native_scope_manager.h"
+
 #if !defined(PREVIEW)
 #include <dlfcn.h>
 #endif
@@ -29,6 +31,21 @@
 
 namespace OHOS::Ace::Framework {
 #if !defined(PREVIEW)
+class ScopeRAII {
+public:
+    explicit ScopeRAII(NativeScopeManager* manager) : manager_(manager)
+    {
+        scope_ = manager_->Open();
+    }
+    ~ScopeRAII()
+    {
+        manager_->Close(scope_);
+    }
+
+private:
+    NativeScopeManager* manager_;
+    NativeScope* scope_;
+};
 
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
 {
@@ -41,7 +58,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
         LOGE("CreatePixelMapFromNapiValue engine is null");
         return nullptr;
     }
-    auto nativeEngine = engine->GetNativeEngine();
+    auto* nativeEngine = engine->GetNativeEngine();
     if (nativeEngine == nullptr) {
         LOGE("nativeEngine is nullptr.");
         return nullptr;
@@ -52,6 +69,8 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
     panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
 #endif
     JSValueWrapper valueWrapper = value;
+
+    ScopeRAII scope(nativeEngine->GetScopeManager());
     NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
 
     PixelMapNapiEntry pixelMapNapiEntry = JsEngine::GetPixelMapNapiEntry();
@@ -92,6 +111,8 @@ const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj)
     panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
 #endif
     JSValueWrapper valueWrapper = value;
+
+    ScopeRAII scope(nativeEngine->GetScopeManager());
     NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
     if (nativeValue == nullptr) {
         LOGE("nativeValue is nullptr.");
@@ -130,10 +151,11 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
     panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
 #endif
     JSValueWrapper valueWrapper = value;
+
+    ScopeRAII scope(nativeEngine->GetScopeManager());
     NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
 
-    return WantWrap::CreateWantWrap(reinterpret_cast<void*>(nativeEngine),
-                                    reinterpret_cast<void*>(nativeValue));
+    return WantWrap::CreateWantWrap(reinterpret_cast<void*>(nativeEngine), reinterpret_cast<void*>(nativeValue));
 }
 
 #endif
