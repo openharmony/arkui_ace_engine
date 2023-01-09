@@ -181,6 +181,8 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("scrollBarColor", &JSScroll::SetScrollBarColor, opt);
     JSClass<JSScroll>::StaticMethod("scrollBarWidth", &JSScroll::SetScrollBarWidth, opt);
     JSClass<JSScroll>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSScroll>::StaticMethod("width", &JSScroll::JsWidth);
+    JSClass<JSScroll>::StaticMethod("height", &JSScroll::JsHeight);
     JSClass<JSScroll>::Inherit<JSContainerBase>();
     JSClass<JSScroll>::Inherit<JSViewAbstract>();
     JSClass<JSScroll>::Bind<>(globalObj);
@@ -210,6 +212,18 @@ void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)
 void JSScroll::SetEdgeEffect(int edgeEffect)
 {
     ScrollModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
+}
+
+void JSScroll::JsWidth(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsWidth(info);
+    ScrollModel::GetInstance()->SetHasWidth(true);
+}
+
+void JSScroll::JsHeight(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsHeight(info);
+    ScrollModel::GetInstance()->SetHasHeight(true);
 }
 
 } // namespace OHOS::Ace::Framework

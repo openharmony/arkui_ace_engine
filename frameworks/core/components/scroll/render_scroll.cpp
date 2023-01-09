@@ -850,6 +850,13 @@ double RenderScroll::GetCurrentPosition() const
 
 void RenderScroll::Update(const RefPtr<Component>& component)
 {
+    auto scroll = AceType::DynamicCast<ScrollComponent>(component);
+    if (scroll == nullptr) {
+        LOGI("scroll component is null, which it is multi scroll, not single scroll");
+        return;
+    }
+    hasHeight_ = scroll->GetHasHeight();
+    hasWidth_ = scroll->GetHasWidth();
     if (!animator_) {
         animator_ = AceType::MakeRefPtr<Animator>(GetContext());
     }
@@ -859,11 +866,6 @@ void RenderScroll::Update(const RefPtr<Component>& component)
     // Send scroll none when first build.
     HandleScrollPosition(0.0, 0.0, SCROLL_NONE);
     MarkNeedLayout();
-    auto scroll = AceType::DynamicCast<ScrollComponent>(component);
-    if (scroll == nullptr) {
-        LOGI("scroll component is null, which it is multi scroll, not single scroll");
-        return;
-    }
     onReachStart_ = AceAsyncEvent<void(const std::string&)>::Create(scroll->GetOnReachStart(), context_);
     onReachEnd_ = AceAsyncEvent<void(const std::string&)>::Create(scroll->GetOnReachEnd(), context_);
     onReachTop_ = AceAsyncEvent<void(const std::string&)>::Create(scroll->GetOnReachTop(), context_);
