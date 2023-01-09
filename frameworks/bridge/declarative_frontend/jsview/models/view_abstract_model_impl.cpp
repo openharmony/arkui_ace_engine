@@ -332,6 +332,9 @@ void ViewAbstractModelImpl::SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle)
 {
     auto decoration = GetBackDecoration();
     decoration->SetBlurStyle(bgBlurStyle);
+    double radius = 0.0;
+    Dimension dimensionRadius(radius, DimensionUnit::PX);
+    decoration->SetBlurRadius(ToAnimatableDimension(dimensionRadius));
 }
 
 void ViewAbstractModelImpl::SetPadding(const Dimension& value)
@@ -923,6 +926,7 @@ void ViewAbstractModelImpl::SetBackdropBlur(const Dimension& radius)
 {
     auto decoration = GetBackDecoration();
     decoration->SetBlurRadius(ToAnimatableDimension(radius));
+    decoration->SetBlurStyle(BlurStyle::NoMaterial);
 }
 
 void ViewAbstractModelImpl::SetFrontBlur(const Dimension& radius)
