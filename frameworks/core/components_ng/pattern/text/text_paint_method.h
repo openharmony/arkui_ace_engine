@@ -38,7 +38,7 @@ public:
     {
         CHECK_NULL_RETURN(paragraph_, nullptr);
         auto offset = paintWrapper->GetContentOffset();
-        auto paintOffset = offset - OffsetF(0.0, baselineOffset_);
+        auto paintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
         return [paragraph = paragraph_, paintOffset](RSCanvas& canvas) {
             paragraph->Paint(canvas, paintOffset.GetX(), paintOffset.GetY());
         };
