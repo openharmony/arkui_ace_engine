@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,8 +55,7 @@ public:
     // TODO: use [PixelMap] as data source when rs provides interface like
     // DrawBitmapRect(Media::PixelMap* pixelMap, const Rect& dstRect, const Rect& srcRect, ...)
     // now we make [SkImage] from [PixelMap] and use [drawImageRect] to draw image
-    static RefPtr<CanvasImage> Create(
-        const RefPtr<PixelMap>& pixelMap, const RefPtr<RenderTaskHolder>& renderTaskHolder);
+    static RefPtr<CanvasImage> Create(const RefPtr<PixelMap>& pixelMap);
     virtual int32_t GetWidth() const = 0;
     virtual int32_t GetHeight() const = 0;
 
@@ -67,6 +66,9 @@ public:
 
     ImagePaintConfig& GetPaintConfig()
     {
+        if (!paintConfig_) {
+            LOGI("image paint config is null");
+        }
         return *paintConfig_;
     }
 

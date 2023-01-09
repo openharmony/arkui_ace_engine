@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,6 @@
 
 namespace OHOS::Ace::NG {
 
-using EnterStateTask = std::function<void()>;
 // [ImageLoadingContext] do two things:
 // 1. Provide interfaces for who owns it, notify it's owner when loading events come.
 // 2. Drive [ImageObject] to load and make [CanvasImage].
@@ -33,12 +32,12 @@ class ImageLoadingContext : public AceType {
 
 public:
     // Create an empty ImageObject and initialize state machine when the constructor is called
-    ImageLoadingContext(const ImageSourceInfo& sourceInfo, const LoadNotifier& loadNotifier, bool syncLoad = false);
-    ~ImageLoadingContext() override = default;
+    ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad = false);
+    ~ImageLoadingContext() override;
 
-    static SizeF CalculateResizeTarget(const SizeF& srcSize, const SizeF& dstSize, const SizeF& rawImageSize);
-    static void MakeCanvasImageIfNeed(const RefPtr<ImageLoadingContext>& loadingCtx, const SizeF& dstSize,
-        bool incomingNeedResize, ImageFit incomingImageFit, const std::optional<SizeF>& sourceSize = std::nullopt);
+    static SizeF CalculateTargetSize(const SizeF& srcSize, const SizeF& dstSize, const SizeF& rawImageSize);
+    void MakeCanvasImageIfNeed(const SizeF& dstSize, bool incomingNeedResize, ImageFit incomingImageFit,
+        const std::optional<SizeF>& sourceSize = std::nullopt);
 
     void RegisterStateChangeCallbacks();
 
@@ -55,29 +54,30 @@ public:
     const RectF& GetSrcRect() const;
     ImageFit GetImageFit() const;
 
-    bool HasCanvasImage() const;
     RefPtr<CanvasImage> MoveCanvasImage();
 
     const ImageSourceInfo& GetSourceInfo() const;
     const SizeF& GetDstSize() const;
-    bool GetNeedResize() const;
+    bool GetAutoResize() const;
     std::optional<SizeF> GetSourceSize() const;
     bool NeedAlt() const;
     const std::optional<Color>& GetSvgFillColor() const;
 
     /* interfaces to set properties */
     void SetImageFit(ImageFit imageFit);
-    void SetNeedResize(bool needResize);
+    void SetAutoResize(bool needResize);
     void SetSourceSize(const std::optional<SizeF>& sourceSize = std::nullopt);
-    void SetSvgFillColor(const std::optional<Color>& svgFillColorOpt);
 
-    void CacheImageObject();
+    // callbacks that will be called by ImageProvider when load process finishes
+    void DataReadyCallback(const RefPtr<ImageObject>& imageObj);
+    void SuccessCallback(const RefPtr<CanvasImage>& canvasImage);
+    void FailCallback(const std::string& errorMsg);
 
 private:
-#define DEFINE_SET_NOTIFY_TASK(loadResult, loadResultNotifierName)                                         \
-    void Set##loadResult##NotifyTask(loadResult##NotifyTask&& loadResultNotifierName##NotifyTask)          \
-    {                                                                                                      \
-        loadNotifier_.loadResultNotifierName##NotifyTask_ = std::move(loadResultNotifierName##NotifyTask); \
+#define DEFINE_SET_NOTIFY_TASK(loadResult, loadResultNotifierName)                                      \
+    void Set##loadResult##NotifyTask(loadResult##NotifyTask&& loadResultNotifierName##NotifyTask)       \
+    {                                                                                                   \
+        notifiers_.loadResultNotifierName##NotifyTask_ = std::move(loadResultNotifierName##NotifyTask); \
     }
 
     // classes that use [ImageLoadingContext] can register three notify tasks to do things
@@ -85,47 +85,38 @@ private:
     DEFINE_SET_NOTIFY_TASK(LoadSuccess, loadSuccess);
     DEFINE_SET_NOTIFY_TASK(LoadFail, loadFail);
 
-    // callbacks that will be set to [LoadCallbacks]
-    DataReadyCallback GenerateDataReadyCallback();
-    LoadSuccessCallback GenerateLoadSuccessCallback();
-    LoadFailCallback GenerateLoadFailCallback();
+    // tasks that run when entering a new state
+    void OnUnloaded();
+    void OnDataLoading();
+    void OnDataReady();
+    void OnMakeCanvasImage();
+    void OnLoadSuccess();
+    void OnLoadFail();
 
-    // things to do when load callback is triggered during image loading
-    void OnDataReady(const ImageSourceInfo& sourceInfo, const RefPtr<ImageObject>& imageObj);
-    void OnLoadSuccess(const ImageSourceInfo& sourceInfo);
-    void OnLoadFail(const ImageSourceInfo& sourceInfo, const std::string& errorMsg, const ImageLoadingCommand& command);
+    void CacheImageObject();
 
-    // generate tasks relative to [ImageLoadingState] which will be run while entering a state
-    EnterStateTask CreateOnUnloadedTask();
-    EnterStateTask CreateOnDataLoadingTask();
-    EnterStateTask CreateOnDataReadyTask();
-    EnterStateTask CreateOnMakeCanvasImageTask();
-    EnterStateTask CreateOnLoadSuccessTask();
-    EnterStateTask CreateOnLoadFailTask();
-
-    void RestoreLoadingParams();
-
-    ImageSourceInfo sourceInfo_;
+    const ImageSourceInfo src_;
     RefPtr<ImageStateManager> stateManager_;
     RefPtr<ImageObject> imageObj_;
+    RefPtr<CanvasImage> canvasImage_;
 
     // [LoadNotifier] contains 3 tasks to notify whom uses [ImageLoadingContext] of loading results
-    LoadNotifier loadNotifier_;
+    LoadNotifier notifiers_;
 
-    // [LoadCallbacks] contains 3 tasks to notify [ImageLoadingContext] itself to handle loading results
-    LoadCallbacks loadCallbacks_;
+    bool autoResize_ = true;
+    bool syncLoad_ = false;
 
     RectF srcRect_;
     RectF dstRect_;
     SizeF dstSize_;
-    bool needResize_ = true;
-    bool syncLoad_ = false;
     ImageFit imageFit_ = ImageFit::COVER;
-    std::optional<Color> svgFillColorOpt_;
     std::unique_ptr<SizeF> sourceSizePtr_ = nullptr;
-    bool needAlt_ = true;
     std::function<void()> updateParamsCallback_ = nullptr;
 
+    // to cancel MakeCanvasImage task
+    std::string canvasKey_;
+
+    friend class ImageStateManager;
     ACE_DISALLOW_COPY_AND_MOVE(ImageLoadingContext);
 };
 

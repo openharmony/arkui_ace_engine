@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -595,7 +595,6 @@ void RatingPattern::OnModifyDone()
             CreateDataReadyCallback(0b001), CreateLoadSuccessCallback(0b001), CreateLoadFailCallback(0b001));
         foregroundImageLoadingCtx_ =
             AceType::MakeRefPtr<ImageLoadingContext>(foregroundImageSourceInfo, std::move(loadNotifierForegroundImage));
-        foregroundImageLoadingCtx_->SetSvgFillColor(foregroundImageSourceInfo.GetFillColor());
         foregroundImageLoadingCtx_->LoadImageData();
     }
     if (!ratingLayoutProperty->HasSecondaryImageSourceInfo()) {
@@ -610,7 +609,6 @@ void RatingPattern::OnModifyDone()
             CreateDataReadyCallback(0b010), CreateLoadSuccessCallback(0b010), CreateLoadFailCallback(0b010));
         secondaryImageLoadingCtx_ =
             AceType::MakeRefPtr<ImageLoadingContext>(secondaryImageSourceInfo, std::move(loadNotifierSecondaryImage));
-        secondaryImageLoadingCtx_->SetSvgFillColor(secondaryImageSourceInfo.GetFillColor());
         secondaryImageLoadingCtx_->LoadImageData();
     }
 
@@ -626,7 +624,6 @@ void RatingPattern::OnModifyDone()
             CreateDataReadyCallback(0b100), CreateLoadSuccessCallback(0b100), CreateLoadFailCallback(0b100));
         backgroundImageLoadingCtx_ =
             AceType::MakeRefPtr<ImageLoadingContext>(backgroundImageSourceInfo, std::move(loadNotifierBackgroundImage));
-        backgroundImageLoadingCtx_->SetSvgFillColor(backgroundImageSourceInfo.GetFillColor());
         backgroundImageLoadingCtx_->LoadImageData();
     }
 

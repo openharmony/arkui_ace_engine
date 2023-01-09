@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,7 @@ bool ImageProvider::TrySetLoadingImage(
     const FailedCallback& failedCallback)
 {
     std::lock_guard lock(loadingImageMutex_);
-    auto key = imageInfo.GetCacheKey();
+    auto key = imageInfo.GetKey();
     auto iter = loadingImage_.find(key);
     if (iter == loadingImage_.end()) {
         std::vector<LoadCallback> callbacks { { successCallback, uploadCallback, failedCallback } };
@@ -75,7 +75,7 @@ void ImageProvider::ProccessLoadingResult(
 {
     std::lock_guard lock(loadingImageMutex_);
     std::vector<LoadCallback> callbacks;
-    auto key = imageInfo.GetCacheKey();
+    auto key = imageInfo.GetKey();
     auto iter = loadingImage_.find(key);
     if (iter != loadingImage_.end()) {
         std::swap(callbacks, iter->second);

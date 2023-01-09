@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,25 +15,22 @@
 
 #include "core/components_ng/image_provider/static_image_object.h"
 
+#include "core/components_ng/image_provider/image_provider.h"
+#include "core/components_ng/image_provider/image_loading_context.h"
+
 namespace OHOS::Ace::NG {
 
 void StaticImageObject::MakeCanvasImage(
-    const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize, bool syncLoad)
+    const RefPtr<ImageLoadingContext>& ctx, const SizeF& targetSize, bool forceResize, bool syncLoad)
 {
-    auto renderTaskHolder = ImageProvider::CreateRenderTaskHolder();
-    CHECK_NULL_VOID(renderTaskHolder);
-    if (syncLoad) {
-        SyncImageProvider::MakeCanvasImage(WeakClaim(this), loadCallbacks, resizeTarget, renderTaskHolder, forceResize);
-    } else {
-        ImageProvider::MakeCanvasImage(WeakClaim(this), loadCallbacks, resizeTarget, renderTaskHolder, forceResize);
-    }
+    ImageProvider::MakeCanvasImage(WeakClaim(this), ctx, targetSize, forceResize, syncLoad);
 }
 
 RefPtr<StaticImageObject> StaticImageObject::Create(
-    const ImageSourceInfo& sourceInfo, const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data)
+    const ImageSourceInfo& src, const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data)
 {
     return AceType::MakeRefPtr<NG::StaticImageObject>(
-        sourceInfo, encodedInfo->GetImageSize(), encodedInfo->GetFrameCount(), data);
+        src, encodedInfo->GetImageSize(), encodedInfo->GetFrameCount(), data);
 }
 
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,8 @@
 #include "core/components_ng/image_provider/svg_image_object.h"
 
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
+#include "core/components_ng/image_provider/image_loading_context.h"
+#include "core/components_ng/render/adapter/svg_canvas_image.h"
 
 namespace OHOS::Ace::NG {
 
@@ -36,10 +38,12 @@ const RefPtr<SvgDomBase>& SvgImageObject::GetSVGDom() const
 }
 
 void SvgImageObject::MakeCanvasImage(
-    const LoadCallbacks& loadCallbacks, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool /*syncLoad*/)
+    const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool /*syncLoad*/)
 {
-    // svg doesn't need to create canvasImage, always run synchronously
-    ImageProvider::MakeSvgCanvasImage(WeakClaim(this), loadCallbacks);
+    CHECK_NULL_VOID(GetSVGDom());
+    // just set svgDom to canvasImage
+    auto canvasImage = MakeRefPtr<NG::SvgCanvasImage>(GetSVGDom());
+    ctx->SuccessCallback(canvasImage);
 }
 
 bool SvgImageObject::MakeSvgDom(const std::optional<Color>& svgFillColor)

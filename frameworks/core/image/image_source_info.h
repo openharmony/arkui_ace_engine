@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@
 namespace OHOS::Ace {
 class ImageSourceInfo {
 public:
-    explicit ImageSourceInfo(const std::string& imageSrc, Dimension width = Dimension(-1),
+    explicit ImageSourceInfo(std::string imageSrc, Dimension width = Dimension(-1),
         Dimension height = Dimension(-1), InternalResource::ResourceId resourceId = InternalResource::ResourceId::NO_ID,
         const RefPtr<PixelMap>& pixmap = nullptr);
     explicit ImageSourceInfo(const RefPtr<PixelMap>& pixmap)
@@ -68,9 +68,9 @@ public:
     SrcType GetSrcType() const;
     Size GetSourceSize() const;
     const std::string& GetSrc() const;
-    std::optional<Color> GetFillColor() const;
+    const std::optional<Color>& GetFillColor() const;
     const RefPtr<PixelMap>& GetPixmap() const;
-    std::string GetCacheKey() const;
+    std::string GetKey() const;
 
     bool IsSupportCache() const
     {

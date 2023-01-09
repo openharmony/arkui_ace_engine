@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "third_party/skia/include/codec/SkCodec.h"
 #include "third_party/skia/include/utils/SkBase64.h"
 
+#include "base/log/ace_trace.h"
 #include "base/network/download_manager.h"
 #include "base/resource/ace_res_config.h"
 #include "base/resource/asset_manager.h"
@@ -169,7 +170,7 @@ void ImageLoader::CacheImageDataToImageCache(const std::string& key, const RefPt
     imageCache->CacheImageData(key, imageData);
 }
 
-RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string key, const std::string suffix)
+RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string& key, const std::string& suffix)
 {
     ACE_FUNCTION_TRACE();
     auto pipelineCtx = PipelineContext::GetCurrentContext();
@@ -185,6 +186,7 @@ RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string 
     return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&skdata));
 }
 
+// NG ImageLoader entrance
 RefPtr<NG::ImageData> ImageLoader::GetImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
@@ -207,10 +209,10 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(
 }
 
 sk_sp<SkData> FileImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& /* context */)
 {
-    ACE_FUNCTION_TRACE();
-    auto src = imageSourceInfo.GetSrc();
+    ACE_SCOPED_TRACE("LoadImageData %s", imageSourceInfo.ToString().c_str());
+    const auto& src = imageSourceInfo.GetSrc();
     std::string filePath = RemovePathHead(src);
     if (imageSourceInfo.GetSrcType() == SrcType::INTERNAL) {
         // the internal source uri format is like "internal://app/imagename.png", the absolute path of which is like
@@ -250,7 +252,7 @@ sk_sp<SkData> FileImageLoader::LoadImageData(
 sk_sp<SkData> DataProviderImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
-    auto src = imageSourceInfo.GetSrc();
+    const auto& src = imageSourceInfo.GetSrc();
     auto skData = ImageLoader::LoadDataFromCachedFile(src);
     if (skData) {
         return skData;
@@ -282,7 +284,7 @@ sk_sp<SkData> AssetImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
     ACE_FUNCTION_TRACE();
-    auto src = imageSourceInfo.GetSrc();
+    const auto& src = imageSourceInfo.GetSrc();
     if (src.empty()) {
         LOGE("image src is empty");
         return nullptr;

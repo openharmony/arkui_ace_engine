@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,8 +19,8 @@
 #include <fstream>
 #include <sys/stat.h>
 
-#include "core/image/image_object.h"
 #include "core/components_ng/image_provider/image_object.h"
+#include "core/image/image_object.h"
 
 namespace OHOS::Ace {
 
@@ -86,9 +86,8 @@ T ImageCache::GetCacheObjWithCountLimitLRU(const std::string& key, std::list<Cac
         cacheList.splice(cacheList.begin(), cacheList, iter->second);
         iter->second = cacheList.begin();
         return iter->second->cacheObj;
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 bool ImageCache::GetFromCacheFile(const std::string& filePath)
@@ -209,13 +208,11 @@ RefPtr<CachedImageData> ImageCache::GetCacheImageData(const std::string& key)
         dataCacheList_.splice(dataCacheList_.begin(), dataCacheList_, iter->second);
         iter->second = dataCacheList_.begin();
         return iter->second->imageDataPtr;
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
-void ImageCache::WriteCacheFile(const std::string& url, const void* const data,
-    const size_t size, const std::string suffix)
+void ImageCache::WriteCacheFile(const std::string& url, const void* const data, size_t size, const std::string& suffix)
 {
     std::vector<std::string> removeVector;
     std::string cacheNetworkFilePath = GetImageCacheFilePath(url) + suffix;
