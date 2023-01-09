@@ -49,17 +49,17 @@ private:
         FINAL_LAYOUT,
     };
 
-    WeakPtr<FrameNode> inNode_;
-    WeakPtr<FrameNode> outNode_;
-    State state_;
-    bool hasInAnim_;
-    bool hasOutAnim_;
-    bool forceOutAnim_;
-    bool forceState_;
-
     void TryToSetState(bool condition, State state);
     void ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& layoutWrapper, bool isNodeIn);
     void SyncGeometry(bool isNodeIn);
+
+    WeakPtr<FrameNode> inNode_;
+    WeakPtr<FrameNode> outNode_;
+    State state_ = State::IDLE;
+    bool hasInAnim_ = false;
+    bool hasOutAnim_ = false;
+    bool forceOutAnim_ = false;
+    bool forceState_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(GeometryTransition);
 };
