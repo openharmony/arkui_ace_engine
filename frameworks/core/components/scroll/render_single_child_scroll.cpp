@@ -242,8 +242,14 @@ void RenderSingleChildScroll::PerformLayout()
     }
     childLastMainSize_ = currentChildMainSize;
 
-    SetLayoutSize(GetLayoutParam().Constrain(itemSize > viewPort_ ? viewPort_ : itemSize));
-
+    auto constrainSize = GetLayoutParam().Constrain(itemSize > viewPort_ ? viewPort_ : itemSize);
+    if (GetHasWidth()) {
+        constrainSize.SetWidth(GetLayoutParam().GetMaxSize().Width());
+    }
+    if (GetHasHeight()) {
+        constrainSize.SetHeight(GetLayoutParam().GetMaxSize().Height());
+    }
+    SetLayoutSize(constrainSize);
     auto textFieldManager = AceType::DynamicCast<TextFieldManager>(context->GetTextFieldManager());
     if (textFieldManager && moveStatus_.first && axis_ == Axis::VERTICAL) {
         moveDistance_ = textFieldManager->GetClickPosition().GetY() - viewPort_.Height();
@@ -275,7 +281,19 @@ void RenderSingleChildScroll::PerformLayout()
             lastOffset_ = currentOffset_;
         }
     }
-    child->SetPosition(Offset::Zero() - currentOffset_ + paddingOffset);
+    auto childOffset = Offset::Zero() - currentOffset_ + paddingOffset;
+    auto parentNode = AceType::DynamicCast<RenderBoxBase>(GetParent().Upgrade());
+    if (parentNode) {
+        auto alignmentPosition =
+            Alignment::GetAlignPosition(GetLayoutSize(), child->GetLayoutSize(), parentNode->GetAlign());
+        if (GetHasWidth()) {
+            childOffset.SetX(childOffset.GetX() + alignmentPosition.GetX());
+        }
+        if (GetHasHeight()) {
+            childOffset.SetY(childOffset.GetY() + alignmentPosition.GetY());
+        }
+    }
+    child->SetPosition(childOffset);
     LOGD("child position:%{public}s", child->GetPosition().ToString().c_str());
 
     currentBottomOffset_ = axis_ == Axis::VERTICAL ? currentOffset_ + Offset(0.0, viewPort_.Height())

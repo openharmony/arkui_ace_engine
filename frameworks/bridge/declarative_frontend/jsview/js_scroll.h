@@ -36,6 +36,8 @@ public:
     static void SetScrollBarWidth(const std::string& width);
     static void SetScrollBar(int displayMode);
     static void SetEdgeEffect(int edgeEffect);
+    static void JsWidth(const JSCallbackInfo& info);
+    static void JsHeight(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
