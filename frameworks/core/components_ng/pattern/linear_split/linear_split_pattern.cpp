@@ -294,8 +294,9 @@ void LinearSplitPattern::OnModifyDone()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
-    auto layoutProperty = host->GetLayoutProperty<LinearSplitLayoutProperty>();
-    resizeable_ = layoutProperty->GetResizeableValue();
+    auto layoutProperty = GetLayoutProperty<LinearSplitLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    resizeable_ = layoutProperty->GetResizeable().value_or(false);
 
     InitPanEvent(gestureHub);
     InitMouseEvent(gestureHub);
