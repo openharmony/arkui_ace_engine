@@ -21,9 +21,6 @@
 #include <dlfcn.h>
 #endif
 
-#include "js_scene_session.h"
-#include "scene_session.h"
-
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
 #include "base/want/want_wrap.h"
@@ -31,6 +28,8 @@
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
+#include "scene_session_manager/js_scene_session.h"
+#include "session/scene/host/include/scene_session.h"
 
 namespace OHOS::Ace::Framework {
 #if !defined(PREVIEW)

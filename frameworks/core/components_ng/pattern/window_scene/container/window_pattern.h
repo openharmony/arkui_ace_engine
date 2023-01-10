@@ -18,7 +18,7 @@
 
 #include <mutex>
 
-#include "session_stage.h"
+#include "session/scene/container/include/session_stage.h"
 
 #include "base/thread/task_executor.h"
 #include "core/components_ng/pattern/pattern.h"

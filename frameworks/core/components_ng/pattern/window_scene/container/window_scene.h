@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_H
 
-#include "scene_session_stage.h"
+#include "session/scene/container/include/scene_session_stage.h"
 
 #include "core/components_ng/pattern/window_scene/container/window_pattern.h"
 

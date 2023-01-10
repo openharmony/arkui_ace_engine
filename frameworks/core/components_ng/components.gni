@@ -145,13 +145,9 @@ template("build_component_ng") {
         include_dirs +=
             [ "//foundation/window/window_manager/interfaces/innerkits" ]
 
-        deps += [
-          "//foundation/window/window_manager/window_scene:window_session",
-        ]
-
-        include_dirs += [
-          "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
-        ]
+        if (defined(config.window_scene_support) && config.window_scene_support) {
+          deps += [ "//foundation/window/window_manager/window_scene/session/scene:scene_session" ]
+        }
       }
 
       if (defined(config.enable_standard_input) &&

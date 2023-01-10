@@ -468,13 +468,11 @@ template("declarative_js_engine") {
       }
 
       if (defined(config.window_scene_support) && config.window_scene_support) {
-        deps += [
-          "//foundation/window/window_manager/window_scene:window_session",
-          "//foundation/window/window_manager/window_scene/interfaces/kits/napi/host:scenesessionmanager_napi",
+        external_deps += [
+          "window_manager:scene_session",
         ]
-
-        include_dirs += [
-          "//foundation/window/window_manager/window_scene/interfaces/kits/napi/host",
+        deps += [
+          "//foundation/window/window_manager/window_scene/interfaces/kits/napi/scene_session_manager:scenesessionmanager_napi",
         ]
       }
     }

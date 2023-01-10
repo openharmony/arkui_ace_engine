@@ -76,7 +76,7 @@ template("ace_core_pipeline_source_set") {
     }
 
     if (defined(config.window_scene_support) && config.window_scene_support) {
-      deps += [ "//foundation/window/window_manager/window_scene:window_session" ]
+      deps += [ "//foundation/window/window_manager/window_scene/session/scene:scene_session" ]
     }
 
     if (platform == "ohos" && defined(config.enable_native_view) &&

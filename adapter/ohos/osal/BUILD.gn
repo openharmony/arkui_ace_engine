@@ -86,6 +86,7 @@ template("ace_osal_ohos_source_set") {
         "input:libmmi-client",
         "multimedia_image_framework:image",
         "napi:ace_napi",
+        "window_manager:scene_session",
       ]
       if (defined(config.accessibility_support) &&
           config.accessibility_support) {
@@ -106,14 +107,6 @@ template("ace_osal_ohos_source_set") {
       } else {
         sources += [ "frame_trace_adapter_fake_impl.cpp" ]
       }
-
-      deps += [
-        "//foundation/window/window_manager/window_scene:window_session",
-      ]
-
-      include_dirs += [
-        "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
-      ]
     } else {
       external_deps += [ "multimedia_image:image" ]
     }

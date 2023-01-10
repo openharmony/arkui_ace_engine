@@ -52,13 +52,13 @@ template("ace_core_pipeline_ng_source_set") {
       include_dirs =
           [ "//foundation/window/window_manager/interfaces/innerkits" ]
 
-      deps += [
-        "//foundation/window/window_manager/window_scene:window_session",
-      ]
-
       include_dirs += [
         "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
       ]
+
+      if (defined(config.window_scene_support) && config.window_scene_support) {
+        deps += [ "//foundation/window/window_manager/window_scene/session/scene:scene_session" ]
+      }
     }
 
     if (platform == "ohos" && defined(config.enable_native_view) &&
