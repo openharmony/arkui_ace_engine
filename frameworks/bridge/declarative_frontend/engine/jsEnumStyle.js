@@ -774,3 +774,11 @@ var MessageLevel
   MessageLevel[MessageLevel["Error"] = 4] = "Error";
   MessageLevel[MessageLevel["Log"] = 5] = "Log";
 })(MessageLevel || (MessageLevel = {}));
+
+var GridDirection;
+(function (GridDirection) {
+  GridDirection[GridDirection["Row"] = 0] = "Row";
+  GridDirection[GridDirection["Column"] = 1] = "Column";
+  GridDirection[GridDirection["RowReverse"] = 2] = "RowReverse";
+  GridDirection[GridDirection["ColumnReverse"] = 3] = "ColumnReverse";
+})(GridDirection || (GridDirection = {}));
