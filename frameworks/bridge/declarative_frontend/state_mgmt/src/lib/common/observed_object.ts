@@ -49,7 +49,8 @@ function Observed<C extends Object>(target: Type<C>): any {
   // the new constructor behaviour
   var f: any = function (...args: any[]) {
     stateMgmtConsole.debug(`New ${original.name}, gets wrapped inside ObservableObject proxy.`);
-    return new ObservedObject<C>(new original(...args), undefined);
+    return ObservedObject.createNew(new original(...args), undefined);
+//    return new ObservedObject<C>(new original(...args), undefined);
   };
 
   Object.setPrototypeOf(f, Object.getPrototypeOf(original));
