@@ -31,6 +31,7 @@ public:
 
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
+    static void Pop();
 
     static void SetState(int32_t state);
     static void SetDuration(int32_t duration);
