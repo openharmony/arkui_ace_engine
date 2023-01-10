@@ -31,4 +31,8 @@ void SubwindowManager::HidePopupNG(int32_t targetId)
 }
 
 void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) {}
+
+void SubwindowManager::HideMenuNG(int32_t targetId) {}
+
+void SubwindowManager::HideMenuNG() {}
 } // namespace OHOS::Ace

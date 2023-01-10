@@ -16,11 +16,19 @@
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 
 #include "base/utils/utils.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
+
+namespace {
+
+constexpr uint32_t MIN_GRID_COUNTS = 2;
+constexpr uint32_t MAX_GRID_COUNTS = 6;
+
+} // namespace
 
 namespace OHOS::Ace::NG {
 
@@ -56,32 +64,33 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     LOGD("menu padding width = %{public}f", padding.Width());
     double outPadding = OUT_PADDING.ConvertToPx();
 
+    auto childConstraint = props->CreateChildConstraint();
+    RefPtr<GridColumnInfo> columnInfo;
+    columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+    columnInfo->GetParent()->BuildColumnWidth();
+    float minWidth = columnInfo->GetWidth(MIN_GRID_COUNTS);
+    childConstraint.minSize.SetWidth(minWidth);
+
     // set max width
     LOGD("Measure Menu Position = %{public}f %{public}f", position_.GetX(), position_.GetY());
     auto leftSpace = position_.GetX();
     auto rightSpace = screenSize_.Width() - leftSpace;
-    float maxWidth = std::max(leftSpace, rightSpace) - 2.0 * padding.Width() - 2.0 * outPadding;
-    auto childConstraint = props->CreateChildConstraint();
+    float maxWidth = std::min(std::max(leftSpace, rightSpace) - 2.0 * padding.Width() - 2.0 * outPadding,
+        columnInfo->GetWidth(MAX_GRID_COUNTS));
     childConstraint.maxSize.SetWidth(maxWidth);
     childConstraint.percentReference.SetWidth(maxWidth);
 
     // measure children (options/customNode)
+    float maxChildrenWidth = GetChildrenMaxWidth(layoutWrapper->GetAllChildrenWithBuild(), childConstraint);
     SizeF menuSize;
+    menuSize.SetWidth(maxChildrenWidth);
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Measure(childConstraint);
-
         auto childSize = child->GetGeometryNode()->GetFrameSize();
         LOGD("menu childSize = %{public}f, %{public}f", childSize.Width(), childSize.Height());
         // set minimum size
-        if (childSize.Width() < OPTION_MIN_WIDTH) {
-            childSize.SetWidth(OPTION_MIN_WIDTH);
-            child->GetGeometryNode()->SetFrameSize(childSize);
-        }
+        childSize.SetWidth(maxChildrenWidth);
+        child->GetGeometryNode()->SetFrameSize(childSize);
 
-        // calculate menuSize from optionSize
-        if (childSize.Width() > menuSize.Width()) {
-            menuSize.SetWidth(childSize.Width());
-        }
         menuSize.AddHeight(childSize.Height());
     }
     // set menu size
@@ -174,6 +183,19 @@ float MenuLayoutAlgorithm::HorizontalLayout(const SizeF& size, float clickPositi
 
     // can't fit in screen, line up with left side of the screen
     return 0.0;
+}
+
+float MenuLayoutAlgorithm::GetChildrenMaxWidth(
+    const std::list<RefPtr<LayoutWrapper>>& children, const LayoutConstraintF& layoutConstraint)
+{
+    float width = layoutConstraint.minSize.Width();
+
+    for (const auto& child : children) {
+        child->Measure(layoutConstraint);
+        auto childSize = child->GetGeometryNode()->GetFrameSize();
+        width = std::max(width, childSize.Width());
+    }
+    return width;
 }
 
 } // namespace OHOS::Ace::NG
