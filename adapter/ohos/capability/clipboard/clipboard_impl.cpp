@@ -28,6 +28,8 @@ std::string g_clipboard;
 RefPtr<PixelMap> g_pixmap;
 }
 #endif
+
+#ifdef SYSTEM_CLIPBOARD_SUPPORTED
 MiscServices::ShareOption TransitionCopyOption(CopyOptions copyOption)
 {
     auto shareOption = MiscServices::ShareOption::InApp;
@@ -46,6 +48,7 @@ MiscServices::ShareOption TransitionCopyOption(CopyOptions copyOption)
     }
     return shareOption;
 }
+#endif
 
 void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
 {
