@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,9 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSView : public JSViewAbstract, public Referenced {
+class JSView : public JSViewAbstract, public virtual AceType {
+    DECLARE_ACE_TYPE(JSView, AceType)
+
 public:
     JSView() : instanceId_(Container::CurrentId()) {}
     ~JSView() override = default;
@@ -178,6 +180,8 @@ private:
 };
 
 class JSViewFullUpdate : public JSView {
+    DECLARE_ACE_TYPE(JSViewFullUpdate, JSView)
+
 public:
     JSViewFullUpdate(const std::string& viewId, JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction);
     ~JSViewFullUpdate() override;
@@ -283,6 +287,8 @@ private:
 };
 
 class JSViewPartialUpdate : public JSView {
+    DECLARE_ACE_TYPE(JSViewPartialUpdate, JSView)
+
 public:
     explicit JSViewPartialUpdate(JSRef<JSObject> jsObject);
     ~JSViewPartialUpdate() override;
