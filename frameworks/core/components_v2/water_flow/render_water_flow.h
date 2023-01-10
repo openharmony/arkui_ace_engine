@@ -174,7 +174,7 @@ protected:
 
 private:
     void HandleScrollEvent();
-    LayoutParam MakeInnerLayoutParam(size_t itemIndex) const;
+    LayoutParam MakeInnerLayoutParam(size_t itemIndex);
 
     // Sets child position, the mainAxis does not contain the offset.
     void SetChildPosition(const RefPtr<RenderNode>& child, size_t itemIndex);
