@@ -229,8 +229,9 @@ private:
 
 class SessionChangeListener : public Rosen::ISessionChangeListener {
 public:
-    explicit SessionChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
-    virtual ~SessionChangeListener() {}
+    SessionChangeListener(int32_t instanceId, const WeakPtr<NG::WindowPattern>& windowPattern)
+        : instanceId_(instanceId), windowPattern_(windowPattern) {}
+    virtual ~SessionChangeListener() = default;
 
     void OnSizeChange(Rosen::WSRect rect, Rosen::SessionSizeChangeReason reason) override
     {
@@ -242,6 +243,10 @@ public:
         LOGI("OnSizeChange window rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
             rect.posX_, rect.posY_, rect.width_, rect.height_);
         UpdateViewportConfig(config, SESSION_TO_WINDOW_MAP.at(reason));
+
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->SetWindowRect(Rect(rect.posX_, rect.posY_, rect.width_, rect.height_));
     }
 
 private:
@@ -293,7 +298,8 @@ private:
         { Rosen::SessionSizeChangeReason::RESIZE,   Rosen::WindowSizeChangeReason::RESIZE    },
         { Rosen::SessionSizeChangeReason::MOVE,     Rosen::WindowSizeChangeReason::MOVE      },
     };
-    int32_t instanceId_;
+    int32_t instanceId_ = -1;
+    WeakPtr<NG::WindowPattern> windowPattern_;
 };
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime) : runtime_(runtime)
@@ -1252,7 +1258,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             LOGI("UIContentImpl: focus again");
             Focus();
         }
-        auto sessionChangeListener = std::make_shared<SessionChangeListener>(instanceId_);
+        auto sessionChangeListener =
+            std::make_shared<SessionChangeListener>(instanceId_, AceType::WeakClaim(windowPattern_));
         windowPattern_->RegisterSessionChangeListener(sessionChangeListener);
         // dragWindowListener_ = new DragWindowListener(instanceId_);
         // windowPattern_->RegisterDragListener(dragWindowListener_);
