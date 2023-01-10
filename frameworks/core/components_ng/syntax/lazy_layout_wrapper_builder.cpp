@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,11 +40,15 @@ LazyLayoutWrapperBuilder::LazyLayoutWrapperBuilder(
 
 void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
 {
-    if (childWrappers_.empty()) {
-        return;
-    }
     auto host = host_.Upgrade();
     CHECK_NULL_VOID(host);
+
+    if (childWrappers_.empty()) {
+        decltype(nodeIds_) nodeIds;
+        std::unordered_map<int32_t, std::optional<std::string>> cacheItems;
+        host->UpdateLazyForEachItems(-1, -1, std::move(nodeIds), std::move(cacheItems));
+        return;
+    }
 
     // check front active flag.
     auto item = childWrappers_.front();
