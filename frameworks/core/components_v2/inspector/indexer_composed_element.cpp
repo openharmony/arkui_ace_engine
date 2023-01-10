@@ -107,9 +107,6 @@ std::string IndexerComposedElement::GetPopupColor() const
         return "";
     }
     auto render = AceType::DynamicCast<RenderIndexer>(node);
-    if (!render->GetBubbleText()) {
-        return "#FF254FF7";
-    }
     auto popupColor = render ? render->GetBubbleText()->GetTextStyle().GetTextColor() : Color::BLACK;
     return popupColor.ColorToString();
 }
@@ -185,9 +182,6 @@ std::string IndexerComposedElement::GetPopupFont() const
     }
     auto render = AceType::DynamicCast<RenderIndexer>(node);
     auto popupFontJson = JsonUtil::Create(true);
-    if (!render->GetBubbleText()) {
-        return "";
-    }
     auto fontSize = render ? render->GetBubbleText()->GetTextStyle().GetFontSize() : Dimension();
     auto fontStyle = render ? render->GetBubbleText()->GetTextStyle().GetFontStyle() : FontStyle::NORMAL;
     auto fontWeight = render ? render->GetBubbleText()->GetTextStyle().GetFontWeight() : FontWeight::NORMAL;
