@@ -18,6 +18,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/gestures/recognizers/recognizer_group.h"
 
 namespace OHOS::Ace::NG {
 
@@ -97,7 +98,15 @@ bool GestureScope::IsPending()
     auto iter =
         std::find_if(std::begin(recognizers_), std::end(recognizers_), [](const WeakPtr<NGGestureRecognizer>& member) {
             auto recognizer = member.Upgrade();
-            return recognizer && ((recognizer->GetRefereeState() == RefereeState::PENDING));
+            RefereeState state = RefereeState::READY;
+            if (recognizer) {
+                state = recognizer->GetRefereeState();
+                if (AceType::InstanceOf<RecognizerGroup>(recognizer)) {
+                    auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
+                    state = group->CheckStates();
+                }
+            }
+            return recognizer && ((state == RefereeState::PENDING));
         });
     return iter != recognizers_.end();
 }
