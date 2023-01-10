@@ -143,7 +143,7 @@ struct EventInfo {
     std::string pageUrl;
 };
 
-class ACE_EXPORT EventReport {
+class ACE_FORCE_EXPORT EventReport {
 public:
     static void SendEvent(const EventInfo& eventInfo);
     static void SendJsCardRenderTimeEvent(

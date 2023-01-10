@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT ConnectServerManager {
+class ACE_FORCE_EXPORT ConnectServerManager {
 public:
     ~ConnectServerManager();
     static ConnectServerManager& Get();

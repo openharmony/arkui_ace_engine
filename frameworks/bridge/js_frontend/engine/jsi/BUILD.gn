@@ -89,7 +89,6 @@ template("js_engine_ark") {
 
     deps = []
     if (defined(config.build_for_preview) && config.build_for_preview) {
-      sources += [ "jsi_utils_windows.cpp" ]
       deps += [
         ":gen_obj_src_abc_strip_native_min",
         "//foundation/arkui/napi/native_engine/impl/ark:ace_napi_impl_ark",
@@ -107,7 +106,6 @@ template("js_engine_ark") {
       deps += [ "//third_party/jsframework:ark_build" ]
       external_deps = [ "napi:ace_napi" ]
     } else {
-      sources += [ "jsi_utils.cpp" ]
       deps += [ "//third_party/jsframework:ark_build" ]
       external_deps = [
         "multimedia_image_framework:image",
