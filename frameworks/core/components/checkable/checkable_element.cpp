@@ -15,7 +15,11 @@
 
 #include "core/components/checkable/checkable_element.h"
 
+#include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
+#include "core/components/checkable/checkable_component.h"
 #include "core/components/checkable/render_checkable.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace {
 
@@ -89,6 +93,43 @@ bool CheckableElement::OnKeyEvent(const KeyEvent& keyEvent)
             return true;
         default:
             return false;
+    }
+}
+
+void CheckableElement::SetNewComponent(const RefPtr<Component>& newComponent)
+{
+    Element::SetNewComponent(newComponent);
+    auto selfComponent = AceType::DynamicCast<CheckboxComponent>(customComponent_.Upgrade());
+    CHECK_NULL_VOID(selfComponent);
+    auto newCheckboxComponent = AceType::DynamicCast<CheckboxComponent>(newComponent);
+    CHECK_NULL_VOID(newCheckboxComponent);
+
+    const static std::string checkboxGroupTag("CheckboxGroupComponent");
+    auto& ungroupedCheckboxs = CheckboxComponent::GetUngroupedCheckboxs();
+    if (selfComponent->GetInspectorTag() == checkboxGroupTag) {
+        auto checkboxList = selfComponent->GetCheckboxList();
+        if (!checkboxList.empty()) {
+            auto groupName = selfComponent->GetGroupName();
+            auto retPair = ungroupedCheckboxs.try_emplace(groupName, std::list<WeakPtr<CheckboxComponent>>());
+            for (auto item : checkboxList) {
+                retPair.first->second.push_back(item);
+            }
+        }
+    }
+
+    if (newCheckboxComponent->GetInspectorTag() == checkboxGroupTag) {
+        auto item = ungroupedCheckboxs.find(newCheckboxComponent->GetGroupName());
+        if (item == ungroupedCheckboxs.end()) {
+            return;
+        }
+        for (auto component : item->second) {
+            auto checkboxComponent = component.Upgrade();
+            if (checkboxComponent) {
+                newCheckboxComponent->AddCheckbox(checkboxComponent);
+                checkboxComponent->SetGroup(newCheckboxComponent);
+            }
+        }
+        ungroupedCheckboxs.erase(item);
     }
 }
 
