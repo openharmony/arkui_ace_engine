@@ -78,6 +78,9 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_001, TestSize.Level1)
     webpattern.OnBlockNetworkUpdate(true);
     webpattern.OnDarkModeUpdate(WebDarkMode::On);
     webpattern.OnForceDarkAccessUpdate(true);
+    webpattern.OnAllowWindowOpenMethodUpdate(true);
+    webpattern.OnHorizontalScrollBarAccessEnabledUpdate(true);
+    webpattern.OnVerticalScrollBarAccessEnabledUpdate(true);
 #endif
 }
 
@@ -126,6 +129,9 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_002, TestSize.Level1)
     webPattern->OnMinLogicalFontSizeUpdate(0);
     webPattern->OnWebFixedFontUpdate("test");
     webPattern->OnBlockNetworkUpdate(true);
+    webPattern->OnAllowWindowOpenMethodUpdate(true);
+    webPattern->OnHorizontalScrollBarAccessEnabledUpdate(true);
+    webPattern->OnVerticalScrollBarAccessEnabledUpdate(true);
 #endif
 }
 

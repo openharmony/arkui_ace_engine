@@ -207,6 +207,7 @@ HWTEST_F(WebViewTestNg, SetWindowNewEvent004, TestSize.Level1)
     WebView::SetTouchIconUrlId(std::move(renderExitedId));
     WebView::SetDarkMode(WebDarkMode::On);
     WebView::SetForceDarkAccess(true);
+    WebView::SetAllowWindowOpenMethod(true);
 #endif
 }
 } // namespace OHOS::Ace::NG
