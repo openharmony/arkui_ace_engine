@@ -75,6 +75,7 @@ void WebView::RegisterPipelineCallback(int32_t nodeId)
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
+    pipeline->AddWindowSizeChangeCallback(nodeId);
 }
 
 void WebView::SetOnCommonDialogImpl(OnWebSyncFunc&& onCommonDialogImpl, DialogEventType dialogEventType)

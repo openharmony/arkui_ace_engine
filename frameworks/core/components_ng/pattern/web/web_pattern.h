@@ -245,6 +245,7 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnWindowShow() override;
     void OnWindowHide() override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnInActive() override;
     void OnActive() override;
     void OnVisibleChange(bool isVisible) override;

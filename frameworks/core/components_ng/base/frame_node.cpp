@@ -1159,6 +1159,11 @@ void FrameNode::OnWindowUnfocused()
     pattern_->OnWindowUnfocused();
 }
 
+void FrameNode::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    pattern_->OnWindowSizeChanged(width, height, type);
+}
+
 OffsetF FrameNode::GetOffsetRelativeToWindow() const
 {
     auto offset = geometryNode_->GetFrameOffset();

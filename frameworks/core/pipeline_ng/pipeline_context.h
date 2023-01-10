@@ -206,6 +206,10 @@ public:
 
     void RemoveWindowFocusChangedCallback(int32_t nodeId);
 
+    void AddWindowSizeChangeCallback(int32_t nodeId);
+
+    void RemoveWindowSizeChangeCallback(int32_t nodeId);
+
     bool GetIsFocusingByTab() const
     {
         return isFocusingByTab_;
@@ -272,6 +276,8 @@ private:
 
     void FlushWindowFocusChangedCallback(bool isFocus);
 
+    void FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type);
+
     void FlushTouchEvents();
 
     void FlushBuildFinishCallbacks();
@@ -303,6 +309,8 @@ private:
     std::list<int32_t> onWindowStateChangedCallbacks_;
     // window on focused or on unfocused
     std::list<int32_t> onWindowFocusChangedCallbacks_;
+    // window on drag
+    std::list<int32_t> onWindowSizeChangeCallbacks_;
 
     std::list<int32_t> nodesToNotifyMemoryLevel_;
 

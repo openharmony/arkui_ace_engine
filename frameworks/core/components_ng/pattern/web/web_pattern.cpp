@@ -56,6 +56,12 @@ void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     isFocus_ = false;
     delegate_->OnBlur();
     OnQuickMenuDismissed();
+
+    auto id = frameNode->GetId();
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(id);
+    pipeline->RemoveWindowSizeChangeCallback(id);
 }
 
 void WebPattern::InitEvent()
@@ -95,20 +101,14 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     if (panEvent_) {
         return;
     }
-    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
-        return;
-    };
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) { return; };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleDragMove(event);
     };
-    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        return;
-    };
-    auto actionCancelTask = [weak = WeakClaim(this)]() {
-        return;
-    };
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) { return; };
+    auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
     PanDirection panDirection;
     panDirection.type = PanDirection::VERTICAL;
     panEvent_ = MakeRefPtr<PanEvent>(
@@ -121,10 +121,8 @@ void WebPattern::HandleDragMove(const GestureEvent& event)
     if (event.GetInputEventType() == InputEventType::AXIS) {
         CHECK_NULL_VOID(delegate_);
         auto localLocation = event.GetLocalLocation();
-        delegate_->HandleAxisEvent(
-            localLocation.GetX(), localLocation.GetY(),
-            event.GetDelta().GetX() * DEFAULT_AXIS_RATIO,
-            event.GetDelta().GetY() * DEFAULT_AXIS_RATIO);
+        delegate_->HandleAxisEvent(localLocation.GetX(), localLocation.GetY(),
+            event.GetDelta().GetX() * DEFAULT_AXIS_RATIO, event.GetDelta().GetY() * DEFAULT_AXIS_RATIO);
     }
 }
 
@@ -272,7 +270,7 @@ void WebPattern::InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureH
 
     auto userOnDragStartFunc = eventHub->GetOnDragStart();
     auto onDragStartId = [weak = WeakClaim(this), userOnDragStartFunc](const RefPtr<OHOS::Ace::DragEvent>& info,
-                                const std::string& extraParams) -> NG::DragDropInfo {
+                             const std::string& extraParams) -> NG::DragDropInfo {
         auto pattern = weak.Upgrade();
         NG::DragDropInfo dragDropInfo;
         CHECK_NULL_RETURN_NOLOG(pattern, dragDropInfo);
@@ -911,8 +909,7 @@ void WebPattern::OnModifyDone()
 
 bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard)
 {
-    LOGI("Web ProcessVirtualKeyBoard width=%{public}d height=%{public}d keyboard=%{public}f",
-        width, height, keyboard);
+    LOGI("Web ProcessVirtualKeyBoard width=%{public}d height=%{public}d keyboard=%{public}f", width, height, keyboard);
     CHECK_NULL_RETURN(delegate_, false);
     if (!isFocus_) {
         if (isVirtualKeyBoardShow_ == VkState::VK_SHOW) {
@@ -1048,37 +1045,31 @@ void WebPattern::ExitFullScreen()
     fullScreenManager->ExitFullScreen(host);
 }
 
-bool WebPattern::IsTouchHandleValid(
-    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)
+bool WebPattern::IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)
 {
     return (handle != nullptr) && (handle->IsEnable());
 }
 
-bool WebPattern::IsTouchHandleShow(
-    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)
+bool WebPattern::IsTouchHandleShow(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)
 {
     CHECK_NULL_RETURN_NOLOG(handle, false);
-    if (handle->GetAlpha() > 0 &&
-        GreatOrEqual(handle->GetY(), static_cast<int32_t>(handle->GetEdgeHeight())) &&
+    if (handle->GetAlpha() > 0 && GreatOrEqual(handle->GetY(), static_cast<int32_t>(handle->GetEdgeHeight())) &&
         GreatNotEqual(GetHostFrameSize().value_or(SizeF()).Height(), handle->GetY())) {
         return true;
     }
     return false;
 }
 
-WebOverlayType WebPattern::GetTouchHandleOverlayType(
-    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
+WebOverlayType WebPattern::GetTouchHandleOverlayType(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle)
 {
-    if (IsTouchHandleValid(insertHandle) &&
-        !IsTouchHandleValid(startSelectionHandle) &&
+    if (IsTouchHandleValid(insertHandle) && !IsTouchHandleValid(startSelectionHandle) &&
         !IsTouchHandleValid(endSelectionHandle)) {
         return INSERT_OVERLAY;
     }
 
-    if (!IsTouchHandleValid(insertHandle) &&
-        IsTouchHandleValid(startSelectionHandle) &&
+    if (!IsTouchHandleValid(insertHandle) && IsTouchHandleValid(startSelectionHandle) &&
         IsTouchHandleValid(endSelectionHandle)) {
         return SELECTION_OVERLAY;
     }
@@ -1141,8 +1132,8 @@ void WebPattern::RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
     if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) {
         selectInfo.menuCallback.onCut = [weak = AceType::WeakClaim(this), callback]() {
             CHECK_NULL_VOID_NOLOG(callback);
-            callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT,
-                OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
+            callback->Continue(
+                OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT, OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
         };
     } else {
         selectInfo.menuInfo.showCut = false;
@@ -1150,8 +1141,8 @@ void WebPattern::RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
     if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY) {
         selectInfo.menuCallback.onCopy = [weak = AceType::WeakClaim(this), callback]() {
             CHECK_NULL_VOID_NOLOG(callback);
-            callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY,
-                OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
+            callback->Continue(
+                OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY, OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
         };
     } else {
         selectInfo.menuInfo.showCopy = false;
@@ -1159,8 +1150,8 @@ void WebPattern::RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
     if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_PASTE) {
         selectInfo.menuCallback.onPaste = [weak = AceType::WeakClaim(this), callback]() {
             CHECK_NULL_VOID_NOLOG(callback);
-            callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_PASTE,
-                OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
+            callback->Continue(
+                OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_PASTE, OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
         };
     } else {
         selectInfo.menuInfo.showPaste = false;
@@ -1190,9 +1181,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
         params->GetTouchHandleState(OHOS::NWeb::NWebTouchHandleState::TouchHandleType::SELECTION_BEGIN_HANDLE);
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle =
         params->GetTouchHandleState(OHOS::NWeb::NWebTouchHandleState::TouchHandleType::SELECTION_END_HANDLE);
-    WebOverlayType overlayType = GetTouchHandleOverlayType(insertTouchHandle,
-                                                           beginTouchHandle,
-                                                           endTouchHandle);
+    WebOverlayType overlayType = GetTouchHandleOverlayType(insertTouchHandle, beginTouchHandle, endTouchHandle);
     if (overlayType == INVALID_OVERLAY) {
         return false;
     }
@@ -1233,9 +1222,7 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle)
 {
-    WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle,
-                                                           startSelectionHandle,
-                                                           endSelectionHandle);
+    WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle, startSelectionHandle, endSelectionHandle);
     if (overlayType == INVALID_OVERLAY) {
         CloseSelectOverlay();
         return;
@@ -1272,9 +1259,7 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
 
 void WebPattern::UpdateTouchHandleForOverlay()
 {
-    WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle_,
-                                                           startSelectionHandle_,
-                                                           endSelectionHandle_);
+    WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle_, startSelectionHandle_, endSelectionHandle_);
     CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);
     if (overlayType == INVALID_OVERLAY) {
         CloseSelectOverlay();
@@ -1330,6 +1315,8 @@ void WebPattern::OnWindowHide()
     needOnFocus_ = false;
     isWindowShow_ = false;
 }
+
+void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
 
 void WebPattern::OnInActive()
 {

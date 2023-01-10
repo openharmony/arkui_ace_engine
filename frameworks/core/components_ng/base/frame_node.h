@@ -255,6 +255,8 @@ public:
 
     void OnWindowUnfocused() override;
 
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+
     void OnNotifyMemoryLevel(int32_t level) override;
 
     OffsetF GetOffsetRelativeToWindow() const;
