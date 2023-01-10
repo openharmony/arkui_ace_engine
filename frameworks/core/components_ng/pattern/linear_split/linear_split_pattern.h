@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_SPLIT_LINEAR_SPLIT_PATTERN_H
 
 #include "base/geometry/axis.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -43,7 +44,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<LinearSplitLayoutAlgorithm>(splitType_);
+        return MakeRefPtr<LinearSplitLayoutAlgorithm>(splitType_, dragSplitOffset_, isOverParent_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -56,13 +57,41 @@ public:
         return MakeRefPtr<LinearSplitPaintMethod>(childrenOffset_, splitLength_, splitType_);
     }
 
+    OffsetF GetParentOffset() const
+    {
+        return parentOffset_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
+    void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandlePanStart(float xOffset, float yOffset, const Offset& globalLocation);
+    void HandlePanUpdate(float xOffset, float yOffset, const Offset& globalLocation);
+    void HandlePanEnd(const Offset& globalLocation);
+    void InitMouseEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleMouseEvent(const Offset& globalLocation);
+    void GetdragedSplitIndexOrIsMoving(const Point& point);
 
     std::vector<OffsetF> childrenOffset_;
     float splitLength_ = 0.0f;
     SplitType splitType_;
+    RefPtr<DragEvent> dragEvent_;
+    RefPtr<InputEvent> mouseEvent_;
+    RefPtr<PanEvent> panEvent_;
+    bool resizeable_ = false;
+
+    std::size_t dragedSplitIndex_ = -1;
+    std::size_t mouseDragedSplitIndex_ = -1;
+    std::vector<Rect> splitRects_;
+    std::vector<float> dragSplitOffset_;
+    OffsetF parentOffset_;
+    bool isDragedMoving_ = false;
+    bool isDraged_ = false;
+    bool isOverParent_ = false;
+    float preOffset_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(LinearSplitPattern);
 };
