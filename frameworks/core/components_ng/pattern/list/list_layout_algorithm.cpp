@@ -59,10 +59,6 @@ void ListLayoutAlgorithm::UpdateListItemConstraint(
 
 void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    if (overScrollFeature_ && !layoutWrapper->CheckChildNeedForceMeasureAndLayout() && !HasItemGroup()) {
-        LOGD("in over scroll case");
-        return;
-    }
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(listLayoutProperty);
 
@@ -464,11 +460,5 @@ void ListLayoutAlgorithm::CreateItemGroupList(LayoutWrapper* layoutWrapper)
             itemGroupList_.push_back(wrapper->GetWeakHostNode());
         }
     }
-}
-
-bool ListLayoutAlgorithm::HasItemGroup()
-{
-    return std::any_of(itemPosition_.begin(), itemPosition_.end(),
-        [](const auto& item) { return item.second.isGroup; });
 }
 } // namespace OHOS::Ace::NG
