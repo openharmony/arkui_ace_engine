@@ -112,8 +112,8 @@ void JSGauge::SetEndAngle(const JSCallbackInfo& info)
 
 void JSGauge::SetColors(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE(" JSGauge::SetColors::The info is wrong, it is supposed to have atleast 1 arguments");
+    if (info.Length() < 1 || !info[0]->IsArray()) {
+        LOGE("The number of argument is less than 1, or the argument is not array.");
         return;
     }
     std::vector<Color> colors;

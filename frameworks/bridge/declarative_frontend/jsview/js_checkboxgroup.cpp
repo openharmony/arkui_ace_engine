@@ -14,8 +14,8 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_checkboxgroup.h"
-#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/checkable/checkable_component.h"
@@ -73,11 +73,23 @@ void JSCheckboxGroup::Create(const JSCallbackInfo& info)
             checkboxComponent->SetGroupName(checkboxGroupName);
             auto checkboxGroupmap = ViewStackProcessor::GetInstance()->GetCheckboxGroupCompnent();
             checkboxGroupmap->emplace(checkboxGroupName, checkboxComponent);
+            auto& ungroupedCheckboxs = CheckboxComponent::GetUngroupedCheckboxs();
+            auto item = ungroupedCheckboxs.find(checkboxGroupName);
+            if (item != ungroupedCheckboxs.end()) {
+                for (auto component : item->second) {
+                    auto chkComponent = component.Upgrade();
+                    if (chkComponent) {
+                        checkboxComponent->AddCheckbox(chkComponent);
+                        chkComponent->SetGroup(checkboxComponent);
+                    }
+                }
+                ungroupedCheckboxs.erase(item);
+            }
         }
     }
     checkboxComponent->SetInspectorTag("CheckboxGroupComponent");
     ViewStackProcessor::GetInstance()->Push(checkboxComponent);
-    
+
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     auto horizontalPadding = checkBoxTheme->GetHotZoneHorizontalPadding();
     auto verticalPadding = checkBoxTheme->GetHotZoneVerticalPadding();
@@ -106,8 +118,8 @@ void JSCheckboxGroup::SetOnChange(const JSCallbackInfo& args)
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<CheckboxGroupResult, 1>>(
         JSRef<JSFunc>::Cast(args[0]), CheckboxGroupResultEventToJSValue);
     auto checkbox = AceType::DynamicCast<CheckboxComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    checkbox->SetOnGroupChange(EventMarker(
-        [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+    checkbox->SetOnGroupChange(
+        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto eventInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(info);
             func->Execute(*eventInfo);
