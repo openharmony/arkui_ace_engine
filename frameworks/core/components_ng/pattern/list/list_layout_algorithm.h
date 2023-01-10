@@ -213,7 +213,6 @@ private:
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
 
     void CreateItemGroupList(LayoutWrapper* layoutWrapper);
-    bool HasItemGroup();
 
     std::optional<int32_t> jumpIndex_;
     ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
