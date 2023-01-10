@@ -218,11 +218,12 @@ const std::list<RefPtr<LayoutWrapper>>& LazyLayoutWrapperBuilder::OnExpandChildL
         auto itemInfo = builder_->CreateChildByIndex(index);
         RefPtr<LayoutWrapper> wrapper;
         auto frameNode = DynamicCast<FrameNode>(itemInfo.second);
+        auto uiNode = itemInfo.second;
         if (frameNode) {
             wrapper = frameNode->CreateLayoutWrapper(forceMeasure_, forceLayout_);
-        } else {
-            // TODO: Check only ifelse syntax node can use LazyForEach and get wrapper from ifelse syntax node.
-            LOGW("syntax node is not support yet");
+        }
+        if (uiNode) {
+            wrapper = uiNode->CreateLayoutWrapper(forceMeasure_, forceLayout_);
         }
         if (!wrapper) {
             LOGE("fail to create wrapper");
