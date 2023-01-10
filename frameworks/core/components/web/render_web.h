@@ -107,6 +107,7 @@ public:
     bool TextOverlayMenuShouldShow() const;
     bool GetShowStartTouchHandle() const;
     bool GetShowEndTouchHandle() const;
+    bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
 #endif
 
     void SetDelegate(const RefPtr<WebDelegate>& delegate)

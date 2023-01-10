@@ -4294,6 +4294,18 @@ void WebDelegate::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchH
     renderWeb->OnTouchSelectionChanged(insertHandle, startSelectionHandle, endSelectionHandle);
 }
 
+bool WebDelegate::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_RETURN(webPattern, false);
+        return webPattern->OnCursorChange(type, info);
+    }
+    auto renderWeb = renderWeb_.Upgrade();
+    CHECK_NULL_RETURN(renderWeb, false);
+    return renderWeb->OnCursorChange(type, info);
+}
+
 void WebDelegate::HandleDragEvent(int32_t x, int32_t y, const DragAction& dragAction)
 {
     if (nweb_) {
