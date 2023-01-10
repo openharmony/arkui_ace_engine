@@ -719,6 +719,9 @@ bool RenderScroll::ScrollPage(bool reverse, bool smooth, const std::function<voi
 void RenderScroll::JumpToPosition(double position, int32_t source)
 {
     // If an animation is playing, stop it.
+    if (!animator_) {
+        return;
+    }
     if (!animator_->IsStopped()) {
         animator_->Stop();
     }
