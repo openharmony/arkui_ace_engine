@@ -133,6 +133,7 @@ public:
         sessionStage_->RegisterSessionChangeListener(listener);
     }
 
+    virtual void Connect();
     virtual void Foreground();
     virtual void Background();
     virtual void Disconnect();

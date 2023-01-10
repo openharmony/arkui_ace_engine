@@ -171,6 +171,12 @@ void WindowPattern::OnHide()
     rsUIDirector_->SendMessages();
 }
 
+void WindowPattern::Connect()
+{
+    CHECK_NULL_VOID(sessionStage_);
+    sessionStage_->Connect();
+}
+
 void WindowPattern::Foreground()
 {
     CHECK_NULL_VOID(sessionStage_);

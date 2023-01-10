@@ -128,9 +128,10 @@ public:
 
     void SetWindowRect(Rect rect);
 
-    virtual void DoForeground() override;
-    virtual void DoBackground() override;
-    virtual void DoDisconnect() override;
+    void Connect() override;
+    void DoForeground() override;
+    void DoBackground() override;
+    void DoDisconnect() override;
 
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);

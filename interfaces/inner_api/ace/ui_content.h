@@ -145,6 +145,7 @@ public:
         const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
         const std::shared_ptr<Rosen::ISessionStageStateListener>& listener) = 0;
 
+    virtual void Connect() = 0;
     virtual void DoForeground() = 0;
     virtual void DoBackground() = 0;
     virtual void DoDisconnect() = 0;

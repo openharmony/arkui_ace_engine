@@ -1758,6 +1758,12 @@ void UIContentImpl::SetWindowRect(Rect rect)
     windowPattern_->SetWindowRect(rect);
 }
 
+void UIContentImpl::Connect()
+{
+    CHECK_NULL_VOID(windowPattern_);
+    windowPattern_->Connect();
+}
+
 void UIContentImpl::DoForeground()
 {
     CHECK_NULL_VOID(windowPattern_);
