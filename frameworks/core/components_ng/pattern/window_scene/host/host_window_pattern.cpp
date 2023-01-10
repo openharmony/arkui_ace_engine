@@ -17,7 +17,8 @@
 
 #include "render_service_client/core/ui/rs_surface_node.h"
 
-#include "core/components_ng/base/view_stack_processor.h"
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -32,10 +33,8 @@ void HostWindowPattern::InitContent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto stack = ViewStackProcessor::GetInstance();
     startingNode_ = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    stack->Push(startingNode_);
     startingNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     startingNode_->GetRenderContext()->UpdateBackgroundColor(Color(0xffeeeeee));
     host->AddChild(startingNode_);
@@ -52,24 +51,32 @@ void HostWindowPattern::InitContent()
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
 
-    surfaceNode->SetBufferAvailableCallback([weak = WeakClaim(this)]() {
+    surfaceNode->SetBufferAvailableCallback([weak = WeakClaim(this), instanceId = Container::CurrentId()]() {
         LOGI("RSSurfaceNode buffer available callback");
         auto hostWindowPattern = weak.Upgrade();
         CHECK_NULL_VOID(hostWindowPattern);
-        auto host = hostWindowPattern->GetHost();
-        CHECK_NULL_VOID(host);
 
-        auto stack = ViewStackProcessor::GetInstance();
-        stack->Pop();
-        stack->Push(hostWindowPattern->contentNode_);
+        auto uiTask = [hostWindowPattern, instanceId]() {
+            ContainerScope scope(instanceId);
 
-        host->RemoveChild(hostWindowPattern->startingNode_);
-        hostWindowPattern->startingNode_.Reset();
-        host->AddChild(hostWindowPattern->contentNode_);
+            auto host = hostWindowPattern->GetHost();
+            CHECK_NULL_VOID(host);
 
-        auto pipelineContext = FrameNode::GetContext();
+            host->RemoveChild(hostWindowPattern->startingNode_);
+            hostWindowPattern->startingNode_.Reset();
+
+            hostWindowPattern->contentNode_->SetActive(true);
+            hostWindowPattern->contentNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            host->AddChild(hostWindowPattern->contentNode_);
+            host->RebuildRenderContextTree();
+        };
+
+        ContainerScope scope(instanceId);
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->RequestFrame();
+        pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
     });
     // session_->RegisterOnBackgroundCallback(&HostWindowPattern::OnBackground);
 }
@@ -100,20 +107,19 @@ void HostWindowPattern::OnBackground()
     // auto snapShot = session_->GetSnapShot();
     RefPtr<PixelMap> snapShot = nullptr;
 
-    auto stack = ViewStackProcessor::GetInstance();
     startingNode_ = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = startingNode_->GetLayoutProperty<ImageLayoutProperty>();
     if (imageLayoutProperty) {
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(snapShot));
     }
-    stack->Pop();
-    stack->Push(startingNode_);
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->RemoveChild(contentNode_);
+
     host->AddChild(startingNode_);
+    host->RebuildRenderContextTree();
 }
 
 } // namespace OHOS::Ace::NG
