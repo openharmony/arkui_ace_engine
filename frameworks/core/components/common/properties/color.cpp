@@ -62,7 +62,7 @@ const LinearColor LinearColor::GREEN = LinearColor(0xff00ff00);
 const LinearColor LinearColor::BLUE = LinearColor(0xff0000ff);
 const LinearColor LinearColor::GRAY = LinearColor(0xffc0c0c0);
 
-Color Color::FromString(std::string colorStr, uint32_t maskAlpha)
+Color Color::FromString(std::string colorStr, uint32_t maskAlpha, Color defaultColor)
 {
     if (colorStr.empty()) {
         // empty string, return transparent
@@ -145,7 +145,7 @@ Color Color::FromString(std::string colorStr, uint32_t maskAlpha)
     }
 
     // Default color.
-    return Color::BLACK;
+    return defaultColor;
 }
 
 bool Color::ParseColorString(std::string colorStr, Color& color, uint32_t maskAlpha)
