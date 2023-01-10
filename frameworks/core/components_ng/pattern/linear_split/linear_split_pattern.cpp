@@ -140,6 +140,9 @@ void LinearSplitPattern::GetdragedSplitIndexOrIsMoving(const Point& point)
 
 void LinearSplitPattern::HandlePanUpdate(float xOffset, float yOffset, const Offset& globalLocation)
 {
+    if (!resizeable_) {
+        return;
+    }
     if (isOverParent_) {
         isDragedMoving_ = false;
     }
@@ -223,6 +226,9 @@ void LinearSplitPattern::InitMouseEvent(const RefPtr<GestureEventHub>& gestureHu
 
 void LinearSplitPattern::HandleMouseEvent(const Offset& globalLocation)
 {
+    if (!resizeable_) {
+        return;
+    }
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     CHECK_NULL_VOID(mouseStyle);
     auto pipeline = PipelineContext::GetCurrentContext();
