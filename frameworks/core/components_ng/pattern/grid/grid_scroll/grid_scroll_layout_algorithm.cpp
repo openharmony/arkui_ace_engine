@@ -457,7 +457,7 @@ void GridScrollLayoutAlgorithm::UpdateGridLayoutInfo(LayoutWrapper* layoutWrappe
 
         // startLine == gridLayoutInfo_.startMainLineIndex_ and scroll out of view
         gridLayoutInfo_.startMainLineIndex_ = startLine;
-        gridLayoutInfo_.startIndex_ = targetIndex;
+        gridLayoutInfo_.UpdateStartIndexByStartLine();
         gridLayoutInfo_.prevOffset_ = 0;
         gridLayoutInfo_.currentOffset_ = 0;
         gridLayoutInfo_.reachEnd_ = false;
@@ -467,6 +467,10 @@ void GridScrollLayoutAlgorithm::UpdateGridLayoutInfo(LayoutWrapper* layoutWrappe
     }
 
     /* 2.3 targetIndex is out of the matrix */
+    if (gridLayoutInfo_.gridMatrix_.empty()) {
+        LOGW("no grid for jump to index:%{public}d", targetIndex);
+        return;
+    }
     bool isTargetBackward = true;
     if (targetIndex < gridLayoutInfo_.gridMatrix_.begin()->second.begin()->second) {
         isTargetBackward = false;
