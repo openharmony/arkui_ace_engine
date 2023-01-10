@@ -183,7 +183,7 @@ HWTEST_F(ManifestParserTest, ManifestParserTest002, TestSize.Level1)
 
     auto resourceAdapter = AceType::MakeRefPtr<MockResourceAdapter>();
     auto themeConstant = AceType::MakeRefPtr<ThemeConstants>(resourceAdapter);
-    EXPECT_CALL(*themeManager, GetThemeConstants("", "")).WillOnce(Return(themeConstant));
+    EXPECT_CALL(*themeManager, GetThemeConstants()).WillOnce(Return(themeConstant));
     EXPECT_CALL(*resourceAdapter, GetIdByName(resourceName, str, resId)).WillOnce(Return(true));
 
     ManifestParser manifestParser;

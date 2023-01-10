@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,11 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "bridge/card_frontend/card_frontend.h"
+#include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/declarative_frontend.h"
+#include "bridge/js_frontend/engine/common/js_engine_loader.h"
+#include "bridge/js_frontend/js_frontend.h"
 #include "core/common/ace_engine.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container_scope.h"
@@ -53,11 +58,6 @@
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/bridge/card_frontend/card_frontend.h"
-#include "frameworks/bridge/common/utils/engine_helper.h"
-#include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
-#include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
-#include "frameworks/bridge/js_frontend/js_frontend.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -167,11 +167,7 @@ void AceContainer::Destroy()
             frontend->Destroy();
         } else {
             frontend->UpdateState(Frontend::State::ON_DESTROY);
-            taskExecutor_->PostTask(
-                [frontend]() {
-                    frontend->Destroy();
-                },
-                TaskExecutor::TaskType::JS);
+            taskExecutor_->PostTask([frontend]() { frontend->Destroy(); }, TaskExecutor::TaskType::JS);
         }
     }
     resRegister_.Reset();
@@ -377,7 +373,7 @@ void AceContainer::OnActive(int32_t instanceId)
     if (front && !container->IsSubContainer()) {
         WeakPtr<Frontend> weakFrontend = front;
         taskExecutor->PostTask(
-            [weakFrontend] () {
+            [weakFrontend]() {
                 auto frontend = weakFrontend.Upgrade();
                 if (frontend) {
                     frontend->UpdateState(Frontend::State::ON_ACTIVE);
@@ -411,7 +407,7 @@ void AceContainer::OnInactive(int32_t instanceId)
     if (front && !container->IsSubContainer()) {
         WeakPtr<Frontend> weakFrontend = front;
         taskExecutor->PostTask(
-            [weakFrontend] () {
+            [weakFrontend]() {
                 auto frontend = weakFrontend.Upgrade();
                 if (frontend) {
                     frontend->UpdateState(Frontend::State::ON_INACTIVE);
@@ -629,9 +625,9 @@ void AceContainer::InitializeCallback()
     aceView_->RegisterDragEventCallback(dragEventCallback);
 }
 
-void AceContainer::CreateContainer(int32_t instanceId, FrontendType type,
-    const std::string& instanceName, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
-    std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner, bool useNewPipeline)
+void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
+    std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
+    bool useCurrentEventRunner, bool useNewPipeline)
 {
     auto aceContainer = AceType::MakeRefPtr<AceContainer>(
         instanceId, type, aceAbility, std::move(callback), useCurrentEventRunner, useNewPipeline);
