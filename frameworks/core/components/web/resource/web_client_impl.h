@@ -170,6 +170,7 @@ public:
         NWeb::ImageColorType colorType,
         NWeb::ImageAlphaType alphaType) override;
     void OnDesktopIconUrl(const std::string& icon_url, bool precomposed) override;
+    bool OnCursorChange(const NWeb::CursorType& type, const NWeb::NWebCursorInfo& info) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
