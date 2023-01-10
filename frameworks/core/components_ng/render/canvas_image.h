@@ -72,6 +72,10 @@ public:
         return *paintConfig_;
     }
 
+    virtual void SetAnimationCallback(std::function<void()>&& callback) {}
+
+    virtual void ControlAnimation(bool play) {}
+
 private:
     std::unique_ptr<ImagePaintConfig> paintConfig_;
 

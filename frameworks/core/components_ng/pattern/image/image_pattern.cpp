@@ -21,7 +21,6 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
-#include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -85,15 +84,14 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
     return task;
 }
 
-void ImagePattern::SetSvgAnimationCallback()
+void ImagePattern::SetAnimationCallback()
 {
-    // set animation flush function for svg
-    auto svg = DynamicCast<SvgCanvasImage>(image_);
-    CHECK_NULL_VOID_NOLOG(svg);
-    svg->SetAnimationCallback([weak = WeakClaim(RawPtr(GetHost()))] {
-        auto image = weak.Upgrade();
-        CHECK_NULL_VOID(image);
-        image->MarkNeedRenderOnly();
+    // set animation flush function for svg / gif
+    CHECK_NULL_VOID_NOLOG(image_);
+    image_->SetAnimationCallback([weak = WeakClaim(RawPtr(GetHost()))] {
+        auto imageNode = weak.Upgrade();
+        CHECK_NULL_VOID(imageNode);
+        imageNode->MarkNeedRenderOnly();
     });
 }
 
@@ -114,11 +112,8 @@ void ImagePattern::OnImageLoadSuccess()
     srcRect_ = loadingCtx_->GetSrcRect();
     dstRect_ = loadingCtx_->GetDstRect();
 
-    bool isSvg = loadingCtx_->GetSourceInfo().IsSvg();
-    if (isSvg) {
-        SetSvgAnimationCallback();
-    }
-    SetImagePaintConfig(image_, srcRect_, dstRect_, isSvg);
+    SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
+    SetAnimationCallback();
 
     if (draggable_) {
         EnableDrag();
@@ -395,12 +390,8 @@ void ImagePattern::OnWindowShow()
 void ImagePattern::OnVisibleChange(bool visible)
 {
     CHECK_NULL_VOID(image_);
-    // control svg animation
-    if (image_->GetPaintConfig().isSvg_) {
-        auto svg = DynamicCast<SvgCanvasImage>(image_);
-        CHECK_NULL_VOID(svg);
-        svg->ControlAnimation(visible);
-    }
+    // control svg / gif animation
+    image_->ControlAnimation(visible);
 }
 
 void ImagePattern::OnAttachToFrameNode()
