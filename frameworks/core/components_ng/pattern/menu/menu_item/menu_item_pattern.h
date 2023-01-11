@@ -40,7 +40,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -127,9 +127,11 @@ private:
     void RegisterOnClick();
     void RegisterOnTouch();
     void RegisterOnHover();
+    void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     // change menu item paint props on press
     void OnPress(const TouchEventInfo& info);
     void OnHover(bool isHover);
+    bool OnKeyEvent(const KeyEvent& event);
 
     void RegisterWrapperMouseEvent();
 

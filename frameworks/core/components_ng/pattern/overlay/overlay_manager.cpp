@@ -374,7 +374,7 @@ void OverlayManager::HideMenuInSubWindow()
 
 void OverlayManager::HideMenu(int32_t targetId)
 {
-    LOGI("OverlayManager::HideMenuNode");
+    LOGI("OverlayManager::HideMenuNode menu targetId is %{public}d", targetId);
     if (menuMap_.find(targetId) == menuMap_.end()) {
         LOGW("OverlayManager: menuNode %{public}d not found in map", targetId);
         return;

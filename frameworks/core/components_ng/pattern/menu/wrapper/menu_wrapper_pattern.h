@@ -57,14 +57,30 @@ public:
         return targetId_;
     }
 
+    void HideMenu();
+
+    void AddSubMenuId(int32_t subMenuId)
+    {
+        subMenuIds_.emplace_back(subMenuId);
+    }
+
+    bool IsHided() const
+    {
+        return isHided_;
+    }
+
 private:
     void OnModifyDone() override;
 
-    void HideMenu(const RefPtr<FrameNode>& menu) const;
+    void HideMenu(const RefPtr<FrameNode>& menu);
 
     RefPtr<TouchEventImpl> onTouch_;
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;
+
+    bool isHided_ = false;
+
+    std::list<int32_t> subMenuIds_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
