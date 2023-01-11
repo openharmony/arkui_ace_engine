@@ -34,25 +34,25 @@ public:
         return false;
     }
 
-    std::shared_ptr<Rosen::Session> GetSession()
-    {
-        return session_;
-    }
-
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
 protected:
     virtual void InitContent();
 
+    virtual void OnForeground();
     virtual void OnBackground();
 
     RefPtr<FrameNode> startingNode_;
     RefPtr<FrameNode> contentNode_;
 
-private:
     std::shared_ptr<Rosen::Session> session_;
 
+private:
+    bool initialized_ = false;
+    bool isFirstForeground_ = true;
+
     friend class HostWindowSceneModel;
+    friend class LifecycleListener;
 
     ACE_DISALLOW_COPY_AND_MOVE(HostWindowPattern);
 };

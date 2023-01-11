@@ -25,12 +25,37 @@
 
 namespace OHOS::Ace::NG {
 
+class LifecycleListener : public Rosen::ILifecycleListener {
+public:
+    LifecycleListener(const WeakPtr<HostWindowPattern>& hostWindowPattern) : hostWindowPattern_(hostWindowPattern) {}
+    virtual ~LifecycleListener() = default;
+
+    void OnForeground() override
+    {
+        auto hostWindowPattern = hostWindowPattern_.Upgrade();
+        CHECK_NULL_VOID(hostWindowPattern);
+        hostWindowPattern->OnForeground();
+    }
+
+    void OnBackground() override
+    {
+        auto hostWindowPattern = hostWindowPattern_.Upgrade();
+        CHECK_NULL_VOID(hostWindowPattern);
+        hostWindowPattern->OnBackground();
+    }
+
+private:
+    WeakPtr<HostWindowPattern> hostWindowPattern_;
+};
+
 void HostWindowPattern::InitContent()
 {
-    if (contentNode_) {
-        // had initialized, should not initialize again
+    // had initialized, should not initialize again
+    if (initialized_) {
         return;
     }
+    initialized_ = true;
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     startingNode_ = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
@@ -78,7 +103,9 @@ void HostWindowPattern::InitContent()
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
     });
-    // session_->RegisterOnBackgroundCallback(&HostWindowPattern::OnBackground);
+
+    auto lifecycleListener = std::make_shared<LifecycleListener>(AceType::WeakClaim(this));
+    session_->RegisterLifecycleListener(lifecycleListener);
 }
 
 bool HostWindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -96,14 +123,33 @@ bool HostWindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         .width_ = windowRect.Width(),
         .height_ = windowRect.Height()
     };
+
+    CHECK_NULL_RETURN(session_, false);
     LOGI("update session rect: [%{public}d, %{public}d, %{public}d, %{public}d]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
     session_->UpdateSessionRect(rect, Rosen::SessionSizeChangeReason::SHOW);
     return false;
 }
 
+void HostWindowPattern::OnForeground()
+{
+    // SessionStage will trigger this callback after ability first start,
+    // should ignore in this situation
+    if (isFirstForeground_) {
+        isFirstForeground_ = false;
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChild(startingNode_);
+
+    host->AddChild(contentNode_);
+    host->RebuildRenderContextTree();
+}
+
 void HostWindowPattern::OnBackground()
 {
+    // CHECK_NULL_VOID(session_);
     // auto snapShot = session_->GetSnapShot();
     RefPtr<PixelMap> snapShot = nullptr;
 

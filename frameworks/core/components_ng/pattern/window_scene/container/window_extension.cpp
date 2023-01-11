@@ -23,7 +23,6 @@ WindowExtension::WindowExtension(
     : WindowPattern(nullptr)
 {
     // sessionStage_ = std::make_shared<Rosen::ExtensionSessionStage>(iExtensionSession);
-    // sessionStage_->Connect();
 }
 
 } // namespace OHOS::Ace::NG
