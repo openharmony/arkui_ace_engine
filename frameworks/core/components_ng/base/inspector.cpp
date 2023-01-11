@@ -137,9 +137,13 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key)
     auto jsonNode = JsonUtil::Create(true);
     jsonNode->Put(INSPECTOR_TYPE, inspectorElement->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, inspectorElement->GetId());
-    if (AceType::InstanceOf<FrameNode>(inspectorElement)) {
-        jsonNode->Put(INSPECTOR_RECT,
-            AceType::DynamicCast<FrameNode>(inspectorElement)->GetGeometryNode()->GetFrameRect().ToBounds().c_str());
+    auto frameNode = AceType::DynamicCast<FrameNode>(inspectorElement);
+    if (frameNode) {
+        RectF rect;
+        rect.SetOffset(frameNode->GetTransformRelativeOffset());
+        rect.SetWidth(frameNode->GetGeometryNode()->GetFrameRect().Width());
+        rect.SetHeight(frameNode->GetGeometryNode()->GetFrameRect().Height());
+        jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
     }
     auto jsonAttrs = JsonUtil::Create(true);
     inspectorElement->ToJsonValue(jsonAttrs);
