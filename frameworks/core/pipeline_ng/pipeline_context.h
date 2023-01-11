@@ -245,9 +245,12 @@ public:
     void FlushMessages() override;
     void SetContainerWindow(bool isShow) override;
 
-    void FlushUITasks() override
+    void FlushUITasks(bool onlyLayout = false) override
     {
-        taskScheduler_.FlushTask();
+        if (onlyLayout) {
+            taskScheduler_.FlushLayoutTask();
+            return;
+        }
     }
     // end pipeline, exit app
     void Finish(bool autoFinish) const override;

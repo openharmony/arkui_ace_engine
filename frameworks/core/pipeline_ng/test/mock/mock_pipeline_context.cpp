@@ -192,6 +192,8 @@ double PipelineContext::MeasureText(const std::string& text, double fontSize, in
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
 void UITaskScheduler::FlushTask() {}
 
+void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread) {}
+
 UITaskScheduler::~UITaskScheduler() = default;
 
 void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty) {}
