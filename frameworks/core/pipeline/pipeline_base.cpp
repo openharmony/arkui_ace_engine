@@ -29,7 +29,7 @@
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
 #include "core/components/custom_paint/render_custom_paint.h"
-#include "core/components_ng/pattern/window_scene/container/window_pattern.h"
+#include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/image/image_provider.h"
 

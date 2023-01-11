@@ -25,15 +25,22 @@ if (is_standard_system) {
 build_component_ng("window_scene") {
   sources = [
     # container
-    "container/window_extension.cpp",
-    "container/window_pattern.cpp",
-    "container/window_scene.cpp",
+    "scene/container/window_extension.cpp",
+    "scene/container/window_pattern.cpp",
+    "scene/container/window_scene.cpp",
 
     # host
-    "host/host_window_extension.cpp",
-    "host/host_window_pattern.cpp",
-    "host/host_window_scene_model.cpp",
-    "host/host_window_scene.cpp",
+    "scene/host/host_window_extension.cpp",
+    "scene/host/host_window_pattern.cpp",
+    "scene/host/host_window_scene_model.cpp",
+    "scene/host/host_window_scene.cpp",
+
+    # root
+    "root/root_scene_model.cpp",
+
+    # screen
+    "screen/screen_model.cpp",
+    "screen/screen_pattern.cpp",
   ]
 
   if (is_standard_system) {

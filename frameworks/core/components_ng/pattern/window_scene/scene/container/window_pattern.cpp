@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/window_scene/container/window_pattern.h"
+#include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
 
 #include "include/vsync_station.h"
 #include "render_service_client/core/ui/rs_ui_director.h"

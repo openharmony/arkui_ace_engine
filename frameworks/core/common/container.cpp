@@ -19,7 +19,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
-#include "core/components_ng/pattern/window_scene/container/window_pattern.h"
+#include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
 
 namespace OHOS::Ace {
 

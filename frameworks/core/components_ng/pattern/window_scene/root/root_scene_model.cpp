@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,20 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/window_scene/container/window_extension.h"
+#include "core/components_ng/pattern/window_scene/root/root_scene_model.h"
+
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
-WindowExtension::WindowExtension(
-    /* const sptr<Rosen::IExtensionSession>& iExtensionSession,
-    const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode */)
-    : WindowPattern(nullptr)
+void RootSceneModel::Create()
 {
-    // sessionStage_ = new Rosen::ExtensionSessionStage(iExtensionSession);
+    auto stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::ROOT_SCENE_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<RootScenePattern>(); });
+    stack->Push(frameNode);
 }
 
 } // namespace OHOS::Ace::NG

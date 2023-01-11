@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/window_scene/host/host_window_pattern.h"
+#include "core/components_ng/pattern/window_scene/scene/host/host_window_pattern.h"
 
 #include "render_service_client/core/ui/rs_surface_node.h"
 

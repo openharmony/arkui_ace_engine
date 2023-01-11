@@ -491,6 +491,8 @@ ACE_EXPORT extern const char MODEL_COMPONENT_TAG[];
 ACE_EXPORT extern const char MODEL_ETS_TAG[];
 
 // window scene
+ACE_EXPORT extern const char ROOT_SCENE_ETS_TAG[];
+ACE_EXPORT extern const char SCREEN_ETS_TAG[];
 ACE_EXPORT extern const char WINDOW_SCENE_ETS_TAG[];
 ACE_EXPORT extern const char HOST_WINDOW_SCENE_ETS_TAG[];
 

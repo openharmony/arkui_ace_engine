@@ -25,7 +25,7 @@
 #include "native_engine/native_engine.h"
 #include "wm/window.h"
 
-#include "core/components_ng/pattern/window_scene/container/window_scene.h"
+#include "core/components_ng/pattern/window_scene/scene/container/window_scene.h"
 
 namespace OHOS {
 

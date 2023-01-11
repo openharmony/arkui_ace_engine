@@ -16,7 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_host_window_scene.h"
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
-#include "frameworks/core/components_ng/pattern/window_scene/host/host_window_scene_model.h"
+#include "frameworks/core/components_ng/pattern/window_scene/scene/host/host_window_scene_model.h"
 
 namespace OHOS::Ace::Framework {
 

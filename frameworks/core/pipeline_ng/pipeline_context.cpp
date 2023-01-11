@@ -63,7 +63,7 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_ng/pattern/window_scene/container/window_pattern.h"
+#include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"

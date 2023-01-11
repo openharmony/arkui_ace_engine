@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/window_scene/host/host_window_scene_model.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCREEN_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCREEN_MODEL_H
 
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/window_scene/screen/screen_pattren.h"
 
 namespace OHOS::Ace::NG {
 
-void HostWindowSceneModel::Create(const sptr<Rosen::Session>& session)
-{
-    auto stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HOST_WINDOW_SCENE_ETS_TAG, nodeId,
-        [&session]() { return AceType::MakeRefPtr<HostWindowScene>(session); });
-    stack->Push(frameNode);
-    frameNode->GetPattern<HostWindowScene>()->InitContent();
-}
+class ACE_EXPORT ScreenModel {
+public:
+    static void Create(const sptr<Rosen::ScreenSession>& screenSession);
+
+    static void SetBrightness(float brightness);
+    static void SetRotation(float degree);
+};
 
 } // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCREEN_MODEL_H

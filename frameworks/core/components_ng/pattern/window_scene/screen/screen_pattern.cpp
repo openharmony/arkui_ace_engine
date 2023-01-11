@@ -13,4 +13,20 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/window_scene/screen/screen_pattren.h"
 
+namespace OHOS::Ace::NG {
+
+void ScreenPattern::SetBrightness(float brightness)
+{
+    // CHECK_NULL_VOID(screenSession_);
+    // screenSession_->SetBrightness();
+}
+
+void ScreenPattern::SetRotation(float degree)
+{
+    // CHECK_NULL_VOID(screenSession_);
+    // screenSession_->SetRotation();
+}
+
+} // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ROOT_SCENE_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ROOT_SCENE_PATTERN_H
-
-#include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/window_scene/scene/host/host_window_extension.h"
 
 namespace OHOS::Ace::NG {
 
-class RootScenePattern : public StackPattern {
-    DECLARE_ACE_TYPE(RootScenePattern, StackPattern);
-};
+void HostWindowExtension::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
 
 } // namespace OHOS::Ace::NG
-
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ROOT_SCENE_PATTERN_H

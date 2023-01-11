@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/window_scene/host/host_window_scene.h"
+#include "core/components_ng/pattern/window_scene/scene/host/host_window_scene.h"
 
 namespace OHOS::Ace::NG {
 

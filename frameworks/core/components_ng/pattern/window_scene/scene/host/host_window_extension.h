@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_EXTENSION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_EXTENSION_H
 
-#include "core/components_ng/pattern/window_scene/host/host_window_pattern.h"
+#include "core/components_ng/pattern/window_scene/scene/host/host_window_pattern.h"
 
 namespace OHOS::Ace::NG {
 

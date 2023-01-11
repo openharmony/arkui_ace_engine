@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,4 +13,16 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/window_scene/scene/container/window_extension.h"
 
+namespace OHOS::Ace::NG {
+
+WindowExtension::WindowExtension(
+    /* const sptr<Rosen::IExtensionSession>& iExtensionSession,
+    const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode */)
+    : WindowPattern(nullptr)
+{
+    // sessionStage_ = new Rosen::ExtensionSessionStage(iExtensionSession);
+}
+
+} // namespace OHOS::Ace::NG
