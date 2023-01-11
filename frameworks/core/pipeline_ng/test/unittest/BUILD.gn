@@ -288,6 +288,7 @@ ohos_unittest("pipeline_ng_test") {
     "$ace_root/frameworks/core/components_ng/render/render_context.cpp",
 
     # public mock
+    "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animation_utils.cpp",

@@ -115,6 +115,7 @@ ohos_unittest("menu_layout_algorithm_test_ng") {
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_container.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_icon_theme.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_dump_log.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_localization.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_stage_manager.cpp",
