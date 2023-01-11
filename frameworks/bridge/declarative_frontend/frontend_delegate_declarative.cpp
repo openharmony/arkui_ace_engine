@@ -1039,6 +1039,9 @@ void FrontendDelegateDeclarative::StartPush(const PageTarget& target, const std:
         {
             UICastContextImpl::HandleRouterPageCall("UICast::Page::push", target.url);
         }
+        if (errorCallback != nullptr) {
+            errorCallback("", ERROR_CODE_NO_ERROR);
+        }
     } else {
         LOGW("[Engine Log] this uri not support in route push.");
         if (errorCallback != nullptr) {
@@ -1081,6 +1084,9 @@ void FrontendDelegateDeclarative::StartReplace(const PageTarget& target, const s
         LoadReplacePage(GenerateNextPageId(), PageTarget(target, pagePath), params);
         {
             UICastContextImpl::HandleRouterPageCall("UICast::Page::replace", target.url);
+        }
+        if (errorCallback != nullptr) {
+            errorCallback("", ERROR_CODE_NO_ERROR);
         }
     } else {
         LOGW("[Engine Log] this uri not support in route replace.");

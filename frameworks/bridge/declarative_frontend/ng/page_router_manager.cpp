@@ -436,6 +436,9 @@ void PageRouterManager::StartPush(const RouterPageInfo& target, const std::strin
         }
         return;
     }
+    if (errorCallback != nullptr) {
+        errorCallback("", Framework::ERROR_CODE_NO_ERROR);
+    }
 
     if (mode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(url);
@@ -473,6 +476,9 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::st
             errorCallback("The uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR_LITE);
         }
         return;
+    }
+    if (errorCallback != nullptr) {
+        errorCallback("", Framework::ERROR_CODE_NO_ERROR);
     }
 
     PopPage("", false, false);
