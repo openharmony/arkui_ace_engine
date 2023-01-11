@@ -186,6 +186,8 @@ bool PipelineContext::OnBackPressed()
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
 void UITaskScheduler::FlushTask() {}
 
+void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread) {}
+
 UITaskScheduler::~UITaskScheduler() = default;
 
 void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty) {}

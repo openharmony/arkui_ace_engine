@@ -460,7 +460,6 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
                 auto pipeline = weak.Upgrade();
                 CHECK_NULL_VOID(pipeline);
                 pipeline->SetRootRect(width, height, 0.0);
-                pipeline->FlushUITasks();
             });
             break;
         }
@@ -477,7 +476,6 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
                 auto pipeline = weak.Upgrade();
                 CHECK_NULL_VOID(pipeline);
                 pipeline->SetRootRect(width, height, 0.0);
-                pipeline->FlushUITasks();
             }, [weak]() {
                 auto pipeline = weak.Upgrade();
                 CHECK_NULL_VOID(pipeline);
