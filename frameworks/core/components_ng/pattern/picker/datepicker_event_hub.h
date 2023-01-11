@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS__DATE_PICKER_DATE_PICKER_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS__DATE_PICKER_DATE_PICKER_EVENT_HUB_H
 
-#include <utility>
-
 #include "base/memory/ace_type.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"

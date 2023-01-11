@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/pattern/picker/datepicker_view.h"
+#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 
 #include <utility>
 
@@ -36,7 +36,7 @@ namespace {
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 } // namespace
 
-void DatePickerView::CreateDatePicker()
+void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -53,11 +53,7 @@ void DatePickerView::CreateDatePicker()
     auto monthId = datePickerPattern->GetMonthId();
     auto dayId = datePickerPattern->GetDayId();
 
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-
     uint32_t showCount = pickerTheme->GetShowOptionCount();
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
         SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
@@ -139,26 +135,26 @@ void DatePickerView::CreateDatePicker()
     stack->Push(dateNode);
 }
 
-RefPtr<FrameNode> DatePickerView::CreateStackNode()
+RefPtr<FrameNode> DatePickerModelNG::CreateStackNode()
 {
     auto stackId = ElementRegister::GetInstance()->MakeUniqueId();
     return FrameNode::GetOrCreateFrameNode(
         V2::STACK_ETS_TAG, stackId, []() { return AceType::MakeRefPtr<StackPattern>(); });
 }
 
-RefPtr<FrameNode> DatePickerView::CreateButtonNode()
+RefPtr<FrameNode> DatePickerModelNG::CreateButtonNode()
 {
     auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
     return FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
 }
 
-void DatePickerView::SetShowLunar(bool lunar)
+void DatePickerModelNG::SetShowLunar(bool lunar)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, Lunar, lunar);
 }
 
-void DatePickerView::SetStartDate(const PickerDate& value)
+void DatePickerModelNG::SetStartDate(const PickerDate& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -168,7 +164,7 @@ void DatePickerView::SetStartDate(const PickerDate& value)
     ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, StartDate, datePickerPattern->GetStartDateLunar());
 }
 
-void DatePickerView::SetEndDate(const PickerDate& value)
+void DatePickerModelNG::SetEndDate(const PickerDate& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -178,7 +174,7 @@ void DatePickerView::SetEndDate(const PickerDate& value)
     ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, EndDate, datePickerPattern->GetEndDateLunar());
 }
 
-void DatePickerView::SetSelectedDate(const PickerDate& value)
+void DatePickerModelNG::SetSelectedDate(const PickerDate& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -188,7 +184,7 @@ void DatePickerView::SetSelectedDate(const PickerDate& value)
     ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, SelectedDate, datePickerPattern->GetSelectDate());
 }
 
-void DatePickerView::SetOnChange(DateChangeEvent&& onChange)
+void DatePickerModelNG::SetOnChange(DateChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

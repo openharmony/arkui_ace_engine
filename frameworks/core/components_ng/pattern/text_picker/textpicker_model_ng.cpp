@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/text_picker/textpicker_view.h"
+#include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
 
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
@@ -34,7 +34,7 @@ namespace {
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 } // namespace
 
-void TextPickerView::Create()
+void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -43,11 +43,7 @@ void TextPickerView::Create()
     auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
 
-    auto context = textPickerNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-
     uint32_t showCount = pickerTheme->GetShowOptionCount();
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
         SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
@@ -76,21 +72,21 @@ void TextPickerView::Create()
     stack->Push(textPickerNode);
 }
 
-RefPtr<FrameNode> TextPickerView::CreateStackNode()
+RefPtr<FrameNode> TextPickerModelNG::CreateStackNode()
 {
     auto stackId = ElementRegister::GetInstance()->MakeUniqueId();
     return FrameNode::GetOrCreateFrameNode(
         V2::STACK_ETS_TAG, stackId, []() { return AceType::MakeRefPtr<StackPattern>(); });
 }
 
-RefPtr<FrameNode> TextPickerView::CreateButtonNode()
+RefPtr<FrameNode> TextPickerModelNG::CreateButtonNode()
 {
     auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
     return FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
 }
 
-void TextPickerView::SetSelected(uint32_t value)
+void TextPickerModelNG::SetSelected(uint32_t value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -99,7 +95,7 @@ void TextPickerView::SetSelected(uint32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Selected, value);
 }
 
-void TextPickerView::SetRange(const std::vector<std::string>& value)
+void TextPickerModelNG::SetRange(const std::vector<std::string>& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -108,12 +104,12 @@ void TextPickerView::SetRange(const std::vector<std::string>& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Range, value);
 }
 
-void TextPickerView::SetDefaultPickerItemHeight(const Dimension& value)
+void TextPickerModelNG::SetDefaultPickerItemHeight(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultPickerItemHeight, value);
 }
 
-void TextPickerView::SetOnChange(TextChangeEvent&& onChange)
+void TextPickerModelNG::SetOnChange(TextChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -121,5 +117,4 @@ void TextPickerView::SetOnChange(TextChangeEvent&& onChange)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
-
 } // namespace OHOS::Ace::NG

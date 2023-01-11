@@ -25,7 +25,6 @@
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
-#include "core/components_ng/pattern/picker/datepicker_view.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
