@@ -44,6 +44,7 @@ namespace {
 // TODO use theme.
 constexpr Dimension MIN_TURN_PAGE_VELOCITY = 10.0_vp;
 constexpr Dimension MIN_DRAG_DISTANCE = 25.0_vp;
+constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
 
 // TODO define as common method
 float CalculateFriction(float gamma)
@@ -407,6 +408,12 @@ void SwiperPattern::InitSwiperIndicator()
     if (swiperParameters_.selectedColorVal.has_value()) {
         paintProperty->UpdateSelectedColor(swiperParameters_.selectedColorVal.value());
     }
+
+    auto renderContext = indicatorNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    BorderRadiusProperty radius;
+    radius.SetRadius(INDICATOR_BORDER_RADIUS);
+    renderContext->UpdateBorderRadius(radius);
 
     indicatorNode->MarkModifyDone();
     indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
