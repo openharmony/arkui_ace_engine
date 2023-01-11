@@ -46,6 +46,7 @@ ShapeAbstractModel* ShapeAbstractModel::GetInstance()
 namespace OHOS::Ace::Framework {
 namespace {
 constexpr double DEFAULT_OPACITY = 1.0;
+constexpr double MIN_OPACITY = 0.0;
 } // namespace
 
 void JSShapeAbstract::SetStrokeDashArray(const JSCallbackInfo& info)
@@ -152,6 +153,12 @@ void JSShapeAbstract::SetStrokeOpacity(const JSCallbackInfo& info)
     }
     double strokeOpacity = DEFAULT_OPACITY;
     ParseJsDouble(info[0], strokeOpacity);
+    if (GreatOrEqual(strokeOpacity, 1.0)) {
+        strokeOpacity = DEFAULT_OPACITY;
+    }
+    if (LessOrEqual(strokeOpacity, 0.0)) {
+        strokeOpacity = MIN_OPACITY;
+    }
     ShapeAbstractModel::GetInstance()->SetStrokeOpacity(strokeOpacity);
 }
 
