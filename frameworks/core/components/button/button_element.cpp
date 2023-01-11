@@ -119,10 +119,10 @@ void ButtonElement::OnClick()
     button_->HandleKeyEnterEvent();
 }
 
-void ButtonElement::OnClick(const KeyEvent& event)
+bool ButtonElement::OnClick(const KeyEvent& event)
 {
     if (!button_) {
-        return;
+        return false;
     }
     ClickInfo info(-1);
     info.SetTimeStamp(event.timeStamp);
@@ -133,7 +133,7 @@ void ButtonElement::OnClick(const KeyEvent& event)
     info.SetSourceDevice(event.sourceType);
     info.SetDeviceId(event.deviceId);
     button_->HandleClickEvent(info);
-    button_->HandleKeyEnterEvent(info);
+    return button_->HandleKeyEnterEvent(info);
 }
 
 void ButtonElement::OnBlur()
