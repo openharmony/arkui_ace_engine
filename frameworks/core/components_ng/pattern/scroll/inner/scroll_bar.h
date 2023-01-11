@@ -310,6 +310,9 @@ public:
     }
 
     void SetGestureEvent();
+    void FlushBarWidth();
+    void PlayGrowAnimation();
+    void PlayShrinkAnimation();
 
 protected:
     void InitTheme();
@@ -352,7 +355,12 @@ private:
     bool isPressed_ = false;
     bool isDriving_ = false; // false: scroll driving; true: bar driving
 
+    Offset paintOffset_;
+    Size viewPortSize_;
+    Offset lastOffset_;
+    double estimatedHeight_ = 0.0;
     RefPtr<TouchEventImpl> touchEvent_;
+    RefPtr<Animator> touchAnimator_;
     std::function<void()> markNeedRenderFunc_;
 };
 
