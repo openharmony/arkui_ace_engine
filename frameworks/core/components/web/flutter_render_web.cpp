@@ -45,7 +45,7 @@ void FlutterRenderWeb::OnPaintFinish()
         NearEqual(preDrawSize_.Width(), drawSize_.Width()) &&
         NearEqual(preDrawSize_.Height(), drawSize_.Height())) {
     } else {
-        delegate_->SetBoundsOrRezise(drawSize_, position_);
+        delegate_->SetBoundsOrResize(drawSize_, position_);
     }
     LOGI("FlutterRenderWeb::OnPaintFinish");
 }
@@ -85,7 +85,7 @@ void FlutterRenderWeb::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     if (delegate_) {
-        delegate_->SetBoundsOrRezise(drawSize_, GetGlobalOffset());
+        delegate_->SetBoundsOrResize(drawSize_, GetGlobalOffset());
     }
     RenderNode::Paint(context, offset);
 }

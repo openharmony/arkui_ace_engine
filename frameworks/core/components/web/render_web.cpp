@@ -158,7 +158,7 @@ bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double key
         if (!isFocus_) {
             if (isVirtualKeyBoardShow_ == VkState::VK_SHOW) {
                 drawSize_.SetSize(drawSizeCache_);
-                delegate_->SetBoundsOrRezise(drawSize_, GetGlobalOffset());
+                delegate_->SetBoundsOrResize(drawSize_, GetGlobalOffset());
                 SyncGeometryProperties();
                 SetRootView(width, height, 0);
                 isVirtualKeyBoardShow_ = VkState::VK_HIDE;
@@ -167,7 +167,7 @@ bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double key
         }
         if (NearZero(keyboard)) {
             drawSize_.SetSize(drawSizeCache_);
-            delegate_->SetBoundsOrRezise(drawSize_, GetGlobalOffset());
+            delegate_->SetBoundsOrResize(drawSize_, GetGlobalOffset());
             SyncGeometryProperties();
             SetRootView(width, height, 0);
             isVirtualKeyBoardShow_ = VkState::VK_HIDE;
@@ -179,7 +179,7 @@ bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double key
                 return true;
             }
             drawSize_.SetHeight(height - keyboard - GetCoordinatePoint().GetY());
-            delegate_->SetBoundsOrRezise(drawSize_, GetGlobalOffset());
+            delegate_->SetBoundsOrResize(drawSize_, GetGlobalOffset());
             SyncGeometryProperties();
             SetRootView(width, height, DEFAULT_NUMS_ONE);
             isVirtualKeyBoardShow_ = VkState::VK_SHOW;
@@ -361,22 +361,13 @@ void RenderWeb::OnSizeChanged()
         return;
     }
     UpdateGlobalPos();
-    if (delegate_) {
-        if (isEnhanceSurface_ && !isCreateWebView_) {
-            isCreateWebView_ = true;
-            delegate_->SetDrawSize(drawSize_);
-            delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
-            delegate_->InitOHOSWeb(context_);
+    if (delegate_ && !isUrlLoaded_) {
+        delegate_->SetBoundsOrResize(drawSize_, GetGlobalOffset());
+        if (!delegate_->LoadDataWithRichText()) {
+            LOGI("RenderWeb::Paint start LoadUrl");
+            delegate_->LoadUrl();
         }
-
-        if (!isUrlLoaded_) {
-            delegate_->SetBoundsOrRezise(drawSize_, GetGlobalOffset());
-            if (!delegate_->LoadDataWithRichText()) {
-                LOGI("RenderWeb::Paint start LoadUrl");
-                delegate_->LoadUrl();
-            }
-            isUrlLoaded_ = true;
-        }
+        isUrlLoaded_ = true;
     }
 }
 
