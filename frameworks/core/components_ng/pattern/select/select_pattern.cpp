@@ -22,6 +22,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/button/button_view.h"
@@ -38,7 +39,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/gestures/gesture_info.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -205,9 +206,9 @@ void SelectPattern::AddOptionNode(const RefPtr<FrameNode>& option)
 void SelectPattern::BuildChild()
 {
     // get theme from SelectThemeManager
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = DynamicCast<PipelineBase>(pipeline)->GetTheme<SelectTheme>();
+    auto theme = pipeline->GetTheme<SelectTheme>();
 
     auto row = FrameNode::CreateFrameNode(
         V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(false));
@@ -222,32 +223,15 @@ void SelectPattern::BuildChild()
     CHECK_NULL_VOID(text_);
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProps);
-    textProps->UpdateTextDecoration(theme->GetTextDecoration());
-    textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    textProps->UpdateMaxLines(SELECT_ITSELF_TEXT_LINES);
+    InitTextProps(textProps, theme);
 
-    ImageSourceInfo imageSourceInfo;
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto iconTheme = themeManager->GetTheme<IconTheme>();
-    CHECK_NULL_VOID(iconTheme);
-    auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SPINNER);
-    imageSourceInfo.SetSrc(iconPath);
     auto spinner = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ImagePattern>());
     CHECK_NULL_VOID(spinner);
-    auto spinnerLayoutProperty = spinner->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(spinnerLayoutProperty);
-    spinnerLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    auto spinnerRenderProperty = spinner->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(spinnerRenderProperty);
-    auto spinnerColor = theme->GetFontColor();
-    spinnerRenderProperty->UpdateSvgFillColor(spinnerColor);
-    CalcSize idealSize = { CalcLength(SPINNER_WIDTH), CalcLength(SPINNER_HEIGHT) };
-    MeasureProperty layoutConstraint;
-    layoutConstraint.selfIdealSize = idealSize;
-    layoutConstraint.maxSize = idealSize;
-    spinner->UpdateLayoutConstraint(layoutConstraint);
+    auto iconTheme = pipeline->GetTheme<IconTheme>();
+    CHECK_NULL_VOID(iconTheme);
+    InitSpinner(spinner, iconTheme, theme);
+
     // mount triangle and text
     text_->MountToParent(row);
     spinner->MountToParent(row);
@@ -474,12 +458,29 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
         lastSelected->SetFontWeight(newSelected->GetFontWeight());
 
         lastSelected->SetBgColor(newSelected->GetBgColor());
+        lastSelected->UpdateNextNodeDivider(true);
+        if (selected_ != 0) {
+            auto lastSelectedNode = lastSelected->GetHost();
+            CHECK_NULL_VOID(lastSelectedNode);
+            auto lastSelectedPros = lastSelectedNode->GetPaintProperty<OptionPaintProperty>();
+            CHECK_NULL_VOID(lastSelectedPros);
+            lastSelectedPros->UpdateNeedDivider(true);
+        }
         options_[selected_]->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
 
     // set newSelected props
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
     if (selectedFont_.FontColor.has_value()) {
         newSelected->SetFontColor(selectedFont_.FontColor.value());
+    } else {
+        auto selectedColorText = theme->GetSelectedColorText();
+        newSelected->SetFontColor(selectedColorText);
     }
     if (selectedFont_.FontFamily.has_value()) {
         newSelected->SetFontFamily(selectedFont_.FontFamily.value());
@@ -496,15 +497,17 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
     if (selectedBgColor_.has_value()) {
         newSelected->SetBgColor(selectedBgColor_.value());
     } else {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto pipeline = host->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<SelectTheme>();
-        CHECK_NULL_VOID(theme);
         auto selectedColor = theme->GetSelectedColor();
         newSelected->SetBgColor(selectedColor);
     }
+    newSelected->UpdateNextNodeDivider(false);
+    auto newSelectedNode = newSelected->GetHost();
+    CHECK_NULL_VOID(newSelectedNode);
+    auto newSelectedPros = newSelectedNode->GetPaintProperty<OptionPaintProperty>();
+    CHECK_NULL_VOID(newSelectedPros);
+    newSelectedPros->UpdateNeedDivider(false);
+
+    menu_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SelectPattern::UpdateText(int32_t index)
@@ -521,6 +524,41 @@ void SelectPattern::UpdateText(int32_t index)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps, const RefPtr<SelectTheme>& theme)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textTheme = pipeline->GetTheme<TextFieldTheme>();
+    textProps->UpdateFontSize(textTheme->GetFontSize());
+    textProps->UpdateTextDecoration(theme->GetTextDecoration());
+    textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textProps->UpdateMaxLines(SELECT_ITSELF_TEXT_LINES);
+}
+
+void SelectPattern::InitSpinner(
+    const RefPtr<FrameNode>& spinner, const RefPtr<IconTheme>& iconTheme, const RefPtr<SelectTheme>& selectTheme)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ImageSourceInfo imageSourceInfo;
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SPINNER);
+    imageSourceInfo.SetSrc(iconPath);
+
+    auto spinnerLayoutProperty = spinner->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(spinnerLayoutProperty);
+    spinnerLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    CalcSize idealSize = { CalcLength(SPINNER_WIDTH), CalcLength(SPINNER_HEIGHT) };
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    spinnerLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
+
+    auto spinnerRenderProperty = spinner->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(spinnerRenderProperty);
+    auto spinnerColor = selectTheme->GetFontColor();
+    spinnerRenderProperty->UpdateSvgFillColor(spinnerColor);
 }
 
 // XTS inspector code

@@ -14,8 +14,11 @@
  */
 #include "core/components_ng/pattern/option/option_view.h"
 
+#include "base/geometry/dimension.h"
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
@@ -60,6 +63,13 @@ RefPtr<FrameNode> CreateText(const std::string& value, const RefPtr<FrameNode>& 
 
     auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProperty, nullptr);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+
+    textProperty->UpdateFontSize(theme->GetFontSize());
     textProperty->UpdateContent(value);
     textNode->MountToParent(parent);
     textNode->MarkModifyDone();
