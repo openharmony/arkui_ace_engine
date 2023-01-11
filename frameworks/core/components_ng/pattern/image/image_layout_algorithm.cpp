@@ -26,19 +26,23 @@ namespace OHOS::Ace::NG {
 namespace {
 // returns maximum size of image component
 // if maxSize is infinite, match screen size and retain aspectRatio
-SizeF GetLayoutMaxSize(const RefPtr<LayoutProperty>& props, float aspectRatio)
+SizeF GetMaxSize(const SizeF& maxSize, float aspectRatio)
 {
     if (NearZero(aspectRatio)) {
         return SizeF(0.0, 0.0);
     }
-    SizeF maxSize = props->GetLayoutConstraint()->maxSize;
     // infinite size not allowed
-    if (GreaterOrEqualToInfinity(maxSize.Width())) {
-        maxSize.SetHeight(PipelineContext::GetCurrentRootHeight());
-        maxSize.SetWidth(maxSize.Height() * aspectRatio);
-    } else if (GreaterOrEqualToInfinity(maxSize.Height())) {
-        maxSize.SetWidth(PipelineContext::GetCurrentRootWidth());
-        maxSize.SetHeight(maxSize.Width() / aspectRatio);
+    bool infWidth = GreaterOrEqualToInfinity(maxSize.Width());
+    bool infHeight = GreaterOrEqualToInfinity(maxSize.Height());
+    if (infWidth && infHeight) {
+        auto width = PipelineContext::GetCurrentRootWidth();
+        return SizeF(width, width / aspectRatio);
+    }
+    if (infWidth) {
+        return SizeF(maxSize.Height() * aspectRatio, maxSize.Height());
+    }
+    if (infHeight) {
+        return SizeF(maxSize.Width(), maxSize.Width() / aspectRatio);
     }
     return maxSize;
 }
@@ -75,7 +79,7 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
         bool fitOriginalSize = props->GetFitOriginalSize().value_or(false);
         if (contentConstraint.selfIdealSize.IsNull()) {
             if (!fitOriginalSize) {
-                size.SetSizeT(GetLayoutMaxSize(props, aspectRatio));
+                size.SetSizeT(GetMaxSize(contentConstraint.maxSize, aspectRatio));
             }
             break;
         }
