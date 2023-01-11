@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,10 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t BAR_EXPAND_DURATION = 150; // 150ms, scroll bar width expands from 4dp to 8dp
+constexpr int32_t BAR_SHRINK_DURATION = 250; // 250ms, scroll bar width shrinks from 8dp to 4dp
+} // namespace
 
 ScrollBar::ScrollBar()
 {
@@ -60,10 +64,24 @@ bool ScrollBar::InBarRegion(const Point& point) const
     return false;
 }
 
+void ScrollBar::FlushBarWidth()
+{
+    SetBarRegion(paintOffset_, viewPortSize_);
+    if (shapeMode_ == ShapeMode::RECT) {
+        SetRectTrickRegion(paintOffset_, viewPortSize_, lastOffset_, estimatedHeight_);
+    } else {
+        SetRoundTrickRegion(paintOffset_, viewPortSize_, lastOffset_, estimatedHeight_);
+    }
+}
+
 void ScrollBar::UpdateScrollBarRegion(
     const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight)
 {
     if (!NearZero(estimatedHeight)) {
+        paintOffset_ = offset;
+        viewPortSize_ = size;
+        lastOffset_ = lastOffset;
+        estimatedHeight_ = estimatedHeight;
         SetBarRegion(offset, size);
         if (shapeMode_ == ShapeMode::RECT) {
             SetRectTrickRegion(offset, size, lastOffset, estimatedHeight);
@@ -203,13 +221,68 @@ void ScrollBar::SetGestureEvent()
                 bool inRegion = scrollBar->InBarRegion(point);
                 scrollBar->SetPressed(inRegion);
                 scrollBar->SetDriving(inRegion);
+                if (inRegion) {
+                    scrollBar->PlayGrowAnimation();
+                }
                 scrollBar->MarkNeedRender();
             }
             if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+                if (scrollBar->IsPressed()) {
+                    scrollBar->PlayShrinkAnimation();
+                }
                 scrollBar->SetPressed(false);
                 scrollBar->MarkNeedRender();
             }
         });
     }
+    if (!touchAnimator_) {
+        touchAnimator_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    }
+}
+
+void ScrollBar::PlayGrowAnimation()
+{
+    if (!touchAnimator_->IsStopped()) {
+        touchAnimator_->Stop();
+    }
+    touchAnimator_->ClearInterpolators();
+    auto activeWidth = activeWidth_.ConvertToPx();
+    auto inactiveWidth = inactiveWidth_.ConvertToPx();
+
+    auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(inactiveWidth, activeWidth, Curves::SHARP);
+    animation->AddListener([weakBar = AceType::WeakClaim(this)](double value) {
+        auto scrollBar = weakBar.Upgrade();
+        if (scrollBar) {
+            scrollBar->normalWidth_ = Dimension(value, DimensionUnit::PX);
+            scrollBar->FlushBarWidth();
+            scrollBar->MarkNeedRender();
+        }
+    });
+    touchAnimator_->AddInterpolator(animation);
+    touchAnimator_->SetDuration(BAR_EXPAND_DURATION);
+    touchAnimator_->Play();
+}
+
+void ScrollBar::PlayShrinkAnimation()
+{
+    if (!touchAnimator_->IsStopped()) {
+        touchAnimator_->Stop();
+    }
+    touchAnimator_->ClearInterpolators();
+    auto activeWidth = activeWidth_.ConvertToPx();
+    auto inactiveWidth = inactiveWidth_.ConvertToPx();
+
+    auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(activeWidth, inactiveWidth, Curves::SHARP);
+    animation->AddListener([weakBar = AceType::WeakClaim(this)](double value) {
+        auto scrollBar = weakBar.Upgrade();
+        if (scrollBar) {
+            scrollBar->normalWidth_ = Dimension(value, DimensionUnit::PX);
+            scrollBar->FlushBarWidth();
+            scrollBar->MarkNeedRender();
+        }
+    });
+    touchAnimator_->AddInterpolator(animation);
+    touchAnimator_->SetDuration(BAR_SHRINK_DURATION);
+    touchAnimator_->Play();
 }
 } // namespace OHOS::Ace::NG
