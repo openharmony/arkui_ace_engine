@@ -26,7 +26,7 @@ class HostWindowPattern : public Pattern {
     DECLARE_ACE_TYPE(HostWindowPattern, Pattern);
 
 public:
-    HostWindowPattern(const std::shared_ptr<Rosen::Session>& session) : session_(session) {}
+    HostWindowPattern(const sptr<Rosen::Session>& session) : session_(session) {}
     ~HostWindowPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -45,7 +45,7 @@ protected:
     RefPtr<FrameNode> startingNode_;
     RefPtr<FrameNode> contentNode_;
 
-    std::shared_ptr<Rosen::Session> session_;
+    sptr<Rosen::Session> session_;
 
 private:
     bool initialized_ = false;

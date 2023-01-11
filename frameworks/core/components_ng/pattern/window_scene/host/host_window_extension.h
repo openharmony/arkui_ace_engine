@@ -24,7 +24,7 @@ class HostWindowExtension : public HostWindowPattern {
     DECLARE_ACE_TYPE(HostWindowExtension, HostWindowPattern);
 
 public:
-    HostWindowExtension(const std::shared_ptr<Rosen::Session>& session) : HostWindowPattern(session) {}
+    HostWindowExtension(const sptr<Rosen::Session>& session) : HostWindowPattern(session) {}
     ~HostWindowExtension() override = default;
 
 protected:

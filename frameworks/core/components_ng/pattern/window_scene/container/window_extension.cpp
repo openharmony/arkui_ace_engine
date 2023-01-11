@@ -22,7 +22,7 @@ WindowExtension::WindowExtension(
     const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode */)
     : WindowPattern(nullptr)
 {
-    // sessionStage_ = std::make_shared<Rosen::ExtensionSessionStage>(iExtensionSession);
+    // sessionStage_ = new Rosen::ExtensionSessionStage(iExtensionSession);
 }
 
 } // namespace OHOS::Ace::NG

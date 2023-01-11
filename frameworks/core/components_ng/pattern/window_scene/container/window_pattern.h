@@ -142,7 +142,7 @@ protected:
     std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode_;
 
     // for lifecycle
-    std::shared_ptr<Rosen::SessionStage> sessionStage_;
+    sptr<Rosen::SessionStage> sessionStage_;
 
     // window properties
     std::string windowName_ = "example";

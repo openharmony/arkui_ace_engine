@@ -154,7 +154,7 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
     return WantWrap::CreateWantWrap(reinterpret_cast<void*>(nativeEngine), reinterpret_cast<void*>(nativeValue));
 }
 
-std::shared_ptr<Rosen::Session> CreateSceneSessionFromNapiValue(JSRef<JSVal> obj)
+sptr<Rosen::Session> CreateSceneSessionFromNapiValue(JSRef<JSVal> obj)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!obj->IsObject()) {
@@ -192,8 +192,7 @@ std::shared_ptr<Rosen::Session> CreateSceneSessionFromNapiValue(JSRef<JSVal> obj
         LOGE("Failed to find scene session From JS Object");
         return nullptr;
     }
-    auto sceneSession = jsSceneSession->GetNativeSession().GetRefPtr();
-    return std::shared_ptr<Rosen::Session>(sceneSession);
+    return jsSceneSession->GetNativeSession();
 #else
     return nullptr;
 #endif

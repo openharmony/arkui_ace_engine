@@ -22,7 +22,7 @@ WindowScene::WindowScene(
     const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
     : WindowPattern(surfaceNode)
 {
-    sessionStage_ = std::make_shared<Rosen::SceneSessionStage>(iSceneSession);
+    sessionStage_ = new Rosen::SceneSessionStage(iSceneSession);
 }
 
 } // namespace OHOS::Ace::NG

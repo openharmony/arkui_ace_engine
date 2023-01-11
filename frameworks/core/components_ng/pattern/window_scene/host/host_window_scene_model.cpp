@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG {
 
-void HostWindowSceneModel::Create(const std::shared_ptr<Rosen::Session>& session)
+void HostWindowSceneModel::Create(const sptr<Rosen::Session>& session)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();

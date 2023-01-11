@@ -22,7 +22,7 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT HostWindowSceneModel {
 public:
-    static void Create(const std::shared_ptr<Rosen::Session>& session);
+    static void Create(const sptr<Rosen::Session>& session);
 };
 
 } // namespace OHOS::Ace::NG
