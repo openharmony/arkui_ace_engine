@@ -482,16 +482,29 @@ void IndexerPattern::SetPositionOfPopupNode(RefPtr<FrameNode>& customNode)
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto indexerItemSize = Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP).ConvertToPx();
+    auto indexerItemSize = Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP);
+    auto itemSize = layoutProperty->GetItemSize().value_or(indexerItemSize);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto indexerWidth = itemSize.ConvertToPx() + padding.left.value_or(0) + padding.right.value_or(0);
+    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
+    if (layoutConstraint.has_value() && layoutConstraint->selfIdealSize.Width().has_value() &&
+        (layoutConstraint->selfIdealSize.Width().value() > indexerWidth)) {
+        indexerWidth = layoutConstraint->selfIdealSize.Width().value();
+    }
     auto alignMent = layoutProperty->GetAlignStyle().value_or(NG::AlignStyle::RIGHT);
-    auto userDefinePositionX = layoutProperty->GetPopupPositionX().value_or(
-        alignMent == NG::AlignStyle::LEFT ? NG::BUBBLE_POSITION_X : -1 * NG::BUBBLE_POSITION_X);
+    auto userDefinePositionX = layoutProperty->GetPopupPositionX().value_or(NG::BUBBLE_POSITION_X);
     auto userDefinePositionY = layoutProperty->GetPopupPositionY().value_or(NG::BUBBLE_POSITION_Y);
-    auto zeroPositionX = host->GetOffsetRelativeToWindow().GetX() + indexerItemSize / 2;
+    auto zeroPositionX = host->GetOffsetRelativeToWindow().GetX() + indexerWidth / 2;
     auto zeroPosiitonY = host->GetOffsetRelativeToWindow().GetY();
     auto renderContext = customNode->GetRenderContext();
-    renderContext->UpdatePosition(OffsetT<Dimension>(
-        Dimension(zeroPositionX + userDefinePositionX), Dimension(zeroPosiitonY + userDefinePositionY)));
+    if (alignMent == NG::AlignStyle::LEFT) {
+        renderContext->UpdatePosition(OffsetT<Dimension>(
+            Dimension(zeroPositionX + userDefinePositionX), Dimension(zeroPosiitonY + userDefinePositionY)));
+    } else {
+        auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
+        renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(zeroPositionX - bubbleSize - userDefinePositionX),
+            Dimension(zeroPosiitonY + userDefinePositionY)));
+    }
 }
 
 RefPtr<FrameNode> IndexerPattern::InitBubbleView()
