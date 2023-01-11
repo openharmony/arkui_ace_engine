@@ -27,11 +27,11 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(listLayoutProperty_);
     auto layoutProperty = AceType::DynamicCast<ListItemGroupLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
+    axis_ = listLayoutProperty_->GetListDirection().value_or(Axis::VERTICAL);
     auto contentConstraint = layoutProperty->GetContentLayoutConstraint().value();
     auto contentIdealSize = CreateIdealSize(
         contentConstraint, axis_, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS));
 
-    axis_ = listLayoutProperty_->GetListDirection().value_or(Axis::VERTICAL);
     auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis_);
     auto space = layoutProperty->GetSpace().value_or(Dimension(0));
 
@@ -70,12 +70,11 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         totalMainSize_ = std::max(totalMainSize_, GetEndPosition() + footerMainSize_);
     }
 
-    if (axis_ == Axis::HORIZONTAL) {
-        contentIdealSize.SetWidth(totalMainSize_);
-    } else {
-        contentIdealSize.SetHeight(totalMainSize_);
+    auto crossSize = contentIdealSize.CrossSize(axis_);
+    if (crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) {
+        contentIdealSize.SetCrossSize(GetChildMaxCrossSize(layoutWrapper, axis_), axis_);
     }
-
+    contentIdealSize.SetMainSize(totalMainSize_, axis_);
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     AddPaddingToSize(padding, contentIdealSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(contentIdealSize.ConvertToSizeT());
@@ -121,6 +120,23 @@ void ListItemGroupLayoutAlgorithm::UpdateListItemConstraint(const OptionalSizeF&
             contentConstraint.minSize.SetCrossSize(minLaneLength_.value(), axis_);
         }
     }
+}
+
+float ListItemGroupLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis)
+{
+    float maxCrossSize = 0.0f;
+    for (const auto& pos : itemPosition_) {
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first, false);
+        if (!wrapper) {
+            continue;
+        }
+        auto getGeometryNode = wrapper->GetGeometryNode();
+        if (!getGeometryNode) {
+            continue;
+        }
+        maxCrossSize = std::max(maxCrossSize, getGeometryNode->GetMarginFrameSize().CrossSize(axis));
+    }
+    return maxCrossSize;
 }
 
 void ListItemGroupLayoutAlgorithm::UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty)

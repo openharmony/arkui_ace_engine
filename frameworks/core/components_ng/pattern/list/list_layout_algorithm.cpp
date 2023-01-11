@@ -40,20 +40,11 @@ void ListLayoutAlgorithm::UpdateListItemConstraint(
     Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint)
 {
     contentConstraint.parentIdealSize = selfIdealSize;
-    if (axis == Axis::VERTICAL) {
-        contentConstraint.maxSize.SetHeight(Infinity<float>());
-        auto width = selfIdealSize.Width();
-        if (width.has_value()) {
-            contentConstraint.maxSize.SetWidth(width.value());
-            contentConstraint.percentReference.SetWidth(width.value());
-        }
-        return;
-    }
-    contentConstraint.maxSize.SetWidth(Infinity<float>());
-    auto height = selfIdealSize.Height();
-    if (height.has_value()) {
-        contentConstraint.maxSize.SetHeight(height.value());
-        contentConstraint.percentReference.SetHeight(height.value());
+    contentConstraint.maxSize.SetMainSize(Infinity<float>(), axis);
+    auto crossSize = selfIdealSize.CrossSize(axis);
+    if (crossSize.has_value()) {
+        contentConstraint.maxSize.SetCrossSize(crossSize.value(), axis);
+        contentConstraint.percentReference.SetCrossSize(crossSize.value(), axis);
     }
 }
 
@@ -119,11 +110,11 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         LOGI("child size is empty");
     }
 
-    if (axis == Axis::HORIZONTAL) {
-        contentIdealSize.SetWidth(contentMainSize_);
-    } else {
-        contentIdealSize.SetHeight(contentMainSize_);
+    auto crossSize = contentIdealSize.CrossSize(axis);
+    if (crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) {
+        contentIdealSize.SetCrossSize(GetChildMaxCrossSize(layoutWrapper, axis), axis);
     }
+    contentIdealSize.SetMainSize(contentMainSize_, axis);
     AddPaddingToSize(padding, contentIdealSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(contentIdealSize.ConvertToSizeT());
 
@@ -132,6 +123,23 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     LOGD("new start index is %{public}d, new end index is %{public}d, offset is %{public}f, mainSize is %{public}f",
         GetStartIndex(), GetEndIndex(), currentOffset_, contentMainSize_);
+}
+
+float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis)
+{
+    float maxCrossSize = 0.0f;
+    for (const auto& pos : itemPosition_) {
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first, false);
+        if (!wrapper) {
+            continue;
+        }
+        auto getGeometryNode = wrapper->GetGeometryNode();
+        if (!getGeometryNode) {
+            continue;
+        }
+        maxCrossSize = std::max(maxCrossSize, getGeometryNode->GetMarginFrameSize().CrossSize(axis));
+    }
+    return maxCrossSize;
 }
 
 void ListLayoutAlgorithm::CalculateEstimateOffset()
