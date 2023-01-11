@@ -465,6 +465,7 @@ void OverlayManager::FocusDialog(const RefPtr<FrameNode>& dialogNode)
     CHECK_NULL_VOID(dialogNode);
     auto focusHub = dialogNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocusImmediately();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto stageManager = pipelineContext->GetStageManager();
@@ -473,7 +474,7 @@ void OverlayManager::FocusDialog(const RefPtr<FrameNode>& dialogNode)
     CHECK_NULL_VOID(pageNode);
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);
-    focusHub->RequestFocusImmediately();
+    pageFocusHub->LostFocus();
 }
 
 void OverlayManager::BlurDialog()
