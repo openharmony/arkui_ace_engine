@@ -189,6 +189,21 @@ if (is_standard_system) {
     deps += [ "//third_party/curl:curl_shared" ]
     sources += [ curl_path + "/thirdparty/curl/libcurl_shared${dylib_suffix}" ]
 
+    # Add dynamic library "libnghttp2_shared"
+    nghttp2_path = get_label_info("//third_party/nghttp2/lib:libnghttp2_shared",
+                                  "root_out_dir")
+    deps += [ "//third_party/nghttp2/lib:libnghttp2_shared" ]
+    sources +=
+        [ nghttp2_path +
+          "/thirdparty/thirdparty_nghttp2/libnghttp2_shared${dylib_suffix}" ]
+
+    # Add dynamic library "libssl_shared"
+    openssl_path =
+        get_label_info("//third_party/openssl:libssl_shared", "root_out_dir")
+    deps += [ "//third_party/openssl:libssl_shared" ]
+    sources += [ openssl_path +
+                 "/developtools/profiler/libssl_openssl${dylib_suffix}" ]
+
     if (use_mac || use_mingw_win) {
       # add kvfdb
       out_path = get_label_info(
