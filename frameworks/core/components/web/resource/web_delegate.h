@@ -507,7 +507,7 @@ public:
     EGLConfig GLGetConfig(int version, EGLDisplay eglDisplay);
     void GLContextInit(void* window);
     sptr<OHOS::SurfaceDelegate> GetSurfaceDelegateClient();
-    void SetBoundsOrRezise(const Size& drawSize, const Offset& offset);
+    void SetBoundsOrResize(const Size& drawSize, const Offset& offset);
     Offset GetWebRenderGlobalPos();
     bool InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context);
 #if defined(ENABLE_ROSEN_BACKEND)

@@ -66,9 +66,12 @@ void RosenRenderWeb::OnAttachContext()
         if (!isEnhanceSurface_) {
             auto surface = GetSurface();
             delegate_->SetSurface(surface);
-            delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
-            delegate_->InitOHOSWeb(context_);
+        } else {
+            drawSize_ = Size(1, 1);
+            delegate_->SetDrawSize(drawSize_);
         }
+        delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
+        delegate_->InitOHOSWeb(context_);
     }
 }
 
@@ -92,7 +95,7 @@ void RosenRenderWeb::Paint(RenderContext& context, const Offset& offset)
     }
     if (delegate_) {
         LOGI("Web paint drawSize width = %{public}f, height = %{public}f", drawSize_.Width(), drawSize_.Height());
-        delegate_->SetBoundsOrRezise(drawSize_, GetGlobalOffset());
+        delegate_->SetBoundsOrResize(drawSize_, GetGlobalOffset());
         if (!isUrlLoaded_) {
             if (!delegate_->LoadDataWithRichText()) {
                 delegate_->LoadUrl();
