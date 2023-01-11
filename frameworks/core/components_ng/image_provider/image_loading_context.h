@@ -93,8 +93,6 @@ private:
     void OnLoadSuccess();
     void OnLoadFail();
 
-    void CacheImageObject();
-
     const ImageSourceInfo src_;
     RefPtr<ImageStateManager> stateManager_;
     RefPtr<ImageObject> imageObj_;

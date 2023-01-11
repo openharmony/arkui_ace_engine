@@ -33,6 +33,20 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+
+void CacheImageObject(const RefPtr<ImageObject>& obj)
+{
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineCtx);
+    auto cache = pipelineCtx->GetImageCache();
+    CHECK_NULL_VOID(cache);
+    if (cache && obj->IsSupportCache()) {
+        cache->CacheImgObjNG(obj->GetSourceInfo().GetKey(), obj);
+    }
+}
+} // namespace
+
 std::mutex ImageProvider::taskMtx_;
 std::unordered_map<std::string, ImageProvider::Task> ImageProvider::tasks_;
 
@@ -193,7 +207,7 @@ void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, cons
 
 void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
 {
-    ACE_FUNCTION_TRACE();
+    ACE_SCOPED_TRACE("CreateImageObj %s", src.ToString().c_str());
     // step1: load image data
     auto imageLoader = ImageLoader::CreateImageLoader(src);
     if (!imageLoader) {
@@ -218,6 +232,7 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     if (!imageObj) {
         FailCallback(src.GetKey(), "Fail to build image object", sync);
     }
+    CacheImageObject(imageObj);
 
     auto ctxs = EndTask(src.GetKey());
     // callback to LoadingContext
@@ -278,13 +293,15 @@ void ImageProvider::CancelTask(const std::string& key, const WeakPtr<ImageLoadin
     CHECK_NULL_VOID(it->second.ctxs_.find(ctx) != it->second.ctxs_.end());
     // only one LoadingContext waiting for this task, can just cancel
     if (it->second.ctxs_.size() == 1) {
-        bool res = it->second.bgTask_.Cancel();
-        LOGD("cancel bgTask %s, result: %d", key.c_str(), res);
-        tasks_.erase(it);
-    } else {
-        // other LoadingContext still waiting for this task, remove ctx from set
-        it->second.ctxs_.erase(ctx);
+        bool canceled = it->second.bgTask_.Cancel();
+        LOGD("cancel bgTask %s, result: %d", key.c_str(), canceled);
+        if (canceled) {
+            tasks_.erase(it);
+            return;
+        }
     }
+    // other LoadingContext still waiting for this task, remove ctx from set
+    it->second.ctxs_.erase(ctx);
 }
 
 void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<ImageLoadingContext>& ctx, bool sync)

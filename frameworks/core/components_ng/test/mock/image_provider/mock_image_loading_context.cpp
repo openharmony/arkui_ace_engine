@@ -151,7 +151,6 @@ const std::optional<Color>& ImageLoadingContext::GetSvgFillColor() const
     return src_.GetFillColor();
 }
 
-void ImageLoadingContext::CacheImageObject() {}
 void ImageLoadingContext::ResetLoading() {}
 void ImageLoadingContext::ResumeLoading() {}
 } // namespace OHOS::Ace::NG
