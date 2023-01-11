@@ -1084,6 +1084,7 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
             auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
             arkRuntime->SetPathResolveCallback(bundleName_, assetPath_);
             arkRuntime->SetBundle(isBundle_);
+            arkRuntime->SetModuleName(moduleName_);
             std::vector<uint8_t> content;
             if (!delegate->GetAssetContent("modules.abc", content)) {
                 LOGE("GetAssetContent \"%{public}s\" failed.", urlName.c_str());

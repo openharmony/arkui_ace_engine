@@ -67,9 +67,11 @@ public:
     ~StageModuleInfo() override = default;
     void ModuleInfoParse(const std::unique_ptr<JsonValue>& root);
     const std::string& GetCompileMode() const;
+    const std::string& GetModuleName() const;
 
 private:
     std::string compileMode_;
+    std::string moduleName_;
     ACE_DISALLOW_COPY_AND_MOVE(StageModuleInfo);
 };
 
