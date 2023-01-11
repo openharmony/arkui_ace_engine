@@ -724,6 +724,15 @@ void WebClientImpl::OnDesktopIconUrl(const std::string& icon_url, bool precompos
     delegate->OnTouchIconUrl(icon_url, precomposed);
 }
 
+bool WebClientImpl::OnCursorChange(const NWeb::CursorType& type, const NWeb::NWebCursorInfo& info)
+{
+    LOGI("OnCursorChange");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    return delegate->OnCursorChange(type, info);
+}
+
 void ReleaseSurfaceImpl::ReleaseSurface()
 {
     ContainerScope scope(instanceId_);

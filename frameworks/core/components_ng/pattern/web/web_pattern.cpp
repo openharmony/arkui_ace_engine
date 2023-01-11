@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/web/web_pattern.h"
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/mousestyle/mouse_style.h"
+#include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/web/resource/web_delegate.h"
@@ -26,6 +28,36 @@
 #include "frameworks/base/utils/system_properties.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
+    { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
+    { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
+    { OHOS::NWeb::CursorType::CT_IBEAM, MouseFormat::TEXT_CURSOR },
+    { OHOS::NWeb::CursorType::CT_HELP, MouseFormat::HELP },
+    { OHOS::NWeb::CursorType::CT_EASTRESIZE, MouseFormat::WEST_EAST },
+    { OHOS::NWeb::CursorType::CT_NORTHRESIZE, MouseFormat::NORTH_SOUTH },
+    { OHOS::NWeb::CursorType::CT_NORTHEASTRESIZE, MouseFormat::NORTH_EAST_SOUTH_WEST },
+    { OHOS::NWeb::CursorType::CT_NORTHWESTRESIZE, MouseFormat::NORTH_WEST_SOUTH_EAST },
+    { OHOS::NWeb::CursorType::CT_SOUTHRESIZE, MouseFormat::NORTH_SOUTH },
+    { OHOS::NWeb::CursorType::CT_SOUTHEASTRESIZE, MouseFormat::NORTH_WEST_SOUTH_EAST },
+    { OHOS::NWeb::CursorType::CT_SOUTHWESTRESIZE, MouseFormat::NORTH_EAST_SOUTH_WEST },
+    { OHOS::NWeb::CursorType::CT_WESTRESIZE, MouseFormat::WEST_EAST },
+    { OHOS::NWeb::CursorType::CT_NORTHSOUTHRESIZE, MouseFormat::NORTH_SOUTH },
+    { OHOS::NWeb::CursorType::CT_EASTWESTRESIZE, MouseFormat::WEST_EAST },
+    { OHOS::NWeb::CursorType::CT_NORTHEASTSOUTHWESTRESIZE, MouseFormat::NORTH_EAST_SOUTH_WEST },
+    { OHOS::NWeb::CursorType::CT_NORTHWESTSOUTHEASTRESIZE, MouseFormat::NORTH_WEST_SOUTH_EAST },
+    { OHOS::NWeb::CursorType::CT_COLUMNRESIZE, MouseFormat::RESIZE_LEFT_RIGHT },
+    { OHOS::NWeb::CursorType::CT_ROWRESIZE, MouseFormat::RESIZE_UP_DOWN },
+    { OHOS::NWeb::CursorType::CT_MOVE, MouseFormat::CURSOR_MOVE },
+    { OHOS::NWeb::CursorType::CT_NODROP, MouseFormat::CURSOR_FORBID },
+    { OHOS::NWeb::CursorType::CT_COPY, MouseFormat::CURSOR_COPY },
+    { OHOS::NWeb::CursorType::CT_NOTALLOWED, MouseFormat::CURSOR_FORBID },
+    { OHOS::NWeb::CursorType::CT_ZOOMIN, MouseFormat::ZOOM_IN },
+    { OHOS::NWeb::CursorType::CT_ZOOMOUT, MouseFormat::ZOOM_OUT },
+    { OHOS::NWeb::CursorType::CT_GRABBING, MouseFormat::HAND_GRABBING },
+};
+} // namespace
+
 constexpr int32_t SINGLE_CLICK_NUM = 1;
 constexpr int32_t DOUBLE_CLICK_NUM = 2;
 constexpr double DEFAULT_DBCLICK_INTERVAL = 0.5f;
@@ -1284,6 +1316,29 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
             UpdateTouchHandleForOverlay();
         }
     }
+}
+
+bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info)
+{
+    (void)info;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto windowId = pipeline->GetWindowId();
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    int32_t curPointerStyle = 0;
+    if (mouseStyle->GetPointerStyle(windowId, curPointerStyle) == -1) {
+        LOGE("OnCursorChange GetPointerStyle failed");
+        return false;
+    }
+    MouseFormat pointStyle = MouseFormat::DEFAULT;
+    int64_t idx = BinarySearchFindIndex(g_cursorTypeMap, ArraySize(g_cursorTypeMap), type);
+    if (idx >= 0) {
+        pointStyle = g_cursorTypeMap[idx].value;
+    }
+    if ((int32_t)pointStyle != curPointerStyle) {
+        mouseStyle->SetPointerStyle(windowId, pointStyle);
+    }
+    return true;
 }
 
 void WebPattern::UpdateTouchHandleForOverlay()

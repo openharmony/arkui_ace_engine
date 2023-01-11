@@ -20,6 +20,7 @@
 #include "struct_multimodal.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
@@ -33,22 +34,29 @@ bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle)
 {
     auto inputManager = MMI::InputManager::GetInstance();
     CHECK_NULL_RETURN(inputManager, false);
-    int32_t MMIPointStyle = 0;
-    switch (pointerStyle) {
-        case MouseFormat::WEST_EAST:
-            MMIPointStyle = MMI::WEST_EAST;
-            break;
-        case MouseFormat::NORTH_SOUTH:
-            MMIPointStyle = MMI::NORTH_SOUTH;
-            break;
-        case MouseFormat::HAND_POINTING:
-            MMIPointStyle = MMI::HAND_POINTING;
-            break;
-        case MouseFormat::TEXT_CURSOR:
-            MMIPointStyle = MMI::TEXT_CURSOR;
-            break;
-        default:
-            MMIPointStyle = MMI::DEFAULT;
+    static const LinearEnumMapNode<MouseFormat, int32_t> mouseFormatMap[] = {
+        { MouseFormat::DEFAULT, MMI::DEFAULT },
+        { MouseFormat::WEST_EAST, MMI::WEST_EAST },
+        { MouseFormat::NORTH_SOUTH, MMI::NORTH_SOUTH },
+        { MouseFormat::NORTH_EAST_SOUTH_WEST, MMI::NORTH_EAST_SOUTH_WEST },
+        { MouseFormat::NORTH_WEST_SOUTH_EAST, MMI::NORTH_WEST_SOUTH_EAST },
+        { MouseFormat::CROSS, MMI::CROSS },
+        { MouseFormat::CURSOR_COPY, MMI::CURSOR_COPY },
+        { MouseFormat::CURSOR_FORBID, MMI::CURSOR_FORBID },
+        { MouseFormat::HAND_GRABBING, MMI::HAND_GRABBING },
+        { MouseFormat::HAND_POINTING, MMI::HAND_POINTING },
+        { MouseFormat::HELP, MMI::HELP },
+        { MouseFormat::CURSOR_MOVE, MMI::CURSOR_MOVE },
+        { MouseFormat::RESIZE_LEFT_RIGHT, MMI::RESIZE_LEFT_RIGHT },
+        { MouseFormat::RESIZE_UP_DOWN, MMI::RESIZE_UP_DOWN },
+        { MouseFormat::TEXT_CURSOR, MMI::TEXT_CURSOR },
+        { MouseFormat::ZOOM_IN, MMI::ZOOM_IN },
+        { MouseFormat::ZOOM_OUT, MMI::ZOOM_OUT },
+    };
+    int32_t MMIPointStyle = MMI::DEFAULT;
+    int64_t idx = BinarySearchFindIndex(mouseFormatMap, ArraySize(mouseFormatMap), pointerStyle);
+    if (idx >= 0) {
+        MMIPointStyle = mouseFormatMap[idx].value;
     }
     MMI::PointerStyle style;
     style.id = MMIPointStyle;
