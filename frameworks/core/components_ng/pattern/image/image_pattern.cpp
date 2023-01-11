@@ -229,7 +229,7 @@ void ImagePattern::LoadImageDataIfNeed()
 
         bool syncLoad = imageLayoutProperty->GetSyncModeValue(false);
         loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad);
-
+        LOGD("start loading image %{public}s", src.ToString().c_str());
         loadingCtx_->LoadImageData();
     }
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {

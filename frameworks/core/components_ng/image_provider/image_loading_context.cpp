@@ -145,7 +145,6 @@ void ImageLoadingContext::OnMakeCanvasImage()
 void ImageLoadingContext::DataReadyCallback(const RefPtr<ImageObject>& imageObj)
 {
     imageObj_ = imageObj;
-    CacheImageObject();
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_DATA_SUCCESS);
 }
 
@@ -287,17 +286,6 @@ void ImageLoadingContext::ResetLoading()
 void ImageLoadingContext::ResumeLoading()
 {
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_DATA);
-}
-
-void ImageLoadingContext::CacheImageObject()
-{
-    auto pipelineCtx = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineCtx);
-    auto cache = pipelineCtx->GetImageCache();
-    CHECK_NULL_VOID(cache);
-    if (cache && imageObj_->GetFrameCount() == 1 && imageObj_->IsSupportCache()) {
-        cache->CacheImgObjNG(imageObj_->GetSourceInfo().GetKey(), imageObj_);
-    }
 }
 
 } // namespace OHOS::Ace::NG
