@@ -116,6 +116,8 @@ public:
         return itemPosition_.rbegin()->second.second + spaceWidth_;
     }
 
+    float GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis);
+
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);

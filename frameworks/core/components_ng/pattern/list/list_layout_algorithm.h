@@ -162,6 +162,8 @@ public:
         chainInterval_ = interval;
     }
 
+    float GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis);
+
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
