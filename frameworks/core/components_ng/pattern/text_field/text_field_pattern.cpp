@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1891,19 +1891,22 @@ void TextFieldPattern::OnImageDataReady(bool checkHidePasswordIcon)
 void TextFieldPattern::OnImageLoadSuccess(bool checkHidePasswordIcon)
 {
     ACE_SCOPED_TRACE("TextFieldPattern::OnImageLoadSuccess");
+    ImagePaintConfig config;
     if (checkHidePasswordIcon) {
         LOGI("Load hide icon successfully");
         hidePasswordCanvasImage_ = hidePasswordImageLoadingCtx_->MoveCanvasImage();
-        passwordIconPaintConfig_.srcRect_ = hidePasswordImageLoadingCtx_->GetSrcRect();
-        passwordIconPaintConfig_.dstRect_ = hidePasswordImageLoadingCtx_->GetDstRect();
-        passwordIconPaintConfig_.isSvg_ = true;
+        config.srcRect_ = hidePasswordImageLoadingCtx_->GetSrcRect();
+        config.dstRect_ = hidePasswordImageLoadingCtx_->GetDstRect();
+        config.isSvg_ = true;
+        hidePasswordCanvasImage_->SetPaintConfig(config);
         return;
     }
     LOGI("Load show icon successfully");
     showPasswordCanvasImage_ = showPasswordImageLoadingCtx_->MoveCanvasImage();
-    passwordIconPaintConfig_.srcRect_ = showPasswordImageLoadingCtx_->GetSrcRect();
-    passwordIconPaintConfig_.dstRect_ = showPasswordImageLoadingCtx_->GetDstRect();
-    passwordIconPaintConfig_.isSvg_ = true;
+    config.srcRect_ = showPasswordImageLoadingCtx_->GetSrcRect();
+    config.dstRect_ = showPasswordImageLoadingCtx_->GetDstRect();
+    config.isSvg_ = true;
+    showPasswordCanvasImage_->SetPaintConfig(config);
 }
 
 void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}

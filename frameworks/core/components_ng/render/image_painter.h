@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,20 +29,18 @@ public:
     explicit ImagePainter(const RefPtr<CanvasImage>& canvasImage) : canvasImage_(canvasImage) {}
     ~ImagePainter() = default;
 
-    void DrawImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize,
-        const ImagePaintConfig& imagePaintConfig) const;
-    void DrawStaticImage(RSCanvas& canvas, const OffsetF& offset, const ImagePaintConfig& imagePaintConfig) const;
-    void DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& svgContainerSize,
-        const ImagePaintConfig& imagePaintConfig) const;
-    void DrawImageWithRepeat(RSCanvas& canvas, const ImagePaintConfig& ImagePaintConfig, const RectF& rect) const;
+    void DrawImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
+    void DrawStaticImage(RSCanvas& canvas, const OffsetF& offset) const;
+    void DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& svgContainerSize) const;
+    void DrawImageWithRepeat(RSCanvas& canvas, const RectF& rect) const;
 
     static void ApplyImageFit(
         ImageFit imageFit, const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect);
 
     static void FlipHorizontal(RSCanvas& canvas, double horizontalOffset, double drawRectWidth);
 
-    static SizeF CalculateBgImageSize(const SizeF& boxPaintSize_, const SizeF& srcSize,
-        const std::optional<BackgroundImageSize>& bgImageSizeOpt);
+    static SizeF CalculateBgImageSize(
+        const SizeF& boxPaintSize_, const SizeF& srcSize, const std::optional<BackgroundImageSize>& bgImageSizeOpt);
     static OffsetF CalculateBgImagePosition(const SizeF& boxPaintSize_, const SizeF& imageRenderSize_,
         const std::optional<BackgroundImagePosition>& bgImgPositionOpt);
 
