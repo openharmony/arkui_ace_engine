@@ -1632,7 +1632,7 @@ bool WebDelegate::InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context)
     }
     surfaceDelegate_->AddSurfaceCallback(surfaceCallback_);
     surfaceDelegate_->CreateSurface();
-    SetBoundsOrRezise(drawSize_, offset_);
+    SetBoundsOrResize(drawSize_, offset_);
     auto aNativeSurface = surfaceDelegate_->GetNativeWindow();
     if (aNativeSurface == nullptr) {
         LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create get NativeWindow is null");
@@ -4152,10 +4152,10 @@ sptr<OHOS::SurfaceDelegate> WebDelegate::GetSurfaceDelegateClient()
     return surfaceDelegate_;
 }
 
-void WebDelegate::SetBoundsOrRezise(const Size& drawSize, const Offset& offset)
+void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset)
 {
     if ((drawSize.Width() == 0) && (drawSize.Height() == 0)) {
-        LOGE("WebDelegate::SetBoundsOrRezise width and height error");
+        LOGE("WebDelegate::SetBoundsOrResize width and height error");
         return;
     }
     if (isEnhanceSurface_) {
