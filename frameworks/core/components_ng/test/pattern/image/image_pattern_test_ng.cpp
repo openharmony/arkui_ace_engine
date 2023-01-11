@@ -247,7 +247,7 @@ HWTEST_F(ImagePatternTestNg, UpdateInternalResource001, TestSize.Level1)
 
 /**
  * @tc.name: SetImagePaintConfig001
- * @tc.desc: When Image upload successfully, Imagepattern will set ImagePaintConfig to CanvaImage.
+ * @tc.desc: When Image upload successfully, ImagePattern will set ImagePaintConfig to CanvasImage.
  * @tc.type: FUNC
  */
 HWTEST_F(ImagePatternTestNg, SetImagePaintConfig001, TestSize.Level1)
@@ -276,16 +276,24 @@ HWTEST_F(ImagePatternTestNg, SetImagePaintConfig001, TestSize.Level1)
      * @tc.steps: step3. AltImage loads successfully, and trigger alt callback.
      */
     imagePattern->altLoadingCtx_->DataReadyCallback(nullptr);
+
+    imagePattern->altLoadingCtx_->srcRect_ = { 0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT };
+    imagePattern->altLoadingCtx_->dstRect_ = { 0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_WIDTH };
     imagePattern->altLoadingCtx_->SuccessCallback(nullptr);
+
+    // check onAltLoadSuccess result
     EXPECT_TRUE(imagePattern->altImage_ != nullptr);
     EXPECT_EQ(*imagePattern->altSrcRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
-    EXPECT_EQ(*imagePattern->altDstRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
+    EXPECT_EQ(*imagePattern->altDstRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_WIDTH));
     EXPECT_TRUE(imagePattern->altImage_->paintConfig_ != nullptr);
     auto altImagePaintConfig = imagePattern->altImage_->GetPaintConfig();
     EXPECT_EQ(altImagePaintConfig.imageFit_, IMAGE_FIT_DEFAULT);
     /**
      * @tc.steps: step4. Image loads successfully, and trigger Pattern->OnImageLoadSuccess.
      */
+
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
     imagePattern->loadingCtx_->SuccessCallback(nullptr);
     EXPECT_TRUE(imagePattern->image_ != nullptr);
     EXPECT_EQ(imagePattern->srcRect_, RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
@@ -344,7 +352,7 @@ HWTEST_F(ImagePatternTestNg, SetImagePaintConfig002, TestSize.Level1)
 
 /**
  * @tc.name: ImagePatternCallback001
- * @tc.desc: Verify that when ImageSourceInfo is not same, ImagePattern's callback will fail.
+ * @tc.desc: trigger image load fail.
  * @tc.type: FUNC
  */
 HWTEST_F(ImagePatternTestNg, ImagePatternCallback001, TestSize.Level1)
@@ -368,12 +376,11 @@ HWTEST_F(ImagePatternTestNg, ImagePatternCallback001, TestSize.Level1)
     /**
      * @tc.steps: step3. ImageLoadingContext trigger callback, but ImageSourceInfo is not match.
      */
-    imagePattern->altLoadingCtx_->SuccessCallback(nullptr);
     imagePattern->altLoadingCtx_->FailCallback("");
     EXPECT_EQ(imagePattern->altImage_, nullptr);
     EXPECT_EQ(imagePattern->altSrcRect_, nullptr);
     EXPECT_EQ(imagePattern->altDstRect_, nullptr);
-    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+
     imagePattern->loadingCtx_->FailCallback("");
     EXPECT_TRUE(imagePattern->image_ == nullptr);
 }
@@ -1288,6 +1295,7 @@ HWTEST_F(ImagePatternTestNg, Drag001, TestSize.Level1)
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
     frameNode->MarkModifyDone();
     auto pattern = frameNode->GetPattern<ImagePattern>();
+    pattern->SetDraggable(true);
     pattern->loadingCtx_->SuccessCallback(nullptr);
 
     // emulate drag event
@@ -1309,6 +1317,7 @@ HWTEST_F(ImagePatternTestNg, Drag001, TestSize.Level1)
 
     // change src
     frameNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(ImageSourceInfo(ALT_SRC_URL));
+    frameNode->MarkModifyDone();
     pattern->loadingCtx_->SuccessCallback(nullptr);
 
     auto newDragDropInfo = (eventHub->GetOnDragStart())(nullptr, extraParams);

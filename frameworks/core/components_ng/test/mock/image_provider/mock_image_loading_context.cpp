@@ -41,9 +41,6 @@ void ImageLoadingContext::OnMakeCanvasImage() {}
 
 void ImageLoadingContext::OnLoadSuccess()
 {
-    RectF rect { 0, 0, src_.GetSourceSize().Width(), src_.GetSourceSize().Height() };
-    dstRect_ = rect;
-    srcRect_ = rect;
 }
 
 void ImageLoadingContext::OnLoadFail() {}
@@ -143,7 +140,7 @@ std::optional<SizeF> ImageLoadingContext::GetSourceSize() const
 
 bool ImageLoadingContext::NeedAlt() const
 {
-    return false;
+    return true;
 }
 
 const std::optional<Color>& ImageLoadingContext::GetSvgFillColor() const
