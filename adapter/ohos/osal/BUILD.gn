@@ -67,6 +67,10 @@ template("ace_osal_ohos_source_set") {
       "want_wrap_ohos.cpp",
     ]
 
+    if (defined(vendor_configs.frameworks_ressched_sources)) {
+      sources -= [ "ressched_report.cpp" ]
+      sources += vendor_configs.frameworks_ressched_sources
+    }
     public_deps = [ "//base/startup/init/interfaces/innerkits:libbegetutil" ]
 
     if (is_standard_system) {
