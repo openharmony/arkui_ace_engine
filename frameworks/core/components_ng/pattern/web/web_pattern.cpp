@@ -1105,7 +1105,7 @@ std::optional<OffsetF> WebPattern::GetCoordinatePoint()
 {
     auto frameNode = GetHost();
     CHECK_NULL_RETURN_NOLOG(frameNode, std::nullopt);
-    return frameNode->GetOffsetRelativeToWindow();
+    return frameNode->GetTransformRelativeOffset();
 }
 
 RectF WebPattern::ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle)
