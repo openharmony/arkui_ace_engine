@@ -4101,7 +4101,7 @@ void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool i
 {
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
-    context->GetTaskExecutor()->PostTask(
+    context->GetTaskExecutor()->PostSyncTask(
         [weak = WeakClaim(this), targetUrl, isAlert, isUserTrigger, handler]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
