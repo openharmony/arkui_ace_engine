@@ -47,6 +47,8 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         auto indicatorLayoutAlgorithm = MakeRefPtr<SwiperIndicatorLayoutAlgorithm>();
+        indicatorLayoutAlgorithm->SetIsHoverOrPress(isHover_ || isPressed_);
+        indicatorLayoutAlgorithm->SetHoverPoint(hoverPoint_);
         return indicatorLayoutAlgorithm;
     }
 
@@ -54,8 +56,12 @@ public:
     {
         auto swiperPattern = GetSwiperNode()->GetPattern<SwiperPattern>();
         CHECK_NULL_RETURN(swiperPattern, nullptr);
-        return MakeRefPtr<SwiperIndicatorPaintMethod>(
+        auto paintMethod = MakeRefPtr<SwiperIndicatorPaintMethod>(
             swiperPattern->GetDirection(), swiperPattern->GetCurrentIndex(), swiperPattern->TotalCount());
+        paintMethod->SetIsHover(isHover_);
+        paintMethod->SetIsPressed(isPressed_);
+        paintMethod->SetHoverPoint(hoverPoint_);
+        return paintMethod;
     }
 
     RefPtr<FrameNode> GetSwiperNode() const
@@ -78,8 +84,20 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleClick(const GestureEvent& info);
+    void InitHoverMouseEvent();
+    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleMouseEvent(const MouseInfo& info);
+    void HandleHoverEvent(bool isHover);
+    void HandleTouchEvent(const TouchEventInfo& info);
+    void HandleTouchDown();
+    void HandleTouchUp();
 
     RefPtr<ClickEvent> clickEvent_;
+    RefPtr<InputEvent> hoverEvent_;
+    RefPtr<TouchEventImpl> touchEvent_;
+    bool isHover_ = false;
+    bool isPressed_ = false;
+    PointF hoverPoint_;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPattern);
 };
 } // namespace OHOS::Ace::NG
