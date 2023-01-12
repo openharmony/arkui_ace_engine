@@ -839,7 +839,7 @@ protected:
     void FlushAnimation(uint64_t nanoTimestamp) override;
     void FlushReload() override;
     void FlushReloadTransition() override;
-    void FlushUITasks(bool onlyLayout = false) override
+    void FlushUITasks() override
     {
         FlushLayout();
     }
