@@ -78,7 +78,13 @@ struct SelectOverlayInfo {
     bool useFullScreen = true;
     RectF showArea;
 
+    // handle touch event
+    std::function<void(const TouchEventInfo&)> onTouchDown;
+    std::function<void(const TouchEventInfo&)> onTouchUp;
+    std::function<void(const TouchEventInfo&)> onTouchMove;
+
     // handle move callback.
+    std::function<void(bool isFirst)> onHandleMoveStart;
     std::function<void(const RectF&, bool isFirst)> onHandleMove;
     std::function<void(const RectF&, bool isFirst)> onHandleMoveDone;
     std::function<void(bool)> onHandleReverse;
