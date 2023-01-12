@@ -664,7 +664,7 @@ public:
     }
     virtual void FlushMessages() = 0;
 
-    virtual void FlushUITasks(bool onlyLayout = false) = 0;
+    virtual void FlushUITasks() = 0;
 
     virtual void FlushPipelineImmediately() = 0;
 
