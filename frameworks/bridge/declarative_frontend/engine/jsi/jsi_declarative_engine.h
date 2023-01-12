@@ -326,9 +326,11 @@ public:
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID) override;
 
-    void InitializeModuleSearcher(const std::string& bundleName, const std::string assetPath, bool isBundle) override
+    void InitializeModuleSearcher(const std::string& bundleName, const std::string& moduleName,
+                                  const std::string assetPath, bool isBundle) override
     {
         bundleName_ = bundleName;
+        moduleName_ = moduleName;
         assetPath_ = assetPath;
         isBundle_ = isBundle;
     }
@@ -364,6 +366,7 @@ private:
 #if defined(PREVIEW)
     std::string assetPath_;
     std::string bundleName_;
+    std::string moduleName_;
     bool isBundle_ = true;
 #endif
 
