@@ -140,7 +140,7 @@ int32_t ListLanesLayoutAlgorithm::CalculateLanesParam(std::optional<float>& minL
     if (lanes < 1) {
         return 1;
     }
-    if (!crossSizeOptional.has_value()) {
+    if (!crossSizeOptional.has_value() || GreaterOrEqualToInfinity(crossSizeOptional.value())) {
         return lanes;
     }
     auto crossSize = crossSizeOptional.value();
