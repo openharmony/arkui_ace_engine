@@ -554,14 +554,13 @@ RefPtr<FrameNode> IndexerPattern::InitBubbleView()
     CHECK_NULL_RETURN(listNode, nullptr);
     auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     auto popListData = indexerEventHub->GetOnRequestPopupData();
-    auto currentListData = popListData(selected_);
+    auto currentListData = popListData ? popListData(selected_) : std::vector<std::string>();
     auto popupSize = currentListData.size();
     auto listActualSize = popupSize < INDEXER_BUBBLE_MAXSIZE ? popupSize : INDEXER_BUBBLE_MAXSIZE;
     auto listLayoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listLayoutProperty, nullptr);
     listLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * listActualSize)));
-
     auto borderWidthZero = Dimension();
     if (!currentListData.empty()) {
         letterLayoutProperty->UpdateBorderWidth(
