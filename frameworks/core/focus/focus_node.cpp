@@ -79,10 +79,9 @@ bool FocusNode::HandleKeyEvent(const KeyEvent& keyEvent)
                 return false;
             }
             if (context->GetIsDeclarative()) {
-                OnClick(keyEvent);
-            } else {
-                OnClick();
+                return OnClick(keyEvent);
             }
+            OnClick();
             return true;
 
         default:
@@ -467,7 +466,7 @@ void FocusNode::RequestFocus()
     }
 }
 
-void FocusNode::OnClick(const KeyEvent& event)
+bool FocusNode::OnClick(const KeyEvent& event)
 {
     if (onClickEventCallback_) {
         auto info = std::make_shared<ClickInfo>(-1);
@@ -493,7 +492,9 @@ void FocusNode::OnClick(const KeyEvent& event)
             info->GetDeviceId(), info->GetTimeStamp().time_since_epoch().count());
 #endif
         onClickEventCallback_(info);
+        return true;
     }
+    return false;
 }
 
 void FocusGroup::AddChild(const RefPtr<FocusNode>& focusNode)

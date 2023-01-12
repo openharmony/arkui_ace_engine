@@ -239,16 +239,18 @@ void RenderButton::HandleClickEvent()
     PlayClickAnimation();
 }
 
-void RenderButton::HandleKeyEnterEvent(const ClickInfo& info)
+bool RenderButton::HandleKeyEnterEvent(const ClickInfo& info)
 {
     if (!buttonComponent_) {
-        return;
+        return false;
     }
     auto onEnterWithInfo =
         AceAsyncEvent<void(const ClickInfo&)>::Create(buttonComponent_->GetKeyEnterEventId(), context_);
     if (onEnterWithInfo) {
         onEnterWithInfo(info);
+        return true;
     }
+    return false;
 }
 
 void RenderButton::HandleKeyEnterEvent()

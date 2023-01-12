@@ -176,7 +176,7 @@ public:
         }
     }
 
-    virtual void OnClick(const KeyEvent& event);
+    virtual bool OnClick(const KeyEvent& event);
 
     int32_t GetTabIndex() const
     {
