@@ -54,7 +54,7 @@ CanvasDrawFunction SwiperIndicatorPaintMethod::GetContentDrawFunction(PaintWrapp
 
     auto paintFunc = [weak = WeakClaim(this), paintProperty, contentSize, contentOffset](RSCanvas& canvas) {
         auto swiper_ = weak.Upgrade();
-        CHECK_NULL_VOID(swiper_);
+        CHECK_NULL_VOID_NOLOG(swiper_);
         if (paintProperty->GetIndicatorMaskValue(false)) {
             swiper_->PaintMask(canvas, paintProperty, contentSize, contentOffset);
         }

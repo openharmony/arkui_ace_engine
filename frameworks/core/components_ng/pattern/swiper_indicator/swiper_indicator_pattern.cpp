@@ -65,7 +65,7 @@ void SwiperIndicatorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestu
     CHECK_NULL_VOID_NOLOG(!clickEvent_);
     auto clickTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleClick(info);
     };
     clickEvent_ = MakeRefPtr<ClickEvent>(std::move(clickTask));

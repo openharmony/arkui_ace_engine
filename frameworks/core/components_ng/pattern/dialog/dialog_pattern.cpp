@@ -79,7 +79,7 @@ void DialogPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     GestureEventFunc task = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleClick(info);
     };
     onClick_ = MakeRefPtr<ClickEvent>(std::move(task));

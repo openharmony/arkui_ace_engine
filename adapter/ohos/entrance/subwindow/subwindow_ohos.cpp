@@ -71,7 +71,7 @@ void SubwindowOhos::InitContainer()
         auto parentWindowId = Platform::AceContainer::GetContainer(parentContainerId_)->GetWindowId();
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
         sptr<OHOS::Rosen::Window> parentWindow = OHOS::Rosen::Window::Find(parentWindowName);
-        CHECK_NULL_VOID(parentWindow);
+        CHECK_NULL_VOID_NOLOG(parentWindow);
         auto windowType = parentWindow->GetType();
         if (windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_FLOAT);
@@ -170,10 +170,10 @@ void SubwindowOhos::ShowPopup(const RefPtr<Component>& newComponent, bool disabl
 bool SubwindowOhos::CancelPopup(const std::string& id)
 {
     auto stack = GetStack();
-    CHECK_NULL_RETURN(stack, false);
+    CHECK_NULL_RETURN_NOLOG(stack, false);
     stack->PopPopup(id);
     auto context = stack->GetContext().Upgrade();
-    CHECK_NULL_RETURN(context, false);
+    CHECK_NULL_RETURN_NOLOG(context, false);
     context->FlushPipelineImmediately();
     HideWindow();
     return true;
@@ -515,9 +515,9 @@ bool SubwindowOhos::CreateEventRunner()
 {
     if (!eventLoop_) {
         eventLoop_ = AppExecFwk::EventRunner::Create("Subwindow_Toast_Dialog");
-        CHECK_NULL_RETURN(eventLoop_, false);
+        CHECK_NULL_RETURN_NOLOG(eventLoop_, false);
         handler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
-        CHECK_NULL_RETURN(handler_, false);
+        CHECK_NULL_RETURN_NOLOG(handler_, false);
     }
     return true;
 }

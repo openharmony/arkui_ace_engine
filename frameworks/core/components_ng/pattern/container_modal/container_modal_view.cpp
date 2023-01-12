@@ -104,7 +104,7 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
         PanDirection panDirection;
         panDirection.type = PanDirection::ALL;
         auto panActionStart = [windowManager](const GestureEvent&) {
-            CHECK_NULL_VOID(windowManager);
+            CHECK_NULL_VOID_NOLOG(windowManager);
             LOGI("container window start move.");
             windowManager->WindowStartMove();
         };
@@ -183,7 +183,7 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
         }));
     containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
         [windowManager, containerPattern](GestureEvent& info) {
-            CHECK_NULL_VOID(windowManager);
+            CHECK_NULL_VOID_NOLOG(windowManager);
             if (containerPattern->GetIsStartMove()) {
                 return;
             }

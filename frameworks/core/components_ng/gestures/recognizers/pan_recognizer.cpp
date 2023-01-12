@@ -55,7 +55,7 @@ PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) :
 
     PanFingersFuncType changeFingers = [weak = AceType::WeakClaim(this)](int32_t fingers) {
         auto panRecognizer = weak.Upgrade();
-        CHECK_NULL_VOID(panRecognizer);
+        CHECK_NULL_VOID_NOLOG(panRecognizer);
         panRecognizer->ChangeFingers(fingers);
     };
     onChangeFingers_ = OnPanFingersFunc(changeFingers);
@@ -63,7 +63,7 @@ PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) :
 
     PanDirectionFuncType changeDirection = [weak = AceType::WeakClaim(this)](const PanDirection& direction) {
         auto panRecognizer = weak.Upgrade();
-        CHECK_NULL_VOID(panRecognizer);
+        CHECK_NULL_VOID_NOLOG(panRecognizer);
         panRecognizer->ChangeDirection(direction);
     };
     onChangeDirection_ = OnPanDirectionFunc(changeDirection);
@@ -71,7 +71,7 @@ PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) :
 
     PanDistanceFuncType changeDistance = [weak = AceType::WeakClaim(this)](double distance) {
         auto panRecognizer = weak.Upgrade();
-        CHECK_NULL_VOID(panRecognizer);
+        CHECK_NULL_VOID_NOLOG(panRecognizer);
         panRecognizer->ChangeDistance(distance);
     };
     onChangeDistance_ = OnPanDistanceFunc(changeDistance);

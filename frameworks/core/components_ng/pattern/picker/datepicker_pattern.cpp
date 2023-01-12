@@ -64,12 +64,12 @@ void DatePickerPattern::OnModifyDone()
     ShowTitle(GetTitleId());
     SetChangeCallback([weak = WeakClaim(this)](const RefPtr<FrameNode>& tag, bool add, uint32_t index, bool notify) {
         auto refPtr = weak.Upgrade();
-        CHECK_NULL_VOID(refPtr);
+        CHECK_NULL_VOID_NOLOG(refPtr);
         refPtr->HandleColumnChange(tag, add, index, notify);
     });
     SetEventCallback([weak = WeakClaim(this), titleId = GetTitleId()](bool refresh) {
         auto refPtr = weak.Upgrade();
-        CHECK_NULL_VOID(refPtr);
+        CHECK_NULL_VOID_NOLOG(refPtr);
         refPtr->FireChangeEvent(refresh);
         if (refresh) {
             refPtr->ShowTitle(titleId);
@@ -129,7 +129,7 @@ void DatePickerPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_RETURN(pattern, false);
+        CHECK_NULL_RETURN_NOLOG(pattern, false);
         return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));

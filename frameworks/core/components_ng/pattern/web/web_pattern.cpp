@@ -83,7 +83,7 @@ void WebPattern::InitEvent()
     CHECK_NULL_VOID(context);
     auto langTask = [weak = AceType::WeakClaim(this)]() {
         auto WebPattern = weak.Upgrade();
-        CHECK_NULL_VOID(WebPattern);
+        CHECK_NULL_VOID_NOLOG(WebPattern);
         WebPattern->UpdateLocale();
     };
     context->SetConfigChangedCallback(std::move(langTask));
@@ -176,7 +176,7 @@ void WebPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
 
     auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleMouseEvent(info);
     };
 
@@ -274,7 +274,7 @@ void WebPattern::InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureH
                                 const std::string& extraParams) -> NG::DragDropInfo {
         auto pattern = weak.Upgrade();
         NG::DragDropInfo dragDropInfo;
-        CHECK_NULL_RETURN(pattern, dragDropInfo);
+        CHECK_NULL_RETURN_NOLOG(pattern, dragDropInfo);
         if (pattern->GenerateDragDropInfo(dragDropInfo)) {
             return dragDropInfo;
         }
@@ -305,25 +305,25 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleDragStart(info);
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleDragUpdate(info);
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleDragEnd(info);
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleDragCancel();
     };
 
@@ -428,14 +428,14 @@ void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto focusTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleFocusEvent();
     };
     focusHub->SetOnFocusInternal(focusTask);
 
     auto blurTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandleBlurEvent();
     };
     focusHub->SetOnBlurInternal(blurTask);
@@ -780,16 +780,12 @@ void WebPattern::RegistVirtualKeyBoardListener()
         return;
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (!pipelineContext) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
     pipelineContext->SetVirtualKeyBoardCallback(
         [weak = AceType::WeakClaim(this)](int32_t width, int32_t height, double keyboard) {
             auto webPattern = weak.Upgrade();
-            if (webPattern) {
-                return webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
-            }
-            return false;
+            CHECK_NULL_RETURN_NOLOG(webPattern, false);
+            return webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
         });
     needUpdateWeb_ = false;
 }
@@ -1018,7 +1014,7 @@ bool WebPattern::IsTouchHandleValid(
 bool WebPattern::IsTouchHandleShow(
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)
 {
-    CHECK_NULL_RETURN(handle, false);
+    CHECK_NULL_RETURN_NOLOG(handle, false);
     if (handle->GetAlpha() > 0 &&
         GreatOrEqual(handle->GetY(), static_cast<int32_t>(handle->GetEdgeHeight())) &&
         GreatNotEqual(GetHostFrameSize().value_or(SizeF()).Height(), handle->GetY())) {
@@ -1050,7 +1046,7 @@ WebOverlayType WebPattern::GetTouchHandleOverlayType(
 std::optional<OffsetF> WebPattern::GetCoordinatePoint()
 {
     auto frameNode = GetHost();
-    CHECK_NULL_RETURN(frameNode, std::nullopt);
+    CHECK_NULL_RETURN_NOLOG(frameNode, std::nullopt);
     return frameNode->GetOffsetRelativeToWindow();
 }
 
@@ -1101,7 +1097,7 @@ void WebPattern::RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
     int32_t flags = params->GetEditStateFlags();
     if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) {
         selectInfo.menuCallback.onCut = [weak = AceType::WeakClaim(this), callback]() {
-            CHECK_NULL_VOID(callback);
+            CHECK_NULL_VOID_NOLOG(callback);
             callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT,
                 OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
         };
@@ -1110,7 +1106,7 @@ void WebPattern::RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
     }
     if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY) {
         selectInfo.menuCallback.onCopy = [weak = AceType::WeakClaim(this), callback]() {
-            CHECK_NULL_VOID(callback);
+            CHECK_NULL_VOID_NOLOG(callback);
             callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY,
                 OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
         };
@@ -1119,7 +1115,7 @@ void WebPattern::RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
     }
     if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_PASTE) {
         selectInfo.menuCallback.onPaste = [weak = AceType::WeakClaim(this), callback]() {
-            CHECK_NULL_VOID(callback);
+            CHECK_NULL_VOID_NOLOG(callback);
             callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_PASTE,
                 OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
         };
@@ -1128,7 +1124,7 @@ void WebPattern::RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
     }
     if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_SELECT_ALL) {
         selectInfo.menuCallback.onSelectAll = [weak = AceType::WeakClaim(this), callback]() {
-            CHECK_NULL_VOID(callback);
+            CHECK_NULL_VOID_NOLOG(callback);
             callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_SELECT_ALL,
                 OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
         };
@@ -1236,7 +1232,7 @@ void WebPattern::UpdateTouchHandleForOverlay()
     WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle_,
                                                            startSelectionHandle_,
                                                            endSelectionHandle_);
-    CHECK_NULL_VOID(selectOverlayProxy_);
+    CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);
     if (overlayType == INVALID_OVERLAY) {
         CloseSelectOverlay();
         return;

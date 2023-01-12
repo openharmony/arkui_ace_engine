@@ -87,7 +87,7 @@ std::string NavBarNode::GetBarItemsString(bool isMenu) const
 {
     auto jsonValue = JsonUtil::Create(true);
     auto parentNodeOfBarItems = isMenu ? DynamicCast<FrameNode>(GetMenu()) : DynamicCast<FrameNode>(GetToolBarNode());
-    CHECK_NULL_RETURN(parentNodeOfBarItems, "");
+    CHECK_NULL_RETURN_NOLOG(parentNodeOfBarItems, "");
     if (!parentNodeOfBarItems->GetChildren().empty()) {
         auto jsonOptions = JsonUtil::CreateArray(true);
         int32_t i = 0;
