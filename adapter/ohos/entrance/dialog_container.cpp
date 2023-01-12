@@ -58,9 +58,8 @@ void DialogContainer::InitializeTouchEventCallback()
             [context, event, markProcess, id]() {
                 context->OnTouchEvent(event);
                 context->NotifyDispatchTouchEventDismiss(event);
-                if (markProcess) {
-                    markProcess();
-                }
+                CHECK_NULL_VOID_NOLOG(markProcess);
+                markProcess();
             },
             TaskExecutor::TaskType::UI);
     };
@@ -76,9 +75,8 @@ void DialogContainer::InitializeMouseEventCallback()
         context->GetTaskExecutor()->PostTask(
             [context, event, markProcess, id]() {
                 context->OnMouseEvent(event);
-                if (markProcess) {
-                    markProcess();
-                }
+                CHECK_NULL_VOID_NOLOG(markProcess);
+                markProcess();
             },
             TaskExecutor::TaskType::UI);
     };
@@ -94,9 +92,8 @@ void DialogContainer::InitializeAxisEventCallback()
         context->GetTaskExecutor()->PostTask(
             [context, event, markProcess, id]() {
                 context->OnAxisEvent(event);
-                if (markProcess) {
-                    markProcess();
-                }
+                CHECK_NULL_VOID_NOLOG(markProcess);
+                markProcess();
             },
             TaskExecutor::TaskType::UI);
     };
@@ -210,11 +207,9 @@ void DialogContainer::InitializeCallback()
 RefPtr<DialogContainer> DialogContainer::GetContainer(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    if (container != nullptr) {
-        auto dialogContainer = AceType::DynamicCast<DialogContainer>(container);
-        return dialogContainer;
-    }
-    return nullptr;
+    CHECK_NULL_RETURN_NOLOG(container, nullptr);
+    auto dialogContainer = AceType::DynamicCast<DialogContainer>(container);
+    return dialogContainer;
 }
 
 void DialogContainer::DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback)
@@ -232,9 +227,8 @@ void DialogContainer::DestroyContainer(int32_t instanceId, const std::function<v
             LOGI("Remove on Platform thread...");
             EngineHelper::RemoveEngine(instanceId);
             AceEngine::Get().RemoveContainer(instanceId);
-            if (destroyCallback) {
-                destroyCallback();
-            }
+            CHECK_NULL_VOID_NOLOG(destroyCallback);
+            destroyCallback();
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -272,13 +266,12 @@ void DialogContainer::Destroy()
 void DialogContainer::DestroyView()
 {
     ContainerScope scope(instanceId_);
-    if (aceView_ != nullptr) {
-        auto* flutterAceView = static_cast<FlutterAceView*>(aceView_);
-        if (flutterAceView) {
-            flutterAceView->DecRefCount();
-        }
-        aceView_ = nullptr;
+    CHECK_NULL_VOID_NOLOG(aceView_);
+    auto* flutterAceView = static_cast<FlutterAceView*>(aceView_);
+    if (flutterAceView) {
+        flutterAceView->DecRefCount();
     }
+    aceView_ = nullptr;
 }
 
 void DialogContainer::SetView(AceView* view, double density, int32_t width, int32_t height,
@@ -403,9 +396,8 @@ void DialogContainer::DumpHeapSnapshot(bool isPrivate)
     taskExecutor_->PostTask(
         [isPrivate, frontend = WeakPtr<Frontend>(frontend_)] {
             auto sp = frontend.Upgrade();
-            if (sp) {
-                sp->DumpHeapSnapshot(isPrivate);
-            }
+            CHECK_NULL_VOID_NOLOG(sp);
+            sp->DumpHeapSnapshot(isPrivate);
         },
         TaskExecutor::TaskType::JS);
 }

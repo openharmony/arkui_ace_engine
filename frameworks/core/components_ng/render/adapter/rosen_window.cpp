@@ -53,9 +53,8 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             CHECK_NULL_VOID(window);
             window->OnVsync(static_cast<uint64_t>(timeStampNanos), 0);
             auto pipeline = container->GetPipelineContext();
-            if (pipeline) {
-                pipeline->OnIdle(timeStampNanos + refreshPeriod);
-            }
+            CHECK_NULL_VOID_NOLOG(pipeline);
+            pipeline->OnIdle(timeStampNanos + refreshPeriod);
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
@@ -70,9 +69,8 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     rsUIDirector_->Init();
     rsUIDirector_->SetUITaskRunner([taskExecutor, id](const std::function<void()>& task) {
         ContainerScope scope(id);
-        if (taskExecutor) {
-            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-        }
+        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
     });
 }
 
@@ -94,9 +92,8 @@ void RosenWindow::RequestFrame()
                 auto container = Container::Current();
                 CHECK_NULL_VOID(container);
                 auto pipeline = container->GetPipelineContext();
-                if (pipeline) {
-                    pipeline->OnIdle(0);
-                }
+                CHECK_NULL_VOID_NOLOG(pipeline);
+                pipeline->OnIdle(0);
             },
             TaskExecutor::TaskType::UI, IDLE_TASK_DELAY_MILLISECOND);
     }

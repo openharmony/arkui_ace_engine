@@ -15,6 +15,7 @@
 
 #include "core/components_ng/event/event_hub.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
@@ -57,9 +58,7 @@ GetEventTargetImpl EventHub::CreateGetEventTargetImpl() const
 {
     auto impl = [weak = host_]() -> std::optional<EventTarget> {
         auto host = weak.Upgrade();
-        if (!host) {
-            return std::nullopt;
-        }
+        CHECK_NULL_RETURN_NOLOG(host, std::nullopt);
         EventTarget eventTarget;
         eventTarget.id = host->GetId();
         eventTarget.type = host->GetTag();

@@ -396,9 +396,8 @@ void GestureEventHub::SetFocusClickEvent(GestureEventFunc&& clickEvent)
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
     auto focusHub = eventHub->GetFocusHub();
-    if (focusHub) {
-        focusHub->SetOnClickCallback(std::move(clickEvent));
-    }
+    CHECK_NULL_VOID_NOLOG(focusHub);
+    focusHub->SetOnClickCallback(std::move(clickEvent));
 }
 
 // helper function to ensure clickActuator is initialized
@@ -440,42 +439,31 @@ OnAccessibilityEventFunc GestureEventHub::GetOnAccessibilityEventFunc()
 {
     auto callback = [weak = WeakClaim(this)](AccessibilityEventType eventType) {
         auto gestureHub = weak.Upgrade();
-        if (!gestureHub) {
-            return;
-        }
+        CHECK_NULL_VOID_NOLOG(gestureHub);
         auto node = gestureHub->GetFrameNode();
-        if (node) {
-            node->OnAccessibilityEvent(eventType);
-        }
+        CHECK_NULL_VOID_NOLOG(node);
+        node->OnAccessibilityEvent(eventType);
     };
     return callback;
 }
 
 bool GestureEventHub::ActClick()
 {
-    if (!clickEventActuator_) {
-        return false;
-    }
-
+    CHECK_NULL_RETURN_NOLOG(clickEventActuator_, false);
     auto click = clickEventActuator_->GetClickEvent();
-    if (click) {
-        GestureEvent info;
-        click(info);
-    }
+    CHECK_NULL_RETURN_NOLOG(click, true);
+    GestureEvent info;
+    click(info);
     return true;
 }
 
 bool GestureEventHub::ActLongClick()
 {
-    if (!longPressEventActuator_) {
-        return false;
-    }
-
+    CHECK_NULL_RETURN_NOLOG(longPressEventActuator_, false);
     auto click = longPressEventActuator_->GetGestureEventFunc();
-    if (click) {
-        GestureEvent info;
-        click(info);
-    }
+    CHECK_NULL_RETURN_NOLOG(click, true);
+    GestureEvent info;
+    click(info);
     return true;
 }
 } // namespace OHOS::Ace::NG

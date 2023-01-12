@@ -17,6 +17,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 
@@ -29,9 +30,7 @@ bool HapAssetProvider::Initialize(const std::string& hapPath, const std::vector<
     }
 
     runtimeExtractor_ = AbilityRuntime::RuntimeExtractor::Create(hapPath);
-    if (!runtimeExtractor_) {
-        return false;
-    }
+    CHECK_NULL_RETURN_NOLOG(runtimeExtractor_, false);
     assetBasePaths_ = assetBasePaths;
     hapPath_ = hapPath;
     LOGD("hapPath_:%{public}s", hapPath_.c_str());

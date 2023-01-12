@@ -16,6 +16,7 @@
 #include "core/common/font_manager.h"
 
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/components/text/render_text.h"
 #include "core/pipeline/base/render_node.h"
 
@@ -43,18 +44,15 @@ void FontManager::RegisterFont(
 
     fontLoader->SetVariationChanged([weak = WeakClaim(this), familyName]() {
         auto fontManager = weak.Upgrade();
-        if (fontManager) {
-            fontManager->VaryFontCollectionWithFontWeightScale();
-        }
+        CHECK_NULL_VOID_NOLOG(fontManager);
+        fontManager->VaryFontCollectionWithFontWeightScale();
     });
 }
 
 void FontManager::RegisterCallback(
     const WeakPtr<RenderNode>& node, const std::string& familyName, const std::function<void()>& callback)
 {
-    if (!callback) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(callback);
     for (auto& fontLoader : fontLoaders_) {
         if (fontLoader->GetFamilyName() == familyName) {
             fontLoader->SetOnLoaded(node, callback);

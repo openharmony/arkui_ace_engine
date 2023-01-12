@@ -19,6 +19,7 @@
 #include "want.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "base/utils/utils.h"
 #include "core/common/container_scope.h"
 #include "core/common/form_manager.h"
 #include "frameworks/base/json/json_util.h"
@@ -31,9 +32,7 @@ int32_t FormUtilsImpl::RouterEvent(
     auto container = Container::Current();
     auto ace_container = AceType::DynamicCast<Platform::AceContainer>(container);
     auto token_ = ace_container->GetToken();
-    if (!token_) {
-        return -1;
-    }
+    CHECK_NULL_RETURN_NOLOG(token_, -1);
     AAFwk::Want want;
     auto eventAction = JsonUtil::ParseJsonString(action);
     auto bundleName = eventAction->GetValue("bundleName");

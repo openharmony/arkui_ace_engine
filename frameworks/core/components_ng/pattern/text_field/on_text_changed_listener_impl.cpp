@@ -72,10 +72,9 @@ void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
     LOGI("[OnTextChangedListenerImpl] SetKeyboardStatus status: %{public}d", status);
     auto task = [textField = pattern_, status] {
         auto client = textField.Upgrade();
-        if (client) {
-            ContainerScope scope(client->GetInstanceId());
-            client->SetInputMethodStatus(status);
-        }
+        CHECK_NULL_VOID_NOLOG(client);
+        ContainerScope scope(client->GetInstanceId());
+        client->SetInputMethodStatus(status);
     };
     PostTaskToUI(task);
 }
@@ -94,10 +93,7 @@ void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey func
     LOGI("[OnTextChangedListenerImpl] Handle function key %{public}d", static_cast<int32_t>(functionKey));
     auto task = [textField = pattern_, functionKey] {
         auto client = textField.Upgrade();
-        if (!client) {
-            LOGE("text field is null");
-            return;
-        }
+        CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
         TextInputAction action = static_cast<TextInputAction>(functionKey);
         switch (action) {
@@ -121,9 +117,7 @@ void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
     LOGI("[OnTextChangedListenerImpl] move cursor %{public}d", static_cast<int32_t>(direction));
     auto task = [textField = pattern_, direction] {
         auto client = textField.Upgrade();
-        if (!client) {
-            return;
-        }
+        CHECK_NULL_VOID_NOLOG(client);
         ContainerScope scope(client->GetInstanceId());
         switch (direction) {
             case MiscServices::Direction::UP:
