@@ -76,6 +76,7 @@ const char LEFT_CURLY_BRACES = '{';
 const char RIGHT_CURLY_BRACES = '}';
 
 // Common error code
+constexpr int32_t ERROR_CODE_NO_ERROR = 0;
 constexpr int32_t ERROR_CODE_PERMISSION_DENIED = 201; // The application does not have permission to call the interface.
 constexpr int32_t ERROR_CODE_PARAM_INVALID = 401;     // Invalid input parameter.
 constexpr int32_t ERROR_CODE_SYSTEMCAP_ERROR = 801;   // The specified SystemCapability names was not found.
