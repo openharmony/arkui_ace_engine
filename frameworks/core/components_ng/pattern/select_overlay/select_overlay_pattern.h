@@ -75,7 +75,8 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
     void HandleOnClick(GestureEvent& info);
-
+    void HandleTouchEvent(const TouchEventInfo& info);
+    void HandleOnTouch(GestureEvent& info);
     void HandlePanStart(GestureEvent& info);
     void HandlePanMove(GestureEvent& info);
     void HandlePanEnd(GestureEvent& info);
@@ -86,6 +87,7 @@ private:
     std::shared_ptr<SelectOverlayInfo> info_;
     RefPtr<PanEvent> panEvent_;
     RefPtr<ClickEvent> clickEvent_;
+    RefPtr<TouchEventImpl> touchEvent_;
 
     RectF firstHandleRegion_;
     RectF secondHandleRegion_;

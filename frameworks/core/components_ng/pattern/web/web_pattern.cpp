@@ -979,6 +979,10 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         return;
     }
     for (auto& touchPoint : touchInfos) {
+        if (fromOverlay) {
+            touchPoint.x -= webOffset_.GetX();
+            touchPoint.y -= webOffset_.GetY();
+        }
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y);
     }
 }
@@ -992,6 +996,10 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
         return;
     }
     for (auto& touchPoint : touchInfos) {
+        if (fromOverlay) {
+            touchPoint.x -= webOffset_.GetX();
+            touchPoint.y -= webOffset_.GetY();
+        }
         delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y);
     }
     if (!touchInfos.empty()) {
@@ -1012,6 +1020,10 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
         return;
     }
     for (auto& touchPoint : touchInfos) {
+        if (fromOverlay) {
+            touchPoint.x -= webOffset_.GetX();
+            touchPoint.y -= webOffset_.GetY();
+        }
         delegate_->HandleTouchMove(touchPoint.id, touchPoint.x, touchPoint.y);
     }
 }
@@ -1189,10 +1201,37 @@ void WebPattern::RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
     } else {
         selectInfo.menuInfo.showCopyAll = false;
     }
+}
+
+void WebPattern::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
+{
     selectInfo.onHandleMoveDone = [weak = AceType::WeakClaim(this)](const RectF& rectF, bool isFirst) {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
         webPattern->UpdateTouchHandleForOverlay();
+        webPattern->SetSelectOverlayDragging(false);
+    };
+    selectInfo.onTouchDown = [weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->HandleTouchDown(info, true);
+    };
+    selectInfo.onTouchUp = [weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->HandleTouchUp(info, true);
+    };
+    selectInfo.onTouchMove = [weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        if (webPattern->IsSelectOverlayDragging()) {
+            webPattern->HandleTouchMove(info, true);
+        }
+    };
+    selectInfo.onHandleMoveStart = [weak = AceType::WeakClaim(this)](bool isFirst) {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->SetSelectOverlayDragging(true);
     };
 }
 
@@ -1221,6 +1260,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     selectHotZone_ = theme->GetHandleHotZoneRadius().ConvertToPx();
     SelectOverlayInfo selectInfo;
     selectInfo.isSingleHandle = (overlayType == INSERT_OVERLAY);
+    selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
     if (selectInfo.isSingleHandle) {
         selectInfo.firstHandle.isShow = IsTouchHandleShow(insertTouchHandle);
         selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(insertTouchHandle);
@@ -1232,6 +1272,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     }
     selectInfo.menuInfo.menuIsShow = true;
     RegisterSelectOverlayCallback(selectInfo, params, callback);
+    RegisterSelectOverlayEvent(selectInfo);
     selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo);
     selectMenuInfo_ = selectInfo.menuInfo;
     insertHandle_ = insertTouchHandle;
@@ -1272,11 +1313,8 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
             selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(insertHandle_);
             selectInfo.menuInfo.menuDisable = true;
             selectInfo.menuInfo.menuIsShow = false;
-            selectInfo.onHandleMoveDone = [weak = AceType::WeakClaim(this)](const RectF& rectF, bool isFirst) {
-                auto webPattern = weak.Upgrade();
-                CHECK_NULL_VOID(webPattern);
-                webPattern->UpdateTouchHandleForOverlay();
-            };
+            selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
+            RegisterSelectOverlayEvent(selectInfo);
             selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo);
         }
     } else {

@@ -233,6 +233,14 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
     void UpdateTouchHandleForOverlay();
+    bool IsSelectOverlayDragging()
+    {
+        return selectOverlayDragging_;
+    }
+    void SetSelectOverlayDragging(bool selectOverlayDragging)
+    {
+        selectOverlayDragging_ = selectOverlayDragging;
+    }
     void UpdateLocale();
 
 private:
@@ -331,6 +339,7 @@ private:
     void RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
+    void RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo);
     void CloseSelectOverlay();
     RectF ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle);
     std::optional<OffsetF> GetCoordinatePoint();
@@ -377,6 +386,7 @@ private:
     bool isAllowWindowOpenMethod_ = false;
     OffsetF webOffset_;
     SelectMenuInfo selectMenuInfo_;
+    bool selectOverlayDragging_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG
