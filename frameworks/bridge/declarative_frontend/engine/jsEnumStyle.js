@@ -924,6 +924,16 @@ var AdaptiveColor;
   AdaptiveColor[AdaptiveColor["Average"] = 1] = "Average";
 })(AdaptiveColor || (AdaptiveColor = {}));
 
+var ShadowStyle;
+(function (ShadowStyle) {
+  ShadowStyle[ShadowStyle["OuterDefaultXS"] = 0] = "OuterDefaultXS";
+  ShadowStyle[ShadowStyle["OuterDefaultSM"] = 1] = "OuterDefaultSM";
+  ShadowStyle[ShadowStyle["OuterDefaultMD"] = 2] = "OuterDefaultMD";
+  ShadowStyle[ShadowStyle["OuterDefaultLG"] = 3] = "OuterDefaultLG";
+  ShadowStyle[ShadowStyle["OuterFloatingSM"] = 4] = "OuterFloatingSM";
+  ShadowStyle[ShadowStyle["OuterFloatingMD"] = 5] = "OuterFloatingMD";
+})(ShadowStyle || (ShadowStyle = {}));
+
 var BreakpointsReference;
 (function (BreakpointsReference) {
   BreakpointsReference[BreakpointsReference["WindowSize"] = 0] = "WindowSize";

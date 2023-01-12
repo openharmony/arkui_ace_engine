@@ -16,6 +16,7 @@
 #include "core/components/common/properties/shadow.h"
 
 #include "core/animation/evaluator.h"
+#include "core/components/common/properties/shadow_config.h"
 
 namespace OHOS::Ace {
 
@@ -29,4 +30,22 @@ Shadow Shadow::Blend(const Shadow& to, const Shadow& from, float progress)
     return Shadow(blurRadius, spreadRadius, offset, color);
 }
 
+Shadow Shadow::CreateShadow(ShadowStyle style)
+{
+    switch (style) {
+        case ShadowStyle::OuterDefaultXS:
+            return ShadowConfig::DefaultShadowXS;
+        case ShadowStyle::OuterDefaultSM:
+            return ShadowConfig::DefaultShadowS;
+        case ShadowStyle::OuterDefaultMD:
+            return ShadowConfig::DefaultShadowM;
+        case ShadowStyle::OuterDefaultLG:
+            return ShadowConfig::DefaultShadowL;
+        case ShadowStyle::OuterFloatingSM:
+            return ShadowConfig::FloatingShadowS;
+        case ShadowStyle::OuterFloatingMD:
+            return ShadowConfig::FloatingShadowM;
+    }
+    return {};
+}
 } // namespace OHOS::Ace

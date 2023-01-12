@@ -45,6 +45,7 @@
 #include "core/components/common/layout/screen_system_manager.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
@@ -3526,8 +3527,17 @@ void JSViewAbstract::JsMotionPath(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsShadow(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::NUMBER };
     if (!CheckJSCallbackInfo("JsShadow", info, checkList)) {
+        return;
+    }
+
+    int32_t shadowStyle = 0;
+    if (ParseJsInteger<int32_t>(info[0], shadowStyle)) {
+        auto style = static_cast<ShadowStyle>(shadowStyle);
+        Shadow shadow = Shadow::CreateShadow(style);
+        std::vector<Shadow> shadows = { shadow };
+        ViewAbstractModel::GetInstance()->SetBackShadow(shadows);
         return;
     }
     auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());

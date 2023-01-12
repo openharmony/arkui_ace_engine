@@ -26,6 +26,15 @@ constexpr float LIGHT_RADIUS = 800.0f; // System recommended value.
 constexpr float LIGHT_POSITION_X = 540.0f; // System recommended value.
 constexpr float LIGHT_POSITION_Y = 0.0f; // System recommended value.
 
+enum class ShadowStyle {
+    OuterDefaultXS,
+    OuterDefaultSM,
+    OuterDefaultMD,
+    OuterDefaultLG,
+    OuterFloatingSM,
+    OuterFloatingMD,
+};
+
 // A style class indicates the way to render shadow effect
 class Shadow final {
 public:
@@ -46,6 +55,8 @@ public:
     {
         SetBlurRadius(blurRadius);
     };
+
+    static Shadow CreateShadow(ShadowStyle style);
 
     bool operator==(const Shadow& rhs) const
     {
