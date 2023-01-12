@@ -184,7 +184,7 @@ void TextFieldElement::OnFocus()
         textField->StartTwinkling();
         textField->OnEditChange(true);
     }
-    RequestKeyboard(true, false);
+    RequestKeyboard(true, true);
     FocusNode::OnFocus();
     textField->SetCanPaintSelection(true);
     auto context = context_.Upgrade();
