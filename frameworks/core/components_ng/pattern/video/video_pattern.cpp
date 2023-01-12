@@ -21,6 +21,7 @@
 #include "base/json/json_util.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
@@ -533,13 +534,15 @@ void VideoPattern::PrepareSurface()
     if (renderSurface_->IsSurfaceValid()) {
         return;
     }
-    renderSurface_->SetRenderContext(renderContextForMediaPlayer_);
+    if (!SystemProperties::GetExtSurfaceEnabled()) {
+        renderSurface_->SetRenderContext(renderContextForMediaPlayer_);
+    }
     renderSurface_->InitSurface();
     mediaPlayer_->SetRenderSurface(renderSurface_);
     if (mediaPlayer_->SetSurface() != 0) {
         LOGE("Player SetVideoSurface failed");
         return;
-    };
+    }
 }
 
 void VideoPattern::OnAttachToFrameNode()
@@ -568,6 +571,11 @@ void VideoPattern::OnModifyDone()
     AddControlBarNodeIfNeeded();
     UpdateMediaPlayer();
     UpdateVideoProperty();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    pipelineContext->AddOnAreaChangeNode(host->GetId());
 }
 
 void VideoPattern::AddPreviewNodeIfNeeded()
@@ -681,6 +689,27 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     return false;
 }
 
+void VideoPattern::OnAreaChangedInner()
+{
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto videoNodeSize = geometryNode->GetContentSize();
+        auto videoNodeOffset = geometryNode->GetContentOffset();
+        auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
+        auto transformRelativeOffset = host->GetTransformRelativeOffset();
+        renderSurface_->SetBounds(transformRelativeOffset.GetX() + videoNodeOffset.GetX() +
+                                    (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+            transformRelativeOffset.GetY() + videoNodeOffset.GetY() +
+                (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+            videoFrameSize.Width(), videoFrameSize.Height());
+    }
+}
+
 RefPtr<FrameNode> VideoPattern::CreateControlBar()
 {
     auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -719,6 +748,7 @@ RefPtr<FrameNode> VideoPattern::CreateControlBar()
     controlBarLayoutProperty->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
     return controlBar;
 }
+
 RefPtr<FrameNode> VideoPattern::CreateSlider()
 {
     auto pipelineContext = PipelineBase::GetCurrentContext();
