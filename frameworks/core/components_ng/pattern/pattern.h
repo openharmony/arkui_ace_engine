@@ -256,6 +256,7 @@ public:
     virtual void OnWindowHide() {}
     virtual void OnWindowFocused() {}
     virtual void OnWindowUnfocused() {}
+    virtual void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
     virtual void OnNotifyMemoryLevel(int32_t level) {}
 
     // get XTS inspector value

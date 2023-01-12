@@ -430,6 +430,8 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
         },
         TaskExecutor::TaskType::JS);
 
+    FlushWindowSizeChangeCallback(width, height, type);
+
 #ifdef ENABLE_ROSEN_BACKEND
     StartWindowSizeChangeAnimate(width, height, type);
 #else
@@ -1222,6 +1224,30 @@ void PipelineContext::FlushWindowFocusChangedCallback(bool isFocus)
             } else {
                 node->OnWindowUnfocused();
             }
+            ++iter;
+        }
+    }
+}
+
+void PipelineContext::AddWindowSizeChangeCallback(int32_t nodeId)
+{
+    onWindowSizeChangeCallbacks_.emplace_back(nodeId);
+}
+
+void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId)
+{
+    onWindowSizeChangeCallbacks_.remove(nodeId);
+}
+
+void PipelineContext::FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    auto iter = onWindowSizeChangeCallbacks_.begin();
+    while (iter != onWindowSizeChangeCallbacks_.end()) {
+        auto node = ElementRegister::GetInstance()->GetUINodeById(*iter);
+        if (!node) {
+            iter = onWindowSizeChangeCallbacks_.erase(iter);
+        } else {
+            node->OnWindowSizeChanged(width, height, type);
             ++iter;
         }
     }

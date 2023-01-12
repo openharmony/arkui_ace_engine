@@ -237,6 +237,8 @@ public:
 
     virtual void OnWindowUnfocused() {}
 
+    virtual void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
+
     virtual void OnNotifyMemoryLevel(int32_t level) {}
 
     virtual void SetActive(bool active);

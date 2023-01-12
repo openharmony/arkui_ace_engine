@@ -24,6 +24,7 @@ void FrameNode::OnWindowShow() {}
 void FrameNode::OnWindowHide() {}
 void FrameNode::OnWindowFocused() {}
 void FrameNode::OnWindowUnfocused() {}
+void FrameNode::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
 void FrameNode::OnNotifyMemoryLevel(int32_t level) {}
 void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType) const {}
 void FrameNode::DumpInfo() {}
