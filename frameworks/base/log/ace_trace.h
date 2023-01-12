@@ -50,7 +50,7 @@ std::string ACE_EXPORT AceAsyncTraceBeginWithArgv(int32_t taskId, const char* fo
 void ACE_EXPORT AceTraceEnd();
 void ACE_EXPORT AceAsyncTraceEnd(int32_t taskId, const char* name);
 
-class ACE_EXPORT AceScopedTrace final {
+class ACE_FORCE_EXPORT AceScopedTrace final {
 public:
     explicit AceScopedTrace(const char* format, ...) __attribute__((__format__(printf, 2, 3)));
     ~AceScopedTrace();

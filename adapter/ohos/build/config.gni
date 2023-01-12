@@ -46,6 +46,7 @@ if (ace_engine_feature_enable_web) {
   web_components_support = true
 }
 
+use_build_in_js_engine = true
 use_external_icu = "shared"
 use_curl_download = true
 ohos_standard_fontmgr = true
@@ -140,6 +141,10 @@ if (multiple_window_support) {
 
 if (model_component_support) {
   defines += [ "MODEL_COMPONENT_SUPPORTED" ]
+}
+
+if (use_build_in_js_engine) {
+  defines += [ "HIDDEN_SYMBOL" ]
 }
 
 cflags_cc = [

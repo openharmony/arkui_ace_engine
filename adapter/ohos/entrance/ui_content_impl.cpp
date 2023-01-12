@@ -109,13 +109,13 @@ private:
     ContentStartAbilityCallback onStartAbility_;
 };
 
-extern "C" ACE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* runtime)
+extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* runtime)
 {
     LOGI("Ace lib loaded, CreateUIContent.");
     return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime);
 }
 
-extern "C" ACE_EXPORT void* OHOS_ACE_CreateSubWindowUIContent(void* ability)
+extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateSubWindowUIContent(void* ability)
 {
     LOGI("Ace lib loaded, Create SubWindowUIContent.");
     return new UIContentImpl(reinterpret_cast<OHOS::AppExecFwk::Ability*>(ability));

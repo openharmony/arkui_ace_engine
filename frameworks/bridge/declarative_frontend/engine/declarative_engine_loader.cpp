@@ -67,7 +67,7 @@ JsEngineLoader& JsEngineLoader::GetDeclarative(const char*)
     return DeclarativeEngineLoader::GetInstance();
 }
 #else
-extern "C" ACE_EXPORT void* OHOS_ACE_GetJsEngineLoader()
+extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_GetJsEngineLoader()
 {
     return &DeclarativeEngineLoader::GetInstance();
 }

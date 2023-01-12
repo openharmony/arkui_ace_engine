@@ -1295,7 +1295,7 @@ sptr<IRemoteObject> AceContainer::GetToken()
     return nullptr;
 }
 
-extern "C" ACE_EXPORT void OHOS_ACE_HotReloadPage()
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 {
     AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
         auto ace = AceType::DynamicCast<AceContainer>(container);

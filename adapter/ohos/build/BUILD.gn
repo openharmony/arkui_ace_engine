@@ -27,12 +27,6 @@ group("ace_packages") {
     "$ace_root/interfaces/native:ace_packages_ndk",
   ]
 
-  # Engine and debugger
-  deps += [ "$ace_root/build:libace_engine_ark" ]
-
-  # Declarative engine
-  deps += [ "$ace_root/build:libace_engine_declarative_ark" ]
-
   # Pa engine
   deps += [ "$ace_root/build:libace_engine_pa_ark" ]
 

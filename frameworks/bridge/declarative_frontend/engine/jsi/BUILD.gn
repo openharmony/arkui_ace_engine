@@ -141,10 +141,8 @@ template("declarative_js_engine_ark") {
     if (defined(config.build_for_preview) && config.build_for_preview) {
       deps += [ ":gen_obj_src_abc_mock_system_plugin" ]
       sources += [ "utils/jsi_module_searcher.cpp" ]
-    } else if ((defined(config.build_for_android) &&
-                config.build_for_android) ||
-               (defined(config.build_for_ios) && config.build_for_ios)) {
-      sources += [ "jsi_declarative_utils.cpp" ]
+    } else if (defined(config.use_build_in_js_engine) &&
+               config.use_build_in_js_engine) {
       if (enable_ng_build) {
         sources += [
           "$ace_root/frameworks/bridge/js_frontend/engine/common/js_api_perf.cpp",
@@ -158,7 +156,6 @@ template("declarative_js_engine_ark") {
         "$ace_root/frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.cpp",
         "$ace_root/frameworks/bridge/js_frontend/engine/jsi/ark_js_value.cpp",
         "$ace_root/frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.cpp",
-        "jsi_declarative_utils.cpp",
       ]
     }
 

@@ -50,7 +50,7 @@ enum class ScreenShape : int32_t {
     SCREEN_SHAPE_UNDEFINED,
 };
 
-class ACE_EXPORT SystemProperties final {
+class ACE_FORCE_EXPORT SystemProperties final {
 public:
     /*
      * Init device type for Ace.

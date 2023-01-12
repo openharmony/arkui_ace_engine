@@ -29,6 +29,8 @@ ohos_unittest("PluginFrontendDelegateTest") {
   deps = [
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/frameworks/bridge/js_frontend/engine:js_engine_ark_ohos",
+    "$ace_root/frameworks/bridge/js_frontend/engine/jsi:js_engine_bridge_ark_ohos",
   ]
 
   part_name = ace_engine_part
