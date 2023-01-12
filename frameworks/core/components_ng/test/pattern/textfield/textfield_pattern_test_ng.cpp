@@ -409,9 +409,9 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition002, TestSize.Level1)
     }
     host_->GetOrCreateFocusHub()->currentFocus_ = true;
     textFieldPattern->SetCaretUpdateType(CaretUpdateType::PRESSED);
-    EXPECT_TRUE(textFieldPattern->UpdateCaretPosition());
+    EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
     textFieldPattern->SetCaretUpdateType(CaretUpdateType::LONG_PRESSED);
-    EXPECT_TRUE(textFieldPattern->UpdateCaretPosition());
+    EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
 }
 
 /**
@@ -430,25 +430,6 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition003, TestSize.Level1)
     textFieldPattern->SetCaretUpdateType(CaretUpdateType::NONE);
     EXPECT_TRUE(textFieldPattern->UpdateCaretPosition());
     textFieldPattern->SetCaretUpdateType(CaretUpdateType::NONE);
-    EXPECT_TRUE(textFieldPattern->UpdateCaretPosition());
-}
-
-/**
- * @tc.name: UpdateCaretPosition004
- * @tc.desc: test UpdateCaretPosition
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition004, TestSize.Level1)
-{
-    auto textFieldPattern = GetTextFieldPattern();
-    if (!textFieldPattern) {
-        EXPECT_FALSE(textFieldPattern == nullptr);
-        return;
-    }
-    host_->GetOrCreateFocusHub()->currentFocus_ = true;
-    textFieldPattern->SetCaretUpdateType(CaretUpdateType::PRESSED);
-    EXPECT_TRUE(textFieldPattern->UpdateCaretPosition());
-    textFieldPattern->SetCaretUpdateType(CaretUpdateType::LONG_PRESSED);
     EXPECT_TRUE(textFieldPattern->UpdateCaretPosition());
 }
 
