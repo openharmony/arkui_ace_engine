@@ -154,9 +154,16 @@ public:
     void UpdateScrollDelta(double delta);
 
 private:
+    void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void SetDividerHeight(uint32_t showOptionCount);
+    void OnTouchDown();
+    void OnTouchUp();
+    void InitMouseAndPressEvent();
+    void HandleMouseEvent(bool isHover);
+    void SetButtonBackgroundColor(const Color& pressColor);
+    void PlayPressAnimation(const Color& pressColor);
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(const GestureEvent& event);
@@ -167,6 +174,8 @@ private:
     void HandleCurveStopped();
     void ScrollOption(double delta);
 
+    RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<InputEvent> mouseEvent_;
     std::map<RefPtr<FrameNode>, std::vector<std::string>> options_;
     ColumnChangeCallback changeCallback_;
     EventCallback EventCallback_;
@@ -180,6 +189,8 @@ private:
     float gradientHeight_;
     float dividerHeight_;
     float dividerSpacingWidth_;
+    Color pressColor_;
+    Color hoverColor_;
 
     double deltaSize_ = 0.0;
     RefPtr<PanEvent> panEvent_;
