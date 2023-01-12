@@ -24,20 +24,27 @@
 
 namespace OHOS::Ace::NG {
 
-void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu) const
+void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
 {
+    isHided_ = true;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    for (auto subMenuId : subMenuIds_) {
+        LOGI("MenuWrapperPattern::HideMenu subMenu id is %{public}d", subMenuId);
+        overlayManager->HideMenu(subMenuId);
+    }
+
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    LOGI("closing menu %{public}d", targetId_);
+    LOGI("MenuWrapperPattern closing menu %{public}d", targetId_);
     // ContextMenu: close in subwindowManager
     if (menuPattern->IsContextMenu()) {
         SubwindowManager::GetInstance()->HideMenuNG(targetId_);
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
     overlayManager->HideMenu(targetId_);
 }
 
@@ -64,6 +71,9 @@ void MenuWrapperPattern::OnModifyDone()
         CHECK_NULL_VOID(host);
         auto pattern = host->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(pattern);
+        if (pattern->IsHided()) {
+            return;
+        }
         // get menu frame node (child of menu wrapper)
         auto menuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
         CHECK_NULL_VOID(menuNode);
@@ -98,5 +108,14 @@ void MenuWrapperPattern::HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItem
         menuItemPattern->ClearHoverRegions();
         menuItemPattern->ResetWrapperMouseEvent();
     }
+}
+
+void MenuWrapperPattern::HideMenu()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto menuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    CHECK_NULL_VOID(menuNode);
+    HideMenu(menuNode);
 }
 } // namespace OHOS::Ace::NG

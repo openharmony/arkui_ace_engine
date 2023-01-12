@@ -33,6 +33,12 @@ void MenuItemPattern::OnModifyDone()
     RegisterOnClick();
     RegisterOnTouch();
     RegisterOnHover();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    RegisterOnKeyEvent(focusHub);
 }
 
 RefPtr<FrameNode> MenuItemPattern::GetMenuWrapper()
@@ -65,10 +71,11 @@ RefPtr<FrameNode> MenuItemPattern::GetMenu()
 
 void MenuItemPattern::ShowSubMenu()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    LOGI("MenuItemPattern::ShowSubMenu menu item id is %{public}d", host->GetId());
     auto buildFunc = GetSubBuilder();
     if (buildFunc && !isSubMenuShowed_) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
@@ -77,15 +84,21 @@ void MenuItemPattern::ShowSubMenu()
         NG::ScopedViewStackProcessor builderViewStackProcessor;
         buildFunc();
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-        auto menuNode = MenuView::Create(customNode, host->GetId(), MenuType::SUB_MENU);
-        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        auto subMenu = MenuView::Create(customNode, host->GetId(), MenuType::SUB_MENU);
+        auto menuPattern = subMenu->GetPattern<MenuPattern>();
         menuPattern->SetParentMenuItem(host);
-        subMenuId_ = menuNode->GetId();
+        subMenuId_ = subMenu->GetId();
         AddSelfHoverRegion(host);
-        LOGI("MenuItemPattern Show SubMenu");
+
+        auto menuWrapper = GetMenuWrapper();
+        CHECK_NULL_VOID(menuWrapper);
+        auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        menuWrapperPattern->AddSubMenuId(host->GetId());
+
         isSubMenuShowed_ = true;
         OffsetF offset = GetSubMenuPostion(host);
-        overlayManager->ShowMenu(host->GetId(), offset, menuNode);
+        overlayManager->ShowMenu(host->GetId(), offset, subMenu);
 
         RegisterWrapperMouseEvent();
     }
@@ -103,32 +116,21 @@ void MenuItemPattern::CloseMenu()
     }
 
     int32_t menuTargetId = 0;
-    bool isInContextMenu = false;
 
     auto menuWrapper = GetMenuWrapper();
     if (menuWrapper) {
         auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(menuWrapperPattern);
-        menuTargetId = menuWrapperPattern->GetTargetId();
-
-        auto menu = AceType::DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
-        CHECK_NULL_VOID(menu);
-        auto menuPattern = menu->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
-        isInContextMenu = menuPattern->IsContextMenu();
+        menuWrapperPattern->HideMenu();
     } else {
         auto subMenu = GetMenu();
         CHECK_NULL_VOID(subMenu);
         auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
         CHECK_NULL_VOID(subMenuPattern);
         menuTargetId = subMenuPattern->IsSubMenu() ? subMenuPattern->GetTargetId() : -1;
-    }
 
-    if (isInContextMenu) {
-        SubwindowManager::GetInstance()->HideMenuNG(menuTargetId);
-        return;
+        overlayManager->HideMenu(menuTargetId);
     }
-    overlayManager->HideMenu(menuTargetId);
 }
 
 void MenuItemPattern::RegisterOnClick()
@@ -192,6 +194,16 @@ void MenuItemPattern::RegisterOnHover()
     inputHub->AddOnHoverEvent(mouseEvent);
 }
 
+void MenuItemPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        return pattern->OnKeyEvent(event);
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
 void MenuItemPattern::OnPress(const TouchEventInfo& info)
 {
     auto host = GetHost();
@@ -228,6 +240,7 @@ void MenuItemPattern::OnHover(bool isHover)
     CHECK_NULL_VOID(theme);
 
     if (isHover || isSubMenuShowed_) {
+        // keep hover color when subMenu showed
         auto hoverColor = theme->GetHoverColor();
         renderContext->UpdateBackgroundColor(hoverColor);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -238,6 +251,20 @@ void MenuItemPattern::OnHover(bool isHover)
         renderContext->UpdateBackgroundColor(bgColor);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+}
+
+bool MenuItemPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if ((event.code == KeyCode::KEY_DPAD_RIGHT || event.code == KeyCode::KEY_ENTER ||
+            event.code == KeyCode::KEY_SPACE) &&
+        !isSubMenuShowed_) {
+        ShowSubMenu();
+        return true;
+    }
+    return false;
 }
 
 void MenuItemPattern::RegisterWrapperMouseEvent()

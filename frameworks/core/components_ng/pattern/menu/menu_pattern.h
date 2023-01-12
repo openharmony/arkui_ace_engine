@@ -43,6 +43,11 @@ public:
         return false;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         return MakeRefPtr<MenuPaintMethod>();
@@ -107,6 +112,9 @@ public:
 private:
     void OnModifyDone() override;
     void RegisterOnClick();
+
+    void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event) const;
 
     RefPtr<TouchEventImpl> onClick_;
     int32_t targetId_ = -1;
