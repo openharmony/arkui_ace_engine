@@ -1312,6 +1312,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onRefreshAccessedHistory", &JSWeb::OnRefreshAccessedHistory);
     JSClass<JSWeb>::StaticMethod("cacheMode", &JSWeb::CacheMode);
     JSClass<JSWeb>::StaticMethod("overviewModeAccess", &JSWeb::OverviewModeAccess);
+    JSClass<JSWeb>::StaticMethod("wideViewModeAccess", &JSWeb::WideViewModeAccess);
     JSClass<JSWeb>::StaticMethod("fileFromUrlAccess", &JSWeb::FileFromUrlAccess);
     JSClass<JSWeb>::StaticMethod("databaseAccess", &JSWeb::DatabaseAccess);
     JSClass<JSWeb>::StaticMethod("textZoomRatio", &JSWeb::TextZoomRatio);
@@ -3283,6 +3284,11 @@ void JSWeb::TableData(bool tableData)
 void JSWeb::OnFileSelectorShowAbandoned(const JSCallbackInfo& args)
 {
     LOGI("JSWeb: OnFileSelectorShow Abandoned");
+}
+
+void JSWeb::WideViewModeAccess(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb: WideViewModeAccess placeholder");
 }
 
 void JSWeb::OnSearchResultReceive(const JSCallbackInfo& args)
