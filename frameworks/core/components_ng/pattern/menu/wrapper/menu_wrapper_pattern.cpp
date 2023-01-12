@@ -54,6 +54,8 @@ void MenuWrapperPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto gestureHub = host->GetOrCreateGestureEventHub();
 
+    isHided_ = false;
+
     // if already initialized touch event
     CHECK_NULL_VOID_NOLOG(!onTouch_);
 
