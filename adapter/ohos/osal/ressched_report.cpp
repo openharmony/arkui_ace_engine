@@ -20,11 +20,7 @@
 
 namespace OHOS::Ace {
 namespace {
-#ifdef __aarch64__
-    const std::string RES_SCHED_CLIENT_SO = "/system/lib64/libressched_client.z.so";
-#else
-    const std::string RES_SCHED_CLIENT_SO = "/system/lib/libressched_client.z.so";
-#endif
+const std::string RES_SCHED_CLIENT_SO = "libressched_client.z.so";
 }
 
 ReportDataFunc LoadReportDataFunc()
