@@ -96,9 +96,6 @@ void BuildTitleBar(const RefPtr<NavDestinationGroupNode>& navDestinationNode, co
 
 void MountTitleBar(const RefPtr<NavDestinationGroupNode>& hostNode)
 {
-    if (!hostNode->GetTitle() && !hostNode->GetSubtitle()) {
-        return;
-    }
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navDestinationLayoutProperty);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
