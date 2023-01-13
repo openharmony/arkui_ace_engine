@@ -163,6 +163,7 @@ public:
         return true;
     }
 #endif
+
 private:
     void InitGlobalObjectTemplate();
     void InitConsoleModule();  // add Console object to global

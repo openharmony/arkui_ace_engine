@@ -177,10 +177,11 @@ JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     const std::unordered_map<std::string, void*>& extraNativeObject, const shared_ptr<JsRuntime>& runtime)
 {
+    LOGE("JsiDeclarativeEngineInstance InitJsEnv 1");
     CHECK_RUN_ON(JS);
     ACE_SCOPED_TRACE("JsiDeclarativeEngineInstance::InitJsEnv");
     if (runtime != nullptr) {
-        LOGD("JsiDeclarativeEngineInstance InitJsEnv usingSharedRuntime");
+        LOGE("Kee JsiDeclarativeEngineInstance InitJsEnv usingSharedRuntime");
         runtime_ = runtime;
         usingSharedRuntime_ = true;
     } else {
@@ -216,18 +217,24 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
 
     runtime_->StartDebugger();
 #endif
-
+    LOGE("JsiDeclarativeEngineInstance InitJsEnv 5 isModulePreloaded_ = %{public}d", isModulePreloaded_);
     LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
     if (!isModulePreloaded_ || !usingSharedRuntime_ || IsPlugin()) {
+        LOGE("JsiDeclarativeEngineInstance InitJsEnv 6 isModulePreloaded_ = %{public}d", isModulePreloaded_);
         InitGlobalObjectTemplate();
     }
 
     // no need to initialize functions on global when use shared runtime
     if (usingSharedRuntime_ && isModuleInitialized_) {
         LOGI("InitJsEnv SharedRuntime has initialized, skip...");
+        LOGE("JsiDeclarativeEngineInstance InitJsEnv 7 isModulePreloaded_ = %{public}d", isModulePreloaded_);
     } else {
+        LOGE("JsiDeclarativeEngineInstance InitJsEnv 8 isModulePreloaded_ = %{public}d", isModulePreloaded_);
+        LOGE("JsiDeclarativeEngineInstance InitJsEnv 9 usingSharedRuntime_ = %{public}d", usingSharedRuntime_);
+        LOGE("JsiDeclarativeEngineInstance InitJsEnv 10 IsPlugin() = %{public}d", IsPlugin());
         InitGroupJsBridge();
         if (!isModulePreloaded_ || !usingSharedRuntime_ || IsPlugin()) {
+            LOGE("JsiDeclarativeEngineInstance InitJsEnv 11 isModulePreloaded_ = %{public}d", isModulePreloaded_);
             InitConsoleModule();
             InitAceModule();
             InitJsExportsUtilObject();
@@ -237,7 +244,10 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         }
     }
 
+    LOGE("JsiDeclarativeEngineInstance InitJsEnv 2 usingSharedRuntime_ = %{public}d", usingSharedRuntime_);
+    LOGE("JsiDeclarativeEngineInstance InitJsEnv 2 isCard_ = %{public}d", isCard_);
     if (usingSharedRuntime_) {
+        LOGE("JsiDeclarativeEngineInstance InitJsEnv set isModuleInitialized_ = true");
         isModuleInitialized_ = true;
     }
 
@@ -255,19 +265,23 @@ bool JsiDeclarativeEngineInstance::FireJsEvent(const std::string& eventStr)
 
 void JsiDeclarativeEngineInstance::InitAceModule()
 {
+    LOGE("Kee JsiDeclarativeEngineInstance::InitAceModule 1");
     uint8_t* codeStart;
     int32_t codeLength;
     codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
     codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
     bool stateMgmtResult = runtime_->EvaluateJsCode(codeStart, codeLength);
     if (!stateMgmtResult) {
+        LOGE("Kee JsiDeclarativeEngineInstance::InitAceModule 3");
         LOGE("EvaluateJsCode stateMgmt failed");
     }
+    LOGE("Kee JsiDeclarativeEngineInstance::InitAceModule 2");
     bool jsEnumStyleResult = runtime_->EvaluateJsCode(
         (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
     if (!jsEnumStyleResult) {
         LOGE("EvaluateJsCode jsEnumStyle failed");
     }
+    LOGE("Kee JsiDeclarativeEngineInstance::InitAceModule 4");
 #if defined(PREVIEW)
     std::string jsMockSystemPluginString(_binary_jsMockSystemPlugin_abc_start,
         _binary_jsMockSystemPlugin_abc_end - _binary_jsMockSystemPlugin_abc_start);
@@ -281,22 +295,25 @@ void JsiDeclarativeEngineInstance::InitAceModule()
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModule(void* runtime)
 {
-    LOGI("Ace ark lib loaded, PreloadAceModule.");
+    LOGE("Kee Ace ark lib loaded, OHOS_ACE_PreloadAceModule.");
     JsiDeclarativeEngineInstance::PreloadAceModule(runtime);
 }
 
 void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
 {
+    LOGE("Kee Ace ark lib loaded, PreloadAceModule.");
     if (isModulePreloaded_ && !IsPlugin()) {
         LOGE("PreloadAceModule already preloaded");
         return;
     }
+    LOGE("Kee Ace ark lib loaded, PreloadAceModule.1");
     auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime);
 
     if (!sharedRuntime) {
         LOGE("PreloadAceModule null runtime");
         return;
     }
+    LOGE("Kee Ace ark lib loaded, PreloadAceModule.2");
     std::shared_ptr<ArkJSRuntime> arkRuntime = std::make_shared<ArkJSRuntime>();
     auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
     EcmaVM* vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
@@ -308,11 +325,12 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
         LOGE("PreloadAceModule Ark Engine initialize runtime failed");
         return;
     }
+    LOGE("Kee Ace ark lib loaded, PreloadAceModule.3");
     LocalScope scope(vm);
     globalRuntime_ = arkRuntime;
     // preload js views
     JsRegisterViews(JSNApi::GetGlobalObject(vm));
-
+    LOGE("Kee Ace ark lib loaded, PreloadAceModule.4");
     // preload aceConsole
     shared_ptr<JsValue> global = arkRuntime->GetGlobal();
     shared_ptr<JsValue> aceConsoleObj = arkRuntime->NewObject();
@@ -322,10 +340,10 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     aceConsoleObj->SetProperty(arkRuntime, "warn", arkRuntime->NewFunction(JsiBaseUtils::JsWarnLogPrint));
     aceConsoleObj->SetProperty(arkRuntime, "error", arkRuntime->NewFunction(JsiBaseUtils::JsErrorLogPrint));
     global->SetProperty(arkRuntime, "aceConsole", aceConsoleObj);
-
+    LOGE("Kee Ace ark lib loaded, PreloadAceModule.5");
     // preload getContext
     JsiContextModule::GetInstance()->InitContextModule(arkRuntime, global);
-
+    LOGE("Kee Ace ark lib loaded, PreloadAceModule.6");
     // preload perfutil
     shared_ptr<JsValue> perfObj = arkRuntime->NewObject();
     perfObj->SetProperty(arkRuntime, "printlog", arkRuntime->NewFunction(JsPerfPrint));
@@ -333,22 +351,25 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     perfObj->SetProperty(arkRuntime, "begin", arkRuntime->NewFunction(JsPerfBegin));
     perfObj->SetProperty(arkRuntime, "end", arkRuntime->NewFunction(JsPerfEnd));
     global->SetProperty(arkRuntime, "perfutil", perfObj);
-
+    LOGE("Kee Ace ark lib loaded, PreloadAceModule.7");
     // preload exports and requireNative
     shared_ptr<JsValue> exportsUtilObj = arkRuntime->NewObject();
     global->SetProperty(arkRuntime, "exports", exportsUtilObj);
     global->SetProperty(arkRuntime, "requireNativeModule", arkRuntime->NewFunction(RequireNativeModule));
 
+    LOGE("Kee Ace ark lib loaded, PreloadAceModule.8");
     // preload js enums
     bool jsEnumStyleResult = arkRuntime->EvaluateJsCode(
         (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
     if (!jsEnumStyleResult) {
+        LOGE("Kee Ace ark lib loaded, PreloadAceModule.9");
         LOGE("EvaluateJsCode jsEnumStyle failed");
         globalRuntime_ = nullptr;
         return;
     }
 
     // preload state management
+    LOGE("Kee Ace ark lib loaded, PreloadAceModule.10");
     uint8_t* codeStart;
     int32_t codeLength;
     codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
@@ -357,10 +378,10 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     if (!evalResult) {
         LOGE("PreloadAceModule EvaluateJsCode stateMgmt failed");
     }
-
+    LOGE("Kee Ace ark lib loaded, PreloadAceModule.11");
     isModulePreloaded_ = evalResult;
     globalRuntime_ = nullptr;
-    LOGI("PreloadAceModule loaded:%{public}d", isModulePreloaded_);
+    LOGE("Kee PreloadAceModule loaded:%{public}d", isModulePreloaded_);
     localRuntime = arkRuntime;
 }
 
@@ -752,11 +773,14 @@ void JsiDeclarativeEngine::Destroy()
 
 bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 {
+    LOGE("Kee JsiDeclarativeEngine::Initialize 1");
     CHECK_RUN_ON(JS);
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::Initialize");
     LOGI("JsiDeclarativeEngine Initialize");
     ACE_DCHECK(delegate);
     engineInstance_ = AceType::MakeRefPtr<JsiDeclarativeEngineInstance>(delegate);
+    LOGE("Kee JsiDeclarativeEngine::Initialize 2 isCard_ = %{public}d", isCard_);
+    engineInstance_->SetIsCard(isCard_);
     auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime_);
     std::shared_ptr<ArkJSRuntime> arkRuntime;
     EcmaVM* vm = nullptr;
@@ -997,7 +1021,7 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
     }
     LOGE("Kee JsiDeclarativeEngine::ExecuteCardAbc fileName = %{public}s", fileName.c_str());
     std::vector<uint8_t> content;
-    LOGE("Kee delegate->GetAssetContent \"%{public}s\" failed.", fileName.c_str());
+    LOGE("Kee delegate->GetAssetContent \"%{public}s\".", fileName.c_str());
     if (!delegate->GetAssetContent(fileName, content)) {
         LOGE("Kee EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
         return true;
@@ -1183,6 +1207,7 @@ void JsiDeclarativeEngine::ReplaceJSContent(const std::string& url, const std::s
 
 RefPtr<Component> JsiDeclarativeEngine::GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID)
 {
+    LOGE("Kee JsiDeclarativeEngine::GetNewComponentWithJsCode");
     std::string dest;
     if (!Base64Util::Decode(jsCode, dest)) {
         return nullptr;

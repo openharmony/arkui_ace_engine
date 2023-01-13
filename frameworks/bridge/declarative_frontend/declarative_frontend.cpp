@@ -193,9 +193,16 @@ bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecuto
         needPostJsTask = !(setting.usePlatformAsUIThread && setting.useUIAsJSThread);
     }
     auto initJSEngineTask = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_), delegate = delegate_] {
+        LOGE("Kee DeclarativeFrontend initJSEngineTask 1");
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
+        }
+        if (delegate->isCardDelegate_) {
+            LOGE("Kee DeclarativeFrontend jsEngine->Initialize is Card");
+            jsEngine->SetIsCard(delegate->isCardDelegate_);
+        } else {
+            LOGE("Kee DeclarativeFrontend jsEngine->Initialize is not Card");
         }
         jsEngine->Initialize(delegate);
     };
@@ -469,6 +476,7 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack, onRestoreAbilityStateCallBack, onNewWantCallBack,
             onMemoryLevelCallBack, onStartContinuationCallBack, onCompleteContinuationCallBack, onRemoteTerminatedCallBack,
             onSaveDataCallBack, onRestoreDataCallBack, externalEventCallback);
+        delegate_->isCardDelegate_ = true;
     } else {
         LOGE("Kee DeclarativeFrontend::InitializeFrontendDelegate new delegate_");
         delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarative>(taskExecutor, loadCallback,

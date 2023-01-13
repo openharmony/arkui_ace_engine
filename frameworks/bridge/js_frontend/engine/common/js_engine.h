@@ -55,6 +55,11 @@ public:
         nativeEngine_ = nativeEngine;
     }
 
+    void SetIsCard(bool isCard)
+    {
+        isCard_ = isCard;
+    }
+    bool isCard_ = false;
 protected:
     NativeEngine* nativeEngine_ = nullptr;
 };
@@ -282,6 +287,12 @@ public:
 #endif
 
     virtual void FlushReload() {}
+
+    void SetIsCard(bool isCard)
+    {
+        isCard_ = isCard;
+    }
+    bool isCard_ = false;
 
 protected:
     NativeEngine* nativeEngine_ = nullptr;
