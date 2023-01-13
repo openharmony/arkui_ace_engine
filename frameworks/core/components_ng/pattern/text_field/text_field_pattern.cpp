@@ -713,7 +713,6 @@ void TextFieldPattern::HandleFocusEvent()
     LOGI("TextField %{public}d on focus", GetHost()->GetId());
     caretUpdateType_ = CaretUpdateType::EVENT;
     CloseSelectOverlay();
-    RequestKeyboard(false, true, true);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
