@@ -30,17 +30,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
-
-RefPtr<ScrollEdgeEffect> CreateScrollEdgeEffect(const EdgeEffect& effect)
-{
-    if (effect == EdgeEffect::SPRING) {
-        return AceType::MakeRefPtr<ScrollSpringEffect>();
-    }
-    if (effect == EdgeEffect::FADE) {
-        return AceType::MakeRefPtr<ScrollFadeEffect>(Color::GRAY);
-    }
-    return AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
-}
 }
 
 void ScrollModelNG::Create()
@@ -80,14 +69,6 @@ void ScrollModelNG::SetAxis(Axis axis)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, Axis, axis);
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollPaintProperty, Axis, axis);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto paintProperty = frameNode->GetPaintProperty<ScrollPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    paintProperty->SetScrollBarPositionMode(axis);
-    auto pattern = frameNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->ResetPosition();
 }
 
 void ScrollModelNG::SetOnScrollBegin(NG::ScrollBeginEvent&& event)
@@ -141,50 +122,25 @@ void ScrollModelNG::InitScrollBar(const RefPtr<ScrollBarTheme>& theme, const std
     const std::pair<bool, Dimension>& width, EdgeEffect effect)
 {}
 
-void ScrollModelNG::SetDisplayMode(int displayMode)
+void ScrollModelNG::SetDisplayMode(int value)
 {
-    if (displayMode < 0 || displayMode >= static_cast<int32_t>(DISPLAY_MODE.size())) {
-        return;
-    }
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto paintProperty = frameNode->GetPaintProperty<ScrollPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    paintProperty->SetDisplayMode(DISPLAY_MODE[displayMode]);
+    auto displayMode = static_cast<NG::DisplayMode>(value);
+    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, displayMode);
 }
 
 void ScrollModelNG::SetScrollBarWidth(const Dimension& dimension)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto paintProperty = frameNode->GetPaintProperty<ScrollPaintProperty>();
-    paintProperty->SetScrollBarWidth(dimension);
+    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, dimension);
 }
 
 void ScrollModelNG::SetScrollBarColor(const Color& color)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto paintProperty = frameNode->GetPaintProperty<ScrollPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    paintProperty->SetScrollBarColor(color);
+    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color);
 }
 
 void ScrollModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto effect = static_cast<EdgeEffect>(edgeEffect);
-    RefPtr<ScrollEdgeEffect> scrollEdgeEffect = CreateScrollEdgeEffect(effect);
-    pattern->SetScrollEdgeEffect(scrollEdgeEffect);
-    auto layoutProperty = frameNode->GetLayoutProperty<ScrollLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->SetScrollEdgeEffect(scrollEdgeEffect);
-    auto paintProperty = frameNode->GetPaintProperty<ScrollPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    paintProperty->SetScrollEdgeEffect(scrollEdgeEffect);
+    ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, EdgeEffect, edgeEffect);
 }
 
 } // namespace OHOS::Ace::NG

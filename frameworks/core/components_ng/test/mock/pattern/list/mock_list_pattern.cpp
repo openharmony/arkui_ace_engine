@@ -30,4 +30,23 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(
 {
     return false;
 }
+
+bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
+{
+    return true;
+}
+
+void ListPattern::UpdateScrollBarOffset() {}
+
+bool ListPattern::IsAtBottom() const
+{
+    return false;
+}
+
+bool ListPattern::IsAtTop() const
+{
+    return false;
+}
+
+void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) {}
 } // namespace OHOS::Ace::NG

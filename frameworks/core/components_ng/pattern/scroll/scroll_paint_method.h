@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_SCROLL_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_SCROLL_PAINT_METHOD_H
 
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -29,9 +31,22 @@ public:
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
 
+    void SetScrollBar(WeakPtr<ScrollBar>&& scrollBar)
+    {
+        scrollBar_ = scrollBar;
+    }
+
+    void SetEdgeEffect(WeakPtr<ScrollEdgeEffect>&& edgeEffect)
+    {
+        edgeEffect_ = edgeEffect;
+    }
+
 private:
     void PaintScrollBar(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
     void PaintScrollEffect(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
+
+    WeakPtr<ScrollBar> scrollBar_;
+    WeakPtr<ScrollEdgeEffect> edgeEffect_;
 };
 } // namespace OHOS::Ace::NG
 
