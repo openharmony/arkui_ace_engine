@@ -79,7 +79,16 @@
                       ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent"
-                  }
+                },
+                {
+                    "header": {
+                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/form_surface_service/include",
+                        "header_files": [
+                            "form_surface_interface.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/interfaces/inner_api/form_surface_service:form_surface_service"
+                }
             ],
             "test": [
                 "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/test:unittest",

@@ -179,11 +179,16 @@ void FormManagerDelegate::ProcessAddFormSurface(
     const AppExecFwk::FormJsInfo& formInfo, const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode)
 {
     if (!rsSurfaceNode) {
-        LOGI("---- etsCardTest ProcessAddFormSurface rsSurfaceNode is null");
+        LOGI("Kee ---- etsCardTest ProcessAddFormSurface rsSurfaceNode is null");
         return;
     }
-    LOGI("---- etsCardTest ProcessAddFormSurface formId=%{public}lld, surfaceNodeId=%{public}llu ----", formInfo.formId,
+    LOGI("Kee ---- etsCardTest ProcessAddFormSurface formId=%{public}lld, surfaceNodeId=%{public}llu ----", formInfo.formId,
         rsSurfaceNode->GetId());
+    if (onFormSurfaceNodeCallback_) {
+        onFormSurfaceNodeCallback_(rsSurfaceNode);
+    } else {
+        LOGE("Kee FormManagerDelegate::ProcessAddFormSurface onFormSurfaceNodeCallback_ = nullptr");
+    }
 }
 
 std::string FormManagerDelegate::ConvertRequestInfo(const RequestFormInfo& info) const
@@ -318,6 +323,15 @@ void FormManagerDelegate::AddFormUninstallCallback(const OnFormUninstallCallback
         return;
     }
     onFormUninstallCallback_ = callback;
+}
+
+void FormManagerDelegate::AddFormSurfaceNodeCallback(const OnFormSurfaceNodeCallback& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        LOGE("Kee callback is null or has released");
+        return;
+    }
+    onFormSurfaceNodeCallback_ = callback;
 }
 
 bool FormManagerDelegate::ParseAction(const std::string &action, AAFwk::Want &want)

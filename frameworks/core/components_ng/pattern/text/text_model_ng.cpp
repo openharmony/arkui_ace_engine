@@ -58,6 +58,7 @@ void TextModelNG::Create(const std::string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    LOGE("Kee TextModelNG::Create nodeId = %{public}d text = %{public}s", nodeId, content.c_str());
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     stack->Push(frameNode);

@@ -175,7 +175,11 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     window_->RecordFrameTime(nanoTimestamp, abilityName);
     FlushAnimation(GetTimeFromExternalTimer());
     FlushBuild();
+    if (isEtsCard_) {
+        LOGE("Kee PipelineContext::FlushVsync drawDelegate_ = %{public}p", drawDelegate_.get());
+    } 
     if (isEtsCard_ && drawDelegate_) {
+        LOGE("Kee PipelineContext::FlushVsync isEtsCard_");
         auto renderContext = AceType::DynamicCast<NG::RenderContext>(rootNode_->GetRenderContext());
         drawDelegate_->DrawRSFrame(renderContext);
         drawDelegate_ = nullptr;
@@ -191,6 +195,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     if (hasAninmation) {
         RequestFrame();
     }
+    if (isEtsCard_) {
+        LOGE("Kee PipelineContext::FlushVsync drawDelegate_ FlushMessages");
+    } 
     FlushMessages();
     if (onShow_ && onFocus_) {
         FlushFocus();
@@ -302,47 +309,70 @@ void PipelineContext::FlushBuildFinishCallbacks()
 
 void PipelineContext::SetupRootElement()
 {
+    LOGE("Kee PipelineContext::SetupRootElement rootWidth_ %{public}lf rootHeight_ %{public}lf", rootWidth_, rootHeight_);
     CHECK_RUN_ON(UI);
+    LOGE("Kee PipelineContext::SetupRootElement 1");
     rootNode_ = FrameNode::CreateFrameNodeWithTree(
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<RootPattern>());
+    LOGE("Kee PipelineContext::SetupRootElement 2 GetInstanceId()=%{public}d", GetInstanceId());
     rootNode_->SetHostRootId(GetInstanceId());
+    LOGE("Kee PipelineContext::SetupRootElement 3");
     rootNode_->SetHostPageId(-1);
+    LOGE("Kee PipelineContext::SetupRootElement 4");
     CalcSize idealSize { CalcLength(rootWidth_), CalcLength(rootHeight_) };
+    LOGE("Kee PipelineContext::SetupRootElement 5");
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     layoutConstraint.maxSize = idealSize;
+    LOGE("Kee PipelineContext::SetupRootElement 6");
     rootNode_->UpdateLayoutConstraint(layoutConstraint);
-    auto rootFocusHub = rootNode_->GetOrCreateFocusHub();
-    rootFocusHub->SetFocusType(FocusType::SCOPE);
-    rootFocusHub->SetFocusable(true);
+    LOGE("Kee PipelineContext::SetupRootElement 7");
+    if (!isEtsCard_) {
+        auto rootFocusHub = rootNode_->GetOrCreateFocusHub();
+        rootFocusHub->SetFocusType(FocusType::SCOPE);
+        rootFocusHub->SetFocusable(true);
+    }
     window_->SetRootFrameNode(rootNode_);
     rootNode_->AttachToMainTree();
-
+    LOGE("Kee PipelineContext::SetupRootElement 8");
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
+    LOGE("Kee PipelineContext::SetupRootElement 9");
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
+        LOGE("Kee PipelineContext::SetupRootElement 10");
         rootNode_->AddChild(ContainerModalView::Create(stageNode));
     } else {
+        LOGE("Kee PipelineContext::SetupRootElement 11");
         rootNode_->AddChild(stageNode);
+        LOGE("Kee PipelineContext::SetupRootElement 1111");
     }
 #ifdef ENABLE_ROSEN_BACKEND
-    if (!IsJsCard()) {
+    if (!IsJsCard() && !isEtsCard_) {
+        LOGE("Kee PipelineContext::SetupRootElement 1122");
         auto rsWindow = static_cast<RosenWindow*>(GetWindow());
         if (rsWindow) {
+            LOGE("Kee PipelineContext::SetupRootElement 11223");
             auto rsUIDirector = rsWindow->GetRsUIDirector();
             if (rsUIDirector) {
+                LOGE("Kee PipelineContext::SetupRootElement 112234");
                 rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
             }
         }
     }
 #endif
+    LOGE("Kee PipelineContext::SetupRootElement 12345");
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
+    LOGE("Kee PipelineContext::SetupRootElement 12");
     overlayManager_ = MakeRefPtr<OverlayManager>(DynamicCast<FrameNode>(stageNode->GetParent()));
+    LOGE("Kee PipelineContext::SetupRootElement 13");
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
+    LOGE("Kee PipelineContext::SetupRootElement 14");
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
+    LOGE("Kee PipelineContext::SetupRootElement 15");
     dragDropManager_ = MakeRefPtr<DragDropManager>();
+    LOGE("Kee PipelineContext::SetupRootElement 16");
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
-    LOGI("SetupRootElement success!");
+    LOGI("Kee SetupRootElement success!");
 }
 
 void PipelineContext::SetupSubRootElement()
@@ -413,7 +443,7 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     CHECK_RUN_ON(UI);
-    LOGD("PipelineContext: OnSurfaceChanged start.");
+    LOGE("Kee PipelineContext: OnSurfaceChanged start.");
     if (NearEqual(rootWidth_, width) && NearEqual(rootHeight_, height) &&
         type == WindowSizeChangeReason::CUSTOM_ANIMATION) {
         TryCallNextFrameLayoutCallback();
@@ -422,10 +452,15 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
 
     // TODO: add adjust for textFieldManager when ime is show.
     taskExecutor_->PostTask(
-        [weakFrontend = weakFrontend_, width, height]() {
+        [weakFrontend = weakFrontend_, isEtsCard = isEtsCard_, width, height]() {
             auto frontend = weakFrontend.Upgrade();
             if (frontend) {
-                frontend->OnSurfaceChanged(width, height);
+                if (isEtsCard) {
+                    LOGE("Kee PipelineContext::OnSurfaceChanged eTS Card");
+                    frontend->OnSurfaceChanged(400, 400); // Card TODO
+                } else {
+                    frontend->OnSurfaceChanged(width, height);
+                }
             }
         },
         TaskExecutor::TaskType::JS);
@@ -510,18 +545,26 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
 
 void PipelineContext::SetRootRect(double width, double height, double offset)
 {
-    LOGI("SetRootRect width %{public}f, height %{public}f, %{public}f", width, height, offset);
+    double w = width;
+    double h = height;
+    if (isEtsCard_) {
+        w = 400.00000;
+        h = 400.00000;
+    }
+    LOGE("Kee SetRootRect width %{public}f, height %{public}f, offset : %{public}f rootWidth_ = %{public}f", w, h, offset, rootWidth_);
     CHECK_RUN_ON(UI);
-    UpdateRootSizeAndScale(width, height);
+    UpdateRootSizeAndScale(w, h);
     CHECK_NULL_VOID(rootNode_);
     ScreenSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
     ScreenSystemManager::GetInstance().OnSurfaceChanged(width);
-    SizeF sizeF { static_cast<float>(width), static_cast<float>(height) };
+    SizeF sizeF { static_cast<float>(w), static_cast<float>(h) };
     if (rootNode_->GetGeometryNode()->GetFrameSize() != sizeF) {
-        CalcSize idealSize { CalcLength(width), CalcLength(height) };
+        LOGE("Kee PipelineContext::SetRootRect rootNode_ UpdateLayoutConstraint");
+        CalcSize idealSize { CalcLength(w), CalcLength(h) };
         MeasureProperty layoutConstraint;
         layoutConstraint.selfIdealSize = idealSize;
         layoutConstraint.maxSize = idealSize;
+        LOGE("Kee layoutConstraint = %{public}s", layoutConstraint.ToString().c_str());
         rootNode_->UpdateLayoutConstraint(layoutConstraint);
         rootNode_->MarkDirtyNode();
     }
@@ -906,6 +949,9 @@ void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node)
         dirtyFocusNode_ = WeakClaim(RawPtr(node));
     } else {
         dirtyFocusScope_ = WeakClaim(RawPtr(node));
+    }
+    if (isEtsCard_) {
+        LOGE("Kee PipelineContext::AddDirtyFocus");
     }
     window_->RequestFrame();
 }

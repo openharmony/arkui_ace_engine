@@ -34,6 +34,8 @@
 #include "core/common/js_message_dispatcher.h"
 #include "core/pipeline/pipeline_context.h"
 
+// #include "adapter/ohos/entrance/ui_content_impl.h"
+#include "adapter/ohos/entrance/ui_content_tmp.h"
 namespace OHOS::Ace::Platform {
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
 class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatcher {
@@ -109,9 +111,13 @@ public:
 
     void SetAssetManager(const RefPtr<AssetManager>& assetManager)
     {
+        LOGE("Kee aceContainer SetAssetManager");
         assetManager_ = assetManager;
         if (frontend_) {
+            LOGE("Kee aceContainer frontend_ SetAssetManager");
             frontend_->SetAssetManager(assetManager);
+        } else {
+            LOGE("Kee aceContainer frontend_ SetAssetManager nullptr");
         }
     }
 
@@ -253,6 +259,11 @@ public:
         return isSubContainer_;
     }
 
+    bool IsCardContainer() const
+    {
+        return isCardContainer_;
+    }
+
     void* GetSharedRuntime() override
     {
         return sharedRuntime_;
@@ -333,6 +344,11 @@ public:
         isSubContainer_ = isSubContainer;
     }
 
+    void SetIsCardContainer(bool isCardContainer)
+    {
+        isCardContainer_ = isCardContainer;
+    }
+
     void InitializeSubContainer(int32_t parentContainerId);
     static void SetDialogCallback(int32_t instanceId, FrontendDialogCallback callback);
 
@@ -356,6 +372,28 @@ public:
 
     void SetToken(sptr<IRemoteObject>& token);
     sptr<IRemoteObject> GetToken();
+    
+    void SetContainerRuntimeContext(RefPtr<Container> container)
+    {
+        auto aceContainer = AceType::DynamicCast<AceContainer>(container);
+        aceContainer->SetRuntimeContext(runtimeContext_);
+    }
+
+    void SetRuntimeContext(std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext)
+    {
+        runtimeContext_ = runtimeContext;
+    }
+
+    std::weak_ptr<OHOS::AbilityRuntime::Context> GetRuntimeContext()
+    {
+        return runtimeContext_;
+    }
+
+    std::unique_ptr<UIContentTmp> InitializeCard() override
+    {
+        LOGE("Kee ace container InitializeCard");
+        return UIContentTmp::CreateCard();
+    }
 
     std::string GetWebHapPath() const override
     {
@@ -401,6 +439,7 @@ private:
     sptr<IRemoteObject> token_;
 
     bool isSubContainer_ = false;
+    bool isCardContainer_ = false;
     int32_t parentId_ = 0;
     bool useStageModel_ = false;
 

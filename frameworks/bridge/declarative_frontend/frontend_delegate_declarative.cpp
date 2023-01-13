@@ -146,7 +146,7 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
       jsAccessibilityManager_(AccessibilityNodeManager::Create()),
       mediaQueryInfo_(AceType::MakeRefPtr<MediaQueryInfo>()), taskExecutor_(taskExecutor)
 {
-    LOGD("FrontendDelegateDeclarative create");
+    LOGE("Kee FrontendDelegateDeclarative create");
 }
 
 FrontendDelegateDeclarative::~FrontendDelegateDeclarative()
@@ -164,7 +164,7 @@ void FrontendDelegateDeclarative::RunPage(const std::string& url, const std::str
 {
     ACE_SCOPED_TRACE("FrontendDelegateDeclarative::RunPage");
 
-    LOGI("FrontendDelegateDeclarative RunPage url=%{public}s", url.c_str());
+    LOGE("Kee FrontendDelegateDeclarative RunPage url=%{public}s params=%{public}s", url.c_str(), params.c_str());
     std::string jsonContent;
     if (GetAssetContent(MANIFEST_JSON, jsonContent)) {
         manifestParser_->Parse(jsonContent);
@@ -1694,13 +1694,16 @@ bool FrontendDelegateDeclarative::GetAssetContent(const std::string& url, std::v
 
 std::string FrontendDelegateDeclarative::GetAssetPath(const std::string& url)
 {
-    return GetAssetPathImpl(assetManager_, url);
+    LOGE("Kee FrontendDelegateDeclarative::GetAssetPath url = %{public}s", url.c_str());
+    auto urlRet = GetAssetPathImpl(assetManager_, url);
+    LOGE("Kee FrontendDelegateDeclarative::GetAssetPath urlRet = %{public}s", urlRet.c_str());
+    return urlRet;
 }
 
 void FrontendDelegateDeclarative::LoadPage(
     int32_t pageId, const PageTarget& target, bool isMainPage, const std::string& params, bool isRestore)
 {
-    LOGI("FrontendDelegateDeclarative %{private}p LoadPage[%{public}d]: %{public}s.", this, pageId, target.url.c_str());
+    LOGE("Kee FrontendDelegateDeclarative %{private}p LoadPage[%{public}d]: %{public}s.", this, pageId, target.url.c_str());
     if (pageId == INVALID_PAGE_ID) {
         LOGE("FrontendDelegateDeclarative, invalid page id");
         EventReport::SendPageRouterException(PageRouterExcepType::LOAD_PAGE_ERR, target.url);

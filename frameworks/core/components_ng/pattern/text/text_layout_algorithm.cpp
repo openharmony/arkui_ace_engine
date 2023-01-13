@@ -57,17 +57,18 @@ void TextLayoutAlgorithm::OnReset() {}
 std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    LOGE("Kee TextLayoutAlgorithm::MeasureContent");
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, std::nullopt);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, std::nullopt);
-
+    LOGE("Kee TextLayoutAlgorithm::MeasureContent content = %{public}s", textLayoutProperty->GetContent().value_or("").c_str());
     if (!contentConstraint.maxSize.IsPositive()) {
         return std::nullopt;
     }
-
+    LOGE("Kee TextLayoutAlgorithm::MeasureContent 1");
     bool skipMeasure = false;
     if (paragraph_) {
         // remeasure case, check text length and layout constrain.
@@ -103,6 +104,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
             paragraphNewWidth = std::clamp(GetTextWidth(), 0.0f, contentConstraint.maxSize.Width());
         }
         if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
+            LOGE("Kee TextLayoutAlgorithm::MeasureContent Layout paragraphNewWidth = %{public}lf", paragraphNewWidth);
             paragraph_->Layout(std::ceil(paragraphNewWidth));
         }
     }
@@ -116,6 +118,8 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     }
     float heightFinal =
         std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
+    LOGE("Kee TextLayoutAlgorithm::MeasureContent paragraph_ width = %{public}lf height = %{public}lf", static_cast<double>(GetTextWidth()), static_cast<double>(heightFinal));
+        
     return SizeF(static_cast<float>(GetTextWidth()), heightFinal);
 }
 

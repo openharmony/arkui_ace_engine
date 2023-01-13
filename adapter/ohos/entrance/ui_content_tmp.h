@@ -13,14 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_CONTENT_H
-#define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_CONTENT_H
+#ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_CONTENT_TEM_H
+#define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_CONTENT_TEM_H
 
 #include <memory>
 #include <string>
-
-#include "viewport_config.h"
-#include "foundation/multimedia/image_framework/interfaces/innerkits/include/pixel_map.h"
 
 namespace OHOS {
 
@@ -56,19 +53,13 @@ class NativeValue;
 
 namespace OHOS::Ace {
 
-#ifndef ACE_EXPORT
-#define ACE_EXPORT __attribute__((visibility("default")))
-#endif // !1
-
-class ACE_EXPORT UIContent {
+class UIContentTmp {
 public:
-    static std::shared_ptr<UIContent> Create(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime, bool isCard);
-    static std::unique_ptr<UIContent> Create(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime);
-    static std::unique_ptr<UIContent> Create(OHOS::AppExecFwk::Ability* ability);
+    static void* gContext;
+    static void* gRuntime;
+    static std::unique_ptr<UIContentTmp> CreateCard();
 
-    static void ShowDumpHelp(std::vector<std::string>& info);
-
-    virtual ~UIContent() = default;
+    virtual ~UIContentTmp() = default;
 
     virtual void SetIsCard(bool isCard) {}
 
@@ -93,7 +84,7 @@ public:
     virtual bool ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) = 0;
     virtual bool ProcessVsyncEvent(uint64_t timeStampNanos) = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) = 0;
-    virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason) = 0;
+    // virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason) = 0;
     virtual void UpdateWindowMode(OHOS::Rosen::WindowMode mode) = 0;
     virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) = 0;
 
@@ -110,9 +101,9 @@ public:
     virtual void NotifyMemoryLevel(int32_t level) = 0;
 
     virtual void SetAppWindowTitle(const std::string& title) = 0;
-    virtual void SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap) = 0;
+    // virtual void SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap) = 0;
 };
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_CONTENT_H
+#endif // FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_CONTENT_TEM_H

@@ -336,7 +336,7 @@ void JSText::Create(const JSCallbackInfo& info)
     if (info.Length() > 0) {
         ParseJsString(info[0], data);
     }
-
+    LOGE("Kee JSText::Create data = %{public}s", data.c_str());
     TextModel::GetInstance()->Create(data);
 }
 

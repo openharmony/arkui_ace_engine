@@ -90,19 +90,20 @@ constexpr int32_t ERROR_CODE_URI_ERROR_LITE = 200002;      // Uri error for lite
 template<class T>
 bool GetAssetContentImpl(const RefPtr<AssetManager>& assetManager, const std::string& url, T& content)
 {
+    LOGE("Kee GetAssetContentImpl url = %{public}s", url.c_str());
     if (!assetManager) {
-        LOGE("AssetManager is null");
+        LOGE("Kee GetAssetContentImpl AssetManager is null");
         return false;
     }
     auto jsAsset = assetManager->GetAsset(url);
     if (jsAsset == nullptr) {
-        LOGW("uri:%{public}s Asset is null", url.c_str());
+        LOGE("Kee uri:%{public}s Asset is null", url.c_str());
         return false;
     }
     auto bufLen = jsAsset->GetSize();
     auto buffer = jsAsset->GetData();
     if ((buffer == nullptr) || (bufLen <= 0)) {
-        LOGE("uri:%{private}s buffer is null", url.c_str());
+        LOGE("Kee uri:%{private}s buffer is null", url.c_str());
         return false;
     }
     content.assign(buffer, buffer + bufLen);
@@ -130,7 +131,7 @@ bool GetAssetContentAllowEmpty(const RefPtr<AssetManager>& assetManager, const s
 inline std::string GetAssetPathImpl(const RefPtr<AssetManager>& assetManager, const std::string& url)
 {
     if (!assetManager) {
-        LOGE("AssetManager is null");
+        LOGE("Kee AssetManager is null");
         return "";
     }
     return assetManager->GetAssetPath(url);

@@ -36,10 +36,12 @@ public:
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
+        LOGE("Kee TextPaintMethod GetContentDrawFunction");
         CHECK_NULL_RETURN(paragraph_, nullptr);
         auto offset = paintWrapper->GetContentOffset();
         auto paintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
         return [paragraph = paragraph_, paintOffset](RSCanvas& canvas) {
+            LOGE("Kee TextPaintMethod GetContentDrawFunction offset: x = %{public}f y = %{public}f", paintOffset.GetX(), paintOffset.GetY());
             paragraph->Paint(canvas, paintOffset.GetX(), paintOffset.GetY());
         };
     }

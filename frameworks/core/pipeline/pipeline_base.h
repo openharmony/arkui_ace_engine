@@ -68,6 +68,7 @@ public:
         const RefPtr<Frontend>& frontend, int32_t instanceId, RefPtr<PlatformResRegister> platformResRegister);
     ~PipelineBase() override;
 
+    static std::unique_ptr<DrawDelegate> gDelegate;
     static RefPtr<PipelineBase> GetCurrentContext();
 
     virtual void SetupRootElement() = 0;
@@ -447,6 +448,7 @@ public:
 
     void SetDrawDelegate(std::unique_ptr<DrawDelegate> delegate)
     {
+        LOGE("Kee SetDrawDelegate delegate = %{public}p", delegate.get());
         drawDelegate_ = std::move(delegate);
     }
 

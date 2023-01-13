@@ -35,6 +35,7 @@ namespace OHOS::Ace::NG {
 
 void TextPattern::OnAttachToFrameNode()
 {
+    LOGE("Kee TextPattern::OnAttachToFrameNode");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
@@ -148,6 +149,7 @@ void TextPattern::HandleOnSelectAll()
 
 void TextPattern::OnModifyDone()
 {
+    LOGE("Kee TextPattern::OnModifyDone");
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto host = GetHost();
@@ -164,9 +166,11 @@ void TextPattern::OnModifyDone()
 
 bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    LOGE("Kee TextPattern::OnDirtyLayoutWrapperSwap");
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
+    LOGE("Kee TextPattern::OnDirtyLayoutWrapperSwap 1");
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
@@ -178,6 +182,7 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     paragraph_ = textLayoutAlgorithm->GetParagraph();
     baselineOffset_ = textLayoutAlgorithm->GetBaselineOffset();
+    LOGE("Kee TextPattern::OnDirtyLayoutWrapperSwap baselineOffset_ = %{public}f", baselineOffset_);
     return true;
 }
 

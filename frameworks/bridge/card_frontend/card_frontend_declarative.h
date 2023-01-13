@@ -34,52 +34,66 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT CardFrontendDeclarative : public CardFrontend {
-    DECLARE_ACE_TYPE(CardFrontendDeclarative, CardFrontend);
+// class ACE_EXPORT CardFrontendDeclarative : public CardFrontend, public DeclarativeFrontendNG {
+//     DECLARE_ACE_TYPE(CardFrontendDeclarative, CardFrontend, DeclarativeFrontendNG);
 
+// class ACE_EXPORT CardFrontendDeclarative : public DeclarativeFrontendNG {
+//     DECLARE_ACE_TYPE(CardFrontendDeclarative, DeclarativeFrontendNG);
+class ACE_EXPORT CardFrontendDeclarative : public DeclarativeFrontend {
+    DECLARE_ACE_TYPE(CardFrontendDeclarative, DeclarativeFrontend);
+
+// class ACE_EXPORT CardFrontendDeclarative : public CardFrontend {
+//     DECLARE_ACE_TYPE(CardFrontendDeclarative, CardFrontend);
 public:
+    // CardFrontendDeclarative() = default;
+    // ~CardFrontendDeclarative() override;
     CardFrontendDeclarative() = default;
-    ~CardFrontendDeclarative() override;
+    // ~CardFrontendDeclarative() override;
 
     // Card
-    void OnPageLoaded(const RefPtr<Framework::JsAcePage>& page) override;
-    void HandleSurfaceChanged(int32_t width, int32_t height) override;
-    void UpdatePageData(const std::string& dataList) override;
-    void OnMediaFeatureUpdate() override;
+    // void OnPageLoaded(const RefPtr<Framework::JsAcePage>& page) override;
+    // void HandleSurfaceChanged(int32_t width, int32_t height) override;
+    // void UpdatePageData(const std::string& dataList) override;
+    // void OnMediaFeatureUpdate() override;
+
+    // Card
+    void UpdateData(const std::string& dataList);
+    void HandleSurfaceChanged(int32_t width, int32_t height);
+    void UpdatePageData(const std::string& dataList);
+    void OnMediaFeatureUpdate();
 
     // Frontend
-    bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override;
-    void Destroy() override;
-    void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;
-    void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
-    void OnShow() override
-    {
-        foregroundFrontend_ = true;
-        if (delegate_) {
-            delegate_->OnPageShow();
-        }
-    }
-    void OnHide() override
-    {
-        foregroundFrontend_ = false;
-        if (delegate_) {
-            delegate_->OnPageHide();
-        }
-    }
+    // bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override;
+    // void Destroy() override;
+    // void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;
+    // void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
+    // void OnShow() override
+    // {
+    //     if (delegate_) {
+    //         delegate_->OnPageShow();
+    //     }
+    // }
+    // void OnHide() override
+    // {
+    //     if (delegate_) {
+    //         delegate_->OnPageHide();
+    //     }
+    // }
 
     void RunPage(int32_t pageId, const std::string& url, const std::string& params) override;
 
     void OnSurfaceChanged(int32_t width, int32_t height) override;
-    void UpdateData(const std::string& dataList) override;
     void SetColorMode(ColorMode colorMode) override;
-    void RebuildAllPages() override;
+    // void RebuildAllPages() override;
 
     // eTSCard only
-    RefPtr<NG::PageRouterManager> GetPageRouterManager() const;
+    // RefPtr<NG::PageRouterManager> GetPageRouterManager() const;
 
-    void SetLoadCardCallBack(WeakPtr<PipelineBase> outSidePipelineContext) override
+    // void SetLoadCardCallBack(WeakPtr<PipelineBase> outSidePipelineContext) override
+    void SetLoadCardCallBack(WeakPtr<PipelineBase> outSidePipelineContext)
     {
         const auto& loadCallback = [outSidePipelineContext](const std::string& url, int64_t cardId) -> bool {
+            LOGE("Kee loadCallback");
             auto context = outSidePipelineContext.Upgrade();
             if (!context) {
                 LOGE("Load card callback failed, host pipeline nullptr");
@@ -97,20 +111,71 @@ public:
             if (!jsEngine) {
                 return false;
             }
-
+            LOGE("Kee loadCallback jsEngine->LoadCard");
             return jsEngine->LoadCard(url, cardId);
         };
-        delegate_->SetLoadCardCallBack(loadCallback);
+        // delegate_->SetLoadCardCallBack(loadCallback);
+        auto delegate = AceType::DynamicCast<Framework::CardFrontendDelegateDeclarative>(delegate_);
+        if (delegate) {
+            LOGE("Kee CardFrontendDeclarative::SetLoadCardCallBack delegate->SetLoadCardCallBack");
+            delegate->SetLoadCardCallBack(loadCallback);
+        } else {
+            LOGE("Kee CardFrontendDeclarative::SetLoadCardCallBack delegate nullptr");
+        }
     }
 
     RefPtr<Framework::CardFrontendDelegateDeclarative> GetDelegate()
     {
-        return delegate_;
+        LOGE("Kee CardFrontendDelegateDeclarative GetDelegate");
+        return AceType::DynamicCast<Framework::CardFrontendDelegateDeclarative>(delegate_);
     }
+
+    // void SetDelegate(RefPtr<Framework::FrontendDelegate> delegate)
+    // {
+    //     LOGE("Kee CardFrontendDelegateDeclarative SetDelegate");
+    //     delegate_ = AceType::DynamicCast<CardFrontendDelegateDeclarative>(delegate_);
+    // }
+
+    std::string GetFormSrcPath(const std::string& uri, const std::string& suffix) const;
+
+    void SetFormSrc(std::string formSrc)
+    {
+        formSrc_ = formSrc;
+    }
+
+    std::string GetFormSrc() const
+    {
+        return formSrc_;
+    }
+
+    void SetRunningCardId(int64_t cardId)
+    {
+        cardId_ = cardId;
+    }
+
+    void ParseManifest() const;
+
+    ColorMode colorMode_ = ColorMode::LIGHT;
+    // FrontendType type_ = FrontendType::JS_CARD;
+    bool foregroundFrontend_ = false;
+    double density_ = 1.0;
+    std::string cardHapPath_;
+
+    Framework::PipelineContextHolder holder_;
+    RefPtr<AssetManager> assetManager_;
+    RefPtr<Framework::ManifestParser> manifestParser_;
+
+    mutable std::once_flag onceFlag_;
+    RefPtr<TaskExecutor> taskExecutor_;
+    RefPtr<AceEventHandler> eventHandler_;
+    Framework::PageIdPool pageIdPool_;
+    std::string formSrc_;
+    WindowConfig cardWindowConfig_;
+    uint64_t cardId_ = 0; // cardId != formId, cardId is the nodeId of component.
 
 private:
     void InitializeDelegate(const RefPtr<TaskExecutor>& taskExecutor);
-    RefPtr<Framework::CardFrontendDelegateDeclarative> delegate_;
+    // RefPtr<Framework::CardFrontendDelegateDeclarative> delegate_;
 };
 
 class CardEventHandlerDeclarative : public AceEventHandler {

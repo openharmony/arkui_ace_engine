@@ -82,7 +82,6 @@ public:
     const std::string& GetAppName() const override;
     const std::string& GetVersionName() const override;
     int32_t GetVersionCode() const override;
-
     double MeasureText(const MeasureContext& context) override;
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override {}
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,

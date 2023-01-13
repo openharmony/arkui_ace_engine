@@ -34,6 +34,9 @@
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/pipeline/pipeline_base.h"
 
+// #include "interfaces/inner_api/ace/ui_content.h"
+#include "adapter/ohos/entrance/ui_content_tmp.h"
+
 namespace OHOS::Ace {
 
 using PageTask = std::function<void()>;
@@ -49,6 +52,7 @@ constexpr int32_t INSTANCE_ID_UNDEFINED = -1;
 constexpr int32_t INSTANCE_ID_PLATFORM = -2;
 constexpr int32_t MIN_PLUGIN_SUBCONTAINER_ID = 2000000;
 
+// class UIContentTmp;
 class ACE_FORCE_EXPORT_WITH_PREVIEW Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
 
@@ -57,6 +61,8 @@ public:
     ~Container() override = default;
 
     virtual void Initialize() = 0;
+
+    virtual std::unique_ptr<OHOS::Ace::UIContentTmp> InitializeCard() { return nullptr;}
 
     virtual void Destroy() = 0;
 
@@ -252,6 +258,19 @@ public:
     Window* GetWindow() const
     {
         auto context = GetPipelineContext();
+        if (context) {
+            LOGE("Kee container GetWindow");
+            auto window = context->GetWindow();
+            if (window) {
+                LOGE("Kee container GetWindow 1");
+                return window;
+            } else {
+                LOGE("Kee container GetWindow 2");
+                return nullptr;
+            }
+        } else {
+            LOGE("Kee container GetWindow 3");
+        }
         return context ? context->GetWindow() : nullptr;
     }
 

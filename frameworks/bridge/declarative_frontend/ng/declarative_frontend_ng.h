@@ -200,7 +200,7 @@ public:
         }
     }
 
-private:
+public:
     void InitializeDelegate(const RefPtr<TaskExecutor>& taskExecutor);
 
     FrontendType type_ = FrontendType::DECLARATIVE_JS;

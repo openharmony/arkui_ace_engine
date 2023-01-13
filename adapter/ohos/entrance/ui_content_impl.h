@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_UI_CONTENT_IMPL_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_UI_CONTENT_IMPL_H
 
+#include "ability_context.h"
+#include "context_impl.h"
+
 #include "ability_info.h"
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
@@ -26,6 +29,8 @@
 #include "base/utils/macros.h"
 #include "wm/window.h"
 
+#include "adapter/ohos/entrance/ui_content_tmp.h"
+
 namespace OHOS {
 
 class Window;
@@ -34,14 +39,21 @@ class Window;
 
 namespace OHOS::Ace {
 
-class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
+class ACE_FORCE_EXPORT UIContentImpl : public UIContent, public UIContentTmp {
 public:
+
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime);
     UIContentImpl(OHOS::AppExecFwk::Ability* ability);
+    UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard);
     ~UIContentImpl()
     {
         DestroyUIDirector();
         DestroyCallback();
+    }
+
+    void SetIsCard(bool isCard) override
+    {
+        isCard_ = isCard;
     }
 
     // UI content lifecycles
@@ -88,6 +100,8 @@ private:
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
+    std::shared_ptr<OHOS::AbilityRuntime::ContextImpl> shareContextImpl_;
+    std::shared_ptr<OHOS::AbilityRuntime::Context> shareContext_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
     std::string startUrl_;
@@ -97,6 +111,7 @@ private:
 
     // ITouchOutsideListener is used for touching out of hot areas of window.
     OHOS::sptr<OHOS::Rosen::ITouchOutsideListener> touchOutsideListener_ = nullptr;
+    bool isCard_ = false;
 };
 
 } // namespace OHOS::Ace

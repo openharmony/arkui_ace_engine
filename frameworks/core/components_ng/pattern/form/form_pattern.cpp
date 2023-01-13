@@ -121,6 +121,8 @@ void FormPattern::InitFormManagerDelegate()
             CHECK_NULL_VOID(form);
             auto container = form->GetSubContainer();
             CHECK_NULL_VOID(container);
+            LOGE("Kee AddFormAcquireCallback designWidth = %{public}d", formJsInfo.formWindow.designWidth);
+            LOGE("Kee AddFormAcquireCallback autoDesignWidth = %{public}d", formJsInfo.formWindow.autoDesignWidth);
             container->SetWindowConfig({ formJsInfo.formWindow.designWidth, formJsInfo.formWindow.autoDesignWidth });
             container->RunCard(id, path, module, data, imageDataMap, formJsInfo.formSrc, frontendType);
         });
@@ -178,6 +180,25 @@ void FormPattern::InitFormManagerDelegate()
             form->FireOnUninstallEvent(formId);
         });
     });
+
+    formManagerBridge_->AddFormSurfaceNodeCallback([weak = WeakClaim(this), instanceID](const std::shared_ptr<RSNode>& node) {
+        ContainerScope scope(instanceID);
+        LOGE("Kee FormPattern::AddFormSurfaceNodeCallback");
+        CHECK_NULL_VOID(node);
+        auto formComponent = weak.Upgrade();
+        CHECK_NULL_VOID(formComponent);
+        auto host = formComponent->GetHost();
+        CHECK_NULL_VOID(host);
+        auto formComponentContext = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
+        CHECK_NULL_VOID(formComponentContext);
+        auto rsNode = formComponentContext->GetRSNode();
+        CHECK_NULL_VOID(rsNode);
+        rsNode->AddChild(node, -1);
+        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        LOGE("Kee FormPattern::AddFormSurfaceNodeCallback FormComponent RSNodeId: %{public}lld", rsNode->GetId());
+        LOGE("Kee FormPattern::AddFormSurfaceNodeCallback eTSCard Root  RSNodeId: %{public}lld", node->GetId());
+        LOGE("Kee FormPattern::AddFormSurfaceNodeCallback end ");
+    });
 }
 
 void FormPattern::CreateCardContainer()
@@ -223,6 +244,7 @@ void FormPattern::CreateCardContainer()
 
 std::unique_ptr<DrawDelegate> FormPattern::GetDrawDelegate()
 {
+    LOGE("Kee FormPattern::GetDrawDelegate");
     auto drawDelegate = std::make_unique<DrawDelegate>();
 #ifdef ENABLE_ROSEN_BACKEND
     drawDelegate->SetDrawRSFrameCallback(
@@ -242,6 +264,7 @@ std::unique_ptr<DrawDelegate> FormPattern::GetDrawDelegate()
 
     drawDelegate->SetDrawRSFrameByRenderContextCallback(
         [weak = WeakClaim(this)](RefPtr<OHOS::Ace::NG::RenderContext>& renderContext) {
+            LOGE("Kee FormPattern::GetDrawDelegate SetDrawRSFrameByRenderContextCallback");
             auto context = DynamicCast<NG::RosenRenderContext>(renderContext);
             CHECK_NULL_VOID(context);
             auto node = context->GetRSNode();
@@ -256,6 +279,9 @@ std::unique_ptr<DrawDelegate> FormPattern::GetDrawDelegate()
             CHECK_NULL_VOID(rsNode);
             rsNode->AddChild(node, -1);
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+            LOGE("Kee FormPattern::GetDrawDelegate FormComponent RSNodeId: %{public}lld", rsNode->GetId());
+            LOGE("Kee FormPattern::GetDrawDelegate eTSCard Root  RSNodeId: %{public}lld", node->GetId());
+            LOGE("Kee FormPattern::GetDrawDelegate SetDrawRSFrameByRenderContextCallback end ");
         });
 #endif
     return drawDelegate;

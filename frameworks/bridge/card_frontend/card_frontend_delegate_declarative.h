@@ -23,7 +23,8 @@
 #include "frameworks/base/utils/measure_util.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
-#include "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h"
+// #include "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h"
+#include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
 
 namespace OHOS::Ace::Framework {
 // This is the primary class by which the CardFrontend delegates
@@ -31,13 +32,48 @@ namespace OHOS::Ace::Framework {
 using LoadCardCallback = std::function<bool(const std::string&, int64_t cardId)>;
 using UpdateCardDataCallback = std::function<void(const std::string&)>;
 
-class ACE_EXPORT CardFrontendDelegateDeclarative : public FrontendDelegateDeclarativeNG {
-    DECLARE_ACE_TYPE(CardFrontendDelegateDeclarative, FrontendDelegateDeclarativeNG);
 
+// class ACE_EXPORT CardFrontendDelegateDeclarative : public FrontendDelegateDeclarativeNG {
+//     DECLARE_ACE_TYPE(CardFrontendDelegateDeclarative, FrontendDelegateDeclarativeNG);
+
+class ACE_EXPORT CardFrontendDelegateDeclarative : public FrontendDelegateDeclarative {
+    DECLARE_ACE_TYPE(CardFrontendDelegateDeclarative, FrontendDelegateDeclarative);
 public:
-    explicit CardFrontendDelegateDeclarative(const RefPtr<TaskExecutor>& taskExecutor)
-        : FrontendDelegateDeclarativeNG(taskExecutor)
-    {}
+    CardFrontendDelegateDeclarative(const RefPtr<TaskExecutor>& taskExecutor, const LoadJsCallback& loadCallback,
+        const JsMessageDispatcherSetterCallback& transferCallback, const EventCallback& asyncEventCallback,
+        const EventCallback& syncEventCallback, const UpdatePageCallback& updatePageCallback,
+        const ResetStagingPageCallback& resetLoadingPageCallback, const DestroyPageCallback& destroyPageCallback,
+        const DestroyApplicationCallback& destroyApplicationCallback,
+        const UpdateApplicationStateCallback& updateApplicationStateCallback, const TimerCallback& timerCallback,
+        const MediaQueryCallback& mediaQueryCallback, const RequestAnimationCallback& requestAnimationCallback,
+        const JsCallback& jsCallback, const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
+        const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
+        const OnSaveAbilityStateCallBack& onSaveAbilityStateCallBack,
+        const OnRestoreAbilityStateCallBack& onRestoreAbilityStateCallBack, const OnNewWantCallBack& onNewWantCallBack,
+        const OnMemoryLevelCallBack& onMemoryLevelCallBack,
+        const OnStartContinuationCallBack& onStartContinuationCallBack,
+        const OnCompleteContinuationCallBack& onCompleteContinuationCallBack,
+        const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack, const OnSaveDataCallBack& onSaveDataCallBack,
+        const OnRestoreDataCallBack& onRestoreDataCallBack, const ExternalEventCallback& externalEventCallback) :
+            FrontendDelegateDeclarative(taskExecutor, loadCallback, transferCallback, asyncEventCallback,
+                syncEventCallback, updatePageCallback,
+                resetLoadingPageCallback, destroyPageCallback,
+                destroyApplicationCallback,
+                updateApplicationStateCallback, timerCallback,
+                mediaQueryCallback, requestAnimationCallback,
+                jsCallback, onWindowDisplayModeChangedCallBack,
+                onConfigurationUpdatedCallBack,
+                onSaveAbilityStateCallBack,
+                onRestoreAbilityStateCallBack, onNewWantCallBack,
+                onMemoryLevelCallBack,
+                onStartContinuationCallBack,
+                onCompleteContinuationCallBack,
+                onRemoteTerminatedCallBack, onSaveDataCallBack,
+                onRestoreDataCallBack, externalEventCallback)
+    {
+        LOGE("Kee CardFrontendDelegateDeclarative constructor");
+    }
+
     ~CardFrontendDelegateDeclarative() override;
 
     void RunCard(const std::string& url, const std::string& params, const std::string& profile, int64_t cardId);
@@ -52,7 +88,11 @@ public:
         CHECK_NULL_VOID(pageRouterManager);
         pageRouterManager->SetLoadCardCallback(loadCallback);
     }
-
+    void LoadResourceConfiguration(
+        std::map<std::string, std::string>& mediaResourceFileMap, std::unique_ptr<JsonValue>& currentResourceData) override
+    {
+        LOGE("Kee CardFrontendDelegateDeclarative LoadResourceConfiguration");
+    }
     void UpdatePageData(const std::string& dataList)
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -76,10 +116,6 @@ public:
             updateCardData_(cardData_);
         }
     }
-	
-    double MeasureText(const MeasureContext& context) override;
-
-    ACE_DISALLOW_COPY_AND_MOVE(CardFrontendDelegateDeclarative);
 
 private:
     UpdateCardDataCallback updateCardData_;

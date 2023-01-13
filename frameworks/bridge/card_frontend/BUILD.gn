@@ -24,7 +24,10 @@ template("card_frontend") {
     configs = [ "$ace_root:ace_config" ]
 
     sources = [
-      "$ace_root/frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.cpp",
+      # "$ace_root/frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.cpp",
+      # "$ace_root/frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.cpp",
+      # "$ace_root/frameworks/bridge/declarative_frontend/declarative_frontend.cpp",
+      # "$ace_root/frameworks/bridge/declarative_frontend/frontend_delegate_declarative.cpp",
       "card_frontend.cpp",
       "card_frontend_declarative.cpp",
       "card_frontend_delegate.cpp",
@@ -32,7 +35,8 @@ template("card_frontend") {
       "js_card_parser.cpp",
     ]
 
-    deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+    deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code"
+             ]
   }
 }
 

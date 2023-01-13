@@ -486,6 +486,7 @@ void AceAbility::OnStart(const Want& want)
     }
 
     // run page.
+    LOGE("Kee AceAbility::OnStart ceContainer::RunPage");
     Platform::AceContainer::RunPage(abilityId_, Platform::AceContainer::GetContainer(abilityId_)->GeneratePageId(),
         parsedPageUrl, want.GetStringParam(START_PARAMS_KEY));
 

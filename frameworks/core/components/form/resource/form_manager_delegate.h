@@ -49,6 +49,7 @@ public:
         std::function<void(int64_t, const std::string&, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&)>;
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using OnFormUninstallCallback = std::function<void(int64_t)>;
+    using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSNode>&)>;
 
     enum class State : char {
         WAITINGFORSIZE,
@@ -71,6 +72,7 @@ public:
     void AddFormUpdateCallback(const OnFormUpdateCallback& callback);
     void AddFormErrorCallback(const OnFormErrorCallback& callback);
     void AddFormUninstallCallback(const OnFormUninstallCallback& callback);
+    void AddFormSurfaceNodeCallback(const OnFormSurfaceNodeCallback& callback);
 
     void OnActionEvent(const std::string& action);
 #ifdef OHOS_STANDARD_SYSTEM
@@ -100,6 +102,7 @@ private:
     OnFormUpdateCallback onFormUpdateCallback_;
     OnFormErrorCallback onFormErrorCallback_;
     OnFormUninstallCallback onFormUninstallCallback_;
+    OnFormSurfaceNodeCallback onFormSurfaceNodeCallback_;
 
     State state_ { State::WAITINGFORSIZE };
 #ifdef OHOS_STANDARD_SYSTEM

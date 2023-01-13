@@ -40,6 +40,7 @@ namespace OHOS::Ace::NG {
 RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<TaskExecutor> taskExecutor, int32_t id)
     : rsWindow_(window), taskExecutor_(taskExecutor), id_(id)
 {
+    LOGE("Kee RosenWindow::RosenWindow id = %{public}d", id);
     int64_t refreshPeriod = static_cast<int64_t>(ONE_SECOND_IN_NANO / GetDisplayRefreshRate());
     vsyncCallback_ = std::make_shared<OHOS::Rosen::VsyncCallback>();
     vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_, refreshPeriod](int64_t timeStampNanos) {
@@ -64,14 +65,19 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
         uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); });
     };
     rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
-    rsUIDirector_->SetRSSurfaceNode(window->GetSurfaceNode());
-    rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
-    rsUIDirector_->Init();
-    rsUIDirector_->SetUITaskRunner([taskExecutor, id](const std::function<void()>& task) {
-        ContainerScope scope(id);
-        CHECK_NULL_VOID_NOLOG(taskExecutor);
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-    });
+    if (id == 0) {
+        LOGE("Kee RosenWindow::RosenWindow SetRSSurfaceNode");
+        rsUIDirector_->SetRSSurfaceNode(window->GetSurfaceNode());
+        rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
+        rsUIDirector_->Init();
+        rsUIDirector_->SetUITaskRunner([taskExecutor, id](const std::function<void()>& task) {
+            ContainerScope scope(id);
+            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+        });
+    } else {
+        LOGE("Kee RosenWindow::RosenWindow SetRSSurfaceNode nullptr");
+    }
 }
 
 void RosenWindow::RequestFrame()
@@ -101,12 +107,14 @@ void RosenWindow::RequestFrame()
 
 void RosenWindow::OnShow()
 {
+    LOGE("Kee RosenWindow::OnShow");
     Window::OnShow();
     rsUIDirector_->GoForeground();
 }
 
 void RosenWindow::OnHide()
 {
+    LOGE("Kee RosenWindow::OnHide");
     Window::OnHide();
     rsUIDirector_->GoBackground();
     rsUIDirector_->SendMessages();
@@ -129,12 +137,18 @@ void RosenWindow::SetDrawTextAsBitmap(bool useBitmap)
 
 void RosenWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
 {
-    LOGI("Rosenwindow set root frame node");
+    LOGE("Kee Rosenwindow set root frame node");
     CHECK_NULL_VOID(root);
     auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(root->GetRenderContext());
     CHECK_NULL_VOID(rosenRenderContext);
-    if (rosenRenderContext->GetRSNode()) {
-        rsUIDirector_->SetRoot(rosenRenderContext->GetRSNode()->GetId());
+    if (isEtsCard_) {
+        LOGE("Kee RosenWindow::SetRootFrameNode eTS Card");
+        
+    } else {
+        LOGE("Kee RosenWindow::SetRootFrameNode Host App");
+        if (rosenRenderContext->GetRSNode()) {
+            rsUIDirector_->SetRoot(rosenRenderContext->GetRSNode()->GetId());
+        }
     }
 }
 

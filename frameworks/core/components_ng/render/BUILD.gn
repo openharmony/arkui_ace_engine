@@ -18,6 +18,7 @@ build_component_ng("render_ng") {
   sources = [
     "adapter/fake_animation_utils.cpp",
     "adapter/fake_modifier_adapter.cpp",
+    "adapter/form_render_window.cpp",
     "adapter/pixelmap_image.cpp",
     "adapter/skia_canvas.cpp",
     "adapter/skia_canvas_image.cpp",

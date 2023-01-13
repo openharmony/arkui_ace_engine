@@ -226,14 +226,17 @@ public:
 
     RefPtr<Framework::FrontendDelegate> GetDelegate() const
     {
+        LOGE("Kee DeclarativeFrontend GetDelegate");
         return AceType::DynamicCast<Framework::FrontendDelegate>(delegate_);
     }
 
+    bool isCardfront_ = false;
+    RefPtr<Framework::FrontendDelegateDeclarative> delegate_;
 private:
     void InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor);
 
     FrontendType type_ = FrontendType::DECLARATIVE_JS;
-    RefPtr<Framework::FrontendDelegateDeclarative> delegate_;
+    // RefPtr<Framework::FrontendDelegateDeclarative> delegate_;
     RefPtr<AceEventHandler> handler_;
     RefPtr<Framework::JsEngine> jsEngine_;
     RefPtr<AccessibilityManager> accessibilityManager_;

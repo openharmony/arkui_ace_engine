@@ -484,6 +484,7 @@ void DialogContainer::ShowActionMenu(int32_t instanceId, const std::string& titl
     CHECK_NULL_VOID(frontend);
     auto delegate = frontend->GetDelegate();
     CHECK_NULL_VOID(delegate);
+    LOGE("Kee DialogContainer::ShowActionMenu begin");
     delegate->ShowActionMenu(title, button, std::move(callback), [instanceId = instanceId](bool isShow) {
         LOGI("DialogContainer::ShowActionMenu HideWindow instanceId = %{public}d", instanceId);
         if (!isShow) {

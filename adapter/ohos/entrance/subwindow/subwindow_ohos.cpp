@@ -63,7 +63,7 @@ SubwindowOhos::SubwindowOhos(int32_t instanceId) : windowId_(id_), parentContain
 
 void SubwindowOhos::InitContainer()
 {
-    LOGI("Subwindow start initialize container");
+    LOGE("Kee Subwindow start initialize container");
     if (!window_) {
         LOGI("Window is null, need create a new window");
         OHOS::sptr<OHOS::Rosen::WindowOption> windowOption = new OHOS::Rosen::WindowOption();

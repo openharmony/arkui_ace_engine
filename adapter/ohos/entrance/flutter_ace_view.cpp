@@ -380,6 +380,7 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 
 FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEventRunner, bool usePlatformThread)
 {
+    LOGE("Kee FlutterAceView::CreateView");
     FlutterAceView* aceSurface = new Platform::FlutterAceView(instanceId);
     if (aceSurface != nullptr) {
         aceSurface->IncRefCount();
@@ -397,8 +398,8 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEv
 #endif
     settings.platform_as_ui_thread = usePlatformThread;
     settings.use_current_event_runner = useCurrentEventRunner;
-    LOGD("software render: %{public}s", settings.enable_software_rendering ? "true" : "false");
-    LOGD("use platform as ui thread: %{public}s", settings.platform_as_ui_thread ? "true" : "false");
+    LOGE("Kee software render: %{public}s", settings.enable_software_rendering ? "true" : "false");
+    LOGE("Kee use platform as ui thread: %{public}s", settings.platform_as_ui_thread ? "true" : "false");
     settings.idle_notification_callback = [instanceId](int64_t deadline) {
         ContainerScope scope(instanceId);
         auto container = Container::Current();
@@ -433,19 +434,25 @@ void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen
 void FlutterAceView::SurfaceChanged(
     FlutterAceView* view, int32_t width, int32_t height, int32_t orientation, WindowSizeChangeReason type)
 {
+    LOGE("Kee FlutterAceView::SurfaceChanged width = %{public}d height = %{public}d", width, height);
     CHECK_NULL_VOID(view);
 
     view->NotifySurfaceChanged(width, height, type);
     auto platformView = view->GetShellHolder()->GetPlatformView();
-    LOGD("FlutterAceView::SurfaceChanged, GetPlatformView");
+    LOGE("Kee FlutterAceView::SurfaceChanged, GetPlatformView");
     if (platformView) {
-        LOGD("FlutterAceView::SurfaceChanged, call NotifyChanged");
+        LOGE("Kee FlutterAceView::SurfaceChanged, call NotifyChanged");
         platformView->NotifyChanged(SkISize::Make(width, height));
     }
     
     auto instanceId = view->GetInstanceId();
     auto container = Platform::AceContainer::GetContainer(instanceId);
+    LOGE("Kee FlutterAceView::SurfaceChanged, instanceId = %{public}d", instanceId);
     if (container) {
+        auto pipeline = container->GetPipelineContext();
+        if (!pipeline) {
+            LOGE("Kee FlutterAceView::SurfaceChanged, pipeline = null");
+        }
         auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->CloseContextMenu();

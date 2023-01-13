@@ -352,6 +352,7 @@ void SubwindowManager::ShowDialog(const std::string& title, const std::string& m
 void SubwindowManager::ShowActionMenu(
     const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
+    LOGE("Kee SubwindowManager::ShowActionMenu");
     auto subwindow = GetOrCreateSubWindow();
     CHECK_NULL_VOID(subwindow);
     subwindow->ShowActionMenu(title, button, std::move(callback));

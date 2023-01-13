@@ -41,6 +41,7 @@ const int32_t THEME_ID_DEFAULT = 117440515;
 
 void SubContainer::Initialize()
 {
+    LOGE("Kee SubContainer::Initialize");
     if (!outSidePipelineContext_.Upgrade()) {
         LOGE("no pipeline context for create form component container.");
         return;
@@ -57,6 +58,7 @@ void SubContainer::Initialize()
         LOGE("main pipeline context executor is not flutter taskexecutor");
         return;
     }
+    LOGE("Kee SubContainer::Initialize");
     taskExecutor_ = Referenced::MakeRefPtr<FlutterTaskExecutor>(taskExecutor);
 }
 
@@ -143,15 +145,38 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
     const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap, const std::string& formSrc,
     const FrontendType& cardType)
 {
+    LOGE("Kee SubContainer::RunCard RunCard!!! path = %{public}s formSrc = %{public}s", path.c_str(), formSrc.c_str());
     if (formId == runningCardId_) {
         LOGE("the card is showing, no need run again");
         return;
     }
     runningCardId_ = formId;
     cardType_ = cardType;
+    
+    ContainerScope scope1(instanceId_);
+    density_ = outSidePipelineContext_.Upgrade()->GetDensity();
+    LOGE("Kee SubContainer::RunCard density_ = %{public}lf", density_);
 
     if (cardType_ == FrontendType::ETS_CARD) {
-        frontend_ = AceType::MakeRefPtr<CardFrontendDeclarative>();
+        LOGE("Kee SubContainer::RunCard eTS Card");
+
+        if (onFormAcquiredCallback_) {
+            onFormAcquiredCallback_(formId);
+        }
+
+        // auto pattern = formPattern_.Upgrade();
+        // CHECK_NULL_VOID(pattern);
+        // PipelineBase::gDelegate = pattern->GetDrawDelegate();
+        // LOGE("Kee SubContainer::RunCard gDelegate = %{public}p", PipelineBase::gDelegate.get());
+        // uiContent_ = UIContentTmp::CreateCard();
+        // uiContent_->SetIsCard(true);
+        // uiContent_->Initialize(nullptr, "/ets/widget/pages/card", nullptr);
+        // uiContent_->Foreground();
+        return;
+    }
+
+    if (cardType_ == FrontendType::ETS_CARD) {
+        // frontend_ = AceType::MakeRefPtr<CardFrontendDeclarative>();
     } else if (cardType_ == FrontendType::JS_CARD) {
         frontend_ = AceType::MakeRefPtr<CardFrontend>();
     } else {
@@ -191,6 +216,7 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
     } else {
         frontend_->SetFormSrc(formSrc);
     }
+    LOGE("Kee formSrc = %{public}s", formSrc.c_str());
     frontend_->SetCardWindowConfig(GetWindowConfig());
     auto&& window = std::make_unique<FormWindow>(outSidePipelineContext_);
 

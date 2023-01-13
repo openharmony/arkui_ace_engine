@@ -27,6 +27,8 @@
 #include "frameworks/core/pipeline/pipeline_context.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 
+#include "adapter/ohos/entrance/ui_content_tmp.h"
+
 namespace OHOS::Ace {
 class ACE_EXPORT SubContainer : public virtual AceType {
     DECLARE_ACE_TYPE(SubContainer, AceType);
@@ -152,6 +154,7 @@ private:
     // Use for NG.
     WeakPtr<NG::FormPattern> formPattern_;
     int64_t nodeId_ = 0;
+    std::unique_ptr<UIContentTmp> uiContent_;
 };
 
 } // namespace OHOS::Ace

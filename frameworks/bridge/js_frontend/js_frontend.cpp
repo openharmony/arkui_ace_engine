@@ -253,9 +253,10 @@ void JsFrontend::Destroy()
 
 bool JsFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor)
 {
-    LOGI("JsFrontend initialize begin.");
+    LOGI("Kee JsFrontend initialize begin.");
     type_ = type;
     ACE_DCHECK(type_ == FrontendType::JS);
+    LOGI("Kee JsFrontend initialize begin. 1");
     InitializeFrontendDelegate(taskExecutor);
     auto weakEngine = AceType::WeakClaim(AceType::RawPtr(jsEngine_));
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(delegate_));

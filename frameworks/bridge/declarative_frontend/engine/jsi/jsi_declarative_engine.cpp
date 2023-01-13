@@ -952,6 +952,7 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
     std::vector<uint8_t> content;
+    LOGE("Kee JsiDeclarativeEngine::ExecuteAbc fileName = %{public}s", fileName.c_str());
     if (!delegate->GetAssetContent(fileName, content)) {
         LOGD("GetAssetContent \"%{public}s\" failed.", fileName.c_str());
         return true;
@@ -961,6 +962,7 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
 #else
     const std::string& abcPath = fileName;
 #endif
+    LOGE("Kee JsiDeclarativeEngine::ExecuteAbc abcPath = %{public}s", abcPath.c_str());
     if (!runtime->EvaluateJsCode(content.data(), content.size(), abcPath, needUpdate_)) {
         LOGE("EvaluateJsCode \"%{public}s\" failed.", fileName.c_str());
         return false;
@@ -993,10 +995,11 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         LOGE("ExecuteCardAbc failed, delegate is nullptr");
         return false;
     }
-
+    LOGE("Kee JsiDeclarativeEngine::ExecuteCardAbc fileName = %{public}s", fileName.c_str());
     std::vector<uint8_t> content;
+    LOGE("Kee delegate->GetAssetContent \"%{public}s\" failed.", fileName.c_str());
     if (!delegate->GetAssetContent(fileName, content)) {
-        LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
+        LOGE("Kee EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
         return true;
     }
 #if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
@@ -1005,6 +1008,7 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
     const std::string& abcPath = fileName;
 #endif
     CardScope cardScope(cardId);
+    LOGE("Kee JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
     if (!runtime->EvaluateJsCode(content.data(), content.size(), abcPath)) {
         LOGE("ExecuteCardAbc EvaluateJsCode \"%{public}s\" failed.", fileName.c_str());
         return false;
@@ -1158,6 +1162,7 @@ bool JsiDeclarativeEngine::LoadPageSource(const std::string& url)
 
 bool JsiDeclarativeEngine::LoadCard(const std::string& url, int64_t cardId)
 {
+    LOGE("Kee JsiDeclarativeEngine::LoadCard");
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadCard");
     return ExecuteCardAbc(url, cardId);
 }

@@ -604,6 +604,7 @@ void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, c
         LOGE("PageRouterManager loadCard_ is nullptr");
         return;
     }
+    LOGE("Kee PageRouterManager loadCard_");
     auto result = loadCard_(target.url, cardId);
     if (!result) {
         LOGE("fail to load page file");

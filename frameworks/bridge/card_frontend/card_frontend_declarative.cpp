@@ -27,65 +27,96 @@
 namespace OHOS::Ace {
 namespace {
 
+const char MANIFEST_JSON[] = "manifest.json";
 const char FILE_TYPE_BIN[] = ".abc";
 
 } // namespace
 
-CardFrontendDeclarative::~CardFrontendDeclarative()
-{
-    LOG_DESTROY();
-}
+// CardFrontendDeclarative::~CardFrontendDeclarative()
+// {
+//     LOG_DESTROY();
+// }
 
-bool CardFrontendDeclarative::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor)
-{
-    type_ = type;
-    taskExecutor_ = taskExecutor;
-    InitializeDelegate(taskExecutor);
-    manifestParser_ = AceType::MakeRefPtr<Framework::ManifestParser>();
-    return true;
-}
+// bool CardFrontendDeclarative::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor)
+// {
+//     type_ = type;
+//     taskExecutor_ = taskExecutor;
+//     // InitializeDelegate(taskExecutor);
+//     manifestParser_ = AceType::MakeRefPtr<Framework::ManifestParser>();
+//     return true;
+// }
 
 void CardFrontendDeclarative::InitializeDelegate(const RefPtr<TaskExecutor>& taskExecutor)
 {
-    auto pageRouterManager = AceType::MakeRefPtr<NG::PageRouterManager>();
-    delegate_ = AceType::MakeRefPtr<Framework::CardFrontendDelegateDeclarative>(taskExecutor);
-    delegate_->SetPageRouterManager(pageRouterManager);
+    // auto pageRouterManager = AceType::MakeRefPtr<NG::PageRouterManager>();
+    // delegate_ = AceType::MakeRefPtr<Framework::CardFrontendDelegateDeclarative>(taskExecutor);
+    // delegate_->SetPageRouterManager(pageRouterManager);
 }
 
-RefPtr<NG::PageRouterManager> CardFrontendDeclarative::GetPageRouterManager() const
-{
-    CHECK_NULL_RETURN(delegate_, nullptr);
-    return delegate_->GetPageRouterManager();
-}
+// RefPtr<NG::PageRouterManager> CardFrontendDeclarative::GetPageRouterManager() const
+// {
+//     CHECK_NULL_RETURN(delegate_, nullptr);
+//     return delegate_->GetPageRouterManager();
+// }
 
-void CardFrontendDeclarative::Destroy()
-{
-    CHECK_RUN_ON(JS);
-    delegate_.Reset();
-    eventHandler_.Reset();
-}
+// void CardFrontendDeclarative::Destroy()
+// {
+//     CHECK_RUN_ON(JS);
+//     delegate_.Reset();
+//     eventHandler_.Reset();
+// }
 
-void CardFrontendDeclarative::AttachPipelineContext(const RefPtr<PipelineBase>& context)
-{
-    auto pipelineContext = DynamicCast<NG::PipelineContext>(context);
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
-    eventHandler_ = AceType::MakeRefPtr<CardEventHandlerDeclarative>(delegate_);
+// void CardFrontendDeclarative::AttachPipelineContext(const RefPtr<PipelineBase>& context)
+// {
+//     auto pipelineContext = DynamicCast<NG::PipelineContext>(context);
+//     CHECK_NULL_VOID_NOLOG(delegate_);
+//     CHECK_NULL_VOID_NOLOG(pipelineContext);
+//     eventHandler_ = AceType::MakeRefPtr<CardEventHandlerDeclarative>(delegate_);
 
-    holder_.Attach(context);
-    delegate_->AttachPipelineContext(context);
-}
+//     holder_.Attach(context);
+//     delegate_->AttachPipelineContext(context);
+// }
 
-void CardFrontendDeclarative::SetAssetManager(const RefPtr<AssetManager>& assetManager)
+// void CardFrontendDeclarative::SetAssetManager(const RefPtr<AssetManager>& assetManager)
+// {
+//     LOGE("Kee CardFrontendDeclarative::SetAssetManager");
+//     assetManager_ = assetManager;
+//     if (delegate_) {
+//         delegate_->SetAssetManager(assetManager);
+//     }
+// }
+
+std::string CardFrontendDeclarative::GetFormSrcPath(const std::string& uri, const std::string& suffix) const
 {
-    assetManager_ = assetManager;
-    if (delegate_) {
-        delegate_->SetAssetManager(assetManager);
+    if (uri.empty()) {
+        LOGW("page uri is empty");
+        return "";
     }
+    // the case uri is starts with "/" and "/" is the mainPage
+    if (uri.size() != 0) {
+        return uri + suffix;
+    }
+
+    LOGE("can't find this page %{private}s path", uri.c_str());
+    return "";
+}
+
+void CardFrontendDeclarative::ParseManifest() const
+{
+    std::call_once(onceFlag_, [this]() {
+        std::string jsonContent;
+        if (!Framework::GetAssetContentImpl(assetManager_, MANIFEST_JSON, jsonContent)) {
+            LOGE("Kee CardFrontendDeclarative::ParseManifest RunPage parse manifest.json failed");
+            EventReport::SendFormException(FormExcepType::RUN_PAGE_ERR);
+            return;
+        }
+        manifestParser_->Parse(jsonContent);
+    });
 }
 
 void CardFrontendDeclarative::RunPage(int32_t pageId, const std::string& url, const std::string& params)
 {
+    LOGE("Kee CardFrontendDeclarative::RunPage url = %{public}s", url.c_str());
     std::string urlPath;
     if (GetFormSrc().empty()) {
         ParseManifest();
@@ -100,97 +131,44 @@ void CardFrontendDeclarative::RunPage(int32_t pageId, const std::string& url, co
     }
     if (urlPath.empty()) {
         LOGE("fail to eTS Card run page due to path url is empty");
-        EventReport::SendFormException(FormExcepType::RUN_PAGE_ERR);
-        return;
+        // EventReport::SendFormException(FormExcepType::RUN_PAGE_ERR);
+        // return;
+        urlPath = url;
     }
-
+    LOGE("Kee CardFrontendDeclarative::RunPage urlPath = %{public}s", urlPath.c_str());
     if (delegate_) {
+        LOGE("Kee CardFrontendDeclarative::RunPage 1");
         auto container = Container::Current();
         if (!container) {
             LOGE("RunPage host container null");
             EventReport::SendFormException(FormExcepType::RUN_PAGE_ERR);
             return;
         }
+        LOGE("Kee CardFrontendDeclarative::RunPage 2");
         container->SetCardFrontend(AceType::WeakClaim(this), cardId_);
-        delegate_->RunCard(urlPath, params, "", cardId_);
+        auto delegate = AceType::DynamicCast<Framework::CardFrontendDelegateDeclarative>(delegate_);
+        if (delegate) {
+            LOGE("Kee CardFrontendDeclarative::RunPage delegate->RunCard");
+            delegate->RunCard(urlPath, params, "", cardId_);
+        } else {
+            LOGE("Kee CardFrontendDeclarative::RunPage delegate nullptr");
+        }
+        // LOGE("Kee CardFrontendDeclarative::RunPage delegate->RunCard");
+        // delegate_->RunCard(urlPath, params, "", cardId_);
     }
-}
-
-void CardFrontendDeclarative::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
-{
-    CHECK_RUN_ON(JS);
-    // Pop all JS command and execute them in UI thread.
-    auto jsCommands = std::make_shared<std::vector<RefPtr<Framework::JsCommand>>>();
-    page->PopAllCommands(*jsCommands);
-    page->SetPipelineContext(holder_.Get());
-    taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), page, jsCommands] {
-            auto frontend = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(frontend);
-            // Flush all JS commands.
-            for (const auto& command : *jsCommands) {
-                command->Execute(page);
-            }
-
-            auto pipelineContext = AceType::DynamicCast<PipelineContext>(frontend->holder_.Get());
-            CHECK_NULL_VOID(pipelineContext);
-            auto minSdk = frontend->manifestParser_->GetMinPlatformVersion();
-            pipelineContext->SetMinPlatformVersion(minSdk);
-
-            auto document = page->GetDomDocument();
-            if (frontend->pageLoaded_) {
-                page->ClearShowCommand();
-                std::vector<NodeId> dirtyNodes;
-                page->PopAllDirtyNodes(dirtyNodes);
-                if (dirtyNodes.empty()) {
-                    return;
-                }
-                auto rootNodeId = dirtyNodes.front();
-                if (rootNodeId == DOM_ROOT_NODE_ID_BASE) {
-                    auto patchComponent = page->BuildPagePatch(rootNodeId);
-                    if (patchComponent) {
-                        pipelineContext->ScheduleUpdate(patchComponent);
-                    }
-                }
-                if (document) {
-                    // When a component is configured with "position: fixed", there is a proxy node in root tree
-                    // instead of the real composed node. So here updates the real composed node.
-                    for (int32_t nodeId : document->GetProxyRelatedNodes()) {
-                        auto patchComponent = page->BuildPagePatch(nodeId);
-                        if (patchComponent) {
-                            pipelineContext->ScheduleUpdate(patchComponent);
-                        }
-                    }
-                }
-                return;
-            }
-
-            // Just clear all dirty nodes.
-            page->ClearAllDirtyNodes();
-            if (document) {
-                document->HandleComponentPostBinding();
-            }
-            if (pipelineContext->GetAccessibilityManager()) {
-                pipelineContext->GetAccessibilityManager()->HandleComponentPostBinding();
-            }
-            if (pipelineContext->CanPushPage()) {
-                pipelineContext->PushPage(page->BuildPage(page->GetUrl()));
-                frontend->pageLoaded_ = true;
-            }
-        },
-        TaskExecutor::TaskType::UI);
 }
 
 void CardFrontendDeclarative::UpdateData(const std::string& dataList)
 {
-    taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), dataList] {
-            auto frontend = weak.Upgrade();
-            if (frontend) {
-                frontend->UpdatePageData(dataList);
-            }
-        },
-        TaskExecutor::TaskType::UI); // eTSCard UI == Main JS/UI/PLATFORM
+    LOGE("Kee CardFrontendDeclarative::UpdateData dataList = %{public}s", dataList.c_str());
+    // taskExecutor_->PostTask(
+    //     [weak = AceType::WeakClaim(this), dataList] {
+    //         auto frontend = weak.Upgrade();
+    //         if (frontend) {
+    //             frontend->UpdatePageData(dataList);
+    //         }
+    //     },
+    //     TaskExecutor::TaskType::UI); // eTSCard UI == Main JS/UI/PLATFORM
 }
 
 void CardFrontendDeclarative::UpdatePageData(const std::string& dataList)
@@ -201,42 +179,44 @@ void CardFrontendDeclarative::UpdatePageData(const std::string& dataList)
         EventReport::SendFormException(FormExcepType::UPDATE_PAGE_ERR);
         return;
     }
-    delegate_->UpdatePageData(dataList);
+    // delegate_->UpdatePageData(dataList);
 }
 
 void CardFrontendDeclarative::SetColorMode(ColorMode colorMode)
 {
-    taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), colorMode]() {
-            auto frontend = weak.Upgrade();
-            if (frontend) {
-                frontend->colorMode_ = colorMode;
-                if (!frontend->delegate_) {
-                    LOGE("the delegate is null");
-                    return;
-                }
-                frontend->OnMediaFeatureUpdate();
-            } else {
-                LOGE("eTS Card frontend is nullptr");
-            }
-        },
-        TaskExecutor::TaskType::JS);
+    LOGE("Kee CardFrontendDeclarative::SetColorMode");
+    // taskExecutor_->PostTask(
+    //     [weak = AceType::WeakClaim(this), colorMode]() {
+    //         auto frontend = weak.Upgrade();
+    //         if (frontend) {
+    //             frontend->colorMode_ = colorMode;
+    //             if (!frontend->delegate_) {
+    //                 LOGE("the delegate is null");
+    //                 return;
+    //             }
+    //             frontend->OnMediaFeatureUpdate();
+    //         } else {
+    //             LOGE("eTS Card frontend is nullptr");
+    //         }
+    //     },
+    //     TaskExecutor::TaskType::JS);
 }
 
-void CardFrontendDeclarative::RebuildAllPages()
-{
-}
+// void CardFrontendDeclarative::RebuildAllPages()
+// {
+// }
 
 void CardFrontendDeclarative::OnSurfaceChanged(int32_t width, int32_t height)
 {
-    taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), width, height] {
-            auto frontend = weak.Upgrade();
-            if (frontend) {
-                frontend->HandleSurfaceChanged(width, height);
-            }
-        },
-        TaskExecutor::TaskType::JS);
+    LOGE("Kee CardFrontendDeclarative::OnSurfaceChanged width = %{public}d height = %{public}d", width, height);
+    // taskExecutor_->PostTask(
+    //     [weak = AceType::WeakClaim(this), width, height] {
+    //         auto frontend = weak.Upgrade();
+    //         if (frontend) {
+    //             frontend->HandleSurfaceChanged(width, height);
+    //         }
+    //     },
+    //     TaskExecutor::TaskType::JS);
 }
 
 void CardFrontendDeclarative::HandleSurfaceChanged(int32_t width, int32_t height)

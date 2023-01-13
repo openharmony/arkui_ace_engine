@@ -1505,6 +1505,7 @@ std::vector<ButtonInfo> JsParseDialogButtons(const std::unique_ptr<JsonValue>& a
 
 void ShowActionMenu(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg)
 {
+    LOGE("Kee ShowActionMenu runtime = %{public}p", runtime.get());
     if (!runtime) {
         LOGE("ShowActionMenu failed. runtime is null.");
         return;
@@ -1575,11 +1576,13 @@ void ShowActionMenu(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsVal
 shared_ptr<JsValue> JsHandlePrompt(
     const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg, const std::string& methodName)
 {
+    LOGE("Kee JsHandlePrompt");
     if (methodName == PROMPT_SHOW_TOAST) {
         ShowToast(runtime, arg);
     } else if (methodName == PROMPT_SHOW_DIALOG) {
         ShowDialog(runtime, arg);
     } else if (methodName == PROMPT_SHOW_ACTION_MENU) {
+        LOGE("Kee JsHandlePrompt ShowActionMenu");
         ShowActionMenu(runtime, arg);
     } else {
         LOGW("system.prompt not support method = %{private}s", methodName.c_str());

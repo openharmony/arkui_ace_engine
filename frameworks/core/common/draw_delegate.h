@@ -55,7 +55,9 @@ public:
 
     void DrawRSFrame(RefPtr<NG::RenderContext>& renderContext)
     {
+        LOGE("Kee DrawDelegate DrawRSFrame");
         if (doDrawRSFrameByRenderContextCallback_) {
+            LOGE("Kee DrawDelegate DrawRSFrame doDrawRSFrameByRenderContextCallback_");
             doDrawRSFrameByRenderContextCallback_(renderContext);
         }
     }

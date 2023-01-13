@@ -24,6 +24,7 @@
 #include "core/common/container.h"
 #include "core/common/thread_checker.h"
 #include "core/components/navigator/navigator_component.h"
+#include "frameworks/bridge/card_frontend/card_frontend_delegate_declarative.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -180,7 +181,7 @@ void DeclarativeFrontend::Destroy()
 
 bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor)
 {
-    LOGD("DeclarativeFrontend initialize begin.");
+    LOGE("Kee DeclarativeFrontend initialize begin.");
     type_ = type;
     ACE_DCHECK(type_ == FrontendType::DECLARATIVE_JS);
     InitializeFrontendDelegate(taskExecutor);
@@ -233,14 +234,16 @@ void DeclarativeFrontend::AttachSubPipelineContext(const RefPtr<PipelineContext>
 
 void DeclarativeFrontend::SetAssetManager(const RefPtr<AssetManager>& assetManager)
 {
-    LOGI("DeclarativeFrontend SetAssetManager.");
+    LOGE("Kee DeclarativeFrontend SetAssetManager.");
     if (delegate_) {
+        LOGE("Kee DeclarativeFrontend SetAssetManager delegate_->SetAssetManager. assetManager = %{public}p", AceType::RawPtr(assetManager));
         delegate_->SetAssetManager(assetManager);
     }
 }
 
 void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor)
 {
+    LOGE("Kee DeclarativeFrontend::InitializeFrontendDelegate");
     const auto& loadCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& url,
                                    const RefPtr<Framework::JsAcePage>& jsPage, bool isMainPage) {
         auto jsEngine = weakEngine.Upgrade();
@@ -457,14 +460,28 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         jsEngine->FireExternalEvent(componentId, nodeId, isDestroy);
     };
 
-    delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarative>(taskExecutor, loadCallback,
-        setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
-        resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
-        timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback, onWindowDisplayModeChangedCallBack,
-        onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack, onRestoreAbilityStateCallBack, onNewWantCallBack,
-        onMemoryLevelCallBack, onStartContinuationCallBack, onCompleteContinuationCallBack, onRemoteTerminatedCallBack,
-        onSaveDataCallBack, onRestoreDataCallBack, externalEventCallback);
+    if (isCardfront_) {
+        LOGE("Kee DeclarativeFrontend::InitializeFrontendDelegate new Card delegate_");
+        delegate_ = AceType::MakeRefPtr<Framework::CardFrontendDelegateDeclarative>(taskExecutor, loadCallback,
+            setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
+            resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
+            timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback, onWindowDisplayModeChangedCallBack,
+            onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack, onRestoreAbilityStateCallBack, onNewWantCallBack,
+            onMemoryLevelCallBack, onStartContinuationCallBack, onCompleteContinuationCallBack, onRemoteTerminatedCallBack,
+            onSaveDataCallBack, onRestoreDataCallBack, externalEventCallback);
+    } else {
+        LOGE("Kee DeclarativeFrontend::InitializeFrontendDelegate new delegate_");
+        delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarative>(taskExecutor, loadCallback,
+            setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
+            resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
+            timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback, onWindowDisplayModeChangedCallBack,
+            onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack, onRestoreAbilityStateCallBack, onNewWantCallBack,
+            onMemoryLevelCallBack, onStartContinuationCallBack, onCompleteContinuationCallBack, onRemoteTerminatedCallBack,
+            onSaveDataCallBack, onRestoreDataCallBack, externalEventCallback);
+    }
+
     if (disallowPopLastPage_) {
+        LOGE("Kee DeclarativeFrontend::InitializeFrontendDelegate disallowPopLastPage_");
         delegate_->DisallowPopLastPage();
     }
     if (!jsEngine_) {
@@ -474,11 +491,15 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
     }
     delegate_->SetGroupJsBridge(jsEngine_->GetGroupJsBridge());
     if (Container::IsCurrentUseNewPipeline()) {
+        LOGE("Kee DeclarativeFrontend::InitializeFrontendDelegate loadPageCallback");
         auto loadPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& url) {
+            LOGE("Kee DeclarativeFrontend::InitializeFrontendDelegate call loadPageCallback");
             auto jsEngine = weakEngine.Upgrade();
             if (!jsEngine) {
+                LOGE("Kee DeclarativeFrontend::InitializeFrontendDelegate loadPageCallback jsEngine = nullptr");
                 return false;
             }
+            LOGE("Kee DeclarativeFrontend::InitializeFrontendDelegate loadPageCallback LoadPageSource url:%{public}s", url.c_str());
             return jsEngine->LoadPageSource(url);
         };
         delegate_->InitializeRouterManager(std::move(loadPageCallback));
@@ -487,9 +508,11 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
 
 void DeclarativeFrontend::RunPage(int32_t pageId, const std::string& url, const std::string& params)
 {
+    LOGE("Kee DeclarativeFrontend::RunPage url = %{public}s params = %{public}s", url.c_str(), params.c_str());
     auto container = Container::Current();
     auto isStageModel = container ? container->IsUseStageModel() : false;
     if (!isStageModel && Container::IsCurrentUseNewPipeline()) {
+        LOGE("Kee DeclarativeFrontend::RunPage In NG structure and fa mode");
         // In NG structure and fa mode, first load app.js
         auto taskExecutor = container ? container->GetTaskExecutor() : nullptr;
         CHECK_NULL_VOID(taskExecutor);
@@ -504,7 +527,14 @@ void DeclarativeFrontend::RunPage(int32_t pageId, const std::string& url, const 
     }
     // Not use this pageId from backend, manage it in FrontendDelegateDeclarative.
     if (delegate_) {
-        delegate_->RunPage(url, params, pageProfile_);
+        if (isCardfront_) {
+            LOGE("Kee DeclarativeFrontend::RunCard delegate_");
+            auto delegate = AceType::DynamicCast<Framework::CardFrontendDelegateDeclarative>(delegate_);
+            delegate->RunCard(url, params, pageProfile_, 0); // RunCard(const std::string& url, const std::string& params, const std::string& profile, int64_t cardId)
+        } else {
+            LOGE("Kee DeclarativeFrontend::RunPage delegate_");
+            delegate_->RunPage(url, params, pageProfile_);
+        }
     }
 }
 

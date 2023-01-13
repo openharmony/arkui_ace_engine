@@ -149,7 +149,7 @@ void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
         auto pageRootNode = AceType::DynamicCast<NG::UINode>(view->CreateViewNode());
         CHECK_NULL_VOID(pageRootNode);
         pageRootNode->MountToParent(pageNode);
-
+        LOGE("Kee UpdateCardRootComponent pageRootNode->MountToParent");
         // update page life cycle function.
         auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
         CHECK_NULL_VOID(pagePattern);
@@ -265,7 +265,7 @@ panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runt
 
 panda::Local<panda::JSValueRef> JsLoadEtsCard(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    LOGD("Load eTS Card start");
+    LOGE("Kee Load eTS Card start");
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc > 2) {

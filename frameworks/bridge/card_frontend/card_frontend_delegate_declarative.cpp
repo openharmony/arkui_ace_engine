@@ -33,6 +33,7 @@ CardFrontendDelegateDeclarative::~CardFrontendDelegateDeclarative()
 void CardFrontendDelegateDeclarative::RunCard(const std::string& url,
     const std::string& params, const std::string& profile, int64_t cardId)
 {
+    LOGE("Kee CardFrontendDelegateDeclarative::RunCard url = %{public}s params = %{public}s cardId = %{public}lld", url.c_str(), params.c_str(), cardId);
     ACE_SCOPED_TRACE("CardFrontendDelegateDeclarative::RunCard");
     auto pageRouterManager = GetPageRouterManager();
     CHECK_NULL_VOID(pageRouterManager);
@@ -42,17 +43,29 @@ void CardFrontendDelegateDeclarative::RunCard(const std::string& url,
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     cardData_ = params;
-    taskExecutor->PostTask(
-        [weakPageRouterManager = WeakPtr<NG::PageRouterManager>(pageRouterManager), 
-         weakCardPipeline = WeakPtr<PipelineBase>(cardPipeline), url, params, cardId]() {
-            auto pageRouterManager = weakPageRouterManager.Upgrade();
-            CHECK_NULL_VOID(pageRouterManager);
-            auto container = Container::Current();
-            CHECK_NULL_VOID(container);
-            container->SetCardPipeline(weakCardPipeline, cardId);
-            pageRouterManager->RunCard(url, params, cardId);
-        },
-        TaskExecutor::TaskType::UI); // eTSCard UI == Main JS/UI/PLATFORM
+    LOGE("Kee CardFrontendDelegateDeclarative::RunCard url 1");
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    LOGE("Kee CardFrontendDelegateDeclarative::RunCard url 2");
+    auto weakCardPipeline = WeakPtr<PipelineBase>(cardPipeline);
+    LOGE("Kee CardFrontendDelegateDeclarative::RunCard url 3");
+    container->SetCardPipeline(weakCardPipeline, cardId);
+    LOGE("Kee CardFrontendDelegateDeclarative::RunCard url 4");
+    pageRouterManager->RunCard(url, params, cardId);
+    LOGE("Kee CardFrontendDelegateDeclarative::RunCard url 5");
+
+    // taskExecutor->PostTask(
+    //     [weakPageRouterManager = WeakPtr<NG::PageRouterManager>(pageRouterManager), 
+    //      weakCardPipeline = WeakPtr<PipelineBase>(cardPipeline), url, params, cardId]() {
+    //         auto pageRouterManager = weakPageRouterManager.Upgrade();
+    //         CHECK_NULL_VOID(pageRouterManager);
+    //         auto container = Container::Current();
+    //         CHECK_NULL_VOID(container);
+    //         LOGE("Kee CardFrontendDelegateDeclarative::RunCard pageRouterManager->RunCard");
+    //         container->SetCardPipeline(weakCardPipeline, cardId);
+    //         pageRouterManager->RunCard(url, params, cardId);
+    //     },
+    //     TaskExecutor::TaskType::UI); // eTSCard UI == Main JS/UI/PLATFORM
 }
 
 void CardFrontendDelegateDeclarative::FireCardEvent(const EventMarker& eventMarker, const std::string& params) {}
@@ -72,10 +85,4 @@ void CardFrontendDelegateDeclarative::FireCardAction(const std::string& action)
         },
         TaskExecutor::TaskType::UI); // eTSCard UI == Main JS/UI/PLATFORM
 }
-
-double CardFrontendDelegateDeclarative::MeasureText(const MeasureContext& context)
-    {
-        return 0.0;
-    }
-
 } // namespace OHOS::Ace::Framework

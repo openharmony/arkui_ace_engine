@@ -1112,6 +1112,7 @@ bool PipelineContext::IsTransitionStop() const
 
 void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const RefPtr<StageElement>& stage)
 {
+    LOGE("Kee PipelineContext::PushPage");
     ACE_FUNCTION_TRACE();
     CHECK_RUN_ON(UI);
     std::unordered_map<std::string, std::string> params { { "pageUrl", pageComponent->GetPageUrl() } };
@@ -1147,6 +1148,7 @@ void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const
         return;
     }
 #endif
+    LOGE("Kee PipelineContext::PushPage FlushBuildAndLayoutBeforeSurfaceReady");
     FlushBuildAndLayoutBeforeSurfaceReady();
 }
 
@@ -2919,7 +2921,9 @@ const RefPtr<OverlayElement> PipelineContext::GetOverlayElement() const
 
 void PipelineContext::FlushBuildAndLayoutBeforeSurfaceReady()
 {
+    LOGE("Kee FlushBuildAndLayoutBeforeSurfaceReady");
     if (isSurfaceReady_) {
+        LOGE("Kee FlushBuildAndLayoutBeforeSurfaceReady isSurfaceReady_");
         return;
     }
     GetTaskExecutor()->PostTask(
@@ -2930,6 +2934,7 @@ void PipelineContext::FlushBuildAndLayoutBeforeSurfaceReady()
             }
 
             context->FlushBuild();
+            LOGE("Kee FlushBuildAndLayoutBeforeSurfaceReady isSurfaceReady_ width_ = %{public}d height_ = %{public}d", context->width_, context->height_);
             context->SetRootRect(context->width_, context->height_);
             context->FlushLayout();
         },

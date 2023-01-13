@@ -46,7 +46,7 @@ template("ace_ohos_standard_source_set") {
 
       # innerkits impl
       "$ace_root/adapter/ohos/entrance/ui_content_impl.cpp",
-
+      "$ace_root/adapter/ohos/entrance/ui_content_tmp.cpp",
       # drag window
       "$ace_root/adapter/ohos/entrance/window/drag_window_ohos.cpp",
     ]
@@ -94,6 +94,7 @@ template("ace_ohos_standard_source_set") {
       "ability_base:configuration",
       "ability_base:extractortool",
       "ability_base:want",
+      "ability_runtime:app_context",
       "ability_runtime:ability_context_native",
       "ability_runtime:ability_manager",
       "data_share:datashare_consumer",
