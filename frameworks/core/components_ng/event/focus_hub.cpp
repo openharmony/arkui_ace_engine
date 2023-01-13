@@ -244,8 +244,6 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode)
     if (lastFocusNode == focusNode) {
         lastWeakFocusNode_ = nullptr;
     }
-
-    focusNode->SetFocusType(FocusType::DISABLE);
 }
 
 // Need update RebuildChild function
