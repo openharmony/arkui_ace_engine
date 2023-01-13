@@ -90,6 +90,7 @@ bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::astcEnabled_ = false;
 int SystemProperties::astcMax_ = 0;
 int SystemProperties::astcPsnr_ = 0;
+bool SystemProperties::extSurfaceEnabled_ = false;
 
 bool SystemProperties::GetDebugBoundaryEnabled()
 {

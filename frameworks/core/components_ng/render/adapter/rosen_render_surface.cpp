@@ -18,6 +18,7 @@
 #include "render_service_client/core/ui/rs_surface_node.h"
 
 #include "base/memory/referenced.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
@@ -25,27 +26,42 @@ namespace OHOS::Ace::NG {
 namespace {
 const char* const SURFACE_STRIDE_ALIGNMENT = "8";
 constexpr int32_t SURFACE_QUEUE_SIZE = 5;
+constexpr int32_t EXT_SURFACE_DEFAULT_SIZE = 100;
 } // namespace
 RosenRenderSurface::~RosenRenderSurface()
 {
-    CHECK_NULL_VOID_NOLOG(producerSurface_);
-    auto* surfaceUtils = SurfaceUtils::GetInstance();
-    auto ret = surfaceUtils->Remove(producerSurface_->GetUniqueId());
-    if (ret != SurfaceError::SURFACE_ERROR_OK) {
-        LOGE("remove surface error: %{public}d", ret);
+    if (SystemProperties::GetExtSurfaceEnabled() && surfaceDelegate_) {
+        surfaceDelegate_->ReleaseSurface();
+    } else {
+        CHECK_NULL_VOID_NOLOG(producerSurface_);
+        auto* surfaceUtils = SurfaceUtils::GetInstance();
+        auto ret = surfaceUtils->Remove(producerSurface_->GetUniqueId());
+        if (ret != SurfaceError::SURFACE_ERROR_OK) {
+            LOGE("remove surface error: %{public}d", ret);
+        }
     }
 }
 
 void RosenRenderSurface::InitSurface()
 {
     auto renderContext = renderContext_.Upgrade();
-    CHECK_NULL_VOID(renderContext);
+    if (!renderContext && SystemProperties::GetExtSurfaceEnabled()) {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        int32_t windowId = context->GetWindowId();
+        surfaceDelegate_ = new OHOS::SurfaceDelegate(windowId);
+        surfaceDelegate_->CreateSurface();
+        surfaceDelegate_->SetBounds(0, 0, EXT_SURFACE_DEFAULT_SIZE, EXT_SURFACE_DEFAULT_SIZE);
+        producerSurface_ = surfaceDelegate_->GetSurface();
+    } else {
+        CHECK_NULL_VOID(renderContext);
 
-    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
-    auto surfaceNode =
-        OHOS::Rosen::RSBaseNode::ReinterpretCast<OHOS::Rosen::RSSurfaceNode>(rosenRenderContext->GetRSNode());
-    CHECK_NULL_VOID_NOLOG(surfaceNode);
-    producerSurface_ = surfaceNode->GetSurface();
+        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
+        auto surfaceNode =
+            OHOS::Rosen::RSBaseNode::ReinterpretCast<OHOS::Rosen::RSSurfaceNode>(rosenRenderContext->GetRSNode());
+        CHECK_NULL_VOID_NOLOG(surfaceNode);
+        producerSurface_ = surfaceNode->GetSurface();
+    }
 }
 
 void RosenRenderSurface::UpdateXComponentConfig()
@@ -99,6 +115,13 @@ void RosenRenderSurface::AdjustNativeWindowSize(uint32_t width, uint32_t height)
 std::string RosenRenderSurface::GetUniqueId() const
 {
     return std::to_string(producerSurface_->GetUniqueId());
+}
+
+void RosenRenderSurface::SetBounds(int32_t left, int32_t top, int32_t width, int32_t height)
+{
+    if (SystemProperties::GetExtSurfaceEnabled() && surfaceDelegate_) {
+        surfaceDelegate_->SetBounds(left, top, width, height);
+    }
 }
 
 } // namespace OHOS::Ace::NG
