@@ -641,8 +641,8 @@ void UpdateAccessibilityElementInfo(
     nodeInfo.SetContent(accessibilityProperty->GetText());
     nodeInfo.SetVisible(node->IsVisible());
     if (node->IsVisible()) {
-        auto left = node->GetTransformRelativeOffset().GetX();
-        auto top = node->GetTransformRelativeOffset().GetY();
+        auto left = node->GetTransformRelativeOffset().GetX() + commonProperty.windowLeft;
+        auto top = node->GetTransformRelativeOffset().GetY() + commonProperty.windowTop;
         auto right = left + node->GetGeometryNode()->GetFrameRect().Width();
         auto bottom = top + node->GetGeometryNode()->GetFrameRect().Height();
         Accessibility::Rect bounds { left, top, right, bottom };
@@ -1154,9 +1154,9 @@ static void DumpTreeNG(
     DumpLog::GetInstance().AddDesc("compid: " + node->GetInspectorId().value_or(""));
     DumpLog::GetInstance().AddDesc("text: " + node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText());
     DumpLog::GetInstance().AddDesc(
-        "top: " + std::to_string(node->GetTransformRelativeOffset().GetY()));
+        "top: " + std::to_string(node->GetTransformRelativeOffset().GetY() + commonProperty.windowTop));
     DumpLog::GetInstance().AddDesc(
-        "left: " + std::to_string(node->GetTransformRelativeOffset().GetX()));
+        "left: " + std::to_string(node->GetTransformRelativeOffset().GetX() + commonProperty.windowLeft));
     DumpLog::GetInstance().AddDesc("width: " + std::to_string(node->GetGeometryNode()->GetFrameRect().Width()));
     DumpLog::GetInstance().AddDesc("height: " + std::to_string(node->GetGeometryNode()->GetFrameRect().Height()));
     DumpLog::GetInstance().AddDesc("visible: " + std::to_string(node->IsVisible()));
