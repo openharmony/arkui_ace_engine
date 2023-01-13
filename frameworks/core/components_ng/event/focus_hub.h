@@ -702,6 +702,15 @@ public:
         getInnerFocusRectFunc_ = callback;
     }
 
+    void SetLastWeakFocusNode(const WeakPtr<FocusHub>& focusHub)
+    {
+        lastWeakFocusNode_ = focusHub;
+    }
+    WeakPtr<FocusHub> GetLastWeakFocusNode() const
+    {
+        return lastWeakFocusNode_;
+    }
+
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);

@@ -894,7 +894,7 @@ void RosenRenderContext::PaintFocusState(
         // TODO: Add property data
         focusStateModifier_ = std::make_shared<FocusStateModifier>();
     }
-    focusStateModifier_->SetRoundRect(paintRect);
+    focusStateModifier_->SetRoundRect(paintRect, borderWidthPx);
     focusStateModifier_->SetPaintTask(std::move(paintTask));
     rsNode_->AddModifier(focusStateModifier_);
     RequestNextFrame();

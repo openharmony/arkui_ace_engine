@@ -110,7 +110,19 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        return { FocusType::SCOPE, true };
+    }
+
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
+    {
+        return ScopeFocusAlgorithm(direction_ != Axis::HORIZONTAL, true, ScopeType::OTHERS,
+            [wp = WeakClaim(this)](
+                FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
+                auto swiper = wp.Upgrade();
+                if (swiper) {
+                    nextFocusNode = swiper->GetNextFocusNode(step, currFocusNode);
+                }
+            });
     }
 
     void UpdateChangeEvent(ChangeEvent&& event)
@@ -149,6 +161,8 @@ private:
     // Init on key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+    void FlushFocus(const RefPtr<FrameNode>& curShowFrame);
+    WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
 
     // Init auto play, show next item in duration time when auto play.
     void InitAutoPlay();
@@ -218,6 +232,7 @@ private:
 
     RefPtr<SwiperController> swiperController_;
 
+    bool isLastIndicatorFocused_ = false;
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
     int32_t currentIndex_ = 0;
@@ -239,6 +254,8 @@ private:
 
     SwiperParameters swiperParameters_;
     SizeF maxChildSize_;
+
+    WeakPtr<FrameNode> lastWeakShowNode_;
 };
 } // namespace OHOS::Ace::NG
 
