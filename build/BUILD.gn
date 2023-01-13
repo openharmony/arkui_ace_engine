@@ -35,35 +35,6 @@ foreach(item, ace_platforms) {
     }
   }
 
-  # build-in qjs debugger so, generate libace_debug library
-  if (defined(engine_config.use_build_in_js_engine) &&
-      engine_config.use_build_in_js_engine) {
-    # only qjs support build-in
-    if (defined(engine_config.qjs_engine)) {
-      engine = {
-      }
-      engine = engine_config.qjs_engine
-      if (defined(engine.have_debug) && engine.have_debug) {
-        libace_static("libace_static_debug_" + item.name) {
-          platform = item.name
-          use_js_debug = true
-          config = {
-          }
-          if (defined(item.config)) {
-            config = item.config
-          }
-        }
-
-        # target for build-in debugger
-        ohos_shared_library("libace_debug") {
-          deps = [ "$ace_root/build:libace_static_debug_${item.name}" ]
-          part_name = ace_engine_part
-          subsystem_name = ace_engine_subsystem
-        }
-      }
-    }
-  }
-
   # generate separated libace_engine lib
   if (platform == "ohos") {
     foreach(engine, support_engines) {
@@ -90,13 +61,6 @@ foreach(item, ace_platforms) {
         platform = item.name
         engine_name = engine.engine_name
         build_type = "engine_declarative"
-      }
-      if (defined(engine.declarative_default) && engine.declarative_default) {
-        ace_bridge_engine("libace_engine_declarative") {
-          platform = item.name
-          engine_name = engine.engine_name
-          build_type = "engine_declarative"
-        }
       }
 
       # generate libace_engine_pa
