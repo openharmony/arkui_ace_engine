@@ -22,7 +22,6 @@ template("ace_base_source_set") {
     part_name = ace_engine_part
     defines += invoker.defines
     deps = [
-      "$cjson_root:cjson_static",
       "base64:ace_base_base64_$platform",
       "i18n:ace_base_i18n_$platform",
       "resource:ace_resource",
@@ -85,6 +84,12 @@ template("ace_base_source_set") {
       } else {
         deps += [ "//third_party/curl:curl_shared" ]
       }
+    }
+
+    if (is_cross_platform_build || platform != "ohos") {
+      deps += [ "//third_party/cJSON:cjson_static" ]
+    } else {
+      deps += [ "//third_party/cJSON:cjson" ]
     }
 
     cflags_cc = []
