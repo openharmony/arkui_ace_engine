@@ -787,6 +787,7 @@ protected:
     std::atomic<bool> isForegroundCalled_ = false;
 
 private:
+    void DumpFrontend() const;
     StatusBarEventHandler statusBarBgColorEventHandler_;
     PopupEventHandler popupEventHandler_;
     MenuEventHandler menuEventHandler_;

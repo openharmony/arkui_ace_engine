@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -398,6 +398,14 @@ void PipelineBase::DumpInfo(const std::vector<std::string>& params, std::vector<
     }
 }
 
+void PipelineBase::DumpFrontend() const
+{
+    auto frontend = weakFrontend_.Upgrade();
+    if (frontend) {
+        frontend->DumpFrontend();
+    }
+}
+
 bool PipelineBase::Dump(const std::vector<std::string>& params) const
 {
     if (params.empty()) {
@@ -424,6 +432,10 @@ bool PipelineBase::Dump(const std::vector<std::string>& params) const
         return true;
     }
     ContainerScope scope(instanceId_);
+    if (params[0] == "-frontend") {
+        DumpFrontend();
+        return true;
+    }
     return OnDumpInfo(params);
 }
 
