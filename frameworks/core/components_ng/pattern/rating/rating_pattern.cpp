@@ -147,6 +147,7 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
         GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
     singleStarImagePaintConfig_.srcRect_ = singleStarRect_;
     singleStarImagePaintConfig_.dstRect_ = singleStarDstRect_;
+    singleStarImagePaintConfig_.imageFit_ = ImageFit::TOP_LEFT;
     return MakeRefPtr<RatingPaintMethod>(
         foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_, singleStarImagePaintConfig_, starNum);
 }
