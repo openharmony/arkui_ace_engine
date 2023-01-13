@@ -82,15 +82,41 @@ void ScrollablePattern::AddScrollEvent()
     auto scrollCallback = [weak = WeakClaim(this)](double offset, int32_t source) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
+        if (pattern->coordinationEvent_ && pattern->isReactInParrentMovement_) {
+            auto onScroll = pattern->coordinationEvent_->GetOnScroll();
+            if (onScroll) {
+                onScroll(offset);
+                return false;
+            }
+        }
+        auto isAtTop = (pattern->IsAtTop() && Positive(offset));
+        if (isAtTop && source == SCROLL_FROM_UPDATE && !pattern->isReactInParrentMovement_ &&
+            (pattern->axis_ == Axis::VERTICAL)) {
+            pattern->isReactInParrentMovement_ = true;
+            if (pattern->coordinationEvent_) {
+                auto onScrollStart = pattern->coordinationEvent_->GetOnScrollStartEvent();
+                if (onScrollStart) {
+                    onScrollStart();
+                }
+            }
+        }
         return pattern->OnScrollCallback(static_cast<float>(offset), source);
     };
+    scrollableEvent_->SetScrollPositionCallback(std::move(scrollCallback));
     auto scrollEnd = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->coordinationEvent_ && pattern->isReactInParrentMovement_) {
+            pattern->isReactInParrentMovement_ = false;
+            auto onScrollEnd = pattern->coordinationEvent_->GetOnScrollEndEvent();
+            if (onScrollEnd) {
+                onScrollEnd();
+                return;
+            }
+        }
         pattern->OnScrollEndCallback();
     };
     scrollableEvent_->SetScrollEndCallback(std::move(scrollEnd));
-    scrollableEvent_->SetScrollPositionCallback(std::move(scrollCallback));
     gestureHub->AddScrollableEvent(scrollableEvent_);
 }
 

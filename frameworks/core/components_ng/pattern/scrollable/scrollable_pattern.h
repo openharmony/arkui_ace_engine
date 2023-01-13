@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -94,6 +95,11 @@ public:
         return barOffset_;
     }
 
+    void SetCoordinationEvent(RefPtr<ScrollableCoordinationEvent> coordinationEvent)
+    {
+        coordinationEvent_ = coordinationEvent;
+    }
+
 protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {
@@ -117,11 +123,13 @@ private:
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
+    RefPtr<ScrollableCoordinationEvent> coordinationEvent_;
     // scrollBar
     RefPtr<ScrollBar> scrollBar_;
     RefPtr<NG::ScrollBarProxy> scrollBarProxy_;
     float barOffset_ = 0.0f;
     float estimatedHeight_ = 0.0f;
+    bool isReactInParrentMovement_ = false;
 };
 } // namespace OHOS::Ace::NG
 
