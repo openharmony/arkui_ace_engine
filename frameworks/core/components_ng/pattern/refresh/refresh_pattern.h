@@ -70,6 +70,8 @@ public:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     void OnActive() override {}
     void OnInActive() override;
+    void CheckCoordinationEvent();
+    RefPtr<FrameNode> FindScrollableChild();
 
 private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -86,13 +88,16 @@ private:
     OffsetF GetShowTimeOffset() const;
     float GetOpacity() const;
     RefreshStatus GetNextStatus();
+    bool ScrollComponentReactInMove();
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     static std::string GetFormatDateTime();
     RefPtr<PanEvent> panEvent_;
     OffsetF timeOffset_;
+    bool movedByScrollableComponent_ = false;
 
     RefPtr<FrameNode> textChild_;
     RefPtr<FrameNode> progressChild_;
+    WeakPtr<FrameNode> scrollableNode_;
     ACE_DISALLOW_COPY_AND_MOVE(RefreshPattern);
 };
 } // namespace OHOS::Ace::NG
