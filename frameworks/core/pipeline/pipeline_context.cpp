@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1019,8 +1019,6 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-layer") {
         auto rootNode = AceType::DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
         rootNode->DumpLayerTree();
-    } else if (params[0] == "-frontend") {
-        DumpFrontend();
 #ifndef WEARABLE_PRODUCT
     } else if (params[0] == "-multimodal") {
         multiModalManager_->DumpMultimodalScene();
@@ -3329,14 +3327,6 @@ void PipelineContext::MakeThreadStuck(const std::vector<std::string>& params) co
         taskExecutor_->PostTask([time] { ThreadStuckTask(time); }, TaskExecutor::TaskType::JS);
     } else {
         taskExecutor_->PostTask([time] { ThreadStuckTask(time); }, TaskExecutor::TaskType::UI);
-    }
-}
-
-void PipelineContext::DumpFrontend() const
-{
-    auto frontend = weakFrontend_.Upgrade();
-    if (frontend) {
-        frontend->DumpFrontend();
     }
 }
 
