@@ -229,6 +229,22 @@ void PipelineBase::NotifyPopupDismiss() const
     }
 }
 
+void PipelineBase::NotifyMenuDismiss() const
+{
+    CHECK_RUN_ON(UI);
+    if (menuEventHandler_) {
+        menuEventHandler_();
+    }
+}
+
+void PipelineBase::NotifyContextMenuDismiss() const
+{
+    CHECK_RUN_ON(UI);
+    if (contextMenuEventHandler_) {
+        contextMenuEventHandler_();
+    }
+}
+
 void PipelineBase::NotifyRouterBackDismiss() const
 {
     CHECK_RUN_ON(UI);

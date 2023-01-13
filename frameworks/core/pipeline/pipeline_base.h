@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -249,13 +249,27 @@ public:
         statusBarBgColorEventHandler_ = std::move(listener);
     }
     void NotifyStatusBarBgColor(const Color& color) const;
-    using PopupEventHandler = std::function<void()>;
 
+    using PopupEventHandler = std::function<void()>;
     void SetPopupEventHandler(PopupEventHandler&& listener)
     {
         popupEventHandler_ = std::move(listener);
     }
     void NotifyPopupDismiss() const;
+
+    using MenuEventHandler = std::function<void()>;
+    void SetMenuEventHandler(MenuEventHandler&& listener)
+    {
+        menuEventHandler_ = std::move(listener);
+    }
+    void NotifyMenuDismiss() const;
+
+    using ContextMenuEventHandler = std::function<void()>;
+    void SetContextMenuEventHandler(ContextMenuEventHandler&& listener)
+    {
+        contextMenuEventHandler_ = std::move(listener);
+    }
+    void NotifyContextMenuDismiss() const;
 
     using RouterBackEventHandler = std::function<void()>;
     void SetRouterBackEventHandler(RouterBackEventHandler&& listener)
@@ -775,6 +789,8 @@ protected:
 private:
     StatusBarEventHandler statusBarBgColorEventHandler_;
     PopupEventHandler popupEventHandler_;
+    MenuEventHandler menuEventHandler_;
+    ContextMenuEventHandler contextMenuEventHandler_;
     RouterBackEventHandler routerBackEventHandler_;
     std::list<PopPageSuccessEventHandler> popPageSuccessEventHandler_;
     std::list<IsPagePathInvalidEventHandler> isPagePathInvalidEventHandler_;
