@@ -88,10 +88,10 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     auto radius = toastTheme->GetRadius();
     borderRadius.SetRadius(Dimension(radius.GetX().ConvertToPx()));
     auto padding = toastTheme->GetPadding();
-    paddings.top = NG::CalcLength(Dimension(padding.Top().Value()));
-    paddings.bottom = NG::CalcLength(Dimension(padding.Bottom().Value()));
-    paddings.left = NG::CalcLength(Dimension(padding.Left().Value()));
-    paddings.right = NG::CalcLength(Dimension(padding.Right().Value()));
+    paddings.top = NG::CalcLength(padding.Top());
+    paddings.bottom = NG::CalcLength(padding.Bottom());
+    paddings.left = NG::CalcLength(padding.Left());
+    paddings.right = NG::CalcLength(padding.Right());
 
     auto gridColumnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::TOAST);
     auto parent = gridColumnInfo->GetParent();
