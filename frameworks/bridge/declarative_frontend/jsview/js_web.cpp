@@ -41,7 +41,7 @@
 #include "pixel_map_napi.h"
 
 namespace OHOS::Ace::Framework {
-
+bool JSWeb::webDebuggingAccess_ = false;
 class JSWebDialog : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -1413,7 +1413,6 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("databaseAccess", &JSWeb::DatabaseAccess);
     JSClass<JSWeb>::StaticMethod("textZoomRatio", &JSWeb::TextZoomRatio);
     JSClass<JSWeb>::StaticMethod("textZoomAtio", &JSWeb::TextZoomRatio);
-    JSClass<JSWeb>::StaticMethod("webDebuggingAccess", &JSWeb::WebDebuggingAccessEnabled);
     JSClass<JSWeb>::StaticMethod("initialScale", &JSWeb::InitialScale);
     JSClass<JSWeb>::StaticMethod("backgroundColor", &JSWeb::BackgroundColor);
     JSClass<JSWeb>::StaticMethod("onKeyEvent", &JSWeb::OnKeyEvent);
@@ -1739,6 +1738,15 @@ void JSWeb::CreateInNewPipeline(
         if (!cmdLine.empty()) {
             NG::WebView::SetCustomScheme(cmdLine);
         }
+
+        auto getWebDebugingFunction = controller->GetProperty("getWebDebuggingAccess");
+        bool webDebuggingAccess = JSRef<JSFunc>::Cast(getWebDebugingFunction)->Call(controller, 0, {})->ToBoolean();
+        if (webDebuggingAccess == JSWeb::webDebuggingAccess_) {
+            LOGI("JS already set debug mode, no need to set again");
+            return;
+        }
+        NG::WebView::SetWebDebuggingAccessEnabled(webDebuggingAccess);
+        JSWeb::webDebuggingAccess_ = webDebuggingAccess;
         return;
     }
     auto* jsWebController = controller->Unwrap<JSWebController>();
@@ -1784,6 +1792,15 @@ void JSWeb::CreateWithWebviewController(
     if (!cmdLine.empty()) {
         webComponent->SetCustomScheme(cmdLine);
     }
+
+    auto getWebDebugingFunction = controller->GetProperty("getWebDebuggingAccess");
+    bool webDebuggingAccess = JSRef<JSFunc>::Cast(getWebDebugingFunction)->Call(controller, 0, {})->ToBoolean();
+    if (webDebuggingAccess == JSWeb::webDebuggingAccess_) {
+        LOGI("JS already set debug mode, no need to set again");
+        return;
+    }
+    webComponent->SetWebDebuggingAccessEnabled(webDebuggingAccess);
+    JSWeb::webDebuggingAccess_ = webDebuggingAccess;
 }
 
 void JSWeb::CreateWithWebController(JSRef<JSObject> controller, RefPtr<WebComponent>& webComponent)

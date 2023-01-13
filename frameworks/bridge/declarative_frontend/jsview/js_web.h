@@ -125,6 +125,8 @@ public:
     static void ForceDarkAccess(bool access);
     static void HorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled);
     static void VerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
+    // Enable or disable debugging of web content
+    static bool webDebuggingAccess_;
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
