@@ -103,7 +103,7 @@ void GetInspectorChildren(
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
     auto node = AceType::DynamicCast<FrameNode>(parent);
-    RectF rect(node->GetOffsetRelativeToWindow().GetX(), node->GetOffsetRelativeToWindow().GetY(),
+    RectF rect(node->GetTransformRelativeOffset().GetX(), node->GetTransformRelativeOffset().GetY(),
         node->GetGeometryNode()->GetFrameRect().Width(), node->GetGeometryNode()->GetFrameRect().Height());
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
     auto jsonObject = JsonUtil::Create(false);
@@ -225,7 +225,11 @@ std::string Inspector::GetInspectorTree(bool isLayoutInspector)
             auto jsonNode = JsonUtil::Create(false);
             jsonNode->Put(INSPECTOR_TYPE, inspectorElement->GetTag().c_str());
             jsonNode->Put(INSPECTOR_ID, inspectorElement->GetId());
-            jsonNode->Put(INSPECTOR_RECT, inspectorElement->GetGeometryNode()->GetFrameRect().ToBounds().c_str());
+            RectF rect;
+            rect.SetOffset(inspectorElement->GetTransformRelativeOffset());
+            rect.SetWidth(inspectorElement->GetGeometryNode()->GetFrameRect().Width());
+            rect.SetHeight(inspectorElement->GetGeometryNode()->GetFrameRect().Height());
+            jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
             auto jsonObject = JsonUtil::Create(false);
             inspectorElement->ToJsonValue(jsonObject);
             jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
@@ -280,7 +284,7 @@ bool Inspector::SendEventByKey(const std::string& key, int action, const std::st
     CHECK_NULL_RETURN(inspectorElement, false);
 
     auto size = inspectorElement->GetGeometryNode()->GetFrameSize();
-    auto offset = inspectorElement->GetOffsetRelativeToWindow();
+    auto offset = inspectorElement->GetTransformRelativeOffset();
     Rect rect { offset.GetX(), offset.GetY(), size.Width(), size.Height() };
     context->GetTaskExecutor()->PostTask(
         [weak = AceType::WeakClaim(AceType::RawPtr(context)), rect, action, params]() {
