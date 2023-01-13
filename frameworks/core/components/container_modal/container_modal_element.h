@@ -48,6 +48,7 @@ private:
     bool CanHideFloatingTitle();
     void ChangeFloatingTitleIcon(bool isFocus = true);
     void ChangeTitleIcon(bool isFocus = true);
+    void SetTitleAccessibilityNodeOffset();
     RefPtr<RenderText> GetTitleRender(bool isFloatingTitle);
     RefPtr<RenderImage> GetIconRender(bool isFloatingTitle);
     WindowMode windowMode_;

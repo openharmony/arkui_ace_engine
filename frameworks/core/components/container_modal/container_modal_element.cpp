@@ -15,7 +15,9 @@
 
 #include "core/components/container_modal/container_modal_element.h"
 
+#include "base/memory/ace_type.h"
 #include "core/components/box/box_element.h"
+#include "core/components/box/render_box.h"
 #include "core/components/clip/clip_element.h"
 #include "core/components/clip/render_clip.h"
 #include "core/components/container_modal/container_modal_constants.h"
@@ -23,6 +25,7 @@
 #include "core/components/flex/flex_element.h"
 #include "core/components/padding/render_padding.h"
 #include "core/gestures/tap_gesture.h"
+#include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -347,6 +350,10 @@ void ContainerModalElement::Update()
         if (deltaMoveX <= MOVE_POPUP_DISTANCE_X && deltaMoveY >= MOVE_POPUP_DISTANCE_Y) {
             containerElement->floatingTitleDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
             containerElement->controller_->ClearStopListeners();
+            containerElement->controller_->AddStopListener([weak] {
+                auto container = weak.Upgrade();
+                container->SetTitleAccessibilityNodeOffset();
+            });
             containerElement->controller_->Forward();
         }
     });
@@ -363,6 +370,10 @@ void ContainerModalElement::Update()
             containerElement->CanShowFloatingTitle()) {
             containerElement->floatingTitleDisplay_->UpdateVisibleType(VisibleType::VISIBLE);
             containerElement->controller_->ClearStopListeners();
+            containerElement->controller_->AddStopListener([weak] {
+                auto container = weak.Upgrade();
+                container->SetTitleAccessibilityNodeOffset();
+            });
             containerElement->controller_->Forward();
         }
         if (info.GetLocalLocation().GetY() * viewScale > (TITLE_POPUP_DISTANCE * containerElement->density_) &&
@@ -605,6 +616,22 @@ RefPtr<RenderImage> ContainerModalElement::GetIconRender(bool isFloatingTitle)
     CHECK_NULL_RETURN(renderPadding, nullptr);
     auto icon = AceType::DynamicCast<RenderImage>(renderPadding->GetFirstChild());
     return icon;
+}
+
+void ContainerModalElement::SetTitleAccessibilityNodeOffset()
+{
+    auto floatingTitleBoxRender = AceType::DynamicCast<RenderBox>(floatingTitleBox_->GetRenderNode());
+    if (floatingTitleBoxRender) {
+        auto accessibilityNode = floatingTitleBoxRender->GetAccessibilityNode().Upgrade();
+        if (accessibilityNode) {
+            Offset globalOffset =
+                (floatingTitleBoxRender->GetGlobalOffsetExternal() + floatingTitleBoxRender->GetMargin().GetOffset()) *
+                floatingTitleBoxRender->GetContext().Upgrade()->GetViewScale();
+            Offset transformOffset(
+                globalOffset.GetX() - accessibilityNode->GetLeft(), globalOffset.GetY() - accessibilityNode->GetTop());
+            accessibilityNode->AddOffsetForChildren(transformOffset);
+        }
+    }
 }
 
 } // namespace OHOS::Ace
