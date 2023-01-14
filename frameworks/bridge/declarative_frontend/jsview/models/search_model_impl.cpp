@@ -335,11 +335,9 @@ void SearchModelImpl::InitializeComponent(OHOS::Ace::RefPtr<OHOS::Ace::SearchCom
     const OHOS::Ace::RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme)
 {
     textFieldComponent->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
-
+    textFieldComponent->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-
     InitializeDefaultValue(boxComponent, textFieldComponent, textFieldTheme);
-
     boxComponent->SetBackDecoration(nullptr);
     boxComponent->SetPadding(Edge());
     textFieldComponent->SetIconSize(searchTheme->GetIconSize());
