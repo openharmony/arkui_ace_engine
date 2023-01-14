@@ -111,6 +111,8 @@ public:
 
     void OnVisibleChange(bool isVisible) override;
 
+    void OnAreaChangedInner() override;
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;

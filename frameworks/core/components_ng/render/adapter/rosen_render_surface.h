@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_RENDER_SURFACE_H
 
 #include "surface.h"
+#include "surface_delegate.h"
 #include "window.h"
 
 #include "base/memory/referenced.h"
@@ -53,10 +54,13 @@ public:
         return producerSurface_;
     }
 
+    void SetBounds(int32_t left, int32_t top, int32_t width, int32_t height) override;
+
 private:
     OHOS::sptr<OHOS::Surface> producerSurface_ = nullptr;
     struct NativeWindow* nativeWindow_ = nullptr;
     WeakPtr<NG::RenderContext> renderContext_ = nullptr;
+    sptr<OHOS::SurfaceDelegate> surfaceDelegate_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderSurface);
 };
