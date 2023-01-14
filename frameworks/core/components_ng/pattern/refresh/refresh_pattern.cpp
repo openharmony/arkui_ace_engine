@@ -15,11 +15,14 @@
 
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 
+#include <queue>
 #include <stack>
 #include <string>
 #include <sys/time.h>
 #include <utility>
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "frameworks/base/i18n/localization.h"
 #include "frameworks/base/utils/time_util.h"
 #include "frameworks/base/utils/utils.h"
@@ -49,6 +52,7 @@ void RefreshPattern::OnModifyDone()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitPanEvent(gestureHub);
+    CheckCoordinationEvent();
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetIsShowLastTimeValue()) {
@@ -62,6 +66,72 @@ void RefreshPattern::OnModifyDone()
     layoutProperty->UpdateLoadingProcessOffset(OffsetF(0, static_cast<float>(indicatorOffset)));
     layoutProperty->UpdateShowTimeOffset(OffsetF(0, GetShowTimeOffset().GetY()));
     timeOffset_ = layoutProperty->GetShowTimeOffsetValue();
+}
+
+void RefreshPattern::CheckCoordinationEvent()
+{
+    movedByScrollableComponent_ = false;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto scrollableNode = FindScrollableChild();
+    scrollableNode_ = WeakClaim(AceType::RawPtr(scrollableNode));
+    CHECK_NULL_VOID(scrollableNode);
+    auto scrollablePattern = scrollableNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(scrollablePattern);
+    auto coordinationEvent = AceType::MakeRefPtr<ScrollableCoordinationEvent>();
+    auto onScrollEvent = [weak = WeakClaim(this)](double offset) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragUpdate(static_cast<float>(offset));
+    };
+    coordinationEvent->SetOnScrollEvent(onScrollEvent);
+    auto onScrollStartEvent = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragStart();
+    };
+    coordinationEvent->SetOnScrollStartEvent(onScrollStartEvent);
+    auto onScrollEndEvent = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragEnd();
+    };
+    coordinationEvent->SetOnScrollEndEvent(onScrollEndEvent);
+    scrollablePattern->SetCoordinationEvent(coordinationEvent);
+    movedByScrollableComponent_ = true;
+}
+
+RefPtr<FrameNode> RefreshPattern::FindScrollableChild()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    std::queue<RefPtr<FrameNode>> frameNodeQueue;
+    frameNodeQueue.push(host);
+    while (!frameNodeQueue.empty()) {
+        auto size = frameNodeQueue.size();
+        while (size > 0) {
+            auto node = frameNodeQueue.front();
+            if (node && AceType::InstanceOf<ScrollablePattern>(node->GetPattern())) {
+                return node;
+            }
+            frameNodeQueue.pop();
+            auto children = node->GetChildren();
+            for (auto const& child : children) {
+                frameNodeQueue.push(DynamicCast<FrameNode>(child));
+            }
+            size--;
+        }
+    }
+    return nullptr;
+}
+
+bool RefreshPattern::ScrollComponentReactInMove()
+{
+    auto scrollableNode = scrollableNode_.Upgrade();
+    CHECK_NULL_RETURN_NOLOG(scrollableNode, false);
+    auto scrollablePattern = scrollableNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN_NOLOG(scrollablePattern, false);
+    return  movedByScrollableComponent_ && scrollablePattern->IsScrollable();
 }
 
 bool RefreshPattern::OnDirtyLayoutWrapperSwap(
@@ -108,21 +178,33 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->ScrollComponentReactInMove()) {
+            return;
+        }
         pattern->HandleDragStart();
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->ScrollComponentReactInMove()) {
+            return;
+        }
         pattern->HandleDragUpdate(static_cast<float>(info.GetMainDelta()));
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->ScrollComponentReactInMove()) {
+            return;
+        }
         pattern->HandleDragEnd();
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->ScrollComponentReactInMove()) {
+            return;
+        }
         pattern->HandleDragCancel();
     };
     PanDirection panDirection;
