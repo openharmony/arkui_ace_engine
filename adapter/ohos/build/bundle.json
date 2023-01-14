@@ -53,8 +53,7 @@
                 "parse5",
                 "qrcodegen",
                 "css_what",
-                "weex_loader",
-                "quickjs"
+                "weex_loader"
             ]
         },
         "build": {

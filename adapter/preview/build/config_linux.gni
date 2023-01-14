@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("config_js_engine.gni")
 import("preview_common.gni")
 
 # js engine common configs
@@ -19,22 +18,13 @@ js_engines = []
 js_pa_support = false
 use_build_in_js_engine = true
 
-if (enable_ark_preview) {
-  ark_engine = {
-    engine_name = "ark"
-    engine_path = "jsi"
-    engine_defines = [ "USE_ARK_ENGINE" ]
-  }
-  js_engines += [ ark_engine ]
-  build_for_preview = true
-} else {
-  qjs_engine = {
-    engine_name = "qjs"
-    engine_path = "quickjs"
-    engine_defines = [ "USE_QUICKJS_ENGINE" ]
-  }
-  js_engines += [ qjs_engine ]
+ark_engine = {
+  engine_name = "ark"
+  engine_path = "jsi"
+  engine_defines = [ "USE_ARK_ENGINE" ]
 }
+js_engines += [ ark_engine ]
+build_for_preview = true
 
 # linux platform defines and configs
 defines += [

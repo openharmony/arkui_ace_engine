@@ -12,8 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import(
-    "//foundation/arkui/ace_engine/adapter/preview/build/config_js_engine.gni")
 import("//foundation/arkui/ace_engine/build/ace_lib.gni")
 import("//foundation/arkui/ace_engine/interfaces/napi/kits/napi_lib.gni")
 
@@ -247,24 +245,18 @@ if (is_standard_system) {
       "$uv_path/thirdparty/libuv/libuv${dylib_suffix}",
     ]
 
-    # Add qjs or ark engine-related dynamic libraries
-    if (enable_ark_preview) {
-      ark_js_path = get_label_info("//arkcompiler/ets_runtime:libark_jsruntime",
-                                   "root_out_dir")
-      deps += [
-        "$ace_napi:ace_napi_ark",
-        "//arkcompiler/ets_runtime:libark_jsruntime",
-      ]
-      sources += [
-        "$ace_napi_path/arkui/napi/libace_napi_ark${dylib_suffix}",
-        "$ark_js_path/arkcompiler/ets_runtime/libark_jsruntime${dylib_suffix}",
-        "//third_party/icu/ohos_icu4j/data/icudt69l.dat",
-      ]
-    } else {
-      deps += [ "$ace_napi:ace_napi_quickjs" ]
-      sources +=
-          [ "$ace_napi_path/arkui/napi/libace_napi_quickjs${dylib_suffix}" ]
-    }
+    # Add ark engine-related dynamic libraries
+    ark_js_path = get_label_info("//arkcompiler/ets_runtime:libark_jsruntime",
+                                 "root_out_dir")
+    deps += [
+      "$ace_napi:ace_napi_ark",
+      "//arkcompiler/ets_runtime:libark_jsruntime",
+    ]
+    sources += [
+      "$ace_napi_path/arkui/napi/libace_napi_ark${dylib_suffix}",
+      "$ark_js_path/arkcompiler/ets_runtime/libark_jsruntime${dylib_suffix}",
+      "//third_party/icu/ohos_icu4j/data/icudt69l.dat",
+    ]
 
     # Add dynamic libraries with different names on mac and windows systems here.
     if (use_mac) {

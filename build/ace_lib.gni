@@ -37,29 +37,6 @@ template("libace_static") {
       deps += config.platform_deps
     }
 
-    # build-in qjs engine
-    if (defined(config.use_build_in_js_engine) &&
-        config.use_build_in_js_engine && defined(config.qjs_engine)) {
-      if (enable_ng_build) {
-        deps += [ "$ace_root/frameworks/bridge/declarative_frontend:declarative_js_engine_ng_qjs_$platform" ]
-      } else {
-        if (defined(use_js_debug) && use_js_debug) {
-          deps += [ "$ace_root/frameworks/bridge/js_frontend/engine:js_engine_qjs_debug_$platform" ]
-          if (defined(config.js_pa_support) && config.js_pa_support) {
-            deps += [ "$ace_root/${config.pa_engine_path}/engine:js_pa_engine_qjs_debug_$platform" ]
-          }
-        } else {
-          deps += [
-            "$ace_root/frameworks/bridge/declarative_frontend:declarative_js_engine_qjs_$platform",
-            "$ace_root/frameworks/bridge/js_frontend/engine:js_engine_qjs_$platform",
-          ]
-          if (defined(config.js_pa_support) && config.js_pa_support) {
-            deps += [ "$ace_root/${config.pa_engine_path}/engine:js_pa_engine_qjs_$platform" ]
-          }
-        }
-      }
-    }
-
     # build-in ark js engine for preview
     if (defined(config.use_build_in_js_engine) &&
         config.use_build_in_js_engine && defined(config.ark_engine)) {
@@ -86,8 +63,6 @@ template("ace_bridge_engine") {
 
     if (build_type == "engine") {
       if (use_js_debug) {
-        assert(defined(engine_name) && engine_name == "qjs",
-               "Only qjs support build-in debugger")
         deps += [ "$ace_root/frameworks/bridge/js_frontend/engine:js_engine_${engine_name}_debug_$platform" ]
       } else {
         deps += [ "$ace_root/frameworks/bridge/js_frontend/engine:js_engine_${engine_name}_$platform" ]

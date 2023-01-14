@@ -60,7 +60,7 @@ RefPtr<PipelineContext> PluginFrontendDelegateTest::GetPipelineContext(const Ref
 RefPtr<Framework::PluginFrontendDelegate> PluginFrontendDelegateTest::GetPluginFrontendDelegate(
     const RefPtr<TaskExecutor>& taskExecutor)
 {
-    auto& loader = Framework::JsEngineLoader::Get("libace_engine_qjs.z.so");
+    auto& loader = Framework::JsEngineLoader::Get("libace_engine_ark.z.so");
     auto jsEngine = loader.CreateJsEngine(0);
     const auto& loadCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine)](const std::string& url,
                                    const RefPtr<Framework::JsAcePage>& jsPage, bool isMainPage) {
