@@ -46,6 +46,11 @@ public:
         return rsUIDirector_;
     }
 
+    std::shared_ptr<Rosen::RSSurfaceNode> GetRSSurfaceNode() const
+    {
+        return rsSurfaceNode_;
+    }
+
     void SetFormRSSurfaceNode(void* surfaceNode) override;
     void OnShow() override;
     void OnHide() override;
@@ -57,6 +62,7 @@ private:
     WeakPtr<TaskExecutor> taskExecutor_ = nullptr;
     int32_t id_ = 0;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
+    std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode_;
     ACE_DISALLOW_COPY_AND_MOVE(FormRenderWindow);
 };
 

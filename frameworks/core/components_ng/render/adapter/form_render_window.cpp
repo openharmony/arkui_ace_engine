@@ -91,7 +91,23 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
 
     receiver_->RequestNextVSync(frameCallback_);
 
+    std::string surfaceNodeName = "ArkTSCardNode";
+    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = surfaceNodeName};
+    rsSurfaceNode_ = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+    LOGE("Kee FormRenderWindow::FormRenderWindow surfaceNode ptr   = %{public}p", rsSurfaceNode_.get());
+    LOGE("Kee FormRenderWindow::FormRenderWindow surfaceNode name  = %{public}s", rsSurfaceNode_->GetName().c_str());
+    LOGE("Kee FormRenderWindow::FormRenderWindow surfaceNode id    = %{public}llu", rsSurfaceNode_->GetId());
+
     rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
+    rsUIDirector_->SetRSSurfaceNode(rsSurfaceNode_);
+    // rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
+    rsUIDirector_->Init();
+    rsUIDirector_->SetUITaskRunner([weakTaskExecutor = taskExecutor_, id = id_](const std::function<void()>& task) {
+        ContainerScope scope(id);
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+    });
 
     LOGE("Kee FormRenderWindow::FormRenderWindow");
 }
@@ -123,15 +139,15 @@ void FormRenderWindow::SetFormRSSurfaceNode(void* surfaceNode)
     }
     std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode;
     rsSurfaceNode.reset(static_cast<Rosen::RSSurfaceNode*>(surfaceNode));
-    rsUIDirector_->SetRSSurfaceNode(rsSurfaceNode);
-    // rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
-    rsUIDirector_->Init();
-    rsUIDirector_->SetUITaskRunner([weakTaskExecutor = taskExecutor_, id = id_](const std::function<void()>& task) {
-        ContainerScope scope(id);
-        auto taskExecutor = weakTaskExecutor.Upgrade();
-        CHECK_NULL_VOID_NOLOG(taskExecutor);
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-    });
+    // rsUIDirector_->SetRSSurfaceNode(rsSurfaceNode);
+    // // rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
+    // rsUIDirector_->Init();
+    // rsUIDirector_->SetUITaskRunner([weakTaskExecutor = taskExecutor_, id = id_](const std::function<void()>& task) {
+    //     ContainerScope scope(id);
+    //     auto taskExecutor = weakTaskExecutor.Upgrade();
+    //     CHECK_NULL_VOID_NOLOG(taskExecutor);
+    //     taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+    // });
 }
 
 void FormRenderWindow::OnShow()
@@ -149,7 +165,7 @@ void FormRenderWindow::OnHide()
 
 void FormRenderWindow::FlushTasks()
 {
-    LOGD("FormRenderWindow flush tasks");
+    LOGE("FormRenderWindow flush tasks");
     rsUIDirector_->SendMessages();
 }
 

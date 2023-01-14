@@ -181,10 +181,15 @@ void FormPattern::InitFormManagerDelegate()
         });
     });
 
-    formManagerBridge_->AddFormSurfaceNodeCallback([weak = WeakClaim(this), instanceID](const std::shared_ptr<RSNode>& node) {
+    formManagerBridge_->AddFormSurfaceNodeCallback([weak = WeakClaim(this), instanceID](const std::shared_ptr<Rosen::RSSurfaceNode>& node) {
         ContainerScope scope(instanceID);
+        sleep(1);
         LOGE("Kee FormPattern::AddFormSurfaceNodeCallback");
         CHECK_NULL_VOID(node);
+        LOGE("Kee FormPattern::AddFormSurfaceNodeCallback 1");
+        node->CreateNodeInRenderThread();
+        node->SetBounds(0, 0, 400, 400);
+        LOGE("Kee FormPattern::AddFormSurfaceNodeCallback 2");
         auto formComponent = weak.Upgrade();
         CHECK_NULL_VOID(formComponent);
         auto host = formComponent->GetHost();

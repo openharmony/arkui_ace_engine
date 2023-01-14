@@ -49,7 +49,7 @@ public:
         std::function<void(int64_t, const std::string&, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&)>;
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using OnFormUninstallCallback = std::function<void(int64_t)>;
-    using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSNode>&)>;
+    using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&)>;
 
     enum class State : char {
         WAITINGFORSIZE,

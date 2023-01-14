@@ -793,16 +793,11 @@ void AceContainer::SetViewNew(
 
     std::unique_ptr<Window> window;
     if (container->isCardContainer_) {
-        window = std::make_unique<FormRenderWindow>(taskExecutor, view->GetInstanceId());
+        auto formRenderWindow = std::make_unique<FormRenderWindow>(taskExecutor, view->GetInstanceId());
+        formSurfaceNode_ = formRenderWindow->GetRSSurfaceNode();
+        window = std::move(formRenderWindow);
         window->SetIsEtsCard(container->isCardContainer_);
         LOGE("Kee AceContainer::SetViewNew isCardContainer_ AttachView window = %{public}p", window.get());
-        // create a SurfaceNode
-        std::string surfaceNodeName = "ArkTSCardNode";
-        struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = surfaceNodeName};
-        auto surfaceNode = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
-        LOGE("Kee AceContainer::SetViewNew isCardContainer_ AttachView surfaceNode = %{public}p", surfaceNode.get());
-        formSurfaceNode_ = std::move(surfaceNode);
-        window->SetFormRSSurfaceNode(formSurfaceNode_.get());
         container->AttachView(std::move(window), view, density, width, height, view->GetInstanceId(), nullptr); // 为了避免contentImpl->Init()的crash
     } else {
         window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
