@@ -207,6 +207,10 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MinFontSize, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MinLogicalFontSize, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BlockNetwork, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DarkMode, WebDarkMode);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ForceDarkAccess, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, HorizontalScrollBarAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, VerticalScrollBarAccessEnabled, bool);
 
     void RequestFullScreen();
     void ExitFullScreen();
@@ -216,6 +220,7 @@ public:
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
+    bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
     void UpdateTouchHandleForOverlay();
     void UpdateLocale();
 
@@ -232,6 +237,7 @@ private:
     void OnInActive() override;
     void OnActive() override;
     void OnVisibleChange(bool isVisible) override;
+    void OnAreaChangedInner() override;
 
     void OnWebSrcUpdate();
     void OnWebDataUpdate();
@@ -266,6 +272,10 @@ private:
     void OnMinFontSizeUpdate(int32_t value);
     void OnMinLogicalFontSizeUpdate(int32_t value);
     void OnBlockNetworkUpdate(bool value);
+    void OnDarkModeUpdate(WebDarkMode mode);
+    void OnForceDarkAccessUpdate(bool access);
+    void OnHorizontalScrollBarAccessEnabledUpdate(bool value);
+    void OnVerticalScrollBarAccessEnabledUpdate(bool value);
 
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -351,6 +361,8 @@ private:
     bool isWindowShow_ = true;
     bool isActive_ = true;
     bool isEnhanceSurface_ = false;
+    OffsetF webOffset_;
+    SelectMenuInfo selectMenuInfo_;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG

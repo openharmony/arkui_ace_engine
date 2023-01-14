@@ -40,6 +40,7 @@
 #include "nweb_handler.h"
 #include "nweb_helper.h"
 #include "nweb_hit_testresult.h"
+#include "app_mgr_client.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "surface.h"
 #endif
@@ -201,6 +202,12 @@ public:
     std::string GetUnfilteredLinkUrl() const override;
     std::string GetSourceUrl() const override;
     bool HasImageContents() const override;
+    bool IsEditable() const override;
+    int GetEditStateFlags() const override;
+    int GetSourceType() const override;
+    int GetMediaType() const override;
+    int GetInputFieldType() const override;
+    std::string GetSelectionText() const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param_;
@@ -214,6 +221,10 @@ public:
 
     void Cancel() const override;
     void CopyImage() const override;
+    void Copy() const override;
+    void Paste() const override;
+    void Cut() const override;
+    void SelectAll() const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback_;
@@ -386,6 +397,11 @@ public:
     void UpdateDomStorageEnabled(const bool& isDomStorageAccessEnabled);
     void UpdateGeolocationEnabled(const bool& isGeolocationAccessEnabled);
     void UpdateCacheMode(const WebCacheMode& mode);
+    std::shared_ptr<OHOS::NWeb::NWeb> GetNweb();
+    bool GetForceDarkMode();
+    void UpdateDarkMode(const WebDarkMode& mode);
+    void UpdateDarkModeAuto(RefPtr<WebDelegate> delegate, std::shared_ptr<OHOS::NWeb::NWebPreference> setting);
+    void UpdateForceDarkAccess(const bool& access);
     void UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled);
     void UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnabled);
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
@@ -405,6 +421,8 @@ public:
     void UpdateMinFontSize(int32_t minFontSize);
     void UpdateMinLogicalFontSize(int32_t minLogicalFontSize);
     void UpdateBlockNetwork(bool isNetworkBlocked);
+    void UpdateHorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled);
+    void UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
@@ -421,8 +439,8 @@ public:
     void OnFocus();
     void OnBlur();
     void OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request);
-    bool RunQuickMenu(
-        std::shared_ptr<NWeb::NWebQuickMenuParams> params, std::shared_ptr<NWeb::NWebQuickMenuCallback> callback);
+    bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
+        std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void OnQuickMenuDismissed();
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
@@ -433,6 +451,7 @@ public:
     void UpdateLocale();
     void OnInactive();
     void OnActive();
+    bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -543,6 +562,8 @@ private:
     void SetWebCallBack();
     void RunSetWebIdCallback();
     void RunJsProxyCallback();
+    void RegisterConfigObserver();
+    void UnRegisterConfigObserver();
 
     // Backward and forward
     void Backward();
@@ -626,6 +647,8 @@ private:
     EGLContext mSharedEGLContext = EGL_NO_CONTEXT;
     EGLSurface mEGLSurface = nullptr;
     WindowsSurfaceInfo surfaceInfo_;
+    bool forceDarkMode_ = false;
+    sptr<AppExecFwk::IConfigurationObserver> configChangeObserver_ = nullptr;
 #endif
 };
 

@@ -104,6 +104,10 @@ public:
     static void SetDataResubmittedId(OnWebAsyncFunc&& DataResubmittedId);
     static void SetFaviconReceivedId(OnWebAsyncFunc&& faviconReceivedId);
     static void SetTouchIconUrlId(OnWebAsyncFunc&& touchIconUrlId);
+    static void SetDarkMode(WebDarkMode mode);
+    static void SetForceDarkAccess(bool access);
+    static void SetHorizontalScrollBarAccessEnabled(bool isHorizontalScrollBarAccessEnabled);
+    static void SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAccessEnabled);
 
 private:
     static void RegisterPipelineCallback(int32_t nodeId);

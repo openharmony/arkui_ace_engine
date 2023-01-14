@@ -25,8 +25,20 @@ enum class MouseFormat : int32_t {
     DEFAULT = 0,        // Default mouse style
     WEST_EAST = 5,      // Drag left-right mouse style
     NORTH_SOUTH = 6,    // Drag up-down mouse style
+    NORTH_EAST_SOUTH_WEST = 11,
+    NORTH_WEST_SOUTH_EAST = 12,
+    CROSS = 13,
+    CURSOR_COPY = 14,
+    CURSOR_FORBID = 15,
+    HAND_GRABBING = 17,
     HAND_POINTING = 19, // Hyperlink mouse style
+    HELP = 20,
+    CURSOR_MOVE = 21,
+    RESIZE_LEFT_RIGHT = 22,
+    RESIZE_UP_DOWN = 23,
     TEXT_CURSOR = 26,   // Text editing mouse style
+    ZOOM_IN = 27,
+    ZOOM_OUT = 28,
 };
 
 class ACE_EXPORT MouseStyle : public AceType {

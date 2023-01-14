@@ -43,6 +43,7 @@
 #include "application_env.h"
 #include "nweb_adapter_helper.h"
 #include "nweb_handler.h"
+#include "web_configuration_observer.h"
 #include "web_javascript_execute_callback.h"
 #include "web_javascript_result_callback.h"
 #endif
@@ -399,6 +400,54 @@ bool ContextMenuParamOhos::HasImageContents() const
     return false;
 }
 
+bool ContextMenuParamOhos::IsEditable() const
+{
+    if (param_) {
+        return param_->IsEditable();
+    }
+    return false;
+}
+
+int ContextMenuParamOhos::GetEditStateFlags() const
+{
+    if (param_) {
+        return param_->GetEditStateFlags();
+    }
+    return OHOS::NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_NONE;
+}
+
+int ContextMenuParamOhos::GetSourceType() const
+{
+    if (param_) {
+        return param_->GetSourceType();
+    }
+    return OHOS::NWeb::NWebContextMenuParams::ContextMenuSourceType::CM_ST_NONE;
+}
+
+int ContextMenuParamOhos::GetMediaType() const
+{
+    if (param_) {
+        return param_->GetMediaType();
+    }
+    return OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_NONE;
+}
+
+int ContextMenuParamOhos::GetInputFieldType() const
+{
+    if (param_) {
+        return param_->GetInputFieldType();
+    }
+    return OHOS::NWeb::NWebContextMenuParams::ContextMenuInputFieldType::CM_IT_NONE;
+}
+
+std::string ContextMenuParamOhos::GetSelectionText() const
+{
+    if (param_) {
+        return param_->GetSelectionText();
+    }
+    return "";
+}
+
 void ContextMenuResultOhos::Cancel() const
 {
     if (callback_) {
@@ -410,6 +459,34 @@ void ContextMenuResultOhos::CopyImage() const
 {
     if (callback_) {
         callback_->Continue(CI_IMAGE_COPY, EF_NONE);
+    }
+}
+
+void ContextMenuResultOhos::Copy() const
+{
+    if (callback_) {
+        callback_->Continue(CI_COPY, EF_NONE);
+    }
+}
+
+void ContextMenuResultOhos::Paste() const
+{
+    if (callback_) {
+        callback_->Continue(CI_PASTE, EF_NONE);
+    }
+}
+
+void ContextMenuResultOhos::Cut() const
+{
+    if (callback_) {
+        callback_->Continue(CI_CUT, EF_NONE);
+    }
+}
+
+void ContextMenuResultOhos::SelectAll() const
+{
+    if (callback_) {
+        callback_->Continue(CI_SELECT_ALL, EF_NONE);
     }
 }
 
@@ -1002,14 +1079,17 @@ void WebDelegate::ClosePort(std::string& port)
 void WebDelegate::PostPortMessage(std::string& port, std::string& data)
 {
     if (nweb_) {
-        nweb_->PostPortMessage(port, data);
+        auto webMsg = std::make_shared<OHOS::NWeb::NWebMessage>(NWebValue::Type::NONE);
+        webMsg->SetType(NWebValue::Type::STRING);
+        webMsg->SetString(data);
+        nweb_->PostPortMessage(port, webMsg);
     }
 }
 
 void WebDelegate::SetPortMessageCallback(std::string& port, std::function<void(const std::string&)>&& callback)
 {
     if (nweb_) {
-        auto callbackImpl = std::make_shared<WebJavaScriptExecuteCallBack>(Container::CurrentId());
+        auto callbackImpl = std::make_shared<WebMessageValueCallBackImpl>(Container::CurrentId());
         if (callbackImpl && callback) {
             callbackImpl->SetCallBack([weak = WeakClaim(this), func = std::move(callback)](std::string result) {
                 auto delegate = weak.Upgrade();
@@ -1724,6 +1804,55 @@ void WebDelegate::RunJsProxyCallback()
     auto webCom = webComponent_.Upgrade();
     CHECK_NULL_VOID(webCom);
     webCom->CallJsProxyCallback();
+}
+
+void WebDelegate::RegisterConfigObserver()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
+            if (appMgrClient->ConnectAppMgrService()) {
+                LOGE("connect to app mgr service failed");
+                return;
+            }
+            delegate->configChangeObserver_ = sptr<AppExecFwk::IConfigurationObserver>(
+                new (std::nothrow) WebConfigurationObserver(delegate));
+            if (appMgrClient->RegisterConfigurationObserver(delegate->configChangeObserver_)) {
+                return;
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UnRegisterConfigObserver()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            if (delegate->configChangeObserver_) {
+                auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
+                if (appMgrClient->ConnectAppMgrService()) {
+                    LOGE("connect to app mgr service failed");
+                    return;
+                }
+                appMgrClient->UnregisterConfigurationObserver(delegate->configChangeObserver_);
+                delegate->configChangeObserver_ = nullptr;
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
 }
 
 void WebDelegate::SetWebCallBack()
@@ -2479,6 +2608,96 @@ void WebDelegate::UpdateCacheMode(const WebCacheMode& mode)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+std::shared_ptr<OHOS::NWeb::NWeb> WebDelegate::GetNweb()
+{
+    return nweb_;
+}
+
+bool WebDelegate::GetForceDarkMode()
+{
+    return forceDarkMode_;
+}
+
+void WebDelegate::UpdateDarkMode(const WebDarkMode& mode)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), mode]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+            if (mode == WebDarkMode::On) {
+                delegate->UnRegisterConfigObserver();
+                setting->PutDarkSchemeEnabled(true);
+                if (delegate->forceDarkMode_) {
+                    setting->PutForceDarkModeEnabled(true);
+                }
+                return;
+            }
+            if (mode == WebDarkMode::Off) {
+                delegate->UnRegisterConfigObserver();
+                setting->PutDarkSchemeEnabled(false);
+                setting->PutForceDarkModeEnabled(false);
+                return;
+            }
+            if (mode == WebDarkMode::Auto) {
+                delegate->UpdateDarkModeAuto(delegate, setting);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateDarkModeAuto(RefPtr<WebDelegate> delegate,
+    std::shared_ptr<OHOS::NWeb::NWebPreference> setting)
+{
+    auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
+    if (appMgrClient->ConnectAppMgrService()) {
+        return;
+    }
+    auto systemConfig = OHOS::AppExecFwk::Configuration();
+    appMgrClient->GetConfiguration(systemConfig);
+    std::string colorMode =
+        systemConfig.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    if (colorMode == "dark") {
+        setting->PutDarkSchemeEnabled(true);
+        if (delegate->GetForceDarkMode()) {
+            setting->PutForceDarkModeEnabled(true);
+        }
+        return;
+    }
+    if (colorMode == "light") {
+        setting->PutDarkSchemeEnabled(false);
+        setting->PutForceDarkModeEnabled(false);
+    }
+    delegate->RegisterConfigObserver();
+}
+
+void WebDelegate::UpdateForceDarkAccess(const bool& access)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), access]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+            delegate->forceDarkMode_ = access;
+            if (setting->DarkSchemeEnabled()) {
+                setting->PutForceDarkModeEnabled(access);
+            } else {
+                setting->PutForceDarkModeEnabled(false);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled)
 {
     auto context = context_.Upgrade();
@@ -2820,6 +3039,44 @@ void WebDelegate::UpdateBlockNetwork(bool isNetworkBlocked)
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
                 if (setting) {
                     setting->PutBlockNetwork(isNetworkBlocked);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateHorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isHorizontalScrollBarAccessEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutHorizontalScrollBarAccess(isHorizontalScrollBarAccessEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isVerticalScrollBarAccessEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutVerticalScrollBarAccess(isVerticalScrollBarAccessEnabled);
                 }
             }
         },
@@ -4035,6 +4292,18 @@ void WebDelegate::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchH
     auto renderWeb = renderWeb_.Upgrade();
     CHECK_NULL_VOID(renderWeb);
     renderWeb->OnTouchSelectionChanged(insertHandle, startSelectionHandle, endSelectionHandle);
+}
+
+bool WebDelegate::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_RETURN(webPattern, false);
+        return webPattern->OnCursorChange(type, info);
+    }
+    auto renderWeb = renderWeb_.Upgrade();
+    CHECK_NULL_RETURN(renderWeb, false);
+    return renderWeb->OnCursorChange(type, info);
 }
 
 void WebDelegate::HandleDragEvent(int32_t x, int32_t y, const DragAction& dragAction)

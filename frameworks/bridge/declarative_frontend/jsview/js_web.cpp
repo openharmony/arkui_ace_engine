@@ -40,13 +40,6 @@
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
 
-namespace {
-
-constexpr int32_t MAX_NAME_SIZE = 32;
-constexpr int32_t MAX_CUSTOM_SCHEME_SIZE = 10;
-
-}
-
 namespace OHOS::Ace::Framework {
 
 class JSWebDialog : public Referenced {
@@ -1132,6 +1125,12 @@ public:
         JSClass<JSContextMenuParam>::CustomMethod("getUnfilteredLinkUrl", &JSContextMenuParam::GetUnfilteredLinkUrl);
         JSClass<JSContextMenuParam>::CustomMethod("getSourceUrl", &JSContextMenuParam::GetSourceUrl);
         JSClass<JSContextMenuParam>::CustomMethod("existsImageContents", &JSContextMenuParam::HasImageContents);
+        JSClass<JSContextMenuParam>::CustomMethod("getSelectionText", &JSContextMenuParam::GetSelectionText);
+        JSClass<JSContextMenuParam>::CustomMethod("isEditable", &JSContextMenuParam::IsEditable);
+        JSClass<JSContextMenuParam>::CustomMethod("getEditStateFlags", &JSContextMenuParam::GetEditStateFlags);
+        JSClass<JSContextMenuParam>::CustomMethod("getSourceType", &JSContextMenuParam::GetSourceType);
+        JSClass<JSContextMenuParam>::CustomMethod("getInputFieldType", &JSContextMenuParam::GetInputFieldType);
+        JSClass<JSContextMenuParam>::CustomMethod("getMediaType", &JSContextMenuParam::GetMediaType);
         JSClass<JSContextMenuParam>::Bind(globalObj, &JSContextMenuParam::Constructor, &JSContextMenuParam::Destructor);
     }
 
@@ -1206,6 +1205,72 @@ public:
         args.SetReturnValue(descriptionRef);
     }
 
+    void GetSelectionText(const JSCallbackInfo& args)
+    {
+        std::string text;
+        if (param_) {
+            text = param_->GetSelectionText();
+        }
+        auto jsText = JSVal(ToJSValue(text));
+        auto descriptionRef = JSRef<JSVal>::Make(jsText);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void IsEditable(const JSCallbackInfo& args)
+    {
+        bool flag = false;
+        if (param_) {
+            flag = param_->IsEditable();
+        }
+        auto jsFlag = JSVal(ToJSValue(flag));
+        auto descriptionRef = JSRef<JSVal>::Make(jsFlag);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetEditStateFlags(const JSCallbackInfo& args)
+    {
+        int32_t flags = 0;
+        if (param_) {
+            flags = param_->GetEditStateFlags();
+        }
+        auto jsFlags = JSVal(ToJSValue(flags));
+        auto descriptionRef = JSRef<JSVal>::Make(jsFlags);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetSourceType(const JSCallbackInfo& args)
+    {
+        int32_t type = 0;
+        if (param_) {
+            type = param_->GetSourceType();
+        }
+        auto jsType = JSVal(ToJSValue(type));
+        auto descriptionRef = JSRef<JSVal>::Make(jsType);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetInputFieldType(const JSCallbackInfo& args)
+    {
+        int32_t type = 0;
+        if (param_) {
+            type = param_->GetInputFieldType();
+        }
+        auto jsType = JSVal(ToJSValue(type));
+        auto descriptionRef = JSRef<JSVal>::Make(jsType);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetMediaType(const JSCallbackInfo& args)
+    {
+        int32_t type = 0;
+        if (param_) {
+            type = param_->GetMediaType();
+        }
+        auto jsType = JSVal(ToJSValue(type));
+        auto descriptionRef = JSRef<JSVal>::Make(jsType);
+        args.SetReturnValue(descriptionRef);
+    }
+
 private:
     static void Constructor(const JSCallbackInfo& args)
     {
@@ -1231,6 +1296,10 @@ public:
         JSClass<JSContextMenuResult>::Declare("WebContextMenuResult");
         JSClass<JSContextMenuResult>::CustomMethod("closeContextMenu", &JSContextMenuResult::Cancel);
         JSClass<JSContextMenuResult>::CustomMethod("copyImage", &JSContextMenuResult::CopyImage);
+        JSClass<JSContextMenuResult>::CustomMethod("copy", &JSContextMenuResult::Copy);
+        JSClass<JSContextMenuResult>::CustomMethod("paste", &JSContextMenuResult::Paste);
+        JSClass<JSContextMenuResult>::CustomMethod("cut", &JSContextMenuResult::Cut);
+        JSClass<JSContextMenuResult>::CustomMethod("selectAll", &JSContextMenuResult::SelectAll);
         JSClass<JSContextMenuResult>::Bind(
             globalObj, &JSContextMenuResult::Constructor, &JSContextMenuResult::Destructor);
     }
@@ -1251,6 +1320,34 @@ public:
     {
         if (result_) {
             result_->CopyImage();
+        }
+    }
+
+    void Copy(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Copy();
+        }
+    }
+
+    void Paste(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Paste();
+        }
+    }
+
+    void Cut(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Cut();
+        }
+    }
+
+    void SelectAll(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->SelectAll();
         }
     }
 
@@ -1291,7 +1388,6 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onGeolocationShow", &JSWeb::OnGeolocationShow);
     JSClass<JSWeb>::StaticMethod("onRequestSelected", &JSWeb::OnRequestFocus);
     JSClass<JSWeb>::StaticMethod("onShowFileSelector", &JSWeb::OnFileSelectorShow);
-    JSClass<JSWeb>::StaticMethod("customSchemes", &JSWeb::CustomSchemes);
     JSClass<JSWeb>::StaticMethod("javaScriptAccess", &JSWeb::JsEnabled);
     JSClass<JSWeb>::StaticMethod("fileExtendAccess", &JSWeb::ContentAccessEnabled);
     JSClass<JSWeb>::StaticMethod("fileAccess", &JSWeb::FileAccessEnabled);
@@ -1363,6 +1459,10 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onDataResubmitted", &JSWeb::OnDataResubmitted);
     JSClass<JSWeb>::StaticMethod("onFaviconReceived", &JSWeb::OnFaviconReceived);
     JSClass<JSWeb>::StaticMethod("onTouchIconUrlReceived", &JSWeb::OnTouchIconUrlReceived);
+    JSClass<JSWeb>::StaticMethod("darkMode", &JSWeb::DarkMode);
+    JSClass<JSWeb>::StaticMethod("forceDarkAccess", &JSWeb::ForceDarkAccess);
+    JSClass<JSWeb>::StaticMethod("horizontalScrollBarAccess", &JSWeb::HorizontalScrollBarAccess);
+    JSClass<JSWeb>::StaticMethod("verticalScrollBarAccess", &JSWeb::VerticalScrollBarAccess);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -1623,6 +1723,12 @@ void JSWeb::CreateInNewPipeline(
             func->Call(webviewController, 1, argv);
         };
         NG::WebView::Create(dstSrc.value(), std::move(setIdCallback));
+
+        auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
+        std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
+        if (!cmdLine.empty()) {
+            NG::WebView::SetCustomScheme(cmdLine);
+        }
         return;
     }
     auto* jsWebController = controller->Unwrap<JSWebController>();
@@ -1653,6 +1759,12 @@ void JSWeb::CreateWithWebviewController(
         func->Call(webviewController, 1, argv);
     };
     webComponent->SetSetWebIdCallback(std::move(setIdCallback));
+
+    auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
+    std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
+    if (!cmdLine.empty()) {
+        webComponent->SetCustomScheme(cmdLine);
+    }
 }
 
 void JSWeb::CreateWithWebController(JSRef<JSObject> controller, RefPtr<WebComponent>& webComponent)
@@ -2522,77 +2634,6 @@ void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
     };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetOnFileSelectorShow(std::move(jsCallback));
-}
-
-bool WebcustomSchemeCheckName(const std::string scheme)
-{
-    if (scheme.empty() || scheme.size() > MAX_NAME_SIZE) {
-        LOGE("invalid size");
-        return false;
-    }
-
-    for (auto it = scheme.begin(); it != scheme.end(); it++) {
-        char chr = *it;
-        if ((chr >= 'a' && chr <= 'z') || (chr >= '0' && chr <= '9') || (chr == '.') || (chr == '+') || (chr == '-')) {
-            continue;
-        } else {
-            LOGE("invalid character %{public}c", chr);
-            return false;
-        }
-    }
-    return true;
-}
-
-void JSWeb::CustomSchemes(const JSCallbackInfo& args)
-{
-    if ((args.Length() <= 0) || !(args[0]->IsArray())) {
-        LOGE("arg is invalid");
-        return;
-    }
-    JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
-    if (array->Length() > MAX_CUSTOM_SCHEME_SIZE) {
-        LOGE("arg len invalid");
-        return;
-    }
-    std::string cmdLine;
-    for (size_t i = 0; i < array->Length(); i++) {
-        auto obj = JSRef<JSObject>::Cast(array->GetValueAt(i));
-        auto schemeName = obj->GetProperty("schemeName");
-        auto isCors = obj->GetProperty("isSupportCors");
-        auto isFetch = obj->GetProperty("isSupportFetch");
-        if (!schemeName->IsString() || !isCors->IsBoolean() || !isFetch->IsBoolean()) {
-            LOGE("scheme value is undefined");
-            return;
-        }
-        auto schemeNamestr = schemeName->ToString();
-        if (!WebcustomSchemeCheckName(schemeNamestr)) {
-            LOGE("scheme name is invalid");
-            return;
-        }
-        auto isCorsBool = isCors->ToBoolean();
-        auto isFetchBool = isFetch->ToBoolean();
-        LOGI("reg scheme info %{public}s:%{public}d:%{public}d", schemeNamestr.c_str(), isCorsBool, isFetchBool);
-        cmdLine.append(schemeNamestr + ",");
-        if (isCorsBool) {
-            cmdLine.append("1,");
-        } else {
-            cmdLine.append("0,");
-        }
-
-        if (isFetchBool) {
-            cmdLine.append("1;");
-        } else {
-            cmdLine.append("0;");
-        }
-    }
-    cmdLine.pop_back();
-    LOGI("reg scheme cmdline %{public}s", cmdLine.c_str());
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::WebView::SetCustomScheme(cmdLine);
-        return;
-    }
-    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    webComponent->SetCustomScheme(cmdLine);
 }
 
 JSRef<JSVal> ContextMenuEventToJSValue(const ContextMenuEvent& eventInfo)
@@ -3925,6 +3966,51 @@ void JSWeb::OnTouchIconUrlReceived(const JSCallbackInfo& args)
         };
         NG::WebView::SetTouchIconUrlId(std::move(uiCallback));
         return;
+    }
+}
+
+void JSWeb::DarkMode(int32_t darkMode)
+{
+    auto mode = WebDarkMode::Off;
+    switch (darkMode) {
+        case 0:
+            mode = WebDarkMode::Off;
+            break;
+        case 1:
+            mode = WebDarkMode::On;
+            break;
+        case 2:
+            mode = WebDarkMode::Auto;
+            break;
+        default:
+            mode = WebDarkMode::Off;
+            break;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetDarkMode(mode);
+        return;
+    }
+}
+
+void JSWeb::ForceDarkAccess(bool access)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetForceDarkAccess(access);
+        return;
+    }
+}
+
+void JSWeb::HorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetHorizontalScrollBarAccessEnabled(isHorizontalScrollBarAccessEnabled);
+    }
+}
+
+void JSWeb::VerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetVerticalScrollBarAccessEnabled(isVerticalScrollBarAccessEnabled);
     }
 }
 } // namespace OHOS::Ace::Framework

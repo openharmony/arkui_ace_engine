@@ -55,7 +55,6 @@ public:
     static void OnErrorReceive(const JSCallbackInfo& args);
     static void OnHttpErrorReceive(const JSCallbackInfo& args);
     static void OnFileSelectorShow(const JSCallbackInfo& args);
-    static void CustomSchemes(const JSCallbackInfo& args);
     static void OnInterceptRequest(const JSCallbackInfo& args);
     static void OnUrlLoadIntercept(const JSCallbackInfo& args);
     static void JsEnabled(bool isJsEnabled);
@@ -121,6 +120,10 @@ public:
     static void OnDataResubmitted(const JSCallbackInfo& args);
     static void OnFaviconReceived(const JSCallbackInfo& args);
     static void OnTouchIconUrlReceived(const JSCallbackInfo& args);
+    static void DarkMode(int32_t darkMode);
+    static void ForceDarkAccess(bool access);
+    static void HorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled);
+    static void VerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
