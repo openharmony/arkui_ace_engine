@@ -86,6 +86,8 @@ void SearchPattern::OnModifyDone()
     InitCancelButtonClickEvent();
     InitTouchEvent();
     InitMouseEvent();
+    InitButtonMouseEvent(searchButtonMouseEvent_, BUTTON_INDEX);
+    InitButtonMouseEvent(cancelButtonMouseEvent_, CANCEL_BUTTON_INDEX);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
@@ -366,11 +368,8 @@ void SearchPattern::InitMouseEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto gesture = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
     auto eventHub = host->GetEventHub<SearchEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
-
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -379,6 +378,28 @@ void SearchPattern::InitMouseEvent()
     };
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnHoverEvent(mouseEvent_);
+}
+
+void SearchPattern::InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId)
+{
+    if (inputEvent) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childId));
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto eventHub = buttonFrameNode->GetEventHub<ButtonEventHub>();
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+
+    auto mouseTask = [weak = WeakClaim(this), childId](bool isHover) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleButtonMouseEvent(isHover, childId);
+        }
+    };
+    inputEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnHoverEvent(inputEvent);
 }
 
 void SearchPattern::OnTouchDown()
@@ -409,6 +430,26 @@ void SearchPattern::HandleMouseEvent(bool isHover)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(theme);
+    auto hoverColor = theme->GetHoverColor();
+    if (isHover) {
+        renderContext->BlendBgColor(hoverColor);
+    } else {
+        renderContext->ResetBlendBgColor();
+    }
+}
+
+void SearchPattern::HandleButtonMouseEvent(bool isHover, int32_t childId)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childId));
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto renderContext = buttonFrameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

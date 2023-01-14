@@ -517,7 +517,7 @@ void CheckBoxGroupPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(pipelineContext);
     auto checkBoxTheme = pipelineContext->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkBoxTheme);
-    auto borderRadius = checkBoxTheme->GetBorderRadius().ConvertToPx();
+    auto borderRadius = checkBoxTheme->GetFocusRadius().ConvertToPx();
     auto paintSize = size_;
     auto paintOffset = offset_;
     auto focusPaintPadding = checkBoxTheme->GetFocusPaintPadding().ConvertToPx();
