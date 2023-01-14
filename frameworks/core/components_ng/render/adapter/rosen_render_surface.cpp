@@ -117,7 +117,7 @@ std::string RosenRenderSurface::GetUniqueId() const
     return std::to_string(producerSurface_->GetUniqueId());
 }
 
-void RosenRenderSurface::SetBounds(int32_t left, int32_t top, int32_t width, int32_t height)
+void RosenRenderSurface::SetExtSurfaceBounds(int32_t left, int32_t top, int32_t width, int32_t height)
 {
     if (SystemProperties::GetExtSurfaceEnabled() && surfaceDelegate_) {
         surfaceDelegate_->SetBounds(left, top, width, height);
