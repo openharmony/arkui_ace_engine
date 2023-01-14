@@ -49,7 +49,7 @@ public:
     {
         return rightButtonId_.has_value();
     }
-    
+
     int32_t GetSwiperId()
     {
         if (!swiperId_.has_value()) {
@@ -72,6 +72,20 @@ public:
             rightButtonId_ = ElementRegister::GetInstance()->MakeUniqueId();
         }
         return rightButtonId_.value();
+    }
+
+    void RemoveLeftButtonNode()
+    {
+        CHECK_NULL_VOID_NOLOG(HasLeftButtonNode());
+        RemoveChildAtIndex(GetChildIndexById(GetLeftButtonId()));
+        leftButtonId_ = std::nullopt;
+    }
+
+    void RemoveRightButtonNode()
+    {
+        CHECK_NULL_VOID_NOLOG(HasRightButtonNode());
+        RemoveChildAtIndex(GetChildIndexById(GetRightButtonId()));
+        rightButtonId_ = std::nullopt;
     }
 
 private:
