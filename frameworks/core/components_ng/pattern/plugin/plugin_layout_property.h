@@ -36,6 +36,7 @@ public:
         auto value = MakeRefPtr<PluginLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<PluginLayoutProperty>(this));
         value->propRequestPluginInfo_ = CloneRequestPluginInfo();
+        value->propData_ = CloneData();
         return value;
     }
 
@@ -43,9 +44,13 @@ public:
     {
         LayoutProperty::Reset();
         ResetRequestPluginInfo();
+        ResetData();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RequestPluginInfo, RequestPluginInfo, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Data, std::string, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DISALLOW_COPY_AND_MOVE(PluginLayoutProperty);
 };
 
 } // namespace OHOS::Ace::NG
