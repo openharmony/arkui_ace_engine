@@ -337,8 +337,6 @@ RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t 
     auto layoutProps = buttonNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProps, nullptr);
     layoutProps->UpdateFlexGrow(1.0);
-
-    buttonNode->SetInternal();
     return buttonNode;
 }
 
@@ -383,8 +381,6 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     auto textNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textNode, nullptr);
-    textNode->SetInternal();
-    CHECK_NULL_RETURN(textNode, nullptr);
     auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, nullptr);
     textProps->UpdateContent(text);
@@ -398,7 +394,6 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     } else {
         textProps->UpdateTextColor(DEFAULT_BUTTON_COLOR);
     }
-    textNode->SetInternal();
     return textNode;
 }
 
