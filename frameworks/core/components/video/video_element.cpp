@@ -422,7 +422,7 @@ std::string VideoElement::GetAssetAbsolutePath(const std::string& fileName)
 
 void VideoElement::OnTextureOffset(int64_t textureId, int32_t x, int32_t y)
 {
-    if (SystemProperties::GetExtSurfaceEnabled()) {
+    if (SystemProperties::GetExtSurfaceEnabled() && surfaceDelegate_) {
         const auto pipelineContext = GetContext().Upgrade();
         if (!pipelineContext) {
             LOGW("pipelineContext is null!");
@@ -530,7 +530,7 @@ void VideoElement::OnTextureSize(int64_t textureId, int32_t textureWidth, int32_
         texture_->OnSize(textureId, textureWidth, textureHeight);
     }
 #else
-    if (SystemProperties::GetExtSurfaceEnabled()) {
+    if (SystemProperties::GetExtSurfaceEnabled() && surfaceDelegate_) {
         const auto pipelineContext = GetContext().Upgrade();
         if (!pipelineContext) {
             LOGW("pipelineContext is null!");
