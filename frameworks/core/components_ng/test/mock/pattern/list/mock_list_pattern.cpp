@@ -43,6 +43,8 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
     return true;
 }
 
+void ListPattern::OnScrollEndCallback() {}
+
 bool ListPattern::IsAtBottom() const
 {
     return false;
