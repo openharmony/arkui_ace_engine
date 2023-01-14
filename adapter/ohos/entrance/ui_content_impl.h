@@ -95,6 +95,8 @@ public:
 
     void SetAppWindowTitle(const std::string& title) override;
     void SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap) override;
+
+    bool GetCardRootNode(void** rootNode) override;
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);

@@ -21,7 +21,9 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/thread_checker.h"
+#include "core/components_ng/base/frame_node.h"
 #include "transaction/rs_interfaces.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace {
 constexpr float ONE_SECOND_IN_NANO = 1000000000.0f;
@@ -89,6 +91,8 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
 
     receiver_->RequestNextVSync(frameCallback_);
 
+    rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
+
     LOGE("Kee FormRenderWindow::FormRenderWindow");
 }
 
@@ -96,6 +100,57 @@ void FormRenderWindow::RequestFrame()
 {
     LOGE("Kee FormRenderWindow::RequestFrame");
     receiver_->RequestNextVSync(frameCallback_);
+}
+
+void FormRenderWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
+{
+    LOGE("Kee FormRenderWindow set root frame node");
+    CHECK_NULL_VOID(root);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(root->GetRenderContext());
+    CHECK_NULL_VOID(rosenRenderContext);
+    LOGE("Kee FormRenderWindow::SetRootFrameNode eTS Card");
+    if (rosenRenderContext->GetRSNode()) {
+        rsUIDirector_->SetRoot(rosenRenderContext->GetRSNode()->GetId());
+    }
+}
+
+void FormRenderWindow::SetFormRSSurfaceNode(void* surfaceNode)
+{
+    LOGE("Kee FormRenderWindow SetFormRSSurfaceNode");
+    if (!surfaceNode) {
+        LOGE("Kee FormRenderWindow SetFormRSSurfaceNode surfaceNode is null !!!");
+        return;
+    }
+    std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode;
+    rsSurfaceNode.reset(static_cast<Rosen::RSSurfaceNode*>(surfaceNode));
+    rsUIDirector_->SetRSSurfaceNode(rsSurfaceNode);
+    // rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
+    rsUIDirector_->Init();
+    rsUIDirector_->SetUITaskRunner([weakTaskExecutor = taskExecutor_, id = id_](const std::function<void()>& task) {
+        ContainerScope scope(id);
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+    });
+}
+
+void FormRenderWindow::OnShow()
+{
+    Window::OnShow();
+    rsUIDirector_->GoForeground();
+}
+
+void FormRenderWindow::OnHide()
+{
+    Window::OnHide();
+    rsUIDirector_->GoBackground();
+    rsUIDirector_->SendMessages();
+}
+
+void FormRenderWindow::FlushTasks()
+{
+    LOGD("FormRenderWindow flush tasks");
+    rsUIDirector_->SendMessages();
 }
 
 } // namespace OHOS::Ace

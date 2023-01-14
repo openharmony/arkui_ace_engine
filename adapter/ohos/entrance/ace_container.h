@@ -317,6 +317,8 @@ public:
     static RefPtr<AceContainer> GetContainer(int32_t instanceId);
     static bool UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content);
 
+    static std::shared_ptr<void> GetFormSurfaceNode();
+
     void SetWindowName(const std::string& name)
     {
         windowName_ = name;
@@ -448,6 +450,7 @@ private:
     mutable std::mutex cardTokensMutex_;
 
     std::string webHapPath_;
+    static std::shared_ptr<void> formSurfaceNode_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };

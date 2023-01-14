@@ -170,8 +170,16 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
         // LOGE("Kee SubContainer::RunCard gDelegate = %{public}p", PipelineBase::gDelegate.get());
         // uiContent_ = UIContentTmp::CreateCard();
         // uiContent_->SetIsCard(true);
-        // uiContent_->Initialize(nullptr, "/ets/widget/pages/card", nullptr);
+        // uiContent_->Initialize(nullptr, "/ets/widget/pages/card", nullptr); // 这里会crash
         // uiContent_->Foreground();
+        // Rosen::RSSurfaceNode* rsSurfaceNodePtr = nullptr;
+        // uiContent_->GetCardRootNode(reinterpret_cast<void**>(&rsSurfaceNodePtr));
+        // if (rsSurfaceNodePtr) {
+        //     LOGE("Kee SubContainer::RunCard surfaceNode = %{public}p, name=%{public}s", rsSurfaceNodePtr,
+        //         rsSurfaceNodePtr->GetName().c_str());
+        // } else {
+        //     LOGE("Kee SubContainer::RunCard surfaceNode is null");
+        // }
         return;
     }
 

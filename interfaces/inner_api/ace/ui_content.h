@@ -111,6 +111,8 @@ public:
 
     virtual void SetAppWindowTitle(const std::string& title) = 0;
     virtual void SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap) = 0;
+
+    virtual bool GetCardRootNode(void** /* rootNode */) { return false; }
 };
 
 } // namespace OHOS::Ace

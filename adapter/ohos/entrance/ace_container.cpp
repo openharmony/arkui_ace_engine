@@ -84,7 +84,7 @@ const char* GetDeclarativeSharedLibrary()
 }
 
 } // namespace
-
+std::shared_ptr<void> AceContainer::formSurfaceNode_ = nullptr;
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
     std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner, bool useNewPipeline)
     : instanceId_(instanceId), type_(type), aceAbility_(aceAbility), useCurrentEventRunner_(useCurrentEventRunner)
@@ -796,7 +796,14 @@ void AceContainer::SetViewNew(
         window = std::make_unique<FormRenderWindow>(taskExecutor, view->GetInstanceId());
         window->SetIsEtsCard(container->isCardContainer_);
         LOGE("Kee AceContainer::SetViewNew isCardContainer_ AttachView window = %{public}p", window.get());
-        container->AttachView(std::move(window), view, density, width, height, view->GetInstanceId(), nullptr);
+        // create a SurfaceNode
+        std::string surfaceNodeName = "ArkTSCardNode";
+        struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = surfaceNodeName};
+        auto surfaceNode = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+        LOGE("Kee AceContainer::SetViewNew isCardContainer_ AttachView surfaceNode = %{public}p", surfaceNode.get());
+        formSurfaceNode_ = std::move(surfaceNode);
+        window->SetFormRSSurfaceNode(formSurfaceNode_.get());
+        container->AttachView(std::move(window), view, density, width, height, view->GetInstanceId(), nullptr); // 为了避免contentImpl->Init()的crash
     } else {
         window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
         window->SetIsEtsCard(container->isCardContainer_);
@@ -1443,6 +1450,15 @@ sptr<IRemoteObject> AceContainer::GetToken()
     }
     LOGE("fail to get Token");
     return nullptr;
+}
+
+std::shared_ptr<void> AceContainer::GetFormSurfaceNode()
+{
+    if (!formSurfaceNode_) {
+        LOGE("Kee form surface node is null");
+        return nullptr;
+    }
+    return formSurfaceNode_;
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()

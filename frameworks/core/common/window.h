@@ -102,6 +102,9 @@ public:
     {
         isEtsCard_ = isEtsCard;
     }
+
+    virtual void SetFormRSSurfaceNode(void* surfaceNode) {}
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;

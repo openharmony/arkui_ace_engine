@@ -342,6 +342,11 @@ std::string UIContentImpl::GetContentInfo() const
     return Platform::AceContainer::GetContentInfo(instanceId_);
 }
 
+bool UIContentImpl::GetCardRootNode(void** rootNode) {
+    *rootNode = Platform::AceContainer::GetFormSurfaceNode().get();
+    return true;
+}
+
 void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
 {
     LOGE("Kee CommonInitialize start.");

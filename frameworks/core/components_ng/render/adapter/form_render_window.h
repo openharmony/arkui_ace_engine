@@ -18,11 +18,12 @@
 
 #include <memory>
 
+#include "render_service_client/core/ui/rs_ui_director.h"
 #include "vsync_receiver.h"
 
+#include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
-#include "base/thread/task_executor.h"
 #include "core/common/window.h"
 #include "core/pipeline/pipeline_context.h"
 
@@ -31,17 +32,31 @@ namespace OHOS::Ace {
 class ACE_EXPORT FormRenderWindow : public Window {
 public:
     explicit FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id);
+    FormRenderWindow() = default;
     ~FormRenderWindow() = default;
 
     void RequestFrame() override;
 
     void SetRootRenderNode(const RefPtr<RenderNode>& root) override {}
 
+    void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override;
+
+    std::shared_ptr<OHOS::Rosen::RSUIDirector> GetRsUIDirector() const
+    {
+        return rsUIDirector_;
+    }
+
+    void SetFormRSSurfaceNode(void* surfaceNode) override;
+    void OnShow() override;
+    void OnHide() override;
+    void FlushTasks() override;
+
 private:
     std::shared_ptr<Rosen::VSyncReceiver> receiver_ = nullptr;
     Rosen::VSyncReceiver::FrameCallback frameCallback_;
     WeakPtr<TaskExecutor> taskExecutor_ = nullptr;
     int32_t id_ = 0;
+    std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
     ACE_DISALLOW_COPY_AND_MOVE(FormRenderWindow);
 };
 
