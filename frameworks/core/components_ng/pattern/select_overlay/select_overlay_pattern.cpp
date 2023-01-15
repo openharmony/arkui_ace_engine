@@ -321,6 +321,25 @@ void SelectOverlayPattern::UpdateSecondSelectHandleInfo(const SelectHandleInfo& 
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void SelectOverlayPattern::UpdateFirstAndSecondHandleInfo(
+    const SelectHandleInfo& firstInfo, const SelectHandleInfo& secondInfo)
+{
+    if (info_->firstHandle == firstInfo && info_->secondHandle == secondInfo) {
+        return;
+    }
+    if (info_->firstHandle != firstInfo) {
+        info_->firstHandle = firstInfo;
+    }
+    if (info_->secondHandle != secondInfo) {
+        info_->secondHandle = secondInfo;
+    }
+    CheckHandleReverse();
+    UpdateHandleHotZone();
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    host->UpdateToolBar(false);
+}
+
 void SelectOverlayPattern::UpdateSelectMenuInfo(const SelectMenuInfo& info)
 {
     auto host = DynamicCast<SelectOverlayNode>(GetHost());

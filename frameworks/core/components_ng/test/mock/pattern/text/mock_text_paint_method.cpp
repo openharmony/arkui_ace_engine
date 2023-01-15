@@ -13,21 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
+#include "core/components_ng/pattern/text/text_paint_method.h"
 
 namespace OHOS::Ace::NG {
-bool SelectOverlayProxy::IsClosed() const
+CanvasDrawFunction TextPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
 {
-    return true;
+    return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
+        auto textPaint = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(textPaint);
+        textPaint->PaintSelection(canvas, paintWrapper);
+    };
 }
 
-void SelectOverlayProxy::Close() const {}
-
-void SelectOverlayProxy::UpdateFirstSelectHandleInfo(const SelectHandleInfo& info) const {}
-
-void SelectOverlayProxy::UpdateSecondSelectHandleInfo(const SelectHandleInfo& info) const {}
-
-void SelectOverlayProxy::UpdateFirstAndSecondHandleInfo(
-    const SelectHandleInfo& firstInfo, const SelectHandleInfo& secondInfo) const
-{}
+void TextPaintMethod::PaintSelection(RSCanvas& canvas, PaintWrapper* paintWrapper) {}
 } // namespace OHOS::Ace::NG

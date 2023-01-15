@@ -372,26 +372,6 @@ HWTEST_F(TextPatternTestNg, OnAttachToFrameNode001, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnAttachToFrameNode002
- * @tc.desc: Test TextPattern OnAttachToFrameNode when GetHost is not nullptr.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPatternTestNg, OnAttachToFrameNode002, TestSize.Level1)
-{
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
-    pattern->AttachToFrameNode(frameNode);
-    pattern->OnAttachToFrameNode();
-    GestureEvent info;
-    auto callback = pattern->longPressEvent_->GetGestureEventFunc();
-    callback(info);
-    EXPECT_NE(pattern->longPressEvent_, nullptr);
-}
-
-/**
  * @tc.name: OnDetachFromFrameNode001
  * @tc.desc: Test TextPattern OnDetachFromFrameNode when FrameNode is nullptr.
  * @tc.type: FUNC
@@ -556,6 +536,41 @@ HWTEST_F(TextPatternTestNg, OnModifyDone001, TestSize.Level1)
     pattern->selectOverlayProxy_ = nullptr;
     pattern->OnModifyDone();
     EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
+}
+
+/**
+ * @tc.name: OnModifyDone002
+ * @tc.desc: Test TextPattern OnModifyDone longPressEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, OnModifyDone002, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    EXPECT_FALSE(textFrameNode == nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    EXPECT_FALSE(textPattern == nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_FALSE(textLayoutProperty == nullptr);
+
+    /**
+     * @tc.steps: step2. set textLayoutProperty.
+     * copyOption: CopyOptions::InApp
+     */
+    textLayoutProperty->UpdateCopyOption(CopyOptions::InApp);
+
+    /**
+     * @tc.steps: step3. check the longPressEvent.
+     */
+    textPattern->OnModifyDone();
+    EXPECT_NE(textPattern->longPressEvent_, nullptr);
 }
 
 /**
