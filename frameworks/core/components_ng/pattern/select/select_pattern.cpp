@@ -67,7 +67,7 @@ void SelectPattern::RegisterOnClick()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    auto callback = [id = host->GetId(), menu = menu_](GestureEvent& /*info*/) mutable {
+    GestureEventFunc callback = [id = host->GetId(), menu = menu_](GestureEvent& /*info*/) mutable {
         if (menu) {
             LOGI("start executing click callback %d", menu->GetId());
         }
@@ -86,9 +86,8 @@ void SelectPattern::RegisterOnClick()
         // menuNode already registered, nullify
         menu.Reset();
     };
-    auto onClick = MakeRefPtr<ClickEvent>(std::move(callback));
     auto gestureHub = host->GetOrCreateGestureEventHub();
-    gestureHub->AddClickEvent(onClick);
+    gestureHub->BindMenu(std::move(callback));
 }
 
 // change background color when hovered
@@ -209,6 +208,11 @@ void SelectPattern::BuildChild()
     CHECK_NULL_VOID(pipeline);
     auto theme = DynamicCast<PipelineBase>(pipeline)->GetTheme<SelectTheme>();
 
+    auto select = GetHost();
+    if (!select->GetChildren().empty()) {
+        select->RemoveChildAtIndex(0);
+    }
+
     auto row = FrameNode::CreateFrameNode(
         V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_VOID(row);
@@ -252,7 +256,6 @@ void SelectPattern::BuildChild()
     text_->MountToParent(row);
     spinner->MountToParent(row);
     spinner->MarkModifyDone();
-    auto select = GetHost();
     row->MountToParent(select);
     row->MarkModifyDone();
 
@@ -323,9 +326,9 @@ void SelectPattern::SetOptionBgColor(const Color& color)
         if (i == selected_ && selectedBgColor_.has_value()) {
             continue;
         }
-        auto renderContext = options_[i]->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateBackgroundColor(color);
+        auto pattern = options_[i]->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetBgColor(color);
     }
 }
 

@@ -30,4 +30,5 @@ void GestureEventHub::CombineIntoExclusiveRecognizer(
 
 void GestureEventHub::OnModifyDone() {}
 void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent) {}
+void GestureEventHub::BindMenu(GestureEventFunc&& showMenu) {}
 } // namespace OHOS::Ace::NG
