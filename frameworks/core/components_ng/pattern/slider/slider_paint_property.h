@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@ public:
         auto value = MakeRefPtr<SliderPaintProperty>();
         value->PaintProperty::UpdatePaintProperty(DynamicCast<PaintProperty>(this));
         value->propSliderPaintStyle_ = CloneSliderPaintStyle();
+        value->propSliderTipStyle_ = CloneSliderTipStyle();
         return value;
     }
 
@@ -41,6 +42,7 @@ public:
     {
         PaintProperty::Reset();
         ResetSliderPaintStyle();
+        ResetSliderTipStyle();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -60,6 +62,7 @@ public:
             "trackBackgroundColor", GetTrackBackgroundColor().value_or(Color(0xafdbdbdb)).ColorToString().c_str());
         json->Put("selectColor", GetSelectColor().value_or(Color(0xff007dff)).ColorToString().c_str());
         json->Put("showSteps", GetShowSteps().value_or(false) ? "true" : "false");
+        json->Put("showTips", GetShowTips().value_or(false) ? "true" : "false");
     }
 
     ACE_DEFINE_PROPERTY_GROUP(SliderPaintStyle, SliderPaintStyle)
@@ -73,6 +76,13 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, ShowSteps, bool, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_GROUP(SliderTipStyle, SliderTipStyle)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, ShowTips, bool, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, Padding, Dimension, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, Content, std::string, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, FontSize, Dimension, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, TextColor, Color, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, TipColor, Color, PROPERTY_UPDATE_RENDER)
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SliderPaintProperty);
 };
