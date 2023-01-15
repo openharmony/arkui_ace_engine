@@ -56,7 +56,6 @@ public:
         menu_ = menu;
     }
 
-    void AddOptionNode(const RefPtr<FrameNode>& option);
     void SetSelectSize(const SizeF& selectSize)
     {
         selectSize_ = selectSize;
@@ -64,6 +63,18 @@ public:
     SizeF GetSelectSize() const
     {
         return selectSize_;
+    }
+
+    void AddOptionNode(const RefPtr<FrameNode>& option);
+
+    void ClearOptions()
+    {
+        options_.clear();
+    }
+
+    void InitSelected()
+    {
+        selected_ = -1;
     }
 
     void SetSelected(int32_t index);
