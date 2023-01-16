@@ -198,6 +198,7 @@ struct PromptAsyncContext {
     napi_ref callbackRef = nullptr;
     int32_t callbackType = -1;
     int32_t successType = -1;
+    bool valid = true;
 };
 
 static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
@@ -213,6 +214,17 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             env, "The number of parameters must be greater than or equal to 1.", Framework::ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
+    if (thisVar == nullptr) {
+        LOGE("%{public}s, This argument is nullptr.", __func__);
+        return nullptr;
+    }
+    napi_valuetype valueTypeOfThis = napi_undefined;
+    napi_typeof(env, thisVar, &valueTypeOfThis);
+    if (valueTypeOfThis == napi_undefined) {
+        LOGE("%{public}s, Wrong this value.", __func__);
+        return nullptr;
+    }
+
     auto asyncContext = new PromptAsyncContext();
     asyncContext->env = env;
     for (size_t i = 0; i < argc; i++) {
@@ -321,14 +333,19 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     asyncContext->callbacks.emplace("success");
     asyncContext->callbacks.emplace("cancel");
 
-    auto callBack = [env, asyncContext](int32_t callbackType, int32_t successType) {
+    auto callBack = [asyncContext](int32_t callbackType, int32_t successType) {
         uv_loop_s* loop = nullptr;
         if (asyncContext == nullptr) {
             return;
         }
+        if (!asyncContext->valid) {
+            LOGE("%{public}s, module exported object is invalid.", __func__);
+            return;
+        }
+
         asyncContext->callbackType = callbackType;
         asyncContext->successType = successType;
-        napi_get_uv_event_loop(env, &loop);
+        napi_get_uv_event_loop(asyncContext->env, &loop);
         uv_work_t* work = new uv_work_t;
         work->data = (void*)asyncContext;
         int rev = uv_queue_work(
@@ -391,6 +408,13 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         }
     };
 
+    napi_wrap(env, thisVar, (void*)asyncContext, [](napi_env env, void* data, void* hint) {
+        PromptAsyncContext* cbInfo = (PromptAsyncContext*)data;
+        if (cbInfo != nullptr) {
+            cbInfo->valid = false;
+            delete cbInfo;
+        }
+    }, nullptr, nullptr);
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
     if (SystemProperties::GetExtSurfaceEnabled() || Container::IsCurrentUseNewPipeline()) {
@@ -472,6 +496,7 @@ struct ShowActionMenuAsyncContext {
     napi_ref callbackRef = nullptr;
     int32_t callbackType = -1;
     int32_t successType = -1;
+    bool valid = true;
 };
 
 static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
@@ -487,6 +512,17 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             env, "The number of parameters must be greater than or equal to 1.", Framework::ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
+    if (thisVar == nullptr) {
+        LOGE("%{public}s, This argument is nullptr.", __func__);
+        return nullptr;
+    }
+    napi_valuetype valueTypeOfThis = napi_undefined;
+    napi_typeof(env, thisVar, &valueTypeOfThis);
+    if (valueTypeOfThis == napi_undefined) {
+        LOGE("%{public}s, Wrong this value.", __func__);
+        return nullptr;
+    }
+
     auto asyncContext = new ShowActionMenuAsyncContext();
     asyncContext->env = env;
     for (size_t i = 0; i < argc; i++) {
@@ -615,14 +651,19 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         napi_get_undefined(env, &result);
     }
 
-    auto callBack = [env, asyncContext](int32_t callbackType, int32_t successType) {
+    auto callBack = [asyncContext](int32_t callbackType, int32_t successType) {
         uv_loop_s* loop = nullptr;
         if (asyncContext == nullptr) {
             return;
         }
+        if (!asyncContext->valid) {
+            LOGE("%{public}s, module exported object is invalid.", __func__);
+            return;
+        }
+
         asyncContext->callbackType = callbackType;
         asyncContext->successType = successType;
-        napi_get_uv_event_loop(env, &loop);
+        napi_get_uv_event_loop(asyncContext->env, &loop);
         uv_work_t* work = new uv_work_t;
         work->data = (void*)asyncContext;
         int rev = uv_queue_work(
@@ -684,6 +725,13 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         }
     };
 
+    napi_wrap(env, thisVar, (void*)asyncContext, [](napi_env env, void* data, void* hint) {
+        ShowActionMenuAsyncContext* cbInfo = (ShowActionMenuAsyncContext*)data;
+        if (cbInfo != nullptr) {
+            cbInfo->valid = false;
+            delete cbInfo;
+        }
+    }, nullptr, nullptr);
 #ifdef OHOS_STANDARD_SYSTEM
     if (SystemProperties::GetExtSurfaceEnabled() || Container::IsCurrentUseNewPipeline()) {
         auto delegate = EngineHelper::GetCurrentDelegate();
