@@ -72,7 +72,7 @@ class SubscribableHandler {
     if (owningProperty) {
       this.addOwningProperty(owningProperty);
     }
-    stateMgmtConsole.debug(`SubscribableHandler: construcstor done`);
+    stateMgmtConsole.debug(`SubscribableHandler: constructor done`);
   }
 
   addOwningProperty(subscriber: IPropertySubscriber): void {
@@ -197,11 +197,19 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
    * Note: Since ES6 Proying is transparent, 'instance of' will not work. Use
    * this static function instead.
    */
-  static IsObservedObject(obj: any): boolean {
+  public static IsObservedObject(obj: any): boolean {
     return obj ? (obj[SubscribableHandler.IS_OBSERVED_OBJECT] === true) : false;
   }
 
-  static addOwningProperty(obj: Object, subscriber: IPropertySubscriber): boolean {
+  /**
+   * add a subscriber to given ObservedObject
+   * due to the proxy nature this static method approach needs to be used instead of a member 
+   * function
+   * @param obj 
+   * @param subscriber 
+   * @returns false if given object is not an ObservedObject 
+   */
+  public static addOwningProperty(obj: Object, subscriber: IPropertySubscriber): boolean {
     if (!ObservedObject.IsObservedObject(obj)) {
       return false;
     }
@@ -210,7 +218,15 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
     return true;
   }
 
-  static removeOwningProperty(obj: Object,
+  /**
+   * remove a subscriber to given ObservedObject
+   * due to the proxy nature this static method approach needs to be used instead of a member 
+   * function
+   * @param obj 
+   * @param subscriber 
+   * @returns false if given object is not an ObservedObject 
+   */
+  public static removeOwningProperty(obj: Object,
     subscriber: IPropertySubscriber): boolean {
     if (!ObservedObject.IsObservedObject(obj)) {
       return false;
@@ -220,6 +236,30 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
     return true;
   }
 
+  /**
+   * Deep copy given Object / Array
+   * deep here means that the copy continues recursively for each found object property 
+   * or array item
+   * if the source object was wrapped inside an ObservedObject so will its copy
+   * this rule applies for each individual object or array found in the recursive process
+   * subscriber info will not be copied from the source object to its copy.
+   * @param obj object, array of simple type data item to be deep copied
+   * @returns deep copied object, optionally wrapped inside an ObservedObject
+   */
+  public static GetDeepCopyOfObject(obj: any): any {
+    if (obj instanceof Array) {
+      let copy = [];
+      obj.forEach((item, index) => copy[index] = ObservedObject.GetDeepCopyOfObject(item));
+      return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
+    } else if (typeof obj === "object") {
+      let copy = {};
+      Object.keys(obj).forEach(k => copy[k] = ObservedObject.GetDeepCopyOfObject(obj[k]));
+      return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
+    }
+
+    return obj;
+  }
+  
   /**
    * Create a new ObservableObject and subscribe its owner to propertyHasChanged
    * ntifications

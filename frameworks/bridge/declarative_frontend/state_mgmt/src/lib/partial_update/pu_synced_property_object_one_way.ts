@@ -13,12 +13,69 @@
  * limitations under the License.
  */
 
+
+type SyncSourceHasChangedCb<T> = (source : ObservedPropertyAbstract<T>) => void;
+
 class SynchedPropertyObjectOneWayPU<C extends Object>
   extends ObservedPropertyObjectAbstractPU<C>
-  implements ISinglePropertyChangeSubscriber<C>, IMultiPropertiesChangeSubscriber {
+  implements IMultiPropertiesChangeSubscriber {
+
+  // inner anonymous class to handler hasChanged
+  // notifications from @Prop source
+  // separate subscriber needed to avoid confusing 
+  // hasChanged events from wrappedValue's ObservedObject
+  private sourceChangeObserver_ = new class<C> {
+    private source_: ObservedPropertyAbstract<C> = undefined;
+    private id_: number;
+    private notifySourceHasChanged_: SyncSourceHasChangedCb<C>;
+  
+    constructor(notifySourceHasChanged: SyncSourceHasChangedCb<C>) {
+      this.id_ = SubscriberManager.MakeId();
+      SubscriberManager.Add(this);
+        this.notifySourceHasChanged_ = notifySourceHasChanged;
+    }
+  
+    // globally unique id
+    public id__(): number {
+      return this.id_;
+    }
+
+    // only use for delayed object init
+    // re-settign source to other value is unsupported.
+    public setSource(source: ObservedPropertyAbstract<C>) : void{
+      if (source) {
+        this.source_ = source;
+        this.source_.subscribeMe(this);
+      }
+    }
+  
+    /**
+     *  inform the subscribed property
+     * that the subscriber is about to be deleted
+     * hence , unsubscribe
+     */
+    public aboutToBeDeleted(owningView?: IPropertySubscriber): void {
+      if (this.source_) {
+        this.source_.unlinkSuscriber(this.id__());
+      }
+      this.source_ = undefined;
+      SubscriberManager.Delete(this.id__())
+    }
+  
+    // implements  ISinglePropertyChangeSubscriber<T>:
+    // this object is subscriber to this.source_
+    // when source notifies a change, copy its value to local backing store
+    public hasChanged(newValue: C): void {
+      this.notifySourceHasChanged_ (this.source_);
+    }
+o    
+    public set(sourceChangedValue : C) : void {
+      // if set causes an actual change, then, ObservedPropertyObject source_ will call hasChanged
+      this.source_.set(sourceChangedValue);
+    }
+  }(this.sourceHasChanged.bind(this));
 
   private wrappedValue_: C;
-  private source_: ObservedPropertyAbstract<C>;
 
   constructor(source: ObservedPropertyAbstract<C> | C,
     owningChildView: IPropertySubscriber,
@@ -26,10 +83,9 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
     super(owningChildView, thisPropertyName);
 
     if (source && (typeof (source) === "object") && ("notifyHasChanged" in source) && ("subscribeMe" in source)) {
-      // code path for @(Local)StorageProp
-      this.source_ = source as ObservedPropertyAbstract<C>;
-      // subscribe to receive value change updates from LocalStorage source property
-      this.source_.subscribeMe(this);
+      // code path for @(Local)StorageProp, the souce is a ObservedPropertyObject in aLocalStorage)
+      this.sourceChangeObserver_.setSource(source as ObservedPropertyAbstract<C>)
+      this.setWrappedValue((source as ObservedPropertyAbstract<C>).get());
     } else {
       // code path for @Prop
       if (!ObservedObject.IsObservedObject(source)) {
@@ -37,11 +93,14 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
            lacks @Observed class decorator. Object property changes will not be observed.`);
       }
 
-      this.source_ = new ObservedPropertyObjectPU<C>(source as C, this, thisPropertyName);
+      this.sourceChangeObserver_.setSource(
+        new ObservedPropertyObjectPU<C>(source as C, /* do not subscribe 'this' */ undefined, thisPropertyName)
+      );
+
+      // deep copy source Object and wrap it
+      this.setWrappedValue(source as C);
     }
 
-    // deep copy source Object and wrap it
-    this.setWrapperValue(this.source_.get());
     stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor ready with wrappedValue '${JSON.stringify(this.wrappedValue_)}'.`);
   }
 
@@ -50,22 +109,15 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
   the property.
   */
   aboutToBeDeleted() {
-    if (this.source_) {
-      this.source_.unlinkSuscriber(this.id__());
-      this.source_ = undefined;
-    }
+    this.sourceChangeObserver_.aboutToBeDeleted();
     super.aboutToBeDeleted();
   }
 
-
-  // this object is subscriber to this.source_
-  // when source notifies a property change, copy its value to local backing store
-  // the guard for newValue being an Object is needed because also property changes of wrappedValue_ 
-  // are notified via this function. We ignore those, these are handled correctly by propertyHasChanged
-  public hasChanged(newValue: C): void {
+  protected sourceHasChanged(source: ObservedPropertyObjectPU<C>): void {
+    const newValue = source.getUnmonitored();
     if (typeof newValue == "object") {
       stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: hasChanged:  newValue '${JSON.stringify(newValue)}'.`);
-      this.setWrapperValue(newValue);
+      this.setWrappedValue(newValue);
       this.notifyHasChanged(ObservedObject.GetRawObject(this.wrappedValue_));
     }
   }
@@ -102,22 +154,17 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
          lacks @Observed class decorator. Object property changes will not be observed.`);
     }
 
-    this.setWrapperValue(newValue);
+    this.setWrappedValue(newValue);
     this.notifyHasChanged(this.wrappedValue_);
   }
 
   public reset(sourceChangedValue: C): void {
     stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: reset from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(sourceChangedValue)}'.`);
-    // if set causes an actual change, then, ObservedPropertyObject source_ will call hasChanged
-    this.source_.set(sourceChangedValue);
+    this.sourceChangeObserver_.set(sourceChangedValue);
   }
 
-  private setWrapperValue(value: C): void {
-    let rawValue = ObservedObject.GetRawObject(value);
-    if (rawValue instanceof Array) {
-      this.wrappedValue_ = ObservedObject.createNew([ ...rawValue ], this);
-    } else {
-      this.wrappedValue_ = ObservedObject.createNew({ ...rawValue }, this);
-    }
+  private setWrappedValue(value: C): void {
+    this.wrappedValue_ = ObservedObject.GetDeepCopyOfObject(value);
+    ObservedObject.addOwningProperty(this.wrappedValue_, this);
   }
 }
