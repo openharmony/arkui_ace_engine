@@ -45,6 +45,26 @@ napi_value GetReturnObject(napi_env env, std::string callbackString)
     return returnObj;
 }
 
+void GetNapiString(napi_env env, napi_value value, std::string& retStr)
+{
+    size_t ret = 0;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType == napi_string) {
+        size_t valueLen = GetParamLen(value) + 1;
+        std::unique_ptr<char[]> titleChar = std::make_unique<char[]>(valueLen);
+        napi_get_value_string_utf8(env, value, titleChar.get(), valueLen, &ret);
+        retStr = titleChar.get();
+    } else if (valueType == napi_object) {
+        int32_t id = 0;
+        int32_t type = 0;
+        std::vector<std::string> params;
+        if (ParseResourceParam(env, value, id, type, params)) {
+            ParseString(id, type, params, retStr);
+        }
+    }
+}
+
 static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
 {
     size_t requireArgc = 1;
@@ -216,7 +236,6 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     auto asyncContext = new PromptAsyncContext();
     asyncContext->env = env;
     for (size_t i = 0; i < argc; i++) {
-        size_t ret = 0;
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
         if (i == 0) {
@@ -230,34 +249,8 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv[0], "message", &asyncContext->messageNApi);
             napi_get_named_property(env, argv[0], "buttons", &asyncContext->buttonsNApi);
             napi_get_named_property(env, argv[0], "autoCancel", &asyncContext->autoCancel);
-            napi_typeof(env, asyncContext->titleNApi, &valueType);
-            if (valueType == napi_string) {
-                size_t titleLen = GetParamLen(asyncContext->titleNApi) + 1;
-                std::unique_ptr<char[]> titleChar = std::make_unique<char[]>(titleLen);
-                napi_get_value_string_utf8(env, asyncContext->titleNApi, titleChar.get(), titleLen, &ret);
-                asyncContext->titleString = titleChar.get();
-            } else if (valueType == napi_object) {
-                int32_t id = 0;
-                int32_t type = 0;
-                std::vector<std::string> params;
-                if (ParseResourceParam(env, asyncContext->titleNApi, id, type, params)) {
-                    ParseString(id, type, params, asyncContext->titleString);
-                }
-            }
-            napi_typeof(env, asyncContext->messageNApi, &valueType);
-            if (valueType == napi_string) {
-                size_t messageLen = GetParamLen(asyncContext->messageNApi) + 1;
-                std::unique_ptr<char[]> messageChar = std::make_unique<char[]>(messageLen);
-                napi_get_value_string_utf8(env, asyncContext->messageNApi, messageChar.get(), messageLen, &ret);
-                asyncContext->messageString = messageChar.get();
-            } else if (valueType == napi_object) {
-                int32_t id = 0;
-                int32_t type = 0;
-                std::vector<std::string> params;
-                if (ParseResourceParam(env, asyncContext->messageNApi, id, type, params)) {
-                    ParseString(id, type, params, asyncContext->messageString);
-                }
-            }
+            GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString);
+            GetNapiString(env, asyncContext->messageNApi, asyncContext->messageString);
             bool isBool = false;
             napi_is_array(env, asyncContext->buttonsNApi, &isBool);
             napi_typeof(env, asyncContext->buttonsNApi, &valueType);
@@ -281,20 +274,8 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                     napi_get_named_property(env, buttonArray, "color", &colorNApi);
                     std::string textString;
                     std::string colorString;
-                    napi_typeof(env, textNApi, &valueType);
-                    if (valueType == napi_string) {
-                        size_t textLen = GetParamLen(textNApi) + 1;
-                        std::unique_ptr<char[]> text = std::make_unique<char[]>(textLen);
-                        napi_get_value_string_utf8(env, textNApi, text.get(), textLen, &ret);
-                        textString = text.get();
-                    }
-                    napi_typeof(env, colorNApi, &valueType);
-                    if (valueType == napi_string) {
-                        size_t colorLen = GetParamLen(colorNApi) + 1;
-                        std::unique_ptr<char[]> color = std::make_unique<char[]>(colorLen);
-                        napi_get_value_string_utf8(env, colorNApi, color.get(), colorLen, &ret);
-                        colorString = color.get();
-                    }
+                    GetNapiString(env, textNApi, textString);
+                    GetNapiString(env, colorNApi, colorString);
                     ButtonInfo buttonInfo = { .text = textString, .textColor = colorString };
                     asyncContext->buttons.emplace_back(buttonInfo);
                 }
@@ -502,20 +483,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             }
             napi_get_named_property(env, argv[0], "title", &asyncContext->titleNApi);
             napi_get_named_property(env, argv[0], "buttons", &asyncContext->buttonsNApi);
-            napi_typeof(env, asyncContext->titleNApi, &valueType);
-            if (valueType == napi_string) {
-                size_t titleLen = GetParamLen(asyncContext->titleNApi) + 1;
-                std::unique_ptr<char[]> titleChar = std::make_unique<char[]>(titleLen);
-                napi_get_value_string_utf8(env, asyncContext->titleNApi, titleChar.get(), titleLen, &ret);
-                asyncContext->titleString = titleChar.get();
-            } else if (valueType == napi_object) {
-                int32_t id = 0;
-                int32_t type = 0;
-                std::vector<std::string> params;
-                if (ParseResourceParam(env, asyncContext->titleNApi, id, type, params)) {
-                    ParseString(id, type, params, asyncContext->titleString);
-                }
-            }
+            GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString);
             bool isBool = false;
             napi_is_array(env, asyncContext->buttonsNApi, &isBool);
             napi_typeof(env, asyncContext->buttonsNApi, &valueType);
