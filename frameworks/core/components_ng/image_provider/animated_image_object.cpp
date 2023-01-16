@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,22 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "core/components_ng/image_provider/static_image_object.h"
+#include "core/components_ng/image_provider/animated_image_object.h"
 
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
-#include "core/components_ng/image_provider/image_provider.h"
-namespace OHOS::Ace::NG {
+#include "frameworks/core/components_ng/render/adapter/animated_image.h"
 
-void StaticImageObject::MakeCanvasImage(
-    const RefPtr<ImageLoadingContext>& ctx, const SizeF& targetSize, bool forceResize, bool syncLoad)
+namespace OHOS::Ace::NG {
+void AnimatedImageObject::MakeCanvasImage(
+    const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool /*forceResize*/, bool /*syncLoad*/)
 {
-    ImageProvider::MakeCanvasImage(WeakClaim(this), ctx, targetSize, forceResize, syncLoad);
+    auto image = AnimatedImage::Create(data_, resizeTarget, src_.GetSrc());
+    if (!image) {
+        ctx->FailCallback("failed to create animated image");
+    }
+    CHECK_NULL_VOID(ctx);
+    ctx->SuccessCallback(image);
 }
 
-RefPtr<ImageObject> StaticImageObject::Clone()
+RefPtr<ImageObject> AnimatedImageObject::Clone()
 {
-    return MakeRefPtr<StaticImageObject>(src_, imageSize_, data_);
+    return Claim(this);
 }
 } // namespace OHOS::Ace::NG

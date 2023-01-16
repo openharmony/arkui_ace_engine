@@ -23,8 +23,10 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
+#include "core/components_ng/image_provider/animated_image_object.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_object.h"
+#include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
 #include "core/components_ng/image_provider/svg_image_object.h"
@@ -50,35 +52,6 @@ void CacheImageObject(const RefPtr<ImageObject>& obj)
 
 std::mutex ImageProvider::taskMtx_;
 std::unordered_map<std::string, ImageProvider::Task> ImageProvider::tasks_;
-
-void ImageProvider::WrapTaskAndPostTo(
-    std::function<void()>&& task, TaskExecutor::TaskType taskType, const char* taskTypeName)
-{
-    auto taskExecutor = Container::CurrentTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("taskExecutor is null when try post task to %{public}s", taskTypeName);
-        return;
-    }
-    taskExecutor->PostTask(
-        [task, id = Container::CurrentId()] {
-            ContainerScope scope(id);
-            CHECK_NULL_VOID(task);
-            task();
-        },
-        taskType);
-}
-
-void ImageProvider::WrapTaskAndPostToUI(std::function<void()>&& task)
-{
-    CHECK_NULL_VOID(task);
-    ImageProvider::WrapTaskAndPostTo(std::move(task), TaskExecutor::TaskType::UI, "UI");
-}
-
-void ImageProvider::WrapTaskAndPostToBackground(std::function<void()>&& task)
-{
-    CHECK_NULL_VOID(task);
-    ImageProvider::WrapTaskAndPostTo(std::move(task), TaskExecutor::TaskType::BACKGROUND, "BACKGROUND");
-}
 
 bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
 {
@@ -139,7 +112,7 @@ void ImageProvider::FailCallback(const std::string& key, const std::string& erro
     if (sync) {
         notifyLoadFailTask();
     } else {
-        ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadFailTask));
+        ImageUtils::PostToUI(std::move(notifyLoadFailTask));
     }
 }
 
@@ -159,7 +132,7 @@ void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, cons
     if (sync) {
         notifyLoadSuccess();
     } else {
-        ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadSuccess));
+        ImageUtils::PostToUI(std::move(notifyLoadSuccess));
     }
 }
 
@@ -180,6 +153,7 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(src, data);
     if (!imageObj) {
         FailCallback(src.GetKey(), "Fail to build image object", sync);
+        return;
     }
     CacheImageObject(imageObj);
 
@@ -197,7 +171,7 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     if (sync) {
         notifyDataReadyTask();
     } else {
-        ImageProvider::WrapTaskAndPostToUI(std::move(notifyDataReadyTask));
+        ImageUtils::PostToUI(std::move(notifyDataReadyTask));
     }
 }
 
@@ -267,7 +241,7 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<
         CancelableCallback<void()> task;
         task.Reset([src] { ImageProvider::CreateImageObjHelper(src); });
         tasks_[src.GetKey()].bgTask_ = task;
-        WrapTaskAndPostToBackground(task);
+        ImageUtils::PostToBg(task);
     }
 }
 
@@ -291,12 +265,9 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
     auto [size, frameCount] = skiaImageData->Parse();
     CHECK_NULL_RETURN(size.IsPositive() && frameCount > 0, nullptr);
 
+    if (frameCount > 1) {
+        return MakeRefPtr<AnimatedImageObject>(src, size, data);
+    }
     return MakeRefPtr<StaticImageObject>(src, size, data);
-}
-
-std::string ImageProvider::GenerateImageKey(const ImageSourceInfo& src, const NG::SizeF& targetSize)
-{
-    return src.GetKey() + std::to_string(static_cast<int32_t>(targetSize.Width())) +
-           std::to_string(static_cast<int32_t>(targetSize.Height()));
 }
 } // namespace OHOS::Ace::NG

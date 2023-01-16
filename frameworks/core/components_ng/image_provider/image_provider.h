@@ -81,12 +81,6 @@ public:
     static void CancelTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx);
 
 private:
-    // helper function to post task to [TaskType] thread
-    static void WrapTaskAndPostTo(
-        std::function<void()>&& task, TaskExecutor::TaskType taskType, const char* taskTypeName);
-    static void WrapTaskAndPostToUI(std::function<void()>&& task);
-    static void WrapTaskAndPostToBackground(std::function<void()>&& task);
-
     // create RenderTaskHolder for skiaGPUObject
     static RefPtr<RenderTaskHolder> CreateRenderTaskHolder();
 

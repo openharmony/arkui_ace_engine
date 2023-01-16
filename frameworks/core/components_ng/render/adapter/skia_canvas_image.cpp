@@ -147,6 +147,7 @@ void SkiaCanvasImage::DrawToRSCanvas(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {
     auto image = GetCanvasImage();
+    CHECK_NULL_VOID(image);
     RSImage rsImage(&image);
     RSSamplingOptions options;
 
