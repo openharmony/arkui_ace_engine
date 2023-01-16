@@ -152,6 +152,7 @@ public:
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result);
     static bool ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
+    static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
 
     static std::pair<Dimension, Dimension> ParseSize(const JSCallbackInfo& info);
     static void JsUseAlign(const JSCallbackInfo& info);
@@ -309,12 +310,25 @@ public:
             return false;
         }
 
+        auto resIdNum = resId->ToNumber<int32_t>();
+        if (resIdNum == -1) {
+            if (!IsGetResourceByName(jsObj)) {
+                return false;
+            }
+            JSRef<JSVal> args = jsObj->GetProperty("params");
+            JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
+            auto param = params->GetValueAt(0);
+            if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+                result = static_cast<T>(themeConstants->GetIntByName(param->ToString()));
+                return true;
+            }
+            return false;
+        }
         if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
             result = static_cast<T>(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 };
 } // namespace OHOS::Ace::Framework

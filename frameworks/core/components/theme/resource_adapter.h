@@ -40,16 +40,48 @@ public:
     };
 
     virtual Color GetColor(uint32_t resId) = 0;
+    virtual Color GetColorByName(const std::string& resName)
+    {
+        return {};
+    }
     virtual Dimension GetDimension(uint32_t resId) = 0;
+    virtual Dimension GetDimensionByName(const std::string& resName)
+    {
+        return {};
+    }
     virtual std::string GetString(uint32_t resId) = 0;
+    virtual std::string GetStringByName(const std::string& resName)
+    {
+        return "";
+    }
     virtual std::vector<std::string> GetStringArray(uint32_t resId) const = 0;
+    virtual std::vector<std::string> GetStringArrayByName(const std::string& resName) const
+    {
+        return {};
+    }
     virtual double GetDouble(uint32_t resId) = 0;
+    virtual double GetDoubleByName(const std::string& resName)
+    {
+        return 0.0;
+    }
     virtual int32_t GetInt(uint32_t resId) = 0;
+    virtual int32_t GetIntByName(const std::string& resName)
+    {
+        return 0;
+    }
     virtual std::string GetPluralString(uint32_t resId, int quantity)
     {
         return "";
     }
+    virtual std::string GetPluralStringByName(const std::string& resName, int quantity)
+    {
+        return "";
+    }
     virtual std::string GetMediaPath(uint32_t resId)
+    {
+        return "";
+    }
+    virtual std::string GetMediaPathByName(const std::string& resName)
     {
         return "";
     }
@@ -73,10 +105,18 @@ public:
     {
         return false;
     };
+    virtual bool GetBooleanByName(const std::string& resName) const
+    {
+        return false;
+    }
     virtual std::vector<uint32_t> GetIntArray(uint32_t resId) const
     {
         return {};
     };
+    virtual std::vector<uint32_t> GetIntArrayByName(const std::string& resName) const
+    {
+        return {};
+    }
     virtual bool GetResource(uint32_t resId, std::ostream& dest) const
     {
         return false;
