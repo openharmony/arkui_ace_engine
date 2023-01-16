@@ -177,7 +177,7 @@ public:
     }
 
 private:
-    void ProcessScrollEnd();
+    void OnScrollEndCallback() override;
 
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -193,7 +193,7 @@ private:
     void ProcessEvent(bool indexChanged, float finalOffset, bool isJump);
     void CheckScrollable();
     bool IsOutOfBoundary(bool useCurrentDelta = true);
-    bool ScrollPositionCallback(float offset, int32_t source);
+    bool OnScrollCallback(float offset, int32_t source) override;
     void InitScrollableEvent();
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void HandleScrollEffect(float offset);

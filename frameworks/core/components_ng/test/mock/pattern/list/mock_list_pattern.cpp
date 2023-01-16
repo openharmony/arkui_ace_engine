@@ -38,6 +38,13 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 
 void ListPattern::UpdateScrollBarOffset() {}
 
+bool ListPattern::OnScrollCallback(float offset, int32_t source)
+{
+    return true;
+}
+
+void ListPattern::OnScrollEndCallback() {}
+
 bool ListPattern::IsAtBottom() const
 {
     return false;

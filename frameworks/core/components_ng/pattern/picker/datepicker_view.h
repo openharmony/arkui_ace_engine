@@ -31,6 +31,10 @@ public:
     static void SetSelectedDate(const PickerDate& value);
     static void SetShowLunar(bool lunar);
     static void SetOnChange(DateChangeEvent&& onChange);
+
+private:
+    static RefPtr<FrameNode> CreateStackNode();
+    static RefPtr<FrameNode> CreateButtonNode();
 };
 } // namespace OHOS::Ace::NG
 

@@ -258,6 +258,7 @@ void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
 
     if (selected < 0 || selected >= getRangeVector.size()) {
         LOGE("selected is out of range");
+        selected = 0;
     }
 
     Dimension height;
@@ -414,6 +415,7 @@ void JSTextPickerDialog::ParseText(RefPtr<PickerTextComponent>& component, const
 
     if (selected < 0 || selected >= getRangeVector.size()) {
         LOGE("selected is out of range");
+        selected = 0;
     }
 
     Dimension height;

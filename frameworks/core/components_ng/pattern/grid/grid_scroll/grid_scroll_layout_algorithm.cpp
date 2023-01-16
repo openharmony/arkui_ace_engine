@@ -560,6 +560,8 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     // are done measured.
     auto oldEnd = gridLayoutInfo_.endMainLineIndex_;
     gridLayoutInfo_.endMainLineIndex_ = runOutOfRecord ? --currentMainLineIndex_ : currentMainLineIndex_;
+    // reset reachEnd_ if any line at bottom is out of viewport
+    gridLayoutInfo_.reachEnd_ = oldEnd > gridLayoutInfo_.endMainLineIndex_;
     // Erase records that are on bottom of viewport.
     // remove from rbegin or LazyLayoutWrapperBuilder will create item and then remove
     for (auto i = oldEnd; i > gridLayoutInfo_.endMainLineIndex_; --i) {

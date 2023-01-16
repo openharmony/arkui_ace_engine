@@ -301,7 +301,7 @@ void ListPattern::MarkDirtyNodeSelf()
     }
 }
 
-void ListPattern::ProcessScrollEnd()
+void ListPattern::OnScrollEndCallback()
 {
     SetScrollBarDriving(false);
     scrollStop_ = true;
@@ -339,11 +339,14 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
     return outOfStart || outOfEnd;
 }
 
-bool ListPattern::ScrollPositionCallback(float offset, int32_t source)
+bool ListPattern::OnScrollCallback(float offset, int32_t source)
 {
     if (source == SCROLL_FROM_START) {
         ProcessDragStart(offset);
         return true;
+    }
+    if (NearZero(offset)) {
+        return false;
     }
     auto scrollBar = GetScrollBar();
     if (scrollBar && scrollBar->IsDriving()) {
@@ -645,25 +648,20 @@ void ListPattern::ProcessDragUpdate(float dragOffset)
         return;
     }
 
-    float delta = FlushChainAnimation(dragOffset);
+    float delta = FlushChainAnimation(-dragOffset);
     currentDelta_ += delta;
 }
 
 float ListPattern::GetChainDelta(int32_t index) const
 {
     if (!chainAdapter_) {
-        return 0.0;
+        return 0.0f;
     }
-    float value = 0.0;
-    RefPtr<BilateralSpringNode> node;
-    int32_t controlIndex = dragStartIndex_;
-    int32_t baseIndex = controlIndex - chainAdapter_->GetControlIndex();
+    int32_t baseIndex = dragStartIndex_ - chainAdapter_->GetControlIndex();
     auto targetIndex = std::clamp(index - baseIndex, 0, CHAIN_ANIMATION_NODE_COUNT - 1);
-    node = AceType::DynamicCast<BilateralSpringNode>(chainAdapter_->GetNode(targetIndex));
-    if (node) {
-        value = node->GetValue();
-    }
-    return value;
+    auto node = AceType::DynamicCast<BilateralSpringNode>(chainAdapter_->GetNode(targetIndex));
+    CHECK_NULL_RETURN(node, 0.0f);
+    return node->GetValue();
 }
 
 void ListPattern::InitMouseEvent()

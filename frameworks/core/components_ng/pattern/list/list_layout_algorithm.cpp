@@ -282,7 +282,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
         LOGD("LayoutForward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
-    } while (LessNotEqual(currentEndPos - chainOffset, endMainPos + paddingAfterContent_));
+    } while (LessNotEqual(currentEndPos + chainOffset, endMainPos + paddingAfterContent_));
 
     if (overScrollFeature_) {
         LOGD("during over scroll, just return in LayoutForward");
@@ -316,7 +316,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
     // Mark inactive in wrapper.
     for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
-        if (GreatOrEqual(pos->second.endPos - chainOffset, startMainPos_ - paddingBeforeContent_)) {
+        if (GreatOrEqual(pos->second.endPos + chainOffset, startMainPos_ - paddingBeforeContent_)) {
             break;
         }
         LOGI("recycle item:%{public}d", pos->first);
@@ -346,7 +346,7 @@ void ListLayoutAlgorithm::LayoutBackward(
         LOGD("LayoutBackward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
-    } while (GreatNotEqual(currentStartPos - chainOffset, startMainPos - paddingBeforeContent_));
+    } while (GreatNotEqual(currentStartPos + chainOffset, startMainPos - paddingBeforeContent_));
 
     if (overScrollFeature_) {
         LOGD("during over scroll, just return in LayoutBackward");
@@ -366,7 +366,7 @@ void ListLayoutAlgorithm::LayoutBackward(
     std::list<int32_t> removeIndexes;
     for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
-        if (LessOrEqual(pos->second.startPos - chainOffset, endMainPos_ + paddingAfterContent_)) {
+        if (LessOrEqual(pos->second.startPos + chainOffset, endMainPos_ + paddingAfterContent_)) {
             break;
         }
         layoutWrapper->RemoveChildInRenderTree(pos->first);
@@ -418,9 +418,9 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         auto chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(index) : 0.0f;
         if (axis == Axis::VERTICAL) {
-            offset = offset + OffsetF(crossOffset, pos.second.startPos - chainOffset);
+            offset = offset + OffsetF(crossOffset, pos.second.startPos + chainOffset);
         } else {
-            offset = offset + OffsetF(pos.second.startPos - chainOffset, crossOffset);
+            offset = offset + OffsetF(pos.second.startPos + chainOffset, crossOffset);
         }
         wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
         if (!overScrollFeature_ || wrapper->CheckNeedForceMeasureAndLayout()) {

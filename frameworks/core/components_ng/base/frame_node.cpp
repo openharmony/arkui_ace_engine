@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1222,6 +1222,22 @@ OffsetF FrameNode::GetPaintRectOffset() const
 void FrameNode::OnNotifyMemoryLevel(int32_t level)
 {
     pattern_->OnNotifyMemoryLevel(level);
+}
+
+int32_t FrameNode::GetAllDepthChildrenCount()
+{
+    int32_t result = 0;
+    std::list<RefPtr<FrameNode>> children;
+    children.emplace_back(Claim(this));
+    while (!children.empty()) {
+        auto& node = children.front();
+        if (!node->IsInternal()) {
+            result++;
+            node->GenerateOneDepthVisibleFrame(children);
+        }
+        children.pop_front();
+    }
+    return result;
 }
 
 void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType) const

@@ -17,12 +17,14 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "base/ressched/ressched_report.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
 
 namespace OHOS::Ace::NG {
@@ -81,17 +83,39 @@ void XComponentPattern::OnAttachToFrameNode()
     auto host = GetHost();
     auto renderContext = host->GetRenderContext();
     if (type_ == XComponentType::SURFACE) {
+        renderSurface_ = RenderSurface::Create();
         renderContextForSurface_ = RenderContext::Create();
         renderContextForSurface_->InitContext(false, id_ + "Surface");
-        renderSurface_ = RenderSurface::Create();
-        renderSurface_->SetRenderContext(renderContextForSurface_);
+        renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
+        if (!SystemProperties::GetExtSurfaceEnabled()) {
+            renderSurface_->SetRenderContext(renderContextForSurface_);
+        } else {
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->AddOnAreaChangeNode(host->GetId());
+        }
         renderSurface_->InitSurface();
         renderSurface_->UpdateXComponentConfig();
-        renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
         InitEvent();
         SetMethodCall();
     }
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+}
+
+void XComponentPattern::OnAreaChangedInner()
+{
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto xcomponentNodeSize = geometryNode->GetContentSize();
+        auto xcomponentNodeOffset = geometryNode->GetContentOffset();
+        auto transformRelativeOffset = host->GetTransformRelativeOffset();
+        renderSurface_->SetExtSurfaceBounds(transformRelativeOffset.GetX() + xcomponentNodeOffset.GetX(),
+            transformRelativeOffset.GetY() + xcomponentNodeOffset.GetY(), xcomponentNodeSize.Width(),
+            xcomponentNodeSize.Height());
+    }
 }
 
 void XComponentPattern::OnRebuildFrame()
@@ -164,10 +188,13 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
+    auto drawSize = geometryNode->GetContentSize();
+    if (drawSize.IsNonPositive()) {
+        return false;
+    }
 
     if (!hasXComponentInit_) {
         auto position = geometryNode->GetContentOffset() + geometryNode->GetFrameOffset();
-        auto drawSize = geometryNode->GetContentSize();
         XComponentSizeInit(drawSize.Width(), drawSize.Height());
         NativeXComponentOffset(position.GetX(), position.GetY());
         hasXComponentInit_ = true;
@@ -177,14 +204,11 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
             NativeXComponentOffset(position.GetX(), position.GetY());
         }
         if (config.contentSizeChange) {
-            auto drawSize = geometryNode->GetContentSize();
             XComponentSizeChange(drawSize.Width(), drawSize.Height());
         }
     }
-
-    auto size = geometryNode->GetContentSize();
     auto offset = geometryNode->GetContentOffset();
-    renderContextForSurface_->SetBounds(offset.GetX(), offset.GetY(), size.Width(), size.Height());
+    renderContextForSurface_->SetBounds(offset.GetX(), offset.GetY(), drawSize.Width(), drawSize.Height());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     host->MarkNeedSyncRenderTree();

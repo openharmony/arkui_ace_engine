@@ -571,11 +571,13 @@ void VideoPattern::OnModifyDone()
     AddControlBarNodeIfNeeded();
     UpdateMediaPlayer();
     UpdateVideoProperty();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    pipelineContext->AddOnAreaChangeNode(host->GetId());
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        pipelineContext->AddOnAreaChangeNode(host->GetId());
+    }
 }
 
 void VideoPattern::AddPreviewNodeIfNeeded()
@@ -702,7 +704,7 @@ void VideoPattern::OnAreaChangedInner()
         CHECK_NULL_VOID(layoutProperty);
         auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
         auto transformRelativeOffset = host->GetTransformRelativeOffset();
-        renderSurface_->SetBounds(transformRelativeOffset.GetX() + videoNodeOffset.GetX() +
+        renderSurface_->SetExtSurfaceBounds(transformRelativeOffset.GetX() + videoNodeOffset.GetX() +
                                     (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
             transformRelativeOffset.GetY() + videoNodeOffset.GetY() +
                 (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
