@@ -54,6 +54,8 @@ public:
 
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
+    RefereeState CheckStates();
+    void ForceReject();
 
     void RemainChildOnResetStatus()
     {
