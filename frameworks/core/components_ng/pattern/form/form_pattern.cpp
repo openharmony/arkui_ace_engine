@@ -188,7 +188,8 @@ void FormPattern::InitFormManagerDelegate()
         CHECK_NULL_VOID(node);
         LOGE("Kee FormPattern::AddFormSurfaceNodeCallback 1");
         node->CreateNodeInRenderThread();
-        node->SetBounds(0, 0, 400, 400);
+        node->SetBounds(0, 0, 500, 500);
+        node->SetBackgroundColor(Color::BLUE.GetValue());
         LOGE("Kee FormPattern::AddFormSurfaceNodeCallback 2");
         auto formComponent = weak.Upgrade();
         CHECK_NULL_VOID(formComponent);
@@ -196,12 +197,18 @@ void FormPattern::InitFormManagerDelegate()
         CHECK_NULL_VOID(host);
         auto formComponentContext = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
         CHECK_NULL_VOID(formComponentContext);
+
         // auto rsNode = formComponentContext->GetRSNode();
         // CHECK_NULL_VOID(rsNode);
-        // // rsNode->AddChild(node, -1);
-        // rsNode->SyncRSNode(std::static_pointer_cast<RSNode>(node));
+        // rsNode->AddChild(node, -1);
+        // LOGE("Kee FormPattern::AddFormSurfaceNodeCallback FormComponent RSNodeId: %{public}lld", rsNode->GetId());
+        
+        LOGE("Kee FormPattern::AddFormSurfaceNodeCallback eTSCard Root RSNodeId: %{public}lld", node->GetId());
+        LOGE("Kee FormPattern::AddFormSurfaceNodeCallback eTSCard Root RSNode Dump: %{public}s", node->DumpNode(0).c_str());
 
         formComponentContext->SetRSNode(node);
+
+
         host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         LOGE("Kee FormPattern::AddFormSurfaceNodeCallback 3");
         auto parent = host->GetParent();
@@ -212,8 +219,7 @@ void FormPattern::InitFormManagerDelegate()
         parent->RebuildRenderContextTree();
         LOGE("Kee FormPattern::AddFormSurfaceNodeCallback 6");
         host->GetRenderContext()->RequestNextFrame();
-        // LOGE("Kee FormPattern::AddFormSurfaceNodeCallback FormComponent RSNodeId: %{public}lld", rsNode->GetId());
-        LOGE("Kee FormPattern::AddFormSurfaceNodeCallback eTSCard Root  RSNodeId: %{public}lld", node->GetId());
+
         LOGE("Kee FormPattern::AddFormSurfaceNodeCallback end ");
     });
 }

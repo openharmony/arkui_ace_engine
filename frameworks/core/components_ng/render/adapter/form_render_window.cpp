@@ -55,7 +55,7 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
     }
 
     int64_t refreshPeriod = static_cast<int64_t>(ONE_SECOND_IN_NANO / GetDisplayRefreshRate());
-    auto task = [weakTask = taskExecutor_, id = id_, refreshPeriod](int64_t timeStampNanos, void* data) {
+    onVsyncCallback_ = [weakTask = taskExecutor_, id = id_, refreshPeriod](int64_t timeStampNanos, void* data) {
         auto taskExecutor = weakTask.Upgrade();
         auto onVsync = [id, timeStampNanos, refreshPeriod] {
             LOGE("Kee FormRenderWindow onVsync");
@@ -85,23 +85,27 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
         });
     };
 
-
     frameCallback_.userData_ = nullptr,
-    frameCallback_.callback_ = task,
+    frameCallback_.callback_ = onVsyncCallback_,
 
     receiver_->RequestNextVSync(frameCallback_);
 
+    rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
+    // rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
+    rsUIDirector_->Init();
+
     std::string surfaceNodeName = "ArkTSCardNode";
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = surfaceNodeName};
-    rsSurfaceNode_ = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+    rsSurfaceNode_ = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
+    rsSurfaceNode_->SetBounds(0, 0, 500, 500);
+    rsSurfaceNode_->SetBackgroundColor(Color::RED.GetValue());
+
     LOGE("Kee FormRenderWindow::FormRenderWindow surfaceNode ptr   = %{public}p", rsSurfaceNode_.get());
     LOGE("Kee FormRenderWindow::FormRenderWindow surfaceNode name  = %{public}s", rsSurfaceNode_->GetName().c_str());
     LOGE("Kee FormRenderWindow::FormRenderWindow surfaceNode id    = %{public}llu", rsSurfaceNode_->GetId());
-
-    rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
+    LOGE("Kee FormRenderWindow::FormRenderWindow surfaceNode dump = %{public}s", rsSurfaceNode_->DumpNode(0).c_str());
     rsUIDirector_->SetRSSurfaceNode(rsSurfaceNode_);
-    // rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
-    rsUIDirector_->Init();
+
     rsUIDirector_->SetUITaskRunner([weakTaskExecutor = taskExecutor_, id = id_](const std::function<void()>& task) {
         ContainerScope scope(id);
         auto taskExecutor = weakTaskExecutor.Upgrade();
@@ -126,8 +130,16 @@ void FormRenderWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
     CHECK_NULL_VOID(rosenRenderContext);
     LOGE("Kee FormRenderWindow::SetRootFrameNode eTS Card");
     if (rosenRenderContext->GetRSNode()) {
+        LOGE("Kee FormRenderWindow::SetRootFrameNode rsUIDirector_->SetRoot");
+        auto rootSRNode = rosenRenderContext->GetRSNode();
+        rootSRNode->SetBounds(0, 0, 400, 400);
+        rootSRNode->SetBackgroundColor(Color::GREEN.GetValue());
         rsUIDirector_->SetRoot(rosenRenderContext->GetRSNode()->GetId());
+        LOGE("Kee FormRenderWindow::SetRootFrameNode Root RSNode id = %{public}lld", rootSRNode->GetId());
+        LOGE("Kee FormRenderWindow::SetRootFrameNode Root RSNode dump = %{public}s", rootSRNode->DumpNode(0).c_str());
     }
+    LOGE("Kee FormRenderWindow::SetRootFrameNode Root RSNode flush tasks");
+    rsUIDirector_->SendMessages();
 }
 
 void FormRenderWindow::SetFormRSSurfaceNode(void* surfaceNode)
@@ -139,15 +151,6 @@ void FormRenderWindow::SetFormRSSurfaceNode(void* surfaceNode)
     }
     std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode;
     rsSurfaceNode.reset(static_cast<Rosen::RSSurfaceNode*>(surfaceNode));
-    // rsUIDirector_->SetRSSurfaceNode(rsSurfaceNode);
-    // // rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
-    // rsUIDirector_->Init();
-    // rsUIDirector_->SetUITaskRunner([weakTaskExecutor = taskExecutor_, id = id_](const std::function<void()>& task) {
-    //     ContainerScope scope(id);
-    //     auto taskExecutor = weakTaskExecutor.Upgrade();
-    //     CHECK_NULL_VOID_NOLOG(taskExecutor);
-    //     taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-    // });
 }
 
 void FormRenderWindow::OnShow()
@@ -165,7 +168,7 @@ void FormRenderWindow::OnHide()
 
 void FormRenderWindow::FlushTasks()
 {
-    LOGE("FormRenderWindow flush tasks");
+    LOGE("Kee FormRenderWindow flush tasks");
     rsUIDirector_->SendMessages();
 }
 

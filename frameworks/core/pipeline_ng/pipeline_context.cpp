@@ -176,31 +176,46 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     FlushAnimation(GetTimeFromExternalTimer());
     FlushBuild();
     if (isEtsCard_) {
-        LOGE("Kee PipelineContext::FlushVsync drawDelegate_ = %{public}p", drawDelegate_.get());
+        LOGE("Kee PipelineContext::FlushVsync Card 1 drawDelegate_ = %{public}p", drawDelegate_.get());
     } 
     if (isEtsCard_ && drawDelegate_) {
-        LOGE("Kee PipelineContext::FlushVsync isEtsCard_");
+        LOGE("Kee PipelineContext::FlushVsync Card 2");
         auto renderContext = AceType::DynamicCast<NG::RenderContext>(rootNode_->GetRenderContext());
         drawDelegate_->DrawRSFrame(renderContext);
         drawDelegate_ = nullptr;
     }
     FlushTouchEvents();
     if (!taskScheduler_.isEmpty()) {
+        if (isEtsCard_) {
+            LOGE("Kee PipelineContext::FlushVsync Card 3");
+        }
 #if !defined(PREVIEW)
         LayoutInspector::SupportInspector();
 #endif
     }
+    if (isEtsCard_) {
+        LOGE("Kee PipelineContext::FlushVsync Card 4");
+    }
     taskScheduler_.FlushTask();
     auto hasAninmation = window_->FlushCustomAnimation(nanoTimestamp);
     if (hasAninmation) {
+        if (isEtsCard_) {
+            LOGE("Kee PipelineContext::FlushVsync Card 5");
+        }
         RequestFrame();
     }
     if (isEtsCard_) {
-        LOGE("Kee PipelineContext::FlushVsync drawDelegate_ FlushMessages");
-    } 
+        LOGE("Kee PipelineContext::FlushVsync Card 6 FlushMessages");
+    }
     FlushMessages();
     if (onShow_ && onFocus_) {
+        if (isEtsCard_) {
+            LOGE("Kee PipelineContext::FlushVsync Card 7");
+        }
         FlushFocus();
+    }
+    if (isEtsCard_) {
+        LOGE("Kee PipelineContext::FlushVsync Card 8");
     }
     HandleVisibleAreaChangeEvent();
     HandleOnAreaChangeEvent();
@@ -320,10 +335,18 @@ void PipelineContext::SetupRootElement()
     rootNode_->SetHostPageId(-1);
     LOGE("Kee PipelineContext::SetupRootElement 4");
     CalcSize idealSize { CalcLength(rootWidth_), CalcLength(rootHeight_) };
+    CalcSize cardSize { CalcLength(400), CalcLength(400) };
     LOGE("Kee PipelineContext::SetupRootElement 5");
     MeasureProperty layoutConstraint;
-    layoutConstraint.selfIdealSize = idealSize;
-    layoutConstraint.maxSize = idealSize;
+    if (isEtsCard_) {
+        LOGE("Kee PipelineContext::SetupRootElement cardSize");
+        layoutConstraint.selfIdealSize = cardSize;
+        layoutConstraint.maxSize = cardSize;
+    } else {
+        LOGE("Kee PipelineContext::SetupRootElement idealSize");
+        layoutConstraint.selfIdealSize = idealSize;
+        layoutConstraint.maxSize = idealSize;
+    }
     LOGE("Kee PipelineContext::SetupRootElement 6");
     rootNode_->UpdateLayoutConstraint(layoutConstraint);
     LOGE("Kee PipelineContext::SetupRootElement 7");
@@ -443,9 +466,10 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     CHECK_RUN_ON(UI);
-    LOGE("Kee PipelineContext: OnSurfaceChanged start.");
+    LOGE("Kee PipelineContext: OnSurfaceChanged start. width = %{width}d height = %{width}d", width, height);
     if (NearEqual(rootWidth_, width) && NearEqual(rootHeight_, height) &&
         type == WindowSizeChangeReason::CUSTOM_ANIMATION) {
+        LOGE("Kee PipelineContext: OnSurfaceChanged start 1. width = %{width}d height = %{width}d", width, height);
         TryCallNextFrameLayoutCallback();
         return;
     }

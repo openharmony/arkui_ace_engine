@@ -30,7 +30,9 @@
 namespace OHOS::Ace {
 
 class ACE_EXPORT FormRenderWindow : public Window {
+
 public:
+    using OnVsyncCallback = std::function<void(int64_t, void*)>;
     explicit FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id);
     FormRenderWindow() = default;
     ~FormRenderWindow() = default;
@@ -59,6 +61,7 @@ public:
 private:
     std::shared_ptr<Rosen::VSyncReceiver> receiver_ = nullptr;
     Rosen::VSyncReceiver::FrameCallback frameCallback_;
+    OnVsyncCallback onVsyncCallback_;
     WeakPtr<TaskExecutor> taskExecutor_ = nullptr;
     int32_t id_ = 0;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
