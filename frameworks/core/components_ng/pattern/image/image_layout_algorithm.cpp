@@ -115,14 +115,14 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     const auto& imageLayoutProperty = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(imageLayoutProperty);
     const auto& dstSize = layoutWrapper->GetGeometryNode()->GetContentSize();
-    bool incomingNeedResize = imageLayoutProperty->GetAutoResize().value_or(true);
-    ImageFit incomingImageFit = imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER);
+    bool autoResize = imageLayoutProperty->GetAutoResize().value_or(true);
+    ImageFit imageFit = imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER);
     const std::optional<SizeF>& sourceSize = imageLayoutProperty->GetSourceSize();
     if (loadingCtx_) {
-        loadingCtx_->MakeCanvasImageIfNeed(dstSize, incomingNeedResize, incomingImageFit, sourceSize);
+        loadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize);
     }
     if (altLoadingCtx_) {
-        altLoadingCtx_->MakeCanvasImageIfNeed(dstSize, true, incomingImageFit, sourceSize);
+        altLoadingCtx_->MakeCanvasImageIfNeed(dstSize, true, imageFit, sourceSize);
     }
 }
 

@@ -77,11 +77,8 @@ sk_sp<SkImage> ApplySizeToSkImage(
     // Marking this as immutable makes the MakeFromBitmap call share the pixels instead of copying.
     scaledBitmap.setImmutable();
     auto scaledImage = SkImage::MakeFromBitmap(scaledBitmap);
-    CHECK_NULL_RETURN_NOLOG(!scaledImage, scaledImage);
-    LOGE("Could not create a scaled image from a scaled bitmap. srcKey: %{private}s, destination size: [%{public}d x"
-         " %{public}d], raw image size: [%{public}d x %{public}d]",
-        srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
-    return rawImage;
+    CHECK_NULL_RETURN_NOLOG(scaledImage, rawImage);
+    return scaledImage;
 }
 
 static sk_sp<SkImage> ResizeSkImage(
@@ -112,8 +109,7 @@ static sk_sp<SkImage> ResizeSkImage(
     if (!needResize && !forceResize) {
         return rawImage;
     }
-    return ApplySizeToSkImage(
-        rawImage, dstWidth, dstHeight, ImageProvider::GenerateImageKey(ImageSourceInfo(src), resizeTarget));
+    return ApplySizeToSkImage(rawImage, dstWidth, dstHeight, src);
 }
 
 } // namespace
@@ -159,9 +155,6 @@ RefPtr<CanvasImage> ImageProvider::QueryCanvasImageFromCache(const ImageSourceIn
     auto cache = pipelineCtx->GetImageCache();
     CHECK_NULL_RETURN(cache, nullptr);
     auto cacheImage = cache->GetCacheImage(key);
-    if (!cacheImage) {
-        LOGI("[ImageCache] canvasImage not found %{public}s", key.c_str());
-    }
     CHECK_NULL_RETURN_NOLOG(cacheImage, nullptr);
 #ifdef NG_BUILD
     auto canvasImage = cacheImage->imagePtr;
