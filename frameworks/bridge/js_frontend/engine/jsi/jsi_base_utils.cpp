@@ -510,6 +510,8 @@ std::string ParseLogContent(const std::vector<std::string>& params)
                 ret += params[i];
                 break;
             }
+        default:
+            break;
     }
     return ret;
 }
