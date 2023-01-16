@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_view.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -114,13 +115,31 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     }
 
     if (!hasYearNode) {
-        yearColumnNode->MountToParent(dateNode);
+        auto stackYearNode = CreateStackNode();
+        auto buttonYearNode = CreateButtonNode();
+        buttonYearNode->MountToParent(stackYearNode);
+        yearColumnNode->MountToParent(stackYearNode);
+        auto layoutProperty = stackYearNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        stackYearNode->MountToParent(dateNode);
     }
     if (!hasMonthNode) {
-        monthColumnNode->MountToParent(dateNode);
+        auto stackMonthNode = CreateStackNode();
+        auto buttonMonthNode = CreateButtonNode();
+        buttonMonthNode->MountToParent(stackMonthNode);
+        monthColumnNode->MountToParent(stackMonthNode);
+        auto layoutProperty = stackMonthNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        stackMonthNode->MountToParent(dateNode);
     }
     if (!hasDayNode) {
-        dayColumnNode->MountToParent(dateNode);
+        auto stackDayNode = CreateStackNode();
+        auto buttonDayNode = CreateButtonNode();
+        buttonDayNode->MountToParent(stackDayNode);
+        dayColumnNode->MountToParent(stackDayNode);
+        auto layoutProperty = stackDayNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        stackDayNode->MountToParent(dateNode);
     }
     dateNode->MarkModifyDone();
 
@@ -169,6 +188,20 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     contentRow->MountToParent(contentColumn);
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return dialogNode;
+}
+
+RefPtr<FrameNode> DatePickerDialogView::CreateStackNode()
+{
+    auto stackId = ElementRegister::GetInstance()->MakeUniqueId();
+    return FrameNode::GetOrCreateFrameNode(
+        V2::STACK_ETS_TAG, stackId, []() { return AceType::MakeRefPtr<StackPattern>(); });
+}
+
+RefPtr<FrameNode> DatePickerDialogView::CreateButtonNode()
+{
+    auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
+    return FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
 }
 
 RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<FrameNode>& dateNode)

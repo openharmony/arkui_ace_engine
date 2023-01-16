@@ -20,6 +20,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/picker/picker_data.h"
+#include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -31,6 +32,10 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const Dimension FOCUS_PAINT_WIDTH = 2.0_vp;
+}
+
 class DatePickerPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(DatePickerPattern, LinearLayoutPattern);
 
@@ -61,7 +66,9 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<DatePickerPaintMethod>();
+        auto paintMethod = MakeRefPtr<DatePickerPaintMethod>();
+        paintMethod->SetEnabled(enabled_);
+        return paintMethod;
     }
 
     void SetChangeCallback(ColumnChangeCallback&& value);
@@ -411,7 +418,17 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, FocusPattern());
+        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+        CHECK_NULL_RETURN(pickerTheme, FocusPattern());
+        auto focusColor = pickerTheme->GetFocusColor();
+
+        FocusPaintParam focusPaintParams;
+        focusPaintParams.SetPaintColor(focusColor);
+        focusPaintParams.SetPaintWidth(FOCUS_PAINT_WIDTH);
+
+        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
     void ShowTitle(int32_t titleId);
@@ -421,12 +438,17 @@ private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     static void Init();
-    RefPtr<ClickEvent> clickEventListener_;
+    void InitDisabled();
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void PaintFocusState();
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
 
+    RefPtr<ClickEvent> clickEventListener_;
+    bool enabled_ = true;
+    int32_t focusKeyID_ = 0;
     std::map<RefPtr<FrameNode>, std::vector<std::string>> options_;
     uint32_t showCount_ = 0;
     std::vector<RefPtr<FrameNode>> datePickerColumns_;
