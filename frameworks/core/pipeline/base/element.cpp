@@ -282,8 +282,8 @@ void Element::Mount(const RefPtr<Element>& parent, int32_t slot, int32_t renderS
     SetParent(parent);
     SetDepth(parent != nullptr ? parent->GetDepth() + 1 : 1);
     SetPipelineContext(parent != nullptr ? parent->context_ : context_);
-    Prepare(parent);
     SetRenderSlot(renderSlot);
+    Prepare(parent);
     if (parent) {
         parent->AddChild(AceType::Claim(this), slot);
         AddToFocus();
