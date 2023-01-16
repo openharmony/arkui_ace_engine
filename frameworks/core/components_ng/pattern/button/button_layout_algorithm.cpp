@@ -26,6 +26,13 @@ namespace OHOS::Ace::NG {
 void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    // If the ButtonType is CIRCLE, then omit text by the smallest edge.
+    if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
+        auto minLength = std::min(layoutConstraint.maxSize.Width(), layoutConstraint.maxSize.Height());
+        layoutConstraint.maxSize = SizeF(minLength, minLength);
+    }
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(layoutConstraint);
     }
