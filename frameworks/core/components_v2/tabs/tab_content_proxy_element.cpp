@@ -59,9 +59,9 @@ RefPtr<FocusNode> TabContentProxyElement::GetChildFocusNode(const RefPtr<Element
         return focusNode;
     }
     for (const auto& child : node->GetChildren()) {
-        auto node = GetChildFocusNode(child);
-        if (node) {
-            return node;
+        auto resNode = GetChildFocusNode(child);
+        if (resNode) {
+            return resNode;
         }
     }
     return nullptr;

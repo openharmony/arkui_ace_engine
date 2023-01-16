@@ -138,8 +138,88 @@ void SwiperPattern::OnModifyDone()
     swiperController_->SetAddSwiperEventCallback(std::move(addSwiperEventCallback));
 }
 
+void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
+{
+    CHECK_NULL_VOID(curShowFrame);
+    auto swiperHost = GetHost();
+    CHECK_NULL_VOID(swiperHost);
+    auto swiperFocusHub = swiperHost->GetFocusHub();
+    CHECK_NULL_VOID(swiperFocusHub);
+    auto showChildFocusHub = curShowFrame->GetFirstFocusHubChild();
+    CHECK_NULL_VOID(showChildFocusHub);
+    auto focusChildren = swiperFocusHub->GetChildren();
+    CHECK_NULL_VOID(!focusChildren.empty());
+    auto iter = focusChildren.rbegin();
+    if (IsShowIndicator()) {
+        ++iter;
+    }
+    while (iter != focusChildren.rend()) {
+        auto child = *iter;
+        if (!child) {
+            ++iter;
+            continue;
+        }
+        if (child != showChildFocusHub) {
+            child->SetParentFocusable(false);
+        } else {
+            child->SetParentFocusable(true);
+        }
+        ++iter;
+    }
+
+    RefPtr<FocusHub> needFocusNode = showChildFocusHub;
+    if (IsShowIndicator() && isLastIndicatorFocused_) {
+        needFocusNode = focusChildren.back();
+    }
+    CHECK_NULL_VOID(needFocusNode);
+    lastWeakShowNode_ = AceType::WeakClaim(AceType::RawPtr(curShowFrame));
+    if (swiperFocusHub->IsCurrentFocus()) {
+        needFocusNode->RequestFocusImmediately();
+    } else {
+        swiperFocusHub->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(needFocusNode)));
+    }
+}
+
+WeakPtr<FocusHub> SwiperPattern::GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)
+{
+    auto swiperHost = GetHost();
+    CHECK_NULL_RETURN(swiperHost, nullptr);
+    auto swiperFocusHub = swiperHost->GetFocusHub();
+    CHECK_NULL_RETURN(swiperFocusHub, nullptr);
+    auto focusChildren = swiperFocusHub->GetChildren();
+    CHECK_NULL_RETURN_NOLOG(!focusChildren.empty(), nullptr);
+    CHECK_NULL_RETURN_NOLOG(IsShowIndicator(), nullptr);
+    auto indicatorNode = focusChildren.back();
+    CHECK_NULL_RETURN(indicatorNode, nullptr);
+    auto lastShowNode = lastWeakShowNode_.Upgrade();
+    CHECK_NULL_RETURN(lastShowNode, nullptr);
+    auto lastShowFocusHub = lastShowNode->GetFocusHub();
+    CHECK_NULL_RETURN(lastShowFocusHub, nullptr);
+
+    auto curFocusNode = currentFocusNode.Upgrade();
+    CHECK_NULL_RETURN(curFocusNode, nullptr);
+
+    if ((curFocusNode == indicatorNode) && ((direction_ == Axis::HORIZONTAL && step == FocusStep::UP) ||
+                                               (direction_ == Axis::VERTICAL && step == FocusStep::LEFT))) {
+        isLastIndicatorFocused_ = false;
+        return lastShowFocusHub;
+    }
+    if ((curFocusNode != indicatorNode) && ((direction_ == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
+                                               (direction_ == Axis::VERTICAL && step == FocusStep::RIGHT))) {
+        isLastIndicatorFocused_ = true;
+        return AceType::WeakClaim(AceType::RawPtr(indicatorNode));
+    }
+    return nullptr;
+}
+
 bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    auto curChild = dirty->GetOrCreateChildByIndex(currentIndex_);
+    CHECK_NULL_RETURN(curChild, false);
+    auto curChildFrame = curChild->GetHostNode();
+    CHECK_NULL_RETURN(curChildFrame, false);
+    FlushFocus(curChildFrame);
+
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }

@@ -67,6 +67,11 @@ public:
         return DynamicCast<FrameNode>(swiperNode);
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true };
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
