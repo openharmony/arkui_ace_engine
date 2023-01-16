@@ -59,13 +59,22 @@ private:
     int32_t TotalCount() const;
 
     void InitSwiperChangeEvent(const RefPtr<SwiperEventHub>& swiperEventHub);
-    void InitButtonClickEvent(const RefPtr<GestureEventHub>& leftGestureHub,
-        const RefPtr<GestureEventHub>& rightGestureHub, const RefPtr<FrameNode>& swiperNode);
-    void HandlingButtonClickEvent(bool isLeft, const RefPtr<FrameNode>& swiperNode);
-    void UpdateButtonText(int32_t index);
+    void UpdateOrCreateLeftButtonNode(int32_t index);
+    void CreateLeftButtonNode();
+    void UpdateLeftButtonNode(int32_t index);
+    void UpdateOrCreateRightButtonNode(int32_t index);
+    void CreateRightButtonNode(int32_t index);
+    void CreateArrowRightButtonNode(int32_t index, bool isDisabled);
+    void CreateArrowlessRightButtonNode(std::string content);
+    void CreateWaitingRightButtonNode();
+    void UpdateRightButtonNode(int32_t index);
+    void InitButtonClickEvent();
+    void HandlingLeftButtonClickEvent();
+    void HandlingRightButtonClickEvent();
 
     int32_t index_ = 0;
     int32_t maxIndex_ = 0;
+    bool isFirstCreate_ = true;
     std::shared_ptr<ChangeEvent> swiperChangeEvent_;
     RefPtr<ClickEvent> leftClickEvent_;
     RefPtr<ClickEvent> rightClickEvent_;
