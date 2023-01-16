@@ -163,7 +163,15 @@ RenderTextField::~RenderTextField()
         fontManager->UnRegisterCallback(AceType::WeakClaim(this));
         fontManager->RemoveVariationNode(WeakClaim(this));
     }
-
+    if (HasSurfaceChangedCallback()) {
+        LOGD("Unregister surface change callback with id %{public}d", surfaceChangedCallbackId_.value_or(-1));
+        pipelineContext->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
+    }
+    if (HasSurfacePositionChangedCallback()) {
+        LOGD("Unregister surface position change callback with id %{public}d",
+            surfacePositionChangedCallbackId_.value_or(-1));
+        pipelineContext->UnregisterSurfacePositionChangedCallback(surfacePositionChangedCallbackId_.value_or(-1));
+    }
     // If soft keyboard is still exist, close it.
     if (HasConnection()) {
 #if defined(ENABLE_STANDARD_INPUT)
@@ -381,6 +389,75 @@ void RenderTextField::SetCallback(const RefPtr<TextFieldComponent>& textField)
     if (textField->GetOnPaste()) {
         onPaste_ = *textField->GetOnPaste();
     }
+    auto pipeline = GetContext().Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    if (!HasSurfaceChangedCallback()) {
+        auto callbackId =
+            pipeline->RegisterSurfaceChangedCallback([weakTextField = AceType::WeakClaim(this)](int32_t newWidth,
+                                                         int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {
+                auto textfield = weakTextField.Upgrade();
+                if (textfield) {
+                    textfield->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
+                }
+            });
+        LOGI("Add surface changed callback id %{public}d", callbackId);
+        UpdateSurfaceChangedCallbackId(callbackId);
+    }
+    if (!HasSurfacePositionChangedCallback()) {
+        auto callbackId = pipeline->RegisterSurfacePositionChangedCallback(
+            [weakTextField = AceType::WeakClaim(this)](int32_t posX, int32_t posY) {
+                auto textfield = weakTextField.Upgrade();
+                if (textfield) {
+                    textfield->HandleSurfacePositionChanged(posX, posY);
+                }
+            });
+        LOGI("Add position changed callback id %{public}d", callbackId);
+        UpdateSurfacePositionChangedCallbackId(callbackId);
+    }
+}
+
+void RenderTextField::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
+{
+    LOGD("Textfield handle surface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
+         "height %{public}d",
+        newWidth, newHeight, prevWidth, prevHeight);
+    UpdateCaretInfoToController();
+}
+
+void RenderTextField::HandleSurfacePositionChanged(int32_t posX, int32_t posY)
+{
+    LOGD("Textfield handle surface position change, posX %{public}d, posY %{public}d", posX, posY);
+    UpdateCaretInfoToController();
+}
+
+void RenderTextField::UpdateCaretInfoToController()
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto manager = context->GetTextFieldManager();
+    CHECK_NULL_VOID(manager);
+    auto textFieldManager = AceType::DynamicCast<TextFieldManager>(manager);
+    CHECK_NULL_VOID(textFieldManager);
+    auto weakFocusedTextField = textFieldManager->GetOnFocusTextField();
+    auto focusedTextField = weakFocusedTextField.Upgrade();
+    if (!focusedTextField || focusedTextField != AceType::Claim(this)) {
+        return;
+    }
+#if defined(ENABLE_STANDARD_INPUT)
+    auto globalOffset = GetGlobalOffset();
+    auto windowOffset = context->GetDisplayWindowRectInfo().GetOffset();
+    MiscServices::CursorInfo cursorInfo {
+        .left = caretRect_.Left() + globalOffset.GetX() + windowOffset.GetX(),
+        .top = caretRect_.Top() + globalOffset.GetY() + windowOffset.GetY(),
+        .width = caretRect_.Width(),
+        .height = caretRect_.Height() };
+    LOGD("UpdateCaretInfoToController, left %{public}f, top %{public}f, width %{public}f, height %{public}f",
+        cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height);
+    MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
+    auto value = GetEditingValue();
+    MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
+        StringUtils::Str8ToStr16(value.text), value.selection.GetStart(), value.selection.GetEnd());
+#endif
 }
 
 void RenderTextField::OnPaintFinish()
