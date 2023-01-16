@@ -20,6 +20,7 @@
 #include <list>
 
 #include "base/log/log.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
@@ -82,7 +83,8 @@ bool AceNewPipeJudgement::QueryAceNewPipeEnabledStage(const std::string& package
         [packagename](const auto& whiteListItem) { return whiteListItem == packagename; });
     if ((apiCompatibleVersion == NEW_PIPE_MIN_VERSION && apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_NEW) ||
         apiCompatibleVersion > NEW_PIPE_MIN_VERSION ||
-        (apiCompatibleVersion == NEW_PIPE_MIN_VERSION && apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE &&
+        (apiCompatibleVersion == NEW_PIPE_MIN_VERSION &&
+            (apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE || SystemProperties::GetExtSurfaceEnabled()) &&
             (arkTSPartialUpdate || isWhiteListItem))) {
         return true;
     }
