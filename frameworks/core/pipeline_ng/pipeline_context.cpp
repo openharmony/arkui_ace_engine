@@ -425,7 +425,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
         TryCallNextFrameLayoutCallback();
         return;
     }
-
+    ExecuteSurfaceChangedCallbacks(width, height);
     // TODO: add adjust for textFieldManager when ime is show.
     taskExecutor_->PostTask(
         [weakFrontend = weakFrontend_, width, height]() {
@@ -441,6 +441,24 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
 #else
     SetRootRect(width, height, 0.0);
 #endif
+}
+
+void PipelineContext::ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight)
+{
+    for (auto&& [id, callback] : surfaceChangedCallbackMap_) {
+        if (callback) {
+            callback(newWidth, newHeight, rootWidth_, rootHeight_);
+        }
+    }
+}
+
+void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY)
+{
+    for (auto&& [id, callback] : surfacePositionChangedCallbackMap_) {
+        if (callback) {
+            callback(posX, posY);
+        }
+    }
 }
 
 void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type)
@@ -552,8 +570,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
     auto rootSize = rootNode_->GetGeometryNode()->GetFrameSize();
     float offsetFix = (rootSize.Height() - positionY) > 100.0 ? keyboardHeight - (rootSize.Height() - positionY) / 2.0
                                                               : keyboardHeight;
-    LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f", positionY,
-        (rootSize.Height() - keyboardHeight), offsetFix);
+    LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f, "
+         "keyboardHeight %{public}f",
+        positionY, (rootSize.Height() - keyboardHeight), offsetFix, keyboardHeight);
     if (NearZero(keyboardHeight)) {
         SetRootRect(rootSize.Width(), rootSize.Height(), 0);
     } else if (positionY > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {

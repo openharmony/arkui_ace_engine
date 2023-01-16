@@ -205,7 +205,9 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     textRect_ = textFieldLayoutAlgorithm->GetTextRect();
     imageRect_ = textFieldLayoutAlgorithm->GetImageRect();
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
-    CHECK_NULL_RETURN_NOLOG(!UpdateCaretPosition(), true);
+    auto textRectNeedToChange = UpdateCaretPosition();
+    UpdateCaretInfoToController();
+    CHECK_NULL_RETURN_NOLOG(!textRectNeedToChange, true);
     // after new text input or events such as left right key,
     // the procedure will be:
     // caret position change (such as move left)
@@ -216,6 +218,38 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     UpdateSelectionOffset();
     SetHandlerOnMoveDone();
     return true;
+}
+
+bool TextFieldPattern::HasFocus() const
+{
+    auto focusHub = GetHost()->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    return focusHub->IsCurrentFocus();
+}
+
+void TextFieldPattern::UpdateCaretInfoToController() const
+{
+    CHECK_NULL_VOID_NOLOG(HasFocus());
+#if defined(ENABLE_STANDARD_INPUT)
+    auto pipeline = GetHost()->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowRect = pipeline->GetCurrentWindowRect();
+    MiscServices::CursorInfo cursorInfo {
+        .left = caretRect_.Left() + windowRect.Left(),
+        .top = caretRect_.Top() + windowRect.Top(),
+        .width = CURSOR_WIDTH.ConvertToPx(),
+        .height = caretRect_.Height() };
+    LOGD("UpdateCaretInfoToController, left %{public}f, top %{public}f, width %{public}f, height %{public}f",
+        cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height);
+    MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
+    if (selectionMode_ == SelectionMode::NONE) {
+        return;
+    }
+    auto value = GetEditingValue();
+    MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
+        StringUtils::Str8ToStr16(value.text), textSelector_.GetStart(), textSelector_.GetEnd());
+
+#endif
 }
 
 // return: true if text rect offset will NOT be further changed by caret position
@@ -407,7 +441,7 @@ void TextFieldPattern::UpdateCaretOffsetByEvent()
     // set caret and text rect to basic padding if caret is at position 0 or text not exists
     if (textEditingValue_.caretPosition == 0) {
         caretRect_.SetLeft(textRect_.GetX());
-        caretRect_.SetLeft(textRect_.GetY());
+        caretRect_.SetTop(textRect_.GetY());
         return;
     }
     UpdateCaretRectByPosition(textEditingValue_.caretPosition);
@@ -711,6 +745,12 @@ const TextEditingValueNG& TextFieldPattern::GetEditingValue() const
 void TextFieldPattern::HandleFocusEvent()
 {
     LOGI("TextField %{public}d on focus", GetHost()->GetId());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto globalOffset = GetHost()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
+    UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
     caretUpdateType_ = CaretUpdateType::EVENT;
     CloseSelectOverlay();
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -1499,9 +1539,20 @@ void TextFieldPattern::ShowSelectOverlay(
     clipboard_->HasData(hasDataCallback);
 }
 
-void TextFieldPattern::OnDetachFromFrameNode(FrameNode* node)
+void TextFieldPattern::OnDetachFromFrameNode(FrameNode* /*node*/)
 {
     CloseSelectOverlay();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (HasSurfaceChangedCallback()) {
+        LOGD("Unregister surface change callback with id %{public}d", surfaceChangedCallbackId_.value_or(-1));
+        pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
+    }
+    if (HasSurfacePositionChangedCallback()) {
+        LOGD("Unregister surface position change callback with id %{public}d",
+            surfacePositionChangedCallbackId_.value_or(-1));
+        pipeline->UnregisterSurfacePositionChangedCallback(surfacePositionChangedCallbackId_.value_or(-1));
+    }
 }
 
 void TextFieldPattern::CloseSelectOverlay()
@@ -2229,6 +2280,21 @@ void TextFieldPattern::OnVisibleChange(bool isVisible)
         CloseKeyboard(true);
         CloseSelectOverlay();
     }
+}
+
+void TextFieldPattern::HandleSurfaceChanged(
+    int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) const
+{
+    LOGD("Textfield handle surface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
+         "height %{public}d",
+        newWidth, newHeight, prevWidth, prevHeight);
+    UpdateCaretInfoToController();
+}
+
+void TextFieldPattern::HandleSurfacePositionChanged(int32_t posX, int32_t posY) const
+{
+    LOGD("Textfield handle surface position change, posX %{public}d, posY %{public}d", posX, posY);
+    UpdateCaretInfoToController();
 }
 
 void TextFieldPattern::DeleteForward(int32_t length)

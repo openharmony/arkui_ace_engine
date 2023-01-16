@@ -679,39 +679,7 @@ void RosenRenderTextField::ComputeOffsetAfterLayout()
             caretRect_ += ComputeVerticalOffsetForCenter(innerRect_.Height(), paragraph_->GetHeight());
         }
     }
-
-#if defined(ENABLE_STANDARD_INPUT)
-    auto globalOffset = GetGlobalOffset();
-    MiscServices::CursorInfo cursorInfo {
-        .left = caretRect_.Left() + globalOffset.GetX(),
-        .top = caretRect_.Top() + globalOffset.GetY(),
-        .width = caretRect_.Width(),
-        .height = caretRect_.Height()
-    };
-    auto context = context_.Upgrade();
-    if (!context) {
-        LOGE("context is nullptr");
-        return;
-    }
-    auto manager = context->GetTextFieldManager();
-    if (!manager) {
-        LOGE("manager is nullptr");
-        return;
-    }
-    auto textFieldManager = AceType::DynamicCast<TextFieldManager>(manager);
-    if (!textFieldManager) {
-        LOGE("textFieldmanager is nullptr");
-        return;
-    }
-    auto weakFocusedTextField = textFieldManager->GetOnFocusTextField();
-    auto focusedTextField = weakFocusedTextField.Upgrade();
-    if (focusedTextField && focusedTextField == AceType::Claim(this)) {
-        MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
-        auto value = GetEditingValue();
-        MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
-            StringUtils::Str8ToStr16(value.text), value.selection.GetStart(), value.selection.GetEnd());
-    }
-#endif
+    RenderTextField::UpdateCaretInfoToController();
 }
 
 Offset RosenRenderTextField::ComputeVerticalOffsetForCenter(double outerHeight, double innerHeight) const

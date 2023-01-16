@@ -40,6 +40,9 @@ class ACE_EXPORT PipelineContext final : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
 public:
+    using SurfaceChangedCallbackMap =
+        std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t)>>;
+    using SurfacePositionChangedCallbackMap = std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
     using PredictTask = std::function<void(int64_t)>;
     PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
@@ -149,7 +152,7 @@ public:
     void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override;
 
-    void OnSurfacePositionChanged(int32_t posX, int32_t posY) override {}
+    void OnSurfacePositionChanged(int32_t posX, int32_t posY) override;
 
     void OnSurfaceDensityChanged(double density) override;
 
@@ -258,6 +261,34 @@ public:
 
     void FlushReload() override;
 
+    int32_t RegisterSurfaceChangedCallback(std::function<void(int32_t, int32_t, int32_t, int32_t)>&& callback)
+    {
+        if (callback) {
+            surfaceChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
+
+    void UnregisterSurfaceChangedCallback(int32_t callbackId)
+    {
+        surfaceChangedCallbackMap_.erase(callbackId);
+    }
+
+    int32_t RegisterSurfacePositionChangedCallback(std::function<void(int32_t, int32_t)>&& callback)
+    {
+        if (callback) {
+            surfacePositionChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
+
+    void UnregisterSurfacePositionChangedCallback(int32_t callbackId)
+    {
+        surfacePositionChangedCallbackMap_.erase(callbackId);
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type);
 
@@ -270,6 +301,8 @@ protected:
     void OnVirtualKeyboardHeightChange(float keyboardHeight) override;
 
 private:
+    void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight);
+
     void FlushWindowStateChangedCallback(bool isShow);
 
     void FlushWindowFocusChangedCallback(bool isFocus);
@@ -311,6 +344,10 @@ private:
     std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_;
+
+    int32_t callbackId_ = 0;
+    SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
+    SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
 
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_map<int32_t, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
