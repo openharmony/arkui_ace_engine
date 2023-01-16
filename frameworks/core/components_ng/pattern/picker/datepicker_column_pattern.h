@@ -147,6 +147,16 @@ public:
         return tossAnimationController_;
     }
 
+    void SetLocalDownDistance(float value)
+    {
+        localDownDistance_ = value;
+    }
+
+    float GetLocalDownDistance() const
+    {
+        return localDownDistance_;
+    }
+
     void UpdateToss(double offsetY);
 
     void TossStoped();
@@ -174,6 +184,7 @@ private:
     void HandleCurveStopped();
     void ScrollOption(double delta);
 
+    float localDownDistance_ = 0.0f;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
     std::map<RefPtr<FrameNode>, std::vector<std::string>> options_;
