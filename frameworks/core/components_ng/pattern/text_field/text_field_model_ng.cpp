@@ -55,6 +55,29 @@ void TextFieldModelNG::CreateNode(
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
+    if (!pattern->HasSurfaceChangedCallback()) {
+        auto callbackId = pipeline->RegisterSurfaceChangedCallback(
+            [weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {
+                auto pattern = weakPattern.Upgrade();
+                if (pattern) {
+                    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
+                }
+            });
+        LOGI("Add surface changed callback id %{public}d", callbackId);
+        pattern->UpdateSurfaceChangedCallbackId(callbackId);
+    }
+    if (!pattern->HasSurfacePositionChangedCallback()) {
+        auto callbackId = pipeline->RegisterSurfacePositionChangedCallback(
+            [weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern))](int32_t posX, int32_t posY) {
+                auto pattern = weakPattern.Upgrade();
+                if (pattern) {
+                    pattern->HandleSurfacePositionChanged(posX, posY);
+                }
+            });
+        LOGI("Add position changed callback id %{public}d", callbackId);
+        pattern->UpdateSurfacePositionChangedCallbackId(callbackId);
+    }
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
@@ -68,7 +91,6 @@ void TextFieldModelNG::CreateNode(
     renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
     auto radius = textFieldTheme->GetBorderRadius();
     SetCaretColor(textFieldTheme->GetCursorColor());
-    // TODO: basic padding check ux
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
     textFieldLayoutProperty->UpdateCopyOptions(CopyOptions::Distributed);

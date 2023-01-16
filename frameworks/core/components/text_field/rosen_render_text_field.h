@@ -126,7 +126,6 @@ private:
     // Used to estimate size.
     std::unique_ptr<txt::Paragraph> template_;
 
-    Rect caretRect_;
     Rect startCaretRect_;
     Size lastLayoutSize_;
     double originInnerWidth_ = 0.0;

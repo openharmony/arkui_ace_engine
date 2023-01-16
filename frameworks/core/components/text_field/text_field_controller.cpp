@@ -26,6 +26,7 @@ void TextFieldController::Focus(bool focus)
         return;
     }
     if (focus) {
+        LOGI("On focus request keyboard");
         textField->RequestKeyboard(true);
     } else {
         textField->CloseKeyboard(true);
