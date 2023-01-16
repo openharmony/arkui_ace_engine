@@ -36,6 +36,7 @@ void AbilityComponentPattern::OnModifyDone()
         CHECK_NULL_VOID(adapter_);
         adapter_->ConnectExtension(GetHost(), windowId);
         pipelineContext->AddOnAreaChangeNode(host->GetId());
+        pipelineContext->AddWindowStateChangedCallback(host->GetId());
         LOGI("connect to windows extension begin %{public}s", GetHost()->GetTag().c_str());
     }
 }
@@ -72,7 +73,7 @@ void AbilityComponentPattern::UpdateWindowRect()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto size = host->GetGeometryNode()->GetFrameSize();
-    auto offset = host->GetGeometryNode()->GetFrameOffset() + host->GetTransformRelativeOffset();
+    auto offset = host->GetTransformRelativeOffset();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto rect = pipeline->GetDisplayWindowRectInfo();
@@ -86,7 +87,9 @@ void AbilityComponentPattern::UpdateWindowRect()
 
 void AbilityComponentPattern::OnAreaChangedInner()
 {
-    UpdateWindowRect();
+    if (hasConnectionToAbility_) {
+        UpdateWindowRect();
+    }
 }
 
 } // namespace OHOS::Ace::NG
