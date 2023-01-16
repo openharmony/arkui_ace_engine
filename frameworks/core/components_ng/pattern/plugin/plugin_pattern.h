@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,6 @@ class PluginManagerDelegate;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
-
 class PluginPattern : public Pattern {
     DECLARE_ACE_TYPE(PluginPattern, Pattern);
 
@@ -47,6 +46,8 @@ public:
     {
         return MakeRefPtr<PluginEventHub>();
     }
+
+    void ReplaceAll(std::string& str, const std::string& pattern, const std::string& newPattern);
 
     std::unique_ptr<DrawDelegate> GetDrawDelegate();
 
@@ -87,8 +88,8 @@ private:
 
     std::string data_;
     RequestPluginInfo pluginInfo_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(PluginPattern);
 };
-
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PLUGIN_PLUGIN_PATTERN_H

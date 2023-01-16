@@ -67,6 +67,16 @@ public:
 
     void AddOptionNode(const RefPtr<FrameNode>& option);
 
+    void ClearOptions()
+    {
+        options_.clear();
+    }
+
+    void InitSelected()
+    {
+        selected_ = -1;
+    }
+
     void SetSelected(int32_t index);
 
     // set properties of text node

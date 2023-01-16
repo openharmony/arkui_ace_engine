@@ -33,7 +33,8 @@ public:
 
     static RefPtr<PluginNode> GetOrCreatePluginNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+        
+    ACE_DISALLOW_COPY_AND_MOVE(PluginNode);
 };
-
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PLUGIN_PLUGIN_NODE_H

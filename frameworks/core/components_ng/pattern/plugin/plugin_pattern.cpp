@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,6 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
 #ifndef OS_ACCOUNT_EXISTS
 constexpr int32_t DEFAULT_OS_ACCOUNT_ID = 0; // 0 is the default id when there is no os_account part
@@ -85,6 +84,7 @@ bool PluginPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     info.width = Dimension(size.Width());
     info.height = Dimension(size.Height());
     layoutProperty->UpdateRequestPluginInfo(info);
+    data_ = layoutProperty->GetData().value_or("");
 
     if (info.bundleName != pluginInfo_.bundleName || info.abilityName != pluginInfo_.abilityName ||
         info.moduleName != pluginInfo_.moduleName || info.pluginName != pluginInfo_.pluginName ||
@@ -221,9 +221,30 @@ void PluginPattern::CreatePluginSubContainer()
         RequestPluginInfo info = pluginPattern->GetPluginRequestInfo();
         CHECK_NULL_VOID(pluginSubContainer);
         auto packagePathStr = pluginPattern->GetPackagePath(weak, info);
-        pluginSubContainer_->RunPlugin(
-            packagePathStr, info.moduleName, info.source, info.moduleResPath, pluginPattern->GetData());
+        if (packagePathStr.empty()) {
+            LOGE("package path is empty.");
+            pluginPattern->FireOnErrorEvent("1", "package path is empty.");
+            return;
+        }
+        if (packagePathStr.rfind(".hap")) {
+            std::string sub = packagePathStr.substr(1, packagePathStr.size() - 5) + "/";
+            ReplaceAll(info.source, sub, "");
+            pluginSubContainer_->RunDecompressedPlugin(
+                packagePathStr, info.moduleName, info.source, info.moduleResPath, pluginPattern->GetData());
+        } else {
+            pluginSubContainer_->RunPlugin(
+                packagePathStr, info.moduleName, info.source, info.moduleResPath, pluginPattern->GetData());
+        }
     });
+}
+
+void PluginPattern::ReplaceAll(std::string& str, const std::string& pattern, const std::string& newPattern)
+{
+    const size_t nSize = newPattern.size();
+    const size_t pSize = pattern.size();
+    for (size_t pos = str.find(pattern, 0); pos != std::string::npos; pos = str.find(pattern, pos + nSize)) {
+        str.replace(pos, pSize, newPattern);
+    }
 }
 
 std::unique_ptr<DrawDelegate> PluginPattern::GetDrawDelegate()
@@ -431,38 +452,44 @@ std::string PluginPattern::GerPackagePathByBms(const WeakPtr<PluginPattern>& wea
         pluginPattern->FireOnErrorEvent("1", "App bundleName is empty.");
         return packagePathStr;
     }
-    if (strList.size() == 1) {
-        AppExecFwk::BundleInfo bundleInfo;
-        bool ret = bms->GetBundleInfo(strList[0], AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo,
-            userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID);
-        if (!ret) {
-            LOGE("Bms get bundleName failed!");
-            pluginPattern->FireOnErrorEvent("1", "Bms get bundleName failed!");
-            return packagePathStr;
-        }
-        if (bundleInfo.moduleResPaths.size() == 1) {
-            info.moduleResPath = bundleInfo.moduleResPaths[0];
-        } else {
-            LOGE("Bms moduleResPaths is empty.");
-            pluginPattern->FireOnErrorEvent("1", "Bms moduleResPaths is empty.");
-            return packagePathStr;
-        }
-        packagePathStr =  bundleInfo.moduleDirs[0] + "/";
-    } else {
-        AAFwk::Want want;
-        AppExecFwk::AbilityInfo abilityInfo;
-        AppExecFwk::ElementName element("", strList[0], strList[1]);
-        want.SetElement(element);
-        bool ret = bms->QueryAbilityInfo(want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT,
-            userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID, abilityInfo);
-        if (!ret) {
-            LOGE("Bms get abilityInfo failed!");
-            pluginPattern->FireOnErrorEvent("1", "Bms get bundleName failed!");
-            return packagePathStr;
-        }
-        packagePathStr = abilityInfo.applicationInfo.codePath + "/" + abilityInfo.package + "/";
-        info.moduleResPath = abilityInfo.resourcePath;
+
+    AppExecFwk::BundleInfo bundleInfo;
+    bool ret = bms->GetBundleInfo(strList[0], AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo,
+        userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID);
+    if (!ret) {
+        LOGE("Bms get bundleName failed!");
+        pluginPattern->FireOnErrorEvent("1", "Bms get bundleName failed!");
+        return packagePathStr;
     }
+    if (bundleInfo.hapModuleInfos[0].hapPath.empty()) {
+        if (strList.size() == 1) {
+            if (bundleInfo.moduleResPaths.size() == 1) {
+                info.moduleResPath = bundleInfo.moduleResPaths[0];
+            } else {
+                LOGE("Bms moduleResPaths is empty.");
+                pluginPattern->FireOnErrorEvent("1", "Bms moduleResPaths is empty.");
+                return packagePathStr;
+            }
+            packagePathStr = bundleInfo.moduleDirs[0] + "/";
+        } else {
+            AAFwk::Want want;
+            AppExecFwk::AbilityInfo abilityInfo;
+            AppExecFwk::ElementName element("", strList[0], strList[1]);
+            want.SetElement(element);
+            bool ret = bms->QueryAbilityInfo(want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT,
+                userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID, abilityInfo);
+            if (!ret) {
+                LOGE("Bms get abilityInfo failed!");
+                pluginPattern->FireOnErrorEvent("1", "Bms get bundleName failed!");
+                return packagePathStr;
+            }
+            packagePathStr = abilityInfo.applicationInfo.codePath + "/" + abilityInfo.package + "/";
+            info.moduleResPath = abilityInfo.resourcePath;
+        }
+    } else {
+        packagePathStr = bundleInfo.hapModuleInfos[0].hapPath;
+    }
+
     return packagePathStr;
 }
 

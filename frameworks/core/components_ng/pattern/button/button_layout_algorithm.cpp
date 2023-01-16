@@ -25,6 +25,12 @@ namespace OHOS::Ace::NG {
 
 void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(childWrapper);
+    auto childConstraint = childWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
+    childWrapper->Measure(childConstraint);
+    childSize_ = childWrapper->GetGeometryNode()->GetContentSize();
+
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(buttonLayoutProperty);
@@ -32,6 +38,11 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
         auto minLength = std::min(layoutConstraint.maxSize.Width(), layoutConstraint.maxSize.Height());
         layoutConstraint.maxSize = SizeF(minLength, minLength);
+    }
+    if (NeedResetHeight(layoutWrapper)) {
+        if (GreatOrEqual(childSize_.Height(), layoutConstraint.maxSize.Height())) {
+            layoutConstraint.maxSize.SetHeight(childSize_.Height());
+        }
     }
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(layoutConstraint);
@@ -48,6 +59,12 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
     auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    if (NeedResetHeight(layoutWrapper)) {
+        if (GreatOrEqual(childSize_.Height(), frameSize.Height())) {
+            frameSize = SizeF(frameSize.Width(), childSize_.Height());
+            layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
+        }
+    }
     Dimension radius;
     if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
         auto minSize = std::min(frameSize.Height(), frameSize.Width());
@@ -82,5 +99,17 @@ void ButtonLayoutAlgorithm::MeasureCircleButton(LayoutWrapper* layoutWrapper)
     }
     frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
+}
+
+bool ButtonLayoutAlgorithm::NeedResetHeight(LayoutWrapper* layoutWrapper)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto buttonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(buttonLayoutProperty, false);
+    if (buttonLayoutProperty->HasFontSize()) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG
