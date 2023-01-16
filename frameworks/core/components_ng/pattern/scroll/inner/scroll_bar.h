@@ -255,6 +255,9 @@ public:
     void SetDisplayMode(DisplayMode displayMode)
     {
         displayMode_ = displayMode;
+        if (displayMode_ == DisplayMode::AUTO) {
+            PlayBarEndAnimation();
+        }
     }
 
     void SetOutBoundary(double outBoundary)
@@ -292,6 +295,18 @@ public:
         return isDriving_;
     }
 
+    uint8_t GetOpacity() const
+    {
+        return opacity_;
+    }
+
+    void OnScrollEnd()
+    {
+        if (displayMode_ == DisplayMode::AUTO) {
+            PlayBarEndAnimation();
+        }
+    }
+
     void MarkNeedRender()
     {
         if (markNeedRenderFunc_) {
@@ -313,6 +328,7 @@ public:
     void FlushBarWidth();
     void PlayGrowAnimation();
     void PlayShrinkAnimation();
+    void PlayBarEndAnimation();
 
 protected:
     void InitTheme();
@@ -359,8 +375,10 @@ private:
     Size viewPortSize_;
     Offset lastOffset_;
     double estimatedHeight_ = 0.0;
+    uint8_t opacity_ = UINT8_MAX;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<Animator> touchAnimator_;
+    RefPtr<Animator> scrollEndAnimator_;
     std::function<void()> markNeedRenderFunc_;
 };
 

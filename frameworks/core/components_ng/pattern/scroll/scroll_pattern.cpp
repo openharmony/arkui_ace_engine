@@ -142,7 +142,6 @@ bool ScrollPattern::OnScrollCallback(float offset, int32_t source)
 
 void ScrollPattern::OnScrollEndCallback()
 {
-    ScrollablePattern::OnScrollEndCallback();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<ScrollEventHub>();

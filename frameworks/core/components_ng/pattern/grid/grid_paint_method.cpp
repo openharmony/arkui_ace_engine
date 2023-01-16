@@ -26,7 +26,7 @@ CanvasDrawFunction GridPaintMethod::GetForegroundDrawFunction(PaintWrapper* /* p
         if (!scrollBar->NeedPaint()) {
             return;
         }
-        ScrollBarPainter::PaintRectBar(canvas, scrollBar, UINT8_MAX);
+        ScrollBarPainter::PaintRectBar(canvas, scrollBar);
     };
 }
 } // namespace OHOS::Ace::NG

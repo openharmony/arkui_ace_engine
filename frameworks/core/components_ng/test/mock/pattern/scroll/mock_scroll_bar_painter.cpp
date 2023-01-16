@@ -16,5 +16,5 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_painter.h"
 
 namespace OHOS::Ace::NG {
-void ScrollBarPainter::PaintRectBar(RSCanvas& canvas, const RefPtr<ScrollBar>& scrollBar, int32_t alpha) {}
+void ScrollBarPainter::PaintRectBar(RSCanvas& canvas, const RefPtr<ScrollBar>& scrollBar) {}
 } // namespace OHOS::Ace::NG
