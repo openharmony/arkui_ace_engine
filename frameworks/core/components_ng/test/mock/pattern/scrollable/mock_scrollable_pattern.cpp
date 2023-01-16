@@ -23,6 +23,4 @@ bool ScrollablePattern::OnScrollCallback(float offset, int32_t source)
 {
     return true;
 }
-
-void ScrollablePattern::OnScrollEndCallback() {}
 } // namespace OHOS::Ace::NG

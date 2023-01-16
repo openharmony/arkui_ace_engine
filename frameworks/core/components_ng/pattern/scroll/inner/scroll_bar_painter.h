@@ -29,7 +29,7 @@ public:
     ScrollBarPainter() = default;
     ~ScrollBarPainter() override  = default;
 
-    static void PaintRectBar(RSCanvas& canvas, const RefPtr<ScrollBar>& scrollBar, int32_t alpha);
+    static void PaintRectBar(RSCanvas& canvas, const RefPtr<ScrollBar>& scrollBar);
 };
 
 } // namespace OHOS::Ace::NG
