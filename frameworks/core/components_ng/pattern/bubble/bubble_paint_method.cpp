@@ -53,6 +53,11 @@ constexpr Dimension ARROW_ONE_HUNDRED_PERCENT_VALUE = Dimension(1.0, DimensionUn
 
 } // namespace
 
+float ModifyBorderRadius(float borderRadius, float halfChildHeight)
+{
+    return GreatOrEqual(borderRadius, halfChildHeight) ? halfChildHeight : borderRadius;
+}
+
 void BubblePaintMethod::PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
@@ -220,25 +225,35 @@ void BubblePaintMethod::PaintTopBubble(RSCanvas& rsCanvas)
         arrowPositionX + BEZIER_HORIZON_OFFSET_FOURTH.ConvertToPx() + arrowOffset,
         arrowPositionY - BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx());
 
+    // when borderRadius greatOrEqual halfChildHeight, borderRadius equal halfChildHeight
+    auto halfChildHeight = childHeight / 2;
+    auto borderBottomRightRadiusY =
+        ModifyBorderRadius(border_.BottomRightRadius().GetY().ConvertToPx(), halfChildHeight);
+    auto borderBottomRightRadiusX =
+        ModifyBorderRadius(border_.BottomRightRadius().GetX().ConvertToPx(), halfChildHeight);
+    auto borderTopRightRadiusX = ModifyBorderRadius(border_.TopRightRadius().GetX().ConvertToPx(), halfChildHeight);
+    auto borderTopRightRadiusY = ModifyBorderRadius(border_.TopRightRadius().GetY().ConvertToPx(), halfChildHeight);
+    auto borderTopLeftRadiusX = ModifyBorderRadius(border_.TopLeftRadius().GetX().ConvertToPx(), halfChildHeight);
+    auto borderTopLeftRadiusY = ModifyBorderRadius(border_.TopLeftRadius().GetY().ConvertToPx(), halfChildHeight);
+    auto borderBottomLeftRadiusX = ModifyBorderRadius(border_.BottomLeftRadius().GetX().ConvertToPx(), halfChildHeight);
+    auto borderBottomLeftRadiusY = ModifyBorderRadius(border_.BottomLeftRadius().GetY().ConvertToPx(), halfChildHeight);
+
     path_.LineTo(
         childOffsetX + childWidth - border_.BottomRightRadius().GetX().ConvertToPx(), childOffsetY + childHeight);
-    path_.ArcTo(border_.BottomRightRadius().GetX().ConvertToPx(), border_.BottomRightRadius().GetY().ConvertToPx(),
-        0.0f, RSPathDirection::CCW_DIRECTION, childOffsetX + childWidth,
-        childOffsetY + childHeight - border_.BottomRightRadius().GetY().ConvertToPx());
+    path_.ArcTo(borderBottomRightRadiusX, borderBottomRightRadiusY, 0.0f, RSPathDirection::CCW_DIRECTION,
+        childOffsetX + childWidth, childOffsetY + childHeight - border_.BottomRightRadius().GetY().ConvertToPx());
 
     path_.LineTo(childOffsetX + childWidth, childOffsetY + border_.TopRightRadius().GetY().ConvertToPx());
-    path_.ArcTo(border_.TopRightRadius().GetX().ConvertToPx(), border_.TopRightRadius().GetY().ConvertToPx(), 0.0f,
-        RSPathDirection::CCW_DIRECTION, childOffsetX + childWidth - border_.TopRightRadius().GetX().ConvertToPx(),
-        childOffsetY);
+    path_.ArcTo(borderTopRightRadiusX, borderTopRightRadiusY, 0.0f, RSPathDirection::CCW_DIRECTION,
+        childOffsetX + childWidth - border_.TopRightRadius().GetX().ConvertToPx(), childOffsetY);
 
     path_.LineTo(childOffsetX + border_.TopLeftRadius().GetX().ConvertToPx(), childOffsetY);
-    path_.ArcTo(border_.TopLeftRadius().GetX().ConvertToPx(), border_.TopLeftRadius().GetY().ConvertToPx(), 0.0f,
-        RSPathDirection::CCW_DIRECTION, childOffsetX, childOffsetY + border_.TopLeftRadius().GetY().ConvertToPx());
+    path_.ArcTo(borderTopLeftRadiusX, borderTopLeftRadiusY, 0.0f, RSPathDirection::CCW_DIRECTION, childOffsetX,
+        childOffsetY + border_.TopLeftRadius().GetY().ConvertToPx());
 
     path_.LineTo(childOffsetX, childOffsetY + childHeight - border_.BottomLeftRadius().GetY().ConvertToPx());
-    path_.ArcTo(border_.BottomLeftRadius().GetX().ConvertToPx(), border_.BottomLeftRadius().GetY().ConvertToPx(), 0.0f,
-        RSPathDirection::CCW_DIRECTION, childOffsetX + border_.BottomLeftRadius().GetX().ConvertToPx(),
-        childOffsetY + childHeight);
+    path_.ArcTo(borderBottomLeftRadiusX, borderBottomLeftRadiusY, 0.0f, RSPathDirection::CCW_DIRECTION,
+        childOffsetX + border_.BottomLeftRadius().GetX().ConvertToPx(), childOffsetY + childHeight);
 
     path_.LineTo(arrowPositionX - BEZIER_HORIZON_OFFSET_FOURTH.ConvertToPx() + arrowOffset,
         arrowPositionY - BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx());
@@ -275,25 +290,35 @@ void BubblePaintMethod::PaintBottomBubble(RSCanvas& canvas)
         arrowPositionX + BEZIER_HORIZON_OFFSET_FOURTH.ConvertToPx() + arrowOffset,
         arrowPositionY + BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx());
 
+    // when borderRadius greatOrEqual halfChildHeight, borderRadius equal halfChildHeight
+    auto halfChildHeight = childHeight / 2;
+    auto borderBottomRightRadiusY =
+        ModifyBorderRadius(border_.BottomRightRadius().GetY().ConvertToPx(), halfChildHeight);
+    auto borderBottomRightRadiusX =
+        ModifyBorderRadius(border_.BottomRightRadius().GetX().ConvertToPx(), halfChildHeight);
+    auto borderTopRightRadiusX = ModifyBorderRadius(border_.TopRightRadius().GetX().ConvertToPx(), halfChildHeight);
+    auto borderTopRightRadiusY = ModifyBorderRadius(border_.TopRightRadius().GetY().ConvertToPx(), halfChildHeight);
+    auto borderTopLeftRadiusX = ModifyBorderRadius(border_.TopLeftRadius().GetX().ConvertToPx(), halfChildHeight);
+    auto borderTopLeftRadiusY = ModifyBorderRadius(border_.TopLeftRadius().GetY().ConvertToPx(), halfChildHeight);
+    auto borderBottomLeftRadiusX = ModifyBorderRadius(border_.BottomLeftRadius().GetX().ConvertToPx(), halfChildHeight);
+    auto borderBottomLeftRadiusY = ModifyBorderRadius(border_.BottomLeftRadius().GetY().ConvertToPx(), halfChildHeight);
+
     path_.LineTo(childOffsetX + childWidth - border_.TopRightRadius().GetX().ConvertToPx(), childOffsetY);
-    path_.ArcTo(border_.TopRightRadius().GetX().ConvertToPx(), border_.TopRightRadius().GetY().ConvertToPx(), 0.0f,
-        RSPathDirection::CW_DIRECTION, childOffsetX + childWidth,
-        childOffsetY + border_.TopRightRadius().GetY().ConvertToPx());
+    path_.ArcTo(borderBottomRightRadiusX, borderBottomRightRadiusY, 0.0f, RSPathDirection::CW_DIRECTION,
+        childOffsetX + childWidth, childOffsetY + border_.TopRightRadius().GetY().ConvertToPx());
 
     path_.LineTo(
         childOffsetX + childWidth, childOffsetY + childHeight - border_.BottomRightRadius().GetY().ConvertToPx());
-    path_.ArcTo(border_.BottomRightRadius().GetX().ConvertToPx(), border_.BottomRightRadius().GetY().ConvertToPx(),
-        0.0f, RSPathDirection::CW_DIRECTION,
+    path_.ArcTo(borderTopRightRadiusX, borderTopRightRadiusY, 0.0f, RSPathDirection::CW_DIRECTION,
         childOffsetX + childWidth - border_.BottomRightRadius().GetX().ConvertToPx(), childOffsetY + childHeight);
 
     path_.LineTo(childOffsetX + border_.BottomLeftRadius().GetX().ConvertToPx(), childOffsetY + childHeight);
-    path_.ArcTo(border_.BottomLeftRadius().GetX().ConvertToPx(), border_.BottomLeftRadius().GetY().ConvertToPx(), 0.0f,
-        RSPathDirection::CW_DIRECTION, childOffsetX,
+    path_.ArcTo(borderTopLeftRadiusX, borderTopLeftRadiusY, 0.0f, RSPathDirection::CW_DIRECTION, childOffsetX,
         childOffsetY + childHeight - border_.BottomLeftRadius().GetY().ConvertToPx());
 
     path_.LineTo(childOffsetX, childOffsetY + border_.TopLeftRadius().GetY().ConvertToPx());
-    path_.ArcTo(border_.TopLeftRadius().GetX().ConvertToPx(), border_.TopLeftRadius().GetY().ConvertToPx(), 0.0f,
-        RSPathDirection::CW_DIRECTION, childOffsetX + border_.TopLeftRadius().GetX().ConvertToPx(), childOffsetY);
+    path_.ArcTo(borderBottomLeftRadiusX, borderBottomLeftRadiusY, 0.0f, RSPathDirection::CW_DIRECTION,
+        childOffsetX + border_.TopLeftRadius().GetX().ConvertToPx(), childOffsetY);
 
     path_.LineTo(arrowPositionX - BEZIER_HORIZON_OFFSET_FOURTH.ConvertToPx() + arrowOffset,
         arrowPositionY + BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx());
