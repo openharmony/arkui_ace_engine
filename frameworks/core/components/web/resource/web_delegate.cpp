@@ -2678,7 +2678,6 @@ void WebDelegate::UpdateDarkModeAuto(RefPtr<WebDelegate> delegate,
         if (delegate->GetForceDarkMode()) {
             setting->PutForceDarkModeEnabled(true);
         }
-        return;
     }
     if (colorMode == "light") {
         setting->PutDarkSchemeEnabled(false);
