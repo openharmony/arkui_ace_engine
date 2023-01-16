@@ -62,19 +62,44 @@ public:
 private:
     void OnActive() override
     {
-        if (adapter_) {
-            adapter_->Show();
+        if (!isActive_) {
+            if (adapter_) {
+                adapter_->Show();
+            }
+            isActive_ = true;
         }
-        isActive_ = true;
     }
 
     void OnInActive() override
     {
-        if (adapter_) {
-            adapter_->Hide();
+        if (isActive_) {
+            if (adapter_) {
+                adapter_->Hide();
+            }
+            isActive_ = false;
         }
-        isActive_ = false;
     }
+
+    void OnWindowShow() override
+    {
+        if (!isActive_) {
+            if (adapter_) {
+                adapter_->Show();
+            }
+            isActive_ = true;
+        }
+    }
+
+    void OnWindowHide() override
+    {
+        if (isActive_) {
+            if (adapter_) {
+                adapter_->Hide();
+            }
+            isActive_ = false;
+        }
+    }
+
     void UpdateWindowRect();
     bool isActive_ = false;
     bool hasConnectionToAbility_ = false;
