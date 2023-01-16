@@ -62,11 +62,7 @@ template("pa_backend") {
       "pa_backend.cpp",
     ]
 
-    # if not build-in js engine, should use engine loader to load so
-    if (!defined(config.use_build_in_js_engine) ||
-        !config.use_build_in_js_engine) {
-      sources += [ "engine/common/js_backend_engine_loader.cpp" ]
-    }
+    sources += [ "engine/common/js_backend_engine_loader.cpp" ]
   }
 }
 

@@ -279,7 +279,7 @@ void JsiDeclarativeEngineInstance::InitAceModule()
 #endif
 }
 
-extern "C" ACE_EXPORT void OHOS_ACE_PreloadAceModule(void* runtime)
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModule(void* runtime)
 {
     LOGI("Ace ark lib loaded, PreloadAceModule.");
     JsiDeclarativeEngineInstance::PreloadAceModule(runtime);

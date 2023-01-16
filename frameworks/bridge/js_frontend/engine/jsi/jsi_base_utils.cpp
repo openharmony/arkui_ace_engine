@@ -20,6 +20,7 @@
 #include "base/log/event_report.h"
 #include "base/log/exception_handler.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
@@ -27,6 +28,38 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 
 namespace OHOS::Ace::Framework {
+
+int32_t GetLineOffset(const AceType *data)
+{
+#ifndef PA_SUPPORT
+    if (data == nullptr) {
+        return 0;
+    }
+    if (AceType::InstanceOf<JsiDeclarativeEngineInstance>(data)) {
+        return 0;
+    }
+#endif
+    const int32_t offset = 14;
+    return offset;
+}
+
+RefPtr<JsAcePage> GetRunningPage(const AceType *data)
+{
+#ifndef PA_SUPPORT
+    if (data == nullptr) {
+        return nullptr;
+    }
+    if (AceType::InstanceOf<JsiEngineInstance>(data)) {
+        auto instance = static_cast<const JsiEngineInstance *>(data);
+        return instance->GetRunningPage();
+    } else if (AceType::InstanceOf<JsiDeclarativeEngineInstance>(data)) {
+        auto instance = static_cast<const JsiDeclarativeEngineInstance *>(data);
+        return instance->GetRunningPage();
+    }
+#endif
+    return nullptr;
+}
+
 std::string JsiBaseUtils::GenerateSummaryBody(
     const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime)
 {

@@ -34,7 +34,7 @@ constexpr int32_t MIN_SUBCONTAINER_ID = 1000000;
 
 using SubwindowMap = std::unordered_map<int32_t, RefPtr<Subwindow>>;
 
-class ACE_EXPORT SubwindowManager final : public NonCopyable {
+class ACE_FORCE_EXPORT SubwindowManager final : public NonCopyable {
 public:
     // Get the instance
     static std::shared_ptr<SubwindowManager> GetInstance();

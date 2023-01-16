@@ -46,7 +46,7 @@ JsEngineLoader& JsEngineLoader::Get(const char*)
     return V8EngineLoader::GetInstance();
 }
 #else
-extern "C" ACE_EXPORT void* OHOS_ACE_GetJsEngineLoader()
+extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_GetJsEngineLoader()
 {
     return &V8EngineLoader::GetInstance();
 }

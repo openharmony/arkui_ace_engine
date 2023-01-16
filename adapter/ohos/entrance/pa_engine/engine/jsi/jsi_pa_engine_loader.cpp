@@ -34,7 +34,7 @@ JsBackendEngineLoader& JsBackendEngineLoader::Get(const char* sharedLibrary)
     return JsiPaEngineLoader::GetInstance();
 }
 #else
-extern "C" ACE_EXPORT void* OHOS_ACE_GetJsBackendEngineLoader()
+extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_GetJsBackendEngineLoader()
 {
     return &JsiPaEngineLoader::GetInstance();
 }
