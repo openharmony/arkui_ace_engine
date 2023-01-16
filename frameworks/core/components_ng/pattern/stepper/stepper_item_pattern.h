@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stepper/stepper_item_layout_property.h"
+#include "core/components_ng/pattern/stepper/stepper_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -38,7 +39,21 @@ public:
         return false;
     }
 
+    void OnModifyDone() override
+    {
+        if (isFirstCreate) {
+            isFirstCreate = false;
+        } else {
+            auto hostNode = DynamicCast<FrameNode>(GetHost());
+            CHECK_NULL_VOID(hostNode);
+            auto swiperNode = DynamicCast<FrameNode>(hostNode->GetParent());
+            auto stepperNode = DynamicCast<StepperNode>(swiperNode->GetParent());
+            stepperNode->MarkModifyDone();
+        }
+    }
+
 private:
+    bool isFirstCreate = true;
     ACE_DISALLOW_COPY_AND_MOVE(StepperItemPattern);
 };
 
