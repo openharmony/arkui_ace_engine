@@ -172,12 +172,17 @@ void ColumnComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Componen
 void ColumnComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
 {
     auto flexElement = GetContentElement<FlexElement>(ColumnElement::TypeId());
-    if (!flexElement) {
-        LOGE("get GetFlexElement failed");
-        return;
+    CHECK_NULL_VOID(flexElement);
+    auto child = GetElementChildBySlot(flexElement, slot);
+    CHECK_NULL_VOID(child);
+    // Deals with the case where the component to be updated is a custom component.
+    auto childComposedElement = AceType::DynamicCast<ComposedElement>(child);
+    if (childComposedElement && childComposedElement->GetName() == "view") {
+        auto innerChild = child->GetChildren().empty() ? nullptr : child->GetChildren().front();
+        child->UpdateChild(innerChild, newComponent);
+    } else {
+        flexElement->UpdateChildWithSlot(child, newComponent, slot, slot);
     }
-    auto child = flexElement->GetChildBySlot(slot);
-    flexElement->UpdateChildWithSlot(child, newComponent, slot, slot);
     flexElement->MarkDirty();
 }
 
