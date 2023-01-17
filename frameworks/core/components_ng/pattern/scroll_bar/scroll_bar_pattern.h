@@ -33,7 +33,7 @@ public:
     ScrollBarPattern() = default;
     ~ScrollBarPattern() override
     {
-        animator_ = nullptr;
+        scrollEndAnimator_ = nullptr;
         scrollBarProxy_ = nullptr;
         scrollableEvent_ = nullptr;
     }
@@ -100,8 +100,9 @@ public:
     bool UpdateCurrentOffset(float offset, int32_t source);
 
     // disappear Animator
-    void StartAnimator() {}
-    void StopAnimator() {}
+    void StartAnimator();
+    void StopAnimator();
+    void SetOpacity(uint8_t value);
 
 private:
     void OnModifyDone() override;
@@ -109,7 +110,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void ValidateOffset(int32_t source);
 
-    RefPtr<Animator> animator_;
+    RefPtr<Animator> scrollEndAnimator_;
     RefPtr<ScrollBarProxy> scrollBarProxy_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     Axis axis_ = Axis::VERTICAL;

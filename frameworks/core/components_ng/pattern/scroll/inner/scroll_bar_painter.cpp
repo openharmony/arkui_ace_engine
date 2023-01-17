@@ -27,10 +27,11 @@ constexpr double FULL_ALPHA = 255.0;
 
 } // namespace
 
-void ScrollBarPainter::PaintRectBar(RSCanvas& canvas, const RefPtr<ScrollBar>& scrollBar, int32_t alpha)
+void ScrollBarPainter::PaintRectBar(RSCanvas& canvas, const RefPtr<ScrollBar>& scrollBar)
 {
     Rect activeRect = scrollBar->GetActiveRect();
     Rect barRect = scrollBar->GetBarRect();
+    uint8_t opacity = scrollBar->GetOpacity();
     if (!NearZero(activeRect.Height()) && !NearZero(barRect.Height())) {
         RSBrush brush;
         brush.SetBlendMode(RSBlendMode::SRC_OVER);
@@ -51,7 +52,7 @@ void ScrollBarPainter::PaintRectBar(RSCanvas& canvas, const RefPtr<ScrollBar>& s
         canvas.DetachBrush();
 
         RSRect fgRect(activeRect.Left(), activeRect.Top(), activeRect.Right(), activeRect.Bottom());
-        RSColor fgColor = ToRSColor(scrollBar->GetForegroundColor().BlendOpacity(alpha / FULL_ALPHA));
+        RSColor fgColor = ToRSColor(scrollBar->GetForegroundColor().BlendOpacity(opacity / FULL_ALPHA));
         brush.SetColor(fgColor);
         pen.SetColor(fgColor);
         canvas.AttachPen(pen);
