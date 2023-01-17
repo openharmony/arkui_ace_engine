@@ -26,19 +26,23 @@ class PixelMapImageObject : public ImageObject {
     DECLARE_ACE_TYPE(PixelMapImageObject, ImageObject);
 
 public:
-    PixelMapImageObject(const RefPtr<PixelMap>& pixmap, const ImageSourceInfo& imageSourceInfo, const SizeF& imageSize)
-        : ImageObject(imageSourceInfo, imageSize, 1, nullptr), pixmap_(pixmap)
+    PixelMapImageObject(const RefPtr<PixelMap>& pixmap, const ImageSourceInfo& src, const SizeF& imageSize)
+        : ImageObject(src, imageSize, nullptr), pixmap_(pixmap)
     {}
     ~PixelMapImageObject() override = default;
 
     void MakeCanvasImage(
         const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
 
-    static RefPtr<PixelMapImageObject> Create(
-        const ImageSourceInfo& sourceInfo, const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data);
+    static RefPtr<PixelMapImageObject> Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data);
+
+    RefPtr<ImageObject> Clone() override
+    {
+        return Claim(this);
+    }
 
 private:
-    RefPtr<PixelMap> pixmap_;
+    const RefPtr<PixelMap> pixmap_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PixelMapImageObject);
 };

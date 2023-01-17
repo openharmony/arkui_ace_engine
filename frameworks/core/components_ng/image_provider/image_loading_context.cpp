@@ -144,7 +144,8 @@ void ImageLoadingContext::OnMakeCanvasImage()
 
 void ImageLoadingContext::DataReadyCallback(const RefPtr<ImageObject>& imageObj)
 {
-    imageObj_ = imageObj;
+    CHECK_NULL_VOID(imageObj);
+    imageObj_ = imageObj->Clone();
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_DATA_SUCCESS);
 }
 

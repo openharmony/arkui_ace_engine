@@ -114,37 +114,6 @@ static sk_sp<SkImage> ResizeSkImage(
 
 } // namespace
 
-RefPtr<ImageEncodedInfo> ImageEncodedInfo::CreateImageEncodedInfoForStaticImage(const RefPtr<NG::ImageData>& data)
-{
-    auto skiaImageData = DynamicCast<SkiaImageData>(data);
-    CHECK_NULL_RETURN(skiaImageData, nullptr);
-    auto codec = SkCodec::MakeFromData(skiaImageData->GetSkData());
-    CHECK_NULL_RETURN_NOLOG(codec, nullptr);
-    int32_t totalFrames = 1;
-    SizeF imageSize;
-    totalFrames = codec->getFrameCount();
-    switch (codec->getOrigin()) {
-        case SkEncodedOrigin::kLeftTop_SkEncodedOrigin:
-        case SkEncodedOrigin::kRightTop_SkEncodedOrigin:
-        case SkEncodedOrigin::kRightBottom_SkEncodedOrigin:
-        case SkEncodedOrigin::kLeftBottom_SkEncodedOrigin:
-            imageSize.SetSizeT(SizeF(codec->dimensions().fHeight, codec->dimensions().fWidth));
-            break;
-        default:
-            imageSize.SetSizeT(SizeF(codec->dimensions().fWidth, codec->dimensions().fHeight));
-    }
-    return MakeRefPtr<ImageEncodedInfo>(imageSize, totalFrames);
-}
-
-RefPtr<ImageEncodedInfo> ImageEncodedInfo::CreateImageEncodedInfoForSvg(const RefPtr<NG::ImageData>& data)
-{
-    auto skiaImageData = DynamicCast<SkiaImageData>(data);
-    CHECK_NULL_RETURN(skiaImageData, nullptr);
-    // TODO: Encode svg
-    int32_t totalFrames = 1;
-    return MakeRefPtr<ImageEncodedInfo>(SizeF(), totalFrames);
-}
-
 RefPtr<CanvasImage> ImageProvider::QueryCanvasImageFromCache(const ImageSourceInfo& src, const SizeF& targetSize)
 {
     // Query [CanvasImage] from cache, if hit, notify load success immediately and returns true
@@ -255,7 +224,7 @@ RefPtr<RenderTaskHolder> ImageProvider::CreateRenderTaskHolder()
     int32_t id = Container::CurrentId();
     auto currentState = flutter::ace::WindowManager::GetWindow(id);
 #else
-    auto currentState = flutter::UIDartState::Current();
+    auto* currentState = flutter::UIDartState::Current();
 #endif
     CHECK_NULL_RETURN(currentState, nullptr);
     return MakeRefPtr<FlutterRenderTaskHolder>(currentState->GetSkiaUnrefQueue(), currentState->GetIOManager(),

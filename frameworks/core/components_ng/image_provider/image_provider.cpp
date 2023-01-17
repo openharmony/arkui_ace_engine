@@ -22,6 +22,7 @@
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/components_ng/image_provider/adapter/skia_image_data.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
@@ -107,49 +108,6 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
     return false;
 }
 
-RefPtr<ImageEncodedInfo> ImageEncodedInfo::CreateImageEncodedInfo(
-    const RefPtr<NG::ImageData>& data, const ImageSourceInfo& src, ImageObjectType imageObjectType)
-{
-    switch (imageObjectType) {
-        case ImageObjectType::STATIC_IMAGE_OBJECT:
-            return ImageEncodedInfo::CreateImageEncodedInfoForStaticImage(data);
-        case ImageObjectType::PIXEL_MAP_IMAGE_OBJECT:
-            return ImageEncodedInfo::CreateImageEncodedInfoForDecodedPixelMap(data, src);
-        case ImageObjectType::SVG_IMAGE_OBJECT:
-            return ImageEncodedInfo::CreateImageEncodedInfoForSvg(data);
-        case ImageObjectType::UNKNOWN:
-        default:
-            return nullptr;
-    }
-}
-
-RefPtr<ImageEncodedInfo> ImageEncodedInfo::CreateImageEncodedInfoForDecodedPixelMap(
-    const RefPtr<NG::ImageData>& data, const ImageSourceInfo& src)
-{
-    auto pixelMap = data->GetPixelMapData();
-    if (!pixelMap) {
-        LOGW("ImageData has no pixel map data when try CreateImageEncodedInfoForDecodedPixelMap, src: %{public}s",
-            src.ToString().c_str());
-        return nullptr;
-    }
-    return MakeRefPtr<ImageEncodedInfo>(SizeF(pixelMap->GetWidth(), pixelMap->GetHeight()), 1);
-}
-
-ImageObjectType ImageProvider::ParseImageObjectType(const RefPtr<NG::ImageData>& data, const ImageSourceInfo& src)
-{
-    if (!data) {
-        LOGW("data is null when try ParseImageObjectType, src: %{public}s", src.ToString().c_str());
-        return ImageObjectType::UNKNOWN;
-    }
-    if (src.IsSvg()) {
-        return ImageObjectType::SVG_IMAGE_OBJECT;
-    }
-    if (src.IsPixmap()) {
-        return ImageObjectType::PIXEL_MAP_IMAGE_OBJECT;
-    }
-    return ImageObjectType::STATIC_IMAGE_OBJECT;
-}
-
 RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(const ImageSourceInfo& src)
 {
     auto pipelineCtx = PipelineContext::GetCurrentContext();
@@ -208,7 +166,7 @@ void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, cons
 void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
 {
     ACE_SCOPED_TRACE("CreateImageObj %s", src.ToString().c_str());
-    // step1: load image data
+    // load image data
     auto imageLoader = ImageLoader::CreateImageLoader(src);
     if (!imageLoader) {
         std::string errorMessage("Fail to create image loader, Image source type not supported");
@@ -218,17 +176,8 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     RefPtr<ImageData> data =
         imageLoader->GetImageData(src, WeakClaim(RawPtr(NG::PipelineContext::GetCurrentContext())));
 
-    // step2: get image size and frame count from data
-    ImageObjectType type = ImageProvider::ParseImageObjectType(data, src);
-    auto encodedInfo = ImageEncodedInfo::CreateImageEncodedInfo(data, src, type);
-    if (!encodedInfo) {
-        std::string errorMessage("Fail to make encoded info, Image data is broken.");
-        FailCallback(src.GetKey(), errorMessage, sync);
-        return;
-    }
-
-    // step3: build ImageObject
-    RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(src, encodedInfo, data, type);
+    // build ImageObject
+    RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(src, data);
     if (!imageObj) {
         FailCallback(src.GetKey(), "Fail to build image object", sync);
     }
@@ -322,25 +271,27 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<
     }
 }
 
-RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src,
-    const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data, ImageObjectType imageObjectType)
+RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, const RefPtr<ImageData>& data)
 {
-    switch (imageObjectType) {
-        case ImageObjectType::STATIC_IMAGE_OBJECT:
-            return StaticImageObject::Create(src, encodedInfo, data);
-        // pixelMap always synchronous
-        case ImageObjectType::PIXEL_MAP_IMAGE_OBJECT:
-            return PixelMapImageObject::Create(src, encodedInfo, data);
-        case ImageObjectType::SVG_IMAGE_OBJECT: {
-            // SVG object needs to make SVG dom during creation
-            return SvgImageObject::Create(src, encodedInfo, data);
-        }
-        case ImageObjectType::UNKNOWN:
-            LOGE("Unknown ImageObject type, src: %{public}s", src.ToString().c_str());
-            [[fallthrough]];
-        default:
-            return nullptr;
+    if (!data) {
+        LOGW("data is null when try ParseImageObjectType, src: %{public}s", src.ToString().c_str());
+        return nullptr;
     }
+    if (src.IsSvg()) {
+        // SVG object needs to make SVG dom during creation
+        return SvgImageObject::Create(src, data);
+    }
+    if (src.IsPixmap()) {
+        return PixelMapImageObject::Create(src, data);
+    }
+
+    // standard skia image object
+    auto skiaImageData = DynamicCast<SkiaImageData>(data);
+    CHECK_NULL_RETURN(skiaImageData, nullptr);
+    auto [size, frameCount] = skiaImageData->Parse();
+    CHECK_NULL_RETURN(size.IsPositive() && frameCount > 0, nullptr);
+
+    return MakeRefPtr<StaticImageObject>(src, size, data);
 }
 
 std::string ImageProvider::GenerateImageKey(const ImageSourceInfo& src, const NG::SizeF& targetSize)
