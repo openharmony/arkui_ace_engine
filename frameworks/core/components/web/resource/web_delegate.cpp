@@ -2392,6 +2392,7 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->RunJsProxyCallback();
             auto releaseSurfaceListenerImpl = std::make_shared<ReleaseSurfaceImpl>(Container::CurrentId());
             releaseSurfaceListenerImpl->SetSurfaceDelegate(delegate->GetSurfaceDelegateClient());
+            delegate->nweb_->PutReleaseSurfaceCallback(releaseSurfaceListenerImpl);
         },
         TaskExecutor::TaskType::PLATFORM);
 }
