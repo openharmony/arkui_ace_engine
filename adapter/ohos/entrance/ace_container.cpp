@@ -961,6 +961,14 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
     pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
     pipelineContext_->SetWindowId(windowId);
     pipelineContext_->SetWindowModal(windowModal_);
+    if (installationFree_) {
+        pipelineContext_->SetInstallationFree(installationFree_);
+        pipelineContext_->SetSharePanelCallback(std::move(sharePanelCallback_));
+        std::shared_ptr<AppExecFwk::AbilityInfo> info = abilityInfo_.lock();
+        if (info != nullptr) {
+            pipelineContext_->SetAppLabelId(info->labelId);
+        }
+    }
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContext_);
     if (pipelineContext) {
         pipelineContext->SetDrawDelegate(aceView_->GetDrawDelegate());

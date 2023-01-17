@@ -36,6 +36,9 @@
 
 namespace OHOS::Ace::Platform {
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
+using SharePanelCallback = std::function<void(const std::string& faBundleName, const std::string& faAbilityName,
+    const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
+    const std::string& abilityName)>;
 class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatcher {
     DECLARE_ACE_TYPE(AceContainer, Container, JsMessageDispatcher);
 
@@ -163,6 +166,16 @@ public:
     void SetWindowModal(WindowModal windowModal)
     {
         windowModal_ = windowModal;
+    }
+
+    void SetInstallationFree(bool installationFree)
+    {
+        installationFree_ = installationFree;
+    }
+
+    void SetSharePanelCallback(SharePanelCallback&& callback)
+    {
+        sharePanelCallback_ = std::move(callback);
     }
 
     void SetColorScheme(ColorScheme colorScheme)
@@ -403,6 +416,9 @@ private:
     mutable std::mutex cardFrontMutex_;
     mutable std::mutex cardPipelineMutex_;
     mutable std::mutex cardTokensMutex_;
+
+    bool installationFree_ = false;
+    SharePanelCallback sharePanelCallback_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };
