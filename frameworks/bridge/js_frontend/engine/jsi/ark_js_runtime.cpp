@@ -45,11 +45,13 @@ bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, 
     option.SetGcType(RuntimeOption::GC_TYPE::GEN_GC);
 #ifdef OHOS_PLATFORM
     option.SetArkProperties(SystemProperties::GetArkProperties());
+    option.SetArkBundleName(SystemProperties::GetArkBundleName());
     option.SetGcThreadNum(SystemProperties::GetGcThreadNum());
     option.SetLongPauseTime(SystemProperties::GetLongPauseTime());
     option.SetEnableAsmInterpreter(SystemProperties::GetAsmInterpreterEnabled());
     option.SetAsmOpcodeDisableRange(SystemProperties::GetAsmOpcodeDisableRange());
-    LOGI("Initialize ark properties = %{public}d", SystemProperties::GetArkProperties());
+    LOGI("Initialize ark properties = %{public}d, bundlename = %{public}s",
+        SystemProperties::GetArkProperties(), SystemProperties::GetArkBundleName().c_str());
 #endif
     const int64_t poolSize = 0x10000000; // 256M
     option.SetGcPoolSize(poolSize);
