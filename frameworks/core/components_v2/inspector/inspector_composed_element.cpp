@@ -330,8 +330,8 @@ void InspectorComposedElement::AddComposedComponentId()
     }
     accessibilityManager->AddComposedElement(std::to_string(inspectorId_), AceType::Claim(this));
     if (accessibilityEnabled_) {
-        accessibilityNode_ =
-            InspectorComposedComponent::CreateAccessibilityNode(inspectorTag_, inspectorId_, inspectorParentId_, -1);
+        accessibilityNode_ = InspectorComposedComponent::CreateAccessibilityNode(
+            inspectorTag_, inspectorId_, inspectorParentId_, GetRenderSlot());
         accessibilityNode_->SetJsComponentId(key_);
     }
 }
