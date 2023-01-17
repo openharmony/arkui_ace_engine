@@ -40,7 +40,7 @@ struct MappingInfo {
     std::string sources;
 };
 
-class ACE_EXPORT RevSourceMap final : public Referenced {
+class ACE_FORCE_EXPORT RevSourceMap final : public Referenced {
 public:
     MappingInfo Find(int32_t row, int32_t col);
     std::string GetOriginalNames(const std::string& sourceCode, uint32_t& errorPos) const;

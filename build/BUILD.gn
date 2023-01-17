@@ -23,6 +23,8 @@ foreach(item, ace_platforms) {
   engine_config = item.config
   support_engines = []
   support_engines = engine_config.js_engines
+  build_in_engine = defined(engine_config.use_build_in_js_engine) &&
+                    engine_config.use_build_in_js_engine
 
   # generate libace_static lib
   libace_static("libace_static_" + item.name) {
@@ -38,29 +40,31 @@ foreach(item, ace_platforms) {
   # generate separated libace_engine lib
   if (platform == "ohos") {
     foreach(engine, support_engines) {
-      # generate libace_engine
-      ace_bridge_engine("libace_engine_${engine.engine_name}") {
-        platform = item.name
-        engine_name = engine.engine_name
-        build_type = "engine"
-        use_js_debug = false
-      }
-
-      # generate libace_engine_debug
-      if (defined(engine.have_debug) && engine.have_debug) {
-        ace_bridge_engine("libace_engine_${engine.engine_name}_debug") {
+      if (!build_in_engine) {
+        # generate libace_engine
+        ace_bridge_engine("libace_engine_${engine.engine_name}") {
           platform = item.name
           engine_name = engine.engine_name
           build_type = "engine"
-          use_js_debug = true
+          use_js_debug = false
         }
-      }
 
-      # generate libace_engine_declarative
-      ace_bridge_engine("libace_engine_declarative_${engine.engine_name}") {
-        platform = item.name
-        engine_name = engine.engine_name
-        build_type = "engine_declarative"
+        # generate libace_engine_debug
+        if (defined(engine.have_debug) && engine.have_debug) {
+          ace_bridge_engine("libace_engine_${engine.engine_name}_debug") {
+            platform = item.name
+            engine_name = engine.engine_name
+            build_type = "engine"
+            use_js_debug = true
+          }
+        }
+
+        # generate libace_engine_declarative
+        ace_bridge_engine("libace_engine_declarative_${engine.engine_name}") {
+          platform = item.name
+          engine_name = engine.engine_name
+          build_type = "engine_declarative"
+        }
       }
 
       # generate libace_engine_pa

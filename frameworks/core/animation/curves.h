@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT_WITH_PREVIEW Curves {
+class ACE_FORCE_EXPORT_WITH_PREVIEW Curves {
 public:
     Curves() = delete;
     ~Curves() = default;

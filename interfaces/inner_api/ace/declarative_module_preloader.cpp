@@ -24,7 +24,7 @@ constexpr char PRE_INIT_ACE_MODULE_FUNC[] = "OHOS_ACE_PreloadAceModule";
 
 void InitAceModule(void* runtime)
 {
-    void* handle = dlopen("libace_engine_declarative_ark.z.so", RTLD_LAZY);
+    void* handle = dlopen("libace.z.so", RTLD_LAZY);
     if (handle == nullptr) {
         return;
     }
