@@ -75,7 +75,8 @@ void RenderBadge::Update(const RefPtr<Component>& component)
     auto padding = badge_->GetPadding();
     auto badgeLabel = badge_->GetBadgeLabel();
     auto messageCount = badge_->GetMessageCount();
-    auto countLimit = badge_->GetMaxCount();
+    auto maxCount = badge_->GetMaxCount();
+    auto countLimit = maxCount > INT_MAX ? INT_MAX : maxCount;
     badgeChildInitialOffset_ = Offset(NormalizeToPx(padding.Left()), NormalizeToPx(padding.Top()));
     onClick_ = AceAsyncEvent<void()>::Create(badge_->GetClickEvent(), context_);
     auto catchMode = true;
