@@ -55,8 +55,6 @@ void ContainerModalPattern::ShowTitle(bool isShow)
     CHECK_NULL_VOID(titleNode);
     auto stackNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
     CHECK_NULL_VOID(stackNode);
-    auto contentNode = AceType::DynamicCast<FrameNode>(stackNode->GetChildren().front());
-    CHECK_NULL_VOID(contentNode);
     auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
     CHECK_NULL_VOID(floatingTitleNode);
     windowMode_ = PipelineContext::GetCurrentContext()->GetWindowManager()->GetWindowMode();

@@ -296,6 +296,7 @@ ohos_unittest("pipeline_ng_test") {
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_property.cpp",
 
     # mock file
+    "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_app_bar_view.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_container_modal_pattern.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_container_modal_view.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_drag_drop_manager.cpp",

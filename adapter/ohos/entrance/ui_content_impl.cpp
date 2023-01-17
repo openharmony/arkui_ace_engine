@@ -447,9 +447,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             }
         }
 
-        auto hapInfo = context->GetHapModuleInfo();
-        if (hapInfo) {
-            pageProfile = hapInfo->pages;
+        if (hapModuleInfo) {
+            pageProfile = hapModuleInfo->pages;
             const std::string profilePrefix = "$profile:";
             if (pageProfile.compare(0, profilePrefix.size(), profilePrefix) == 0) {
                 pageProfile = pageProfile.substr(profilePrefix.length()).append(".json");
@@ -460,9 +459,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         }
     } else {
         auto packagePathStr = context->GetBundleCodeDir();
-        auto moduleInfo = context->GetHapModuleInfo();
-        if (moduleInfo != nullptr) {
-            packagePathStr += "/" + moduleInfo->package + "/";
+        if (hapModuleInfo != nullptr) {
+            packagePathStr += "/" + hapModuleInfo->package + "/";
         }
         std::string srcPath = "";
         if (info != nullptr && !info->srcPath.empty()) {
@@ -492,8 +490,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             }
         }
     }
-    auto hapInfo = context->GetHapModuleInfo();
-    if (appInfo && flutterAssetManager && hapInfo) {
+
+    if (appInfo && flutterAssetManager && hapModuleInfo) {
         /* Note: DO NOT modify the sequence of adding libPath  */
         std::string nativeLibraryPath = appInfo->nativeLibraryPath;
         std::string quickFixLibraryPath = appInfo->appQuickFix.deployedAppqfInfo.nativeLibraryPath;
@@ -508,12 +506,12 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             libPaths.push_back(libPath);
             LOGI("napi lib path = %{private}s", libPath.c_str());
         }
-        auto isLibIsolated = hapInfo->isLibIsolated;
+        auto isLibIsolated = hapModuleInfo->isLibIsolated;
         if (!libPaths.empty()) {
             if (!isLibIsolated) {
                 flutterAssetManager->SetLibPath("default", libPaths);
             } else {
-                std::string appLibPathKey = hapInfo->bundleName + "/" + hapInfo->moduleName;
+                std::string appLibPathKey = hapModuleInfo->bundleName + "/" + hapModuleInfo->moduleName;
                 flutterAssetManager->SetLibPath(appLibPathKey, libPaths);
             }
         }
@@ -599,6 +597,27 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetAssetManager(flutterAssetManager);
     container->SetBundlePath(context->GetBundleCodeDir());
     container->SetFilesDataPath(context->GetFilesDir());
+    // for atomic service
+    container->SetInstallationFree(hapModuleInfo ? hapModuleInfo->installationFree : false);
+    if (hapModuleInfo->installationFree) {
+        container->SetSharePanelCallback(
+            [context = context_](const std::string& faBundleName, const std::string& faAbilityName,
+                const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
+                const std::string& abilityName) {
+                auto sharedContext = context.lock();
+                CHECK_NULL_VOID_NOLOG(sharedContext);
+                auto abilityContext =
+                    OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+                CHECK_NULL_VOID_NOLOG(abilityContext);
+                AAFwk::Want want;
+                want.SetParam("bundleName", faBundleName);
+                want.SetParam("moduleName", faModuleName);
+                want.SetParam("abilityName", faAbilityName);
+                want.SetParam("hostPkgName", faHostPkgName);
+                want.SetElementName(bundleName, abilityName);
+                abilityContext->StartAbility(want, REQUEST_CODE);
+            });
+    }
 
     if (window_->IsDecorEnable()) {
         LOGI("Container modal is enabled.");

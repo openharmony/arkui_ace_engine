@@ -17,6 +17,7 @@ import(
 build_component_ng("pattern_ng") {
   sources = [
     "animator/animator_model_ng.cpp",
+    "app_bar/app_bar_view.cpp",
     "badge/badge_layout_algorithm.cpp",
     "badge/badge_layout_property.cpp",
     "badge/badge_pattern.cpp",
