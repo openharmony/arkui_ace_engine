@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
-#include <memory>
-
 #include "base/geometry/axis.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
@@ -83,6 +81,10 @@ void GridPattern::OnModifyDone()
         InitMouseEvent();
     }
 
+    if (!multiSelectable_ && isMouseEventInit_) {
+        UninitMouseEvent();
+    }
+
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(gridLayoutProperty);
     gridLayoutInfo_.axis_ = gridLayoutProperty->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
@@ -106,6 +108,17 @@ void GridPattern::OnModifyDone()
     if (focusHub) {
         InitOnKeyEvent(focusHub);
     }
+}
+
+void GridPattern::UninitMouseEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto mouseEventHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(mouseEventHub);
+    mouseEventHub->SetMouseEvent(nullptr);
+    ClearMultiSelect();
+    isMouseEventInit_ = false;
 }
 
 void GridPattern::InitMouseEvent()

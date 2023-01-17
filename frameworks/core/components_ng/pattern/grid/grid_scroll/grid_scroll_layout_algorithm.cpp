@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -190,6 +190,9 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
 {
     itemsCrossPosition_.clear();
+    if (gridLayoutInfo_.gridMatrix_.empty()) {
+        layoutWrapper->RemoveAllChildInRenderTree();
+    }
     SkipForwardLines(mainSize, layoutWrapper);
     SkipBackwardLines(mainSize, layoutWrapper);
     if (layoutWrapper->GetHostNode()->GetChildrenUpdated() != -1) {
@@ -565,7 +568,7 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     // Erase records that are on bottom of viewport.
     // remove from rbegin or LazyLayoutWrapperBuilder will create item and then remove
     for (auto i = oldEnd; i > gridLayoutInfo_.endMainLineIndex_; --i) {
-        auto iter = gridLayoutInfo_.gridMatrix_.find(oldEnd);
+        auto iter = gridLayoutInfo_.gridMatrix_.find(i);
         if (iter != gridLayoutInfo_.gridMatrix_.end()) {
             for (auto item = iter->second.rbegin(); item != iter->second.rend(); ++item) {
                 layoutWrapper->RemoveChildInRenderTree(item->second);
