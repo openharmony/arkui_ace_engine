@@ -73,6 +73,7 @@ public:
     static void OnRefreshAccessedHistory(const JSCallbackInfo& args);
     static void CacheMode(int32_t cacheMode);
     static void OverviewModeAccess(bool isOverviewModeAccessEnabled);
+    static void WebDebuggingAccess(const JSCallbackInfo& args);
     static void WideViewModeAccess(const JSCallbackInfo& args);
     static void FileFromUrlAccess(bool isFileFromUrlAccessEnabled);
     static void DatabaseAccess(bool isDatabaseAccessEnabled);
