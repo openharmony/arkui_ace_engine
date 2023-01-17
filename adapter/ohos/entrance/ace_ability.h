@@ -113,6 +113,7 @@ private:
     std::string remotePageUrl_;
     std::string remoteData_;
     std::string pageUrl_;
+    bool isFirstActive_ = true;
 };
 
 } // namespace OHOS::Ace
