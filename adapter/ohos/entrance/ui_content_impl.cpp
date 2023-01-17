@@ -250,17 +250,37 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     LOGE("Kee Create UIContentImpl successfully.");
 }
 
+// UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard) : runtime_(runtime), isCard_(isCard)
+// {
+//     LOGE("Kee UIContentImpl::UIContentImpl 11");
+//     CHECK_NULL_VOID(context);
+//     LOGE("Kee UIContentImpl::UIContentImpl 12");
+//     shareContextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
+//     auto hapModuleInfo = context->GetHapModuleInfo();
+//     shareContextImpl_->InitHapModuleInfo((*hapModuleInfo.get()));
+//     shareContext_ = shareContextImpl_;
+//     context_ = shareContext_;
+//     LOGE("Kee Create UIContentImpl successfully.");
+// }
+
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard) : runtime_(runtime), isCard_(isCard)
 {
-    LOGE("Kee UIContentImpl::UIContentImpl 11");
+    LOGE("Kee UIContentImpl::UIContentImpl Card 1");
     CHECK_NULL_VOID(context);
-    LOGE("Kee UIContentImpl::UIContentImpl 12");
-    shareContextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
-    auto hapModuleInfo = context->GetHapModuleInfo();
-    shareContextImpl_->InitHapModuleInfo((*hapModuleInfo.get()));
-    shareContext_ = shareContextImpl_;
-    context_ = shareContext_;
-    LOGE("Kee Create UIContentImpl successfully.");
+    LOGE("Kee UIContentImpl::UIContentImpl Card 2");
+    const auto& obj = context->GetBindingObject();
+    if (!obj) {
+        LOGE("Kee UIContentImpl::UIContentImpl Card 3");
+    }
+    LOGE("Kee UIContentImpl::UIContentImpl Card 4");
+    auto ref = obj->Get<NativeReference>();
+    LOGE("Kee UIContentImpl::UIContentImpl Card 5");
+    auto object = AbilityRuntime::ConvertNativeValueTo<NativeObject>(ref->Get());
+    LOGE("Kee UIContentImpl::UIContentImpl Card 6");
+    auto weak = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(object->GetNativePointer());
+    LOGE("Kee UIContentImpl::UIContentImpl Card 7");
+    context_ = *weak;
+    LOGE("Kee UIContentImpl::UIContentImpl Card successfully.");
 }
 
 UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
@@ -459,6 +479,10 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             SystemProperties::SetDeviceAccess(
                 resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
         }
+    } else {
+        LOGE("Kee Context is nullptr, set localeInfo to default");
+        AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
+        SystemProperties::SetColorMode(ColorMode::LIGHT);
     }
 
     LOGE("Kee Context 2");
