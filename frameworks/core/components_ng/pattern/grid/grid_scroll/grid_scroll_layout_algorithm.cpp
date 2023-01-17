@@ -198,7 +198,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     if (layoutWrapper->GetHostNode()->GetChildrenUpdated() != -1) {
         gridLayoutInfo_.lineHeightMap_.clear();
         gridLayoutInfo_.gridMatrix_.clear();
-
+        layoutWrapper->RemoveAllChildInRenderTree();
         gridLayoutInfo_.endIndex_ = -1;
         gridLayoutInfo_.endMainLineIndex_ = 0;
         gridLayoutInfo_.reachEnd_ = false;
