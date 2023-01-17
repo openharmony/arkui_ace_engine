@@ -25,6 +25,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/components/text/render_text.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace OHOS::Ace {

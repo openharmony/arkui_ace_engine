@@ -21,12 +21,10 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<SvgImageObject> SvgImageObject::Create(
-    const ImageSourceInfo& sourceInfo, const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data)
+RefPtr<SvgImageObject> SvgImageObject::Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data)
 {
-    auto obj = AceType::MakeRefPtr<NG::SvgImageObject>(
-        sourceInfo, encodedInfo->GetImageSize(), encodedInfo->GetFrameCount(), data);
-    if (!obj->MakeSvgDom(sourceInfo.GetFillColor())) {
+    auto obj = AceType::MakeRefPtr<SvgImageObject>(src, SizeF());
+    if (!obj->MakeSvgDom(data, src.GetFillColor())) {
         return nullptr;
     };
     return obj;
@@ -42,13 +40,13 @@ void SvgImageObject::MakeCanvasImage(
 {
     CHECK_NULL_VOID(GetSVGDom());
     // just set svgDom to canvasImage
-    auto canvasImage = MakeRefPtr<NG::SvgCanvasImage>(GetSVGDom());
+    auto canvasImage = MakeRefPtr<SvgCanvasImage>(GetSVGDom());
     ctx->SuccessCallback(canvasImage);
 }
 
-bool SvgImageObject::MakeSvgDom(const std::optional<Color>& svgFillColor)
+bool SvgImageObject::MakeSvgDom(const RefPtr<ImageData>& data, const std::optional<Color>& svgFillColor)
 {
-    auto skiaImageData = DynamicCast<SkiaImageData>(data_);
+    auto skiaImageData = DynamicCast<SkiaImageData>(data);
     CHECK_NULL_RETURN(skiaImageData, false);
     // update SVGSkiaDom
     svgDomBase_ = skiaImageData->MakeSvgDom(svgFillColor);

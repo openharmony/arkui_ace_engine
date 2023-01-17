@@ -30,6 +30,7 @@ public:
     size_t GetSize() const override;
     const void* GetData() const override;
     sk_sp<SkData> GetSkData() const;
+    std::pair<SizeF, int32_t> Parse() const;
     RefPtr<SvgDomBase> MakeSvgDom(const std::optional<Color>& svgFillColor);
 
 private:

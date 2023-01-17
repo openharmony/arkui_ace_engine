@@ -29,21 +29,20 @@ class ImageObject : public virtual AceType {
 
 public:
     ImageObject() = delete;
-    ImageObject(
-        const ImageSourceInfo& sourceInfo, const SizeF& imageSize, int32_t frameCount, const RefPtr<ImageData>& data)
-        : src_(sourceInfo), imageSize_(imageSize), frameCount_(frameCount), data_(data)
+    ImageObject(const ImageSourceInfo& sourceInfo, const SizeF& imageSize, const RefPtr<ImageData>& data)
+        : src_(sourceInfo), imageSize_(imageSize), data_(data)
     {}
     ~ImageObject() override = default;
 
-    int32_t GetFrameCount() const;
     const SizeF& GetImageSize() const;
     const ImageSourceInfo& GetSourceInfo() const;
     const RefPtr<ImageData>& GetData() const;
-    bool IsSingleFrame() const;
 
     void SetData(const RefPtr<ImageData>& data);
     void SetImageSize(const SizeF& imageSize);
     void ClearData();
+
+    virtual RefPtr<ImageObject> Clone() = 0;
 
     bool IsSupportCache() const
     {
@@ -54,9 +53,8 @@ public:
         const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) = 0;
 
 protected:
-    ImageSourceInfo src_;
+    const ImageSourceInfo src_;
     SizeF imageSize_ { -1.0, -1.0 };
-    int32_t frameCount_ = 1;
     // no longer needed after making canvas image
     RefPtr<ImageData> data_;
 
