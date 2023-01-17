@@ -106,7 +106,7 @@ private:
         CHECK_NULL_VOID(context);
         auto geometryNode = node->GetGeometryNode();
         auto size = geometryNode->GetFrameSize();
-        geometryNode->SetFrameOffset(geometryNode->GetFrameOffset() + context->GetPaintRectWithTransform().GetOffset());
+        geometryNode->SetFrameOffset(context->GetPaintRectWithTransform().GetOffset());
         node->SetGeometryNode(geometryNode);
         auto offset = node->GetGeometryNode()->GetFrameOffset();
         LOGI("OnWindowReady surface size:%{public}f %{public}f %{public}f %{public}f", offset.GetX(), offset.GetY(),
