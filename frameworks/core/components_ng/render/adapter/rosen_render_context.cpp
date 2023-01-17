@@ -157,9 +157,11 @@ void RosenRenderContext::SetTransitionPivot(const SizeF& frameSize, bool transit
 void RosenRenderContext::InitContext(bool isRoot, const std::optional<std::string>& surfaceName, bool useExternalNode)
 {
     // skip if useExternalNode is true or node already created
-    CHECK_NULL_VOID_NOLOG(!useExternalNode);
     CHECK_NULL_VOID_NOLOG(!rsNode_);
-
+    if (useExternalNode) {
+        LOGE("Kee RosenRenderContext::InitContext useExternalNode");
+        return;
+    }
     // create proper RSNode base on input
     if (surfaceName.has_value()) {
         struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceName.value() };

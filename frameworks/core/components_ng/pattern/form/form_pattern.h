@@ -52,9 +52,15 @@ public:
 
     const RefPtr<SubContainer>& GetSubContainer() const;
 
+    RefPtr<RenderContext> GetExternalRenderContext()
+    {
+        return externalRenderContext_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnRebuildFrame() override;
 
     void InitFormManagerDelegate();
     void CreateCardContainer();
@@ -65,6 +71,9 @@ private:
     void FireOnUninstallEvent(int64_t id) const;
 
     bool ISAllowUpdate() const;
+
+    // used by ArkTS Card, for RSSurfaceNode from FRS,
+    RefPtr<RenderContext> externalRenderContext_;
 
     RefPtr<SubContainer> subContainer_;
     RefPtr<FormManagerDelegate> formManagerBridge_;

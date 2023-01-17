@@ -36,7 +36,20 @@ void FormPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+    // Init the render context for RSSurfaceNode from FRS.
+    externalRenderContext_ = RenderContext::Create();
+    externalRenderContext_->InitContext(false, "Form_" + std::to_string(host->GetId()) + "_Remote_Surface", true);
     InitFormManagerDelegate();
+}
+
+void FormPattern::OnRebuildFrame()
+{
+    LOGE("Kee FormPattern::OnRebuildFrame");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->AddChild(externalRenderContext_, 0);
 }
 
 bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -76,6 +89,9 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             subContainer_->UpdateRootElementSize();
             subContainer_->UpdateSurfaceSize();
         }
+        // auto offset = geometryNode->GetContentOffset();
+        // renderContextForSurface_->SetBounds(offset.GetX(), offset.GetY(), size.Width(), size.Height());
+
         return false;
     }
     CreateCardContainer();
@@ -188,25 +204,40 @@ void FormPattern::InitFormManagerDelegate()
         CHECK_NULL_VOID(node);
         LOGE("Kee FormPattern::AddFormSurfaceNodeCallback 1");
         node->CreateNodeInRenderThread();
-        node->SetBounds(0, 0, 500, 500);
-        node->SetBackgroundColor(Color::BLUE.GetValue());
         LOGE("Kee FormPattern::AddFormSurfaceNodeCallback 2");
         auto formComponent = weak.Upgrade();
         CHECK_NULL_VOID(formComponent);
         auto host = formComponent->GetHost();
         CHECK_NULL_VOID(host);
+        auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(formComponent->GetExternalRenderContext());
+        CHECK_NULL_VOID(externalRenderContext);
+
+        auto size = host->GetGeometryNode()->GetFrameSize();
+        auto offset = host->GetGeometryNode()->GetFrameOffset() + host->GetTransformRelativeOffset();
+
+        externalRenderContext->SetRSNode(node);
+        externalRenderContext->SetBounds(0, 0, size.Width(), size.Height());
+        // externalRenderContext->BlendBgColor(Color::BLUE);
+        LOGE("Kee FormPattern::AddFormSurfaceNodeCallback 11 Offset: (%{public}lf %{public}lf) Size: (%{public}lf %{public}lf)",
+            offset.GetX(), offset.GetY(), size.Width(), size.Height());
+
         auto formComponentContext = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
         CHECK_NULL_VOID(formComponentContext);
+        formComponentContext->AddChild(externalRenderContext, 0);
 
+        // node->SetBounds(0, 0, 500, 500);
+        // node->SetBackgroundColor(Color::BLUE.GetValue());
         // auto rsNode = formComponentContext->GetRSNode();
         // CHECK_NULL_VOID(rsNode);
         // rsNode->AddChild(node, -1);
         // LOGE("Kee FormPattern::AddFormSurfaceNodeCallback FormComponent RSNodeId: %{public}lld", rsNode->GetId());
-        
+
+
+
         LOGE("Kee FormPattern::AddFormSurfaceNodeCallback eTSCard Root RSNodeId: %{public}lld", node->GetId());
         LOGE("Kee FormPattern::AddFormSurfaceNodeCallback eTSCard Root RSNode Dump: %{public}s", node->DumpNode(0).c_str());
 
-        formComponentContext->SetRSNode(node);
+        // formComponentContext->SetRSNode(node);
 
 
         host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
