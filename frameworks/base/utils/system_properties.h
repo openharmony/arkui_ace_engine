@@ -279,6 +279,8 @@ public:
 
     static int GetArkProperties();
 
+    static std::string GetArkBundleName();
+
     static size_t GetGcThreadNum();
 
     static size_t GetLongPauseTime();
