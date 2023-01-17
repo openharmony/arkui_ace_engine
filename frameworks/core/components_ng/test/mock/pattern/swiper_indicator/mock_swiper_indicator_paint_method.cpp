@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/text/text_layout_adapter.h"
+#include "core/components_ng/pattern/swiper_indicator/swiper_indicator_paint_method.h"
 
 namespace OHOS::Ace::NG {
-bool TextLayoutadapter::IsLeftToRight(int32_t charOfShowingText)
+CanvasDrawFunction SwiperIndicatorPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
-    return true;
+    return nullptr;
 }
-bool TextLayoutadapter::IsRightToLeft(int32_t charOfShowingText)
-{
-    return false;
-}
-bool TextLayoutadapter::IsRightTOLeftArabic(int32_t charOfShowingText)
-{
-    return false;
-}
+
+void SwiperIndicatorPaintMethod::PaintMask(
+    RSCanvas& canvas, RefPtr<SwiperIndicatorPaintProperty> paintProperty, SizeF contentSize, OffsetF contentOffset)
+{}
+
+void SwiperIndicatorPaintMethod::PaintContent(
+    RSCanvas& canvas, const RefPtr<SwiperIndicatorPaintProperty>& paintProperty, SizeF contentSize)
+{}
 } // namespace OHOS::Ace::NG

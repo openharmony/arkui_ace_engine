@@ -48,7 +48,8 @@ void StepperPattern::OnModifyDone()
 
     auto swiperEventHub = swiperNode->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
-    maxIndex_ = TotalCount() - 1;
+    maxIndex_ = TotalCount();
+    CHECK_NULL_VOID_NOLOG(maxIndex_ > -1);
     InitSwiperChangeEvent(swiperEventHub);
     UpdateOrCreateLeftButtonNode(index_);
     UpdateOrCreateRightButtonNode(index_);
@@ -66,6 +67,7 @@ void StepperPattern::InitSwiperChangeEvent(const RefPtr<SwiperEventHub>& swiperE
 {
     ChangeEvent changeEvent = [weak = WeakClaim(this)](int32_t index) {
         auto stepperPattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(stepperPattern->TotalCount() > -1);
         stepperPattern->UpdateOrCreateLeftButtonNode(index);
         stepperPattern->UpdateOrCreateRightButtonNode(index);
         stepperPattern->InitButtonClickEvent();
@@ -142,7 +144,6 @@ void StepperPattern::CreateLeftButtonNode()
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent("symbol");
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(Color::BLACK);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateMaxLines(stepperTheme->GetTextMaxLines());
@@ -161,6 +162,7 @@ void StepperPattern::UpdateLeftButtonNode(int32_t index)
 
     auto swiperNode = hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId()));
     auto stepperItemNode = DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(static_cast<int32_t>(index)));
+    CHECK_NULL_VOID(stepperItemNode);
     auto stepperItemLayoutProperty = stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>();
     auto buttonBackText = Localization::GetInstance()->GetEntryLetters("stepper.back");
     auto leftLabel = stepperItemLayoutProperty->GetLeftLabel().value_or(buttonBackText);
@@ -188,6 +190,7 @@ void StepperPattern::CreateRightButtonNode(int32_t index)
     CHECK_NULL_VOID(hostNode);
     auto swiperNode = hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId()));
     auto stepperItemNode = DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(static_cast<int32_t>(index)));
+    CHECK_NULL_VOID(stepperItemNode);
     auto labelStatus =
         stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetLabelStatus().value_or("normal");
     if (labelStatus == "normal") {
@@ -216,6 +219,7 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     // get rightLabel
     auto swiperNode = hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId()));
     auto stepperItemNode = DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(static_cast<int32_t>(index)));
+    CHECK_NULL_VOID(stepperItemNode);
     auto buttonNextText = Localization::GetInstance()->GetEntryLetters("stepper.next");
     auto rightLabel =
         stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetRightLabel().value_or(buttonNextText);
@@ -406,6 +410,7 @@ void StepperPattern::HandlingRightButtonClickEvent()
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
     auto stepperItemNode = DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(static_cast<int32_t>(index_)));
+    CHECK_NULL_VOID(stepperItemNode);
     auto labelStatus =
         stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetLabelStatus().value_or("normal");
     if (labelStatus == "skip") {
@@ -429,7 +434,7 @@ int32_t StepperPattern::TotalCount() const
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
     CHECK_NULL_RETURN(swiperNode, 0);
-    return swiperNode->TotalChildCount();
+    return swiperNode->TotalChildCount() - 1;
 }
 
 } // namespace OHOS::Ace::NG
