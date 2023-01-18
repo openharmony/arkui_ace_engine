@@ -155,7 +155,9 @@ void JSSelect::JSBind(BindingTarget globalObj)
 void JSSelect::Selected(int value)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        LOGI("set selected");
+        if (value <= 0) {
+            value = 0;
+        }
         NG::SelectView::SetSelected(value);
         return;
     }
