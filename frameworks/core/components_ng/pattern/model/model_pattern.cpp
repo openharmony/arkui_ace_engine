@@ -28,7 +28,7 @@ ModelPattern::ModelPattern(uint32_t key) : key_(key)
             auto model = weak.Upgrade();
             if (model) {
                 if (model->NeedsRepaint()) {
-                    model->MarkDirtyNode();
+                    model->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
                 }
                 model->GetPaintProperty<ModelPaintProperty>()->ResetFlagProperties();
             }
@@ -64,11 +64,14 @@ void ModelPattern::OnModifyDone()
 
 bool ModelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (config.skipMeasure || dirty->SkipMeasureContent()) {
-        return false;
+    bool measure = (config.skipMeasure || dirty->SkipMeasureContent()) ? false : true;
+    
+    CHECK_NULL_RETURN(modelAdapter_, measure);
+    if (!modelAdapter_->IsInitialized()) {
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 
-    return true;
+    return measure;
 }
 
 void ModelPattern::OnAttachToFrameNode()
@@ -86,7 +89,7 @@ void ModelPattern::HandleTouchEvent(const TouchEventInfo& info)
     CHECK_NULL_VOID(modelAdapter_);
     bool repaint = modelAdapter_->HandleTouchEvent(info);
     if (repaint) {
-        MarkDirtyNode();
+        MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 
@@ -96,11 +99,11 @@ bool ModelPattern::NeedsRepaint()
     return modelAdapter_->NeedsRepaint();
 }
 
-void ModelPattern::MarkDirtyNode()
+void ModelPattern::MarkDirtyNode(const PropertyChangeFlag flag)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    host->MarkDirtyNode(flag);
 }
 
 } // namespace OHOS::Ace::NG
