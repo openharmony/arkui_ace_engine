@@ -583,6 +583,8 @@ void WebPattern::OnAreaChangedInner()
     }
     webOffset_ = offset;
     UpdateTouchHandleForOverlay();
+    auto resizeOffset = Offset(offset.GetX(), offset.GetY());
+    delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
 }
 
 void WebPattern::OnWebSrcUpdate()
