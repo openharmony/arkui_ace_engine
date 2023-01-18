@@ -362,12 +362,14 @@ void ContainerModalPattern::SetAppTitle(const std::string& title)
     CHECK_NULL_VOID(titleNode);
     auto titleLabel = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(TITLE_LABEL_INDEX));
     titleLabel->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(title);
+    titleLabel->MarkModifyDone();
     titleLabel->MarkDirtyNode();
 
     auto floatingNode = AceType::DynamicCast<FrameNode>(GetHost()->GetChildren().back());
     CHECK_NULL_VOID(floatingNode);
     auto floatingTitleLabel = AceType::DynamicCast<FrameNode>(floatingNode->GetChildAtIndex(TITLE_LABEL_INDEX));
     floatingTitleLabel->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(title);
+    floatingTitleLabel->MarkModifyDone();
     floatingTitleLabel->MarkDirtyNode();
 }
 
