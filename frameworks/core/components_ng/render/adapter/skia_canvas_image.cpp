@@ -150,7 +150,6 @@ void SkiaCanvasImage::DrawToRSCanvas(
     CHECK_NULL_VOID(image);
     RSImage rsImage(&image);
     RSSamplingOptions options;
-
 #ifdef ENABLE_ROSEN_BACKEND
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
     if (rsCanvas == nullptr) {
@@ -185,8 +184,15 @@ void SkiaCanvasImage::DrawToRSCanvas(
             SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerLeft_Corner].GetY(), 0.0f)));
     }
     recordingCanvas->ClipAdaptiveRRect(radii);
-    Rosen::RsImageInfo rsImageInfo((int)(GetPaintConfig().imageFit_), (int)(GetPaintConfig().imageRepeat_), radii, 1.0,
-        GetUniqueID(), GetCompressWidth(), GetCompressHeight());
+    auto config = GetPaintConfig();
+    if (config.imageFit_ == ImageFit::TOP_LEFT) {
+        SkAutoCanvasRestore acr(recordingCanvas, true);
+        auto skSrcRect = SkRect::MakeXYWH(srcRect.GetLeft(), srcRect.GetTop(), srcRect.GetWidth(), srcRect.GetHeight());
+        auto skDstRect = SkRect::MakeXYWH(dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetWidth(), dstRect.GetHeight());
+        recordingCanvas->concat(SkMatrix::MakeRectToRect(skSrcRect, skDstRect, SkMatrix::kFill_ScaleToFit));
+    }
+    Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii, 1.0, GetUniqueID(),
+        GetCompressWidth(), GetCompressHeight());
     auto data = GetCompressData();
     recordingCanvas->DrawImageWithParm(image, std::move(data), rsImageInfo, paint);
 #else
