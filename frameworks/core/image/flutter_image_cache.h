@@ -35,14 +35,22 @@ struct CachedImage {
     explicit CachedImage(const RefPtr<NG::CanvasImage>& image) : imagePtr(image) {}
     RefPtr<NG::CanvasImage> imagePtr;
 #else
-    explicit CachedImage(fml::RefPtr<flutter::CanvasImage>  image) : imagePtr(std::move(image)) {}
+    explicit CachedImage(fml::RefPtr<flutter::CanvasImage> image) : imagePtr(std::move(image)) {}
     fml::RefPtr<flutter::CanvasImage> imagePtr;
 #endif
     uint32_t uniqueId = 0;
 };
 
+namespace NG {
+struct CachedImage {
+    explicit CachedImage(sk_sp<SkImage> image) : imagePtr(std::move(image)) {}
+    sk_sp<SkImage> imagePtr;
+};
+} // namespace NG
+
 struct SkiaCachedImageData : public CachedImageData {
     DECLARE_ACE_TYPE(SkiaCachedImageData, CachedImageData);
+
 public:
     explicit SkiaCachedImageData(const sk_sp<SkData>& data) : imageData(data) {}
     ~SkiaCachedImageData() override = default;

@@ -36,6 +36,7 @@
 #include "core/common/thread_checker.h"
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
 #include "core/components_ng/image_provider/image_object.h"
+#include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/image_provider/svg_image_object.h"
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
 #include "core/image/flutter_image_cache.h"
@@ -120,7 +121,7 @@ RefPtr<CanvasImage> ImageProvider::QueryCanvasImageFromCache(const ImageSourceIn
     auto pipelineCtx = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN_NOLOG(pipelineCtx, nullptr);
     CHECK_NULL_RETURN_NOLOG(pipelineCtx->GetImageCache(), nullptr);
-    auto key = GenerateImageKey(src, targetSize);
+    auto key = ImageUtils::GenerateImageKey(src, targetSize);
     auto cache = pipelineCtx->GetImageCache();
     CHECK_NULL_RETURN(cache, nullptr);
     auto cacheImage = cache->GetCacheImage(key);
@@ -152,7 +153,7 @@ void ImageProvider::MakeCanvasImageHelper(const WeakPtr<ImageObject>& objWp, con
     auto skiaImageData = DynamicCast<SkiaImageData>(obj->GetData());
     CHECK_NULL_VOID(skiaImageData && skiaImageData->GetSkData());
     auto rawImage = SkImage::MakeFromEncoded(skiaImageData->GetSkData());
-    auto key = GenerateImageKey(obj->GetSourceInfo(), targetSize);
+    auto key = ImageUtils::GenerateImageKey(obj->GetSourceInfo(), targetSize);
     if (!rawImage) {
         std::string errorMessage(
             "Static image MakeFromEncoded fail! The image format is not supported, please check image format.");
@@ -187,7 +188,7 @@ void ImageProvider::MakeCanvasImageHelper(const WeakPtr<ImageObject>& objWp, con
         ImageProvider::SuccessCallback(canvasImage, key, sync);
     };
     ImageProvider::UploadImageToGPUForRender(
-        canvasImage, std::move(uploadTask), renderTaskHolder, key, targetSize, compressFileData, false);
+        canvasImage, std::move(uploadTask), renderTaskHolder, key, targetSize, compressFileData, sync);
 }
 
 void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const WeakPtr<ImageLoadingContext>& ctxWp,
@@ -195,7 +196,7 @@ void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const Wea
 {
     auto obj = objWp.Upgrade();
     CHECK_NULL_VOID(obj);
-    auto key = GenerateImageKey(obj->GetSourceInfo(), targetSize);
+    auto key = ImageUtils::GenerateImageKey(obj->GetSourceInfo(), targetSize);
     // check if same task is already executing
     if (!RegisterTask(key, ctxWp)) {
         return;
@@ -213,7 +214,7 @@ void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const Wea
             MakeCanvasImageHelper(objWp, targetSize, renderTaskHolder, forceResize);
         });
         tasks_[key].bgTask_ = task;
-        WrapTaskAndPostToBackground(task);
+        ImageUtils::PostToBg(task);
     }
 }
 
@@ -299,7 +300,7 @@ void ImageProvider::UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasI
                 flutterRenderTaskHolder->ioTaskRunner->PostDelayedTask(
                     releaseTask, fml::TimeDelta::FromMilliseconds(ImageCompressor::releaseTimeMs));
             } else {
-                ImageProvider::WrapTaskAndPostToBackground(std::move(releaseTask));
+                ImageUtils::PostToBg(std::move(releaseTask));
             }
         }
         callback(skiaCanvasImage);
@@ -309,7 +310,7 @@ void ImageProvider::UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasI
     if (syncLoad) {
         task();
     } else {
-        ImageProvider::WrapTaskAndPostToBackground(std::move(task));
+        ImageUtils::PostToBg(std::move(task));
     }
 #endif
 }
@@ -325,7 +326,7 @@ void ImageProvider::CacheCanvasImage(const RefPtr<CanvasImage>& canvasImage, con
     auto skiaCanvasImage = AceType::DynamicCast<SkiaCanvasImage>(canvasImage);
     CHECK_NULL_VOID_NOLOG(skiaCanvasImage);
     LOGD("[ImageCache][CanvasImage] succeed caching image: %{public}s", key.c_str());
-    auto cached = std::make_shared<CachedImage>(skiaCanvasImage->GetFlutterCanvasImage());
+    auto cached = std::make_shared<Ace::CachedImage>(skiaCanvasImage->GetFlutterCanvasImage());
     cached->uniqueId = skiaCanvasImage->GetUniqueID();
     pipelineCtx->GetImageCache()->CacheImage(key, cached);
 #endif

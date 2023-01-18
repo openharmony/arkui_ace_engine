@@ -18,6 +18,7 @@
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
 #include "third_party/skia/include/core/SkPixelRef.h"
 
+#include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "core/image/image_provider.h"
 
@@ -47,6 +48,7 @@ void AnimatedImagePlayer::RenderFrame(const int32_t& index)
     auto taskExecutor = context->GetTaskExecutor();
     taskExecutor->PostTask(
         [weak = AceType::WeakClaim(this), index, dstWidth = dstWidth_, dstHeight = dstHeight_, taskExecutor] {
+            ACE_SCOPED_TRACE("decode frame %d", index);
             auto player = weak.Upgrade();
             if (!player) {
                 return;
