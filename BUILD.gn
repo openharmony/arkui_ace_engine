@@ -110,6 +110,7 @@ config("ace_test_config") {
   ldflags = [ "-Wl,-gc-sections" ]
 }
 
+# continuous optimization
 config("ace_unittest_config") {
   visibility = [ ":*" ]
   include_dirs = [
@@ -143,6 +144,11 @@ config("ace_unittest_config") {
   cflags_cc += [ "-fvisibility-inlines-hidden" ]
   ldflags = [ "-Wl,-gc-sections" ]
 
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
+
   defines += [ "ACE_UNITTEST" ]
 }
 
@@ -160,6 +166,12 @@ ohos_source_set("ace_test_log") {
     "hiviewdfx_hilog_native:libhilog",
   ]
 
+  configs = [ ":ace_unittest_config" ]
+}
+
+ohos_source_set("ace_unittest_log") {
+  sources = [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
+  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   configs = [ ":ace_unittest_config" ]
 }
 
