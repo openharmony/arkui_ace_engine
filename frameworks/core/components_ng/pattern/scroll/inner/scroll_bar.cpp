@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,14 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t STOP_DURATION = 2000; // 2000ms
+constexpr float KEY_TIME_START = 0.0f;
+constexpr float KEY_TIME_MIDDLE = 0.7f;
+constexpr float KEY_TIME_END = 1.0f;
+constexpr int32_t BAR_EXPAND_DURATION = 150; // 150ms, scroll bar width expands from 4dp to 8dp
+constexpr int32_t BAR_SHRINK_DURATION = 250; // 250ms, scroll bar width shrinks from 8dp to 4dp
+} // namespace
 
 ScrollBar::ScrollBar()
 {
@@ -60,10 +68,25 @@ bool ScrollBar::InBarRegion(const Point& point) const
     return false;
 }
 
+void ScrollBar::FlushBarWidth()
+{
+    SetBarRegion(paintOffset_, viewPortSize_);
+    if (shapeMode_ == ShapeMode::RECT) {
+        SetRectTrickRegion(paintOffset_, viewPortSize_, lastOffset_, estimatedHeight_);
+    } else {
+        SetRoundTrickRegion(paintOffset_, viewPortSize_, lastOffset_, estimatedHeight_);
+    }
+}
+
 void ScrollBar::UpdateScrollBarRegion(
     const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight)
 {
     if (!NearZero(estimatedHeight)) {
+        paintOffset_ = offset;
+        viewPortSize_ = size;
+        lastOffset_ = lastOffset;
+        estimatedHeight_ = estimatedHeight;
+        opacity_ = UINT8_MAX;
         SetBarRegion(offset, size);
         if (shapeMode_ == ShapeMode::RECT) {
             SetRectTrickRegion(offset, size, lastOffset, estimatedHeight);
@@ -165,7 +188,7 @@ bool ScrollBar::NeedScrollBar() const
 
 bool ScrollBar::NeedPaint() const
 {
-    return NeedScrollBar() && isScrollable_ && GreatNotEqual(normalWidth_.Value(), 0.0);
+    return NeedScrollBar() && isScrollable_ && GreatNotEqual(normalWidth_.Value(), 0.0) && opacity_ > 0;
 }
 
 double ScrollBar::GetNormalWidthToPx() const
@@ -203,13 +226,104 @@ void ScrollBar::SetGestureEvent()
                 bool inRegion = scrollBar->InBarRegion(point);
                 scrollBar->SetPressed(inRegion);
                 scrollBar->SetDriving(inRegion);
+                if (inRegion) {
+                    scrollBar->PlayGrowAnimation();
+                }
+                if (scrollBar->scrollEndAnimator_ && !scrollBar->scrollEndAnimator_->IsStopped()) {
+                    scrollBar->scrollEndAnimator_->Stop();
+                }
                 scrollBar->MarkNeedRender();
             }
             if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+                if (scrollBar->IsPressed()) {
+                    scrollBar->PlayShrinkAnimation();
+                }
                 scrollBar->SetPressed(false);
                 scrollBar->MarkNeedRender();
             }
         });
     }
+    if (!touchAnimator_) {
+        touchAnimator_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    }
+}
+
+void ScrollBar::PlayGrowAnimation()
+{
+    if (!touchAnimator_->IsStopped()) {
+        touchAnimator_->Stop();
+    }
+    touchAnimator_->ClearInterpolators();
+    auto activeWidth = activeWidth_.ConvertToPx();
+    auto inactiveWidth = inactiveWidth_.ConvertToPx();
+
+    auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(inactiveWidth, activeWidth, Curves::SHARP);
+    animation->AddListener([weakBar = AceType::WeakClaim(this)](double value) {
+        auto scrollBar = weakBar.Upgrade();
+        if (scrollBar) {
+            scrollBar->normalWidth_ = Dimension(value, DimensionUnit::PX);
+            scrollBar->FlushBarWidth();
+            scrollBar->MarkNeedRender();
+        }
+    });
+    touchAnimator_->AddInterpolator(animation);
+    touchAnimator_->SetDuration(BAR_EXPAND_DURATION);
+    touchAnimator_->Play();
+}
+
+void ScrollBar::PlayShrinkAnimation()
+{
+    if (!touchAnimator_->IsStopped()) {
+        touchAnimator_->Stop();
+    }
+    touchAnimator_->ClearInterpolators();
+    auto activeWidth = activeWidth_.ConvertToPx();
+    auto inactiveWidth = inactiveWidth_.ConvertToPx();
+
+    auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(activeWidth, inactiveWidth, Curves::SHARP);
+    animation->AddListener([weakBar = AceType::WeakClaim(this)](double value) {
+        auto scrollBar = weakBar.Upgrade();
+        if (scrollBar) {
+            scrollBar->normalWidth_ = Dimension(value, DimensionUnit::PX);
+            scrollBar->FlushBarWidth();
+            scrollBar->MarkNeedRender();
+        }
+    });
+    touchAnimator_->AddInterpolator(animation);
+    touchAnimator_->SetDuration(BAR_SHRINK_DURATION);
+    touchAnimator_->Play();
+}
+
+void ScrollBar::PlayBarEndAnimation()
+{
+    if (scrollEndAnimator_ && !scrollEndAnimator_->IsStopped()) {
+        scrollEndAnimator_->Stop();
+    }
+    if (scrollEndAnimator_) {
+        scrollEndAnimator_->Play();
+        return;
+    }
+
+    scrollEndAnimator_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    auto hiddenStartKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEY_TIME_START, UINT8_MAX);
+    auto hiddenMiddleKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEY_TIME_MIDDLE, UINT8_MAX);
+    auto hiddenEndKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEY_TIME_END, 0);
+    hiddenMiddleKeyframe->SetCurve(Curves::LINEAR);
+    hiddenEndKeyframe->SetCurve(Curves::FRICTION);
+
+    auto animation = AceType::MakeRefPtr<KeyframeAnimation<int32_t>>();
+    animation->AddKeyframe(hiddenStartKeyframe);
+    animation->AddKeyframe(hiddenMiddleKeyframe);
+    animation->AddKeyframe(hiddenEndKeyframe);
+    animation->AddListener([weakBar = AceType::WeakClaim(this)](int32_t value) {
+        auto scrollBar = weakBar.Upgrade();
+        if (scrollBar) {
+            scrollBar->opacity_ = value;
+            scrollBar->MarkNeedRender();
+        }
+    });
+    scrollEndAnimator_->AddInterpolator(animation);
+    scrollEndAnimator_->SetDuration(STOP_DURATION);
+    scrollEndAnimator_->Play();
 }
 } // namespace OHOS::Ace::NG

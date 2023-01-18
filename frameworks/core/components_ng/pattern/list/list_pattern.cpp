@@ -303,7 +303,6 @@ void ListPattern::MarkDirtyNodeSelf()
 
 void ListPattern::OnScrollEndCallback()
 {
-    SetScrollBarDriving(false);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
 }
