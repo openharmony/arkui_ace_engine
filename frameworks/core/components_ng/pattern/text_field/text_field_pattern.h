@@ -437,6 +437,8 @@ public:
         surfacePositionChangedCallbackId_ = id;
     }
 
+    void OnCursorMoveDone();
+
 private:
     void HandleBlurEvent();
     bool HasFocus() const;
