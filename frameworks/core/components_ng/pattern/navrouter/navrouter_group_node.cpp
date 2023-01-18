@@ -172,6 +172,17 @@ void NavRouterGroupNode::SetBackButtonEvent(const RefPtr<UINode>& parent)
         CHECK_NULL_VOID(navRouter);
         auto layoutProperty = navigation->GetLayoutProperty<NavigationLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
+
+        auto destinationContent = navDestination->GetContentNode();
+        if (destinationContent) {
+            auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+            CHECK_NULL_VOID(navDestinationPattern);
+            auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
+            CHECK_NULL_VOID(shallowBuilder);
+            shallowBuilder->MarkIsExecuteDeepRenderDone(false);
+            destinationContent->Clean();
+        }
+
         if (layoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {
             if (navDestination->GetPreNode()) {
                 navRouter->BackToPreNavDestination(navDestination->GetPreNode(), navigation);
