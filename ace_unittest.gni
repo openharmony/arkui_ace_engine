@@ -15,11 +15,17 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-# testcases output directory
+# ======================= unittest cases output directory ==================================================
 pattern_test_output_path = "ace_engine/NewFrameworkBackendComponents"
+gestures_test_output_path = "ace_engine/NewFrameworkBackendGestures"
+event_test_output_path = "ace_engine/NewFrameworkBackendEvent"
+base_test_outout_path = "ace_engine/NewFrameworkInfrastructure"
+syntax_test_output_path = "ace_engine/NewFrameworkSyntaxNodes"
+image_test_output_path = "ace_engine/NewFrameworkImageResourceLoading"
 
+# ======================== common template =================================================================
 test_pattern_sources = [
-  "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+  # base
   "$ace_root/frameworks/base/geometry/dimension.cpp",
   "$ace_root/frameworks/base/json/json_util.cpp",
   "$ace_root/frameworks/base/utils/base_id.cpp",
@@ -65,6 +71,8 @@ test_pattern_sources = [
   "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
   "$ace_root/frameworks/core/components_ng/property/property.cpp",
   "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
+
+  # pipeline
   "$ace_root/frameworks/core/pipeline/base/constants.cpp",
 
   # mock
@@ -87,12 +95,10 @@ test_pattern_sources = [
 ]
 
 test_pattern_deps = [
+  "$ace_root:ace_unittest_log",
   "$ace_root/frameworks/core/components/theme:build_theme_code",
   "$cjson_root:cjson_static",
   "//third_party/googletest:gmock_main",
 ]
-test_pattern_external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
-test_pattern_configs = [
-  "$ace_root:ace_unittest_config",
-  "$ace_root:ace_test_coverage_config",
-]
+
+test_pattern_configs = [ "$ace_root:ace_unittest_config" ]
