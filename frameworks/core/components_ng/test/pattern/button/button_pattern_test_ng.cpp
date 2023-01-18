@@ -383,8 +383,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest008, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     EXPECT_FALSE(buttonPattern == nullptr);
     auto buttonLayoutProperty = buttonPattern->GetLayoutProperty<ButtonLayoutProperty>();
@@ -440,8 +439,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest009, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     EXPECT_FALSE(buttonPattern == nullptr);
     auto buttonLayoutProperty = buttonPattern->GetLayoutProperty<ButtonLayoutProperty>();
@@ -498,8 +496,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest0010, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     EXPECT_FALSE(buttonPattern == nullptr);
     auto buttonLayoutAlgorithm = buttonPattern->CreateLayoutAlgorithm();
