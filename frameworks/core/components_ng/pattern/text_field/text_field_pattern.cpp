@@ -2135,9 +2135,16 @@ float TextFieldPattern::PreferredLineHeight()
     return static_cast<float>(lineHeightMeasureUtilParagraph_->GetHeight());
 }
 
+void TextFieldPattern::OnCursorMoveDone()
+{
+    caretUpdateType_ = CaretUpdateType::EVENT;
+    selectionMode_ = SelectionMode::NONE;
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
 void TextFieldPattern::CursorMoveLeft()
 {
-    LOGD("Handle cursor move left");
+    LOGI("Handle cursor move left");
     if (InSelectMode() && selectionMode_ == SelectionMode::SELECT_ALL) {
         textEditingValue_.caretPosition = 0;
     } else if (InSelectMode()) {
@@ -2145,13 +2152,12 @@ void TextFieldPattern::CursorMoveLeft()
     } else {
         textEditingValue_.CursorMoveLeft();
     }
-    selectionMode_ = SelectionMode::NONE;
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    OnCursorMoveDone();
 }
 
 void TextFieldPattern::CursorMoveRight()
 {
-    LOGD("Handle cursor move right");
+    LOGI("Handle cursor move right");
     if (InSelectMode() && selectionMode_ == SelectionMode::SELECT_ALL) {
         textEditingValue_.caretPosition = static_cast<int32_t>(textEditingValue_.text.length());
     } else if (InSelectMode()) {
@@ -2159,26 +2165,27 @@ void TextFieldPattern::CursorMoveRight()
     } else {
         textEditingValue_.CursorMoveRight();
     }
-    selectionMode_ = SelectionMode::NONE;
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    OnCursorMoveDone();
 }
 
 void TextFieldPattern::CursorMoveUp()
 {
-    LOGD("Handle cursor move up");
+    LOGI("Handle cursor move up");
     CHECK_NULL_VOID_NOLOG(IsTextArea());
     float verticalOffset = caretRect_.GetY() - PreferredLineHeight();
     textEditingValue_.caretPosition = static_cast<int32_t>(
         paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.GetX(), verticalOffset).pos_);
+    OnCursorMoveDone();
 }
 
 void TextFieldPattern::CursorMoveDown()
 {
-    LOGD("Handle cursor move down");
+    LOGI("Handle cursor move down");
     CHECK_NULL_VOID_NOLOG(IsTextArea());
     float verticalOffset = caretRect_.GetY() + PreferredLineHeight();
     textEditingValue_.caretPosition = static_cast<int32_t>(
         paragraph_->GetGlyphPositionAtCoordinateWithCluster(caretRect_.GetX(), verticalOffset).pos_);
+    OnCursorMoveDone();
 }
 
 void TextFieldPattern::Delete(int32_t start, int32_t end)
