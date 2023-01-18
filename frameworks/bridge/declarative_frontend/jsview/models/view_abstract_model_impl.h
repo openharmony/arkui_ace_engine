@@ -41,7 +41,7 @@ public:
     void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) override;
     void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) override;
     void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) override;
-    void SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle) override;
+    void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) override;
     void SetPadding(const Dimension& value) override;
     void SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
         const std::optional<Dimension>& left, const std::optional<Dimension>& right) override;

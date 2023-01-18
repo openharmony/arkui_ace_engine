@@ -85,10 +85,35 @@ enum class SpreadMethod {
 };
 
 enum class BlurStyle {
-    NoMaterial,
+    NO_MATERIAL = 0,
     THIN,
     REGULAR,
     THICK,
+    BACKGROUND_THIN,
+    BACKGROUND_REGULAR,
+    BACKGROUND_THICK,
+    BACKGROUND_ULTRA_THICK,
+};
+
+enum class ThemeColorMode {
+    SYSTEM = 0,
+    LIGHT,
+    DARK,
+};
+
+enum class AdaptiveColor {
+    DEFAULT = 0,
+    AVERAGE,
+};
+
+struct BlurStyleOption {
+    BlurStyle blurStyle = BlurStyle::NO_MATERIAL;
+    ThemeColorMode colorMode = ThemeColorMode::SYSTEM;
+    AdaptiveColor adaptiveColor = AdaptiveColor::DEFAULT;
+    bool operator == (const BlurStyleOption& other) const
+    {
+        return blurStyle == other.blurStyle && colorMode == other.colorMode && adaptiveColor == other.adaptiveColor;
+    }
 };
 
 struct LinearGradientInfo {
@@ -928,9 +953,9 @@ public:
         windowBlurStyle_ = style;
     }
 
-    void SetBlurStyle(BlurStyle style)
+    void SetBlurStyle(const BlurStyleOption& style)
     {
-        blurStyle = style;
+        blurStyle_ = style;
     }
 
     const Border& GetBorder() const
@@ -1116,9 +1141,9 @@ public:
         return windowBlurStyle_;
     }
 
-    BlurStyle GetBlurStyle()
+    const BlurStyleOption& GetBlurStyle() const
     {
-        return blurStyle;
+        return blurStyle_;
     }
 
     // Indicate how much size the decoration taken, excluding the content size.
@@ -1171,8 +1196,8 @@ private:
     // window blur style;
     WindowBlurStyle windowBlurStyle_ = WindowBlurStyle::STYLE_BACKGROUND_SMALL_LIGHT;
     Color colorBlend;
-    // window blur form rosen
-    BlurStyle blurStyle = BlurStyle::NoMaterial;
+    // blur from rosen
+    BlurStyleOption blurStyle_;
 };
 
 class Pattern final {
