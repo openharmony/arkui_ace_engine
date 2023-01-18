@@ -60,7 +60,7 @@ RenderLayer FlutterRenderWeb::GetRenderLayer()
     } else {
         holeLayer_->SetSize(drawSize_.Width(), drawSize_.Height());
     }
-    holeLayer_->SetOffset(GetCoordinatePoint().GetY(), GetCoordinatePoint().GetY());
+    holeLayer_->SetOffset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
 
     return AceType::RawPtr(holeLayer_);
 }

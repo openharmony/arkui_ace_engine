@@ -584,6 +584,8 @@ void WebPattern::OnAreaChangedInner()
     }
     webOffset_ = offset;
     UpdateTouchHandleForOverlay();
+    auto resizeOffset = Offset(offset.GetX(), offset.GetY());
+    delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
 }
 
 void WebPattern::OnWebSrcUpdate()
@@ -1126,7 +1128,7 @@ std::optional<OffsetF> WebPattern::GetCoordinatePoint()
 {
     auto frameNode = GetHost();
     CHECK_NULL_RETURN_NOLOG(frameNode, std::nullopt);
-    return frameNode->GetOffsetRelativeToWindow();
+    return frameNode->GetTransformRelativeOffset();
 }
 
 RectF WebPattern::ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle)
