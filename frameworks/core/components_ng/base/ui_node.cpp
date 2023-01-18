@@ -179,6 +179,24 @@ RefPtr<FrameNode> UINode::GetFocusParent() const
     return nullptr;
 }
 
+RefPtr<FocusHub> UINode::GetFirstFocusHubChild() const
+{
+    const auto* frameNode = AceType::DynamicCast<FrameNode>(this);
+    if (frameNode) {
+        auto focusHub = frameNode->GetFocusHub();
+        if (focusHub && focusHub->GetFocusType() != FocusType::DISABLE) {
+            return focusHub;
+        }
+    }
+    for (const auto& child : GetChildren()) {
+        auto focusHub = child->GetFirstFocusHubChild();
+        if (focusHub) {
+            return focusHub;
+        }
+    }
+    return nullptr;
+}
+
 void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const
 {
     auto uiChildren = GetChildren();
