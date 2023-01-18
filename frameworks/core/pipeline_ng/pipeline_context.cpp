@@ -324,11 +324,11 @@ void PipelineContext::SetupRootElement()
 
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
-    auto appBarNode = AppBarView::Create(stageNode);
+    auto appBarNode = installationFree_ ? AppBarView::Create(stageNode) : nullptr;
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
-        rootNode_->AddChild(ContainerModalView::Create(installationFree_ ? appBarNode : stageNode));
+        rootNode_->AddChild(ContainerModalView::Create(appBarNode ? appBarNode : stageNode));
     } else {
-        rootNode_->AddChild(installationFree_ ? appBarNode : stageNode);
+        rootNode_->AddChild(appBarNode ? appBarNode : stageNode);
     }
 #ifdef ENABLE_ROSEN_BACKEND
     if (!IsJsCard()) {

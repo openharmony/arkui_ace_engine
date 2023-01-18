@@ -31,6 +31,7 @@ const Dimension SHARE_IMAGE_SIZE = 24.0_vp;
 const Dimension MARGIN_TEXT = -8.0_vp;
 const Dimension MARGIN_BUTTON = 12.0_vp;
 const Dimension DEFAULT_CORNER_RADIUS_S = 18.0_vp;
+const Dimension TITLE_FONT_SIZE = 20.0_fp;
 const Color COLOR_PRIMARY = Color(0xe5000000);
 const Color CLICK_EFFECT_COLOR = Color(0x19000000);
 const Color COLOR_APP_BAR_BG = Color(0xffffffff);
@@ -80,7 +81,7 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
 
     textLayoutProperty->UpdateContent(themeConstants->GetString(pipeline->GetAppLabelId()));
     textLayoutProperty->UpdateMaxLines(2);
-    textLayoutProperty->UpdateFontSize(Dimension(20, DimensionUnit::FP));
+    textLayoutProperty->UpdateFontSize(TITLE_FONT_SIZE);
     textLayoutProperty->UpdateTextColor(COLOR_PRIMARY);
     textLayoutProperty->UpdateFontWeight(FontWeight::W500);
     textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
