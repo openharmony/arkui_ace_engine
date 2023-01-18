@@ -180,6 +180,7 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(src, data);
     if (!imageObj) {
         FailCallback(src.GetKey(), "Fail to build image object", sync);
+        return;
     }
     CacheImageObject(imageObj);
 
