@@ -76,12 +76,13 @@ void LazyForEachNode::UpdateLazyForEachItems(int32_t newStartIndex, int32_t newE
         return;
     }
 
+    std::unordered_set<std::optional<std::string>> oldIdsSet(ids_.begin(), ids_.end());
     // use new ids to create new child tree.
     for (const auto& id : newIds) {
         CHECK_NULL_VOID(id);
         auto uiNode = builder_->GetChildByKey(*id);
         CHECK_NULL_VOID(uiNode);
-        AddChild(uiNode);
+        AddChild(uiNode, DEFAULT_NODE_SLOT, oldIdsSet.find(id) != oldIdsSet.end());
     }
 
     // delete useless items.
