@@ -87,7 +87,7 @@ std::unique_ptr<fml::Mapping> FileAssetProvider::GetAsMapping(const std::string&
     return nullptr;
 }
 
-std::string FileAssetProvider::GetAssetPath(const std::string& assetName)
+std::string FileAssetProvider::GetAssetPath(const std::string& assetName, bool /* isAddHapPath */)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     for (const auto& basePath : assetBasePaths_) {
@@ -101,7 +101,7 @@ std::string FileAssetProvider::GetAssetPath(const std::string& assetName)
         return assetBasePath;
     }
     LOGE("Cannot find base path of %{public}s", assetName.c_str());
-    return "";
+    return {};
 }
 
 void FileAssetProvider::GetAssetList(const std::string& path, std::vector<std::string>& assetList)

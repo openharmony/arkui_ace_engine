@@ -21,6 +21,15 @@
 
 namespace OHOS::Ace {
 
+struct RawfileDescription {
+    // the rawfile fd
+    int fd = 0;
+    // the offset from where the rawfile starts in the hap
+    long offset = 0;
+    // the length of the rawfile in the hap
+    long length = 0;
+};
+
 class ResourceAdapter : public virtual AceType {
     DECLARE_ACE_TYPE(ResourceAdapter, AceType);
 
@@ -31,106 +40,144 @@ public:
     static RefPtr<ResourceAdapter> Create();
 
     virtual void Init(const ResourceInfo& resourceInfo) {}
+
     virtual void Reload() {}
+
     virtual void UpdateConfig(const ResourceConfiguration& config) {}
 
     virtual RefPtr<ThemeStyle> GetTheme(int32_t themeId)
     {
         return nullptr;
-    };
+    }
 
     virtual Color GetColor(uint32_t resId) = 0;
+
     virtual Color GetColorByName(const std::string& resName)
     {
         return {};
     }
+
     virtual Dimension GetDimension(uint32_t resId) = 0;
+
     virtual Dimension GetDimensionByName(const std::string& resName)
     {
         return {};
     }
+
     virtual std::string GetString(uint32_t resId) = 0;
+
     virtual std::string GetStringByName(const std::string& resName)
     {
-        return "";
+        return {};
     }
+
     virtual std::vector<std::string> GetStringArray(uint32_t resId) const = 0;
+
     virtual std::vector<std::string> GetStringArrayByName(const std::string& resName) const
     {
         return {};
     }
+
     virtual double GetDouble(uint32_t resId) = 0;
+
     virtual double GetDoubleByName(const std::string& resName)
     {
         return 0.0;
     }
+
     virtual int32_t GetInt(uint32_t resId) = 0;
+
     virtual int32_t GetIntByName(const std::string& resName)
     {
         return 0;
     }
+
     virtual std::string GetPluralString(uint32_t resId, int quantity)
     {
-        return "";
+        return {};
     }
+
     virtual std::string GetPluralStringByName(const std::string& resName, int quantity)
     {
-        return "";
+        return {};
     }
+
     virtual std::string GetMediaPath(uint32_t resId)
     {
-        return "";
+        return {};
     }
+
     virtual std::string GetMediaPathByName(const std::string& resName)
     {
-        return "";
+        return {};
     }
+
     virtual std::string GetRawfile(const std::string& fileName)
     {
-        return "";
+        return {};
     }
-    virtual bool GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]> &dest)
+
+    virtual bool GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest)
     {
         return false;
     }
-    virtual bool GetMediaData(uint32_t resId, size_t& len, std::unique_ptr<uint8_t[]> &dest)
+
+    virtual bool GetMediaData(uint32_t resId, size_t& len, std::unique_ptr<uint8_t[]>& dest)
     {
         return false;
     }
-    virtual bool GetMediaData(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]> &dest)
+
+    virtual bool GetMediaData(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]>& dest)
     {
         return false;
     }
+
     virtual bool GetBoolean(uint32_t resId) const
     {
         return false;
-    };
+    }
+
     virtual bool GetBooleanByName(const std::string& resName) const
     {
         return false;
     }
+
     virtual std::vector<uint32_t> GetIntArray(uint32_t resId) const
     {
         return {};
-    };
+    }
+
     virtual std::vector<uint32_t> GetIntArrayByName(const std::string& resName) const
     {
         return {};
     }
+
     virtual bool GetResource(uint32_t resId, std::ostream& dest) const
     {
         return false;
-    };
+    }
+
     virtual bool GetResource(const std::string& resId, std::ostream& dest) const
     {
         return false;
-    };
+    }
+
     virtual bool GetIdByName(const std::string& resName, const std::string& resType, uint32_t& resId) const
     {
         return false;
     }
 
     virtual void UpdateResourceManager(const std::string& bundleName, const std::string& moduleName) {}
+
+    virtual bool GetRawFileDescription(const std::string& rawfileName, RawfileDescription& rawfileDescription) const
+    {
+        return false;
+    }
+
+    virtual bool GetMediaById(const int32_t& resId, std::string& mediaPath) const
+    {
+        return false;
+    }
 };
 
 } // namespace OHOS::Ace

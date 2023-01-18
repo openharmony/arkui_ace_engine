@@ -156,7 +156,7 @@ public:
      * @return plural string value corresponding to the name and count.
      */
     std::string GetPluralStringByName(const std::string& resName, int count) const;
-    
+
     /*
      * Get bool value from platform constants.
      * NOTE: false will be returned if not found or value is not boolean.
@@ -235,6 +235,22 @@ public:
      */
     std::string GetRawfile(const std::string& fileName) const;
 
+    /*
+     * Get rawfile file description.
+     * NOTE: false value will be returned if not found.
+     * @param[in] rawfileName Target rawfile, rawfileDescription Target file info.
+     * @return success or not to get file info.
+     */
+    bool GetRawFileDescription(const std::string& rawfileName, RawfileDescription& rawfileDescription) const;
+
+    /*
+     * Get resource media file path.
+     * NOTE: false value will be returned if not found.
+     * @param[in] resId Target resource id, mediaPath Target media path.
+     * @return success or not to get media path.
+     */
+    bool GetMediaById(const int32_t& resId, std::string& mediaPath) const;
+
     template<class T>
     bool GetMediaResource(T& resId, std::ostream& dest) const
     {
@@ -245,7 +261,7 @@ public:
     }
 
     template<class T>
-    bool GetMediaData(T& resId, size_t& len, std::unique_ptr<uint8_t[]> &dest)
+    bool GetMediaData(T& resId, size_t& len, std::unique_ptr<uint8_t[]>& dest)
     {
         if (!resAdapter_) {
             return false;
@@ -253,7 +269,7 @@ public:
         return resAdapter_->GetMediaData(resId, len, dest);
     }
 
-    bool GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]> &dest)
+    bool GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest)
     {
         if (!resAdapter_) {
             return false;
@@ -295,6 +311,7 @@ public:
             resAdapter_->Reload();
         }
     }
+
 private:
     static const ResValueWrapper* GetPlatformConstants(uint32_t key);
     static const ResValueWrapper* styleMapDefault[];

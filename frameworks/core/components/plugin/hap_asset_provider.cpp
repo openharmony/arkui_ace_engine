@@ -62,7 +62,7 @@ std::unique_ptr<fml::Mapping> HapAssetProvider::GetAsMapping(const std::string& 
     return nullptr;
 }
 
-std::string HapAssetProvider::GetAssetPath(const std::string& assetName)
+std::string HapAssetProvider::GetAssetPath(const std::string& assetName, bool isAddHapPath)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     for (const auto& basePath : assetBasePaths_) {
@@ -71,9 +71,9 @@ std::string HapAssetProvider::GetAssetPath(const std::string& assetName)
         if (!hasFile) {
             continue;
         }
-        return hapPath_ + "/" + basePath;
+        return isAddHapPath? (hapPath_ + "/" + basePath) : fileName;
     }
-    return "";
+    return {};
 }
 
 void HapAssetProvider::GetAssetList(const std::string& path, std::vector<std::string>& assetList)
@@ -90,5 +90,10 @@ void HapAssetProvider::GetAssetList(const std::string& path, std::vector<std::st
             continue;
         }
     }
+}
+
+bool HapAssetProvider::GetFileInfo(const std::string& /* fileName */, MediaFileInfo& /* fileInfo */) const
+{
+    return false;
 }
 } // namespace OHOS::Ace::Plugin
