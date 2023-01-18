@@ -469,7 +469,7 @@ std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
     if (!packagePathStr_.empty()) {
         return "file:///" + packagePathStr_ + "resources/rawfile/" + fileName;
     }
-    return "resource://RAWFILE/" + fileName;
+    return "resource://rawfile/" + fileName;
 }
 
 bool ResourceAdapterImpl::GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest)
