@@ -251,7 +251,7 @@ public:
     void SetSelectDate(const PickerDate& value)
     {
         selectedDate_ = value;
-        AdjustSolarDate(selectedDate_, limitStartDate_, limitEndDate_);
+        AdjustSolarDate(selectedDate_, startDateSolar_, endDateSolar_);
         selectedLunar_ = SolarToLunar(selectedDate_);
     }
 
