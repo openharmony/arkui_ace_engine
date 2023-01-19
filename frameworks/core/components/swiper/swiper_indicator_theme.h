@@ -68,12 +68,16 @@ public:
                 LOGW("find pattern of swiper fail");
                 return theme;
             }
-            theme->color_ = swiperPattern->GetAttr<Color>("indicator_color", Color::RED);
-            theme->hotZoneColor_ = swiperPattern->GetAttr<Color>("indicator_hotzone_color", Color::RED);
-            theme->indicatorTextFocusColor_ = swiperPattern->GetAttr<Color>("indicator_text_color_focused", Color::RED);
+            theme->color_ = swiperPattern->GetAttr<Color>("indicator_color", Color::TRANSPARENT);
+            theme->hotZoneColor_ = swiperPattern->GetAttr<Color>("indicator_hotzone_color", Color::TRANSPARENT);
+            theme->indicatorTextFocusColor_ =
+                swiperPattern->GetAttr<Color>("indicator_text_color_focused", Color::TRANSPARENT);
             theme->digitalIndicatorTextStyle_.SetTextColor(
-                swiperPattern->GetAttr<Color>("indicator_text_color", Color::RED));
-            theme->selectedColor_ = swiperPattern->GetAttr<Color>("indicator_color_selected", Color::RED);
+                swiperPattern->GetAttr<Color>("indicator_text_color", Color::TRANSPARENT));
+            theme->selectedColor_ = swiperPattern->GetAttr<Color>("indicator_color_selected", Color::TRANSPARENT);
+            theme->hoverColor_ = swiperPattern->GetAttr<Color>("indicator_color_hover", Color::TRANSPARENT);
+            theme->pressedColor_ = swiperPattern->GetAttr<Color>("indicator_color_pressed", Color::TRANSPARENT);
+            theme->focusedColor_ = swiperPattern->GetAttr<Color>("indicator_color_focused", Color::TRANSPARENT);
             return theme;
         }
     };
@@ -88,6 +92,21 @@ public:
     const Color& GetSelectedColor() const
     {
         return selectedColor_;
+    }
+
+    const Color& GetHoverColor() const
+    {
+        return hoverColor_;
+    }
+
+    const Color& GetPressedColor() const
+    {
+        return pressedColor_;
+    }
+
+    const Color& GetFocusedColor() const
+    {
+        return focusedColor_;
     }
 
     const Dimension& GetSize() const
@@ -176,6 +195,9 @@ protected:
 private:
     Color color_;
     Color selectedColor_;
+    Color hoverColor_;
+    Color pressedColor_;
+    Color focusedColor_;
     Dimension size_;
     Dimension selectedSize_;
     Dimension indicatorPointPadding_;

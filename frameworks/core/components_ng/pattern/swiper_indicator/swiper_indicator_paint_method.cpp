@@ -36,6 +36,9 @@ namespace {
 constexpr uint32_t GRADIENT_COLOR_SIZE = 3;
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr Dimension INDICATOR_PADDING_DEFAULT = 13.0_vp;
+constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
+constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
+constexpr float INDICATOR_ZOOM_IN_SCALE_DEFAULT = 1.0f;
 
 } // namespace
 
@@ -127,15 +130,120 @@ void SwiperIndicatorPaintMethod::PaintContent(
     if (LessNotEqual(userSize, 0.0)) {
         userSize = swiperTheme->GetSize().ConvertToPx();
     }
+
+    auto indicatorPadding = INDICATOR_PADDING_DEFAULT;
+    auto zoomInScale = INDICATOR_ZOOM_IN_SCALE_DEFAULT;
+    if (isHover_ || isPressed_) {
+        zoomInScale = INDICATOR_ZOOM_IN_SCALE;
+        indicatorPadding = INDICATOR_PADDING_HOVER;
+    }
     auto radius = userSize / 2.0;
     auto selectedSize = userSize * 2.0f;
+    bool hasIndicatorHovered =
+        HasIndicatorHovered(userSize, indicatorSize, zoomInScale, indicatorPadding.ConvertToPx());
 
-    Offset center = Offset(INDICATOR_PADDING_DEFAULT.ConvertToPx() + radius, indicatorSize / 2.0);
+    OffsetF center = OffsetF(static_cast<float>(indicatorPadding.ConvertToPx() + radius * zoomInScale),
+        static_cast<float>(indicatorSize / 2.0));
+    auto unselectedColor = paintProperty->GetColor().value_or(swiperTheme->GetColor());
+    auto selectedColor = paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor());
+
     for (int32_t i = 0; i < itemCount_; i++) {
         if (i != currentIndex_) {
-            RSBrush brush;
-            brush.SetColor(ToRSColor(paintProperty->GetColor().value_or(swiperTheme->GetColor())));
-            canvas.AttachBrush(brush);
+            PaintUnselectedIndicator(canvas, center, unselectedColor, radius, zoomInScale, hasIndicatorHovered);
+            center += OffsetF(static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() + userSize * zoomInScale), 0.0);
+            continue;
+        }
+
+        PaintSelectedIndicator(canvas, center, selectedColor, userSize, zoomInScale, hasIndicatorHovered);
+        center += OffsetF(static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() + selectedSize * zoomInScale), 0.0);
+    }
+}
+
+void SwiperIndicatorPaintMethod::PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center, const Color& color,
+    double radius, double zoomInScale, bool hasIndicatorHovered)
+{
+    RSBrush brush;
+    brush.SetColor(ToRSColor(color));
+    canvas.AttachBrush(brush);
+    rosen::Point point;
+    if (axis_ == Axis::HORIZONTAL) {
+        point.SetX(center.GetX());
+        point.SetY(center.GetY());
+    } else {
+        point.SetX(center.GetY());
+        point.SetY(center.GetX());
+    }
+
+    if (hasIndicatorHovered) {
+        if (IsIndicatorPointHovered(point.GetX(), point.GetY(), static_cast<float>(radius * zoomInScale))) {
+            zoomInScale = INDICATOR_ZOOM_IN_SCALE;
+        } else {
+            zoomInScale = INDICATOR_ZOOM_IN_SCALE_DEFAULT;
+        }
+    }
+
+    canvas.DrawCircle(point, radius * zoomInScale);
+}
+
+void SwiperIndicatorPaintMethod::PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& center, const Color& color,
+    double userSize, double zoomInScale, bool hasIndicatorHovered)
+{
+    auto radius = userSize / 2.0;
+    auto selectedSize = userSize * 2.0f;
+    RSBrush brush;
+    brush.SetColor(ToRSColor(color));
+    canvas.AttachBrush(brush);
+    Offset selectOffset;
+    if (axis_ == Axis::HORIZONTAL) {
+        selectOffset.SetX(center.GetX() - radius * zoomInScale);
+        selectOffset.SetY(center.GetY() - radius * zoomInScale);
+    } else {
+        selectOffset.SetX(center.GetY() - radius * zoomInScale);
+        selectOffset.SetY(center.GetX() - radius * zoomInScale);
+    }
+
+    if (hasIndicatorHovered) {
+        auto rectWidth = axis_ == Axis::HORIZONTAL ? selectedSize * zoomInScale : userSize * zoomInScale;
+        auto rectHeight = axis_ == Axis::HORIZONTAL ? userSize * zoomInScale : selectedSize * zoomInScale;
+        RectF selectedRect(selectOffset.GetX(), selectOffset.GetY(), rectWidth, rectHeight);
+        if (selectedRect.IsInRegion(hoverPoint_)) {
+            zoomInScale = INDICATOR_ZOOM_IN_SCALE;
+        } else {
+            zoomInScale = INDICATOR_ZOOM_IN_SCALE_DEFAULT;
+        }
+    }
+
+    if (axis_ == Axis::HORIZONTAL) {
+        selectOffset.SetX(center.GetX() - radius * zoomInScale);
+        selectOffset.SetY(center.GetY() - radius * zoomInScale);
+    } else {
+        selectOffset.SetX(center.GetY() - radius * zoomInScale);
+        selectOffset.SetY(center.GetX() - radius * zoomInScale);
+    }
+
+    auto rectWidth = axis_ == Axis::HORIZONTAL ? selectedSize * zoomInScale + selectOffset.GetX()
+                                               : userSize * zoomInScale + selectOffset.GetX();
+    auto rectHeight = axis_ == Axis::HORIZONTAL ? userSize * zoomInScale + selectOffset.GetY()
+                                                : selectedSize * zoomInScale + selectOffset.GetY();
+    canvas.DrawRoundRect({ { selectOffset.GetX(), selectOffset.GetY(), rectWidth, rectHeight }, radius * zoomInScale,
+        radius * zoomInScale });
+}
+
+bool SwiperIndicatorPaintMethod::IsIndicatorPointHovered(float x, float y, float radius)
+{
+    return hoverPoint_.GetX() >= (x - radius) && hoverPoint_.GetX() <= (x + radius) &&
+           hoverPoint_.GetY() >= (y - radius) && hoverPoint_.GetY() <= (y + radius);
+}
+
+bool SwiperIndicatorPaintMethod::HasIndicatorHovered(
+    double userSize, float indicatorSize, double zoomInScale, double indicatorPaddingPX)
+{
+    auto radius = userSize / 2.0;
+    auto selectedSize = userSize * 2.0f;
+    OffsetF center =
+        OffsetF(static_cast<float>(indicatorPaddingPX + radius * zoomInScale), static_cast<float>(indicatorSize / 2.0));
+    for (int32_t i = 0; i < itemCount_; i++) {
+        if (i != currentIndex_) {
             rosen::Point point;
             if (axis_ == Axis::HORIZONTAL) {
                 point.SetX(center.GetX());
@@ -145,28 +253,32 @@ void SwiperIndicatorPaintMethod::PaintContent(
                 point.SetY(center.GetX());
             }
 
-            canvas.DrawCircle(point, radius);
-            center += Offset(INDICATOR_ITEM_SPACE.ConvertToPx() + userSize, 0.0);
+            if (isHover_ && IsIndicatorPointHovered(point.GetX(), point.GetY(), radius * zoomInScale)) {
+                return true;
+            }
+
+            center += OffsetF(static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() + userSize * zoomInScale), 0.0f);
             continue;
         }
-        RSBrush brush;
-        brush.SetColor(ToRSColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor())));
-        canvas.AttachBrush(brush);
         Offset selectOffset;
         if (axis_ == Axis::HORIZONTAL) {
-            selectOffset.SetX(center.GetX() - radius);
-            selectOffset.SetY(center.GetY() - radius);
+            selectOffset.SetX(center.GetX() - radius * zoomInScale);
+            selectOffset.SetY(center.GetY() - radius * zoomInScale);
         } else {
-            selectOffset.SetX(center.GetY() - radius);
-            selectOffset.SetY(center.GetX() - radius);
+            selectOffset.SetX(center.GetY() - radius * zoomInScale);
+            selectOffset.SetY(center.GetX() - radius * zoomInScale);
         }
-        auto rectWidth =
-            axis_ == Axis::HORIZONTAL ? selectedSize + selectOffset.GetX() : userSize + selectOffset.GetX();
-        auto rectHeight =
-            axis_ == Axis::HORIZONTAL ? userSize + selectOffset.GetY() : selectedSize + selectOffset.GetY();
-        canvas.DrawRoundRect({ { selectOffset.GetX(), selectOffset.GetY(), rectWidth, rectHeight }, radius, radius });
-        center += Offset(INDICATOR_ITEM_SPACE.ConvertToPx() + selectedSize, 0.0);
+        auto rectWidth = axis_ == Axis::HORIZONTAL ? selectedSize * zoomInScale : userSize * zoomInScale;
+        auto rectHeight = axis_ == Axis::HORIZONTAL ? userSize * zoomInScale : selectedSize * zoomInScale;
+
+        RectF selectedRect(selectOffset.GetX(), selectOffset.GetY(), rectWidth, rectHeight);
+        if (isHover_ && selectedRect.IsInRegion(hoverPoint_)) {
+            return true;
+        }
+        center += OffsetF(static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() + selectedSize * zoomInScale), 0.0f);
     }
+
+    return false;
 }
 
 } // namespace OHOS::Ace::NG
