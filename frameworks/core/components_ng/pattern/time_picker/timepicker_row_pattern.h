@@ -22,9 +22,14 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
+#include "core/components_ng/pattern/time_picker/timepicker_paint_method.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const Dimension TIME_FOCUS_PAINT_WIDTH = 2.0_vp;
+}
+
 class TimePickerRowPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(TimePickerRowPattern, LinearLayoutPattern);
 
@@ -45,7 +50,9 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<TimePickerPaintMethod>();
+        auto paintMethod = MakeRefPtr<TimePickerPaintMethod>();
+        paintMethod->SetEnabled(enabled_);
+        return paintMethod;
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
@@ -241,7 +248,15 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, FocusPattern());
+        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+        CHECK_NULL_RETURN(pickerTheme, FocusPattern());
+        auto focusColor = pickerTheme->GetFocusColor();
+        FocusPaintParam focusPaintParams;
+        focusPaintParams.SetPaintColor(focusColor);
+        focusPaintParams.SetPaintWidth(TIME_FOCUS_PAINT_WIDTH);
+        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -260,7 +275,15 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
+    void InitDisabled();
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void PaintFocusState();
+    void SetButtonIdeaSize();
+    double SetAmPmButtonIdeaSize();
 
+    RefPtr<ClickEvent> clickEventListener_;
+    bool enabled_ = true;
+    int32_t focusKeyID_ = 0;
     std::map<RefPtr<FrameNode>, std::vector<std::string>> options_;
     uint32_t showCount_ = 0;
     // true, use 24 hours style; false, use 12 hours style.

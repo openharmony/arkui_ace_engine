@@ -19,13 +19,13 @@
 #include <utility>
 
 #include "base/i18n/localization.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_base_component.h"
 #include "core/components/picker/picker_date_component.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_layout_algorithm.h"
-#include "core/components_ng/pattern/time_picker/timepicker_paint_method.h"
 #include "core/components_ng/pattern/time_picker/toss_animation_controller.h"
 
 namespace OHOS::Ace::NG {
@@ -106,6 +106,7 @@ public:
     void SetShowCount(const uint32_t showCount)
     {
         showCount_ = showCount;
+        GetHost()->MarkModifyDone();
     }
 
     void HandleChangeCallback(bool isAdd, bool needNotify)
@@ -193,6 +194,17 @@ private:
     void HandleCurveStopped();
     void ScrollOption(double delta);
 
+    void OnTouchDown();
+    void OnTouchUp();
+    void InitMouseAndPressEvent();
+    void HandleMouseEvent(bool isHover);
+    void SetButtonBackgroundColor(const Color& pressColor);
+    void PlayPressAnimation(const Color& pressColor);
+
+    Color pressColor_;
+    Color hoverColor_;
+    RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<InputEvent> mouseEvent_;
     bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
     std::map<RefPtr<FrameNode>, std::vector<std::string>> options_;
     ColumnChangeCallback changeCallback_;

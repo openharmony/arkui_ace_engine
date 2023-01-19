@@ -41,6 +41,10 @@ public:
     static RefPtr<FrameNode> CreateConfirmNode(const RefPtr<FrameNode>& dateNode, DialogEvent& acceptEvent);
     static RefPtr<FrameNode> CreateCancelNode(NG::DialogGestureEvent& cancelEvent);
     static RefPtr<FrameNode> CreateBoxNode();
+
+private:
+    static RefPtr<FrameNode> CreateStackNode();
+    static RefPtr<FrameNode> CreateButtonNode();
 };
 } // namespace OHOS::Ace::NG
 

@@ -19,7 +19,10 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
@@ -50,15 +53,41 @@ void TextPickerView::Create()
         SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
         showCount = OPTION_COUNT_PHONE_LANDSCAPE;
     }
+    auto textColumnNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<TextPickerColumnPattern>(); });
     if (textPickerNode->GetChildren().empty()) {
         for (uint32_t index = 0; index < showCount; index++) {
             auto textNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             CHECK_NULL_VOID(textNode);
-            textNode->MountToParent(textPickerNode);
+            textNode->MountToParent(textColumnNode);
         }
+        auto stackHourNode = CreateStackNode();
+        auto buttonYearNode = CreateButtonNode();
+        buttonYearNode->MountToParent(stackHourNode);
+        textColumnNode->MountToParent(stackHourNode);
+        textColumnNode->MarkModifyDone();
+        textColumnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto layoutProperty = stackHourNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        stackHourNode->MountToParent(textPickerNode);
     }
     stack->Push(textPickerNode);
+}
+
+RefPtr<FrameNode> TextPickerView::CreateStackNode()
+{
+    auto stackId = ElementRegister::GetInstance()->MakeUniqueId();
+    return FrameNode::GetOrCreateFrameNode(
+        V2::STACK_ETS_TAG, stackId, []() { return AceType::MakeRefPtr<StackPattern>(); });
+}
+
+RefPtr<FrameNode> TextPickerView::CreateButtonNode()
+{
+    auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
+    return FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
 }
 
 void TextPickerView::SetSelected(uint32_t value)
