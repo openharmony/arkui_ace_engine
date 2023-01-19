@@ -268,7 +268,9 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
 {
     // inner scrollbar
     if (scrollBar_) {
-        scrollBar_->SetScrollable(IsScrollable());
+        auto mainSize = axis_ == Axis::VERTICAL ? viewPort.Height() : viewPort.Width();
+        bool scrollable = GreatNotEqual(estimatedHeight, mainSize);
+        scrollBar_->SetScrollable(IsScrollable() && scrollable);
         Offset scrollOffset = { offset, offset }; // fit for w/h switched.
         scrollBar_->UpdateScrollBarRegion(Offset(), viewPort, scrollOffset, estimatedHeight);
         scrollBar_->MarkNeedRender();
