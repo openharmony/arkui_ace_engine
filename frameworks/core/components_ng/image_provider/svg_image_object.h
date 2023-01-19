@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,28 +24,28 @@ class SvgImageObject : public ImageObject {
     DECLARE_ACE_TYPE(SvgImageObject, ImageObject);
 
 public:
-    SvgImageObject(
-        const ImageSourceInfo& sourceInfo, const SizeF& imageSize, int32_t frameCount, const RefPtr<ImageData>& data)
-        : ImageObject(sourceInfo, imageSize, frameCount, data)
-    {}
+    SvgImageObject(const ImageSourceInfo& src, const SizeF& imageSize) : ImageObject(src, imageSize, nullptr) {}
     ~SvgImageObject() override = default;
 
-    static RefPtr<SvgImageObject> Create(
-        const ImageSourceInfo& sourceInfo, const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data);
+    static RefPtr<SvgImageObject> Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data);
     const RefPtr<SvgDomBase>& GetSVGDom() const;
 
-    void MakeCanvasImage(
-        const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
-
-    // return true if process is successful
-    bool MakeSvgDom(const std::optional<Color>& svgFillColor);
+    RefPtr<ImageObject> Clone() override
+    {
+        return Claim(this);
+    }
 
 private:
+    void MakeCanvasImage(
+        const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
+
+    // return true if process is successful
+    bool MakeSvgDom(const RefPtr<ImageData>& data, const std::optional<Color>& svgFillColor);
+
     RefPtr<SvgDomBase> svgDomBase_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SvgImageObject);
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_SVG_IMAGE_OBJECT_H

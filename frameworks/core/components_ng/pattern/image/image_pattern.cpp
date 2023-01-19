@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,6 +81,17 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
     return task;
 }
 
+void ImagePattern::SetRedrawCallback()
+{
+    // set animation flush function for svg / gif
+    CHECK_NULL_VOID_NOLOG(image_);
+    image_->SetRedrawCallback([weak = WeakClaim(RawPtr(GetHost()))] {
+        auto imageNode = weak.Upgrade();
+        CHECK_NULL_VOID(imageNode);
+        imageNode->MarkNeedRenderOnly();
+    });
+}
+
 void ImagePattern::OnImageLoadSuccess()
 {
     auto host = GetHost();
@@ -97,7 +108,10 @@ void ImagePattern::OnImageLoadSuccess()
     image_ = loadingCtx_->MoveCanvasImage();
     srcRect_ = loadingCtx_->GetSrcRect();
     dstRect_ = loadingCtx_->GetDstRect();
+
     SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
+    SetRedrawCallback();
+
     // clear alt data
     altLoadingCtx_ = nullptr;
     altImage_ = nullptr;
@@ -160,7 +174,7 @@ void ImagePattern::SetImagePaintConfig(
         CHECK_NULL_VOID(host);
         auto borderRadius = host->GetRenderContext()->GetBorderRadius();
         BorderRadiusArray radiusXY = { PointF(borderRadius->radiusTopLeft->ConvertToPx(),
-                                                                borderRadius->radiusTopLeft->ConvertToPx()),
+                                           borderRadius->radiusTopLeft->ConvertToPx()),
             PointF(borderRadius->radiusTopRight->ConvertToPx(), borderRadius->radiusTopRight->ConvertToPx()),
             PointF(borderRadius->radiusBottomLeft->ConvertToPx(), borderRadius->radiusBottomLeft->ConvertToPx()),
             PointF(borderRadius->radiusBottomRight->ConvertToPx(), borderRadius->radiusBottomRight->ConvertToPx()) };
@@ -196,21 +210,20 @@ void ImagePattern::LoadImageDataIfNeed()
     CHECK_NULL_VOID(imageLayoutProperty);
     auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(imageRenderProperty);
-    auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
-    UpdateInternalResource(currentSourceInfo);
+    auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    UpdateInternalResource(src);
     std::optional<Color> svgFillColorOpt = std::nullopt;
-    if (currentSourceInfo.IsSvg()) {
-        svgFillColorOpt = currentSourceInfo.GetFillColor();
+    if (src.IsSvg()) {
+        svgFillColorOpt = src.GetFillColor();
     }
 
-    if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != currentSourceInfo ||
-        (currentSourceInfo.IsSvg() && loadingCtx_->GetSvgFillColor() != svgFillColorOpt)) {
+    if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src ||
+        (src.IsSvg() && loadingCtx_->GetSvgFillColor() != svgFillColorOpt)) {
         LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
 
         bool syncLoad = imageLayoutProperty->GetSyncModeValue(false);
-        loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(currentSourceInfo, std::move(loadNotifier), syncLoad);
-
-        loadingCtx_->SetSvgFillColor(svgFillColorOpt);
+        loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad);
+        LOGD("start loading image %{public}s", src.ToString().c_str());
         loadingCtx_->LoadImageData();
     }
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
@@ -225,7 +238,6 @@ void ImagePattern::LoadImageDataIfNeed()
             (altLoadingCtx_ && altImageSourceInfo.IsSvg() && altSvgFillColorOpt.has_value() &&
                 altLoadingCtx_->GetSvgFillColor() != altSvgFillColorOpt)) {
             altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(altImageSourceInfo, std::move(altLoadNotifier));
-            altLoadingCtx_->SetSvgFillColor(altSvgFillColorOpt);
             altLoadingCtx_->LoadImageData();
         }
     }
@@ -263,8 +275,8 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
         }
 
         // calculate params for [altLoadingCtx] to do [MakeCanvasImage] if component size is already settled
-        ImageLoadingContext::MakeCanvasImageIfNeed(pattern->altLoadingCtx_, geometryNode->GetContentSize(), true,
-            imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER));
+        pattern->altLoadingCtx_->MakeCanvasImageIfNeed(
+            geometryNode->GetContentSize(), true, imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER));
     };
     return task;
 }
@@ -300,13 +312,14 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
     if (!sourceInfo.IsInternalResource()) {
         return;
     }
+
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
     auto iconPath = iconTheme->GetIconPath(sourceInfo.GetResourceId());
     if (!iconPath.empty()) {
-        sourceInfo.SetSrc(iconPath);
+        sourceInfo.SetSrc(iconPath, sourceInfo.GetFillColor());
         auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
@@ -366,6 +379,13 @@ void ImagePattern::OnWindowShow()
 {
     isShow_ = true;
     LoadImageDataIfNeed();
+}
+
+void ImagePattern::OnVisibleChange(bool visible)
+{
+    CHECK_NULL_VOID(image_);
+    // control svg / gif animation
+    image_->ControlAnimation(visible);
 }
 
 void ImagePattern::OnAttachToFrameNode()

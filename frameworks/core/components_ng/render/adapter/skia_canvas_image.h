@@ -47,16 +47,6 @@ public:
 #endif
         return nullptr;
     }
-
-    virtual fml::RefPtr<flutter::CanvasImage> GetFlutterCanvasImage() const
-    {
-#ifndef NG_BUILD
-        if (image_) {
-            return image_;
-        }
-#endif
-        return nullptr;
-    }
     virtual sk_sp<SkData> GetCompressData() const
     {
 #ifndef NG_BUILD
@@ -110,6 +100,15 @@ public:
         uniqueId_ = id;
 #endif
     }
+#ifndef NG_BUILD
+    virtual fml::RefPtr<flutter::CanvasImage> GetFlutterCanvasImage() const
+    {
+        if (image_) {
+            return image_;
+        }
+        return nullptr;
+    }
+#endif
     void ReplaceSkImage(flutter::SkiaGPUObject<SkImage> newSkGpuObjSkImage);
     int32_t GetWidth() const override;
     int32_t GetHeight() const override;
