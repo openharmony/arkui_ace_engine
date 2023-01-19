@@ -162,6 +162,7 @@ void WindowPattern::OnShow()
 {
     onShow_ = true;
     rsUIDirector_->GoForeground();
+    rsUIDirector_->SendMessages();
 }
 
 void WindowPattern::OnHide()

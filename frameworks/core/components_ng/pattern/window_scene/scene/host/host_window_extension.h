@@ -27,9 +27,6 @@ public:
     HostWindowExtension(const sptr<Rosen::Session>& session) : HostWindowPattern(session) {}
     ~HostWindowExtension() override = default;
 
-protected:
-    void OnAttachToFrameNode() override;
-
 private:
     ACE_DISALLOW_COPY_AND_MOVE(HostWindowExtension);
 };

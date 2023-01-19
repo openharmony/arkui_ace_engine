@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_SCENE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_SCENE_H
 
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/window_scene/scene/host/host_window_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -28,15 +27,19 @@ public:
     HostWindowScene(const sptr<Rosen::Session>& session) : HostWindowPattern(session) {}
     ~HostWindowScene() override = default;
 
-    void OnModifyDone() override;
-
 protected:
-    void OnAttachToFrameNode() override;
+    void InitContent() override;
+
+    void OnForeground() override;
+    void OnBackground() override;
 
 private:
-    void OnClick();
+    void BufferAvailableCallback();
 
-    RefPtr<ClickEvent> clickListener_;
+    bool initialized_ = false;
+
+    friend class HostWindowSceneModel;
+
     ACE_DISALLOW_COPY_AND_MOVE(HostWindowScene);
 };
 

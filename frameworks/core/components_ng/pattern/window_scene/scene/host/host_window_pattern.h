@@ -18,6 +18,7 @@
 
 #include "session/scene/host/include/session.h"
 
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -26,21 +27,22 @@ class HostWindowPattern : public Pattern {
     DECLARE_ACE_TYPE(HostWindowPattern, Pattern);
 
 public:
-    HostWindowPattern(const sptr<Rosen::Session>& session) : session_(session) {}
+    HostWindowPattern(const sptr<Rosen::Session>& session);
     ~HostWindowPattern() override = default;
-
-    bool IsAtomicNode() const override
-    {
-        return false;
-    }
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
-protected:
-    virtual void InitContent();
+    void OnModifyDone() override;
 
-    virtual void OnForeground();
-    virtual void OnBackground();
+protected:
+    void OnAttachToFrameNode() override;
+
+    virtual void InitContent() {}
+
+    virtual void OnForeground() {}
+    virtual void OnBackground() {}
+
+    int32_t instanceId_ = -1;
 
     RefPtr<FrameNode> startingNode_;
     RefPtr<FrameNode> contentNode_;
@@ -48,10 +50,10 @@ protected:
     sptr<Rosen::Session> session_;
 
 private:
-    bool initialized_ = false;
-    bool isFirstForeground_ = true;
+    void OnClick();
 
-    friend class HostWindowSceneModel;
+    RefPtr<ClickEvent> clickListener_;
+
     friend class LifecycleListener;
 
     ACE_DISALLOW_COPY_AND_MOVE(HostWindowPattern);

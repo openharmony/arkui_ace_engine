@@ -15,13 +15,8 @@
 
 #include "core/components_ng/pattern/window_scene/scene/host/host_window_pattern.h"
 
-#include "render_service_client/core/ui/rs_surface_node.h"
-
 #include "core/common/container.h"
-#include "core/common/container_scope.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -48,63 +43,14 @@ private:
     WeakPtr<HostWindowPattern> hostWindowPattern_;
 };
 
-void HostWindowPattern::InitContent()
+HostWindowPattern::HostWindowPattern(const sptr<Rosen::Session>& session) : session_(session)
 {
-    // had initialized, should not initialize again
-    if (initialized_) {
-        return;
-    }
-    initialized_ = true;
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    startingNode_ = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    startingNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    startingNode_->GetRenderContext()->UpdateBackgroundColor(Color(0xffeeeeee));
-    host->AddChild(startingNode_);
-
-    contentNode_ = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-    contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-
+    LOGI("create HostWindowPattern");
     CHECK_NULL_VOID(session_);
-    auto surfaceNode = session_->GetSurfaceNode();
-    CHECK_NULL_VOID(surfaceNode);
 
-    auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
-    CHECK_NULL_VOID(context);
-    context->SetRSNode(surfaceNode);
+    instanceId_ = Container::CurrentId();
 
-    surfaceNode->SetBufferAvailableCallback([weak = WeakClaim(this), instanceId = Container::CurrentId()]() {
-        LOGI("RSSurfaceNode buffer available callback");
-        auto hostWindowPattern = weak.Upgrade();
-        CHECK_NULL_VOID(hostWindowPattern);
-
-        auto uiTask = [hostWindowPattern, instanceId]() {
-            ContainerScope scope(instanceId);
-
-            auto host = hostWindowPattern->GetHost();
-            CHECK_NULL_VOID(host);
-
-            host->RemoveChild(hostWindowPattern->startingNode_);
-            hostWindowPattern->startingNode_.Reset();
-
-            hostWindowPattern->contentNode_->SetActive(true);
-            hostWindowPattern->contentNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            host->AddChild(hostWindowPattern->contentNode_);
-            host->RebuildRenderContextTree();
-        };
-
-        ContainerScope scope(instanceId);
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        auto pipelineContext = container->GetPipelineContext();
-        CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
-    });
-
-    auto lifecycleListener = std::make_shared<LifecycleListener>(AceType::WeakClaim(this));
+    auto lifecycleListener = std::make_shared<LifecycleListener>(WeakClaim(this));
     session_->RegisterLifecycleListener(lifecycleListener);
 }
 
@@ -118,10 +64,10 @@ bool HostWindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     auto geometryNode = dirty->GetGeometryNode();
     auto windowRect = geometryNode->GetFrameRect();
     Rosen::WSRect rect = {
-        .posX_ = windowRect.GetX(),
-        .posY_ = windowRect.GetY(),
-        .width_ = windowRect.Width(),
-        .height_ = windowRect.Height()
+        .posX_ = std::round(windowRect.GetX()),
+        .posY_ = std::round(windowRect.GetY()),
+        .width_ = std::round(windowRect.Width()),
+        .height_ = std::round(windowRect.Height())
     };
 
     CHECK_NULL_RETURN(session_, false);
@@ -131,41 +77,39 @@ bool HostWindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     return false;
 }
 
-void HostWindowPattern::OnForeground()
+void HostWindowPattern::OnAttachToFrameNode()
 {
-    // SessionStage will trigger this callback after ability first start,
-    // should ignore in this situation
-    if (isFirstForeground_) {
-        isFirstForeground_ = false;
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->RemoveChild(startingNode_);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
-    host->AddChild(contentNode_);
-    host->RebuildRenderContextTree();
+    auto renderContext = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
+    renderContext->SetClipToBounds(true);
 }
 
-void HostWindowPattern::OnBackground()
+void HostWindowPattern::OnModifyDone()
 {
-    // CHECK_NULL_VOID(session_);
-    // auto snapShot = session_->GetSnapShot();
-    RefPtr<PixelMap> snapShot = nullptr;
-
-    startingNode_ = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    auto imageLayoutProperty = startingNode_->GetLayoutProperty<ImageLayoutProperty>();
-    if (imageLayoutProperty) {
-        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(snapShot));
+    if (clickListener_) {
+        return;
     }
-
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto hostWindowPattern = weak.Upgrade();
+        CHECK_NULL_VOID(hostWindowPattern);
+        hostWindowPattern->OnClick();
+    };
+    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->RemoveChild(contentNode_);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    gesture->AddClickEvent(clickListener_);
+}
 
-    host->AddChild(startingNode_);
-    host->RebuildRenderContextTree();
+void HostWindowPattern::OnClick()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 } // namespace OHOS::Ace::NG
