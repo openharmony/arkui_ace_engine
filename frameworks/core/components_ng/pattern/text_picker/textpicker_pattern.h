@@ -58,7 +58,6 @@ public:
     {
         auto textPickerPaintMethod = MakeRefPtr<TextPickerPaintMethod>();
         textPickerPaintMethod->SetDefaultPickerItemHeight(CalculateHeight());
-        textPickerPaintMethod->SetEnabled(enabled_);
         return textPickerPaintMethod;
     }
 

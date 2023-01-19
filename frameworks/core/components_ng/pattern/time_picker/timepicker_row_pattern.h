@@ -50,9 +50,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto paintMethod = MakeRefPtr<TimePickerPaintMethod>();
-        paintMethod->SetEnabled(enabled_);
-        return paintMethod;
+        return MakeRefPtr<TimePickerPaintMethod>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
