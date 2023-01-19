@@ -29,8 +29,10 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/render/mock_render_surface.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/event/touch_event.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -67,6 +69,24 @@ const SizeF CHILD_SIZE(CHILD_WIDTH, CHILD_HEIGHT);
 const float CHILD_OFFSET_WIDTH = 50.0f;
 const float CHILD_OFFSET_HEIGHT = 0.0f;
 TestProperty testProperty;
+
+TouchType ConvertXComponentTouchType(const OH_NativeXComponent_TouchEventType& type)
+{
+    switch (type) {
+        case OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_CANCEL:
+            return TouchType::CANCEL;
+        case OH_NATIVEXCOMPONENT_DOWN:
+            return TouchType::DOWN;
+        case OH_NATIVEXCOMPONENT_UP:
+            return TouchType::UP;
+        case OH_NATIVEXCOMPONENT_MOVE:
+            return TouchType::MOVE;
+        case OH_NATIVEXCOMPONENT_UNKNOWN:
+            return TouchType::UNKNOWN;
+        default:
+            return TouchType::UNKNOWN;
+    }
+}
 } // namespace
 
 class XComponentPropertyTestNg : public testing::Test {
@@ -423,12 +443,17 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest006, TestSize.Le
     DirtySwapConfig config;
     auto xComponentLayoutAlgorithm = AceType::MakeRefPtr<XComponentLayoutAlgorithm>();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(MAX_SIZE);
+    geometryNode->SetContentSize(MAX_SIZE);
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
     EXPECT_TRUE(layoutProperty);
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(xComponentLayoutAlgorithm, false);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
     EXPECT_FALSE(pattern->hasXComponentInit_);
+    EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_))),
+        SetBounds(0.0f, 0.0f, MAX_WIDTH, MAX_HEIGHT))
+        .WillOnce(Return());
     EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_))), IsSurfaceValid())
         .WillOnce(Return(true))
         .WillOnce(Return(true))
@@ -452,6 +477,9 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest006, TestSize.Le
      */
     bool frameOffsetChanges[2] = { false, true };
     bool contentOffsetChanges[2] = { false, true };
+    EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_))),
+        SetBounds(0.0f, 0.0f, MAX_WIDTH, MAX_HEIGHT))
+        .Times(4);
     pattern->type_ = XCOMPONENT_SURFACE_TYPE_VALUE;
     for (bool frameOffsetChange : frameOffsetChanges) {
         for (bool contentOffsetChange : contentOffsetChanges) {
@@ -580,7 +608,8 @@ HWTEST_F(XComponentPropertyTestNg, XComponentTouchEventTest008, TestSize.Level1)
         locationInfo.SetTouchType(touchType);
         touchEventInfo.AddChangedTouchLocationInfo(std::move(locationInfo));
         pattern->HandleTouchEvent(touchEventInfo);
-        EXPECT_EQ(static_cast<int>(pattern->touchEventPoint_.type), static_cast<int>(touchType));
+        EXPECT_EQ(
+            static_cast<int>(ConvertXComponentTouchType(pattern->touchEventPoint_.type)), static_cast<int>(touchType));
     }
 
     /**
