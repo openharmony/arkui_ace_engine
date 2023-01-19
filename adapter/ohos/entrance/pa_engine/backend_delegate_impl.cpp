@@ -573,7 +573,7 @@ bool BackendDelegateImpl::GetResourceData(const std::string& fileUri, std::vecto
         LOGE("GetResourceData parse file uri failed.");
         return false;
     }
-    ami = assetManager_->GetAssetPath(targetFilePath) + targetFilePath;
+    ami = assetManager_->GetAssetPath(targetFilePath, true) + targetFilePath;
     if (!Framework::GetAssetContentAllowEmpty(assetManager_, targetFilePath, content)) {
         LOGE("GetResourceData GetAssetContent failed.");
         return false;

@@ -21,6 +21,7 @@
 #include <unistd.h>
 
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -31,6 +32,8 @@ constexpr float SPEED_1_00_X = 1.00;
 constexpr float SPEED_1_25_X = 1.25;
 constexpr float SPEED_1_75_X = 1.75;
 constexpr float SPEED_2_00_X = 2.00;
+const int32_t RESOURCE_PREFIX_LENGTH = strlen("resource:///");
+const int32_t RAWFILE_PREFIX_LENGTH = strlen("resource://");
 
 std::string GetAssetAbsolutePath(const std::string& fileName)
 {
@@ -38,7 +41,7 @@ std::string GetAssetAbsolutePath(const std::string& fileName)
     CHECK_NULL_RETURN(pipelineContext, fileName);
     auto assetManager = pipelineContext->GetAssetManager();
     CHECK_NULL_RETURN(assetManager, fileName);
-    std::string filePath = assetManager->GetAssetPath(fileName);
+    std::string filePath = assetManager->GetAssetPath(fileName, true);
     std::string absolutePath = filePath + fileName;
     return absolutePath;
 }
@@ -115,19 +118,8 @@ bool RosenMediaPlayer::SetSource(const std::string& src)
     }
 
     int32_t fd = -1;
-    // SetSource by fd.
-    if (StringUtils::StartWith(videoSrc, "dataability://") || StringUtils::StartWith(videoSrc, "datashare://")) {
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(context, false);
-        auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(context->GetDataProviderManager());
-        CHECK_NULL_RETURN(dataProvider, false);
-        fd = dataProvider->GetDataProviderFile(videoSrc, "r");
-    } else if (!StringUtils::StartWith(videoSrc, "http")) {
-        videoSrc = GetAssetAbsolutePath(videoSrc);
-        fd = open(videoSrc.c_str(), O_RDONLY);
-    }
 
-    if (fd >= 0) {
+    if (SetMediaSource(videoSrc, fd) && fd >= 0) {
         // get size of file.
         struct stat statBuf {};
         auto statRes = fstat(fd, &statBuf);
@@ -143,11 +135,85 @@ bool RosenMediaPlayer::SetSource(const std::string& src)
             return false;
         }
         close(fd);
-    } else {
-        if (mediaPlayer_->SetSource(videoSrc) != 0) {
+    }
+    return true;
+}
+
+bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd)
+{
+    if (StringUtils::StartWith(filePath, "dataability://") || StringUtils::StartWith(filePath, "datashare://")) {
+        // dataability:// or datashare://
+        auto pipeline = PipelineBase::GetCurrentContext();
+        auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(pipeline->GetDataProviderManager());
+        fd = dataProvider->GetDataProviderFile(filePath, "r");
+    } else if (StringUtils::StartWith(filePath, "file://")) {
+        filePath = GetAssetAbsolutePath(filePath.substr(FILE_PREFIX_LENGTH));
+        fd = open(filePath.c_str(), O_RDONLY);
+    } else if (StringUtils::StartWith(filePath, "resource:///")) {
+        // file path: resources/base/media/xxx.xx --> resource:///xxx.xx
+        auto assetManager = PipelineBase::GetCurrentContext()->GetAssetManager();
+        auto resId = StringUtils::StringToUint(filePath.substr(RESOURCE_PREFIX_LENGTH, 8));
+        auto themeManager = PipelineBase::GetCurrentContext()->GetThemeManager();
+        auto themeConstants = themeManager->GetThemeConstants();
+        std::string mediaPath;
+        auto state1 = themeConstants->GetMediaById(resId, mediaPath);
+        if (!state1) {
+            LOGE("GetMediaById failed");
+            return false;
+        }
+        MediaFileInfo fileInfo;
+        auto state2 = assetManager->GetFileInfo(mediaPath.substr(mediaPath.find("resources/base")), fileInfo);
+        if (!state2) {
+            LOGE("GetMediaFileInfo failed");
+            return false;
+        }
+        auto hapPath = Container::Current()->GetHapPath();
+        auto hapFd = open(hapPath.c_str(), O_RDONLY);
+        if (mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
+            LOGE("Player SetSource failed");
+            close(hapFd);
+            return false;
+        }
+        close(hapFd);
+    } else if (StringUtils::StartWith(filePath, "resource://rawfile")) {
+        // file path: resource/rawfile/xxx.xx --> resource://rawfile/xxx.xx
+        auto themeManager = PipelineBase::GetCurrentContext()->GetThemeManager();
+        auto themeConstants = themeManager->GetThemeConstants();
+        RawfileDescription rfd;
+        auto state = themeConstants->GetRawFileDescription(filePath.substr(RAWFILE_PREFIX_LENGTH), rfd);
+        if (!state) {
+            LOGE("Get rawfile description failed");
+            return false;
+        }
+        if (mediaPlayer_->SetSource(rfd.fd, rfd.offset, rfd.length) != 0) {
+            LOGE("Player SetSource failed");
+            close(rfd.fd);
+            return false;
+        }
+        close(rfd.fd);
+    } else if (StringUtils::StartWith(filePath, "http")) {
+        // http or https
+        if (mediaPlayer_->SetSource(filePath) != 0) {
             LOGE("Player SetSource failed");
             return false;
         }
+    } else {
+        // relative path
+        auto assetManager = PipelineBase::GetCurrentContext()->GetAssetManager();
+        MediaFileInfo fileInfo;
+        auto state = assetManager->GetFileInfo(assetManager->GetAssetPath(filePath, false), fileInfo);
+        if (!state) {
+            LOGE("GetMediaFileInfo failed");
+            return false;
+        }
+        auto hapPath = Container::Current()->GetHapPath();
+        auto hapFd = open(hapPath.c_str(), O_RDONLY);
+        if (mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
+            LOGE("Player SetSource failed");
+            close(hapFd);
+            return false;
+        }
+        close(hapFd);
     }
     return true;
 }

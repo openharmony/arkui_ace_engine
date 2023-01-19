@@ -115,6 +115,7 @@ private:
     void HiddenChange(bool hidden);
     void OnTextureSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
     void EnableLooping(bool loop);
+    void SetMediaSource(std::string& filePath, int32_t& fd);
 
     const RefPtr<Component> CreatePoster();
     const RefPtr<Component> CreateControl();
