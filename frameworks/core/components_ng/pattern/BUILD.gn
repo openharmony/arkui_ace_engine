@@ -376,4 +376,8 @@ build_component_ng("pattern_model_component_ng") {
     "model/model_touch_handler.cpp",
     "model/model_view_ng.cpp",
   ]
+
+  if (is_standard_system) {
+    deps = [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+  }
 }
