@@ -21,7 +21,6 @@
 #include "base/thread/cancelable_callback.h"
 #include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
-#include "core/focus/focus_node.h"
 
 namespace OHOS::Ace::NG {
 

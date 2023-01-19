@@ -45,15 +45,18 @@ test_pattern_sources = [
   "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
   "$ace_root/frameworks/core/components_ng/base/ui_node.cpp",
   "$ace_root/frameworks/core/components_ng/base/view_stack_processor.cpp",
+  "$ace_root/frameworks/core/components_ng/event/click_event.cpp",
   "$ace_root/frameworks/core/components_ng/event/drag_event.cpp",
   "$ace_root/frameworks/core/components_ng/event/event_hub.cpp",
   "$ace_root/frameworks/core/components_ng/event/focus_hub.cpp",
   "$ace_root/frameworks/core/components_ng/event/gesture_event_hub.cpp",
   "$ace_root/frameworks/core/components_ng/event/input_event.cpp",
   "$ace_root/frameworks/core/components_ng/event/input_event_hub.cpp",
+  "$ace_root/frameworks/core/components_ng/event/pan_event.cpp",
   "$ace_root/frameworks/core/components_ng/event/state_style_manager.cpp",
   "$ace_root/frameworks/core/components_ng/event/touch_event.cpp",
   "$ace_root/frameworks/core/components_ng/gestures/gesture_referee.cpp",
+  "$ace_root/frameworks/core/components_ng/gestures/recognizers/click_recognizer.cpp",
   "$ace_root/frameworks/core/components_ng/gestures/recognizers/exclusive_recognizer.cpp",
   "$ace_root/frameworks/core/components_ng/gestures/recognizers/gesture_recognizer.cpp",
   "$ace_root/frameworks/core/components_ng/gestures/recognizers/long_press_recognizer.cpp",
@@ -72,10 +75,14 @@ test_pattern_sources = [
   "$ace_root/frameworks/core/components_ng/property/property.cpp",
   "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
 
+  # components_v2
+  "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
+
   # pipeline
   "$ace_root/frameworks/core/pipeline/base/constants.cpp",
 
   # mock
+  "$ace_root/frameworks/base/test/mock/mock_ressched_report.cpp",
   "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
   "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
@@ -87,8 +94,8 @@ test_pattern_sources = [
   "$ace_root/frameworks/core/components_ng/test/mock/render/mock_modifier_adapter.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
+  "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_surface_creator.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/syntax/mock_for_each_node.cpp",
-  "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
   "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
   "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
   "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
@@ -101,4 +108,4 @@ test_pattern_deps = [
   "//third_party/googletest:gmock_main",
 ]
 
-test_pattern_configs = [ "$ace_root:ace_unittest_config" ]
+test_configs = [ "$ace_root:ace_unittest_config" ]

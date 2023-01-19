@@ -33,13 +33,9 @@ ohos_unittest("stepper_pattern_test_ng") {
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components/common/properties/shadow_config.cpp",
-    "$ace_root/frameworks/core/components_ng/event/click_event.cpp",
-    "$ace_root/frameworks/core/components_ng/event/pan_event.cpp",
-    "$ace_root/frameworks/core/components_ng/gestures/recognizers/click_recognizer.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
 
     # mock
-    "$ace_root/frameworks/base/test/mock/ressched/mock_ressched_report.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
 
     # select_overlay
@@ -99,5 +95,5 @@ ohos_unittest("stepper_pattern_test_ng") {
 
   sources += test_pattern_sources
   deps = test_pattern_deps
-  configs = test_pattern_configs
+  configs = test_configs
 }

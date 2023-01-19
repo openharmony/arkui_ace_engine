@@ -46,5 +46,5 @@ ohos_unittest("image_pattern_test_ng") {
 
   sources += test_pattern_sources
   deps = test_pattern_deps
-  configs = test_pattern_configs
+  configs = test_configs
 }

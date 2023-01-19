@@ -119,8 +119,8 @@ ohos_unittest("slider_pattern_test_ng") {
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
 
     # mock
+    "$ace_root/frameworks/base/test/mock/mock_ressched_report.cpp",
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
-    "$ace_root/frameworks/base/test/mock/ressched/mock_ressched_report.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_container.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
