@@ -39,7 +39,7 @@ public:
     {}
     ~RenderElementProxy() override
     {
-        ReleaseElementByIndex(startIndex_);
+        ReleaseElement(false);
     }
 
     void Update(const RefPtr<Component>& component, size_t startIndex) override
@@ -108,9 +108,8 @@ public:
         host->AddActiveComposeId(composedId_);
     };
 
-    void ReleaseElementByIndex(size_t index) override
+    void ReleaseElement(bool callRemoveFunction)
     {
-        ACE_DCHECK(index == startIndex_);
         if (!element_) {
             return;
         }
@@ -119,7 +118,16 @@ public:
             return;
         }
         SetComposedId("");
+        if (callRemoveFunction) {
+            element_->UnregisterForElementProxy();
+        }
         element_ = host->OnUpdateElement(element_, nullptr);
+    }
+
+    void ReleaseElementByIndex(size_t index) override
+    {
+        ACE_DCHECK(index == startIndex_);
+        ReleaseElement(true);
     }
 
     void ReleaseElementById(const ComposeId& id) override

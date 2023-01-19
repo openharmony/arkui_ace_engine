@@ -207,4 +207,11 @@ RefPtr<Element> ComposedElement::UpdateChild(const RefPtr<Element>& child, const
     return newChild;
 }
 
+void ComposedElement::UnregisterForElementProxy()
+{
+    if (removeFunction_) {
+        removeFunction_();
+    }
+    Element::UnregisterForElementProxy();
+}
 } // namespace OHOS::Ace

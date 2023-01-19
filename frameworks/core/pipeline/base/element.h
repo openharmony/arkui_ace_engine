@@ -250,6 +250,8 @@ public:
         return ignoreInspector_;
     }
 
+    virtual void UnregisterForElementProxy();
+
 protected:
     inline RefPtr<Element> DoUpdateChildWithNewComponent(
         const RefPtr<Element>& child, const RefPtr<Component>& newComponent, int32_t slot, int32_t renderSlot);
