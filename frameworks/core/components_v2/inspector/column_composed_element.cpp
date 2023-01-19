@@ -169,13 +169,25 @@ void ColumnComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Componen
 
 void ColumnComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
 {
-    auto flexElement = GetContentElement<FlexElement>(ColumnElement::TypeId());
+    auto flexElement = GetContentElement<Element>(ColumnElement::TypeId());
     if (!flexElement) {
         LOGE("get GetFlexElement failed");
         return;
     }
-    auto child = flexElement->GetChildBySlot(slot);
-    flexElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    auto child = GetElementChildBySlot(flexElement, slot);
+    if (!child) {
+        LOGE("child is null.");
+        return;
+    }
+
+    // Replace the component with newComponent.
+    auto context = flexElement->GetContext().Upgrade();
+    auto needRebuildFocusElement = AceType::DynamicCast<Element>(flexElement->GetFocusScope());
+    if (context && needRebuildFocusElement) {
+        context->AddNeedRebuildFocusElement(needRebuildFocusElement);
+    }
+    flexElement->DeactivateChild(child);
+    flexElement->InflateComponent(newComponent, child->GetSlot(), child->GetRenderSlot());
     flexElement->MarkDirty();
 }
 
