@@ -31,8 +31,11 @@ void HdcJdwpSimulator::Disconnect()
 {
     if (ctxPoint_ != nullptr && ctxPoint_->cfd > -1) {
         disconnectFlag_ = true;
+        shutdown(ctxPoint_->cfd, SHUT_RDWR);
         close(ctxPoint_->cfd);
         ctxPoint_->cfd = -1;
+        unsigned int threadDelay = 500000;
+        usleep(threadDelay);
     }
 }
 
@@ -41,6 +44,7 @@ HdcJdwpSimulator::~HdcJdwpSimulator()
     if (ctxPoint_ != nullptr) {
         if (ctxPoint_->cfd > -1) {
             disconnectFlag_ = true;
+            shutdown(ctxPoint_->cfd, SHUT_RDWR);
             close(ctxPoint_->cfd);
             ctxPoint_->cfd = -1;
         }
@@ -145,21 +149,16 @@ bool HdcJdwpSimulator::Connect()
             LOGE("connect failed errno:%{public}d", errno);
         } else if (ConnectJpid(this)) {
             char recvBuf[100] = { 0 }; // 100 buf size
-            bool reRecv = false;
-            do {
-                reRecv = false;
-                int ret = recv(cfd, recvBuf, sizeof(recvBuf), 0); // stop when server connect, or retry
-                LOGE("jdwp retry connect server errno:%{public}d, ret:%{public}d", errno, ret);
-                if (errno == EINTR || errno == EAGAIN) {
-                    reRecv = true;
-                }
-            } while (reRecv);
+            int ret = recv(cfd, recvBuf, sizeof(recvBuf), 0); // stop when server connect, or retry
+            LOGE("jdwp retry connect server errno:%{public}d, ret:%{public}d", errno, ret);
         }
-	if (ctxPoint_->cfd > -1) {
+        if (ctxPoint_->cfd > -1) {
             close(ctxPoint_->cfd);
             ctxPoint_->cfd = -1;
         }
-        sleep(3); // connect per 3 second
+        if (!disconnectFlag_) {
+            sleep(3); // connect per 3 second
+        }
     }
     return true;
 }
