@@ -16,12 +16,13 @@
 #include "core/components_ng/pattern/badge/badge_layout_algorithm.h"
 
 #include "core/components/badge/badge_theme.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/badge/badge_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -54,19 +55,22 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         textWrapper->Measure(textFirstLayoutConstraint);
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
     CHECK_NULL_VOID(badgeTheme);
     auto badgeCircleSize = badgeTheme->GetBadgeCircleSize();
+    auto badgeValue = layoutProperty->GetBadgeValue();
+    if (badgeValue.has_value() && badgeValue.value().empty()) {
+        badgeCircleSize = badgeTheme->GetLittleBadgeCircleSize();
+    }
     auto circleSize = layoutProperty->GetBadgeCircleSize();
     auto badgeCircleDiameter = circleSize.has_value() ? (circleSize->IsValid() ? circleSize->ConvertToPx() : 0)
                                                       : badgeCircleSize.ConvertToPx();
 
     auto badgeWidth = 0.0;
     auto badgeHeight = badgeCircleDiameter;
-    auto countLimit =
-        layoutProperty->HasBadgeMaxCount() ? layoutProperty->GetBadgeMaxCountValue() : badgeTheme->GetMaxCount();
+    auto countLimit = layoutProperty->GetBadgeMaxCountValue();
     auto badgeCircleRadius = badgeCircleDiameter / 2;
 
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
@@ -130,7 +134,7 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto badgePosition = layoutProperty->GetBadgePosition();
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
     CHECK_NULL_VOID(badgeTheme);
