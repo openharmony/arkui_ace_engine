@@ -21,7 +21,7 @@
 namespace OHOS::Ace::NG {
 class ImageUtils {
 public:
-    static void PostToUI(std::function<void()> task);
+    static void PostToUI(std::function<void()>&& task);
     static void PostToBg(std::function<void()>&& task);
 
     inline static std::string GenerateImageKey(const ImageSourceInfo& src, const NG::SizeF& targetSize)

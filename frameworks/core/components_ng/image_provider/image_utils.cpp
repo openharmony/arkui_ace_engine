@@ -33,7 +33,7 @@ void ImageUtils::PostTask(
         taskType);
 }
 
-void ImageUtils::PostToUI(std::function<void()> task)
+void ImageUtils::PostToUI(std::function<void()>&& task)
 {
     CHECK_NULL_VOID(task);
     ImageUtils::PostTask(std::move(task), TaskExecutor::TaskType::UI, "UI");
