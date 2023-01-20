@@ -928,7 +928,7 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
         swiper->FireAnimationEndEvent();
         auto host = swiper->GetHost();
         CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     });
     controller_->SetDuration(GetDuration());
     controller_->AddInterpolator(translate);
