@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/model/model_pattern.h"
 
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -65,7 +66,7 @@ void ModelPattern::OnModifyDone()
 bool ModelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     bool measure = (config.skipMeasure || dirty->SkipMeasureContent()) ? false : true;
-    
+
     CHECK_NULL_RETURN(modelAdapter_, measure);
     if (!modelAdapter_->IsInitialized()) {
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -77,6 +78,15 @@ bool ModelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 void ModelPattern::OnAttachToFrameNode()
 {
     LOGD("MODEL_NG: ModelPattern::OnAttachToFrameNode()");
+#ifdef ENABLE_ROSEN_BACKEND
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
+    CHECK_NULL_VOID(context);
+    auto rsNode = context->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+    rsNode->SetFrameGravity(OHOS::Rosen::Gravity::RESIZE);
+#endif
 }
 
 void ModelPattern::OnDetachFromFrameNode(FrameNode* node)
