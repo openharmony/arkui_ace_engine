@@ -1523,6 +1523,19 @@ int32_t FrontendDelegateImpl::OnClearInvisiblePagesSuccess()
 
 void FrontendDelegateImpl::ClearInvisiblePages()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
+    // Execute invisible pages' OnJsEngineDestroy to release JsValue
+    for (auto pageRouteIter = pageRouteStack_.cbegin(); pageRouteIter != pageRouteStack_.cend() - 1; ++pageRouteIter) {
+        const auto& info = *pageRouteIter;
+        auto iter = pageMap_.find(info.pageId);
+        if (iter != pageMap_.end()) {
+            auto page = iter->second;
+            if (page) {
+                page->OnJsEngineDestroy();
+            }
+        }
+    }
+
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this)] {
             auto delegate = weak.Upgrade();
