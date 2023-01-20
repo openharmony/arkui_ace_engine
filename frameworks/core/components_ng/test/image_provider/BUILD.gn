@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_unittest.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("image_provider_test_ng") {
   module_out_path = "$image_test_output_path/"
@@ -30,7 +30,6 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/frameworks/core/components_ng/image_provider/svg_image_object.cpp",
 
     # mock
-    "$ace_root/frameworks/core/common/test/mock/mock_container.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_flutter_image_provider.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_cache.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loader.cpp",
@@ -42,6 +41,7 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_pixmap_image.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_skia_canvas_image.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_svg_canvas_image.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
 
     # test
     "image_provider_test_ng.cpp",

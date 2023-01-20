@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_unittest.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 module_output_path = "ace_engine/backenduicomponent/register"
 
@@ -29,13 +29,10 @@ ohos_unittest("RegisterTest") {
     "$ace_root/frameworks/core/common/register/hdc_jdwp.cpp",
 
     #mock
-    "$ace_root/frameworks/core/common/test/mock/mock_container.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
   ]
 
-  configs = [
-    "$ace_root:ace_unittest_config",
-    "$ace_root:ace_test_coverage_config",
-  ]
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 
   deps = [
     "$ace_root/adapter/ohos/osal:ace_osal_ohos",

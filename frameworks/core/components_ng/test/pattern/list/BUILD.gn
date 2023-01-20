@@ -92,7 +92,6 @@ common_sources = [
   "$ace_root/frameworks/core/animation/test/mock/mock_animator.cpp",
   "$ace_root/frameworks/core/animation/test/mock/mock_scheduler.cpp",
   "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
-  "$ace_root/frameworks/core/common/test/mock/mock_container.cpp",
   "$ace_root/frameworks/core/components_ng/test/event/mock/mock_drag_event.cpp",
   "$ace_root/frameworks/core/components_ng/test/event/mock/mock_long_press_event.cpp",
   "$ace_root/frameworks/core/components_ng/test/event/mock/mock_pan_event.cpp",
@@ -113,7 +112,8 @@ common_sources = [
   "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
   "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
   "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
-  "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_drag_drop_manager.cpp",
+  "$ace_root/test/mock/core/common/mock_container.cpp",
+  "$ace_root/test/unittest/core/pipeline/mock_drag_drop_manager.cpp",
 
   # scroll
   "$ace_root/frameworks/core/components_ng/pattern/scroll/effect/scroll_fade_controller.cpp",
@@ -161,15 +161,13 @@ ohos_unittest("list_pattern_test_ng") {
   sources = test_sources + common_sources
 
   deps = [
-    "$ace_root:ace_test_log",
+    "$ace_root/test/unittest:ace_unittest_log",
+    "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson_static",
     "//third_party/googletest:gmock_main",
   ]
 
-  configs = [
-    "$ace_root:ace_unittest_config",
-    "$ace_root:ace_test_coverage_config",
-  ]
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
 
 ohos_unittest("list_test_ng") {
@@ -180,13 +178,11 @@ ohos_unittest("list_test_ng") {
   sources = common_sources + test_sources
 
   deps = [
-    "$ace_root:ace_test_log",
+    "$ace_root/test/unittest:ace_unittest_log",
+    "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson_static",
     "//third_party/googletest:gmock_main",
   ]
 
-  configs = [
-    "$ace_root:ace_unittest_config",
-    "$ace_root:ace_test_coverage_config",
-  ]
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

@@ -95,7 +95,7 @@ const char TEST_INPUT_ARGS_ONE[MAX_STRING_SIZE] = "TODAY";
 const std::vector<int64_t> RESOURCEHANDLERS = {255};
 } // namespace
 
-class UtilsTest : public testing::Test {
+class BaseUtilsTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -103,43 +103,43 @@ public:
     void TearDown();
 };
 
-void UtilsTest::SetUpTestCase()
+void BaseUtilsTest::SetUpTestCase()
 {
-    GTEST_LOG_(INFO) << "UtilsTest SetUpTestCase";
+    GTEST_LOG_(INFO) << "BaseUtilsTest SetUpTestCase";
 }
 
-void UtilsTest::TearDownTestCase()
+void BaseUtilsTest::TearDownTestCase()
 {
-    GTEST_LOG_(INFO) << "UtilsTest TearDownTestCase";
+    GTEST_LOG_(INFO) << "BaseUtilsTest TearDownTestCase";
 }
 
-void UtilsTest::SetUp()
+void BaseUtilsTest::SetUp()
 {
-    GTEST_LOG_(INFO) << "UtilsTest SetUp";
+    GTEST_LOG_(INFO) << "BaseUtilsTest SetUp";
 }
 
-void UtilsTest::TearDown()
+void BaseUtilsTest::TearDown()
 {
-    GTEST_LOG_(INFO) << "UtilsTest TearDown";
+    GTEST_LOG_(INFO) << "BaseUtilsTest TearDown";
 }
 
 /**
- * @tc.name: UtilsTest001
+ * @tc.name: BaseUtilsTest001
  * @tc.desc: Call BaseId() constructor twice
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest001, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest001, TestSize.Level1)
 {
     BaseId baseId_1;
     ASSERT_TRUE(baseId_1.GetId() == NUM_OF_ID);
 }
 
 /**
- * @tc.name: UtilsTest002
+ * @tc.name: BaseUtilsTest002
  * @tc.desc: Set year:2022,month:10,day:28
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest002, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest002, TestSize.Level1)
 {
     Date oneDay;
     ASSERT_EQ(oneDay.year, DEFAULT_YEAR);
@@ -172,11 +172,11 @@ HWTEST_F(UtilsTest, UtilsTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest003
+ * @tc.name: BaseUtilsTest003
  * @tc.desc: Give a normal formula to ConvertDal2Rpn
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest003, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest003, TestSize.Level1)
 {
     double CalculateExp(const std::string& expression, const std::function<double(const Dimension&)>& calcFunc);
     auto calcResult =
@@ -185,11 +185,11 @@ HWTEST_F(UtilsTest, UtilsTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest004
+ * @tc.name: BaseUtilsTest004
  * @tc.desc: Give a error formula to ConvertDal2Rpn
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest004, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest004, TestSize.Level1)
 {
     double CalculateExp(const std::string& expression, const std::function<double(const Dimension&)>& calcFunc);
     auto errResultTwo =
@@ -201,11 +201,11 @@ HWTEST_F(UtilsTest, UtilsTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest005
+ * @tc.name: BaseUtilsTest005
  * @tc.desc: Check FormatString
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest005, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest005, TestSize.Level1)
 {
     auto firstTestText = StringUtils::FormatString("");
     auto secondTestText =
@@ -215,11 +215,11 @@ HWTEST_F(UtilsTest, UtilsTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest006
+ * @tc.name: BaseUtilsTest006
  * @tc.desc: Set the time zone within [-14, -12]
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest006, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest006, TestSize.Level1)
 {
     time_t nowTime;
     struct tm* localTime;
@@ -252,11 +252,11 @@ HWTEST_F(UtilsTest, UtilsTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest007
+ * @tc.name: BaseUtilsTest007
  * @tc.desc: Set the time zone within [-12, 12]
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest007, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest007, TestSize.Level1)
 {
     time_t nowTime;
     struct tm* localTime;
@@ -298,11 +298,11 @@ HWTEST_F(UtilsTest, UtilsTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest008
+ * @tc.name: BaseUtilsTest008
  * @tc.desc: Set the time zone beyond the range of [-14, 12]
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest008, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest008, TestSize.Level1)
 {
     time_t nowTime;
     struct tm* localTime;
@@ -323,11 +323,11 @@ HWTEST_F(UtilsTest, UtilsTest008, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest009
+ * @tc.name: BaseUtilsTest009
  * @tc.desc: Check the time since the device was started
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest009, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest009, TestSize.Level1)
 {
     auto microTickCount = GetMicroTickCount();
     auto sysTimestamp = GetSysTimestamp();
@@ -338,11 +338,11 @@ HWTEST_F(UtilsTest, UtilsTest009, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest010
+ * @tc.name: BaseUtilsTest010
  * @tc.desc: Set ResourceConfiguration
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest010, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest010, TestSize.Level1)
 {
     ResourceConfiguration resConfiguration;
     ASSERT_EQ(resConfiguration.TestFlag(ResourceConfiguration::COLOR_MODE_UPDATED_FLAG,
@@ -362,11 +362,11 @@ HWTEST_F(UtilsTest, UtilsTest010, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest011
+ * @tc.name: BaseUtilsTest011
  * @tc.desc: Set ResourceInfo
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest011, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest011, TestSize.Level1)
 {
     ResourceInfo resourceInfo;
     ResourceConfiguration resConfiguration;
@@ -383,11 +383,11 @@ HWTEST_F(UtilsTest, UtilsTest011, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest012
+ * @tc.name: BaseUtilsTest012
  * @tc.desc: Json does not contain "colorMode"
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest012, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest012, TestSize.Level1)
 {
     const std::string inputTestJsonStr = "{"
                                          "  \"deviceType\": \"PHONE\",          "
@@ -400,11 +400,11 @@ HWTEST_F(UtilsTest, UtilsTest012, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest013
+ * @tc.name: BaseUtilsTest013
  * @tc.desc: Json does not contain "fontScale"
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest013, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest013, TestSize.Level1)
 {
     const std::string inputTestJsonStr = "{"
                                          "  \"deviceType\": \"PHONE\",          "
@@ -417,11 +417,11 @@ HWTEST_F(UtilsTest, UtilsTest013, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest014
+ * @tc.name: BaseUtilsTest014
  * @tc.desc: ColorMode is not "light" or "dark"
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest014, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest014, TestSize.Level1)
 {
     const std::string inputTestJsonStr = "{"
                                          "  \"deviceType\": \"PHONE\",          "
@@ -435,11 +435,11 @@ HWTEST_F(UtilsTest, UtilsTest014, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest015
+ * @tc.name: BaseUtilsTest015
  * @tc.desc: FontScale is not 1.0
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest015, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest015, TestSize.Level1)
 {
     const std::string inputTestJsonStr = "{"
                                          "  \"deviceType\": \"PHONE\",          "
@@ -454,11 +454,11 @@ HWTEST_F(UtilsTest, UtilsTest015, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest016
+ * @tc.name: BaseUtilsTest016
  * @tc.desc: Set colorMode "dark"
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest016, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest016, TestSize.Level1)
 {
     const std::string inputTestJsonStr = "{"
                                          "  \"deviceType\": \"PHONE\",          "
@@ -473,11 +473,11 @@ HWTEST_F(UtilsTest, UtilsTest016, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest017
+ * @tc.name: BaseUtilsTest017
  * @tc.desc: Check char in bmp and whether the content of string is a number
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest017, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest017, TestSize.Level1)
 {
     const char16_t testChar16 = 0xD800;
     const wchar_t testWchar = 0xD800;
@@ -488,11 +488,11 @@ HWTEST_F(UtilsTest, UtilsTest017, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest018
+ * @tc.name: BaseUtilsTest018
  * @tc.desc: U16string-string-wstring, string-uint32, string-int64 convert
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest018, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest018, TestSize.Level1)
 {
     ASSERT_EQ(StringUtils::Str8ToStr16(TEST_INPUT_U8_STRING), TEST_INPUT_U16_STRING);
     ASSERT_EQ(StringUtils::Str16ToStr8(TEST_INPUT_U16_STRING), TEST_INPUT_U8_STRING);
@@ -508,11 +508,11 @@ HWTEST_F(UtilsTest, UtilsTest018, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest019
+ * @tc.name: BaseUtilsTest019
  * @tc.desc: Delete all mark : "."
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest019, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest019, TestSize.Level1)
 {
     std::string markString = "THIS. IS. A. STRING";
     const char mark = '.';
@@ -521,11 +521,11 @@ HWTEST_F(UtilsTest, UtilsTest019, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest020
+ * @tc.name: BaseUtilsTest020
  * @tc.desc: Replace tab and newline with space
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest020, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest020, TestSize.Level1)
 {
     std::string inputTabAndNewLine = "THIS\rIS\nA\tSTRING";
     StringUtils::ReplaceTabAndNewLine(inputTabAndNewLine);
@@ -533,11 +533,11 @@ HWTEST_F(UtilsTest, UtilsTest020, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest021
+ * @tc.name: BaseUtilsTest021
  * @tc.desc: Input a string contain "auto"
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest021, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest021, TestSize.Level1)
 {
     const std::string stringToDimensionValue = "auto";
     auto dim = StringUtils::StringToDimension(stringToDimensionValue, true);
@@ -549,11 +549,11 @@ HWTEST_F(UtilsTest, UtilsTest021, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest022
+ * @tc.name: BaseUtilsTest022
  * @tc.desc: Input a string contain "calc"
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest022, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest022, TestSize.Level1)
 {
     const std::string stringToDimensionValue = "100.0calc";
     auto dim = StringUtils::StringToDimension(stringToDimensionValue, true);
@@ -564,11 +564,11 @@ HWTEST_F(UtilsTest, UtilsTest022, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest023
+ * @tc.name: BaseUtilsTest023
  * @tc.desc: Input a string contain "%"
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest023, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest023, TestSize.Level1)
 {
     const std::string stringToDimensionValue = "100.0%";
     auto dim = StringUtils::StringToDimension(stringToDimensionValue, true);
@@ -577,11 +577,11 @@ HWTEST_F(UtilsTest, UtilsTest023, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest024
+ * @tc.name: BaseUtilsTest024
  * @tc.desc: Input a string contain "px"
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest024, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest024, TestSize.Level1)
 {
     const std::string stringToDimensionValue = "100.0px";
     auto dim = StringUtils::StringToDimension(stringToDimensionValue, true);
@@ -590,11 +590,11 @@ HWTEST_F(UtilsTest, UtilsTest024, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest025
+ * @tc.name: BaseUtilsTest025
  * @tc.desc: Input a string contain "vp"
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest025, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest025, TestSize.Level1)
 {
     const std::string stringToDimensionValue = "100.0vp";
     auto dim = StringUtils::StringToDimension(stringToDimensionValue, true);
@@ -603,11 +603,11 @@ HWTEST_F(UtilsTest, UtilsTest025, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest026
+ * @tc.name: BaseUtilsTest026
  * @tc.desc: Input a string contain "fp"
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest026, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest026, TestSize.Level1)
 {
     const std::string stringToDimensionValue = "100.0fp";
     auto dim = StringUtils::StringToDimension(stringToDimensionValue, true);
@@ -616,11 +616,11 @@ HWTEST_F(UtilsTest, UtilsTest026, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest027
+ * @tc.name: BaseUtilsTest027
  * @tc.desc: Input a string contain "lpx"
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest027, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest027, TestSize.Level1)
 {
     const std::string stringToDimensionValue = "100.0lpx";
     auto dim = StringUtils::StringToDimension(stringToDimensionValue, true);
@@ -629,11 +629,11 @@ HWTEST_F(UtilsTest, UtilsTest027, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest028
+ * @tc.name: BaseUtilsTest028
  * @tc.desc: Set an empty string
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest028, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest028, TestSize.Level1)
 {
     const std::string stringToDimensionValue = "";
     auto dim = StringUtils::StringToDimension(stringToDimensionValue, true);
@@ -642,11 +642,11 @@ HWTEST_F(UtilsTest, UtilsTest028, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest029
+ * @tc.name: BaseUtilsTest029
  * @tc.desc: Set an empty string, check StringToDegree
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest029, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest029, TestSize.Level1)
 {
     const std::string stringToDegreeValue = "";
     auto degreeValue = StringUtils::StringToDegree(stringToDegreeValue);
@@ -654,11 +654,11 @@ HWTEST_F(UtilsTest, UtilsTest029, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest030
+ * @tc.name: BaseUtilsTest030
  * @tc.desc: Input a string contain "deg"
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest030, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest030, TestSize.Level1)
 {
     const std::string stringToDegreeValue = "360.0deg";
     auto degreeValue = StringUtils::StringToDegree(stringToDegreeValue);
@@ -666,11 +666,11 @@ HWTEST_F(UtilsTest, UtilsTest030, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest031
+ * @tc.name: BaseUtilsTest031
  * @tc.desc: Input a string contain "gard"
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest031, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest031, TestSize.Level1)
 {
     const std::string stringToDegreeValue = "400.0grad";
     auto degreeValue = StringUtils::StringToDegree(stringToDegreeValue);
@@ -678,11 +678,11 @@ HWTEST_F(UtilsTest, UtilsTest031, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest032
+ * @tc.name: BaseUtilsTest032
  * @tc.desc: Input a string contain "rad"
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest032, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest032, TestSize.Level1)
 {
     const std::string stringToDegreeValue = "6.28318530717958647692rad";
     auto degreeValue = StringUtils::StringToDegree(stringToDegreeValue);
@@ -690,11 +690,11 @@ HWTEST_F(UtilsTest, UtilsTest032, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest033
+ * @tc.name: BaseUtilsTest033
  * @tc.desc: Input a string contain "turn"
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest033, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest033, TestSize.Level1)
 {
     const std::string stringToDegreeValue = "1turn";
     auto degreeValue = StringUtils::StringToDegree(stringToDegreeValue);
@@ -702,11 +702,11 @@ HWTEST_F(UtilsTest, UtilsTest033, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest034
+ * @tc.name: BaseUtilsTest034
  * @tc.desc: Input a string contain "-", split string to string
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest034, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest034, TestSize.Level1)
 {
     const std::string stringSplitterValue = "123456-123456";
     const char delimiter = '-';
@@ -716,11 +716,11 @@ HWTEST_F(UtilsTest, UtilsTest034, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest035
+ * @tc.name: BaseUtilsTest035
  * @tc.desc: Input a string contain "-", split string to int32_t
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest035, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest035, TestSize.Level1)
 {
     const std::string stringSplitterValue = "123456-123456";
     const char delimiter = '-';
@@ -730,11 +730,11 @@ HWTEST_F(UtilsTest, UtilsTest035, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest036
+ * @tc.name: BaseUtilsTest036
  * @tc.desc: Input a string contain "-", split string to double
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest036, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest036, TestSize.Level1)
 {
     const std::string stringSplitterValue = "123456-123456";
     const char delimiter = '-';
@@ -744,11 +744,11 @@ HWTEST_F(UtilsTest, UtilsTest036, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest037
+ * @tc.name: BaseUtilsTest037
  * @tc.desc: Input a string contain "-", split string to float
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest037, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest037, TestSize.Level1)
 {
     const std::string stringSplitterValue = "123456-123456";
     const char delimiter = '-';
@@ -758,11 +758,11 @@ HWTEST_F(UtilsTest, UtilsTest037, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest038
+ * @tc.name: BaseUtilsTest038
  * @tc.desc: Input a string contain "-", split string to Dimension
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest038, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest038, TestSize.Level1)
 {
     const std::string stringSplitterValue = "123456-123456";
     const char delimiter = '-';
@@ -773,11 +773,11 @@ HWTEST_F(UtilsTest, UtilsTest038, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest039
+ * @tc.name: BaseUtilsTest039
  * @tc.desc: No characters found for splitSepValue in splitStrValue
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest039, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest039, TestSize.Level1)
 {
     const std::string splitStrValue = "THIS IS A STRING";
     const std::string splitSepValue = "!?";
@@ -791,11 +791,11 @@ HWTEST_F(UtilsTest, UtilsTest039, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest040
+ * @tc.name: BaseUtilsTest040
  * @tc.desc: There is some characters found for splitSepValue in splitStrValue
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest040, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest040, TestSize.Level1)
 {
     const std::string splitStrValue = "##THIS IS A STRING***##";
     const std::string splitSepValue = "#*";
@@ -809,11 +809,11 @@ HWTEST_F(UtilsTest, UtilsTest040, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest041
+ * @tc.name: BaseUtilsTest041
  * @tc.desc: splitString is empty
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest041, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest041, TestSize.Level1)
 {
     const std::string splitStrValue = "";
     const std::string splitSepValue = "";
@@ -826,11 +826,11 @@ HWTEST_F(UtilsTest, UtilsTest041, TestSize.Level1)
 }
 
 /**
- * @tc.name: UtilsTest042
+ * @tc.name: BaseUtilsTest042
  * @tc.desc: StartWith, EndWith the same string
  * @tc.type: FUNC
  */
-HWTEST_F(UtilsTest, UtilsTest042, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, BaseUtilsTest042, TestSize.Level1)
 {
     const std::string startWithValue = "THIS IS A STRING";
     const std::string prefixString = "THIS IS A STRING";

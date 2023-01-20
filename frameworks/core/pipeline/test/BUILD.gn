@@ -16,6 +16,4 @@ import("//build/test.gni")
 group("unittest") {
   testonly = true
   deps = []
-
-  #deps += [ "pipeline_context:unittest" ]
 }

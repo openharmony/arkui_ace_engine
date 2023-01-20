@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_unittest.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("pipeline_context_test_ng") {
   module_out_path = base_test_outout_path
@@ -289,14 +289,14 @@ ohos_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_property.cpp",
 
     # mock file
-    "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_app_bar_view.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_container_modal_pattern.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_container_modal_view.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_drag_drop_manager.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_event_manager.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_full_screen_manager.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_overlay_manager.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_shared_overlay_manager.cpp",
+    "$ace_root/test/unittest/core/pipeline/mock_app_bar_view.cpp",
+    "$ace_root/test/unittest/core/pipeline/mock_container_modal_pattern.cpp",
+    "$ace_root/test/unittest/core/pipeline/mock_container_modal_view.cpp",
+    "$ace_root/test/unittest/core/pipeline/mock_drag_drop_manager.cpp",
+    "$ace_root/test/unittest/core/pipeline/mock_event_manager.cpp",
+    "$ace_root/test/unittest/core/pipeline/mock_full_screen_manager.cpp",
+    "$ace_root/test/unittest/core/pipeline/mock_overlay_manager.cpp",
+    "$ace_root/test/unittest/core/pipeline/mock_shared_overlay_manager.cpp",
 
     # test file
     "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
@@ -304,8 +304,8 @@ ohos_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
 
     # self
-    "$ace_root/frameworks/core/pipeline_ng/test/unittest/pipeline_context_test_ng.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/test/unittest/ui_task_scheduler_test.cpp",
+    "$ace_root/test/unittest/core/pipeline/pipeline_context_test_ng.cpp",
+    "$ace_root/test/unittest/core/pipeline/ui_task_scheduler_test.cpp",
   ]
 
   if (is_wearable_product) {
@@ -363,8 +363,5 @@ ohos_unittest("pipeline_context_test_ng") {
 
   cflags_cc = [ "-w" ]
 
-  configs = [
-    "$ace_root:ace_test_coverage_config",
-    "$ace_root:ace_config",
-  ]
+  configs = [ "$ace_root:ace_config" ]
 }

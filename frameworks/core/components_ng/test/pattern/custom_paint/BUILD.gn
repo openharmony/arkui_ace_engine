@@ -37,8 +37,6 @@ ohos_unittest("custom_paint_pattern_test_ng") {
     ":config_custom_paint_test",
     "$ace_root:ace_config",
   ]
-
-  configs += [ "$ace_root:ace_test_coverage_config" ]
 }
 
 config("config_custom_paint_test") {

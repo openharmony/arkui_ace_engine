@@ -21,7 +21,7 @@
         ],
         "rom": "25600KB",
         "ram": "102400KB",
-        "hisysevent_config":[
+        "hisysevent_config": [
             "//foundation/arkui/ace_engine/adapter/ohos/build/hisysevent.yaml"
         ],
         "deps": {
@@ -71,32 +71,30 @@
             "inner_kits": [
                 {
                     "header": {
-                      "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/ace/",
-                      "header_files": [
-                          "ui_content.h",
-                          "viewport_config.h"
-                      ]
+                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/ace/",
+                        "header_files": [
+                            "ui_content.h",
+                            "viewport_config.h"
+                        ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent"
                 },
                 {
                     "header": {
-                      "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/form_render/include",
-                      "header_files": [
-                          "form_renderer_group.h"
-                      ]
+                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/form_render/include",
+                        "header_files": [
+                            "form_renderer_group.h"
+                        ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/form_render:ace_form_render"
                 }
             ],
             "test": [
-                "//foundation/arkui/ace_engine/frameworks/base/test:unittest",
+                "//foundation/arkui/ace_engine/test/unittest:unittest",
                 "//foundation/arkui/ace_engine/frameworks/bridge/test:unittest",
                 "//foundation/arkui/ace_engine/frameworks/core/accessibility/test:unittest",
-                "//foundation/arkui/ace_engine/frameworks/core/pipeline_ng/test:unittest",
                 "//foundation/arkui/ace_engine/frameworks/core/common/test:unittest",
                 "//foundation/arkui/ace_engine/frameworks/core/components_ng/test:unittest",
-                "//foundation/arkui/ace_engine/interfaces/test:unittest",
                 "//foundation/arkui/ace_engine/test/fuzztest:fuzztest"
             ]
         }

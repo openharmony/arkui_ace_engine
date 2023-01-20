@@ -15,6 +15,7 @@
 #include <cstdint>
 
 #include "gtest/gtest.h"
+#include "test/mock/core/common/mock_container.h"
 
 #include "core/components/common/layout/constants.h"
 
@@ -26,7 +27,6 @@
 #include "base/memory/referenced.h"
 #include "core/common/ace_engine.h"
 #include "core/common/event_manager.h"
-#include "core/common/test/mock/mock_container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -64,6 +64,7 @@ constexpr double DEFAULT_DOUBLE1 = 1.0;
 constexpr double DEFAULT_DOUBLE2 = 2.0;
 constexpr double DEFAULT_DOUBLE4 = 4.0;
 const std::string TEST_TAG("test");
+const std::string ACCESS_TAG("-accessibility");
 } // namespace
 
 class PipelineContextTestNg : public testing::Test {
@@ -1137,7 +1138,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg025, TestSize.Level1)
      * @tc.steps5: Call the function OnDumpInfo and test the third branch.
      * @tc.expected: The return value of function is true.
      */
-    params = { "-accessibility" };
+    params = { ACCESS_TAG };
     EXPECT_TRUE(context_->OnDumpInfo(params));
     params = { "-inspector" };
     EXPECT_TRUE(context_->OnDumpInfo(params));
