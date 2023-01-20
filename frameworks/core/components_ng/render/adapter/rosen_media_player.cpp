@@ -175,7 +175,7 @@ bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd)
             return false;
         }
         close(hapFd);
-    } else if (StringUtils::StartWith(filePath, "resource://rawfile")) {
+    } else if (StringUtils::StartWith(filePath, "resource://RAWFILE")) {
         // file path: resource/rawfile/xxx.xx --> resource://rawfile/xxx.xx
         auto themeManager = PipelineBase::GetCurrentContext()->GetThemeManager();
         auto themeConstants = themeManager->GetThemeConstants();
