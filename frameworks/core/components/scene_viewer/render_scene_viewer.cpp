@@ -76,6 +76,8 @@ void RenderSceneViewer::HandleEvent(const OHOS::Render3D::SceneViewerTouchEvent&
             break;
         case OHOS::Ace::TouchType::UNKNOWN:
             break;
+        default:
+            break;
     }
 
     if (!isHandleCameraMove_) {
