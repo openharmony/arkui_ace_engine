@@ -95,6 +95,12 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
     this.subscribers_.forEach((subscribedId) => {
       var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
       if (subscriber) {
+        // PU code path, only used for ObservedPropertySimple/Object stored inside App/LocalStorage
+        if ('syncPeerHasChanged' in subscriber) {
+          (subscriber as unknown as PropertyEventsReceiverPU<T>).syncPeerHasChanged(this as unknown as ObservedPropertyAbstractPU<T>);
+        }
+
+        // FU code path
         if ('hasChanged' in subscriber) {
           (subscriber as ISinglePropertyChangeSubscriber<T>).hasChanged(newValue);
         }

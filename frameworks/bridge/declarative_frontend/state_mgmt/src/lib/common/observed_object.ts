@@ -105,7 +105,6 @@ class SubscribableHandler {
         if ('objectPropertyHasChangedPU' in owningProperty) {
           // PU code path
           (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).objectPropertyHasChangedPU(this, propName);
-          return;
         }
 
         // FU code path

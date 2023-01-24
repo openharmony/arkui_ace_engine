@@ -34,7 +34,7 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
       this.source_.subscribeMe(this);
     } else {
       // code path for @Prop
-      this.source_ = new ObservedPropertySimple<T>(source as T, this, thisPropertyName);
+      this.source_ = new ObservedPropertySimplePU<T>(source as T, this, thisPropertyName);
     }
 
     // use own backing store for value to avoid
@@ -66,9 +66,11 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
   }
 
   public syncPeerHasChanged(eventSource : ObservedPropertyAbstractPU<T>) {
-    if (eventSource == this.source_) {
+  //  if (eventSource == this.source_) {
+    stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
+       syncPeerHasChanged peer '${eventSource.info()}'.`);
       this.sourceHasChanged(eventSource);
-    } 
+  //  } 
   }
 
   protected sourceHasChanged(eventSource: ObservedPropertyAbstractPU<T>): void {

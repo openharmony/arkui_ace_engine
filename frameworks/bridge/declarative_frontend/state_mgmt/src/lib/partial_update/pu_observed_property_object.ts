@@ -48,7 +48,7 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
   // It is NOT called when
   //    thisProp.aObsObj = new ClassA
   hasChanged(newValue: T): void {
-    stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: hasChanged DO NO USE`);
+    // stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: hasChanged DO NO USE`);
     // this.notifyHasChanged(this.wrappedValue_);
     // this.notifyPropertryHasChangedPU();
   }
@@ -112,7 +112,7 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
 
   public get(): T {
     stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: get`);
-    this.notifyPropertyRead();
+    this.notifyPropertryHasBeenReadPU();
     return this.wrappedValue_;
   }
 

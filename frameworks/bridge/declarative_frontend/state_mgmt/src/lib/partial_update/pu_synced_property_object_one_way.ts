@@ -41,7 +41,7 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
 
     // only use for delayed object init
     // re-settign source to other value is unsupported.
-    public setSource(source: ObservedPropertyAbstract<C>) : void{
+    public setSource(source: ObservedPropertyAbstractPU<C>) : void{
       if (source) {
         this.source_ = source;
         this.source_.subscribeMe(this);
@@ -100,7 +100,7 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
 
     if (source && (typeof (source) === "object") && ("notifyHasChanged" in source) && ("subscribeMe" in source)) {
       // code path for @(Local)StorageProp, the souce is a ObservedPropertyObject in aLocalStorage)
-      this.sourceChangeObserver_.setSource(source as ObservedPropertyAbstract<C>)
+      this.sourceChangeObserver_.setSource(source as ObservedPropertyAbstractPU<C>)
       this.setWrappedValue((source as ObservedPropertyAbstract<C>).get());
     } else {
       // code path for @Prop

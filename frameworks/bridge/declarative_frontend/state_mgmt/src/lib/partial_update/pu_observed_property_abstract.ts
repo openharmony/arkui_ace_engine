@@ -66,6 +66,10 @@ abstract class ObservedPropertyAbstractPU<T>
         if ('propertyHasBeenReadPU' in subscriber) {
           (subscriber as unknown as PropertyEventsReceiverPU<T>).propertyHasBeenReadPU(this);
         }
+//        if ('propertyRead' in subscriber) {
+//          stateMgmtConsole.error(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: propertyHasBeenReadPU. propertyRead FU CODE PATH STILL used`);
+//          (subscriber as IMultiPropertiesReadSubscriber).propertyRead(this.info_);
+//        }
       }
     });
     this.recordDependentUpdate();
