@@ -48,8 +48,29 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
   // It is NOT called when
   //    thisProp.aObsObj = new ClassA
   hasChanged(newValue: T): void {
-    stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: hasChanged`);
-    this.notifyHasChanged(this.wrappedValue_);
+    stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: hasChanged DO NO USE`);
+    // this.notifyHasChanged(this.wrappedValue_);
+    // this.notifyPropertryHasChangedPU();
+  }
+
+  /**
+   * Called by a @Link - SynchedPropertyObjectTwoWay that uses this as sync peer when it has changed
+   * @param eventSource 
+   */
+  syncPeerHasChanged(eventSource : ObservedPropertyAbstractPU<T>) {
+    stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: syncPeerHasChanged peer '${eventSource.info()}'.`);
+    this.notifyPropertryHasChangedPU();
+  }
+
+  /**
+   * Wraped ObservedObject has changed
+   * @param souceObject 
+   * @param changedPropertyName 
+   */
+  public objectPropertyHasChangedPU(souceObject: ObservedObject<T>, changedPropertyName : string) {
+    stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: \
+        objectPropertyHasChangedPU: contained ObservedObject property '${changedPropertyName}' has changed.`)
+    this.notifyPropertryHasChangedPU();
   }
 
   private unsubscribeFromOwningProperty() {
@@ -108,6 +129,7 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
     }
     stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: set, changed`);
     this.setValueInternal(newValue);
-    this.notifyHasChanged(newValue);
+    //this.notifyHasChanged(newValue);
+    this.notifyPropertryHasChangedPU();
   }
 }

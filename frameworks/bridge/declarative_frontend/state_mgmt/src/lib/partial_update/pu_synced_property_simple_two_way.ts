@@ -47,9 +47,23 @@ class SynchedPropertySimpleTwoWayPU<T> extends ObservedPropertySimpleAbstractPU<
   // will call this cb function when property has changed
   // a set (newValue) is not done because get reads through for the source_
   hasChanged(newValue: T): void {
+//    if (!this.changeNotificationIsOngoing_) {
+//      stateMgmtConsole.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`)
+      // this.notifyHasChanged(newValue);
+//      this.notifyPropertryHasChangedPU();
+//    }
+  }
+
+  /**
+   * Called when sync peer ObservedPropertySimple or SynchedPropertySimpletTwoWay has chnaged value
+   * that peer can be in either parent or child component if 'this' is used for a @Link
+   * that peer can be in either acestor or descendant component if 'this' is used for a @Consume
+   * @param eventSource 
+   */
+  syncPeerHasChanged(eventSource : ObservedPropertyAbstractPU<T>) {
     if (!this.changeNotificationIsOngoing_) {
-      stateMgmtConsole.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`)
-      this.notifyHasChanged(newValue);
+      stateMgmtConsole.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: propertyHasChangedPU, property ${eventSource.info()}`);
+      this.notifyPropertryHasChangedPU();
     }
   }
 
@@ -61,7 +75,8 @@ class SynchedPropertySimpleTwoWayPU<T> extends ObservedPropertySimpleAbstractPU<
   // get 'read through` from the ObservedProperty
   public get(): T {
     stateMgmtConsole.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: get`);
-    this.notifyPropertyRead();
+    // this.notifyPropertyRead();
+    this.notifyPropertryHasBeenReadPU()
     return this.getUnmonitored();
   }
 
@@ -84,7 +99,8 @@ class SynchedPropertySimpleTwoWayPU<T> extends ObservedPropertySimpleAbstractPU<
 
     // the source_ ObservedProeprty will call: this.hasChanged(newValue);
     this.source_.set(newValue);
-    this.notifyHasChanged(newValue);
+    // this.notifyHasChanged(newValue);
+    this.notifyPropertryHasChangedPU();
 
     this.changeNotificationIsOngoing_ = false;
   }

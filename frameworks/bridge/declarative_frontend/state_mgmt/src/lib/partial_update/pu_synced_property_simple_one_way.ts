@@ -59,10 +59,23 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
   // this object is subscriber to this.source_
   // when source notifies a change, copy its value to local backing store
   public hasChanged(newValue: T): void {
-    stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`)
-    this.wrappedValue_ = newValue;
-    this.notifyHasChanged(newValue);
+ //   stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}' DO NOT USE.`)
+//    this.wrappedValue_ = newValue;
+    // this.notifyHasChanged(newValue);
+//    this.notifyPropertryHasChangedPU();
   }
+
+  public syncPeerHasChanged(eventSource : ObservedPropertyAbstractPU<T>) {
+    if (eventSource == this.source_) {
+      this.sourceHasChanged(eventSource);
+    } 
+  }
+
+  protected sourceHasChanged(eventSource: ObservedPropertyAbstractPU<T>): void {
+    stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: sourceHasChanged: source '${eventSource.info()}' has changed value to ${eventSource.getUnmonitored()}.`)
+    this.wrappedValue_ = eventSource.getUnmonitored();
+    this.notifyPropertryHasChangedPU();
+}
 
   public getUnmonitored(): T {
     stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored returns '${JSON.stringify(this.wrappedValue_)}' .`);
@@ -73,7 +86,8 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
   // get 'read through` from the ObservedProperty
   public get(): T {
     stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: get returns '${this.wrappedValue_}'`);
-    this.notifyPropertyRead();
+    // this.notifyPropertyRead();
+    this.notifyPropertryHasBeenReadPU()
     return this.wrappedValue_;
   }
 
@@ -85,7 +99,8 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
 
     stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: set from '${this.wrappedValue_} to '${newValue}'.`);
     this.wrappedValue_ = newValue;
-    this.notifyHasChanged(newValue);
+    // this.notifyHasChanged(newValue);
+    this.notifyPropertryHasChangedPU();
   }
 
   public reset(sourceChangedValue: T): void {

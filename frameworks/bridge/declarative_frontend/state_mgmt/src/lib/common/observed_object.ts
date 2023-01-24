@@ -50,7 +50,7 @@ function Observed<C extends Object>(target: Type<C>): any {
   var f: any = function (...args: any[]) {
     stateMgmtConsole.debug(`New ${original.name}, gets wrapped inside ObservableObject proxy.`);
     return ObservedObject.createNew(new original(...args), undefined);
-//    return new ObservedObject<C>(new original(...args), undefined);
+    //    return new ObservedObject<C>(new original(...args), undefined);
   };
 
   Object.setPrototypeOf(f, Object.getPrototypeOf(original));
@@ -77,10 +77,10 @@ class SubscribableHandler {
 
   addOwningProperty(subscriber: IPropertySubscriber): void {
     if (subscriber) {
-        stateMgmtConsole.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id__()}'.`)
-        this.owningProperties_.add(subscriber.id__());
+      stateMgmtConsole.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id__()}'.`)
+      this.owningProperties_.add(subscriber.id__());
     } else {
-        stateMgmtConsole.warn(`SubscribableHandler: addOwningProperty: undefined subscriber. - Internal error?`);
+      stateMgmtConsole.warn(`SubscribableHandler: addOwningProperty: undefined subscriber. - Internal error?`);
     }
   }
 
@@ -97,11 +97,18 @@ class SubscribableHandler {
   }
 
 
-  protected notifyPropertyHasChanged(propName: string, newValue: any) {
-    stateMgmtConsole.debug(`SubscribableHandler: notifyPropertyHasChanged '${propName}'.`)
+  protected notifyObjectPropertyHasChanged(propName: string, newValue: any) {
+    stateMgmtConsole.debug(`SubscribableHandler: notifyObjectPropertyHasChanged '${propName}'.`)
     this.owningProperties_.forEach((subscribedId) => {
       var owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId)
       if (owningProperty) {
+        if ('objectPropertyHasChangedPU' in owningProperty) {
+          // PU code path
+          (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).objectPropertyHasChangedPU(this, propName);
+          return;
+        }
+
+        // FU code path
         if ('hasChanged' in owningProperty) {
           (owningProperty as ISinglePropertyChangeSubscriber<any>).hasChanged(newValue);
         }
@@ -109,10 +116,25 @@ class SubscribableHandler {
           (owningProperty as IMultiPropertiesChangeSubscriber).propertyHasChanged(propName);
         }
       } else {
-        stateMgmtConsole.warn(`SubscribableHandler: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+        stateMgmtConsole.warn(`SubscribableHandler: notifyObjectPropertyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
       }
     });
   }
+
+
+  protected notifyObjectPropertyHasBeenRead(propName: string) {
+    stateMgmtConsole.debug(`SubscribableHandler: notifyObjectPropertyHasBeenRead '${propName}'.`)
+    this.owningProperties_.forEach((subscribedId) => {
+      var owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId)
+      if (owningProperty) {
+        // PU code path
+        if ('propertyHasBeenReadPU' in owningProperty) {
+          (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).objectHasBeenReadPU(this, propName);
+        }
+      }
+    });
+  }
+
 
   public get(target: Object, property: PropertyKey): any {
     return (property === SubscribableHandler.IS_OBSERVED_OBJECT) ? true :
@@ -136,7 +158,7 @@ class SubscribableHandler {
           return true;
         }
         target[property] = newValue;
-        this.notifyPropertyHasChanged(property.toString(), newValue);
+        this.notifyObjectPropertyHasChanged(property.toString(), newValue);
         return true;
         break;
     }
@@ -259,7 +281,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
 
     return obj;
   }
-  
+
   /**
    * Create a new ObservableObject and subscribe its owner to propertyHasChanged
    * ntifications

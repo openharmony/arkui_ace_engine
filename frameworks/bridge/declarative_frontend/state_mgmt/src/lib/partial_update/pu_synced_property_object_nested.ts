@@ -57,10 +57,16 @@ class SynchedPropertyNesedObjectPU<C extends Object>
   // this object is subscriber to ObservedObject
   // will call this cb function when property has changed
   hasChanged(newValue: C): void {
-    stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`)
-    this.notifyHasChanged(this.obsObject_);
+    // stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`)
+    // this.notifyHasChanged(this.obsObject_);
+    //this.notifyPropertryHasChangedPU();
   }
 
+  objectPropertyHasChangedPU(eventSource: ObservedObject<C>, changedPropertyName: string) {
+    stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: \
+        objectPropertyHasChangedPU: contained ObservedObject property '${changedPropertyName}' has changed.`)
+    this.notifyPropertryHasChangedPU();
+  }
 
   public getUnmonitored(): C {
     // stateMgmtConsole.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: getUnmonitored returns '${JSON.stringify(this.wrappedValue_)}' .`);
@@ -71,7 +77,8 @@ class SynchedPropertyNesedObjectPU<C extends Object>
   // get 'read through` from the ObservedProperty
   public get(): C {
     stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: get`)
-    this.notifyPropertyRead();
+    // this.notifyPropertyRead();
+    this.notifyPropertryHasBeenReadPU()
     return this.obsObject_;
   }
 
@@ -93,6 +100,7 @@ class SynchedPropertyNesedObjectPU<C extends Object>
     ObservedObject.addOwningProperty(this.obsObject_, this);
 
     // notify value change to subscribing View
-    this.notifyHasChanged(this.obsObject_);
+    // this.notifyHasChanged(this.obsObject_);
+    this.notifyPropertryHasChangedPU();
   }
 }

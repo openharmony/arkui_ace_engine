@@ -19,7 +19,9 @@
  * all definitions in this file are framework internal
  */
 
-abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T> {
+abstract class ObservedPropertyAbstractPU<T> 
+    extends ObservedPropertyAbstract<T> 
+{
 
   private dependentElementIds_: Set<number> = new Set<number>();
 
@@ -28,6 +30,8 @@ abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T>
   }
 
   protected notifyHasChanged(newValue: T) {
+    stateMgmtConsole.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged, DO NOT USE.`);
+    /*
     stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
     this.subscribers_.forEach((subscribedId) => {
       var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
@@ -44,12 +48,45 @@ abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T>
         stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
       }
     });
+    */
   }
 
   protected notifyPropertyRead() {
-    super.notifyPropertyRead();
-    this.recordDependentUpdate();
+    //stateMgmtConsole.error(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertyRead DO NOT USE with PU`);
+    // FIXME remove function
+   //    super.notifyPropertyRead();
+    //    this.recordDependentUpdate();
   }
+
+  protected notifyPropertryHasBeenReadPU() {
+    stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: propertyHasBeenReadPU.`)
+    this.subscribers_.forEach((subscribedId) => {
+      var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
+      if (subscriber) {
+        if ('propertyHasBeenReadPU' in subscriber) {
+          (subscriber as unknown as PropertyEventsReceiverPU<T>).propertyHasBeenReadPU(this);
+        }
+      }
+    });
+    this.recordDependentUpdate();
+  } 
+
+  protected notifyPropertryHasChangedPU() {
+    stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertryHasChangedPU.`)
+    this.subscribers_.forEach((subscribedId) => {
+      var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
+      if (subscriber) {
+        if ('viewPropertyHasChanged' in subscriber) {
+          (subscriber as ViewPU).viewPropertyHasChanged(this.info_, this.dependentElementIds_);
+        } else if ('syncPeerHasChanged' in subscriber) {
+          (subscriber as unknown as PropertyEventsReceiverPU<T>).syncPeerHasChanged(this);
+        } else  {
+          stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertryHasChangedPU: unknown subscriber ID '${subscribedId}' error!`);
+        }
+      }
+    });
+  }
+  
 
   public markDependentElementsDirty(view: ViewPU) {
     // TODO ace-ets2bundle, framework, compilated apps need to update together

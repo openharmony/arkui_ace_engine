@@ -17,8 +17,7 @@
 type SyncSourceHasChangedCb<T> = (source : ObservedPropertyAbstract<T>) => void;
 
 class SynchedPropertyObjectOneWayPU<C extends Object>
-  extends ObservedPropertyObjectAbstractPU<C>
-  implements IMultiPropertiesChangeSubscriber {
+  extends ObservedPropertyObjectAbstractPU<C> {
 
   // inner anonymous class to handler hasChanged
   // notifications from @Prop source
@@ -61,14 +60,31 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
       this.source_ = undefined;
       SubscriberManager.Delete(this.id__())
     }
-  
+
+
     // implements  ISinglePropertyChangeSubscriber<T>:
     // this object is subscriber to this.source_
     // when source notifies a change, copy its value to local backing store
     public hasChanged(newValue: C): void {
-      this.notifySourceHasChanged_ (this.source_);
+      // stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}]: hasChanged. DO NOT HANDLE.`)
+      //  this.notifySourceHasChanged_ (this.source_);
     }
-o    
+
+    /**
+     * Emited when source has changed
+     * @param eventSource 
+     */
+    public syncPeerHasChanged(eventSource : ObservedPropertyAbstractPU<C>) {
+      if (eventSource && this.source_ == eventSource) {
+        // should always be the case!
+        stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}]: syncPeerHasChanged(): Source '${eventSource.info()}' has changed'.`)
+        this.notifySourceHasChanged_(this.source_);
+      } else {
+        stateMgmtConsole.warn(`SynchedPropertyNesedObjectPU[${this.id__()}]: syncPeerHasChanged Unexpected situation. Ignorning event.`)
+      }
+    }
+  
+    
     public set(sourceChangedValue : C) : void {
       // if set causes an actual change, then, ObservedPropertyObject source_ will call hasChanged
       this.source_.set(sourceChangedValue);
@@ -118,13 +134,20 @@ o
     if (typeof newValue == "object") {
       stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: hasChanged:  newValue '${JSON.stringify(newValue)}'.`);
       this.setWrappedValue(newValue);
-      this.notifyHasChanged(ObservedObject.GetRawObject(this.wrappedValue_));
+      // this.notifyHasChanged(ObservedObject.GetRawObject(this.wrappedValue_));
+      this.notifyPropertryHasChangedPU();
     }
   }
 
-  public propertyHasChanged(propName : string) : void {
-    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: propertyHasChanged '${propName}'.`);
-    this.notifyHasChanged(ObservedObject.GetRawObject(this.wrappedValue_));
+  /**
+   * event emited by wrapped ObservedObject, when one of its property values changes
+   * @param souceObject 
+   * @param changedPropertyName 
+   */
+  public objectPropertyHasChangedPU(souceObject: ObservedObject<C>, changedPropertyName : string) {
+    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
+        objectPropertyHasChangedPU: contained ObservedObject property '${changedPropertyName}' has changed.`)
+    this.notifyPropertryHasChangedPU();
   }
 
   public getUnmonitored(): C {
@@ -136,7 +159,8 @@ o
   // get 'read through` from the ObservedObject
   public get(): C {
     stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: get returning ${JSON.stringify(this.wrappedValue_)}.`)
-    this.notifyPropertyRead();
+    // this.notifyPropertyRead();
+    this.notifyPropertryHasBeenReadPU()
     return this.wrappedValue_;
   }
 
@@ -155,7 +179,8 @@ o
     }
 
     this.setWrappedValue(newValue);
-    this.notifyHasChanged(this.wrappedValue_);
+    //    this.notifyHasChanged(this.wrappedValue_);
+    this.notifyPropertryHasChangedPU();
   }
 
   public reset(sourceChangedValue: C): void {

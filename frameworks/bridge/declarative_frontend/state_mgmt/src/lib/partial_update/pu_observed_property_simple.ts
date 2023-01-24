@@ -43,8 +43,18 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
   }
 
   hasChanged(newValue: T): void {
-    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: hasChanged`);
-    this.notifyHasChanged(this.wrappedValue_);
+    //   stateMgmtConsole.error(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: NOT USED`);
+    // this.notifyHasChanged(this.wrappedValue_);
+    //  this.notifyPropertryHasChangedPU();
+  }
+
+  /**
+ * Called by a @Link - SynchedPropertySimpleTwoWay that uses this as sync peer when it has changed
+ * @param eventSource 
+ */
+  syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<T>) {
+    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: syncPeerHasChanged peer '${eventSource.info()}'.`);
+    this.notifyPropertryHasChangedPU();
   }
 
   /*
@@ -65,7 +75,8 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
 
   public get(): T {
     stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: get returns '${JSON.stringify(this.wrappedValue_)}' .`);
-    this.notifyPropertyRead();
+    // this.notifyPropertyRead();
+    this.notifyPropertryHasBeenReadPU()
     return this.wrappedValue_;
   }
 
@@ -76,6 +87,8 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
     }
     stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: set, changed from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(newValue)}.`);
     this.setValueInternal(newValue);
-    this.notifyHasChanged(newValue);
+    // this.notifyHasChanged(newValue);
+    this.notifyPropertryHasChangedPU();
+
   }
 }
