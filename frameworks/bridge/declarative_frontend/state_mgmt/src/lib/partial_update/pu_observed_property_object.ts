@@ -15,6 +15,7 @@
 
 /**
  * ObservedPropertyObjectPU
+ * implementation of @State and @Provide decorated variables of type class object
  *
  * all definitions in this file are framework internal
  * 
@@ -41,15 +42,24 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
     super.aboutToBeDeleted();
   }
 
-  // notification from ObservedObject value one of its
-  // props has chnaged. Implies the ObservedProperty has changed
-  // Note: this function gets called when in this case:
-  //       thisProp.aObsObj.aProp = 47  a object prop gets changed
-  // It is NOT called when
-  //    thisProp.aObsObj = new ClassA
-  hasChanged(newValue: T): void {
-    stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: hasChanged`);
-    this.notifyHasChanged(this.wrappedValue_);
+  /**
+   * Called by a SynchedPropertyObjectTwoWayPU (@Link, @Consume) that uses this as sync peer when it has changed
+   * @param eventSource 
+   */
+  syncPeerHasChanged(eventSource : ObservedPropertyAbstractPU<T>) {
+    stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: syncPeerHasChanged peer '${eventSource.info()}'.`);
+    this.notifyPropertryHasChangedPU();
+  }
+
+  /**
+   * Wraped ObservedObjectPU has changed
+   * @param souceObject 
+   * @param changedPropertyName 
+   */
+  public objectPropertyHasChangedPU(souceObject: ObservedObject<T>, changedPropertyName : string) {
+    stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: \
+        objectPropertyHasChangedPU: contained ObservedObject property '${changedPropertyName}' has changed.`)
+    this.notifyPropertryHasChangedPU();
   }
 
   private unsubscribeFromOwningProperty() {
@@ -91,7 +101,7 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
 
   public get(): T {
     stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: get`);
-    this.notifyPropertyRead();
+    this.notifyPropertryHasBeenReadPU();
     return this.wrappedValue_;
   }
 
@@ -108,6 +118,6 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
     }
     stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: set, changed`);
     this.setValueInternal(newValue);
-    this.notifyHasChanged(newValue);
+    this.notifyPropertryHasChangedPU();
   }
 }

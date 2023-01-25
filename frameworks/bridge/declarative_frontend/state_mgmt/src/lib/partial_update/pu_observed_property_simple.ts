@@ -15,8 +15,9 @@
 
 /**
  * ObservedPropertySimplePU
- * 
- * class that holds an actual property value of type T
+ * implementation of @State and @Provide decorated variables of types (T=) boolean | number | string | enum
+ *
+ * Holds an actual property value of type T
  * uses its base class to manage subscribers to this
  * property.
  * 
@@ -42,9 +43,13 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
     super.aboutToBeDeleted();
   }
 
-  hasChanged(newValue: T): void {
-    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: hasChanged`);
-    this.notifyHasChanged(this.wrappedValue_);
+  /**
+ * Called by a @Link - SynchedPropertySimpleTwoWay that uses this as sync peer when it has changed
+ * @param eventSource 
+ */
+  syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<T>) {
+    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: syncPeerHasChanged peer '${eventSource.info()}'.`);
+    this.notifyPropertryHasChangedPU();
   }
 
   /*
@@ -65,7 +70,7 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
 
   public get(): T {
     stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: get returns '${JSON.stringify(this.wrappedValue_)}' .`);
-    this.notifyPropertyRead();
+    this.notifyPropertryHasBeenReadPU()
     return this.wrappedValue_;
   }
 
@@ -76,6 +81,7 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
     }
     stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: set, changed from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(newValue)}.`);
     this.setValueInternal(newValue);
-    this.notifyHasChanged(newValue);
+    this.notifyPropertryHasChangedPU();
+
   }
 }
