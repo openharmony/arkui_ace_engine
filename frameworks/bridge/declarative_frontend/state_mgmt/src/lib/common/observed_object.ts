@@ -105,7 +105,7 @@ class SubscribableHandler {
     if (owningProperty) {
       this.addOwningProperty(owningProperty);
     }
-    stateMgmtConsole.debug(`SubscribableHandler: construcstor done`);
+    stateMgmtConsole.debug(`SubscribableHandler: constructor done`);
   }
 
   addOwningProperty(subscriber: IPropertySubscriber): void {
@@ -130,11 +130,17 @@ class SubscribableHandler {
   }
 
 
-  protected notifyPropertyHasChanged(propName: string, newValue: any) {
-    stateMgmtConsole.debug(`SubscribableHandler: notifyPropertyHasChanged '${propName}'.`)
+  protected notifyObjectPropertyHasChanged(propName: string, newValue: any) {
+    stateMgmtConsole.debug(`SubscribableHandler: notifyObjectPropertyHasChanged '${propName}'.`)
     this.owningProperties_.forEach((subscribedId) => {
       var owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId)
       if (owningProperty) {
+        if ('objectPropertyHasChangedPU' in owningProperty) {
+          // PU code path
+          (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).objectPropertyHasChangedPU(this, propName);
+        }
+
+        // FU code path
         if ('hasChanged' in owningProperty) {
           (owningProperty as ISinglePropertyChangeSubscriber<any>).hasChanged(newValue);
         }
@@ -142,7 +148,21 @@ class SubscribableHandler {
           (owningProperty as IMultiPropertiesChangeSubscriber).propertyHasChanged(propName);
         }
       } else {
-        stateMgmtConsole.warn(`SubscribableHandler: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+        stateMgmtConsole.warn(`SubscribableHandler: notifyObjectPropertyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+      }
+    });
+  }
+
+
+  protected notifyObjectPropertyHasBeenRead(propName: string) {
+    stateMgmtConsole.debug(`SubscribableHandler: notifyObjectPropertyHasBeenRead '${propName}'.`)
+    this.owningProperties_.forEach((subscribedId) => {
+      var owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId)
+      if (owningProperty) {
+        // PU code path
+        if ('objectPropertyHasBeenReadPU' in owningProperty) {
+          (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).objectPropertyHasBeenReadPU(this, propName);
+        }
       }
     });
   }
@@ -175,7 +195,7 @@ class SubscribableHandler {
         }
         stateMgmtConsole.debug(`SubscribableHandler: set '${property.toString()}'.`);
         Reflect.set(target, property, newValue);
-        this.notifyPropertyHasChanged(property.toString(), newValue);
+        this.notifyObjectPropertyHasChanged(property.toString(), newValue);
         return true;
         break;
     }
@@ -212,7 +232,7 @@ class SubscribableDateHandler extends SubscribableHandler {
       return function () {
         // execute original function with given arguments
         let result = ret.apply(this, arguments);
-        self.notifyPropertyHasChanged(property.toString(), this);
+        self.notifyObjectPropertyHasChanged(property.toString(), this);
         return result;
       }.bind(target) // bind "this" to target inside the function
     } else if (typeof ret === "function") {
@@ -283,7 +303,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
                 // prop is the function name here
                 // and result is the function return value
                 // functinon modifies none or more properties
-                self.notifyPropertyHasChanged(prop, target);
+                self.notifyObjectPropertyHasChanged(prop, target);
                 return result;
               }.bind(proxiedObject);
             }
@@ -295,7 +315,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
 
                 // 'result' is the unproxied object               
                 // functinon modifies none or more properties
-                self.notifyPropertyHasChanged(prop, result);
+                self.notifyObjectPropertyHasChanged(prop, result);
 
                 // returning the 'proxiedObject' ensures that when chain calls also 2nd function call
                 // operates on the proxied object.
@@ -356,7 +376,15 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
     return true;
   }
 
-  static removeOwningProperty(obj: Object,
+  /**
+   * remove a subscriber to given ObservedObject
+   * due to the proxy nature this static method approach needs to be used instead of a member 
+   * function
+   * @param obj 
+   * @param subscriber 
+   * @returns false if given object is not an ObservedObject 
+   */
+  public static removeOwningProperty(obj: Object,
     subscriber: IPropertySubscriber): boolean {
     if (!ObservedObject.IsObservedObject(obj)) {
       return false;

@@ -15,13 +15,14 @@
 
 /**
  * SynchedPropertyNesedObjectPU
+ * implementation of @ObjectLink decorated variables
  * 
  * all definitions in this file are framework internal
  * 
  */
 class SynchedPropertyNesedObjectPU<C extends Object>
   extends ObservedPropertyObjectAbstractPU<C>
-  implements ISinglePropertyChangeSubscriber<C> {
+  implements ObservedObjectEventsPUReceiver<C> {
 
   private obsObject_: C;
 
@@ -53,15 +54,19 @@ class SynchedPropertyNesedObjectPU<C extends Object>
     super.aboutToBeDeleted();
   }
 
-
-  // this object is subscriber to ObservedObject
-  // will call this cb function when property has changed
-  hasChanged(newValue: C): void {
-    stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`)
-    this.notifyHasChanged(this.obsObject_);
+  public objectPropertyHasChangedPU(eventSource: ObservedObject<C>, changedPropertyName: string) {
+    stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: \
+        objectPropertyHasChangedPU: contained ObservedObject property '${changedPropertyName}' has changed.`)
+    this.notifyPropertyHasChangedPU();
   }
 
 
+  public objectPropertyHasBeenReadPU(souceObject: ObservedObject<C>, changedPropertyName : string) {
+    stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: \
+    objectPropertyHasBeenReadPU: contained ObservedObject property '${changedPropertyName}' has been read.`);
+    this.notifyPropertyHasBeenReadPU();
+  }
+  
   public getUnmonitored(): C {
     // stateMgmtConsole.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: getUnmonitored returns '${JSON.stringify(this.wrappedValue_)}' .`);
     // unmonitored get access , no call to otifyPropertyRead !
@@ -71,7 +76,8 @@ class SynchedPropertyNesedObjectPU<C extends Object>
   // get 'read through` from the ObservedProperty
   public get(): C {
     stateMgmtConsole.debug(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: get`)
-    this.notifyPropertyRead();
+    // this.notifyPropertyRead();
+    this.notifyPropertyHasBeenReadPU()
     return this.obsObject_;
   }
 
@@ -93,6 +99,6 @@ class SynchedPropertyNesedObjectPU<C extends Object>
     ObservedObject.addOwningProperty(this.obsObject_, this);
 
     // notify value change to subscribing View
-    this.notifyHasChanged(this.obsObject_);
+    this.notifyPropertyHasChangedPU();
   }
 }
