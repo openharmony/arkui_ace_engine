@@ -29,6 +29,11 @@ abstract class NativeViewPartialUpdate {
 
   abstract id__(): void;
 
+  isFirstRender(): boolean {
+    console.warn(`${this.id__()}:${this.constructor.name}: isFirstRender Always returns true!`);
+    return true;
+  }
+
   protected markNeedUpdate(): void {
     console.log(`${this.id__()}:${this.constructor.name}: markNeedUpdate`);
   }
