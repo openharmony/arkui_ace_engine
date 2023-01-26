@@ -20,24 +20,25 @@
  * all definitions in this file are framework internal
  */
 class SynchedPropertyObjectTwoWayPU<C extends Object>
-  extends ObservedPropertyObjectAbstractPU<C>
-  implements ISinglePropertyChangeSubscriber<C> {
+  extends ObservedPropertyObjectAbstractPU<C> {
 
-  private linkedParentProperty_: ObservedPropertyObjectAbstract<C>;
+  private source_: ObservedPropertyObjectAbstract<C>;
   private changeNotificationIsOngoing_: boolean = false;
     
-  constructor(linkSource: ObservedPropertyObjectAbstract<C>,
+  constructor(source: ObservedPropertyObjectAbstract<C>,
     owningChildView: IPropertySubscriber,
     thisPropertyName: PropertyInfo) {
     super(owningChildView, thisPropertyName);
-    this.linkedParentProperty_ = linkSource;
-    if (this.linkedParentProperty_) {
+    if (source) {
       // register to the parent property
-      this.linkedParentProperty_.subscribeMe(this);
-    }
+      this.source_ = source;
+      this.source_.subscribeMe(this);
 
     // register to the ObservedObject
-    ObservedObject.addOwningProperty(this.linkedParentProperty_.get(), this);
+    ObservedObject.addOwningProperty(this.source_.get(), this);
+    } else {
+      stateMgmtConsole.error(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source must not be undefined. Application error!`);
+    }
   }
 
   /*
@@ -46,21 +47,13 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
   */
   aboutToBeDeleted() {
     // unregister from parent of this link
-    if (this.linkedParentProperty_) {
-        this.linkedParentProperty_.unlinkSuscriber(this.id__());
+    if (this.source_) {
+        this.source_.unlinkSuscriber(this.id__());
     
         // unregister from the ObservedObject
-        ObservedObject.removeOwningProperty(this.linkedParentProperty_.getUnmonitored(), this);
+        ObservedObject.removeOwningProperty(this.source_.getUnmonitored(), this);
     }
     super.aboutToBeDeleted();
-  }
-
-  private setObject(newValue: C): void {
-    if (!this.linkedParentProperty_) {
-        stateMgmtConsole.warn(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject, no linked parent property.`);
-        return;
-    }
-    this.linkedParentProperty_.set(newValue)
   }
 
   /**
@@ -89,9 +82,9 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
 
 
   public getUnmonitored(): C {
-    stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored returns '${(this.linkedParentProperty_ ? JSON.stringify(this.linkedParentProperty_.getUnmonitored()) : "undefined")}' .`);
+    stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored returns '${(this.source_ ? JSON.stringify(this.source_.getUnmonitored()) : "undefined")}' .`);
     // unmonitored get access , no call to otifyPropertyRead !
-    return (this.linkedParentProperty_ ? this.linkedParentProperty_.getUnmonitored() : undefined);
+    return (this.source_ ? this.source_.getUnmonitored() : undefined);
   }
 
   // get 'read through` from the ObservedProperty
@@ -109,8 +102,6 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
     }
 
     stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
-
-    ObservedObject.removeOwningProperty(this.getUnmonitored(), this);
     
     // avoid circular notifications @Link -> source @State -> other but also back to same @Link
     this.changeNotificationIsOngoing_ = true;
@@ -118,5 +109,18 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
     ObservedObject.addOwningProperty(this.getUnmonitored(), this);
     this.notifyPropertryHasChangedPU();
     this.changeNotificationIsOngoing_ = false;
+  }
+
+  private setObject(newValue: C): void {
+    if (!this.source_) {
+        stateMgmtConsole.warn(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject, no linked parent property.`);
+        return;
+    }
+
+    let oldValueObject = this.getUnmonitored();
+    if (oldValueObject) {
+      ObservedObject.removeOwningProperty(oldValueObject, this);
+    }
+    this.source_.set(newValue)
   }
 }

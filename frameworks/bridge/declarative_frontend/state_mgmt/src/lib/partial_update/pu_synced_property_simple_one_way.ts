@@ -19,8 +19,7 @@
  * all definitions in this file are framework internal
  */
 
-class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<T>
-  implements ISinglePropertyChangeSubscriber<T>  {
+class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<T> {
 
   private wrappedValue_: T;
   private source_: ObservedPropertyAbstract<T>;
@@ -28,7 +27,12 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
   constructor(source: ObservedPropertyAbstract<T> | T, subscribeMe?: IPropertySubscriber, thisPropertyName?: PropertyInfo) {
     super(subscribeMe, thisPropertyName);
 
-    if (source && (typeof (source) === "object") && ("notifyHasChanged" in source) && ("subscribeMe" in source)) {
+    if (!source) {
+      stateMgmtConsole.error(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Prop source must not be undefined. Application error!`);
+      return;
+    }
+
+    if ((typeof (source) === "object") && ("notifyHasChanged" in source) && ("subscribeMe" in source)) {
       // code path for @(Local)StorageProp
       this.source_ = source as ObservedPropertyAbstract<T>;
       // subscribe to receive value chnage updates from LocalStorge source property
@@ -60,15 +64,10 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
       // defensive, should always be the case
       stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
        syncPeerHasChanged peer '${eventSource.info()}'.`);
-      this.sourceHasChanged(eventSource);
-    }
+       this.setWrappedValue(eventSource.getUnmonitored());
+       this.notifyPropertryHasChangedPU();
+       }
   }
-
-  protected sourceHasChanged(eventSource: ObservedPropertyAbstractPU<T>): void {
-    stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: sourceHasChanged: source '${eventSource.info()}' has changed value to ${eventSource.getUnmonitored()}.`)
-    this.wrappedValue_ = eventSource.getUnmonitored();
-    this.notifyPropertryHasChangedPU();
-}
 
   public getUnmonitored(): T {
     stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored returns '${JSON.stringify(this.wrappedValue_)}' .`);
@@ -90,7 +89,7 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
     }
 
     stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: set from '${this.wrappedValue_} to '${newValue}'.`);
-    this.wrappedValue_ = newValue;
+    this.setWrappedValue(newValue);
     this.notifyPropertryHasChangedPU();
   }
 
@@ -98,6 +97,10 @@ class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<
     stateMgmtConsole.debug(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: reset from '${this.wrappedValue_} to '${sourceChangedValue}'.`);
     // if set causes an actual change, then, ObservedPropertySimple source_ will call hasChanged
     this.source_.set(sourceChangedValue);
+  }
+
+  private setWrappedValue(newValue: T): void {
+    this.wrappedValue_ = newValue;
   }
 }
 

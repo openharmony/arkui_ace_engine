@@ -20,16 +20,19 @@
  * all definitions in this file are framework internal
  */
 
-class SynchedPropertySimpleTwoWayPU<T> extends ObservedPropertySimpleAbstractPU<T>
-  implements ISinglePropertyChangeSubscriber<T> {
+class SynchedPropertySimpleTwoWayPU<T> extends ObservedPropertySimpleAbstractPU<T> {
 
   private source_: ObservedPropertyAbstract<T>;
   private changeNotificationIsOngoing_: boolean = false;
 
   constructor(source: ObservedPropertyAbstract<T>, owningView: IPropertySubscriber, owningViewPropNme: PropertyInfo) {
     super(owningView, owningViewPropNme);
-    this.source_ = source;
-    this.source_.subscribeMe(this);
+    if (source) {
+      this.source_ = source;
+      this.source_.subscribeMe(this);
+    } else {
+      stateMgmtConsole.error(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source must not be undefined. Application error!`);
+    }
   }
 
   /*

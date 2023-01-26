@@ -35,7 +35,12 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
     thisPropertyName: PropertyInfo) {
     super(owningChildView, thisPropertyName);
 
-    if (source && (typeof (source) === "object") && ("subscribeMe" in source)) {
+    if (!source) {  
+      stateMgmtConsole.error(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Prop source must not be undefined. Application error!`);
+      return;
+    }
+
+    if ((typeof (source) === "object") && ("subscribeMe" in source)) {
       // code path for @(Local)StorageProp, the souce is a ObservedPropertyObject in aLocalStorage)
       this.source_ = source as ObservedPropertyAbstractPU<C>;
       // subscribe to receive value change updates from LocalStorage source property

@@ -23,17 +23,20 @@
  * 
  * all definitions in this file are framework internal
 */
-class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
-  implements ISinglePropertyChangeSubscriber<T> {
+class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T> {
 
   private wrappedValue_: T;
 
-  constructor(value: T, owningView: IPropertySubscriber, propertyName: PropertyInfo) {
+  constructor(localInitValue: T, owningView: IPropertySubscriber, propertyName: PropertyInfo) {
     super(owningView, propertyName);
-    if (typeof value === "object") {
+    if (!localInitValue) {
+      stateMgmtConsole.error(`ObservedPropertySimplePU[${this.id__()}, '${this.info() || "unknown"}']: constructor @State/@Provide initial value must not be undefined. Application error!`);
+      return;
+    }
+    if (typeof localInitValue === "object") {
       throw new SyntaxError("ObservedPropertySimple value must not be an object")!
     }
-    this.setValueInternal(value);
+    this.setValueInternal(localInitValue);
   }
 
   aboutToBeDeleted(unsubscribeMe?: IPropertySubscriber) {
@@ -57,9 +60,13 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
     called needs to do value change check
     and also notify with this.aboutToChange();
   */
-  private setValueInternal(newValue: T): void {
+  private setValueInternal(newValue: T): boolean {
     stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}'] new value is of simple type`);
-    this.wrappedValue_ = newValue;
+    if (this.wrappedValue_ != newValue) {
+      this.wrappedValue_ = newValue;
+      return true;
+    }
+    return false;
   }
 
   public getUnmonitored(): T {
@@ -80,8 +87,8 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
       return;
     }
     stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: set, changed from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(newValue)}.`);
-    this.setValueInternal(newValue);
-    this.notifyPropertryHasChangedPU();
-
+    if (this.setValueInternal(newValue)) {
+      this.notifyPropertryHasChangedPU();
+    }
   }
 }
