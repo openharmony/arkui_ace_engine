@@ -1076,6 +1076,11 @@ class SubscribaleAbstract {
         this.owningProperties_.forEach((subscribedId) => {
             var owningProperty = SubscriberManager.Find(subscribedId);
             if (owningProperty) {
+                if ('objectPropertyHasChangedPU' in owningProperty) {
+                    // PU code path
+                    owningProperty.objectPropertyHasChangedPU(this, propName);
+                }
+                // FU code path
                 if ('hasChanged' in owningProperty) {
                     owningProperty.hasChanged(newValue);
                 }
@@ -3042,12 +3047,16 @@ class ObservedPropertySimpleAbstractPU extends ObservedPropertyAbstractPU {
  * property.
 */
 class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
-    constructor(value, owningView, propertyName) {
+    constructor(localInitValue, owningView, propertyName) {
         super(owningView, propertyName);
-        this.setValueInternal(value);
+        if (!localInitValue) {
+            stateMgmtConsole.error(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @State/@Provide initial value must not be undefined. Application error!`);
+            return;
+        }
+        this.setValueInternal(localInitValue);
     }
     aboutToBeDeleted(unsubscribeMe) {
-        this.unsubscribeFromOwningProperty();
+        this.unsubscribeWrappedObject();
         if (unsubscribeMe) {
             this.unlinkSuscriber(unsubscribeMe.id__());
         }
@@ -3070,7 +3079,7 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
         
         this.notifyPropertryHasChangedPU();
     }
-    unsubscribeFromOwningProperty() {
+    unsubscribeWrappedObject() {
         if (this.wrappedValue_) {
             if (this.wrappedValue_ instanceof SubscribaleAbstract) {
                 this.wrappedValue_.removeOwningProperty(this);
@@ -3087,10 +3096,14 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
     */
     setValueInternal(newValue) {
         if (typeof newValue !== 'object') {
+            stateMgmtConsole.error(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`);
+            return false;
+        }
+        if (newValue == this.wrappedValue_) {
             
             return false;
         }
-        this.unsubscribeFromOwningProperty();
+        this.unsubscribeWrappedObject();
         if (ObservedObject.IsObservedObject(newValue)) {
             
             ObservedObject.addOwningProperty(newValue, this);
@@ -3123,8 +3136,9 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
             return;
         }
         
-        this.setValueInternal(newValue);
-        this.notifyPropertryHasChangedPU();
+        if (this.setValueInternal(newValue)) {
+            this.notifyPropertryHasChangedPU();
+        }
     }
 }
 /*
@@ -3152,12 +3166,16 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
  * all definitions in this file are framework internal
 */
 class ObservedPropertySimplePU extends ObservedPropertySimpleAbstractPU {
-    constructor(value, owningView, propertyName) {
+    constructor(localInitValue, owningView, propertyName) {
         super(owningView, propertyName);
-        if (typeof value === "object") {
+        if (!localInitValue) {
+            stateMgmtConsole.error(`ObservedPropertySimplePU[${this.id__()}, '${this.info() || "unknown"}']: constructor @State/@Provide initial value must not be undefined. Application error!`);
+            return;
+        }
+        if (typeof localInitValue === "object") {
             throw new SyntaxError("ObservedPropertySimple value must not be an object");
         }
-        this.setValueInternal(value);
+        this.setValueInternal(localInitValue);
     }
     aboutToBeDeleted(unsubscribeMe) {
         if (unsubscribeMe) {
@@ -3180,7 +3198,11 @@ class ObservedPropertySimplePU extends ObservedPropertySimpleAbstractPU {
     */
     setValueInternal(newValue) {
         
-        this.wrappedValue_ = newValue;
+        if (this.wrappedValue_ != newValue) {
+            this.wrappedValue_ = newValue;
+            return true;
+        }
+        return false;
     }
     getUnmonitored() {
         
@@ -3198,8 +3220,9 @@ class ObservedPropertySimplePU extends ObservedPropertySimpleAbstractPU {
             return;
         }
         
-        this.setValueInternal(newValue);
-        this.notifyPropertryHasChangedPU();
+        if (this.setValueInternal(newValue)) {
+            this.notifyPropertryHasChangedPU();
+        }
     }
 }
 /*
@@ -3219,7 +3242,11 @@ class ObservedPropertySimplePU extends ObservedPropertySimpleAbstractPU {
 class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
     constructor(source, owningChildView, thisPropertyName) {
         super(owningChildView, thisPropertyName);
-        if (source && (typeof (source) === "object") && ("subscribeMe" in source)) {
+        if (!source) {
+            stateMgmtConsole.error(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Prop source must not be undefined. Application error!`);
+            return;
+        }
+        if ((typeof (source) === "object") && ("subscribeMe" in source)) {
             // code path for @(Local)StorageProp, the souce is a ObservedPropertyObject in aLocalStorage)
             this.source_ = source;
             // subscribe to receive value change updates from LocalStorage source property
@@ -3329,16 +3356,19 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
  * all definitions in this file are framework internal
  */
 class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
-    constructor(linkSource, owningChildView, thisPropertyName) {
+    constructor(source, owningChildView, thisPropertyName) {
         super(owningChildView, thisPropertyName);
         this.changeNotificationIsOngoing_ = false;
-        this.linkedParentProperty_ = linkSource;
-        if (this.linkedParentProperty_) {
+        if (source) {
             // register to the parent property
-            this.linkedParentProperty_.subscribeMe(this);
+            this.source_ = source;
+            this.source_.subscribeMe(this);
+            // register to the ObservedObject
+            ObservedObject.addOwningProperty(this.source_.get(), this);
         }
-        // register to the ObservedObject
-        ObservedObject.addOwningProperty(this.linkedParentProperty_.get(), this);
+        else {
+            stateMgmtConsole.error(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source must not be undefined. Application error!`);
+        }
     }
     /*
     like a destructor, need to call this before deleting
@@ -3346,19 +3376,12 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
     */
     aboutToBeDeleted() {
         // unregister from parent of this link
-        if (this.linkedParentProperty_) {
-            this.linkedParentProperty_.unlinkSuscriber(this.id__());
+        if (this.source_) {
+            this.source_.unlinkSuscriber(this.id__());
             // unregister from the ObservedObject
-            ObservedObject.removeOwningProperty(this.linkedParentProperty_.getUnmonitored(), this);
+            ObservedObject.removeOwningProperty(this.source_.getUnmonitored(), this);
         }
         super.aboutToBeDeleted();
-    }
-    setObject(newValue) {
-        if (!this.linkedParentProperty_) {
-            stateMgmtConsole.warn(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject, no linked parent property.`);
-            return;
-        }
-        this.linkedParentProperty_.set(newValue);
     }
     /**
      * Called when sync peer ObservedPropertyObject or SynchedPropertyObjectTwoWay has chnaged value
@@ -3384,7 +3407,7 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
     getUnmonitored() {
         
         // unmonitored get access , no call to otifyPropertyRead !
-        return (this.linkedParentProperty_ ? this.linkedParentProperty_.getUnmonitored() : undefined);
+        return (this.source_ ? this.source_.getUnmonitored() : undefined);
     }
     // get 'read through` from the ObservedProperty
     get() {
@@ -3399,13 +3422,23 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
             return;
         }
         
-        ObservedObject.removeOwningProperty(this.getUnmonitored(), this);
         // avoid circular notifications @Link -> source @State -> other but also back to same @Link
         this.changeNotificationIsOngoing_ = true;
         this.setObject(newValue);
         ObservedObject.addOwningProperty(this.getUnmonitored(), this);
         this.notifyPropertryHasChangedPU();
         this.changeNotificationIsOngoing_ = false;
+    }
+    setObject(newValue) {
+        if (!this.source_) {
+            stateMgmtConsole.warn(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject, no linked parent property.`);
+            return;
+        }
+        let oldValueObject = this.getUnmonitored();
+        if (oldValueObject) {
+            ObservedObject.removeOwningProperty(oldValueObject, this);
+        }
+        this.source_.set(newValue);
     }
 }
 /*
@@ -3431,7 +3464,11 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
 class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
     constructor(source, subscribeMe, thisPropertyName) {
         super(subscribeMe, thisPropertyName);
-        if (source && (typeof (source) === "object") && ("notifyHasChanged" in source) && ("subscribeMe" in source)) {
+        if (!source) {
+            stateMgmtConsole.error(`SynchedPropertySimpleOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Prop source must not be undefined. Application error!`);
+            return;
+        }
+        if ((typeof (source) === "object") && ("notifyHasChanged" in source) && ("subscribeMe" in source)) {
             // code path for @(Local)StorageProp
             this.source_ = source;
             // subscribe to receive value chnage updates from LocalStorge source property
@@ -3460,13 +3497,9 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
         if (eventSource && (eventSource == this.source_)) {
             // defensive, should always be the case
             
-            this.sourceHasChanged(eventSource);
+            this.setWrappedValue(eventSource.getUnmonitored());
+            this.notifyPropertryHasChangedPU();
         }
-    }
-    sourceHasChanged(eventSource) {
-        
-        this.wrappedValue_ = eventSource.getUnmonitored();
-        this.notifyPropertryHasChangedPU();
     }
     getUnmonitored() {
         
@@ -3485,13 +3518,16 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
             return;
         }
         
-        this.wrappedValue_ = newValue;
+        this.setWrappedValue(newValue);
         this.notifyPropertryHasChangedPU();
     }
     reset(sourceChangedValue) {
         
         // if set causes an actual change, then, ObservedPropertySimple source_ will call hasChanged
         this.source_.set(sourceChangedValue);
+    }
+    setWrappedValue(newValue) {
+        this.wrappedValue_ = newValue;
     }
 }
 /*
@@ -3518,8 +3554,13 @@ class SynchedPropertySimpleTwoWayPU extends ObservedPropertySimpleAbstractPU {
     constructor(source, owningView, owningViewPropNme) {
         super(owningView, owningViewPropNme);
         this.changeNotificationIsOngoing_ = false;
-        this.source_ = source;
-        this.source_.subscribeMe(this);
+        if (source) {
+            this.source_ = source;
+            this.source_.subscribeMe(this);
+        }
+        else {
+            stateMgmtConsole.error(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source must not be undefined. Application error!`);
+        }
     }
     /*
     like a destructor, need to call this before deleting
@@ -3606,6 +3647,10 @@ class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
      */
     constructor(obsObject, owningChildView, propertyName) {
         super(owningChildView, propertyName);
+        if (!obsObject) {
+            stateMgmtConsole.error(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @ObjectLink wrapped object must not be undefined!.`);
+            return;
+        }
         this.obsObject_ = obsObject;
         // register to the ObservedObject
         ObservedObject.addOwningProperty(this.obsObject_, this);
