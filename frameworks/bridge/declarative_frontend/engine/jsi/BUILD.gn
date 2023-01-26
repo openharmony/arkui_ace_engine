@@ -98,8 +98,6 @@ template("declarative_js_engine_ark") {
 
     configs += [ "${uicast_configs.ace_uicast}:uicast_jsi_config" ]
 
-    public_configs = [ "//arkcompiler/ets_runtime:ark_jsruntime_public_config" ]
-
     sources = [
       "js_converter.cpp",
       "jsi_declarative_engine.cpp",
@@ -135,12 +133,14 @@ template("declarative_js_engine_ark") {
       deps += [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
     }
 
+    external_deps = []
     if (!use_ios) {
-      deps += [ "//arkcompiler/ets_runtime:libark_jsruntime" ]
+      external_deps += [ "ets_runtime:libark_jsruntime" ]
     } else {
-      deps += [ "//arkcompiler/ets_runtime:libark_jsruntime_static" ]
+      external_deps += [ "ets_runtime:libark_jsruntime_static" ]
     }
 
+    deps = []
     if (defined(config.build_for_preview) && config.build_for_preview) {
       deps += [ ":gen_obj_src_abc_mock_system_plugin" ]
       sources += [ "utils/jsi_module_searcher.cpp" ]

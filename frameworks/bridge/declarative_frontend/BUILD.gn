@@ -428,19 +428,27 @@ template("declarative_js_engine") {
     include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
     include_dirs += uicast_configs.uicast_root_include
 
+    external_deps = []
+    if (defined(config.build_for_ios) && config.build_for_ios) {
+      # static library for ios platform
+      external_deps += [ "ets_runtime:libark_jsruntime_static" ]
+    } else {
+      external_deps += [ "ets_runtime:libark_jsruntime" ]
+    }
+
     if (platform == "windows" || platform == "mac" || platform == "linux") {
       deps += [ ":gen_obj_src_js_mock_system_plugin" ]
     } else {
       if (defined(config.plugin_components_support) &&
           config.plugin_components_support) {
         if (!use_mingw_win && !use_mac && !use_linux) {
-          external_deps = [
+          external_deps += [
             "multimedia_image_framework:image",
             "multimedia_image_framework:image_native",
           ]
         }
       } else {
-        external_deps = [
+        external_deps += [
           "multimedia_image_framework:image",
           "multimedia_image_framework:image_native",
         ]
