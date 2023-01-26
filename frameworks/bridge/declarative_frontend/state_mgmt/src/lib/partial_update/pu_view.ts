@@ -383,8 +383,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     return providedVarStore.createSync(
       <T>(source: ObservedPropertyAbstract<T>) => (source instanceof ObservedPropertySimple)
-        ? new SynchedPropertySimpleTwoWayPU<T>(source, this, consumeVarName)
-        : new SynchedPropertyObjectTwoWayPU<T>(source, this, consumeVarName)) as ObservedPropertyAbstractPU<T>;
+        ? new SynchedPropertyTwoWayPU<T>(source, this, consumeVarName)
+        : new SynchedPropertyTwoWayPU<T>(source, this, consumeVarName)) as ObservedPropertyAbstractPU<T>;
   }
 
 
@@ -603,8 +603,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
       <T>(source: ObservedPropertyAbstract<T>) => (source === undefined)
         ? undefined
         : (source instanceof ObservedPropertySimple)
-          ? new SynchedPropertySimpleTwoWayPU<T>(source, this, viewVariableName)
-          : new SynchedPropertyObjectTwoWayPU<T>(source, this, viewVariableName)
+          ? new SynchedPropertyTwoWayPU<T>(source, this, viewVariableName)
+          : new SynchedPropertyTwoWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
   }
 

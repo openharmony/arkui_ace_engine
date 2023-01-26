@@ -80,7 +80,7 @@ class ObservedPropertySimple<T> extends ObservedPropertySimpleAbstract<T>
   public createLink(subscribeOwner?: IPropertySubscriber,
     linkPropName?: PropertyInfo): ObservedPropertyAbstract<T> {
     return ((subscribeOwner !== undefined) && ("rerender" in subscribeOwner)) ?
-    new SynchedPropertySimpleTwoWayPU(this, subscribeOwner, linkPropName) :
+    new SynchedPropertyTwoWayPU(this, subscribeOwner, linkPropName) :
     new SynchedPropertySimpleTwoWay(this, subscribeOwner, linkPropName);
   }
   public createProp(subscribeOwner?: IPropertySubscriber,

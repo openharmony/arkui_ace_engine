@@ -111,6 +111,7 @@ class ObservedPropertyObject<T extends Object> extends ObservedPropertyObjectAbs
  */
   public createLink(subscribeOwner?: IPropertySubscriber,
     linkPropName?: PropertyInfo): ObservedPropertyAbstract<T> {
+    // FIXME check the simple type version, code branching here for PU?
     return new SynchedPropertyObjectTwoWay(this, subscribeOwner, linkPropName);
   }
 
