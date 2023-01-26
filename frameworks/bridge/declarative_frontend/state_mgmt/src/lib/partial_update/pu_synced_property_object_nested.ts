@@ -38,6 +38,11 @@ class SynchedPropertyNesedObjectPU<C extends Object>
   constructor(obsObject: C,
     owningChildView: IPropertySubscriber, propertyName: PropertyInfo) {
     super(owningChildView, propertyName);
+
+    if (!obsObject) {  
+      stateMgmtConsole.error(`SynchedPropertyNesedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @ObjectLink wrapped object must not be undefined!.`);
+      return;
+    }
     this.obsObject_ = obsObject;
 
     // register to the ObservedObject

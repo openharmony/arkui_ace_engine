@@ -28,8 +28,12 @@ class SynchedPropertySimpleTwoWayPU<T> extends ObservedPropertySimpleAbstractPU<
 
   constructor(source: ObservedPropertyAbstract<T>, owningView: IPropertySubscriber, owningViewPropNme: PropertyInfo) {
     super(owningView, owningViewPropNme);
-    this.source_ = source;
-    this.source_.subscribeMe(this);
+    if (source) {
+      this.source_ = source;
+      this.source_.subscribeMe(this);
+    } else {
+      stateMgmtConsole.error(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source must not be undefined. Application error!`);
+    }
   }
 
   /*
