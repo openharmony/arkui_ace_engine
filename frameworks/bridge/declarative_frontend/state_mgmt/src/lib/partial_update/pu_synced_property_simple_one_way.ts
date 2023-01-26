@@ -19,7 +19,7 @@
  * all definitions in this file are framework internal
  */
 
-class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertySimpleAbstractPU<T> {
+class SynchedPropertySimpleOneWayPU<T> extends ObservedPropertyAbstractPU<T> {
 
   private wrappedValue_: T;
   private source_: ObservedPropertyAbstract<T>;

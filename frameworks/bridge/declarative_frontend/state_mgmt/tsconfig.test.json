@@ -51,8 +51,6 @@
     // partial update specific 
     "src/lib/partial_update/pu_types_events.ts",
     "src/lib/partial_update/pu_observed_property_abstract.ts",
-    "src/lib/partial_update/pu_observed_property_object_abstract.ts",
-    "src/lib/partial_update/pu_observed_property_simple_abstract.ts",
     "src/lib/partial_update/pu_observed_property_object.ts",
     "src/lib/partial_update/pu_observed_property_simple.ts",
     "src/lib/partial_update/pu_synced_property_object_one_way.ts",

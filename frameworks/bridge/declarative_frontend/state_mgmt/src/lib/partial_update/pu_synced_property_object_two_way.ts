@@ -19,8 +19,7 @@
  * 
  * all definitions in this file are framework internal
  */
-class SynchedPropertyObjectTwoWayPU<C extends Object>
-  extends ObservedPropertyObjectAbstractPU<C> {
+class SynchedPropertyObjectTwoWayPU<C extends Object> extends ObservedPropertyAbstractPU<C> {
 
   private source_: ObservedPropertyObjectAbstract<C>;
   private changeNotificationIsOngoing_: boolean = false;

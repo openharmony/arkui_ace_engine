@@ -24,8 +24,7 @@
 
 type SyncSourceHasChangedCb<T> = (source : ObservedPropertyAbstract<T>) => void;
 
-class SynchedPropertyObjectOneWayPU<C extends Object>
-  extends ObservedPropertyObjectAbstractPU<C> {
+class SynchedPropertyObjectOneWayPU<C extends Object> extends ObservedPropertyAbstractPU<C> {
 
   private wrappedValue_: C;
   private source_: ObservedPropertyAbstract<C>;

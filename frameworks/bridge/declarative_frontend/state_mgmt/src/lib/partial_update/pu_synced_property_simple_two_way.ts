@@ -20,7 +20,7 @@
  * all definitions in this file are framework internal
  */
 
-class SynchedPropertySimpleTwoWayPU<T> extends ObservedPropertySimpleAbstractPU<T> {
+class SynchedPropertySimpleTwoWayPU<T> extends ObservedPropertyAbstractPU<T> {
 
   private source_: ObservedPropertyAbstract<T>;
   private changeNotificationIsOngoing_: boolean = false;

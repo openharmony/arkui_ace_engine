@@ -20,9 +20,7 @@
  * all definitions in this file are framework internal
  * 
  */
-class SynchedPropertyNesedObjectPU<C extends Object>
-  extends ObservedPropertyObjectAbstractPU<C>
-  implements ISinglePropertyChangeSubscriber<C> {
+class SynchedPropertyNesedObjectPU<C extends Object> extends ObservedPropertyAbstractPU<C> {
 
   private obsObject_: C;
 

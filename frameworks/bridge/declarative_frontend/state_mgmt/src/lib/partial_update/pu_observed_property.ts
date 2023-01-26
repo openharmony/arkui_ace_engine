@@ -14,8 +14,8 @@
  */
 
 /**
- * ObservedPropertyObjectPU
- * implementation of @State and @Provide decorated variables of type class object
+ * ObservedPropertyOPU
+ * implementation of @State and @Provide decorated variables of all types
  *
  * all definitions in this file are framework internal
  * 
@@ -24,17 +24,13 @@
  * property.
 */
 
-class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectAbstractPU<T> {
+class ObservedPropertyPU<T> extends  ObservedPropertyAbstractPU<T> {
 
   private wrappedValue_: T;
 
   constructor(localInitValue: T, owningView: IPropertySubscriber, propertyName: PropertyInfo) {
     super(owningView, propertyName);
 
-    if (!localInitValue) {
-      stateMgmtConsole.error(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @State/@Provide initial value must not be undefined. Application error!`);
-      return;
-    }
     this.setValueInternal(localInitValue);
   }
 
@@ -66,14 +62,16 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
     this.notifyPropertryHasChangedPU();
   }
 
-  private unsubscribeWrappedObject() {
-    if (this.wrappedValue_) {
-      if (this.wrappedValue_ instanceof SubscribaleAbstract) {
-        (this.wrappedValue_ as SubscribaleAbstract).removeOwningProperty(this);
-      } else {
-        ObservedObject.removeOwningProperty(this.wrappedValue_, this);
-      }
+  private unsubscribeWrappedObject() : void {
+    if (this.wrappedValue_ == undefined) {
+      return;
     }
+    if (this.wrappedValue_ instanceof SubscribaleAbstract) {
+      (this.wrappedValue_ as SubscribaleAbstract).removeOwningProperty(this);
+    } else if (ObservedObject.IsObservedObject(this.wrappedValue_)) {
+      ObservedObject.removeOwningProperty(this.wrappedValue_, this);
+    }
+    // nothing to do for simple type warappedValue_
   }
   
   /*
@@ -82,30 +80,35 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
     and also notify with this.aboutToChange();
   */
   private setValueInternal(newValue: T): boolean {
-    if (typeof newValue !== 'object') {
-      stateMgmtConsole.error(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`);
-      return false;
-    }
 
-    if (newValue == this.wrappedValue_){
+    if (newValue == this.wrappedValue_) {
       stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] newValue unchanged`);
       return false;
     }
 
     this.unsubscribeWrappedObject();
 
-    if (ObservedObject.IsObservedObject(newValue)) {
-      stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an ObservedObject already`);
+    if (newValue == undefined) {
+      stateMgmtConsole.warn(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] setValue: Warning: new value is undefined. This can cause issues.`);
+      this.wrappedValue_ = newValue
+    } else if (ObservedObject.IsObservedObject(newValue)) {
+      stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] setValue: new value is an ObservedObject already`);
       ObservedObject.addOwningProperty(newValue, this);
       this.wrappedValue_ = newValue;
     } else if (newValue instanceof SubscribaleAbstract) {
-      stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an SubscribaleAbstract, subscribiung to it.`);
+      stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] setValue: new value is an SubscribaleAbstract, subscribiung to it.`);
       this.wrappedValue_ = newValue;
       (this.wrappedValue_ as unknown as SubscribaleAbstract).addOwningProperty(this);
-    } else {
-      stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an Object, needs to be wrapped in an ObservedObject.`);
+    } else if (typeof newValue === 'object') {
+      stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] setValue: new value is an Object, needs to be wrapped in an ObservedObject.`);
       this.wrappedValue_ = ObservedObject.createNew(newValue, this);
+    } else if (typeof newValue === 'string' || typeof newValue === 'number' || typeof newValue === 'boolean') {
+      stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] setValue: new value is simple type.`);
+      this.wrappedValue_ = newValue
+    } else {
+      stateMgmtConsole.error(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] setValue: new value is unsupported type. Application error!`);
     }
+
     return true;
   }
 
@@ -130,5 +133,31 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
     if (this.setValueInternal(newValue)) {
       this.notifyPropertryHasChangedPU();
     }
+  }
+}
+
+// backward compatibility
+
+class ObservedPropertySimplePU<S> extends ObservedPropertyPU<S> {
+  constructor(localInitValue: S, owningView: IPropertySubscriber, propertyName: PropertyInfo) {
+    super(localInitValue, owningView, propertyName);
+  }
+}
+
+class ObservedPropertyObjectPU<C extends Object> extends ObservedPropertyPU<C> {
+  constructor(localInitValue: C, owningView: IPropertySubscriber, propertyName: PropertyInfo) {
+    super(localInitValue, owningView, propertyName);
+  }
+}
+
+abstract class ObservedPropertyObjectAbstractPU<C extends Object> extends ObservedPropertyAbstractPU<C> {
+  constructor(owningView: IPropertySubscriber, thisPropertyName: PropertyInfo) {
+    super(owningView, thisPropertyName)
+  }
+}
+
+abstract class ObservedPropertySimpleAbstractPU<T> extends ObservedPropertyAbstractPU<T>  {
+  constructor(owningView: IPropertySubscriber, propertyName: PropertyInfo) {
+    super(owningView, propertyName);
   }
 }
