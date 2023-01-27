@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <regex>
@@ -1301,13 +1302,16 @@ void JSViewAbstract::SetVisibility(const JSCallbackInfo& info)
         LOGE("SetVisibility: The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-
-    if (!info[0]->IsNumber()) {
-        LOGE("SetVisibility: The first param type is not number, invalid.");
+    int32_t visible = 0;
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        // undefined value use default value.
+        visible = 0;
+    } else if (!info[0]->IsNumber()) {
+        LOGD("SetVisibility: The first param type is not number, invalid.");
         return;
+    } else {
+        visible = info[0]->ToNumber<int32_t>();
     }
-
-    int32_t visible = info[0]->ToNumber<int32_t>();
 
     if (info.Length() > 1 && info[1]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
