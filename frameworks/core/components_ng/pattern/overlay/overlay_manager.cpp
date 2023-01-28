@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 
+#include <cstdint>
 #include <utility>
 
 #include "base/memory/ace_type.h"
@@ -45,7 +46,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const int ANIMATION_DUR = 200;
+// should be moved to theme.
+constexpr int32_t COMMON_ANIMATION_DUR = 200;
+constexpr int32_t TOAST_ANIMATION_DURATION = 100;
+constexpr float TOAST_ANIMATION_POSITION = 15.0f;
 } // namespace
 
 void OverlayManager::Show(const RefPtr<FrameNode>& node)
@@ -57,7 +61,7 @@ void OverlayManager::Show(const RefPtr<FrameNode>& node)
 
     AnimationOption option;
     option.SetCurve(Curves::LINEAR);
-    option.SetDuration(ANIMATION_DUR);
+    option.SetDuration(COMMON_ANIMATION_DUR);
     option.SetFillMode(FillMode::FORWARDS);
     option.SetOnFinishEvent([weak = WeakClaim(this), nodeWK = WeakClaim(RawPtr(node)), id = Container::CurrentId()] {
         auto node = nodeWK.Upgrade();
@@ -139,7 +143,7 @@ void OverlayManager::Pop(const RefPtr<FrameNode>& node)
 
     AnimationOption option;
     option.SetCurve(Curves::LINEAR);
-    option.SetDuration(ANIMATION_DUR);
+    option.SetDuration(COMMON_ANIMATION_DUR);
     option.SetFillMode(FillMode::FORWARDS);
     option.SetOnFinishEvent([root, node, id = Container::CurrentId()] {
         ContainerScope scope(id);
@@ -177,7 +181,7 @@ void OverlayManager::PopInSubwindow(const RefPtr<FrameNode>& node)
 {
     AnimationOption option;
     option.SetCurve(Curves::SMOOTH);
-    option.SetDuration(ANIMATION_DUR);
+    option.SetDuration(COMMON_ANIMATION_DUR);
     option.SetOnFinishEvent([id = Container::CurrentId()] {
         ContainerScope scope(id);
         SubwindowManager::GetInstance()->ClearMenuNG();
@@ -209,14 +213,32 @@ void OverlayManager::ShowToast(
     toastNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     toastMap_[toastId] = toastNode;
-
-    context->GetTaskExecutor()->PostDelayedTask(
-        [weak = WeakClaim(this), toastId] {
-            auto overlayManager = weak.Upgrade();
-            CHECK_NULL_VOID(overlayManager);
-            overlayManager->PopToast(toastId);
+    AnimationOption option;
+    auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+    option.SetCurve(curve);
+    option.SetDuration(TOAST_ANIMATION_DURATION);
+    option.SetFillMode(FillMode::FORWARDS);
+    option.SetOnFinishEvent([weak = WeakClaim(this), toastId, duration] {
+        auto context = PipelineContext::GetCurrentContext();
+        context->GetTaskExecutor()->PostDelayedTask(
+            [weak, toastId, duration] {
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID(overlayManager);
+                overlayManager->PopToast(toastId);
+            },
+            TaskExecutor::TaskType::UI, duration);
+    });
+    auto ctx = toastNode->GetRenderContext();
+    CHECK_NULL_VOID(ctx);
+    ctx->UpdateOpacity(0.0);
+    ctx->OnTransformTranslateUpdate({ 0.0f, TOAST_ANIMATION_POSITION, 0.0f });
+    AnimationUtils::Animate(
+        option,
+        [ctx]() {
+            ctx->UpdateOpacity(1.0);
+            ctx->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
         },
-        TaskExecutor::TaskType::UI, duration);
+        option.GetOnFinishEvent());
 }
 
 void OverlayManager::PopToast(int32_t toastId)
@@ -227,15 +249,45 @@ void OverlayManager::PopToast(int32_t toastId)
         return;
     }
     auto toastUnderPop = toastIter->second.Upgrade();
-    CHECK_NULL_VOID(toastUnderPop);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto rootNode = context->GetRootElement();
-    CHECK_NULL_VOID(rootNode);
-    LOGI("begin to pop toast, id is %{public}d", toastUnderPop->GetId());
-    rootNode->RemoveChild(toastUnderPop);
-    toastMap_.erase(toastId);
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    AnimationOption option;
+    auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+    option.SetCurve(curve);
+    option.SetDuration(TOAST_ANIMATION_DURATION);
+    option.SetFillMode(FillMode::FORWARDS);
+    option.SetOnFinishEvent([weak = WeakClaim(this), toastId] {
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(overlayManager);
+        auto toastIter = overlayManager->toastMap_.find(toastId);
+        if (toastIter == overlayManager->toastMap_.end()) {
+            LOGI("No toast under pop");
+            return;
+        }
+        auto toastUnderPop = toastIter->second.Upgrade();
+        CHECK_NULL_VOID_NOLOG(toastUnderPop);
+        LOGI("begin to pop toast, id is %{public}d", toastUnderPop->GetId());
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(context);
+        auto rootNode = context->GetRootElement();
+        CHECK_NULL_VOID_NOLOG(rootNode);
+        rootNode->RemoveChild(toastUnderPop);
+        overlayManager->toastMap_.erase(toastId);
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    });
+    auto ctx = toastUnderPop->GetRenderContext();
+    CHECK_NULL_VOID(ctx);
+    ctx->UpdateOpacity(1.0);
+    ctx->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+    AnimationUtils::Animate(
+        option,
+        [ctx]() {
+            ctx->UpdateOpacity(0.0);
+            ctx->OnTransformTranslateUpdate({ 0.0f, TOAST_ANIMATION_POSITION, 0.0f });
+        },
+        option.GetOnFinishEvent());
+    // start animation immediately
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RequestFrame();
 }
 
 void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo)
@@ -476,6 +528,7 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps,
     std::map<std::string, PickerDate> datePickerProperty, bool isLunar,
     std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
+    LOGI("OverlayManager::ShowDateDialogPicker");
     auto dialogNode = DatePickerDialogView::Show(
         dialogProps, std::move(datePickerProperty), isLunar, std::move(dialogEvent), std::move(dialogCancelEvent));
     Show(dialogNode);
@@ -485,6 +538,7 @@ void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps,
     std::map<std::string, PickerTime> timePickerProperty, bool isUseMilitaryTime,
     std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
+    LOGI("OverlayManager::ShowTimeDialogPicker");
     auto dialogNode = TimePickerDialogView::Show(dialogProps, std::move(timePickerProperty), isUseMilitaryTime,
         std::move(dialogEvent), std::move(dialogCancelEvent));
     Show(dialogNode);
@@ -494,6 +548,7 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, uint32_
     const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DialogTextEvent> dialogEvent,
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
+    LOGI("OverlayManager::ShowTextDialogPicker");
     auto dialogNode = TextPickerDialogView::Show(
         dialogProps, selected, height, getRangeVector, std::move(dialogEvent), std::move(dialogCancelEvent));
     Show(dialogNode);
@@ -540,6 +595,7 @@ void OverlayManager::FocusDialog(const RefPtr<FrameNode>& dialogNode)
 
 void OverlayManager::BlurDialog()
 {
+    LOGI("OverlayManager::BlurDialog");
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto stageManager = pipelineContext->GetStageManager();
