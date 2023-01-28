@@ -75,7 +75,13 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, FocusPattern());
+        auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        CHECK_NULL_RETURN(swiperTheme, FocusPattern());
+        FocusPaintParam paintParam;
+        paintParam.SetPaintColor(swiperTheme->GetFocusedColor());
+        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, paintParam };
     }
 
 private:
