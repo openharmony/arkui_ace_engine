@@ -46,6 +46,16 @@ public:
     ~RadioPaintMethod() override = default;
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
+    void SetHotZoneOffset(OffsetF& hotZoneOffset)
+    {
+        hotZoneOffset_ = hotZoneOffset;
+    }
+
+    void SetHotZoneSize(SizeF& hotZoneSize)
+    {
+        hotZoneSize_ = hotZoneSize;
+    }
+
 private:
     void InitializeParam();
     void PaintRadio(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& offset) const;
@@ -55,13 +65,14 @@ private:
 
     float shadowWidth_ = 1.5f;
     float borderWidth_ = 1.5f;
-    Color pointColor_ = Color::WHITE;
-    Color activeColor_ = Color::BLUE;
-    Color inactiveColor_ = Color::WHITE;
-    Color shadowColor_ = Color::RED;
-    Color clickEffectColor_ = Color::WHITE;
-    Color hoverColor_ = Color::WHITE;
-    Dimension hotZoneHorizontalPadding_ = 11.0_vp;
+    Color pointColor_;
+    Color activeColor_;
+    Color inactiveColor_;
+    Color inactivePointColor_;
+    Color shadowColor_;
+    Color clickEffectColor_;
+    Color hoverColor_;
+    Dimension hotZoneHorizontalPadding_;
 
     bool enabled_ = true;
     bool isTouch_ = false;
@@ -69,6 +80,8 @@ private:
     float totalScale_ = 1.0f;
     float pointScale_ = 0.5f;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
+    OffsetF hotZoneOffset_;
+    SizeF hotZoneSize_;
 };
 } // namespace OHOS::Ace::NG
 
