@@ -29,24 +29,4 @@ void ScreenModel::Create(const sptr<Rosen::ScreenSession>& screenSession)
     stack->Push(frameNode);
 }
 
-void ScreenModel::SetBrightness(float brightness)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto screenPattern = frameNode->GetPattern<ScreenPattern>();
-    CHECK_NULL_VOID(screenPattern);
-    screenPattern->SetBrightness(brightness);
-}
-
-void ScreenModel::SetRotation(float degree)
-{
-    // ACE_UPDATE_LAYOUT_PROPERTY(ScreenLayoutProperty, Rotation, degree);
-
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto screenPattern = frameNode->GetPattern<ScreenPattern>();
-    CHECK_NULL_VOID(screenPattern);
-    screenPattern->SetRotation(degree);
-}
-
 } // namespace OHOS::Ace::NG

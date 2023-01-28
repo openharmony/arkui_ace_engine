@@ -29,9 +29,6 @@ public:
     ScreenPattern(const sptr<Rosen::ScreenSession>& screenSession) : screenSession_(screenSession) {}
     ~ScreenPattern() override = default;
 
-    void SetBrightness(float brightness);
-    void SetRotation(float degree);
-
 private:
     sptr<Rosen::ScreenSession> screenSession_;
 

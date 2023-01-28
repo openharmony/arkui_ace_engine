@@ -23,9 +23,6 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ScreenModel {
 public:
     static void Create(const sptr<Rosen::ScreenSession>& screenSession);
-
-    static void SetBrightness(float brightness);
-    static void SetRotation(float degree);
 };
 
 } // namespace OHOS::Ace::NG

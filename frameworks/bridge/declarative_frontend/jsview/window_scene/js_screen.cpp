@@ -24,8 +24,6 @@ void JSScreen::JSBind(BindingTarget globalObj)
 {
     JSClass<JSScreen>::Declare("Screen");
     JSClass<JSScreen>::StaticMethod("create", &JSScreen::Create, MethodOptions::NONE);
-    JSClass<JSScreen>::StaticMethod("brightness", &JSScreen::SetBrightness, MethodOptions::NONE);
-    JSClass<JSScreen>::StaticMethod("rotation", &JSScreen::SetRotation, MethodOptions::NONE);
     JSClass<JSScreen>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSScreen>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSScreen>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -49,41 +47,6 @@ void JSScreen::Create(const JSCallbackInfo& info)
 
     // auto screenSession = CreateScreenSessionFromNapiValue(info[0]);
     NG::ScreenModel::Create(nullptr);
-}
-
-void JSScreen::SetBrightness(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have 1 argument");
-        return;
-    }
-
-    double brightness;
-    if (!ParseJsDouble(info[0], brightness)) {
-        LOGE("Failed to parse brightness");
-        return;
-    }
-
-    // brightness is between 0 and 1
-    brightness = std::clamp<double>(brightness, 0.f, 1.f);
-
-    NG::ScreenModel::SetBrightness(brightness);
-}
-
-void JSScreen::SetRotation(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have 1 argument");
-        return;
-    }
-
-    double degree;
-    if (!ParseJsDouble(info[0], degree)) {
-        LOGE("Failed to parse degree");
-        return;
-    }
-
-    NG::ScreenModel::SetRotation(degree);
 }
 
 } // namespace OHOS::Ace::Framework

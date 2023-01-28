@@ -25,9 +25,6 @@ class JSScreen : public JSViewAbstract, public JSInteractableView {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
-
-    static void SetBrightness(const JSCallbackInfo& info);
-    static void SetRotation(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
