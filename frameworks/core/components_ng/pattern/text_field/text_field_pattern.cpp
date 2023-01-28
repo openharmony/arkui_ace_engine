@@ -205,9 +205,11 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     textRect_ = textFieldLayoutAlgorithm->GetTextRect();
     imageRect_ = textFieldLayoutAlgorithm->GetImageRect();
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
-    auto textRectNeedToChange = UpdateCaretPosition();
+    auto textRectNotNeedToChange = UpdateCaretPosition();
     UpdateCaretInfoToController();
-    CHECK_NULL_RETURN_NOLOG(!textRectNeedToChange, true);
+    if (textRectNotNeedToChange) {
+        return true;
+    }
     // after new text input or events such as left right key,
     // the procedure will be:
     // caret position change (such as move left)
@@ -451,6 +453,8 @@ void TextFieldPattern::UpdateSelectionOffset()
 {
     CHECK_NULL_VOID_NOLOG(InSelectMode());
     if (textSelector_.baseOffset == textSelector_.destinationOffset) {
+        textSelector_.selectionBaseOffset.SetX(caretRect_.GetX());
+        textSelector_.selectionDestinationOffset.SetX(caretRect_.GetX());
         return;
     }
     if (selectionMode_ == SelectionMode::SELECT_ALL) {
@@ -714,8 +718,7 @@ bool TextFieldPattern::ComputeOffsetForCaretDownstream(
 
     const auto& textBox = *textBoxes_.begin();
     // Caret is within width of the downstream glyphs.
-    float caretStart = textBox.rect_.GetRight();
-    float offsetX = std::min(caretStart, static_cast<float>(paragraph_->GetLongestLine()));
+    float offsetX = textBox.rect_.GetRight();
     result.offset.SetX(offsetX);
     result.offset.SetY(textBox.rect_.GetTop());
     result.height = textBox.rect_.GetHeight();
@@ -1445,7 +1448,9 @@ void TextFieldPattern::ProcessOverlay()
     selectionMode_ = SelectionMode::SELECT;
     if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
         if (textEditingValue_.caretPosition == 0) {
-            UpdateSelection(0, 1);
+            UpdateSelection(0, 0);
+        } else if (textEditingValue_.CaretAtLast()) {
+            UpdateSelection(textEditingValue_.caretPosition, textEditingValue_.caretPosition);
         } else {
             UpdateSelection(textEditingValue_.caretPosition - 1, textEditingValue_.caretPosition);
         }

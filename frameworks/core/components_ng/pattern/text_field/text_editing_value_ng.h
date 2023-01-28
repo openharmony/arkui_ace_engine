@@ -101,6 +101,11 @@ struct TextEditingValueNG {
         return StringUtils::ToString(wideText.substr(min, max - min));
     }
 
+    bool CaretAtLast() const
+    {
+        return static_cast<int32_t>(GetWideText().length()) == caretPosition;
+    }
+
     std::string ToString() const
     {
         return GetValueBeforeCursor() + "|" + GetValueAfterCursor();

@@ -120,7 +120,9 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (pattern->IsTextArea()) {
         textRect_.SetSize(SizeF(
             contentConstraint.maxSize.Width() - horizontalPaddingSum, static_cast<float>(paragraph_->GetHeight())));
-        return SizeF(contentConstraint.maxSize.Width() - horizontalPaddingSum, preferredHeight);
+        return SizeF(contentConstraint.maxSize.Width() - horizontalPaddingSum,
+            std::min(contentConstraint.maxSize.Height() - pattern->GetVerticalPaddingSum(),
+                static_cast<float>(paragraph_->GetHeight())));
     }
     auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(true);
     // check password image size.
@@ -229,7 +231,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(
         fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();
     }
     textStyle.SetFontSize(fontSize);
-
+    textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
     textStyle.SetFontWeight(
         layoutProperty->GetFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
     textStyle.SetTextColor(layoutProperty->GetTextColorValue(theme ? theme->GetTextColor() : textStyle.GetTextColor()));

@@ -125,8 +125,8 @@ void TextFieldPaintMethod::PaintSelection(RSCanvas& canvas, PaintWrapper* paintW
     switch (paintProperty->GetInputStyleValue(InputStyle::DEFAULT)) {
         case InputStyle::DEFAULT:
             // for default style, selection height is equal to the content height
-            canvas.DrawRect(RSRect(startOffset, paintWrapper->GetContentOffset().GetY(), endOffset,
-                paintWrapper->GetContentOffset().GetY() + paintWrapper->GetContentSize().Height()));
+            canvas.DrawRect(RSRect(startOffset, textFieldPattern->GetCaretRect().GetY(), endOffset,
+                textFieldPattern->GetCaretRect().GetY() + textFieldPattern->PreferredLineHeight()));
             break;
         case InputStyle::INLINE:
             // for inline style, selection height is equal to the frame height
