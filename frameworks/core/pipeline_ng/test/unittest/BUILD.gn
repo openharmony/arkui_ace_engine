@@ -12,16 +12,10 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/ace_unittest.gni")
 
-if (is_standard_system) {
-  module_output_path = "ace_engine/graphicalbasicability/pipeline_ng"
-} else {
-  module_output_path = "ace_engine_full/graphicalbasicability/pipeline_ng"
-}
-
-ohos_unittest("pipeline_ng_test") {
-  module_out_path = module_output_path
+ohos_unittest("pipeline_context_test_ng") {
+  module_out_path = base_test_outout_path
 
   sources = [
     # animation
@@ -311,7 +305,7 @@ ohos_unittest("pipeline_ng_test") {
     "$ace_root/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
 
     # self
-    "$ace_root/frameworks/core/pipeline_ng/test/unittest/pipeline_context_test.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/test/unittest/pipeline_context_test_ng.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/unittest/ui_task_scheduler_test.cpp",
   ]
 
