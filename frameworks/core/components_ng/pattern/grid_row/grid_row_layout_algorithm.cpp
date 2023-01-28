@@ -86,9 +86,10 @@ void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, float chi
 {
     const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto layoutConstraint = layoutProperty->GetLayoutConstraint();
+    auto padding = layoutProperty->CreatePaddingAndBorder();
 
     auto frameSize = CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
-    frameSize.SetHeight(childHeight);
+    frameSize.SetHeight(childHeight + padding.Height());
     frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
 }
@@ -202,6 +203,9 @@ void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto directionVal = layoutProperty->GetDirectionValue();
     auto width = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
 
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    OffsetF paddingOffset = { padding.left.value_or(0.0f), padding.top.value_or(0.0f) };
+
     for (auto&& pair : gridColChildren_) {
         auto childLayoutWrapper = pair.first;
         auto& newLineOffset = pair.second;
@@ -216,7 +220,7 @@ void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
 
         OffsetF offset(offsetWidth, newLineOffset.offsetY);
-        childLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
+        childLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(offset + paddingOffset);
         childLayoutWrapper->Layout();
     }
 }
