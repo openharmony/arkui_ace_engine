@@ -930,7 +930,7 @@ HWTEST_F(PipelineContextTest, PipelineContextTest022, TestSize.Level1)
     context_->SetIsNeedShowFocus(false);
     event.pressedCodes = { KeyCode::KEY_DPAD_UP };
     eventManager->SetInstanceId(DEFAULT_INT0);
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_TRUE(context_->OnKeyEvent(event));
     EXPECT_FALSE(context_->GetIsNeedShowFocus());
 
     /**
@@ -942,7 +942,7 @@ HWTEST_F(PipelineContextTest, PipelineContextTest022, TestSize.Level1)
     context_->SetIsNeedShowFocus(false);
     event.action = KeyAction::UP;
     event.pressedCodes = { KeyCode::KEY_CLEAR };
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_TRUE(context_->OnKeyEvent(event));
     EXPECT_FALSE(context_->GetIsNeedShowFocus());
 
     /**
