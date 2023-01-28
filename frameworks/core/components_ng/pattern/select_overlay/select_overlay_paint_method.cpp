@@ -35,7 +35,7 @@ void SelectOverlayPaintMethod::DrawHandles(const std::shared_ptr<SelectOverlayIn
         LOGD("hide handles due to handle is out of show area");
         return;
     }
-    LOGE("paint handles");
+    LOGD("paint handles");
     if (info->isSingleHandle) {
         // Paint one handle.
         if (info->firstHandle.isShow) {
@@ -98,6 +98,7 @@ void SelectOverlayPaintMethod::PaintHandle(RSCanvas& canvas, const RectF& handle
         endPoint.SetY(handleRadius + handleRect.Height() + (1.0_vp).ConvertToPx());
     }
     canvas.DrawLine({ startPoint.GetX(), startPoint.GetY() }, { endPoint.GetX(), endPoint.GetY() });
+    canvas.DetachPen();
     canvas.Restore();
 }
 

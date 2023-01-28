@@ -30,10 +30,14 @@ ohos_unittest("stepper_pattern_test_ng") {
     "$ace_root/frameworks/core/animation/scroll_motion.cpp",
     "$ace_root/frameworks/core/animation/spring_model.cpp",
     "$ace_root/frameworks/core/animation/spring_motion.cpp",
+    "$ace_root/frameworks/core/common/clipboard/clipboard_proxy.cpp",
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components/common/properties/shadow_config.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
+
+    # components_ng_event
+    "$ace_root/frameworks/core/components_ng/event/long_press_event.cpp",
 
     # mock
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
@@ -81,6 +85,7 @@ ohos_unittest("stepper_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/text/text_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_styles.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/text/mock_text_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/text/mock_text_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/text/mock/mock_text_layout_adapter.cpp",
 
     # self

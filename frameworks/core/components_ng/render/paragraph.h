@@ -62,6 +62,10 @@ public:
     virtual float GetLongestLine() = 0;
     virtual float GetMaxWidth() = 0;
     virtual float GetAlphabeticBaseline() = 0;
+    virtual int32_t GetHandlePositionForClick(const Offset& offset) = 0;
+    virtual void GetRectsForRange(int32_t start, int32_t end, std::vector<Rect>& selectedRects) = 0;
+    virtual bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics& result) = 0;
+    virtual bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& result) = 0;
 
     // interfaces for painting
     virtual void Paint(const RSCanvas& canvas, float x, float y) = 0;
