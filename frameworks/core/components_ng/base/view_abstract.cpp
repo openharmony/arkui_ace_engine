@@ -84,6 +84,19 @@ void ViewAbstract::SetHeight(const CalcLength& height)
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, height));
 }
 
+void ViewAbstract::ClearWidthOrHeight(bool isWidth)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ClearUserDefinedIdealSize(isWidth);
+}
+
 void ViewAbstract::SetMinWidth(const CalcLength& width)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

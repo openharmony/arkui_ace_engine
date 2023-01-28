@@ -46,6 +46,7 @@ public:
     static void SetShowPasswordIcon(const JSCallbackInfo& info);
     static void SetBackgroundColor(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
+    static void JsWidth(const JSCallbackInfo& info);
     static void JsPadding(const JSCallbackInfo& info);
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderWidth(const JSCallbackInfo& info);
