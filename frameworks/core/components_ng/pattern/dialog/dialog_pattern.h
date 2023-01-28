@@ -78,6 +78,24 @@ public:
         return message_;
     }
 
+    void SetOpenAnimation(const std::optional<AnimationOption>& openAnimation)
+    {
+        openAnimation_ = openAnimation;
+    }
+    std::optional<AnimationOption> GetOpenAnimation() const
+    {
+        return openAnimation_;
+    }
+
+    void SetCloseAnimation(const std::optional<AnimationOption>& closeAnimation)
+    {
+        closeAnimation_ = closeAnimation;
+    }
+    std::optional<AnimationOption> GetCloseAnimation() const
+    {
+        return closeAnimation_;
+    }
+
 private:
     void OnModifyDone() override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -104,6 +122,9 @@ private:
     RefPtr<DialogTheme> dialogTheme_;
     RefPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
+
+    std::optional<AnimationOption> openAnimation_;
+    std::optional<AnimationOption> closeAnimation_;
 
     // XTS inspector values
     std::string message_;

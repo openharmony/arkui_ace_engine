@@ -25,6 +25,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
@@ -63,6 +64,67 @@ void OverlayManager::Show(const RefPtr<FrameNode>& node)
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
     ctx->OpacityAnimation(option, 0.0, 1.0);
+}
+
+void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
+{
+    auto root = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(root && node);
+    node->MountToParent(root);
+    root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+
+    AnimationOption option;
+    option.SetFillMode(FillMode::FORWARDS);
+
+    auto dialogPattern = node->GetPattern<DialogPattern>();
+    option = dialogPattern->GetOpenAnimation().value_or(option);
+    auto onFinish = option.GetOnFinishEvent();
+
+    option.SetOnFinishEvent(
+        [weak = WeakClaim(this), nodeWK = WeakClaim(RawPtr(node)), id = Container::CurrentId(), onFinish] {
+            auto node = nodeWK.Upgrade();
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(node && overlayManager);
+            ContainerScope scope(id);
+            overlayManager->FocusDialog(node);
+
+            if (onFinish != nullptr) {
+                onFinish();
+            }
+        });
+    auto ctx = node->GetRenderContext();
+    CHECK_NULL_VOID(ctx);
+    ctx->OpacityAnimation(option, 0.0, 1.0);
+}
+
+void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
+{
+    auto root = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(root && node);
+
+    AnimationOption option;
+    option.SetFillMode(FillMode::FORWARDS);
+
+    auto dialogPattern = node->GetPattern<DialogPattern>();
+    option = dialogPattern->GetCloseAnimation().value_or(option);
+    auto onFinish = option.GetOnFinishEvent();
+
+    option.SetOnFinishEvent([root, node, id = Container::CurrentId(), onFinish] {
+        ContainerScope scope(id);
+        if (onFinish != nullptr) {
+            onFinish();
+        }
+
+        root->RemoveChild(node);
+        root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    });
+    auto ctx = node->GetRenderContext();
+    CHECK_NULL_VOID(ctx);
+    ctx->OpacityAnimation(option, 1.0, 0.0);
+    // start animation immediately
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RequestFrame();
 }
 
 void OverlayManager::Pop(const RefPtr<FrameNode>& node)
@@ -373,7 +435,7 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
 {
     LOGI("OverlayManager::ShowDialog");
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
-    Show(dialog);
+    OpenDialogAnimation(dialog);
     return dialog;
 }
 
@@ -408,7 +470,7 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, uint32_
 void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
 {
     LOGI("OverlayManager::CloseDialog");
-    Pop(dialogNode);
+    CloseDialogAnimation(dialogNode);
     BlurDialog();
 }
 

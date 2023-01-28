@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 
+#include <optional>
 #include <string>
 
 #include "base/memory/ace_type.h"
@@ -67,7 +68,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     // create gray background
     auto dialogContext = dialog->GetRenderContext();
     CHECK_NULL_RETURN(dialogContext, dialog);
-    dialogContext->UpdateBackgroundColor(dialogTheme->GetMaskColorEnd());
+    dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
 
     // set onCancel callback
     auto hub = dialog->GetEventHub<DialogEventHub>();
@@ -78,6 +79,11 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     auto pattern = dialog->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     pattern->BuildChild(param);
+
+    // set open and close animation
+    pattern->SetOpenAnimation(param.openAnimation);
+    pattern->SetCloseAnimation(param.closeAnimation);
+
     dialog->MarkModifyDone();
     return dialog;
 }
