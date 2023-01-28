@@ -52,6 +52,8 @@ void SwiperIndicatorPattern::OnModifyDone()
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitClickEvent(gestureHub);
+    InitHoverMouseEvent();
+    InitTouchEvent(gestureHub);
 }
 
 bool SwiperIndicatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -101,6 +103,128 @@ void SwiperIndicatorPattern::HandleClick(const GestureEvent& info)
     } else if (mainClickOffset > lengthWithCurrentIndex) {
         swiperPattern->ShowNext();
     }
+}
+
+void SwiperIndicatorPattern::InitHoverMouseEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleHoverEvent(isHover);
+        }
+    };
+
+    if (!hoverEvent_) {
+        hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
+        inputHub->AddOnHoverEvent(hoverEvent_);
+    }
+
+    inputHub->SetMouseEvent([weak = WeakClaim(this)](MouseInfo& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleMouseEvent(info);
+        }
+    });
+}
+
+void SwiperIndicatorPattern::HandleMouseEvent(const MouseInfo& info)
+{
+    auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    hoverPoint_.SetX(mouseOffsetX);
+    hoverPoint_.SetY(mouseOffsetY);
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SwiperIndicatorPattern::HandleHoverEvent(bool isHover)
+{
+    if (isHover_ == isHover) {
+        return;
+    }
+
+    isHover_ = isHover;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperTheme);
+    auto hoverColor = swiperTheme->GetHoverColor();
+    renderContext->UpdateBackgroundColor(isHover_ ? hoverColor : Color::TRANSPARENT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void SwiperIndicatorPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (touchEvent_) {
+        return;
+    }
+
+    auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleTouchEvent(info);
+        }
+    };
+
+    if (touchEvent_) {
+        gestureHub->RemoveTouchEvent(touchEvent_);
+    }
+    touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+    gestureHub->AddTouchEvent(touchEvent_);
+}
+
+void SwiperIndicatorPattern::HandleTouchEvent(const TouchEventInfo& info)
+{
+    auto touchType = info.GetTouches().front().GetTouchType();
+    if (touchType == TouchType::DOWN) {
+        HandleTouchDown();
+    } else if (touchType == TouchType::UP) {
+        HandleTouchUp();
+    } else if (touchType == TouchType::CANCEL) {
+        HandleTouchUp();
+    }
+}
+
+void SwiperIndicatorPattern::HandleTouchDown()
+{
+    isPressed_ = true;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperTheme);
+    auto pressedColor = swiperTheme->GetPressedColor();
+    renderContext->UpdateBackgroundColor(pressedColor);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void SwiperIndicatorPattern::HandleTouchUp()
+{
+    isPressed_ = false;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 } // namespace OHOS::Ace::NG
