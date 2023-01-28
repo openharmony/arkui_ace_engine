@@ -15,6 +15,9 @@
 
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
 
+#include "third_party/skia/include/codec/SkCodec.h"
+#include "third_party/skia/include/core/SkGraphics.h"
+
 #include "base/utils/system_properties.h"
 #include "core/components_ng/image_provider/adapter/skia_svg_dom.h"
 #include "core/components_ng/svg/svg_dom.h"
@@ -73,15 +76,32 @@ RefPtr<SvgDomBase> SkiaImageData::MakeSvgDom(const std::optional<Color>& svgFill
     if (!svgDom_) {
         return nullptr;
     }
-    svgDom_->SetFunction(
+    svgDom_->SetFuncNormalizeToPx(
         [pipeline = WeakClaim(RawPtr(PipelineContext::GetCurrentContext()))](const Dimension& value) -> double {
             auto context = pipeline.Upgrade();
             CHECK_NULL_RETURN(context, 0.0);
             return context->NormalizeToPx(value);
-        },
-        nullptr);
+        });
     return svgDom_;
 #endif
+}
+
+std::pair<SizeF, int32_t> SkiaImageData::Parse() const
+{
+    auto codec = SkCodec::MakeFromData(GetSkData());
+    CHECK_NULL_RETURN_NOLOG(codec, {});
+    SizeF imageSize;
+    switch (codec->getOrigin()) {
+        case SkEncodedOrigin::kLeftTop_SkEncodedOrigin:
+        case SkEncodedOrigin::kRightTop_SkEncodedOrigin:
+        case SkEncodedOrigin::kRightBottom_SkEncodedOrigin:
+        case SkEncodedOrigin::kLeftBottom_SkEncodedOrigin:
+            imageSize.SetSizeT(SizeF(codec->dimensions().fHeight, codec->dimensions().fWidth));
+            break;
+        default:
+            imageSize.SetSizeT(SizeF(codec->dimensions().fWidth, codec->dimensions().fHeight));
+    }
+    return { imageSize, codec->getFrameCount() };
 }
 
 } // namespace OHOS::Ace::NG

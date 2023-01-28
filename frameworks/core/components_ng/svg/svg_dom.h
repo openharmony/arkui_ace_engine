@@ -22,9 +22,9 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/image_provider/svg_dom_base.h"
-#include "frameworks/core/components_ng/svg/parse/svg_context.h"
-#include "frameworks/core/components_ng/svg/parse/svg_node.h"
-#include "frameworks/core/components_ng/svg/parse/svg_style.h"
+#include "core/components_ng/svg/parse/svg_node.h"
+#include "core/components_ng/svg/parse/svg_style.h"
+#include "core/components_ng/svg/svg_context.h"
 
 namespace OHOS::Ace::NG {
 class SvgDom : public SvgDomBase {
@@ -32,11 +32,13 @@ class SvgDom : public SvgDomBase {
 
 public:
     SvgDom();
-    ~SvgDom();
+    ~SvgDom() override;
 
     static RefPtr<SvgDom> CreateSvgDom(SkStream& svgStream, const std::optional<Color>& color);
 
-    void SetFunction(const FuncNormalizeToPx& funcNormalizeToPx, const FuncAnimateFlush& funcAnimateFlush);
+    void SetFuncNormalizeToPx(FuncNormalizeToPx&& funcNormalizeToPx);
+    void SetAnimationCallback(std::function<void()>&& funcAnimateFlush) override;
+    void ControlAnimation(bool play) override;
 
     bool ParseSvg(SkStream& svgStream);
 
@@ -70,8 +72,8 @@ private:
 
     RefPtr<SvgContext> svgContext_;
     RefPtr<SvgNode> root_;
-    Size layout_; // svg外视口, 即image组件赋予的布局宽高
-    Size svgSize_; // svg内视口，即图源内置宽高
+    Size layout_;  // layout size set by Image Component
+    Size svgSize_; // self size specified in SVG file
     Rect viewBox_;
     std::optional<Color> fillColor_;
     PushAttr attrCallback_;

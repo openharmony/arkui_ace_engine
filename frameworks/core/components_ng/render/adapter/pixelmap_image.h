@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_PIXELMP_IMAGE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_PIXELMP_IMAGE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_PIXELMAP_IMAGE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_PIXELMAP_IMAGE_H
+
+#include <utility>
 
 #include "third_party/skia/include/core/SkImage.h"
 
@@ -25,19 +27,19 @@ namespace OHOS::Ace::NG {
 class PixelMapImage : public CanvasImage {
     DECLARE_ACE_TYPE(PixelMapImage, CanvasImage)
 public:
-    explicit PixelMapImage(RefPtr<PixelMap> pixelMap) : pixelMap_(pixelMap) {}
+    explicit PixelMapImage(RefPtr<PixelMap> pixelMap) : pixelMap_(std::move(pixelMap)) {}
 
     ~PixelMapImage() override = default;
 
     int32_t GetWidth() const override;
     int32_t GetHeight() const override;
 
-    void DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect,
-        const BorderRadiusArray& radiusXY) override;
+    void DrawToRSCanvas(
+        RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override;
 
 private:
-    RefPtr<PixelMap> pixelMap_;
+    const RefPtr<PixelMap> pixelMap_;
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_PIXELMP_IMAGE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_PIXELMAP_IMAGE_H

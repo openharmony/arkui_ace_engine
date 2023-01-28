@@ -36,7 +36,7 @@ namespace OHOS::Ace {
 
 std::string ImageObject::GenerateCacheKey(const ImageSourceInfo& srcInfo, Size targetImageSize)
 {
-    return srcInfo.GetCacheKey() + std::to_string(static_cast<int32_t>(targetImageSize.Width())) +
+    return srcInfo.GetKey() + std::to_string(static_cast<int32_t>(targetImageSize.Width())) +
            std::to_string(static_cast<int32_t>(targetImageSize.Height()));
 }
 

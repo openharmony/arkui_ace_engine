@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,8 +19,8 @@
 #include <fstream>
 #include <sys/stat.h>
 
-#include "core/image/image_object.h"
 #include "core/components_ng/image_provider/image_object.h"
+#include "core/image/image_object.h"
 
 namespace OHOS::Ace {
 
@@ -86,9 +86,8 @@ T ImageCache::GetCacheObjWithCountLimitLRU(const std::string& key, std::list<Cac
         cacheList.splice(cacheList.begin(), cacheList, iter->second);
         iter->second = cacheList.begin();
         return iter->second->cacheObj;
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 bool ImageCache::GetFromCacheFile(const std::string& filePath)
@@ -114,14 +113,29 @@ void ImageCache::CacheImage(const std::string& key, const std::shared_ptr<Cached
     if (key.empty() || capacity_ == 0) {
         return;
     }
-    std::scoped_lock lock(imageCacheMutex_, cacheListMutex_);
+    std::scoped_lock lock(imageCacheMutex_);
     CacheWithCountLimitLRU<std::shared_ptr<CachedImage>>(key, image, cacheList_, imageCache_, capacity_);
+}
+
+void ImageCache::CacheImageNG(const std::string& key, const std::shared_ptr<NG::CachedImage>& image)
+{
+    if (key.empty() || capacity_ == 0) {
+        return;
+    }
+    std::scoped_lock lock(imageCacheMutex_);
+    CacheWithCountLimitLRU<std::shared_ptr<NG::CachedImage>>(key, image, cacheListNG_, imageCacheNG_, capacity_);
 }
 
 std::shared_ptr<CachedImage> ImageCache::GetCacheImage(const std::string& key)
 {
-    std::scoped_lock lock(imageCacheMutex_, cacheListMutex_);
+    std::scoped_lock lock(imageCacheMutex_);
     return GetCacheObjWithCountLimitLRU<std::shared_ptr<CachedImage>>(key, cacheList_, imageCache_);
+}
+
+std::shared_ptr<NG::CachedImage> ImageCache::GetCacheImageNG(const std::string& key)
+{
+    std::scoped_lock lock(imageCacheMutex_);
+    return GetCacheObjWithCountLimitLRU<std::shared_ptr<NG::CachedImage>>(key, cacheListNG_, imageCacheNG_);
 }
 
 void ImageCache::CacheImgObjNG(const std::string& key, const RefPtr<NG::ImageObject>& imgObj)
@@ -209,13 +223,11 @@ RefPtr<CachedImageData> ImageCache::GetCacheImageData(const std::string& key)
         dataCacheList_.splice(dataCacheList_.begin(), dataCacheList_, iter->second);
         iter->second = dataCacheList_.begin();
         return iter->second->imageDataPtr;
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
-void ImageCache::WriteCacheFile(const std::string& url, const void* const data,
-    const size_t size, const std::string suffix)
+void ImageCache::WriteCacheFile(const std::string& url, const void* const data, size_t size, const std::string& suffix)
 {
     std::vector<std::string> removeVector;
     std::string cacheNetworkFilePath = GetImageCacheFilePath(url) + suffix;

@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG {
 
-SvgGradient::SvgGradient(GradientType gradientType) : SvgNode()
+SvgGradient::SvgGradient(GradientType gradientType)
 {
     gradientDeclaration_ = AceType::MakeRefPtr<SvgGradientDeclaration>();
     gradientDeclaration_->Init();

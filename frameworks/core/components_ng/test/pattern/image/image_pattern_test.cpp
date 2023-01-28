@@ -40,14 +40,6 @@ namespace {
 constexpr double RADIUS_DEFAULT = 300.0;
 constexpr double IMAGE_FRAMESIZE_WIDTH = 400.0;
 constexpr double IMAGE_FRAMESIZE_HEIGHT = 500.0;
-constexpr double IMAGE_SOURCESIZE_WIDTH = 300.0;
-constexpr double IMAGE_SOURCESIZE_HEIGHT = 300.0;
-constexpr double ALT_SOURCESIZE_WIDTH = 100.0;
-constexpr double ALT_SOURCESIZE_HEIGHT = 200.0;
-constexpr Dimension IMAGE_SOURCEINFO_WIDTH = Dimension(IMAGE_SOURCESIZE_WIDTH);
-constexpr Dimension IMAGE_SOURCEINFO_HEIGHT = Dimension(IMAGE_SOURCESIZE_HEIGHT);
-constexpr Dimension ALT_SOURCEINFO_WIDTH = Dimension(ALT_SOURCESIZE_WIDTH);
-constexpr Dimension ALT_SOURCEINFO_HEIGHT = Dimension(ALT_SOURCESIZE_HEIGHT);
 constexpr ImageFit IMAGE_FIT_DEFAULT = ImageFit::COVER;
 constexpr ImageRepeat IMAGE_REPEAT_DEFAULT = ImageRepeat::REPEAT;
 constexpr ImageInterpolation IMAGE_INTERPOLATION_DEFAULT = ImageInterpolation::HIGH;
@@ -184,68 +176,6 @@ HWTEST_F(ImagePatternTest, UpdateInternalResource001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetImagePaintConfig001
- * @tc.desc: When Image upload successfully, Imagepattern will set ImagePaintConfig to CanvaImage.
- * @tc.type: FUNC
- */
-HWTEST_F(ImagePatternTest, SetImagePaintConfig001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create Image frameNode.
-     */
-    auto frameNode = ImagePatternTest::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr, SVG_FILL_COLOR_DEFAULT,
-        IMAGE_FIT_DEFAULT, IMAGE_RENDERMODE_DEFAULT, IMAGE_INTERPOLATION_DEFAULT, IMAGE_REPEAT_DEFAULT,
-        COLOR_FILTER_DEFAULT, MATCHTEXTDIRECTION_DEFAULT);
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
-    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetFrameSize(SizeF(IMAGE_FRAMESIZE_WIDTH, IMAGE_FRAMESIZE_HEIGHT));
-    frameNode->SetGeometryNode(geometryNode);
-    frameNode->SetActive(true);
-    /**
-     * @tc.steps: step2. get ImagePattern and enter markModifyDone, load ImageLoadingContext.
-     */
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    EXPECT_TRUE(imagePattern != nullptr);
-    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
-    EXPECT_TRUE(imageLayoutProperty != nullptr);
-    imageLayoutProperty->UpdateImageSourceInfo(
-        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
-    imageLayoutProperty->UpdateAlt(ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT));
-    frameNode->MarkModifyDone();
-    /**
-     * @tc.steps: step3. AltImage loads successfully, and trigger alt callback.
-     */
-    imagePattern->altLoadingCtx_->OnDataReady(
-        ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT), nullptr);
-    imagePattern->altLoadingCtx_->OnLoadSuccess(
-        ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT));
-    EXPECT_TRUE(imagePattern->altImage_ != nullptr);
-    EXPECT_EQ(*imagePattern->altSrcRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
-    EXPECT_EQ(*imagePattern->altDstRect_, RectF(0, 0, ALT_SOURCESIZE_WIDTH, ALT_SOURCESIZE_HEIGHT));
-    EXPECT_TRUE(imagePattern->altImage_->paintConfig_ != nullptr);
-    auto altImagePaintConfig = imagePattern->altImage_->GetPaintConfig();
-    EXPECT_EQ(altImagePaintConfig.imageFit_, IMAGE_FIT_DEFAULT);
-    /**
-     * @tc.steps: step4. Image loads successfully, and trigger Pattern->OnImageLoadSuccess.
-     */
-    imagePattern->loadingCtx_->OnLoadSuccess(
-        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
-    EXPECT_TRUE(imagePattern->image_ != nullptr);
-    EXPECT_EQ(imagePattern->srcRect_, RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
-    EXPECT_EQ(imagePattern->dstRect_, RectF(0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT));
-    EXPECT_TRUE(imagePattern->image_->paintConfig_ != nullptr);
-    auto imagePaintConfig = imagePattern->image_->GetPaintConfig();
-    EXPECT_EQ(imagePaintConfig.imageFit_, IMAGE_FIT_DEFAULT);
-    /**
-     * @tc.steps: step5. Image loads successfully, and clear alt data.
-     */
-    EXPECT_EQ(imagePattern->altLoadingCtx_, nullptr);
-    EXPECT_EQ(imagePattern->altImage_, nullptr);
-    EXPECT_EQ(imagePattern->altSrcRect_, nullptr);
-    EXPECT_EQ(imagePattern->altDstRect_, nullptr);
-}
-
-/**
  * @tc.name: SetImagePaintConfig002
  * @tc.desc: Verify that Imagepattern will set correct ImagePaintConfig to CanvaImage.
  * @tc.type: FUNC
@@ -283,82 +213,6 @@ HWTEST_F(ImagePatternTest, SetImagePaintConfig002, TestSize.Level1)
     for (auto point : *paintConfig.borderRadiusXY_) {
         EXPECT_EQ(point, PointF(RADIUS_DEFAULT, RADIUS_DEFAULT));
     }
-}
-
-/**
- * @tc.name: ImagePatternCallback001
- * @tc.desc: Verify that when ImageSourceInfo is not same, ImagePattern's callback will fail.
- * @tc.type: FUNC
- */
-HWTEST_F(ImagePatternTest, ImagePatternCallback001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create Image frameNode.
-     */
-    auto frameNode = ImagePatternTest::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
-    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetFrameSize(SizeF(IMAGE_FRAMESIZE_WIDTH, IMAGE_FRAMESIZE_HEIGHT));
-    frameNode->SetGeometryNode(geometryNode);
-    /**
-     * @tc.steps: step2. get ImagePattern and enter markModifyDone, load ImageLoadingContext.
-     */
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    EXPECT_TRUE(imagePattern != nullptr);
-    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
-    EXPECT_TRUE(imageLayoutProperty != nullptr);
-    frameNode->MarkModifyDone();
-    /**
-     * @tc.steps: step3. ImageLoadingContext trigger callback, but ImageSourceInfo is not match.
-     */
-    imagePattern->altLoadingCtx_->OnLoadSuccess(
-        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
-    imagePattern->altLoadingCtx_->OnLoadFail(
-        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT), "",
-        ImageLoadingCommand::LOAD_DATA_FAIL);
-    EXPECT_EQ(imagePattern->altImage_, nullptr);
-    EXPECT_EQ(imagePattern->altSrcRect_, nullptr);
-    EXPECT_EQ(imagePattern->altDstRect_, nullptr);
-    imagePattern->loadingCtx_->OnLoadSuccess(
-        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
-    imagePattern->loadingCtx_->OnLoadFail(
-        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT), "",
-        ImageLoadingCommand::LOAD_DATA_FAIL);
-    EXPECT_TRUE(imagePattern->image_ == nullptr);
-}
-
-/**
- * @tc.name: ImagePatternCallback002
- * @tc.desc: Verify that ImagePattern's Failcallback is common.
- * @tc.type: FUNC
- */
-HWTEST_F(ImagePatternTest, ImagePatternCallback002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create Image frameNode.
-     */
-    auto frameNode = ImagePatternTest::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
-    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetFrameSize(SizeF(IMAGE_FRAMESIZE_WIDTH, IMAGE_FRAMESIZE_HEIGHT));
-    frameNode->SetGeometryNode(geometryNode);
-    /**
-     * @tc.steps: step2. get ImagePattern and enter markModifyDone, load ImageLoadingContext.
-     */
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    EXPECT_TRUE(imagePattern != nullptr);
-    auto imageLayoutProperty = imagePattern->GetLayoutProperty<ImageLayoutProperty>();
-    EXPECT_TRUE(imageLayoutProperty != nullptr);
-    imageLayoutProperty->UpdateImageSourceInfo(
-        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT));
-    frameNode->MarkModifyDone();
-    /**
-     * @tc.steps: step3. Image loads failed, and trigger Pattern->OnImageLoadFail.
-     */
-    imagePattern->loadingCtx_->OnLoadFail(
-        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT), "",
-        ImageLoadingCommand::LOAD_DATA_FAIL);
-    EXPECT_TRUE(imagePattern->image_ == nullptr);
 }
 
 /**

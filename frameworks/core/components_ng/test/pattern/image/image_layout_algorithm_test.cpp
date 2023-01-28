@@ -601,7 +601,7 @@ HWTEST_F(ImageLayoutAlgorithmTest, ImageLayoutFunction001, TestSize.Level1)
     geometryNode->SetContentSize(SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
     imageLayoutAlgorithm->Layout(&layoutWrapper);
     EXPECT_EQ(loadingCtx->imageFit_, ImageFit::COVER);
-    EXPECT_EQ(loadingCtx->needResize_, true);
+    EXPECT_EQ(loadingCtx->autoResize_, true);
     EXPECT_EQ(loadingCtx->dstSize_, SizeF(IMAGE_COMPONENTSIZE_WIDTH, IMAGE_COMPONENTSIZE_HEIGHT));
 }
 } // namespace OHOS::Ace::NG

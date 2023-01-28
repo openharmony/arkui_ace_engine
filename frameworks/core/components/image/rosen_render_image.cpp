@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -564,7 +564,7 @@ void RosenRenderImage::CacheSvgImageObject()
     }
     auto imageCache = context->GetImageCache();
     if (imageCache) {
-        imageCache->CacheImgObj(sourceInfo_.GetCacheKey(), imageObj_);
+        imageCache->CacheImgObj(sourceInfo_.GetKey(), imageObj_);
     }
 }
 
@@ -580,7 +580,7 @@ RefPtr<ImageObject> RosenRenderImage::QueryCacheSvgImageObject()
         LOGE("image cached is null!");
         return nullptr;
     }
-    return imageCache->GetCacheImgObj(sourceInfo_.GetCacheKey());
+    return imageCache->GetCacheImgObj(sourceInfo_.GetKey());
 }
 
 void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
