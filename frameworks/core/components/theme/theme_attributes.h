@@ -80,6 +80,7 @@ extern const char PATTERN_BG_COLOR_FOCUSED[];
 extern const char PATTERN_BG_COLOR_DISABLED_ALPHA[];
 extern const char PATTERN_BG_COLOR_ALPHA[];
 extern const char PATTERN_TEXT_COLOR[];
+extern const char PATTERN_TEXT_COLOR_ALPHA[];
 extern const char PATTERN_TEXT_COLOR_FOCUSED[];
 extern const char PATTERN_TEXT_COLOR_SELECTED[];
 extern const char PATTERN_TEXT_COLOR_DISABLED[];
