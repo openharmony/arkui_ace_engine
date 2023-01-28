@@ -17,6 +17,7 @@ import(
 build_component_ng("pattern_ng") {
   sources = [
     "animator/animator_model_ng.cpp",
+    "app_bar/app_bar_view.cpp",
     "badge/badge_layout_algorithm.cpp",
     "badge/badge_layout_property.cpp",
     "badge/badge_pattern.cpp",
@@ -376,4 +377,8 @@ build_component_ng("pattern_model_component_ng") {
     "model/model_touch_handler.cpp",
     "model/model_view_ng.cpp",
   ]
+
+  if (is_standard_system) {
+    deps = [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+  }
 }

@@ -72,7 +72,7 @@ public:
         return *paintConfig_;
     }
 
-    virtual void SetAnimationCallback(std::function<void()>&& callback) {}
+    virtual void SetRedrawCallback(std::function<void()>&& callback) {}
 
     virtual void ControlAnimation(bool play) {}
 

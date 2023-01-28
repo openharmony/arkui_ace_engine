@@ -34,9 +34,11 @@ public:
     void OnReset() override {}
 
 private:
-    static void PerformMeasureSelf(LayoutWrapper* layoutWrapper);
-    static void UpdateFrameSizeUsingChild(LayoutWrapper* layoutWrapper, SizeF& frameSize);
-    static void MeasureCircleButton(LayoutWrapper* layoutWrapper);
+    void PerformMeasureSelf(LayoutWrapper* layoutWrapper);
+    void UpdateFrameSizeUsingChild(LayoutWrapper* layoutWrapper, SizeF& frameSize);
+    void MeasureCircleButton(LayoutWrapper* layoutWrapper);
+
+    SizeF childSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ButtonLayoutAlgorithm);
 };

@@ -48,6 +48,9 @@ void ModelPaintMethod::PerformPaint(RSCanvas& canvas, PaintWrapper* paintWrapper
     LOGD("MODEL_NG PerformPaint()");
     auto adapter = modelAdapter_.Upgrade();
     CHECK_NULL_VOID(adapter);
+    if (!adapter->IsReady()) {
+        return;
+    }
     auto paintProperty = DynamicCast<ModelPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
     auto offset = paintWrapper->GetContentOffset();

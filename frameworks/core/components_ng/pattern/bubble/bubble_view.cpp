@@ -197,6 +197,17 @@ RefPtr<FrameNode> BubbleView::CreateMessage(const std::string& message, bool IsU
     } else {
         layoutProperty->UpdateTextColor(Color::WHITE);
     }
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    CHECK_NULL_RETURN(popupTheme, nullptr);
+    auto padding = popupTheme->GetPadding();
+    PaddingProperty textPadding;
+    textPadding.left = CalcLength(padding.Left());
+    textPadding.right = CalcLength(padding.Right());
+    textPadding.top = CalcLength(padding.Top());
+    textPadding.bottom = CalcLength(padding.Bottom());
+    layoutProperty->UpdatePadding(textPadding);
     textNode->MarkModifyDone();
     return textNode;
 }

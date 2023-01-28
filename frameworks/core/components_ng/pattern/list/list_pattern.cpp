@@ -301,9 +301,8 @@ void ListPattern::MarkDirtyNodeSelf()
     }
 }
 
-void ListPattern::ProcessScrollEnd()
+void ListPattern::OnScrollEndCallback()
 {
-    SetScrollBarDriving(false);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
 }
@@ -344,6 +343,9 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
     if (source == SCROLL_FROM_START) {
         ProcessDragStart(offset);
         return true;
+    }
+    if (NearZero(offset)) {
+        return false;
     }
     auto scrollBar = GetScrollBar();
     if (scrollBar && scrollBar->IsDriving()) {

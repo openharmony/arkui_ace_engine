@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_SURFACE_H
 
 #include <cstdint>
+#include <stdint.h>
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
@@ -59,7 +60,7 @@ public:
         return "";
     }
 
-    virtual void SetBounds(int32_t left, int32_t top, int32_t width, int32_t height) {}
+    virtual void SetExtSurfaceBounds(int32_t left, int32_t top, int32_t width, int32_t height) {}
 
 protected:
     RenderSurface() = default;

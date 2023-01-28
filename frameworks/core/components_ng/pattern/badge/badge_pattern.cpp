@@ -45,20 +45,20 @@ void BadgePattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
     auto badgeCount = layoutProperty->GetBadgeCount();
     auto badgeValue = layoutProperty->GetBadgeValue();
-    if (badgeCount.has_value() && badgeCount.value() > 0) {
-        const int32_t maxCountNum = 99;
-        auto badgeMaxCount = layoutProperty->GetBadgeMaxCount().value_or(maxCountNum);
-        auto maxCount = badgeMaxCount;
-        if (badgeCount.value() > maxCount) {
-            badgeCount.value() = maxCount;
-            textLayoutProperty->UpdateContent(std::to_string(badgeCount.value()) + "+");
+    if (badgeCount.has_value()) {
+        if (badgeCount.value() > 0) {
+            const int32_t maxCountNum = 99;
+            auto badgeMaxCount = layoutProperty->GetBadgeMaxCount().value_or(maxCountNum);
+            auto maxCount = badgeMaxCount;
+            if (badgeCount.value() > maxCount) {
+                badgeCount.value() = maxCount;
+                textLayoutProperty->UpdateContent(std::to_string(badgeCount.value()) + "+");
+            } else {
+                textLayoutProperty->UpdateContent(std::to_string(badgeCount.value()));
+            }
         } else {
-            textLayoutProperty->UpdateContent(std::to_string(badgeCount.value()));
+            textLayoutProperty->ResetContent();
         }
-    } else if (badgeCount.has_value() && badgeCount.value() < 0) {
-        textLayoutProperty->UpdateContent(" ");
-    } else if (badgeCount.has_value() && badgeCount.value() == 0) {
-        textLayoutProperty->ResetContent();
     }
 
     if (badgeValue.has_value()) {

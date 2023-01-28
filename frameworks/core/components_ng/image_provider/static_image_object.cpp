@@ -15,9 +15,9 @@
 
 #include "core/components_ng/image_provider/static_image_object.h"
 
-#include "core/components_ng/image_provider/image_provider.h"
+#include "core/components_ng/image_provider/adapter/skia_image_data.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
-
+#include "core/components_ng/image_provider/image_provider.h"
 namespace OHOS::Ace::NG {
 
 void StaticImageObject::MakeCanvasImage(
@@ -26,11 +26,8 @@ void StaticImageObject::MakeCanvasImage(
     ImageProvider::MakeCanvasImage(WeakClaim(this), ctx, targetSize, forceResize, syncLoad);
 }
 
-RefPtr<StaticImageObject> StaticImageObject::Create(
-    const ImageSourceInfo& src, const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data)
+RefPtr<ImageObject> StaticImageObject::Clone()
 {
-    return AceType::MakeRefPtr<NG::StaticImageObject>(
-        src, encodedInfo->GetImageSize(), encodedInfo->GetFrameCount(), data);
+    return MakeRefPtr<StaticImageObject>(src_, imageSize_, data_);
 }
-
 } // namespace OHOS::Ace::NG

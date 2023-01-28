@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/model/model_pattern.h"
 
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -28,7 +29,7 @@ ModelPattern::ModelPattern(uint32_t key) : key_(key)
             auto model = weak.Upgrade();
             if (model) {
                 if (model->NeedsRepaint()) {
-                    model->MarkDirtyNode();
+                    model->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
                 }
                 model->GetPaintProperty<ModelPaintProperty>()->ResetFlagProperties();
             }
@@ -64,16 +65,28 @@ void ModelPattern::OnModifyDone()
 
 bool ModelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (config.skipMeasure || dirty->SkipMeasureContent()) {
-        return false;
+    bool measure = (config.skipMeasure || dirty->SkipMeasureContent()) ? false : true;
+
+    CHECK_NULL_RETURN(modelAdapter_, measure);
+    if (!modelAdapter_->IsInitialized()) {
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 
-    return true;
+    return measure;
 }
 
 void ModelPattern::OnAttachToFrameNode()
 {
     LOGD("MODEL_NG: ModelPattern::OnAttachToFrameNode()");
+#ifdef ENABLE_ROSEN_BACKEND
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
+    CHECK_NULL_VOID(context);
+    auto rsNode = context->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+    rsNode->SetFrameGravity(OHOS::Rosen::Gravity::RESIZE);
+#endif
 }
 
 void ModelPattern::OnDetachFromFrameNode(FrameNode* node)
@@ -86,7 +99,7 @@ void ModelPattern::HandleTouchEvent(const TouchEventInfo& info)
     CHECK_NULL_VOID(modelAdapter_);
     bool repaint = modelAdapter_->HandleTouchEvent(info);
     if (repaint) {
-        MarkDirtyNode();
+        MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 
@@ -96,11 +109,11 @@ bool ModelPattern::NeedsRepaint()
     return modelAdapter_->NeedsRepaint();
 }
 
-void ModelPattern::MarkDirtyNode()
+void ModelPattern::MarkDirtyNode(const PropertyChangeFlag flag)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    host->MarkDirtyNode(flag);
 }
 
 } // namespace OHOS::Ace::NG

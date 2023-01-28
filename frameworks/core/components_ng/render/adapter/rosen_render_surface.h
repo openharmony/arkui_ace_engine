@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/render/render_surface.h"
+#include "foundation/graphic/graphic_2d/interfaces/inner_api/surface/surface_delegate.h"
 
 namespace OHOS::Ace::NG {
 class RosenRenderSurface : public RenderSurface {
@@ -54,7 +55,7 @@ public:
         return producerSurface_;
     }
 
-    void SetBounds(int32_t left, int32_t top, int32_t width, int32_t height) override;
+    void SetExtSurfaceBounds(int32_t left, int32_t top, int32_t width, int32_t height) override;
 
 private:
     OHOS::sptr<OHOS::Surface> producerSurface_ = nullptr;

@@ -55,8 +55,6 @@ void ContainerModalPattern::ShowTitle(bool isShow)
     CHECK_NULL_VOID(titleNode);
     auto stackNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
     CHECK_NULL_VOID(stackNode);
-    auto contentNode = AceType::DynamicCast<FrameNode>(stackNode->GetChildren().front());
-    CHECK_NULL_VOID(contentNode);
     auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
     CHECK_NULL_VOID(floatingTitleNode);
     windowMode_ = PipelineContext::GetCurrentContext()->GetWindowManager()->GetWindowMode();
@@ -362,12 +360,14 @@ void ContainerModalPattern::SetAppTitle(const std::string& title)
     CHECK_NULL_VOID(titleNode);
     auto titleLabel = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(TITLE_LABEL_INDEX));
     titleLabel->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(title);
+    titleLabel->MarkModifyDone();
     titleLabel->MarkDirtyNode();
 
     auto floatingNode = AceType::DynamicCast<FrameNode>(GetHost()->GetChildren().back());
     CHECK_NULL_VOID(floatingNode);
     auto floatingTitleLabel = AceType::DynamicCast<FrameNode>(floatingNode->GetChildAtIndex(TITLE_LABEL_INDEX));
     floatingTitleLabel->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(title);
+    floatingTitleLabel->MarkModifyDone();
     floatingTitleLabel->MarkDirtyNode();
 }
 

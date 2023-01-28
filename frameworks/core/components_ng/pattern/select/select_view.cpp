@@ -40,10 +40,12 @@ void SelectView::Create(const std::vector<SelectParam>& params)
     // create menu node
     auto menu = MenuView::Create(params, nodeId);
     pattern->SetMenuNode(menu);
+    pattern->InitSelected();
 
     // store option pointers in select
     auto menuContainer = menu->GetChildAtIndex(0);
     CHECK_NULL_VOID(menuContainer);
+    pattern->ClearOptions();
     auto options = menuContainer->GetChildren();
     for (auto&& option : options) {
         auto optionNode = AceType::DynamicCast<FrameNode>(option);

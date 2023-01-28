@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/badge/badge_layout_algorithm.h"
 
+#include "base/utils/utils.h"
 #include "core/components/badge/badge_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -60,6 +61,10 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
     CHECK_NULL_VOID(badgeTheme);
     auto badgeCircleSize = badgeTheme->GetBadgeCircleSize();
+    auto badgeValue = layoutProperty->GetBadgeValue();
+    if (badgeValue.has_value() && badgeValue.value().empty()) {
+        badgeCircleSize = badgeTheme->GetLittleBadgeCircleSize();
+    }
     auto circleSize = layoutProperty->GetBadgeCircleSize();
     auto badgeCircleDiameter = circleSize.has_value() ? (circleSize->IsValid() ? circleSize->ConvertToPx() : 0)
                                                       : badgeCircleSize.ConvertToPx();
@@ -92,7 +97,6 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             badgeCircleRadius = badgeCircleDiameter / 2;
         }
     }
-
     textLayoutProperty->UpdateMarginSelfIdealSize(SizeF(badgeWidth, badgeHeight));
     auto textLayoutConstraint = textFirstLayoutConstraint;
     textLayoutConstraint.selfIdealSize = OptionalSize<float>(badgeWidth, badgeHeight);

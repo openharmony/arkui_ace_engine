@@ -2392,6 +2392,7 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->RunJsProxyCallback();
             auto releaseSurfaceListenerImpl = std::make_shared<ReleaseSurfaceImpl>(Container::CurrentId());
             releaseSurfaceListenerImpl->SetSurfaceDelegate(delegate->GetSurfaceDelegateClient());
+            delegate->nweb_->PutReleaseSurfaceCallback(releaseSurfaceListenerImpl);
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -2678,7 +2679,6 @@ void WebDelegate::UpdateDarkModeAuto(RefPtr<WebDelegate> delegate,
         if (delegate->GetForceDarkMode()) {
             setting->PutForceDarkModeEnabled(true);
         }
-        return;
     }
     if (colorMode == "light") {
         setting->PutDarkSchemeEnabled(false);

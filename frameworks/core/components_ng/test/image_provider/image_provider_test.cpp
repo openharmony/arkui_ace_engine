@@ -18,6 +18,7 @@
 #define private public
 
 #include "core/components_ng/image_provider/image_provider.h"
+#include "core/components_ng/image_provider/image_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -49,7 +50,7 @@ void ImageProviderTestNg::TearDown() {}
  */
 HWTEST_F(ImageProviderTestNg, ImageProviderTestNg001, TestSize.Level1)
 {
-    ImageProvider::WrapTaskAndPostToBackground(nullptr);
+    ImageUtils::PostToBg(nullptr);
 }
 
 } // namespace OHOS::Ace::NG

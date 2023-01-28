@@ -32,9 +32,12 @@ namespace OHOS::Ace {
 
 struct CachedImage;
 class ImageObject;
+
 namespace NG {
+struct CachedImage;
 class ImageObject;
-}
+} // namespace NG
+
 template<typename T>
 struct CacheNode {
     CacheNode(std::string key, const T& obj) : cacheKey(std::move(key)), cacheObj(obj) {}
@@ -80,9 +83,12 @@ class ACE_EXPORT ImageCache : public AceType {
 public:
     static RefPtr<ImageCache> Create();
     ImageCache() = default;
-    virtual ~ImageCache() = default;
+    ~ImageCache() override = default;
+
     void CacheImage(const std::string& key, const std::shared_ptr<CachedImage>& image);
+    void CacheImageNG(const std::string& key, const std::shared_ptr<NG::CachedImage>& image);
     std::shared_ptr<CachedImage> GetCacheImage(const std::string& key);
+    std::shared_ptr<NG::CachedImage> GetCacheImageNG(const std::string& key);
 
     void CacheImageData(const std::string& key, const RefPtr<CachedImageData>& imageData);
     RefPtr<CachedImageData> GetCacheImageData(const std::string& key);
@@ -117,7 +123,7 @@ public:
 
     size_t GetCachedImageCount() const
     {
-        std::lock_guard<std::mutex> lock(cacheListMutex_);
+        std::lock_guard<std::mutex> lock(imageCacheMutex_);
         return cacheList_.size();
     }
 
@@ -193,11 +199,12 @@ protected:
 
     bool ProcessImageDataCacheInner(size_t dataSize);
 
-    mutable std::mutex cacheListMutex_;
+    mutable std::mutex imageCacheMutex_;
     std::list<CacheNode<std::shared_ptr<CachedImage>>> cacheList_;
+    std::list<CacheNode<std::shared_ptr<NG::CachedImage>>> cacheListNG_;
 
-    std::mutex imageCacheMutex_;
     std::unordered_map<std::string, std::list<CacheNode<std::shared_ptr<CachedImage>>>::iterator> imageCache_;
+    std::unordered_map<std::string, std::list<CacheNode<std::shared_ptr<NG::CachedImage>>>::iterator> imageCacheNG_;
 
     std::atomic<size_t> capacity_ = 0; // by default memory cache can store 0 images.
 

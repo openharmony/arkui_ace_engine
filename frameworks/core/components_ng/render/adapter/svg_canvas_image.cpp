@@ -36,7 +36,7 @@ void SvgCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, con
         canvas, GetPaintConfig().imageFit_, Size(srcRect.GetWidth(), srcRect.GetHeight()), GetSvgFillColor());
 }
 
-void SvgCanvasImage::SetAnimationCallback(std::function<void()>&& callback)
+void SvgCanvasImage::SetRedrawCallback(std::function<void()>&& callback)
 {
     svgDom_->SetAnimationCallback(std::move(callback));
 }

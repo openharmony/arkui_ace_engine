@@ -28,6 +28,5 @@ ohos_unittest("gauge_pattern_test_ng") {
 
   sources += test_pattern_sources
   deps = test_pattern_deps
-  external_deps = test_pattern_external_deps
-  configs = test_pattern_configs
+  configs = test_configs
 }

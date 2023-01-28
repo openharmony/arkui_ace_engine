@@ -59,6 +59,7 @@ public:
     void MovePosition(int32_t slot);
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false);
     RefPtr<FrameNode> GetFocusParent() const;
+    RefPtr<FocusHub> GetFirstFocusHubChild() const;
     void GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const;
     void Clean();
     void RemoveChildAtIndex(int32_t index);

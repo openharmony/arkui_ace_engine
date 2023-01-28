@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/patternlock/patternlock_paint_method.h"
 
+#include <algorithm>
+
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
 #include "core/components_ng/pattern/patternlock/patternlock_pattern.h"
@@ -117,8 +119,9 @@ void PatternLockPaintMethod::PaintLockLine(RSCanvas& canvas, const OffsetF& offs
     if (LessOrEqual(pathStrokeWidth_.Value(), 0.0)) {
         return;
     }
-    float handleStrokeWidth = pathStrokeWidth_.ConvertToPx() > sideLength_.ConvertToPx() / PATTERN_LOCK_COL_COUNT ?
-        sideLength_.ConvertToPx() / PATTERN_LOCK_COL_COUNT : pathStrokeWidth_.ConvertToPx();
+    float handleStrokeWidth = pathStrokeWidth_.ConvertToPx() > sideLength_.ConvertToPx() / PATTERN_LOCK_COL_COUNT
+                                  ? sideLength_.ConvertToPx() / PATTERN_LOCK_COL_COUNT
+                                  : pathStrokeWidth_.ConvertToPx();
     pathStrokeWidth_ = Dimension(handleStrokeWidth < 0 ? 0 : handleStrokeWidth);
 
     RSPen pen;
@@ -166,14 +169,17 @@ void PatternLockPaintMethod::PaintLockCircle(RSCanvas& canvas, const OffsetF& of
     brush.SetColor(ToRSColor(regularColor_));
 
     OffsetF cellcenter = GetCircleCenterByXY(offset, x, y);
+    OffsetF firstCellcenter = GetCircleCenterByXY(offset, 1, 1);
     float offsetX = cellcenter.GetX();
     float offsetY = cellcenter.GetY();
-    circleRadius_ = circleRadius_.Unit() ==
-        DimensionUnit::PERCENT ? Dimension(circleRadius_.Value() * sideLength_.ConvertToPx()) : circleRadius_;
+    circleRadius_ = circleRadius_.Unit() == DimensionUnit::PERCENT
+                        ? Dimension(circleRadius_.Value() * sideLength_.ConvertToPx())
+                        : circleRadius_;
     const int16_t radiusCount = RADIUS_TO_DIAMETER * PATTERN_LOCK_COL_COUNT;
     float handleCircleRadius =
-        circleRadius_.ConvertToPx() > (sideLength_.ConvertToPx() / SCALE_SELECTED_CIRCLE_RADIUS / radiusCount) ?
-            (sideLength_.ConvertToPx() / SCALE_SELECTED_CIRCLE_RADIUS / radiusCount) : circleRadius_.ConvertToPx();
+        circleRadius_.ConvertToPx() > (sideLength_.ConvertToPx() / SCALE_SELECTED_CIRCLE_RADIUS / radiusCount)
+            ? (sideLength_.ConvertToPx() / SCALE_SELECTED_CIRCLE_RADIUS / radiusCount)
+            : circleRadius_.ConvertToPx();
     circleRadius_ = Dimension(handleCircleRadius < 0 ? 0 : handleCircleRadius);
     if (CheckChoosePoint(x, y)) {
         const int16_t lastIndexFir = 1;
@@ -181,8 +187,9 @@ void PatternLockPaintMethod::PaintLockCircle(RSCanvas& canvas, const OffsetF& of
             if (isMoveEventValid_) {
                 brush.SetColor(ToRSColor(activeColor_));
                 canvas.AttachBrush(brush);
+                auto radius = circleRadius_.ConvertToPx() * 2 * SCALE_ACTIVE_CIRCLE_RADIUS;
                 canvas.DrawCircle(
-                    RSPoint(offsetX, offsetY), circleRadius_.ConvertToPx() * 2 * SCALE_ACTIVE_CIRCLE_RADIUS);
+                    RSPoint(offsetX, offsetY), std::min(static_cast<float>(radius), firstCellcenter.GetX()));
             } else {
                 brush.SetColor(ToRSColor(selectedColor_));
                 canvas.AttachBrush(brush);

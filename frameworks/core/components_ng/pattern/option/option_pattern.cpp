@@ -164,7 +164,10 @@ void OptionPattern::UpdateNextNodeDivider(bool needDivider)
 {
     auto host = GetHost();
     // find next option node from parent menuNode
-    auto nextNode = host->GetParent()->GetChildAtIndex(index_ + 1);
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetParent();
+    CHECK_NULL_VOID(parent);
+    auto nextNode = parent->GetChildAtIndex(index_ + 1);
     if (nextNode) {
         if (!InstanceOf<FrameNode>(nextNode)) {
             LOGW("next optionNode is not a frameNode! type = %{public}s", nextNode->GetTag().c_str());

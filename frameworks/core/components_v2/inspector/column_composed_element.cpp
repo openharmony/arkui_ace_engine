@@ -171,13 +171,30 @@ void ColumnComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Componen
 
 void ColumnComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
 {
-    auto flexElement = GetContentElement<FlexElement>(ColumnElement::TypeId());
-    if (!flexElement) {
-        LOGE("get GetFlexElement failed");
-        return;
+    auto flexElement = GetContentElement<Element>(ColumnElement::TypeId());
+    CHECK_NULL_VOID(flexElement);
+    auto child = GetElementChildBySlot(flexElement, slot);
+    CHECK_NULL_VOID(child);
+
+    // Deals with the case where the component to be updated is a custom component.
+    auto rootElement = flexElement;
+    auto childComposedElement = AceType::DynamicCast<ComposedElement>(child);
+    if (childComposedElement && childComposedElement->GetName() == "view") {
+        rootElement = child;
+        child = rootElement->GetChildren().empty() ? nullptr : rootElement->GetChildren().front();
     }
-    auto child = flexElement->GetChildBySlot(slot);
-    flexElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+
+    // Replace the component with newComponent.
+    auto context = rootElement->GetContext().Upgrade();
+    auto needRebuildFocusElement = AceType::DynamicCast<Element>(rootElement->GetFocusScope());
+    if (context && needRebuildFocusElement) {
+        context->AddNeedRebuildFocusElement(needRebuildFocusElement);
+    }
+    ElementRegister::GetInstance()->RemoveItemSilently(child->GetElementId());
+    rootElement->DeactivateChild(child);
+    auto newChild = rootElement->InflateComponent(newComponent, child->GetSlot(), child->GetRenderSlot());
+    ElementRegister::GetInstance()->AddElement(newChild);
+
     flexElement->MarkDirty();
 }
 

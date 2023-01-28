@@ -905,7 +905,24 @@ var BlurStyle;
   BlurStyle[BlurStyle["Thin"] = 1] = "Thin";
   BlurStyle[BlurStyle["Regular"] = 2] = "Regular";
   BlurStyle[BlurStyle["Thick"] = 3] = "Thick";
+  BlurStyle[BlurStyle["BackgroundThin"] = 4] = "BackgroundThin";
+  BlurStyle[BlurStyle["BackgroundRegular"] = 5] = "BackgroundRegular";
+  BlurStyle[BlurStyle["BackgroundThick"] = 6] = "BackgroundThick";
+  BlurStyle[BlurStyle["BackgroundUltraThick"] = 7] = "BackgroundUltraThick";
 })(BlurStyle || (BlurStyle = {}));
+
+var ThemeColorMode;
+(function (ThemeColorMode) {
+  ThemeColorMode[ThemeColorMode["System"] = 0] = "System";
+  ThemeColorMode[ThemeColorMode["Light"] = 1] = "Light";
+  ThemeColorMode[ThemeColorMode["Dark"] = 2] = "Dark";
+})(ThemeColorMode || (ThemeColorMode = {}));
+
+var AdaptiveColor;
+(function (AdaptiveColor) {
+  AdaptiveColor[AdaptiveColor["Default"] = 0] = "Default";
+  AdaptiveColor[AdaptiveColor["Average"] = 1] = "Average";
+})(AdaptiveColor || (AdaptiveColor = {}));
 
 var BreakpointsReference;
 (function (BreakpointsReference) {

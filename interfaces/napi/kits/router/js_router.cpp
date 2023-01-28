@@ -318,12 +318,14 @@ static napi_value JSRouterPushWithCallback(napi_env env, napi_callback_info info
                 napi_close_handle_scope(env, scope);
             };
             auto delegate = EngineHelper::GetCurrentDelegate();
+            std::string uriString = asyncContext->uriString;
+            std::string paramsString = asyncContext->paramsString;
             if (delegate) {
                 if (asyncContext->isModeType) {
-                    delegate->PushWithCallback(
-                        asyncContext->uriString, asyncContext->paramsString, errorCallback, asyncContext->mode);
+                    uint32_t mode = asyncContext->mode;
+                    delegate->PushWithCallback(uriString, paramsString, errorCallback, mode);
                 } else {
-                    delegate->PushWithCallback(asyncContext->uriString, asyncContext->paramsString, errorCallback);
+                    delegate->PushWithCallback(uriString, paramsString, errorCallback);
                 }
             } else {
                 LOGE("delegate is null");
@@ -513,12 +515,14 @@ static napi_value JSRouterReplaceWithCallback(napi_env env, napi_callback_info i
                 napi_close_handle_scope(env, scope);
             };
             auto delegate = EngineHelper::GetCurrentDelegate();
+            std::string uriString = asyncContext->uriString;
+            std::string paramsString = asyncContext->paramsString;
             if (delegate) {
                 if (asyncContext->isModeType) {
-                    delegate->ReplaceWithCallback(
-                        asyncContext->uriString, asyncContext->paramsString, errorCallback, asyncContext->mode);
+                    uint32_t mode = asyncContext->mode;
+                    delegate->ReplaceWithCallback(uriString, paramsString, errorCallback, mode);
                 } else {
-                    delegate->ReplaceWithCallback(asyncContext->uriString, asyncContext->paramsString, errorCallback);
+                    delegate->ReplaceWithCallback(uriString, paramsString, errorCallback);
                 }
             } else {
                 LOGE("delegate is null");

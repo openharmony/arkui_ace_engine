@@ -259,7 +259,7 @@ sk_sp<SkImage> CanvasPaintMethod::GetImage(const std::string& src)
     auto rasterizedImage = image->makeRasterImage();
     auto canvasImage = flutter::CanvasImage::Create();
     canvasImage->set_image({ rasterizedImage, renderTaskHolder_->unrefQueue });
-    imageCache_->CacheImage(src, std::make_shared<CachedImage>(canvasImage));
+    imageCache_->CacheImage(src, std::make_shared<Ace::CachedImage>(canvasImage));
     return rasterizedImage;
 }
 

@@ -72,6 +72,7 @@ template("ace_osal_preview_source_set") {
     ]
     if (is_standard_system) {
       sources += [
+        "${ace_root}/adapter/ohos/osal/resource_theme_style.cpp",
         "frame_trace_adapter_impl.cpp",
         "resource_adapter_impl_standard.cpp",
         "resource_convertor.cpp",

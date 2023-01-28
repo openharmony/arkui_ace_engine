@@ -177,7 +177,7 @@ public:
     }
 
 private:
-    void ProcessScrollEnd();
+    void OnScrollEndCallback() override;
 
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

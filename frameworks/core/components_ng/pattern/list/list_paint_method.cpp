@@ -100,7 +100,9 @@ void ListPaintMethod::PaintScrollBar(RSCanvas& canvas)
 {
     auto scrollBar = scrollBar_.Upgrade();
     CHECK_NULL_VOID_NOLOG(scrollBar);
-    ScrollBarPainter::PaintRectBar(canvas, scrollBar, UINT8_MAX);
+    if (scrollBar->NeedPaint()) {
+        ScrollBarPainter::PaintRectBar(canvas, scrollBar);
+    }
 }
 
 void ListPaintMethod::PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas)

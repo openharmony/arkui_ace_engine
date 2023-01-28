@@ -31,7 +31,7 @@ class Frontend : public AceType {
     DECLARE_ACE_TYPE(Frontend, AceType);
 };
 class OffscreenCanvas : public AceType {
-    DECLARE_ACE_TYPE(Frontend, AceType);
+    DECLARE_ACE_TYPE(OffscreenCanvas, AceType);
 };
 enum class FrontendType {};
 

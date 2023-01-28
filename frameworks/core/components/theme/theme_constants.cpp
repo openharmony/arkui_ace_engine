@@ -309,6 +309,22 @@ std::string ThemeConstants::GetRawfile(const std::string& fileName) const
     return resAdapter_->GetRawfile(fileName);
 }
 
+bool ThemeConstants::GetRawFileDescription(const std::string& rawfileName, RawfileDescription& rawfileDescription) const
+{
+    if (!resAdapter_) {
+        return false;
+    }
+    return resAdapter_->GetRawFileDescription(rawfileName, rawfileDescription);
+}
+
+bool ThemeConstants::GetMediaById(const int32_t& resId, std::string& mediaPath) const
+{
+    if (!resAdapter_) {
+        return false;
+    }
+    return resAdapter_->GetMediaById(resId, mediaPath);
+}
+
 bool ThemeConstants::GetBoolean(uint32_t key) const
 {
     if (IsGlobalResource(key)) {

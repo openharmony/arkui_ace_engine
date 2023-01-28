@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/image_provider/image_state_manager.h"
+#include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
 #include "core/components_ng/render/image_painter.h"
@@ -79,7 +80,9 @@ void ImageLoadingContext::OnUnloaded()
 
 void ImageLoadingContext::OnLoadSuccess()
 {
-    imageObj_->ClearData();
+    if (DynamicCast<StaticImageObject>(imageObj_)) {
+        imageObj_->ClearData();
+    }
     if (notifiers_.loadSuccessNotifyTask_) {
         notifiers_.loadSuccessNotifyTask_(src_);
     }
@@ -138,13 +141,14 @@ void ImageLoadingContext::OnMakeCanvasImage()
     }
     LOGI("CanvasImage cache miss, need to MakeCanvasImage: %{public}s", imageObj_->GetSourceInfo().ToString().c_str());
     // step4: [MakeCanvasImage] according to [resizeTarget]
-    canvasKey_ = ImageProvider::GenerateImageKey(src_, resizeTarget);
+    canvasKey_ = ImageUtils::GenerateImageKey(src_, resizeTarget);
     imageObj_->MakeCanvasImage(Claim(this), resizeTarget, GetSourceSize().has_value(), syncLoad_);
 }
 
 void ImageLoadingContext::DataReadyCallback(const RefPtr<ImageObject>& imageObj)
 {
-    imageObj_ = imageObj;
+    CHECK_NULL_VOID(imageObj);
+    imageObj_ = imageObj->Clone();
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_DATA_SUCCESS);
 }
 
