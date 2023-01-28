@@ -450,7 +450,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest004, TestSize.Level1)
     EXPECT_EQ(scrollBarProxy->scrollableNodes_.size(), 2);
     scrollBarProxy->RegisterScrollableNode({ nullptr, std::move(scrollFunction) });
     EXPECT_EQ(scrollBarProxy->scrollableNodes_.size(), 3);
-    scrollPattern1->scrollableDistance_ = SCROLL_BAR_FLOAT_100;
+    scrollPattern1->estimatedHeight_ = SCROLL_BAR_FLOAT_100;
     pattern->scrollableDistance_ = SCROLL_BAR_FLOAT_100;
     scrollBarProxy->NotifyScrollableNode(1.0, AceType::WeakClaim(scrollBarPatternRaw));
     EXPECT_EQ(distance, 1.0);
@@ -567,8 +567,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest005, TestSize.Level1)
     pattern->displayMode_ = DisplayMode::AUTO;
     scrollBarProxy->StartScrollBarAnimator();
     scrollBarProxy->StopScrollBarAnimator();
-    scrollPattern->scrollableDistance_ = SCROLL_BAR_FLOAT_100;
-    scrollPattern->currentOffset_ = SCROLL_BAR_FLOAT_NEGATIVE_100;
+    scrollPattern->estimatedHeight_ = SCROLL_BAR_FLOAT_100;
+    scrollPattern->barOffset_ = SCROLL_BAR_FLOAT_NEGATIVE_100;
     pattern->scrollableDistance_ = 1.0f;
     scrollBarProxy->NotifyScrollBar(nullptr);
     EXPECT_EQ(pattern->currentOffset_, 0.0f);
