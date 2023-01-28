@@ -328,7 +328,7 @@ void ViewAbstractModelImpl::SetBackgroundImagePosition(const BackgroundImagePosi
     decoration->SetImage(image);
 }
 
-void ViewAbstractModelImpl::SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle)
+void ViewAbstractModelImpl::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
 {
     auto decoration = GetBackDecoration();
     decoration->SetBlurStyle(bgBlurStyle);
@@ -926,7 +926,7 @@ void ViewAbstractModelImpl::SetBackdropBlur(const Dimension& radius)
 {
     auto decoration = GetBackDecoration();
     decoration->SetBlurRadius(ToAnimatableDimension(radius));
-    decoration->SetBlurStyle(BlurStyle::NoMaterial);
+    decoration->SetBlurStyle(BlurStyleOption());
 }
 
 void ViewAbstractModelImpl::SetFrontBlur(const Dimension& radius)

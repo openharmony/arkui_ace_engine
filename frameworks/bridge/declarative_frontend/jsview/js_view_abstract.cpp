@@ -45,6 +45,7 @@
 #include "core/components/common/layout/screen_system_manager.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
@@ -1541,7 +1542,28 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsBackgroundBlurStyle", info, checkList)) {
         return;
     }
-    ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(static_cast<BlurStyle>(info[0]->ToNumber<int32_t>()));
+    BlurStyleOption styleOption;
+    auto blurStyle = info[0]->ToNumber<int32_t>();
+    if (blurStyle >= static_cast<int>(BlurStyle::THIN) &&
+        blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+        styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
+    }
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
+        auto colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
+        ParseJsInt32(jsOption->GetProperty("colorMode"), colorMode);
+        if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
+            colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
+            styleOption.colorMode = static_cast<ThemeColorMode>(colorMode);
+        }
+        auto adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+        ParseJsInt32(jsOption->GetProperty("adaptiveColor"), adaptiveColor);
+        if (adaptiveColor >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+            adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+            styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption);
 }
 
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
