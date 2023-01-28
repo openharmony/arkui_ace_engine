@@ -14,8 +14,10 @@
  */
 
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
+#include <vector>
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
@@ -160,6 +162,14 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
         child->Layout();
         translate += OffsetF(0, child->GetGeometryNode()->GetFrameSize().Height());
+    }
+
+    if (menuPattern->IsContextMenu()) {
+        std::vector<Rect> rects;
+        auto frameRect = layoutWrapper->GetGeometryNode()->GetFrameRect();
+        auto rect = Rect(frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height());
+        rects.emplace_back(rect);
+        SubwindowManager::GetInstance()->SetHotAreas(rects);
     }
 }
 
