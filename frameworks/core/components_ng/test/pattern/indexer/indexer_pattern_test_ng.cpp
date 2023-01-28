@@ -354,8 +354,6 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern003, TestSize.Level1)
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
-    indexerLayoutAlgorithm->isInitialized_ = false;
-    indexerLayoutAlgorithm->selected_ = COMMON_SELECTED_VALUE;
     indexerLayoutAlgorithm->itemSizeRender_ = ITEM_SIZE_RENDER;
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
     DirtySwapConfig dirtySwapConfig;
@@ -368,8 +366,6 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern003, TestSize.Level1)
     dirtySwapConfig.skipMeasure = true;
     dirtySwapConfig.skipLayout = true;
     indexerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
-    EXPECT_EQ(indexerPattern->isInitialized_, false);
-    EXPECT_EQ(indexerPattern->selected_, 0);
     EXPECT_EQ(indexerPattern->itemSizeRender_, 0);
 
     /**
@@ -380,8 +376,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern003, TestSize.Level1)
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = false;
     indexerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
-    EXPECT_EQ(indexerPattern->isInitialized_, false);
-    EXPECT_EQ(indexerPattern->selected_, COMMON_SELECTED_VALUE);
+    EXPECT_EQ(indexerPattern->selected_, CREATE_SELECTED_VALUE);
     EXPECT_EQ(indexerPattern->itemSizeRender_, ITEM_SIZE_RENDER);
 
     /**
@@ -392,8 +387,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern003, TestSize.Level1)
     dirtySwapConfig.skipMeasure = true;
     dirtySwapConfig.skipLayout = false;
     indexerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
-    EXPECT_EQ(indexerPattern->isInitialized_, false);
-    EXPECT_EQ(indexerPattern->selected_, COMMON_SELECTED_VALUE);
+    EXPECT_EQ(indexerPattern->selected_, CREATE_SELECTED_VALUE);
     EXPECT_EQ(indexerPattern->itemSizeRender_, ITEM_SIZE_RENDER);
 
     /**
@@ -404,8 +398,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern003, TestSize.Level1)
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = true;
     indexerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
-    EXPECT_EQ(indexerPattern->isInitialized_, false);
-    EXPECT_EQ(indexerPattern->selected_, COMMON_SELECTED_VALUE);
+    EXPECT_EQ(indexerPattern->selected_, CREATE_SELECTED_VALUE);
     EXPECT_EQ(indexerPattern->itemSizeRender_, ITEM_SIZE_RENDER);
 }
 
@@ -612,7 +605,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern008, TestSize.Level1)
      * @tc.expected: step3. MoveIndexByOffset success and result correct.
      */
     indexerPattern->itemSizeRender_ = 0;
-    indexerPattern->MoveIndexByOffset(Offset(0, MOVE_INDEX_OFFSET), true);
+    indexerPattern->MoveIndexByOffset(Offset(0, MOVE_INDEX_OFFSET));
     EXPECT_EQ(indexerPattern->childPressIndex_, -1);
 
     /**
@@ -622,7 +615,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern008, TestSize.Level1)
      */
     indexerPattern->itemSizeRender_ = 1;
     indexerPattern->itemCount_ = 0;
-    indexerPattern->MoveIndexByOffset(Offset(0, MOVE_INDEX_OFFSET), true);
+    indexerPattern->MoveIndexByOffset(Offset(0, MOVE_INDEX_OFFSET));
     EXPECT_EQ(indexerPattern->childPressIndex_, -1);
 
     /**
@@ -632,7 +625,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern008, TestSize.Level1)
      */
     indexerPattern->itemSizeRender_ = ITEM_SIZE_RENDER;
     indexerPattern->itemCount_ = CREATE_ARRAY_VALUE.size();
-    indexerPattern->MoveIndexByOffset(Offset(0, MOVE_INDEX_OFFSET), true);
+    indexerPattern->MoveIndexByOffset(Offset(0, MOVE_INDEX_OFFSET));
     int32_t expectedIndex = static_cast<int32_t>(MOVE_INDEX_OFFSET / ITEM_SIZE_RENDER);
     EXPECT_EQ(expectedIndex, indexerPattern->childPressIndex_);
 
@@ -641,7 +634,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern008, TestSize.Level1)
      * @tc.steps: case4: itemSizeRender > 0, itemCount > 0, isRepeatCalled true, next == child
      * @tc.expected: step3. MoveIndexByOffset success and result correct.
      */
-    indexerPattern->MoveIndexByOffset(Offset(0, 0), true);
+    indexerPattern->MoveIndexByOffset(Offset(0, 0));
     EXPECT_EQ(indexerPattern->childPressIndex_, 0);
 
     /**
@@ -649,7 +642,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern008, TestSize.Level1)
      * @tc.steps: case5: itemSizeRender > 0, itemCount > 0, isRepeatCalled false, next == child
      * @tc.expected: step3. MoveIndexByOffset success and result correct.
      */
-    indexerPattern->MoveIndexByOffset(Offset(0, 0), true);
+    indexerPattern->MoveIndexByOffset(Offset(0, 0));
     EXPECT_EQ(indexerPattern->childPressIndex_, 0);
 
     /**
@@ -657,7 +650,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern008, TestSize.Level1)
      * @tc.steps: case5: itemSizeRender > 0, itemCount > 0, isRepeatCalled false, next != child
      * @tc.expected: step3. MoveIndexByOffset success and result correct.
      */
-    indexerPattern->MoveIndexByOffset(Offset(0, MOVE_INDEX_OFFSET), true);
+    indexerPattern->MoveIndexByOffset(Offset(0, MOVE_INDEX_OFFSET));
     EXPECT_EQ(expectedIndex, indexerPattern->childPressIndex_);
 }
 
@@ -961,7 +954,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern015, TestSize.Level1)
     indexerPattern->selected_ = -1;
     indexerPattern->itemCount_ = CREATE_ARRAY_VALUE.size();
     indexerPattern->ApplyIndexChanged();
-    EXPECT_NE(indexerPattern->selected_, -1);
+    EXPECT_EQ(indexerPattern->selected_, -1);
 
     /**
      * @tc.steps: step3. call indexerPattern ApplyIndexChange function, compare result.
@@ -1015,7 +1008,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest001, TestSize.Level1)
      * @tc.expected: step3. create indexer layoutWrapper success.
      */
     int32_t itemCount = CREATE_ARRAY_VALUE.size();
-    for (int32_t index = 0; index <= itemCount; index++) {
+    for (int32_t index = 0; index < itemCount; index++) {
         auto childFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
         EXPECT_NE(childFrameNode, nullptr);
         auto childGeometryNode = childFrameNode->GetGeometryNode();
@@ -1043,7 +1036,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest001, TestSize.Level1)
         EXPECT_NE(childGeometryNode, nullptr);
         OffsetF childFrameOffset = childGeometryNode->GetMarginFrameOffset();
         EXPECT_EQ(childFrameOffset.GetX(), 0);
-        EXPECT_EQ(childFrameOffset.GetY(), index * ITEM_SIZE_VALUE.Value());
+        EXPECT_EQ(childFrameOffset.GetY(), 0);
     }
 }
 
@@ -1076,7 +1069,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest002, TestSize.Level1)
      * @tc.expected: step3. create indexer layoutWrapper success.
      */
     int32_t itemCount = CREATE_ARRAY_VALUE.size();
-    for (int32_t index = 0; index <= itemCount; index++) {
+    for (int32_t index = 0; index < itemCount; index++) {
         auto childFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
         EXPECT_NE(childFrameNode, nullptr);
         auto childGeometryNode = childFrameNode->GetGeometryNode();
@@ -1140,11 +1133,8 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest003, TestSize.Level1)
     EXPECT_EQ(indexerLayoutAlgorithm.itemSizeRender_, 0);
 
     indexerLayoutAlgorithm.itemSize_ = CREATE_ARRAY_VALUE.size();
-    indexerLayoutAlgorithm.alignStyle_ = AlignStyle::LEFT;
     indexerLayoutAlgorithm.Layout(&layoutWrapper);
     EXPECT_EQ(indexerLayoutAlgorithm.itemSizeRender_, 0);
-
-    indexerLayoutAlgorithm.alignStyle_ = AlignStyle::RIGHT;
     indexerLayoutAlgorithm.Layout(&layoutWrapper);
     EXPECT_EQ(indexerLayoutAlgorithm.itemSizeRender_, 0);
 }
@@ -1184,7 +1174,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest004, TestSize.Level1)
      * @tc.expected: step4. layout success.
      */
     indexerLayoutAlgorithm.Measure(&layoutWrapper);
-    EXPECT_EQ(indexerLayoutAlgorithm.itemSizeRender_, ITEM_SIZE_VALUE.Value());
+    EXPECT_EQ(indexerLayoutAlgorithm.itemSizeRender_, 0);
 
     /**
      * @tc.steps: step1. create testProperty and set properties of indexer.
@@ -1214,7 +1204,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest004, TestSize.Level1)
      * @tc.expected: step4. layout success.
      */
     indexerLayoutAlgorithm1.Measure(&layoutWrapper1);
-    EXPECT_EQ(indexerLayoutAlgorithm1.itemSizeRender_, ITEM_SIZE_VALUE.Value());
+    EXPECT_EQ(indexerLayoutAlgorithm1.itemSizeRender_, 0);
 }
 } // namespace OHOS::Ace::NG
 

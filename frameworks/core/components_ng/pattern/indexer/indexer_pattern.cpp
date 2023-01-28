@@ -62,14 +62,11 @@ void IndexerPattern::OnModifyDone()
         itemCount_ = static_cast<int32_t>(arrayValue_.size());
     }
 
-    if (layoutProperty->GetSelected().has_value() &&
-        (selected_ != layoutProperty->GetSelected().value() || !initialized_)) {
-        auto propSelect = layoutProperty->GetSelected().value();
-        selected_ = (propSelect >= 0 && propSelect < itemCount_) ? propSelect : 0;
-        ResetStatus();
-        ApplyIndexChanged(initialized_);
-        initialized_ = true;
-    }
+    auto propSelect = layoutProperty->GetSelected().value();
+    selected_ = (propSelect >= 0 && propSelect < itemCount_) ? propSelect : 0;
+    ResetStatus();
+    ApplyIndexChanged(initialized_);
+    initialized_ = true;
 
     auto gesture = host->GetOrCreateGestureEventHub();
     if (gesture) {
