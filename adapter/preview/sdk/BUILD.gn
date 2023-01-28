@@ -194,6 +194,13 @@ if (is_standard_system) {
     sources += [ openssl_path +
                  "/developtools/profiler/libssl_openssl${dylib_suffix}" ]
 
+    # Add dynamic library "libcrypto_shared"
+    crypto_path =
+        get_label_info("//third_party/openssl:libcrypto_shared", "root_out_dir")
+    deps += [ "//third_party/openssl:libcrypto_shared" ]
+    sources +=
+        [ "${crypto_path}/security/huks/libcrypto_openssl${dylib_suffix}" ]
+
     if (use_mac || use_mingw_win) {
       # add kvfdb
       out_path = get_label_info(
