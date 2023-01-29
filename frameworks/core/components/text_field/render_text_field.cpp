@@ -1164,7 +1164,7 @@ void RenderTextField::ResetOnFocusForTextFieldManager()
 bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
     if (!enabled_) {
-        LOGD("TextField is not enabled.");
+        LOGW("TextField is not enabled.");
         return false;
     }
 
@@ -1277,7 +1277,7 @@ void RenderTextField::AttachIme()
     config.action = action_;
     config.actionLabel = actionLabel_;
     config.obscureText = obscure_;
-    LOGD("Request keyboard configuration: type=%{private}d action=%{private}d actionLabel=%{private}s "
+    LOGI("Request keyboard configuration: type=%{private}d action=%{private}d actionLabel=%{private}s "
          "obscureText=%{private}d",
         keyboard_, action_, actionLabel_.c_str(), obscure_);
     connection_ =
@@ -1704,7 +1704,7 @@ void RenderTextField::PerformDefaultAction()
 
 void RenderTextField::PerformAction(TextInputAction action, bool forceCloseKeyboard)
 {
-    LOGD("PerformAction  %{public}d", static_cast<int32_t>(action));
+    LOGI("PerformAction  %{public}d", static_cast<int32_t>(action));
     ContainerScope scope(instanceId_);
     if (keyboard_ == TextInputType::MULTILINE) {
         auto value = GetEditingValue();
@@ -2351,11 +2351,11 @@ void RenderTextField::HandleOnCut()
         return;
     }
     if (GetEditingValue().GetSelectedText().empty()) {
-        LOGD("copy value is empty");
+        LOGW("copy value is empty");
         return;
     }
     if (copyOption_ != CopyOptions::None) {
-        LOGD("copy value is %{private}s", GetEditingValue().GetSelectedText().c_str());
+        LOGI("copy value is %{private}s", GetEditingValue().GetSelectedText().c_str());
         clipboard_->SetData(GetEditingValue().GetSelectedText(), copyOption_);
     }
     if (onCut_) {
@@ -2380,7 +2380,7 @@ void RenderTextField::HandleOnCopy()
         return;
     }
     if (copyOption_ != CopyOptions::None) {
-        LOGD("copy value is %{private}s", GetEditingValue().GetSelectedText().c_str());
+        LOGI("copy value is %{private}s", GetEditingValue().GetSelectedText().c_str());
         clipboard_->SetData(GetEditingValue().GetSelectedText(), copyOption_);
     }
     if (onCopy_) {
@@ -2401,7 +2401,7 @@ void RenderTextField::HandleOnPaste()
             LOGW("paste value is empty");
             return;
         }
-        LOGD("paste value is %{private}s", data.c_str());
+        LOGI("paste value is %{private}s", data.c_str());
         auto textfield = weak.Upgrade();
         if (textfield) {
             auto value = textfield->GetEditingValue();
@@ -2511,14 +2511,8 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
     if (appendElement.empty()) {
         return false;
     }
-
-    auto editingValue = std::make_shared<TextEditingValue>();
-    editingValue->text = GetEditingValue().GetBeforeSelection() + appendElement + GetEditingValue().GetAfterSelection();
-    editingValue->UpdateSelection(
-        std::max(GetEditingValue().selection.GetEnd(), 0) + StringUtils::Str8ToStr16(appendElement).length());
-    UpdateEditingValue(editingValue);
-    MarkNeedLayout();
-    return true;
+    LOGW("Insert text through key event is no longer supported");
+    return false;
 }
 
 void RenderTextField::UpdateAccessibilityAttr()
