@@ -467,7 +467,13 @@ std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
 {
     // as web component not support resource format: resource://RAWFILE/{fileName}, use old format
     if (!packagePathStr_.empty()) {
-        return "file:///" + packagePathStr_ + "resources/rawfile/" + fileName;
+        std::string outPath;
+        auto state = resourceManager_->GetRawFilePathByName(fileName, outPath);
+        if (state != Global::Resource::SUCCESS) {
+            LOGE("GetRawfile error, filename:%{public}s, error:%{public}u", fileName.c_str(), state);
+            return "";
+        }
+        return "file:///" + outPath;
     }
     return "resource://RAWFILE/" + fileName;
 }
