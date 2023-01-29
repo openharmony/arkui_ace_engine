@@ -41,7 +41,7 @@ constexpr float FIXED_WIDTH = 1.0f;
 constexpr float HALF_CIRCLE = 180.0f;
 constexpr float QUARTER_CIRCLE = 90.0f;
 constexpr float DIAMETER_TO_THICKNESS_RATIO = 0.12;
-constexpr Color BACKGROUND_COLOR = Color(0x4C000000);
+constexpr Color BACKGROUND_COLOR = Color(0x08182431);
 constexpr float SHADOW_BLUR_RADIUS = 5.0f;
 
 } // namespace
