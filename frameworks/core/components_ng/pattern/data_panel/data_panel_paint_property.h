@@ -57,7 +57,7 @@ public:
             double value = propValues_.value()[i];
             jsonDashArray->Put(index.c_str(), value);
         }
-        bool closeEffect = true;
+        bool closeEffect = false;
         if (propEffect_.has_value()) {
             closeEffect = !propEffect_.value();
         }
