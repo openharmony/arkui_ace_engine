@@ -75,8 +75,8 @@ class ACE_EXPORT IndexerComponent : public ComponentGroup {
 public:
     using OnRequestPopupDataFunc = std::function<std::vector<std::string>(std::shared_ptr<IndexerEventInfo>)>;
 
-    IndexerComponent(const std::vector<std::string>& label, int32_t selectedIndex, bool bubble = true)
-        : selectedIndex_(selectedIndex), bubbleEnabled_(bubble)
+    IndexerComponent(const std::vector<std::string>& label, int32_t selectedIndex)
+        : selectedIndex_(selectedIndex)
     {
         indexerLabel_ = GetU16StrVector(label);
         itemSize_ = Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP);
@@ -315,7 +315,7 @@ protected:
     // item size
     Dimension itemSize_;
     bool hasCollapseItem_ = false;
-    bool bubbleEnabled_ = true;
+    bool bubbleEnabled_ = false;
     bool popupListEnabled_ = false;
 
 private:
