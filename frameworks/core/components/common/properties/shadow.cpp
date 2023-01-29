@@ -15,6 +15,7 @@
 
 #include "core/components/common/properties/shadow.h"
 
+#include "base/utils/system_properties.h"
 #include "core/animation/evaluator.h"
 #include "core/components/common/properties/shadow_config.h"
 
@@ -32,6 +33,24 @@ Shadow Shadow::Blend(const Shadow& to, const Shadow& from, float progress)
 
 Shadow Shadow::CreateShadow(ShadowStyle style)
 {
+    auto colorMode = SystemProperties::GetColorMode();
+    if (colorMode == ColorMode::DARK) {
+        switch (style) {
+            case ShadowStyle::OuterDefaultXS:
+                return ShadowConfig::DefaultShadowXSDark;
+            case ShadowStyle::OuterDefaultSM:
+                return ShadowConfig::DefaultShadowSDark;
+            case ShadowStyle::OuterDefaultMD:
+                return ShadowConfig::DefaultShadowMDark;
+            case ShadowStyle::OuterDefaultLG:
+                return ShadowConfig::DefaultShadowLDark;
+            case ShadowStyle::OuterFloatingSM:
+                return ShadowConfig::FloatingShadowSDark;
+            case ShadowStyle::OuterFloatingMD:
+                return ShadowConfig::FloatingShadowMDark;
+        }
+        return {};
+    }
     switch (style) {
         case ShadowStyle::OuterDefaultXS:
             return ShadowConfig::DefaultShadowXS;

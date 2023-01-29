@@ -34,6 +34,13 @@ public:
     static const Shadow DefaultShadowL;
     static const Shadow FloatingShadowS;
     static const Shadow FloatingShadowM;
+
+    static const Shadow DefaultShadowXSDark;
+    static const Shadow DefaultShadowSDark;
+    static const Shadow DefaultShadowMDark;
+    static const Shadow DefaultShadowLDark;
+    static const Shadow FloatingShadowSDark;
+    static const Shadow FloatingShadowMDark;
 };
 
 } // namespace OHOS::Ace
