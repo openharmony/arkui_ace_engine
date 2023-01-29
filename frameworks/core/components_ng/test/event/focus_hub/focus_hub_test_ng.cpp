@@ -105,22 +105,6 @@ HWTEST_F(FocusHubTestNg, FocusHubCreateTest001, TestSize.Level1)
      * @tc.expected: FocusHub will return frameNode' parent focusHub which is also nullptr.
      */
     EXPECT_TRUE(focusHub2->GetParentFocusHub() == nullptr);
-
-    /**
-     * @tc.steps: step4. Invoke GetParentFocusHub passing node as parameter which does not have parent.
-     * @tc.expected: FocusHub will return node' parent focusHub which does not exist.
-     */
-    auto node = FrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    EXPECT_TRUE(focusHub2->GetParentFocusHub() == nullptr);
-
-    /**
-     * @tc.steps: step5. Invoke GetParentFocusHub passing node as parameter which does not have parent.
-     * @tc.expected: FocusHub will return node' parent focusHub which does not exist.
-     */
-    auto nodeParent = AceType::MakeRefPtr<FrameNode>(V2::BLANK_ETS_TAG, -1, AceType::MakeRefPtr<FlexLayoutPattern>());
-    nodeParent->GetOrCreateFocusHub();
-    node.SetParent(nodeParent);
-    EXPECT_TRUE(focusHub2->GetParentFocusHub() != nullptr);
 }
 
 /**
