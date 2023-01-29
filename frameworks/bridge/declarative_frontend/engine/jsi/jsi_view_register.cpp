@@ -528,8 +528,8 @@ panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::JsiRuntimeCallInfo* ru
     }
 
     if (container->IsUseNewPipeline()) {
-        auto nodeInfos = NG::Inspector::GetInspectorTree();
-        return panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str());
+        auto nodeInfos = NG::Inspector::GetInspector();
+        return panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str()));
     }
 #if !defined(NG_BUILD)
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
@@ -538,7 +538,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::JsiRuntimeCallInfo* ru
         return panda::JSValueRef::Undefined(vm);
     }
     auto nodeInfos = V2::Inspector::GetInspectorTree(pipelineContext);
-    return panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str());
+    return panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str()));
 #else
     return panda::JSValueRef::Undefined(vm);
 #endif
