@@ -19,18 +19,9 @@
 #include <cstdint>
 
 #include "frameworks/base/geometry/dimension.h"
-#include "frameworks/core/components_ng/property/calc_length.h"
 
 namespace OHOS::Ace::NG {
-
-const Dimension ROUND_RADIUS_PHONE = 12.0_vp;
-constexpr float DEFAULT_STROKE_WIDTH = 1.0f;
-
 constexpr Dimension VERTICAL_INTERVAL_PHONE = 14.4_vp;
-constexpr Dimension HORIZONTAL_INTERVAL_PHONE = 12.0_vp;
-
-const CalcLength ICON_SIDE_LENGTH(24.0_vp);
-const CalcLength ICON_RIGHT_PADDING(5.0_vp);
 
 } // namespace OHOS::Ace::NG
 

@@ -18,6 +18,7 @@
 
 #include <optional>
 
+#include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/option/option_event_hub.h"
@@ -123,6 +124,7 @@ private:
     std::string iconSrc_;
     RefPtr<FrameNode> text_ = nullptr;
     RefPtr<TextTheme> textTheme_ = nullptr;
+    RefPtr<SelectTheme> selectTheme_ = nullptr;
     // this option node's index in the menu
     int index_ = -1;
 

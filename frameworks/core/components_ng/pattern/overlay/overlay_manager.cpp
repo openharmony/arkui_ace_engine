@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <utility>
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -35,6 +36,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -43,6 +45,7 @@
 #include "core/components_ng/pattern/toast/toast_view.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -149,24 +152,6 @@ void OverlayManager::Pop(const RefPtr<FrameNode>& node)
         ContainerScope scope(id);
         root->RemoveChild(node);
         root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-        auto menuPattern = node->GetPattern<MenuPattern>();
-        if (menuPattern && menuPattern->IsSubMenu()) {
-            auto menuItemParent = menuPattern->GetParentMenuItem();
-            CHECK_NULL_VOID(menuItemParent);
-            auto menuItemPattern = menuItemParent->GetPattern<MenuItemPattern>();
-            CHECK_NULL_VOID(menuItemPattern);
-            menuItemPattern->SetIsSubMenuShowed(false);
-
-            auto renderContext = menuItemParent->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto theme = pipeline->GetTheme<SelectTheme>();
-            CHECK_NULL_VOID(theme);
-            auto bgColor = theme->GetBackgroundColor();
-            renderContext->UpdateBackgroundColor(bgColor);
-            menuItemParent->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        }
     });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
@@ -177,18 +162,99 @@ void OverlayManager::Pop(const RefPtr<FrameNode>& node)
     pipeline->RequestFrame();
 }
 
-void OverlayManager::PopInSubwindow(const RefPtr<FrameNode>& node)
+void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
 {
     AnimationOption option;
-    option.SetCurve(Curves::SMOOTH);
-    option.SetDuration(COMMON_ANIMATION_DUR);
-    option.SetOnFinishEvent([id = Container::CurrentId()] {
+    option.SetCurve(Curves::LINEAR);
+    option.SetDuration(MENU_ANIMATION_DURATION);
+    option.SetFillMode(FillMode::FORWARDS);
+    option.SetOnFinishEvent([weak = WeakClaim(this), menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId()] {
+        auto menu = menuWK.Upgrade();
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(menu && overlayManager);
         ContainerScope scope(id);
-        SubwindowManager::GetInstance()->ClearMenuNG();
+        overlayManager->FocusDialog(menu);
     });
-    auto ctx = node->GetRenderContext();
-    CHECK_NULL_VOID(ctx);
-    ctx->OpacityAnimation(option, 1.0, 0.0);
+
+    bool isSelectMenu = false;
+    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    if (menuWrapperPattern && menuWrapperPattern->IsSelectMenu()) {
+        isSelectMenu = true;
+    }
+
+    auto context = menu->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateOpacity(0.0);
+    if (isSelectMenu) {
+        context->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-MENU_ANIMATION_MOVE.ConvertToPx()), 0.0f });
+    } else {
+        context->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(MENU_ANIMATION_MOVE.ConvertToPx()), 0.0f });
+    }
+
+    AnimationUtils::Animate(
+        option,
+        [context]() {
+            context->UpdateOpacity(1.0);
+            context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+        },
+        option.GetOnFinishEvent());
+}
+
+void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
+{
+    AnimationOption option;
+    option.SetCurve(Curves::LINEAR);
+    option.SetDuration(MENU_ANIMATION_DURATION);
+    option.SetFillMode(FillMode::FORWARDS);
+    option.SetOnFinishEvent([rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId()] {
+        auto menu = menuWK.Upgrade();
+        auto root = rootWeak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(menu && root);
+        ContainerScope scope(id);
+        auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+        // clear contextMenu then return
+        if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
+            SubwindowManager::GetInstance()->ClearMenuNG();
+            return;
+        }
+        root->RemoveChild(menu);
+        root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+
+        auto menuPattern = menu->GetPattern<MenuPattern>();
+        if (!menuPattern || !menuPattern->IsSubMenu()) {
+            return;
+        }
+        menuPattern->RemoveParentHoverStyle();
+    });
+
+    bool isSelectMenu = false;
+    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    if (menuWrapperPattern && menuWrapperPattern->IsSelectMenu()) {
+        isSelectMenu = true;
+    }
+
+    auto context = menu->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateOpacity(1.0);
+    context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+    AnimationUtils::Animate(
+        option,
+        [context, isSelectMenu]() {
+            context->UpdateOpacity(0.0);
+            if (isSelectMenu) {
+                context->OnTransformTranslateUpdate(
+                    { 0.0f, static_cast<float>(-MENU_ANIMATION_MOVE.ConvertToPx()), 0.0f });
+            } else {
+                context->OnTransformTranslateUpdate(
+                    { 0.0f, static_cast<float>(MENU_ANIMATION_MOVE.ConvertToPx()), 0.0f });
+            }
+        },
+        option.GetOnFinishEvent());
+
+    // start animation immediately
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RequestFrame();
 }
 
 void OverlayManager::ShowToast(
@@ -437,7 +503,10 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
     if (iter != rootChildren.end()) {
         LOGW("menuNode already appended");
     } else {
-        Show(menu);
+        menu->MountToParent(rootNode);
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+
+        ShowMenuAnimation(menu);
         menu->MarkModifyDone();
         LOGI("menuNode mounted");
     }
@@ -454,6 +523,7 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     CHECK_NULL_VOID(rootNode);
     rootNode->Clean();
     menu->MountToParent(rootNode);
+    ShowMenuAnimation(menu);
     menu->MarkModifyDone();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     LOGI("menuNode mounted in subwindow");
@@ -468,7 +538,7 @@ void OverlayManager::HideMenuInSubWindow(int32_t targetId)
     }
     auto node = menuMap_[targetId];
     CHECK_NULL_VOID(node);
-    PopInSubwindow(node);
+    PopMenuAnimation(node);
 }
 
 void OverlayManager::HideMenuInSubWindow()
@@ -481,7 +551,7 @@ void OverlayManager::HideMenuInSubWindow()
     auto rootNode = rootNodeWeak_.Upgrade();
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
-        PopInSubwindow(node);
+        PopMenuAnimation(node);
     }
 }
 
@@ -492,7 +562,7 @@ void OverlayManager::HideMenu(int32_t targetId)
         LOGW("OverlayManager: menuNode %{public}d not found in map", targetId);
         return;
     }
-    Pop(menuMap_[targetId]);
+    PopMenuAnimation(menuMap_[targetId]);
 }
 
 void OverlayManager::DeleteMenu(int32_t targetId)

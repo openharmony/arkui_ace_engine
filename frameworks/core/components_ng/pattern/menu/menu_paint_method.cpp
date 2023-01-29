@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/menu/menu_paint_method.h"
 
 #include "base/utils/utils.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -30,7 +31,11 @@ CanvasDrawFunction MenuPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWr
         if (menu) {
             // paint background
             RSBrush brush;
-            Color bgColor(DEFAULT_BACKGROUND_COLOR);
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto selectTheme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_VOID(selectTheme);
+            Color bgColor = selectTheme->GetBackgroundColor();
             brush.SetARGB(bgColor.GetRed(), bgColor.GetGreen(), bgColor.GetBlue(), bgColor.GetAlpha());
             canvas.AttachBrush(brush);
 
