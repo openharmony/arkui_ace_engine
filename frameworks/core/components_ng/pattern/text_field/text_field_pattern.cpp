@@ -1121,7 +1121,7 @@ void TextFieldPattern::HandleOnCut()
     if (parentFrameNode && parentFrameNode->GetTag() == V2::SEARCH_ETS_TAG) {
         auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
         CHECK_NULL_VOID(eventHub);
-        eventHub->FireOnCut(textEditingValue_.text);
+        eventHub->FireOnCut(selectedText);
         FireEventHubOnChange(textEditingValue_.text);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         return;
@@ -1129,7 +1129,7 @@ void TextFieldPattern::HandleOnCut()
 
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->FireOnCut(textEditingValue_.text);
+    eventHub->FireOnCut(selectedText);
     FireEventHubOnChange(textEditingValue_.text);
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
