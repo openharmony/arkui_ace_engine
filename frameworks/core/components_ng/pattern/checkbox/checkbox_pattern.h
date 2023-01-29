@@ -59,6 +59,8 @@ public:
         CHECK_NULL_RETURN(eventHub, nullptr);
         auto enabled = eventHub->IsEnabled();
         auto paintMethod = MakeRefPtr<CheckBoxPaintMethod>(enabled, isTouch_, isHover_, shapeScale_, uiStatus_);
+        paintMethod->SetHotZoneOffset(hotZoneOffset_);
+        paintMethod->SetHotZoneSize(hotZoneSize_);
         return paintMethod;
     }
 
@@ -135,9 +137,9 @@ private:
     void UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& frameNode,
         std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap, bool isSelected);
     void CheckBoxGroupIsTrue();
-    RectF GetHotZoneRect(bool isOriginal) const;
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
 
     std::optional<std::string> preName_;
@@ -155,10 +157,12 @@ private:
     RefPtr<CurveAnimation<float>> translate_;
     float shapeScale_ = 1.0f;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
-    Dimension hotZoneHorizontalPadding_ = 11.0_vp;
-    Dimension hotZoneVerticalPadding_ = 11.0_vp;
+    Dimension hotZoneHorizontalPadding_;
+    Dimension hotZoneVerticalPadding_;
     OffsetF offset_;
     SizeF size_;
+    OffsetF hotZoneOffset_;
+    SizeF hotZoneSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxPattern);
 };

@@ -105,15 +105,13 @@ private:
 
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
 
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd();
 
     bool IsOutOfBoundary(double mainOffset) const;
-
-    RectF GetHotZoneRect(bool isOriginal) const;
-
     void OnClick();
 
     RefPtr<PanEvent> panEvent_;
