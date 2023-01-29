@@ -140,10 +140,24 @@ void JsiArray::SetValueAt(size_t index, JsiRef<JsiValue> value) const
     panda::ArrayRef::SetValueAt(runtime->GetEcmaVm(), GetHandle(), index, value.Get().GetHandle());
 }
 
-size_t JsiArray::Length() const
+JsiRef<JsiValue> JsiArray::GetProperty(const char* prop) const
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    return GetHandle()->Length(runtime->GetEcmaVm());
+    auto stringRef = panda::StringRef::NewFromUtf8(runtime->GetEcmaVm(), prop);
+    auto value = GetHandle()->Get(runtime->GetEcmaVm(), stringRef);
+    auto func = JsiValue(value);
+    auto refValue =  JsiRef<JsiValue>(func);
+    return refValue;
+}
+
+size_t JsiArray::Length() const
+{
+    size_t length = -1;
+    JsiRef<JsiValue> propLength = GetProperty("length");
+    if (propLength->IsNumber()) {
+        length = propLength->ToNumber<int32_t>();
+    }
+    return length;
 }
 
 bool JsiArray::IsArray() const
