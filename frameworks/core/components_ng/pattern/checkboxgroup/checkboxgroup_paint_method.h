@@ -36,11 +36,23 @@ public:
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
+    void SetHotZoneOffset(OffsetF& hotZoneOffset)
+    {
+        hotZoneOffset_ = hotZoneOffset;
+    }
+
+    void SetHotZoneSize(SizeF& hotZoneSize)
+    {
+        hotZoneSize_ = hotZoneSize;
+    }
+
 private:
     void InitializeParam();
     void PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
     void DrawUnselected(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, SizeF& paintSize) const;
     void DrawActiveBorder(RSCanvas& canvas, const OffsetF& paintOffset, RSBrush& brush, const SizeF& paintSize) const;
+    void DrawUnselectedBorder(
+        RSCanvas& canvas, const OffsetF& paintOffset, RSBrush& brush, const SizeF& paintSize) const;
     void DrawPart(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
     void DrawTouchBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
     void DrawHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
@@ -50,15 +62,16 @@ private:
     float borderWidth_ = 0.0f;
     float borderRadius_ = 0.0f;
     float checkStroke_ = 0.0f;
-    Color pointColor_ = Color::WHITE;
-    Color activeColor_ = Color::BLUE;
-    Color inactiveColor_ = Color::GRAY;
-    Color shadowColor_ = Color::WHITE;
-    Color clickEffectColor_ = Color::WHITE;
-    Color hoverColor_ = Color::WHITE;
-    Dimension hoverRadius_ = 8.0_vp;
-    Dimension hotZoneHorizontalPadding_ = 11.0_vp;
-    Dimension hotZoneVerticalPadding_ = 11.0_vp;
+    Color pointColor_;
+    Color activeColor_;
+    Color inactiveColor_;
+    Color shadowColor_;
+    Color clickEffectColor_;
+    Color hoverColor_;
+    Color inactivePointColor_;
+    Dimension hoverRadius_;
+    Dimension hotZoneHorizontalPadding_;
+    Dimension hotZoneVerticalPadding_;
     Dimension shadowWidth_;
 
     bool enabled_ = true;
@@ -66,6 +79,8 @@ private:
     bool isHover_ = false;
     float shapeScale_ = 1.0f;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
+    OffsetF hotZoneOffset_;
+    SizeF hotZoneSize_;
 };
 } // namespace OHOS::Ace::NG
 

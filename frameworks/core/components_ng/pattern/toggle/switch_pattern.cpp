@@ -241,16 +241,6 @@ void SwitchPattern::OnTouchDown()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = true;
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
-    auto frameSize = geometryNode->GetFrameSize();
-    if (originalPaintRect.GetSize() == frameSize) {
-        originalPaintRect = GetHotZoneRect(true);
-    }
-    renderContext->SyncGeometryProperties(originalPaintRect);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -259,16 +249,6 @@ void SwitchPattern::OnTouchUp()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = false;
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto paintRect = renderContext->GetPaintRectWithoutTransform();
-    auto frameSize = geometryNode->GetFrameSize();
-    if (paintRect.GetSize() != frameSize && !isHover_) {
-        paintRect = GetHotZoneRect(false);
-    }
-    renderContext->SyncGeometryProperties(paintRect);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -385,6 +365,15 @@ void SwitchPattern::InitMouseEvent()
 
 void SwitchPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (!pattern) {
+            return false;
+        }
+        return pattern->OnKeyEvent(event);
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+
     auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
         auto pattern = wp.Upgrade();
         if (pattern) {
@@ -392,6 +381,18 @@ void SwitchPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
         }
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+}
+
+bool SwitchPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if (event.code == KeyCode::KEY_ENTER) {
+        OnClick();
+        return true;
+    }
+    return false;
 }
 
 void SwitchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
@@ -420,18 +421,6 @@ void SwitchPattern::HandleMouseEvent(bool isHover)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = false;
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
-    auto frameSize = geometryNode->GetFrameSize();
-    if (isHover_ && originalPaintRect.GetSize() == frameSize) {
-        originalPaintRect = GetHotZoneRect(true);
-    } else if (!isHover_ && originalPaintRect.GetSize() != frameSize) {
-        originalPaintRect = GetHotZoneRect(false);
-    }
-    renderContext->SyncGeometryProperties(originalPaintRect);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -473,42 +462,6 @@ void SwitchPattern::HandleDragEnd()
 bool SwitchPattern::IsOutOfBoundary(double mainOffset) const
 {
     return mainOffset < 0 || mainOffset > GetSwitchWidth();
-}
-
-RectF SwitchPattern::GetHotZoneRect(bool isOriginal) const
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, {});
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, {});
-    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
-    CHECK_NULL_RETURN(switchTheme, {});
-    auto defaultWidth = switchTheme->GetDefaultWidth().ConvertToPx();
-    auto defaultHeight = switchTheme->GetDefaultHeight().ConvertToPx();
-    auto defaultWidthGap =
-        defaultWidth - (switchTheme->GetWidth() - switchTheme->GetHotZoneHorizontalPadding() * 2).ConvertToPx();
-    auto defaultHeightGap =
-        defaultHeight - (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, {});
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, {});
-    auto originalPaintRect = renderContext->GetPaintRectWithoutTransform();
-    auto offset = originalPaintRect.GetOffset();
-    double actualWidth = 0.0;
-    double actualHeight = 0.0;
-    if (isOriginal) {
-        actualWidth = geometryNode->GetFrameSize().Width() + defaultWidthGap;
-        actualHeight = geometryNode->GetFrameSize().Height() + defaultHeightGap;
-        offset.SetX(offset.GetX() - defaultWidthGap / 2);
-        offset.SetY(offset.GetY() - defaultHeightGap / 2);
-    } else {
-        actualWidth = geometryNode->GetFrameSize().Width();
-        actualHeight = geometryNode->GetFrameSize().Height();
-        offset.SetX(offset.GetX() + defaultWidthGap / 2);
-        offset.SetY(offset.GetY() + defaultHeightGap / 2);
-    }
-    return RectF(offset, SizeF(actualWidth, actualHeight));
 }
 
 } // namespace OHOS::Ace::NG

@@ -655,6 +655,5 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest019, TestSize.Level1)
     pattern->InitOnKeyEvent(focusHub);
     RoundRect paintRect;
     pattern->GetInnerFocusPaintRect(paintRect);
-    pattern->GetHotZoneRect(false);
 }
 } // namespace OHOS::Ace::NG
