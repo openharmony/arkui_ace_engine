@@ -43,4 +43,29 @@ void DeclarativeModulePreloader::Preload(NativeEngine& runtime)
     InitAceModule(reinterpret_cast<void*>(&runtime));
 }
 
+// ArkTsCard start
+using CreateFuncCard = void (*)(void*);
+constexpr char PRE_INIT_ACE_MODULE_FUNC_CARD[] = "OHOS_ACE_PreloadAceModuleCard";
+
+void InitAceModuleCard(void* runtime)
+{
+    void* handle = dlopen("libace.z.so", RTLD_LAZY);
+    if (handle == nullptr) {
+        return;
+    }
+
+    auto entry = reinterpret_cast<CreateFuncCard>(dlsym(handle, PRE_INIT_ACE_MODULE_FUNC_CARD));
+    if (entry == nullptr) {
+        dlclose(handle);
+        return;
+    }
+
+    entry(runtime);
+}
+
+void DeclarativeModulePreloader::PreloadCard(NativeEngine& runtime)
+{
+    InitAceModuleCard(reinterpret_cast<void*>(&runtime));
+}
+// ArkTsCard end
 } // namespace OHOS::Ace
