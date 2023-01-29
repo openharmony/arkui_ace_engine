@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/touch_event.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -33,8 +34,12 @@ void OptionPattern::OnModifyDone()
     RegisterOnClick();
     RegisterOnTouch();
     RegisterOnHover();
-    textTheme_ = PipelineContext::GetCurrentContext()->GetTheme<TextTheme>();
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    textTheme_ = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme_);
+    selectTheme_ = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme_);
 }
 
 void OptionPattern::RegisterOnClick()
@@ -256,7 +261,8 @@ Dimension OptionPattern::GetFontSize()
     CHECK_NULL_RETURN(text_, Dimension());
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(props, Dimension());
-    auto defaultSize = textTheme_->GetTextStyle().GetFontSize();
+    CHECK_NULL_RETURN(selectTheme_, Dimension());
+    auto defaultSize = selectTheme_->GetMenuFontSize();
     return props->GetFontSizeValue(defaultSize);
 }
 
@@ -292,7 +298,7 @@ Color OptionPattern::GetFontColor()
     CHECK_NULL_RETURN(text_, Color::TRANSPARENT);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(props, Color::TRANSPARENT);
-    auto defaultColor = textTheme_->GetTextStyle().GetTextColor();
+    auto defaultColor = selectTheme_->GetMenuFontColor();
     return props->GetTextColorValue(defaultColor);
 }
 

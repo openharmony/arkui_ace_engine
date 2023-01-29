@@ -17,7 +17,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
-#include "core/components/divider/divider_theme.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/option/option_theme.h"
@@ -32,9 +32,9 @@ CanvasDrawFunction MenuItemGroupPaintMethod::GetOverlayDrawFunction(PaintWrapper
     return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto group = weak.Upgrade();
         if (group) {
-            CHECK_NULL_VOID(paintWrapper);
+            CHECK_NULL_VOID_NOLOG(paintWrapper);
             auto props = DynamicCast<MenuItemGroupPaintProperty>(paintWrapper->GetPaintProperty());
-            CHECK_NULL_VOID(props);
+            CHECK_NULL_VOID_NOLOG(props);
             bool needHeaderPadding = props->GetNeedHeaderPadding().value_or(false);
             if (needHeaderPadding) {
                 group->PaintDivider(canvas, paintWrapper, true);
@@ -50,22 +50,23 @@ CanvasDrawFunction MenuItemGroupPaintMethod::GetOverlayDrawFunction(PaintWrapper
 void MenuItemGroupPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrapper, bool isHeader)
 {
     auto groupSize = paintWrapper->GetGeometryNode()->GetFrameSize();
-    float horInterval = HORIZONTAL_INTERVAL_PHONE.ConvertToPx();
-    float verInterval = DIVIDER_PADDING.ConvertToPx();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto horInterval = static_cast<float>(selectTheme->GetMenuIconPadding().ConvertToPx());
+    auto verInterval = static_cast<float>(selectTheme->GetDividerPaddingVertical().ConvertToPx());
     if (!isHeader) {
         verInterval = groupSize.Height() - verInterval;
     }
     RSPath path;
     // draw divider above content, length = content width
-    path.AddRect(horInterval, verInterval, groupSize.Width() - horInterval, verInterval + DEFAULT_STROKE_WIDTH);
+    path.AddRect(horInterval, verInterval, groupSize.Width() - horInterval,
+        verInterval + static_cast<float>(DEFAULT_STROKE_WIDTH.ConvertToPx()));
 
     RSBrush brush;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<DividerTheme>();
-    CHECK_NULL_VOID(theme);
-    auto dividerColor = theme->GetColor();
-    brush.SetColor(dividerColor.GetValue());
+    auto dividerColor = selectTheme->GetLineColor();
+    brush.SetColor(static_cast<int>(dividerColor.GetValue()));
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
     canvas.DrawPath(path);

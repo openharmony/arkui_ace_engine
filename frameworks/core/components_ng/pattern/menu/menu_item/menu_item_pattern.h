@@ -119,6 +119,13 @@ public:
 
     void CloseMenu();
 
+    void SetContentNode(const RefPtr<FrameNode>& content)
+    {
+        content_ = content;
+    }
+
+    void UpdateBackgroundColor(const Color& color);
+
 protected:
     void OnModifyDone() override;
 
@@ -159,6 +166,7 @@ private:
 
     int32_t subMenuId_ = -1;
     RefPtr<FrameNode> subMenu_;
+    RefPtr<FrameNode> content_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemPattern);
 };

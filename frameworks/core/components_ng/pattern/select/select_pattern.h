@@ -123,6 +123,8 @@ private:
     void RegisterOnClick();
     // callback when an option is selected
     void CreateSelectedCallback();
+    // change text and spinner color if disabled
+    void SetDisabledStyle();
 
     // update selected option props
     void UpdateSelectedProps(int32_t index);
@@ -136,6 +138,7 @@ private:
     std::vector<RefPtr<FrameNode>> options_;
     RefPtr<FrameNode> menu_ = nullptr;
     RefPtr<FrameNode> text_ = nullptr;
+    RefPtr<FrameNode> spinner_ = nullptr;
     SizeF selectSize_;
 
     // index of selected option

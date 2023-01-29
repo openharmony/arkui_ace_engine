@@ -56,7 +56,7 @@ void MenuPattern::OnModifyDone()
 
     // make menu round rect
     BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(theme->GetPopupRRectSize());
+    borderRadius.SetRadius(theme->GetMenuBorderRadius());
     renderContext->UpdateBorderRadius(borderRadius);
     renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
 }
@@ -148,5 +148,23 @@ bool MenuPattern::OnKeyEvent(const KeyEvent& event) const
         return true;
     }
     return false;
+}
+
+void MenuPattern::RemoveParentHoverStyle()
+{
+    if (!IsSubMenu()) {
+        return;
+    }
+    auto menuItemParent = GetParentMenuItem();
+    CHECK_NULL_VOID(menuItemParent);
+    auto menuItemPattern = menuItemParent->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(menuItemPattern);
+    menuItemPattern->SetIsSubMenuShowed(false);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    menuItemPattern->UpdateBackgroundColor(theme->GetBackgroundColor());
 }
 } // namespace OHOS::Ace::NG
