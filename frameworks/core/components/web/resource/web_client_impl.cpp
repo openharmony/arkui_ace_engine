@@ -733,6 +733,17 @@ bool WebClientImpl::OnCursorChange(const NWeb::CursorType& type, const NWeb::NWe
     return delegate->OnCursorChange(type, info);
 }
 
+void WebClientImpl::OnSelectPopupMenu(
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback)
+{
+    LOGI("OnSelectPopupMenu");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnSelectPopupMenu(params, callback);
+}
+
 void ReleaseSurfaceImpl::ReleaseSurface()
 {
     ContainerScope scope(instanceId_);
