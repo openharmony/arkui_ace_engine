@@ -34,6 +34,8 @@
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
 #include "core/common/container.h"
+#include "core/common/rosen/rosen_convert_helper.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
@@ -328,16 +330,44 @@ void RosenRenderContext::OnBackgroundImagePositionUpdate(const BackgroundImagePo
     PaintBackground();
 }
 
-void RosenRenderContext::OnBackgroundBlurStyleUpdate(const BlurStyle& bgBlurStyle)
+void RosenRenderContext::SetBackBlurFilter()
 {
-    CHECK_NULL_VOID(rsNode_);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    const auto& background = GetBackground();
+    CHECK_NULL_VOID(background);
+    const auto& blurStyle = background->propBlurStyleOption;
+    std::shared_ptr<Rosen::RSFilter> backFilter;
     auto dipScale_ = context->GetDipScale();
-    auto backFilter =
-        Rosen::RSFilter::CreateMaterialFilter(static_cast<int>(bgBlurStyle), static_cast<float>(dipScale_));
-    CHECK_NULL_VOID(backFilter);
+    auto rosenBlurStyleValue =
+        blurStyle.has_value() ? GetRosenBlurStyleValue(blurStyle.value()) : MATERIAL_BLUR_STYLE::NO_MATERIAL;
+    if (rosenBlurStyleValue != MATERIAL_BLUR_STYLE::NO_MATERIAL) {
+        backFilter = Rosen::RSFilter::CreateMaterialFilter(static_cast<int>(rosenBlurStyleValue),
+            static_cast<float>(dipScale_), static_cast<Rosen::BLUR_COLOR_MODE>(blurStyle->adaptiveColor));
+    } else {
+        const auto& radius = background->propBlurRadius;
+        if (radius.has_value() && radius->IsValid()) {
+            float radiusPx = context->NormalizeToPx(radius.value());
+            float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
+            backFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
+        }
+    }
     rsNode_->SetBackgroundFilter(backFilter);
+}
+
+void RosenRenderContext::UpdateBackBlurStyle(const BlurStyleOption& bgBlurStyle)
+{
+    const auto& groupProperty = GetOrCreateBackground();
+    if (groupProperty->CheckBlurStyleOption(bgBlurStyle)) {
+        // Same with previous value.
+        // If colorMode is following system and has valid blurStyle, still needs updating
+        if (bgBlurStyle.blurStyle == BlurStyle::NO_MATERIAL || bgBlurStyle.colorMode != ThemeColorMode::SYSTEM) {
+            return;
+        }
+    } else {
+        groupProperty->propBlurStyleOption = bgBlurStyle;
+    }
+    isBackBlurChanged_ = true;
 }
 
 void RosenRenderContext::OnOpacityUpdate(double opacity)
@@ -714,6 +744,10 @@ void RosenRenderContext::OnModifyDone()
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(rsNode_);
+    if (isBackBlurChanged_) {
+        SetBackBlurFilter();
+        isBackBlurChanged_ = false;
+    }
     const auto& size = frameNode->GetGeometryNode()->GetFrameSize();
     if (!size.IsPositive()) {
         LOGD("first modify, make change in SyncGeometryProperties");
@@ -1185,20 +1219,13 @@ void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
 
 void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
 {
-    auto pipelineBase = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineBase);
-    std::shared_ptr<Rosen::RSFilter> backFilter = nullptr;
-    auto blurStyle = GetBackgroundBlurStyleValue(BlurStyle::NoMaterial);
-    if (blurStyle != BlurStyle::NoMaterial) {
-        backFilter = Rosen::RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle), pipelineBase->GetDipScale());
-    } else if (radius.IsValid()) {
-        float radiusPx = pipelineBase->NormalizeToPx(radius);
-        float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
-        backFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
+    const auto& groupProperty = GetOrCreateBackground();
+    if (groupProperty->CheckBlurRadius(radius)) {
+        // Same with previous value
+        return;
     }
-    CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetBackgroundFilter(backFilter);
-    RequestNextFrame();
+    groupProperty->propBlurRadius = radius;
+    isBackBlurChanged_ = true;
 }
 
 void RosenRenderContext::OnFrontBlurRadiusUpdate(const Dimension& radius)

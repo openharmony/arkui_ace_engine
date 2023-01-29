@@ -24,6 +24,7 @@
 #include "third_party/skia/include/utils/SkParsePath.h"
 
 #include "core/common/frontend.h"
+#include "core/common/rosen/rosen_convert_helper.h"
 #include "core/components/box/rosen_mask_painter.h"
 #include "core/components/common/painter/debug_boundary_painter.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
@@ -1072,10 +1073,13 @@ void RosenRenderBox::SyncDecorationToRSNode()
             );
         }
         RosenDecorationPainter::PaintBoxShadows(backDecoration_->GetShadows(), rsNode);
-        if (backDecoration_->GetBlurStyle() != BlurStyle::NoMaterial) {
-            backFilter = Rosen::RSFilter::CreateMaterialFilter(
-                static_cast<int>(backDecoration_->GetBlurStyle()), dipScale_);
-        } else if (backDecoration_->GetBlurRadius().IsValid()) {
+        auto rosenBlurStyleValue = GetRosenBlurStyleValue(backDecoration_->GetBlurStyle());
+        if (rosenBlurStyleValue != MATERIAL_BLUR_STYLE::NO_MATERIAL) {
+            backFilter = Rosen::RSFilter::CreateMaterialFilter(static_cast<int>(rosenBlurStyleValue),
+                static_cast<float>(dipScale_),
+                static_cast<Rosen::BLUR_COLOR_MODE>(backDecoration_->GetBlurStyle().adaptiveColor));
+        }
+        if (backDecoration_->GetBlurRadius().IsValid()) {
             float radius = NormalizeToPx(backDecoration_->GetBlurRadius());
             float backblurRadius = RosenDecorationPainter::ConvertRadiusToSigma(radius);
             backFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
@@ -1107,7 +1111,7 @@ void RosenRenderBox::SyncDecorationToRSNode()
     rsNode->SetFilter(filter);
     if (GetNeedMaterial() && Rosen::RSSystemProperties::GetUniRenderEnabled()) {
         backFilter = Rosen::RSFilter::CreateMaterialFilter(
-            static_cast<int>(BlurStyle::THICK), dipScale_);
+            static_cast<int>(MATERIAL_BLUR_STYLE::STYLE_CARD_THICK_LIGHT), dipScale_);
         rsNode->SetBackgroundFilter(backFilter);
         rsNode->SetBackgroundColor(0x00000000);
     }
