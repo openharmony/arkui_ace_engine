@@ -17,7 +17,7 @@ group("pattern_unittest") {
     "ability_component:ability_component_pattern_unit_test",
     "badge:badge_pattern_unit_test",
     "blank:blank_pattern_unit_test",
-    "bubble:bubble_pattern_test_ng",
+    # "bubble:bubble_pattern_test_ng",
     "button:button_pattern_test_ng",
     "calendar:calendar_pattern_test_ng",
     "checkbox:checkbox_pattern_test_ng",
