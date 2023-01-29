@@ -26,8 +26,6 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/gestures/gesture_info.h"
@@ -399,7 +397,7 @@ void TextPattern::OnModifyDone()
         paragraph_.Reset();
     }
 
-    bool shouldClipToContent = textLayoutProperty->GetTextOverflow().value_or(TextOverflow::NONE) == TextOverflow::CLIP;
+    bool shouldClipToContent = textLayoutProperty->GetTextOverflow().value_or(TextOverflow::CLIP) == TextOverflow::CLIP;
     host->GetRenderContext()->SetClipToFrame(shouldClipToContent);
 
     textForDisplay_ = textLayoutProperty->GetContent().value_or("");
