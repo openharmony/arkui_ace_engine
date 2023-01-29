@@ -150,6 +150,9 @@ public:
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
 
     virtual void OnTransformTranslateUpdate(const Vector3F& value) {}
+    virtual void OnTransformScaleUpdate(const VectorF& value) {}
+    virtual void OnTransformCenterUpdate(const DimensionOffset& value) {}
+    virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
 
     virtual RectF GetPaintRectWithTransform()
     {
@@ -324,12 +327,9 @@ protected:
     virtual void OnBorderStyleUpdate(const BorderStyleProperty& value) {}
     virtual void OnOpacityUpdate(double opacity) {}
 
-    virtual void OnTransformScaleUpdate(const VectorF& value) {}
-    virtual void OnTransformCenterUpdate(const DimensionOffset& value) {}
     virtual void OnTransformRotateUpdate(const Vector4F& value) {}
     virtual void OnTransformMatrixUpdate(const Matrix4& matrix) {}
 
-    virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnAnchorUpdate(const OffsetT<Dimension>& value) {}
 
     virtual void OnClipShapeUpdate(const RefPtr<BasicShape>& basicShape) {}
