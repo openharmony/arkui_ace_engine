@@ -121,10 +121,16 @@ private:
     void RegisterOnHover();
     // add click event to show menu
     void RegisterOnClick();
+
+    void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
+
     // callback when an option is selected
     void CreateSelectedCallback();
     // change text and spinner color if disabled
     void SetDisabledStyle();
+
+    void ShowSelectMenu();
 
     // update selected option props
     void UpdateSelectedProps(int32_t index);
