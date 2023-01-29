@@ -33,7 +33,7 @@ public:
     {
         return nullptr;
     }
-
+    void SetWidthAuto(bool isAuto) override {};
     void SetType(TextInputType value) override;
     void SetPlaceholderColor(const Color& value) override;
     void SetPlaceholderFont(const Font& value) override;

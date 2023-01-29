@@ -50,12 +50,17 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    float contentWidth = 0.0f;
     float contentHeight = 0.0f;
     if (content) {
         auto contentSize = content->GetRect().GetSize();
+        contentWidth = contentSize.Width();
         contentHeight = contentSize.Height();
     }
     if (pattern->IsTextArea()) {
+        if (!layoutConstraint->selfIdealSize.Width().has_value()) {
+            frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingSum());
+        }
         if (!frameSize.Height().has_value()) {
             frameSize.SetHeight(contentHeight + pattern->GetVerticalPaddingSum());
         }
@@ -67,6 +72,19 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!frameSize.Height().has_value()) {
         frameSize.SetHeight(
             std::min(layoutConstraint->maxSize.Height(), contentHeight + pattern->GetVerticalPaddingSum()));
+    }
+    auto textfieldLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(textfieldLayoutProperty);
+    if (textfieldLayoutProperty->GetWidthAutoValue(false)) {
+        if (LessOrEqual(layoutConstraint->minSize.Width(), 0.0f)) {
+            frameSize.SetWidth(std::clamp(textRect_.GetSize().Width() + pattern->GetHorizontalPaddingSum(),
+                pattern->GetHorizontalPaddingSum(), layoutConstraint->maxSize.Width()));
+        } else if (LessOrEqual(textRect_.Width(), 0.0f)) {
+            frameSize.SetWidth(layoutConstraint->minSize.Width());
+        } else {
+            frameSize.SetWidth(std::clamp(textRect_.Width() + pattern->GetHorizontalPaddingSum(),
+                layoutConstraint->minSize.Width(), layoutConstraint->maxSize.Width()));
+        }
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
     frameRect_ =
