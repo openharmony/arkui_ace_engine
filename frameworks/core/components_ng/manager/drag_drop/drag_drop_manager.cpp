@@ -81,7 +81,11 @@ void DragDropManager::CreateDragWindow(const GestureEvent& info, uint32_t width,
     dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
         static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Left(),
         static_cast<int32_t>(info.GetGlobalPoint().GetY()) + rect.Top(), width, height);
-    dragWindow_->SetOffset(rect.Left(), rect.Top());
+    if (dragWindow_) {
+        dragWindow_->SetOffset(rect.Left(), rect.Top());
+    } else {
+        LOGE("dragWindow create failed!");
+    }
 #endif
 }
 
