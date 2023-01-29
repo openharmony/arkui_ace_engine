@@ -1684,6 +1684,20 @@ void TextFieldPattern::InitMouseEvent()
     inputHub->AddOnHoverEvent(hoverEvent_);
 }
 
+void TextFieldPattern::SetMouseStyle(MouseFormat format)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowId = pipeline->GetWindowId();
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    mouseStyle->SetPointerStyle(windowId, format);
+    int32_t currentPointerStyle = 0;
+    mouseStyle->GetPointerStyle(windowId, currentPointerStyle);
+    if (currentPointerStyle != static_cast<int32_t>(format)) {
+        mouseStyle->SetPointerStyle(windowId, format);
+    }
+}
+
 void TextFieldPattern::OnHover(bool isHover)
 {
     if (enableTouchAndHoverEffect_) {
@@ -1691,9 +1705,12 @@ void TextFieldPattern::OnHover(bool isHover)
         CHECK_NULL_VOID(textfieldPaintProperty);
         auto renderContext = GetHost()->GetRenderContext();
         if (isHover) {
+            SetMouseStyle(MouseFormat::HAND_POINTING);
             renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetHoverBgColorValue(Color()));
             GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
             return;
+        } else {
+            SetMouseStyle(MouseFormat::DEFAULT);
         }
         renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetBackgroundColorValue(Color()));
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1712,6 +1729,7 @@ void TextFieldPattern::HandleMouseEvent(const MouseInfo& info)
         StartTwinkling();
         lastTouchOffset_ = info.GetLocalLocation();
         caretUpdateType_ = CaretUpdateType::PRESSED;
+        SetMouseStyle(MouseFormat::HAND_GRABBING);
         selectionMode_ = SelectionMode::NONE;
         if (!focusHub->RequestFocusImmediately()) {
             LOGE("Request focus failed, cannot open input method");
@@ -1727,6 +1745,7 @@ void TextFieldPattern::HandleMouseEvent(const MouseInfo& info)
         if (!focusHub->IsCurrentFocus()) {
             return;
         }
+        SetMouseStyle(MouseFormat::HAND_POINTING);
         if (RequestKeyboard(false, true, true)) {
             auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
             CHECK_NULL_VOID(eventHub);
