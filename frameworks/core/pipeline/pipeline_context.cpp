@@ -381,7 +381,7 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco)
     }
     auto containerModal = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
     if (containerModal) {
-        containerModal->ShowTitle(isShow);
+        containerModal->ShowTitle(isShow, hasDeco);
     }
 }
 

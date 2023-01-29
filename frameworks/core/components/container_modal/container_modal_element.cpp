@@ -133,6 +133,7 @@ void ContainerModalElement::ShowTitle(bool isShow, bool hasDeco)
     }
     windowMode_ = context->GetWindowManager()->GetWindowMode();
     hasDeco_ = hasDeco;
+    LOGI("ShowTitle isShow: %{public}d, windowMode: %{public}d, hasDeco: %{public}d", isShow, windowMode_, hasDeco_);
     if (!hasDeco_) {
         isShow = false;
     }
