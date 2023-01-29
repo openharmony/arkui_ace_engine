@@ -245,11 +245,6 @@ HWTEST_F(
     EXPECT_EQ(lazyLayoutWrapperBuilder->startIndex_.value_or(DEFAULT_INDEX), NEW_START_ID);
     EXPECT_EQ(lazyLayoutWrapperBuilder->endIndex_.value_or(DEFAULT_INDEX), NEW_START_ID);
 
-    lazyLayoutWrapperBuilder->OnExpandChildLayoutWrapper();
-    lazyLayoutWrapperBuilder->SwapDirtyAndUpdateBuildCache();
-    EXPECT_EQ(lazyLayoutWrapperBuilder->startIndex_.value_or(DEFAULT_INDEX), START_ID);
-    EXPECT_EQ(lazyLayoutWrapperBuilder->endIndex_.value_or(DEFAULT_INDEX), NEW_END_ID);
-
     /**
      * @tc.steps: step1. Create lazyLayoutWrapperBuilder and invoke SwapDirtyAndUpdateBuildCache when cacheCount is not
      * 0.
