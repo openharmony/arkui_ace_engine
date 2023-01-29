@@ -127,6 +127,11 @@ public:
         }
         jsEngine->RegisterMediaUpdateCallback(NapiCallback);
 
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        if (scope == nullptr) {
+            return nullptr;
+        }
         napi_value thisVar = nullptr;
         napi_value cb = nullptr;
         size_t argc = ParseArgs(env, info, thisVar, cb);
@@ -144,6 +149,7 @@ public:
         napi_ref ref = nullptr;
         napi_create_reference(env, cb, 1, &ref);
         listener->cbList_.emplace_back(ref);
+        napi_close_handle_scope(env, scope);
 
 #if defined(PREVIEW)
         NapiCallback(AceType::RawPtr(jsEngine));
@@ -227,12 +233,18 @@ public:
 private:
     void Initialize(napi_env env, napi_value thisVar)
     {
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        if (scope == nullptr) {
+            return;
+        }
         if (env_ == nullptr) {
             env_ = env;
         }
         if (thisVarRef_ == nullptr) {
             napi_create_reference(env, thisVar, 1, &thisVarRef_);
         }
+        napi_close_handle_scope(env, scope);
         auto jsEngine = EngineHelper::GetCurrentEngine();
         if (!jsEngine) {
             LOGE("get jsEngine failed");
