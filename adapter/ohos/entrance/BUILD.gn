@@ -84,7 +84,7 @@ template("ace_ohos_standard_source_set") {
       "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
       "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
       "//foundation/multimodalinput/input/frameworks/proxy:libmmi-common",
-      "//third_party/zlib:libz",
+      "//third_party/zlib:shared_libz",
     ]
 
     public_deps =

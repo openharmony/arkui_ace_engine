@@ -34,7 +34,7 @@ ohos_shared_library("hdc_register") {
   external_deps = hilog_deps
 
   deps += [
-    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/libuv:uv",
   ]
 
