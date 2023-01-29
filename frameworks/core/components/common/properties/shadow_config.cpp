@@ -24,4 +24,10 @@ const Shadow ShadowConfig::DefaultShadowL = Shadow(50.0f, Offset(0.0, 10.0), Col
 const Shadow ShadowConfig::FloatingShadowS = Shadow(55.0f, Offset(0.0, 10.0), Color(0x40000000));
 const Shadow ShadowConfig::FloatingShadowM = Shadow(70.0f, Offset(0.0, 10.0), Color(0x73000000));
 
+const Shadow ShadowConfig::DefaultShadowXSDark = Shadow(4.0f, Offset(0.0, 0.0), Color(0x4d000000));
+const Shadow ShadowConfig::DefaultShadowSDark = Shadow(20.0f, Offset(0.0, 0.0), Color(0x33000000));
+const Shadow ShadowConfig::DefaultShadowMDark = Shadow(50.0f, Offset(0.0, 10.0), Color(0x80000000));
+const Shadow ShadowConfig::DefaultShadowLDark = Shadow(50.0f, Offset(0.0, 10.0), Color(0xcc000000));
+const Shadow ShadowConfig::FloatingShadowSDark = Shadow(55.0f, Offset(0.0, 10.0), Color(0x4d000000));
+const Shadow ShadowConfig::FloatingShadowMDark = Shadow(70.0f, Offset(0.0, 10.0), Color(0x80000000));
 } // namespace OHOS::Ace
