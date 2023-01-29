@@ -52,6 +52,11 @@ public:
         }
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
 private:
     bool isFirstCreate = true;
     ACE_DISALLOW_COPY_AND_MOVE(StepperItemPattern);
