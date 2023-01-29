@@ -119,7 +119,7 @@ RefPtr<StageElement> ContainerModalElement::GetStageElement() const
     return {};
 }
 
-void ContainerModalElement::ShowTitle(bool isShow)
+void ContainerModalElement::ShowTitle(bool isShow, bool hasDeco)
 {
     auto containerBox = AceType::DynamicCast<BoxElement>(GetFirstChild());
     if (!containerBox) {
@@ -132,6 +132,10 @@ void ContainerModalElement::ShowTitle(bool isShow)
         return;
     }
     windowMode_ = context->GetWindowManager()->GetWindowMode();
+    hasDeco_ = hasDeco;
+    if (!hasDeco_) {
+        isShow = false;
+    }
 
     // set container window show state to RS
     context->SetContainerWindow(isShow);
@@ -258,7 +262,7 @@ void ContainerModalElement::PerformBuild()
 
     // The first time it starts up, it needs to hide title if mode as follows.
     windowMode_ = context_.Upgrade()->GetWindowManager()->GetWindowMode();
-    ShowTitle(windowMode_ == WindowMode::WINDOW_MODE_FLOATING);
+    ShowTitle(windowMode_ == WindowMode::WINDOW_MODE_FLOATING, hasDeco_);
 }
 
 void ContainerModalElement::FlushReload()
@@ -308,7 +312,7 @@ void ContainerModalElement::Update()
     containerBox->SetOnTouchDownId([weak = WeakClaim(this), context = context_](const TouchEventInfo& info) {
         auto containerElement = weak.Upgrade();
         auto pipeline = context.Upgrade();
-        if (!pipeline || !containerElement) {
+        if (!pipeline || !containerElement || !containerElement->hasDeco_) {
             return;
         }
         auto viewScale = pipeline->GetViewScale();
@@ -335,7 +339,8 @@ void ContainerModalElement::Update()
     containerBox->SetOnTouchMoveId([weak = WeakClaim(this), context = context_](const TouchEventInfo& info) {
         auto containerElement = weak.Upgrade();
         auto pipeline = context.Upgrade();
-        if (!pipeline || !containerElement || !containerElement->CanShowFloatingTitle()) {
+        if (!pipeline || !containerElement || !containerElement->hasDeco_ ||
+            !containerElement->CanShowFloatingTitle()) {
             return;
         }
         auto viewScale = pipeline->GetViewScale();
@@ -362,7 +367,7 @@ void ContainerModalElement::Update()
     containerBox->SetOnMouseId([weak = WeakClaim(this), context = context_](MouseInfo& info) {
         auto containerElement = weak.Upgrade();
         auto pipeline = context.Upgrade();
-        if (!pipeline || !containerElement || info.GetAction() != MouseAction::MOVE) {
+        if (!pipeline || !containerElement || !containerElement->hasDeco_ || info.GetAction() != MouseAction::MOVE) {
             return;
         }
         auto viewScale = pipeline->GetViewScale();

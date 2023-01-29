@@ -31,7 +31,7 @@ class ContainerModalElement : public SoleChildElement {
 public:
     RefPtr<OverlayElement> GetOverlayElement() const;
     RefPtr<StageElement> GetStageElement() const;
-    void ShowTitle(bool isShow);
+    void ShowTitle(bool isShow, bool hasDeco = true);
     void BlurWindow(bool isBlur);
     void WindowFocus(bool isFocus);
     void SetAppBgColor(const Color& color);
@@ -62,6 +62,7 @@ private:
     float moveX_ = 0.0f;
     float moveY_ = 0.0f;
     bool windowFocus_ = true;
+    bool hasDeco_ = true;
 };
 
 } // namespace OHOS::Ace
