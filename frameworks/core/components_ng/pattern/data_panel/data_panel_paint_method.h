@@ -44,7 +44,7 @@ public:
         auto values_ = paintProperty->GetValues().value();
         auto max_ = paintProperty->GetMax().value_or(100);
         auto dataPanelType_ = paintProperty->GetDataPanelType().value_or(0);
-        auto effect_ = paintProperty->GetEffect().value_or(false);
+        auto effect_ = paintProperty->GetEffect().value_or(true);
         auto offset_ = paintWrapper->GetContentOffset();
         dataPanelModifier_->UpdateDate();
         dataPanelModifier_->SetValues(values_);
