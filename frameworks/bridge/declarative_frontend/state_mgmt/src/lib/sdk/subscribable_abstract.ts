@@ -64,7 +64,7 @@
  *
  */
 
-abstract class SubscribaleAbstract {
+abstract class SubscribableAbstract {
 
   // keeps track of all subscribing properties
   private owningProperties_: Set<number>;
@@ -149,3 +149,14 @@ abstract class SubscribaleAbstract {
     this.owningProperties_.delete(subscriberId);
   }
 }
+
+
+// backward compatibility
+// there was a typo in the class name: SubscribaleAbstract instead of SubscribableAbstract
+// missing 'b'
+abstract class SubscribaleAbstract extends SubscribableAbstract {
+  constructor() {
+    super();
+  }
+}
+
