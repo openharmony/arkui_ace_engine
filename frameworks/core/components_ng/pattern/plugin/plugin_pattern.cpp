@@ -53,12 +53,14 @@ ErrCode GetActiveAccountIds(std::vector<int32_t>& userIds)
 
 PluginPattern::~PluginPattern()
 {
-    auto currentId = pluginSubContainer_->GetInstanceId();
-    PluginManager::GetInstance().RemovePluginSubContainer(currentId);
-    PluginManager::GetInstance().RemovePluginParentContainer(currentId);
     pluginManagerBridge_.Reset();
-    pluginSubContainer_->Destroy();
-    pluginSubContainer_.Reset();
+    if (pluginSubContainer_) {
+        auto currentId = pluginSubContainer_->GetInstanceId();
+        PluginManager::GetInstance().RemovePluginSubContainer(currentId);
+        PluginManager::GetInstance().RemovePluginParentContainer(currentId);
+        pluginSubContainer_->Destroy();
+        pluginSubContainer_.Reset();
+    }
 }
 
 void PluginPattern::OnAttachToFrameNode()
