@@ -1053,7 +1053,7 @@ class SubscribedAbstractProperty {
  * last subscriber.
  *
  */
-class SubscribaleAbstract {
+class SubscribableAbstract {
     /**
      * make sure to call super() from subclass constructor!
      *
@@ -1127,6 +1127,14 @@ class SubscribaleAbstract {
     removeOwningPropertyById(subscriberId) {
         
         this.owningProperties_.delete(subscriberId);
+    }
+}
+// backward compatibility
+// there was a typo in the class name: SubscribaleAbstract instead of SubscribableAbstract
+// missing 'b'
+class SubscribaleAbstract extends SubscribableAbstract {
+    constructor() {
+        super();
     }
 }
 /*
@@ -2171,7 +2179,7 @@ class ObservedPropertyObject extends ObservedPropertyObjectAbstract {
     }
     unsubscribeFromOwningProperty() {
         if (this.wrappedValue_) {
-            if (this.wrappedValue_ instanceof SubscribaleAbstract) {
+            if (this.wrappedValue_ instanceof SubscribableAbstract) {
                 this.wrappedValue_.removeOwningProperty(this);
             }
             else {
@@ -2195,7 +2203,7 @@ class ObservedPropertyObject extends ObservedPropertyObjectAbstract {
             ObservedObject.addOwningProperty(newValue, this);
             this.wrappedValue_ = newValue;
         }
-        else if (newValue instanceof SubscribaleAbstract) {
+        else if (newValue instanceof SubscribableAbstract) {
             
             this.wrappedValue_ = newValue;
             this.wrappedValue_.addOwningProperty(this);
@@ -3093,7 +3101,7 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
     }
     unsubscribeWrappedObject() {
         if (this.wrappedValue_) {
-            if (this.wrappedValue_ instanceof SubscribaleAbstract) {
+            if (this.wrappedValue_ instanceof SubscribableAbstract) {
                 this.wrappedValue_.removeOwningProperty(this);
             }
             else {
@@ -3121,7 +3129,7 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
             ObservedObject.addOwningProperty(newValue, this);
             this.wrappedValue_ = newValue;
         }
-        else if (newValue instanceof SubscribaleAbstract) {
+        else if (newValue instanceof SubscribableAbstract) {
             
             this.wrappedValue_ = newValue;
             this.wrappedValue_.addOwningProperty(this);
