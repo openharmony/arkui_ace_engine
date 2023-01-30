@@ -114,9 +114,14 @@ private:
 
     void RegisterOnTouch();
     void RegisterOnHover();
+    void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+
     // change option paint props on press
     void OnPress(const TouchEventInfo& info);
     void OnHover(bool isHover);
+    bool OnKeyEvent(const KeyEvent& event);
+
+    void OnSelectProcess();
 
     std::optional<Color> bgColor_;
 

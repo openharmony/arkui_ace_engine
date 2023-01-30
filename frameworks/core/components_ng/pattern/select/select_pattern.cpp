@@ -61,11 +61,34 @@ void SelectPattern::OnModifyDone()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    RegisterOnKeyEvent(focusHub);
+
     auto eventHub = host->GetEventHub<SelectEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->IsEnabled()) {
         SetDisabledStyle();
     }
+}
+
+void SelectPattern::ShowSelectMenu()
+{
+    if (menu_) {
+        LOGI("start executing click callback %d", menu_->GetId());
+    }
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto selectNode = GetHost();
+    CHECK_NULL_VOID(selectNode);
+    auto select = selectNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(select);
+    auto offset = selectNode->GetPaintRectOffset();
+    offset.AddY(select->GetSelectSize().Height());
+    offset.AddY(static_cast<float>(SELECT_MENU_PADDING.ConvertToPx()));
+    overlayManager->ShowMenu(selectNode->GetId(), offset, menu_);
 }
 
 // add click event to show menu
@@ -74,24 +97,10 @@ void SelectPattern::RegisterOnClick()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    GestureEventFunc callback = [id = host->GetId(), menu = menu_](GestureEvent& /*info*/) mutable {
-        if (menu) {
-            LOGI("start executing click callback %d", menu->GetId());
-        }
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto overlayManager = context->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        auto selectNode = FrameNode::GetFrameNode(V2::SELECT_ETS_TAG, id);
-        CHECK_NULL_VOID(selectNode);
-        auto select = selectNode->GetPattern<SelectPattern>();
-        CHECK_NULL_VOID(select);
-        auto offset = selectNode->GetPaintRectOffset();
-        offset.AddY(select->GetSelectSize().Height());
-        offset.AddY(SELECT_MENU_PADDING.ConvertToVp());
-        overlayManager->ShowMenu(id, offset, menu);
-        // menuNode already registered, nullify
-        menu.Reset();
+    GestureEventFunc callback = [weak = WeakClaim(this)](GestureEvent& /* info */) mutable {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->ShowSelectMenu();
     };
     auto gestureHub = host->GetOrCreateGestureEventHub();
     gestureHub->BindMenu(std::move(callback));
@@ -186,6 +195,28 @@ void SelectPattern::CreateSelectedCallback()
         hub->SetOnSelect(callback);
         option->MarkModifyDone();
     }
+}
+
+void SelectPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        return pattern->OnKeyEvent(event);
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool SelectPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_SPACE) {
+        ShowSelectMenu();
+        return true;
+    }
+    return false;
 }
 
 void SelectPattern::SetDisabledStyle()
@@ -537,6 +568,7 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
     CHECK_NULL_VOID(newSelectedPros);
     newSelectedPros->UpdateNeedDivider(false);
 
+    CHECK_NULL_VOID(menu_);
     menu_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

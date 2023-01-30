@@ -165,7 +165,7 @@ void OverlayManager::Pop(const RefPtr<FrameNode>& node)
 void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
 {
     AnimationOption option;
-    option.SetCurve(Curves::LINEAR);
+    option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(MENU_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
     option.SetOnFinishEvent([weak = WeakClaim(this), menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId()] {
@@ -203,7 +203,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
 void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
 {
     AnimationOption option;
-    option.SetCurve(Curves::LINEAR);
+    option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(MENU_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
     option.SetOnFinishEvent([rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId()] {
@@ -539,6 +539,7 @@ void OverlayManager::HideMenuInSubWindow(int32_t targetId)
     auto node = menuMap_[targetId];
     CHECK_NULL_VOID(node);
     PopMenuAnimation(node);
+    BlurDialog();
 }
 
 void OverlayManager::HideMenuInSubWindow()
@@ -563,6 +564,7 @@ void OverlayManager::HideMenu(int32_t targetId)
         return;
     }
     PopMenuAnimation(menuMap_[targetId]);
+    BlurDialog();
 }
 
 void OverlayManager::DeleteMenu(int32_t targetId)
