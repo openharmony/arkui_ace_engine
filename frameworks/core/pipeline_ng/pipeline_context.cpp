@@ -914,7 +914,17 @@ bool PipelineContext::RequestFocus(const std::string& targetNodeId)
     CHECK_NULL_RETURN(rootNode_, false);
     auto focusHub = rootNode_->GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
-    return focusHub->RequestFocusImmediatelyById(targetNodeId);
+    auto currentFocusChecked = focusHub->RequestFocusImmediatelyById(targetNodeId);
+    if (!isSubPipeline_ || currentFocusChecked) {
+        LOGI("Request focus in current pipeline return is %{public}d", currentFocusChecked);
+        return currentFocusChecked;
+    }
+    LOGI("Request focus in parent pipeline");
+    auto parentPipelineBase = parentPipeline_.Upgrade();
+    CHECK_NULL_RETURN(parentPipelineBase, false);
+    auto parentPipelineContext = AceType::DynamicCast<NG::PipelineContext>(parentPipelineBase);
+    CHECK_NULL_RETURN(parentPipelineContext, false);
+    return parentPipelineContext->RequestFocus(targetNodeId);
 }
 
 void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node)
