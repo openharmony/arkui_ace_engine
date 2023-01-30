@@ -17,6 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_RENDER_WEB_H
 
 #include "core/components/common/layout/constants.h"
+#include "core/components/option/option_component.h"
+#include "core/components/select_popup/select_popup_component.h"
+#include "core/components/text/text_component.h"
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_component.h"
@@ -108,6 +111,9 @@ public:
     bool GetShowStartTouchHandle() const;
     bool GetShowEndTouchHandle() const;
     bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
+    void OnSelectPopupMenu(
+        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
+        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
 #endif
 
     void SetDelegate(const RefPtr<WebDelegate>& delegate)
@@ -189,6 +195,7 @@ private:
     void OnDragWindowMoveEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info);
     void OnDragWindowDropEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info);
     void UpdateGlobalPos();
+    RefPtr<OptionComponent> BuildSelectMenu(const std::string& value);
 
     RefPtr<RawRecognizer> touchRecognizer_ = nullptr;
     RefPtr<PanRecognizer> panRecognizer_ = nullptr;
@@ -218,6 +225,9 @@ private:
     double offsetFix_ = 0.0;
     VkState isVirtualKeyBoardShow_ { VkState::VK_NONE };
     std::queue<MouseClickInfo> doubleClickQueue_;
+    RefPtr<SelectPopupComponent> popup_ = nullptr;
+    RefPtr<ThemeManager> themeManager_ = nullptr;
+    RefPtr<AccessibilityManager> accessibilityManager_ = nullptr;
 };
 
 } // namespace OHOS::Ace
