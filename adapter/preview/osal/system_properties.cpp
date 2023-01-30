@@ -92,11 +92,6 @@ int SystemProperties::astcMax_ = 0;
 int SystemProperties::astcPsnr_ = 0;
 bool SystemProperties::extSurfaceEnabled_ = false;
 
-bool SystemProperties::GetDebugBoundaryEnabled()
-{
-    return false;
-}
-
 DeviceType SystemProperties::GetDeviceType()
 {
     return deviceType_;
