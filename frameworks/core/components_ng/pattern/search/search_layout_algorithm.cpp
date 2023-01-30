@@ -90,7 +90,8 @@ void SearchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         padding.right = CalcLength(searchTheme->GetSearchButtonTextPadding());
         textLayoutProperty->UpdatePadding(padding);
         auto buttonLayoutConstraint = childLayoutConstraint;
-        auto buttonHeight = idealSize.Height() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx();
+        auto buttonHeight =
+            searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx();
         auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(buttonWrapper->GetLayoutProperty());
         CalcSize buttonCalcSize;
         buttonCalcSize.SetHeight(CalcLength(buttonHeight));
@@ -120,7 +121,8 @@ void SearchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto cancelImageWrapper = layoutWrapper->GetOrCreateChildByIndex(CANCEL_IMAGE_INDEX);
     CHECK_NULL_VOID(cancelImageWrapper);
     if (textLayoutProperty->HasValue() && !textLayoutProperty->GetValue()->empty()) {
-        auto cancelButtonHeight = idealSize.Height() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx();
+        auto cancelButtonHeight =
+            searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx();
         auto cancelButtonLayoutProperty = DynamicCast<ButtonLayoutProperty>(cancelButtonWrapper->GetLayoutProperty());
         CalcSize cancelButtonCalcSize((CalcLength(cancelButtonHeight)), CalcLength(cancelButtonHeight));
         cancelButtonLayoutProperty->UpdateUserDefinedIdealSize(cancelButtonCalcSize);
