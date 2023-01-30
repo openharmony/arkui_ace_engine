@@ -85,6 +85,7 @@ public:
             theme->hoverColor_ = pattern->GetAttr<Color>("search_hover_color", Color());
             theme->searchDividerColor_ = pattern->GetAttr<Color>("search_divider_color", Color());
             theme->searchButtonTextColor_ = pattern->GetAttr<Color>("search_button_text_color", Color());
+            theme->searchIconColor_ = pattern->GetAttr<Color>("search_icon_color", Color());
             theme->searchButtonTextPadding_ = pattern->GetAttr<Dimension>("search_button_text_padding", Dimension());
             theme->searchButtonSpace_ = pattern->GetAttr<Dimension>("search_button_space", Dimension());
             theme->dividerSideSpace_ = pattern->GetAttr<Dimension>("search_divider_side_space", Dimension());
@@ -226,6 +227,11 @@ public:
         return searchButtonTextColor_;
     }
 
+    const Color& GetSearchIconColor() const
+    {
+        return searchIconColor_;
+    }
+
 protected:
     SearchTheme() = default;
 
@@ -256,6 +262,7 @@ private:
     Dimension searchIconRightSpace_;
     Color searchDividerColor_;
     Color searchButtonTextColor_;
+    Color searchIconColor_;
 };
 
 } // namespace OHOS::Ace
