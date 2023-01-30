@@ -15,24 +15,28 @@
 
 /**
  * ObservedPropertySimplePU
- * 
- * class that holds an actual property value of type T
+ * implementation of @State and @Provide decorated variables of types (T=) boolean | number | string | enum
+ *
+ * Holds an actual property value of type T
  * uses its base class to manage subscribers to this
  * property.
  * 
  * all definitions in this file are framework internal
 */
-class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
-  implements ISinglePropertyChangeSubscriber<T> {
+class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T> {
 
   private wrappedValue_: T;
 
-  constructor(value: T, owningView: IPropertySubscriber, propertyName: PropertyInfo) {
+  constructor(localInitValue: T, owningView: IPropertySubscriber, propertyName: PropertyInfo) {
     super(owningView, propertyName);
-    if (typeof value === "object") {
+    if (!localInitValue) {
+      stateMgmtConsole.error(`ObservedPropertySimplePU[${this.id__()}, '${this.info() || "unknown"}']: constructor @State/@Provide initial value must not be undefined. Application error!`);
+      return;
+    }
+    if (typeof localInitValue === "object") {
       throw new SyntaxError("ObservedPropertySimple value must not be an object")!
     }
-    this.setValueInternal(value);
+    this.setValueInternal(localInitValue);
   }
 
   aboutToBeDeleted(unsubscribeMe?: IPropertySubscriber) {
@@ -42,9 +46,13 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
     super.aboutToBeDeleted();
   }
 
-  hasChanged(newValue: T): void {
-    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: hasChanged`);
-    this.notifyHasChanged(this.wrappedValue_);
+  /**
+ * Called by a @Link - SynchedPropertySimpleTwoWay that uses this as sync peer when it has changed
+ * @param eventSource 
+ */
+  syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<T>) {
+    stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: syncPeerHasChanged peer '${eventSource.info()}'.`);
+    this.notifyPropertryHasChangedPU();
   }
 
   /*
@@ -52,9 +60,13 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
     called needs to do value change check
     and also notify with this.aboutToChange();
   */
-  private setValueInternal(newValue: T): void {
+  private setValueInternal(newValue: T): boolean {
     stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}'] new value is of simple type`);
-    this.wrappedValue_ = newValue;
+    if (this.wrappedValue_ != newValue) {
+      this.wrappedValue_ = newValue;
+      return true;
+    }
+    return false;
   }
 
   public getUnmonitored(): T {
@@ -65,7 +77,7 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
 
   public get(): T {
     stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: get returns '${JSON.stringify(this.wrappedValue_)}' .`);
-    this.notifyPropertyRead();
+    this.notifyPropertryHasBeenReadPU()
     return this.wrappedValue_;
   }
 
@@ -75,7 +87,8 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T>
       return;
     }
     stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: set, changed from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(newValue)}.`);
-    this.setValueInternal(newValue);
-    this.notifyHasChanged(newValue);
+    if (this.setValueInternal(newValue)) {
+      this.notifyPropertryHasChangedPU();
+    }
   }
 }
