@@ -67,7 +67,7 @@ group("pattern_unittest") {
     "slider:slider_pattern_test_ng",
     "stack:stack_pattern_test_ng",
     "stepper:stepper_pattern_test_ng",
-    "swiper_indicator:swiper_indicator_pattern_test_ng",
+    "swiper:swiper_pattern_test_ng",
     "tabs:tabs_pattern_test_ng",
     "text:text_pattern_test_ng",
     "text_clock:text_clock_pattern_unit_test",
