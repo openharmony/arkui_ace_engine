@@ -244,9 +244,6 @@ void TextFieldPattern::UpdateCaretInfoToController() const
     LOGD("UpdateCaretInfoToController, left %{public}f, top %{public}f, width %{public}f, height %{public}f",
         cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height);
     MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
-    if (selectionMode_ == SelectionMode::NONE) {
-        return;
-    }
     auto value = GetEditingValue();
     MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
         StringUtils::Str8ToStr16(value.text), textSelector_.GetStart(), textSelector_.GetEnd());
@@ -447,6 +444,7 @@ void TextFieldPattern::UpdateCaretOffsetByEvent()
         return;
     }
     UpdateCaretRectByPosition(textEditingValue_.caretPosition);
+    UpdateSelection(textEditingValue_.caretPosition, textEditingValue_.caretPosition);
 }
 
 void TextFieldPattern::UpdateSelectionOffset()
@@ -509,6 +507,7 @@ void TextFieldPattern::UpdateCaretPositionByTextEdit()
         return;
     }
     UpdateCaretRectByPosition(textEditingValue_.caretPosition);
+    UpdateSelection(textEditingValue_.caretPosition, textEditingValue_.caretPosition);
 }
 
 void TextFieldPattern::UpdateCaretRectByPosition(int32_t position)
@@ -1390,6 +1389,13 @@ void TextFieldPattern::OnModifyDone()
                                                                                  : PROPERTY_UPDATE_MEASURE);
 }
 
+bool TextFieldPattern::IsDisabled()
+{
+    auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_RETURN(eventHub, true);
+    return !eventHub->IsEnabled();
+}
+
 void TextFieldPattern::ProcessPadding()
 {
     auto pipeline = GetHost()->GetContext();
@@ -1898,7 +1904,6 @@ ImageSourceInfo TextFieldPattern::GetImageSourceInfoFromTheme(bool checkHidePass
     ImageSourceInfo imageSourceInfo;
     auto theme = context->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(theme, imageSourceInfo);
-    ImageSourceInfo srcInfo;
     if (checkHidePasswordIcon) {
         imageSourceInfo.SetResourceId(InternalResource::ResourceId::HIDE_PASSWORD_SVG);
         return imageSourceInfo;
@@ -1919,7 +1924,13 @@ void TextFieldPattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
         LOGE("Icon path empty");
         return;
     }
-    sourceInfo.SetSrc(iconPath);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    if (IsDisabled()) {
+        sourceInfo.SetSrc(iconPath, theme->GetDisabledIconFillColor());
+    } else {
+        sourceInfo.SetSrc(iconPath);
+    }
     sourceInfo.SetDimension(DEFAULT_FONT, DEFAULT_FONT);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -2142,11 +2153,12 @@ float TextFieldPattern::PreferredLineHeight()
     std::string textContent;
     // use text or placeHolder value if exists, space otherwise
     if (!layoutProperty->GetValueValue("").empty() || layoutProperty->GetPlaceholderValue("").empty()) {
-        TextFieldLayoutAlgorithm::UpdateTextStyle(layoutProperty, textFieldTheme, lineHeightMeasureUtilTextStyle_);
+        TextFieldLayoutAlgorithm::UpdateTextStyle(
+            layoutProperty, textFieldTheme, lineHeightMeasureUtilTextStyle_, false);
         textContent = layoutProperty->GetValueValue(" ");
     } else {
         TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(
-            layoutProperty, textFieldTheme, lineHeightMeasureUtilTextStyle_);
+            layoutProperty, textFieldTheme, lineHeightMeasureUtilTextStyle_, false);
         textContent = layoutProperty->GetPlaceholderValue(" ");
     }
     RSParagraphStyle paraStyle;
