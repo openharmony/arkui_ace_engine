@@ -73,7 +73,8 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::WRONG_SVG, "wrong" },
     { InternalResource::ResourceId::INPUT_SEARCH_SVG, "ic_public_input_search" },
     { InternalResource::ResourceId::APP_BAR_BACK_SVG, "app_bar_back" },
-    { InternalResource::ResourceId::APP_BAR_FA_SVG, "app_bar_fa" }
+    { InternalResource::ResourceId::APP_BAR_FA_SVG, "app_bar_fa" },
+    { InternalResource::ResourceId::MENU_OK_SVG, "ic_public_ok" }
 };
 }
 

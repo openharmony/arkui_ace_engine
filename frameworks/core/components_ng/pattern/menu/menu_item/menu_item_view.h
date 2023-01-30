@@ -38,6 +38,7 @@ public:
     // createMenuItem with startIcon, content, endIcon, labelInfo
     static void Create(const MenuItemProperties& props);
 
+    static void SetSelected(bool isSelected = false);
     static void SetSelectIcon(bool isShow = false);
     static void SetOnChange(std::function<void(bool)>&& onChange);
 

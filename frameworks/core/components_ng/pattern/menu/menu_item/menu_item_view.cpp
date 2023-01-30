@@ -161,6 +161,13 @@ void MenuItemView::Create(const MenuItemProperties& menuItemProps)
     }
 }
 
+void MenuItemView::SetSelected(bool isSelected)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<MenuItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelected(isSelected);
+}
+
 void MenuItemView::SetSelectIcon(bool isShow)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<MenuItemPattern>();

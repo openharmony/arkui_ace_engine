@@ -53,9 +53,21 @@ public:
         return MakeRefPtr<MenuItemLayoutAlgorithm>();
     }
 
+    void SetSelected(bool isSelected)
+    {
+        isSelected_ = isSelected;
+        GetHost()->MarkModifyDone();
+    }
+
+    bool IsSelected() const
+    {
+        return isSelected_;
+    }
+
     void SetSelectIcon(bool isShow)
     {
         isSelectIconShow_ = isShow;
+        GetHost()->MarkModifyDone();
     }
 
     bool IsSelectIconShow() const
@@ -109,7 +121,7 @@ public:
 
     void SetChange()
     {
-        isChanged_ = !isChanged_;
+        isSelected_ = !isSelected_;
     }
 
     bool IsChange() const
@@ -142,6 +154,8 @@ private:
 
     void RegisterWrapperMouseEvent();
 
+    void AddSelectIcon();
+
     RefPtr<FrameNode> GetMenuWrapper();
     RefPtr<FrameNode> GetMenu();
 
@@ -155,6 +169,7 @@ private:
 
     RefPtr<InputEvent> wrapperMouseEvent_;
 
+    bool isSelected_ = false;
     bool isSelectIconShow_ = false;
 
     bool isSubMenuShowed_ = false;
@@ -167,6 +182,7 @@ private:
     int32_t subMenuId_ = -1;
     RefPtr<FrameNode> subMenu_;
     RefPtr<FrameNode> content_ = nullptr;
+    RefPtr<FrameNode> selectIcon_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemPattern);
 };

@@ -19,8 +19,10 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -53,6 +55,9 @@ void MenuItemPattern::OnModifyDone()
         auto contentProperty = content_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(contentProperty);
         contentProperty->UpdateTextColor(theme->GetDisabledMenuFontColor());
+    }
+    if (IsSelectIconShow()) {
+        AddSelectIcon();
     }
 }
 
@@ -160,7 +165,7 @@ void MenuItemPattern::RegisterOnClick()
         pattern->SetChange();
         if (onChange) {
             LOGI("trigger onChange");
-            onChange(pattern->IsChange());
+            onChange(pattern->IsSelected());
         }
 
         if (pattern->GetSubBuilder() != nullptr) {
@@ -337,5 +342,49 @@ void MenuItemPattern::UpdateBackgroundColor(const Color& color)
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(color);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void MenuItemPattern::AddSelectIcon()
+{
+    auto host = GetHost();
+    auto row = host->GetChildAtIndex(0);
+    CHECK_NULL_VOID(row);
+    if (IsSelected() && !selectIcon_) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto iconTheme = pipeline->GetTheme<IconTheme>();
+        CHECK_NULL_VOID(iconTheme);
+        auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::MENU_OK_SVG);
+        ImageSourceInfo imageSourceInfo;
+        imageSourceInfo.SetSrc(iconPath);
+        auto selectTheme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(selectTheme);
+        imageSourceInfo.SetFillColor(Color::BLACK);
+
+        auto selectIcon = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        CHECK_NULL_VOID(selectIcon);
+        auto props = selectIcon->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(props);
+        props->UpdateImageSourceInfo(imageSourceInfo);
+        props->UpdateAlignment(Alignment::CENTER);
+        CalcSize idealSize = { CalcLength(ICON_SIDE_LENGTH), CalcLength(ICON_SIDE_LENGTH) };
+        MeasureProperty layoutConstraint;
+        layoutConstraint.selfIdealSize = idealSize;
+        props->UpdateCalcLayoutProperty(layoutConstraint);
+
+        auto iconRenderProperty = selectIcon->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(iconRenderProperty);
+        iconRenderProperty->UpdateSvgFillColor(Color::BLACK);
+
+        selectIcon->MountToParent(row, 0);
+        selectIcon->MarkModifyDone();
+
+        selectIcon_ = selectIcon;
+    }
+    if (!IsSelected() && selectIcon_) {
+        row->RemoveChildAtIndex(0);
+        selectIcon_ = nullptr;
+    }
 }
 } // namespace OHOS::Ace::NG
