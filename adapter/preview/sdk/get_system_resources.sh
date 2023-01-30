@@ -20,6 +20,6 @@ fi
 
 unzip -o -q -d $2 $1
 
-cp -R "$2/assets/." $2
+cp -R "$2/assets/entry/." $2
 
 rm -rf "$2/assets"
