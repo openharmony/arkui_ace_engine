@@ -63,7 +63,8 @@ RefereeState RecognizerGroup::CheckStates()
         if (!AceType::InstanceOf<RecognizerGroup>(recognizer)) {
             if (recognizer->GetRefereeState() != RefereeState::SUCCEED_BLOCKED &&
                 recognizer->GetRefereeState() != RefereeState::SUCCEED &&
-                recognizer->GetRefereeState() != RefereeState::FAIL) {
+                recognizer->GetRefereeState() != RefereeState::FAIL &&
+                recognizer->GetRefereeState() != RefereeState::READY) {
                 count++;
                 break;
             }
