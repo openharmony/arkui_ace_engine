@@ -290,20 +290,19 @@ RefPtr<FrameNode> SearchModelNG::CreateImage(const RefPtr<SearchNode>& parentNod
     ImageSourceInfo imageSourceInfo(src);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_RETURN(searchTheme, nullptr);
     if (src.empty()) {
         imageSourceInfo.SetResourceId(InternalResource::ResourceId::SEARCH_SVG);
         auto iconTheme = pipeline->GetTheme<IconTheme>();
         CHECK_NULL_RETURN(iconTheme, nullptr);
         auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SEARCH_SVG);
-        imageSourceInfo.SetSrc(iconPath);
+        imageSourceInfo.SetSrc(iconPath, searchTheme->GetSearchIconColor());
     }
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_RETURN(searchTheme, nullptr);
     auto iconHeigth = searchTheme->GetIconHeight();
     CalcSize idealSize = { CalcLength(iconHeigth), CalcLength(iconHeigth) };
     MeasureProperty layoutConstraint;
@@ -322,16 +321,14 @@ RefPtr<FrameNode> SearchModelNG::CreateCancelImage(const RefPtr<SearchNode>& par
     imageSourceInfo.SetResourceId(InternalResource::ResourceId::CLOSE_SVG);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_RETURN(iconTheme, nullptr);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_RETURN(searchTheme, nullptr);
     auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::CLOSE_SVG);
-    imageSourceInfo.SetSrc(iconPath);
-
+    imageSourceInfo.SetSrc(iconPath, searchTheme->GetSearchIconColor());
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_RETURN(searchTheme, nullptr);
     auto iconHeigth = searchTheme->GetIconHeight();
     CalcSize idealSize = { CalcLength(iconHeigth), CalcLength(iconHeigth) };
     MeasureProperty layoutConstraint;

@@ -31,6 +31,7 @@ constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
 // The focus state requires an 2vp inner stroke, which should be indented by 1vp when drawn.
 constexpr Dimension FOCUS_OFFSET = 1.0_vp;
+constexpr Dimension UP_AND_DOWN_PADDING = 8.0_vp;
 } // namespace
 
 bool SearchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& /*config*/)
@@ -62,6 +63,12 @@ void SearchPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->GetMarginProperty()) {
+        MarginProperty margin;
+        margin.top = CalcLength(UP_AND_DOWN_PADDING.ConvertToPx());
+        margin.bottom = CalcLength(UP_AND_DOWN_PADDING.ConvertToPx());
+        layoutProperty->UpdateMargin(margin);
+    }
     auto searchButton = layoutProperty->GetSearchButton();
     searchButton_ = searchButton.has_value() ? searchButton->value() : "";
     InitSearchController();
@@ -199,6 +206,8 @@ void SearchPattern::OnClickCancelButton()
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateValue("");
+    auto eventHub = host->GetEventHub<SearchEventHub>();
+    eventHub->UpdateChangeEvent("");
     host->MarkModifyDone();
     textFieldFrameNode->MarkModifyDone();
 }
@@ -295,25 +304,25 @@ void SearchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     float radius = 0.0f;
     float focusOffset = FOCUS_OFFSET.ConvertToPx();
     if (focusChoice_ == FocusChoice::SEARCH) {
-        originX = searchOffset_.GetX();
-        originY = searchOffset_.GetY();
-        endX = searchSize_.Width() + originX;
-        endY = searchSize_.Height() + originY;
-        radius = searchSize_.Height() / 2.0;
+        originX = searchOffset_.GetX() + focusOffset;
+        originY = searchOffset_.GetY() + focusOffset;
+        endX = searchSize_.Width() + originX - 2 * focusOffset;
+        endY = searchSize_.Height() + originY - 2 * focusOffset;
+        radius = searchSize_.Height() / 2.0 - focusOffset;
     }
     if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
         originX = cancelButtonOffset_.GetX() + focusOffset;
         originY = cancelButtonOffset_.GetY() + focusOffset;
         endX = cancelButtonSize_.Width() + originX - 2 * focusOffset;
         endY = cancelButtonSize_.Height() + originY - 2 * focusOffset;
-        radius = cancelButtonSize_.Height() / 2.0;
+        radius = cancelButtonSize_.Height() / 2.0 - focusOffset;
     }
     if (focusChoice_ == FocusChoice::SEARCH_BUTTON) {
         originX = buttonOffset_.GetX() + focusOffset;
         originY = buttonOffset_.GetY() + focusOffset;
         endX = buttonSize_.Width() + originX - 2 * focusOffset;
         endY = buttonSize_.Height() + originY - 2 * focusOffset;
-        radius = buttonSize_.Height() / 2.0;
+        radius = buttonSize_.Height() / 2.0 - focusOffset;
     }
 
     paintRect.SetRect({ originX, originY, endX - originX, endY - originY });
