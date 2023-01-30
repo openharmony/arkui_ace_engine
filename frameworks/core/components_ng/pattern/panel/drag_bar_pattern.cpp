@@ -64,6 +64,7 @@ void DragBarPattern::OnModifyDone()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitTouchEvent(gestureHub);
+    InitClickEvent();
     UpdateDrawPoint();
     MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
@@ -247,6 +248,32 @@ void DragBarPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gestureHub->AddTouchEvent(touchEvent_);
+}
+
+void DragBarPattern::InitClickEvent()
+{
+    if (clickListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto dragBarPattern = weak.Upgrade();
+        CHECK_NULL_VOID(dragBarPattern);
+        dragBarPattern->OnClick();
+    };
+    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gesture->AddClickEvent(clickListener_);
+}
+
+void DragBarPattern::OnClick()
+{
+    if (!clickArrowCallback_) {
+        return;
+    }
+    clickArrowCallback_();
 }
 
 void DragBarPattern::HandleTouchEvent(const TouchEventInfo& info)

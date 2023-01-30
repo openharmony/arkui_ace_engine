@@ -90,11 +90,10 @@ private:
     int32_t GetAnimationDuration(float delta, float dragRange) const;
     void CheckHeightValidity();
     void CheckPanelModeAndType();
-    void RemoveEvent();
-    void AddEvent();
     void FirstLayout();
     void IsShowChanged(bool isShow);
     void HeightDynamicUpdate();
+    void SetDragBarCallBack();
 
     PanelType GetPanelType() const;
     PanelMode GetPanelMode() const;
