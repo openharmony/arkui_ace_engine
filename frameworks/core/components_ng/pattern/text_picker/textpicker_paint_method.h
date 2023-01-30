@@ -42,19 +42,11 @@ public:
         defaultPickerItemHeight_ = defaultPickerItemHeight;
     }
 
-    void PaintDisable(RSCanvas& canvas, double X, double Y);
-
-    void SetEnabled(bool enabled)
-    {
-        enabled_ = enabled;
-    }
-
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
     void PaintGradient(RSCanvas& canvas, const RectF& frameRect);
 
 private:
     double defaultPickerItemHeight_ = 0.0;
-    bool enabled_ = true;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_PICKER_TEXT_PICKER_PAINT_METHOD_H

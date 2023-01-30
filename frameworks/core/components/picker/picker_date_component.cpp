@@ -147,8 +147,10 @@ PickerDate PickerDateComponent::GetCurrentDate() const
 
     if (!lunar_) {
         result.SetYear(startDateSolar_.GetYear() + yearColumn->GetCurrentIndex());
-        result.SetMonth(monthColumn->GetCurrentIndex() + 1); // month from 1 to 12, index from 0 to 11.
-        result.SetDay(dayColumn->GetCurrentIndex() + 1); // day from 1 to 31, index from 0 to 30.
+        result.SetMonth(StringUtils::StringToUint(
+            monthColumn->GetOption(monthColumn->GetCurrentIndex()))); // month from 1 to 12, index from 0 to 11.
+        result.SetDay(StringUtils::StringToUint(
+            dayColumn->GetOption(dayColumn->GetCurrentIndex()))); // day from 1 to 31, index from 0 to 30.
         return result;
     }
 

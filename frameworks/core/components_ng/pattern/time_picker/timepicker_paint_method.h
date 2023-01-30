@@ -34,15 +34,6 @@ public:
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
     void PaintGradient(RSCanvas& canvas, const RectF& frameRect);
-    void PaintDisable(RSCanvas& canvas, double X, double Y);
-
-    void SetEnabled(bool enabled)
-    {
-        enabled_ = enabled;
-    }
-
-private:
-    bool enabled_ = true;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_TIME_PICKER_PAINT_METHOD_H
