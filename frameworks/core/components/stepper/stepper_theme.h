@@ -78,6 +78,7 @@ public:
                 auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("stepper_pattern", nullptr);
                 if (pattern) {
                     theme->textStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::RED));
+                    theme->textStyle_.SetFontSize(pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 16.0_vp));
                     theme->radius_ = pattern->GetAttr<Dimension>("border_radius", 0.0_vp);
                     theme->buttonPressedColor_ = pattern->GetAttr<Color>("button_bg_color_pressed", Color::RED);
                     theme->mouseHoverColor_ = pattern->GetAttr<Color>("button_bg_color_hovered", Color::RED);

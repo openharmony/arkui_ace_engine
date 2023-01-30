@@ -35,7 +35,6 @@ namespace OHOS::Ace::NG {
 
 void StepperPattern::OnModifyDone()
 {
-    LOGI("yangwt-----StepperPattern::OnModifyDone-----begin");
     auto hostNode = DynamicCast<StepperNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto swiperNode =
@@ -112,17 +111,16 @@ void StepperPattern::CreateLeftButtonNode()
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    buttonNode->GetLayoutProperty()->UpdateBorderWidth({ stepperTheme->GetControlMargin(),
-        stepperTheme->GetControlMargin(), stepperTheme->GetControlMargin(), stepperTheme->GetControlMargin() });
     buttonNode->GetRenderContext()->UpdateBorderRadius(
         { stepperTheme->GetRadius(), stepperTheme->GetRadius(), stepperTheme->GetRadius(), stepperTheme->GetRadius() });
-    buttonNode->GetRenderContext()->UpdateBorderColor(
-        { Color::TRANSPARENT, Color::TRANSPARENT, Color::TRANSPARENT, Color::TRANSPARENT });
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
     // Create rowNode
     auto rowNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    rowNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateSpace(stepperTheme->GetControlPadding());
+    rowNode->GetLayoutProperty()->UpdateMargin(
+        { CalcLength(stepperTheme->GetControlPadding()), CalcLength(stepperTheme->GetControlPadding()) });
     rowNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     rowNode->MountToParent(buttonNode);
     rowNode->MarkModifyDone();
@@ -138,14 +136,20 @@ void StepperPattern::CreateLeftButtonNode()
     SizeF sourceSize(static_cast<float>(stepperTheme->GetArrowWidth().ConvertToPx()),
         static_cast<float>(stepperTheme->GetArrowHeight().ConvertToPx()));
     imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateSourceSize(sourceSize);
+    imageNode->GetPaintProperty<ImageRenderProperty>()->UpdateSvgFillColor(stepperTheme->GetArrowColor());
     imageNode->MountToParent(rowNode);
     imageNode->MarkModifyDone();
     // Create textNode
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
+    textNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(Color::BLACK);
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(stepperTheme->GetTextStyle().GetTextColor());
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontSize(stepperTheme->GetTextStyle().GetFontSize());
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateAdaptMinFontSize(stepperTheme->GetMinFontSize());
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateAdaptMaxFontSize(
+        stepperTheme->GetTextStyle().GetFontSize());
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateMaxLines(stepperTheme->GetTextMaxLines());
     textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
     textNode->MountToParent(rowNode);
@@ -223,8 +227,6 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     auto buttonNextText = Localization::GetInstance()->GetEntryLetters("stepper.next");
     auto rightLabel =
         stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetRightLabel().value_or(buttonNextText);
-    // get buttonColor
-    auto buttonColor = isDisabled ? stepperTheme->GetDisabledColor() : Color::BLACK;
     // Create buttonNode
     auto buttonId = hostNode->GetRightButtonId();
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
@@ -233,27 +235,33 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    buttonNode->GetLayoutProperty()->UpdateBorderWidth({ stepperTheme->GetControlMargin(),
-        stepperTheme->GetControlMargin(), stepperTheme->GetControlMargin(), stepperTheme->GetControlMargin() });
     buttonNode->GetRenderContext()->UpdateBorderRadius(
         { stepperTheme->GetRadius(), stepperTheme->GetRadius(), stepperTheme->GetRadius(), stepperTheme->GetRadius() });
-    buttonNode->GetRenderContext()->UpdateBorderColor(
-        { Color::TRANSPARENT, Color::TRANSPARENT, Color::TRANSPARENT, Color::TRANSPARENT });
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
     // Create rowNode
     auto rowNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    rowNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateSpace(stepperTheme->GetControlPadding());
+    rowNode->GetLayoutProperty()->UpdateMargin(
+        { CalcLength(stepperTheme->GetControlPadding()), CalcLength(stepperTheme->GetControlPadding()) });
     rowNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     rowNode->MountToParent(buttonNode);
     rowNode->MarkModifyDone();
     // Create textNode
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
+    textNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(rightLabel);
-    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(buttonColor);
+    auto textColor = stepperTheme->GetTextStyle().GetTextColor();
+    textColor = isDisabled ? textColor.BlendOpacity(stepperTheme->GetDisabledAlpha()) : textColor;
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(textColor);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontSize(stepperTheme->GetTextStyle().GetFontSize());
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateAdaptMinFontSize(stepperTheme->GetMinFontSize());
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateAdaptMaxFontSize(
+        stepperTheme->GetTextStyle().GetFontSize());
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateMaxLines(stepperTheme->GetTextMaxLines());
     textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
     textNode->MountToParent(rowNode);
@@ -270,7 +278,9 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     SizeF sourceSize(static_cast<float>(stepperTheme->GetArrowWidth().ConvertToPx()),
         static_cast<float>(stepperTheme->GetArrowHeight().ConvertToPx()));
     imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateSourceSize(sourceSize);
-    imageNode->GetPaintProperty<ImageRenderProperty>()->UpdateSvgFillColor(buttonColor);
+    auto imageColor = stepperTheme->GetArrowColor();
+    imageColor = isDisabled ? imageColor.BlendOpacity(stepperTheme->GetDisabledAlpha()) : imageColor;
+    imageNode->GetPaintProperty<ImageRenderProperty>()->UpdateSvgFillColor(imageColor);
     imageNode->MountToParent(rowNode);
     imageNode->MarkModifyDone();
 }
@@ -304,9 +314,9 @@ void StepperPattern::CreateArrowlessRightButtonNode(std::string content)
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(content);
-    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(Color::BLACK);
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontSize(stepperTheme->GetTextStyle().GetFontSize());
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(stepperTheme->GetTextStyle().GetTextColor());
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateMaxLines(stepperTheme->GetTextMaxLines());
     textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
     textNode->MountToParent(buttonNode);
     textNode->MarkModifyDone();
