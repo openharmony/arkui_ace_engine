@@ -438,6 +438,7 @@ public:
     }
 
     void OnCursorMoveDone();
+    bool IsDisabled();
 
 private:
     void HandleBlurEvent();
@@ -536,6 +537,7 @@ private:
     bool CursorInContentRegion();
     bool OffsetInContentRegion(const Offset& offset);
     void ProcessPadding();
+    void SetDisabledStyle();
 
     void ProcessPasswordIcon();
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);

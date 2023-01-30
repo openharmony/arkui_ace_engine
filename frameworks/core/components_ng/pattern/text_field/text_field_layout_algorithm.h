@@ -85,9 +85,9 @@ public:
     static TextDirection GetTextDirection(const std::string& content);
 
     static void UpdateTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
-        const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle);
+        const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled);
     static void UpdatePlaceholderTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
-        const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle);
+        const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled);
 
 private:
     void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText);

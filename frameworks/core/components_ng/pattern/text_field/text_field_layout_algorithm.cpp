@@ -90,10 +90,10 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     std::string textContent;
     bool showPlaceHolder = false;
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
-        UpdateTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle);
+        UpdateTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetValueValue("");
     } else {
-        UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle);
+        UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetPlaceholderValue("");
         showPlaceHolder = true;
     }
@@ -216,8 +216,8 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 }
 
-void TextFieldLayoutAlgorithm::UpdateTextStyle(
-    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle)
+void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
+    const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled)
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
@@ -232,7 +232,12 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(
 
     textStyle.SetFontWeight(
         layoutProperty->GetFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
-    textStyle.SetTextColor(layoutProperty->GetTextColorValue(theme ? theme->GetTextColor() : textStyle.GetTextColor()));
+    if (isDisabled) {
+        textStyle.SetTextColor(theme ? theme->GetDisableTextColor() : textStyle.GetTextColor());
+    } else {
+        textStyle.SetTextColor(
+            layoutProperty->GetTextColorValue(theme ? theme->GetTextColor() : textStyle.GetTextColor()));
+    }
     if (layoutProperty->GetMaxLines()) {
         textStyle.SetMaxLines(layoutProperty->GetMaxLines().value());
     }
@@ -244,8 +249,8 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(
     }
 }
 
-void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(
-    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle)
+void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
+    const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled)
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
@@ -259,8 +264,12 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(
     textStyle.SetFontSize(fontSize);
     textStyle.SetFontWeight(
         layoutProperty->GetPlaceholderFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
-    textStyle.SetTextColor(
-        layoutProperty->GetPlaceholderTextColorValue(theme ? theme->GetPlaceholderColor() : textStyle.GetTextColor()));
+    if (isDisabled) {
+        textStyle.SetTextColor(theme ? theme->GetDisableTextColor() : textStyle.GetTextColor());
+    } else {
+        textStyle.SetTextColor(layoutProperty->GetPlaceholderTextColorValue(
+            theme ? theme->GetPlaceholderColor() : textStyle.GetTextColor()));
+    }
     if (layoutProperty->HasPlaceholderMaxLines()) {
         textStyle.SetMaxLines(layoutProperty->GetPlaceholderMaxLines().value());
     }
