@@ -194,7 +194,10 @@ public:
         return isHookModeEnabled_;
     }
 
-    static bool GetDebugBoundaryEnabled();
+    static bool GetDebugBoundaryEnabled()
+    {
+        return debugBoundaryEnabled_;
+    }
 
     static bool GetTraceEnabled()
     {

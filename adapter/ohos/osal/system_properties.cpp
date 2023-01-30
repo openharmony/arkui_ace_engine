@@ -60,6 +60,11 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
     deviceHeight = temp;
 }
 
+bool IsDebugBoundaryEnabled()
+{
+    return system::GetParameter(ENABLE_DEBUG_BOUNDARY_KEY, "false") == "true";
+}
+
 bool IsTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.enabled", "0") == "1" ||
@@ -172,11 +177,6 @@ bool SystemProperties::IsSyscapExist(const char* cap)
 #endif
 }
 
-bool SystemProperties::GetDebugBoundaryEnabled()
-{
-    return system::GetParameter(ENABLE_DEBUG_BOUNDARY_KEY, "false") == "true";
-}
-
 void SystemProperties::InitDeviceType(DeviceType)
 {
     // Do nothing, no need to store type here, use system property at 'GetDeviceType' instead.
@@ -276,7 +276,7 @@ LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::unZipHap_ = true;
 bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
 bool SystemProperties::isHookModeEnabled_ = IsHookModeEnabled();
-bool SystemProperties::debugBoundaryEnabled_ = false;
+bool SystemProperties::debugBoundaryEnabled_ = IsDebugBoundaryEnabled();
 bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 bool SystemProperties::debugEnabled_ = IsDebugEnabled();
 bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
