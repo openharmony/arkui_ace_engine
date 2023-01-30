@@ -59,16 +59,12 @@ public:
         auto enabled = eventHub->IsEnabled();
         auto paintMethod =
             MakeRefPtr<RadioPaintMethod>(enabled, isTouch_, isHover_, totalScale_, pointScale_, uiStatus_);
+        paintMethod->SetHotZoneOffset(hotZoneOffset_);
+        paintMethod->SetHotZoneSize(hotZoneSize_);
         return paintMethod;
     }
 
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& /*config*/) override
-    {
-        auto geometryNode = dirty->GetGeometryNode();
-        offset_ = geometryNode->GetContentOffset();
-        size_ = geometryNode->GetContentSize();
-        return true;
-    }
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& /*config*/) override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -132,9 +128,9 @@ private:
     void UpdateTotalScale(float scale);
     void UpdatePointScale(float scale);
     void UpdateUIStatus(bool check);
-    RectF GetHotZoneRect(bool isOriginal) const;
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
 
     RefPtr<ClickEvent> clickListener_;
@@ -152,11 +148,13 @@ private:
     float totalScale_ = 1.0f;
     float pointScale_ = 0.5f;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
-    Dimension hotZoneHorizontalPadding_ = 11.0_vp;
-    Dimension hotZoneVerticalPadding_ = 11.0_vp;
+    Dimension hotZoneHorizontalPadding_;
+    Dimension hotZoneVerticalPadding_;
     OffsetF offset_;
     SizeF size_;
-
+    OffsetF hotZoneOffset_;
+    SizeF hotZoneSize_;
+    
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };
 } // namespace OHOS::Ace::NG

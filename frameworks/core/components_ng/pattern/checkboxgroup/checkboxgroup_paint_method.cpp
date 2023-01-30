@@ -73,6 +73,7 @@ void CheckBoxGroupPaintMethod::InitializeParam()
     pointColor_ = checkBoxTheme->GetPointColor();
     activeColor_ = checkBoxTheme->GetActiveColor();
     inactiveColor_ = checkBoxTheme->GetInactiveColor();
+    inactivePointColor_ = checkBoxTheme->GetInactivePointColor();
     shadowColor_ = checkBoxTheme->GetShadowColor();
     clickEffectColor_ = checkBoxTheme->GetClickEffectColor();
     hoverColor_ = checkBoxTheme->GetHoverColor();
@@ -93,19 +94,12 @@ void CheckBoxGroupPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* pai
     if (paintProperty->HasCheckBoxGroupSelectedColor()) {
         color = paintProperty->GetCheckBoxGroupSelectedColorValue();
     }
-    auto offset = paintWrapper->GetContentOffset();
+    auto paintOffset = paintWrapper->GetContentOffset();
     RSPen pen;
     RSBrush brush;
-    OffsetF paintOffset = OffsetF(offset.GetX(), offset.GetY());
     pen.SetWidth(borderWidth_);
     pen.SetAntiAlias(true);
-    float strokeOffset = borderWidth_ / 2;
-    paintOffset += OffsetF(strokeOffset, strokeOffset);
-    contentSize.SetWidth(contentSize.Width() - borderWidth_);
-    contentSize.SetHeight(contentSize.Height() - borderWidth_);
     if (isTouch_) {
-        paintOffset.SetX(paintOffset.GetX() + hotZoneHorizontalPadding_.ConvertToPx());
-        paintOffset.SetY(paintOffset.GetY() + hotZoneVerticalPadding_.ConvertToPx());
         DrawTouchBoard(canvas, contentSize, paintOffset);
     }
     if (isHover_) {
@@ -141,10 +135,14 @@ void CheckBoxGroupPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* pai
         DrawActiveBorder(canvas, paintOffset, brush, contentSize);
         DrawAnimationOnToOff(canvas, paintOffset, pen, contentSize);
     } else if (uiStatus_ == UIStatus::UNSELECTED && status != CheckBoxGroupPaintProperty::SelectStatus::PART) {
+        brush.SetColor(ToRSColor(inactivePointColor_));
         pen.SetColor(ToRSColor(inactiveColor_));
         if (!enabled_) {
+            brush.SetColor(
+                ToRSColor(inactivePointColor_.BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
             pen.SetColor(ToRSColor(inactiveColor_.BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
         }
+        DrawUnselectedBorder(canvas, paintOffset, brush, contentSize);
         DrawUnselected(canvas, paintOffset, pen, contentSize);
     }
 }
@@ -152,10 +150,11 @@ void CheckBoxGroupPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* pai
 void CheckBoxGroupPaintMethod::DrawUnselected(
     RSCanvas& canvas, const OffsetF& origin, RSPen& pen, SizeF& paintSize) const
 {
-    float originX = origin.GetX();
-    float originY = origin.GetY();
-    auto rrect = RSRoundRect(
-        { originX, originY, paintSize.Width() + originX, paintSize.Height() + originY }, borderRadius_, borderRadius_);
+    float originX = origin.GetX() + borderWidth_ / 2.0;
+    float originY = origin.GetY() + borderWidth_ / 2.0;
+    float endX = originX + paintSize.Width() - borderWidth_;
+    float endY = originY + paintSize.Height() - borderWidth_;
+    auto rrect = RSRoundRect({ originX, originY, endX, endY }, borderRadius_, borderRadius_);
     canvas.AttachPen(pen);
     canvas.DrawRoundRect(rrect);
 }
@@ -165,8 +164,21 @@ void CheckBoxGroupPaintMethod::DrawActiveBorder(
 {
     float originX = paintOffset.GetX();
     float originY = paintOffset.GetY();
-    auto rrect = RSRoundRect(
-        { originX, originY, paintSize.Width() + originX, paintSize.Height() + originY }, borderRadius_, borderRadius_);
+    float endX = originX + paintSize.Width();
+    float endY = originY + paintSize.Height();
+    auto rrect = RSRoundRect({ originX, originY, endX, endY }, borderRadius_, borderRadius_);
+    canvas.AttachBrush(brush);
+    canvas.DrawRoundRect(rrect);
+}
+
+void CheckBoxGroupPaintMethod::DrawUnselectedBorder(
+    RSCanvas& canvas, const OffsetF& paintOffset, RSBrush& brush, const SizeF& paintSize) const
+{
+    float originX = paintOffset.GetX() + borderWidth_;
+    float originY = paintOffset.GetY() + borderWidth_;
+    float endX = originX + paintSize.Width() - 2 * borderWidth_;
+    float endY = originY + paintSize.Height() - 2 * borderWidth_;
+    auto rrect = RSRoundRect({ originX, originY, endX, endY }, borderRadius_, borderRadius_);
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(rrect);
 }

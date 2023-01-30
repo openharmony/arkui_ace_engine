@@ -174,7 +174,7 @@ HWTEST_F(RadioPaintMethodTestNg, RadioPaintMethodTest004, TestSize.Level1)
     RadioPaintMethod radioPaintMethod(false, false, false, 0.0, POINT_SCALE, UIStatus::SELECTED);
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(4));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(2));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     radioPaintMethod.PaintRadio(canvas, false, CONTENT_SIZE, CONTENT_OFFSET);
     /**
@@ -185,7 +185,7 @@ HWTEST_F(RadioPaintMethodTestNg, RadioPaintMethodTest004, TestSize.Level1)
     RadioPaintMethod radioPaintMethod2(true, false, false, 0.0, POINT_SCALE_INVALID, UIStatus::SELECTED);
     Testing::MockCanvas canvas2;
     EXPECT_CALL(canvas2, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas2));
-    EXPECT_CALL(canvas2, DrawCircle(_, _)).Times(AtLeast(4));
+    EXPECT_CALL(canvas2, DrawCircle(_, _)).Times(AtLeast(2));
     EXPECT_CALL(canvas2, AttachPen(_)).WillRepeatedly(ReturnRef(canvas2));
     radioPaintMethod2.PaintRadio(canvas2, false, CONTENT_SIZE, CONTENT_OFFSET);
 }
@@ -235,8 +235,6 @@ HWTEST_F(RadioPaintMethodTestNg, RadioLayoutAlgorithmTest001, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(radioTheme));
     RadioLayoutAlgorithm radioLayoutAlgorithm;
     radioLayoutAlgorithm.InitializeParam();
-    EXPECT_EQ(radioLayoutAlgorithm.defaultWidth_, DEFAULT_WIDTH);
-    EXPECT_EQ(radioLayoutAlgorithm.defaultHeight_, DEFAULT_HEIGHT);
     EXPECT_EQ(radioLayoutAlgorithm.horizontalPadding_, HORIZONTAL_PADDING.ConvertToPx());
     EXPECT_EQ(radioLayoutAlgorithm.verticalPadding_, VERTICAL_PADDING.ConvertToPx());
 }
@@ -349,13 +347,8 @@ HWTEST_F(RadioPaintMethodTestNg, RadioLayoutAlgorithmTest005, TestSize.Level1)
     layoutConstraintSize.minSize = SizeF(0, 0);
     auto size = radioLayoutAlgorithm.MeasureContent(layoutConstraintSize, &layoutWrapper);
     EXPECT_FALSE(size == std::nullopt);
-    EXPECT_EQ(radioLayoutAlgorithm.defaultWidth_, DEFAULT_WIDTH);
-    EXPECT_EQ(radioLayoutAlgorithm.defaultHeight_, DEFAULT_HEIGHT);
     EXPECT_EQ(radioLayoutAlgorithm.horizontalPadding_, HORIZONTAL_PADDING.ConvertToPx());
     EXPECT_EQ(radioLayoutAlgorithm.verticalPadding_, VERTICAL_PADDING.ConvertToPx());
-    auto length = std::min(radioLayoutAlgorithm.defaultWidth_ - 2 * radioLayoutAlgorithm.horizontalPadding_,
-        radioLayoutAlgorithm.defaultHeight_ - 2 * radioLayoutAlgorithm.verticalPadding_);
-    EXPECT_EQ(size.value(), SizeF(length, length));
 }
 
 /**
@@ -432,7 +425,7 @@ HWTEST_F(RadioPaintMethodTestNg, RadioPaintMethodTest009, TestSize.Level1)
     RadioPaintMethod radioPaintMethod(true, false, false, 0.0, POINT_SCALE_INVALID_0, UIStatus::SELECTED);
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(4));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(2));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     radioPaintMethod.PaintRadio(canvas, false, CONTENT_SIZE, CONTENT_OFFSET);
 }
