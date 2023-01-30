@@ -64,6 +64,8 @@ public:
 
     void UpdateSecondSelectHandleInfo(const SelectHandleInfo& info);
 
+    void UpdateFirstAndSecondHandleInfo(const SelectHandleInfo& firstInfo, const SelectHandleInfo& secondInfo);
+
     void UpdateSelectMenuInfo(const SelectMenuInfo& info);
 
     void UpdateShowArea(const RectF& area);

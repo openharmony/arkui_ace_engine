@@ -92,4 +92,20 @@ size_t TxtParagraph::GetLineCount()
 }
 
 void TxtParagraph::Paint(const RSCanvas& canvas, float x, float y) {}
+
+int32_t TxtParagraph::GetHandlePositionForClick(const Offset& offset)
+{
+    return 0;
+}
+
+void TxtParagraph::GetRectsForRange(int32_t start, int32_t end, std::vector<Rect>& selectedRects) {}
+
+bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics& result)
+{
+    return true;
+}
+bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& result)
+{
+    return true;
+}
 } // namespace OHOS::Ace::NG

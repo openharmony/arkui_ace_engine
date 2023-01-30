@@ -66,6 +66,7 @@ public:                                                                      \
 namespace OHOS::Ace::NG {
 
 struct SpanItem : public Referenced {
+    int32_t positon;
     std::string content;
     std::unique_ptr<FontStyle> fontStyle;
     GestureEventFunc onClick;

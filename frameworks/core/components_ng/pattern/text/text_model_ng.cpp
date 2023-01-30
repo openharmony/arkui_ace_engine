@@ -170,7 +170,7 @@ void TextModelNG::SetRemoteMessage(std::function<void()>&& event)
 
 void TextModelNG::SetCopyOption(CopyOptions copyOption)
 {
-    LOGE("no support CopyOption");
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOption);
 }
 
 void TextModelNG::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)

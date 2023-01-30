@@ -60,8 +60,6 @@ constexpr Dimension CURSOR_PADDING = 2.0_vp;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
-enum class CaretUpdateType { PRESSED, LONG_PRESSED, DEL, EVENT, HANDLE_MOVE, HANDLE_MOVE_DONE, INPUT, NONE };
-
 enum {
     ACTION_SELECT_ALL, // Smallest code unit.
     ACTION_UNDO,

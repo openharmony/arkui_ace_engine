@@ -24,6 +24,7 @@
 
 namespace OHOS::Ace::NG {
 
+enum class CaretUpdateType { PRESSED, LONG_PRESSED, DEL, EVENT, HANDLE_MOVE, HANDLE_MOVE_DONE, INPUT, NONE };
 /**
  * Stands for selection indexes
  * We use base/destination to indicate the start/end position because of uncertain direction.
@@ -34,8 +35,8 @@ struct TextSelector {
 
     void Update(int32_t base, int32_t destination)
     {
-        baseOffset = base;
-        destinationOffset = destination;
+        baseOffset = std::min(base, destination);
+        destinationOffset = std::max(base, destination);
     }
 
     // Usually called when none is selected.
