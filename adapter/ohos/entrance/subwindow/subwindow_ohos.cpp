@@ -142,6 +142,7 @@ void SubwindowOhos::InitContainer()
         auto subPipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(
             Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext());
         CHECK_NULL_VOID(subPipelineContextNG);
+        subPipelineContextNG->SetParentPipeline(parentContainer->GetPipelineContext());
         subPipelineContextNG->SetupSubRootElement();
         return;
     }

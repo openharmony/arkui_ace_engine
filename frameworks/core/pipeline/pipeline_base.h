@@ -722,6 +722,21 @@ public:
         isForegroundCalled_ = isForegroundCalled;
     }
 
+    void SetIsSubPipeline(bool isSubPipeline)
+    {
+        isSubPipeline_ = isSubPipeline;
+    }
+
+    bool IsSubPipeline() const
+    {
+        return isSubPipeline_;
+    }
+
+    void SetParentPipeline(const WeakPtr<PipelineBase>& pipeline)
+    {
+        parentPipeline_ = pipeline;
+    }
+
 protected:
     void TryCallNextFrameLayoutCallback()
     {
@@ -753,6 +768,7 @@ protected:
     bool isRightToLeft_ = false;
     bool isFullWindow_ = false;
     bool installationFree_ = false;
+    bool isSubPipeline_ = false;
 
     bool isJsPlugin_ = false;
     int32_t minPlatformVersion_ = 0;
@@ -795,6 +811,8 @@ protected:
     StartAbilityHandler startAbilityHandler_;
     ActionEventHandler actionEventHandler_;
     RefPtr<PlatformResRegister> platformResRegister_;
+
+    WeakPtr<PipelineBase> parentPipeline_;
 
     std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
 
