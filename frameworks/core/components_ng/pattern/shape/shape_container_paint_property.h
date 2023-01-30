@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_CONTAINER_PAINT_PROPERTY_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_CONTAINER_PAINT_PROPERTY_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_SHAPE_CONTAINER_PAINT_PROPERTY_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_SHAPE_CONTAINER_PAINT_PROPERTY_H
 
 #include <string>
 
@@ -27,16 +27,15 @@
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
-
-class ACE_EXPORT ContainerPaintProperty : public ShapePaintProperty {
-    DECLARE_ACE_TYPE(ContainerPaintProperty, ShapePaintProperty);
+class ACE_EXPORT ShapeContainerPaintProperty : public ShapePaintProperty {
+    DECLARE_ACE_TYPE(ShapeContainerPaintProperty, ShapePaintProperty);
 
 public:
-    ContainerPaintProperty() = default;
-    ~ContainerPaintProperty() override = default;
+    ShapeContainerPaintProperty() = default;
+    ~ShapeContainerPaintProperty() override = default;
     RefPtr<PaintProperty> Clone() const override
     {
-        auto value = MakeRefPtr<ContainerPaintProperty>();
+        auto value = MakeRefPtr<ShapeContainerPaintProperty>();
         value->PaintProperty::UpdatePaintProperty(DynamicCast<PaintProperty>(this));
         value->propImageMesh_ = CloneImageMesh();
         value->propShapeViewBox_ = CloneShapeViewBox();
@@ -78,7 +77,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShapeViewBox, ShapeViewBox, PROPERTY_UPDATE_RENDER);
 
 private:
-    ACE_DISALLOW_COPY_AND_MOVE(ContainerPaintProperty);
+    ACE_DISALLOW_COPY_AND_MOVE(ShapeContainerPaintProperty);
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_CONTAINER_PAINT_PROPERTY_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_SHAPE_CONTAINER_PAINT_PROPERTY_H
