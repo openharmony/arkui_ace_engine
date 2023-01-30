@@ -141,6 +141,7 @@ JSRef<JSArray> GenMeasureChildArray(std::list<RefPtr<NG::LayoutWrapper>> childre
 
 void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     ACE_SCOPED_TRACE("ViewFunctions::ExecuteLayout");
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
@@ -155,6 +156,7 @@ void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper)
 
 void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     ACE_SCOPED_TRACE("ViewFunctions::ExecuteMeasure");
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
@@ -172,6 +174,7 @@ void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
 
 void ViewFunctions::ExecuteReload(bool deep)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     ACE_SCOPED_TRACE("ViewFunctions::ExecuteReload");
     auto func = jsReloadFunc_.Lock();
     if (!func.IsEmpty()) {
@@ -185,6 +188,7 @@ void ViewFunctions::ExecuteReload(bool deep)
 
 void ViewFunctions::ExecuteForceNodeRerender(int32_t elemId)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     ACE_SCOPED_TRACE("ViewFunctions::ExecuteForceNodeRerender");
     auto func = jsForceRerenderNodeFunc_.Lock();
     if (!func.IsEmpty()) {
@@ -379,6 +383,7 @@ ViewFunctions::ViewFunctions(const JSRef<JSObject>& jsObject, const JSRef<JSFunc
 
 void ViewFunctions::ExecuteRender()
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     if (jsRenderFunc_.IsEmpty()) {
         LOGE("no render function in View!");
         return;
@@ -591,6 +596,7 @@ void ViewFunctions::Destroy()
 // Partial update method
 void ViewFunctions::ExecuteRerender()
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     if (jsRerenderFunc_.IsEmpty()) {
         LOGE("no rerender function in View!");
         return;
