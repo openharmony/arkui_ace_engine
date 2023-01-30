@@ -270,6 +270,20 @@ void ListItemGroupLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper,
             currentStartPos, currentEndPos);
     }
 
+    currentStartPos = startPos - spaceWidth_;
+    currentIndex = startIndex;
+    while (currentIndex > 0  && GreatOrEqual(currentStartPos, startPos_ - referencePos_)) {
+        currentEndPos = currentStartPos;
+        int32_t count = MeasureALineBackward(layoutWrapper, layoutConstraint, currentIndex,
+            currentEndPos, currentStartPos);
+        if (count == 0) {
+            break;
+        }
+        if (currentIndex > 0) {
+            currentStartPos = currentStartPos - spaceWidth_;
+        }
+    }
+
     // Mark inactive in wrapper.
     for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {
         if (GreatOrEqual(pos->second.second, startPos_ - referencePos_)) {
