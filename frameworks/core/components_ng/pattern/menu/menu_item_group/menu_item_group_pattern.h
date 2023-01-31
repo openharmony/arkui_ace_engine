@@ -83,10 +83,23 @@ public:
         CHECK_NULL_VOID(frameNode);
     }
 
+    void AddHeaderContent(const RefPtr<NG::FrameNode>& headerContent)
+    {
+        headerContent_ = headerContent;
+    }
+
+    void AddFooterContent(const RefPtr<NG::FrameNode>& footerContent)
+    {
+        footerContent_ = footerContent;
+    }
+
 private:
     int32_t headerIndex_ = -1;
     int32_t footerIndex_ = -1;
     int32_t itemStartIndex_ = 0;
+
+    RefPtr<FrameNode> headerContent_;
+    RefPtr<FrameNode> footerContent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemGroupPattern);
 };
