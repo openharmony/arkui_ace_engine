@@ -1288,4 +1288,10 @@ bool FrameNode::MarkRemoving()
     return pendingRemove;
 }
 
+void FrameNode::AddHotZoneRect(const DimensionRect& hotZoneRect) const
+{
+    auto gestureHub = GetOrCreateGestureEventHub();
+    gestureHub->AddResponseRect(hotZoneRect);
+}
+
 } // namespace OHOS::Ace::NG

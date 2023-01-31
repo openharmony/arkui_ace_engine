@@ -301,6 +301,8 @@ public:
 
     bool MarkRemoving() override;
 
+    void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;

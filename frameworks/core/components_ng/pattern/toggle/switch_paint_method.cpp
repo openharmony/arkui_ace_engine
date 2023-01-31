@@ -58,12 +58,9 @@ void SwitchPaintMethod::PaintContent(
     auto radius = height / 2;
     auto actualGap = radiusGap_.ConvertToPx() * height /
                      (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
-
     auto xOffset = contentOffset.GetX();
     auto yOffset = contentOffset.GetY();
-
     pointRadius_ = radius - actualGap;
-
     clickEffectColor_ = switchTheme->GetClickEffectColor();
     hoverColor_ = switchTheme->GetHoverColor();
     hoverRadius_ = switchTheme->GetHoverRadius();
@@ -77,7 +74,6 @@ void SwitchPaintMethod::PaintContent(
     actualHeight_ = height + defaultHeightGap;
     hoverRadius_ =
         hoverRadius_ * height / (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
-        
     if (isTouch_) {
         OffsetF touchBoardOffset;
         touchBoardOffset.SetX(xOffset - (actualWidth_ - width) / 2.0);

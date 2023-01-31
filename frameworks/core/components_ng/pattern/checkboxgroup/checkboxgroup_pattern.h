@@ -68,8 +68,13 @@ public:
         const RefPtr<LayoutWrapper>& dirty, bool /*skipMeasure*/, bool /*skipLayout*/) override
     {
         auto geometryNode = dirty->GetGeometryNode();
-        offset_ = geometryNode->GetContentOffset();
-        size_ = geometryNode->GetContentSize();
+        auto offset = geometryNode->GetContentOffset();
+        auto size = geometryNode->GetContentSize();
+        if (offset != offset_ || size != size_) {
+            offset_ = offset;
+            size_ = size;
+            AddHotZoneRect();
+        }
         return true;
     }
 
@@ -140,6 +145,7 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void AddHotZoneRect();
 
     std::optional<std::string> preGroup_;
     bool isAddToMap_ = true;
