@@ -64,6 +64,7 @@ public:
     }
     void SetScrollableAxis(Axis axis);
     const RefPtr<GestureEventHub>& GetGestureHub();
+    const RefPtr<InputEventHub>& GetInputHub();
 
     // edgeEffect
     const RefPtr<ScrollEdgeEffect>& GetScrollEdgeEffect() const

@@ -54,6 +54,15 @@ const RefPtr<GestureEventHub>& ScrollablePattern::GetGestureHub()
     return hub->GetOrCreateGestureEventHub();
 }
 
+const RefPtr<InputEventHub>& ScrollablePattern::GetInputHub()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(host, nullptr);
+    return hub->GetOrCreateInputEventHub();
+}
+
 bool ScrollablePattern::OnScrollCallback(float offset, int32_t source)
 {
     if (source == SCROLL_FROM_START) {
@@ -203,14 +212,18 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gestureHub = GetGestureHub();
+    auto inputHub = GetInputHub();
     CHECK_NULL_VOID(gestureHub);
+    CHECK_NULL_VOID(inputHub);
     scrollBar_->SetGestureEvent();
+    scrollBar_->SetMouseEvent();
     scrollBar_->SetMarkNeedRenderFunc([weak = AceType::WeakClaim(AceType::RawPtr(host))]() {
         auto host = weak.Upgrade();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     });
     gestureHub->AddTouchEvent(scrollBar_->GetTouchEvent());
+    inputHub->AddOnMouseEvent(scrollBar_->GetMouseEvent());
 }
 
 void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
