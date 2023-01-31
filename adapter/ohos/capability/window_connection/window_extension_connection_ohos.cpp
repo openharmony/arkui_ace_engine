@@ -54,7 +54,6 @@ public:
         auto rect = nodeStrong->GetPaintRect();
         auto size = rect.GetSize();
         rsSurfaceNode->SetBounds(0, 0, static_cast<float>(size.Width()), static_cast<float>(size.Height()));
-        rsSurfaceNode->SetBackgroundColor(Color::WHITE.GetValue());
         if (!originNode_) {
             originNode_ = nodeStrong->GetRSNode();
         }
