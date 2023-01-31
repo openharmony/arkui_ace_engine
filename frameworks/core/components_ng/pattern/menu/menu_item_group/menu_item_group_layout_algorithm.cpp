@@ -21,7 +21,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -29,13 +28,13 @@ namespace OHOS::Ace::NG {
 void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto host = layoutWrapper->GetHostNode();
-    auto verInterval = static_cast<float>(VERTICAL_INTERVAL_PHONE.ConvertToPx());
+    auto verInterval = static_cast<float>(VERTICAL_INTERVAL.ConvertToPx());
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    auto groupDividerPadding_ = theme->GetDividerPaddingVertical() * 2 + DEFAULT_STROKE_WIDTH;
+    auto groupDividerPadding_ = theme->GetDividerPaddingVertical() * 2 + theme->GetDefaultDividerWidth();
 
     const auto& props = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(props);
@@ -134,7 +133,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     float headerPadding = (needHeaderPadding_ ? static_cast<float>(groupDividerPadding_.ConvertToPx()) : 0.0f) +
-                          static_cast<float>(VERTICAL_INTERVAL_PHONE.ConvertToPx());
+                          static_cast<float>(VERTICAL_INTERVAL.ConvertToPx());
     LayoutIndex(wrapper, OffsetF(static_cast<float>(theme->GetIconContentPadding().ConvertToPx()), headerPadding));
 }
 
@@ -153,7 +152,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     float footerPadding = (needFooterPadding_ ? static_cast<float>(groupDividerPadding_.ConvertToPx()) : 0.0f) +
-                          static_cast<float>(VERTICAL_INTERVAL_PHONE.ConvertToPx());
+                          static_cast<float>(VERTICAL_INTERVAL.ConvertToPx());
     LayoutIndex(wrapper, OffsetF(static_cast<float>(theme->GetIconContentPadding().ConvertToPx()),
                              (groupHeight - footerHeight - footerPadding)));
 }

@@ -27,24 +27,12 @@
 
 namespace OHOS::Ace {
 
-constexpr int MENU_ANIMATION_DURATION = 150;
 constexpr double SELECT_OPTION_LEFT_LENGTH = 16.0;
 constexpr double SELECT_OPTION_TOP_LENGTH = 15.0;
 constexpr double SELECT_OPTION_RIGHT_LENGTH = 16.0;
 constexpr double SELECT_OPTION_BOTTOM_LENGTH = 15.0;
-constexpr Dimension SELECT_MENU_PADDING = 4.0_vp;
-constexpr Dimension OPTION_MIN_HEIGHT = 48.0_vp;
-constexpr Dimension OUT_PADDING = 4.0_vp;
-constexpr Dimension CONTENT_SPINNER_PADDING = 8.0_vp;
-constexpr Dimension MENU_ANIMATION_MOVE = 30.0_px;
+constexpr Dimension VERTICAL_INTERVAL = 14.4_vp;
 
-constexpr Dimension SPINNER_WIDTH = 12.0_vp;
-constexpr Dimension SPINNER_HEIGHT = 24.0_vp;
-constexpr Dimension DEFAULT_STROKE_WIDTH = 1.0_vp;
-const NG::CalcLength SELECT_MIN_WIDTH(66.0_vp);
-const NG::CalcLength SELECT_MIN_HEIGHT(40.0_vp);
-const NG::CalcLength ICON_SIDE_LENGTH(24.0_vp);
-const NG::CalcLength CONTENT_MARGIN(8.0_vp);
 /**
  * SelectTheme defines color and styles of SelectComponent. SelectTheme should be build
  * using SelectTheme::Builder.
@@ -104,7 +92,6 @@ public:
             theme->optionPadding_ = Edge(SELECT_OPTION_LEFT_LENGTH, SELECT_OPTION_TOP_LENGTH,
                 SELECT_OPTION_RIGHT_LENGTH, SELECT_OPTION_BOTTOM_LENGTH, DimensionUnit::VP);
             theme->optionInterval_ = theme->isTV_ ? Dimension(6.0, DimensionUnit::VP) : 0.0_vp;
-            theme->optionMinHeight_ = OPTION_MIN_HEIGHT;
             theme->tvFocusTextColor_ = Color(0xE6000000);
             theme->tvNormalBackColor_ = Color(0x33FFFFFF);
             theme->tvBackColor_ = (theme->isTV_ ? Color(0x99000000) : Color::TRANSPARENT);
@@ -147,7 +134,9 @@ public:
             theme->secondaryFontColor_ =
                 pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->fontColor_)
                     .BlendOpacity(pattern->GetAttr<double>("menu_text_secondary_alpha", defaultSecondaryColorAlpha));
-            theme->menuFontColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->menuFontColor_);
+            theme->menuFontColor_ =
+                pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->menuFontColor_)
+                    .BlendOpacity(pattern->GetAttr<double>("menu_text_primary_alpha", defaultTextColorAlpha));
             theme->disabledMenuFontColor_ = theme->menuFontColor_.BlendOpacity(
                 pattern->GetAttr<double>("menu_text_tertiary_alpha", defaultTertiaryColorAlpha));
             theme->clickedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_CLICKED, theme->clickedColor_);
@@ -170,6 +159,21 @@ public:
             theme->menuIconColor_ = pattern->GetAttr<Color>("menu_icon_color", theme->menuIconColor_);
             theme->dividerPaddingVertical_ =
                 pattern->GetAttr<Dimension>("divider_padding_vertical", theme->dividerPaddingVertical_);
+            theme->optionMinHeight_ = pattern->GetAttr<Dimension>("option_min_height", theme->optionMinHeight_);
+            theme->selectMenuPadding_ = pattern->GetAttr<Dimension>("select_menu_padding", theme->selectMenuPadding_);
+            theme->outPadding_ = pattern->GetAttr<Dimension>("out_padding", theme->outPadding_);
+            theme->contentSpinnerPadding_ =
+                pattern->GetAttr<Dimension>("content_spinner_padding", theme->contentSpinnerPadding_);
+            theme->menuAnimationOffset_ =
+                pattern->GetAttr<Dimension>("menu_animation_offset", theme->menuAnimationOffset_);
+            theme->spinnerWidth_ = pattern->GetAttr<Dimension>("spinner_width", theme->spinnerWidth_);
+            theme->spinnerHeight_ = pattern->GetAttr<Dimension>("spinner_height", theme->spinnerHeight_);
+            theme->defaultDividerWidth_ =
+                pattern->GetAttr<Dimension>("default_divider_width", theme->defaultDividerWidth_);
+            theme->selectMinWidth_ = pattern->GetAttr<Dimension>("select_min_width", theme->selectMinWidth_);
+            theme->selectMinHeight_ = pattern->GetAttr<Dimension>("select_min_height", theme->selectMinHeight_);
+            theme->iconSideLength_ = pattern->GetAttr<Dimension>("icon_side_length", theme->iconSideLength_);
+            theme->contentMargin_ = pattern->GetAttr<Dimension>("content_margin", theme->contentMargin_);
         }
     };
 
@@ -237,6 +241,18 @@ public:
         theme->iconContentPadding_ = iconContentPadding_;
         theme->dividerPaddingVertical_ = dividerPaddingVertical_;
         theme->menuIconColor_ = menuIconColor_;
+        theme->optionMinHeight_ = optionMinHeight_;
+        theme->selectMenuPadding_ = selectMenuPadding_;
+        theme->outPadding_ = outPadding_;
+        theme->contentSpinnerPadding_ = contentSpinnerPadding_;
+        theme->menuAnimationOffset_ = menuAnimationOffset_;
+        theme->spinnerWidth_ = spinnerWidth_;
+        theme->spinnerHeight_ = spinnerHeight_;
+        theme->defaultDividerWidth_ = defaultDividerWidth_;
+        theme->selectMinWidth_ = selectMinWidth_;
+        theme->selectMinHeight_ = selectMinHeight_;
+        theme->iconSideLength_ = iconSideLength_;
+        theme->contentMargin_ = contentMargin_;
         return theme;
     }
 
@@ -650,6 +666,61 @@ public:
         return dividerPaddingVertical_;
     }
 
+    const Dimension& GetSelectMenuPadding() const
+    {
+        return selectMenuPadding_;
+    }
+
+    const Dimension& GetOutPadding() const
+    {
+        return outPadding_;
+    }
+
+    const Dimension& GetContentSpinnerPadding() const
+    {
+        return contentSpinnerPadding_;
+    }
+
+    const Dimension& GetMenuAnimationOffset() const
+    {
+        return menuAnimationOffset_;
+    }
+
+    const Dimension& GetSpinnerWidth() const
+    {
+        return spinnerWidth_;
+    }
+
+    const Dimension& GetSpinnerHeight() const
+    {
+        return spinnerHeight_;
+    }
+
+    const Dimension& GetDefaultDividerWidth() const
+    {
+        return defaultDividerWidth_;
+    }
+
+    const Dimension& GetSelectMinWidth() const
+    {
+        return selectMinWidth_;
+    }
+
+    const Dimension& GetSelectMinHeight() const
+    {
+        return selectMinHeight_;
+    }
+
+    const Dimension& GetIconSideLength() const
+    {
+        return iconSideLength_;
+    }
+
+    const Dimension& GetContentMargin() const
+    {
+        return contentMargin_;
+    }
+
 private:
     Color disabledColor_;
     Color clickedColor_;
@@ -702,6 +773,19 @@ private:
     Dimension menuIconPadding_;
     Dimension iconContentPadding_;
     Dimension dividerPaddingVertical_;
+
+    Dimension selectMenuPadding_;
+    Dimension outPadding_;
+    Dimension contentSpinnerPadding_;
+    Dimension menuAnimationOffset_;
+    Dimension spinnerWidth_;
+    Dimension spinnerHeight_;
+    Dimension defaultDividerWidth_;
+
+    Dimension selectMinWidth_;
+    Dimension selectMinHeight_;
+    Dimension iconSideLength_;
+    Dimension contentMargin_;
 
     Color tvFocusTextColor_;
     Color tvNormalBackColor_;

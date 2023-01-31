@@ -87,7 +87,10 @@ void SelectPattern::ShowSelectMenu()
     CHECK_NULL_VOID(select);
     auto offset = selectNode->GetPaintRectOffset();
     offset.AddY(select->GetSelectSize().Height());
-    offset.AddY(static_cast<float>(SELECT_MENU_PADDING.ConvertToPx()));
+
+    auto selectTheme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    offset.AddY(static_cast<float>(selectTheme->GetSelectMenuPadding().ConvertToPx()));
     overlayManager->ShowMenu(selectNode->GetId(), offset, menu_);
 }
 
@@ -283,7 +286,7 @@ void SelectPattern::BuildChild()
     CHECK_NULL_VOID(rowProps);
     rowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     rowProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    rowProps->UpdateSpace(CONTENT_SPINNER_PADDING);
+    rowProps->UpdateSpace(theme->GetContentSpinnerPadding());
     text_ = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<TextPattern>());
     CHECK_NULL_VOID(text_);
@@ -317,7 +320,7 @@ void SelectPattern::BuildChild()
     auto props = select->GetLayoutProperty();
     CHECK_NULL_VOID(props);
     props->UpdateAlignment(Alignment::CENTER);
-    props->UpdateCalcMinSize(CalcSize(SELECT_MIN_WIDTH, SELECT_MIN_HEIGHT));
+    props->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinWidth()), CalcLength(theme->GetSelectMinHeight())));
 }
 
 void SelectPattern::SetValue(const std::string& value)
@@ -590,9 +593,6 @@ void SelectPattern::UpdateText(int32_t index)
 
 void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps, const RefPtr<SelectTheme>& theme)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textTheme = pipeline->GetTheme<TextFieldTheme>();
     textProps->UpdateFontSize(theme->GetFontSize());
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateTextColor(theme->GetFontColor());
@@ -600,17 +600,14 @@ void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps, c
     textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textProps->UpdateMaxLines(SELECT_ITSELF_TEXT_LINES);
     MarginProperty margin;
-    margin.left = CONTENT_MARGIN;
+    margin.left = CalcLength(theme->GetContentMargin());
     textProps->UpdateMargin(margin);
 }
 
 void SelectPattern::InitSpinner(
     const RefPtr<FrameNode>& spinner, const RefPtr<IconTheme>& iconTheme, const RefPtr<SelectTheme>& selectTheme)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
     ImageSourceInfo imageSourceInfo;
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
     auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SPINNER);
     imageSourceInfo.SetSrc(iconPath);
     imageSourceInfo.SetFillColor(selectTheme->GetSpinnerColor());
@@ -618,12 +615,12 @@ void SelectPattern::InitSpinner(
     auto spinnerLayoutProperty = spinner->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(spinnerLayoutProperty);
     spinnerLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    CalcSize idealSize = { CalcLength(SPINNER_WIDTH), CalcLength(SPINNER_HEIGHT) };
+    CalcSize idealSize = { CalcLength(selectTheme->GetSpinnerWidth()), CalcLength(selectTheme->GetSpinnerHeight()) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     spinnerLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
     MarginProperty margin;
-    margin.right = CONTENT_MARGIN;
+    margin.right = CalcLength(selectTheme->GetContentMargin());
     spinnerLayoutProperty->UpdateMargin(margin);
 
     auto spinnerRenderProperty = spinner->GetPaintProperty<ImageRenderProperty>();

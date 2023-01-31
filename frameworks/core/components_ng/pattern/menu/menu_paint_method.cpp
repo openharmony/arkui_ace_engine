@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/divider_painter.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -54,7 +55,11 @@ void MenuPaintMethod::PaintGradient(RSCanvas& canvas, PaintWrapper* paintWrapper
     auto menuSize = paintWrapper->GetGeometryNode()->GetFrameSize();
 
     // create gradientRect
-    const double outPadding = OUT_PADDING.ConvertToPx();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    const double outPadding = theme->GetOutPadding().ConvertToPx();
     const double gradientHeight = GRADIENT_HEIGHT.ConvertToPx();
     LOGD("GRADIENT_HEIGHT = %{public}f px", gradientHeight);
     auto yPos = isTop ? outPadding : menuSize.Height() - gradientHeight;

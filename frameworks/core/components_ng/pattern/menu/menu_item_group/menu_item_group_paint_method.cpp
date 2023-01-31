@@ -20,7 +20,6 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_ng/pattern/shape/rect_paint_property.h"
 #include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/drawing.h"
@@ -62,7 +61,7 @@ void MenuItemGroupPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* pain
     RSPath path;
     // draw divider above content, length = content width
     path.AddRect(horInterval, verInterval, groupSize.Width() - horInterval,
-        verInterval + static_cast<float>(DEFAULT_STROKE_WIDTH.ConvertToPx()));
+        verInterval + static_cast<float>(selectTheme->GetDefaultDividerWidth().ConvertToPx()));
 
     RSBrush brush;
     auto dividerColor = selectTheme->GetLineColor();

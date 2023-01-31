@@ -18,7 +18,6 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
-#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -33,7 +32,11 @@ void NavigationMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     float x = HorizontalLayout(size, position_.GetX());
     float y = VerticalLayout(size, position_.GetY());
-    auto outPadding = OUT_PADDING.ConvertToPx();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto outPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
     auto child = layoutWrapper->GetOrCreateChildByIndex(0, false);
     float offsetX = 0.0;
     if (child) {
