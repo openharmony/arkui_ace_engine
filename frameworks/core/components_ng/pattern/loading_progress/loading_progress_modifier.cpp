@@ -94,7 +94,7 @@ void LoadingProgressModifier::DrawOrbit(DrawingContext& context, float date, flo
     canvas.Save();
     canvas.Translate(center.GetX(), center.GetY());
     std::vector<RSPoint> points;
-    for (int i = 0; i <= pointCounts; i++) {
+    for (int i = 0; i < pointCounts; i++) {
         RSPoint point;
         float cometAngal = i * COMET_TAIL_ANGLE + angle + TOTAL_ANGLE - pointCounts * COMET_TAIL_ANGLE - MOVE_ANGLE;
         float rad = cometAngal * PI_NUM / (TOTAL_ANGLE * HALF);
@@ -104,7 +104,7 @@ void LoadingProgressModifier::DrawOrbit(DrawingContext& context, float date, flo
     }
     std::vector<RSPoint> distPoints(pointCounts);
     matrix.MapPoints(distPoints, points, points.size());
-    for (int i = 0; i <= pointCounts; i++) {
+    for (int i = 0; i < pointCounts; i++) {
         RSPoint pointCenter = distPoints[i];
         float setAlpha = colorAlpha * pow(static_cast<float>(i) / pointCounts, DECAY_FACTOR);
         if (NearZero(setAlpha)) {
