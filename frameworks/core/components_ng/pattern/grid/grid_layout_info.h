@@ -46,10 +46,37 @@ struct GridLayoutInfo {
         startIndex_ = startLine->second.begin()->second;
     }
 
+    void UpdateEndLine(float mainSize, float mainGap)
+    {
+        if (mainSize >= lastMainSize_) {
+            return;
+        }
+        for (auto i = startMainLineIndex_; i < endMainLineIndex_; ++i) {
+            mainSize -= (lineHeightMap_[i] + mainGap);
+            if (LessOrEqual(mainSize + mainGap, 0)) {
+                endMainLineIndex_ = i;
+                break;
+            }
+        }
+    }
+    float GetAverageLineHeight()
+    {
+        float totalHeight = 0;
+        int32_t totalRow = 0;
+        for (const auto& record : lineHeightMap_) {
+            if (record.second > 0) {
+                totalRow++;
+                totalHeight += record.second;
+            }
+        }
+        return totalRow > 0 ? totalHeight / totalRow : 0;
+    }
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f;
     float prevOffset_ = 0.0f;
+    float lastMainSize_ = 0.0f;
 
     // index of first and last GridItem in viewport
     int32_t startIndex_ = 0;
