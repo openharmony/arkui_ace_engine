@@ -225,6 +225,16 @@ std::string ViewStackProcessor::ProcessViewId(const std::string& viewId)
     return viewKey_.empty() ? viewId : viewKey_ + "_" + viewId;
 }
 
+void ViewStackProcessor::SetImplicitAnimationOption(const AnimationOption& option)
+{
+    implicitAnimationOption_ = option;
+}
+
+const AnimationOption& ViewStackProcessor::GetImplicitAnimationOption() const
+{
+    return implicitAnimationOption_;
+}
+
 ScopedViewStackProcessor::ScopedViewStackProcessor()
 {
     std::swap(instance_, ViewStackProcessor::instance);

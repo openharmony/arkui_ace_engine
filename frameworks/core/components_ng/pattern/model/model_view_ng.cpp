@@ -21,8 +21,21 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/model/model_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+
+ModelViewNG::ModelViewNG()
+{
+    RefPtr<PipelineBase> pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline) {
+        cameraPosition_.SetContextAndCallbacks(pipeline,
+            std::bind(&ModelViewNG::PerformCameraUpdate, this));
+    } else {
+        LOGE("ModelViewNG() pipeline context is null");
+    }
+}
 
 void ModelViewNG::Create(const std::string& src)
 {
@@ -32,6 +45,7 @@ void ModelViewNG::Create(const std::string& src)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::MODEL_ETS_TAG, nodeId, [&nodeId]() { return AceType::MakeRefPtr<ModelPattern>(nodeId); });
     stack->Push(frameNode);
+    frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     ACE_UPDATE_LAYOUT_PROPERTY(ModelLayoutProperty, NeedsSceneSetup, false);
     ACE_UPDATE_LAYOUT_PROPERTY(ModelLayoutProperty, ModelSource, src);
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelLights, {});
@@ -60,10 +74,18 @@ void ModelViewNG::SetTransparent(bool value)
 void ModelViewNG::SetCameraPosition(AnimatableFloat x, AnimatableFloat y, AnimatableFloat z,
     AnimatableFloat distance, bool isAngular)
 {
-    LOGD("MODEL_NG: cameraPosition: [%.2f, %.2f %.2f]", x.GetValue(), y.GetValue(), z.GetValue());
-    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, CameraPosition, OHOS::Ace::Vec3(x, y, z));
-    LOGD("MODEL_NG: cameraDistance: %.2f", distance.GetValue());
-    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, CameraDistance, distance);
+    LOGD("MODEL_NG: cameraPosition: [%.2f, %.2f %.2f], distance: %.2f",
+        x.GetValue(), y.GetValue(), z.GetValue(), distance.GetValue());
+    if (NearEqual(cameraPosition_.GetDistance().GetValue(), std::numeric_limits<float>::max())) {
+        // Initial update. Set the values directly without the animation if any.
+        cameraPosition_.SetDistance(AnimatableFloat(distance.GetValue()));
+        cameraPosition_.SetVec(OHOS::Ace::Vec3(x.GetValue(), y.GetValue(), z.GetValue()));
+        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, CameraDistance, distance);
+        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, CameraPosition, OHOS::Ace::Vec3(x, y, z));
+    } else {
+        cameraPosition_.SetDistance(distance);
+        cameraPosition_.SetVec(OHOS::Ace::Vec3(x, y, z));
+    }
     LOGD("MODEL_NG: cameraIsAngular: %s", isAngular ? "true" : "false");
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, CameraIsAngular, isAngular);
 }
@@ -133,6 +155,26 @@ void ModelViewNG::SetHeight(Dimension& height)
         height.SetValue(0.0);
     }
     ViewAbstract::SetHeight(CalcLength(height));
+}
+
+void ModelViewNG::PerformCameraUpdate()
+{
+    LOGD("ModelViewNG::PerformCameraUpdate() position: %f, %f, %f, distance: %f", cameraPosition_.GetX(),
+        cameraPosition_.GetY(), cameraPosition_.GetZ(), cameraPosition_.GetDistance().GetValue());
+    auto frameNode = frameNode_.Upgrade();
+    if (!frameNode) {
+        LOGE("frameNode is null!");
+        return;
+    }
+
+    auto paintProperty = frameNode->GetPaintProperty<ModelPaintProperty>();
+    if (paintProperty) {
+        paintProperty->UpdateCameraDistance(cameraPosition_.GetDistance());
+        paintProperty->UpdateCameraPosition(cameraPosition_.GetVec());
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    } else {
+        LOGE("ModelPaintProperty is null");
+    }
 }
 
 } // namespace OHOS::Ace::NG

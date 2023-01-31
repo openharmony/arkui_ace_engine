@@ -173,6 +173,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     CHECK_NULL_VOID(pipelineContextBase);
     if (info[0]->IsNull() || !info[0]->IsObject()) {
         if (Container::IsCurrentUseNewPipeline()) {
+            NG::ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
             NG::ViewStackProcessor::GetInstance()->FlushImplicitAnimation();
             pipelineContextBase->CloseImplicitAnimation();
         } else {
@@ -197,6 +198,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     if (animationArgs->IsNull()) {
         LOGE("Js Parse failed. animationArgs is null.");
         if (Container::IsCurrentUseNewPipeline()) {
+            NG::ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
             pipelineContextBase->CloseImplicitAnimation();
         } else {
             ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
@@ -209,6 +211,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         option.SetAllowRunningAsynchronously(true);
     }
     if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
         pipelineContextBase->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
     } else {
         ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
