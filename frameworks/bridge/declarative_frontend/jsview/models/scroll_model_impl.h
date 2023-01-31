@@ -30,6 +30,7 @@ public:
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
     void SetAxis(Axis axis) override;
     void SetOnScrollBegin(NG::ScrollBeginEvent&& event) override;
+    void SetOnScrollFrameBegin(NG::ScrollFrameBeginEvent&& event) override;
     void SetOnScroll(NG::OnScrollEvent&& event) override;
     void SetOnScrollEdge(NG::ScrollEdgeEvent&& event) override;
     void SetOnScrollEnd(NG::ScrollEndEvent&& event) override;

@@ -213,7 +213,7 @@ void JSList::ScrollCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
         auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                            const Dimension& scrollOffset, const V2::ScrollState& scrollState) {
+                            const Dimension& scrollOffset, const ScrollState& scrollState) {
             auto params = ConvertToJSValues(scrollOffset, scrollState);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return;
@@ -449,6 +449,36 @@ void JSList::ScrollBeginCallback(const JSCallbackInfo& args)
     }
 }
 
+void JSList::ScrollFrameBeginCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollBegin = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                 const Dimension& offset, const ScrollState& state) -> ScrollFrameResult {
+            ScrollFrameResult scrollRes { .offset = offset };
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollRes);
+            auto params = ConvertToJSValues(offset, state);
+            auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+            if (result.IsEmpty()) {
+                LOGE("Error calling onScrollFrameBegin, result is empty.");
+                return scrollRes;
+            }
+
+            if (!result->IsObject()) {
+                LOGE("Error calling onScrollFrameBegin, result is not object.");
+                return scrollRes;
+            }
+
+            auto resObj = JSRef<JSObject>::Cast(result);
+            auto dxRemainValue = resObj->GetProperty("offsetRemain");
+            if (dxRemainValue->IsNumber()) {
+                scrollRes.offset = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
+            }
+            return scrollRes;
+        };
+        ListModel::GetInstance()->SetOnScrollFrameBegin(std::move(onScrollBegin));
+    }
+}
+
 void JSList::JSBind(BindingTarget globalObj)
 {
     JSClass<JSList>::Declare("List");
@@ -476,6 +506,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("onItemMove", &JSList::ItemMoveCallback);
     JSClass<JSList>::StaticMethod("onScrollIndex", &JSList::ScrollIndexCallback);
     JSClass<JSList>::StaticMethod("onScrollBegin", &JSList::ScrollBeginCallback);
+    JSClass<JSList>::StaticMethod("onScrollFrameBegin", &JSList::ScrollFrameBeginCallback);
 
     JSClass<JSList>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSList>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
