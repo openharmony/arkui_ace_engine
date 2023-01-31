@@ -60,10 +60,18 @@ void ScrollBar::InitTheme()
     SetScrollable(true);
 }
 
-bool ScrollBar::InBarRegion(const Point& point) const
+bool ScrollBar::InBarTouchRegion(const Point& point) const
 {
     if (NeedScrollBar() && shapeMode_ == ShapeMode::RECT) {
         return touchRegion_.IsInRegion(point);
+    }
+    return false;
+}
+
+bool ScrollBar::InBarRegion(const Point& point) const
+{
+    if (NeedScrollBar() && shapeMode_ == ShapeMode::RECT) {
+        return barRect_.IsInRegion(point);
     }
     return false;
 }
@@ -223,10 +231,10 @@ void ScrollBar::SetGestureEvent()
             auto touch = info.GetTouches().front();
             if (touch.GetTouchType() == TouchType::DOWN) {
                 Point point(touch.GetLocalLocation().GetX(), touch.GetLocalLocation().GetY());
-                bool inRegion = scrollBar->InBarRegion(point);
-                scrollBar->SetPressed(inRegion);
-                scrollBar->SetDriving(inRegion);
-                if (inRegion) {
+                bool inTouchRegion = scrollBar->InBarTouchRegion(point);
+                scrollBar->SetPressed(inTouchRegion);
+                scrollBar->SetDriving(inTouchRegion);
+                if (inTouchRegion) {
                     scrollBar->PlayGrowAnimation();
                 }
                 if (scrollBar->scrollEndAnimator_ && !scrollBar->scrollEndAnimator_->IsStopped()) {
@@ -245,6 +253,26 @@ void ScrollBar::SetGestureEvent()
     }
     if (!touchAnimator_) {
         touchAnimator_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    }
+}
+
+void ScrollBar::SetMouseEvent()
+{
+    if (!mouseEvent_) {
+        mouseEvent_ = MakeRefPtr<InputEvent>([weak = WeakClaim(this)](MouseInfo& info) {
+            auto scrollBar = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(scrollBar);
+            Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
+            bool inRegion = scrollBar->InBarRegion(point);
+            if (inRegion && !scrollBar->isHover_) {
+                scrollBar->PlayGrowAnimation();
+                scrollBar->MarkNeedRender();
+            }
+            if (scrollBar->isHover_ && !inRegion) {
+                scrollBar->PlayShrinkAnimation();
+                scrollBar->MarkNeedRender();
+            }
+        });
     }
 }
 
@@ -269,6 +297,7 @@ void ScrollBar::PlayGrowAnimation()
     touchAnimator_->AddInterpolator(animation);
     touchAnimator_->SetDuration(BAR_EXPAND_DURATION);
     touchAnimator_->Play();
+    isHover_ = true;
 }
 
 void ScrollBar::PlayShrinkAnimation()
@@ -292,6 +321,7 @@ void ScrollBar::PlayShrinkAnimation()
     touchAnimator_->AddInterpolator(animation);
     touchAnimator_->SetDuration(BAR_SHRINK_DURATION);
     touchAnimator_->Play();
+    isHover_ = false;
 }
 
 void ScrollBar::PlayBarEndAnimation()

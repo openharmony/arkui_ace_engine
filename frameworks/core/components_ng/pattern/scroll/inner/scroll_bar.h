@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
+#include "core/components_ng/event/input_event.h"
 #include "core/components_ng/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
@@ -89,6 +90,7 @@ public:
         PositionMode positionMode = PositionMode::RIGHT);
     ~ScrollBar() override = default;
 
+    bool InBarTouchRegion(const Point& point) const;
     bool InBarRegion(const Point& point) const;
     bool NeedScrollBar() const;
     bool NeedPaint() const;
@@ -324,7 +326,13 @@ public:
         return touchEvent_;
     }
 
+    RefPtr<InputEvent> GetMouseEvent()
+    {
+        return mouseEvent_;
+    }
+
     void SetGestureEvent();
+    void SetMouseEvent();
     void FlushBarWidth();
     void PlayGrowAnimation();
     void PlayShrinkAnimation();
@@ -370,6 +378,7 @@ private:
 
     bool isPressed_ = false;
     bool isDriving_ = false; // false: scroll driving; true: bar driving
+    bool isHover_ = false;
 
     Offset paintOffset_;
     Size viewPortSize_;
@@ -377,6 +386,7 @@ private:
     double estimatedHeight_ = 0.0;
     uint8_t opacity_ = UINT8_MAX;
     RefPtr<TouchEventImpl> touchEvent_;
+    RefPtr<InputEvent> mouseEvent_;
     RefPtr<Animator> touchAnimator_;
     RefPtr<Animator> scrollEndAnimator_;
     std::function<void()> markNeedRenderFunc_;
