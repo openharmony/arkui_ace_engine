@@ -53,7 +53,15 @@ RefPtr<OHOS::Ace::Component> JSView::CreateComponent()
         return jsView ? jsView->InternalRender(component) : nullptr;
     };
 
-    auto elementFunction = [weak = AceType::WeakClaim(this), renderFunction](const RefPtr<ComposedElement>& element) {
+    auto removeFunction = [weak = AceType::WeakClaim(this)]() -> void {
+        auto jsView = weak.Upgrade();
+        if (jsView && jsView->jsViewFunction_) {
+            jsView->jsViewFunction_->ExecuteDisappear();
+        }
+    };
+
+    auto elementFunction = [weak = AceType::WeakClaim(this), renderFunction, removeFunction](
+                               const RefPtr<ComposedElement>& element) {
         auto jsView = weak.Upgrade();
         if (!jsView) {
             LOGE("the js view is nullptr in element function");
@@ -70,6 +78,7 @@ RefPtr<OHOS::Ace::Component> JSView::CreateComponent()
         // to state update it will call this callback to get the new child component.
         if (element) {
             element->SetRenderFunction(std::move(renderFunction));
+            element->SetRemoveFunction(std::move(removeFunction));
             if (jsView->jsViewFunction_ && jsView->jsViewFunction_->HasPageTransition()) {
                 auto pageTransitionFunction = [weak]() -> RefPtr<Component> {
                     auto jsView = weak.Upgrade();

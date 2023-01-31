@@ -495,4 +495,10 @@ void Element::MarkActive(bool active)
     }
 }
 
+void Element::UnregisterForElementProxy()
+{
+    for (const auto& child : GetChildren()) {
+        child->UnregisterForElementProxy();
+    }
+}
 } // namespace OHOS::Ace
