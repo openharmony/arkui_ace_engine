@@ -276,6 +276,7 @@ bool TextFieldPattern::UpdateCaretPosition()
         }
     } else if (caretUpdateType_ == CaretUpdateType::NONE) {
         if (GetEditingValue().text.empty()) {
+            UpdateSelection(0, 0);
             SetCaretOffsetXForEmptyText();
         } else {
             caretRect_.SetLeft(textRect_.GetX() + textRect_.Width());
@@ -430,6 +431,7 @@ bool TextFieldPattern::UpdateCaretPositionByMouseMovement()
 void TextFieldPattern::UpdateCaretOffsetByEvent()
 {
     if (textEditingValue_.text.empty()) {
+        UpdateSelection(0, 0);
         SetCaretOffsetXForEmptyText();
         return;
     }
@@ -498,6 +500,7 @@ void TextFieldPattern::UpdateSelectionOffset()
 void TextFieldPattern::UpdateCaretPositionByTextEdit()
 {
     if (textEditingValue_.text.empty()) {
+        UpdateSelection(0, 0);
         SetCaretOffsetXForEmptyText();
         return;
     }
@@ -1717,12 +1720,13 @@ void TextFieldPattern::SetMouseStyle(MouseFormat format)
 
 void TextFieldPattern::OnHover(bool isHover)
 {
+    LOGD("Textfield %{public}d %{public}s", GetHost()->GetId(), isHover ? "on hover" : "exit hover");
     if (enableTouchAndHoverEffect_) {
         auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
         CHECK_NULL_VOID(textfieldPaintProperty);
         auto renderContext = GetHost()->GetRenderContext();
         if (isHover) {
-            SetMouseStyle(MouseFormat::HAND_POINTING);
+            SetMouseStyle(HasFocus() ? MouseFormat::TEXT_CURSOR : MouseFormat::HAND_POINTING);
             renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetHoverBgColorValue(Color()));
             GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
             return;
@@ -1747,24 +1751,25 @@ void TextFieldPattern::HandleMouseEvent(const MouseInfo& info)
         StartTwinkling();
         lastTouchOffset_ = info.GetLocalLocation();
         caretUpdateType_ = CaretUpdateType::PRESSED;
-        SetMouseStyle(MouseFormat::HAND_GRABBING);
         selectionMode_ = SelectionMode::NONE;
         if (!focusHub->RequestFocusImmediately()) {
             LOGE("Request focus failed, cannot open input method");
             StopTwinkling();
+            SetMouseStyle(MouseFormat::HAND_GRABBING);
             return;
         }
+        SetMouseStyle(MouseFormat::TEXT_CURSOR);
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         return;
     }
     if (info.GetAction() == MouseAction::RELEASE) {
         LOGI("Handle mouse release");
-        caretUpdateType_ = CaretUpdateType::PRESSED;
+        caretUpdateType_ = CaretUpdateType::NONE;
         isMousePressed_ = false;
+        SetMouseStyle(HasFocus() ? MouseFormat::TEXT_CURSOR : MouseFormat::HAND_POINTING);
         if (!focusHub->IsCurrentFocus()) {
             return;
         }
-        SetMouseStyle(MouseFormat::HAND_POINTING);
         if (RequestKeyboard(false, true, true)) {
             auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
             CHECK_NULL_VOID(eventHub);
