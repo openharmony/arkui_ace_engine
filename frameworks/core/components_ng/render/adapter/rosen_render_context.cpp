@@ -519,6 +519,19 @@ void RosenRenderContext::OpacityAnimation(const AnimationOption& option, double 
         option.GetOnFinishEvent());
 }
 
+void RosenRenderContext::ScaleAnimation(const AnimationOption& option, double begin, double end)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetScale(begin);
+    AnimationUtils::Animate(
+        option,
+        [rsNode = rsNode_, endScale = end]() {
+            CHECK_NULL_VOID_NOLOG(rsNode);
+            rsNode->SetScale(endScale);
+        },
+        option.GetOnFinishEvent());
+}
+
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
     CHECK_NULL_VOID(rsNode_);

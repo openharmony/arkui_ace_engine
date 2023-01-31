@@ -109,10 +109,6 @@ private:
     void FocusDialog(const RefPtr<FrameNode>& dialogNode);
     void BlurDialog();
 
-    // helper functions to show/hide popups with animation
-    void Show(const RefPtr<FrameNode>& node);
-    void Pop(const RefPtr<FrameNode>& node);
-
     void ShowMenuAnimation(const RefPtr<FrameNode>& menu);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu);
 
