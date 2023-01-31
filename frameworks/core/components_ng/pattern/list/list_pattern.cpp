@@ -415,8 +415,7 @@ bool ListPattern::OnKeyEvent(const KeyEvent& event)
         return true;
     }
     if (event.IsDirectionalKey()) {
-        HandleDirectionKey(event.code);
-        return true;
+        return HandleDirectionKey(event.code);
     }
     return false;
 }
@@ -433,7 +432,7 @@ bool ListPattern::HandleDirectionKey(KeyCode code)
         LOGD("Scroll to next index: %{public}d", scrollIndex_);
         // Need to update: current selection
         ScrollToIndex(scrollIndex_, ScrollIndexAlignment::ALIGN_TOP);
-        return true;
+        return false;
     }
     if ((GetAxis() == Axis::VERTICAL && code == KeyCode::KEY_DPAD_DOWN) ||
         (GetAxis() == Axis::HORIZONTAL && code == KeyCode::KEY_DPAD_RIGHT)) {
@@ -445,7 +444,7 @@ bool ListPattern::HandleDirectionKey(KeyCode code)
         LOGD("Scroll to previous index: %{public}d", scrollIndex_);
         // Need to update: current selection
         ScrollToIndex(scrollIndex_, ScrollIndexAlignment::ALIGN_BUTTON);
-        return true;
+        return false;
     }
     return false;
 }

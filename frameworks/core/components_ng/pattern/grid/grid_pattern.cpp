@@ -431,10 +431,6 @@ bool GridPattern::OnKeyEvent(const KeyEvent& event)
     if ((event.code == KeyCode::KEY_PAGE_DOWN) || (event.code == KeyCode::KEY_PAGE_UP)) {
         ScrollPage(event.code == KeyCode::KEY_PAGE_UP);
     }
-    if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN) {
-        HandleDirectionKey(event.code);
-        return true;
-    }
     return false;
 }
 
