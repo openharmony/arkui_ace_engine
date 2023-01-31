@@ -34,9 +34,6 @@ namespace {
 constexpr int32_t CHILD_SIZE = 3;
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
-const uint8_t ENABLED_ALPHA = 255;
-const uint8_t DISABLED_ALPHA = 102;
-const double AVAILABLE_ALPHA = 1.0;
 } // namespace
 bool DatePickerPattern::inited_ = false;
 const std::string DatePickerPattern::empty_;
@@ -118,11 +115,6 @@ void DatePickerPattern::InitDisabled()
     CHECK_NULL_VOID(eventHub);
     auto renderContext = host->GetRenderContext();
     enabled_ = eventHub->IsEnabled();
-    if (!enabled_) {
-        renderContext->UpdateOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA);
-    } else {
-        renderContext->UpdateOpacity(AVAILABLE_ALPHA);
-    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -287,8 +279,8 @@ bool DatePickerPattern::HandleDirectionKey(KeyCode code)
     if (code == KeyCode::KEY_DPAD_RIGHT) {
         focusKeyID_ += 1;
         auto childSize = static_cast<int32_t>(host->GetChildren().size());
-        if (focusKeyID_ > childSize - 1) {
-            focusKeyID_ = childSize - 1;
+        if (focusKeyID_ > childSize -1) {
+            focusKeyID_ = childSize -1;
         }
         PaintFocusState();
         return true;
@@ -366,7 +358,7 @@ void DatePickerPattern::FlushColumn()
     dayColumnPattern->FlushCurrentOptions();
 }
 
-void DatePickerPattern::FireChangeEvent(bool refresh)
+void DatePickerPattern::FireChangeEvent(bool refresh) const
 {
     if (refresh) {
         auto datePickerEventHub = GetEventHub<DatePickerEventHub>();
@@ -725,7 +717,7 @@ void DatePickerPattern::HandleLunarYearChange(bool isAdd, uint32_t index)
     LunarColumnsBuilding(lunarDate);
 }
 
-LunarDate DatePickerPattern::GetCurrentLunarDate(uint32_t lunarYear)
+LunarDate DatePickerPattern::GetCurrentLunarDate(uint32_t lunarYear) const
 {
     LunarDate lunarResult;
     auto host = GetHost();
@@ -795,7 +787,7 @@ void DatePickerPattern::HandleSolarYearChange(bool isAdd, uint32_t index)
     SolarColumnsBuilding(date);
 }
 
-PickerDate DatePickerPattern::GetCurrentDate()
+PickerDate DatePickerPattern::GetCurrentDate() const
 {
     PickerDate currentDate;
     auto host = GetHost();
@@ -833,10 +825,9 @@ PickerDate DatePickerPattern::GetCurrentDate()
     }
     if (!IsShowLunar()) {
         currentDate.SetYear(startDateSolar_.GetYear() + yearDatePickerColumnPattern->GetCurrentIndex());
-        currentDate.SetMonth(StringUtils::StringToUint(GetOptionValue(
-            monthColumn, monthDatePickerColumnPattern->GetCurrentIndex()))); // month from 1 to 12, index from 0 to 11.
-        currentDate.SetDay(StringUtils::StringToUint(GetOptionValue(
-            dayColumn, dayDatePickerColumnPattern->GetCurrentIndex()))); // day from 1 to 31, index from 0 to 30.
+        currentDate.SetMonth(
+            monthDatePickerColumnPattern->GetCurrentIndex() + 1); // month from 1 to 12, index from 0 to 11.
+        currentDate.SetDay(dayDatePickerColumnPattern->GetCurrentIndex() + 1); // day from 1 to 31, index from 0 to 30.
         return currentDate;
     }
 
