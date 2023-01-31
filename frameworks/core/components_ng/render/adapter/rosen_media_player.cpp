@@ -17,6 +17,7 @@
 #include <fcntl.h>
 #include <iomanip>
 #include <sstream>
+#include <string>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -26,14 +27,16 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t FILE_PREFIX_LENGTH = 7;
 constexpr float SPEED_0_75_X = 0.75;
 constexpr float SPEED_1_00_X = 1.00;
 constexpr float SPEED_1_25_X = 1.25;
 constexpr float SPEED_1_75_X = 1.75;
 constexpr float SPEED_2_00_X = 2.00;
-const int32_t RESOURCE_PREFIX_LENGTH = strlen("resource:///");
-const int32_t RAWFILE_PREFIX_LENGTH = strlen("resource://");
+constexpr int32_t FILE_PREFIX_LENGTH = 7;
+constexpr uint32_t MEDIA_RESOURCE_MATCH_SIZE = 2;
+const int32_t RAWFILE_PREFIX_LENGTH = strlen("resource://RAWFILE/");
+const std::regex MEDIA_RES_ID_REGEX(R"(^resource://\w+/([0-9]+)\.\w+$)", std::regex::icase);
+const std::regex MEDIA_APP_RES_ID_REGEX(R"(^resource://.*/([0-9]+)\.\w+$)", std::regex::icase);
 
 std::string GetAssetAbsolutePath(const std::string& fileName)
 {
@@ -78,6 +81,7 @@ OHOS::Media::PlaybackRateMode ConvertToMediaPlaybackSpeed(float speed)
     return mode;
 }
 } // namespace
+
 RosenMediaPlayer::~RosenMediaPlayer()
 {
     CHECK_NULL_VOID_NOLOG(mediaPlayer_);
@@ -139,6 +143,111 @@ bool RosenMediaPlayer::SetSource(const std::string& src)
     return true;
 }
 
+// Interim programme
+bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
+{
+    auto assetManager = PipelineBase::GetCurrentContext()->GetAssetManager();
+    uint32_t resId = 0;
+    auto state1 = GetResourceId(filePath, resId);
+    if (!state1) {
+        return false;
+    }
+    auto themeManager = PipelineBase::GetCurrentContext()->GetThemeManager();
+    auto themeConstants = themeManager->GetThemeConstants();
+    std::string mediaPath;
+    auto state2 = themeConstants->GetMediaById(resId, mediaPath);
+    if (!state2) {
+        LOGE("GetMediaById failed");
+        return false;
+    }
+    MediaFileInfo fileInfo;
+    auto state3 = assetManager->GetFileInfo(mediaPath.substr(mediaPath.find("resources/base")), fileInfo);
+    if (!state3) {
+        LOGE("GetMediaFileInfo failed");
+        return false;
+    }
+    auto hapPath = Container::Current()->GetHapPath();
+    auto hapFd = open(hapPath.c_str(), O_RDONLY);
+    if (hapFd < 0) {
+        LOGE("Open hap file failed");
+        return false;
+    }
+    if (mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
+        LOGE("Player SetSource failed");
+        close(hapFd);
+        return false;
+    }
+    close(hapFd);
+    return true;
+}
+
+bool RosenMediaPlayer::RawFilePlay(const std::string& filePath)
+{
+    auto assetManager = PipelineBase::GetCurrentContext()->GetAssetManager();
+    auto path = "resources/rawfile/" + filePath.substr(RAWFILE_PREFIX_LENGTH);
+    MediaFileInfo fileInfo;
+    auto state1 = assetManager->GetFileInfo(path, fileInfo);
+    if (!state1) {
+        LOGE("GetMediaFileInfo failed");
+        return false;
+    }
+    auto hapPath = Container::Current()->GetHapPath();
+    auto hapFd = open(hapPath.c_str(), O_RDONLY);
+    if (hapFd < 0) {
+        LOGE("Open hap file failed");
+        return false;
+    }
+    if (mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
+        LOGE("Player SetSource failed");
+        close(hapFd);
+        return false;
+    }
+    close(hapFd);
+    return true;
+}
+
+bool RosenMediaPlayer::RelativePathPlay(const std::string& filePath)
+{
+    // relative path
+    auto assetManager = PipelineBase::GetCurrentContext()->GetAssetManager();
+    MediaFileInfo fileInfo;
+    auto state = assetManager->GetFileInfo(assetManager->GetAssetPath(filePath, false), fileInfo);
+    if (!state) {
+        LOGE("GetMediaFileInfo failed");
+        return false;
+    }
+    auto hapPath = Container::Current()->GetHapPath();
+    auto hapFd = open(hapPath.c_str(), O_RDONLY);
+    if (hapFd < 0) {
+        LOGE("Open hap file failed");
+        return false;
+    }
+    if (mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
+        LOGE("Player SetSource failed");
+        close(hapFd);
+        return false;
+    }
+    close(hapFd);
+    return true;
+}
+
+bool RosenMediaPlayer::GetResourceId(const std::string& path, uint32_t& resId)
+{
+    std::smatch matches;
+    if (std::regex_match(path, matches, MEDIA_RES_ID_REGEX) && matches.size() == MEDIA_RESOURCE_MATCH_SIZE) {
+        resId = static_cast<uint32_t>(std::stoul(matches[1].str()));
+        return true;
+    }
+
+    std::smatch appMatches;
+    if (std::regex_match(path, appMatches, MEDIA_APP_RES_ID_REGEX) && appMatches.size() == MEDIA_RESOURCE_MATCH_SIZE) {
+        resId = static_cast<uint32_t>(std::stoul(appMatches[1].str()));
+        return true;
+    }
+
+    return false;
+}
+
 bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd)
 {
     if (StringUtils::StartWith(filePath, "dataability://") || StringUtils::StartWith(filePath, "datashare://")) {
@@ -151,46 +260,10 @@ bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd)
         fd = open(filePath.c_str(), O_RDONLY);
     } else if (StringUtils::StartWith(filePath, "resource:///")) {
         // file path: resources/base/media/xxx.xx --> resource:///xxx.xx
-        auto assetManager = PipelineBase::GetCurrentContext()->GetAssetManager();
-        auto resId = StringUtils::StringToUint(filePath.substr(RESOURCE_PREFIX_LENGTH, 8));
-        auto themeManager = PipelineBase::GetCurrentContext()->GetThemeManager();
-        auto themeConstants = themeManager->GetThemeConstants();
-        std::string mediaPath;
-        auto state1 = themeConstants->GetMediaById(resId, mediaPath);
-        if (!state1) {
-            LOGE("GetMediaById failed");
-            return false;
-        }
-        MediaFileInfo fileInfo;
-        auto state2 = assetManager->GetFileInfo(mediaPath.substr(mediaPath.find("resources/base")), fileInfo);
-        if (!state2) {
-            LOGE("GetMediaFileInfo failed");
-            return false;
-        }
-        auto hapPath = Container::Current()->GetHapPath();
-        auto hapFd = open(hapPath.c_str(), O_RDONLY);
-        if (mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
-            LOGE("Player SetSource failed");
-            close(hapFd);
-            return false;
-        }
-        close(hapFd);
+        MediaPlay(filePath);
     } else if (StringUtils::StartWith(filePath, "resource://RAWFILE")) {
         // file path: resource/rawfile/xxx.xx --> resource://rawfile/xxx.xx
-        auto themeManager = PipelineBase::GetCurrentContext()->GetThemeManager();
-        auto themeConstants = themeManager->GetThemeConstants();
-        RawfileDescription rfd;
-        auto state = themeConstants->GetRawFileDescription(filePath.substr(RAWFILE_PREFIX_LENGTH), rfd);
-        if (!state) {
-            LOGE("Get rawfile description failed");
-            return false;
-        }
-        if (mediaPlayer_->SetSource(rfd.fd, rfd.offset, rfd.length) != 0) {
-            LOGE("Player SetSource failed");
-            close(rfd.fd);
-            return false;
-        }
-        close(rfd.fd);
+        RawFilePlay(filePath);
     } else if (StringUtils::StartWith(filePath, "http")) {
         // http or https
         if (mediaPlayer_->SetSource(filePath) != 0) {
@@ -199,21 +272,7 @@ bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd)
         }
     } else {
         // relative path
-        auto assetManager = PipelineBase::GetCurrentContext()->GetAssetManager();
-        MediaFileInfo fileInfo;
-        auto state = assetManager->GetFileInfo(assetManager->GetAssetPath(filePath, false), fileInfo);
-        if (!state) {
-            LOGE("GetMediaFileInfo failed");
-            return false;
-        }
-        auto hapPath = Container::Current()->GetHapPath();
-        auto hapFd = open(hapPath.c_str(), O_RDONLY);
-        if (mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
-            LOGE("Player SetSource failed");
-            close(hapFd);
-            return false;
-        }
-        close(hapFd);
+        RelativePathPlay(filePath);
     }
     return true;
 }
