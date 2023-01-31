@@ -27,7 +27,6 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/option/option_event_hub.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
-#include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/image/image_source_info.h"
@@ -116,15 +115,17 @@ RefPtr<FrameNode> OptionView::CreateSelectOption(const std::string& value, const
         auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         props->UpdateImageSourceInfo(ImageSourceInfo(icon));
         props->UpdateImageFit(ImageFit::SCALE_DOWN);
-        props->UpdateCalcMaxSize(CalcSize(ICON_SIDE_LENGTH, ICON_SIDE_LENGTH));
-        props->UpdateAlignment(Alignment::CENTER_LEFT);
 
-        auto renderProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
-        CHECK_NULL_RETURN(renderProperty, nullptr);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, nullptr);
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_RETURN(theme, nullptr);
+        props->UpdateCalcMaxSize(
+            CalcSize(CalcLength(theme->GetIconSideLength()), CalcLength(theme->GetIconSideLength())));
+        props->UpdateAlignment(Alignment::CENTER_LEFT);
+
+        auto renderProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_RETURN(renderProperty, nullptr);
         renderProperty->UpdateSvgFillColor(theme->GetMenuIconColor());
 
         MarginProperty margin;

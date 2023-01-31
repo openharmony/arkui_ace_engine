@@ -52,6 +52,7 @@ namespace {
 // should be moved to theme.
 constexpr int32_t COMMON_ANIMATION_DUR = 200;
 constexpr int32_t TOAST_ANIMATION_DURATION = 100;
+constexpr int32_t MENU_ANIMATION_DURATION = 150;
 constexpr float TOAST_ANIMATION_POSITION = 15.0f;
 } // namespace
 
@@ -185,10 +186,16 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
     auto context = menu->GetRenderContext();
     CHECK_NULL_VOID(context);
     context->UpdateOpacity(0.0);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto menuAnimationOffset = static_cast<float>(theme->GetMenuAnimationOffset().ConvertToPx());
     if (isSelectMenu) {
-        context->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(-MENU_ANIMATION_MOVE.ConvertToPx()), 0.0f });
+        context->OnTransformTranslateUpdate({ 0.0f, -menuAnimationOffset, 0.0f });
     } else {
-        context->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(MENU_ANIMATION_MOVE.ConvertToPx()), 0.0f });
+        context->OnTransformTranslateUpdate({ 0.0f, menuAnimationOffset, 0.0f });
     }
 
     AnimationUtils::Animate(
@@ -237,23 +244,24 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
     CHECK_NULL_VOID(context);
     context->UpdateOpacity(1.0);
     context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto menuAnimationOffset = static_cast<float>(theme->GetMenuAnimationOffset().ConvertToPx());
     AnimationUtils::Animate(
         option,
-        [context, isSelectMenu]() {
+        [context, isSelectMenu, menuAnimationOffset]() {
             context->UpdateOpacity(0.0);
             if (isSelectMenu) {
-                context->OnTransformTranslateUpdate(
-                    { 0.0f, static_cast<float>(-MENU_ANIMATION_MOVE.ConvertToPx()), 0.0f });
+                context->OnTransformTranslateUpdate({ 0.0f, -menuAnimationOffset, 0.0f });
             } else {
-                context->OnTransformTranslateUpdate(
-                    { 0.0f, static_cast<float>(MENU_ANIMATION_MOVE.ConvertToPx()), 0.0f });
+                context->OnTransformTranslateUpdate({ 0.0f, menuAnimationOffset, 0.0f });
             }
         },
         option.GetOnFinishEvent());
 
     // start animation immediately
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
 }
 

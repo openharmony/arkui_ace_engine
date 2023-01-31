@@ -19,7 +19,6 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
@@ -30,7 +29,7 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    verInterval_ = static_cast<float>(VERTICAL_INTERVAL_PHONE.ConvertToPx());
+    verInterval_ = static_cast<float>(VERTICAL_INTERVAL.ConvertToPx());
     horInterval_ = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx());
     auto props = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(props);

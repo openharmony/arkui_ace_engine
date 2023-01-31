@@ -25,7 +25,6 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
@@ -40,15 +39,16 @@ void MenuItemView::AddIcon(const std::optional<std::string>& icon, const RefPtr<
         auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         props->UpdateImageSourceInfo(ImageSourceInfo(iconPath));
         props->UpdateImageFit(ImageFit::SCALE_DOWN);
-        props->UpdateCalcMaxSize(CalcSize(ICON_SIDE_LENGTH, ICON_SIDE_LENGTH));
-        props->UpdateAlignment(Alignment::CENTER);
-
-        auto renderProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
-        CHECK_NULL_VOID(renderProperty);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
+        props->UpdateCalcMaxSize(
+            CalcSize(CalcLength(theme->GetIconSideLength()), CalcLength(theme->GetIconSideLength())));
+        props->UpdateAlignment(Alignment::CENTER);
+
+        auto renderProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(renderProperty);
         renderProperty->UpdateSvgFillColor(theme->GetMenuIconColor());
 
         iconNode->MountToParent(row);

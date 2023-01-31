@@ -19,7 +19,6 @@
 #include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
-#include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_ng/pattern/shape/rect_paint_property.h"
 #include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/drawing.h"
@@ -59,7 +58,7 @@ void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrappe
 
     RSPath path;
     // draw divider above content, length = content width
-    path.AddRect(horInterval, 0, optionSize.Width() - horInterval, DEFAULT_STROKE_WIDTH.ConvertToPx());
+    path.AddRect(horInterval, 0, optionSize.Width() - horInterval, selectTheme->GetDefaultDividerWidth().ConvertToPx());
     LOGD("drawing option divider with length %{public}f", optionSize.Width() - 2 * horInterval);
 
     RSBrush brush;
