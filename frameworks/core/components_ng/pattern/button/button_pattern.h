@@ -20,6 +20,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/button/button_accessibility_property.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_algorithm.h"
@@ -27,6 +28,7 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+enum class ComponentButtonType { POPUP, BUTTON };
 class ButtonPattern : public Pattern {
     DECLARE_ACE_TYPE(ButtonPattern, Pattern);
 
@@ -62,6 +64,11 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
+        if (buttonType_ == ComponentButtonType::POPUP) {
+            FocusPaintParam focusPaintParam;
+            focusPaintParam.SetPaintColor(FocusBorderColor_);
+            return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam };
+        }
         return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
     }
 
@@ -69,6 +76,16 @@ public:
     {
         clickedColor_ = color;
         isSetClickedColor_ = true;
+    }
+
+    void SetFocusBorderColor(const Color& color)
+    {
+        FocusBorderColor_ = color;
+    }
+
+    void setComponentButtonType(const ComponentButtonType& buttonType)
+    {
+        buttonType_ = buttonType;
     }
 
 protected:
@@ -83,7 +100,9 @@ private:
     static void SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, const RefPtr<PipelineBase>& pipeline);
     Color clickedColor_;
     Color backgroundColor_;
+    Color FocusBorderColor_;
     bool isSetClickedColor_ = false;
+    ComponentButtonType buttonType_ = ComponentButtonType::BUTTON;
 
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;

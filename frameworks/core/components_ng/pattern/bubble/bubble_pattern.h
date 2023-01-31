@@ -20,6 +20,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/bubble//bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_algorithm.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
@@ -80,6 +81,11 @@ public:
         return childOffset_;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -107,7 +113,6 @@ private:
     SizeF childSize_;
     RectF touchRegion_;
 
-    // Is there has enough space for showing arrow.
     bool showTopArrow_ = true;
     bool showBottomArrow_ = true;
     bool showCustomArrow_ = false;

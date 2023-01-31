@@ -312,8 +312,16 @@ RefPtr<FrameNode> BubbleView::CreateButton(
     auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
     CHECK_NULL_RETURN(buttonTheme, nullptr);
     auto popupTheme = GetPopupTheme();
+    auto focusColor = popupTheme->GetFocusColor();
     auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, buttonId, AceType::MakeRefPtr<ButtonPattern>());
+    auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
+    CHECK_NULL_RETURN(buttonPattern, nullptr);
+    // set button foucus color
+    buttonPattern->setComponentButtonType(ComponentButtonType::POPUP);
+    buttonPattern->SetFocusBorderColor(focusColor);
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, buttonId, buttonPattern);
+    CHECK_NULL_RETURN(buttonPattern, nullptr);
+
     auto buttonProp = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
     auto isUseCustom = param->IsUseCustom();
     auto isShow = param->IsShow();

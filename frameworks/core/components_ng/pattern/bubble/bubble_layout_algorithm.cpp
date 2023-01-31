@@ -25,6 +25,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
@@ -45,7 +46,6 @@ constexpr Dimension HORIZON_SPACING_WITH_SCREEN = 6.0_vp;
 constexpr int32_t GRID_NUMBER_LANDSCAPE = 8;
 constexpr int32_t BUBBLR_GRID_MAX_LANDSCAPE = 6;
 constexpr Dimension BUBBLE_RADIUS = 16.0_vp;
-const Dimension CONTAINER_TITLE_HEIGHT = 37.0_vp;
 constexpr Dimension BEZIER_WIDTH_HALF = 16.0_vp;
 
 } // namespace
