@@ -337,6 +337,7 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
         return;
     }
     ExecuteScrollBegin(mainDelta);
+    ExecuteScrollFrameBegin(mainDelta, ScrollState::SCROLL);
     auto source = info.GetSourceDevice() == SourceType::MOUSE ? SCROLL_FROM_AXIS : SCROLL_FROM_UPDATE;
     moved_ = UpdateScrollPosition(mainDelta, source);
 }
@@ -424,6 +425,18 @@ void Scrollable::ExecuteScrollBegin(double& mainDelta)
         scrollInfo = scrollBeginCallback_(Dimension(mainDelta / context->GetDipScale(), DimensionUnit::VP), 0.0_vp);
         mainDelta = context->NormalizeToPx(scrollInfo.dx);
     }
+}
+
+void Scrollable::ExecuteScrollFrameBegin(double& mainDelta, ScrollState state)
+{
+    auto context = context_.Upgrade();
+    if (!scrollFrameBeginCallback_ || !context) {
+        return;
+    }
+
+    auto offset = Dimension(mainDelta / context->GetDipScale(), DimensionUnit::VP);
+    auto scrollRes = scrollFrameBeginCallback_(offset, state);
+    mainDelta = context->NormalizeToPx(scrollRes.offset);
 }
 
 void Scrollable::FixScrollMotion(double position)
@@ -565,6 +578,7 @@ void Scrollable::ProcessScrollMotion(double position)
         // UpdateScrollPosition return false, means reach to scroll limit.
         auto mainDelta = position - currentPos_;
         ExecuteScrollBegin(mainDelta);
+        ExecuteScrollFrameBegin(mainDelta, ScrollState::FLING);
         if (!UpdateScrollPosition(mainDelta, SCROLL_FROM_ANIMATION)) {
             controller_->Stop();
         } else if (!touchUp_) {

@@ -64,6 +64,19 @@ public:
         return scrollBeginCallback_;
     }
 
+    void SetScrollFrameBeginCallback(ScrollFrameBeginCallback&& scrollFrameBeginCallback)
+    {
+        if (!scrollFrameBeginCallback) {
+            return;
+        }
+        scrollFrameBeginCallback_ = std::move(scrollFrameBeginCallback);
+    }
+
+    const ScrollFrameBeginCallback& GetScrollFrameBeginCallback() const
+    {
+        return scrollFrameBeginCallback_;
+    }
+
     void SetOnScrollCallback(OnScrollCallback&& onScrollCallback)
     {
         if (!onScrollCallback) {
@@ -148,6 +161,7 @@ private:
     ScrollPositionCallback callback_;
     OnScrollCallback onScrollCallback_;
     ScrollBeginCallback scrollBeginCallback_;
+    ScrollFrameBeginCallback scrollFrameBeginCallback_;
     ScrollEndCallback scrollEndCallback_;
     OutBoundaryCallback outBoundaryCallback_;
 

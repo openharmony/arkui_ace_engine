@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 
@@ -146,6 +147,15 @@ void ListModelNG::SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin)
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollBegin(std::move(onScrollBegin));
+}
+
+void ListModelNG::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollFrameBegin(std::move(onScrollFrameBegin));
 }
 
 void ListModelNG::SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
