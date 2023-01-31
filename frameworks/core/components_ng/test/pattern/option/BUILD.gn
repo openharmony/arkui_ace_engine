@@ -31,7 +31,6 @@ ohos_unittest("panel_option_test_ng") {
 
   sources = [
     # inner
-    "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/adapter/preview/osal/frame_trace_adapter_impl.cpp",
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
     "$ace_root/frameworks/base/geometry/dimension.cpp",
@@ -60,7 +59,6 @@ ohos_unittest("panel_option_test_ng") {
     "$ace_root/frameworks/core/components/common/properties/border_image_edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/common/properties/decoration.cpp",
-    "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
     "$ace_root/frameworks/core/components_ng/layout/box_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
@@ -88,11 +86,10 @@ ohos_unittest("panel_option_test_ng") {
     "panel_option_test_ng.cpp",
   ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
-
   deps = [
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
+    "$ace_root:ace_test_log",
     "$cjson_root:cjson",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
