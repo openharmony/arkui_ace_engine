@@ -90,11 +90,10 @@ private:
     int32_t GetAnimationDuration(float delta, float dragRange) const;
     void CheckHeightValidity();
     void CheckPanelModeAndType();
-    void RemoveEvent();
-    void AddEvent();
     void FirstLayout();
     void IsShowChanged(bool isShow);
     void HeightDynamicUpdate();
+    void SetDragBarCallBack();
 
     PanelType GetPanelType() const;
     PanelMode GetPanelMode() const;
@@ -124,8 +123,6 @@ private:
     float dragStartCurrentOffset_ = 0.0f;
 
     std::optional<bool> isShow_;
-    PanDirection panDirection_;
-    float distance_ = 0.0f;
     bool isDrag_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SlidingPanelPattern);

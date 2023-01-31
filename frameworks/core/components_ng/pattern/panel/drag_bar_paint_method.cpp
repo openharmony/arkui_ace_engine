@@ -33,7 +33,6 @@ const OffsetT<Dimension> POINT_L_INITIAL = OffsetT<Dimension>(18.0_vp, 12.0_vp);
 const OffsetT<Dimension> POINT_C_INITIAL = OffsetT<Dimension>(32.0_vp, 12.0_vp);
 const OffsetT<Dimension> POINT_R_INITIAL = OffsetT<Dimension>(46.0_vp, 12.0_vp);
 const float OPACITY = 1.0f;
-const Color BAR_COLOR = Color(0xffb3b3b3);
 const Dimension BAR_WIDTH = 4.0_vp;
 
 } // namespace
@@ -66,12 +65,16 @@ void DragBarPaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) con
     auto height = contentSize.Height();
     // paint offset
     auto paintOffset = paintWrapper->GetContentOffset();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragBarTheme = pipeline->GetTheme<DragBarTheme>();
+    CHECK_NULL_VOID(dragBarTheme);
     RSPen pen;
     pen.SetAntiAlias(true);
     const float defaultOpacity = 0.2f;
     auto alpha_ = std::floor(UINT8_MAX * defaultOpacity);
     pen.SetAlpha(alpha_ * opacity);
-    pen.SetColor(ToRSColor(BAR_COLOR));
+    pen.SetColor(ToRSColor(dragBarTheme->GetDragBarColor()));
     pen.SetWidth(BAR_WIDTH.ConvertToPx() * scaleWidth_);
     pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     canvas.AttachPen(pen);
