@@ -103,6 +103,8 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             Dimension dy;
             auto dyValue = offsetObj->GetProperty("dy");
             JSViewAbstract::ParseJsDimensionVp(dyValue, dy);
+            dx.ResetInvalidValue();
+            dy.ResetInvalidValue();
             instance->dialogProperties_.offset = DimensionOffset(dx, dy);
         }
 
