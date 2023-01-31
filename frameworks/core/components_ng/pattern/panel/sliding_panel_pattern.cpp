@@ -56,6 +56,13 @@ void SlidingPanelPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     InitPanEvent(gestureHub);
     Update();
+    auto dragBar = GetDragBarNode();
+    CHECK_NULL_VOID(dragBar);
+    auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
+    CHECK_NULL_VOID(dragBarPattern);
+    if (dragBarPattern && !(dragBarPattern->HasClickArrowCallback())) {
+        SetDragBarCallBack();
+    }
 }
 
 void SlidingPanelPattern::OnAttachToFrameNode()
@@ -569,6 +576,30 @@ void SlidingPanelPattern::FireHeightChangeEvent()
 
     auto currentHeight = static_cast<float>(geometryNode->GetFrameSize().Height() - currentOffset_);
     slidingPanelEventHub->FireHeightChangeEvent(currentHeight);
+}
+
+void SlidingPanelPattern::SetDragBarCallBack()
+{
+    auto dragBar = GetDragBarNode();
+    CHECK_NULL_VOID(dragBar);
+    auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
+    CHECK_NULL_VOID(dragBarPattern);
+    dragBarPattern->SetClickArrowCallback([weak = WeakClaim(this)]() {
+        auto panel = weak.Upgrade();
+        CHECK_NULL_VOID(panel);
+        panel->previousMode_ = panel->mode_;
+        if (panel->mode_ == PanelMode::MINI) {
+            panel->mode_ = panel->type_ == PanelType::MINI_BAR ? PanelMode::FULL : PanelMode::HALF;
+        } else if (panel->mode_ == PanelMode::FULL) {
+            panel->mode_ = panel->type_ == PanelType::MINI_BAR ? PanelMode::MINI : PanelMode::HALF;
+        } else {
+            LOGD("not support click in half mode");
+        }
+        panel->AnimateTo(panel->defaultBlankHeights_[panel->mode_], panel->mode_);
+        if (panel->previousMode_ != panel->mode_) {
+            panel->FireSizeChangeEvent();
+        }
+    });
 }
 
 void SlidingPanelPattern::MarkDirtyNode(PropertyChangeFlag extraFlag)
