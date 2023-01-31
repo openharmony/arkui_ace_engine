@@ -26,6 +26,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components/common/properties/shadow_config.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
@@ -264,10 +265,25 @@ void BubblePaintMethod::PaintTopBubble(RSCanvas& rsCanvas)
     path_.QuadTo(arrowPositionX - BEZIER_HORIZON_OFFSET_FIRST.ConvertToPx() + arrowOffset,
         arrowPositionY + BEZIER_VERTICAL_OFFSET_FIRST.ConvertToPx(), arrowPositionX + arrowOffset, arrowPositionY);
     path_.Close();
-    // TODO: need shadow
-    // RosenDecorationPainter::PaintShadow(path_, ShadowConfig::DefaultShadowM, skCanvas);
+    // paint shadow
+    PaintShadow(path_, ShadowConfig::DefaultShadowM, rsCanvas);
     rsCanvas.DrawPath(path_);
     rsCanvas.ClipPath(path_, RSClipOp::INTERSECT);
+}
+
+void BubblePaintMethod::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas)
+{
+    canvas.Save();
+    RSPath rsPath = path;
+    rsPath.Offset(shadow.GetOffset().GetX(), shadow.GetOffset().GetY());
+    RSColor spotColor = ToRSColor(shadow.GetColor());
+    RSPoint3 planeParams = { 0.0f, 0.0f, shadow.GetElevation() };
+    RSPoint3 lightPos = { rsPath.GetBounds().GetLeft() / 2 + rsPath.GetBounds().GetRight(),
+        rsPath.GetBounds().GetTop() / 2.0 + rsPath.GetBounds().GetBottom() / 2.0, shadow.GetLightHeight() };
+    RSColor ambientColor = RSColor(0, 0, 0, 0);
+    canvas.DrawShadow(rsPath, planeParams, lightPos, shadow.GetLightRadius(), ambientColor, spotColor,
+        RSShadowFlags::TRANSPARENT_OCCLUDER);
+    canvas.Restore();
 }
 
 void BubblePaintMethod::PaintBottomBubble(RSCanvas& canvas)
@@ -329,7 +345,8 @@ void BubblePaintMethod::PaintBottomBubble(RSCanvas& canvas)
     path_.QuadTo(arrowPositionX - BEZIER_HORIZON_OFFSET_FIRST.ConvertToPx() + arrowOffset,
         arrowPositionY - BEZIER_VERTICAL_OFFSET_FIRST.ConvertToPx(), arrowPositionX + arrowOffset, arrowPositionY);
     path_.Close();
-    // TODO: shadow is not completed.
+    // paint shadow
+    PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
     canvas.DrawPath(path_);
     canvas.ClipPath(path_, RSClipOp::INTERSECT);
 }
@@ -338,6 +355,7 @@ void BubblePaintMethod::PaintDefaultBubble(RSCanvas& canvas)
 {
     auto rrect = MakeRRect();
     // TODO: need paint shadow
+    PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
     canvas.DrawRoundRect(rrect);
     canvas.ClipRoundRect(rrect, RSClipOp::INTERSECT);
 }
@@ -362,7 +380,7 @@ RSRoundRect BubblePaintMethod::MakeRRect()
 void BubblePaintMethod::PaintBubbleWithArrow(RSCanvas& canvas, PaintWrapper* paintWrapper)
 {
     BuildCompletePath(path_);
-    // TODO: need shadow
+    PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
     canvas.DrawPath(path_);
     canvas.ClipPath(path_, RSClipOp::INTERSECT);
 }

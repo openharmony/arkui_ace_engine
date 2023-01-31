@@ -29,7 +29,6 @@ RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap);
 RSColor ToRSColor(const Color& color);
 RSColor ToRSColor(const LinearColor& color);
 RSRect ToRSRect(const NG::RectF& rect);
-RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap);
 RSTextDirection ToRSTextDirection(const TextDirection& txtDir);
 RSTextAlign ToRSTextAlign(const TextAlign& align);
 RSWordBreakType ToRSWordBreakType(const WordBreak& wordBreak);

@@ -132,6 +132,7 @@ private:
     bool showBottomArrow_ = false;
     bool showTopArrow_ = false;
     bool showCustomArrow_ = false;
+    float scaledBubbleSpacing_;
 
     ACE_DISALLOW_COPY_AND_MOVE(BubbleLayoutAlgorithm);
 };

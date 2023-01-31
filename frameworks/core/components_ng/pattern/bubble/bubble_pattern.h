@@ -19,6 +19,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/bubble//bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_algorithm.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
@@ -74,20 +75,32 @@ public:
         return MakeRefPtr<BubbleEventHub>();
     }
 
+    OffsetF GetChildOffset()
+    {
+        return childOffset_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
-    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    RefPtr<FrameNode> GetButtonRowNode();
+    void InitTouchEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& clickPosition);
+    void RegisterButtonOnHover();
+    void RegisterButtonOnTouch();
+    void ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& buttonNode);
+    void ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::FrameNode>& buttonNode);
     void PopBubble();
 
     int32_t targetNodeId_ = -1;
     std::string targetTag_;
 
     RefPtr<TouchEventImpl> touchEvent_;
+    bool mouseEventInitFlag_ = false;
+    bool touchEventInitFlag_ = false;
 
     OffsetF childOffset_;
     OffsetF arrowPosition_;

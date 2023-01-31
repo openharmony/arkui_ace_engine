@@ -136,5 +136,9 @@ extern const char DIALOG_MASK_COLOR_END[];
 // pattern attributes for drag bar
 extern const char DRAG_BAR_COLOR[];
 
+// pattern attributes for popup
+extern const char POPUP_BORDER_RADIUS[];
+extern const char POPUP_HORIZONTAL_PADDING[];
+extern const char POPUP_VERTICAL_PADDING[];
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_ATTRIBUTES_H
