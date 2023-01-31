@@ -28,6 +28,10 @@ namespace OHOS::Ace {
 class ACE_EXPORT DeclarativeModulePreloader {
 public:
     static void Preload(NativeEngine& runtime);
+
+    // ArkTsCard start
+    static void PreloadCard(NativeEngine& runtime);
+    // ArkTsCard end
 };
 
 } // namespace OHOS::Ace
