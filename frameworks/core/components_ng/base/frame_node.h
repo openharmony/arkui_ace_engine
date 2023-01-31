@@ -301,6 +301,8 @@ public:
 
     bool MarkRemoving() override;
 
+    bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint);
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;

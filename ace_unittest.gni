@@ -85,6 +85,7 @@ test_pattern_sources = [
   "$ace_root/frameworks/base/test/mock/mock_ressched_report.cpp",
   "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
   "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
+  "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/base/mock_dump_log.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/base/mock_localization.cpp",

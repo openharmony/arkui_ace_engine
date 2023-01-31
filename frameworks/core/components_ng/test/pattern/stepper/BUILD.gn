@@ -39,9 +39,6 @@ ohos_unittest("stepper_pattern_test_ng") {
     # components_ng_event
     "$ace_root/frameworks/core/components_ng/event/long_press_event.cpp",
 
-    # mock
-    "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
-
     # select_overlay
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_proxy.cpp",
