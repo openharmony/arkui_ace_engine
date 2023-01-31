@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -27,12 +28,12 @@
 #include "core/components_ng/pattern/panel/sliding_panel_node.h"
 #include "core/components_ng/pattern/panel/sliding_panel_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
-const Dimension PANEL_RADIUS = 24.0_vp;
-const Color BG_COLOR = Color(0xfff1f3f5);
+const Dimension PANEL_RADIUS = 32.0_vp;
 } // namespace
 
 void SlidingPanelModelNG::Create(bool isShow)
@@ -56,7 +57,11 @@ void SlidingPanelModelNG::Create(bool isShow)
 
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext) {
-        renderContext->UpdateBackgroundColor(BG_COLOR);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto dragBarTheme = pipeline->GetTheme<DragBarTheme>();
+        CHECK_NULL_VOID(dragBarTheme);
+        renderContext->UpdateBackgroundColor(dragBarTheme->GetPanelBgColor());
         BorderRadiusProperty radius;
         radius.radiusTopLeft = PANEL_RADIUS;
         radius.radiusTopRight = PANEL_RADIUS;
