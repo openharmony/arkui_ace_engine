@@ -15,9 +15,9 @@
 
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
-#include "core/pipeline_ng/test/mock/mock_interface.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/pipeline_ng/test/mock/mock_interface.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -119,4 +119,6 @@ RefPtr<Frontend> PipelineBase::GetFrontend() const
 {
     return nullptr;
 }
+
+void PipelineBase::SetTouchPipeline(const WeakPtr<PipelineBase>& context) {}
 } // namespace OHOS::Ace
