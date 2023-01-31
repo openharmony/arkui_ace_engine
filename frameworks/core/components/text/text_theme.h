@@ -62,7 +62,7 @@ public:
                 LOGW("find pattern of text fail");
                 return;
             }
-            theme->textStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK));
+            theme->selectedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_SELECTED, Color(0x330a59f7));
         }
     };
 
@@ -73,11 +73,17 @@ public:
         return textStyle_;
     }
 
+    const Color& GetSelectedColor() const
+    {
+        return selectedColor_;
+    }
+
 protected:
     TextTheme() = default;
 
 private:
     TextStyle textStyle_;
+    Color selectedColor_;
 };
 
 } // namespace OHOS::Ace

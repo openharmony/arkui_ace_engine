@@ -50,6 +50,9 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
     const RefPtr<Paragraph>& GetParagraph();
+
+    std::list<RefPtr<SpanItem>>&& GetSpanItemChildren();
+    
     float GetBaselineOffset() const;
 
 private:

@@ -24,7 +24,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 const std::u16string ELLIPSIS = u"\u2026";
-}
+constexpr char16_t NEWLINE_CODE = u'\n';
+} // namespace
 RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
 {
     auto txtFontCollection = DynamicCast<TxtFontCollection>(fontCollection);
@@ -77,6 +78,7 @@ void TxtParagraph::AddText(const std::u16string& text)
     if (!builder_) {
         CreateBuilder();
     }
+    text_ = text;
     builder_->AddText(text);
 }
 
@@ -157,6 +159,105 @@ void TxtParagraph::Paint(const RSCanvas& canvas, float x, float y)
     SkCanvas* skCanvas = canvas.GetImpl<RSSkCanvas>()->ExportSkCanvas();
     CHECK_NULL_VOID(skCanvas);
     paragraph_->Paint(skCanvas, x, y);
+}
+
+int32_t TxtParagraph::GetHandlePositionForClick(const Offset& offset)
+{
+    if (!paragraph_) {
+        return 0;
+    }
+    return static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(offset.GetX(), offset.GetY()).position);
+}
+
+bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& result)
+{
+    if (!paragraph_ || text_.empty()) {
+        return false;
+    }
+
+    char16_t prevChar = 0;
+    if (static_cast<size_t>(extent) <= text_.length()) {
+        prevChar = text_[std::max(0, extent - 1)];
+    }
+
+    result.Reset();
+    int32_t graphemeClusterLength = StringUtils::NotInUtf16Bmp(prevChar) ? 2 : 1;
+    int32_t prev = extent - graphemeClusterLength;
+    auto boxes = paragraph_->GetRectsForRange(
+        prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+    while (boxes.empty() && !text_.empty()) {
+        graphemeClusterLength *= 2;
+        prev = extent - graphemeClusterLength;
+        if (prev < 0) {
+            boxes = paragraph_->GetRectsForRange(
+                0, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+            break;
+        }
+        boxes = paragraph_->GetRectsForRange(
+            prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+    }
+    if (boxes.empty()) {
+        return false;
+    }
+
+    const auto& textBox = *boxes.begin();
+
+    if (prevChar == NEWLINE_CODE) {
+        // Return the start of next line.
+        result.offset.SetX(0.0);
+        result.offset.SetY(textBox.rect.fBottom);
+        return true;
+    }
+
+    bool isLtr = textBox.direction == txt::TextDirection::ltr;
+    // Caret is within width of the downstream glyphs.
+    double caretStart = isLtr ? textBox.rect.fRight : textBox.rect.fLeft;
+    double offsetX = std::min(caretStart, paragraph_->GetMaxWidth());
+    result.offset.SetX(offsetX);
+    result.offset.SetY(textBox.rect.fTop);
+    result.height = textBox.rect.fBottom - textBox.rect.fTop;
+
+    return true;
+}
+
+bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics& result)
+{
+    if (!paragraph_ || static_cast<size_t>(extent) >= text_.length()) {
+        return false;
+    }
+
+    result.Reset();
+    const int32_t graphemeClusterLength = 1;
+    const int32_t next = extent + graphemeClusterLength;
+    auto boxes = paragraph_->GetRectsForRange(
+        extent, next, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+    if (boxes.empty()) {
+        return false;
+    }
+
+    const auto& textBox = *boxes.begin();
+    bool isLtr = textBox.direction == txt::TextDirection::ltr;
+    // Caret is within width of the downstream glyphs.
+    double caretStart = isLtr ? textBox.rect.fLeft : textBox.rect.fRight;
+    double offsetX = std::min(caretStart, paragraph_->GetMaxWidth());
+    result.offset.SetX(offsetX);
+    result.offset.SetY(textBox.rect.fTop);
+    result.height = textBox.rect.fBottom - textBox.rect.fTop;
+
+    return true;
+}
+
+void TxtParagraph::GetRectsForRange(int32_t start, int32_t end, std::vector<Rect>& selectedRects)
+{
+    const auto& boxes = paragraph_->GetRectsForRange(
+        start, end, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+    if (boxes.empty()) {
+        return;
+    }
+    for (const auto& box : boxes) {
+        auto selectionRect = Constants::ConvertSkRect(box.rect);
+        selectedRects.emplace_back(selectionRect);
+    }
 }
 
 } // namespace OHOS::Ace::NG
