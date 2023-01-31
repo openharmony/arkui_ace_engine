@@ -368,7 +368,8 @@ void MenuItemPattern::AddSelectIcon()
         CHECK_NULL_VOID(props);
         props->UpdateImageSourceInfo(imageSourceInfo);
         props->UpdateAlignment(Alignment::CENTER);
-        CalcSize idealSize = { CalcLength(ICON_SIDE_LENGTH), CalcLength(ICON_SIDE_LENGTH) };
+        CalcSize idealSize = { CalcLength(selectTheme->GetIconSideLength()),
+            CalcLength(selectTheme->GetIconSideLength()) };
         MeasureProperty layoutConstraint;
         layoutConstraint.selfIdealSize = idealSize;
         props->UpdateCalcLayoutProperty(layoutConstraint);
