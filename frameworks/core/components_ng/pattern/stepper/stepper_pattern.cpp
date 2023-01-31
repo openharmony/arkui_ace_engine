@@ -108,6 +108,7 @@ void StepperPattern::CreateLeftButtonNode()
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     buttonNode->GetEventHub<ButtonEventHub>()->SetStateEffect(true);
+    SetButtonOnHoverBoardColor(buttonNode, stepperTheme->GetMouseHoverColor());
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
@@ -232,6 +233,7 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     buttonNode->GetEventHub<ButtonEventHub>()->SetStateEffect(true);
+    SetButtonOnHoverBoardColor(buttonNode, stepperTheme->GetMouseHoverColor());
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
@@ -298,6 +300,7 @@ void StepperPattern::CreateArrowlessRightButtonNode(std::string content)
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     buttonNode->GetEventHub<ButtonEventHub>()->SetStateEffect(true);
+    SetButtonOnHoverBoardColor(buttonNode, stepperTheme->GetMouseHoverColor());
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
@@ -355,6 +358,23 @@ void StepperPattern::UpdateRightButtonNode(int32_t index)
     CHECK_NULL_VOID(hostNode);
     hostNode->RemoveRightButtonNode();
     CreateRightButtonNode(index);
+}
+
+void StepperPattern::SetButtonOnHoverBoardColor(RefPtr<FrameNode> buttonNode, const Color& buttonOnHoverBoardColor)
+{
+    CHECK_NULL_VOID(buttonNode);
+    auto buttonInputHub = buttonNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(buttonInputHub);
+    auto hoverCallback = [buttonNode, buttonOnHoverBoardColor](bool isHovered) {
+        if (isHovered) {
+            buttonNode->GetRenderContext()->UpdateBackgroundColor(buttonOnHoverBoardColor);
+        } else {
+            buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+        }
+        buttonNode->MarkModifyDone();
+    };
+    buttonOnHoverListenr_ = MakeRefPtr<InputEvent>(std::move(hoverCallback));
+    buttonInputHub->AddOnHoverEvent(buttonOnHoverListenr_);
 }
 
 void StepperPattern::InitButtonClickEvent()

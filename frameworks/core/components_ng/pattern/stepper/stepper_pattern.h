@@ -76,6 +76,7 @@ private:
     void InitButtonClickEvent();
     void HandlingLeftButtonClickEvent();
     void HandlingRightButtonClickEvent();
+    void SetButtonOnHoverBoardColor(RefPtr<FrameNode> buttonNode, const Color& buttonOnHoverBoardColor);
 
     int32_t index_ = 0;
     int32_t maxIndex_ = 0;
@@ -83,6 +84,7 @@ private:
     std::shared_ptr<ChangeEvent> swiperChangeEvent_;
     RefPtr<ClickEvent> leftClickEvent_;
     RefPtr<ClickEvent> rightClickEvent_;
+    RefPtr<InputEvent> buttonOnHoverListenr_;
     ACE_DISALLOW_COPY_AND_MOVE(StepperPattern);
 };
 
