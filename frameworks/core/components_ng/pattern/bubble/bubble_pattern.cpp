@@ -215,6 +215,7 @@ void BubblePattern::ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::F
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PopupTheme>();
+    CHECK_NULL_VOID(theme);
     if (touchType == TouchType::DOWN) {
         auto pressColor = theme->GetButtonPressColor();
         renderContext->UpdateBackgroundColor(pressColor);
