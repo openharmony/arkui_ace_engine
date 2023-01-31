@@ -147,12 +147,13 @@ void FrameNode::DumpInfo()
                                        .append(geometryNode_->GetParentLayoutConstraint().has_value()
                                                    ? geometryNode_->GetParentLayoutConstraint().value().ToString()
                                                    : "NA"));
-    DumpLog::GetInstance().AddDesc(std::string("top: ").append(std::to_string(GetOffsetRelativeToWindow().GetY())));
-    DumpLog::GetInstance().AddDesc(std::string("left: ").append(std::to_string(GetOffsetRelativeToWindow().GetX())));
-    DumpLog::GetInstance().AddDesc(
-        std::string("width: ").append(std::to_string(geometryNode_->GetFrameRect().Width())));
-    DumpLog::GetInstance().AddDesc(
-        std::string("height: ").append(std::to_string(geometryNode_->GetFrameRect().Height())));
+    DumpLog::GetInstance().AddDesc(std::string("top: ")
+                                       .append(std::to_string(GetOffsetRelativeToWindow().GetY()))
+                                       .append(" left: ")
+                                       .append(std::to_string(GetOffsetRelativeToWindow().GetX())));
+    DumpLog::GetInstance().AddDesc(std::string("Visible: ")
+                                       .append(std::to_string(static_cast<int32_t>(
+                                           layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)))));
     if (layoutProperty_->GetPaddingProperty()) {
         DumpLog::GetInstance().AddDesc(
             std::string("Padding: ").append(layoutProperty_->GetPaddingProperty()->ToString().c_str()));
