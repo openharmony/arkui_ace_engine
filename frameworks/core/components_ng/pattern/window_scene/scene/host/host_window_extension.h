@@ -27,7 +27,26 @@ public:
     HostWindowExtension(const sptr<Rosen::Session>& session) : HostWindowPattern(session) {}
     ~HostWindowExtension() override = default;
 
+protected:
+    void InitContent() override;
+
+    /**
+     * Whther this extension has starting page.
+     * If true, starting page will show first until the first frame of surface node is drawn.
+     * Otherwise, no content will be shown until the first frame of surface node is drawn.
+     */
+    virtual bool HasStartingPage()
+    {
+        return false;
+    }
+
 private:
+    void BufferAvailableCallback();
+
+    bool initialized_ = false;
+
+    friend class HostWindowExtensionModel;
+
     ACE_DISALLOW_COPY_AND_MOVE(HostWindowExtension);
 };
 

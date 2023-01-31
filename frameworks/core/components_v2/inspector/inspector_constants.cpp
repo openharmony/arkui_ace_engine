@@ -484,5 +484,7 @@ ACE_EXPORT extern const char ROOT_SCENE_ETS_TAG[] = "RootScene";
 ACE_EXPORT extern const char SCREEN_ETS_TAG[] = "Screen";
 ACE_EXPORT extern const char WINDOW_SCENE_ETS_TAG[] = "WindowScene";
 ACE_EXPORT extern const char HOST_WINDOW_SCENE_ETS_TAG[] = "HostWindowScene";
+ACE_EXPORT extern const char WINDOW_EXTENSION_ETS_TAG[] = "WindowExtension";
+ACE_EXPORT extern const char HOST_WINDOW_EXTENSION_ETS_TAG[] = "HostWindowExtension";
 
 } // namespace OHOS::Ace::V2
