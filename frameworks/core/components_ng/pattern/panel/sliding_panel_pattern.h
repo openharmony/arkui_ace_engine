@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PANEL_PANEL_PATTERN_H
 
 #include <optional>
+
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
@@ -52,6 +53,7 @@ public:
         auto layoutAlgorithm = MakeRefPtr<SlidingPanelLayoutAlgorithm>();
         layoutAlgorithm->SetCurrentOffset(currentOffset_);
         layoutAlgorithm->SetIsFirstLayout(isFirstLayout_);
+        layoutAlgorithm->SetInvisibleFlag(invisibleFlag_.value_or(false));
         return layoutAlgorithm;
     }
 
@@ -103,7 +105,7 @@ private:
     RefPtr<PanEvent> panEvent_;
     RefPtr<Animator> animator_;
     std::unordered_map<PanelMode, double> defaultBlankHeights_;
-    
+
     bool isAnimating_ = false;
     bool isFirstLayout_ = true;
 
@@ -124,6 +126,8 @@ private:
 
     std::optional<bool> isShow_;
     bool isDrag_ = false;
+    std::optional<bool> invisibleFlag_;
+    std::queue<bool> isShowQueue_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SlidingPanelPattern);
 };

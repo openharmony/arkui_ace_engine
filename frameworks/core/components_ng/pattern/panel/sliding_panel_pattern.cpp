@@ -48,7 +48,7 @@ void SlidingPanelPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty();
+    auto layoutProperty = host->GetLayoutProperty<SlidingPanelLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
@@ -63,6 +63,15 @@ void SlidingPanelPattern::OnModifyDone()
     if (dragBarPattern && !(dragBarPattern->HasClickArrowCallback())) {
         SetDragBarCallBack();
     }
+    auto isShow = layoutProperty->GetIsShowValue(false);
+    if (isShow_.has_value() && isShow != isShow_.value_or(false)) {
+        isShowQueue_.push(isShow);
+        if (isShowQueue_.size() == 1 && isShowQueue_.front()) {
+            invisibleFlag_ = false;
+        }
+        return;
+    }
+    invisibleFlag_ = !invisibleFlag_.has_value() ? !isShow : false;
 }
 
 void SlidingPanelPattern::OnAttachToFrameNode()
@@ -450,10 +459,15 @@ void SlidingPanelPattern::AnimateTo(float targetLocation, PanelMode mode)
         CHECK_NULL_VOID(panel);
         auto dragBar = panel->GetDragBarNode();
         CHECK_NULL_VOID(dragBar);
-        panel->OnAnimationStop();
         auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
         CHECK_NULL_VOID(dragBarPattern);
         dragBarPattern->ShowInPanelMode(mode);
+        if (!panel->isShowQueue_.empty() && !panel->isShowQueue_.front()) {
+            auto panelNode = panel->GetHost();
+            panel->invisibleFlag_ = true;
+            panelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+        panel->OnAnimationStop();
     });
     AppendBlankHeightAnimation(targetLocation, mode);
     auto geometryNode = host->GetGeometryNode();
@@ -510,6 +524,14 @@ int32_t SlidingPanelPattern::GetAnimationDuration(float delta, float dragRange) 
 
 void SlidingPanelPattern::OnAnimationStop()
 {
+    if (!isShowQueue_.empty()) {
+        isShowQueue_.pop();
+        if (!isShowQueue_.empty() && isShowQueue_.front()) {
+            invisibleFlag_ = false;
+            auto host = GetHost();
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
     isAnimating_ = false;
 }
 
