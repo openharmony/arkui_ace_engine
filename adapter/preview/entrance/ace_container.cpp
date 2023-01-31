@@ -588,20 +588,6 @@ void AceContainer::DispatchPluginError(int32_t callbackId, int32_t errorCode, st
         TaskExecutor::TaskType::BACKGROUND);
 }
 
-bool AceContainer::Dump(const std::vector<std::string>& params)
-{
-    ContainerScope scope(instanceId_);
-    if (aceView_ && aceView_->Dump(params)) {
-        return true;
-    }
-
-    if (pipelineContext_) {
-        pipelineContext_->Dump(params);
-        return true;
-    }
-    return false;
-}
-
 void AceContainer::AddRouterChangeCallback(int32_t instanceId, const OnRouterChangeCallback& onRouterChangeCallback)
 {
     auto container = GetContainerInstance(instanceId);

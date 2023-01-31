@@ -252,6 +252,11 @@ public:
 
     virtual void FlushReload() {}
 
+    State GetState() const
+    {
+        return state_;
+    }
+
 protected:
     bool disallowPopLastPage_ = false;
     FrontendDialogCallback dialogCallback_ = nullptr;

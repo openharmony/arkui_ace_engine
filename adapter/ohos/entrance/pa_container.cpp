@@ -440,11 +440,6 @@ void PaContainer::DispatchPluginError(int32_t callbackId, int32_t errorCode, std
     return;
 }
 
-bool PaContainer::Dump(const std::vector<std::string>& params)
-{
-    return false;
-}
-
 sptr<IRemoteObject> PaContainer::OnConnect(int32_t instanceId, const OHOS::AAFwk::Want& want)
 {
     LOGI("OnConnect with id %{private}d", instanceId);

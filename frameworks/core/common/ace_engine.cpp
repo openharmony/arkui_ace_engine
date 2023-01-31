@@ -94,24 +94,6 @@ void AceEngine::RemoveContainer(int32_t instanceId)
     }
 }
 
-void AceEngine::Dump(const std::vector<std::string>& params) const
-{
-    std::unordered_map<int32_t, RefPtr<Container>> copied;
-    {
-        std::shared_lock<std::shared_mutex> lock(mutex_);
-        copied = containerMap_;
-    }
-    for (const auto& container : copied) {
-        auto pipelineContext = container.second->GetPipelineContext();
-        if (!pipelineContext) {
-            LOGW("the pipeline context is nullptr, pa container");
-            continue;
-        }
-        pipelineContext->GetTaskExecutor()->PostSyncTask(
-            [params, container = container.second]() { container->Dump(params); }, TaskExecutor::TaskType::UI);
-    }
-}
-
 RefPtr<Container> AceEngine::GetContainer(int32_t instanceId)
 {
 #ifdef PLUGIN_COMPONENT_SUPPORTED
