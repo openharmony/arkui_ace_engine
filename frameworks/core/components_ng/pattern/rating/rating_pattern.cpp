@@ -406,7 +406,7 @@ void RatingPattern::UpdateInternalResource(ImageSourceInfo& sourceInfo, int32_t 
     CHECK_NULL_VOID(iconTheme);
     auto iconPath = iconTheme->GetIconPath(sourceInfo.GetResourceId());
     if (!iconPath.empty()) {
-        sourceInfo.SetSrc(iconPath);
+        sourceInfo.SetSrc(iconPath, sourceInfo.GetFillColor());
         auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
         CHECK_NULL_VOID(ratingLayoutProperty);
         switch (imageFlag) {
