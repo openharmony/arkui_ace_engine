@@ -59,11 +59,18 @@ void AnimatedImagePlayer::RenderFrame(const int32_t& index)
                 LOGW("animated player cannot get the %{public}d skImage!", index);
                 return;
             }
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+            player->successCallback_(player->imageSource_, canvasImage);
+        },
+        TaskExecutor::TaskType::UI);
+#else
             taskExecutor->PostTask([callback = player->successCallback_, canvasImage,
                                        source = player->imageSource_] { callback(source, canvasImage); },
                 TaskExecutor::TaskType::UI);
         },
         TaskExecutor::TaskType::IO);
+#endif
+
 }
 
 sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
@@ -110,6 +117,7 @@ sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
         iterator->second = std::make_unique<SkBitmap>(bitmap);
     }
 #ifndef GPU_DISABLED
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     // weak reference of io manager must be check and used on io thread, because io manager is created on io thread.
     if (ioManager_) {
         auto resourceContext = ioManager_->GetResourceContext();
@@ -118,6 +126,7 @@ sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
             return SkImage::MakeCrossContextFromPixmap(resourceContext.get(), pixmap, true, pixmap.colorSpace());
         }
     }
+#endif
 #endif
     return SkImage::MakeFromBitmap(bitmap);
 }
