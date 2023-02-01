@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "base/geometry/size.h"
+#include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/declaration/common/declaration.h"
@@ -69,6 +70,10 @@ public:
 
     void SetSrc(const std::string& src)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetWebSrc(src);
     }
 
@@ -79,6 +84,10 @@ public:
 
     void SetData(const std::string& data)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetWebData(data);
     }
 
@@ -89,6 +98,10 @@ public:
 
     void SetPageStartedEventId(const EventMarker& pageStartedEventId)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetPageStartedEventId(pageStartedEventId);
     }
 
@@ -99,6 +112,10 @@ public:
 
     void SetPageFinishedEventId(const EventMarker& pageFinishedEventId)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetPageFinishedEventId(pageFinishedEventId);
     }
 
@@ -124,6 +141,10 @@ public:
 
     void SetTitleReceiveEventId(const EventMarker& titleReceiveEventId)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetTitleReceiveEventId(titleReceiveEventId);
     }
 
@@ -134,6 +155,10 @@ public:
 
     void SetOnFullScreenExitEventId(const EventMarker& fullScreenExitEventId)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetOnFullScreenExitEventId(fullScreenExitEventId);
     }
 
@@ -144,6 +169,10 @@ public:
 
     void SetGeolocationHideEventId(const EventMarker& geolocationHideEventId)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetGeolocationHideEventId(geolocationHideEventId);
     }
 
@@ -154,6 +183,10 @@ public:
 
     void SetGeolocationShowEventId(const EventMarker& geolocationShowEventId)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetGeolocationShowEventId(geolocationShowEventId);
     }
 
@@ -164,6 +197,10 @@ public:
 
     void SetRequestFocusEventId(const EventMarker& requestFocusEventId)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetRequestFocusEventId(requestFocusEventId);
     }
 
@@ -174,6 +211,10 @@ public:
 
     void SetDownloadStartEventId(const EventMarker& downloadStartEventId)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetDownloadStartEventId(downloadStartEventId);
     }
 
@@ -184,6 +225,10 @@ public:
 
     void SetPageErrorEventId(const EventMarker& pageErrorEventId)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetPageErrorEventId(pageErrorEventId);
     }
 
@@ -194,6 +239,10 @@ public:
 
     void SetHttpErrorEventId(const EventMarker& httpErrorEventId)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetHttpErrorEventId(httpErrorEventId);
     }
 
@@ -204,6 +253,10 @@ public:
 
     void SetMessageEventId(const EventMarker& messageEventId)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetMessageEventId(messageEventId);
     }
 
@@ -214,6 +267,10 @@ public:
 
     void SetRenderExitedId(const EventMarker& renderExitedId)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetRenderExitedId(renderExitedId);
     }
 
@@ -224,6 +281,10 @@ public:
 
     void SetRefreshAccessedHistoryId(const EventMarker& refreshAccessedHistoryId)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetRefreshAccessedHistoryId(refreshAccessedHistoryId);
     }
 
@@ -234,6 +295,10 @@ public:
 
     void SetResourceLoadId(const EventMarker& resourceLoadId)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetResourceLoadId(resourceLoadId);
     }
 
@@ -244,6 +309,10 @@ public:
 
     void SetScaleChangeId(const EventMarker& scaleChangeId)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetScaleChangeId(scaleChangeId);
     }
 
@@ -254,6 +323,10 @@ public:
 
     void SetScrollId(const EventMarker& scrollId)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetScrollId(scrollId);
     }
 
@@ -264,6 +337,10 @@ public:
 
     void SetPermissionRequestEventId(const EventMarker& permissionRequestEventId)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetPermissionRequestEventId(permissionRequestEventId);
     }
 
@@ -290,6 +367,10 @@ public:
 
     void SetWindowExitEventId(const EventMarker& windowExitEventId)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetWindowExitEventId(windowExitEventId);
     }
 
@@ -782,6 +863,10 @@ public:
 
     void SetSearchResultReceiveEventId(const EventMarker& searchResultReceiveEventId)
     {
+        if (!declaration_) {
+            LOGE("declaration_ is null");
+            return;
+        }
         declaration_->SetSearchResultReceiveEventId(searchResultReceiveEventId);
     }
 
