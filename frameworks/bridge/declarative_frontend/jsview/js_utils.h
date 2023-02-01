@@ -30,6 +30,7 @@
 namespace OHOS::Rosen {
 class RSNode;
 class Session;
+class ScreenSession;
 }
 
 namespace OHOS::Ace {
@@ -41,6 +42,7 @@ namespace OHOS::Ace::Framework {
     const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj);
     RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj);
     sptr<Rosen::Session> CreateSceneSessionFromNapiValue(JSRef<JSVal> obj);
+    sptr<Rosen::ScreenSession> CreateScreenSessionFromNapiValue(JSRef<JSVal> obj);
 } // namespace OHOS::Ace::Framework
 #endif
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_UTILS_H

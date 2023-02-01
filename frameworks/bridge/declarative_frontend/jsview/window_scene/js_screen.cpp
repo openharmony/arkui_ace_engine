@@ -40,13 +40,13 @@ void JSScreen::Create(const JSCallbackInfo& info)
         return;
     }
 
-    // if (info.Length() < 1) {
-    //     LOGE("The arg is wrong, it is supposed to have 1 argument");
-    //     return;
-    // }
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have 1 argument");
+        return;
+    }
 
-    // auto screenSession = CreateScreenSessionFromNapiValue(info[0]);
-    NG::ScreenModel::Create(nullptr);
+    auto screenSession = CreateScreenSessionFromNapiValue(info[0]);
+    NG::ScreenModel::Create(screenSession);
 }
 
 } // namespace OHOS::Ace::Framework

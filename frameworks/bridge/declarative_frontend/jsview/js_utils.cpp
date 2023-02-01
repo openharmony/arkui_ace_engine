@@ -21,6 +21,11 @@
 #include <dlfcn.h>
 #endif
 
+#include "scene_session_manager/js_scene_session.h"
+#include "screen_session_manager/js_screen_session.h"
+#include "session/scene/host/include/scene_session.h"
+#include "session/screen/include/screen_session.h"
+
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
 #include "base/want/want_wrap.h"
@@ -28,8 +33,6 @@
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
-#include "scene_session_manager/js_scene_session.h"
-#include "session/scene/host/include/scene_session.h"
 
 namespace OHOS::Ace::Framework {
 #if !defined(PREVIEW)
@@ -158,12 +161,12 @@ sptr<Rosen::Session> CreateSceneSessionFromNapiValue(JSRef<JSVal> obj)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!obj->IsObject()) {
-        LOGE("CreateSceneSessionFromNapiValue: info[0] is not an object");
+        LOGE("obj is not an object");
         return nullptr;
     }
     auto engine = EngineHelper::GetCurrentEngine();
     if (!engine) {
-        LOGE("CreateSceneSessionFromNapiValue: engine is null");
+        LOGE("engine is nullptr");
         return nullptr;
     }
     auto nativeEngine = engine->GetNativeEngine();
@@ -184,15 +187,61 @@ sptr<Rosen::Session> CreateSceneSessionFromNapiValue(JSRef<JSVal> obj)
     }
     NativeObject* object = static_cast<NativeObject*>(nativeValue->GetInterface(NativeObject::INTERFACE_ID));
     if (object == nullptr) {
+        LOGE("nativeObject is nullptr");
         return nullptr;
     }
 
     auto jsSceneSession = static_cast<Rosen::JsSceneSession*>(object->GetNativePointer());
     if (jsSceneSession == nullptr) {
-        LOGE("Failed to find scene session From JS Object");
+        LOGE("jsSceneSession is nullptr");
         return nullptr;
     }
     return jsSceneSession->GetNativeSession();
+#else
+    return nullptr;
+#endif
+}
+
+sptr<Rosen::ScreenSession> CreateScreenSessionFromNapiValue(JSRef<JSVal> obj)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!obj->IsObject()) {
+        LOGE("obj is not an object");
+        return nullptr;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        LOGE("engine is nullptr");
+        return nullptr;
+    }
+    auto nativeEngine = engine->GetNativeEngine();
+    if (nativeEngine == nullptr) {
+        LOGE("nativeEngine is nullptr");
+        return nullptr;
+    }
+#ifdef USE_V8_ENGINE
+    v8::Local<v8::Value> value = obj->operator v8::Local<v8::Value>();
+#elif USE_ARK_ENGINE
+    panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
+#endif
+    JSValueWrapper valueWrapper = value;
+    NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
+    if (nativeValue == nullptr) {
+        LOGE("nativeValue is nullptr");
+        return nullptr;
+    }
+    NativeObject* object = static_cast<NativeObject*>(nativeValue->GetInterface(NativeObject::INTERFACE_ID));
+    if (object == nullptr) {
+        LOGE("nativeObject is nullptr");
+        return nullptr;
+    }
+
+    auto jsScreenSession = static_cast<Rosen::JsScreenSession*>(object->GetNativePointer());
+    if (jsScreenSession == nullptr) {
+        LOGE("jsScreenSession is nullptr");
+        return nullptr;
+    }
+    return jsScreenSession->GetNativeSession();
 #else
     return nullptr;
 #endif

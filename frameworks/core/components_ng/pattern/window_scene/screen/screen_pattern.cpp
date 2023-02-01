@@ -15,6 +15,26 @@
 
 #include "core/components_ng/pattern/window_scene/screen/screen_pattren.h"
 
+#include "render_service_client/core/ui/rs_display_node.h"
+
+#include "core/components_ng/render/adapter/rosen_render_context.h"
+
 namespace OHOS::Ace::NG {
+
+void ScreenPattern::OnAttachToFrameNode()
+{
+    CHECK_NULL_VOID(screenSession_);
+
+    Rosen::RSDisplayNodeConfig config = { .screenId = screenSession_->GetScreenId() };
+
+    auto displayNode = Rosen::RSDisplayNode::Create(config);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
+    CHECK_NULL_VOID(context);
+    context->SetRSNode(displayNode);
+}
 
 } // namespace OHOS::Ace::NG

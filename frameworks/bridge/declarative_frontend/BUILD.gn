@@ -474,9 +474,11 @@ template("declarative_js_engine") {
       if (defined(config.window_scene_support) && config.window_scene_support) {
         external_deps += [
           "window_manager:scene_session",
+          "window_manager:screen_session",
         ]
         deps += [
           "//foundation/window/window_manager/window_scene/interfaces/kits/napi/scene_session_manager:scenesessionmanager_napi",
+          "//foundation/window/window_manager/window_scene/interfaces/kits/napi/screen_session_manager:screensessionmanager_napi",
         ]
       }
     }
