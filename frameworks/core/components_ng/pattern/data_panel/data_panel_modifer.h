@@ -30,6 +30,16 @@
 
 namespace OHOS::Ace::NG {
 
+constexpr int32_t ANIMATION_DURATION = 1200;        // The circle animation duration is 1200ms
+constexpr int32_t ANIMATION_DELAY = 0;              // The circle animation delay is 0ms
+constexpr int32_t ANIMATION_TIMES = 1;              // The circle animation repeat times is 1
+constexpr float ANIMATION_START = 0.0f;             // The circle animation start from 0.0
+constexpr float ANIMATION_END = 1.0f;               // The circle animation end with 1.0
+constexpr float ANIMATION_CURVE_VELOCITY = 0.0f;    // The circle animation spring curve velocity is 0.0
+constexpr float ANIMATION_CURVE_MASS = 1.0f;        // The circle animation spring curve mass is 1.0
+constexpr float ANIMATION_CURVE_STIFFNESS = 110.0f; // The circle animation spring curve stiffness is 110.0
+constexpr float ANIMATION_CURVE_DAMPING = 17.0f;    // The circle animation spring curve damping is 17.0
+
 struct ArcData {
     Offset center;
     float progress = 0.0f;
@@ -73,14 +83,17 @@ public:
     void UpdateDate()
     {
         if (date_) {
-            float data = NearZero(date_->Get()) ? 1.0f : 0;
+            // When the date update, the animation will repeat once.
+            LOGI("Data panel animatableProperty is updating, the animation will start from 0.0 to 1.0.");
+            date_->Set(ANIMATION_START);
             AnimationOption option = AnimationOption();
-            RefPtr<Curve> curve = AceType::MakeRefPtr<SpringCurve>(0.0f, 1.0f, 110.0f, 17.0f);
-            option.SetDuration(1200);
-            option.SetDelay(0);
+            RefPtr<Curve> curve = AceType::MakeRefPtr<SpringCurve>(
+                ANIMATION_CURVE_VELOCITY, ANIMATION_CURVE_MASS, ANIMATION_CURVE_STIFFNESS, ANIMATION_CURVE_DAMPING);
+            option.SetDuration(ANIMATION_DURATION);
+            option.SetDelay(ANIMATION_DELAY);
             option.SetCurve(curve);
-            option.SetIteration(1);
-            AnimationUtils::Animate(option, [&]() { date_->Set(data); });
+            option.SetIteration(ANIMATION_TIMES);
+            AnimationUtils::Animate(option, [&]() { date_->Set(ANIMATION_END); });
         }
     }
 
