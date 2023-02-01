@@ -89,6 +89,7 @@ public:
     MOCK_METHOD0(FlushPipelineImmediately, void());
     MOCK_METHOD1(OnVirtualKeyboardHeightChange, void(float keyboardHeight));
     MOCK_METHOD1(SetContainerWindow, void(bool isShow));
+    MOCK_METHOD1(SetTouchPipeline, void(const WeakPtr<PipelineBase>& context));
 
     static RefPtr<MockPipelineBase> pipeline_;
 };
