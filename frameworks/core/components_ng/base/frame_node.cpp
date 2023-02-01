@@ -601,6 +601,8 @@ void FrameNode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
 
 RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
+    CHECK_NULL_RETURN_NOLOG(layoutProperty_, nullptr);
+    CHECK_NULL_RETURN_NOLOG(pattern_, nullptr);
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
         auto layoutWrapper =
             MakeRefPtr<LayoutWrapper>(WeakClaim(this), MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>());
