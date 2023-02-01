@@ -114,27 +114,6 @@ SizeF CalculateFitScaleDown(const SizeF& videoSize, const SizeF& layoutSize)
     return CalculateFitContain(videoSize, layoutSize);
 }
 
-SizeF ConstraintSize(const SizeF& contentSize, const SizeF& layoutSize)
-{
-    if (contentSize.Width() <= layoutSize.Width() && contentSize.Height() <= layoutSize.Height()) {
-        return contentSize;
-    }
-
-    double widthRatio = contentSize.Width() / layoutSize.Width();
-    double heightRatio = contentSize.Height() / layoutSize.Height();
-    double rightRatio;
-    if (widthRatio <= 1) {
-        rightRatio = heightRatio;
-    } else if (heightRatio <= 1) {
-        rightRatio = widthRatio;
-    } else {
-        rightRatio = widthRatio > heightRatio ? heightRatio : heightRatio;
-    }
-
-    return { static_cast<float>(contentSize.Width() / rightRatio),
-        static_cast<float>(contentSize.Height() / rightRatio) };
-}
-
 SizeF MeasureVideoContentLayout(const SizeF& layoutSize, const RefPtr<VideoLayoutProperty>& layoutProperty)
 {
     if (!layoutProperty || !layoutProperty->HasVideoSize()) {
@@ -143,7 +122,7 @@ SizeF MeasureVideoContentLayout(const SizeF& layoutSize, const RefPtr<VideoLayou
     }
 
     auto videoSize = layoutProperty->GetVideoSizeValue(SizeF(0, 0));
-    LOGD("VideoSize = %{public}s", videoSize.ToString().c_str());
+    LOGD("Video original size before fitting is %{public}s", videoSize.ToString().c_str());
     auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
     SizeF contentSize = { 0.0, 0.0 };
     switch (imageFit) {
@@ -166,8 +145,9 @@ SizeF MeasureVideoContentLayout(const SizeF& layoutSize, const RefPtr<VideoLayou
             contentSize = CalculateFitContain(videoSize, layoutSize);
     }
 
-    // The video frame area should not be greater than the video component area.
-    return ConstraintSize(contentSize, layoutSize);
+    // Just return contentSize as the video frame area.
+    LOGD("Video contentSize after fitting is %{public}s", contentSize.ToString().c_str());
+    return contentSize;
 }
 } // namespace
 
