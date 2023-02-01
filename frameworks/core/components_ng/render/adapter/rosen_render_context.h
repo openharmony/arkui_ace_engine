@@ -38,6 +38,7 @@
 
 namespace OHOS::Ace::NG {
 class BorderImageModifier;
+class DebugBoundaryModifier;
 class MouseSelectModifier;
 class FocusStateModifier;
 class PageTransitionEffect;
@@ -194,6 +195,16 @@ public:
     void OnZIndexUpdate(int32_t value) override;
     void DumpInfo() const override;
 
+    void SetNeedDebugBoundary(bool flag) override
+    {
+        needDebugBoundary_ = flag;
+    }
+
+    bool NeedDebugBoundary() const override
+    {
+        return needDebugBoundary_;
+    }
+
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -287,6 +298,8 @@ private:
     DataReadyNotifyTask CreateBorderImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBorderImageLoadSuccessCallback();
 
+    void PaintDebugBoundary();
+
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
     RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
@@ -301,9 +314,11 @@ private:
     bool isPositionChanged_ = false;
     bool firstTransitionIn_ = false;
     bool isBackBlurChanged_ = false;
+    bool needDebugBoundary_ = false;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
 
+    std::shared_ptr<DebugBoundaryModifier> debugBoundaryModifier_;
     std::shared_ptr<BorderImageModifier> borderImageModifier_;
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_;
     std::shared_ptr<FocusStateModifier> focusStateModifier_;
