@@ -50,43 +50,31 @@
 namespace OHOS::Ace::NG {
 namespace {
 // should be moved to theme.
-constexpr int32_t COMMON_ANIMATION_DUR = 200;
 constexpr int32_t TOAST_ANIMATION_DURATION = 100;
 constexpr int32_t MENU_ANIMATION_DURATION = 150;
 constexpr float TOAST_ANIMATION_POSITION = 15.0f;
+
+// dialog animation params
+const RefPtr<Curve> SHOW_SCALE_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.38f, 1.33f, 0.6f, 1.0f);
+
 } // namespace
-
-void OverlayManager::Show(const RefPtr<FrameNode>& node)
-{
-    auto root = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(root && node);
-    node->MountToParent(root);
-    root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-
-    AnimationOption option;
-    option.SetCurve(Curves::LINEAR);
-    option.SetDuration(COMMON_ANIMATION_DUR);
-    option.SetFillMode(FillMode::FORWARDS);
-    option.SetOnFinishEvent([weak = WeakClaim(this), nodeWK = WeakClaim(RawPtr(node)), id = Container::CurrentId()] {
-        auto node = nodeWK.Upgrade();
-        auto overlayManager = weak.Upgrade();
-        CHECK_NULL_VOID(node && overlayManager);
-        ContainerScope scope(id);
-        overlayManager->FocusDialog(node);
-    });
-    auto ctx = node->GetRenderContext();
-    CHECK_NULL_VOID(ctx);
-    ctx->OpacityAnimation(option, 0.0, 1.0);
-}
 
 void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(theme);
+
     auto root = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(root && node);
     node->MountToParent(root);
     root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
 
     AnimationOption option;
+    // default opacity animation params
+    option.SetCurve(Curves::SHARP);
+    option.SetDuration(theme->GetOpacityAnimationDurIn());
     option.SetFillMode(FillMode::FORWARDS);
 
     auto dialogPattern = node->GetPattern<DialogPattern>();
@@ -107,59 +95,64 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
         });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
-    ctx->OpacityAnimation(option, 0.0, 1.0);
+    ctx->OpacityAnimation(option, theme->GetOpacityStart(), theme->GetOpacityEnd());
+
+    // scale animation on dialog content
+    auto contentNode = DynamicCast<FrameNode>(node->GetFirstChild());
+    CHECK_NULL_VOID(contentNode);
+    ctx = contentNode->GetRenderContext();
+    CHECK_NULL_VOID(ctx);
+    option.SetOnFinishEvent(nullptr);
+    option.SetCurve(SHOW_SCALE_ANIMATION_CURVE);
+    option.SetDuration(theme->GetAnimationDurationIn());
+    ctx->ScaleAnimation(option, theme->GetScaleStart(), theme->GetScaleEnd());
 }
 
 void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
 {
-    auto root = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(root && node);
+    CHECK_NULL_VOID(node);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(theme);
 
+    // default opacity animation params
     AnimationOption option;
     option.SetFillMode(FillMode::FORWARDS);
+    option.SetCurve(Curves::SHARP);
 
+    option.SetDuration(theme->GetAnimationDurationOut());
+    // get customized animation params
     auto dialogPattern = node->GetPattern<DialogPattern>();
     option = dialogPattern->GetCloseAnimation().value_or(option);
     auto onFinish = option.GetOnFinishEvent();
 
-    option.SetOnFinishEvent([root, node, id = Container::CurrentId(), onFinish] {
-        ContainerScope scope(id);
-        if (onFinish != nullptr) {
-            onFinish();
-        }
+    option.SetOnFinishEvent(
+        [rootWk = rootNodeWeak_, nodeWk = WeakClaim(RawPtr(node)), id = Container::CurrentId(), onFinish] {
+            ContainerScope scope(id);
+            auto root = rootWk.Upgrade();
+            auto node = nodeWk.Upgrade();
+            CHECK_NULL_VOID(root && node);
+            if (onFinish != nullptr) {
+                onFinish();
+            }
 
-        root->RemoveChild(node);
-        root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-    });
+            root->RemoveChild(node);
+            root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
-    ctx->OpacityAnimation(option, 1.0, 0.0);
-    // start animation immediately
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->RequestFrame();
-}
+    ctx->OpacityAnimation(option, theme->GetOpacityEnd(), theme->GetOpacityStart());
 
-void OverlayManager::Pop(const RefPtr<FrameNode>& node)
-{
-    auto root = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(root && node);
-
-    AnimationOption option;
-    option.SetCurve(Curves::LINEAR);
-    option.SetDuration(COMMON_ANIMATION_DUR);
-    option.SetFillMode(FillMode::FORWARDS);
-    option.SetOnFinishEvent([root, node, id = Container::CurrentId()] {
-        ContainerScope scope(id);
-        root->RemoveChild(node);
-        root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-    });
-    auto ctx = node->GetRenderContext();
+    // scale animation
+    auto contentNode = DynamicCast<FrameNode>(node->GetFirstChild());
+    CHECK_NULL_VOID(contentNode);
+    ctx = contentNode->GetRenderContext();
     CHECK_NULL_VOID(ctx);
-    ctx->OpacityAnimation(option, 1.0, 0.0);
+    option.SetOnFinishEvent(nullptr);
+    option.SetCurve(Curves::FRICTION);
+    ctx->ScaleAnimation(option, theme->GetScaleEnd(), theme->GetScaleStart());
     // start animation immediately
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
 }
 
@@ -611,7 +604,7 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps,
     LOGI("OverlayManager::ShowDateDialogPicker");
     auto dialogNode = DatePickerDialogView::Show(
         dialogProps, std::move(datePickerProperty), isLunar, std::move(dialogEvent), std::move(dialogCancelEvent));
-    Show(dialogNode);
+    OpenDialogAnimation(dialogNode);
 }
 
 void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps,
@@ -621,7 +614,7 @@ void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps,
     LOGI("OverlayManager::ShowTimeDialogPicker");
     auto dialogNode = TimePickerDialogView::Show(dialogProps, std::move(timePickerProperty), isUseMilitaryTime,
         std::move(dialogEvent), std::move(dialogCancelEvent));
-    Show(dialogNode);
+    OpenDialogAnimation(dialogNode);
 }
 
 void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, uint32_t selected, const Dimension& height,
@@ -631,7 +624,7 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, uint32_
     LOGI("OverlayManager::ShowTextDialogPicker");
     auto dialogNode = TextPickerDialogView::Show(
         dialogProps, selected, height, getRangeVector, std::move(dialogEvent), std::move(dialogCancelEvent));
-    Show(dialogNode);
+    OpenDialogAnimation(dialogNode);
 }
 
 void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
@@ -646,7 +639,15 @@ bool OverlayManager::RemoveOverlay()
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, true);
     if (rootNode->GetChildren().size() > 1) {
-        // stage node is at index 0
+        // stage node is at index 0, remove overlay at index 1
+        auto overlay = DynamicCast<FrameNode>(rootNode->GetChildAtIndex(1));
+        CHECK_NULL_RETURN(overlay, false);
+        // close dialog with animation
+        auto dialogPattern = overlay->GetPattern<DialogPattern>();
+        if (dialogPattern) {
+            CloseDialog(overlay);
+            return true;
+        }
         rootNode->RemoveChildAtIndex(1);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         LOGI("overlay removed successfully");

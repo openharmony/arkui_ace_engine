@@ -349,6 +349,11 @@ public:
         return emphasizeButtonTextColor_;
     }
 
+    int32_t GetOpacityAnimationDurIn() const
+    {
+        return opacityAnimationDurIn_;
+    }
+
     int32_t GetAnimationDurationIn() const
     {
         return animationDurationIn_;
@@ -443,6 +448,7 @@ private:
     double opacityStart_ = 0.0;
     double opacityEnd_ = 1.0;
     int32_t animationDurationIn_ = 250;
+    int32_t opacityAnimationDurIn_ = 150;
     int32_t animationDurationOut_ = 250;
     Color maskColorStart_;
     Color maskColorEnd_;
