@@ -143,6 +143,7 @@ public:
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
+    virtual void UpdateBackBlurStyle(const BlurStyleOption& blurStyle) {}
 
     virtual void ClipWithRect(const RectF& rectF) {}
 
@@ -202,6 +203,15 @@ public:
         return sharedTransitionOption_ != nullptr;
     }
 
+    std::optional<BlurStyleOption> GetBackBlurStyle() const
+    {
+        return GetBackground() ? GetBackground()->propBlurStyleOption : std::nullopt;
+    }
+    std::optional<Dimension> GetBackBlurRadius() const
+    {
+        return GetBackground() ? GetBackground()->propBlurRadius : std::nullopt;
+    }
+
     virtual void PaintAccessibilityFocus() {};
 
     virtual void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) {}
@@ -226,7 +236,6 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageRepeat, ImageRepeat);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageSize, BackgroundImageSize);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImagePosition, BackgroundImagePosition);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundBlurStyle, BlurStyle);
 
     // BorderImage
     ACE_DEFINE_PROPERTY_GROUP(BdImage, BorderImageProperty);
@@ -306,7 +315,6 @@ protected:
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
     virtual void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) {}
     virtual void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) {}
-    virtual void OnBackgroundBlurStyleUpdate(const BlurStyle& bgBlurStyle) {}
 
     virtual void OnBorderImageUpdate(const RefPtr<BorderImage>& borderImage) {}
     virtual void OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo) {}

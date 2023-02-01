@@ -374,7 +374,10 @@ template("ace_core_source_set") {
     }
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
-      sources += [ "animation/native_curve_helper.cpp" ]
+      sources += [
+        "animation/native_curve_helper.cpp",
+        "common/rosen/rosen_convert_helper.cpp",
+      ]
       deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
     }
 
@@ -703,6 +706,13 @@ template("ace_core_ng_source_set") {
       if (!use_mingw_win && !use_mac && !use_linux) {
         deps += [ "$ace_root/frameworks/core/components_ng/pattern/form:ace_core_components_form_pattern_ng_$platform" ]
       }
+    }
+    if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
+      sources += [
+        "animation/native_curve_helper.cpp",
+        "common/rosen/rosen_convert_helper.cpp",
+      ]
+      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
     }
     cflags_cc = []
     cflags_cc += invoker.cflags_cc

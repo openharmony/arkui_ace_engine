@@ -97,7 +97,7 @@ public:
         ViewAbstract::SetBackgroundImagePosition(bgImgPosition);
     }
 
-    void SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle) override
+    void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) override
     {
         ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle);
     }
