@@ -97,6 +97,7 @@ void JsFunction::ExecuteNew(const std::vector<std::string>& keys, const std::str
 
 JSRef<JSVal> JsFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
 {
+    JAVASCRIPT_EXECUTION_SCOPE_STATIC
     ACE_FUNCTION_TRACE();
 
     JSRef<JSVal> jsObject = jsThis_.Lock();
