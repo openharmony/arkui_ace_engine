@@ -20,6 +20,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/scroll_model_impl.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/scroll/scrollable.h"
 #include "core/components_ng/pattern/scroll/scroll_model.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 
@@ -119,6 +120,37 @@ void JSScroll::OnScrollBeginCallback(const JSCallbackInfo& args)
     args.SetReturnValue(args.This());
 }
 
+void JSScroll::OnScrollFrameBeginCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollFrameBegin = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                      const Dimension& offset, ScrollState state) -> ScrollFrameResult {
+            OHOS::Ace::ScrollFrameResult scrollRes { .offset = offset };
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollRes);
+            auto params = ConvertToJSValues(offset, state);
+            auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+            if (result.IsEmpty()) {
+                LOGE("Error calling onScrollBegin, result is empty.");
+                return scrollRes;
+            }
+
+            if (!result->IsObject()) {
+                LOGE("Error calling onScrollBegin, result is not object.");
+                return scrollRes;
+            }
+
+            auto resObj = JSRef<JSObject>::Cast(result);
+            auto dxRemainValue = resObj->GetProperty("offsetRemain");
+            if (dxRemainValue->IsNumber()) {
+                scrollRes.offset = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
+            }
+            return scrollRes;
+        };
+        ScrollModel::GetInstance()->SetOnScrollFrameBegin(std::move(onScrollFrameBegin));
+    }
+    args.SetReturnValue(args.This());
+}
+
 void JSScroll::OnScrollCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
@@ -166,6 +198,7 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("create", &JSScroll::Create, opt);
     JSClass<JSScroll>::StaticMethod("scrollable", &JSScroll::SetScrollable, opt);
     JSClass<JSScroll>::StaticMethod("onScrollBegin", &JSScroll::OnScrollBeginCallback, opt);
+    JSClass<JSScroll>::StaticMethod("onScrollFrameBegin", &JSScroll::OnScrollFrameBeginCallback, opt);
     JSClass<JSScroll>::StaticMethod("onScroll", &JSScroll::OnScrollCallback, opt);
     JSClass<JSScroll>::StaticMethod("onScrollEdge", &JSScroll::OnScrollEdgeCallback, opt);
     JSClass<JSScroll>::StaticMethod("onScrollEnd", &JSScroll::OnScrollEndCallback, opt);
