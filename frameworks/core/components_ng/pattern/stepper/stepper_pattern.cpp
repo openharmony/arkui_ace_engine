@@ -133,11 +133,11 @@ void StepperPattern::CreateLeftButtonNode()
     imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageFit(ImageFit::FILL);
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_BACK_ARROW);
+    imageSourceInfo.SetFillColor(stepperTheme->GetArrowColor());
     imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(imageSourceInfo);
     SizeF sourceSize(static_cast<float>(stepperTheme->GetArrowWidth().ConvertToPx()),
         static_cast<float>(stepperTheme->GetArrowHeight().ConvertToPx()));
     imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateSourceSize(sourceSize);
-    imageNode->GetPaintProperty<ImageRenderProperty>()->UpdateSvgFillColor(stepperTheme->GetArrowColor());
     imageNode->MountToParent(rowNode);
     imageNode->MarkModifyDone();
     // Create textNode
@@ -276,13 +276,13 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageFit(ImageFit::FILL);
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_NEXT_ARROW);
+    auto imageColor = stepperTheme->GetArrowColor();
+    imageColor = isDisabled ? imageColor.BlendOpacity(stepperTheme->GetDisabledAlpha()) : imageColor;
+    imageSourceInfo.SetFillColor(imageColor);
     imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(imageSourceInfo);
     SizeF sourceSize(static_cast<float>(stepperTheme->GetArrowWidth().ConvertToPx()),
         static_cast<float>(stepperTheme->GetArrowHeight().ConvertToPx()));
     imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateSourceSize(sourceSize);
-    auto imageColor = stepperTheme->GetArrowColor();
-    imageColor = isDisabled ? imageColor.BlendOpacity(stepperTheme->GetDisabledAlpha()) : imageColor;
-    imageNode->GetPaintProperty<ImageRenderProperty>()->UpdateSvgFillColor(imageColor);
     imageNode->MountToParent(rowNode);
     imageNode->MarkModifyDone();
 }
@@ -343,11 +343,11 @@ void StepperPattern::CreateWaitingRightButtonNode()
     imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageFit(ImageFit::FILL);
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetResourceId(InternalResource::ResourceId::PIECE_DELETE_SVG);
+    imageSourceInfo.SetFillColor(stepperTheme->GetProgressColor());
     imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(imageSourceInfo);
     SizeF sourceSize(static_cast<float>(stepperTheme->GetProgressDiameter().ConvertToPx()),
         static_cast<float>(stepperTheme->GetProgressDiameter().ConvertToPx()));
     imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateSourceSize(sourceSize);
-    imageNode->GetPaintProperty<ImageRenderProperty>()->UpdateSvgFillColor(stepperTheme->GetProgressColor());
     imageNode->MountToParent(hostNode);
     imageNode->MarkModifyDone();
 }
