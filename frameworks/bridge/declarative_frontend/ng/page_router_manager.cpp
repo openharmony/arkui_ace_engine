@@ -418,12 +418,16 @@ void PageRouterManager::StartPush(const RouterPageInfo& target, const std::strin
         LOGE("router.Push uri is empty");
         return;
     }
+    if (!manifestParser_) {
+        LOGE("the router manifest parser is null.");
+        return;
+    }
     if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
         LOGE("router stack size is larger than max size 32.");
         return;
     }
     std::string url = target.url;
-    std::string pagePath = url + ".js";
+    std::string pagePath = manifestParser_->GetRouter()->GetPagePath(url);
     LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
     if (pagePath.empty()) {
         LOGE("[Engine Log] this uri not support in route push.");
@@ -459,8 +463,12 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::st
         LOGE("router.Push uri is empty");
         return;
     }
+    if (!manifestParser_) {
+        LOGE("the router manifest parser is null.");
+        return;
+    }
     std::string url = target.url;
-    std::string pagePath = url + ".js";
+    std::string pagePath = manifestParser_->GetRouter()->GetPagePath(url);
     LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
     if (pagePath.empty()) {
         LOGE("[Engine Log] this uri not support in route push.");
@@ -504,8 +512,12 @@ void PageRouterManager::StartBack(const RouterPageInfo& target, const std::strin
         return;
     }
 
+    if (!manifestParser_) {
+        LOGE("the router manifest parser is null.");
+        return;
+    }
     std::string url = target.url;
-    std::string pagePath = url + ".js";
+    std::string pagePath = manifestParser_->GetRouter()->GetPagePath(url);
     LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
     if (pagePath.empty()) {
         LOGE("[Engine Log] this uri not support in route push.");
