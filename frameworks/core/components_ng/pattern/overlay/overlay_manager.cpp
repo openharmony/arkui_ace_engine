@@ -237,6 +237,23 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
+void OverlayManager::HideAllPopups()
+{
+    LOGI("OverlayManager::HideAllPopups");
+    if (popupMap_.empty()) {
+        LOGW("OverlayManager: popupMap is empty");
+        return;
+    }
+    for (const auto& popup : popupMap_) {
+        auto popupInfo = popup.second;
+        if (popupInfo.isCurrentOnShow && popupInfo.target.Upgrade()) {
+            popupInfo.markNeedUpdate = true;
+            popupInfo.popupId = -1;
+            UpdatePopupNode(popupInfo.target.Upgrade()->GetId(), popupInfo);
+        }
+    }
+}
+
 void OverlayManager::ErasePopup(int32_t targetId)
 {
     if (popupMap_.find(targetId) != popupMap_.end()) {
@@ -346,6 +363,22 @@ void OverlayManager::HideMenu(int32_t targetId)
         return;
     }
     Pop(menuMap_[targetId]);
+}
+
+void OverlayManager::HideAllMenus()
+{
+    LOGI("OverlayManager::HideAllMenus");
+    if (menuMap_.empty()) {
+        LOGW("OverlayManager: menuMap is empty");
+        return;
+    }
+    auto rootNode = rootNodeWeak_.Upgrade();
+    for (const auto& child : rootNode->GetChildren()) {
+        auto node = DynamicCast<FrameNode>(child);
+        if (node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+            PopMenuAnimation(node);
+        }
+    }
 }
 
 void OverlayManager::DeleteMenu(int32_t targetId)
