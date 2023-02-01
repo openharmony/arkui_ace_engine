@@ -94,11 +94,10 @@ void ButtonPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
     InitButtonLabel();
+    HandleEnabled();
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-
     if (touchListener_) {
         return;
     }
@@ -115,8 +114,6 @@ void ButtonPattern::OnModifyDone()
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gesture->AddTouchEvent(touchListener_);
-
-    HandleEnabled();
 }
 
 void ButtonPattern::OnTouchDown()
