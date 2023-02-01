@@ -74,12 +74,18 @@ public:
         return miniHeight_;
     }
 
+    void SetInvisibleFlag(bool invisibleFlag)
+    {
+        invisibleFlag_ = invisibleFlag;
+    }
+
 private:
     float currentOffset_ = 0.0f;
     bool isFirstLayout_ = true;
     Dimension fullHeight_;
     Dimension halfHeight_;
     Dimension miniHeight_;
+    bool invisibleFlag_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SlidingPanelLayoutAlgorithm);
 };
