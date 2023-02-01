@@ -778,14 +778,14 @@ void GridScrollLayoutAlgorithm::UpdateMatrixForDeletedItems(int32_t deletedLineC
     decltype(gridLayoutInfo_.lineHeightMap_) gridLineHeightMap(std::move(gridLayoutInfo_.lineHeightMap_));
     decltype(gridLayoutInfo_.gridMatrix_) gridMatrix(std::move(gridLayoutInfo_.gridMatrix_));
     for (const auto& item : gridMatrix) {
-        if (item.first == 0) {
+        if (item.first <= currentMainLineIndex_) {
             gridLayoutInfo_.gridMatrix_[item.first] = item.second;
         } else {
             gridLayoutInfo_.gridMatrix_[item.first - deletedLineCount] = item.second;
         }
     }
     for (const auto& item : gridLineHeightMap) {
-        if (item.first == 0) {
+        if (item.first <= currentMainLineIndex_) {
             gridLayoutInfo_.lineHeightMap_[item.first] = item.second;
         } else {
             gridLayoutInfo_.lineHeightMap_[item.first - deletedLineCount] = item.second;
