@@ -18,6 +18,6 @@ group("unittest") {
   testonly = true
   deps = []
   if (is_standard_system && !is_asan) {
-    deps += [ "unittest:pipeline_ng_test" ]
+    deps += [ "unittest:pipeline_context_test_ng" ]
   }
 }

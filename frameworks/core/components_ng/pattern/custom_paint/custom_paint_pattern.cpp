@@ -51,7 +51,9 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     }
 
     if (!isCanvasInit_) {
-        customPaintEventHub->FireReadyEvent();
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(context, false);
+        context->PostAsyncEvent([customPaintEventHub]() { customPaintEventHub->FireReadyEvent(); });
         isCanvasInit_ = true;
         return true;
     }
@@ -790,11 +792,13 @@ std::string CustomPaintPattern::GetJsonData(const std::string& path)
 
 double CustomPaintPattern::GetWidth()
 {
+    CHECK_NULL_RETURN(canvasSize_, 0.0);
     return canvasSize_->Width();
 }
 
 double CustomPaintPattern::GetHeight()
 {
+    CHECK_NULL_RETURN(canvasSize_, 0.0);
     return canvasSize_->Height();
 }
 } // namespace OHOS::Ace::NG

@@ -82,9 +82,6 @@ void IndexerComponent::InitIndexerItemStyle()
 
 void IndexerComponent::BuildBubbleBox()
 {
-    if (!bubbleEnabled_) {
-        return;
-    }
     RefPtr<BoxComponent> bubble = AceType::MakeRefPtr<BoxComponent>();
     bubble->SetFlex(BoxFlex::FLEX_NO);
     bubble->SetAlignment(Alignment::CENTER);
@@ -116,10 +113,6 @@ void IndexerComponent::BuildBubbleBox()
 
 void IndexerComponent::BuildPopupList()
 {
-    if (!bubbleEnabled_ && !popupListEnabled_) {
-        return;
-    }
-
     if (!popupList_) {
         popupList_ = AceType::MakeRefPtr<PopupListComponent>();
     }

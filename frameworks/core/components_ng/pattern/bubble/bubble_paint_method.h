@@ -22,8 +22,11 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components/common/properties/shadow.h"
+#include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
 
@@ -101,6 +104,7 @@ private:
     void BuildRightLinePath(RSPath& path, float arrowOffset, float radius);
     void BuildBottomLinePath(RSPath& path, float arrowOffset, float radius);
     void BuildLeftLinePath(RSPath& path, float arrowOffset, float radius);
+    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas);
 
     // Get from RenderProp
     bool useCustom_ = false;

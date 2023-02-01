@@ -2082,9 +2082,11 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
     if (textFieldManager_) {
         positionY = textFieldManager_->GetClickPosition().GetY();
     }
-    double offsetFix = (height_ - positionY) > 100.0 ? keyboardHeight - (height_ - positionY) / 2.0 : keyboardHeight;
+    keyboardHeight = keyboardHeight / viewScale_;
+    auto height = height_ / viewScale_;
+    double offsetFix = (height - positionY) > 100.0 ? keyboardHeight - (height - positionY) / 2.0 : keyboardHeight;
     LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f", positionY,
-        (height_ - keyboardHeight), offsetFix);
+        (height - keyboardHeight), offsetFix);
     if (NearZero(keyboardHeight)) {
         if (textFieldManager_ && AceType::InstanceOf<TextFieldManager>(textFieldManager_)) {
             auto textFieldManager = AceType::DynamicCast<TextFieldManager>(textFieldManager_);
@@ -2094,10 +2096,10 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
         }
         SetRootSizeWithWidthHeight(width_, height_, 0);
         rootOffset_.SetY(0.0);
-    } else if (positionY > (height_ - keyboardHeight) && offsetFix > 0.0) {
+    } else if (positionY > (height - keyboardHeight) && offsetFix > 0.0) {
         if (textFieldManager_ && AceType::InstanceOf<TextFieldManager>(textFieldManager_)) {
             auto textFieldManager = AceType::DynamicCast<TextFieldManager>(textFieldManager_);
-            if (textFieldManager->UpdatePanelForVirtualKeyboard(-offsetFix, height_)) {
+            if (textFieldManager->UpdatePanelForVirtualKeyboard(-offsetFix, height)) {
                 return;
             }
         }

@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/canvas_image.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -100,7 +101,7 @@ private:
         const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect, bool isSvg);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
 
-    void SetAnimationCallback();
+    void SetRedrawCallback();
 
     DataReadyNotifyTask CreateDataReadyCallback();
     LoadSuccessNotifyTask CreateLoadSuccessCallback();

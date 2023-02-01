@@ -22,6 +22,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t STOP_DURATION = 2000; // 2000ms
+constexpr float KEY_TIME_START = 0.0f;
+constexpr float KEY_TIME_MIDDLE = 0.7f;
+constexpr float KEY_TIME_END = 1.0f;
 constexpr int32_t BAR_EXPAND_DURATION = 150; // 150ms, scroll bar width expands from 4dp to 8dp
 constexpr int32_t BAR_SHRINK_DURATION = 250; // 250ms, scroll bar width shrinks from 8dp to 4dp
 } // namespace
@@ -56,10 +60,18 @@ void ScrollBar::InitTheme()
     SetScrollable(true);
 }
 
-bool ScrollBar::InBarRegion(const Point& point) const
+bool ScrollBar::InBarTouchRegion(const Point& point) const
 {
     if (NeedScrollBar() && shapeMode_ == ShapeMode::RECT) {
         return touchRegion_.IsInRegion(point);
+    }
+    return false;
+}
+
+bool ScrollBar::InBarRegion(const Point& point) const
+{
+    if (NeedScrollBar() && shapeMode_ == ShapeMode::RECT) {
+        return barRect_.IsInRegion(point);
     }
     return false;
 }
@@ -82,6 +94,7 @@ void ScrollBar::UpdateScrollBarRegion(
         viewPortSize_ = size;
         lastOffset_ = lastOffset;
         estimatedHeight_ = estimatedHeight;
+        opacity_ = UINT8_MAX;
         SetBarRegion(offset, size);
         if (shapeMode_ == ShapeMode::RECT) {
             SetRectTrickRegion(offset, size, lastOffset, estimatedHeight);
@@ -183,7 +196,7 @@ bool ScrollBar::NeedScrollBar() const
 
 bool ScrollBar::NeedPaint() const
 {
-    return NeedScrollBar() && isScrollable_ && GreatNotEqual(normalWidth_.Value(), 0.0);
+    return NeedScrollBar() && isScrollable_ && GreatNotEqual(normalWidth_.Value(), 0.0) && opacity_ > 0;
 }
 
 double ScrollBar::GetNormalWidthToPx() const
@@ -218,11 +231,14 @@ void ScrollBar::SetGestureEvent()
             auto touch = info.GetTouches().front();
             if (touch.GetTouchType() == TouchType::DOWN) {
                 Point point(touch.GetLocalLocation().GetX(), touch.GetLocalLocation().GetY());
-                bool inRegion = scrollBar->InBarRegion(point);
-                scrollBar->SetPressed(inRegion);
-                scrollBar->SetDriving(inRegion);
-                if (inRegion) {
+                bool inTouchRegion = scrollBar->InBarTouchRegion(point);
+                scrollBar->SetPressed(inTouchRegion);
+                scrollBar->SetDriving(inTouchRegion);
+                if (inTouchRegion) {
                     scrollBar->PlayGrowAnimation();
+                }
+                if (scrollBar->scrollEndAnimator_ && !scrollBar->scrollEndAnimator_->IsStopped()) {
+                    scrollBar->scrollEndAnimator_->Stop();
                 }
                 scrollBar->MarkNeedRender();
             }
@@ -237,6 +253,26 @@ void ScrollBar::SetGestureEvent()
     }
     if (!touchAnimator_) {
         touchAnimator_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    }
+}
+
+void ScrollBar::SetMouseEvent()
+{
+    if (!mouseEvent_) {
+        mouseEvent_ = MakeRefPtr<InputEvent>([weak = WeakClaim(this)](MouseInfo& info) {
+            auto scrollBar = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(scrollBar);
+            Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
+            bool inRegion = scrollBar->InBarRegion(point);
+            if (inRegion && !scrollBar->isHover_) {
+                scrollBar->PlayGrowAnimation();
+                scrollBar->MarkNeedRender();
+            }
+            if (scrollBar->isHover_ && !inRegion) {
+                scrollBar->PlayShrinkAnimation();
+                scrollBar->MarkNeedRender();
+            }
+        });
     }
 }
 
@@ -261,6 +297,7 @@ void ScrollBar::PlayGrowAnimation()
     touchAnimator_->AddInterpolator(animation);
     touchAnimator_->SetDuration(BAR_EXPAND_DURATION);
     touchAnimator_->Play();
+    isHover_ = true;
 }
 
 void ScrollBar::PlayShrinkAnimation()
@@ -284,5 +321,39 @@ void ScrollBar::PlayShrinkAnimation()
     touchAnimator_->AddInterpolator(animation);
     touchAnimator_->SetDuration(BAR_SHRINK_DURATION);
     touchAnimator_->Play();
+    isHover_ = false;
+}
+
+void ScrollBar::PlayBarEndAnimation()
+{
+    if (scrollEndAnimator_ && !scrollEndAnimator_->IsStopped()) {
+        scrollEndAnimator_->Stop();
+    }
+    if (scrollEndAnimator_) {
+        scrollEndAnimator_->Play();
+        return;
+    }
+
+    scrollEndAnimator_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    auto hiddenStartKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEY_TIME_START, UINT8_MAX);
+    auto hiddenMiddleKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEY_TIME_MIDDLE, UINT8_MAX);
+    auto hiddenEndKeyframe = AceType::MakeRefPtr<Keyframe<int32_t>>(KEY_TIME_END, 0);
+    hiddenMiddleKeyframe->SetCurve(Curves::LINEAR);
+    hiddenEndKeyframe->SetCurve(Curves::FRICTION);
+
+    auto animation = AceType::MakeRefPtr<KeyframeAnimation<int32_t>>();
+    animation->AddKeyframe(hiddenStartKeyframe);
+    animation->AddKeyframe(hiddenMiddleKeyframe);
+    animation->AddKeyframe(hiddenEndKeyframe);
+    animation->AddListener([weakBar = AceType::WeakClaim(this)](int32_t value) {
+        auto scrollBar = weakBar.Upgrade();
+        if (scrollBar) {
+            scrollBar->opacity_ = value;
+            scrollBar->MarkNeedRender();
+        }
+    });
+    scrollEndAnimator_->AddInterpolator(animation);
+    scrollEndAnimator_->SetDuration(STOP_DURATION);
+    scrollEndAnimator_->Play();
 }
 } // namespace OHOS::Ace::NG

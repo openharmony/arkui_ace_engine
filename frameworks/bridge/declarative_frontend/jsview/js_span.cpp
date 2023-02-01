@@ -177,7 +177,18 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
 void JSSpan::JsOnClick(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsOnClick(info);
+        if (!info[0]->IsFunction()) {
+            LOGW("the info is not click function");
+            return;
+        }
+        auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc](const BaseEventInfo* info) {
+            const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onClick");
+            func->Execute(*clickInfo);
+        };
+        SpanModel::GetInstance()->SetOnClick(std::move(onClick));
         return;
     }
 #ifndef NG_BUILD

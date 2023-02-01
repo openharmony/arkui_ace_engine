@@ -18,6 +18,7 @@
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
 #include "third_party/skia/include/core/SkPixelRef.h"
 
+#include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "core/image/image_provider.h"
 
@@ -47,6 +48,7 @@ void AnimatedImagePlayer::RenderFrame(const int32_t& index)
     auto taskExecutor = context->GetTaskExecutor();
     taskExecutor->PostTask(
         [weak = AceType::WeakClaim(this), index, dstWidth = dstWidth_, dstHeight = dstHeight_, taskExecutor] {
+            ACE_SCOPED_TRACE("decode frame %d", index);
             auto player = weak.Upgrade();
             if (!player) {
                 return;
@@ -66,11 +68,18 @@ void AnimatedImagePlayer::RenderFrame(const int32_t& index)
                 return;
             }
 #endif
+#ifdef PREVIEW
+            player->successCallback_(player->imageSource_, canvasImage);
+        },
+        TaskExecutor::TaskType::UI);
+#else
             taskExecutor->PostTask([callback = player->successCallback_, canvasImage,
                                        source = player->imageSource_] { callback(source, canvasImage); },
                 TaskExecutor::TaskType::UI);
         },
         TaskExecutor::TaskType::IO);
+#endif
+
 }
 
 sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
@@ -117,6 +126,7 @@ sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
         iterator->second = std::make_unique<SkBitmap>(bitmap);
     }
 #ifndef GPU_DISABLED
+#ifndef PREVIEW
     // weak reference of io manager must be check and used on io thread, because io manager is created on io thread.
     if (ioManager_) {
         auto resourceContext = ioManager_->GetResourceContext();
@@ -125,6 +135,7 @@ sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
             return SkImage::MakeCrossContextFromPixmap(resourceContext.get(), pixmap, true, pixmap.colorSpace());
         }
     }
+#endif
 #endif
     return SkImage::MakeFromBitmap(bitmap);
 }

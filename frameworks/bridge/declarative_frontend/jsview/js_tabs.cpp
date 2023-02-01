@@ -107,7 +107,6 @@ void JSTabs::Create(const JSCallbackInfo& info)
             }
 #ifndef NG_BUILD
             tabController->SetInitialIndex(index);
-            tabController->SetIndexWithoutChangeContent(index);
 #endif
         }
     }

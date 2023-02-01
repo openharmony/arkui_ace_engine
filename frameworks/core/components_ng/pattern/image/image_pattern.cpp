@@ -84,11 +84,11 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
     return task;
 }
 
-void ImagePattern::SetAnimationCallback()
+void ImagePattern::SetRedrawCallback()
 {
     // set animation flush function for svg / gif
     CHECK_NULL_VOID_NOLOG(image_);
-    image_->SetAnimationCallback([weak = WeakClaim(RawPtr(GetHost()))] {
+    image_->SetRedrawCallback([weak = WeakClaim(RawPtr(GetHost()))] {
         auto imageNode = weak.Upgrade();
         CHECK_NULL_VOID(imageNode);
         imageNode->MarkNeedRenderOnly();
@@ -113,7 +113,7 @@ void ImagePattern::OnImageLoadSuccess()
     dstRect_ = loadingCtx_->GetDstRect();
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
-    SetAnimationCallback();
+    SetRedrawCallback();
 
     if (draggable_) {
         EnableDrag();
@@ -398,7 +398,7 @@ void ImagePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToBounds(true);
+    host->GetRenderContext()->SetClipToBounds(false);
 }
 
 void ImagePattern::EnableDrag()

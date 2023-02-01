@@ -66,7 +66,7 @@ constexpr double DEFAULT_DOUBLE4 = 4.0;
 const std::string TEST_TAG("test");
 } // namespace
 
-class PipelineContextTest : public testing::Test {
+class PipelineContextTestNg : public testing::Test {
 public:
     static void ResetEventFlag(int32_t testFlag);
     static bool GetEventFlag(int32_t testFlag);
@@ -83,25 +83,25 @@ private:
     static RefPtr<PipelineContext> context_;
 };
 
-ElementIdType PipelineContextTest::frameNodeId_ = 0;
-ElementIdType PipelineContextTest::customNodeId_ = 0;
-RefPtr<FrameNode> PipelineContextTest::frameNode_ = nullptr;
-RefPtr<CustomNode> PipelineContextTest::customNode_ = nullptr;
-RefPtr<PipelineContext> PipelineContextTest::context_ = nullptr;
+ElementIdType PipelineContextTestNg::frameNodeId_ = 0;
+ElementIdType PipelineContextTestNg::customNodeId_ = 0;
+RefPtr<FrameNode> PipelineContextTestNg::frameNode_ = nullptr;
+RefPtr<CustomNode> PipelineContextTestNg::customNode_ = nullptr;
+RefPtr<PipelineContext> PipelineContextTestNg::context_ = nullptr;
 
-void PipelineContextTest::ResetEventFlag(int32_t testFlag)
+void PipelineContextTestNg::ResetEventFlag(int32_t testFlag)
 {
     auto flag = context_->eventManager_->GetInstanceId();
     context_->eventManager_->SetInstanceId(flag & (~testFlag));
 }
 
-bool PipelineContextTest::GetEventFlag(int32_t testFlag)
+bool PipelineContextTestNg::GetEventFlag(int32_t testFlag)
 {
     auto flag = context_->eventManager_->GetInstanceId();
     return flag & testFlag;
 }
 
-void PipelineContextTest::SetUpTestSuite()
+void PipelineContextTestNg::SetUpTestSuite()
 {
     frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
     customNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
@@ -118,11 +118,11 @@ void PipelineContextTest::SetUpTestSuite()
 }
 
 /**
- * @tc.name: PipelineContextTest001
+ * @tc.name: PipelineContextTestNg001
  * @tc.desc: Test the function FlushDirtyNodeUpdate.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest001, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg001, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -142,11 +142,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest002
+ * @tc.name: PipelineContextTestNg002
  * @tc.desc: Test the function FlushVsync, AddVisibleAreaChangeNode, HandleVisibleAreaChangeEvent and .
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest002, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg002, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -202,11 +202,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest003
+ * @tc.name: PipelineContextTestNg003
  * @tc.desc: Test the function FlushVsync and functions FlushLayoutTask and FlushRenderTask of the UITaskScheduler.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest003, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg003, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -246,11 +246,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest004
+ * @tc.name: PipelineContextTestNg004
  * @tc.desc: Test the function FlushAnimation.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest004, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg004, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -278,11 +278,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest005
+ * @tc.name: PipelineContextTestNg005
  * @tc.desc: Test the function FlushFocus and RequestDefaultFocus.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest005, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -301,11 +301,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest006
+ * @tc.name: PipelineContextTestNg006
  * @tc.desc: Test the function FlushBuildFinishCallbacks.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest006, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg006, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -325,11 +325,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest007
+ * @tc.name: PipelineContextTestNg007
  * @tc.desc: Test the function SetupRootElement.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest007, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg007, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -357,11 +357,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest008
+ * @tc.name: PipelineContextTestNg008
  * @tc.desc: Test the function SetupSubRootElement.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest008, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg008, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -388,11 +388,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest008, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest009
+ * @tc.name: PipelineContextTestNg009
  * @tc.desc: Test the function OnSurfaceChanged.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest009, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg009, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -433,11 +433,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest009, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest010
+ * @tc.name: PipelineContextTestNg010
  * @tc.desc: Test the function OnSurfaceDensityChanged.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest010, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg010, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -467,11 +467,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest010, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest011
+ * @tc.name: PipelineContextTestNg011
  * @tc.desc: Test the function AddDirtyFocus.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest011, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg011, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -505,11 +505,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest011, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest012
+ * @tc.name: PipelineContextTestNg012
  * @tc.desc: Test functions WindowFocus and FlushWindowFocusChangedCallback.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest012, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg012, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -561,11 +561,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest012, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest013
+ * @tc.name: PipelineContextTestNg013
  * @tc.desc: Test the function NotifyMemoryLevel.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest013, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg013, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -586,11 +586,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest013, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest014
+ * @tc.name: PipelineContextTestNg014
  * @tc.desc: Test the function OnIdle.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest014, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg014, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -616,11 +616,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest014, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest015
+ * @tc.name: PipelineContextTestNg015
  * @tc.desc: Test the function Finish.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest015, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg015, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -647,11 +647,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest015, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest016
+ * @tc.name: PipelineContextTestNg016
  * @tc.desc: Test functions OnShow, OnHide and FlushWindowStateChangedCallback.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest016, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg016, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -683,11 +683,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest016, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest017
+ * @tc.name: PipelineContextTestNg017
  * @tc.desc: Test functions OnDragEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest017, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -727,11 +727,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest017, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest018
+ * @tc.name: PipelineContextTestNg018
  * @tc.desc: Test the function ShowContainerTitle.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest018, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg018, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -767,11 +767,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest018, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest019
+ * @tc.name: PipelineContextTestNg019
  * @tc.desc: Test the function SetAppTitle.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest019, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg019, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -807,11 +807,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest019, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest020
+ * @tc.name: PipelineContextTestNg020
  * @tc.desc: Test the function SetAppIcon.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest020, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg020, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -847,11 +847,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest020, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest021
+ * @tc.name: PipelineContextTestNg021
  * @tc.desc: Test the function OnAxisEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest021, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg021, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -894,11 +894,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest021, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest022
+ * @tc.name: PipelineContextTestNg022
  * @tc.desc: Test the function OnKeyEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest022, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -930,7 +930,7 @@ HWTEST_F(PipelineContextTest, PipelineContextTest022, TestSize.Level1)
     context_->SetIsNeedShowFocus(false);
     event.pressedCodes = { KeyCode::KEY_DPAD_UP };
     eventManager->SetInstanceId(DEFAULT_INT0);
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_TRUE(context_->OnKeyEvent(event));
     EXPECT_FALSE(context_->GetIsNeedShowFocus());
 
     /**
@@ -942,7 +942,7 @@ HWTEST_F(PipelineContextTest, PipelineContextTest022, TestSize.Level1)
     context_->SetIsNeedShowFocus(false);
     event.action = KeyAction::UP;
     event.pressedCodes = { KeyCode::KEY_CLEAR };
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_TRUE(context_->OnKeyEvent(event));
     EXPECT_FALSE(context_->GetIsNeedShowFocus());
 
     /**
@@ -959,11 +959,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest022, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest023
+ * @tc.name: PipelineContextTestNg023
  * @tc.desc: Test the function OnMouseEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest023, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg023, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -1054,11 +1054,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest023, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest024
+ * @tc.name: PipelineContextTestNg024
  * @tc.desc: Test the function FlushTouchEvents.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest024, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg024, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -1090,11 +1090,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest024, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest025
+ * @tc.name: PipelineContextTestNg025
  * @tc.desc: Test the function OnDumpInfo.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest025, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg025, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -1151,11 +1151,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest025, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest026
+ * @tc.name: PipelineContextTestNg026
  * @tc.desc: Test the function OnBackPressed.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest026, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg026, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -1212,11 +1212,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest026, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest027
+ * @tc.name: PipelineContextTestNg027
  * @tc.desc: Test functions StartWindowSizeChangeAnimate and SetRootRect.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest027, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg027, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -1264,11 +1264,11 @@ HWTEST_F(PipelineContextTest, PipelineContextTest027, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTest028
+ * @tc.name: PipelineContextTestNg028
  * @tc.desc: Test functions OnVirtualKeyboardHeightChange and SetRootRect.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTest, PipelineContextTest028, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "base/geometry/ng/offset_t.h"
+#include "core/animation/spring_curve.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/property/property.h"
@@ -74,15 +75,12 @@ public:
         if (date_) {
             float data = NearZero(date_->Get()) ? 1.0f : 0;
             AnimationOption option = AnimationOption();
-            RefPtr<Curve> curve = AceType::MakeRefPtr<LinearCurve>();
-            option.SetDuration(200);
+            RefPtr<Curve> curve = AceType::MakeRefPtr<SpringCurve>(0.0f, 1.0f, 110.0f, 17.0f);
+            option.SetDuration(1200);
             option.SetDelay(0);
             option.SetCurve(curve);
             option.SetIteration(1);
-            option.SetTempo(0.2f);
-            AnimationUtils::Animate(option, [&]() {
-                date_->Set(data);
-            });
+            AnimationUtils::Animate(option, [&]() { date_->Set(data); });
         }
     }
 
@@ -117,7 +115,7 @@ private:
     std::vector<double> values_;
     double max_;
     size_t dataPanelType_;
-    bool effect_;
+    bool effect_ = true;
     OffsetF offset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DataPanelModifier);

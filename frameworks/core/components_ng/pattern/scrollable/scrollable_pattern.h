@@ -52,7 +52,7 @@ public:
         return scrollableEvent_;
     }
     virtual bool OnScrollCallback(float offset, int32_t source);
-    virtual void OnScrollEndCallback();
+    virtual void OnScrollEndCallback() {};
     bool ScrollableIdle()
     {
         return !scrollableEvent_ || scrollableEvent_->Idle();
@@ -64,6 +64,7 @@ public:
     }
     void SetScrollableAxis(Axis axis);
     const RefPtr<GestureEventHub>& GetGestureHub();
+    const RefPtr<InputEventHub>& GetInputHub();
 
     // edgeEffect
     const RefPtr<ScrollEdgeEffect>& GetScrollEdgeEffect() const
@@ -119,6 +120,8 @@ protected:
 
 private:
     void RegisterScrollBarEventTask();
+    void OnScrollEnd();
+    bool OnScrollPosition(double offset, int32_t source);
 
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -129,7 +132,7 @@ private:
     RefPtr<NG::ScrollBarProxy> scrollBarProxy_;
     float barOffset_ = 0.0f;
     float estimatedHeight_ = 0.0f;
-    bool isReactInParrentMovement_ = false;
+    bool isReactInParentMovement_ = false;
 };
 } // namespace OHOS::Ace::NG
 

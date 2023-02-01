@@ -357,7 +357,7 @@ HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest004, TestSize.Level1)
      * @tc.steps: step3. update layoutProp and arrowPlacement.
      * @tc.expected: step3. check whether the function is executed.
      */
-    for (int32_t i = 0; i < BUBBLE_LAYOUT_PROPERTY_PLACEMENTS.size(); ++i) {
+    for (uint32_t i = 0; i < BUBBLE_LAYOUT_PROPERTY_PLACEMENTS.size(); ++i) {
         if (i % 2 == 0) {
             bubbleLayoutProperty->UpdateEnableArrow(BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_TRUE);
         } else {

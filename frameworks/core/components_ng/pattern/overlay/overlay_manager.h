@@ -112,7 +112,12 @@ private:
     // helper functions to show/hide popups with animation
     void Show(const RefPtr<FrameNode>& node);
     void Pop(const RefPtr<FrameNode>& node);
-    void PopInSubwindow(const RefPtr<FrameNode>& node);
+
+    void ShowMenuAnimation(const RefPtr<FrameNode>& menu);
+    void PopMenuAnimation(const RefPtr<FrameNode>& menu);
+
+    void OpenDialogAnimation(const RefPtr<FrameNode>& node);
+    void CloseDialogAnimation(const RefPtr<FrameNode>& node);
 
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;

@@ -15,7 +15,10 @@
 
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 
+#include <vector>
+
 #include "base/geometry/ng/offset_t.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
@@ -24,6 +27,7 @@
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace {
@@ -49,6 +53,10 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     screenSize_ = SizeF(pipeline->GetRootWidth(), pipeline->GetRootHeight());
 
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    outPadding_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+
     auto stageManager = pipeline->GetStageManager();
     CHECK_NULL_VOID(stageManager);
     auto page = stageManager->GetLastPage();
@@ -66,21 +74,20 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     const auto& padding = props->CreatePaddingAndBorder();
     LOGD("menu padding width = %{public}f", padding.Width());
-    double outPadding = OUT_PADDING.ConvertToPx();
 
     // calculate menu main size
     auto childConstraint = props->CreateChildConstraint();
     RefPtr<GridColumnInfo> columnInfo;
     columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
     columnInfo->GetParent()->BuildColumnWidth();
-    float minWidth = columnInfo->GetWidth(MIN_GRID_COUNTS);
+    float minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS)) - outPadding_ * 2;
     childConstraint.minSize.SetWidth(minWidth);
 
     // set max width
     LOGD("Measure Menu Position = %{public}f %{public}f", position_.GetX(), position_.GetY());
     auto leftSpace = position_.GetX();
     auto rightSpace = screenSize_.Width() - leftSpace;
-    float maxWidth = std::min(std::max(leftSpace, rightSpace) - 2.0 * padding.Width() - 2.0 * outPadding,
+    float maxWidth = std::min(std::max(leftSpace, rightSpace) - 2.0 * padding.Width() - 2.0 * outPadding_,
         columnInfo->GetWidth(MAX_GRID_COUNTS));
     childConstraint.maxSize.SetWidth(maxWidth);
     childConstraint.percentReference.SetWidth(maxWidth);
@@ -106,8 +113,8 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto menuPattern = frameNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     if (!menuPattern->IsMultiMenu()) {
-        menuSize.AddHeight(2.0 * outPadding);
-        menuSize.AddWidth(2.0 * outPadding);
+        menuSize.AddHeight(outPadding_ * 2);
+        menuSize.AddWidth(outPadding_ * 2);
     }
 
     LOGD("finish measure, menu size = %{public}f x %{public}f", menuSize.Width(), menuSize.Height());
@@ -138,10 +145,10 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         x -= pageOffset_.GetX();
         y -= pageOffset_.GetY();
     }
-    auto outPadding = OUT_PADDING.ConvertToPx();
+
     MarginPropertyF margin;
     if (!menuPattern->IsMultiMenu()) {
-        margin.left = margin.top = margin.right = margin.bottom = outPadding;
+        margin.left = margin.top = margin.right = margin.bottom = outPadding_;
     }
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -153,13 +160,21 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto menuParent = menuNode->GetParent();
     CHECK_NULL_VOID(menuParent);
     if (!menuPattern->IsMultiMenu() || menuParent->GetTag() == V2::MENU_ETS_TAG) {
-        translate = OffsetF(outPadding, outPadding);
+        translate = OffsetF(outPadding_, outPadding_);
     }
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         LOGD("layout child at offset: %{public}f, %{public}f", translate.GetX(), translate.GetY());
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
         child->Layout();
         translate += OffsetF(0, child->GetGeometryNode()->GetFrameSize().Height());
+    }
+
+    if (menuPattern->IsContextMenu()) {
+        std::vector<Rect> rects;
+        auto frameRect = layoutWrapper->GetGeometryNode()->GetFrameRect();
+        auto rect = Rect(frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height());
+        rects.emplace_back(rect);
+        SubwindowManager::GetInstance()->SetHotAreas(rects);
     }
 }
 
@@ -190,8 +205,7 @@ void MenuLayoutAlgorithm::LayoutSubMenu(LayoutWrapper* layoutWrapper)
         parentPattern->AddHoverRegions(topLeftPoint, bottomRightPoint);
     }
 
-    auto outPadding = OUT_PADDING.ConvertToPx();
-    OffsetF translate(outPadding, outPadding);
+    OffsetF translate(outPadding_, outPadding_);
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
     child->GetGeometryNode()->SetMarginFrameOffset(translate);
     child->Layout();
@@ -200,9 +214,9 @@ void MenuLayoutAlgorithm::LayoutSubMenu(LayoutWrapper* layoutWrapper)
 // return vertical offset
 float MenuLayoutAlgorithm::VerticalLayout(const SizeF& size, float clickPosition)
 {
-    double screenHeight = screenSize_.Height();
-    double bottomSpace = screenHeight - clickPosition;
-    double topSpace = clickPosition - pageOffset_.GetY();
+    float screenHeight = screenSize_.Height();
+    float bottomSpace = screenHeight - clickPosition;
+    float topSpace = clickPosition - pageOffset_.GetY();
     // can put menu below click point
     if (bottomSpace >= size.Height()) {
         return clickPosition;
@@ -224,9 +238,9 @@ float MenuLayoutAlgorithm::VerticalLayout(const SizeF& size, float clickPosition
 // returns horizontal offset
 float MenuLayoutAlgorithm::HorizontalLayout(const SizeF& size, float clickPosition)
 {
-    double screenWidth = screenSize_.Width();
-    double rightSpace = screenWidth - clickPosition;
-    double leftSpace = clickPosition - pageOffset_.GetX();
+    float screenWidth = screenSize_.Width();
+    float rightSpace = screenWidth - clickPosition;
+    float leftSpace = clickPosition - pageOffset_.GetX();
     // can fit menu on the right side of clickPosition
     if (rightSpace >= size.Width()) {
         return clickPosition;

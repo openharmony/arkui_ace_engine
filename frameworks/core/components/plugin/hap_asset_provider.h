@@ -42,9 +42,16 @@ public:
 
     bool IsValid() const override;
 
-    std::string GetAssetPath(const std::string& assetName) override;
+    std::string GetAssetPath(const std::string& assetName, bool isAddHapPath) override;
 
     void GetAssetList(const std::string& path, std::vector<std::string>& assetList) override;
+
+    bool GetFileInfo(const std::string& fileName, MediaFileInfo& fileInfo) const override;
+
+    std::string GetHapPath() const
+    {
+        return hapPath_;
+    }
 
 private:
     mutable std::mutex mutex_;

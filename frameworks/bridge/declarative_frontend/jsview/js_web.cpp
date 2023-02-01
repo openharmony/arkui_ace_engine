@@ -1408,6 +1408,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onRefreshAccessedHistory", &JSWeb::OnRefreshAccessedHistory);
     JSClass<JSWeb>::StaticMethod("cacheMode", &JSWeb::CacheMode);
     JSClass<JSWeb>::StaticMethod("overviewModeAccess", &JSWeb::OverviewModeAccess);
+    JSClass<JSWeb>::StaticMethod("webDebuggingAccess", &JSWeb::WebDebuggingAccess);
     JSClass<JSWeb>::StaticMethod("wideViewModeAccess", &JSWeb::WideViewModeAccess);
     JSClass<JSWeb>::StaticMethod("fileFromUrlAccess", &JSWeb::FileFromUrlAccess);
     JSClass<JSWeb>::StaticMethod("databaseAccess", &JSWeb::DatabaseAccess);
@@ -1436,7 +1437,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onDragLeave", &JSWeb::JsOnDragLeave);
     JSClass<JSWeb>::StaticMethod("onDrop", &JSWeb::JsOnDrop);
     JSClass<JSWeb>::StaticMethod("onScroll", &JSWeb::OnScroll);
-    JSClass<JSWeb>::StaticMethod("pinchSmoothMode", &JSWeb::PinchSmoothModeEnabled);
+    JSClass<JSWeb>::StaticMethod("pinchSmooth", &JSWeb::PinchSmoothModeEnabled);
     JSClass<JSWeb>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSWeb>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSWeb>::StaticMethod("onWindowNew", &JSWeb::OnWindowNew);
@@ -3366,6 +3367,11 @@ void JSWeb::OnFileSelectorShowAbandoned(const JSCallbackInfo& args)
 void JSWeb::WideViewModeAccess(const JSCallbackInfo& args)
 {
     LOGI("JSWeb: WideViewModeAccess placeholder");
+}
+
+void JSWeb::WebDebuggingAccess(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb: WebDebuggingAccess placeholder");
 }
 
 void JSWeb::OnSearchResultReceive(const JSCallbackInfo& args)

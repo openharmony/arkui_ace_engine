@@ -905,7 +905,34 @@ var BlurStyle;
   BlurStyle[BlurStyle["Thin"] = 1] = "Thin";
   BlurStyle[BlurStyle["Regular"] = 2] = "Regular";
   BlurStyle[BlurStyle["Thick"] = 3] = "Thick";
+  BlurStyle[BlurStyle["BackgroundThin"] = 4] = "BackgroundThin";
+  BlurStyle[BlurStyle["BackgroundRegular"] = 5] = "BackgroundRegular";
+  BlurStyle[BlurStyle["BackgroundThick"] = 6] = "BackgroundThick";
+  BlurStyle[BlurStyle["BackgroundUltraThick"] = 7] = "BackgroundUltraThick";
 })(BlurStyle || (BlurStyle = {}));
+
+var ThemeColorMode;
+(function (ThemeColorMode) {
+  ThemeColorMode[ThemeColorMode["System"] = 0] = "System";
+  ThemeColorMode[ThemeColorMode["Light"] = 1] = "Light";
+  ThemeColorMode[ThemeColorMode["Dark"] = 2] = "Dark";
+})(ThemeColorMode || (ThemeColorMode = {}));
+
+var AdaptiveColor;
+(function (AdaptiveColor) {
+  AdaptiveColor[AdaptiveColor["Default"] = 0] = "Default";
+  AdaptiveColor[AdaptiveColor["Average"] = 1] = "Average";
+})(AdaptiveColor || (AdaptiveColor = {}));
+
+var ShadowStyle;
+(function (ShadowStyle) {
+  ShadowStyle[ShadowStyle["OuterDefaultXS"] = 0] = "OuterDefaultXS";
+  ShadowStyle[ShadowStyle["OuterDefaultSM"] = 1] = "OuterDefaultSM";
+  ShadowStyle[ShadowStyle["OuterDefaultMD"] = 2] = "OuterDefaultMD";
+  ShadowStyle[ShadowStyle["OuterDefaultLG"] = 3] = "OuterDefaultLG";
+  ShadowStyle[ShadowStyle["OuterFloatingSM"] = 4] = "OuterFloatingSM";
+  ShadowStyle[ShadowStyle["OuterFloatingMD"] = 5] = "OuterFloatingMD";
+})(ShadowStyle || (ShadowStyle = {}));
 
 var BreakpointsReference;
 (function (BreakpointsReference) {

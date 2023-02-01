@@ -74,4 +74,9 @@ SizeF TextLayoutAlgorithm::GetMaxMeasureSize(const LayoutConstraintF& contentCon
 {
     return SizeF(1.0f, 1.0f);
 }
+
+std::list<RefPtr<SpanItem>>&& TextLayoutAlgorithm::GetSpanItemChildren()
+{
+    return std::move(spanItemChildren_);
+}
 } // namespace OHOS::Ace::NG

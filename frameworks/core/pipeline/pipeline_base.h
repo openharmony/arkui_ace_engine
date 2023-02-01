@@ -56,6 +56,9 @@ class Window;
 class FontManager;
 class ManagerInterface;
 enum class FrontendType;
+using SharePanelCallback = std::function<void(const std::string& faBundleName, const std::string& faAbilityName,
+    const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
+    const std::string& abilityName)>;
 
 class ACE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
@@ -201,6 +204,16 @@ public:
     const Color& GetAppBgColor() const
     {
         return appBgColor_;
+    }
+
+    int32_t GetAppLabelId() const
+    {
+        return appLabelId_;
+    }
+
+    void SetAppLabelId(int32_t appLabelId)
+    {
+        appLabelId_ = appLabelId;
     }
 
     virtual void SetAppTitle(const std::string& title) = 0;
@@ -383,9 +396,29 @@ public:
     {
         return minPlatformVersion_;
     }
+
     void SetMinPlatformVersion(int32_t minPlatformVersion)
     {
         minPlatformVersion_ = minPlatformVersion;
+    }
+
+    void SetInstallationFree(int32_t installationFree)
+    {
+        installationFree_ = installationFree;
+    }
+
+    void SetSharePanelCallback(SharePanelCallback&& callback)
+    {
+        sharePanelCallback_ = std::move(callback);
+    }
+
+    void FireSharePanelCallback(const std::string& faBundleName, const std::string& faAbilityName,
+        const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
+        const std::string& abilityName)
+    {
+        if (sharePanelCallback_) {
+            sharePanelCallback_(faBundleName, faAbilityName, faModuleName, faHostPkgName, bundleName, abilityName);
+        }
     }
 
     RefPtr<ThemeManager> GetThemeManager() const
@@ -704,6 +737,21 @@ public:
         isForegroundCalled_ = isForegroundCalled;
     }
 
+    void SetIsSubPipeline(bool isSubPipeline)
+    {
+        isSubPipeline_ = isSubPipeline;
+    }
+
+    bool IsSubPipeline() const
+    {
+        return isSubPipeline_;
+    }
+
+    void SetParentPipeline(const WeakPtr<PipelineBase>& pipeline)
+    {
+        parentPipeline_ = pipeline;
+    }
+
 protected:
     void TryCallNextFrameLayoutCallback()
     {
@@ -734,10 +782,13 @@ protected:
     bool isEtsCard_ = false;
     bool isRightToLeft_ = false;
     bool isFullWindow_ = false;
+    bool installationFree_ = false;
+    bool isSubPipeline_ = false;
 
     bool isJsPlugin_ = false;
     int32_t minPlatformVersion_ = 0;
     int32_t windowId_ = 0;
+    int32_t appLabelId_ = 0;
     float fontScale_ = 1.0f;
     float designWidthScale_ = 1.0f;
     float viewScale_ = 1.0f;
@@ -776,6 +827,8 @@ protected:
     ActionEventHandler actionEventHandler_;
     RefPtr<PlatformResRegister> platformResRegister_;
 
+    WeakPtr<PipelineBase> parentPipeline_;
+
     std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
 
     RefPtr<Clipboard> clipboard_;
@@ -784,6 +837,7 @@ protected:
     AnimationOption animationOption_;
 
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
+    SharePanelCallback sharePanelCallback_ = nullptr;
     std::atomic<bool> isForegroundCalled_ = false;
 
 private:

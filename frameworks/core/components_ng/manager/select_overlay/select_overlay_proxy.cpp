@@ -51,6 +51,14 @@ void SelectOverlayProxy::UpdateSecondSelectHandleInfo(const SelectHandleInfo& in
     pattern->UpdateSecondSelectHandleInfo(info);
 }
 
+void SelectOverlayProxy::UpdateFirstAndSecondHandleInfo(
+    const SelectHandleInfo& firstInfo, const SelectHandleInfo& secondInfo) const
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateFirstAndSecondHandleInfo(firstInfo, secondInfo);
+}
+
 void SelectOverlayProxy::UpdateSelectMenuInfo(const SelectMenuInfo& info) const
 {
     auto pattern = GetSelectOverlayPattern(selectOverlayId_);

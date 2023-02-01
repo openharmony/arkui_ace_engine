@@ -13,16 +13,14 @@
  * limitations under the License.
  */
 
-#include <cstddef>
-#include <optional>
-#include <string>
-#include <utility>
-
 #include "gtest/gtest.h"
-
+#define private public
+#define protected public
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/stepper/stepper_event_hub.h"
 #include "core/components_ng/pattern/stepper/stepper_model_ng.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -38,41 +36,24 @@ const std::string PREVIOUS_EVENT_NAME = "PREVIOUS_EVENT";
 const uint32_t INDEX = 0;
 } // namespace
 
-struct TestProperty {
-    StepperModel::RoutineCallbackEvent finishEvent = nullptr;
-    StepperModel::RoutineCallbackEvent skipEvent = nullptr;
-    StepperModel::IndexCallbackEvent changeEvent = nullptr;
-    StepperModel::IndexCallbackEvent nextEvent = nullptr;
-    StepperModel::IndexCallbackEvent previousEvent = nullptr;
-};
-
 class StepperPatternTestNg : public testing::Test {
 public:
-protected:
-    static RefPtr<FrameNode> CreateTextNode(uint32_t index, TestProperty& testProperty);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
 };
 
-RefPtr<FrameNode> StepperPatternTestNg::CreateTextNode(uint32_t index, TestProperty& testProperty)
+void StepperPatternTestNg::SetUpTestCase()
 {
-    StepperModelNG stepperMode;
-    stepperMode.Create(index);
-    if (testProperty.changeEvent != nullptr) {
-        stepperMode.SetOnChange(std::move(testProperty.changeEvent));
-    }
-    if (testProperty.finishEvent != nullptr) {
-        stepperMode.SetOnFinish(std::move(testProperty.finishEvent));
-    }
-    if (testProperty.nextEvent != nullptr) {
-        stepperMode.SetOnNext(std::move(testProperty.nextEvent));
-    }
-    if (testProperty.previousEvent != nullptr) {
-        stepperMode.SetOnPrevious(std::move(testProperty.previousEvent));
-    }
-    if (testProperty.skipEvent != nullptr) {
-        stepperMode.SetOnSkip(std::move(testProperty.skipEvent));
-    }
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // stepper pop
-    return AceType::DynamicCast<FrameNode>(element);
+    MockPipelineBase::SetUp();
+    // set StepperTheme to themeManager before using themeManager to get StepperTheme
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<StepperTheme>()));
+}
+
+void StepperPatternTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
 }
 
 /**
@@ -82,32 +63,31 @@ RefPtr<FrameNode> StepperPatternTestNg::CreateTextNode(uint32_t index, TestPrope
  */
 HWTEST_F(StepperPatternTestNg, StepperFrameNodeCreator001, TestSize.Level1)
 {
-    TestProperty testProperty;
     std::string eventName;
     int32_t eventParameterA = -1;
     int32_t eventParameterB = -1;
-    testProperty.finishEvent = [&eventName]() { eventName = FINISH_EVENT_NAME; };
-    testProperty.skipEvent = [&eventName]() { eventName = SKIP_EVENT_NAME; };
-    testProperty.changeEvent = [&eventName, &eventParameterA, &eventParameterB](int32_t a, int32_t b) {
+    StepperModelNG().Create(INDEX);
+    StepperModelNG().SetOnChange([&eventName, &eventParameterA, &eventParameterB](int32_t a, int32_t b) {
         eventName = CHANGE_EVENT_NAME;
         eventParameterA = a;
         eventParameterB = b;
-    };
-    testProperty.nextEvent = [&eventName, &eventParameterA, &eventParameterB](int32_t a, int32_t b) {
+    });
+    StepperModelNG().SetOnFinish([&eventName]() { eventName = FINISH_EVENT_NAME; });
+    StepperModelNG().SetOnNext([&eventName, &eventParameterA, &eventParameterB](int32_t a, int32_t b) {
         eventName = NEXT_EVENT_NAME;
         eventParameterA = a;
         eventParameterB = b;
-    };
-    testProperty.previousEvent = [&eventName, &eventParameterA, &eventParameterB](int32_t a, int32_t b) {
+    });
+    StepperModelNG().SetOnPrevious([&eventName, &eventParameterA, &eventParameterB](int32_t a, int32_t b) {
         eventName = PREVIOUS_EVENT_NAME;
         eventParameterA = a;
         eventParameterB = b;
-    };
-
-    RefPtr<FrameNode> frameNode = CreateTextNode(INDEX, testProperty);
-    EXPECT_EQ(frameNode == nullptr, false);
+    });
+    StepperModelNG().SetOnSkip([&eventName]() { eventName = SKIP_EVENT_NAME; });
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<StepperEventHub>();
-    EXPECT_EQ(eventHub == nullptr, false);
+    EXPECT_NE(eventHub, nullptr);
     eventHub->FireFinishEvent();
     EXPECT_EQ(eventName, FINISH_EVENT_NAME);
     eventHub->FireSkipEvent();

@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -31,6 +32,7 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
     DialogAlignment::BOTTOM_END };
+constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
 
 } // namespace
 
@@ -101,6 +103,8 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             Dimension dy;
             auto dyValue = offsetObj->GetProperty("dy");
             JSViewAbstract::ParseJsDimensionVp(dyValue, dy);
+            dx.ResetInvalidValue();
+            dy.ResetInvalidValue();
             instance->dialogProperties_.offset = DimensionOffset(dx, dy);
         }
 
@@ -108,6 +112,28 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         auto gridCountValue = constructorArg->GetProperty("gridCount");
         if (gridCountValue->IsNumber()) {
             instance->dialogProperties_.gridCount = gridCountValue->ToNumber<int32_t>();
+        }
+
+        // Parse maskColor.
+        auto maskColorValue = constructorArg->GetProperty("maskColor");
+        Color maskColor;
+        if (JSViewAbstract::ParseJsColor(maskColorValue, maskColor)) {
+            instance->dialogProperties_.maskColor = maskColor;
+        }
+
+        auto execContext = info.GetExecutionContext();
+        // Parse openAnimation.
+        auto openAnimationValue = constructorArg->GetProperty("openAnimation");
+        AnimationOption openAnimation;
+        if (ParseAnimation(execContext, openAnimationValue, openAnimation)) {
+            instance->dialogProperties_.openAnimation = openAnimation;
+        }
+
+        // Parse closeAnimation.
+        auto closeAnimationValue = constructorArg->GetProperty("closeAnimation");
+        AnimationOption closeAnimation;
+        if (ParseAnimation(execContext, closeAnimationValue, closeAnimation)) {
+            instance->dialogProperties_.closeAnimation = closeAnimation;
         }
 
         info.SetReturnValue(instance);
@@ -413,6 +439,59 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
         return;
     }
     CloseDialog();
+}
+
+bool JSCustomDialogController::ParseAnimation(
+    const JsiExecutionContext& execContext, const JsiRef<JsiValue>& animationValue, AnimationOption& result)
+{
+    if (animationValue->IsNull() || !animationValue->IsObject()) {
+        return false;
+    }
+    auto animationArgs = JsonUtil::ParseJsonString(animationValue->ToString());
+    if (animationArgs->IsNull()) {
+        return false;
+    }
+    // If the attribute does not exist, the default value is used.
+    auto duration = animationArgs->GetInt("duration", DEFAULT_ANIMATION_DURATION);
+    auto delay = animationArgs->GetInt("delay", 0);
+    auto iterations = animationArgs->GetInt("iterations", 1);
+    auto tempo = static_cast<float>(animationArgs->GetDouble("tempo", 1.0));
+    auto direction = StringToAnimationDirection(animationArgs->GetString("playMode", "normal"));
+    RefPtr<Curve> curve;
+    auto curveArgs = animationArgs->GetValue("curve");
+    if (curveArgs->IsString()) {
+        curve = CreateCurve(animationArgs->GetString("curve", "linear"));
+    } else if (curveArgs->IsObject()) {
+        auto curveString = curveArgs->GetValue("__curveString");
+        if (!curveString) {
+            // Default AnimationOption which is invalid.
+            return false;
+        }
+        curve = CreateCurve(curveString->GetString());
+    } else {
+        curve = Curves::EASE_IN_OUT;
+    }
+    result.SetDuration(duration);
+    result.SetDelay(delay);
+    result.SetIteration(iterations);
+    result.SetTempo(tempo);
+    result.SetAnimationDirection(direction);
+    result.SetCurve(curve);
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(animationValue);
+    JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
+    std::function<void()> onFinishEvent;
+    if (onFinish->IsFunction()) {
+        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
+        onFinishEvent = [execCtx = execContext, func = std::move(jsFunc), id = Container::CurrentId()]() {
+            ContainerScope scope(id);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("CustomDialog.onFinish");
+            func->Execute();
+        };
+        result.SetOnFinishEvent(onFinishEvent);
+    }
+    return true;
 }
 
 void JSCustomDialogController::JSBind(BindingTarget object)

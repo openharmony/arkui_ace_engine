@@ -25,17 +25,15 @@ class StaticImageObject : public ImageObject {
     DECLARE_ACE_TYPE(StaticImageObject, ImageObject);
 
 public:
-    StaticImageObject(
-        const ImageSourceInfo& sourceInfo, const SizeF& imageSize, int32_t frameCount, const RefPtr<ImageData>& data)
-        : ImageObject(sourceInfo, imageSize, frameCount, data)
+    StaticImageObject(const ImageSourceInfo& src, const SizeF& size, const RefPtr<ImageData>& data)
+        : ImageObject(src, size, data)
     {}
     ~StaticImageObject() override = default;
 
     void MakeCanvasImage(
         const RefPtr<ImageLoadingContext>& ctxWp, const SizeF& targetSize, bool forceResize, bool syncLoad) override;
 
-    static RefPtr<StaticImageObject> Create(
-        const ImageSourceInfo& src, const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data);
+    RefPtr<ImageObject> Clone() override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(StaticImageObject);

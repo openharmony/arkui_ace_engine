@@ -77,6 +77,7 @@ const char PATTERN_BG_COLOR_FOCUSED[] = "bg_color_focused";
 const char PATTERN_BG_COLOR_DISABLED_ALPHA[] = "bg_color_disabled_alpha";
 const char PATTERN_BG_COLOR_ALPHA[] = "bg_color_alpha";
 const char PATTERN_TEXT_COLOR[] = "text_color";
+const char PATTERN_TEXT_COLOR_ALPHA[] = "text_color_alpha";
 const char PATTERN_TEXT_COLOR_FOCUSED[] = "text_color_focused";
 const char PATTERN_TEXT_COLOR_SELECTED[] = "text_color_selected";
 const char PATTERN_TEXT_COLOR_DISABLED[] = "text_color_disabled";
@@ -132,4 +133,8 @@ const char DIALOG_MASK_COLOR_END[] = "dialog_mask_color_end";
 // pattern attributes for drag bar
 const char DRAG_BAR_COLOR[] = "drag_bar_color";
 
+// pattern attributes for popup
+const char POPUP_BORDER_RADIUS[] = "popup_border_radius";
+const char POPUP_HORIZONTAL_PADDING[] = "popup_horizontal_padding";
+const char POPUP_VERTICAL_PADDING[] = "popup_vertical_padding";
 } // namespace OHOS::Ace

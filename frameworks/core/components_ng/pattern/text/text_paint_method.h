@@ -29,8 +29,8 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT TextPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(TextPaintMethod, NodePaintMethod)
 public:
-    TextPaintMethod(RefPtr<Paragraph> paragraph, float baselineOffset)
-        : paragraph_(std::move(paragraph)), baselineOffset_(baselineOffset)
+    TextPaintMethod(const WeakPtr<Pattern>& pattern, RefPtr<Paragraph> paragraph, float baselineOffset)
+        : pattern_(pattern), paragraph_(std::move(paragraph)), baselineOffset_(baselineOffset)
     {}
     ~TextPaintMethod() override = default;
 
@@ -39,12 +39,16 @@ public:
         CHECK_NULL_RETURN(paragraph_, nullptr);
         auto offset = paintWrapper->GetContentOffset();
         auto paintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
-        return [paragraph = paragraph_, paintOffset](RSCanvas& canvas) {
-            paragraph->Paint(canvas, paintOffset.GetX(), paintOffset.GetY());
-        };
+        return [paragraph = paragraph_, paintOffset](
+                   RSCanvas& canvas) { paragraph->Paint(canvas, paintOffset.GetX(), paintOffset.GetY()); };
     }
 
+    CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
+
 private:
+    void PaintSelection(RSCanvas& canvas, PaintWrapper* paintWrapper);
+
+    WeakPtr<Pattern> pattern_;
     RefPtr<Paragraph> paragraph_;
     float baselineOffset_;
 

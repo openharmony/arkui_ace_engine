@@ -171,6 +171,8 @@ public:
         NWeb::ImageAlphaType alphaType) override;
     void OnDesktopIconUrl(const std::string& icon_url, bool precomposed) override;
     bool OnCursorChange(const NWeb::CursorType& type, const NWeb::NWebCursorInfo& info) override;
+    void OnSelectPopupMenu(std::shared_ptr<NWeb::NWebSelectPopupMenuParam> params,
+                           std::shared_ptr<NWeb::NWebSelectPopupMenuCallback> callback) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {

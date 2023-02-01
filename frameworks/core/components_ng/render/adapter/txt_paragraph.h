@@ -60,12 +60,19 @@ public:
     // interfaces for painting
     void Paint(const RSCanvas& canvas, float x, float y) override;
 
+    // interfaces for calculate the the specified paragraph position
+    int32_t GetHandlePositionForClick(const Offset& offset) override;
+    void GetRectsForRange(int32_t start, int32_t end, std::vector<Rect>& selectedRects) override;
+    bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics& result) override;
+    bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& result) override;
+
 private:
     void CreateBuilder();
     ParagraphStyle paraStyle_;
     std::unique_ptr<txt::Paragraph> paragraph_;
     std::unique_ptr<txt::ParagraphBuilder> builder_;
     std::shared_ptr<txt::FontCollection> fontCollection_;
+    std::u16string text_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TxtParagraph);
 };

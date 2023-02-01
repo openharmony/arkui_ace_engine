@@ -117,7 +117,8 @@ void SpanModelNG::SetLetterSpacing(const Dimension& value)
 
 void SpanModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& click)
 {
-    LOGE("no support OnClick");
+    auto clickFunc = [func = std::move(click)](GestureEvent& info) { func(&info); };
+    ACE_UPDATE_SPAN_PROPERTY(OnClickEvent, std::move(clickFunc));
 }
 
 } // namespace OHOS::Ace::NG

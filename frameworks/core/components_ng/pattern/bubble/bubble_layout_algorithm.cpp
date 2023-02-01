@@ -25,9 +25,11 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -44,7 +46,6 @@ constexpr Dimension HORIZON_SPACING_WITH_SCREEN = 6.0_vp;
 constexpr int32_t GRID_NUMBER_LANDSCAPE = 8;
 constexpr int32_t BUBBLR_GRID_MAX_LANDSCAPE = 6;
 constexpr Dimension BUBBLE_RADIUS = 16.0_vp;
-constexpr Dimension BUBBLE_SPACING = Dimension(8.0, DimensionUnit::VP);
 constexpr Dimension BEZIER_WIDTH_HALF = 16.0_vp;
 
 } // namespace
@@ -95,7 +96,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         float rootW = context->GetRootWidth();
         auto childHeight = child->GetGeometryNode()->GetMarginFrameSize().Height();
         auto childWidth = child->GetGeometryNode()->GetMarginFrameSize().Width();
-        float scaledBubbleSpacing = BUBBLE_SPACING.ConvertToPx() * 2.0;
+        auto scaledBubbleSpacing = scaledBubbleSpacing_ * 2;
         auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
         CHECK_NULL_VOID(targetNode);
         auto geometryNode = targetNode->GetGeometryNode();
@@ -144,7 +145,7 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     selfSize_ = layoutWrapper->GetGeometryNode()->GetFrameSize(); // bubble's size
     auto child = children.front();
     childSize_ = child->GetGeometryNode()->GetMarginFrameSize(); // bubble's child's size
-    childOffset_ = GetChildPosition(childSize_, bubbleProp); // bubble's child's offset
+    childOffset_ = GetChildPosition(childSize_, bubbleProp);     // bubble's child's offset
     bool useCustom = bubbleProp->GetUseCustom().value_or(false);
     if (useCustom) { // use custom popupOption
         UpdateCustomChildPosition(bubbleProp);
@@ -156,20 +157,21 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);
     padding_ = popupTheme->GetPadding();
     border_.SetBorderRadius(popupTheme->GetRadius());
     targetSpace_ = popupTheme->GetTargetSpace();
     placement_ = layoutProp->GetPlacement().value_or(Placement::BOTTOM);
+    scaledBubbleSpacing_ = static_cast<float>(popupTheme->GetBubbleSpacing().ConvertToPx());
 }
 
 OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp)
 {
     InitArrowState(layoutProp);
-    float scaledBubbleSpacing = BUBBLE_SPACING.ConvertToPx();
+    auto scaledBubbleSpacing = scaledBubbleSpacing_;
     OffsetF bottomPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
         targetOffset_.GetY() + targetSize_.Height() + scaledBubbleSpacing);
     if (showBottomArrow_) {
@@ -241,18 +243,18 @@ void BubbleLayoutAlgorithm::InitArrowTopAndBottomPosition(OffsetF& topArrowPosit
     topArrowPosition =
         topPosition + OffsetF(std::max(padding_.Left().ConvertToPx(), border_.TopLeftRadius().GetX().ConvertToPx()) +
                                   BEZIER_WIDTH_HALF.ConvertToPx(),
-                          childSize.Height() + BUBBLE_SPACING.ConvertToPx());
+                          childSize.Height() + scaledBubbleSpacing_);
     bottomArrowPosition = bottomPosition + OffsetF(std::max(padding_.Left().ConvertToPx(),
                                                        border_.BottomLeftRadius().GetX().ConvertToPx()) +
                                                        BEZIER_WIDTH_HALF.ConvertToPx(),
-                                               -BUBBLE_SPACING.ConvertToPx());
+                                               -scaledBubbleSpacing_);
 }
 
 OffsetF BubbleLayoutAlgorithm::GetPositionWithPlacement(const SizeF& childSize, const OffsetF& topPosition,
     const OffsetF& bottomPosition, const OffsetF& topArrowPosition, const OffsetF& bottomArrowPosition)
 {
     OffsetF childPosition;
-    float bubbleSpacing = BUBBLE_SPACING.ConvertToPx();
+    float bubbleSpacing = scaledBubbleSpacing_;
     float marginRight = 0.0f;
     float marginBottom = 0.0f;
     float marginTop = 0.0f;
@@ -468,13 +470,17 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(const RefPtr<BubbleLayoutP
     CHECK_NULL_VOID(geometryNode);
     targetSize_ = geometryNode->GetFrameSize();
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
-    auto context = targetNode->GetRenderContext();
-    CHECK_NULL_VOID(context);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+                            pipelineContext->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     targetOffset_ = targetNode->GetPaintRectOffset();
+    if (isContainerModal) {
+        auto newOffsetY = targetOffset_.GetY() - static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx());
+        targetOffset_.SetY(newOffsetY);
+    }
     // Show in SubWindow
     if (showInSubWindow) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
         auto overlayManager = pipelineContext->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         auto displayWindowOffset = layoutProp->GetDisplayWindowOffset().value_or(OffsetF());

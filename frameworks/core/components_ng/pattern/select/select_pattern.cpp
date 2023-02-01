@@ -17,6 +17,8 @@
 
 #include <cstdint>
 
+#include "base/geometry/dimension.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/json/json_util.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
@@ -30,6 +32,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
+#include "core/components_ng/pattern/select/select_event_hub.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -46,11 +49,6 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr uint32_t SELECT_ITSELF_TEXT_LINES = 1;
-constexpr Dimension SELECT_BORDER = 20.0_vp;
-const Edge SELECT_PADDING = Edge(8.0, 9.25, 8.0, 9.25, DimensionUnit::VP);
-constexpr Dimension SPINNER_WIDTH = 10.0_vp;
-constexpr Dimension SPINNER_HEIGHT = 10.0_vp;
-constexpr Dimension SELECT_MENU_PADDING = 4.0_vp;
 
 } // namespace
 
@@ -60,6 +58,40 @@ void SelectPattern::OnModifyDone()
     RegisterOnPress();
     RegisterOnHover();
     CreateSelectedCallback();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    RegisterOnKeyEvent(focusHub);
+
+    auto eventHub = host->GetEventHub<SelectEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (!eventHub->IsEnabled()) {
+        SetDisabledStyle();
+    }
+}
+
+void SelectPattern::ShowSelectMenu()
+{
+    if (menu_) {
+        LOGI("start executing click callback %d", menu_->GetId());
+    }
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto selectNode = GetHost();
+    CHECK_NULL_VOID(selectNode);
+    auto select = selectNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(select);
+    auto offset = selectNode->GetPaintRectOffset();
+    offset.AddY(select->GetSelectSize().Height());
+
+    auto selectTheme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    offset.AddY(static_cast<float>(selectTheme->GetSelectMenuPadding().ConvertToPx()));
+    overlayManager->ShowMenu(selectNode->GetId(), offset, menu_);
 }
 
 // add click event to show menu
@@ -68,24 +100,10 @@ void SelectPattern::RegisterOnClick()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    GestureEventFunc callback = [id = host->GetId(), menu = menu_](GestureEvent& /*info*/) mutable {
-        if (menu) {
-            LOGI("start executing click callback %d", menu->GetId());
-        }
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto overlayManager = context->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        auto selectNode = FrameNode::GetFrameNode(V2::SELECT_ETS_TAG, id);
-        CHECK_NULL_VOID(selectNode);
-        auto select = selectNode->GetPattern<SelectPattern>();
-        CHECK_NULL_VOID(select);
-        auto offset = selectNode->GetPaintRectOffset();
-        offset.AddY(select->GetSelectSize().Height());
-        offset.AddY(SELECT_MENU_PADDING.ConvertToVp());
-        overlayManager->ShowMenu(id, offset, menu);
-        // menuNode already registered, nullify
-        menu.Reset();
+    GestureEventFunc callback = [weak = WeakClaim(this)](GestureEvent& /* info */) mutable {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->ShowSelectMenu();
     };
     auto gestureHub = host->GetOrCreateGestureEventHub();
     gestureHub->BindMenu(std::move(callback));
@@ -182,6 +200,53 @@ void SelectPattern::CreateSelectedCallback()
     }
 }
 
+void SelectPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        return pattern->OnKeyEvent(event);
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool SelectPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_SPACE) {
+        ShowSelectMenu();
+        return true;
+    }
+    return false;
+}
+
+void SelectPattern::SetDisabledStyle()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+
+    auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textProps);
+    textProps->UpdateTextColor(theme->GetDisabledFontColor());
+    text_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+
+    auto spinnerLayoutProperty = spinner_->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(spinnerLayoutProperty);
+    ImageSourceInfo imageSourceInfo = spinnerLayoutProperty->GetImageSourceInfo().value();
+    if (imageSourceInfo.IsSvg()) {
+        imageSourceInfo.SetFillColor(theme->GetDisabledSpinnerColor());
+        spinnerLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    }
+    auto spinnerRenderProperty = spinner_->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(spinnerRenderProperty);
+    spinnerRenderProperty->UpdateSvgFillColor(theme->GetDisabledSpinnerColor());
+    spinner_->MarkModifyDone();
+}
+
 void SelectPattern::SetSelected(int32_t index)
 {
     // if option is already selected, do nothing
@@ -221,7 +286,7 @@ void SelectPattern::BuildChild()
     CHECK_NULL_VOID(rowProps);
     rowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     rowProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    rowProps->UpdateSpace(Dimension(8.0f, DimensionUnit::VP));
+    rowProps->UpdateSpace(theme->GetContentSpinnerPadding());
     text_ = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<TextPattern>());
     CHECK_NULL_VOID(text_);
@@ -229,17 +294,17 @@ void SelectPattern::BuildChild()
     CHECK_NULL_VOID(textProps);
     InitTextProps(textProps, theme);
 
-    auto spinner = FrameNode::CreateFrameNode(
+    spinner_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ImagePattern>());
-    CHECK_NULL_VOID(spinner);
+    CHECK_NULL_VOID(spinner_);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
-    InitSpinner(spinner, iconTheme, theme);
+    InitSpinner(spinner_, iconTheme, theme);
 
     // mount triangle and text
     text_->MountToParent(row);
-    spinner->MountToParent(row);
-    spinner->MarkModifyDone();
+    spinner_->MountToParent(row);
+    spinner_->MarkModifyDone();
     row->MountToParent(select);
     row->MarkModifyDone();
 
@@ -247,19 +312,15 @@ void SelectPattern::BuildChild()
     auto renderContext = select->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+
     BorderRadiusProperty border;
-    border.SetRadius(SELECT_BORDER);
+    border.SetRadius(theme->GetSelectBorderRadius());
     renderContext->UpdateBorderRadius(border);
 
     auto props = select->GetLayoutProperty();
-    PaddingProperty padding = {
-        .left = CalcLength(SELECT_PADDING.Left()),
-        .right = CalcLength(SELECT_PADDING.Right()),
-        .top = CalcLength(SELECT_PADDING.Top()),
-        .bottom = CalcLength(SELECT_PADDING.Bottom()),
-    };
-    props->UpdatePadding(padding);
+    CHECK_NULL_VOID(props);
     props->UpdateAlignment(Alignment::CENTER);
+    props->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinWidth()), CalcLength(theme->GetSelectMinHeight())));
 }
 
 void SelectPattern::SetValue(const std::string& value)
@@ -510,6 +571,7 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
     CHECK_NULL_VOID(newSelectedPros);
     newSelectedPros->UpdateNeedDivider(false);
 
+    CHECK_NULL_VOID(menu_);
     menu_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -531,37 +593,39 @@ void SelectPattern::UpdateText(int32_t index)
 
 void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps, const RefPtr<SelectTheme>& theme)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textTheme = pipeline->GetTheme<TextFieldTheme>();
-    textProps->UpdateFontSize(textTheme->GetFontSize());
+    textProps->UpdateFontSize(theme->GetFontSize());
+    textProps->UpdateFontWeight(FontWeight::MEDIUM);
+    textProps->UpdateTextColor(theme->GetFontColor());
     textProps->UpdateTextDecoration(theme->GetTextDecoration());
     textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textProps->UpdateMaxLines(SELECT_ITSELF_TEXT_LINES);
+    MarginProperty margin;
+    margin.left = CalcLength(theme->GetContentMargin());
+    textProps->UpdateMargin(margin);
 }
 
 void SelectPattern::InitSpinner(
     const RefPtr<FrameNode>& spinner, const RefPtr<IconTheme>& iconTheme, const RefPtr<SelectTheme>& selectTheme)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
     ImageSourceInfo imageSourceInfo;
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
     auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SPINNER);
     imageSourceInfo.SetSrc(iconPath);
+    imageSourceInfo.SetFillColor(selectTheme->GetSpinnerColor());
 
     auto spinnerLayoutProperty = spinner->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(spinnerLayoutProperty);
     spinnerLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    CalcSize idealSize = { CalcLength(SPINNER_WIDTH), CalcLength(SPINNER_HEIGHT) };
+    CalcSize idealSize = { CalcLength(selectTheme->GetSpinnerWidth()), CalcLength(selectTheme->GetSpinnerHeight()) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     spinnerLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
+    MarginProperty margin;
+    margin.right = CalcLength(selectTheme->GetContentMargin());
+    spinnerLayoutProperty->UpdateMargin(margin);
 
     auto spinnerRenderProperty = spinner->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(spinnerRenderProperty);
-    auto spinnerColor = selectTheme->GetFontColor();
-    spinnerRenderProperty->UpdateSvgFillColor(spinnerColor);
+    spinnerRenderProperty->UpdateSvgFillColor(selectTheme->GetSpinnerColor());
 }
 
 // XTS inspector code

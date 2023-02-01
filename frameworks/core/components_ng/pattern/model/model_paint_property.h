@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MODEL_MODEL_PAINT_PROPERTY_H
 
 #include "core/components_ng/render/paint_property.h"
+#include "core/components_ng/pattern/model/model_property.h"
 
 #include "base/geometry/animatable_float.h"
 #include "base/geometry/vec3.h"
@@ -25,27 +26,6 @@
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/light.h"
 
 namespace OHOS::Ace::NG {
-
-#define DEFINE_NEEDS_SETUP_FLAG_PROPERTY(name, defaultVal, changeFlag)  \
-public:                                                                 \
-    bool Needs##name##Setup() const                                     \
-    {                                                                   \
-        return needs##name##Setup_;                                     \
-    }                                                                   \
-    void UpdateNeeds##name##Setup(const bool value)                     \
-    {                                                                   \
-        needs##name##Setup_ = value;                                    \
-        if (value) {                                                    \
-            UpdatePropertyChangeFlag(changeFlag);                       \
-        }                                                               \
-    }                                                                   \
-    bool CloneNeeds##name##Setup() const                                \
-    {                                                                   \
-        return needs##name##Setup_;                                     \
-    }                                                                   \
-private:                                                                \
-    bool needs##name##Setup_ = defaultVal;
-
 
 class ModelPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(ModelPaintProperty, PaintProperty)

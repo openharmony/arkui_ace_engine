@@ -25,7 +25,7 @@ void JSBlank::Create(const JSCallbackInfo& info)
         Dimension blankMin;
         NG::BlankView::Create();
         if (info.Length() >= 1 && ParseJsDimensionVp(info[0], blankMin)) {
-            NG::BlankView::SetBlankMin(blankMin);
+            NG::BlankView::SetBlankMin(blankMin.IsValid() ? blankMin : Dimension());
         }
         return;
     }
@@ -41,7 +41,7 @@ void JSBlank::Create(const JSCallbackInfo& info)
 
     Dimension flexBasis;
     if (info.Length() >= 1 && ParseJsDimensionVp(info[0], flexBasis)) {
-        flexItem->SetFlexBasis(flexBasis);
+        flexItem->SetFlexBasis(flexBasis.IsValid() ? flexBasis : Dimension());
     }
 }
 

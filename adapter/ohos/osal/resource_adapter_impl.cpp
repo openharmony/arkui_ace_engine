@@ -148,7 +148,7 @@ void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
 {
     auto resConfig = ConvertConfigToGlobal(config);
     LOGI("UpdateConfig ori=%{public}d, dpi=%{public}f, device=%{public}d, "
-         "colorMode=%{publid}d, inputDevice=%{public}d",
+         "colorMode=%{public}d, inputDevice=%{public}d",
         resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType(), resConfig->GetColorMode(),
         resConfig->GetInputDevice());
     if (sysResourceManager_) {
@@ -531,12 +531,39 @@ void ResourceAdapterImpl::UpdateResourceManager(const std::string& bundleName, c
     }
 }
 
+bool ResourceAdapterImpl::GetRawFileDescription(
+    const std::string& rawfileName, RawfileDescription& rawfileDescription) const
+{
+    CHECK_NULL_RETURN_NOLOG(resourceManager_, false);
+    OHOS::Global::Resource::ResourceManager::RawFileDescriptor descriptor;
+    auto state = resourceManager_->GetRawFileDescriptorFromHap(rawfileName, descriptor);
+    if (state != Global::Resource::SUCCESS) {
+        LOGE("GetRawfileDescription error, rawfileName=%{public}s, error:%{public}u", rawfileName.c_str(), state);
+        return false;
+    }
+    rawfileDescription.fd = descriptor.fd;
+    rawfileDescription.offset = descriptor.offset;
+    rawfileDescription.length = descriptor.length;
+    return true;
+}
+
+bool ResourceAdapterImpl::GetMediaById(const int32_t& resId, std::string& mediaPath) const
+{
+    CHECK_NULL_RETURN_NOLOG(resourceManager_, false);
+    auto state = resourceManager_->GetMediaById(resId, mediaPath);
+    if (state != Global::Resource::SUCCESS) {
+        LOGE("GetMediaById error, resId=%{public}d, error:%{public}u", resId, state);
+        return false;
+    }
+    return true;
+}
+
 std::string ResourceAdapterImpl::GetActualResourceName(const std::string& resName) const
 {
     auto index = resName.find_last_of('.');
     if (index == std::string::npos) {
         LOGE("GetActualResourceName error, incorrect resName format.");
-        return "";
+        return {};
     }
     return resName.substr(index + 1, resName.length() - index - 1);
 }

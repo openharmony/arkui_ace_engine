@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
@@ -319,7 +320,7 @@ void NavigationView::Create()
 
         auto context = contentNode->GetRenderContext();
         CHECK_NULL_VOID(context);
-        context->UpdateBackgroundColor(Color::WHITE);
+        context->UpdateBackgroundColor(CONTENT_COLOR);
     }
 
     // divider node

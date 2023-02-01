@@ -105,6 +105,7 @@ public:
     virtual RefPtr<TextFieldControllerBase> CreateTextArea(
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value) = 0;
 
+    virtual void SetWidthAuto(bool isAuto) {}
     virtual void SetType(TextInputType value) = 0;
     virtual void SetPlaceholderColor(const Color& value) = 0;
     virtual void SetPlaceholderFont(const Font& value) = 0;

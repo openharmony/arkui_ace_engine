@@ -52,6 +52,7 @@ class ACE_EXPORT ViewAbstract {
 public:
     static void SetWidth(const CalcLength& width);
     static void SetHeight(const CalcLength& height);
+    static void ClearWidthOrHeight(bool isWidth);
     static void SetMinWidth(const CalcLength& minWidth);
     static void SetMinHeight(const CalcLength& minHeight);
     static void SetMaxWidth(const CalcLength& maxWidth);
@@ -66,7 +67,7 @@ public:
     static void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat);
     static void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition);
-    static void SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle);
+    static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle);
     static void SetPadding(const CalcLength& value);
     static void SetPadding(const PaddingProperty& value);
     static void SetMargin(const CalcLength& value);

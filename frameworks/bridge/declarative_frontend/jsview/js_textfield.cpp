@@ -503,6 +503,40 @@ void JSTextField::JsHeight(const JSCallbackInfo& info)
     textInputComponent->SetHeight(value);
 }
 
+void JSTextField::JsWidth(const JSCallbackInfo& info)
+{
+    if (info[0]->IsString() && info[0]->ToString() == "auto") {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+        TextFieldModel::GetInstance()->SetWidthAuto(true);
+        return;
+    }
+    JSViewAbstract::JsWidth(info);
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    TextFieldModel::GetInstance()->SetWidthAuto(false);
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        LOGD("Parse to dimension VP failed!");
+        return;
+    }
+    if (LessNotEqual(value.Value(), 0.0)) {
+        LOGE("dimension value: %{public}f is invalid!", value.Value());
+        return;
+    }
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto textInputComponent = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
+    if (!textInputComponent) {
+        LOGE("JSTextInput set height failed, textInputComponent is null.");
+        return;
+    }
+    textInputComponent->SetHeight(value);
+}
+
 void JSTextField::JsPadding(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {

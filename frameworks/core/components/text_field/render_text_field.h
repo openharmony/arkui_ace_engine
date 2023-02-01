@@ -396,6 +396,24 @@ public:
 
     bool NeedToFilter();
 
+    bool HasSurfaceChangedCallback()
+    {
+        return surfaceChangedCallbackId_.has_value();
+    }
+    void UpdateSurfaceChangedCallbackId(int32_t id)
+    {
+        surfaceChangedCallbackId_ = id;
+    }
+
+    bool HasSurfacePositionChangedCallback()
+    {
+        return surfacePositionChangedCallbackId_.has_value();
+    }
+    void UpdateSurfacePositionChangedCallbackId(int32_t id)
+    {
+        surfacePositionChangedCallbackId_ = id;
+    }
+
 protected:
     // Describe where caret is and how tall visually.
     struct CaretMetrics {
@@ -444,6 +462,7 @@ protected:
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
     void UpdateDirectionStatus();
+    void UpdateCaretInfoToController();
     Offset GetPositionForExtend(int32_t extend, bool isSingleHandle);
     /**
      * Get grapheme cluster length before or after extend.
@@ -574,7 +593,7 @@ protected:
     bool isCallbackCalled_ = false; // Whether custom font is loaded.
     bool isOverlayShowed_ = false;  // Whether overlay has showed.
     bool isLongPressStatus_ = false;
-    double textHeight_ = 0.0;       // Height of text.
+    double textHeight_ = 0.0; // Height of text.
     double textHeightLast_ = 0.0;
     double iconSize_ = 0.0;
     double iconHotZoneSize_ = 0.0;
@@ -601,6 +620,7 @@ protected:
     // It maybe seems rough, and doesn't support scrolling smoothly.
     Offset textOffsetForShowCaret_;
     InputStyle inputStyle_;
+    Rect caretRect_;
 
 private:
     void SetCallback(const RefPtr<TextFieldComponent>& textField);
@@ -656,6 +676,8 @@ private:
     // distribute
     void ApplyRestoreInfo();
     void OnTapCallback();
+    void HandleSurfacePositionChanged(int32_t posX, int32_t posY);
+    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
 
     int32_t initIndex_ = 0;
     bool isOverlayFocus_ = false;
@@ -704,6 +726,8 @@ private:
     TapCallback tapCallback_;
     CancelableCallback<void()> cursorTwinklingTask_;
 
+    std::optional<int32_t> surfaceChangedCallbackId_;
+    std::optional<int32_t> surfacePositionChangedCallbackId_;
     std::vector<InputOption> inputOptions_;
     std::list<std::unique_ptr<TextInputFormatter>> textInputFormatters_;
     RefPtr<TextEditController> controller_;

@@ -22,6 +22,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
+#include "base/mousestyle/mouse_style.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -59,8 +60,6 @@ constexpr Dimension CURSOR_WIDTH = 1.5_vp;
 constexpr Dimension CURSOR_PADDING = 2.0_vp;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
-
-enum class CaretUpdateType { PRESSED, LONG_PRESSED, DEL, EVENT, HANDLE_MOVE, HANDLE_MOVE_DONE, INPUT, NONE };
 
 enum {
     ACTION_SELECT_ALL, // Smallest code unit.
@@ -416,8 +415,33 @@ public:
     float GetIconHotZoneSize();
     float GetIconSize();
 
+    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) const;
+    void HandleSurfacePositionChanged(int32_t posX, int32_t posY) const;
+
+    bool HasSurfaceChangedCallback()
+    {
+        return surfaceChangedCallbackId_.has_value();
+    }
+    void UpdateSurfaceChangedCallbackId(int32_t id)
+    {
+        surfaceChangedCallbackId_ = id;
+    }
+
+    bool HasSurfacePositionChangedCallback()
+    {
+        return surfacePositionChangedCallbackId_.has_value();
+    }
+    void UpdateSurfacePositionChangedCallbackId(int32_t id)
+    {
+        surfacePositionChangedCallbackId_ = id;
+    }
+
+    void OnCursorMoveDone();
+    bool IsDisabled();
+
 private:
     void HandleBlurEvent();
+    bool HasFocus() const;
     void HandleFocusEvent();
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
@@ -443,7 +467,9 @@ private:
     void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle);
 
     void CursorMoveOnClick(const Offset& offset);
+    void UpdateCaretInfoToController() const;
 
+    void SetMouseStyle(MouseFormat format);
     void ProcessOverlay();
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
@@ -511,6 +537,7 @@ private:
     bool CursorInContentRegion();
     bool OffsetInContentRegion(const Offset& offset);
     void ProcessPadding();
+    void SetDisabledStyle();
 
     void ProcessPasswordIcon();
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
@@ -566,6 +593,8 @@ private:
     bool needCloseOverlay_ = true;
     bool textObscured_ = true;
     bool enableTouchAndHoverEffect_ = true;
+    std::optional<int32_t> surfaceChangedCallbackId_;
+    std::optional<int32_t> surfacePositionChangedCallbackId_;
 
     SelectionMode selectionMode_ = SelectionMode::NONE;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;

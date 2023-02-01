@@ -147,6 +147,7 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
         GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
     singleStarImagePaintConfig_.srcRect_ = singleStarRect_;
     singleStarImagePaintConfig_.dstRect_ = singleStarDstRect_;
+    singleStarImagePaintConfig_.imageFit_ = ImageFit::TOP_LEFT;
     return MakeRefPtr<RatingPaintMethod>(
         foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_, singleStarImagePaintConfig_, starNum);
 }
@@ -173,15 +174,12 @@ ImageSourceInfo RatingPattern::GetImageSourceInfoFromTheme(int32_t imageFlag)
     switch (imageFlag) {
         case 0b001:
             imageSourceInfo.SetResourceId(ratingTheme->GetForegroundResourceId());
-            imageSourceInfo.SetFillColor(ratingTheme->GetStarColorActive());
             break;
         case 0b010:
             imageSourceInfo.SetResourceId(ratingTheme->GetSecondaryResourceId());
-            imageSourceInfo.SetFillColor(ratingTheme->GetStarColorInactive());
             break;
         case 0b100:
             imageSourceInfo.SetResourceId(ratingTheme->GetBackgroundResourceId());
-            imageSourceInfo.SetFillColor(ratingTheme->GetStarColorInactive());
             break;
         default:
             break;

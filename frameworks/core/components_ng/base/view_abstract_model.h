@@ -56,6 +56,7 @@ public:
     // basic size
     virtual void SetWidth(const Dimension& width) = 0;
     virtual void SetHeight(const Dimension& height) = 0;
+    virtual void ClearWidthOrHeight(bool isWidth) = 0;
     virtual void SetMinWidth(const Dimension& minWidth) = 0;
     virtual void SetMinHeight(const Dimension& minHeight) = 0;
     virtual void SetMaxWidth(const Dimension& maxWidth) = 0;
@@ -67,7 +68,7 @@ public:
     virtual void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) = 0;
     virtual void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) = 0;
     virtual void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) = 0;
-    virtual void SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle) = 0;
+    virtual void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) = 0;
     virtual void SetPadding(const Dimension& value) = 0;
     virtual void SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
         const std::optional<Dimension>& left, const std::optional<Dimension>& right) = 0;

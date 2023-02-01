@@ -52,6 +52,11 @@ public:
         ViewAbstract::SetHeight(NG::CalcLength(height));
     }
 
+    void ClearWidthOrHeight(bool isWidth) override
+    {
+        ViewAbstract::ClearWidthOrHeight(isWidth);
+    }
+
     void SetMinWidth(const Dimension& minWidth) override
     {
         ViewAbstract::SetMinWidth(NG::CalcLength(minWidth));
@@ -97,7 +102,7 @@ public:
         ViewAbstract::SetBackgroundImagePosition(bgImgPosition);
     }
 
-    void SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle) override
+    void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) override
     {
         ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle);
     }

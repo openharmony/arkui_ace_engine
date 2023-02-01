@@ -1277,5 +1277,74 @@ void RenderWeb::UpdateGlobalPos()
         delegate_->SetWebRendeGlobalPos(position);
     }
 }
+
+RefPtr<OptionComponent> RenderWeb::BuildSelectMenu(const std::string& value)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return nullptr;
+    }
+    if (!themeManager_) {
+        themeManager_ = context->GetThemeManager();
+    }
+    if (!accessibilityManager_) {
+        accessibilityManager_ = context->GetAccessibilityManager();
+    }
+    auto optionComponent = AceType::MakeRefPtr<OptionComponent>();
+    if (!optionComponent) {
+        return nullptr;
+    }
+    optionComponent->SetNeedDrawDividerLine(false);
+    auto textComponent = AceType::MakeRefPtr<TextComponent>(value);
+    optionComponent->SetText(textComponent);
+    optionComponent->SetValue(value);
+    optionComponent->InitTheme(themeManager_);
+    optionComponent->Initialize(accessibilityManager_);
+    return optionComponent;
+}
+
+void RenderWeb::OnSelectPopupMenu(
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback)
+{
+    auto context = context_.Upgrade();
+    if (!context || !params || !callback) {
+        return;
+    }
+    const auto pipeline = context_.Upgrade();
+    if (!pipeline) {
+        return;
+    }
+    auto stackElement = pipeline->GetLastStack();
+    if (!stackElement) {
+        return;
+    }
+    popup_ = AceType::MakeRefPtr<SelectPopupComponent>();
+    auto themeManager = context->GetThemeManager();
+    popup_->InitTheme(themeManager);
+    for (size_t index = 0; index < params->menuItems.size(); index++) {
+        RefPtr<OptionComponent> option = BuildSelectMenu(params->menuItems[index].label);
+        if (!option) {
+            continue;
+        }
+        popup_->AppendSelectOption(option);
+        if (index == params->selectedItem) {
+            option->SetSelected(true);
+        }
+    }
+    popup_->SetOptionClickedCallback([callback](std::size_t index) {
+        std::vector<int32_t> indices { static_cast<int32_t>(index) };
+        callback->Continue(indices);
+    });
+    popup_->SetPopupCanceledCallback([callback]() {
+        callback->Cancel();
+    });
+
+    Offset leftTop = { params->bounds.x + GetGlobalOffset().GetX(),
+                       params->bounds.y + GetGlobalOffset().GetY() };
+    Offset rightBottom = { params->bounds.x + GetGlobalOffset().GetX() + params->bounds.width,
+                           params->bounds.y + GetGlobalOffset().GetY() + params->bounds.height };
+    popup_->ShowDialog(stackElement, leftTop, rightBottom, false);
+}
 #endif
 } // namespace OHOS::Ace

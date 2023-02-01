@@ -50,12 +50,17 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    float contentWidth = 0.0f;
     float contentHeight = 0.0f;
     if (content) {
         auto contentSize = content->GetRect().GetSize();
+        contentWidth = contentSize.Width();
         contentHeight = contentSize.Height();
     }
     if (pattern->IsTextArea()) {
+        if (!layoutConstraint->selfIdealSize.Width().has_value()) {
+            frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingSum());
+        }
         if (!frameSize.Height().has_value()) {
             frameSize.SetHeight(contentHeight + pattern->GetVerticalPaddingSum());
         }
@@ -67,6 +72,19 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!frameSize.Height().has_value()) {
         frameSize.SetHeight(
             std::min(layoutConstraint->maxSize.Height(), contentHeight + pattern->GetVerticalPaddingSum()));
+    }
+    auto textfieldLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(textfieldLayoutProperty);
+    if (textfieldLayoutProperty->GetWidthAutoValue(false)) {
+        if (LessOrEqual(layoutConstraint->minSize.Width(), 0.0f)) {
+            frameSize.SetWidth(std::clamp(textRect_.GetSize().Width() + pattern->GetHorizontalPaddingSum(),
+                pattern->GetHorizontalPaddingSum(), layoutConstraint->maxSize.Width()));
+        } else if (LessOrEqual(textRect_.Width(), 0.0f)) {
+            frameSize.SetWidth(layoutConstraint->minSize.Width());
+        } else {
+            frameSize.SetWidth(std::clamp(textRect_.Width() + pattern->GetHorizontalPaddingSum(),
+                layoutConstraint->minSize.Width(), layoutConstraint->maxSize.Width()));
+        }
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
     frameRect_ =
@@ -90,10 +108,10 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     std::string textContent;
     bool showPlaceHolder = false;
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
-        UpdateTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle);
+        UpdateTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetValueValue("");
     } else {
-        UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle);
+        UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetPlaceholderValue("");
         showPlaceHolder = true;
     }
@@ -120,7 +138,9 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (pattern->IsTextArea()) {
         textRect_.SetSize(SizeF(
             contentConstraint.maxSize.Width() - horizontalPaddingSum, static_cast<float>(paragraph_->GetHeight())));
-        return SizeF(contentConstraint.maxSize.Width() - horizontalPaddingSum, preferredHeight);
+        return SizeF(contentConstraint.maxSize.Width() - horizontalPaddingSum,
+            std::min(contentConstraint.maxSize.Height() - pattern->GetVerticalPaddingSum(),
+                static_cast<float>(paragraph_->GetHeight())));
     }
     auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(true);
     // check password image size.
@@ -216,8 +236,8 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 }
 
-void TextFieldLayoutAlgorithm::UpdateTextStyle(
-    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle)
+void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
+    const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled)
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
@@ -229,10 +249,15 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(
         fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();
     }
     textStyle.SetFontSize(fontSize);
-
+    textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
     textStyle.SetFontWeight(
         layoutProperty->GetFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
-    textStyle.SetTextColor(layoutProperty->GetTextColorValue(theme ? theme->GetTextColor() : textStyle.GetTextColor()));
+    if (isDisabled) {
+        textStyle.SetTextColor(theme ? theme->GetDisableTextColor() : textStyle.GetTextColor());
+    } else {
+        textStyle.SetTextColor(
+            layoutProperty->GetTextColorValue(theme ? theme->GetTextColor() : textStyle.GetTextColor()));
+    }
     if (layoutProperty->GetMaxLines()) {
         textStyle.SetMaxLines(layoutProperty->GetMaxLines().value());
     }
@@ -244,8 +269,8 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(
     }
 }
 
-void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(
-    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle)
+void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
+    const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled)
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
@@ -259,8 +284,12 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(
     textStyle.SetFontSize(fontSize);
     textStyle.SetFontWeight(
         layoutProperty->GetPlaceholderFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
-    textStyle.SetTextColor(
-        layoutProperty->GetPlaceholderTextColorValue(theme ? theme->GetPlaceholderColor() : textStyle.GetTextColor()));
+    if (isDisabled) {
+        textStyle.SetTextColor(theme ? theme->GetDisableTextColor() : textStyle.GetTextColor());
+    } else {
+        textStyle.SetTextColor(layoutProperty->GetPlaceholderTextColorValue(
+            theme ? theme->GetPlaceholderColor() : textStyle.GetTextColor()));
+    }
     if (layoutProperty->HasPlaceholderMaxLines()) {
         textStyle.SetMaxLines(layoutProperty->GetPlaceholderMaxLines().value());
     }

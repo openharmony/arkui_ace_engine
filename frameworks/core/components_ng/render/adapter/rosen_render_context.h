@@ -135,6 +135,7 @@ public:
     void AnimateHoverEffectScale(bool isHovered) override;
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
+    void UpdateBackBlurStyle(const BlurStyleOption& bgBlurStyle) override;
     void OnBackShadowUpdate(const Shadow& shadow) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
@@ -199,7 +200,6 @@ private:
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
     void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) override;
     void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) override;
-    void OnBackgroundBlurStyleUpdate(const BlurStyle& bgBlurStyle) override;
 
     void OnBorderImageUpdate(const RefPtr<BorderImage>& borderImage) override;
     void OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo) override;
@@ -261,6 +261,7 @@ private:
     void PaintBorderImage();
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
+    void SetBackBlurFilter();
     void GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop);
 
     // helper function to check if paint rect is valid
@@ -299,6 +300,7 @@ private:
     bool isHoveredBoard_ = false;
     bool isPositionChanged_ = false;
     bool firstTransitionIn_ = false;
+    bool isBackBlurChanged_ = false;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
 

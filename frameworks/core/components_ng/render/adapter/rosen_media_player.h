@@ -55,6 +55,13 @@ public:
     int32_t Seek(int32_t mSeconds, OHOS::Ace::SeekMode mode) override;
 
 private:
+    // Interim programme
+    bool SetMediaSource(std::string& filePath, int32_t& fd);
+    bool MediaPlay(const std::string& filePath);
+    bool RawFilePlay(const std::string& filePath);
+    bool RelativePathPlay(const std::string& filePath);
+    bool GetResourceId(const std::string& path, uint32_t& resId);
+
     std::shared_ptr<OHOS::Media::Player> mediaPlayer_ = nullptr;
     std::shared_ptr<MediaPlayerCallback> mediaPlayerCallback_ = nullptr;
     WeakPtr<NG::RosenRenderSurface> renderSurface_ = nullptr;

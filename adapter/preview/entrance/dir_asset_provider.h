@@ -28,9 +28,9 @@
 
 #include "flutter/assets/directory_asset_bundle.h"
 
-#include "core/common/flutter/flutter_asset_manager.h"
 #include "base/resource/asset_manager.h"
 #include "base/utils/macros.h"
+#include "core/common/flutter/flutter_asset_manager.h"
 
 namespace OHOS::Ace {
 
@@ -59,7 +59,7 @@ public:
         return assetProvider_->IsValid();
     }
 
-    std::string GetAssetPath(const std::string& assetName) override
+    std::string GetAssetPath(const std::string& assetName, bool /* isAddHapPath */) override
     {
         std::string fileName = basePath_ + assetName;
         std::FILE* fp = std::fopen(fileName.c_str(), "r");

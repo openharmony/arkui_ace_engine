@@ -46,6 +46,9 @@ private:
     void CloseDialog();
     void NotifyDialogOperation(DialogOperation operation);
 
+    static bool ParseAnimation(
+        const JsiExecutionContext& execContext, const JsiRef<JsiValue>& jsiValue, AnimationOption& result);
+
     JSView* ownerView_ = nullptr;
     bool isShown_ = false;
     bool pending_ = false;

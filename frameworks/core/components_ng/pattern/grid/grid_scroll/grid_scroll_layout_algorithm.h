@@ -79,6 +79,7 @@ private:
     void GetTargetIndexInfoWithBenchMark(
         LayoutWrapper* layoutWrapper, int32_t benchmarkIndex, int32_t mainStartIndex, int32_t targetIndex);
 
+    void UpdateOffsetOnVirtualKeyboardHeightChange(LayoutWrapper* layoutWrapper, float mainSize);
     void AdaptToChildMainSize(LayoutWrapper* layoutWrapper, RefPtr<GridLayoutProperty>& gridLayoutProperty,
         float mainSize, const SizeF& idealSize);
 

@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_VIDEO_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_VIDEO_ELEMENT_H
 
+#include <stdint.h>
+
+#include "base/resource/asset_manager.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/multimodal/render_multimodal.h"
 #include "core/components/slider/slider_theme.h"
@@ -28,10 +31,9 @@
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "foundation/multimedia/player_framework/interfaces/inner_api/native/player.h"
+#include "surface_delegate.h"
 
 #include "core/components/video/media_player_callback.h"
-
-#include "surface_delegate.h"
 #endif
 
 namespace OHOS::Ace {
@@ -115,6 +117,12 @@ private:
     void HiddenChange(bool hidden);
     void OnTextureSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight);
     void EnableLooping(bool loop);
+    // Interim programme
+    void SetMediaSource(std::string& filePath, int32_t& fd);
+    void MediaPlay(const std::string& filePath);
+    void RawFilePlay(const std::string& filePath);
+    void RelativePathPlay(const std::string& filePath);
+    bool GetResourceId(const std::string& path, uint32_t& resId);
 
     const RefPtr<Component> CreatePoster();
     const RefPtr<Component> CreateControl();

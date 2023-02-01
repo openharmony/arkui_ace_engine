@@ -225,8 +225,7 @@ const std::list<RefPtr<LayoutWrapper>>& LazyLayoutWrapperBuilder::OnExpandChildL
         auto uiNode = itemInfo.second;
         if (frameNode) {
             wrapper = frameNode->CreateLayoutWrapper(forceMeasure_, forceLayout_);
-        }
-        if (uiNode) {
+        } else if (uiNode) {
             wrapper = uiNode->CreateLayoutWrapper(forceMeasure_, forceLayout_);
         }
         if (!wrapper) {

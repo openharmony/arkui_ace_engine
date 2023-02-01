@@ -112,7 +112,7 @@ std::unique_ptr<fml::Mapping> FileAssetProvider::GetAsMapping(const std::string&
     return nullptr;
 }
 
-std::string FileAssetProvider::GetAssetPath(const std::string& assetName)
+std::string FileAssetProvider::GetAssetPath(const std::string& assetName, bool /* isAddHapPath */)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     for (const auto& basePath : assetBasePaths_) {

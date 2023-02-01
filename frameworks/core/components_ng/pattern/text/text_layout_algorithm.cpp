@@ -20,7 +20,6 @@
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
-#include "core/components/font/constants_converter.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -116,7 +115,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     }
     float heightFinal =
         std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
-    return SizeF(static_cast<float>(GetTextWidth()), heightFinal);
+    return SizeF(static_cast<float>(std::min(GetTextWidth(), paragraph_->GetMaxWidth())), heightFinal);
 }
 
 void TextLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -148,9 +147,12 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
         StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
         paragraph_->AddText(StringUtils::Str8ToStr16(content));
     } else {
+        int32_t spanTextLength = 0;
         for (const auto& child : spanItemChildren_) {
             if (child) {
                 child->UpdateParagraph(paragraph_);
+                child->positon = spanTextLength + child->content.length();
+                spanTextLength += child->content.length();
             }
         }
     }
@@ -184,7 +186,11 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
         return false;
     }
     if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
-        CreateParagraphAndLayout(textStyle, content, contentConstraint);
+        if (!CreateParagraphAndLayout(textStyle, content, contentConstraint)) {
+            LOGE("fail to initialize text paragraph when adapt min text size.");
+            return false;
+        }
+        return true;
     }
     constexpr Dimension ADAPT_UNIT = 1.0_fp;
     Dimension step = ADAPT_UNIT;
@@ -257,6 +263,11 @@ SizeF TextLayoutAlgorithm::GetMaxMeasureSize(const LayoutConstraintF& contentCon
     auto maxSize = contentConstraint.selfIdealSize;
     maxSize.UpdateIllegalSizeWithCheck(contentConstraint.maxSize);
     return maxSize.ConvertToSizeT();
+}
+
+std::list<RefPtr<SpanItem>>&& TextLayoutAlgorithm::GetSpanItemChildren()
+{
+    return std::move(spanItemChildren_);
 }
 
 } // namespace OHOS::Ace::NG

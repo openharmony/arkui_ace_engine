@@ -36,4 +36,9 @@ FrameTraceAdapter* FrameTraceAdapter::GetInstance()
     static FrameTraceAdapterImpl instance;
     return &instance;
 }
+
+bool FrameTraceAdapterImpl::IsEnabled()
+{
+    return FRAME_TRACE::IsEnabled();
+}
 }

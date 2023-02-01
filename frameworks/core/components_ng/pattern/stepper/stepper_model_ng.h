@@ -33,8 +33,6 @@ public:
 
 private:
     static RefPtr<FrameNode> CreateSwiperChild(int32_t id, uint32_t index);
-    static RefPtr<FrameNode> CreateButtonChild(
-        int32_t id, const std::string& symbol, const RefPtr<StepperTheme>& theme);
 };
 
 } // namespace OHOS::Ace::NG
