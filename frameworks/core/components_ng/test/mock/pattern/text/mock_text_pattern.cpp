@@ -36,4 +36,6 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 }
 
 void TextPattern::BeforeCreateLayoutWrapper() {}
+
+void TextPattern::DumpInfo() {}
 } // namespace OHOS::Ace::NG

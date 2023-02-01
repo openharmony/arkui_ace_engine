@@ -18,6 +18,7 @@
 #include <stack>
 
 #include "base/geometry/ng/rect_t.h"
+#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -396,7 +397,7 @@ void TextPattern::OnModifyDone()
         paragraph_.Reset();
     }
 
-    bool shouldClipToContent = textLayoutProperty->GetTextOverflow().value_or(TextOverflow::NONE) == TextOverflow::CLIP;
+    bool shouldClipToContent = textLayoutProperty->GetTextOverflow().value_or(TextOverflow::CLIP) == TextOverflow::CLIP;
     host->GetRenderContext()->SetClipToFrame(shouldClipToContent);
 
     textForDisplay_ = textLayoutProperty->GetContent().value_or("");
@@ -489,5 +490,12 @@ void TextPattern::BeforeCreateLayoutWrapper()
             nodes.push(*iter);
         }
     }
+}
+
+void TextPattern::DumpInfo()
+{
+    auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProp);
+    DumpLog::GetInstance().AddDesc(std::string("Content: ").append(textLayoutProp->GetContent().value_or(" ")));
 }
 } // namespace OHOS::Ace::NG
