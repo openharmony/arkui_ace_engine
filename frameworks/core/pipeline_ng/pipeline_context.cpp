@@ -342,6 +342,18 @@ void PipelineContext::SetupRootElement()
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
+
+    OnAreaChangedFunc onAreaChangedFunc = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager_))](
+                                              const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
+                                              const RectF& /* rect */, const OffsetF& /* origin */) {
+        auto overlay = weakOverlayManger.Upgrade();
+        CHECK_NULL_VOID(overlay);
+        overlay->HideAllMenus();
+        overlay->HideAllPopups();
+    };
+    rootNode_->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
+    AddOnAreaChangeNode(rootNode_->GetId());
+
     LOGI("SetupRootElement success!");
 }
 
@@ -945,6 +957,9 @@ void PipelineContext::RootLostFocus(BlurReason reason) const
     auto focusHub = rootNode_->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->LostFocus(reason);
+    CHECK_NULL_VOID(overlayManager_);
+    overlayManager_->HideAllMenus();
+    overlayManager_->HideAllPopups();
 }
 
 MouseEvent ConvertAxisToMouse(const AxisEvent& event)
