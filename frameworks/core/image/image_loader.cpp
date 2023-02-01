@@ -27,6 +27,7 @@
 #include "base/resource/asset_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/components/common/layout/constants.h"
@@ -179,7 +180,7 @@ RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string&
     CHECK_NULL_RETURN(imageCache, nullptr);
     std::string filePath = ImageCache::GetImageCacheFilePath(key) + suffix;
     auto data = imageCache->GetDataFromCacheFile(filePath);
-    CHECK_NULL_RETURN(data, nullptr);
+    CHECK_NULL_RETURN_NOLOG(data, nullptr);
     // add adapter layer to replace [SkiaCachedImageData]
     auto skdata = AceType::DynamicCast<SkiaCachedImageData>(data)->imageData;
     CHECK_NULL_RETURN(skdata, nullptr);

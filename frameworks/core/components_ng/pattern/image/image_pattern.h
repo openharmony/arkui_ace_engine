@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -79,7 +80,7 @@ private:
     {
         auto id = frameNode->GetId();
         auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-        CHECK_NULL_VOID(pipeline);
+        CHECK_NULL_VOID_NOLOG(pipeline);
         pipeline->RemoveWindowStateChangedCallback(id);
         pipeline->RemoveNodesToNotifyMemoryLevel(id);
     }

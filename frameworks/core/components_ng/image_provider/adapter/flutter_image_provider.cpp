@@ -325,7 +325,6 @@ void ImageProvider::CacheCanvasImage(const RefPtr<CanvasImage>& canvasImage, con
 #else
     auto skiaCanvasImage = AceType::DynamicCast<SkiaCanvasImage>(canvasImage);
     CHECK_NULL_VOID_NOLOG(skiaCanvasImage);
-    LOGD("[ImageCache][CanvasImage] succeed caching image: %{public}s", key.c_str());
     auto cached = std::make_shared<Ace::CachedImage>(skiaCanvasImage->GetFlutterCanvasImage());
     cached->uniqueId = skiaCanvasImage->GetUniqueID();
     pipelineCtx->GetImageCache()->CacheImage(key, cached);
