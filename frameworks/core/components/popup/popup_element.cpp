@@ -159,6 +159,10 @@ bool PopupElement::ShowPopup()
         }
         node->SetZIndexToChild(stackElement->GetChildrenSize());
         manager->ClearNodeRectInfo(node, false);
+        auto children = node->GetChildList();
+        for (auto& child : children) {
+            child->SetVisible(true);
+        }
     }
 #endif
     return true;
@@ -176,22 +180,22 @@ bool PopupElement::CancelPopup(const ComposeId& id)
     if (context) {
         const auto& accessibilityManager = context->GetAccessibilityManager();
         if (accessibilityManager) {
+#if !defined(PREVIEW)
             accessibilityManager->RemoveAccessibilityNodeById(StringUtils::StringToInt(popup_->GetId()));
-        }
-    }
-#if defined(PREVIEW)
-    if (context) {
-        auto manager = context->GetAccessibilityManager();
-        if (manager) {
-            auto node = manager->GetAccessibilityNodeById(StringUtils::StringToInt(popup_->GetId()));
+#else
+            auto node = accessibilityManager->GetAccessibilityNodeById(StringUtils::StringToInt(popup_->GetId()));
             if (!node) {
                 return true;
             }
             node->SetZIndexToChild(0);
-            manager->ClearNodeRectInfo(node, true);
+            accessibilityManager->ClearNodeRectInfo(node, true);
+            auto children = node->GetChildList();
+            for (auto& child : children) {
+                child->SetVisible(true);
+            }
+#endif
         }
     }
-#endif
     return true;
 }
 
