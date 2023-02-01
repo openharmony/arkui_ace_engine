@@ -97,13 +97,13 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
                 return std::nullopt;
             }
         }
-
-        double paragraphNewWidth = std::min(GetTextWidth(), paragraph_->GetMaxWidth());
         if (!contentConstraint.selfIdealSize.Width()) {
+            double paragraphNewWidth = paragraph_->GetMaxWidth();
+            paragraphNewWidth = std::min(GetTextWidth(), paragraph_->GetMaxWidth());
             paragraphNewWidth = std::clamp(GetTextWidth(), 0.0f, contentConstraint.maxSize.Width());
-        }
-        if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
-            paragraph_->Layout(std::ceil(paragraphNewWidth));
+            if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
+                paragraph_->Layout(std::ceil(paragraphNewWidth));
+            }
         }
     }
 
@@ -116,7 +116,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     }
     float heightFinal =
         std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
-    return SizeF(static_cast<float>(std::min(GetTextWidth(), paragraph_->GetMaxWidth())), heightFinal);
+    return SizeF(paragraph_->GetMaxWidth(), heightFinal);
 }
 
 void TextLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
