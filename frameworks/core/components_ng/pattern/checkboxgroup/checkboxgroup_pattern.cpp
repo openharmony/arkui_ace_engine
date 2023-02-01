@@ -517,4 +517,19 @@ FocusPattern CheckBoxGroupPattern::GetFocusPattern() const
     return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
 }
 
+// Set the default hot zone for the component.
+void CheckBoxGroupPattern::AddHotZoneRect()
+{
+    hotZoneOffset_.SetX(-hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneOffset_.SetY(-hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneSize_.SetWidth(size_.Width() + 2 * hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneSize_.SetHeight(size_.Height() + 2 * hotZoneVerticalPadding_.ConvertToPx());
+    DimensionRect hotZoneRegion;
+    hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize_.Width()), Dimension(hotZoneSize_.Height())));
+    hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset_.GetX()), Dimension(hotZoneOffset_.GetY())));
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->AddHotZoneRect(hotZoneRegion);
+}
+
 } // namespace OHOS::Ace::NG

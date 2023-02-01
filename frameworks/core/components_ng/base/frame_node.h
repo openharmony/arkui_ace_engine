@@ -297,6 +297,8 @@ public:
         destroyCallbacks_.emplace_back(callback);
     }
 
+    void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;

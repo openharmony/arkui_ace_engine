@@ -63,6 +63,8 @@ public:
         CHECK_NULL_RETURN(eventHub, nullptr);
         auto enabled = eventHub->IsEnabled();
         auto paintMethod = MakeRefPtr<SwitchPaintMethod>(currentOffset_, enabled, isTouch_, isHover_);
+        paintMethod->SetHotZoneOffset(hotZoneOffset_);
+        paintMethod->SetHotZoneSize(hotZoneSize_);
         return paintMethod;
     }
 
@@ -113,6 +115,7 @@ private:
 
     bool IsOutOfBoundary(double mainOffset) const;
     void OnClick();
+    void AddHotZoneRect();
 
     RefPtr<PanEvent> panEvent_;
 
@@ -130,6 +133,12 @@ private:
 
     float width_ = 0.0f;
     float height_ = 0.0f;
+    Dimension hotZoneHorizontalPadding_;
+    Dimension hotZoneVerticalPadding_;
+    OffsetF offset_;
+    SizeF size_;
+    OffsetF hotZoneOffset_;
+    SizeF hotZoneSize_;
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
 };
 } // namespace OHOS::Ace::NG
