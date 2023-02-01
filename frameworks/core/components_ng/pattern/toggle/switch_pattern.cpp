@@ -55,6 +55,14 @@ bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
     width_ = width;
     height_ = height;
+    auto geometryNode = dirty->GetGeometryNode();
+    auto offset = geometryNode->GetContentOffset();
+    auto size = geometryNode->GetContentSize();
+    if (offset != offset_ || size != size_) {
+        offset_ = offset;
+        size_ = size;
+        AddHotZoneRect();
+    }
     return true;
 }
 
@@ -80,6 +88,8 @@ void SwitchPattern::OnModifyDone()
         margin.bottom = CalcLength(switchTheme->GetHotZoneVerticalPadding());
         layoutProperty->UpdateMargin(margin);
     }
+    hotZoneHorizontalPadding_ = switchTheme->GetHotZoneHorizontalPadding();
+    hotZoneVerticalPadding_ = switchTheme->GetHotZoneVerticalPadding();
     if (layoutProperty->GetPositionProperty()) {
         layoutProperty->UpdateAlignment(
             layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));
@@ -462,6 +472,21 @@ void SwitchPattern::HandleDragEnd()
 bool SwitchPattern::IsOutOfBoundary(double mainOffset) const
 {
     return mainOffset < 0 || mainOffset > GetSwitchWidth();
+}
+
+// Set the default hot zone for the component.
+void SwitchPattern::AddHotZoneRect()
+{
+    hotZoneOffset_.SetX(-hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneOffset_.SetY(-hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneSize_.SetWidth(size_.Width() + 2 * hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneSize_.SetHeight(size_.Height() + 2 * hotZoneVerticalPadding_.ConvertToPx());
+    DimensionRect hotZoneRegion;
+    hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize_.Width()), Dimension(hotZoneSize_.Height())));
+    hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset_.GetX()), Dimension(hotZoneOffset_.GetY())));
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->AddHotZoneRect(hotZoneRegion);
 }
 
 } // namespace OHOS::Ace::NG

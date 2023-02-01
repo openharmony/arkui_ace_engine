@@ -33,6 +33,16 @@ public:
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
+    void SetHotZoneOffset(OffsetF& hotZoneOffset)
+    {
+        hotZoneOffset_ = hotZoneOffset;
+    }
+
+    void SetHotZoneSize(SizeF& hotZoneSize)
+    {
+        hotZoneSize_ = hotZoneSize;
+    }
+
 private:
     void PaintContent(
         RSCanvas& canvas, RefPtr<SwitchPaintProperty> paintProperty, SizeF contentSize, OffsetF contentOffset);
@@ -52,6 +62,8 @@ private:
 
     bool isTouch_ = false;
     bool isHover_ = false;
+    OffsetF hotZoneOffset_;
+    SizeF hotZoneSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPaintMethod);
 };

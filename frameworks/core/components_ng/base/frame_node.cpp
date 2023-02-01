@@ -1250,4 +1250,10 @@ void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType) const
     }
 }
 
+void FrameNode::AddHotZoneRect(const DimensionRect& hotZoneRect) const
+{
+    auto gestureHub = GetOrCreateGestureEventHub();
+    gestureHub->AddResponseRect(hotZoneRect);
+}
+
 } // namespace OHOS::Ace::NG

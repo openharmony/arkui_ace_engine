@@ -296,6 +296,12 @@ public:
         }
     }
 
+    void AddResponseRect(const DimensionRect& responseRect)
+    {
+        responseRegion_.emplace_back(responseRect);
+        isResponseRegion_ = true;
+    }
+
     bool GetTouchable() const
     {
         return touchable_;
