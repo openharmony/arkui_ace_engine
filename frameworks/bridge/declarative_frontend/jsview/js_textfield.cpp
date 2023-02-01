@@ -516,25 +516,6 @@ void JSTextField::JsWidth(const JSCallbackInfo& info)
         return;
     }
     TextFieldModel::GetInstance()->SetWidthAuto(false);
-    if (Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
-    Dimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
-        LOGD("Parse to dimension VP failed!");
-        return;
-    }
-    if (LessNotEqual(value.Value(), 0.0)) {
-        LOGE("dimension value: %{public}f is invalid!", value.Value());
-        return;
-    }
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto textInputComponent = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
-    if (!textInputComponent) {
-        LOGE("JSTextInput set height failed, textInputComponent is null.");
-        return;
-    }
-    textInputComponent->SetHeight(value);
 }
 
 void JSTextField::JsPadding(const JSCallbackInfo& info)
