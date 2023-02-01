@@ -26,8 +26,10 @@
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 
 void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -52,6 +54,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // Step2: Measure children that can be displayed in viewport of Grid
     float mainSize = GetMainAxisSize(idealSize, axis);
     float crossSize = GetCrossAxisSize(idealSize, axis);
+    UpdateOffsetOnVirtualKeyboardHeightChange(layoutWrapper, mainSize);
     FillGridViewportAndMeasureChildren(mainSize, crossSize, layoutWrapper);
 
     // update cache info.
@@ -60,9 +63,43 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     AdaptToChildMainSize(layoutWrapper, gridLayoutProperty, mainSize, idealSize);
 }
 
+void GridScrollLayoutAlgorithm::UpdateOffsetOnVirtualKeyboardHeightChange(LayoutWrapper* layoutWrapper, float mainSize)
+{
+    if (GreatOrEqual(mainSize, gridLayoutInfo_.lastMainSize_)) {
+        return;
+    }
+    // only need to offset vertical grid
+    if (gridLayoutInfo_.axis_ != Axis::VERTICAL) {
+        return;
+    }
+
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    // only when textField is onFocus
+    auto focused = textFieldManager->GetOnFocusTextField().Upgrade();
+    CHECK_NULL_VOID(focused);
+    auto position = textFieldManager->GetClickPosition().GetY();
+    auto grid = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(grid);
+    auto gridOffset = grid->GetTransformRelativeOffset();
+    auto offset = mainSize + gridOffset.GetY() - position;
+    if (LessOrEqual(offset, 0.0)) {
+        // negative offset to scroll down
+        auto lineHeight = gridLayoutInfo_.GetAverageLineHeight();
+        if (GreatNotEqual(lineHeight, 0)) {
+            offset = floor(offset / lineHeight) * lineHeight;
+        }
+        gridLayoutInfo_.currentOffset_ += offset;
+        LOGI("update offset on virtual keyboard height change, %{public}f", offset);
+    }
+}
+
 void GridScrollLayoutAlgorithm::AdaptToChildMainSize(LayoutWrapper* layoutWrapper,
     RefPtr<GridLayoutProperty>& gridLayoutProperty, float mainSize, const SizeF& idealSize)
 {
+    gridLayoutInfo_.lastMainSize_ = mainSize;
     // grid with columnsTemplate/rowsTemplate and maxCount
     if (!gridLayoutProperty->HasMaxCount()) {
         return;
@@ -90,6 +127,7 @@ void GridScrollLayoutAlgorithm::AdaptToChildMainSize(LayoutWrapper* layoutWrappe
             gridMainSize = std::max(gridMainSize, gridLayoutProperty->GetLayoutConstraint()->minSize.Height());
             layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(idealSize.Width(), gridMainSize));
         }
+        gridLayoutInfo_.lastMainSize_ = gridMainSize;
         LOGI("gridMainSize:%{public}f", gridMainSize);
     }
 }
@@ -619,6 +657,9 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
     if (!GreatOrEqual(-gridLayoutInfo_.currentOffset_, mainSize)) {
         return;
     }
+
+    // grid size change from big to small
+    gridLayoutInfo_.UpdateEndLine(mainSize, mainGap_);
 
     // skip lines in matrix
     while (GreatOrEqual(-gridLayoutInfo_.currentOffset_, mainSize)) {
