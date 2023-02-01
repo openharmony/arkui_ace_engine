@@ -23,6 +23,8 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr float DIVIDER_LINE_WIDTH = 1.0f;
+constexpr uint8_t ENABLED_ALPHA = 255;
+constexpr uint8_t DISABLED_ALPHA = 102;
 } // namespace
 
 CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
@@ -37,7 +39,7 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     CHECK_NULL_RETURN(geometryNode, nullptr);
     auto frameRect = geometryNode->GetFrameRect();
     return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, frameRect, dividerColor, dividerSpacing,
-               pressColor](RSCanvas& canvas) {
+               pressColor, enabled = enabled_](RSCanvas& canvas) {
         auto picker = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(picker);
         DividerPainter dividerPainter(dividerLineWidth, frameRect.Width(), false, dividerColor, LineCap::SQUARE);
@@ -47,7 +49,11 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
         dividerPainter.DrawLine(canvas, offset);
         OffsetF offsetY = OffsetF(0.0f, downLine);
         dividerPainter.DrawLine(canvas, offsetY);
-        picker->PaintGradient(canvas, frameRect);
+        if (enabled) {
+            picker->PaintGradient(canvas, frameRect);
+        } else {
+            picker->PaintDisable(canvas, frameRect.Width(), frameRect.Height());
+        }
     };
 }
 
@@ -84,5 +90,21 @@ void TextPickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRe
     canvas.DrawRect(rect);
     canvas.DetachBrush();
     canvas.Restore();
+}
+
+void TextPickerPaintMethod::PaintDisable(RSCanvas& canvas, double X, double Y)
+{
+    double centerY = Y;
+    double centerX = X;
+    RSRect rRect(0, 0, centerX, centerY);
+    RSPath path;
+    path.AddRoundRect(rRect, 0, 0, RSPathDirection::CW_DIRECTION);
+    RSPen pen;
+    RSBrush brush;
+    brush.SetColor(float(DISABLED_ALPHA) / ENABLED_ALPHA);
+    pen.SetColor(float(DISABLED_ALPHA) / ENABLED_ALPHA);
+    canvas.AttachBrush(brush);
+    canvas.AttachPen(pen);
+    canvas.DrawPath(path);
 }
 } // namespace OHOS::Ace::NG
