@@ -43,6 +43,7 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     childConstraint.maxSize.SetWidth(maxTextWidth);
     childConstraint.percentReference.SetWidth(maxTextWidth);
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(text);
     text->Measure(childConstraint);
 
     // set self size based on TextNode size;

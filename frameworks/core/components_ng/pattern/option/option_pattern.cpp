@@ -19,6 +19,7 @@
 #include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
@@ -42,7 +43,7 @@ void OptionPattern::RegisterOnClick()
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<OptionEventHub>();
 
-    auto event = [JsAction = hub->GetJsCallback(), onSelect = hub->GetOnSelect(), index = index_](
+    auto event = [JsAction = hub->GetJsCallback(), onSelect = hub->GetOnSelect(), index = index_, option = host](
                      GestureEvent& /*info*/) {
         if (JsAction) {
             LOGI("Option's callback executing");
@@ -52,6 +53,17 @@ void OptionPattern::RegisterOnClick()
             LOGI("selecting option %d", index);
             onSelect(index);
         }
+        // hide menu when option is clicked
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        auto menu = AceType::DynamicCast<FrameNode>(option->GetParent());
+        CHECK_NULL_VOID(menu);
+        auto menuPattern = menu->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        auto targetId = menuPattern->GetTargetId();
+        overlayManager->HideMenu(targetId);
     };
     auto clickEvent = MakeRefPtr<ClickEvent>(std::move(event));
 

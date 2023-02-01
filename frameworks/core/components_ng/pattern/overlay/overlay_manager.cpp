@@ -16,16 +16,20 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 #include <utility>
+
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/select/select_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
@@ -36,6 +40,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_view.h"
 #include "core/components_ng/pattern/toast/toast_view.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -79,6 +84,24 @@ void OverlayManager::Pop(const RefPtr<FrameNode>& node)
         ContainerScope scope(id);
         root->RemoveChild(node);
         root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        auto menuPattern = node->GetPattern<MenuPattern>();
+        if (menuPattern && menuPattern->IsSubMenu()) {
+            auto menuItemParent = menuPattern->GetParentMenuItem();
+            CHECK_NULL_VOID(menuItemParent);
+            auto menuItemPattern = menuItemParent->GetPattern<MenuItemPattern>();
+            CHECK_NULL_VOID(menuItemPattern);
+            menuItemPattern->SetIsSubMenuShowed(false);
+
+            auto renderContext = menuItemParent->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto theme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_VOID(theme);
+            auto bgColor = theme->GetBackgroundColor();
+            renderContext->UpdateBackgroundColor(bgColor);
+            menuItemParent->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
     });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
@@ -265,9 +288,13 @@ bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, c
         LOGI("menuNode %{public}d added to map", targetId);
     }
     CHECK_NULL_RETURN(menu, false);
-    auto menuChild = menu->GetChildAtIndex(0);
-    CHECK_NULL_RETURN(menuChild, false);
-    auto menuFrameNode = DynamicCast<FrameNode>(menuChild);
+
+    RefPtr<FrameNode> menuFrameNode = menu;
+    if (menu->GetTag() != V2::MENU_ETS_TAG) {
+        auto menuChild = menu->GetChildAtIndex(0);
+        CHECK_NULL_RETURN(menuChild, false);
+        menuFrameNode = DynamicCast<FrameNode>(menuChild);
+    }
 
     auto props = menuFrameNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(props, false);
@@ -340,7 +367,7 @@ void OverlayManager::HideMenuInSubWindow()
 
 void OverlayManager::HideMenu(int32_t targetId)
 {
-    LOGI("OverlayManager::HideMenuNode");
+    LOGI("OverlayManager::HideMenuNode menu targetId is %{public}d", targetId);
     if (menuMap_.find(targetId) == menuMap_.end()) {
         LOGW("OverlayManager: menuNode %{public}d not found in map", targetId);
         return;

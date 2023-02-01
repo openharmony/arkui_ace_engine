@@ -19,6 +19,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/string_utils.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_paint_method.h"
@@ -49,14 +50,37 @@ public:
         return MakeRefPtr<MenuWrapperLayoutAlgorithm>();
     }
 
+    void HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItemPattern>& menuItem);
+
+    int32_t GetTargetId() const
+    {
+        return targetId_;
+    }
+
+    void HideMenu();
+
+    void AddSubMenuId(int32_t subMenuId)
+    {
+        subMenuIds_.emplace_back(subMenuId);
+    }
+
+    bool IsHided() const
+    {
+        return isHided_;
+    }
+
 private:
     void OnModifyDone() override;
 
-    void HideMenu(const RefPtr<FrameNode>& menu) const;
+    void HideMenu(const RefPtr<FrameNode>& menu);
 
     RefPtr<TouchEventImpl> onTouch_;
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;
+
+    bool isHided_ = false;
+
+    std::list<int32_t> subMenuIds_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
