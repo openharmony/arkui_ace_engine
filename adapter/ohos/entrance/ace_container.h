@@ -210,6 +210,16 @@ public:
 
     void SetHapPath(const std::string& hapPath);
 
+    std::string GetSrcPath() const override
+    {
+        return resourceInfo_.GetSrcPath();
+    }
+
+    void SetSrcPath(const std::string& srcPath)
+    {
+        return resourceInfo_.SetSrcPath(srcPath);
+    }
+
     void Dispatch(
         const std::string& group, std::vector<uint8_t>&& data, int32_t id, bool replyToComponent) const override;
 

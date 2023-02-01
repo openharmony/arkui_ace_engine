@@ -340,7 +340,6 @@ void AceAbility::OnStart(const Want& want)
             }
         }
     }
-
     AceApplicationInfo::GetInstance().SetDebug(appInfo->debug, want.GetBoolParam("debugApp", false));
 
     auto pluginUtils = std::make_shared<PluginUtilsImpl>();
@@ -369,6 +368,7 @@ void AceAbility::OnStart(const Want& want)
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetHapPath(hapPath);
+    container->SetSrcPath(srcPath);
     container->SetBundlePath(abilityContext->GetBundleCodeDir());
     container->SetFilesDataPath(abilityContext->GetFilesDir());
     if (window->IsDecorEnable()) {

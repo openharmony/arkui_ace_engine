@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "base/resource/ace_extractor.h"
 #include "core/common/ace_application_info.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -83,17 +84,30 @@ bool FrontendDelegate::GetResourceData(const std::string& fileUri, T& content)
 template<typename T>
 bool FrontendDelegate::GetResourceData(const std::string& fileUri, T& content, std::string& ami)
 {
-    std::string targetFilePath;
-    if (!ParseFileUri(assetManager_, fileUri, targetFilePath)) {
-        LOGE("GetResourceData parse file uri failed.");
-        return false;
+    if (fileUri.find(".hap/") == std::string::npos) {
+        std::string targetFilePath;
+        if (!ParseFileUri(assetManager_, fileUri, targetFilePath)) {
+            LOGE("GetResourceData parse file uri failed.");
+            return false;
+        }
+        ami = assetManager_->GetAssetPath(targetFilePath, true) + targetFilePath;
+        if (!GetAssetContentAllowEmpty(assetManager_, targetFilePath, content)) {
+            LOGE("GetResourceData GetAssetContent failed.");
+            return false;
+        }
+    } else {
+        size_t pos = fileUri.find("/assets/js/");
+        std::string filePath = fileUri.substr(pos + 1);
+        std::string hapPath = fileUri.substr(0, pos);
+        auto aceExtractor = new AceExtractor();
+        std::unique_ptr<uint8_t[]> dataPtr = nullptr;
+        size_t fileLen = 0;
+        if (!aceExtractor->ExtractToBufByName(filePath, hapPath, dataPtr, fileLen)) {
+            LOGE("get mergeAbc fileBuffer failed");
+            return false;
+        }
+        content.assign(dataPtr.get(), dataPtr.get() + fileLen);
     }
-    ami = assetManager_->GetAssetPath(targetFilePath, true) + targetFilePath;
-    if (!GetAssetContentAllowEmpty(assetManager_, targetFilePath, content)) {
-        LOGE("GetResourceData GetAssetContent failed.");
-        return false;
-    }
-
     return true;
 }
 

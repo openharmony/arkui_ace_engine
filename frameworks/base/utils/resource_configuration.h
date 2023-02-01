@@ -142,6 +142,16 @@ public:
         return hapPath_;
     }
 
+    void SetSrcPath(const std::string& srcPath)
+    {
+        srcPath_ = srcPath;
+    }
+
+    std::string GetSrcPath() const
+    {
+        return srcPath_;
+    }
+
     void SetPackagePath(const std::string& packagePath)
     {
         packagePath_ = packagePath;
@@ -178,6 +188,7 @@ private:
     ResourceConfiguration resourceConfiguration_;
     std::vector<int64_t> resourcehandlers_;
     std::string hapPath_;
+    std::string srcPath_;
     std::string packagePath_;
 #if defined(PREVIEW)
     std::string systemPackagePath_;
