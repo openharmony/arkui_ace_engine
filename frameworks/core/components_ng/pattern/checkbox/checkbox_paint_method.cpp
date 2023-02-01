@@ -44,7 +44,6 @@ constexpr float CHECK_MARK_LEFT_ANIMATION_PERCENT = 0.45;
 constexpr float CHECK_MARK_RIGHT_ANIMATION_PERCENT = 0.55;
 constexpr float DEFAULT_MAX_CHECKBOX_SHAPE_SCALE = 1.0;
 constexpr float DEFAULT_MIN_CHECKBOX_SHAPE_SCALE = 0.0;
-
 } // namespace
 
 CanvasDrawFunction CheckBoxPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)

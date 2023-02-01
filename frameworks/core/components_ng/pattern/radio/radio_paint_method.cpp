@@ -129,7 +129,7 @@ void RadioPaintMethod::DrawTouchBoard(RSCanvas& canvas, const SizeF& contentSize
     float outCircleRadius = contentSize.Width() / 2;
     float centerX = outCircleRadius + offset.GetX();
     float centerY = outCircleRadius + offset.GetY();
-    outCircleRadius += hotZoneHorizontalPadding_.ConvertToPx() / 2;
+    outCircleRadius += hotZoneHorizontalPadding_.ConvertToPx();
     RSBrush brush;
     brush.SetColor(ToRSColor(Color(clickEffectColor_)));
     brush.SetAntiAlias(true);
@@ -142,7 +142,7 @@ void RadioPaintMethod::DrawHoverBoard(RSCanvas& canvas, const SizeF& contentSize
     float outCircleRadius = contentSize.Width() / 2;
     float centerX = outCircleRadius + offset.GetX();
     float centerY = outCircleRadius + offset.GetY();
-    outCircleRadius += hotZoneHorizontalPadding_.ConvertToPx() / 2;
+    outCircleRadius += hotZoneHorizontalPadding_.ConvertToPx();
     RSBrush brush;
     brush.SetColor(ToRSColor(Color(hoverColor_)));
     brush.SetAntiAlias(true);
