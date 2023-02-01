@@ -101,13 +101,14 @@ void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto indexerHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
 
     auto firstChildWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(firstChildWrapper);
     auto childWidth = firstChildWrapper->GetGeometryNode()->GetFrameSize().Width();
     auto childHeight = firstChildWrapper->GetGeometryNode()->GetFrameSize().Height();
-    auto originMaginLeft = (indexerWidth - childWidth) * HALF;
-    auto addjustMarginLeft = left < originMaginLeft ? originMaginLeft : left;
-    auto originMarginTop = indexerHeight - childHeight * itemCount_;
-    auto addjustMarginTop = top < originMarginTop ? originMarginTop : top;
-    auto marginOffset = OffsetF(addjustMarginLeft, addjustMarginTop);
+    auto originMarginLeft = (indexerWidth - childWidth) * HALF;
+    auto adjustMarginLeft = left < originMarginLeft ? originMarginLeft : left;
+    auto originMarginTop = (indexerHeight - childHeight * itemCount_) * HALF;
+    auto adjustMarginTop = top < originMarginTop ? originMarginTop : top;
+    auto marginOffset = OffsetF(adjustMarginLeft, adjustMarginTop);
     for (int32_t index = 0; index < itemCount_; index++) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         CHECK_NULL_VOID(childWrapper);
