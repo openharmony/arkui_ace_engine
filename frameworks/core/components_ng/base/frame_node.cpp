@@ -907,6 +907,10 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint)
     auto responseRegionList = GetResponseRegionList(paintRect);
     auto localPoint = parentLocalPoint - paintRect.GetOffset();
     if ((!InResponseRegionList(parentLocalPoint, responseRegionList) || !GetTouchable()) && !IsResponseRegion()) {
+        if (!pattern_->UsResRegion()) {
+            LOGD("TouchTest: not use resRegion, point is out of region in %{public}s", GetTag().c_str());
+            return true;
+        }
         for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
             const auto& child = *iter;
             if (!child->IsOutOfTouchTestRegion(localPoint)) {
