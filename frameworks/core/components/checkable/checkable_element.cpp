@@ -15,6 +15,7 @@
 
 #include "core/components/checkable/checkable_element.h"
 
+#include <string>
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -22,6 +23,10 @@
 #include "core/components/checkable/render_checkable.h"
 
 namespace OHOS::Ace {
+
+namespace {
+const std::string checkboxGroupTag("CheckboxGroupComponent");
+}
 
 void CheckableElement::Update()
 {
@@ -80,7 +85,6 @@ void CheckableElement::SetNewComponent(const RefPtr<Component>& newComponent)
         return;
     }
 
-    const static std::string checkboxGroupTag("CheckboxGroupComponent");
     auto& ungroupedCheckboxs = CheckboxComponent::GetUngroupedCheckboxs();
     if (selfComponent->GetInspectorTag() == checkboxGroupTag) {
         auto checkboxList = selfComponent->GetCheckboxList();
@@ -106,6 +110,32 @@ void CheckableElement::SetNewComponent(const RefPtr<Component>& newComponent)
             }
         }
         ungroupedCheckboxs.erase(item);
+    }
+}
+
+void CheckableElement::Deactivate()
+{
+    RenderElement::Deactivate();
+    auto selfComponent = AceType::DynamicCast<CheckboxComponent>(customComponent_.Upgrade());
+    if (!selfComponent) {
+        return;
+    }
+
+    auto& ungroupedCheckboxs = CheckboxComponent::GetUngroupedCheckboxs();
+    if (selfComponent->GetInspectorTag() == checkboxGroupTag) {
+        auto checkboxList = selfComponent->GetCheckboxList();
+        if (!checkboxList.empty()) {
+            auto groupName = selfComponent->GetGroupName();
+            auto retPair = ungroupedCheckboxs.try_emplace(groupName, std::list<WeakPtr<CheckboxComponent>>());
+            for (auto item : checkboxList) {
+                retPair.first->second.push_back(item);
+            }
+        }
+        auto& checkboxGroupmap = CheckboxComponent::GetCheckboxGroupComponent();
+        auto item = checkboxGroupmap.find(selfComponent->GetGroupName());
+        if (item != checkboxGroupmap.end() && item->second == selfComponent) {
+            checkboxGroupmap.erase(item);
+        }
     }
 }
 

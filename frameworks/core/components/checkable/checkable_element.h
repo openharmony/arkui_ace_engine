@@ -35,6 +35,7 @@ public:
     void OnFocus() override;
     void OnBlur() override;
     void SetNewComponent(const RefPtr<Component>& newComponent) override;
+    void Deactivate() override;
 
     bool CanUpdate(const RefPtr<Component>& newComponent) override
     {
