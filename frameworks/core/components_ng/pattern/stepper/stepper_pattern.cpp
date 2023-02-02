@@ -200,7 +200,7 @@ void StepperPattern::CreateRightButtonNode(int32_t index)
         stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetLabelStatus().value_or("normal");
     if (labelStatus == "normal") {
         if (index == maxIndex_) {
-            CreateArrowlessRightButtonNode(Localization::GetInstance()->GetEntryLetters("stepper.start"));
+            CreateArrowlessRightButtonNode(index, Localization::GetInstance()->GetEntryLetters("stepper.start"));
         } else {
             CreateArrowRightButtonNode(index, false);
         }
@@ -209,7 +209,7 @@ void StepperPattern::CreateRightButtonNode(int32_t index)
     } else if (labelStatus == "waiting") {
         CreateWaitingRightButtonNode();
     } else if (labelStatus == "skip") {
-        CreateArrowlessRightButtonNode(Localization::GetInstance()->GetEntryLetters("stepper.skip"));
+        CreateArrowlessRightButtonNode(index, Localization::GetInstance()->GetEntryLetters("stepper.skip"));
     }
 }
 
@@ -287,7 +287,7 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     imageNode->MarkModifyDone();
 }
 
-void StepperPattern::CreateArrowlessRightButtonNode(std::string content)
+void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, const std::string& defaultContent)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -295,6 +295,11 @@ void StepperPattern::CreateArrowlessRightButtonNode(std::string content)
     CHECK_NULL_VOID(stepperTheme);
     auto hostNode = DynamicCast<StepperNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+    // get rightLabel
+    auto swiperNode = hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId()));
+    auto stepperItemNode = DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(static_cast<int32_t>(index)));
+    auto rightLabel =
+        stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetRightLabel().value_or(defaultContent);
     // Create buttonNode
     auto buttonId = hostNode->GetRightButtonId();
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
@@ -316,7 +321,7 @@ void StepperPattern::CreateArrowlessRightButtonNode(std::string content)
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(content);
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(rightLabel);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontSize(stepperTheme->GetTextStyle().GetFontSize());
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(stepperTheme->GetTextStyle().GetTextColor());
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextOverflow(TextOverflow::ELLIPSIS);
