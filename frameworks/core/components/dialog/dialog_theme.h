@@ -26,9 +26,6 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
-namespace {
-constexpr Dimension DEFAULT_RADIUS = 16.0_vp;
-} // namespace
 
 /**
  * DialogTheme defines color and styles of DialogComponent. DialogTheme should be built
@@ -50,7 +47,6 @@ public:
                 return theme;
             }
             // init theme from global data
-            theme->radius_ = Radius(DEFAULT_RADIUS, DEFAULT_RADIUS);
             theme->backgroundColor_ = themeConstants->GetColor(THEME_DIALOG_BACKGROUND_COLOR);
             theme->titleTextStyle_.SetTextColor(themeConstants->GetColor(THEME_DIALOG_TITLE_TEXT_COLOR));
             theme->titleTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_DIALOG_TITLE_TEXT_FONTSIZE));
@@ -139,13 +135,13 @@ public:
             theme->titleTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("title_text_color", Color::BLACK));
             theme->contentTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("content_text_color", Color::BLACK));
             theme->buttonBackgroundColor_ = dialogPattern->GetAttr<Color>("button_bg_color", Color::BLACK);
+            theme->radius_ = Radius(dialogPattern->GetAttr<Dimension>("radius", 24.0_vp));
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
             }
-            auto defaultPadding = dialogPattern->GetAttr<Dimension>(DIALOG_CONTENT_TOP_PADDING, 0.0_vp);
+            auto defaultPadding = dialogPattern->GetAttr<Dimension>(DIALOG_CONTENT_TOP_PADDING, 24.0_vp);
             auto titlePadding = dialogPattern->GetAttr<Dimension>(DIALOG_TITLE_TOP_PADDING, 0.0_vp);
             auto actionsTopPadding = dialogPattern->GetAttr<Dimension>(DIALOG_ACTIONS_TOP_PADDING, 0.0_vp);
-            theme->radius_ = Radius(DEFAULT_RADIUS);
             theme->titleAdjustPadding_ = Edge(defaultPadding, titlePadding, defaultPadding, titlePadding);
             theme->titleDefaultPadding_ = Edge(defaultPadding, titlePadding, defaultPadding, titlePadding);
             theme->defaultPadding_ = Edge(defaultPadding, defaultPadding, defaultPadding, defaultPadding);
