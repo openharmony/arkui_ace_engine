@@ -223,21 +223,11 @@ void AceAbility::OnStart(const Want& want)
     // TODO: now choose pipeline using param set as package name, later enable for all.
     auto apiCompatibleVersion = abilityContext->GetApplicationInfo()->apiCompatibleVersion;
     auto apiReleaseType = abilityContext->GetApplicationInfo()->apiReleaseType;
-    auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledFa(
+    auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledFA(
         AceApplicationInfo::GetInstance().GetPackageName(), apiCompatibleVersion, apiReleaseType);
     LOGI("AceAbility: apiCompatibleVersion: %{public}d, and apiReleaseType: %{public}s, useNewPipe: %{public}d",
         apiCompatibleVersion, apiReleaseType.c_str(), useNewPipe);
     OHOS::sptr<OHOS::Rosen::Window> window = Ability::GetWindow();
-#ifdef ENABLE_ROSEN_BACKEND
-    std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
-    if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
-        rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-        auto surfaceNode = window->GetSurfaceNode();
-        rsUiDirector->SetRSSurfaceNode(surfaceNode);
-        rsUiDirector->SetCacheDir(cacheDir);
-        rsUiDirector->Init();
-    }
-#endif
     std::shared_ptr<AceAbility> self = std::static_pointer_cast<AceAbility>(shared_from_this());
     OHOS::sptr<AceWindowListener> aceWindowListener = new AceWindowListener(self);
     // register surface change callback and window mode change callback
@@ -311,7 +301,17 @@ void AceAbility::OnStart(const Want& want)
     bool isHap = moduleInfo ? !moduleInfo->hapPath.empty() : false;
     std::string& packagePath = isHap ? moduleInfo->hapPath : packagePathStr;
     FrontendType frontendType = GetFrontendTypeFromManifest(packagePath, srcPath, isHap);
-
+    useNewPipe = useNewPipe && (frontendType == FrontendType::ETS_CARD || frontendType == FrontendType::DECLARATIVE_JS);
+#ifdef ENABLE_ROSEN_BACKEND
+    std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
+    if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
+        rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
+        auto surfaceNode = window->GetSurfaceNode();
+        rsUiDirector->SetRSSurfaceNode(surfaceNode);
+        rsUiDirector->SetCacheDir(cacheDir);
+        rsUiDirector->Init();
+    }
+#endif
     AceApplicationInfo::GetInstance().SetAbilityName(info ? info->name : "");
     std::string moduleName = info ? info->moduleName : "";
     std::string moduleHapPath = info ? info->hapPath : "";
