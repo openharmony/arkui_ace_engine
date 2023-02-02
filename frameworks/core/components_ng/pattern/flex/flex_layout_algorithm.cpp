@@ -302,7 +302,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                     const auto& childMagicItemProperty =
                         childLayoutWrapper->GetLayoutProperty()->GetMagicItemProperty();
                     if (childMagicItemProperty) {
-                        childLayoutWeight = childMagicItemProperty->GetLayoutWeightValue();
+                        childLayoutWeight = childMagicItemProperty->GetLayoutWeight().value_or(0.0f);
                     }
                     if (LessOrEqual(childLayoutWeight, 0.0f)) {
                         const auto& childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
@@ -353,7 +353,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                 float childLayoutWeight = 0.0f;
                 const auto& childMagicItemProperty = childLayoutWrapper->GetLayoutProperty()->GetMagicItemProperty();
                 if (childMagicItemProperty) {
-                    childLayoutWeight = childMagicItemProperty->GetLayoutWeightValue();
+                    childLayoutWeight = childMagicItemProperty->GetLayoutWeight().value_or(0.0f);
                 }
                 if (LessOrEqual(childLayoutWeight, 0.0)) {
                     continue;
@@ -397,7 +397,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                 float childLayoutWeight = 0.0f;
                 const auto& childMagicItemProperty = childLayoutWrapper->GetLayoutProperty()->GetMagicItemProperty();
                 if (childMagicItemProperty) {
-                    childLayoutWeight = childMagicItemProperty->GetLayoutWeightValue();
+                    childLayoutWeight = childMagicItemProperty->GetLayoutWeight().value_or(0.0f);
                 }
                 secondaryMeasureList_.emplace_back(child);
                 if (LessOrEqual(childLayoutWeight, 0.0)) {
