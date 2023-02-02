@@ -525,7 +525,6 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::StaticMethod("onPopupSelect", &JSIndexer::JsOnPopupSelected, opt);
     JSClass<JSIndexer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSIndexer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSIndexer>::Inherit<JSContainerBase>();
     JSClass<JSIndexer>::Inherit<JSViewAbstract>();
     JSClass<JSIndexer>::Bind(globalObj);
 }
