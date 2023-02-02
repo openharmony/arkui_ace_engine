@@ -40,8 +40,7 @@ group("pattern_unittest") {
     "grid_row:grid_row_pattern_test_ng",
     "image:image_pattern_test_ng",
     "image_animator:image_animator_pattern_test",
-
-    #"indexer:indexer_pattern_test_ng",
+    "indexer:indexer_pattern_test_ng",
     "linear_layout:linear_layout_pattern_test_ng",
     "linear_split:linear_split_pattern_test_ng",
     "list:list_pattern_test_ng",
@@ -71,6 +70,7 @@ group("pattern_unittest") {
     "side_bar:side_bar_pattern_test_ng",
     "slider:slider_pattern_test_ng",
     "stack:stack_pattern_test_ng",
+    "stage:stage_pattern_test_ng",
     "stepper:stepper_pattern_test_ng",
     "swiper:swiper_pattern_test_ng",
     "tabs:tabs_pattern_test_ng",
