@@ -587,11 +587,6 @@ void ParseCustomPopupParam(
         popupParam->SetEnableArrow(enableArrowValue->ToBoolean());
     }
 
-    auto askBlockEventsValue = popupObj->GetProperty("askBlockEvents");
-    if (askBlockEventsValue->IsBoolean()) {
-        popupParam->SetBlockEvent(askBlockEventsValue->ToBoolean());
-    }
-
 #if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
          "emulator or a real device instead.");
