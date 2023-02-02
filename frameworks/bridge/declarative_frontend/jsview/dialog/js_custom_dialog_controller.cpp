@@ -68,8 +68,17 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         // Process cancel function.
         JSRef<JSVal> cancelCallback = constructorArg->GetProperty("cancel");
         if (!cancelCallback->IsUndefined() && cancelCallback->IsFunction()) {
-            instance->jsCancelFunction_ =
-                AceType::MakeRefPtr<JsFunction>(ownerObj, JSRef<JSFunc>::Cast(cancelCallback));
+            auto jsCancelFunction = AceType::MakeRefPtr<JsFunction>(ownerObj, JSRef<JSFunc>::Cast(cancelCallback));
+            instance->jsCancelFunction_ = jsCancelFunction;
+
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto onCancel = [execCtx = info.GetExecutionContext(), func = std::move(jsCancelFunction)]() {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    ACE_SCORING_EVENT("onCancel");
+                    func->Execute();
+                };
+                instance->dialogProperties_.onCancel = onCancel;
+            }
         }
 
         // Parses autoCancel.
