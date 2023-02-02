@@ -22,6 +22,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
+#include "base/mousestyle/mouse_style.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -74,6 +75,26 @@ enum {
     ACTION_AUTOFILL,
 };
 
+struct CaretMetricsF {
+    void Reset()
+    {
+        offset.Reset();
+        height = 0.0;
+    }
+
+    OffsetF offset;
+    // When caret is close to different glyphs, the height will be different.
+    float height = 0.0;
+    std::string ToString() const
+    {
+        std::string result = "Offset: ";
+        result += offset.ToString();
+        result += ", height: ";
+        result += std::to_string(height);
+        return result;
+    }
+};
+
 class TextFieldPattern : public Pattern, public ValueChangeObserver {
     DECLARE_ACE_TYPE(TextFieldPattern, Pattern, ValueChangeObserver);
 
@@ -116,10 +137,13 @@ public:
     void UpdateCaretPositionByPressOffset();
     void UpdateSelectionOffset();
 
-    OffsetF CalcCursorOffsetByPosition(int32_t position);
+    CaretMetricsF CalcCursorOffsetByPosition(int32_t position);
 
-    bool ComputeOffsetForCaretDownstream(
-        const TextEditingValueNG& TextEditingValueNG, int32_t extent, CaretMetrics& result);
+    bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result);
+
+    bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result) const;
+
+    OffsetF MakeEmptyOffset() const;
 
     int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
 
@@ -436,6 +460,9 @@ public:
     }
 
     void OnCursorMoveDone();
+    bool IsDisabled();
+
+    bool LastInputIsNewLine() const;
 
 private:
     void HandleBlurEvent();
@@ -467,6 +494,7 @@ private:
     void CursorMoveOnClick(const Offset& offset);
     void UpdateCaretInfoToController() const;
 
+    void SetMouseStyle(MouseFormat format);
     void ProcessOverlay();
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
@@ -534,6 +562,7 @@ private:
     bool CursorInContentRegion();
     bool OffsetInContentRegion(const Offset& offset);
     void ProcessPadding();
+    void SetDisabledStyle();
 
     void ProcessPasswordIcon();
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
@@ -552,6 +581,8 @@ private:
     std::shared_ptr<RSParagraph> paragraph_;
     TextStyle lineHeightMeasureUtilTextStyle_;
     std::shared_ptr<RSParagraph> lineHeightMeasureUtilParagraph_;
+    TextStyle nextLineUtilTextStyle_;
+    std::shared_ptr<RSParagraph> nextLineUtilParagraph_;
 
     RefPtr<ImageLoadingContext> showPasswordImageLoadingCtx_;
     RefPtr<ImageLoadingContext> hidePasswordImageLoadingCtx_;
@@ -596,6 +627,7 @@ private:
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
+    float placeholderParagraphHeight_ = 0.0f;
 
     CancelableCallback<void()> cursorTwinklingTask_;
 

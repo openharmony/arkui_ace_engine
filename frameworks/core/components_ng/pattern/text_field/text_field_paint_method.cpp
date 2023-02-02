@@ -54,6 +54,7 @@ CanvasDrawFunction TextFieldPaintMethod::GetContentDrawFunction(PaintWrapper* pa
                             passwordIconCanvasImage](RSCanvas& canvas) {
         CHECK_NULL_VOID_NOLOG(textFieldPattern);
         auto frameRect = textFieldPattern->GetFrameRect();
+        auto iconRect = textFieldPattern->GetImageRect();
         RSRect clipInnerRect;
         if (textFieldPattern->IsTextArea()) {
             clipInnerRect = RSRect(offset.GetX(), contentOffset.GetY(), contentSize.Width() + contentOffset.GetX(),
@@ -73,12 +74,12 @@ CanvasDrawFunction TextFieldPaintMethod::GetContentDrawFunction(PaintWrapper* pa
                 paragraph->Paint(&canvas, textFieldPattern->GetTextRect().GetX(), contentOffset.GetY());
             }
         }
+        canvas.Restore();
         if (!textFieldPattern->NeedShowPasswordIcon()) {
             return;
         }
         CHECK_NULL_VOID_NOLOG(passwordIconCanvasImage);
         const ImagePainter passwordIconImagePainter(passwordIconCanvasImage);
-        auto iconRect = textFieldPattern->GetImageRect();
         passwordIconImagePainter.DrawImage(canvas, iconRect.GetOffset(), iconRect.GetSize());
     };
     return drawFunction;
@@ -125,8 +126,8 @@ void TextFieldPaintMethod::PaintSelection(RSCanvas& canvas, PaintWrapper* paintW
     switch (paintProperty->GetInputStyleValue(InputStyle::DEFAULT)) {
         case InputStyle::DEFAULT:
             // for default style, selection height is equal to the content height
-            canvas.DrawRect(RSRect(startOffset, paintWrapper->GetContentOffset().GetY(), endOffset,
-                paintWrapper->GetContentOffset().GetY() + paintWrapper->GetContentSize().Height()));
+            canvas.DrawRect(RSRect(startOffset, textFieldPattern->GetCaretRect().GetY(), endOffset,
+                textFieldPattern->GetCaretRect().GetY() + textFieldPattern->GetCaretRect().Height()));
             break;
         case InputStyle::INLINE:
             // for inline style, selection height is equal to the frame height
@@ -159,7 +160,7 @@ void TextFieldPaintMethod::PaintCursor(RSCanvas& canvas, PaintWrapper* paintWrap
     brush.SetAntiAlias(true);
     brush.SetColor(cursorColor.GetValue());
     canvas.AttachBrush(brush);
-    float caretHeight = textFieldPattern->GetTextOrPlaceHolderFontSize();
+    float caretHeight = textFieldPattern->GetCaretRect().Height();
     if (!textFieldPattern->IsTextArea()) {
         auto top = static_cast<float>(
             paintWrapper->GetContentOffset().GetY() + (paintWrapper->GetContentSize().Height() - caretHeight) / 2);

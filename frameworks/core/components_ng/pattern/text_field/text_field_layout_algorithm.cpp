@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/font_collection.h"
@@ -50,12 +51,17 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    float contentWidth = 0.0f;
     float contentHeight = 0.0f;
     if (content) {
         auto contentSize = content->GetRect().GetSize();
+        contentWidth = contentSize.Width();
         contentHeight = contentSize.Height();
     }
     if (pattern->IsTextArea()) {
+        if (!layoutConstraint->selfIdealSize.Width().has_value()) {
+            frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingSum());
+        }
         if (!frameSize.Height().has_value()) {
             frameSize.SetHeight(contentHeight + pattern->GetVerticalPaddingSum());
         }
@@ -67,6 +73,19 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!frameSize.Height().has_value()) {
         frameSize.SetHeight(
             std::min(layoutConstraint->maxSize.Height(), contentHeight + pattern->GetVerticalPaddingSum()));
+    }
+    auto textfieldLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(textfieldLayoutProperty);
+    if (textfieldLayoutProperty->GetWidthAutoValue(false)) {
+        if (LessOrEqual(layoutConstraint->minSize.Width(), 0.0f)) {
+            frameSize.SetWidth(std::clamp(textRect_.GetSize().Width() + pattern->GetHorizontalPaddingSum(),
+                pattern->GetHorizontalPaddingSum(), layoutConstraint->maxSize.Width()));
+        } else if (LessOrEqual(textRect_.Width(), 0.0f)) {
+            frameSize.SetWidth(layoutConstraint->minSize.Width());
+        } else {
+            frameSize.SetWidth(std::clamp(textRect_.Width() + pattern->GetHorizontalPaddingSum(),
+                layoutConstraint->minSize.Width(), layoutConstraint->maxSize.Width()));
+        }
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
     frameRect_ =
@@ -89,45 +108,50 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     TextStyle textStyle;
     std::string textContent;
     bool showPlaceHolder = false;
+    auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width()) -
+                      pattern->GetHorizontalPaddingSum();
+    auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height()) -
+                       pattern->GetVerticalPaddingSum();
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
-        UpdateTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle);
+        UpdateTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetValueValue("");
     } else {
-        UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle);
+        UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetPlaceholderValue("");
         showPlaceHolder = true;
     }
     auto isPasswordType =
         textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
     CreateParagraph(textStyle, textContent, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder);
-
-    auto horizontalPaddingSum = pattern->GetHorizontalPaddingSum();
     if (textStyle.GetMaxLines() == 1 && !showPlaceHolder) {
         // for text input case, need to measure in one line without constraint.
         paragraph_->Layout(std::numeric_limits<double>::infinity());
     } else {
         // for text area, max width is content width without password icon
-        paragraph_->Layout(contentConstraint.maxSize.Width() - horizontalPaddingSum);
+        paragraph_->Layout(idealWidth);
     }
     auto paragraphNewWidth = static_cast<float>(paragraph_->GetMaxIntrinsicWidth());
     if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth()) && !pattern->IsTextArea()) {
         paragraph_->Layout(std::ceil(paragraphNewWidth));
+    }
+    if (showPlaceHolder) {
+        placeholderParagraphHeight_ = paragraph_->GetHeight();
     }
     auto preferredHeight = static_cast<float>(paragraph_->GetHeight());
     if (textContent.empty()) {
         preferredHeight = pattern->PreferredLineHeight();
     }
     if (pattern->IsTextArea()) {
-        textRect_.SetSize(SizeF(
-            contentConstraint.maxSize.Width() - horizontalPaddingSum, static_cast<float>(paragraph_->GetHeight())));
-        return SizeF(contentConstraint.maxSize.Width() - horizontalPaddingSum, preferredHeight);
+        auto useHeight = static_cast<float>(paragraph_->GetHeight());
+        textRect_.SetSize(SizeF(idealWidth, useHeight));
+        return SizeF(idealWidth, std::min(idealHeight, useHeight));
     }
     auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(true);
     // check password image size.
     if (!showPasswordIcon || !isPasswordType) {
         textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
         imageRect_.Reset();
-        return SizeF(contentConstraint.maxSize.Width() - horizontalPaddingSum, preferredHeight);
+        return SizeF(idealWidth, preferredHeight);
     }
     float imageSize = 0.0f;
     imageSize = showPasswordIcon ? preferredHeight : 0.0f;
@@ -137,10 +161,10 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
 
     if (textStyle.GetMaxLines() > 1 || pattern->IsTextArea()) {
         // for textArea, need to delete imageWidth and remeasure.
-        paragraph_->Layout(contentConstraint.maxSize.Width() - imageSize);
+        paragraph_->Layout(idealWidth - imageSize);
         textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
         imageRect_.SetSize(SizeF(0.0f, 0.0f));
-        return SizeF(contentConstraint.maxSize.Width(), imageSize);
+        return SizeF(idealWidth, imageSize);
     }
     imageRect_.SetSize(SizeF(imageSize, imageSize));
     if (pattern->GetTextObscured() && pattern->GetHidePasswordIconCtx()) {
@@ -148,10 +172,9 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     } else if (!pattern->GetTextObscured() && pattern->GetShowPasswordIconCtx()) {
         pattern->GetShowPasswordIconCtx()->MakeCanvasImage(imageRect_.GetSize(), true, ImageFit::NONE);
     }
-    preferredHeight = std::min(static_cast<float>(paragraph_->GetHeight()), contentConstraint.maxSize.Height());
+    preferredHeight = std::min(static_cast<float>(paragraph_->GetHeight()), idealHeight);
     textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), static_cast<float>(preferredHeight)));
-    return SizeF(contentConstraint.maxSize.Width() - horizontalPaddingSum - imageSize,
-        std::min(contentConstraint.maxSize.Height() - pattern->GetVerticalPaddingSum(), preferredHeight));
+    return SizeF(idealWidth - imageSize, std::min(idealHeight, preferredHeight));
 }
 
 void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -182,9 +205,7 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         textRect_.SetOffset(contentOffset);
         return;
     }
-
     contentOffset = Alignment::GetAlignPosition(size, contentSize, align);
-
     content->SetOffset(OffsetF(pattern->GetPaddingLeft(), contentOffset.GetY()));
     // if handler is moving, no need to adjust text rect in pattern
     if (pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE ||
@@ -216,8 +237,8 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 }
 
-void TextFieldLayoutAlgorithm::UpdateTextStyle(
-    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle)
+void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
+    const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled)
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
@@ -229,10 +250,15 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(
         fontSize = theme ? theme->GetFontSize() : textStyle.GetFontSize();
     }
     textStyle.SetFontSize(fontSize);
-
+    textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
     textStyle.SetFontWeight(
         layoutProperty->GetFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
-    textStyle.SetTextColor(layoutProperty->GetTextColorValue(theme ? theme->GetTextColor() : textStyle.GetTextColor()));
+    if (isDisabled) {
+        textStyle.SetTextColor(theme ? theme->GetDisableTextColor() : textStyle.GetTextColor());
+    } else {
+        textStyle.SetTextColor(
+            layoutProperty->GetTextColorValue(theme ? theme->GetTextColor() : textStyle.GetTextColor()));
+    }
     if (layoutProperty->GetMaxLines()) {
         textStyle.SetMaxLines(layoutProperty->GetMaxLines().value());
     }
@@ -244,8 +270,8 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(
     }
 }
 
-void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(
-    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle)
+void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
+    const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled)
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
@@ -259,8 +285,12 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(
     textStyle.SetFontSize(fontSize);
     textStyle.SetFontWeight(
         layoutProperty->GetPlaceholderFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
-    textStyle.SetTextColor(
-        layoutProperty->GetPlaceholderTextColorValue(theme ? theme->GetPlaceholderColor() : textStyle.GetTextColor()));
+    if (isDisabled) {
+        textStyle.SetTextColor(theme ? theme->GetDisableTextColor() : textStyle.GetTextColor());
+    } else {
+        textStyle.SetTextColor(layoutProperty->GetPlaceholderTextColorValue(
+            theme ? theme->GetPlaceholderColor() : textStyle.GetTextColor()));
+    }
     if (layoutProperty->HasPlaceholderMaxLines()) {
         textStyle.SetMaxLines(layoutProperty->GetPlaceholderMaxLines().value());
     }
@@ -280,6 +310,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     paraStyle.maxLines_ = textStyle.GetMaxLines();
     paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
     paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle.GetWordBreak());
+    paraStyle.fontSize_ = textStyle.GetFontSize().ConvertToPx();
     if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
         paraStyle.ellipsis_ = RSParagraphStyle::ELLIPSIS;
     }
