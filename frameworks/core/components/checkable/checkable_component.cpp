@@ -79,6 +79,7 @@ RefPtr<Element> CheckableComponent::CreateElement()
 }
 
 std::unordered_map<std::string, std::list<WeakPtr<CheckboxComponent>>> CheckboxComponent::ungroupedCheckboxs_;
+std::unordered_map<std::string, RefPtr<CheckboxComponent>> CheckboxComponent::checkboxGroups_;
 
 CheckboxComponent::CheckboxComponent(const RefPtr<CheckboxTheme>& theme)
     : CheckableComponent(CheckableType::CHECKBOX, theme), CheckableValue<bool>(DEFAULT_CHECKBOX_VALUE)
