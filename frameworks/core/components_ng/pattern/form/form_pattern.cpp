@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,8 +25,25 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "pointer_event.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void ShowPointEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (!pointerEvent) {
+        LOGE("Func: %{public}s, pointerEvent is null.", __func__);
+        return;
+    }
+    int32_t pointerID = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem item;
+    bool ret = pointerEvent->GetPointerItem(pointerID, item);
+    if (!ret) {
+        LOGE("Func: %{public}s, get pointer item failed.", __func__);
+        return;
+    }
+}
+}
 
 FormPattern::FormPattern() = default;
 FormPattern::~FormPattern() = default;
@@ -36,7 +53,20 @@ void FormPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+    host->GetRenderContext()->SetClipToBounds(true);
+    // Init the render context for RSSurfaceNode from FRS.
+    externalRenderContext_ = RenderContext::Create();
+    externalRenderContext_->InitContext(false, "Form_" + std::to_string(host->GetId()) + "_Remote_Surface", true);
     InitFormManagerDelegate();
+}
+
+void FormPattern::OnRebuildFrame()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->AddChild(externalRenderContext_, 0);
 }
 
 bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -97,6 +127,7 @@ void FormPattern::InitFormManagerDelegate()
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     formManagerBridge_ = AceType::MakeRefPtr<FormManagerDelegate>(context);
+    formManagerBridge_->RegisterEventCallback();
     auto formUtils = FormManager::GetInstance().GetFormUtils();
     if (formUtils) {
         formManagerBridge_->SetFormUtils(formUtils);
@@ -107,7 +138,8 @@ void FormPattern::InitFormManagerDelegate()
                                                    const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&
                                                        imageDataMap,
                                                    const AppExecFwk::FormJsInfo& formJsInfo,
-                                                   const FrontendType& frontendType) {
+                                                   const FrontendType& frontendType,
+                                                   const FrontendType& uiSyntax) {
         ContainerScope scope(instanceID);
         auto form = weak.Upgrade();
         CHECK_NULL_VOID(form);
@@ -115,14 +147,15 @@ void FormPattern::InitFormManagerDelegate()
         CHECK_NULL_VOID(host);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([id, path, module, data, imageDataMap, formJsInfo, weak, instanceID, frontendType] {
+        uiTaskExecutor.PostTask([id, path, module, data, imageDataMap, formJsInfo, weak,
+                                 instanceID, frontendType, uiSyntax] {
             ContainerScope scope(instanceID);
             auto form = weak.Upgrade();
             CHECK_NULL_VOID(form);
             auto container = form->GetSubContainer();
             CHECK_NULL_VOID(container);
             container->SetWindowConfig({ formJsInfo.formWindow.designWidth, formJsInfo.formWindow.autoDesignWidth });
-            container->RunCard(id, path, module, data, imageDataMap, formJsInfo.formSrc, frontendType);
+            container->RunCard(id, path, module, data, imageDataMap, formJsInfo.formSrc, frontendType, uiSyntax);
         });
     });
 
@@ -177,6 +210,35 @@ void FormPattern::InitFormManagerDelegate()
             CHECK_NULL_VOID(form);
             form->FireOnUninstallEvent(formId);
         });
+    });
+
+    formManagerBridge_->AddFormSurfaceNodeCallback(
+        [weak = WeakClaim(this), instanceID](const std::shared_ptr<Rosen::RSSurfaceNode>& node) {
+            ContainerScope scope(instanceID);
+            CHECK_NULL_VOID(node);
+            node->CreateNodeInRenderThread();
+
+            auto formComponent = weak.Upgrade();
+            CHECK_NULL_VOID(formComponent);
+            auto host = formComponent->GetHost();
+            CHECK_NULL_VOID(host);
+            auto size = host->GetGeometryNode()->GetFrameSize();
+
+            auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(formComponent->GetExternalRenderContext());
+            CHECK_NULL_VOID(externalRenderContext);
+            externalRenderContext->SetRSNode(node);
+            externalRenderContext->SetBounds(0, 0, size.Width(), size.Height());
+
+            auto formComponentContext = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
+            CHECK_NULL_VOID(formComponentContext);
+            formComponentContext->AddChild(externalRenderContext, 0);
+
+            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+            auto parent = host->GetParent();
+            CHECK_NULL_VOID(parent);
+            parent->MarkNeedSyncRenderTree();
+            parent->RebuildRenderContextTree();
+            host->GetRenderContext()->RequestNextFrame();
     });
 }
 
@@ -353,4 +415,16 @@ const RefPtr<SubContainer>& FormPattern::GetSubContainer() const
     return subContainer_;
 }
 
+void FormPattern::DispatchFormEvent(
+    int64_t formId, const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
+{
+    if (!pointerEvent || !formManagerBridge_) {
+        LOGE("Func: %{public}s, pointerEvent or formManagerBridge is null", __func__);
+        return;
+    }
+
+    LOGE("DispatchFormEvent formId: %{public}" PRId64, formId);
+    ShowPointEvent(pointerEvent);
+    formManagerBridge_->DispatchFormEvent(formId, pointerEvent);
+}
 } // namespace OHOS::Ace::NG

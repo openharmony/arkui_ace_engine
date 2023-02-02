@@ -38,10 +38,16 @@ class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime);
     UIContentImpl(OHOS::AppExecFwk::Ability* ability);
+    UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard);
     ~UIContentImpl()
     {
         DestroyUIDirector();
         DestroyCallback();
+    }
+
+    void SetIsCard(bool isCard) override
+    {
+        isCard_ = isCard;
     }
 
     // UI content lifecycles
@@ -83,8 +89,34 @@ public:
 
     void SetAppWindowTitle(const std::string& title) override;
     void SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap) override;
+
+    // ArkTS Form
+    std::shared_ptr<Rosen::RSSurfaceNode> GetCardRootNode() override;
+    void ProcessFormUpdate(const std::string& data) override;
+
+    void SetFormWidth(float width) override
+    {
+        formWidth_ = width;
+    }
+    void SetFormHeight(float height) override
+    {
+        formHeight_ = height;
+    }
+    float GetFormWidth() override
+    {
+        return formWidth_;
+    }
+    float GetFormHeight() override
+    {
+        return formHeight_;
+    }
+
+    void SetActionEventHandler(
+        std::function<void(const std::string& action)>&& actionCallback) override;
+
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
+    void CommonInitializeCard(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
@@ -97,6 +129,12 @@ private:
 
     // ITouchOutsideListener is used for touching out of hot areas of window.
     OHOS::sptr<OHOS::Rosen::ITouchOutsideListener> touchOutsideListener_ = nullptr;
+    
+    // ArkTS Form
+    bool isCard_ = false;
+    std::string bundleName_ = "";
+    float formWidth_;
+    float formHeight_;
 };
 
 } // namespace OHOS::Ace

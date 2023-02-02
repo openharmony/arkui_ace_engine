@@ -749,6 +749,11 @@ public:
         parentPipeline_ = pipeline;
     }
 
+    void AddEtsCardTouchEventCallback(const std::function<void(const TouchEvent&)>&& callback)
+    {
+        etsCardTouchEventCallback_ = std::move(callback);
+    }
+
 protected:
     void TryCallNextFrameLayoutCallback()
     {
@@ -827,6 +832,7 @@ protected:
     WeakPtr<PipelineBase> parentPipeline_;
 
     std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
+    std::function<void(const TouchEvent&)> etsCardTouchEventCallback_;
 
     RefPtr<Clipboard> clipboard_;
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;

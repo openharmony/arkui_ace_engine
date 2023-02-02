@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,12 +22,17 @@
 #include "core/components_ng/pattern/form/form_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 
-namespace OHOS::Ace {
+namespace OHOS {
+namespace MMI {
+class PointerEvent;
+} // namespace MMI
+
+namespace Ace {
 class SubContainer;
 class FormManagerDelegate;
-} // namespace OHOS::Ace
 
-namespace OHOS::Ace::NG {
+
+namespace NG {
 
 class FormPattern : public Pattern {
     DECLARE_ACE_TYPE(FormPattern, Pattern);
@@ -52,9 +57,18 @@ public:
 
     const RefPtr<SubContainer>& GetSubContainer() const;
 
+    void DispatchFormEvent(
+        int64_t formId, const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
+
+    RefPtr<RenderContext> GetExternalRenderContext()
+    {
+        return externalRenderContext_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnRebuildFrame() override;
 
     void InitFormManagerDelegate();
     void CreateCardContainer();
@@ -66,12 +80,17 @@ private:
 
     bool ISAllowUpdate() const;
 
+    // used by ArkTS Card, for RSSurfaceNode from FRS,
+    RefPtr<RenderContext> externalRenderContext_;
+
     RefPtr<SubContainer> subContainer_;
     RefPtr<FormManagerDelegate> formManagerBridge_;
 
     RequestFormInfo cardInfo_;
 };
 
-} // namespace OHOS::Ace::NG
+} // namespace NG
+} // namespace Ace
+} // OHOS
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_PATTERN_H

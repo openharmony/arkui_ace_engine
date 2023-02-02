@@ -98,12 +98,19 @@ public:
 
     virtual void SetDrawTextAsBitmap(bool useBitmap) {}
 
+    void SetIsEtsCard(bool isEtsCard)
+    {
+        isEtsCard_ = isEtsCard;
+    }
+
+    virtual void SetFormRSSurfaceNode(void* surfaceNode) {}
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
     double density_ = 1.0;
     std::list<AceVsyncCallback> callbacks_;
-
+    bool isEtsCard_ = false;
 private:
     std::function<Rect()> windowRectImpl_;
     std::unique_ptr<PlatformWindow> platformWindow_;

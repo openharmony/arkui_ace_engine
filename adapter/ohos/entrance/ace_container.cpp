@@ -41,6 +41,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/card_frontend/card_frontend.h"
+#include "bridge/card_frontend/form_frontend_declarative.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #include "bridge/js_frontend/engine/common/js_engine_loader.h"
@@ -57,6 +58,7 @@
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -205,22 +207,44 @@ void AceContainer::InitializeFrontend()
         frontend_ = AceType::MakeRefPtr<CardFrontend>();
     } else if (type_ == FrontendType::DECLARATIVE_JS) {
         if (!isSubContainer_) {
-            frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
-            auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
-            auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary());
-            RefPtr<Framework::JsEngine> jsEngine;
-            if (GetSettings().usingSharedRuntime) {
-                jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
-                LOGI("Create engine using runtime, engine %{public}p", RawPtr(jsEngine));
+            if (isCardContainer_) {
+                LOGI("Init Form Frontend");
+                frontend_ = AceType::MakeRefPtr<FormFrontendDeclarative>();
+                auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
+                auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary());
+                RefPtr<Framework::JsEngine> jsEngine;
+                if (GetSettings().usingSharedRuntime) {
+                    jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
+                } else {
+                    jsEngine = loader.CreateJsEngine(instanceId_);
+                }
+                jsEngine->AddExtraNativeObject("ability", aceAbility.get());
+                EngineHelper::AddEngine(instanceId_, jsEngine);
+                cardFrontend->SetJsEngine(jsEngine);
+                cardFrontend->SetPageProfile(pageProfile_);
+                cardFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
+                cardFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
+                // Card front
+                cardFrontend->SetRunningCardId(0); // ArkTsCard TODO: nodeId, Host->FMS->FRS->innersdk
+                cardFrontend->SetCardFrontend(true);
             } else {
-                jsEngine = loader.CreateJsEngine(instanceId_);
+                frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
+                auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+                auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary());
+                RefPtr<Framework::JsEngine> jsEngine;
+                if (GetSettings().usingSharedRuntime) {
+                    jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
+                    LOGI("Create engine using runtime, engine %{public}p", RawPtr(jsEngine));
+                } else {
+                    jsEngine = loader.CreateJsEngine(instanceId_);
+                }
+                jsEngine->AddExtraNativeObject("ability", aceAbility.get());
+                EngineHelper::AddEngine(instanceId_, jsEngine);
+                declarativeFrontend->SetJsEngine(jsEngine);
+                declarativeFrontend->SetPageProfile(pageProfile_);
+                declarativeFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
+                declarativeFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
             }
-            jsEngine->AddExtraNativeObject("ability", aceAbility.get());
-            EngineHelper::AddEngine(instanceId_, jsEngine);
-            declarativeFrontend->SetJsEngine(jsEngine);
-            declarativeFrontend->SetPageProfile(pageProfile_);
-            declarativeFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
-            declarativeFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
         } else {
             frontend_ = OHOS::Ace::Platform::AceContainer::GetContainer(parentId_)->GetFrontend();
             return;
@@ -709,8 +733,19 @@ void AceContainer::SetViewNew(
     CHECK_NULL_VOID(taskExecutor);
     AceContainer::SetUIWindow(view->GetInstanceId(), rsWindow);
 
-    std::unique_ptr<Window> window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
-    container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId(), nullptr);
+	// ArkTSCard
+    std::unique_ptr<Window> window;
+    if (container->isCardContainer_) {
+        auto formRenderWindow = std::make_unique<FormRenderWindow>(taskExecutor, view->GetInstanceId());
+        container->formSurfaceNode_ = formRenderWindow->GetRSSurfaceNode();
+        window = std::move(formRenderWindow);
+        window->SetIsEtsCard(container->isCardContainer_);
+        container->AttachView(std::move(window), view, density, width, height, view->GetInstanceId(), nullptr);
+    } else {
+        window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+        window->SetIsEtsCard(container->isCardContainer_);
+        container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId(), nullptr);
+    }
 #endif
 }
 
@@ -1019,6 +1054,17 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
             std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
     }
+
+    // ArkTSCard
+    if (isCardContainer_) {
+        pipelineContext_->SetIsEtsCard(isCardContainer_);
+        auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
+        if (cardFrontend) {
+            cardFrontend->SetTaskExecutor(taskExecutor_);
+            cardFrontend->SetLoadCardCallBack(WeakPtr<PipelineBase>(pipelineContext_));
+        }
+    }
+
     pipelineContext_->SetRootSize(density, width, height);
     pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
     pipelineContext_->SetWindowId(windowId);
@@ -1373,6 +1419,15 @@ sptr<IRemoteObject> AceContainer::GetToken()
     LOGE("fail to get Token");
     return nullptr;
 }
+
+// ArkTsCard start
+std::shared_ptr<Rosen::RSSurfaceNode> AceContainer::GetFormSurfaceNode(int32_t instanceId)
+{
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    CHECK_NULL_RETURN_NOLOG(container, nullptr);
+    return container->formSurfaceNode_;
+}
+// ArkTsCard end
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 {

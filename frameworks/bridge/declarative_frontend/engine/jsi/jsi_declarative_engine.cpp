@@ -37,6 +37,7 @@
 #include "core/common/container_scope.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
+#include "frameworks/bridge/card_frontend/form_frontend_declarative.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -984,40 +985,40 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
 bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t cardId)
 {
     auto runtime = engineInstance_->GetJsRuntime();
-    if (!runtime) {
-        LOGE("ExecuteCardAbc failed, runtime is nullptr");
-        return false;
-    }
+    CHECK_NULL_RETURN(runtime, false);
 
     auto container = Container::Current();
-    if (!container) {
-        LOGE("ExecuteCardAbc failed, container is nullptr");
-        return false;
-    }
+    CHECK_NULL_RETURN(container, false);
 
-    auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
-    if (!frontEnd) {
-        LOGE("ExecuteCardAbc failed, frontEnd is nullptr");
-        return false;
-    }
-
-    auto delegate = frontEnd->GetDelegate();
-    if (!delegate) {
-        LOGE("ExecuteCardAbc failed, delegate is nullptr");
-        return false;
-    }
-
-    std::vector<uint8_t> content;
-    if (!delegate->GetAssetContent(fileName, content)) {
-        LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
-        return true;
-    }
-#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
-    const std::string abcPath = delegate->GetAssetPath(fileName).append(fileName);
-#else
-    const std::string& abcPath = fileName;
-#endif
+    LOGE("Kee JsiDeclarativeEngine::ExecuteCardAbc fileName = %{public}s", fileName.c_str());
     CardScope cardScope(cardId);
+    std::string abcPath;
+    std::vector<uint8_t> content;
+    if (container->IsFRSCardContainer()) {
+        LOGE("Kee ExecuteCardAbc In FRS");
+        auto frontEnd = AceType::DynamicCast<FormFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+        CHECK_NULL_RETURN(frontEnd, false);
+        auto delegate = frontEnd->GetDelegate();
+        CHECK_NULL_RETURN(delegate, false);
+        if (!delegate->GetAssetContent(fileName, content)) {
+            LOGE("Kee EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
+            return false;
+        }
+        abcPath = delegate->GetAssetPath(fileName).append(fileName);
+    } else {
+        LOGE("Kee ExecuteCardAbc In HOST");
+        auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+        CHECK_NULL_RETURN(frontEnd, false);
+        auto delegate = frontEnd->GetDelegate();
+        CHECK_NULL_RETURN(delegate, false);
+        if (!delegate->GetAssetContent(fileName, content)) {
+            LOGE("Kee EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
+            return false;
+        }
+        abcPath = delegate->GetAssetPath(fileName).append(fileName);
+    }
+
+    LOGE("Kee JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
     if (!runtime->EvaluateJsCode(content.data(), content.size(), abcPath)) {
         LOGE("ExecuteCardAbc EvaluateJsCode \"%{public}s\" failed.", fileName.c_str());
         return false;

@@ -36,6 +36,8 @@ public:
 
     static RefPtr<FormNode> GetOrCreateFormNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+
+    void DispatchFormEvent(int64_t formId, const TouchEvent& point) const;
 };
 
 } // namespace OHOS::Ace::NG

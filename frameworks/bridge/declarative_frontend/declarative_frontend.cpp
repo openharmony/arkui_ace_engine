@@ -24,6 +24,7 @@
 #include "core/common/container.h"
 #include "core/common/thread_checker.h"
 #include "core/components/navigator/navigator_component.h"
+#include "frameworks/bridge/card_frontend/form_frontend_delegate_declarative.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -457,13 +458,26 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         jsEngine->FireExternalEvent(componentId, nodeId, isDestroy);
     };
 
-    delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarative>(taskExecutor, loadCallback,
-        setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
-        resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
-        timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback, onWindowDisplayModeChangedCallBack,
-        onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack, onRestoreAbilityStateCallBack, onNewWantCallBack,
-        onMemoryLevelCallBack, onStartContinuationCallBack, onCompleteContinuationCallBack, onRemoteTerminatedCallBack,
-        onSaveDataCallBack, onRestoreDataCallBack, externalEventCallback);
+    if (isCardfront_) {
+        LOGE("Kee DeclarativeFrontend::InitializeFrontendDelegate new Card delegate_");
+        delegate_ = AceType::MakeRefPtr<Framework::FormFrontendDelegateDeclarative>(taskExecutor, loadCallback,
+            setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
+            resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
+            timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback,
+            onWindowDisplayModeChangedCallBack, onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack,
+            onRestoreAbilityStateCallBack, onNewWantCallBack,
+            onMemoryLevelCallBack, onStartContinuationCallBack, onCompleteContinuationCallBack, 
+            onRemoteTerminatedCallBack, onSaveDataCallBack, onRestoreDataCallBack, externalEventCallback);
+    } else {
+        delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarative>(taskExecutor, loadCallback,
+            setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
+            resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
+            timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback, onWindowDisplayModeChangedCallBack,
+            onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack, onRestoreAbilityStateCallBack, onNewWantCallBack,
+            onMemoryLevelCallBack, onStartContinuationCallBack, onCompleteContinuationCallBack, onRemoteTerminatedCallBack,
+            onSaveDataCallBack, onRestoreDataCallBack, externalEventCallback);
+    }
+
     if (disallowPopLastPage_) {
         delegate_->DisallowPopLastPage();
     }
@@ -504,7 +518,13 @@ void DeclarativeFrontend::RunPage(int32_t pageId, const std::string& url, const 
     }
     // Not use this pageId from backend, manage it in FrontendDelegateDeclarative.
     if (delegate_) {
-        delegate_->RunPage(url, params, pageProfile_);
+        if (isCardfront_) {
+            LOGI("Kee DeclarativeFrontend::RunCard delegate_");
+            auto delegate = AceType::DynamicCast<Framework::FormFrontendDelegateDeclarative>(delegate_);
+            delegate->RunCard(url, params, pageProfile_, 0);
+        } else {
+            delegate_->RunPage(url, params, pageProfile_);
+        }
     }
 }
 
