@@ -780,6 +780,7 @@ void ViewAbstract::BindPopup(
     // update PopupInfo props
     popupInfo.popupId = popupId;
     popupInfo.popupNode = popupNode;
+    popupInfo.isBlockEvent = param->IsBlockEvent();
     if (popupNode) {
         popupNode->MarkModifyDone();
     }

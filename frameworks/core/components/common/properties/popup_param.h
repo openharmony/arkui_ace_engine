@@ -188,6 +188,16 @@ public:
         enableArrow_ = enableArrow;
     }
 
+    bool IsBlockEvent() const
+    {
+        return blockEvent_;
+    }
+
+    void SetBlockEvent(bool blockEvent)
+    {
+        blockEvent_ = blockEvent;
+    }
+
     bool IsUseCustom() const
     {
         return useCustom_;
@@ -286,6 +296,7 @@ private:
     bool isBackgroundColorSetted_ = false;
     bool useCustom_ = false;
     bool isShowInSubWindow_ = false;
+    bool blockEvent_ = true;
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;
