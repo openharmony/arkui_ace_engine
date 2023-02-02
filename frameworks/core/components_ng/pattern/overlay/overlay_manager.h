@@ -36,6 +36,7 @@ struct PopupInfo {
     RefPtr<FrameNode> popupNode;
     bool markNeedUpdate = false;
     bool isCurrentOnShow = false;
+    bool isBlockEvent = true;
     SizeF targetSize;
     OffsetF targetOffset;
 };

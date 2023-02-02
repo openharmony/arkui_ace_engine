@@ -422,6 +422,22 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
         }
     }
 
+    JSRef<JSVal> maskValue = popupObj->GetProperty("mask");
+    if (maskValue->IsBoolean()) {
+        if (popupParam) {
+            popupParam->SetBlockEvent(maskValue->ToBoolean());
+        } else {
+            LOGI("Empty popup.");
+        }
+    }
+    if (maskValue->IsObject()) {
+        auto maskObj = JSRef<JSObject>::Cast(maskValue);
+        auto colorValue = maskObj->GetProperty("color");
+        Color maskColor;
+        if (JSViewAbstract::ParseJsColor(colorValue, maskColor)) {
+            popupParam->SetMaskColor(maskColor);
+        }
+    }
     JSRef<JSVal> onStateChangeVal = popupObj->GetProperty("onStateChange");
     if (onStateChangeVal->IsFunction()) {
         std::vector<std::string> keys = { "isVisible" };
@@ -547,10 +563,17 @@ void ParseCustomPopupParam(
         popupParam->SetArrowOffset(offset);
     }
 
-    auto maskColorValue = popupObj->GetProperty("maskColor");
-    Color maskColor;
-    if (JSViewAbstract::ParseJsColor(maskColorValue, maskColor)) {
-        popupParam->SetMaskColor(maskColor);
+    auto maskValue = popupObj->GetProperty("mask");
+    if (maskValue->IsBoolean()) {
+        popupParam->SetBlockEvent(maskValue->ToBoolean());
+    }
+    if (maskValue->IsObject()) {
+        auto maskObj = JSRef<JSObject>::Cast(maskValue);
+        auto colorValue = maskObj->GetProperty("color");
+        Color maskColor;
+        if (JSViewAbstract::ParseJsColor(colorValue, maskColor)) {
+            popupParam->SetMaskColor(maskColor);
+        }
     }
 
     auto popupColorValue = popupObj->GetProperty("popupColor");
@@ -562,6 +585,11 @@ void ParseCustomPopupParam(
     auto enableArrowValue = popupObj->GetProperty("enableArrow");
     if (enableArrowValue->IsBoolean()) {
         popupParam->SetEnableArrow(enableArrowValue->ToBoolean());
+    }
+
+    auto askBlockEventsValue = popupObj->GetProperty("askBlockEvents");
+    if (askBlockEventsValue->IsBoolean()) {
+        popupParam->SetBlockEvent(askBlockEventsValue->ToBoolean());
     }
 
 #if defined(PREVIEW)

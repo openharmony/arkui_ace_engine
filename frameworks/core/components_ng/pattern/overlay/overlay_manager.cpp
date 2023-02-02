@@ -312,6 +312,13 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
         CHECK_NULL_VOID_NOLOG(!popupInfo.isCurrentOnShow);
         LOGI("begin push");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(true);
+        auto hub = popupInfo.popupNode->GetEventHub<BubbleEventHub>();
+        if (!popupInfo.isBlockEvent && hub) {
+            auto ges = hub->GetOrCreateGestureEventHub();
+            if (ges) {
+                ges->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+            }
+        }
         popupMap_[targetId].popupNode->MountToParent(rootNode);
     }
     popupMap_[targetId].isCurrentOnShow = !popupInfo.isCurrentOnShow;
