@@ -114,6 +114,9 @@ private:
     void Pop(const RefPtr<FrameNode>& node);
     void PopInSubwindow(const RefPtr<FrameNode>& node);
 
+    void OpenDialogAnimation(const RefPtr<FrameNode>& node);
+    void CloseDialogAnimation(const RefPtr<FrameNode>& node);
+
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     // K: target frameNode ID, V: menuNode
