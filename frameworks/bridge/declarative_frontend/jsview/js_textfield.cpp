@@ -503,6 +503,21 @@ void JSTextField::JsHeight(const JSCallbackInfo& info)
     textInputComponent->SetHeight(value);
 }
 
+void JSTextField::JsWidth(const JSCallbackInfo& info)
+{
+    if (info[0]->IsString() && info[0]->ToString() == "auto") {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+        TextFieldModel::GetInstance()->SetWidthAuto(true);
+        return;
+    }
+    JSViewAbstract::JsWidth(info);
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    TextFieldModel::GetInstance()->SetWidthAuto(false);
+}
+
 void JSTextField::JsPadding(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
