@@ -276,25 +276,29 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
     itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
 
-    auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, DragType::GRID);
+    auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, dragType);
     if (!dragFrameNode) {
         if (preGridTargetFrameNode_) {
             FireOnItemDragEvent(preGridTargetFrameNode_, dragType, itemDragInfo, DragEventType::LEAVE, draggedIndex);
+            preGridTargetFrameNode_ = nullptr;
         }
-
         return;
     }
 
     if (dragFrameNode == preGridTargetFrameNode_) {
-        auto eventHub = dragFrameNode->GetEventHub<GridEventHub>();
-        CHECK_NULL_VOID(eventHub);
-
-        auto itemFrameNode = eventHub->FindGridItemByPosition(globalX, globalY);
         int32_t insertIndex = -1;
-        if (!itemFrameNode && eventHub->CheckPostionInGrid(globalX, globalY)) {
-            insertIndex = eventHub->GetFrameNodeChildSize();
-        } else {
-            insertIndex = eventHub->GetGridItemIndex(itemFrameNode);
+        auto gridEventHub = dragFrameNode->GetEventHub<GridEventHub>();
+        if (gridEventHub) {
+            auto itemFrameNode = gridEventHub->FindGridItemByPosition(globalX, globalY);
+            if (!itemFrameNode && gridEventHub->CheckPostionInGrid(globalX, globalY)) {
+                insertIndex = gridEventHub->GetFrameNodeChildSize();
+            } else {
+                insertIndex = gridEventHub->GetGridItemIndex(itemFrameNode);
+            }
+        }
+        auto listEventHub = dragFrameNode->GetEventHub<ListEventHub>();
+        if (listEventHub) {
+            insertIndex = listEventHub->GetListItemIndexByPosition(globalX, globalY);
         }
         FireOnItemDragEvent(dragFrameNode, dragType, itemDragInfo, DragEventType::MOVE, draggedIndex, insertIndex);
         return;
@@ -305,6 +309,7 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     }
 
     FireOnItemDragEvent(dragFrameNode, dragType, itemDragInfo, DragEventType::ENTER, draggedIndex);
+    preGridTargetFrameNode_ = dragFrameNode;
 }
 
 void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t draggedIndex, DragType dragType)
