@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,6 @@
 #include "core/components_ng/pattern/slider/slider_model.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT SliderModelNG : public SliderModel {
 public:
     void Create(float value, float step, float min, float max) override;
@@ -40,5 +39,4 @@ public:
 };
 
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SLIDER_SLIDER_MODEL_NG_H
