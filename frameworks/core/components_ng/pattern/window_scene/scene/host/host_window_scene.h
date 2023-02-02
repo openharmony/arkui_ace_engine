@@ -28,16 +28,15 @@ public:
     ~HostWindowScene() override = default;
 
 protected:
-    void InitContent() override;
+    bool HasStartingPage() override
+    {
+        return true;
+    }
 
     void OnForeground() override;
     void OnBackground() override;
 
 private:
-    void BufferAvailableCallback();
-
-    bool initialized_ = false;
-
     friend class HostWindowSceneModel;
 
     ACE_DISALLOW_COPY_AND_MOVE(HostWindowScene);

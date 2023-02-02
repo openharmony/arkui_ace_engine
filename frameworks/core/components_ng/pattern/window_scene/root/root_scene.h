@@ -13,21 +13,26 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/window_scene/scene/host/host_window_extension_model.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ROOT_SCENE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ROOT_SCENE_H
 
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
 
 namespace OHOS::Ace::NG {
 
-void HostWindowExtensionModel::Create(const sptr<Rosen::Session>& session)
-{
-    auto stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HOST_WINDOW_EXTENSION_ETS_TAG, nodeId,
-        [&session]() { return AceType::MakeRefPtr<HostWindowExtension>(session); });
-    stack->Push(frameNode);
-    frameNode->GetPattern<HostWindowExtension>()->InitContent();
-}
+class RootScene : public WindowPattern {
+    DECLARE_ACE_TYPE(RootScene, WindowPattern);
+
+public:
+    RootScene(/** const sptr<Rosen::RootSceneSession>& rootSceneSession */);
+    ~RootScene() override = default;
+
+    void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override {}
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(RootScene);
+};
 
 } // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ROOT_SCENE_H

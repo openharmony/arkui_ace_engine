@@ -37,7 +37,9 @@ public:
 protected:
     void OnAttachToFrameNode() override;
 
-    virtual void InitContent() {}
+    virtual void InitContent();
+
+    virtual bool HasStartingPage() = 0;
 
     virtual void OnForeground() {}
     virtual void OnBackground() {}
@@ -50,7 +52,10 @@ protected:
     sptr<Rosen::Session> session_;
 
 private:
+    void BufferAvailableCallback();
     void OnClick();
+
+    bool initialized_ = false;
 
     RefPtr<ClickEvent> clickListener_;
 

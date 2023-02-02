@@ -98,7 +98,7 @@ public:
         callbacks_.push_back(std::move(callback));
     }
 
-    void SetRootFrameNode(const RefPtr<NG::FrameNode>& root);
+    virtual void SetRootFrameNode(const RefPtr<NG::FrameNode>& root);
 
     std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector() const
     {

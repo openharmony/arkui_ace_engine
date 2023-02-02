@@ -29,6 +29,11 @@ public:
     ScreenPattern(const sptr<Rosen::ScreenSession>& screenSession) : screenSession_(screenSession) {}
     ~ScreenPattern() override = default;
 
+    bool UseExternalRSNode() const override
+    {
+        return true;
+    }
+
 protected:
     void OnAttachToFrameNode() override;
 
