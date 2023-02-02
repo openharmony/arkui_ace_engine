@@ -116,16 +116,17 @@ template("declarative_js_engine_ark") {
       "modules/jsi_syscap_module.cpp",
       "modules/jsi_timer_module.cpp",
     ]
-
+    deps = []
     sources += [ "jsi_animator_model_ng_impl.cpp" ]
+    deps += [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
 
     defines += uicast_configs.uicast_defines
     sources += uicast_configs.uicast_jsi_sources
 
     if (!use_ios) {
-      deps = [ "//arkcompiler/ets_runtime:libark_jsruntime" ]
+      deps += [ "//arkcompiler/ets_runtime:libark_jsruntime" ]
     } else {
-      deps = [ "//arkcompiler/ets_runtime:libark_jsruntime_static" ]
+      deps += [ "//arkcompiler/ets_runtime:libark_jsruntime_static" ]
     }
 
     if (defined(config.build_for_preview) && config.build_for_preview) {
