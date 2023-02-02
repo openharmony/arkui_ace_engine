@@ -56,10 +56,6 @@ std::ifstream& AceNewPipeJudgement::SafeGetLine(std::ifstream& configFile, std::
 bool AceNewPipeJudgement::QueryAceNewPipeEnabledFa(
     const std::string& packagename, uint32_t apiCompatibleVersion, const std::string& apiReleaseType)
 {
-    if ((apiCompatibleVersion == NEW_PIPE_MIN_VERSION && apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_NEW) ||
-        apiCompatibleVersion > NEW_PIPE_MIN_VERSION) {
-        return true;
-    }
     switch (aceNewPipeEnabledType_) {
         case AceNewPipeEnabledType::ACE_NEW_PIPE_PARTIALLY_ENABLED:
             return aceNewPipeEnabledList_.find(packagename) != aceNewPipeEnabledList_.end();
