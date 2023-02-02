@@ -168,8 +168,7 @@ void ButtonPattern::HandleEnabled()
     CHECK_NULL_VOID(theme);
     if (!enabled) {
         auto alpha = theme->GetBgDisabledAlpha();
-        auto color = renderContext->GetBackgroundColor();
-        renderContext->UpdateBackgroundColor(color->BlendOpacity(alpha));
+        renderContext->BlendBgColor(Color::WHITE.BlendOpacity(alpha));
     } else {
         renderContext->ResetBlendBgColor();
     }
