@@ -180,10 +180,7 @@ public:
         return false;
     }
 
-    // Called by AceAbility and UiContent.
-    void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) const;
-
-    // Called by AceEngine.
+    // Called by AceContainer.
     bool Dump(const std::vector<std::string>& params) const;
 
     virtual bool IsLastPage()

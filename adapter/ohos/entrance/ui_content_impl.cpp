@@ -923,9 +923,7 @@ void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->DumpInfo(params, info);
+    container->Dump(params, info);
 }
 
 void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog)

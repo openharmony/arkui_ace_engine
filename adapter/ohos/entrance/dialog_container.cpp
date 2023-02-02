@@ -393,11 +393,6 @@ void DialogContainer::InitializeFrontend()
     front->SetAssetManager(assetManager_);
 }
 
-bool DialogContainer::Dump(const std::vector<std::string>& params)
-{
-    return false;
-}
-
 void DialogContainer::DumpHeapSnapshot(bool isPrivate)
 {
     taskExecutor_->PostTask(

@@ -751,9 +751,7 @@ void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::s
     ContainerScope scope(abilityId_);
     taskExecutor->PostSyncTask(
         [container, params, &info] {
-            auto context = container->GetPipelineContext();
-            CHECK_NULL_VOID_NOLOG(context);
-            context->DumpInfo(params, info);
+            container->Dump(params, info);
         },
         TaskExecutor::TaskType::UI);
 }

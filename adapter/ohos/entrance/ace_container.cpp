@@ -15,6 +15,7 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 
+#include <fstream>
 #include <functional>
 
 #include "ability_info.h"
@@ -32,6 +33,7 @@
 #include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
+#include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/frame_report.h"
 #include "base/log/log.h"
@@ -797,16 +799,85 @@ void AceContainer::DispatchPluginError(int32_t callbackId, int32_t errorCode, st
         TaskExecutor::TaskType::BACKGROUND);
 }
 
-bool AceContainer::Dump(const std::vector<std::string>& params)
+bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     ContainerScope scope(instanceId_);
+    auto result = false;
+    if (!SystemProperties::GetDebugEnabled()) {
+        std::unique_ptr<std::ostream> ss = std::make_unique<std::ostringstream>();
+        CHECK_NULL_RETURN(ss, false);
+        DumpLog::GetInstance().SetDumpFile(std::move(ss));
+        result = DumpInfo(params);
+        const auto& infoFile = DumpLog::GetInstance().GetDumpFile();
+        auto* ostringstream = static_cast<std::ostringstream*>(infoFile.get());
+        info.emplace_back(ostringstream->str().substr(0, DumpLog::MAX_DUMP_LENGTH));
+        DumpLog::GetInstance().Reset();
+    } else {
+        auto dumpFilePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui.dump";
+        std::unique_ptr<std::ostream> ss = std::make_unique<std::ofstream>(dumpFilePath);
+        CHECK_NULL_RETURN(ss, false);
+        DumpLog::GetInstance().SetDumpFile(std::move(ss));
+        result = DumpInfo(params);
+        info.emplace_back("dumpFilePath: " + dumpFilePath);
+        DumpLog::GetInstance().Reset();
+    }
+    if (!result) {
+        DumpLog::ShowDumpHelp(info);
+    }
+    return true;
+}
+
+bool AceContainer::DumpInfo(const std::vector<std::string>& params)
+{
     if (aceView_ && aceView_->Dump(params)) {
         return true;
     }
 
+    if (OnDumpInfo(params)) {
+        return true;
+    }
     CHECK_NULL_RETURN_NOLOG(pipelineContext_, false);
-    pipelineContext_->Dump(params);
-    return true;
+    return pipelineContext_->Dump(params);
+}
+
+bool AceContainer::OnDumpInfo(const std::vector<std::string>& params)
+{
+    if (params[0] == "-basicinfo") {
+        DumpLog::GetInstance().Print("BasicInfo: ");
+        DumpLog::GetInstance().Print(1, "InstanceId: " + std::to_string(instanceId_));
+        DumpLog::GetInstance().Print(1,
+            "FrontendType: " + std::to_string(static_cast<typename std::underlying_type<FrontendType>::type>(type_)));
+        DumpLog::GetInstance().Print(1, "NewPipeline: " + std::string(IsUseNewPipeline() ? "true" : "false"));
+        DumpLog::GetInstance().Print(1, "WindowName: " + windowName_);
+        DumpLog::GetInstance().Print(
+            1, "WindowState: " +
+                   (!frontend_ ? "frontend is null"
+                               : std::to_string(static_cast<typename std::underlying_type<Frontend::State>::type>(
+                                     frontend_->GetState()))));
+        DumpLog::GetInstance().Print(1, "Language: " + AceApplicationInfo::GetInstance().GetLocaleTag());
+        DumpLog::GetInstance().Print(
+            1, "RTL: " + std::string(AceApplicationInfo::GetInstance().IsRightToLeft() ? "true" : "false"));
+        DumpLog::GetInstance().Print(
+            1, "ColorMode: " + std::string(SystemProperties::GetColorMode() == ColorMode::DARK ? "Dark" : "Light"));
+        DumpLog::GetInstance().Print(1,
+            "DeviceOrientation: " + std::string(SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE
+                                                    ? "Landscape"
+                                                    : "Portrait"));
+        DumpLog::GetInstance().Print(1, "Resolution: " + std::to_string(SystemProperties::GetDeviceWidth()) + "*" +
+                                            std::to_string(SystemProperties::GetDeviceHeight()));
+        if (pipelineContext_) {
+            DumpLog::GetInstance().Print(1, "AppBgColor: " + pipelineContext_->GetAppBgColor().ColorToString());
+            DumpLog::GetInstance().Print(1, "Density: " + std::to_string(pipelineContext_->GetDensity()));
+            DumpLog::GetInstance().Print(1, "ViewScale: " + std::to_string(pipelineContext_->GetViewScale()));
+            DumpLog::GetInstance().Print(
+                1, "DisplayWindowRect: " + pipelineContext_->GetDisplayWindowRectInfo().ToString());
+        }
+        DumpLog::GetInstance().Print(1, "ApiVersion: " + SystemProperties::GetApiVersion());
+        DumpLog::GetInstance().Print(1, "ReleaseType: " + SystemProperties::GetReleaseType());
+        DumpLog::GetInstance().Print(1, "DeviceType: " + SystemProperties::GetParamDeviceType());
+        return true;
+    }
+    return false;
 }
 
 void AceContainer::TriggerGarbageCollection()

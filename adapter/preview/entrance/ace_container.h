@@ -187,8 +187,6 @@ public:
 
     void DispatchPluginError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override;
 
-    bool Dump(const std::vector<std::string>& params) override;
-
     void UpdateDeviceConfig(const DeviceConfig& deviceConfig);
 
     void LoadDocument(const std::string& url, const std::string& componentName);
