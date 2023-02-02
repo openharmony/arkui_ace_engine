@@ -236,8 +236,7 @@ void TextFieldPattern::UpdateCaretInfoToController() const
     auto pipeline = GetHost()->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto windowRect = pipeline->GetCurrentWindowRect();
-    MiscServices::CursorInfo cursorInfo {
-        .left = caretRect_.Left() + windowRect.Left(),
+    MiscServices::CursorInfo cursorInfo { .left = caretRect_.Left() + windowRect.Left(),
         .top = caretRect_.Top() + windowRect.Top(),
         .width = CURSOR_WIDTH.ConvertToPx(),
         .height = caretRect_.Height() };
@@ -2016,7 +2015,9 @@ void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
 void TextFieldPattern::InsertValue(const std::string& insertValue)
 {
-    if (static_cast<uint32_t>(textEditingValue_.GetWideText().length()) >= GetMaxLength()) {
+    auto newVal = StringUtils::ToWstring(textEditingValue_.GetValueBeforePosition(textSelector_.GetStart()) +
+                                         insertValue + textEditingValue_.GetValueAfterPosition(textSelector_.GetEnd()));
+    if (static_cast<uint32_t>(newVal.length()) >= GetMaxLength()) {
         LOGW("Max length reached");
         return;
     }
