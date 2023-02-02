@@ -21,6 +21,7 @@
 #include "core/components/stepper/stepper_theme.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/stepper/stepper_node.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
@@ -77,7 +78,8 @@ void StepperLayoutAlgorithm::MeasureLeftButton(LayoutWrapper* layoutWrapper, Lay
     CHECK_NULL_VOID(pipeline);
     auto stepperTheme = pipeline->GetTheme<StepperTheme>();
     CHECK_NULL_VOID(stepperTheme);
-    auto padding = static_cast<float>(stepperTheme->GetDefaultPaddingStart().ConvertToPx());
+    auto padding =
+        static_cast<float>((stepperTheme->GetDefaultPaddingStart() + stepperTheme->GetControlPadding()).ConvertToPx());
     auto buttonWidth = (buttonLayoutConstraint.parentIdealSize.Width().value() / 2) - padding;
     auto buttonHeight = static_cast<float>(
         stepperTheme->GetControlHeight().ConvertToPx() - 2 * stepperTheme->GetControlMargin().ConvertToPx());
@@ -88,6 +90,7 @@ void StepperLayoutAlgorithm::MeasureLeftButton(LayoutWrapper* layoutWrapper, Lay
     auto index = hostNode->GetChildIndexById(hostNode->GetLeftButtonId());
     auto leftButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     leftButtonWrapper->Measure(buttonLayoutConstraint);
+    MeasureText(leftButtonWrapper, buttonLayoutConstraint, true);
 }
 void StepperLayoutAlgorithm::MeasureRightButton(LayoutWrapper* layoutWrapper, LayoutConstraintF buttonLayoutConstraint)
 {
@@ -99,7 +102,8 @@ void StepperLayoutAlgorithm::MeasureRightButton(LayoutWrapper* layoutWrapper, La
     CHECK_NULL_VOID(pipeline);
     auto stepperTheme = pipeline->GetTheme<StepperTheme>();
     CHECK_NULL_VOID(stepperTheme);
-    auto padding = static_cast<float>(stepperTheme->GetDefaultPaddingEnd().ConvertToPx());
+    auto padding =
+        static_cast<float>((stepperTheme->GetDefaultPaddingEnd() + stepperTheme->GetControlPadding()).ConvertToPx());
     auto buttonWidth = (buttonLayoutConstraint.parentIdealSize.Width().value() / 2) - padding;
     auto buttonHeight = static_cast<float>(
         stepperTheme->GetControlHeight().ConvertToPx() - 2 * stepperTheme->GetControlMargin().ConvertToPx());
@@ -110,6 +114,32 @@ void StepperLayoutAlgorithm::MeasureRightButton(LayoutWrapper* layoutWrapper, La
     auto index = hostNode->GetChildIndexById(hostNode->GetRightButtonId());
     auto rightButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     rightButtonWrapper->Measure(buttonLayoutConstraint);
+    MeasureText(rightButtonWrapper, buttonLayoutConstraint, false);
+}
+
+void StepperLayoutAlgorithm::MeasureText(
+    const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& buttonLayoutConstraint, bool isLeft)
+{
+    CHECK_NULL_VOID_NOLOG(layoutWrapper->GetHostTag() == std::string(V2::BUTTON_ETS_TAG));
+    auto rowWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID_NOLOG(rowWrapper->GetHostTag() == std::string(V2::ROW_ETS_TAG));
+    auto textWrapper = rowWrapper->GetOrCreateChildByIndex(isLeft ? 1 : 0);
+    CHECK_NULL_VOID(textWrapper->GetHostTag() == std::string(V2::TEXT_ETS_TAG));
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto stepperTheme = pipeline->GetTheme<StepperTheme>();
+    CHECK_NULL_VOID(stepperTheme);
+
+    LayoutConstraintF textLayoutConstraint = buttonLayoutConstraint;
+    auto controlPadding = static_cast<float>(stepperTheme->GetControlPadding().ConvertToPx());
+    auto arrowWidth = static_cast<float>(stepperTheme->GetArrowWidth().ConvertToPx());
+    auto textMaxWidth =
+        buttonLayoutConstraint.maxSize.Width() - controlPadding - controlPadding - arrowWidth - controlPadding;
+    textLayoutConstraint.minSize = { 0, 0 };
+    textLayoutConstraint.maxSize.SetWidth(textMaxWidth);
+    textLayoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, std::nullopt);
+    textWrapper->Measure(textLayoutConstraint);
 }
 
 void StepperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

@@ -53,6 +53,11 @@ public:
         return MakeRefPtr<StepperEventHub>();
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -65,12 +70,13 @@ private:
     void UpdateOrCreateRightButtonNode(int32_t index);
     void CreateRightButtonNode(int32_t index);
     void CreateArrowRightButtonNode(int32_t index, bool isDisabled);
-    void CreateArrowlessRightButtonNode(std::string content);
+    void CreateArrowlessRightButtonNode(int32_t index, const std::string& defaultContent);
     void CreateWaitingRightButtonNode();
     void UpdateRightButtonNode(int32_t index);
     void InitButtonClickEvent();
     void HandlingLeftButtonClickEvent();
     void HandlingRightButtonClickEvent();
+    void SetButtonOnHoverBoardColor(RefPtr<FrameNode> buttonNode, const Color& buttonOnHoverBoardColor);
 
     int32_t index_ = 0;
     int32_t maxIndex_ = 0;
@@ -78,6 +84,7 @@ private:
     std::shared_ptr<ChangeEvent> swiperChangeEvent_;
     RefPtr<ClickEvent> leftClickEvent_;
     RefPtr<ClickEvent> rightClickEvent_;
+    RefPtr<InputEvent> buttonOnHoverListenr_;
     ACE_DISALLOW_COPY_AND_MOVE(StepperPattern);
 };
 
