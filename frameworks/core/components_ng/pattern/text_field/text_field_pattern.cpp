@@ -1384,8 +1384,8 @@ void TextFieldPattern::OnModifyDone()
         redoOperationRecords_.clear();
     }
     auto maxLength = GetMaxLength();
-    if (GreatOrEqual(textEditingValue_.text.length(), maxLength)) {
-        textEditingValue_.text = textEditingValue_.text.substr(0, maxLength);
+    if (GreatOrEqual(textEditingValue_.GetWideText().length(), maxLength)) {
+        textEditingValue_.text = StringUtils::ToString(textEditingValue_.GetWideText().substr(0, maxLength));
         SetEditingValueToProperty(textEditingValue_.text);
     }
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
@@ -2016,7 +2016,7 @@ void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
 void TextFieldPattern::InsertValue(const std::string& insertValue)
 {
-    if (static_cast<uint32_t>(textEditingValue_.text.length()) >= GetMaxLength()) {
+    if (static_cast<uint32_t>(textEditingValue_.GetWideText().length()) >= GetMaxLength()) {
         LOGW("Max length reached");
         return;
     }
