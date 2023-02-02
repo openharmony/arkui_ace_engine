@@ -476,7 +476,10 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(const RefPtr<BubbleLayoutP
                             pipelineContext->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     targetOffset_ = targetNode->GetPaintRectOffset();
     if (isContainerModal) {
+        auto newOffsetX = targetOffset_.GetX() - static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) -
+                          static_cast<float>(CONTENT_PADDING.ConvertToPx());
         auto newOffsetY = targetOffset_.GetY() - static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx());
+        targetOffset_.SetX(newOffsetX);
         targetOffset_.SetY(newOffsetY);
     }
     // Show in SubWindow
