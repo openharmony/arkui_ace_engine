@@ -42,7 +42,7 @@ constexpr float HALF_CIRCLE = 180.0f;
 constexpr float QUARTER_CIRCLE = 90.0f;
 constexpr float DIAMETER_TO_THICKNESS_RATIO = 0.12;
 constexpr Color BACKGROUND_COLOR = Color(0x08182431);
-constexpr float SHADOW_BLUR_RADIUS = 5.0f;
+constexpr float SHADOW_BLUR_OFFSET = 5.0f;
 
 } // namespace
 
@@ -54,7 +54,7 @@ DataPanelModifier::DataPanelModifier() : date_(AceType::MakeRefPtr<AnimatablePro
 void DataPanelModifier::PaintRainbowFilterMask(RSCanvas& canvas, double factor, ArcData arcData) const
 {
     float thickness = arcData.thickness;
-    float radius = arcData.radius - SHADOW_BLUR_RADIUS;
+    float radius = arcData.radius;
     float progress = arcData.progress;
     if (GreatNotEqual(progress, 100.0f)) {
         progress = 100.0f;
@@ -65,7 +65,7 @@ void DataPanelModifier::PaintRainbowFilterMask(RSCanvas& canvas, double factor, 
     if (NearEqual(progress, 0.0f)) {
         return;
     }
-    Offset center = arcData.center;
+    Offset center = arcData.center + Offset(SHADOW_BLUR_OFFSET, SHADOW_BLUR_OFFSET);
     PointF centerPt = PointF(center.GetX(), center.GetY() - radius + thickness / 2);
 
     // for example whole circle is 100 which is divided into 100 piece 360 / 100 = 3.6
@@ -144,12 +144,16 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset, flo
     canvas.Translate(offset.GetX(), offset.GetY());
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    ArcData arcData;
-    arcData.center = Offset(context.width / 2.0f, context.height / 2.0f);
-    arcData.radius = std::min(context.width, context.height) / 2.0f;
+
     auto theme = pipelineContext->GetTheme<DataPanelTheme>();
     auto colors = theme->GetColorsArray();
     auto defaultThickness = theme->GetThickness().ConvertToPx();
+    ArcData arcData;
+    arcData.center = Offset(context.width / 2.0f, context.height / 2.0f);
+
+    // Here radius will minus defaultThickness,when there will be new api to set padding, use the new padding.
+    arcData.radius = std::min(context.width, context.height) / 2.0f - defaultThickness;
+
     if (defaultThickness >= arcData.radius) {
         arcData.thickness = arcData.radius * DIAMETER_TO_THICKNESS_RATIO;
     } else {
