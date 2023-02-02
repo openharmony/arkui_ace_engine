@@ -70,6 +70,22 @@ void SwiperPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
+void SwiperPattern::OnIndexChange() const
+{
+    auto totalCount = TotalCount();
+    if (NonPositive(totalCount)) {
+        return;
+    }
+
+    auto currentIndex = (currentIndex_ + totalCount) % totalCount;
+    auto targetIndex = (CurrentIndex() + totalCount) % totalCount;
+    if (currentIndex != targetIndex) {
+        auto swiperEventHub = GetEventHub<SwiperEventHub>();
+        CHECK_NULL_VOID(swiperEventHub);
+        swiperEventHub->FireChangeEvent(targetIndex);
+    }
+}
+
 void SwiperPattern::OnModifyDone()
 {
     auto host = GetHost();
@@ -80,6 +96,8 @@ void SwiperPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+
+    OnIndexChange();
 
     InitSwiperIndicator();
     auto childrenSize = TotalCount();
