@@ -70,7 +70,7 @@ private:
     void UpdateOrCreateRightButtonNode(int32_t index);
     void CreateRightButtonNode(int32_t index);
     void CreateArrowRightButtonNode(int32_t index, bool isDisabled);
-    void CreateArrowlessRightButtonNode(std::string content);
+    void CreateArrowlessRightButtonNode(int32_t index, const std::string& defaultContent);
     void CreateWaitingRightButtonNode();
     void UpdateRightButtonNode(int32_t index);
     void InitButtonClickEvent();
