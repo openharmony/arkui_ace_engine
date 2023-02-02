@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_PATTERN_H
 
+#include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
@@ -28,7 +29,7 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
-enum class MenuType { MENU, CONTEXT_MENU, NAVIGATION_MENU };
+enum class MenuType { MENU, CONTEXT_MENU, NAVIGATION_MENU, MULTI_MENU, SUB_MENU };
 
 class MenuPattern : public Pattern {
     DECLARE_ACE_TYPE(MenuPattern, Pattern);
@@ -40,6 +41,11 @@ public:
     bool IsAtomicNode() const override
     {
         return false;
+    }
+
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
@@ -68,13 +74,55 @@ public:
         return type_ == MenuType::NAVIGATION_MENU;
     }
 
+    bool IsMultiMenu() const
+    {
+        return type_ == MenuType::MULTI_MENU;
+    }
+
+    bool IsSubMenu() const
+    {
+        return type_ == MenuType::SUB_MENU;
+    }
+
+    void SetFontSize(const Dimension& value)
+    {
+        fontSize_ = value;
+    }
+
+    Dimension FontSize() const
+    {
+        return fontSize_.value_or(Dimension());
+    }
+
+    void SetParentMenuItem(const RefPtr<FrameNode>& parentMenuItem)
+    {
+        parentMenuItem_ = parentMenuItem;
+    }
+
+    RefPtr<FrameNode> GetParentMenuItem()
+    {
+        return parentMenuItem_;
+    }
+
+    int32_t GetTargetId() const
+    {
+        return targetId_;
+    }
+
 private:
     void OnModifyDone() override;
     void RegisterOnClick();
 
+    void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event) const;
+
     RefPtr<TouchEventImpl> onClick_;
     int32_t targetId_ = -1;
     MenuType type_ = MenuType::MENU;
+
+    RefPtr<FrameNode> parentMenuItem_;
+
+    std::optional<Dimension> fontSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

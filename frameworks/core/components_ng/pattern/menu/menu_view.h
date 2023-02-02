@@ -38,6 +38,11 @@ public:
 
     // create select's popup menu
     static RefPtr<FrameNode> Create(const std::vector<SelectParam>& params, int32_t targetId);
+
+    // create menu with menuItem and menuItemGroup
+    static void Create();
+
+    static void SetFontSize(const Dimension& fontSize);
 };
 } // namespace OHOS::Ace::NG
 

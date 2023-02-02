@@ -374,6 +374,8 @@ const char RELATIVE_CONTAINER_ETS_TAG[] = "RelativeContainer";
 const char MENU_COMPONENT_TAG[] = "MenuComponent";
 const char MENU_TAG[] = "menu";
 const char MENU_ETS_TAG[] = "Menu";
+const char MENU_ITEM_ETS_TAG[] = "MenuItem";
+const char MENU_ITEM_GROUP_ETS_TAG[] = "MenuItemGroup";
 const char MENU_WRAPPER_ETS_TAG[] = "MenuWrapper";
 
 // textarea

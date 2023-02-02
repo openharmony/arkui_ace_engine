@@ -24,20 +24,27 @@
 
 namespace OHOS::Ace::NG {
 
-void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu) const
+void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
 {
+    isHided_ = true;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    for (auto subMenuId : subMenuIds_) {
+        LOGI("MenuWrapperPattern::HideMenu subMenu id is %{public}d", subMenuId);
+        overlayManager->HideMenu(subMenuId);
+    }
+
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    LOGI("closing menu %{public}d", targetId_);
+    LOGI("MenuWrapperPattern closing menu %{public}d", targetId_);
     // ContextMenu: close in subwindowManager
     if (menuPattern->IsContextMenu()) {
         SubwindowManager::GetInstance()->HideMenuNG(targetId_);
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
     overlayManager->HideMenu(targetId_);
 }
 
@@ -46,6 +53,8 @@ void MenuWrapperPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gestureHub = host->GetOrCreateGestureEventHub();
+
+    isHided_ = false;
 
     // if already initialized touch event
     CHECK_NULL_VOID_NOLOG(!onTouch_);
@@ -57,13 +66,16 @@ void MenuWrapperPattern::OnModifyDone()
         }
         auto touch = info.GetTouches().front();
         // filter out other touch types
-        if (touch.GetTouchType() != TouchType::DOWN) {
+        if (touch.GetTouchType() != TouchType::DOWN && touch.GetTouchType() != TouchType::UP) {
             return;
         }
         auto host = weak.Upgrade();
         CHECK_NULL_VOID(host);
         auto pattern = host->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(pattern);
+        if (pattern->IsHided()) {
+            return;
+        }
         // get menu frame node (child of menu wrapper)
         auto menuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
         CHECK_NULL_VOID(menuNode);
@@ -78,5 +90,34 @@ void MenuWrapperPattern::OnModifyDone()
     };
     onTouch_ = MakeRefPtr<TouchEventImpl>(std::move(callback));
     gestureHub->AddTouchEvent(onTouch_);
+}
+
+// close subMenu when mouse move outside
+void MenuWrapperPattern::HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItemPattern>& menuItemPattern)
+{
+    auto menuItem = menuItemPattern->GetHost();
+    CHECK_NULL_VOID(menuItem);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    const auto& mousePosition = info.GetGlobalLocation();
+    if (!menuItemPattern->IsInHoverRegions(mousePosition.GetX(), mousePosition.GetY()) &&
+        menuItemPattern->IsSubMenuShowed()) {
+        LOGI("MenuWrapperPattern Hide SubMenu");
+        overlayManager->HideMenu(menuItem->GetId());
+        menuItemPattern->SetIsSubMenuShowed(false);
+        menuItemPattern->ClearHoverRegions();
+        menuItemPattern->ResetWrapperMouseEvent();
+    }
+}
+
+void MenuWrapperPattern::HideMenu()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto menuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    CHECK_NULL_VOID(menuNode);
+    HideMenu(menuNode);
 }
 } // namespace OHOS::Ace::NG

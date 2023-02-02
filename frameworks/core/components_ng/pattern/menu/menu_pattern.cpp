@@ -19,7 +19,9 @@
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/event/click_event.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -30,9 +32,16 @@ void MenuPattern::OnModifyDone()
     if (!onClick_) {
         RegisterOnClick();
     }
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    RegisterOnKeyEvent(focusHub);
+
+    if (IsMultiMenu()) {
+        return;
+    }
+
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
@@ -55,11 +64,38 @@ void MenuPattern::OnModifyDone()
 // close menu on touch up
 void MenuPattern::RegisterOnClick()
 {
-    auto event = [targetId = targetId_, isContextMenu = IsContextMenu()](const TouchEventInfo& info) {
+    auto event = [targetId = targetId_, isContextMenu = IsContextMenu(), weak = WeakClaim(this)](
+                     const TouchEventInfo& info) {
+        auto menuPattern = weak.Upgrade();
+        CHECK_NULL_VOID(menuPattern);
+        auto menuNode = menuPattern->GetHost();
+        CHECK_NULL_VOID(menuNode);
+        bool isCustomOption = false;
+        auto firstChild = menuNode->GetChildAtIndex(0);
+        if (firstChild && firstChild->GetTag() == V2::SCROLL_ETS_TAG) {
+            isCustomOption = true;
+            auto scrollChild = firstChild->GetChildAtIndex(0);
+            if ((scrollChild && scrollChild->GetTag() == V2::MENU_ETS_TAG)) {
+                isCustomOption = false;
+            }
+        }
+        if (!menuPattern->IsSubMenu() && !isCustomOption) {
+            // menu with options or menu items is closed by option or menuItem click event.
+            return;
+        }
+
         auto touches = info.GetTouches();
         if (touches.empty() || touches.front().GetTouchType() != TouchType::UP) {
             return;
         }
+
+        if (menuPattern->IsSubMenu()) {
+            auto menuItemParent = menuPattern->GetParentMenuItem();
+            auto menuItemPattern = menuItemParent->GetPattern<MenuItemPattern>();
+            menuItemPattern->CloseMenu();
+            return;
+        }
+
         if (isContextMenu) {
             SubwindowManager::GetInstance()->HideMenuNG(targetId);
             return;
@@ -69,7 +105,7 @@ void MenuPattern::RegisterOnClick()
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->HideMenu(targetId);
-        LOGI("closing menu %{public}d", targetId);
+        LOGI("MenuPattern closing menu %{public}d", targetId);
     };
     onClick_ = MakeRefPtr<TouchEventImpl>(std::move(event));
 
@@ -80,4 +116,37 @@ void MenuPattern::RegisterOnClick()
     gestureHub->AddTouchEvent(onClick_);
 }
 
+void MenuPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        return pattern->OnKeyEvent(event);
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool MenuPattern::OnKeyEvent(const KeyEvent& event) const
+{
+    if (event.action != KeyAction::DOWN || IsMultiMenu()) {
+        return false;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    if (event.code == KeyCode::KEY_ESCAPE) {
+        if (IsContextMenu()) {
+            SubwindowManager::GetInstance()->HideMenuNG(targetId_);
+            return true;
+        }
+        overlayManager->HideMenu(targetId_);
+        return true;
+    }
+    if (event.code == KeyCode::KEY_DPAD_LEFT && IsSubMenu()) {
+        overlayManager->HideMenu(targetId_);
+        return true;
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG
