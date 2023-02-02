@@ -751,6 +751,7 @@ void RenderScroll::AnimateTo(double position, float duration, const RefPtr<Curve
 {
     LOGD("animate from position %{public}lf to %{public}lf, duration: %{public}f", GetCurrentPosition(), position,
         duration);
+    CHECK_NULL_VOID_NOLOG(animator_);
     if (!animator_->IsStopped()) {
         animator_->Stop();
     }
