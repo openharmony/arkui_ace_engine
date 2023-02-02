@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,8 +73,22 @@ bool UnwrapWantFromJS(napi_env env, napi_value param, ACEAsyncJSCallbackInfo* as
     return true;
 }
 
-bool UnwrapNameFromJS(napi_env env, napi_value param, const std::string& key,
-    ACEAsyncJSCallbackInfo* asyncCallbackInfo)
+bool UnwrapTargetFromJS(napi_env env, napi_value param, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
+{
+    napi_value jsValue = AceGetPropertyValueByPropertyName(env, param, "target", napi_object);
+    if (jsValue == nullptr) {
+        HILOG_INFO("%{public}s called, Params(Target) is not object.", __func__);
+        return false;
+    }
+
+    if (!AceUnwrapWant(env, jsValue, asyncCallbackInfo->jsParamList.want)) {
+        HILOG_INFO("%{public}s called, Params(Target) is invalid.", __func__);
+        return false;
+    }
+    return true;
+}
+
+bool UnwrapNameFromJS(napi_env env, napi_value param, const std::string& key, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
 {
     napi_value jsValue = AceGetPropertyValueByPropertyName(env, param, key.c_str(), napi_string);
     if (jsValue == nullptr) {
@@ -119,7 +133,7 @@ bool UnwrapPushParameters(napi_env env, napi_value param, ACEAsyncJSCallbackInfo
         }
     }
 
-    if (!UnwrapWantFromJS(env, param, asyncCallbackInfo)) {
+    if (!UnwrapWantFromJS(env, param, asyncCallbackInfo) && !UnwrapTargetFromJS(env, param, asyncCallbackInfo)) {
         HILOG_INFO("%{public}s called, Params(want) is invalid.", __func__);
         return false;
     }
@@ -140,8 +154,7 @@ bool UnwrapPushParameters(napi_env env, napi_value param, ACEAsyncJSCallbackInfo
     return true;
 }
 
-bool UnwrapParamForPush(napi_env env, size_t argc, napi_value* argv,
-    ACEAsyncJSCallbackInfo* asyncCallbackInfo)
+bool UnwrapParamForPush(napi_env env, size_t argc, napi_value* argv, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
 {
     HILOG_INFO("%{public}s called, argc=%{public}zu", __func__, argc);
     const size_t argcMax = ACE_ARGS_TWO;
@@ -269,7 +282,7 @@ bool UnwrapRequestParameters(napi_env env, napi_value param, ACEAsyncJSCallbackI
         }
     }
 
-    if (!UnwrapWantFromJS(env, param, asyncCallbackInfo)) {
+    if (!UnwrapWantFromJS(env, param, asyncCallbackInfo) && !UnwrapTargetFromJS(env, param, asyncCallbackInfo)) {
         HILOG_INFO("%{public}s called, Params(want) is invalid.", __func__);
         return false;
     }

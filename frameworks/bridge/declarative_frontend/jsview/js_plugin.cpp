@@ -62,10 +62,15 @@ void JSPlugin::Create(const JSCallbackInfo& info)
             pluginInfo.pluginName = sourceVal->ToString();
         }
         auto abilityVal = jstemplateObj->GetProperty("ability");
-        if (abilityVal->IsString()) {
+        if (!abilityVal->IsEmpty() && abilityVal->IsString()) {
             pluginInfo.bundleName = abilityVal->ToString();
         }
-        LOGD("JSPlugin::Create: source=%{public}s ability=%{public}s", pluginInfo.pluginName.c_str(),
+
+        auto bundleValue = jstemplateObj->GetProperty("bundleName");
+        if (!bundleValue->IsEmpty() && bundleValue->IsString()) {
+            pluginInfo.bundleName = bundleValue->ToString();
+        }
+        LOGD("JSPlugin::Create: source=%{public}s bundleName=%{public}s", pluginInfo.pluginName.c_str(),
             pluginInfo.bundleName.c_str());
     }
 
