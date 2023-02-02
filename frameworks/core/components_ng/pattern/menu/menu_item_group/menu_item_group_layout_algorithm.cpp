@@ -17,10 +17,10 @@
 
 #include "base/utils/utils.h"
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -28,7 +28,13 @@ namespace OHOS::Ace::NG {
 void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto host = layoutWrapper->GetHostNode();
-    auto verInterval = VERTICAL_INTERVAL_PHONE.ConvertToPx();
+    auto verInterval = static_cast<float>(VERTICAL_INTERVAL.ConvertToPx());
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto groupDividerPadding_ = theme->GetDividerPaddingVertical() * 2 + theme->GetDefaultDividerWidth();
 
     const auto& props = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(props);
@@ -52,11 +58,11 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto paintProperty = host->GetPaintProperty<MenuItemGroupPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateNeedHeaderPadding(needHeaderPadding_);
-    float headerPadding = needHeaderPadding_ ? GROUP_DIVIDER_PADDING.ConvertToPx() : 0.0f;
+    float headerPadding = needHeaderPadding_ ? static_cast<float>(groupDividerPadding_.ConvertToPx()) : 0.0f;
     totalHeight += headerPadding;
     if (headerIndex_ >= 0) {
         auto headerWrapper = layoutWrapper->GetOrCreateChildByIndex(headerIndex_);
-        totalHeight += headerWrapper->GetGeometryNode()->GetMarginFrameSize().Height() + verInterval * 2.0;
+        totalHeight += headerWrapper->GetGeometryNode()->GetMarginFrameSize().Height() + verInterval * 2;
     }
     // measure menu item
     auto totalItemCount = layoutWrapper->GetTotalChildCount();
@@ -77,12 +83,12 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     if (footerIndex_ >= 0) {
         auto footerWrapper = layoutWrapper->GetOrCreateChildByIndex(footerIndex_);
-        totalHeight += footerWrapper->GetGeometryNode()->GetMarginFrameSize().Height() + verInterval * 2.0;
+        totalHeight += footerWrapper->GetGeometryNode()->GetMarginFrameSize().Height() + verInterval * 2;
     }
     // set menu size
     needFooterPadding_ = NeedFooterPadding(host);
     paintProperty->UpdateNeedFooterPadding(needFooterPadding_);
-    float footerPadding = needFooterPadding_ ? GROUP_DIVIDER_PADDING.ConvertToPx() : 0.0f;
+    float footerPadding = needFooterPadding_ ? static_cast<float>(groupDividerPadding_.ConvertToPx()) : 0.0f;
     totalHeight += footerPadding;
     menuItemGroupSize.SetHeight(totalHeight);
 
@@ -121,11 +127,14 @@ void MenuItemGroupLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper)
 {
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(headerIndex_);
     CHECK_NULL_VOID(wrapper);
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    float headerPadding =
-        (needHeaderPadding_ ? GROUP_DIVIDER_PADDING.ConvertToPx() : 0.0f) + VERTICAL_INTERVAL_PHONE.ConvertToPx();
-    LayoutIndex(wrapper, OffsetF(MENU_ITEM_GROUP_PADDING.ConvertToPx(), headerPadding));
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    float headerPadding = (needHeaderPadding_ ? static_cast<float>(groupDividerPadding_.ConvertToPx()) : 0.0f) +
+                          static_cast<float>(VERTICAL_INTERVAL.ConvertToPx());
+    LayoutIndex(wrapper, OffsetF(static_cast<float>(theme->GetIconContentPadding().ConvertToPx()), headerPadding));
 }
 
 void MenuItemGroupLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper)
@@ -137,11 +146,15 @@ void MenuItemGroupLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper)
 
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto groupHeight = size.Height();
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    float footerPadding =
-        (needFooterPadding_ ? GROUP_DIVIDER_PADDING.ConvertToPx() : 0.0f) + VERTICAL_INTERVAL_PHONE.ConvertToPx();
-    LayoutIndex(wrapper, OffsetF(MENU_ITEM_GROUP_PADDING.ConvertToPx(), (groupHeight - footerHeight - footerPadding)));
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    float footerPadding = (needFooterPadding_ ? static_cast<float>(groupDividerPadding_.ConvertToPx()) : 0.0f) +
+                          static_cast<float>(VERTICAL_INTERVAL.ConvertToPx());
+    LayoutIndex(wrapper, OffsetF(static_cast<float>(theme->GetIconContentPadding().ConvertToPx()),
+                             (groupHeight - footerHeight - footerPadding)));
 }
 
 void MenuItemGroupLayoutAlgorithm::LayoutIndex(const RefPtr<LayoutWrapper>& wrapper, const OffsetF& offset)

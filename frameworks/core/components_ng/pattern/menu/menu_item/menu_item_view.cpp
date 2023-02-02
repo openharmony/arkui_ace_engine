@@ -25,7 +25,6 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
@@ -40,26 +39,46 @@ void MenuItemView::AddIcon(const std::optional<std::string>& icon, const RefPtr<
         auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         props->UpdateImageSourceInfo(ImageSourceInfo(iconPath));
         props->UpdateImageFit(ImageFit::SCALE_DOWN);
-        props->UpdateCalcMaxSize(CalcSize(ICON_SIDE_LENGTH, ICON_SIDE_LENGTH));
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
+        props->UpdateCalcMaxSize(
+            CalcSize(CalcLength(theme->GetIconSideLength()), CalcLength(theme->GetIconSideLength())));
         props->UpdateAlignment(Alignment::CENTER);
+
+        auto renderProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(renderProperty);
+        renderProperty->UpdateSvgFillColor(theme->GetMenuIconColor());
 
         iconNode->MountToParent(row);
         iconNode->MarkModifyDone();
     }
 }
 
-void MenuItemView::AddContent(const std::string& content, const RefPtr<FrameNode>& row)
+void MenuItemView::AddContent(
+    const std::string& content, const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& menuItem)
 {
     auto contentNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_VOID(contentNode);
     auto contentProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(contentProperty);
-    contentProperty->UpdateFontSize(MENU_FONT_SIZE);
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    contentProperty->UpdateFontSize(theme->GetMenuFontSize());
+    contentProperty->UpdateFontWeight(FontWeight::REGULAR);
+    contentProperty->UpdateTextColor(theme->GetMenuFontColor());
     contentProperty->UpdateContent(content);
 
     contentNode->MountToParent(row);
     contentNode->MarkModifyDone();
+
+    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(menuItemPattern);
+    menuItemPattern->SetContentNode(contentNode);
 }
 
 void MenuItemView::AddLabelInfo(const std::optional<std::string>& labelInfo, const RefPtr<FrameNode>& row)
@@ -71,14 +90,15 @@ void MenuItemView::AddLabelInfo(const std::optional<std::string>& labelInfo, con
         CHECK_NULL_VOID(labelNode);
         auto labelProperty = labelNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(labelProperty);
-        labelProperty->UpdateFontSize(MENU_FONT_SIZE);
-        labelProperty->UpdateContent(labelStr);
+
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
-        auto textColor = theme->GetNormalTextDisableColor();
-        labelProperty->UpdateTextColor(textColor);
+        labelProperty->UpdateFontSize(theme->GetMenuFontSize());
+        labelProperty->UpdateTextColor(theme->GetSecondaryFontColor());
+        labelProperty->UpdateFontWeight(FontWeight::REGULAR);
+        labelProperty->UpdateContent(labelStr);
 
         labelNode->MountToParent(row);
         labelNode->MarkModifyDone();
@@ -100,8 +120,12 @@ void MenuItemView::Create(const MenuItemProperties& menuItemProps)
     // set border radius
     auto renderContext = menuItem->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
     BorderRadiusProperty border;
-    border.SetRadius(ROUND_RADIUS_PHONE);
+    border.SetRadius(theme->GetInnerBorderRadius());
     renderContext->UpdateBorderRadius(border);
 
     auto leftRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -111,11 +135,11 @@ void MenuItemView::Create(const MenuItemProperties& menuItemProps)
     CHECK_NULL_VOID(leftRowLayoutProps);
     leftRowLayoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     leftRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    leftRowLayoutProps->UpdateSpace(MENU_ITEM_PADDING);
+    leftRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
 
     leftRow->MountToParent(menuItem);
     AddIcon(menuItemProps.startIcon, leftRow);
-    AddContent(menuItemProps.content, leftRow);
+    AddContent(menuItemProps.content, leftRow, menuItem);
     auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_VOID(rightRow);
@@ -123,7 +147,7 @@ void MenuItemView::Create(const MenuItemProperties& menuItemProps)
     CHECK_NULL_VOID(rightRowLayoutProps);
     rightRowLayoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     rightRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    rightRowLayoutProps->UpdateSpace(MENU_ITEM_PADDING);
+    rightRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
 
     rightRow->MountToParent(menuItem);
     AddLabelInfo(menuItemProps.labelInfo, rightRow);

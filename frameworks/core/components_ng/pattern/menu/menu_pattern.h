@@ -109,6 +109,17 @@ public:
         return targetId_;
     }
 
+    void SetIsSelectMenu(bool isSelectMenu)
+    {
+        isSelectMenu_ = isSelectMenu;
+    }
+    bool IsSelectMenu() const
+    {
+        return isSelectMenu_;
+    }
+
+    void RemoveParentHoverStyle();
+
 private:
     void OnModifyDone() override;
     void RegisterOnClick();
@@ -123,6 +134,8 @@ private:
     RefPtr<FrameNode> parentMenuItem_;
 
     std::optional<Dimension> fontSize_;
+
+    bool isSelectMenu_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

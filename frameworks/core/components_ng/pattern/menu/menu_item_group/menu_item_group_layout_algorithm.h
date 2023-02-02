@@ -17,6 +17,7 @@
 
 #include <map>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -55,6 +56,8 @@ private:
 
     bool needHeaderPadding_ = false;
     bool needFooterPadding_ = false;
+
+    Dimension groupDividerPadding_;
 
     ItemPositionMap itemPosition_;
 
