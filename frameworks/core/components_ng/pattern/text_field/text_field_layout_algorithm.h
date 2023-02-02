@@ -89,6 +89,11 @@ public:
     static void UpdatePlaceholderTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
         const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled);
 
+    float GetPlaceholderParagraphHeight()
+    {
+        return placeholderParagraphHeight_;
+    }
+
 private:
     void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText);
     bool CreateParagraphAndLayout(
@@ -107,6 +112,7 @@ private:
     RectF textRect_;
     RectF imageRect_;
     OffsetF parentGlobalOffset_;
+    float placeholderParagraphHeight_ = 0.0f;
 
     float caretOffsetX_ = 0.0f;
 

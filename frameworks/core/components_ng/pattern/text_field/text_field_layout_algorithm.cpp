@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/font_collection.h"
@@ -107,6 +108,10 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     TextStyle textStyle;
     std::string textContent;
     bool showPlaceHolder = false;
+    auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width()) -
+                      pattern->GetHorizontalPaddingSum();
+    auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height()) -
+                       pattern->GetVerticalPaddingSum();
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
         UpdateTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetValueValue("");
@@ -118,36 +123,35 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     auto isPasswordType =
         textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
     CreateParagraph(textStyle, textContent, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder);
-
-    auto horizontalPaddingSum = pattern->GetHorizontalPaddingSum();
     if (textStyle.GetMaxLines() == 1 && !showPlaceHolder) {
         // for text input case, need to measure in one line without constraint.
         paragraph_->Layout(std::numeric_limits<double>::infinity());
     } else {
         // for text area, max width is content width without password icon
-        paragraph_->Layout(contentConstraint.maxSize.Width() - horizontalPaddingSum);
+        paragraph_->Layout(idealWidth);
     }
     auto paragraphNewWidth = static_cast<float>(paragraph_->GetMaxIntrinsicWidth());
     if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth()) && !pattern->IsTextArea()) {
         paragraph_->Layout(std::ceil(paragraphNewWidth));
+    }
+    if (showPlaceHolder) {
+        placeholderParagraphHeight_ = paragraph_->GetHeight();
     }
     auto preferredHeight = static_cast<float>(paragraph_->GetHeight());
     if (textContent.empty()) {
         preferredHeight = pattern->PreferredLineHeight();
     }
     if (pattern->IsTextArea()) {
-        textRect_.SetSize(SizeF(
-            contentConstraint.maxSize.Width() - horizontalPaddingSum, static_cast<float>(paragraph_->GetHeight())));
-        return SizeF(contentConstraint.maxSize.Width() - horizontalPaddingSum,
-            std::min(contentConstraint.maxSize.Height() - pattern->GetVerticalPaddingSum(),
-                static_cast<float>(paragraph_->GetHeight())));
+        auto useHeight = static_cast<float>(paragraph_->GetHeight());
+        textRect_.SetSize(SizeF(idealWidth, useHeight));
+        return SizeF(idealWidth, std::min(idealHeight, useHeight));
     }
     auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(true);
     // check password image size.
     if (!showPasswordIcon || !isPasswordType) {
         textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
         imageRect_.Reset();
-        return SizeF(contentConstraint.maxSize.Width() - horizontalPaddingSum, preferredHeight);
+        return SizeF(idealWidth, preferredHeight);
     }
     float imageSize = 0.0f;
     imageSize = showPasswordIcon ? preferredHeight : 0.0f;
@@ -157,10 +161,10 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
 
     if (textStyle.GetMaxLines() > 1 || pattern->IsTextArea()) {
         // for textArea, need to delete imageWidth and remeasure.
-        paragraph_->Layout(contentConstraint.maxSize.Width() - imageSize);
+        paragraph_->Layout(idealWidth - imageSize);
         textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
         imageRect_.SetSize(SizeF(0.0f, 0.0f));
-        return SizeF(contentConstraint.maxSize.Width(), imageSize);
+        return SizeF(idealWidth, imageSize);
     }
     imageRect_.SetSize(SizeF(imageSize, imageSize));
     if (pattern->GetTextObscured() && pattern->GetHidePasswordIconCtx()) {
@@ -168,10 +172,9 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     } else if (!pattern->GetTextObscured() && pattern->GetShowPasswordIconCtx()) {
         pattern->GetShowPasswordIconCtx()->MakeCanvasImage(imageRect_.GetSize(), true, ImageFit::NONE);
     }
-    preferredHeight = std::min(static_cast<float>(paragraph_->GetHeight()), contentConstraint.maxSize.Height());
+    preferredHeight = std::min(static_cast<float>(paragraph_->GetHeight()), idealHeight);
     textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), static_cast<float>(preferredHeight)));
-    return SizeF(contentConstraint.maxSize.Width() - horizontalPaddingSum - imageSize,
-        std::min(contentConstraint.maxSize.Height() - pattern->GetVerticalPaddingSum(), preferredHeight));
+    return SizeF(idealWidth - imageSize, std::min(idealHeight, preferredHeight));
 }
 
 void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -202,9 +205,7 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         textRect_.SetOffset(contentOffset);
         return;
     }
-
     contentOffset = Alignment::GetAlignPosition(size, contentSize, align);
-
     content->SetOffset(OffsetF(pattern->GetPaddingLeft(), contentOffset.GetY()));
     // if handler is moving, no need to adjust text rect in pattern
     if (pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE ||
@@ -309,6 +310,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     paraStyle.maxLines_ = textStyle.GetMaxLines();
     paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
     paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle.GetWordBreak());
+    paraStyle.fontSize_ = textStyle.GetFontSize().ConvertToPx();
     if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
         paraStyle.ellipsis_ = RSParagraphStyle::ELLIPSIS;
     }
