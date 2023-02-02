@@ -343,7 +343,7 @@ if (is_standard_system) {
       out_path = get_label_info(
               "//foundation/distributeddatamgr/preferences/frameworks/js/napi:preferences",
               "root_out_dir")
-      deps = [ "//foundation/distributeddatamgr/preferences/frameworks/js/napi:preferences" ]
+      deps = [ "//foundation/distributeddatamgr/preferences/frameworks/js/napi/preferences:preferences" ]
       sources = [ "${out_path}/distributeddatamgr/preferences/libpreferences${dylib_suffix}" ]
 
       #rdb
