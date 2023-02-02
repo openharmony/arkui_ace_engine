@@ -154,7 +154,7 @@ bool RefreshPattern::OnDirtyLayoutWrapperSwap(
     if (!textChild_) {
         textChild_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->TotalChildCount() - 2));
     }
-    if (refreshRenderProperty->GetIsRefreshingValue()) {
+    if (refreshRenderProperty->GetIsRefreshingValue() && (refreshStatus_ != RefreshStatus::REFRESH)) {
         auto textChildLayoutProperty = textChild_->GetLayoutProperty<TextLayoutProperty>();
         if (textChildLayoutProperty->GetVisibilityValue() == VisibleType::INVISIBLE &&
             refreshLayoutProperty->GetIsShowLastTimeValue()) {
