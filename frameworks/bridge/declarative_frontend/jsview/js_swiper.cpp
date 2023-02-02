@@ -394,24 +394,30 @@ void JSSwiper::SetOnAnimationEnd(const JSCallbackInfo& info)
 
 void JSSwiper::SetOnClick(const JSCallbackInfo& info)
 {
-    if (info[0]->IsFunction()) {
-        RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onClick = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc)](
-                           const BaseEventInfo* info, const RefPtr<V2::InspectorFunctionImpl>& impl) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
-            auto newInfo = *clickInfo;
-            if (impl) {
-                impl->UpdateEventInfo(newInfo);
-            }
-            ACE_SCORING_EVENT("onClick");
-            func->Execute(newInfo);
-        };
-
-        SwiperModel::GetInstance()->SetOnClick(onClick);
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSInteractableView::JsOnClick(info);
+        return;
     }
 
-    info.SetReturnValue(info.This());
+    if (!info[0]->IsFunction()) {
+        LOGW("JSSwiper::SetOnClick the info is not click function");
+        return;
+    }
+
+    RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onClick = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc)](
+                       const BaseEventInfo* info, const RefPtr<V2::InspectorFunctionImpl>& impl) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+        auto newInfo = *clickInfo;
+        if (impl) {
+            impl->UpdateEventInfo(newInfo);
+        }
+        ACE_SCORING_EVENT("onClick");
+        func->Execute(newInfo);
+    };
+
+    SwiperModel::GetInstance()->SetOnClick(onClick);
 }
 
 void JSSwiper::SetWidth(const JSCallbackInfo& info)
