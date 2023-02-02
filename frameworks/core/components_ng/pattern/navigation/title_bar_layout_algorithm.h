@@ -115,6 +115,7 @@ private:
 
     Dimension maxPaddingStart_;
     Dimension maxPaddingEnd_;
+    Dimension defaultPaddingStart_;
     Dimension menuHeight_;
     Dimension iconSize_;
     Dimension titleFontSize_;
