@@ -20,7 +20,6 @@
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 
 namespace OHOS::Ace::NG {
-
 RefPtr<SvgImageObject> SvgImageObject::Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data)
 {
     auto obj = AceType::MakeRefPtr<SvgImageObject>(src, SizeF());
@@ -55,5 +54,4 @@ bool SvgImageObject::MakeSvgDom(const RefPtr<ImageData>& data, const std::option
     SetImageSize(svgDomBase_->GetContainerSize());
     return true;
 }
-
 } // namespace OHOS::Ace::NG

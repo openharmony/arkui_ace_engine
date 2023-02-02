@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,6 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-
 struct SliderLayoutStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SliderMode, SliderModel::SliderMode)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Direction, Axis)
@@ -41,6 +40,13 @@ struct SliderPaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ShowSteps, bool)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Direction, Axis)
 };
-
+struct SliderTipStyle {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ShowTips, bool)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Padding, Dimension)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Content, std::string)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextColor, Color)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TipColor, Color)
+};
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SLIDER_SLIDER_STYLE_H
