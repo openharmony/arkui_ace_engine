@@ -191,6 +191,30 @@ void JSScroll::OnScrollEndCallback(const JSCallbackInfo& args)
     args.SetReturnValue(args.This());
 }
 
+void JSScroll::OnScrollStartCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto scrollStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Call(JSRef<JSObject>(), 0, nullptr);
+        };
+        ScrollModel::GetInstance()->SetOnScrollStart(std::move(scrollStart));
+    }
+    args.SetReturnValue(args.This());
+}
+
+void JSScroll::OnScrollStopCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto scrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Call(JSRef<JSObject>(), 0, nullptr);
+        };
+        ScrollModel::GetInstance()->SetOnScrollStop(std::move(scrollStop));
+    }
+    args.SetReturnValue(args.This());
+}
+
 void JSScroll::JSBind(BindingTarget globalObj)
 {
     JSClass<JSScroll>::Declare("Scroll");
@@ -202,6 +226,8 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("onScroll", &JSScroll::OnScrollCallback, opt);
     JSClass<JSScroll>::StaticMethod("onScrollEdge", &JSScroll::OnScrollEdgeCallback, opt);
     JSClass<JSScroll>::StaticMethod("onScrollEnd", &JSScroll::OnScrollEndCallback, opt);
+    JSClass<JSScroll>::StaticMethod("onScrollStart", &JSScroll::OnScrollStartCallback, opt);
+    JSClass<JSScroll>::StaticMethod("onScrollStop", &JSScroll::OnScrollStopCallback, opt);
     JSClass<JSScroll>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSScroll>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSScroll>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

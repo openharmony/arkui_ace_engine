@@ -116,6 +116,24 @@ void ScrollModelNG::SetOnScrollEnd(NG::ScrollEndEvent&& event)
     eventHub->SetOnScrollEnd(std::move(event));
 }
 
+void ScrollModelNG::SetOnScrollStart(NG::ScrollStartEvent&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollStart(std::move(event));
+}
+
+void ScrollModelNG::SetOnScrollStop(NG::ScrollStopEvent&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollStop(std::move(event));
+}
+
 void ScrollModelNG::SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
