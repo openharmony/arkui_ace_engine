@@ -220,4 +220,11 @@ const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
 void PipelineContext::AddPredictTask(PredictTask&& task) {}
 
 void PipelineContext::FlushPipelineImmediately() {}
+
+FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp)
+{
+    return nullptr;
+}
+
+void PipelineContext::DumpPipelineInfo() const {}
 } // namespace OHOS::Ace::NG

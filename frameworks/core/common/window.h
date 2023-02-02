@@ -98,11 +98,22 @@ public:
 
     virtual void SetDrawTextAsBitmap(bool useBitmap) {}
 
+    virtual float GetRefreshRate() const
+    {
+        return 0.0f;
+    }
+
+    uint64_t GetLastRequestVsyncTime() const {
+        return lastRequestVsyncTime_;
+    }
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
     double density_ = 1.0;
     std::list<AceVsyncCallback> callbacks_;
+
+    uint64_t lastRequestVsyncTime_ = 0;
 
 private:
     std::function<Rect()> windowRectImpl_;

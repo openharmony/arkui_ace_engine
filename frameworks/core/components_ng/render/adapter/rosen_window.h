@@ -60,6 +60,8 @@ public:
 
     void SetDrawTextAsBitmap(bool useBitmap) override;
 
+    float GetRefreshRate() const override;
+
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;

@@ -91,6 +91,7 @@ bool SystemProperties::astcEnabled_ = false;
 int SystemProperties::astcMax_ = 0;
 int SystemProperties::astcPsnr_ = 0;
 bool SystemProperties::extSurfaceEnabled_ = false;
+uint32_t SystemProperties::dumpFrameCount_ = 0;
 
 DeviceType SystemProperties::GetDeviceType()
 {
