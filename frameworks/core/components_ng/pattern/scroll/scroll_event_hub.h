@@ -42,6 +42,8 @@ using ScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
 using ScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, ScrollState)>;
 using ScrollEdgeEvent = std::function<void(ScrollEdge)>;
 using ScrollEndEvent = std::function<void()>;
+using ScrollStartEvent = std::function<void()>;
+using ScrollStopEvent = std::function<void()>;
 
 class ScrollEventHub : public EventHub {
     DECLARE_ACE_TYPE(ScrollEventHub, EventHub)
@@ -80,6 +82,26 @@ public:
         onScrollEnd_ = std::move(event);
     }
 
+    const ScrollStartEvent& GetScrollStartEvent()
+    {
+        return onScrollStart_;
+    }
+
+    void SetOnScrollStart(ScrollStartEvent&& event)
+    {
+        onScrollStart_ = std::move(event);
+    }
+
+    const ScrollStopEvent& GetScrollStopEvent()
+    {
+        return onScrollStop_;
+    }
+
+    void SetOnScrollStop(ScrollStopEvent&& event)
+    {
+        onScrollStop_ = std::move(event);
+    }
+
     const ScrollBeginEvent& GetScrollBeginEvent()
     {
         return onScrollBegin_;
@@ -105,6 +127,8 @@ private:
     ScrollBeginEvent onScrollBegin_;
     ScrollFrameBeginEvent onScrollFrameBegin_;
     ScrollEndEvent onScrollEnd_;
+    ScrollStartEvent onScrollStart_;
+    ScrollStopEvent onScrollStop_;
     ScrollEdgeEvent onScrollEdge_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ScrollEventHub);
