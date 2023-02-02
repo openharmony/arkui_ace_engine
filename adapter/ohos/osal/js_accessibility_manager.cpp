@@ -1187,6 +1187,7 @@ void JsAccessibilityManager::DumpTree(int32_t depth, NodeId nodeID)
         auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
         auto rootNode = ngPipeline->GetRootElement();
         CHECK_NULL_VOID(rootNode);
+        nodeID = rootNode -> GetAccessibilityId();
         auto windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
         auto windowTop = GetWindowTop(ngPipeline->GetWindowId());
         auto page = ngPipeline->GetStageManager()->GetLastPage();
