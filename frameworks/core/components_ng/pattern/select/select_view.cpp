@@ -173,7 +173,7 @@ void SelectView::SetOptionFontColor(const Color& color)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetOptionBgColor(color);
+    pattern->SetOptionFontColor(color);
 }
 
 void SelectView::SetOptionItalicFontStyle(const Ace::FontStyle& value)
