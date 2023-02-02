@@ -51,8 +51,6 @@ namespace OHOS::Ace::NG {
 namespace {
 // should be moved to theme.
 constexpr int32_t COMMON_ANIMATION_DUR = 200;
-constexpr int32_t TOAST_ANIMATION_DURATION = 100;
-constexpr float TOAST_ANIMATION_POSITION = 15.0f;
 } // namespace
 
 void OverlayManager::Show(const RefPtr<FrameNode>& node)
@@ -279,32 +277,13 @@ void OverlayManager::ShowToast(
     toastNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     toastMap_[toastId] = toastNode;
-    AnimationOption option;
-    auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
-    option.SetCurve(curve);
-    option.SetDuration(TOAST_ANIMATION_DURATION);
-    option.SetFillMode(FillMode::FORWARDS);
-    option.SetOnFinishEvent([weak = WeakClaim(this), toastId, duration] {
-        auto context = PipelineContext::GetCurrentContext();
-        context->GetTaskExecutor()->PostDelayedTask(
-            [weak, toastId, duration] {
-                auto overlayManager = weak.Upgrade();
-                CHECK_NULL_VOID(overlayManager);
-                overlayManager->PopToast(toastId);
-            },
-            TaskExecutor::TaskType::UI, duration);
-    });
-    auto ctx = toastNode->GetRenderContext();
-    CHECK_NULL_VOID(ctx);
-    ctx->UpdateOpacity(0.0);
-    ctx->OnTransformTranslateUpdate({ 0.0f, TOAST_ANIMATION_POSITION, 0.0f });
-    AnimationUtils::Animate(
-        option,
-        [ctx]() {
-            ctx->UpdateOpacity(1.0);
-            ctx->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+    context->GetTaskExecutor()->PostDelayedTask(
+        [weak= WeakClaim(this), toastId] {
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->PopToast(toastId);
         },
-        option.GetOnFinishEvent());
+        TaskExecutor::TaskType::UI, duration);
 }
 
 void OverlayManager::PopToast(int32_t toastId)
@@ -315,45 +294,15 @@ void OverlayManager::PopToast(int32_t toastId)
         return;
     }
     auto toastUnderPop = toastIter->second.Upgrade();
-    AnimationOption option;
-    auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
-    option.SetCurve(curve);
-    option.SetDuration(TOAST_ANIMATION_DURATION);
-    option.SetFillMode(FillMode::FORWARDS);
-    option.SetOnFinishEvent([weak = WeakClaim(this), toastId] {
-        auto overlayManager = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(overlayManager);
-        auto toastIter = overlayManager->toastMap_.find(toastId);
-        if (toastIter == overlayManager->toastMap_.end()) {
-            LOGI("No toast under pop");
-            return;
-        }
-        auto toastUnderPop = toastIter->second.Upgrade();
-        CHECK_NULL_VOID_NOLOG(toastUnderPop);
-        LOGI("begin to pop toast, id is %{public}d", toastUnderPop->GetId());
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(context);
-        auto rootNode = context->GetRootElement();
-        CHECK_NULL_VOID_NOLOG(rootNode);
-        rootNode->RemoveChild(toastUnderPop);
-        overlayManager->toastMap_.erase(toastId);
-        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    });
-    auto ctx = toastUnderPop->GetRenderContext();
-    CHECK_NULL_VOID(ctx);
-    ctx->UpdateOpacity(1.0);
-    ctx->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-    AnimationUtils::Animate(
-        option,
-        [ctx]() {
-            ctx->UpdateOpacity(0.0);
-            ctx->OnTransformTranslateUpdate({ 0.0f, TOAST_ANIMATION_POSITION, 0.0f });
-        },
-        option.GetOnFinishEvent());
-    // start animation immediately
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->RequestFrame();
+    CHECK_NULL_VOID_NOLOG(toastUnderPop);
+    LOGI("begin to pop toast, id is %{public}d", toastUnderPop->GetId());
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(context);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_VOID_NOLOG(rootNode);
+    rootNode->RemoveChild(toastUnderPop);
+    toastMap_.erase(toastId);
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo)
