@@ -44,6 +44,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/adapter/border_image_modifier.h"
+#include "core/components_ng/render/adapter/debug_boundary_modifier.h"
 #include "core/components_ng/render/adapter/focus_state_modifier.h"
 #include "core/components_ng/render/adapter/graphics_modifier.h"
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
@@ -55,6 +56,7 @@
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/canvas.h"
+#include "core/components_ng/render/debug_boundary_painter.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
@@ -228,6 +230,32 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     if (propOverlay_) {
         PaintOverlayText();
     }
+
+    if (NeedDebugBoundary() && SystemProperties::GetDebugBoundaryEnabled()) {
+        PaintDebugBoundary();
+    }
+}
+
+void RosenRenderContext::PaintDebugBoundary()
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    auto paintTask = [contentSize = geometryNode->GetFrameSize(), frameSize = geometryNode->GetMarginFrameSize(),
+                         offset = geometryNode->GetMarginFrameOffset(),
+                         frameOffset = geometryNode->GetFrameOffset()](RSCanvas& rsCanvas) mutable {
+        DebugBoundaryPainter painter(contentSize, frameSize);
+        painter.SetFrameOffset(frameOffset);
+        painter.DrawDebugBoundaries(rsCanvas, offset);
+    };
+
+    if (!debugBoundaryModifier_) {
+        debugBoundaryModifier_ = std::make_shared<DebugBoundaryModifier>();
+        debugBoundaryModifier_->SetPaintTask(std::move(paintTask));
+        rsNode_->AddModifier(debugBoundaryModifier_);
+    }
+    debugBoundaryModifier_->SetCustomData(true);
 }
 
 void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
