@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
 void SliderModelNG::Create(float value, float step, float min, float max)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -73,7 +72,7 @@ void SliderModelNG::SetShowSteps(bool value)
 }
 void SliderModelNG::SetShowTips(bool value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, ShowTips, value);
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, ShowTips, value);
 }
 void SliderModelNG::SetThickness(const Dimension& value)
 {
@@ -87,5 +86,4 @@ void SliderModelNG::SetOnChange(SliderOnChangeEvent&& eventOnChange)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(eventOnChange));
 }
-
 } // namespace OHOS::Ace::NG

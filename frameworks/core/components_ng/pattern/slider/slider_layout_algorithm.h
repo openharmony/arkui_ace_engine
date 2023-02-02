@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,14 +26,11 @@ class ACE_EXPORT SliderLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(SliderLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    explicit SliderLayoutAlgorithm(bool bubbleFlag = false, const OffsetF& circleCenter = { 0, 0 })
-        : circleCenter_(circleCenter), bubbleFlag_(bubbleFlag) {};
+    explicit SliderLayoutAlgorithm() = default;
     ~SliderLayoutAlgorithm() override = default;
 
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
-
-    void Layout(LayoutWrapper* layoutWrapper) override;
 
     float GetTrackThickness() const
     {
@@ -54,8 +51,6 @@ private:
     float blockDiameter_ = 0.0f;
     float blockHotSize_ = 0.0f;
 
-    OffsetF circleCenter_ = { 0, 0 };
-    bool bubbleFlag_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SliderLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

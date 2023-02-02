@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,6 @@
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 
 namespace OHOS::Ace::NG {
-
 class SliderPattern : public Pattern {
     DECLARE_ACE_TYPE(SliderPattern, Pattern);
 
@@ -38,7 +37,8 @@ public:
     {
         SliderPaintMethod::Parameters paintParameters { trackThickness_, blockDiameter_, sliderLength_, borderBlank_,
             stepRatio_, valueRatio_, hotBlockShadowWidth_, hotFlag_, mouseHoverFlag_, mousePressedFlag_ };
-        return MakeRefPtr<SliderPaintMethod>(paintParameters);
+        return MakeRefPtr<SliderPaintMethod>(
+            paintParameters, paragraph_, bubbleFlag_, bubbleSize_, bubbleOffset_, textOffset_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -53,7 +53,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<SliderLayoutAlgorithm>(bubbleFlag_, circleCenter_);
+        return MakeRefPtr<SliderLayoutAlgorithm>();
     }
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
@@ -68,28 +68,19 @@ public:
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
     }
 
-    bool HasBubbleNode() const
-    {
-        return bubbleId_.has_value();
-    }
-
-    int32_t GetBubbleId()
-    {
-        if (!bubbleId_.has_value()) {
-            bubbleId_ = ElementRegister::GetInstance()->MakeUniqueId();
-        }
-        return bubbleId_.value();
-    }
-
 private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
+    void CreateParagraphFunc();
+    void CreateParagraphAndLayout(
+        const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
+    bool CreateParagraph(const TextStyle& textStyle, std::string content);
     void UpdateCircleCenterOffset();
     void UpdateTipsValue();
-    void UpdateBubbleNode();
-    void CreateAndSetBubbleNode();
-    void RemoveBubbleNode();
+    void UpdateBubbleSizeAndLayout();
+    void UpdateBubble();
+    void InitializeBubble();
 
     void UpdateMarkDirtyNode(const PropertyChangeFlag& Flag);
     Axis GetDirection() const;
@@ -139,11 +130,13 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
 
-    std::optional<int32_t> bubbleId_;
+    // tip Parameters
     bool bubbleFlag_ = false;
-
+    RefPtr<Paragraph> paragraph_;
+    SizeF bubbleSize_;
+    OffsetF bubbleOffset_;
+    OffsetF textOffset_;
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
 };
-
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SLIDER_SLIDER_PATTERN_H

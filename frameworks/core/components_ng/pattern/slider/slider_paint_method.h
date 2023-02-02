@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,9 +21,9 @@
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT SliderPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SliderPaintMethod, NodePaintMethod)
 
@@ -40,8 +40,13 @@ public:
         bool mouseHoverFlag_ = false;
         bool mousePressedFlag_ = false;
     };
-    explicit SliderPaintMethod(const Parameters& parameters) : parameters_(parameters) {};
+    explicit SliderPaintMethod(const Parameters& parameters, RefPtr<NG::Paragraph> paragraph, bool bubbleFlag,
+        SizeF bubbleSize, OffsetF bubbleOffset, OffsetF textOffset)
+        : parameters_(parameters), paragraph_(std::move(paragraph)), isDrawBubble_(bubbleFlag), bubbleSize_(bubbleSize),
+          bubbleOffset_(bubbleOffset), textOffset_(textOffset)
+    {}
     ~SliderPaintMethod() override = default;
+    CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
@@ -72,13 +77,17 @@ private:
         const RefPtr<SliderTheme>& theme) const;
     CirclePenAndSize GetCirclePen(const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset,
         const RefPtr<SliderTheme>& theme) const;
+    void PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper);
 
     Parameters parameters_;
-
+    RefPtr<NG::Paragraph> paragraph_;
+    bool isDrawBubble_ = false;
+    SizeF bubbleSize_;
+    OffsetF bubbleOffset_;
+    OffsetF textOffset_;
+    // Distance between slide track and Content boundary
     float centerWidth_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(SliderPaintMethod);
 };
-
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SLIDER_SLIDER_PAINT_METHOD_H
