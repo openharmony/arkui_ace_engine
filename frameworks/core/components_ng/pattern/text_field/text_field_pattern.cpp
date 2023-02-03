@@ -2017,7 +2017,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
 {
     auto newVal = StringUtils::ToWstring(textEditingValue_.GetValueBeforePosition(textSelector_.GetStart()) +
                                          insertValue + textEditingValue_.GetValueAfterPosition(textSelector_.GetEnd()));
-    if (static_cast<uint32_t>(newVal.length()) >= GetMaxLength()) {
+    if (static_cast<uint32_t>(newVal.length()) > GetMaxLength()) {
         LOGW("Max length reached");
         return;
     }
