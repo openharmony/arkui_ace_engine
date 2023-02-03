@@ -37,7 +37,6 @@ private:
     void PerformMeasureSelf(LayoutWrapper* layoutWrapper);
     void UpdateFrameSizeUsingChild(LayoutWrapper* layoutWrapper, SizeF& frameSize);
     void MeasureCircleButton(LayoutWrapper* layoutWrapper);
-    bool NeedResetHeight(LayoutWrapper* layoutWrapper);
 
     SizeF childSize_;
 
