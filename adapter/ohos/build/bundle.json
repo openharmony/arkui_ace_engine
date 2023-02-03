@@ -31,7 +31,6 @@
                 "ability_runtime",
                 "appexecfwk_standard",
                 "ipc",
-                "ipc_js",
                 "samgr",
                 "preferences",
                 "relational_store",

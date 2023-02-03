@@ -100,7 +100,7 @@ template("ace_ohos_standard_source_set") {
       "form_fwk:form_manager",
       "input:libmmi-client",
       "ipc:ipc_core",
-      "ipc_js:rpc",
+      "ipc:ipc_napi_common",
       "preferences:native_preferences",
       "relational_store:native_dataability",
       "relational_store:native_rdb",
