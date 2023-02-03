@@ -84,7 +84,7 @@ public:
     virtual RefPtr<PipelineBase> GetPipelineContext() const = 0;
 
     // Dump container.
-    virtual bool Dump(const std::vector<std::string>& params) = 0;
+    virtual bool Dump(const std::vector<std::string>& params, std::vector<std::string>& info);
 
     // Get the width/height of the view
     virtual int32_t GetViewWidth() const = 0;

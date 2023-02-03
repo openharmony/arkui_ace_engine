@@ -334,7 +334,7 @@ public:
 
     void RefreshStageFocus();
 
-    void ShowContainerTitle(bool isShow) override;
+    void ShowContainerTitle(bool isShow, bool hasDeco = true) override;
 
     void BlurWindowWithDrag(bool isBlur);
 

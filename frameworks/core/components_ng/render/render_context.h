@@ -60,6 +60,12 @@ public:
     void SetHostNode(const WeakPtr<FrameNode>& host);
     RefPtr<FrameNode> GetHost() const;
 
+    virtual void SetNeedDebugBoundary(bool flag) {}
+    virtual bool NeedDebugBoundary() const
+    {
+        return false;
+    }
+
     virtual void FlushContentDrawFunction(CanvasDrawFunction&& contentDraw) {}
 
     virtual void FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw) {}
@@ -359,6 +365,7 @@ protected:
 private:
     std::function<void()> requestFrame_;
     WeakPtr<FrameNode> host_;
+    bool needDebugBoundary_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderContext);
 };

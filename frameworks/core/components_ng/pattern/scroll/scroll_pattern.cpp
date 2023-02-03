@@ -102,6 +102,10 @@ void ScrollPattern::RegisterScrollEventTask()
     if (scrollBeginEvent) {
         scrollableEvent->SetScrollBeginCallback(std::move(scrollBeginEvent));
     }
+    auto scrollFrameBeginEvent = eventHub->GetScrollFrameBeginEvent();
+    if (scrollFrameBeginEvent) {
+        scrollableEvent->SetScrollFrameBeginCallback(std::move(scrollFrameBeginEvent));
+    }
 }
 
 bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -122,6 +126,17 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     return false;
 }
 
+void ScrollPattern::FireOnScrollStart()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID_NOLOG(hub);
+    auto onScrollStart = hub->GetScrollStartEvent();
+    CHECK_NULL_VOID_NOLOG(onScrollStart);
+    onScrollStart();
+}
+
 bool ScrollPattern::OnScrollCallback(float offset, int32_t source)
 {
     if (source != SCROLL_FROM_START) {
@@ -136,6 +151,8 @@ bool ScrollPattern::OnScrollCallback(float offset, int32_t source)
         }
         AdjustOffset(adjustOffset, source);
         return UpdateCurrentOffset(adjustOffset, source);
+    } else {
+        FireOnScrollStart();
     }
     return true;
 }
@@ -149,6 +166,10 @@ void ScrollPattern::OnScrollEndCallback()
     auto scrollEndEvent = eventHub->GetScrollEndEvent();
     if (scrollEndEvent) {
         scrollEndEvent();
+    }
+    auto scrollStopEvent = eventHub->GetScrollStopEvent();
+    if (scrollStopEvent) {
+        scrollStopEvent();
     }
 }
 

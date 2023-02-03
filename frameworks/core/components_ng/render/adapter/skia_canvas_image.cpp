@@ -133,6 +133,7 @@ int32_t SkiaCanvasImage::GetHeight() const
 void SkiaCanvasImage::AddFilter(SkPaint& paint)
 {
     auto config = GetPaintConfig();
+    paint.setFilterQuality(SkFilterQuality(config.imageInterpolation_));
     if (ImageRenderMode::TEMPLATE == config.renderMode_ || config.colorFilter_) {
         RSColorMatrix colorFilterMatrix;
         if (config.colorFilter_) {

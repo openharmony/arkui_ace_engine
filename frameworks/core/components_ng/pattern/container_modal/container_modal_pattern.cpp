@@ -42,10 +42,10 @@ void ContainerModalPattern::OnModifyDone()
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
     windowMode_ = windowManager->GetWindowMode();
-    ShowTitle(windowMode_ == WindowMode::WINDOW_MODE_FLOATING);
+    ShowTitle(windowMode_ == WindowMode::WINDOW_MODE_FLOATING, hasDeco_);
 }
 
-void ContainerModalPattern::ShowTitle(bool isShow)
+void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco)
 {
     auto containerNode = GetHost();
     CHECK_NULL_VOID(containerNode);
@@ -58,6 +58,11 @@ void ContainerModalPattern::ShowTitle(bool isShow)
     auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
     CHECK_NULL_VOID(floatingTitleNode);
     windowMode_ = PipelineContext::GetCurrentContext()->GetWindowManager()->GetWindowMode();
+    hasDeco_ = hasDeco;
+    LOGI("ShowTitle isShow: %{public}d, windowMode: %{public}d, hasDeco: %{public}d", isShow, windowMode_, hasDeco_);
+    if (!hasDeco_) {
+        isShow = false;
+    }
 
     // set container window show state to RS
     PipelineContext::GetCurrentContext()->SetContainerWindow(isShow);
@@ -131,6 +136,9 @@ void ContainerModalPattern::InitContainerEvent()
                                      TouchEventInfo& info) {
         auto container = weak.Upgrade();
         CHECK_NULL_VOID(container);
+        if (!container->hasDeco_) {
+            return;
+        }
         if (info.GetChangedTouches().begin()->GetGlobalLocation().GetY() <= titlePopupDistance) {
             // step1. Record the coordinates of the start of the touch.
             if (info.GetChangedTouches().begin()->GetTouchType() == TouchType::DOWN) {
@@ -176,7 +184,7 @@ void ContainerModalPattern::InitContainerEvent()
                                      MouseInfo& info) {
         auto container = weak.Upgrade();
         CHECK_NULL_VOID(container);
-        if (info.GetAction() != MouseAction::MOVE) {
+        if (info.GetAction() != MouseAction::MOVE || !container->hasDeco_) {
             return;
         }
         if (info.GetLocalLocation().GetY() <= MOUSE_MOVE_POPUP_DISTANCE && container->CanShowFloatingTitle()) {

@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 #include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -104,13 +103,8 @@ void PagePattern::ProcessShowState()
 void PagePattern::OnShow()
 {
     CHECK_NULL_VOID_NOLOG(!isOnShow_);
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto frontend = container->GetFrontend();
-    CHECK_NULL_VOID(frontend);
-    CHECK_NULL_VOID_NOLOG(frontend->IsForeground());
     isOnShow_ = true;
-    auto context = container->GetPipelineContext();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     if (onPageShow_) {
         context->PostAsyncEvent([onPageShow = onPageShow_]() { onPageShow(); });

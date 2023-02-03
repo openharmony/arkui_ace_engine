@@ -215,6 +215,7 @@ private:
     bool IsDisableSwipe() const;
     bool IsShowIndicator() const;
     float GetTranslateLength() const;
+    void OnIndexChange() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;

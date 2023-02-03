@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG {
 void ContainerModalPattern::OnModifyDone() {}
 
-void ContainerModalPattern::ShowTitle(bool isShow)
+void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco)
 {
     moveX_ = 1.0;
 }

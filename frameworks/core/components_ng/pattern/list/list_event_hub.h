@@ -53,6 +53,26 @@ public:
         return onScrollBeginEvent_;
     }
 
+    void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin)
+    {
+        onScrollFrameBeginEvent_ = std::move(onScrollFrameBegin);
+    }
+
+    const OnScrollFrameBeginEvent& GetOnScrollFrameBegin() const
+    {
+        return onScrollFrameBeginEvent_;
+    }
+
+    void SetOnScrollStart(OnScrollStartEvent&& onScrollStart)
+    {
+        onScrollStartEvent_ = std::move(onScrollStart);
+    }
+
+    const OnScrollStartEvent& GetOnScrollStart() const
+    {
+        return onScrollStartEvent_;
+    }
+
     void SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
     {
         onScrollStopEvent_ = std::move(onScrollStop);
@@ -219,6 +239,8 @@ private:
 
     OnScrollEvent onScrollEvent_;
     OnScrollBeginEvent onScrollBeginEvent_;
+    OnScrollFrameBeginEvent onScrollFrameBeginEvent_;
+    OnScrollStartEvent onScrollStartEvent_;
     OnScrollStopEvent onScrollStopEvent_;
     OnScrollIndexEvent onScrollIndexEvent_;
     OnReachEvent onReachStartEvent_;

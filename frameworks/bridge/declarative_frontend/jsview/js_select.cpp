@@ -692,6 +692,10 @@ void JSSelect::OnSelected(const JSCallbackInfo& info)
 
 void JSSelect::JsWidth(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsWidth(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
@@ -715,6 +719,10 @@ void JSSelect::Width(const JSRef<JSVal>& jsValue)
 
 void JSSelect::JsHeight(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsHeight(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
@@ -817,6 +825,10 @@ void JSSelect::JsPadding(const JSCallbackInfo& info)
 
 void JSSelect::SetPaddingLeft(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::SetPaddingLeft(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
@@ -834,6 +846,10 @@ void JSSelect::SetPaddingLeft(const JSCallbackInfo& info)
 
 void JSSelect::SetPaddingTop(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::SetPaddingTop(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
@@ -851,6 +867,10 @@ void JSSelect::SetPaddingTop(const JSCallbackInfo& info)
 
 void JSSelect::SetPaddingRight(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::SetPaddingRight(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
@@ -868,6 +888,10 @@ void JSSelect::SetPaddingRight(const JSCallbackInfo& info)
 
 void JSSelect::SetPaddingBottom(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::SetPaddingBottom(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;

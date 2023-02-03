@@ -39,9 +39,9 @@ void CheckBoxModelImpl::Create(
     if (groupName.has_value()) {
         const auto& checkboxGroup = groupName.value();
         checkboxComponent->SetBelongGroup(checkboxGroup);
-        auto checkboxGroupmap = ViewStackProcessor::GetInstance()->GetCheckboxGroupComponent();
-        auto item = checkboxGroupmap->find(checkboxGroup);
-        if (item != checkboxGroupmap->end()) {
+        auto& checkboxGroupmap = CheckboxComponent::GetCheckboxGroupComponent();
+        auto item = checkboxGroupmap.find(checkboxGroup);
+        if (item != checkboxGroupmap.end()) {
             item->second->AddCheckbox(checkboxComponent);
             checkboxComponent->SetGroup(item->second);
         } else {

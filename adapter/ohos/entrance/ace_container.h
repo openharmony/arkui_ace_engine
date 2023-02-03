@@ -219,7 +219,11 @@ public:
 
     void DispatchPluginError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override;
 
-    bool Dump(const std::vector<std::string>& params) override;
+    bool Dump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+
+    bool DumpInfo(const std::vector<std::string>& params);
+
+    bool OnDumpInfo(const std::vector<std::string>& params);
 
     void TriggerGarbageCollection() override;
 

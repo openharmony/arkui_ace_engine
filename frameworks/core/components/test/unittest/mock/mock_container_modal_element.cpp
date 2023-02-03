@@ -31,7 +31,7 @@ RefPtr<StageElement> ContainerModalElement::GetStageElement() const
     return nullptr;
 }
 
-void ContainerModalElement::ShowTitle(bool isShow)
+void ContainerModalElement::ShowTitle(bool isShow, bool hasDeco)
 {
     density_ = 1.0f;
     moveX_ = 0.0f;

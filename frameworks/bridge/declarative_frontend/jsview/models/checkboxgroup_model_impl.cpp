@@ -33,8 +33,8 @@ void CheckBoxGroupModelImpl::Create(const std::optional<std::string>& groupName)
     if (groupName.has_value()) {
         const auto& checkboxGroupName = groupName.value();
         checkboxComponent->SetGroupName(checkboxGroupName);
-        auto checkboxGroupmap = ViewStackProcessor::GetInstance()->GetCheckboxGroupComponent();
-        checkboxGroupmap->emplace(checkboxGroupName, checkboxComponent);
+        auto& checkboxGroupmap = CheckboxComponent::GetCheckboxGroupComponent();
+        checkboxGroupmap.emplace(checkboxGroupName, checkboxComponent);
         auto& ungroupedCheckboxs = CheckboxComponent::GetUngroupedCheckboxs();
         auto item = ungroupedCheckboxs.find(checkboxGroupName);
         if (item != ungroupedCheckboxs.end()) {

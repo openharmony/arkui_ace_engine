@@ -150,7 +150,7 @@ public:
 
     virtual void WindowFocus(bool isFocus) = 0;
 
-    virtual void ShowContainerTitle(bool isShow) = 0;
+    virtual void ShowContainerTitle(bool isShow, bool hasDeco = true) = 0;
 
     virtual void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) = 0;
@@ -180,10 +180,7 @@ public:
         return false;
     }
 
-    // Called by AceAbility and UiContent.
-    void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) const;
-
-    // Called by AceEngine.
+    // Called by AceContainer.
     bool Dump(const std::vector<std::string>& params) const;
 
     virtual bool IsLastPage()

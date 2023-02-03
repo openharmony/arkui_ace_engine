@@ -15,8 +15,6 @@
 
 #include "core/pipeline/pipeline_base.h"
 
-#include <fstream>
-
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
@@ -370,32 +368,6 @@ void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
     dipScale_ = density_ / viewScale_;
     rootHeight_ = height / viewScale_;
     rootWidth_ = width / viewScale_;
-}
-
-void PipelineBase::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) const
-{
-    auto result = false;
-    if (!SystemProperties::GetDebugEnabled()) {
-        std::unique_ptr<std::ostream> ss = std::make_unique<std::ostringstream>();
-        CHECK_NULL_VOID(ss);
-        DumpLog::GetInstance().SetDumpFile(std::move(ss));
-        result = Dump(params);
-        const auto& infoFile = DumpLog::GetInstance().GetDumpFile();
-        auto* ostringstream = static_cast<std::ostringstream*>(infoFile.get());
-        info.emplace_back(ostringstream->str().substr(0, DumpLog::MAX_DUMP_LENGTH));
-        DumpLog::GetInstance().Reset();
-    } else {
-        auto dumpFilePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui.dump";
-        std::unique_ptr<std::ostream> ss = std::make_unique<std::ofstream>(dumpFilePath);
-        CHECK_NULL_VOID(ss);
-        DumpLog::GetInstance().SetDumpFile(std::move(ss));
-        result = Dump(params);
-        info.emplace_back("dumpFilePath: " + dumpFilePath);
-        DumpLog::GetInstance().Reset();
-    }
-    if (!result) {
-        DumpLog::ShowDumpHelp(info);
-    }
 }
 
 void PipelineBase::DumpFrontend() const

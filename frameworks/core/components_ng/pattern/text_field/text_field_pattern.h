@@ -75,6 +75,26 @@ enum {
     ACTION_AUTOFILL,
 };
 
+struct CaretMetricsF {
+    void Reset()
+    {
+        offset.Reset();
+        height = 0.0;
+    }
+
+    OffsetF offset;
+    // When caret is close to different glyphs, the height will be different.
+    float height = 0.0;
+    std::string ToString() const
+    {
+        std::string result = "Offset: ";
+        result += offset.ToString();
+        result += ", height: ";
+        result += std::to_string(height);
+        return result;
+    }
+};
+
 class TextFieldPattern : public Pattern, public ValueChangeObserver {
     DECLARE_ACE_TYPE(TextFieldPattern, Pattern, ValueChangeObserver);
 
@@ -117,10 +137,13 @@ public:
     void UpdateCaretPositionByPressOffset();
     void UpdateSelectionOffset();
 
-    OffsetF CalcCursorOffsetByPosition(int32_t position);
+    CaretMetricsF CalcCursorOffsetByPosition(int32_t position);
 
-    bool ComputeOffsetForCaretDownstream(
-        const TextEditingValueNG& TextEditingValueNG, int32_t extent, CaretMetrics& result);
+    bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result);
+
+    bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result) const;
+
+    OffsetF MakeEmptyOffset() const;
 
     int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
 
@@ -439,6 +462,8 @@ public:
     void OnCursorMoveDone();
     bool IsDisabled();
 
+    bool LastInputIsNewLine() const;
+
 private:
     void HandleBlurEvent();
     bool HasFocus() const;
@@ -462,7 +487,7 @@ private:
     void OnTextAreaScroll(float dy);
     void InitMouseEvent();
     void OnHover(bool isHover);
-    void HandleMouseEvent(const MouseInfo& info);
+    void HandleMouseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
     void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle);
 
@@ -556,6 +581,8 @@ private:
     std::shared_ptr<RSParagraph> paragraph_;
     TextStyle lineHeightMeasureUtilTextStyle_;
     std::shared_ptr<RSParagraph> lineHeightMeasureUtilParagraph_;
+    TextStyle nextLineUtilTextStyle_;
+    std::shared_ptr<RSParagraph> nextLineUtilParagraph_;
 
     RefPtr<ImageLoadingContext> showPasswordImageLoadingCtx_;
     RefPtr<ImageLoadingContext> hidePasswordImageLoadingCtx_;
@@ -600,6 +627,7 @@ private:
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
+    float placeholderParagraphHeight_ = 0.0f;
 
     CancelableCallback<void()> cursorTwinklingTask_;
 

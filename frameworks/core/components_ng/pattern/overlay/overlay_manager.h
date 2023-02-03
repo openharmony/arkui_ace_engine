@@ -36,6 +36,7 @@ struct PopupInfo {
     RefPtr<FrameNode> popupNode;
     bool markNeedUpdate = false;
     bool isCurrentOnShow = false;
+    bool isBlockEvent = true;
     SizeF targetSize;
     OffsetF targetOffset;
 };
@@ -57,6 +58,7 @@ public:
     void UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo);
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
     void ErasePopup(int32_t targetId);
+    void HideAllPopups();
 
     const PopupInfo& GetPopupInfo(int32_t targetId)
     {
@@ -70,6 +72,7 @@ public:
     void HideMenuInSubWindow(int32_t targetId);
     void HideMenuInSubWindow();
     void CleanMenuInSubWindow();
+    void HideAllMenus();
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
 

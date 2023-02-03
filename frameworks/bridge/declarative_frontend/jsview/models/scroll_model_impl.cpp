@@ -64,6 +64,10 @@ void ScrollModelImpl::SetOnScrollBegin(NG::ScrollBeginEvent&& event)
     JSViewSetProperty(&ScrollComponent::SetOnScrollBegin, std::move(event));
 }
 
+void ScrollModelImpl::SetOnScrollFrameBegin(NG::ScrollFrameBeginEvent&& event)
+{
+}
+
 void ScrollModelImpl::SetOnScroll(NG::OnScrollEvent&& event)
 {
     auto onScroll = EventMarker([scrollEvent = std::move(event)](const BaseEventInfo* info) {

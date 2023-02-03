@@ -37,9 +37,6 @@ constexpr uint32_t AM_PM_HOUR_11 = 11;
 const int32_t AM_PM_COUNT = 3;
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
-const uint8_t ENABLED_ALPHA = 255;
-const uint8_t DISABLED_ALPHA = 102;
-const double AVAILABLE_ALPHA = 1.0;
 } // namespace
 
 void TimePickerRowPattern::OnAttachToFrameNode()
@@ -129,11 +126,6 @@ void TimePickerRowPattern::InitDisabled()
     CHECK_NULL_VOID(eventHub);
     auto renderContext = host->GetRenderContext();
     enabled_ = eventHub->IsEnabled();
-    if (!enabled_) {
-        renderContext->UpdateOpacity(float(DISABLED_ALPHA) / ENABLED_ALPHA);
-    } else {
-        renderContext->UpdateOpacity(AVAILABLE_ALPHA);
-    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

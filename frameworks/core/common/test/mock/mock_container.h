@@ -39,7 +39,6 @@ public:
     MOCK_METHOD(RefPtr<TaskExecutor>, GetTaskExecutor, (), (const, override));
     MOCK_METHOD(RefPtr<AssetManager>, GetAssetManager, (), (const, override));
     MOCK_METHOD(RefPtr<PlatformResRegister>, GetPlatformResRegister, (), (const, override));
-    MOCK_METHOD(bool, Dump, (const std::vector<std::string>& params), (override));
     MOCK_METHOD(int32_t, GetViewWidth, (), (const, override));
     MOCK_METHOD(int32_t, GetViewHeight, (), (const, override));
     MOCK_METHOD(int32_t, GetViewPosX, (), (const, override));
