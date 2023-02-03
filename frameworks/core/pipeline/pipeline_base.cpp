@@ -61,7 +61,7 @@ PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> 
     window_->SetVsyncCallback(vsyncCallback);
 }
 
-PipelineBase::PipelineBase(RefPtr<NG::WindowPattern> windowPattern, RefPtr<TaskExecutor> taskExecutor,
+PipelineBase::PipelineBase(const RefPtr<NG::WindowPattern>& windowPattern, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
     : windowPattern_(windowPattern), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
       weakFrontend_(frontend), instanceId_(instanceId)

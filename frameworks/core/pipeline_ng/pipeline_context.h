@@ -48,7 +48,7 @@ public:
     PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
-    PipelineContext(RefPtr<NG::WindowPattern> windowPattern, RefPtr<TaskExecutor> taskExecutor,
+    PipelineContext(const RefPtr<NG::WindowPattern>& windowPattern, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId);
     PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId);

@@ -26,9 +26,8 @@ class WindowScene : public WindowPattern {
     DECLARE_ACE_TYPE(WindowScene, WindowPattern);
 
 public:
-    WindowScene(
-        const sptr<Rosen::ISceneSession>& iSceneSession,
-        const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
+    WindowScene(const std::shared_ptr<AbilityRuntime::Context>& context,
+        const sptr<Rosen::ISceneSession>& iSceneSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
     ~WindowScene() override = default;
 
 private:

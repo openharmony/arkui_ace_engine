@@ -35,6 +35,48 @@ float GetDisplayRefreshRate()
 
 namespace OHOS::Ace::NG {
 
+class SessionChangeListener : public Rosen::ISessionChangeListener {
+public:
+    SessionChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
+    virtual ~SessionChangeListener() = default;
+
+    void OnSizeChange(Rosen::WSRect rect, Rosen::SessionSizeChangeReason reason) override
+    {
+        ContainerScope scope(instanceId_);
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto window = container->GetWindowPattern();
+        CHECK_NULL_VOID(window);
+        window->SetWindowRect(Rect(rect.posX_, rect.posY_, rect.width_, rect.height_));
+
+        ViewportConfig config;
+        config.SetPosition(rect.posX_, rect.posY_);
+        config.SetSize(rect.width_, rect.height_);
+        // TODO: get display density
+        config.SetDensity(1.5);
+        LOGI("OnSizeChange window rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
+            rect.posX_, rect.posY_, rect.width_, rect.height_);
+        window->UpdateViewportConfig(config, SESSION_TO_WINDOW_MAP.at(reason));
+    }
+
+private:
+    const std::map<Rosen::SessionSizeChangeReason, Rosen::WindowSizeChangeReason> SESSION_TO_WINDOW_MAP {
+        { Rosen::SessionSizeChangeReason::SHOW,     Rosen::WindowSizeChangeReason::UNDEFINED },
+        { Rosen::SessionSizeChangeReason::HIDE,     Rosen::WindowSizeChangeReason::HIDE      },
+        { Rosen::SessionSizeChangeReason::MAXIMIZE, Rosen::WindowSizeChangeReason::MAXIMIZE  },
+        { Rosen::SessionSizeChangeReason::MINIMIZE, Rosen::WindowSizeChangeReason::UNDEFINED },
+        { Rosen::SessionSizeChangeReason::RECOVER,  Rosen::WindowSizeChangeReason::RECOVER   },
+        { Rosen::SessionSizeChangeReason::ROTATION, Rosen::WindowSizeChangeReason::ROTATION  },
+        { Rosen::SessionSizeChangeReason::RESIZE,   Rosen::WindowSizeChangeReason::RESIZE    },
+        { Rosen::SessionSizeChangeReason::MOVE,     Rosen::WindowSizeChangeReason::MOVE      },
+    };
+    int32_t instanceId_ = -1;
+};
+
+WindowPattern::WindowPattern(const std::shared_ptr<AbilityRuntime::Context>& context,
+    const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode) : surfaceNode_(surfaceNode), context_(context)
+{}
+
 void WindowPattern::Init()
 {
     int64_t refreshPeriod = static_cast<int64_t>(ONE_SECOND_IN_NANO / GetDisplayRefreshRate());
@@ -82,6 +124,21 @@ void WindowPattern::Destroy()
     rsUIDirector_->Destroy();
     rsUIDirector_.reset();
     callbacks_.clear();
+}
+
+void WindowPattern::InitUIContent(const std::string& contentInfo, NativeEngine* engine, NativeValue* storage)
+{
+    uiContent_ = UIContent::Create(context_.get(), engine);
+    uiContent_->Initialize(this, contentInfo, storage);
+
+    auto listener = std::make_shared<SessionChangeListener>(instanceId_);
+    RegisterSessionChangeListener(listener);
+}
+
+void WindowPattern::UpdateViewportConfig(const ViewportConfig& config, Rosen::WindowSizeChangeReason reason)
+{
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->UpdateViewportConfig(config, reason);
 }
 
 void WindowPattern::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)

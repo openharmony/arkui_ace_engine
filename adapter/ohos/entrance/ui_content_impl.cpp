@@ -227,81 +227,6 @@ private:
     int32_t instanceId_ = -1;
 };
 
-class SessionChangeListener : public Rosen::ISessionChangeListener {
-public:
-    SessionChangeListener(int32_t instanceId, const WeakPtr<NG::WindowPattern>& windowPattern)
-        : instanceId_(instanceId), windowPattern_(windowPattern) {}
-    virtual ~SessionChangeListener() = default;
-
-    void OnSizeChange(Rosen::WSRect rect, Rosen::SessionSizeChangeReason reason) override
-    {
-        ViewportConfig config;
-        config.SetPosition(rect.posX_, rect.posY_);
-        config.SetSize(rect.width_, rect.height_);
-        // TODO: get display density
-        config.SetDensity(1.5);
-        LOGI("OnSizeChange window rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
-            rect.posX_, rect.posY_, rect.width_, rect.height_);
-        UpdateViewportConfig(config, SESSION_TO_WINDOW_MAP.at(reason));
-
-        auto windowPattern = windowPattern_.Upgrade();
-        CHECK_NULL_VOID(windowPattern);
-        windowPattern->SetWindowRect(Rect(rect.posX_, rect.posY_, rect.width_, rect.height_));
-    }
-
-private:
-    void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason)
-    {
-        LOGI("UIContentImpl: UpdateViewportConfig %{public}s", config.ToString().c_str());
-        SystemProperties::SetResolution(config.Density());
-        SystemProperties::SetDeviceOrientation(config.Height() >= config.Width() ? 0 : 1);
-        auto container = Platform::AceContainer::GetContainer(instanceId_);
-        if (!container) {
-            LOGE("UpdateViewportConfig: container is null.");
-            return;
-        }
-        auto taskExecutor = container->GetTaskExecutor();
-        if (!taskExecutor) {
-            LOGE("UpdateViewportConfig: taskExecutor is null.");
-            return;
-        }
-        taskExecutor->PostTask([config, container, reason]() {
-            container->SetWindowPos(config.Left(), config.Top());
-            auto pipelineContext = container->GetPipelineContext();
-            if (pipelineContext) {
-                pipelineContext->SetDisplayWindowRectInfo(
-                    Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
-            }
-            auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
-            if (!aceView) {
-                LOGE("UpdateViewportConfig: aceView is null.");
-                return;
-            }
-            flutter::ViewportMetrics metrics;
-            metrics.physical_width = config.Width();
-            metrics.physical_height = config.Height();
-            metrics.device_pixel_ratio = config.Density();
-            Platform::FlutterAceView::SetViewportMetrics(aceView, metrics);
-            Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
-                static_cast<WindowSizeChangeReason>(reason));
-            Platform::FlutterAceView::SurfacePositionChanged(aceView, config.Left(), config.Top());
-        }, TaskExecutor::TaskType::PLATFORM);
-    }
-
-    const std::map<Rosen::SessionSizeChangeReason, Rosen::WindowSizeChangeReason> SESSION_TO_WINDOW_MAP {
-        { Rosen::SessionSizeChangeReason::SHOW,     Rosen::WindowSizeChangeReason::UNDEFINED },
-        { Rosen::SessionSizeChangeReason::HIDE,     Rosen::WindowSizeChangeReason::HIDE      },
-        { Rosen::SessionSizeChangeReason::MAXIMIZE, Rosen::WindowSizeChangeReason::MAXIMIZE  },
-        { Rosen::SessionSizeChangeReason::MINIMIZE, Rosen::WindowSizeChangeReason::UNDEFINED },
-        { Rosen::SessionSizeChangeReason::RECOVER,  Rosen::WindowSizeChangeReason::RECOVER   },
-        { Rosen::SessionSizeChangeReason::ROTATION, Rosen::WindowSizeChangeReason::ROTATION  },
-        { Rosen::SessionSizeChangeReason::RESIZE,   Rosen::WindowSizeChangeReason::RESIZE    },
-        { Rosen::SessionSizeChangeReason::MOVE,     Rosen::WindowSizeChangeReason::MOVE      },
-    };
-    int32_t instanceId_ = -1;
-    WeakPtr<NG::WindowPattern> windowPattern_;
-};
-
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime) : runtime_(runtime)
 {
     CHECK_NULL_VOID(context);
@@ -400,8 +325,9 @@ void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& cont
     LOGI("Restore UIContentImpl done.");
 }
 
-void UIContentImpl::Initialize(const std::string& url, NativeValue* storage)
+void UIContentImpl::Initialize(OHOS::Ace::NG::WindowPattern* windowPattern, const std::string& url, NativeValue* storage)
 {
+    windowPattern_ = windowPattern;
     if (windowPattern_ && StringUtils::StartWith(windowPattern_->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
         CommonInitialize(nullptr, url, storage);
         return;
@@ -415,8 +341,9 @@ void UIContentImpl::Initialize(const std::string& url, NativeValue* storage)
     LOGI("Initialize UIContentImpl done");
 }
 
-void UIContentImpl::Restore(const std::string& url, NativeValue* storage)
+void UIContentImpl::Restore(OHOS::Ace::NG::WindowPattern* windowPattern, const std::string& url, NativeValue* storage)
 {
+    windowPattern_ = windowPattern;
     CommonInitialize(nullptr, url, storage);
     startUrl_ = Platform::AceContainer::RestoreRouterStack(instanceId_, url);
     if (startUrl_.empty()) {
@@ -1258,9 +1185,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             LOGI("UIContentImpl: focus again");
             Focus();
         }
-        auto sessionChangeListener =
-            std::make_shared<SessionChangeListener>(instanceId_, AceType::WeakClaim(windowPattern_));
-        windowPattern_->RegisterSessionChangeListener(sessionChangeListener);
         // dragWindowListener_ = new DragWindowListener(instanceId_);
         // windowPattern_->RegisterDragListener(dragWindowListener_);
         // occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
@@ -1748,44 +1672,5 @@ void UIContentImpl::SetErrorEventHandler(std::function<void(const std::string&, 
     auto front = container->GetFrontend();
     CHECK_NULL_VOID(front);
     return front->SetErrorEventHandler(std::move(errorCallback));
-}
-
-void UIContentImpl::InitWindowScene(
-    const sptr<Rosen::ISceneSession>& iSceneSession,
-    const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
-    const std::shared_ptr<Rosen::ISessionStageStateListener>& listener)
-{
-    windowPattern_ = new NG::WindowScene(iSceneSession, surfaceNode);
-    windowPattern_->RegisterSessionStageStateListener(listener);
-}
-
-void UIContentImpl::SetWindowRect(Rect rect)
-{
-    CHECK_NULL_VOID(windowPattern_);
-    windowPattern_->SetWindowRect(rect);
-}
-
-void UIContentImpl::Connect()
-{
-    CHECK_NULL_VOID(windowPattern_);
-    windowPattern_->Connect();
-}
-
-void UIContentImpl::DoForeground()
-{
-    CHECK_NULL_VOID(windowPattern_);
-    windowPattern_->Foreground();
-}
-
-void UIContentImpl::DoBackground()
-{
-    CHECK_NULL_VOID(windowPattern_);
-    windowPattern_->Background();
-}
-
-void UIContentImpl::DoDisconnect()
-{
-    CHECK_NULL_VOID(windowPattern_);
-    windowPattern_->Disconnect();
 }
 } // namespace OHOS::Ace

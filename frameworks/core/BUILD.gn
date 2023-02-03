@@ -513,6 +513,7 @@ template("ace_core_source_set") {
     if (defined(config.window_scene_support) && config.window_scene_support) {
       deps += [
         "$ace_root/frameworks/core/components_ng/pattern/window_scene:ace_core_components_window_scene_$platform",
+        "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent",
         "//foundation/window/window_manager/window_scene/session/scene:scene_session",
       ]
     }

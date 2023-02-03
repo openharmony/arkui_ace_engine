@@ -27,7 +27,8 @@ class WindowExtension : public WindowPattern {
 
 public:
     WindowExtension(
-        /* const sptr<Rosen::IExtensionSession>& iExtensionSession,
+        /* const std::shared_ptr<AbilityRuntime::Context>& context,
+        const sptr<Rosen::IExtensionSession>& iExtensionSession,
         const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode */);
     ~WindowExtension() override = default;
 

@@ -49,7 +49,7 @@ public:
 
     // UI content lifecycles
     void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
-    void Initialize(const std::string& url, NativeValue* storage) override;
+    void Initialize(OHOS::Ace::NG::WindowPattern* windowPattern, const std::string& url, NativeValue* storage) override;
     void Foreground() override;
     void Background() override;
     void Focus() override;
@@ -59,7 +59,7 @@ public:
 
     // distribute
     void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) override;
-    void Restore(const std::string& contentInfo, NativeValue* storage) override;
+    void Restore(OHOS::Ace::NG::WindowPattern* windowPattern, const std::string& contentInfo, NativeValue* storage) override;
     std::string GetContentInfo() const override;
     void DestroyUIDirector() override;
 
@@ -118,20 +118,6 @@ public:
         std::function<void(const std::string& action)>&& actionCallback) override;
     void SetErrorEventHandler(
         std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
-
-
-    // window scene
-    void InitWindowScene(
-        const sptr<Rosen::ISceneSession>& iSceneSession,
-        const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
-        const std::shared_ptr<Rosen::ISessionStageStateListener>& listener) override;
-
-    void SetWindowRect(Rect rect);
-
-    void Connect() override;
-    void DoForeground() override;
-    void DoBackground() override;
-    void DoDisconnect() override;
 
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);

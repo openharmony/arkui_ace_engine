@@ -19,6 +19,8 @@
 #include <mutex>
 
 #include "session/scene/container/include/session_stage.h"
+#include "ui_content.h"
+#include "ui_window.h"
 
 #include "base/thread/task_executor.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -31,15 +33,20 @@ struct VsyncCallback;
 
 namespace OHOS::Ace::NG {
 
-class WindowPattern : public Pattern {
+class WindowPattern : public UIWindow, public Pattern {
     DECLARE_ACE_TYPE(WindowPattern, Pattern);
 
 public:
-    WindowPattern(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode) : surfaceNode_(surfaceNode) {}
+    WindowPattern(const std::shared_ptr<AbilityRuntime::Context>& context,
+        const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
     ~WindowPattern() override = default;
 
     void Init();
     void Destroy();
+
+    void InitUIContent(const std::string& contentInfo, NativeEngine* engine, NativeValue* storage) override;
+
+    void UpdateViewportConfig(const ViewportConfig& config, Rosen::WindowSizeChangeReason reason);
 
     std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode()
     {
@@ -121,7 +128,7 @@ public:
     void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount);
 
     // for lifecycle
-    void RegisterSessionStageStateListener(const std::shared_ptr<Rosen::ISessionStageStateListener>& listener)
+    void RegisterSessionStageStateListener(const std::shared_ptr<Rosen::ISessionStageStateListener>& listener) override
     {
         CHECK_NULL_VOID(sessionStage_);
         sessionStage_->RegisterSessionStageStateListener(listener);
@@ -133,10 +140,10 @@ public:
         sessionStage_->RegisterSessionChangeListener(listener);
     }
 
-    virtual void Connect();
-    virtual void Foreground();
-    virtual void Background();
-    virtual void Disconnect();
+    void Connect()  override;
+    void Foreground()  override;
+    void Background() override;
+    void Disconnect() override;
 
 protected:
     std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode_;
@@ -153,6 +160,9 @@ protected:
     std::recursive_mutex mutex_;
 
 private:
+    std::unique_ptr<UIContent> uiContent_;
+    std::shared_ptr<AbilityRuntime::Context> context_;
+
     bool isRequestVsync_ = false;
     bool onShow_ = true;
     std::list<AceVsyncCallback> callbacks_;

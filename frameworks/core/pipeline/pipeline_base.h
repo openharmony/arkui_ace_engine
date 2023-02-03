@@ -75,7 +75,7 @@ public:
     PipelineBase() = default;
     PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
-    PipelineBase(RefPtr<NG::WindowPattern> windowPattern, RefPtr<TaskExecutor> taskExecutor,
+    PipelineBase(const RefPtr<NG::WindowPattern>& windowPattern, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId);
     PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
         const RefPtr<Frontend>& frontend, int32_t instanceId, RefPtr<PlatformResRegister> platformResRegister);

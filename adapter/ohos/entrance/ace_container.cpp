@@ -740,7 +740,7 @@ void AceContainer::SetViewNew(
 }
 
 void AceContainer::SetView(
-    AceView* view, double density, int32_t width, int32_t height, RefPtr<NG::WindowPattern> windowPattern)
+    AceView* view, double density, int32_t width, int32_t height, const RefPtr<NG::WindowPattern>& windowPattern)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(view);
@@ -1041,7 +1041,7 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
 }
 
 void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width,
-    int32_t height, int32_t windowId, UIEnvCallback callback, RefPtr<NG::WindowPattern> windowPattern)
+    int32_t height, int32_t windowId, UIEnvCallback callback, const RefPtr<NG::WindowPattern>& windowPattern)
 {
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();

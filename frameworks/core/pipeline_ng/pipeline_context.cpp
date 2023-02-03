@@ -84,7 +84,7 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     window_->OnHide();
 }
 
-PipelineContext::PipelineContext(RefPtr<NG::WindowPattern> windowPattern, RefPtr<TaskExecutor> taskExecutor,
+PipelineContext::PipelineContext(const RefPtr<NG::WindowPattern>& windowPattern, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
     : PipelineBase(windowPattern, std::move(taskExecutor), std::move(assetManager), frontend, instanceId)
 {}

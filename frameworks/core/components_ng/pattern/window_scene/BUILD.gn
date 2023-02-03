@@ -48,6 +48,7 @@ build_component_ng("window_scene") {
     configs = [ ":ohos_window_scene_config" ]
 
     deps = [
+      "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent",
       "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
       "//foundation/window/window_manager/window_scene/session/scene:scene_session",
       "//foundation/window/window_manager/window_scene/session/screen:screen_session",

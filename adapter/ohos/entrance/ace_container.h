@@ -318,7 +318,7 @@ public:
     static void SetViewNew(
         AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window> rsWindow);
     static void SetView(
-        AceView* view, double density, int32_t width, int32_t height, RefPtr<NG::WindowPattern> windowPattern);
+        AceView* view, double density, int32_t width, int32_t height, const RefPtr<NG::WindowPattern>& windowPattern);
     static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow);
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
@@ -412,7 +412,7 @@ private:
     void InitWindowCallback();
 
     void AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
-        int32_t windowId, UIEnvCallback callback = nullptr, RefPtr<NG::WindowPattern> windowPattern = nullptr);
+        int32_t windowId, UIEnvCallback callback = nullptr, const RefPtr<NG::WindowPattern>& windowPattern = nullptr);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
     std::weak_ptr<OHOS::AppExecFwk::Ability> GetAbilityInner() const;

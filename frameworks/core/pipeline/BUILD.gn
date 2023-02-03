@@ -76,7 +76,10 @@ template("ace_core_pipeline_source_set") {
     }
 
     if (defined(config.window_scene_support) && config.window_scene_support) {
-      deps += [ "//foundation/window/window_manager/window_scene/session/scene:scene_session" ]
+      deps += [
+        "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent",
+        "//foundation/window/window_manager/window_scene/session/scene:scene_session"
+      ]
     }
 
     if (platform == "ohos" && defined(config.enable_native_view) &&

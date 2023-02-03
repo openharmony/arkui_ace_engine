@@ -17,10 +17,20 @@
 
 namespace OHOS::Ace::NG {
 
+// extern "C" ACE_EXPORT void* OHOS_ACE_CreateWindowExtension(
+//     const std::shared_ptr<AbilityRuntime::Context>& context,
+//     const sptr<Rosen::IExtensionSession>& iExtensionSession,
+//     const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
+// {
+//     LOGI("Ace lib loaded, CreateWindowExtension.");
+//     return new WindowExtension(context, iExtensionSession, surfaceNode);
+// }
+
 WindowExtension::WindowExtension(
-    /* const sptr<Rosen::IExtensionSession>& iExtensionSession,
+    /* const std::shared_ptr<AbilityRuntime::Context>& context,
+    const sptr<Rosen::IExtensionSession>& iExtensionSession,
     const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode */)
-    : WindowPattern(nullptr)
+    : WindowPattern(nullptr, nullptr)
 {
     // sessionStage_ = new Rosen::ExtensionSessionStage(iExtensionSession);
 }
