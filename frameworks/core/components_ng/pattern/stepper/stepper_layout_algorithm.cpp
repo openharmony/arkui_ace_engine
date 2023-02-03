@@ -80,9 +80,10 @@ void StepperLayoutAlgorithm::MeasureLeftButton(LayoutWrapper* layoutWrapper, Lay
     CHECK_NULL_VOID(stepperTheme);
     auto padding =
         static_cast<float>((stepperTheme->GetDefaultPaddingStart() + stepperTheme->GetControlPadding()).ConvertToPx());
-    auto buttonWidth = (buttonLayoutConstraint.parentIdealSize.Width().value() / 2) - padding;
+    auto margin = static_cast<float>(stepperTheme->GetControlMargin().ConvertToPx());
+    auto buttonWidth = (buttonLayoutConstraint.parentIdealSize.Width().value() / 2) - padding - margin;
     auto buttonHeight = static_cast<float>(
-        stepperTheme->GetControlHeight().ConvertToPx() - 2 * stepperTheme->GetControlMargin().ConvertToPx());
+        stepperTheme->GetArrowHeight().ConvertToPx() + 2 * stepperTheme->GetControlMargin().ConvertToPx());
     buttonLayoutConstraint.minSize = { 0, buttonHeight };
     buttonLayoutConstraint.maxSize = { buttonWidth, buttonHeight };
     buttonLayoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, buttonHeight);
@@ -104,9 +105,10 @@ void StepperLayoutAlgorithm::MeasureRightButton(LayoutWrapper* layoutWrapper, La
     CHECK_NULL_VOID(stepperTheme);
     auto padding =
         static_cast<float>((stepperTheme->GetDefaultPaddingEnd() + stepperTheme->GetControlPadding()).ConvertToPx());
-    auto buttonWidth = (buttonLayoutConstraint.parentIdealSize.Width().value() / 2) - padding;
+    auto margin = static_cast<float>(stepperTheme->GetControlMargin().ConvertToPx());
+    auto buttonWidth = (buttonLayoutConstraint.parentIdealSize.Width().value() / 2) - padding - margin;
     auto buttonHeight = static_cast<float>(
-        stepperTheme->GetControlHeight().ConvertToPx() - 2 * stepperTheme->GetControlMargin().ConvertToPx());
+        stepperTheme->GetArrowHeight().ConvertToPx() + 2 * stepperTheme->GetControlMargin().ConvertToPx());
     buttonLayoutConstraint.minSize = { 0, buttonHeight };
     buttonLayoutConstraint.maxSize = { buttonWidth, buttonHeight };
     buttonLayoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, buttonHeight);
@@ -184,9 +186,13 @@ void StepperLayoutAlgorithm::LayoutLeftButton(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto stepperTheme = pipeline->GetTheme<StepperTheme>();
     CHECK_NULL_VOID(stepperTheme);
-    auto buttonHeightOffset = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() -
-                              static_cast<float>(stepperTheme->GetControlHeight().ConvertToPx());
-    auto buttonWidthOffset = static_cast<float>(stepperTheme->GetDefaultPaddingStart().ConvertToPx());
+    auto controlHeight = static_cast<float>(stepperTheme->GetControlHeight().ConvertToPx());
+    auto buttonHeight = leftButtonWrapper->GetGeometryNode()->GetFrameSize().Height();
+    auto buttonHeightOffset = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - controlHeight;
+    buttonHeightOffset += (controlHeight - buttonHeight) / 2;
+    auto padding = static_cast<float>(stepperTheme->GetDefaultPaddingStart().ConvertToPx());
+    auto margin = static_cast<float>(stepperTheme->GetControlMargin().ConvertToPx());
+    auto buttonWidthOffset = padding + margin;
     OffsetF buttonOffset = { buttonWidthOffset, buttonHeightOffset };
     auto geometryNode = leftButtonWrapper->GetGeometryNode();
     geometryNode->SetMarginFrameOffset(buttonOffset);
@@ -207,9 +213,12 @@ void StepperLayoutAlgorithm::LayoutRightButton(LayoutWrapper* layoutWrapper)
     auto frameSizeWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
     auto rightButtonWidth = rightButtonWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
     auto padding = static_cast<float>(stepperTheme->GetDefaultPaddingEnd().ConvertToPx());
-    auto buttonWidthOffset = frameSizeWidth - rightButtonWidth - padding;
-    auto buttonHeightOffset = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() -
-                              static_cast<float>(stepperTheme->GetControlHeight().ConvertToPx());
+    auto margin = static_cast<float>(stepperTheme->GetControlMargin().ConvertToPx());
+    auto buttonWidthOffset = frameSizeWidth - rightButtonWidth - padding - margin;
+    auto controlHeight = static_cast<float>(stepperTheme->GetControlHeight().ConvertToPx());
+    auto buttonHeight = rightButtonWrapper->GetGeometryNode()->GetFrameSize().Height();
+    auto buttonHeightOffset = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - controlHeight;
+    buttonHeightOffset += (controlHeight - buttonHeight) / 2;
     OffsetF buttonOffset = { buttonWidthOffset, buttonHeightOffset };
     rightButtonWrapper->GetGeometryNode()->SetMarginFrameOffset(buttonOffset);
     rightButtonWrapper->Layout();
