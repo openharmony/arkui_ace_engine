@@ -42,6 +42,9 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
     }
 
     CreateDragWindow(info, pixelMap->GetWidth(), pixelMap->GetHeight());
+    if (!dragWindow_) {
+        return nullptr;
+    }
     dragWindow_->DrawPixelMap(pixelMap);
 #endif
     currentId_ = ++g_proxyId;
@@ -65,6 +68,9 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
 
     auto frameRect = geometryNode->GetFrameSize();
     CreateDragWindow(info, static_cast<uint32_t>(frameRect.Width()), static_cast<uint32_t>(frameRect.Height()));
+    if (!dragWindow_) {
+        return nullptr;
+    }
     dragWindow_->DrawFrameNode(dragWindowRootNode_);
 #endif
     currentId_ = ++g_proxyId;
