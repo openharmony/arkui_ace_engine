@@ -250,8 +250,8 @@ private:
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot);
 
-    std::shared_ptr<Rosen::RSTransitionEffect> GetDefaultPageTransition(PageTransitionType type);
-    std::shared_ptr<Rosen::RSTransitionEffect> GetPageTransitionEffect(const RefPtr<PageTransitionEffect>& transition);
+    RefPtr<PageTransitionEffect> GetDefaultPageTransition(PageTransitionType type);
+    RefPtr<PageTransitionEffect> GetPageTransitionEffect(const RefPtr<PageTransitionEffect>& transition);
 
     void PaintBackground();
     void PaintClip(const SizeF& frameSize);

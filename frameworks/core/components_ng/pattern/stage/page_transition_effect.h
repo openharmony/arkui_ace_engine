@@ -54,6 +54,11 @@ public:
         slide_ = slide;
     }
 
+    void SetUserCallback(PageTransitionEventFunc&& callback)
+    {
+        userCallback_ = callback;
+    }
+
     const std::optional<SlideEffect>& GetSlideEffect() const
     {
         return slide_;
@@ -111,12 +116,29 @@ public:
         return animationOption_.curve;
     }
 
+    const PageTransitionEventFunc& GetUserCallback() const
+    {
+        return userCallback_;
+    }
+
+    PageTransitionType GetPageTransitionType() const
+    {
+        return type_;
+    }
+
+    PageTransitionOption GetPageTransitionOption() const
+    {
+        return animationOption_;
+    }
+
 private:
     std::optional<TranslateOptions> translate_;
     std::optional<ScaleOptions> scale_;
     std::optional<SlideEffect> slide_;
     std::optional<float> opacity_;
     PageTransitionOption animationOption_;
+    // user defined onEnter or onExit callback;
+    PageTransitionEventFunc userCallback_;
     PageTransitionType type_ = PageTransitionType::ENTER;
 };
 } // namespace OHOS::Ace::NG
