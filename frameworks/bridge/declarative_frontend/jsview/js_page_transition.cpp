@@ -219,6 +219,9 @@ PageTransitionOption JSPageTransition::ParseTransitionOption(const std::unique_p
     option.curve = Curves::LINEAR;
     if (transitionArgs && !transitionArgs->IsNull()) {
         option.duration = transitionArgs->GetInt("duration", defaultDuration);
+        if (option.duration < 0) {
+            option.duration = defaultDuration;
+        }
         option.delay = transitionArgs->GetInt("delay", 0);
         auto routeTypeTmp = transitionArgs->GetInt("type", static_cast<int32_t>(RouteType::NONE));
         if (routeTypeTmp >= static_cast<int32_t>(RouteType::NONE) &&
