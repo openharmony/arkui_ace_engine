@@ -863,6 +863,13 @@ double FrontendDelegateImpl::MeasureText(const MeasureContext& context)
     return MeasureUtil::MeasureText(context);
 }
 
+Size FrontendDelegateImpl::MeasureTextSize(const MeasureContext& context)
+{
+    LOGD("FrontendDelegateImpl MeasureTxtSize.");
+    return MeasureUtil::MeasureTextSize(context);
+}
+
+
 void FrontendDelegateImpl::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
 {
     LOGD("FrontendDelegateImpl ShowToast.");

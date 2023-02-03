@@ -227,6 +227,11 @@ double FrontendDelegateDeclarativeNG::MeasureText(const MeasureContext& context)
     return MeasureUtil::MeasureText(context);
 }
 
+Size FrontendDelegateDeclarativeNG::MeasureTextSize(const MeasureContext& context)
+{
+    return MeasureUtil::MeasureTextSize(context);
+}
+
 SingleTaskExecutor FrontendDelegateDeclarativeNG::GetAnimationJsTask()
 {
     return SingleTaskExecutor::Make(taskExecutor_, TaskExecutor::TaskType::JS);

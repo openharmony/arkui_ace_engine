@@ -920,6 +920,11 @@ double PluginFrontendDelegate::MeasureText(const MeasureContext& context)
     return MeasureUtil::MeasureText(context);
 }
 
+Size PluginFrontendDelegate::MeasureTextSize(const MeasureContext& context)
+{
+    return MeasureUtil::MeasureTextSize(context);
+}
+
 void PluginFrontendDelegate::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
 {
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);

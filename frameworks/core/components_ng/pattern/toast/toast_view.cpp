@@ -102,7 +102,7 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
 
     textlayoutProperty->UpdateContent(message);
     textlayoutProperty->UpdateTextColor(textColor);
-    textlayoutProperty->UpdateTextAlign(TextAlign::START);
+    textlayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     textlayoutProperty->UpdateFontWeight(fontWeight);
     textlayoutProperty->UpdateFontSize(fontSize);
     textlayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(maxWidth), std::nullopt));

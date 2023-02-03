@@ -172,6 +172,7 @@ public:
     }
 
     double MeasureText(const MeasureContext& context) override;
+    Size MeasureTextSize(const MeasureContext& context) override;
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
     void SetToastStopListenerCallback(std::function<void()>&& stopCallback) override;
