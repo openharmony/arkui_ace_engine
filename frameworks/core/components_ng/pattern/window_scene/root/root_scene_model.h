@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ROOT_SCENE_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ROOT_SCENE_MODEL_H
 
-#include "core/components_ng/pattern/window_scene/root/root_scene_pattern.h"
+#include "core/components_ng/pattern/window_scene/root/root_scene_node.h"
 
 namespace OHOS::Ace::NG {
 

@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_root_scene.h"
 
+#include "core/components_ng/base/view_stack_model.h"
 #include "frameworks/core/components_ng/pattern/window_scene/root/root_scene_model.h"
 
 namespace OHOS::Ace::Framework {
@@ -23,12 +24,7 @@ void JSRootScene::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRootScene>::Declare("RootScene");
     JSClass<JSRootScene>::StaticMethod("create", &JSRootScene::Create, MethodOptions::NONE);
-    JSClass<JSRootScene>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSRootScene>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
-    JSClass<JSRootScene>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
-    JSClass<JSRootScene>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
-    JSClass<JSRootScene>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSRootScene>::Inherit<JSViewAbstract>();
+    JSClass<JSRootScene>::StaticMethod("pop", &JSRootScene::Pop, MethodOptions::NONE);
     JSClass<JSRootScene>::Bind(globalObj);
 }
 
@@ -40,6 +36,11 @@ void JSRootScene::Create(const JSCallbackInfo& info)
     }
 
     NG::RootSceneModel::Create();
+}
+
+void JSRootScene::Pop()
+{
+    ViewStackModel::GetInstance()->PopContainer();
 }
 
 } // namespace OHOS::Ace::Framework

@@ -16,15 +16,16 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_ROOT_SCENE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_ROOT_SCENE_H
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/engine/bindings.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 
 namespace OHOS::Ace::Framework {
 
-class JSRootScene : public JSViewAbstract, public JSInteractableView {
+class JSRootScene {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
+    static void Pop();
 };
 
 } // namespace OHOS::Ace::Framework
