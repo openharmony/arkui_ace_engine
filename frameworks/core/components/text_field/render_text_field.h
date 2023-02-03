@@ -426,14 +426,6 @@ protected:
         Offset offset;
         // When caret is close to different glyphs, the height will be different.
         double height = 0.0;
-        std::string ToString() const
-        {
-            std::string result = "Offset: ";
-            result += offset.ToString();
-            result += ", height: ";
-            result += std::to_string(height);
-            return result;
-        }
     };
 
     RenderTextField();

@@ -116,16 +116,6 @@ RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextArea(
     return pattern->GetTextFieldController();
 }
 
-void TextFieldModelNG::SetWidthAuto(bool isAuto)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
-        return;
-    }
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WidthAuto, isAuto);
-}
-
 void TextFieldModelNG::SetType(TextInputType value)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();

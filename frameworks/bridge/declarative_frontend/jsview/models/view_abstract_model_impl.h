@@ -31,7 +31,6 @@ public:
 
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;
-    void ClearWidthOrHeight(bool isWidth) override {};
     void SetMinWidth(const Dimension& minWidth) override;
     void SetMinHeight(const Dimension& minHeight) override;
     void SetMaxWidth(const Dimension& maxWidth) override;

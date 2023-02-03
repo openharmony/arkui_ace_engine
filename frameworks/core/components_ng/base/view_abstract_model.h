@@ -56,7 +56,6 @@ public:
     // basic size
     virtual void SetWidth(const Dimension& width) = 0;
     virtual void SetHeight(const Dimension& height) = 0;
-    virtual void ClearWidthOrHeight(bool isWidth) = 0;
     virtual void SetMinWidth(const Dimension& minWidth) = 0;
     virtual void SetMinHeight(const Dimension& minHeight) = 0;
     virtual void SetMaxWidth(const Dimension& maxWidth) = 0;

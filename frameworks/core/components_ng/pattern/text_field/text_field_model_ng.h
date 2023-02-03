@@ -32,7 +32,6 @@ public:
     RefPtr<TextFieldControllerBase> CreateTextArea(
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value) override;
 
-    void SetWidthAuto(bool isAuto) override;
     void SetType(TextInputType value) override;
     void SetPlaceholderColor(const Color& value) override;
     void SetPlaceholderFont(const Font& value) override;

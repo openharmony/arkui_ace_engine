@@ -45,7 +45,6 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("enterKeyType", &JSTextField::SetEnterKeyType);
     JSClass<JSTextInput>::StaticMethod("caretColor", &JSTextField::SetCaretColor);
     JSClass<JSTextInput>::StaticMethod("maxLength", &JSTextField::SetMaxLength);
-    JSClass<JSTextInput>::StaticMethod("width", &JSTextField::JsWidth);
     JSClass<JSTextInput>::StaticMethod("height", &JSTextField::JsHeight);
     JSClass<JSTextInput>::StaticMethod("padding", &JSTextField::JsPadding);
     JSClass<JSTextInput>::StaticMethod("border", &JSTextField::JsBorder);

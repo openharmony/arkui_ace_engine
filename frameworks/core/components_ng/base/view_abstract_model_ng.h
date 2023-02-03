@@ -52,11 +52,6 @@ public:
         ViewAbstract::SetHeight(NG::CalcLength(height));
     }
 
-    void ClearWidthOrHeight(bool isWidth) override
-    {
-        ViewAbstract::ClearWidthOrHeight(isWidth);
-    }
-
     void SetMinWidth(const Dimension& minWidth) override
     {
         ViewAbstract::SetMinWidth(NG::CalcLength(minWidth));

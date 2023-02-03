@@ -52,7 +52,6 @@ class ACE_EXPORT ViewAbstract {
 public:
     static void SetWidth(const CalcLength& width);
     static void SetHeight(const CalcLength& height);
-    static void ClearWidthOrHeight(bool isWidth);
     static void SetMinWidth(const CalcLength& minWidth);
     static void SetMinHeight(const CalcLength& minHeight);
     static void SetMaxWidth(const CalcLength& maxWidth);

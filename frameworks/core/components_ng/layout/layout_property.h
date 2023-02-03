@@ -205,16 +205,6 @@ public:
         }
     }
 
-    void ClearUserDefinedIdealSize(bool isWidth)
-    {
-        if (!calcLayoutConstraint_) {
-            calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
-        }
-        if (calcLayoutConstraint_->ClearSelfIdealSize(isWidth)) {
-            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
-        }
-    }
-
     void UpdateCalcMinSize(const CalcSize& value)
     {
         if (!calcLayoutConstraint_) {

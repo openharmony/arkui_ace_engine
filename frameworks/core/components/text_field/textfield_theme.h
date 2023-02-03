@@ -154,7 +154,7 @@ public:
             theme->cursorColor_ = pattern->GetAttr<Color>("cursor_color", Color());
             theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
             theme->pressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
-            theme->disabledIconFillColor_ = theme->bgColor_.BlendOpacity(theme->disableOpacityRatio_);
+
         }
     };
 
@@ -238,11 +238,6 @@ public:
     double GetDisableOpacityRatio() const
     {
         return disableOpacityRatio_;
-    }
-
-    const Color& GetDisabledIconFillColor() const
-    {
-        return disabledIconFillColor_;
     }
 
     const Dimension& GetOverHideLength() const
@@ -345,7 +340,6 @@ private:
     Color selectedColor_;
     Color hoverColor_;
     Color pressColor_;
-    Color disabledIconFillColor_;
     Dimension errorSpacing_;
     bool errorIsInner_ = false;
     Dimension errorBorderWidth_;

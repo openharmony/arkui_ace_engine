@@ -18,9 +18,9 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "frameworks/base/memory/ace_type.h"
 #include "frameworks/base/geometry/offset.h"
 #include "frameworks/base/geometry/rect.h"
-#include "frameworks/base/memory/ace_type.h"
 #include "frameworks/core/common/ime/text_editing_value.h"
 #include "frameworks/core/pipeline/base/overlay_show_option.h"
 
@@ -64,14 +64,6 @@ struct CaretMetrics {
     Offset offset;
     // When caret is close to different glyphs, the height will be different.
     double height = 0.0;
-    std::string ToString() const
-    {
-        std::string result = "Offset: ";
-        result += offset.ToString();
-        result += ", height: ";
-        result += std::to_string(height);
-        return result;
-    }
 };
 
 class TextOverlayBase : public virtual AceType {
@@ -104,7 +96,7 @@ public:
     static bool IsSelectiveDevice()
     {
         return (SystemProperties::GetDeviceType() != DeviceType::TV &&
-                SystemProperties::GetDeviceType() != DeviceType::WATCH);
+            SystemProperties::GetDeviceType() != DeviceType::WATCH);
     }
 
     void MarkIsOverlayShowed(bool isOverlayShowed)
@@ -163,8 +155,8 @@ protected:
     TextEditingValue textValue_;
     std::string textForDisplay_;
     int32_t cursorPositionForShow_ = 0;
-    double cursorWidth_ = 0.0;     // The unit is px.
-    bool isOverlayShowed_ = false; // Whether overlay has showed.
+    double cursorWidth_ = 0.0; // The unit is px.
+    bool isOverlayShowed_ = false;  // Whether overlay has showed.
     RefPtr<Animator> animator_;
     std::function<void(const OverlayShowOption&)> updateHandlePosition_;
     std::function<void(const double&)> updateHandleDiameter_;
@@ -235,8 +227,8 @@ public:
 
     const RefPtr<RenderNode> GetTargetNode() const;
     void PopTextOverlay();
-    void PushTextOverlayToStack(
-        const RefPtr<TextOverlayComponent>& textOverlay, const WeakPtr<PipelineContext>& context);
+    void PushTextOverlayToStack(const RefPtr<TextOverlayComponent>& textOverlay,
+        const WeakPtr<PipelineContext>& context);
 
     void HandleCtrlC() const;
 

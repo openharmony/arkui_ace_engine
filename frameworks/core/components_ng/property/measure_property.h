@@ -107,18 +107,6 @@ public:
         return true;
     }
 
-    bool ClearSize(bool isWidth)
-    {
-        if (isWidth && width_.has_value()) {
-            width_.reset();
-            return true;
-        } else if (!isWidth && height_.has_value()) {
-            height_.reset();
-            return true;
-        }
-        return false;
-    }
-
     std::string ToString() const
     {
         static const int32_t precision = 2;
@@ -165,14 +153,6 @@ struct MeasureProperty {
         }
         selfIdealSize = size;
         return true;
-    }
-
-    bool ClearSelfIdealSize(bool isWidth)
-    {
-        if (selfIdealSize.has_value()) {
-            return selfIdealSize->ClearSize(isWidth);
-        }
-        return false;
     }
 
     bool UpdateMaxSizeWithCheck(const CalcSize& size)
