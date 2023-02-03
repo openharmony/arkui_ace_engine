@@ -131,9 +131,11 @@ public:
             if (!dialogPattern) {
                 return;
             }
-            theme->backgroundColor_ = dialogPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::BLACK);
+            theme->backgroundColor_ = dialogPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color(0xd9ffffff));
             theme->titleTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("title_text_color", Color::BLACK));
+            theme->titleTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("title_text_font_size", 20.0_fp));
             theme->contentTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("content_text_color", Color::BLACK));
+            theme->contentTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("content_text_font_size", 16.0_fp));
             theme->buttonBackgroundColor_ = dialogPattern->GetAttr<Color>("button_bg_color", Color::BLACK);
             theme->radius_ = Radius(dialogPattern->GetAttr<Dimension>("radius", 24.0_vp));
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
