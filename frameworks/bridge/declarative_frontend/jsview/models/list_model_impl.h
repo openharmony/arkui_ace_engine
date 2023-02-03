@@ -49,6 +49,7 @@ public:
     void SetOnScroll(OnScrollEvent&& onScroll) override;
     void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) override;
+    void SetOnScrollStart(OnScrollStopEvent&& onScrollStop) override {}
     void SetOnScrollStop(OnScrollStopEvent&& onScrollStop) override;
     void SetOnScrollIndex(OnScrollIndexEvent&& onScrollIndex) override;
     void SetOnReachStart(OnReachEvent&& onReachStart) override;

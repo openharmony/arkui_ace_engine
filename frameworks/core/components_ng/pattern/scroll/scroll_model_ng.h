@@ -34,6 +34,8 @@ public:
     void SetOnScroll(NG::OnScrollEvent&& event) override;
     void SetOnScrollEdge(NG::ScrollEdgeEvent&& event) override;
     void SetOnScrollEnd(NG::ScrollEndEvent&& event) override;
+    void SetOnScrollStart(NG::ScrollStartEvent&& event) override;
+    void SetOnScrollStop(NG::ScrollStopEvent&& event) override;
     void SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy) override;
     void InitScrollBar(const RefPtr<ScrollBarTheme>& theme, const std::pair<bool, Color>& color,
         const std::pair<bool, Dimension>& width, EdgeEffect effect) override;
