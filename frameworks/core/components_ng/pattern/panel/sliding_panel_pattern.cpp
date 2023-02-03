@@ -56,12 +56,14 @@ void SlidingPanelPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     InitPanEvent(gestureHub);
     Update();
-    auto dragBar = GetDragBarNode();
-    CHECK_NULL_VOID(dragBar);
-    auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
-    CHECK_NULL_VOID(dragBarPattern);
-    if (dragBarPattern && !(dragBarPattern->HasClickArrowCallback())) {
-        SetDragBarCallBack();
+    if (layoutProperty->GetHasDragBarValue(true)) {
+        auto dragBar = GetDragBarNode();
+        CHECK_NULL_VOID(dragBar);
+        auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
+        CHECK_NULL_VOID(dragBarPattern);
+        if (dragBarPattern && !(dragBarPattern->HasClickArrowCallback())) {
+            SetDragBarCallBack();
+        }
     }
     auto isShow = layoutProperty->GetIsShowValue(false);
     if (isShow_.has_value() && isShow != isShow_.value_or(false)) {
@@ -164,11 +166,13 @@ void SlidingPanelPattern::FirstLayout()
             FireSizeChangeEvent();
         }
         isShow_ = true;
-        auto dragBar = GetDragBarNode();
-        CHECK_NULL_VOID(dragBar);
-        auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
-        CHECK_NULL_VOID(dragBarPattern);
-        dragBarPattern->ShowInPanelMode(mode_);
+        if (layoutProperty->GetHasDragBarValue(true)) {
+            auto dragBar = GetDragBarNode();
+            CHECK_NULL_VOID(dragBar);
+            auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
+            CHECK_NULL_VOID(dragBarPattern);
+            dragBarPattern->ShowInPanelMode(mode_);
+        }
         return;
     }
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
@@ -185,6 +189,7 @@ void SlidingPanelPattern::IsShowChanged(bool isShow)
     CHECK_NULL_VOID(host);
     auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto hasDragBar = layoutProperty->GetHasDragBarValue(true);
     if (isShow) {
         isShow_ = true;
         CheckPanelModeAndType();
@@ -192,22 +197,26 @@ void SlidingPanelPattern::IsShowChanged(bool isShow)
         if (previousMode_ != mode_) {
             FireSizeChangeEvent();
         }
-        auto dragBar = GetDragBarNode();
-        CHECK_NULL_VOID(dragBar);
-        auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
-        CHECK_NULL_VOID(dragBarPattern);
-        dragBarPattern->ShowInPanelMode(mode_);
+        if (hasDragBar) {
+            auto dragBar = GetDragBarNode();
+            CHECK_NULL_VOID(dragBar);
+            auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
+            CHECK_NULL_VOID(dragBarPattern);
+            dragBarPattern->ShowInPanelMode(mode_);
+        }
         return;
     }
     isShow_ = false;
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
     auto paintRectOffset = host->GetPaintRectOffset().GetY();
     AnimateTo(rootHeight - paintRectOffset, mode_);
-    auto dragBar = GetDragBarNode();
-    CHECK_NULL_VOID(dragBar);
-    auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
-    CHECK_NULL_VOID(dragBarPattern);
-    dragBarPattern->ShowInPanelMode(mode_);
+    if (hasDragBar) {
+        auto dragBar = GetDragBarNode();
+        CHECK_NULL_VOID(dragBar);
+        auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
+        CHECK_NULL_VOID(dragBarPattern);
+        dragBarPattern->ShowInPanelMode(mode_);
+    }
 }
 
 void SlidingPanelPattern::HeightDynamicUpdate()
@@ -457,11 +466,15 @@ void SlidingPanelPattern::AnimateTo(float targetLocation, PanelMode mode)
     animator_->AddStopListener([weak = WeakClaim(this), mode]() {
         auto panel = weak.Upgrade();
         CHECK_NULL_VOID(panel);
-        auto dragBar = panel->GetDragBarNode();
-        CHECK_NULL_VOID(dragBar);
-        auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
-        CHECK_NULL_VOID(dragBarPattern);
-        dragBarPattern->ShowInPanelMode(mode);
+        auto layoutProperty = panel->GetLayoutProperty<SlidingPanelLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        if (layoutProperty->GetHasDragBarValue(true)) {
+            auto dragBar = panel->GetDragBarNode();
+            CHECK_NULL_VOID(dragBar);
+            auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
+            CHECK_NULL_VOID(dragBarPattern);
+            dragBarPattern->ShowInPanelMode(mode);
+        }
         if (!panel->isShowQueue_.empty() && !panel->isShowQueue_.front()) {
             auto panelNode = panel->GetHost();
             panel->invisibleFlag_ = true;
@@ -490,11 +503,15 @@ void SlidingPanelPattern::AppendBlankHeightAnimation(float targetLocation, Panel
                 return;
             }
             if (value > 1.0) {
-                auto dragBar = panel->GetDragBarNode();
-                CHECK_NULL_VOID(dragBar);
-                auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
-                CHECK_NULL_VOID(dragBarPattern);
-                dragBarPattern->ShowInPanelMode(mode);
+                auto layoutProperty = panel->GetLayoutProperty<SlidingPanelLayoutProperty>();
+                CHECK_NULL_VOID(layoutProperty);
+                if (layoutProperty->GetHasDragBarValue(true)) {
+                    auto dragBar = panel->GetDragBarNode();
+                    CHECK_NULL_VOID(dragBar);
+                    auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
+                    CHECK_NULL_VOID(dragBarPattern);
+                    dragBarPattern->ShowInPanelMode(mode);
+                }
             }
             panel->UpdateCurrentOffsetOnAnimate((end - start) * value + start);
             panel->FireHeightChangeEvent();
@@ -578,10 +595,16 @@ void SlidingPanelPattern::FireSizeChangeEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto frameSize = host->GetGeometryNode()->GetFrameSize();
-    auto dragBar = GetDragBarNode();
-    CHECK_NULL_VOID(dragBar);
-    auto dragBarFrameSize = dragBar->GetGeometryNode()->GetFrameSize();
-    float height = std::floor(frameSize.Height() - defaultBlankHeights_[mode_] - dragBarFrameSize.Height());
+    auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    float height = 0.0f;
+    if (layoutProperty->GetHasDragBarValue(true)) {
+        auto dragBar = GetDragBarNode();
+        CHECK_NULL_VOID(dragBar);
+        auto dragBarFrameSize = dragBar->GetGeometryNode()->GetFrameSize();
+        height = std::floor(frameSize.Height() - defaultBlankHeights_[mode_] - dragBarFrameSize.Height());
+    }
+    height = std::floor(frameSize.Height() - defaultBlankHeights_[mode_]);
     float width = std::floor(frameSize.Width());
     slidingPanelEventHub->FireSizeChangeEvent(mode_, width, height);
     previousMode_ = mode_;
