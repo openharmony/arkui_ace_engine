@@ -1737,7 +1737,7 @@ void TextFieldPattern::OnHover(bool isHover)
     }
 }
 
-void TextFieldPattern::HandleMouseEvent(const MouseInfo& info)
+void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
 {
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     CloseSelectOverlay();
@@ -1785,6 +1785,7 @@ void TextFieldPattern::HandleMouseEvent(const MouseInfo& info)
         lastTouchOffset_ = info.GetLocalLocation();
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+    info.SetStopPropagation(true);
 }
 
 void TextFieldPattern::UpdatePositionOfParagraph(int32_t position)

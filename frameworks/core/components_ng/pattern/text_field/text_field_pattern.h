@@ -462,7 +462,7 @@ private:
     void OnTextAreaScroll(float dy);
     void InitMouseEvent();
     void OnHover(bool isHover);
-    void HandleMouseEvent(const MouseInfo& info);
+    void HandleMouseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
     void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle);
 
