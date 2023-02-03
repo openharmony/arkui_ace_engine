@@ -19,7 +19,7 @@
 #include <string>
 
 #include "flutter/fml/memory/ref_counted.h"
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
 #include "flutter/lib/ui/io_manager.h"
 #else
 #include "flutter/lib/ui/painting/image.h"
@@ -33,7 +33,7 @@
 #include "core/image/image_loader.h"
 #include "core/pipeline/pipeline_base.h"
 
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
 #include "core/components_ng/render/canvas_image.h"
 #endif
 
@@ -61,7 +61,7 @@ public:
 
 class SvgDom;
 using ImageObjSuccessCallback = std::function<void(ImageSourceInfo, const RefPtr<ImageObject>)>;
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
 using UploadSuccessCallback = std::function<void(ImageSourceInfo, const RefPtr<NG::CanvasImage>&)>;
 #else
 using UploadSuccessCallback = std::function<void(ImageSourceInfo, const fml::RefPtr<flutter::CanvasImage>&)>;
@@ -197,7 +197,7 @@ public:
         const RefPtr<TaskExecutor>& taskExecutor,
         const ImageSourceInfo& imageInfo,
         const Size& imageSize,
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
         const RefPtr<NG::CanvasImage>& canvasImage,
 #else
         const fml::RefPtr<flutter::CanvasImage>& canvasImage,

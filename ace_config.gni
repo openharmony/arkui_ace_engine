@@ -170,6 +170,7 @@ if (enable_dump_drawcmd) {
 
 if (enable_ng_build) {
   ace_common_defines += [ "NG_BUILD" ]
+  ace_common_defines += [ "FLUTTER_2_5" ]
 }
 
 if (!defined(global_parts_info) ||

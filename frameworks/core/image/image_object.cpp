@@ -22,7 +22,7 @@
 #include "core/components/image/render_image.h"
 #include "core/image/flutter_image_cache.h"
 
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
 #include "core/components_ng/render/adapter/flutter_canvas_image.h"
 #include "core/components_ng/render/canvas_image.h"
 #endif
@@ -50,7 +50,7 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
 {
     // build svg image object.
     if (source.IsSvg()) {
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
         return nullptr;
 #else
         const auto svgStream = std::make_unique<SkMemoryStream>(skData);
@@ -166,7 +166,7 @@ void StaticImageObject::UploadToGpuForRender(
             LOGI("other thread is uploading same image to gpu : %{public}s", imageSource.ToString().c_str());
             return;
         }
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
         RefPtr<NG::CanvasImage> cachedFlutterImage;
 #else
         fml::RefPtr<flutter::CanvasImage> cachedFlutterImage;
@@ -190,7 +190,7 @@ void StaticImageObject::UploadToGpuForRender(
         auto callback = [successCallback, imageSource, taskExecutor, imageCache,
                 imageSize, key, id = Container::CurrentId()]
                 (flutter::SkiaGPUObject<SkImage> image, sk_sp<SkData> compressData) {
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
             if (!image.skia_object() && !compressData.get()) {
 #else
             if (!image.get() && !compressData.get()) {
@@ -199,7 +199,7 @@ void StaticImageObject::UploadToGpuForRender(
                     "Image data may be broken or absent in upload callback.");
             }
             ContainerScope scope(id);
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
             auto canvasImage = NG::CanvasImage::Create();
             auto flutterImage = AceType::DynamicCast<NG::FlutterCanvasImage>(canvasImage);
             if (flutterImage) {

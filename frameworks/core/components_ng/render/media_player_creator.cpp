@@ -16,7 +16,7 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_media_player.h"
 #endif
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
 #include "core/components_ng/render/adapter/flutter_media_player.h"
 #endif
 #include "core/components_ng/render/media_player.h"
@@ -29,7 +29,7 @@ RefPtr<MediaPlayer> MediaPlayer::Create()
         return MakeRefPtr<RosenMediaPlayer>();
 #endif
     }
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     return MakeRefPtr<FlutterMediaPlayer>();
 #else
     return nullptr;

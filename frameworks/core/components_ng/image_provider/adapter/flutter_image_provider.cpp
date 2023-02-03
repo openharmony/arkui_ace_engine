@@ -22,7 +22,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
 #include "ace_shell/shell/common/window_manager.h"
 #include "flutter/lib/ui/io_manager.h"
 #else
@@ -44,7 +44,7 @@
 #include "core/image/image_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
 #include "core/components_ng/render/adapter/flutter_canvas_image.h"
 #endif
 
@@ -64,7 +64,7 @@ sk_sp<SkImage> ApplySizeToSkImage(
             srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
         return rawImage;
     }
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     if (!rawImage->scalePixels(
             scaledBitmap.pixmap(), SkSamplingOptions(SkFilterMode::kLinear), SkImage::kDisallow_CachingHint)) {
 #else
@@ -126,7 +126,7 @@ RefPtr<CanvasImage> ImageProvider::QueryCanvasImageFromCache(const ImageSourceIn
     CHECK_NULL_RETURN(cache, nullptr);
     auto cacheImage = cache->GetCacheImage(key);
     CHECK_NULL_RETURN_NOLOG(cacheImage, nullptr);
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     auto canvasImage = cacheImage->imagePtr;
 #else
     auto flutterCanvasImage = cacheImage->imagePtr;
@@ -169,7 +169,7 @@ void ImageProvider::MakeCanvasImageHelper(const WeakPtr<ImageObject>& objWp, con
     CHECK_NULL_VOID(image);
     // create gpu object
     flutter::SkiaGPUObject<SkImage> skiaGpuObjSkImage({ image, flutterRenderTaskHolder->unrefQueue });
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     auto canvasImage = CanvasImage::Create();
     auto flutterImage = AceType::DynamicCast<NG::FlutterCanvasImage>(canvasImage);
     if (flutterImage) {
@@ -221,7 +221,7 @@ void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const Wea
 RefPtr<RenderTaskHolder> ImageProvider::CreateRenderTaskHolder()
 {
     CHECK_NULL_RETURN(CheckThread(TaskExecutor::TaskType::UI), nullptr);
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     int32_t id = Container::CurrentId();
     auto currentState = flutter::ace::WindowManager::GetWindow(id);
 #else
@@ -320,7 +320,7 @@ void ImageProvider::CacheCanvasImage(const RefPtr<CanvasImage>& canvasImage, con
     auto pipelineCtx = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineCtx);
     CHECK_NULL_VOID(pipelineCtx->GetImageCache());
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     pipelineCtx->GetImageCache()->CacheImage(key, std::make_shared<CachedImage>(canvasImage));
 #else
     auto skiaCanvasImage = AceType::DynamicCast<SkiaCanvasImage>(canvasImage);
