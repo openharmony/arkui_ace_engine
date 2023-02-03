@@ -299,8 +299,6 @@ public:
 
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
 
-    bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint);
-    
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
