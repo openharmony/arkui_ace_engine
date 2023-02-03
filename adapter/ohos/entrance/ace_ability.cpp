@@ -172,10 +172,10 @@ void AceWindowListener::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::Window
     callbackOwner_->OnSizeChange(rect, reason);
 }
 
-void AceWindowListener::OnModeChange(OHOS::Rosen::WindowMode mode)
+void AceWindowListener::OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco)
 {
     CHECK_NULL_VOID(callbackOwner_);
-    callbackOwner_->OnModeChange(mode);
+    callbackOwner_->OnModeChange(mode, hasDeco);
 }
 
 bool AceWindowListener::OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
@@ -703,7 +703,7 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode)
+void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco)
 {
     LOGI("OnModeChange, window mode is %{public}d", mode);
     auto container = Platform::AceContainer::GetContainer(abilityId_);
@@ -712,10 +712,10 @@ void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode)
     CHECK_NULL_VOID(taskExecutor);
     ContainerScope scope(abilityId_);
     taskExecutor->PostTask(
-        [container, mode]() {
+        [container, mode, hasDeco]() {
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->ShowContainerTitle(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING);
+            pipelineContext->ShowContainerTitle(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING, hasDeco);
         },
         TaskExecutor::TaskType::UI);
 }

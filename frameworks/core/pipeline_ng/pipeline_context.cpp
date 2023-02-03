@@ -1104,7 +1104,7 @@ void PipelineContext::WindowFocus(bool isFocus)
     FlushWindowFocusChangedCallback(isFocus);
 }
 
-void PipelineContext::ShowContainerTitle(bool isShow)
+void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         LOGW("ShowContainerTitle failed, Window modal is not container.");
@@ -1112,7 +1112,7 @@ void PipelineContext::ShowContainerTitle(bool isShow)
     }
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
-    containerNode->GetPattern<ContainerModalPattern>()->ShowTitle(isShow);
+    containerNode->GetPattern<ContainerModalPattern>()->ShowTitle(isShow, hasDeco);
 }
 
 void PipelineContext::SetContainerWindow(bool isShow)

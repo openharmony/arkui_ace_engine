@@ -884,19 +884,19 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode)
+void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco)
 {
-    LOGI("UIContentImpl: UpdateWindowMode, window mode is %{public}d", mode);
+    LOGI("UIContentImpl: UpdateWindowMode, window mode is %{public}d, hasDeco is %{public}d", mode, hasDeco);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [container, mode]() {
+        [container, mode, hasDeco]() {
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->ShowContainerTitle(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING);
+            pipelineContext->ShowContainerTitle(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING, hasDeco);
         },
         TaskExecutor::TaskType::UI);
 }
