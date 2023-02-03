@@ -550,7 +550,6 @@ bool PluginFrontend::OnBackPressed()
 void PluginFrontend::OnShow()
 {
     CHECK_NULL_VOID_NOLOG(delegate_);
-    foregroundFrontend_ = true;
     delegate_->OnForeground();
 }
 
