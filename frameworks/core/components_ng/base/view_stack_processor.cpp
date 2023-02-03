@@ -146,7 +146,7 @@ RefPtr<UINode> ViewStackProcessor::Finish()
         frameNode->MarkModifyDone();
         auto renderContext = frameNode->GetRenderContext();
         if (renderContext) {
-            renderContext->SetNeedDebugBoundary(true);
+            renderContext->SetNeedDebugBoundary(false);
         }
     }
     // ForEach Partial Update Path.
