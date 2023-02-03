@@ -30,6 +30,8 @@ struct TranslateOptions {
     Dimension x;
     Dimension y;
     Dimension z;
+    TranslateOptions() = default;
+    TranslateOptions(const Dimension& x, const Dimension& y, const Dimension& z) : x(x), y(y), z(z) {}
     bool operator==(const TranslateOptions& other) const
     {
         return x == other.x && y == other.y && z == other.z;

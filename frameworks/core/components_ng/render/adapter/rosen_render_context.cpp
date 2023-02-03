@@ -41,6 +41,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/adapter/border_image_modifier.h"
@@ -1567,49 +1568,52 @@ void RosenRenderContext::OnClipMaskUpdate(const RefPtr<BasicShape>& /*basicShape
     RequestNextFrame();
 }
 
-std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetDefaultPageTransition(PageTransitionType type)
+RefPtr<PageTransitionEffect> RosenRenderContext::GetDefaultPageTransition(PageTransitionType type)
 {
+    auto resultEffect = AceType::MakeRefPtr<PageTransitionEffect>(type, PageTransitionOption());
+    resultEffect->SetScaleEffect(ScaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct));
+    TranslateOptions translate;
     auto rect = GetPaintRectWithoutTransform();
-    std::shared_ptr<Rosen::RSTransitionEffect> effect = Rosen::RSTransitionEffect::Create();
     switch (type) {
         case PageTransitionType::ENTER_PUSH:
         case PageTransitionType::EXIT_POP:
-            effect->Translate({ rect.Width(), 0, 0 });
+            translate.x = Dimension(rect.Width());
             break;
         case PageTransitionType::ENTER_POP:
         case PageTransitionType::EXIT_PUSH:
-            effect->Translate({ -rect.Width(), 0, 0 });
+            translate.x = Dimension(-rect.Width());
             break;
         default:
             LOGI("unexpected transition type");
             break;
     }
-    return effect;
+    resultEffect->SetTranslateEffect(translate);
+    resultEffect->SetOpacityEffect(1);
+    return resultEffect;
 }
 
-std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetPageTransitionEffect(
-    const RefPtr<PageTransitionEffect>& transition)
+RefPtr<PageTransitionEffect> RosenRenderContext::GetPageTransitionEffect(const RefPtr<PageTransitionEffect>& transition)
 {
-    std::shared_ptr<Rosen::RSTransitionEffect> effect = Rosen::RSTransitionEffect::Create();
-    if (transition->GetScaleEffect().has_value()) {
-        const auto& scaleOptions = transition->GetScaleEffect();
-        effect->Scale({ scaleOptions->xScale, scaleOptions->yScale, scaleOptions->zScale });
-    }
+    auto resultEffect = AceType::MakeRefPtr<PageTransitionEffect>(
+        transition->GetPageTransitionType(), transition->GetPageTransitionOption());
+    resultEffect->SetScaleEffect(
+        transition->GetScaleEffect().value_or(ScaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct)));
+    TranslateOptions translate;
     // slide and translate, only one can be effective
     if (transition->GetSlideEffect().has_value()) {
         auto rect = GetPaintRectWithoutTransform();
         switch (transition->GetSlideEffect().value()) {
             case SlideEffect::LEFT:
-                effect->Translate({ -rect.Width(), 0, 0 });
+                translate.x = Dimension(-rect.Width());
                 break;
             case SlideEffect::RIGHT:
-                effect->Translate({ rect.Width(), 0, 0 });
+                translate.x = Dimension(rect.Width());
                 break;
             case SlideEffect::BOTTOM:
-                effect->Translate({ 0, rect.Height(), 0 });
+                translate.y = Dimension(rect.Height());
                 break;
             case SlideEffect::TOP:
-                effect->Translate({ 0, -rect.Height(), 0 });
+                translate.y = Dimension(-rect.Height());
                 break;
             default:
                 LOGW("unexpected slide effect");
@@ -1618,15 +1622,13 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetPageTransition
     } else if (transition->GetTranslateEffect().has_value()) {
         auto rect = GetPaintRectWithoutTransform();
         const auto& translateOptions = transition->GetTranslateEffect();
-        auto xTranslate = static_cast<float>(translateOptions->x.ConvertToPxWithSize(rect.Width()));
-        auto yTranslate = static_cast<float>(translateOptions->y.ConvertToPxWithSize(rect.Height()));
-        auto zTranslate = static_cast<float>(translateOptions->z.ConvertToPx());
-        effect->Translate({ xTranslate, yTranslate, zTranslate });
+        translate.x = Dimension(translateOptions->x.ConvertToPxWithSize(rect.Width()));
+        translate.y = Dimension(translateOptions->y.ConvertToPxWithSize(rect.Height()));
+        translate.z = Dimension(translateOptions->z.ConvertToPx());
     }
-    if (transition->GetOpacityEffect().has_value()) {
-        effect->Opacity(transition->GetOpacityEffect().value());
-    }
-    return effect;
+    resultEffect->SetTranslateEffect(translate);
+    resultEffect->SetOpacityEffect(transition->GetOpacityEffect().value_or(1));
+    return resultEffect;
 }
 
 bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
@@ -1646,17 +1648,10 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
     auto pattern = host->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pattern, false);
     auto transition = pattern->FindPageTransitionEffect(type);
-    std::shared_ptr<Rosen::RSTransitionEffect> effect;
+    RefPtr<PageTransitionEffect> effect;
     AnimationOption option;
     if (transition) {
         effect = GetPageTransitionEffect(transition);
-        if (transition->GetScaleEffect().has_value()) {
-            const auto& scaleOptions = transition->GetScaleEffect();
-            auto rect = GetPaintRectWithoutTransform();
-            float xPivot = ConvertDimensionToScaleBySize(scaleOptions->centerX, rect.Width());
-            float yPivot = ConvertDimensionToScaleBySize(scaleOptions->centerY, rect.Height());
-            SetPivot(xPivot, yPivot);
-        }
         option.SetCurve(transition->GetCurve());
         option.SetDuration(transition->GetDuration());
         option.SetDelay(transition->GetDelay());
@@ -1666,9 +1661,29 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
         option.SetCurve(Curves::LINEAR);
         option.SetDuration(pageTransitionDuration);
     }
-    AnimationUtils::Animate(
-        option, [rsNode = rsNode_, effect, transitionIn]() { rsNode->NotifyTransition(effect, transitionIn); },
-        onFinish);
+    const auto& scaleOptions = effect->GetScaleEffect();
+    const auto& translateOptions = effect->GetTranslateEffect();
+    UpdateTransformCenter(DimensionOffset(scaleOptions->centerX, scaleOptions->centerY));
+
+    if (transitionIn) {
+        UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
+        UpdateTransformTranslate(Vector3F(translateOptions->x.Value(), translateOptions->y.Value(), 0.0f));
+        UpdateOpacity(effect->GetOpacityEffect().value());
+        AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), onFinish);
+        UpdateTransformScale(VectorF(1.0f, 1.0f));
+        UpdateTransformTranslate(Vector3F(0.0f, 0.0f, 0.0f));
+        UpdateOpacity(1.0);
+        AnimationUtils::CloseImplicitAnimation();
+        return true;
+    }
+    UpdateTransformScale(VectorF(1.0f, 1.0f));
+    UpdateTransformTranslate(Vector3F(0.0f, 0.0f, 0.0f));
+    UpdateOpacity(1.0);
+    AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), onFinish);
+    UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
+    UpdateTransformTranslate(Vector3F(translateOptions->x.Value(), translateOptions->y.Value(), 0.0f));
+    UpdateOpacity(effect->GetOpacityEffect().value());
+    AnimationUtils::CloseImplicitAnimation();
     return true;
 }
 

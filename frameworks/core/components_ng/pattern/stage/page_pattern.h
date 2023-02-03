@@ -89,7 +89,7 @@ public:
         pageTransitionFunc_ = std::move(pageTransitionFunc);
     }
 
-    // find pageTransition effect according to transition type, it will clear the transition effect stack
+    // find pageTransition effect according to transition type
     RefPtr<PageTransitionEffect> FindPageTransitionEffect(PageTransitionType type);
 
     void ClearPageTransitionEffect();
@@ -134,18 +134,23 @@ public:
     // Mark current page node visible in render tree.
     void ProcessShowState();
 
+    void StopPageTransition();
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
+    void FirePageTransitionFinish();
 
     RefPtr<PageInfo> pageInfo_;
+    RefPtr<Animator> controller_;
 
     std::function<void()> onPageShow_;
     std::function<void()> onPageHide_;
     std::function<bool()> OnBackPressed_;
     std::function<void()> pageTransitionFunc_;
     std::function<void()> firstBuildCallback_;
-    std::stack<RefPtr<PageTransitionEffect>> pageTransitionEffects_;
+    std::shared_ptr<std::function<void()>> pageTransitionFinish_;
+    std::list<RefPtr<PageTransitionEffect>> pageTransitionEffects_;
 
     bool isOnShow_ = false;
     bool isFirstLoad_ = true;
