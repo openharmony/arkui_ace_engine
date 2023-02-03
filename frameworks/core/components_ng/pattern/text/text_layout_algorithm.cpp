@@ -187,7 +187,11 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
         return false;
     }
     if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
-        CreateParagraphAndLayout(textStyle, content, contentConstraint);
+        if (!CreateParagraphAndLayout(textStyle, content, contentConstraint)) {
+            LOGE("fail to initialize text paragraph when adapt min text size.");
+            return false;
+        }
+        return true;
     }
     constexpr Dimension ADAPT_UNIT = 1.0_fp;
     Dimension step = ADAPT_UNIT;
