@@ -325,6 +325,11 @@ RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t 
     // to close dialog when clicked inside button rect
     BindCloseCallBack(hub, index);
 
+    // add scale animation
+    auto inputHub = buttonNode->GetOrCreateInputEventHub();
+    CHECK_NULL_RETURN(inputHub, nullptr);
+    inputHub->SetHoverAnimation(HoverEffectType::SCALE);
+
     // update background color
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
