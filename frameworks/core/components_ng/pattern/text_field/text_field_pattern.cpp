@@ -238,8 +238,8 @@ void TextFieldPattern::UpdateCaretInfoToController() const
     auto pipeline = GetHost()->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto windowRect = pipeline->GetCurrentWindowRect();
-    MiscServices::CursorInfo cursorInfo { .left = caretRect_.Left() + windowRect.Left(),
-        .top = caretRect_.Top() + windowRect.Top(),
+    MiscServices::CursorInfo cursorInfo { .left = caretRect_.Left() + windowRect.Left() + parentGlobalOffset_.GetX(),
+        .top = caretRect_.Top() + windowRect.Top() + parentGlobalOffset_.GetY(),
         .width = CURSOR_WIDTH.ConvertToPx(),
         .height = caretRect_.Height() };
     LOGD("UpdateCaretInfoToController, left %{public}f, top %{public}f, width %{public}f, height %{public}f",
