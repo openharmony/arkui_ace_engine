@@ -112,7 +112,6 @@ private:
         LOGI("OnWindowReady surface size:%{public}f %{public}f %{public}f %{public}f", offset.GetX(), offset.GetY(),
             size.Width(), size.Height());
         rsSurfaceNode->SetBounds(offset.GetX(), offset.GetY(), size.Width(), size.Height());
-        rsSurfaceNode->SetBackgroundColor(Color::WHITE.GetValue());
         AceType::DynamicCast<NG::RosenRenderContext>(context)->SetRSNode(rsSurfaceNode);
         auto parent = node->GetParent();
         CHECK_NULL_VOID(parent);
