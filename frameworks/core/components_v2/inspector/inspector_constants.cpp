@@ -112,6 +112,7 @@ const char NAVIGATION_CONTENT_ETS_TAG[] = "NavigationContent";
 const char TOOL_BAR_ETS_TAG[] = "ToolBar";
 const char NAVIGATION_MENU_ETS_TAG[] = "NavigationMenu";
 const char BACK_BUTTON_ETS_TAG[] = "BackButton";
+const char BACK_BUTTON_IMAGE_ETS_TAG[] = "BackButtonImage";
 const char NAVBAR_CONTENT_ETS_TAG[] = "NavBarContent";
 const char NAVBAR_ETS_TAG[] = "NavBar";
 
