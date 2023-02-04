@@ -266,18 +266,20 @@ bool JsiDeclarativeEngineInstance::FireJsEvent(const std::string& eventStr)
 
 void JsiDeclarativeEngineInstance::InitAceModule()
 {
-    uint8_t* codeStart;
-    int32_t codeLength;
-    codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
-    codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
-    bool stateMgmtResult = runtime_->EvaluateJsCode(codeStart, codeLength);
-    if (!stateMgmtResult) {
-        LOGE("EvaluateJsCode stateMgmt failed");
-    }
-    bool jsEnumStyleResult = runtime_->EvaluateJsCode(
-        (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
-    if (!jsEnumStyleResult) {
-        LOGE("EvaluateJsCode jsEnumStyle failed");
+    if (isUnique_ == false) {
+        uint8_t* codeStart;
+        int32_t codeLength;
+        codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
+        codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
+        bool stateMgmtResult = runtime_->EvaluateJsCode(codeStart, codeLength);
+        if (!stateMgmtResult) {
+            LOGE("EvaluateJsCode stateMgmt failed");
+        }
+        bool jsEnumStyleResult = runtime_->EvaluateJsCode(
+            (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
+        if (!jsEnumStyleResult) {
+            LOGE("EvaluateJsCode jsEnumStyle failed");
+        }
     }
 #if defined(PREVIEW)
     std::string jsMockSystemPluginString(_binary_jsMockSystemPlugin_abc_start,
@@ -1823,26 +1825,24 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
     global->SetProperty(arkRuntime, "requireNativeModule", arkRuntime->NewFunction(RequireNativeModule));
 
     // preload js enums
-    if (isUnique_ == false) {
-        bool jsEnumStyleResult = arkRuntime->EvaluateJsCode(
-            (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
-        if (!jsEnumStyleResult) {
-            LOGE("EvaluateJsCode jsEnumStyle failed");
-            globalRuntime_ = nullptr;
-            return;
-        }
-
-        // preload state management
-        uint8_t* codeStart;
-        int32_t codeLength;
-        codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
-        codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
-        bool evalResult = arkRuntime->EvaluateJsCode(codeStart, codeLength);
-        if (!evalResult) {
-            LOGE("PreloadAceModuleCard EvaluateJsCode stateMgmt failed");
-        }
-        isModulePreloaded_ = evalResult;
+    bool jsEnumStyleResult = arkRuntime->EvaluateJsCode(
+        (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
+    if (!jsEnumStyleResult) {
+        LOGE("EvaluateJsCode jsEnumStyle failed");
+        globalRuntime_ = nullptr;
+        return;
     }
+
+    // preload state management
+    uint8_t* codeStart;
+    int32_t codeLength;
+    codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
+    codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
+    bool evalResult = arkRuntime->EvaluateJsCode(codeStart, codeLength);
+    if (!evalResult) {
+        LOGE("PreloadAceModuleCard EvaluateJsCode stateMgmt failed");
+    }
+    isModulePreloaded_ = evalResult;
 
     globalRuntime_ = nullptr;
     localRuntime = arkRuntime;
